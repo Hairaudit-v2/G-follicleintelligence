@@ -49,15 +49,21 @@ export function ClinicalStaffingStatusCard({
     : "rounded-xl border border-white/[0.08] bg-[#0F1629]/60 p-4";
 
   return (
-    <section className={[shellClass, className].filter(Boolean).join(" ")} aria-label="Clinical staffing status">
+    <section
+      className={[shellClass, className].filter(Boolean).join(" ")}
+      aria-label="Clinical staffing status"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Staffing readiness</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Staffing readiness
+        </h3>
         <ClinicalStaffingStatusBadge status={summary.displayStatus} compact={compact} />
       </div>
 
       {!compact ? (
         <p className="mt-2 text-xs text-slate-400">
-          WorkforceOS validates required roles, clinical eligibility, and availability for this event.
+          WorkforceOS validates required roles, clinical eligibility, and availability for this
+          event.
         </p>
       ) : null}
 

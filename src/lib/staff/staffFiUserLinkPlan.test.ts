@@ -75,7 +75,10 @@ test("duplicate staff emails in plan share one create action (executor dedupes i
     selectedStaffIds: [STAFF_1, STAFF_2],
   });
   assert.equal(plan.rows.length, 2);
-  assert.equal(plan.rows.every((r) => r.action === "create_user_and_link"), true);
+  assert.equal(
+    plan.rows.every((r) => r.action === "create_user_and_link"),
+    true
+  );
   assert.equal(plan.unlinkedAfter, 0);
 });
 

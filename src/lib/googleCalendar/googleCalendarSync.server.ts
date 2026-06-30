@@ -192,7 +192,8 @@ function mapHealthFromRow(row: IntegrationSyncRow | null): GoogleCalendarSyncHea
     last_sync_error_summary:
       row?.last_sync_status === "failed" ? summarizeError(row.last_sync_error) : null,
     last_validated_at: row?.last_validated_at ?? null,
-    last_validation_status: (row?.last_validation_status as FiCalendarValidationStatus | null) ?? null,
+    last_validation_status:
+      (row?.last_validation_status as FiCalendarValidationStatus | null) ?? null,
     token_expires_at: row?.token_expires_at ?? null,
     can_create_meet: canCreateMeet(row),
   };
@@ -228,7 +229,9 @@ export async function syncGoogleCalendarForTenant(
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const source = input.source ?? "manual";
 
-  const integrations = await loadActiveIntegrations(supabase, tenantId, { requireSyncEnabled: true });
+  const integrations = await loadActiveIntegrations(supabase, tenantId, {
+    requireSyncEnabled: true,
+  });
   const integration = integrations[0];
 
   if (!integration) {
@@ -378,9 +381,7 @@ export async function syncGoogleCalendarForTenant(
     eventsSkipped: syncResultData.eventsSkippedTotal ?? syncResultData.skipped,
     eventsMarkedDeleted: syncResultData.deleted,
     failedCalendarCount: syncResultData.failedCalendars?.length ?? 0,
-    perCalendarJson: syncResultData.perCalendar
-      ? JSON.stringify(syncResultData.perCalendar)
-      : null,
+    perCalendarJson: syncResultData.perCalendar ? JSON.stringify(syncResultData.perCalendar) : null,
     skipNoExternalId: syncResultData.skipBreakdown?.noExternalId,
     skipDuplicateTitleStart: syncResultData.skipBreakdown?.duplicateTitleStart,
     skipUniqueViolation: syncResultData.skipBreakdown?.uniqueViolation,
@@ -520,7 +521,9 @@ export async function handleGoogleCalendarSyncCronGet(
   if (auth) return auth;
 
   if (getEnv("FI_GOOGLE_CALENDAR_SYNC_CRON_DISABLED") === "1") {
-    logStructured("warn", "google_calendar_sync_cron_disabled", { reason: "FI_GOOGLE_CALENDAR_SYNC_CRON_DISABLED" });
+    logStructured("warn", "google_calendar_sync_cron_disabled", {
+      reason: "FI_GOOGLE_CALENDAR_SYNC_CRON_DISABLED",
+    });
     const body: GoogleCalendarSyncCronResponse = {
       success: true,
       synced: 0,

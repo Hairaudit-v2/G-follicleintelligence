@@ -18,15 +18,22 @@ function SectionHeading({
     <header className="max-w-4xl">
       {eyebrow ? (
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">{eyebrow}</p>
-          <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">
+            {eyebrow}
+          </p>
+          <div
+            className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+            aria-hidden
+          />
         </div>
       ) : null}
       <h2
         id={id}
         className={cn(
           "max-w-[52rem] font-display font-semibold tracking-tight text-foreground text-balance",
-          eyebrow ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]" : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
+          eyebrow
+            ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
+            : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
         )}
       >
         {title}
@@ -58,14 +65,18 @@ function AuthorityProofCard({ card, index }: { card: HomeAuthorityCard; index: n
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: "radial-gradient(480px 160px at 15% 0%, rgb(212 175 55 / 0.08), transparent 58%)",
+          background:
+            "radial-gradient(480px 160px at 15% 0%, rgb(212 175 55 / 0.08), transparent 58%)",
         }}
       />
       <div className="relative flex items-start justify-between gap-3 border-b border-white/[0.06] pb-3">
         <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/45">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span className="h-px w-12 shrink-0 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
+        <span
+          className="h-px w-12 shrink-0 bg-gradient-to-r from-amber-400/45 to-transparent"
+          aria-hidden
+        />
       </div>
 
       <div className="relative mt-4 flex-1">
@@ -77,14 +88,22 @@ function AuthorityProofCard({ card, index }: { card: HomeAuthorityCard; index: n
               </span>
             </p>
             {card.statSuffix ? (
-              <span className="font-display text-lg font-semibold tracking-tight text-amber-100/80 sm:text-xl">{card.statSuffix}</span>
+              <span className="font-display text-lg font-semibold tracking-tight text-amber-100/80 sm:text-xl">
+                {card.statSuffix}
+              </span>
             ) : null}
           </div>
         ) : (
-          <p className="font-display text-lg font-semibold leading-snug tracking-tight text-foreground/95 sm:text-xl">{card.headline}</p>
+          <p className="font-display text-lg font-semibold leading-snug tracking-tight text-foreground/95 sm:text-xl">
+            {card.headline}
+          </p>
         )}
-        <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/80">{card.label}</p>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">{card.copy}</p>
+        <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/80">
+          {card.label}
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">
+          {card.copy}
+        </p>
       </div>
     </div>
   );
@@ -98,14 +117,21 @@ function FounderAuthorityPanel({ panel }: { panel: HomeAuthorityFounderPanel }) 
         className="pointer-events-none absolute -inset-px rounded-[1.75rem] bg-gradient-to-br from-amber-400/18 via-white/[0.05] to-transparent opacity-50 blur-sm sm:rounded-[2rem]"
       />
       <div className="relative overflow-hidden rounded-[1.75rem] border border-amber-400/20 bg-gradient-to-br from-[rgb(10_14_22_/0.96)] via-[rgb(7_10_16_/0.94)] to-[rgb(4_7_12_/0.98)] shadow-[0_28px_90px_rgb(0_0_0_/0.48),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:rounded-[2rem]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_0%_0%,rgb(212_175_55_/0.11),transparent_55%)]" aria-hidden />
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_0%_0%,rgb(212_175_55_/0.11),transparent_55%)]"
+          aria-hidden
+        />
         <div className="relative p-7 sm:p-9 md:p-12">
           <div className="max-w-3xl border-l-2 border-amber-400/35 pl-6 md:pl-10">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-200/70">{panel.eyebrow}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-200/70">
+              {panel.eyebrow}
+            </p>
             <h3 className="mt-5 font-display text-xl font-semibold leading-snug tracking-tight text-foreground text-balance sm:text-2xl md:text-[1.65rem] md:leading-snug">
               {panel.headline}
             </h3>
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground md:text-lg">{panel.body}</p>
+            <p className="mt-6 text-base leading-relaxed text-muted-foreground md:text-lg">
+              {panel.body}
+            </p>
             <p className="mt-6 border-t border-white/[0.08] pt-6 text-sm font-medium leading-relaxed text-amber-100/90 sm:text-base">
               {panel.closingLine}
             </p>

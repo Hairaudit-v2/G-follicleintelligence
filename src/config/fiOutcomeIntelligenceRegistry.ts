@@ -60,7 +60,10 @@ export type FiOutcomeProtocolKey = (typeof FI_OUTCOME_PROTOCOL_KEYS)[number];
 export type FiOutcomeRegistryCategory = "checkpoint" | "metric" | "protocol";
 
 /** Where the datum may appear in product surfaces (not an RLS substitute). */
-export type FiOutcomeRegistryVisibility = "tenant_clinical" | "tenant_aggregate" | "network_candidate";
+export type FiOutcomeRegistryVisibility =
+  | "tenant_clinical"
+  | "tenant_aggregate"
+  | "network_candidate";
 
 /**
  * - `tenant_only`: never roll into cross-tenant aggregates.
@@ -132,15 +135,63 @@ export const FI_OUTCOME_CHECKPOINT_REGISTRY: readonly FiOutcomeRegistryEntry[] =
     "tenant_clinical",
     "anonymisable"
   ),
-  checkpoint("day_1", "Day 1", "Immediate post-operative checkpoint.", "tenant_clinical", "anonymisable"),
+  checkpoint(
+    "day_1",
+    "Day 1",
+    "Immediate post-operative checkpoint.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
   checkpoint("day_7", "Day 7", "Early healing checkpoint.", "tenant_clinical", "anonymisable"),
-  checkpoint("month_1", "Month 1", "One-month structural review window.", "tenant_clinical", "anonymisable"),
-  checkpoint("month_3", "Month 3", "Early density / shock-loss window.", "tenant_aggregate", "anonymisable"),
-  checkpoint("month_6", "Month 6", "Mid-term growth checkpoint.", "tenant_aggregate", "anonymisable"),
-  checkpoint("month_9", "Month 9", "Optional mid-longitudinal review.", "tenant_aggregate", "anonymisable"),
-  checkpoint("month_12", "Month 12", "Primary 12-month outcome window.", "tenant_aggregate", "anonymisable"),
-  checkpoint("month_18", "Month 18", "Extended follow-up window.", "tenant_aggregate", "anonymisable"),
-  checkpoint("month_24", "Month 24", "Longitudinal stability window.", "tenant_aggregate", "anonymisable"),
+  checkpoint(
+    "month_1",
+    "Month 1",
+    "One-month structural review window.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
+  checkpoint(
+    "month_3",
+    "Month 3",
+    "Early density / shock-loss window.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
+  checkpoint(
+    "month_6",
+    "Month 6",
+    "Mid-term growth checkpoint.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
+  checkpoint(
+    "month_9",
+    "Month 9",
+    "Optional mid-longitudinal review.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
+  checkpoint(
+    "month_12",
+    "Month 12",
+    "Primary 12-month outcome window.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
+  checkpoint(
+    "month_18",
+    "Month 18",
+    "Extended follow-up window.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
+  checkpoint(
+    "month_24",
+    "Month 24",
+    "Longitudinal stability window.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
 ];
 
 export const FI_OUTCOME_METRIC_REGISTRY: readonly FiOutcomeRegistryEntry[] = [
@@ -245,11 +296,41 @@ export const FI_OUTCOME_METRIC_REGISTRY: readonly FiOutcomeRegistryEntry[] = [
 ];
 
 export const FI_OUTCOME_PROTOCOL_REGISTRY: readonly FiOutcomeRegistryEntry[] = [
-  protocol("fue", "FUE", "Follicular unit excision harvesting technique.", "tenant_clinical", "anonymisable"),
-  protocol("dfi", "DFI", "Direct follicle implantation or related implantation variant.", "tenant_clinical", "anonymisable"),
-  protocol("ptt", "PTT", "Partial / targeted technique code as used by the tenant.", "tenant_clinical", "anonymisable"),
-  protocol("sapphire", "Sapphire blades", "Sapphire blade tooling noted for incisions.", "tenant_clinical", "anonymisable"),
-  protocol("implanter_pen", "Implanter pen", "Implanter pen implantation method.", "tenant_clinical", "anonymisable"),
+  protocol(
+    "fue",
+    "FUE",
+    "Follicular unit excision harvesting technique.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
+  protocol(
+    "dfi",
+    "DFI",
+    "Direct follicle implantation or related implantation variant.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
+  protocol(
+    "ptt",
+    "PTT",
+    "Partial / targeted technique code as used by the tenant.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
+  protocol(
+    "sapphire",
+    "Sapphire blades",
+    "Sapphire blade tooling noted for incisions.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
+  protocol(
+    "implanter_pen",
+    "Implanter pen",
+    "Implanter pen implantation method.",
+    "tenant_clinical",
+    "anonymisable"
+  ),
   protocol(
     "forceps_implantation",
     "Forceps implantation",
@@ -295,7 +376,13 @@ export const FI_OUTCOME_PROTOCOL_REGISTRY: readonly FiOutcomeRegistryEntry[] = [
     "tenant_clinical",
     "not_network"
   ),
-  protocol("laser_therapy", "Low-level laser therapy", "LLLT or laser cap protocol flag.", "tenant_aggregate", "anonymisable"),
+  protocol(
+    "laser_therapy",
+    "Low-level laser therapy",
+    "LLLT or laser cap protocol flag.",
+    "tenant_aggregate",
+    "anonymisable"
+  ),
 ];
 
 const ALL_REGISTRY: readonly FiOutcomeRegistryEntry[] = [

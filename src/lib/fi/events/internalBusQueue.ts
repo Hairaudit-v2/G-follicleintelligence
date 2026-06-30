@@ -44,7 +44,9 @@ function newQueueItemId(): string {
   return `iq_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function buildPayloadSummary(payload: Record<string, unknown>): InternalIntelligenceQueuedEnvelopeSummary["payload_summary"] {
+function buildPayloadSummary(
+  payload: Record<string, unknown>
+): InternalIntelligenceQueuedEnvelopeSummary["payload_summary"] {
   const keys = Object.keys(payload).filter((k) => k !== ADAPTER_MIRROR);
   const top_level_keys_sample = keys.slice(0, 12);
   return {
@@ -115,7 +117,10 @@ export async function enqueueInternalIntelligenceEvent(
 
   queue.push({ summary, envelope_for_handlers });
 
-  if (!options?.skipIntelligenceEventLogPersist && isFiIntelligenceEventLogPersistEnabled(options)) {
+  if (
+    !options?.skipIntelligenceEventLogPersist &&
+    isFiIntelligenceEventLogPersistEnabled(options)
+  ) {
     try {
       const { persistIntelligenceEventLog } = await import("./persistIntelligenceEventLog.server");
       await persistIntelligenceEventLog(
@@ -180,7 +185,8 @@ export async function drainInternalIntelligenceEventQueue(
 
     if (isFiIntelligenceEventLogPersistEnabled(options)) {
       try {
-        const { persistIntelligenceEventLog } = await import("./persistIntelligenceEventLog.server");
+        const { persistIntelligenceEventLog } =
+          await import("./persistIntelligenceEventLog.server");
         const errCount = handler_errors.length;
         await persistIntelligenceEventLog(
           {

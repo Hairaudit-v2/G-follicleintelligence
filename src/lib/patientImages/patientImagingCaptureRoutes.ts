@@ -51,14 +51,18 @@ export function buildPatientImagingCaptureHref(
   return `${imagingBasePath(tenantId, patientId)}?${params.toString()}`;
 }
 
-export function parseImagingWorkspaceTab(value: string | null | undefined): ImagingWorkspaceTab | null {
+export function parseImagingWorkspaceTab(
+  value: string | null | undefined
+): ImagingWorkspaceTab | null {
   const v = value?.trim().toLowerCase();
   if (v === TAB_CAPTURE) return "capture";
   if (v === TAB_COMPARE) return "compare";
   return null;
 }
 
-export function parseImagingCaptureIntent(value: string | null | undefined): PatientImagingCaptureIntent | null {
+export function parseImagingCaptureIntent(
+  value: string | null | undefined
+): PatientImagingCaptureIntent | null {
   const v = value?.trim().toLowerCase();
   if (v === "camera" || v === "library") return v;
   return null;
@@ -69,7 +73,9 @@ export function parsePatientPhotoAddedFeedback(value: string | null | undefined)
   return v === "1" || v === "true" || v === "yes";
 }
 
-export function parsePatientPhotoQuickActionSource(value: string | null | undefined): PatientPhotoQuickActionSource | null {
+export function parsePatientPhotoQuickActionSource(
+  value: string | null | undefined
+): PatientPhotoQuickActionSource | null {
   const v = value?.trim().toLowerCase();
   if (v === "patient_profile" || v === "patient_slide_over") return v;
   return null;

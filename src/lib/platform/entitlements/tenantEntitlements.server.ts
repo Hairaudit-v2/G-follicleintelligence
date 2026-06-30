@@ -27,7 +27,12 @@ export type LoadEntitlementContextOptions = {
 
 type TenantRow = { id: string; verification_status: string | null };
 type BillingRow = { subscription_status: string | null };
-type ModuleRow = { id: string; code: string; default_allowed_roles: string[] | null; is_active: boolean | null };
+type ModuleRow = {
+  id: string;
+  code: string;
+  default_allowed_roles: string[] | null;
+  is_active: boolean | null;
+};
 type TenantModuleRow = { enabled: boolean | null; allowed_roles: string[] | null };
 type UserRow = { id: string; role: string | null };
 
@@ -44,8 +49,16 @@ export async function loadEntitlementAccessContext(opts: {
 
   const [tenantRes, billingRes, moduleRes, userRes] = await Promise.all([
     supabase.from("fi_tenants").select("id, verification_status").eq("id", tenantId).maybeSingle(),
-    supabase.from("fi_tenant_billing_status").select("subscription_status").eq("tenant_id", tenantId).maybeSingle(),
-    supabase.from("fi_modules").select("id, code, default_allowed_roles, is_active").eq("code", moduleCode).maybeSingle(),
+    supabase
+      .from("fi_tenant_billing_status")
+      .select("subscription_status")
+      .eq("tenant_id", tenantId)
+      .maybeSingle(),
+    supabase
+      .from("fi_modules")
+      .select("id, code, default_allowed_roles, is_active")
+      .eq("code", moduleCode)
+      .maybeSingle(),
     supabase
       .from("fi_users")
       .select("id, role")
@@ -72,7 +85,11 @@ export async function loadEntitlementAccessContext(opts: {
 
   const moduleExists = Boolean(moduleRow && moduleRow.is_active !== false);
   const allowedRoles = moduleExists
-    ? resolveEffectiveAllowedRoles(moduleCode, tenantModule?.allowed_roles, moduleRow?.default_allowed_roles)
+    ? resolveEffectiveAllowedRoles(
+        moduleCode,
+        tenantModule?.allowed_roles,
+        moduleRow?.default_allowed_roles
+      )
     : [...defaultAllowedRolesForModule(moduleCode)];
 
   return {

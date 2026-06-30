@@ -39,7 +39,11 @@ type EntityMaps = {
   surgeryIds: string[];
 };
 
-function entityKey(packCode: SandboxSeedPackCode, entityType: SandboxSeedEntityType, index: number): string {
+function entityKey(
+  packCode: SandboxSeedPackCode,
+  entityType: SandboxSeedEntityType,
+  index: number
+): string {
   return `${packCode}:${entityType}:${String(index).padStart(3, "0")}`;
 }
 
@@ -93,15 +97,27 @@ async function findExistingStaffByEntityKey(
   return String((data as { id: string }).id);
 }
 
-async function loadDefaultClinicId(supabase: SupabaseClient, tenantId: string): Promise<string | null> {
-  const { data, error } = await supabase.from("fi_clinics").select("id").eq("tenant_id", tenantId).limit(1).maybeSingle();
+async function loadDefaultClinicId(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("fi_clinics")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .limit(1)
+    .maybeSingle();
   if (error || !data) return null;
   return String((data as { id: string }).id);
 }
 
 async function seedStaff(ctx: ApplyContext, counts: SandboxSeedEntityCounts): Promise<string[]> {
   const total = countFor(ctx, "staff");
-  const roleSeeds = ctx.deploymentPlan.rolePack.staffRoleSeeds ?? ["consultant", "crm_operator", "nurse"];
+  const roleSeeds = ctx.deploymentPlan.rolePack.staffRoleSeeds ?? [
+    "consultant",
+    "crm_operator",
+    "nurse",
+  ];
   const ids: string[] = [];
 
   for (let i = 0; i < total; i += 1) {
@@ -109,7 +125,10 @@ async function seedStaff(ctx: ApplyContext, counts: SandboxSeedEntityCounts): Pr
     const existingId = await findExistingStaffByEntityKey(ctx.supabase, ctx.tenantId, key);
     if (existingId) {
       ids.push(existingId);
-      counts.staff = { created: counts.staff?.created ?? 0, existing: (counts.staff?.existing ?? 0) + 1 };
+      counts.staff = {
+        created: counts.staff?.created ?? 0,
+        existing: (counts.staff?.existing ?? 0) + 1,
+      };
       continue;
     }
 
@@ -147,23 +166,37 @@ async function seedStaff(ctx: ApplyContext, counts: SandboxSeedEntityCounts): Pr
 
     if (error || !data) throw new Error(error?.message ?? "Failed to insert sandbox staff.");
     ids.push(String((data as { id: string }).id));
-    counts.staff = { created: (counts.staff?.created ?? 0) + 1, existing: counts.staff?.existing ?? 0 };
+    counts.staff = {
+      created: (counts.staff?.created ?? 0) + 1,
+      existing: counts.staff?.existing ?? 0,
+    };
   }
 
   return ids;
 }
 
-async function seedPatients(ctx: ApplyContext, counts: SandboxSeedEntityCounts): Promise<{ personIds: string[]; patientIds: string[] }> {
+async function seedPatients(
+  ctx: ApplyContext,
+  counts: SandboxSeedEntityCounts
+): Promise<{ personIds: string[]; patientIds: string[] }> {
   const total = countFor(ctx, "patients");
   const personIds: string[] = [];
   const patientIds: string[] = [];
 
   for (let i = 0; i < total; i += 1) {
     const key = entityKey(ctx.packCode, "patients", i);
-    const existingPatientId = await findExistingByEntityKey(ctx.supabase, "fi_patients", ctx.tenantId, key);
+    const existingPatientId = await findExistingByEntityKey(
+      ctx.supabase,
+      "fi_patients",
+      ctx.tenantId,
+      key
+    );
     if (existingPatientId) {
       patientIds.push(existingPatientId);
-      counts.patients = { created: counts.patients?.created ?? 0, existing: (counts.patients?.existing ?? 0) + 1 };
+      counts.patients = {
+        created: counts.patients?.created ?? 0,
+        existing: (counts.patients?.existing ?? 0) + 1,
+      };
       const { data: patientRow } = await ctx.supabase
         .from("fi_patients")
         .select("person_id")
@@ -188,7 +221,8 @@ async function seedPatients(ctx: ApplyContext, counts: SandboxSeedEntityCounts):
       .insert({ tenant_id: ctx.tenantId, metadata: personMeta })
       .select("id")
       .single();
-    if (personErr || !person) throw new Error(personErr?.message ?? "Failed to insert sandbox person.");
+    if (personErr || !person)
+      throw new Error(personErr?.message ?? "Failed to insert sandbox person.");
 
     const personId = String((person as { id: string }).id);
     personIds.push(personId);
@@ -210,7 +244,8 @@ async function seedPatients(ctx: ApplyContext, counts: SandboxSeedEntityCounts):
       })
       .select("id")
       .single();
-    if (patientErr || !patient) throw new Error(patientErr?.message ?? "Failed to insert sandbox patient.");
+    if (patientErr || !patient)
+      throw new Error(patientErr?.message ?? "Failed to insert sandbox patient.");
 
     const patientId = String((patient as { id: string }).id);
     patientIds.push(patientId);
@@ -222,7 +257,10 @@ async function seedPatients(ctx: ApplyContext, counts: SandboxSeedEntityCounts):
       source_patient_id: key,
     });
 
-    counts.patients = { created: (counts.patients?.created ?? 0) + 1, existing: counts.patients?.existing ?? 0 };
+    counts.patients = {
+      created: (counts.patients?.created ?? 0) + 1,
+      existing: counts.patients?.existing ?? 0,
+    };
   }
 
   return { personIds, patientIds };
@@ -241,10 +279,18 @@ async function seedLeads(
 
   for (let i = 0; i < total; i += 1) {
     const key = entityKey(ctx.packCode, "leads", i);
-    const existingId = await findExistingByEntityKey(ctx.supabase, "fi_crm_leads", ctx.tenantId, key);
+    const existingId = await findExistingByEntityKey(
+      ctx.supabase,
+      "fi_crm_leads",
+      ctx.tenantId,
+      key
+    );
     if (existingId) {
       leadIds.push(existingId);
-      counts.leads = { created: counts.leads?.created ?? 0, existing: (counts.leads?.existing ?? 0) + 1 };
+      counts.leads = {
+        created: counts.leads?.created ?? 0,
+        existing: (counts.leads?.existing ?? 0) + 1,
+      };
       continue;
     }
 
@@ -265,7 +311,10 @@ async function seedLeads(
 
     if (error || !data) throw new Error(error?.message ?? "Failed to insert sandbox lead.");
     leadIds.push(String((data as { id: string }).id));
-    counts.leads = { created: (counts.leads?.created ?? 0) + 1, existing: counts.leads?.existing ?? 0 };
+    counts.leads = {
+      created: (counts.leads?.created ?? 0) + 1,
+      existing: counts.leads?.existing ?? 0,
+    };
   }
 
   return leadIds;
@@ -300,7 +349,9 @@ async function seedConsultations(
       continue;
     }
 
-    const consultationDate = new Date(Date.parse(FIXED_EPOCH) + i * 86_400_000).toISOString().slice(0, 10);
+    const consultationDate = new Date(Date.parse(FIXED_EPOCH) + i * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     const structured = {
       ...sandboxMetadata(ctx, "consultations", i),
       sandbox_training_note: "Demo consultation workspace — not real clinical data.",
@@ -325,7 +376,10 @@ async function seedConsultations(
 
     if (error || !data) throw new Error(error?.message ?? "Failed to insert sandbox consultation.");
     consultationIds.push(String((data as { id: string }).id));
-    counts.consultations = { created: (counts.consultations?.created ?? 0) + 1, existing: counts.consultations?.existing ?? 0 };
+    counts.consultations = {
+      created: (counts.consultations?.created ?? 0) + 1,
+      existing: counts.consultations?.existing ?? 0,
+    };
   }
 
   return consultationIds;
@@ -345,7 +399,12 @@ async function seedAppointments(
 
   for (let i = 0; i < total; i += 1) {
     const key = entityKey(ctx.packCode, "appointments", i);
-    const existingId = await findExistingByEntityKey(ctx.supabase, "fi_bookings", ctx.tenantId, key);
+    const existingId = await findExistingByEntityKey(
+      ctx.supabase,
+      "fi_bookings",
+      ctx.tenantId,
+      key
+    );
     if (existingId) {
       bookingIds.push(existingId);
       counts.appointments = {
@@ -381,7 +440,10 @@ async function seedAppointments(
 
     if (error || !data) throw new Error(error?.message ?? "Failed to insert sandbox booking.");
     bookingIds.push(String((data as { id: string }).id));
-    counts.appointments = { created: (counts.appointments?.created ?? 0) + 1, existing: counts.appointments?.existing ?? 0 };
+    counts.appointments = {
+      created: (counts.appointments?.created ?? 0) + 1,
+      existing: counts.appointments?.existing ?? 0,
+    };
   }
 
   return bookingIds;
@@ -398,14 +460,24 @@ async function seedSurgeries(
 
   for (let i = 0; i < total; i += 1) {
     const key = entityKey(ctx.packCode, "surgeries", i);
-    const existingId = await findExistingByEntityKey(ctx.supabase, "fi_surgeries", ctx.tenantId, key);
+    const existingId = await findExistingByEntityKey(
+      ctx.supabase,
+      "fi_surgeries",
+      ctx.tenantId,
+      key
+    );
     if (existingId) {
       surgeryIds.push(existingId);
-      counts.surgeries = { created: counts.surgeries?.created ?? 0, existing: (counts.surgeries?.existing ?? 0) + 1 };
+      counts.surgeries = {
+        created: counts.surgeries?.created ?? 0,
+        existing: (counts.surgeries?.existing ?? 0) + 1,
+      };
       continue;
     }
 
-    const scheduledDate = new Date(Date.parse(FIXED_EPOCH) + (i + 14) * 86_400_000).toISOString().slice(0, 10);
+    const scheduledDate = new Date(Date.parse(FIXED_EPOCH) + (i + 14) * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     const metadata = {
       ...sandboxMetadata(ctx, "surgeries", i),
       surgery_os_metric_placeholder: {
@@ -435,7 +507,10 @@ async function seedSurgeries(
 
     if (error || !data) throw new Error(error?.message ?? "Failed to insert sandbox surgery.");
     surgeryIds.push(String((data as { id: string }).id));
-    counts.surgeries = { created: (counts.surgeries?.created ?? 0) + 1, existing: counts.surgeries?.existing ?? 0 };
+    counts.surgeries = {
+      created: (counts.surgeries?.created ?? 0) + 1,
+      existing: counts.surgeries?.existing ?? 0,
+    };
   }
 
   return surgeryIds;
@@ -454,10 +529,18 @@ async function seedInvoicesAndPayments(
 
   for (let i = 0; i < invoiceTotal; i += 1) {
     const key = entityKey(ctx.packCode, "invoices", i);
-    const existingId = await findExistingByEntityKey(ctx.supabase, "fi_invoices", ctx.tenantId, key);
+    const existingId = await findExistingByEntityKey(
+      ctx.supabase,
+      "fi_invoices",
+      ctx.tenantId,
+      key
+    );
     if (existingId) {
       invoiceIds.push(existingId);
-      counts.invoices = { created: counts.invoices?.created ?? 0, existing: (counts.invoices?.existing ?? 0) + 1 };
+      counts.invoices = {
+        created: counts.invoices?.created ?? 0,
+        existing: (counts.invoices?.existing ?? 0) + 1,
+      };
       continue;
     }
 
@@ -486,7 +569,9 @@ async function seedInvoicesAndPayments(
         total_cents: amountCents + Math.round(amountCents * 0.1),
         amount_paid_cents: i % 3 === 0 ? amountCents : 0,
         currency: "AUD",
-        due_date: new Date(Date.parse(FIXED_EPOCH) + (i + 30) * 86_400_000).toISOString().slice(0, 10),
+        due_date: new Date(Date.parse(FIXED_EPOCH) + (i + 30) * 86_400_000)
+          .toISOString()
+          .slice(0, 10),
         invoice_number: `SBX-INV-${String(i + 1).padStart(4, "0")}`,
         title: `Sandbox invoice #${i + 1}`,
         metadata,
@@ -497,7 +582,10 @@ async function seedInvoicesAndPayments(
     if (error || !data) throw new Error(error?.message ?? "Failed to insert sandbox invoice.");
     const invoiceId = String((data as { id: string }).id);
     invoiceIds.push(invoiceId);
-    counts.invoices = { created: (counts.invoices?.created ?? 0) + 1, existing: counts.invoices?.existing ?? 0 };
+    counts.invoices = {
+      created: (counts.invoices?.created ?? 0) + 1,
+      existing: counts.invoices?.existing ?? 0,
+    };
 
     await ctx.supabase.from("fi_invoice_items").insert({
       tenant_id: ctx.tenantId,
@@ -520,7 +608,10 @@ async function seedInvoicesAndPayments(
       .maybeSingle();
 
     if (existing) {
-      counts.payments = { created: counts.payments?.created ?? 0, existing: (counts.payments?.existing ?? 0) + 1 };
+      counts.payments = {
+        created: counts.payments?.created ?? 0,
+        existing: (counts.payments?.existing ?? 0) + 1,
+      };
       continue;
     }
 
@@ -542,7 +633,10 @@ async function seedInvoicesAndPayments(
     });
 
     if (error) throw new Error(error.message);
-    counts.payments = { created: (counts.payments?.created ?? 0) + 1, existing: counts.payments?.existing ?? 0 };
+    counts.payments = {
+      created: (counts.payments?.created ?? 0) + 1,
+      existing: counts.payments?.existing ?? 0,
+    };
   }
 }
 
@@ -565,7 +659,9 @@ async function seedMetricPlaceholders(
   if (loadErr) throw new Error(loadErr.message);
 
   const existingMeta =
-    settingsRow?.metadata && typeof settingsRow.metadata === "object" && !Array.isArray(settingsRow.metadata)
+    settingsRow?.metadata &&
+    typeof settingsRow.metadata === "object" &&
+    !Array.isArray(settingsRow.metadata)
       ? (settingsRow.metadata as Record<string, unknown>)
       : {};
 
@@ -573,8 +669,9 @@ async function seedMetricPlaceholders(
     academy_readiness: Array.from({ length: academyCount }, (_, i) => ({
       ...sandboxMetadata(ctx, "academy_readiness", i),
       track_code:
-        ctx.deploymentPlan.academyAssignments[i % Math.max(ctx.deploymentPlan.academyAssignments.length, 1)]?.trackCode ??
-        "fi_clinical_foundations",
+        ctx.deploymentPlan.academyAssignments[
+          i % Math.max(ctx.deploymentPlan.academyAssignments.length, 1)
+        ]?.trackCode ?? "fi_clinical_foundations",
       readiness_pct: 35 + i * 8,
       mandatory: i % 2 === 0,
     })),
@@ -611,11 +708,15 @@ async function seedMetricPlaceholders(
   }
 
   if (academyCount > 0) counts.academy_readiness = { created: academyCount, existing: 0 };
-  if (surgeryMetricCount > 0) counts.surgery_os_metrics = { created: surgeryMetricCount, existing: 0 };
-  if (financialMetricCount > 0) counts.financial_os_metrics = { created: financialMetricCount, existing: 0 };
+  if (surgeryMetricCount > 0)
+    counts.surgery_os_metrics = { created: surgeryMetricCount, existing: 0 };
+  if (financialMetricCount > 0)
+    counts.financial_os_metrics = { created: financialMetricCount, existing: 0 };
 }
 
-function summariseCounts(counts: SandboxSeedEntityCounts): Partial<Record<SandboxSeedEntityType, number>> {
+function summariseCounts(
+  counts: SandboxSeedEntityCounts
+): Partial<Record<SandboxSeedEntityType, number>> {
   const summary: Partial<Record<SandboxSeedEntityType, number>> = {};
   for (const [key, value] of Object.entries(counts)) {
     const entityType = key as SandboxSeedEntityType;
@@ -688,7 +789,10 @@ export function buildHistoryEntryFromApply(opts: {
   };
 }
 
-export function resolvePackForApply(templateCode: ClinicDeploymentTemplateCode, packCode?: SandboxSeedPackCode | null): SandboxSeedPackCode {
+export function resolvePackForApply(
+  templateCode: ClinicDeploymentTemplateCode,
+  packCode?: SandboxSeedPackCode | null
+): SandboxSeedPackCode {
   const pack = resolveSandboxSeedPack(templateCode, packCode);
   if (!pack) throw new Error("Unknown sandbox seed pack.");
   return pack.code;

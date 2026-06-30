@@ -5,7 +5,11 @@ import {
   type ApprovedServiceImportPlanEntry,
 } from "@/src/lib/timelyImport/approvedFiServicesImportPlan";
 import { defaultClinicServicesAsImportRows } from "@/src/lib/services/defaultClinicServices";
-import { insertFiService, loadFiServicesForTenant, updateFiService } from "@/src/lib/services/fiServices.server";
+import {
+  insertFiService,
+  loadFiServicesForTenant,
+  updateFiService,
+} from "@/src/lib/services/fiServices.server";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type DefaultClinicServicesSeedResult = {
@@ -58,7 +62,9 @@ async function applySeedEntry(
  * Idempotent default clinic catalog seed. Creates missing rows; updates metadata on matches
  * without changing existing `base_price`. Safe to run multiple times.
  */
-export async function seedDefaultClinicServicesForTenant(tenantId: string): Promise<DefaultClinicServicesSeedResult> {
+export async function seedDefaultClinicServicesForTenant(
+  tenantId: string
+): Promise<DefaultClinicServicesSeedResult> {
   const tid = tenantId.trim();
   const existing = await loadFiServicesForTenant(tid);
   const existingById = new Map(existing.map((r) => [r.id, r]));

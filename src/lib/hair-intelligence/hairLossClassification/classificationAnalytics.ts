@@ -36,7 +36,12 @@ export function computeHairLossClassificationAnalytics(rows: HairLossClassificat
   let unknownGrades = 0;
   const sexCounts = new Map<string, number>();
   const maleish = new Set(["male_pattern_baldness", "diffuse_male_pattern", "retrograde_alopecia"]);
-  const femaleish = new Set(["female_pattern_loss", "diffuse_female_thinning", "traction_pattern", "frontal_fibrosing_pattern"]);
+  const femaleish = new Set([
+    "female_pattern_loss",
+    "diffuse_female_thinning",
+    "traction_pattern",
+    "frontal_fibrosing_pattern",
+  ]);
   let malePatternLike = 0;
   let femalePatternLike = 0;
   const frontal: number[] = [];
@@ -62,7 +67,8 @@ export function computeHairLossClassificationAnalytics(rows: HairLossClassificat
   }
 
   const total = rows.length;
-  const unknownClassificationRate = total === 0 ? 0 : (unknownPatterns + unknownGrades) / (2 * total);
+  const unknownClassificationRate =
+    total === 0 ? 0 : (unknownPatterns + unknownGrades) / (2 * total);
 
   const mostCommonPatternTypes = Array.from(patternCounts.entries())
     .sort((a, b) => b[1] - a[1])

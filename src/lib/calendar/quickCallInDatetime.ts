@@ -1,4 +1,7 @@
-import { fromDatetimeLocalValueInTimezone, toDatetimeLocalValueInTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  fromDatetimeLocalValueInTimezone,
+  toDatetimeLocalValueInTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 
 const STEP_MS = 15 * 60_000;
 

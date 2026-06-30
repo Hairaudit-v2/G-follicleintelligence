@@ -7,7 +7,10 @@ export function parseMoneyStringToCentsAud(raw: string | null | undefined): numb
   const s0 = String(raw).trim();
   if (!s0) return null;
   const lowered = s0.toLowerCase();
-  const stripped = lowered.replace(/aud|nz|usd|gbp|eur/gi, "").replace(/[$€£,\s]/g, "").trim();
+  const stripped = lowered
+    .replace(/aud|nz|usd|gbp|eur/gi, "")
+    .replace(/[$€£,\s]/g, "")
+    .trim();
   if (!stripped) return null;
   const n = Number.parseFloat(stripped);
   if (!Number.isFinite(n) || n < 0) return null;

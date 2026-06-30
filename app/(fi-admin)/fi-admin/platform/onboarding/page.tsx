@@ -18,7 +18,9 @@ const BADGE_CLASSES: Record<string, string> = {
 export default async function OnboardingOsListPage() {
   const loaded = await loadTenantProvisioningSessions();
   if (!loaded.ok) {
-    return <p className="text-sm text-red-400">Could not load provisioning sessions: {loaded.error}</p>;
+    return (
+      <p className="text-sm text-red-400">Could not load provisioning sessions: {loaded.error}</p>
+    );
   }
 
   const sessions = loaded.sessions;
@@ -30,8 +32,8 @@ export default async function OnboardingOsListPage() {
           <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase A</p>
           <h1 className="mt-1 text-xl font-semibold text-slate-50">Tenant provisioning</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500">
-            Start and track FI OS clinic onboarding sessions. All writes run server-side via the service role — no
-            unsafe public database access.
+            Start and track FI OS clinic onboarding sessions. All writes run server-side via the
+            service role — no unsafe public database access.
           </p>
         </div>
         <Link
@@ -51,7 +53,10 @@ export default async function OnboardingOsListPage() {
             {sessions.map((s) => {
               const badge = resolveProvisioningStatusBadge(s.status as ProvisioningSessionStatus);
               return (
-                <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                <li
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                >
                   <div>
                     <p className="font-medium text-slate-100">{s.tenant_name}</p>
                     <p className="text-xs text-slate-500">

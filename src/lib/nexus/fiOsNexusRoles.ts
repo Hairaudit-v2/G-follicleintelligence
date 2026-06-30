@@ -21,13 +21,15 @@ export function isFiOsNexusRoleCode(value: string): value is FiOsNexusRoleCode {
   return ROLE_SET.has(value.trim());
 }
 
-export function validateFiOsNexusRoleCodes(roles: string[]): {
-  ok: true;
-  roles: FiOsNexusRoleCode[];
-} | {
-  ok: false;
-  invalidRoles: string[];
-} {
+export function validateFiOsNexusRoleCodes(roles: string[]):
+  | {
+      ok: true;
+      roles: FiOsNexusRoleCode[];
+    }
+  | {
+      ok: false;
+      invalidRoles: string[];
+    } {
   const invalidRoles: string[] = [];
   const normalized: FiOsNexusRoleCode[] = [];
   const seen = new Set<string>();

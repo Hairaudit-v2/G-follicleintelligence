@@ -33,7 +33,11 @@ function pct(n: number | null): string {
   return `${(n * 100).toFixed(1)}%`;
 }
 
-export default async function FinancialOsDashboardPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsDashboardPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
@@ -56,7 +60,10 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
             label="Upcoming (30d)"
             value={`${metrics.upcomingPaymentRequestCount} payment links · ${metrics.upcomingInstallmentCount} installment dates`}
           />
-          <FinancialOsMetricTile label="Failed gateway payments (60d)" value={metrics.failedPaymentCount} />
+          <FinancialOsMetricTile
+            label="Failed gateway payments (60d)"
+            value={metrics.failedPaymentCount}
+          />
           <FinancialOsMetricTile
             label="Deposit conversion (90d consultation quotes)"
             value={pct(metrics.depositConversionRate)}
@@ -65,7 +72,9 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
           <FinancialOsMetricTile
             label="Monthly revenue forecast"
             value={
-              metrics.monthlyRevenueForecastCents != null ? fmtMoney(metrics.monthlyRevenueForecastCents, metrics.currency) : "—"
+              metrics.monthlyRevenueForecastCents != null
+                ? fmtMoney(metrics.monthlyRevenueForecastCents, metrics.currency)
+                : "—"
             }
             foot="Average succeeded gateway totals over the prior three full months."
           />
@@ -77,7 +86,8 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         kicker="Settlement"
         description={
           <>
-            Settlement intent recorded on <code className={financialOsClasses.code}>fi_payment_pathways</code> — see{" "}
+            Settlement intent recorded on{" "}
+            <code className={financialOsClasses.code}>fi_payment_pathways</code> — see{" "}
             <Link href={`${base}/payment-pathways`} className={financialOsClasses.link}>
               Payment Pathways
             </Link>{" "}
@@ -123,7 +133,10 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
             label="Expected settlement (next 30 days)"
             value={metrics.paymentPathways.expectedSettlementNext30DaysCount}
           />
-          <FinancialOsMetricTile label="Pathway attention" value={metrics.paymentPathways.attentionCount} />
+          <FinancialOsMetricTile
+            label="Pathway attention"
+            value={metrics.paymentPathways.attentionCount}
+          />
         </dl>
       </FinancialOsSectionCard>
 
@@ -141,9 +154,18 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         }
       >
         <dl className={financialOsClasses.metricGrid}>
-          <FinancialOsMetricTile label="Open pathway tasks" value={metrics.pathwayInbox.openCount} />
-          <FinancialOsMetricTile label="Urgent pathway tasks" value={metrics.pathwayInbox.urgentCount} />
-          <FinancialOsMetricTile label="Waiting patient tasks" value={metrics.pathwayInbox.waitingPatientCount} />
+          <FinancialOsMetricTile
+            label="Open pathway tasks"
+            value={metrics.pathwayInbox.openCount}
+          />
+          <FinancialOsMetricTile
+            label="Urgent pathway tasks"
+            value={metrics.pathwayInbox.urgentCount}
+          />
+          <FinancialOsMetricTile
+            label="Waiting patient tasks"
+            value={metrics.pathwayInbox.waitingPatientCount}
+          />
           <FinancialOsMetricTile label="Overdue tasks" value={metrics.pathwayInbox.overdueCount} />
         </dl>
       </FinancialOsSectionCard>
@@ -166,10 +188,22 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         }
       >
         <dl className={financialOsClasses.metricGrid}>
-          <FinancialOsMetricTile label="Applications submitted" value={metrics.financeApplications.submittedCount} />
-          <FinancialOsMetricTile label="Applications approved" value={metrics.financeApplications.approvedCount} />
-          <FinancialOsMetricTile label="Pending documents" value={metrics.financeApplications.pendingDocsCount} />
-          <FinancialOsMetricTile label="Settlement pending" value={metrics.financeApplications.settlementPendingCount} />
+          <FinancialOsMetricTile
+            label="Applications submitted"
+            value={metrics.financeApplications.submittedCount}
+          />
+          <FinancialOsMetricTile
+            label="Applications approved"
+            value={metrics.financeApplications.approvedCount}
+          />
+          <FinancialOsMetricTile
+            label="Pending documents"
+            value={metrics.financeApplications.pendingDocsCount}
+          />
+          <FinancialOsMetricTile
+            label="Settlement pending"
+            value={metrics.financeApplications.settlementPendingCount}
+          />
           <FinancialOsMetricTile
             label="Average approval time"
             value={
@@ -178,13 +212,18 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
                 : "—"
             }
           />
-          <FinancialOsMetricTile label="Applications requiring attention" value={metrics.financeApplications.attentionCount} />
+          <FinancialOsMetricTile
+            label="Applications requiring attention"
+            value={metrics.financeApplications.attentionCount}
+          />
         </dl>
         {metrics.financeApplications.mostUsedProvider ? (
           <p className="mt-4 text-xs text-slate-400">
             Most used provider:{" "}
-            <span className="font-semibold text-slate-200">{metrics.financeApplications.mostUsedProvider.providerName}</span> (
-            {metrics.financeApplications.mostUsedProvider.count} applications)
+            <span className="font-semibold text-slate-200">
+              {metrics.financeApplications.mostUsedProvider.providerName}
+            </span>{" "}
+            ({metrics.financeApplications.mostUsedProvider.count} applications)
           </p>
         ) : null}
         {metrics.financeApplications.providerConversionRates.length ? (
@@ -219,17 +258,34 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
       >
         <dl className={financialOsClasses.metricGrid}>
           <FinancialOsMetricTile label="Open applications" value={metrics.superRelease.openCount} />
-          <FinancialOsMetricTile label="Clinical letters pending" value={metrics.superRelease.clinicalLettersPendingCount} />
-          <FinancialOsMetricTile label="Awaiting documents" value={metrics.superRelease.awaitingDocumentsCount} />
-          <FinancialOsMetricTile label="Submitted applications" value={metrics.superRelease.submittedCount} />
-          <FinancialOsMetricTile label="Funds release pending" value={metrics.superRelease.fundsReleasePendingCount} />
+          <FinancialOsMetricTile
+            label="Clinical letters pending"
+            value={metrics.superRelease.clinicalLettersPendingCount}
+          />
+          <FinancialOsMetricTile
+            label="Awaiting documents"
+            value={metrics.superRelease.awaitingDocumentsCount}
+          />
+          <FinancialOsMetricTile
+            label="Submitted applications"
+            value={metrics.superRelease.submittedCount}
+          />
+          <FinancialOsMetricTile
+            label="Funds release pending"
+            value={metrics.superRelease.fundsReleasePendingCount}
+          />
           <FinancialOsMetricTile
             label="Average approval time"
             value={
-              metrics.superRelease.averageApprovalDays != null ? `${metrics.superRelease.averageApprovalDays} days` : "—"
+              metrics.superRelease.averageApprovalDays != null
+                ? `${metrics.superRelease.averageApprovalDays} days`
+                : "—"
             }
           />
-          <FinancialOsMetricTile label="Applications requiring attention" value={metrics.superRelease.attentionCount} />
+          <FinancialOsMetricTile
+            label="Applications requiring attention"
+            value={metrics.superRelease.attentionCount}
+          />
         </dl>
       </FinancialOsSectionCard>
 
@@ -247,12 +303,30 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         }
       >
         <dl className={financialOsClasses.metricGrid}>
-          <FinancialOsMetricTile label="Open applications" value={metrics.internationalTransfer.openCount} />
-          <FinancialOsMetricTile label="Awaiting transfer" value={metrics.internationalTransfer.awaitingTransferCount} />
-          <FinancialOsMetricTile label="Proof received" value={metrics.internationalTransfer.proofReceivedCount} />
-          <FinancialOsMetricTile label="Settlement pending" value={metrics.internationalTransfer.settlementPendingCount} />
-          <FinancialOsMetricTile label="Variance review" value={metrics.internationalTransfer.varianceReviewCount} />
-          <FinancialOsMetricTile label="Settled this month" value={metrics.internationalTransfer.settledThisMonthCount} />
+          <FinancialOsMetricTile
+            label="Open applications"
+            value={metrics.internationalTransfer.openCount}
+          />
+          <FinancialOsMetricTile
+            label="Awaiting transfer"
+            value={metrics.internationalTransfer.awaitingTransferCount}
+          />
+          <FinancialOsMetricTile
+            label="Proof received"
+            value={metrics.internationalTransfer.proofReceivedCount}
+          />
+          <FinancialOsMetricTile
+            label="Settlement pending"
+            value={metrics.internationalTransfer.settlementPendingCount}
+          />
+          <FinancialOsMetricTile
+            label="Variance review"
+            value={metrics.internationalTransfer.varianceReviewCount}
+          />
+          <FinancialOsMetricTile
+            label="Settled this month"
+            value={metrics.internationalTransfer.settledThisMonthCount}
+          />
           <FinancialOsMetricTile
             label="Average settlement days"
             value={
@@ -269,7 +343,10 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
                 : "—"
             }
           />
-          <FinancialOsMetricTile label="Applications requiring attention" value={metrics.internationalTransfer.attentionCount} />
+          <FinancialOsMetricTile
+            label="Applications requiring attention"
+            value={metrics.internationalTransfer.attentionCount}
+          />
         </dl>
       </FinancialOsSectionCard>
 
@@ -279,11 +356,26 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         description="Unified advisory clearance for surgery bookings in the next 14 days — aggregates invoices, pathways, finance, super release, international transfer, installments, and deposit state. Does not block SurgeryOS or change payment recording."
       >
         <dl className={financialOsClasses.metricGrid}>
-          <FinancialOsMetricTile label="Financially cleared" value={metrics.financialClearance.financiallyClearedSurgeries} />
-          <FinancialOsMetricTile label="Attention required" value={metrics.financialClearance.attentionRequired} />
-          <FinancialOsMetricTile label="Pathway pending" value={metrics.financialClearance.pathwayPending} />
-          <FinancialOsMetricTile label="Deposit ready" value={metrics.financialClearance.depositReady} />
-          <FinancialOsMetricTile label="Paid in full" value={metrics.financialClearance.paidInFull} />
+          <FinancialOsMetricTile
+            label="Financially cleared"
+            value={metrics.financialClearance.financiallyClearedSurgeries}
+          />
+          <FinancialOsMetricTile
+            label="Attention required"
+            value={metrics.financialClearance.attentionRequired}
+          />
+          <FinancialOsMetricTile
+            label="Pathway pending"
+            value={metrics.financialClearance.pathwayPending}
+          />
+          <FinancialOsMetricTile
+            label="Deposit ready"
+            value={metrics.financialClearance.depositReady}
+          />
+          <FinancialOsMetricTile
+            label="Paid in full"
+            value={metrics.financialClearance.paidInFull}
+          />
           <FinancialOsMetricTile label="Not ready" value={metrics.financialClearance.notReady} />
           <FinancialOsMetricTile
             label="Clearance rate (14d)"
@@ -295,25 +387,39 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
 
       <div className={financialOsClasses.dashboardGridWide}>
         <FinancialOsAutomationNotice>
-        <p>
-          Schedule authenticated calls to{" "}
-          <code className={financialOsClasses.code}>POST /api/cron/financial-os/automation?job=deposit_overdue</code> (and{" "}
-          <code className={financialOsClasses.code}>balance_due_reminders</code>, <code className={financialOsClasses.code}>failed_payment_recovery</code>,{" "}
-          <code className={financialOsClasses.code}>payment_escalation_alerts</code>) with Bearer <code className={financialOsClasses.code}>CRON_SECRET</code> or{" "}
-          <code className={financialOsClasses.code}>FINANCIAL_OS_CRON_SECRET</code>. Supports <code className={financialOsClasses.code}>dry_run=1</code>,{" "}
-          <code className={financialOsClasses.code}>tenantId</code>, and <code className={financialOsClasses.code}>date=YYYY-MM-DD</code>.
-        </p>
-        <p>
-          Optional Phase 4 snapshot cron: <code className={financialOsClasses.code}>POST /api/cron/financial-os/clearance-snapshots</code> with the same Bearer
-          secrets. Supports <code className={financialOsClasses.code}>dry_run=1</code>, <code className={financialOsClasses.code}>tenantId</code>,{" "}
-          <code className={financialOsClasses.code}>date=YYYY-MM-DD</code>, <code className={financialOsClasses.code}>horizonDays</code>, and{" "}
-          <code className={financialOsClasses.code}>limit</code>.
-        </p>
-        <p className="text-slate-500">
-          Balance reminders reuse invoice <code className={financialOsClasses.code}>automation_hints</code> offsets (same semantics as{" "}
-          <code className={financialOsClasses.code}>/api/cron/fi-payments/reminders</code>).
-        </p>
-      </FinancialOsAutomationNotice>
+          <p>
+            Schedule authenticated calls to{" "}
+            <code className={financialOsClasses.code}>
+              POST /api/cron/financial-os/automation?job=deposit_overdue
+            </code>{" "}
+            (and <code className={financialOsClasses.code}>balance_due_reminders</code>,{" "}
+            <code className={financialOsClasses.code}>failed_payment_recovery</code>,{" "}
+            <code className={financialOsClasses.code}>payment_escalation_alerts</code>) with Bearer{" "}
+            <code className={financialOsClasses.code}>CRON_SECRET</code> or{" "}
+            <code className={financialOsClasses.code}>FINANCIAL_OS_CRON_SECRET</code>. Supports{" "}
+            <code className={financialOsClasses.code}>dry_run=1</code>,{" "}
+            <code className={financialOsClasses.code}>tenantId</code>, and{" "}
+            <code className={financialOsClasses.code}>date=YYYY-MM-DD</code>.
+          </p>
+          <p>
+            Optional Phase 4 snapshot cron:{" "}
+            <code className={financialOsClasses.code}>
+              POST /api/cron/financial-os/clearance-snapshots
+            </code>{" "}
+            with the same Bearer secrets. Supports{" "}
+            <code className={financialOsClasses.code}>dry_run=1</code>,{" "}
+            <code className={financialOsClasses.code}>tenantId</code>,{" "}
+            <code className={financialOsClasses.code}>date=YYYY-MM-DD</code>,{" "}
+            <code className={financialOsClasses.code}>horizonDays</code>, and{" "}
+            <code className={financialOsClasses.code}>limit</code>.
+          </p>
+          <p className="text-slate-500">
+            Balance reminders reuse invoice{" "}
+            <code className={financialOsClasses.code}>automation_hints</code> offsets (same
+            semantics as{" "}
+            <code className={financialOsClasses.code}>/api/cron/fi-payments/reminders</code>).
+          </p>
+        </FinancialOsAutomationNotice>
       </div>
 
       <FinancialOsSectionCard
@@ -322,16 +428,18 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         kicker="Deposits"
         description={
           <>
-            Creates a RevenueOS payment request for a consultation quote invoice and sets the linked booking&apos;s{" "}
-            <code className={financialOsClasses.code}>financial_os_status</code> to <code className={financialOsClasses.code}>deposit_pending</code> when a
-            consultation booking link exists. Does not alter ConsultationOS quote acceptance.
+            Creates a RevenueOS payment request for a consultation quote invoice and sets the linked
+            booking&apos;s <code className={financialOsClasses.code}>financial_os_status</code> to{" "}
+            <code className={financialOsClasses.code}>deposit_pending</code> when a consultation
+            booking link exists. Does not alter ConsultationOS quote acceptance.
           </>
         }
       >
         {!paymentsEnabled ? (
           <InfoNotice variant="warning" className="mb-4">
-            Stripe checkout is disabled (<code className={financialOsClasses.code}>FI_PAYMENTS_ENABLED</code>) — you can still create draft payment requests
-            with &quot;Send checkout&quot; off.
+            Stripe checkout is disabled (
+            <code className={financialOsClasses.code}>FI_PAYMENTS_ENABLED</code>) — you can still
+            create draft payment requests with &quot;Send checkout&quot; off.
           </InfoNotice>
         ) : null}
         <FinancialOsDashboardDepositForm tenantId={tid} canMutate={canMutate} />

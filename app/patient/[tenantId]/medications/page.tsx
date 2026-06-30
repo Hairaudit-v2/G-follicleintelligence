@@ -10,12 +10,19 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function PatientMedicationsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function PatientMedicationsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
@@ -29,7 +36,5 @@ export default async function PatientMedicationsPage({ params }: { params: Promi
     loadMedicationReorderRequestsForPatient(tid, access.patientId),
   ]);
 
-  return (
-    <PatientMedicationsPortalClient tenantId={tid} lines={lines} requests={requests} />
-  );
+  return <PatientMedicationsPortalClient tenantId={tid} lines={lines} requests={requests} />;
 }

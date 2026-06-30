@@ -9,7 +9,7 @@ const OPEN_PAYMENT_REQUEST_STATUSES = ["draft", "sent", "viewed"] as const;
 /** Resolve a public pay page URL for a manual payment record (via case invoice link). */
 export async function resolvePaymentLinkForPaymentRecord(
   tenantId: string,
-  paymentRecordId: string,
+  paymentRecordId: string
 ): Promise<string | null> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const pid = assertNonEmptyUuid(paymentRecordId, "paymentRecordId");
@@ -47,7 +47,7 @@ export async function resolvePaymentLinkForPaymentRecord(
 /** Batch-resolve payment links for outstanding deposit rows. */
 export async function resolvePaymentLinksForPaymentRecords(
   tenantId: string,
-  paymentRecordIds: readonly string[],
+  paymentRecordIds: readonly string[]
 ): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   for (const id of paymentRecordIds) {

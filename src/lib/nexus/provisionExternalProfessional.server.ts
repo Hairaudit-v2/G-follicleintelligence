@@ -24,7 +24,11 @@ export type NexusProvisionDeps = {
 const defaultDeps: NexusProvisionDeps = {
   async assertTenantExists(tenantId: string) {
     const supabase = supabaseAdmin();
-    const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+    const { data, error } = await supabase
+      .from("fi_tenants")
+      .select("id")
+      .eq("id", tenantId)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     return Boolean(data?.id);
   },
@@ -41,7 +45,9 @@ const defaultDeps: NexusProvisionDeps = {
   },
 };
 
-function validateProvisionPayload(payload: NexusProvisionPayload): { ok: true } | { ok: false; error: string } {
+function validateProvisionPayload(
+  payload: NexusProvisionPayload
+): { ok: true } | { ok: false; error: string } {
   const globalProfessionalId = payload.globalProfessionalId?.trim() ?? "";
   if (!GLOBAL_PROFESSIONAL_ID_RE.test(globalProfessionalId)) {
     return { ok: false, error: "Invalid globalProfessionalId." };
@@ -211,7 +217,8 @@ async function maybeCreateAuthUserForNexus(payload: NexusProvisionPayload): Prom
   if (!readFiOsNexusCreateAuthUser()) return;
 
   logStructured("info", "nexus_auth_user_creation_skipped", {
-    reason: "FI_OS_NEXUS_CREATE_AUTH_USER is enabled but auth user creation is not wired in Phase 9A.",
+    reason:
+      "FI_OS_NEXUS_CREATE_AUTH_USER is enabled but auth user creation is not wired in Phase 9A.",
     email_domain: payload.email.split("@")[1] ?? null,
   });
 }
@@ -228,7 +235,11 @@ export async function provisionExternalProfessionalFromNexus(
 
   const roleValidation = validateFiOsNexusRoleCodes(payload.approvedRoles);
   if (!roleValidation.ok) {
-    return { ok: false, error: `Invalid role(s): ${roleValidation.invalidRoles.join(", ")}`, httpStatus: 400 };
+    return {
+      ok: false,
+      error: `Invalid role(s): ${roleValidation.invalidRoles.join(", ")}`,
+      httpStatus: 400,
+    };
   }
 
   const globalProfessionalId = payload.globalProfessionalId.trim();
@@ -280,12 +291,16 @@ export async function provisionExternalProfessionalFromNexus(
     await upsertExternalProfessional(supabase, payload, globalProfessionalId);
     await upsertTenantMembership(supabase, payload, globalProfessionalId, tenantId, siteId);
     await upsertStaffProfile(supabase, payload, globalProfessionalId, tenantId, siteId);
-    await assignApprovedRolesIdempotently(supabase, globalProfessionalId, tenantId, roleValidation.roles);
+    await assignApprovedRolesIdempotently(
+      supabase,
+      globalProfessionalId,
+      tenantId,
+      roleValidation.roles
+    );
     await maybeCreateAuthUserForNexus(payload);
 
-    const { linkNexusProfessionalToFiStaff } = await import(
-      "@/src/lib/workforce-os/nexusFiStaffBridge.server"
-    );
+    const { linkNexusProfessionalToFiStaff } =
+      await import("@/src/lib/workforce-os/nexusFiStaffBridge.server");
     await linkNexusProfessionalToFiStaff(payload, globalProfessionalId, tenantId, siteId, supabase);
 
     const stateResult = await readExternalProfessionalState(globalProfessionalId, supabase);
@@ -298,7 +313,9 @@ export async function provisionExternalProfessionalFromNexus(
         globalProfessionalId,
         actionType: "provision",
         payload: payload as unknown as Record<string, unknown>,
-        beforeState: beforeStateResult?.ok ? (beforeStateResult.state as unknown as Record<string, unknown>) : null,
+        beforeState: beforeStateResult?.ok
+          ? (beforeStateResult.state as unknown as Record<string, unknown>)
+          : null,
         afterState: stateResult.state as unknown as Record<string, unknown>,
         result: "success",
       },

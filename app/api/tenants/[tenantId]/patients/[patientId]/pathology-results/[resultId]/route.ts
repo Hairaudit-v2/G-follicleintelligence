@@ -3,9 +3,18 @@
  * JSON body: discriminated union save_draft | mark_reviewed | archive
  */
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { patchPathologyResultBodySchema } from "@/src/lib/pathology/pathologyResultApiSchemas";
-import { archivePathologyResult, markPathologyResultReviewed, patchPathologyResultDraft } from "@/src/lib/pathology/pathologyResultMutations.server";
+import {
+  archivePathologyResult,
+  markPathologyResultReviewed,
+  patchPathologyResultDraft,
+} from "@/src/lib/pathology/pathologyResultMutations.server";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +38,10 @@ export async function PATCH(
 
     const parsed = patchPathologyResultBodySchema.safeParse(body);
     if (!parsed.success) {
-      return crmJsonError(400, parsed.error.issues.map((i) => i.message).join(" ") || "Invalid body.");
+      return crmJsonError(
+        400,
+        parsed.error.issues.map((i) => i.message).join(" ") || "Invalid body."
+      );
     }
 
     const tid = tenantId.trim();
@@ -42,7 +54,9 @@ export async function PATCH(
         resultDate: parsed.data.result_date.trim(),
         providerName: parsed.data.provider_name?.trim() ? parsed.data.provider_name.trim() : null,
         pathologyRequestId: parsed.data.pathology_request_id ?? null,
-        clinicalSummary: parsed.data.clinical_summary?.trim() ? parsed.data.clinical_summary.trim() : null,
+        clinicalSummary: parsed.data.clinical_summary?.trim()
+          ? parsed.data.clinical_summary.trim()
+          : null,
         items: parsed.data.items.map((i) => ({
           test_code: i.test_code ?? null,
           test_label: i.test_label,
@@ -60,7 +74,13 @@ export async function PATCH(
     }
 
     if (parsed.data.action === "mark_reviewed") {
-      const result = await markPathologyResultReviewed(tid, pid, rid, parsed.data.clinical_summary ?? null, actingUserId);
+      const result = await markPathologyResultReviewed(
+        tid,
+        pid,
+        rid,
+        parsed.data.clinical_summary ?? null,
+        actingUserId
+      );
       return crmJsonOk({ pathology_result: result });
     }
 

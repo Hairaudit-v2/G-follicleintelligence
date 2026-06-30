@@ -1,7 +1,10 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readFiPaymentsEnabled, readFiPaymentProviderId } from "@/src/lib/payments/fiPaymentEnv.server";
+import {
+  readFiPaymentsEnabled,
+  readFiPaymentProviderId,
+} from "@/src/lib/payments/fiPaymentEnv.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
@@ -23,17 +26,29 @@ export type PublicPaymentRequestView =
       amountDueCents: number;
       paymentRequest: Pick<
         FiPaymentRequestRow,
-        "total_cents" | "amount_cents" | "currency" | "checkout_url" | "status" | "expires_at" | "sent_at"
+        | "total_cents"
+        | "amount_cents"
+        | "currency"
+        | "checkout_url"
+        | "status"
+        | "expires_at"
+        | "sent_at"
       >;
       checkoutUrl: string | null;
     };
 
-export async function loadPublicPaymentRequestView(rawToken: string): Promise<PublicPaymentRequestView> {
+export async function loadPublicPaymentRequestView(
+  rawToken: string
+): Promise<PublicPaymentRequestView> {
   const token = rawToken?.trim() ?? "";
   if (!isPaymentPublicTokenFormat(token)) return { ok: false, state: "invalid" };
 
   const supabase = supabaseAdmin();
-  const { data: prRaw, error: pe } = await supabase.from("fi_payment_requests").select("*").eq("public_token", token).maybeSingle();
+  const { data: prRaw, error: pe } = await supabase
+    .from("fi_payment_requests")
+    .select("*")
+    .eq("public_token", token)
+    .maybeSingle();
   if (pe || !prRaw) return { ok: false, state: "invalid" };
   const pr = mapPaymentRequestRow(prRaw as Record<string, unknown>);
 
@@ -46,18 +61,32 @@ export async function loadPublicPaymentRequestView(rawToken: string): Promise<Pu
   if (ie || !invRaw) return { ok: false, state: "invalid" };
   const inv = mapInvoiceRow(invRaw as Record<string, unknown>);
 
-  const { data: tenantRaw } = await supabase.from("fi_tenants").select("name").eq("id", pr.tenant_id).maybeSingle();
-  const brandName = String((tenantRaw as { name?: string } | null)?.name ?? "Clinic").trim() || "Clinic";
+  const { data: tenantRaw } = await supabase
+    .from("fi_tenants")
+    .select("name")
+    .eq("id", pr.tenant_id)
+    .maybeSingle();
+  const brandName =
+    String((tenantRaw as { name?: string } | null)?.name ?? "Clinic").trim() || "Clinic";
 
   let clinicDisplayName: string | null = null;
   if (inv.clinic_id?.trim()) {
-    const { data: c } = await supabase.from("fi_clinics").select("name").eq("id", inv.clinic_id.trim()).maybeSingle();
+    const { data: c } = await supabase
+      .from("fi_clinics")
+      .select("name")
+      .eq("id", inv.clinic_id.trim())
+      .maybeSingle();
     clinicDisplayName = String((c as { name?: string } | null)?.name ?? "").trim() || null;
   }
 
   const stripeCheckoutEnabled = readFiPaymentsEnabled() && readFiPaymentProviderId() === "stripe";
   const nowMs = Date.now();
-  const state = derivePublicPaymentPageState({ paymentRequest: pr, invoice: inv, nowMs, stripeCheckoutEnabled });
+  const state = derivePublicPaymentPageState({
+    paymentRequest: pr,
+    invoice: inv,
+    nowMs,
+    stripeCheckoutEnabled,
+  });
   const amountDue = Math.min(pr.total_cents, Math.max(0, inv.total_cents - inv.amount_paid_cents));
 
   return {

@@ -141,7 +141,10 @@ export function CrmKanbanBoard({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-400">
           Showing <strong>{cards.length}</strong> of <strong>{total}</strong> matching leads
-          {truncated ? <span className="text-amber-300"> (board cap reached — narrow filters)</span> : null}.
+          {truncated ? (
+            <span className="text-amber-300"> (board cap reached — narrow filters)</span>
+          ) : null}
+          .
         </p>
         <div className="flex items-center gap-2">
           {canMutate ? (
@@ -168,7 +171,8 @@ export function CrmKanbanBoard({
 
       {!canMutate ? (
         <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-          Your role can view the board but not move cards. Ask an FI admin or CRM operator to update stages.
+          Your role can view the board but not move cards. Ask an FI admin or CRM operator to update
+          stages.
         </p>
       ) : null}
 
@@ -242,7 +246,9 @@ export function CrmKanbanBoard({
                 onOpenPreview={openLead}
               />
             ))}
-            <p className="text-[11px] text-gray-500">Assign a pipeline stage from the lead detail page.</p>
+            <p className="text-[11px] text-gray-500">
+              Assign a pipeline stage from the lead detail page.
+            </p>
           </CrmKanbanColumn>
         ) : null}
       </div>

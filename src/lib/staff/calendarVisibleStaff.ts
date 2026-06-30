@@ -20,10 +20,13 @@ export type CalendarVisibleStaffInput = {
 };
 
 export function isNonCalendarSupportRole(staffRole: string | null | undefined): boolean {
-  const r = String(staffRole ?? "").trim().toLowerCase();
+  const r = String(staffRole ?? "")
+    .trim()
+    .toLowerCase();
   if (!r) return false;
   if (NON_CALENDAR_ROLES.has(r)) return true;
-  if (/\b(reception|receptionist|administrator|admin|finance|coordinator|backend)\b/.test(r)) return true;
+  if (/\b(reception|receptionist|administrator|admin|finance|coordinator|backend)\b/.test(r))
+    return true;
   return false;
 }
 
@@ -33,12 +36,18 @@ export function isCalendarVisibleClinicalStaff(staff: CalendarVisibleStaffInput)
   if (staff.calendar_visible === true) return true;
   if (staff.calendar_visible === false) return false;
 
-  const role = String(staff.staff_role ?? "").trim().toLowerCase();
+  const role = String(staff.staff_role ?? "")
+    .trim()
+    .toLowerCase();
   if (!role || role === "needs_review") return false;
   if (isNonCalendarSupportRole(role)) return false;
 
   if (CALENDAR_VISIBLE_CLINICAL_ROLES.some((clinical) => role.includes(clinical))) return true;
-  if (/\b(doctor|physician|nurse|technician|consultant|trichologist|surgeon|clinical assistant)\b/.test(role)) {
+  if (
+    /\b(doctor|physician|nurse|technician|consultant|trichologist|surgeon|clinical assistant)\b/.test(
+      role
+    )
+  ) {
     return true;
   }
 

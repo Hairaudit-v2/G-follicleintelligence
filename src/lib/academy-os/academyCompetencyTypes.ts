@@ -69,5 +69,9 @@ export type CompetencyExportReceiveResult =
     };
 
 export type StaffIdentityResolutionResult =
-  | { ok: true; staffId: string; method: "global_professional_id" | "academy_profile_id" | "iiohr_user_id" | "staff_email" }
+  | {
+      ok: true;
+      staffId: string;
+      method: "global_professional_id" | "academy_profile_id" | "iiohr_user_id" | "staff_email";
+    }
   | { ok: false; reason: string };

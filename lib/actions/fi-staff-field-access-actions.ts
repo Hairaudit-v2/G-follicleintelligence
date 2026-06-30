@@ -10,9 +10,7 @@ import {
 } from "@/src/lib/staffAccess/staffFieldAccess.server";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
-import {
-  STAFF_ACCESS_SCOPES,
-} from "@/src/lib/staffAccess/staffAccessRegistry";
+import { STAFF_ACCESS_SCOPES } from "@/src/lib/staffAccess/staffAccessRegistry";
 import {
   STAFF_ACCESS_FIELDS_BY_KEY,
   STAFF_FIELD_PERMISSION_LEVELS,

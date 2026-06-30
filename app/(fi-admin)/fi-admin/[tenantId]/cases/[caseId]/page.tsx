@@ -23,7 +23,11 @@ import { sanitizeFromCasesSearchParam } from "@/src/lib/cases/caseDetailFromCase
 import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 import { loadPaymentRecordsForCases } from "@/src/lib/payments/paymentRecordLoaders.server";
-import { buildCaseOutcomeIntelligenceView, loadCaseOutcomeMeasurements, loadCaseOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import {
+  buildCaseOutcomeIntelligenceView,
+  loadCaseOutcomeMeasurements,
+  loadCaseOutcomeProtocols,
+} from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadCrmQuotesForCase } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { loadCaseFinancialOsSurgeryPipelineSummary } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import { buildFinancialClearanceFromPipelineStatus } from "@/src/lib/financialOs/financialClearanceCore";
@@ -54,27 +58,44 @@ export default async function CaseDetailRoutePage({
 
   if (!tenantId?.trim() || !caseId?.trim()) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
-  const [detail, surgeryPlan, procedureDay, teamUserOptions, postOpTracking, followUps, timelineExtra, measurementRows, protocolRows, casePaymentReadiness] =
-    await Promise.all([
-      loadCaseAdminDetail(tenantId, caseId),
-      loadSurgeryPlanForCase(tenantId, caseId),
-      loadProcedureDayForCase(tenantId, caseId),
-      loadProcedureTeamPickerOptions(tenantId),
-      loadPostOpTrackingForCase(tenantId, caseId),
-      loadFollowUpsForCase(tenantId, caseId),
-      loadCaseTimelineExtraSources(tenantId, caseId),
-      loadCaseOutcomeMeasurements(tenantId, caseId),
-      loadCaseOutcomeProtocols(tenantId, caseId),
-      loadCasePaymentReadiness(tenantId, caseId),
-    ]);
+  const [
+    detail,
+    surgeryPlan,
+    procedureDay,
+    teamUserOptions,
+    postOpTracking,
+    followUps,
+    timelineExtra,
+    measurementRows,
+    protocolRows,
+    casePaymentReadiness,
+  ] = await Promise.all([
+    loadCaseAdminDetail(tenantId, caseId),
+    loadSurgeryPlanForCase(tenantId, caseId),
+    loadProcedureDayForCase(tenantId, caseId),
+    loadProcedureTeamPickerOptions(tenantId),
+    loadPostOpTrackingForCase(tenantId, caseId),
+    loadFollowUpsForCase(tenantId, caseId),
+    loadCaseTimelineExtraSources(tenantId, caseId),
+    loadCaseOutcomeMeasurements(tenantId, caseId),
+    loadCaseOutcomeProtocols(tenantId, caseId),
+    loadCasePaymentReadiness(tenantId, caseId),
+  ]);
   if (!detail) notFound();
 
   const timelineItems = buildCaseTimeline({
@@ -101,7 +122,9 @@ export default async function CaseDetailRoutePage({
     },
   });
 
-  const followCheckpoints = followUps.filter((f) => f.follow_up_status === "completed").map((f) => f.checkpoint);
+  const followCheckpoints = followUps
+    .filter((f) => f.follow_up_status === "completed")
+    .map((f) => f.checkpoint);
   const outcomeIntelligence = buildCaseOutcomeIntelligenceView({
     followUpCheckpoints: followCheckpoints,
     measurementRows,
@@ -117,12 +140,23 @@ export default async function CaseDetailRoutePage({
     foundationParam === "true" ||
     (Array.isArray(foundationParam) && foundationParam.some((v) => v === "1" || v === "true"));
 
-  const foundationRecord = showFoundation ? await loadUniversalCaseRecord({ tenantId, caseId }) : null;
+  const foundationRecord = showFoundation
+    ? await loadUniversalCaseRecord({ tenantId, caseId })
+    : null;
   const foundationOk = foundationRecord && foundationRecord.ok ? foundationRecord : null;
 
   const linkedFiPatientId = detail.patient?.foundation_patient_id ?? null;
-  const [caseAppointmentBookings, services, calendarSettings, assignees, scope, bookingSession, payMap, payCap, caseCrmQuotes] =
-    await Promise.all([
+  const [
+    caseAppointmentBookings,
+    services,
+    calendarSettings,
+    assignees,
+    scope,
+    bookingSession,
+    payMap,
+    payCap,
+    caseCrmQuotes,
+  ] = await Promise.all([
     loadCaseAppointmentBookingsForShell(tenantId, caseId, linkedFiPatientId),
     loadFiServicesForTenant(tenantId.trim()),
     loadTenantOperationalCalendarSettings(tenantId.trim()),
@@ -133,7 +167,10 @@ export default async function CaseDetailRoutePage({
     getPaymentRecordMutationCapability(tenantId.trim()),
     loadCrmQuotesForCase(tenantId.trim(), caseId.trim()),
   ]);
-  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
+  const operationalTodayYmd = calendarDateStringFromInstant(
+    new Date(),
+    calendarSettings.calendarTimezone
+  );
   const initialPaymentRecords = payMap.get(caseId.trim()) ?? [];
 
   const caseFinancialPipeline = await loadCaseFinancialOsSurgeryPipelineSummary(tenantId.trim(), {
@@ -144,7 +181,10 @@ export default async function CaseDetailRoutePage({
     caseAppointmentBookings,
   });
 
-  const linkedSurgery = pickPrimaryLinkedSurgeryBookingYmd(caseAppointmentBookings, calendarSettings.calendarTimezone);
+  const linkedSurgery = pickPrimaryLinkedSurgeryBookingYmd(
+    caseAppointmentBookings,
+    calendarSettings.calendarTimezone
+  );
 
   const caseFinancialClearance = buildFinancialClearanceFromPipelineStatus({
     todayYmd: operationalTodayYmd,
@@ -155,7 +195,10 @@ export default async function CaseDetailRoutePage({
   });
 
   const liveSurgery = await loadLiveSurgeryForCase(tenantId.trim(), caseId.trim());
-  const surgeryEconomicsMeta = await loadCaseSnapshotReadinessSummary(tenantId.trim(), caseId.trim());
+  const surgeryEconomicsMeta = await loadCaseSnapshotReadinessSummary(
+    tenantId.trim(),
+    caseId.trim()
+  );
   const caseSurgeryEconomics = await loadCaseSurgeryEconomicsSummary({
     tenantId: tenantId.trim(),
     caseId: caseId.trim(),
@@ -170,9 +213,14 @@ export default async function CaseDetailRoutePage({
     actualEndAt: liveSurgery?.actual_end_at ?? null,
   });
 
-  let caseRevenueAttributionOverride: Awaited<ReturnType<typeof loadRevenueAttributionOverrideForCase>> = null;
+  let caseRevenueAttributionOverride: Awaited<
+    ReturnType<typeof loadRevenueAttributionOverrideForCase>
+  > = null;
   try {
-    caseRevenueAttributionOverride = await loadRevenueAttributionOverrideForCase(tenantId.trim(), caseId.trim());
+    caseRevenueAttributionOverride = await loadRevenueAttributionOverrideForCase(
+      tenantId.trim(),
+      caseId.trim()
+    );
   } catch {
     /* table may not exist until migration */
   }
@@ -181,7 +229,10 @@ export default async function CaseDetailRoutePage({
     .filter((o) => o.staff_role === "consultant")
     .map((o) => ({ value: o.fi_user_id, label: o.label }));
 
-  const caseAccountsReceivable = await loadCaseAccountsReceivableSummary(tenantId.trim(), caseId.trim());
+  const caseAccountsReceivable = await loadCaseAccountsReceivableSummary(
+    tenantId.trim(),
+    caseId.trim()
+  );
 
   const pageView = (
     <CaseDetailPageView

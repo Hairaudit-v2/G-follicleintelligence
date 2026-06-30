@@ -60,7 +60,10 @@ describe("crmLeadListQuery", () => {
       updatedFrom: "2026-02-01",
       updatedTo: "2026-02-02",
     });
-    const href = buildCrmLeadListHref("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", parsedCrmLeadListToHrefQuery(q));
+    const href = buildCrmLeadListHref(
+      "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      parsedCrmLeadListToHrefQuery(q)
+    );
     assert.ok(href.includes("view=board"));
     assert.ok(href.includes("updatedFrom="));
     assert.ok(href.includes("updatedTo="));
@@ -68,7 +71,10 @@ describe("crmLeadListQuery", () => {
 
   it("buildCrmLeadListHref roundtrip", () => {
     const q = parseCrmLeadListQuery({ stage: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee", page: "3" });
-    const href = buildCrmLeadListHref("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", parsedCrmLeadListToHrefQuery(q));
+    const href = buildCrmLeadListHref(
+      "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      parsedCrmLeadListToHrefQuery(q)
+    );
     assert.ok(href.includes("stage="));
     assert.ok(href.includes("page=3"));
   });

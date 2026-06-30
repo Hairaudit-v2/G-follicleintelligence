@@ -1,4 +1,11 @@
-import type { FiGatewayPaymentStatus, FiInvoiceItemRow, FiInvoiceKind, FiInvoiceRow, FiPaymentRequestRow, FiPaymentRequestStatus } from "./revenueInvoiceModel";
+import type {
+  FiGatewayPaymentStatus,
+  FiInvoiceItemRow,
+  FiInvoiceKind,
+  FiInvoiceRow,
+  FiPaymentRequestRow,
+  FiPaymentRequestStatus,
+} from "./revenueInvoiceModel";
 import { invoiceBalanceDueCents, normalizeInvoiceStatusValue } from "./revenueInvoiceModel";
 
 function jsonObject(raw: unknown): Record<string, unknown> {
@@ -34,7 +41,8 @@ export function mapInvoiceRow(raw: Record<string, unknown>): FiInvoiceRow {
             amount_paid_cents: Number(raw.amount_paid_cents ?? 0),
           }),
     days_overdue: Number(raw.days_overdue ?? 0),
-    last_reminder_sent_at: raw.last_reminder_sent_at != null ? String(raw.last_reminder_sent_at) : null,
+    last_reminder_sent_at:
+      raw.last_reminder_sent_at != null ? String(raw.last_reminder_sent_at) : null,
     invoice_number: raw.invoice_number != null ? String(raw.invoice_number) : null,
     title: raw.title != null ? String(raw.title) : null,
     automation_hints: jsonObject(raw.automation_hints),
@@ -74,7 +82,8 @@ export function mapPaymentRequestRow(raw: Record<string, unknown>): FiPaymentReq
     viewed_at: raw.viewed_at != null ? String(raw.viewed_at) : null,
     checkout_url: raw.checkout_url != null ? String(raw.checkout_url) : null,
     provider: raw.provider != null ? String(raw.provider) : null,
-    provider_checkout_session_id: raw.provider_checkout_session_id != null ? String(raw.provider_checkout_session_id) : null,
+    provider_checkout_session_id:
+      raw.provider_checkout_session_id != null ? String(raw.provider_checkout_session_id) : null,
     expires_at: raw.expires_at != null ? String(raw.expires_at) : null,
     metadata: jsonObject(raw.metadata),
     created_at: String(raw.created_at ?? ""),

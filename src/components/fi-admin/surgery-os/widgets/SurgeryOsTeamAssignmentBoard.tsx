@@ -31,12 +31,17 @@ export function SurgeryOsTeamAssignmentBoardWidget({ team }: { team: SurgeryOsTe
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
             <Users className="mb-2 h-8 w-8 text-slate-400" aria-hidden />
-            <p className="text-sm text-slate-400">No team assignments for today&apos;s surgeries.</p>
+            <p className="text-sm text-slate-400">
+              No team assignments for today&apos;s surgeries.
+            </p>
           </div>
         ) : (
           <ul className="space-y-2">
             {groups.map(([surgeryId, members]) => (
-              <li key={surgeryId} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+              <li
+                key={surgeryId}
+                className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5"
+              >
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   {members[0]?.patientLabel ?? "Surgery"}
                 </p>
@@ -49,7 +54,10 @@ export function SurgeryOsTeamAssignmentBoardWidget({ team }: { team: SurgeryOsTe
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5">
                         <span
-                          className={cn("h-2 w-2 rounded-full", STATUS_DOT[m.assignmentStatus] ?? "bg-slate-400")}
+                          className={cn(
+                            "h-2 w-2 rounded-full",
+                            STATUS_DOT[m.assignmentStatus] ?? "bg-slate-400"
+                          )}
                           aria-hidden
                         />
                         <span className="text-xs text-slate-400">{m.assignmentStatusLabel}</span>

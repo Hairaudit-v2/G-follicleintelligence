@@ -1,6 +1,9 @@
 /** Row shape for `fi_patient_images` (application layer). */
 
-import type { ImagingAnatomicalRegion, ImagingLibraryAxis } from "@/src/lib/imagingOs/imagingOsConstants";
+import type {
+  ImagingAnatomicalRegion,
+  ImagingLibraryAxis,
+} from "@/src/lib/imagingOs/imagingOsConstants";
 
 export type PatientImageCategory =
   | "consult"

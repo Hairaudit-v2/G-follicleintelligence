@@ -3,9 +3,15 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadConsultationsForPatient } from "@/src/lib/consultations/consultationLoaders.server";
-import { loadClinicalNotesForPatient, type PatientClinicalNoteSummary } from "@/src/lib/clinicalNotes/clinicalNotesLoaders.server";
+import {
+  loadClinicalNotesForPatient,
+  type PatientClinicalNoteSummary,
+} from "@/src/lib/clinicalNotes/clinicalNotesLoaders.server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import {
+  loadCrmShellScopePickerOptions,
+  loadCrmShellStaffPickerOptions,
+} from "@/src/lib/crm/crmShellLoaders";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import {
@@ -14,7 +20,10 @@ import {
   sumPatientLifetimeValueGbp,
   type PatientDirectoryBookingLike,
 } from "./patientDirectoryMetrics";
-import { mapPatientConsultationListItems, type PatientConsultationListItem } from "./patientConsultations";
+import {
+  mapPatientConsultationListItems,
+  type PatientConsultationListItem,
+} from "./patientConsultations";
 import {
   loadPatientPersonLeadHistory,
   loadPersonCrmActivityForLeads,
@@ -22,14 +31,20 @@ import {
   type PatientPersonCrmActivityItem,
   type PatientPersonLeadHistoryItem,
 } from "./patientLeadHistory";
-import { parsePreviousProceduresFromClinical, type PreviousProcedureRow } from "./previousProcedures";
+import {
+  parsePreviousProceduresFromClinical,
+  type PreviousProcedureRow,
+} from "./previousProcedures";
 import {
   loadPatientProfile,
   type PatientProfileFoundationData,
   type PatientProfileLoadResult,
 } from "./patientProfileLoader";
 
-export type { PatientPersonLeadHistoryItem, PatientPersonCrmActivityItem } from "./patientLeadHistoryShared";
+export type {
+  PatientPersonLeadHistoryItem,
+  PatientPersonCrmActivityItem,
+} from "./patientLeadHistoryShared";
 export type { PatientConsultationListItem as PatientDetailConsultationItem } from "./patientConsultations";
 
 export type PatientDetailNextAppointment = {
@@ -113,7 +128,10 @@ async function loadPatientBookingRows(
       end_at: String(r.end_at),
       timezone: r.timezone != null ? String(r.timezone) : null,
       location: r.location != null ? String(r.location) : null,
-      metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      metadata:
+        meta && typeof meta === "object" && !Array.isArray(meta)
+          ? (meta as Record<string, unknown>)
+          : {},
       cancelled_at: r.cancelled_at != null ? String(r.cancelled_at) : null,
       cancelled_by_user_id: r.cancelled_by_user_id != null ? String(r.cancelled_by_user_id) : null,
       cancellation_reason: r.cancellation_reason != null ? String(r.cancellation_reason) : null,
@@ -142,16 +160,23 @@ export async function loadPatientDetailPayload(
 
   const personLeadHistory = await loadPatientPersonLeadHistory(supabase, tid, personId, pid);
 
-  const [personCrmActivity, consultationsRaw, bookingRows, assignees, scope, calendarSettings, voiceClinicalNotes] =
-    await Promise.all([
-      loadPersonCrmActivityForLeads(supabase, tid, pid, personLeadHistory),
-      loadConsultationsForPatient(tid, pid, personId),
-      loadPatientBookingRows(supabase, tid, pid),
-      loadCrmShellStaffPickerOptions(tid),
-      loadCrmShellScopePickerOptions(tid),
-      loadTenantOperationalCalendarSettings(tid),
-      loadClinicalNotesForPatient(tid, pid),
-    ]);
+  const [
+    personCrmActivity,
+    consultationsRaw,
+    bookingRows,
+    assignees,
+    scope,
+    calendarSettings,
+    voiceClinicalNotes,
+  ] = await Promise.all([
+    loadPersonCrmActivityForLeads(supabase, tid, pid, personLeadHistory),
+    loadConsultationsForPatient(tid, pid, personId),
+    loadPatientBookingRows(supabase, tid, pid),
+    loadCrmShellStaffPickerOptions(tid),
+    loadCrmShellScopePickerOptions(tid),
+    loadTenantOperationalCalendarSettings(tid),
+    loadClinicalNotesForPatient(tid, pid),
+  ]);
 
   const bookingLikes: PatientDirectoryBookingLike[] = bookingRows.map((b) => ({
     id: b.id,
@@ -165,7 +190,10 @@ export async function loadPatientDetailPayload(
   const leadMetas = personLeadHistory.map(({ lead }) => lead.metadata ?? {});
   const lifetimeValueGbp = sumPatientLifetimeValueGbp(leadMetas);
 
-  const consultations = mapPatientConsultationListItems(consultationsRaw, profile.clinicalDetails.row);
+  const consultations = mapPatientConsultationListItems(
+    consultationsRaw,
+    profile.clinicalDetails.row
+  );
   const previousProcedures = parsePreviousProceduresFromClinical(profile.clinicalDetails.row);
   const primaryLead = pickPrimaryLeadForPatient(personLeadHistory);
 

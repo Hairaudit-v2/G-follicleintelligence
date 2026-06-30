@@ -86,10 +86,8 @@ export function canExecuteAiVisionTask(
     return { allowed: false, reason: "AI execution is disabled (ai_enabled=false)." };
   }
 
-  const requirements = IMAGING_AI_VISION_TASK_REQUIREMENTS[task_type as Exclude<
-    ImagingOsAiVisionTaskType,
-    "unknown"
-  >];
+  const requirements =
+    IMAGING_AI_VISION_TASK_REQUIREMENTS[task_type as Exclude<ImagingOsAiVisionTaskType, "unknown">];
 
   if (!requirements) {
     return { allowed: false, reason: `Unknown or unsupported task type: ${task_type}.` };
@@ -198,9 +196,7 @@ export class ImagingOsStubAiProvider implements ImagingOsAiProvider {
 }
 
 /** Create an AI provider instance for the given provider type (IM-12: stub only). */
-export function createAiProvider(
-  providerType: ImagingOsAiProviderType
-): ImagingOsAiProvider {
+export function createAiProvider(providerType: ImagingOsAiProviderType): ImagingOsAiProvider {
   switch (providerType) {
     case "stub":
       return new ImagingOsStubAiProvider();
@@ -419,12 +415,9 @@ export async function executeImagingAiVisionTask(
   warnings.push(...validation.warnings);
   blockers.push(...validation.blockers);
 
-  const auditLog = buildExecutionAuditLog(
-    request,
-    output.model_name,
-    output.model_version,
-    { execution_status: validation.valid ? "executed" : "validation_failed" }
-  );
+  const auditLog = buildExecutionAuditLog(request, output.model_name, output.model_version, {
+    execution_status: validation.valid ? "executed" : "validation_failed",
+  });
 
   if (!validation.valid) {
     return {

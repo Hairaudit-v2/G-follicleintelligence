@@ -23,7 +23,9 @@ export function ConsultationOsNotesPanel({
     <FiSection title="Live consultation notes" headingId="consultation-os-notes-heading">
       {promptFocus.length > 0 ? (
         <div className="mb-3 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Prompt focus</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            Prompt focus
+          </p>
           <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs text-slate-400">
             {promptFocus.map((line) => (
               <li key={line}>{line}</li>

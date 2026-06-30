@@ -128,7 +128,9 @@ async function paginatedDistinctUnifiedPatients(
   return { size: set.size, capped, skipped: false };
 }
 
-export async function loadFoundationOsDashboard(tenantId: string): Promise<FoundationOsDashboardPayload> {
+export async function loadFoundationOsDashboard(
+  tenantId: string
+): Promise<FoundationOsDashboardPayload> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
 
@@ -146,16 +148,31 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
     { count: reports_total, error: repErr },
   ] = await Promise.all([
     supabase.from("fi_uploads").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
-    supabase.from("v_fi_media_unified").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
-    supabase.from("v_fi_media_unified").select("*", { count: "exact", head: true }).eq("tenant_id", tid).is("foundation_patient_id", null),
-    supabase.from("v_fi_patient_resolution").select("*", { count: "exact", head: true }).eq("tenant_id", tid).not("foundation_patient_id", "is", null),
+    supabase
+      .from("v_fi_media_unified")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tid),
+    supabase
+      .from("v_fi_media_unified")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("foundation_patient_id", null),
+    supabase
+      .from("v_fi_patient_resolution")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .not("foundation_patient_id", "is", null),
     supabase
       .from("v_fi_patient_resolution")
       .select("*", { count: "exact", head: true })
       .eq("tenant_id", tid)
       .is("global_patient_id", null)
       .not("foundation_patient_id", "is", null),
-    supabase.from("v_fi_patient_resolution").select("*", { count: "exact", head: true }).eq("tenant_id", tid).not("global_patient_id", "is", null),
+    supabase
+      .from("v_fi_patient_resolution")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .not("global_patient_id", "is", null),
     supabase
       .from("v_fi_patient_resolution")
       .select("*", { count: "exact", head: true })
@@ -201,10 +218,14 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
     distinctPatientIdsFromCrmLeads(supabase, tid),
   ]);
 
-  if (distinctTimeline.capped) scan_notes.push(`Distinct patients with timeline rows capped at ${SCAN_CAP} scanned rows.`);
-  if (distinctUnified.capped) scan_notes.push(`Distinct patients with unified media capped at ${SCAN_CAP} view rows.`);
-  if (distinctUnified.skipped) scan_notes.push("Unified media patient distinct scan skipped (view error).");
-  if (distinctCrm.capped) scan_notes.push(`Distinct CRM-linked patients capped at ${SCAN_CAP} lead rows.`);
+  if (distinctTimeline.capped)
+    scan_notes.push(`Distinct patients with timeline rows capped at ${SCAN_CAP} scanned rows.`);
+  if (distinctUnified.capped)
+    scan_notes.push(`Distinct patients with unified media capped at ${SCAN_CAP} view rows.`);
+  if (distinctUnified.skipped)
+    scan_notes.push("Unified media patient distinct scan skipped (view error).");
+  if (distinctCrm.capped)
+    scan_notes.push(`Distinct CRM-linked patients capped at ${SCAN_CAP} lead rows.`);
 
   /** Distinct foundation patients reachable via a case that has any fi_reports row. */
   let auditPatients = 0;
@@ -213,7 +234,11 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
     const caseSet = new Set<string>();
     let from = 0;
     for (;;) {
-      const { data, error } = await supabase.from("fi_reports").select("case_id").eq("tenant_id", tid).range(from, from + PAGE - 1);
+      const { data, error } = await supabase
+        .from("fi_reports")
+        .select("case_id")
+        .eq("tenant_id", tid)
+        .range(from, from + PAGE - 1);
       if (error) {
         audit_scan_ok = false;
         scan_notes.push(`Audit linkage scan skipped: ${error.message}`);
@@ -287,7 +312,7 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
     unified_media_rows: unified_media_rows,
     unified_media_without_case: integrity.unified_media_without_case_id,
     fi_media_assets_without_case_id: integrity.risks.fi_media_assets_without_case_id,
-    unified_rows_without_patient: uwpErr ? null : unified_without_patient ?? 0,
+    unified_rows_without_patient: uwpErr ? null : (unified_without_patient ?? 0),
   };
 
   const timeline_events = {
@@ -296,10 +321,13 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
     fi_events_last_7_days: fi_events_last_7_days ?? 0,
     fi_timeline_events: integrity.totals.fi_timeline_events,
     timeline_events_with_patient_id: timeline_with_patient ?? 0,
-    timeline_events_with_empty_detail_sample: integrity.risks.fi_timeline_events_detail_empty_or_null,
+    timeline_events_with_empty_detail_sample:
+      integrity.risks.fi_timeline_events_detail_empty_or_null,
     events_with_fi_case_link: integrity.coverage.events_with_fi_case_link,
-    events_with_foundation_patient_on_linked_case: integrity.coverage.events_with_foundation_patient_on_linked_case,
-    events_with_person_on_linked_foundation_patient: integrity.coverage.events_with_person_on_linked_foundation_patient,
+    events_with_foundation_patient_on_linked_case:
+      integrity.coverage.events_with_foundation_patient_on_linked_case,
+    events_with_person_on_linked_foundation_patient:
+      integrity.coverage.events_with_person_on_linked_foundation_patient,
   };
 
   const globalRows = resolution_rows_global ?? 0;
@@ -309,10 +337,15 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
 
   const surgeryos_linkage_pct = pct(casesWithFp, Math.max(casesTot, 1));
   const timeline_coverage_pct = pct(distinctTimeline.size, Math.max(fp, 1));
-  const media_coverage_pct = distinctUnified.skipped ? null : pct(distinctUnified.size, Math.max(fp, 1));
+  const media_coverage_pct = distinctUnified.skipped
+    ? null
+    : pct(distinctUnified.size, Math.max(fp, 1));
   const crm_coverage_pct = pct(distinctCrm.size, Math.max(fp, 1));
-  const audit_case_coverage_pct =
-    audit_scan_ok ? (fp > 0 ? pct(auditPatients, Math.max(fp, 1)) : 0) : null;
+  const audit_case_coverage_pct = audit_scan_ok
+    ? fp > 0
+      ? pct(auditPatients, Math.max(fp, 1))
+      : 0
+    : null;
 
   const twin_readiness_score_hint = meanCoverageHint([
     timeline_coverage_pct,
@@ -335,7 +368,7 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
 
   if (media.fi_uploads > 0 && media.fi_media_assets === 0) {
     scan_notes.push(
-      "fi_uploads has rows but fi_media_assets is empty — often indicates foundation media dual-write is not yet writing assets for this tenant (confirm pipeline; uploads may still exist only in legacy tables).",
+      "fi_uploads has rows but fi_media_assets is empty — often indicates foundation media dual-write is not yet writing assets for this tenant (confirm pipeline; uploads may still exist only in legacy tables)."
     );
   }
 

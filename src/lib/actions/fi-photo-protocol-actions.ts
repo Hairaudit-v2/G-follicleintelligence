@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import {
   HLI_PHOTO_PROTOCOL_CLINICAL_CONTEXTS,
   type HliPhotoProtocolClinicalContext,
@@ -55,7 +59,9 @@ export async function createPhotoProtocolSessionAction(
     const pid = patientId.trim();
     const slug =
       parsed.template_slug?.trim() ||
-      resolveDefaultTemplateSlugForClinicalContext(parsed.clinical_context as HliPhotoProtocolClinicalContext);
+      resolveDefaultTemplateSlugForClinicalContext(
+        parsed.clinical_context as HliPhotoProtocolClinicalContext
+      );
     const fiUserId = await tryResolveFiUserIdForTenant(tid, undefined);
     const { session } = await createFiOsPhotoProtocolSession({
       tenantId: tid,
@@ -192,7 +198,11 @@ export async function completePhotoProtocolSessionAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const supabase = supabaseAdmin();
@@ -205,7 +215,10 @@ export async function completePhotoProtocolSessionAction(
     if (!sess || String((sess as { patient_id: string }).patient_id) !== pid) {
       throw new Error("Session not found for this patient.");
     }
-    const res = await completePhotoProtocolSessionIfEligible({ tenantId: tid, sessionId: sessionId.trim() });
+    const res = await completePhotoProtocolSessionIfEligible({
+      tenantId: tid,
+      sessionId: sessionId.trim(),
+    });
     if (!res.ok) throw new Error(res.reason);
     revalidatePhotoProtocol(tid, pid);
     return { ok: true };
@@ -222,10 +235,15 @@ export async function analyseUnclassifiedProtocolImagesAction(
 ): Promise<{ ok: true; processed: number } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
-    const ids = body && typeof body === "object" && Array.isArray(body.image_ids) ? body.image_ids : [];
+    const ids =
+      body && typeof body === "object" && Array.isArray(body.image_ids) ? body.image_ids : [];
     let n = 0;
     for (const raw of ids) {
       if (typeof raw !== "string" || !raw.trim()) continue;

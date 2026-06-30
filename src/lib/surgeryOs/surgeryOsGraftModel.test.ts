@@ -122,7 +122,10 @@ describe("surgeryOsGraftModel", () => {
   it("maps graft event types to procedure timeline kinds", () => {
     assert.equal(graftEventTypeToTimelineKind("tray_count"), "tray_count_recorded");
     assert.equal(graftEventTypeToTimelineKind("tray_confirmed"), "tray_count_recorded");
-    assert.equal(graftEventTypeToTimelineKind("graft_reconciliation"), "graft_reconciliation_completed");
+    assert.equal(
+      graftEventTypeToTimelineKind("graft_reconciliation"),
+      "graft_reconciliation_completed"
+    );
     assert.equal(graftEventTypeToTimelineKind("correction"), "graft_correction");
     assert.equal(graftEventTypeToTimelineKind("count_update"), "graft_count_update");
   });
@@ -130,7 +133,7 @@ describe("surgeryOsGraftModel", () => {
   it("computes tray hair totals from composition", () => {
     assert.equal(
       computeTrayHairTotal({ singles: 10, doubles: 5, triples: 2, multiples: 1 }),
-      10 + 10 + 6 + 4,
+      10 + 10 + 6 + 4
     );
   });
 
@@ -210,7 +213,7 @@ describe("surgeryOsGraftModel", () => {
         requestingDeviceId: "device-b",
         nowMs,
       }),
-      false,
+      false
     );
     assert.equal(
       canAcquireGraftCountSessionLock({
@@ -219,7 +222,7 @@ describe("surgeryOsGraftModel", () => {
         requestingDeviceId: "device-a",
         nowMs,
       }),
-      true,
+      true
     );
   });
 
@@ -232,7 +235,7 @@ describe("surgeryOsGraftModel", () => {
         requestingDeviceId: "device-b",
         nowMs,
       }),
-      true,
+      true
     );
   });
 
@@ -267,7 +270,10 @@ describe("surgeryOsGraftModel", () => {
   it("blocks completed/cancelled surgeries unless admin override", () => {
     assert.equal(isSurgeryStatusEligibleForGraftCounting("in_progress"), true);
     assert.equal(isSurgeryStatusEligibleForGraftCounting("completed"), false);
-    assert.equal(isSurgeryStatusEligibleForGraftCounting("completed", { allowAdminOverride: true }), true);
+    assert.equal(
+      isSurgeryStatusEligibleForGraftCounting("completed", { allowAdminOverride: true }),
+      true
+    );
   });
 
   it("requires graft reconciliation before recovery or complete phases", () => {

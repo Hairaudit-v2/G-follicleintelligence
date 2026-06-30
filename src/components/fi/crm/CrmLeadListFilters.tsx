@@ -20,7 +20,11 @@ export function CrmLeadListFilters({
   const clearHref = query.view === "board" ? `${action}?view=board` : action;
 
   return (
-    <form method="get" action={action} className="space-y-3 rounded border border-white/[0.08] bg-white/[0.03] p-4">
+    <form
+      method="get"
+      action={action}
+      className="space-y-3 rounded border border-white/[0.08] bg-white/[0.03] p-4"
+    >
       {query.view === "board" ? <input type="hidden" name="view" value="board" /> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <label className="block text-xs font-medium text-slate-300">
@@ -131,7 +135,10 @@ export function CrmLeadListFilters({
         />
       </label>
       <div className="flex flex-wrap items-center gap-2">
-        <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">
+        <button
+          type="submit"
+          className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800"
+        >
           Apply filters
         </button>
         <a href={clearHref} className="text-sm text-blue-300 hover:underline">

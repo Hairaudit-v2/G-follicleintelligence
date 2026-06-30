@@ -8,7 +8,10 @@ import { createCrmLeadCommunication } from "@/src/lib/crm/leadCommunications";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import type { ReminderTriggerEvent } from "./reminderConstants";
-import { buildMergeContext, appendClinicalSummaryToContext } from "./reminderBookingMergeContext.server";
+import {
+  buildMergeContext,
+  appendClinicalSummaryToContext,
+} from "./reminderBookingMergeContext.server";
 import { sendReminderDelivery } from "./reminderDelivery.server";
 import { isReminderLiveDeliveryEnabled } from "./reminderLiveDeliveryPolicy.server";
 import { renderReminderText, type ReminderMergeContext } from "./remindersCore";
@@ -37,7 +40,10 @@ async function buildMergeContextForLeadAnchoredJob(
   const ctx: ReminderMergeContext = {
     booking_title: trigger === "post_consult" ? "Consultation follow-up" : "Your enquiry",
     booking_type: trigger === "post_consult" ? "consultation" : "crm_lead",
-    booking_time: trigger === "post_consult" ? "Following your recent consultation" : "Recent activity with our team",
+    booking_time:
+      trigger === "post_consult"
+        ? "Following your recent consultation"
+        : "Recent activity with our team",
   };
 
   if (params.leadId?.trim()) {
@@ -144,7 +150,9 @@ async function claimReminderJob(
   const row = data as Record<string, unknown>;
   const rawMeta = row.metadata;
   const metadata =
-    rawMeta && typeof rawMeta === "object" && !Array.isArray(rawMeta) ? (rawMeta as Record<string, unknown>) : {};
+    rawMeta && typeof rawMeta === "object" && !Array.isArray(rawMeta)
+      ? (rawMeta as Record<string, unknown>)
+      : {};
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
@@ -239,7 +247,11 @@ export async function processReminderJobsOnce(opts?: {
 
     try {
       assertNonEmptyUuid(row.tenant_id, "tenantId");
-      const template = await loadReminderTemplateForTenant(row.tenant_id, row.template_id, supabase);
+      const template = await loadReminderTemplateForTenant(
+        row.tenant_id,
+        row.template_id,
+        supabase
+      );
       if (!template) throw new Error("Template missing.");
 
       let merge: ReminderMergeContext;
@@ -294,7 +306,12 @@ export async function processReminderJobsOnce(opts?: {
 
       const patientId = await resolvePatientIdForJob(supabase, row.tenant_id, row);
       if (!patientId) {
-        await finalizeJobCancelled(supabase, row.id, "Patient anchor missing; reminder not sent.", nowIso);
+        await finalizeJobCancelled(
+          supabase,
+          row.id,
+          "Patient anchor missing; reminder not sent.",
+          nowIso
+        );
         cancelled += 1;
         continue;
       }

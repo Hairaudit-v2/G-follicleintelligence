@@ -24,7 +24,10 @@ import {
   quoteDraftTitle,
   surgeryPlanningHandoffEligible,
 } from "./consultationHandoffPure";
-import type { ConsultationHandoffBaseInput, ConsultationHandoffMutationResult } from "./consultationHandoffTypes";
+import type {
+  ConsultationHandoffBaseInput,
+  ConsultationHandoffMutationResult,
+} from "./consultationHandoffTypes";
 
 function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
@@ -40,15 +43,20 @@ export async function requireLockedHandoffContext(
   tenantId: string,
   consultationId: string,
   formInstanceId: string
-): Promise<{ summary: ConsultationCompletionSummary; consultation: NonNullable<Awaited<ReturnType<typeof loadConsultationForTenant>>> }> {
+): Promise<{
+  summary: ConsultationCompletionSummary;
+  consultation: NonNullable<Awaited<ReturnType<typeof loadConsultationForTenant>>>;
+}> {
   const tid = tenantId.trim();
   const cid = consultationId.trim();
   const fid = formInstanceId.trim();
-  if (!tid || !cid || !fid) throw new Error("tenantId, consultationId, and formInstanceId are required.");
+  if (!tid || !cid || !fid)
+    throw new Error("tenantId, consultationId, and formInstanceId are required.");
 
   const inst = await loadConsultationFormInstance(tid, fid);
   if (!inst) throw new Error("Form instance not found.");
-  if (String(inst.consultation_id) !== cid) throw new Error("Form instance does not belong to this consultation.");
+  if (String(inst.consultation_id) !== cid)
+    throw new Error("Form instance does not belong to this consultation.");
   if (inst.status !== "locked" || !inst.completed_at) {
     throw new Error("Complete the guided consultation before running handoffs.");
   }
@@ -103,7 +111,11 @@ export async function createConsultationFollowUpTaskFromSummary(
     .maybeSingle();
   if (dupErr) throw new Error(dupErr.message);
   if (dup?.id) {
-    return { id: String((dup as { id: string }).id), reused: true, href: leadTasksHref(tid, leadId) };
+    return {
+      id: String((dup as { id: string }).id),
+      reused: true,
+      href: leadTasksHref(tid, leadId),
+    };
   }
 
   const dueAt = addBusinessDaysUtc(new Date(), 2).toISOString();
@@ -308,7 +320,9 @@ export async function createSurgeryPlanningDraftFromConsultationSummary(
 
   const caseId = consultation.case_id?.trim() || null;
   if (!surgeryPlanningHandoffEligible(summary, caseId)) {
-    throw new Error("Surgery planning handoff requires proceed_surgery outcome, a linked case, and plan details in the summary.");
+    throw new Error(
+      "Surgery planning handoff requires proceed_surgery outcome, a linked case, and plan details in the summary."
+    );
   }
 
   const { data: planRow, error: pe } = await supabase
@@ -361,7 +375,11 @@ export async function createSurgeryPlanningDraftFromConsultationSummary(
   if (ue) throw new Error(ue.message);
   const planId = String((after as { id: string }).id);
 
-  const { error: me } = await supabase.from("fi_case_surgery_plans").update({ metadata: nextMeta }).eq("id", planId).eq("tenant_id", tid);
+  const { error: me } = await supabase
+    .from("fi_case_surgery_plans")
+    .update({ metadata: nextMeta })
+    .eq("id", planId)
+    .eq("tenant_id", tid);
   if (me) throw new Error(me.message);
 
   return { id: planId, reused: false, href: caseHref(tid, caseId!) };

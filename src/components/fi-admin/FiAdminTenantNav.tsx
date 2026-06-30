@@ -54,8 +54,16 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   ];
   if (showBookingsBoard) {
     clinicItems.push(
-      { href: `${base}/appointments`, label: "Appointments", title: "ClinicOS — appointments list and slide-over actions." },
-      { href: `${base}/bookings`, label: "Board", title: "ClinicOS — legacy booking board and agenda." },
+      {
+        href: `${base}/appointments`,
+        label: "Appointments",
+        title: "ClinicOS — appointments list and slide-over actions.",
+      },
+      {
+        href: `${base}/bookings`,
+        label: "Board",
+        title: "ClinicOS — legacy booking board and agenda.",
+      },
       { href: `${base}/calendar`, label: "Calendar", title: "ClinicOS — operational calendar." },
       {
         href: `${base}/calendar/testing`,
@@ -179,7 +187,8 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   groups.push({
     id: "analyticsos",
     label: "AnalyticsOS",
-    description: "Executive KPIs across ClinicOS, LeadFlow, PatientOS, SurgeryOS, AuditOS, FoundationOS.",
+    description:
+      "Executive KPIs across ClinicOS, LeadFlow, PatientOS, SurgeryOS, AuditOS, FoundationOS.",
     items: [
       {
         href: `${base}/analytics`,
@@ -210,7 +219,8 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       {
         href: `${base}/foundation-integrity`,
         label: "Patient Twin",
-        title: "Patient Twin — unified patient identity, media, clinical timeline, and treatment history.",
+        title:
+          "Patient Twin — unified patient identity, media, clinical timeline, and treatment history.",
       },
     ],
   });
@@ -275,7 +285,7 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       href: `${base}/settings/integrations/timely/discovery`,
       label: "Integrations · Timely Discovery",
       title: "Settings — capture raw Timely Zapier payloads for inspection (temporary).",
-    },
+    }
   );
   groups.push({
     id: "settings",
@@ -336,28 +346,28 @@ export function FiAdminTenantNav({
               key={group.id}
               className="flex flex-wrap items-center gap-x-0.5 gap-y-1 border-r border-white/[0.08] pr-2 last:border-r-0 last:pr-0 sm:gap-x-1 sm:pr-3"
             >
-            {showGroupLabel ? (
-              <span className={groupLabelClass} title={group.description}>
-                {group.label}
-              </span>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-x-0.5 gap-y-1 sm:gap-x-1">
-              {group.items.map((item) => {
-                const active = linkActive(pathname, item.href, item.home);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    title={item.title}
-                    className={cn(linkBase, active && linkActiveClass)}
-                    aria-current={active ? "page" : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+              {showGroupLabel ? (
+                <span className={groupLabelClass} title={group.description}>
+                  {group.label}
+                </span>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-x-0.5 gap-y-1 sm:gap-x-1">
+                {group.items.map((item) => {
+                  const active = linkActive(pathname, item.href, item.home);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={item.title}
+                      className={cn(linkBase, active && linkActiveClass)}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
           );
         })}
       </div>

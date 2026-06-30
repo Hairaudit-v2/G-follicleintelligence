@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { organisationBelongsToTenant, clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
+import {
+  organisationBelongsToTenant,
+  clinicBelongsToTenant,
+} from "@/src/lib/fi/foundation/tenantSettings";
 import { appendCrmActivityEvent } from "./activity";
 import { publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import {
@@ -82,7 +85,8 @@ export async function updateCrmLeadDetails(
         .eq("id", clinicId)
         .maybeSingle();
       if (cErr) throw new Error(cErr.message);
-      const cOrg = (clinicRow as { organisation_id: string | null } | null)?.organisation_id ?? null;
+      const cOrg =
+        (clinicRow as { organisation_id: string | null } | null)?.organisation_id ?? null;
       if (cOrg && cOrg !== orgId) {
         throw new Error("Selected clinic does not belong to the selected organisation.");
       }
@@ -93,8 +97,14 @@ export async function updateCrmLeadDetails(
     if (!ok) throw new Error("Owner must be a user in this tenant.");
   }
 
-  const merge = params.adminMetadataMerge && Object.keys(params.adminMetadataMerge).length > 0 ? params.adminMetadataMerge : null;
-  if (merge && !isFiAdminApiKeyMatch(params.fiAdminKey ?? undefined, process.env.FI_ADMIN_API_KEY)) {
+  const merge =
+    params.adminMetadataMerge && Object.keys(params.adminMetadataMerge).length > 0
+      ? params.adminMetadataMerge
+      : null;
+  if (
+    merge &&
+    !isFiAdminApiKeyMatch(params.fiAdminKey ?? undefined, process.env.FI_ADMIN_API_KEY)
+  ) {
     throw new Error("FI admin key required to apply admin metadata merge.");
   }
 
@@ -165,13 +175,12 @@ export async function updateCrmLeadDetails(
     supabase
   );
 
-  const scoringChanged =
-    changedKeys.includes("priority") ||
-    changedKeys.includes("metadata");
+  const scoringChanged = changedKeys.includes("priority") || changedKeys.includes("metadata");
   if (scoringChanged) {
-    const meta = out.metadata && typeof out.metadata === "object" && !Array.isArray(out.metadata)
-      ? (out.metadata as Record<string, unknown>)
-      : {};
+    const meta =
+      out.metadata && typeof out.metadata === "object" && !Array.isArray(out.metadata)
+        ? (out.metadata as Record<string, unknown>)
+        : {};
     const scoreValue =
       typeof meta.lead_score === "number"
         ? meta.lead_score

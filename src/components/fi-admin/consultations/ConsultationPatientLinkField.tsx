@@ -54,7 +54,11 @@ export function ConsultationPatientLinkField({
     try {
       const url = `/api/tenants/${encodeURIComponent(tid)}/consultations/search-links?q=${encodeURIComponent(debounced)}`;
       const res = await fetch(url, { credentials: "same-origin" });
-      const json = (await res.json()) as { ok?: boolean; error?: string; patients?: ConsultationLinkSearchPatientHit[] };
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        patients?: ConsultationLinkSearchPatientHit[];
+      };
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Search failed.");
       }
@@ -84,7 +88,9 @@ export function ConsultationPatientLinkField({
   return (
     <div className="space-y-2">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Patient</p>
-      <p className="text-sm font-medium text-slate-100">{patientLabel?.trim() || "No patient linked"}</p>
+      <p className="text-sm font-medium text-slate-100">
+        {patientLabel?.trim() || "No patient linked"}
+      </p>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -134,7 +140,11 @@ export function ConsultationPatientLinkField({
               </button>
             </div>
             <div className="space-y-3 p-4">
-              <label htmlFor={searchInputId} id={searchLabelId} className="block text-sm font-medium text-slate-200">
+              <label
+                htmlFor={searchInputId}
+                id={searchLabelId}
+                className="block text-sm font-medium text-slate-200"
+              >
                 Patient search
               </label>
               <p id={searchHintId} className="text-xs text-slate-500">

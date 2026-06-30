@@ -39,8 +39,9 @@ export function CaseProcedureDayCard({
             Procedure day workflow
           </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
-            Stage 5C: structured procedure-day record (timing, team, technique, counts, notes). This is not HairAudit
-            scoring or formal surgical audit grading — post-op and qualitative outcomes live in Stage 5D below.
+            Stage 5C: structured procedure-day record (timing, team, technique, counts, notes). This
+            is not HairAudit scoring or formal surgical audit grading — post-op and qualitative
+            outcomes live in Stage 5D below.
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
@@ -51,8 +52,12 @@ export function CaseProcedureDayCard({
           {procedure ? (
             <p className="text-xs text-slate-400">
               Status:{" "}
-              <span className="font-medium text-slate-100">{procedureStatusLabel(procedure.procedure_status)}</span>
-              <span className="ml-2 text-gray-400">· updated {procedure.updated_at ? procedure.updated_at.slice(0, 10) : "—"}</span>
+              <span className="font-medium text-slate-100">
+                {procedureStatusLabel(procedure.procedure_status)}
+              </span>
+              <span className="ml-2 text-gray-400">
+                · updated {procedure.updated_at ? procedure.updated_at.slice(0, 10) : "—"}
+              </span>
             </p>
           ) : (
             <p className="text-xs text-amber-300">No procedure-day row yet — save to create one.</p>
@@ -69,7 +74,12 @@ export function CaseProcedureDayCard({
       ) : null}
 
       <div className="mt-4 border-t border-white/[0.06] pt-4">
-        <CaseProcedureDayForm tenantId={tenantId} caseId={caseId} initial={procedure} teamUserOptions={teamUserOptions} />
+        <CaseProcedureDayForm
+          tenantId={tenantId}
+          caseId={caseId}
+          initial={procedure}
+          teamUserOptions={teamUserOptions}
+        />
       </div>
     </div>
   );

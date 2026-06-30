@@ -106,14 +106,18 @@ function serviceNeedsRoomMapping(service: FiServiceRow): boolean {
   });
 }
 
-export function computeOverallReadinessStatus(checks: RoomSchedulingReadinessCheck[]): OverallReadinessStatus {
+export function computeOverallReadinessStatus(
+  checks: RoomSchedulingReadinessCheck[]
+): OverallReadinessStatus {
   if (checks.some((c) => c.key === "active_rooms" && c.status === "fail")) return "needs_setup";
   if (checks.some((c) => c.status === "fail")) return "needs_setup";
   if (checks.some((c) => c.status === "warning")) return "warning";
   return "ready";
 }
 
-export function buildRoomSchedulingReadinessChecks(input: RoomSchedulingReadinessInput): RoomSchedulingReadinessCheck[] {
+export function buildRoomSchedulingReadinessChecks(
+  input: RoomSchedulingReadinessInput
+): RoomSchedulingReadinessCheck[] {
   const p = paths(input.tenantId);
   const active = activeRooms(input.rooms);
   const checks: RoomSchedulingReadinessCheck[] = [];
@@ -144,7 +148,8 @@ export function buildRoomSchedulingReadinessChecks(input: RoomSchedulingReadines
   });
 
   const prpRooms = roomsOfTypes(input.rooms, ["prp", "multi_use"]).filter(
-    (r) => r.room_type === "prp" || r.capabilities.some((c) => /prp|exosome|prf|regenerative/i.test(c))
+    (r) =>
+      r.room_type === "prp" || r.capabilities.some((c) => /prp|exosome|prf|regenerative/i.test(c))
   );
   checks.push({
     key: "prp_room",
@@ -276,7 +281,9 @@ export function buildRoomSchedulingReadinessChecks(input: RoomSchedulingReadines
     const a = roomByCode(input.rooms, aCode);
     const b = roomByCode(input.rooms, bCode);
     if (a && b && a.physical_room_key.trim() !== b.physical_room_key.trim()) {
-      aliasIssues.push(`${group.label} use different physical keys (${a.physical_room_key} vs ${b.physical_room_key})`);
+      aliasIssues.push(
+        `${group.label} use different physical keys (${a.physical_room_key} vs ${b.physical_room_key})`
+      );
     } else if (a && b && a.physical_room_key.trim() === b.physical_room_key.trim()) {
       // ok
     } else if (a || b) {
@@ -304,7 +311,9 @@ export function buildRoomSchedulingReadinessChecks(input: RoomSchedulingReadines
     const expectedRoom = roomByCode(input.rooms, expectedCode);
     if (!expectedRoom) continue;
 
-    const elig = (input.roomEligibilityByServiceId.get(service.id) ?? []).filter((r) => r.is_active);
+    const elig = (input.roomEligibilityByServiceId.get(service.id) ?? []).filter(
+      (r) => r.is_active
+    );
     const preferred = elig.find((r) => r.is_preferred);
     if (!preferred) {
       preferredIssues.push(`${service.name}: no preferred room (expected ${expectedCode})`);
@@ -328,7 +337,9 @@ export function buildRoomSchedulingReadinessChecks(input: RoomSchedulingReadines
   return checks;
 }
 
-export function buildRoomSchedulingReadinessResult(input: RoomSchedulingReadinessInput): RoomSchedulingReadinessResult {
+export function buildRoomSchedulingReadinessResult(
+  input: RoomSchedulingReadinessInput
+): RoomSchedulingReadinessResult {
   const checks = buildRoomSchedulingReadinessChecks(input);
   return {
     overallStatus: computeOverallReadinessStatus(checks),

@@ -5,7 +5,12 @@ function asRecord(v: unknown): Record<string, unknown> {
 }
 
 function readOptionalDayCount(meta: Record<string, unknown>): string | null {
-  const keys = ["procedure_days", "day_count", "estimated_procedure_days", "surgery_day_count"] as const;
+  const keys = [
+    "procedure_days",
+    "day_count",
+    "estimated_procedure_days",
+    "surgery_day_count",
+  ] as const;
   for (const k of keys) {
     const v = meta[k];
     if (typeof v === "number" && Number.isFinite(v) && v > 0) return String(Math.floor(v));
@@ -18,7 +23,11 @@ function readOptionalDayCount(meta: Record<string, unknown>): string | null {
   return null;
 }
 
-function formatQuotedAud(subtotal: number | null, total: number | null, meta: Record<string, unknown>): string | null {
+function formatQuotedAud(
+  subtotal: number | null,
+  total: number | null,
+  meta: Record<string, unknown>
+): string | null {
   const hint = typeof meta.price_quoted_hint === "string" ? meta.price_quoted_hint.trim() : "";
   if (hint) return hint;
   const n = total ?? subtotal;
@@ -31,7 +40,12 @@ function formatQuotedAud(subtotal: number | null, total: number | null, meta: Re
 function graftEstimateShort(meta: Record<string, unknown>): string | null {
   const min = meta.estimated_grafts_min;
   const max = meta.estimated_grafts_max;
-  if (typeof min === "number" && typeof max === "number" && Number.isFinite(min) && Number.isFinite(max)) {
+  if (
+    typeof min === "number" &&
+    typeof max === "number" &&
+    Number.isFinite(min) &&
+    Number.isFinite(max)
+  ) {
     return `${Math.floor(min)}–${Math.floor(max)}`;
   }
   if (typeof min === "number" && Number.isFinite(min)) return String(Math.floor(min));
@@ -59,10 +73,17 @@ function inclusionLine(meta: Record<string, unknown>): string | null {
   return `Inclusions / add-ons: ${[...new Set(hits)].join(", ")}`;
 }
 
-function procedureNotesFromQuote(meta: Record<string, unknown>, lineItemsSnapshot: unknown): string | null {
+function procedureNotesFromQuote(
+  meta: Record<string, unknown>,
+  lineItemsSnapshot: unknown
+): string | null {
   const qn = typeof meta.quote_notes === "string" ? meta.quote_notes.trim() : "";
   if (qn) return qn;
-  if (Array.isArray(lineItemsSnapshot) && lineItemsSnapshot[0] && typeof lineItemsSnapshot[0] === "object") {
+  if (
+    Array.isArray(lineItemsSnapshot) &&
+    lineItemsSnapshot[0] &&
+    typeof lineItemsSnapshot[0] === "object"
+  ) {
     const li = lineItemsSnapshot[0] as { description?: string };
     if (typeof li.description === "string" && li.description.trim()) return li.description.trim();
   }

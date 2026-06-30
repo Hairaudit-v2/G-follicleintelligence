@@ -2,7 +2,10 @@
  * ReceptionOS Phase 2 — pure task policy (status transitions, permissions, enums).
  */
 
-import type { ReceptionOsSeverity, ReceptionOsViewerRole } from "@/src/lib/receptionOs/receptionOsBoardModel";
+import type {
+  ReceptionOsSeverity,
+  ReceptionOsViewerRole,
+} from "@/src/lib/receptionOs/receptionOsBoardModel";
 
 export const RECEPTION_TASK_SOURCE_TYPES = [
   "booking",
@@ -16,7 +19,13 @@ export const RECEPTION_TASK_SOURCE_TYPES = [
 ] as const;
 export type ReceptionTaskSourceType = (typeof RECEPTION_TASK_SOURCE_TYPES)[number];
 
-export const RECEPTION_TASK_STATUSES = ["open", "in_progress", "snoozed", "resolved", "dismissed"] as const;
+export const RECEPTION_TASK_STATUSES = [
+  "open",
+  "in_progress",
+  "snoozed",
+  "resolved",
+  "dismissed",
+] as const;
 export type ReceptionTaskStatus = (typeof RECEPTION_TASK_STATUSES)[number];
 
 export const RECEPTION_TASK_AUDIT_EVENT_KINDS = [
@@ -42,7 +51,11 @@ export const RECEPTION_TASK_ACTIONS = [
 ] as const;
 export type ReceptionTaskAction = (typeof RECEPTION_TASK_ACTIONS)[number];
 
-export const OPEN_RECEPTION_TASK_STATUSES: readonly ReceptionTaskStatus[] = ["open", "in_progress", "snoozed"];
+export const OPEN_RECEPTION_TASK_STATUSES: readonly ReceptionTaskStatus[] = [
+  "open",
+  "in_progress",
+  "snoozed",
+];
 
 export function isReceptionTaskStatus(v: string): v is ReceptionTaskStatus {
   return (RECEPTION_TASK_STATUSES as readonly string[]).includes(v);
@@ -60,19 +73,28 @@ const ALLOWED_TRANSITIONS: Record<ReceptionTaskStatus, readonly ReceptionTaskSta
   dismissed: [],
 };
 
-export function canTransitionReceptionTaskStatus(from: ReceptionTaskStatus, to: ReceptionTaskStatus): boolean {
+export function canTransitionReceptionTaskStatus(
+  from: ReceptionTaskStatus,
+  to: ReceptionTaskStatus
+): boolean {
   if (from === to) return true;
   return ALLOWED_TRANSITIONS[from].includes(to);
 }
 
-export function assertReceptionTaskStatusTransition(from: ReceptionTaskStatus, to: ReceptionTaskStatus): void {
+export function assertReceptionTaskStatusTransition(
+  from: ReceptionTaskStatus,
+  to: ReceptionTaskStatus
+): void {
   if (!canTransitionReceptionTaskStatus(from, to)) {
     throw new Error(`Invalid reception task status transition: ${from} → ${to}.`);
   }
 }
 
 /** Role-gated task actions for ReceptionOS operators. */
-export function receptionTaskActionAllowed(role: ReceptionOsViewerRole, action: ReceptionTaskAction): boolean {
+export function receptionTaskActionAllowed(
+  role: ReceptionOsViewerRole,
+  action: ReceptionTaskAction
+): boolean {
   if (role === "admin" || role === "clinic_manager") return true;
   if (action === "dismiss") return false;
   if (action === "create_from_alert") return true;

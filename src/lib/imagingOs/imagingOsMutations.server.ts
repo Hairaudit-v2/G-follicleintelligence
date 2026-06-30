@@ -155,7 +155,11 @@ export async function upsertImagingScalpMap(
     created_at: now,
     updated_at: now,
   };
-  const { data, error } = await supabase.from("fi_imaging_scalp_maps").insert(insert).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_imaging_scalp_maps")
+    .insert(insert)
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
   const mapId = String((data as { id: string }).id);
 

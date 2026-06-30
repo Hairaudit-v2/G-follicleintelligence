@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  buildFinancialSurgeryPipelineStatus,
-} from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import { buildFinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import {
   aggregatePathwayInboxDashboardCounts,
   buildPathwayTaskAttentionSummary,
@@ -31,7 +29,10 @@ describe("financialPaymentPathwayInboxCore — task auto creation mapping", () =
   it("maps non-standard pathway types to review task types", () => {
     assert.equal(mapPathwayTypeToTaskType("medical_finance"), "finance_review");
     assert.equal(mapPathwayTypeToTaskType("super_release"), "super_release_review");
-    assert.equal(mapPathwayTypeToTaskType("international_transfer"), "international_transfer_review");
+    assert.equal(
+      mapPathwayTypeToTaskType("international_transfer"),
+      "international_transfer_review"
+    );
     assert.equal(mapPathwayTypeToTaskType("installment_plan"), "installment_review");
     assert.equal(mapPathwayTypeToTaskType("manual"), "manual_payment_review");
   });

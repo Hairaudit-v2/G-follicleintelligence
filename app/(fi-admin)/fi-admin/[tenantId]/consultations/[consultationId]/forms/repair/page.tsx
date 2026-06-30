@@ -37,9 +37,12 @@ export default async function HairTransplantRepairGuidedFormPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <p className="mb-4 text-sm text-slate-400">
-        ConsultationOS pathway 4 — dedicated repair / revision intake (prior surgery audit, donor & recipient risk, HairAudit +
-        SurgeryOS routing). For primary transplant planning, use the{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms`} className="font-semibold text-emerald-300 underline">
+        ConsultationOS pathway 4 — dedicated repair / revision intake (prior surgery audit, donor &
+        recipient risk, HairAudit + SurgeryOS routing). For primary transplant planning, use the{" "}
+        <Link
+          href={`/fi-admin/${tid}/consultations/${cid}/forms`}
+          className="font-semibold text-emerald-300 underline"
+        >
           standard hair transplant form
         </Link>
         .

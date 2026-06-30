@@ -75,7 +75,10 @@ export async function loadImportReviewQueueAction(
     };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid input." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load import review queue." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load import review queue.",
+    };
   }
 }
 

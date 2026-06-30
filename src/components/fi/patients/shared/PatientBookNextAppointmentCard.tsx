@@ -36,7 +36,10 @@ export function PatientBookNextAppointmentCard({
 }) {
   const slide = useAppointmentSlideOverOptional();
   const now = useMemo(() => new Date(groupingNowIso), [groupingNowIso]);
-  const nextUpcoming = useMemo(() => pickNextUpcomingPatientBooking(bookings, now), [bookings, now]);
+  const nextUpcoming = useMemo(
+    () => pickNextUpcomingPatientBooking(bookings, now),
+    [bookings, now]
+  );
   const recommended = useMemo(
     () => deriveRecommendedBookingTypeForPatient({ bookings, primaryLead: primaryLead ?? null }),
     [bookings, primaryLead]
@@ -69,7 +72,9 @@ export function PatientBookNextAppointmentCard({
     <section className={crmLeadCardClass}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className={`font-semibold text-slate-100 ${compact ? "text-xs uppercase tracking-wide" : "text-sm"}`}>
+          <h2
+            className={`font-semibold text-slate-100 ${compact ? "text-xs uppercase tracking-wide" : "text-sm"}`}
+          >
             Book next appointment
           </h2>
           {!compact ? (
@@ -89,14 +94,22 @@ export function PatientBookNextAppointmentCard({
         </button>
       </div>
 
-      <dl className={`grid gap-2 text-sm ${compact ? "mt-2 sm:grid-cols-1" : "mt-3 sm:grid-cols-2"}`}>
+      <dl
+        className={`grid gap-2 text-sm ${compact ? "mt-2 sm:grid-cols-1" : "mt-3 sm:grid-cols-2"}`}
+      >
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Recommended type</dt>
-          <dd className="font-medium text-slate-100">{bookingTypeLabel(recommended.bookingType)}</dd>
+          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Recommended type
+          </dt>
+          <dd className="font-medium text-slate-100">
+            {bookingTypeLabel(recommended.bookingType)}
+          </dd>
           {!compact ? <dd className="text-xs text-gray-500">{recommended.reason}</dd> : null}
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Next scheduled</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Next scheduled
+          </dt>
           <dd className="text-slate-100">
             {nextUpcoming ? formatUpcomingBookingLabel(nextUpcoming) : "No upcoming visits"}
           </dd>

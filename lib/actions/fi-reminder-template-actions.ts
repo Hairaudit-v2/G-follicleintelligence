@@ -23,8 +23,11 @@ function errMsg(e: unknown): string {
   return "Request failed.";
 }
 
-export async function loadReminderTemplatesAction(tenantId: string): Promise<
-  { ok: true; templates: Awaited<ReturnType<typeof loadReminderTemplatesForTenant>> } | { ok: false; error: string }
+export async function loadReminderTemplatesAction(
+  tenantId: string
+): Promise<
+  | { ok: true; templates: Awaited<ReturnType<typeof loadReminderTemplatesForTenant>> }
+  | { ok: false; error: string }
 > {
   try {
     const templates = await loadReminderTemplatesForTenant(tenantId.trim());
@@ -111,7 +114,8 @@ export async function previewReminderTemplateAction(
       norwood_summary: "Norwood IIIa · Temple recession",
     };
     const renderedBody = renderReminderText(parsed.body, sample);
-    const renderedSubject = parsed.subject != null ? renderReminderText(parsed.subject, sample) : null;
+    const renderedSubject =
+      parsed.subject != null ? renderReminderText(parsed.subject, sample) : null;
     return { ok: true, subject: renderedSubject, body: renderedBody };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

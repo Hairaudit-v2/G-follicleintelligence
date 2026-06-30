@@ -1,5 +1,8 @@
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
-import type { FiClinicalIntelligenceSignalKey, FiClinicalIntelligenceSeverityThresholds } from "@/src/config/fiClinicalIntelligenceSignals";
+import type {
+  FiClinicalIntelligenceSignalKey,
+  FiClinicalIntelligenceSeverityThresholds,
+} from "@/src/config/fiClinicalIntelligenceSignals";
 import { getFiClinicalIntelligenceSignalDefinition } from "@/src/config/fiClinicalIntelligenceSignals";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
@@ -41,7 +44,10 @@ export function clinicalSeverityFromCount(
   return "info";
 }
 
-export function clinicalSeverityMax(a: ClinicalSignalSeverity, b: ClinicalSignalSeverity): ClinicalSignalSeverity {
+export function clinicalSeverityMax(
+  a: ClinicalSignalSeverity,
+  b: ClinicalSignalSeverity
+): ClinicalSignalSeverity {
   const rank = { info: 0, attention: 1, critical: 2 };
   return rank[a] >= rank[b] ? a : b;
 }
@@ -89,7 +95,10 @@ export function derivePatientTwinIntegritySignals(twin: PatientTwinV1): Normaliz
   const score = twin.completeness?.score ?? 100;
   const n = warnN + missingN;
   if (n > 0 || score < 65) {
-    const severity = clinicalSeverityFromCount(n || (score < 40 ? 3 : 1), def?.severityThresholds ?? null);
+    const severity = clinicalSeverityFromCount(
+      n || (score < 40 ? 3 : 1),
+      def?.severityThresholds ?? null
+    );
     out.push({
       signalKey: "patient_twin_integrity_attention",
       severity: clinicalSeverityMax(severity, score < 40 ? "attention" : "info"),
@@ -103,7 +112,12 @@ export function derivePatientTwinIntegritySignals(twin: PatientTwinV1): Normaliz
     });
   }
 
-  const draftPath = twin.pathology.results.filter((r) => String(r.status ?? "").trim().toLowerCase() === "draft");
+  const draftPath = twin.pathology.results.filter(
+    (r) =>
+      String(r.status ?? "")
+        .trim()
+        .toLowerCase() === "draft"
+  );
   if (draftPath.length) {
     const pd = getFiClinicalIntelligenceSignalDefinition("pathology_review_pending");
     out.push({
@@ -146,7 +160,8 @@ export function deriveCaseClinicalSignals(input: {
   const pid = input.patientFoundationId;
 
   if (r.overallPercent < 100) {
-    const severity = r.overallPercent < 45 ? "critical" : r.overallPercent < 75 ? "attention" : "info";
+    const severity =
+      r.overallPercent < 45 ? "critical" : r.overallPercent < 75 ? "attention" : "info";
     out.push({
       signalKey: "surgery_readiness_attention",
       severity,

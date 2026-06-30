@@ -18,7 +18,9 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-function parseExecutiveFilters(sp: Record<string, string | string[] | undefined>): ExecutiveFinanceDashboardFilters {
+function parseExecutiveFilters(
+  sp: Record<string, string | string[] | undefined>
+): ExecutiveFinanceDashboardFilters {
   const one = (key: string) => {
     const v = sp[`ex_${key}`] ?? sp[key];
     if (typeof v === "string") return v.trim() || null;

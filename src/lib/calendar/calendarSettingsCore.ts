@@ -2,7 +2,11 @@
  * Pure calendar display settings (GC-11) — validation, defaults, and query/lane helpers.
  */
 
-import type { CalendarResourceView, CalendarViewMode, ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import type {
+  CalendarResourceView,
+  CalendarViewMode,
+  ParsedCalendarQuery,
+} from "@/src/lib/bookings/calendarQuery";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import { formatWeekdayShort } from "@/src/lib/calendar/calendarTimezone";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
@@ -36,7 +40,9 @@ const VIEW_SET = new Set<CalendarViewMode>(["day", "3day", "week", "month"]);
 const RESOURCE_MODE_SET = new Set<CalendarResourceView>(["staff", "room", "clinic"]);
 
 function parseViewMode(raw: unknown): CalendarViewMode {
-  const v = String(raw ?? "").trim().toLowerCase();
+  const v = String(raw ?? "")
+    .trim()
+    .toLowerCase();
   if (v === "day") return "day";
   if (v === "3day" || v === "3-day" || v === "three_day") return "3day";
   if (v === "month") return "month";
@@ -44,7 +50,9 @@ function parseViewMode(raw: unknown): CalendarViewMode {
 }
 
 function parseResourceMode(raw: unknown): CalendarResourceView {
-  const v = String(raw ?? "").trim().toLowerCase();
+  const v = String(raw ?? "")
+    .trim()
+    .toLowerCase();
   if (v === "room" || v === "clinic") return v;
   return "staff";
 }
@@ -99,7 +107,9 @@ export function validateCalendarSettingsInput(raw: unknown): CalendarSettingsVal
     document: {
       dayStartHour: Math.floor(dayStartHour),
       dayEndHour: Math.floor(dayEndHour),
-      slotMinutes: SLOT_MINUTES_SET.has(slotMinutes) ? slotMinutes : DEFAULT_CALENDAR_SETTINGS.slotMinutes,
+      slotMinutes: SLOT_MINUTES_SET.has(slotMinutes)
+        ? slotMinutes
+        : DEFAULT_CALENDAR_SETTINGS.slotMinutes,
       defaultView,
       showWeekends: Boolean(o.showWeekends),
       bufferMinutes: Math.floor(bufferMinutes),

@@ -15,7 +15,10 @@ import {
   loadAllStagingRowsForBatch,
   type FiImportBatchRow,
 } from "@/src/lib/crm/hubspotImport/hubspotImportBatchLoad.server";
-import type { HubspotContactsDryRunReport, HubspotContactRowValidation } from "@/src/lib/crm/hubspotImport/validateHubspotContactsImport";
+import type {
+  HubspotContactsDryRunReport,
+  HubspotContactRowValidation,
+} from "@/src/lib/crm/hubspotImport/validateHubspotContactsImport";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
@@ -26,13 +29,20 @@ function errMsg(e: unknown): string {
 function isDryRunReport(value: unknown): value is HubspotContactsDryRunReport {
   if (!value || typeof value !== "object") return false;
   const o = value as Record<string, unknown>;
-  return typeof o.generatedAt === "string" && Array.isArray(o.rowResults) && typeof o.passed === "boolean";
+  return (
+    typeof o.generatedAt === "string" &&
+    Array.isArray(o.rowResults) &&
+    typeof o.passed === "boolean"
+  );
 }
 
 export async function hubspotCrmImportUploadCsvAction(
   tenantId: string,
   csvText: string
-): Promise<{ ok: true; batchId: string; rowCount: number; parseError?: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; batchId: string; rowCount: number; parseError?: string }
+  | { ok: false; error: string }
+> {
   try {
     await assertCrmTenantWriteAllowed({ tenantId, request: undefined });
     const parsed = parseHubspotContactsCsv(csvText);
@@ -92,7 +102,11 @@ export async function hubspotCrmImportUploadCsvAction(
         if (sErr) throw new Error(sErr.message);
       }
     } catch (e) {
-      await supabase.from("fi_import_batches").delete().eq("id", batchId).eq("tenant_id", tenantId.trim());
+      await supabase
+        .from("fi_import_batches")
+        .delete()
+        .eq("id", batchId)
+        .eq("tenant_id", tenantId.trim());
       throw e;
     }
 
@@ -105,7 +119,10 @@ export async function hubspotCrmImportUploadCsvAction(
 export async function hubspotCrmImportDryRunAction(
   tenantId: string,
   batchId: string
-): Promise<{ ok: true; report: HubspotContactsDryRunReport; batch: FiImportBatchRow } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; report: HubspotContactsDryRunReport; batch: FiImportBatchRow }
+  | { ok: false; error: string }
+> {
   try {
     await assertCrmTenantWriteAllowed({ tenantId, request: undefined });
     const supabase = supabaseAdmin();
@@ -214,7 +231,11 @@ export async function hubspotCrmImportCommitStage1Action(
         maxRows: 100,
       });
     } catch (e) {
-      await supabase.from("fi_import_batches").update({ status: "dry_run_passed" }).eq("id", bid).eq("tenant_id", tid);
+      await supabase
+        .from("fi_import_batches")
+        .update({ status: "dry_run_passed" })
+        .eq("id", bid)
+        .eq("tenant_id", tid);
       throw e;
     }
 
@@ -251,7 +272,10 @@ export async function hubspotCrmImportCommitStage1Action(
 export async function hubspotCrmImportRollbackBatchAction(
   tenantId: string,
   batchId: string
-): Promise<{ ok: true; summary: { leadsDeleted: number; patientsDeleted: number; personsDeleted: number } } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; summary: { leadsDeleted: number; patientsDeleted: number; personsDeleted: number } }
+  | { ok: false; error: string }
+> {
   try {
     await assertCrmTenantWriteAllowed({ tenantId, request: undefined });
     const tid = tenantId.trim();
@@ -266,7 +290,9 @@ export async function hubspotCrmImportRollbackBatchAction(
     if (be) throw new Error(be.message);
     if (!b) throw new Error("Batch not found.");
     if (String((b as { status: string }).status) !== "import_completed") {
-      throw new Error("Rollback is only available after a successful import (status import_completed).");
+      throw new Error(
+        "Rollback is only available after a successful import (status import_completed)."
+      );
     }
     const summary = await rollbackHubspotImportBatch(tid, bid);
     const { error: ue } = await supabase

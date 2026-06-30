@@ -9,7 +9,11 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 /** @deprecated Use `/fi-admin/[tenantId]/hr/staff-import` (CRM-gated HR import). */
-export default async function IiohrHrStaffImportLegacyRedirectPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function IiohrHrStaffImportLegacyRedirectPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   const tid = tenantId?.trim();

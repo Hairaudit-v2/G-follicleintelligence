@@ -84,11 +84,24 @@ describe("roomSchedulingReadinessCore", () => {
       rooms: PERTH_ROOMS,
       services: [prpService()],
       roomEligibilityByServiceId: new Map(),
-      staffEligibilityByServiceId: new Map([["s1", [{ staff_id: null, staff_role: "nurse", is_active: true }]]]),
-      staff: [{ id: "st1", full_name: "Nurse A", staff_role: "nurse", is_active: true, calendar_visible: null }],
+      staffEligibilityByServiceId: new Map([
+        ["s1", [{ staff_id: null, staff_role: "nurse", is_active: true }]],
+      ]),
+      staff: [
+        {
+          id: "st1",
+          full_name: "Nurse A",
+          staff_role: "nurse",
+          is_active: true,
+          calendar_visible: null,
+        },
+      ],
     });
     assert.equal(result.overallStatus, "warning");
-    assert.equal(result.checks.find((c) => c.key === "service_room_eligibility")?.status, "warning");
+    assert.equal(
+      result.checks.find((c) => c.key === "service_room_eligibility")?.status,
+      "warning"
+    );
   });
 
   it("warns when physical alias keys do not match", () => {
@@ -123,7 +136,15 @@ describe("roomSchedulingReadinessCore", () => {
       staffEligibilityByServiceId: new Map([
         ["s1", [{ staff_id: null, staff_role: "nurse", is_active: true }]],
       ]),
-      staff: [{ id: "st1", full_name: "Nurse A", staff_role: "nurse", is_active: true, calendar_visible: null }],
+      staff: [
+        {
+          id: "st1",
+          full_name: "Nurse A",
+          staff_role: "nurse",
+          is_active: true,
+          calendar_visible: null,
+        },
+      ],
     });
     assert.equal(result.overallStatus, "ready");
   });

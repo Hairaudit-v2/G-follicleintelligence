@@ -33,7 +33,8 @@ export function followUpTaskRecommended(summary: ConsultationCompletionSummary):
 export function buildFollowUpTaskDescription(summary: ConsultationCompletionSummary): string {
   const parts: string[] = [];
   if (summary.followUpReason.trim()) parts.push(`Follow-up: ${summary.followUpReason.trim()}`);
-  if (summary.recommendedProcedure.trim()) parts.push(`Plan: ${summary.recommendedProcedure.trim()}`);
+  if (summary.recommendedProcedure.trim())
+    parts.push(`Plan: ${summary.recommendedProcedure.trim()}`);
   if (summary.quoteNotes.trim()) parts.push(`Quote notes: ${summary.quoteNotes.trim()}`);
   return parts.join("\n\n").trim() || "Follow up from guided consultation completion.";
 }
@@ -53,7 +54,8 @@ export function buildQuoteDraftNotesText(summary: ConsultationCompletionSummary)
   if (summary.recommendedZones.length) {
     lines.push(`Zones: ${summary.recommendedZones.join(", ")}`);
   }
-  if (summary.diagnosisImpression.trim()) lines.push(`Diagnosis: ${summary.diagnosisImpression.trim()}`);
+  if (summary.diagnosisImpression.trim())
+    lines.push(`Diagnosis: ${summary.diagnosisImpression.trim()}`);
   return lines.join("\n\n").trim() || "Consultation quote draft.";
 }
 
@@ -62,9 +64,12 @@ export function quoteDraftTitle(summary: ConsultationCompletionSummary): string 
   return t ? t.slice(0, 200) : "Consultation treatment plan";
 }
 
-export function pathologyTemplateForOutcome(outcomeType: ConsultationOutcomeType): PathologyTemplateId {
+export function pathologyTemplateForOutcome(
+  outcomeType: ConsultationOutcomeType
+): PathologyTemplateId {
   if (outcomeType === "proceed_surgery") return "hair_transplant_pre_op";
-  if (outcomeType === "medical_management" || outcomeType === "needs_blood_tests") return "hair_loss_investigation";
+  if (outcomeType === "medical_management" || outcomeType === "needs_blood_tests")
+    return "hair_loss_investigation";
   return "custom_request";
 }
 
@@ -76,7 +81,9 @@ export function pathologyHandoffRecommended(summary: ConsultationCompletionSumma
  * Auto-orchestration quote policy: skip creating draft quotes unless the summary shows clear
  * pricing / treatment intent, or the caller explicitly enables `quote_draft` in `enabledHandoffs`.
  */
-export function quoteDraftAutomationIntentEligible(summary: ConsultationCompletionSummary): boolean {
+export function quoteDraftAutomationIntentEligible(
+  summary: ConsultationCompletionSummary
+): boolean {
   if (
     summary.outcomeType === "proceed_surgery" ||
     summary.outcomeType === "proceed_prp" ||
@@ -90,7 +97,10 @@ export function quoteDraftAutomationIntentEligible(summary: ConsultationCompleti
   return false;
 }
 
-export function surgeryPlanningHandoffEligible(summary: ConsultationCompletionSummary, caseId: string | null): boolean {
+export function surgeryPlanningHandoffEligible(
+  summary: ConsultationCompletionSummary,
+  caseId: string | null
+): boolean {
   if (!caseId?.trim()) return false;
   if (summary.outcomeType !== "proceed_surgery") return false;
 
@@ -105,12 +115,20 @@ export function surgeryPlanningHandoffEligible(summary: ConsultationCompletionSu
   return hasPlanSignal;
 }
 
-export function handoffIdempotencyMetadata(formInstanceId: string, source: string): Record<string, unknown> {
+export function handoffIdempotencyMetadata(
+  formInstanceId: string,
+  source: string
+): Record<string, unknown> {
   return { form_instance_id: formInstanceId, source };
 }
 
-export function buildSurgeryHandoffStrategyNotes(summary: ConsultationCompletionSummary, maxLen = 15000): string {
-  const parts = [summary.recommendedProcedure, summary.quoteNotes, summary.clinicianNotesPreview].map((s) => s.trim()).filter(Boolean);
+export function buildSurgeryHandoffStrategyNotes(
+  summary: ConsultationCompletionSummary,
+  maxLen = 15000
+): string {
+  const parts = [summary.recommendedProcedure, summary.quoteNotes, summary.clinicianNotesPreview]
+    .map((s) => s.trim())
+    .filter(Boolean);
   const t = parts.join("\n\n");
   return t.length > maxLen ? `${t.slice(0, maxLen - 1)}…` : t;
 }

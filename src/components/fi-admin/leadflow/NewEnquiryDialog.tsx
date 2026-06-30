@@ -213,7 +213,9 @@ export function NewEnquiryDialog({
                 <h2 id="new-enquiry-title" className="text-base font-semibold text-slate-100">
                   New enquiry
                 </h2>
-                <p className="mt-1 text-sm text-slate-400">Capture a patient opportunity and assign the next action.</p>
+                <p className="mt-1 text-sm text-slate-400">
+                  Capture a patient opportunity and assign the next action.
+                </p>
               </div>
               <button
                 type="button"
@@ -226,7 +228,10 @@ export function NewEnquiryDialog({
               </button>
             </div>
 
-            <form className="max-h-[min(72vh,40rem)] space-y-3 overflow-y-auto px-4 py-4 sm:px-5" onSubmit={(e) => void onSubmit(e)}>
+            <form
+              className="max-h-[min(72vh,40rem)] space-y-3 overflow-y-auto px-4 py-4 sm:px-5"
+              onSubmit={(e) => void onSubmit(e)}
+            >
               <LabeledTextInput
                 id="new-enquiry-name"
                 label="Patient / enquiry name *"

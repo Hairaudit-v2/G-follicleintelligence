@@ -41,10 +41,21 @@ export type FiAiHairState = (typeof FI_AI_HAIR_STATES)[number];
 export const FI_AI_SHAVE_STATES = ["shaved", "non_shaved", "partially_shaved", "unknown"] as const;
 export type FiAiShaveState = (typeof FI_AI_SHAVE_STATES)[number];
 
-export const FI_AI_SURGERY_STAGES = ["pre_op", "intra_op", "immediate_post_op", "follow_up", "unknown"] as const;
+export const FI_AI_SURGERY_STAGES = [
+  "pre_op",
+  "intra_op",
+  "immediate_post_op",
+  "follow_up",
+  "unknown",
+] as const;
 export type FiAiSurgeryStage = (typeof FI_AI_SURGERY_STAGES)[number];
 
-export const FI_AI_IMAGE_REVIEW_STATUSES = ["pending", "accepted", "corrected", "rejected"] as const;
+export const FI_AI_IMAGE_REVIEW_STATUSES = [
+  "pending",
+  "accepted",
+  "corrected",
+  "rejected",
+] as const;
 export type FiAiImageReviewStatus = (typeof FI_AI_IMAGE_REVIEW_STATUSES)[number];
 
 /** Normalised classification returned by the shared classifier (camelCase). */

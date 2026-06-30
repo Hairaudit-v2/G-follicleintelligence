@@ -42,9 +42,13 @@ function SectionIntro({
   return (
     <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -138,8 +142,9 @@ export default function PatientTwinPage() {
               One patient. One timeline. Connected forever.
             </p>
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
-              The Patient Twin™ connects every consultation, image, treatment, blood marker, medication, surgery,
-              follow-up and outcome into one living clinical intelligence record.
+              The Patient Twin™ connects every consultation, image, treatment, blood marker,
+              medication, surgery, follow-up and outcome into one living clinical intelligence
+              record.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -219,8 +224,8 @@ export default function PatientTwinPage() {
               ))}
             </div>
             <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              From first capture through retention, every stage stays attached to the same patient intelligence
-              substrate—so decisions compound instead of resetting at each visit.
+              From first capture through retention, every stage stays attached to the same patient
+              intelligence substrate—so decisions compound instead of resetting at each visit.
             </p>
           </div>
         </FadeIn>
@@ -237,7 +242,13 @@ export default function PatientTwinPage() {
         <FadeIn delay={0.06}>
           <div className="mt-8 flex flex-wrap gap-2">
             {PLATFORM_LINKS.map((item) => (
-              <Button key={item.label} asChild variant="outline" size="sm" className="rounded-full border-border/70">
+              <Button
+                key={item.label}
+                asChild
+                variant="outline"
+                size="sm"
+                className="rounded-full border-border/70"
+              >
                 <Link href={item.href}>{item.label}</Link>
               </Button>
             ))}

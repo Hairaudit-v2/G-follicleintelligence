@@ -16,7 +16,9 @@ export async function generateMetadata({
   const { tenantId, patientId } = await params;
   const loaded = await loadPatientProfile(tenantId, patientId);
   const name =
-    loaded.ok && loaded.mode === "foundation" ? displayFromPersonMetadata(loaded.data.person.metadata).name : null;
+    loaded.ok && loaded.mode === "foundation"
+      ? displayFromPersonMetadata(loaded.data.person.metadata).name
+      : null;
   return {
     title: `${name?.trim() ? name.trim() : "Patient"} · Upload blood results`,
     robots: { index: false, follow: false },
@@ -38,21 +40,27 @@ export default async function PatientBloodResultsNewPage({
   const loaded = await loadPatientProfile(tenantId, patientId);
   if (!loaded.ok || loaded.mode !== "foundation") notFound();
 
-  const requestOptions = await loadPathologyRequestOptionsForPatient(tenantId.trim(), patientId.trim());
+  const requestOptions = await loadPathologyRequestOptionsForPatient(
+    tenantId.trim(),
+    patientId.trim()
+  );
   const defaultResultDate = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`}
+          className="text-blue-300 hover:underline"
+        >
           ← Patient profile
         </Link>
       </p>
       <header className="space-y-1">
         <h1 className="text-lg font-semibold text-slate-100">Upload blood results</h1>
         <p className="text-sm text-slate-400">
-          DoctorOS pathology results (Stage 3). Attach a lab PDF and/or enter structured markers. OCR and lab integrations
-          are not enabled yet.
+          DoctorOS pathology results (Stage 3). Attach a lab PDF and/or enter structured markers.
+          OCR and lab integrations are not enabled yet.
         </p>
       </header>
       <BloodPathologyResultNewClient

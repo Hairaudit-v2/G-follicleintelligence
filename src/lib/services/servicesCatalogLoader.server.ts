@@ -18,7 +18,9 @@ export type ServicesCatalogPageResult = {
   staffRolesByServiceId: Record<string, string[]>;
 };
 
-export async function loadServicesCatalogPage(tenantId: string): Promise<ServicesCatalogPageResult> {
+export async function loadServicesCatalogPage(
+  tenantId: string
+): Promise<ServicesCatalogPageResult> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const [services, rooms, eligibilityMaps, canManageServices] = await Promise.all([
     loadFiServicesForTenant(tid),
@@ -31,7 +33,8 @@ export async function loadServicesCatalogPage(tenantId: string): Promise<Service
   const preferredRoomByServiceId: Record<string, string | null> = {};
   for (const [serviceId, rows] of Array.from(eligibilityMaps.roomByServiceId.entries())) {
     roomEligibilityByServiceId[serviceId] = rows.filter((r) => r.is_active).map((r) => r.room_id);
-    preferredRoomByServiceId[serviceId] = rows.find((r) => r.is_active && r.is_preferred)?.room_id ?? null;
+    preferredRoomByServiceId[serviceId] =
+      rows.find((r) => r.is_active && r.is_preferred)?.room_id ?? null;
   }
 
   const staffRolesByServiceId: Record<string, string[]> = {};

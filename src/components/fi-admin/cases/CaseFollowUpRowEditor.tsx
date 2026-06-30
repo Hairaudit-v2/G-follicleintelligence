@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { deleteCaseFollowUpAction, upsertCaseFollowUpAction } from "@/lib/actions/fi-case-post-op-actions";
+import {
+  deleteCaseFollowUpAction,
+  upsertCaseFollowUpAction,
+} from "@/lib/actions/fi-case-post-op-actions";
 import type { CaseImageListItem } from "@/src/lib/cases/caseLoaders";
 import type { CaseFollowUpRow } from "@/src/lib/cases/postOpLoaders";
 import { followUpCheckpointLabel, followUpStatusLabel } from "@/src/lib/cases/postOpLabels";
@@ -86,10 +89,15 @@ export function CaseFollowUpRowEditor({
   return (
     <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h3 className="text-xs font-semibold text-slate-100">{followUpCheckpointLabel(checkpoint)}</h3>
+        <h3 className="text-xs font-semibold text-slate-100">
+          {followUpCheckpointLabel(checkpoint)}
+        </h3>
         {row ? (
           <p className="text-xs text-gray-500">
-            Status: <span className="font-medium text-slate-200">{followUpStatusLabel(row.follow_up_status)}</span>
+            Status:{" "}
+            <span className="font-medium text-slate-200">
+              {followUpStatusLabel(row.follow_up_status)}
+            </span>
           </p>
         ) : (
           <p className="text-xs text-gray-500">No row yet — save to record this checkpoint.</p>
@@ -119,7 +127,10 @@ export function CaseFollowUpRowEditor({
         </label>
       </div>
 
-      <label htmlFor={followUpStatusField.id} className="mt-2 block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={followUpStatusField.id}
+        className="mt-2 block text-xs font-medium text-slate-300"
+      >
         Follow-up status
         <select
           {...followUpStatusField}
@@ -147,29 +158,37 @@ export function CaseFollowUpRowEditor({
       </label>
 
       <fieldset className="mt-2">
-        <legend className="text-xs font-medium text-slate-300">Linked patient images (by ID)</legend>
+        <legend className="text-xs font-medium text-slate-300">
+          Linked patient images (by ID)
+        </legend>
         {imageOptions.length === 0 ? (
-          <p className="mt-1 text-xs text-gray-500">No patient images on file — upload via patient images first.</p>
+          <p className="mt-1 text-xs text-gray-500">
+            No patient images on file — upload via patient images first.
+          </p>
         ) : (
           <ul className="mt-1 max-h-32 space-y-1 overflow-y-auto text-xs">
             {imageOptions.map((img) => {
               const linkedImageField = caseFormField(`follow-up-${checkpoint}-linked-${img.id}`);
               return (
-              <li key={img.id} className="flex items-start gap-2">
-                <input
-                  {...linkedImageField}
-                  type="checkbox"
-                  checked={linkedIds.includes(img.id)}
-                  onChange={() => toggleImage(img.id)}
-                  className="mt-0.5 rounded border-slate-700"
-                />
-                <span className="text-slate-200">
-                  <span className="font-mono text-[10px] text-gray-500">{img.id.slice(0, 8)}…</span>{" "}
-                  {img.image_category}
-                  {img.caption ? ` — ${img.caption.slice(0, 60)}${img.caption.length > 60 ? "…" : ""}` : null}
-                </span>
-              </li>
-            );
+                <li key={img.id} className="flex items-start gap-2">
+                  <input
+                    {...linkedImageField}
+                    type="checkbox"
+                    checked={linkedIds.includes(img.id)}
+                    onChange={() => toggleImage(img.id)}
+                    className="mt-0.5 rounded border-slate-700"
+                  />
+                  <span className="text-slate-200">
+                    <span className="font-mono text-[10px] text-gray-500">
+                      {img.id.slice(0, 8)}…
+                    </span>{" "}
+                    {img.image_category}
+                    {img.caption
+                      ? ` — ${img.caption.slice(0, 60)}${img.caption.length > 60 ? "…" : ""}`
+                      : null}
+                  </span>
+                </li>
+              );
             })}
           </ul>
         )}
@@ -188,16 +207,24 @@ export function CaseFollowUpRowEditor({
                 row?.id != null
                   ? {
                       id: row.id,
-                      scheduled_date: scheduledDate.trim() ? scheduledDate.trim().slice(0, 10) : null,
-                      completed_date: completedDate.trim() ? completedDate.trim().slice(0, 10) : null,
+                      scheduled_date: scheduledDate.trim()
+                        ? scheduledDate.trim().slice(0, 10)
+                        : null,
+                      completed_date: completedDate.trim()
+                        ? completedDate.trim().slice(0, 10)
+                        : null,
                       follow_up_status: followUpStatus as FollowUpStatusValue,
                       notes: notes.trim() ? notes.trim() : null,
                       linked_image_ids: linkedIds,
                     }
                   : {
                       checkpoint,
-                      scheduled_date: scheduledDate.trim() ? scheduledDate.trim().slice(0, 10) : null,
-                      completed_date: completedDate.trim() ? completedDate.trim().slice(0, 10) : null,
+                      scheduled_date: scheduledDate.trim()
+                        ? scheduledDate.trim().slice(0, 10)
+                        : null,
+                      completed_date: completedDate.trim()
+                        ? completedDate.trim().slice(0, 10)
+                        : null,
                       follow_up_status: followUpStatus as FollowUpStatusValue,
                       notes: notes.trim() ? notes.trim() : null,
                       linked_image_ids: linkedIds,
@@ -228,7 +255,9 @@ export function CaseFollowUpRowEditor({
                 row?.id != null
                   ? {
                       id: row.id,
-                      scheduled_date: scheduledDate.trim() ? scheduledDate.trim().slice(0, 10) : null,
+                      scheduled_date: scheduledDate.trim()
+                        ? scheduledDate.trim().slice(0, 10)
+                        : null,
                       completed_date: t,
                       follow_up_status: "completed" as const,
                       notes: notes.trim() ? notes.trim() : null,
@@ -236,7 +265,9 @@ export function CaseFollowUpRowEditor({
                     }
                   : {
                       checkpoint,
-                      scheduled_date: scheduledDate.trim() ? scheduledDate.trim().slice(0, 10) : null,
+                      scheduled_date: scheduledDate.trim()
+                        ? scheduledDate.trim().slice(0, 10)
+                        : null,
                       completed_date: t,
                       follow_up_status: "completed" as const,
                       notes: notes.trim() ? notes.trim() : null,

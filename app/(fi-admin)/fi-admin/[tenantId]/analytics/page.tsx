@@ -43,7 +43,11 @@ async function resolveAnalyticsDiagnosticsExpanded(
   return role === "fi_admin" || role === "admin";
 }
 
-export default async function AnalyticsOsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function AnalyticsOsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
@@ -51,7 +55,10 @@ export default async function AnalyticsOsPage({ params }: { params: Promise<{ te
   await assertFiTenantPortalAccess(tenantId);
   await assertStaffModuleAccess(tenantId, "analytics_os", "read");
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>

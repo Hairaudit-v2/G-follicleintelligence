@@ -3,7 +3,12 @@
  * ReceptionOS live refresh payload (tenant-scoped).
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { resolveReceptionOsViewerContext } from "@/src/lib/receptionOs/receptionOsAccess.server";
 import { loadReceptionOsCommandCentrePayload } from "@/src/lib/receptionOs/receptionOsCommandCentreLoader.server";
 
@@ -19,7 +24,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
 
     const viewer = await resolveReceptionOsViewerContext(tenantId.trim());
     if (!viewer.canAccessReceptionOs) {
-      return crmJsonError(403, "ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+      return crmJsonError(
+        403,
+        "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+      );
     }
 
     const url = new URL(req.url);

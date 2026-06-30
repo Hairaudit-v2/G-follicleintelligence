@@ -43,7 +43,10 @@ function publicAnalyticsLoadNote(key: string, err: unknown): string {
   return `${key}: ${msg || "unknown error"}`;
 }
 
-async function wrapLoad<T>(key: string, fn: () => Promise<T>): Promise<AnalyticsOsModuleSnapshot<T>> {
+async function wrapLoad<T>(
+  key: string,
+  fn: () => Promise<T>
+): Promise<AnalyticsOsModuleSnapshot<T>> {
   try {
     const data = await fn();
     return { state: "ok", data };
@@ -52,10 +55,7 @@ async function wrapLoad<T>(key: string, fn: () => Promise<T>): Promise<Analytics
   }
 }
 
-function healthFrom(
-  limited: boolean,
-  attention: boolean
-): AnalyticsOsModuleHealthStatus {
+function healthFrom(limited: boolean, attention: boolean): AnalyticsOsModuleHealthStatus {
   if (limited) return "limited_data";
   if (attention) return "attention";
   return "healthy";
@@ -230,9 +230,9 @@ function buildModuleHealth(
       op.state === "limited",
       Boolean(
         opOk &&
-          (opOk.staleLeads.length > 0 ||
-            opOk.tasksDue.length > 0 ||
-            opOk.quickStats.todaysNoShows > 0)
+        (opOk.staleLeads.length > 0 ||
+          opOk.tasksDue.length > 0 ||
+          opOk.quickStats.todaysNoShows > 0)
       )
     ),
     primaryMetric: opOk ? `${agenda} agenda (72h)` : "—",
@@ -248,10 +248,7 @@ function buildModuleHealth(
       op.state === "limited",
       Boolean(opOk && (opOk.staleLeads.length > 0 || opOk.tasksDue.length > 0))
     ),
-    primaryMetric:
-      opOk != null
-        ? `${opOk.quickStats.newLeadsThisWeek} new leads · week`
-        : "—",
+    primaryMetric: opOk != null ? `${opOk.quickStats.newLeadsThisWeek} new leads · week` : "—",
     detail:
       op.state === "limited"
         ? "Operational snapshot unavailable."
@@ -278,7 +275,9 @@ function buildModuleHealth(
     href: `${base}/cases`,
     status: healthFrom(
       sur.state === "limited",
-      Boolean(surOk && (surOk.metrics.readinessReviewCases > 0 || surOk.metrics.followUpsDueCases > 0))
+      Boolean(
+        surOk && (surOk.metrics.readinessReviewCases > 0 || surOk.metrics.followUpsDueCases > 0)
+      )
     ),
     primaryMetric: surOk ? `${surOk.metrics.totalActiveCases} active cases` : "—",
     detail: sur.state === "limited" ? "Surgery worklist could not be derived." : undefined,
@@ -288,10 +287,7 @@ function buildModuleHealth(
     moduleId: "auditos",
     label: "AuditOS",
     href: `${base}/audit`,
-    status: healthFrom(
-      aud.state === "limited",
-      Boolean(audOk && audOk.kpis.pending_reviews > 0)
-    ),
+    status: healthFrom(aud.state === "limited", Boolean(audOk && audOk.kpis.pending_reviews > 0)),
     primaryMetric: audOk ? `${audOk.kpis.pending_reviews} pending reviews` : "—",
     detail: aud.state === "limited" ? "Audit snapshot unavailable." : undefined,
   };
@@ -323,7 +319,9 @@ async function loadSurgerySnapshot(tenantId: string): Promise<SurgeryOsDashboard
   return deriveSurgeryOsDashboardModel(enriched);
 }
 
-async function loadPatientWithFallback(tenantId: string): Promise<AnalyticsOsModuleSnapshot<PatientOsOverviewModel>> {
+async function loadPatientWithFallback(
+  tenantId: string
+): Promise<AnalyticsOsModuleSnapshot<PatientOsOverviewModel>> {
   const direct = await wrapLoad("patientos", () => loadPatientOsOverview(tenantId));
   if (direct.state === "ok") return direct;
   try {
@@ -386,7 +384,15 @@ export async function loadAnalyticsOsDashboard(
     audit: mapAuditSnapshot(audit),
     foundation: mapFoundationSnapshot(foundation),
     loadNotes,
-    moduleHealth: buildModuleHealth(base, ctx.showCrmNav, operational, patient, surgery, audit, foundation),
+    moduleHealth: buildModuleHealth(
+      base,
+      ctx.showCrmNav,
+      operational,
+      patient,
+      surgery,
+      audit,
+      foundation
+    ),
     riskRows: buildRiskRows(base, ctx.showCrmNav, operational, surgery, audit, foundation),
   };
 }

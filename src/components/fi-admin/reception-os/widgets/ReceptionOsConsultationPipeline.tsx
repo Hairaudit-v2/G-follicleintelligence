@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import { ReceptionOsRecordLinks, receptionOsPrimaryHref } from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
+import {
+  ReceptionOsRecordLinks,
+  receptionOsPrimaryHref,
+} from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
 import {
   RECEPTION_OS_PIPELINE_COLUMN_IDS,
   RECEPTION_OS_PIPELINE_COLUMN_LABELS,
@@ -24,7 +27,11 @@ function PipelineCard({ card }: { card: ReceptionOsPipelineCard }) {
   const inner = (
     <article className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-2.5 text-sm shadow-sm shadow-black/25">
       <p className="truncate font-semibold text-slate-50">{card.patientOrLeadLabel}</p>
-      {card.detailLine ? <p className="mt-1 line-clamp-2 text-[0.68rem] leading-snug text-slate-500">{card.detailLine}</p> : null}
+      {card.detailLine ? (
+        <p className="mt-1 line-clamp-2 text-[0.68rem] leading-snug text-slate-500">
+          {card.detailLine}
+        </p>
+      ) : null}
       <ReceptionOsRecordLinks hrefs={card.hrefs} className="mt-1.5" />
     </article>
   );
@@ -45,14 +52,20 @@ export function ReceptionOsConsultationPipelineWidget(props: {
   return (
     <DashboardCard className="overflow-hidden">
       <div className="border-b border-white/[0.06] px-4 py-3">
-        <SectionHeader title="Consultation pipeline" description="Lead → surgery conversion funnel" />
+        <SectionHeader
+          title="Consultation pipeline"
+          description="Lead → surgery conversion funnel"
+        />
       </div>
       <div className="overflow-x-auto p-3">
         <div className="flex min-w-[960px] gap-3">
           {RECEPTION_OS_PIPELINE_COLUMN_IDS.map((colId) => (
             <div
               key={colId}
-              className={cn("flex min-w-[150px] flex-1 flex-col rounded-xl border p-2", COLUMN_TONES[colId])}
+              className={cn(
+                "flex min-w-[150px] flex-1 flex-col rounded-xl border p-2",
+                COLUMN_TONES[colId]
+              )}
             >
               <div className="mb-2 flex items-center justify-between gap-2 px-1">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400">

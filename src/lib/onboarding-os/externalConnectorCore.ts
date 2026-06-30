@@ -23,7 +23,10 @@ import {
   isExternalConnectorStatus,
 } from "./externalConnectorTypes";
 
-const PROVIDER_CATEGORY_MAP: Record<ExternalConnectorProvider, ExternalConnectorCatalogEntry["category"]> = {
+const PROVIDER_CATEGORY_MAP: Record<
+  ExternalConnectorProvider,
+  ExternalConnectorCatalogEntry["category"]
+> = {
   pabau: "crm",
   cliniko: "crm",
   hubspot: "crm",
@@ -193,7 +196,10 @@ const BASE_MAPPING_PLANS: Record<
   ],
 };
 
-const CONFIG_FIELDS: Record<ExternalConnectorProvider, ExternalConnectorCatalogEntry["configFields"]> = {
+const CONFIG_FIELDS: Record<
+  ExternalConnectorProvider,
+  ExternalConnectorCatalogEntry["configFields"]
+> = {
   pabau: [
     { key: "subdomain", label: "Pabau subdomain", required: true },
     { key: "api_key", label: "API key", required: true, sensitive: true },
@@ -296,7 +302,11 @@ export function validateConnectorConfiguration(
   }
 
   const hasSensitiveField = entry.configFields.some((f) => f.sensitive);
-  if (hasSensitiveField && !input.credentialPlaintext?.trim() && !configHasSensitiveValue(config, entry)) {
+  if (
+    hasSensitiveField &&
+    !input.credentialPlaintext?.trim() &&
+    !configHasSensitiveValue(config, entry)
+  ) {
     errors.push("Credential or API key material is required for this connector.");
   }
 
@@ -368,7 +378,9 @@ export function resolveConnectorHealthStatus(opts: {
 }
 
 /** Build default entity mapping plan for a provider. */
-export function buildConnectorMappingPlan(provider: ExternalConnectorProvider): ExternalConnectorMappingPlan {
+export function buildConnectorMappingPlan(
+  provider: ExternalConnectorProvider
+): ExternalConnectorMappingPlan {
   const category = PROVIDER_CATEGORY_MAP[provider];
   return {
     provider,
@@ -378,7 +390,9 @@ export function buildConnectorMappingPlan(provider: ExternalConnectorProvider): 
 }
 
 /** Calculate sync health score from integration and sync signals. */
-export function calculateConnectorSyncHealth(input: ExternalConnectorSyncHealthInput): ExternalConnectorSyncHealth {
+export function calculateConnectorSyncHealth(
+  input: ExternalConnectorSyncHealthInput
+): ExternalConnectorSyncHealth {
   const recommendations: string[] = [];
   let score = input.healthScore;
 

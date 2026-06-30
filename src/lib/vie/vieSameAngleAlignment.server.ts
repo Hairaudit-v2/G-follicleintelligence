@@ -42,7 +42,9 @@ function mapAlignmentRow(row: Record<string, unknown>): VieAlignmentResultRow {
     engine_version: "vie-alignment.v1",
     alignment_score: Number(row.alignment_score ?? 0),
     alignment_status: String(row.alignment_status) as VieAlignmentResultRow["alignment_status"],
-    confidence_band: String(row.confidence_band ?? "medium") as VieAlignmentResultRow["confidence_band"],
+    confidence_band: String(
+      row.confidence_band ?? "medium"
+    ) as VieAlignmentResultRow["confidence_band"],
     warnings: Array.isArray(row.warnings) ? row.warnings.map(String) : [],
     reference_image_id: row.reference_image_id != null ? String(row.reference_image_id) : null,
     reference_captured_at:
@@ -97,7 +99,10 @@ async function loadReferenceCandidates(
   if (imageErr) throw new Error(imageErr.message);
 
   const imageById = new Map(
-    (imageRows ?? []).map((row) => [String((row as Record<string, unknown>).id), row as Record<string, unknown>])
+    (imageRows ?? []).map((row) => [
+      String((row as Record<string, unknown>).id),
+      row as Record<string, unknown>,
+    ])
   );
 
   const candidates: VieAlignmentReferenceCandidate[] = [];
@@ -110,7 +115,9 @@ async function loadReferenceCandidates(
     const image = imageById.get(imageId);
     if (!image) continue;
 
-    const protocol = String(ir.protocol_template_slug ?? image.imaging_protocol_template_slug ?? "").trim();
+    const protocol = String(
+      ir.protocol_template_slug ?? image.imaging_protocol_template_slug ?? ""
+    ).trim();
     const slot = String(ir.protocol_slot_slug ?? image.imaging_protocol_slot_slug ?? "").trim();
     if (!protocol || !slot) continue;
 
@@ -126,7 +133,8 @@ async function loadReferenceCandidates(
       clinically_usable: true,
       acceptance_status: "accepted",
       captured_at: String(ir.accepted_at ?? ir.created_at ?? image.taken_at ?? image.created_at),
-      follow_up_interval: image.follow_up_interval != null ? String(image.follow_up_interval) : null,
+      follow_up_interval:
+        image.follow_up_interval != null ? String(image.follow_up_interval) : null,
       visit_type: image.visit_type != null ? String(image.visit_type) : null,
       imaging_library_axis: String(image.imaging_library_axis ?? "general_clinical"),
     });
@@ -138,7 +146,9 @@ async function loadReferenceCandidates(
         : {};
     const std = meta.vie_capture_standardization;
     const stdObj =
-      std && typeof std === "object" && !Array.isArray(std) ? (std as Record<string, unknown>) : null;
+      std && typeof std === "object" && !Array.isArray(std)
+        ? (std as Record<string, unknown>)
+        : null;
 
     const width = image.image_width != null ? Number(image.image_width) : null;
     const height = image.image_height != null ? Number(image.image_height) : null;
@@ -207,7 +217,9 @@ export async function buildAlignmentCaptureInput(params: {
 
   const ir = (intel ?? {}) as Record<string, unknown>;
   const img = image as Record<string, unknown>;
-  const protocol = String(ir.protocol_template_slug ?? img.imaging_protocol_template_slug ?? "").trim();
+  const protocol = String(
+    ir.protocol_template_slug ?? img.imaging_protocol_template_slug ?? ""
+  ).trim();
   const slot = String(ir.protocol_slot_slug ?? img.imaging_protocol_slot_slug ?? "").trim();
   if (!protocol || !slot) return null;
 
@@ -306,10 +318,14 @@ export async function loadVieCaptureReferenceGuidance(params: {
   const slot = params.protocolSlotSlug.trim();
   const framing = deriveSlotFraming(slot, protocol);
   const slotFamily = deriveSlotFamily(slot);
-  const region =
-    getVieProtocolSlotRegion(protocol, slot) ?? "unknown";
+  const region = getVieProtocolSlotRegion(protocol, slot) ?? "unknown";
 
-  const candidates = await loadReferenceCandidates(params.tenantId, params.patientId, null, supabase);
+  const candidates = await loadReferenceCandidates(
+    params.tenantId,
+    params.patientId,
+    null,
+    supabase
+  );
   const pseudoCapture: VieAlignmentCaptureInput = {
     image_id: "__preview__",
     patient_id: params.patientId.trim(),
@@ -446,25 +462,31 @@ export async function evaluateAndPersistVieAlignment(params: {
       },
       null
     );
-    await persistAlignmentResult(params.tenantId, params.patientId, {
-      ...empty,
-      image_id: params.imageId,
-      patient_id: params.patientId.trim(),
-      anatomical_region: "unknown",
-      slot_family: "unknown",
-      framing: "overview",
-      protocol_template_slug: "",
-      protocol_slot_slug: "",
-      quality_score: 0,
-      captured_at: new Date().toISOString(),
-      visit_type: null,
-      image_width: null,
-      image_height: null,
-      orientation: "unknown",
-      capture_distance_hint: null,
-      capture_guide: null,
-      journey_stage: "consultation",
-    } as VieAlignmentCaptureInput, empty, supabase);
+    await persistAlignmentResult(
+      params.tenantId,
+      params.patientId,
+      {
+        ...empty,
+        image_id: params.imageId,
+        patient_id: params.patientId.trim(),
+        anatomical_region: "unknown",
+        slot_family: "unknown",
+        framing: "overview",
+        protocol_template_slug: "",
+        protocol_slot_slug: "",
+        quality_score: 0,
+        captured_at: new Date().toISOString(),
+        visit_type: null,
+        image_width: null,
+        image_height: null,
+        orientation: "unknown",
+        capture_distance_hint: null,
+        capture_guide: null,
+        journey_stage: "consultation",
+      } as VieAlignmentCaptureInput,
+      empty,
+      supabase
+    );
     return empty;
   }
 
@@ -478,7 +500,13 @@ export async function evaluateAndPersistVieAlignment(params: {
   const alignment = evaluateSameAngleAlignment(capture, reference);
 
   await persistAlignmentResult(params.tenantId, params.patientId, capture, alignment, supabase);
-  await persistCaptureStandardizationMetadata(params.tenantId, capture.image_id, capture, alignment, supabase);
+  await persistCaptureStandardizationMetadata(
+    params.tenantId,
+    capture.image_id,
+    capture,
+    alignment,
+    supabase
+  );
 
   return alignment;
 }
@@ -550,7 +578,10 @@ export function enrichComparisonPairWithAlignment(
       alignment_score: fallback.alignment_score,
       alignment_status: fallback.alignment_status,
       confidence_band: fallback.confidence_band,
-      is_standardized_evidence: isStandardizedEvidence(fallback.alignment_status, fallback.alignment_score),
+      is_standardized_evidence: isStandardizedEvidence(
+        fallback.alignment_status,
+        fallback.alignment_score
+      ),
     };
   }
 
@@ -558,7 +589,10 @@ export function enrichComparisonPairWithAlignment(
     alignment_score: direct.alignment_score,
     alignment_status: direct.alignment_status,
     confidence_band: direct.confidence_band,
-    is_standardized_evidence: isStandardizedEvidence(direct.alignment_status, direct.alignment_score),
+    is_standardized_evidence: isStandardizedEvidence(
+      direct.alignment_status,
+      direct.alignment_score
+    ),
   };
 }
 
@@ -575,9 +609,13 @@ export async function loadPatientTwinAlignmentSummary(
       alignment_score: r.alignment_score,
       alignment_status: r.alignment_status,
       protocol_slot_slug:
-        typeof r.metadata.protocol_slot_slug === "string" ? r.metadata.protocol_slot_slug : undefined,
+        typeof r.metadata.protocol_slot_slug === "string"
+          ? r.metadata.protocol_slot_slug
+          : undefined,
       protocol_template_slug:
-        typeof r.metadata.protocol_template_slug === "string" ? r.metadata.protocol_template_slug : undefined,
+        typeof r.metadata.protocol_template_slug === "string"
+          ? r.metadata.protocol_template_slug
+          : undefined,
     }))
   );
 }

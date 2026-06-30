@@ -5,11 +5,15 @@ import { cancelBookingAction, completeBookingAction } from "@/lib/actions/fi-boo
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatBookingWindowInTimezone,
+  normalizeCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function BookingSummaryCard({
   tenantId,
@@ -55,7 +59,11 @@ export function BookingSummaryCard({
     setBusy(true);
     setFeedback(null);
     try {
-      const r = await cancelBookingAction(tenantId, booking.id, withAdmin({ cancellationReason: null }));
+      const r = await cancelBookingAction(
+        tenantId,
+        booking.id,
+        withAdmin({ cancellationReason: null })
+      );
       if (!r.ok) setFeedback(r.error);
       else onChanged();
     } finally {
@@ -65,7 +73,9 @@ export function BookingSummaryCard({
 
   const range = useMemo(() => {
     const tz = normalizeCalendarTimezone(booking.timezone);
-    return formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, { endPart: "timeOnly" });
+    return formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, {
+      endPart: "timeOnly",
+    });
   }, [booking.start_at, booking.end_at, booking.timezone]);
 
   const assignment = useMemo(
@@ -77,8 +87,12 @@ export function BookingSummaryCard({
     <div className={card}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-medium uppercase text-gray-500">{bookingTypeLabel(booking.booking_type)}</p>
-          <p className="text-sm font-semibold text-slate-100">{booking.title?.trim() || "Booking"}</p>
+          <p className="text-xs font-medium uppercase text-gray-500">
+            {bookingTypeLabel(booking.booking_type)}
+          </p>
+          <p className="text-sm font-semibold text-slate-100">
+            {booking.title?.trim() || "Booking"}
+          </p>
           <p className="text-xs text-slate-400">{range}</p>
           <p className="text-xs text-gray-500">
             {bookingStatusLabel(booking.booking_status)}

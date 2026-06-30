@@ -25,7 +25,11 @@ function fmtMoney(cents: number, currency: string): string {
   return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export default async function FinancialOsInvoicesPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsInvoicesPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
@@ -59,10 +63,15 @@ export default async function FinancialOsInvoicesPage({ params }: { params: Prom
               <FinancialOsRecordStatusBadge status={r.status} />
             </td>
             <td className={financialOsClasses.tableCell}>{fmtMoney(r.total_cents, r.currency)}</td>
-            <td className={financialOsClasses.tableCell}>{fmtMoney(invoiceBalanceDueCents(r), r.currency)}</td>
+            <td className={financialOsClasses.tableCell}>
+              {fmtMoney(invoiceBalanceDueCents(r), r.currency)}
+            </td>
             <td className={financialOsClasses.tableCell}>
               {r.case_id ? (
-                <Link className={financialOsClasses.inlineLink} href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}>
+                <Link
+                  className={financialOsClasses.inlineLink}
+                  href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}
+                >
                   Case
                 </Link>
               ) : null}{" "}

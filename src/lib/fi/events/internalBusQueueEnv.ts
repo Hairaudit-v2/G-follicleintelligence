@@ -17,7 +17,9 @@ export type InternalBusQueueEnvOptions = {
  * `FI_INTELLIGENCE_INTERNAL_BUS_QUEUE_ENABLED === "1"` **and** `NODE_ENV !== "production"`.
  * Production is always off until an explicit future policy stage changes this contract.
  */
-export function isInternalIntelligenceInternalBusQueueEnabled(options?: InternalBusQueueEnvOptions): boolean {
+export function isInternalIntelligenceInternalBusQueueEnabled(
+  options?: InternalBusQueueEnvOptions
+): boolean {
   const env = options?.env ?? (process.env as Record<string, string | undefined>);
   const nodeEnv = options?.nodeEnv ?? env.NODE_ENV ?? "";
   if (nodeEnv === "production") return false;

@@ -5,7 +5,9 @@ import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/
 
 import { quoteDraftAllowedForAutomationRun } from "./consultationAutomationPolicy";
 
-function baseSummary(over: Partial<ConsultationCompletionSummary> = {}): ConsultationCompletionSummary {
+function baseSummary(
+  over: Partial<ConsultationCompletionSummary> = {}
+): ConsultationCompletionSummary {
   return {
     consultationId: "c1",
     formInstanceId: "f1",
@@ -37,8 +39,14 @@ function baseSummary(over: Partial<ConsultationCompletionSummary> = {}): Consult
 describe("consultationAutomationPolicy", () => {
   it("quoteDraftAllowedForAutomationRun: default mode uses intent signals", () => {
     assert.equal(quoteDraftAllowedForAutomationRun(undefined, baseSummary()), false);
-    assert.equal(quoteDraftAllowedForAutomationRun(undefined, baseSummary({ outcomeType: "proceed_surgery" })), true);
-    assert.equal(quoteDraftAllowedForAutomationRun(undefined, baseSummary({ quoteNotes: "x" })), true);
+    assert.equal(
+      quoteDraftAllowedForAutomationRun(undefined, baseSummary({ outcomeType: "proceed_surgery" })),
+      true
+    );
+    assert.equal(
+      quoteDraftAllowedForAutomationRun(undefined, baseSummary({ quoteNotes: "x" })),
+      true
+    );
   });
 
   it("quoteDraftAllowedForAutomationRun: explicit quote_draft bypasses intent when filter is present", () => {

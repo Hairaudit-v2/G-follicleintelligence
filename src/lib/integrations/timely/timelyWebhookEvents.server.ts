@@ -74,7 +74,11 @@ export async function insertTimelyZapierDiscoveryWebhookEvent(params: {
     error_message: null as string | null,
   };
 
-  const { data, error } = await supabase.from("fi_integration_webhook_events").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_integration_webhook_events")
+    .insert(row)
+    .select("id")
+    .single();
 
   if (error || !data?.id) {
     return { ok: false, message: error?.message ?? "Failed to store webhook event.", status: 500 };
@@ -90,7 +94,9 @@ export async function loadRecentTimelyIntegrationWebhookEvents(
   const sb = supabase ?? supabaseAdmin();
   const { data, error } = await sb
     .from("fi_integration_webhook_events")
-    .select("id, tenant_id, provider, event_type, route, status, payload, payload_hash, error_message, created_at")
+    .select(
+      "id, tenant_id, provider, event_type, route, status, payload, payload_hash, error_message, created_at"
+    )
     .eq("tenant_id", tenantId)
     .eq("provider", "timely")
     .order("created_at", { ascending: false })

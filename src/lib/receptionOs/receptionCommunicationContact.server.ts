@@ -16,7 +16,7 @@ export type ReceptionCommunicationContactSubject = {
 
 async function loadPersonContact(
   tenantId: string,
-  personId: string,
+  personId: string
 ): Promise<{ email: string | null; phoneE164: string | null }> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -49,7 +49,7 @@ async function loadPersonContact(
 
 export async function resolveReceptionCommunicationContactSubject(
   tenantId: string,
-  context: { leadId?: string | null; taskId?: string | null; patientId?: string | null },
+  context: { leadId?: string | null; taskId?: string | null; patientId?: string | null }
 ): Promise<ReceptionCommunicationContactSubject> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
@@ -82,7 +82,12 @@ export async function resolveReceptionCommunicationContactSubject(
       if (!patientId) {
         const personId = (data as { person_id: string }).person_id;
         const personContact = await loadPersonContact(tid, personId);
-        return { leadId, patientId: null, email: personContact.email, phoneE164: personContact.phoneE164 };
+        return {
+          leadId,
+          patientId: null,
+          email: personContact.email,
+          phoneE164: personContact.phoneE164,
+        };
       }
     }
   }
@@ -105,7 +110,10 @@ export async function resolveReceptionCommunicationContactSubject(
       .eq("id", leadId)
       .maybeSingle();
     if (data) {
-      const personContact = await loadPersonContact(tid, String((data as { person_id: string }).person_id));
+      const personContact = await loadPersonContact(
+        tid,
+        String((data as { person_id: string }).person_id)
+      );
       return { leadId, patientId: null, ...personContact };
     }
   }
@@ -116,9 +124,11 @@ export async function resolveReceptionCommunicationContactSubject(
 export function resolveReceptionCommunicationToAddress(
   channel: "sms" | "email",
   explicit: string | null | undefined,
-  subject: ReceptionCommunicationContactSubject,
+  subject: ReceptionCommunicationContactSubject
 ): string | null {
   const direct = explicit?.trim();
   if (direct) return direct;
-  return channel === "email" ? subject.email?.trim() ?? null : subject.phoneE164?.trim() ?? null;
+  return channel === "email"
+    ? (subject.email?.trim() ?? null)
+    : (subject.phoneE164?.trim() ?? null);
 }

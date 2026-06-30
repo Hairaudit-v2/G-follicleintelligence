@@ -24,15 +24,27 @@ export type FiInternationalTransferProofType =
   | "swift_confirmation"
   | "custom";
 
-export type FiInternationalTransferProofStatus = "pending" | "requested" | "received" | "verified" | "rejected";
+export type FiInternationalTransferProofStatus =
+  | "pending"
+  | "requested"
+  | "received"
+  | "verified"
+  | "rejected";
 
-export const CLEARED_INTERNATIONAL_TRANSFER_STATUSES: readonly FiInternationalTransferStatus[] = ["settled"];
+export const CLEARED_INTERNATIONAL_TRANSFER_STATUSES: readonly FiInternationalTransferStatus[] = [
+  "settled",
+];
 
-export const RESOLVED_INTERNATIONAL_TRANSFER_STATUSES: readonly FiInternationalTransferStatus[] = ["settled", "cancelled"];
+export const RESOLVED_INTERNATIONAL_TRANSFER_STATUSES: readonly FiInternationalTransferStatus[] = [
+  "settled",
+  "cancelled",
+];
 
-export const INTERNATIONAL_INSTRUCTIONS_REQUIRED_LABEL = "International Instructions Required" as const;
+export const INTERNATIONAL_INSTRUCTIONS_REQUIRED_LABEL =
+  "International Instructions Required" as const;
 export const AWAITING_INTERNATIONAL_TRANSFER_LABEL = "Awaiting International Transfer" as const;
-export const PROOF_RECONCILIATION_REQUIRED_LABEL = "Proof Received — Reconciliation Required" as const;
+export const PROOF_RECONCILIATION_REQUIRED_LABEL =
+  "Proof Received — Reconciliation Required" as const;
 export const INTERNATIONAL_SETTLEMENT_PENDING_LABEL = "Settlement Pending" as const;
 export const FX_VARIANCE_REVIEW_LABEL = "FX Variance Review" as const;
 export const INTERNATIONAL_TRANSFER_SETTLED_LABEL = "International Transfer Settled" as const;
@@ -40,7 +52,8 @@ export const INTERNATIONAL_TRANSFER_REJECTED_LABEL = "International Transfer Rej
 
 /** Surgery pipeline chip labels (shorter variants). */
 export const SURGERY_PROOF_RECONCILIATION_PENDING_LABEL = "Proof/Reconciliation Pending" as const;
-export const SURGERY_INTERNATIONAL_SETTLEMENT_PENDING_LABEL = "International Settlement Pending" as const;
+export const SURGERY_INTERNATIONAL_SETTLEMENT_PENDING_LABEL =
+  "International Settlement Pending" as const;
 
 export type FiInternationalTransferApplicationRow = {
   id: string;
@@ -94,15 +107,21 @@ function daysSinceIso(iso: string, todayYmd: string): number {
   return daysBetween(d, todayYmd);
 }
 
-export function isClearedInternationalTransferStatus(status: FiInternationalTransferStatus): boolean {
+export function isClearedInternationalTransferStatus(
+  status: FiInternationalTransferStatus
+): boolean {
   return CLEARED_INTERNATIONAL_TRANSFER_STATUSES.includes(status);
 }
 
-export function isResolvedInternationalTransferStatus(status: FiInternationalTransferStatus): boolean {
+export function isResolvedInternationalTransferStatus(
+  status: FiInternationalTransferStatus
+): boolean {
   return RESOLVED_INTERNATIONAL_TRANSFER_STATUSES.includes(status);
 }
 
-export function hasRemainingSettlementBalance(application: FiInternationalTransferApplicationRow): boolean {
+export function hasRemainingSettlementBalance(
+  application: FiInternationalTransferApplicationRow
+): boolean {
   if (application.transfer_status !== "partially_settled") return false;
   const expected = application.expected_settlement_amount_cents;
   const received = application.received_amount_cents;
@@ -130,7 +149,10 @@ function statusAnchorIso(application: FiInternationalTransferApplicationRow): st
   return application.updated_at || application.created_at;
 }
 
-export function computeDaysInStatus(application: FiInternationalTransferApplicationRow, todayYmd: string): number {
+export function computeDaysInStatus(
+  application: FiInternationalTransferApplicationRow,
+  todayYmd: string
+): number {
   return daysSinceIso(statusAnchorIso(application), todayYmd);
 }
 
@@ -174,7 +196,8 @@ export function requiresEscalatedInternationalTransferAttention(
   input: BuildInternationalTransferAttentionInput
 ): boolean {
   const { todayYmd, application, surgeryDateYmd = null } = input;
-  if (!application || isResolvedInternationalTransferStatus(application.transfer_status)) return false;
+  if (!application || isResolvedInternationalTransferStatus(application.transfer_status))
+    return false;
   if (isClearedInternationalTransferStatus(application.transfer_status)) return false;
 
   const status = application.transfer_status;
@@ -202,7 +225,9 @@ export function requiresEscalatedInternationalTransferAttention(
   return false;
 }
 
-export function buildInternationalTransferAttentionLabels(input: BuildInternationalTransferAttentionInput): string[] {
+export function buildInternationalTransferAttentionLabels(
+  input: BuildInternationalTransferAttentionInput
+): string[] {
   const { todayYmd, application, surgeryDateYmd = null, surgeryPipelineLabels = false } = input;
   if (!application || isResolvedInternationalTransferStatus(application.transfer_status)) return [];
   if (isClearedInternationalTransferStatus(application.transfer_status)) return [];
@@ -267,11 +292,17 @@ function summaryLabelForStatus(
       return AWAITING_INTERNATIONAL_TRANSFER_LABEL;
     case "proof_received":
     case "under_reconciliation":
-      return surgeryPipelineLabels ? SURGERY_PROOF_RECONCILIATION_PENDING_LABEL : PROOF_RECONCILIATION_REQUIRED_LABEL;
+      return surgeryPipelineLabels
+        ? SURGERY_PROOF_RECONCILIATION_PENDING_LABEL
+        : PROOF_RECONCILIATION_REQUIRED_LABEL;
     case "settlement_pending":
-      return surgeryPipelineLabels ? SURGERY_INTERNATIONAL_SETTLEMENT_PENDING_LABEL : INTERNATIONAL_SETTLEMENT_PENDING_LABEL;
+      return surgeryPipelineLabels
+        ? SURGERY_INTERNATIONAL_SETTLEMENT_PENDING_LABEL
+        : INTERNATIONAL_SETTLEMENT_PENDING_LABEL;
     case "partially_settled":
-      return surgeryPipelineLabels ? SURGERY_INTERNATIONAL_SETTLEMENT_PENDING_LABEL : INTERNATIONAL_SETTLEMENT_PENDING_LABEL;
+      return surgeryPipelineLabels
+        ? SURGERY_INTERNATIONAL_SETTLEMENT_PENDING_LABEL
+        : INTERNATIONAL_SETTLEMENT_PENDING_LABEL;
     case "variance_review":
       return FX_VARIANCE_REVIEW_LABEL;
     case "rejected":
@@ -296,7 +327,8 @@ export function buildInternationalTransferAttentionSummary(
   if (!application || !isUnresolvedInternationalTransferApplication(application)) {
     return {
       international_transfer_attention_required: false,
-      international_transfer_summary_label: application?.transfer_status === "settled" ? INTERNATIONAL_TRANSFER_SETTLED_LABEL : null,
+      international_transfer_summary_label:
+        application?.transfer_status === "settled" ? INTERNATIONAL_TRANSFER_SETTLED_LABEL : null,
       international_transfer_attention_labels: [],
       days_in_status: 0,
       sla_breach: false,
@@ -311,7 +343,8 @@ export function buildInternationalTransferAttentionSummary(
 
   return {
     international_transfer_attention_required: true,
-    international_transfer_summary_label: labels[0] ?? summaryLabelForStatus(application.transfer_status, surgeryPipelineLabels),
+    international_transfer_summary_label:
+      labels[0] ?? summaryLabelForStatus(application.transfer_status, surgeryPipelineLabels),
     international_transfer_attention_labels: labels,
     days_in_status,
     sla_breach,
@@ -320,7 +353,9 @@ export function buildInternationalTransferAttentionSummary(
   };
 }
 
-export function resolveInternationalTransferAttention(input: BuildInternationalTransferAttentionInput): boolean {
+export function resolveInternationalTransferAttention(
+  input: BuildInternationalTransferAttentionInput
+): boolean {
   return requiresEscalatedInternationalTransferAttention(input);
 }
 
@@ -409,10 +444,14 @@ export function aggregateInternationalTransferAnalytics(
   }
 
   const countries = countByField(
-    applications.map((a) => (a.source_country_code?.trim().toUpperCase() || "") as string).filter(Boolean)
+    applications
+      .map((a) => (a.source_country_code?.trim().toUpperCase() || "") as string)
+      .filter(Boolean)
   );
   const currencies = countByField(
-    applications.map((a) => (a.source_currency_code?.trim().toUpperCase() || "") as string).filter(Boolean)
+    applications
+      .map((a) => (a.source_currency_code?.trim().toUpperCase() || "") as string)
+      .filter(Boolean)
   );
   const methods = countByField(applications.map((a) => a.transfer_method));
 
@@ -426,12 +465,19 @@ export function aggregateInternationalTransferAnalytics(
         ? Math.round(proofReceivedDays.reduce((a, b) => a + b, 0) / proofReceivedDays.length)
         : null,
     averageDaysToSettled:
-      settledDays.length > 0 ? Math.round(settledDays.reduce((a, b) => a + b, 0) / settledDays.length) : null,
+      settledDays.length > 0
+        ? Math.round(settledDays.reduce((a, b) => a + b, 0) / settledDays.length)
+        : null,
     averageFxVarianceCents:
-      fxVariances.length > 0 ? Math.round(fxVariances.reduce((a, b) => a + b, 0) / fxVariances.length) : null,
+      fxVariances.length > 0
+        ? Math.round(fxVariances.reduce((a, b) => a + b, 0) / fxVariances.length)
+        : null,
     mostCommonSourceCountries: countries.map((c) => ({ countryCode: c.key, count: c.count })),
     mostCommonSourceCurrencies: currencies.map((c) => ({ currencyCode: c.key, count: c.count })),
-    transferMethodUsage: methods.map((m) => ({ method: m.key as FiInternationalTransferMethod, count: m.count })),
+    transferMethodUsage: methods.map((m) => ({
+      method: m.key as FiInternationalTransferMethod,
+      count: m.count,
+    })),
   };
 }
 
@@ -453,18 +499,26 @@ export function aggregateInternationalTransferDashboardCounts(
 
   for (const app of applications) {
     if (!isResolvedInternationalTransferStatus(app.transfer_status)) openCount += 1;
-    if (["instructions_sent", "awaiting_transfer"].includes(app.transfer_status)) awaitingTransferCount += 1;
+    if (["instructions_sent", "awaiting_transfer"].includes(app.transfer_status))
+      awaitingTransferCount += 1;
     if (app.transfer_status === "proof_received") proofReceivedCount += 1;
     if (app.transfer_status === "settlement_pending") settlementPendingCount += 1;
     if (app.transfer_status === "variance_review") varianceReviewCount += 1;
 
-    if (app.transfer_status === "settled" && app.actual_settlement_date && app.actual_settlement_date >= monthStart) {
+    if (
+      app.transfer_status === "settled" &&
+      app.actual_settlement_date &&
+      app.actual_settlement_date >= monthStart
+    ) {
       settledThisMonthCount += 1;
     }
 
-    if (app.settlement_variance_cents != null) totalSettlementVarianceCents += app.settlement_variance_cents;
+    if (app.settlement_variance_cents != null)
+      totalSettlementVarianceCents += app.settlement_variance_cents;
 
-    const surgeryYmd = app.booking_id ? surgeryDatesByBookingId.get(app.booking_id) ?? null : null;
+    const surgeryYmd = app.booking_id
+      ? (surgeryDatesByBookingId.get(app.booking_id) ?? null)
+      : null;
     if (
       resolveInternationalTransferAttention({
         todayYmd,
@@ -490,7 +544,9 @@ export function aggregateInternationalTransferDashboardCounts(
     settledThisMonthCount,
     attentionCount,
     averageSettlementDays:
-      settlementDays.length > 0 ? Math.round(settlementDays.reduce((a, b) => a + b, 0) / settlementDays.length) : null,
+      settlementDays.length > 0
+        ? Math.round(settlementDays.reduce((a, b) => a + b, 0) / settlementDays.length)
+        : null,
     totalSettlementVarianceCents,
   };
 }

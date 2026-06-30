@@ -4,9 +4,18 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
 import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
-import { loadPatientSlideOverPayload, type PatientSlideOverPayload } from "@/src/lib/patients/patientSlideOverLoader";
-import { patientImageArchiveBodySchema, patientImagePatchBodySchema } from "@/src/lib/patientImages/patientImageApiSchemas";
-import { archivePatientImage, updatePatientImageDetails } from "@/src/lib/patientImages/patientImagesServer";
+import {
+  loadPatientSlideOverPayload,
+  type PatientSlideOverPayload,
+} from "@/src/lib/patients/patientSlideOverLoader";
+import {
+  patientImageArchiveBodySchema,
+  patientImagePatchBodySchema,
+} from "@/src/lib/patientImages/patientImageApiSchemas";
+import {
+  archivePatientImage,
+  updatePatientImageDetails,
+} from "@/src/lib/patientImages/patientImagesServer";
 import { patientClinicalDetailsPatchBodySchema } from "@/src/lib/patients/clinicalDetailsApiSchemas";
 import { patientAdminPatchBodySchema } from "@/src/lib/patients/patientApiSchemas";
 import { updatePatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsServer";
@@ -165,9 +174,7 @@ const createDirectPatientBodySchema = z
     lastName: z.string().min(1, "Last name is required.").max(120),
     mobile: z.string().min(6, "Mobile is required.").max(40),
     email: z.string().email("A valid email is required."),
-    dateOfBirth: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD."),
+    dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD."),
   })
   .strict();
 
@@ -178,7 +185,10 @@ export type CreateDirectPatientResult =
 /**
  * Direct walk-in / admin patient registration — creates fi_person + fi_patient.
  */
-export async function createDirectPatientAction(tenantId: string, body: unknown): Promise<CreateDirectPatientResult> {
+export async function createDirectPatientAction(
+  tenantId: string,
+  body: unknown
+): Promise<CreateDirectPatientResult> {
   try {
     const parsed = createDirectPatientBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });

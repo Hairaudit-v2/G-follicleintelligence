@@ -16,18 +16,95 @@ export type DefaultPipelineStageDefinition = {
 /** Stable ordering: lower sort_order = earlier funnel. */
 export function defaultHairRestorationPipelineDefinitions(): readonly DefaultPipelineStageDefinition[] {
   return [
-    { slug: "new", label: "New inquiry", sort_order: 0, is_entry: true, is_won: false, is_lost: false },
-    { slug: "contacted", label: "Contacted", sort_order: 10, is_entry: false, is_won: false, is_lost: false },
-    { slug: "qualified", label: "Qualified", sort_order: 20, is_entry: false, is_won: false, is_lost: false },
-    { slug: "consult_scheduled", label: "Consult scheduled", sort_order: 30, is_entry: false, is_won: false, is_lost: false },
-    { slug: "consult_completed", label: "Consult completed", sort_order: 40, is_entry: false, is_won: false, is_lost: false },
-    { slug: "treatment_planning", label: "Treatment planning", sort_order: 50, is_entry: false, is_won: false, is_lost: false },
-    { slug: "quote_sent", label: "Quote sent", sort_order: 60, is_entry: false, is_won: false, is_lost: false },
-    { slug: "deposit_or_booked", label: "Deposit / booked", sort_order: 70, is_entry: false, is_won: false, is_lost: false },
-    { slug: "in_treatment", label: "In treatment", sort_order: 80, is_entry: false, is_won: false, is_lost: false },
-    { slug: "won_closed", label: "Won / completed", sort_order: 90, is_entry: false, is_won: true, is_lost: false },
+    {
+      slug: "new",
+      label: "New inquiry",
+      sort_order: 0,
+      is_entry: true,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "contacted",
+      label: "Contacted",
+      sort_order: 10,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "qualified",
+      label: "Qualified",
+      sort_order: 20,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "consult_scheduled",
+      label: "Consult scheduled",
+      sort_order: 30,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "consult_completed",
+      label: "Consult completed",
+      sort_order: 40,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "treatment_planning",
+      label: "Treatment planning",
+      sort_order: 50,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "quote_sent",
+      label: "Quote sent",
+      sort_order: 60,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "deposit_or_booked",
+      label: "Deposit / booked",
+      sort_order: 70,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "in_treatment",
+      label: "In treatment",
+      sort_order: 80,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
+    {
+      slug: "won_closed",
+      label: "Won / completed",
+      sort_order: 90,
+      is_entry: false,
+      is_won: true,
+      is_lost: false,
+    },
     { slug: "lost", label: "Lost", sort_order: 100, is_entry: false, is_won: false, is_lost: true },
-    { slug: "nurture", label: "Nurture", sort_order: 110, is_entry: false, is_won: false, is_lost: false },
+    {
+      slug: "nurture",
+      label: "Nurture",
+      sort_order: 110,
+      is_entry: false,
+      is_won: false,
+      is_lost: false,
+    },
   ] as const;
 }
 
@@ -54,7 +131,8 @@ export function buildDefaultPipelineStageInsertRows(params: {
   clinicId: string | null;
   pipelineKey?: string;
 }): PipelineStageInsertRow[] {
-  const pipelineKey = (params.pipelineKey ?? DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
+  const pipelineKey =
+    (params.pipelineKey ?? DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
   const defs = defaultHairRestorationPipelineDefinitions();
   return defs.map((d) => ({
     tenant_id: params.tenantId.trim(),
@@ -77,7 +155,9 @@ export function assertDefaultPipelineStageOrderingInvariant(
 ): void {
   const entries = defs.filter((d) => d.is_entry);
   if (entries.length !== 1) {
-    throw new Error(`Default pipeline must have exactly one is_entry stage; found ${entries.length}.`);
+    throw new Error(
+      `Default pipeline must have exactly one is_entry stage; found ${entries.length}.`
+    );
   }
   const sorted = [...defs].sort((a, b) => a.sort_order - b.sort_order);
   for (let i = 1; i < sorted.length; i++) {

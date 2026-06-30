@@ -2,7 +2,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { AuditActivityRow, AuditDashboardSnapshot, AuditQueueItem } from "@/src/lib/fiAdmin/auditDashboardTypes";
+import type {
+  AuditActivityRow,
+  AuditDashboardSnapshot,
+  AuditQueueItem,
+} from "@/src/lib/fiAdmin/auditDashboardTypes";
 
 export type {
   AuditActivityRow,
@@ -19,7 +23,10 @@ async function countExact(
   match: { column: string; value: string },
   extra?: { column: string; value: string }
 ): Promise<number> {
-  let q = supabase.from(table).select("*", { count: "exact", head: true }).eq(match.column, match.value);
+  let q = supabase
+    .from(table)
+    .select("*", { count: "exact", head: true })
+    .eq(match.column, match.value);
   if (extra) q = q.eq(extra.column, extra.value);
   const { count, error } = await q;
   if (error) return 0;
@@ -63,7 +70,13 @@ export async function fetchAuditQueueForTenant(
   );
 
   return reports.map((r) => {
-    const row = r as { id: string; case_id: string; version: number; status: string; created_at: string };
+    const row = r as {
+      id: string;
+      case_id: string;
+      version: number;
+      status: string;
+      created_at: string;
+    };
     const patient = intakeByCase.get(row.case_id) ?? null;
     return {
       report_id: row.id,
@@ -99,9 +112,24 @@ export async function loadAuditDashboardSnapshot(
     scorecards_total,
   ] = await Promise.all([
     fetchAuditQueueForTenant(supabase, tid),
-    countExact(supabase, "fi_reports", { column: "tenant_id", value: tid }, { column: "status", value: "draft" }),
-    countExact(supabase, "fi_reports", { column: "tenant_id", value: tid }, { column: "status", value: "changes_required" }),
-    countExact(supabase, "fi_reports", { column: "tenant_id", value: tid }, { column: "status", value: "released" }),
+    countExact(
+      supabase,
+      "fi_reports",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "draft" }
+    ),
+    countExact(
+      supabase,
+      "fi_reports",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "changes_required" }
+    ),
+    countExact(
+      supabase,
+      "fi_reports",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "released" }
+    ),
     supabase
       .from("fi_reports")
       .select("created_at")
@@ -116,10 +144,30 @@ export async function loadAuditDashboardSnapshot(
       .eq("tenant_id", tid)
       .order("created_at", { ascending: false })
       .limit(20),
-    countExact(supabase, "fi_model_runs", { column: "tenant_id", value: tid }, { column: "status", value: "queued" }),
-    countExact(supabase, "fi_model_runs", { column: "tenant_id", value: tid }, { column: "status", value: "running" }),
-    countExact(supabase, "fi_model_runs", { column: "tenant_id", value: tid }, { column: "status", value: "failed" }),
-    countExact(supabase, "fi_model_runs", { column: "tenant_id", value: tid }, { column: "status", value: "complete" }),
+    countExact(
+      supabase,
+      "fi_model_runs",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "queued" }
+    ),
+    countExact(
+      supabase,
+      "fi_model_runs",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "running" }
+    ),
+    countExact(
+      supabase,
+      "fi_model_runs",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "failed" }
+    ),
+    countExact(
+      supabase,
+      "fi_model_runs",
+      { column: "tenant_id", value: tid },
+      { column: "status", value: "complete" }
+    ),
     countExact(supabase, "fi_scorecards", { column: "tenant_id", value: tid }),
   ]);
 

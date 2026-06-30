@@ -3,8 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { createPaymentRecordAction, recordManualPaymentAction, updatePaymentRecordStatusAction } from "@/lib/actions/fi-payment-record-actions";
-import type { PaymentContext, PaymentRecordRow, PaymentStatus } from "@/src/lib/payments/paymentRecordModel";
+import {
+  createPaymentRecordAction,
+  recordManualPaymentAction,
+  updatePaymentRecordStatusAction,
+} from "@/lib/actions/fi-payment-record-actions";
+import type {
+  PaymentContext,
+  PaymentRecordRow,
+  PaymentStatus,
+} from "@/src/lib/payments/paymentRecordModel";
 import { PAYMENT_STATUSES } from "@/src/lib/payments/paymentRecordModel";
 
 export function RecordPaymentModal(props: {
@@ -117,7 +125,11 @@ export function RecordPaymentModal(props: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal
+    >
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-5 shadow-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -166,7 +178,9 @@ export function RecordPaymentModal(props: {
         {tab === "create" ? (
           <div className="mt-4 space-y-3 text-sm">
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Amount expected</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Amount expected
+              </span>
               <input
                 className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
                 value={amountExpected}
@@ -175,11 +189,20 @@ export function RecordPaymentModal(props: {
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Currency (ISO)</span>
-              <input className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" value={currency} onChange={(e) => setCurrency(e.target.value)} maxLength={3} />
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Currency (ISO)
+              </span>
+              <input
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                maxLength={3}
+              />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Due date (optional)</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Due date (optional)
+              </span>
               <input
                 className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
                 type="date"
@@ -188,8 +211,15 @@ export function RecordPaymentModal(props: {
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Notes (optional)</span>
-              <textarea className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Notes (optional)
+              </span>
+              <textarea
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </label>
             <button
               type="button"
@@ -205,17 +235,26 @@ export function RecordPaymentModal(props: {
         {tab === "pay" ? (
           <div className="mt-4 space-y-3 text-sm">
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Record</span>
-              <select className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" value={recordId} onChange={(e) => setRecordId(e.target.value)}>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Record
+              </span>
+              <select
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                value={recordId}
+                onChange={(e) => setRecordId(e.target.value)}
+              >
                 {props.existingRecords.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.id.slice(0, 8)}… · {r.status} · {r.currency} {r.amount_paid}/{r.amount_expected}
+                    {r.id.slice(0, 8)}… · {r.status} · {r.currency} {r.amount_paid}/
+                    {r.amount_expected}
                   </option>
                 ))}
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Payment amount received</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Payment amount received
+              </span>
               <input
                 className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
                 value={payAmount}
@@ -224,8 +263,15 @@ export function RecordPaymentModal(props: {
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Notes (optional)</span>
-              <textarea className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Notes (optional)
+              </span>
+              <textarea
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </label>
             <button
               type="button"
@@ -241,8 +287,14 @@ export function RecordPaymentModal(props: {
         {tab === "status" ? (
           <div className="mt-4 space-y-3 text-sm">
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Record</span>
-              <select className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" value={recordId} onChange={(e) => setRecordId(e.target.value)}>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Record
+              </span>
+              <select
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                value={recordId}
+                onChange={(e) => setRecordId(e.target.value)}
+              >
                 {props.existingRecords.map((r) => (
                   <option key={r.id} value={r.id}>
                     {r.id.slice(0, 8)}… · {r.status}
@@ -251,8 +303,14 @@ export function RecordPaymentModal(props: {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</span>
-              <select className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" value={status} onChange={(e) => setStatus(e.target.value as PaymentStatus)}>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Status
+              </span>
+              <select
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as PaymentStatus)}
+              >
                 {PAYMENT_STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {s.replace(/_/g, " ")}
@@ -261,8 +319,15 @@ export function RecordPaymentModal(props: {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Notes (optional)</span>
-              <textarea className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Notes (optional)
+              </span>
+              <textarea
+                className="mt-1 w-full rounded border border-white/[0.08] px-2 py-1.5"
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </label>
             <button
               type="button"

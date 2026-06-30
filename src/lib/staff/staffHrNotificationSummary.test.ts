@@ -126,7 +126,9 @@ test("sensitive fields are never rendered in safe metadata or summary", () => {
 });
 
 test("stale sync warning when last_synced_at is old", () => {
-  const staleAt = new Date(NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000).toISOString();
+  const staleAt = new Date(
+    NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000
+  ).toISOString();
   const s = buildStaffHrNotificationSummary(
     {
       source_system: "iiohr_hr",
@@ -153,10 +155,15 @@ test("role-review row carries HR notification summary", () => {
     },
     NOW
   );
-  const row = buildStaffRoleReviewEditableRow(staff({ id: "1", full_name: "A" }), null, {
-    position_title: null,
-    primary_clinic_id: null,
-  }, hr);
+  const row = buildStaffRoleReviewEditableRow(
+    staff({ id: "1", full_name: "A" }),
+    null,
+    {
+      position_title: null,
+      primary_clinic_id: null,
+    },
+    hr
+  );
   assert.equal(row.hrNotification.outstandingTaskCount, 2);
   assert.ok(row.hrNotification.alerts.includes("Certificates outstanding"));
   assert.ok(row.hrNotification.alerts.includes("Contract/onboarding incomplete"));

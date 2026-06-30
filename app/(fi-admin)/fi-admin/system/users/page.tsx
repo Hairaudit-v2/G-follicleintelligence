@@ -60,10 +60,11 @@ export default function SystemUsersImpersonationPage() {
         <p className={fiOsChromeClasses.sectionEyebrow}>Security</p>
         <h1 className="mt-1 text-xl font-semibold text-slate-50">User impersonation</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-400">
-          <strong className="text-slate-200">Act as user</strong> sets an httpOnly cookie so tenant checks use the target
-          identity while your Supabase session remains the platform administrator. Sessions are written to{" "}
-          <code className="text-xs text-slate-300">fi_os_impersonation_sessions</code> with initiator, target, IP, user-agent,
-          optional tenant, and timestamps.
+          <strong className="text-slate-200">Act as user</strong> sets an httpOnly cookie so tenant
+          checks use the target identity while your Supabase session remains the platform
+          administrator. Sessions are written to{" "}
+          <code className="text-xs text-slate-300">fi_os_impersonation_sessions</code> with
+          initiator, target, IP, user-agent, optional tenant, and timestamps.
         </p>
       </div>
 
@@ -101,7 +102,9 @@ export default function SystemUsersImpersonationPage() {
 
       <div className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5">
         <h2 className="text-sm font-semibold text-slate-100">Exit impersonation</h2>
-        <p className="mt-1 text-xs text-slate-500">Clears the impersonation cookie and closes open audit rows for your session.</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Clears the impersonation cookie and closes open audit rows for your session.
+        </p>
         <button
           type="button"
           disabled={busy}

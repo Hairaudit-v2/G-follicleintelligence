@@ -2,7 +2,10 @@
  * LeadFlowOS Phase LF-2 — pure HubSpot → fi_leads mapping (no DB I/O).
  */
 
-import { sha256HexUtf8, stableStringifyForWebhookHash } from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
+import {
+  sha256HexUtf8,
+  stableStringifyForWebhookHash,
+} from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
 import {
   buildLeadStageChangedActivityMetadata,
   normalizeLeadEmail,
@@ -61,7 +64,10 @@ const HUBSPOT_STAGE_PATTERNS: ReadonlyArray<{ re: RegExp; stage: FiLeadCurrentSt
   { re: /\blead\b|new|subscriber/i, stage: "new" },
 ];
 
-function extractProperty(props: Record<string, unknown> | undefined, ...keys: string[]): string | null {
+function extractProperty(
+  props: Record<string, unknown> | undefined,
+  ...keys: string[]
+): string | null {
   if (!props) return null;
   for (const key of keys) {
     const val = props[key];
@@ -104,8 +110,14 @@ export function mapHubSpotStageToLeadStage(
   return "new";
 }
 
-export function inferHubSpotLeadFlowWebhookKind(payload: Record<string, unknown>): HubSpotLeadFlowWebhookKind {
-  if (readString(payload.hubspot_deal_id) || readString(payload.dealId) || readString(payload.objectType) === "DEAL") {
+export function inferHubSpotLeadFlowWebhookKind(
+  payload: Record<string, unknown>
+): HubSpotLeadFlowWebhookKind {
+  if (
+    readString(payload.hubspot_deal_id) ||
+    readString(payload.dealId) ||
+    readString(payload.objectType) === "DEAL"
+  ) {
     return "deal";
   }
   if (
@@ -132,7 +144,11 @@ export function resolveHubSpotContactObjectId(payload: Record<string, unknown>):
 }
 
 export function resolveHubSpotDealObjectId(payload: Record<string, unknown>): string | null {
-  return readString(payload.hubspot_deal_id) ?? readString(payload.dealId) ?? readString(payload.objectId);
+  return (
+    readString(payload.hubspot_deal_id) ??
+    readString(payload.dealId) ??
+    readString(payload.objectId)
+  );
 }
 
 export function computeHubSpotLeadFlowProviderEventId(
@@ -173,19 +189,25 @@ export function resolveHubSpotLeadFlowEventType(payload: Record<string, unknown>
 
 export function flattenHubSpotLeadFlowWebhookBody(body: unknown): Record<string, unknown>[] {
   if (Array.isArray(body)) {
-    return body.filter((item): item is Record<string, unknown> => !!item && typeof item === "object" && !Array.isArray(item));
+    return body.filter(
+      (item): item is Record<string, unknown> =>
+        !!item && typeof item === "object" && !Array.isArray(item)
+    );
   }
   if (!body || typeof body !== "object") return [];
   const record = body as Record<string, unknown>;
   if (Array.isArray(record.events)) {
     return record.events.filter(
-      (item): item is Record<string, unknown> => !!item && typeof item === "object" && !Array.isArray(item)
+      (item): item is Record<string, unknown> =>
+        !!item && typeof item === "object" && !Array.isArray(item)
     );
   }
   return [record];
 }
 
-export function normalizeHubSpotContactToLead(payload: Record<string, unknown>): NormalizedHubSpotLeadInput | null {
+export function normalizeHubSpotContactToLead(
+  payload: Record<string, unknown>
+): NormalizedHubSpotLeadInput | null {
   const props = asRecord(payload.properties) ?? {};
   const hubspotContactId = resolveHubSpotContactObjectId(payload);
   if (!hubspotContactId) return null;
@@ -220,8 +242,11 @@ export function normalizeHubSpotContactToLead(payload: Record<string, unknown>):
         "non_surgical",
         "non_surgical_treatment",
         "treatment_interest"
-      ) ?? readString(payload.procedure_type) ?? readString(payload.procedure_interest),
-    country: extractProperty(props, "country", "country_of_residence") ?? readString(payload.country),
+      ) ??
+      readString(payload.procedure_type) ??
+      readString(payload.procedure_interest),
+    country:
+      extractProperty(props, "country", "country_of_residence") ?? readString(payload.country),
     budgetRange:
       extractProperty(props, "budget_range", "budget", "estimated_budget", "deal_budget") ??
       readString(payload.budget_range) ??
@@ -230,7 +255,9 @@ export function normalizeHubSpotContactToLead(payload: Record<string, unknown>):
   };
 }
 
-export function normalizeHubSpotDealToLeadPatch(payload: Record<string, unknown>): HubSpotLeadFieldPatch | null {
+export function normalizeHubSpotDealToLeadPatch(
+  payload: Record<string, unknown>
+): HubSpotLeadFieldPatch | null {
   const props = asRecord(payload.properties) ?? {};
   const hubspotContactId =
     readString(payload.hubspot_contact_id) ??
@@ -246,7 +273,9 @@ export function normalizeHubSpotDealToLeadPatch(payload: Record<string, unknown>
   const patch: HubSpotLeadFieldPatch = {
     hubspotContactId,
     currentStage: mapHubSpotStageToLeadStage(null, dealStage),
-    leadSource: extractProperty(props, "hs_analytics_source", "lead_source", "source") ?? readString(payload.lead_source),
+    leadSource:
+      extractProperty(props, "hs_analytics_source", "lead_source", "source") ??
+      readString(payload.lead_source),
     procedureInterest:
       readString(payload.procedure_type) ??
       extractProperty(props, "procedure_type", "procedure_interest", "dealname"),
@@ -284,7 +313,10 @@ export function buildLeadUpsertPlan(
   const nextStage = incoming.currentStage ?? mapHubSpotStageToLeadStage(null, null);
 
   const patch: HubSpotLeadFieldPatch = {};
-  const assign = <K extends keyof HubSpotLeadFieldPatch>(key: K, value: HubSpotLeadFieldPatch[K]) => {
+  const assign = <K extends keyof HubSpotLeadFieldPatch>(
+    key: K,
+    value: HubSpotLeadFieldPatch[K]
+  ) => {
     if (value == null || value === "") return;
     patch[key] = value;
   };
@@ -333,7 +365,9 @@ export function buildLeadUpsertPlan(
   };
 }
 
-export function buildStageChangedActivityMetadataFromPlan(plan: HubSpotLeadUpsertPlan): Record<string, unknown> {
+export function buildStageChangedActivityMetadataFromPlan(
+  plan: HubSpotLeadUpsertPlan
+): Record<string, unknown> {
   return buildLeadStageChangedActivityMetadata({
     fromStage: plan.previousStage ?? "new",
     toStage: plan.nextStage,

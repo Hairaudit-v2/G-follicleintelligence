@@ -26,9 +26,18 @@ export function ReceptionOsRecordLinks(props: {
   if (!links.length) return null;
 
   return (
-    <div className={cn("flex flex-wrap gap-x-2 gap-y-0.5 text-[0.65rem] font-semibold", props.className)}>
+    <div
+      className={cn(
+        "flex flex-wrap gap-x-2 gap-y-0.5 text-[0.65rem] font-semibold",
+        props.className
+      )}
+    >
       {links.map((l) => (
-        <Link key={`${l.label}-${l.href}`} href={l.href} className="text-cyan-400/95 hover:text-cyan-300">
+        <Link
+          key={`${l.label}-${l.href}`}
+          href={l.href}
+          className="text-cyan-400/95 hover:text-cyan-300"
+        >
           {l.label}
         </Link>
       ))}
@@ -36,6 +45,8 @@ export function ReceptionOsRecordLinks(props: {
   );
 }
 
-export function receptionOsPrimaryHref(hrefs: Parameters<typeof primaryRecordHref>[0]): string | null {
+export function receptionOsPrimaryHref(
+  hrefs: Parameters<typeof primaryRecordHref>[0]
+): string | null {
   return primaryRecordHref(hrefs);
 }

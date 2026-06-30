@@ -18,7 +18,9 @@ type MarkerRow = {
 };
 
 function uid(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `r-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return (
+    globalThis.crypto?.randomUUID?.() ?? `r-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  );
 }
 
 function emptyRow(): MarkerRow {
@@ -55,7 +57,8 @@ export function BloodPathologyResultNewClient({
   const [error, setError] = useState<string | null>(null);
 
   const addRow = () => setRows((p) => [...p, emptyRow()]);
-  const removeRow = (id: string) => setRows((p) => (p.length <= 1 ? p : p.filter((r) => r.clientId !== id)));
+  const removeRow = (id: string) =>
+    setRows((p) => (p.length <= 1 ? p : p.filter((r) => r.clientId !== id)));
   const patchRow = (id: string, patch: Partial<MarkerRow>) => {
     setRows((p) => p.map((r) => (r.clientId === id ? { ...r, ...patch } : r)));
   };
@@ -109,7 +112,11 @@ export function BloodPathologyResultNewClient({
         `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/pathology-results`,
         { method: "POST", body: form }
       );
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; pathology_result?: { id: string } };
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        pathology_result?: { id: string };
+      };
       if (!res.ok || json.ok !== true) {
         setError(typeof json?.error === "string" ? json.error : `Save failed (${res.status}).`);
         return;
@@ -193,11 +200,18 @@ export function BloodPathologyResultNewClient({
       <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-100">Structured markers</h2>
-          <button type="button" className="text-xs font-medium text-cyan-300 hover:underline" onClick={addRow}>
+          <button
+            type="button"
+            className="text-xs font-medium text-cyan-300 hover:underline"
+            onClick={addRow}
+          >
             + Add row
           </button>
         </div>
-        <p className="text-xs text-slate-400">Enter at least a test name for each row you want stored. Values can be filled after quick-add.</p>
+        <p className="text-xs text-slate-400">
+          Enter at least a test name for each row you want stored. Values can be filled after
+          quick-add.
+        </p>
 
         <div className="flex flex-wrap gap-2">
           {PATHOLOGY_RESULT_QUICK_PANELS.map((p) => (
@@ -277,7 +291,11 @@ export function BloodPathologyResultNewClient({
                     </select>
                   </td>
                   <td className="py-1">
-                    <button type="button" className="text-rose-300 hover:underline" onClick={() => removeRow(r.clientId)}>
+                    <button
+                      type="button"
+                      className="text-rose-300 hover:underline"
+                      onClick={() => removeRow(r.clientId)}
+                    >
                       Remove
                     </button>
                   </td>

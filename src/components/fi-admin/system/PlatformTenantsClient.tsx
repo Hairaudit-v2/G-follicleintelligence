@@ -47,9 +47,12 @@ export function PlatformTenantsClient() {
     <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-slate-200">Create tenant</h2>
       <p className="mt-1 text-xs text-slate-500">
-        Seeds default feature flags and branding in <code className="text-slate-400">fi_tenants.config_json</code>,{" "}
-        <code className="text-slate-400">fi_tenant_settings</code>, one <code className="text-slate-400">fi_clinics</code> row, and a{" "}
-        <code className="text-slate-400">clinic_admin</code> tenant backend user (invite if they have no Supabase account yet).
+        Seeds default feature flags and branding in{" "}
+        <code className="text-slate-400">fi_tenants.config_json</code>,{" "}
+        <code className="text-slate-400">fi_tenant_settings</code>, one{" "}
+        <code className="text-slate-400">fi_clinics</code> row, and a{" "}
+        <code className="text-slate-400">clinic_admin</code> tenant backend user (invite if they
+        have no Supabase account yet).
       </p>
 
       {message ? (
@@ -116,7 +119,9 @@ export function PlatformTenantsClient() {
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-xs font-medium text-slate-400">Support email (optional — defaults to support@&lt;slug&gt;.local)</span>
+          <span className="text-xs font-medium text-slate-400">
+            Support email (optional — defaults to support@&lt;slug&gt;.local)
+          </span>
           <input
             type="email"
             className="mt-1 w-full rounded-lg border border-white/[0.12] bg-[#030810] px-3 py-2 text-sm text-slate-100 outline-none ring-cyan-500/30 focus:ring-2"

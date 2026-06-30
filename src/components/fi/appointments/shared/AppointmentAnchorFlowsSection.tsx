@@ -40,14 +40,22 @@ export function AppointmentAnchorFlowsSection({
 
   return (
     <section className={appointmentCardClass}>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Lead & patient</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Lead & patient
+      </h3>
 
       {showConvert && canMutate ? (
         <div className="mb-3 space-y-2">
-          <p className="text-xs text-slate-400">Convert this lead to a foundation patient, then link the appointment.</p>
+          <p className="text-xs text-slate-400">
+            Convert this lead to a foundation patient, then link the appointment.
+          </p>
           <form className="space-y-2" onSubmit={onConvert}>
             <label className="flex items-center gap-2 text-xs">
-              <input type="checkbox" checked={seedCase} onChange={(e) => onSeedCaseChange(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={seedCase}
+                onChange={(e) => onSeedCaseChange(e.target.checked)}
+              />
               Seed a case when converting
             </label>
             {convErr ? <p className="text-xs text-rose-300">{convErr}</p> : null}
@@ -64,7 +72,9 @@ export function AppointmentAnchorFlowsSection({
 
       {showLink && canMutate ? (
         <div className="space-y-2">
-          <p className="text-xs text-slate-400">Lead has a patient record that is not yet on this appointment.</p>
+          <p className="text-xs text-slate-400">
+            Lead has a patient record that is not yet on this appointment.
+          </p>
           {linkErr ? <p className="text-xs text-rose-300">{linkErr}</p> : null}
           <button
             type="button"

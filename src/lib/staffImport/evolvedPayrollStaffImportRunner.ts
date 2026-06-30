@@ -21,7 +21,10 @@ import {
   resolveEvolvedHrPerthClinicForTenant,
 } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
 
-export type { EvolvedPayrollStaffImportPreviewBuckets, EvolvedPayrollStaffImportRow } from "./evolvedPayrollStaffImportTypes";
+export type {
+  EvolvedPayrollStaffImportPreviewBuckets,
+  EvolvedPayrollStaffImportRow,
+} from "./evolvedPayrollStaffImportTypes";
 
 const tenantIdSchema = z.string().uuid("tenantId must be a UUID.");
 
@@ -111,7 +114,8 @@ function validatePackedPayrollRows(rows: EvolvedPayrollStaffImportRow[]): {
       ...r,
       external_staff_id: String(r.external_staff_id).trim(),
       full_name: String(r.full_name).trim(),
-      email: r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
+      email:
+        r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
       mobile: r.mobile != null && String(r.mobile).trim() ? String(r.mobile).trim() : null,
       employment_type: r.employment_type != null ? String(r.employment_type).trim() : null,
       start_date: r.start_date != null ? String(r.start_date).trim() || null : null,
@@ -271,7 +275,9 @@ export async function runEvolvedPayrollStaffImport(
   }
 
   const preview = buildEvolvedPayrollStaffImportPreview(plan, skippedSensitiveFields);
-  const skippedRowCount = plan.perRow.filter((p) => p.skippedDuplicate || p.skippedValidation).length;
+  const skippedRowCount = plan.perRow.filter(
+    (p) => p.skippedDuplicate || p.skippedValidation
+  ).length;
   const dryRunCounts = countFromPlan(plan);
   const validationErrors = parseValidationErrors;
 
@@ -370,7 +376,9 @@ export async function runEvolvedPayrollStaffImport(
   };
 }
 
-export function logEvolvedPayrollStaffImportReport(result: EvolvedPayrollStaffImportRunResult): void {
+export function logEvolvedPayrollStaffImportReport(
+  result: EvolvedPayrollStaffImportRunResult
+): void {
   const counts = result.commit && result.appliedCounts ? result.appliedCounts : result.dryRunCounts;
   console.log(`\n=== Evolved payroll staff import (${result.commit ? "COMMIT" : "DRY-RUN"}) ===\n`);
   console.log(`OK: ${result.ok}${result.error ? ` — ${result.error}` : ""}`);
@@ -379,7 +387,9 @@ export function logEvolvedPayrollStaffImportReport(result: EvolvedPayrollStaffIm
   console.log(`Matched existing: ${result.preview.matched_existing_staff.length}`);
   console.log(`Needs role assignment: ${result.preview.needs_role_assignment.length}`);
   if (result.skippedSensitiveFields.length) {
-    console.log(`Sensitive columns stripped (names only): ${result.skippedSensitiveFields.join(", ")}`);
+    console.log(
+      `Sensitive columns stripped (names only): ${result.skippedSensitiveFields.join(", ")}`
+    );
   }
   console.log(`\nPlanned/applied fi_staff creates: ${counts.createdStaff}`);
   console.log(`Source id creates: ${counts.createdSourceIds}\n`);

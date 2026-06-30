@@ -41,7 +41,7 @@ export function FinancialOsPillFilterBar<T extends string>(props: {
                 "inline-flex shrink-0 items-center px-3 py-1.5 text-xs font-semibold transition",
                 active
                   ? "border-cyan-400/45 bg-cyan-500/10 text-cyan-50"
-                  : "text-slate-400 hover:border-white/[0.12] hover:text-slate-200",
+                  : "text-slate-400 hover:border-white/[0.12] hover:text-slate-200"
               )}
             >
               {option.label}

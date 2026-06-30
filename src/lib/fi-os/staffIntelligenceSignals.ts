@@ -36,7 +36,9 @@ export function severityForSignalCount(
  */
 export function buildStaffSignalCards(counts: FiStaffSignalCountMap): FiStaffSignalCard[] {
   const out: FiStaffSignalCard[] = [];
-  for (const key of Object.keys(FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS) as FiOrganisationalIntelligenceSignalKey[]) {
+  for (const key of Object.keys(
+    FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS
+  ) as FiOrganisationalIntelligenceSignalKey[]) {
     const def = FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS[key];
     const count = Math.max(0, Math.floor(Number(counts[key] ?? 0)));
     out.push({
@@ -50,7 +52,8 @@ export function buildStaffSignalCards(counts: FiStaffSignalCountMap): FiStaffSig
     });
   }
   return out.sort((a, b) => {
-    const sev = (s: FiIntelligenceSignalSeverity) => (s === "critical" ? 2 : s === "attention" ? 1 : 0);
+    const sev = (s: FiIntelligenceSignalSeverity) =>
+      s === "critical" ? 2 : s === "attention" ? 1 : 0;
     return sev(b.severity) - sev(a.severity) || b.count - a.count || a.label.localeCompare(b.label);
   });
 }

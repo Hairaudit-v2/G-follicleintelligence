@@ -17,7 +17,10 @@ describe("timelyAppointmentLifecycle", () => {
   });
 
   it("normalizeTimelyLifecycleEventType accepts aliases", () => {
-    assert.equal(normalizeTimelyLifecycleEventType("appointment_cancelled"), "appointment_cancelled");
+    assert.equal(
+      normalizeTimelyLifecycleEventType("appointment_cancelled"),
+      "appointment_cancelled"
+    );
     assert.equal(normalizeTimelyLifecycleEventType("cancelled"), "appointment_cancelled");
     assert.equal(normalizeTimelyLifecycleEventType("reschedule"), "appointment_rescheduled");
     assert.equal(normalizeTimelyLifecycleEventType("noshow"), "appointment_no_show");

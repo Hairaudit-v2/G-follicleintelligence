@@ -25,7 +25,8 @@ export function StaffWorkforceRosterPanel({
 }) {
   const textMuted = variant === "dark" ? "text-[#94A3B8]" : "text-slate-500";
   const textMain = variant === "dark" ? "text-[#E2E8F0]" : "text-slate-200";
-  const border = variant === "dark" ? "border-white/10 bg-white/[0.03]" : "border-white/[0.08] bg-white/[0.03]";
+  const border =
+    variant === "dark" ? "border-white/10 bg-white/[0.03]" : "border-white/[0.08] bg-white/[0.03]";
 
   return (
     <DashboardCard className="p-6 sm:p-8">
@@ -34,7 +35,8 @@ export function StaffWorkforceRosterPanel({
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-semibold text-[#F8FAFC]">Roster &amp; availability</h2>
           <p className={`mt-1 text-sm ${textMuted}`}>
-            Upcoming shifts, availability blocks, and clinical event assignments. Read-only in this phase.
+            Upcoming shifts, availability blocks, and clinical event assignments. Read-only in this
+            phase.
           </p>
         </div>
       </div>
@@ -67,7 +69,9 @@ export function StaffWorkforceRosterPanel({
             <ul className="mt-3 space-y-2">
               {profile.upcomingShifts.map((shift) => (
                 <li key={shift.id} className={`rounded-lg border px-4 py-3 text-sm ${border}`}>
-                  <p className={`font-medium capitalize ${textMain}`}>{shift.shift_type.replace(/_/g, " ")}</p>
+                  <p className={`font-medium capitalize ${textMain}`}>
+                    {shift.shift_type.replace(/_/g, " ")}
+                  </p>
                   <p className={`mt-0.5 ${textMuted}`}>
                     {formatDateTime(shift.starts_at)} → {formatDateTime(shift.ends_at)}
                   </p>
@@ -89,11 +93,15 @@ export function StaffWorkforceRosterPanel({
             <ul className="mt-3 space-y-2">
               {profile.activeAvailabilityBlocks.map((block) => (
                 <li key={block.id} className={`rounded-lg border px-4 py-3 text-sm ${border}`}>
-                  <p className={`font-medium capitalize ${textMain}`}>{block.block_type.replace(/_/g, " ")}</p>
+                  <p className={`font-medium capitalize ${textMain}`}>
+                    {block.block_type.replace(/_/g, " ")}
+                  </p>
                   <p className={`mt-0.5 ${textMuted}`}>
                     {formatDateTime(block.starts_at)} → {formatDateTime(block.ends_at)}
                   </p>
-                  {block.reason ? <p className={`mt-1 text-xs ${textMuted}`}>{block.reason}</p> : null}
+                  {block.reason ? (
+                    <p className={`mt-1 text-xs ${textMuted}`}>{block.reason}</p>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -112,7 +120,9 @@ export function StaffWorkforceRosterPanel({
               {profile.recentClinicalAssignments.map((assignment) => (
                 <li key={assignment.id} className={`rounded-lg border px-4 py-3 text-sm ${border}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className={`font-medium capitalize ${textMain}`}>{assignment.assigned_role}</p>
+                    <p className={`font-medium capitalize ${textMain}`}>
+                      {assignment.assigned_role}
+                    </p>
                     <span
                       className={
                         assignment.assignment_status === "blocked"
@@ -127,7 +137,9 @@ export function StaffWorkforceRosterPanel({
                   </div>
                   <p className={`mt-0.5 ${textMuted}`}>
                     {assignment.event_source}
-                    {assignment.readiness_score != null ? ` · Readiness ${assignment.readiness_score}%` : ""}
+                    {assignment.readiness_score != null
+                      ? ` · Readiness ${assignment.readiness_score}%`
+                      : ""}
                   </p>
                 </li>
               ))}

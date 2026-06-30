@@ -25,7 +25,9 @@ export function SurgeryReadinessSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
               Raw readiness calculations, column distribution, and loader window internals.
@@ -71,10 +73,17 @@ export function SurgeryReadinessSystemDiagnostics({
         </DashboardCard>
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-          <SectionHeader title="Column distribution" description="Kanban column card counts (raw loader output)." className="mb-3" />
+          <SectionHeader
+            title="Column distribution"
+            description="Kanban column card counts (raw loader output)."
+            className="mb-3"
+          />
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {columnCounts.map(({ key, count }) => (
-              <div key={key} className="rounded-lg border border-white/[0.06] px-3 py-2 text-sm text-[#94A3B8]">
+              <div
+                key={key}
+                className="rounded-lg border border-white/[0.06] px-3 py-2 text-sm text-[#94A3B8]"
+              >
                 <span className="font-medium text-[#CBD5E1]">{key}</span>
                 <span className="ml-2 tabular-nums text-[#F8FAFC]">{count}</span>
               </div>
@@ -83,7 +92,11 @@ export function SurgeryReadinessSystemDiagnostics({
         </DashboardCard>
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-          <SectionHeader title="KPI aggregates" description="Manager filter KPIs from readiness model." className="mb-3" />
+          <SectionHeader
+            title="KPI aggregates"
+            description="Manager filter KPIs from readiness model."
+            className="mb-3"
+          />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard label="Upcoming (14d)" value={payload.kpis.upcomingNext14Days} />
             <StatCard label="Ready" value={payload.kpis.ready} />
@@ -92,12 +105,19 @@ export function SurgeryReadinessSystemDiagnostics({
             <StatCard label="Missing pathology" value={payload.kpis.missingPathology} />
             <StatCard label="Missing consent" value={payload.kpis.missingConsent} />
             <StatCard label="Deposits pending" value={payload.kpis.surgeryDepositsPending} />
-            <StatCard label="Payment rows tracked" value={payload.kpis.surgeryPaymentRecordsTracked} />
+            <StatCard
+              label="Payment rows tracked"
+              value={payload.kpis.surgeryPaymentRecordsTracked}
+            />
           </div>
         </DashboardCard>
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-          <SectionHeader title="Loaded cards" description={`${all.length} surgery readiness cards in window.`} className="mb-3" />
+          <SectionHeader
+            title="Loaded cards"
+            description={`${all.length} surgery readiness cards in window.`}
+            className="mb-3"
+          />
           <div className="max-h-48 overflow-y-auto rounded-lg border border-white/[0.06]">
             <table className="min-w-full text-left text-xs text-[#94A3B8]">
               <thead className="sticky top-0 border-b border-white/[0.06] bg-[#0a101f] text-[0.62rem] uppercase tracking-wide text-[#64748B]">
@@ -113,8 +133,12 @@ export function SurgeryReadinessSystemDiagnostics({
                 {all.map((c) => (
                   <tr key={c.bookingId} className="border-b border-white/[0.04]">
                     <td className="px-3 py-2 text-[#E2E8F0]">{c.patientLabel}</td>
-                    <td className="px-3 py-2 font-mono text-[0.65rem]">{c.bookingId.slice(0, 8)}…</td>
-                    <td className="px-3 py-2 font-mono text-[0.65rem]">{c.caseId?.slice(0, 8) ?? "—"}</td>
+                    <td className="px-3 py-2 font-mono text-[0.65rem]">
+                      {c.bookingId.slice(0, 8)}…
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[0.65rem]">
+                      {c.caseId?.slice(0, 8) ?? "—"}
+                    </td>
                     <td className="px-3 py-2">{c.primaryColumn}</td>
                     <td className="px-3 py-2">{c.issues.length}</td>
                   </tr>

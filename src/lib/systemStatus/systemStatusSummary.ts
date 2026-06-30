@@ -59,7 +59,9 @@ export function calculateSystemReadinessScore(input: ReadinessScoreInput): numbe
   const strip =
     input.summaryStrip.length === 0
       ? 0
-      : (input.summaryStrip.reduce((acc, s) => acc + weight(s.traffic), 0) / input.summaryStrip.length) * 25;
+      : (input.summaryStrip.reduce((acc, s) => acc + weight(s.traffic), 0) /
+          input.summaryStrip.length) *
+        25;
 
   const calPart = input.calendarReady ? 15 : 0;
 
@@ -67,8 +69,16 @@ export function calculateSystemReadinessScore(input: ReadinessScoreInput): numbe
 }
 
 function buildCrmSection(snap: SystemStatusDbSnapshot): CrmSectionModel {
-  const names = ["fi_crm_leads", "fi_crm_tasks", "fi_crm_lead_notes", "fi_crm_lead_communications"] as const;
-  const tables: CrmTableCheck[] = names.map((name) => ({ name, exists: Boolean(snap.tablePresence[name]) }));
+  const names = [
+    "fi_crm_leads",
+    "fi_crm_tasks",
+    "fi_crm_lead_notes",
+    "fi_crm_lead_communications",
+  ] as const;
+  const tables: CrmTableCheck[] = names.map((name) => ({
+    name,
+    exists: Boolean(snap.tablePresence[name]),
+  }));
   const leadsOk = tables.find((t) => t.name === "fi_crm_leads")?.exists ?? false;
   const allOk = tables.every((t) => t.exists);
 
@@ -122,7 +132,10 @@ function buildCalendar(snap: SystemStatusDbSnapshot): CalendarSectionModel {
   const routeEnabled = true;
   const loadersAvailable = snap.calendarLoadersAvailable;
   const ready =
-    snap.supabaseConfigured && Boolean(snap.tablePresence.fi_bookings) && loadersAvailable && routeEnabled;
+    snap.supabaseConfigured &&
+    Boolean(snap.tablePresence.fi_bookings) &&
+    loadersAvailable &&
+    routeEnabled;
   return {
     routeEnabled,
     loadersAvailable,
@@ -240,8 +253,10 @@ function buildSummaryStrip(
 function buildReadiness(score: number): SystemReadinessModel {
   let headline = "Environment is mostly ready for FI OS operations.";
   if (score >= 90) headline = "Core schema and modules line up — safe for active rollout testing.";
-  else if (score >= 70) headline = "Most surfaces are live; review amber modules before expanding usage.";
-  else if (score >= 45) headline = "Several prerequisites are missing — treat as development or partial tenant.";
+  else if (score >= 70)
+    headline = "Most surfaces are live; review amber modules before expanding usage.";
+  else if (score >= 45)
+    headline = "Several prerequisites are missing — treat as development or partial tenant.";
   else headline = "Major gaps detected — database or module prerequisites need attention.";
   return { scorePercent: score, headline };
 }

@@ -3,7 +3,11 @@ import { isBookingCancelled } from "@/src/lib/bookings/bookingPolicy";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 /** Bookings whose interval overlaps the clinic-local lane for `dayKey`. */
-export function bookingsOverlappingDayKey(rows: FiBookingRow[], lanes: CalendarDayLane[], dayKey: string): FiBookingRow[] {
+export function bookingsOverlappingDayKey(
+  rows: FiBookingRow[],
+  lanes: CalendarDayLane[],
+  dayKey: string
+): FiBookingRow[] {
   const lane = lanes.find((l) => l.dayKey === dayKey.trim());
   if (!lane) return [];
   return rows.filter((b) => {
@@ -37,6 +41,8 @@ export function computeFiOsTodayStripCounts(dayRows: FiBookingRow[]): FiOsTodayS
     return st === "scheduled" || st === "confirmed";
   }).length;
   const completed = rows.filter((b) => b.booking_status.trim() === "completed").length;
-  const unassigned = rows.filter((b) => !b.assigned_staff_id?.trim() && !b.assigned_user_id?.trim()).length;
+  const unassigned = rows.filter(
+    (b) => !b.assigned_staff_id?.trim() && !b.assigned_user_id?.trim()
+  ).length;
   return { all, consultation, prp, surgery, arrived, waiting, completed, unassigned };
 }

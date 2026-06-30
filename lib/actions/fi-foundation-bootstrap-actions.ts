@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { assertFiTenantExists, isFiAdminUuid, requireFiAdminKey } from "@/lib/server/fiAdminKeyGate";
+import {
+  assertFiTenantExists,
+  isFiAdminUuid,
+  requireFiAdminKey,
+} from "@/lib/server/fiAdminKeyGate";
 import { organisationBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
 import type { OrganisationType } from "@/src/lib/fi/foundation/types";
 
@@ -20,10 +24,15 @@ function trimToNull(v: unknown): string | null {
   return s === "" ? null : s;
 }
 
-function requiredBoundedName(v: unknown, max: number, label: string): { ok: true; value: string } | { ok: false; error: string } {
+function requiredBoundedName(
+  v: unknown,
+  max: number,
+  label: string
+): { ok: true; value: string } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: false, error: `${label} is required.` };
-  if (raw.length > max) return { ok: false, error: `${label} is too long (max ${max} characters).` };
+  if (raw.length > max)
+    return { ok: false, error: `${label} is too long (max ${max} characters).` };
   if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(raw)) {
     return { ok: false, error: `${label} contains invalid characters.` };
   }
@@ -31,7 +40,9 @@ function requiredBoundedName(v: unknown, max: number, label: string): { ok: true
 }
 
 /** Normalise and validate URL-style slug segment(s). */
-function validateOrganisationSlug(v: unknown): { ok: true; value: string } | { ok: false; error: string } {
+function validateOrganisationSlug(
+  v: unknown
+): { ok: true; value: string } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: false, error: "Slug is required." };
   const s = raw.toLowerCase();
@@ -39,13 +50,16 @@ function validateOrganisationSlug(v: unknown): { ok: true; value: string } | { o
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s)) {
     return {
       ok: false,
-      error: "Slug must use lowercase letters, digits, and single hyphens between segments (e.g. evolved-perth).",
+      error:
+        "Slug must use lowercase letters, digits, and single hyphens between segments (e.g. evolved-perth).",
     };
   }
   return { ok: true, value: s };
 }
 
-function parseOrganisationType(v: unknown): { ok: true; value: OrganisationType } | { ok: false; error: string } {
+function parseOrganisationType(
+  v: unknown
+): { ok: true; value: OrganisationType } | { ok: false; error: string } {
   const s = trimToNull(v);
   if (!s) return { ok: false, error: "Organisation type is required." };
   if (!ORG_TYPES.includes(s as OrganisationType)) {
@@ -139,7 +153,10 @@ export async function createFiClinicAction(input: {
   });
 
   if (error?.code === "23505") {
-    return { ok: false, error: "This clinic could not be created because of a duplicate constraint." };
+    return {
+      ok: false,
+      error: "This clinic could not be created because of a duplicate constraint.",
+    };
   }
   if (error) {
     return { ok: false, error: "Could not create clinic. Try again or contact support." };

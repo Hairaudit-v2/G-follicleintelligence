@@ -36,11 +36,14 @@ function ModuleMenuItem(props: { base: string; module: FinancialOsModule; pathna
           "flex w-full items-center gap-2 rounded-lg border px-2 py-2 text-sm outline-none transition",
           active
             ? "border-cyan-400/25 bg-cyan-500/[0.16] text-slate-50 shadow-[inset_3px_0_0_0_rgba(34,211,238,0.9)]"
-            : "border-transparent text-slate-300 hover:border-white/[0.06] hover:bg-white/[0.06] hover:text-slate-100 focus-visible:bg-white/[0.06]",
+            : "border-transparent text-slate-300 hover:border-white/[0.06] hover:bg-white/[0.06] hover:text-slate-100 focus-visible:bg-white/[0.06]"
         )}
         aria-current={active ? "page" : undefined}
       >
-        <Check className={cn("h-4 w-4 shrink-0", active ? "opacity-100" : "opacity-0")} aria-hidden />
+        <Check
+          className={cn("h-4 w-4 shrink-0", active ? "opacity-100" : "opacity-0")}
+          aria-hidden
+        />
         <span className="min-w-0 flex-1 truncate">{module.label}</span>
       </Link>
     </DropdownMenuItem>
@@ -59,7 +62,7 @@ export function FinancialOsModuleSwitcher({ base }: { base: string }) {
           type="button"
           className={cn(
             fiOsChromeClasses.toolbarControlSurface,
-            "inline-flex h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-semibold text-cyan-100/95 sm:h-10 sm:w-auto sm:min-w-[15rem]",
+            "inline-flex h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-semibold text-cyan-100/95 sm:h-10 sm:w-auto sm:min-w-[15rem]"
           )}
           aria-label={`FinancialOS section: ${activeLabel}. Open section switcher.`}
           aria-haspopup="menu"

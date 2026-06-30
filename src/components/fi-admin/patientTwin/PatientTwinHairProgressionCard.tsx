@@ -1,5 +1,8 @@
 import { FiSection } from "@/src/components/fi-design/FiSection";
-import { fiBadgeIntentClassNames, type FiBadgeIntent } from "@/src/components/fi-design/fiDesignTokens";
+import {
+  fiBadgeIntentClassNames,
+  type FiBadgeIntent,
+} from "@/src/components/fi-design/fiDesignTokens";
 import { cn } from "@/lib/utils";
 import type { HairProgressionStabilityLabel } from "@/src/lib/hair-intelligence/hairProgressionIntelligence";
 import {
@@ -15,7 +18,9 @@ import {
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>
+  );
 }
 
 function formatIsoDate(iso: string | null | undefined): string {
@@ -83,13 +88,17 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
         <div className="mt-4 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-3">
           <p className="text-sm font-medium text-white">Insufficient longitudinal data</p>
           <p className="mt-1 text-xs text-[#94A3B8]">
-            At least two graded observations on the same dominant classification system, spanning roughly six weeks, are required before reporting progression velocity and stability with confidence.
+            At least two graded observations on the same dominant classification system, spanning
+            roughly six weeks, are required before reporting progression velocity and stability with
+            confidence.
           </p>
         </div>
       ) : null}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Classification stability</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+          Classification stability
+        </span>
         <span
           className={cn(
             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset",
@@ -104,17 +113,16 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <div>
           <FieldLabel>Dominant classification system</FieldLabel>
-          <p className="mt-0.5 text-sm font-medium text-white">{dominant ? dominant.replace(/_/g, " ") : "—"}</p>
+          <p className="mt-0.5 text-sm font-medium text-white">
+            {dominant ? dominant.replace(/_/g, " ") : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Latest grade / ordinal</FieldLabel>
           <p className="mt-0.5 text-sm text-slate-200">
             {latest.grade ?? "—"}
             {latest.ordinal != null ? (
-              <span className="text-[#94A3B8]">
-                {" "}
-                (ordinal {latest.ordinal})
-              </span>
+              <span className="text-[#94A3B8]"> (ordinal {latest.ordinal})</span>
             ) : null}
           </p>
         </div>
@@ -127,7 +135,9 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
         <div>
           <FieldLabel>Progression velocity (confidence-weighted)</FieldLabel>
           <p className="mt-0.5 text-sm tabular-nums text-slate-200">
-            {formatVelocityGradesPerYearWithUnit(hp.progression_velocity.confidence_weighted_grades_per_year)}
+            {formatVelocityGradesPerYearWithUnit(
+              hp.progression_velocity.confidence_weighted_grades_per_year
+            )}
           </p>
         </div>
         <div>
@@ -140,39 +150,48 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
         </div>
         <div>
           <FieldLabel>Classification points (analysed)</FieldLabel>
-          <p className="mt-0.5 text-sm tabular-nums text-slate-200">{hp.analysis_basis.point_count}</p>
+          <p className="mt-0.5 text-sm tabular-nums text-slate-200">
+            {hp.analysis_basis.point_count}
+          </p>
         </div>
         <div>
           <FieldLabel>Observation span</FieldLabel>
           <p className="mt-0.5 text-sm text-slate-200">
             {hp.analysis_basis.span_months != null ? `${hp.analysis_basis.span_months} mo` : "—"}
             {hp.analysis_basis.span_days != null ? (
-              <span className="text-[#64748B]">
-                {" "}
-                ({hp.analysis_basis.span_days} d)
-              </span>
+              <span className="text-[#64748B]"> ({hp.analysis_basis.span_days} d)</span>
             ) : null}
           </p>
         </div>
         <div>
           <FieldLabel>Clinician-verified point fraction</FieldLabel>
-          <p className="mt-0.5 text-sm tabular-nums text-slate-200">{formatVerifiedPointFraction(hp.clinician_review_weighting.verified_point_fraction)}</p>
+          <p className="mt-0.5 text-sm tabular-nums text-slate-200">
+            {formatVerifiedPointFraction(hp.clinician_review_weighting.verified_point_fraction)}
+          </p>
         </div>
         <div>
           <FieldLabel>Review confidence weighting (mean multiplier)</FieldLabel>
-          <p className="mt-0.5 text-sm tabular-nums text-slate-200">{formatReviewMultiplier(hp.clinician_review_weighting.average_review_multiplier)}</p>
+          <p className="mt-0.5 text-sm tabular-nums text-slate-200">
+            {formatReviewMultiplier(hp.clinician_review_weighting.average_review_multiplier)}
+          </p>
         </div>
         {hp.stability.segment_velocity_std_grades_per_year != null ? (
           <div className="sm:col-span-2">
             <FieldLabel>Segment velocity dispersion (grades/year, SD)</FieldLabel>
-            <p className="mt-0.5 text-sm tabular-nums text-slate-200">{hp.stability.segment_velocity_std_grades_per_year.toFixed(3)}</p>
+            <p className="mt-0.5 text-sm tabular-nums text-slate-200">
+              {hp.stability.segment_velocity_std_grades_per_year.toFixed(3)}
+            </p>
           </div>
         ) : null}
       </div>
 
       <div className="mt-8 border-t border-white/10 pt-6">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Treatment-associated velocity change</h3>
-        <p className="mt-1 text-xs text-[#64748B]">Slopes before vs after first recorded exposure (MedicationOS events).</p>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">
+          Treatment-associated velocity change
+        </h3>
+        <p className="mt-1 text-xs text-[#64748B]">
+          Slopes before vs after first recorded exposure (MedicationOS events).
+        </p>
         <ul className="mt-3 space-y-2">
           {hp.treatment_response.map((row) => (
             <li
@@ -182,7 +201,9 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="font-medium text-white">{row.display_label}</span>
                 {row.first_exposure_at ? (
-                  <span className="text-xs text-[#94A3B8]">First exposure: {formatIsoDate(row.first_exposure_at)}</span>
+                  <span className="text-xs text-[#94A3B8]">
+                    First exposure: {formatIsoDate(row.first_exposure_at)}
+                  </span>
                 ) : (
                   <span className="text-xs text-[#64748B]">No recorded exposure</span>
                 )}
@@ -190,30 +211,42 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
               <div className="mt-2 grid gap-2 text-xs sm:grid-cols-3">
                 <div>
                   <span className="text-[#64748B]">Before: </span>
-                  <span className="tabular-nums text-slate-200">{formatVelocityGradesPerYearWithUnit(row.velocity_before_grades_per_year)}</span>
+                  <span className="tabular-nums text-slate-200">
+                    {formatVelocityGradesPerYearWithUnit(row.velocity_before_grades_per_year)}
+                  </span>
                 </div>
                 <div>
                   <span className="text-[#64748B]">After: </span>
-                  <span className="tabular-nums text-slate-200">{formatVelocityGradesPerYearWithUnit(row.velocity_after_grades_per_year)}</span>
+                  <span className="tabular-nums text-slate-200">
+                    {formatVelocityGradesPerYearWithUnit(row.velocity_after_grades_per_year)}
+                  </span>
                 </div>
                 <div>
                   <span className="text-[#64748B]">Δ velocity: </span>
-                  <span className="tabular-nums text-slate-200">{formatSignedVelocityDeltaGradesPerYear(row.delta_velocity_after_minus_before)}</span>
+                  <span className="tabular-nums text-slate-200">
+                    {formatSignedVelocityDeltaGradesPerYear(row.delta_velocity_after_minus_before)}
+                  </span>
                 </div>
               </div>
-              {row.notes ? <p className="mt-2 text-[11px] leading-snug text-[#64748B]">{row.notes}</p> : null}
+              {row.notes ? (
+                <p className="mt-2 text-[11px] leading-snug text-[#64748B]">{row.notes}</p>
+              ) : null}
             </li>
           ))}
         </ul>
       </div>
 
       <div className="mt-8 border-t border-white/10 pt-6">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Forecast (Norwood linear extrapolation)</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">
+          Forecast (Norwood linear extrapolation)
+        </h3>
         {hp.forecast && hp.forecast.target_grade === "V" ? (
           <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
             <div>
               <FieldLabel>Years to Norwood V (model estimate)</FieldLabel>
-              <p className="mt-0.5 tabular-nums text-white">{hp.forecast.estimated_years_to_target.toFixed(1)} yr</p>
+              <p className="mt-0.5 tabular-nums text-white">
+                {hp.forecast.estimated_years_to_target.toFixed(1)} yr
+              </p>
             </div>
             <div>
               <FieldLabel>Current grade / ordinal</FieldLabel>
@@ -223,17 +256,27 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
             </div>
             <div className="sm:col-span-2">
               <FieldLabel>Velocity used in projection</FieldLabel>
-              <p className="mt-0.5 tabular-nums text-slate-200">{formatVelocityGradesPerYearWithUnit(hp.forecast.velocity_grades_per_year)}</p>
+              <p className="mt-0.5 tabular-nums text-slate-200">
+                {formatVelocityGradesPerYearWithUnit(hp.forecast.velocity_grades_per_year)}
+              </p>
             </div>
           </dl>
         ) : (
-          <p className="mt-2 text-sm text-[#94A3B8]">No Norwood V timing estimate for this snapshot (requires positive Norwood velocity and current stage below V).</p>
+          <p className="mt-2 text-sm text-[#94A3B8]">
+            No Norwood V timing estimate for this snapshot (requires positive Norwood velocity and
+            current stage below V).
+          </p>
         )}
       </div>
 
       <div className="mt-8 border-t border-white/10 pt-6">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Network cohort context</h3>
-        <p className="mt-1 text-xs text-[#64748B]">Anonymised weekly aggregates keyed by cohort signature — no patient identifiers in benchmark rows.</p>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">
+          Network cohort context
+        </h3>
+        <p className="mt-1 text-xs text-[#64748B]">
+          Anonymised weekly aggregates keyed by cohort signature — no patient identifiers in
+          benchmark rows.
+        </p>
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <FieldLabel>Age band (cohorting)</FieldLabel>
@@ -241,18 +284,24 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
           </div>
           <div className="sm:col-span-2 min-w-0">
             <FieldLabel>Cohort signature</FieldLabel>
-            <p className="mt-0.5 break-all font-mono text-xs text-[#94A3B8]">{cohort.cohort_signature || "—"}</p>
+            <p className="mt-0.5 break-all font-mono text-xs text-[#94A3B8]">
+              {cohort.cohort_signature || "—"}
+            </p>
           </div>
         </div>
         {hasNetworkRow ? (
           <dl className="mt-4 grid gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] p-3 text-sm sm:grid-cols-2">
             <div>
               <FieldLabel>Network mean velocity</FieldLabel>
-              <p className="mt-0.5 tabular-nums text-white">{formatVelocityGradesPerYearWithUnit(net.population_mean_velocity)}</p>
+              <p className="mt-0.5 tabular-nums text-white">
+                {formatVelocityGradesPerYearWithUnit(net.population_mean_velocity)}
+              </p>
             </div>
             <div>
               <FieldLabel>Network sample count</FieldLabel>
-              <p className="mt-0.5 tabular-nums text-slate-200">{net.population_sample_count ?? "—"}</p>
+              <p className="mt-0.5 tabular-nums text-slate-200">
+                {net.population_sample_count ?? "—"}
+              </p>
             </div>
             <div className="sm:col-span-2">
               <FieldLabel>Week bucket</FieldLabel>
@@ -261,12 +310,15 @@ export function PatientTwinHairProgressionCard({ twin }: { twin: PatientTwinV1 }
           </dl>
         ) : (
           <p className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-[#94A3B8]">
-            No anonymised network bucket matched this cohort for the latest available ingestion week. Benchmarks may be unavailable or not yet populated for this signature.
+            No anonymised network bucket matched this cohort for the latest available ingestion
+            week. Benchmarks may be unavailable or not yet populated for this signature.
           </p>
         )}
       </div>
 
-      <p className="mt-6 text-[10px] text-[#475569]">Engine {hp.engine_version} · timeline cap {hp.timeline_point_cap}</p>
+      <p className="mt-6 text-[10px] text-[#475569]">
+        Engine {hp.engine_version} · timeline cap {hp.timeline_point_cap}
+      </p>
     </FiSection>
   );
 }

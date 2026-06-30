@@ -22,4 +22,6 @@ export const recordClinicalIntelligenceEventInputSchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
-export type RecordClinicalIntelligenceEventInput = z.infer<typeof recordClinicalIntelligenceEventInputSchema>;
+export type RecordClinicalIntelligenceEventInput = z.infer<
+  typeof recordClinicalIntelligenceEventInputSchema
+>;

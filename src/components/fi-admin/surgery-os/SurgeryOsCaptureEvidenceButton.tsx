@@ -50,7 +50,14 @@ export function SurgeryOsCaptureEvidenceButton({
       setSession({ sessionId: res.sessionId, progress: res.progress });
       setOpen(true);
     });
-  }, [capture.bookingId, capture.caseId, capture.patientId, capture.procedureDayId, capture.surgeryId, tenantId]);
+  }, [
+    capture.bookingId,
+    capture.caseId,
+    capture.patientId,
+    capture.procedureDayId,
+    capture.surgeryId,
+    tenantId,
+  ]);
 
   return (
     <>

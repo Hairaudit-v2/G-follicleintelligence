@@ -77,7 +77,9 @@ export function buildRelinkSyncRowsBySourceStaffId(input: {
   // Also match feed rows to staff by email when no HR source id yet
   const emailRelink = buildRelinkSyncRowsByEmail({
     staff: input.staff.filter((s) => !matchedStaffIds.includes(s.id)),
-    feedRows: input.feedRows.filter((r) => !seenExt.has(normalizeFiStaffSourceStaffId(r.external_staff_id))),
+    feedRows: input.feedRows.filter(
+      (r) => !seenExt.has(normalizeFiStaffSourceStaffId(r.external_staff_id))
+    ),
   });
   for (const row of emailRelink.rows) {
     const ext = normalizeFiStaffSourceStaffId(row.external_staff_id);

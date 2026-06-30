@@ -12,7 +12,9 @@ export type LeadFlowExternalEventMeta = {
   failed_from_status?: string;
 };
 
-export function readLeadFlowEventMeta(payload: Record<string, unknown> | null | undefined): LeadFlowExternalEventMeta {
+export function readLeadFlowEventMeta(
+  payload: Record<string, unknown> | null | undefined
+): LeadFlowExternalEventMeta {
   const raw = payload?.[LEADFLOW_EVENT_META_KEY];
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   return raw as LeadFlowExternalEventMeta;

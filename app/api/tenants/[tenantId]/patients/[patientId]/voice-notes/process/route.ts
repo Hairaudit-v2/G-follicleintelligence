@@ -3,7 +3,12 @@
  * DoctorOS 1C: transcribe → structure → persist ai_draft clinical note + patient timeline row.
  */
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { insertVoiceClinicalNoteDraft } from "@/src/lib/clinicalNotes/clinicalNotesMutations.server";
 import {
   structureTranscriptWithOpenAI,
@@ -14,7 +19,10 @@ export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 24 * 1024 * 1024;
 
-export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string; patientId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; patientId: string }> }
+) {
   try {
     const { tenantId, patientId } = await params;
     if (!tenantId?.trim() || !patientId?.trim()) {

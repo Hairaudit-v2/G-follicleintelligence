@@ -19,12 +19,16 @@ export function isGoogleCalendarTransientServerStatus(status: number | undefined
   return status === 500 || status === 503;
 }
 
-export function computeExponentialBackoffMs(attempt: number, baseMs: number = DEFAULT_BASE_BACKOFF_MS): number {
+export function computeExponentialBackoffMs(
+  attempt: number,
+  baseMs: number = DEFAULT_BASE_BACKOFF_MS
+): number {
   return baseMs * 2 ** Math.max(0, attempt);
 }
 
 export async function sleepMs(ms: number, sleep?: (ms: number) => Promise<void>): Promise<void> {
-  const delay = sleep ?? ((value: number) => new Promise<void>((resolve) => setTimeout(resolve, value)));
+  const delay =
+    sleep ?? ((value: number) => new Promise<void>((resolve) => setTimeout(resolve, value)));
   await delay(ms);
 }
 

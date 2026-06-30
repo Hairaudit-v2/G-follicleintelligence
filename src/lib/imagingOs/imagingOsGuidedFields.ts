@@ -1,4 +1,8 @@
-import { buildGuidedVisitType, mapTemplateSlugToImagingLibraryAxis, type ImagingAnatomicalRegion } from "./imagingOsConstants";
+import {
+  buildGuidedVisitType,
+  mapTemplateSlugToImagingLibraryAxis,
+  type ImagingAnatomicalRegion,
+} from "./imagingOsConstants";
 import { normalizeImagingAnatomicalRegion } from "@/src/lib/patientImages/patientImagePolicy";
 
 export type GuidedImageUploadFieldSnapshot = {
@@ -44,7 +48,8 @@ export function assertGuidedSessionUploadPreconditions(args: {
 }): void {
   if (!args.tenantId.trim()) throw new Error("tenant_id is required.");
   if (!args.patientId.trim()) throw new Error("patient_id is required.");
-  if (!args.protocolSessionId.trim()) throw new Error("protocol_session_id is required for guided capture.");
+  if (!args.protocolSessionId.trim())
+    throw new Error("protocol_session_id is required for guided capture.");
   const sid = args.protocolSessionId.trim();
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sid)) {
     throw new Error("protocol_session_id must be a valid UUID.");

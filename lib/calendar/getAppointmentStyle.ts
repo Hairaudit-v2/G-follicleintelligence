@@ -1,11 +1,4 @@
-import {
-  Scissors,
-  Stethoscope,
-  Syringe,
-  UserRound,
-  Video,
-  type LucideIcon,
-} from "lucide-react";
+import { Scissors, Stethoscope, Syringe, UserRound, Video, type LucideIcon } from "lucide-react";
 
 import {
   appointmentStatusRingClasses,
@@ -77,7 +70,10 @@ const TERMINAL_STATUSES = new Set(["completed", "cancelled", "no_show"]);
 function applyStatusOverlay(
   status: string,
   base: Pick<AppointmentStyle, "borderColor" | "backgroundTint" | "textColor" | "statusRing">
-): Pick<AppointmentStyle, "borderColor" | "backgroundTint" | "textColor" | "statusRing" | "isTerminal"> {
+): Pick<
+  AppointmentStyle,
+  "borderColor" | "backgroundTint" | "textColor" | "statusRing" | "isTerminal"
+> {
   const normalized = status.trim();
 
   if (normalized === "cancelled") {
@@ -132,7 +128,9 @@ export function getAppointmentStyle(appointment: AppointmentStyleInput): Appoint
   });
 
   const procedureLabel =
-    appointment.procedureLabel?.trim() || fiProcedureFamilyLabels[family] || appointment.procedureType;
+    appointment.procedureLabel?.trim() ||
+    fiProcedureFamilyLabels[family] ||
+    appointment.procedureType;
 
   const base = {
     borderColor: fiProcedureBorderClassNames[family],

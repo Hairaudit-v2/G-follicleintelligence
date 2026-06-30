@@ -1,11 +1,21 @@
 "use client";
 
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+} from "@/src/lib/cases/caseDetailNavConstants";
 import { CaseReadinessChecklist } from "./CaseReadinessChecklist";
 
 export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessReport }) {
-  const { overallPercent, requiredSatisfied, requiredTotal, nextRecommendedStep, warnings, sections } = report;
+  const {
+    overallPercent,
+    requiredSatisfied,
+    requiredTotal,
+    nextRecommendedStep,
+    warnings,
+    sections,
+  } = report;
   const warnShow = warnings.slice(0, 8);
   const warnMore = warnings.length - warnShow.length;
 
@@ -20,8 +30,8 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
             SurgeryOS readiness
           </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
-            Stage 5F: read-only checklist from data already on this page — no new writes, no HairAudit or audit
-            scoring, no AI or certification scores, no graft survival math.
+            Stage 5F: read-only checklist from data already on this page — no new writes, no
+            HairAudit or audit scoring, no AI or certification scores, no graft survival math.
           </p>
         </div>
         <div className="text-right">
@@ -40,7 +50,9 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
       </div>
 
       <div className="mt-4 rounded border border-blue-100 bg-blue-500/10 p-3">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-blue-300">Next recommended step</p>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-blue-300">
+          Next recommended step
+        </p>
         <p className="mt-1 text-sm text-blue-200">{nextRecommendedStep}</p>
       </div>
 
@@ -52,7 +64,9 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
               <li key={w}>{w}</li>
             ))}
           </ul>
-          {warnMore > 0 ? <p className="mt-2 text-[11px] text-amber-200">+ {warnMore} more</p> : null}
+          {warnMore > 0 ? (
+            <p className="mt-2 text-[11px] text-amber-200">+ {warnMore} more</p>
+          ) : null}
         </div>
       ) : null}
 

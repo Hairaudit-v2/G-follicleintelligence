@@ -329,7 +329,7 @@ const intelligenceSchema = z.object({
       relatedWidget: z.string(),
       confidence: z.number(),
       exportEligible: z.boolean(),
-    }),
+    })
   ),
   generatedAt: z.string(),
 });

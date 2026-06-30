@@ -29,7 +29,12 @@ export function receptionCommunicationPreviewAllowed(_role: ReceptionOsViewerRol
 }
 
 export function receptionCommunicationManualLogAllowed(role: ReceptionOsViewerRole): boolean {
-  return role === "receptionist" || role === "consultant" || role === "clinic_manager" || role === "admin";
+  return (
+    role === "receptionist" ||
+    role === "consultant" ||
+    role === "clinic_manager" ||
+    role === "admin"
+  );
 }
 
 export function receptionCommunicationCopyPaymentLinkAllowed(role: ReceptionOsViewerRole): boolean {
@@ -38,7 +43,7 @@ export function receptionCommunicationCopyPaymentLinkAllowed(role: ReceptionOsVi
 
 export function receptionCommunicationSendAllowed(
   role: ReceptionOsViewerRole,
-  templateKey: ReceptionCommunicationTemplateKey,
+  templateKey: ReceptionCommunicationTemplateKey
 ): boolean {
   if (role === "admin" || role === "clinic_manager") return true;
   if (role === "consultant") return CONSULTANT_SENDABLE_TEMPLATE_KEYS.includes(templateKey);
@@ -48,7 +53,7 @@ export function receptionCommunicationSendAllowed(
 export function receptionCommunicationActionAllowed(
   role: ReceptionOsViewerRole,
   action: ReceptionCommunicationAction,
-  templateKey?: ReceptionCommunicationTemplateKey | null,
+  templateKey?: ReceptionCommunicationTemplateKey | null
 ): boolean {
   switch (action) {
     case "preview":

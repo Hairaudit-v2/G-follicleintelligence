@@ -29,7 +29,11 @@ function buildDisplayName(payload: TimelyPatientPayload): string {
 }
 
 async function assertTenantExists(supabase: SupabaseClient, tenantId: string): Promise<void> {
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new TimelyWebhookHttpError(404, "Tenant not found.");
 }

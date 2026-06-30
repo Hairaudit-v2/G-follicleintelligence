@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
-import { endOpenFiOsImpersonationSessions, FI_OS_IMPERSONATION_COOKIE } from "@/src/lib/fiOs/fiOsImpersonation.server";
+import {
+  endOpenFiOsImpersonationSessions,
+  FI_OS_IMPERSONATION_COOKIE,
+} from "@/src/lib/fiOs/fiOsImpersonation.server";
 
 export const dynamic = "force-dynamic";
 

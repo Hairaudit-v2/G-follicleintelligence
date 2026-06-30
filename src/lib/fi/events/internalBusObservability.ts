@@ -9,7 +9,10 @@ import type {
   IntelligenceEventPrivacyLevel,
   IntelligenceSystemSource,
 } from "@follicle/intelligence-core";
-import type { DrainInternalIntelligenceEventQueueResult, EnqueueInternalIntelligenceEventResult } from "./internalBusQueue";
+import type {
+  DrainInternalIntelligenceEventQueueResult,
+  EnqueueInternalIntelligenceEventResult,
+} from "./internalBusQueue";
 
 export type InternalBusQueueObservabilityWarning = { code: string; message: string };
 

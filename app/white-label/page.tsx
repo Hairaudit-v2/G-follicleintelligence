@@ -49,14 +49,17 @@ export default function WhiteLabelPage() {
       />
       <Section>
         <FadeIn>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">Deployment models</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">
+            Deployment models
+          </p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             From single brand to global portfolio.
           </h2>
           <p className="mt-4 max-w-3xl text-muted-foreground leading-relaxed">
-            Buyers get credible quality programs without building scoring science from scratch. Strategically,
-            white-label deepens integration into customer workflows—the same compounding signal and
-            defensibility story as direct FI adoption, embedded where enterprises already operate.
+            Buyers get credible quality programs without building scoring science from scratch.
+            Strategically, white-label deepens integration into customer workflows—the same
+            compounding signal and defensibility story as direct FI adoption, embedded where
+            enterprises already operate.
           </p>
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -79,7 +82,9 @@ export default function WhiteLabelPage() {
       <Section className="border-y border-border/40">
         <FadeIn>
           <div className="fi-panel rounded-2xl p-8 md:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">Configurable stack</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">
+              Configurable stack
+            </p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {[
                 "Brand identity: logos, nomenclature, report templates",
@@ -98,12 +103,19 @@ export default function WhiteLabelPage() {
               ))}
             </div>
             <p className="mt-8 text-sm leading-relaxed text-muted-foreground">
-              Specific security, compliance, and hosting terms are agreed with enterprise customers; see{" "}
-              <Link href="/security" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+              Specific security, compliance, and hosting terms are agreed with enterprise customers;
+              see{" "}
+              <Link
+                href="/security"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
                 security
               </Link>{" "}
               for our posture overview and{" "}
-              <Link href="/licensing" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+              <Link
+                href="/licensing"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
                 licensing
               </Link>{" "}
               for deployment tiers.

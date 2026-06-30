@@ -228,7 +228,9 @@ describe("analyticsPublisherPhaseC coverage engine", () => {
   it("derives analytics confidence from coverage tiers", () => {
     const high = buildModuleCoverage(
       ANALYTICS_PIPELINE_MODULES.flatMap((moduleName) =>
-        Array.from({ length: 25 }, () => event({ module_name: moduleName, event_type: "payment_received" }))
+        Array.from({ length: 25 }, () =>
+          event({ module_name: moduleName, event_type: "payment_received" })
+        )
       )
     );
     assert.equal(deriveAnalyticsConfidence(high), "high");
@@ -272,14 +274,15 @@ describe("analyticsPublisherPhaseC executive scoring", () => {
     const sparseCoverage = buildModuleCoverage([
       event({ module_name: "financial_os", event_type: "payment_received" }),
     ]);
-    const richEvents = ANALYTICS_PIPELINE_MODULES.filter((m) => m !== "clinic_os").flatMap((moduleName) =>
-      Array.from({ length: 25 }, (_, i) =>
-        event({
-          module_name: moduleName,
-          event_type: "payment_received",
-          entity_id: `${moduleName}-${i}`,
-        })
-      )
+    const richEvents = ANALYTICS_PIPELINE_MODULES.filter((m) => m !== "clinic_os").flatMap(
+      (moduleName) =>
+        Array.from({ length: 25 }, (_, i) =>
+          event({
+            module_name: moduleName,
+            event_type: "payment_received",
+            entity_id: `${moduleName}-${i}`,
+          })
+        )
     );
     const richCoverage = buildModuleCoverage(richEvents);
 

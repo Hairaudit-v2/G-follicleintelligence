@@ -87,7 +87,9 @@ export function ClinicOsShellCalendarBar({ clinicLabel }: { clinicLabel: string 
               onClick={() => setViewMode(label)}
               className={cn(
                 "rounded px-2 py-1 text-xs font-medium transition sm:px-2.5 sm:text-sm",
-                viewMode === label ? "bg-white/[0.06] text-slate-100 shadow-sm" : "text-slate-500 hover:text-slate-200"
+                viewMode === label
+                  ? "bg-white/[0.06] text-slate-100 shadow-sm"
+                  : "text-slate-500 hover:text-slate-200"
               )}
               title="View mode (preview only)"
             >

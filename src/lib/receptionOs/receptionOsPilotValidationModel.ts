@@ -22,7 +22,7 @@ export type ReceptionOsPilotValidationReport = {
 
 export function appendPilotValidationCheck(
   checks: ReceptionOsPilotValidationCheck[],
-  check: ReceptionOsPilotValidationCheck,
+  check: ReceptionOsPilotValidationCheck
 ): void {
   checks.push(check);
 }

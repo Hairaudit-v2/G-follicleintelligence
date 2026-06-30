@@ -37,7 +37,10 @@ export type FiGlobalCaseRow = {
 };
 
 /** Exported for unit tests; used when linking `fi_cases` to `fi_global_cases`. */
-export function assertFiCaseTenantMatchesGlobalTenant(fiCaseTenantId: string, globalCaseTenantId: string): void {
+export function assertFiCaseTenantMatchesGlobalTenant(
+  fiCaseTenantId: string,
+  globalCaseTenantId: string
+): void {
   if (fiCaseTenantId.trim() !== globalCaseTenantId.trim()) {
     throw new Error("fi_case tenant_id does not match fi_global_cases tenant_id.");
   }
@@ -53,7 +56,10 @@ export type FiEventLinkRow = {
 };
 
 /** External id for fi_cases linking a producer case id to FI (shared with foundation helpers). */
-export function buildCaseExternalId(sourceSystem: FiSourceSystem | string, sourceCaseId: string): string {
+export function buildCaseExternalId(
+  sourceSystem: FiSourceSystem | string,
+  sourceCaseId: string
+): string {
   return `${sourceSystem}:${sourceCaseId}`;
 }
 
@@ -172,7 +178,9 @@ export function buildPlaceholderIntake(
 ): IntakeUpsertInput {
   const safeCaseId = sourceCaseId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32) || "case";
   return {
-    full_name: normalizeSparseText(seed?.full_name) ?? `${String(sourceSystem).toUpperCase()} Case ${sourceCaseId}`,
+    full_name:
+      normalizeSparseText(seed?.full_name) ??
+      `${String(sourceSystem).toUpperCase()} Case ${sourceCaseId}`,
     email: normalizeSparseText(seed?.email) ?? `${sourceSystem}-${safeCaseId}@local.invalid`,
     dob: normalizeSparseText(seed?.dob) ?? "1900-01-01",
     sex: normalizeSparseText(seed?.sex) ?? "unknown",
@@ -204,7 +212,10 @@ export async function resolveOrCreateGlobalPatient(params: {
   if (existing.error) throw new Error(existing.error.message);
   if (existing.data) {
     const existingRow = existing.data as unknown as FiGlobalPatientRow;
-    const mergedMetadata = shallowAdditiveMerge(existingRow.metadata_json ?? {}, params.metadataJson);
+    const mergedMetadata = shallowAdditiveMerge(
+      existingRow.metadata_json ?? {},
+      params.metadataJson
+    );
     if (JSON.stringify(mergedMetadata) !== JSON.stringify(existingRow.metadata_json ?? {})) {
       const updated = await supabase
         .from("fi_global_patients")
@@ -270,7 +281,8 @@ export async function resolveOrCreateGlobalCase(params: {
 }): Promise<FiGlobalCaseRow> {
   const supabase = supabaseAdmin();
   const sourceCaseId = normalizeSourceId(params.sourceCaseId);
-  if (!sourceCaseId) throw new Error("sourceCaseId is required to resolve or create a global case.");
+  if (!sourceCaseId)
+    throw new Error("sourceCaseId is required to resolve or create a global case.");
 
   const existing = await supabase
     .from("fi_global_cases")
@@ -292,7 +304,10 @@ export async function resolveOrCreateGlobalCase(params: {
       updates.fi_case_id = params.fiCaseId;
     }
 
-    const mergedMetadata = shallowAdditiveMerge(existingRow.metadata_json ?? {}, params.metadataJson);
+    const mergedMetadata = shallowAdditiveMerge(
+      existingRow.metadata_json ?? {},
+      params.metadataJson
+    );
     if (JSON.stringify(mergedMetadata) !== JSON.stringify(existingRow.metadata_json ?? {})) {
       updates.metadata_json = mergedMetadata;
     }
@@ -350,7 +365,10 @@ export async function resolveOrCreateGlobalCase(params: {
   }
 
   const racedRow = raced.data as unknown as FiGlobalCaseRow;
-  if ((!racedRow.global_patient_id && params.globalPatientId) || (!racedRow.fi_case_id && params.fiCaseId)) {
+  if (
+    (!racedRow.global_patient_id && params.globalPatientId) ||
+    (!racedRow.fi_case_id && params.fiCaseId)
+  ) {
     const updates: Record<string, unknown> = {};
     if (!racedRow.global_patient_id && params.globalPatientId) {
       updates.global_patient_id = params.globalPatientId;
@@ -404,14 +422,18 @@ export async function attachFiCaseIdToGlobalCase(params: {
     .maybeSingle();
 
   if (fiCaseRow.error || !fiCaseRow.data) {
-    throw new Error(fiCaseRow.error?.message ?? "fi_cases row not found for attachFiCaseIdToGlobalCase.");
+    throw new Error(
+      fiCaseRow.error?.message ?? "fi_cases row not found for attachFiCaseIdToGlobalCase."
+    );
   }
   const fiTenant = String((fiCaseRow.data as { tenant_id: string }).tenant_id);
   assertFiCaseTenantMatchesGlobalTenant(fiTenant, row.tenant_id);
 
   if (row.fi_case_id === params.fiCaseId) return row;
   if (row.fi_case_id && row.fi_case_id !== params.fiCaseId) {
-    throw new Error(`Global case ${params.globalCaseId} is already linked to a different fi_case_id.`);
+    throw new Error(
+      `Global case ${params.globalCaseId} is already linked to a different fi_case_id.`
+    );
   }
 
   const updated = await supabase
@@ -536,9 +558,7 @@ export async function ensureFiIntake(
 ): Promise<void> {
   const existing = await supabase
     .from("fi_intakes")
-    .select(
-      "full_name, email, dob, sex, country, primary_concern, selections, notes"
-    )
+    .select("full_name, email, dob, sex, country, primary_concern, selections, notes")
     .eq("tenant_id", input.tenantId)
     .eq("case_id", input.caseId)
     .maybeSingle();
@@ -575,8 +595,7 @@ export async function ensureFiIntake(
     dob: resolvedDob,
     sex: resolvedSex,
     country: input.intake.country ?? existing.data?.country ?? null,
-    primary_concern:
-      input.intake.primary_concern ?? existing.data?.primary_concern ?? null,
+    primary_concern: input.intake.primary_concern ?? existing.data?.primary_concern ?? null,
     selections: {
       ...existingSelections,
       ...(input.intake.selections ?? {}),
@@ -674,6 +693,7 @@ export async function ensureUploadRecord(
     .select("id")
     .single();
 
-  if (inserted.error || !inserted.data) throw new Error(inserted.error?.message ?? "Failed to insert upload.");
+  if (inserted.error || !inserted.data)
+    throw new Error(inserted.error?.message ?? "Failed to insert upload.");
   return { id: inserted.data.id, created: true };
 }

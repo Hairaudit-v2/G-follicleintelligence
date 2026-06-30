@@ -22,16 +22,20 @@ function MetricPill({
       href={href}
       className={cn(
         "flex min-w-0 flex-col rounded-xl border border-white/[0.07] bg-[#0c1426]/70 px-3 py-3 shadow-inner shadow-black/20 backdrop-blur-sm transition",
-        "hover:border-cyan-500/25 hover:bg-[#141c33]/80",
+        "hover:border-cyan-500/25 hover:bg-[#141c33]/80"
       )}
     >
       <div className="flex items-center gap-2">
         <span className="text-cyan-400/90" aria-hidden>
           {icon}
         </span>
-        <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+        <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          {label}
+        </p>
       </div>
-      <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">{value}</p>
+      <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">
+        {value}
+      </p>
     </Link>
   );
 }
@@ -51,7 +55,11 @@ export function DashboardClinicalIntelligenceSummary(props: {
     s.outcomeDataMissingApprox > 0;
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-clinical-intel-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="dash-clinical-intel-heading"
+    >
       <SectionHeader
         id="dash-clinical-intel-heading"
         kicker="Journey signals"

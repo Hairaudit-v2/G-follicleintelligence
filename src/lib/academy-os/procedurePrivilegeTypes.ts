@@ -176,7 +176,10 @@ export function comparePrivilegeLevels(a: PrivilegeLevel, b: PrivilegeLevel): nu
 }
 
 /** Returns true when `actual` meets or exceeds `required`. */
-export function doesPrivilegeLevelSatisfy(actual: PrivilegeLevel, required: PrivilegeLevel): boolean {
+export function doesPrivilegeLevelSatisfy(
+  actual: PrivilegeLevel,
+  required: PrivilegeLevel
+): boolean {
   return PRIVILEGE_LEVEL_RANK[actual] >= PRIVILEGE_LEVEL_RANK[required];
 }
 

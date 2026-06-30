@@ -10,14 +10,19 @@ function mapRow(x: Record<string, unknown>): PatientTwinDonorAssessmentRow {
     source_record_id: x.source_record_id != null ? String(x.source_record_id) : null,
     donor_region: String(x.donor_region ?? ""),
     donor_quality_rating: String(x.donor_quality_rating ?? ""),
-    confidence_score: typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
-    estimated_density_band: x.estimated_density_band != null ? String(x.estimated_density_band) : null,
+    confidence_score:
+      typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
+    estimated_density_band:
+      x.estimated_density_band != null ? String(x.estimated_density_band) : null,
     miniaturisation_risk: x.miniaturisation_risk != null ? String(x.miniaturisation_risk) : null,
     retrograde_risk: x.retrograde_risk != null ? String(x.retrograde_risk) : null,
     overharvesting_risk: x.overharvesting_risk != null ? String(x.overharvesting_risk) : null,
-    safe_donor_capacity_band: x.safe_donor_capacity_band != null ? String(x.safe_donor_capacity_band) : null,
-    lifetime_graft_budget_band: x.lifetime_graft_budget_band != null ? String(x.lifetime_graft_budget_band) : null,
-    extraction_caution_level: x.extraction_caution_level != null ? String(x.extraction_caution_level) : null,
+    safe_donor_capacity_band:
+      x.safe_donor_capacity_band != null ? String(x.safe_donor_capacity_band) : null,
+    lifetime_graft_budget_band:
+      x.lifetime_graft_budget_band != null ? String(x.lifetime_graft_budget_band) : null,
+    extraction_caution_level:
+      x.extraction_caution_level != null ? String(x.extraction_caution_level) : null,
     review_status: String(x.review_status ?? "pending"),
     clinical_observations: x.clinical_observations != null ? String(x.clinical_observations) : null,
     ai_notes: x.ai_notes != null ? String(x.ai_notes) : null,

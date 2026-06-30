@@ -24,18 +24,7 @@ export const ENTERPRISE_DEMO_TOTAL_SURGERIES =
  * 1 quoted + 6 accepted + 5 converted = 12 surgeries per clinic (96 total).
  */
 export const ENTERPRISE_DEMO_SURGERY_PATIENT_INDICES: readonly number[] = [
-  17,
-  19,
-  20,
-  21,
-  22,
-  23,
-  24,
-  25,
-  26,
-  27,
-  28,
-  29,
+  17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
 ];
 
 export const ENTERPRISE_DEMO_SURGERY_STATUSES = [
@@ -55,7 +44,8 @@ export const ENTERPRISE_DEMO_EXTRACTION_TECHNIQUES = [
   "manual FUE",
 ] as const;
 
-export type EnterpriseDemoExtractionTechnique = (typeof ENTERPRISE_DEMO_EXTRACTION_TECHNIQUES)[number];
+export type EnterpriseDemoExtractionTechnique =
+  (typeof ENTERPRISE_DEMO_EXTRACTION_TECHNIQUES)[number];
 
 export const ENTERPRISE_DEMO_IMPLANTATION_METHODS = [
   "lateral slit",
@@ -64,9 +54,17 @@ export const ENTERPRISE_DEMO_IMPLANTATION_METHODS = [
   "DHI implanter",
 ] as const;
 
-export type EnterpriseDemoImplantationMethod = (typeof ENTERPRISE_DEMO_IMPLANTATION_METHODS)[number];
+export type EnterpriseDemoImplantationMethod =
+  (typeof ENTERPRISE_DEMO_IMPLANTATION_METHODS)[number];
 
-export const ENTERPRISE_DEMO_PUNCH_SIZES = ["0.70", "0.75", "0.80", "0.85", "0.90", "1.00"] as const;
+export const ENTERPRISE_DEMO_PUNCH_SIZES = [
+  "0.70",
+  "0.75",
+  "0.80",
+  "0.85",
+  "0.90",
+  "1.00",
+] as const;
 
 export type EnterpriseDemoClinicPerformanceProfile =
   | "default"
@@ -415,7 +413,12 @@ function buildGraftSessionSpec(
 
   return {
     demoGraftSessionKey,
-    phase: status === "completed" ? "reconciliation" : status === "paused" ? "extraction" : "implantation",
+    phase:
+      status === "completed"
+        ? "reconciliation"
+        : status === "paused"
+          ? "extraction"
+          : "implantation",
     targetGrafts: graftTarget,
     extractedGrafts: extracted,
     implantedGrafts: implanted,
@@ -477,7 +480,11 @@ function buildSurgerySpecFromPatient(
       role: "nurse",
       demoStaffKey: `${clinicSlug}-lead-nurse`,
       assignmentStatus:
-        surgeryStatus === "completed" ? "completed" : surgeryStatus === "scheduled" ? "assigned" : "checked_in",
+        surgeryStatus === "completed"
+          ? "completed"
+          : surgeryStatus === "scheduled"
+            ? "assigned"
+            : "checked_in",
     },
     {
       role: "technician",
@@ -492,7 +499,7 @@ function buildSurgerySpecFromPatient(
   ];
 
   const invoiceGraftPlaceholder =
-    profile === "graft_count_vs_quote" ? patientSpec.graftEstimate ?? graftTarget : null;
+    profile === "graft_count_vs_quote" ? (patientSpec.graftEstimate ?? graftTarget) : null;
 
   return {
     demoSurgeryKey,
@@ -513,8 +520,16 @@ function buildSurgerySpecFromPatient(
     quotedGraftEstimate: patientSpec.graftEstimate,
     quotedValue: patientSpec.quotedValue,
     punchSize: pick(ENTERPRISE_DEMO_PUNCH_SIZES, patientSpec.demoPatientKey, "punch"),
-    extractionTechnique: pick(ENTERPRISE_DEMO_EXTRACTION_TECHNIQUES, patientSpec.demoPatientKey, "technique"),
-    implantationMethod: pick(ENTERPRISE_DEMO_IMPLANTATION_METHODS, patientSpec.demoPatientKey, "implant"),
+    extractionTechnique: pick(
+      ENTERPRISE_DEMO_EXTRACTION_TECHNIQUES,
+      patientSpec.demoPatientKey,
+      "technique"
+    ),
+    implantationMethod: pick(
+      ENTERPRISE_DEMO_IMPLANTATION_METHODS,
+      patientSpec.demoPatientKey,
+      "implant"
+    ),
     dayCount,
     scheduledDate: scheduled.scheduledDate,
     scheduledStartAt: scheduled.scheduledStartAt,
@@ -554,14 +569,13 @@ export function buildEnterpriseDemoSurgerySpecs(
       .filter((p) => p.clinicSlug === clinic.slug)
       .sort((a, b) => a.patientIndex - b.patientIndex);
     const surgeryCandidates = clinicPatients
-      .filter((p) =>
-        ["quoted", "accepted", "converted_to_case"].includes(p.consultationStatus)
-      )
+      .filter((p) => ["quoted", "accepted", "converted_to_case"].includes(p.consultationStatus))
       .slice(-volume.surgeriesPerClinic);
 
     for (let i = 0; i < surgeryCandidates.length; i++) {
       const patientSpec = surgeryCandidates[i];
-      const surgeryStatus = SURGERY_STATUS_TEMPLATE[Math.min(i, SURGERY_STATUS_TEMPLATE.length - 1)];
+      const surgeryStatus =
+        SURGERY_STATUS_TEMPLATE[Math.min(i, SURGERY_STATUS_TEMPLATE.length - 1)];
       specs.push(buildSurgerySpecFromPatient(patientSpec, surgeryStatus, i));
     }
   }

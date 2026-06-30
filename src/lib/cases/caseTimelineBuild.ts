@@ -2,7 +2,11 @@ import type { CaseAdminDetail } from "@/src/lib/cases/caseLoaders";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
-import { followUpCheckpointLabel, followUpStatusLabel, postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
+import {
+  followUpCheckpointLabel,
+  followUpStatusLabel,
+  postOpStatusLabel,
+} from "@/src/lib/cases/postOpLabels";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { surgeryPlanningStatusLabel } from "@/src/lib/cases/surgeryPlanningLabels";
 import type { CaseTimelineExtraSources, CaseTimelineItem } from "./caseTimelineTypes";
@@ -52,7 +56,10 @@ function crmActivitySensitive(activityKind: string): boolean {
   return /message|email|sms|note|call|communication/i.test(k);
 }
 
-function push(out: CaseTimelineItem[], item: Omit<CaseTimelineItem, "occurred_at"> & { occurred_at: string | null }) {
+function push(
+  out: CaseTimelineItem[],
+  item: Omit<CaseTimelineItem, "occurred_at"> & { occurred_at: string | null }
+) {
   const iso = validIso(item.occurred_at);
   if (!iso) return;
   out.push({ ...item, occurred_at: iso });
@@ -62,7 +69,8 @@ function push(out: CaseTimelineItem[], item: Omit<CaseTimelineItem, "occurred_at
  * Aggregates case-linked rows into a single newest-first timeline (read-only).
  */
 export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineItem[] {
-  const { tenantId, caseId, detail, surgeryPlan, procedureDay, postOpTracking, followUps, extra } = input;
+  const { tenantId, caseId, detail, surgeryPlan, procedureDay, postOpTracking, followUps, extra } =
+    input;
   const out: CaseTimelineItem[] = [];
 
   const crmLeadHref = (leadId: string) => `/fi-admin/${tenantId}/crm/leads/${leadId}`;
@@ -107,7 +115,12 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
       occurred_at: lead.created_at,
       status: lead.status,
       href: crmLeadHref(lead.id),
-      metadata_summary: lead.case_id === caseId ? "Linked via patient" : lead.converted_case_id === caseId ? "Converted to this patient" : null,
+      metadata_summary:
+        lead.case_id === caseId
+          ? "Linked via patient"
+          : lead.converted_case_id === caseId
+            ? "Converted to this patient"
+            : null,
     });
 
     if (lead.converted_case_id === caseId && lead.converted_at?.trim()) {
@@ -194,7 +207,9 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
       occurred_at: procedureDay.created_at,
       status: procedureStatusLabel(procedureDay.procedure_status),
       href: null,
-      metadata_summary: procedureDay.procedure_date ? `Procedure date ${procedureDay.procedure_date}` : null,
+      metadata_summary: procedureDay.procedure_date
+        ? `Procedure date ${procedureDay.procedure_date}`
+        : null,
     });
     if (procedureDay.updated_at !== procedureDay.created_at) {
       push(out, {
@@ -254,7 +269,9 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
         occurred_at: noonUtcFromDateOnly(fu.scheduled_date),
         status: followUpStatusLabel(fu.follow_up_status),
         href: null,
-        metadata_summary: fu.linked_image_ids.length ? `${fu.linked_image_ids.length} linked image(s)` : null,
+        metadata_summary: fu.linked_image_ids.length
+          ? `${fu.linked_image_ids.length} linked image(s)`
+          : null,
       });
     }
     if (fu.completed_date?.trim()) {
@@ -267,7 +284,9 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
         occurred_at: noonUtcFromDateOnly(fu.completed_date),
         status: followUpStatusLabel(fu.follow_up_status),
         href: null,
-        metadata_summary: fu.linked_image_ids.length ? `${fu.linked_image_ids.length} linked image(s)` : null,
+        metadata_summary: fu.linked_image_ids.length
+          ? `${fu.linked_image_ids.length} linked image(s)`
+          : null,
       });
     }
   }

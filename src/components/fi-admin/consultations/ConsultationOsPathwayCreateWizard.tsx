@@ -60,7 +60,9 @@ export function ConsultationOsPathwayCreateWizard({
   const [linkedLeadLabel, setLinkedLeadLabel] = useState<string | null>(null);
   const [linkedLeadStage, setLinkedLeadStage] = useState<string | null>(null);
 
-  const [selectedPathway, setSelectedPathway] = useState<ConsultationPathwayLauncherPathKey | null>(null);
+  const [selectedPathway, setSelectedPathway] = useState<ConsultationPathwayLauncherPathKey | null>(
+    null
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,7 +159,9 @@ export function ConsultationOsPathwayCreateWizard({
       </FiCard>
 
       <FiCard className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Optional break-glass access
+        </p>
         <label htmlFor="cos-new-admin-key" className="block text-xs text-slate-400">
           FI Admin API key (only if your account does not have CRM write access)
         </label>
@@ -176,7 +180,9 @@ export function ConsultationOsPathwayCreateWizard({
           type="button"
           onClick={() => setStep(1)}
           className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            step === 1 ? "bg-sky-600 text-white" : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300"
+            step === 1
+              ? "bg-sky-600 text-white"
+              : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300"
           }`}
         >
           Step 1 · Intake
@@ -185,7 +191,9 @@ export function ConsultationOsPathwayCreateWizard({
           type="button"
           onClick={() => setStep(2)}
           className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            step === 2 ? "bg-sky-600 text-white" : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300"
+            step === 2
+              ? "bg-sky-600 text-white"
+              : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300"
           }`}
         >
           Step 2 · Pathway
@@ -193,7 +201,10 @@ export function ConsultationOsPathwayCreateWizard({
       </nav>
 
       {error ? (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300" role="alert">
+        <div
+          className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -226,15 +237,22 @@ export function ConsultationOsPathwayCreateWizard({
                 />
               ) : (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lead (optional)</p>
-                  <p className="text-sm text-slate-400">CRM lead linking requires Sales (CRM) access for this user.</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Lead (optional)
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    CRM lead linking requires Sales (CRM) access for this user.
+                  </p>
                 </div>
               )}
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-4 border-t border-white/[0.06] pt-6 sm:grid-cols-2">
               <div>
-                <label htmlFor="cos-new-date" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                <label
+                  htmlFor="cos-new-date"
+                  className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                >
                   Consultation date
                 </label>
                 <input
@@ -247,7 +265,10 @@ export function ConsultationOsPathwayCreateWizard({
               </div>
               {clinicalStaffOptions.length > 0 ? (
                 <div>
-                  <label htmlFor="cos-new-consultant-staff" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <label
+                    htmlFor="cos-new-consultant-staff"
+                    className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                  >
                     Consultant
                   </label>
                   <StaffClinicalSelect
@@ -262,14 +283,18 @@ export function ConsultationOsPathwayCreateWizard({
                     onChange={(staffId) => {
                       setConsultantStaffId(staffId);
                       const picked = clinicalStaffOptions.find((s) => s.id === staffId);
-                      if (picked) setConsultantName(picked.full_name?.trim() || picked.email?.trim() || "");
+                      if (picked)
+                        setConsultantName(picked.full_name?.trim() || picked.email?.trim() || "");
                       else if (!staffId) setConsultantName("");
                     }}
                   />
                 </div>
               ) : (
                 <div>
-                  <label htmlFor="cos-new-consultant-name" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <label
+                    htmlFor="cos-new-consultant-name"
+                    className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                  >
                     Consultant
                   </label>
                   <input
@@ -322,8 +347,12 @@ export function ConsultationOsPathwayCreateWizard({
                         : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md hover:border-slate-700 dark:border-slate-700 dark:bg-slate-950/40"
                     }`}
                   >
-                    <span className="text-sm font-semibold text-slate-100 dark:text-slate-50">{c.title}</span>
-                    <span className="mt-2 text-xs leading-snug text-slate-400 dark:text-slate-400">{c.subtitle}</span>
+                    <span className="text-sm font-semibold text-slate-100 dark:text-slate-50">
+                      {c.title}
+                    </span>
+                    <span className="mt-2 text-xs leading-snug text-slate-400 dark:text-slate-400">
+                      {c.subtitle}
+                    </span>
                   </button>
                 );
               })}

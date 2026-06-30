@@ -101,8 +101,8 @@ export function ProviderCalendarLinksCard({
         <div>
           <h2 className="text-base font-semibold text-[#F8FAFC]">Provider calendar links</h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#94A3B8]">
-            Map external Google or Timely calendar IDs to staff members so CalendarOS events appear in the
-            correct provider column instead of Unassigned.
+            Map external Google or Timely calendar IDs to staff members so CalendarOS events appear
+            in the correct provider column instead of Unassigned.
           </p>
         </div>
         {pageModel.canManage ? (
@@ -118,8 +118,8 @@ export function ProviderCalendarLinksCard({
 
       {provider === "timely" || timelyIcsUrl ? (
         <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
-          Timely ICS feed URLs are sensitive — treat them like passwords. They are encrypted on the server and
-          never shown in full after saving.
+          Timely ICS feed URLs are sensitive — treat them like passwords. They are encrypted on the
+          server and never shown in full after saving.
         </p>
       ) : null}
 
@@ -157,7 +157,11 @@ export function ProviderCalendarLinksCard({
                 type="text"
                 value={calendarId}
                 onChange={(e) => setCalendarId(e.target.value)}
-                placeholder={provider === "google" ? "primary or calendar@group.calendar.google.com" : "timely-staff-feed-id"}
+                placeholder={
+                  provider === "google"
+                    ? "primary or calendar@group.calendar.google.com"
+                    : "timely-staff-feed-id"
+                }
                 className="mt-1 w-full rounded-lg border border-white/10 bg-[#0a1424] px-3 py-2 text-[#F8FAFC]"
               />
             </label>
@@ -225,9 +229,12 @@ export function ProviderCalendarLinksCard({
           <tbody>
             {pageModel.links.length === 0 ? (
               <tr>
-                <td colSpan={pageModel.canManage ? 7 : 6} className="px-2 py-6 text-center text-[#64748B]">
-                  No provider calendar links yet. Events from synced calendars will stay in Unassigned until
-                  linked.
+                <td
+                  colSpan={pageModel.canManage ? 7 : 6}
+                  className="px-2 py-6 text-center text-[#64748B]"
+                >
+                  No provider calendar links yet. Events from synced calendars will stay in
+                  Unassigned until linked.
                 </td>
               </tr>
             ) : (
@@ -238,14 +245,20 @@ export function ProviderCalendarLinksCard({
                   <td className="px-2 py-2">{link.calendarLabel ?? "—"}</td>
                   <td className="px-2 py-2 capitalize">{link.provider}</td>
                   <td className="px-2 py-2">
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadgeClass(link.status)}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs ${statusBadgeClass(link.status)}`}
+                    >
                       {link.status}
                     </span>
                     {link.timelyIcsConfigured ? (
-                      <span className="mt-1 block text-xs text-[#64748B]">{link.timelyIcsMasked}</span>
+                      <span className="mt-1 block text-xs text-[#64748B]">
+                        {link.timelyIcsMasked}
+                      </span>
                     ) : null}
                   </td>
-                  <td className="px-2 py-2 text-xs text-[#94A3B8]">{formatUpdatedAt(link.updatedAt)}</td>
+                  <td className="px-2 py-2 text-xs text-[#94A3B8]">
+                    {formatUpdatedAt(link.updatedAt)}
+                  </td>
                   {pageModel.canManage ? (
                     <td className="px-2 py-2">
                       {link.status === "active" ? (

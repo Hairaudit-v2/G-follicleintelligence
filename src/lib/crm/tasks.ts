@@ -55,7 +55,11 @@ function mapTaskRow(row: Record<string, unknown>): FiCrmTaskRow {
   };
 }
 
-async function fiUserBelongsToTenant(supabase: SupabaseClient, tenantId: string, fiUserId: string): Promise<boolean> {
+async function fiUserBelongsToTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  fiUserId: string
+): Promise<boolean> {
   const { data, error } = await supabase
     .from("fi_users")
     .select("id")
@@ -104,7 +108,10 @@ async function assertOptionalPatientCaseForLead(
   }
 }
 
-export async function createCrmTask(params: CreateCrmTaskParams, client?: SupabaseClient): Promise<FiCrmTaskRow> {
+export async function createCrmTask(
+  params: CreateCrmTaskParams,
+  client?: SupabaseClient
+): Promise<FiCrmTaskRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tenantId = assertNonEmptyUuid(params.tenantId, "tenantId");
   const leadId = assertNonEmptyUuid(params.leadId, "leadId");
@@ -247,7 +254,10 @@ export type UpdateCrmTaskParams = {
   assigneeUserId?: string | null;
 };
 
-export async function updateCrmTask(params: UpdateCrmTaskParams, client?: SupabaseClient): Promise<FiCrmTaskRow> {
+export async function updateCrmTask(
+  params: UpdateCrmTaskParams,
+  client?: SupabaseClient
+): Promise<FiCrmTaskRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const task = await loadCrmTaskForLead(params.tenantId, params.leadId, params.taskId, supabase);
   if (!task) throw new Error("Task not found for this lead.");

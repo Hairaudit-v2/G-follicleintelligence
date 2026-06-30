@@ -28,9 +28,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -153,8 +157,14 @@ export default function LicensingPage() {
                     <h3 className="text-base font-semibold text-foreground">{block.prompt}</h3>
                     <ul className="mt-4 space-y-3">
                       {block.options.map((opt) => (
-                        <li key={opt} className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground md:text-base">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" aria-hidden />
+                        <li
+                          key={opt}
+                          className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground md:text-base"
+                        >
+                          <CheckCircle2
+                            className="mt-0.5 h-4 w-4 shrink-0 text-primary/60"
+                            aria-hidden
+                          />
                           <span>{opt}</span>
                         </li>
                       ))}
@@ -215,7 +225,9 @@ export default function LicensingPage() {
                     <div className="mb-2 font-mono text-xs font-medium uppercase tracking-wider text-primary/80">
                       Infrastructure alignment
                     </div>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{tier.infrastructure}</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {tier.infrastructure}
+                    </p>
                   </div>
                   <div>
                     <div className="mb-2 font-mono text-xs font-medium uppercase tracking-wider text-primary/80">
@@ -268,12 +280,19 @@ export default function LicensingPage() {
         </div>
         <FadeIn delay={0.1}>
           <p className="mt-10 text-sm leading-relaxed text-muted-foreground">
-            Seat counts, SLAs, security exhibits, and regional terms are set in contract. For platform context, see{" "}
-            <Link href="/platform" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+            Seat counts, SLAs, security exhibits, and regional terms are set in contract. For
+            platform context, see{" "}
+            <Link
+              href="/platform"
+              className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+            >
               Platform
             </Link>
             . Start with{" "}
-            <Link href="/contact" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+            <Link
+              href="/contact"
+              className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+            >
               contact
             </Link>{" "}
             for a scoped conversation.

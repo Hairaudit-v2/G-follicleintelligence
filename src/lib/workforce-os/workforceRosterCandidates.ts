@@ -3,9 +3,7 @@
  */
 
 import { canStaffBeAssignedClinically } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
-import {
-  canStaffBeAssignedToProcedure,
-} from "@/src/lib/workforce-os/workforceProcedureClinicalEligibility";
+import { canStaffBeAssignedToProcedure } from "@/src/lib/workforce-os/workforceProcedureClinicalEligibility";
 import type { ProcedurePrivilegeEligibilityResult } from "@/src/lib/academy-os/procedurePrivilegeTypes";
 import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
 import {
@@ -106,7 +104,8 @@ function resolveCandidateSection(input: {
   unavailable: boolean;
   warningCount: number;
 }): RosterCandidateSection {
-  if (!input.isActive || !input.eligible || input.hasConflicts || input.unavailable) return "blocked";
+  if (!input.isActive || !input.eligible || input.hasConflicts || input.unavailable)
+    return "blocked";
   if (input.warningCount > 0) return "warning";
   return "eligible";
 }
@@ -114,7 +113,9 @@ function resolveCandidateSection(input: {
 /**
  * Rank staff for a missing clinical role. Does not auto-assign — recommendations only.
  */
-export function rankAssignableStaffForRole(input: RankAssignableStaffInput): RosterAssignableCandidate[] {
+export function rankAssignableStaffForRole(
+  input: RankAssignableStaffInput
+): RosterAssignableCandidate[] {
   const assignedRole = normalizeRole(input.assignedRole);
   const eventClinicId = input.clinicId?.trim() || null;
   const candidates: RosterAssignableCandidate[] = [];
@@ -187,7 +188,11 @@ export function rankAssignableStaffForRole(input: RankAssignableStaffInput): Ros
     });
   }
 
-  const sectionOrder: Record<RosterCandidateSection, number> = { eligible: 0, warning: 1, blocked: 2 };
+  const sectionOrder: Record<RosterCandidateSection, number> = {
+    eligible: 0,
+    warning: 1,
+    blocked: 2,
+  };
   return candidates.sort((a, b) => {
     const sectionDiff = sectionOrder[a.section] - sectionOrder[b.section];
     if (sectionDiff !== 0) return sectionDiff;

@@ -16,7 +16,13 @@ type InfoNoticeProps = HTMLAttributes<HTMLDivElement> & {
 /**
  * Inline alert / callout — maps to OS login error/notice tone without copying markup everywhere.
  */
-export function InfoNotice({ variant = "info", title, children, className = "", ...rest }: InfoNoticeProps) {
+export function InfoNotice({
+  variant = "info",
+  title,
+  children,
+  className = "",
+  ...rest
+}: InfoNoticeProps) {
   const role = variant === "danger" ? "alert" : "status";
   return (
     <div

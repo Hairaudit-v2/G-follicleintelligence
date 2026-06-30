@@ -1,4 +1,7 @@
-import type { ConsultationStatus, ConsultationTypeId } from "@/src/lib/consultations/consultationTypes";
+import type {
+  ConsultationStatus,
+  ConsultationTypeId,
+} from "@/src/lib/consultations/consultationTypes";
 import type { LudwigScaleValue, NorwoodScaleValue } from "@/src/lib/patients/hairLossScales";
 import { ENTERPRISE_DEMO_CLINICS } from "./enterpriseDemoConstants";
 import {
@@ -210,7 +213,14 @@ const NORWOOD_MALE: readonly NorwoodScaleValue[] = [
 
 const LUDWIG_FEMALE: readonly LudwigScaleValue[] = ["I", "II", "III"];
 
-const SAVIN_FEMALE: readonly EnterpriseDemoSavinScale[] = ["I-1", "I-2", "I-3", "I-4", "II-1", "II-2"];
+const SAVIN_FEMALE: readonly EnterpriseDemoSavinScale[] = [
+  "I-1",
+  "I-2",
+  "I-3",
+  "I-4",
+  "II-1",
+  "II-2",
+];
 
 const DIAGNOSES_MALE = [
   "Androgenetic alopecia with frontal recession and temple loss.",
@@ -269,7 +279,10 @@ function buildDemoPatientKey(clinicSlug: string, index: number): string {
 }
 
 export function buildEnterpriseDemoPatientEmail(demoPatientKey: string): string {
-  const local = demoPatientKey.trim().toLowerCase().replace(/[^a-z0-9]+/g, ".");
+  const local = demoPatientKey
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ".");
   return `titan.patient.${local}@${ENTERPRISE_DEMO_PATIENT_EMAIL_DOMAIN}`;
 }
 
@@ -316,12 +329,13 @@ function consultationDateForKey(key: string, _timezone: string): string {
 }
 
 function consultantStaffKey(clinicSlug: string, index: number): string {
-  return index % 3 === 0
-    ? `${clinicSlug}-consultant`
-    : `${clinicSlug}-senior-consultant`;
+  return index % 3 === 0 ? `${clinicSlug}-consultant` : `${clinicSlug}-senior-consultant`;
 }
 
-function journeyArchetypeForIndex(index: number, patientsPerClinic: number): EnterpriseDemoJourneyArchetype {
+function journeyArchetypeForIndex(
+  index: number,
+  patientsPerClinic: number
+): EnterpriseDemoJourneyArchetype {
   const archetypes = ENTERPRISE_DEMO_JOURNEY_ARCHETYPES;
   const slot = Math.min(index - 1, patientsPerClinic - 1);
   const bucket = Math.floor((slot / Math.max(patientsPerClinic, 1)) * archetypes.length);
@@ -377,21 +391,17 @@ function buildPatientSpec(
     consultationStatus === "draft" || consultationStatus === "in_progress"
       ? null
       : pick(QUOTED_TREATMENTS, demoPatientKey, "treatment");
-  const consultationType =
-    quotedTreatment
-      ? CONSULTATION_TYPE_BY_TREATMENT[quotedTreatment] ?? "scalp_hair_transplant"
-      : pick(
-          ["scalp_hair_transplant", "medical_hair_loss", "prp_prf"] as const,
-          demoPatientKey,
-          "early_type"
-        );
+  const consultationType = quotedTreatment
+    ? (CONSULTATION_TYPE_BY_TREATMENT[quotedTreatment] ?? "scalp_hair_transplant")
+    : pick(
+        ["scalp_hair_transplant", "medical_hair_loss", "prp_prf"] as const,
+        demoPatientKey,
+        "early_type"
+      );
 
-  const norwoodScale =
-    gender === "male" ? pick(NORWOOD_MALE, demoPatientKey, "norwood") : null;
-  const ludwigScale =
-    gender === "female" ? pick(LUDWIG_FEMALE, demoPatientKey, "ludwig") : null;
-  const savinScale =
-    gender === "female" ? pick(SAVIN_FEMALE, demoPatientKey, "savin") : null;
+  const norwoodScale = gender === "male" ? pick(NORWOOD_MALE, demoPatientKey, "norwood") : null;
+  const ludwigScale = gender === "female" ? pick(LUDWIG_FEMALE, demoPatientKey, "ludwig") : null;
+  const savinScale = gender === "female" ? pick(SAVIN_FEMALE, demoPatientKey, "savin") : null;
   const diagnosis =
     gender === "male"
       ? pick(DIAGNOSES_MALE, demoPatientKey, "diagnosis")
@@ -402,7 +412,9 @@ function buildPatientSpec(
       ? quotedValueForTreatment(quotedTreatment, demoPatientKey)
       : null;
   const graftEstimate =
-    quotedTreatment && quotedValue != null ? graftEstimateForTreatment(quotedTreatment, demoPatientKey) : null;
+    quotedTreatment && quotedValue != null
+      ? graftEstimateForTreatment(quotedTreatment, demoPatientKey)
+      : null;
 
   return {
     demoPatientKey,

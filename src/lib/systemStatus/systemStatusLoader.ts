@@ -24,7 +24,10 @@ async function readLatestMigrationFilename(): Promise<{ latest: string | null; o
  * Never throws for migration metadata failures — surfaces `Unknown` in the payload instead.
  */
 export async function loadSystemStatus(tenantId: string): Promise<SystemStatusPayload> {
-  const [db, migration] = await Promise.all([runSystemStatusDbQueries(tenantId), readLatestMigrationFilename()]);
+  const [db, migration] = await Promise.all([
+    runSystemStatusDbQueries(tenantId),
+    readLatestMigrationFilename(),
+  ]);
 
   const calendarLoadersAvailable =
     typeof loadCalendarViewData === "function" && typeof loadCalendarResources === "function";

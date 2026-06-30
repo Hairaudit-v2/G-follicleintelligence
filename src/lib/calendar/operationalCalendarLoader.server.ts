@@ -10,7 +10,12 @@ import {
   bucketBookingsIntoCalendar,
   buildCalendarLanesForView,
 } from "@/src/lib/bookings/calendarView";
-import { calendarRangeIsoForQuery, parseCalendarSearchParams, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import {
+  calendarRangeIsoForQuery,
+  parseCalendarSearchParams,
+  type CalendarRoute,
+  type ParsedCalendarQuery,
+} from "@/src/lib/bookings/calendarQuery";
 import { buildCalendarHref, mergeCalendarHrefQuery } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
@@ -37,7 +42,10 @@ export type {
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
-import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
+import {
+  formatStaffWeeklyHoursSummary,
+  parseStaffWeeklyHours,
+} from "@/src/lib/staff/staffWeeklyHours";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
@@ -74,9 +82,7 @@ import {
   loadFiCalendarEventsForOverlap,
   mapFiCalendarEventsToOperationalCalendar,
 } from "@/src/lib/calendar/calendarOsEvents.server";
-import {
-  calendarOsOverlapRowsForDisplayContext,
-} from "@/src/lib/calendar/calendarOsEventsCore";
+import { calendarOsOverlapRowsForDisplayContext } from "@/src/lib/calendar/calendarOsEventsCore";
 import { buildCalendarOsDisplayPipelineTrace } from "@/src/lib/calendar/calendarOsDisplayPipeline";
 import { loadActiveStaffCalendarLinkIndex } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 
@@ -112,9 +118,17 @@ function resolveCalendarQueryFromSettings(
   const parsed = parseCalendarSearchParams(searchParams, new Date(), {
     calendarTimezone: calendarSettings.calendarTimezone,
   });
-  const withSettings = applyCalendarSettingsToQuery(parsed, calendarSettings.settings, searchParams);
+  const withSettings = applyCalendarSettingsToQuery(
+    parsed,
+    calendarSettings.settings,
+    searchParams
+  );
   const lanes = filterCalendarLanesForWeekends(
-    buildCalendarLanesForView(withSettings.view, withSettings.dateAnchor, withSettings.calendarTimezone),
+    buildCalendarLanesForView(
+      withSettings.view,
+      withSettings.dateAnchor,
+      withSettings.calendarTimezone
+    ),
     withSettings.view,
     calendarSettings.settings.showWeekends
   );
@@ -134,9 +148,13 @@ const loadTenantStaffAndResourcesCached = cache(
     })
 );
 
-const resolveBookingMutationGateCached = cache((tenantId: string) => resolveBookingMutationGate(tenantId.trim()));
+const resolveBookingMutationGateCached = cache((tenantId: string) =>
+  resolveBookingMutationGate(tenantId.trim())
+);
 
-const loadFiServicesForTenantCached = cache((tenantId: string) => loadFiServicesForTenant(tenantId.trim()));
+const loadFiServicesForTenantCached = cache((tenantId: string) =>
+  loadFiServicesForTenant(tenantId.trim())
+);
 
 const loadClinicalStaffPickerOptionsCached = cache((tenantId: string) =>
   loadClinicalStaffPickerOptions(tenantId.trim())
@@ -152,7 +170,10 @@ const loadTenantConfigRowCached = cache(async (tenantId: string) => {
   return data as { config_json?: unknown } | null;
 });
 
-async function loadClinicalDetailsMap(tenantId: string, patientIds: string[]): Promise<Map<string, ClinicalLite>> {
+async function loadClinicalDetailsMap(
+  tenantId: string,
+  patientIds: string[]
+): Promise<Map<string, ClinicalLite>> {
   const out = new Map<string, ClinicalLite>();
   const ids = Array.from(new Set(patientIds.map((x) => x.trim()).filter(Boolean)));
   if (!ids.length) return out;
@@ -211,8 +232,7 @@ async function loadTenantStaffAndClinics(
   ]);
   if (clinicsRes.error) throw new Error(clinicsRes.error.message);
 
-  const rooms =
-    resourceView === "room" ? allRooms.filter((r) => r.is_active) : allRooms;
+  const rooms = resourceView === "room" ? allRooms.filter((r) => r.is_active) : allRooms;
 
   const calendarStaff = staffDirectory.filter((s) =>
     isCalendarVisibleClinicalStaff({
@@ -239,7 +259,10 @@ async function loadTenantStaffAndClinics(
       id: String(r.id),
       display_name: String(r.display_name),
       organisation_id: r.organisation_id != null ? String(r.organisation_id) : null,
-      metadata: r.metadata != null && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : null,
+      metadata:
+        r.metadata != null && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : null,
     };
   });
 
@@ -266,7 +289,10 @@ async function loadTenantStaffAndClinics(
 
   let resourceColumns: OperationalCalendarResourceColumn[];
   if (resourceView === "room") {
-    resourceColumns = [...roomColumns, { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No room" }];
+    resourceColumns = [
+      ...roomColumns,
+      { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No room" },
+    ];
   } else if (resourceView === "clinic") {
     resourceColumns = [
       ...clinicColumns,
@@ -315,7 +341,9 @@ function applyStructuredFilters(
   staffDirectory: ClinicalStaffPickerOption[]
 ): FiBookingRow[] {
   const roleBucketIds =
-    q.staffRoleBucket && !q.staffId?.trim() ? staffIdsMatchingRoleBucket(staffDirectory, q.staffRoleBucket) : null;
+    q.staffRoleBucket && !q.staffId?.trim()
+      ? staffIdsMatchingRoleBucket(staffDirectory, q.staffRoleBucket)
+      : null;
 
   return rows.filter((b) => {
     if (q.status?.trim()) {
@@ -396,7 +424,10 @@ async function augmentStaffResourceColumnsForProviderLinks(
   tenantId: string,
   resourceColumns: OperationalCalendarResourceColumn[],
   resourceView: ParsedCalendarQuery["resourceView"],
-  staffCalendarLinkIndex: Map<string, import("@/src/lib/googleCalendar/googleCalendarProviderLinksCore").StaffCalendarLinkLookupRow>,
+  staffCalendarLinkIndex: Map<
+    string,
+    import("@/src/lib/googleCalendar/googleCalendarProviderLinksCore").StaffCalendarLinkLookupRow
+  >,
   calendarOsBookings: FiBookingRow[],
   calendarStaffDirectory: ClinicalStaffPickerOption[]
 ): Promise<OperationalCalendarResourceColumn[]> {
@@ -433,9 +464,13 @@ function calendarOsBookingFilterExcludedIds(
   staffDirectory: ClinicalStaffPickerOption[]
 ): Set<string> {
   const kept = new Set(
-    applyStructuredFilters(mappedBookings, query, staffUserByStaffId, staffIdByUserId, staffDirectory).map(
-      (b) => b.id
-    )
+    applyStructuredFilters(
+      mappedBookings,
+      query,
+      staffUserByStaffId,
+      staffIdByUserId,
+      staffDirectory
+    ).map((b) => b.id)
   );
   const excluded = new Set<string>();
   for (const row of mappedBookings) {
@@ -451,7 +486,9 @@ function humanizeBookingType(type: string): string {
 
 function staffHasConfiguredHours(staffDirectory: CrmShellUserPickerOption[]): boolean {
   for (const s of staffDirectory) {
-    const summary = formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(s.working_hours ?? undefined)).trim();
+    const summary = formatStaffWeeklyHoursSummary(
+      parseStaffWeeklyHours(s.working_hours ?? undefined)
+    ).trim();
     if (summary) return true;
   }
   return false;
@@ -528,13 +565,15 @@ export async function loadOperationalCalendarShellData(
   const route = opts?.route ?? "fi-admin";
   const tid = tenantId.trim();
   const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const calendarSettings = await loadTenantCalendarSettingsCached(tid, clinicIdFromSearchParams(searchParams));
-  const { query: resolvedQuery, lanes, settingsRedirectHref } = resolveCalendarQueryFromSettings(
+  const calendarSettings = await loadTenantCalendarSettingsCached(
     tid,
-    searchParams,
-    route,
-    calendarSettings
+    clinicIdFromSearchParams(searchParams)
   );
+  const {
+    query: resolvedQuery,
+    lanes,
+    settingsRedirectHref,
+  } = resolveCalendarQueryFromSettings(tid, searchParams, route, calendarSettings);
   let query = resolvedQuery;
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
@@ -547,7 +586,9 @@ export async function loadOperationalCalendarShellData(
 
   const cfg = tenantMetaRow?.config_json;
   const tenantMetadata =
-    cfg != null && typeof cfg === "object" && !Array.isArray(cfg) ? (cfg as Record<string, unknown>) : null;
+    cfg != null && typeof cfg === "object" && !Array.isArray(cfg)
+      ? (cfg as Record<string, unknown>)
+      : null;
 
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;
@@ -581,7 +622,10 @@ export async function loadOperationalCalendarShellData(
     timezoneConfigured: calendarSettings.timezoneConfigured,
   });
 
-  const calendarOperatorPrimaryClinicId = await loadCalendarOperatorPrimaryClinicId(tid, resources.staffDirectory);
+  const calendarOperatorPrimaryClinicId = await loadCalendarOperatorPrimaryClinicId(
+    tid,
+    resources.staffDirectory
+  );
 
   const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
   logOperationalCalendarServerTiming({
@@ -636,7 +680,10 @@ export async function loadOperationalCalendarGridData(
   const tid = tenantId.trim();
   const route = opts?.route ?? "fi-admin";
   const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const calendarSettings = await loadTenantCalendarSettingsCached(tid, clinicIdFromSearchParams(searchParams));
+  const calendarSettings = await loadTenantCalendarSettingsCached(
+    tid,
+    clinicIdFromSearchParams(searchParams)
+  );
   const { query: resolvedQuery, lanes } = resolveCalendarQueryFromSettings(
     tid,
     searchParams,
@@ -738,12 +785,13 @@ export async function loadOperationalCalendarGridData(
     persons: new Map(),
   };
 
-  const assignmentMapPromise: Promise<Map<string, FiBookingResourceAssignmentRow[]>> = monthSummaryMode
-    ? Promise.resolve(new Map())
-    : loadBookingResourceAssignmentsForBookings({
-        tenantId: tid,
-        bookingIds: structuredBookings.map((b) => b.id),
-      });
+  const assignmentMapPromise: Promise<Map<string, FiBookingResourceAssignmentRow[]>> =
+    monthSummaryMode
+      ? Promise.resolve(new Map())
+      : loadBookingResourceAssignmentsForBookings({
+          tenantId: tid,
+          bookingIds: structuredBookings.map((b) => b.id),
+        });
 
   logOperationalCalendarServerTiming({
     phase: "loadOperationalCalendarGridData.displayEnrichment.start",
@@ -767,7 +815,9 @@ export async function loadOperationalCalendarGridData(
       : measureAsync(() =>
           loadClinicalDetailsMap(
             tid,
-            structuredBookings.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
+            structuredBookings
+              .map((b) => b.patient_id)
+              .filter((x): x is string => Boolean(x?.trim()))
           )
         ),
     monthSummaryMode
@@ -850,7 +900,9 @@ export async function loadOperationalCalendarGridData(
     const startMs = Date.parse(row.start_at);
     const endMs = Date.parse(row.end_at);
     const durationMin =
-      Number.isFinite(startMs) && Number.isFinite(endMs) ? Math.max(1, Math.round((endMs - startMs) / 60000)) : 30;
+      Number.isFinite(startMs) && Number.isFinite(endMs)
+        ? Math.max(1, Math.round((endMs - startMs) / 60000))
+        : 30;
 
     const clin = row.patient_id?.trim() ? clinicalMap.get(row.patient_id.trim()) : undefined;
     const scalesSummary = clin
@@ -886,9 +938,9 @@ export async function loadOperationalCalendarGridData(
       patientPhone: contact?.phone ?? null,
       roomLabel: monthSummaryMode
         ? null
-        : (row.room_id?.trim() ? resources.roomDisplayById[row.room_id.trim()] : null) ??
+        : ((row.room_id?.trim() ? resources.roomDisplayById[row.room_id.trim()] : null) ??
           row.location?.trim() ??
-          null,
+          null),
       resourceRoomLine: resourceLines.roomLine,
       resourceTeamLine: resourceLines.teamLine,
       clinicalStaffing: clinicalStaffingByBooking.get(row.id) ?? null,

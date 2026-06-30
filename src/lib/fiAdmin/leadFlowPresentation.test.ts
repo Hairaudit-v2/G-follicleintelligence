@@ -72,7 +72,9 @@ const basePayload: LeadFlowDashboardPayload = {
   staleLeadThresholdDays: 7,
 };
 
-function makeCard(overrides: Partial<CrmKanbanLeadCard> & { id: string; slug: string }): CrmKanbanLeadCard {
+function makeCard(
+  overrides: Partial<CrmKanbanLeadCard> & { id: string; slug: string }
+): CrmKanbanLeadCard {
   const { id, slug, ...rest } = overrides;
   return {
     lead: {

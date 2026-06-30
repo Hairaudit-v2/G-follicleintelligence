@@ -6,7 +6,10 @@ import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { ReceptionOsCommunicationActionBar } from "@/src/components/fi-admin/reception-os/ReceptionOsCommunicationActionBar";
-import { ReceptionOsRecordLinks, receptionOsPrimaryHref } from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
+import {
+  ReceptionOsRecordLinks,
+  receptionOsPrimaryHref,
+} from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
 import { buildContextFromDeposit } from "@/src/components/fi-admin/reception-os/receptionOsCommunicationContext";
 import {
   ReceptionOsSeverityBadge,
@@ -48,17 +51,27 @@ export function ReceptionOsOutstandingDepositsWidget({
               const primaryHref = receptionOsPrimaryHref(d.hrefs);
               return (
                 <li key={d.id}>
-                  <div className={cn("rounded-lg px-3 py-2.5", receptionOsSeverityRowClass(d.severity))}>
+                  <div
+                    className={cn(
+                      "rounded-lg px-3 py-2.5",
+                      receptionOsSeverityRowClass(d.severity)
+                    )}
+                  >
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <div className="min-w-0 flex-1">
                         {primaryHref ? (
-                          <Link href={primaryHref} className="truncate font-medium text-slate-100 hover:underline">
+                          <Link
+                            href={primaryHref}
+                            className="truncate font-medium text-slate-100 hover:underline"
+                          >
                             {d.patientLabel}
                           </Link>
                         ) : (
                           <p className="truncate font-medium text-slate-100">{d.patientLabel}</p>
                         )}
-                        <p className="text-xs capitalize text-slate-500">{d.context.replace(/_/g, " ")}</p>
+                        <p className="text-xs capitalize text-slate-500">
+                          {d.context.replace(/_/g, " ")}
+                        </p>
                       </div>
                       <ReceptionOsSeverityBadge severity={d.severity} />
                       <div className="text-right">
@@ -66,7 +79,12 @@ export function ReceptionOsOutstandingDepositsWidget({
                           {d.currency} {d.amountPaid.toFixed(0)} / {d.amountExpected.toFixed(0)}
                         </p>
                         {d.dueDate ? (
-                          <p className={cn("text-xs", d.isOverdue ? "font-semibold text-rose-400" : "text-slate-500")}>
+                          <p
+                            className={cn(
+                              "text-xs",
+                              d.isOverdue ? "font-semibold text-rose-400" : "text-slate-500"
+                            )}
+                          >
                             {d.isOverdue ? (
                               <span className="inline-flex items-center gap-1">
                                 <AlertTriangle className="h-3 w-3" aria-hidden />

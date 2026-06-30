@@ -15,7 +15,10 @@ import {
 import { renderPathologyBloodRequestPdfBytes } from "@/src/lib/pathology/pathologyPdfRender.server";
 import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { sendResendEmailHttp } from "@/src/lib/email/resendHttpSend.server";
-import { buildResendFromAddress, isEmailDeliveryConfigured } from "@/src/lib/reminders/reminderDeliveryConfig";
+import {
+  buildResendFromAddress,
+  isEmailDeliveryConfigured,
+} from "@/src/lib/reminders/reminderDeliveryConfig";
 import { loadReminderDeliveryConfig } from "@/src/lib/reminders/reminderDeliveryConfig.server";
 
 /**
@@ -40,7 +43,8 @@ export async function sendPathologyRequestToPatientEmail(params: {
   if (!to) throw new Error("Patient has no email on file for this person record.");
 
   const cfg = loadReminderDeliveryConfig();
-  if (!isEmailDeliveryConfigured(cfg)) throw new Error("Email delivery is not configured (set RESEND_API_KEY and RESEND_FROM_EMAIL).");
+  if (!isEmailDeliveryConfigured(cfg))
+    throw new Error("Email delivery is not configured (set RESEND_API_KEY and RESEND_FROM_EMAIL).");
 
   const pdfInput = buildPathologyPdfInputFromDetail(bundle);
   const pdfBytes = await renderPathologyBloodRequestPdfBytes(pdfInput);
@@ -89,7 +93,7 @@ export async function sendPathologyRequestToPatientEmail(params: {
     {
       tenant_id: tid,
       pathology_request_id: rid,
-      recipient_email_domain: to.includes("@") ? to.split("@")[1]?.toLowerCase() ?? null : null,
+      recipient_email_domain: to.includes("@") ? (to.split("@")[1]?.toLowerCase() ?? null) : null,
       delivery_path: "pathology_patient_pdf",
     }
   );
@@ -100,7 +104,13 @@ export async function sendPathologyRequestToPatientEmail(params: {
       .upload(storagePath, Buffer.from(pdfBytes), { contentType: "application/pdf", upsert: true });
     if (!upErr) {
       await persistPathologyRequestPdfStorage(
-        { tenantId: tid, patientId: pid, requestId: rid, bucket: PATHOLOGY_PATIENT_PDF_BUCKET, storagePath },
+        {
+          tenantId: tid,
+          patientId: pid,
+          requestId: rid,
+          bucket: PATHOLOGY_PATIENT_PDF_BUCKET,
+          storagePath,
+        },
         supabase
       );
     }
@@ -109,7 +119,10 @@ export async function sendPathologyRequestToPatientEmail(params: {
   }
 
   const sentAt = new Date().toISOString();
-  await markPathologyRequestEmailedToPatient({ tenantId: tid, patientId: pid, requestId: rid, occurredAtIso: sentAt }, supabase);
+  await markPathologyRequestEmailedToPatient(
+    { tenantId: tid, patientId: pid, requestId: rid, occurredAtIso: sentAt },
+    supabase
+  );
 
   await appendCrmActivityEvent({
     tenantId: tid,
@@ -119,7 +132,7 @@ export async function sendPathologyRequestToPatientEmail(params: {
     detail: {
       pathology_request_id: rid,
       resend_id: resendId,
-      to_email_domain: to.includes("@") ? to.split("@")[1]?.toLowerCase() ?? null : null,
+      to_email_domain: to.includes("@") ? (to.split("@")[1]?.toLowerCase() ?? null) : null,
     },
     occurredAt: sentAt,
   });

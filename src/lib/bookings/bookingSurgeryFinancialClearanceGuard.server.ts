@@ -19,7 +19,13 @@ export type AssertSurgeryBookingConfirmationFinancialClearanceInput = {
   existing: Pick<FiBookingRow, "booking_type" | "booking_status">;
   next: Pick<
     FiBookingRow,
-    "id" | "booking_type" | "booking_status" | "start_at" | "case_id" | "patient_id" | "financial_os_status"
+    | "id"
+    | "booking_type"
+    | "booking_status"
+    | "start_at"
+    | "case_id"
+    | "patient_id"
+    | "financial_os_status"
   >;
   now?: Date;
   window?: SurgeryReadinessBoardWindow;
@@ -60,21 +66,18 @@ export async function assertSurgeryBookingConfirmationFinancialClearance(
   });
   if (!withinWindow) return;
 
-  const clearance = await resolveFinancialClearanceForBooking(
-    input.tenantId.trim(),
-    {
-      todayYmd: window.todayYmd,
-      calendarTimezone: window.calendarTimezone,
-      booking: {
-        id: input.next.id,
-        case_id: input.next.case_id,
-        patient_id: input.next.patient_id,
-        booking_status: input.next.booking_status,
-        financial_os_status: input.next.financial_os_status,
-        start_at: input.next.start_at,
-      },
-    }
-  );
+  const clearance = await resolveFinancialClearanceForBooking(input.tenantId.trim(), {
+    todayYmd: window.todayYmd,
+    calendarTimezone: window.calendarTimezone,
+    booking: {
+      id: input.next.id,
+      case_id: input.next.case_id,
+      patient_id: input.next.patient_id,
+      booking_status: input.next.booking_status,
+      financial_os_status: input.next.financial_os_status,
+      start_at: input.next.start_at,
+    },
+  });
 
   if (!shouldBlockSurgeryConfirmationForFinancialClearance(clearance, true)) return;
 

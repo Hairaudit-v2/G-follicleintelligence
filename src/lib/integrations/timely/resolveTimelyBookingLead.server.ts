@@ -22,7 +22,11 @@ export type ResolveTimelyBookingLeadResult = {
 };
 
 function isActiveCrmLeadStatus(status: string | null | undefined): boolean {
-  return !TERMINAL_LEAD_STATUSES.has(String(status ?? "").trim().toLowerCase());
+  return !TERMINAL_LEAD_STATUSES.has(
+    String(status ?? "")
+      .trim()
+      .toLowerCase()
+  );
 }
 
 /**

@@ -6,7 +6,11 @@ import type { OperationalCalendarGridPatch } from "@/src/lib/calendar/operationa
 
 import { useOperationalCalendarStream } from "./operationalCalendarStreamContext";
 
-export function OperationalCalendarGridPatchBridge({ patch }: { patch: OperationalCalendarGridPatch }) {
+export function OperationalCalendarGridPatchBridge({
+  patch,
+}: {
+  patch: OperationalCalendarGridPatch;
+}) {
   const stream = useOperationalCalendarStream();
   useLayoutEffect(() => {
     stream?.applyGridPatch(patch);

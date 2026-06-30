@@ -16,7 +16,13 @@ import { regenerateVieComparisonsBestEffort } from "./vieLongitudinalComparison.
 
 const patientId = "00000000-0000-4000-8000-000000000001";
 
-function acceptedRecord(overrides: Partial<VieComparisonCaptureRecord> & Pick<VieComparisonCaptureRecord, "patient_image_id" | "protocol_template_slug" | "protocol_slot_slug" | "captured_at">): VieComparisonCaptureRecord {
+function acceptedRecord(
+  overrides: Partial<VieComparisonCaptureRecord> &
+    Pick<
+      VieComparisonCaptureRecord,
+      "patient_image_id" | "protocol_template_slug" | "protocol_slot_slug" | "captured_at"
+    >
+): VieComparisonCaptureRecord {
   const base = buildComparisonCaptureRecord({
     patient_image_id: overrides.patient_image_id,
     patient_id: patientId,
@@ -80,7 +86,10 @@ describe("VIE longitudinal comparison core", () => {
     });
 
     const pairs = generateVieComparisonPairs([pending, followUp]);
-    assert.equal(pairs.find((p) => p.before_image_id === pending.patient_image_id), undefined);
+    assert.equal(
+      pairs.find((p) => p.before_image_id === pending.patient_image_id),
+      undefined
+    );
     assert.ok(isExcludedFromTimeline(pending));
   });
 
@@ -102,13 +111,13 @@ describe("VIE longitudinal comparison core", () => {
     });
 
     const strictPairs = generateVieComparisonPairs([low, followUp], 65);
-    assert.equal(strictPairs.find((p) => p.comparison_category === "baseline_vs_follow_up"), undefined);
+    assert.equal(
+      strictPairs.find((p) => p.comparison_category === "baseline_vs_follow_up"),
+      undefined
+    );
 
     const lenientPairs = generateVieComparisonPairs(
-      [
-        { ...low, quality_score: 70, clinically_usable: true },
-        followUp,
-      ],
+      [{ ...low, quality_score: 70, clinically_usable: true }, followUp],
       65
     );
     const warned = lenientPairs.find((p) => p.comparison_category === "baseline_vs_follow_up");
@@ -137,8 +146,10 @@ describe("VIE longitudinal comparison core", () => {
     const pairs = generateVieComparisonPairs([overview, closeUp]);
     const crossFraming = pairs.filter(
       (p) =>
-        (p.before_image_id === overview.patient_image_id && p.after_image_id === closeUp.patient_image_id) ||
-        (p.before_image_id === closeUp.patient_image_id && p.after_image_id === overview.patient_image_id)
+        (p.before_image_id === overview.patient_image_id &&
+          p.after_image_id === closeUp.patient_image_id) ||
+        (p.before_image_id === closeUp.patient_image_id &&
+          p.after_image_id === overview.patient_image_id)
     );
     assert.equal(crossFraming.length, 0);
   });
@@ -245,10 +256,18 @@ describe("VIE longitudinal comparison core", () => {
     });
 
     const timeline = buildVieProgressionTimeline([baseline, surgery, rejected], patientId);
-    assert.equal(timeline.stages.some((s) => s.stage === "baseline"), true);
-    assert.equal(timeline.stages.some((s) => s.stage === "surgery_day"), true);
     assert.equal(
-      timeline.stages.flatMap((s) => s.groups.flatMap((g) => g.images)).some((i) => i.patient_image_id === rejected.patient_image_id),
+      timeline.stages.some((s) => s.stage === "baseline"),
+      true
+    );
+    assert.equal(
+      timeline.stages.some((s) => s.stage === "surgery_day"),
+      true
+    );
+    assert.equal(
+      timeline.stages
+        .flatMap((s) => s.groups.flatMap((g) => g.images))
+        .some((i) => i.patient_image_id === rejected.patient_image_id),
       false
     );
   });

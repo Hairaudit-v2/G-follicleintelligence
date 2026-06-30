@@ -9,7 +9,10 @@ import {
   type MedicationReorderStatus,
 } from "@/src/lib/medicationReorder/medicationReorderTypes";
 import { loadPrescriptionsForPatient } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
-import type { FiPatientPrescriptionRow, FiPrescriptionItemRow } from "@/src/lib/prescribing/fiPrescribingTypes";
+import type {
+  FiPatientPrescriptionRow,
+  FiPrescriptionItemRow,
+} from "@/src/lib/prescribing/fiPrescribingTypes";
 
 function asReorderRow(raw: Record<string, unknown>): FiMedicationReorderRequestRow {
   const st = String(raw.status ?? "");
@@ -31,9 +34,13 @@ function asReorderRow(raw: Record<string, unknown>): FiMedicationReorderRequestR
     status,
     fee_pence: raw.fee_pence != null && raw.fee_pence !== "" ? Number(raw.fee_pence) : null,
     payment_status,
-    doctor_review_crm_task_id: raw.doctor_review_crm_task_id != null ? String(raw.doctor_review_crm_task_id) : null,
+    doctor_review_crm_task_id:
+      raw.doctor_review_crm_task_id != null ? String(raw.doctor_review_crm_task_id) : null,
     rejection_reason: raw.rejection_reason != null ? String(raw.rejection_reason) : null,
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
   };
@@ -91,7 +98,10 @@ export type MedicationPortalLine = {
   prescription: FiPatientPrescriptionRow;
 };
 
-export async function loadMedicationPortalLines(tenantId: string, patientId: string): Promise<MedicationPortalLine[]> {
+export async function loadMedicationPortalLines(
+  tenantId: string,
+  patientId: string
+): Promise<MedicationPortalLine[]> {
   const rxs = await loadPrescriptionsForPatient(tenantId, patientId);
   if (!rxs.length) return [];
   const ids = rxs.map((r) => r.id);
@@ -122,7 +132,8 @@ export async function loadMedicationPortalLines(tenantId: string, patientId: str
         form_type: row.form_type as FiPrescriptionItemRow["form_type"],
         quantity_label: String(row.quantity_label ?? ""),
         dose_instructions: String(row.dose_instructions ?? ""),
-        repeats_instructions: row.repeats_instructions != null ? String(row.repeats_instructions) : null,
+        repeats_instructions:
+          row.repeats_instructions != null ? String(row.repeats_instructions) : null,
         reorder_rule: row.reorder_rule != null ? String(row.reorder_rule) : null,
         repeat_rules_prescriber_confirmed: Boolean(row.repeat_rules_prescriber_confirmed),
         sort_order: Number(row.sort_order ?? 0),
@@ -148,7 +159,10 @@ export async function loadMedicationReorderQueueForTenant(
   if (error) throw new Error(error.message);
   const map = new Map<string, string>();
   for (const it of items ?? []) {
-    map.set(String((it as { id: string }).id), String((it as { medication_name: string }).medication_name ?? ""));
+    map.set(
+      String((it as { id: string }).id),
+      String((it as { medication_name: string }).medication_name ?? "")
+    );
   }
   return rows.map((r) => ({
     ...r,

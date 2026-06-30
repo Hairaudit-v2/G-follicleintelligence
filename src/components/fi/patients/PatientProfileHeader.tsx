@@ -39,7 +39,8 @@ export function PatientProfileHeader({
         </div>
       </div>
       <p className="text-xs text-gray-500">
-        Patient since <time dateTime={data.patient.created_at}>{data.patient.created_at.slice(0, 10)}</time> · ID{" "}
+        Patient since{" "}
+        <time dateTime={data.patient.created_at}>{data.patient.created_at.slice(0, 10)}</time> · ID{" "}
         <code className="rounded bg-white/[0.06] px-1">{data.foundationPatientId}</code>
       </p>
     </header>

@@ -12,7 +12,9 @@ export const SURGERY_PLANNING_STATUS_VALUES = [
 
 export type SurgeryPlanningStatusValue = (typeof SURGERY_PLANNING_STATUS_VALUES)[number];
 
-export function isSurgeryPlanningStatus(s: string | null | undefined): s is SurgeryPlanningStatusValue {
+export function isSurgeryPlanningStatus(
+  s: string | null | undefined
+): s is SurgeryPlanningStatusValue {
   return !!s && (SURGERY_PLANNING_STATUS_VALUES as readonly string[]).includes(s.trim());
 }
 

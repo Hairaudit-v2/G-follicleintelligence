@@ -15,7 +15,7 @@ export function StatCard({ label, value, icon, className }: StatCardProps) {
     <div
       className={cn(
         "flex gap-3 rounded-xl border border-white/[0.08] bg-[#141C33]/60 px-4 py-3 shadow-inner shadow-black/20 backdrop-blur-sm",
-        className,
+        className
       )}
     >
       {icon ? (
@@ -24,8 +24,12 @@ export function StatCard({ label, value, icon, className }: StatCardProps) {
         </div>
       ) : null}
       <div className="min-w-0 flex-1">
-        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">{label}</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-[#F8FAFC] sm:text-[1.75rem]">{value}</div>
+        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
+          {label}
+        </div>
+        <div className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-[#F8FAFC] sm:text-[1.75rem]">
+          {value}
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,12 @@ type Props = {
  * Button-style trigger that opens the patient slide-over when a provider is mounted.
  * Use inside {@link PatientSlideOverProvider}, or set `requireProvider` to surface a clear error during development.
  */
-export function PatientSlideOverTrigger({ patientId, children, className, requireProvider }: Props) {
+export function PatientSlideOverTrigger({
+  patientId,
+  children,
+  className,
+  requireProvider,
+}: Props) {
   const slide = usePatientSlideOverOptional();
   if (!slide) {
     if (requireProvider) {
@@ -29,7 +34,11 @@ export function PatientSlideOverTrigger({ patientId, children, className, requir
       className={className}
       onClick={(e) => {
         if (e.ctrlKey || e.metaKey) {
-          window.open(`/fi-admin/${slide.tenantId}/patients/${patientId}`, "_blank", "noopener,noreferrer");
+          window.open(
+            `/fi-admin/${slide.tenantId}/patients/${patientId}`,
+            "_blank",
+            "noopener,noreferrer"
+          );
           return;
         }
         slide.openPatient(patientId);

@@ -4,10 +4,12 @@ import type { PaymentContext, PaymentStatus } from "@/src/lib/payments/paymentRe
 
 const uuid = z.string().uuid();
 
-const PAYMENT_CONTEXT_Z = z.enum(["consultation", "surgery", "medication_reorder", "other"] as unknown as [
-  PaymentContext,
-  ...PaymentContext[],
-]);
+const PAYMENT_CONTEXT_Z = z.enum([
+  "consultation",
+  "surgery",
+  "medication_reorder",
+  "other",
+] as unknown as [PaymentContext, ...PaymentContext[]]);
 
 const PAYMENT_STATUS_Z = z.enum([
   "not_required",

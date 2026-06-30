@@ -37,7 +37,9 @@ export async function updatePatientAdminDetails(
   if (params.admin_note !== undefined) {
     const raw = params.admin_note;
     updates.admin_note =
-      raw === null || raw === "" ? null : assertAdminNoteWithinBounds(typeof raw === "string" ? raw : String(raw));
+      raw === null || raw === ""
+        ? null
+        : assertAdminNoteWithinBounds(typeof raw === "string" ? raw : String(raw));
   }
   if (params.reminder_consent !== undefined) {
     updates.reminder_consent = Boolean(params.reminder_consent);
@@ -60,7 +62,9 @@ export async function updatePatientAdminDetails(
     .update(updates)
     .eq("tenant_id", tid)
     .eq("id", pid)
-    .select("id, patient_status, admin_note, reminder_consent, preferred_contact_method, updated_at")
+    .select(
+      "id, patient_status, admin_note, reminder_consent, preferred_contact_method, updated_at"
+    )
     .single();
 
   if (error) throw new Error(error.message);
@@ -72,7 +76,8 @@ export async function updatePatientAdminDetails(
     patient_status: String(row.patient_status ?? "active"),
     admin_note: row.admin_note != null ? String(row.admin_note) : null,
     reminder_consent: Boolean(row.reminder_consent),
-    preferred_contact_method: row.preferred_contact_method != null ? String(row.preferred_contact_method) : null,
+    preferred_contact_method:
+      row.preferred_contact_method != null ? String(row.preferred_contact_method) : null,
     updated_at: String(row.updated_at),
   };
 }

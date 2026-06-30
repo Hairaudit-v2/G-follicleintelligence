@@ -15,7 +15,8 @@ export const GOOGLE_CALENDAR_SYNC_ALERT_EVENT_TYPES = [
   "google_calendar_sync_alert_created",
 ] as const;
 
-export type GoogleCalendarSyncAlertEventType = (typeof GOOGLE_CALENDAR_SYNC_ALERT_EVENT_TYPES)[number];
+export type GoogleCalendarSyncAlertEventType =
+  (typeof GOOGLE_CALENDAR_SYNC_ALERT_EVENT_TYPES)[number];
 
 type ServerOpts = {
   supabaseClientForTests?: SupabaseClient;

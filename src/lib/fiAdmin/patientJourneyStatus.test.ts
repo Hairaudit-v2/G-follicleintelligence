@@ -362,8 +362,14 @@ test("every output has required shape { label, tone, description }", () => {
   ];
   for (const input of inputs) {
     const s = derivePatientJourneyStatus(input);
-    assert.ok(typeof s.label === "string" && s.label.length > 0, `label missing for ${JSON.stringify(input)}`);
-    assert.ok(["neutral", "info", "warning", "success"].includes(s.tone), `invalid tone: ${s.tone}`);
+    assert.ok(
+      typeof s.label === "string" && s.label.length > 0,
+      `label missing for ${JSON.stringify(input)}`
+    );
+    assert.ok(
+      ["neutral", "info", "warning", "success"].includes(s.tone),
+      `invalid tone: ${s.tone}`
+    );
     assert.ok(typeof s.description === "string" && s.description.length > 0, `description missing`);
   }
 });

@@ -7,7 +7,12 @@ import {
   updateSuperReleaseDocumentAction,
   updateSuperReleaseStatusAction,
 } from "@/lib/actions/financial-os-super-release-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  financialOsActionFeedback,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialSuperReleaseStatusBadge } from "@/src/components/fi/financial/FinancialSuperReleaseStatusBadge";
 import type { SuperReleaseApplicationRecord } from "@/src/lib/financialOs/financialSuperRelease.server";
 
@@ -91,10 +96,15 @@ export function FinancialSuperReleaseDocuments(props: {
     <div className={`space-y-4 ${financialOsClasses.formPanel}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className={financialOsClasses.formTitle}>{application.provider_name ?? "Super release application"}</p>
+          <p className={financialOsClasses.formTitle}>
+            {application.provider_name ?? "Super release application"}
+          </p>
           <p className={financialOsClasses.bodyTextXs}>
-            Requested {fmtMoney(application.requested_amount_cents)} · Approved {fmtMoney(application.approved_amount_cents)}
-            {application.expected_release_date ? ` · Expected release ${application.expected_release_date}` : null}
+            Requested {fmtMoney(application.requested_amount_cents)} · Approved{" "}
+            {fmtMoney(application.approved_amount_cents)}
+            {application.expected_release_date
+              ? ` · Expected release ${application.expected_release_date}`
+              : null}
           </p>
         </div>
         <FinancialSuperReleaseStatusBadge status={application.application_status} />
@@ -106,7 +116,9 @@ export function FinancialSuperReleaseDocuments(props: {
             Application status
             <select
               defaultValue={application.application_status}
-              onChange={(e) => updateStatus(e.target.value as (typeof APPLICATION_STATUSES)[number])}
+              onChange={(e) =>
+                updateStatus(e.target.value as (typeof APPLICATION_STATUSES)[number])
+              }
               disabled={pending}
               className={financialOsClasses.select}
             >
@@ -124,14 +136,21 @@ export function FinancialSuperReleaseDocuments(props: {
         <h4 className={financialOsClasses.metricLabel}>Documents</h4>
         <ul className="mt-2 space-y-2">
           {(application.documents ?? []).map((doc) => (
-            <li key={doc.id} className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}>
-              <span className="font-medium text-slate-100">{doc.document_type.replace(/_/g, " ")}</span>
+            <li
+              key={doc.id}
+              className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}
+            >
+              <span className="font-medium text-slate-100">
+                {doc.document_type.replace(/_/g, " ")}
+              </span>
               <span className={financialOsClasses.bodyTextXs}>{doc.status}</span>
               {canMutate ? (
                 <select
                   defaultValue={doc.status}
                   disabled={pending}
-                  onChange={(e) => updateDocStatus(doc.id, e.target.value as (typeof DOCUMENT_STATUSES)[number])}
+                  onChange={(e) =>
+                    updateDocStatus(doc.id, e.target.value as (typeof DOCUMENT_STATUSES)[number])
+                  }
                   className={financialOsClasses.inlineSelect}
                 >
                   {DOCUMENT_STATUSES.map((s) => (
@@ -143,7 +162,9 @@ export function FinancialSuperReleaseDocuments(props: {
               ) : null}
             </li>
           ))}
-          {!application.documents?.length ? <li className={financialOsClasses.mutedMeta}>No documents tracked yet.</li> : null}
+          {!application.documents?.length ? (
+            <li className={financialOsClasses.mutedMeta}>No documents tracked yet.</li>
+          ) : null}
         </ul>
       </div>
 
@@ -163,7 +184,12 @@ export function FinancialSuperReleaseDocuments(props: {
               ))}
             </select>
           </label>
-          <button type="button" disabled={pending} onClick={addDocument} className={financialOsClasses.primaryButton}>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={addDocument}
+            className={financialOsClasses.primaryButton}
+          >
             Add document
           </button>
         </div>

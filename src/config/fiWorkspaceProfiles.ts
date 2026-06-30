@@ -61,7 +61,8 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   director: {
     key: "director",
     label: "Director",
-    description: "Business performance, conversion, revenue, clinic health, and full ReceptionOS visibility.",
+    description:
+      "Business performance, conversion, revenue, clinic health, and full ReceptionOS visibility.",
     primaryFocus: "Business performance, conversion, revenue, clinic health, outcome intelligence.",
     defaultDashboardWidgets: [
       "clinic_metrics",
@@ -90,7 +91,8 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   clinic_manager: {
     key: "clinic_manager",
     label: "Clinic manager",
-    description: "Day-to-day clinic operations, staffing, patient flow, and full ReceptionOS oversight.",
+    description:
+      "Day-to-day clinic operations, staffing, patient flow, and full ReceptionOS oversight.",
     primaryFocus: "Operational excellence, scheduling, team coordination, patient experience.",
     defaultDashboardWidgets: [
       "operational_workspace",
@@ -185,12 +187,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     preferredNavFeatures: ["procedure_day", "patients", "imaging", "calendar"],
     hiddenByDefaultFeatures: [],
     allowedFeatureOverrides: true,
-    priorityTaskTypes: [
-      "Procedure preparation",
-      "Follow-ups",
-      "Imaging uploads",
-      "Patient flow",
-    ],
+    priorityTaskTypes: ["Procedure preparation", "Follow-ups", "Imaging uploads", "Patient flow"],
   },
   consultant: {
     key: "consultant",
@@ -219,7 +216,8 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   reception: {
     key: "reception",
     label: "Reception",
-    description: "Front desk, calendar, arrivals, and ReceptionOS command centre (patients, comms, alerts, surgery awareness).",
+    description:
+      "Front desk, calendar, arrivals, and ReceptionOS command centre (patients, comms, alerts, surgery awareness).",
     primaryFocus: "Bookings, front desk, calendar, patient flow.",
     defaultDashboardWidgets: [
       "operational_workspace",
@@ -232,41 +230,60 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     preferredNavFeatures: ["calendar", "patients", "crm"],
     hiddenByDefaultFeatures: [],
     allowedFeatureOverrides: true,
-    priorityTaskTypes: [
-      "Today’s bookings",
-      "Patient arrivals",
-      "Call-ins",
-      "Unassigned leads",
-    ],
+    priorityTaskTypes: ["Today’s bookings", "Patient arrivals", "Call-ins", "Unassigned leads"],
   },
   academy_trainer: {
     key: "academy_trainer",
     label: "Academy trainer",
     description: "Training delivery, academy content, and learner follow-ups.",
     primaryFocus: "Training sessions, academy progress, learner engagement.",
-    defaultDashboardWidgets: ["my_workspace", "attention_centre", "operational_workspace", "quick_actions"],
+    defaultDashboardWidgets: [
+      "my_workspace",
+      "attention_centre",
+      "operational_workspace",
+      "quick_actions",
+    ],
     defaultQuickActions: ["patient", "booking", "consultation", "lead"],
     preferredNavFeatures: ["academy", "staff", "calendar"],
     hiddenByDefaultFeatures: [],
     allowedFeatureOverrides: true,
-    priorityTaskTypes: ["Session prep", "Learner follow-ups", "Content updates", "Clinic coordination"],
+    priorityTaskTypes: [
+      "Session prep",
+      "Learner follow-ups",
+      "Content updates",
+      "Clinic coordination",
+    ],
   },
   auditor: {
     key: "auditor",
     label: "Auditor",
-    description: "Security and compliance review surfaces (visibility still obeys Stage 2 toggles).",
+    description:
+      "Security and compliance review surfaces (visibility still obeys Stage 2 toggles).",
     primaryFocus: "Audit trails, access review, data safety signals.",
-    defaultDashboardWidgets: ["audit_summary", "attention_centre", "clinic_metrics", "quick_actions", "my_workspace", "outcome_intelligence_summary"],
+    defaultDashboardWidgets: [
+      "audit_summary",
+      "attention_centre",
+      "clinic_metrics",
+      "quick_actions",
+      "my_workspace",
+      "outcome_intelligence_summary",
+    ],
     defaultQuickActions: ["patient", "booking", "case"],
     preferredNavFeatures: ["audit", "analytics", "staff"],
     hiddenByDefaultFeatures: [],
     allowedFeatureOverrides: true,
-    priorityTaskTypes: ["Items requiring verification", "Policy exceptions", "Access anomalies", "Documentation gaps"],
+    priorityTaskTypes: [
+      "Items requiring verification",
+      "Policy exceptions",
+      "Access anomalies",
+      "Documentation gaps",
+    ],
   },
   platform_admin: {
     key: "platform_admin",
     label: "Platform admin",
-    description: "Full-module FI OS operator layout (subject to Stage 2 when impersonating tenant staff).",
+    description:
+      "Full-module FI OS operator layout (subject to Stage 2 when impersonating tenant staff).",
     primaryFocus: "Cross-tenant operations, configuration, and support readiness.",
     defaultDashboardWidgets: [
       "quick_actions",
@@ -285,7 +302,12 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     preferredNavFeatures: [],
     hiddenByDefaultFeatures: [],
     allowedFeatureOverrides: true,
-    priorityTaskTypes: ["Operator escalations", "Tenant support tasks", "Configuration follow-ups", "Cross-clinic checks"],
+    priorityTaskTypes: [
+      "Operator escalations",
+      "Tenant support tasks",
+      "Configuration follow-ups",
+      "Cross-clinic checks",
+    ],
   },
   default: {
     key: "default",
@@ -304,7 +326,12 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     preferredNavFeatures: [],
     hiddenByDefaultFeatures: [],
     allowedFeatureOverrides: true,
-    priorityTaskTypes: ["Assigned CRM tasks", "Owned reminders", "Personal follow-ups", "Delegated work"],
+    priorityTaskTypes: [
+      "Assigned CRM tasks",
+      "Owned reminders",
+      "Personal follow-ups",
+      "Delegated work",
+    ],
   },
 };
 

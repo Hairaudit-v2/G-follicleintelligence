@@ -6,8 +6,15 @@ import {
   buildDefaultTaxLocalisationDocument,
   parseFiTaxCountryRegionFromMetadata,
 } from "@/src/lib/taxLocalisation/taxLocalisationDefaults";
-import { mergeTaxLocalisationFromStorage, taxLocalisationDocumentToRowPayload } from "@/src/lib/taxLocalisation/taxLocalisationMerge";
-import type { FiClinicOption, FiTaxCountryRegion, FiTaxLocalisationDocument } from "@/src/lib/taxLocalisation/taxLocalisationTypes";
+import {
+  mergeTaxLocalisationFromStorage,
+  taxLocalisationDocumentToRowPayload,
+} from "@/src/lib/taxLocalisation/taxLocalisationMerge";
+import type {
+  FiClinicOption,
+  FiTaxCountryRegion,
+  FiTaxLocalisationDocument,
+} from "@/src/lib/taxLocalisation/taxLocalisationTypes";
 
 export async function loadClinicsForTenant(tenantId: string): Promise<FiClinicOption[]> {
   const tid = tenantId.trim();
@@ -33,7 +40,9 @@ export async function loadTaxLocalisationDocumentForScope(opts: {
   const supabase = supabaseAdmin();
   let q = supabase
     .from("fi_tax_localisation_settings")
-    .select("country_region, currency, effective_from, tax_profile, invoice_settings, receipt_settings")
+    .select(
+      "country_region, currency, effective_from, tax_profile, invoice_settings, receipt_settings"
+    )
     .eq("tenant_id", tid);
   q = cid ? q.eq("clinic_id", cid) : q.is("clinic_id", null);
   const { data, error } = await q.maybeSingle();
@@ -61,7 +70,10 @@ export async function loadTaxLocalisationDocumentForScope(opts: {
  * Optional country hint for a clinic (`fi_clinic_settings.metadata` then `fi_clinics.metadata`).
  * Keys: `tax_country_region` or `country_region` (e.g. `NZ`, `AU`).
  */
-export async function loadClinicCountryRegionHint(tenantId: string, clinicId: string): Promise<FiTaxCountryRegion | null> {
+export async function loadClinicCountryRegionHint(
+  tenantId: string,
+  clinicId: string
+): Promise<FiTaxCountryRegion | null> {
   const tid = tenantId.trim();
   const cid = clinicId.trim();
   if (!tid || !cid) return null;
@@ -74,10 +86,17 @@ export async function loadClinicCountryRegionHint(tenantId: string, clinicId: st
     .eq("clinic_id", cid)
     .maybeSingle();
   const m1 = cs?.metadata as Record<string, unknown> | undefined;
-  const fromSettings = parseFiTaxCountryRegionFromMetadata(m1?.tax_country_region ?? m1?.country_region);
+  const fromSettings = parseFiTaxCountryRegionFromMetadata(
+    m1?.tax_country_region ?? m1?.country_region
+  );
   if (fromSettings) return fromSettings;
 
-  const { data: cl } = await supabase.from("fi_clinics").select("metadata").eq("tenant_id", tid).eq("id", cid).maybeSingle();
+  const { data: cl } = await supabase
+    .from("fi_clinics")
+    .select("metadata")
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .maybeSingle();
   const m2 = cl?.metadata as Record<string, unknown> | undefined;
   return parseFiTaxCountryRegionFromMetadata(m2?.tax_country_region ?? m2?.country_region);
 }

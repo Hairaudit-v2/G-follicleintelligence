@@ -3,7 +3,11 @@
  */
 
 import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
-import { addDaysToCalendarDate, calendarDateStringFromInstant, zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  addDaysToCalendarDate,
+  calendarDateStringFromInstant,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection } from "@/src/lib/payments/paymentRecordModel";
 import {
@@ -22,25 +26,36 @@ export type ProcedureDayBoardWindow = {
   rangeEndIso: string;
 };
 
-export function computeProcedureDayBoardWindow(now: Date, calendarTimezone: string): ProcedureDayBoardWindow {
+export function computeProcedureDayBoardWindow(
+  now: Date,
+  calendarTimezone: string
+): ProcedureDayBoardWindow {
   const tz = calendarTimezone.trim();
   const todayYmd = calendarDateStringFromInstant(now, tz);
   const nextYmd = addDaysToCalendarDate(todayYmd, 1, tz);
   const startMs = zonedMidnightUtcMs(todayYmd, tz);
   const endMs = zonedMidnightUtcMs(nextYmd, tz);
   const rangeStartIso = (startMs != null ? new Date(startMs) : now).toISOString();
-  const rangeEndIso = (endMs != null ? new Date(endMs) : new Date(now.getTime() + 86_400_000)).toISOString();
+  const rangeEndIso = (
+    endMs != null ? new Date(endMs) : new Date(now.getTime() + 86_400_000)
+  ).toISOString();
   return { calendarTimezone: tz, todayYmd, rangeStartIso, rangeEndIso };
 }
 
-export function isBookingStartOnTenantLocalDay(startAtIso: string, tz: string, ymd: string): boolean {
+export function isBookingStartOnTenantLocalDay(
+  startAtIso: string,
+  tz: string,
+  ymd: string
+): boolean {
   return calendarDateStringFromInstant(new Date(startAtIso), tz) === ymd.trim();
 }
 
 /** Buckets for aggregate procedure progress (fi_case_procedures.procedure_status). */
 export type ProcedureProgressBucket = "scheduled" | "in_progress" | "completed" | "cancelled";
 
-export function procedureProgressBucket(procedureStatus: string | null | undefined): ProcedureProgressBucket | null {
+export function procedureProgressBucket(
+  procedureStatus: string | null | undefined
+): ProcedureProgressBucket | null {
   if (!procedureStatus?.trim()) return null;
   const s = procedureStatus.trim().toLowerCase();
   if (s === "completed") return "completed";
@@ -65,7 +80,8 @@ export function deriveSurgeryDayPipelinePhase(input: {
   if (bst === "completed") return "completed";
   const ps = input.procedureStatus?.trim().toLowerCase() ?? "";
   if (ps === "completed") return "completed";
-  if (ps === "in_progress" || ps === "paused" || ps === "checked_in" || bst === "arrived") return "in_progress";
+  if (ps === "in_progress" || ps === "paused" || ps === "checked_in" || bst === "arrived")
+    return "in_progress";
   if (input.readinessBucket === "ready") return "ready";
   return "scheduled";
 }
@@ -101,11 +117,16 @@ export type ProcedureDayActionInput = {
   hasRoom: boolean;
   procedureRowExists: boolean;
   procedureStatus: string | null;
-  surgeryPaymentRecord: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid"> | null;
+  surgeryPaymentRecord: Pick<
+    PaymentRecordRow,
+    "status" | "due_date" | "amount_expected" | "amount_paid"
+  > | null;
   todayYmd: string;
 };
 
-export function buildProcedureDayActionItems(input: ProcedureDayActionInput): ProcedureDayActionItem[] {
+export function buildProcedureDayActionItems(
+  input: ProcedureDayActionInput
+): ProcedureDayActionItem[] {
   const tid = input.tenantId.trim();
   const base = `/fi-admin/${encodeURIComponent(tid)}`;
   const appt = `${base}/appointments/${encodeURIComponent(input.bookingId)}`;
@@ -171,7 +192,10 @@ export function buildProcedureDayActionItems(input: ProcedureDayActionInput): Pr
     });
   }
 
-  if (input.surgeryPaymentRecord && paymentRecordNeedsCollection(input.surgeryPaymentRecord, input.todayYmd)) {
+  if (
+    input.surgeryPaymentRecord &&
+    paymentRecordNeedsCollection(input.surgeryPaymentRecord, input.todayYmd)
+  ) {
     actions.push({
       kind: "surgery_deposit_pending",
       label: "Surgery deposit still expected (manual payment record)",
@@ -183,7 +207,13 @@ export function buildProcedureDayActionItems(input: ProcedureDayActionInput): Pr
   }
 
   const ps = input.procedureStatus?.trim().toLowerCase() ?? "";
-  if (input.procedureRowExists && ps !== "completed" && ps !== "cancelled" && ps !== "aborted" && bst !== "completed") {
+  if (
+    input.procedureRowExists &&
+    ps !== "completed" &&
+    ps !== "cancelled" &&
+    ps !== "aborted" &&
+    bst !== "completed"
+  ) {
     actions.push({
       kind: "complete_procedure_day_record",
       label: "Complete procedure day record when the case finishes",
@@ -211,7 +241,10 @@ export function buildPreOpChecklistFlags(input: {
   caseId: string | null;
   consultRows: ConsultationConsentInput[];
   hasPathologyResult: boolean;
-  surgeryPaymentRecord: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid"> | null;
+  surgeryPaymentRecord: Pick<
+    PaymentRecordRow,
+    "status" | "due_date" | "amount_expected" | "amount_paid"
+  > | null;
   todayYmd: string;
   hasSurgeryPlanRow: boolean;
   surgeryPlanningComplete: boolean;
@@ -224,8 +257,11 @@ export function buildPreOpChecklistFlags(input: {
   const consentProxy = !caseLinked ? true : hasConsultationConsentSignal(input.consultRows);
   const pathologyReviewed = !caseLinked ? true : input.hasPathologyResult;
   const depositOkOrUntracked =
-    !input.surgeryPaymentRecord || !paymentRecordNeedsCollection(input.surgeryPaymentRecord, input.todayYmd);
-  const procedurePlanComplete = !caseLinked ? false : input.hasSurgeryPlanRow && input.surgeryPlanningComplete;
+    !input.surgeryPaymentRecord ||
+    !paymentRecordNeedsCollection(input.surgeryPaymentRecord, input.todayYmd);
+  const procedurePlanComplete = !caseLinked
+    ? false
+    : input.hasSurgeryPlanRow && input.surgeryPlanningComplete;
   const surgeonAssigned = input.hasBookingAssignee || input.hasProcedureSurgeon;
   const roomOk = !input.roomRequired || input.hasRoom;
   return {
@@ -249,7 +285,10 @@ export function buildTodayProcedureReadinessIssues(input: {
   surgeryPlanningComplete: boolean;
   bookingStatus: string;
   surgeryPlanPlanningStatus: string | null;
-  surgeryPaymentRecord: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid"> | null;
+  surgeryPaymentRecord: Pick<
+    PaymentRecordRow,
+    "status" | "due_date" | "amount_expected" | "amount_paid"
+  > | null;
   todayYmd: string;
 }): SurgeryReadinessIssue[] {
   const raw = buildSurgeryReadinessIssues({

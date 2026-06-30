@@ -2,12 +2,19 @@
 
 import { z, ZodError } from "zod";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import { createCrmLeadWithPerson } from "@/src/lib/crm/leads";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
-import { endIsoFromStartAndProcedure, servicesByBookingType } from "@/src/lib/bookings/servicesCatalog";
+import {
+  endIsoFromStartAndProcedure,
+  servicesByBookingType,
+} from "@/src/lib/bookings/servicesCatalog";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { BOOKING_TYPES, isAllowedBookingType } from "@/src/lib/bookings/bookingPolicy";
 import { createBooking } from "@/src/lib/bookings/server";
@@ -40,12 +47,14 @@ function errMsg(e: unknown): string {
   return "Request failed.";
 }
 
-export type QuickCallInBookingResult = {
-  ok: true;
-  leadId: string;
-  bookingId: string;
-  booking: Awaited<ReturnType<typeof createBooking>>;
-} | { ok: false; error: string };
+export type QuickCallInBookingResult =
+  | {
+      ok: true;
+      leadId: string;
+      bookingId: string;
+      booking: Awaited<ReturnType<typeof createBooking>>;
+    }
+  | { ok: false; error: string };
 
 /**
  * Front-desk phone intake: CRM lead (source Phone) + linked consultation booking + reminder sync via {@link createBooking}.

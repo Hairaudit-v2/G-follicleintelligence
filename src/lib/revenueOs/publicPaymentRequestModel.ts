@@ -1,7 +1,13 @@
 import type { FiInvoiceRow, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { invoiceBalanceDueCents } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
-export type PublicPaymentRequestUiState = "invalid" | "payable" | "paid" | "expired" | "cancelled" | "manual_contact";
+export type PublicPaymentRequestUiState =
+  | "invalid"
+  | "payable"
+  | "paid"
+  | "expired"
+  | "cancelled"
+  | "manual_contact";
 
 /** Hex token generated server-side (see `revenueInvoiceMutations`); avoids path traversal / odd chars. */
 export function isPaymentPublicTokenFormat(raw: string | null | undefined): boolean {

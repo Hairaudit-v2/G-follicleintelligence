@@ -16,7 +16,9 @@ import {
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>
+  );
 }
 
 export function PatientHairLossClassificationCard({
@@ -29,7 +31,10 @@ export function PatientHairLossClassificationCard({
   twin: PatientTwinV1;
 }) {
   const { hair_loss } = twin.intelligence;
-  const galleryIds = useMemo(() => twin.imaging.gallery.items.map((i) => i.id), [twin.imaging.gallery.items]);
+  const galleryIds = useMemo(
+    () => twin.imaging.gallery.items.map((i) => i.id),
+    [twin.imaging.gallery.items]
+  );
   const [selectedImageId, setSelectedImageId] = useState(() => galleryIds[0] ?? "");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -103,16 +108,22 @@ export function PatientHairLossClassificationCard({
         </div>
         <div>
           <FieldLabel>Classification system</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest ? latest.classification_system : "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest ? latest.classification_system : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Grade</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest ? latest.classification_grade : "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest ? latest.classification_grade : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Confidence</FieldLabel>
           <p className="mt-0.5 text-sm text-slate-200">
-            {latest != null && latest.confidence_score != null ? latest.confidence_score.toFixed(2) : "—"}
+            {latest != null && latest.confidence_score != null
+              ? latest.confidence_score.toFixed(2)
+              : "—"}
           </p>
         </div>
         <div>
@@ -149,7 +160,9 @@ export function PatientHairLossClassificationCard({
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-[#94A3B8]">No hair loss classification runs yet for this patient.</p>
+        <p className="mt-3 text-sm text-[#94A3B8]">
+          No hair loss classification runs yet for this patient.
+        </p>
       )}
 
       <div className="mt-5 border-t border-white/10 pt-4">
@@ -176,7 +189,12 @@ export function PatientHairLossClassificationCard({
           onClick={() => {
             setMessage(null);
             start(async () => {
-              const res = await classifyPatientHairLossAction(tenantId, patientId, selectedImageId, {});
+              const res = await classifyPatientHairLossAction(
+                tenantId,
+                patientId,
+                selectedImageId,
+                {}
+              );
               if (!res.ok) setMessage(res.error);
             });
           }}
@@ -300,15 +318,20 @@ export function PatientHairLossClassificationCard({
                 setMessage(null);
                 start(async () => {
                   const c = Number(conf);
-                  const res = await updateHairLossClassificationReviewAction(tenantId, patientId, editId, {
-                    review_status: review as (typeof HIE_HAIR_LOSS_REVIEW_STATUSES)[number],
-                    classification_system: sys as (typeof HIE_CLASSIFICATION_SYSTEMS)[number],
-                    pattern_type: pat as (typeof HIE_HAIR_LOSS_PATTERN_TYPES)[number],
-                    classification_grade: grade,
-                    confidence_score: Number.isFinite(c) ? c : 0,
-                    ai_notes: notes || null,
-                    sex_classification: sex as (typeof HIE_SEX_CLASSIFICATIONS)[number],
-                  });
+                  const res = await updateHairLossClassificationReviewAction(
+                    tenantId,
+                    patientId,
+                    editId,
+                    {
+                      review_status: review as (typeof HIE_HAIR_LOSS_REVIEW_STATUSES)[number],
+                      classification_system: sys as (typeof HIE_CLASSIFICATION_SYSTEMS)[number],
+                      pattern_type: pat as (typeof HIE_HAIR_LOSS_PATTERN_TYPES)[number],
+                      classification_grade: grade,
+                      confidence_score: Number.isFinite(c) ? c : 0,
+                      ai_notes: notes || null,
+                      sex_classification: sex as (typeof HIE_SEX_CLASSIFICATIONS)[number],
+                    }
+                  );
                   if (!res.ok) setMessage(res.error);
                 });
               }}

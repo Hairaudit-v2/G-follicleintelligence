@@ -7,11 +7,7 @@ import { normalizeEmail, normalizeWhitespaceName } from "@/src/lib/fi/foundation
 
 export type DuplicateMatchEntityType = "person" | "lead" | "patient" | "case" | "external_mapping";
 
-export type DuplicateMatchRule =
-  | "exact_email"
-  | "exact_phone"
-  | "external_mapping"
-  | "fuzzy_name";
+export type DuplicateMatchRule = "exact_email" | "exact_phone" | "external_mapping" | "fuzzy_name";
 
 export type DuplicateMatch = {
   entityType: DuplicateMatchEntityType;
@@ -238,8 +234,9 @@ export function runDuplicateDetection(
 
   const deduped = dedupeMatches(matches);
   const highestConfidence = deduped.length ? Math.max(...deduped.map((m) => m.confidence)) : 0;
-  const hasBlockingMatch =
-    deduped.some((m) => m.confidence >= 95 && (m.rule === "exact_email" || m.rule === "external_mapping"));
+  const hasBlockingMatch = deduped.some(
+    (m) => m.confidence >= 95 && (m.rule === "exact_email" || m.rule === "external_mapping")
+  );
 
   const confidenceScore = highestConfidence;
 
@@ -274,7 +271,10 @@ function dedupeMatches(matches: DuplicateMatch[]): DuplicateMatch[] {
 }
 
 /** Extract person index fields from fi_persons metadata row. */
-export function personRowToDuplicateCandidate(row: { id: string; metadata: unknown }): DuplicateCheckCandidateIndex["persons"][number] {
+export function personRowToDuplicateCandidate(row: {
+  id: string;
+  metadata: unknown;
+}): DuplicateCheckCandidateIndex["persons"][number] {
   const m = row.metadata as Record<string, unknown> | null;
   const emailNormalized =
     typeof m?.email_normalized === "string" ? normalizeEmail(m.email_normalized) : null;

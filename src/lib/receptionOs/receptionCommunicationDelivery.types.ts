@@ -6,7 +6,8 @@ export const RECEPTION_COMMUNICATION_DELIVERY_STATUSES = [
   "failed",
 ] as const;
 
-export type ReceptionCommunicationDeliveryStatus = (typeof RECEPTION_COMMUNICATION_DELIVERY_STATUSES)[number];
+export type ReceptionCommunicationDeliveryStatus =
+  (typeof RECEPTION_COMMUNICATION_DELIVERY_STATUSES)[number];
 
 export type ReceptionCommunicationDeliveryRow = {
   id: string;

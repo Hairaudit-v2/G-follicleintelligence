@@ -51,9 +51,7 @@ export function GuidedAssistToggle({
         onClick={toggle}
         className={cn(
           "relative h-6 w-11 shrink-0 rounded-full border transition-colors",
-          assistEnabled
-            ? "border-cyan-500/60 bg-cyan-600/30"
-            : "border-slate-600 bg-slate-800/80"
+          assistEnabled ? "border-cyan-500/60 bg-cyan-600/30" : "border-slate-600 bg-slate-800/80"
         )}
       >
         <span
@@ -62,7 +60,9 @@ export function GuidedAssistToggle({
             assistEnabled ? "translate-x-5" : "translate-x-0.5"
           )}
         />
-        <span className="sr-only">{assistEnabled ? "Disable guided assist" : "Enable guided assist"}</span>
+        <span className="sr-only">
+          {assistEnabled ? "Disable guided assist" : "Enable guided assist"}
+        </span>
       </button>
       {!compact ? (
         <span className="text-xs text-slate-400">{assistEnabled ? "On" : "Off"}</span>

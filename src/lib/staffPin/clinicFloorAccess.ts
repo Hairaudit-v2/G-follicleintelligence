@@ -31,7 +31,9 @@ function pinToClinicFloorSession(pin: StaffPinClinicSession): ClinicFloorSession
   };
 }
 
-export async function getClinicFloorSessionIfAllowed(tenantId: string): Promise<ClinicFloorSession | null> {
+export async function getClinicFloorSessionIfAllowed(
+  tenantId: string
+): Promise<ClinicFloorSession | null> {
   const pin = await getStaffPinClinicSessionIfValid(tenantId);
   if (pin) return pinToClinicFloorSession(pin);
 
@@ -40,14 +42,16 @@ export async function getClinicFloorSessionIfAllowed(tenantId: string): Promise<
   return { ...booking, authMode: "supabase" };
 }
 
-export const getClinicFloorPageSession = cache(async (tenantId: string): Promise<ClinicFloorSession> => {
-  const session = await getClinicFloorSessionIfAllowed(tenantId);
-  if (session) return session;
+export const getClinicFloorPageSession = cache(
+  async (tenantId: string): Promise<ClinicFloorSession> => {
+    const session = await getClinicFloorSessionIfAllowed(tenantId);
+    if (session) return session;
 
-  // Fall back to bookings operator flow (redirects when Supabase session exists but unauthorized).
-  const booking = await getBookingsOperatorPageSession(tenantId);
-  return { ...booking, authMode: "supabase" };
-});
+    // Fall back to bookings operator flow (redirects when Supabase session exists but unauthorized).
+    const booking = await getBookingsOperatorPageSession(tenantId);
+    return { ...booking, authMode: "supabase" };
+  }
+);
 
 export async function assertClinicFloorPageAccess(tenantId: string): Promise<ClinicFloorSession> {
   return getClinicFloorPageSession(tenantId);

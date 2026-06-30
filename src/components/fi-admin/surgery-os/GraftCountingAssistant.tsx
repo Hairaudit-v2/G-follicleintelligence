@@ -27,7 +27,11 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { useSurgeryOsRefresh } from "@/src/components/fi-admin/surgery-os/useSurgeryOsRefresh";
 import { useGraftCountDevice } from "@/src/components/fi-admin/surgery-os/useGraftCountDevice";
 import type { SurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
-import type { SurgeryOsAlert, SurgeryOsGraftCountEvent, SurgeryOsGraftSummary } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
+import type {
+  SurgeryOsAlert,
+  SurgeryOsGraftCountEvent,
+  SurgeryOsGraftSummary,
+} from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 import type { SurgeryOsGraftCountSessionLock } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
 import type { GraftSaveState } from "@/src/components/fi-admin/surgery-os/useGraftCountDevice";
 import {
@@ -95,7 +99,7 @@ export function GraftCountingAssistant({
       staffRoleCategory: staffCategory,
       actorFiUserId: null,
     }),
-    [data.viewer.role, staffCategory],
+    [data.viewer.role, staffCategory]
   );
 
   const canExtract = surgeryOsGraftActionAllowed(ctx, "add_extraction_count");
@@ -116,9 +120,8 @@ export function GraftCountingAssistant({
           : "quick_tap";
 
   const countableSurgeries = useMemo(
-    () =>
-      data.liveSurgeries.filter((s) => s.graftCountingEligible || isAdmin),
-    [data.liveSurgeries, isAdmin],
+    () => data.liveSurgeries.filter((s) => s.graftCountingEligible || isAdmin),
+    [data.liveSurgeries, isAdmin]
   );
 
   const defaultSurgeryId =
@@ -138,21 +141,20 @@ export function GraftCountingAssistant({
   const selectedSurgery = countableSurgeries.find((s) => s.id === effectiveSurgeryId);
   const graft = data.graftSummary.find((g) => g.surgeryId === effectiveSurgeryId);
   const surgeryAlerts = useMemo(
-    () => data.alerts.filter((a) => a.surgeryId === effectiveSurgeryId && a.kind.startsWith("graft_")),
-    [data.alerts, effectiveSurgeryId],
+    () =>
+      data.alerts.filter((a) => a.surgeryId === effectiveSurgeryId && a.kind.startsWith("graft_")),
+    [data.alerts, effectiveSurgeryId]
   );
   const surgeryEvents = useMemo(
     () => data.graftEvents.filter((e) => e.surgeryId === effectiveSurgeryId),
-    [data.graftEvents, effectiveSurgeryId],
+    [data.graftEvents, effectiveSurgeryId]
   );
   const pendingTrays = useMemo(
     () => surgeryEvents.filter((e) => e.eventType === "tray_count" && e.reviewStatus === "pending"),
-    [surgeryEvents],
+    [surgeryEvents]
   );
   const nextTrayNumber = useMemo(() => {
-    const nums = surgeryEvents
-      .map((e) => e.trayNumber)
-      .filter((n): n is number => n != null);
+    const nums = surgeryEvents.map((e) => e.trayNumber).filter((n): n is number => n != null);
     return nums.length ? Math.max(...nums) + 1 : 1;
   }, [surgeryEvents]);
 
@@ -169,7 +171,7 @@ export function GraftCountingAssistant({
             nowMs: Date.now(),
           })
         : null,
-    [graft, deviceId],
+    [graft, deviceId]
   );
   const implantationLock = useMemo(
     () =>
@@ -184,7 +186,7 @@ export function GraftCountingAssistant({
             nowMs: Date.now(),
           })
         : null,
-    [graft, deviceId],
+    [graft, deviceId]
   );
 
   const graftMutationBase = useMemo(
@@ -192,13 +194,16 @@ export function GraftCountingAssistant({
       surgery_id: effectiveSurgeryId,
       device_id: deviceId,
     }),
-    [effectiveSurgeryId, deviceId],
+    [effectiveSurgeryId, deviceId]
   );
 
   const run = useCallback(
     async (
-      action: (ctx: { deviceId: string; clientSubmissionId: string }) => Promise<{ ok: boolean; error?: string }>,
-      successLabel?: string,
+      action: (ctx: {
+        deviceId: string;
+        clientSubmissionId: string;
+      }) => Promise<{ ok: boolean; error?: string }>,
+      successLabel?: string
     ) => {
       if (!selectedSurgery?.graftCountingEligible && !isAdmin) {
         setError("This surgery is not eligible for graft counting.");
@@ -216,7 +221,7 @@ export function GraftCountingAssistant({
       }
       if (successLabel) setLastTap(successLabel);
     },
-    [isAdmin, refresh, runGuarded, selectedSurgery?.graftCountingEligible],
+    [isAdmin, refresh, runGuarded, selectedSurgery?.graftCountingEligible]
   );
 
   const pending = isSubmitting;
@@ -230,7 +235,9 @@ export function GraftCountingAssistant({
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-8 text-center">
           <Scissors className="mx-auto mb-3 h-10 w-10 text-violet-400/60" aria-hidden />
           <p className="text-lg font-medium text-slate-200">No active surgeries today</p>
-          <p className="mt-1 text-sm text-slate-500">Graft counting opens when a live surgery is on the board.</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Graft counting opens when a live surgery is on the board.
+          </p>
         </div>
       </div>
     );
@@ -244,16 +251,24 @@ export function GraftCountingAssistant({
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.28em] text-violet-400/90">
             Graft counting assistant
           </p>
-          <h1 className="mt-1 text-xl font-semibold text-slate-50 sm:text-2xl">Theatre count capture</h1>
+          <h1 className="mt-1 text-xl font-semibold text-slate-50 sm:text-2xl">
+            Theatre count capture
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Role: <span className="capitalize text-slate-300">{staffCategory ?? data.viewer.role.replace(/_/g, " ")}</span>
+            Role:{" "}
+            <span className="capitalize text-slate-300">
+              {staffCategory ?? data.viewer.role.replace(/_/g, " ")}
+            </span>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={effectiveSurgeryId}
             onChange={(e) => setSurgeryId(e.target.value)}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "min-h-11 px-3 py-2 text-sm text-slate-200")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "min-h-11 px-3 py-2 text-sm text-slate-200"
+            )}
           >
             {countableSurgeries.map((s) => (
               <option key={s.id} value={s.id}>
@@ -278,7 +293,8 @@ export function GraftCountingAssistant({
                   reconciledByLabel: graft.reconciledByLabel,
                   reconciliationNote:
                     data.graftEvents.find(
-                      (e) => e.surgeryId === graft.surgeryId && e.eventType === "graft_reconciliation",
+                      (e) =>
+                        e.surgeryId === graft.surgeryId && e.eventType === "graft_reconciliation"
                     )?.note ?? null,
                   events: surgeryEvents.map((e) => ({
                     eventType: e.eventType,
@@ -291,7 +307,9 @@ export function GraftCountingAssistant({
                     deltaDiscarded: e.deltaDiscarded,
                   })),
                 });
-                const blob = new Blob([JSON.stringify(exportDoc, null, 2)], { type: "application/json" });
+                const blob = new Blob([JSON.stringify(exportDoc, null, 2)], {
+                  type: "application/json",
+                });
                 const url = URL.createObjectURL(blob);
                 const anchor = document.createElement("a");
                 anchor.href = url;
@@ -301,7 +319,7 @@ export function GraftCountingAssistant({
               }}
               className={cn(
                 fiOsChromeClasses.toolbarControlSurface,
-                "inline-flex min-h-11 items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200",
+                "inline-flex min-h-11 items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
               )}
             >
               <Download className="h-4 w-4" aria-hidden />
@@ -314,10 +332,13 @@ export function GraftCountingAssistant({
             disabled={isRefreshing || pending}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex min-h-11 items-center gap-2 px-3 py-2 text-sm font-semibold text-violet-100",
+              "inline-flex min-h-11 items-center gap-2 px-3 py-2 text-sm font-semibold text-violet-100"
             )}
           >
-            <RefreshCw className={cn("h-4 w-4", (isRefreshing || pending) && "animate-spin")} aria-hidden />
+            <RefreshCw
+              className={cn("h-4 w-4", (isRefreshing || pending) && "animate-spin")}
+              aria-hidden
+            />
             Sync
           </button>
         </div>
@@ -327,15 +348,21 @@ export function GraftCountingAssistant({
 
       {selectedSurgery && !selectedSurgery.graftCountingEligible ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
-          Admin override active — this surgery is completed/cancelled. Counting is audit-only and requires manager
-          approval.
+          Admin override active — this surgery is completed/cancelled. Counting is audit-only and
+          requires manager approval.
         </div>
       ) : null}
 
-      {extractionLock && !extractionLock.isHeldByDevice && extractionLock.deviceId && !extractionLock.isStale ? (
+      {extractionLock &&
+      !extractionLock.isHeldByDevice &&
+      extractionLock.deviceId &&
+      !extractionLock.isStale ? (
         <SessionLockBanner lock={extractionLock} />
       ) : null}
-      {implantationLock && !implantationLock.isHeldByDevice && implantationLock.deviceId && !implantationLock.isStale ? (
+      {implantationLock &&
+      !implantationLock.isHeldByDevice &&
+      implantationLock.deviceId &&
+      !implantationLock.isStale ? (
         <SessionLockBanner lock={implantationLock} />
       ) : null}
 
@@ -370,7 +397,7 @@ export function GraftCountingAssistant({
                   note,
                   client_submission_id: ctx.clientSubmissionId,
                 }),
-              approved ? "Tray confirmed" : "Tray rejected",
+              approved ? "Tray confirmed" : "Tray rejected"
             )
           }
         />
@@ -394,7 +421,7 @@ export function GraftCountingAssistant({
                 "shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition touch-manipulation",
                 mode === m.id
                   ? "bg-violet-600 text-white shadow-lg shadow-violet-900/40"
-                  : "border border-white/10 bg-slate-900/60 text-slate-400 hover:text-slate-200",
+                  : "border border-white/10 bg-slate-900/60 text-slate-400 hover:text-slate-200"
               )}
             >
               {m.label}
@@ -423,7 +450,7 @@ export function GraftCountingAssistant({
                     graft_type: graftType,
                     client_submission_id: ctx.clientSubmissionId,
                   }),
-                label,
+                label
               );
             }}
           />
@@ -447,7 +474,7 @@ export function GraftCountingAssistant({
                     note: values.note,
                     client_submission_id: ctx.clientSubmissionId,
                   }),
-                `Tray #${values.trayNumber} recorded`,
+                `Tray #${values.trayNumber} recorded`
               )
             }
           />
@@ -476,17 +503,19 @@ export function GraftCountingAssistant({
                       note: values.note,
                       client_submission_id: ctx.clientSubmissionId,
                     }),
-                  "Batch tray recorded",
+                  "Batch tray recorded"
                 );
                 return;
               }
-              const total =
-                values.singles + values.doubles + values.triples + values.multiples;
+              const total = values.singles + values.doubles + values.triples + values.multiples;
               if (total <= 0) {
                 setError("Enter at least one graft.");
                 return;
               }
-              const addCount = countPhase === "extraction" ? addExtractionGraftCountAction : addImplantationGraftCountAction;
+              const addCount =
+                countPhase === "extraction"
+                  ? addExtractionGraftCountAction
+                  : addImplantationGraftCountAction;
 
               setError(null);
               for (const [graftType, count] of [
@@ -502,7 +531,7 @@ export function GraftCountingAssistant({
                     count,
                     graft_type: graftType,
                     client_submission_id: ctx.clientSubmissionId,
-                  }),
+                  })
                 );
                 if (!result.ok) {
                   setError(result.error ?? "Batch entry failed.");
@@ -538,7 +567,7 @@ export function GraftCountingAssistant({
                       note: values.note,
                       client_submission_id: ctx.clientSubmissionId,
                     }),
-                  "Manual tray entry saved",
+                  "Manual tray entry saved"
                 );
                 return;
               }
@@ -558,7 +587,7 @@ export function GraftCountingAssistant({
                     note: values.note,
                     client_submission_id: ctx.clientSubmissionId,
                   }),
-                `Manual +${count}`,
+                `Manual +${count}`
               );
             }}
           />
@@ -585,7 +614,7 @@ export function GraftCountingAssistant({
                     note: values.note,
                     client_submission_id: ctx.clientSubmissionId,
                   }),
-                "Correction applied — original events preserved in audit log",
+                "Correction applied — original events preserved in audit log"
               )
             }
             onReconcile={(note) =>
@@ -596,7 +625,7 @@ export function GraftCountingAssistant({
                     note,
                     client_submission_id: ctx.clientSubmissionId,
                   }),
-                "Grafts reconciled",
+                "Grafts reconciled"
               )
             }
           />
@@ -638,11 +667,13 @@ function StatsBar({ graft }: { graft: SurgeryOsGraftSummary }) {
           key={cell.label}
           className="rounded-xl border border-white/[0.06] bg-slate-900/80 px-3 py-3 text-center"
         >
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{cell.label}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            {cell.label}
+          </p>
           <p
             className={cn(
               "mt-1 text-2xl font-bold tabular-nums",
-              cell.warn ? "text-amber-400" : cell.accent ? "text-violet-200" : "text-slate-100",
+              cell.warn ? "text-amber-400" : cell.accent ? "text-violet-200" : "text-slate-100"
             )}
           >
             {cell.value}
@@ -673,7 +704,9 @@ function PhaseToggle({
           onClick={() => onPhaseChange("extraction")}
           className={cn(
             "flex-1 rounded-xl py-3 text-sm font-semibold touch-manipulation",
-            countPhase === "extraction" ? "bg-cyan-700 text-white" : "border border-white/10 text-slate-400",
+            countPhase === "extraction"
+              ? "bg-cyan-700 text-white"
+              : "border border-white/10 text-slate-400"
           )}
         >
           Extraction
@@ -685,7 +718,9 @@ function PhaseToggle({
           onClick={() => onPhaseChange("implantation")}
           className={cn(
             "flex-1 rounded-xl py-3 text-sm font-semibold touch-manipulation",
-            countPhase === "implantation" ? "bg-emerald-700 text-white" : "border border-white/10 text-slate-400",
+            countPhase === "implantation"
+              ? "bg-emerald-700 text-white"
+              : "border border-white/10 text-slate-400"
           )}
         >
           Implantation
@@ -710,11 +745,14 @@ function QuickTapPanel({
   pending: boolean;
   onTap: (graftType: SurgeryOsGraftType, count: number) => void;
 }) {
-  const active = (countPhase === "extraction" && canExtract) || (countPhase === "implantation" && canImplant);
+  const active =
+    (countPhase === "extraction" && canExtract) || (countPhase === "implantation" && canImplant);
 
   return (
     <div>
-      <p className="mb-4 text-sm text-slate-400">Tap to count — each tap saves immediately to the audit log.</p>
+      <p className="mb-4 text-sm text-slate-400">
+        Tap to count — each tap saves immediately to the audit log.
+      </p>
       <PhaseToggle
         countPhase={countPhase}
         onPhaseChange={onPhaseChange}
@@ -781,7 +819,8 @@ function TrayEntryPanel({
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-400">
-        Count a full tray. Totals accumulate — nurse review required before implantation reconciliation.
+        Count a full tray. Totals accumulate — nurse review required before implantation
+        reconciliation.
       </p>
       <label className="block text-sm text-slate-500">
         Tray number
@@ -891,7 +930,9 @@ function BatchEntryPanel(props: {
 
   return (
     <div>
-      <p className="mb-4 text-sm text-slate-400">Enter all graft types for this batch, then submit once.</p>
+      <p className="mb-4 text-sm text-slate-400">
+        Enter all graft types for this batch, then submit once.
+      </p>
       {!props.canTray ? (
         <PhaseToggle
           countPhase={props.countPhase}
@@ -976,8 +1017,8 @@ function ManualEntryPanel(props: {
       <div className="flex items-start gap-2 rounded-xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3 text-sm text-cyan-100/90">
         <Mic className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" aria-hidden />
         <p>
-          Voice-friendly manual entry — large fields for tablet use. Dictate counts to a scribe; voice capture
-          integration coming in a later phase.
+          Voice-friendly manual entry — large fields for tablet use. Dictate counts to a scribe;
+          voice capture integration coming in a later phase.
         </p>
       </div>
       {props.canTray ? (
@@ -989,7 +1030,9 @@ function ManualEntryPanel(props: {
               onClick={() => setEntryKind(k)}
               className={cn(
                 "flex-1 rounded-xl py-2.5 text-sm font-semibold capitalize",
-                entryKind === k ? "bg-violet-700 text-white" : "border border-white/10 text-slate-400",
+                entryKind === k
+                  ? "bg-violet-700 text-white"
+                  : "border border-white/10 text-slate-400"
               )}
             >
               {k}
@@ -1033,13 +1076,22 @@ function ManualEntryPanel(props: {
           </label>
         </>
       ) : (
-        <TrayEntryPanel nextTrayNumber={1} pending={props.pending} onSubmit={(v) => props.onSubmit({ entryKind: "tray", totalCount: 0, graftType, ...v })} />
+        <TrayEntryPanel
+          nextTrayNumber={1}
+          pending={props.pending}
+          onSubmit={(v) => props.onSubmit({ entryKind: "tray", totalCount: 0, graftType, ...v })}
+        />
       )}
       {entryKind === "count" ? (
         <>
           <label className="block text-sm text-slate-500">
             Note (optional)
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} className={fieldClass} />
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              className={fieldClass}
+            />
           </label>
           <button
             type="button"
@@ -1190,7 +1242,10 @@ function CorrectionPanel({
                 note: note.trim() || null,
               })
             }
-            className={cn(tapButtonClass, "w-full min-h-[3.5rem] border-amber-500/30 bg-amber-950/30 text-amber-50")}
+            className={cn(
+              tapButtonClass,
+              "w-full min-h-[3.5rem] border-amber-500/30 bg-amber-950/30 text-amber-50"
+            )}
           >
             Apply correction
           </button>
@@ -1205,7 +1260,10 @@ function CorrectionPanel({
               {graft.remainingGrafts}
             </span>
             {graft.pendingTrayCount > 0 ? (
-              <span className="text-rose-400"> · {graft.pendingTrayCount} tray(s) pending review</span>
+              <span className="text-rose-400">
+                {" "}
+                · {graft.pendingTrayCount} tray(s) pending review
+              </span>
             ) : null}
           </p>
           <label className="mt-3 block text-sm text-slate-500">
@@ -1221,7 +1279,10 @@ function CorrectionPanel({
             type="button"
             disabled={pending || graft.remainingGrafts !== 0 || graft.pendingTrayCount > 0}
             onClick={() => onReconcile(reconcileNote.trim() || null)}
-            className={cn(tapButtonClass, "mt-3 w-full min-h-[3.5rem] border-emerald-500/30 bg-emerald-900/40")}
+            className={cn(
+              tapButtonClass,
+              "mt-3 w-full min-h-[3.5rem] border-emerald-500/30 bg-emerald-900/40"
+            )}
           >
             Complete reconciliation
           </button>
@@ -1244,7 +1305,9 @@ function TrayReviewPanel({
 
   return (
     <div className="rounded-2xl border border-amber-500/25 bg-amber-950/20 p-4">
-      <p className="text-sm font-semibold text-amber-200">Nurse tray review queue ({pendingTrays.length})</p>
+      <p className="text-sm font-semibold text-amber-200">
+        Nurse tray review queue ({pendingTrays.length})
+      </p>
       <p className="mt-1 text-xs text-amber-100/70">
         Confirmed trays contribute to totals. Rejected trays remain in the audit log only.
       </p>
@@ -1262,7 +1325,8 @@ function TrayReviewPanel({
                   Tray #{tray.trayNumber ?? "—"} · {tray.createdByLabel ?? "Technician"}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {grafts} grafts · {tray.totalHairs ?? "—"} hairs · {tray.deltaDiscarded} damaged/discarded
+                  {grafts} grafts · {tray.totalHairs ?? "—"} hairs · {tray.deltaDiscarded}{" "}
+                  damaged/discarded
                 </p>
                 {tray.note ? <p className="mt-1 text-xs text-slate-400">{tray.note}</p> : null}
               </div>
@@ -1271,7 +1335,9 @@ function TrayReviewPanel({
                 <input
                   type="text"
                   value={rejectNotes[tray.id] ?? ""}
-                  onChange={(e) => setRejectNotes((prev) => ({ ...prev, [tray.id]: e.target.value }))}
+                  onChange={(e) =>
+                    setRejectNotes((prev) => ({ ...prev, [tray.id]: e.target.value }))
+                  }
                   placeholder="Optional for confirm; recommended for reject"
                   className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100"
                 />
@@ -1293,7 +1359,7 @@ function TrayReviewPanel({
                     onConfirm(
                       tray.id,
                       false,
-                      rejectNotes[tray.id]?.trim() || "Rejected at nurse review",
+                      rejectNotes[tray.id]?.trim() || "Rejected at nurse review"
                     )
                   }
                   className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-950/40 px-4 py-2 text-sm font-semibold text-rose-200 touch-manipulation disabled:opacity-50"
@@ -1314,8 +1380,8 @@ function SessionLockBanner({ lock }: { lock: SurgeryOsGraftCountSessionLock }) {
   return (
     <div className="rounded-xl border border-cyan-500/25 bg-cyan-950/20 px-4 py-3 text-sm text-cyan-100">
       Another tablet holds the active {lock.kind} count session
-      {lock.heldByLabel ? ` (${lock.heldByLabel})` : ""}. Counting is disabled on this device until the lock
-      expires or the other session ends.
+      {lock.heldByLabel ? ` (${lock.heldByLabel})` : ""}. Counting is disabled on this device until
+      the lock expires or the other session ends.
     </div>
   );
 }
@@ -1330,7 +1396,7 @@ function GraftAlertsPanel({ alerts }: { alerts: SurgeryOsAlert[] }) {
             "flex items-start gap-2 rounded-xl border px-4 py-3 text-sm",
             alert.severity === "blocked" || alert.severity === "critical"
               ? "border-rose-500/30 bg-rose-950/30 text-rose-100"
-              : "border-amber-500/25 bg-amber-950/20 text-amber-100",
+              : "border-amber-500/25 bg-amber-950/20 text-amber-100"
           )}
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
@@ -1350,7 +1416,7 @@ function SaveStateIndicator({ saveState }: { saveState: GraftSaveState }) {
     <p
       className={cn(
         "text-center text-sm",
-        saveState === "saving" ? "text-violet-300" : "text-emerald-400",
+        saveState === "saving" ? "text-violet-300" : "text-emerald-400"
       )}
       aria-live="polite"
     >
@@ -1373,10 +1439,15 @@ function EventLog({ events }: { events: SurgeryOsGraftCountEvent[] }) {
       <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Audit log</h2>
       <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
         {events.slice(0, 30).map((e) => (
-          <li key={e.id} className="rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-2 text-sm">
+          <li
+            key={e.id}
+            className="rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-2 text-sm"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-medium text-slate-200">{e.eventTypeLabel}</span>
-              <span className="text-xs text-slate-400">{new Date(e.createdAt).toLocaleTimeString()}</span>
+              <span className="text-xs text-slate-400">
+                {new Date(e.createdAt).toLocaleTimeString()}
+              </span>
             </div>
             <p className="mt-0.5 text-xs text-slate-500">
               {e.deltaExtracted > 0 ? `+${e.deltaExtracted} extracted · ` : ""}
@@ -1392,7 +1463,7 @@ function EventLog({ events }: { events: SurgeryOsGraftCountEvent[] }) {
                     ? "text-emerald-400"
                     : e.reviewStatus === "rejected"
                       ? "text-rose-400"
-                      : "text-amber-400",
+                      : "text-amber-400"
                 )}
               >
                 {e.reviewStatus}

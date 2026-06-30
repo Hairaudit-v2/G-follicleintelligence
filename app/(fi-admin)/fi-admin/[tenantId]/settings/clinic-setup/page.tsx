@@ -7,7 +7,11 @@ export const metadata = {
   title: "Clinic setup",
 };
 
-export default async function ClinicSetupPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function ClinicSetupPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId.trim();
   const clinics = await loadClinicsForTenant(tid);

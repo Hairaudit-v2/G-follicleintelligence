@@ -10,7 +10,10 @@ import {
   validateEnterpriseDemoSurgerySpecs,
   type EnterpriseDemoSurgerySpec,
 } from "./enterpriseDemoSurgeriesGenerator";
-import { ENTERPRISE_DEMO_DEFAULT_VOLUME, type EnterpriseDemoVolumeOptions } from "./enterpriseDemoVolumeOptions";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 import { ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA } from "./enterpriseDemoPatientsSeed.server";
 
 export const ENTERPRISE_DEMO_SURGERY_METADATA_FLAG = "enterprise_demo_surgery";
@@ -148,7 +151,9 @@ async function loadStaffRows(supabase: SupabaseClient, tenantId: string): Promis
       staff_metadata: unknown;
     };
     const staff_metadata =
-      raw.staff_metadata && typeof raw.staff_metadata === "object" && !Array.isArray(raw.staff_metadata)
+      raw.staff_metadata &&
+      typeof raw.staff_metadata === "object" &&
+      !Array.isArray(raw.staff_metadata)
         ? (raw.staff_metadata as Record<string, unknown>)
         : null;
     return {
@@ -194,7 +199,9 @@ async function loadConsultationRows(
   return (data ?? []).map((row) => {
     const raw = row as { id: string; structured_data: unknown; case_id: string | null };
     const structured_data =
-      raw.structured_data && typeof raw.structured_data === "object" && !Array.isArray(raw.structured_data)
+      raw.structured_data &&
+      typeof raw.structured_data === "object" &&
+      !Array.isArray(raw.structured_data)
         ? (raw.structured_data as Record<string, unknown>)
         : null;
     return {
@@ -272,23 +279,31 @@ function findPatientByDemoKey(rows: PatientRow[], key: string): PatientRow | und
   return rows.find((row) => demoPatientKeyFromMetadata(row.metadata) === key);
 }
 
-function findConsultationByDemoKey(rows: ConsultationRow[], key: string): ConsultationRow | undefined {
+function findConsultationByDemoKey(
+  rows: ConsultationRow[],
+  key: string
+): ConsultationRow | undefined {
   return rows.find((row) => demoConsultationKeyFromStructured(row.structured_data) === key);
 }
 
 function findCaseByDemoKey(rows: CaseRow[], key: string): CaseRow | undefined {
   return rows.find(
     (row) =>
-      metadataKey(row.metadata, ENTERPRISE_DEMO_CASE_KEY_METADATA) === key || row.external_id === key
+      metadataKey(row.metadata, ENTERPRISE_DEMO_CASE_KEY_METADATA) === key ||
+      row.external_id === key
   );
 }
 
 function findBookingByDemoKey(rows: BookingRow[], key: string): BookingRow | undefined {
-  return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_BOOKING_KEY_METADATA) === key);
+  return rows.find(
+    (row) => metadataKey(row.metadata, ENTERPRISE_DEMO_BOOKING_KEY_METADATA) === key
+  );
 }
 
 function findSurgeryByDemoKey(rows: SurgeryRow[], key: string): SurgeryRow | undefined {
-  return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_SURGERY_KEY_METADATA) === key);
+  return rows.find(
+    (row) => metadataKey(row.metadata, ENTERPRISE_DEMO_SURGERY_KEY_METADATA) === key
+  );
 }
 
 async function ensureDemoFiUserForStaff(
@@ -474,19 +489,25 @@ export async function seedEnterpriseDemoSurgeries(
   for (const spec of specs) {
     const clinicId = clinicIdBySlug.get(spec.clinicSlug);
     if (!clinicId) {
-      warnings.push(`Clinic slug "${spec.clinicSlug}" not found; skipped surgery "${spec.demoSurgeryKey}".`);
+      warnings.push(
+        `Clinic slug "${spec.clinicSlug}" not found; skipped surgery "${spec.demoSurgeryKey}".`
+      );
       continue;
     }
 
     const patient = findPatientByDemoKey(patientRows, spec.demoPatientKey);
     if (!patient) {
-      warnings.push(`Patient "${spec.demoPatientKey}" not found; skipped surgery "${spec.demoSurgeryKey}".`);
+      warnings.push(
+        `Patient "${spec.demoPatientKey}" not found; skipped surgery "${spec.demoSurgeryKey}".`
+      );
       continue;
     }
 
     const surgeonStaff = findStaffByDemoKey(staffRows, spec.leadSurgeonStaffKey);
     if (!surgeonStaff) {
-      warnings.push(`Surgeon staff "${spec.leadSurgeonStaffKey}" not found for "${spec.demoSurgeryKey}".`);
+      warnings.push(
+        `Surgeon staff "${spec.leadSurgeonStaffKey}" not found for "${spec.demoSurgeryKey}".`
+      );
     }
 
     let surgeonFiUserId: string | null = null;
@@ -507,7 +528,9 @@ export async function seedEnterpriseDemoSurgeries(
     const existingCase = findCaseByDemoKey(caseRows, spec.demoCaseKey);
     if (existingCase) {
       if (!isEnterpriseDemoCaseMetadata(existingCase.metadata)) {
-        warnings.push(`Case key collision for "${spec.demoCaseKey}" on non-demo case; skipped surgery seed.`);
+        warnings.push(
+          `Case key collision for "${spec.demoCaseKey}" on non-demo case; skipped surgery seed.`
+        );
         continue;
       }
       existingCases += 1;
@@ -621,13 +644,15 @@ export async function seedEnterpriseDemoSurgeries(
           scheduled_start_at: spec.scheduledStartAt,
           scheduled_end_at: spec.scheduledEndAt,
           actual_start_at:
-            spec.surgeryStatus === "completed" || spec.surgeryStatus === "in_progress" || spec.surgeryStatus === "paused"
+            spec.surgeryStatus === "completed" ||
+            spec.surgeryStatus === "in_progress" ||
+            spec.surgeryStatus === "paused"
               ? spec.scheduledStartAt
               : null,
           actual_end_at: spec.surgeryStatus === "completed" ? spec.scheduledEndAt : null,
-          readiness_percent: spec.surgeryStatus === "completed" ? 100 : spec.surgeryStatus === "scheduled" ? 40 : 75,
-          readiness_risk_level:
-            spec.performanceProfile === "elevated_transection" ? "high" : "low",
+          readiness_percent:
+            spec.surgeryStatus === "completed" ? 100 : spec.surgeryStatus === "scheduled" ? 40 : 75,
+          readiness_risk_level: spec.performanceProfile === "elevated_transection" ? "high" : "low",
           metadata: surgeryMetadata,
           created_at: now,
           updated_at: now,

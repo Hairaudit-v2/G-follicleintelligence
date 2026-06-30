@@ -26,7 +26,10 @@ export function PatientTreatmentTimelineCard({
   patientTimeline: PatientTimelineBuildResult;
   patientImages: PatientImagesProfileBundle;
 }) {
-  const [filters, setFilters] = useState<PatientTimelineFilterState>({ itemTypes: null, sourceTypes: null });
+  const [filters, setFilters] = useState<PatientTimelineFilterState>({
+    itemTypes: null,
+    sourceTypes: null,
+  });
   const [sortDirection, setSortDirection] = useState<PatientTimelineSortDirection>("newest_first");
 
   const thumbByImageId = useMemo(() => {
@@ -48,11 +51,12 @@ export function PatientTreatmentTimelineCard({
     <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <h2 className="text-sm font-semibold text-slate-100">Treatment timeline</h2>
       <p className="mt-1 text-xs text-gray-500">
-        This timeline summarises patient activity without exposing full clinical notes, admin notes, or message bodies.
+        This timeline summarises patient activity without exposing full clinical notes, admin notes,
+        or message bodies.
       </p>
       <p className="mt-2 text-xs text-amber-200">
-        Read-only aggregation across CRM, bookings, cases, clinical metadata, and imaging. Editing, drag-and-drop
-        timelines, and patient-facing views remain out of scope for Stage 4D.
+        Read-only aggregation across CRM, bookings, cases, clinical metadata, and imaging. Editing,
+        drag-and-drop timelines, and patient-facing views remain out of scope for Stage 4D.
       </p>
 
       <div className="mt-4">
@@ -65,7 +69,9 @@ export function PatientTreatmentTimelineCard({
       </div>
 
       {patientTimeline.hasMore ? (
-        <p className="mt-2 text-xs text-gray-500">Showing the latest {patientTimeline.items.length} events.</p>
+        <p className="mt-2 text-xs text-gray-500">
+          Showing the latest {patientTimeline.items.length} events.
+        </p>
       ) : null}
 
       {visible.length === 0 ? (
@@ -81,13 +87,19 @@ export function PatientTreatmentTimelineCard({
             if (!block.length) return null;
             return (
               <div key={key}>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">{sectionTitle(key)}</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {sectionTitle(key)}
+                </h3>
                 <ul className="mt-1">
                   {block.map((item) => (
                     <PatientTimelineItem
                       key={item.id}
                       item={item}
-                      thumbnailUrl={item.item_type === "image_uploaded" ? thumbByImageId.get(item.source_id) : null}
+                      thumbnailUrl={
+                        item.item_type === "image_uploaded"
+                          ? thumbByImageId.get(item.source_id)
+                          : null
+                      }
                     />
                   ))}
                 </ul>

@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { buildCalendarHref, parseCalendarSearchParams } from "@/src/lib/bookings/calendarQuery";
-import { buildCalendarNavigationHref, updateCalendarSearchParams } from "@/src/lib/calendar/calendarViewNavigation";
+import {
+  buildCalendarNavigationHref,
+  updateCalendarSearchParams,
+} from "@/src/lib/calendar/calendarViewNavigation";
 
 const TENANT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TZ_OPTS = { calendarTimezone: "Australia/Brisbane" };

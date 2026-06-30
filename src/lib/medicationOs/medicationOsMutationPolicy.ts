@@ -59,12 +59,16 @@ function asObjectRecord(v: unknown): Record<string, unknown> {
 /**
  * Stable sort order, trimmed codes, defaulted numerics for insert/update payloads.
  */
-export function normaliseTherapyPlanItems(items: DraftTherapyPlanItemInput[]): NormalisedTherapyPlanItemInsert[] {
+export function normaliseTherapyPlanItems(
+  items: DraftTherapyPlanItemInput[]
+): NormalisedTherapyPlanItemInsert[] {
   if (!items.length) {
     throw new Error("Therapy plan requires at least one item.");
   }
   const trimmed = items.map((it, index) => {
-    const code = String(it.canonical_code ?? "").trim().toLowerCase();
+    const code = String(it.canonical_code ?? "")
+      .trim()
+      .toLowerCase();
     if (!code) {
       throw new Error("Each therapy plan item must include a non-empty canonical_code.");
     }
@@ -85,9 +89,14 @@ export function normaliseTherapyPlanItems(items: DraftTherapyPlanItemInput[]): N
           ? Math.trunc(Number(it.day_offset_start))
           : null,
       day_offset_end:
-        it.day_offset_end != null && !Number.isNaN(Number(it.day_offset_end)) ? Math.trunc(Number(it.day_offset_end)) : null,
+        it.day_offset_end != null && !Number.isNaN(Number(it.day_offset_end))
+          ? Math.trunc(Number(it.day_offset_end))
+          : null,
       pathology_gate: it.pathology_gate != null ? String(it.pathology_gate).trim() || null : null,
-      sort_order: typeof it.sort_order === "number" && !Number.isNaN(it.sort_order) ? Math.trunc(it.sort_order) : index,
+      sort_order:
+        typeof it.sort_order === "number" && !Number.isNaN(it.sort_order)
+          ? Math.trunc(it.sort_order)
+          : index,
       metadata: asObjectRecord(it.metadata),
     };
   });
@@ -95,11 +104,16 @@ export function normaliseTherapyPlanItems(items: DraftTherapyPlanItemInput[]): N
   return trimmed.map((it, i) => ({ ...it, sort_order: i }));
 }
 
-export function findInvalidCanonicalCodes(codes: string[], allowedActiveCodes: Set<string>): string[] {
+export function findInvalidCanonicalCodes(
+  codes: string[],
+  allowedActiveCodes: Set<string>
+): string[] {
   const invalid: string[] = [];
   const seen = new Set<string>();
   for (const raw of codes) {
-    const c = String(raw ?? "").trim().toLowerCase();
+    const c = String(raw ?? "")
+      .trim()
+      .toLowerCase();
     if (!c) continue;
     if (seen.has(c)) continue;
     seen.add(c);
@@ -108,7 +122,10 @@ export function findInvalidCanonicalCodes(codes: string[], allowedActiveCodes: S
   return invalid;
 }
 
-export function assertCanonicalCodesAllowed(codes: string[], allowedActiveCodes: Set<string>): void {
+export function assertCanonicalCodesAllowed(
+  codes: string[],
+  allowedActiveCodes: Set<string>
+): void {
   const invalid = findInvalidCanonicalCodes(codes, allowedActiveCodes);
   if (invalid.length) {
     throw new Error(`Unknown or inactive canonical_code for tenant: ${invalid.join(", ")}`);

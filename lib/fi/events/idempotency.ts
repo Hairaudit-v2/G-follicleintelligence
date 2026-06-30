@@ -95,7 +95,9 @@ async function loadEventLogRow(
   };
 }
 
-export async function getExistingFiEventBySourceKey(params: SourceKeyParams): Promise<FiEventRow | null> {
+export async function getExistingFiEventBySourceKey(
+  params: SourceKeyParams
+): Promise<FiEventRow | null> {
   return getExistingFiEventBySourceKeyWithClient(supabaseAdmin(), params);
 }
 
@@ -220,7 +222,10 @@ export async function createOrLoadEventLog(
       sourceEventId: event.source_event_id,
     });
     if (!existing) {
-      return { ok: false, error: "Duplicate fi_events row detected but existing row could not be loaded." };
+      return {
+        ok: false,
+        error: "Duplicate fi_events row detected but existing row could not be loaded.",
+      };
     }
 
     const row = await loadEventLogRow(supabase, existing.id, event.tenant_id);

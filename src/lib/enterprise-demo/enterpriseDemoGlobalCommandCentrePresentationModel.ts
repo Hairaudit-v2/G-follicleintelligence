@@ -119,7 +119,10 @@ export function buildOperatorPainCallouts(data: GlobalCommandCentrePayload): Ope
   );
 
   const refundAlerts = alerts.filter(
-    (alert) => alert.domain === "financial" || alert.domain === "surgical" || alert.title.toLowerCase().includes("refund")
+    (alert) =>
+      alert.domain === "financial" ||
+      alert.domain === "surgical" ||
+      alert.title.toLowerCase().includes("refund")
   ).length;
 
   return [
@@ -166,14 +169,20 @@ export function buildOperatorPainCallouts(data: GlobalCommandCentrePayload): Ope
   ];
 }
 
-export function buildPresentationStorySections(data: GlobalCommandCentrePayload): PresentationStorySection[] {
+export function buildPresentationStorySections(
+  data: GlobalCommandCentrePayload
+): PresentationStorySection[] {
   const { networkKpis, clinicRiskRows, surgicalSnapshot, outcomeSnapshot, alerts } = data;
   const highRiskCount = clinicRiskRows.filter((row) => row.riskScore >= 55).length;
   const elevatedSurgicalCount = clinicRiskRows.filter(
-    (row) => row.surgicalQualityStatus === "Elevated transection" || row.surgicalQualityStatus === "Reconciliation pending"
+    (row) =>
+      row.surgicalQualityStatus === "Elevated transection" ||
+      row.surgicalQualityStatus === "Reconciliation pending"
   ).length;
   const financialAlerts = alerts.filter((alert) => alert.domain === "financial").length;
-  const imagingAlerts = alerts.filter((alert) => alert.domain === "imaging" || alert.domain === "outcome").length;
+  const imagingAlerts = alerts.filter(
+    (alert) => alert.domain === "imaging" || alert.domain === "outcome"
+  ).length;
   const topRiskNames = topRiskClinicNames(clinicRiskRows);
 
   return [

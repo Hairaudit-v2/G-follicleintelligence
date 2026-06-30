@@ -25,12 +25,17 @@ function calendarListResponse(entries: GoogleCalendarListEntry[]): Response {
   return new Response(JSON.stringify({ items: entries }), { status: 200 });
 }
 
-function createGc6aMockSupabase(seed?: { integrations?: IntegrationRow[]; inbound?: InboundRow[] }) {
+function createGc6aMockSupabase(seed?: {
+  integrations?: IntegrationRow[];
+  inbound?: InboundRow[];
+}) {
   const integrations: IntegrationRow[] = [...(seed?.integrations ?? [])];
   const inboundCalendars: InboundRow[] = [...(seed?.inbound ?? [])];
 
-  const filterRows = <T extends Record<string, unknown>>(rows: T[], filters: Record<string, string | boolean>) =>
-    rows.filter((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
+  const filterRows = <T extends Record<string, unknown>>(
+    rows: T[],
+    filters: Record<string, string | boolean>
+  ) => rows.filter((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
 
   const client = {
     from(table: string) {
@@ -166,7 +171,10 @@ const SAMPLE_CALENDAR_LIST: GoogleCalendarListEntry[] = [
   },
 ];
 
-function seedInput(integrationId: string, overrides: Partial<SeedGoogleInboundCalendarScopesInput> = {}) {
+function seedInput(
+  integrationId: string,
+  overrides: Partial<SeedGoogleInboundCalendarScopesInput> = {}
+) {
   return {
     tenantId: TENANT,
     integrationId,
@@ -182,7 +190,10 @@ const origEnv = { ...process.env };
 describe("CalendarOS GC-6A — default inbound enablement", () => {
   it("enables primary calendar", () => {
     assert.equal(
-      shouldEnableGoogleInboundCalendarByDefault({ id: "primary", summary: "Work", primary: true }, null),
+      shouldEnableGoogleInboundCalendarByDefault(
+        { id: "primary", summary: "Work", primary: true },
+        null
+      ),
       true
     );
   });
@@ -226,7 +237,10 @@ describe("CalendarOS GC-6A — default inbound enablement", () => {
 
   it("disables Personal calendar", () => {
     assert.equal(
-      shouldEnableGoogleInboundCalendarByDefault({ id: "personal@gmail.com", summary: "Personal" }, null),
+      shouldEnableGoogleInboundCalendarByDefault(
+        { id: "personal@gmail.com", summary: "Personal" },
+        null
+      ),
       false
     );
   });
@@ -269,7 +283,8 @@ describe("CalendarOS GC-6A — inbound scope seeder idempotency", () => {
     const { client, inboundCalendars } = createGc6aMockSupabase();
 
     const fetchOverride: typeof fetch = async (input) => {
-      if (String(input).includes("/calendarList")) return calendarListResponse(SAMPLE_CALENDAR_LIST);
+      if (String(input).includes("/calendarList"))
+        return calendarListResponse(SAMPLE_CALENDAR_LIST);
       return new Response("not found", { status: 404 });
     };
 
@@ -287,7 +302,9 @@ describe("CalendarOS GC-6A — inbound scope seeder idempotency", () => {
     assert.equal(result.disabledByDefault, 2);
     assert.equal(inboundCalendars.length, SAMPLE_CALENDAR_LIST.length);
 
-    const birthdays = inboundCalendars.find((r) => r.google_calendar_id === "birthdays@group.v.calendar.google.com");
+    const birthdays = inboundCalendars.find(
+      (r) => r.google_calendar_id === "birthdays@group.v.calendar.google.com"
+    );
     assert.equal(birthdays?.is_enabled, false);
 
     const consultations = inboundCalendars.find(
@@ -307,7 +324,8 @@ describe("CalendarOS GC-6A — inbound scope seeder idempotency", () => {
     const { client, inboundCalendars } = createGc6aMockSupabase();
 
     const fetchOverride: typeof fetch = async (input) => {
-      if (String(input).includes("/calendarList")) return calendarListResponse(SAMPLE_CALENDAR_LIST);
+      if (String(input).includes("/calendarList"))
+        return calendarListResponse(SAMPLE_CALENDAR_LIST);
       return new Response("not found", { status: 404 });
     };
 
@@ -355,7 +373,8 @@ describe("CalendarOS GC-6A — OAuth connect seeds inbound scopes", () => {
     process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
     process.env.GOOGLE_CALENDAR_CLIENT_ID = "client-id";
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = "client-secret";
-    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/oauth/callback";
+    process.env.GOOGLE_CALENDAR_REDIRECT_URI =
+      "https://app.example.com/api/google-calendar/oauth/callback";
   });
 
   afterEach(() => {
@@ -378,7 +397,9 @@ describe("CalendarOS GC-6A — OAuth connect seeds inbound scopes", () => {
         );
       }
       if (url.includes("googleapis.com/oauth2/v2/userinfo")) {
-        return new Response(JSON.stringify({ email: "support@follicleintelligence.ai" }), { status: 200 });
+        return new Response(JSON.stringify({ email: "support@follicleintelligence.ai" }), {
+          status: 200,
+        });
       }
       if (url.includes("/calendarList")) return calendarListResponse(SAMPLE_CALENDAR_LIST);
       return new Response("not found", { status: 404 });

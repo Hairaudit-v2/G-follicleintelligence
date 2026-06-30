@@ -31,6 +31,8 @@ export function clinicalRecommendationLooksTreatmentLike(text: string): boolean 
 
 export function assertSafeClinicalRecommendationCopy(text: string): void {
   if (clinicalRecommendationLooksTreatmentLike(text)) {
-    throw new Error("Clinical intelligence recommendation copy must not resemble treatment or dosing advice.");
+    throw new Error(
+      "Clinical intelligence recommendation copy must not resemble treatment or dosing advice."
+    );
   }
 }

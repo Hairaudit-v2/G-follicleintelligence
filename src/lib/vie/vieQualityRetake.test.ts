@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { getSlotImageIds, mergeProgressForSlotCapture, slotIsSatisfied } from "@/src/lib/imagingOs/imagingOsProtocol";
+import {
+  getSlotImageIds,
+  mergeProgressForSlotCapture,
+  slotIsSatisfied,
+} from "@/src/lib/imagingOs/imagingOsProtocol";
 import { assertVieProtocolCapturePolicy } from "./vieCapturePolicy.server";
 import { VIE_CAPTURE_POLICY_DEFAULTS } from "./vieCapturePolicy";
 import { canAcceptVieCapture, deriveClinicalUsability } from "./vieQualityGate";
@@ -37,7 +41,11 @@ describe("VIE quality gate", () => {
     quality_score: 80,
     quality_band: "acceptable" as const,
     focus_verification: { status: "heuristic_pass" as const, blur_score: null, message: "ok" },
-    lighting_verification: { status: "heuristic_pass" as const, exposure_score: null, message: "ok" },
+    lighting_verification: {
+      status: "heuristic_pass" as const,
+      exposure_score: null,
+      message: "ok",
+    },
     classification: {
       status: "pending_ai" as const,
       expected_slot: "front_hairline",
@@ -53,7 +61,11 @@ describe("VIE quality gate", () => {
 
   it("allows accept for clinically usable capture", () => {
     const clinical = deriveClinicalUsability(baseIntel, VIE_CAPTURE_POLICY_DEFAULTS);
-    const decision = canAcceptVieCapture({ clinical, quality_score: 80, policy: VIE_CAPTURE_POLICY_DEFAULTS });
+    const decision = canAcceptVieCapture({
+      clinical,
+      quality_score: 80,
+      policy: VIE_CAPTURE_POLICY_DEFAULTS,
+    });
     assert.equal(decision.allowed, true);
     assert.equal(decision.requires_override, false);
   });
@@ -70,7 +82,11 @@ describe("VIE quality gate", () => {
       },
     };
     const clinical = deriveClinicalUsability(lowIntel, VIE_CAPTURE_POLICY_DEFAULTS);
-    const decision = canAcceptVieCapture({ clinical, quality_score: 40, policy: VIE_CAPTURE_POLICY_DEFAULTS });
+    const decision = canAcceptVieCapture({
+      clinical,
+      quality_score: 40,
+      policy: VIE_CAPTURE_POLICY_DEFAULTS,
+    });
     assert.equal(decision.allowed, false);
     assert.equal(decision.requires_override, true);
   });
@@ -113,13 +129,19 @@ describe("VIE quality gate", () => {
         },
       },
     };
-    assert.equal(slotIsSatisfied({ slug: "front_hairline", label: "Front", required: true }, progress), false);
+    assert.equal(
+      slotIsSatisfied({ slug: "front_hairline", label: "Front", required: true }, progress),
+      false
+    );
     assert.deepEqual(getSlotImageIds(progress, "front_hairline"), []);
   });
 
   it("retake replace keeps a single slot image id", () => {
     const progress = { front_hairline: ["old-id"] };
-    const prev = mergeProgressForSlotCapture.extractPreviousSlotImageIds(progress, "front_hairline");
+    const prev = mergeProgressForSlotCapture.extractPreviousSlotImageIds(
+      progress,
+      "front_hairline"
+    );
     assert.deepEqual(prev, ["old-id"]);
     const next = mergeProgressForSlotCapture.apply(progress, "front_hairline", "new-id");
     assert.deepEqual(getSlotImageIds(next, "front_hairline"), ["new-id"]);

@@ -23,7 +23,9 @@ import { sendTwilioSmsViaReminderConfig } from "@/src/lib/reminders/reminderDeli
 
 /** Live provider — Resend (email) and Twilio (SMS) when configured. */
 export class LiveReceptionCommunicationProvider implements ReceptionCommunicationProvider {
-  async send(request: ReceptionCommunicationSendRequest): Promise<ReceptionCommunicationSendResult> {
+  async send(
+    request: ReceptionCommunicationSendRequest
+  ): Promise<ReceptionCommunicationSendResult> {
     const cfg = loadReminderDeliveryConfig();
     const to = request.toAddress?.trim() ?? "";
     const body = request.body.trim();
@@ -44,7 +46,7 @@ export class LiveReceptionCommunicationProvider implements ReceptionCommunicatio
           subject: request.subject?.trim() || "Message from clinic",
           text: body,
         },
-        { tenant_id: request.tenantId, delivery_path: "reception_os_communication" },
+        { tenant_id: request.tenantId, delivery_path: "reception_os_communication" }
       );
 
       return {
@@ -75,7 +77,9 @@ export class ControlledReceptionCommunicationProvider implements ReceptionCommun
   private readonly dryRun = new DryRunReceptionCommunicationProvider();
   private readonly live = new LiveReceptionCommunicationProvider();
 
-  async send(request: ReceptionCommunicationSendRequest): Promise<ReceptionCommunicationSendResult> {
+  async send(
+    request: ReceptionCommunicationSendRequest
+  ): Promise<ReceptionCommunicationSendResult> {
     if (isReceptionOsCommunicationDryRun() || !shouldReceptionOsLiveSend(request.channel)) {
       return this.dryRun.send(request);
     }

@@ -41,7 +41,9 @@ export function composeWorkspaceDashboardWidgets(opts: {
   availableWidgets: readonly FiDashboardWidgetKey[];
 }): FiDashboardWidgetKey[] {
   const { workspaceProfile, featureAccess, registryBaselineOrder, availableWidgets } = opts;
-  const profileKey: FiWorkspaceProfileKey = isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
+  const profileKey: FiWorkspaceProfileKey = isFiWorkspaceProfileKey(workspaceProfile)
+    ? workspaceProfile
+    : "default";
   const available = new Set(availableWidgets.filter((k) => AVAILABLE_WIDGET_SET.has(k)));
 
   const baseline = dedupePreserveOrder(registryBaselineOrder.filter((k) => available.has(k)));
@@ -51,14 +53,17 @@ export function composeWorkspaceDashboardWidgets(opts: {
   const useBaselineOnly = profileKey === "default";
 
   const fromProfile = dedupePreserveOrder(
-    (useBaselineOnly ? baseline : profile.defaultDashboardWidgets.filter((k) => available.has(k)))
+    useBaselineOnly ? baseline : profile.defaultDashboardWidgets.filter((k) => available.has(k))
   );
   const fromProfileVisible = filterByFeature(fromProfile, featureAccess);
 
   if (fromProfileVisible.length > 0) return fromProfileVisible;
   if (baselineVisible.length > 0) return baselineVisible;
 
-  const lastResort = filterByFeature(dedupePreserveOrder([...FI_DASHBOARD_WIDGET_KEYS]), featureAccess);
+  const lastResort = filterByFeature(
+    dedupePreserveOrder([...FI_DASHBOARD_WIDGET_KEYS]),
+    featureAccess
+  );
   if (lastResort.length > 0) return lastResort;
 
   for (const k of registryBaselineOrder) {

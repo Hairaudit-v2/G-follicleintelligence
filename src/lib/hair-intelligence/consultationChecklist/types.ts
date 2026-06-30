@@ -1,16 +1,38 @@
-export const HIE_CONSULTATION_CHECKLIST_SOURCE_SYSTEMS = ["fi_os", "hairaudit", "hair_longevity"] as const;
-export type HieConsultationChecklistSourceSystem = (typeof HIE_CONSULTATION_CHECKLIST_SOURCE_SYSTEMS)[number];
+export const HIE_CONSULTATION_CHECKLIST_SOURCE_SYSTEMS = [
+  "fi_os",
+  "hairaudit",
+  "hair_longevity",
+] as const;
+export type HieConsultationChecklistSourceSystem =
+  (typeof HIE_CONSULTATION_CHECKLIST_SOURCE_SYSTEMS)[number];
 
-export const HIE_CONSULTATION_CHECKLIST_STATUSES = ["generated", "reviewed", "approved", "archived"] as const;
+export const HIE_CONSULTATION_CHECKLIST_STATUSES = [
+  "generated",
+  "reviewed",
+  "approved",
+  "archived",
+] as const;
 export type HieConsultationChecklistStatus = (typeof HIE_CONSULTATION_CHECKLIST_STATUSES)[number];
 
 export const HIE_CONSULTATION_PRIORITY_LEVELS = ["low", "moderate", "high", "urgent"] as const;
 export type HieConsultationPriorityLevel = (typeof HIE_CONSULTATION_PRIORITY_LEVELS)[number];
 
-export const HIE_CONSULTATION_CONSENT_COMPLEXITY_LEVELS = ["standard", "moderate", "high", "complex", "unknown"] as const;
-export type HieConsultationConsentComplexityLevel = (typeof HIE_CONSULTATION_CONSENT_COMPLEXITY_LEVELS)[number];
+export const HIE_CONSULTATION_CONSENT_COMPLEXITY_LEVELS = [
+  "standard",
+  "moderate",
+  "high",
+  "complex",
+  "unknown",
+] as const;
+export type HieConsultationConsentComplexityLevel =
+  (typeof HIE_CONSULTATION_CONSENT_COMPLEXITY_LEVELS)[number];
 
-export const HIE_CONSULTATION_REVIEW_STATUSES = ["pending", "accepted", "corrected", "rejected"] as const;
+export const HIE_CONSULTATION_REVIEW_STATUSES = [
+  "pending",
+  "accepted",
+  "corrected",
+  "rejected",
+] as const;
 export type HieConsultationReviewStatus = (typeof HIE_CONSULTATION_REVIEW_STATUSES)[number];
 
 export type ConsultationChecklistModelResult = {

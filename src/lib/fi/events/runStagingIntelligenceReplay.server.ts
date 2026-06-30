@@ -29,7 +29,9 @@ export type RunStagingIntelligenceReplayResult =
 
 function assertAdmin(omit?: boolean): Promise<void> {
   if (omit) return Promise.resolve();
-  return import("@/src/lib/fiOs/fiOsPlatformSystemGate.server").then((m) => m.assertFiPlatformAdminSystemAccess());
+  return import("@/src/lib/fiOs/fiOsPlatformSystemGate.server").then((m) =>
+    m.assertFiPlatformAdminSystemAccess()
+  );
 }
 
 function rollback(): readonly string[] {
@@ -58,7 +60,8 @@ export async function runStagingIntelligenceReplay(
     return {
       ok: false,
       code: "staging_replay_production_blocked",
-      message: "Staging intelligence replay activation is never permitted when NODE_ENV is production.",
+      message:
+        "Staging intelligence replay activation is never permitted when NODE_ENV is production.",
       rollback_instructions: rollback(),
     };
   }
@@ -76,7 +79,11 @@ export async function runStagingIntelligenceReplay(
   await assertAdmin(options?.omitPlatformAdminAssertForOperatorCli);
 
   const supabase = options?.supabaseClientForTests ?? supabaseAdmin();
-  const { data: row, error: loadErr } = await supabase.from("fi_intelligence_replay_runs").select("*").eq("id", runId).maybeSingle();
+  const { data: row, error: loadErr } = await supabase
+    .from("fi_intelligence_replay_runs")
+    .select("*")
+    .eq("id", runId)
+    .maybeSingle();
 
   if (loadErr || !row) {
     return {

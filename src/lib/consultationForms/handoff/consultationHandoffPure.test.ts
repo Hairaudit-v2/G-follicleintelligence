@@ -14,7 +14,9 @@ import {
   surgeryPlanningHandoffEligible,
 } from "./consultationHandoffPure";
 
-function baseSummary(over: Partial<ConsultationCompletionSummary> = {}): ConsultationCompletionSummary {
+function baseSummary(
+  over: Partial<ConsultationCompletionSummary> = {}
+): ConsultationCompletionSummary {
   return {
     consultationId: "c1",
     formInstanceId: "f1",
@@ -73,7 +75,10 @@ describe("consultationHandoffPure", () => {
 
   it("quoteDraftTitle prefers recommended procedure", () => {
     assert.equal(quoteDraftTitle(baseSummary({ recommendedProcedure: "FUE plan" })), "FUE plan");
-    assert.equal(quoteDraftTitle(baseSummary({ recommendedProcedure: "" })), "Consultation treatment plan");
+    assert.equal(
+      quoteDraftTitle(baseSummary({ recommendedProcedure: "" })),
+      "Consultation treatment plan"
+    );
   });
 
   it("pathologyTemplateForOutcome picks templates aligned with DB naming", () => {
@@ -90,16 +95,34 @@ describe("consultationHandoffPure", () => {
     });
     assert.equal(surgeryPlanningHandoffEligible(s, null), false);
     assert.equal(surgeryPlanningHandoffEligible(s, "case-1"), true);
-    assert.equal(surgeryPlanningHandoffEligible(baseSummary({ outcomeType: "undecided", recommendedProcedure: "FUE" }), "case-1"), false);
     assert.equal(
       surgeryPlanningHandoffEligible(
-        baseSummary({ outcomeType: "proceed_surgery", recommendedProcedure: "", estimatedGraftsMin: 1, estimatedGraftsMax: 2 }),
+        baseSummary({ outcomeType: "undecided", recommendedProcedure: "FUE" }),
+        "case-1"
+      ),
+      false
+    );
+    assert.equal(
+      surgeryPlanningHandoffEligible(
+        baseSummary({
+          outcomeType: "proceed_surgery",
+          recommendedProcedure: "",
+          estimatedGraftsMin: 1,
+          estimatedGraftsMax: 2,
+        }),
         "case-1"
       ),
       true
     );
     assert.equal(
-      surgeryPlanningHandoffEligible(baseSummary({ outcomeType: "proceed_surgery", recommendedProcedure: "", recommendedZones: ["crown"] }), "case-1"),
+      surgeryPlanningHandoffEligible(
+        baseSummary({
+          outcomeType: "proceed_surgery",
+          recommendedProcedure: "",
+          recommendedZones: ["crown"],
+        }),
+        "case-1"
+      ),
       true
     );
   });
@@ -142,13 +165,31 @@ describe("consultationHandoffPure", () => {
   });
 
   it("quoteDraftAutomationIntentEligible detects quote/treatment intent signals", () => {
-    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "medical_management" })), false);
-    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "proceed_surgery" })), true);
-    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "proceed_prp" })), true);
+    assert.equal(
+      quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "medical_management" })),
+      false
+    );
+    assert.equal(
+      quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "proceed_surgery" })),
+      true
+    );
+    assert.equal(
+      quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "proceed_prp" })),
+      true
+    );
     assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ quoteNotes: "  " })), false);
-    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ quoteNotes: "Pricing TBD" })), true);
-    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ recommendedProcedure: "FUE" })), true);
-    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ recommendedTreatments: ["finasteride"] })), true);
+    assert.equal(
+      quoteDraftAutomationIntentEligible(baseSummary({ quoteNotes: "Pricing TBD" })),
+      true
+    );
+    assert.equal(
+      quoteDraftAutomationIntentEligible(baseSummary({ recommendedProcedure: "FUE" })),
+      true
+    );
+    assert.equal(
+      quoteDraftAutomationIntentEligible(baseSummary({ recommendedTreatments: ["finasteride"] })),
+      true
+    );
   });
 
   it("handoffIdempotencyMetadata builder is stable for JSON containment queries", () => {

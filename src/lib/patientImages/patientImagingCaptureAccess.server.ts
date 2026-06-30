@@ -2,7 +2,11 @@ import "server-only";
 
 import { cache } from "react";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  resolveAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import { evaluateModuleAccess } from "@/src/lib/platform/entitlements/modules";
 import { loadEntitlementAccessContext } from "@/src/lib/platform/entitlements/tenantEntitlements.server";
@@ -20,7 +24,9 @@ async function loadFiUserIdForAuth(tenantId: string, authUserId: string): Promis
   return String((data as { id: string }).id);
 }
 
-async function getPatientImagingCaptureCapabilityImpl(tenantId: string): Promise<{ canCapture: boolean }> {
+async function getPatientImagingCaptureCapabilityImpl(
+  tenantId: string
+): Promise<{ canCapture: boolean }> {
   const tid = tenantId.trim();
   if (!tid) return { canCapture: false };
 

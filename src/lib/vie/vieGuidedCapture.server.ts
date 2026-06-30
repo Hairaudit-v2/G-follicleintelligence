@@ -228,7 +228,10 @@ export async function acceptVieProtocolCapture(params: {
   if (!pending) throw new Error("No pending capture to accept for this slot.");
 
   let clinical = {
-    status: (pending.clinically_usable ? "usable" : "unusable") as "usable" | "warning" | "unusable",
+    status: (pending.clinically_usable ? "usable" : "unusable") as
+      | "usable"
+      | "warning"
+      | "unusable",
     clinically_usable: pending.clinically_usable,
     warnings: [] as string[],
     retake_recommendation: pending.clinically_usable ? null : "Retake recommended.",
@@ -237,7 +240,9 @@ export async function acceptVieProtocolCapture(params: {
   if (pending.intelligence_id) {
     const { data: intelRow } = await supabase
       .from("fi_vie_capture_intelligence")
-      .select("clinical_usability, quality_score, clinically_usable, retake_recommendation, warnings")
+      .select(
+        "clinical_usability, quality_score, clinically_usable, retake_recommendation, warnings"
+      )
       .eq("tenant_id", tid)
       .eq("id", pending.intelligence_id)
       .maybeSingle();

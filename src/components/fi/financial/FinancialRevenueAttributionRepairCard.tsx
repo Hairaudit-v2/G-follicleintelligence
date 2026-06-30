@@ -48,7 +48,10 @@ export function FinancialRevenueAttributionRepairCard(props: {
         consultant_fi_user_id: consultantId || null,
       });
       if (result.ok) {
-        setFeedback({ tone: "success", message: "Attribution override saved. Recalculate to append a correction event." });
+        setFeedback({
+          tone: "success",
+          message: "Attribution override saved. Recalculate to append a correction event.",
+        });
       } else {
         setFeedback({ tone: "error", message: result.error });
       }
@@ -59,7 +62,9 @@ export function FinancialRevenueAttributionRepairCard(props: {
     if (!canMutate) return;
     startTransition(async () => {
       setFeedback(null);
-      const result = await recalculateRevenueAttributionAction(props.tenantId, { case_id: props.caseId });
+      const result = await recalculateRevenueAttributionAction(props.tenantId, {
+        case_id: props.caseId,
+      });
       if (result.ok) {
         setFeedback({ tone: "success", message: "Manual attribution event recorded." });
       } else {
@@ -71,10 +76,12 @@ export function FinancialRevenueAttributionRepairCard(props: {
   return (
     <div className={className}>
       <div className={panelCls}>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Revenue attribution repair</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          Revenue attribution repair
+        </p>
         <p className="mt-1 text-xs text-slate-500">
-          Override source, campaign, or consultant. Saves per-case manual rules; recalculate appends a correction event
-          (confidence = manual).
+          Override source, campaign, or consultant. Saves per-case manual rules; recalculate appends
+          a correction event (confidence = manual).
         </p>
 
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -153,7 +160,11 @@ export function FinancialRevenueAttributionRepairCard(props: {
           </div>
         ) : null}
 
-        <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} className="mt-2" />
+        <FinancialOsFeedbackText
+          message={feedback?.message ?? null}
+          tone={feedback?.tone}
+          className="mt-2"
+        />
       </div>
     </div>
   );

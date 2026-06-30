@@ -53,10 +53,7 @@ describe("validateFullEnv", () => {
   });
 
   it("respects SKIP_ENV_VALIDATION", () => {
-    const r = validateFullEnv(
-      { NODE_ENV: "production" },
-      { skipValidation: true }
-    );
+    const r = validateFullEnv({ NODE_ENV: "production" }, { skipValidation: true });
     assert.equal(r.ok, true);
   });
 });

@@ -16,10 +16,14 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string; patientId: string; requestId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; patientId: string; requestId: string }> }
+) {
   try {
     const { tenantId, patientId, requestId } = await params;
-    if (!tenantId?.trim() || !patientId?.trim() || !requestId?.trim()) return crmJsonError(400, "Missing route parameters.");
+    if (!tenantId?.trim() || !patientId?.trim() || !requestId?.trim())
+      return crmJsonError(400, "Missing route parameters.");
 
     const adminKey = extractAdminKeyFromRequest(req, null);
     await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
@@ -32,7 +36,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
     const bytes = await renderPathologyBloodRequestPdfBytes(pdfInput);
 
     const supabase = supabaseAdmin();
-    const storagePath = buildPathologyPdfStoragePath(tenantId.trim(), patientId.trim(), requestId.trim());
+    const storagePath = buildPathologyPdfStoragePath(
+      tenantId.trim(),
+      patientId.trim(),
+      requestId.trim()
+    );
     const { error: upErr } = await supabase.storage
       .from(PATHOLOGY_PATIENT_PDF_BUCKET)
       .upload(storagePath, Buffer.from(bytes), { contentType: "application/pdf", upsert: true });

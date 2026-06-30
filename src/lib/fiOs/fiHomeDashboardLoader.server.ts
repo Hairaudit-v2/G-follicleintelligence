@@ -34,7 +34,9 @@ export type FiHomeDashboardPayload = {
   };
 };
 
-function clinicSettingsComplete(overview: Awaited<ReturnType<typeof loadTenantConfigurationOverview>>): boolean {
+function clinicSettingsComplete(
+  overview: Awaited<ReturnType<typeof loadTenantConfigurationOverview>>
+): boolean {
   if (overview.clinics.length === 0) return false;
   return overview.clinics.every((c) => c.settings != null);
 }
@@ -48,28 +50,32 @@ function computeNextAction(
   if (overview.organisations.length === 0) {
     return {
       title: "Create an organisation",
-      description: "Every clinic belongs to an organisation. Start by creating your first organisation in the directory.",
+      description:
+        "Every clinic belongs to an organisation. Start by creating your first organisation in the directory.",
       href: `${base}/directory`,
     };
   }
   if (overview.clinics.length === 0) {
     return {
       title: "Create a clinic",
-      description: "Add at least one clinic under your organisation so cases and settings can be scoped correctly.",
+      description:
+        "Add at least one clinic under your organisation so cases and settings can be scoped correctly.",
       href: `${base}/directory`,
     };
   }
   if (!clinicSettingsComplete(overview)) {
     return {
       title: "Complete clinic configuration",
-      description: "Finish clinic-level details (contact, timezone, URLs) so branding and workflows resolve correctly.",
+      description:
+        "Finish clinic-level details (contact, timezone, URLs) so branding and workflows resolve correctly.",
       href: `${base}/configuration`,
     };
   }
   if (caseCount === 0) {
     return {
       title: "Create your first patient",
-      description: "Use the guided wizard to add a person, patient record, and clinical patient in one flow.",
+      description:
+        "Use the guided wizard to add a person, patient record, and clinical patient in one flow.",
       href: `${base}/cases/new`,
     };
   }
@@ -116,7 +122,11 @@ export async function loadFiHomeDashboardPayload(
     loadTenantConfigurationOverview(tid),
     supabase.from("fi_persons").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
     supabase.from("fi_patients").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
-    supabase.from("fi_cases").select("*", { count: "exact", head: true }).eq("tenant_id", tid).is("deleted_at", null),
+    supabase
+      .from("fi_cases")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("deleted_at", null),
   ]);
 
   if (tenantRes.error) throw new Error(tenantRes.error.message);
@@ -149,7 +159,11 @@ export async function loadFiHomeDashboardPayload(
       patients: patientsRes.count ?? 0,
       cases: caseCount,
     },
-    setupProgressRatio: computeSetupProgress(overview, caseCount, options.showCrmShellChecklistItems),
+    setupProgressRatio: computeSetupProgress(
+      overview,
+      caseCount,
+      options.showCrmShellChecklistItems
+    ),
     nextAction: computeNextAction(tid, overview, caseCount),
     checklist,
   };

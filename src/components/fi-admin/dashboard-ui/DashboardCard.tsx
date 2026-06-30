@@ -18,7 +18,7 @@ export function DashboardCard({ className, elevated, children, ...rest }: Dashbo
         elevated
           ? "border-white/[0.1] bg-[#0f1629]/88 shadow-lg shadow-black/45"
           : "border-white/[0.07] bg-[#0c1426]/80 shadow-md shadow-black/35",
-        className,
+        className
       )}
       {...rest}
     >

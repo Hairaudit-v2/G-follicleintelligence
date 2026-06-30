@@ -37,7 +37,9 @@ export function assertBookingStartInOperationalWindow(
   return { ok: true };
 }
 
-export function assertBookingMutableForReceptionFlow(bookingStatus: string): { ok: true } | { ok: false; error: string } {
+export function assertBookingMutableForReceptionFlow(
+  bookingStatus: string
+): { ok: true } | { ok: false; error: string } {
   const st = String(bookingStatus ?? "").trim();
   if (st === "cancelled" || st === "completed" || st === "no_show") {
     return { ok: false, error: "This booking can no longer be changed." };

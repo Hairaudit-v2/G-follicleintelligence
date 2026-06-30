@@ -27,7 +27,10 @@ export type ReminderMergeContext = {
   norwood_summary?: string;
 };
 
-const PLACEHOLDER_MAP: Record<(typeof REMINDER_PLACEHOLDER_KEYS)[number], keyof ReminderMergeContext> = {
+const PLACEHOLDER_MAP: Record<
+  (typeof REMINDER_PLACEHOLDER_KEYS)[number],
+  keyof ReminderMergeContext
+> = {
   "{{patient_name}}": "patient_name",
   "{{booking_time}}": "booking_time",
   "{{clinic_name}}": "clinic_name",
@@ -37,9 +40,14 @@ const PLACEHOLDER_MAP: Record<(typeof REMINDER_PLACEHOLDER_KEYS)[number], keyof 
 };
 
 /** Maps shorthand template triggers to scheduling keys used by `scheduledAtForBookingTrigger`. */
-export type BookingReminderScheduleTrigger = "booking_created" | "booking_48h_before" | "booking_24h_before";
+export type BookingReminderScheduleTrigger =
+  | "booking_created"
+  | "booking_48h_before"
+  | "booking_24h_before";
 
-export function toBookingScheduleTrigger(trigger: ReminderTriggerEvent): BookingReminderScheduleTrigger | null {
+export function toBookingScheduleTrigger(
+  trigger: ReminderTriggerEvent
+): BookingReminderScheduleTrigger | null {
   switch (trigger) {
     case "booking_created":
       return "booking_created";
@@ -59,7 +67,10 @@ export function toBookingScheduleTrigger(trigger: ReminderTriggerEvent): Booking
  */
 export function renderReminderText(template: string, ctx: ReminderMergeContext): string {
   let out = template;
-  for (const [token, key] of Object.entries(PLACEHOLDER_MAP) as [keyof typeof PLACEHOLDER_MAP, keyof ReminderMergeContext][]) {
+  for (const [token, key] of Object.entries(PLACEHOLDER_MAP) as [
+    keyof typeof PLACEHOLDER_MAP,
+    keyof ReminderMergeContext,
+  ][]) {
     const val = ctx[key];
     if (val === undefined || val === null) continue;
     const s = String(val);
@@ -95,7 +106,10 @@ export function scheduledAtForBookingTrigger(params: {
 }
 
 /** Immediate send queue time for non-booking triggers (lead_created, post_consult). */
-export function scheduledAtForImmediateTrigger(trigger: ReminderTriggerEvent, nowIso: string): string | null {
+export function scheduledAtForImmediateTrigger(
+  trigger: ReminderTriggerEvent,
+  nowIso: string
+): string | null {
   if (trigger === "lead_created" || trigger === "post_consult") return nowIso;
   return null;
 }

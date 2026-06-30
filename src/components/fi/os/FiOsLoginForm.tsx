@@ -12,7 +12,10 @@ function FiOsLoginFields() {
   return (
     <>
       <div>
-        <label htmlFor="fi-os-email" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+        <label
+          htmlFor="fi-os-email"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+        >
           Work email
         </label>
         <input
@@ -27,7 +30,10 @@ function FiOsLoginFields() {
         />
       </div>
       <div>
-        <label htmlFor="fi-os-password" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+        <label
+          htmlFor="fi-os-password"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+        >
           Password
         </label>
         <input

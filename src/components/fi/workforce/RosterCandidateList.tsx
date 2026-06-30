@@ -48,7 +48,9 @@ export function RosterCandidateList({
         if (!rows.length) return null;
         return (
           <div key={section}>
-            <h4 className={`text-xs font-semibold uppercase tracking-wider ${sectionTone(section)}`}>
+            <h4
+              className={`text-xs font-semibold uppercase tracking-wider ${sectionTone(section)}`}
+            >
               {sectionTitle(section)}
             </h4>
             <ul className="mt-2 space-y-2">
@@ -70,7 +72,9 @@ export function RosterCandidateList({
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-medium text-slate-100">{candidate.name}</span>
-                        <span className="font-mono text-xs text-slate-400">{candidate.readinessScore}</span>
+                        <span className="font-mono text-xs text-slate-400">
+                          {candidate.readinessScore}
+                        </span>
                       </div>
                       <p className="mt-0.5 text-xs capitalize text-slate-500">
                         {candidate.role?.replace(/_/g, " ") ?? "Role unset"} ·{" "}
@@ -81,13 +85,13 @@ export function RosterCandidateList({
                       </p>
                       {candidate.privilegeWarnings.length ? (
                         <p className="mt-1 text-xs text-amber-200/90">
-                          {candidate.privilegeWarnings
-                            .map((w) => w.replace(/_/g, " "))
-                            .join("; ")}
+                          {candidate.privilegeWarnings.map((w) => w.replace(/_/g, " ")).join("; ")}
                         </p>
                       ) : null}
                       {candidate.warnings.length ? (
-                        <p className="mt-1 text-xs text-amber-200">{candidate.warnings.join("; ")}</p>
+                        <p className="mt-1 text-xs text-amber-200">
+                          {candidate.warnings.join("; ")}
+                        </p>
                       ) : null}
                       {candidate.reasons.length && section === "blocked" ? (
                         <p className="mt-1 text-xs text-rose-200">{candidate.reasons.join("; ")}</p>

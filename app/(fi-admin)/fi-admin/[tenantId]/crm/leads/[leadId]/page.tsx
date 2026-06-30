@@ -50,7 +50,8 @@ export default async function CrmLeadShellPage({
       <div className="mx-auto max-w-3xl space-y-4 py-6">
         <h1 className="text-lg font-semibold text-slate-100">Lead not found</h1>
         <p className="text-sm text-slate-400">
-          No lead <code className="font-mono text-xs">{leadId}</code> for this tenant, or it was deleted.
+          No lead <code className="font-mono text-xs">{leadId}</code> for this tenant, or it was
+          deleted.
         </p>
         <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-blue-300 hover:underline">
           ← Leads
@@ -73,7 +74,15 @@ export default async function CrmLeadShellPage({
       calendarTimezone={payload.calendarTimezone}
       services={services}
     >
-      <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="mx-auto max-w-6xl animate-pulse space-y-4 py-6"
+            aria-busy="true"
+            aria-hidden
+          />
+        }
+      >
         <CrmLeadDetailPageView
           tenantId={tenantId}
           leadId={leadId}

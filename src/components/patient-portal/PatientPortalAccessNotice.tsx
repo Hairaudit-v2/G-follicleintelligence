@@ -43,18 +43,24 @@ export function PatientPortalAccessNotice({
     <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.06] p-5 text-sm text-amber-100">
       <p className="text-base font-semibold text-amber-50">Your portal is not linked yet</p>
       <p className="mt-2 leading-relaxed text-amber-100/90">
-        You are signed in, but {clinicLabel} has not connected your account to a patient record yet. Please contact the
-        clinic reception team and ask them to link your portal access.
+        You are signed in, but {clinicLabel} has not connected your account to a patient record yet.
+        Please contact the clinic reception team and ask them to link your portal access.
       </p>
       <p className="mt-3 text-amber-100/80">
         Need help? Email{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-amber-50 underline underline-offset-2">
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="font-medium text-amber-50 underline underline-offset-2"
+        >
           {SUPPORT_EMAIL}
         </a>
         .
       </p>
       <p className="mt-4">
-        <Link href={signInHref} className="text-sm font-medium text-cyan-300 hover:text-cyan-200 hover:underline">
+        <Link
+          href={signInHref}
+          className="text-sm font-medium text-cyan-300 hover:text-cyan-200 hover:underline"
+        >
           Try a different account
         </Link>
       </p>

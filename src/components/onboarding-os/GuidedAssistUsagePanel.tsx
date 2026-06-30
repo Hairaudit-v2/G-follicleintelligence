@@ -16,7 +16,13 @@ function formatPercent(rate: number): string {
   return `${Math.round(rate * 100)}%`;
 }
 
-export function GuidedAssistUsagePanel({ tenantId, windowDays = 30 }: { tenantId: string; windowDays?: number }) {
+export function GuidedAssistUsagePanel({
+  tenantId,
+  windowDays = 30,
+}: {
+  tenantId: string;
+  windowDays?: number;
+}) {
   const [summary, setSummary] = useState<GuidedAssistUsageSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,8 +58,9 @@ export function GuidedAssistUsagePanel({ tenantId, windowDays = 30 }: { tenantId
         Guided Assist usage ({summary.windowDays} days)
       </h3>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-        See where team members rely on operational tips, which guidance they dismiss, and which FI OS modules may need
-        clearer onboarding paths. All metrics are deterministic — no clinical advice is generated or tracked.
+        See where team members rely on operational tips, which guidance they dismiss, and which FI
+        OS modules may need clearer onboarding paths. All metrics are deterministic — no clinical
+        advice is generated or tracked.
       </p>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
@@ -69,7 +76,8 @@ export function GuidedAssistUsagePanel({ tenantId, windowDays = 30 }: { tenantId
 
       {!hasActivity ? (
         <p className="mt-4 text-sm text-[#94A3B8]">
-          No guided assist activity in this window yet. Metrics appear after users view tips in the tenant workspace.
+          No guided assist activity in this window yet. Metrics appear after users view tips in the
+          tenant workspace.
         </p>
       ) : null}
 
@@ -118,8 +126,8 @@ export function GuidedAssistUsagePanel({ tenantId, windowDays = 30 }: { tenantId
       {summary.modulesNeedingGuidanceReview.length > 0 ? (
         <InsightBlock title="Modules needing onboarding review">
           <p className="mb-2 text-xs text-[#94A3B8]">
-            High dismiss rates with repeated tip views suggest the module workflow may need clearer in-app guidance or
-            training.
+            High dismiss rates with repeated tip views suggest the module workflow may need clearer
+            in-app guidance or training.
           </p>
           <ul className="space-y-2">
             {summary.areaInsights
@@ -129,7 +137,9 @@ export function GuidedAssistUsagePanel({ tenantId, windowDays = 30 }: { tenantId
                   key={row.guidanceArea}
                   className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/20 bg-amber-950/20 px-3 py-2 text-sm"
                 >
-                  <span className="font-medium text-amber-100">{GUIDED_ASSIST_AREA_LABELS[row.guidanceArea]}</span>
+                  <span className="font-medium text-amber-100">
+                    {GUIDED_ASSIST_AREA_LABELS[row.guidanceArea]}
+                  </span>
                   <span className="shrink-0 text-xs text-amber-200/90">
                     {formatPercent(row.dismissRate)} dismiss · {row.tipsShown} shown
                   </span>

@@ -68,16 +68,22 @@ const roleBodySchema = idBodySchema.extend({
 
 export type FiTenantAdminActionResult = { ok: true } | { ok: false; error: string };
 
-export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTenantAdminActionResult> {
+export async function inviteTenantAdminUserAction(
+  body: unknown
+): Promise<FiTenantAdminActionResult> {
   try {
     const parsed = inviteBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
     await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
-      return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
+      return {
+        ok: false,
+        error: "You do not have permission to manage admin users for this clinic.",
+      };
     }
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tid);
-    if (!actorFiUserId) return { ok: false, error: "Could not resolve your clinic user for this action." };
+    if (!actorFiUserId)
+      return { ok: false, error: "Could not resolve your clinic user for this action." };
 
     const email = parsed.email.trim().toLowerCase();
     const supabase = supabaseAdmin();
@@ -104,7 +110,8 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
         })
         .select("id")
         .single();
-      if (insErr || !created) return { ok: false, error: insErr?.message ?? "Could not create tenant user row." };
+      if (insErr || !created)
+        return { ok: false, error: insErr?.message ?? "Could not create tenant user row." };
       fiUserId = String((created as { id: string }).id);
     }
 
@@ -117,9 +124,12 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
     if (dupErr) return { ok: false, error: dupErr.message };
     if (dup) return { ok: false, error: "This user is already registered as a tenant admin user." };
 
-    const { data: authRpc, error: rpcErr } = await supabase.rpc("fi_admin_lookup_auth_user_id_by_email", {
-      _email: email,
-    });
+    const { data: authRpc, error: rpcErr } = await supabase.rpc(
+      "fi_admin_lookup_auth_user_id_by_email",
+      {
+        _email: email,
+      }
+    );
     if (rpcErr) return { ok: false, error: rpcErr.message };
     const rpcAuthId = authRpc ? String(authRpc) : null;
 
@@ -145,7 +155,9 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
         logStructured("error", "fi_auth_admin_invite_failed", {
           source: "tenant_admin_invite",
           tenant_id: tid,
-          recipient_email_domain: email.includes("@") ? email.split("@")[1]?.toLowerCase() ?? null : null,
+          recipient_email_domain: email.includes("@")
+            ? (email.split("@")[1]?.toLowerCase() ?? null)
+            : null,
           auth_error_message: invErr?.message ?? "invite_missing_user",
           auth_error_name: (invErr as { name?: string } | null)?.name ?? null,
         });
@@ -161,7 +173,11 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
     if (!existingUser?.auth_user_id) {
       userPatch.auth_user_id = authUserId;
     }
-    const { error: linkErr } = await supabase.from("fi_users").update(userPatch).eq("id", fiUserId).eq("tenant_id", tid);
+    const { error: linkErr } = await supabase
+      .from("fi_users")
+      .update(userPatch)
+      .eq("id", fiUserId)
+      .eq("tenant_id", tid);
     if (linkErr) return { ok: false, error: linkErr.message };
 
     let status: "invited" | "active" = "invited";
@@ -185,7 +201,8 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
       })
       .select("id")
       .single();
-    if (admErr || !adminRow) return { ok: false, error: admErr?.message ?? "Could not create admin user profile." };
+    if (admErr || !adminRow)
+      return { ok: false, error: admErr?.message ?? "Could not create admin user profile." };
 
     await insertFiTenantAdminAuditEvent({
       tenantId: tid,
@@ -199,21 +216,28 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
     revalidatePath(`/fi-admin/${tid}/settings/admin-users`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }
 
-export async function updateTenantAdminUserRoleAction(body: unknown): Promise<FiTenantAdminActionResult> {
+export async function updateTenantAdminUserRoleAction(
+  body: unknown
+): Promise<FiTenantAdminActionResult> {
   try {
     const parsed = roleBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
     await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
-      return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
+      return {
+        ok: false,
+        error: "You do not have permission to manage admin users for this clinic.",
+      };
     }
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tid);
-    if (!actorFiUserId) return { ok: false, error: "Could not resolve your clinic user for this action." };
+    if (!actorFiUserId)
+      return { ok: false, error: "Could not resolve your clinic user for this action." };
 
     const supabase = supabaseAdmin();
     const { data: row, error: le } = await supabase
@@ -247,21 +271,28 @@ export async function updateTenantAdminUserRoleAction(body: unknown): Promise<Fi
     revalidatePath(`/fi-admin/${tid}/settings/admin-users`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }
 
-export async function suspendTenantAdminUserAction(body: unknown): Promise<FiTenantAdminActionResult> {
+export async function suspendTenantAdminUserAction(
+  body: unknown
+): Promise<FiTenantAdminActionResult> {
   try {
     const parsed = idBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
     await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
-      return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
+      return {
+        ok: false,
+        error: "You do not have permission to manage admin users for this clinic.",
+      };
     }
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tid);
-    if (!actorFiUserId) return { ok: false, error: "Could not resolve your clinic user for this action." };
+    if (!actorFiUserId)
+      return { ok: false, error: "Could not resolve your clinic user for this action." };
 
     const supabase = supabaseAdmin();
     const { data: row, error: le } = await supabase
@@ -294,21 +325,28 @@ export async function suspendTenantAdminUserAction(body: unknown): Promise<FiTen
     revalidatePath(`/fi-admin/${tid}/settings/admin-users`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }
 
-export async function reactivateTenantAdminUserAction(body: unknown): Promise<FiTenantAdminActionResult> {
+export async function reactivateTenantAdminUserAction(
+  body: unknown
+): Promise<FiTenantAdminActionResult> {
   try {
     const parsed = idBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
     await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
-      return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
+      return {
+        ok: false,
+        error: "You do not have permission to manage admin users for this clinic.",
+      };
     }
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tid);
-    if (!actorFiUserId) return { ok: false, error: "Could not resolve your clinic user for this action." };
+    if (!actorFiUserId)
+      return { ok: false, error: "Could not resolve your clinic user for this action." };
 
     const supabase = supabaseAdmin();
     const { data: row, error: le } = await supabase
@@ -356,7 +394,8 @@ export async function reactivateTenantAdminUserAction(body: unknown): Promise<Fi
     revalidatePath(`/fi-admin/${tid}/settings/admin-users`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }
@@ -364,16 +403,22 @@ export async function reactivateTenantAdminUserAction(body: unknown): Promise<Fi
 /**
  * Removes the tenant admin access row only. Does not delete `fi_users` or `fi_staff`.
  */
-export async function revokeTenantAdminUserAccessAction(body: unknown): Promise<FiTenantAdminActionResult> {
+export async function revokeTenantAdminUserAccessAction(
+  body: unknown
+): Promise<FiTenantAdminActionResult> {
   try {
     const parsed = idBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
     await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
-      return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
+      return {
+        ok: false,
+        error: "You do not have permission to manage admin users for this clinic.",
+      };
     }
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tid);
-    if (!actorFiUserId) return { ok: false, error: "Could not resolve your clinic user for this action." };
+    if (!actorFiUserId)
+      return { ok: false, error: "Could not resolve your clinic user for this action." };
 
     const supabase = supabaseAdmin();
     const { data: row, error: le } = await supabase
@@ -390,10 +435,22 @@ export async function revokeTenantAdminUserAccessAction(body: unknown): Promise<
     const adminUserId = parsed.adminUserId.trim();
     const prevRole = String((row as { admin_role: string }).admin_role);
 
-    const { data: fu } = await supabase.from("fi_users").select("email").eq("tenant_id", tid).eq("id", fiUserId).maybeSingle();
-    const email = fu && typeof (fu as { email: unknown }).email === "string" ? (fu as { email: string }).email : null;
+    const { data: fu } = await supabase
+      .from("fi_users")
+      .select("email")
+      .eq("tenant_id", tid)
+      .eq("id", fiUserId)
+      .maybeSingle();
+    const email =
+      fu && typeof (fu as { email: unknown }).email === "string"
+        ? (fu as { email: string }).email
+        : null;
 
-    const { error: delErr } = await supabase.from("fi_tenant_admin_users").delete().eq("tenant_id", tid).eq("id", adminUserId);
+    const { error: delErr } = await supabase
+      .from("fi_tenant_admin_users")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", adminUserId);
     if (delErr) return { ok: false, error: delErr.message };
 
     await insertFiTenantAdminAuditEvent({
@@ -408,7 +465,8 @@ export async function revokeTenantAdminUserAccessAction(body: unknown): Promise<
     revalidatePath(`/fi-admin/${tid}/settings/admin-users`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }

@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import { markCrmQuoteAcceptedForTenant } from "@/src/lib/crm/crmQuoteMutations.server";
 
 function errMsg(e: unknown): string {
@@ -14,7 +18,10 @@ function errMsg(e: unknown): string {
 export async function markCrmQuoteAcceptedAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; result: Awaited<ReturnType<typeof markCrmQuoteAcceptedForTenant>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; result: Awaited<ReturnType<typeof markCrmQuoteAcceptedForTenant>> }
+  | { ok: false; error: string }
+> {
   try {
     const b =
       body && typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
@@ -37,7 +44,9 @@ export async function markCrmQuoteAcceptedAction(
       revalidatePath(`/fi-admin/${tid}/cases/${encodeURIComponent(result.caseId.trim())}`);
     }
     if (result.consultationId?.trim()) {
-      revalidatePath(`/fi-admin/${tid}/consultations/${encodeURIComponent(result.consultationId.trim())}`);
+      revalidatePath(
+        `/fi-admin/${tid}/consultations/${encodeURIComponent(result.consultationId.trim())}`
+      );
     }
     if (result.leadId?.trim()) {
       revalidatePath(`/fi-admin/${tid}/crm/leads/${encodeURIComponent(result.leadId.trim())}`);

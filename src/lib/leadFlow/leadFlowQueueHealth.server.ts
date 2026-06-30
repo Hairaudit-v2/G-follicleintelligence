@@ -109,7 +109,8 @@ export async function loadLeadFlowQueueHealth(opts?: {
     provider: HUBSPOT_PROVIDER,
     counts: { pending, retrying, processing, processed, failed },
     oldest_pending_at: (oldestPending as { created_at?: string } | null)?.created_at ?? null,
-    newest_processed_at: (newestProcessed as { processed_at?: string } | null)?.processed_at ?? null,
+    newest_processed_at:
+      (newestProcessed as { processed_at?: string } | null)?.processed_at ?? null,
     failed_last_24h: failedLast24h,
     processed_last_24h: processedLast24h,
   };

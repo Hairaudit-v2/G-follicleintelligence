@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { updateBookingAction, loadBookingResourceAssignmentsAction, loadBookingReminderJobsAction } from "@/lib/actions/fi-booking-actions";
+import {
+  updateBookingAction,
+  loadBookingResourceAssignmentsAction,
+  loadBookingReminderJobsAction,
+} from "@/lib/actions/fi-booking-actions";
 import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
 import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
 import { NextAvailableBookingSlots } from "@/src/components/calendar/NextAvailableBookingSlots";
@@ -19,13 +23,20 @@ import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
-import { canSelectStaffForClinicalPicker, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import {
+  canSelectStaffForClinicalPicker,
+  type ClinicalStaffPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
 import {
   endLocalFromStartLocalAndProcedure,
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from "@/src/components/fi/bookings/bookingFormUtils";
-import { formatIsoDateTimeInTimezone, normalizeCalendarTimezone, bookingDurationMinutesUtc } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatIsoDateTimeInTimezone,
+  normalizeCalendarTimezone,
+  bookingDurationMinutesUtc,
+} from "@/src/lib/calendar/calendarTimezone";
 
 const WRITABLE_STATUSES = ["scheduled", "confirmed", "arrived", "no_show"] as const;
 
@@ -58,7 +69,9 @@ export function BookingEditDrawer({
 }) {
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [lazyReminderJobs, setLazyReminderJobs] = useState<FiReminderJobWithTemplate[] | null>(null);
+  const [lazyReminderJobs, setLazyReminderJobs] = useState<FiReminderJobWithTemplate[] | null>(
+    null
+  );
   const [lazyReminderJobsLoading, setLazyReminderJobsLoading] = useState(false);
 
   const [bookingType, setBookingType] = useState("");
@@ -87,7 +100,9 @@ export function BookingEditDrawer({
     setBookingStatus(booking.booking_status);
     setTitle(booking.title ?? "");
     setDescription(booking.description ?? "");
-    setStartLocal(toDatetimeLocalValue(booking.start_at, clinicCalendarTimezone ?? booking.timezone));
+    setStartLocal(
+      toDatetimeLocalValue(booking.start_at, clinicCalendarTimezone ?? booking.timezone)
+    );
     setEndLocal(toDatetimeLocalValue(booking.end_at, clinicCalendarTimezone ?? booking.timezone));
     setTimezone(booking.timezone ?? clinicCalendarTimezone ?? "");
     setLocation(booking.location ?? "");
@@ -141,12 +156,14 @@ export function BookingEditDrawer({
     let cancelledEffect = false;
     setLazyReminderJobs(null);
     setLazyReminderJobsLoading(true);
-    void loadBookingReminderJobsAction(tenantId, booking.id, booking.lead_id, adminKey).then((r) => {
-      if (cancelledEffect) return;
-      setLazyReminderJobsLoading(false);
-      if (r.ok) setLazyReminderJobs(r.reminderJobs);
-      else setLazyReminderJobs([]);
-    });
+    void loadBookingReminderJobsAction(tenantId, booking.id, booking.lead_id, adminKey).then(
+      (r) => {
+        if (cancelledEffect) return;
+        setLazyReminderJobsLoading(false);
+        if (r.ok) setLazyReminderJobs(r.reminderJobs);
+        else setLazyReminderJobs([]);
+      }
+    );
     return () => {
       cancelledEffect = true;
     };
@@ -165,7 +182,10 @@ export function BookingEditDrawer({
     return Array.from(u);
   }, [bookingType]);
 
-  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+  const selectedCatalog = useMemo(
+    () => serviceForBookingType(services, bookingType),
+    [services, bookingType]
+  );
 
   const datetimeTz = useMemo(
     () => clinicCalendarTimezone ?? (timezone.trim() || undefined),
@@ -247,7 +267,7 @@ export function BookingEditDrawer({
       clinicId: clinicId.trim(),
       bookingType: bookingType.trim() || null,
       staffId: assignedStaffId.trim() || null,
-      roomId: (draftRoomId.trim() || booking.room_id?.trim()) || null,
+      roomId: draftRoomId.trim() || booking.room_id?.trim() || null,
       bookingId: booking.id,
       preferredStartAt: startIso,
       durationMinutes: dur,
@@ -331,7 +351,11 @@ export function BookingEditDrawer({
   const displayTz = normalizeCalendarTimezone(clinicCalendarTimezone ?? booking.timezone);
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-black/30" role="presentation" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-40 flex justify-end bg-black/30"
+      role="presentation"
+      onClick={onClose}
+    >
       <aside
         className="h-full w-full max-w-md overflow-y-auto bg-[#0F1629]/80 backdrop-blur-md shadow-xl"
         role="dialog"
@@ -340,7 +364,11 @@ export function BookingEditDrawer({
       >
         <div className="border-b border-white/[0.08] px-4 py-3 flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-100">Edit booking</h2>
-          <button type="button" className="text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+          <button
+            type="button"
+            className="text-sm text-slate-400 hover:text-slate-100"
+            onClick={onClose}
+          >
             Close
           </button>
         </div>
@@ -348,7 +376,9 @@ export function BookingEditDrawer({
         <div className="space-y-4 p-4 text-sm">
           {cancelled ? (
             <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
-              <p className="font-medium">Cancelled bookings are locked except for viewing cancellation details.</p>
+              <p className="font-medium">
+                Cancelled bookings are locked except for viewing cancellation details.
+              </p>
               {booking.cancellation_reason?.trim() ? (
                 <p className="mt-2 text-slate-200">Reason: {booking.cancellation_reason}</p>
               ) : null}
@@ -359,7 +389,9 @@ export function BookingEditDrawer({
               ) : null}
             </div>
           ) : completed ? (
-            <p className="text-xs text-slate-400">This booking is completed and cannot be edited here.</p>
+            <p className="text-xs text-slate-400">
+              This booking is completed and cannot be edited here.
+            </p>
           ) : (
             <form onSubmit={(e) => void onSubmit(e)} className="space-y-3">
               <div className="text-xs text-slate-400">
@@ -368,7 +400,9 @@ export function BookingEditDrawer({
                 {booking.person_id ? `Person ${booking.person_id.slice(0, 8)}… ` : ""}
                 {booking.patient_id ? `Patient ${booking.patient_id.slice(0, 8)}… ` : ""}
                 {booking.case_id ? `Patient ${booking.case_id.slice(0, 8)}…` : ""}
-                {!booking.lead_id && !booking.person_id && !booking.patient_id && !booking.case_id ? "—" : ""}
+                {!booking.lead_id && !booking.person_id && !booking.patient_id && !booking.case_id
+                  ? "—"
+                  : ""}
               </div>
               <label className="block text-xs font-medium text-slate-300">
                 Type
@@ -433,8 +467,9 @@ export function BookingEditDrawer({
                   className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
                 <p className="mt-1 text-[11px] text-gray-500">
-                  Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min
-                  (end updates when you change type).
+                  Default slot for this procedure type:{" "}
+                  {defaultProcedureDurationMinutes(bookingType, services)} min (end updates when you
+                  change type).
                   {selectedCatalog && selectedCatalog.base_price > 0 ? (
                     <> Suggested price: {formatPriceAud(selectedCatalog.base_price)}.</>
                   ) : null}
@@ -484,8 +519,8 @@ export function BookingEditDrawer({
               <div className="rounded border border-white/[0.08] bg-white/[0.03] p-2 text-xs">
                 <p className="font-semibold text-slate-100">Supporting staff & rooms</p>
                 <p className="mt-1 text-slate-400">
-                  Extra team members and rooms (multi-resource). Primary provider and primary room stay in the fields
-                  above.
+                  Extra team members and rooms (multi-resource). Primary provider and primary room
+                  stay in the fields above.
                 </p>
                 {resourceDraft.length > 0 ? (
                   <ul className="mt-2 space-y-1">
@@ -497,8 +532,9 @@ export function BookingEditDrawer({
                         <span>
                           {x.resource_type === "staff" ? "Staff" : "Room"}:{" "}
                           {x.resource_type === "staff"
-                            ? clinicalStaffOptions.find((s) => s.id === x.resource_id)?.full_name?.trim() ||
-                              x.resource_id.slice(0, 8)
+                            ? clinicalStaffOptions
+                                .find((s) => s.id === x.resource_id)
+                                ?.full_name?.trim() || x.resource_id.slice(0, 8)
                             : x.resource_id.slice(0, 8)}
                         </span>
                         <button
@@ -524,8 +560,16 @@ export function BookingEditDrawer({
                       e.currentTarget.value = "";
                       if (!id) return;
                       if (id === assignedStaffId.trim()) return;
-                      if (resourceDraft.some((r) => r.resource_type === "staff" && r.resource_id === id)) return;
-                      setResourceDraft((d) => [...d, { resource_type: "staff", resource_id: id, role_label: null }]);
+                      if (
+                        resourceDraft.some(
+                          (r) => r.resource_type === "staff" && r.resource_id === id
+                        )
+                      )
+                        return;
+                      setResourceDraft((d) => [
+                        ...d,
+                        { resource_type: "staff", resource_id: id, role_label: null },
+                      ]);
                     }}
                   >
                     <option value="">Select staff to add…</option>
@@ -570,13 +614,17 @@ export function BookingEditDrawer({
               <p className="font-semibold text-slate-100">Reminder queue</p>
               <ul className="mt-2 space-y-1">
                 {effectiveReminderJobs.map((j) => (
-                  <li key={j.id} className="flex flex-wrap justify-between gap-1 border-t border-white/[0.08] pt-1 first:border-0 first:pt-0">
+                  <li
+                    key={j.id}
+                    className="flex flex-wrap justify-between gap-1 border-t border-white/[0.08] pt-1 first:border-0 first:pt-0"
+                  >
                     <span className="font-medium">{j.template_name || "Template"}</span>
                     <span className="text-slate-400">
                       {j.template_type} · {j.template_trigger_event}
                     </span>
                     <span className="w-full text-slate-400 sm:w-auto">
-                      {j.status} · scheduled {formatIsoDateTimeInTimezone(j.scheduled_at, displayTz)}
+                      {j.status} · scheduled{" "}
+                      {formatIsoDateTimeInTimezone(j.scheduled_at, displayTz)}
                     </span>
                     {j.error_log?.trim() && (j.status === "failed" || j.status === "cancelled") ? (
                       <span className="w-full text-[11px] text-amber-300">{j.error_log}</span>
@@ -587,8 +635,8 @@ export function BookingEditDrawer({
             </div>
           ) : booking.patient_id && !lazyReminderJobsLoading ? (
             <p className="text-xs text-gray-500">
-              No reminder jobs for this booking yet. Jobs appear when the patient has reminder consent and active templates
-              exist.
+              No reminder jobs for this booking yet. Jobs appear when the patient has reminder
+              consent and active templates exist.
             </p>
           ) : null}
         </div>

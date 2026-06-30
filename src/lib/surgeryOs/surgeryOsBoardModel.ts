@@ -7,7 +7,12 @@ import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 
 export const SURGERY_OS_DEFAULT_REFRESH_MS = 30_000;
 
-export const SURGERY_OS_VIEWER_ROLES = ["coordinator", "surgeon", "theatre_manager", "admin"] as const;
+export const SURGERY_OS_VIEWER_ROLES = [
+  "coordinator",
+  "surgeon",
+  "theatre_manager",
+  "admin",
+] as const;
 export type SurgeryOsViewerRole = (typeof SURGERY_OS_VIEWER_ROLES)[number];
 
 export const SURGERY_OS_WIDGET_KEYS = [
@@ -31,7 +36,14 @@ export const SURGERY_OS_SEVERITY_LABELS: Record<SurgeryOsSeverity, string> = {
   blocked: "Blocked",
 };
 
-export const SURGERY_OS_LIVE_STATUSES = ["waiting", "active", "break", "delayed", "blocked", "completed"] as const;
+export const SURGERY_OS_LIVE_STATUSES = [
+  "waiting",
+  "active",
+  "break",
+  "delayed",
+  "blocked",
+  "completed",
+] as const;
 export type SurgeryOsLiveStatus = (typeof SURGERY_OS_LIVE_STATUSES)[number];
 
 export const SURGERY_OS_LIVE_STATUS_LABELS: Record<SurgeryOsLiveStatus, string> = {
@@ -85,17 +97,18 @@ export const SURGERY_OS_READINESS_CHECKLIST_KEYS = [
 ] as const;
 export type SurgeryOsReadinessChecklistKey = (typeof SURGERY_OS_READINESS_CHECKLIST_KEYS)[number];
 
-export const SURGERY_OS_READINESS_CHECKLIST_LABELS: Record<SurgeryOsReadinessChecklistKey, string> = {
-  deposit_paid: "Deposit paid",
-  consent_signed: "Consent signed",
-  photography_complete: "Photography complete",
-  bloods_complete: "Bloods complete",
-  medication_prepared: "Medication prepared",
-  prp_prepared: "PRP prepared",
-  exosomes_prepared: "Exosomes prepared",
-  staff_assigned: "Staff assigned",
-  consumables_ready: "Consumables ready",
-};
+export const SURGERY_OS_READINESS_CHECKLIST_LABELS: Record<SurgeryOsReadinessChecklistKey, string> =
+  {
+    deposit_paid: "Deposit paid",
+    consent_signed: "Consent signed",
+    photography_complete: "Photography complete",
+    bloods_complete: "Bloods complete",
+    medication_prepared: "Medication prepared",
+    prp_prepared: "PRP prepared",
+    exosomes_prepared: "Exosomes prepared",
+    staff_assigned: "Staff assigned",
+    consumables_ready: "Consumables ready",
+  };
 
 export const SURGERY_OS_READINESS_RISK_LEVELS = ["low", "medium", "high", "blocked"] as const;
 export type SurgeryOsReadinessRiskLevel = (typeof SURGERY_OS_READINESS_RISK_LEVELS)[number];
@@ -236,14 +249,31 @@ export const SURGERY_OS_NOTE_KIND_LABELS: Record<SurgeryOsNoteKind, string> = {
   general: "General note",
 };
 
-export const SURGERY_OS_PERSONA_WIDGET_DEFAULTS: Record<SurgeryOsViewerRole, readonly SurgeryOsWidgetKey[]> = {
-  coordinator: ["live_surgery_board", "surgical_readiness_engine", "surgical_alerts", "team_assignment_board", "live_graft_intelligence"],
-  surgeon: ["live_surgery_board", "live_graft_intelligence", "live_procedure_timeline", "surgical_notes_events", "surgical_alerts"],
+export const SURGERY_OS_PERSONA_WIDGET_DEFAULTS: Record<
+  SurgeryOsViewerRole,
+  readonly SurgeryOsWidgetKey[]
+> = {
+  coordinator: [
+    "live_surgery_board",
+    "surgical_readiness_engine",
+    "surgical_alerts",
+    "team_assignment_board",
+    "live_graft_intelligence",
+  ],
+  surgeon: [
+    "live_surgery_board",
+    "live_graft_intelligence",
+    "live_procedure_timeline",
+    "surgical_notes_events",
+    "surgical_alerts",
+  ],
   theatre_manager: SURGERY_OS_WIDGET_KEYS,
   admin: SURGERY_OS_WIDGET_KEYS,
 };
 
-export const SURGERY_OS_WORKSPACE_PROFILE_TO_PERSONA: Partial<Record<FiWorkspaceProfileKey, SurgeryOsViewerRole>> = {
+export const SURGERY_OS_WORKSPACE_PROFILE_TO_PERSONA: Partial<
+  Record<FiWorkspaceProfileKey, SurgeryOsViewerRole>
+> = {
   clinic_manager: "theatre_manager",
   director: "admin",
   platform_admin: "admin",
@@ -251,7 +281,9 @@ export const SURGERY_OS_WORKSPACE_PROFILE_TO_PERSONA: Partial<Record<FiWorkspace
   reception: "coordinator",
 };
 
-export function resolveSurgeryOsPersonaFromWorkspaceProfile(profile: FiWorkspaceProfileKey): SurgeryOsViewerRole | null {
+export function resolveSurgeryOsPersonaFromWorkspaceProfile(
+  profile: FiWorkspaceProfileKey
+): SurgeryOsViewerRole | null {
   return SURGERY_OS_WORKSPACE_PROFILE_TO_PERSONA[profile] ?? null;
 }
 
@@ -265,7 +297,7 @@ export function computeReadinessPercent(checklist: SurgeryOsReadinessChecklist):
 
 export function computeReadinessRiskLevel(
   checklist: SurgeryOsReadinessChecklist,
-  percent: number,
+  percent: number
 ): SurgeryOsReadinessRiskLevel {
   if (!checklist.consent_signed || !checklist.deposit_paid) return "blocked";
   if (percent >= 90) return "low";
@@ -279,7 +311,9 @@ export function compareSurgeryOsSeverity(a: SurgeryOsSeverity, b: SurgeryOsSever
   return rank[b] - rank[a];
 }
 
-export function visibleWidgetsForSurgeryOsRole(role: SurgeryOsViewerRole): readonly SurgeryOsWidgetKey[] {
+export function visibleWidgetsForSurgeryOsRole(
+  role: SurgeryOsViewerRole
+): readonly SurgeryOsWidgetKey[] {
   return SURGERY_OS_PERSONA_WIDGET_DEFAULTS[role] ?? SURGERY_OS_WIDGET_KEYS;
 }
 
@@ -291,11 +325,17 @@ export function isSurgeryOsSeverity(v: string): v is SurgeryOsSeverity {
   return (SURGERY_OS_SEVERITIES as readonly string[]).includes(v);
 }
 
-export function assertSurgeryOsTenantRowScope(expectedTenantId: string, rowTenantId: string, entity: string): void {
+export function assertSurgeryOsTenantRowScope(
+  expectedTenantId: string,
+  rowTenantId: string,
+  entity: string
+): void {
   const expected = expectedTenantId.trim();
   const actual = rowTenantId.trim();
   if (!expected || !actual || expected !== actual) {
-    throw new Error(`SurgeryOS tenant scope violation for ${entity}: expected ${expected}, got ${actual || "empty"}.`);
+    throw new Error(
+      `SurgeryOS tenant scope violation for ${entity}: expected ${expected}, got ${actual || "empty"}.`
+    );
   }
 }
 
@@ -387,7 +427,11 @@ export function deriveSurgeryAlerts(input: {
     });
   } else if (input.scheduledStartAt) {
     const startMs = Date.parse(input.scheduledStartAt);
-    if (Number.isFinite(startMs) && input.nowMs > startMs + 30 * 60_000 && input.liveStatus === "waiting") {
+    if (
+      Number.isFinite(startMs) &&
+      input.nowMs > startMs + 30 * 60_000 &&
+      input.liveStatus === "waiting"
+    ) {
       alerts.push({
         id: `${input.surgeryId}:procedure_delayed`,
         kind: "procedure_delayed",

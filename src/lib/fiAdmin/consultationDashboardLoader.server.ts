@@ -11,7 +11,9 @@ export type { ConsultationDashboardPayload } from "./consultationDashboardTypes"
 
 const CONSULTATION_INDEX_LIMIT = 200;
 
-export async function loadConsultationDashboardPayload(tenantId: string): Promise<ConsultationDashboardPayload> {
+export async function loadConsultationDashboardPayload(
+  tenantId: string
+): Promise<ConsultationDashboardPayload> {
   const tid = tenantId.trim();
   const [calendarSettings, consultations, conversion] = await Promise.all([
     loadTenantOperationalCalendarSettings(tid),

@@ -14,7 +14,10 @@ export default async function HairAuditOsAdminPage() {
   await assertHairAuditOsAdminAccess();
 
   const supabase = supabaseAdmin();
-  const { data: tenants, error } = await supabase.from("fi_tenants").select("id, name, slug").order("name");
+  const { data: tenants, error } = await supabase
+    .from("fi_tenants")
+    .select("id, name, slug")
+    .order("name");
 
   if (error) {
     return (
@@ -37,11 +40,13 @@ export default async function HairAuditOsAdminPage() {
       />
       <div className="relative z-10 mx-auto max-w-3xl px-6 py-14">
         <header className="mb-10 border-b border-slate-700/80 pb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-400/90">HairAudit</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-400/90">
+            HairAudit
+          </p>
           <h1 className="mt-2 text-3xl font-semibold text-white">Audit operating console</h1>
           <p className="mt-2 max-w-xl text-sm text-slate-400">
-            Cross-clinic audit access for platform auditors. Open a tenant&apos;s audit queue to review submissions and
-            reports.
+            Cross-clinic audit access for platform auditors. Open a tenant&apos;s audit queue to
+            review submissions and reports.
           </p>
         </header>
 
@@ -72,7 +77,10 @@ export default async function HairAuditOsAdminPage() {
               Sign out
             </button>
           </form>
-          <Link href="/follicle-intelligence/login" className="text-slate-500 hover:text-slate-400 hover:underline">
+          <Link
+            href="/follicle-intelligence/login"
+            className="text-slate-500 hover:text-slate-400 hover:underline"
+          >
             OS sign-in
           </Link>
         </div>

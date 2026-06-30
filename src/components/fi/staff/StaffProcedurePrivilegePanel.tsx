@@ -80,14 +80,14 @@ export function StaffProcedurePrivilegePanel({
     <div>
       <h2 className={`text-lg font-semibold ${titleClass}`}>Procedure Privileges</h2>
       <p className={`mt-1 text-sm ${mutedClass}`}>
-        AcademyOS operational authorization — what this clinic permits the staff member to perform or assist.
-        Distinct from IIOHR certifications.
+        AcademyOS operational authorization — what this clinic permits the staff member to perform
+        or assist. Distinct from IIOHR certifications.
       </p>
 
       {privileges.length === 0 ? (
         <p className={`mt-4 text-sm ${mutedClass}`}>
-          No operational procedure privileges granted yet. Privileges are clinic authorization records, not LMS
-          certifications.
+          No operational procedure privileges granted yet. Privileges are clinic authorization
+          records, not LMS certifications.
         </p>
       ) : (
         <ul className="mt-4 space-y-3">
@@ -95,8 +95,12 @@ export function StaffProcedurePrivilegePanel({
             <li key={row.id} className={rowClass}>
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className={`font-mono text-sm font-medium ${valueClass}`}>{procedureKeyLabel(row.procedureKey)}</p>
-                  <p className={`mt-0.5 text-xs ${mutedClass}`}>{privilegeLevelLabel(row.privilegeLevel)}</p>
+                  <p className={`font-mono text-sm font-medium ${valueClass}`}>
+                    {procedureKeyLabel(row.procedureKey)}
+                  </p>
+                  <p className={`mt-0.5 text-xs ${mutedClass}`}>
+                    {privilegeLevelLabel(row.privilegeLevel)}
+                  </p>
                 </div>
                 <span className={statusBadgeClass(row.privilegeStatus)}>
                   {privilegeStatusLabel(row.privilegeStatus)}
@@ -105,7 +109,9 @@ export function StaffProcedurePrivilegePanel({
               <dl className={`mt-3 grid gap-2 text-xs sm:grid-cols-2 ${labelClass}`}>
                 <div>
                   <dt>Clinic scope</dt>
-                  <dd className={`mt-0.5 ${valueClass}`}>{row.clinicId ? "Clinic-specific" : "Tenant-wide"}</dd>
+                  <dd className={`mt-0.5 ${valueClass}`}>
+                    {row.clinicId ? "Clinic-specific" : "Tenant-wide"}
+                  </dd>
                 </div>
                 <div>
                   <dt>Expires</dt>
@@ -136,7 +142,9 @@ export function StaffProcedurePrivilegePanel({
           Read-only suggestions — admin grant workflow coming in a later phase.
         </p>
         {novelSuggestions.length === 0 ? (
-          <p className={`mt-3 text-sm ${mutedClass}`}>No new privilege suggestions from current competency projections.</p>
+          <p className={`mt-3 text-sm ${mutedClass}`}>
+            No new privilege suggestions from current competency projections.
+          </p>
         ) : (
           <ul className="mt-3 space-y-2">
             {novelSuggestions.map((item, index) => (
@@ -145,7 +153,8 @@ export function StaffProcedurePrivilegePanel({
                 className={rowClass}
               >
                 <p className={`text-sm font-medium ${valueClass}`}>
-                  {procedureKeyLabel(item.procedureKey)} · {privilegeLevelLabel(item.privilegeLevel)}
+                  {procedureKeyLabel(item.procedureKey)} ·{" "}
+                  {privilegeLevelLabel(item.privilegeLevel)}
                 </p>
                 <p className={`mt-1 text-xs ${mutedClass}`}>{item.reason}</p>
                 <p className={`mt-2 text-[10px] uppercase tracking-wider ${labelClass}`}>

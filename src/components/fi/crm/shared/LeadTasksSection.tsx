@@ -29,13 +29,18 @@ export function LeadTasksSection({
 
   return (
     <section className={crmLeadCardClass}>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Open tasks</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Open tasks
+      </h3>
       {openTasks.length === 0 ? (
         <p className="text-xs text-slate-400">No open tasks.</p>
       ) : (
         <ul className="space-y-2 text-xs">
           {openTasks.map((t) => (
-            <li key={t.id} className="flex items-start justify-between gap-2 rounded border border-white/[0.06] p-2">
+            <li
+              key={t.id}
+              className="flex items-start justify-between gap-2 rounded border border-white/[0.06] p-2"
+            >
               <div>
                 <p className="font-medium text-slate-100">{t.title}</p>
                 <p className="text-gray-500">

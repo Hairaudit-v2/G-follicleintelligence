@@ -43,7 +43,7 @@ export function isMissingDatabaseRelationError(error: unknown): boolean {
   return (
     message.includes("does not exist") ||
     message.includes("could not find the table") ||
-    message.includes("relation") && message.includes("does not exist") ||
+    (message.includes("relation") && message.includes("does not exist")) ||
     message.includes("schema cache") ||
     message.includes("42p01") ||
     message.includes("pgrst205")
@@ -62,9 +62,12 @@ export function missingTableMessage(tableName: string): string {
 
 export function emptyConsultationConversionBoardPayload(
   calendarTimezone = "UTC",
-  todayYmd = new Date().toISOString().slice(0, 10),
+  todayYmd = new Date().toISOString().slice(0, 10)
 ): ConsultationConversionBoardPayload {
-  const columns = {} as Record<ConsultationConversionBoardColumnId, ConsultationConversionBoardPayload["columns"][ConsultationConversionBoardColumnId]>;
+  const columns = {} as Record<
+    ConsultationConversionBoardColumnId,
+    ConsultationConversionBoardPayload["columns"][ConsultationConversionBoardColumnId]
+  >;
   for (const col of CONVERSION_COLUMNS) columns[col] = [];
   return {
     window: {
@@ -90,9 +93,12 @@ export function emptyConsultationConversionBoardPayload(
 
 export function emptySurgeryReadinessBoardPayload(
   calendarTimezone = "UTC",
-  todayYmd = new Date().toISOString().slice(0, 10),
+  todayYmd = new Date().toISOString().slice(0, 10)
 ): SurgeryReadinessBoardPayload {
-  const columns = {} as Record<SurgeryReadinessBoardColumnId, SurgeryReadinessBoardPayload["columns"][SurgeryReadinessBoardColumnId]>;
+  const columns = {} as Record<
+    SurgeryReadinessBoardColumnId,
+    SurgeryReadinessBoardPayload["columns"][SurgeryReadinessBoardColumnId]
+  >;
   for (const col of SURGERY_COLUMNS) columns[col] = [];
   return {
     window: {
@@ -117,7 +123,10 @@ export function emptySurgeryReadinessBoardPayload(
 }
 
 export function emptyReceptionCloseoutSnapshot(input: {
-  board: Pick<ReceptionOsBoardPayload, "tenantId" | "operationalDay" | "outstandingDeposits" | "upcomingSurgeries" | "actionAlerts">;
+  board: Pick<
+    ReceptionOsBoardPayload,
+    "tenantId" | "operationalDay" | "outstandingDeposits" | "upcomingSurgeries" | "actionAlerts"
+  >;
   tasks?: readonly ReceptionOsTaskItem[];
   viewerRole: ReceptionOsViewerRole;
 }): ReceptionCloseoutSnapshot {

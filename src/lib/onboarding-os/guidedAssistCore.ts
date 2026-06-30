@@ -21,10 +21,7 @@ import type {
   GuidedAssistUserPreferences,
   GuidedAssistViewerContext,
 } from "./guidedAssistTypes";
-import {
-  GUIDED_ASSIST_AREA_LABELS,
-  GUIDED_ASSIST_SAFETY_NOTICE,
-} from "./guidedAssistTypes";
+import { GUIDED_ASSIST_AREA_LABELS, GUIDED_ASSIST_SAFETY_NOTICE } from "./guidedAssistTypes";
 
 export function resolveGuidedAssistPageKey(pathname: string, tenantBase: string): string {
   return normalizeFiAdminTenantPathSuffix(pathname, tenantBase);
@@ -105,7 +102,10 @@ function matchesSetupRequirements(
   flags: GuidedAssistSetupFlags
 ): boolean {
   if (!requires) return true;
-  for (const [key, expected] of Object.entries(requires) as [keyof GuidedAssistSetupFlags, boolean][]) {
+  for (const [key, expected] of Object.entries(requires) as [
+    keyof GuidedAssistSetupFlags,
+    boolean,
+  ][]) {
     if (flags[key] !== expected) return false;
   }
   return true;
@@ -121,7 +121,8 @@ export function selectGuidedAssistTips(
   const tenantBase = `/fi-admin/${ctx.tenantId}`;
 
   const eligible = GUIDED_ASSIST_TIPS.filter((tip) => {
-    if (!matchesRoleScope(tip.roleScope, ctx.workspaceProfileKey, ctx.tenantAdminRole)) return false;
+    if (!matchesRoleScope(tip.roleScope, ctx.workspaceProfileKey, ctx.tenantAdminRole))
+      return false;
     if (!matchesPageKey(ctx.pageKey, tip.pageKey, tip.pageKeyPrefix)) return false;
     if (isTipDismissed(tip.code, prefs.dismissedTipCodes)) return false;
     if (isTipSnoozed(tip.code, prefs.snoozedTips, nowMs)) return false;
@@ -140,7 +141,8 @@ export function selectGuidedAssistNextAction(
   const base = tenantBase ?? `/fi-admin/${ctx.tenantId}`;
 
   const match = GUIDED_ASSIST_NEXT_ACTIONS.filter((action) => {
-    if (!matchesRoleScope(action.roleScope, ctx.workspaceProfileKey, ctx.tenantAdminRole)) return false;
+    if (!matchesRoleScope(action.roleScope, ctx.workspaceProfileKey, ctx.tenantAdminRole))
+      return false;
     if (!matchesSetupRequirements(action.requiresSetupFlags, ctx.setupFlags)) return false;
     return true;
   }).sort((a, b) => a.priority - b.priority)[0];
@@ -170,7 +172,9 @@ function toTipView(
     dismissible: tip.dismissible,
     snoozeHours: tip.snoozeHours ?? null,
     actionLabel: tip.actionLabel ?? null,
-    actionHref: tip.actionHrefSuffix ? `${tenantBase}/${tip.actionHrefSuffix.replace(/^\/+/, "")}` : null,
+    actionHref: tip.actionHrefSuffix
+      ? `${tenantBase}/${tip.actionHrefSuffix.replace(/^\/+/, "")}`
+      : null,
   };
 }
 
@@ -277,16 +281,22 @@ export function summarizeGuidedAssistUsageEvents(
     if (kind === "assist_disabled" && e.fi_user_id) disabledUsers.add(e.fi_user_id);
     if (kind === "tip_shown") {
       tipsShown += 1;
-      if (e.fi_user_id) userShownCounts.set(e.fi_user_id, (userShownCounts.get(e.fi_user_id) ?? 0) + 1);
-      if (e.guidance_code) shownByTip.set(e.guidance_code, (shownByTip.get(e.guidance_code) ?? 0) + 1);
+      if (e.fi_user_id)
+        userShownCounts.set(e.fi_user_id, (userShownCounts.get(e.fi_user_id) ?? 0) + 1);
+      if (e.guidance_code)
+        shownByTip.set(e.guidance_code, (shownByTip.get(e.guidance_code) ?? 0) + 1);
     }
     if (kind === "tip_dismissed") {
       tipsDismissed += 1;
-      if (e.guidance_code) dismissedByTip.set(e.guidance_code, (dismissedByTip.get(e.guidance_code) ?? 0) + 1);
+      if (e.guidance_code)
+        dismissedByTip.set(e.guidance_code, (dismissedByTip.get(e.guidance_code) ?? 0) + 1);
     }
     if (kind === "tip_snoozed") tipsSnoozed += 1;
     if (kind === "next_action_clicked") nextActionsClicked += 1;
-    if (e.guidance_code && (kind === "tip_shown" || kind === "tip_dismissed" || kind === "tip_snoozed")) {
+    if (
+      e.guidance_code &&
+      (kind === "tip_shown" || kind === "tip_dismissed" || kind === "tip_snoozed")
+    ) {
       tipCounts.set(e.guidance_code, (tipCounts.get(e.guidance_code) ?? 0) + 1);
     }
     if (e.guidance_area && e.guidance_area in GUIDED_ASSIST_AREA_LABELS) {
@@ -339,7 +349,8 @@ export function summarizeGuidedAssistUsageEvents(
         tipsDismissed: areaDismissed,
         tipsSnoozed: areaSnoozed,
         dismissRate,
-        needsGuidanceReview: areaShown >= GUIDANCE_REVIEW_MIN_SHOWN && dismissRate >= GUIDANCE_REVIEW_DISMISS_RATE,
+        needsGuidanceReview:
+          areaShown >= GUIDANCE_REVIEW_MIN_SHOWN && dismissRate >= GUIDANCE_REVIEW_DISMISS_RATE,
       };
     })
     .sort((a, b) => b.dismissRate - a.dismissRate || b.tipsShown - a.tipsShown);

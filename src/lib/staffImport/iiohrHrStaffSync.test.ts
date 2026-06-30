@@ -7,7 +7,10 @@ import {
   applyIiohrHrStaffSyncStampToPlan,
   mapIiohrHrStaffSyncRowToImportRow,
 } from "@/src/lib/staffImport/iiohrHrStaffSync";
-import { IIOHR_HR_SOURCE_SYSTEM, planIiohrHrStaffImport } from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
+import {
+  IIOHR_HR_SOURCE_SYSTEM,
+  planIiohrHrStaffImport,
+} from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
 import type {
   IiohrHrImportExistingStaff,
   IiohrHrStaffImportPlanResult,
@@ -33,7 +36,9 @@ const ALLOWED_IMPORT_ACTION_TYPES = new Set([
   "skip_row",
 ]);
 
-function importRow(p: Partial<IiohrHrStaffImportRow> & Pick<IiohrHrStaffImportRow, "external_staff_id" | "full_name">): IiohrHrStaffImportRow {
+function importRow(
+  p: Partial<IiohrHrStaffImportRow> & Pick<IiohrHrStaffImportRow, "external_staff_id" | "full_name">
+): IiohrHrStaffImportRow {
   return {
     staff_role: "consultant",
     employment_status: "active",
@@ -104,7 +109,11 @@ test("create_staff_source_id uses external_staff_id as stable source_staff_id (i
     existingStaffSourceIds: [],
   });
   attachEvolvedPerthClinicMetadataToPlan(plan, null);
-  applyIiohrHrStaffSyncStampToPlan(plan, [{ external_staff_id: "STABLE-KEY-42", full_name: "E", email: "e@x.com" }], "2026-01-01T00:00:00.000Z");
+  applyIiohrHrStaffSyncStampToPlan(
+    plan,
+    [{ external_staff_id: "STABLE-KEY-42", full_name: "E", email: "e@x.com" }],
+    "2026-01-01T00:00:00.000Z"
+  );
   plan.actions = plan.perRow.flatMap((p) => p.actions);
   const c = plan.actions.find((a) => a.type === "create_staff_source_id");
   assert.ok(c && c.type === "create_staff_source_id");
@@ -116,13 +125,19 @@ test("source_url deep link preserved on stamped create_staff_source_id", () => {
   const url = "https://iiohr.example/hr/staff/abc";
   const plan = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [importRow({ external_staff_id: "K", email: "k@x.com", full_name: "K", source_url: url })],
+    rows: [
+      importRow({ external_staff_id: "K", email: "k@x.com", full_name: "K", source_url: url }),
+    ],
     existingUsers: [],
     existingStaff: [],
     existingStaffSourceIds: [],
   });
   attachEvolvedPerthClinicMetadataToPlan(plan, null);
-  applyIiohrHrStaffSyncStampToPlan(plan, [{ external_staff_id: "K", full_name: "K", email: "k@x.com" }], "2026-01-02T00:00:00.000Z");
+  applyIiohrHrStaffSyncStampToPlan(
+    plan,
+    [{ external_staff_id: "K", full_name: "K", email: "k@x.com" }],
+    "2026-01-02T00:00:00.000Z"
+  );
   plan.actions = plan.perRow.flatMap((p) => p.actions);
   const c = plan.actions.find((a) => a.type === "create_staff_source_id");
   assert.ok(c && c.type === "create_staff_source_id");
@@ -144,7 +159,9 @@ test("match by staff email when no source id — email is reconciliation, extern
   ];
   const plan = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [importRow({ external_staff_id: "NEW-HR-ID", email: "same@x.com", full_name: "Renamed" })],
+    rows: [
+      importRow({ external_staff_id: "NEW-HR-ID", email: "same@x.com", full_name: "Renamed" }),
+    ],
     existingUsers: [],
     existingStaff,
     existingStaffSourceIds: [],

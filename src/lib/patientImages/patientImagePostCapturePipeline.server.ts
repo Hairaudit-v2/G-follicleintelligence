@@ -102,7 +102,9 @@ async function loadAttributionContext(
       .eq("tenant_id", tenantId)
       .eq("id", effectiveClinicId)
       .maybeSingle();
-    clinicName = clinicRow ? String((clinicRow as { display_name?: string }).display_name ?? "").trim() || null : null;
+    clinicName = clinicRow
+      ? String((clinicRow as { display_name?: string }).display_name ?? "").trim() || null
+      : null;
   }
 
   let practitionerName: string | null = null;

@@ -66,7 +66,10 @@ export function normalizePublicImagePath(input: string | null | undefined): stri
 export function isEvolvedLogoPath(path: string | null | undefined): boolean {
   const normalized = normalizePublicImagePath(path);
   if (!normalized) return false;
-  return normalized === PUBLIC_IMAGE_PATHS.evolvedLogo || normalized.endsWith(`/${EVOLVED_LOGO_BASENAME}`);
+  return (
+    normalized === PUBLIC_IMAGE_PATHS.evolvedLogo ||
+    normalized.endsWith(`/${EVOLVED_LOGO_BASENAME}`)
+  );
 }
 
 export function resolvePublicStaticImage(path: string | null | undefined): StaticImageData | null {

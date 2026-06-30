@@ -14,11 +14,16 @@ export type IiohrHrPerthStaffSyncCronPostOptions = {
   /** Wall-clock cap for the scheduled job (feed + FI POST). */
   timeoutMs?: number;
   /** Optional hook after a scheduled result is known (e.g. alert intent logging). */
-  afterRun?: (result: ScheduledIiohrHrStaffSyncCoreResult, getEnv: (key: string) => string | undefined) => void | Promise<void>;
+  afterRun?: (
+    result: ScheduledIiohrHrStaffSyncCoreResult,
+    getEnv: (key: string) => string | undefined
+  ) => void | Promise<void>;
 };
 
 function sleep(ms: number): Promise<never> {
-  return new Promise((_, reject) => setTimeout(() => reject(new Error("Scheduled staff sync timed out.")), ms));
+  return new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Scheduled staff sync timed out.")), ms)
+  );
 }
 
 function jsonBody(
@@ -58,10 +63,16 @@ export async function handleIiohrHrPerthStaffSyncCronPost(
 
   const tenantId = opts.getEnv("EVOLVED_PERTH_TENANT_ID")?.trim();
   if (!tenantId) {
-    return NextResponse.json({ ok: false, error: "EVOLVED_PERTH_TENANT_ID is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, error: "EVOLVED_PERTH_TENANT_ID is not configured." },
+      { status: 503 }
+    );
   }
   if (!z.string().uuid().safeParse(tenantId).success) {
-    return NextResponse.json({ ok: false, error: "EVOLVED_PERTH_TENANT_ID is not a valid UUID." }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, error: "EVOLVED_PERTH_TENANT_ID is not a valid UUID." },
+      { status: 503 }
+    );
   }
 
   const timeoutMs = opts.timeoutMs ?? 55_000;

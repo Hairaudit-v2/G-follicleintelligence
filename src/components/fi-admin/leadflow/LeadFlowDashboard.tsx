@@ -20,7 +20,11 @@ import {
   readinessBadgeClass,
 } from "@/src/lib/fiAdmin/leadFlowPresentation";
 import type { ParsedCrmLeadListQuery } from "@/src/lib/crm/crmLeadListQuery";
-import type { CrmShellClinicOption, CrmShellOrgOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type {
+  CrmShellClinicOption,
+  CrmShellOrgOption,
+  CrmShellUserPickerOption,
+} from "@/src/lib/crm/types";
 
 function LeadFlowPrimaryActions({
   base,
@@ -35,7 +39,11 @@ function LeadFlowPrimaryActions({
 }) {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
-      <LeadFlowNewLeadButton tenantId={tenantId} owners={owners} defaultOwnerUserId={defaultOwnerUserId} />
+      <LeadFlowNewLeadButton
+        tenantId={tenantId}
+        owners={owners}
+        defaultOwnerUserId={defaultOwnerUserId}
+      />
       <Link href={`${base}/calendar`} className={leadFlowLinkButtonClass}>
         Open Calendar
       </Link>
@@ -77,7 +85,10 @@ export function LeadFlowDashboard({
   const showCalmAttention = !hasUrgentLeadFlowAttention(attentionItems);
   const bookingItems = buildBookingReadinessItems(base, payload, 5);
   const atRiskItems = buildAtRiskLeadItems(base, payload, 5);
-  const conversionMetrics = buildConversionSnapshotMetrics(payload.conversionKpis, payload.conversionLostCount);
+  const conversionMetrics = buildConversionSnapshotMetrics(
+    payload.conversionKpis,
+    payload.conversionLostCount
+  );
   const recentActivity = buildRecentLeadActivity(base, payload.recentActivity, 8);
 
   return (
@@ -89,11 +100,15 @@ export function LeadFlowDashboard({
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">LeadFlow</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+              FI OS
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+              LeadFlow
+            </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-              Consultation conversion, follow-up priority, booking readiness, and revenue opportunity across every
-              enquiry.
+              Consultation conversion, follow-up priority, booking readiness, and revenue
+              opportunity across every enquiry.
             </p>
             <LeadFlowPrimaryActions
               base={base}
@@ -121,7 +136,9 @@ export function LeadFlowDashboard({
               className="group flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4 transition hover:border-[#22C1FF]/25"
             >
               <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                {card.value}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#22C1FF]/80 opacity-0 transition group-hover:opacity-100">
                 View <ArrowRight className="h-3 w-3" aria-hidden />
@@ -156,14 +173,20 @@ export function LeadFlowDashboard({
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                      {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                      {item.detail ? (
+                        <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                      ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                   </Link>
                 ) : (
-                  <div className={`rounded-xl border px-4 py-4 ${attentionSeverityClass(item.severity)}`}>
+                  <div
+                    className={`rounded-xl border px-4 py-4 ${attentionSeverityClass(item.severity)}`}
+                  >
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                 )}
               </li>
@@ -180,7 +203,9 @@ export function LeadFlowDashboard({
           className="mb-4"
         />
         {bookingItems.length === 0 ? (
-          <p className="text-sm text-[#94A3B8]">Active leads will appear here as enquiries are captured and qualified.</p>
+          <p className="text-sm text-[#94A3B8]">
+            Active leads will appear here as enquiries are captured and qualified.
+          </p>
         ) : (
           <ul className="space-y-3">
             {bookingItems.map((item) => (
@@ -200,7 +225,9 @@ export function LeadFlowDashboard({
                     </div>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#94A3B8]">
                       {item.sourceLabel ? <span>Source: {item.sourceLabel}</span> : null}
-                      {item.treatmentInterest ? <span>Interest: {item.treatmentInterest}</span> : null}
+                      {item.treatmentInterest ? (
+                        <span>Interest: {item.treatmentInterest}</span>
+                      ) : null}
                     </div>
                     <p className="text-sm text-[#CBD5E1]">{item.nextAction}</p>
                   </div>
@@ -265,13 +292,18 @@ export function LeadFlowDashboard({
               className="rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
             >
               <p className="text-sm font-semibold text-[#F8FAFC]">{metric.label}</p>
-              <p className="mt-2 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{metric.value}</p>
+              <p className="mt-2 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
+                {metric.value}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{metric.detail}</p>
             </div>
           ))}
         </div>
         <p className="mt-4">
-          <Link href={`${base}/consultation-conversion`} className="text-sm font-semibold text-[#22C1FF] hover:underline">
+          <Link
+            href={`${base}/consultation-conversion`}
+            className="text-sm font-semibold text-[#22C1FF] hover:underline"
+          >
             Open Conversion Board →
           </Link>
         </p>
@@ -286,12 +318,16 @@ export function LeadFlowDashboard({
         />
         {recentActivity.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
-            Recent lead activity will appear here as enquiries, consultations, and follow-ups are captured.
+            Recent lead activity will appear here as enquiries, consultations, and follow-ups are
+            captured.
           </p>
         ) : (
           <ul className="divide-y divide-white/[0.06]">
             {recentActivity.map((row) => (
-              <li key={row.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <li
+                key={row.id}
+                className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[#F8FAFC]">{row.label}</p>
                   <p className="text-xs text-[#64748B]">{row.detail}</p>
@@ -299,7 +335,10 @@ export function LeadFlowDashboard({
                 <div className="flex shrink-0 items-center gap-3 text-xs text-[#94A3B8]">
                   <time dateTime={row.occurredAt}>{formatLeadFlowDateTime(row.occurredAt)}</time>
                   {row.leadHref ? (
-                    <Link href={row.leadHref} className="font-semibold text-[#22C1FF] hover:underline">
+                    <Link
+                      href={row.leadHref}
+                      className="font-semibold text-[#22C1FF] hover:underline"
+                    >
                       Open
                     </Link>
                   ) : null}

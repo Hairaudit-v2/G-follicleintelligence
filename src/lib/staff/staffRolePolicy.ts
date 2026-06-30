@@ -14,7 +14,11 @@ export const CLINICAL_STAFF_ROLE_OPTIONS = [
 export type ClinicalStaffRoleOption = (typeof CLINICAL_STAFF_ROLE_OPTIONS)[number];
 
 export function isStaffRoleNeedsReview(staffRole: string | null | undefined): boolean {
-  return String(staffRole ?? "").trim().toLowerCase() === NEEDS_REVIEW_STAFF_ROLE;
+  return (
+    String(staffRole ?? "")
+      .trim()
+      .toLowerCase() === NEEDS_REVIEW_STAFF_ROLE
+  );
 }
 
 /**

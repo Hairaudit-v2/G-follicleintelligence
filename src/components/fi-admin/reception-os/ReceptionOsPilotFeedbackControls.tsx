@@ -66,7 +66,12 @@ export function ReceptionOsPilotFeedbackControls({
 
   if (submitted) {
     return (
-      <p className={cn("flex items-center gap-1.5 text-xs text-emerald-400/90", compact ? "mt-2" : "mt-3")}>
+      <p
+        className={cn(
+          "flex items-center gap-1.5 text-xs text-emerald-400/90",
+          compact ? "mt-2" : "mt-3"
+        )}
+      >
         <Check className="h-3.5 w-3.5" aria-hidden />
         Thanks — {RECEPTION_PILOT_FEEDBACK_LABELS[submitted].replace("?", "")} recorded.
       </p>
@@ -76,7 +81,9 @@ export function ReceptionOsPilotFeedbackControls({
   return (
     <div className={cn(compact ? "mt-2" : "mt-3 border-t border-white/[0.06] pt-3")}>
       {!compact ? (
-        <p className="mb-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">Pilot feedback</p>
+        <p className="mb-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Pilot feedback
+        </p>
       ) : null}
       <div className="flex flex-wrap gap-1.5">
         {RECEPTION_PILOT_FEEDBACK_KINDS.map((kind) => {
@@ -89,7 +96,7 @@ export function ReceptionOsPilotFeedbackControls({
               onClick={() => submit(kind)}
               className={cn(
                 fiOsChromeClasses.toolbarControlSurface,
-                "inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-slate-300 disabled:opacity-50",
+                "inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-slate-300 disabled:opacity-50"
               )}
             >
               <Icon className="h-3 w-3 shrink-0 opacity-70" aria-hidden />

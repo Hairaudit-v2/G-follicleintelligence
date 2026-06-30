@@ -6,7 +6,8 @@ import {
   type ResolvedDashboardQuickAction,
 } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
 
-const DEFINITION_KEY_ORDER: readonly DashboardQuickActionKey[] = DASHBOARD_QUICK_ACTION_DEFINITIONS.map((d) => d.key);
+const DEFINITION_KEY_ORDER: readonly DashboardQuickActionKey[] =
+  DASHBOARD_QUICK_ACTION_DEFINITIONS.map((d) => d.key);
 
 /**
  * Reorders resolved quick actions using the workspace profile, then appends any remaining definition keys
@@ -17,7 +18,9 @@ export function composeWorkspaceQuickActionsOrder(opts: {
   resolvedItems: readonly ResolvedDashboardQuickAction[];
 }): ResolvedDashboardQuickAction[] {
   const { workspaceProfile, resolvedItems } = opts;
-  const profileKey: FiWorkspaceProfileKey = isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
+  const profileKey: FiWorkspaceProfileKey = isFiWorkspaceProfileKey(workspaceProfile)
+    ? workspaceProfile
+    : "default";
   const profile = FI_WORKSPACE_PROFILES[profileKey] ?? FI_WORKSPACE_PROFILES.default;
 
   const preferred: readonly DashboardQuickActionKey[] =

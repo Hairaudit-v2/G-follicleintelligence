@@ -35,7 +35,16 @@ test("buildAuditAttentionPriorities: returns at most five items ordered by prior
       pending_reviews: 6,
       oldest_queue_created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     },
-    queue: [{ report_id: "r1", case_id: "c1", version: 1, report_status: "draft", created_at: new Date().toISOString(), patient: null }],
+    queue: [
+      {
+        report_id: "r1",
+        case_id: "c1",
+        version: 1,
+        report_status: "draft",
+        created_at: new Date().toISOString(),
+        patient: null,
+      },
+    ],
   });
   assert.equal(items.length, 5);
   assert.equal(items[0]?.id, "pending_review");

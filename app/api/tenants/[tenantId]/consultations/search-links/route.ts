@@ -17,8 +17,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ tena
       return NextResponse.json({ ok: false, error: gate.message }, { status: gate.status });
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-      return NextResponse.json({ ok: false, error: "Search is not configured on this server." }, { status: 503 });
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+      !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Search is not configured on this server." },
+        { status: 503 }
+      );
     }
 
     const url = new URL(request.url);

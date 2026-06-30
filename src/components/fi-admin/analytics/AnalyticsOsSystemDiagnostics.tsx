@@ -1,18 +1,20 @@
-import {
-  Activity,
-  BarChart3,
-  ShieldCheck,
-} from "lucide-react";
+import { Activity, BarChart3, ShieldCheck } from "lucide-react";
 
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import type { AnalyticsExecutiveDashboardPayload } from "@/src/lib/analytics-os/analyticsExecutiveTypes";
 import type { AnalyticsOsDashboardPayload } from "@/src/lib/fiAdmin/analyticsOsDashboardTypes";
 
 function formatPeriodDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function analyticsConfidenceLabel(level: AnalyticsExecutiveDashboardPayload["snapshot"]["analyticsConfidence"]): string {
+function analyticsConfidenceLabel(
+  level: AnalyticsExecutiveDashboardPayload["snapshot"]["analyticsConfidence"]
+): string {
   if (level === "high") return "High";
   if (level === "medium") return "Medium";
   return "Low";
@@ -46,11 +48,13 @@ export function AnalyticsOsSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support analytics integrity and do not affect day-to-day clinic
-              workflows.
+              For platform operators only. These checks support analytics integrity and do not
+              affect day-to-day clinic workflows.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-[#22C1FF]/80">
@@ -75,11 +79,15 @@ export function AnalyticsOsSystemDiagnostics({
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#0c1220]/80 px-3 py-2">
               <dt className="text-xs text-[#64748B]">Analytics event count</dt>
-              <dd className="mt-1 text-sm font-semibold tabular-nums text-[#F8FAFC]">{totalEvents}</dd>
+              <dd className="mt-1 text-sm font-semibold tabular-nums text-[#F8FAFC]">
+                {totalEvents}
+              </dd>
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#0c1220]/80 px-3 py-2">
               <dt className="text-xs text-[#64748B]">Active publishing modules</dt>
-              <dd className="mt-1 text-sm font-semibold tabular-nums text-[#F8FAFC]">{activeModules}</dd>
+              <dd className="mt-1 text-sm font-semibold tabular-nums text-[#F8FAFC]">
+                {activeModules}
+              </dd>
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#0c1220]/80 px-3 py-2">
               <dt className="text-xs text-[#64748B]">Generated</dt>
@@ -142,7 +150,11 @@ export function AnalyticsOsSystemDiagnostics({
 
         {found?.scan_notes?.length ? (
           <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-            <SectionHeader title="Foundation scan notes" description="Internal scan caveats from FoundationOS." className="mb-2" />
+            <SectionHeader
+              title="Foundation scan notes"
+              description="Internal scan caveats from FoundationOS."
+              className="mb-2"
+            />
             <ul className="list-disc space-y-1 pl-5 text-xs text-[#94A3B8]">
               {found.scan_notes.slice(0, 8).map((n) => (
                 <li key={n}>{n}</li>
@@ -153,7 +165,10 @@ export function AnalyticsOsSystemDiagnostics({
 
         <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#0c1220]/40 px-4 py-3 text-xs text-[#64748B]">
           <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
-          <p>Diagnostics use aggregate counts and scores only. Raw event metadata is not exposed in this view.</p>
+          <p>
+            Diagnostics use aggregate counts and scores only. Raw event metadata is not exposed in
+            this view.
+          </p>
           <Activity className="ml-auto h-4 w-4 shrink-0 opacity-50" aria-hidden />
         </div>
       </div>

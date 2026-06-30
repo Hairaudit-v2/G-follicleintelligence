@@ -1,6 +1,11 @@
 "use server";
 
-import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantReadAllowed,
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import {
   bookingCancelBodySchema,
@@ -17,7 +22,12 @@ import { loadAppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentS
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import { assertAppointmentProcedureStaffAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
-import { cancelBooking, completeBooking, createBooking, updateBooking } from "@/src/lib/bookings/server";
+import {
+  cancelBooking,
+  completeBooking,
+  createBooking,
+  updateBooking,
+} from "@/src/lib/bookings/server";
 import {
   cancelWorkforceAssignmentsForEvent,
   syncExistingAssignedStaffToWorkforceAssignments,
@@ -43,7 +53,9 @@ function errMsg(e: unknown): string {
 export async function createBookingAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof createBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof createBooking>> } | { ok: false; error: string }
+> {
   try {
     const parsed = bookingCreateBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({
@@ -77,7 +89,11 @@ export async function createBookingAction(
     });
     if (booking.assigned_staff_id?.trim() || parsed.resourceAssignments?.length) {
       try {
-        await syncExistingAssignedStaffToWorkforceAssignments({ tenantId, booking, allowBlockedDraft: true });
+        await syncExistingAssignedStaffToWorkforceAssignments({
+          tenantId,
+          booking,
+          allowBlockedDraft: true,
+        });
       } catch {
         /* Non-blocking — calendar assignment remains source for column layout. */
       }
@@ -92,7 +108,9 @@ export async function updateBookingAction(
   tenantId: string,
   bookingId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }
+> {
   try {
     const parsed = bookingUpdateBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -127,7 +145,11 @@ export async function updateBookingAction(
       parsed.endAt !== undefined
     ) {
       try {
-        await syncExistingAssignedStaffToWorkforceAssignments({ tenantId, booking, allowBlockedDraft: true });
+        await syncExistingAssignedStaffToWorkforceAssignments({
+          tenantId,
+          booking,
+          allowBlockedDraft: true,
+        });
       } catch {
         /* Non-blocking workforce bridge. */
       }
@@ -142,7 +164,9 @@ export async function cancelBookingAction(
   tenantId: string,
   bookingId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof cancelBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof cancelBooking>> } | { ok: false; error: string }
+> {
   try {
     const parsed = bookingCancelBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -154,7 +178,11 @@ export async function cancelBookingAction(
       cancelledByUserId,
     });
     try {
-      await cancelWorkforceAssignmentsForEvent({ tenantId, eventSource: "booking", eventId: bookingId });
+      await cancelWorkforceAssignmentsForEvent({
+        tenantId,
+        eventSource: "booking",
+        eventId: bookingId,
+      });
     } catch {
       /* Non-blocking workforce bridge. */
     }
@@ -168,7 +196,9 @@ export async function completeBookingAction(
   tenantId: string,
   bookingId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof completeBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof completeBooking>> } | { ok: false; error: string }
+> {
   try {
     const parsed = bookingCompleteBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({
@@ -196,7 +226,8 @@ export async function loadAppointmentSlideOverBundleAction(
   try {
     const parsed = appointmentSlideOverLoadSchema.parse({ tenantId, appointmentId });
     const session = await getBookingsOperatorSessionIfAllowed(parsed.tenantId);
-    if (!session) return { ok: false, error: "Not signed in or scheduling access denied for this tenant." };
+    if (!session)
+      return { ok: false, error: "Not signed in or scheduling access denied for this tenant." };
     const data = await loadAppointmentSlideOverPayload(parsed.tenantId, parsed.appointmentId);
     if (!data) return { ok: false, error: "Appointment not found." };
     return { ok: true, data };
@@ -222,17 +253,21 @@ export async function updateAppointmentProcedureAction(
   tenantId: string,
   appointmentId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }
+> {
   try {
     const parsed = appointmentProcedurePatchSchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
     const existing = await loadBookingForTenant(tenantId, appointmentId);
     if (!existing) return { ok: false, error: "Appointment not found." };
     const patch: Partial<AppointmentProcedureMetadata> = {};
-    if (parsed.graftCountEstimate !== undefined) patch.graft_count_estimate = parsed.graftCountEstimate;
+    if (parsed.graftCountEstimate !== undefined)
+      patch.graft_count_estimate = parsed.graftCountEstimate;
     if (parsed.donorArea !== undefined) patch.donor_area = parsed.donorArea;
     if (parsed.technique !== undefined) patch.technique = parsed.technique;
-    if (parsed.specialInstructions !== undefined) patch.special_instructions = parsed.specialInstructions;
+    if (parsed.specialInstructions !== undefined)
+      patch.special_instructions = parsed.specialInstructions;
     if (parsed.surgeonUserId !== undefined) patch.surgeon_user_id = parsed.surgeonUserId;
     if (parsed.consultantUserId !== undefined) patch.consultant_user_id = parsed.consultantUserId;
     if (parsed.techUserId !== undefined) patch.tech_user_id = parsed.techUserId;
@@ -261,9 +296,14 @@ export async function linkAppointmentPatientFromLeadAction(
   tenantId: string,
   appointmentId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }
+> {
   try {
-    const parsed = z.object({ adminKey: z.string().optional() }).strict().parse(body ?? {});
+    const parsed = z
+      .object({ adminKey: z.string().optional() })
+      .strict()
+      .parse(body ?? {});
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
     const existing = await loadBookingForTenant(tenantId, appointmentId);
     if (!existing) return { ok: false, error: "Appointment not found." };
@@ -273,7 +313,10 @@ export async function linkAppointmentPatientFromLeadAction(
     if (!lead) return { ok: false, error: "Lead not found." };
     const pid = lead.patient_id?.trim();
     if (!pid) {
-      return { ok: false, error: "Convert the lead to a patient first, then link the appointment." };
+      return {
+        ok: false,
+        error: "Convert the lead to a patient first, then link the appointment.",
+      };
     }
     if (existing.patient_id === pid) return { ok: true, booking: existing };
     const booking = await updateBooking({
@@ -301,7 +344,9 @@ export async function sendAppointmentInstructionsAction(
   tenantId: string,
   appointmentId: string,
   body: unknown
-): Promise<{ ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; booking: Awaited<ReturnType<typeof updateBooking>> } | { ok: false; error: string }
+> {
   try {
     const parsed = sendInstructionsSchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -340,8 +385,7 @@ export async function loadBookingResourceAssignmentsAction(
   bookingId: string,
   adminKey?: string
 ): Promise<
-  | { ok: true; assignments: FiBookingResourceAssignmentRow[] }
-  | { ok: false; error: string }
+  { ok: true; assignments: FiBookingResourceAssignmentRow[] } | { ok: false; error: string }
 > {
   try {
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });

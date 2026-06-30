@@ -39,16 +39,20 @@ export function parseIiohrHrStaffSyncRows(rawRows: unknown[]): ParseIiohrHrStaff
     const r = parsed.data;
     const sourceUrl = r.source_url != null ? String(r.source_url) : null;
     const metadataRaw =
-      r.metadata_snapshot && typeof r.metadata_snapshot === "object" && !Array.isArray(r.metadata_snapshot)
+      r.metadata_snapshot &&
+      typeof r.metadata_snapshot === "object" &&
+      !Array.isArray(r.metadata_snapshot)
         ? r.metadata_snapshot
         : {};
     const metadataCombined: Record<string, unknown> = { ...metadataRaw };
     if (r.onboarding_status !== undefined) metadataCombined.onboarding_status = r.onboarding_status;
-    if (r.onboarding_completed_at !== undefined) metadataCombined.onboarding_completed_at = r.onboarding_completed_at;
+    if (r.onboarding_completed_at !== undefined)
+      metadataCombined.onboarding_completed_at = r.onboarding_completed_at;
     if (r.required_documents_missing_count !== undefined) {
       metadataCombined.required_documents_missing_count = r.required_documents_missing_count;
     }
-    if (r.training_required_count !== undefined) metadataCombined.training_required_count = r.training_required_count;
+    if (r.training_required_count !== undefined)
+      metadataCombined.training_required_count = r.training_required_count;
     if (r.certificates_outstanding_count !== undefined) {
       metadataCombined.certificates_outstanding_count = r.certificates_outstanding_count;
     }
@@ -57,7 +61,8 @@ export function parseIiohrHrStaffSyncRows(rawRows: unknown[]): ParseIiohrHrStaff
     rows.push({
       external_staff_id: String(r.external_staff_id).trim(),
       full_name: String(r.full_name ?? "").trim(),
-      email: r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
+      email:
+        r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
       staff_role: r.staff_role != null ? String(r.staff_role).trim() : null,
       employment_status: r.employment_status != null ? String(r.employment_status).trim() : null,
       source_url: sourceUrl,
@@ -65,10 +70,14 @@ export function parseIiohrHrStaffSyncRows(rawRows: unknown[]): ParseIiohrHrStaff
       working_hours: r.working_hours ?? undefined,
       iiohr_user_id: r.iiohr_user_id != null ? String(r.iiohr_user_id).trim() : null,
       onboarding_status: r.onboarding_status != null ? String(r.onboarding_status).trim() : null,
-      onboarding_completed_at: r.onboarding_completed_at != null ? String(r.onboarding_completed_at).trim() : null,
+      onboarding_completed_at:
+        r.onboarding_completed_at != null ? String(r.onboarding_completed_at).trim() : null,
       required_documents_missing_count:
-        r.required_documents_missing_count != null ? Number(r.required_documents_missing_count) : null,
-      training_required_count: r.training_required_count != null ? Number(r.training_required_count) : null,
+        r.required_documents_missing_count != null
+          ? Number(r.required_documents_missing_count)
+          : null,
+      training_required_count:
+        r.training_required_count != null ? Number(r.training_required_count) : null,
       certificates_outstanding_count:
         r.certificates_outstanding_count != null ? Number(r.certificates_outstanding_count) : null,
       hr_profile_url: r.hr_profile_url != null ? String(r.hr_profile_url).trim() : null,

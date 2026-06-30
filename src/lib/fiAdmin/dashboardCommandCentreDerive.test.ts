@@ -54,8 +54,16 @@ test("buildClinicSnapshotCards: caps at six cards", () => {
     base: "/fi-admin/t1",
     clinicToday: { consultations: 3, prp: 0, followUps: 1, surgeries: 2 },
     receptionCards: [],
-    paymentCommercialKpis: { depositsDueCount: 1, depositsPaidTodayCount: 0, overduePaymentsCount: 2 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 1, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 1,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 2,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 1,
+      overdueInvoiceCount: 0,
+    },
     quickStats: {
       newLeadsThisWeek: 0,
       newLeadsToday: 0,
@@ -98,7 +106,11 @@ test("buildTomorrowPreview: summarizes tomorrow surgeries and missing prep", () 
       follow_up: [],
       other: [],
     },
-    paymentCommercialKpis: { depositsDueCount: 1, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 1,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
     now: new Date("2026-06-10T12:00:00.000Z"),
   });
   assert.ok(lines.some((l) => /surgery scheduled tomorrow/i.test(l.text)));

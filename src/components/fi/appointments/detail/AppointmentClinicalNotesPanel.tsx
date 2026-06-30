@@ -39,7 +39,8 @@ export function AppointmentClinicalNotesPanel({
       <section className={appointmentCardClass}>
         <h2 className="text-sm font-semibold text-slate-100">Appointment clinical notes</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Free-text notes stored on this booking (consultation findings, intra-op observations, plan for next visit).
+          Free-text notes stored on this booking (consultation findings, intra-op observations, plan
+          for next visit).
         </p>
         {canMutate ? (
           <form className="mt-3 space-y-2" onSubmit={onSaveDescription}>
@@ -60,7 +61,9 @@ export function AppointmentClinicalNotesPanel({
             </button>
           </form>
         ) : (
-          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-300">{description.trim() || "—"}</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-300">
+            {description.trim() || "—"}
+          </p>
         )}
       </section>
     </div>

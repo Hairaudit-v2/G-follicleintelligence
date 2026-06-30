@@ -37,7 +37,14 @@ function SetupProgressRing({ percent }: { percent: number }) {
     <div className="flex shrink-0 flex-col items-center">
       <div className="relative h-[7.5rem] w-[7.5rem] sm:h-32 sm:w-32">
         <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120" aria-hidden>
-          <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+          <circle
+            cx="60"
+            cy="60"
+            r={r}
+            fill="none"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="10"
+          />
           <circle
             cx="60"
             cy="60"
@@ -59,7 +66,9 @@ function SetupProgressRing({ percent }: { percent: number }) {
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-3xl">{pct}%</span>
+          <span className="text-2xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-3xl">
+            {pct}%
+          </span>
           <span className="text-xs font-medium text-[#94A3B8]">setup</span>
         </div>
       </div>
@@ -95,7 +104,9 @@ function StatusPill({ percent }: { percent: number }) {
       <span className="text-white/25" aria-hidden>
         ·
       </span>
-      <span className="text-[#94A3B8]">{complete ? "Setup complete" : `Setup in progress · ${percent}%`}</span>
+      <span className="text-[#94A3B8]">
+        {complete ? "Setup complete" : `Setup in progress · ${percent}%`}
+      </span>
     </div>
   );
 }
@@ -128,16 +139,22 @@ export function FiHomeDashboard({
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">Follicle Intelligence OS</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Welcome back</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+            Follicle Intelligence OS
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            Welcome back
+          </h1>
           <p className="mt-2 text-xl font-medium text-[#E2E8F0] sm:text-2xl">{data.tenantName}</p>
-          <p className="mt-2 break-all font-mono text-sm leading-relaxed text-[#64748B] sm:text-base">{tenantMeta}</p>
+          <p className="mt-2 break-all font-mono text-sm leading-relaxed text-[#64748B] sm:text-base">
+            {tenantMeta}
+          </p>
           <div className="mt-5">
             <StatusPill percent={pct} />
           </div>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#94A3B8]">
-            Read-only operator home — jump to setup tasks, patients, and configuration. Underlying data and access rules are
-            unchanged.
+            Read-only operator home — jump to setup tasks, patients, and configuration. Underlying
+            data and access rules are unchanged.
           </p>
         </div>
       </DashboardCard>
@@ -180,7 +197,11 @@ export function FiHomeDashboard({
 
       {/* 3. Setup progress | Recommended next step */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-        <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="setup-progress-heading">
+        <DashboardCard
+          className="p-5 sm:p-6"
+          role="region"
+          aria-labelledby="setup-progress-heading"
+        >
           <SectionHeader
             id="setup-progress-heading"
             title="Setup progress"
@@ -189,10 +210,19 @@ export function FiHomeDashboard({
           <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
             <SetupProgressRing percent={pct} />
             <ul className="min-w-0 flex-1 space-y-3 border-t border-white/[0.08] pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-              <ProgressChecklistItem done={data.checklist.organisationCreated} label="Organisation created" />
+              <ProgressChecklistItem
+                done={data.checklist.organisationCreated}
+                label="Organisation created"
+              />
               <ProgressChecklistItem done={data.checklist.clinicCreated} label="Clinic created" />
-              <ProgressChecklistItem done={data.checklist.clinicSettingsComplete} label="Clinic settings completed" />
-              <ProgressChecklistItem done={data.checklist.firstCaseCreated} label="First patient created" />
+              <ProgressChecklistItem
+                done={data.checklist.clinicSettingsComplete}
+                label="Clinic settings completed"
+              />
+              <ProgressChecklistItem
+                done={data.checklist.firstCaseCreated}
+                label="First patient created"
+              />
               {showCrmShellExtras ? (
                 <>
                   <ProgressChecklistItem
@@ -211,7 +241,11 @@ export function FiHomeDashboard({
           </div>
         </DashboardCard>
 
-        <DashboardCard className="flex flex-col p-5 sm:p-6" role="region" aria-labelledby="next-step-heading">
+        <DashboardCard
+          className="flex flex-col p-5 sm:p-6"
+          role="region"
+          aria-labelledby="next-step-heading"
+        >
           <SectionHeader
             id="next-step-heading"
             title="Recommended next step"
@@ -219,7 +253,9 @@ export function FiHomeDashboard({
           />
           <div className="mt-5 flex min-h-0 flex-1 flex-col rounded-xl border border-white/[0.06] bg-[#081020]/50 p-5 sm:p-6">
             <p className="text-lg font-semibold text-[#F8FAFC]">{data.nextAction.title}</p>
-            <p className="mt-3 text-base leading-relaxed text-[#94A3B8]">{data.nextAction.description}</p>
+            <p className="mt-3 text-base leading-relaxed text-[#94A3B8]">
+              {data.nextAction.description}
+            </p>
             <div className="mt-auto pt-8">
               <Link href={data.nextAction.href} className={ctaButtonClass}>
                 Continue
@@ -243,8 +279,16 @@ export function FiHomeDashboard({
             value={data.counts.organisations}
             icon={<Building2 size={ICON} strokeWidth={1.75} />}
           />
-          <StatCard label="Clinics" value={data.counts.clinics} icon={<Hospital size={ICON} strokeWidth={1.75} />} />
-          <StatCard label="Persons" value={data.counts.persons} icon={<Users size={ICON} strokeWidth={1.75} />} />
+          <StatCard
+            label="Clinics"
+            value={data.counts.clinics}
+            icon={<Hospital size={ICON} strokeWidth={1.75} />}
+          />
+          <StatCard
+            label="Persons"
+            value={data.counts.persons}
+            icon={<Users size={ICON} strokeWidth={1.75} />}
+          />
           <StatCard
             label="Patients"
             value={data.counts.patients}
@@ -259,23 +303,30 @@ export function FiHomeDashboard({
       </section>
 
       {/* 5. Foundation integrity */}
-      <DashboardCard className="border-amber-500/20 bg-[#0F1629]/80 p-5 sm:p-6" role="region" aria-labelledby="foundation-integrity-heading">
+      <DashboardCard
+        className="border-amber-500/20 bg-[#0F1629]/80 p-5 sm:p-6"
+        role="region"
+        aria-labelledby="foundation-integrity-heading"
+      >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
           <div className="min-w-0 space-y-3">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200">
                 <Activity size={ICON_SM} strokeWidth={1.75} aria-hidden />
               </span>
-              <h2 id="foundation-integrity-heading" className="text-lg font-semibold text-[#F8FAFC] sm:text-xl">
+              <h2
+                id="foundation-integrity-heading"
+                className="text-lg font-semibold text-[#F8FAFC] sm:text-xl"
+              >
                 Foundation Integrity
               </h2>
             </div>
             <p className="max-w-3xl text-base leading-relaxed text-[#94A3B8]">
               This screen is for <strong className="text-[#E2E8F0]">technical health</strong>,{" "}
               <strong className="text-[#E2E8F0]">event coverage</strong>, and{" "}
-              <strong className="text-[#E2E8F0]">data integrity</strong> — not day-to-day clinical operations. Use{" "}
-              <strong className="text-[#E2E8F0]">Patients</strong> and (when available) <strong className="text-[#E2E8F0]">CRM</strong>{" "}
-              for routine work.
+              <strong className="text-[#E2E8F0]">data integrity</strong> — not day-to-day clinical
+              operations. Use <strong className="text-[#E2E8F0]">Patients</strong> and (when
+              available) <strong className="text-[#E2E8F0]">CRM</strong> for routine work.
             </p>
           </div>
           <Link
@@ -300,7 +351,11 @@ export function FiHomeDashboard({
             />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               <Link href={`${base}/patients`} className={crmLinkClass}>
-                <UserCircle2 className="shrink-0 text-[#22C1FF] transition group-hover:text-[#22C1FF]" size={ICON} strokeWidth={1.75} />
+                <UserCircle2
+                  className="shrink-0 text-[#22C1FF] transition group-hover:text-[#22C1FF]"
+                  size={ICON}
+                  strokeWidth={1.75}
+                />
                 Patients
               </Link>
               <Link href={`${base}/crm`} className={crmLinkClass}>

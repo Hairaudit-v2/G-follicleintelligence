@@ -23,7 +23,10 @@ const rawSchema = z.object({
   ai_notes: z.string(),
 });
 
-export type ConsultationChecklistModelJsonParseSuccess = { ok: true; data: ConsultationChecklistModelResult };
+export type ConsultationChecklistModelJsonParseSuccess = {
+  ok: true;
+  data: ConsultationChecklistModelResult;
+};
 export type ConsultationChecklistModelJsonParseFailure = { ok: false; error: string };
 
 function sliceText(s: string, max: number): string {
@@ -44,7 +47,9 @@ function normalizeStringArray(raw: unknown[], maxItems: number, maxLen: number):
   return out;
 }
 
-export function parseConsultationChecklistModelJson(parsed: unknown): ConsultationChecklistModelJsonParseSuccess | ConsultationChecklistModelJsonParseFailure {
+export function parseConsultationChecklistModelJson(
+  parsed: unknown
+): ConsultationChecklistModelJsonParseSuccess | ConsultationChecklistModelJsonParseFailure {
   const zod = rawSchema.safeParse(parsed);
   if (!zod.success) {
     return { ok: false, error: zod.error.issues[0]?.message ?? "invalid json" };
@@ -64,7 +69,10 @@ export function parseConsultationChecklistModelJson(parsed: unknown): Consultati
     delay_recommended: Boolean(d.delay_recommended),
     checklist_items: normalizeStringArray(d.checklist_items, 60, 500),
     risk_flags: normalizeStringArray(d.risk_flags, 40, 240),
-    consultation_summary: sliceText(typeof d.consultation_summary === "string" ? d.consultation_summary : "", 8000),
+    consultation_summary: sliceText(
+      typeof d.consultation_summary === "string" ? d.consultation_summary : "",
+      8000
+    ),
     ai_notes: sliceText(typeof d.ai_notes === "string" ? d.ai_notes : "", 8000),
   };
   return { ok: true, data: out };

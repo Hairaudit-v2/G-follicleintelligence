@@ -99,7 +99,9 @@ function createAnalyticsEventsMock(initial: StoredRow[] = []) {
 describe("analyticsEventCore", () => {
   it("validates metadata must be a plain object", () => {
     assert.throws(() => validateAnalyticsEventMetadata([]), AnalyticsEventValidationError);
-    assert.deepEqual(validateAnalyticsEventMetadata({ staff_role: "nurse" }), { staff_role: "nurse" });
+    assert.deepEqual(validateAnalyticsEventMetadata({ staff_role: "nurse" }), {
+      staff_role: "nurse",
+    });
   });
 
   it("validates module and event type contracts", () => {
@@ -266,7 +268,10 @@ describe("analyticsEventCore", () => {
       },
     ]);
 
-    const tenantAEvents = await getAnalyticsEvents({ tenantId: TENANT_A }, { supabaseClientForTests: client });
+    const tenantAEvents = await getAnalyticsEvents(
+      { tenantId: TENANT_A },
+      { supabaseClientForTests: client }
+    );
     assert.equal(tenantAEvents.length, 1);
     assert.equal(tenantAEvents[0]?.tenant_id, TENANT_A);
 

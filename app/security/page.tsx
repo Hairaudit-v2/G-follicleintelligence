@@ -27,9 +27,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -108,9 +112,9 @@ export default function SecurityPage() {
         <FadeIn>
           <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 px-5 py-4 text-sm leading-relaxed text-muted-foreground">
             <span className="font-medium text-foreground">Important: </span>
-            This page summarizes posture. It does not replace a completed vendor risk assessment, BAA, or
-            regulatory determination for your use case. Certifications and attestations are shared under NDA during
-            procurement when applicable to your deployment.
+            This page summarizes posture. It does not replace a completed vendor risk assessment,
+            BAA, or regulatory determination for your use case. Certifications and attestations are
+            shared under NDA during procurement when applicable to your deployment.
           </div>
         </FadeIn>
       </Section>
@@ -216,7 +220,9 @@ export default function SecurityPage() {
                   <CardTitle className="text-xl">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-base leading-relaxed">{item.desc}</CardDescription>
+                  <CardDescription className="text-base leading-relaxed">
+                    {item.desc}
+                  </CardDescription>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -229,10 +235,12 @@ export default function SecurityPage() {
           <div className="fi-panel rounded-[1.5rem] p-8 md:p-10">
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">Contact</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">
+                  Contact
+                </p>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  Route security and procurement questions through your normal vendor process. For initial
-                  outreach:{" "}
+                  Route security and procurement questions through your normal vendor process. For
+                  initial outreach:{" "}
                   <Link
                     href="mailto:hello@follicleintelligence.ai?subject=Security%20review"
                     className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
@@ -240,11 +248,17 @@ export default function SecurityPage() {
                     hello@follicleintelligence.ai
                   </Link>
                   . Reference{" "}
-                  <Link href="/integration" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+                  <Link
+                    href="/integration"
+                    className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+                  >
                     integration
                   </Link>{" "}
                   and{" "}
-                  <Link href="/licensing" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+                  <Link
+                    href="/licensing"
+                    className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+                  >
                     licensing
                   </Link>{" "}
                   for technical and commercial context.

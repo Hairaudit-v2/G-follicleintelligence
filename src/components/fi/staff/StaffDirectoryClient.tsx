@@ -21,8 +21,14 @@ import {
   filterStaffDirectoryRows,
   type StaffDirectoryFilterState,
 } from "@/src/lib/staff/staffDirectoryFilters";
-import { mergeStaffWorkingHoursDocument, parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
-import { CLINICAL_STAFF_ROLE_OPTIONS, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
+import {
+  mergeStaffWorkingHoursDocument,
+  parseStaffProfileExtras,
+} from "@/src/lib/staff/staffProfileExtras";
+import {
+  CLINICAL_STAFF_ROLE_OPTIONS,
+  NEEDS_REVIEW_STAFF_ROLE,
+} from "@/src/lib/staff/staffRolePolicy";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import type { WorkforceRoleSegmentId } from "@/src/lib/staff/workforceCommandCentre";
 import { parseExplicitWorkspaceProfile } from "@/src/lib/fi-os/workspaceProfileDerivation";
@@ -91,7 +97,7 @@ export function StaffDirectoryClient({
   const [pending, startTransition] = useTransition();
 
   const editingRow = useMemo(
-    () => (editingId ? data.staff.find((s) => s.id === editingId) ?? null : null),
+    () => (editingId ? (data.staff.find((s) => s.id === editingId) ?? null) : null),
     [editingId, data.staff]
   );
 
@@ -105,7 +111,10 @@ export function StaffDirectoryClient({
     [enrichedRows, initialFilters]
   );
 
-  const needsReviewCount = useMemo(() => enrichedRows.filter((r) => r.needsReview).length, [enrichedRows]);
+  const needsReviewCount = useMemo(
+    () => enrichedRows.filter((r) => r.needsReview).length,
+    [enrichedRows]
+  );
 
   const hrSyncIssueCount = useMemo(
     () =>
@@ -121,9 +130,10 @@ export function StaffDirectoryClient({
     [enrichedRows]
   );
 
-  const editingPayroll = editingRow ? data.payrollByStaffId[editingRow.id] ?? null : null;
+  const editingPayroll = editingRow ? (data.payrollByStaffId[editingRow.id] ?? null) : null;
   const editingHrNotification = editingRow
-    ? data.hrNotificationByStaffId[editingRow.id] ?? enrichedRows.find((r) => r.id === editingRow.id)?.hrNotification
+    ? (data.hrNotificationByStaffId[editingRow.id] ??
+      enrichedRows.find((r) => r.id === editingRow.id)?.hrNotification)
     : null;
 
   const canManage = data.canManageStaff;
@@ -223,12 +233,17 @@ export function StaffDirectoryClient({
       {needsReviewCount > 0 ? (
         <DashboardCard className="border-amber-500/25 bg-amber-500/[0.06] p-4">
           <p className="text-sm text-amber-100">
-            <strong>{needsReviewCount}</strong> staff member{needsReviewCount === 1 ? "" : "s"} still have role{" "}
-            <code className="rounded bg-amber-500/20 px-1 text-xs">needs_review</code> from payroll import.
+            <strong>{needsReviewCount}</strong> staff member{needsReviewCount === 1 ? "" : "s"}{" "}
+            still have role{" "}
+            <code className="rounded bg-amber-500/20 px-1 text-xs">needs_review</code> from payroll
+            import.
           </p>
           {canManage ? (
             <p className="mt-2 text-sm">
-              <Link href={`${base}/staff/role-review`} className="font-medium text-amber-200 hover:underline">
+              <Link
+                href={`${base}/staff/role-review`}
+                className="font-medium text-amber-200 hover:underline"
+              >
                 Assign roles workflow
               </Link>
             </p>
@@ -239,11 +254,14 @@ export function StaffDirectoryClient({
       {canManage && hrSyncIssueCount > 0 ? (
         <DashboardCard className="border-amber-500/25 bg-amber-500/[0.06] p-4">
           <p className="text-sm text-amber-100">
-            <strong>{hrSyncIssueCount}</strong> active staff member{hrSyncIssueCount === 1 ? "" : "s"} have IIOHR HR
-            sync gaps.
+            <strong>{hrSyncIssueCount}</strong> active staff member
+            {hrSyncIssueCount === 1 ? "" : "s"} have IIOHR HR sync gaps.
           </p>
           <p className="mt-2 text-sm">
-            <Link href={`${base}/hr/sync-health`} className="font-medium text-amber-200 hover:underline">
+            <Link
+              href={`${base}/hr/sync-health`}
+              className="font-medium text-amber-200 hover:underline"
+            >
               Open HR sync health dashboard
             </Link>
           </p>
@@ -267,7 +285,10 @@ export function StaffDirectoryClient({
       ) : null}
 
       {error ? (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200" role="alert">
+        <div
+          className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -279,15 +300,26 @@ export function StaffDirectoryClient({
           aria-label={mode === "create" ? "Add staff member" : "Edit staff member"}
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-[#F8FAFC]">{mode === "create" ? "New staff" : "Edit staff"}</h2>
-            <button type="button" onClick={closePanel} className="text-xs text-[#94A3B8] hover:text-[#F8FAFC]">
+            <h2 className="text-sm font-semibold text-[#F8FAFC]">
+              {mode === "create" ? "New staff" : "Edit staff"}
+            </h2>
+            <button
+              type="button"
+              onClick={closePanel}
+              className="text-xs text-[#94A3B8] hover:text-[#F8FAFC]"
+            >
               Close
             </button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className={labelClassName}>
               Full name
-              <input className={inputClassName} value={form.full_name} onChange={(e) => onField("full_name", e.target.value)} required />
+              <input
+                className={inputClassName}
+                value={form.full_name}
+                onChange={(e) => onField("full_name", e.target.value)}
+                required
+              />
             </label>
             <label className={labelClassName}>
               Role
@@ -303,7 +335,9 @@ export function StaffDirectoryClient({
                   </option>
                 ))}
                 {form.staff_role !== NEEDS_REVIEW_STAFF_ROLE &&
-                !CLINICAL_STAFF_ROLE_OPTIONS.includes(form.staff_role as (typeof CLINICAL_STAFF_ROLE_OPTIONS)[number]) ? (
+                !CLINICAL_STAFF_ROLE_OPTIONS.includes(
+                  form.staff_role as (typeof CLINICAL_STAFF_ROLE_OPTIONS)[number]
+                ) ? (
                   <option value={form.staff_role}>{form.staff_role}</option>
                 ) : null}
               </select>
@@ -334,11 +368,20 @@ export function StaffDirectoryClient({
             </label>
             <label className={labelClassName}>
               Email
-              <input type="email" className={inputClassName} value={form.email} onChange={(e) => onField("email", e.target.value)} />
+              <input
+                type="email"
+                className={inputClassName}
+                value={form.email}
+                onChange={(e) => onField("email", e.target.value)}
+              />
             </label>
             <label className={labelClassName}>
               Mobile
-              <input className={inputClassName} value={form.mobile} onChange={(e) => onField("mobile", e.target.value)} />
+              <input
+                className={inputClassName}
+                value={form.mobile}
+                onChange={(e) => onField("mobile", e.target.value)}
+              />
             </label>
             <label className={labelClassName}>
               Default timezone (IANA)
@@ -363,7 +406,11 @@ export function StaffDirectoryClient({
             </label>
             <label className={`${labelClassName} sm:col-span-2`}>
               Linked login user (optional)
-              <select className={inputClassName} value={form.fi_user_id} onChange={(e) => onField("fi_user_id", e.target.value)}>
+              <select
+                className={inputClassName}
+                value={form.fi_user_id}
+                onChange={(e) => onField("fi_user_id", e.target.value)}
+              >
                 <option value="">— None —</option>
                 {data.fiUsersForLink.map((u) => (
                   <option key={u.id} value={u.id}>
@@ -423,14 +470,18 @@ export function StaffDirectoryClient({
               {data.canViewStaffOrganisationalIntelligence &&
               editingRow &&
               data.staffOrganisationalIntelligenceByStaffId[editingRow.id] ? (
-                <StaffOrganisationalIntelligencePanel intel={data.staffOrganisationalIntelligenceByStaffId[editingRow.id]} />
+                <StaffOrganisationalIntelligencePanel
+                  intel={data.staffOrganisationalIntelligenceByStaffId[editingRow.id]}
+                />
               ) : null}
               {data.canManageStaffFeatureVisibility ? (
                 <StaffFeatureAccessPanel
                   tenantId={tenantId}
                   staffId={editingRow.id}
                   dbOverrides={data.staffFeatureAccessByStaffId[editingRow.id] ?? {}}
-                  featureTemplateDefaults={data.staffFeatureTemplateDefaultsByStaffId[editingRow.id] ?? {}}
+                  featureTemplateDefaults={
+                    data.staffFeatureTemplateDefaultsByStaffId[editingRow.id] ?? {}
+                  }
                   staffPositionTypeId={editingRow.position_type_id}
                   positionTypes={data.staffPositionTypes.map((p) => ({
                     id: p.id,

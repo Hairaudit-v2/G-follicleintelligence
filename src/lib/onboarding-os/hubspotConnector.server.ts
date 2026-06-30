@@ -142,9 +142,7 @@ const HUBSPOT_DEAL_PROPERTIES = [
   "amount",
 ].join(",");
 
-export type HubspotActionResult<T = void> =
-  | { ok: true; data?: T }
-  | { ok: false; error: string };
+export type HubspotActionResult<T = void> = { ok: true; data?: T } | { ok: false; error: string };
 
 export type RunHubspotSyncResult =
   | { ok: true; syncRun: HubspotSyncRun; snapshot: HubspotConnectorSnapshot }
@@ -154,10 +152,9 @@ function resolveMasterKey(): Buffer | null {
   return deriveExternalConnectorMasterKey(process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY);
 }
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
@@ -224,7 +221,12 @@ async function resolveWriteAuth(
 > {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) {
-    return { ok: true, actorAuthUserId: platform.actorAuthUserId, fiUserId: null, actorLabel: "Platform admin" };
+    return {
+      ok: true,
+      actorAuthUserId: platform.actorAuthUserId,
+      fiUserId: null,
+      actorLabel: "Platform admin",
+    };
   }
   const tenant = await resolveTenantAdminAuth(tenantId, opts);
   if (!tenant.ok) return tenant;
@@ -236,7 +238,10 @@ async function resolveWriteAuth(
   };
 }
 
-async function resolveReadAuth(tenantId: string, opts: ServerOpts): Promise<{ ok: true } | { ok: false; error: string }> {
+async function resolveReadAuth(
+  tenantId: string,
+  opts: ServerOpts
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) return { ok: true };
 
@@ -304,7 +309,9 @@ function mapDealStagingRow(row: DealStagingRow): HubspotStagingDeal {
 }
 
 function mapSyncRunRow(row: SyncRunRow): HubspotSyncRun {
-  const status = isHubspotSyncRunStatus(row.status) ? row.status : coerceHubspotSyncRunStatus(row.status);
+  const status = isHubspotSyncRunStatus(row.status)
+    ? row.status
+    : coerceHubspotSyncRunStatus(row.status);
   return {
     id: row.id,
     integrationId: row.integration_id,
@@ -447,7 +454,9 @@ async function fetchAllHubspotObjects<T extends { id?: string }>(
 }
 
 /** Read-only HubSpot contacts list (GET only — never writes to HubSpot). */
-export async function fetchHubspotContactsReadOnly(accessToken: string): Promise<HubspotApiContact[]> {
+export async function fetchHubspotContactsReadOnly(
+  accessToken: string
+): Promise<HubspotApiContact[]> {
   return fetchAllHubspotObjects<HubspotApiContact>("/crm/v3/objects/contacts", accessToken, {
     properties: HUBSPOT_CONTACT_PROPERTIES,
   });
@@ -461,7 +470,9 @@ export async function fetchHubspotDealsReadOnly(accessToken: string): Promise<Hu
 }
 
 /** Read-only HubSpot deal pipelines (GET only). */
-export async function fetchHubspotPipelinesReadOnly(accessToken: string): Promise<HubspotApiPipeline[]> {
+export async function fetchHubspotPipelinesReadOnly(
+  accessToken: string
+): Promise<HubspotApiPipeline[]> {
   const json = await hubspotGet<{ results?: HubspotApiPipeline[] }>(
     "/crm/v3/pipelines/deals",
     accessToken
@@ -582,7 +593,10 @@ export async function runHubspotSync(
 
   const accessToken = await loadHubspotAccessToken(supabase, integrationId);
   if (!accessToken && !opts.fetchHubspotOverride) {
-    return { ok: false, error: "OAuth access token not available — store connector credentials first." };
+    return {
+      ok: false,
+      error: "OAuth access token not available — store connector credentials first.",
+    };
   }
 
   const now = new Date().toISOString();
@@ -757,7 +771,9 @@ export async function runHubspotSync(
 
     for (const raw of discoveredDeals) {
       const pipelineId = raw.properties?.pipeline ?? null;
-      const pipelineName = pipelineId ? pipelineNames[String(pipelineId)] ?? String(pipelineId) : null;
+      const pipelineName = pipelineId
+        ? (pipelineNames[String(pipelineId)] ?? String(pipelineId))
+        : null;
       const deal = normalizeHubspotDeal(raw, {
         pipelineName,
         existingDealIds,
@@ -841,7 +857,12 @@ export async function runHubspotSync(
 
     const totalDiscovered = discoveredContacts.length + discoveredDeals.length;
     const totalSkipped = contactsSkipped + dealsSkipped;
-    if (totalDiscovered > 0 && totalSkipped >= totalDiscovered && contactsStaged === 0 && dealsStaged === 0) {
+    if (
+      totalDiscovered > 0 &&
+      totalSkipped >= totalDiscovered &&
+      contactsStaged === 0 &&
+      dealsStaged === 0
+    ) {
       syncStatus = "partial";
     }
   } catch (e) {
@@ -926,7 +947,10 @@ export async function runHubspotSync(
       last_success_at: syncStatus === "failed" ? null : completedAt,
       last_error: syncError,
       records_synced: contactsStaged + dealsStaged,
-      records_failed: syncStatus === "failed" ? discoveredContacts.length + discoveredDeals.length : contactsSkipped + dealsSkipped,
+      records_failed:
+        syncStatus === "failed"
+          ? discoveredContacts.length + discoveredDeals.length
+          : contactsSkipped + dealsSkipped,
       detail: { provider: "hubspot", read_only: true },
       updated_at: completedAt,
     },
@@ -976,10 +1000,7 @@ export async function loadHubspotStagingContacts(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts & { importStatus?: string | null } = {}
-): Promise<
-  | { ok: true; contacts: HubspotStagingContact[] }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; contacts: HubspotStagingContact[] } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, opts);
   if (!read.ok) return read;
 
@@ -1006,10 +1027,7 @@ export async function loadHubspotStagingDeals(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts & { importStatus?: string | null } = {}
-): Promise<
-  | { ok: true; deals: HubspotStagingDeal[] }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; deals: HubspotStagingDeal[] } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, opts);
   if (!read.ok) return read;
 
@@ -1037,10 +1055,7 @@ async function reviewContactStaging(
   tenantId: string,
   action: "approve" | "reject",
   opts: ServerOpts
-): Promise<
-  | { ok: true; contact: HubspotStagingContact }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; contact: HubspotStagingContact } | { ok: false; error: string }> {
   const auth = await resolveWriteAuth(tenantId, opts);
   if (!auth.ok) return auth;
 
@@ -1058,7 +1073,11 @@ async function reviewContactStaging(
   const row = existing as ContactStagingRow;
   const nextStatus = resolveHubspotImportStatus(row.import_status, action);
   if (!nextStatus) {
-    return { ok: false, error: "Contact is not eligible for review — only staged records can be approved or rejected." };
+    return {
+      ok: false,
+      error:
+        "Contact is not eligible for review — only staged records can be approved or rejected.",
+    };
   }
 
   const now = new Date().toISOString();
@@ -1102,10 +1121,7 @@ export async function approveHubspotLead(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; contact: HubspotStagingContact }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; contact: HubspotStagingContact } | { ok: false; error: string }> {
   return reviewContactStaging(stagingContactId, integrationId, tenantId, "approve", opts);
 }
 
@@ -1115,10 +1131,7 @@ export async function rejectHubspotLead(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; contact: HubspotStagingContact }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; contact: HubspotStagingContact } | { ok: false; error: string }> {
   return reviewContactStaging(stagingContactId, integrationId, tenantId, "reject", opts);
 }
 
@@ -1128,10 +1141,7 @@ async function reviewDealStaging(
   tenantId: string,
   action: "approve" | "reject",
   opts: ServerOpts
-): Promise<
-  | { ok: true; deal: HubspotStagingDeal }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; deal: HubspotStagingDeal } | { ok: false; error: string }> {
   const auth = await resolveWriteAuth(tenantId, opts);
   if (!auth.ok) return auth;
 
@@ -1149,7 +1159,10 @@ async function reviewDealStaging(
   const row = existing as DealStagingRow;
   const nextStatus = resolveHubspotImportStatus(row.import_status, action);
   if (!nextStatus) {
-    return { ok: false, error: "Deal is not eligible for review — only staged records can be approved or rejected." };
+    return {
+      ok: false,
+      error: "Deal is not eligible for review — only staged records can be approved or rejected.",
+    };
   }
 
   const now = new Date().toISOString();
@@ -1192,10 +1205,7 @@ export async function approveHubspotDeal(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; deal: HubspotStagingDeal }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; deal: HubspotStagingDeal } | { ok: false; error: string }> {
   return reviewDealStaging(stagingDealId, integrationId, tenantId, "approve", opts);
 }
 
@@ -1205,10 +1215,7 @@ export async function rejectHubspotDeal(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; deal: HubspotStagingDeal }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; deal: HubspotStagingDeal } | { ok: false; error: string }> {
   return reviewDealStaging(stagingDealId, integrationId, tenantId, "reject", opts);
 }
 
@@ -1217,10 +1224,7 @@ export async function loadHubspotSyncRuns(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts & { limit?: number } = {}
-): Promise<
-  | { ok: true; runs: HubspotSyncRun[] }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; runs: HubspotSyncRun[] } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, opts);
   if (!read.ok) return read;
 
@@ -1302,10 +1306,7 @@ export async function loadHubspotConnectorSnapshot(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; snapshot: HubspotConnectorSnapshot }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; snapshot: HubspotConnectorSnapshot } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, { ...opts, allowTenantMemberRead: true });
   if (!read.ok) return read;
 

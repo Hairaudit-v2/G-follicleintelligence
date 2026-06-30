@@ -90,7 +90,8 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
     id: "hairaudit",
     name: "HairAudit",
     completionPercent: 82,
-    description: "Independent surgical audit, evidence capture, quality scoring, and outcome verification.",
+    description:
+      "Independent surgical audit, evidence capture, quality scoring, and outcome verification.",
     href: "https://hairaudit.com",
     external: true,
   },
@@ -98,7 +99,8 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
     id: "iiohr",
     name: "IIOHR Infrastructure",
     completionPercent: 78,
-    description: "Training, certification, Nexus provisioning, and institute-aligned workforce standards.",
+    description:
+      "Training, certification, Nexus provisioning, and institute-aligned workforce standards.",
     href: "https://iiohr.com",
     external: true,
   },
@@ -106,7 +108,8 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
     id: "hli",
     name: "HLI Platform",
     completionPercent: 71,
-    description: "Hair Longevity Institute diagnostics, treatment pathways, and longitudinal biology intelligence.",
+    description:
+      "Hair Longevity Institute diagnostics, treatment pathways, and longitudinal biology intelligence.",
     href: "https://hairlongevityinstitute.com",
     external: true,
   },
@@ -138,7 +141,8 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   infrastructureLayer: {
     eyebrow: "Core substrate",
     headline: "Core Infrastructure Layer",
-    intro: "Systems that power every module above — event-driven architecture, security, integrations, and learning engines.",
+    intro:
+      "Systems that power every module above — event-driven architecture, security, integrations, and learning engines.",
   },
 
   vie: {
@@ -151,7 +155,8 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   milestones: {
     eyebrow: "Deployment log",
     headline: "Engineering deployment timeline",
-    intro: "Chronological record of infrastructure releases — migrations, engines, and integration contracts.",
+    intro:
+      "Chronological record of infrastructure releases — migrations, engines, and integration contracts.",
   },
 
   intelligenceNetwork: {
@@ -184,7 +189,8 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   platformArchitecture: {
     eyebrow: "System architecture",
     headline: "Platform Architecture",
-    intro: "Vertically integrated layers — from acquisition through clinical execution to intelligence and infrastructure.",
+    intro:
+      "Vertically integrated layers — from acquisition through clinical execution to intelligence and infrastructure.",
   },
 
   eventBus: {
@@ -218,8 +224,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
       "Global treatment benchmarking",
       "Multi-clinic healthcare operations",
     ] as const,
-    closing:
-      "This creates structural defensibility that becomes stronger as adoption grows.",
+    closing: "This creates structural defensibility that becomes stronger as adoption grows.",
   },
 
   closing: {
@@ -331,13 +336,17 @@ export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
 
 const DEPLOYABLE_STATUSES: PlatformProgressStatus[] = ["Live", "Production", "Pilot Ready"];
 
-export function computePlatformProgressEcosystemAverage(modules: readonly PlatformProgressModule[]) {
+export function computePlatformProgressEcosystemAverage(
+  modules: readonly PlatformProgressModule[]
+) {
   if (modules.length === 0) return 0;
   const total = modules.reduce((sum, mod) => sum + mod.completionPercent, 0);
   return Math.round(total / modules.length);
 }
 
-export function getPlatformProgressSnapshot(modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES) {
+export function getPlatformProgressSnapshot(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+) {
   const fiOsModuleAverage = computePlatformProgressEcosystemAverage(modules);
   return {
     overallEcosystemPercent: FI_ECOSYSTEM_COMPLETION_SUMMARY.overallEcosystemPercent,
@@ -346,7 +355,8 @@ export function getPlatformProgressSnapshot(modules: readonly PlatformProgressMo
     ecosystemAverage: fiOsModuleAverage,
     fiOsModuleAverage,
     activeModuleCount: modules.length,
-    deployableSurfaceCount: modules.filter((mod) => DEPLOYABLE_STATUSES.includes(mod.status)).length,
+    deployableSurfaceCount: modules.filter((mod) => DEPLOYABLE_STATUSES.includes(mod.status))
+      .length,
     lastUpdated: PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated,
   };
 }
@@ -379,7 +389,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "ClinicOS",
     completionPercent: 91,
     stage: "Phase 5 · operations centre",
-    description: "Calendars, services, appointment lifecycle, and day-to-day clinic rhythm for multi-site operators.",
+    description:
+      "Calendars, services, appointment lifecycle, and day-to-day clinic rhythm for multi-site operators.",
     status: "Production",
     statusLabel: "Production Ready",
     latestMilestone: "Multi-site scheduling spine in production",
@@ -390,7 +401,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "ConsultationOS",
     completionPercent: 72,
     stage: "Phase 3 · workflow engine",
-    description: "Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.",
+    description:
+      "Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.",
     status: "Active Development",
     statusLabel: "Advanced Build",
     latestMilestone: "Conversion pathway launcher shipped",
@@ -400,7 +412,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "PatientOS",
     completionPercent: 81,
     stage: "Phase 4 · longitudinal records",
-    description: "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
+    description:
+      "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
     status: "Production",
     statusLabel: "Production Stable",
     latestMilestone: "Patient Twin records integration live",
@@ -411,7 +424,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "LeadFlow",
     completionPercent: 68,
     stage: "Phase 2 · acquisition pipeline",
-    description: "Lead capture, attribution, HubSpot sync, and conversion funnel intelligence across acquisition surfaces.",
+    description:
+      "Lead capture, attribution, HubSpot sync, and conversion funnel intelligence across acquisition surfaces.",
     status: "Active Development",
     statusLabel: "Scaling",
     latestMilestone: "HubSpot acquisition pipeline wired",
@@ -434,7 +448,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "SurgeryOS",
     completionPercent: 84,
     stage: "Phase 3 · procedure-day command",
-    description: "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
+    description:
+      "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
     status: "Active Development",
     statusLabel: "Advanced Build",
     latestMilestone: "Graft intelligence procedure-day command",
@@ -445,7 +460,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "HairIntel",
     completionPercent: 79,
     stage: "Phase 2 · classification intelligence",
-    description: "Hair loss classification, progression velocity, treatment response modelling, and cohort intelligence.",
+    description:
+      "Hair loss classification, progression velocity, treatment response modelling, and cohort intelligence.",
     status: "Active Development",
     statusLabel: "Intelligence Layer",
     latestMilestone: "Multi-system classification engine live",
@@ -455,7 +471,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "AuditOS",
     completionPercent: 82,
     stage: "Phase 3 · HairAudit exposure",
-    description: "Independent audit workflows, HairAudit patient exposure layer, report surfaces, and network integration contracts.",
+    description:
+      "Independent audit workflows, HairAudit patient exposure layer, report surfaces, and network integration contracts.",
     status: "Production",
     statusLabel: "Production Stable",
     latestMilestone: "HairAudit patient exposure layer completed",
@@ -478,7 +495,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "AcademyOS",
     completionPercent: 76,
     stage: "Phase 2 · certification spine",
-    description: "Training pathways, certification hooks, and institute-aligned competency tracking for clinical teams.",
+    description:
+      "Training pathways, certification hooks, and institute-aligned competency tracking for clinical teams.",
     status: "Active Development",
     statusLabel: "Certification Engine",
     latestMilestone: "Competency curriculum spine operational",
@@ -524,7 +542,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "Security Layer",
     completionPercent: 85,
     stage: "SA-2 · field permissions",
-    description: "Row-level security, tenant isolation, field-level permissions, and secret validation across the FI substrate.",
+    description:
+      "Row-level security, tenant isolation, field-level permissions, and secret validation across the FI substrate.",
     status: "Infrastructure Complete",
     statusLabel: "Infrastructure Core",
     latestMilestone: "SA-2 Field Level Permission Engine completed",
@@ -534,7 +553,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "Event Bus",
     completionPercent: 92,
     stage: "GC-10 · platform event architecture",
-    description: "Event-driven architecture, subscriber framework, retry processing, and idempotency validation.",
+    description:
+      "Event-driven architecture, subscriber framework, retry processing, and idempotency validation.",
     status: "Infrastructure Complete",
     statusLabel: "Core Infrastructure",
     latestMilestone: "GC-10 Platform Event Bus architecture released",
@@ -544,7 +564,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "Integration Layer",
     completionPercent: 80,
     stage: "Phase F · connector framework",
-    description: "Google Calendar, HubSpot, Timely, Zapier, and API connector framework for enterprise clinic deployments.",
+    description:
+      "Google Calendar, HubSpot, Timely, Zapier, and API connector framework for enterprise clinic deployments.",
     status: "Pilot Ready",
     statusLabel: "Connector Framework",
     latestMilestone: "Enterprise connector auth and verification layer",
@@ -554,7 +575,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     name: "AI Intelligence Layer",
     completionPercent: 74,
     stage: "Phase 2 · learning systems",
-    description: "Hair loss classification, surgical benchmarking, outcome learning, and pattern recognition engines.",
+    description:
+      "Hair loss classification, surgical benchmarking, outcome learning, and pattern recognition engines.",
     status: "Active Development",
     statusLabel: "Learning Systems",
     latestMilestone: "Deterministic clinical interpretation pipelines",
@@ -572,7 +594,12 @@ export const PLATFORM_PROGRESS_INFRASTRUCTURE_LAYERS: PlatformProgressInfrastruc
     id: "security",
     name: "Security Architecture",
     tagline: "Tenant-safe by design",
-    capabilities: ["Row-level security", "Tenant isolation", "Field-level permissions", "Secret validation"],
+    capabilities: [
+      "Row-level security",
+      "Tenant isolation",
+      "Field-level permissions",
+      "Secret validation",
+    ],
   },
   {
     id: "integration",
@@ -584,7 +611,12 @@ export const PLATFORM_PROGRESS_INFRASTRUCTURE_LAYERS: PlatformProgressInfrastruc
     id: "ai-engine",
     name: "AI Intelligence Engine",
     tagline: "Continuous learning systems",
-    capabilities: ["Hair loss classification", "Surgical benchmarking", "Outcome learning", "Pattern recognition"],
+    capabilities: [
+      "Hair loss classification",
+      "Surgical benchmarking",
+      "Outcome learning",
+      "Pattern recognition",
+    ],
   },
 ];
 
@@ -614,10 +646,14 @@ export const PLATFORM_INFRASTRUCTURE_CORE_SYSTEM_IDS = [
   "integration-layer",
 ] as const;
 
-export type PlatformInfrastructureCoreSystemId = (typeof PLATFORM_INFRASTRUCTURE_CORE_SYSTEM_IDS)[number];
+export type PlatformInfrastructureCoreSystemId =
+  (typeof PLATFORM_INFRASTRUCTURE_CORE_SYSTEM_IDS)[number];
 
 /** Deployment status copy for infrastructure core systems (replaces visible completion %). */
-export const PLATFORM_INFRASTRUCTURE_DEPLOYMENT_STATUS: Record<PlatformInfrastructureCoreSystemId, string> = {
+export const PLATFORM_INFRASTRUCTURE_DEPLOYMENT_STATUS: Record<
+  PlatformInfrastructureCoreSystemId,
+  string
+> = {
   "foundation-os": "Core Platform Operational",
   "security-layer": "Operational Security Architecture",
   "event-bus": "Infrastructure Deployed",
@@ -712,16 +748,66 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
     tag: "onboarding-os",
     title: "IHRG-DEMO-1 Demo Data Expansion Pack shipped",
   },
-  { id: "gc-11", date: "2026-06-26", tag: "calendar-os", title: "GC-11 Calendar Settings Centre deployed" },
-  { id: "vie-6", date: "2026-06-26", tag: "vie", title: "VIE-6 Same Angle Alignment Engine completed" },
-  { id: "gc-10", date: "2026-06-25", tag: "event-bus", title: "GC-10 Platform Event Bus architecture released" },
-  { id: "sa-2", date: "2026-06-24", tag: "security", title: "SA-2 Field Level Permission Engine completed" },
-  { id: "gc-8", date: "2026-06-23", tag: "calendar-os", title: "GC-8 Scheduled background sync monitoring released" },
-  { id: "gc-7", date: "2026-06-22", tag: "calendar-os", title: "GC-7 Google sync conflict review queue deployed" },
-  { id: "onb-f5", date: "2026-06-22", tag: "onboarding-os", title: "ONB-F5 HubSpot staged import engine operational" },
-  { id: "an-c", date: "2026-06-21", tag: "analytics-os", title: "AN-C Analytics publisher expansion completed" },
-  { id: "ha-guide-2b", date: "2026-06-20", tag: "patient-os", title: "HA-GUIDE-2B Spanish multilingual patient education released" },
-  { id: "vie-5", date: "2026-06-19", tag: "vie", title: "VIE-5 Longitudinal Comparison Engine deployed" },
+  {
+    id: "gc-11",
+    date: "2026-06-26",
+    tag: "calendar-os",
+    title: "GC-11 Calendar Settings Centre deployed",
+  },
+  {
+    id: "vie-6",
+    date: "2026-06-26",
+    tag: "vie",
+    title: "VIE-6 Same Angle Alignment Engine completed",
+  },
+  {
+    id: "gc-10",
+    date: "2026-06-25",
+    tag: "event-bus",
+    title: "GC-10 Platform Event Bus architecture released",
+  },
+  {
+    id: "sa-2",
+    date: "2026-06-24",
+    tag: "security",
+    title: "SA-2 Field Level Permission Engine completed",
+  },
+  {
+    id: "gc-8",
+    date: "2026-06-23",
+    tag: "calendar-os",
+    title: "GC-8 Scheduled background sync monitoring released",
+  },
+  {
+    id: "gc-7",
+    date: "2026-06-22",
+    tag: "calendar-os",
+    title: "GC-7 Google sync conflict review queue deployed",
+  },
+  {
+    id: "onb-f5",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "ONB-F5 HubSpot staged import engine operational",
+  },
+  {
+    id: "an-c",
+    date: "2026-06-21",
+    tag: "analytics-os",
+    title: "AN-C Analytics publisher expansion completed",
+  },
+  {
+    id: "ha-guide-2b",
+    date: "2026-06-20",
+    tag: "patient-os",
+    title: "HA-GUIDE-2B Spanish multilingual patient education released",
+  },
+  {
+    id: "vie-5",
+    date: "2026-06-19",
+    tag: "vie",
+    title: "VIE-5 Longitudinal Comparison Engine deployed",
+  },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */

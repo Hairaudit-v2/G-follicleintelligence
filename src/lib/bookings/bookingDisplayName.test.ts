@@ -89,8 +89,14 @@ test("getBookingDisplayName never returns uuid truncation labels", () => {
 
 test("optimisticBookingAnchorLabel avoids uuid-style labels", () => {
   assert.equal(
-    optimisticBookingAnchorLabel({ title: "Consultation — Jamie Fox", booking_type: "consultation" }),
+    optimisticBookingAnchorLabel({
+      title: "Consultation — Jamie Fox",
+      booking_type: "consultation",
+    }),
     "Jamie Fox"
   );
-  assert.equal(isUuidTruncationDisplayLabel(optimisticBookingAnchorLabel({ booking_type: "prp" })), false);
+  assert.equal(
+    isUuidTruncationDisplayLabel(optimisticBookingAnchorLabel({ booking_type: "prp" })),
+    false
+  );
 });

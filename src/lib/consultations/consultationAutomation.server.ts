@@ -24,7 +24,10 @@ import {
   type ConsultationAutomationHandoffKind,
 } from "./consultationAutomationPolicy";
 
-export type { ConsultationAutomationEnabledHandoffs, ConsultationAutomationHandoffKind } from "./consultationAutomationPolicy";
+export type {
+  ConsultationAutomationEnabledHandoffs,
+  ConsultationAutomationHandoffKind,
+} from "./consultationAutomationPolicy";
 export { quoteDraftAllowedForAutomationRun } from "./consultationAutomationPolicy";
 
 export type ConsultationAutomationHandoffRunStatus = "success" | "skipped" | "failed";
@@ -91,7 +94,11 @@ async function runFollowUpHandoff(
 ): Promise<ConsultationAutomationHandoffResult> {
   const kind: ConsultationAutomationHandoffKind = "follow_up_task";
   if (!followUpTaskRecommended(summary)) {
-    return { handoff: kind, status: "skipped", reason: "Follow-up task is not indicated for this completion summary." };
+    return {
+      handoff: kind,
+      status: "skipped",
+      reason: "Follow-up task is not indicated for this completion summary.",
+    };
   }
   const leadId = consultation.lead_id?.trim();
   if (!leadId) {
@@ -153,7 +160,11 @@ async function runQuoteDraftHandoff(
   const leadId = consultation.lead_id?.trim() || null;
   const caseId = consultation.case_id?.trim() || null;
   if (!leadId && !caseId) {
-    return { handoff: kind, status: "skipped", reason: "Link a CRM lead or case on the consultation to create a quote draft." };
+    return {
+      handoff: kind,
+      status: "skipped",
+      reason: "Link a CRM lead or case on the consultation to create a quote draft.",
+    };
   }
   if (dryRun) {
     if (existingQuoteId) {
@@ -200,7 +211,11 @@ async function runPathologyHandoff(
 ): Promise<ConsultationAutomationHandoffResult> {
   const kind: ConsultationAutomationHandoffKind = "pathology_recommendation";
   if (!pathologyHandoffRecommended(summary)) {
-    return { handoff: kind, status: "skipped", reason: "Pathology / screening was not flagged on this completion summary." };
+    return {
+      handoff: kind,
+      status: "skipped",
+      reason: "Pathology / screening was not flagged on this completion summary.",
+    };
   }
   const patientId = consultation.patient_id?.trim();
   if (!patientId) {
@@ -211,7 +226,8 @@ async function runPathologyHandoff(
       return {
         handoff: kind,
         status: "skipped",
-        reason: "Dry run: a saved pathology request already exists for this form instance (would reuse).",
+        reason:
+          "Dry run: a saved pathology request already exists for this form instance (would reuse).",
         entityId: existingRequestId,
         existingEntityId: existingRequestId,
       };
@@ -255,7 +271,8 @@ async function runSurgeryPlanningHandoff(
     return {
       handoff: kind,
       status: "skipped",
-      reason: "Surgery planning handoff requires proceed_surgery outcome, a linked case, and plan details in the summary.",
+      reason:
+        "Surgery planning handoff requires proceed_surgery outcome, a linked case, and plan details in the summary.",
     };
   }
   if (dryRun) {
@@ -279,7 +296,9 @@ async function runSurgeryPlanningHandoff(
     return {
       handoff: kind,
       status: "success",
-      reason: r.reused ? "Surgery plan handoff reused (idempotent)." : "Surgery planning draft applied to case plan.",
+      reason: r.reused
+        ? "Surgery plan handoff reused (idempotent)."
+        : "Surgery planning draft applied to case plan.",
       entityId: r.id,
       ...(r.reused ? { existingEntityId: r.id } : {}),
     };
@@ -312,7 +331,9 @@ export async function runConsultationCompletionAutomation(
   const enabledHandoffs = options.enabledHandoffs;
 
   if (!tenantId || !formInstanceId) {
-    throw new Error("runConsultationCompletionAutomation requires non-empty tenantId and formInstanceId.");
+    throw new Error(
+      "runConsultationCompletionAutomation requires non-empty tenantId and formInstanceId."
+    );
   }
 
   const empty: RunConsultationCompletionAutomationResult = {
@@ -376,16 +397,41 @@ export async function runConsultationCompletionAutomation(
     let row: ConsultationAutomationHandoffResult;
     switch (kind) {
       case "follow_up_task":
-        row = await runFollowUpHandoff(input, summary, consultation, dryRun, existing.followUpTaskId);
+        row = await runFollowUpHandoff(
+          input,
+          summary,
+          consultation,
+          dryRun,
+          existing.followUpTaskId
+        );
         break;
       case "quote_draft":
-        row = await runQuoteDraftHandoff(input, summary, consultation, enabledHandoffs, dryRun, existing.quoteId);
+        row = await runQuoteDraftHandoff(
+          input,
+          summary,
+          consultation,
+          enabledHandoffs,
+          dryRun,
+          existing.quoteId
+        );
         break;
       case "pathology_recommendation":
-        row = await runPathologyHandoff(input, summary, consultation, dryRun, existing.pathologyRequestId);
+        row = await runPathologyHandoff(
+          input,
+          summary,
+          consultation,
+          dryRun,
+          existing.pathologyRequestId
+        );
         break;
       case "surgery_planning_draft":
-        row = await runSurgeryPlanningHandoff(input, summary, consultation, dryRun, existing.surgeryPlanId);
+        row = await runSurgeryPlanningHandoff(
+          input,
+          summary,
+          consultation,
+          dryRun,
+          existing.surgeryPlanId
+        );
         break;
     }
     handoffs.push(row);

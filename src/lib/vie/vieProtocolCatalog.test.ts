@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { protocolRequiredCompletionPercent, slotIsSatisfied } from "@/src/lib/imagingOs/imagingOsProtocol";
+import {
+  protocolRequiredCompletionPercent,
+  slotIsSatisfied,
+} from "@/src/lib/imagingOs/imagingOsProtocol";
 import {
   computeConsultationCompleteness,
   computeDonorDocumentationCompleteness,
@@ -143,10 +146,15 @@ describe("VIE completeness scoring", () => {
         },
       },
     };
-    const domain = computeConsultationCompleteness([{ template_slug: "baseline_consultation", progress }]);
+    const domain = computeConsultationCompleteness([
+      { template_slug: "baseline_consultation", progress },
+    ]);
     assert.equal(domain.required_total, 6);
     assert.equal(domain.required_complete, 2);
-    assert.equal(slotIsSatisfied({ slug: "right_side", label: "Right side", required: true }, progress), false);
+    assert.equal(
+      slotIsSatisfied({ slug: "right_side", label: "Right side", required: true }, progress),
+      false
+    );
   });
 
   it("initial consult completeness stays at 6 required views", () => {
@@ -157,7 +165,9 @@ describe("VIE completeness scoring", () => {
       top: ["d"],
       crown: ["e"],
     };
-    const domain = computeConsultationCompleteness([{ template_slug: "baseline_consultation", progress }]);
+    const domain = computeConsultationCompleteness([
+      { template_slug: "baseline_consultation", progress },
+    ]);
     assert.equal(domain.required_total, 6);
     assert.equal(domain.required_complete, 5);
     assert.equal(domain.percent, 83);
@@ -182,7 +192,9 @@ describe("VIE completeness scoring", () => {
     assert.equal(headSeries.required_total, 10);
     assert.equal(headSeries.required_complete, 8);
 
-    const consult = computeConsultationCompleteness([{ template_slug: "full_clinical_head_series", progress }]);
+    const consult = computeConsultationCompleteness([
+      { template_slug: "full_clinical_head_series", progress },
+    ]);
     assert.equal(consult.required_total, 6);
     assert.equal(consult.required_complete, 0);
   });
@@ -204,7 +216,9 @@ describe("VIE completeness scoring", () => {
       graft_tray_close: ["g2"],
       recipient_sites: ["r1"],
     };
-    const domain = computeSurgicalDocumentationCompleteness([{ template_slug: "surgery_day", progress }]);
+    const domain = computeSurgicalDocumentationCompleteness([
+      { template_slug: "surgery_day", progress },
+    ]);
     assert.equal(domain.required_total, surgery.slots.length);
     assert.equal(domain.required_complete, 3);
     assert.equal(domain.percent, Math.round((3 / surgery.slots.length) * 100));

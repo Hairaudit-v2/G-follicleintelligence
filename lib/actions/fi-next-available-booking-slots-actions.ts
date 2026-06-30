@@ -18,7 +18,11 @@ const bodySchema = z
     roomId: z.union([UUID, z.null()]).optional(),
     bookingId: z.union([UUID, z.null()]).optional(),
     preferredStartAt: z.string().min(1),
-    durationMinutes: z.number().int().positive().max(24 * 60),
+    durationMinutes: z
+      .number()
+      .int()
+      .positive()
+      .max(24 * 60),
     limit: z.number().int().positive().max(20).optional(),
   })
   .strict();
@@ -33,7 +37,7 @@ function errMsg(e: unknown): string {
 export async function findNextAvailableBookingSlotsAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true } & FindNextAvailableBookingSlotsResult | { ok: false; error: string }> {
+): Promise<({ ok: true } & FindNextAvailableBookingSlotsResult) | { ok: false; error: string }> {
   try {
     const parsed = bodySchema.parse(body);
     const slots = await findNextAvailableBookingSlots({

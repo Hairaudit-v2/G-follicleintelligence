@@ -44,7 +44,10 @@ import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPic
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 
-export { bookingAgendaBucket, computeOperationalAgendaUtcRange } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
+export {
+  bookingAgendaBucket,
+  computeOperationalAgendaUtcRange,
+} from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
 export type { AgendaBucket } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
 
 /** Days in current pipeline stage before a lead appears on the dashboard stale list. */
@@ -68,7 +71,9 @@ function addHours(d: Date, hours: number): Date {
 function mondayStartUtc(d: Date): Date {
   const day = d.getUTCDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
-  const start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + mondayOffset, 0, 0, 0, 0));
+  const start = new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + mondayOffset, 0, 0, 0, 0)
+  );
   return start;
 }
 
@@ -351,7 +356,10 @@ async function loadFiUserDashboard(
   };
 }
 
-async function loadAgendaBookings(tenantId: string, now: Date): Promise<{
+async function loadAgendaBookings(
+  tenantId: string,
+  now: Date
+): Promise<{
   range: { startIso: string; endIso: string };
   byBucket: Record<AgendaBucket, DashboardBookingItem[]>;
 }> {
@@ -360,7 +368,11 @@ async function loadAgendaBookings(tenantId: string, now: Date): Promise<{
   const raw = await loadBookingsForTenantRange(tenantId, rangeStartIso, rangeEndIso);
 
   const filtered = raw.filter((b) => {
-    if (b.booking_status === "cancelled" || b.booking_status === "completed" || b.booking_status === "no_show") {
+    if (
+      b.booking_status === "cancelled" ||
+      b.booking_status === "completed" ||
+      b.booking_status === "no_show"
+    ) {
       return false;
     }
     return agendaBookingStatusSet.has(b.booking_status);
@@ -415,14 +427,27 @@ async function loadStaleLeads(
     person_id: string;
   }[];
 
-  const activeLeads = leads.filter((l) => !terminalLeadStatuses.has(String(l.status ?? "").trim().toLowerCase()));
+  const activeLeads = leads.filter(
+    (l) =>
+      !terminalLeadStatuses.has(
+        String(l.status ?? "")
+          .trim()
+          .toLowerCase()
+      )
+  );
   if (activeLeads.length === 0) return [];
 
   const personIds = Array.from(new Set(activeLeads.map((l) => l.person_id)));
-  const { data: persons, error: pe } = await supabase.from("fi_persons").select("id, metadata").in("id", personIds);
+  const { data: persons, error: pe } = await supabase
+    .from("fi_persons")
+    .select("id, metadata")
+    .in("id", personIds);
   if (pe) throw new Error(pe.message);
   const personMeta = new Map(
-    (persons ?? []).map((p) => [String((p as { id: string }).id), (p as { metadata: unknown }).metadata])
+    (persons ?? []).map((p) => [
+      String((p as { id: string }).id),
+      (p as { metadata: unknown }).metadata,
+    ])
   );
 
   const leadIds = activeLeads.map((l) => l.id);
@@ -454,7 +479,7 @@ async function loadStaleLeads(
 
   for (const lead of activeLeads) {
     const sid = lead.current_stage_id;
-    const enteredIso = sid ? stageEnteredAt.get(lead.id) ?? lead.created_at : lead.created_at;
+    const enteredIso = sid ? (stageEnteredAt.get(lead.id) ?? lead.created_at) : lead.created_at;
     const enteredMs = Date.parse(enteredIso);
     if (!Number.isFinite(enteredMs)) continue;
     const daysInStage = Math.floor((nowMs - enteredMs) / MS_DAY);
@@ -462,7 +487,9 @@ async function loadStaleLeads(
 
     const meta = personMeta.get(lead.person_id);
     const metaObj =
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : null;
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : null;
     const personLabel = personMetadataDisplayLabel(metaObj);
     const summaryTitle = leadTitleFromRow(lead.summary, lead.id);
     const title = personLabel !== "—" ? `${summaryTitle} · ${personLabel}` : summaryTitle;
@@ -470,7 +497,7 @@ async function loadStaleLeads(
     stale.push({
       leadId: lead.id,
       title,
-      stageLabel: sid ? stageLabel.get(sid) ?? "Stage" : "No stage",
+      stageLabel: sid ? (stageLabel.get(sid) ?? "Stage") : "No stage",
       daysInStage,
       enteredStageAt: enteredIso,
     });
@@ -480,7 +507,11 @@ async function loadStaleLeads(
   return stale.slice(0, 25).map((s) => staleLeadItemSchema.parse(s));
 }
 
-async function loadTasksDue(tenantId: string, fiUserId: string | null, now: Date): Promise<TaskDueItem[]> {
+async function loadTasksDue(
+  tenantId: string,
+  fiUserId: string | null,
+  now: Date
+): Promise<TaskDueItem[]> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const horizon = addHours(now, 14 * 24).toISOString();
@@ -600,7 +631,18 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
   const horizonIso = addHours(now, 14 * 24).toISOString();
   const nowIso = now.toISOString();
 
-  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes, surgeryFinancialPaymentAttention, financialPathwayTasksAttention, financeApplicationsAttention, superReleaseApplicationsAttention, internationalTransferApplicationsAttention, financialClearanceAttention] = await Promise.all([
+  const [
+    openLeadsRes,
+    consultRes,
+    followUpRes,
+    surgeryReadyRes,
+    surgeryFinancialPaymentAttention,
+    financialPathwayTasksAttention,
+    financeApplicationsAttention,
+    superReleaseApplicationsAttention,
+    internationalTransferApplicationsAttention,
+    financialClearanceAttention,
+  ] = await Promise.all([
     supabase
       .from("fi_crm_leads")
       .select("id", { count: "exact", head: true })
@@ -696,55 +738,49 @@ async function loadQuickStats(
   const lostIds = new Set(stages.filter((s) => s.is_lost).map((s) => s.id));
   const terminalStageIds = Array.from(wonIds).concat(Array.from(lostIds));
 
-  const [
-    newLeadsRes,
-    newLeadsTodayRes,
-    terminalHistRes,
-    consultRes,
-    noShowRes,
-    staffBookingsRes,
-  ] = await Promise.all([
-    supabase
-      .from("fi_crm_leads")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid)
-      .gte("created_at", weekStart),
-    supabase
-      .from("fi_crm_leads")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid)
-      .gte("created_at", localStartIso)
-      .lt("created_at", localEndIso),
-    terminalStageIds.length
-      ? supabase
-          .from("fi_crm_lead_stage_history")
-          .select("lead_id, to_stage_id, changed_at")
-          .eq("tenant_id", tid)
-          .gte("changed_at", thirtyAgo)
-          .in("to_stage_id", terminalStageIds)
-          .order("changed_at", { ascending: false })
-      : Promise.resolve({ data: [], error: null }),
-    supabase
-      .from("fi_consultations")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid)
-      .in("status", ["draft", "in_progress", "quoted"]),
-    supabase
-      .from("fi_bookings")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid)
-      .eq("booking_status", "no_show")
-      .gte("start_at", dayStart)
-      .lt("start_at", dayEnd),
-    supabase
-      .from("fi_bookings")
-      .select("assigned_staff_id")
-      .eq("tenant_id", tid)
-      .in("booking_status", ["scheduled", "confirmed", "arrived"])
-      .gte("start_at", localStartIso)
-      .lt("start_at", localEndIso)
-      .not("assigned_staff_id", "is", null),
-  ]);
+  const [newLeadsRes, newLeadsTodayRes, terminalHistRes, consultRes, noShowRes, staffBookingsRes] =
+    await Promise.all([
+      supabase
+        .from("fi_crm_leads")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .gte("created_at", weekStart),
+      supabase
+        .from("fi_crm_leads")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .gte("created_at", localStartIso)
+        .lt("created_at", localEndIso),
+      terminalStageIds.length
+        ? supabase
+            .from("fi_crm_lead_stage_history")
+            .select("lead_id, to_stage_id, changed_at")
+            .eq("tenant_id", tid)
+            .gte("changed_at", thirtyAgo)
+            .in("to_stage_id", terminalStageIds)
+            .order("changed_at", { ascending: false })
+        : Promise.resolve({ data: [], error: null }),
+      supabase
+        .from("fi_consultations")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .in("status", ["draft", "in_progress", "quoted"]),
+      supabase
+        .from("fi_bookings")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .eq("booking_status", "no_show")
+        .gte("start_at", dayStart)
+        .lt("start_at", dayEnd),
+      supabase
+        .from("fi_bookings")
+        .select("assigned_staff_id")
+        .eq("tenant_id", tid)
+        .in("booking_status", ["scheduled", "confirmed", "arrived"])
+        .gte("start_at", localStartIso)
+        .lt("start_at", localEndIso)
+        .not("assigned_staff_id", "is", null),
+    ]);
 
   if (newLeadsRes.error) throw new Error(newLeadsRes.error.message);
   if (newLeadsTodayRes.error) throw new Error(newLeadsTodayRes.error.message);
@@ -758,7 +794,11 @@ async function loadQuickStats(
     staffRows.map((r) => r.assigned_staff_id?.trim()).filter((x): x is string => Boolean(x))
   ).size;
 
-  const hist = (terminalHistRes.data ?? []) as { lead_id: string; to_stage_id: string; changed_at: string }[];
+  const hist = (terminalHistRes.data ?? []) as {
+    lead_id: string;
+    to_stage_id: string;
+    changed_at: string;
+  }[];
   const lastOutcome = new Map<string, { to: string; at: string }>();
   for (const row of hist) {
     if (!lastOutcome.has(row.lead_id)) {
@@ -794,7 +834,10 @@ async function loadCrmPipelineLeadVolume(
 ): Promise<CrmPipelineLeadVolumePayload> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
-  const { data, error } = await supabase.from("fi_crm_leads").select("current_stage_id, status").eq("tenant_id", tid);
+  const { data, error } = await supabase
+    .from("fi_crm_leads")
+    .select("current_stage_id, status")
+    .eq("tenant_id", tid);
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as { current_stage_id: string | null; status: string | null }[];
   const stageIds = new Set(pipelineStages.map((s) => s.id));
@@ -805,7 +848,10 @@ async function loadCrmPipelineLeadVolume(
 const UPCOMING_REMINDER_ROW_CAP = 10;
 const UPCOMING_REMINDER_HORIZON_DAYS = 7;
 
-async function loadUpcomingReminders(tenantId: string, now: Date): Promise<DashboardReminderItem[]> {
+async function loadUpcomingReminders(
+  tenantId: string,
+  now: Date
+): Promise<DashboardReminderItem[]> {
   const raw = await loadOperationalDashboardReminderJobs(tenantId, now, {
     horizonDays: UPCOMING_REMINDER_HORIZON_DAYS,
     limit: UPCOMING_REMINDER_ROW_CAP,
@@ -841,10 +887,18 @@ async function loadReceptionBoardCards(
   const supabase = supabaseAdmin();
   const [clinicRes, roomRes] = await Promise.all([
     clinicIds.length
-      ? supabase.from("fi_clinics").select("id, display_name").eq("tenant_id", tid).in("id", clinicIds)
+      ? supabase
+          .from("fi_clinics")
+          .select("id, display_name")
+          .eq("tenant_id", tid)
+          .in("id", clinicIds)
       : Promise.resolve({ data: [], error: null }),
     roomIds.length
-      ? supabase.from("fi_clinic_rooms").select("id, display_name").eq("tenant_id", tid).in("id", roomIds)
+      ? supabase
+          .from("fi_clinic_rooms")
+          .select("id, display_name")
+          .eq("tenant_id", tid)
+          .in("id", roomIds)
       : Promise.resolve({ data: [], error: null }),
   ]);
   if (clinicRes.error) throw new Error(clinicRes.error.message);
@@ -869,8 +923,10 @@ async function loadReceptionBoardCards(
         : {};
     const displayName = anchorLabelForBookingRow(b, maps);
     const assign = bookingAssignmentDisplay(staffOpts, userOpts, b);
-    const clinicLabel = b.clinic_id?.trim() ? clinicNameById.get(b.clinic_id.trim()) ?? null : null;
-    const roomLabel = b.room_id?.trim() ? roomNameById.get(b.room_id.trim()) ?? null : null;
+    const clinicLabel = b.clinic_id?.trim()
+      ? (clinicNameById.get(b.clinic_id.trim()) ?? null)
+      : null;
+    const roomLabel = b.room_id?.trim() ? (roomNameById.get(b.room_id.trim()) ?? null) : null;
     cards.push(
       receptionBoardCardSchema.parse({
         id: b.id,
@@ -888,7 +944,10 @@ async function loadReceptionBoardCards(
         providerLabel: assign.providerLabel,
         clinicLabel,
         roomLabel,
-        receptionColumn: receptionBoardColumnForBooking({ booking_status: b.booking_status, metadata: meta }),
+        receptionColumn: receptionBoardColumnForBooking({
+          booking_status: b.booking_status,
+          metadata: meta,
+        }),
         metadata: meta,
       })
     );
@@ -942,12 +1001,20 @@ export async function loadTenantOperationalDashboard(
   const [calendarSettings, pipelineStages] = await Promise.all([
     loadTenantOperationalCalendarSettings(tid),
     loadPipelineStages(
-      { tenantId: tid, organisationId: null, clinicId: null, pipelineKey: DEFAULT_CRM_PIPELINE_KEY },
+      {
+        tenantId: tid,
+        organisationId: null,
+        clinicId: null,
+        pipelineKey: DEFAULT_CRM_PIPELINE_KEY,
+      },
       supabase
     ),
   ]);
   const operationalCalendarTimezone = calendarSettings.calendarTimezone;
-  const operationalLocalDayFull = computeOperationalLocalDayUtcWindow(now, operationalCalendarTimezone);
+  const operationalLocalDayFull = computeOperationalLocalDayUtcWindow(
+    now,
+    operationalCalendarTimezone
+  );
   const operationalLocalDay = {
     localStartIso: operationalLocalDayFull.localStartIso,
     localEndIso: operationalLocalDayFull.localEndIso,
@@ -991,9 +1058,18 @@ export async function loadTenantOperationalDashboard(
     loadOpenCrmTasksCount(tid, viewerFiUserId),
     loadMedicationReorderPendingReviewCount(tid),
     loadCrmPipelineLeadVolume(tid, pipelineStages),
-    loadPaymentSummaryForOperations(tid, operationalTodayYmd, operationalLocalDay.localStartIso, operationalLocalDay.localEndIso),
+    loadPaymentSummaryForOperations(
+      tid,
+      operationalTodayYmd,
+      operationalLocalDay.localStartIso,
+      operationalLocalDay.localEndIso
+    ),
     includeReceptionBoard
-      ? loadReceptionBoardCards(tid, operationalLocalDay.localStartIso, operationalLocalDay.localEndIso)
+      ? loadReceptionBoardCards(
+          tid,
+          operationalLocalDay.localStartIso,
+          operationalLocalDay.localEndIso
+        )
       : Promise.resolve([]),
     loadRevenueCollectionsDashboardKpis(tid, operationalTodayYmd),
   ]);

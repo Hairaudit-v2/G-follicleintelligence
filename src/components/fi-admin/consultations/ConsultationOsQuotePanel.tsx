@@ -1,6 +1,9 @@
 import { FiSection } from "@/src/components/fi-design/FiSection";
 
-import { CONSULTATION_QUOTE_DATA_KEYS, type ConsultationQuoteDataKey } from "@/src/lib/consultations/consultationTypes";
+import {
+  CONSULTATION_QUOTE_DATA_KEYS,
+  type ConsultationQuoteDataKey,
+} from "@/src/lib/consultations/consultationTypes";
 
 import { LabeledTextInput } from "./consultationOsPreviewFields";
 
@@ -19,7 +22,11 @@ export type ConsultationOsQuotePanelProps = {
   disabled?: boolean;
 };
 
-export function ConsultationOsQuotePanel({ values, onFieldChange, disabled }: ConsultationOsQuotePanelProps) {
+export function ConsultationOsQuotePanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsQuotePanelProps) {
   return (
     <FiSection title="Quote" headingId="consultation-os-quote-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

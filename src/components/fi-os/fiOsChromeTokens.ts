@@ -2,7 +2,10 @@
  * FI OS workspace chrome — shared with `fiAdminDashboard` / login (`FiOsLoginScreen`):
  * deep navy base, cyan accent, glass borders, slate text steps.
  */
-export { fiAdminDashboard as fiOsDesignTokens, fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboard-ui/dashboardTheme";
+export {
+  fiAdminDashboard as fiOsDesignTokens,
+  fiAdminAmbientBackgroundStyle,
+} from "@/src/components/fi-admin/dashboard-ui/dashboardTheme";
 
 /** Shared padding + flex sizing for FI OS `<main>` (vertical overflow chosen in `FiOsAppShell`). */
 const FI_OS_MAIN_PAD =
@@ -14,7 +17,8 @@ export const fiOsChromeClasses = {
   shellBody: "flex min-h-[100dvh] w-full min-h-0 flex-1",
   mainColumn: "flex min-h-0 min-w-0 flex-1 flex-col",
   /** Command bar — tighter vertical rhythm than marketing pages. */
-  topBar: "sticky top-0 z-30 shrink-0 border-b border-white/[0.08] bg-[#0a1424]/92 px-3 py-2 backdrop-blur-xl sm:px-4 lg:px-5",
+  topBar:
+    "sticky top-0 z-30 shrink-0 border-b border-white/[0.08] bg-[#0a1424]/92 px-3 py-2 backdrop-blur-xl sm:px-4 lg:px-5",
   /** Non-calendar tenant pages: single vertical scroll on `<main>`. */
   mainScroll: `${FI_OS_MAIN_PAD} overflow-y-auto`,
   /** Calendar subtree owns scroll; `<main>` does not scroll vertically (`isFiOsTenantCalendarPath`). */
@@ -27,7 +31,8 @@ export const fiOsChromeClasses = {
   sidebarRail:
     "relative hidden w-[260px] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",
   /** Mobile drawer panel */
-  sidebarDrawer: "relative flex h-full w-[min(88vw,300px)] flex-col border-r border-white/[0.1] bg-[#060d18] shadow-2xl",
+  sidebarDrawer:
+    "relative flex h-full w-[min(88vw,300px)] flex-col border-r border-white/[0.1] bg-[#060d18] shadow-2xl",
   /** Login-adjacent glass card (matches login form panel feel) */
   glassCard: "rounded-xl border border-cyan-500/10 bg-white/[0.03] backdrop-blur-md",
   /** OS section eyebrow (compact modules, control centre panels). */

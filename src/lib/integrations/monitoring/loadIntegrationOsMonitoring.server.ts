@@ -95,7 +95,11 @@ async function countWebhookEvents(supabase: Supa, build: WebhookFilter): Promise
 }
 
 async function latestTimestamp(supabase: Supa, build: WebhookFilter): Promise<string | null> {
-  const base = supabase.from(WEBHOOK_TABLE).select("created_at").order("created_at", { ascending: false }).limit(1);
+  const base = supabase
+    .from(WEBHOOK_TABLE)
+    .select("created_at")
+    .order("created_at", { ascending: false })
+    .limit(1);
   const { data, error } = await build(base).maybeSingle();
   if (error) throw new Error(error.message);
   const row = data as { created_at?: string } | null;
@@ -115,12 +119,24 @@ async function loadTimelyStatus(supabase: Supa): Promise<TimelyIntegrationStatus
     appointmentCompletedCount,
   ] = await Promise.all([
     latestTimestamp(supabase, (q) => q.eq("provider", "timely")),
-    latestTimestamp(supabase, (q) => q.eq("provider", "timely").eq("route", appt).eq("status", "processed")),
-    countWebhookEvents(supabase, (q) => q.eq("provider", "timely").eq("route", appt).eq("status", "error")),
-    countWebhookEvents(supabase, (q) => q.eq("provider", "timely").eq("event_type", "appointment_created")),
-    countWebhookEvents(supabase, (q) => q.eq("provider", "timely").eq("event_type", "appointment_updated")),
-    countWebhookEvents(supabase, (q) => q.eq("provider", "timely").eq("event_type", "appointment_cancelled")),
-    countWebhookEvents(supabase, (q) => q.eq("provider", "timely").eq("event_type", "appointment_completed")),
+    latestTimestamp(supabase, (q) =>
+      q.eq("provider", "timely").eq("route", appt).eq("status", "processed")
+    ),
+    countWebhookEvents(supabase, (q) =>
+      q.eq("provider", "timely").eq("route", appt).eq("status", "error")
+    ),
+    countWebhookEvents(supabase, (q) =>
+      q.eq("provider", "timely").eq("event_type", "appointment_created")
+    ),
+    countWebhookEvents(supabase, (q) =>
+      q.eq("provider", "timely").eq("event_type", "appointment_updated")
+    ),
+    countWebhookEvents(supabase, (q) =>
+      q.eq("provider", "timely").eq("event_type", "appointment_cancelled")
+    ),
+    countWebhookEvents(supabase, (q) =>
+      q.eq("provider", "timely").eq("event_type", "appointment_completed")
+    ),
   ]);
 
   return {
@@ -168,8 +184,13 @@ async function loadHubspotStatus(supabase: Supa): Promise<HubspotIntegrationStat
 
     // Per-row outcomes are recorded in metadata.import_stage1_errors. Duplicate skips carry
     // "already imported"; everything else is a genuine row failure.
-    const meta = row.metadata && typeof row.metadata === "object" ? (row.metadata as Record<string, unknown>) : {};
-    const errs = Array.isArray(meta.import_stage1_errors) ? (meta.import_stage1_errors as unknown[]) : [];
+    const meta =
+      row.metadata && typeof row.metadata === "object"
+        ? (row.metadata as Record<string, unknown>)
+        : {};
+    const errs = Array.isArray(meta.import_stage1_errors)
+      ? (meta.import_stage1_errors as unknown[])
+      : [];
     for (const e of errs) {
       const msg = typeof e === "string" ? e : "";
       if (DUPLICATE_ERROR_PATTERN.test(msg)) duplicateRecords += 1;
@@ -184,7 +205,9 @@ async function loadRecentWebhookEvents(supabase: Supa): Promise<IntegrationWebho
   // NOTE: `payload` is intentionally NOT selected — it can contain patient data.
   const { data, error } = await supabase
     .from(WEBHOOK_TABLE)
-    .select("id, tenant_id, provider, event_type, route, status, payload_hash, error_message, created_at")
+    .select(
+      "id, tenant_id, provider, event_type, route, status, payload_hash, error_message, created_at"
+    )
     .order("created_at", { ascending: false })
     .limit(RECENT_EVENTS_LIMIT);
   if (error) throw new Error(error.message);
@@ -198,7 +221,9 @@ async function loadSystemHealth(
 ): Promise<SystemHealthStatus> {
   const [apiFailuresTotal, apiFailures24h, retryStuckReceived, retryErrored] = await Promise.all([
     countWebhookEvents(supabase, (q) => q.eq("status", "error")),
-    countWebhookEvents(supabase, (q) => q.eq("status", "error").gte("created_at", isoMinutesAgo(24 * 60))),
+    countWebhookEvents(supabase, (q) =>
+      q.eq("status", "error").gte("created_at", isoMinutesAgo(24 * 60))
+    ),
     countWebhookEvents(supabase, (q) =>
       q.eq("status", "received").lt("created_at", isoMinutesAgo(RECEIVED_STUCK_MINUTES))
     ),
@@ -283,13 +308,16 @@ export async function loadIntegrationOsMonitoring(): Promise<IntegrationOsMonito
   ]);
 
   const timely = timelyR.status === "fulfilled" ? timelyR.value : emptyTimely;
-  if (timelyR.status === "rejected") errors.push(`Timely: ${String(timelyR.reason?.message ?? timelyR.reason)}`);
+  if (timelyR.status === "rejected")
+    errors.push(`Timely: ${String(timelyR.reason?.message ?? timelyR.reason)}`);
 
   const hubspot = hubspotR.status === "fulfilled" ? hubspotR.value : emptyHubspot;
-  if (hubspotR.status === "rejected") errors.push(`HubSpot: ${String(hubspotR.reason?.message ?? hubspotR.reason)}`);
+  if (hubspotR.status === "rejected")
+    errors.push(`HubSpot: ${String(hubspotR.reason?.message ?? hubspotR.reason)}`);
 
   const recentWebhookEvents = eventsR.status === "fulfilled" ? eventsR.value : [];
-  if (eventsR.status === "rejected") errors.push(`Webhook events: ${String(eventsR.reason?.message ?? eventsR.reason)}`);
+  if (eventsR.status === "rejected")
+    errors.push(`Webhook events: ${String(eventsR.reason?.message ?? eventsR.reason)}`);
 
   let systemHealth: SystemHealthStatus = {
     apiFailuresTotal: 0,

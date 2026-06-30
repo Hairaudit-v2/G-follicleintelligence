@@ -55,7 +55,8 @@ export function parseProtocolSlots(slotsJson: unknown): ProtocolSlotDef[] {
     const label = typeof o.label === "string" ? o.label.trim() : "";
     if (!slug || !label) continue;
     const required = o.required === false ? false : true;
-    const suggested_region = typeof o.suggested_region === "string" ? o.suggested_region.trim() : undefined;
+    const suggested_region =
+      typeof o.suggested_region === "string" ? o.suggested_region.trim() : undefined;
     const instructionRaw =
       typeof o.instruction === "string"
         ? o.instruction.trim()
@@ -108,7 +109,8 @@ function parseViePendingMap(raw: unknown): ProgressMeta["vie_pending"] {
   for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
     if (!v || typeof v !== "object" || Array.isArray(v)) continue;
     const o = v as Record<string, unknown>;
-    const patient_image_id = typeof o.patient_image_id === "string" ? o.patient_image_id.trim() : "";
+    const patient_image_id =
+      typeof o.patient_image_id === "string" ? o.patient_image_id.trim() : "";
     if (!patient_image_id) continue;
     out[k] = {
       patient_image_id,
@@ -128,7 +130,8 @@ function parseVieSlotQualityMap(raw: unknown): ProgressMeta["vie_slot_quality"] 
   for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
     if (!v || typeof v !== "object" || Array.isArray(v)) continue;
     const o = v as Record<string, unknown>;
-    const patient_image_id = typeof o.patient_image_id === "string" ? o.patient_image_id.trim() : "";
+    const patient_image_id =
+      typeof o.patient_image_id === "string" ? o.patient_image_id.trim() : "";
     const accepted_at = typeof o.accepted_at === "string" ? o.accepted_at : "";
     if (!patient_image_id || !accepted_at) continue;
     out[k] = {
@@ -153,7 +156,9 @@ export function getSlotImageIds(progress: Record<string, unknown>, slotSlug: str
   if (slotSlug === PROGRESS_META_KEY) return [];
   const v = progress[slotSlug];
   if (!Array.isArray(v)) return [];
-  return v.filter((id): id is string => typeof id === "string" && id.trim().length > 0).map((id) => id.trim());
+  return v
+    .filter((id): id is string => typeof id === "string" && id.trim().length > 0)
+    .map((id) => id.trim());
 }
 
 export function slotIsSatisfied(slot: ProtocolSlotDef, progress: Record<string, unknown>): boolean {
@@ -167,7 +172,10 @@ export function slotIsSatisfied(slot: ProtocolSlotDef, progress: Record<string, 
 }
 
 /** Required slots only — optional slots may be skipped without affecting this percentage. */
-export function protocolRequiredCompletionPercent(slots: ProtocolSlotDef[], progress: Record<string, unknown>): number {
+export function protocolRequiredCompletionPercent(
+  slots: ProtocolSlotDef[],
+  progress: Record<string, unknown>
+): number {
   const required = slots.filter((s) => s.required !== false);
   if (required.length === 0) return 100;
   let fulfilled = 0;
@@ -177,17 +185,28 @@ export function protocolRequiredCompletionPercent(slots: ProtocolSlotDef[], prog
   return Math.round((fulfilled / required.length) * 100);
 }
 
-export function missingRequiredSlotSlugs(slots: ProtocolSlotDef[], progress: Record<string, unknown>): string[] {
-  return slots.filter((s) => s.required !== false && !slotIsSatisfied(s, progress)).map((s) => s.slug);
+export function missingRequiredSlotSlugs(
+  slots: ProtocolSlotDef[],
+  progress: Record<string, unknown>
+): string[] {
+  return slots
+    .filter((s) => s.required !== false && !slotIsSatisfied(s, progress))
+    .map((s) => s.slug);
 }
 
-export function firstIncompleteSlotIndex(slots: ProtocolSlotDef[], progress: Record<string, unknown>): number {
+export function firstIncompleteSlotIndex(
+  slots: ProtocolSlotDef[],
+  progress: Record<string, unknown>
+): number {
   const idx = slots.findIndex((s) => !slotIsSatisfied(s, progress));
   return idx >= 0 ? idx : Math.max(0, slots.length - 1);
 }
 
 /** Next slot to capture: required gaps first, then optional not yet satisfied. */
-export function nextRecommendedSlotSlug(slots: ProtocolSlotDef[], progress: Record<string, unknown>): string | null {
+export function nextRecommendedSlotSlug(
+  slots: ProtocolSlotDef[],
+  progress: Record<string, unknown>
+): string | null {
   const missingReq = missingRequiredSlotSlugs(slots, progress);
   if (missingReq.length > 0) return missingReq[0] ?? null;
   const opt = slots.find((s) => s.required === false && !slotIsSatisfied(s, progress));
@@ -204,7 +223,11 @@ export const mergeProgressForSlotCapture = {
   extractPreviousSlotImageIds(progress: Record<string, unknown>, slotSlug: string): string[] {
     return getSlotImageIds(progress, slotSlug);
   },
-  apply(progress: Record<string, unknown>, slotSlug: string, newImageId: string): Record<string, unknown> {
+  apply(
+    progress: Record<string, unknown>,
+    slotSlug: string,
+    newImageId: string
+  ): Record<string, unknown> {
     const next = { ...progress };
     next[slotSlug] = [newImageId.trim()];
     return next;

@@ -10,9 +10,11 @@ const bookingTypeSchema = z.enum([...BOOKING_TYPES] as [string, ...string[]]);
 const BOOKING_STATUS_NON_TERMINAL = ["scheduled", "confirmed", "arrived", "no_show"] as const;
 const bookingStatusWritableSchema = z.enum(BOOKING_STATUS_NON_TERMINAL);
 
-const metadataSchema = z.record(z.string(), z.unknown()).refine((v) => v != null && typeof v === "object" && !Array.isArray(v), {
-  message: "metadata must be a JSON object.",
-});
+const metadataSchema = z
+  .record(z.string(), z.unknown())
+  .refine((v) => v != null && typeof v === "object" && !Array.isArray(v), {
+    message: "metadata must be a JSON object.",
+  });
 
 const resourceAssignmentInputSchema = z
   .object({

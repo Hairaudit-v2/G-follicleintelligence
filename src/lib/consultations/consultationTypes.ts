@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { CONSULTATION_TYPE_DEFINITIONS, type ConsultationTypeId as ConfigConsultationTypeId } from "./consultationTypeConfig";
+import {
+  CONSULTATION_TYPE_DEFINITIONS,
+  type ConsultationTypeId as ConfigConsultationTypeId,
+} from "./consultationTypeConfig";
 
 /** Row status — must match `fi_consultations_status_chk`. */
 export const CONSULTATION_STATUSES = [
@@ -31,7 +34,8 @@ export const CONSULTATION_STRUCTURED_SECTION_KEYS = [
   "medical_hair_loss",
 ] as const;
 
-export type ConsultationStructuredSectionKey = (typeof CONSULTATION_STRUCTURED_SECTION_KEYS)[number];
+export type ConsultationStructuredSectionKey =
+  (typeof CONSULTATION_STRUCTURED_SECTION_KEYS)[number];
 
 /** MVP quote JSON keys (UI mirrors these snake_case fields). */
 export const CONSULTATION_QUOTE_DATA_KEYS = [

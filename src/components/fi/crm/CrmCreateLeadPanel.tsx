@@ -26,10 +26,10 @@ function hasPersonResolveSignal(p: {
   const displayName = p.displayName.trim();
   return Boolean(
     p.sourcePersonId.trim() ||
-      p.sourcePatientId.trim() ||
-      email.length > 0 ||
-      phone.length > 0 ||
-      displayName.length > 0
+    p.sourcePatientId.trim() ||
+    email.length > 0 ||
+    phone.length > 0 ||
+    displayName.length > 0
   );
 }
 
@@ -95,7 +95,8 @@ export function CrmCreateLeadPanel({
     const ss = sourceSystem.trim();
     const sl = sourceLeadId.trim();
     if ((ss && !sl) || (!ss && sl)) {
-      nextErrors.sourcePair = "Enter both a source system and a source lead id, or leave both empty.";
+      nextErrors.sourcePair =
+        "Enter both a source system and a source lead id, or leave both empty.";
     }
 
     if (personMode === "link") {
@@ -114,7 +115,8 @@ export function CrmCreateLeadPanel({
         sourcePatientId: "",
       };
       if (!hasPersonResolveSignal(resolveInput)) {
-        nextErrors.personResolve = "Enter at least an email, phone, display name, or external person id so we can find or create the person.";
+        nextErrors.personResolve =
+          "Enter at least an email, phone, display name, or external person id so we can find or create the person.";
       }
     }
 
@@ -191,8 +193,9 @@ export function CrmCreateLeadPanel({
     <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <h2 className="mb-1 text-sm font-semibold text-slate-100">Create lead</h2>
       <p className="mb-4 text-xs text-slate-400">
-        Internal workflow — uses the gated CRM server action. Choose <strong>New / matched person</strong> to resolve or
-        create <code className="rounded bg-white/[0.06] px-0.5">fi_persons</code> from contact fields, or{" "}
+        Internal workflow — uses the gated CRM server action. Choose{" "}
+        <strong>New / matched person</strong> to resolve or create{" "}
+        <code className="rounded bg-white/[0.06] px-0.5">fi_persons</code> from contact fields, or{" "}
         <strong>Existing person</strong> to attach by UUID.
       </p>
 
@@ -236,7 +239,9 @@ export function CrmCreateLeadPanel({
             placeholder="e.g. FUE consult — follow up Monday"
             autoComplete="off"
           />
-          {fieldErrors.summary ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.summary}</p> : null}
+          {fieldErrors.summary ? (
+            <p className="mt-1 text-xs text-rose-300">{fieldErrors.summary}</p>
+          ) : null}
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -287,7 +292,8 @@ export function CrmCreateLeadPanel({
                   setClinicId((cur) => {
                     const c = clinics.find((x) => x.id === cur);
                     if (!c) return "";
-                    if (e.target.value && c.organisation_id && c.organisation_id !== e.target.value) return "";
+                    if (e.target.value && c.organisation_id && c.organisation_id !== e.target.value)
+                      return "";
                     return cur;
                   });
                 }}
@@ -346,7 +352,9 @@ export function CrmCreateLeadPanel({
             />
           </label>
         </div>
-        {fieldErrors.sourcePair ? <p className="text-xs text-rose-300">{fieldErrors.sourcePair}</p> : null}
+        {fieldErrors.sourcePair ? (
+          <p className="text-xs text-rose-300">{fieldErrors.sourcePair}</p>
+        ) : null}
 
         {personMode === "link" ? (
           <label className="block">
@@ -361,7 +369,9 @@ export function CrmCreateLeadPanel({
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
               spellCheck={false}
             />
-            {fieldErrors.personId ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.personId}</p> : null}
+            {fieldErrors.personId ? (
+              <p className="mt-1 text-xs text-rose-300">{fieldErrors.personId}</p>
+            ) : null}
           </label>
         ) : (
           <div className="space-y-3 rounded border border-white/[0.06] bg-white/[0.03] p-3">
@@ -423,7 +433,9 @@ export function CrmCreateLeadPanel({
               </label>
             </div>
             <label className="block">
-              <span className="text-xs text-slate-400">Extra person metadata (JSON object, optional)</span>
+              <span className="text-xs text-slate-400">
+                Extra person metadata (JSON object, optional)
+              </span>
               <textarea
                 value={personMetadataRaw}
                 onChange={(e) => {
@@ -434,14 +446,20 @@ export function CrmCreateLeadPanel({
                 className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
                 placeholder='{"segment":"web_form"}'
               />
-              {fieldErrors.personMetadata ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.personMetadata}</p> : null}
+              {fieldErrors.personMetadata ? (
+                <p className="mt-1 text-xs text-rose-300">{fieldErrors.personMetadata}</p>
+              ) : null}
             </label>
-            {fieldErrors.personResolve ? <p className="text-xs text-rose-300">{fieldErrors.personResolve}</p> : null}
+            {fieldErrors.personResolve ? (
+              <p className="text-xs text-rose-300">{fieldErrors.personResolve}</p>
+            ) : null}
           </div>
         )}
 
         <label className="block">
-          <span className="text-xs text-slate-400">FI admin key (optional — same as Configuration)</span>
+          <span className="text-xs text-slate-400">
+            FI admin key (optional — same as Configuration)
+          </span>
           <input
             type="password"
             value={adminKey}
@@ -452,7 +470,10 @@ export function CrmCreateLeadPanel({
         </label>
 
         {formError ? (
-          <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+          <div
+            className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+            role="alert"
+          >
             {formError}
           </div>
         ) : null}

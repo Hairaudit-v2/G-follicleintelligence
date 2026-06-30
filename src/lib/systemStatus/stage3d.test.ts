@@ -28,7 +28,10 @@ function baseSnapshot(over: Partial<SystemStatusDbSnapshot> = {}): SystemStatusD
     "fi_users",
     "fi_crm_activity_events",
   ];
-  const tablePresence = Object.fromEntries(allTables.map((t) => [t, true])) as Record<string, boolean>;
+  const tablePresence = Object.fromEntries(allTables.map((t) => [t, true])) as Record<
+    string,
+    boolean
+  >;
   const z = (n: number) => n;
   const snap: SystemStatusDbSnapshot = {
     tenantId: TID,
@@ -69,7 +72,10 @@ function baseSnapshot(over: Partial<SystemStatusDbSnapshot> = {}): SystemStatusD
 
 describe("Stage 3D — system status & readiness", () => {
   it("calculateSystemReadinessScore matches weighted formula", () => {
-    const rows: DatabaseHealthRow[] = SYSTEM_STATUS_CORE_TABLES.map((table) => ({ table, present: true }));
+    const rows: DatabaseHealthRow[] = SYSTEM_STATUS_CORE_TABLES.map((table) => ({
+      table,
+      present: true,
+    }));
     const score = calculateSystemReadinessScore({
       databaseHealth: rows,
       summaryStrip: [

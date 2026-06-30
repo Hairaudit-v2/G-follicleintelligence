@@ -18,14 +18,26 @@ function mergeOptions(staticVals: readonly string[], fromRows: string[]): string
 const FILTER_HEADING_ID = "cases-worklist-filters-heading";
 
 const FILTER_FIELDS = {
-  q: { inputId: "cases-worklist-filter-q", labelId: "cases-worklist-filter-q-label", label: "Search" },
-  status: { inputId: "cases-worklist-filter-status", labelId: "cases-worklist-filter-status-label", label: "Patient status" },
+  q: {
+    inputId: "cases-worklist-filter-q",
+    labelId: "cases-worklist-filter-q-label",
+    label: "Search",
+  },
+  status: {
+    inputId: "cases-worklist-filter-status",
+    labelId: "cases-worklist-filter-status-label",
+    label: "Patient status",
+  },
   treatment_type: {
     inputId: "cases-worklist-filter-treatment-type",
     labelId: "cases-worklist-filter-treatment-type-label",
     label: "Treatment type",
   },
-  case_type: { inputId: "cases-worklist-filter-case-type", labelId: "cases-worklist-filter-case-type-label", label: "Patient type" },
+  case_type: {
+    inputId: "cases-worklist-filter-case-type",
+    labelId: "cases-worklist-filter-case-type-label",
+    label: "Patient type",
+  },
   planning_status: {
     inputId: "cases-worklist-filter-planning-status",
     labelId: "cases-worklist-filter-planning-status-label",
@@ -46,7 +58,11 @@ const FILTER_FIELDS = {
     labelId: "cases-worklist-filter-readiness-label",
     label: "Readiness",
   },
-  sort: { inputId: "cases-worklist-filter-sort", labelId: "cases-worklist-filter-sort-label", label: "Sort" },
+  sort: {
+    inputId: "cases-worklist-filter-sort",
+    labelId: "cases-worklist-filter-sort-label",
+    label: "Sort",
+  },
 } as const;
 
 export function CasesWorklistFilters({
@@ -59,7 +75,10 @@ export function CasesWorklistFilters({
   filterOptions: CasesIndexFilterOptions;
 }) {
   const basePath = `/fi-admin/${tenantId}/cases`;
-  const planningOpts = mergeOptions(SURGERY_PLANNING_STATUS_VALUES, filterOptions.planning_statuses);
+  const planningOpts = mergeOptions(
+    SURGERY_PLANNING_STATUS_VALUES,
+    filterOptions.planning_statuses
+  );
   const procedureOpts = mergeOptions(PROCEDURE_STATUS_VALUES, filterOptions.procedure_statuses);
   const postOpOpts = mergeOptions(POST_OP_STATUS_VALUES, filterOptions.post_op_statuses);
 
@@ -73,7 +92,12 @@ export function CasesWorklistFilters({
       <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-slate-100">
         Filter and search cases
       </h2>
-      <input type="hidden" id="cases-worklist-filter-page-size" name="pageSize" value={String(query.pageSize)} />
+      <input
+        type="hidden"
+        id="cases-worklist-filter-page-size"
+        name="pageSize"
+        value={String(query.pageSize)}
+      />
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <label
           id={FILTER_FIELDS.q.labelId}
@@ -228,7 +252,9 @@ export function CasesWorklistFilters({
             <option value="all">All</option>
             <option value="ready">{casesWorklistReadinessFilterLabel("ready")}</option>
             <option value="in_progress">{casesWorklistReadinessFilterLabel("in_progress")}</option>
-            <option value="needs_attention">{casesWorklistReadinessFilterLabel("needs_attention")}</option>
+            <option value="needs_attention">
+              {casesWorklistReadinessFilterLabel("needs_attention")}
+            </option>
           </select>
         </label>
         <label
@@ -251,10 +277,16 @@ export function CasesWorklistFilters({
         </label>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
-        <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800">
+        <button
+          type="submit"
+          className="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
+        >
           Apply filters
         </button>
-        <Link href={basePath} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03]">
+        <Link
+          href={basePath}
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03]"
+        >
           Clear
         </Link>
       </div>

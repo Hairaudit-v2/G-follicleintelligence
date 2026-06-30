@@ -273,11 +273,15 @@ export function createGc9MockSupabase(options: Gc9MockSupabaseOptions) {
             return buildReview(filters);
           },
           maybeSingle: async () => {
-            const row = reviewItems.find((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
+            const row = reviewItems.find((r) =>
+              Object.entries(filters).every(([k, v]) => r[k] === v)
+            );
             return { data: row ?? null, error: null };
           },
           single: async () => {
-            const row = reviewItems.find((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
+            const row = reviewItems.find((r) =>
+              Object.entries(filters).every(([k, v]) => r[k] === v)
+            );
             return { data: row ?? null, error: row ? null : { message: "not found" } };
           },
           select: () => buildReview(),
@@ -298,7 +302,9 @@ export function createGc9MockSupabase(options: Gc9MockSupabaseOptions) {
           update(patch: Record<string, unknown>) {
             return {
               eq() {
-                return { select: () => ({ single: async () => ({ data: { ...patch }, error: null }) }) };
+                return {
+                  select: () => ({ single: async () => ({ data: { ...patch }, error: null }) }),
+                };
               },
             };
           },

@@ -3,7 +3,11 @@
  * Internal storage and APIs remain ISO UTC; these helpers are display-only.
  */
 
-import { fromDatetimeLocalValueInTimezone, normalizeCalendarTimezone, parseIsoUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  fromDatetimeLocalValueInTimezone,
+  normalizeCalendarTimezone,
+  parseIsoUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 
 export type ResolveClinicLocaleInput = {
   /** ISO 3166-1 alpha-2 (or UK) when known from clinic row or settings. */
@@ -139,7 +143,11 @@ function normalizeWallDatetimeLocal(local: string): string {
 }
 
 function wallLooksLikeDatetimeLocal(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s.trim()) && !/[zZ]$/.test(s.trim()) && !/[+-]\d{2}:?\d{2}$/.test(s.trim());
+  return (
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s.trim()) &&
+    !/[zZ]$/.test(s.trim()) &&
+    !/[+-]\d{2}:?\d{2}$/.test(s.trim())
+  );
 }
 
 /**
@@ -166,7 +174,12 @@ export function formatClinicTime(isoOrWallLocal: string, locale: string, timeZon
 }
 
 /** Two times in the same locale and zone, e.g. `4:00 pm – 4:45 pm`. */
-export function formatClinicDateTimeRange(start: string, end: string, locale: string, timeZone: string): string {
+export function formatClinicDateTimeRange(
+  start: string,
+  end: string,
+  locale: string,
+  timeZone: string
+): string {
   const a = formatClinicTime(start, locale, timeZone);
   const b = formatClinicTime(end, locale, timeZone);
   if (!a || !b) return a || b || "";

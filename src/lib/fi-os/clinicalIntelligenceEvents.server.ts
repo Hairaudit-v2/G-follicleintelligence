@@ -10,7 +10,10 @@ import {
   type RecordClinicalIntelligenceEventInput,
 } from "@/src/lib/fi-os/clinicalIntelligenceEventsSchema";
 
-export { recordClinicalIntelligenceEventInputSchema, type RecordClinicalIntelligenceEventInput } from "@/src/lib/fi-os/clinicalIntelligenceEventsSchema";
+export {
+  recordClinicalIntelligenceEventInputSchema,
+  type RecordClinicalIntelligenceEventInput,
+} from "@/src/lib/fi-os/clinicalIntelligenceEventsSchema";
 
 function assertSignalKey(key: string): asserts key is FiClinicalIntelligenceSignalKey {
   if (!isFiClinicalIntelligenceSignalKey(key)) {
@@ -18,7 +21,9 @@ function assertSignalKey(key: string): asserts key is FiClinicalIntelligenceSign
   }
 }
 
-export async function recordClinicalIntelligenceEvent(raw: RecordClinicalIntelligenceEventInput): Promise<{ id: string }> {
+export async function recordClinicalIntelligenceEvent(
+  raw: RecordClinicalIntelligenceEventInput
+): Promise<{ id: string }> {
   const input = recordClinicalIntelligenceEventInputSchema.parse(raw);
   assertSignalKey(input.signalKey);
 
@@ -42,10 +47,16 @@ export async function recordClinicalIntelligenceEvent(raw: RecordClinicalIntelli
     metadata: input.metadata,
   };
 
-  const { data, error } = await supabase.from("fi_clinical_intelligence_events").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_clinical_intelligence_events")
+    .insert(row)
+    .select("id")
+    .single();
   if (error) {
     if (error.message?.includes("fi_clinical_intelligence_events") || error.code === "42P01") {
-      throw new Error("Clinical intelligence events table is not available (migration not applied).");
+      throw new Error(
+        "Clinical intelligence events table is not available (migration not applied)."
+      );
     }
     throw new Error(error.message);
   }

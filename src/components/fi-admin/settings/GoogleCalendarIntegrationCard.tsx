@@ -122,9 +122,7 @@ function CreateTestAppointmentPanel({
       }
 
       setLastMeetUrl(body.appointment?.google_meet_url ?? null);
-      setResultMessage(
-        `Test appointment created (${body.appointment?.id?.slice(0, 8) ?? "ok"}).`
-      );
+      setResultMessage(`Test appointment created (${body.appointment?.id?.slice(0, 8) ?? "ok"}).`);
     } catch {
       setResultMessage("Request failed — check network and try again.");
     } finally {
@@ -148,8 +146,8 @@ function CreateTestAppointmentPanel({
           <p className="text-xs text-[#64748B]">
             Admin-only utility to verify Google Calendar write + optional Meet link. Not a booking
             UI. Attendees are added to the Google event with{" "}
-            <code className="text-[#22C1FF]">sendUpdates=none</code> — Google does not email
-            invites in this phase.
+            <code className="text-[#22C1FF]">sendUpdates=none</code> — Google does not email invites
+            in this phase.
           </p>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -217,9 +215,7 @@ function CreateTestAppointmentPanel({
             ) : null}
           </div>
 
-          {resultMessage ? (
-            <p className="mt-3 text-sm text-[#94A3B8]">{resultMessage}</p>
-          ) : null}
+          {resultMessage ? <p className="mt-3 text-sm text-[#94A3B8]">{resultMessage}</p> : null}
           {lastMeetUrl ? (
             <p className="mt-2 text-sm">
               <span className="text-[#94A3B8]">Meet link: </span>
@@ -321,7 +317,8 @@ export function GoogleCalendarIntegrationCard({
         <div>
           <h2 className="text-base font-semibold text-[#F8FAFC]">Google Calendar</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">
-            Native CalendarOS connector — OAuth tokens are encrypted server-side and never exposed to the browser.
+            Native CalendarOS connector — OAuth tokens are encrypted server-side and never exposed
+            to the browser.
           </p>
         </div>
         <span
@@ -384,9 +381,7 @@ export function GoogleCalendarIntegrationCard({
         <StatusRow
           label="Last validated"
           value={
-            status.last_validated_at
-              ? new Date(status.last_validated_at).toLocaleString()
-              : "—"
+            status.last_validated_at ? new Date(status.last_validated_at).toLocaleString() : "—"
           }
         />
         <StatusRow label="Google Meet ready" value={status.can_create_meet ? "Yes" : "No"} />
@@ -419,9 +414,7 @@ export function GoogleCalendarIntegrationCard({
         </button>
       </div>
 
-      {validateMessage ? (
-        <p className="mt-3 text-sm text-[#94A3B8]">{validateMessage}</p>
-      ) : null}
+      {validateMessage ? <p className="mt-3 text-sm text-[#94A3B8]">{validateMessage}</p> : null}
 
       <GoogleCalendarIntegrationProgressSection />
 

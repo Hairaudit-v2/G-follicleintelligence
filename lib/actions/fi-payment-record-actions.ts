@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 
-import { PaymentRecordAccessError, assertPaymentRecordWriteAllowed } from "@/src/lib/payments/paymentRecordAccess.server";
+import {
+  PaymentRecordAccessError,
+  assertPaymentRecordWriteAllowed,
+} from "@/src/lib/payments/paymentRecordAccess.server";
 import {
   createPaymentRecord,
   recordManualPayment,
@@ -33,7 +36,10 @@ function revalidatePaymentSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}/cases`);
 }
 
-function revalidatePatientPaymentSurface(tenantId: string, patientId: string | null | undefined): void {
+function revalidatePatientPaymentSurface(
+  tenantId: string,
+  patientId: string | null | undefined
+): void {
   const pid = patientId?.trim();
   if (!pid) return;
   const tid = tenantId.trim();
@@ -51,7 +57,9 @@ export async function createPaymentRecordAction(
     revalidatePaymentSurfaces(tenantId);
     const tid = tenantId.trim();
     if (row.consultation_id?.trim()) {
-      revalidatePath(`/fi-admin/${tid}/consultations/${encodeURIComponent(row.consultation_id.trim())}`);
+      revalidatePath(
+        `/fi-admin/${tid}/consultations/${encodeURIComponent(row.consultation_id.trim())}`
+      );
     }
     if (row.case_id?.trim()) {
       revalidatePath(`/fi-admin/${tid}/cases/${encodeURIComponent(row.case_id.trim())}`);
@@ -70,7 +78,12 @@ export async function updatePaymentRecordStatusAction(
   try {
     const parsed = updatePaymentRecordStatusBodySchema.parse(body);
     await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
-    const updated = await updatePaymentRecordStatus(tenantId.trim(), parsed.payment_record_id, parsed.status, parsed.notes);
+    const updated = await updatePaymentRecordStatus(
+      tenantId.trim(),
+      parsed.payment_record_id,
+      parsed.status,
+      parsed.notes
+    );
     revalidatePaymentSurfaces(tenantId);
     revalidatePatientPaymentSurface(tenantId.trim(), updated.patient_id);
     return { ok: true };
@@ -86,7 +99,12 @@ export async function recordManualPaymentAction(
   try {
     const parsed = recordManualPaymentBodySchema.parse(body);
     await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
-    const updated = await recordManualPayment(tenantId.trim(), parsed.payment_record_id, parsed.payment_amount, parsed.notes);
+    const updated = await recordManualPayment(
+      tenantId.trim(),
+      parsed.payment_record_id,
+      parsed.payment_amount,
+      parsed.notes
+    );
     revalidatePaymentSurfaces(tenantId);
     revalidatePatientPaymentSurface(tenantId.trim(), updated.patient_id);
     return { ok: true };

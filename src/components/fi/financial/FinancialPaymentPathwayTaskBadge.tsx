@@ -3,7 +3,10 @@ import {
   financialOsStatusBadgeTones,
   resolveFinancialOsRecordStatusTone,
 } from "@/src/components/fi-admin/financial-os/financialOsStatusBadgeStyles";
-import type { FiPaymentPathwayTaskPriority, FiPaymentPathwayTaskStatus } from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
+import type {
+  FiPaymentPathwayTaskPriority,
+  FiPaymentPathwayTaskStatus,
+} from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
 
 const STATUS_LABELS: Record<FiPaymentPathwayTaskStatus, string> = {
   open: "Open",
@@ -57,12 +60,17 @@ export function FinancialPaymentPathwayTaskBadge(props: {
       : "border-white/[0.08] bg-white/[0.03] text-slate-300";
 
   const tone = variant === "dark" ? toneDark : toneLight;
-  const base = variant === "dark" ? financialOsStatusBadgeBase : "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide";
+  const base =
+    variant === "dark"
+      ? financialOsStatusBadgeBase
+      : "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide";
 
   return (
     <span className={`${base} ${tone}`}>
       <span>{pathwayTaskStatusLabel(status)}</span>
-      {priority !== "normal" ? <span className="opacity-80">· {pathwayTaskPriorityLabel(priority)}</span> : null}
+      {priority !== "normal" ? (
+        <span className="opacity-80">· {pathwayTaskPriorityLabel(priority)}</span>
+      ) : null}
     </span>
   );
 }

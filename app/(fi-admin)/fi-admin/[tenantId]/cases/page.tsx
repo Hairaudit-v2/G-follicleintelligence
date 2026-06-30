@@ -9,7 +9,11 @@ import {
   paginateCaseWorklistRows,
   sortCaseWorklistRows,
 } from "@/src/lib/cases/casesIndexBuild";
-import { buildCasesWorklistQueryString, casesWorklistHref, parseCasesIndexQuery } from "@/src/lib/cases/casesIndexFilters";
+import {
+  buildCasesWorklistQueryString,
+  casesWorklistHref,
+  parseCasesIndexQuery,
+} from "@/src/lib/cases/casesIndexFilters";
 import { loadCasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders";
 import { loadCasesIndexForTenant } from "@/src/lib/cases/caseLoaders";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
@@ -32,7 +36,10 @@ export default async function CasesIndexRoutePage({
   await assertStaffModuleAccess(tenantId, "surgery_os", "read");
   const sp = (await searchParams) ?? {};
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>
@@ -62,7 +69,11 @@ export default async function CasesIndexRoutePage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 py-2 lg:max-w-[1200px]">
-      <SurgeryOsDashboard tenantId={tenantId} rows={enriched} worklistQueryString={worklistQueryString} />
+      <SurgeryOsDashboard
+        tenantId={tenantId}
+        rows={enriched}
+        worklistQueryString={worklistQueryString}
+      />
 
       <section id="surgeryos-case-worklist" aria-labelledby="cases-index-heading">
         <h2 id="cases-index-heading" className="sr-only">

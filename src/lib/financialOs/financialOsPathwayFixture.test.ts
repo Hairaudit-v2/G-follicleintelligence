@@ -22,7 +22,7 @@ describe("FinancialOS pathway fixture", () => {
     const fixture = buildFinancialOsPathwayFixture();
     assert.equal(
       assertLedgerRowsTenantScoped(fixture.ledgerTimeline, FINANCIAL_OS_PATHWAY_FIXTURE_TENANT_ID),
-      true,
+      true
     );
   });
 });

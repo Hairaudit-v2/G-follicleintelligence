@@ -10,7 +10,10 @@ import {
 } from "@/src/lib/bookings/calendarLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
-import { formatTimeRangeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatTimeRangeInTimezone,
+  normalizeCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 
 export function BookingCalendarCard({
@@ -33,8 +36,12 @@ export function BookingCalendarCard({
 }) {
   const cancelled = isBookingCancelled(booking);
   const completed = booking.booking_status === "completed";
-  const chip = bookingCalendarChipSurface(booking.booking_type, display.procedureCatalogHex ?? null);
-  const typeLabel = display.procedureCatalogName?.trim() || bookingTypeCalendarLegendLabel(booking.booking_type);
+  const chip = bookingCalendarChipSurface(
+    booking.booking_type,
+    display.procedureCatalogHex ?? null
+  );
+  const typeLabel =
+    display.procedureCatalogName?.trim() || bookingTypeCalendarLegendLabel(booking.booking_type);
   const tz = normalizeCalendarTimezone(calendarTimezone ?? booking.timezone);
   const range = formatTimeRangeInTimezone(booking.start_at, booking.end_at, tz);
 
@@ -53,19 +60,27 @@ export function BookingCalendarCard({
     >
       <div className="truncate font-semibold leading-tight">{display.anchorLabel}</div>
       <div className="mt-0.5 flex flex-wrap items-center gap-1">
-        <span className="truncate text-[10px] font-medium uppercase tracking-wide opacity-90">{typeLabel}</span>
+        <span className="truncate text-[10px] font-medium uppercase tracking-wide opacity-90">
+          {typeLabel}
+        </span>
         <BookingStatusBadge status={booking.booking_status} />
       </div>
       <div className="mt-0.5 truncate text-[10px] tabular-nums opacity-90">{range}</div>
       <div className="mt-0.5 text-[10px] opacity-90">{display.durationMin} min</div>
       {display.scalesSummary ? (
-        <div className="mt-0.5 line-clamp-2 text-[10px] font-medium leading-snug text-slate-200">{display.scalesSummary}</div>
+        <div className="mt-0.5 line-clamp-2 text-[10px] font-medium leading-snug text-slate-200">
+          {display.scalesSummary}
+        </div>
       ) : null}
       {display.resourceTeamLine ? (
-        <div className="mt-0.5 truncate text-[9px] font-medium leading-tight opacity-90">{display.resourceTeamLine}</div>
+        <div className="mt-0.5 truncate text-[9px] font-medium leading-tight opacity-90">
+          {display.resourceTeamLine}
+        </div>
       ) : null}
       {display.resourceRoomLine ? (
-        <div className="mt-0.5 truncate text-[9px] leading-tight opacity-90">{display.resourceRoomLine}</div>
+        <div className="mt-0.5 truncate text-[9px] leading-tight opacity-90">
+          {display.resourceRoomLine}
+        </div>
       ) : null}
       {display.reminderHint ? (
         <div className="mt-0.5 line-clamp-2 text-[9px] font-medium leading-snug text-cyan-200 dark:text-sky-200/90">

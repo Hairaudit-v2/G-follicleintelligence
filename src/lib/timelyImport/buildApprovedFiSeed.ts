@@ -95,7 +95,8 @@ export function collectConsultationDuplicateDeferrals(rows: FiServiceSeedReviewR
         color: r.color,
         is_active: false,
         review_flags: [],
-        deferral_reason: "Duplicate consultation service name in Timely export — superseded by higher-gross row.",
+        deferral_reason:
+          "Duplicate consultation service name in Timely export — superseded by higher-gross row.",
         curation_notes: `Superseded in curation; Timely line ${r.timely.sourceLineNumber}.`,
       });
     }
@@ -112,7 +113,9 @@ function hasUncertainMapping(r: FiServiceSeedReviewRow): boolean {
 }
 
 function hasOnlyPriceUnknown(r: FiServiceSeedReviewRow): boolean {
-  return r.review_flags.length > 0 && r.review_flags.every((f) => f === "price_unknown_default_zero");
+  return (
+    r.review_flags.length > 0 && r.review_flags.every((f) => f === "price_unknown_default_zero")
+  );
 }
 
 /**
@@ -159,7 +162,8 @@ export function buildApprovedFiSeedFromReviewRows(
         color: r.color,
         is_active: false,
         review_flags: [],
-        deferral_reason: "Uncertain FI category or booking_type mapping — resolve manually before import.",
+        deferral_reason:
+          "Uncertain FI category or booking_type mapping — resolve manually before import.",
         curation_notes: `Original flags: ${r.review_flags.join(", ")}`,
       });
       continue;
@@ -202,12 +206,16 @@ export function buildApprovedFiSeedFromReviewRows(
       );
       if (/\bplanning\b/i.test(r.name) && duration_minutes >= 120) {
         duration_minutes = 60;
-        notes.push("duration_minutes adjusted to 60 for planning-style row after booking_type dedupe.");
+        notes.push(
+          "duration_minutes adjusted to 60 for planning-style row after booking_type dedupe."
+        );
       }
     }
 
     if (hasOnlyPriceUnknown(r)) {
-      notes.push("Timely window showed no unit revenue; base_price left at 0 — confirm before go-live.");
+      notes.push(
+        "Timely window showed no unit revenue; base_price left at 0 — confirm before go-live."
+      );
     }
 
     approved_for_import.push({
@@ -255,16 +263,23 @@ export function buildStage7a2MarkdownReport(payload: FiServiceApprovedPayload): 
   lines.push(`| **Uncertain mappings deferred** | ${s.uncertain_resolved_count} |`);
   lines.push("");
   lines.push(`## Recommended defaults`);
-  lines.push(`- One **\`booking_type\`** value per tenant in \`fi_services\` when linked; duplicates in Timely are merged by keeping the highest-gross row for that type.`);
-  lines.push(`- **Diagnostics / other** services without a confident \`booking_type\` stay in **inactive_deferred** until mapped (often \`other\` or left unlinked).`);
+  lines.push(
+    `- One **\`booking_type\`** value per tenant in \`fi_services\` when linked; duplicates in Timely are merged by keeping the highest-gross row for that type.`
+  );
+  lines.push(
+    `- **Diagnostics / other** services without a confident \`booking_type\` stay in **inactive_deferred** until mapped (often \`other\` or left unlinked).`
+  );
   lines.push(`- **Retail** lines are excluded from the bookable clinical catalogue.`);
   lines.push("");
   lines.push(`## Services ready for FI import`);
-  if (payload.approved_for_import.length === 0) lines.push(`_None — re-run after fixing review input._`);
+  if (payload.approved_for_import.length === 0)
+    lines.push(`_None — re-run after fixing review input._`);
   else {
     for (const r of payload.approved_for_import) {
       const bt = r.booking_type ?? "—";
-      lines.push(`- **${r.name}** — ${r.category}; \`booking_type\`: ${bt}; ${r.duration_minutes} min; AUD ${r.base_price}; colour ${r.color ?? "—"}`);
+      lines.push(
+        `- **${r.name}** — ${r.category}; \`booking_type\`: ${bt}; ${r.duration_minutes} min; AUD ${r.base_price}; colour ${r.color ?? "—"}`
+      );
       if (r.curation_notes) lines.push(`  - *Note:* ${r.curation_notes}`);
     }
   }
@@ -286,6 +301,8 @@ export function buildStage7a2MarkdownReport(payload: FiServiceApprovedPayload): 
   }
   lines.push("");
   lines.push(`## Next step`);
-  lines.push(`Use a guarded import job (separate task) to upsert \`fi_services\` from \`fi-services-seed-approved.json\` — **no Supabase insert in Stage 7A.2.**`);
+  lines.push(
+    `Use a guarded import job (separate task) to upsert \`fi_services\` from \`fi-services-seed-approved.json\` — **no Supabase insert in Stage 7A.2.**`
+  );
   return lines.join("\n");
 }

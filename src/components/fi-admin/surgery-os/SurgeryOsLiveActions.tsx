@@ -37,11 +37,15 @@ import type {
 
 type ModalKind = "phase" | "event" | "note" | "team" | "booking" | null;
 
-function surgeryStatusFromLive(s: SurgeryOsLiveSurgery): { status: string; procedurePhase: string } {
+function surgeryStatusFromLive(s: SurgeryOsLiveSurgery): {
+  status: string;
+  procedurePhase: string;
+} {
   const phase = s.procedurePhase;
   let status = "in_progress";
   if (phase === "completed") status = "completed";
-  else if (phase === "pre_op" || phase === "patient_arrived" || phase === "design") status = "pre_op";
+  else if (phase === "pre_op" || phase === "patient_arrived" || phase === "design")
+    status = "pre_op";
   else if (phase === "extraction_paused" || phase === "break") status = "paused";
   return { status, procedurePhase: phase };
 }
@@ -68,13 +72,14 @@ export function SurgeryOsLiveActions({
       staffRoleCategory: staffCategory,
       actorFiUserId: null,
     }),
-    [viewerRole, staffCategory],
+    [viewerRole, staffCategory]
   );
 
   const canPhase = surgeryOsActionAllowed(ctx, "transition_phase");
   const canEvent = surgeryOsActionAllowed(ctx, "log_event");
   const canNote = surgeryOsActionAllowed(ctx, "add_note");
-  const canTeam = surgeryOsActionAllowed(ctx, "update_team_status") || staffCategory === "technician";
+  const canTeam =
+    surgeryOsActionAllowed(ctx, "update_team_status") || staffCategory === "technician";
   const canBooking = surgeryOsActionAllowed(ctx, "create_from_booking");
 
   const anyAction = canPhase || canEvent || canNote || canTeam || canBooking;
@@ -113,12 +118,17 @@ export function SurgeryOsLiveActions({
   return (
     <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Live actions</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">
+          Live actions
+        </span>
         {surgeries.length > 0 ? (
           <select
             value={effectiveSurgeryId}
             onChange={(e) => setSurgeryId(e.target.value)}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2 py-1.5 text-xs text-slate-200")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "px-2 py-1.5 text-xs text-slate-200"
+            )}
           >
             {surgeries.map((s) => (
               <option key={s.id} value={s.id}>
@@ -130,14 +140,22 @@ export function SurgeryOsLiveActions({
           <span className="text-xs text-slate-500">No active surgeries</span>
         )}
         {canPhase && selectedSurgery && nextPhase ? (
-          <ActionButton icon={Play} label="Continue phase" onClick={() => setModal("phase")} primary />
+          <ActionButton
+            icon={Play}
+            label="Continue phase"
+            onClick={() => setModal("phase")}
+            primary
+          />
         ) : null}
-        {(canEvent || canNote || canTeam || canBooking) ? (
+        {canEvent || canNote || canTeam || canBooking ? (
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowSecondary((v) => !v)}
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2.5 py-1.5 text-xs font-semibold text-slate-400")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "px-2.5 py-1.5 text-xs font-semibold text-slate-400"
+              )}
             >
               More actions
             </button>
@@ -214,10 +232,13 @@ export function SurgeryOsLiveActions({
                 transitionSurgeryPhaseAction(tenantId, {
                   surgery_id: effectiveSurgeryId,
                   to_phase: nextPhase,
-                }),
+                })
               )
             }
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100"
+            )}
           >
             Confirm phase transition
           </button>
@@ -235,7 +256,7 @@ export function SurgeryOsLiveActions({
                 event_kind: eventKind,
                 custom_label: customLabel,
                 custom_body: customBody,
-              }),
+              })
             )
           }
         />
@@ -252,7 +273,7 @@ export function SurgeryOsLiveActions({
                 surgery_id: effectiveSurgeryId,
                 note_kind: noteKind,
                 body,
-              }),
+              })
             )
           }
         />
@@ -269,7 +290,7 @@ export function SurgeryOsLiveActions({
                 assignment_id: assignmentId,
                 assignment_fi_user_id: fiUserId,
                 status,
-              }),
+              })
             )
           }
         />
@@ -309,7 +330,7 @@ function ActionButton({
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
         "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold",
-        primary ? "text-cyan-100" : "text-slate-200",
+        primary ? "text-cyan-100" : "text-slate-200"
       )}
     >
       <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -328,11 +349,18 @@ function ModalShell({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+    >
       <div className="w-full max-w-md rounded-xl border border-white/10 bg-slate-900 p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
-          <button type="button" onClick={onClose} className="text-xs text-slate-500 hover:text-slate-300">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs text-slate-500 hover:text-slate-300"
+          >
             Close
           </button>
         </div>
@@ -396,9 +424,16 @@ function EventModal({
         type="button"
         disabled={pending}
         onClick={() =>
-          onSubmit(eventKind, eventKind === "custom" ? customLabel || null : null, eventKind === "custom" ? customBody || null : null)
+          onSubmit(
+            eventKind,
+            eventKind === "custom" ? customLabel || null : null,
+            eventKind === "custom" ? customBody || null : null
+          )
         }
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100"
+        )}
       >
         Log event
       </button>
@@ -413,12 +448,16 @@ function NoteModal({
   onSubmit,
 }: {
   pending: boolean;
-  ctx: { viewerRole: SurgeryOsViewerRole; staffRoleCategory: ReturnType<typeof resolveSurgeryOsStaffRoleCategory>; actorFiUserId: string | null };
+  ctx: {
+    viewerRole: SurgeryOsViewerRole;
+    staffRoleCategory: ReturnType<typeof resolveSurgeryOsStaffRoleCategory>;
+    actorFiUserId: string | null;
+  };
   onClose: () => void;
   onSubmit: (kind: SurgeryOsNoteKind, body: string) => void;
 }) {
-  const allowedKinds = (Object.keys(SURGERY_OS_NOTE_KIND_LABELS) as SurgeryOsNoteKind[]).filter((k) =>
-    surgeryOsNoteKindAllowed(ctx, k),
+  const allowedKinds = (Object.keys(SURGERY_OS_NOTE_KIND_LABELS) as SurgeryOsNoteKind[]).filter(
+    (k) => surgeryOsNoteKindAllowed(ctx, k)
   );
   const [noteKind, setNoteKind] = useState<SurgeryOsNoteKind>(allowedKinds[0] ?? "general");
   const [body, setBody] = useState("");
@@ -452,7 +491,10 @@ function NoteModal({
         type="button"
         disabled={pending || !body.trim()}
         onClick={() => onSubmit(noteKind, body.trim())}
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100"
+        )}
       >
         Save note
       </button>
@@ -498,18 +540,23 @@ function TeamModal({
           onChange={(e) => setStatus(e.target.value as SurgeryOsAssignmentStatus)}
           className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-200"
         >
-          {(Object.keys(SURGERY_OS_ASSIGNMENT_STATUS_LABELS) as SurgeryOsAssignmentStatus[]).map((s) => (
-            <option key={s} value={s}>
-              {SURGERY_OS_ASSIGNMENT_STATUS_LABELS[s]}
-            </option>
-          ))}
+          {(Object.keys(SURGERY_OS_ASSIGNMENT_STATUS_LABELS) as SurgeryOsAssignmentStatus[]).map(
+            (s) => (
+              <option key={s} value={s}>
+                {SURGERY_OS_ASSIGNMENT_STATUS_LABELS[s]}
+              </option>
+            )
+          )}
         </select>
       </label>
       <button
         type="button"
         disabled={pending || !selected}
         onClick={() => selected && onSubmit(selected.id, selected.fiUserId, status)}
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100"
+        )}
       >
         Update status
       </button>
@@ -531,7 +578,8 @@ function BookingModal({
   return (
     <ModalShell title="Create surgery from booking" onClose={onClose}>
       <p className="text-xs text-slate-500">
-        Enter the confirmed surgery booking ID. Duplicate bookings return the existing surgery record.
+        Enter the confirmed surgery booking ID. Duplicate bookings return the existing surgery
+        record.
       </p>
       <label className="mt-3 block text-xs text-slate-500">
         Booking ID
@@ -546,7 +594,10 @@ function BookingModal({
         type="button"
         disabled={pending || !bookingId.trim()}
         onClick={() => onSubmit(bookingId.trim())}
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-cyan-100"
+        )}
       >
         Create surgery
       </button>

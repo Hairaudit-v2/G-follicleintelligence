@@ -25,7 +25,10 @@ import {
   STAFF_ROLE_FIELD_TEMPLATE_DEFAULTS,
   type RoleFieldTemplateMap,
 } from "@/src/lib/staffAccess/staffFieldAccessRegistry";
-import type { StaffAccessLevel, StaffAccessModuleKey } from "@/src/lib/staffAccess/staffAccessRegistry";
+import type {
+  StaffAccessLevel,
+  StaffAccessModuleKey,
+} from "@/src/lib/staffAccess/staffAccessRegistry";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -45,7 +48,10 @@ function grant(
 }
 
 /** Module levels for a role, derived from SA-1 style defaults used in these tests. */
-const ROLE_MODULE_LEVELS: Record<string, Partial<Record<StaffAccessModuleKey, StaffAccessLevel>>> = {
+const ROLE_MODULE_LEVELS: Record<
+  string,
+  Partial<Record<StaffAccessModuleKey, StaffAccessLevel>>
+> = {
   doctor: {
     clinic_os: "read",
     patient_os: "edit",
@@ -226,13 +232,14 @@ test("field grant is clamped down to the module ceiling (read module → read fi
 });
 
 test("mergeRoleFieldTemplatesWithGrants: active grant overrides template, revoked ignored", () => {
-  const merged = mergeRoleFieldTemplatesWithGrants(
-    { "patient.identity": "read" },
-    [
-      grant({ fieldKey: "patient.identity", permissionLevel: "edit" }),
-      grant({ fieldKey: "patient.contact_details", permissionLevel: "read", revokedAt: "2026-01-01" }),
-    ]
-  );
+  const merged = mergeRoleFieldTemplatesWithGrants({ "patient.identity": "read" }, [
+    grant({ fieldKey: "patient.identity", permissionLevel: "edit" }),
+    grant({
+      fieldKey: "patient.contact_details",
+      permissionLevel: "read",
+      revokedAt: "2026-01-01",
+    }),
+  ]);
   assert.equal(merged["patient.identity"].level, "edit");
   assert.equal(merged["patient.identity"].source, "grant");
   assert.equal(merged["patient.contact_details"], undefined);

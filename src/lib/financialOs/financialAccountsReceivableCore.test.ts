@@ -23,18 +23,35 @@ const TODAY = "2026-06-20";
 
 describe("financialAccountsReceivableCore", () => {
   it("classifyReceivableType maps invoice kinds", () => {
-    assert.equal(classifyReceivableType({ invoice_kind: "consultation_quote" }), "consultation_invoice");
+    assert.equal(
+      classifyReceivableType({ invoice_kind: "consultation_quote" }),
+      "consultation_invoice"
+    );
     assert.equal(classifyReceivableType({ invoice_kind: "surgery_deposit" }), "surgery_deposit");
     assert.equal(classifyReceivableType({ invoice_kind: "surgery_balance" }), "surgery_balance");
     assert.equal(
       classifyReceivableType({ invoice_kind: "other", metadata: { source: "subscription" } }),
-      "subscription",
+      "subscription"
     );
   });
 
   it("calculateDaysOverdue returns zero when not past due", () => {
-    assert.equal(calculateDaysOverdue({ due_date: "2026-06-25", outstanding_amount_cents: 1000, todayYmd: TODAY }), 0);
-    assert.equal(calculateDaysOverdue({ due_date: "2026-06-15", outstanding_amount_cents: 0, todayYmd: TODAY }), 0);
+    assert.equal(
+      calculateDaysOverdue({
+        due_date: "2026-06-25",
+        outstanding_amount_cents: 1000,
+        todayYmd: TODAY,
+      }),
+      0
+    );
+    assert.equal(
+      calculateDaysOverdue({
+        due_date: "2026-06-15",
+        outstanding_amount_cents: 0,
+        todayYmd: TODAY,
+      }),
+      0
+    );
   });
 
   it("overdue invoice derive creates AR case payload", () => {
@@ -85,7 +102,11 @@ describe("financialAccountsReceivableCore", () => {
 
   it("full payment resolves AR case", () => {
     const result = applyPaymentToArCase({
-      case: { outstanding_amount_cents: 15_000, status: "call_required", original_amount_cents: 15_000 },
+      case: {
+        outstanding_amount_cents: 15_000,
+        status: "call_required",
+        original_amount_cents: 15_000,
+      },
       payment_amount_cents: 15_000,
       todayYmd: TODAY,
       receivable_type: "surgery_balance",
@@ -206,16 +227,22 @@ describe("financialAccountsReceivableCore", () => {
   it("buildCaseArDisplayStatus reflects payment plan and high risk", () => {
     assert.equal(buildCaseArDisplayStatus([]), "no_ar_issue");
     assert.equal(
-      buildCaseArDisplayStatus([{ status: "payment_plan", risk_level: "medium", outstanding_amount_cents: 1000 }]),
-      "payment_plan_active",
+      buildCaseArDisplayStatus([
+        { status: "payment_plan", risk_level: "medium", outstanding_amount_cents: 1000 },
+      ]),
+      "payment_plan_active"
     );
     assert.equal(
-      buildCaseArDisplayStatus([{ status: "open", risk_level: "critical", outstanding_amount_cents: 5000 }]),
-      "high_risk_overdue",
+      buildCaseArDisplayStatus([
+        { status: "open", risk_level: "critical", outstanding_amount_cents: 5000 },
+      ]),
+      "high_risk_overdue"
     );
     assert.equal(
-      buildCaseArDisplayStatus([{ status: "resolved", risk_level: "low", outstanding_amount_cents: 0 }]),
-      "resolved",
+      buildCaseArDisplayStatus([
+        { status: "resolved", risk_level: "low", outstanding_amount_cents: 0 },
+      ]),
+      "resolved"
     );
   });
 

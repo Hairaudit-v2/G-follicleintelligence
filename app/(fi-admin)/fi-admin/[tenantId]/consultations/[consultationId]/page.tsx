@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 
 import { ConsultationOsEditPage } from "@/src/components/fi-admin/consultations/ConsultationOsEditPage";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
-import { loadConsultationForTenant, loadConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
+import {
+  loadConsultationForTenant,
+  loadConsultationWorkspaceDisplay,
+} from "@/src/lib/consultations/consultationLoaders.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadLatestConsultationChecklistForPatientWorkspace } from "@/src/lib/patientTwin/patientTwinConsultationChecklist.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
@@ -31,12 +34,13 @@ export default async function ConsultationOsEditRoutePage({
 
   const tid = tenantId.trim();
   const cid = consultationId.trim();
-  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, formInstances] = await Promise.all([
-    getCrmShellNavAllowed(tid),
-    loadConsultationWorkspaceDisplay(tid, row),
-    loadClinicalStaffPickerOptions(tid),
-    loadConsultationFormInstances(tid, cid),
-  ]);
+  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, formInstances] =
+    await Promise.all([
+      getCrmShellNavAllowed(tid),
+      loadConsultationWorkspaceDisplay(tid, row),
+      loadClinicalStaffPickerOptions(tid),
+      loadConsultationFormInstances(tid, cid),
+    ]);
   const pathwayLauncher = buildConsultationPathwayLauncherViewModel({
     tenantId: tid,
     consultationId: cid,
@@ -46,7 +50,9 @@ export default async function ConsultationOsEditRoutePage({
   const patientIdForChecklist = row.patient_id?.trim() ?? null;
   const initialConsultationChecklistPreview =
     patientIdForChecklist != null
-      ? await loadLatestConsultationChecklistForPatientWorkspace(tid, patientIdForChecklist).catch(() => null)
+      ? await loadLatestConsultationChecklistForPatientWorkspace(tid, patientIdForChecklist).catch(
+          () => null
+        )
       : null;
 
   return (

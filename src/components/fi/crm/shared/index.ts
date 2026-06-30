@@ -1,4 +1,9 @@
-export { crmLeadCardClass, crmPrioritySelectOptions, crmStageLabel, crmStatusSelectOptions } from "./crmSharedStyles";
+export {
+  crmLeadCardClass,
+  crmPrioritySelectOptions,
+  crmStageLabel,
+  crmStatusSelectOptions,
+} from "./crmSharedStyles";
 export { buildLeadNotesPreview, type LeadNotePreviewItem } from "./leadNotesPreview";
 export { LeadActivityFeed, type LeadActivityFeedProps } from "./LeadActivityFeed";
 export { LeadNotesSection, type LeadNotesSectionProps } from "./LeadNotesSection";

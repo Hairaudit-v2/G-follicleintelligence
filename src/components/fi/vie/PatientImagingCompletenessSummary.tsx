@@ -26,8 +26,14 @@ export function PatientImagingCompletenessSummary({
   const labelClass = variant === "dark" ? "text-slate-500" : "text-gray-500";
 
   return (
-    <div className={variant === "dark" ? "rounded-md bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06]" : ""}>
-      <p className={`text-[0.55rem] font-semibold uppercase tracking-[0.15em] ${labelClass}`}>Imaging completeness</p>
+    <div
+      className={
+        variant === "dark" ? "rounded-md bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06]" : ""
+      }
+    >
+      <p className={`text-[0.55rem] font-semibold uppercase tracking-[0.15em] ${labelClass}`}>
+        Imaging completeness
+      </p>
       <p className={`mt-0.5 text-sm font-medium ${textClass}`}>{headline}</p>
       {qualityLine ? <p className={`mt-1 text-xs ${labelClass}`}>{qualityLine}</p> : null}
       <div
@@ -37,7 +43,10 @@ export function PatientImagingCompletenessSummary({
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div className={`h-full rounded-full transition-all ${fillClass}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full rounded-full transition-all ${fillClass}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
       <div className="mt-2 grid gap-1 text-[0.65rem]">
         <p className={textClass}>Consultation: {completeness.consultation.display}</p>

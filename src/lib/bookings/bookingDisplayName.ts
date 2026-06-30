@@ -2,8 +2,7 @@ import { bookingTypeLabel } from "./operatorBookingLabels";
 
 export const UNNAMED_PATIENT_LABEL = "Unnamed patient";
 
-const UUID_TRUNCATION_LABEL =
-  /^(Patient|Lead|Person|Case)\s+[0-9a-f]{6,8}(?:…|\.\.\.)?$/i;
+const UUID_TRUNCATION_LABEL = /^(Patient|Lead|Person|Case)\s+[0-9a-f]{6,8}(?:…|\.\.\.)?$/i;
 
 /** True when a label is a developer-style truncated id (must not appear on calendar cards). */
 export function isUuidTruncationDisplayLabel(label: string | null | undefined): boolean {
@@ -27,7 +26,10 @@ export type BookingDisplayNameContext = {
   bookingType?: string | null;
 };
 
-function readMetaString(meta: Record<string, unknown> | null | undefined, key: string): string | null {
+function readMetaString(
+  meta: Record<string, unknown> | null | undefined,
+  key: string
+): string | null {
   if (!meta || typeof meta !== "object") return null;
   const v = meta[key];
   if (typeof v !== "string") return null;
@@ -35,7 +37,9 @@ function readMetaString(meta: Record<string, unknown> | null | undefined, key: s
   return t || null;
 }
 
-function personFullNameFromMetadata(meta: Record<string, unknown> | null | undefined): string | null {
+function personFullNameFromMetadata(
+  meta: Record<string, unknown> | null | undefined
+): string | null {
   if (!meta || typeof meta !== "object") return null;
   const first = readMetaString(meta, "first_name");
   const last = readMetaString(meta, "last_name") ?? readMetaString(meta, "surname");
@@ -43,7 +47,9 @@ function personFullNameFromMetadata(meta: Record<string, unknown> | null | undef
   return combined || null;
 }
 
-function preferredOrDisplayFromMetadata(meta: Record<string, unknown> | null | undefined): string | null {
+function preferredOrDisplayFromMetadata(
+  meta: Record<string, unknown> | null | undefined
+): string | null {
   if (!meta || typeof meta !== "object") return null;
   return (
     readMetaString(meta, "preferred_name") ??
@@ -54,11 +60,15 @@ function preferredOrDisplayFromMetadata(meta: Record<string, unknown> | null | u
 }
 
 /** Best-effort person/patient full or display name from metadata (no uuid fallbacks). */
-export function personDisplayNameFromMetadata(meta: Record<string, unknown> | null | undefined): string | null {
+export function personDisplayNameFromMetadata(
+  meta: Record<string, unknown> | null | undefined
+): string | null {
   return personFullNameFromMetadata(meta) ?? preferredOrDisplayFromMetadata(meta);
 }
 
-export function contactFallbackFromMetadata(meta: Record<string, unknown> | null | undefined): string | null {
+export function contactFallbackFromMetadata(
+  meta: Record<string, unknown> | null | undefined
+): string | null {
   const phone = readMetaString(meta, "phone");
   if (phone) return phone;
   const email = readMetaString(meta, "email") ?? readMetaString(meta, "email_normalized");

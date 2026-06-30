@@ -4,7 +4,12 @@
  * Reschedule / reassign calendar appointments (drag-and-drop, provider change).
  */
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import {
   appointmentRescheduleBodySchema,
   procedureDetailsToMetadata,

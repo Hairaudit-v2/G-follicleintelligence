@@ -40,8 +40,7 @@ export type IntakeValidationResult =
   | { ok: true; intake: ImagingIntakeRecord }
   | { ok: false; error: string; field?: string };
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const SOURCE_SYSTEMS = new Set<ImagingOsSourceSystem>([
   "fi_os",
@@ -96,17 +95,29 @@ export function buildImagingIntakeRecord(input: BuildImagingIntakeInput): Intake
   const storagePath = input.storage_path ? readNonEmptyString(input.storage_path) : null;
 
   if (storageBucket && !storagePath) {
-    return { ok: false, error: "storage_path is required when storage_bucket is set", field: "storage_path" };
+    return {
+      ok: false,
+      error: "storage_path is required when storage_bucket is set",
+      field: "storage_path",
+    };
   }
   if (storagePath && !storageBucket) {
-    return { ok: false, error: "storage_bucket is required when storage_path is set", field: "storage_bucket" };
+    return {
+      ok: false,
+      error: "storage_bucket is required when storage_path is set",
+      field: "storage_bucket",
+    };
   }
 
   let fileSizeBytes: number | null = null;
   if (input.file_size_bytes != null) {
     const size = Number(input.file_size_bytes);
     if (!Number.isFinite(size) || size < 0 || !Number.isInteger(size)) {
-      return { ok: false, error: "file_size_bytes must be a non-negative integer", field: "file_size_bytes" };
+      return {
+        ok: false,
+        error: "file_size_bytes must be a non-negative integer",
+        field: "file_size_bytes",
+      };
     }
     fileSizeBytes = size;
   }
@@ -278,8 +289,8 @@ function resolveCanonicalCategory(
 function hasProcessableStorageReference(request: ImagingOsImageIngestionRequest): boolean {
   return Boolean(
     readNonEmptyString(request.storage_path) ||
-      readNonEmptyString(request.public_url) ||
-      readNonEmptyString(request.signed_url)
+    readNonEmptyString(request.public_url) ||
+    readNonEmptyString(request.signed_url)
   );
 }
 
@@ -294,9 +305,7 @@ export function normalizeImageIngestionRequest(
   const isProcessable = hasProcessableStorageReference(request);
 
   if (!isProcessable) {
-    warnings.push(
-      "No storage_path, public_url, or signed_url provided; image is not processable"
-    );
+    warnings.push("No storage_path, public_url, or signed_url provided; image is not processable");
   }
 
   const canonicalPhotoCategory = resolveCanonicalCategory(request, warnings);

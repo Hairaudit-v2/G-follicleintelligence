@@ -31,7 +31,8 @@ function mapCostModelDbRow(raw: Record<string, unknown>): FiSurgeryCostModelRow 
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
     archived_at: raw.archived_at != null ? String(raw.archived_at) : null,
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
   };
 }
 
@@ -95,7 +96,8 @@ export async function loadSurgeryCostModelsForTenant(
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   const rows = (data ?? []).map((r) => mapCostModelDbRow(r as Record<string, unknown>));
-  if (!assertCostModelsTenantScoped(rows, tid)) throw new Error("Tenant isolation violation in cost models.");
+  if (!assertCostModelsTenantScoped(rows, tid))
+    throw new Error("Tenant isolation violation in cost models.");
   return rows;
 }
 
@@ -164,7 +166,10 @@ export async function createSurgeryCostModel(args: {
     prp_cost_cents: Math.max(0, Math.floor(args.input.prp_cost_cents)),
     exosome_cost_cents: Math.max(0, Math.floor(args.input.exosome_cost_cents)),
     medication_cost_cents: Math.max(0, Math.floor(args.input.medication_cost_cents)),
-    default_duration_minutes: Math.max(1, Math.min(1440, Math.floor(args.input.default_duration_minutes))),
+    default_duration_minutes: Math.max(
+      1,
+      Math.min(1440, Math.floor(args.input.default_duration_minutes))
+    ),
     is_active: activate,
     archived_at: null,
     created_by_fi_user_id: args.createdByFiUserId?.trim() || null,
@@ -172,7 +177,11 @@ export async function createSurgeryCostModel(args: {
     updated_at: now,
   };
 
-  const { data, error } = await supabase.from("fi_surgery_cost_models").insert(insertRow).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_surgery_cost_models")
+    .insert(insertRow)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapCostModelDbRow(data as Record<string, unknown>);
 }
@@ -188,24 +197,54 @@ export async function updateActiveSurgeryCostModel(args: {
   const supabase = args.client ?? supabaseAdmin();
   const existing = await loadSurgeryCostModelById(tid, id, supabase);
   if (!existing) throw new Error("Cost model not found.");
-  if (!existing.is_active) throw new Error("Only the active cost model can be edited. Activate a version or create a new model.");
+  if (!existing.is_active)
+    throw new Error(
+      "Only the active cost model can be edited. Activate a version or create a new model."
+    );
 
   const updatePayload: Record<string, unknown> = { updated_at: new Date().toISOString() };
   const p = args.patch;
-  if (p.procedure_type !== undefined) updatePayload.procedure_type = normalizeProcedureType(p.procedure_type);
-  if (p.surgeon_cost_type !== undefined) updatePayload.surgeon_cost_type = assertSurgeonCostType(p.surgeon_cost_type);
-  if (p.surgeon_cost_value_cents !== undefined) updatePayload.surgeon_cost_value_cents = Math.max(0, Math.floor(p.surgeon_cost_value_cents));
-  if (p.rn_hourly_rate_cents !== undefined) updatePayload.rn_hourly_rate_cents = Math.max(0, Math.floor(p.rn_hourly_rate_cents));
-  if (p.technician_hourly_rate_cents !== undefined) updatePayload.technician_hourly_rate_cents = Math.max(0, Math.floor(p.technician_hourly_rate_cents));
-  if (p.assistant_hourly_rate_cents !== undefined) updatePayload.assistant_hourly_rate_cents = Math.max(0, Math.floor(p.assistant_hourly_rate_cents));
-  if (p.room_hourly_cost_cents !== undefined) updatePayload.room_hourly_cost_cents = Math.max(0, Math.floor(p.room_hourly_cost_cents));
-  if (p.consumables_base_cost_cents !== undefined) updatePayload.consumables_base_cost_cents = Math.max(0, Math.floor(p.consumables_base_cost_cents));
-  if (p.graft_consumable_cost_cents !== undefined) updatePayload.graft_consumable_cost_cents = Math.max(0, Math.floor(p.graft_consumable_cost_cents));
-  if (p.prp_cost_cents !== undefined) updatePayload.prp_cost_cents = Math.max(0, Math.floor(p.prp_cost_cents));
-  if (p.exosome_cost_cents !== undefined) updatePayload.exosome_cost_cents = Math.max(0, Math.floor(p.exosome_cost_cents));
-  if (p.medication_cost_cents !== undefined) updatePayload.medication_cost_cents = Math.max(0, Math.floor(p.medication_cost_cents));
+  if (p.procedure_type !== undefined)
+    updatePayload.procedure_type = normalizeProcedureType(p.procedure_type);
+  if (p.surgeon_cost_type !== undefined)
+    updatePayload.surgeon_cost_type = assertSurgeonCostType(p.surgeon_cost_type);
+  if (p.surgeon_cost_value_cents !== undefined)
+    updatePayload.surgeon_cost_value_cents = Math.max(0, Math.floor(p.surgeon_cost_value_cents));
+  if (p.rn_hourly_rate_cents !== undefined)
+    updatePayload.rn_hourly_rate_cents = Math.max(0, Math.floor(p.rn_hourly_rate_cents));
+  if (p.technician_hourly_rate_cents !== undefined)
+    updatePayload.technician_hourly_rate_cents = Math.max(
+      0,
+      Math.floor(p.technician_hourly_rate_cents)
+    );
+  if (p.assistant_hourly_rate_cents !== undefined)
+    updatePayload.assistant_hourly_rate_cents = Math.max(
+      0,
+      Math.floor(p.assistant_hourly_rate_cents)
+    );
+  if (p.room_hourly_cost_cents !== undefined)
+    updatePayload.room_hourly_cost_cents = Math.max(0, Math.floor(p.room_hourly_cost_cents));
+  if (p.consumables_base_cost_cents !== undefined)
+    updatePayload.consumables_base_cost_cents = Math.max(
+      0,
+      Math.floor(p.consumables_base_cost_cents)
+    );
+  if (p.graft_consumable_cost_cents !== undefined)
+    updatePayload.graft_consumable_cost_cents = Math.max(
+      0,
+      Math.floor(p.graft_consumable_cost_cents)
+    );
+  if (p.prp_cost_cents !== undefined)
+    updatePayload.prp_cost_cents = Math.max(0, Math.floor(p.prp_cost_cents));
+  if (p.exosome_cost_cents !== undefined)
+    updatePayload.exosome_cost_cents = Math.max(0, Math.floor(p.exosome_cost_cents));
+  if (p.medication_cost_cents !== undefined)
+    updatePayload.medication_cost_cents = Math.max(0, Math.floor(p.medication_cost_cents));
   if (p.default_duration_minutes !== undefined) {
-    updatePayload.default_duration_minutes = Math.max(1, Math.min(1440, Math.floor(p.default_duration_minutes)));
+    updatePayload.default_duration_minutes = Math.max(
+      1,
+      Math.min(1440, Math.floor(p.default_duration_minutes))
+    );
   }
 
   const { data, error } = await supabase

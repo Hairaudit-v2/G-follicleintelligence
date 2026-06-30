@@ -30,7 +30,9 @@ export type TimelyZapierIntegrationSetup = {
   recentBookingImports: TimelyZapierRecentImportRow[];
 };
 
-export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promise<TimelyZapierIntegrationSetup> {
+export async function loadTimelyZapierIntegrationSetup(
+  tenantId: string
+): Promise<TimelyZapierIntegrationSetup> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
 
@@ -55,8 +57,11 @@ export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promis
     .eq("source_system", TIMELY)
     .eq("entity_type", ENTITY_BOOKING);
 
-  const [{ count: mappingsTotal, error: e1 }, { count: patientsCount, error: e2 }, { count: appointmentsCount, error: e3 }] =
-    await Promise.all([mappingsQ, patientsQ, appointmentsQ]);
+  const [
+    { count: mappingsTotal, error: e1 },
+    { count: patientsCount, error: e2 },
+    { count: appointmentsCount, error: e3 },
+  ] = await Promise.all([mappingsQ, patientsQ, appointmentsQ]);
 
   if (e1) throw new Error(e1.message);
   if (e2) throw new Error(e2.message);
@@ -73,7 +78,9 @@ export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promis
     .limit(1);
   if (eLast) throw new Error(eLast.message);
 
-  const lastMap = (lastRows ?? [])[0] as { created_at: string; external_id: string; internal_id: string } | undefined;
+  const lastMap = (lastRows ?? [])[0] as
+    | { created_at: string; external_id: string; internal_id: string }
+    | undefined;
 
   let lastAppointment: TimelyZapierLastAppointment = null;
   if (lastMap) {
@@ -105,7 +112,11 @@ export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promis
     .limit(20);
   if (eRecent) throw new Error(eRecent.message);
 
-  const maps = (recentMaps ?? []) as { created_at: string; external_id: string; internal_id: string }[];
+  const maps = (recentMaps ?? []) as {
+    created_at: string;
+    external_id: string;
+    internal_id: string;
+  }[];
   const bookingIds = Array.from(new Set(maps.map((m) => String(m.internal_id)).filter(Boolean)));
   const bookingById = new Map<string, { start_at: string | null; title: string | null }>();
   if (bookingIds.length > 0) {
@@ -115,7 +126,11 @@ export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promis
       .eq("tenant_id", tid)
       .in("id", bookingIds);
     if (eB) throw new Error(eB.message);
-    for (const row of (bookings ?? []) as { id: string; start_at: string; title: string | null }[]) {
+    for (const row of (bookings ?? []) as {
+      id: string;
+      start_at: string;
+      title: string | null;
+    }[]) {
       bookingById.set(String(row.id), {
         start_at: row.start_at != null ? String(row.start_at) : null,
         title: row.title != null ? String(row.title) : null,

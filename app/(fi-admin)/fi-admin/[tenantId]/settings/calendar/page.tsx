@@ -29,7 +29,10 @@ export default async function CalendarSettingsPage({
 
   await assertFiTenantPortalAccess(tenantId);
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>
@@ -41,7 +44,11 @@ export default async function CalendarSettingsPage({
   if (!access.canView) notFound();
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const sp = (await searchParams) ?? {};
@@ -54,16 +61,25 @@ export default async function CalendarSettingsPage({
     <div className="space-y-4">
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
-          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-[#22C1FF] hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/configuration`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Configuration
           </Link>{" "}
           / Calendar
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Calendar settings</h1>
+        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          Calendar settings
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Configure visible hours, slot size, default view, and display options for the operational calendar. Tenant defaults
-          apply when no clinic override exists. You can also manage these from{" "}
-          <Link href={`/fi-admin/${tenantId}/configuration?tab=calendar`} className="text-[#22C1FF] hover:underline">
+          Configure visible hours, slot size, default view, and display options for the operational
+          calendar. Tenant defaults apply when no clinic override exists. You can also manage these
+          from{" "}
+          <Link
+            href={`/fi-admin/${tenantId}/configuration?tab=calendar`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Configuration → Calendar
           </Link>
           .

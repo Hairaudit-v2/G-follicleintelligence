@@ -73,15 +73,11 @@ const NARRATIVE_BULLETS: string[] = [
  * Compute androgen-age risk model outputs.
  * Pure engine logic: no UI, no canvas. Same module for B2C and B2B.
  */
-export function computeAndrogenAgeModule(
-  input: AndrogenAgeInput
-): AndrogenAgeModuleOutput {
+export function computeAndrogenAgeModule(input: AndrogenAgeInput): AndrogenAgeModuleOutput {
   const { patientAge, freeTPct, trt, dhtManagement } = input;
 
   const ftFactor =
-    freeTPct != null
-      ? Math.min(1.3, Math.max(0.7, 0.7 + 0.6 * (freeTPct / 100)))
-      : 1.0;
+    freeTPct != null ? Math.min(1.3, Math.max(0.7, 0.7 + 0.6 * (freeTPct / 100))) : 1.0;
 
   const annotations: string[] = [];
   if (freeTPct == null) annotations.push("Free T not available");

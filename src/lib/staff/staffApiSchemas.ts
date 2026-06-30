@@ -37,7 +37,10 @@ export const staffCreateBodySchema = z.object({
   adminKey: z.string().optional(),
   full_name: z.string().min(1, "Name is required.").max(200),
   staff_role: z.string().min(1).max(80).optional(),
-  email: z.union([z.string().email(), z.literal("")]).optional().nullable(),
+  email: z
+    .union([z.string().email(), z.literal("")])
+    .optional()
+    .nullable(),
   mobile: z.string().max(40).optional().nullable(),
   default_timezone: z.string().max(80).optional().nullable(),
   working_hours: workingHoursSchema,
@@ -50,7 +53,10 @@ export const staffPatchBodySchema = z.object({
   adminKey: z.string().optional(),
   full_name: z.string().min(1).max(200).optional(),
   staff_role: z.string().min(1).max(80).optional(),
-  email: z.union([z.string().email(), z.literal("")]).optional().nullable(),
+  email: z
+    .union([z.string().email(), z.literal("")])
+    .optional()
+    .nullable(),
   mobile: z.string().max(40).optional().nullable(),
   default_timezone: z.string().max(80).optional().nullable(),
   working_hours: workingHoursSchema,

@@ -125,7 +125,9 @@ test("clinical assignment error message format for server mutations", () => {
 });
 
 test("stale HR sync blocks clinical availability", () => {
-  const staleAt = new Date(NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000).toISOString();
+  const staleAt = new Date(
+    NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000
+  ).toISOString();
   const readiness = buildClinicalStaffPickerReadiness({
     full_name: "Alex",
     staff_role: "surgeon",

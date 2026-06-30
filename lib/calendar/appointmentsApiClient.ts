@@ -35,11 +35,13 @@ export async function fetchCalendarAppointments(
   const res = await fetch(`${tenantAppointmentsBase(params.tenantId)}?${sp.toString()}`, {
     credentials: "include",
   });
-  const json = (await res.json()) as ApiOk<{
-    date: string;
-    providerId: string | null;
-    appointments: CalendarAppointment[];
-  }> | ApiErr;
+  const json = (await res.json()) as
+    | ApiOk<{
+        date: string;
+        providerId: string | null;
+        appointments: CalendarAppointment[];
+      }>
+    | ApiErr;
   if (!res.ok || !json.ok) {
     throw new Error(!json.ok ? json.error : `Request failed (${res.status}).`);
   }
@@ -162,7 +164,7 @@ export async function rescheduleCalendarAppointmentRequest(
   return {
     ok: false,
     error: !json.ok ? json.error : `Request failed (${res.status}).`,
-    conflictingAppointmentId: !json.ok ? json.conflictingAppointmentId ?? null : null,
+    conflictingAppointmentId: !json.ok ? (json.conflictingAppointmentId ?? null) : null,
     isConflict: res.status === 409,
   };
 }

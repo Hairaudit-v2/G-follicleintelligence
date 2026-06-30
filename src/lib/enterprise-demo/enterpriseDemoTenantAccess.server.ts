@@ -14,7 +14,9 @@ export type ResolvedEnterpriseDemoTenant = {
   tenantName: string;
 };
 
-async function loadTenantSettingsMetadata(tenantId: string): Promise<Record<string, unknown> | null> {
+async function loadTenantSettingsMetadata(
+  tenantId: string
+): Promise<Record<string, unknown> | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_tenant_settings")

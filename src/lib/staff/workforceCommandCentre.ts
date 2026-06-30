@@ -17,16 +17,17 @@ export type WorkforceRoleSegmentId =
   | "consultants"
   | "management";
 
-export const WORKFORCE_ROLE_SEGMENTS: ReadonlyArray<{ id: WorkforceRoleSegmentId; label: string }> = [
-  { id: "all", label: "All" },
-  { id: "clinical", label: "Clinical" },
-  { id: "surgeons", label: "Surgeons" },
-  { id: "nurses", label: "Nurses" },
-  { id: "technicians", label: "Technicians" },
-  { id: "reception", label: "Reception" },
-  { id: "consultants", label: "Consultants" },
-  { id: "management", label: "Management" },
-];
+export const WORKFORCE_ROLE_SEGMENTS: ReadonlyArray<{ id: WorkforceRoleSegmentId; label: string }> =
+  [
+    { id: "all", label: "All" },
+    { id: "clinical", label: "Clinical" },
+    { id: "surgeons", label: "Surgeons" },
+    { id: "nurses", label: "Nurses" },
+    { id: "technicians", label: "Technicians" },
+    { id: "reception", label: "Reception" },
+    { id: "consultants", label: "Consultants" },
+    { id: "management", label: "Management" },
+  ];
 
 export type StaffWorkforceIntelligence = {
   readinessScore: number | null;
@@ -75,10 +76,15 @@ const SURGERY_READY_BANDS = new Set<WorkforceReadinessBandId>(["fully_ready", "e
 const LOW_READINESS_THRESHOLD = 70;
 
 function normalizeRole(role: string | null | undefined): string {
-  return String(role ?? "").trim().toLowerCase();
+  return String(role ?? "")
+    .trim()
+    .toLowerCase();
 }
 
-export function staffMatchesRoleSegment(staffRole: string | null | undefined, segment: WorkforceRoleSegmentId): boolean {
+export function staffMatchesRoleSegment(
+  staffRole: string | null | undefined,
+  segment: WorkforceRoleSegmentId
+): boolean {
   if (segment === "all") return true;
   const role = normalizeRole(staffRole);
   switch (segment) {
@@ -113,7 +119,11 @@ function isPendingOnboarding(row: StaffDirectoryRowView): boolean {
   if (row.needsReview) return true;
   if (row.hrNotification.onboardingStatus === "incomplete") return true;
   if (!row.is_active) return false;
-  return row.hrNotification.hasHrLink && row.hrNotification.onboardingStatus === "unknown" && row.hrNotification.outstandingTaskCount > 0;
+  return (
+    row.hrNotification.hasHrLink &&
+    row.hrNotification.onboardingStatus === "unknown" &&
+    row.hrNotification.outstandingTaskCount > 0
+  );
 }
 
 function hasComplianceIssue(status: StaffComplianceStatus | null | undefined): boolean {
@@ -244,7 +254,10 @@ function pickNextAction(input: {
   if (input.trainingRequiredCount > 0) {
     return `Assign or verify training for ${input.trainingRequiredCount} active staff member${input.trainingRequiredCount === 1 ? "" : "s"}.`;
   }
-  if (input.averageReadinessScore != null && input.averageReadinessScore < LOW_READINESS_THRESHOLD) {
+  if (
+    input.averageReadinessScore != null &&
+    input.averageReadinessScore < LOW_READINESS_THRESHOLD
+  ) {
     return "Workforce readiness is below operational threshold — review Staff Twin profiles and HR sync health.";
   }
   return "Workforce is operationally clear — monitor roster coverage and upcoming shifts.";
@@ -299,7 +312,9 @@ function formatAttentionPrimaryLabel(reasons: WorkforceAttentionReason[]): strin
   return "Needs attention";
 }
 
-export function formatComplianceStatusLabel(status: StaffComplianceStatus | null | undefined): string {
+export function formatComplianceStatusLabel(
+  status: StaffComplianceStatus | null | undefined
+): string {
   switch (status) {
     case "current":
       return "Current";
@@ -316,7 +331,9 @@ export function formatComplianceStatusLabel(status: StaffComplianceStatus | null
   }
 }
 
-export function complianceStatusPillClass(status: StaffComplianceStatus | null | undefined): string {
+export function complianceStatusPillClass(
+  status: StaffComplianceStatus | null | undefined
+): string {
   switch (status) {
     case "current":
       return "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25";

@@ -29,8 +29,8 @@ export function PatientVoiceClinicalNotesCard({
         <h2 className="text-sm font-semibold text-slate-100">Clinical notes (voice)</h2>
       </div>
       <p className="mt-1 text-xs text-gray-500">
-        AI-generated entries stay in <strong>AI draft</strong> until a clinician approves them. Use the{" "}
-        <strong>Voice note</strong> button in the Actions bar above to record or upload audio.
+        AI-generated entries stay in <strong>AI draft</strong> until a clinician approves them. Use
+        the <strong>Voice note</strong> button in the Actions bar above to record or upload audio.
       </p>
       {items.length === 0 ? (
         <p className="mt-3 text-sm text-slate-400">No voice clinical notes yet.</p>
@@ -39,11 +39,15 @@ export function PatientVoiceClinicalNotesCard({
           {items.map((row) => (
             <li key={row.id} className="py-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${statusClass(row.record_status)}`}>
+                <span
+                  className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${statusClass(row.record_status)}`}
+                >
                   {statusLabel(row.record_status)}
                 </span>
                 <span className="font-mono text-[10px] text-gray-400">{row.id.slice(0, 8)}…</span>
-                <span className="text-xs text-gray-500">{new Date(row.created_at).toLocaleString()}</span>
+                <span className="text-xs text-gray-500">
+                  {new Date(row.created_at).toLocaleString()}
+                </span>
                 {row.case_id ? (
                   <Link
                     href={`/fi-admin/${tenantId.trim()}/cases/${row.case_id}`}

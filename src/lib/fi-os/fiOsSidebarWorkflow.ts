@@ -52,7 +52,9 @@ export const FI_OS_SIDEBAR_ITEM_DEFAULT_GROUP: Record<string, FiOsWorkflowGroupI
 };
 
 /** Persona-specific overrides only (never removes access — Stage 2 still filters rows). */
-const PROFILE_GROUP_OVERRIDES: Partial<Record<FiWorkspaceProfileKey, Partial<Record<string, FiOsWorkflowGroupId>>>> = {
+const PROFILE_GROUP_OVERRIDES: Partial<
+  Record<FiWorkspaceProfileKey, Partial<Record<string, FiOsWorkflowGroupId>>>
+> = {
   surgeon: { "patient-twin": "CLINICAL" },
   doctor: { "patient-twin": "CLINICAL" },
   nurse: { "patient-twin": "CLINICAL" },
@@ -73,7 +75,8 @@ export function workflowGroupForNavItemId(
   itemId: string,
   workspaceProfile: FiWorkspaceProfileKey | null | undefined
 ): FiOsWorkflowGroupId {
-  const p = workspaceProfile && isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
+  const p =
+    workspaceProfile && isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
   const override = PROFILE_GROUP_OVERRIDES[p]?.[itemId];
   if (override) return override;
   return FI_OS_SIDEBAR_ITEM_DEFAULT_GROUP[itemId] ?? "INTELLIGENCE";
@@ -83,8 +86,11 @@ export function workflowGroupForNavItemId(
  * Reorders workflow groups for sidebar emphasis (Stage UI activation).
  * Feature access still removes individual rows; empty groups are dropped later.
  */
-export function orderedWorkflowGroupsForWorkspace(workspaceProfile: FiWorkspaceProfileKey | null | undefined): FiOsWorkflowGroupId[] {
-  const p = workspaceProfile && isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
+export function orderedWorkflowGroupsForWorkspace(
+  workspaceProfile: FiWorkspaceProfileKey | null | undefined
+): FiOsWorkflowGroupId[] {
+  const p =
+    workspaceProfile && isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
   const base = [...FI_OS_WORKFLOW_GROUP_IDS];
   let ordered: FiOsWorkflowGroupId[];
   switch (p) {
@@ -123,7 +129,10 @@ export type FiOsSidebarWorkflowSection = {
   items: FiOsPrimarySidebarItem[];
 };
 
-function sortItemsByGroupOrder(groupId: FiOsWorkflowGroupId, items: FiOsPrimarySidebarItem[]): FiOsPrimarySidebarItem[] {
+function sortItemsByGroupOrder(
+  groupId: FiOsWorkflowGroupId,
+  items: FiOsPrimarySidebarItem[]
+): FiOsPrimarySidebarItem[] {
   const order = GROUP_MEMBER_ORDER[groupId];
   const idx = (id: string) => {
     const i = order.indexOf(id);

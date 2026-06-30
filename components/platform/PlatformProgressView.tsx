@@ -67,14 +67,20 @@ function ModuleProgressCard({ module, index }: { module: PlatformProgressModule;
 
         {hidePercent && deploymentStatus ? (
           <div className="mt-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Status</p>
-            <p className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground">{deploymentStatus}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Status
+            </p>
+            <p className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground">
+              {deploymentStatus}
+            </p>
           </div>
         ) : (
           <>
             <div className="mt-6 grid gap-6 sm:grid-cols-[auto_1fr] sm:items-end">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Completion</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Completion
+                </p>
                 <p className="mt-2 font-mono text-4xl font-semibold tabular-nums tracking-tight text-foreground">
                   {module.completionPercent}
                   <span className="text-xl text-muted-foreground">%</span>
@@ -84,7 +90,9 @@ function ModuleProgressCard({ module, index }: { module: PlatformProgressModule;
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Infrastructure phase
                 </p>
-                <p className="mt-2 text-sm font-medium leading-snug text-amber-100/85">{module.stage}</p>
+                <p className="mt-2 text-sm font-medium leading-snug text-amber-100/85">
+                  {module.stage}
+                </p>
               </div>
             </div>
             <div className="mt-5">
@@ -103,18 +111,26 @@ function ModuleProgressCard({ module, index }: { module: PlatformProgressModule;
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Infrastructure phase
             </p>
-            <p className="mt-2 text-sm font-medium leading-snug text-amber-100/85">{module.stage}</p>
+            <p className="mt-2 text-sm font-medium leading-snug text-amber-100/85">
+              {module.stage}
+            </p>
           </div>
         ) : null}
 
         {module.latestMilestone ? (
           <div className="mt-6 rounded-xl border border-white/[0.06] bg-black/20 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Latest milestone</p>
-            <p className="mt-2 text-sm leading-relaxed text-foreground/90">{module.latestMilestone}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Latest milestone
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-foreground/90">
+              {module.latestMilestone}
+            </p>
           </div>
         ) : null}
 
-        <p className="mt-5 flex-1 text-sm leading-[1.7] text-muted-foreground">{module.description}</p>
+        <p className="mt-5 flex-1 text-sm leading-[1.7] text-muted-foreground">
+          {module.description}
+        </p>
 
         {module.learnMoreHref ? (
           <Link
@@ -122,7 +138,10 @@ function ModuleProgressCard({ module, index }: { module: PlatformProgressModule;
             className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-200/95 transition-colors hover:text-amber-50"
           >
             Surface documentation
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+            <ArrowRight
+              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
           </Link>
         ) : null}
       </GlassCard>
@@ -130,7 +149,13 @@ function ModuleProgressCard({ module, index }: { module: PlatformProgressModule;
   );
 }
 
-function IntelligenceSystemCard({ module, index }: { module: PlatformProgressModule; index: number }) {
+function IntelligenceSystemCard({
+  module,
+  index,
+}: {
+  module: PlatformProgressModule;
+  index: number;
+}) {
   const hidePercent = isPlatformInfrastructureCoreSystem(module.id);
   const deploymentStatus = getPlatformInfrastructureDeploymentStatus(module.id);
 
@@ -139,21 +164,31 @@ function IntelligenceSystemCard({ module, index }: { module: PlatformProgressMod
       <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.06] to-transparent p-5 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amber-400/20 sm:p-6">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/25 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-lg font-semibold tracking-tight text-foreground">{module.name}</h3>
+          <h3 className="font-display text-lg font-semibold tracking-tight text-foreground">
+            {module.name}
+          </h3>
           {hidePercent && deploymentStatus ? (
             <span className="max-w-[8rem] text-right text-[10px] font-semibold uppercase leading-snug tracking-[0.12em] text-emerald-200/85">
               Deployed
             </span>
           ) : (
-            <span className="font-mono text-lg font-semibold tabular-nums text-amber-200/90">{module.completionPercent}%</span>
+            <span className="font-mono text-lg font-semibold tabular-nums text-amber-200/90">
+              {module.completionPercent}%
+            </span>
           )}
         </div>
         <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          {hidePercent && deploymentStatus ? deploymentStatus : (module.statusLabel ?? module.status)}
+          {hidePercent && deploymentStatus
+            ? deploymentStatus
+            : (module.statusLabel ?? module.status)}
         </p>
         {!hidePercent ? (
           <div className="mt-4">
-            <PlatformProgressAnimatedBar percent={module.completionPercent} status={module.status} delay={0.04 + index * 0.02} />
+            <PlatformProgressAnimatedBar
+              percent={module.completionPercent}
+              status={module.status}
+              delay={0.04 + index * 0.02}
+            />
           </div>
         ) : null}
       </div>
@@ -161,11 +196,20 @@ function IntelligenceSystemCard({ module, index }: { module: PlatformProgressMod
   );
 }
 
-function ArchitecturalSystemGroup({ group, groupIndex }: { group: PlatformSystemArchitectureGroup; groupIndex: number }) {
+function ArchitecturalSystemGroup({
+  group,
+  groupIndex,
+}: {
+  group: PlatformSystemArchitectureGroup;
+  groupIndex: number;
+}) {
   const modules = resolvePlatformProgressModulesByName(group.moduleNames);
 
   return (
-    <details open className="group/arch overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-black/15">
+    <details
+      open
+      className="group/arch overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-black/15"
+    >
       <summary className="cursor-pointer list-none px-6 py-6 sm:px-8 sm:py-7 [&::-webkit-details-marker]:hidden">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-3xl">
@@ -175,7 +219,9 @@ function ArchitecturalSystemGroup({ group, groupIndex }: { group: PlatformSystem
             <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
               {group.heading}
             </h3>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">{group.description}</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {group.description}
+            </p>
           </div>
           <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
             {modules.length} systems
@@ -211,7 +257,9 @@ function PlatformMetricsStrip() {
             {platformMetrics.map((metric, index) => (
               <GlassCard key={metric.label} className="border-white/[0.07] !p-5 sm:!p-6">
                 <FadeIn delay={0.03 * index}>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{metric.label}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    {metric.label}
+                  </p>
                   <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
                     {metric.value}
                   </p>
@@ -290,7 +338,9 @@ function InfrastructureLayerCard({
             <Icon className="h-5 w-5 text-amber-200/80" aria-hidden />
           </div>
           <div>
-            <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">{layer.name}</h3>
+            <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
+              {layer.name}
+            </h3>
             <p className="mt-1 text-sm text-amber-100/75">{layer.tagline}</p>
           </div>
         </div>
@@ -347,7 +397,9 @@ function EventBusFeaturedSection() {
           <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-3">
             {c.eventBus.capabilities.map((cap, index) => (
               <div key={cap} className="bg-[#040810] px-6 py-5 sm:px-8 sm:py-6">
-                <p className="font-mono text-[10px] tabular-nums text-cyan-200/50">{String(index + 1).padStart(2, "0")}</p>
+                <p className="font-mono text-[10px] tabular-nums text-cyan-200/50">
+                  {String(index + 1).padStart(2, "0")}
+                </p>
                 <p className="mt-2 text-sm font-medium text-foreground/92">{cap}</p>
               </div>
             ))}
@@ -380,13 +432,18 @@ function DeploymentTimeline() {
           <li key={entry.id}>
             <FadeIn delay={0.025 * (index % 8)}>
               <div className="flex flex-col gap-3 px-6 py-5 transition-colors hover:bg-white/[0.02] sm:flex-row sm:items-center sm:gap-8 sm:px-8 sm:py-6">
-                <time dateTime={entry.date} className="shrink-0 font-mono text-xs tabular-nums text-amber-200/70">
+                <time
+                  dateTime={entry.date}
+                  className="shrink-0 font-mono text-xs tabular-nums text-amber-200/70"
+                >
                   {entry.date}
                 </time>
                 <span className="inline-flex w-fit shrink-0 rounded-md border border-white/[0.08] bg-black/25 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-200/80">
                   {entry.tag}
                 </span>
-                <p className="font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">{entry.title}</p>
+                <p className="font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
+                  {entry.title}
+                </p>
               </div>
             </FadeIn>
           </li>
@@ -405,14 +462,23 @@ function ExtendedChangelog() {
             <FadeIn delay={0.02 * (index % 6)}>
               <div className="grid gap-4 px-6 py-5 sm:grid-cols-[7rem_1fr] sm:px-8 sm:py-6">
                 <div>
-                  <time dateTime={entry.date} className="font-mono text-xs tabular-nums text-muted-foreground">
+                  <time
+                    dateTime={entry.date}
+                    className="font-mono text-xs tabular-nums text-muted-foreground"
+                  >
                     {entry.date}
                   </time>
-                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-200/70">{entry.tag}</p>
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-200/70">
+                    {entry.tag}
+                  </p>
                 </div>
                 <div>
-                  <h3 className="font-display text-base font-semibold text-foreground">{entry.title}</h3>
-                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">{entry.summary}</p>
+                  <h3 className="font-display text-base font-semibold text-foreground">
+                    {entry.title}
+                  </h3>
+                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+                    {entry.summary}
+                  </p>
                 </div>
               </div>
             </FadeIn>
@@ -440,8 +506,13 @@ export function PlatformProgressView() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-28 md:py-36">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-amber-200/80">{c.hero.eyebrow}</p>
-            <div className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/60 via-amber-400/20 to-transparent" aria-hidden />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-amber-200/80">
+              {c.hero.eyebrow}
+            </p>
+            <div
+              className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/60 via-amber-400/20 to-transparent"
+              aria-hidden
+            />
             <h1
               id="platform-progress-hero-heading"
               className="mt-8 max-w-5xl font-display text-[2.25rem] font-semibold leading-[1.06] tracking-tight text-foreground text-balance sm:text-5xl md:text-[3.25rem] md:leading-[1.05]"
@@ -456,13 +527,17 @@ export function PlatformProgressView() {
                 <Sparkles className="h-4 w-4 text-amber-300/70" aria-hidden />
                 <span>
                   Registry updated{" "}
-                  <time dateTime={c.hero.lastUpdated} className="font-mono tabular-nums text-foreground/90">
+                  <time
+                    dateTime={c.hero.lastUpdated}
+                    className="font-mono tabular-nums text-foreground/90"
+                  >
                     {c.hero.lastUpdated}
                   </time>
                 </span>
               </span>
               <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground/90">
-                {snapshot.activeModuleCount} systems · {snapshot.fiOsCorePlatformPercent}% ecosystem completion
+                {snapshot.activeModuleCount} systems · {snapshot.fiOsCorePlatformPercent}% ecosystem
+                completion
               </span>
             </div>
           </FadeIn>
@@ -532,7 +607,12 @@ export function PlatformProgressView() {
           />
           <div className="mt-14 grid gap-6 md:grid-cols-2">
             {PLATFORM_PROGRESS_INFRASTRUCTURE_LAYERS.map((layer, i) => (
-              <InfrastructureLayerCard key={layer.id} layer={layer} index={i} icon={INFRA_ICONS[i] ?? ServerCog} />
+              <InfrastructureLayerCard
+                key={layer.id}
+                layer={layer}
+                index={i}
+                icon={INFRA_ICONS[i] ?? ServerCog}
+              />
             ))}
           </div>
         </FadeIn>
@@ -560,7 +640,10 @@ export function PlatformProgressView() {
                 {vieModule ? (
                   <>
                     <div className="flex flex-wrap items-center gap-4">
-                      <PlatformProgressStatusBadge status={vieModule.status} label={vieModule.statusLabel} />
+                      <PlatformProgressStatusBadge
+                        status={vieModule.status}
+                        label={vieModule.statusLabel}
+                      />
                       <span className="font-mono text-3xl font-semibold tabular-nums text-foreground">
                         {vieModule.completionPercent}%
                       </span>
@@ -568,7 +651,9 @@ export function PlatformProgressView() {
                     <p className="mt-4 text-sm font-medium uppercase tracking-[0.14em] text-violet-200/75">
                       {vieModule.stage}
                     </p>
-                    <p className="mt-6 text-base leading-[1.75] text-muted-foreground">{vieModule.description}</p>
+                    <p className="mt-6 text-base leading-[1.75] text-muted-foreground">
+                      {vieModule.description}
+                    </p>
                     {vieModule.latestMilestone ? (
                       <p className="mt-6 rounded-xl border border-violet-400/15 bg-violet-950/20 px-4 py-3 text-sm text-foreground/90">
                         Latest: {vieModule.latestMilestone}
@@ -578,7 +663,9 @@ export function PlatformProgressView() {
                 ) : null}
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Capabilities</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Capabilities
+                </p>
                 <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                   {PLATFORM_PROGRESS_VIE_CAPABILITIES.map((cap) => (
                     <li
@@ -622,7 +709,10 @@ export function PlatformProgressView() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-violet-200/75">
             {c.intelligenceNetwork.eyebrow}
           </p>
-          <div className="mt-4 h-px w-16 bg-gradient-to-r from-violet-300/55 to-transparent" aria-hidden />
+          <div
+            className="mt-4 h-px w-16 bg-gradient-to-r from-violet-300/55 to-transparent"
+            aria-hidden
+          />
           <h2
             id="intelligence-network-heading"
             className="mt-8 max-w-4xl font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl"
@@ -688,7 +778,9 @@ export function PlatformProgressView() {
               </ul>
             </div>
             <GlassCard className="border-amber-400/12 !p-8 sm:!p-10">
-              <p className="text-lg leading-[1.75] text-foreground/92 sm:text-xl">{c.defensibility.closing}</p>
+              <p className="text-lg leading-[1.75] text-foreground/92 sm:text-xl">
+                {c.defensibility.closing}
+              </p>
             </GlassCard>
           </div>
         </FadeIn>
@@ -721,8 +813,13 @@ export function PlatformProgressView() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,rgb(167_139_250_/0.08),transparent_40%)]" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-amber-200/75">{c.closing.eyebrow}</p>
-            <div className="mt-5 h-px w-20 bg-gradient-to-r from-amber-300/50 to-transparent" aria-hidden />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-amber-200/75">
+              {c.closing.eyebrow}
+            </p>
+            <div
+              className="mt-5 h-px w-20 bg-gradient-to-r from-amber-300/50 to-transparent"
+              aria-hidden
+            />
             <h2
               id="platform-progress-closing-heading"
               className="mt-10 max-w-5xl font-display text-4xl font-semibold leading-[1.08] tracking-tight text-foreground text-balance sm:text-5xl md:text-[3.5rem] md:leading-[1.06]"

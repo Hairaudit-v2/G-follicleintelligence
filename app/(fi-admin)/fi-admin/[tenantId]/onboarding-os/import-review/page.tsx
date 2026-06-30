@@ -42,7 +42,11 @@ export default async function OnboardingOsImportReviewPage({
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   let integrationId = typeof sp.integrationId === "string" ? sp.integrationId.trim() : "";
@@ -59,10 +63,13 @@ export default async function OnboardingOsImportReviewPage({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">OnboardingOS import review</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          OnboardingOS import review
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Convert approved connector staging records into native FI leads and opportunities. Every import requires
-          explicit human approval — no automatic import, no HubSpot write-back, and no overwrite of existing FI records.
+          Convert approved connector staging records into native FI leads and opportunities. Every
+          import requires explicit human approval — no automatic import, no HubSpot write-back, and
+          no overwrite of existing FI records.
         </p>
       </div>
       <ImportReviewPanel

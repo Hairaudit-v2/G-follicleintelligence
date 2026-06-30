@@ -25,8 +25,12 @@ export function PublicPaymentPathwaySelector(props: {
   } = props;
 
   const [pending, start] = useTransition();
-  const [selectedType, setSelectedType] = useState<FiPaymentPathwayType | null>(initialSelectedPathwayType);
-  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(initialConfirmationMessage);
+  const [selectedType, setSelectedType] = useState<FiPaymentPathwayType | null>(
+    initialSelectedPathwayType
+  );
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
+    initialConfirmationMessage
+  );
   const [showCheckout, setShowCheckout] = useState(initialShowCheckout);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(initialCheckoutUrl);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +55,8 @@ export function PublicPaymentPathwaySelector(props: {
       <div>
         <h2 className="text-sm font-semibold text-slate-100">Choose your payment option</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Select how you would like to proceed. Your clinic will see your choice and follow up where needed.
+          Select how you would like to proceed. Your clinic will see your choice and follow up where
+          needed.
         </p>
       </div>
 
@@ -74,19 +79,27 @@ export function PublicPaymentPathwaySelector(props: {
                 <span className="block text-sm font-semibold text-slate-100">{opt.title}</span>
                 <span className="mt-0.5 block text-xs text-slate-400">{opt.description}</span>
                 {isSelected ? (
-                  <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-blue-300">Selected</span>
+                  <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-blue-300">
+                    Selected
+                  </span>
                 ) : null}
-                {isBusy ? <span className="mt-1 block text-[11px] text-slate-500">Saving…</span> : null}
+                {isBusy ? (
+                  <span className="mt-1 block text-[11px] text-slate-500">Saving…</span>
+                ) : null}
               </button>
             </li>
           );
         })}
       </ul>
 
-      {error ? <p className="rounded bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{error}</p> : null}
+      {error ? (
+        <p className="rounded bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{error}</p>
+      ) : null}
 
       {confirmationMessage ? (
-        <p className="rounded bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">{confirmationMessage}</p>
+        <p className="rounded bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+          {confirmationMessage}
+        </p>
       ) : null}
 
       {showCheckout && checkoutUrl ? (
@@ -97,7 +110,9 @@ export function PublicPaymentPathwaySelector(props: {
           >
             Pay now
           </a>
-          <p className="mt-2 text-xs text-slate-500">You will leave this page to complete card payment with our payment partner.</p>
+          <p className="mt-2 text-xs text-slate-500">
+            You will leave this page to complete card payment with our payment partner.
+          </p>
         </div>
       ) : null}
     </section>

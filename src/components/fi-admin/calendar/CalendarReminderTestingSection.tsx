@@ -66,7 +66,9 @@ export function CalendarReminderTestingSection({
     setBookingErr(null);
     setBookingJobs(null);
     try {
-      const r = await listCalendarReminderJobsForBookingAction(tid, { bookingId: bookingId.trim() });
+      const r = await listCalendarReminderJobsForBookingAction(tid, {
+        bookingId: bookingId.trim(),
+      });
       if (!r.ok) {
         setBookingErr(r.error);
         return;
@@ -125,10 +127,16 @@ export function CalendarReminderTestingSection({
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-semibold text-slate-100">Appointment reminders (UAT)</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Inspect templates and jobs, preview merged copy, and optionally send a <strong>test email</strong> to{" "}
-              <code className="rounded bg-white/[0.06] px-1 font-mono text-xs">FI_REMINDER_TEST_EMAIL</code> when{" "}
-              <code className="rounded bg-white/[0.06] px-1 font-mono text-xs">FI_REMINDERS_TEST_SEND=true</code>. Patient
-              addresses are never used from this panel.
+              Inspect templates and jobs, preview merged copy, and optionally send a{" "}
+              <strong>test email</strong> to{" "}
+              <code className="rounded bg-white/[0.06] px-1 font-mono text-xs">
+                FI_REMINDER_TEST_EMAIL
+              </code>{" "}
+              when{" "}
+              <code className="rounded bg-white/[0.06] px-1 font-mono text-xs">
+                FI_REMINDERS_TEST_SEND=true
+              </code>
+              . Patient addresses are never used from this panel.
             </p>
           </div>
         </div>
@@ -137,16 +145,22 @@ export function CalendarReminderTestingSection({
           <div
             className={cn(
               "rounded-lg border p-3 text-sm",
-              reminders.liveDeliveryEnabled ? "border-amber-400/20 bg-amber-400/10 text-amber-200" : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
+              reminders.liveDeliveryEnabled
+                ? "border-amber-400/20 bg-amber-400/10 text-amber-200"
+                : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
             )}
           >
-            <p className="font-semibold">{reminders.liveDeliveryEnabled ? "Live delivery ON" : "Live delivery OFF"}</p>
+            <p className="font-semibold">
+              {reminders.liveDeliveryEnabled ? "Live delivery ON" : "Live delivery OFF"}
+            </p>
             <p className="mt-1 leading-relaxed opacity-90">{reminders.liveDeliveryHelp}</p>
           </div>
           <div
             className={cn(
               "rounded-lg border p-3 text-sm",
-              reminders.testSendConfigured ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-200" : "border-white/[0.08] bg-white/[0.03] text-slate-200"
+              reminders.testSendConfigured
+                ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-200"
+                : "border-white/[0.08] bg-white/[0.03] text-slate-200"
             )}
           >
             <p className="font-semibold">Test email override</p>
@@ -165,19 +179,30 @@ export function CalendarReminderTestingSection({
           </span>
         </div>
 
-        <p className="mt-4 text-sm leading-relaxed text-slate-400">{reminders.bookingEnqueueSummary}</p>
+        <p className="mt-4 text-sm leading-relaxed text-slate-400">
+          {reminders.bookingEnqueueSummary}
+        </p>
       </FiCard>
 
       <FiCard>
         <h3 className="text-sm font-semibold text-slate-100">Template readiness</h3>
-        <p className="mt-1 text-xs text-slate-500">Active templates in this tenant vs common UAT scenarios.</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Active templates in this tenant vs common UAT scenarios.
+        </p>
         <ul className="mt-3 divide-y divide-white/[0.06]">
           {reminders.templateChecklist.map((row) => (
-            <li key={row.id} className="flex flex-col gap-1 py-3 first:pt-0 sm:flex-row sm:items-start sm:justify-between">
+            <li
+              key={row.id}
+              className="flex flex-col gap-1 py-3 first:pt-0 sm:flex-row sm:items-start sm:justify-between"
+            >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-medium text-slate-100">{row.label}</span>
-                  <FiStatusBadge tone={row.satisfied ? "success" : "warning"} appearance="pill" density="compact">
+                  <FiStatusBadge
+                    tone={row.satisfied ? "success" : "warning"}
+                    appearance="pill"
+                    density="compact"
+                  >
                     {row.satisfied ? "Ready" : "Gap"}
                   </FiStatusBadge>
                 </div>
@@ -189,7 +214,9 @@ export function CalendarReminderTestingSection({
       </FiCard>
 
       <FiCard>
-        <h3 className="text-sm font-semibold text-slate-100">Reminder jobs (last 30 days, tenant-wide)</h3>
+        <h3 className="text-sm font-semibold text-slate-100">
+          Reminder jobs (last 30 days, tenant-wide)
+        </h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {statKeys.map((k) => (
             <span
@@ -206,13 +233,18 @@ export function CalendarReminderTestingSection({
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Failed (recent)</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Failed (recent)
+            </h4>
             {reminders.recentFailedJobs.length === 0 ? (
               <p className="mt-2 text-sm text-slate-400">No failed jobs in range.</p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {reminders.recentFailedJobs.map((j) => (
-                  <li key={j.id} className="rounded border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md p-2 text-xs">
+                  <li
+                    key={j.id}
+                    className="rounded border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md p-2 text-xs"
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-medium text-slate-100">{j.template_name}</span>
                       <span className="text-slate-500">{j.scheduled_at}</span>
@@ -242,13 +274,20 @@ export function CalendarReminderTestingSection({
             )}
           </div>
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Upcoming (pending)</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Upcoming (pending)
+            </h4>
             {reminders.upcomingJobs.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-400">No upcoming pending jobs (or none scheduled ahead).</p>
+              <p className="mt-2 text-sm text-slate-400">
+                No upcoming pending jobs (or none scheduled ahead).
+              </p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {reminders.upcomingJobs.map((j) => (
-                  <li key={j.id} className="rounded border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md p-2 text-xs">
+                  <li
+                    key={j.id}
+                    className="rounded border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md p-2 text-xs"
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-medium text-slate-100">{j.template_name}</span>
                       <span className="text-slate-500">{j.scheduled_at}</span>
@@ -258,7 +297,8 @@ export function CalendarReminderTestingSection({
                       {j.booking_id ? (
                         <>
                           {" "}
-                          · booking <code className="font-mono text-[10px]">{j.booking_id.slice(0, 8)}…</code>
+                          · booking{" "}
+                          <code className="font-mono text-[10px]">{j.booking_id.slice(0, 8)}…</code>
                         </>
                       ) : null}
                     </p>
@@ -290,7 +330,9 @@ export function CalendarReminderTestingSection({
 
       <FiCard>
         <h3 className="text-sm font-semibold text-slate-100">Booking reminder jobs</h3>
-        <p className="mt-1 text-sm text-slate-400">Paste a booking UUID to list all reminder jobs anchored to it.</p>
+        <p className="mt-1 text-sm text-slate-400">
+          Paste a booking UUID to list all reminder jobs anchored to it.
+        </p>
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
           <label className="block min-w-0 flex-1 text-xs font-medium text-slate-300">
             Booking ID
@@ -323,13 +365,18 @@ export function CalendarReminderTestingSection({
         {bookingJobs && bookingJobs.length > 0 ? (
           <ul className="mt-3 divide-y divide-white/[0.06] rounded border border-white/[0.06]">
             {bookingJobs.map((j) => (
-              <li key={j.id} className="flex flex-col gap-2 px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between">
+              <li
+                key={j.id}
+                className="flex flex-col gap-2 px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="min-w-0">
                   <p className="font-medium text-slate-100">{j.template_name}</p>
                   <p className="text-slate-400">
                     {j.scheduled_at} · {j.status} · {j.template_type} · {j.template_trigger_event}
                   </p>
-                  {j.error_log ? <p className="mt-1 font-mono text-[11px] text-rose-300">{j.error_log}</p> : null}
+                  {j.error_log ? (
+                    <p className="mt-1 font-mono text-[11px] text-rose-300">{j.error_log}</p>
+                  ) : null}
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <button
@@ -343,7 +390,9 @@ export function CalendarReminderTestingSection({
                   <button
                     type="button"
                     disabled={sendBusy === j.id || j.template_type !== "email"}
-                    title={j.template_type !== "email" ? "Test send supports email jobs only" : undefined}
+                    title={
+                      j.template_type !== "email" ? "Test send supports email jobs only" : undefined
+                    }
                     onClick={() => void onSendTest(j.id)}
                     className="rounded border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold text-cyan-200 hover:bg-cyan-500/15 disabled:opacity-50"
                   >
@@ -361,11 +410,16 @@ export function CalendarReminderTestingSection({
       {sendMsg ? <p className="text-sm text-emerald-300">{sendMsg}</p> : null}
 
       {preview ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" role="dialog">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+          role="dialog"
+        >
           <div className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl bg-[#0F1629]/80 backdrop-blur-md shadow-xl">
             <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
               <div>
-                <p className="text-sm font-semibold text-slate-100">Preview · {preview.templateName}</p>
+                <p className="text-sm font-semibold text-slate-100">
+                  Preview · {preview.templateName}
+                </p>
                 <p className="text-xs text-slate-500">
                   {preview.triggerEvent} · {preview.channel}
                 </p>

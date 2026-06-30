@@ -7,7 +7,11 @@ import { CrmPipelinePanel } from "@/src/components/fi/crm/CrmDataPanels";
 import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
 import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 import { summarizeHubspotDiagnostics } from "@/src/lib/fiAdmin/leadFlowPresentation";
-import type { CrmShellClinicOption, CrmShellOrgOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type {
+  CrmShellClinicOption,
+  CrmShellOrgOption,
+  CrmShellUserPickerOption,
+} from "@/src/lib/crm/types";
 
 export function LeadFlowSystemDiagnostics({
   tenantId,
@@ -42,11 +46,13 @@ export function LeadFlowSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support lead integrity and external imports without affecting
-              day-to-day conversion workflows.
+              For platform operators only. These checks support lead integrity and external imports
+              without affecting day-to-day conversion workflows.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-[#22C1FF]/80">
@@ -77,10 +83,12 @@ export function LeadFlowSystemDiagnostics({
           {funnelStages.length > 0 ? (
             <ul className="mt-4 space-y-1.5 text-sm">
               {funnelStages.map((stage) => (
-                <li key={stage.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.06] px-3 py-2">
+                <li
+                  key={stage.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.06] px-3 py-2"
+                >
                   <span className="text-[#CBD5E1]">
-                    {stage.label}{" "}
-                    <span className="text-xs text-[#64748B]">({stage.slug})</span>
+                    {stage.label} <span className="text-xs text-[#64748B]">({stage.slug})</span>
                   </span>
                   <span className="font-mono text-xs tabular-nums text-[#94A3B8]">
                     {crmPipelineLeadVolume.activeByStageId[stage.id] ?? 0}
@@ -119,21 +127,32 @@ export function LeadFlowSystemDiagnostics({
             </dl>
           ) : null}
           <p className="mt-3">
-            <Link href={`${base}/settings/imports/hubspot`} className="text-sm font-semibold text-[#22C1FF] hover:underline">
+            <Link
+              href={`${base}/settings/imports/hubspot`}
+              className="text-sm font-semibold text-[#22C1FF] hover:underline"
+            >
               Open HubSpot import centre →
             </Link>
           </p>
         </DashboardCard>
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-          <SectionHeader title="Pipeline stage reference" description="fi_crm_pipeline_stages for this tenant scope." className="mb-3" />
+          <SectionHeader
+            title="Pipeline stage reference"
+            description="fi_crm_pipeline_stages for this tenant scope."
+            className="mb-3"
+          />
           <div className="rounded-xl border border-white/[0.06] bg-[#081020]/50 p-3">
             <CrmPipelinePanel stages={crmPipelineStages} />
           </div>
         </DashboardCard>
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-          <SectionHeader title="Open lead by ID" description="Direct UUID jump for operator support." className="mb-3" />
+          <SectionHeader
+            title="Open lead by ID"
+            description="Direct UUID jump for operator support."
+            className="mb-3"
+          />
           <CrmLeadIdJump tenantId={tenantId} />
         </DashboardCard>
 

@@ -158,9 +158,18 @@ describe("Stage 3B — labels", () => {
 
 describe("Stage 3B — operator sort + cancelled filter", () => {
   it("sorts ascending by start_at then id", () => {
-    const a = row({ id: "b0000000-0000-4000-8000-000000000002", start_at: "2026-06-02T10:00:00.000Z" });
-    const b = row({ id: "b0000000-0000-4000-8000-000000000001", start_at: "2026-06-02T10:00:00.000Z" });
-    const c = row({ id: "b0000000-0000-4000-8000-000000000003", start_at: "2026-06-01T10:00:00.000Z" });
+    const a = row({
+      id: "b0000000-0000-4000-8000-000000000002",
+      start_at: "2026-06-02T10:00:00.000Z",
+    });
+    const b = row({
+      id: "b0000000-0000-4000-8000-000000000001",
+      start_at: "2026-06-02T10:00:00.000Z",
+    });
+    const c = row({
+      id: "b0000000-0000-4000-8000-000000000003",
+      start_at: "2026-06-01T10:00:00.000Z",
+    });
     const sorted = sortBookingsByStartAt([a, b, c]);
     assert.deepEqual(
       sorted.map((x) => x.id),

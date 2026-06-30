@@ -49,7 +49,11 @@ export async function classifyPatientImageAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const iid = patientImageId.trim();
@@ -66,7 +70,11 @@ export async function classifyPatientImageAction(
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Image not found for this patient.");
 
-    await classifyFiPatientImageAndPersist({ tenantId: tid, patientImageId: iid, client: supabase });
+    await classifyFiPatientImageAndPersist({
+      tenantId: tid,
+      patientImageId: iid,
+      client: supabase,
+    });
     revalidatePatientImageRoutes(tid, pid);
     return { ok: true };
   } catch (e) {
@@ -119,7 +127,9 @@ export async function updatePatientImageClassificationReviewAction(
       notes:
         parsed.ai_image_ai_notes !== undefined
           ? (parsed.ai_image_ai_notes ?? "").trim().slice(0, 8000)
-          : String(x.ai_image_ai_notes ?? "").trim().slice(0, 8000),
+          : String(x.ai_image_ai_notes ?? "")
+              .trim()
+              .slice(0, 8000),
     };
 
     const { error: upErr } = await supabase

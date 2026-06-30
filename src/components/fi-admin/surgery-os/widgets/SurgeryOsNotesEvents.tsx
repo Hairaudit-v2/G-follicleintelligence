@@ -10,7 +10,11 @@ import type { SurgeryOsOperationalNote } from "@/src/lib/surgeryOs/surgeryOsBoar
 
 function formatTimestamp(iso: string): string {
   try {
-    return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
+    return new Date(iso).toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   } catch {
     return iso;
   }
@@ -42,7 +46,9 @@ export function SurgeryOsNotesEventsWidget({ notes }: { notes: SurgeryOsOperatio
                       {n.noteKindLabel}
                     </p>
                     <SurgeryOsSeverityBadge severity={n.severity} />
-                    <span className="text-xs tabular-nums text-slate-400">{formatTimestamp(n.recordedAt)}</span>
+                    <span className="text-xs tabular-nums text-slate-400">
+                      {formatTimestamp(n.recordedAt)}
+                    </span>
                   </div>
                   <p className="mt-1 text-sm text-slate-200">{n.body}</p>
                   <p className="mt-1 text-xs text-slate-500">

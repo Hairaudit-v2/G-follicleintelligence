@@ -15,7 +15,10 @@ export const FUTURE_OF_HAIR_RESTORATION_PAGE_CONTENT = {
       "The clinics that thrive will not simply perform procedures.",
       "They will operate as intelligence-driven medical systems.",
     ],
-    primaryCta: { label: "Why Follicle Intelligence Exists", href: "/why-follicle-intelligence" as const },
+    primaryCta: {
+      label: "Why Follicle Intelligence Exists",
+      href: "/why-follicle-intelligence" as const,
+    },
     secondaryCta: { label: "Explore Ecosystem Architecture", href: "/platform/ecosystem" as const },
   },
 
@@ -136,7 +139,8 @@ export const FUTURE_OF_HAIR_RESTORATION_PAGE_CONTENT = {
       "Training accreditation systems",
       "International procedural benchmarks",
     ],
-    closingStatement: "Medicine always moves toward standardisation. Hair restoration will be no different.",
+    closingStatement:
+      "Medicine always moves toward standardisation. Hair restoration will be no different.",
   },
 
   nextDecade: {

@@ -16,7 +16,10 @@ import type { FiClinicRoomRow, FiServiceRoomEligibilityRow } from "@/src/lib/roo
 import { isStaffEligibleForServiceRules } from "@/src/lib/rooms/roomAvailabilityCore";
 import { isSupportStaffRole } from "@/src/lib/staff/clinicalStaffPicker";
 import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
-import { isCalendarVisibleClinicalStaff, isNonCalendarSupportRole } from "@/src/lib/staff/calendarVisibleStaff";
+import {
+  isCalendarVisibleClinicalStaff,
+  isNonCalendarSupportRole,
+} from "@/src/lib/staff/calendarVisibleStaff";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import type {
@@ -105,7 +108,8 @@ async function buildBookingSetupHygiene(args: {
       status: "warning",
       message:
         "At least one clinical provider has “Show on calendar” turned off. Eligible staff may not appear as assignees until visibility is restored.",
-      suggestedAction: "Clear the calendar visibility override for affected staff, or run “Fix automatically”.",
+      suggestedAction:
+        "Clear the calendar visibility override for affected staff, or run “Fix automatically”.",
       href: `${BASE(tid)}/staff`,
       fixKeys: [AUTOFIX_KEY_CLINICAL_CALENDAR_RESTORE],
     });
@@ -155,7 +159,9 @@ function pickRegenerativeService(services: FiServiceRow[]): FiServiceRow | null 
   const bt = new Set(["prp", "exosomes", "mesotherapy", "prf"]);
   const byBt = services.filter((s) => s.is_active && s.booking_type && bt.has(s.booking_type));
   if (byBt.length) return pickFirstByName(byBt);
-  const byCat = services.filter((s) => s.is_active && categorizeServiceForWizard(s) === "regenerative");
+  const byCat = services.filter(
+    (s) => s.is_active && categorizeServiceForWizard(s) === "regenerative"
+  );
   return pickFirstByName(byCat);
 }
 
@@ -171,11 +177,16 @@ function pickFollowUpService(services: FiServiceRow[]): FiServiceRow | null {
     (s) => s.is_active && (s.booking_type === "follow_up" || s.booking_type === "review")
   );
   if (byBt.length) return pickFirstByName(byBt);
-  const byCat = services.filter((s) => s.is_active && categorizeServiceForWizard(s) === "consult_loose");
+  const byCat = services.filter(
+    (s) => s.is_active && categorizeServiceForWizard(s) === "consult_loose"
+  );
   return pickFirstByName(byCat);
 }
 
-function pickServiceForProfile(services: FiServiceRow[], profile: ClinicBookingSetupTestProfile): FiServiceRow | null {
+function pickServiceForProfile(
+  services: FiServiceRow[],
+  profile: ClinicBookingSetupTestProfile
+): FiServiceRow | null {
   switch (profile) {
     case "consult":
       return pickConsultService(services);
@@ -277,9 +288,12 @@ function buildSuccessMessage(args: {
 }): string {
   const primaryRoomLabel = simplifyPreferredRoomLabel(args.roomElig, args.roomById);
   const activeRules = args.staffRules.filter((r) => r.is_active);
-  const preferredStaff = args.visibleStaff.find((st) => isStaffEligibleForServiceRules(st.id, st.staff_role, activeRules));
+  const preferredStaff = args.visibleStaff.find((st) =>
+    isStaffEligibleForServiceRules(st.id, st.staff_role, activeRules)
+  );
   const roleHint =
-    preferredStaff?.full_name ?? (activeRules.length ? "an eligible clinical assignee" : "a clinical assignee");
+    preferredStaff?.full_name ??
+    (activeRules.length ? "an eligible clinical assignee" : "a clinical assignee");
   const first = args.slotsOpen.slots[0];
   const slotBit = first ? ` ${first.reason.replace(/\.$/, "")}.` : "";
   const note = args.pieces.length ? ` Note: ${args.pieces.join(" ")}` : "";
@@ -318,15 +332,20 @@ export async function runClinicBookingSetupTest(args: {
         label,
         status: "fail",
         message: `No active ${label.toLowerCase()} service was found in your catalogue.`,
-        suggestedAction: "Add or activate a matching service and set its booking type where possible.",
+        suggestedAction:
+          "Add or activate a matching service and set its booking type where possible.",
         href: `${BASE(tid)}/services`,
       });
       continue;
     }
 
     const roomEligRaw = await loadServiceRoomEligibilityForService(tid, service.id, client);
-    const roomElig = filterRoomEligibilityForClinic(roomEligRaw, cid).filter((e) => e.is_active) as FiServiceRoomEligibilityRow[];
-    const roomById = new Map(rooms.map((r) => [r.id, { display_name: r.display_name, is_active: r.is_active }]));
+    const roomElig = filterRoomEligibilityForClinic(roomEligRaw, cid).filter(
+      (e) => e.is_active
+    ) as FiServiceRoomEligibilityRow[];
+    const roomById = new Map(
+      rooms.map((r) => [r.id, { display_name: r.display_name, is_active: r.is_active }])
+    );
 
     if (roomElig.length === 0) {
       tests.push({
@@ -350,7 +369,8 @@ export async function runClinicBookingSetupTest(args: {
         const room = roomById.get(e.room_id);
         return room?.is_active;
       });
-      if (!prefOk) pieces.push("Preferred room is missing or inactive; another eligible room may be used.");
+      if (!prefOk)
+        pieces.push("Preferred room is missing or inactive; another eligible room may be used.");
     }
 
     const staffRulesRaw = await loadServiceStaffEligibilityForService(tid, service.id, client);
@@ -364,7 +384,8 @@ export async function runClinicBookingSetupTest(args: {
         label,
         status: "fail",
         message: `“${service.name}” has staff rules, but no calendar-visible clinical assignee matches them (reception and admin are excluded by default).`,
-        suggestedAction: "Adjust staff eligibility, turn on “Show on calendar” for a qualified provider, or use Clinic setup.",
+        suggestedAction:
+          "Adjust staff eligibility, turn on “Show on calendar” for a qualified provider, or use Clinic setup.",
         href: `${BASE(tid)}/staff`,
         fixKeys: [staffEligibilityFixKey(profile), AUTOFIX_KEY_CLINICAL_CALENDAR_RESTORE],
       });
@@ -373,11 +394,16 @@ export async function runClinicBookingSetupTest(args: {
 
     const preferredStaff =
       staffRules.length > 0
-        ? visibleStaff.find((st) => isStaffEligibleForServiceRules(st.id, st.staff_role, staffRules))
+        ? visibleStaff.find((st) =>
+            isStaffEligibleForServiceRules(st.id, st.staff_role, staffRules)
+          )
         : null;
 
     const preferredStartAt = new Date().toISOString();
-    const durationMinutes = Math.max(5, Math.min(24 * 60, Math.floor(service.duration_minutes) || 30));
+    const durationMinutes = Math.max(
+      5,
+      Math.min(24 * 60, Math.floor(service.duration_minutes) || 30)
+    );
 
     const slotsOpen = await findNextAvailableBookingSlots({
       tenantId: tid,
@@ -434,7 +460,8 @@ export async function runClinicBookingSetupTest(args: {
     const fixKeys: string[] = [];
     for (const p of pieces) {
       if (p.includes("No preferred room")) fixKeys.push(preferredRoomFixKey(profile));
-      if (p.includes("Preferred room is missing or inactive")) fixKeys.push(preferredRoomFixKey(profile));
+      if (p.includes("Preferred room is missing or inactive"))
+        fixKeys.push(preferredRoomFixKey(profile));
       if (p.includes("No staff eligibility rules")) fixKeys.push(staffEligibilityFixKey(profile));
     }
     const uniqueFixKeys = Array.from(new Set(fixKeys));

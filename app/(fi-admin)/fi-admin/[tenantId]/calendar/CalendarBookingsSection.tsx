@@ -14,8 +14,12 @@ export async function CalendarBookingsSection({
   searchParams: Record<string, string | string[] | undefined>;
   route?: CalendarRoute;
 }) {
-  const patch: OperationalCalendarGridPatch = await loadOperationalCalendarGridData(tenantId, searchParams, {
-    route,
-  });
+  const patch: OperationalCalendarGridPatch = await loadOperationalCalendarGridData(
+    tenantId,
+    searchParams,
+    {
+      route,
+    }
+  );
   return <OperationalCalendarGridPatchBridge patch={patch} />;
 }

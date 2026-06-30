@@ -57,7 +57,11 @@ import {
   type SurgeryOsGraftReconciliationStatus,
   type SurgeryOsGraftSessionPhase,
 } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
-import { graftSessionToTotals, loadGraftCountEventsForSurgeries, loadGraftSessionsForSurgeries } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
+import {
+  graftSessionToTotals,
+  loadGraftCountEventsForSurgeries,
+  loadGraftSessionsForSurgeries,
+} from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
 import { surgeryOsCommandCentrePayloadSchema } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
 import { loadSurgeryOsVieCaptureSummaries } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import {
@@ -136,7 +140,7 @@ function parseChecklist(raw: unknown): SurgeryOsReadinessChecklist {
 async function loadPatientLabels(
   supabase: SupabaseClient,
   tenantId: string,
-  patientIds: string[],
+  patientIds: string[]
 ): Promise<Map<string, string>> {
   const tid = tenantId.trim();
   const ids = uniqueStrings(patientIds);
@@ -150,7 +154,9 @@ async function loadPatientLabels(
     .in("id", ids);
   if (pErr) throw new Error(pErr.message);
 
-  const personIds = uniqueStrings((patients ?? []).map((p) => (p as { person_id: string | null }).person_id));
+  const personIds = uniqueStrings(
+    (patients ?? []).map((p) => (p as { person_id: string | null }).person_id)
+  );
   const personMeta = new Map<string, Record<string, unknown>>();
   if (personIds.length) {
     const { data: persons, error: peErr } = await supabase
@@ -165,14 +171,14 @@ async function loadPatientLabels(
         String(row.id),
         row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
           ? (row.metadata as Record<string, unknown>)
-          : {},
+          : {}
       );
     }
   }
 
   for (const raw of patients ?? []) {
     const p = raw as { id: string; person_id: string | null };
-    const meta = p.person_id ? personMeta.get(String(p.person_id)) ?? {} : {};
+    const meta = p.person_id ? (personMeta.get(String(p.person_id)) ?? {}) : {};
     const label = displayFromPersonMetadata(meta).name.trim() || "Patient";
     out.set(String(p.id), label);
   }
@@ -182,13 +188,17 @@ async function loadPatientLabels(
 async function loadFiUserLabelsById(
   supabase: SupabaseClient,
   tenantId: string,
-  userIds: string[],
+  userIds: string[]
 ): Promise<Map<string, string>> {
   const tid = tenantId.trim();
   const ids = uniqueStrings(userIds);
   const out = new Map<string, string>();
   if (!ids.length) return out;
-  const { data, error } = await supabase.from("fi_users").select("id, email").eq("tenant_id", tid).in("id", ids);
+  const { data, error } = await supabase
+    .from("fi_users")
+    .select("id, email")
+    .eq("tenant_id", tid)
+    .in("id", ids);
   if (error) throw new Error(error.message);
   for (const raw of data ?? []) {
     const r = raw as { id: string; email: string | null };
@@ -197,7 +207,10 @@ async function loadFiUserLabelsById(
   return out;
 }
 
-function buildHrefs(tenantId: string, row: Pick<SurgeryRow, "id" | "patient_id" | "case_id" | "booking_id">) {
+function buildHrefs(
+  tenantId: string,
+  row: Pick<SurgeryRow, "id" | "patient_id" | "case_id" | "booking_id">
+) {
   const base = `/fi-admin/${tenantId.trim()}`;
   return {
     patient: row.patient_id ? `${base}/patients/${row.patient_id}` : null,
@@ -209,7 +222,7 @@ function buildHrefs(tenantId: string, row: Pick<SurgeryRow, "id" | "patient_id" 
 
 export async function loadSurgeryOsCommandCentrePayload(
   tenantId: string,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): Promise<SurgeryOsCommandCentrePayload> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
@@ -237,7 +250,7 @@ export async function loadSurgeryOsCommandCentrePayload(
     const { data, error } = await supabase
       .from("fi_surgeries")
       .select(
-        "id, tenant_id, patient_id, case_id, booking_id, surgeon_fi_user_id, status, live_status, procedure_phase, target_grafts, scheduled_date, scheduled_start_at, readiness_percent, readiness_risk_level, readiness_checklist",
+        "id, tenant_id, patient_id, case_id, booking_id, surgeon_fi_user_id, status, live_status, procedure_phase, target_grafts, scheduled_date, scheduled_start_at, readiness_percent, readiness_risk_level, readiness_checklist"
       )
       .eq("tenant_id", tid)
       .eq("scheduled_date", window.todayYmd)
@@ -285,7 +298,9 @@ export async function loadSurgeryOsCommandCentrePayload(
         .in("surgery_id", surgeryIds),
       supabase
         .from("fi_surgery_operational_notes")
-        .select("id, tenant_id, surgery_id, note_kind, severity, body, recorded_at, recorded_by_fi_user_id")
+        .select(
+          "id, tenant_id, surgery_id, note_kind, severity, body, recorded_at, recorded_by_fi_user_id"
+        )
         .eq("tenant_id", tid)
         .in("surgery_id", surgeryIds)
         .order("recorded_at", { ascending: false })
@@ -311,12 +326,13 @@ export async function loadSurgeryOsCommandCentrePayload(
     ...noteRows.map((n) => n.recorded_by_fi_user_id),
   ]);
 
-  const [patientLabels, userLabels, graftSessionsBySurgery, graftEventsBySurgery] = await Promise.all([
-    loadPatientLabels(supabase, tid, patientIds.filter(Boolean) as string[]),
-    loadFiUserLabelsById(supabase, tid, userIds),
-    loadGraftSessionsForSurgeries(tid, surgeryIds),
-    loadGraftCountEventsForSurgeries(tid, surgeryIds),
-  ]);
+  const [patientLabels, userLabels, graftSessionsBySurgery, graftEventsBySurgery] =
+    await Promise.all([
+      loadPatientLabels(supabase, tid, patientIds.filter(Boolean) as string[]),
+      loadFiUserLabelsById(supabase, tid, userIds),
+      loadGraftSessionsForSurgeries(tid, surgeryIds),
+      loadGraftCountEventsForSurgeries(tid, surgeryIds),
+    ]);
 
   const teamBySurgery = new Map<string, TeamAssignmentRow[]>();
   for (const t of teamRows) {
@@ -327,8 +343,8 @@ export async function loadSurgeryOsCommandCentrePayload(
 
   const graftEventUserIds = uniqueStrings(
     [...graftEventsBySurgery.values()].flatMap((events) =>
-      events.map((e) => e.created_by_fi_user_id).filter(Boolean),
-    ) as string[],
+      events.map((e) => e.created_by_fi_user_id).filter(Boolean)
+    ) as string[]
   );
   const missingUserIds = graftEventUserIds.filter((id) => !userLabels.has(id));
   if (missingUserIds.length) {
@@ -342,13 +358,15 @@ export async function loadSurgeryOsCommandCentrePayload(
   const allAlerts: SurgeryOsAlert[] = [];
 
   for (const row of surgeries) {
-    const patientLabel = row.patient_id ? patientLabels.get(row.patient_id) ?? "Patient" : "Patient";
+    const patientLabel = row.patient_id
+      ? (patientLabels.get(row.patient_id) ?? "Patient")
+      : "Patient";
     const hrefs = buildHrefs(tid, row);
     const team = teamBySurgery.get(row.id) ?? [];
     const surgeonFromTeam = team.find((t) => t.role === "surgeon");
     const surgeonLabel =
-      (row.surgeon_fi_user_id ? userLabels.get(row.surgeon_fi_user_id) ?? null : null) ??
-      (surgeonFromTeam ? userLabels.get(surgeonFromTeam.fi_user_id) ?? null : null) ??
+      (row.surgeon_fi_user_id ? (userLabels.get(row.surgeon_fi_user_id) ?? null) : null) ??
+      (surgeonFromTeam ? (userLabels.get(surgeonFromTeam.fi_user_id) ?? null) : null) ??
       null;
 
     const teamNames = team
@@ -427,37 +445,40 @@ export async function loadSurgeryOsCommandCentrePayload(
         eventType: e.event_type,
         note: e.note,
         createdAt: e.created_at,
-      })),
+      }))
     );
     const trayBuckets = countTrayReviewBuckets(
       rawGraftEvents.map((e) => ({
         eventType: e.event_type,
-        reviewStatus: e.event_type === "tray_count" ? reviewStatuses.get(e.id) ?? "pending" : null,
-      })),
+        reviewStatus:
+          e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+      }))
     );
     const confirmedTrayTotals = computeConfirmedTrayTotals(
       rawGraftEvents.map((e) => ({
         eventType: e.event_type,
-        reviewStatus: e.event_type === "tray_count" ? reviewStatuses.get(e.id) ?? "pending" : null,
+        reviewStatus:
+          e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
         singles: e.singles,
         doubles: e.doubles,
         triples: e.triples,
         multiples: e.multiples,
         totalHairs: e.total_hairs,
         deltaDiscarded: e.delta_discarded,
-      })),
+      }))
     );
     const recentCorrection = rawGraftEvents.find((e) => e.event_type === "correction");
     const recentCorrectionMagnitude = recentCorrection
       ? Math.max(
           Math.abs(recentCorrection.delta_extracted),
           Math.abs(recentCorrection.delta_implanted),
-          Math.abs(recentCorrection.delta_discarded),
+          Math.abs(recentCorrection.delta_discarded)
         )
       : null;
 
     const graftPhase = (graftSession?.phase ?? "extraction") as SurgeryOsGraftSessionPhase;
-    const reconciliationStatus = (graftSession?.reconciliation_status ?? "pending") as SurgeryOsGraftReconciliationStatus;
+    const reconciliationStatus = (graftSession?.reconciliation_status ??
+      "pending") as SurgeryOsGraftReconciliationStatus;
     const totals = graftSession
       ? graftSessionToTotals(graftSession)
       : graftSessionToTotals({
@@ -507,12 +528,17 @@ export async function loadSurgeryOsCommandCentrePayload(
       averageHairsPerGraft: totals.averageHairsPerGraft,
       progressPercent: computeGraftProgressPercent(totals.extractedGrafts, totals.targetGrafts),
       reconciliationStatus,
-      reconciliationStatusLabel: SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS[reconciliationStatus],
+      reconciliationStatusLabel:
+        SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS[reconciliationStatus],
       pendingTrayCount: trayBuckets.pending,
-      confirmedTrayGrafts: confirmedTrayTotals.singles + confirmedTrayTotals.doubles + confirmedTrayTotals.triples + confirmedTrayTotals.multiples,
+      confirmedTrayGrafts:
+        confirmedTrayTotals.singles +
+        confirmedTrayTotals.doubles +
+        confirmedTrayTotals.triples +
+        confirmedTrayTotals.multiples,
       reconciledAt: graftSession?.reconciled_at ?? null,
       reconciledByLabel: graftSession?.reconciled_by_fi_user_id
-        ? userLabels.get(graftSession.reconciled_by_fi_user_id) ?? null
+        ? (userLabels.get(graftSession.reconciled_by_fi_user_id) ?? null)
         : null,
       sessionLocks: {
         extraction: resolveGraftCountSessionLock({
@@ -521,7 +547,7 @@ export async function loadSurgeryOsCommandCentrePayload(
           heldAt: graftSession?.extraction_lock_held_at ?? null,
           heldByFiUserId: graftSession?.extraction_lock_held_by_fi_user_id ?? null,
           heldByLabel: graftSession?.extraction_lock_held_by_fi_user_id
-            ? userLabels.get(graftSession.extraction_lock_held_by_fi_user_id) ?? null
+            ? (userLabels.get(graftSession.extraction_lock_held_by_fi_user_id) ?? null)
             : null,
           requestingDeviceId: null,
           nowMs: now.getTime(),
@@ -532,7 +558,7 @@ export async function loadSurgeryOsCommandCentrePayload(
           heldAt: graftSession?.implantation_lock_held_at ?? null,
           heldByFiUserId: graftSession?.implantation_lock_held_by_fi_user_id ?? null,
           heldByLabel: graftSession?.implantation_lock_held_by_fi_user_id
-            ? userLabels.get(graftSession.implantation_lock_held_by_fi_user_id) ?? null
+            ? (userLabels.get(graftSession.implantation_lock_held_by_fi_user_id) ?? null)
             : null,
           requestingDeviceId: null,
           nowMs: now.getTime(),
@@ -565,13 +591,18 @@ export async function loadSurgeryOsCommandCentrePayload(
         severity: a.severity,
         surgeryId: a.surgeryId,
         href: a.href,
-      })),
+      }))
     );
   }
 
   allAlerts.sort((a, b) => compareSurgeryOsSeverity(a.severity, b.severity));
 
-  const surgeryPatientMap = new Map(surgeries.map((s) => [s.id, s.patient_id ? patientLabels.get(s.patient_id) ?? "Patient" : "Patient"]));
+  const surgeryPatientMap = new Map(
+    surgeries.map((s) => [
+      s.id,
+      s.patient_id ? (patientLabels.get(s.patient_id) ?? "Patient") : "Patient",
+    ])
+  );
 
   const procedureTimeline: SurgeryOsProcedureTimelineEvent[] = events.map((e) => {
     const kind = e.event_kind as SurgeryOsProcedureEventKind;
@@ -582,7 +613,9 @@ export async function loadSurgeryOsCommandCentrePayload(
       eventKind: kind,
       eventLabel: SURGERY_OS_PROCEDURE_EVENT_LABELS[kind] ?? kind,
       occurredAt: e.occurred_at,
-      recordedByLabel: e.recorded_by_fi_user_id ? userLabels.get(e.recorded_by_fi_user_id) ?? null : null,
+      recordedByLabel: e.recorded_by_fi_user_id
+        ? (userLabels.get(e.recorded_by_fi_user_id) ?? null)
+        : null,
     };
   });
 
@@ -613,7 +646,9 @@ export async function loadSurgeryOsCommandCentrePayload(
       severity: (n.severity as SurgeryOsOperationalNote["severity"]) ?? "info",
       body: n.body,
       recordedAt: n.recorded_at,
-      recordedByLabel: n.recorded_by_fi_user_id ? userLabels.get(n.recorded_by_fi_user_id) ?? null : null,
+      recordedByLabel: n.recorded_by_fi_user_id
+        ? (userLabels.get(n.recorded_by_fi_user_id) ?? null)
+        : null,
     };
   });
 
@@ -626,7 +661,7 @@ export async function loadSurgeryOsCommandCentrePayload(
         eventType: e.event_type,
         note: e.note,
         createdAt: e.created_at,
-      })),
+      }))
     );
     for (const e of rawEvents) {
       graftEvents.push({
@@ -645,8 +680,11 @@ export async function loadSurgeryOsCommandCentrePayload(
         totalHairs: e.total_hairs,
         note: e.note,
         createdAt: e.created_at,
-        createdByLabel: e.created_by_fi_user_id ? userLabels.get(e.created_by_fi_user_id) ?? null : null,
-        reviewStatus: e.event_type === "tray_count" ? reviewStatuses.get(e.id) ?? "pending" : null,
+        createdByLabel: e.created_by_fi_user_id
+          ? (userLabels.get(e.created_by_fi_user_id) ?? null)
+          : null,
+        reviewStatus:
+          e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
         trayNumber: parseTrayNumberFromNote(e.note),
       });
     }
@@ -657,7 +695,7 @@ export async function loadSurgeryOsCommandCentrePayload(
     .map((row) => ({
       surgeryId: row.id,
       patientId: row.patient_id!.trim(),
-      patientLabel: row.patient_id ? patientLabels.get(row.patient_id) ?? "Patient" : "Patient",
+      patientLabel: row.patient_id ? (patientLabels.get(row.patient_id) ?? "Patient") : "Patient",
       caseId: row.case_id,
       bookingId: row.booking_id,
     }));
@@ -699,7 +737,10 @@ export async function loadSurgeryOsCommandCentrePayload(
   try {
     return surgeryOsCommandCentrePayloadSchema.parse(payload);
   } catch (e) {
-    console.error("[loadSurgeryOsCommandCentrePayload] schema validation failed", normalizeLoaderErrorMessage(e));
+    console.error(
+      "[loadSurgeryOsCommandCentrePayload] schema validation failed",
+      normalizeLoaderErrorMessage(e)
+    );
     throw e;
   }
 }

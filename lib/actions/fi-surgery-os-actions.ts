@@ -153,14 +153,17 @@ function revalidateSurgeryOsPaths(tenantId: string) {
   revalidatePath(`${base}/graft-counting`);
 }
 
-
 export async function createSurgeryFromBookingAction(
   tenantId: string,
-  input: z.infer<typeof createFromBookingSchema>,
+  input: z.infer<typeof createFromBookingSchema>
 ) {
   try {
     const parsed = createFromBookingSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "create_from_booking", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "create_from_booking",
+      parsed.adminKey
+    );
     const data = await createSurgeryFromBooking({
       tenantId,
       bookingId: parsed.booking_id,
@@ -175,11 +178,15 @@ export async function createSurgeryFromBookingAction(
 
 export async function transitionSurgeryPhaseAction(
   tenantId: string,
-  input: z.infer<typeof transitionPhaseSchema>,
+  input: z.infer<typeof transitionPhaseSchema>
 ) {
   try {
     const parsed = transitionPhaseSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "transition_phase", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "transition_phase",
+      parsed.adminKey
+    );
     const data = await transitionSurgeryPhase({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -193,10 +200,17 @@ export async function transitionSurgeryPhaseAction(
   }
 }
 
-export async function logSurgeryEventAction(tenantId: string, input: z.infer<typeof logEventSchema>) {
+export async function logSurgeryEventAction(
+  tenantId: string,
+  input: z.infer<typeof logEventSchema>
+) {
   try {
     const parsed = logEventSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "log_event", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "log_event",
+      parsed.adminKey
+    );
     const data = await logSurgeryProcedureEvent({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -216,7 +230,11 @@ export async function logSurgeryEventAction(tenantId: string, input: z.infer<typ
 export async function addSurgeryNoteAction(tenantId: string, input: z.infer<typeof addNoteSchema>) {
   try {
     const parsed = addNoteSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsNoteMutationAllowed(tenantId, parsed.note_kind, parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsNoteMutationAllowed(
+      tenantId,
+      parsed.note_kind,
+      parsed.adminKey
+    );
     const data = await addSurgeryOperationalNote({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -234,14 +252,14 @@ export async function addSurgeryNoteAction(tenantId: string, input: z.infer<type
 
 export async function updateSurgeryTeamStatusAction(
   tenantId: string,
-  input: z.infer<typeof teamStatusSchema> & { assignment_fi_user_id: string },
+  input: z.infer<typeof teamStatusSchema> & { assignment_fi_user_id: string }
 ) {
   try {
     const parsed = teamStatusSchema.parse(input);
     const { actorFiUserId } = await assertSurgeryOsTeamStatusMutationAllowed(
       tenantId,
       input.assignment_fi_user_id,
-      parsed.adminKey,
+      parsed.adminKey
     );
     const data = await updateSurgeryTeamStatus({
       tenantId,
@@ -258,11 +276,15 @@ export async function updateSurgeryTeamStatusAction(
 
 export async function addExtractionGraftCountAction(
   tenantId: string,
-  input: z.infer<typeof extractionCountSchema>,
+  input: z.infer<typeof extractionCountSchema>
 ) {
   try {
     const parsed = extractionCountSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "add_extraction_count", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "add_extraction_count",
+      parsed.adminKey
+    );
     const data = await addExtractionGraftCount({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -281,11 +303,15 @@ export async function addExtractionGraftCountAction(
 
 export async function addImplantationGraftCountAction(
   tenantId: string,
-  input: z.infer<typeof implantationCountSchema>,
+  input: z.infer<typeof implantationCountSchema>
 ) {
   try {
     const parsed = implantationCountSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "add_implantation_count", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "add_implantation_count",
+      parsed.adminKey
+    );
     const data = await addImplantationGraftCount({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -302,10 +328,17 @@ export async function addImplantationGraftCountAction(
   }
 }
 
-export async function enterTrayGraftCountAction(tenantId: string, input: z.infer<typeof trayCountSchema>) {
+export async function enterTrayGraftCountAction(
+  tenantId: string,
+  input: z.infer<typeof trayCountSchema>
+) {
   try {
     const parsed = trayCountSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "enter_tray_count", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "enter_tray_count",
+      parsed.adminKey
+    );
     const data = await enterTrayGraftCount({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -327,10 +360,17 @@ export async function enterTrayGraftCountAction(tenantId: string, input: z.infer
   }
 }
 
-export async function logDiscardedGraftsAction(tenantId: string, input: z.infer<typeof discardedGraftsSchema>) {
+export async function logDiscardedGraftsAction(
+  tenantId: string,
+  input: z.infer<typeof discardedGraftsSchema>
+) {
   try {
     const parsed = discardedGraftsSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "log_discarded_grafts", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "log_discarded_grafts",
+      parsed.adminKey
+    );
     const data = await logDiscardedGrafts({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -345,10 +385,17 @@ export async function logDiscardedGraftsAction(tenantId: string, input: z.infer<
   }
 }
 
-export async function correctGraftCountAction(tenantId: string, input: z.infer<typeof correctGraftSchema>) {
+export async function correctGraftCountAction(
+  tenantId: string,
+  input: z.infer<typeof correctGraftSchema>
+) {
   try {
     const parsed = correctGraftSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "correct_graft_count", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "correct_graft_count",
+      parsed.adminKey
+    );
     const data = await correctGraftCount({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -370,10 +417,17 @@ export async function correctGraftCountAction(tenantId: string, input: z.infer<t
   }
 }
 
-export async function reconcileGraftsAction(tenantId: string, input: z.infer<typeof reconcileGraftsSchema>) {
+export async function reconcileGraftsAction(
+  tenantId: string,
+  input: z.infer<typeof reconcileGraftsSchema>
+) {
   try {
     const parsed = reconcileGraftsSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "reconcile_grafts", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "reconcile_grafts",
+      parsed.adminKey
+    );
     const data = await reconcileGrafts({
       tenantId,
       surgeryId: parsed.surgery_id,
@@ -390,11 +444,15 @@ export async function reconcileGraftsAction(tenantId: string, input: z.infer<typ
 
 export async function confirmTrayGraftCountAction(
   tenantId: string,
-  input: z.infer<typeof confirmTrayCountSchema>,
+  input: z.infer<typeof confirmTrayCountSchema>
 ) {
   try {
     const parsed = confirmTrayCountSchema.parse(input);
-    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId, "confirm_tray_count", parsed.adminKey);
+    const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+      tenantId,
+      "confirm_tray_count",
+      parsed.adminKey
+    );
     const data = await confirmTrayGraftCount({
       tenantId,
       surgeryId: parsed.surgery_id,

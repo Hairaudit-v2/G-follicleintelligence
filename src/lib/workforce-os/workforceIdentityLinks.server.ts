@@ -89,7 +89,9 @@ export async function getStaffIdentityLinksForStaff(
 
   const { data, error } = await supabase
     .from("fi_staff_source_ids")
-    .select("id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at")
+    .select(
+      "id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at"
+    )
     .eq("tenant_id", tid)
     .eq("staff_id", sid)
     .order("source_system", { ascending: true });
@@ -115,7 +117,9 @@ export async function getStaffIdentityLinksByExternalId(
   const supabase = client ?? supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_source_ids")
-    .select("id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at")
+    .select(
+      "id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at"
+    )
     .eq("tenant_id", tid)
     .eq("source_system", sys)
     .eq("source_staff_id", extId)
@@ -168,7 +172,8 @@ export async function upsertStaffIdentityLink(
     );
   }
 
-  const existingId = (byStaff.data as { id: string } | null)?.id ?? (byExternal.data as { id: string } | null)?.id;
+  const existingId =
+    (byStaff.data as { id: string } | null)?.id ?? (byExternal.data as { id: string } | null)?.id;
   const existingMeta = normalizeFiStaffSourceMetadata(
     (byStaff.data as { metadata?: unknown } | null)?.metadata ??
       (byExternal.data as { metadata?: unknown } | null)?.metadata
@@ -188,7 +193,9 @@ export async function upsertStaffIdentityLink(
       .update(patch)
       .eq("id", existingId)
       .eq("tenant_id", tid)
-      .select("id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at")
+      .select(
+        "id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at"
+      )
       .single();
 
     if (error) throw new Error(error.message);
@@ -207,7 +214,9 @@ export async function upsertStaffIdentityLink(
       created_at: now,
       updated_at: now,
     })
-    .select("id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at")
+    .select(
+      "id, tenant_id, staff_id, source_system, source_staff_id, source_url, metadata, created_at, updated_at"
+    )
     .single();
 
   if (error) throw new Error(error.message);

@@ -117,11 +117,20 @@ export function FoundationDirectoryTools({
     <section id="foundation-tools" className="scroll-mt-4">
       <DashboardCard className="p-4 sm:p-5">
         <div>
-          <h2 className="text-base font-semibold tracking-tight text-[#F8FAFC]">Foundation records</h2>
+          <h2 className="text-base font-semibold tracking-tight text-[#F8FAFC]">
+            Foundation records
+          </h2>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-            Create <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#E2E8F0]">fi_organisations</code> and{" "}
-            <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#E2E8F0]">fi_clinics</code> for this tenant.
-            Writes use the same deployment <code className="text-xs text-[#22C1FF]">FI_ADMIN_API_KEY</code> as Configuration
+            Create{" "}
+            <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#E2E8F0]">
+              fi_organisations
+            </code>{" "}
+            and{" "}
+            <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#E2E8F0]">
+              fi_clinics
+            </code>{" "}
+            for this tenant. Writes use the same deployment{" "}
+            <code className="text-xs text-[#22C1FF]">FI_ADMIN_API_KEY</code> as Configuration
             (server-side service role only).
           </p>
         </div>
@@ -129,9 +138,15 @@ export function FoundationDirectoryTools({
         {isBarren ? (
           <DashboardCard elevated className="mt-4 border-amber-500/25 bg-amber-950/25 p-4">
             <p className="text-sm leading-relaxed text-amber-100/95">
-              <strong className="text-amber-50">Starting fresh:</strong> this tenant has no organisations or clinics yet.
-              Create an <strong className="text-amber-50">organisation</strong> first, then a <strong className="text-amber-50">clinic</strong>. After each step you can finish branding in{" "}
-              <Link href={`/fi-admin/${tenantId}/configuration`} className="font-semibold text-amber-200 underline underline-offset-2 hover:text-amber-50">
+              <strong className="text-amber-50">Starting fresh:</strong> this tenant has no
+              organisations or clinics yet. Create an{" "}
+              <strong className="text-amber-50">organisation</strong> first, then a{" "}
+              <strong className="text-amber-50">clinic</strong>. After each step you can finish
+              branding in{" "}
+              <Link
+                href={`/fi-admin/${tenantId}/configuration`}
+                className="font-semibold text-amber-200 underline underline-offset-2 hover:text-amber-50"
+              >
                 Configuration
               </Link>
               .
@@ -139,15 +154,16 @@ export function FoundationDirectoryTools({
           </DashboardCard>
         ) : null}
 
-        <DashboardCard
-          elevated
-          className="mt-5 border-violet-500/25 bg-[#120a1e]/55 p-4 sm:p-5"
-        >
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-violet-300/90">Deployment operators</p>
-          <h3 className="mt-1 text-sm font-semibold text-[#E2E8F0]">Admin API key (not stored in browser)</h3>
+        <DashboardCard elevated className="mt-5 border-violet-500/25 bg-[#120a1e]/55 p-4 sm:p-5">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-violet-300/90">
+            Deployment operators
+          </p>
+          <h3 className="mt-1 text-sm font-semibold text-[#E2E8F0]">
+            Admin API key (not stored in browser)
+          </h3>
           <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#94A3B8] sm:text-sm">
-            Only the actions below need this key. Browsing the directory and search never require it — clinical staff can
-            explore read-only results without credentials.
+            Only the actions below need this key. Browsing the directory and search never require it
+            — clinical staff can explore read-only results without credentials.
           </p>
           <label className="mt-4 block max-w-md space-y-1.5">
             <span className={labelClass}>FI_ADMIN_API_KEY</span>
@@ -163,12 +179,23 @@ export function FoundationDirectoryTools({
         </DashboardCard>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <div id="directory-create-organisation" className="scroll-mt-24 space-y-3 rounded-xl border border-white/[0.08] bg-[#141C33]/50 p-4 backdrop-blur-sm">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[#22C1FF]">Create organisation</h3>
+          <div
+            id="directory-create-organisation"
+            className="scroll-mt-24 space-y-3 rounded-xl border border-white/[0.08] bg-[#141C33]/50 p-4 backdrop-blur-sm"
+          >
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[#22C1FF]">
+              Create organisation
+            </h3>
             <form className="space-y-2" onSubmit={onCreateOrganisation}>
               <label className="block space-y-1">
                 <span className={labelClass}>Name</span>
-                <input name="name" required maxLength={200} className={fieldClass} autoComplete="off" />
+                <input
+                  name="name"
+                  required
+                  maxLength={200}
+                  className={fieldClass}
+                  autoComplete="off"
+                />
               </label>
               <label className="block space-y-1">
                 <span className={labelClass}>Slug</span>
@@ -205,11 +232,17 @@ export function FoundationDirectoryTools({
             </form>
           </div>
 
-          <div id="directory-create-clinic" className="scroll-mt-24 space-y-3 rounded-xl border border-white/[0.08] bg-[#141C33]/50 p-4 backdrop-blur-sm">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[#22C1FF]">Create clinic</h3>
+          <div
+            id="directory-create-clinic"
+            className="scroll-mt-24 space-y-3 rounded-xl border border-white/[0.08] bg-[#141C33]/50 p-4 backdrop-blur-sm"
+          >
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[#22C1FF]">
+              Create clinic
+            </h3>
             {!hasOrgs ? (
               <DashboardCard className="border-amber-500/20 bg-amber-950/30 p-3 text-xs text-amber-100">
-                Create an organisation first. Clinics can optionally link to an organisation for this tenant.
+                Create an organisation first. Clinics can optionally link to an organisation for
+                this tenant.
               </DashboardCard>
             ) : null}
             <form className="space-y-2" onSubmit={onCreateClinic}>

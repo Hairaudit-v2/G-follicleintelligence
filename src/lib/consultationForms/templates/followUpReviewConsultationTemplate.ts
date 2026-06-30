@@ -1,4 +1,8 @@
-import type { ConsultationFormField, ConsultationFormOption, ConsultationFormSchema } from "../consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormOption,
+  ConsultationFormSchema,
+} from "../consultationFormTypes";
 
 function fld(field: ConsultationFormField): ConsultationFormField {
   return field;
@@ -179,7 +183,8 @@ export const followUpReviewConsultationSchemaV1: ConsultationFormSchema = {
     {
       id: "outcome_intelligence",
       title: "Outcome Intelligence",
-      description: "Feeds Patient Twin, HairAudit progression hooks, HLI response tracking, and AnalyticsOS (placeholders in completion summary until wired).",
+      description:
+        "Feeds Patient Twin, HairAudit progression hooks, HLI response tracking, and AnalyticsOS (placeholders in completion summary until wired).",
       fields: [
         fld({
           id: "clinical_progression_assessment",

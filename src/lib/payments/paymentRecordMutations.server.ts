@@ -6,35 +6,61 @@ import type { CreatePaymentRecordBody } from "@/src/lib/payments/paymentRecordSc
 
 async function assertPatientInTenant(tenantId: string, patientId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_patients").select("id").eq("tenant_id", tenantId).eq("id", patientId).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_patients")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("id", patientId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Patient not found for this tenant.");
 }
 
 async function assertLeadInTenant(tenantId: string, leadId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_crm_leads").select("id").eq("tenant_id", tenantId).eq("id", leadId).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_crm_leads")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("id", leadId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Lead not found for this tenant.");
 }
 
 async function assertConsultationInTenant(tenantId: string, consultationId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_consultations").select("id").eq("tenant_id", tenantId).eq("id", consultationId).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("id", consultationId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Consultation not found for this tenant.");
 }
 
 async function assertCaseInTenant(tenantId: string, caseId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_cases").select("id").eq("tenant_id", tenantId).eq("id", caseId).is("deleted_at", null).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_cases")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("id", caseId)
+    .is("deleted_at", null)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Case not found for this tenant.");
 }
 
 async function assertBookingInTenant(tenantId: string, bookingId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_bookings").select("id").eq("tenant_id", tenantId).eq("id", bookingId).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_bookings")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("id", bookingId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Booking not found for this tenant.");
 }
@@ -71,7 +97,8 @@ async function validateOptionalLinks(
 ): Promise<void> {
   if (input.patient_id?.trim()) await assertPatientInTenant(tenantId, input.patient_id.trim());
   if (input.lead_id?.trim()) await assertLeadInTenant(tenantId, input.lead_id.trim());
-  if (input.consultation_id?.trim()) await assertConsultationInTenant(tenantId, input.consultation_id.trim());
+  if (input.consultation_id?.trim())
+    await assertConsultationInTenant(tenantId, input.consultation_id.trim());
   if (input.case_id?.trim()) await assertCaseInTenant(tenantId, input.case_id.trim());
   if (input.booking_id?.trim()) await assertBookingInTenant(tenantId, input.booking_id.trim());
 }
@@ -104,7 +131,11 @@ export async function createPaymentRecord(
     recorded_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase.from("fi_payment_records").insert(insert).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_payment_records")
+    .insert(insert)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapRow(data as Record<string, unknown>);
 }
@@ -122,14 +153,25 @@ export async function updatePaymentRecordStatus(
   const id = paymentRecordId.trim();
   const supabase = supabaseAdmin();
 
-  const { data: existing, error: le } = await supabase.from("fi_payment_records").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  const { data: existing, error: le } = await supabase
+    .from("fi_payment_records")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .maybeSingle();
   if (le) throw new Error(le.message);
   if (!existing) throw new Error("Payment record not found for this tenant.");
 
   const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
   if (notes !== undefined) patch.notes = notes?.trim() || null;
 
-  const { data, error } = await supabase.from("fi_payment_records").update(patch).eq("tenant_id", tid).eq("id", id).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_payment_records")
+    .update(patch)
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapRow(data as Record<string, unknown>);
 }

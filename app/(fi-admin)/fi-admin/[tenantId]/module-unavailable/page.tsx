@@ -18,7 +18,8 @@ export default async function FiOsModuleUnavailablePage({
 
   await assertFiTenantPortalAccess(tenantId);
 
-  const raw = typeof searchParams.featureDenied === "string" ? searchParams.featureDenied.trim() : "";
+  const raw =
+    typeof searchParams.featureDenied === "string" ? searchParams.featureDenied.trim() : "";
   const featureKey = raw && isFiFeatureKey(raw) ? raw : null;
 
   return <FiFeatureAccessDenied tenantId={tenantId} featureKey={featureKey} />;

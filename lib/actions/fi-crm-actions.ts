@@ -1,6 +1,10 @@
 "use server";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import {
   crmAppendActivityBodySchema,
   crmArchiveLeadCommunicationBodySchema,
@@ -42,7 +46,10 @@ import {
 } from "@/src/lib/crm/server";
 import { z, ZodError } from "zod";
 import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
-import { loadCrmShellLeadSlideOverPayload, type CrmLeadShellSlideOverPayload } from "@/src/lib/crm/crmShellLoaders";
+import {
+  loadCrmShellLeadSlideOverPayload,
+  type CrmLeadShellSlideOverPayload,
+} from "@/src/lib/crm/crmShellLoaders";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -54,7 +61,10 @@ function errMsg(e: unknown): string {
 export async function crmCreateLeadAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; lead: Awaited<ReturnType<typeof createCrmLeadWithPerson>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; lead: Awaited<ReturnType<typeof createCrmLeadWithPerson>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmCreateLeadBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -120,7 +130,11 @@ export async function crmMoveLeadStageAction(
   leadId: string,
   body: unknown
 ): Promise<
-  | { ok: true; lead: Awaited<ReturnType<typeof moveCrmLeadToStage>>["lead"]; timelineEventId: string | null }
+  | {
+      ok: true;
+      lead: Awaited<ReturnType<typeof moveCrmLeadToStage>>["lead"];
+      timelineEventId: string | null;
+    }
   | { ok: false; error: string }
 > {
   try {
@@ -144,7 +158,10 @@ export async function crmAppendActivityAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; event: Awaited<ReturnType<typeof appendCrmActivityEvent>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; event: Awaited<ReturnType<typeof appendCrmActivityEvent>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmAppendActivityBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -168,7 +185,9 @@ export async function crmCreateTaskAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; task: Awaited<ReturnType<typeof createCrmTask>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; task: Awaited<ReturnType<typeof createCrmTask>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmCreateTaskBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -196,7 +215,9 @@ export async function updateCrmTaskAction(
   leadId: string,
   taskId: string,
   body: unknown
-): Promise<{ ok: true; task: Awaited<ReturnType<typeof updateCrmTask>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; task: Awaited<ReturnType<typeof updateCrmTask>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmUpdateTaskBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -222,7 +243,9 @@ export async function completeCrmTaskAction(
   leadId: string,
   taskId: string,
   body: unknown
-): Promise<{ ok: true; task: Awaited<ReturnType<typeof completeCrmTask>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; task: Awaited<ReturnType<typeof completeCrmTask>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmCompleteTaskBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -238,7 +261,9 @@ export async function reopenCrmTaskAction(
   leadId: string,
   taskId: string,
   body: unknown
-): Promise<{ ok: true; task: Awaited<ReturnType<typeof reopenCrmTask>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; task: Awaited<ReturnType<typeof reopenCrmTask>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmReopenTaskBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -253,7 +278,10 @@ export async function crmCreateNoteAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; note: Awaited<ReturnType<typeof createCrmNoteForLead>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; note: Awaited<ReturnType<typeof createCrmNoteForLead>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmCreateNoteBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -275,7 +303,9 @@ export async function createCrmLeadNoteAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; note: Awaited<ReturnType<typeof createCrmLeadNote>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; note: Awaited<ReturnType<typeof createCrmLeadNote>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmCreateLeadNoteBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -299,7 +329,9 @@ export async function updateCrmLeadNoteAction(
   leadId: string,
   noteId: string,
   body: unknown
-): Promise<{ ok: true; note: Awaited<ReturnType<typeof updateCrmLeadNote>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; note: Awaited<ReturnType<typeof updateCrmLeadNote>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmUpdateLeadNoteBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -322,7 +354,9 @@ export async function archiveCrmLeadNoteAction(
   leadId: string,
   noteId: string,
   body: unknown
-): Promise<{ ok: true; note: Awaited<ReturnType<typeof archiveCrmLeadNote>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; note: Awaited<ReturnType<typeof archiveCrmLeadNote>> } | { ok: false; error: string }
+> {
   try {
     const parsed = crmArchiveLeadNoteBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -337,7 +371,10 @@ export async function createCrmLeadCommunicationAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; communication: Awaited<ReturnType<typeof createCrmLeadCommunication>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; communication: Awaited<ReturnType<typeof createCrmLeadCommunication>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmCreateLeadCommunicationBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -368,7 +405,10 @@ export async function updateCrmLeadCommunicationAction(
   leadId: string,
   communicationId: string,
   body: unknown
-): Promise<{ ok: true; communication: Awaited<ReturnType<typeof updateCrmLeadCommunication>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; communication: Awaited<ReturnType<typeof updateCrmLeadCommunication>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmUpdateLeadCommunicationBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -376,7 +416,9 @@ export async function updateCrmLeadCommunicationAction(
       tenantId,
       leadId,
       communicationId,
-      ...(parsed.communicationType !== undefined ? { communicationType: parsed.communicationType } : {}),
+      ...(parsed.communicationType !== undefined
+        ? { communicationType: parsed.communicationType }
+        : {}),
       ...(parsed.direction !== undefined ? { direction: parsed.direction } : {}),
       ...(parsed.outcome !== undefined ? { outcome: parsed.outcome } : {}),
       ...(parsed.subject !== undefined ? { subject: parsed.subject } : {}),
@@ -396,7 +438,10 @@ export async function archiveCrmLeadCommunicationAction(
   leadId: string,
   communicationId: string,
   body: unknown
-): Promise<{ ok: true; communication: Awaited<ReturnType<typeof archiveCrmLeadCommunication>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; communication: Awaited<ReturnType<typeof archiveCrmLeadCommunication>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmArchiveLeadCommunicationBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -411,7 +456,10 @@ export async function convertCrmLeadAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; result: Awaited<ReturnType<typeof executeCrmLeadConversion>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; result: Awaited<ReturnType<typeof executeCrmLeadConversion>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmConvertLeadBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -435,7 +483,10 @@ export async function crmCreateMessagePreviewAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; message: Awaited<ReturnType<typeof createCrmMessagePreview>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; message: Awaited<ReturnType<typeof createCrmMessagePreview>> }
+  | { ok: false; error: string }
+> {
   try {
     if (body && typeof body === "object") {
       assertMessagePayloadHasNoForbiddenBodyKeys(body as Record<string, unknown>);
@@ -459,7 +510,10 @@ export async function updateCrmLeadDetailsAction(
   tenantId: string,
   leadId: string,
   body: unknown
-): Promise<{ ok: true; lead: Awaited<ReturnType<typeof updateCrmLeadDetails>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; lead: Awaited<ReturnType<typeof updateCrmLeadDetails>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = crmUpdateLeadDetailsBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -494,7 +548,8 @@ export async function crmLoadLeadSlideOverBundleAction(
   try {
     const parsed = crmLeadSlideOverLoadSchema.parse({ tenantId, leadId });
     const session = await getCrmShellSessionIfAllowed(parsed.tenantId);
-    if (!session) return { ok: false, error: "Not signed in or CRM access denied for this tenant." };
+    if (!session)
+      return { ok: false, error: "Not signed in or CRM access denied for this tenant." };
     const data = await loadCrmShellLeadSlideOverPayload(parsed.tenantId, parsed.leadId);
     if (!data) return { ok: false, error: "Lead not found." };
     return { ok: true, data };

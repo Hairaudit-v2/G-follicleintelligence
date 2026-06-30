@@ -29,7 +29,8 @@ export async function createFiPartnerFromBody(
 ): Promise<FiPartnerCreateResult> {
   const tenant_id = typeof body.tenant_id === "string" ? body.tenant_id.trim() : null;
   const name = typeof body.name === "string" ? body.name.trim() : null;
-  const reference_code = typeof body.reference_code === "string" ? body.reference_code.trim() : null;
+  const reference_code =
+    typeof body.reference_code === "string" ? body.reference_code.trim() : null;
 
   if (!tenant_id || !name || !reference_code) {
     return {
@@ -47,15 +48,26 @@ export async function createFiPartnerFromBody(
     };
   }
 
-  const { data: tenant } = await supabase.from("fi_tenants").select("id").eq("id", tenant_id).single();
+  const { data: tenant } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenant_id)
+    .single();
   if (!tenant) {
     return { ok: false, status: 404, error: "Tenant not found." };
   }
 
   const slug =
-    typeof body.slug === "string" ? body.slug.trim() || null : body.slug === null || body.slug === undefined ? null : null;
+    typeof body.slug === "string"
+      ? body.slug.trim() || null
+      : body.slug === null || body.slug === undefined
+        ? null
+        : null;
   const metadata =
-    body.metadata !== undefined && body.metadata !== null && typeof body.metadata === "object" && !Array.isArray(body.metadata)
+    body.metadata !== undefined &&
+    body.metadata !== null &&
+    typeof body.metadata === "object" &&
+    !Array.isArray(body.metadata)
       ? (body.metadata as Record<string, unknown>)
       : {};
 

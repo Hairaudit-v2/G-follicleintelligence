@@ -14,7 +14,9 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === "object" && !Array.isArray(v);
 }
 
-export function parseStaffProfileExtras(workingHours: Record<string, unknown> | null | undefined): StaffProfileExtras {
+export function parseStaffProfileExtras(
+  workingHours: Record<string, unknown> | null | undefined
+): StaffProfileExtras {
   if (!isObject(workingHours)) {
     return { position_title: null, primary_clinic_id: null };
   }

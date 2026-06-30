@@ -1,6 +1,10 @@
 import { Briefcase, CalendarPlus, UserPlus, Users } from "lucide-react";
 
-import { DashboardCard, QuickActionCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import {
+  DashboardCard,
+  QuickActionCard,
+  SectionHeader,
+} from "@/src/components/fi-admin/dashboard-ui";
 import { cn } from "@/lib/utils";
 
 const ICON = 22;
@@ -25,7 +29,7 @@ export function DashboardQuickActions(props: {
       <div
         className={cn(
           "grid grid-cols-1 gap-4",
-          showMyHrPortal ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+          showMyHrPortal ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"
         )}
       >
         {showCrmNav ? (

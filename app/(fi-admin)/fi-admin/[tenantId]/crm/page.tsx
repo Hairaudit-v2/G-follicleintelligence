@@ -84,15 +84,22 @@ export default async function CrmShellPage({
 
   const query = isBoard && board ? board.query : list!.query;
   const filtered = crmLeadListHasActiveFilters(query);
-  const firstPageHref = buildCrmLeadListHref(tenantId, { ...parsedCrmLeadListToHrefQuery(query), page: 1 });
+  const firstPageHref = buildCrmLeadListHref(tenantId, {
+    ...parsedCrmLeadListToHrefQuery(query),
+    page: 1,
+  });
   const base = `/fi-admin/${tenantId}`;
 
   return (
-    <div className={`mx-auto space-y-6 py-6 ${isBoard ? "max-w-[100rem] px-3 sm:px-4" : "max-w-[88rem] px-3 sm:px-4"}`}>
+    <div
+      className={`mx-auto space-y-6 py-6 ${isBoard ? "max-w-[100rem] px-3 sm:px-4" : "max-w-[88rem] px-3 sm:px-4"}`}
+    >
       <DashboardCard elevated className="p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">LeadFlow</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
+              LeadFlow
+            </p>
             <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
               {isBoard ? "Conversion board view" : "Lead index"}
             </h1>
@@ -101,12 +108,19 @@ export default async function CrmShellPage({
                 ? "Stage-based kanban for pipeline management — return to Workspace for conversion priorities."
                 : "Full lead table with filters — return to Workspace for follow-up priorities and booking readiness."}
             </p>
-            <Link href={base} className="inline-block text-sm font-medium text-[#22C1FF] hover:underline">
+            <Link
+              href={base}
+              className="inline-block text-sm font-medium text-[#22C1FF] hover:underline"
+            >
               ← Back to LeadFlow workspace
             </Link>
           </div>
           <div className="flex flex-col items-stretch gap-3 sm:items-end">
-            <NewEnquiryDialog tenantId={tenantId} owners={owners} defaultOwnerUserId={session.fiUserId} />
+            <NewEnquiryDialog
+              tenantId={tenantId}
+              owners={owners}
+              defaultOwnerUserId={session.fiUserId}
+            />
             <CrmLeadIndexViewTabs tenantId={tenantId} query={query} variant="dark" />
           </div>
         </div>
@@ -119,7 +133,9 @@ export default async function CrmShellPage({
           {board.total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
               <p className="font-medium text-[#F8FAFC]">No leads yet</p>
-              <p className="mt-2">Create an enquiry from the workspace or seed data to see cards here.</p>
+              <p className="mt-2">
+                Create an enquiry from the workspace or seed data to see cards here.
+              </p>
             </div>
           ) : board.total === 0 && filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
@@ -147,7 +163,9 @@ export default async function CrmShellPage({
           {list!.total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
               <p className="font-medium text-[#F8FAFC]">No leads yet</p>
-              <p className="mt-2">Create an enquiry from the workspace or seed data to see rows here.</p>
+              <p className="mt-2">
+                Create an enquiry from the workspace or seed data to see rows here.
+              </p>
             </div>
           ) : list!.total === 0 && filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
@@ -177,7 +195,6 @@ export default async function CrmShellPage({
           )}
         </DashboardCard>
       )}
-
     </div>
   );
 }

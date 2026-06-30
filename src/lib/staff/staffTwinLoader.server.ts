@@ -7,10 +7,16 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadStaffMemberForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
-import { loadStaffPinMetadataForStaff, type StaffPinMetadata } from "@/src/lib/staffPin/staffPin.server";
+import {
+  loadStaffPinMetadataForStaff,
+  type StaffPinMetadata,
+} from "@/src/lib/staffPin/staffPin.server";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
-import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
+import {
+  formatStaffWeeklyHoursSummary,
+  parseStaffWeeklyHours,
+} from "@/src/lib/staff/staffWeeklyHours";
 import { loadStaffCompetencyProjections } from "@/src/lib/academy-os/academyCompetencyReceiver.server";
 import type { FiStaffCompetencyProjectionRow } from "@/src/lib/academy-os/academyCompetencyTypes";
 import {
@@ -69,7 +75,10 @@ async function loadFiUserRowForAuth(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 async function canViewStaffTwin(opts: {
@@ -100,7 +109,10 @@ async function canViewStaffTwin(opts: {
 /**
  * Read-only Staff Twin payload. Returns `null` when staff is missing or the viewer may not access this row.
  */
-export async function loadStaffTwinPage(tenantId: string, staffId: string): Promise<StaffTwinPageData | null> {
+export async function loadStaffTwinPage(
+  tenantId: string,
+  staffId: string
+): Promise<StaffTwinPageData | null> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const sid = assertNonEmptyUuid(staffId, "staffId");
 
@@ -122,7 +134,8 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
   const fiUser = await loadFiUserRowForAuth(tid, authUserId);
   const os = await loadFiOsIdentity(authUserId);
   const canManageStaffPin =
-    Boolean(fiUser && isCrmStaffManageRole(fiUser.role)) || isFiOsElevatedOsOperatorRole(os?.osRole);
+    Boolean(fiUser && isCrmStaffManageRole(fiUser.role)) ||
+    isFiOsElevatedOsOperatorRole(os?.osRole);
   const pinMetadata = canManageStaffPin ? await loadStaffPinMetadataForStaff(tid, sid) : null;
 
   const supabase = supabaseAdmin();

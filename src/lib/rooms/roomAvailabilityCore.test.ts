@@ -11,7 +11,11 @@ import {
 } from "@/src/lib/rooms/roomAvailabilityCore";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 
-function room(id: string, physicalKey: string, overrides?: Partial<FiClinicRoomRow>): FiClinicRoomRow {
+function room(
+  id: string,
+  physicalKey: string,
+  overrides?: Partial<FiClinicRoomRow>
+): FiClinicRoomRow {
   return {
     id,
     tenant_id: "t1",
@@ -145,11 +149,15 @@ describe("roomAvailabilityCore", () => {
 
   it("enforces service staff role eligibility", () => {
     assert.equal(
-      isStaffEligibleForServiceRules("s1", "nurse", [{ staff_id: null, staff_role: "doctor", is_active: true }]),
+      isStaffEligibleForServiceRules("s1", "nurse", [
+        { staff_id: null, staff_role: "doctor", is_active: true },
+      ]),
       false
     );
     assert.equal(
-      isStaffEligibleForServiceRules("s1", "nurse", [{ staff_id: null, staff_role: "nurse", is_active: true }]),
+      isStaffEligibleForServiceRules("s1", "nurse", [
+        { staff_id: null, staff_role: "nurse", is_active: true },
+      ]),
       true
     );
   });

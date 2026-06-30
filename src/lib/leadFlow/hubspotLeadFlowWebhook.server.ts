@@ -28,7 +28,8 @@ export async function queueHubSpotLeadFlowWebhookEvents(
   for (const payload of items) {
     const eventType = resolveHubSpotLeadFlowEventType(payload);
     const providerEventId = computeHubSpotLeadFlowProviderEventId(tenantId, payload, eventType);
-    const externalId = resolveHubSpotContactObjectId(payload) ?? resolveHubSpotDealObjectId(payload);
+    const externalId =
+      resolveHubSpotContactObjectId(payload) ?? resolveHubSpotDealObjectId(payload);
 
     const inserted = await insertFiExternalEvent({
       tenantId,

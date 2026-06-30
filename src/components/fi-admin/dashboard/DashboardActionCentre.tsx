@@ -35,23 +35,24 @@ export function attentionSeverityForRow(row: AttentionRowKey, count: number): At
   return "normal";
 }
 
-const severityRowClasses: Record<AttentionSeverity, { row: string; icon: string; badge: string }> = {
-  critical: {
-    row: "border-red-400/35 bg-red-950/35 hover:border-red-300/50 hover:bg-red-950/45",
-    icon: "border-red-400/40 bg-red-950/50 text-red-100",
-    badge: "bg-red-950/55 text-red-50 ring-1 ring-red-400/25",
-  },
-  warning: {
-    row: "border-orange-400/35 bg-orange-950/25 hover:border-orange-300/45 hover:bg-orange-950/35",
-    icon: "border-orange-400/40 bg-orange-950/40 text-orange-100",
-    badge: "bg-orange-950/45 text-orange-50 ring-1 ring-orange-400/25",
-  },
-  normal: {
-    row: "border-sky-500/20 bg-sky-950/20 hover:border-cyan-400/35 hover:bg-cyan-950/25",
-    icon: "border-sky-400/30 bg-sky-950/35 text-sky-200",
-    badge: "bg-sky-950/40 text-cyan-50 ring-1 ring-sky-400/20",
-  },
-};
+const severityRowClasses: Record<AttentionSeverity, { row: string; icon: string; badge: string }> =
+  {
+    critical: {
+      row: "border-red-400/35 bg-red-950/35 hover:border-red-300/50 hover:bg-red-950/45",
+      icon: "border-red-400/40 bg-red-950/50 text-red-100",
+      badge: "bg-red-950/55 text-red-50 ring-1 ring-red-400/25",
+    },
+    warning: {
+      row: "border-orange-400/35 bg-orange-950/25 hover:border-orange-300/45 hover:bg-orange-950/35",
+      icon: "border-orange-400/40 bg-orange-950/40 text-orange-100",
+      badge: "bg-orange-950/45 text-orange-50 ring-1 ring-orange-400/25",
+    },
+    normal: {
+      row: "border-sky-500/20 bg-sky-950/20 hover:border-cyan-400/35 hover:bg-cyan-950/25",
+      icon: "border-sky-400/30 bg-sky-950/35 text-sky-200",
+      badge: "bg-sky-950/40 text-cyan-50 ring-1 ring-sky-400/20",
+    },
+  };
 
 function ActionRow({
   href,
@@ -76,14 +77,16 @@ function ActionRow({
       href={href}
       className={cn(
         "flex items-center gap-3 rounded-xl border px-3 py-3 transition sm:px-4",
-        hasItems ? tone.row : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]",
-        !hasItems && severity === "normal" && "border-sky-500/10 bg-sky-950/15",
+        hasItems
+          ? tone.row
+          : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]",
+        !hasItems && severity === "normal" && "border-sky-500/10 bg-sky-950/15"
       )}
     >
       <span
         className={cn(
           "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border",
-          hasItems ? tone.icon : "border-slate-600/30 bg-slate-800/40 text-slate-500",
+          hasItems ? tone.icon : "border-slate-600/30 bg-slate-800/40 text-slate-500"
         )}
         aria-hidden
       >
@@ -96,7 +99,7 @@ function ActionRow({
       <span
         className={cn(
           "shrink-0 rounded-lg px-2.5 py-1 font-mono text-sm font-semibold tabular-nums",
-          hasItems ? tone.badge : "bg-white/[0.04] text-slate-500",
+          hasItems ? tone.badge : "bg-white/[0.04] text-slate-500"
         )}
       >
         {count}
@@ -105,7 +108,11 @@ function ActionRow({
   );
 }
 
-export function DashboardActionCentre(props: { base: string; actionCentre: TenantActionCentre; showCrmNav: boolean }) {
+export function DashboardActionCentre(props: {
+  base: string;
+  actionCentre: TenantActionCentre;
+  showCrmNav: boolean;
+}) {
   const { base, actionCentre, showCrmNav } = props;
   const total =
     actionCentre.leadsAwaitingContact +
@@ -121,7 +128,11 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-action-centre-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="dash-action-centre-heading"
+    >
       <SectionHeader
         id="dash-action-centre-heading"
         kicker="Attention"
@@ -152,7 +163,10 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             detail="Draft, in progress, or quoted workspaces."
             count={actionCentre.consultationsAwaitingCompletion}
             icon={<ClipboardList className="h-4 w-4" />}
-            severity={attentionSeverityForRow("consultations", actionCentre.consultationsAwaitingCompletion)}
+            severity={attentionSeverityForRow(
+              "consultations",
+              actionCentre.consultationsAwaitingCompletion
+            )}
           />
           <ActionRow
             href={`${base}/calendar`}
@@ -168,7 +182,10 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             detail="Upcoming procedures without a linked case."
             count={actionCentre.surgeryReadinessAlerts}
             icon={<Scissors className="h-4 w-4" />}
-            severity={attentionSeverityForRow("surgeryReadiness", actionCentre.surgeryReadinessAlerts)}
+            severity={attentionSeverityForRow(
+              "surgeryReadiness",
+              actionCentre.surgeryReadinessAlerts
+            )}
           />
           <ActionRow
             href={`${base}/financial/invoices`}
@@ -208,7 +225,9 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             detail="Cross-border transfer workflows breaching instructions, proof, reconciliation, or settlement SLAs."
             count={actionCentre.internationalTransferApplicationsAttention}
             icon={<Banknote className="h-4 w-4" />}
-            severity={actionCentre.internationalTransferApplicationsAttention > 0 ? "warning" : "normal"}
+            severity={
+              actionCentre.internationalTransferApplicationsAttention > 0 ? "warning" : "normal"
+            }
           />
           <ActionRow
             href={`${base}/financial/dashboard`}

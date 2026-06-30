@@ -5,7 +5,8 @@ import { useEffect } from "react";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { logClientError } from "@/src/lib/client/logClientError";
 
-const GENERIC_MESSAGE = "Something went wrong loading this page. Try again or contact support if it persists.";
+const GENERIC_MESSAGE =
+  "Something went wrong loading this page. Try again or contact support if it persists.";
 
 export function FiAdminSegmentError({
   error,

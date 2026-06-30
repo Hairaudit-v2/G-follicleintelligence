@@ -64,7 +64,9 @@ export function normalizeFiStaffSourceMetadata(raw: unknown): Record<string, unk
  * Returns normalised key parts for inserts and dedupe lookups.
  * `tenantId` / `staffId` are trimmed only (UUIDs must stay canonical).
  */
-export function normalizeFiStaffSourceIdKey(input: FiStaffSourceIdKeyInput): NormalizedFiStaffSourceIdKey {
+export function normalizeFiStaffSourceIdKey(
+  input: FiStaffSourceIdKeyInput
+): NormalizedFiStaffSourceIdKey {
   return {
     tenantId: input.tenantId.trim(),
     staffId: input.staffId.trim(),

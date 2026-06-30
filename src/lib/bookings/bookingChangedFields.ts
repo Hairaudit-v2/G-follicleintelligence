@@ -39,7 +39,9 @@ function stableMetadataJson(metadata: Record<string, unknown>): string {
   return JSON.stringify(metadata, Object.keys(metadata).sort());
 }
 
-export function bookingDetailSnapshotFromRowLike(row: FiBookingRow): BookingDetailComparableSnapshot {
+export function bookingDetailSnapshotFromRowLike(
+  row: FiBookingRow
+): BookingDetailComparableSnapshot {
   return {
     booking_type: row.booking_type.trim(),
     booking_status: row.booking_status.trim(),

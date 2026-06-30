@@ -20,7 +20,10 @@ export class PaymentRecordAccessError extends Error {
   }
 }
 
-async function loadFiUserForTenant(tenantId: string, authUserId: string): Promise<{ id: string; role: string } | null> {
+async function loadFiUserForTenant(
+  tenantId: string,
+  authUserId: string
+): Promise<{ id: string; role: string } | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
@@ -30,7 +33,10 @@ async function loadFiUserForTenant(tenantId: string, authUserId: string): Promis
     .maybeSingle();
   if (error) throw new PaymentRecordAccessError(500, "Could not verify tenant membership.");
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 /**
@@ -38,7 +44,10 @@ async function loadFiUserForTenant(tenantId: string, authUserId: string): Promis
  * **Not** aligned with `fi_tenant_admin_users` capability grants — see `docs/design/fi-payment-records-access.md`.
  * Staff PIN sessions are always blocked (even if role would allow).
  */
-export async function assertPaymentRecordWriteAllowed(tenantId: string, adminKey?: string | null): Promise<{
+export async function assertPaymentRecordWriteAllowed(
+  tenantId: string,
+  adminKey?: string | null
+): Promise<{
   actorFiUserId: string | null;
 }> {
   const tid = tenantId.trim();
@@ -61,12 +70,17 @@ export async function assertPaymentRecordWriteAllowed(tenantId: string, adminKey
   const row = await loadFiUserForTenant(tid, authUserId);
   if (!row) throw new PaymentRecordAccessError(403, "Not a member of this tenant.");
   if (!isPaymentMutationRole(row.role)) {
-    throw new PaymentRecordAccessError(403, "Finance or manager access required to record payments.");
+    throw new PaymentRecordAccessError(
+      403,
+      "Finance or manager access required to record payments."
+    );
   }
   return { actorFiUserId: row.id };
 }
 
-export async function getPaymentRecordMutationCapability(tenantId: string): Promise<{ canMutate: boolean }> {
+export async function getPaymentRecordMutationCapability(
+  tenantId: string
+): Promise<{ canMutate: boolean }> {
   try {
     await assertPaymentRecordWriteAllowed(tenantId, undefined);
     return { canMutate: true };

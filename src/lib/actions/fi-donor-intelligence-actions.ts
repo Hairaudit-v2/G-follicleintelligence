@@ -45,7 +45,11 @@ export async function assessPatientDonorImageAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const iid = patientImageId.trim();
@@ -62,7 +66,11 @@ export async function assessPatientDonorImageAction(
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Image not found for this patient.");
 
-    await assessFiOsPatientDonorAndPersist({ tenantId: tid, patientImageId: iid, client: supabase });
+    await assessFiOsPatientDonorAndPersist({
+      tenantId: tid,
+      patientImageId: iid,
+      client: supabase,
+    });
     revalidatePatientTwinAndImaging(tid, pid);
     return { ok: true };
   } catch (e) {
@@ -100,7 +108,9 @@ export async function updateDonorAssessmentReviewAction(
 
     const merged = {
       donor_region: normalizeHieDonorRegion(parsed.donor_region ?? x.donor_region),
-      donor_quality_rating: normalizeHieDonorQualityRating(parsed.donor_quality_rating ?? x.donor_quality_rating),
+      donor_quality_rating: normalizeHieDonorQualityRating(
+        parsed.donor_quality_rating ?? x.donor_quality_rating
+      ),
       confidence_score:
         parsed.confidence_score !== undefined
           ? clampDonorConfidence(parsed.confidence_score)
@@ -134,7 +144,9 @@ export async function updateDonorAssessmentReviewAction(
           ? normalizeHieExtractionCautionLevel(parsed.extraction_caution_level)
           : normalizeHieExtractionCautionLevel(x.extraction_caution_level),
       clinical_observations:
-        parsed.clinical_observations !== undefined ? parsed.clinical_observations : (x.clinical_observations as string | null),
+        parsed.clinical_observations !== undefined
+          ? parsed.clinical_observations
+          : (x.clinical_observations as string | null),
       ai_notes: parsed.ai_notes !== undefined ? parsed.ai_notes : (x.ai_notes as string | null),
       review_status: parsed.review_status,
       reviewed_by_user_id: fiUserId,

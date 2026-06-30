@@ -85,7 +85,10 @@ export function partitionSidebarAgendaBookings(
   const thisWeek: FiBookingRow[] = [];
 
   const sorted = [...bookings]
-    .filter((b) => !isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status))
+    .filter(
+      (b) =>
+        !isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status)
+    )
     .sort((a, b) => a.start_at.localeCompare(b.start_at));
 
   for (const booking of sorted) {
@@ -97,7 +100,12 @@ export function partitionSidebarAgendaBookings(
       today.push(booking);
     } else if (dayKey === tomorrowKey) {
       tomorrow.push(booking);
-    } else if (dayKey >= mondayKey && dayKey <= sundayKey && dayKey !== todayKey && dayKey !== tomorrowKey) {
+    } else if (
+      dayKey >= mondayKey &&
+      dayKey <= sundayKey &&
+      dayKey !== todayKey &&
+      dayKey !== tomorrowKey
+    ) {
       thisWeek.push(booking);
     }
   }
@@ -112,7 +120,10 @@ function isWaitlistBooking(booking: FiBookingRow): boolean {
 
 export function deriveWaitlistFromBookings(bookings: FiBookingRow[]): SidebarWaitlistItem[] {
   return bookings
-    .filter((b) => isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status))
+    .filter(
+      (b) =>
+        isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status)
+    )
     .map((b) => {
       const meta = b.metadata ?? {};
       const durationMin = bookingDurationMinutesUtc(b.start_at, b.end_at) ?? 30;
@@ -164,7 +175,8 @@ function AgendaMiniCard({
 
   const className = cn(
     "group relative w-full overflow-hidden rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2.5 text-left shadow-lg shadow-black/40 transition",
-    onClick && "hover:border-slate-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
+    onClick &&
+      "hover:border-slate-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
   );
 
   const inner = (
@@ -179,7 +191,9 @@ function AgendaMiniCard({
             {formatIsoTimeNumericInTimezone(booking.start_at, tzKey)}
             {durMin > 0 ? ` · ${durMin}m` : ""}
           </span>
-          <span className="truncate font-medium text-slate-400">{bookingStatusLabel(booking.booking_status)}</span>
+          <span className="truncate font-medium text-slate-400">
+            {bookingStatusLabel(booking.booking_status)}
+          </span>
         </div>
       </div>
     </>
@@ -196,13 +210,7 @@ function AgendaMiniCard({
   return <div className={className}>{inner}</div>;
 }
 
-function WaitlistMiniCard({
-  item,
-  draggable,
-}: {
-  item: SidebarWaitlistItem;
-  draggable: boolean;
-}) {
+function WaitlistMiniCard({ item, draggable }: { item: SidebarWaitlistItem; draggable: boolean }) {
   const appointmentStyle = getAppointmentStyle({
     procedureType: item.procedureType,
     status: item.booking?.booking_status ?? "scheduled",
@@ -219,7 +227,10 @@ function WaitlistMiniCard({
       type: "waitlist",
       item,
       appointment: item.booking
-        ? appointmentCardDataFromBooking(item.booking, { anchorLabel: item.patientName, durationMin: item.durationMin })
+        ? appointmentCardDataFromBooking(item.booking, {
+            anchorLabel: item.patientName,
+            durationMin: item.durationMin,
+          })
         : {
             id: item.id,
             patientName: item.patientName,
@@ -251,16 +262,23 @@ function WaitlistMiniCard({
       <span aria-hidden className={cn("absolute inset-y-2 left-0 w-1 rounded-full", accent)} />
       <div className="flex items-start gap-2 pl-2">
         {draggable ? (
-          <GripVertical className="fi-calendar-touch-target mt-0.5 h-4 w-4 shrink-0 text-slate-400 sm:h-3.5 sm:w-3.5" aria-hidden />
+          <GripVertical
+            className="fi-calendar-touch-target mt-0.5 h-4 w-4 shrink-0 text-slate-400 sm:h-3.5 sm:w-3.5"
+            aria-hidden
+          />
         ) : null}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-semibold text-slate-100">{item.patientName}</p>
           <p className="mt-0.5 truncate text-[11px] text-slate-500">{procedure}</p>
           {item.notes ? (
-            <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-500">{item.notes}</p>
+            <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-500">
+              {item.notes}
+            </p>
           ) : null}
           {draggable ? (
-            <p className="mt-1.5 text-[10px] font-medium text-cyan-300">Drag to calendar to schedule</p>
+            <p className="mt-1.5 text-[10px] font-medium text-cyan-300">
+              Drag to calendar to schedule
+            </p>
           ) : null}
         </div>
       </div>
@@ -282,7 +300,9 @@ function AgendaSection({
   return (
     <section className="space-y-2">
       <div className="flex items-center justify-between gap-2 px-0.5">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</h3>
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          {title}
+        </h3>
         <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-400">
           {count}
         </span>
@@ -447,83 +467,94 @@ export function SidebarAgenda({
         )}
         aria-label="Agenda sidebar"
       >
-      <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Agenda</p>
-          <p className="truncate text-sm font-semibold text-slate-100">{totalUpcoming} upcoming</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCollapsed(true)}
-          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:text-slate-200"
-          aria-label="Collapse agenda sidebar"
-        >
-          <PanelLeftClose className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4">
-        <div>{addButton}</div>
-
-        {(Object.keys(SECTION_LABELS) as SidebarAgendaSection[]).map((section) => {
-          const rows = groups[section];
-          return (
-            <AgendaSection
-              key={section}
-              title={SECTION_LABELS[section]}
-              count={rows.length}
-              emptyLabel={`No appointments ${section === "today" ? "today" : section === "tomorrow" ? "tomorrow" : "this week"}.`}
-            >
-              {rows.map((booking) => {
-                const label = bookingDisplay[booking.id]?.anchorLabel ?? booking.title?.trim() ?? "Patient";
-                return (
-                  <AgendaMiniCard
-                    key={booking.id}
-                    booking={booking}
-                    label={label}
-                    clinicTimeZone={calendarTimezone}
-                    onClick={onSelectBooking ? () => onSelectBooking(booking) : undefined}
-                  />
-                );
-              })}
-            </AgendaSection>
-          );
-        })}
-
-        <section className="space-y-2 border-t border-white/[0.08] pt-4">
-          <div className="flex items-center justify-between gap-2 px-0.5">
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Waitlist</h3>
-            <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-amber-300 ring-1 ring-amber-200/80">
-              {waitlist.length}
-            </span>
+        <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Agenda
+            </p>
+            <p className="truncate text-sm font-semibold text-slate-100">
+              {totalUpcoming} upcoming
+            </p>
           </div>
-          <p className="px-0.5 text-[11px] leading-relaxed text-slate-500">
-            Patients awaiting a slot. Drag onto the calendar to schedule.
-          </p>
-          {waitlist.length === 0 ? (
-            <CalendarEmptyState preset="waitlist" compact className="rounded-lg border border-dashed border-amber-400/20 bg-amber-400/10" />
-          ) : (
-            <div className="space-y-2">
-              {waitlist.map((item) => (
-                <WaitlistMiniCard key={item.id} item={item} draggable={draggableWaitlist} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+          <button
+            type="button"
+            onClick={() => setCollapsed(true)}
+            className="rounded-lg p-1.5 text-slate-500 transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:text-slate-200"
+            aria-label="Collapse agenda sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        </div>
 
-      <div className="border-t border-white/[0.08] px-4 py-3">
-        <button
-          type="button"
-          onClick={() => setCollapsed(true)}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:text-slate-200"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
-          Collapse
-          <ChevronRight className="h-3.5 w-3.5 rotate-180" aria-hidden />
-        </button>
-      </div>
-    </aside>
+        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4">
+          <div>{addButton}</div>
+
+          {(Object.keys(SECTION_LABELS) as SidebarAgendaSection[]).map((section) => {
+            const rows = groups[section];
+            return (
+              <AgendaSection
+                key={section}
+                title={SECTION_LABELS[section]}
+                count={rows.length}
+                emptyLabel={`No appointments ${section === "today" ? "today" : section === "tomorrow" ? "tomorrow" : "this week"}.`}
+              >
+                {rows.map((booking) => {
+                  const label =
+                    bookingDisplay[booking.id]?.anchorLabel ?? booking.title?.trim() ?? "Patient";
+                  return (
+                    <AgendaMiniCard
+                      key={booking.id}
+                      booking={booking}
+                      label={label}
+                      clinicTimeZone={calendarTimezone}
+                      onClick={onSelectBooking ? () => onSelectBooking(booking) : undefined}
+                    />
+                  );
+                })}
+              </AgendaSection>
+            );
+          })}
+
+          <section className="space-y-2 border-t border-white/[0.08] pt-4">
+            <div className="flex items-center justify-between gap-2 px-0.5">
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Waitlist
+              </h3>
+              <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-amber-300 ring-1 ring-amber-200/80">
+                {waitlist.length}
+              </span>
+            </div>
+            <p className="px-0.5 text-[11px] leading-relaxed text-slate-500">
+              Patients awaiting a slot. Drag onto the calendar to schedule.
+            </p>
+            {waitlist.length === 0 ? (
+              <CalendarEmptyState
+                preset="waitlist"
+                compact
+                className="rounded-lg border border-dashed border-amber-400/20 bg-amber-400/10"
+              />
+            ) : (
+              <div className="space-y-2">
+                {waitlist.map((item) => (
+                  <WaitlistMiniCard key={item.id} item={item} draggable={draggableWaitlist} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <div className="border-t border-white/[0.08] px-4 py-3">
+          <button
+            type="button"
+            onClick={() => setCollapsed(true)}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:text-slate-200"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
+            Collapse
+            <ChevronRight className="h-3.5 w-3.5 rotate-180" aria-hidden />
+          </button>
+        </div>
+      </aside>
     </>
   );
 }

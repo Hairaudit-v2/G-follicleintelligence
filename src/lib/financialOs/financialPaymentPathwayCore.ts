@@ -73,10 +73,15 @@ function isSettledLike(status: FiPaymentPathwayStatus): boolean {
  * isn't cancelled, preferring settlement-relevant rows. Staff are expected to keep at most one
  * non-cancelled pathway per invoice/booking, but we defensively pick the latest if several exist.
  */
-export function resolveActivePaymentPathway(rows: FiPaymentPathwayRow[]): FiPaymentPathwayRow | null {
+export function resolveActivePaymentPathway(
+  rows: FiPaymentPathwayRow[]
+): FiPaymentPathwayRow | null {
   const candidates = rows.filter((r) => r.status !== "cancelled");
   if (!candidates.length) return null;
-  return [...candidates].sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""))[0] ?? null;
+  return (
+    [...candidates].sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""))[0] ??
+    null
+  );
 }
 
 /**
@@ -135,7 +140,12 @@ export function buildPaymentPathwayAttentionSummary(input: {
     daysToSurgery <= 7
   ) {
     reason = "International transfer settlement pending within 7 days of surgery";
-  } else if (expected && expected < todayYmd && !isSettledLike(pathway.status) && pathway.status !== "settled") {
+  } else if (
+    expected &&
+    expected < todayYmd &&
+    !isSettledLike(pathway.status) &&
+    pathway.status !== "settled"
+  ) {
     reason = "Expected settlement date has passed and pathway is not settled";
   }
 

@@ -3,8 +3,14 @@
  * Readiness Board, Procedure Day, and SurgeryOS share this layer (no loader changes).
  */
 
-import type { ProcedureDayScheduleCard, ProcedureDayBoardPayload } from "@/src/lib/surgery/procedureDayBoardLoader.server";
-import type { SurgeryReadinessBoardCard, SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
+import type {
+  ProcedureDayScheduleCard,
+  ProcedureDayBoardPayload,
+} from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import type {
+  SurgeryReadinessBoardCard,
+  SurgeryReadinessBoardPayload,
+} from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import {
   SURGERY_READINESS_ISSUE_LABEL,
   hasHighRiskSeverity,
@@ -134,39 +140,53 @@ export function readinessStatusLabel(card: SurgeryReadinessBoardCard): string {
 export function nextActionForReadinessCard(card: SurgeryReadinessBoardCard): string {
   const issues = displayIssues(card.issues);
   if (!card.caseId) return "Link a SurgeryOS case before clearance can continue.";
-  if (hasIssueKind(issues, "missing_consent_proxy")) return "Obtain signed consent or quote acceptance.";
+  if (hasIssueKind(issues, "missing_consent_proxy"))
+    return "Obtain signed consent or quote acceptance.";
   if (hasIssueKind(issues, "missing_pathology")) return "Confirm pathology results are on file.";
-  if (hasIssueKind(issues, "abnormal_pathology")) return "Doctor sign-off required for abnormal pathology.";
-  if (hasIssueKind(issues, "surgery_deposit_pending")) return "Clear outstanding payment before surgery day.";
-  if (hasIssueKind(issues, "missing_surgery_plan")) return "Complete the surgery plan and preparation forms.";
+  if (hasIssueKind(issues, "abnormal_pathology"))
+    return "Doctor sign-off required for abnormal pathology.";
+  if (hasIssueKind(issues, "surgery_deposit_pending"))
+    return "Clear outstanding payment before surgery day.";
+  if (hasIssueKind(issues, "missing_surgery_plan"))
+    return "Complete the surgery plan and preparation forms.";
   if (hasIssueKind(issues, "booking_unconfirmed")) return "Confirm the booking with the patient.";
-  if (card.clinicalStaffing?.displayStatus === "missing_roles" || card.clinicalStaffing?.displayStatus === "blocked") {
+  if (
+    card.clinicalStaffing?.displayStatus === "missing_roles" ||
+    card.clinicalStaffing?.displayStatus === "blocked"
+  ) {
     return "Resolve surgical team coverage for this procedure.";
   }
   if (card.primaryColumn === "ready") return "Monitor — procedure is cleared for surgery day.";
   return "Review clearance checklist and resolve remaining blockers.";
 }
 
-export function flattenReadinessCards(payload: SurgeryReadinessBoardPayload): SurgeryReadinessBoardCard[] {
+export function flattenReadinessCards(
+  payload: SurgeryReadinessBoardPayload
+): SurgeryReadinessBoardCard[] {
   return Object.values(payload.columns).flat();
 }
 
-export function buildReadinessSnapshotCards(base: string, payload: SurgeryReadinessBoardPayload): SurgicalSnapshotCard[] {
+export function buildReadinessSnapshotCards(
+  base: string,
+  payload: SurgeryReadinessBoardPayload
+): SurgicalSnapshotCard[] {
   const { kpis } = payload;
   const all = flattenReadinessCards(payload);
   const blocked = all.filter(
-    (c) => c.primaryColumn === "high_risk" || c.primaryColumn === "on_hold_not_linked",
+    (c) => c.primaryColumn === "high_risk" || c.primaryColumn === "on_hold_not_linked"
   ).length;
   const consentForms = all.filter(
     (c) =>
       hasIssueKind(c.issues, "missing_consent_proxy") ||
-      hasIssueKind(c.issues, "missing_surgery_plan"),
+      hasIssueKind(c.issues, "missing_surgery_plan")
   ).length;
-  const paymentBlockers = all.filter((c) => hasIssueKind(c.issues, "surgery_deposit_pending")).length;
+  const paymentBlockers = all.filter((c) =>
+    hasIssueKind(c.issues, "surgery_deposit_pending")
+  ).length;
   const staffBlockers = all.filter(
     (c) =>
       c.clinicalStaffing?.displayStatus === "missing_roles" ||
-      c.clinicalStaffing?.displayStatus === "blocked",
+      c.clinicalStaffing?.displayStatus === "blocked"
   ).length;
 
   return [
@@ -238,12 +258,17 @@ function aggregateReadinessIssues(cards: SurgeryReadinessBoardCard[]): IssueAggr
   return Array.from(map.values()).sort((a, b) => b.score - a.score || b.count - a.count);
 }
 
-const CLEARANCE_PRIORITY_HEADLINES: Partial<Record<SurgeryReadinessIssueKind, (n: number) => string>> = {
+const CLEARANCE_PRIORITY_HEADLINES: Partial<
+  Record<SurgeryReadinessIssueKind, (n: number) => string>
+> = {
   missing_consent_proxy: (n) => `${plural(n, "surgery", "surgeries")} missing signed consent`,
-  surgery_deposit_pending: (n) => `${plural(n, "patient", "patients")} ${n === 1 ? "has" : "have"} payment outstanding`,
-  missing_surgery_plan: (n) => `${plural(n, "case", "cases")} missing preparation or medication setup`,
+  surgery_deposit_pending: (n) =>
+    `${plural(n, "patient", "patients")} ${n === 1 ? "has" : "have"} payment outstanding`,
+  missing_surgery_plan: (n) =>
+    `${plural(n, "case", "cases")} missing preparation or medication setup`,
   missing_pathology: (n) => `${plural(n, "case", "cases")} awaiting pathology clearance`,
-  abnormal_pathology: (n) => `Doctor sign-off required on ${plural(n, "pathology flag", "pathology flags")}`,
+  abnormal_pathology: (n) =>
+    `Doctor sign-off required on ${plural(n, "pathology flag", "pathology flags")}`,
   missing_case_link: (n) => `${plural(n, "booking", "bookings")} not linked to a SurgeryOS case`,
   booking_unconfirmed: (n) => `${plural(n, "booking", "bookings")} still unconfirmed`,
   case_on_hold: (n) => `${plural(n, "case", "cases")} on hold`,
@@ -252,40 +277,44 @@ const CLEARANCE_PRIORITY_HEADLINES: Partial<Record<SurgeryReadinessIssueKind, (n
 export function buildReadinessClearancePriorities(
   base: string,
   payload: SurgeryReadinessBoardPayload,
-  limit = 5,
+  limit = 5
 ): SurgicalPriorityItem[] {
   const cards = flattenReadinessCards(payload);
   const aggregates = aggregateReadinessIssues(cards);
   const staffBlocked = cards.filter(
     (c) =>
-      c.clinicalStaffing?.displayStatus === "missing_roles" || c.clinicalStaffing?.displayStatus === "blocked",
+      c.clinicalStaffing?.displayStatus === "missing_roles" ||
+      c.clinicalStaffing?.displayStatus === "blocked"
   ).length;
 
   const items: SurgicalPriorityItem[] = aggregates.map((a) => {
-      const headlineFn = CLEARANCE_PRIORITY_HEADLINES[a.kind];
-      const headline = headlineFn
-        ? headlineFn(a.count)
-        : `${plural(a.count, "procedure", "procedures")} — ${SURGERY_READINESS_ISSUE_LABEL[a.kind]}`;
-      const sample = cards.find((c) => hasIssueKind(c.issues, a.kind));
-      return {
-        id: `readiness-${a.kind}`,
-        headline,
-        detail: sample ? `${sample.patientLabel} · ${sample.surgeryLocalYmd}` : undefined,
-        href: sample?.hrefs.case ?? sample?.hrefs.appointments ?? `${base}/surgery-readiness`,
-        severity: a.severity,
-        priorityScore: a.score,
-      };
-    });
+    const headlineFn = CLEARANCE_PRIORITY_HEADLINES[a.kind];
+    const headline = headlineFn
+      ? headlineFn(a.count)
+      : `${plural(a.count, "procedure", "procedures")} — ${SURGERY_READINESS_ISSUE_LABEL[a.kind]}`;
+    const sample = cards.find((c) => hasIssueKind(c.issues, a.kind));
+    return {
+      id: `readiness-${a.kind}`,
+      headline,
+      detail: sample ? `${sample.patientLabel} · ${sample.surgeryLocalYmd}` : undefined,
+      href: sample?.hrefs.case ?? sample?.hrefs.appointments ?? `${base}/surgery-readiness`,
+      severity: a.severity,
+      priorityScore: a.score,
+    };
+  });
 
   if (staffBlocked > 0) {
     const sample = cards.find(
       (c) =>
-        c.clinicalStaffing?.displayStatus === "missing_roles" || c.clinicalStaffing?.displayStatus === "blocked",
+        c.clinicalStaffing?.displayStatus === "missing_roles" ||
+        c.clinicalStaffing?.displayStatus === "blocked"
     );
     items.push({
       id: "readiness-staff-coverage",
       headline: "Staff coverage issue detected",
-      detail: sample ? `${plural(staffBlocked, "procedure", "procedures")} · ${sample.patientLabel}` : undefined,
+      detail: sample
+        ? `${plural(staffBlocked, "procedure", "procedures")} · ${sample.patientLabel}`
+        : undefined,
       href: sample?.hrefs.appointments ?? `${base}/surgery-readiness`,
       severity: "warning",
       priorityScore: 20,
@@ -295,7 +324,9 @@ export function buildReadinessClearancePriorities(
   return items.sort((a, b) => b.priorityScore - a.priorityScore).slice(0, limit);
 }
 
-export function buildUpcomingProcedureReadinessList(payload: SurgeryReadinessBoardPayload): UpcomingProcedureReadinessItem[] {
+export function buildUpcomingProcedureReadinessList(
+  payload: SurgeryReadinessBoardPayload
+): UpcomingProcedureReadinessItem[] {
   const cards = flattenReadinessCards(payload);
   return cards
     .map((card) => ({
@@ -308,14 +339,20 @@ export function buildUpcomingProcedureReadinessList(payload: SurgeryReadinessBoa
     .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 }
 
-export function buildClearanceChecklistSummary(cards: SurgeryReadinessBoardCard[]): ClearanceChecklistGroup[] {
+export function buildClearanceChecklistSummary(
+  cards: SurgeryReadinessBoardCard[]
+): ClearanceChecklistGroup[] {
   const count = (predicate: (c: SurgeryReadinessBoardCard) => boolean) => {
     const blocked = cards.filter(predicate).length;
     return { blockedCount: blocked, clearedCount: Math.max(0, cards.length - blocked) };
   };
 
   return [
-    { id: "consent", label: "Consent", ...count((c) => hasIssueKind(c.issues, "missing_consent_proxy")) },
+    {
+      id: "consent",
+      label: "Consent",
+      ...count((c) => hasIssueKind(c.issues, "missing_consent_proxy")),
+    },
     {
       id: "payment",
       label: "Payment",
@@ -324,13 +361,18 @@ export function buildClearanceChecklistSummary(cards: SurgeryReadinessBoardCard[
     {
       id: "forms",
       label: "Forms",
-      ...count((c) => hasIssueKind(c.issues, "missing_surgery_plan") || hasIssueKind(c.issues, "case_on_hold")),
+      ...count(
+        (c) =>
+          hasIssueKind(c.issues, "missing_surgery_plan") || hasIssueKind(c.issues, "case_on_hold")
+      ),
     },
     {
       id: "pathology",
       label: "Pathology",
       ...count(
-        (c) => hasIssueKind(c.issues, "missing_pathology") || hasIssueKind(c.issues, "abnormal_pathology"),
+        (c) =>
+          hasIssueKind(c.issues, "missing_pathology") ||
+          hasIssueKind(c.issues, "abnormal_pathology")
       ),
     },
     {
@@ -343,7 +385,8 @@ export function buildClearanceChecklistSummary(cards: SurgeryReadinessBoardCard[
       label: "Staff",
       ...count(
         (c) =>
-          c.clinicalStaffing?.displayStatus === "missing_roles" || c.clinicalStaffing?.displayStatus === "blocked",
+          c.clinicalStaffing?.displayStatus === "missing_roles" ||
+          c.clinicalStaffing?.displayStatus === "blocked"
       ),
     },
     { id: "room", label: "Room", blockedCount: 0, clearedCount: cards.length },
@@ -363,13 +406,17 @@ export const PROCEDURE_DAY_FLOW_LANES: readonly ProcedureDayFlowLane[] = [
   { id: "completed", label: "Completed" },
 ] as const;
 
-export function procedureDayFlowLaneForCard(card: ProcedureDayScheduleCard): ProcedureDayFlowLaneId {
+export function procedureDayFlowLaneForCard(
+  card: ProcedureDayScheduleCard
+): ProcedureDayFlowLaneId {
   const bst = card.bookingStatus.trim().toLowerCase();
   const ps = card.procedureProgress.statusRaw?.trim().toLowerCase() ?? "";
 
-  if (bst === "completed" || ps === "completed" || card.pipelinePhase === "completed") return "completed";
+  if (bst === "completed" || ps === "completed" || card.pipelinePhase === "completed")
+    return "completed";
   if (ps === "in_progress" && card.procedureProgress.finishTime) return "recovery_post_op";
-  if (ps === "in_progress" || ps === "paused" || card.pipelinePhase === "in_progress") return "in_procedure";
+  if (ps === "in_progress" || ps === "paused" || card.pipelinePhase === "in_progress")
+    return "in_procedure";
   if (bst === "arrived" || ps === "checked_in") return "arrived_preparing";
   return "scheduled";
 }
@@ -389,7 +436,8 @@ export function procedureDayLiveStatusLabel(card: ProcedureDayScheduleCard): str
 export function nextActionForProcedureDayCard(card: ProcedureDayScheduleCard): string {
   const issues = displayIssues(card.issues);
   if (!card.caseId) return "Link a SurgeryOS case before surgical prep can continue.";
-  if (hasHighRiskSeverity(issues)) return "Resolve clearance blockers before starting the procedure.";
+  if (hasHighRiskSeverity(issues))
+    return "Resolve clearance blockers before starting the procedure.";
   const lane = procedureDayFlowLaneForCard(card);
   if (lane === "scheduled") return "Confirm patient arrival and begin surgical preparation.";
   if (lane === "arrived_preparing") return "Complete pre-op checklist and hand off to theatre.";
@@ -400,7 +448,10 @@ export function nextActionForProcedureDayCard(card: ProcedureDayScheduleCard): s
   return "Monitor live progress and update the surgical record.";
 }
 
-export function buildProcedureDaySnapshotCards(base: string, data: ProcedureDayBoardPayload): SurgicalSnapshotCard[] {
+export function buildProcedureDaySnapshotCards(
+  base: string,
+  data: ProcedureDayBoardPayload
+): SurgicalSnapshotCard[] {
   const flat = data.scheduleGroups.flatMap((g) => g.cards);
   const arrived = flat.filter((c) => {
     const bst = c.bookingStatus.toLowerCase();
@@ -456,7 +507,11 @@ export function buildProcedureDaySnapshotCards(base: string, data: ProcedureDayB
   ];
 }
 
-export function buildProcedureDayPriorities(base: string, data: ProcedureDayBoardPayload, limit = 5): SurgicalPriorityItem[] {
+export function buildProcedureDayPriorities(
+  base: string,
+  data: ProcedureDayBoardPayload,
+  limit = 5
+): SurgicalPriorityItem[] {
   const flat = data.scheduleGroups.flatMap((g) => g.cards);
   const items: SurgicalPriorityItem[] = [];
 
@@ -489,7 +544,9 @@ export function buildProcedureDayPriorities(base: string, data: ProcedureDayBoar
     items.push({
       id: "pd-team",
       headline: "Team assignment incomplete",
-      detail: sample ? `${data.summary.unassignedSurgeonOrTeam} cases · ${sample.patientLabel}` : undefined,
+      detail: sample
+        ? `${data.summary.unassignedSurgeonOrTeam} cases · ${sample.patientLabel}`
+        : undefined,
       href: sample?.hrefs.appointment ?? `${base}/procedure-day`,
       severity: "warning",
       priorityScore: 24,
@@ -500,7 +557,7 @@ export function buildProcedureDayPriorities(base: string, data: ProcedureDayBoar
     (c) =>
       c.procedureProgress.rowExists &&
       c.procedureProgress.extractionImplantSummary &&
-      !c.procedureProgress.extractionImplantSummary.toLowerCase().includes("balanced"),
+      !c.procedureProgress.extractionImplantSummary.toLowerCase().includes("balanced")
   );
   if (graftIncomplete.length) {
     items.push({
@@ -539,7 +596,9 @@ export function buildProcedureDayPriorities(base: string, data: ProcedureDayBoar
   return items.sort((a, b) => b.priorityScore - a.priorityScore).slice(0, limit);
 }
 
-export function buildProcedureDayFlowBoardItems(cards: ProcedureDayScheduleCard[]): ProcedureDayFlowBoardItem[] {
+export function buildProcedureDayFlowBoardItems(
+  cards: ProcedureDayScheduleCard[]
+): ProcedureDayFlowBoardItem[] {
   return cards.map((card) => ({
     card,
     laneId: procedureDayFlowLaneForCard(card),
@@ -549,24 +608,35 @@ export function buildProcedureDayFlowBoardItems(cards: ProcedureDayScheduleCard[
   }));
 }
 
-export function buildRoomTeamCoordination(cards: ProcedureDayScheduleCard[]): RoomTeamCoordinationRow[] {
+export function buildRoomTeamCoordination(
+  cards: ProcedureDayScheduleCard[]
+): RoomTeamCoordinationRow[] {
   return cards.map((c) => {
-    const teamParts = [c.procedureSurgeonLabel, c.calendarAssigneeLabel, ...c.procedureTechnicianLabels].filter(Boolean);
+    const teamParts = [
+      c.procedureSurgeonLabel,
+      c.calendarAssigneeLabel,
+      ...c.procedureTechnicianLabels,
+    ].filter(Boolean);
     const staffingBlocked =
-      c.clinicalStaffing?.displayStatus === "missing_roles" || c.clinicalStaffing?.displayStatus === "blocked";
+      c.clinicalStaffing?.displayStatus === "missing_roles" ||
+      c.clinicalStaffing?.displayStatus === "blocked";
     return {
       id: c.bookingId,
       patientLabel: c.patientLabel,
       roomLabel: c.roomLabel ?? (c.preOp.roomOk ? "Assigned" : "Theatre needed"),
       teamLabel: teamParts.length ? teamParts.join(" · ") : "Team assignment needed",
-      readinessLabel: staffingBlocked ? "Team coverage gap" : (c.readinessBucketLabel ?? "Monitoring"),
+      readinessLabel: staffingBlocked
+        ? "Team coverage gap"
+        : (c.readinessBucketLabel ?? "Monitoring"),
       handoffLabel: procedureDayLiveStatusLabel(c),
       href: c.hrefs.case ?? c.hrefs.appointment,
     };
   });
 }
 
-export function buildPostOpDischargeReadiness(cards: ProcedureDayScheduleCard[]): PostOpDischargeRow[] {
+export function buildPostOpDischargeReadiness(
+  cards: ProcedureDayScheduleCard[]
+): PostOpDischargeRow[] {
   return cards
     .filter((c) => {
       const lane = procedureDayFlowLaneForCard(c);
@@ -586,7 +656,7 @@ export function buildPostOpDischargeReadiness(cards: ProcedureDayScheduleCard[])
 export function buildSurgeryOsAttentionItems(
   payload: SurgeryOsCommandCentrePayload,
   base: string,
-  limit = 5,
+  limit = 5
 ): SurgicalPriorityItem[] {
   const items: SurgicalPriorityItem[] = [];
 
@@ -687,7 +757,8 @@ export function buildSurgeryOsAttentionItems(
       headline: alert.title,
       detail: alert.detail,
       href: alert.href ?? `${base}/surgery-os`,
-      severity: alert.severity === "critical" || alert.severity === "blocked" ? "critical" : "warning",
+      severity:
+        alert.severity === "critical" || alert.severity === "blocked" ? "critical" : "warning",
       priorityScore: alert.severity === "blocked" ? 32 : 18,
     });
   }
@@ -695,6 +766,9 @@ export function buildSurgeryOsAttentionItems(
   return items.sort((a, b) => b.priorityScore - a.priorityScore).slice(0, limit);
 }
 
-export function surgeryOsAttentionComplete(payload: SurgeryOsCommandCentrePayload, base: string): boolean {
+export function surgeryOsAttentionComplete(
+  payload: SurgeryOsCommandCentrePayload,
+  base: string
+): boolean {
   return buildSurgeryOsAttentionItems(payload, base, 1).length === 0;
 }

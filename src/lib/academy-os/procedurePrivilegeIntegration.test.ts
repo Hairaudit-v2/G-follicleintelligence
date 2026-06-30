@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { ACADEMY_EVENTS, isEventTypeAllowedForModule } from "@/src/lib/analytics-os/analyticsEventTypes";
+import {
+  ACADEMY_EVENTS,
+  isEventTypeAllowedForModule,
+} from "@/src/lib/analytics-os/analyticsEventTypes";
 import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { rankAssignableStaffForRole } from "@/src/lib/workforce-os/workforceRosterCandidates";

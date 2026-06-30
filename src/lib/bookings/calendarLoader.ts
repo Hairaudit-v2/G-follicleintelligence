@@ -1,6 +1,9 @@
 import "server-only";
 
-import { loadCrmShellScopePickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import {
+  loadCrmShellScopePickerOptions,
+  loadCrmShellUserPickerOptions,
+} from "@/src/lib/crm/crmShellLoaders";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
   calendarRangeIsoForQuery,
@@ -8,7 +11,11 @@ import {
   type ParsedCalendarQuery,
 } from "./calendarQuery";
 import { formatCalendarRangeTitle } from "./calendarLabels";
-import { buildCalendarLanesForView, bucketBookingsIntoCalendar, type CalendarDayLane } from "./calendarView";
+import {
+  buildCalendarLanesForView,
+  bucketBookingsIntoCalendar,
+  type CalendarDayLane,
+} from "./calendarView";
 import { loadBookingsForCalendarOverlap } from "./bookings";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "./operatorBookingConstants";
 import type { FiBookingRow } from "./types";
@@ -45,7 +52,9 @@ export type CalendarViewData = {
   services: FiServiceRow[];
 };
 
-export async function loadCalendarResources(tenantId: string): Promise<CalendarResources & { clinicalStaffOptions: ClinicalStaffPickerOption[] }> {
+export async function loadCalendarResources(
+  tenantId: string
+): Promise<CalendarResources & { clinicalStaffOptions: ClinicalStaffPickerOption[] }> {
   const tid = tenantId.trim();
   const [assignees, clinicalStaffOptions, scope] = await Promise.all([
     loadCrmShellUserPickerOptions(tid),
@@ -58,7 +67,12 @@ export async function loadCalendarResources(tenantId: string): Promise<CalendarR
 export async function loadCalendarBookings(
   tenantId: string,
   query: ParsedCalendarQuery
-): Promise<{ bookings: FiBookingRow[]; rangeStartIso: string; rangeEndIso: string; listTruncated: boolean }> {
+): Promise<{
+  bookings: FiBookingRow[];
+  rangeStartIso: string;
+  rangeEndIso: string;
+  listTruncated: boolean;
+}> {
   const tid = tenantId.trim();
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 

@@ -1,7 +1,15 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { CheckCircle2, Clock, Loader2, MessageSquarePlus, Play, UserPlus, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Loader2,
+  MessageSquarePlus,
+  Play,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -12,13 +20,19 @@ import {
   setReceptionTaskStatusAction,
   snoozeReceptionTaskAction,
 } from "@/lib/actions/fi-reception-task-actions";
-import { ReceptionOsRecordLinks, receptionOsPrimaryHref } from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
+import {
+  ReceptionOsRecordLinks,
+  receptionOsPrimaryHref,
+} from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
 import {
   ReceptionOsSeverityBadge,
   RECEPTION_OS_SEVERITY_SURFACE,
 } from "@/src/components/fi-admin/reception-os/receptionOsSeverityStyles";
 import { RECEPTION_OS_ALERT_LABELS } from "@/src/lib/receptionOs/receptionOsBoardModel";
-import type { ReceptionOsActionAlert, ReceptionOsTaskItem } from "@/src/lib/receptionOs/receptionOsBoardModel.types";
+import type {
+  ReceptionOsActionAlert,
+  ReceptionOsTaskItem,
+} from "@/src/lib/receptionOs/receptionOsBoardModel.types";
 import type { ReceptionOsViewerRole } from "@/src/lib/receptionOs/receptionOsBoardModel";
 import { ReceptionOsCommunicationActionBar } from "@/src/components/fi-admin/reception-os/ReceptionOsCommunicationActionBar";
 import { buildContextFromActionAlert } from "@/src/components/fi-admin/reception-os/receptionOsCommunicationContext";
@@ -58,19 +72,27 @@ export function ReceptionOsActionAlertsPanel({
     return map;
   }, [tasks]);
 
-  const criticalCount = alerts.filter((a) => a.severity === "critical" || a.severity === "blocked").length;
+  const criticalCount = alerts.filter(
+    (a) => a.severity === "critical" || a.severity === "blocked"
+  ).length;
 
   return (
     <DashboardCard className="flex h-full min-h-[280px] flex-col overflow-hidden">
       <div className="border-b border-white/[0.06] px-4 py-3">
         <SectionHeader
           title="Action required"
-          description={criticalCount > 0 ? `${criticalCount} critical · ${alerts.length} total` : `${alerts.length} items`}
+          description={
+            criticalCount > 0
+              ? `${criticalCount} critical · ${alerts.length} total`
+              : `${alerts.length} items`
+          }
         />
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {alerts.length === 0 ? (
-          <p className="px-4 py-10 text-center text-sm text-slate-400">All clear — no action items right now.</p>
+          <p className="px-4 py-10 text-center text-sm text-slate-400">
+            All clear — no action items right now.
+          </p>
         ) : (
           <ul className="space-y-1.5">
             {alerts.map((alert) => (
@@ -166,50 +188,81 @@ function AlertRow({
               onClick={() => run(() => createReceptionTaskFromAlertAction(tenantId, { alert }))}
             />
           ) : null}
-          {linkedTask && receptionTaskActionAllowed(role, "mark_in_progress") && linkedTask.status === "open" ? (
+          {linkedTask &&
+          receptionTaskActionAllowed(role, "mark_in_progress") &&
+          linkedTask.status === "open" ? (
             <ActionChip
               icon={Play}
               label="In progress"
               disabled={pending}
               onClick={() =>
-                run(() => setReceptionTaskStatusAction(tenantId, { task_id: linkedTask.id, status: "in_progress" }))
+                run(() =>
+                  setReceptionTaskStatusAction(tenantId, {
+                    task_id: linkedTask.id,
+                    status: "in_progress",
+                  })
+                )
               }
             />
           ) : null}
-          {linkedTask && receptionTaskActionAllowed(role, "snooze") && linkedTask.status !== "resolved" ? (
+          {linkedTask &&
+          receptionTaskActionAllowed(role, "snooze") &&
+          linkedTask.status !== "resolved" ? (
             <ActionChip
               icon={Clock}
               label="Snooze"
               disabled={pending}
               onClick={() =>
                 run(() =>
-                  snoozeReceptionTaskAction(tenantId, { task_id: linkedTask.id, snoozed_until: snoozeUntilTomorrow() }),
+                  snoozeReceptionTaskAction(tenantId, {
+                    task_id: linkedTask.id,
+                    snoozed_until: snoozeUntilTomorrow(),
+                  })
                 )
               }
             />
           ) : null}
-          {linkedTask && receptionTaskActionAllowed(role, "resolve") && linkedTask.status !== "resolved" ? (
+          {linkedTask &&
+          receptionTaskActionAllowed(role, "resolve") &&
+          linkedTask.status !== "resolved" ? (
             <ActionChip
               icon={CheckCircle2}
               label="Resolve"
               disabled={pending}
               onClick={() =>
-                run(() => setReceptionTaskStatusAction(tenantId, { task_id: linkedTask.id, status: "resolved" }))
+                run(() =>
+                  setReceptionTaskStatusAction(tenantId, {
+                    task_id: linkedTask.id,
+                    status: "resolved",
+                  })
+                )
               }
             />
           ) : null}
-          {linkedTask && receptionTaskActionAllowed(role, "dismiss") && linkedTask.status !== "dismissed" ? (
+          {linkedTask &&
+          receptionTaskActionAllowed(role, "dismiss") &&
+          linkedTask.status !== "dismissed" ? (
             <ActionChip
               icon={XCircle}
               label="Dismiss"
               disabled={pending}
               onClick={() =>
-                run(() => setReceptionTaskStatusAction(tenantId, { task_id: linkedTask.id, status: "dismissed" }))
+                run(() =>
+                  setReceptionTaskStatusAction(tenantId, {
+                    task_id: linkedTask.id,
+                    status: "dismissed",
+                  })
+                )
               }
             />
           ) : null}
           {linkedTask && receptionTaskActionAllowed(role, "add_note") ? (
-            <ActionChip icon={MessageSquarePlus} label="Note" disabled={pending} onClick={() => setNoteOpen((v) => !v)} />
+            <ActionChip
+              icon={MessageSquarePlus}
+              label="Note"
+              disabled={pending}
+              onClick={() => setNoteOpen((v) => !v)}
+            />
           ) : null}
           {pending ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" aria-hidden /> : null}
         </div>
@@ -230,7 +283,10 @@ function AlertRow({
               e.preventDefault();
               if (!note.trim()) return;
               run(async () => {
-                const res = await addReceptionTaskNoteAction(tenantId, { task_id: linkedTask.id, note: note.trim() });
+                const res = await addReceptionTaskNoteAction(tenantId, {
+                  task_id: linkedTask.id,
+                  note: note.trim(),
+                });
                 if (res.ok) {
                   setNote("");
                   setNoteOpen(false);
@@ -243,12 +299,18 @@ function AlertRow({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Internal note…"
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "min-w-0 flex-1 px-2 py-1.5 text-xs text-slate-200")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "min-w-0 flex-1 px-2 py-1.5 text-xs text-slate-200"
+              )}
             />
             <button
               type="submit"
               disabled={pending || !note.trim()}
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2 py-1.5 text-xs font-semibold text-cyan-100")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "px-2 py-1.5 text-xs font-semibold text-cyan-100"
+              )}
             >
               Save
             </button>
@@ -279,7 +341,7 @@ function ActionChip({
       onClick={onClick}
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
-        "inline-flex items-center gap-1 px-2 py-1 text-[0.68rem] font-semibold text-slate-300 disabled:opacity-50",
+        "inline-flex items-center gap-1 px-2 py-1 text-[0.68rem] font-semibold text-slate-300 disabled:opacity-50"
       )}
     >
       <Icon className="h-3 w-3" aria-hidden />

@@ -64,7 +64,7 @@ export function FiOsCalendarQuickFilters({
     const href = buildCalendarHref(
       tenantId,
       mergeCalendarHrefQuery(query, {
-        clinicId: clinicChipActive ? null : firstClinicId ?? null,
+        clinicId: clinicChipActive ? null : (firstClinicId ?? null),
       }),
       hrefOpts
     );

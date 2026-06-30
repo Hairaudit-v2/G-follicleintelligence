@@ -15,9 +15,10 @@ function asClinicRow(row: Record<string, unknown>): FiClinicRow {
     tenant_id: String(row.tenant_id),
     organisation_id: row.organisation_id == null ? null : String(row.organisation_id),
     display_name: String(row.display_name),
-    metadata: (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
-      ? (row.metadata as Record<string, unknown>)
-      : {}) ?? {},
+    metadata:
+      (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {}) ?? {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -72,8 +73,13 @@ export async function resolveOrCreateClinic(
         .eq("id", mapped.data.clinic_id)
         .eq("tenant_id", tenantId)
         .single();
-      if (row.error || !row.data) throw new Error(row.error?.message ?? "Clinic not found for mapping.");
-      return { clinic: asClinicRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
+      if (row.error || !row.data)
+        throw new Error(row.error?.message ?? "Clinic not found for mapping.");
+      return {
+        clinic: asClinicRow(row.data as Record<string, unknown>),
+        created: false,
+        mapping_created: false,
+      };
     }
   }
 
@@ -88,10 +94,18 @@ export async function resolveOrCreateClinic(
     const { data: candidates, error: listErr } = await q;
     if (listErr) throw new Error(listErr.message);
     const rows = (candidates ?? []) as Record<string, unknown>[];
-    const matches = rows.filter((r) => normalizeWhitespaceName(String(r.display_name)) === normName);
+    const matches = rows.filter(
+      (r) => normalizeWhitespaceName(String(r.display_name)) === normName
+    );
     if (matches.length === 1) {
       const clinic = asClinicRow(matches[0]);
-      const mappingCreated = await ensureClinicSourceMapping(supabase, tenantId, clinic.id, sourceSystem, sourceClinicId);
+      const mappingCreated = await ensureClinicSourceMapping(
+        supabase,
+        tenantId,
+        clinic.id,
+        sourceSystem,
+        sourceClinicId
+      );
       return { clinic, created: false, mapping_created: mappingCreated };
     }
   }
@@ -135,12 +149,23 @@ export async function resolveOrCreateClinic(
         .eq("id", retry.data.clinic_id)
         .eq("tenant_id", tenantId)
         .single();
-      if (row.data) return { clinic: asClinicRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
+      if (row.data)
+        return {
+          clinic: asClinicRow(row.data as Record<string, unknown>),
+          created: false,
+          mapping_created: false,
+        };
     }
   }
 
   if (inserted.error) throw new Error(inserted.error.message);
   const clinic = asClinicRow(inserted.data as Record<string, unknown>);
-  const mappingCreated = await ensureClinicSourceMapping(supabase, tenantId, clinic.id, sourceSystem, sourceClinicId);
+  const mappingCreated = await ensureClinicSourceMapping(
+    supabase,
+    tenantId,
+    clinic.id,
+    sourceSystem,
+    sourceClinicId
+  );
   return { clinic, created: true, mapping_created: mappingCreated };
 }

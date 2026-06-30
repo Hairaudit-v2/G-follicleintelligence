@@ -30,7 +30,10 @@ describe("calendarTimezone — tenant resolution", () => {
   });
 
   it("falls back to metadata.timezone", () => {
-    assert.equal(resolveTenantCalendarTimezone({ metadata: { timezone: "Europe/Dublin" } }), "Europe/Dublin");
+    assert.equal(
+      resolveTenantCalendarTimezone({ metadata: { timezone: "Europe/Dublin" } }),
+      "Europe/Dublin"
+    );
   });
 
   it("falls back to Australia/Brisbane when tenant row is absent", () => {
@@ -38,7 +41,10 @@ describe("calendarTimezone — tenant resolution", () => {
   });
 
   it("normalizes invalid IANA to Brisbane fallback", () => {
-    assert.equal(resolveTenantCalendarTimezone({ default_timezone: "Not/A_Real_Zone" }), "Australia/Brisbane");
+    assert.equal(
+      resolveTenantCalendarTimezone({ default_timezone: "Not/A_Real_Zone" }),
+      "Australia/Brisbane"
+    );
   });
 });
 
@@ -107,7 +113,10 @@ describe("calendarTimezone — Australia/Brisbane wall time → UTC", () => {
   });
 
   it("clinicLocalSlotToUtcIso matches isoFromLocalDayMinutes for 10:00", () => {
-    assert.equal(clinicLocalSlotToUtcIso("2026-06-10", 10 * 60, tz), isoFromLocalDayMinutes("2026-06-10", 10 * 60, tz));
+    assert.equal(
+      clinicLocalSlotToUtcIso("2026-06-10", 10 * 60, tz),
+      isoFromLocalDayMinutes("2026-06-10", 10 * 60, tz)
+    );
   });
 
   it("formatCalendarLongWeekdayDate uses en-GB weekday ordering", () => {

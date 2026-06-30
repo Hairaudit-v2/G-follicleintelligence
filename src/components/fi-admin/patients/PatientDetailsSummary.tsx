@@ -62,11 +62,13 @@ export function PatientDetailsSummary({ data }: { data: PatientProfileFoundation
 
   const hasHubspotSlice = idc.hasHubspotSlice;
   const sourceItems: { label: string; value: string }[] = [];
-  if (idc.hubspotRecordId) sourceItems.push({ label: "HubSpot record ID", value: idc.hubspotRecordId });
+  if (idc.hubspotRecordId)
+    sourceItems.push({ label: "HubSpot record ID", value: idc.hubspotRecordId });
   if (idc.importBatchId) sourceItems.push({ label: "Import batch", value: idc.importBatchId });
   if (idc.lifecycleStage) sourceItems.push({ label: "Lifecycle stage", value: idc.lifecycleStage });
   if (idc.leadStatus) sourceItems.push({ label: "Lead status", value: idc.leadStatus });
-  if (idc.stageOfJourney) sourceItems.push({ label: "Stage of journey", value: idc.stageOfJourney });
+  if (idc.stageOfJourney)
+    sourceItems.push({ label: "Stage of journey", value: idc.stageOfJourney });
   const hasSourceDetails = hasHubspotSlice || sourceItems.length > 0;
 
   return (

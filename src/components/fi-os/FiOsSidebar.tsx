@@ -44,14 +44,16 @@ export function FiOsSidebar({
         className={cn(
           "mb-1 flex items-center gap-3 rounded-xl border border-white/[0.08] px-3 py-2.5 transition",
           "hover:border-white/[0.12] hover:bg-white/[0.05]",
-          fiOsChromeClasses.glassCard,
+          fiOsChromeClasses.glassCard
         )}
       >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/15 bg-slate-950/50 text-xs font-bold tracking-tight text-cyan-400">
           FI
         </div>
         <div className="min-w-0">
-          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-cyan-400/90">FI OS</p>
+          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-cyan-400/90">
+            FI OS
+          </p>
           <p className="truncate text-sm font-semibold text-slate-50">{brandName}</p>
         </div>
       </Link>
@@ -86,7 +88,13 @@ export function FiOsSidebar({
     return (
       <div className={fiOsChromeClasses.sidebarDrawer}>
         {brandBlock}
-        <FiOsModuleNav sections={navSections} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
+        <FiOsModuleNav
+          sections={navSections}
+          activeId={activeNavId}
+          pathname={pathname}
+          onNavigate={onNavigate}
+          dense={dense}
+        />
       </div>
     );
   }
@@ -104,7 +112,13 @@ export function FiOsSidebar({
       <div className="relative flex min-h-0 flex-1 flex-col px-2.5">
         {brandBlock}
         {logoStrip}
-        <FiOsModuleNav sections={navSections} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
+        <FiOsModuleNav
+          sections={navSections}
+          activeId={activeNavId}
+          pathname={pathname}
+          onNavigate={onNavigate}
+          dense={dense}
+        />
       </div>
     </aside>
   );

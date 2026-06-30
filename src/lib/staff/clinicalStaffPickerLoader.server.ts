@@ -22,13 +22,17 @@ export async function enrichStaffPickerOptionsWithReadiness(
 }
 
 /** Active bookable staff with HR readiness metadata for clinical pickers. */
-export async function loadClinicalStaffPickerOptions(tenantId: string): Promise<ClinicalStaffPickerOption[]> {
+export async function loadClinicalStaffPickerOptions(
+  tenantId: string
+): Promise<ClinicalStaffPickerOption[]> {
   const base = await loadCrmShellStaffPickerOptions(tenantId);
   return enrichStaffPickerOptionsWithReadiness(tenantId, base);
 }
 
 /** Staff linked to fi_users for SurgeryOS procedure day pickers. */
-export async function loadProcedureTeamPickerOptions(tenantId: string): Promise<ProcedureTeamPickerOption[]> {
+export async function loadProcedureTeamPickerOptions(
+  tenantId: string
+): Promise<ProcedureTeamPickerOption[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = supabaseAdmin();
   const { data, error } = await supabase

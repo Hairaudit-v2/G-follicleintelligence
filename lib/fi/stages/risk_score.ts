@@ -67,7 +67,8 @@ export async function runRiskScore(
       await supabase.from("fi_scorecards").insert(payload);
     }
 
-    const surgicalReadiness = scorecard.sections.surgical_readiness?.score ?? scorecard.overall_score;
+    const surgicalReadiness =
+      scorecard.sections.surgical_readiness?.score ?? scorecard.overall_score;
     void publishAuditEvent({
       tenantId,
       eventType: "graft_integrity_scored",

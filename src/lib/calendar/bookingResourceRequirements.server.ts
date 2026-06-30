@@ -19,7 +19,11 @@ import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 import { AppointmentStaffHoursError } from "@/src/lib/bookings/bookingErrors";
 
-export type ServiceResourceRequirementType = "staff_role" | "staff_member" | "room_type" | "room_id";
+export type ServiceResourceRequirementType =
+  | "staff_role"
+  | "staff_member"
+  | "room_type"
+  | "room_id";
 
 export type FiServiceResourceRequirementRow = {
   id: string;
@@ -69,7 +73,9 @@ function mapRequirementRow(raw: Record<string, unknown>): FiServiceResourceRequi
     quantity: Number(raw.quantity ?? 1),
     sort_order: Number(raw.sort_order ?? 0),
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: raw.created_at != null ? String(raw.created_at) : undefined,
     updated_at: raw.updated_at != null ? String(raw.updated_at) : undefined,
   };
@@ -86,7 +92,9 @@ function mapAssignmentRow(raw: Record<string, unknown>): FiBookingResourceAssign
     role_label: raw.role_label != null ? String(raw.role_label) : null,
     is_primary: Boolean(raw.is_primary),
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: raw.created_at != null ? String(raw.created_at) : undefined,
     updated_at: raw.updated_at != null ? String(raw.updated_at) : undefined,
   };
@@ -166,7 +174,12 @@ function staffMatchesRolePattern(staffRole: string, pattern: string): boolean {
   return false;
 }
 
-async function loadOverlappingBookings(tenantId: string, startAt: string, endAt: string, client: SupabaseClient) {
+async function loadOverlappingBookings(
+  tenantId: string,
+  startAt: string,
+  endAt: string,
+  client: SupabaseClient
+) {
   const startMs = Date.parse(startAt);
   const endMs = Date.parse(endAt);
   const padStart = new Date(Math.min(startMs, startMs - 86_400_000)).toISOString();
@@ -227,7 +240,9 @@ export async function assertBookingResourceAssignmentsAvailable(args: {
     if (hit) {
       const s = await loadStaffMemberForTenant(tid, sid, client);
       const name = s?.full_name?.trim() || "This staff member";
-      throw new RoomAvailabilityError(`${name} is already assigned to another overlapping appointment.`);
+      throw new RoomAvailabilityError(
+        `${name} is already assigned to another overlapping appointment.`
+      );
     }
     try {
       await assertStaffAppointmentWithinWorkingHours(tid, sid, args.startAt, args.endAt, client);
@@ -250,7 +265,9 @@ export async function assertBookingResourceAssignmentsAvailable(args: {
     if (hit) {
       const room = rooms.find((r) => r.id === rid);
       const label = room?.display_name ?? "A selected room";
-      throw new RoomAvailabilityError(`${label} is already booked for an overlapping appointment (including shared physical room).`);
+      throw new RoomAvailabilityError(
+        `${label} is already booked for an overlapping appointment (including shared physical room).`
+      );
     }
   }
 }
@@ -272,7 +289,11 @@ export async function assertServiceResourceRequirementsMet(args: {
   const client = args.client ?? supabaseAdmin();
   if (!args.serviceId?.trim()) return;
 
-  const requirements = await loadServiceResourceRequirements({ tenantId: tid, serviceId: args.serviceId.trim(), client });
+  const requirements = await loadServiceResourceRequirements({
+    tenantId: tid,
+    serviceId: args.serviceId.trim(),
+    client,
+  });
   if (requirements.length === 0) return;
 
   const rooms = await loadClinicRoomsForTenant(tid, { clinicId, activeOnly: true }, client);
@@ -322,11 +343,15 @@ export async function assertServiceResourceRequirementsMet(args: {
     } else if (req.resource_type === "staff_member") {
       const need = req.resource_key.trim();
       if (!staffIds.has(need)) {
-        throw new RoomAvailabilityError(`Required staff member for “${req.requirement_label}” is not assigned.`);
+        throw new RoomAvailabilityError(
+          `Required staff member for “${req.requirement_label}” is not assigned.`
+        );
       }
     } else if (req.resource_type === "room_type") {
       const want = req.resource_key.trim() as FiClinicRoomRow["room_type"];
-      const matchedRoomIds = new Set(roomsUsed.filter((r) => r.room_type === want).map((r) => r.id));
+      const matchedRoomIds = new Set(
+        roomsUsed.filter((r) => r.room_type === want).map((r) => r.id)
+      );
       if (matchedRoomIds.size < req.quantity) {
         throw new RoomAvailabilityError(
           `This booking needs ${req.quantity}× ${req.requirement_label} (room type “${want}”). Pick additional rooms if needed.`
@@ -335,7 +360,9 @@ export async function assertServiceResourceRequirementsMet(args: {
     } else if (req.resource_type === "room_id") {
       const need = req.resource_key.trim();
       if (!roomIds.has(need)) {
-        throw new RoomAvailabilityError(`Required room for “${req.requirement_label}” is not assigned.`);
+        throw new RoomAvailabilityError(
+          `Required room for “${req.requirement_label}” is not assigned.`
+        );
       }
     }
   }
@@ -352,7 +379,11 @@ export async function replaceBookingResourceAssignments(args: {
   const client = args.client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
-  const { error: delErr } = await client.from("fi_booking_resource_assignments").delete().eq("tenant_id", tid).eq("booking_id", bid);
+  const { error: delErr } = await client
+    .from("fi_booking_resource_assignments")
+    .delete()
+    .eq("tenant_id", tid)
+    .eq("booking_id", bid);
   if (delErr) throw new Error(delErr.message);
 
   if (args.rows.length === 0) return;
@@ -418,7 +449,11 @@ export async function suggestResourceAssignments(args: {
   const sid = assertNonEmptyUuid(args.serviceId, "serviceId");
   const client = args.client ?? supabaseAdmin();
 
-  const requirements = await loadServiceResourceRequirements({ tenantId: tid, serviceId: sid, client });
+  const requirements = await loadServiceResourceRequirements({
+    tenantId: tid,
+    serviceId: sid,
+    client,
+  });
   const rooms = await loadClinicRoomsForTenant(tid, { clinicId: cid, activeOnly: true }, client);
 
   const staffOptionsByRequirementId: Record<string, string[]> = {};
@@ -432,7 +467,9 @@ export async function suggestResourceAssignments(args: {
       staffOptionsByRequirementId[req.id] = ids;
     } else if (req.resource_type === "staff_member") {
       const id = req.resource_key.trim();
-      staffOptionsByRequirementId[req.id] = args.staffCandidates.some((s) => s.id === id) ? [id] : [];
+      staffOptionsByRequirementId[req.id] = args.staffCandidates.some((s) => s.id === id)
+        ? [id]
+        : [];
     } else if (req.resource_type === "room_type") {
       const want = req.resource_key.trim() as FiClinicRoomRow["room_type"];
       roomOptionsByRequirementId[req.id] = rooms.filter((r) => r.room_type === want);
@@ -446,7 +483,9 @@ export async function suggestResourceAssignments(args: {
   return { staffOptionsByRequirementId, roomOptionsByRequirementId };
 }
 
-export function assignmentRowsToInput(rows: FiBookingResourceAssignmentRow[]): ResourceAssignmentInput[] {
+export function assignmentRowsToInput(
+  rows: FiBookingResourceAssignmentRow[]
+): ResourceAssignmentInput[] {
   return rows.map((r) => ({
     resource_type: r.resource_type,
     resource_id: r.resource_id,
@@ -491,4 +530,3 @@ export function buildBookingResourceSummaryLines(args: {
     teamLine: team.length ? `Team: ${team.join(", ")}` : null,
   };
 }
-

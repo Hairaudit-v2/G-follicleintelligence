@@ -26,14 +26,17 @@ export function PaymentStatusBadge(props: {
   todayYmd: string;
   className?: string;
 }) {
-  const eff = computeEffectivePaymentStatus({ status: props.status, due_date: props.dueDate }, props.todayYmd);
+  const eff = computeEffectivePaymentStatus(
+    { status: props.status, due_date: props.dueDate },
+    props.todayYmd
+  );
   const tone = STATUS_TONE[eff] ?? STATUS_TONE.neutral;
   return (
     <span
       className={cn(
         "inline-flex max-w-full items-center rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold capitalize",
         tone,
-        props.className,
+        props.className
       )}
       title="Recorded payment status (manual tracking — not integrated billing)."
     >

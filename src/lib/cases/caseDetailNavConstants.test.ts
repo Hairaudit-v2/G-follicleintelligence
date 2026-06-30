@@ -23,13 +23,22 @@ test("caseProcedureDayDetailHref: encodes special characters in path segments", 
 });
 
 test("procedureDayLinkForClipboard: returns relative href when origin missing", () => {
-  assert.equal(procedureDayLinkForClipboard("/fi-admin/t1/cases/c1#case-procedure-day"), "/fi-admin/t1/cases/c1#case-procedure-day");
-  assert.equal(procedureDayLinkForClipboard("/fi-admin/t1/cases/c1#case-procedure-day", ""), "/fi-admin/t1/cases/c1#case-procedure-day");
+  assert.equal(
+    procedureDayLinkForClipboard("/fi-admin/t1/cases/c1#case-procedure-day"),
+    "/fi-admin/t1/cases/c1#case-procedure-day"
+  );
+  assert.equal(
+    procedureDayLinkForClipboard("/fi-admin/t1/cases/c1#case-procedure-day", ""),
+    "/fi-admin/t1/cases/c1#case-procedure-day"
+  );
 });
 
 test("procedureDayLinkForClipboard: builds absolute URL when origin provided", () => {
   assert.equal(
-    procedureDayLinkForClipboard("/fi-admin/t1/cases/c1#case-procedure-day", "https://app.example.com"),
+    procedureDayLinkForClipboard(
+      "/fi-admin/t1/cases/c1#case-procedure-day",
+      "https://app.example.com"
+    ),
     "https://app.example.com/fi-admin/t1/cases/c1#case-procedure-day"
   );
 });

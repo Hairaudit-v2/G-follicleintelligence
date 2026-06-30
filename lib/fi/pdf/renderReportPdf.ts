@@ -21,11 +21,7 @@ function parseHexColor(hex: string | null | undefined): RGB {
   if (!hex || typeof hex !== "string") return DEFAULT_GOLD;
   const m = hex.replace(/^#/, "").match(/^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
   if (!m) return DEFAULT_GOLD;
-  return rgb(
-    parseInt(m[1], 16) / 255,
-    parseInt(m[2], 16) / 255,
-    parseInt(m[3], 16) / 255
-  );
+  return rgb(parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255);
 }
 
 type BrandingColors = {
@@ -169,12 +165,7 @@ function drawBar(
     y: y.current - barH,
     width: Math.max(2, fillW),
     height: barH,
-    color:
-      value > 0.6
-        ? rgb(0.9, 0.5, 0.25)
-        : value > 0.4
-          ? accentColor
-          : rgb(0.35, 0.6, 0.45),
+    color: value > 0.6 ? rgb(0.9, 0.5, 0.25) : value > 0.4 ? accentColor : rgb(0.35, 0.6, 0.45),
   });
   y.current -= barH + 12;
 }
@@ -220,8 +211,7 @@ function drawAndrogenCurveChart(
   const x = (age: number) =>
     chartLeft + ((age - options.ageMin) / (options.ageMax - options.ageMin)) * chartW;
   const maxY = Math.max(...data.unmanaged, ...data.dhtManaged, 0.001);
-  const y = (val: number) =>
-    chartTop - (val / maxY) * chartH;
+  const y = (val: number) => chartTop - (val / maxY) * chartH;
 
   // Draw axis
   page.drawLine({
@@ -349,21 +339,14 @@ export async function renderReportPdf(report: ReportJson): Promise<Uint8Array> {
   const hasAndrogen = !!androgenChart;
   const contentSectionsCount = report.sections.filter((s) => s.id !== "androgen_age").length;
   const sectionPages = Math.ceil(contentSectionsCount / 4) || 0;
-  const totalPages =
-    2 + (hasAndrogen ? 1 : 0) + sectionPages + 2; // cover, disclaimers+scores, [androgen], [sections], blood, images
+  const totalPages = 2 + (hasAndrogen ? 1 : 0) + sectionPages + 2; // cover, disclaimers+scores, [androgen], [sections], blood, images
 
   // Page 1: Cover + metadata
   let page = addPage();
   pageNum++;
   drawHeader(page, helvetica, helveticaBold, pageNum, totalPages, colors);
   const yRef = { current: PAGE_H - 55 };
-  const draw = (
-    p: PDFPage,
-    text: string,
-    size: number,
-    bold = false,
-    color = LIGHT
-  ) => {
+  const draw = (p: PDFPage, text: string, size: number, bold = false, color = LIGHT) => {
     drawText(p, yRef, text, size, helvetica, helveticaBold, bold, color);
   };
 
@@ -455,17 +438,21 @@ export async function renderReportPdf(report: ReportJson): Promise<Uint8Array> {
   yRef.current -= 16;
 
   draw(page, "Domain scores", 14, true, colors.accent);
-  draw(
-    page,
-    `Overall: ${(report.score_summary.overall_score * 10).toFixed(1)}/10`,
-    10
-  );
+  draw(page, `Overall: ${(report.score_summary.overall_score * 10).toFixed(1)}/10`, 10);
   yRef.current -= 12;
 
   const domainChart = report.charts.find((c) => c.type === "domain_scores");
   const maxScore = (domainChart?.data?.maxScore as number) ?? 1;
   for (const s of report.score_summary.sections) {
-    drawBar(page, yRef, `${s.label}: ${(s.score * 10).toFixed(1)}`, s.score, maxScore, helvetica, colors.accent);
+    drawBar(
+      page,
+      yRef,
+      `${s.label}: ${(s.score * 10).toFixed(1)}`,
+      s.score,
+      maxScore,
+      helvetica,
+      colors.accent
+    );
   }
 
   drawFooter(page, helvetica, ref, colors, partnerRefCode);
@@ -555,11 +542,7 @@ export async function renderReportPdf(report: ReportJson): Promise<Uint8Array> {
       draw(page, `${m.name}: ${val}${unit}${flag}${refStr}`, 9);
     }
     if (report.appendix.blood_markers.length > 25) {
-      draw(
-        page,
-        `… and ${report.appendix.blood_markers.length - 25} more markers`,
-        8
-      );
+      draw(page, `… and ${report.appendix.blood_markers.length - 25} more markers`, 8);
     }
   } else {
     draw(page, "No blood markers in this report.", 9);

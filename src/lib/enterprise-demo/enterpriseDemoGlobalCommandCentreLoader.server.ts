@@ -1,7 +1,10 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { isInvoiceOpenForCollection, type FiInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  isInvoiceOpenForCollection,
+  type FiInvoiceStatus,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 import { ENTERPRISE_DEMO_CLINICS, ENTERPRISE_DEMO_CODE_NAME } from "./enterpriseDemoConstants";
 import {
@@ -81,7 +84,9 @@ type ClinicRow = {
   metadata: unknown;
 };
 
-function mapClinicRow(row: ClinicRow): { id: string; slug: string; name: string; city: string; country: string } | null {
+function mapClinicRow(
+  row: ClinicRow
+): { id: string; slug: string; name: string; city: string; country: string } | null {
   const metadata = asRecord(row.metadata);
   const slug = metadataString(metadata, "slug");
   if (!slug) return null;
@@ -220,7 +225,12 @@ export async function loadGlobalCommandCentrePayload(
   const surgeryIds: string[] = [];
 
   for (const row of surgeryRaw ?? []) {
-    const raw = row as { id: string; clinic_id: string | null; scheduled_date: string; metadata: unknown };
+    const raw = row as {
+      id: string;
+      clinic_id: string | null;
+      scheduled_date: string;
+      metadata: unknown;
+    };
     const metadata = asRecord(raw.metadata);
     if (metadata?.enterprise_demo_surgery !== true && metadata?.enterprise_demo !== true) continue;
 

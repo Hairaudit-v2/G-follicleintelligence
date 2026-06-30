@@ -29,8 +29,11 @@ export function normalizeVoiceNoteValue(raw: unknown): VoiceNoteFieldValue {
   const o = raw as Record<string, unknown>;
   const transcript = typeof o.transcript === "string" ? o.transcript : "";
   const clinicalNoteId =
-    typeof o.clinicalNoteId === "string" && o.clinicalNoteId.trim() ? o.clinicalNoteId.trim() : null;
-  const updatedAt = typeof o.updatedAt === "string" && o.updatedAt.trim() ? o.updatedAt.trim() : nowIso();
+    typeof o.clinicalNoteId === "string" && o.clinicalNoteId.trim()
+      ? o.clinicalNoteId.trim()
+      : null;
+  const updatedAt =
+    typeof o.updatedAt === "string" && o.updatedAt.trim() ? o.updatedAt.trim() : nowIso();
   return { mode: "voice_note", transcript, clinicalNoteId, updatedAt };
 }
 
@@ -43,7 +46,8 @@ export function normalizeClinicalNoteValue(raw: unknown): ClinicalNoteFieldValue
   }
   const o = raw as Record<string, unknown>;
   const note = typeof o.note === "string" ? o.note : "";
-  const updatedAt = typeof o.updatedAt === "string" && o.updatedAt.trim() ? o.updatedAt.trim() : nowIso();
+  const updatedAt =
+    typeof o.updatedAt === "string" && o.updatedAt.trim() ? o.updatedAt.trim() : nowIso();
   return { mode: "clinical_note", note, updatedAt };
 }
 
@@ -62,7 +66,8 @@ export function isValidVoiceNoteValueShape(raw: unknown): boolean {
   if (typeof raw !== "object" || Array.isArray(raw)) return false;
   const o = raw as Record<string, unknown>;
   if ("transcript" in o && typeof o.transcript !== "string") return false;
-  if ("clinicalNoteId" in o && o.clinicalNoteId != null && typeof o.clinicalNoteId !== "string") return false;
+  if ("clinicalNoteId" in o && o.clinicalNoteId != null && typeof o.clinicalNoteId !== "string")
+    return false;
   if ("mode" in o && o.mode !== undefined && o.mode !== "voice_note") return false;
   return true;
 }

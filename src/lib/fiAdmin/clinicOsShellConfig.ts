@@ -86,7 +86,14 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     label: "ClinicOS",
     description: "Dashboard, bookings, calendar, and daily operations.",
     items: [
-      { id: "dashboard", label: "Dashboard", path: "", home: true, permissionHint: {}, description: "Tenant home and overview." },
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        path: "",
+        home: true,
+        permissionHint: {},
+        description: "Tenant home and overview.",
+      },
       {
         id: "operations-centre",
         label: "Operations",
@@ -99,7 +106,8 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         label: "ReceptionOS",
         path: "reception-os",
         permissionHint: {},
-        description: "Front-desk command centre — patients, communications, pipeline, deposits, and alerts.",
+        description:
+          "Front-desk command centre — patients, communications, pipeline, deposits, and alerts.",
       },
       {
         id: "reception-board",
@@ -113,7 +121,8 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         label: "Tomorrow",
         path: "tomorrow",
         permissionHint: {},
-        description: "End-of-day readiness for tomorrow’s clinic day (bookings, surgery signals, payments, staff).",
+        description:
+          "End-of-day readiness for tomorrow’s clinic day (bookings, surgery signals, payments, staff).",
       },
       {
         id: "appointments",
@@ -129,7 +138,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         permissionHint: { requiresBookingsBoardNav: true },
         description: "Legacy booking board and agenda.",
       },
-      { id: "calendar", label: "Calendar", path: "calendar", permissionHint: {}, description: "Operational calendar." },
+      {
+        id: "calendar",
+        label: "Calendar",
+        path: "calendar",
+        permissionHint: {},
+        description: "Operational calendar.",
+      },
       {
         id: "doctor-workspace",
         label: "Doctor workspace",
@@ -173,8 +188,18 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     label: "LeadFlow",
     description: "Enquiries, leads, pipeline, tasks, and follow-ups.",
     items: [
-      { id: "leadflow", label: "LeadFlow", path: "leadflow", permissionHint: { requiresCrmShellNav: true } },
-      { id: "leadflow-crm", label: "CRM workspace", path: "crm", permissionHint: { requiresCrmShellNav: true } },
+      {
+        id: "leadflow",
+        label: "LeadFlow",
+        path: "leadflow",
+        permissionHint: { requiresCrmShellNav: true },
+      },
+      {
+        id: "leadflow-crm",
+        label: "CRM workspace",
+        path: "crm",
+        permissionHint: { requiresCrmShellNav: true },
+      },
     ],
   },
   {
@@ -193,7 +218,8 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   {
     id: "imagingos",
     label: "ImagingOS",
-    description: "Clinical imaging library, protocols, scalp maps, and compare — per patient from PatientOS.",
+    description:
+      "Clinical imaging library, protocols, scalp maps, and compare — per patient from PatientOS.",
     items: [
       {
         id: "imagingos-guide",
@@ -215,21 +241,24 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         label: "Command centre",
         path: "surgery-os",
         permissionHint: {},
-        description: "Live surgical command centre — theatre board, readiness, timeline, team, and alerts.",
+        description:
+          "Live surgical command centre — theatre board, readiness, timeline, team, and alerts.",
       },
       {
         id: "surgery-readiness-board",
         label: "Readiness board",
         path: "surgery-readiness",
         permissionHint: {},
-        description: "14-day surgery readiness across bookings, cases, pathology, and consent signals.",
+        description:
+          "14-day surgery readiness across bookings, cases, pathology, and consent signals.",
       },
       {
         id: "procedure-day-board",
         label: "Procedure day",
         path: "procedure-day",
         permissionHint: {},
-        description: "Today’s surgery schedule, team, procedure progress, and operating-room checklist.",
+        description:
+          "Today’s surgery schedule, team, procedure progress, and operating-room checklist.",
       },
     ],
   },
@@ -243,19 +272,23 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     id: "academyos",
     label: "AcademyOS",
     description: "Training and certification (coming soon).",
-    items: [{ id: "academyos", label: "AcademyOS", path: "", permissionHint: {}, placeholder: true }],
+    items: [
+      { id: "academyos", label: "AcademyOS", path: "", permissionHint: {}, placeholder: true },
+    ],
   },
   {
     id: "workforceos",
     label: "WorkforceOS",
-    description: "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
+    description:
+      "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
     items: [
       {
         id: "workforceos",
         label: "WorkforceOS",
         path: "hr-os",
         permissionHint: {},
-        description: "Onboarding centre, identity layer, compliance, and operational staff governance.",
+        description:
+          "Onboarding centre, identity layer, compliance, and operational staff governance.",
       },
     ],
   },
@@ -313,7 +346,8 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         label: "Tax & Localisation",
         path: "settings/tax-localisation",
         permissionHint: {},
-        description: "Configure tax, currency, invoice, and regional business settings for this clinic.",
+        description:
+          "Configure tax, currency, invoice, and regional business settings for this clinic.",
       },
       {
         id: "integrations",
@@ -341,7 +375,8 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
 ];
 
 /** Flattened nav defs (e.g. tests, introspection). */
-export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = CLINIC_OS_SHELL_NAV_MODULES.flatMap((m) => m.items);
+export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] =
+  CLINIC_OS_SHELL_NAV_MODULES.flatMap((m) => m.items);
 
 function normalizeBase(base: string): string {
   return base.replace(/\/+$/, "") || "";
@@ -410,7 +445,14 @@ function resolveOneNavItem(
     };
   }
   const href = def.home ? normalizeBase(base) : hrefFor(base, def.path);
-  return { id: def.id, label: def.label, href, disabled: false, home: def.home, description: def.description };
+  return {
+    id: def.id,
+    label: def.label,
+    href,
+    disabled: false,
+    home: def.home,
+    description: def.description,
+  };
 }
 
 /**
@@ -477,7 +519,9 @@ export function resolveClinicOsShellNavModules(
   showManageAdminUsers: boolean = false
 ): ResolvedClinicOsShellNavModule[] {
   return CLINIC_OS_SHELL_NAV_MODULES.map((mod) => {
-    const items = mod.items.map((def) => resolveOneNavItem(base, def, showCrmNav, showBookingsBoard, showManageAdminUsers));
+    const items = mod.items.map((def) =>
+      resolveOneNavItem(base, def, showCrmNav, showBookingsBoard, showManageAdminUsers)
+    );
     const nonPlaceholderDefs = mod.items.filter((d) => !d.placeholder);
     const realLinks = nonPlaceholderDefs.length;
     const duplicateModuleLabel = nonPlaceholderDefs.some((d) => d.label === mod.label);
@@ -498,7 +542,12 @@ export function resolveClinicOsShellNavItems(
   showBookingsBoard: boolean = showCrmNav,
   showManageAdminUsers: boolean = false
 ): ResolvedClinicOsShellNavItem[] {
-  return resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard, showManageAdminUsers).flatMap((m) => m.items);
+  return resolveClinicOsShellNavModules(
+    base,
+    showCrmNav,
+    showBookingsBoard,
+    showManageAdminUsers
+  ).flatMap((m) => m.items);
 }
 
 export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
@@ -561,15 +610,33 @@ export function resolveClinicOsShellQuickActions(
 ): ResolvedClinicOsQuickAction[] {
   return CLINIC_OS_SHELL_QUICK_ACTIONS.map((def) => {
     if (def.placeholder) {
-      return { id: def.id, label: def.label, href: "#", disabled: true, description: def.description };
+      return {
+        id: def.id,
+        label: def.label,
+        href: "#",
+        disabled: true,
+        description: def.description,
+      };
     }
     const needsCrm = Boolean(def.permissionHint.requiresCrmShellNav);
     const needsBookings = Boolean(def.permissionHint.requiresBookingsBoardNav);
     if (needsCrm && !showCrmNav) {
-      return { id: def.id, label: def.label, href: "#", disabled: true, description: def.description };
+      return {
+        id: def.id,
+        label: def.label,
+        href: "#",
+        disabled: true,
+        description: def.description,
+      };
     }
     if (needsBookings && !showBookingsBoard) {
-      return { id: def.id, label: def.label, href: "#", disabled: true, description: def.description };
+      return {
+        id: def.id,
+        label: def.label,
+        href: "#",
+        disabled: true,
+        description: def.description,
+      };
     }
     return {
       id: def.id,

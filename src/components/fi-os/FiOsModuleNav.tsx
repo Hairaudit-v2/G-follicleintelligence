@@ -78,7 +78,7 @@ function RowLink(props: {
       ? "cursor-not-allowed border-transparent text-slate-600"
       : active
         ? "border-cyan-400/25 bg-cyan-500/[0.16] text-slate-50 shadow-[inset_3px_0_0_0_rgba(34,211,238,0.9)]"
-        : "border-transparent text-slate-400 hover:bg-white/[0.05] hover:text-slate-100",
+        : "border-transparent text-slate-400 hover:bg-white/[0.05] hover:text-slate-100"
   );
 
   const path = pathname ?? "";
@@ -95,7 +95,7 @@ function RowLink(props: {
               "ml-6 block rounded-md border border-transparent py-1 pl-2 pr-2 text-[12px] font-medium transition",
               subActive
                 ? "border-cyan-400/20 bg-cyan-500/15 text-cyan-100"
-                : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-200",
+                : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-200"
             )}
           >
             {subItem.label}
@@ -115,11 +115,17 @@ function RowLink(props: {
 
   return (
     <div key={item.id} className="flex flex-col gap-0.5">
-      <Link href={item.href} className={row} title={item.hint} aria-current={active ? "page" : undefined} onClick={onNavigate}>
+      <Link
+        href={item.href}
+        className={row}
+        title={item.hint}
+        aria-current={active ? "page" : undefined}
+        onClick={onNavigate}
+      >
         <Icon
           className={cn(
             "h-[1.125rem] w-[1.125rem] shrink-0",
-            active ? "text-cyan-300" : "text-slate-500 group-hover:text-slate-300",
+            active ? "text-cyan-300" : "text-slate-500 group-hover:text-slate-300"
           )}
           aria-hidden
         />
@@ -147,13 +153,25 @@ export function FiOsModuleNav({
 }) {
   const path = pathname ?? "";
   return (
-    <nav className={cn("flex flex-1 flex-col gap-3 px-1.5 py-1.5", className)} aria-label="FI OS modules">
+    <nav
+      className={cn("flex flex-1 flex-col gap-3 px-1.5 py-1.5", className)}
+      aria-label="FI OS modules"
+    >
       {sections.map((section) => (
         <div key={section.groupId} className="space-y-1">
-          <p className="px-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500/95">{section.title}</p>
+          <p className="px-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500/95">
+            {section.title}
+          </p>
           <div className="flex flex-col gap-0.5">
             {section.items.map((item) => (
-              <RowLink key={item.id} item={item} activeId={activeId} pathname={path} onNavigate={onNavigate} dense={dense} />
+              <RowLink
+                key={item.id}
+                item={item}
+                activeId={activeId}
+                pathname={path}
+                onNavigate={onNavigate}
+                dense={dense}
+              />
             ))}
           </div>
         </div>

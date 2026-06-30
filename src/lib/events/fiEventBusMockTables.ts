@@ -54,7 +54,11 @@ export function createFiEventBusMockTables() {
   let eventsInsertShouldFail = false;
   const idempotencyKeys = new Set<string>();
 
-  function buildChain(rows: Row[], filters: Record<string, unknown> = {}, opts?: { countOnly?: boolean }) {
+  function buildChain(
+    rows: Row[],
+    filters: Record<string, unknown> = {},
+    opts?: { countOnly?: boolean }
+  ) {
     const terminal = {
       maybeSingle: async () => {
         const matched = applyFilters(rows, filters);
@@ -71,10 +75,7 @@ export function createFiEventBusMockTables() {
             const matched = applyFilters(rows, filters).slice(0, n);
             return { data: matched[0] ?? null, error: null };
           },
-          then(
-            resolve: (v: { data: Row[]; error: null }) => void,
-            reject?: (e: unknown) => void
-          ) {
+          then(resolve: (v: { data: Row[]; error: null }) => void, reject?: (e: unknown) => void) {
             try {
               resolve({ data: applyFilters(rows, filters).slice(0, n), error: null });
             } catch (e) {
@@ -202,11 +203,15 @@ export function createFiEventBusMockTables() {
         return {
           eq(col: string, val: unknown) {
             const matched = rows.filter((r) => r[col] === val);
-            matched.forEach((r) => Object.assign(r, patch, { updated_at: new Date().toISOString() }));
+            matched.forEach((r) =>
+              Object.assign(r, patch, { updated_at: new Date().toISOString() })
+            );
             return {
               eq(col2: string, val2: unknown) {
                 const narrowed = matched.filter((r) => r[col2] === val2);
-                narrowed.forEach((r) => Object.assign(r, patch, { updated_at: new Date().toISOString() }));
+                narrowed.forEach((r) =>
+                  Object.assign(r, patch, { updated_at: new Date().toISOString() })
+                );
                 return Promise.resolve({ error: null });
               },
               then(resolve: (v: { error: null }) => void) {

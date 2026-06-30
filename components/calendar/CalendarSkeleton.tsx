@@ -3,7 +3,10 @@
 import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 
-import { CALENDAR_HEADER_HEIGHT_PX, CALENDAR_PX_PER_HOUR } from "@/components/calendar/ProviderColumn";
+import {
+  CALENDAR_HEADER_HEIGHT_PX,
+  CALENDAR_PX_PER_HOUR,
+} from "@/components/calendar/ProviderColumn";
 import { cn } from "@/lib/utils";
 
 function Shimmer({ className, style }: { className?: string; style?: CSSProperties }) {
@@ -77,7 +80,10 @@ export function CalendarSkeleton() {
         {/* Grid */}
         <div className="flex min-w-0 flex-1 overflow-hidden">
           <div className="w-11 shrink-0 border-r border-white/[0.08] bg-[#f8fafc] lg:w-14">
-            <div style={{ height: CALENDAR_HEADER_HEIGHT_PX }} className="border-b border-white/[0.08]" />
+            <div
+              style={{ height: CALENDAR_HEADER_HEIGHT_PX }}
+              className="border-b border-white/[0.08]"
+            />
             <div className="space-y-7 px-2 py-3">
               {Array.from({ length: 8 }, (_, i) => (
                 <Shimmer key={i} className="ml-auto h-3 w-8" />

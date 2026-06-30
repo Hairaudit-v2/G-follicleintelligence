@@ -41,7 +41,8 @@ export function FiTenantOperatingModePanel({
     <DashboardCard elevated className="border-cyan-500/20 bg-[#0c1426]/80 p-4 sm:p-5">
       <h2 className="text-base font-semibold tracking-tight text-[#F8FAFC]">Operating mode</h2>
       <p className="mt-2 max-w-3xl text-xs leading-relaxed text-[#94A3B8] sm:text-sm">
-        This sets <strong className="text-[#E2E8F0]">tenant defaults</strong> for FI OS Stage 3.5. Staff-level overrides and templates still win.{" "}
+        This sets <strong className="text-[#E2E8F0]">tenant defaults</strong> for FI OS Stage 3.5.
+        Staff-level overrides and templates still win.{" "}
         <span className="text-amber-200/90">This does not mass-update staff rows.</span>
       </p>
 
@@ -62,7 +63,10 @@ export function FiTenantOperatingModePanel({
         </label>
 
         {FI_TENANT_OPERATING_MODE_UI_OPTIONS.filter((o) => o.modeKey === selection).map((o) => (
-          <div key={o.modeKey} className="rounded-lg border border-white/[0.06] bg-[#081020]/60 p-3 text-xs text-[#94A3B8]">
+          <div
+            key={o.modeKey}
+            className="rounded-lg border border-white/[0.06] bg-[#081020]/60 p-3 text-xs text-[#94A3B8]"
+          >
             <p className="font-medium text-[#CBD5E1]">{o.label}</p>
             <p className="mt-2 leading-relaxed">{o.description}</p>
             <p className="mt-2 text-[#64748B]">

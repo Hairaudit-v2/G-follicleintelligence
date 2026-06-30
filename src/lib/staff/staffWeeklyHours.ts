@@ -54,7 +54,9 @@ function dayHoursFromUnknown(raw: unknown): StaffDayHours | null {
 }
 
 /** Normalise DB `working_hours` into a weekday map (unknown keys ignored). */
-export function parseStaffWeeklyHours(workingHours: Record<string, unknown> | null | undefined): StaffWeeklyHoursMap {
+export function parseStaffWeeklyHours(
+  workingHours: Record<string, unknown> | null | undefined
+): StaffWeeklyHoursMap {
   if (!workingHours || typeof workingHours !== "object" || Array.isArray(workingHours)) return {};
   const w = (workingHours as StaffWorkingHoursDocument).weekly;
   if (!w || typeof w !== "object" || Array.isArray(w)) return {};
@@ -130,7 +132,10 @@ export function staffLocalMinutesFromUtcMs(ms: number, staffTz: string): number 
     hour12: false,
   });
   const parts = Object.fromEntries(
-    dtf.formatToParts(new Date(ms)).filter((p) => p.type !== "literal").map((p) => [p.type, p.value])
+    dtf
+      .formatToParts(new Date(ms))
+      .filter((p) => p.type !== "literal")
+      .map((p) => [p.type, p.value])
   );
   const h = Number(parts.hour);
   const m = Number(parts.minute);
@@ -143,7 +148,10 @@ export function timeZoneShortLabel(timeZone: string, refMs: number = Date.now())
   try {
     const dtf = new Intl.DateTimeFormat("en-AU", { timeZone: tz, timeZoneName: "short" });
     const name =
-      dtf.formatToParts(new Date(refMs)).find((p) => p.type === "timeZoneName")?.value?.trim() || tz;
+      dtf
+        .formatToParts(new Date(refMs))
+        .find((p) => p.type === "timeZoneName")
+        ?.value?.trim() || tz;
     return name;
   } catch {
     return tz;
@@ -175,7 +183,8 @@ export function isUtcRangeWithinStaffWeeklyHours(
   staffTz: string
 ): boolean {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return false;
-  if (staffWeekdayKeyFromUtcMs(startMs, staffTz) !== staffWeekdayKeyFromUtcMs(endMs - 1, staffTz)) return false;
+  if (staffWeekdayKeyFromUtcMs(startMs, staffTz) !== staffWeekdayKeyFromUtcMs(endMs - 1, staffTz))
+    return false;
   const key = staffWeekdayKeyFromUtcMs(startMs, staffTz);
   const day = weekly[key];
   const sm = day?.start ? minutesFromHm(day.start) : null;

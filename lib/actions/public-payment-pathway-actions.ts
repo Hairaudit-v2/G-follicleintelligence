@@ -25,9 +25,7 @@ function errMsg(e: unknown): string {
   return "Request failed.";
 }
 
-export async function selectPublicPaymentPathwayAction(
-  body: unknown
-): Promise<
+export async function selectPublicPaymentPathwayAction(body: unknown): Promise<
   | {
       ok: true;
       pathwayType: string;
@@ -40,7 +38,10 @@ export async function selectPublicPaymentPathwayAction(
 > {
   try {
     const parsed = selectSchema.parse(body);
-    const result = await selectPublicPaymentPathwayForToken(parsed.publicToken.trim(), parsed.pathwayType);
+    const result = await selectPublicPaymentPathwayForToken(
+      parsed.publicToken.trim(),
+      parsed.pathwayType
+    );
     if (!result.ok) return result;
     return {
       ok: true,

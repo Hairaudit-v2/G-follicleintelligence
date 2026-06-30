@@ -1,9 +1,19 @@
 import { z } from "zod";
 
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
-import type { IiohrHrStaffImportCounts, IiohrHrStaffImportRunResult } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
+import {
+  CRON_OR_WEBHOOK_SECRET_MIN_LENGTH,
+  timingSafeUtf8Equal,
+} from "@/src/lib/security/timingSafeSecret";
+import type {
+  IiohrHrStaffImportCounts,
+  IiohrHrStaffImportRunResult,
+} from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
 import { parseIiohrHrStaffSyncRows } from "@/src/lib/staffImport/iiohrHrStaffSyncRowsParse";
-import type { IiohrHrStaffSyncPayload, IiohrHrStaffSyncSummary, SyncIiohrHrStaffForTenantInput } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
+import type {
+  IiohrHrStaffSyncPayload,
+  IiohrHrStaffSyncSummary,
+  SyncIiohrHrStaffForTenantInput,
+} from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
 
 export const IIOHR_HR_STAFF_SYNC_MAX_ROWS = 500;
 
@@ -157,7 +167,8 @@ export async function processIiohrHrStaffSyncPost(
       body: { ok: false, error: "commit requires confirm: true." },
     };
   }
-  const effectiveMode: "preview" | "commit" = requestedMode === "commit" && raw.confirm === true ? "commit" : "preview";
+  const effectiveMode: "preview" | "commit" =
+    requestedMode === "commit" && raw.confirm === true ? "commit" : "preview";
 
   const rowParse = parseIiohrHrStaffSyncRows(rowsArr);
   if (!rowParse.ok) {

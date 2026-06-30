@@ -7,7 +7,10 @@ import {
   revokeStaffFieldAccessGrantAction,
   upsertStaffFieldAccessGrantAction,
 } from "@/lib/actions/fi-staff-field-access-actions";
-import { STAFF_ACCESS_SCOPES, type StaffAccessScope } from "@/src/lib/staffAccess/staffAccessRegistry";
+import {
+  STAFF_ACCESS_SCOPES,
+  type StaffAccessScope,
+} from "@/src/lib/staffAccess/staffAccessRegistry";
 import { STAFF_FIELD_PERMISSION_LEVELS } from "@/src/lib/staffAccess/staffFieldAccessRegistry";
 
 type FieldRow = {
@@ -158,7 +161,9 @@ export function FieldAccessSection({
                   <span className="text-[#64748B]">Module access:</span>
                   <span
                     className={`rounded px-1.5 py-0.5 font-medium ${
-                      moduleBlocked ? "bg-[#475569]/20 text-[#64748B]" : "bg-[#22C1FF]/10 text-[#22C1FF]"
+                      moduleBlocked
+                        ? "bg-[#475569]/20 text-[#64748B]"
+                        : "bg-[#22C1FF]/10 text-[#22C1FF]"
                     }`}
                   >
                     {moduleLevel}
@@ -237,8 +242,11 @@ export function FieldAccessSection({
                   <span className="text-xs text-[#64748B]">{fmtDate(a.createdAt)}</span>
                 </div>
                 <div className="mt-1 text-xs text-[#94A3B8]">
-                  {summarisePermission(a.previousPermission)} → {summarisePermission(a.newPermission)}
-                  {a.reason ? <span className="ml-2 italic text-[#64748B]">“{a.reason}”</span> : null}
+                  {summarisePermission(a.previousPermission)} →{" "}
+                  {summarisePermission(a.newPermission)}
+                  {a.reason ? (
+                    <span className="ml-2 italic text-[#64748B]">“{a.reason}”</span>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -353,11 +361,7 @@ function FieldRowEditor({
       <td className="px-2 py-2">
         {canManage ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <select
-              className={inputClass}
-              value={level}
-              onChange={(e) => setLevel(e.target.value)}
-            >
+            <select className={inputClass} value={level} onChange={(e) => setLevel(e.target.value)}>
               {STAFF_FIELD_PERMISSION_LEVELS.map((l) => (
                 <option key={l} value={l}>
                   {l}

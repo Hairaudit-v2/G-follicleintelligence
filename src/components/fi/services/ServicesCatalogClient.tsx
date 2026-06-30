@@ -12,7 +12,10 @@ import {
   loadDefaultClinicServicesAction,
   updateServiceAction,
 } from "@/lib/actions/fi-services-actions";
-import { saveServiceRoomEligibilityAction, saveServiceStaffEligibilityAction } from "@/lib/actions/fi-rooms-actions";
+import {
+  saveServiceRoomEligibilityAction,
+  saveServiceStaffEligibilityAction,
+} from "@/lib/actions/fi-rooms-actions";
 import { DEFAULT_CLINIC_SERVICE_LIBRARY } from "@/src/lib/services/defaultClinicServices";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
@@ -98,7 +101,8 @@ export function ServicesCatalogClient({
   }, []);
 
   const deactivateRow = (row: FiServiceRow) => {
-    if (!window.confirm(`Deactivate “${row.name}”? It will stay in the catalogue as inactive.`)) return;
+    if (!window.confirm(`Deactivate “${row.name}”? It will stay in the catalogue as inactive.`))
+      return;
     setError(null);
     startTransition(async () => {
       const r = await deactivateServiceAction(tenantId, row.id, {});
@@ -134,7 +138,9 @@ export function ServicesCatalogClient({
       const parts = [`${r.created} created`];
       if (r.updated) parts.push(`${r.updated} updated`);
       if (r.skipped) parts.push(`${r.skipped} unchanged`);
-      setSeedMessage(`Default clinic services loaded (${parts.join(", ")}). Existing prices were kept.`);
+      setSeedMessage(
+        `Default clinic services loaded (${parts.join(", ")}). Existing prices were kept.`
+      );
       router.refresh();
     });
   };
@@ -196,9 +202,9 @@ export function ServicesCatalogClient({
         <div className="space-y-1">
           <h1 className="text-lg font-semibold text-slate-100">Services</h1>
           <p className="max-w-3xl text-sm text-slate-400">
-            Procedure catalog: default duration, price suggestion, and calendar colour per booking type. When{" "}
-            <span className="font-medium">Procedure type</span> is set, that row defines the catalog for that type (one
-            per tenant).
+            Procedure catalog: default duration, price suggestion, and calendar colour per booking
+            type. When <span className="font-medium">Procedure type</span> is set, that row defines
+            the catalog for that type (one per tenant).
           </p>
           <p className="text-sm text-slate-400">
             <Link href={base} className="text-blue-300 hover:underline">
@@ -233,7 +239,8 @@ export function ServicesCatalogClient({
           </div>
         ) : (
           <p className="text-xs text-gray-500">
-            View only — tenant admin, platform FI OS admin, or valid admin API access can edit the catalogue.
+            View only — tenant admin, platform FI OS admin, or valid admin API access can edit the
+            catalogue.
           </p>
         )}
       </header>
@@ -245,12 +252,18 @@ export function ServicesCatalogClient({
         >
           <p className="font-medium">No active services in your catalog</p>
           <p className="mt-1 text-amber-200">
-            Calendar and bookings still work with built-in fallbacks, but procedure colours, durations, and price hints
-            work best with a service library. Load the {DEFAULT_CLINIC_SERVICE_LIBRARY.length} Evolved defaults or add
-            your own rows.
+            Calendar and bookings still work with built-in fallbacks, but procedure colours,
+            durations, and price hints work best with a service library. Load the{" "}
+            {DEFAULT_CLINIC_SERVICE_LIBRARY.length} Evolved defaults or add your own rows.
           </p>
           {canManage ? (
-            <Button type="button" variant="outline" className="mt-3" onClick={loadDefaults} disabled={pending}>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-3"
+              onClick={loadDefaults}
+              disabled={pending}
+            >
               Load Default Clinic Services
             </Button>
           ) : null}
@@ -258,13 +271,19 @@ export function ServicesCatalogClient({
       ) : null}
 
       {seedMessage ? (
-        <div className="rounded border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300" role="status">
+        <div
+          className="rounded border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300"
+          role="status"
+        >
           {seedMessage}
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+        <div
+          className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -275,8 +294,14 @@ export function ServicesCatalogClient({
           aria-label={mode === "create" ? "Add service" : "Edit service"}
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-slate-100">{mode === "create" ? "New service" : "Edit service"}</h2>
-            <button type="button" onClick={closePanel} className="text-xs text-slate-400 hover:text-slate-100">
+            <h2 className="text-sm font-semibold text-slate-100">
+              {mode === "create" ? "New service" : "Edit service"}
+            </h2>
+            <button
+              type="button"
+              onClick={closePanel}
+              className="text-xs text-slate-400 hover:text-slate-100"
+            >
               Close
             </button>
           </div>
@@ -346,13 +371,19 @@ export function ServicesCatalogClient({
               </select>
             </label>
             <label className="flex items-center gap-2 text-xs font-medium text-slate-300 sm:col-span-2">
-              <input type="checkbox" checked={form.is_active === "on"} onChange={(e) => onField("is_active", e.target.checked ? "on" : "")} />
+              <input
+                type="checkbox"
+                checked={form.is_active === "on"}
+                onChange={(e) => onField("is_active", e.target.checked ? "on" : "")}
+              />
               Active
             </label>
           </div>
           {mode === "edit" ? (
             <div className="mt-4 space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Scheduling eligibility</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Scheduling eligibility
+              </p>
               {data.rooms.length === 0 ? (
                 <p className="text-xs text-gray-500">
                   No rooms configured. Add rooms in{" "}
@@ -370,9 +401,12 @@ export function ServicesCatalogClient({
                         checked={eligibleRoomIds.includes(room.id)}
                         onChange={(e) => {
                           setEligibleRoomIds((ids) =>
-                            e.target.checked ? [...ids, room.id] : ids.filter((id) => id !== room.id)
+                            e.target.checked
+                              ? [...ids, room.id]
+                              : ids.filter((id) => id !== room.id)
                           );
-                          if (!e.target.checked && preferredRoomId === room.id) setPreferredRoomId("");
+                          if (!e.target.checked && preferredRoomId === room.id)
+                            setPreferredRoomId("");
                         }}
                       />
                       {room.display_name}
@@ -442,11 +476,18 @@ export function ServicesCatalogClient({
                 <td colSpan={8} className="px-3 py-8 text-center text-slate-400">
                   <p>No services in the catalog yet.</p>
                   <p className="mt-2 text-sm text-gray-500">
-                    {canManage ? "Add the first row to drive booking durations and colours, or use " : "See "}
-                    <Link href={`${base}/calendar/testing`} className="text-blue-300 hover:underline">
+                    {canManage
+                      ? "Add the first row to drive booking durations and colours, or use "
+                      : "See "}
+                    <Link
+                      href={`${base}/calendar/testing`}
+                      className="text-blue-300 hover:underline"
+                    >
                       Calendar UAT
                     </Link>
-                    {canManage ? " for optional demo services (dev / staging)." : " for setup guidance."}
+                    {canManage
+                      ? " for optional demo services (dev / staging)."
+                      : " for setup guidance."}
                   </p>
                 </td>
               </tr>
@@ -462,7 +503,11 @@ export function ServicesCatalogClient({
                   <td className="px-3 py-2">
                     {row.color ? (
                       <span className="inline-flex items-center gap-1">
-                        <span className="inline-block h-4 w-4 rounded border border-slate-700" style={{ backgroundColor: row.color }} title={row.color} />
+                        <span
+                          className="inline-block h-4 w-4 rounded border border-slate-700"
+                          style={{ backgroundColor: row.color }}
+                          title={row.color}
+                        />
                         <span className="font-mono text-xs">{row.color}</span>
                       </span>
                     ) : (

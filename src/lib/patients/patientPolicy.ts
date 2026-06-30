@@ -2,7 +2,13 @@
  * Pure patient admin policy (Stage 4A): status allow-list and admin note bounds.
  */
 
-export const PATIENT_STATUS_VALUES = ["active", "inactive", "archived", "deceased", "duplicate"] as const;
+export const PATIENT_STATUS_VALUES = [
+  "active",
+  "inactive",
+  "archived",
+  "deceased",
+  "duplicate",
+] as const;
 
 export type PatientStatusValue = (typeof PATIENT_STATUS_VALUES)[number];
 
@@ -13,7 +19,9 @@ export const PATIENT_ADMIN_NOTE_MAX_LENGTH = 4000;
 
 const STATUS_SET = new Set<string>(PATIENT_STATUS_VALUES);
 
-export function isAllowedPatientStatus(value: string | null | undefined): value is PatientStatusValue {
+export function isAllowedPatientStatus(
+  value: string | null | undefined
+): value is PatientStatusValue {
   if (!value || typeof value !== "string") return false;
   return STATUS_SET.has(value.trim());
 }

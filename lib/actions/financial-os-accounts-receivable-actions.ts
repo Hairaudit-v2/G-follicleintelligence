@@ -61,7 +61,7 @@ function revalidateArPaths(tenantId: string, caseId?: string | null) {
 
 export async function assignArCaseOwnerAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = assignSchema.parse(body);
@@ -76,7 +76,7 @@ export async function assignArCaseOwnerAction(
 
 export async function setArCaseNextActionAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = nextActionSchema.parse(body);
@@ -91,7 +91,7 @@ export async function setArCaseNextActionAction(
 
 export async function logArCallAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; event_id?: string } | { ok: false; error: string }> {
   try {
     const parsed = callSchema.parse(body);
@@ -107,13 +107,18 @@ export async function logArCallAction(
 
 export async function markArReminderSentAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; draft_preview?: string } | { ok: false; error: string }> {
   try {
     const parsed = reminderSchema.parse(body);
     await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tenantId.trim());
-    const { draft } = await markArReminderSent(tenantId.trim(), parsed.ar_case_id, parsed.channel, actorFiUserId);
+    const { draft } = await markArReminderSent(
+      tenantId.trim(),
+      parsed.ar_case_id,
+      parsed.channel,
+      actorFiUserId
+    );
     revalidateArPaths(tenantId);
     return { ok: true, draft_preview: draft.reminder_body_preview };
   } catch (e) {
@@ -123,7 +128,7 @@ export async function markArReminderSentAction(
 
 export async function resolveArCaseAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = caseIdSchema.parse(body);
@@ -139,7 +144,7 @@ export async function resolveArCaseAction(
 
 export async function writeOffArCaseAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = writeOffSchema.parse(body);
@@ -157,7 +162,7 @@ export async function writeOffArCaseAction(
 
 export async function createManualArCaseAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; ar_case_id: string } | { ok: false; error: string }> {
   try {
     const parsed = manualSchema.parse(body);

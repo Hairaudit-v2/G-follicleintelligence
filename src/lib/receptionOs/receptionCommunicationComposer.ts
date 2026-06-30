@@ -52,10 +52,7 @@ export function patientFirstNameFromLabel(label: string): string {
 }
 
 export function suggestReceptionCommunicationTemplateKey(
-  input: Pick<
-    ReceptionCommunicationContextInput,
-    "sourceKind" | "alertKind" | "taskSourceType"
-  >,
+  input: Pick<ReceptionCommunicationContextInput, "sourceKind" | "alertKind" | "taskSourceType">
 ): ReceptionCommunicationTemplateKey {
   const kind = input.alertKind?.trim() ?? "";
 
@@ -87,7 +84,9 @@ export function suggestReceptionCommunicationTemplateKey(
   return "quote_follow_up";
 }
 
-export function suggestTemplateFromActionAlert(alert: ReceptionOsActionAlert): ReceptionCommunicationTemplateKey {
+export function suggestTemplateFromActionAlert(
+  alert: ReceptionOsActionAlert
+): ReceptionCommunicationTemplateKey {
   return suggestReceptionCommunicationTemplateKey({
     sourceKind: "action_alert",
     alertKind: alert.kind,
@@ -95,7 +94,7 @@ export function suggestTemplateFromActionAlert(alert: ReceptionOsActionAlert): R
 }
 
 export function suggestTemplateFromRevenueAlertKind(
-  kind: ReceptionOsRevenueRiskAlertKind,
+  kind: ReceptionOsRevenueRiskAlertKind
 ): ReceptionCommunicationTemplateKey {
   return suggestReceptionCommunicationTemplateKey({
     sourceKind: "revenue_alert",
@@ -104,7 +103,7 @@ export function suggestTemplateFromRevenueAlertKind(
 }
 
 export function buildReceptionCommunicationVariables(
-  input: ReceptionCommunicationContextInput,
+  input: ReceptionCommunicationContextInput
 ): ReceptionCommunicationTemplateVariables {
   const currency = input.currency?.trim() || "AUD";
   const depositAmt =
@@ -131,7 +130,9 @@ export function buildReceptionCommunicationVariables(
   };
 }
 
-export function parseSuggestedTemplateKey(raw: string | null | undefined): ReceptionCommunicationTemplateKey | null {
+export function parseSuggestedTemplateKey(
+  raw: string | null | undefined
+): ReceptionCommunicationTemplateKey | null {
   const t = raw?.trim() ?? "";
   return isReceptionCommunicationTemplateKey(t) ? t : null;
 }

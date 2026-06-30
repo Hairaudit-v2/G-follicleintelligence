@@ -78,9 +78,11 @@ export async function loadPostOpTrackingForCase(
     instructions_given: Boolean(r.instructions_given),
     aftercare_notes: r.aftercare_notes != null ? String(r.aftercare_notes) : null,
     donor_recovery_notes: r.donor_recovery_notes != null ? String(r.donor_recovery_notes) : null,
-    recipient_recovery_notes: r.recipient_recovery_notes != null ? String(r.recipient_recovery_notes) : null,
+    recipient_recovery_notes:
+      r.recipient_recovery_notes != null ? String(r.recipient_recovery_notes) : null,
     complication_notes: r.complication_notes != null ? String(r.complication_notes) : null,
-    patient_satisfaction_score: r.patient_satisfaction_score != null ? Number(r.patient_satisfaction_score) : null,
+    patient_satisfaction_score:
+      r.patient_satisfaction_score != null ? Number(r.patient_satisfaction_score) : null,
     outcome_notes: r.outcome_notes != null ? String(r.outcome_notes) : null,
     created_at: String(r.created_at ?? ""),
     updated_at: String(r.updated_at ?? ""),

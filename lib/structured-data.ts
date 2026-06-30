@@ -161,14 +161,8 @@ export interface WebSiteOptions {
 /**
  * Build WebSite schema (root).
  */
-export function buildWebSiteSchema(
-  siteUrl: string,
-  options: WebSiteOptions = {}
-): object {
-  const {
-    name = "Follicle Intelligence",
-    description = SITE_SEO_DESCRIPTION,
-  } = options;
+export function buildWebSiteSchema(siteUrl: string, options: WebSiteOptions = {}): object {
+  const { name = "Follicle Intelligence", description = SITE_SEO_DESCRIPTION } = options;
   const base = siteUrl.replace(/\/$/, "");
   return {
     "@context": SCHEMA_CONTEXT,

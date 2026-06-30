@@ -46,7 +46,9 @@ describe("buildHairTransplantCompletionSummary", () => {
   });
 
   it("graft range parsed from free text when numbers absent", () => {
-    const s = buildHairTransplantCompletionSummary(baseInput({ graft_range_estimate: "2000–2800" }));
+    const s = buildHairTransplantCompletionSummary(
+      baseInput({ graft_range_estimate: "2000–2800" })
+    );
     assert.equal(s.estimatedGraftsMin, 2000);
     assert.equal(s.estimatedGraftsMax, 2800);
   });

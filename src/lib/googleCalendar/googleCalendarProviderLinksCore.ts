@@ -104,7 +104,11 @@ export function findStaffForCalendarEvent(
   const key = staffCalendarLinkLookupKey(event.provider, event.calendar_id);
   if (links instanceof Map) {
     const match = links.get(key);
-    if (!match || match.tenant_id.trim() !== tid || match.status.trim().toLowerCase() !== "active") {
+    if (
+      !match ||
+      match.tenant_id.trim() !== tid ||
+      match.status.trim().toLowerCase() !== "active"
+    ) {
       return null;
     }
     return match.staff_member_id.trim() || null;
@@ -130,7 +134,11 @@ export function resolveCalendarEventStaffAssignment(
 
   if (links instanceof Map) {
     const match = links.get(key);
-    if (!match || match.tenant_id.trim() !== tid || match.status.trim().toLowerCase() !== "active") {
+    if (
+      !match ||
+      match.tenant_id.trim() !== tid ||
+      match.status.trim().toLowerCase() !== "active"
+    ) {
       return { staffMemberId: null, linkId: null };
     }
     return { staffMemberId: match.staff_member_id.trim() || null, linkId: match.id };
@@ -216,7 +224,9 @@ export function staffCalendarLinkClientPayloadExposesSecrets(payload: unknown): 
 }
 
 /** Strip ICS URL fields from arbitrary objects before client serialization. */
-export function sanitizeStaffCalendarLinkPayloadForClient<T extends Record<string, unknown>>(obj: T): T {
+export function sanitizeStaffCalendarLinkPayloadForClient<T extends Record<string, unknown>>(
+  obj: T
+): T {
   const out = { ...obj };
   for (const key of Object.keys(out)) {
     if (ICS_URL_KEY_PATTERN.test(key) || key === "timely_ics_url_encrypted") {

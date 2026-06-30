@@ -25,7 +25,9 @@ export function aggregateActiveLeadVolumeByPipelineStage(
   let activeOtherPipelineStage = 0;
 
   for (const row of rows) {
-    const st = String(row.status ?? "").trim().toLowerCase();
+    const st = String(row.status ?? "")
+      .trim()
+      .toLowerCase();
     if (TERMINAL_LEAD_STATUSES.has(st)) continue;
     const sid = row.current_stage_id?.trim();
     if (!sid) {

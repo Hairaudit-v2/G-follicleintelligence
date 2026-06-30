@@ -7,7 +7,10 @@ import {
   RECEPTION_OS_SEVERITIES,
   type ReceptionOsSeverity,
 } from "@/src/lib/receptionOs/receptionOsBoardModel";
-import type { ReceptionOsActionAlert, ReceptionOsBoardPayload } from "@/src/lib/receptionOs/receptionOsBoardModel.types";
+import type {
+  ReceptionOsActionAlert,
+  ReceptionOsBoardPayload,
+} from "@/src/lib/receptionOs/receptionOsBoardModel.types";
 import type { ReceptionTaskRow } from "@/src/lib/receptionOs/receptionTasks.types";
 import { OPEN_RECEPTION_TASK_STATUSES } from "@/src/lib/receptionOs/receptionTaskPolicy";
 
@@ -28,7 +31,9 @@ function emptySeverityCounts(): Record<ReceptionOsSeverity, number> {
   return { info: 0, warning: 0, critical: 0, blocked: 0 };
 }
 
-function countAlertsBySeverity(alerts: ReceptionOsActionAlert[]): Record<ReceptionOsSeverity, number> {
+function countAlertsBySeverity(
+  alerts: ReceptionOsActionAlert[]
+): Record<ReceptionOsSeverity, number> {
   const out = emptySeverityCounts();
   for (const a of alerts) {
     if (RECEPTION_OS_SEVERITIES.includes(a.severity)) out[a.severity] += 1;
@@ -49,15 +54,19 @@ export function buildReceptionOsDailyBrief(
     ReceptionOsBoardPayload,
     "todaysPatients" | "outstandingDeposits" | "upcomingSurgeries" | "actionAlerts"
   >,
-  openTasks: readonly ReceptionTaskRow[],
+  openTasks: readonly ReceptionTaskRow[]
 ): ReceptionOsDailyBrief {
   const alertsBySeverity = countAlertsBySeverity(board.actionAlerts);
   const overdueDepositCount = board.outstandingDeposits.filter((d) => d.isOverdue).length;
   const surgeryRiskCount = board.upcomingSurgeries.filter(
-    (s) => s.severity === "critical" || s.severity === "blocked" || s.severity === "warning",
+    (s) => s.severity === "critical" || s.severity === "blocked" || s.severity === "warning"
   ).length;
-  const followUpNeededCount = board.actionAlerts.filter((a) => a.kind === "no_follow_up_after_consultation").length;
-  const openTaskCount = openTasks.filter((t) => OPEN_RECEPTION_TASK_STATUSES.includes(t.status)).length;
+  const followUpNeededCount = board.actionAlerts.filter(
+    (a) => a.kind === "no_follow_up_after_consultation"
+  ).length;
+  const openTaskCount = openTasks.filter((t) =>
+    OPEN_RECEPTION_TASK_STATUSES.includes(t.status)
+  ).length;
 
   const projectedOperationalRisk = maxSeverity(
     overdueDepositCount > 0 ? "critical" : "info",
@@ -69,7 +78,7 @@ export function buildReceptionOsDailyBrief(
         : alertsBySeverity.warning > 0
           ? "warning"
           : "info",
-    openTaskCount >= 8 ? "warning" : "info",
+    openTaskCount >= 8 ? "warning" : "info"
   );
 
   const summaryLines: string[] = [

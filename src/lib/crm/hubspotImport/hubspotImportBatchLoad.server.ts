@@ -70,7 +70,11 @@ export type FiImportBatchRow = {
 export async function loadHubspotImportBatch(
   tenantId: string,
   batchId: string
-): Promise<{ batch: FiImportBatchRow | null; stagingPreview: StagingRowDb[]; stagingTotal: number }> {
+): Promise<{
+  batch: FiImportBatchRow | null;
+  stagingPreview: StagingRowDb[];
+  stagingTotal: number;
+}> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const bid = batchId.trim();
@@ -107,7 +111,10 @@ export async function loadHubspotImportBatch(
   };
 }
 
-export async function loadAllStagingRowsForBatch(tenantId: string, batchId: string): Promise<HubspotContactParsedRow[]> {
+export async function loadAllStagingRowsForBatch(
+  tenantId: string,
+  batchId: string
+): Promise<HubspotContactParsedRow[]> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const bid = batchId.trim();

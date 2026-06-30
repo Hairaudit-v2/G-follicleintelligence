@@ -37,11 +37,13 @@ function asPrescriptionRow(raw: Record<string, unknown>): FiPatientPrescriptionR
     pharmacy_id: raw.pharmacy_id != null ? String(raw.pharmacy_id) : null,
     pharmacy_name: raw.pharmacy_name != null ? String(raw.pharmacy_name) : null,
     delivery_type: raw.delivery_type != null ? String(raw.delivery_type) : null,
-    patient_shipping_address: raw.patient_shipping_address != null ? String(raw.patient_shipping_address) : null,
+    patient_shipping_address:
+      raw.patient_shipping_address != null ? String(raw.patient_shipping_address) : null,
     clinical_notes: raw.clinical_notes != null ? String(raw.clinical_notes) : null,
     signed_at: raw.signed_at != null ? String(raw.signed_at) : null,
     sent_at: raw.sent_at != null ? String(raw.sent_at) : null,
-    ready_for_pharmacy_at: raw.ready_for_pharmacy_at != null ? String(raw.ready_for_pharmacy_at) : null,
+    ready_for_pharmacy_at:
+      raw.ready_for_pharmacy_at != null ? String(raw.ready_for_pharmacy_at) : null,
     repeats_allowed: Boolean(raw.repeats_allowed),
     repeat_limit: Number(raw.repeat_limit ?? 0),
     reorders_used: Number(raw.reorders_used ?? 0),
@@ -53,7 +55,8 @@ function asPrescriptionRow(raw: Record<string, unknown>): FiPatientPrescriptionR
         ? Number(raw.patient_reorder_fee_pence)
         : null,
     reorder_fee_payment_required: Boolean(raw.reorder_fee_payment_required),
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
   };
@@ -69,7 +72,8 @@ function asItemRow(raw: Record<string, unknown>): FiPrescriptionItemRow {
     form_type: raw.form_type as MedicationFormType,
     quantity_label: String(raw.quantity_label ?? ""),
     dose_instructions: String(raw.dose_instructions ?? ""),
-    repeats_instructions: raw.repeats_instructions != null ? String(raw.repeats_instructions) : null,
+    repeats_instructions:
+      raw.repeats_instructions != null ? String(raw.repeats_instructions) : null,
     reorder_rule: raw.reorder_rule != null ? String(raw.reorder_rule) : null,
     repeat_rules_prescriber_confirmed: Boolean(raw.repeat_rules_prescriber_confirmed),
     sort_order: Number(raw.sort_order ?? 0),
@@ -90,7 +94,9 @@ function asEventRow(raw: Record<string, unknown>): FiPrescriptionStatusEventRow 
   };
 }
 
-export async function loadMedicationCatalogueForTenant(tenantId: string): Promise<FiMedicationCatalogueRow[]> {
+export async function loadMedicationCatalogueForTenant(
+  tenantId: string
+): Promise<FiMedicationCatalogueRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_medication_catalogue")

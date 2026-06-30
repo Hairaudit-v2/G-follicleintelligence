@@ -9,7 +9,10 @@ import {
   staffHasConfiguredWorkingHours,
 } from "@/src/lib/hr/hrStaffReadinessDashboard";
 import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
-import type { StaffComplianceItem, StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
+import type {
+  StaffComplianceItem,
+  StaffComplianceSummary,
+} from "@/src/lib/staffCompliance/staffComplianceTypes";
 import {
   buildWorkforceIdentityReadinessSignals,
   type WorkforceIdentityReadinessSignals,
@@ -119,7 +122,12 @@ function daysUntil(date: Date, now: Date): number {
 
 function isCertificationItem(item: StaffComplianceItem): boolean {
   const hay = `${item.id} ${item.label}`.toLowerCase();
-  return hay.includes("cert") || hay.includes("certificate") || hay.includes("licence") || hay.includes("license");
+  return (
+    hay.includes("cert") ||
+    hay.includes("certificate") ||
+    hay.includes("licence") ||
+    hay.includes("license")
+  );
 }
 
 function isSopItem(item: StaffComplianceItem): boolean {
@@ -181,12 +189,17 @@ function scoreOnboarding(hr: StaffHrNotificationSummary): number {
   return max;
 }
 
-function scoreTraining(hr: StaffHrNotificationSummary, trainingItems: StaffComplianceItem[]): number {
+function scoreTraining(
+  hr: StaffHrNotificationSummary,
+  trainingItems: StaffComplianceItem[]
+): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.training;
   const hrRequired = hr.training_required_count ?? 0;
 
   if (trainingItems.length > 0) {
-    const current = trainingItems.filter((i) => i.status === "current" || i.status === "unknown").length;
+    const current = trainingItems.filter(
+      (i) => i.status === "current" || i.status === "unknown"
+    ).length;
     const hrPenalty = hrRequired > 0 ? Math.min(max, hrRequired * 4) : 0;
     return Math.max(0, ratioScore(current, trainingItems.length, max) - hrPenalty);
   }
@@ -197,13 +210,18 @@ function scoreTraining(hr: StaffHrNotificationSummary, trainingItems: StaffCompl
   return hr.hasHrLink ? max : Math.round(max * 0.5);
 }
 
-function scoreCertification(hr: StaffHrNotificationSummary, certificationItems: StaffComplianceItem[]): number {
+function scoreCertification(
+  hr: StaffHrNotificationSummary,
+  certificationItems: StaffComplianceItem[]
+): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.certification;
   const outstanding = hr.certificates_outstanding_count ?? 0;
 
   if (certificationItems.some((i) => i.status === "expired")) return 0;
   if (certificationItems.length > 0) {
-    const current = certificationItems.filter((i) => i.status === "current" || i.status === "unknown").length;
+    const current = certificationItems.filter(
+      (i) => i.status === "current" || i.status === "unknown"
+    ).length;
     const dueSoon = certificationItems.filter((i) => i.status === "due_soon").length;
     const base = ratioScore(current, certificationItems.length, max);
     const penalty = dueSoon > 0 ? Math.min(max * 0.25, dueSoon * 3) : 0;
@@ -239,12 +257,16 @@ function scoreAvailability(is_active: boolean): number {
   return is_active ? max : 0;
 }
 
-function scoreHrSync(signals: WorkforceIdentityReadinessSignals, hr: StaffHrNotificationSummary): number {
+function scoreHrSync(
+  signals: WorkforceIdentityReadinessSignals,
+  hr: StaffHrNotificationSummary
+): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.hr_sync;
   if (!signals.hasHrIdentityLink) return 0;
   if (signals.syncStatus === "revoked") return 0;
   if (signals.isHrSyncStale || hr.isSyncStale) return Math.round(max * 0.4);
-  if (signals.syncStatus === "error" || signals.syncStatus === "stale") return Math.round(max * 0.5);
+  if (signals.syncStatus === "error" || signals.syncStatus === "stale")
+    return Math.round(max * 0.5);
   return max;
 }
 
@@ -282,7 +304,9 @@ function scoreCompetency(
     return Math.max(0, Math.round(max * 0.3));
   }
   if (competencyItems.length > 0) {
-    const current = competencyItems.filter((i) => i.status === "current" || i.status === "unknown").length;
+    const current = competencyItems.filter(
+      (i) => i.status === "current" || i.status === "unknown"
+    ).length;
     return ratioScore(current, competencyItems.length, max);
   }
   const due = parseIsoDate(competencyReviewDueAt);
@@ -321,7 +345,8 @@ function collectBlockingIssues(input: {
   if (isHrOnboardingIncomplete(input.hr)) issues.push("onboarding_incomplete");
   if (isTrainingIncomplete(input.hr)) issues.push("training_incomplete");
   if ((input.hr.certificates_outstanding_count ?? 0) > 0) issues.push("certification_expired");
-  if (input.certificationItems.some((i) => i.status === "expired")) issues.push("certification_expired");
+  if (input.certificationItems.some((i) => i.status === "expired"))
+    issues.push("certification_expired");
   if (input.sopItems.some((i) => i.status === "missing" || i.status === "expired")) {
     issues.push("mandatory_sop_incomplete");
   }
@@ -330,7 +355,10 @@ function collectBlockingIssues(input: {
   }
 
   const academy = input.signals.academyCompetencySignals;
-  if (academy?.hasProjection && (academy.restrictedCompetencies > 0 || academy.expiredCompetencies > 0)) {
+  if (
+    academy?.hasProjection &&
+    (academy.restrictedCompetencies > 0 || academy.expiredCompetencies > 0)
+  ) {
     issues.push("critical_compliance_expired");
   }
 
@@ -351,7 +379,8 @@ function collectWarnings(input: {
 
   if (input.signals.isAcademySyncStale) warnings.push("academy_sync_stale");
   if (input.signals.isHrSyncStale || input.hr.isSyncStale) warnings.push("hr_sync_stale");
-  if (!staffHasConfiguredWorkingHours(input.working_hours)) warnings.push("working_hours_incomplete");
+  if (!staffHasConfiguredWorkingHours(input.working_hours))
+    warnings.push("working_hours_incomplete");
 
   for (const item of input.sopItems) {
     if (item.status === "due_soon") {
@@ -386,7 +415,10 @@ function collectWarnings(input: {
       }
     }
   }
-  if (!warnings.includes("certification_expiring_soon") && (input.hr.certificates_outstanding_count ?? 0) > 0) {
+  if (
+    !warnings.includes("certification_expiring_soon") &&
+    (input.hr.certificates_outstanding_count ?? 0) > 0
+  ) {
     // HR snapshot flags outstanding certs as a softer signal when item rows are absent.
   }
 
@@ -520,16 +552,17 @@ export function calculateWorkforceReadinessScore(
   };
 }
 
-export const WORKFORCE_READINESS_BLOCKING_LABELS: Record<WorkforceReadinessBlockingIssue, string> = {
-  inactive: "Staff profile is inactive",
-  no_hr_identity: "No IIOHR HR identity link",
-  onboarding_incomplete: "Onboarding incomplete",
-  training_incomplete: "Mandatory training incomplete",
-  certification_expired: "Certification expired or outstanding",
-  mandatory_sop_incomplete: "Mandatory SOP incomplete",
-  sync_revoked: "Identity sync revoked",
-  critical_compliance_expired: "Critical compliance item expired",
-};
+export const WORKFORCE_READINESS_BLOCKING_LABELS: Record<WorkforceReadinessBlockingIssue, string> =
+  {
+    inactive: "Staff profile is inactive",
+    no_hr_identity: "No IIOHR HR identity link",
+    onboarding_incomplete: "Onboarding incomplete",
+    training_incomplete: "Mandatory training incomplete",
+    certification_expired: "Certification expired or outstanding",
+    mandatory_sop_incomplete: "Mandatory SOP incomplete",
+    sync_revoked: "Identity sync revoked",
+    critical_compliance_expired: "Critical compliance item expired",
+  };
 
 export const WORKFORCE_READINESS_WARNING_LABELS: Record<WorkforceReadinessWarning, string> = {
   sop_expiring_soon: "SOP expires within 14 days",

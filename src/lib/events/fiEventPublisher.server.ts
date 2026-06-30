@@ -7,11 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logStructured } from "@/src/lib/server/structuredLog";
 
-import {
-  getFiEventVersion,
-  isFiEventName,
-  type FiEventName,
-} from "./fiEventRegistry";
+import { getFiEventVersion, isFiEventName, type FiEventName } from "./fiEventRegistry";
 
 export type PublishFiEventInput = {
   tenantId: string;

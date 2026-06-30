@@ -50,7 +50,9 @@ export type SanitizedIntelligencePersistenceShape = {
 /**
  * From a raw envelope payload object: count and sample **key names** only; exclude sensitive key names.
  */
-export function sanitizeIntelligencePayloadKeysForPersistence(payload: Record<string, unknown>): SanitizedIntelligencePersistenceShape {
+export function sanitizeIntelligencePayloadKeysForPersistence(
+  payload: Record<string, unknown>
+): SanitizedIntelligencePersistenceShape {
   const keys = Object.keys(payload).filter(isSafeKeyName);
   return {
     key_count: keys.length,
@@ -81,7 +83,9 @@ export function sanitizeIntelligenceEventForPersistence(
 } {
   if (input.kind === "envelope") {
     const e = input.envelope;
-    const shape = sanitizeIntelligencePayloadKeysForPersistence(e.payload as Record<string, unknown>);
+    const shape = sanitizeIntelligencePayloadKeysForPersistence(
+      e.payload as Record<string, unknown>
+    );
     return {
       event_name: e.event_name,
       source: e.source,

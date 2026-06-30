@@ -32,8 +32,17 @@ export function buildFiOsWorkspaceFocusLine(opts: {
     return `Your workspace is focused on ${labels[0]}.`;
   }
 
-  const fallbacks: FiFeatureKey[] = ["consultations", "calendar", "crm", "cases", "patients", "procedure_day"];
-  const fbLabels = fallbacks.filter((k) => isFeatureOn(featureAccess, k)).map((k) => FI_FEATURE_REGISTRY[k].label);
+  const fallbacks: FiFeatureKey[] = [
+    "consultations",
+    "calendar",
+    "crm",
+    "cases",
+    "patients",
+    "procedure_day",
+  ];
+  const fbLabels = fallbacks
+    .filter((k) => isFeatureOn(featureAccess, k))
+    .map((k) => FI_FEATURE_REGISTRY[k].label);
   if (fbLabels.length) {
     return `Your workspace is tuned for ${fbLabels.slice(0, 2).join(" and ")}.`;
   }

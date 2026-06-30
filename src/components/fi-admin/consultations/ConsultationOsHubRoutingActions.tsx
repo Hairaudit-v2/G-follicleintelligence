@@ -76,7 +76,8 @@ export function ConsultationOsHubRoutingActions({
     <div className="space-y-3">
       <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Routing</h3>
       <p className={fiOsLightFormSurfaceClassNames.helper}>
-        Next operating surfaces for this consultation. Nothing here runs automatically — pick the workflow you need.
+        Next operating surfaces for this consultation. Nothing here runs automatically — pick the
+        workflow you need.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((t) => {
@@ -86,11 +87,17 @@ export function ConsultationOsHubRoutingActions({
               <FiCard
                 className={cn(
                   "flex h-full flex-col gap-2 p-4 transition",
-                  enabled ? "border-white/[0.08] hover:border-sky-300 hover:shadow-sm" : "border-white/[0.06] bg-white/[0.03] opacity-80"
+                  enabled
+                    ? "border-white/[0.08] hover:border-sky-300 hover:shadow-sm"
+                    : "border-white/[0.06] bg-white/[0.03] opacity-80"
                 )}
               >
-                <h4 className="text-sm font-semibold text-slate-100 dark:text-slate-50">{t.title}</h4>
-                <p className={cn("flex-1 text-xs", fiOsLightFormSurfaceClassNames.helper)}>{t.body}</p>
+                <h4 className="text-sm font-semibold text-slate-100 dark:text-slate-50">
+                  {t.title}
+                </h4>
+                <p className={cn("flex-1 text-xs", fiOsLightFormSurfaceClassNames.helper)}>
+                  {t.body}
+                </p>
                 {enabled ? (
                   <Link
                     href={t.href!}
@@ -111,7 +118,10 @@ export function ConsultationOsHubRoutingActions({
       {lid ? (
         <p className="text-xs text-slate-500 dark:text-slate-400">
           CRM:{" "}
-          <Link href={`/fi-admin/${tid}/crm/leads/${lid}`} className="font-semibold text-cyan-300 underline dark:text-sky-400">
+          <Link
+            href={`/fi-admin/${tid}/crm/leads/${lid}`}
+            className="font-semibold text-cyan-300 underline dark:text-sky-400"
+          >
             Open linked lead
           </Link>
         </p>

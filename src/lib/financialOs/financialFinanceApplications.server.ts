@@ -68,13 +68,20 @@ function mapAppRow(raw: Record<string, unknown>): FinanceApplicationRecord {
     finance_provider_id: String(raw.finance_provider_id),
     application_status: raw.application_status as FiFinanceApplicationStatus,
     application_reference: raw.application_reference ? String(raw.application_reference) : null,
-    requested_amount_cents: raw.requested_amount_cents != null ? Number(raw.requested_amount_cents) : null,
-    approved_amount_cents: raw.approved_amount_cents != null ? Number(raw.approved_amount_cents) : null,
+    requested_amount_cents:
+      raw.requested_amount_cents != null ? Number(raw.requested_amount_cents) : null,
+    approved_amount_cents:
+      raw.approved_amount_cents != null ? Number(raw.approved_amount_cents) : null,
     submitted_at: raw.submitted_at ? String(raw.submitted_at) : null,
     approved_at: raw.approved_at ? String(raw.approved_at) : null,
     settled_at: raw.settled_at ? String(raw.settled_at) : null,
-    expected_settlement_date: raw.expected_settlement_date ? String(raw.expected_settlement_date).slice(0, 10) : null,
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    expected_settlement_date: raw.expected_settlement_date
+      ? String(raw.expected_settlement_date).slice(0, 10)
+      : null,
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
     provider_name: raw.provider_name ? String(raw.provider_name) : undefined,
@@ -92,13 +99,19 @@ function mapDocRow(raw: Record<string, unknown>): FinanceApplicationDocumentReco
     status: raw.status as FiFinanceApplicationDocumentStatus,
     file_url: raw.file_url ? String(raw.file_url) : null,
     notes: raw.notes ? String(raw.notes) : null,
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
   };
 }
 
-async function assertMedicalFinancePathway(tenantId: string, paymentPathwayId: string): Promise<void> {
+async function assertMedicalFinancePathway(
+  tenantId: string,
+  paymentPathwayId: string
+): Promise<void> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_payment_pathways")
@@ -135,7 +148,12 @@ async function enrichApplications(
     .eq("tenant_id", tid)
     .in("id", pathwayIds);
   if (pe) throw new Error(pe.message);
-  const pathwayTypes = new Map((pathways ?? []).map((p) => [String((p as { id: string }).id), String((p as { pathway_type?: unknown }).pathway_type ?? "")]));
+  const pathwayTypes = new Map(
+    (pathways ?? []).map((p) => [
+      String((p as { id: string }).id),
+      String((p as { pathway_type?: unknown }).pathway_type ?? ""),
+    ])
+  );
 
   const docsByApp = new Map<string, FinanceApplicationDocumentRecord[]>();
   if (includeDocuments) {
@@ -149,7 +167,10 @@ async function enrichApplications(
     if (de) throw new Error(de.message);
     for (const raw of docs ?? []) {
       const doc = mapDocRow(raw as Record<string, unknown>);
-      docsByApp.set(doc.finance_application_id, [...(docsByApp.get(doc.finance_application_id) ?? []), doc]);
+      docsByApp.set(doc.finance_application_id, [
+        ...(docsByApp.get(doc.finance_application_id) ?? []),
+        doc,
+      ]);
     }
   }
 
@@ -157,7 +178,7 @@ async function enrichApplications(
     ...r,
     provider_name: providerNames.get(r.finance_provider_id) ?? r.finance_provider_id,
     pathway_type: pathwayTypes.get(r.payment_pathway_id),
-    documents: includeDocuments ? docsByApp.get(r.id) ?? [] : undefined,
+    documents: includeDocuments ? (docsByApp.get(r.id) ?? []) : undefined,
   }));
 }
 
@@ -203,15 +224,28 @@ export async function loadFinanceApplications(
 ): Promise<FinanceApplicationRecord[]> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
-  let q = supabase.from("fi_finance_applications").select(APP_SELECT).eq("tenant_id", tid).order("updated_at", { ascending: false }).limit(500);
+  let q = supabase
+    .from("fi_finance_applications")
+    .select(APP_SELECT)
+    .eq("tenant_id", tid)
+    .order("updated_at", { ascending: false })
+    .limit(500);
   if (filters?.status && filters.status !== "all") q = q.eq("application_status", filters.status);
-  if (filters?.providerId && filters.providerId !== "all") q = q.eq("finance_provider_id", filters.providerId);
+  if (filters?.providerId && filters.providerId !== "all")
+    q = q.eq("finance_provider_id", filters.providerId);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  return enrichApplications(tid, (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)), true);
+  return enrichApplications(
+    tid,
+    (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)),
+    true
+  );
 }
 
-export async function loadFinanceApplicationById(tenantId: string, applicationId: string): Promise<FinanceApplicationRecord | null> {
+export async function loadFinanceApplicationById(
+  tenantId: string,
+  applicationId: string
+): Promise<FinanceApplicationRecord | null> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -222,7 +256,11 @@ export async function loadFinanceApplicationById(tenantId: string, applicationId
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const [enriched] = await enrichApplications(tid, [mapAppRow(data as Record<string, unknown>)], true);
+  const [enriched] = await enrichApplications(
+    tid,
+    [mapAppRow(data as Record<string, unknown>)],
+    true
+  );
   return enriched ?? null;
 }
 
@@ -249,8 +287,10 @@ export async function updateFinanceApplicationStatus(args: {
 
   const nowIso = new Date().toISOString();
   const patch: Record<string, unknown> = { application_status: args.status };
-  if (args.applicationReference !== undefined) patch.application_reference = args.applicationReference?.trim() || null;
-  if (args.approvedAmountCents !== undefined) patch.approved_amount_cents = args.approvedAmountCents;
+  if (args.applicationReference !== undefined)
+    patch.application_reference = args.applicationReference?.trim() || null;
+  if (args.approvedAmountCents !== undefined)
+    patch.approved_amount_cents = args.approvedAmountCents;
   if (args.expectedSettlementDate !== undefined) {
     patch.expected_settlement_date = args.expectedSettlementDate?.trim() || null;
   }
@@ -270,7 +310,11 @@ export async function updateFinanceApplicationStatus(args: {
     .select(APP_SELECT)
     .single();
   if (error) throw new Error(error.message);
-  const [enriched] = await enrichApplications(tid, [mapAppRow(data as Record<string, unknown>)], true);
+  const [enriched] = await enrichApplications(
+    tid,
+    [mapAppRow(data as Record<string, unknown>)],
+    true
+  );
   return enriched!;
 }
 
@@ -348,7 +392,10 @@ export async function updateFinanceApplicationDocument(args: {
   return mapDocRow(data as Record<string, unknown>);
 }
 
-export async function resolveFinanceApplicationAttention(tenantId: string, applicationId: string): Promise<FinanceApplicationRecord> {
+export async function resolveFinanceApplicationAttention(
+  tenantId: string,
+  applicationId: string
+): Promise<FinanceApplicationRecord> {
   return updateFinanceApplicationStatus({
     tenantId,
     applicationId,
@@ -356,7 +403,10 @@ export async function resolveFinanceApplicationAttention(tenantId: string, appli
   });
 }
 
-async function loadSurgeryDatesByBookingIds(tenantId: string, bookingIds: string[]): Promise<Map<string, string>> {
+async function loadSurgeryDatesByBookingIds(
+  tenantId: string,
+  bookingIds: string[]
+): Promise<Map<string, string>> {
   const ids = bookingIds.filter(Boolean);
   const out = new Map<string, string>();
   if (!ids.length) return out;
@@ -375,7 +425,9 @@ async function loadSurgeryDatesByBookingIds(tenantId: string, bookingIds: string
   return out;
 }
 
-export async function loadFinanceApplicationsRequiringAttention(tenantId: string): Promise<FinanceApplicationRecord[]> {
+export async function loadFinanceApplicationsRequiringAttention(
+  tenantId: string
+): Promise<FinanceApplicationRecord[]> {
   const tid = tenantId.trim();
   const todayYmd = new Date().toISOString().slice(0, 10);
   const apps = await loadFinanceApplications(tid);
@@ -386,7 +438,7 @@ export async function loadFinanceApplicationsRequiringAttention(tenantId: string
     requiresEscalatedFinanceApplicationAttention({
       todayYmd,
       application: app,
-      surgeryDateYmd: app.booking_id ? surgeryDates.get(app.booking_id) ?? null : null,
+      surgeryDateYmd: app.booking_id ? (surgeryDates.get(app.booking_id) ?? null) : null,
     })
   );
 }
@@ -396,7 +448,9 @@ export async function loadFinanceApplicationAttentionCount(tenantId: string): Pr
   return rows.length;
 }
 
-export async function loadFinanceApplicationsDashboardCounts(tenantId: string): Promise<FinanceApplicationsDashboardCounts> {
+export async function loadFinanceApplicationsDashboardCounts(
+  tenantId: string
+): Promise<FinanceApplicationsDashboardCounts> {
   const tid = tenantId.trim();
   const todayYmd = new Date().toISOString().slice(0, 10);
   const apps = await loadFinanceApplications(tid);
@@ -406,7 +460,9 @@ export async function loadFinanceApplicationsDashboardCounts(tenantId: string): 
   return aggregateFinanceApplicationsDashboardCounts(apps, todayYmd, providerNames, surgeryDates);
 }
 
-export async function loadFinanceProviderAnalytics(tenantId: string): Promise<FinanceProviderAnalytics[]> {
+export async function loadFinanceProviderAnalytics(
+  tenantId: string
+): Promise<FinanceProviderAnalytics[]> {
   const tid = tenantId.trim();
   const apps = await loadFinanceApplications(tid);
   const providerNames = await loadProviderNameMap(tid);
@@ -431,7 +487,10 @@ export async function loadUnresolvedFinanceApplicationsForBookings(
     .not("application_status", "in", '("settled","cancelled")');
   if (error) throw new Error(error.message);
 
-  const rows = await enrichApplications(tenantId, (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)));
+  const rows = await enrichApplications(
+    tenantId,
+    (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>))
+  );
   for (const row of rows) {
     if (!row.booking_id) continue;
     out.set(row.booking_id, [...(out.get(row.booking_id) ?? []), row]);
@@ -457,7 +516,10 @@ export async function loadUnresolvedFinanceApplicationsForPathways(
     .order("updated_at", { ascending: false });
   if (error) throw new Error(error.message);
 
-  const rows = await enrichApplications(tenantId, (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)));
+  const rows = await enrichApplications(
+    tenantId,
+    (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>))
+  );
   for (const row of rows) {
     if (!out.has(row.payment_pathway_id)) out.set(row.payment_pathway_id, row);
   }

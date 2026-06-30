@@ -5,14 +5,22 @@ import { updatePatientAdminDetailsAction } from "@/lib/actions/fi-patient-action
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import { PATIENT_STATUS_VALUES, type PatientStatusValue } from "@/src/lib/patients/patientPolicy";
 
-export function PatientAdminNotesCard({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
+export function PatientAdminNotesCard({
+  tenantId,
+  data,
+}: {
+  tenantId: string;
+  data: PatientProfileFoundationData;
+}) {
   const [note, setNote] = useState(data.patient.admin_note ?? "");
   const [status, setStatus] = useState<PatientStatusValue>(data.patient.patient_status);
   const [msg, setMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const [reminderConsent, setReminderConsent] = useState(Boolean(data.patient.reminder_consent));
-  const [preferredContact, setPreferredContact] = useState<string>(data.patient.preferred_contact_method ?? "");
+  const [preferredContact, setPreferredContact] = useState<string>(
+    data.patient.preferred_contact_method ?? ""
+  );
 
   const dirty = useMemo(() => {
     return (
@@ -60,8 +68,8 @@ export function PatientAdminNotesCard({ tenantId, data }: { tenantId: string; da
           onChange={(e) => setReminderConsent(e.target.checked)}
         />
         <span>
-          Reminder consent — allow automated booking reminders (email/SMS) when templates exist and the booking has a
-          patient anchor.
+          Reminder consent — allow automated booking reminders (email/SMS) when templates exist and
+          the booking has a patient anchor.
         </span>
       </label>
       <label className="mt-3 block text-xs font-medium text-slate-300">

@@ -6,7 +6,10 @@ import { invoiceBalanceDueCents } from "@/src/lib/revenueOs/revenueInvoiceModel"
 
 type FinancialOsBookingStatus = "tentative" | "deposit_pending" | "confirmed" | "paid_in_full";
 
-async function resolveBookingIdForInvoice(tenantId: string, invoice: FiInvoiceRow): Promise<string | null> {
+async function resolveBookingIdForInvoice(
+  tenantId: string,
+  invoice: FiInvoiceRow
+): Promise<string | null> {
   const supabase = supabaseAdmin();
   const cid = invoice.consultation_id?.trim();
   if (cid) {
@@ -71,7 +74,9 @@ export async function syncFinancialOsAfterInvoiceSettlement(args: {
     confirmed: 2,
     paid_in_full: 3,
   };
-  const validPrev = (Object.keys(rank) as FinancialOsBookingStatus[]).includes(prev as FinancialOsBookingStatus);
+  const validPrev = (Object.keys(rank) as FinancialOsBookingStatus[]).includes(
+    prev as FinancialOsBookingStatus
+  );
   const prevRank = validPrev ? rank[prev as FinancialOsBookingStatus] : -1;
   if (rank[next] <= prevRank) return;
 

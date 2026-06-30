@@ -126,7 +126,10 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/calendar`, base), "calendar");
   assert.equal(getClinicOsShellActiveNavId(`${base}/bookings/new`, base), "bookings");
   assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1`, base), "patientos");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1/imaging`, base), "imagingos-guide");
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/patients/p-1/imaging`, base),
+    "imagingos-guide"
+  );
   assert.equal(getClinicOsShellActiveNavId(`${base}/services`, base), "services");
   assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "configuration");
   assert.equal(getClinicOsShellActiveNavId(`${base}/appointments`, base), "appointments");
@@ -136,10 +139,19 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/cases/c-1`, base), "surgeryos");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/surgery-readiness`, base), "surgery-readiness-board");
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/surgery-readiness`, base),
+    "surgery-readiness-board"
+  );
   assert.equal(getClinicOsShellActiveNavId(`${base}/procedure-day`, base), "procedure-day-board");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/procedure-day/extra`, base), "procedure-day-board");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/consultation-conversion`, base), "consultation-conversion-board");
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/procedure-day/extra`, base),
+    "procedure-day-board"
+  );
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/consultation-conversion`, base),
+    "consultation-conversion-board"
+  );
   assert.equal(getClinicOsShellActiveNavId(`${base}/consultations/c-1`, base), "consultations");
   assert.equal(getClinicOsShellActiveNavId(`${base}/operations`, base), "operations-centre");
   assert.equal(getClinicOsShellActiveNavId(`${base}/reception`, base), "reception-board");
@@ -212,7 +224,10 @@ test("getClinicOsShellActiveNavId: admin users under settings cluster", () => {
 });
 
 test("getClinicOsShellActiveNavId: tax localisation under settings cluster", () => {
-  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/tax-localisation`, base), "configuration");
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/settings/tax-localisation`, base),
+    "configuration"
+  );
 });
 
 test("getClinicOsShellActiveNavId: integrations hub under settings cluster", () => {
@@ -220,11 +235,17 @@ test("getClinicOsShellActiveNavId: integrations hub under settings cluster", () 
 });
 
 test("getClinicOsShellActiveNavId: Timely Zapier under settings cluster", () => {
-  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/integrations/timely`, base), "configuration");
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/settings/integrations/timely`, base),
+    "configuration"
+  );
 });
 
 test("getClinicOsShellActiveNavId: Timely discovery under settings cluster", () => {
-  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/integrations/timely/discovery`, base), "configuration");
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/settings/integrations/timely/discovery`, base),
+    "configuration"
+  );
 });
 
 test("resolveClinicOsShellNavItems: Admin Users gated by showManageAdminUsers", () => {

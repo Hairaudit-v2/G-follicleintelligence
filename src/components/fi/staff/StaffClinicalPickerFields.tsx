@@ -61,7 +61,10 @@ export function StaffClinicalSelect({
         ) : null}
       </select>
       {selected && !selected.clinical_readiness.clinically_available ? (
-        <StaffReadinessPickerWarning tenantId={tenantId} blockReason={selected.clinical_readiness.block_reason} />
+        <StaffReadinessPickerWarning
+          tenantId={tenantId}
+          blockReason={selected.clinical_readiness.block_reason}
+        />
       ) : null}
     </div>
   );
@@ -78,7 +81,10 @@ export function StaffReadinessPickerWarning({
   return (
     <p className="mt-1 text-[11px] leading-snug text-amber-300">
       {blockReason}.{" "}
-      <Link href={staffReadinessDashboardPath(tenantId)} className="font-medium text-amber-200 underline">
+      <Link
+        href={staffReadinessDashboardPath(tenantId)}
+        className="font-medium text-amber-200 underline"
+      >
         Open readiness dashboard
       </Link>
     </p>
@@ -109,7 +115,12 @@ export function ProcedureTeamSelect({
   const selected = options.find((o) => o.fi_user_id === value.trim()) ?? null;
   return (
     <div>
-      <select id={id} className={className} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select
+        id={id}
+        className={className}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
         {allowEmpty ? <option value="">{emptyLabel}</option> : null}
         {options.map((o) => {
           const selectable = canSelectStaffForProcedureSlot(o, slot);
@@ -124,15 +135,20 @@ export function ProcedureTeamSelect({
         ) : null}
       </select>
       {selected && !canSelectStaffForProcedureSlot(selected, slot) ? (
-        <StaffReadinessPickerWarning tenantId={tenantId} blockReason={selected.clinical_readiness.block_reason} />
+        <StaffReadinessPickerWarning
+          tenantId={tenantId}
+          blockReason={selected.clinical_readiness.block_reason}
+        />
       ) : null}
     </div>
   );
 }
 
 /** Label helper when only CrmShell options without full clinical enrichment. */
-export function staffPickerLabelFallback(
-  option: { full_name?: string | null; email?: string | null; id: string }
-): string {
+export function staffPickerLabelFallback(option: {
+  full_name?: string | null;
+  email?: string | null;
+  id: string;
+}): string {
   return staffOptionPrimaryLabel(option as ClinicalStaffPickerOption);
 }

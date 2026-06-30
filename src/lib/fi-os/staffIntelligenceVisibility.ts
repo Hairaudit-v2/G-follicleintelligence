@@ -9,7 +9,9 @@ export const FI_STAFF_INTELLIGENCE_HOME_WIDGET_PROFILES: readonly FiWorkspacePro
 
 const WIDGET_PROFILE_SET = new Set<string>(FI_STAFF_INTELLIGENCE_HOME_WIDGET_PROFILES);
 
-export function isStaffIntelligenceHomeWidgetAllowedForWorkspace(profile: FiWorkspaceProfileKey | null | undefined): boolean {
+export function isStaffIntelligenceHomeWidgetAllowedForWorkspace(
+  profile: FiWorkspaceProfileKey | null | undefined
+): boolean {
   if (!profile) return false;
   return WIDGET_PROFILE_SET.has(profile);
 }

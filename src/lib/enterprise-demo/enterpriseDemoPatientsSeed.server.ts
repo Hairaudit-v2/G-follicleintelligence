@@ -93,7 +93,9 @@ function buildPersonMetadata(spec: EnterpriseDemoPatientConsultationSpec): Recor
   };
 }
 
-function buildPatientMetadata(spec: EnterpriseDemoPatientConsultationSpec): Record<string, unknown> {
+function buildPatientMetadata(
+  spec: EnterpriseDemoPatientConsultationSpec
+): Record<string, unknown> {
   return {
     [ENTERPRISE_DEMO_PATIENT_METADATA_FLAG]: true,
     [ENTERPRISE_DEMO_PATIENT_KEY_METADATA]: spec.demoPatientKey,
@@ -137,7 +139,9 @@ function buildConsultationStructuredData(
   };
 }
 
-function buildConsultationQuoteData(spec: EnterpriseDemoPatientConsultationSpec): Record<string, unknown> {
+function buildConsultationQuoteData(
+  spec: EnterpriseDemoPatientConsultationSpec
+): Record<string, unknown> {
   if (!spec.quotedTreatment || spec.quotedValue == null) return {};
   return {
     price_quoted: spec.quotedValue,
@@ -248,7 +252,9 @@ async function loadExistingConsultations(
   return (data ?? []).map((row) => {
     const raw = row as { id: string; structured_data: unknown };
     const structured_data =
-      raw.structured_data && typeof raw.structured_data === "object" && !Array.isArray(raw.structured_data)
+      raw.structured_data &&
+      typeof raw.structured_data === "object" &&
+      !Array.isArray(raw.structured_data)
         ? (raw.structured_data as Record<string, unknown>)
         : null;
     return { id: String(raw.id), structured_data };
@@ -276,7 +282,10 @@ function findPatientByDemoKey(rows: PatientRow[], key: string): PatientRow | und
   return rows.find((row) => demoPatientKeyFromMetadata(row.metadata) === key);
 }
 
-function findConsultationByDemoKey(rows: ConsultationRow[], key: string): ConsultationRow | undefined {
+function findConsultationByDemoKey(
+  rows: ConsultationRow[],
+  key: string
+): ConsultationRow | undefined {
   return rows.find((row) => demoConsultationKeyFromStructured(row.structured_data) === key);
 }
 
@@ -311,7 +320,9 @@ export async function seedEnterpriseDemoPatientsAndConsultations(
   for (const spec of specs) {
     const clinicId = clinicIdBySlug.get(spec.clinicSlug);
     if (!clinicId) {
-      warnings.push(`Clinic slug "${spec.clinicSlug}" not found; skipped patient "${spec.demoPatientKey}".`);
+      warnings.push(
+        `Clinic slug "${spec.clinicSlug}" not found; skipped patient "${spec.demoPatientKey}".`
+      );
       continue;
     }
 
@@ -437,7 +448,10 @@ export async function seedEnterpriseDemoPatientsAndConsultations(
       existingClinicalDetails += 1;
     }
 
-    const existingConsultation = findConsultationByDemoKey(consultationRows, spec.demoConsultationKey);
+    const existingConsultation = findConsultationByDemoKey(
+      consultationRows,
+      spec.demoConsultationKey
+    );
     if (existingConsultation) {
       existingConsultations += 1;
       continue;
@@ -464,8 +478,9 @@ export async function seedEnterpriseDemoPatientsAndConsultations(
       consultation_date: spec.consultationDate,
       structured_data: structuredData,
       live_notes: null,
-      recommendation_notes:
-        spec.quotedTreatment ? `Recommended plan: ${spec.quotedTreatment}.` : "Consultation in progress.",
+      recommendation_notes: spec.quotedTreatment
+        ? `Recommended plan: ${spec.quotedTreatment}.`
+        : "Consultation in progress.",
       quote_data: quoteData,
       created_at: now,
       updated_at: now,

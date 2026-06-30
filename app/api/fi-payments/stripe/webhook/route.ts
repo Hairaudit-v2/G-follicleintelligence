@@ -38,7 +38,9 @@ export async function POST(req: NextRequest) {
   const supabase = supabaseAdmin();
   const mapped = provider.mapWebhookToPaymentEvent(rawEvent);
   const tenantHint =
-    mapped.kind === "checkout_completed" || mapped.kind === "checkout_failed" ? mapped.tenantId : null;
+    mapped.kind === "checkout_completed" || mapped.kind === "checkout_failed"
+      ? mapped.tenantId
+      : null;
 
   const { data: wh, error: whe } = await supabase
     .from("fi_payment_webhook_events")
@@ -98,7 +100,11 @@ export async function POST(req: NextRequest) {
             .eq("id", mapped.invoiceId.trim())
             .maybeSingle();
           if (invRow) {
-            const ir = invRow as { lead_id: string | null; patient_id: string | null; case_id: string | null };
+            const ir = invRow as {
+              lead_id: string | null;
+              patient_id: string | null;
+              case_id: string | null;
+            };
             leadId = ir.lead_id;
             patientId = ir.patient_id;
             caseId = ir.case_id;

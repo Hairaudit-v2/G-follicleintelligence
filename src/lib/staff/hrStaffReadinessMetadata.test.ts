@@ -8,7 +8,10 @@ import {
   mergeHrStaffSourceMetadataOnSync,
   sanitizeIiohrHrMetadataSnapshot,
 } from "./hrStaffReadinessMetadata";
-import { buildStaffHrNotificationSummary, STAFF_HR_SYNC_STALE_DAYS } from "./staffHrNotificationSummary";
+import {
+  buildStaffHrNotificationSummary,
+  STAFF_HR_SYNC_STALE_DAYS,
+} from "./staffHrNotificationSummary";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 const FRESH_SYNC_AT = NOW.toISOString();
@@ -46,7 +49,11 @@ test("sensitive keys are stripped from metadata snapshot", () => {
   });
 
   for (const key of HR_STAFF_SENSITIVE_METADATA_KEYS) {
-    assert.equal((sanitized as Record<string, unknown>)[key], undefined, `leaked sensitive key: ${key}`);
+    assert.equal(
+      (sanitized as Record<string, unknown>)[key],
+      undefined,
+      `leaked sensitive key: ${key}`
+    );
   }
   assert.equal(sanitized.onboarding_status, "pending");
   assert.equal(sanitized.training_required_count, 1);
@@ -92,7 +99,9 @@ test("missing counts stay absent (unknown in UI)", () => {
 });
 
 test("stale sync clears after fresh last_synced_at update", () => {
-  const staleAt = new Date(NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000).toISOString();
+  const staleAt = new Date(
+    NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000
+  ).toISOString();
   const stale = buildStaffHrNotificationSummary(
     {
       source_system: "iiohr_hr",

@@ -19,7 +19,9 @@ export type FiServicesCatalogManageSnapshot = {
  * Tenant `admin` / `fi_admin`, platform OS `fi_admin`, or admin API key may manage the catalogue.
  * Platform `fi_auditor` is always denied (read-only). `crm_operator` is denied unless later expanded.
  */
-export function evaluateFiServicesCatalogManageAllowed(snapshot: FiServicesCatalogManageSnapshot): boolean {
+export function evaluateFiServicesCatalogManageAllowed(
+  snapshot: FiServicesCatalogManageSnapshot
+): boolean {
   if (snapshot.adminKeyValid) return true;
 
   const os = normalizeFiOsRole(snapshot.osRole);

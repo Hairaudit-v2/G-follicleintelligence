@@ -87,7 +87,10 @@ export type CaseAdminDetail = {
   images: CaseImageListItem[];
 };
 
-export async function loadCasesIndexForTenant(tenantId: string, client?: SupabaseClient): Promise<CaseIndexRow[]> {
+export async function loadCasesIndexForTenant(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<CaseIndexRow[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
 
@@ -112,7 +115,11 @@ export async function loadCasesIndexForTenant(tenantId: string, client?: Supabas
   const legacyIds = uniqueIds(rows.map((r) => (r as { patient_id: string | null }).patient_id));
 
   const patientPersonByFoundation = await loadPatientPersonMap(supabase, tid, foundationIds);
-  const patientPersonByLegacy = await loadPatientPersonMapByLegacyPatientId(supabase, tid, legacyIds);
+  const patientPersonByLegacy = await loadPatientPersonMapByLegacyPatientId(
+    supabase,
+    tid,
+    legacyIds
+  );
 
   const leadByCase = await loadPrimaryLeadLabelsForCases(supabase, tid, caseIds);
 
@@ -187,7 +194,11 @@ export async function loadCasesIndexRowsForIds(
   const legacyIds = uniqueIds(rows.map((r) => (r as { patient_id: string | null }).patient_id));
 
   const patientPersonByFoundation = await loadPatientPersonMap(supabase, tid, foundationIds);
-  const patientPersonByLegacy = await loadPatientPersonMapByLegacyPatientId(supabase, tid, legacyIds);
+  const patientPersonByLegacy = await loadPatientPersonMapByLegacyPatientId(
+    supabase,
+    tid,
+    legacyIds
+  );
 
   const leadByCase = await loadPrimaryLeadLabelsForCases(supabase, tid, rowCaseIds);
 
@@ -252,7 +263,8 @@ export async function loadCaseAdminDetail(
 
   const row = c as Record<string, unknown>;
   const meta = asObj(row.metadata);
-  const foundationPatientId = row.foundation_patient_id != null ? String(row.foundation_patient_id) : null;
+  const foundationPatientId =
+    row.foundation_patient_id != null ? String(row.foundation_patient_id) : null;
   const legacyPatientId = row.patient_id != null ? String(row.patient_id) : null;
 
   let patient: CasePatientLink | null = null;
@@ -293,7 +305,13 @@ export async function loadCaseAdminDetail(
   if (le) throw new Error(le.message);
 
   const leads: CaseLeadLink[] = (leadRows ?? []).map((lr) => {
-    const L = lr as { id: string; summary: string | null; status: string; case_id: string | null; converted_case_id: string | null };
+    const L = lr as {
+      id: string;
+      summary: string | null;
+      status: string;
+      case_id: string | null;
+      converted_case_id: string | null;
+    };
     const link_reason: CaseLeadLink["link_reason"] =
       L.case_id && String(L.case_id) === cid ? "case_id" : "converted_case_id";
     return {
@@ -403,7 +421,10 @@ async function loadPatientPersonMap(
 
   const personMeta = new Map<string, Record<string, unknown>>();
   for (const row of persons ?? []) {
-    personMeta.set(String((row as { id: string }).id), asObj((row as { metadata: unknown }).metadata));
+    personMeta.set(
+      String((row as { id: string }).id),
+      asObj((row as { metadata: unknown }).metadata)
+    );
   }
 
   for (const pr of pats ?? []) {
@@ -434,8 +455,16 @@ async function loadPrimaryLeadLabelsForCases(
   if (caseIds.length === 0) return out;
 
   const [{ data: byCaseId }, { data: byConverted }] = await Promise.all([
-    supabase.from("fi_crm_leads").select("id, summary, case_id").eq("tenant_id", tenantId).in("case_id", caseIds),
-    supabase.from("fi_crm_leads").select("id, summary, converted_case_id").eq("tenant_id", tenantId).in("converted_case_id", caseIds),
+    supabase
+      .from("fi_crm_leads")
+      .select("id, summary, case_id")
+      .eq("tenant_id", tenantId)
+      .in("case_id", caseIds),
+    supabase
+      .from("fi_crm_leads")
+      .select("id, summary, converted_case_id")
+      .eq("tenant_id", tenantId)
+      .in("converted_case_id", caseIds),
   ]);
 
   const attach = (caseId: string | null | undefined, id: string, title: string) => {
@@ -445,7 +474,11 @@ async function loadPrimaryLeadLabelsForCases(
 
   for (const row of byCaseId ?? []) {
     const L = row as { id: string; summary: string | null; case_id: string | null };
-    attach(L.case_id != null ? String(L.case_id) : null, String(L.id), leadTitleFromRow(L.summary, String(L.id)));
+    attach(
+      L.case_id != null ? String(L.case_id) : null,
+      String(L.id),
+      leadTitleFromRow(L.summary, String(L.id))
+    );
   }
   for (const row of byConverted ?? []) {
     const L = row as { id: string; summary: string | null; converted_case_id: string | null };

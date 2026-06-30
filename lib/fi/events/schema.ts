@@ -92,9 +92,7 @@ function isCompatibleSourceSystem(eventType: FiEventType, sourceSystem: FiSource
   }
 }
 
-function parseIdentifiers(
-  input: unknown
-): NonNullable<FiEventEnvelope["identifiers"]> | undefined {
+function parseIdentifiers(input: unknown): NonNullable<FiEventEnvelope["identifiers"]> | undefined {
   if (!isRecord(input)) return undefined;
   return {
     source_patient_id: asOptionalTrimmedString(input.source_patient_id),
@@ -125,8 +123,7 @@ function parseHliIntakePayload(input: unknown): ValidationResult<HliIntakeSubmit
   if (!sex) return { ok: false, error: "payload.intake.sex is required." };
 
   const selectionsRaw = parseSelections(intake.selections);
-  const selections =
-    selectionsRaw && !Array.isArray(selectionsRaw) ? selectionsRaw : undefined;
+  const selections = selectionsRaw && !Array.isArray(selectionsRaw) ? selectionsRaw : undefined;
 
   return {
     ok: true,
@@ -154,7 +151,10 @@ function parseHliDocumentPayload(input: unknown): ValidationResult<HliDocumentUp
   const filename = asTrimmedString(document.filename);
   const storage_path = asTrimmedString(document.storage_path);
   if (!hliDocumentKinds.includes(kind as (typeof hliDocumentKinds)[number])) {
-    return { ok: false, error: "payload.document.kind must be blood_pdf, blood_csv, or supporting_docs." };
+    return {
+      ok: false,
+      error: "payload.document.kind must be blood_pdf, blood_csv, or supporting_docs.",
+    };
   }
   if (!filename) return { ok: false, error: "payload.document.filename is required." };
   if (!storage_path) return { ok: false, error: "payload.document.storage_path is required." };
@@ -173,7 +173,9 @@ function parseHliDocumentPayload(input: unknown): ValidationResult<HliDocumentUp
   };
 }
 
-function parseHairAuditCasePayload(input: unknown): ValidationResult<HairAuditCaseSubmittedPayload> {
+function parseHairAuditCasePayload(
+  input: unknown
+): ValidationResult<HairAuditCaseSubmittedPayload> {
   const payload = isRecord(input) ? input : {};
   const casePayload = isRecord(payload.case) ? payload.case : null;
   if (!casePayload) return { ok: false, error: "payload.case is required." };
@@ -203,7 +205,9 @@ function parseHairAuditCasePayload(input: unknown): ValidationResult<HairAuditCa
   };
 }
 
-function parseHairAuditImagesPayload(input: unknown): ValidationResult<HairAuditImagesUploadedPayload> {
+function parseHairAuditImagesPayload(
+  input: unknown
+): ValidationResult<HairAuditImagesUploadedPayload> {
   const payload = isRecord(input) ? input : {};
   const images = Array.isArray(payload.images) ? payload.images : null;
   if (!images || images.length === 0) {

@@ -144,7 +144,9 @@ function firstEmbeddedRow(rel: unknown): Record<string, unknown> | null {
   if (rel == null) return null;
   if (Array.isArray(rel)) {
     const row = rel[0];
-    return row && typeof row === "object" && !Array.isArray(row) ? (row as Record<string, unknown>) : null;
+    return row && typeof row === "object" && !Array.isArray(row)
+      ? (row as Record<string, unknown>)
+      : null;
   }
   if (typeof rel === "object" && !Array.isArray(rel)) return rel as Record<string, unknown>;
   return null;
@@ -156,7 +158,11 @@ export async function loadTenantBranding(
 ): Promise<FiTenantSettingsRow | null> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = tenantId.trim();
-  const { data, error } = await supabase.from("fi_tenant_settings").select("*").eq("tenant_id", tid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenant_settings")
+    .select("*")
+    .eq("tenant_id", tid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   const r = data as Record<string, unknown>;
@@ -250,11 +256,16 @@ export async function resolveEffectiveBranding(
   const resolvedClinicDisplay =
     (clinic?.display_name?.trim() ? clinic.display_name : null) ?? clinicFoundationDisplay;
 
-  const pick = <T extends string | null>(clinicVal: T | undefined, orgVal: T | null | undefined, tenantVal: T | null | undefined): T | null => {
+  const pick = <T extends string | null>(
+    clinicVal: T | undefined,
+    orgVal: T | null | undefined,
+    tenantVal: T | null | undefined
+  ): T | null => {
     const c = clinicVal !== undefined ? clinicVal : undefined;
     if (c !== undefined && c !== null && String(c).trim() !== "") return c;
     if (orgVal !== undefined && orgVal !== null && String(orgVal).trim() !== "") return orgVal;
-    if (tenantVal !== undefined && tenantVal !== null && String(tenantVal).trim() !== "") return tenantVal;
+    if (tenantVal !== undefined && tenantVal !== null && String(tenantVal).trim() !== "")
+      return tenantVal;
     return null;
   };
 
@@ -267,7 +278,9 @@ export async function resolveEffectiveBranding(
     secondary_colour: pick(undefined, org?.secondary_colour, tenant?.secondary_colour),
     accent_colour: pick(undefined, org?.accent_colour, tenant?.accent_colour),
     support_email: org?.support_email ?? tenant?.support_email ?? null,
-    default_timezone: clinic?.timezone?.trim() ? clinic.timezone : tenant?.default_timezone ?? null,
+    default_timezone: clinic?.timezone?.trim()
+      ? clinic.timezone
+      : (tenant?.default_timezone ?? null),
     website_url: org?.website_url ?? null,
     clinic_display_name: resolvedClinicDisplay,
     booking_url: clinic?.booking_url ?? null,
@@ -290,7 +303,11 @@ export async function loadTenantConfigurationOverview(
   const tenant_settings = await loadTenantBranding(tid, client);
 
   let fi_os_operating_mode_key: string | null = null;
-  const { data: tcfgRow, error: cfgErr } = await supabase.from("fi_tenants").select("config_json").eq("id", tid).maybeSingle();
+  const { data: tcfgRow, error: cfgErr } = await supabase
+    .from("fi_tenants")
+    .select("config_json")
+    .eq("id", tid)
+    .maybeSingle();
   if (cfgErr) throw new Error(cfgErr.message);
   const cj = (tcfgRow as { config_json?: unknown } | null)?.config_json;
   if (cj && typeof cj === "object" && !Array.isArray(cj)) {
@@ -455,7 +472,12 @@ export async function organisationBelongsToTenant(
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = tenantId.trim();
   const oid = organisationId.trim();
-  const { data, error } = await supabase.from("fi_organisations").select("id").eq("tenant_id", tid).eq("id", oid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_organisations")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", oid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return !!data;
 }
@@ -469,7 +491,12 @@ export async function clinicBelongsToTenant(
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = tenantId.trim();
   const cid = clinicId.trim();
-  const { data, error } = await supabase.from("fi_clinics").select("id").eq("tenant_id", tid).eq("id", cid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_clinics")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return !!data;
 }

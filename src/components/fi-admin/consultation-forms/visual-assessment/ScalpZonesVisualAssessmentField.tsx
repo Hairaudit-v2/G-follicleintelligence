@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import type { ConsultationFormOption } from "@/src/lib/consultationForms/consultationFormTypes";
 import type { ConsultationScalpZoneId } from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
-import { CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE, parseSelectedZones } from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
+import {
+  CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE,
+  parseSelectedZones,
+} from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
 
 import { ScalpZonesTopViewSvg } from "./ScalpZonesTopViewSvg";
 
@@ -43,10 +46,9 @@ export function ScalpZonesVisualAssessmentField({
     </label>
   );
 
-  const desc =
-    description?.trim() ? (
-      <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
-    ) : null;
+  const desc = description?.trim() ? (
+    <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
+  ) : null;
 
   return (
     <div className="space-y-3">
@@ -58,7 +60,8 @@ export function ScalpZonesVisualAssessmentField({
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
         <div className="space-y-2 rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className={cn("text-xs", fiOsLightFormSurfaceClassNames.helper)}>
-            Tap regions on the schematic to toggle involvement (44px+ touch targets). Optional reference:
+            Tap regions on the schematic to toggle involvement (44px+ touch targets). Optional
+            reference:
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -79,7 +82,9 @@ export function ScalpZonesVisualAssessmentField({
         </div>
 
         <div className="space-y-2">
-          <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>Selected</span>
+          <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>
+            Selected
+          </span>
           <ul className="min-h-[2rem] list-inside list-disc text-sm text-slate-300">
             {selected.length === 0 ? <li className="list-none text-slate-500">None</li> : null}
             {selected.map((z) => (

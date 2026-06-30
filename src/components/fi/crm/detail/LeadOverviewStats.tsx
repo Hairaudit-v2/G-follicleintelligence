@@ -16,13 +16,21 @@ export function LeadOverviewStats({
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className={crmLeadCardClass}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Treatment value</p>
-        <p className="mt-1 text-lg font-semibold text-slate-100">{opportunity.treatmentValueLabel ?? "—"}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Treatment value
+        </p>
+        <p className="mt-1 text-lg font-semibold text-slate-100">
+          {opportunity.treatmentValueLabel ?? "—"}
+        </p>
         <p className="mt-1 text-xs text-gray-500">From lead metadata when set</p>
       </div>
       <div className={crmLeadCardClass}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Conversion probability</p>
-        <p className="mt-1 text-lg font-semibold text-slate-100">{opportunity.conversionProbabilityLabel ?? "—"}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Conversion probability
+        </p>
+        <p className="mt-1 text-lg font-semibold text-slate-100">
+          {opportunity.conversionProbabilityLabel ?? "—"}
+        </p>
         <p className="mt-1 text-xs text-gray-500">
           Stage: {opportunity.stageLabel}
           {opportunity.isWonStage ? " · won" : ""}

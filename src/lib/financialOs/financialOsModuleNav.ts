@@ -12,12 +12,27 @@ export type FinancialOsModule = {
 export const FINANCIAL_OS_PRIMARY_MODULES: readonly FinancialOsModule[] = [
   { id: "dashboard", label: "Financial dashboard", segment: "dashboard", group: "primary" },
   { id: "payments", label: "Payments", segment: "payments", group: "primary" },
-  { id: "payment-requests", label: "Payment requests", segment: "payment-requests", group: "primary" },
+  {
+    id: "payment-requests",
+    label: "Payment requests",
+    segment: "payment-requests",
+    group: "primary",
+  },
   { id: "installments", label: "Installments", segment: "installments", group: "primary" },
   { id: "providers", label: "Providers", segment: "providers", group: "primary" },
-  { id: "finance-applications", label: "Finance applications", segment: "finance-applications", group: "primary" },
+  {
+    id: "finance-applications",
+    label: "Finance applications",
+    segment: "finance-applications",
+    group: "primary",
+  },
   { id: "super-release", label: "Super release", segment: "super-release", group: "primary" },
-  { id: "international-transfers", label: "International transfers", segment: "international-transfers", group: "primary" },
+  {
+    id: "international-transfers",
+    label: "International transfers",
+    segment: "international-transfers",
+    group: "primary",
+  },
   { id: "deposit-rules", label: "Deposit rules", segment: "deposit-rules", group: "primary" },
 ] as const;
 
@@ -38,7 +53,10 @@ export function financialOsModuleHref(base: string, segment: string): string {
   return `${normalizedBase}/${segment}`;
 }
 
-export function resolveFinancialOsActiveModule(pathname: string, base: string): FinancialOsModule | null {
+export function resolveFinancialOsActiveModule(
+  pathname: string,
+  base: string
+): FinancialOsModule | null {
   const normalizedBase = base.replace(/\/+$/, "");
   const normalizedPath = (pathname.split("?")[0] ?? pathname).replace(/\/+$/, "");
   if (!normalizedPath.startsWith(normalizedBase)) return null;
@@ -52,7 +70,11 @@ export function resolveFinancialOsActiveModule(pathname: string, base: string): 
   return FINANCIAL_OS_ALL_MODULES.find((m) => m.segment === segment) ?? null;
 }
 
-export function financialOsModuleIsActive(pathname: string, base: string, module: FinancialOsModule): boolean {
+export function financialOsModuleIsActive(
+  pathname: string,
+  base: string,
+  module: FinancialOsModule
+): boolean {
   const active = resolveFinancialOsActiveModule(pathname, base);
   return active?.id === module.id;
 }

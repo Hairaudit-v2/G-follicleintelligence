@@ -16,7 +16,11 @@ export type StaffFiUserLinkExistingUser = {
   tenantId: string;
 };
 
-export type StaffFiUserLinkActionKind = "link_existing_user" | "create_user_and_link" | "skip_no_email" | "skip_already_linked";
+export type StaffFiUserLinkActionKind =
+  | "link_existing_user"
+  | "create_user_and_link"
+  | "skip_no_email"
+  | "skip_already_linked";
 
 export type StaffFiUserLinkPlanRow = {
   staffId: string;
@@ -43,7 +47,9 @@ export function normalizeStaffLinkEmail(email: string | null | undefined): strin
   return t.toLowerCase();
 }
 
-export function buildEmailToFiUserMap(users: StaffFiUserLinkExistingUser[]): Map<string, StaffFiUserLinkExistingUser> {
+export function buildEmailToFiUserMap(
+  users: StaffFiUserLinkExistingUser[]
+): Map<string, StaffFiUserLinkExistingUser> {
   const out = new Map<string, StaffFiUserLinkExistingUser>();
   for (const u of users) {
     const key = normalizeStaffLinkEmail(u.email);
@@ -53,7 +59,9 @@ export function buildEmailToFiUserMap(users: StaffFiUserLinkExistingUser[]): Map
   return out;
 }
 
-export function listUnlinkedStaffWithEmail(staff: StaffFiUserLinkCandidate[]): StaffFiUserLinkCandidate[] {
+export function listUnlinkedStaffWithEmail(
+  staff: StaffFiUserLinkCandidate[]
+): StaffFiUserLinkCandidate[] {
   return staff.filter((s) => !s.fiUserId?.trim() && normalizeStaffLinkEmail(s.email));
 }
 

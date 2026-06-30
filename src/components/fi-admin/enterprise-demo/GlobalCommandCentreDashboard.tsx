@@ -2,7 +2,17 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Activity, AlertTriangle, Building2, Camera, DollarSign, Globe2, MonitorPlay, Scissors, Shield } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  Building2,
+  Camera,
+  DollarSign,
+  Globe2,
+  MonitorPlay,
+  Scissors,
+  Shield,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -55,7 +65,10 @@ function SnapshotMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalCommandCentreDashboardProps) {
+export function GlobalCommandCentreDashboard({
+  data,
+  presentationHref,
+}: GlobalCommandCentreDashboardProps) {
   const { networkKpis, clinicRiskRows, alerts, surgicalSnapshot, outcomeSnapshot } = data;
 
   return (
@@ -86,8 +99,8 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
       </header>
 
       <div className={globalCommandCentreClasses.readOnlyBanner}>
-        Read-only dashboard — no mutations. Aggregates seeded Phase 1A–1F enterprise demo data across{" "}
-        {networkKpis.activeClinics} clinics.
+        Read-only dashboard — no mutations. Aggregates seeded Phase 1A–1F enterprise demo data
+        across {networkKpis.activeClinics} clinics.
       </div>
 
       <section aria-label="Network KPIs">
@@ -129,12 +142,18 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
           />
           <KpiTile
             label="Collected"
-            value={formatCommandCentreMoney(networkKpis.revenueCollectedCents, networkKpis.currency)}
+            value={formatCommandCentreMoney(
+              networkKpis.revenueCollectedCents,
+              networkKpis.currency
+            )}
             icon={<DollarSign className="h-4 w-4" />}
           />
           <KpiTile
             label="Outstanding"
-            value={formatCommandCentreMoney(networkKpis.revenueOutstandingCents, networkKpis.currency)}
+            value={formatCommandCentreMoney(
+              networkKpis.revenueOutstandingCents,
+              networkKpis.currency
+            )}
             icon={<AlertTriangle className="h-4 w-4" />}
           />
         </div>
@@ -149,10 +168,12 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
           <div className={globalCommandCentreClasses.panelBody}>
             {clinicRiskRows.length === 0 ? (
               <div className={globalCommandCentreClasses.emptyPanel}>
-                <p className={globalCommandCentreClasses.emptyPanelTitle}>No clinic risk rows yet</p>
+                <p className={globalCommandCentreClasses.emptyPanelTitle}>
+                  No clinic risk rows yet
+                </p>
                 <p className="mt-2">
-                  Run <code className="text-slate-400">npm run seed:enterprise-demo</code> to populate the IHRG
-                  franchise network before demoing the command centre.
+                  Run <code className="text-slate-400">npm run seed:enterprise-demo</code> to
+                  populate the IHRG franchise network before demoing the command centre.
                 </p>
               </div>
             ) : (
@@ -178,11 +199,19 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
                           </div>
                         </td>
                         <td className={globalCommandCentreClasses.td}>
-                          <span className={globalCommandCentreClasses.riskPill(row.riskScore)}>{row.riskScore}</span>
+                          <span className={globalCommandCentreClasses.riskPill(row.riskScore)}>
+                            {row.riskScore}
+                          </span>
                         </td>
-                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.revenueStatus}</td>
-                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.imagingCompliance}</td>
-                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.surgicalQualityStatus}</td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>
+                          {row.revenueStatus}
+                        </td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>
+                          {row.imagingCompliance}
+                        </td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>
+                          {row.surgicalQualityStatus}
+                        </td>
                         <td className={cn(globalCommandCentreClasses.td, "text-slate-500 italic")}>
                           {row.staffTrainingStatus}
                         </td>
@@ -200,18 +229,28 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
             <p className={globalCommandCentreClasses.panelKicker}>Live feed</p>
             <h2 className={globalCommandCentreClasses.panelTitle}>Network alerts</h2>
           </div>
-          <div className={cn(globalCommandCentreClasses.panelBody, alerts.length > 0 ? "space-y-3" : "")}>
+          <div
+            className={cn(
+              globalCommandCentreClasses.panelBody,
+              alerts.length > 0 ? "space-y-3" : ""
+            )}
+          >
             {alerts.length === 0 ? (
               <div className={globalCommandCentreClasses.emptyPanel}>
-                <p className={globalCommandCentreClasses.emptyPanelTitle}>No network alerts to display</p>
+                <p className={globalCommandCentreClasses.emptyPanelTitle}>
+                  No network alerts to display
+                </p>
                 <p className="mt-2">
-                  Alerts appear when seeded clinic slugs match the curated TITAN anomaly feed. Re-run the enterprise demo
-                  seed if this panel is empty after seeding.
+                  Alerts appear when seeded clinic slugs match the curated TITAN anomaly feed.
+                  Re-run the enterprise demo seed if this panel is empty after seeding.
                 </p>
               </div>
             ) : (
               alerts.map((alert) => (
-                <article key={alert.id} className={globalCommandCentreClasses.alertItem(alert.severity)}>
+                <article
+                  key={alert.id}
+                  className={globalCommandCentreClasses.alertItem(alert.severity)}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -219,7 +258,9 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
                       </p>
                       <h3 className="mt-0.5 text-sm font-semibold text-slate-100">{alert.title}</h3>
                     </div>
-                    <span className="shrink-0 text-[10px] text-slate-500">{formatAlertTimestamp(alert.occurredAt)}</span>
+                    <span className="shrink-0 text-[10px] text-slate-500">
+                      {formatAlertTimestamp(alert.occurredAt)}
+                    </span>
                   </div>
                   <p className="mt-2 text-xs leading-relaxed text-slate-400">{alert.summary}</p>
                 </article>
@@ -230,22 +271,42 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className={globalCommandCentreClasses.panel} aria-label="Surgical intelligence snapshot">
+        <section
+          className={globalCommandCentreClasses.panel}
+          aria-label="Surgical intelligence snapshot"
+        >
           <div className={globalCommandCentreClasses.panelHeader}>
             <p className={globalCommandCentreClasses.panelKicker}>SurgeryOS</p>
-            <h2 className={globalCommandCentreClasses.panelTitle}>Surgical intelligence snapshot</h2>
+            <h2 className={globalCommandCentreClasses.panelTitle}>
+              Surgical intelligence snapshot
+            </h2>
           </div>
           <div className={globalCommandCentreClasses.panelBody}>
             <div className={globalCommandCentreClasses.metricGrid}>
-              <SnapshotMetric label="Grafts extracted" value={formatCommandCentreNumber(surgicalSnapshot.totalGraftsExtracted)} />
-              <SnapshotMetric label="Grafts implanted" value={formatCommandCentreNumber(surgicalSnapshot.totalGraftsImplanted)} />
-              <SnapshotMetric label="Total hairs" value={formatCommandCentreNumber(surgicalSnapshot.totalHairs)} />
+              <SnapshotMetric
+                label="Grafts extracted"
+                value={formatCommandCentreNumber(surgicalSnapshot.totalGraftsExtracted)}
+              />
+              <SnapshotMetric
+                label="Grafts implanted"
+                value={formatCommandCentreNumber(surgicalSnapshot.totalGraftsImplanted)}
+              />
+              <SnapshotMetric
+                label="Total hairs"
+                value={formatCommandCentreNumber(surgicalSnapshot.totalHairs)}
+              />
               <SnapshotMetric
                 label="Transection profile"
                 value={formatCommandCentrePct(surgicalSnapshot.averageTransectionRatePct)}
               />
-              <SnapshotMetric label="Reconciled" value={String(surgicalSnapshot.reconciliationCompleted)} />
-              <SnapshotMetric label="Pending / mismatch" value={`${surgicalSnapshot.reconciliationPending} / ${surgicalSnapshot.reconciliationMismatch}`} />
+              <SnapshotMetric
+                label="Reconciled"
+                value={String(surgicalSnapshot.reconciliationCompleted)}
+              />
+              <SnapshotMetric
+                label="Pending / mismatch"
+                value={`${surgicalSnapshot.reconciliationPending} / ${surgicalSnapshot.reconciliationMismatch}`}
+              />
             </div>
           </div>
         </section>
@@ -257,12 +318,30 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
           </div>
           <div className={globalCommandCentreClasses.panelBody}>
             <div className={globalCommandCentreClasses.metricGrid}>
-              <SnapshotMetric label="Survival estimate" value={formatCommandCentrePct(outcomeSnapshot.averageSurvivalEstimatePct)} />
-              <SnapshotMetric label="Donor recovery" value={formatCommandCentrePct(outcomeSnapshot.averageDonorRecoveryScore)} />
-              <SnapshotMetric label="Satisfaction" value={formatCommandCentrePct(outcomeSnapshot.averageSatisfactionScore)} />
-              <SnapshotMetric label="Approved audits" value={String(outcomeSnapshot.auditsApproved)} />
-              <SnapshotMetric label="With warnings" value={String(outcomeSnapshot.auditsWithWarnings)} />
-              <SnapshotMetric label="Incomplete follow-up" value={String(outcomeSnapshot.incompleteFollowUp)} />
+              <SnapshotMetric
+                label="Survival estimate"
+                value={formatCommandCentrePct(outcomeSnapshot.averageSurvivalEstimatePct)}
+              />
+              <SnapshotMetric
+                label="Donor recovery"
+                value={formatCommandCentrePct(outcomeSnapshot.averageDonorRecoveryScore)}
+              />
+              <SnapshotMetric
+                label="Satisfaction"
+                value={formatCommandCentrePct(outcomeSnapshot.averageSatisfactionScore)}
+              />
+              <SnapshotMetric
+                label="Approved audits"
+                value={String(outcomeSnapshot.auditsApproved)}
+              />
+              <SnapshotMetric
+                label="With warnings"
+                value={String(outcomeSnapshot.auditsWithWarnings)}
+              />
+              <SnapshotMetric
+                label="Incomplete follow-up"
+                value={String(outcomeSnapshot.incompleteFollowUp)}
+              />
             </div>
           </div>
         </section>
@@ -270,7 +349,8 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
 
       <footer className="flex items-center gap-2 text-[10px] text-slate-600">
         <Globe2 className="h-3.5 w-3.5 text-amber-400/50" aria-hidden />
-        Generated {formatAlertTimestamp(data.generatedAt)} · Project {data.codename} enterprise simulation
+        Generated {formatAlertTimestamp(data.generatedAt)} · Project {data.codename} enterprise
+        simulation
       </footer>
     </div>
   );

@@ -49,7 +49,10 @@ export function deriveRecommendedBookingTypeForPatient(opts: {
 
   const lastCompleted = completed[completed.length - 1];
   if (!types.has("surgery") && lastCompleted?.booking_type.trim() === "consultation") {
-    return { bookingType: "surgery", reason: "Consultation completed — typical next step is procedure day." };
+    return {
+      bookingType: "surgery",
+      reason: "Consultation completed — typical next step is procedure day.",
+    };
   }
 
   if (types.has("surgery")) {
@@ -65,7 +68,10 @@ export function buildPatientBookingTitle(bookingType: string, displayName?: stri
   return name ? `${label} — ${name}` : label;
 }
 
-export function filterUpcomingPatientBookings(bookings: FiBookingRow[], now: Date = new Date()): FiBookingRow[] {
+export function filterUpcomingPatientBookings(
+  bookings: FiBookingRow[],
+  now: Date = new Date()
+): FiBookingRow[] {
   return filterUpcomingLeadBookings(bookings, now);
 }
 

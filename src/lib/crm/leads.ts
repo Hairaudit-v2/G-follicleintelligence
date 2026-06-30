@@ -11,7 +11,10 @@ import { syncLeadCreatedReminderJobs } from "@/src/lib/reminders/reminderEnqueue
 import { publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import type { CrmPipelineScope, FiCrmLeadRow } from "./types";
 import { CRM_DEFAULT_PERSON_SOURCE_SYSTEM } from "./types";
-import { organisationBelongsToTenant, clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
+import {
+  organisationBelongsToTenant,
+  clinicBelongsToTenant,
+} from "@/src/lib/fi/foundation/tenantSettings";
 import {
   leadSourceDuplicateErrorMessage,
   leadSourceInsertRaceErrorMessage,
@@ -60,7 +63,9 @@ export type CreateCrmLeadWithResolvedPersonParams = CreateCrmLeadShared & {
 
 export type CreateCrmLeadWithPersonResolutionParams = CreateCrmLeadShared & {
   /** Passed to `resolveOrCreatePerson` (`tenant_id` and default `source_system` applied by the CRM layer). */
-  person: Omit<ResolvePersonInput, "tenant_id" | "source_system"> & { source_system?: string | null };
+  person: Omit<ResolvePersonInput, "tenant_id" | "source_system"> & {
+    source_system?: string | null;
+  };
 };
 
 /**
@@ -93,7 +98,8 @@ export async function createCrmLeadWithPerson(
         .eq("id", clinicId)
         .maybeSingle();
       if (cErr) throw new Error(cErr.message);
-      const cOrg = (clinicRow as { organisation_id: string | null } | null)?.organisation_id ?? null;
+      const cOrg =
+        (clinicRow as { organisation_id: string | null } | null)?.organisation_id ?? null;
       if (cOrg && cOrg !== organisationId) {
         throw new Error("Selected clinic does not belong to the selected organisation.");
       }

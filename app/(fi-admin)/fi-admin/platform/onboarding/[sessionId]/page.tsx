@@ -27,8 +27,15 @@ export default async function OnboardingSessionDetailPage({
     return <p className="text-sm text-red-400">{loaded.error}</p>;
   }
 
-  const { session, steps, progress, deploymentPlan, templateReadiness, sandboxSeedPreview, sandboxSeedHistory } =
-    loaded.detail;
+  const {
+    session,
+    steps,
+    progress,
+    deploymentPlan,
+    templateReadiness,
+    sandboxSeedPreview,
+    sandboxSeedHistory,
+  } = loaded.detail;
 
   const readinessLoaded = await loadGoLiveReadinessSnapshot(sessionId);
   const intelligenceLoaded = await loadDeploymentIntelligenceSnapshot(sessionId);
@@ -38,13 +45,19 @@ export default async function OnboardingSessionDetailPage({
       : null;
   const authLoaded =
     session.tenant_id != null
-      ? await loadConnectorAuthSummary(session.tenant_id, { skipAuthCheck: true, allowTenantMemberRead: true })
+      ? await loadConnectorAuthSummary(session.tenant_id, {
+          skipAuthCheck: true,
+          allowTenantMemberRead: true,
+        })
       : null;
 
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/fi-admin/platform/onboarding" className="text-sm text-cyan-400 hover:text-cyan-300">
+        <Link
+          href="/fi-admin/platform/onboarding"
+          className="text-sm text-cyan-400 hover:text-cyan-300"
+        >
           ← All sessions
         </Link>
         <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Session</p>
@@ -71,9 +84,13 @@ export default async function OnboardingSessionDetailPage({
           sessionId={session.id}
         />
       ) : session.tenant_id ? (
-        <p className="text-sm text-slate-500">{connectorsLoaded?.error ?? "External connectors unavailable."}</p>
+        <p className="text-sm text-slate-500">
+          {connectorsLoaded?.error ?? "External connectors unavailable."}
+        </p>
       ) : (
-        <p className="text-sm text-slate-500">Connect existing systems after tenant core is provisioned.</p>
+        <p className="text-sm text-slate-500">
+          Connect existing systems after tenant core is provisioned.
+        </p>
       )}
 
       <OnboardingSessionDetailClient

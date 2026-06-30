@@ -78,7 +78,10 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
         } else {
           return {
             ok: false,
-            error: "Case already has " + activeOrComplete.status + " job. Wait for completion or use existing jobId.",
+            error:
+              "Case already has " +
+              activeOrComplete.status +
+              " job. Wait for completion or use existing jobId.",
           };
         }
       }

@@ -67,7 +67,7 @@ export function SurgeryOsVieCapturePanel({
   );
 
   const selectedSurgery = surgeries.find((s) => s.id === surgeryId) ?? surgeries[0] ?? null;
-  const capture = selectedSurgery ? captureBySurgery.get(selectedSurgery.id) ?? null : null;
+  const capture = selectedSurgery ? (captureBySurgery.get(selectedSurgery.id) ?? null) : null;
 
   if (surgeries.length === 0) return null;
 
@@ -107,14 +107,26 @@ export function SurgeryOsVieCapturePanel({
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-[#64748B]">Surgical documentation</p>
-              <p className={cn("mt-1 text-2xl font-semibold", percentClass(capture.surgicalDocumentationPercent))}>
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">
+                Surgical documentation
+              </p>
+              <p
+                className={cn(
+                  "mt-1 text-2xl font-semibold",
+                  percentClass(capture.surgicalDocumentationPercent)
+                )}
+              >
                 {capture.surgicalDocumentationPercent}%
               </p>
             </div>
             <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-[#64748B]">Donor documentation</p>
-              <p className={cn("mt-1 text-2xl font-semibold", percentClass(capture.donorDocumentationPercent))}>
+              <p
+                className={cn(
+                  "mt-1 text-2xl font-semibold",
+                  percentClass(capture.donorDocumentationPercent)
+                )}
+              >
                 {capture.donorDocumentationPercent}%
               </p>
             </div>
@@ -126,7 +138,12 @@ export function SurgeryOsVieCapturePanel({
             </div>
             <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-[#64748B]">Immediate post-op</p>
-              <p className={cn("mt-1 text-lg font-semibold", statusClass(capture.immediatePostOpStatus))}>
+              <p
+                className={cn(
+                  "mt-1 text-lg font-semibold",
+                  statusClass(capture.immediatePostOpStatus)
+                )}
+              >
                 {statusLabel(capture.immediatePostOpStatus)}
               </p>
             </div>
@@ -134,7 +151,9 @@ export function SurgeryOsVieCapturePanel({
 
           {capture.outcomeReadiness ? (
             <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-[#64748B]">Outcome readiness (evidence quality)</p>
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">
+                Outcome readiness (evidence quality)
+              </p>
               <p className="mt-1 text-lg font-semibold text-[#F8FAFC]">
                 {capture.outcomeReadiness.overall_score}%
                 <span className="ml-2 text-sm font-normal text-[#94A3B8]">
@@ -144,27 +163,37 @@ export function SurgeryOsVieCapturePanel({
               <div className="mt-3 grid gap-2 sm:grid-cols-3 text-xs">
                 <p className="text-[#94A3B8]">
                   Surgical healing:{" "}
-                  <span className={outcomeStatusClass(capture.outcomeReadiness.surgical_healing.status)}>
+                  <span
+                    className={outcomeStatusClass(capture.outcomeReadiness.surgical_healing.status)}
+                  >
                     {capture.outcomeReadiness.surgical_healing.status.replace(/_/g, " ")} (
                     {capture.outcomeReadiness.surgical_healing.evidence_count} evidence)
                   </span>
                 </p>
                 <p className="text-[#94A3B8]">
                   Donor recovery:{" "}
-                  <span className={outcomeStatusClass(capture.outcomeReadiness.donor_recovery.status)}>
+                  <span
+                    className={outcomeStatusClass(capture.outcomeReadiness.donor_recovery.status)}
+                  >
                     {capture.outcomeReadiness.donor_recovery.status.replace(/_/g, " ")} (
                     {capture.outcomeReadiness.donor_recovery.evidence_count} evidence)
                   </span>
                 </p>
                 <p className="text-[#94A3B8]">
                   Documentation:{" "}
-                  <span className={outcomeStatusClass(capture.outcomeReadiness.documentation_readiness.status)}>
+                  <span
+                    className={outcomeStatusClass(
+                      capture.outcomeReadiness.documentation_readiness.status
+                    )}
+                  >
                     {capture.outcomeReadiness.documentation_readiness.status.replace(/_/g, " ")}
                   </span>
                 </p>
               </div>
               {capture.outcomeReadiness.audit_ready ? (
-                <p className="mt-2 text-xs text-emerald-300">Audit-ready evidence signal — suitable for VIE-8 evidence packs</p>
+                <p className="mt-2 text-xs text-emerald-300">
+                  Audit-ready evidence signal — suitable for VIE-8 evidence packs
+                </p>
               ) : null}
             </div>
           ) : null}
@@ -184,7 +213,9 @@ export function SurgeryOsVieCapturePanel({
             </p>
             <p className="rounded-lg border border-[#334155] px-3 py-2 text-[#94A3B8]">
               Pre/post-op pair:{" "}
-              <span className={comparisonPairClass(capture.comparisonStatus.immediate_post_op_pair)}>
+              <span
+                className={comparisonPairClass(capture.comparisonStatus.immediate_post_op_pair)}
+              >
                 {comparisonPairLabel(capture.comparisonStatus.immediate_post_op_pair)}
               </span>
             </p>
@@ -221,8 +252,12 @@ export function SurgeryOsVieCapturePanel({
                   <p className="font-semibold text-[#F8FAFC]">{phase.label}</p>
                   <p className="text-xs text-[#94A3B8]">
                     {phase.acceptedCount}/{phase.requiredTotal} accepted
-                    {phase.pendingReviewCount > 0 ? ` · ${phase.pendingReviewCount} pending review` : null}
-                    {phase.latestQualityScore != null ? ` · Q${Math.round(phase.latestQualityScore)}` : null}
+                    {phase.pendingReviewCount > 0
+                      ? ` · ${phase.pendingReviewCount} pending review`
+                      : null}
+                    {phase.latestQualityScore != null
+                      ? ` · Q${Math.round(phase.latestQualityScore)}`
+                      : null}
                   </p>
                 </div>
                 {phase.nextRecommendedSlotLabel ? (

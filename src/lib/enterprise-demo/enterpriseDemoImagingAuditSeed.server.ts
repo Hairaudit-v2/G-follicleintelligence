@@ -186,7 +186,9 @@ async function loadConsultationRows(
   return (data ?? []).map((row) => {
     const raw = row as { id: string; structured_data: unknown };
     const structured_data =
-      raw.structured_data && typeof raw.structured_data === "object" && !Array.isArray(raw.structured_data)
+      raw.structured_data &&
+      typeof raw.structured_data === "object" &&
+      !Array.isArray(raw.structured_data)
         ? (raw.structured_data as Record<string, unknown>)
         : null;
     return { id: String(raw.id), structured_data };
@@ -247,15 +249,23 @@ function findCaseByDemoKey(rows: CaseRow[], key: string): CaseRow | undefined {
   return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_CASE_KEY_METADATA) === key);
 }
 
-function findConsultationByDemoKey(rows: ConsultationRow[], key: string): ConsultationRow | undefined {
-  return rows.find((row) => metadataKey(row.structured_data, ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA) === key);
+function findConsultationByDemoKey(
+  rows: ConsultationRow[],
+  key: string
+): ConsultationRow | undefined {
+  return rows.find(
+    (row) => metadataKey(row.structured_data, ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA) === key
+  );
 }
 
 function findImageByDemoKey(rows: PatientImageRow[], key: string): PatientImageRow | undefined {
   return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_IMAGE_KEY_METADATA) === key);
 }
 
-function findOutcomeByDemoKey(rows: OutcomeMeasurementRow[], key: string): OutcomeMeasurementRow | undefined {
+function findOutcomeByDemoKey(
+  rows: OutcomeMeasurementRow[],
+  key: string
+): OutcomeMeasurementRow | undefined {
   return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_AUDIT_KEY_METADATA) === key);
 }
 
@@ -418,19 +428,25 @@ async function seedBundle(ctx: {
 
   const clinicId = ctx.clinicIdBySlug.get(spec.clinicSlug);
   if (!clinicId) {
-    warnings.push(`Clinic "${spec.clinicSlug}" not found; skipped imaging for "${spec.demoSurgeryKey}".`);
+    warnings.push(
+      `Clinic "${spec.clinicSlug}" not found; skipped imaging for "${spec.demoSurgeryKey}".`
+    );
     return;
   }
 
   const patient = findPatientByDemoKey(ctx.patientRows, spec.demoPatientKey);
   if (!patient) {
-    warnings.push(`Patient "${spec.demoPatientKey}" not found; skipped imaging for "${spec.demoSurgeryKey}".`);
+    warnings.push(
+      `Patient "${spec.demoPatientKey}" not found; skipped imaging for "${spec.demoSurgeryKey}".`
+    );
     return;
   }
 
   const caseRow = findCaseByDemoKey(ctx.caseRows, spec.demoCaseKey);
   if (!caseRow) {
-    warnings.push(`Case "${spec.demoCaseKey}" not found; skipped imaging for "${spec.demoSurgeryKey}".`);
+    warnings.push(
+      `Case "${spec.demoCaseKey}" not found; skipped imaging for "${spec.demoSurgeryKey}".`
+    );
     return;
   }
 

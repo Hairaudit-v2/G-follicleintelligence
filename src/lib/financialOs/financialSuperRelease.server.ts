@@ -83,13 +83,20 @@ function mapAppRow(raw: Record<string, unknown>): SuperReleaseApplicationRecord 
     payment_pathway_id: String(raw.payment_pathway_id),
     provider_name: raw.provider_name ? String(raw.provider_name) : null,
     application_status: raw.application_status as FiSuperReleaseApplicationStatus,
-    requested_amount_cents: raw.requested_amount_cents != null ? Number(raw.requested_amount_cents) : null,
-    approved_amount_cents: raw.approved_amount_cents != null ? Number(raw.approved_amount_cents) : null,
+    requested_amount_cents:
+      raw.requested_amount_cents != null ? Number(raw.requested_amount_cents) : null,
+    approved_amount_cents:
+      raw.approved_amount_cents != null ? Number(raw.approved_amount_cents) : null,
     submitted_at: raw.submitted_at ? String(raw.submitted_at) : null,
     approved_at: raw.approved_at ? String(raw.approved_at) : null,
     funds_released_at: raw.funds_released_at ? String(raw.funds_released_at) : null,
-    expected_release_date: raw.expected_release_date ? String(raw.expected_release_date).slice(0, 10) : null,
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    expected_release_date: raw.expected_release_date
+      ? String(raw.expected_release_date).slice(0, 10)
+      : null,
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
     pathway_type: raw.pathway_type ? String(raw.pathway_type) : undefined,
@@ -106,7 +113,10 @@ function mapDocRow(raw: Record<string, unknown>): SuperReleaseDocumentRecord {
     status: raw.status as FiSuperReleaseDocumentStatus,
     file_url: raw.file_url ? String(raw.file_url) : null,
     notes: raw.notes ? String(raw.notes) : null,
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
   };
@@ -123,13 +133,19 @@ function mapLetterRow(raw: Record<string, unknown>): SuperReleaseClinicalLetterR
     issued_at: raw.issued_at ? String(raw.issued_at) : null,
     file_url: raw.file_url ? String(raw.file_url) : null,
     notes: raw.notes ? String(raw.notes) : null,
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
   };
 }
 
-async function assertSuperReleasePathway(tenantId: string, paymentPathwayId: string): Promise<void> {
+async function assertSuperReleasePathway(
+  tenantId: string,
+  paymentPathwayId: string
+): Promise<void> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_payment_pathways")
@@ -160,7 +176,12 @@ async function enrichApplications(
     .eq("tenant_id", tid)
     .in("id", pathwayIds);
   if (pe) throw new Error(pe.message);
-  const pathwayTypes = new Map((pathways ?? []).map((p) => [String((p as { id: string }).id), String((p as { pathway_type?: unknown }).pathway_type ?? "")]));
+  const pathwayTypes = new Map(
+    (pathways ?? []).map((p) => [
+      String((p as { id: string }).id),
+      String((p as { pathway_type?: unknown }).pathway_type ?? ""),
+    ])
+  );
 
   const docsByApp = new Map<string, SuperReleaseDocumentRecord[]>();
   const lettersByApp = new Map<string, SuperReleaseClinicalLetterRecord[]>();
@@ -185,19 +206,25 @@ async function enrichApplications(
     if (le) throw new Error(le.message);
     for (const raw of docs ?? []) {
       const doc = mapDocRow(raw as Record<string, unknown>);
-      docsByApp.set(doc.super_release_application_id, [...(docsByApp.get(doc.super_release_application_id) ?? []), doc]);
+      docsByApp.set(doc.super_release_application_id, [
+        ...(docsByApp.get(doc.super_release_application_id) ?? []),
+        doc,
+      ]);
     }
     for (const raw of letters ?? []) {
       const letter = mapLetterRow(raw as Record<string, unknown>);
-      lettersByApp.set(letter.super_release_application_id, [...(lettersByApp.get(letter.super_release_application_id) ?? []), letter]);
+      lettersByApp.set(letter.super_release_application_id, [
+        ...(lettersByApp.get(letter.super_release_application_id) ?? []),
+        letter,
+      ]);
     }
   }
 
   return rows.map((r) => ({
     ...r,
     pathway_type: pathwayTypes.get(r.payment_pathway_id),
-    documents: includeDetails ? docsByApp.get(r.id) ?? [] : undefined,
-    clinical_letters: includeDetails ? lettersByApp.get(r.id) ?? [] : undefined,
+    documents: includeDetails ? (docsByApp.get(r.id) ?? []) : undefined,
+    clinical_letters: includeDetails ? (lettersByApp.get(r.id) ?? []) : undefined,
   }));
 }
 
@@ -250,7 +277,11 @@ export async function loadSuperReleaseApplications(
   if (filters?.status && filters.status !== "all") q = q.eq("application_status", filters.status);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  return enrichApplications(tid, (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)), true);
+  return enrichApplications(
+    tid,
+    (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)),
+    true
+  );
 }
 
 export async function loadSuperReleaseApplicationById(
@@ -267,7 +298,11 @@ export async function loadSuperReleaseApplicationById(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const [enriched] = await enrichApplications(tid, [mapAppRow(data as Record<string, unknown>)], true);
+  const [enriched] = await enrichApplications(
+    tid,
+    [mapAppRow(data as Record<string, unknown>)],
+    true
+  );
   return enriched ?? null;
 }
 
@@ -295,8 +330,10 @@ export async function updateSuperReleaseStatus(args: {
   const nowIso = new Date().toISOString();
   const patch: Record<string, unknown> = { application_status: args.status };
   if (args.providerName !== undefined) patch.provider_name = args.providerName?.trim() || null;
-  if (args.approvedAmountCents !== undefined) patch.approved_amount_cents = args.approvedAmountCents;
-  if (args.expectedReleaseDate !== undefined) patch.expected_release_date = args.expectedReleaseDate?.trim() || null;
+  if (args.approvedAmountCents !== undefined)
+    patch.approved_amount_cents = args.approvedAmountCents;
+  if (args.expectedReleaseDate !== undefined)
+    patch.expected_release_date = args.expectedReleaseDate?.trim() || null;
   if (args.metadataPatch) patch.metadata = { ...row.metadata, ...args.metadataPatch };
 
   if (args.status === "submitted" && !row.submitted_at) patch.submitted_at = nowIso;
@@ -313,7 +350,11 @@ export async function updateSuperReleaseStatus(args: {
     .select(APP_SELECT)
     .single();
   if (error) throw new Error(error.message);
-  const [enriched] = await enrichApplications(tid, [mapAppRow(data as Record<string, unknown>)], true);
+  const [enriched] = await enrichApplications(
+    tid,
+    [mapAppRow(data as Record<string, unknown>)],
+    true
+  );
   return enriched!;
 }
 
@@ -465,7 +506,10 @@ export async function updateClinicalLetterStatus(args: {
   return mapLetterRow(data as Record<string, unknown>);
 }
 
-export async function resolveSuperReleaseAttention(tenantId: string, applicationId: string): Promise<SuperReleaseApplicationRecord> {
+export async function resolveSuperReleaseAttention(
+  tenantId: string,
+  applicationId: string
+): Promise<SuperReleaseApplicationRecord> {
   return updateSuperReleaseStatus({
     tenantId,
     applicationId,
@@ -473,7 +517,10 @@ export async function resolveSuperReleaseAttention(tenantId: string, application
   });
 }
 
-async function loadSurgeryDatesByBookingIds(tenantId: string, bookingIds: string[]): Promise<Map<string, string>> {
+async function loadSurgeryDatesByBookingIds(
+  tenantId: string,
+  bookingIds: string[]
+): Promise<Map<string, string>> {
   const ids = bookingIds.filter(Boolean);
   const out = new Map<string, string>();
   if (!ids.length) return out;
@@ -492,7 +539,9 @@ async function loadSurgeryDatesByBookingIds(tenantId: string, bookingIds: string
   return out;
 }
 
-async function loadAllClinicalLetters(tenantId: string): Promise<SuperReleaseClinicalLetterRecord[]> {
+async function loadAllClinicalLetters(
+  tenantId: string
+): Promise<SuperReleaseClinicalLetterRecord[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_super_release_clinical_letters")
@@ -504,7 +553,9 @@ async function loadAllClinicalLetters(tenantId: string): Promise<SuperReleaseCli
   return (data ?? []).map((r) => mapLetterRow(r as Record<string, unknown>));
 }
 
-export async function loadSuperReleaseApplicationsRequiringAttention(tenantId: string): Promise<SuperReleaseApplicationRecord[]> {
+export async function loadSuperReleaseApplicationsRequiringAttention(
+  tenantId: string
+): Promise<SuperReleaseApplicationRecord[]> {
   const tid = tenantId.trim();
   const todayYmd = new Date().toISOString().slice(0, 10);
   const apps = await loadSuperReleaseApplications(tid);
@@ -515,7 +566,7 @@ export async function loadSuperReleaseApplicationsRequiringAttention(tenantId: s
     requiresEscalatedSuperReleaseAttention({
       todayYmd,
       application: app,
-      surgeryDateYmd: app.booking_id ? surgeryDates.get(app.booking_id) ?? null : null,
+      surgeryDateYmd: app.booking_id ? (surgeryDates.get(app.booking_id) ?? null) : null,
     })
   );
 }
@@ -525,10 +576,15 @@ export async function loadSuperReleaseAttentionCount(tenantId: string): Promise<
   return rows.length;
 }
 
-export async function loadSuperReleaseDashboardCounts(tenantId: string): Promise<SuperReleaseDashboardCounts> {
+export async function loadSuperReleaseDashboardCounts(
+  tenantId: string
+): Promise<SuperReleaseDashboardCounts> {
   const tid = tenantId.trim();
   const todayYmd = new Date().toISOString().slice(0, 10);
-  const [apps, clinicalLetters] = await Promise.all([loadSuperReleaseApplications(tid), loadAllClinicalLetters(tid)]);
+  const [apps, clinicalLetters] = await Promise.all([
+    loadSuperReleaseApplications(tid),
+    loadAllClinicalLetters(tid),
+  ]);
   const bookingIds = apps.map((a) => a.booking_id).filter(Boolean) as string[];
   const surgeryDates = await loadSurgeryDatesByBookingIds(tid, bookingIds);
   return aggregateSuperReleaseDashboardCounts(apps, todayYmd, clinicalLetters, surgeryDates);
@@ -536,7 +592,10 @@ export async function loadSuperReleaseDashboardCounts(tenantId: string): Promise
 
 export async function loadSuperReleaseAnalytics(tenantId: string): Promise<SuperReleaseAnalytics> {
   const tid = tenantId.trim();
-  const [apps, clinicalLetters] = await Promise.all([loadSuperReleaseApplications(tid), loadAllClinicalLetters(tid)]);
+  const [apps, clinicalLetters] = await Promise.all([
+    loadSuperReleaseApplications(tid),
+    loadAllClinicalLetters(tid),
+  ]);
   return aggregateSuperReleaseAnalytics(apps, clinicalLetters);
 }
 
@@ -558,7 +617,10 @@ export async function loadUnresolvedSuperReleaseApplicationsForBookings(
     .not("application_status", "in", '("funds_released","cancelled")');
   if (error) throw new Error(error.message);
 
-  const rows = await enrichApplications(tenantId, (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)));
+  const rows = await enrichApplications(
+    tenantId,
+    (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>))
+  );
   for (const row of rows) {
     if (!row.booking_id) continue;
     out.set(row.booking_id, [...(out.get(row.booking_id) ?? []), row]);
@@ -584,7 +646,10 @@ export async function loadUnresolvedSuperReleaseApplicationsForPathways(
     .order("updated_at", { ascending: false });
   if (error) throw new Error(error.message);
 
-  const rows = await enrichApplications(tenantId, (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>)));
+  const rows = await enrichApplications(
+    tenantId,
+    (data ?? []).map((r) => mapAppRow(r as Record<string, unknown>))
+  );
   for (const row of rows) {
     if (!out.has(row.payment_pathway_id)) out.set(row.payment_pathway_id, row);
   }

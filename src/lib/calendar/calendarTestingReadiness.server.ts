@@ -2,7 +2,10 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { AppointmentStaffHoursError } from "@/src/lib/bookings/bookingErrors";
-import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "@/src/lib/bookings/appointmentAvailability";
+import {
+  checkAppointmentAvailability,
+  DEFAULT_APPOINTMENT_BUFFER_MINUTES,
+} from "@/src/lib/bookings/appointmentAvailability";
 import { loadBookingsForOperatorView, loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import {
   addDaysToCalendarDate,
@@ -13,7 +16,11 @@ import {
 } from "@/src/lib/calendar/calendarTimezone";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
-import { loadAllStaffForTenant, loadStaffFiUserIdMap, resolveBookingStaffAssignment } from "@/src/lib/staff/staff.server";
+import {
+  loadAllStaffForTenant,
+  loadStaffFiUserIdMap,
+  resolveBookingStaffAssignment,
+} from "@/src/lib/staff/staff.server";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 import {
   formatStaffWeeklyHoursSummary,
@@ -24,9 +31,19 @@ import {
 
 import { nextStaffWorkingLocalDayYmd } from "./calendarTestingSlotHelpers";
 import { loadCalendarReminderTestingPayload } from "./calendarReminderTesting.server";
-import type { CalendarQaRow, CalendarQaSection, CalendarTestingPagePayload } from "./calendarTestingTypes";
+import type {
+  CalendarQaRow,
+  CalendarQaSection,
+  CalendarTestingPagePayload,
+} from "./calendarTestingTypes";
 
-function qaRow(id: string, title: string, status: CalendarQaRow["status"], detail?: string, description?: string): CalendarQaRow {
+function qaRow(
+  id: string,
+  title: string,
+  status: CalendarQaRow["status"],
+  detail?: string,
+  description?: string
+): CalendarQaRow {
   return { id, title, description, status, detail };
 }
 
@@ -67,34 +84,67 @@ async function probeOutsideHoursRejects(tenantId: string): Promise<CalendarQaRow
   const active = staffList.filter((s) => s.is_active);
   const candidate = active.find((s) => hasWeeklyHoursSummary(s));
   if (!candidate) {
-    return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "warning", "No active staff with weekly hours to probe.");
+    return qaRow(
+      "probe_outside_hours",
+      "Outside-hours appointment is rejected",
+      "warning",
+      "No active staff with weekly hours to probe."
+    );
   }
   const weekly = parseStaffWeeklyHours(candidate.working_hours);
-  const staffTz = normalizeCalendarTimezone(candidate.default_timezone?.trim() || "Australia/Perth");
+  const staffTz = normalizeCalendarTimezone(
+    candidate.default_timezone?.trim() || "Australia/Perth"
+  );
   const ymd = nextStaffWorkingLocalDayYmd(staffTz, weekly, Date.now());
   if (!ymd) {
-    return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "warning", "Could not find a working day in the next 3 weeks.");
+    return qaRow(
+      "probe_outside_hours",
+      "Outside-hours appointment is rejected",
+      "warning",
+      "Could not find a working day in the next 3 weeks."
+    );
   }
   const mid = zonedMidnightUtcMs(ymd, staffTz);
   if (mid == null) {
-    return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "failed", "Invalid staff timezone for day math.");
+    return qaRow(
+      "probe_outside_hours",
+      "Outside-hours appointment is rejected",
+      "failed",
+      "Invalid staff timezone for day math."
+    );
   }
   const anchor = mid + 12 * 3_600_000;
   const wk = staffWeekdayKeyFromUtcMs(anchor, staffTz);
   const day = weekly[wk];
   const openMin = day?.start ? minutesFromHm(day.start) : null;
   if (openMin == null) {
-    return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "warning", "Staff day hours could not be parsed.");
+    return qaRow(
+      "probe_outside_hours",
+      "Outside-hours appointment is rejected",
+      "warning",
+      "Staff day hours could not be parsed."
+    );
   }
   const outsideMin = Math.max(0, openMin - 120);
   const startIso = isoFromLocalDayMinutes(ymd, outsideMin, staffTz);
   const endIso = isoFromLocalDayMinutes(ymd, outsideMin + 30, staffTz);
   if (!startIso || !endIso) {
-    return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "failed", "Could not build a local wall-clock slot.");
+    return qaRow(
+      "probe_outside_hours",
+      "Outside-hours appointment is rejected",
+      "failed",
+      "Could not build a local wall-clock slot."
+    );
   }
   const supabase = supabaseAdmin();
   try {
-    await assertStaffAppointmentWithinWorkingHours(tenantId, candidate.id, startIso, endIso, supabase);
+    await assertStaffAppointmentWithinWorkingHours(
+      tenantId,
+      candidate.id,
+      startIso,
+      endIso,
+      supabase
+    );
     return qaRow(
       "probe_outside_hours",
       "Outside-hours appointment is rejected",
@@ -103,9 +153,19 @@ async function probeOutsideHoursRejects(tenantId: string): Promise<CalendarQaRow
     );
   } catch (e) {
     if (e instanceof AppointmentStaffHoursError) {
-      return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "ready", "Guard rejected an out-of-hours slot as expected.");
+      return qaRow(
+        "probe_outside_hours",
+        "Outside-hours appointment is rejected",
+        "ready",
+        "Guard rejected an out-of-hours slot as expected."
+      );
     }
-    return qaRow("probe_outside_hours", "Outside-hours appointment is rejected", "warning", e instanceof Error ? e.message : String(e));
+    return qaRow(
+      "probe_outside_hours",
+      "Outside-hours appointment is rejected",
+      "warning",
+      e instanceof Error ? e.message : String(e)
+    );
   }
 }
 
@@ -113,25 +173,58 @@ async function probeMidnightCrossRejects(tenantId: string): Promise<CalendarQaRo
   const staffList = await loadAllStaffForTenant(tenantId);
   const candidate = staffList.find((s) => s.is_active && hasWeeklyHoursSummary(s));
   if (!candidate) {
-    return qaRow("probe_midnight", "Appointment crossing local midnight is rejected", "warning", "No active staff with weekly hours to probe.");
+    return qaRow(
+      "probe_midnight",
+      "Appointment crossing local midnight is rejected",
+      "warning",
+      "No active staff with weekly hours to probe."
+    );
   }
-  const staffTz = normalizeCalendarTimezone(candidate.default_timezone?.trim() || "Australia/Perth");
+  const staffTz = normalizeCalendarTimezone(
+    candidate.default_timezone?.trim() || "Australia/Perth"
+  );
   const ymd = calendarDateStringFromInstant(new Date(), staffTz);
   const startIso = isoFromLocalDayMinutes(ymd, 23 * 60, staffTz);
   const nextYmd = addDaysToCalendarDate(ymd, 1, staffTz);
   const endIso = isoFromLocalDayMinutes(nextYmd, 1 * 60, staffTz);
   if (!startIso || !endIso) {
-    return qaRow("probe_midnight", "Appointment crossing local midnight is rejected", "failed", "Could not build cross-midnight instants.");
+    return qaRow(
+      "probe_midnight",
+      "Appointment crossing local midnight is rejected",
+      "failed",
+      "Could not build cross-midnight instants."
+    );
   }
   const supabase = supabaseAdmin();
   try {
-    await assertStaffAppointmentWithinWorkingHours(tenantId, candidate.id, startIso, endIso, supabase);
-    return qaRow("probe_midnight", "Appointment crossing local midnight is rejected", "failed", "Expected cross-midnight rejection but validation passed.");
+    await assertStaffAppointmentWithinWorkingHours(
+      tenantId,
+      candidate.id,
+      startIso,
+      endIso,
+      supabase
+    );
+    return qaRow(
+      "probe_midnight",
+      "Appointment crossing local midnight is rejected",
+      "failed",
+      "Expected cross-midnight rejection but validation passed."
+    );
   } catch (e) {
     if (e instanceof AppointmentStaffHoursError) {
-      return qaRow("probe_midnight", "Appointment crossing local midnight is rejected", "ready", "Guard rejected a cross-midnight span as expected.");
+      return qaRow(
+        "probe_midnight",
+        "Appointment crossing local midnight is rejected",
+        "ready",
+        "Guard rejected a cross-midnight span as expected."
+      );
     }
-    return qaRow("probe_midnight", "Appointment crossing local midnight is rejected", "warning", e instanceof Error ? e.message : String(e));
+    return qaRow(
+      "probe_midnight",
+      "Appointment crossing local midnight is rejected",
+      "warning",
+      e instanceof Error ? e.message : String(e)
+    );
   }
 }
 
@@ -155,12 +248,25 @@ async function probeInactiveStaffAssignmentRejects(tenantId: string): Promise<Ca
   }
   const sid = String((data as { id: string }).id);
   try {
-    await resolveBookingStaffAssignment(supabase, tenantId, { assignedStaffId: sid, assignedUserId: null });
-    return qaRow("probe_inactive_staff", "Inactive-staff booking is rejected", "failed", "Expected inactive-staff assignment to fail.");
+    await resolveBookingStaffAssignment(supabase, tenantId, {
+      assignedStaffId: sid,
+      assignedUserId: null,
+    });
+    return qaRow(
+      "probe_inactive_staff",
+      "Inactive-staff booking is rejected",
+      "failed",
+      "Expected inactive-staff assignment to fail."
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (/inactive/i.test(msg)) {
-      return qaRow("probe_inactive_staff", "Inactive-staff booking is rejected", "ready", "Assignment resolver rejects inactive staff as expected.");
+      return qaRow(
+        "probe_inactive_staff",
+        "Inactive-staff booking is rejected",
+        "ready",
+        "Assignment resolver rejects inactive staff as expected."
+      );
     }
     return qaRow("probe_inactive_staff", "Inactive-staff booking is rejected", "ready", msg);
   }
@@ -188,7 +294,12 @@ async function probeOverlapRejects(tenantId: string): Promise<CalendarQaRow> {
   }
   const b = await loadBookingForTenant(tenantId, String((data as { id: string }).id), supabase);
   if (!b?.assigned_staff_id?.trim()) {
-    return qaRow("probe_overlap", "Overlapping appointment is rejected", "warning", "Sample booking has no staff assignee.");
+    return qaRow(
+      "probe_overlap",
+      "Overlapping appointment is rejected",
+      "warning",
+      "Sample booking has no staff assignee."
+    );
   }
   const staffIds = [b.assigned_staff_id.trim()];
   const staffIdToUserId = await loadStaffFiUserIdMap(tenantId, staffIds, supabase);
@@ -211,7 +322,12 @@ async function probeOverlapRejects(tenantId: string): Promise<CalendarQaRow> {
     bufferMinutes: DEFAULT_APPOINTMENT_BUFFER_MINUTES,
   });
   if (!result.ok) {
-    return qaRow("probe_overlap", "Overlapping appointment is rejected", "ready", "Duplicate slot for the same assignee is flagged (including buffer).");
+    return qaRow(
+      "probe_overlap",
+      "Overlapping appointment is rejected",
+      "ready",
+      "Duplicate slot for the same assignee is flagged (including buffer)."
+    );
   }
   return qaRow(
     "probe_overlap",
@@ -247,7 +363,9 @@ async function probeValidAppointmentPlaceholder(tenantId: string): Promise<Calen
   );
 }
 
-export async function loadCalendarTestingPageData(tenantId: string): Promise<CalendarTestingPagePayload> {
+export async function loadCalendarTestingPageData(
+  tenantId: string
+): Promise<CalendarTestingPagePayload> {
   const tid = tenantId.trim();
   const [staff, services, inactiveBookings, reminders] = await Promise.all([
     loadAllStaffForTenant(tid),
@@ -265,7 +383,9 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
       "staff_active_count",
       "Active staff count",
       activeStaff.length > 0 ? "ready" : "failed",
-      activeStaff.length ? `${activeStaff.length} active staff` : "No active staff — add staff before go-live."
+      activeStaff.length
+        ? `${activeStaff.length} active staff`
+        : "No active staff — add staff before go-live."
     ),
     qaRow(
       "staff_missing_hours",
@@ -287,12 +407,16 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
       "inactive_staff_bookings",
       "Inactive staff still assigned to bookings",
       inactiveBookings === 0 ? "ready" : "failed",
-      inactiveBookings ? `${inactiveBookings} non-cancelled booking(s) reference inactive staff` : "No dangling inactive-staff assignments."
+      inactiveBookings
+        ? `${inactiveBookings} non-cancelled booking(s) reference inactive staff`
+        : "No dangling inactive-staff assignments."
     ),
   ];
 
   const activeServices = services.filter((s) => s.is_active);
-  const badDuration = activeServices.filter((s) => !Number.isFinite(s.duration_minutes) || s.duration_minutes <= 0);
+  const badDuration = activeServices.filter(
+    (s) => !Number.isFinite(s.duration_minutes) || s.duration_minutes <= 0
+  );
   const longSurgery = activeServices.filter(
     (s) =>
       s.is_active &&
@@ -302,7 +426,9 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
   const hasPrp = activeServices.some((s) => serviceMatchesCategory(s, "prp"));
   const hasReview = activeServices.some((s) => serviceMatchesCategory(s, "review"));
   const hasConsult = activeServices.some(
-    (s) => serviceMatchesCategory(s, "consult") || (s.booking_type ?? "").toLowerCase() === "consultation"
+    (s) =>
+      serviceMatchesCategory(s, "consult") ||
+      (s.booking_type ?? "").toLowerCase() === "consultation"
   );
 
   const serviceRows: CalendarQaRow[] = [
@@ -310,13 +436,17 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
       "svc_active_count",
       "Active service catalog count",
       activeServices.length > 0 ? "ready" : "warning",
-      activeServices.length ? `${activeServices.length} active services` : "No active services — configure Services before rollout."
+      activeServices.length
+        ? `${activeServices.length} active services`
+        : "No active services — configure Services before rollout."
     ),
     qaRow(
       "svc_duration",
       "Services missing duration_minutes",
       badDuration.length === 0 ? "ready" : "failed",
-      badDuration.length ? badDuration.map((s) => s.name).join(", ") : "All active services have positive duration."
+      badDuration.length
+        ? badDuration.map((s) => s.name).join(", ")
+        : "All active services have positive duration."
     ),
     qaRow(
       "svc_long_surgery",
@@ -326,8 +456,18 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
         ? `Review: ${longSurgery.map((s) => `${s.name} (${s.duration_minutes}m)`).join("; ")}`
         : "No active surgery-type service exceeds 240 minutes."
     ),
-    qaRow("svc_prp", "PRP-style service present", hasPrp ? "ready" : "warning", hasPrp ? "Found PRP-related catalog row." : "No obvious PRP service — add if you offer PRP."),
-    qaRow("svc_review", "Review-style service present", hasReview ? "ready" : "warning", hasReview ? "Found review-related catalog row." : "No obvious review service."),
+    qaRow(
+      "svc_prp",
+      "PRP-style service present",
+      hasPrp ? "ready" : "warning",
+      hasPrp ? "Found PRP-related catalog row." : "No obvious PRP service — add if you offer PRP."
+    ),
+    qaRow(
+      "svc_review",
+      "Review-style service present",
+      hasReview ? "ready" : "warning",
+      hasReview ? "Found review-related catalog row." : "No obvious review service."
+    ),
     qaRow(
       "svc_consult",
       "Consultation service present",
@@ -372,11 +512,36 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
       "not_tested",
       `From a patient profile, schedule PRP / PRF / mesotherapy / exosomes when your catalog supports it.`
     ),
-    qaRow("wf_case_surgery", "Case → surgery booking", "not_tested", `Anchor a surgery-type booking to the SurgeryOS case when planning allows.`),
-    qaRow("wf_case_review", "Case → post-op review booking", "not_tested", `Schedule follow_up / review linked to the same case after surgery.`),
-    qaRow("wf_cancel", "Cancel booking", "not_tested", `Cancel from the appointment slide-over or booking UI; verify status and calendar refresh.`),
-    qaRow("wf_complete", "Complete booking", "not_tested", `Mark complete from appointment UI; verify status and any CRM side-effects.`),
-    qaRow("wf_reschedule", "Reschedule booking", "not_tested", `Change time via calendar drag/edit; confirm staff hours + overlap guards still pass.`),
+    qaRow(
+      "wf_case_surgery",
+      "Case → surgery booking",
+      "not_tested",
+      `Anchor a surgery-type booking to the SurgeryOS case when planning allows.`
+    ),
+    qaRow(
+      "wf_case_review",
+      "Case → post-op review booking",
+      "not_tested",
+      `Schedule follow_up / review linked to the same case after surgery.`
+    ),
+    qaRow(
+      "wf_cancel",
+      "Cancel booking",
+      "not_tested",
+      `Cancel from the appointment slide-over or booking UI; verify status and calendar refresh.`
+    ),
+    qaRow(
+      "wf_complete",
+      "Complete booking",
+      "not_tested",
+      `Mark complete from appointment UI; verify status and any CRM side-effects.`
+    ),
+    qaRow(
+      "wf_reschedule",
+      "Reschedule booking",
+      "not_tested",
+      `Change time via calendar drag/edit; confirm staff hours + overlap guards still pass.`
+    ),
   ];
 
   const errorCopyRows: CalendarQaRow[] = [
@@ -384,65 +549,78 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
       "err_staff_hours",
       "Outside staff working hours",
       "not_tested",
-      "Expected copy: appointment falls outside configured weekly hours for that staff member (with weekday and wall-time hint). Surfaces from calendar create/drag and booking mutations when a staff assignee is set.",
+      "Expected copy: appointment falls outside configured weekly hours for that staff member (with weekday and wall-time hint). Surfaces from calendar create/drag and booking mutations when a staff assignee is set."
     ),
     qaRow(
       "err_staff_inactive",
       "Inactive staff assignee",
       "not_tested",
-      "Expected copy: inactive staff cannot be assigned — choose another clinician or reactivate in Staff.",
+      "Expected copy: inactive staff cannot be assigned — choose another clinician or reactivate in Staff."
     ),
     qaRow(
       "err_staff_no_hours",
       "Missing staff working hours",
       "not_tested",
-      "Expected copy: no weekly hours on file — add hours in Staff before scheduling that person.",
+      "Expected copy: no weekly hours on file — add hours in Staff before scheduling that person."
     ),
     qaRow(
       "err_overlap",
       "Overlapping appointment",
       "not_tested",
-      "Expected copy: slot overlaps another booking for the same assignee, including the configured buffer (default 15 minutes).",
+      "Expected copy: slot overlaps another booking for the same assignee, including the configured buffer (default 15 minutes)."
     ),
     qaRow(
       "err_service_duration",
       "Missing / invalid service duration",
       "not_tested",
-      "Catalog rows must have positive duration_minutes (≤ 24h). If a procedure type has no catalog row, the app uses built-in fallback durations — still verify Services for UAT realism.",
+      "Catalog rows must have positive duration_minutes (≤ 24h). If a procedure type has no catalog row, the app uses built-in fallback durations — still verify Services for UAT realism."
     ),
     qaRow(
       "err_clinic",
       "Invalid clinic",
       "not_tested",
-      "Expected copy: clinic must belong to this tenant — pick a clinic from the tenant scope list.",
+      "Expected copy: clinic must belong to this tenant — pick a clinic from the tenant scope list."
     ),
     qaRow(
       "err_appt_permission",
       "No appointment / scheduling permission",
       "not_tested",
-      "Users without booking-operator access cannot open the appointment slide-over from case or patient context (amber notice + deep link to Appointments). loadAppointmentSlideOverBundleAction returns a clear denial when session is missing.",
+      "Users without booking-operator access cannot open the appointment slide-over from case or patient context (amber notice + deep link to Appointments). loadAppointmentSlideOverBundleAction returns a clear denial when session is missing."
     ),
   ];
 
   const sections: CalendarQaSection[] = [
-    { id: "staff", title: "Staff setup", description: "Directory and working-hours hygiene.", rows: staffRows },
-    { id: "services", title: "Service setup", description: "Catalog coverage for common ClinicOS flows.", rows: serviceRows },
+    {
+      id: "staff",
+      title: "Staff setup",
+      description: "Directory and working-hours hygiene.",
+      rows: staffRows,
+    },
+    {
+      id: "services",
+      title: "Service setup",
+      description: "Catalog coverage for common ClinicOS flows.",
+      rows: serviceRows,
+    },
     {
       id: "validation",
       title: "Booking validation (automated probes)",
-      description: "Uses the same server guards as production — read-only except the optional smoke test.",
+      description:
+        "Uses the same server guards as production — read-only except the optional smoke test.",
       rows: validationRows,
     },
     {
       id: "workflow",
       title: "Manual UAT workflows",
-      description: "Sign off after you run each path in a staging tenant. Progress is stored in this browser only.",
+      description:
+        "Sign off after you run each path in a staging tenant. Progress is stored in this browser only.",
       rows: workflowRows,
     },
     {
       id: "error_copy",
       title: "Expected error messages (reference)",
-      description: "What testers should see when guards fire — not automated; use during scripted UAT.",
+      description:
+        "What testers should see when guards fire — not automated; use during scripted UAT.",
       rows: errorCopyRows,
     },
   ];

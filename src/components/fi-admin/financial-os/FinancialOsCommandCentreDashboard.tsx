@@ -61,7 +61,12 @@ export function FinancialOsCommandCentreDashboard(props: {
   };
   showDiagnosticsExpanded?: boolean;
 }) {
-  const { data, surgeryEconomicsFilterOptions, revenueAttributionFilterOptions, showDiagnosticsExpanded = false } = props;
+  const {
+    data,
+    surgeryEconomicsFilterOptions,
+    revenueAttributionFilterOptions,
+    showDiagnosticsExpanded = false,
+  } = props;
   const base = `/fi-admin/${data.tenantId}`;
 
   const healthCards = buildFinancialHealthCards(base, data);
@@ -81,10 +86,15 @@ export function FinancialOsCommandCentreDashboard(props: {
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">FinancialOS</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+            FI OS
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            FinancialOS
+          </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Revenue, payments, deposits, profitability, and collection priorities across clinic operations.
+            Revenue, payments, deposits, profitability, and collection priorities across clinic
+            operations.
           </p>
           <FinancialOsPrimaryActions base={base} />
         </div>
@@ -105,7 +115,9 @@ export function FinancialOsCommandCentreDashboard(props: {
               className="group flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4 transition hover:border-[#22C1FF]/25"
             >
               <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                {card.value}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#22C1FF]/80 opacity-0 transition group-hover:opacity-100">
                 View <ArrowRight className="h-3 w-3" aria-hidden />
@@ -125,7 +137,9 @@ export function FinancialOsCommandCentreDashboard(props: {
         {showCalmAttention ? (
           <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
-            <p className="text-sm leading-relaxed text-[#CBD5E1]">Financial workflow is currently under control.</p>
+            <p className="text-sm leading-relaxed text-[#CBD5E1]">
+              Financial workflow is currently under control.
+            </p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -138,14 +152,20 @@ export function FinancialOsCommandCentreDashboard(props: {
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                      {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                      {item.detail ? (
+                        <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                      ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                   </Link>
                 ) : (
-                  <div className={`rounded-xl border px-4 py-4 ${financialAttentionSeverityClass(item.severity)}`}>
+                  <div
+                    className={`rounded-xl border px-4 py-4 ${financialAttentionSeverityClass(item.severity)}`}
+                  >
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                 )}
               </li>
@@ -212,16 +232,23 @@ export function FinancialOsCommandCentreDashboard(props: {
           />
           {profitability.hasLimitedData && profitability.completedWithData === 0 ? (
             <p className="text-sm leading-relaxed text-[#94A3B8]">
-              Procedure profitability will strengthen as surgery costs, payments, and case records are captured.
+              Procedure profitability will strengthen as surgery costs, payments, and case records
+              are captured.
             </p>
           ) : (
             <dl className="grid gap-3 sm:grid-cols-2">
               <div className={financialOsClasses.subPanel}>
-                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Procedures with data</dt>
-                <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{profitability.completedWithData}</dd>
+                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                  Procedures with data
+                </dt>
+                <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {profitability.completedWithData}
+                </dd>
               </div>
               <div className={financialOsClasses.subPanel}>
-                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Average procedure revenue</dt>
+                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                  Average procedure revenue
+                </dt>
                 <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
                   {profitability.averageRevenueCents != null
                     ? fmtFinancialMoney(profitability.averageRevenueCents, data.currency)
@@ -229,24 +256,34 @@ export function FinancialOsCommandCentreDashboard(props: {
                 </dd>
               </div>
               <div className={financialOsClasses.subPanel}>
-                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Average margin</dt>
+                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                  Average margin
+                </dt>
                 <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
                   {profitability.averageMarginPct.toFixed(1)}%
                 </dd>
               </div>
               <div className={financialOsClasses.subPanel}>
-                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Missing cost data</dt>
-                <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{profitability.casesMissingCostData}</dd>
+                <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                  Missing cost data
+                </dt>
+                <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {profitability.casesMissingCostData}
+                </dd>
               </div>
               {profitability.bestMarginSignal ? (
                 <div className={financialOsClasses.subPanel}>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-400/80">Best margin</dt>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-400/80">
+                    Best margin
+                  </dt>
                   <dd className="mt-1 text-sm text-[#CBD5E1]">{profitability.bestMarginSignal}</dd>
                 </div>
               ) : null}
               {profitability.worstMarginSignal ? (
                 <div className={financialOsClasses.subPanel}>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-400/80">Lowest margin</dt>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-400/80">
+                    Lowest margin
+                  </dt>
                   <dd className="mt-1 text-sm text-[#CBD5E1]">{profitability.worstMarginSignal}</dd>
                 </div>
               ) : null}
@@ -254,7 +291,8 @@ export function FinancialOsCommandCentreDashboard(props: {
           )}
           {profitability.hasLimitedData && profitability.completedWithData > 0 ? (
             <p className="mt-4 text-xs text-[#64748B]">
-              Procedure profitability will strengthen as surgery costs, payments, and case records are captured.
+              Procedure profitability will strengthen as surgery costs, payments, and case records
+              are captured.
             </p>
           ) : null}
         </DashboardCard>
@@ -296,7 +334,8 @@ export function FinancialOsCommandCentreDashboard(props: {
         />
         {recentActivity.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
-            Recent financial activity will appear as payments, invoices, deposits, and procedure costs are captured.
+            Recent financial activity will appear as payments, invoices, deposits, and procedure
+            costs are captured.
           </p>
         ) : (
           <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#0c1220]/50">
@@ -306,7 +345,9 @@ export function FinancialOsCommandCentreDashboard(props: {
                   <p className="text-sm font-medium text-[#F8FAFC]">{item.label}</p>
                   <p className="mt-0.5 text-xs text-[#94A3B8]">{item.detail}</p>
                 </div>
-                <time className="shrink-0 text-xs tabular-nums text-[#64748B]">{fmtFinancialWhen(item.occurredAt)}</time>
+                <time className="shrink-0 text-xs tabular-nums text-[#64748B]">
+                  {fmtFinancialWhen(item.occurredAt)}
+                </time>
               </li>
             ))}
           </ul>

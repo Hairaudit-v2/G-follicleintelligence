@@ -49,8 +49,13 @@ export const appointmentListQuerySchema = z
   })
   .strict();
 
-export function parseAppointmentListQuery(searchParams: URLSearchParams): z.infer<typeof appointmentListQuerySchema> {
-  const providerRaw = searchParams.get("provider") ?? searchParams.get("providerId") ?? searchParams.get("assignedUserId");
+export function parseAppointmentListQuery(
+  searchParams: URLSearchParams
+): z.infer<typeof appointmentListQuerySchema> {
+  const providerRaw =
+    searchParams.get("provider") ??
+    searchParams.get("providerId") ??
+    searchParams.get("assignedUserId");
   const staffRaw = searchParams.get("staff") ?? searchParams.get("staffId");
   const procedureRaw =
     searchParams.get("procedure") ?? searchParams.get("type") ?? searchParams.get("bookingType");
@@ -143,7 +148,8 @@ export const appointmentRescheduleBodySchema = z
     if (!hasChange) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Provide at least one field to update (startAt, endAt, provider, procedure, etc.).",
+        message:
+          "Provide at least one field to update (startAt, endAt, provider, procedure, etc.).",
       });
     }
   });
@@ -166,10 +172,12 @@ export function procedureDetailsToMetadata(
 ): Record<string, unknown> | undefined {
   if (!details) return undefined;
   const out: Record<string, unknown> = {};
-  if (details.graftCountEstimate !== undefined) out.graft_count_estimate = details.graftCountEstimate;
+  if (details.graftCountEstimate !== undefined)
+    out.graft_count_estimate = details.graftCountEstimate;
   if (details.donorArea !== undefined) out.donor_area = details.donorArea;
   if (details.technique !== undefined) out.technique = details.technique;
-  if (details.specialInstructions !== undefined) out.special_instructions = details.specialInstructions;
+  if (details.specialInstructions !== undefined)
+    out.special_instructions = details.specialInstructions;
   if (details.surgeonUserId !== undefined) out.surgeon_user_id = details.surgeonUserId;
   if (details.consultantUserId !== undefined) out.consultant_user_id = details.consultantUserId;
   if (details.techUserId !== undefined) out.tech_user_id = details.techUserId;

@@ -34,7 +34,9 @@ export type PatientLeadHistoryTimelineRow =
     };
 
 /** Pick the best CRM lead anchor for booking prefill (linked to this patient first). */
-export function pickPrimaryLeadForPatient(items: PatientPersonLeadHistoryItem[]): FiCrmLeadRow | null {
+export function pickPrimaryLeadForPatient(
+  items: PatientPersonLeadHistoryItem[]
+): FiCrmLeadRow | null {
   const linked = items.filter((i) => i.linkedToThisPatient);
   if (linked.length > 0) return linked[0]!.lead;
   return items[0]?.lead ?? null;
@@ -87,8 +89,8 @@ export function mapPersonCrmActivityRows(
       activity_kind: String(r.activity_kind),
       title: r.title != null ? String(r.title) : null,
       lead_id: leadId,
-      leadTitle: leadId ? titleByLeadId.get(leadId) ?? null : null,
-      linkedToThisPatient: leadId ? linkedByLeadId.get(leadId) ?? false : true,
+      leadTitle: leadId ? (titleByLeadId.get(leadId) ?? null) : null,
+      linkedToThisPatient: leadId ? (linkedByLeadId.get(leadId) ?? false) : true,
     };
   });
 

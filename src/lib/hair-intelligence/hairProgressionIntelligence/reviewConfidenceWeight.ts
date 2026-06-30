@@ -11,11 +11,15 @@ export function hairLossReviewStatusToConfidenceMultiplier(status: string): numb
   return 1;
 }
 
-export function isClinicianVerifiedReviewStatus(status: string): status is "accepted" | "corrected" {
+export function isClinicianVerifiedReviewStatus(
+  status: string
+): status is "accepted" | "corrected" {
   return status === "accepted" || status === "corrected";
 }
 
-export function describeReviewWeighting(points: Array<{ review_status: HieHairLossReviewStatus | string }>) {
+export function describeReviewWeighting(
+  points: Array<{ review_status: HieHairLossReviewStatus | string }>
+) {
   if (points.length === 0) {
     return { average_review_multiplier: 1, verified_point_fraction: 0 };
   }

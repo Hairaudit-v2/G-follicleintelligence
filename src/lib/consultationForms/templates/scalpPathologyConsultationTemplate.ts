@@ -1,4 +1,8 @@
-import type { ConsultationFormField, ConsultationFormOption, ConsultationFormSchema } from "../consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormOption,
+  ConsultationFormSchema,
+} from "../consultationFormTypes";
 
 function fld(field: ConsultationFormField): ConsultationFormField {
   return field;
@@ -170,7 +174,8 @@ export const scalpPathologyConsultationSchemaV1: ConsultationFormSchema = {
           id: "pathology_reason",
           label: "Reason for pathology / lab pathway",
           type: "textarea",
-          placeholder: "e.g. rule out cicatricial pattern, correlate with discoid lesions, baseline before systemic therapy…",
+          placeholder:
+            "e.g. rule out cicatricial pattern, correlate with discoid lesions, baseline before systemic therapy…",
           showWhen: { fieldId: "pathology_recommended_explicit", operator: "equals", value: true },
           required: true,
         }),

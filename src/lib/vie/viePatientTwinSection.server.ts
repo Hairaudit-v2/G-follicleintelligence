@@ -5,7 +5,10 @@ import { loadViePatientImagingCompleteness } from "./vieCompleteness.server";
 import { loadVieComparisonReadinessForPatient } from "./vieLongitudinalComparison.server";
 import type { VieComparisonReadinessSummary } from "./vieComparisonTypes";
 import type { ViePatientTwinAlignmentSummary } from "./vieAlignmentTypes";
-import type { VieInstantIntelligenceResult, ViePatientImagingCompleteness } from "./vieProtocolTypes";
+import type {
+  VieInstantIntelligenceResult,
+  ViePatientImagingCompleteness,
+} from "./vieProtocolTypes";
 import { VIE_ENGINE_VERSION } from "./vieProtocolTypes";
 import { VIE_FUTURE_ARCHITECTURE } from "./vieFutureArchitecture";
 import { loadPatientTwinAlignmentSummary } from "./vieSameAngleAlignment.server";
@@ -59,9 +62,13 @@ export async function loadPatientTwinVieSection(
       protocol_template_slug: String(r.protocol_template_slug),
       protocol_slot_slug: String(r.protocol_slot_slug),
       quality_score: Number(r.quality_score ?? 0),
-      quality_band: String(r.quality_band ?? "acceptable") as VieInstantIntelligenceResult["quality_band"],
+      quality_band: String(
+        r.quality_band ?? "acceptable"
+      ) as VieInstantIntelligenceResult["quality_band"],
       clinically_usable: r.clinically_usable !== false,
-      acceptance_status: String(r.acceptance_status ?? "pending") as VieInstantIntelligenceResult["acceptance_status"],
+      acceptance_status: String(
+        r.acceptance_status ?? "pending"
+      ) as VieInstantIntelligenceResult["acceptance_status"],
       created_at: String(r.created_at),
     };
   });
@@ -83,9 +90,16 @@ export async function loadPatientTwinVieSection(
     };
   }
 
-  const comparison_readiness = await loadVieComparisonReadinessForPatient(tenantId, patientId, null, supabase);
+  const comparison_readiness = await loadVieComparisonReadinessForPatient(
+    tenantId,
+    patientId,
+    null,
+    supabase
+  );
   const alignment_summary = await loadPatientTwinAlignmentSummary(tenantId, patientId, supabase);
-  const outcome_summary = await computeVieOutcomeSummaryForPatient(tenantId, patientId, { client: supabase });
+  const outcome_summary = await computeVieOutcomeSummaryForPatient(tenantId, patientId, {
+    client: supabase,
+  });
 
   return {
     engine_version: VIE_ENGINE_VERSION,

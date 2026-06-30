@@ -160,7 +160,8 @@ export function computeProviderColumnOverlapLayouts(
 
   for (const item of sorted) {
     const overlapping = sorted.filter(
-      (o) => o.booking.id !== item.booking.id && o.startMin < item.endMin && o.endMin > item.startMin
+      (o) =>
+        o.booking.id !== item.booking.id && o.startMin < item.endMin && o.endMin > item.startMin
     );
     const group = [item, ...overlapping];
     const totalCols = Math.max(1, ...group.map((g) => (colById.get(g.booking.id) ?? 0) + 1));
@@ -232,7 +233,11 @@ function CurrentTimeLine({
   if (nowTop == null || nowTop < 0 || nowTop > bodyHeightPx) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 z-30" style={{ top: nowTop }} aria-hidden>
+    <div
+      className="pointer-events-none absolute inset-x-0 z-30"
+      style={{ top: nowTop }}
+      aria-hidden
+    >
       <div className="relative flex items-center">
         <span className="absolute -left-1 h-2.5 w-2.5 rounded-full bg-red-500 shadow-sm ring-2 ring-white" />
         <div className="h-[2px] w-full rounded-full bg-red-500/90 shadow-[0_0_6px_rgb(239_68_68/0.45)]" />
@@ -274,10 +279,14 @@ export function ProviderColumnHeader({
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold tracking-tight text-[var(--fi-cal-ws-header-title,#f1f5f9)]">{name}</p>
+        <p className="truncate text-sm font-semibold tracking-tight text-[var(--fi-cal-ws-header-title,#f1f5f9)]">
+          {name}
+        </p>
         <div className="flex min-w-0 flex-wrap items-center gap-1">
           {role ? (
-            <p className="truncate text-[11px] font-medium text-[var(--fi-cal-ws-header-subtitle,#94a3b8)]">{role}</p>
+            <p className="truncate text-[11px] font-medium text-[var(--fi-cal-ws-header-subtitle,#94a3b8)]">
+              {role}
+            </p>
           ) : null}
           {ownerColumn ? (
             <span className="shrink-0 rounded bg-white/[0.08] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-300 dark:bg-slate-700/80 dark:text-slate-300">
@@ -341,7 +350,13 @@ export type ProviderColumnProps = {
   /** Click empty grid area to book (e.g. quick call-in modal). */
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
   /** Right-click empty grid — quick actions menu (e.g. templates + block). */
-  onEmptySlotContextMenu?: (info: { dayKey: string; columnId: string; localStart: string; clientX: number; clientY: number }) => void;
+  onEmptySlotContextMenu?: (info: {
+    dayKey: string;
+    columnId: string;
+    localStart: string;
+    clientX: number;
+    clientY: number;
+  }) => void;
   bodyHeightPx?: number;
   minWidthPx?: number;
   /**
@@ -443,7 +458,13 @@ export function ProviderColumn({
     e.preventDefault();
     const slot = slotFromClientY(e.clientY, e.currentTarget);
     if (!slot) return;
-    onEmptySlotContextMenu({ dayKey, columnId: id, localStart: slot.localStart, clientX: e.clientX, clientY: e.clientY });
+    onEmptySlotContextMenu({
+      dayKey,
+      columnId: id,
+      localStart: slot.localStart,
+      clientX: e.clientX,
+      clientY: e.clientY,
+    });
   };
 
   return (
@@ -498,7 +519,10 @@ export function ProviderColumn({
       >
         <BusinessTimeSlotGrid
           bodyHeightPx={bodyHeightPx}
-          gridHours={{ dayStartHourUtc: gridConfig.dayStartHourUtc, dayEndHourUtc: gridConfig.dayEndHourUtc }}
+          gridHours={{
+            dayStartHourUtc: gridConfig.dayStartHourUtc,
+            dayEndHourUtc: gridConfig.dayEndHourUtc,
+          }}
         />
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
@@ -546,7 +570,9 @@ export function ProviderColumn({
                 isPendingSave={isPendingSave}
                 isHighlighted={highlightedBookingId === booking.id}
                 calendarTimezone={gridConfig.timeZone}
-                onResizeEnd={onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined}
+                onResizeEnd={
+                  onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
+                }
                 onClick={onSelectAppointment ? () => onSelectAppointment(booking) : undefined}
               />
             );

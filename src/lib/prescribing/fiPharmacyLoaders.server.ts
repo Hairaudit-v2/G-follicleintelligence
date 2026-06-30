@@ -1,7 +1,10 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { FiPatientPrescriptionRow, FiPrescriptionItemRow } from "@/src/lib/prescribing/fiPrescribingTypes";
+import type {
+  FiPatientPrescriptionRow,
+  FiPrescriptionItemRow,
+} from "@/src/lib/prescribing/fiPrescribingTypes";
 
 export type FiCompoundPharmacyRow = {
   id: string;
@@ -57,7 +60,10 @@ function asTransmissionRow(raw: Record<string, unknown>): FiPharmacyTransmission
     pharmacy_id: String(raw.pharmacy_id),
     method: raw.method as PharmacyTransmissionMethod,
     status: raw.status as PharmacyTransmissionStatus,
-    payload_snapshot: snap && typeof snap === "object" && !Array.isArray(snap) ? (snap as Record<string, unknown>) : {},
+    payload_snapshot:
+      snap && typeof snap === "object" && !Array.isArray(snap)
+        ? (snap as Record<string, unknown>)
+        : {},
     sent_at: raw.sent_at != null ? String(raw.sent_at) : null,
     error_message: raw.error_message != null ? String(raw.error_message) : null,
     created_at: String(raw.created_at ?? ""),
@@ -65,7 +71,9 @@ function asTransmissionRow(raw: Record<string, unknown>): FiPharmacyTransmission
   };
 }
 
-export async function loadActiveCompoundPharmaciesForTenant(tenantId: string): Promise<FiCompoundPharmacyRow[]> {
+export async function loadActiveCompoundPharmaciesForTenant(
+  tenantId: string
+): Promise<FiCompoundPharmacyRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_compound_pharmacies")
@@ -126,7 +134,9 @@ export async function loadCompoundPharmacyById(
 
 export type LatestTransmissionOutcome = "none" | "sent" | "failed" | "pending";
 
-export function classifyLatestTransmissionOutcome(rows: FiPharmacyTransmissionRow[]): LatestTransmissionOutcome {
+export function classifyLatestTransmissionOutcome(
+  rows: FiPharmacyTransmissionRow[]
+): LatestTransmissionOutcome {
   if (rows.length === 0) return "none";
   const latest = rows[0]!;
   if (latest.status === "pending") return "pending";
@@ -152,5 +162,8 @@ export type PharmacyOrderPayloadSnapshotV1 = {
   items: FiPrescriptionItemRow[];
   patient: { display_name: string; email: string | null };
   prescriber: { full_name: string; staff_role: string };
-  pharmacy: Pick<FiCompoundPharmacyRow, "id" | "pharmacy_name" | "contact_email" | "phone" | "address">;
+  pharmacy: Pick<
+    FiCompoundPharmacyRow,
+    "id" | "pharmacy_name" | "contact_email" | "phone" | "address"
+  >;
 };

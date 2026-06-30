@@ -40,7 +40,8 @@ function parseCompetencyItem(raw: unknown, _index: number): FiCompetencyExportIt
 
   const readinessRaw = trimStr(raw.readinessBand ?? raw.readiness_band).toLowerCase();
   const readinessBand =
-    readinessRaw && (FI_COMPETENCY_EXPORT_READINESS_BANDS as readonly string[]).includes(readinessRaw)
+    readinessRaw &&
+    (FI_COMPETENCY_EXPORT_READINESS_BANDS as readonly string[]).includes(readinessRaw)
       ? (readinessRaw as FiCompetencyExportItemV1["readinessBand"])
       : null;
 
@@ -49,7 +50,9 @@ function parseCompetencyItem(raw: unknown, _index: number): FiCompetencyExportIt
 
   const evidenceCountRaw = raw.evidenceCount ?? raw.evidence_count;
   const evidenceCount =
-    typeof evidenceCountRaw === "number" && Number.isFinite(evidenceCountRaw) && evidenceCountRaw >= 0
+    typeof evidenceCountRaw === "number" &&
+    Number.isFinite(evidenceCountRaw) &&
+    evidenceCountRaw >= 0
       ? Math.floor(evidenceCountRaw)
       : 0;
 
@@ -84,7 +87,10 @@ export function validateCompetencyExportPayload(input: unknown): CompetencyExpor
 
   const schemaVersion = input.schemaVersion ?? input.schema_version;
   if (schemaVersion !== FI_COMPETENCY_EXPORT_PAYLOAD_V1_VERSION) {
-    return { ok: false, error: `Unsupported schemaVersion; expected ${FI_COMPETENCY_EXPORT_PAYLOAD_V1_VERSION}.` };
+    return {
+      ok: false,
+      error: `Unsupported schemaVersion; expected ${FI_COMPETENCY_EXPORT_PAYLOAD_V1_VERSION}.`,
+    };
   }
 
   const exportEventId = trimStr(input.exportEventId ?? input.export_event_id);
@@ -116,7 +122,8 @@ export function validateCompetencyExportPayload(input: unknown): CompetencyExpor
     competencies.push(item);
   }
 
-  const globalProfessionalId = trimStr(input.globalProfessionalId ?? input.global_professional_id) || null;
+  const globalProfessionalId =
+    trimStr(input.globalProfessionalId ?? input.global_professional_id) || null;
   const iiohrUserId = trimStr(input.iiohrUserId ?? input.iiohr_user_id) || null;
   const academyProfileId = trimStr(input.academyProfileId ?? input.academy_profile_id) || null;
   const staffEmail = trimStr(input.staffEmail ?? input.staff_email) || null;
@@ -124,7 +131,8 @@ export function validateCompetencyExportPayload(input: unknown): CompetencyExpor
   if (!globalProfessionalId && !iiohrUserId && !academyProfileId && !staffEmail) {
     return {
       ok: false,
-      error: "At least one identity field is required (globalProfessionalId, academyProfileId, iiohrUserId, or staffEmail).",
+      error:
+        "At least one identity field is required (globalProfessionalId, academyProfileId, iiohrUserId, or staffEmail).",
     };
   }
 

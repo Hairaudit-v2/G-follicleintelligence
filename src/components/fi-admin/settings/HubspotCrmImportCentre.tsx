@@ -11,12 +11,19 @@ import {
   hubspotCrmImportUploadCsvAction,
 } from "@/lib/actions/fi-hubspot-crm-import-actions";
 import type { HubspotContactsDryRunReport } from "@/src/lib/crm/hubspotImport/validateHubspotContactsImport";
-import type { FiImportBatchRow, StagingRowDb } from "@/src/lib/crm/hubspotImport/hubspotImportBatchLoad.server";
+import type {
+  FiImportBatchRow,
+  StagingRowDb,
+} from "@/src/lib/crm/hubspotImport/hubspotImportBatchLoad.server";
 
 function isDryRunReport(value: unknown): value is HubspotContactsDryRunReport {
   if (!value || typeof value !== "object") return false;
   const o = value as Record<string, unknown>;
-  return typeof o.generatedAt === "string" && Array.isArray(o.rowResults) && typeof o.passed === "boolean";
+  return (
+    typeof o.generatedAt === "string" &&
+    Array.isArray(o.rowResults) &&
+    typeof o.passed === "boolean"
+  );
 }
 
 export function HubspotCrmImportCentre({
@@ -43,7 +50,11 @@ export function HubspotCrmImportCentre({
 
   const effectiveBatch = useMemo(() => {
     if (!batchId) return null;
-    return localBatch?.id === batchId ? localBatch : initialBatch?.id === batchId ? initialBatch : null;
+    return localBatch?.id === batchId
+      ? localBatch
+      : initialBatch?.id === batchId
+        ? initialBatch
+        : null;
   }, [batchId, initialBatch, localBatch]);
 
   const refresh = useCallback(() => {
@@ -63,7 +74,9 @@ export function HubspotCrmImportCentre({
           return;
         }
         setMessage(`Uploaded ${res.rowCount} rows.`);
-        router.push(`/fi-admin/${tenantId}/settings/imports/hubspot?batchId=${encodeURIComponent(res.batchId)}`);
+        router.push(
+          `/fi-admin/${tenantId}/settings/imports/hubspot?batchId=${encodeURIComponent(res.batchId)}`
+        );
         router.refresh();
       });
     };
@@ -140,9 +153,9 @@ export function HubspotCrmImportCentre({
   const previewRows = stagingPreview;
   const dryRunPassed = Boolean(effectiveBatch?.dry_run_passed);
   const terminalDryRunBlock = ["import_completed", "rolled_back", "importing"];
-  const canDryRun = Boolean(batchId) && effectiveBatch && !terminalDryRunBlock.includes(effectiveBatch.status);
-  const canImport =
-    Boolean(batchId) && dryRunPassed && effectiveBatch?.status === "dry_run_passed";
+  const canDryRun =
+    Boolean(batchId) && effectiveBatch && !terminalDryRunBlock.includes(effectiveBatch.status);
+  const canImport = Boolean(batchId) && dryRunPassed && effectiveBatch?.status === "dry_run_passed";
   const canRollback = Boolean(batchId) && effectiveBatch?.status === "import_completed";
 
   return (
@@ -179,8 +192,8 @@ export function HubspotCrmImportCentre({
             Choose CSV
           </label>
           <p className="text-xs text-slate-400">
-            Expected columns include Record ID, First Name, Last Name, Email, Phone Number, Lead Status, Stage of Journey,
-            Associated Deal IDs, etc.
+            Expected columns include Record ID, First Name, Last Name, Email, Phone Number, Lead
+            Status, Stage of Journey, Associated Deal IDs, etc.
           </p>
         </div>
       </DashboardCard>
@@ -188,7 +201,9 @@ export function HubspotCrmImportCentre({
       {batchId ? (
         <>
           <DashboardCard className="p-4 sm:p-5">
-            <h2 className="text-base font-semibold text-slate-100">Preview (first 50 staged rows)</h2>
+            <h2 className="text-base font-semibold text-slate-100">
+              Preview (first 50 staged rows)
+            </h2>
             <p className="mt-1 font-mono text-[11px] text-slate-500">Batch {batchId}</p>
             <div className="mt-4 max-h-[360px] overflow-auto rounded border border-white/10">
               <table className="min-w-full text-left text-xs text-slate-200">
@@ -208,7 +223,9 @@ export function HubspotCrmImportCentre({
                     <tr key={r.id} className="border-t border-white/[0.06]">
                       <td className="px-2 py-1.5 text-slate-500">{r.row_index}</td>
                       <td className="px-2 py-1.5 font-mono text-[11px]">{r.record_id ?? "—"}</td>
-                      <td className="px-2 py-1.5">{[r.first_name, r.last_name].filter(Boolean).join(" ") || "—"}</td>
+                      <td className="px-2 py-1.5">
+                        {[r.first_name, r.last_name].filter(Boolean).join(" ") || "—"}
+                      </td>
                       <td className="px-2 py-1.5">{r.email ?? "—"}</td>
                       <td className="px-2 py-1.5">{r.phone_number ?? "—"}</td>
                       <td className="px-2 py-1.5">{r.lifecycle_stage ?? "—"}</td>
@@ -217,14 +234,17 @@ export function HubspotCrmImportCentre({
                   ))}
                 </tbody>
               </table>
-              {!previewRows.length ? <p className="p-3 text-sm text-slate-500">No staged rows loaded.</p> : null}
+              {!previewRows.length ? (
+                <p className="p-3 text-sm text-slate-500">No staged rows loaded.</p>
+              ) : null}
             </div>
           </DashboardCard>
 
           <DashboardCard className="p-4 sm:p-5">
             <h2 className="text-base font-semibold text-slate-100">Dry-run & import</h2>
             <p className="mt-1 text-xs text-slate-400">
-              Service-role writes only after dry-run passes. Import processes at most 100 valid rows.
+              Service-role writes only after dry-run passes. Import processes at most 100 valid
+              rows.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <button
@@ -253,7 +273,10 @@ export function HubspotCrmImportCentre({
               </button>
             </div>
             <p className="mt-2 text-xs text-slate-500">
-              Batch status: <span className="font-mono text-slate-300">{effectiveBatch?.status ?? "unknown"}</span>
+              Batch status:{" "}
+              <span className="font-mono text-slate-300">
+                {effectiveBatch?.status ?? "unknown"}
+              </span>
               {dryRunPassed ? <span className="ml-2 text-emerald-400">dry_run_passed</span> : null}
             </p>
           </DashboardCard>
@@ -276,13 +299,18 @@ export function HubspotCrmImportCentre({
                   </thead>
                   <tbody>
                     {localReport.rowResults.slice(0, 200).map((rr) => (
-                      <tr key={rr.rowIndex} className="border-t border-white/[0.06] align-top text-slate-200">
+                      <tr
+                        key={rr.rowIndex}
+                        className="border-t border-white/[0.06] align-top text-slate-200"
+                      >
                         <td className="px-2 py-1.5">{rr.rowIndex}</td>
                         <td className="px-2 py-1.5 font-mono text-[11px]">{rr.recordId ?? "—"}</td>
                         <td className="px-2 py-1.5">{rr.classification}</td>
                         <td className="px-2 py-1.5 text-[11px] text-slate-400">
                           {rr.issues.length
-                            ? rr.issues.map((i) => `${i.code}${i.blocking ? " (!)" : ""}`).join(", ")
+                            ? rr.issues
+                                .map((i) => `${i.code}${i.blocking ? " (!)" : ""}`)
+                                .join(", ")
                             : "—"}
                         </td>
                       </tr>
@@ -295,7 +323,9 @@ export function HubspotCrmImportCentre({
         </>
       ) : (
         <InfoNotice variant="info" title="No batch selected">
-          <p className="text-sm">Upload a CSV to create a batch, or open this page with ?batchId=…</p>
+          <p className="text-sm">
+            Upload a CSV to create a batch, or open this page with ?batchId=…
+          </p>
         </InfoNotice>
       )}
     </div>

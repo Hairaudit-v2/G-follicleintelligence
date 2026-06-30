@@ -1,7 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sha256HexUtf8, stableStringifyForWebhookHash } from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
+import {
+  sha256HexUtf8,
+  stableStringifyForWebhookHash,
+} from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
 
 /**
  * HubSpot timeline-sync audit, recorded in the shared fi_integration_webhook_events inbox with
@@ -116,7 +119,12 @@ export async function withHubspotTimelineAudit<T>(params: {
       return { ok: false, message: error.message ?? "Failed to store webhook event.", status: 500 };
     }
     if (existing.status === "processed" || existing.status === "received") {
-      return { ok: true, duplicate: true, event_id: existing.id, duplicate_status: existing.status };
+      return {
+        ok: true,
+        duplicate: true,
+        event_id: existing.id,
+        duplicate_status: existing.status,
+      };
     }
     eventId = existing.id; // prior error → re-run to repair
   } else {

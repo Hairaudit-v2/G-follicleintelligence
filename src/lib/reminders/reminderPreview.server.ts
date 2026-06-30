@@ -36,7 +36,12 @@ export async function renderBookingReminderJobPreview(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!job) return null;
-  const row = job as { id: string; template_id: string; booking_id: string | null; tenant_id: string };
+  const row = job as {
+    id: string;
+    template_id: string;
+    booking_id: string | null;
+    tenant_id: string;
+  };
   const bid = row.booking_id?.trim();
   if (!bid) return null;
 

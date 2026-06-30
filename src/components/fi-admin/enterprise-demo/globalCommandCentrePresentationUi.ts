@@ -29,12 +29,13 @@ export const globalCommandCentrePresentationClasses = {
   painHeadline: "mt-1 text-xs font-medium leading-snug text-slate-100",
   painMetric: "mt-1 text-[10px] tabular-nums text-slate-500",
   main: "relative z-10 min-h-0 flex-1 overflow-y-auto scroll-smooth",
-  sectionNav:
-    "fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 lg:flex",
+  sectionNav: "fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 lg:flex",
   sectionDot: (active: boolean) =>
     cn(
       "h-2 w-2 rounded-full border transition",
-      active ? "border-amber-300 bg-amber-300" : "border-white/20 bg-transparent hover:border-amber-400/50"
+      active
+        ? "border-amber-300 bg-amber-300"
+        : "border-white/20 bg-transparent hover:border-amber-400/50"
     ),
   storySection:
     "scroll-mt-4 border-b border-white/[0.05] px-4 py-10 sm:px-8 sm:py-14 lg:min-h-[min(72vh,820px)] lg:py-16",

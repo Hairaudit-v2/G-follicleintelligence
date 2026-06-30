@@ -9,7 +9,11 @@ const FIELDS = [
   { key: "possible_contraindications", label: "Possible contraindications", wide: true },
 ] as const;
 
-export function ConsultationOsMedicalPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsMedicalPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Medical" headingId="consultation-os-medical-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

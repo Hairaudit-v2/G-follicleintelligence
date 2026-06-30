@@ -3,7 +3,12 @@
  */
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
 import { crmCreateLeadBodySchema } from "@/src/lib/crm/crmApiSchemas";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { createCrmLeadWithPerson } from "@/src/lib/crm/server";
 
 export const dynamic = "force-dynamic";

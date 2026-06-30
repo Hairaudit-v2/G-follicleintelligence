@@ -55,10 +55,15 @@ export function AnalyticsOsDashboard({
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">AnalyticsOS</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+            FI OS
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            AnalyticsOS
+          </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Executive intelligence across revenue, consultations, surgery, patients, workforce, and clinic performance.
+            Executive intelligence across revenue, consultations, surgery, patients, workforce, and
+            clinic performance.
           </p>
           {tenantName ? (
             <p className="mt-2 text-sm text-[#64748B]">
@@ -78,7 +83,10 @@ export function AnalyticsOsDashboard({
                 Open LeadFlow
               </span>
             )}
-            <Link href={showCrmNav ? `${base}/patients` : `${base}/directory`} className={analyticsOsLinkButtonClass}>
+            <Link
+              href={showCrmNav ? `${base}/patients` : `${base}/directory`}
+              className={analyticsOsLinkButtonClass}
+            >
               Open PatientOS
             </Link>
             <Link href={`${base}/cases`} className={analyticsOsLinkButtonClass}>
@@ -119,7 +127,9 @@ export function AnalyticsOsDashboard({
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{displayValue}</p>
+                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {displayValue}
+                </p>
                 {isNumeric ? (
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
                     <div
@@ -129,7 +139,8 @@ export function AnalyticsOsDashboard({
                   </div>
                 ) : (
                   <p className="mt-3 text-xs leading-relaxed text-[#64748B]">
-                    Activity from bookings, consultations, payments, and surgeries will populate this view over time.
+                    Activity from bookings, consultations, payments, and surgeries will populate
+                    this view over time.
                   </p>
                 )}
               </div>
@@ -178,11 +189,20 @@ export function AnalyticsOsDashboard({
         />
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           {metricGroups.map((group) => (
-            <div key={group.id} className="rounded-xl border border-white/[0.08] bg-[#0c1220]/50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#64748B]">{group.title}</p>
+            <div
+              key={group.id}
+              className="rounded-xl border border-white/[0.08] bg-[#0c1220]/50 p-4"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#64748B]">
+                {group.title}
+              </p>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {group.metrics.slice(0, 2).map((metric) => (
-                  <StatCard key={`${group.id}_${metric.label}`} label={metric.label} value={metric.value} />
+                  <StatCard
+                    key={`${group.id}_${metric.label}`}
+                    label={metric.label}
+                    value={metric.value}
+                  />
                 ))}
               </div>
             </div>
@@ -201,8 +221,8 @@ export function AnalyticsOsDashboard({
           <div className="flex gap-3 rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4">
             <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-[#22C1FF]" aria-hidden />
             <p className="text-sm leading-relaxed text-[#CBD5E1]">
-              Trend intelligence will strengthen as more bookings, consultations, payments, surgeries, and audit outcomes
-              are captured.
+              Trend intelligence will strengthen as more bookings, consultations, payments,
+              surgeries, and audit outcomes are captured.
             </p>
           </div>
         ) : (
@@ -249,9 +269,14 @@ export function AnalyticsOsDashboard({
               </div>
               <p className="mt-2 text-sm text-[#94A3B8]">{row.summary}</p>
               {row.linkDisabled ? (
-                <span className="mt-3 text-xs font-medium text-[#64748B]">Link unavailable for this user</span>
+                <span className="mt-3 text-xs font-medium text-[#64748B]">
+                  Link unavailable for this user
+                </span>
               ) : (
-                <Link href={row.href} className="mt-3 text-sm font-medium text-[#22C1FF] hover:underline">
+                <Link
+                  href={row.href}
+                  className="mt-3 text-sm font-medium text-[#22C1FF] hover:underline"
+                >
                   Open module →
                 </Link>
               )}
@@ -272,8 +297,8 @@ export function AnalyticsOsDashboard({
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#64748B]" aria-hidden />
             <div>
               <p className="text-sm text-[#94A3B8]">
-                Some module snapshots loaded partially. Expand <span className="text-[#CBD5E1]">System diagnostics</span>{" "}
-                for operator details.
+                Some module snapshots loaded partially. Expand{" "}
+                <span className="text-[#CBD5E1]">System diagnostics</span> for operator details.
               </p>
               <p className="mt-1 flex items-center gap-1 text-xs text-[#64748B]">
                 <HeartPulse className="h-3.5 w-3.5" aria-hidden />

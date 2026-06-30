@@ -23,7 +23,10 @@ export default async function NewPrescriptionPage({
   const sp = (await searchParams) ?? {};
   if (!tenantId?.trim()) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
@@ -38,7 +41,9 @@ export default async function NewPrescriptionPage({
 
   const session = await getFiTenantMemberSessionIfAllowed(tenantId.trim());
   const defaultDoctorStaffId =
-    session != null ? await resolveDefaultDoctorStaffIdForFiUser(tenantId.trim(), session.fiUserId) : null;
+    session != null
+      ? await resolveDefaultDoctorStaffIdForFiUser(tenantId.trim(), session.fiUserId)
+      : null;
 
   const [catalogue, staff] = await Promise.all([
     loadMedicationCatalogueForTenant(tenantId.trim()),
@@ -49,7 +54,9 @@ export default async function NewPrescriptionPage({
     return (
       <div className="mx-auto max-w-2xl py-10 text-sm text-slate-300">
         <p>No medication catalogue rows for this tenant yet.</p>
-        <p className="mt-2 text-xs text-slate-500">Apply the latest Supabase migrations to create and seed `fi_medication_catalogue`.</p>
+        <p className="mt-2 text-xs text-slate-500">
+          Apply the latest Supabase migrations to create and seed `fi_medication_catalogue`.
+        </p>
       </div>
     );
   }
@@ -57,7 +64,9 @@ export default async function NewPrescriptionPage({
   if (staff.length === 0) {
     return (
       <div className="mx-auto max-w-2xl py-10 text-sm text-slate-300">
-        <p>Add at least one active staff member (Settings → Staff) before creating prescriptions.</p>
+        <p>
+          Add at least one active staff member (Settings → Staff) before creating prescriptions.
+        </p>
       </div>
     );
   }

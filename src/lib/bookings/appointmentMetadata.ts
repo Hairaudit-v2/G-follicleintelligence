@@ -35,10 +35,14 @@ function strOrNull(v: unknown): string | null {
 function uuidOrNull(v: unknown): string | null {
   const s = strOrNull(v);
   if (!s) return null;
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s) ? s : null;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s)
+    ? s
+    : null;
 }
 
-export function parseAppointmentProcedureMetadata(metadata: Record<string, unknown>): AppointmentProcedureMetadata {
+export function parseAppointmentProcedureMetadata(
+  metadata: Record<string, unknown>
+): AppointmentProcedureMetadata {
   return {
     graft_count_estimate: strOrNull(metadata.graft_count_estimate),
     donor_area: strOrNull(metadata.donor_area),
@@ -69,7 +73,9 @@ export function mergeAppointmentProcedureMetadata(
   return next;
 }
 
-export function parseAppointmentStatusHistory(metadata: Record<string, unknown>): AppointmentStatusHistoryEntry[] {
+export function parseAppointmentStatusHistory(
+  metadata: Record<string, unknown>
+): AppointmentStatusHistoryEntry[] {
   const raw = metadata[STATUS_HISTORY_KEY];
   if (!Array.isArray(raw)) return [];
   const out: AppointmentStatusHistoryEntry[] = [];
@@ -101,7 +107,9 @@ export function appendAppointmentStatusHistory(
 }
 
 /** Merges stored history with derived booking lifecycle rows (newest first). */
-export function buildAppointmentStatusHistory(booking: FiBookingRow): AppointmentStatusHistoryEntry[] {
+export function buildAppointmentStatusHistory(
+  booking: FiBookingRow
+): AppointmentStatusHistoryEntry[] {
   const meta = booking.metadata ?? {};
   const stored = parseAppointmentStatusHistory(meta);
   const derived: AppointmentStatusHistoryEntry[] = [];
@@ -140,7 +148,9 @@ export function buildAppointmentStatusHistory(booking: FiBookingRow): Appointmen
   return merged;
 }
 
-export function parseInstructionsSent(metadata: Record<string, unknown>): AppointmentInstructionsSentMetadata {
+export function parseInstructionsSent(
+  metadata: Record<string, unknown>
+): AppointmentInstructionsSentMetadata {
   const raw = metadata[INSTRUCTIONS_SENT_KEY];
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const r = raw as Record<string, unknown>;

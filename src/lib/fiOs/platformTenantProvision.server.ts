@@ -14,7 +14,8 @@ function firstForwardedValue(raw: string | null): string | null {
 }
 
 export function getRequestOriginFromHeaders(getHeader: (name: string) => string | null): string {
-  const host = firstForwardedValue(getHeader("x-forwarded-host")) ?? getHeader("host")?.trim() ?? null;
+  const host =
+    firstForwardedValue(getHeader("x-forwarded-host")) ?? getHeader("host")?.trim() ?? null;
   const protoRaw = firstForwardedValue(getHeader("x-forwarded-proto")) ?? "http";
   const proto = protoRaw.split("/")[0]?.trim() || "http";
   if (host) return `${proto}://${host}`;
@@ -59,11 +60,13 @@ export async function provisionPlatformTenant(
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return {
       ok: false,
-      error: "Slug must use lowercase letters, digits, and single hyphens between segments (e.g. acme-clinic).",
+      error:
+        "Slug must use lowercase letters, digits, and single hyphens between segments (e.g. acme-clinic).",
     };
   }
   if (!clinicName) return { ok: false, error: "Default clinic display name is required." };
-  if (!tz || tz.length > 120) return { ok: false, error: "Default timezone is required (max 120 characters)." };
+  if (!tz || tz.length > 120)
+    return { ok: false, error: "Default timezone is required (max 120 characters)." };
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: "A valid first tenant admin email is required." };
   }
@@ -72,13 +75,20 @@ export async function provisionPlatformTenant(
   const primaryHex = resolved.branding?.primary_color?.trim() || "#C6A75E";
   const secondaryHex = resolved.branding?.secondary_color?.trim() || "#0F1B2D";
   const support =
-    (input.supportEmail?.trim() || "").length > 0 ? input.supportEmail!.trim() : `support@${slug}.local`;
+    (input.supportEmail?.trim() || "").length > 0
+      ? input.supportEmail!.trim()
+      : `support@${slug}.local`;
 
   let tenantId: string | null = null;
   try {
-    const { data: tRow, error: tErr } = await supabase.from("fi_tenants").insert({ name: tenantName, slug }).select("id").single();
+    const { data: tRow, error: tErr } = await supabase
+      .from("fi_tenants")
+      .insert({ name: tenantName, slug })
+      .select("id")
+      .single();
     if (tErr || !tRow) {
-      if (tErr?.code === "23505") return { ok: false, error: "A tenant with this slug already exists." };
+      if (tErr?.code === "23505")
+        return { ok: false, error: "A tenant with this slug already exists." };
       return { ok: false, error: tErr?.message ?? "Could not create tenant." };
     }
     tenantId = String((tRow as { id: string }).id);
@@ -141,7 +151,8 @@ export async function provisionPlatformTenant(
         })
         .select("id")
         .single();
-      if (insErr || !created) throw new Error(insErr?.message ?? "Could not create tenant user row.");
+      if (insErr || !created)
+        throw new Error(insErr?.message ?? "Could not create tenant user row.");
       fiUserId = String((created as { id: string }).id);
     }
 
@@ -154,9 +165,12 @@ export async function provisionPlatformTenant(
     if (dupErr) throw new Error(dupErr.message);
     if (dup) throw new Error("This user is already registered as a tenant admin user.");
 
-    const { data: authRpc, error: rpcErr } = await supabase.rpc("fi_admin_lookup_auth_user_id_by_email", {
-      _email: email,
-    });
+    const { data: authRpc, error: rpcErr } = await supabase.rpc(
+      "fi_admin_lookup_auth_user_id_by_email",
+      {
+        _email: email,
+      }
+    );
     if (rpcErr) throw new Error(rpcErr.message);
     const rpcAuthId = authRpc ? String(authRpc) : null;
 
@@ -182,7 +196,9 @@ export async function provisionPlatformTenant(
         logStructured("error", "fi_auth_admin_invite_failed", {
           source: "platform_tenant_provision",
           tenant_slug: slug,
-          recipient_email_domain: email.includes("@") ? email.split("@")[1]?.toLowerCase() ?? null : null,
+          recipient_email_domain: email.includes("@")
+            ? (email.split("@")[1]?.toLowerCase() ?? null)
+            : null,
           auth_error_message: invErr?.message ?? "invite_missing_user",
           auth_error_name: (invErr as { name?: string } | null)?.name ?? null,
         });
@@ -198,7 +214,11 @@ export async function provisionPlatformTenant(
     if (!(existingUser as { auth_user_id?: string | null } | null)?.auth_user_id) {
       userPatch.auth_user_id = authUserId;
     }
-    const { error: linkErr } = await supabase.from("fi_users").update(userPatch).eq("id", fiUserId).eq("tenant_id", tenantId);
+    const { error: linkErr } = await supabase
+      .from("fi_users")
+      .update(userPatch)
+      .eq("id", fiUserId)
+      .eq("tenant_id", tenantId);
     if (linkErr) throw new Error(linkErr.message);
 
     let status: "invited" | "active" = "invited";
@@ -222,7 +242,8 @@ export async function provisionPlatformTenant(
       })
       .select("id")
       .single();
-    if (admErr || !adminRow) throw new Error(admErr?.message ?? "Could not create tenant admin user profile.");
+    if (admErr || !adminRow)
+      throw new Error(admErr?.message ?? "Could not create tenant admin user profile.");
     const tenantAdminUserId = String((adminRow as { id: string }).id);
 
     await insertFiTenantAdminAuditEvent({

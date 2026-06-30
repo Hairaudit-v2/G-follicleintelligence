@@ -13,14 +13,18 @@ import {
   HIE_CONSULTATION_REVIEW_STATUSES,
 } from "./types";
 
-export function normalizeHieConsultationSourceSystem(raw: unknown): HieConsultationChecklistSourceSystem {
+export function normalizeHieConsultationSourceSystem(
+  raw: unknown
+): HieConsultationChecklistSourceSystem {
   const s = String(raw ?? "").trim();
   return (HIE_CONSULTATION_CHECKLIST_SOURCE_SYSTEMS as readonly string[]).includes(s)
     ? (s as HieConsultationChecklistSourceSystem)
     : "fi_os";
 }
 
-export function normalizeHieConsultationChecklistStatus(raw: unknown): HieConsultationChecklistStatus {
+export function normalizeHieConsultationChecklistStatus(
+  raw: unknown
+): HieConsultationChecklistStatus {
   const s = String(raw ?? "").trim();
   return (HIE_CONSULTATION_CHECKLIST_STATUSES as readonly string[]).includes(s)
     ? (s as HieConsultationChecklistStatus)
@@ -29,7 +33,9 @@ export function normalizeHieConsultationChecklistStatus(raw: unknown): HieConsul
 
 export function normalizeHieConsultationPriorityLevel(raw: unknown): HieConsultationPriorityLevel {
   const s = String(raw ?? "").trim();
-  return (HIE_CONSULTATION_PRIORITY_LEVELS as readonly string[]).includes(s) ? (s as HieConsultationPriorityLevel) : "low";
+  return (HIE_CONSULTATION_PRIORITY_LEVELS as readonly string[]).includes(s)
+    ? (s as HieConsultationPriorityLevel)
+    : "low";
 }
 
 export function normalizeHieConsultationConsentComplexity(

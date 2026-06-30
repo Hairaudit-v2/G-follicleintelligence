@@ -26,7 +26,12 @@ function fmtWhen(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function riskStatus(risk: string): string {
@@ -44,7 +49,9 @@ export function FinancialOsAccountsReceivablePanel(props: {
 }) {
   const { tenantId, currency, metrics, rows } = props;
   const queueHref = `/fi-admin/${tenantId}/financial-os/accounts-receivable`;
-  const openRows = rows.filter((r) => r.outstanding_amount_cents > 0 && r.status !== "resolved" && r.status !== "written_off");
+  const openRows = rows.filter(
+    (r) => r.outstanding_amount_cents > 0 && r.status !== "resolved" && r.status !== "written_off"
+  );
 
   return (
     <FinancialOsSectionCard
@@ -52,7 +59,8 @@ export function FinancialOsAccountsReceivablePanel(props: {
       kicker="Collections"
       description={
         <>
-          Identify, prioritise, and recover outstanding revenue across invoices, deposits, and balances.{" "}
+          Identify, prioritise, and recover outstanding revenue across invoices, deposits, and
+          balances.{" "}
           <Link href={queueHref} className={financialOsClasses.textButton}>
             Open work queue →
           </Link>
@@ -88,7 +96,9 @@ export function FinancialOsAccountsReceivablePanel(props: {
       </dl>
 
       <div className="mt-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Priority AR cases</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          Priority AR cases
+        </p>
         <FinancialOsTable
           isEmpty={openRows.length === 0}
           emptyMessage="No open accounts receivable cases. Overdue invoices will auto-open cases via FinancialOS automation."
@@ -109,15 +119,27 @@ export function FinancialOsAccountsReceivablePanel(props: {
           {openRows.slice(0, 8).map((row) => (
             <tr key={row.id} className={financialOsClasses.tableRow}>
               <td className={financialOsClasses.tableCellStrong}>{row.patient_label ?? "—"}</td>
-              <td className={financialOsClasses.tableCell}>{FI_AR_RECEIVABLE_TYPE_LABELS[row.receivable_type]}</td>
-              <td className={financialOsClasses.tableCell}>{row.invoice_label ?? "—"}</td>
-              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.outstanding_amount_cents, currency)}</td>
-              <td className={financialOsClasses.tableCellMono}>{row.days_overdue > 0 ? row.days_overdue : "—"}</td>
               <td className={financialOsClasses.tableCell}>
-                <FinancialOsRecordStatusBadge status={riskStatus(row.risk_level)} label={FI_AR_RISK_LABELS[row.risk_level]} />
+                {FI_AR_RECEIVABLE_TYPE_LABELS[row.receivable_type]}
+              </td>
+              <td className={financialOsClasses.tableCell}>{row.invoice_label ?? "—"}</td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.outstanding_amount_cents, currency)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {row.days_overdue > 0 ? row.days_overdue : "—"}
               </td>
               <td className={financialOsClasses.tableCell}>
-                <FinancialOsRecordStatusBadge status={row.status} label={FI_AR_STATUS_LABELS[row.status]} />
+                <FinancialOsRecordStatusBadge
+                  status={riskStatus(row.risk_level)}
+                  label={FI_AR_RISK_LABELS[row.risk_level]}
+                />
+              </td>
+              <td className={financialOsClasses.tableCell}>
+                <FinancialOsRecordStatusBadge
+                  status={row.status}
+                  label={FI_AR_STATUS_LABELS[row.status]}
+                />
               </td>
               <td className={financialOsClasses.tableCell}>{fmtWhen(row.next_action_at)}</td>
               <td className={financialOsClasses.tableCell}>{row.owner_label ?? "Unassigned"}</td>

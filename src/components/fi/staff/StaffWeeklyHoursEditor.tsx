@@ -59,7 +59,8 @@ export function StaffWeeklyHoursEditor({
       </div>
       <p className="text-[11px] leading-snug text-gray-500">
         Interpreted in this staff member&apos;s <strong>default timezone</strong> (below); if blank,{" "}
-        <code className="rounded bg-white/[0.06] px-0.5">Australia/Perth</code> is used for hints in booking forms.
+        <code className="rounded bg-white/[0.06] px-0.5">Australia/Perth</code> is used for hints in
+        booking forms.
       </p>
       <div className="overflow-x-auto rounded border border-white/[0.08]">
         <table className="min-w-full text-xs">

@@ -125,8 +125,17 @@ test("buildDoctorClinicalTimeline sorts by recency", () => {
 test("doctorWorkspaceDiagnosticCounts aggregates bundle lengths", () => {
   const counts = doctorWorkspaceDiagnosticCounts(
     emptyBundle({
-      todayPatients: [{ patientId: "p", patientLabel: "P", nextStartAt: "", bookingId: "b", bookingTitle: null, bookingType: "consultation" }],
-    }),
+      todayPatients: [
+        {
+          patientId: "p",
+          patientLabel: "P",
+          nextStartAt: "",
+          bookingId: "b",
+          bookingTitle: null,
+          bookingType: "consultation",
+        },
+      ],
+    })
   );
   assert.equal(counts.todayPatients, 1);
 });

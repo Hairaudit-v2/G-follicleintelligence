@@ -3,7 +3,12 @@
  * ReceptionOS Phase 2 task mutations (tenant-scoped).
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { assertReceptionTaskMutationAllowed } from "@/src/lib/receptionOs/receptionTaskAccess.server";
 import { resolveReceptionOsViewerContext } from "@/src/lib/receptionOs/receptionOsAccess.server";
 import {
@@ -40,12 +45,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     const viewer = await resolveReceptionOsViewerContext(tenantId.trim());
     if (!viewer.canAccessReceptionOs) {
-      return crmJsonError(403, "ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+      return crmJsonError(
+        403,
+        "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+      );
     }
 
     const body = (await req.json()) as TaskBody;
-    const action = String(body.action ?? "").trim() as import("@/src/lib/receptionOs/receptionTaskPolicy").ReceptionTaskAction;
-    const { actorFiUserId } = await assertReceptionTaskMutationAllowed(tenantId.trim(), action, adminKey);
+    const action = String(
+      body.action ?? ""
+    ).trim() as import("@/src/lib/receptionOs/receptionTaskPolicy").ReceptionTaskAction;
+    const { actorFiUserId } = await assertReceptionTaskMutationAllowed(
+      tenantId.trim(),
+      action,
+      adminKey
+    );
 
     switch (action) {
       case "create_from_alert": {
@@ -70,7 +84,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ task: serializeReceptionTaskRow(row) });
       }
       case "snooze": {
-        if (!body.task_id || !body.snoozed_until) return crmJsonError(400, "Missing task_id or snoozed_until.");
+        if (!body.task_id || !body.snoozed_until)
+          return crmJsonError(400, "Missing task_id or snoozed_until.");
         const row = await snoozeReceptionTask({
           tenantId: tenantId.trim(),
           taskId: body.task_id,
@@ -93,7 +108,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ task: serializeReceptionTaskRow(row) });
       }
       case "add_note": {
-        if (!body.task_id || !body.note?.trim()) return crmJsonError(400, "Missing task_id or note.");
+        if (!body.task_id || !body.note?.trim())
+          return crmJsonError(400, "Missing task_id or note.");
         const row = await addReceptionTaskNote({
           tenantId: tenantId.trim(),
           taskId: body.task_id,

@@ -19,7 +19,13 @@ import {
 
 const optionalAdminKey = z.object({ adminKey: z.string().optional() });
 
-const PROVIDER_TYPES = ["medical_financing", "bnpl", "super_release", "international_financing", "custom"] as const;
+const PROVIDER_TYPES = [
+  "medical_financing",
+  "bnpl",
+  "super_release",
+  "international_financing",
+  "custom",
+] as const;
 
 const APPLICATION_STATUSES = [
   "draft",

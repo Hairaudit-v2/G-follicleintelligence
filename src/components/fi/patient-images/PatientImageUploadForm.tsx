@@ -24,8 +24,8 @@ export function PatientImageUploadForm({
     <div className="rounded-lg border border-cyan-100 bg-cyan-50/40 p-4">
       <h3 className="text-sm font-semibold text-slate-100">Protocol-driven capture</h3>
       <p className="mt-1 text-xs text-slate-400">
-        Generic image upload is disabled. All clinical photography must follow a Visual Intelligence Engine protocol so
-        views, quality checks, and Patient Twin sync stay consistent.
+        Generic image upload is disabled. All clinical photography must follow a Visual Intelligence
+        Engine protocol so views, quality checks, and Patient Twin sync stay consistent.
       </p>
       <div className="mt-3">
         <PatientImagingCompletenessSummary completeness={data.vieImagingCompleteness} />

@@ -22,7 +22,11 @@ export type CaseCrmQuoteRow = {
   updated_at: string;
 };
 
-export async function loadCrmQuotesForCase(tenantId: string, caseId: string, client?: SupabaseClient): Promise<CaseCrmQuoteRow[]> {
+export async function loadCrmQuotesForCase(
+  tenantId: string,
+  caseId: string,
+  client?: SupabaseClient
+): Promise<CaseCrmQuoteRow[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const cid = assertNonEmptyUuid(caseId, "caseId");
@@ -40,7 +44,10 @@ export async function loadCrmQuotesForCase(tenantId: string, caseId: string, cli
 
   return (data ?? []).map((raw) => {
     const r = raw as Record<string, unknown>;
-    const meta = r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
+    const meta =
+      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+        ? (r.metadata as Record<string, unknown>)
+        : {};
     return {
       id: String(r.id),
       tenant_id: String(r.tenant_id),
@@ -53,8 +60,14 @@ export async function loadCrmQuotesForCase(tenantId: string, caseId: string, cli
       valid_until: r.valid_until != null ? String(r.valid_until) : null,
       sent_at: r.sent_at != null ? String(r.sent_at) : null,
       responded_at: r.responded_at != null ? String(r.responded_at) : null,
-      subtotal_amount: r.subtotal_amount != null && Number.isFinite(Number(r.subtotal_amount)) ? Number(r.subtotal_amount) : null,
-      total_amount: r.total_amount != null && Number.isFinite(Number(r.total_amount)) ? Number(r.total_amount) : null,
+      subtotal_amount:
+        r.subtotal_amount != null && Number.isFinite(Number(r.subtotal_amount))
+          ? Number(r.subtotal_amount)
+          : null,
+      total_amount:
+        r.total_amount != null && Number.isFinite(Number(r.total_amount))
+          ? Number(r.total_amount)
+          : null,
       updated_at: String(r.updated_at ?? ""),
     };
   });

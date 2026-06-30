@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { assertCrmTenantWriteAllowed, CrmAccessError, parseAdminKeyFromUnknown } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  parseAdminKeyFromUnknown,
+} from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 
 const baseJobSchema = z.object({
@@ -153,7 +157,8 @@ export async function rescheduleReminderJobAction(
       .select("id")
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!data) throw new Error("Job not found or not pending (cannot reschedule while processing).");
+    if (!data)
+      throw new Error("Job not found or not pending (cannot reschedule while processing).");
     revalidatePath(`/fi-admin/${tid}`);
     revalidatePath(`/fi-admin/${tid}/bookings`);
     revalidatePath(`/fi-admin/${tid}/calendar`);

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import {
   filterFiOsPrimarySidebarItemsByFeatureAccess,
   getFiOsShellActiveSidebarId,
@@ -36,8 +39,14 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations`, base), "settings");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely`, base), "settings");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely/discovery`, base), "settings");
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely`, base),
+    "settings"
+  );
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely/discovery`, base),
+    "settings"
+  );
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });
 
@@ -65,7 +74,10 @@ test("resolveFiOsPrimarySidebarItems: cases entry includes readiness and procedu
 });
 
 test("getFiOsShellActiveSidebarId: consultation conversion route stays under Consultations", () => {
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultation-conversion`, base), "consultations");
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/consultation-conversion`, base),
+    "consultations"
+  );
 });
 
 test("getFiOsShellActiveSidebarId: operations centre maps to Ops sidebar tab", () => {

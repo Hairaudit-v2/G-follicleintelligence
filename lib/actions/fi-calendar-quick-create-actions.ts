@@ -3,7 +3,11 @@
 import { z, ZodError } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { createCrmLeadWithPerson, loadCrmLeadById } from "@/src/lib/crm/leads";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
@@ -225,8 +229,12 @@ export async function calendarQuickCreateBookingAction(
 
     const tz = parsed.calendarTimezone.trim();
     const metaBase =
-      parsed.metadata && typeof parsed.metadata === "object" && !Array.isArray(parsed.metadata) ? parsed.metadata : {};
-    const templateMeta = parsed.templateId?.trim() ? { quick_template_id: parsed.templateId.trim() } : {};
+      parsed.metadata && typeof parsed.metadata === "object" && !Array.isArray(parsed.metadata)
+        ? parsed.metadata
+        : {};
+    const templateMeta = parsed.templateId?.trim()
+      ? { quick_template_id: parsed.templateId.trim() }
+      : {};
 
     const createdByUserId = await tryResolveFiUserIdForTenant(tenantId, undefined);
     const clinicId = parsed.clinicId?.trim() || null;
@@ -255,7 +263,8 @@ export async function calendarQuickCreateBookingAction(
         if (!personIdFromLead) {
           return {
             ok: false,
-            error: "This lead has no contact person. Book as a new patient or pick an existing patient.",
+            error:
+              "This lead has no contact person. Book as a new patient or pick an existing patient.",
           };
         }
         if (!resolvedPatientId) {
@@ -287,7 +296,13 @@ export async function calendarQuickCreateBookingAction(
     } else if (parsed.anchor.kind === "patient") {
       const anchorPersonId = parsed.anchor.personId.trim();
       const anchorPatientId = parsed.anchor.patientId.trim();
-      const resolvedLeadId = await ensureOpenLeadForPatient(tid, anchorPersonId, anchorPatientId, clinicId, "Patient");
+      const resolvedLeadId = await ensureOpenLeadForPatient(
+        tid,
+        anchorPersonId,
+        anchorPatientId,
+        clinicId,
+        "Patient"
+      );
       const lead = await loadCrmLeadById(resolvedLeadId, tid);
       if (!lead) return { ok: false, error: "Could not resolve CRM lead for this patient." };
       leadId = lead.id;
@@ -380,7 +395,10 @@ export async function calendarQuickCreateBookingAction(
     return { ok: true, booking };
   } catch (e) {
     if (process.env.NODE_ENV === "development") {
-      console.error("[calendarQuickCreateBookingAction] error", { tenantId: tenantId.trim(), err: e });
+      console.error("[calendarQuickCreateBookingAction] error", {
+        tenantId: tenantId.trim(),
+        err: e,
+      });
     }
     return { ok: false, error: errMsg(e) };
   }

@@ -18,7 +18,9 @@ import { buildClinicalStaffPickerReadiness } from "@/src/lib/staff/clinicalStaff
 
 const STAFF_A = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
-function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiCalendarEventOverlapRow {
+function sampleEventRow(
+  overrides: Partial<FiCalendarEventOverlapRow> = {}
+): FiCalendarEventOverlapRow {
   return {
     id: randomUUID(),
     tenant_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
@@ -114,7 +116,10 @@ describe("CalendarOS display pipeline", () => {
       ])
     );
 
-    assert.equal(columns.some((c) => c.id === staffColumnId(STAFF_A)), true);
+    assert.equal(
+      columns.some((c) => c.id === staffColumnId(STAFF_A)),
+      true
+    );
     assert.equal(columns.at(-1)?.id, "unassigned");
   });
 
@@ -123,8 +128,19 @@ describe("CalendarOS display pipeline", () => {
     const mapped = calendarOsBooking({ id: raw.id });
     const lanes = buildCalendarDay("2026-06-26", "UTC");
     const resourceColumns = [
-      { id: staffColumnId(STAFF_A), kind: "fi_staff" as const, label: "Paul", subtitle: "Consultant", staffId: STAFF_A },
-      { id: "unassigned", kind: "unassigned" as const, label: "Unassigned", subtitle: "No staff column" },
+      {
+        id: staffColumnId(STAFF_A),
+        kind: "fi_staff" as const,
+        label: "Paul",
+        subtitle: "Consultant",
+        staffId: STAFF_A,
+      },
+      {
+        id: "unassigned",
+        kind: "unassigned" as const,
+        label: "Unassigned",
+        subtitle: "No staff column",
+      },
     ];
 
     const trace = buildCalendarOsDisplayPipelineTrace({

@@ -1,7 +1,12 @@
 import type { FiIntelligenceReplayRunMode } from "./intelligenceReplayRunTypes";
-import type { IntelligenceEventLogReplayFilters, IntelligenceEventLogReplayMode } from "./intelligenceEventLogReplayTypes";
+import type {
+  IntelligenceEventLogReplayFilters,
+  IntelligenceEventLogReplayMode,
+} from "./intelligenceEventLogReplayTypes";
 
-export type ParsedIntelligenceReplayCliMode = IntelligenceEventLogReplayMode | FiIntelligenceReplayRunMode;
+export type ParsedIntelligenceReplayCliMode =
+  | IntelligenceEventLogReplayMode
+  | FiIntelligenceReplayRunMode;
 
 export type IntelligenceEventLogReplayCliResult = {
   mode: ParsedIntelligenceReplayCliMode;
@@ -9,7 +14,10 @@ export type IntelligenceEventLogReplayCliResult = {
   printJson: boolean;
 };
 
-function readValue(args: string[], i: number): { value: string; nextIndex: number } | { error: string } {
+function readValue(
+  args: string[],
+  i: number
+): { value: string; nextIndex: number } | { error: string } {
   const v = args[i + 1];
   if (v === undefined || v.startsWith("--")) {
     return { error: "Missing value for flag" };
@@ -26,7 +34,9 @@ function readValue(args: string[], i: number): { value: string; nextIndex: numbe
 export function parseIntelligenceEventLogReplayCliArgs(
   argv: string[],
   options?: { includeDispatchFutureReplayMode?: boolean }
-): { ok: true; value: IntelligenceEventLogReplayCliResult } | { ok: false; exitCode: number; message: string } {
+):
+  | { ok: true; value: IntelligenceEventLogReplayCliResult }
+  | { ok: false; exitCode: number; message: string } {
   const args = argv.slice(2);
   let mode: ParsedIntelligenceReplayCliMode = "dry_run";
   const filters: IntelligenceEventLogReplayFilters = {};
@@ -56,7 +66,8 @@ export function parseIntelligenceEventLogReplayCliArgs(
     }
     if (a === "--event-name") {
       const r = readValue(args, i);
-      if ("error" in r) return { ok: false, exitCode: 2, message: "Missing value for --event-name" };
+      if ("error" in r)
+        return { ok: false, exitCode: 2, message: "Missing value for --event-name" };
       filters.event_name = r.value;
       i = r.nextIndex;
       continue;
@@ -77,7 +88,8 @@ export function parseIntelligenceEventLogReplayCliArgs(
     }
     if (a === "--privacy-level") {
       const r = readValue(args, i);
-      if ("error" in r) return { ok: false, exitCode: 2, message: "Missing value for --privacy-level" };
+      if ("error" in r)
+        return { ok: false, exitCode: 2, message: "Missing value for --privacy-level" };
       filters.privacy_level = r.value;
       i = r.nextIndex;
       continue;
@@ -98,7 +110,8 @@ export function parseIntelligenceEventLogReplayCliArgs(
     }
     if (a === "--correlation-id") {
       const r = readValue(args, i);
-      if ("error" in r) return { ok: false, exitCode: 2, message: "Missing value for --correlation-id" };
+      if ("error" in r)
+        return { ok: false, exitCode: 2, message: "Missing value for --correlation-id" };
       filters.correlation_id = r.value;
       i = r.nextIndex;
       continue;

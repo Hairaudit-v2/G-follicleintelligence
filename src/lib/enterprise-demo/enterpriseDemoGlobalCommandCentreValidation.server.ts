@@ -168,10 +168,13 @@ export async function runGlobalCommandCentreDemoValidation(
         id: "synthetic_image_paths",
         label: "Synthetic imaging placeholders",
         severity: "warn",
-        detail: "No demo patient images found — ImagingOS seed may be missing. Command centre does not render images.",
+        detail:
+          "No demo patient images found — ImagingOS seed may be missing. Command centre does not render images.",
       });
     } else {
-      const invalid = imageSample.filter((row) => !validateSyntheticImageStoragePath(String(row.storage_path ?? "")));
+      const invalid = imageSample.filter(
+        (row) => !validateSyntheticImageStoragePath(String(row.storage_path ?? ""))
+      );
       appendGlobalCommandCentreValidationCheck(checks, {
         id: "synthetic_image_paths",
         label: "Synthetic imaging placeholders",

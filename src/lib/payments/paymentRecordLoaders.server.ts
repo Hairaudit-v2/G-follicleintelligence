@@ -2,7 +2,11 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import type { PaymentContext, PaymentRecordRow, PaymentStatus } from "@/src/lib/payments/paymentRecordModel";
+import type {
+  PaymentContext,
+  PaymentRecordRow,
+  PaymentStatus,
+} from "@/src/lib/payments/paymentRecordModel";
 import { summarizePaymentRecordsForOperations } from "@/src/lib/payments/paymentRecordModel";
 
 function mapRow(raw: Record<string, unknown>): PaymentRecordRow {
@@ -80,7 +84,10 @@ export async function loadPaymentRecordsForSurgeryBoard(
   tenantId: string,
   bookingIds: string[],
   caseIds: string[]
-): Promise<{ byBookingId: Map<string, PaymentRecordRow>; byCaseId: Map<string, PaymentRecordRow> }> {
+): Promise<{
+  byBookingId: Map<string, PaymentRecordRow>;
+  byCaseId: Map<string, PaymentRecordRow>;
+}> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const bids = uniqueIds(bookingIds);
   const cids = uniqueIds(caseIds);
@@ -181,7 +188,11 @@ export async function loadPaymentRecordsForCases(
   const ctxFilter = contexts?.length ? contexts : null;
 
   for (const part of chunk(ids, 80)) {
-    let q = supabase.from("fi_payment_records").select("*").eq("tenant_id", tid).in("case_id", part);
+    let q = supabase
+      .from("fi_payment_records")
+      .select("*")
+      .eq("tenant_id", tid)
+      .in("case_id", part);
     if (ctxFilter) q = q.in("payment_context", ctxFilter);
     const { data, error } = await q.order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -214,7 +225,10 @@ export async function loadPaymentRecordsForConsultationId(
   return (data ?? []).map((r) => mapRow(r as Record<string, unknown>));
 }
 
-export async function loadPaymentRecordsForPatientId(tenantId: string, patientId: string): Promise<PaymentRecordRow[]> {
+export async function loadPaymentRecordsForPatientId(
+  tenantId: string,
+  patientId: string
+): Promise<PaymentRecordRow[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const pid = assertNonEmptyUuid(patientId, "patientId").trim();
   const supabase = supabaseAdmin();
@@ -247,6 +261,14 @@ export async function loadPaymentSummaryForOperations(
     .limit(5000);
 
   if (error) throw new Error(error.message);
-  const rows = (data ?? []) as Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid" | "updated_at">[];
-  return summarizePaymentRecordsForOperations(rows, todayYmd, operationalLocalStartIso, operationalLocalEndIso);
+  const rows = (data ?? []) as Pick<
+    PaymentRecordRow,
+    "status" | "due_date" | "amount_expected" | "amount_paid" | "updated_at"
+  >[];
+  return summarizePaymentRecordsForOperations(
+    rows,
+    todayYmd,
+    operationalLocalStartIso,
+    operationalLocalEndIso
+  );
 }

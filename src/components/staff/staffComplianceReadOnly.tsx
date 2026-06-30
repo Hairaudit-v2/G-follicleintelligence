@@ -57,7 +57,9 @@ function complianceStatusBadgeClass(s: StaffComplianceStatus): string {
 }
 
 function ItemStatusBadge({ status }: { status: StaffComplianceStatus }) {
-  return <span className={complianceStatusBadgeClass(status)}>{complianceStatusLabel(status)}</span>;
+  return (
+    <span className={complianceStatusBadgeClass(status)}>{complianceStatusLabel(status)}</span>
+  );
 }
 
 /**
@@ -89,8 +91,9 @@ export function StaffTwinIiohrComplianceCard({ summary }: { summary: StaffCompli
         <div>
           <h2 className="text-lg font-semibold text-[#F8FAFC]">IIOHR training &amp; compliance</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">
-            Snapshot from <span className="font-mono text-xs text-[#64748B]">fi_staff_source_ids.metadata</span> — not
-            the legal system of record.
+            Snapshot from{" "}
+            <span className="font-mono text-xs text-[#64748B]">fi_staff_source_ids.metadata</span> —
+            not the legal system of record.
           </p>
         </div>
         <span className={complianceStatusBadgeClass(summary.overallStatus)}>
@@ -133,7 +136,8 @@ export function StaffTwinIiohrComplianceCard({ summary }: { summary: StaffCompli
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-[#E2E8F0]">{item.label}</p>
                 <p className="mt-1 text-xs text-[#64748B]">
-                  Completed {formatComplianceIsoDate(item.completedAt)} · Expires {formatComplianceIsoDate(item.expiresAt)}
+                  Completed {formatComplianceIsoDate(item.completedAt)} · Expires{" "}
+                  {formatComplianceIsoDate(item.expiresAt)}
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -163,11 +167,17 @@ export function StaffTwinIiohrComplianceCard({ summary }: { summary: StaffCompli
 }
 
 function attentionItems(summary: StaffComplianceSummary): StaffComplianceItem[] {
-  return summary.items.filter((i) => i.status === "due_soon" || i.status === "expired" || i.status === "missing");
+  return summary.items.filter(
+    (i) => i.status === "due_soon" || i.status === "expired" || i.status === "missing"
+  );
 }
 
 /** My HR Portal: compact read-only snapshot for the signed-in staff member. */
-export function MyHrTrainingComplianceCompactCard({ summary }: { summary: StaffComplianceSummary }) {
+export function MyHrTrainingComplianceCompactCard({
+  summary,
+}: {
+  summary: StaffComplianceSummary;
+}) {
   const items = attentionItems(summary);
   const synced = formatLastSyncedLine(summary.lastSyncedAt ?? null);
 
@@ -180,15 +190,21 @@ export function MyHrTrainingComplianceCompactCard({ summary }: { summary: StaffC
         </span>
       </div>
       <p className="mt-2 text-xs leading-relaxed text-[#64748B]">
-        Read-only summary from Follicle Intelligence link data — not your official HR or Academy record.
+        Read-only summary from Follicle Intelligence link data — not your official HR or Academy
+        record.
       </p>
       {synced ? <p className="mt-2 text-xs text-[#64748B]">{synced}</p> : null}
       {items.length === 0 ? (
-        <p className="mt-4 text-sm text-[#94A3B8]">No items are due soon, expired, or missing in this snapshot.</p>
+        <p className="mt-4 text-sm text-[#94A3B8]">
+          No items are due soon, expired, or missing in this snapshot.
+        </p>
       ) : (
         <ul className="mt-4 space-y-2">
           {items.map((item) => (
-            <li key={`${item.sourceSystem}:${item.id}:${item.label}`} className="text-sm text-[#CBD5E1]">
+            <li
+              key={`${item.sourceSystem}:${item.id}:${item.label}`}
+              className="text-sm text-[#CBD5E1]"
+            >
               <span className="font-medium text-[#E2E8F0]">{item.label}</span>
               <span className="mx-2 text-[#475569]">·</span>
               <ItemStatusBadge status={item.status} />

@@ -9,7 +9,9 @@ import {
 function readFiBaseUrl(): string {
   const raw = process.env.FI_BASE_URL?.trim();
   if (!raw) {
-    throw new Error("FI_BASE_URL is not configured; cannot push staff sync to Follicle Intelligence.");
+    throw new Error(
+      "FI_BASE_URL is not configured; cannot push staff sync to Follicle Intelligence."
+    );
   }
   return normalizeFiDeploymentBaseUrl(raw);
 }
@@ -17,7 +19,9 @@ function readFiBaseUrl(): string {
 function readSyncSecret(): string {
   const s = process.env.IIOHR_HR_SYNC_SECRET?.trim();
   if (!s) {
-    throw new Error("IIOHR_HR_SYNC_SECRET is not configured; cannot authenticate to FI staff sync.");
+    throw new Error(
+      "IIOHR_HR_SYNC_SECRET is not configured; cannot authenticate to FI staff sync."
+    );
   }
   return s;
 }
@@ -31,7 +35,9 @@ function staffSyncPath(tenantId: string): string {
  * POSTs operational staff rows to the FI IIOHR HR staff-sync endpoint (same contract as inbound producer).
  * Never logs the shared secret. Throws on network/HTTP failure with messages that do not echo the secret.
  */
-export async function pushStaffSyncToFi(input: PushStaffSyncToFiInput): Promise<PushStaffSyncToFiResult> {
+export async function pushStaffSyncToFi(
+  input: PushStaffSyncToFiInput
+): Promise<PushStaffSyncToFiResult> {
   const base = readFiBaseUrl();
   const secret = readSyncSecret();
   const url = `${base}${staffSyncPath(input.tenantId)}`;

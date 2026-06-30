@@ -3,7 +3,10 @@ import type { FiCrmLeadRow } from "@/src/lib/crm/types";
 import type { FiBookingRow } from "./types";
 import type { AppointmentCreatePrefill } from "./appointmentCreateTypes";
 import { buildAppointmentCreatePrefillFromLead } from "./bookingLeadPrefillShared";
-import { buildPatientBookingTitle, deriveRecommendedBookingTypeForPatient } from "./bookingPatientSummary";
+import {
+  buildPatientBookingTitle,
+  deriveRecommendedBookingTypeForPatient,
+} from "./bookingPatientSummary";
 
 /** Client-safe prefill from patient row + optional primary lead + bookings. */
 export function buildAppointmentCreatePrefillFromPatient(opts: {

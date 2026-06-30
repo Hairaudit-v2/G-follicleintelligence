@@ -20,25 +20,30 @@ import type {
 import { isHubspotLeadType } from "./hubspotConnectorTypes";
 
 /** Keyword rules ordered by specificity (first match wins). */
-const LEAD_CLASSIFICATION_RULES: readonly { type: HubspotLeadType; keywords: readonly string[] }[] = [
-  { type: "exosomes", keywords: ["exosome", "exosomes"] },
-  { type: "prp", keywords: ["prp", "platelet rich plasma", "platelet-rich"] },
-  {
-    type: "hair_transplant",
-    keywords: ["hair transplant", "fue", "dhi", "transplant", "surgery", "procedure"],
-  },
-  { type: "trichology", keywords: ["trichology", "trichologist", "scalp treatment", "scalp care"] },
-  { type: "follow_up", keywords: ["follow up", "follow-up", "followup", "post op", "post-op", "postoperative"] },
-  { type: "review", keywords: ["review", "check-in", "check in", "progress review", "6 month", "12 month"] },
-];
+const LEAD_CLASSIFICATION_RULES: readonly { type: HubspotLeadType; keywords: readonly string[] }[] =
+  [
+    { type: "exosomes", keywords: ["exosome", "exosomes"] },
+    { type: "prp", keywords: ["prp", "platelet rich plasma", "platelet-rich"] },
+    {
+      type: "hair_transplant",
+      keywords: ["hair transplant", "fue", "dhi", "transplant", "surgery", "procedure"],
+    },
+    {
+      type: "trichology",
+      keywords: ["trichology", "trichologist", "scalp treatment", "scalp care"],
+    },
+    {
+      type: "follow_up",
+      keywords: ["follow up", "follow-up", "followup", "post op", "post-op", "postoperative"],
+    },
+    {
+      type: "review",
+      keywords: ["review", "check-in", "check in", "progress review", "6 month", "12 month"],
+    },
+  ];
 
 function normalizeSearchText(...parts: (string | null | undefined)[]): string {
-  return parts
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return parts.filter(Boolean).join(" ").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 function normalizeEmail(value: string | null | undefined): string | null {
@@ -51,7 +56,10 @@ function normalizePhone(value: string | null | undefined): string | null {
   return phone || null;
 }
 
-function extractProperty(props: Record<string, string | null | undefined> | undefined, ...keys: string[]): string | null {
+function extractProperty(
+  props: Record<string, string | null | undefined> | undefined,
+  ...keys: string[]
+): string | null {
   if (!props) return null;
   for (const key of keys) {
     const val = props[key];
@@ -88,7 +96,13 @@ export function normalizeHubspotContact(
   const phone = normalizePhone(
     extractProperty(props, "phone", "mobilephone", "phone_number", "hs_whatsapp_phone_number")
   );
-  const leadSource = extractProperty(props, "hs_lead_status", "lead_source", "hs_analytics_source", "source");
+  const leadSource = extractProperty(
+    props,
+    "hs_lead_status",
+    "lead_source",
+    "hs_analytics_source",
+    "source"
+  );
   const firstName = extractProperty(props, "firstname");
   const lastName = extractProperty(props, "lastname");
   const lifecycleStage = extractProperty(props, "lifecyclestage");
@@ -197,13 +211,9 @@ export function detectDuplicateHubspotContact(
     if (row.importStatus === "rejected") continue;
 
     const emailMatch =
-      candidate.email &&
-      row.email &&
-      normalizeEmail(candidate.email) === normalizeEmail(row.email);
+      candidate.email && row.email && normalizeEmail(candidate.email) === normalizeEmail(row.email);
     const phoneMatch =
-      candidate.phone &&
-      row.phone &&
-      normalizePhone(candidate.phone) === normalizePhone(row.phone);
+      candidate.phone && row.phone && normalizePhone(candidate.phone) === normalizePhone(row.phone);
 
     if (emailMatch || phoneMatch) return true;
   }
@@ -213,10 +223,7 @@ export function detectDuplicateHubspotContact(
 /** Detect duplicate deal against existing staging rows. */
 export function detectDuplicateHubspotDeal(
   candidate: NormalizedHubspotDeal,
-  existing: readonly Pick<
-    HubspotStagingDeal,
-    "hubspotDealId" | "email" | "importStatus"
-  >[]
+  existing: readonly Pick<HubspotStagingDeal, "hubspotDealId" | "email" | "importStatus">[]
 ): boolean {
   for (const row of existing) {
     if (row.hubspotDealId === candidate.hubspotDealId) return true;
@@ -251,12 +258,8 @@ export function buildHubspotSyncPreview(opts: {
   let contactDuplicateCount = 0;
   let duplicateRiskCount = 0;
 
-  const existingEmails = opts.existingContacts
-    .map((c) => c.email)
-    .filter(Boolean) as string[];
-  const existingPhones = opts.existingContacts
-    .map((c) => c.phone)
-    .filter(Boolean) as string[];
+  const existingEmails = opts.existingContacts.map((c) => c.email).filter(Boolean) as string[];
+  const existingPhones = opts.existingContacts.map((c) => c.phone).filter(Boolean) as string[];
 
   for (const raw of opts.discoveredContacts) {
     const contact = normalizeHubspotContact(raw, { existingEmails, existingPhones });
@@ -279,7 +282,7 @@ export function buildHubspotSyncPreview(opts: {
 
   for (const raw of opts.discoveredDeals) {
     const pipelineId = extractProperty(raw.properties, "pipeline");
-    const pipelineName = pipelineId ? opts.pipelineNames?.[pipelineId] ?? pipelineId : null;
+    const pipelineName = pipelineId ? (opts.pipelineNames?.[pipelineId] ?? pipelineId) : null;
     const deal = normalizeHubspotDeal(raw, {
       pipelineName,
       existingDealIds,
@@ -330,7 +333,9 @@ export function calculateHubspotSyncHealth(opts: {
   stagingDeals: readonly Pick<HubspotStagingDeal, "importStatus" | "duplicateRisk">[];
   authVerified: boolean;
 }): HubspotSyncHealth {
-  const contactsPendingReview = opts.stagingContacts.filter((c) => c.importStatus === "staged").length;
+  const contactsPendingReview = opts.stagingContacts.filter(
+    (c) => c.importStatus === "staged"
+  ).length;
   const dealsPendingReview = opts.stagingDeals.filter((d) => d.importStatus === "staged").length;
   const approvedCount =
     opts.stagingContacts.filter((c) => c.importStatus === "approved").length +
@@ -376,13 +381,17 @@ export function calculateHubspotSyncHealth(opts: {
   }
 
   if (duplicateRiskCount > 0) {
-    warnings.push(`${duplicateRiskCount} record(s) flagged with duplicate risk — review before approval.`);
+    warnings.push(
+      `${duplicateRiskCount} record(s) flagged with duplicate risk — review before approval.`
+    );
     healthScore = Math.max(0, healthScore - 5);
   }
 
   const failedRecent = opts.recentSyncRuns.filter((r) => r.status === "failed").length;
   if (failedRecent >= 2) {
-    warnings.push("Multiple recent sync failures — check OAuth token and HubSpot portal configuration.");
+    warnings.push(
+      "Multiple recent sync failures — check OAuth token and HubSpot portal configuration."
+    );
     healthScore = Math.max(0, healthScore - 15);
   }
 
@@ -394,16 +403,15 @@ export function calculateHubspotSyncHealth(opts: {
   else if (healthScore >= 45) healthBand = "degraded";
   else healthBand = "unhealthy";
 
-  const summary =
-    !opts.authVerified
-      ? "Verify HubSpot credentials before syncing."
-      : lastRun?.status === "failed"
-        ? "Last sync failed — review connector auth and portal configuration."
-        : pendingTotal > 0
-          ? `${pendingTotal} staged record(s) pending human review — no automatic import.`
-          : lastRun?.status === "completed"
-            ? "HubSpot sync healthy — contacts and deals staged for review only."
-            : "Run a manual sync to discover HubSpot contacts and deals.";
+  const summary = !opts.authVerified
+    ? "Verify HubSpot credentials before syncing."
+    : lastRun?.status === "failed"
+      ? "Last sync failed — review connector auth and portal configuration."
+      : pendingTotal > 0
+        ? `${pendingTotal} staged record(s) pending human review — no automatic import.`
+        : lastRun?.status === "completed"
+          ? "HubSpot sync healthy — contacts and deals staged for review only."
+          : "Run a manual sync to discover HubSpot contacts and deals.";
 
   return {
     healthScore,

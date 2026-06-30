@@ -30,14 +30,20 @@ export function CasesWorklistPagination({
           <span className="font-medium text-slate-100">{totalPages}</span>
         </span>
         {canPrev ? (
-          <Link href={casesWorklistHref(tenantId, query, { page: page - 1 })} className={activeLink}>
+          <Link
+            href={casesWorklistHref(tenantId, query, { page: page - 1 })}
+            className={activeLink}
+          >
             Previous
           </Link>
         ) : (
           <span className={disabled}>Previous</span>
         )}
         {canNext ? (
-          <Link href={casesWorklistHref(tenantId, query, { page: page + 1 })} className={activeLink}>
+          <Link
+            href={casesWorklistHref(tenantId, query, { page: page + 1 })}
+            className={activeLink}
+          >
             Next
           </Link>
         ) : (
@@ -54,7 +60,9 @@ export function CasesWorklistPagination({
                 key={ps}
                 href={casesWorklistHref(tenantId, query, { pageSize: ps, page: 1 })}
                 className={`rounded border px-2.5 py-1 text-xs font-medium ${
-                  active ? "border-gray-900 bg-gray-900 text-white" : "border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.03]"
+                  active
+                    ? "border-gray-900 bg-gray-900 text-white"
+                    : "border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.03]"
                 }`}
               >
                 {ps}

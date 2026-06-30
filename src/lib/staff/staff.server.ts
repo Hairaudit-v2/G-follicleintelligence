@@ -82,7 +82,11 @@ export async function loadStaffMembersByIdForTenant(
 
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const { data, error } = await supabase.from("fi_staff").select("*").eq("tenant_id", tid).in("id", ids);
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("*")
+    .eq("tenant_id", tid)
+    .in("id", ids);
   if (error) throw new Error(error.message);
   for (const raw of data ?? []) {
     const row = mapStaffRow(raw as Record<string, unknown>);
@@ -110,7 +114,10 @@ export async function loadStaffMemberForTenant(
   return mapStaffRow(data as Record<string, unknown>);
 }
 
-export async function loadActiveStaffForTenant(tenantId: string, client?: SupabaseClient): Promise<FiStaffRow[]> {
+export async function loadActiveStaffForTenant(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<FiStaffRow[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const { data, error } = await supabase
@@ -123,7 +130,10 @@ export async function loadActiveStaffForTenant(tenantId: string, client?: Supaba
   return ((data ?? []) as Record<string, unknown>[]).map(mapStaffRow);
 }
 
-export async function loadAllStaffForTenant(tenantId: string, client?: SupabaseClient): Promise<FiStaffRow[]> {
+export async function loadAllStaffForTenant(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<FiStaffRow[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const { data, error } = await supabase
@@ -234,11 +244,15 @@ export async function insertFiStaff(
   if (posId) await assertFiStaffPositionTypeAssignableToTenant(tid, posId);
 
   const wh =
-    input.working_hours && typeof input.working_hours === "object" && !Array.isArray(input.working_hours)
+    input.working_hours &&
+    typeof input.working_hours === "object" &&
+    !Array.isArray(input.working_hours)
       ? input.working_hours
       : {};
   const sm =
-    input.staff_metadata && typeof input.staff_metadata === "object" && !Array.isArray(input.staff_metadata)
+    input.staff_metadata &&
+    typeof input.staff_metadata === "object" &&
+    !Array.isArray(input.staff_metadata)
       ? input.staff_metadata
       : {};
   const payload = {
@@ -273,8 +287,10 @@ export async function updateFiStaff(
   await assertFiStaffBelongsToTenant(supabase, tid, sid);
 
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (patch.full_name !== undefined) row.full_name = String(patch.full_name ?? "").trim() || "Staff";
-  if (patch.staff_role !== undefined) row.staff_role = String(patch.staff_role ?? "consultant").trim() || "consultant";
+  if (patch.full_name !== undefined)
+    row.full_name = String(patch.full_name ?? "").trim() || "Staff";
+  if (patch.staff_role !== undefined)
+    row.staff_role = String(patch.staff_role ?? "consultant").trim() || "consultant";
   if (patch.position_type_id !== undefined) {
     const pt = patch.position_type_id?.trim() || null;
     if (pt) {
@@ -284,10 +300,13 @@ export async function updateFiStaff(
   }
   if (patch.email !== undefined) row.email = patch.email?.trim() || null;
   if (patch.mobile !== undefined) row.mobile = patch.mobile?.trim() || null;
-  if (patch.default_timezone !== undefined) row.default_timezone = patch.default_timezone?.trim() || null;
+  if (patch.default_timezone !== undefined)
+    row.default_timezone = patch.default_timezone?.trim() || null;
   if (patch.working_hours !== undefined) {
     const wh =
-      patch.working_hours && typeof patch.working_hours === "object" && !Array.isArray(patch.working_hours)
+      patch.working_hours &&
+      typeof patch.working_hours === "object" &&
+      !Array.isArray(patch.working_hours)
         ? patch.working_hours
         : {};
     row.working_hours = wh;
@@ -305,7 +324,13 @@ export async function updateFiStaff(
       sm && typeof sm === "object" && !Array.isArray(sm) ? (sm as Record<string, unknown>) : {};
   }
 
-  const { data, error } = await supabase.from("fi_staff").update(row).eq("tenant_id", tid).eq("id", sid).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .update(row)
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapStaffRow(data as Record<string, unknown>);
 }

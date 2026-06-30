@@ -40,7 +40,10 @@ function minimalFemaleValues(over: Record<string, unknown> = {}): Record<string,
     hli_pathway_recommended: "patient_twin_full",
     treatment_priority: "gentle_escalation",
     treatment_timeline: "2_4_weeks",
-    structured_clinical_note: { mode: "clinical_note", note: "FPHL pattern; discuss topical therapy." },
+    structured_clinical_note: {
+      mode: "clinical_note",
+      note: "FPHL pattern; discuss topical therapy.",
+    },
     follow_up_urgency: "routine",
     ...over,
   };
@@ -109,7 +112,9 @@ describe("buildFemaleHairLossCompletionSummary", () => {
 
 describe("buildConsultationCompletionSummary female dispatch", () => {
   it("routes female-hair-loss-consultation slug to female rules", () => {
-    const s: ConsultationCompletionSummary = buildConsultationCompletionSummary(baseInput(minimalFemaleValues()));
+    const s: ConsultationCompletionSummary = buildConsultationCompletionSummary(
+      baseInput(minimalFemaleValues())
+    );
     assert.equal(s.templateSlug, FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG);
     assert.ok(s.femaleHairLossCompletionSnapshot?.patternLabel);
   });

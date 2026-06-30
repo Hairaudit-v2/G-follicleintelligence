@@ -25,27 +25,45 @@ describe("quickBookTime — deriveQuickBookEndLocal (Brisbane, no DST)", () => {
 
   it("16:00 + 45 = 16:45", () => {
     assert.equal(
-      deriveQuickBookEndLocal({ startLocal: "2026-06-10T16:00:00", durationMinutes: 45, timeZone: tz }),
+      deriveQuickBookEndLocal({
+        startLocal: "2026-06-10T16:00:00",
+        durationMinutes: 45,
+        timeZone: tz,
+      }),
       "2026-06-10T16:45"
     );
   });
 
   it("start change 16:00 → 16:15 with 45 mins updates end 17:00", () => {
     assert.equal(
-      deriveQuickBookEndLocal({ startLocal: "2026-06-10T16:15", durationMinutes: 45, timeZone: tz }),
+      deriveQuickBookEndLocal({
+        startLocal: "2026-06-10T16:15",
+        durationMinutes: 45,
+        timeZone: tz,
+      }),
       "2026-06-10T17:00"
     );
   });
 
   it("service change 30 → 45 updates end time (same start)", () => {
     const start = "2026-06-10T16:00";
-    assert.equal(deriveQuickBookEndLocal({ startLocal: start, durationMinutes: 30, timeZone: tz }), "2026-06-10T16:30");
-    assert.equal(deriveQuickBookEndLocal({ startLocal: start, durationMinutes: 45, timeZone: tz }), "2026-06-10T16:45");
+    assert.equal(
+      deriveQuickBookEndLocal({ startLocal: start, durationMinutes: 30, timeZone: tz }),
+      "2026-06-10T16:30"
+    );
+    assert.equal(
+      deriveQuickBookEndLocal({ startLocal: start, durationMinutes: 45, timeZone: tz }),
+      "2026-06-10T16:45"
+    );
   });
 
   it("month view default 09:00 + selected consult duration works", () => {
     assert.equal(
-      deriveQuickBookEndLocal({ startLocal: "2026-06-10T09:00", durationMinutes: 45, timeZone: tz }),
+      deriveQuickBookEndLocal({
+        startLocal: "2026-06-10T09:00",
+        durationMinutes: 45,
+        timeZone: tz,
+      }),
       "2026-06-10T09:45"
     );
   });
@@ -135,7 +153,21 @@ describe("quickBookTime — template duration switch (catalog-shaped)", () => {
       title: "Consultation",
     };
     const start = "2026-06-10T16:00";
-    assert.equal(deriveQuickBookEndLocal({ startLocal: start, durationMinutes: t30.durationMinutes, timeZone: tz }), "2026-06-10T16:30");
-    assert.equal(deriveQuickBookEndLocal({ startLocal: start, durationMinutes: t45.durationMinutes, timeZone: tz }), "2026-06-10T16:45");
+    assert.equal(
+      deriveQuickBookEndLocal({
+        startLocal: start,
+        durationMinutes: t30.durationMinutes,
+        timeZone: tz,
+      }),
+      "2026-06-10T16:30"
+    );
+    assert.equal(
+      deriveQuickBookEndLocal({
+        startLocal: start,
+        durationMinutes: t45.durationMinutes,
+        timeZone: tz,
+      }),
+      "2026-06-10T16:45"
+    );
   });
 });

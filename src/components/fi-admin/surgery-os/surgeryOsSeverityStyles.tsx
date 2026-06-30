@@ -41,7 +41,7 @@ export function SurgeryOsSeverityBadge(props: { severity: SurgeryOsSeverity; cla
       className={cn(
         "rounded px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
         styles.badge,
-        props.className,
+        props.className
       )}
     >
       {SURGERY_OS_SEVERITY_LABELS[props.severity]}
@@ -63,9 +63,14 @@ export const SURGERY_OS_LIVE_STATUS_SURFACE: Record<string, { dot: string; text:
   completed: { dot: "bg-cyan-400", text: "text-cyan-400" },
 };
 
-export const SURGERY_OS_RISK_SURFACE: Record<string, { border: string; bg: string; text: string }> = {
-  low: { border: "border-emerald-500/20", bg: "bg-emerald-500/[0.06]", text: "text-emerald-400" },
-  medium: { border: "border-amber-500/25", bg: "bg-amber-500/[0.06]", text: "text-amber-400" },
-  high: { border: "border-rose-500/30", bg: "bg-rose-500/[0.07]", text: "text-rose-400" },
-  blocked: { border: "border-fuchsia-500/35", bg: "bg-fuchsia-500/[0.08]", text: "text-fuchsia-300" },
-};
+export const SURGERY_OS_RISK_SURFACE: Record<string, { border: string; bg: string; text: string }> =
+  {
+    low: { border: "border-emerald-500/20", bg: "bg-emerald-500/[0.06]", text: "text-emerald-400" },
+    medium: { border: "border-amber-500/25", bg: "bg-amber-500/[0.06]", text: "text-amber-400" },
+    high: { border: "border-rose-500/30", bg: "bg-rose-500/[0.07]", text: "text-rose-400" },
+    blocked: {
+      border: "border-fuchsia-500/35",
+      bg: "bg-fuchsia-500/[0.08]",
+      text: "text-fuchsia-300",
+    },
+  };

@@ -61,15 +61,28 @@ test("isTomorrowAgendaBooking: only rows inside tomorrow window and active statu
   const now = new Date("2026-06-10T12:00:00.000Z");
   const w = computeTomorrowOperationalWindow(now, "UTC");
   assert.equal(
-    isTomorrowAgendaBooking(bookingStub({ start_at: "2026-06-11T09:00:00.000Z", end_at: "2026-06-11T10:00:00.000Z", booking_status: "confirmed" }), w),
+    isTomorrowAgendaBooking(
+      bookingStub({
+        start_at: "2026-06-11T09:00:00.000Z",
+        end_at: "2026-06-11T10:00:00.000Z",
+        booking_status: "confirmed",
+      }),
+      w
+    ),
     true
   );
   assert.equal(
-    isTomorrowAgendaBooking(bookingStub({ start_at: "2026-06-12T09:00:00.000Z", booking_status: "confirmed" }), w),
+    isTomorrowAgendaBooking(
+      bookingStub({ start_at: "2026-06-12T09:00:00.000Z", booking_status: "confirmed" }),
+      w
+    ),
     false
   );
   assert.equal(
-    isTomorrowAgendaBooking(bookingStub({ start_at: "2026-06-11T09:00:00.000Z", booking_status: "cancelled" }), w),
+    isTomorrowAgendaBooking(
+      bookingStub({ start_at: "2026-06-11T09:00:00.000Z", booking_status: "cancelled" }),
+      w
+    ),
     false
   );
 });
@@ -179,11 +192,17 @@ test("deriveTomorrowActionItems: chase_deposit only when payment record exists",
   const noPay = deriveTomorrowActionItems({
     window,
     agendaBookings: [],
-    surgeryReadiness: sr.map((r) => ({ ...r, issues: [{ kind: "missing_pathology", severity: "warning" }] })),
+    surgeryReadiness: sr.map((r) => ({
+      ...r,
+      issues: [{ kind: "missing_pathology", severity: "warning" }],
+    })),
     surgeryPayments: { byBookingId: new Map(), byCaseId: new Map() },
     bookingLabel: () => "x",
   });
-  assert.equal(noPay.some((a) => a.kind === "chase_deposit"), false);
+  assert.equal(
+    noPay.some((a) => a.kind === "chase_deposit"),
+    false
+  );
 });
 
 test("summarizeTomorrowBoard: abnormal pathology counts as high-risk surgery item", () => {
@@ -200,7 +219,10 @@ test("summarizeTomorrowBoard: abnormal pathology counts as high-risk surgery ite
       isHighRisk: true,
     },
   ];
-  const summary = summarizeTomorrowBoard(agenda, sr, "2026-06-10", { byBookingId: new Map(), byCaseId: new Map() });
+  const summary = summarizeTomorrowBoard(agenda, sr, "2026-06-10", {
+    byBookingId: new Map(),
+    byCaseId: new Map(),
+  });
   assert.equal(summary.highRiskSurgeryItems, 1);
 });
 

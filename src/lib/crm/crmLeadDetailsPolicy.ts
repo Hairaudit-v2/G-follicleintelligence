@@ -62,7 +62,10 @@ export function stableMetadataFingerprint(metadata: Record<string, unknown>): st
   return JSON.stringify(sortJsonKeysDeep(metadata));
 }
 
-export function leadDetailSnapshotsEqual(a: LeadDetailComparableSnapshot, b: LeadDetailComparableSnapshot): boolean {
+export function leadDetailSnapshotsEqual(
+  a: LeadDetailComparableSnapshot,
+  b: LeadDetailComparableSnapshot
+): boolean {
   return (
     a.summary === b.summary &&
     a.status === b.status &&
@@ -96,7 +99,9 @@ export function collectChangedLeadDetailKeys(
   const changed: LeadDetailTrackedKey[] = [];
   for (const k of TRACKED_KEYS) {
     if (k === "metadata") {
-      if (stableMetadataFingerprint(before.metadata) !== stableMetadataFingerprint(after.metadata)) {
+      if (
+        stableMetadataFingerprint(before.metadata) !== stableMetadataFingerprint(after.metadata)
+      ) {
         changed.push("metadata");
       }
       continue;

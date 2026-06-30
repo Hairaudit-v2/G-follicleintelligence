@@ -25,7 +25,11 @@ function fmtMoney(cents: number, currency: string): string {
   return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export default async function FinancialOsInstallmentsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsInstallmentsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
@@ -40,7 +44,9 @@ export default async function FinancialOsInstallmentsPage({ params }: { params: 
         title="Installment plans"
         description={
           <>
-            Schedules are stored on <code className={financialOsClasses.code}>fi_installment_plans</code> — staff-managed; no auto-debit.
+            Schedules are stored on{" "}
+            <code className={financialOsClasses.code}>fi_installment_plans</code> — staff-managed;
+            no auto-debit.
           </>
         }
       />
@@ -65,8 +71,12 @@ export default async function FinancialOsInstallmentsPage({ params }: { params: 
               <FinancialOsRecordStatusBadge status={p.status} />
             </td>
             <td className={financialOsClasses.tableCell}>{p.frequency}</td>
-            <td className={financialOsClasses.tableCell}>{fmtMoney(p.installment_amount, p.currency)}</td>
-            <td className={financialOsClasses.tableCell}>{fmtMoney(p.remaining_balance, p.currency)}</td>
+            <td className={financialOsClasses.tableCell}>
+              {fmtMoney(p.installment_amount, p.currency)}
+            </td>
+            <td className={financialOsClasses.tableCell}>
+              {fmtMoney(p.remaining_balance, p.currency)}
+            </td>
             <td className={financialOsClasses.tableCell}>{p.next_payment_date ?? "—"}</td>
             <td className={financialOsClasses.tableCellMono}>{p.invoice_id.slice(0, 8)}…</td>
           </tr>

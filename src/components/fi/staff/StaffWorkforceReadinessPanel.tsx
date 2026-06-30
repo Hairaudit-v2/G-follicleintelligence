@@ -65,7 +65,8 @@ export function StaffWorkforceReadinessPanel({
 }) {
   const textMuted = variant === "dark" ? "text-[#94A3B8]" : "text-slate-500";
   const textMain = variant === "dark" ? "text-[#F8FAFC]" : "text-slate-50";
-  const badgeBase = "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset";
+  const badgeBase =
+    "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset";
 
   return (
     <div>
@@ -83,7 +84,9 @@ export function StaffWorkforceReadinessPanel({
 
       <div className="mt-6 flex flex-wrap items-end gap-4">
         <div>
-          <p className={`text-xs font-semibold uppercase tracking-wider ${textMuted}`}>Readiness score</p>
+          <p className={`text-xs font-semibold uppercase tracking-wider ${textMuted}`}>
+            Readiness score
+          </p>
           <p className={`mt-1 text-4xl font-bold tabular-nums tracking-tight ${textMain}`}>
             {readiness.score}
             <span className={`ml-1 text-lg font-medium ${textMuted}`}>/ 100</span>
@@ -125,14 +128,26 @@ export function StaffWorkforceReadinessPanel({
         >
           <div className="flex items-start gap-2">
             <AlertTriangle
-              className={variant === "dark" ? "mt-0.5 h-4 w-4 shrink-0 text-amber-300" : "mt-0.5 h-4 w-4 shrink-0 text-amber-300"}
+              className={
+                variant === "dark"
+                  ? "mt-0.5 h-4 w-4 shrink-0 text-amber-300"
+                  : "mt-0.5 h-4 w-4 shrink-0 text-amber-300"
+              }
               aria-hidden
             />
             <div>
-              <p className={variant === "dark" ? "text-sm font-medium text-amber-100" : "text-sm font-medium text-amber-200"}>
+              <p
+                className={
+                  variant === "dark"
+                    ? "text-sm font-medium text-amber-100"
+                    : "text-sm font-medium text-amber-200"
+                }
+              >
                 Warnings
               </p>
-              <ul className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-amber-100/90" : "text-amber-200"}`}>
+              <ul
+                className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-amber-100/90" : "text-amber-200"}`}
+              >
                 {readiness.warnings.map((w) => (
                   <li key={w}>• {WORKFORCE_READINESS_WARNING_LABELS[w]}</li>
                 ))}
@@ -152,14 +167,26 @@ export function StaffWorkforceReadinessPanel({
         >
           <div className="flex items-start gap-2">
             <Ban
-              className={variant === "dark" ? "mt-0.5 h-4 w-4 shrink-0 text-rose-300" : "mt-0.5 h-4 w-4 shrink-0 text-rose-300"}
+              className={
+                variant === "dark"
+                  ? "mt-0.5 h-4 w-4 shrink-0 text-rose-300"
+                  : "mt-0.5 h-4 w-4 shrink-0 text-rose-300"
+              }
               aria-hidden
             />
             <div>
-              <p className={variant === "dark" ? "text-sm font-medium text-rose-100" : "text-sm font-medium text-rose-200"}>
+              <p
+                className={
+                  variant === "dark"
+                    ? "text-sm font-medium text-rose-100"
+                    : "text-sm font-medium text-rose-200"
+                }
+              >
                 Blocking issues — cannot assign to surgery
               </p>
-              <ul className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-rose-100/90" : "text-rose-300"}`}>
+              <ul
+                className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-rose-100/90" : "text-rose-300"}`}
+              >
                 {readiness.blocking_issues.map((b) => (
                   <li key={b}>• {WORKFORCE_READINESS_BLOCKING_LABELS[b]}</li>
                 ))}

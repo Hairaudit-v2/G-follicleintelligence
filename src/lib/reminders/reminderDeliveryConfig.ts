@@ -34,7 +34,10 @@ export function isDeliveryChannelConfigured(
 }
 
 /** Formats a stored phone value for Twilio `To` (E.164 when possible). */
-export function formatPhoneForTwilio(phone: string, defaultCountryCode?: string | null): string | null {
+export function formatPhoneForTwilio(
+  phone: string,
+  defaultCountryCode?: string | null
+): string | null {
   const trimmed = phone.trim();
   if (!trimmed) return null;
   if (trimmed.startsWith("+")) {

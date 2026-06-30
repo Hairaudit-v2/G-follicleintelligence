@@ -4,7 +4,10 @@
  */
 
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
-import { hrStaffSourceSystemRank, isHrStaffSourceSystem } from "@/src/lib/staff/hrStaffReadinessMetadata";
+import {
+  hrStaffSourceSystemRank,
+  isHrStaffSourceSystem,
+} from "@/src/lib/staff/hrStaffReadinessMetadata";
 import {
   normalizeFiStaffSourceMetadata,
   normalizeFiStaffSourceStaffId,
@@ -65,8 +68,12 @@ function jsonForCompare(v: unknown): string {
  * - `inactive` / `terminated` / `resigned` → `false`
  * - unknown or empty → `null` (do not change existing staff active flag)
  */
-export function resolveEmploymentIsActive(employment_status: string | null | undefined): boolean | null {
-  const s = String(employment_status ?? "").trim().toLowerCase();
+export function resolveEmploymentIsActive(
+  employment_status: string | null | undefined
+): boolean | null {
+  const s = String(employment_status ?? "")
+    .trim()
+    .toLowerCase();
   if (!s) return null;
   if (s === "active" || s === "current" || s === "employed") return true;
   if (s === "inactive" || s === "terminated" || s === "resigned") return false;
@@ -88,7 +95,9 @@ function resolveSourceUrlForRow(
   const t = String(raw).trim();
   if (!t) return null;
   if (!isAllowedHrPortalUrl(t)) {
-    warnings.push(`Row ${rowIndex}: invalid source_url ignored (only http:// or https:// allowed).`);
+    warnings.push(
+      `Row ${rowIndex}: invalid source_url ignored (only http:// or https:// allowed).`
+    );
     return null;
   }
   return normalizeFiStaffSourceUrl(t);
@@ -112,10 +121,15 @@ function sourceIdNeedsUpdate(
 ): boolean {
   const url = existing.source_url ?? null;
   if (nextUrl !== url) return true;
-  return jsonForCompare(normalizeFiStaffSourceMetadata(existing.metadata)) !== jsonForCompare(nextMeta);
+  return (
+    jsonForCompare(normalizeFiStaffSourceMetadata(existing.metadata)) !== jsonForCompare(nextMeta)
+  );
 }
 
-type UpdateFiStaffPayload = Extract<IiohrHrStaffImportAction, { type: "update_fi_staff" }>["payload"];
+type UpdateFiStaffPayload = Extract<
+  IiohrHrStaffImportAction,
+  { type: "update_fi_staff" }
+>["payload"];
 
 function buildStaffUpdatePayload(
   staff: IiohrHrImportExistingStaff,
@@ -132,7 +146,8 @@ function buildStaffUpdatePayload(
 
   const patch: UpdateFiStaffPayload = { staffId: staff.id };
 
-  if (row.full_name.trim() && row.full_name.trim() !== staff.full_name) patch.full_name = row.full_name.trim();
+  if (row.full_name.trim() && row.full_name.trim() !== staff.full_name)
+    patch.full_name = row.full_name.trim();
   const role = (row.staff_role?.trim() || "consultant").trim() || "consultant";
   if (role !== staff.staff_role) patch.staff_role = role;
   /** Do not overwrite an existing staff email from HR import; only set when the FI row has no email yet. */
@@ -144,7 +159,9 @@ function buildStaffUpdatePayload(
   if (nextTz !== stz) patch.default_timezone = nextTz;
 
   const existingWh =
-    staff.working_hours && typeof staff.working_hours === "object" && !Array.isArray(staff.working_hours)
+    staff.working_hours &&
+    typeof staff.working_hours === "object" &&
+    !Array.isArray(staff.working_hours)
       ? staff.working_hours
       : {};
   if (jsonForCompare(wh) !== jsonForCompare(existingWh)) patch.working_hours = wh;
@@ -205,7 +222,9 @@ function resolveSourceRowIndex(input: IiohrHrStaffImportPlanInput, packedIndex: 
  *
  * Matching (first hit wins): `fi_staff_source_ids` (`iiohr_hr` + external id) → `fi_staff.email` → `fi_users.email` → new staff.
  */
-export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): IiohrHrStaffImportPlanResult {
+export function planIiohrHrStaffImport(
+  input: IiohrHrStaffImportPlanInput
+): IiohrHrStaffImportPlanResult {
   const warnings: string[] = [];
   const validationIssues: IiohrHrStaffImportValidationIssue[] = [];
   const tid = input.tenantId.trim();
@@ -243,7 +262,10 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
     if (!isHrStaffSourceSystem(sys)) continue;
     const staffId = sid.staff_id.trim();
     const existing = staffIdToHrSource.get(staffId);
-    if (!existing || hrStaffSourceSystemRank(sys) < hrStaffSourceSystemRank(existing.source_system)) {
+    if (
+      !existing ||
+      hrStaffSourceSystemRank(sys) < hrStaffSourceSystemRank(existing.source_system)
+    ) {
       staffIdToHrSource.set(staffId, sid);
     }
   }
@@ -297,7 +319,9 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
     const emailK = emailKey(row.email);
     let staffFromSource = externalIdToStaffId.get(extNorm);
     if (staffFromSource && !staffById.has(staffFromSource)) {
-      warnings.push(`Row ${rowIndex}: source id maps to unknown staff_id ${staffFromSource}; ignoring.`);
+      warnings.push(
+        `Row ${rowIndex}: source id maps to unknown staff_id ${staffFromSource}; ignoring.`
+      );
       staffFromSource = undefined;
     }
 
@@ -381,7 +405,9 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
       const nextMeta = mergeSourceMetadata({}, row.iiohr_user_id);
 
       const wh =
-        row.working_hours && typeof row.working_hours === "object" && !Array.isArray(row.working_hours)
+        row.working_hours &&
+        typeof row.working_hours === "object" &&
+        !Array.isArray(row.working_hours)
           ? (row.working_hours as Record<string, unknown>)
           : {};
       const nextTz = row.default_timezone?.trim() || null;
@@ -433,7 +459,9 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
       }
 
       const wh =
-        row.working_hours && typeof row.working_hours === "object" && !Array.isArray(row.working_hours)
+        row.working_hours &&
+        typeof row.working_hours === "object" &&
+        !Array.isArray(row.working_hours)
           ? (row.working_hours as Record<string, unknown>)
           : {};
       const nextTz = row.default_timezone?.trim() || null;

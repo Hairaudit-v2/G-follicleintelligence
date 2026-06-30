@@ -8,7 +8,9 @@ export type CasePersonDisplay = {
 /**
  * Best-effort person label from `fi_persons.metadata` for case shells.
  */
-export function casePersonDisplayFromMetadata(metadata: Record<string, unknown> | null | undefined): CasePersonDisplay {
+export function casePersonDisplayFromMetadata(
+  metadata: Record<string, unknown> | null | undefined
+): CasePersonDisplay {
   const meta = metadata && typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
   const { name, email } = displayFromPersonMetadata(meta as Record<string, unknown>);
   return { label: name === "—" ? "Unnamed person" : name, email };

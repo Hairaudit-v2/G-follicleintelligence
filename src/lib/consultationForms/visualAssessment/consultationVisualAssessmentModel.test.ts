@@ -16,7 +16,10 @@ describe("consultationVisualAssessmentModel", () => {
   });
 
   it("parseSelectedZones filters unknown ids and dedupes", () => {
-    assert.deepEqual(parseSelectedZones(["frontal", "bogus", "frontal", "crown"]), ["frontal", "crown"]);
+    assert.deepEqual(parseSelectedZones(["frontal", "bogus", "frontal", "crown"]), [
+      "frontal",
+      "crown",
+    ]);
   });
 
   it("parseSelectedZones returns [] for non-array non-json inputs", () => {

@@ -15,7 +15,12 @@ export type SeedRoomRow = {
   is_active: boolean;
 };
 
-export type EligibilityProfileId = "consult" | "regenerative" | "surgery" | "block_time" | "non_room";
+export type EligibilityProfileId =
+  | "consult"
+  | "regenerative"
+  | "surgery"
+  | "block_time"
+  | "non_room";
 
 export type EligibilityProfile = {
   id: EligibilityProfileId;
@@ -26,7 +31,10 @@ export type EligibilityProfile = {
   skipRoomEligibility: boolean;
 };
 
-export const EVOLVED_PERTH_ELIGIBILITY_PROFILES: Record<Exclude<EligibilityProfileId, "non_room">, EligibilityProfile> = {
+export const EVOLVED_PERTH_ELIGIBILITY_PROFILES: Record<
+  Exclude<EligibilityProfileId, "non_room">,
+  EligibilityProfile
+> = {
   consult: {
     id: "consult",
     label: "Consultation / follow-up / review",
@@ -120,7 +128,13 @@ function nameMatchesSurgery(name: string): boolean {
 }
 
 function nameMatchesRegenerative(name: string): boolean {
-  return /\bprp\b/.test(name) || /\bprf\b/.test(name) || /\bexosome/.test(name) || /\bmeso/.test(name) || /\bregenerative\b/.test(name);
+  return (
+    /\bprp\b/.test(name) ||
+    /\bprf\b/.test(name) ||
+    /\bexosome/.test(name) ||
+    /\bmeso/.test(name) ||
+    /\bregenerative\b/.test(name)
+  );
 }
 
 export function matchEligibilityProfileId(service: SeedServiceRow): EligibilityProfileId | null {
@@ -263,7 +277,9 @@ export function tenantMatchesQuery(row: { slug: string; name: string }, query: s
   if (!q) return false;
   const slug = row.slug.trim().toLowerCase();
   const name = row.name.trim().toLowerCase();
-  return slug === q || slug.includes(q) || name === q || name.includes(q) || slugifyLabel(name) === q;
+  return (
+    slug === q || slug.includes(q) || name === q || name.includes(q) || slugifyLabel(name) === q
+  );
 }
 
 export function clinicMatchesQuery(
@@ -281,7 +297,11 @@ export function clinicMatchesQuery(
 }
 
 /** Default tenant slug/name candidates (first match wins when loading from DB). */
-export const DEFAULT_TENANT_LOOKUPS = ["evolved-hair", "evolved-hair-restoration", "evolved"] as const;
+export const DEFAULT_TENANT_LOOKUPS = [
+  "evolved-hair",
+  "evolved-hair-restoration",
+  "evolved",
+] as const;
 
 /** Default clinic name/slug candidates. */
 export const DEFAULT_CLINIC_LOOKUPS = [

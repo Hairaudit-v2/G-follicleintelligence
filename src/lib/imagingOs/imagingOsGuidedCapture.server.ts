@@ -67,7 +67,9 @@ export async function loadImagingProtocolSessionForPatient(
   if (!data) return null;
   const r = data as Record<string, unknown>;
   const progress =
-    r.progress && typeof r.progress === "object" && !Array.isArray(r.progress) ? (r.progress as Record<string, unknown>) : {};
+    r.progress && typeof r.progress === "object" && !Array.isArray(r.progress)
+      ? (r.progress as Record<string, unknown>)
+      : {};
   return {
     id: String(r.id),
     tenant_id: String(r.tenant_id),
@@ -124,7 +126,10 @@ export async function applyGuidedCaptureToSession(params: {
     throw new Error("This protocol session is already complete.");
   }
 
-  if (params.templateSlugFromImageRow && params.templateSlugFromImageRow.trim() !== session.template_slug.trim()) {
+  if (
+    params.templateSlugFromImageRow &&
+    params.templateSlugFromImageRow.trim() !== session.template_slug.trim()
+  ) {
     throw new Error("Image protocol template does not match active session.");
   }
 
@@ -132,8 +137,15 @@ export async function applyGuidedCaptureToSession(params: {
   if (!tpl) throw new Error("Protocol template not found.");
   assertSlotBelongsToTemplate(tpl.slots, params.slotSlug);
 
-  const prevIds = mergeProgressForSlotCapture.extractPreviousSlotImageIds(session.progress, params.slotSlug);
-  const nextProgress = mergeProgressForSlotCapture.apply(session.progress, params.slotSlug, params.newImageId);
+  const prevIds = mergeProgressForSlotCapture.extractPreviousSlotImageIds(
+    session.progress,
+    params.slotSlug
+  );
+  const nextProgress = mergeProgressForSlotCapture.apply(
+    session.progress,
+    params.slotSlug,
+    params.newImageId
+  );
 
   if (params.replacePrevious && prevIds.length > 0) {
     for (const oldId of prevIds) {
@@ -154,7 +166,10 @@ export async function applyGuidedCaptureToSession(params: {
 
   const meta = parseProgressMeta(nextProgress);
   const pct = protocolRequiredCompletionPercent(tpl.slots, nextProgress);
-  let mergedMeta: ProgressMeta = { ...meta, status: meta.status === "completed" ? "completed" : "active" };
+  let mergedMeta: ProgressMeta = {
+    ...meta,
+    status: meta.status === "completed" ? "completed" : "active",
+  };
   let sessionCompleted = false;
   if (pct >= 100) {
     mergedMeta = { ...mergedMeta, status: "completed", completed_at: new Date().toISOString() };

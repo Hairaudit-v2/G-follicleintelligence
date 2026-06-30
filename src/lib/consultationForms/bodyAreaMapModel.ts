@@ -114,7 +114,10 @@ function isSeverity(v: unknown): v is BodyAreaMapSeverity {
   return v === "mild" || v === "moderate" || v === "severe" || v === "not_assessed";
 }
 
-function normalizeAnnotation(raw: unknown, fallbackView: BodyAreaMapViewId): BodyAreaMapAnnotation | null {
+function normalizeAnnotation(
+  raw: unknown,
+  fallbackView: BodyAreaMapViewId
+): BodyAreaMapAnnotation | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const o = raw as Record<string, unknown>;
   const id = typeof o.id === "string" && o.id.trim() ? o.id.trim() : randomAnnotationId();
@@ -126,7 +129,9 @@ function normalizeAnnotation(raw: unknown, fallbackView: BodyAreaMapViewId): Bod
   const tags = Array.isArray(o.tags) ? o.tags.map((t) => String(t)).filter(Boolean) : [];
   const notes = typeof o.notes === "string" ? o.notes : "";
   const createdAt =
-    typeof o.createdAt === "string" && o.createdAt.trim() ? o.createdAt.trim() : new Date().toISOString();
+    typeof o.createdAt === "string" && o.createdAt.trim()
+      ? o.createdAt.trim()
+      : new Date().toISOString();
   return { id, view, x, y, label, severity, tags, notes, createdAt };
 }
 
@@ -165,7 +170,10 @@ export function isWellFormedBodyAreaMapValue(raw: unknown): boolean {
 }
 
 /** True if there is at least one annotation (for future required rules). */
-export function bodyAreaMapHasAnnotations(raw: unknown, allowedViews?: readonly BodyAreaMapViewId[]): boolean {
+export function bodyAreaMapHasAnnotations(
+  raw: unknown,
+  allowedViews?: readonly BodyAreaMapViewId[]
+): boolean {
   const n = normalizeBodyAreaMapValue(raw, allowedViews ?? BODY_AREA_MAP_VIEWS);
   return n.annotations.length > 0;
 }
@@ -199,7 +207,9 @@ export type BodyAreaMapRegionAggregate = {
   combinedNotes: string;
 };
 
-export function aggregateBodyAreaMapByRegionLabel(annotations: readonly BodyAreaMapAnnotation[]): BodyAreaMapRegionAggregate[] {
+export function aggregateBodyAreaMapByRegionLabel(
+  annotations: readonly BodyAreaMapAnnotation[]
+): BodyAreaMapRegionAggregate[] {
   type Acc = {
     views: Set<BodyAreaMapViewId>;
     severity: BodyAreaMapSeverity;
@@ -225,7 +235,9 @@ export function aggregateBodyAreaMapByRegionLabel(annotations: readonly BodyArea
   const viewOrder = new Map(BODY_AREA_MAP_VIEWS.map((v, i) => [v, i] as const));
   const rows: BodyAreaMapRegionAggregate[] = [];
   for (const [labelValue, acc] of byLabel) {
-    const views = [...acc.views].sort((x, y) => (viewOrder.get(x) ?? 99) - (viewOrder.get(y) ?? 99));
+    const views = [...acc.views].sort(
+      (x, y) => (viewOrder.get(x) ?? 99) - (viewOrder.get(y) ?? 99)
+    );
     rows.push({
       labelValue,
       labelDisplay: labelDisplayForBodyAreaMap(labelValue),

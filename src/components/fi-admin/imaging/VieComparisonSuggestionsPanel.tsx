@@ -81,7 +81,8 @@ export function VieComparisonSuggestionsPanel({
         const status = p.alignment?.alignment_status;
         if (status !== "poor" && status !== "retake_recommended") return false;
       }
-      if (alignmentFilter === "standardized_evidence" && !p.alignment?.is_standardized_evidence) return false;
+      if (alignmentFilter === "standardized_evidence" && !p.alignment?.is_standardized_evidence)
+        return false;
       return true;
     });
   }, [pairs, regionFilter, categoryFilter, useFilter, confidenceFilter, alignmentFilter]);
@@ -105,7 +106,8 @@ export function VieComparisonSuggestionsPanel({
   if (pairs.length === 0) {
     return (
       <p className="text-sm text-slate-400">
-        No suggested comparison pairs yet. Accept VIE protocol captures to build before/after candidates automatically.
+        No suggested comparison pairs yet. Accept VIE protocol captures to build before/after
+        candidates automatically.
       </p>
     );
   }
@@ -182,18 +184,27 @@ export function VieComparisonSuggestionsPanel({
         {filtered.map((pair) => {
           const beforeTile = tilesById.get(pair.before_image_id);
           const afterTile = tilesById.get(pair.after_image_id);
-          const outcomeContribution = pairContributesToOutcomeEvidence(mapComparisonPairToOutcomeInput(pair));
+          const outcomeContribution = pairContributesToOutcomeEvidence(
+            mapComparisonPairToOutcomeInput(pair)
+          );
           return (
-            <li key={pair.id} className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+            <li
+              key={pair.id}
+              className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
+            >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-slate-100">{categoryLabel(pair.comparison_category)}</p>
+                  <p className="text-sm font-semibold text-slate-100">
+                    {categoryLabel(pair.comparison_category)}
+                  </p>
                   <p className="text-xs text-slate-400">
-                    {pair.anatomical_region.replace(/_/g, " ")} · {pair.slot_family.replace(/_/g, " ")} ·{" "}
-                    {pair.days_between} day{pair.days_between === 1 ? "" : "s"} apart
+                    {pair.anatomical_region.replace(/_/g, " ")} ·{" "}
+                    {pair.slot_family.replace(/_/g, " ")} · {pair.days_between} day
+                    {pair.days_between === 1 ? "" : "s"} apart
                   </p>
                   <p className="text-xs text-gray-500">
-                    {journeyStageLabel(pair.before_timepoint)} → {journeyStageLabel(pair.after_timepoint)}
+                    {journeyStageLabel(pair.before_timepoint)} →{" "}
+                    {journeyStageLabel(pair.after_timepoint)}
                   </p>
                 </div>
                 <div>
@@ -231,7 +242,9 @@ export function VieComparisonSuggestionsPanel({
                           unoptimized
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-gray-400">Image unavailable</div>
+                        <div className="flex h-full items-center justify-center text-xs text-gray-400">
+                          Image unavailable
+                        </div>
                       )}
                     </div>
                   </div>
@@ -245,7 +258,11 @@ export function VieComparisonSuggestionsPanel({
                 </div>
                 <div>
                   <dt className="font-medium text-gray-500">Alignment score</dt>
-                  <dd>{pair.alignment?.alignment_score != null ? `${pair.alignment.alignment_score}%` : "—"}</dd>
+                  <dd>
+                    {pair.alignment?.alignment_score != null
+                      ? `${pair.alignment.alignment_score}%`
+                      : "—"}
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-500">Alignment confidence</dt>
@@ -304,7 +321,9 @@ export function VieComparisonSuggestionsPanel({
                   </button>
                 </div>
               ) : (
-                <p className="mt-2 text-xs font-medium text-emerald-300">Review status: {pair.review_status}</p>
+                <p className="mt-2 text-xs font-medium text-emerald-300">
+                  Review status: {pair.review_status}
+                </p>
               )}
             </li>
           );

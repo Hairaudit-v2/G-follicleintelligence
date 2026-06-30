@@ -15,8 +15,14 @@ describe("receptionCommunicationPolicy", () => {
   });
 
   it("blocks receptionist from sending templated SMS/email", () => {
-    assert.equal(receptionCommunicationActionAllowed("receptionist", "send_sms", "deposit_reminder"), false);
-    assert.equal(receptionCommunicationActionAllowed("receptionist", "send_email", "quote_follow_up"), false);
+    assert.equal(
+      receptionCommunicationActionAllowed("receptionist", "send_sms", "deposit_reminder"),
+      false
+    );
+    assert.equal(
+      receptionCommunicationActionAllowed("receptionist", "send_email", "quote_follow_up"),
+      false
+    );
   });
 
   it("allows consultant quote and consultation follow-ups", () => {

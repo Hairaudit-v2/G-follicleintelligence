@@ -13,7 +13,8 @@ export function PatientPersonDetailsCard({ data }: { data: PatientProfileFoundat
     <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <h2 className="text-sm font-semibold text-slate-100">Person record</h2>
       <p className="mt-1 text-xs text-gray-500">
-        Same identity resolution as the Contact details card; useful when comparing to the raw person row.
+        Same identity resolution as the Contact details card; useful when comparing to the raw
+        person row.
       </p>
       <dl className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
         <div>

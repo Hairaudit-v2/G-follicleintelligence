@@ -22,7 +22,9 @@ export const APPOINTMENT_DETAIL_TAB_LABELS: Record<AppointmentDetailTabId, strin
   post_op: "Post-procedure plan",
 };
 
-export function parseAppointmentDetailTab(raw: string | string[] | undefined): AppointmentDetailTabId {
+export function parseAppointmentDetailTab(
+  raw: string | string[] | undefined
+): AppointmentDetailTabId {
   const v = Array.isArray(raw) ? raw[0] : raw;
   const t = v?.trim().toLowerCase();
   if (t && TAB_SET.has(t)) return t as AppointmentDetailTabId;

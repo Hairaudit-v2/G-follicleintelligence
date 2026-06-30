@@ -17,7 +17,7 @@ import {
 import { loadReminderDeliveryConfig } from "@/src/lib/reminders/reminderDeliveryConfig.server";
 
 export function buildReceptionOsSystemStatusFromPayload(
-  payload: Pick<ReceptionOsCommandCentrePayload, "loadedAt" | "endOfDayCloseout">,
+  payload: Pick<ReceptionOsCommandCentrePayload, "loadedAt" | "endOfDayCloseout">
 ): ReceptionOsSystemStatus {
   const cfg = loadReminderDeliveryConfig();
   return buildReceptionOsSystemStatus({

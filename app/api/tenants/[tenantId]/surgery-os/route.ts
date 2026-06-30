@@ -5,7 +5,12 @@
 import { z } from "zod";
 
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { resolveSurgeryOsViewerContext } from "@/src/lib/surgeryOs/surgeryOsAccess.server";
 import { loadSurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsCommandCentreLoader.server";
 import {
@@ -52,7 +57,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
 
     const viewer = await resolveSurgeryOsViewerContext(tenantId.trim());
     if (!viewer.canAccessSurgeryOs) {
-      return crmJsonError(403, "SurgeryOS access requires an active staff or CRM shell role for this tenant.");
+      return crmJsonError(
+        403,
+        "SurgeryOS access requires an active staff or CRM shell role for this tenant."
+      );
     }
 
     const data = await loadSurgeryOsCommandCentrePayload(tenantId.trim(), new Date());
@@ -165,7 +173,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     switch (body.action) {
       case "create_from_booking": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "create_from_booking", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "create_from_booking",
+          adminKey
+        );
         const result = await createSurgeryFromBooking({
           tenantId: tenantId.trim(),
           bookingId: body.booking_id,
@@ -174,7 +186,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "transition_phase": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "transition_phase", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "transition_phase",
+          adminKey
+        );
         const result = await transitionSurgeryPhase({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -184,7 +200,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "log_event": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "log_event", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "log_event",
+          adminKey
+        );
         const result = await logSurgeryProcedureEvent({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -200,7 +220,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         const { actorFiUserId } = await assertSurgeryOsNoteMutationAllowed(
           tenantId.trim(),
           body.note_kind,
-          adminKey,
+          adminKey
         );
         const note = await addSurgeryOperationalNote({
           tenantId: tenantId.trim(),
@@ -216,7 +236,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         const { actorFiUserId } = await assertSurgeryOsTeamStatusMutationAllowed(
           tenantId.trim(),
           body.assignment_fi_user_id,
-          adminKey,
+          adminKey
         );
         const assignment = await updateSurgeryTeamStatus({
           tenantId: tenantId.trim(),
@@ -227,7 +247,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: { assignment } });
       }
       case "add_extraction_count": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "add_extraction_count", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "add_extraction_count",
+          adminKey
+        );
         const result = await addExtractionGraftCount({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -239,7 +263,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "add_implantation_count": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "add_implantation_count", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "add_implantation_count",
+          adminKey
+        );
         const result = await addImplantationGraftCount({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -251,7 +279,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "enter_tray_count": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "enter_tray_count", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "enter_tray_count",
+          adminKey
+        );
         const result = await enterTrayGraftCount({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -268,7 +300,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "log_discarded_grafts": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "log_discarded_grafts", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "log_discarded_grafts",
+          adminKey
+        );
         const result = await logDiscardedGrafts({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -279,7 +315,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "correct_graft_count": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "correct_graft_count", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "correct_graft_count",
+          adminKey
+        );
         const result = await correctGraftCount({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -297,7 +337,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "reconcile_grafts": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "reconcile_grafts", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "reconcile_grafts",
+          adminKey
+        );
         const result = await reconcileGrafts({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,
@@ -307,7 +351,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonOk({ data: result });
       }
       case "confirm_tray_count": {
-        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(tenantId.trim(), "confirm_tray_count", adminKey);
+        const { actorFiUserId } = await assertSurgeryOsMutationAllowed(
+          tenantId.trim(),
+          "confirm_tray_count",
+          adminKey
+        );
         const result = await confirmTrayGraftCount({
           tenantId: tenantId.trim(),
           surgeryId: body.surgery_id,

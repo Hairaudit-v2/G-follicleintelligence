@@ -14,7 +14,12 @@ export function bookingTimesOverlap(
   const aEnd = Date.parse(aEndIso);
   const bStart = Date.parse(bStartIso);
   const bEnd = Date.parse(bEndIso);
-  if (!Number.isFinite(aStart) || !Number.isFinite(aEnd) || !Number.isFinite(bStart) || !Number.isFinite(bEnd)) {
+  if (
+    !Number.isFinite(aStart) ||
+    !Number.isFinite(aEnd) ||
+    !Number.isFinite(bStart) ||
+    !Number.isFinite(bEnd)
+  ) {
     return false;
   }
   return aStart < bEnd && aEnd > bStart;
@@ -55,9 +60,18 @@ export function roomIdsSharingPhysicalSpace(roomId: string, ctx: RoomOverlapCont
   return ctx.roomIdsByPhysicalKey.get(key) ?? [room.id];
 }
 
-export function isActiveBookingRow(row: { booking_status: string; cancelled_at?: string | null }): boolean {
+export function isActiveBookingRow(row: {
+  booking_status: string;
+  cancelled_at?: string | null;
+}): boolean {
   if (row.cancelled_at?.trim()) return false;
-  if (isBookingCancelled({ booking_status: row.booking_status, cancelled_at: row.cancelled_at ?? null })) return false;
+  if (
+    isBookingCancelled({
+      booking_status: row.booking_status,
+      cancelled_at: row.cancelled_at ?? null,
+    })
+  )
+    return false;
   if (row.booking_status === "completed") return false;
   return true;
 }
@@ -86,7 +100,10 @@ export function findRoomOverlapConflictWithAssignments(args: {
   candidateEndIso: string;
   existing: RoomOverlapBookingLike[];
   ctx: RoomOverlapContext;
-  assignmentsByBookingId: ReadonlyMap<string, ReadonlyArray<{ resource_type: string; resource_id: string }>>;
+  assignmentsByBookingId: ReadonlyMap<
+    string,
+    ReadonlyArray<{ resource_type: string; resource_id: string }>
+  >;
   excludeBookingId?: string | null;
 }): RoomOverlapBookingLike | null {
   const roomId = args.candidateRoomId.trim();
@@ -98,12 +115,14 @@ export function findRoomOverlapConflictWithAssignments(args: {
   for (const b of args.existing) {
     if (exclude && b.id === exclude) continue;
     if (!isActiveBookingRow(b)) continue;
-    if (!bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at)) continue;
+    if (!bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at))
+      continue;
 
     const bookedRoomIds: string[] = [];
     if (b.room_id?.trim()) bookedRoomIds.push(b.room_id.trim());
     for (const a of args.assignmentsByBookingId.get(b.id) ?? []) {
-      if (a.resource_type === "room" && a.resource_id.trim()) bookedRoomIds.push(a.resource_id.trim());
+      if (a.resource_type === "room" && a.resource_id.trim())
+        bookedRoomIds.push(a.resource_id.trim());
     }
     for (const bookedRid of bookedRoomIds) {
       if (blockedRoomIds.has(bookedRid)) return b;
@@ -117,7 +136,12 @@ export function findStaffOverlapConflict(args: {
   candidateStaffId: string;
   candidateStartIso: string;
   candidateEndIso: string;
-  existing: Array<Pick<FiBookingRow, "id" | "assigned_staff_id" | "start_at" | "end_at" | "booking_status" | "cancelled_at">>;
+  existing: Array<
+    Pick<
+      FiBookingRow,
+      "id" | "assigned_staff_id" | "start_at" | "end_at" | "booking_status" | "cancelled_at"
+    >
+  >;
   excludeBookingId?: string | null;
 }): (typeof args.existing)[number] | null {
   return findStaffOverlapConflictWithAssignments({
@@ -134,8 +158,16 @@ export function findStaffOverlapConflictWithAssignments(args: {
   candidateStaffId: string;
   candidateStartIso: string;
   candidateEndIso: string;
-  existing: Array<Pick<FiBookingRow, "id" | "assigned_staff_id" | "start_at" | "end_at" | "booking_status" | "cancelled_at">>;
-  assignmentsByBookingId: ReadonlyMap<string, ReadonlyArray<{ resource_type: string; resource_id: string }>>;
+  existing: Array<
+    Pick<
+      FiBookingRow,
+      "id" | "assigned_staff_id" | "start_at" | "end_at" | "booking_status" | "cancelled_at"
+    >
+  >;
+  assignmentsByBookingId: ReadonlyMap<
+    string,
+    ReadonlyArray<{ resource_type: string; resource_id: string }>
+  >;
   excludeBookingId?: string | null;
 }): (typeof args.existing)[number] | null {
   const staffId = args.candidateStaffId.trim();
@@ -145,12 +177,14 @@ export function findStaffOverlapConflictWithAssignments(args: {
   for (const b of args.existing) {
     if (exclude && b.id === exclude) continue;
     if (!isActiveBookingRow(b)) continue;
-    if (!bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at)) continue;
+    if (!bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at))
+      continue;
 
     const bookedStaff = new Set<string>();
     if (b.assigned_staff_id?.trim()) bookedStaff.add(b.assigned_staff_id.trim());
     for (const a of args.assignmentsByBookingId.get(b.id) ?? []) {
-      if (a.resource_type === "staff" && a.resource_id.trim()) bookedStaff.add(a.resource_id.trim());
+      if (a.resource_type === "staff" && a.resource_id.trim())
+        bookedStaff.add(a.resource_id.trim());
     }
     if (bookedStaff.has(staffId)) return b;
   }
@@ -158,9 +192,9 @@ export function findStaffOverlapConflictWithAssignments(args: {
   return null;
 }
 
-export function resolveDefaultRoomFromOptions<T extends { room: FiClinicRoomRow; eligible: boolean; available: boolean; preferred: boolean }>(
-  options: T[]
-): T | null {
+export function resolveDefaultRoomFromOptions<
+  T extends { room: FiClinicRoomRow; eligible: boolean; available: boolean; preferred: boolean },
+>(options: T[]): T | null {
   const eligibleAvailable = options.filter((o) => o.eligible && o.available && o.room.is_active);
   if (eligibleAvailable.length === 0) return null;
   const preferred = eligibleAvailable.find((o) => o.preferred);
@@ -179,13 +213,15 @@ export function staffRoleMatchesEligibility(staffRole: string, eligibleRole: str
   const e = eligibleRole.trim().toLowerCase();
   if (!r || !e) return false;
   if (r === e) return true;
-  if (e === "doctor" && /\b(doctor|physician|surgeon|dermatologist|gp|trichologist)\b/.test(r)) return true;
+  if (e === "doctor" && /\b(doctor|physician|surgeon|dermatologist|gp|trichologist)\b/.test(r))
+    return true;
   if (e === "consultant" && (r.includes("consultant") || r.includes("trichologist"))) return true;
   if (e === "surgeon" && r.includes("surgeon")) return true;
   if (e === "nurse" && r.includes("nurse")) return true;
   if (e === "technician" && r.includes("technician")) return true;
   if (e === "trichologist" && r.includes("trichologist")) return true;
-  if (e === "clinical_assistant" && (r.includes("assistant") || r.includes("clinical assistant"))) return true;
+  if (e === "clinical_assistant" && (r.includes("assistant") || r.includes("clinical assistant")))
+    return true;
   return r.includes(e);
 }
 

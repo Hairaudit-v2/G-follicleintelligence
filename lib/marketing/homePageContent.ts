@@ -139,7 +139,8 @@ export const HOME_PAGE_CONTENT = {
       "Run enquiries, consultations, surgery planning, patient records, staff management, payments, and clinical outcomes from one connected operating system built specifically for modern hair restoration clinics.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
     secondaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
-    supportingLine: "Built for clinics today. Designed for the future of global hair restoration medicine.",
+    supportingLine:
+      "Built for clinics today. Designed for the future of global hair restoration medicine.",
     orbitModules: [
       { label: "LeadFlowOS", subtitle: "Acquisition & pipeline" },
       { label: "ClinicOS", subtitle: "Operations spine" },
@@ -158,21 +159,68 @@ export const HOME_PAGE_CONTENT = {
     id: "clinical-ecosystem",
     storyEyebrow: "Complete ecosystem",
     headline: "Built Around The Entire Clinical Ecosystem",
-    subtext:
-      "From first enquiry to long-term outcomes—every part of the clinic in one platform.",
+    subtext: "From first enquiry to long-term outcomes—every part of the clinic in one platform.",
     modules: [
-      { name: "LeadFlow", description: "Capture enquiries faster, automate follow-up, and convert more consultations into procedures." },
-      { name: "ReceptionOS", description: "Manage appointments, front desk workflow, staff availability, and clinic scheduling from one place." },
-      { name: "ConsultationOS", description: "Standardize consultations, treatment plans, recommendations, quotes, and patient handovers." },
-      { name: "SurgeryOS", description: "Plan procedures, coordinate surgical teams, track grafts, and improve procedure quality." },
-      { name: "FinancialOS", description: "Track payments, revenue, outstanding balances, and clinic financial performance clearly." },
-      { name: "WorkforceOS", description: "Keep onboarding, training, SOPs, staff permissions, and compliance organized." },
-      { name: "PatientOS", description: "Manage patient journeys, communication, records, treatment history, and long-term care." },
-      { name: "ImagingOS", description: "Organize clinical photography, scalp imaging, treatment documentation, and visual progress tracking." },
-      { name: "AuditOS", description: "Track outcomes, review procedures, measure quality, and improve patient accountability." },
-      { name: "AcademyOS", description: "Train surgeons, certify teams, and maintain competency standards across the clinic." },
-      { name: "AnalyticsOS", description: "Understand conversion rates, productivity, financial trends, and operational performance." },
-      { name: "ClinicOS", description: "Coordinate daily clinic operations, staff schedules, appointments, and operational workflow." },
+      {
+        name: "LeadFlow",
+        description:
+          "Capture enquiries faster, automate follow-up, and convert more consultations into procedures.",
+      },
+      {
+        name: "ReceptionOS",
+        description:
+          "Manage appointments, front desk workflow, staff availability, and clinic scheduling from one place.",
+      },
+      {
+        name: "ConsultationOS",
+        description:
+          "Standardize consultations, treatment plans, recommendations, quotes, and patient handovers.",
+      },
+      {
+        name: "SurgeryOS",
+        description:
+          "Plan procedures, coordinate surgical teams, track grafts, and improve procedure quality.",
+      },
+      {
+        name: "FinancialOS",
+        description:
+          "Track payments, revenue, outstanding balances, and clinic financial performance clearly.",
+      },
+      {
+        name: "WorkforceOS",
+        description:
+          "Keep onboarding, training, SOPs, staff permissions, and compliance organized.",
+      },
+      {
+        name: "PatientOS",
+        description:
+          "Manage patient journeys, communication, records, treatment history, and long-term care.",
+      },
+      {
+        name: "ImagingOS",
+        description:
+          "Organize clinical photography, scalp imaging, treatment documentation, and visual progress tracking.",
+      },
+      {
+        name: "AuditOS",
+        description:
+          "Track outcomes, review procedures, measure quality, and improve patient accountability.",
+      },
+      {
+        name: "AcademyOS",
+        description:
+          "Train surgeons, certify teams, and maintain competency standards across the clinic.",
+      },
+      {
+        name: "AnalyticsOS",
+        description:
+          "Understand conversion rates, productivity, financial trends, and operational performance.",
+      },
+      {
+        name: "ClinicOS",
+        description:
+          "Coordinate daily clinic operations, staff schedules, appointments, and operational workflow.",
+      },
     ] satisfies readonly HomeEcosystemModule[],
   },
 
@@ -204,17 +252,20 @@ export const HOME_PAGE_CONTENT = {
     cards: [
       {
         title: "Clinical Intelligence",
-        description: "Improve diagnosis, treatment planning, and patient assessment using connected clinical systems.",
+        description:
+          "Improve diagnosis, treatment planning, and patient assessment using connected clinical systems.",
         bullets: ["AI diagnostics", "Blood interpretation", "Trichology intelligence"],
       },
       {
         title: "Surgical Intelligence",
-        description: "Track procedures, improve graft quality, and create more consistent surgical outcomes.",
+        description:
+          "Track procedures, improve graft quality, and create more consistent surgical outcomes.",
         bullets: ["Live graft counting", "Transection monitoring", "Procedure analytics"],
       },
       {
         title: "Financial Intelligence",
-        description: "Monitor revenue, payments, forecasting, and business performance across the clinic.",
+        description:
+          "Monitor revenue, payments, forecasting, and business performance across the clinic.",
         bullets: ["Revenue forecasting", "Accounts receivable", "Executive dashboards"],
       },
       {
@@ -238,15 +289,18 @@ export const HOME_PAGE_CONTENT = {
     cards: [
       {
         title: "Growing Clinics",
-        description: "Manage growth without losing control of patient follow-up, operations, and team coordination.",
+        description:
+          "Manage growth without losing control of patient follow-up, operations, and team coordination.",
       },
       {
         title: "Established Clinics",
-        description: "Improve consistency, optimize team performance, and standardize the patient journey.",
+        description:
+          "Improve consistency, optimize team performance, and standardize the patient journey.",
       },
       {
         title: "Enterprise Groups",
-        description: "Manage multiple locations using connected systems, centralized reporting, and shared intelligence.",
+        description:
+          "Manage multiple locations using connected systems, centralized reporting, and shared intelligence.",
       },
     ] satisfies readonly HomeClinicStageCard[],
   },
@@ -311,7 +365,8 @@ export const HOME_PAGE_CONTENT = {
       ],
     },
     closingStatement: {
-      line1: "No unified operating system currently exists for the global hair restoration industry.",
+      line1:
+        "No unified operating system currently exists for the global hair restoration industry.",
       line2: "Until now.",
     },
   },
@@ -421,7 +476,8 @@ export const HOME_PAGE_CONTENT = {
       "Longitudinal Progress Tracking",
     ] as const,
     closingStatement: {
-      line1: "Over time, millions of patient journeys create the world's largest structured hair restoration dataset.",
+      line1:
+        "Over time, millions of patient journeys create the world's largest structured hair restoration dataset.",
       line2: "This intelligence becomes more valuable than the software itself.",
     },
   },
@@ -453,8 +509,7 @@ export const HOME_PAGE_CONTENT = {
     cards: [
       {
         title: "Keep current workflows",
-        copy:
-          "Clinics can continue using the systems their teams already know while FI begins connecting operational, clinical, and commercial data.",
+        copy: "Clinics can continue using the systems their teams already know while FI begins connecting operational, clinical, and commercial data.",
       },
       {
         title: "Connect before replacing",
@@ -466,8 +521,7 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         title: "Build toward full OS adoption",
-        copy:
-          "As confidence grows, clinics can activate more FI modules across LeadFlow, ClinicOS, SurgeryOS, AuditOS, AcademyOS, and AnalyticsOS.",
+        copy: "As confidence grows, clinics can activate more FI modules across LeadFlow, ClinicOS, SurgeryOS, AuditOS, AcademyOS, and AnalyticsOS.",
       },
     ] satisfies HomeIntegrationAdoptionCard[],
   },
@@ -561,7 +615,8 @@ export const HOME_PAGE_CONTENT = {
           },
           {
             name: "PatientOS",
-            description: "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
+            description:
+              "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
           },
         ],
       },
@@ -570,15 +625,18 @@ export const HOME_PAGE_CONTENT = {
         modules: [
           {
             name: "ImagingOS",
-            description: "Template-driven photography sessions, slot progress, and surgical-domain progression assessments.",
+            description:
+              "Template-driven photography sessions, slot progress, and surgical-domain progression assessments.",
           },
           {
             name: "SurgeryOS",
-            description: "Surgical planning, donor intelligence, graft economics, and procedure-day orchestration built for the OR.",
+            description:
+              "Surgical planning, donor intelligence, graft economics, and procedure-day orchestration built for the OR.",
           },
           {
             name: "AuditOS",
-            description: "HairAudit-aligned verification, independent review, and quality scoring that makes excellence legible.",
+            description:
+              "HairAudit-aligned verification, independent review, and quality scoring that makes excellence legible.",
           },
         ],
       },
@@ -592,7 +650,8 @@ export const HOME_PAGE_CONTENT = {
           },
           {
             name: "AcademyOS",
-            description: "Doctor, nurse, consultant, and technician pathways—anchored to the International Institute of Hair Restoration.",
+            description:
+              "Doctor, nurse, consultant, and technician pathways—anchored to the International Institute of Hair Restoration.",
           },
         ],
       },
@@ -606,11 +665,13 @@ export const HOME_PAGE_CONTENT = {
           },
           {
             name: "AnalyticsOS",
-            description: "Conversion, productivity, and cohort analytics across reception, consultation, and financial surfaces.",
+            description:
+              "Conversion, productivity, and cohort analytics across reception, consultation, and financial surfaces.",
           },
           {
             name: "ClinicOS",
-            description: "Scheduling, services, staff, and the operational rhythm that keeps high-volume hair programs coherent.",
+            description:
+              "Scheduling, services, staff, and the operational rhythm that keeps high-volume hair programs coherent.",
           },
           {
             name: "OnboardingOS",
@@ -645,7 +706,8 @@ export const HOME_PAGE_CONTENT = {
       {
         id: "leadflow-os",
         name: "LeadFlowOS",
-        description: "Acquisition pipelines, tasks, follow-ups, and patient conversion intelligence.",
+        description:
+          "Acquisition pipelines, tasks, follow-ups, and patient conversion intelligence.",
         shell: "crm-pipeline",
         // screenshotSrc: "/marketing/product-showcase/leadflow-os.png",
       },
@@ -708,73 +770,85 @@ export const HOME_PAGE_CONTENT = {
         capability: "Lead management",
         traditionalCrm: "Sales pipelines without restoration-specific clinical substrate.",
         genericClinic: "Enquiry logs and light CRM—weak linkage into medical truth.",
-        follicleIntelligence: "LeadFlowOS with pipeline intelligence tied to consultation and clinical spine.",
+        follicleIntelligence:
+          "LeadFlowOS with pipeline intelligence tied to consultation and clinical spine.",
       },
       {
         capability: "Scheduling",
         traditionalCrm: "Not built for OR density, rooms, or hair-program rhythm.",
         genericClinic: "Appointment grids—rarely procedure-day and resource orchestration.",
-        follicleIntelligence: "ClinicOS scheduling aligned to services, staff, and high-volume hair workflows.",
+        follicleIntelligence:
+          "ClinicOS scheduling aligned to services, staff, and high-volume hair workflows.",
       },
       {
         capability: "Patient records",
         traditionalCrm: "Contact records—not longitudinal restoration intelligence.",
         genericClinic: "Charts and attachments—often fragmented across tools.",
-        follicleIntelligence: "FoundationOS: digital twin continuity and handoff-safe records across years.",
+        follicleIntelligence:
+          "FoundationOS: digital twin continuity and handoff-safe records across years.",
       },
       {
         capability: "Hair loss diagnostics",
         traditionalCrm: "Not in scope.",
         genericClinic: "Basic notes or third-party bolt-ons.",
-        follicleIntelligence: "HairIntel: structured classification, imaging context, and restoration-aligned reasoning.",
+        follicleIntelligence:
+          "HairIntel: structured classification, imaging context, and restoration-aligned reasoning.",
       },
       {
         capability: "Blood interpretation",
         traditionalCrm: "Not in scope.",
         genericClinic: "PDF uploads or generic lab flags.",
-        follicleIntelligence: "Blood intelligence mapped to hair restoration treatment and monitoring workflows.",
+        follicleIntelligence:
+          "Blood intelligence mapped to hair restoration treatment and monitoring workflows.",
       },
       {
         capability: "Surgical workflow management",
         traditionalCrm: "Not in scope.",
         genericClinic: "Peri-op checklists—thin on donor economics and OR orchestration.",
-        follicleIntelligence: "SurgeryOS: planning, donor intelligence, graft economics, procedure-day command.",
+        follicleIntelligence:
+          "SurgeryOS: planning, donor intelligence, graft economics, procedure-day command.",
       },
       {
         capability: "Procedure intelligence",
         traditionalCrm: "Not in scope.",
         genericClinic: "Billing codes or free-text—weak procedural variables.",
-        follicleIntelligence: "Native surgical variables, team throughput, and evidence-grade procedure signal.",
+        follicleIntelligence:
+          "Native surgical variables, team throughput, and evidence-grade procedure signal.",
       },
       {
         capability: "Outcome benchmarking",
         traditionalCrm: "Not in scope.",
         genericClinic: "Ad-hoc photos—limited cohort discipline.",
-        follicleIntelligence: "Structured outcomes with honest denominators and governance-ready comparison context.",
+        follicleIntelligence:
+          "Structured outcomes with honest denominators and governance-ready comparison context.",
       },
       {
         capability: "Independent auditing",
         traditionalCrm: "Not in scope.",
         genericClinic: "Internal QA only—hard to externalise credibly.",
-        follicleIntelligence: "AuditOS / HairAudit-aligned review, scoring primitives, and verification packets.",
+        follicleIntelligence:
+          "AuditOS / HairAudit-aligned review, scoring primitives, and verification packets.",
       },
       {
         capability: "Staff certification",
         traditionalCrm: "Not in scope.",
         genericClinic: "Disconnected LMS or vendor certificates.",
-        follicleIntelligence: "AcademyOS pathways anchored to IIHR with competency tied to live clinical evidence.",
+        follicleIntelligence:
+          "AcademyOS pathways anchored to IIHR with competency tied to live clinical evidence.",
       },
       {
         capability: "Global intelligence dataset",
         traditionalCrm: "Not in scope.",
         genericClinic: "Siloed per clinic—no network learning substrate.",
-        follicleIntelligence: "Governed structured signal designed to compound responsibly across programmes.",
+        follicleIntelligence:
+          "Governed structured signal designed to compound responsibly across programmes.",
       },
       {
         capability: "Predictive intelligence",
         traditionalCrm: "Generic sales forecasting only.",
         genericClinic: "Rarely connected to longitudinal clinical evidence.",
-        follicleIntelligence: "Forward roadmap grounded in structured capture—bounded by evidence quality and policy.",
+        follicleIntelligence:
+          "Forward roadmap grounded in structured capture—bounded by evidence quality and policy.",
       },
     ] satisfies HomeComparisonRow[],
   },
@@ -808,22 +882,26 @@ export const HOME_PAGE_CONTENT = {
     audiences: [
       {
         headline: "Surgeons",
-        outcome: "Sharper preparation, measurable technique signal, and audit-grade evidence that supports reputation under scrutiny—not vanity metrics.",
+        outcome:
+          "Sharper preparation, measurable technique signal, and audit-grade evidence that supports reputation under scrutiny—not vanity metrics.",
         cta: { label: "Surgeon pathway", href: "/surgeons" as const },
       },
       {
         headline: "Clinic Owners",
-        outcome: "One operating system for revenue, operations, and clinical coherence—so the business scales without the brand drifting.",
+        outcome:
+          "One operating system for revenue, operations, and clinical coherence—so the business scales without the brand drifting.",
         cta: { label: "Owner playbook", href: "/clinic-owners" as const },
       },
       {
         headline: "Multi-Clinic Groups",
-        outcome: "Portfolio governance with comparable signal across regions—standards that travel, exceptions that surface early.",
+        outcome:
+          "Portfolio governance with comparable signal across regions—standards that travel, exceptions that surface early.",
         cta: { label: "Enterprise deployments", href: "/enterprise" as const },
       },
       {
         headline: "Industry Organisations",
-        outcome: "Training infrastructure and standards programs that connect to evidence—so certification reflects defensible practice, not attendance alone.",
+        outcome:
+          "Training infrastructure and standards programs that connect to evidence—so certification reflects defensible practice, not attendance alone.",
         cta: { label: "Academy & partnerships", href: "/academy" as const },
       },
     ] satisfies HomeAudienceCard[],
@@ -840,7 +918,8 @@ export const HOME_PAGE_CONTENT = {
     tracks: [
       {
         title: "Doctor certification",
-        detail: "Structured progression with assessment gates tied to real clinical evidence—not checklist theatre.",
+        detail:
+          "Structured progression with assessment gates tied to real clinical evidence—not checklist theatre.",
       },
       {
         title: "Nurse surgical training",
@@ -848,23 +927,28 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         title: "Hair consultant education",
-        detail: "Consultation quality, consent depth, and expectation integrity as measurable professional skills.",
+        detail:
+          "Consultation quality, consent depth, and expectation integrity as measurable professional skills.",
       },
       {
         title: "Technician competency",
-        detail: "Role-specific standards with performance signal that leadership can review and remediate.",
+        detail:
+          "Role-specific standards with performance signal that leadership can review and remediate.",
       },
       {
         title: "Clinical assessment frameworks",
-        detail: "Shared rubrics so reviewers, trainers, and operators speak one professional language.",
+        detail:
+          "Shared rubrics so reviewers, trainers, and operators speak one professional language.",
       },
       {
         title: "CPD tracking",
-        detail: "Continuing education that connects to live workflows—not disconnected LMS credits.",
+        detail:
+          "Continuing education that connects to live workflows—not disconnected LMS credits.",
       },
       {
         title: "Performance-based accreditation",
-        detail: "Accreditation that can tighten when signal weakens and expand when evidence supports it.",
+        detail:
+          "Accreditation that can tighten when signal weakens and expand when evidence supports it.",
       },
     ] satisfies HomeTrainingTrack[],
   },
@@ -876,11 +960,23 @@ export const HOME_PAGE_CONTENT = {
     intelligenceGroups: [
       {
         title: "Procedure metrics",
-        items: ["Graft counts", "Hair counts", "Punch size", "Extraction speed", "Transection rate", "Procedure timelines"],
+        items: [
+          "Graft counts",
+          "Hair counts",
+          "Punch size",
+          "Extraction speed",
+          "Transection rate",
+          "Procedure timelines",
+        ],
       },
       {
         title: "Donor intelligence",
-        items: ["Donor quality", "Recipient density planning", "Donor recovery signal", "Follicle economics context"],
+        items: [
+          "Donor quality",
+          "Recipient density planning",
+          "Donor recovery signal",
+          "Follicle economics context",
+        ],
       },
       {
         title: "Team performance",
@@ -892,7 +988,12 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         title: "Outcome tracking",
-        items: ["Healing progression", "12-month outcomes", "Patient-reported signal", "Audit-ready evidence packets"],
+        items: [
+          "Healing progression",
+          "12-month outcomes",
+          "Patient-reported signal",
+          "Audit-ready evidence packets",
+        ],
       },
     ] satisfies HomeIntelligenceGroup[],
     closing:
@@ -907,10 +1008,24 @@ export const HOME_PAGE_CONTENT = {
       "HairAudit exists as the accountability layer: independent review, disciplined scoring, outcome verification, and benchmarking that serious operators can stand behind under scrutiny.",
     poweredBy: "HairAudit",
     trustPillars: [
-      { title: "Independent review", detail: "Review paths designed to reduce self-graded quality and narrative drift." },
-      { title: "Quality scoring", detail: "Transparent scoring primitives so standing is legible—not a black box index." },
-      { title: "Outcome verification", detail: "Evidence-linked outcomes that can support internal QA and cleared external disclosure where policy allows." },
-      { title: "Evidence-based benchmarking", detail: "Cohort context with honest denominators—so comparison strengthens credibility instead of eroding it." },
+      {
+        title: "Independent review",
+        detail: "Review paths designed to reduce self-graded quality and narrative drift.",
+      },
+      {
+        title: "Quality scoring",
+        detail: "Transparent scoring primitives so standing is legible—not a black box index.",
+      },
+      {
+        title: "Outcome verification",
+        detail:
+          "Evidence-linked outcomes that can support internal QA and cleared external disclosure where policy allows.",
+      },
+      {
+        title: "Evidence-based benchmarking",
+        detail:
+          "Cohort context with honest denominators—so comparison strengthens credibility instead of eroding it.",
+      },
     ],
     metrics: [
       "Graft survival analysis",
@@ -1006,7 +1121,8 @@ export const HOME_PAGE_CONTENT = {
     closing: {
       headline: "Every Patient Makes The Entire Industry Smarter",
       body: "Hair restoration can evolve from isolated clinic decisions into a connected network where every consultation, procedure, audit, and outcome improves future care.",
-      finalLine: "This is bigger than software. This is infrastructure for the future of the industry.",
+      finalLine:
+        "This is bigger than software. This is infrastructure for the future of the industry.",
     },
   },
 
@@ -1077,7 +1193,8 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
     id: "final-cta",
     eyebrow: "Enterprise infrastructure",
     headline: "Building Infrastructure For The Future Of Hair Restoration",
-    subtext: "Built to help clinics run smarter today while creating the foundation for the future of hair restoration medicine.",
+    subtext:
+      "Built to help clinics run smarter today while creating the foundation for the future of hair restoration medicine.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
     secondaryCta: { label: "Request Enterprise Access", href: "/demo" as const },
   },
@@ -1143,23 +1260,38 @@ export const HOME_V5_CONTENT = {
     cards: [
       {
         category: "Lead Management",
-        items: ["Enquiries not followed up quickly enough", "Potential patients lost before consultation"],
+        items: [
+          "Enquiries not followed up quickly enough",
+          "Potential patients lost before consultation",
+        ],
       },
       {
         category: "Consultation Process",
-        items: ["Manual workflows create inconsistency between consultants", "Reduced conversion opportunities"],
+        items: [
+          "Manual workflows create inconsistency between consultants",
+          "Reduced conversion opportunities",
+        ],
       },
       {
         category: "Surgical Performance",
-        items: ["No objective measurement of procedural quality", "No visibility into team performance"],
+        items: [
+          "No objective measurement of procedural quality",
+          "No visibility into team performance",
+        ],
       },
       {
         category: "Patient Journey",
-        items: ["Photos, notes and treatment history scattered across systems", "No connected patient intelligence"],
+        items: [
+          "Photos, notes and treatment history scattered across systems",
+          "No connected patient intelligence",
+        ],
       },
       {
         category: "Staff Readiness",
-        items: ["Difficult to know who is truly procedure-ready", "Training accountability often unclear"],
+        items: [
+          "Difficult to know who is truly procedure-ready",
+          "Training accountability often unclear",
+        ],
       },
       {
         category: "Outcome Tracking",
@@ -1184,7 +1316,8 @@ export const HOME_V5_CONTENT = {
       "Reduced patient referrals",
       "Slower clinic growth",
     ] as const,
-    closingStatement: "Disconnected operational systems quietly reduce clinic profitability every day.",
+    closingStatement:
+      "Disconnected operational systems quietly reduce clinic profitability every day.",
   },
 
   platformSystems: {
@@ -1282,7 +1415,8 @@ export const HOME_V5_CONTENT = {
       "Surgeon performance benchmarking",
       "Technique comparison analysis",
     ] as const,
-    closingStatement: "The Clinics That Measure Outcomes Improve Faster Than The Clinics That Guess",
+    closingStatement:
+      "The Clinics That Measure Outcomes Improve Faster Than The Clinics That Guess",
   },
 
   staffIntelligence: {

@@ -202,7 +202,11 @@ export async function loadRoleTemplateFromDb(
     const moduleKey = String(r.module_key ?? "");
     const level = String(r.access_level ?? "none");
     const scope = String(r.scope ?? "tenant");
-    if (!isStaffAccessModuleKey(moduleKey) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
+    if (
+      !isStaffAccessModuleKey(moduleKey) ||
+      !isStaffAccessLevel(level) ||
+      !isStaffAccessScope(scope)
+    )
       continue;
     if (level === "none") {
       delete out[moduleKey];
@@ -233,7 +237,11 @@ export async function loadStaffAccessGrants(
     const moduleKey = String(r.module_key ?? "");
     const level = String(r.access_level ?? "none");
     const scope = String(r.scope ?? "tenant");
-    if (!isStaffAccessModuleKey(moduleKey) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
+    if (
+      !isStaffAccessModuleKey(moduleKey) ||
+      !isStaffAccessLevel(level) ||
+      !isStaffAccessScope(scope)
+    )
       continue;
     out.push({
       moduleKey: moduleKey,
@@ -475,7 +483,11 @@ export async function loadStaffAccessGrantRows(
     const moduleKey = String(r.module_key ?? "");
     const level = String(r.access_level ?? "none");
     const scope = String(r.scope ?? "tenant");
-    if (!isStaffAccessModuleKey(moduleKey) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
+    if (
+      !isStaffAccessModuleKey(moduleKey) ||
+      !isStaffAccessLevel(level) ||
+      !isStaffAccessScope(scope)
+    )
       continue;
     out.push({
       id: String(r.id),

@@ -36,7 +36,10 @@ import {
 } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
 import { isMissingDatabaseRelationError } from "@/src/lib/surgeryOs/surgeryOsLoaderResilience";
 import type { SurgeryOsAction } from "@/src/lib/surgeryOs/surgeryOsPolicy";
-import type { ProcedureEventRow, SurgeryMutationRow } from "@/src/lib/surgeryOs/surgeryMutations.server";
+import type {
+  ProcedureEventRow,
+  SurgeryMutationRow,
+} from "@/src/lib/surgeryOs/surgeryMutations.server";
 
 export type GraftSessionRow = {
   id: string;
@@ -105,32 +108,46 @@ function mapGraftSessionRow(raw: Record<string, unknown>): GraftSessionRow {
     average_hairs_per_graft:
       raw.average_hairs_per_graft != null ? Number(raw.average_hairs_per_graft) : null,
     reconciliation_status: String(raw.reconciliation_status ?? "pending"),
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
     extraction_lock_device_id:
       raw.extraction_lock_device_id != null ? String(raw.extraction_lock_device_id) : null,
     extraction_lock_held_at:
       raw.extraction_lock_held_at != null ? String(raw.extraction_lock_held_at) : null,
     extraction_lock_held_by_fi_user_id:
-      raw.extraction_lock_held_by_fi_user_id != null ? String(raw.extraction_lock_held_by_fi_user_id) : null,
+      raw.extraction_lock_held_by_fi_user_id != null
+        ? String(raw.extraction_lock_held_by_fi_user_id)
+        : null,
     implantation_lock_device_id:
       raw.implantation_lock_device_id != null ? String(raw.implantation_lock_device_id) : null,
     implantation_lock_held_at:
       raw.implantation_lock_held_at != null ? String(raw.implantation_lock_held_at) : null,
     implantation_lock_held_by_fi_user_id:
-      raw.implantation_lock_held_by_fi_user_id != null ? String(raw.implantation_lock_held_by_fi_user_id) : null,
+      raw.implantation_lock_held_by_fi_user_id != null
+        ? String(raw.implantation_lock_held_by_fi_user_id)
+        : null,
     reconciled_by_fi_user_id:
       raw.reconciled_by_fi_user_id != null ? String(raw.reconciled_by_fi_user_id) : null,
     reconciled_at: raw.reconciled_at != null ? String(raw.reconciled_at) : null,
   };
 }
 
-async function loadSurgeryForGraftMutation(tenantId: string, surgeryId: string): Promise<SurgeryMutationRow> {
+async function loadSurgeryForGraftMutation(
+  tenantId: string,
+  surgeryId: string
+): Promise<SurgeryMutationRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const sid = assertNonEmptyUuid(surgeryId, "surgeryId").trim();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_surgeries").select("*").eq("tenant_id", tid).eq("id", sid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_surgeries")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .maybeSingle();
   if (error) {
-    if (isMissingDatabaseRelationError(error)) throw new Error("SurgeryOS tables are not available.");
+    if (isMissingDatabaseRelationError(error))
+      throw new Error("SurgeryOS tables are not available.");
     throw new Error(error.message);
   }
   if (!data) throw new Error("Surgery not found.");
@@ -156,15 +173,20 @@ async function loadSurgeryForGraftMutation(tenantId: string, surgeryId: string):
   };
 }
 
-function assertSurgeryGraftCountingAllowed(surgery: SurgeryMutationRow, allowAdminOverride?: boolean): void {
+function assertSurgeryGraftCountingAllowed(
+  surgery: SurgeryMutationRow,
+  allowAdminOverride?: boolean
+): void {
   if (!isSurgeryStatusEligibleForGraftCounting(surgery.status, { allowAdminOverride })) {
     throw new Error(
-      "Graft counting is only allowed for active surgeries today. Completed or cancelled surgeries require admin override.",
+      "Graft counting is only allowed for active surgeries today. Completed or cancelled surgeries require admin override."
     );
   }
 }
 
-function sessionLockKindForAction(action: SurgeryOsAction): SurgeryOsGraftCountSessionLockKind | null {
+function sessionLockKindForAction(
+  action: SurgeryOsAction
+): SurgeryOsGraftCountSessionLockKind | null {
   switch (action) {
     case "add_extraction_count":
     case "enter_tray_count":
@@ -242,7 +264,7 @@ async function findExistingGraftSubmission(input: {
 
 async function loadGraftCountEventsForSession(
   tenantId: string,
-  sessionId: string,
+  sessionId: string
 ): Promise<GraftCountEventRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -287,7 +309,7 @@ async function getOrCreateGraftSession(
   tenantId: string,
   surgery: SurgeryMutationRow,
   actorFiUserId: string | null,
-  phase: SurgeryOsGraftSessionPhase,
+  phase: SurgeryOsGraftSessionPhase
 ): Promise<GraftSessionRow> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
@@ -363,7 +385,8 @@ async function insertGraftTimelineEvent(input: {
     surgery_id: String(row.surgery_id),
     event_kind: String(row.event_kind),
     occurred_at: String(row.occurred_at),
-    recorded_by_fi_user_id: row.recorded_by_fi_user_id != null ? String(row.recorded_by_fi_user_id) : null,
+    recorded_by_fi_user_id:
+      row.recorded_by_fi_user_id != null ? String(row.recorded_by_fi_user_id) : null,
     metadata:
       row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, unknown>)
@@ -409,7 +432,11 @@ async function applyGraftMutation(input: {
   deviceId?: string | null;
   allowAdminOverride?: boolean;
   patch: GraftMutationPatch;
-}): Promise<{ session: GraftSessionRow; event: GraftCountEventRow; timelineEvent: ProcedureEventRow }> {
+}): Promise<{
+  session: GraftSessionRow;
+  event: GraftCountEventRow;
+  timelineEvent: ProcedureEventRow;
+}> {
   const surgery = await loadSurgeryForGraftMutation(input.tenantId, input.surgeryId);
   assertSurgeryGraftCountingAllowed(surgery, input.allowAdminOverride);
 
@@ -417,7 +444,7 @@ async function applyGraftMutation(input: {
     input.tenantId,
     surgery,
     input.actorFiUserId,
-    input.patch.phase ?? sessionPhaseFromAction(input.patch.sourceAction),
+    input.patch.phase ?? sessionPhaseFromAction(input.patch.sourceAction)
   );
 
   if (input.patch.clientSubmissionId?.trim()) {
@@ -454,7 +481,9 @@ async function applyGraftMutation(input: {
           ? session.extraction_lock_device_id
           : session.implantation_lock_device_id,
       lockHeldAt:
-        lockKind === "extraction" ? session.extraction_lock_held_at : session.implantation_lock_held_at,
+        lockKind === "extraction"
+          ? session.extraction_lock_held_at
+          : session.implantation_lock_held_at,
       requestingDeviceId: input.deviceId ?? null,
       nowMs,
     });
@@ -554,7 +583,7 @@ async function applyGraftMutation(input: {
     nextImplanted,
     nextDiscarded,
     nextRemaining,
-    input.patch.reconciliationCompleted === true,
+    input.patch.reconciliationCompleted === true
   );
 
   const supabase = supabaseAdmin();
@@ -583,7 +612,7 @@ async function applyGraftMutation(input: {
         deviceId: input.deviceId.trim(),
         actorFiUserId: input.actorFiUserId,
         nowIso,
-      }),
+      })
     );
   }
 
@@ -608,14 +637,28 @@ async function applyGraftMutation(input: {
       surgery_id: surgery.id,
       session_id: session.id,
       event_type: input.patch.eventType,
-      delta_extracted: input.patch.eventType === "correction" ? nextExtracted - session.extracted_grafts : deltaExtracted,
-      delta_implanted: input.patch.eventType === "correction" ? nextImplanted - session.implanted_grafts : deltaImplanted,
-      delta_discarded: input.patch.eventType === "correction" ? nextDiscarded - session.discarded_grafts : deltaDiscarded,
+      delta_extracted:
+        input.patch.eventType === "correction"
+          ? nextExtracted - session.extracted_grafts
+          : deltaExtracted,
+      delta_implanted:
+        input.patch.eventType === "correction"
+          ? nextImplanted - session.implanted_grafts
+          : deltaImplanted,
+      delta_discarded:
+        input.patch.eventType === "correction"
+          ? nextDiscarded - session.discarded_grafts
+          : deltaDiscarded,
       singles: input.patch.eventSingles ?? input.patch.singles ?? input.patch.deltaSingles ?? null,
       doubles: input.patch.eventDoubles ?? input.patch.doubles ?? input.patch.deltaDoubles ?? null,
       triples: input.patch.eventTriples ?? input.patch.triples ?? input.patch.deltaTriples ?? null,
-      multiples: input.patch.eventMultiples ?? input.patch.multiples ?? input.patch.deltaMultiples ?? null,
-      total_hairs: input.patch.eventTotalHairs ?? input.patch.totalHairs ?? input.patch.deltaTotalHairs ?? null,
+      multiples:
+        input.patch.eventMultiples ?? input.patch.multiples ?? input.patch.deltaMultiples ?? null,
+      total_hairs:
+        input.patch.eventTotalHairs ??
+        input.patch.totalHairs ??
+        input.patch.deltaTotalHairs ??
+        null,
       note: input.patch.note?.trim() || null,
       created_by_fi_user_id: input.actorFiUserId,
       client_submission_id: input.patch.clientSubmissionId?.trim() || null,
@@ -824,17 +867,13 @@ export async function enterTrayGraftCount(input: {
   clientSubmissionId?: string | null;
   allowAdminOverride?: boolean;
 }) {
-  if (
-    input.singles < 0 ||
-    input.doubles < 0 ||
-    input.triples < 0 ||
-    input.multiples < 0
-  ) {
+  if (input.singles < 0 || input.doubles < 0 || input.triples < 0 || input.multiples < 0) {
     throw new Error("Tray composition counts cannot be negative.");
   }
   const trayTotal = input.singles + input.doubles + input.triples + input.multiples;
   const damaged = input.damaged ?? 0;
-  if (trayTotal <= 0 && damaged <= 0) throw new Error("Tray count requires at least one graft or damaged unit.");
+  if (trayTotal <= 0 && damaged <= 0)
+    throw new Error("Tray count requires at least one graft or damaged unit.");
 
   const trayComposition = {
     singles: input.singles,
@@ -909,7 +948,12 @@ export async function correctGraftCount(input: {
   actorFiUserId: string | null;
 }) {
   const surgery = await loadSurgeryForGraftMutation(input.tenantId, input.surgeryId);
-  const session = await getOrCreateGraftSession(input.tenantId, surgery, input.actorFiUserId, "extraction");
+  const session = await getOrCreateGraftSession(
+    input.tenantId,
+    surgery,
+    input.actorFiUserId,
+    "extraction"
+  );
   const magnitude = computeGraftCorrectionMagnitude({
     previous: {
       extracted: session.extracted_grafts,
@@ -924,7 +968,7 @@ export async function correctGraftCount(input: {
   });
   if (requiresLargeCorrectionNote(magnitude) && !input.note?.trim()) {
     throw new Error(
-      `Correction of ${magnitude} or more grafts requires a note explaining the change.`,
+      `Correction of ${magnitude} or more grafts requires a note explaining the change.`
     );
   }
 
@@ -970,7 +1014,8 @@ export async function confirmTrayGraftCount(input: {
     .maybeSingle();
 
   if (error) {
-    if (isMissingDatabaseRelationError(error)) throw new Error("SurgeryOS graft tables are not available.");
+    if (isMissingDatabaseRelationError(error))
+      throw new Error("SurgeryOS graft tables are not available.");
     throw new Error(error.message);
   }
   if (!trayEvent) throw new Error("Tray count event not found.");
@@ -988,7 +1033,7 @@ export async function confirmTrayGraftCount(input: {
       eventType: e.event_type,
       note: e.note,
       createdAt: e.created_at,
-    })),
+    }))
   );
   if (reviewStatus !== "pending") {
     throw new Error(`Tray has already been ${reviewStatus}.`);
@@ -1038,11 +1083,16 @@ export async function reconcileGrafts(input: {
 }) {
   const surgery = await loadSurgeryForGraftMutation(input.tenantId, input.surgeryId);
   assertSurgeryGraftCountingAllowed(surgery, input.allowAdminOverride);
-  const session = await getOrCreateGraftSession(input.tenantId, surgery, input.actorFiUserId, "reconciliation");
+  const session = await getOrCreateGraftSession(
+    input.tenantId,
+    surgery,
+    input.actorFiUserId,
+    "reconciliation"
+  );
   const remaining = computeRemainingGrafts(
     session.extracted_grafts,
     session.implanted_grafts,
-    session.discarded_grafts,
+    session.discarded_grafts
   );
 
   const sessionEvents = await loadGraftCountEventsForSession(input.tenantId, session.id);
@@ -1058,15 +1108,15 @@ export async function reconcileGrafts(input: {
             eventType: ev.event_type,
             note: ev.note,
             createdAt: ev.created_at,
-          })),
+          }))
         ),
-      ]),
+      ])
   );
   const pendingTrayCount = countTrayReviewBuckets(
     sessionEvents.map((e) => ({
       eventType: e.event_type,
-      reviewStatus: e.event_type === "tray_count" ? reviewStatuses.get(e.id) ?? "pending" : null,
-    })),
+      reviewStatus: e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+    }))
   ).pending;
 
   assertGraftReconciliationGate({
@@ -1081,7 +1131,7 @@ export async function reconcileGrafts(input: {
 
   if (remaining !== 0) {
     throw new Error(
-      `Graft reconciliation mismatch: ${remaining} graft(s) unaccounted. Extracted − implanted − discarded must equal zero.`,
+      `Graft reconciliation mismatch: ${remaining} graft(s) unaccounted. Extracted − implanted − discarded must equal zero.`
     );
   }
 
@@ -1119,7 +1169,9 @@ export async function reconcileGrafts(input: {
   return result;
 }
 
-export function graftSessionToTotals(session: GraftSessionRow): ReturnType<typeof buildGraftTotalsFromSession> {
+export function graftSessionToTotals(
+  session: GraftSessionRow
+): ReturnType<typeof buildGraftTotalsFromSession> {
   return buildGraftTotalsFromSession({
     targetGrafts: session.target_grafts,
     extractedGrafts: session.extracted_grafts,
@@ -1135,7 +1187,7 @@ export function graftSessionToTotals(session: GraftSessionRow): ReturnType<typeo
 
 export async function loadGraftSessionsForSurgeries(
   tenantId: string,
-  surgeryIds: string[],
+  surgeryIds: string[]
 ): Promise<Map<string, GraftSessionRow>> {
   const tid = tenantId.trim();
   const ids = surgeryIds.filter(Boolean);
@@ -1164,7 +1216,7 @@ export async function loadGraftSessionsForSurgeries(
 
 export async function loadGraftCountEventsForSurgeries(
   tenantId: string,
-  surgeryIds: string[],
+  surgeryIds: string[]
 ): Promise<Map<string, GraftCountEventRow[]>> {
   const tid = tenantId.trim();
   const ids = surgeryIds.filter(Boolean);
@@ -1227,7 +1279,9 @@ export async function assertGraftReconciliationForPhaseTransition(input: {
   const sessions = await loadGraftSessionsForSurgeries(input.tenantId, [surgery.id]);
   const graftSession = sessions.get(surgery.id);
   if (!graftSession) {
-    throw new Error("Graft reconciliation must be completed before moving to recovery or complete.");
+    throw new Error(
+      "Graft reconciliation must be completed before moving to recovery or complete."
+    );
   }
 
   const sessionEvents = await loadGraftCountEventsForSession(input.tenantId, graftSession.id);
@@ -1243,15 +1297,15 @@ export async function assertGraftReconciliationForPhaseTransition(input: {
             eventType: ev.event_type,
             note: ev.note,
             createdAt: ev.created_at,
-          })),
+          }))
         ),
-      ]),
+      ])
   );
   const pendingTrayCount = countTrayReviewBuckets(
     sessionEvents.map((e) => ({
       eventType: e.event_type,
-      reviewStatus: e.event_type === "tray_count" ? reviewStatuses.get(e.id) ?? "pending" : null,
-    })),
+      reviewStatus: e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+    }))
   ).pending;
 
   assertGraftReconciliationGate({

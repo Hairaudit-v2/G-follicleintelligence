@@ -17,20 +17,32 @@ describe("medicationOsTimeline (pure)", () => {
       assert.equal(mapTherapyEventToTimelineKind("therapy_started"), "therapy.maintenance_started");
     });
     it("maps session_completed", () => {
-      assert.equal(mapTherapyEventToTimelineKind("session_completed"), "therapy.procedure_session_completed");
+      assert.equal(
+        mapTherapyEventToTimelineKind("session_completed"),
+        "therapy.procedure_session_completed"
+      );
     });
     it("maps plan_completed for post_operative to postop_protocol_completed", () => {
-      assert.equal(mapTherapyEventToTimelineKind("plan_completed", "post_operative"), "therapy.postop_protocol_completed");
+      assert.equal(
+        mapTherapyEventToTimelineKind("plan_completed", "post_operative"),
+        "therapy.postop_protocol_completed"
+      );
     });
     it("maps plan_completed for other plan types to plan_completed", () => {
-      assert.equal(mapTherapyEventToTimelineKind("plan_completed", "maintenance"), "therapy.plan_completed");
+      assert.equal(
+        mapTherapyEventToTimelineKind("plan_completed", "maintenance"),
+        "therapy.plan_completed"
+      );
     });
     it("maps plan_cancelled and plan_superseded to plan_stopped", () => {
       assert.equal(mapTherapyEventToTimelineKind("plan_cancelled"), "therapy.plan_stopped");
       assert.equal(mapTherapyEventToTimelineKind("plan_superseded"), "therapy.plan_stopped");
     });
     it("maps pathology_gate_cleared and adverse_event", () => {
-      assert.equal(mapTherapyEventToTimelineKind("pathology_gate_cleared"), "therapy.pathology_gate_cleared");
+      assert.equal(
+        mapTherapyEventToTimelineKind("pathology_gate_cleared"),
+        "therapy.pathology_gate_cleared"
+      );
       assert.equal(mapTherapyEventToTimelineKind("adverse_event"), "therapy.adverse_event");
     });
     it("returns null for adherence_note and other unmapped types", () => {

@@ -12,7 +12,10 @@ import {
 function formatMoney(cents: number, currency: string): string {
   const n = cents / 100;
   try {
-    return new Intl.NumberFormat("en-AU", { style: "currency", currency: currency || "AUD" }).format(n);
+    return new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: currency || "AUD",
+    }).format(n);
   } catch {
     return `${currency} ${n.toFixed(2)}`;
   }
@@ -49,7 +52,9 @@ export function FinancialSurgeryPipelineInline(props: {
 
   const tone = variant === "dark" ? toneDark : toneLight;
   const linkCls =
-    variant === "dark" ? "text-cyan-400/95 hover:text-cyan-300" : "text-blue-300 hover:text-blue-300 hover:underline";
+    variant === "dark"
+      ? "text-cyan-400/95 hover:text-cyan-300"
+      : "text-blue-300 hover:text-blue-300 hover:underline";
 
   const label = muted ? FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY : status.summary_label;
 
@@ -59,7 +64,7 @@ export function FinancialSurgeryPipelineInline(props: {
         <span
           className={cn(
             "inline-flex w-fit max-w-full rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
-            tone,
+            tone
           )}
         >
           {label}
@@ -67,23 +72,36 @@ export function FinancialSurgeryPipelineInline(props: {
         {!muted ? (
           <span className="flex flex-wrap gap-x-3 text-[0.62rem] font-medium">
             {status.task_attention_required ? (
-              <span className={variant === "dark" ? "text-amber-300" : "text-amber-300"}>{AWAITING_FINANCIAL_WORKFLOW_COPY}</span>
+              <span className={variant === "dark" ? "text-amber-300" : "text-amber-300"}>
+                {AWAITING_FINANCIAL_WORKFLOW_COPY}
+              </span>
             ) : null}
             {status.financeApplicationAttention.finance_attention_labels.map((label) => (
-              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-300"}>
+              <span
+                key={label}
+                className={variant === "dark" ? "text-orange-300" : "text-orange-300"}
+              >
                 {label}
               </span>
             ))}
             {status.superReleaseApplicationAttention.super_release_attention_labels.map((label) => (
-              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-300"}>
+              <span
+                key={label}
+                className={variant === "dark" ? "text-orange-300" : "text-orange-300"}
+              >
                 {label}
               </span>
             ))}
-            {status.internationalTransferApplicationAttention.international_transfer_attention_labels.map((label) => (
-              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-300"}>
-                {label}
-              </span>
-            ))}
+            {status.internationalTransferApplicationAttention.international_transfer_attention_labels.map(
+              (label) => (
+                <span
+                  key={label}
+                  className={variant === "dark" ? "text-orange-300" : "text-orange-300"}
+                >
+                  {label}
+                </span>
+              )
+            )}
             <Link href={`${base}/invoices`} className={linkCls}>
               Invoices
             </Link>
@@ -103,7 +121,10 @@ export function FinancialSurgeryPipelineInline(props: {
               Intl transfers
             </Link>
             {caseId ? (
-              <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>
+              <Link
+                href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`}
+                className={linkCls}
+              >
                 Case
               </Link>
             ) : null}
@@ -117,11 +138,15 @@ export function FinancialSurgeryPipelineInline(props: {
     <div
       className={cn(
         "rounded-lg border p-3 text-sm",
-        variant === "dark" ? "border-white/[0.08] bg-white/[0.03]" : "border-white/[0.08] bg-white/[0.03]",
+        variant === "dark"
+          ? "border-white/[0.08] bg-white/[0.03]"
+          : "border-white/[0.08] bg-white/[0.03]"
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", tone)}>{label}</span>
+        <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", tone)}>
+          {label}
+        </span>
         {!muted ? (
           <span className="flex flex-wrap gap-x-3 text-xs">
             <Link href={`${base}/invoices`} className={linkCls}>
@@ -131,7 +156,10 @@ export function FinancialSurgeryPipelineInline(props: {
               Payment requests
             </Link>
             {caseId ? (
-              <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>
+              <Link
+                href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`}
+                className={linkCls}
+              >
                 Case
               </Link>
             ) : null}
@@ -142,11 +170,15 @@ export function FinancialSurgeryPipelineInline(props: {
         <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-400 sm:grid-cols-4">
           <div>
             <dt className="text-gray-500">Paid</dt>
-            <dd className="font-mono text-slate-100">{formatMoney(status.amount_paid_cents, status.currency)}</dd>
+            <dd className="font-mono text-slate-100">
+              {formatMoney(status.amount_paid_cents, status.currency)}
+            </dd>
           </div>
           <div>
             <dt className="text-gray-500">Balance due</dt>
-            <dd className="font-mono text-slate-100">{formatMoney(status.balance_due_cents, status.currency)}</dd>
+            <dd className="font-mono text-slate-100">
+              {formatMoney(status.balance_due_cents, status.currency)}
+            </dd>
           </div>
           <div>
             <dt className="text-gray-500">Next due</dt>
@@ -154,7 +186,9 @@ export function FinancialSurgeryPipelineInline(props: {
           </div>
           <div>
             <dt className="text-gray-500">Latest pay link</dt>
-            <dd className="truncate text-slate-100">{status.latest_payment_request_status ?? "—"}</dd>
+            <dd className="truncate text-slate-100">
+              {status.latest_payment_request_status ?? "—"}
+            </dd>
           </div>
         </dl>
       ) : null}

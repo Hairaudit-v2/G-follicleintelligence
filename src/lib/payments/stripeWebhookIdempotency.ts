@@ -2,7 +2,9 @@
  * Stripe webhook inserts into `fi_payment_webhook_events` use a unique index on (provider, provider_event_id).
  * Treat duplicate inserts as successful idempotent replays.
  */
-export function isStripeWebhookDuplicateInsert(error: { code?: string; message?: string } | null | undefined): boolean {
+export function isStripeWebhookDuplicateInsert(
+  error: { code?: string; message?: string } | null | undefined
+): boolean {
   if (!error) return false;
   if (error.code === "23505") return true;
   const m = error.message ?? "";
@@ -17,7 +19,7 @@ export const isPostgresUniqueViolation = isStripeWebhookDuplicateInsert;
  */
 export function isFiStripeGatewayPaymentIntentDuplicateInsert(
   error: { code?: string; message?: string } | null | undefined,
-  args: { provider: string; paymentIntentId?: string | null | undefined },
+  args: { provider: string; paymentIntentId?: string | null | undefined }
 ): boolean {
   if (!args.paymentIntentId?.trim()) return false;
   if (args.provider.trim().toLowerCase() !== "stripe") return false;

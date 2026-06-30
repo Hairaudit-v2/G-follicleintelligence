@@ -54,7 +54,12 @@ export function DoctorWorkspaceDashboard(props: {
   const snapshotCards = buildDoctorSnapshotCards(base, bundle);
   const priorityItems = buildDoctorPriorities(base, bundle, 5);
   const patientQueue = buildDoctorPatientReviewQueue(base, bundle);
-  const prescriptionModel = buildDoctorPrescriptionWorkspace(base, bundle, recentPrescriptions, patientLabels);
+  const prescriptionModel = buildDoctorPrescriptionWorkspace(
+    base,
+    bundle,
+    recentPrescriptions,
+    patientLabels
+  );
   const treatmentApprovals = buildDoctorTreatmentApprovals(base, bundle);
   const timeline = buildDoctorClinicalTimeline(base, bundle, recentPrescriptions, patientLabels);
 
@@ -71,9 +76,12 @@ export function DoctorWorkspaceDashboard(props: {
               <Stethoscope className="h-4 w-4" aria-hidden />
               FI OS
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Doctor Workspace</h1>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+              Doctor Workspace
+            </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-              Clinical review, patient approvals, prescriptions, consultations, and physician decision-making.
+              Clinical review, patient approvals, prescriptions, consultations, and physician
+              decision-making.
             </p>
             <DoctorWorkspacePrimaryActions base={base} />
           </div>
@@ -93,7 +101,9 @@ export function DoctorWorkspaceDashboard(props: {
             const inner = (
               <>
                 <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {card.value}
+                </p>
                 <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               </>
             );
@@ -123,7 +133,11 @@ export function DoctorWorkspaceDashboard(props: {
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="doctor-priorities-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="doctor-priorities-heading"
+      >
         <SectionHeader
           id="doctor-priorities-heading"
           kicker="Priorities"
@@ -149,14 +163,20 @@ export function DoctorWorkspaceDashboard(props: {
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                      {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                      {item.detail ? (
+                        <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                      ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-emerald-400/70" aria-hidden />
                   </Link>
                 ) : (
-                  <div className={`rounded-xl border px-4 py-4 ${doctorAttentionSeverityClass(item.severity)}`}>
+                  <div
+                    className={`rounded-xl border px-4 py-4 ${doctorAttentionSeverityClass(item.severity)}`}
+                  >
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                 )}
               </li>
@@ -165,7 +185,11 @@ export function DoctorWorkspaceDashboard(props: {
         )}
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="doctor-patient-queue-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="doctor-patient-queue-heading"
+      >
         <SectionHeader
           id="doctor-patient-queue-heading"
           kicker="Queue"
@@ -235,7 +259,11 @@ export function DoctorWorkspaceDashboard(props: {
         )}
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="doctor-prescriptions-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="doctor-prescriptions-heading"
+      >
         <SectionHeader
           id="doctor-prescriptions-heading"
           kicker="Medication"
@@ -246,7 +274,11 @@ export function DoctorWorkspaceDashboard(props: {
         <DoctorPrescriptionWorkspace base={base} model={prescriptionModel} />
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="doctor-approvals-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="doctor-approvals-heading"
+      >
         <SectionHeader
           id="doctor-approvals-heading"
           kicker="Approvals"
@@ -278,7 +310,11 @@ export function DoctorWorkspaceDashboard(props: {
       </DashboardCard>
 
       {timeline.length > 0 ? (
-        <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="doctor-timeline-heading">
+        <DashboardCard
+          className="p-5 sm:p-6"
+          role="region"
+          aria-labelledby="doctor-timeline-heading"
+        >
           <SectionHeader
             id="doctor-timeline-heading"
             kicker="Activity"
@@ -288,9 +324,14 @@ export function DoctorWorkspaceDashboard(props: {
           />
           <ul className="divide-y divide-white/[0.06]">
             {timeline.map((item) => (
-              <li key={item.id} className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
+              <li
+                key={item.id}
+                className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0"
+              >
                 <div className="min-w-0">
-                  <p className="text-xs font-medium tabular-nums text-emerald-400/80">{item.timeLabel}</p>
+                  <p className="text-xs font-medium tabular-nums text-emerald-400/80">
+                    {item.timeLabel}
+                  </p>
                   <p className="mt-0.5 truncate text-sm text-[#CBD5E1]">{item.label}</p>
                 </div>
                 {item.href ? (

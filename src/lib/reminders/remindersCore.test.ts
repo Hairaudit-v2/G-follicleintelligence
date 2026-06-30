@@ -12,18 +12,27 @@ import {
 
 describe("remindersCore — bookingStartsAfterNow", () => {
   it("detects future start", () => {
-    assert.equal(bookingStartsAfterNow("2030-01-01T00:00:00.000Z", Date.parse("2026-01-01T00:00:00.000Z")), true);
-    assert.equal(bookingStartsAfterNow("2020-01-01T00:00:00.000Z", Date.parse("2026-01-01T00:00:00.000Z")), false);
+    assert.equal(
+      bookingStartsAfterNow("2030-01-01T00:00:00.000Z", Date.parse("2026-01-01T00:00:00.000Z")),
+      true
+    );
+    assert.equal(
+      bookingStartsAfterNow("2020-01-01T00:00:00.000Z", Date.parse("2026-01-01T00:00:00.000Z")),
+      false
+    );
   });
 });
 
 describe("remindersCore — template rendering", () => {
   it("replaces known placeholders", () => {
-    const out = renderReminderText("Hi {{patient_name}}, see you at {{booking_time}} at {{clinic_name}}.", {
-      patient_name: "Alex",
-      booking_time: "Mon, Jun 1, 10:00 AM",
-      clinic_name: "Evolved Hair",
-    });
+    const out = renderReminderText(
+      "Hi {{patient_name}}, see you at {{booking_time}} at {{clinic_name}}.",
+      {
+        patient_name: "Alex",
+        booking_time: "Mon, Jun 1, 10:00 AM",
+        clinic_name: "Evolved Hair",
+      }
+    );
     assert.equal(out, "Hi Alex, see you at Mon, Jun 1, 10:00 AM at Evolved Hair.");
   });
 

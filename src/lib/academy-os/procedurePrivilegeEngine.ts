@@ -134,23 +134,25 @@ function collectPrivilegeWarnings(
 /**
  * Finds the best matching privilege for a procedure, preferring clinic-specific over tenant-wide.
  */
-export function findMatchingProcedurePrivilege(
-  input: FindMatchingProcedurePrivilegeInput
-): { privilege: FiStaffProcedurePrivilegeRow | null; usedTenantWideFallback: boolean } {
+export function findMatchingProcedurePrivilege(input: FindMatchingProcedurePrivilegeInput): {
+  privilege: FiStaffProcedurePrivilegeRow | null;
+  usedTenantWideFallback: boolean;
+} {
   const at = input.at ?? new Date();
   const procedureKey = normalizeKey(input.procedureKey);
   const clinicId = input.clinicId?.trim() || null;
   const minimumLevel = input.minimumLevel;
 
-  const candidates = input.privileges.filter((p) => normalizeKey(String(p.procedureKey)) === procedureKey);
+  const candidates = input.privileges.filter(
+    (p) => normalizeKey(String(p.procedureKey)) === procedureKey
+  );
 
-  const clinicSpecific = clinicId
-    ? candidates.filter((p) => p.clinicId?.trim() === clinicId)
-    : [];
+  const clinicSpecific = clinicId ? candidates.filter((p) => p.clinicId?.trim() === clinicId) : [];
   const tenantWide = candidates.filter((p) => !p.clinicId?.trim());
 
   const ordered = clinicSpecific.length > 0 ? clinicSpecific : tenantWide;
-  const usedTenantWideFallback = clinicId != null && clinicSpecific.length === 0 && tenantWide.length > 0;
+  const usedTenantWideFallback =
+    clinicId != null && clinicSpecific.length === 0 && tenantWide.length > 0;
 
   let best: FiStaffProcedurePrivilegeRow | null = null;
 
@@ -163,7 +165,9 @@ export function findMatchingProcedurePrivilege(
   }
 
   if (!best && ordered.length > 0) {
-    const sorted = [...ordered].sort((a, b) => comparePrivilegeLevels(b.privilegeLevel, a.privilegeLevel));
+    const sorted = [...ordered].sort((a, b) =>
+      comparePrivilegeLevels(b.privilegeLevel, a.privilegeLevel)
+    );
     return { privilege: sorted[0] ?? null, usedTenantWideFallback };
   }
 
@@ -397,7 +401,9 @@ export function buildProcedurePrivilegeEligibilitySnapshot(input: {
 }): Record<string, unknown> {
   return {
     procedure_privilege_status: input.eligibility.status,
-    required_procedure_keys: input.eligibility.missingRequirements.map((m) => m.requiredProcedureKey),
+    required_procedure_keys: input.eligibility.missingRequirements.map(
+      (m) => m.requiredProcedureKey
+    ),
     matched_privileges: input.eligibility.matchedPrivilege
       ? [
           {

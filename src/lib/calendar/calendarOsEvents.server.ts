@@ -59,4 +59,7 @@ export async function loadFiCalendarEventsForOverlap(
   return rows;
 }
 
-export { mapFiCalendarEventsToOperationalCalendar, CALENDAR_OS_EVENTS_OVERLAP_CAP } from "@/src/lib/calendar/calendarOsEventsCore";
+export {
+  mapFiCalendarEventsToOperationalCalendar,
+  CALENDAR_OS_EVENTS_OVERLAP_CAP,
+} from "@/src/lib/calendar/calendarOsEventsCore";

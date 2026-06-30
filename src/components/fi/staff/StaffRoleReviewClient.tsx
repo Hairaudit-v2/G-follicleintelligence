@@ -48,7 +48,9 @@ export function StaffRoleReviewClient({
   const router = useRouter();
   const base = `/fi-admin/${tenantId}`;
   const [rows, setRows] = useState(initialRows);
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(initialRows.map((r) => r.staffId)));
+  const [selected, setSelected] = useState<Set<string>>(
+    () => new Set(initialRows.map((r) => r.staffId))
+  );
   const [bulkClinicId, setBulkClinicId] = useState("");
   const [expandedHours, setExpandedHours] = useState<Set<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
@@ -139,11 +141,16 @@ export function StaffRoleReviewClient({
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-8 text-center">
           <h1 className="text-xl font-semibold text-emerald-200">All staff roles assigned</h1>
           <p className="mt-2 text-sm text-emerald-300">
-            No active staff remain with role <code className="rounded bg-emerald-500/15 px-1 text-xs">needs_review</code>.
-            Payroll-imported staff can now appear in clinical booking pickers once their assigned roles are saved.
+            No active staff remain with role{" "}
+            <code className="rounded bg-emerald-500/15 px-1 text-xs">needs_review</code>.
+            Payroll-imported staff can now appear in clinical booking pickers once their assigned
+            roles are saved.
           </p>
           <p className="mt-6">
-            <Link href={`${base}/staff`} className="font-medium text-emerald-300 underline-offset-2 hover:underline">
+            <Link
+              href={`${base}/staff`}
+              className="font-medium text-emerald-300 underline-offset-2 hover:underline"
+            >
               Back to Staff directory
             </Link>
           </p>
@@ -155,18 +162,22 @@ export function StaffRoleReviewClient({
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-wide text-amber-300">Payroll follow-up</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-amber-300">
+          Payroll follow-up
+        </p>
         <h1 className="text-2xl font-semibold text-slate-100">Assign staff roles</h1>
         <p className="max-w-3xl text-sm text-slate-400">
-          Review payroll-imported team members and assign operational roles before they can be used on the calendar or as
-          clinical providers. Payroll metadata below is read-only.
+          Review payroll-imported team members and assign operational roles before they can be used
+          on the calendar or as clinical providers. Payroll metadata below is read-only.
         </p>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="rounded-full bg-amber-400/15 px-3 py-1 font-semibold text-amber-200">
             {progress.assigned} of {progress.total} staff roles assigned
           </span>
           {progress.isComplete ? (
-            <span className="text-emerald-300">Ready to save all — every row has an operational role.</span>
+            <span className="text-emerald-300">
+              Ready to save all — every row has an operational role.
+            </span>
           ) : (
             <span className="text-gray-500">{progress.remaining} remaining with needs_review</span>
           )}
@@ -185,14 +196,19 @@ export function StaffRoleReviewClient({
       </header>
 
       {error ? (
-        <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+        <div
+          className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
 
       <section className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-slate-100">Bulk tools</h2>
-        <p className="mt-1 text-xs text-gray-500">Select rows below, apply bulk changes, then save each row or save all.</p>
+        <p className="mt-1 text-xs text-gray-500">
+          Select rows below, apply bulk changes, then save each row or save all.
+        </p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="block text-xs font-medium text-slate-300">
             Primary clinic
@@ -209,13 +225,31 @@ export function StaffRoleReviewClient({
               ))}
             </select>
           </label>
-          <Button type="button" variant="outline" size="sm" disabled={!selected.size || pending} onClick={applyBulkClinic}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!selected.size || pending}
+            onClick={applyBulkClinic}
+          >
             Set clinic for selected ({selected.size})
           </Button>
-          <Button type="button" variant="outline" size="sm" disabled={!selected.size || pending} onClick={applyBulkHours}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!selected.size || pending}
+            onClick={applyBulkHours}
+          >
             Default Perth hours for selected
           </Button>
-          <Button type="button" variant="outline" size="sm" disabled={!selected.size || pending} onClick={applyBulkAdmin}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!selected.size || pending}
+            onClick={applyBulkAdmin}
+          >
             Mark selected as admin (non-clinical)
           </Button>
         </div>
@@ -226,7 +260,12 @@ export function StaffRoleReviewClient({
           <thead className="bg-white/[0.03] text-left text-xs font-medium uppercase tracking-wide text-gray-500">
             <tr>
               <th className="px-3 py-2">
-                <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} aria-label="Select all" />
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="Select all"
+                />
               </th>
               <th className="px-3 py-2">Staff</th>
               <th className="px-3 py-2">Payroll (read-only)</th>
@@ -306,7 +345,9 @@ export function StaffRoleReviewClient({
                         <input
                           className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                           value={row.position_title ?? ""}
-                          onChange={(e) => patchRow(row.staffId, { position_title: e.target.value || null })}
+                          onChange={(e) =>
+                            patchRow(row.staffId, { position_title: e.target.value || null })
+                          }
                         />
                       </label>
                       <label className="block text-xs font-medium text-slate-300">
@@ -314,7 +355,9 @@ export function StaffRoleReviewClient({
                         <select
                           className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                           value={row.primary_clinic_id ?? ""}
-                          onChange={(e) => patchRow(row.staffId, { primary_clinic_id: e.target.value || null })}
+                          onChange={(e) =>
+                            patchRow(row.staffId, { primary_clinic_id: e.target.value || null })
+                          }
                         >
                           <option value="">— None —</option>
                           {clinics.map((c) => (
@@ -369,10 +412,15 @@ export function StaffRoleReviewClient({
 
       {rows.some((r) => r.payroll) ? (
         <details className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-4">
-          <summary className="cursor-pointer text-sm font-medium text-slate-200">Sample payroll metadata panel (read-only)</summary>
+          <summary className="cursor-pointer text-sm font-medium text-slate-200">
+            Sample payroll metadata panel (read-only)
+          </summary>
           <div className="mt-4 max-w-2xl">
             {rows.find((r) => r.payroll)?.payroll ? (
-              <StaffPayrollMetadataPanel payroll={rows.find((r) => r.payroll)!.payroll!} variant="light" />
+              <StaffPayrollMetadataPanel
+                payroll={rows.find((r) => r.payroll)!.payroll!}
+                variant="light"
+              />
             ) : null}
           </div>
         </details>

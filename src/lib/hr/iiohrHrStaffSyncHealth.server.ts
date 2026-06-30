@@ -10,7 +10,9 @@ import {
 } from "@/src/lib/hr/iiohrHrStaffSyncHealth";
 import { listRecentStaffSyncRunsForTenant } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
 
-function mapRuns(rows: Awaited<ReturnType<typeof listRecentStaffSyncRunsForTenant>>): StaffSyncRunHealthRef[] {
+function mapRuns(
+  rows: Awaited<ReturnType<typeof listRecentStaffSyncRunsForTenant>>
+): StaffSyncRunHealthRef[] {
   return rows.map((r) => ({
     status: r.status,
     started_at: r.started_at,
@@ -20,7 +22,9 @@ function mapRuns(rows: Awaited<ReturnType<typeof listRecentStaffSyncRunsForTenan
   }));
 }
 
-export async function loadIiohrHrStaffSyncHealthJson(getEnv: (k: string) => string | undefined): Promise<IiohrHrStaffSyncHealthJson> {
+export async function loadIiohrHrStaffSyncHealthJson(
+  getEnv: (k: string) => string | undefined
+): Promise<IiohrHrStaffSyncHealthJson> {
   const tid = getEnv("EVOLVED_PERTH_TENANT_ID")?.trim() ?? null;
   const hours = parseStaffSyncStaleWarningHours(getEnv);
   const validTenant = tid && z.string().uuid().safeParse(tid).success;

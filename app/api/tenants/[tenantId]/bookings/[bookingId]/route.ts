@@ -2,16 +2,25 @@
  * PATCH /api/tenants/[tenantId]/bookings/[bookingId]
  */
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { bookingUpdateBodySchema } from "@/src/lib/bookings/bookingApiSchemas";
 import { updateBooking } from "@/src/lib/bookings/server";
 
 export const dynamic = "force-dynamic";
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ tenantId: string; bookingId: string }> }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; bookingId: string }> }
+) {
   try {
     const { tenantId, bookingId } = await params;
-    if (!tenantId?.trim() || !bookingId?.trim()) return crmJsonError(400, "Missing tenantId or bookingId.");
+    if (!tenantId?.trim() || !bookingId?.trim())
+      return crmJsonError(400, "Missing tenantId or bookingId.");
 
     const body = await req.json().catch(() => ({}));
     const adminKey = extractAdminKeyFromRequest(req, body);

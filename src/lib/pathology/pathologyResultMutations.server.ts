@@ -17,11 +17,13 @@ function mapResult(row: Record<string, unknown>): PathologyResultRow {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
     patient_id: String(row.patient_id),
-    pathology_request_id: row.pathology_request_id != null ? String(row.pathology_request_id) : null,
+    pathology_request_id:
+      row.pathology_request_id != null ? String(row.pathology_request_id) : null,
     result_date: String(row.result_date ?? "").slice(0, 10),
     provider_name: row.provider_name != null ? String(row.provider_name) : null,
     source_type: String(row.source_type) as PathologyResultRow["source_type"],
-    uploaded_file_bucket: row.uploaded_file_bucket != null ? String(row.uploaded_file_bucket) : null,
+    uploaded_file_bucket:
+      row.uploaded_file_bucket != null ? String(row.uploaded_file_bucket) : null,
     uploaded_file_path: row.uploaded_file_path != null ? String(row.uploaded_file_path) : null,
     status: String(row.status) as PathologyResultStatus,
     clinical_summary: row.clinical_summary != null ? String(row.clinical_summary) : null,
@@ -56,7 +58,11 @@ function mapItem(row: Record<string, unknown>): PathologyResultItemRow {
   };
 }
 
-export function buildPathologyResultPdfStoragePath(tenantId: string, patientId: string, resultId: string): string {
+export function buildPathologyResultPdfStoragePath(
+  tenantId: string,
+  patientId: string,
+  resultId: string
+): string {
   const tid = tenantId.trim();
   const pid = patientId.trim();
   const rid = resultId.trim();
@@ -72,8 +78,17 @@ export type PathologyResultItemInput = {
   flag: PathologyResultItemFlag;
 };
 
-async function assertPatientInTenant(supabase: SupabaseClient, tenantId: string, patientId: string): Promise<void> {
-  const { data, error } = await supabase.from("fi_patients").select("id").eq("tenant_id", tenantId).eq("id", patientId).maybeSingle();
+async function assertPatientInTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<void> {
+  const { data, error } = await supabase
+    .from("fi_patients")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("id", patientId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Patient not found for tenant.");
 }
@@ -101,7 +116,11 @@ async function replaceResultItems(
   resultId: string,
   items: PathologyResultItemInput[]
 ): Promise<PathologyResultItemRow[]> {
-  const { error: delErr } = await supabase.from("fi_pathology_result_items").delete().eq("tenant_id", tenantId).eq("result_id", resultId);
+  const { error: delErr } = await supabase
+    .from("fi_pathology_result_items")
+    .delete()
+    .eq("tenant_id", tenantId)
+    .eq("result_id", resultId);
   if (delErr) throw new Error(delErr.message);
 
   const filtered = items.filter((i) => i.test_label.trim().length > 0);
@@ -120,7 +139,10 @@ async function replaceResultItems(
     metadata: {},
   }));
 
-  const { data: rows, error: insErr } = await supabase.from("fi_pathology_result_items").insert(payloads).select("*");
+  const { data: rows, error: insErr } = await supabase
+    .from("fi_pathology_result_items")
+    .insert(payloads)
+    .select("*");
   if (insErr) throw new Error(insErr.message);
   return ((rows ?? []) as Record<string, unknown>[]).map(mapItem);
 }
@@ -173,7 +195,12 @@ async function appendBloodResultReviewed(params: {
   });
 }
 
-async function appendBloodResultArchived(params: { tenantId: string; patientId: string; result: PathologyResultRow; markerCount: number }): Promise<void> {
+async function appendBloodResultArchived(params: {
+  tenantId: string;
+  patientId: string;
+  result: PathologyResultRow;
+  markerCount: number;
+}): Promise<void> {
   await appendCrmActivityEvent({
     tenantId: params.tenantId,
     patientId: params.patientId,
@@ -209,7 +236,10 @@ export type CreatePathologyResultOutput = {
   items: PathologyResultItemRow[];
 };
 
-export async function createPathologyResult(input: CreatePathologyResultInput, client?: SupabaseClient): Promise<CreatePathologyResultOutput> {
+export async function createPathologyResult(
+  input: CreatePathologyResultInput,
+  client?: SupabaseClient
+): Promise<CreatePathologyResultOutput> {
   const supabase = client ?? supabaseAdmin();
   const tid = input.tenantId.trim();
   const pid = input.patientId.trim();
@@ -258,13 +288,18 @@ export async function createPathologyResult(input: CreatePathologyResultInput, c
 
   if (hasPdf && input.pdfBytes) {
     const path = buildPathologyResultPdfStoragePath(tid, pid, result.id);
-    const { error: upErr } = await supabase.storage.from(PATHOLOGY_PATIENT_PDF_BUCKET).upload(path, input.pdfBytes, {
-      contentType: "application/pdf",
-      upsert: true,
-    });
+    const { error: upErr } = await supabase.storage
+      .from(PATHOLOGY_PATIENT_PDF_BUCKET)
+      .upload(path, input.pdfBytes, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
     if (upErr) throw new Error(upErr.message);
 
-    const nextMeta = { ...result.metadata, original_filename: input.originalFilename?.trim() || result.metadata.original_filename };
+    const nextMeta = {
+      ...result.metadata,
+      original_filename: input.originalFilename?.trim() || result.metadata.original_filename,
+    };
     const { data: upd, error: ue } = await supabase
       .from("fi_pathology_results")
       .update({
@@ -289,7 +324,12 @@ export async function createPathologyResult(input: CreatePathologyResultInput, c
   });
 
   if (initialStatus === "reviewed") {
-    await appendBloodResultReviewed({ tenantId: tid, patientId: pid, result, markerCount: items.length });
+    await appendBloodResultReviewed({
+      tenantId: tid,
+      patientId: pid,
+      result,
+      markerCount: items.length,
+    });
   }
 
   return { result, items };
@@ -448,7 +488,12 @@ export async function markPathologyResultReviewed(
   return result;
 }
 
-export async function archivePathologyResult(tenantId: string, patientId: string, resultId: string, client?: SupabaseClient): Promise<PathologyResultRow> {
+export async function archivePathologyResult(
+  tenantId: string,
+  patientId: string,
+  resultId: string,
+  client?: SupabaseClient
+): Promise<PathologyResultRow> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
   const pid = patientId.trim();

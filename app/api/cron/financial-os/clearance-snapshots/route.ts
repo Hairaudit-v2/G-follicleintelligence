@@ -30,7 +30,9 @@ async function handle(req: NextRequest) {
   const runDateYmd = url.searchParams.get("date")?.trim() || new Date().toISOString().slice(0, 10);
   const tenantId = url.searchParams.get("tenantId")?.trim() || null;
   const horizonRaw = Number(url.searchParams.get("horizonDays") ?? "14");
-  const horizonDays = Number.isFinite(horizonRaw) ? Math.min(60, Math.max(1, Math.floor(horizonRaw))) : 14;
+  const horizonDays = Number.isFinite(horizonRaw)
+    ? Math.min(60, Math.max(1, Math.floor(horizonRaw)))
+    : 14;
   const limitRaw = Number(url.searchParams.get("limit") ?? "200");
   const limit = Number.isFinite(limitRaw) ? Math.min(500, Math.max(1, Math.floor(limitRaw))) : 200;
 

@@ -107,7 +107,14 @@ export function GoogleCalendarInboundScopeCard({
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const runAction = useCallback(
-    (fn: () => Promise<{ ok: boolean; error?: string; message?: string; summary?: GoogleCalendarInboundSyncNowSummary }>) => {
+    (
+      fn: () => Promise<{
+        ok: boolean;
+        error?: string;
+        message?: string;
+        summary?: GoogleCalendarInboundSyncNowSummary;
+      }>
+    ) => {
       setError(null);
       setActionMessage(null);
       startTransition(async () => {
@@ -141,9 +148,7 @@ export function GoogleCalendarInboundScopeCard({
           return;
         }
         setActionMessage(
-          isEnabled
-            ? "Calendar enabled for inbound sync."
-            : "Calendar disabled for inbound sync."
+          isEnabled ? "Calendar enabled for inbound sync." : "Calendar disabled for inbound sync."
         );
         router.refresh();
       });
@@ -184,11 +189,7 @@ export function GoogleCalendarInboundScopeCard({
             <StatCard label="Last sync" value={formatIso(stats.lastSyncAt)} />
             <StatCard
               label="Last sync result"
-              value={
-                stats.lastSyncResult
-                  ? formatSyncStatus(stats.lastSyncResult.status)
-                  : "—"
-              }
+              value={stats.lastSyncResult ? formatSyncStatus(stats.lastSyncResult.status) : "—"}
               className={
                 stats.lastSyncResult
                   ? stats.lastSyncResult.status === "success"
@@ -255,9 +256,7 @@ export function GoogleCalendarInboundScopeCard({
               {error}
             </p>
           ) : null}
-          {actionMessage ? (
-            <p className="mt-3 text-sm text-[#94A3B8]">{actionMessage}</p>
-          ) : null}
+          {actionMessage ? <p className="mt-3 text-sm text-[#94A3B8]">{actionMessage}</p> : null}
           {syncSummary ? <SyncNowSummaryPanel summary={syncSummary} /> : null}
 
           <div className="mt-4 overflow-x-auto">
@@ -297,16 +296,12 @@ export function GoogleCalendarInboundScopeCard({
                               onChange={(e) => handleToggle(cal.id, e.target.checked)}
                               className="rounded border-white/20"
                             />
-                            <span className="text-xs">{cal.isEnabled ? "Enabled" : "Disabled"}</span>
+                            <span className="text-xs">
+                              {cal.isEnabled ? "Enabled" : "Disabled"}
+                            </span>
                           </label>
                         ) : (
-                          <span
-                            className={
-                              cal.isEnabled
-                                ? "text-emerald-300"
-                                : "text-slate-400"
-                            }
-                          >
+                          <span className={cal.isEnabled ? "text-emerald-300" : "text-slate-400"}>
                             {cal.isEnabled ? "Enabled" : "Disabled"}
                           </span>
                         )}

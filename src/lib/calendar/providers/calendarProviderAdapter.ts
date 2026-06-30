@@ -49,33 +49,29 @@ export type ListEventsResult = {
 export interface CalendarProviderAdapter {
   readonly provider: CalendarProviderName;
 
-  createEvent(
-    input: {
-      tenantId: string;
-      calendarId: string;
+  createEvent(input: {
+    tenantId: string;
+    calendarId: string;
+    title: string;
+    description?: string | null;
+    location?: string | null;
+    startTime: string;
+    endTime: string;
+    addGoogleMeet?: boolean;
+  }): Promise<{ ok: true; event: NormalizedCalendarEvent } | { ok: false; error: string }>;
+
+  updateEvent(input: {
+    tenantId: string;
+    calendarId: string;
+    externalEventId: string;
+    patch: Partial<{
       title: string;
-      description?: string | null;
-      location?: string | null;
+      description: string | null;
+      location: string | null;
       startTime: string;
       endTime: string;
-      addGoogleMeet?: boolean;
-    }
-  ): Promise<{ ok: true; event: NormalizedCalendarEvent } | { ok: false; error: string }>;
-
-  updateEvent(
-    input: {
-      tenantId: string;
-      calendarId: string;
-      externalEventId: string;
-      patch: Partial<{
-        title: string;
-        description: string | null;
-        location: string | null;
-        startTime: string;
-        endTime: string;
-      }>;
-    }
-  ): Promise<{ ok: true; event: NormalizedCalendarEvent } | { ok: false; error: string }>;
+    }>;
+  }): Promise<{ ok: true; event: NormalizedCalendarEvent } | { ok: false; error: string }>;
 
   deleteEvent(input: {
     tenantId: string;
@@ -87,11 +83,16 @@ export interface CalendarProviderAdapter {
     tenantId: string;
     calendarId: string;
     externalEventId: string;
-  }): Promise<{ ok: true; event: NormalizedCalendarEvent } | { ok: false; error: string; notFound?: boolean }>;
+  }): Promise<
+    { ok: true; event: NormalizedCalendarEvent } | { ok: false; error: string; notFound?: boolean }
+  >;
 
   listEvents(
     input: ListEventsOptions & { tenantId: string }
-  ): Promise<{ ok: true; result: ListEventsResult } | { ok: false; error: string; syncTokenInvalid?: boolean }>;
+  ): Promise<
+    | { ok: true; result: ListEventsResult }
+    | { ok: false; error: string; syncTokenInvalid?: boolean }
+  >;
 
   subscribeWebhook(input: {
     tenantId: string;
@@ -108,7 +109,9 @@ export interface CalendarProviderAdapter {
     resourceId: string;
   }): Promise<{ ok: true } | { ok: false; error: string }>;
 
-  refreshToken(tenantId: string): Promise<{ ok: true; accessToken: string } | { ok: false; error: string }>;
+  refreshToken(
+    tenantId: string
+  ): Promise<{ ok: true; accessToken: string } | { ok: false; error: string }>;
 
   normalizeEvent(event: GoogleCalendarApiEvent, calendarId: string): NormalizedCalendarEvent;
 }
@@ -126,7 +129,10 @@ export function deriveCalendarEventOwnershipSource(
   if (local.patientId || local.leadId) {
     return "fi_system";
   }
-  if (local.metadata?.imported_from_review === true || local.metadata?.ownership === "imported_external") {
+  if (
+    local.metadata?.imported_from_review === true ||
+    local.metadata?.ownership === "imported_external"
+  ) {
     return "imported_external";
   }
   return "google_external";
@@ -143,17 +149,21 @@ export const GOOGLE_MIRRORABLE_DISPLAY_FIELDS = [
 ] as const;
 
 export function isRiskyGoogleChangeForFiOwnedEvent(
-  local: Pick<FiCalendarEvent, "title" | "startTime" | "endTime" | "metadata" | "patientId" | "leadId">,
+  local: Pick<
+    FiCalendarEvent,
+    "title" | "startTime" | "endTime" | "metadata" | "patientId" | "leadId"
+  >,
   incoming: Pick<NormalizedCalendarEvent, "title" | "startTime" | "endTime">
 ): boolean {
   if (deriveCalendarEventOwnershipSource(local) !== "fi_system") return false;
 
-  const titleChanged =
-    local.title.trim().toLowerCase() !== incoming.title.trim().toLowerCase();
+  const titleChanged = local.title.trim().toLowerCase() !== incoming.title.trim().toLowerCase();
   const startChanged = Boolean(
     local.startTime && incoming.startTime && local.startTime !== incoming.startTime
   );
-  const endChanged = Boolean(local.endTime && incoming.endTime && local.endTime !== incoming.endTime);
+  const endChanged = Boolean(
+    local.endTime && incoming.endTime && local.endTime !== incoming.endTime
+  );
 
   return titleChanged || startChanged || endChanged;
 }

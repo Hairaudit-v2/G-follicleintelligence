@@ -23,10 +23,17 @@ export function CalendarResourceColumn({
           headerClassName
         )}
       >
-        <div className="truncate text-[11px] font-semibold text-slate-100 dark:text-slate-100">{label}</div>
-        {subtitle ? <div className="truncate text-[10px] text-slate-400 dark:text-slate-400">{subtitle}</div> : null}
+        <div className="truncate text-[11px] font-semibold text-slate-100 dark:text-slate-100">
+          {label}
+        </div>
+        {subtitle ? (
+          <div className="truncate text-[10px] text-slate-400 dark:text-slate-400">{subtitle}</div>
+        ) : null}
       </div>
-      <div className="relative flex-1 bg-[#0F1629]/80 backdrop-blur-md dark:bg-slate-950" style={{ minHeight: bodyMinHeightPx }}>
+      <div
+        className="relative flex-1 bg-[#0F1629]/80 backdrop-blur-md dark:bg-slate-950"
+        style={{ minHeight: bodyMinHeightPx }}
+      >
         {children}
       </div>
     </div>

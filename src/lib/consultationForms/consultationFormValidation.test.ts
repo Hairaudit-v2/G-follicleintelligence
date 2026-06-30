@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { bodyAreaMapHasAnnotations, isWellFormedBodyAreaMapValue, normalizeBodyAreaMapValue } from "./bodyAreaMapModel";
+import {
+  bodyAreaMapHasAnnotations,
+  isWellFormedBodyAreaMapValue,
+  normalizeBodyAreaMapValue,
+} from "./bodyAreaMapModel";
 import type { ConsultationFormSchema } from "./consultationFormTypes";
 import {
   isValidBodyAreaMapJsonShape,
@@ -82,7 +86,9 @@ describe("body_area_map validation", () => {
 
   it("validateBodyAreaMapShapesInValues flags bad annotations type", () => {
     const schema: ConsultationFormSchema = {
-      sections: [{ id: "s", title: "S", fields: [{ id: "m", label: "Map", type: "body_area_map" }] }],
+      sections: [
+        { id: "s", title: "S", fields: [{ id: "m", label: "Map", type: "body_area_map" }] },
+      ],
     };
     const issues = validateBodyAreaMapShapesInValues(schema, { m: { annotations: 3 } });
     assert.equal(issues.length, 1);
@@ -92,10 +98,16 @@ describe("body_area_map validation", () => {
   it("required body_area_map needs at least one annotation", () => {
     const schema: ConsultationFormSchema = {
       sections: [
-        { id: "s", title: "S", fields: [{ id: "m", label: "Map", type: "body_area_map", required: true }] },
+        {
+          id: "s",
+          title: "S",
+          fields: [{ id: "m", label: "Map", type: "body_area_map", required: true }],
+        },
       ],
     };
-    const empty = validateConsultationFormRequiredFields(schema, { m: { view: "crown", annotations: [] } });
+    const empty = validateConsultationFormRequiredFields(schema, {
+      m: { view: "crown", annotations: [] },
+    });
     assert.ok(empty.some((i) => i.fieldId === "m"));
     const ok = validateConsultationFormRequiredFields(schema, {
       m: {
@@ -121,14 +133,44 @@ describe("body_area_map validation", () => {
   it("normalizeBodyAreaMapValue clamps coordinates", () => {
     const n = normalizeBodyAreaMapValue({
       view: "crown",
-      annotations: [{ id: "a", view: "crown", x: 500, y: -10, label: "scar", severity: "severe", tags: ["scar"], notes: "x", createdAt: "t" }],
+      annotations: [
+        {
+          id: "a",
+          view: "crown",
+          x: 500,
+          y: -10,
+          label: "scar",
+          severity: "severe",
+          tags: ["scar"],
+          notes: "x",
+          createdAt: "t",
+        },
+      ],
     });
     assert.equal(n.annotations[0]?.x, 100);
     assert.equal(n.annotations[0]?.y, 0);
   });
 
   it("bodyAreaMapHasAnnotations is true when annotations exist", () => {
-    assert.equal(bodyAreaMapHasAnnotations({ view: "crown", annotations: [{ id: "1", view: "crown", x: 1, y: 2, label: "scar", severity: "mild", tags: [], notes: "", createdAt: "t" }] }), true);
+    assert.equal(
+      bodyAreaMapHasAnnotations({
+        view: "crown",
+        annotations: [
+          {
+            id: "1",
+            view: "crown",
+            x: 1,
+            y: 2,
+            label: "scar",
+            severity: "mild",
+            tags: [],
+            notes: "",
+            createdAt: "t",
+          },
+        ],
+      }),
+      true
+    );
     assert.equal(bodyAreaMapHasAnnotations({ view: "crown", annotations: [] }), false);
   });
 });
@@ -226,13 +268,22 @@ describe("Hair Loss Treatment template validation", () => {
       follow_up_urgency: "routine",
     };
 
-    const requiredIssues = validateConsultationFormRequiredFields(hairLossTreatmentConsultationSchemaV1, values);
+    const requiredIssues = validateConsultationFormRequiredFields(
+      hairLossTreatmentConsultationSchemaV1,
+      values
+    );
     assert.equal(requiredIssues.length, 0);
 
-    const shapeIssues = validateVoiceNoteClinicalNoteShapesInValues(hairLossTreatmentConsultationSchemaV1, values);
+    const shapeIssues = validateVoiceNoteClinicalNoteShapesInValues(
+      hairLossTreatmentConsultationSchemaV1,
+      values
+    );
     assert.equal(shapeIssues.length, 0);
 
-    const mapIssues = validateBodyAreaMapShapesInValues(hairLossTreatmentConsultationSchemaV1, values);
+    const mapIssues = validateBodyAreaMapShapesInValues(
+      hairLossTreatmentConsultationSchemaV1,
+      values
+    );
     assert.equal(mapIssues.length, 0);
   });
 });

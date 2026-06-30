@@ -27,8 +27,12 @@ export function FinancialCaseAccountsReceivableCard(props: {
 }) {
   const { tenantId, caseId, summary, currency = "AUD", variant = "light" } = props;
   const isLight = variant === "light";
-  const shell = isLight ? "rounded border border-white/[0.08] bg-white/[0.03] p-3" : "rounded-lg border border-white/[0.06] bg-white/[0.02] p-3";
-  const titleCls = isLight ? "text-xs font-semibold text-slate-100" : "text-xs font-semibold text-slate-100";
+  const shell = isLight
+    ? "rounded border border-white/[0.08] bg-white/[0.03] p-3"
+    : "rounded-lg border border-white/[0.06] bg-white/[0.02] p-3";
+  const titleCls = isLight
+    ? "text-xs font-semibold text-slate-100"
+    : "text-xs font-semibold text-slate-100";
   const metaCls = isLight ? "text-[11px] text-slate-400" : "text-[11px] text-slate-400";
   const queueHref = `/fi-admin/${tenantId}/financial-os/accounts-receivable`;
 
@@ -48,11 +52,17 @@ export function FinancialCaseAccountsReceivableCard(props: {
     <div className={shell}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className={titleCls}>Accounts receivable</p>
-        <FinancialOsRecordStatusBadge status={displayTone(summary.display_status)} label={summary.display_label} />
+        <FinancialOsRecordStatusBadge
+          status={displayTone(summary.display_status)}
+          label={summary.display_label}
+        />
       </div>
       <p className={`mt-1 ${metaCls}`}>
         {summary.open_cases.length} open case(s) · {currency}{" "}
-        {(summary.total_outstanding_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+        {(summary.total_outstanding_cents / 100).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}{" "}
         outstanding
       </p>
       {summary.open_cases.length > 0 ? (
@@ -68,7 +78,11 @@ export function FinancialCaseAccountsReceivableCard(props: {
       <div className="mt-2">
         <Link
           href={queueHref}
-          className={isLight ? "text-xs font-medium text-blue-300 hover:underline" : "text-xs font-medium text-cyan-400/95 hover:text-cyan-300"}
+          className={
+            isLight
+              ? "text-xs font-medium text-blue-300 hover:underline"
+              : "text-xs font-medium text-cyan-400/95 hover:text-cyan-300"
+          }
         >
           Open AR work queue →
         </Link>

@@ -5,7 +5,10 @@
  * See: docs/hairaudit-phase-3f-fi-classifier-endpoint.md
  */
 
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
+import {
+  CRON_OR_WEBHOOK_SECRET_MIN_LENGTH,
+  timingSafeUtf8Equal,
+} from "@/src/lib/security/timingSafeSecret";
 
 export const HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN_ENV = "HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN" as const;
 export const HAIRAUDIT_IMAGE_CLASSIFIER_MODE_ENV = "HAIRAUDIT_IMAGE_CLASSIFIER_MODE" as const;

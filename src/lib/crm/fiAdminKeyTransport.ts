@@ -49,7 +49,9 @@ export type ExtractFiAdminKeyFromRequestPartsOpts = {
  * Precedence: `x-fi-admin-key` → `Authorization: Bearer` (only if token equals configured key, timing-safe)
  * → `?adminKey=` (only if {@link isAdminKeyQueryAllowed}) → JSON `adminKey`.
  */
-export function extractFiAdminKeyFromRequestParts(opts: ExtractFiAdminKeyFromRequestPartsOpts): string | undefined {
+export function extractFiAdminKeyFromRequestParts(
+  opts: ExtractFiAdminKeyFromRequestPartsOpts
+): string | undefined {
   const env = opts.env ?? process.env;
   const configured = opts.configuredApiKey?.trim();
 

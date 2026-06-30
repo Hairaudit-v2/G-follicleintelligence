@@ -57,7 +57,9 @@ export function BookingCalendarWeekView({
             <div key={lane.dayKey} className="min-w-0 flex-1 border-l border-white/[0.08]">
               <div className="sticky top-0 z-[3] border-b border-white/[0.08] bg-white/[0.03] px-1 py-2 text-center text-[11px] font-medium text-slate-200">
                 <div>{calendarDayHeading(lane)}</div>
-                <div className="text-[10px] font-normal text-gray-500">{displayCalendarTimezoneSubtitle(lane.timeZone)}</div>
+                <div className="text-[10px] font-normal text-gray-500">
+                  {displayCalendarTimezoneSubtitle(lane.timeZone)}
+                </div>
               </div>
               <div className="relative" style={{ height: CALENDAR_DAY_COLUMN_HEIGHT_PX }}>
                 {HOURS.map((h) => (
@@ -66,9 +68,13 @@ export function BookingCalendarWeekView({
                     type="button"
                     aria-label={`Create booking ${lane.dayKey} ${String(h).padStart(2, "0")}:00 (${displayCalendarTimezoneSubtitle(lane.timeZone)})`}
                     className="absolute left-0 right-0 border-t border-white/[0.06] hover:bg-primary/5"
-                    style={{ top: h * CALENDAR_GRID_PX_PER_HOUR, height: CALENDAR_GRID_PX_PER_HOUR }}
+                    style={{
+                      top: h * CALENDAR_GRID_PX_PER_HOUR,
+                      height: CALENDAR_GRID_PX_PER_HOUR,
+                    }}
                     onClick={() => {
-                      if (utcHourSlotIsoRange(lane.dayKey, h, lane.timeZone)) onEmptySlot(lane.dayKey, h);
+                      if (utcHourSlotIsoRange(lane.dayKey, h, lane.timeZone))
+                        onEmptySlot(lane.dayKey, h);
                     }}
                   />
                 ))}

@@ -6,7 +6,12 @@ import {
   createClinicalLetterRecordAction,
   updateClinicalLetterStatusAction,
 } from "@/lib/actions/financial-os-super-release-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  financialOsActionFeedback,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import type { SuperReleaseApplicationRecord } from "@/src/lib/financialOs/financialSuperRelease.server";
 
 const LETTER_STATUSES = ["draft", "review_required", "approved", "issued"] as const;
@@ -47,7 +52,12 @@ export function FinancialSuperReleaseClinicalLetterPanel(props: {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h4 className={financialOsClasses.formTitle}>Clinical letters</h4>
         {canMutate ? (
-          <button type="button" disabled={pending} onClick={createLetter} className={financialOsClasses.primaryButton}>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={createLetter}
+            className={financialOsClasses.primaryButton}
+          >
             New letter
           </button>
         ) : null}
@@ -55,8 +65,13 @@ export function FinancialSuperReleaseClinicalLetterPanel(props: {
 
       <ul className="space-y-2">
         {(application.clinical_letters ?? []).map((letter) => (
-          <li key={letter.id} className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}>
-            <span className="font-medium text-slate-100">{letter.letter_status.replace(/_/g, " ")}</span>
+          <li
+            key={letter.id}
+            className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}
+          >
+            <span className="font-medium text-slate-100">
+              {letter.letter_status.replace(/_/g, " ")}
+            </span>
             <span className={financialOsClasses.bodyTextXs}>
               {letter.issued_at ? `Issued ${letter.issued_at.slice(0, 10)}` : "Not issued"}
             </span>
@@ -64,7 +79,9 @@ export function FinancialSuperReleaseClinicalLetterPanel(props: {
               <select
                 defaultValue={letter.letter_status}
                 disabled={pending}
-                onChange={(e) => updateLetterStatus(letter.id, e.target.value as (typeof LETTER_STATUSES)[number])}
+                onChange={(e) =>
+                  updateLetterStatus(letter.id, e.target.value as (typeof LETTER_STATUSES)[number])
+                }
                 className={financialOsClasses.inlineSelect}
               >
                 {LETTER_STATUSES.map((s) => (

@@ -2,15 +2,21 @@
  * URL parsing for `/fi-admin/[tenantId]/appointments` (Calendar | List | Today tabs).
  */
 
-import { parseCalendarSearchParams, type CalendarViewMode, type ParsedCalendarQuery } from "./calendarQuery";
-import { parseOperatorBookingSearchParams, type ParsedOperatorBookingQuery } from "./operatorBookingQuery";
+import {
+  parseCalendarSearchParams,
+  type CalendarViewMode,
+  type ParsedCalendarQuery,
+} from "./calendarQuery";
+import {
+  parseOperatorBookingSearchParams,
+  type ParsedOperatorBookingQuery,
+} from "./operatorBookingQuery";
 import { defaultRangeIso } from "@/src/components/fi/bookings/bookingFormUtils";
 import type { AppointmentCreatePrefill } from "./appointmentCreateTypes";
 
 export type AppointmentsTab = "calendar" | "list" | "today";
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(v: string): boolean {
   return UUID_RE.test(v.trim());
@@ -53,7 +59,8 @@ export function parseAppointmentsCreatePrefill(
   const personId = firstString(searchParams.personId).trim();
   const startIso = tryParseIso(firstString(searchParams.start));
   const endIso = tryParseIso(firstString(searchParams.end));
-  const bookingType = firstString(searchParams.type).trim() || firstString(searchParams.bookingType).trim();
+  const bookingType =
+    firstString(searchParams.type).trim() || firstString(searchParams.bookingType).trim();
   const title = firstString(searchParams.title).trim();
   const assignedUserId = firstString(searchParams.assignedUserId).trim();
   const clinicId = firstString(searchParams.clinicId).trim();

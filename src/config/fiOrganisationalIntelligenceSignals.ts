@@ -5,8 +5,13 @@
 
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 
-export const FI_INTELLIGENCE_SIGNAL_VISIBILITY_LEVELS = ["staff_self", "manager_only", "director_only"] as const;
-export type FiIntelligenceSignalVisibilityLevel = (typeof FI_INTELLIGENCE_SIGNAL_VISIBILITY_LEVELS)[number];
+export const FI_INTELLIGENCE_SIGNAL_VISIBILITY_LEVELS = [
+  "staff_self",
+  "manager_only",
+  "director_only",
+] as const;
+export type FiIntelligenceSignalVisibilityLevel =
+  (typeof FI_INTELLIGENCE_SIGNAL_VISIBILITY_LEVELS)[number];
 
 export const FI_INTELLIGENCE_SIGNAL_CATEGORIES = [
   "consultations",
@@ -58,9 +63,12 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNAL_KEYS = [
   "clinical_readiness_attention",
 ] as const;
 
-export type FiOrganisationalIntelligenceSignalKey = (typeof FI_ORGANISATIONAL_INTELLIGENCE_SIGNAL_KEYS)[number];
+export type FiOrganisationalIntelligenceSignalKey =
+  (typeof FI_ORGANISATIONAL_INTELLIGENCE_SIGNAL_KEYS)[number];
 
-export function isFiOrganisationalIntelligenceSignalKey(v: string): v is FiOrganisationalIntelligenceSignalKey {
+export function isFiOrganisationalIntelligenceSignalKey(
+  v: string
+): v is FiOrganisationalIntelligenceSignalKey {
   return (FI_ORGANISATIONAL_INTELLIGENCE_SIGNAL_KEYS as readonly string[]).includes(v);
 }
 
@@ -71,7 +79,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   consultations_assigned: {
     key: "consultations_assigned",
     label: "Consultations in progress",
-    description: "Consultation records linked to this clinician that are still in an in-flight status.",
+    description:
+      "Consultation records linked to this clinician that are still in an in-flight status.",
     category: "consultations",
     visibility_level: "staff_self",
     related_workspace_profiles: ["consultant", "doctor", "surgeon", "clinic_manager", "director"],
@@ -91,7 +100,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   consultations_overdue: {
     key: "consultations_overdue",
     label: "Consultations needing follow-up",
-    description: "Consultations with a past scheduled date still awaiting completion or structured handoff.",
+    description:
+      "Consultations with a past scheduled date still awaiting completion or structured handoff.",
     category: "consultations",
     visibility_level: "manager_only",
     related_workspace_profiles: ["consultant", "clinic_manager", "director", "doctor"],
@@ -111,7 +121,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   leads_stale: {
     key: "leads_stale",
     label: "Leads with ageing pipeline stages",
-    description: "Leads that have remained in the same pipeline stage longer than the clinic’s stale threshold.",
+    description:
+      "Leads that have remained in the same pipeline stage longer than the clinic’s stale threshold.",
     category: "crm",
     visibility_level: "manager_only",
     related_workspace_profiles: ["consultant", "clinic_manager", "director"],
@@ -121,7 +132,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   follow_ups_due: {
     key: "follow_ups_due",
     label: "Follow-up tasks",
-    description: "Active CRM follow-up style tasks assigned to this user with an approaching or past due time.",
+    description:
+      "Active CRM follow-up style tasks assigned to this user with an approaching or past due time.",
     category: "follow_up",
     visibility_level: "staff_self",
     related_workspace_profiles: ["consultant", "nurse", "reception", "clinic_manager", "director"],
@@ -131,7 +143,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   surgery_cases_assigned: {
     key: "surgery_cases_assigned",
     label: "Surgery cases in flight",
-    description: "Cases where this staff member is a primary assignee (when wired to case assignment in a later release).",
+    description:
+      "Cases where this staff member is a primary assignee (when wired to case assignment in a later release).",
     category: "surgery",
     visibility_level: "manager_only",
     related_workspace_profiles: ["surgeon", "doctor", "nurse", "clinic_manager", "director"],
@@ -141,7 +154,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   surgery_readiness_alerts: {
     key: "surgery_readiness_alerts",
     label: "Surgery readiness items",
-    description: "Cases with readiness sections that still need review or documentation (best-effort).",
+    description:
+      "Cases with readiness sections that still need review or documentation (best-effort).",
     category: "surgery",
     visibility_level: "manager_only",
     related_workspace_profiles: ["surgeon", "doctor", "clinic_manager", "director"],
@@ -151,7 +165,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   post_op_pending: {
     key: "post_op_pending",
     label: "Post-operative follow-ups",
-    description: "Post-operative pathways that may need structured review (placeholder aggregation).",
+    description:
+      "Post-operative pathways that may need structured review (placeholder aggregation).",
     category: "clinical",
     visibility_level: "manager_only",
     related_workspace_profiles: ["nurse", "surgeon", "doctor", "clinic_manager", "director"],
@@ -161,7 +176,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   imaging_uploads_pending: {
     key: "imaging_uploads_pending",
     label: "Imaging follow-ups",
-    description: "Imaging or media workflows awaiting upload or review (when linked to this staff member).",
+    description:
+      "Imaging or media workflows awaiting upload or review (when linked to this staff member).",
     category: "imaging",
     visibility_level: "staff_self",
     related_workspace_profiles: ["nurse", "doctor", "surgeon", "clinic_manager"],
@@ -174,7 +190,13 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
     description: "Training or academy checkpoints sourced from HR metadata when available.",
     category: "training",
     visibility_level: "staff_self",
-    related_workspace_profiles: ["academy_trainer", "nurse", "consultant", "clinic_manager", "director"],
+    related_workspace_profiles: [
+      "academy_trainer",
+      "nurse",
+      "consultant",
+      "clinic_manager",
+      "director",
+    ],
     attention_min: 1,
     critical_min: 4,
   },
@@ -201,7 +223,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   patient_satisfaction_low: {
     key: "patient_satisfaction_low",
     label: "Experience signals",
-    description: "Aggregated patient experience indicators when survey or outcome feeds are connected.",
+    description:
+      "Aggregated patient experience indicators when survey or outcome feeds are connected.",
     category: "experience",
     visibility_level: "director_only",
     related_workspace_profiles: ["director", "clinic_manager", "consultant"],
@@ -211,7 +234,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   conversion_attention: {
     key: "conversion_attention",
     label: "Conversion support",
-    description: "Pipeline or consultation signals that suggest additional conversion support could help.",
+    description:
+      "Pipeline or consultation signals that suggest additional conversion support could help.",
     category: "conversion",
     visibility_level: "manager_only",
     related_workspace_profiles: ["consultant", "clinic_manager", "director"],
@@ -221,7 +245,8 @@ export const FI_ORGANISATIONAL_INTELLIGENCE_SIGNALS: Record<
   productivity_attention: {
     key: "productivity_attention",
     label: "Workload balance",
-    description: "Composite queue depth across CRM and consultation tasks (supportive, not comparative).",
+    description:
+      "Composite queue depth across CRM and consultation tasks (supportive, not comparative).",
     category: "productivity",
     visibility_level: "manager_only",
     related_workspace_profiles: ["clinic_manager", "director", "consultant", "reception"],

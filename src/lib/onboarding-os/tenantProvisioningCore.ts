@@ -4,7 +4,10 @@
  */
 
 import { FI_OS_MODULE_CODES, isFiModuleCode } from "@/src/lib/platform/entitlements/modules";
-import { FI_TENANT_ADMIN_ROLES, isFiTenantAdminRoleString } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import {
+  FI_TENANT_ADMIN_ROLES,
+  isFiTenantAdminRoleString,
+} from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 import {
   CLINIC_DEPLOYMENT_TEMPLATES,
@@ -75,7 +78,8 @@ const STEP_LABELS: Record<ProvisioningStepCode, { label: string; description: st
   },
   deploy_clinic_configuration: {
     label: "Deploy clinic configuration",
-    description: "Apply service catalog from deployment template (workflows stored as plan — no CRM import).",
+    description:
+      "Apply service catalog from deployment template (workflows stored as plan — no CRM import).",
   },
   assign_academy_training: {
     label: "Assign AcademyOS training",
@@ -162,7 +166,9 @@ export function calculateProvisioningProgress(
   };
 }
 
-export function resolveProvisioningStatusBadge(status: ProvisioningSessionStatus): ProvisioningStatusBadge {
+export function resolveProvisioningStatusBadge(
+  status: ProvisioningSessionStatus
+): ProvisioningStatusBadge {
   switch (status) {
     case "draft":
       return { label: "Draft", tone: "neutral" };
@@ -181,7 +187,9 @@ export function resolveProvisioningStatusBadge(status: ProvisioningSessionStatus
   }
 }
 
-export function resolveProvisioningStepStatusBadge(status: ProvisioningStepStatus): ProvisioningStatusBadge {
+export function resolveProvisioningStepStatusBadge(
+  status: ProvisioningStepStatus
+): ProvisioningStatusBadge {
   switch (status) {
     case "pending":
       return { label: "Pending", tone: "neutral" };
@@ -210,10 +218,14 @@ export function validateProvisioningInput(raw: unknown): ProvisioningInputValida
   const input = (raw ?? {}) as Record<string, unknown>;
 
   const tenantName = String(input.tenantName ?? "").trim();
-  const tenantSlug = String(input.tenantSlug ?? "").trim().toLowerCase();
+  const tenantSlug = String(input.tenantSlug ?? "")
+    .trim()
+    .toLowerCase();
   const defaultClinicDisplayName = String(input.defaultClinicDisplayName ?? "").trim();
   const defaultTimezone = String(input.defaultTimezone ?? "").trim();
-  const firstTenantAdminEmail = String(input.firstTenantAdminEmail ?? "").trim().toLowerCase();
+  const firstTenantAdminEmail = String(input.firstTenantAdminEmail ?? "")
+    .trim()
+    .toLowerCase();
   const supportEmailRaw = input.supportEmail;
   const supportEmail =
     supportEmailRaw == null || String(supportEmailRaw).trim() === ""
@@ -244,7 +256,8 @@ export function validateProvisioningInput(raw: unknown): ProvisioningInputValida
   }
   if (!defaultClinicDisplayName) errors.push("Default clinic display name is required.");
   if (!defaultTimezone) errors.push("Default timezone is required.");
-  if (defaultTimezone.length > 120) errors.push("Default timezone must be 120 characters or fewer.");
+  if (defaultTimezone.length > 120)
+    errors.push("Default timezone must be 120 characters or fewer.");
   if (!firstTenantAdminEmail) errors.push("First tenant admin email is required.");
   if (firstTenantAdminEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(firstTenantAdminEmail)) {
     errors.push("First tenant admin email must be a valid email address.");
@@ -284,7 +297,9 @@ export function validateProvisioningInput(raw: unknown): ProvisioningInputValida
 }
 
 /** Resolve a deployment template code from session input (Phase B) or legacy template code. */
-export function resolveDeploymentTemplateCode(input: ProvisioningInput): ClinicDeploymentTemplateCode {
+export function resolveDeploymentTemplateCode(
+  input: ProvisioningInput
+): ClinicDeploymentTemplateCode {
   const explicit = input.deploymentTemplateCode?.trim();
   if (explicit && isClinicDeploymentTemplateCode(explicit)) return explicit;
 
@@ -321,7 +336,9 @@ export function resolveModuleBundle(
 }
 
 /** Resolve role pack from catalog code. */
-export function resolveRolePack(rolePackCode: string): ProvisioningRoleTemplate & { code: string; displayName: string } {
+export function resolveRolePack(
+  rolePackCode: string
+): ProvisioningRoleTemplate & { code: string; displayName: string } {
   const pack = ROLE_PACKS[rolePackCode] ?? ROLE_PACKS.standard_clinic_roles;
   return {
     code: pack.code,
@@ -332,7 +349,9 @@ export function resolveRolePack(rolePackCode: string): ProvisioningRoleTemplate 
 }
 
 /** Resolve service + workflow pack for a deployment template. */
-export function resolveServiceWorkflowPack(template: ClinicDeploymentTemplate): ServiceWorkflowPack {
+export function resolveServiceWorkflowPack(
+  template: ClinicDeploymentTemplate
+): ServiceWorkflowPack {
   return {
     serviceTemplates: [...template.serviceTemplates],
     workflowTemplates: [...template.workflowTemplates],
@@ -532,7 +551,9 @@ export function buildDefaultModuleTemplate(): ProvisioningModuleTemplate {
 }
 
 /** Resolve module template from deployment plan or legacy defaults. */
-export function resolveModuleTemplateFromInput(input: ProvisioningInput): ProvisioningModuleTemplate {
+export function resolveModuleTemplateFromInput(
+  input: ProvisioningInput
+): ProvisioningModuleTemplate {
   const deploymentCode = resolveDeploymentTemplateCode(input);
   const template = CLINIC_DEPLOYMENT_TEMPLATES[deploymentCode];
   const resolved = resolveModuleBundle(template.moduleBundleCode, input);
@@ -630,7 +651,10 @@ export function resolveSandboxSeedPack(
 ): SandboxSeedPack | null {
   const explicit = String(packCode ?? "").trim();
   if (explicit && isSandboxSeedPackCode(explicit)) return SANDBOX_SEED_PACKS[explicit];
-  return SANDBOX_SEED_PACKS[SANDBOX_SEED_DEFAULT_PACK_BY_TEMPLATE[templateCode] ?? "standard_demo"] ?? null;
+  return (
+    SANDBOX_SEED_PACKS[SANDBOX_SEED_DEFAULT_PACK_BY_TEMPLATE[templateCode] ?? "standard_demo"] ??
+    null
+  );
 }
 
 /** Sum entity counts for a pack (optionally filtered by deployment toggles). */
@@ -648,7 +672,10 @@ export function calculateSandboxSeedSize(
   return total;
 }
 
-function isSandboxEntityIncluded(entityType: SandboxSeedEntityType, plan: ClinicDeploymentPlan): boolean {
+function isSandboxEntityIncluded(
+  entityType: SandboxSeedEntityType,
+  plan: ClinicDeploymentPlan
+): boolean {
   const { sandboxSeed, moduleBundle } = plan;
   if (!sandboxSeed.enabled) return false;
   if (entityType === "staff") return sandboxSeed.includeDemoStaff;
@@ -659,7 +686,11 @@ function isSandboxEntityIncluded(entityType: SandboxSeedEntityType, plan: Clinic
   if (entityType === "surgeries" || entityType === "surgery_os_metrics") {
     return moduleBundle.enabledModules.includes("surgery_os");
   }
-  if (entityType === "invoices" || entityType === "payments" || entityType === "financial_os_metrics") {
+  if (
+    entityType === "invoices" ||
+    entityType === "payments" ||
+    entityType === "financial_os_metrics"
+  ) {
     return moduleBundle.enabledModules.includes("financial_os");
   }
   if (entityType === "academy_readiness") {
@@ -696,7 +727,8 @@ export function buildSandboxSeedPlan(opts: {
 
   const entities = (Object.keys(pack.counts) as SandboxSeedEntityType[]).map((entityType) => {
     const count = pack.counts[entityType];
-    const included = sandboxEnabled && count > 0 && isSandboxEntityIncluded(entityType, opts.deploymentPlan);
+    const included =
+      sandboxEnabled && count > 0 && isSandboxEntityIncluded(entityType, opts.deploymentPlan);
     return {
       entityType,
       label: SANDBOX_SEED_ENTITY_LABELS[entityType],
@@ -778,11 +810,19 @@ export function validateSandboxSeedRequest(opts: {
   }
 
   if (!opts.sandboxEnabled) {
-    return { ok: false, errorCode: "sandbox_disabled", error: "Sandbox seed is disabled for this session." };
+    return {
+      ok: false,
+      errorCode: "sandbox_disabled",
+      error: "Sandbox seed is disabled for this session.",
+    };
   }
 
   if (!opts.tenantId) {
-    return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before applying sandbox seed." };
+    return {
+      ok: false,
+      errorCode: "tenant_missing",
+      error: "Tenant must be provisioned before applying sandbox seed.",
+    };
   }
 
   if (isSandboxSeedTenantLive(opts)) {
@@ -822,7 +862,9 @@ export function parseSandboxSeedHistory(metadata: unknown): SandboxSeedHistoryEn
     entries.push({
       packCode,
       appliedAt: String(row.appliedAt ?? row.applied_at ?? ""),
-      entityCounts: (row.entityCounts ?? row.entity_counts ?? {}) as Partial<Record<SandboxSeedEntityType, number>>,
+      entityCounts: (row.entityCounts ?? row.entity_counts ?? {}) as Partial<
+        Record<SandboxSeedEntityType, number>
+      >,
       actorAuthUserId: row.actorAuthUserId != null ? String(row.actorAuthUserId) : null,
       sessionId: String(row.sessionId ?? row.session_id ?? ""),
       seedFingerprint: String(row.seedFingerprint ?? row.seed_fingerprint ?? ""),

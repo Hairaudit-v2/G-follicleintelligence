@@ -15,7 +15,11 @@ type DashboardShellProps = {
 export function DashboardShell({ children, className }: DashboardShellProps) {
   return (
     <div className="relative min-h-screen min-h-dvh overflow-x-hidden bg-[#081020] font-sans text-[#F8FAFC] antialiased">
-      <div className="pointer-events-none absolute inset-0" style={fiAdminAmbientBackgroundStyle} aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={fiAdminAmbientBackgroundStyle}
+        aria-hidden
+      />
       <div className={cn("relative z-10 min-h-screen min-h-dvh w-full", className)}>{children}</div>
     </div>
   );

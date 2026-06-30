@@ -15,14 +15,18 @@ function PatientPortalSignInFields({ clinicName }: { clinicName: string | null }
       <p className="text-sm text-slate-400">
         {clinicName ? (
           <>
-            Sign in to access your medications at <span className="font-medium text-slate-200">{clinicName}</span>.
+            Sign in to access your medications at{" "}
+            <span className="font-medium text-slate-200">{clinicName}</span>.
           </>
         ) : (
           "Sign in with the email address your clinic provided."
         )}
       </p>
       <div>
-        <label htmlFor="patient-portal-email" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+        <label
+          htmlFor="patient-portal-email"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+        >
           Email
         </label>
         <input
@@ -37,7 +41,10 @@ function PatientPortalSignInFields({ clinicName }: { clinicName: string | null }
         />
       </div>
       <div>
-        <label htmlFor="patient-portal-password" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+        <label
+          htmlFor="patient-portal-password"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+        >
           Password
         </label>
         <input
@@ -60,7 +67,10 @@ function PatientPortalSignInFields({ clinicName }: { clinicName: string | null }
         {pending ? "Signing in…" : "Sign in"}
       </button>
       <p className="text-center text-sm text-slate-400">
-        <Link href="/follicle-intelligence/forgot-password" className="text-cyan-400/90 hover:text-cyan-300 hover:underline">
+        <Link
+          href="/follicle-intelligence/forgot-password"
+          className="text-cyan-400/90 hover:text-cyan-300 hover:underline"
+        >
           Forgot password?
         </Link>
       </p>
@@ -100,20 +110,29 @@ export function PatientPortalSignInForm({
       <input type="hidden" name="next" value={returnPath} />
       <input type="hidden" name="errorReturn" value={`/patient/${tenantId}/sign-in`} />
       {err ? (
-        <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-100">
+        <div
+          role="alert"
+          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-100"
+        >
           {err}
         </div>
       ) : null}
       <PatientPortalSignInFields clinicName={clinicName} />
       <p className="border-t border-slate-700/60 pt-4 text-center text-xs text-slate-500">
         Clinic staff should use the{" "}
-        <Link href="/follicle-intelligence/login" className="text-slate-400 hover:text-slate-300 hover:underline">
+        <Link
+          href="/follicle-intelligence/login"
+          className="text-slate-400 hover:text-slate-300 hover:underline"
+        >
           FI OS sign-in page
         </Link>
         .
       </p>
       <p className="text-center text-xs text-slate-500">
-        <Link href={`/patient/${tenantId}/medications`} className="text-slate-400 hover:text-slate-300 hover:underline">
+        <Link
+          href={`/patient/${tenantId}/medications`}
+          className="text-slate-400 hover:text-slate-300 hover:underline"
+        >
           Back to medications
         </Link>
       </p>

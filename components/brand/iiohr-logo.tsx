@@ -136,7 +136,15 @@ export function IiohrFullLockup({ tone = "dark", className, ...props }: LogoProp
         <SealArtwork idPrefix={`iiohr-full-${id}`} tone={tone} />
       </g>
 
-      <line x1="178" y1="410" x2="542" y2="410" stroke={palette.accent} strokeOpacity="0.85" strokeWidth="2" />
+      <line
+        x1="178"
+        y1="410"
+        x2="542"
+        y2="410"
+        stroke={palette.accent}
+        strokeOpacity="0.85"
+        strokeWidth="2"
+      />
       <text
         x="360"
         y="472"
@@ -193,7 +201,15 @@ export function IiohrAcronymLockup({ tone = "dark", className, ...props }: LogoP
       >
         IIOHR
       </text>
-      <line x1="188" y1="374" x2="632" y2="374" stroke={palette.accent} strokeOpacity="0.85" strokeWidth="2" />
+      <line
+        x1="188"
+        y1="374"
+        x2="632"
+        y2="374"
+        stroke={palette.accent}
+        strokeOpacity="0.85"
+        strokeWidth="2"
+      />
       <text
         x="410"
         y="430"
@@ -249,7 +265,15 @@ export function IiohrHorizontalLockup({ tone = "dark", className, ...props }: Lo
       >
         IIOHR
       </text>
-      <line x1="472" y1="138" x2="1370" y2="138" stroke={palette.accent} strokeOpacity="0.7" strokeWidth="2" />
+      <line
+        x1="472"
+        y1="138"
+        x2="1370"
+        y2="138"
+        stroke={palette.accent}
+        strokeOpacity="0.7"
+        strokeWidth="2"
+      />
       <text
         x="472"
         y="230"

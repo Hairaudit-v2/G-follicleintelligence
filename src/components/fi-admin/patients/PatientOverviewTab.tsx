@@ -166,9 +166,7 @@ function TimelinePreviewCard({ items }: { items: PatientTimelineItem[] }) {
                     {item.occurred_at.slice(0, 10)}
                   </time>
                 </div>
-                {item.subtitle && (
-                  <p className="mt-0.5 text-xs text-slate-500">{item.subtitle}</p>
-                )}
+                {item.subtitle && <p className="mt-0.5 text-xs text-slate-500">{item.subtitle}</p>}
               </div>
             </li>
           ))}
@@ -206,7 +204,10 @@ function LeadHistoryCompactCard({
               : `${linked} linked · ${prior} prior enquir${prior !== 1 ? "ies" : "y"}`
           }
           cta={
-            <Link href={`/fi-admin/${tenantId}/crm`} className="text-xs text-cyan-400 hover:text-cyan-300">
+            <Link
+              href={`/fi-admin/${tenantId}/crm`}
+              className="text-xs text-cyan-400 hover:text-cyan-300"
+            >
               CRM →
             </Link>
           }
@@ -303,11 +304,7 @@ function TechnicalDetailsAccordion({
 // ─── Legacy card wrapper (for embedded white components in left column) ───────
 
 function LegacyCardShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={`overflow-hidden ${pwsLegacyCard}`}>
-      {children}
-    </div>
-  );
+  return <div className={`overflow-hidden ${pwsLegacyCard}`}>{children}</div>;
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────

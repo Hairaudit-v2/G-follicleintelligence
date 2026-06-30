@@ -22,7 +22,11 @@ function formatWindow(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
   const end = new Date(endsAt);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "—";
-  const date = start.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+  const date = start.toLocaleDateString("en-AU", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
   const timeFmt = (d: Date) =>
     d.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${date} · ${timeFmt(start)}–${timeFmt(end)}`;
@@ -81,11 +85,15 @@ export function RosterEventStaffingCard({
       <dl className="mt-3 grid gap-2 text-xs text-slate-400 sm:grid-cols-2">
         <div>
           <dt className="text-slate-500">Required</dt>
-          <dd className="text-slate-300">{formatRequiredRolesLine(event.staffing.requiredRoles)}</dd>
+          <dd className="text-slate-300">
+            {formatRequiredRolesLine(event.staffing.requiredRoles)}
+          </dd>
         </div>
         <div>
           <dt className="text-slate-500">Assigned</dt>
-          <dd className="text-slate-300">{formatRequiredRolesLine(event.staffing.assignedCounts)}</dd>
+          <dd className="text-slate-300">
+            {formatRequiredRolesLine(event.staffing.assignedCounts)}
+          </dd>
         </div>
       </dl>
 

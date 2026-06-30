@@ -11,10 +11,17 @@ import {
 } from "@/lib/actions/fi-pharmacy-transmission-actions";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
-import type { FiCompoundPharmacyRow, FiPharmacyTransmissionRow } from "@/src/lib/prescribing/fiPharmacyLoaders.server";
+import type {
+  FiCompoundPharmacyRow,
+  FiPharmacyTransmissionRow,
+} from "@/src/lib/prescribing/fiPharmacyLoaders.server";
 import type { PrescriptionStatus } from "@/src/lib/prescribing/fiPrescribingTypes";
 
-const METHOD_LABELS = { email: "Email + PDF", api: "API (JSON)", manual_export: "Manual export" } as const;
+const METHOD_LABELS = {
+  email: "Email + PDF",
+  api: "API (JSON)",
+  manual_export: "Manual export",
+} as const;
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
@@ -202,11 +209,13 @@ export function PrescriptionPharmacySendPanel({
         </div>
       ) : canAttemptSend && pharmacies.length === 0 ? (
         <p className="mt-3 text-sm text-amber-300">
-          No active compound pharmacies configured. Add rows in `fi_compound_pharmacies` (migration seeds a default placeholder).
+          No active compound pharmacies configured. Add rows in `fi_compound_pharmacies` (migration
+          seeds a default placeholder).
         </p>
       ) : (
         <p className="mt-3 text-sm text-slate-400">
-          This prescription is not in a state that allows a new pharmacy transmission from this screen.
+          This prescription is not in a state that allows a new pharmacy transmission from this
+          screen.
         </p>
       )}
 
@@ -227,7 +236,9 @@ export function PrescriptionPharmacySendPanel({
                       {new Date(tx.created_at).toLocaleString()}
                       {tx.sent_at ? ` · Sent ${new Date(tx.sent_at).toLocaleString()}` : null}
                     </p>
-                    {tx.error_message ? <p className="mt-1 text-xs text-rose-300">{tx.error_message}</p> : null}
+                    {tx.error_message ? (
+                      <p className="mt-1 text-xs text-rose-300">{tx.error_message}</p>
+                    ) : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <a

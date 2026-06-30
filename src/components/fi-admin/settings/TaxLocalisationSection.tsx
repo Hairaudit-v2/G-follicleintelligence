@@ -1,10 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
+import {
+  useMemo,
+  useState,
+  useTransition,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import { saveTaxLocalisationSettingsAction } from "@/lib/actions/fi-tax-localisation-actions";
-import { defaultTaxProfileForCountry, inferDefaultCurrencyForCountry } from "@/src/lib/taxLocalisation/taxLocalisationDefaults";
+import {
+  defaultTaxProfileForCountry,
+  inferDefaultCurrencyForCountry,
+} from "@/src/lib/taxLocalisation/taxLocalisationDefaults";
 import { primaryConsumptionTaxLabel } from "@/src/lib/taxLocalisation/taxLocalisationPolicy";
 import type {
   AustraliaTaxProfile,
@@ -15,7 +25,12 @@ import type {
   IndiaTaxProfile,
   NewZealandTaxProfile,
 } from "@/src/lib/taxLocalisation/taxLocalisationTypes";
-import { FI_TAX_COUNTRY_LABELS, FI_TAX_COUNTRY_REGIONS, FI_TAX_CURRENCY_LABELS, FI_TAX_CURRENCIES } from "@/src/lib/taxLocalisation/taxLocalisationTypes";
+import {
+  FI_TAX_COUNTRY_LABELS,
+  FI_TAX_COUNTRY_REGIONS,
+  FI_TAX_CURRENCY_LABELS,
+  FI_TAX_CURRENCIES,
+} from "@/src/lib/taxLocalisation/taxLocalisationTypes";
 
 const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";
@@ -40,7 +55,10 @@ export function TaxLocalisationSection(props: {
 
   const clinicId = props.clinicId;
 
-  const taxLabel = useMemo(() => primaryConsumptionTaxLabel(doc.countryRegion), [doc.countryRegion]);
+  const taxLabel = useMemo(
+    () => primaryConsumptionTaxLabel(doc.countryRegion),
+    [doc.countryRegion]
+  );
 
   function setCountry(next: FiTaxCountryRegion) {
     setDoc((d) => {
@@ -86,8 +104,8 @@ export function TaxLocalisationSection(props: {
           className="rounded-lg border border-amber-600/35 bg-amber-950/30 px-3 py-2 text-xs text-amber-100/95"
           role="status"
         >
-          View only — your role can review tax and localisation values but cannot save changes. Ask a clinic or finance
-          admin to update settings.
+          View only — your role can review tax and localisation values but cannot save changes. Ask
+          a clinic or finance admin to update settings.
         </div>
       ) : null}
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -107,7 +125,9 @@ export function TaxLocalisationSection(props: {
             ))}
           </select>
           {clinics.length === 0 ? (
-            <p className="text-xs text-[#94A3B8]">No clinics in this tenant — settings apply at tenant level only.</p>
+            <p className="text-xs text-[#94A3B8]">
+              No clinics in this tenant — settings apply at tenant level only.
+            </p>
           ) : null}
         </div>
         {canEdit ? (
@@ -120,7 +140,9 @@ export function TaxLocalisationSection(props: {
             {pending ? "Saving…" : "Save settings"}
           </button>
         ) : (
-          <p className="text-xs text-amber-200/90">View only — finance or clinic admin access required to edit.</p>
+          <p className="text-xs text-amber-200/90">
+            View only — finance or clinic admin access required to edit.
+          </p>
         )}
       </div>
       {msg ? <p className="text-sm text-emerald-400">{msg}</p> : null}
@@ -129,7 +151,8 @@ export function TaxLocalisationSection(props: {
       <div className="rounded-xl border border-white/[0.08] bg-[#0b1426]/80 p-4">
         <h2 className={sectionTitle}>Country & currency</h2>
         <p className="mt-1 text-xs text-[#94A3B8]">
-          Defaults follow the selected country; you can override currency and rates where regulations allow.
+          Defaults follow the selected country; you can override currency and rates where
+          regulations allow.
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <label className={labelClass}>
@@ -138,7 +161,9 @@ export function TaxLocalisationSection(props: {
               className={inputClass}
               value={doc.countryRegion}
               disabled={disabled}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => setCountry(e.target.value as FiTaxCountryRegion)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setCountry(e.target.value as FiTaxCountryRegion)
+              }
             >
               {(FI_TAX_COUNTRY_REGIONS as readonly FiTaxCountryRegion[]).map((c) => (
                 <option key={c} value={c}>
@@ -195,7 +220,12 @@ export function TaxLocalisationSection(props: {
               className={inputClass}
               disabled={disabled}
               value={doc.invoiceSettings.invoicePrefix}
-              onChange={(e) => setDoc((d) => ({ ...d, invoiceSettings: { ...d.invoiceSettings, invoicePrefix: e.target.value } }))}
+              onChange={(e) =>
+                setDoc((d) => ({
+                  ...d,
+                  invoiceSettings: { ...d.invoiceSettings, invoicePrefix: e.target.value },
+                }))
+              }
             />
           </label>
           <label className={labelClass}>
@@ -223,7 +253,10 @@ export function TaxLocalisationSection(props: {
               disabled={disabled}
               value={doc.invoiceSettings.paymentTerms}
               onChange={(e) =>
-                setDoc((d) => ({ ...d, invoiceSettings: { ...d.invoiceSettings, paymentTerms: e.target.value } }))
+                setDoc((d) => ({
+                  ...d,
+                  invoiceSettings: { ...d.invoiceSettings, paymentTerms: e.target.value },
+                }))
               }
             />
           </label>
@@ -249,7 +282,10 @@ export function TaxLocalisationSection(props: {
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  invoiceSettings: { ...d.invoiceSettings, showBusinessRegistrationNumber: e.target.checked },
+                  invoiceSettings: {
+                    ...d.invoiceSettings,
+                    showBusinessRegistrationNumber: e.target.checked,
+                  },
                 }))
               }
             />
@@ -268,7 +304,10 @@ export function TaxLocalisationSection(props: {
               disabled={disabled}
               value={doc.receiptSettings.legalEntityName}
               onChange={(e) =>
-                setDoc((d) => ({ ...d, receiptSettings: { ...d.receiptSettings, legalEntityName: e.target.value } }))
+                setDoc((d) => ({
+                  ...d,
+                  receiptSettings: { ...d.receiptSettings, legalEntityName: e.target.value },
+                }))
               }
             />
           </label>
@@ -279,7 +318,10 @@ export function TaxLocalisationSection(props: {
               disabled={disabled}
               value={doc.receiptSettings.tradingName}
               onChange={(e) =>
-                setDoc((d) => ({ ...d, receiptSettings: { ...d.receiptSettings, tradingName: e.target.value } }))
+                setDoc((d) => ({
+                  ...d,
+                  receiptSettings: { ...d.receiptSettings, tradingName: e.target.value },
+                }))
               }
             />
           </label>
@@ -290,7 +332,10 @@ export function TaxLocalisationSection(props: {
               disabled={disabled}
               value={doc.receiptSettings.registeredAddress}
               onChange={(e) =>
-                setDoc((d) => ({ ...d, receiptSettings: { ...d.receiptSettings, registeredAddress: e.target.value } }))
+                setDoc((d) => ({
+                  ...d,
+                  receiptSettings: { ...d.receiptSettings, registeredAddress: e.target.value },
+                }))
               }
             />
           </label>
@@ -301,7 +346,10 @@ export function TaxLocalisationSection(props: {
               disabled={disabled}
               value={doc.receiptSettings.taxFooterText}
               onChange={(e) =>
-                setDoc((d) => ({ ...d, receiptSettings: { ...d.receiptSettings, taxFooterText: e.target.value } }))
+                setDoc((d) => ({
+                  ...d,
+                  receiptSettings: { ...d.receiptSettings, taxFooterText: e.target.value },
+                }))
               }
             />
           </label>
@@ -312,7 +360,10 @@ export function TaxLocalisationSection(props: {
               disabled={disabled}
               value={doc.receiptSettings.refundPolicyUrl}
               onChange={(e) =>
-                setDoc((d) => ({ ...d, receiptSettings: { ...d.receiptSettings, refundPolicyUrl: e.target.value } }))
+                setDoc((d) => ({
+                  ...d,
+                  receiptSettings: { ...d.receiptSettings, refundPolicyUrl: e.target.value },
+                }))
               }
             />
           </label>
@@ -321,8 +372,10 @@ export function TaxLocalisationSection(props: {
 
       <p className="text-xs text-[#64748B]">
         Quotes, invoices, and finance dashboards should load these values from{" "}
-        <code className="rounded bg-[#141C33] px-1 text-[11px] text-[#22C1FF]">resolveTaxLocalisationDocumentOrDefault</code> in
-        server code — avoid hard-coding tax rules in presentational components.
+        <code className="rounded bg-[#141C33] px-1 text-[11px] text-[#22C1FF]">
+          resolveTaxLocalisationDocumentOrDefault
+        </code>{" "}
+        in server code — avoid hard-coding tax rules in presentational components.
       </p>
     </div>
   );
@@ -374,7 +427,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "AU", businessName: e.target.value },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "AU",
+                    businessName: e.target.value,
+                  },
                 }))
               }
             />
@@ -387,7 +444,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "AU", gstRegistered: e.target.checked },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "AU",
+                    gstRegistered: e.target.checked,
+                  },
                 }))
               }
             />
@@ -429,7 +490,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "IN", gstin: e.target.value },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "IN",
+                    gstin: e.target.value,
+                  },
                 }))
               }
             />
@@ -443,7 +508,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "IN", state: e.target.value },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "IN",
+                    state: e.target.value,
+                  },
                 }))
               }
             />
@@ -457,7 +526,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "IN", placeOfSupply: e.target.value },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "IN",
+                    placeOfSupply: e.target.value,
+                  },
                 }))
               }
             />
@@ -560,7 +633,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "NZ", gstNumber: e.target.value },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "NZ",
+                    gstNumber: e.target.value,
+                  },
                 }))
               }
             />
@@ -573,7 +650,11 @@ function renderTaxProfileEditor(
               onChange={(e) =>
                 setDoc((d) => ({
                   ...d,
-                  taxProfile: { ...(d.taxProfile as typeof p), country: "NZ", gstRegistered: e.target.checked },
+                  taxProfile: {
+                    ...(d.taxProfile as typeof p),
+                    country: "NZ",
+                    gstRegistered: e.target.checked,
+                  },
                 }))
               }
             />
@@ -605,8 +686,9 @@ function renderTaxProfileEditor(
     default:
       return (
         <p className="text-sm text-[#94A3B8]">
-          For {FI_TAX_COUNTRY_LABELS[doc.countryRegion]}, configure generic tax labels in receipts and invoices; extend{" "}
-          <code className="text-xs text-[#22C1FF]">tax_profile</code> when country-specific rules are added.
+          For {FI_TAX_COUNTRY_LABELS[doc.countryRegion]}, configure generic tax labels in receipts
+          and invoices; extend <code className="text-xs text-[#22C1FF]">tax_profile</code> when
+          country-specific rules are added.
         </p>
       );
   }

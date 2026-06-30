@@ -18,7 +18,9 @@ export type FiOsRole = (typeof FI_OS_ROLES)[number];
 const CROSS_TENANT_DIRECTORY = new Set<FiOsRole>(["fi_platform_admin", "fi_admin", "fi_auditor"]);
 
 export function normalizeFiOsRole(role: string | null | undefined): string {
-  return String(role ?? "").trim().toLowerCase();
+  return String(role ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 export function isFiOsRoleString(role: string | null | undefined): role is FiOsRole {

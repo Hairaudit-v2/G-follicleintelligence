@@ -35,7 +35,8 @@ export function generateAnalyticsExecutiveInsights(
       severity: "positive",
       title: "Revenue momentum improving",
       description: "Payment activity increased compared with the previous period.",
-      recommendedAction: "Review collection velocity and reinforce high-performing revenue channels.",
+      recommendedAction:
+        "Review collection velocity and reinforce high-performing revenue channels.",
       sourceModules: ["financial_os"],
     });
   } else if (paymentMetric?.changePercent != null && paymentMetric.changePercent <= -15) {
@@ -45,7 +46,8 @@ export function generateAnalyticsExecutiveInsights(
       severity: "warning",
       title: "Revenue momentum declining",
       description: "Payment activity decreased compared with the previous period.",
-      recommendedAction: "Inspect AR follow-up, invoice cadence, and consultation-to-payment conversion.",
+      recommendedAction:
+        "Inspect AR follow-up, invoice cadence, and consultation-to-payment conversion.",
       sourceModules: ["financial_os"],
     });
   } else if (revenue.limitedSignal) {
@@ -106,7 +108,8 @@ export function generateAnalyticsExecutiveInsights(
       severity: "info",
       title: "Workforce signal limited",
       description: workforce.explanation,
-      recommendedAction: "Enable WorkforceOS readiness overview or increase staffing event coverage.",
+      recommendedAction:
+        "Enable WorkforceOS readiness overview or increase staffing event coverage.",
       sourceModules: ["workforce_os"],
     });
   }

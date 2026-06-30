@@ -105,7 +105,7 @@ const MODULE_BY_ID: Record<PlatformArchitectureModuleId, ModuleDef> = MODULES.re
     acc[m.id] = m;
     return acc;
   },
-  {} as Record<PlatformArchitectureModuleId, ModuleDef>,
+  {} as Record<PlatformArchitectureModuleId, ModuleDef>
 );
 
 const ENGINE_LABEL = "Follicle Intelligence Engine";
@@ -151,8 +151,9 @@ function ModuleDetail({
         aria-label="Layer details"
       >
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Select a layer with the pointer, keyboard, or assistive technology to see how it connects across the
-          operating system. Each module exchanges structured signal with the central {ENGINE_LABEL}.
+          Select a layer with the pointer, keyboard, or assistive technology to see how it connects
+          across the operating system. Each module exchanges structured signal with the central{" "}
+          {ENGINE_LABEL}.
         </p>
       </div>
     );
@@ -167,8 +168,12 @@ function ModuleDetail({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/90">{module.layer}</p>
-          <h3 className="mt-2 text-xl font-semibold tracking-tight text-foreground">{module.name}</h3>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/90">
+            {module.layer}
+          </p>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+            {module.name}
+          </h3>
         </div>
         <Link
           href={module.href}
@@ -177,9 +182,14 @@ function ModuleDetail({
           View layer
         </Link>
       </div>
-      <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">{module.description}</p>
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+        {module.description}
+      </p>
       <div className="mt-5 border-t border-border/50 pt-4">
-        <p id={connectionsHeadingId} className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <p
+          id={connectionsHeadingId}
+          className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+        >
           Connected modules
         </p>
         <ul className="mt-3 flex flex-wrap gap-2" aria-labelledby={connectionsHeadingId}>
@@ -207,13 +217,18 @@ function EngineCore({ className, engineDescId }: { className?: string; engineDes
     <div
       className={cn(
         "rounded-2xl border border-primary/35 bg-gradient-to-b from-primary/15 to-background/60 px-4 py-4 text-center shadow-lg shadow-black/25 xl:px-3 xl:py-4",
-        className,
+        className
       )}
       role="img"
       aria-label={`${ENGINE_LABEL}: scoring, benchmarks, governance rules, and longitudinal intelligence shared across every OS layer.`}
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/90">Central core</p>
-      <p id={engineDescId} className="mt-1.5 text-base font-semibold leading-snug text-foreground xl:text-sm xl:leading-snug">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/90">
+        Central core
+      </p>
+      <p
+        id={engineDescId}
+        className="mt-1.5 text-base font-semibold leading-snug text-foreground xl:text-sm xl:leading-snug"
+      >
         {ENGINE_LABEL}
       </p>
       <p className="mx-auto mt-2 hidden text-xs leading-relaxed text-muted-foreground xl:block">
@@ -270,10 +285,13 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
         setPinnedId((prev) => (prev === id ? null : id));
       }
     },
-    [focusModuleAt],
+    [focusModuleAt]
   );
 
-  const angles = useMemo(() => MODULES.map((_, i) => (i / MODULES.length) * Math.PI * 2 - Math.PI / 2), []);
+  const angles = useMemo(
+    () => MODULES.map((_, i) => (i / MODULES.length) * Math.PI * 2 - Math.PI / 2),
+    []
+  );
   const radius = 40;
 
   const moduleButtonClass = (isActive: boolean, isRadial: boolean) =>
@@ -282,7 +300,7 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
       isRadial ? "px-2.5 py-2 xl:w-[min(34%,150px)]" : "w-full px-3 py-3",
       isActive
         ? "border-primary/50 bg-primary/10 shadow-[0_0_0_1px_hsl(var(--primary)/0.25)]"
-        : "border-border/70 bg-card/35 hover:border-primary/35 xl:bg-card/80",
+        : "border-border/70 bg-card/35 hover:border-primary/35 xl:bg-card/80"
     );
 
   const renderModuleButton = (m: ModuleDef, i: number, isRadial: boolean) => {
@@ -295,7 +313,9 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
         ref={(el) => {
           buttonRefs.current[i] = el;
         }}
-        style={isRadial ? { left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" } : undefined}
+        style={
+          isRadial ? { left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" } : undefined
+        }
         className={cn(moduleButtonClass(isActive, isRadial), isRadial && "absolute z-20")}
         aria-pressed={pinnedId === m.id}
         aria-describedby={detailId}
@@ -309,12 +329,17 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
         <span
           className={cn(
             "block font-semibold uppercase tracking-[0.18em] text-muted-foreground",
-            isRadial ? "text-[9px] tracking-[0.16em]" : "text-[10px]",
+            isRadial ? "text-[9px] tracking-[0.16em]" : "text-[10px]"
           )}
         >
           {m.layer}
         </span>
-        <span className={cn("mt-1 block font-semibold text-foreground", isRadial ? "text-xs sm:text-sm" : "text-sm")}>
+        <span
+          className={cn(
+            "mt-1 block font-semibold text-foreground",
+            isRadial ? "text-xs sm:text-sm" : "text-sm"
+          )}
+        >
           {m.name}
         </span>
       </button>
@@ -332,7 +357,11 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] xl:items-start xl:gap-10">
           {isDesktopRadial ? (
             <div className="relative mx-auto aspect-square w-full max-w-[min(100%,520px)]">
-              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" aria-hidden>
+              <svg
+                className="pointer-events-none absolute inset-0 h-full w-full"
+                viewBox="0 0 100 100"
+                aria-hidden
+              >
                 {MODULES.map((m, i) => {
                   const { x, y } = polarToPercent(angles[i], radius);
                   const isLit =
@@ -369,7 +398,8 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
               <div className="my-4">
                 <EngineCore engineDescId={engineDescId} className="mx-auto max-w-lg" />
                 <p className="mx-auto mt-3 max-w-lg text-center text-xs leading-relaxed text-muted-foreground sm:text-sm xl:hidden">
-                  Scoring, benchmarks, governance rules, and longitudinal intelligence—shared across every OS layer.
+                  Scoring, benchmarks, governance rules, and longitudinal intelligence—shared across
+                  every OS layer.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -383,10 +413,15 @@ export function PlatformArchitectureMap({ className }: { className?: string }) {
               Layer details
             </p>
             <div aria-live="polite" aria-atomic="true" className="min-h-[180px] md:min-h-[200px]">
-              <ModuleDetail module={activeModule} detailId={detailId} connectionsHeadingId={connectionsHeadingId} />
+              <ModuleDetail
+                module={activeModule}
+                detailId={detailId}
+                connectionsHeadingId={connectionsHeadingId}
+              />
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              Tip: hover to preview; click or press Enter to pin selection. Arrow keys move focus between modules.
+              Tip: hover to preview; click or press Enter to pin selection. Arrow keys move focus
+              between modules.
             </p>
           </div>
         </div>

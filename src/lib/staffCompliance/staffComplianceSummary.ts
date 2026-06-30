@@ -40,7 +40,13 @@ function parseIsoDate(raw: unknown): Date | null {
 function normalizeStatusString(raw: unknown): StaffComplianceStatus | null {
   if (raw == null || typeof raw !== "string") return null;
   const s = raw.trim().toLowerCase();
-  if (s === "current" || s === "due_soon" || s === "expired" || s === "missing" || s === "unknown") {
+  if (
+    s === "current" ||
+    s === "due_soon" ||
+    s === "expired" ||
+    s === "missing" ||
+    s === "unknown"
+  ) {
     return s as StaffComplianceStatus;
   }
   return null;
@@ -112,7 +118,10 @@ export function resolveStaffComplianceStatus(
 
 function asObjectArray(raw: unknown): Record<string, unknown>[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((x) => x && typeof x === "object" && !Array.isArray(x)) as Record<string, unknown>[];
+  return raw.filter((x) => x && typeof x === "object" && !Array.isArray(x)) as Record<
+    string,
+    unknown
+  >[];
 }
 
 function pickLastSyncedAt(a: string | null, b: string | null): string | null {
@@ -152,7 +161,10 @@ export function buildStaffComplianceSummaryFromSourceRows(
   options?: { now?: Date }
 ): StaffComplianceSummary {
   const now = options?.now ?? new Date();
-  const mergedById = new Map<string, { entry: Record<string, unknown>; sourceSystem: string; bucket: "training" | "compliance" }>();
+  const mergedById = new Map<
+    string,
+    { entry: Record<string, unknown>; sourceSystem: string; bucket: "training" | "compliance" }
+  >();
 
   let lastSyncedAt: string | null = null;
 
@@ -186,7 +198,8 @@ export function buildStaffComplianceSummaryFromSourceRows(
     const label = String(entry.label ?? id).trim() || id;
     const declared = normalizeStatusString(entry.status);
     const status = resolveStaffComplianceStatus(declared, entry, now);
-    const completedAt = entry.completed_at != null ? String(entry.completed_at).trim() || null : null;
+    const completedAt =
+      entry.completed_at != null ? String(entry.completed_at).trim() || null : null;
     const expiresAt = entry.expires_at != null ? String(entry.expires_at).trim() || null : null;
     const sourceUrl = safeSourceUrl(entry.source_url);
     const meta =

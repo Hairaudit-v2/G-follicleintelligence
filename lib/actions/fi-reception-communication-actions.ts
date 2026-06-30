@@ -31,7 +31,15 @@ const usageContextSchema = z.object({
 });
 
 const contextSchema = z.object({
-  sourceKind: z.enum(["task", "action_alert", "revenue_alert", "deposit", "surgery", "pipeline", "patient"]),
+  sourceKind: z.enum([
+    "task",
+    "action_alert",
+    "revenue_alert",
+    "deposit",
+    "surgery",
+    "pipeline",
+    "patient",
+  ]),
   sourceId: z.string().min(1),
   label: z.string().min(1),
   alertKind: z.string().nullable().optional(),
@@ -99,13 +107,18 @@ function revalidateReceptionOsPaths(tenantId: string) {
 
 async function assertCommunicationAccess(
   tenantId: string,
-  adminKey?: string,
-): Promise<{ role: import("@/src/lib/receptionOs/receptionOsBoardModel").ReceptionOsViewerRole; actorFiUserId: string | null }> {
+  adminKey?: string
+): Promise<{
+  role: import("@/src/lib/receptionOs/receptionOsBoardModel").ReceptionOsViewerRole;
+  actorFiUserId: string | null;
+}> {
   const tid = tenantId.trim();
   await assertCrmTenantReadAllowed({ tenantId: tid, adminKey, request: undefined });
   const viewer = await resolveReceptionOsViewerContext(tid);
   if (!viewer.canAccessReceptionOs) {
-    throw new Error("ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+    throw new Error(
+      "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+    );
   }
   const member = await getFiTenantMemberSessionIfAllowed(tid);
   return { role: viewer.receptionOsRole, actorFiUserId: member?.fiUserId ?? null };
@@ -127,8 +140,10 @@ export type ReceptionCommunicationPreviewPayload = {
 
 export async function previewReceptionCommunicationAction(
   tenantId: string,
-  body: unknown,
-): Promise<{ ok: true; preview: ReceptionCommunicationPreviewPayload } | { ok: false; error: string }> {
+  body: unknown
+): Promise<
+  { ok: true; preview: ReceptionCommunicationPreviewPayload } | { ok: false; error: string }
+> {
   try {
     const parsed = previewSchema.parse(body);
     const { role, actorFiUserId } = await assertCommunicationAccess(tenantId, parsed.adminKey);
@@ -144,7 +159,7 @@ export async function previewReceptionCommunicationAction(
     const template = await loadReceptionCommunicationTemplateForTenant(tenantId, templateKey);
     const rendered = renderReceptionCommunicationTemplateContent(
       template,
-      buildReceptionCommunicationVariables({ ...context, paymentLink }),
+      buildReceptionCommunicationVariables({ ...context, paymentLink })
     );
 
     trackReceptionUsageEventSafe({
@@ -173,7 +188,11 @@ export async function previewReceptionCommunicationAction(
         canSendEmail: receptionCommunicationActionAllowed(role, "send_email", templateKey),
         canLogCall: receptionCommunicationActionAllowed(role, "log_call", templateKey),
         canAddNote: receptionCommunicationActionAllowed(role, "add_note", templateKey),
-        canCopyPaymentLink: receptionCommunicationActionAllowed(role, "copy_payment_link", templateKey),
+        canCopyPaymentLink: receptionCommunicationActionAllowed(
+          role,
+          "copy_payment_link",
+          templateKey
+        ),
       },
     };
   } catch (e) {
@@ -183,7 +202,7 @@ export async function previewReceptionCommunicationAction(
 
 export async function sendReceptionCommunicationAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<
   | { ok: true; communicationId: string | null; paymentLink: string | null; provider: string }
   | { ok: false; error: string }
@@ -240,7 +259,7 @@ export async function sendReceptionCommunicationAction(
 
 export async function sendPaymentReminderAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<
   | { ok: true; communicationId: string | null; paymentLink: string | null; provider: string }
   | { ok: false; error: string }
@@ -273,12 +292,14 @@ export async function sendPaymentReminderAction(
 
 export async function resolveReceptionPaymentLinkAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; paymentLink: string | null } | { ok: false; error: string }> {
   try {
     const parsed = paymentLinkSchema.parse(body);
     await assertCommunicationAccess(tenantId, parsed.adminKey);
-    const recordId = parsed.paymentRecordId ?? (parsed.context?.sourceKind === "deposit" ? parsed.context.sourceId : null);
+    const recordId =
+      parsed.paymentRecordId ??
+      (parsed.context?.sourceKind === "deposit" ? parsed.context.sourceId : null);
     if (!recordId) return { ok: true, paymentLink: null };
     const paymentLink = await resolvePaymentLinkForPaymentRecord(tenantId, recordId);
     return { ok: true, paymentLink };

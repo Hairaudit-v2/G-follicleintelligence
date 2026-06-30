@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT } from "@/lib/marketing/ecosystemArchitecturePageContent";
 import { HOME_PAGE_CONTENT } from "@/lib/marketing/homePageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight, GitBranch } from "lucide-react";
 
@@ -31,17 +34,31 @@ function moduleAnchorId(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function OsModuleCard({ index, name, description }: { index: number; name: string; description: string }) {
+function OsModuleCard({
+  index,
+  name,
+  description,
+}: {
+  index: number;
+  name: string;
+  description: string;
+}) {
   return (
     // Wrapper carries the stable anchor id + scroll offset so deep links from the homepage land
     // below the sticky header without overlap (scroll-margin causes no layout shift).
     <div id={moduleAnchorId(name)} className="h-full scroll-mt-28">
-      <GlassCard variant="os" className="group flex h-full min-h-[10.5rem] flex-col sm:min-h-[11.5rem]">
+      <GlassCard
+        variant="os"
+        className="group flex h-full min-h-[10.5rem] flex-col sm:min-h-[11.5rem]"
+      >
         <div className="flex items-center border-b border-white/[0.07] pb-3">
           <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
+          <span
+            className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent"
+            aria-hidden
+          />
         </div>
         <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
           {name}
@@ -68,7 +85,9 @@ function EcosystemLayerStack() {
       <div className="relative mt-10 space-y-10">
         {ecosystemLayers.map((layer, bandIdx) => {
           const layerDescription =
-            c.architecture.layerDescriptions[layer.title as keyof typeof c.architecture.layerDescriptions];
+            c.architecture.layerDescriptions[
+              layer.title as keyof typeof c.architecture.layerDescriptions
+            ];
 
           return (
             <div key={layer.title}>
@@ -93,7 +112,12 @@ function EcosystemLayerStack() {
                   {layer.modules.map((mod) => {
                     const index = moduleIndex++;
                     return (
-                      <OsModuleCard key={mod.name} index={index} name={mod.name} description={mod.description} />
+                      <OsModuleCard
+                        key={mod.name}
+                        index={index}
+                        name={mod.name}
+                        description={mod.description}
+                      />
                     );
                   })}
                 </div>
@@ -125,15 +149,23 @@ function DigitalTwinTimeline({ stages }: { stages: readonly string[] }) {
             {stages.map((stage, index) => (
               <Fragment key={stage}>
                 <li className="flex w-[7.5rem] shrink-0 flex-col xl:w-[8rem]">
-                  <GlassCard variant="default" className="h-full border-amber-400/10 !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)] sm:!p-4">
+                  <GlassCard
+                    variant="default"
+                    className="h-full border-amber-400/10 !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)] sm:!p-4"
+                  >
                     <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/55">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <p className="mt-2 text-[0.75rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">{stage}</p>
+                    <p className="mt-2 text-[0.75rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">
+                      {stage}
+                    </p>
                   </GlassCard>
                 </li>
                 {index < stages.length - 1 ? (
-                  <li className="flex w-6 shrink-0 items-center justify-center self-center pt-6 xl:w-7" aria-hidden>
+                  <li
+                    className="flex w-6 shrink-0 items-center justify-center self-center pt-6 xl:w-7"
+                    aria-hidden
+                  >
                     <ChevronRight className="h-3.5 w-3.5 text-amber-400/45" strokeWidth={2} />
                   </li>
                 ) : null}
@@ -150,11 +182,16 @@ function DigitalTwinTimeline({ stages }: { stages: readonly string[] }) {
               aria-hidden
               className="absolute -left-[19px] top-2 flex h-3 w-3 items-center justify-center rounded-full border border-amber-300/45 bg-gradient-to-br from-amber-200/55 to-amber-800/30 shadow-[0_0_16px_rgb(212_175_55_/0.35)] sm:-left-[21px]"
             />
-            <GlassCard variant="default" className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]">
+            <GlassCard
+              variant="default"
+              className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]"
+            >
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
                 Stage {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">{stage}</p>
+              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">
+                {stage}
+              </p>
             </GlassCard>
           </li>
         ))}
@@ -182,7 +219,10 @@ export function EcosystemArchitectureView() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">
               {c.hero.eyebrow}
             </p>
-            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+            <div
+              className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+              aria-hidden
+            />
             <h1
               id={`${c.hero.id}-heading`}
               className="mt-5 max-w-4xl font-display text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance drop-shadow-[0_2px_36px_rgb(0_0_0_/0.45)] sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
@@ -192,7 +232,9 @@ export function EcosystemArchitectureView() {
             <p className="mt-6 max-w-3xl text-base font-medium leading-relaxed text-foreground/88 sm:text-lg md:text-xl md:leading-relaxed">
               {c.hero.subheadline}
             </p>
-            <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">{c.hero.body}</p>
+            <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {c.hero.body}
+            </p>
             <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <Button
                 asChild
@@ -207,7 +249,12 @@ export function EcosystemArchitectureView() {
                   <ChevronRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.secondaryCta.href}>
                   {c.hero.secondaryCta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -260,7 +307,9 @@ export function EcosystemArchitectureView() {
                       <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.2em] text-amber-200/50">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <p className="mt-2 text-sm leading-relaxed text-foreground sm:text-[0.9375rem]">{insight}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-foreground sm:text-[0.9375rem]">
+                        {insight}
+                      </p>
                     </div>
                   </div>
                 </GlassCard>
@@ -340,16 +389,24 @@ export function EcosystemArchitectureView() {
       >
         <FadeIn>
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200/75">{c.finalCta.eyebrow}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200/75">
+              {c.finalCta.eyebrow}
+            </p>
             <h2
               id={`${c.finalCta.id}-heading`}
               className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl"
             >
               {c.finalCta.headline}
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">{c.finalCta.body}</p>
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {c.finalCta.body}
+            </p>
             <div className="mt-8 flex justify-center">
-              <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                size="lg"
+                className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.finalCta.cta.href}>
                   {c.finalCta.cta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />

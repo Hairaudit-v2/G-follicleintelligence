@@ -105,7 +105,15 @@ const STANDARD_WORKFLOWS: WorkflowTemplate[] = [
     name: "Standard lead pipeline",
     type: "crm_pipeline",
     config: {
-      stages: ["new_lead", "contacted", "consultation_booked", "consultation_complete", "treatment_plan", "won", "lost"],
+      stages: [
+        "new_lead",
+        "contacted",
+        "consultation_booked",
+        "consultation_complete",
+        "treatment_plan",
+        "won",
+        "lost",
+      ],
     },
   },
   {
@@ -154,7 +162,17 @@ const ENTERPRISE_WORKFLOWS: WorkflowTemplate[] = [
     code: "multi_clinic_routing",
     name: "Multi-clinic lead routing",
     type: "crm_pipeline",
-    config: { stages: ["intake", "clinic_assignment", "consultation_booked", "treatment_plan", "won", "lost"], multiClinic: true },
+    config: {
+      stages: [
+        "intake",
+        "clinic_assignment",
+        "consultation_booked",
+        "treatment_plan",
+        "won",
+        "lost",
+      ],
+      multiClinic: true,
+    },
   },
 ];
 
@@ -249,7 +267,13 @@ export const MODULE_BUNDLES: Readonly<Record<string, ModuleBundle>> = {
     displayName: "Growth & Consultation",
     subscriptionStatus: "trialing",
     verificationStatus: "verified",
-    enabledModules: ["reception_os", "consultation_os", "patient_os", "financial_os", "analytics_os"],
+    enabledModules: [
+      "reception_os",
+      "consultation_os",
+      "patient_os",
+      "financial_os",
+      "analytics_os",
+    ],
   },
   enterprise_group: {
     code: "enterprise_group",
@@ -312,22 +336,28 @@ function sandboxSeed(enabled: boolean, opts?: Partial<SandboxSeedOption>): Sandb
   };
 }
 
-export const CLINIC_DEPLOYMENT_TEMPLATES: Readonly<Record<ClinicDeploymentTemplateCode, ClinicDeploymentTemplate>> = {
+export const CLINIC_DEPLOYMENT_TEMPLATES: Readonly<
+  Record<ClinicDeploymentTemplateCode, ClinicDeploymentTemplate>
+> = {
   standard_hair_restoration: {
     code: "standard_hair_restoration",
     displayName: "Standard Hair Restoration Clinic",
-    description: "Core reception, consultation, and patient workflows for a single-site hair restoration clinic.",
+    description:
+      "Core reception, consultation, and patient workflows for a single-site hair restoration clinic.",
     rolePackCode: "standard_clinic_roles",
     moduleBundleCode: "core_clinic",
-    serviceTemplates: [...CORE_SERVICES, {
-      code: "prp",
-      name: "PRP Treatment",
-      bookingType: "prp",
-      durationMinutes: 60,
-      category: "Treatment",
-      basePrice: 0,
-      color: "#14b8a6",
-    }],
+    serviceTemplates: [
+      ...CORE_SERVICES,
+      {
+        code: "prp",
+        name: "PRP Treatment",
+        bookingType: "prp",
+        durationMinutes: 60,
+        category: "Treatment",
+        basePrice: 0,
+        color: "#14b8a6",
+      },
+    ],
     workflowTemplates: STANDARD_WORKFLOWS,
     academyAssignments: STANDARD_ACADEMY,
     sandboxSeed: sandboxSeed(true),
@@ -335,7 +365,8 @@ export const CLINIC_DEPLOYMENT_TEMPLATES: Readonly<Record<ClinicDeploymentTempla
   surgical_hair_restoration: {
     code: "surgical_hair_restoration",
     displayName: "Surgical Hair Restoration Clinic",
-    description: "Full surgical stack with theatre workflows, imaging, financial clearance, and AcademyOS privileges.",
+    description:
+      "Full surgical stack with theatre workflows, imaging, financial clearance, and AcademyOS privileges.",
     rolePackCode: "surgical_clinic_roles",
     moduleBundleCode: "surgical_clinic",
     serviceTemplates: SURGICAL_SERVICES,
@@ -346,7 +377,8 @@ export const CLINIC_DEPLOYMENT_TEMPLATES: Readonly<Record<ClinicDeploymentTempla
   growth_consultation: {
     code: "growth_consultation",
     displayName: "Growth / Consultation Clinic",
-    description: "Consultation-led growth clinic with trichology and non-surgical treatment pathways.",
+    description:
+      "Consultation-led growth clinic with trichology and non-surgical treatment pathways.",
     rolePackCode: "growth_clinic_roles",
     moduleBundleCode: "growth_clinic",
     serviceTemplates: GROWTH_SERVICES,
@@ -357,7 +389,8 @@ export const CLINIC_DEPLOYMENT_TEMPLATES: Readonly<Record<ClinicDeploymentTempla
   enterprise_multi_clinic: {
     code: "enterprise_multi_clinic",
     displayName: "Enterprise Multi-Clinic Group",
-    description: "Enterprise verification, HR OS, audit, and multi-clinic routing for clinic groups.",
+    description:
+      "Enterprise verification, HR OS, audit, and multi-clinic routing for clinic groups.",
     rolePackCode: "enterprise_group_roles",
     moduleBundleCode: "enterprise_group",
     serviceTemplates: SURGICAL_SERVICES,
@@ -372,8 +405,12 @@ export const LEGACY_TEMPLATE_CODE_MAP: Readonly<Record<string, ClinicDeploymentT
   standard_clinic: "standard_hair_restoration",
 };
 
-export function isClinicDeploymentTemplateCode(value: string | null | undefined): value is ClinicDeploymentTemplateCode {
-  return CLINIC_DEPLOYMENT_TEMPLATE_CODES.includes(String(value ?? "").trim() as ClinicDeploymentTemplateCode);
+export function isClinicDeploymentTemplateCode(
+  value: string | null | undefined
+): value is ClinicDeploymentTemplateCode {
+  return CLINIC_DEPLOYMENT_TEMPLATE_CODES.includes(
+    String(value ?? "").trim() as ClinicDeploymentTemplateCode
+  );
 }
 
 export function listClinicDeploymentTemplateSummaries(): readonly {

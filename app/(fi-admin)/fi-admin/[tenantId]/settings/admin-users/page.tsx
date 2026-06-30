@@ -14,14 +14,21 @@ import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server
 
 export const dynamic = "force-dynamic";
 
-export default async function TenantAdminUsersSettingsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function TenantAdminUsersSettingsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>
@@ -35,11 +42,17 @@ export default async function TenantAdminUsersSettingsPage({ params }: { params:
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const rows = await loadTenantAdminUserRowsForTenant(tenantId);
-  const authIds = rows.map((r) => r.fiUserAuthUserId).filter((x): x is string => Boolean(x?.trim()));
+  const authIds = rows
+    .map((r) => r.fiUserAuthUserId)
+    .filter((x): x is string => Boolean(x?.trim()));
   const lastMap = await loadAuthLastSignInAtForUserIds(authIds);
   const lastLoginByAuthUserId: Record<string, string | null> = {};
   lastMap.forEach((v, k) => {
@@ -50,21 +63,30 @@ export default async function TenantAdminUsersSettingsPage({ params }: { params:
     <div className="space-y-4">
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
-          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-[#22C1FF] hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/configuration`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Configuration
           </Link>{" "}
           / Admin Users
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Admin Users</h1>
+        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          Admin Users
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Manage non-clinical platform access for trusted administrators, finance teams, owners, auditors, investors,
-          compliance officers, and operational staff.{" "}
+          Manage non-clinical platform access for trusted administrators, finance teams, owners,
+          auditors, investors, compliance officers, and operational staff.{" "}
           <span className="text-[#CBD5E1]">Access users</span> (this screen) are separate from{" "}
-          <span className="text-[#CBD5E1]">staff profiles</span> used for rosters, calendars, surgical teams, and HR:
-          removing one does not remove the other.
+          <span className="text-[#CBD5E1]">staff profiles</span> used for rosters, calendars,
+          surgical teams, and HR: removing one does not remove the other.
         </p>
       </div>
-      <TenantAdminUsersSection tenantId={tenantId} rows={rows} lastLoginByAuthUserId={lastLoginByAuthUserId} />
+      <TenantAdminUsersSection
+        tenantId={tenantId}
+        rows={rows}
+        lastLoginByAuthUserId={lastLoginByAuthUserId}
+      />
     </div>
   );
 }

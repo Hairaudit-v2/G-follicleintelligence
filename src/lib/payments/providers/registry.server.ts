@@ -7,8 +7,12 @@ import { createStripePaymentProvider } from "@/src/lib/payments/providers/stripe
 class ManualPaymentProvider implements FiPaymentProvider {
   readonly id = "manual";
 
-  async createCheckoutSession(): Promise<import("@/src/lib/payments/providers/PaymentProvider").CheckoutSessionResult> {
-    throw new Error("Online checkout is disabled (FI_PAYMENT_PROVIDER=manual). Create a payment request without send, or enable Stripe.");
+  async createCheckoutSession(): Promise<
+    import("@/src/lib/payments/providers/PaymentProvider").CheckoutSessionResult
+  > {
+    throw new Error(
+      "Online checkout is disabled (FI_PAYMENT_PROVIDER=manual). Create a payment request without send, or enable Stripe."
+    );
   }
 
   verifyWebhook(): Promise<unknown> {

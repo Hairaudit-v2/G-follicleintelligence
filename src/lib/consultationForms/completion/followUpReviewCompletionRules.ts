@@ -118,7 +118,9 @@ const INTEGRATION_PLACEHOLDER =
 /**
  * Rules-based completion summary for {@link FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG}.
  */
-export function buildFollowUpReviewCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildFollowUpReviewCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   const v = input.values ?? {};
   const base = emptyFollowUpBase(input);
 
@@ -144,7 +146,11 @@ export function buildFollowUpReviewCompletionSummary(input: ConsultationCompleti
 
   const satRaw = v.patient_satisfaction;
   const satisfactionScore =
-    typeof satRaw === "number" && Number.isFinite(satRaw) ? Math.round(satRaw) : satRaw != null ? Number.parseInt(String(satRaw), 10) : NaN;
+    typeof satRaw === "number" && Number.isFinite(satRaw)
+      ? Math.round(satRaw)
+      : satRaw != null
+        ? Number.parseInt(String(satRaw), 10)
+        : NaN;
   const satisfactionDisplay = Number.isFinite(satisfactionScore) ? satisfactionScore : null;
 
   const diagnosisImpression = [
@@ -166,7 +172,8 @@ export function buildFollowUpReviewCompletionSummary(input: ConsultationCompleti
   const treatLabels = treatKeys.map((k) => optLabel(TREATMENT_LABELS, k)).filter(Boolean);
 
   const ai = readString(v.ai_progress_summary).trim();
-  const recommendedProcedure = ai || "Follow-up review documented — see structured note and snapshot.";
+  const recommendedProcedure =
+    ai || "Follow-up review documented — see structured note and snapshot.";
 
   const nextKey = readString(v.next_pathway_recommended).trim();
   const nextPathwayLabel = optLabel(NEXT_PATHWAY_OPTIONS, nextKey);

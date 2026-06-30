@@ -10,7 +10,10 @@ import {
 } from "@/src/lib/fi-os/workspaceProfile.server";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { buildWorkspaceProfileChangedAuditInsert } from "@/src/lib/fi-os/staffFeatureAccessAuditPayload";
-import { resolveActorIdsForFiOsAudit, tryInsertFiStaffFeatureAccessAuditEvent } from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
+import {
+  resolveActorIdsForFiOsAudit,
+  tryInsertFiStaffFeatureAccessAuditEvent,
+} from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 
 function errMsg(e: unknown): string {

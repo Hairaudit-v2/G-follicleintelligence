@@ -40,11 +40,20 @@ async function handle(req: NextRequest) {
     }
 
     const supabase = supabaseAdmin();
-    const { data: tenants, error } = await supabase.from("fi_tenants").select("id").order("name").limit(500);
+    const { data: tenants, error } = await supabase
+      .from("fi_tenants")
+      .select("id")
+      .order("name")
+      .limit(500);
     if (error) throw new Error(error.message);
 
     const ids = (tenants ?? []).map((t) => String((t as { id: string }).id));
-    const perTenant: { tenant_id: string; upserted: number; computed_count: number; error?: string }[] = [];
+    const perTenant: {
+      tenant_id: string;
+      upserted: number;
+      computed_count: number;
+      error?: string;
+    }[] = [];
 
     for (const tid of ids) {
       try {

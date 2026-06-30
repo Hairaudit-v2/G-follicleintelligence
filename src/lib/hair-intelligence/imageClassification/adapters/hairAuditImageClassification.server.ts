@@ -1,6 +1,10 @@
 import "server-only";
 
-import type { FiAiImageClassificationResult, HliClinicalUseContext, HliSourceSystem } from "../types";
+import type {
+  FiAiImageClassificationResult,
+  HliClinicalUseContext,
+  HliSourceSystem,
+} from "../types";
 import { classifyClinicalHairImageFromModelUrl } from "../classifyClinicalHairImage.server";
 import {
   classificationResultToHliInsert,
@@ -23,7 +27,9 @@ export type HairAuditImageClassificationInput = {
  * HairAudit adapter: runs the shared classifier and appends an `hli_image_classifications` row.
  * Wire to HairAudit image tables when those land in this repo.
  */
-export async function classifyHairAuditImageAndPersist(input: HairAuditImageClassificationInput): Promise<{
+export async function classifyHairAuditImageAndPersist(
+  input: HairAuditImageClassificationInput
+): Promise<{
   result: FiAiImageClassificationResult;
   classifierVersion: string;
   usedOpenAi: boolean;

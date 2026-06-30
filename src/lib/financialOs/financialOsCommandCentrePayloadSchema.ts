@@ -54,7 +54,7 @@ export const financialOsCommandCentrePayloadSchema = z.object({
       invoice_kind: z.string(),
       remaining_balance_cents: z.number(),
       currency: z.string(),
-    }),
+    })
   ),
   alerts: financialOsCommandCentreAlertStripSchema,
   surgeryEconomics: z.object({
@@ -81,7 +81,7 @@ export const financialOsCommandCentrePayloadSchema = z.object({
         revenue_per_graft_cents: z.number().nullable(),
         calculated_at: z.string(),
         patient_label: z.string().nullable(),
-      }),
+      })
     ),
     currency: z.string(),
   }),
@@ -111,7 +111,7 @@ export const financialOsCommandCentrePayloadSchema = z.object({
         gross_profit_cents: z.number(),
         margin_percentage: z.number().nullable(),
         confidence: z.string(),
-      }),
+      })
     ),
     recentEvents: z.array(z.object({ id: z.string(), attribution_source: z.string() })),
   }),
@@ -143,19 +143,25 @@ export const financialOsCommandCentrePayloadSchema = z.object({
         severity: z.enum(["info", "warning", "critical"]),
         title: z.string(),
         detail: z.string(),
-      }),
+      })
     ),
   }),
 });
 
-export type FinancialOsCommandCentrePayloadValidated = z.infer<typeof financialOsCommandCentrePayloadSchema>;
+export type FinancialOsCommandCentrePayloadValidated = z.infer<
+  typeof financialOsCommandCentrePayloadSchema
+>;
 
-export function parseFinancialOsCommandCentrePayload(raw: unknown): FinancialOsCommandCentrePayloadValidated {
+export function parseFinancialOsCommandCentrePayload(
+  raw: unknown
+): FinancialOsCommandCentrePayloadValidated {
   return financialOsCommandCentrePayloadSchema.parse(raw);
 }
 
 /** Smoke-check invariants without full Zod parse (for deployed-host script). */
-export function assertFinancialOsSmokeInvariants(payload: FinancialOsCommandCentrePayloadValidated): void {
+export function assertFinancialOsSmokeInvariants(
+  payload: FinancialOsCommandCentrePayloadValidated
+): void {
   if (payload.revenueTodayFromLedger !== true) {
     throw new Error("revenueTodayFromLedger must be true");
   }
@@ -168,7 +174,9 @@ export function assertFinancialOsSmokeInvariants(payload: FinancialOsCommandCent
       throw new Error(`Cross-tenant transaction in recentTransactions: ${tx.id}`);
     }
   }
-  if (payload.depositsAwaitingPayment.count !== payload.depositsAwaitingPayment.depositInvoiceCount) {
+  if (
+    payload.depositsAwaitingPayment.count !== payload.depositsAwaitingPayment.depositInvoiceCount
+  ) {
     throw new Error("depositsAwaitingPayment count must match depositInvoiceCount filter");
   }
 }

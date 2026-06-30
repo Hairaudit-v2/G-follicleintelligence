@@ -12,7 +12,9 @@ import {
 } from "@/src/lib/financialOs/financialInternationalTransferCore";
 import { buildFinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 
-function baseApp(over: Partial<FiInternationalTransferApplicationRow> = {}): FiInternationalTransferApplicationRow {
+function baseApp(
+  over: Partial<FiInternationalTransferApplicationRow> = {}
+): FiInternationalTransferApplicationRow {
   return {
     id: "app-1",
     transfer_status: "instructions_required",
@@ -105,7 +107,9 @@ describe("financialInternationalTransferCore — proof_received reconciliation S
       buildInternationalTransferAttentionSummary({
         todayYmd: "2026-06-10",
         application: baseApp({ transfer_status: "proof_received" }),
-      }).international_transfer_attention_labels.includes("Proof Received — Reconciliation Required")
+      }).international_transfer_attention_labels.includes(
+        "Proof Received — Reconciliation Required"
+      )
     );
   });
 
@@ -245,10 +249,19 @@ describe("financialInternationalTransferCore — settled clears attention", () =
       paymentRequests: [],
       payments: [],
       installmentPlans: [],
-      internationalTransferApplication: baseApp({ transfer_status: "settled", received_amount_cents: 200_000 }),
+      internationalTransferApplication: baseApp({
+        transfer_status: "settled",
+        received_amount_cents: 200_000,
+      }),
     });
-    assert.equal(pipeline.internationalTransferApplicationAttention.international_transfer_attention_required, false);
-    assert.equal(pipeline.internationalTransferApplicationAttention.financial_clearance_state, "cleared");
+    assert.equal(
+      pipeline.internationalTransferApplicationAttention.international_transfer_attention_required,
+      false
+    );
+    assert.equal(
+      pipeline.internationalTransferApplicationAttention.financial_clearance_state,
+      "cleared"
+    );
   });
 
   it("blocks surgery pipeline clearance for unresolved international transfer", () => {
@@ -263,10 +276,28 @@ describe("financialInternationalTransferCore — settled clears attention", () =
       paymentRequests: [],
       payments: [],
       installmentPlans: [],
-      paymentPathways: [{ id: "path-1", pathway_type: "international_transfer", status: "settlement_pending", provider: null, provider_reference: null, expected_settlement_date: null, actual_settlement_date: null, expected_amount_cents: null, settled_amount_cents: null, currency_code: "AUD", created_at: "", updated_at: "" }],
+      paymentPathways: [
+        {
+          id: "path-1",
+          pathway_type: "international_transfer",
+          status: "settlement_pending",
+          provider: null,
+          provider_reference: null,
+          expected_settlement_date: null,
+          actual_settlement_date: null,
+          expected_amount_cents: null,
+          settled_amount_cents: null,
+          currency_code: "AUD",
+          created_at: "",
+          updated_at: "",
+        },
+      ],
       internationalTransferApplication: baseApp({ transfer_status: "awaiting_transfer" }),
     });
-    assert.equal(pipeline.internationalTransferApplicationAttention.international_transfer_attention_required, true);
+    assert.equal(
+      pipeline.internationalTransferApplicationAttention.international_transfer_attention_required,
+      true
+    );
     assert.equal(pipeline.payment_attention_required, true);
   });
 });
@@ -274,7 +305,12 @@ describe("financialInternationalTransferCore — settled clears attention", () =
 describe("financialInternationalTransferCore — analytics aggregation", () => {
   it("aggregates settlement success rate and source countries", () => {
     const apps: FiInternationalTransferApplicationRow[] = [
-      baseApp({ id: "a1", transfer_status: "settled", actual_settlement_date: "2026-06-05", source_country_code: "GB" }),
+      baseApp({
+        id: "a1",
+        transfer_status: "settled",
+        actual_settlement_date: "2026-06-05",
+        source_country_code: "GB",
+      }),
       baseApp({ id: "a2", transfer_status: "rejected", source_country_code: "US" }),
       baseApp({ id: "a3", transfer_status: "cancelled", source_country_code: "GB" }),
     ];

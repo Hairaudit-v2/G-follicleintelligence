@@ -7,7 +7,11 @@ import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/c
 import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
 import { clinicOsGridPlacementForBooking } from "@/src/lib/fiAdmin/clinicOsCalendarGrid";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import type { ClinicOsCalendarColumnId, ClinicOsCalendarLiveBookingDTO, ClinicOsCalendarReadOnlyPayload } from "./clinicOsCalendarTypes";
+import type {
+  ClinicOsCalendarColumnId,
+  ClinicOsCalendarLiveBookingDTO,
+  ClinicOsCalendarReadOnlyPayload,
+} from "./clinicOsCalendarTypes";
 import { anchorLabelForBookingRow } from "@/src/lib/bookings/bookingDisplayContext";
 import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
 

@@ -9,7 +9,11 @@ import {
   CRM_TASK_STATUS_DONE,
   isCrmTaskActiveStatus,
 } from "./crmTaskPolicy";
-import { collectChangedTaskDetailKeys, taskDetailSnapshotFromRowLike, type TaskDetailComparableSnapshot } from "./crmTaskChangedFields";
+import {
+  collectChangedTaskDetailKeys,
+  taskDetailSnapshotFromRowLike,
+  type TaskDetailComparableSnapshot,
+} from "./crmTaskChangedFields";
 import { isTaskOwnedByLeadTenant } from "./crmTaskOwnership";
 import type { FiCrmTaskRow } from "./types";
 
@@ -104,15 +108,43 @@ describe("Stage 2I — due / bucket grouping (pure)", () => {
 describe("Stage 2I — changed field metadata (pure)", () => {
   it("collectChangedTaskDetailKeys lists only changed fields", () => {
     const before = taskDetailSnapshotFromRowLike(
-      taskRow({ id: "x", title: "A", description: "d", task_type: "call", status: "open", due_at: null, assignee_user_id: null })
+      taskRow({
+        id: "x",
+        title: "A",
+        description: "d",
+        task_type: "call",
+        status: "open",
+        due_at: null,
+        assignee_user_id: null,
+      })
     );
     const after: TaskDetailComparableSnapshot = { ...before, title: "B" };
     assert.deepEqual(collectChangedTaskDetailKeys(before, after), ["title"]);
   });
 
   it("treats trimmed description equivalence", () => {
-    const before = taskDetailSnapshotFromRowLike(taskRow({ id: "x", title: "T", description: "  ", task_type: "email", status: "open", due_at: null, assignee_user_id: null }));
-    const after = taskDetailSnapshotFromRowLike(taskRow({ id: "x", title: "T", description: null, task_type: "email", status: "open", due_at: null, assignee_user_id: null }));
+    const before = taskDetailSnapshotFromRowLike(
+      taskRow({
+        id: "x",
+        title: "T",
+        description: "  ",
+        task_type: "email",
+        status: "open",
+        due_at: null,
+        assignee_user_id: null,
+      })
+    );
+    const after = taskDetailSnapshotFromRowLike(
+      taskRow({
+        id: "x",
+        title: "T",
+        description: null,
+        task_type: "email",
+        status: "open",
+        due_at: null,
+        assignee_user_id: null,
+      })
+    );
     assert.deepEqual(collectChangedTaskDetailKeys(before, after), []);
   });
 });
@@ -124,15 +156,24 @@ describe("Stage 2I — complete/reopen payload rules (pure)", () => {
   });
 
   it("rejects stray keys", () => {
-    assert.throws(() => assertCompleteReopenBodyHasNoExtraKeys({ status: "done" }), /Unexpected field/);
+    assert.throws(
+      () => assertCompleteReopenBodyHasNoExtraKeys({ status: "done" }),
+      /Unexpected field/
+    );
   });
 });
 
 describe("Stage 2I — task–lead ownership helper (pure)", () => {
   it("matches tenant and lead", () => {
     assert.equal(isTaskOwnedByLeadTenant({ tenant_id: TID, lead_id: LID }, TID, LID), true);
-    assert.equal(isTaskOwnedByLeadTenant({ tenant_id: TID, lead_id: LID }, TID, "other-lead"), false);
-    assert.equal(isTaskOwnedByLeadTenant({ tenant_id: TID, lead_id: LID }, "other-tenant", LID), false);
+    assert.equal(
+      isTaskOwnedByLeadTenant({ tenant_id: TID, lead_id: LID }, TID, "other-lead"),
+      false
+    );
+    assert.equal(
+      isTaskOwnedByLeadTenant({ tenant_id: TID, lead_id: LID }, "other-tenant", LID),
+      false
+    );
   });
 });
 

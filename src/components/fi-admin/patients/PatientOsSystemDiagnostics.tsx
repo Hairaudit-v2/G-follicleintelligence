@@ -30,11 +30,13 @@ export function PatientOsSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support patient record integrity and do not affect day-to-day
-              patient journey coordination.
+              For platform operators only. These checks support patient record integrity and do not
+              affect day-to-day patient journey coordination.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-cyan-300/80">
@@ -94,7 +96,10 @@ export function PatientOsSystemDiagnostics({
                 key={p.patientId}
                 className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/[0.04] px-2 py-1"
               >
-                <Link href={`${base}/patients/${p.patientId}`} className="text-cyan-300/90 hover:underline">
+                <Link
+                  href={`${base}/patients/${p.patientId}`}
+                  className="text-cyan-300/90 hover:underline"
+                >
                   {p.patientId}
                 </Link>
                 <span>
@@ -119,7 +124,10 @@ export function PatientOsSystemDiagnostics({
               >
                 <span className="text-[#94A3B8]">
                   patient {j.patientId} → case{" "}
-                  <Link href={`${base}/cases/${j.caseId}`} className="text-cyan-300/90 hover:underline">
+                  <Link
+                    href={`${base}/cases/${j.caseId}`}
+                    className="text-cyan-300/90 hover:underline"
+                  >
                     {j.caseId}
                   </Link>
                 </span>

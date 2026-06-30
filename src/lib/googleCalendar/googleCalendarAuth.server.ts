@@ -76,7 +76,11 @@ function resolveMasterKey(): Buffer | null {
   return deriveExternalConnectorMasterKey(process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY);
 }
 
-function resolveGoogleOAuthConfig(): { clientId: string; clientSecret: string; redirectUri: string } | null {
+function resolveGoogleOAuthConfig(): {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+} | null {
   const clientId = (
     process.env.GOOGLE_CALENDAR_CLIENT_ID ??
     process.env.GOOGLE_CLIENT_ID ??
@@ -123,11 +127,13 @@ function mapIntegrationRow(row: IntegrationRow): FiCalendarIntegration {
     tokenExpiresAt: row.token_expires_at,
     status: row.status as FiCalendarIntegrationStatus,
     lastSyncedAt: row.last_synced_at,
-    lastSyncStatus: (row.last_sync_status ?? "never_synced") as FiCalendarIntegration["lastSyncStatus"],
+    lastSyncStatus: (row.last_sync_status ??
+      "never_synced") as FiCalendarIntegration["lastSyncStatus"],
     lastSyncError: row.last_sync_error,
     syncFailureCount: row.sync_failure_count ?? 0,
     lastValidatedAt: row.last_validated_at,
-    lastValidationStatus: row.last_validation_status as FiCalendarIntegration["lastValidationStatus"],
+    lastValidationStatus:
+      row.last_validation_status as FiCalendarIntegration["lastValidationStatus"],
     lastValidationError: row.last_validation_error,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -155,7 +161,10 @@ async function loadIntegrationRow(
   return (data as IntegrationRow | null) ?? null;
 }
 
-async function fetchGoogleAccountEmail(accessToken: string, fetchFn: typeof fetch): Promise<string | null> {
+async function fetchGoogleAccountEmail(
+  accessToken: string,
+  fetchFn: typeof fetch
+): Promise<string | null> {
   const res = await fetchFn("https://www.googleapis.com/oauth2/v2/userinfo", {
     method: "GET",
     headers: {
@@ -265,7 +274,10 @@ export async function connectGoogleCalendar(
 ): Promise<ConnectGoogleCalendarResult> {
   const config = resolveGoogleOAuthConfig();
   if (!config) {
-    return { ok: false, error: "Google Calendar OAuth is not configured (client id/secret/redirect)." };
+    return {
+      ok: false,
+      error: "Google Calendar OAuth is not configured (client id/secret/redirect).",
+    };
   }
 
   const tenant = tenantId.trim();
@@ -275,7 +287,8 @@ export async function connectGoogleCalendar(
   if (!stateSecret) {
     return {
       ok: false,
-      error: "Google Calendar OAuth state signing is not configured (set FI_EXTERNAL_CONNECTOR_MASTER_KEY).",
+      error:
+        "Google Calendar OAuth state signing is not configured (set FI_EXTERNAL_CONNECTOR_MASTER_KEY).",
     };
   }
 
@@ -305,7 +318,10 @@ export async function storeGoogleCalendarCredentials(
 
   const accessEncrypted = encryptToken(accessToken);
   if (!accessEncrypted) {
-    return { ok: false, error: "Credential encryption unavailable — set FI_EXTERNAL_CONNECTOR_MASTER_KEY." };
+    return {
+      ok: false,
+      error: "Credential encryption unavailable — set FI_EXTERNAL_CONNECTOR_MASTER_KEY.",
+    };
   }
 
   let refreshEncrypted: string | null = null;
@@ -546,8 +562,7 @@ export async function validateGoogleCalendarConnection(
 
   const json = (await res.json()) as { summary?: string; id?: string };
   const calendarEmail =
-    integration.googleAccountEmail?.trim() ||
-    (json.id?.includes("@") ? json.id.trim() : null);
+    integration.googleAccountEmail?.trim() || (json.id?.includes("@") ? json.id.trim() : null);
 
   await supabase
     .from("fi_calendar_integrations")

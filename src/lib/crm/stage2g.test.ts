@@ -27,7 +27,10 @@ describe("Stage 2G — lead source mapping policy (pure)", () => {
 
   it("duplicate and race messages are readable", () => {
     const ref = { source_system: "x", source_lead_id: "y" };
-    assert.match(leadSourceDuplicateErrorMessage(ref, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"), /aaaaaaaa/);
+    assert.match(
+      leadSourceDuplicateErrorMessage(ref, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+      /aaaaaaaa/
+    );
     assert.match(leadSourceInsertRaceErrorMessage(ref), /another lead/i);
   });
 });

@@ -40,7 +40,10 @@ export const OPEN_PATHWAY_TASK_STATUSES: readonly FiPaymentPathwayTaskStatus[] =
   "waiting_provider",
 ];
 
-export const RESOLVED_PATHWAY_TASK_STATUSES: readonly FiPaymentPathwayTaskStatus[] = ["completed", "cancelled"];
+export const RESOLVED_PATHWAY_TASK_STATUSES: readonly FiPaymentPathwayTaskStatus[] = [
+  "completed",
+  "cancelled",
+];
 
 const PATHWAY_TYPE_TO_TASK_TYPE: Partial<Record<FiPaymentPathwayType, FiPaymentPathwayTaskType>> = {
   medical_finance: "finance_review",
@@ -71,7 +74,9 @@ function daysSinceIso(iso: string, todayYmd: string): number {
 /**
  * Maps pathway type to auto-created inbox task type. Returns null for pay_in_full and deposit_balance.
  */
-export function mapPathwayTypeToTaskType(pathwayType: FiPaymentPathwayType): FiPaymentPathwayTaskType | null {
+export function mapPathwayTypeToTaskType(
+  pathwayType: FiPaymentPathwayType
+): FiPaymentPathwayTaskType | null {
   return PATHWAY_TYPE_TO_TASK_TYPE[pathwayType] ?? null;
 }
 
@@ -83,7 +88,9 @@ export function isUnresolvedOpenPathwayTaskStatus(status: FiPaymentPathwayTaskSt
   return isOpenPathwayTaskStatus(status);
 }
 
-export function filterUnresolvedOpenPathwayTasks(tasks: FiPaymentPathwayTaskRow[]): FiPaymentPathwayTaskRow[] {
+export function filterUnresolvedOpenPathwayTasks(
+  tasks: FiPaymentPathwayTaskRow[]
+): FiPaymentPathwayTaskRow[] {
   return tasks.filter((t) => isUnresolvedOpenPathwayTaskStatus(t.status));
 }
 
@@ -96,7 +103,9 @@ export type PathwayTaskAttentionSummary = {
 /**
  * Derives surgery / booking attention from unresolved open pathway inbox tasks.
  */
-export function buildPathwayTaskAttentionSummary(tasks: FiPaymentPathwayTaskRow[]): PathwayTaskAttentionSummary {
+export function buildPathwayTaskAttentionSummary(
+  tasks: FiPaymentPathwayTaskRow[]
+): PathwayTaskAttentionSummary {
   const unresolved = filterUnresolvedOpenPathwayTasks(tasks);
   if (!unresolved.length) {
     return {
@@ -132,7 +141,9 @@ export type ComputeTaskEscalationPriorityInput = {
  * - expected settlement date missed → urgent
  * - surgery within 7 days and unresolved task → urgent
  */
-export function computeTaskEscalationPriority(input: ComputeTaskEscalationPriorityInput): FiPaymentPathwayTaskPriority | null {
+export function computeTaskEscalationPriority(
+  input: ComputeTaskEscalationPriorityInput
+): FiPaymentPathwayTaskPriority | null {
   const { todayYmd, task, expectedSettlementDateYmd, surgeryDateYmd } = input;
 
   if (!isUnresolvedOpenPathwayTaskStatus(task.status)) return null;
@@ -147,7 +158,8 @@ export function computeTaskEscalationPriority(input: ComputeTaskEscalationPriori
     if (daysToSurgery >= 0 && daysToSurgery <= 7) return "urgent";
   }
 
-  if (task.status === "waiting_patient" && daysSinceIso(task.updated_at, todayYmd) > 7) return "urgent";
+  if (task.status === "waiting_patient" && daysSinceIso(task.updated_at, todayYmd) > 7)
+    return "urgent";
 
   if (task.status === "open" && daysSinceIso(task.created_at, todayYmd) > 3) return "high";
 

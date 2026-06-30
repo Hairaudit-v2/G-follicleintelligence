@@ -29,7 +29,9 @@ function displayName(twin: PatientTwinV1): string {
   return twin.person.display_name?.trim() || "Patient";
 }
 
-function completenessKpiTone(band: PatientTwinV1["completeness"]["band"]): "neutral" | "info" | "success" | "warning" | "danger" {
+function completenessKpiTone(
+  band: PatientTwinV1["completeness"]["band"]
+): "neutral" | "info" | "success" | "warning" | "danger" {
   if (band === "poor") return "danger";
   if (band === "partial") return "warning";
   if (band === "good") return "info";
@@ -64,7 +66,9 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-cyan-300/90">
             Patient Twin · Read-only
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{displayName(twin)}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+            {displayName(twin)}
+          </h1>
           <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-[#94A3B8]">
             {twin.person.email ? (
               <span>
@@ -100,7 +104,10 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
             <span aria-hidden>·</span>
             <span>Generated {formatGenerated(twin.provenance.generated_at)}</span>
             <span aria-hidden>·</span>
-            <Link href={profileHref} className="text-cyan-300/90 underline-offset-2 hover:text-cyan-200 hover:underline">
+            <Link
+              href={profileHref}
+              className="text-cyan-300/90 underline-offset-2 hover:text-cyan-200 hover:underline"
+            >
               Open clinical profile
             </Link>
             <span aria-hidden>·</span>
@@ -126,9 +133,24 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
             description={warnings === 0 ? "No coverage flags" : "Review twin warnings"}
             tone={warnings > 0 ? "warning" : "neutral"}
           />
-          <FiKpiTile label="Cases" value={String(cases)} description="Linked fi_cases" tone="info" />
-          <FiKpiTile label="Audits" value={String(audits)} description="fi_audits rows" tone="neutral" />
-          <FiKpiTile label="Media" value={String(media)} description="Unified assets" tone="neutral" />
+          <FiKpiTile
+            label="Cases"
+            value={String(cases)}
+            description="Linked fi_cases"
+            tone="info"
+          />
+          <FiKpiTile
+            label="Audits"
+            value={String(audits)}
+            description="fi_audits rows"
+            tone="neutral"
+          />
+          <FiKpiTile
+            label="Media"
+            value={String(media)}
+            description="Unified assets"
+            tone="neutral"
+          />
         </div>
       </div>
     </header>

@@ -14,7 +14,10 @@ export const RESEARCH_PAGE_CONTENT = {
       "Follicle Intelligence is being built to help transform disconnected clinical activity into structured intelligence that can support benchmarking, research collaboration, outcome registries, and evidence-based improvement across the industry.",
     ],
     primaryCta: { label: "Explore Platform Architecture", href: "/platform/ecosystem" as const },
-    secondaryCta: { label: "View The Future Of Hair Restoration", href: "/the-future-of-hair-restoration" as const },
+    secondaryCta: {
+      label: "View The Future Of Hair Restoration",
+      href: "/the-future-of-hair-restoration" as const,
+    },
   },
 
   evidenceGap: {
@@ -49,7 +52,8 @@ export const RESEARCH_PAGE_CONTENT = {
         body: "AI systems require structured, high-quality datasets to become clinically useful.",
       },
     ],
-    closingStatement: "Without structured evidence, the industry cannot fully learn from its own clinical activity.",
+    closingStatement:
+      "Without structured evidence, the industry cannot fully learn from its own clinical activity.",
   },
 
   researchDomains: {
@@ -114,14 +118,16 @@ export const RESEARCH_PAGE_CONTENT = {
       "Patient-reported satisfaction",
       "Long-term progression",
     ],
-    closingStatement: "A global outcome registry would allow the industry to move from anecdote toward measurable evidence.",
+    closingStatement:
+      "A global outcome registry would allow the industry to move from anecdote toward measurable evidence.",
   },
 
   aiInfrastructure: {
     id: "research-ai-infrastructure",
     eyebrow: "AI research",
     headline: "AI requires structured clinical intelligence",
-    description: "Artificial intelligence in medicine is only as strong as the data systems behind it.",
+    description:
+      "Artificial intelligence in medicine is only as strong as the data systems behind it.",
     opportunitiesLabel: "Future AI research opportunities:",
     opportunities: [
       "Hair loss pattern classification",
@@ -204,7 +210,16 @@ export const RESEARCH_PAGE_CONTENT = {
       "Global population insights",
       "Research-ready anonymised datasets",
     ],
-    networkNodes: ["Clinics", "Researchers", "Universities", "Registries", "Outcomes", "Training", "Partners", "Institutions"],
+    networkNodes: [
+      "Clinics",
+      "Researchers",
+      "Universities",
+      "Registries",
+      "Outcomes",
+      "Training",
+      "Partners",
+      "Institutions",
+    ],
     networkCenterLabel: "Research Network",
   },
 
@@ -224,7 +239,8 @@ export const RESEARCH_PAGE_CONTENT = {
       "Transparent methodology",
       "Responsible AI development",
     ],
-    closingStatement: "The goal is not simply to collect data. The goal is to build trusted clinical intelligence responsibly.",
+    closingStatement:
+      "The goal is not simply to collect data. The goal is to build trusted clinical intelligence responsibly.",
   },
 
   collaboration: {

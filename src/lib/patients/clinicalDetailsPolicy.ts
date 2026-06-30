@@ -97,7 +97,10 @@ export function normalizeClinicalTextInput(raw: string | null | undefined): stri
   return s;
 }
 
-export function assertClinicalTextWithinBounds(field: EditableClinicalDetailTextKey, value: string | null): string | null {
+export function assertClinicalTextWithinBounds(
+  field: EditableClinicalDetailTextKey,
+  value: string | null
+): string | null {
   if (value == null) return null;
   const max = CLINICAL_DETAILS_TEXT_MAX[field];
   if (value.length > max) {
@@ -107,7 +110,9 @@ export function assertClinicalTextWithinBounds(field: EditableClinicalDetailText
 }
 
 /** Strips unknown keys; validates lengths and JSON object fields. */
-export function normalizeEditableClinicalDetailsPayload(input: Record<string, unknown>): EditableClinicalDetailsPayload {
+export function normalizeEditableClinicalDetailsPayload(
+  input: Record<string, unknown>
+): EditableClinicalDetailsPayload {
   const out: EditableClinicalDetailsPayload = {
     primary_hair_concern: null,
     treatment_interest: null,
@@ -171,5 +176,7 @@ export function clinicalDetailsPatientRowMatchesTenant(
   row: { tenant_id?: unknown; id?: unknown } | null | undefined
 ): boolean {
   if (!row) return false;
-  return String(row.tenant_id) === expectedTenantId.trim() && String(row.id) === expectedPatientId.trim();
+  return (
+    String(row.tenant_id) === expectedTenantId.trim() && String(row.id) === expectedPatientId.trim()
+  );
 }

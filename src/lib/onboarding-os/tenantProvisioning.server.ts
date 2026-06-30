@@ -123,10 +123,9 @@ type ServerOpts = {
   skipAuthCheck?: boolean;
 };
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
     return { ok: true, actorAuthUserId: opts.actorAuthUserId };
   }
@@ -160,7 +159,10 @@ async function writeProvisioningAudit(
   });
 }
 
-async function loadDefaultTemplateId(supabase: SupabaseClient, templateCode?: string | null): Promise<string | null> {
+async function loadDefaultTemplateId(
+  supabase: SupabaseClient,
+  templateCode?: string | null
+): Promise<string | null> {
   const code = templateCode?.trim();
   const query = supabase
     .from("fi_tenant_provisioning_templates")
@@ -175,13 +177,17 @@ async function loadDefaultTemplateId(supabase: SupabaseClient, templateCode?: st
   return String((data as { id: string }).id);
 }
 
-function parseDeploymentPlanFromSnapshot(snapshot: Record<string, unknown>): ClinicDeploymentPlan | null {
+function parseDeploymentPlanFromSnapshot(
+  snapshot: Record<string, unknown>
+): ClinicDeploymentPlan | null {
   const plan = snapshot?.plan;
   if (!plan || typeof plan !== "object") return null;
   return plan as ClinicDeploymentPlan;
 }
 
-function parseTemplateReadinessFromSnapshot(snapshot: Record<string, unknown>): TemplateReadinessResult | null {
+function parseTemplateReadinessFromSnapshot(
+  snapshot: Record<string, unknown>
+): TemplateReadinessResult | null {
   const readiness = snapshot?.readiness;
   if (!readiness || typeof readiness !== "object") return null;
   return readiness as TemplateReadinessResult;
@@ -205,13 +211,20 @@ async function loadTenantSettingsMetadata(
   supabase: SupabaseClient,
   tenantId: string
 ): Promise<Record<string, unknown> | null> {
-  const { data } = await supabase.from("fi_tenant_settings").select("metadata").eq("tenant_id", tenantId).maybeSingle();
+  const { data } = await supabase
+    .from("fi_tenant_settings")
+    .select("metadata")
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
   const raw = (data as { metadata?: unknown } | null)?.metadata;
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return null;
   return raw as Record<string, unknown>;
 }
 
-function buildSandboxContextFromSession(session: TenantProvisioningSessionRow, deploymentPlan: ClinicDeploymentPlan | null) {
+function buildSandboxContextFromSession(
+  session: TenantProvisioningSessionRow,
+  deploymentPlan: ClinicDeploymentPlan | null
+) {
   const input = session.input_snapshot as ProvisioningInput;
   const plan = deploymentPlan ?? buildClinicDeploymentPlan(input);
   const templateCode = plan.templateCode;
@@ -223,7 +236,9 @@ function buildSandboxContextFromSession(session: TenantProvisioningSessionRow, d
 export async function prepareSandboxSeedPlan(
   sessionId: string,
   opts: ServerOpts & { packCode?: SandboxSeedPackCode | null } = {}
-): Promise<{ ok: true; plan: SandboxSeedPlan; preview: SandboxSeedPreview } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; plan: SandboxSeedPlan; preview: SandboxSeedPreview } | { ok: false; error: string }
+> {
   const auth = await resolvePlatformAdminAuth(opts);
   if (!auth.ok) return auth;
 
@@ -256,7 +271,10 @@ export async function prepareSandboxSeedPlan(
 export async function loadSandboxSeedPreview(
   sessionId: string,
   opts: ServerOpts & { packCode?: SandboxSeedPackCode | null } = {}
-): Promise<{ ok: true; preview: SandboxSeedPreview; history: SandboxSeedHistoryEntry[] } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; preview: SandboxSeedPreview; history: SandboxSeedHistoryEntry[] }
+  | { ok: false; error: string }
+> {
   const prepared = await prepareSandboxSeedPlan(sessionId, opts);
   if (!prepared.ok) return prepared;
   const loaded = await loadTenantProvisioningSessionDetail(sessionId, {
@@ -272,12 +290,15 @@ export async function loadSandboxSeedPreview(
 export async function applySandboxSeedToTenant(
   request: SandboxSeedRequest,
   opts: ServerOpts = {}
-): Promise<{ ok: true; result: SandboxSeedResult } | { ok: false; error: string; errorCode?: string }> {
+): Promise<
+  { ok: true; result: SandboxSeedResult } | { ok: false; error: string; errorCode?: string }
+> {
   const auth = await resolvePlatformAdminAuth(opts);
   if (!auth.ok) return auth;
 
   const sessionId = request.sessionId.trim();
-  if (!sessionId) return { ok: false, error: "sessionId is required.", errorCode: "invalid_request" };
+  if (!sessionId)
+    return { ok: false, error: "sessionId is required.", errorCode: "invalid_request" };
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const loaded = await loadTenantProvisioningSessionDetail(sessionId, {
@@ -291,7 +312,9 @@ export async function applySandboxSeedToTenant(
   const { plan, templateCode, history } = buildSandboxContextFromSession(session, deploymentPlan);
   const tenantId = session.tenant_id;
   const billingStatus = tenantId ? await loadTenantBillingStatus(supabase, tenantId) : null;
-  const tenantSettingsMetadata = tenantId ? await loadTenantSettingsMetadata(supabase, tenantId) : null;
+  const tenantSettingsMetadata = tenantId
+    ? await loadTenantSettingsMetadata(supabase, tenantId)
+    : null;
 
   const validation = validateSandboxSeedRequest({
     request: { sessionId, packCode: request.packCode, force: request.force },
@@ -319,7 +342,8 @@ export async function applySandboxSeedToTenant(
     generatedAt: SANDBOX_SEED_GENERATED_AT,
   });
 
-  if (!seedPlan) return { ok: false, error: "Could not build sandbox seed plan.", errorCode: "plan_failed" };
+  if (!seedPlan)
+    return { ok: false, error: "Could not build sandbox seed plan.", errorCode: "plan_failed" };
 
   try {
     const applied = await executeSandboxSeedApply({
@@ -388,7 +412,10 @@ export async function applyDeploymentTemplateToSession(
   supabase: SupabaseClient,
   sessionId: string,
   input: ProvisioningInput
-): Promise<{ ok: true; plan: ClinicDeploymentPlan; readiness: TemplateReadinessResult } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; plan: ClinicDeploymentPlan; readiness: TemplateReadinessResult }
+  | { ok: false; error: string }
+> {
   const templateCode = resolveDeploymentTemplateCode(input);
   const template = buildClinicDeploymentTemplate(templateCode);
   if (!template) {
@@ -417,7 +444,11 @@ export async function deployDefaultClinicConfiguration(
   tenantId: string,
   plan: ClinicDeploymentPlan
 ): Promise<
-  | { ok: true; deployedServices: string[]; workflowPlan: ReturnType<typeof resolveServiceWorkflowPack> }
+  | {
+      ok: true;
+      deployedServices: string[];
+      workflowPlan: ReturnType<typeof resolveServiceWorkflowPack>;
+    }
   | { ok: false; error: string }
 > {
   const pack = resolveServiceWorkflowPack({
@@ -456,7 +487,10 @@ export async function deployDefaultClinicConfiguration(
     };
 
     if (existing) {
-      const { error } = await supabase.from("fi_services").update(row).eq("id", (existing as { id: string }).id);
+      const { error } = await supabase
+        .from("fi_services")
+        .update(row)
+        .eq("id", (existing as { id: string }).id);
       if (error) failures.push(`${svc.code}: ${error.message}`);
       else deployedServices.push(svc.code);
     } else {
@@ -497,7 +531,9 @@ export function assignAcademyTrainingTracks(plan: ClinicDeploymentPlan): Academy
 
 export async function loadTenantProvisioningTemplates(
   opts: ServerOpts = {}
-): Promise<{ ok: true; templates: TenantProvisioningTemplateRow[] } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; templates: TenantProvisioningTemplateRow[] } | { ok: false; error: string }
+> {
   const auth = await resolvePlatformAdminAuth(opts);
   if (!auth.ok) return auth;
 
@@ -526,7 +562,10 @@ async function syncSessionProgress(
 
   let sessionStatus: ProvisioningSessionStatus = "in_progress";
   if (failed) sessionStatus = "failed";
-  else if (progress.percent === 100 && steps.every((s) => s.status === "completed" || s.status === "skipped")) {
+  else if (
+    progress.percent === 100 &&
+    steps.every((s) => s.status === "completed" || s.status === "skipped")
+  ) {
     const reviewStep = steps.find((s) => s.step_code === "ready_for_review");
     const finalizeStep = steps.find((s) => s.step_code === "finalize");
     if (finalizeStep?.status === "completed") sessionStatus = "completed";
@@ -701,9 +740,14 @@ export async function loadTenantProvisioningSessionDetail(
   const progress = calculateProvisioningProgress(stepRows);
   const sessionRow = session as TenantProvisioningSessionRow;
   const deploymentPlan = parseDeploymentPlanFromSnapshot(sessionRow.deployment_snapshot ?? {});
-  const templateReadiness = parseTemplateReadinessFromSnapshot(sessionRow.deployment_snapshot ?? {});
+  const templateReadiness = parseTemplateReadinessFromSnapshot(
+    sessionRow.deployment_snapshot ?? {}
+  );
   const sandboxSeedHistory = parseSandboxSeedHistory(sessionRow.metadata ?? {});
-  const { plan: resolvedPlan, templateCode } = buildSandboxContextFromSession(sessionRow, deploymentPlan);
+  const { plan: resolvedPlan, templateCode } = buildSandboxContextFromSession(
+    sessionRow,
+    deploymentPlan
+  );
   const seedPlan = buildSandboxSeedPlan({
     sessionId: sessionRow.id,
     tenantId: sessionRow.tenant_id,
@@ -735,7 +779,9 @@ async function executeStepLogic(
   session: TenantProvisioningSessionRow,
   step: TenantProvisioningStepRow,
   actorAuthUserId: string
-): Promise<{ ok: true; output: Record<string, unknown> } | { ok: false; errorCode: string; error: string }> {
+): Promise<
+  { ok: true; output: Record<string, unknown> } | { ok: false; errorCode: string; error: string }
+> {
   const input = session.input_snapshot as ProvisioningInput;
   const moduleTemplate = resolveModuleTemplateFromInput(input);
 
@@ -757,7 +803,11 @@ async function executeStepLogic(
         .maybeSingle();
       if (error) return { ok: false, errorCode: "slug_check_failed", error: error.message };
       if (existing) {
-        return { ok: false, errorCode: "slug_taken", error: "A tenant with this slug already exists." };
+        return {
+          ok: false,
+          errorCode: "slug_taken",
+          error: "A tenant with this slug already exists.",
+        };
       }
       return { ok: true, output: { slug_available: true, slug } };
     }
@@ -801,7 +851,11 @@ async function executeStepLogic(
     case "apply_module_entitlements": {
       const tenantId = session.tenant_id;
       if (!tenantId) {
-        return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before module entitlements." };
+        return {
+          ok: false,
+          errorCode: "tenant_missing",
+          error: "Tenant must be provisioned before module entitlements.",
+        };
       }
       const activated: string[] = [];
       const failures: string[] = [];
@@ -836,23 +890,33 @@ async function executeStepLogic(
     case "apply_verification_status": {
       const tenantId = session.tenant_id;
       if (!tenantId) {
-        return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before verification." };
+        return {
+          ok: false,
+          errorCode: "tenant_missing",
+          error: "Tenant must be provisioned before verification.",
+        };
       }
       const { error } = await supabase
         .from("fi_tenants")
         .update({ verification_status: moduleTemplate.verificationStatus })
         .eq("id", tenantId);
-      if (error) return { ok: false, errorCode: "verification_update_failed", error: error.message };
+      if (error)
+        return { ok: false, errorCode: "verification_update_failed", error: error.message };
       return { ok: true, output: { verification_status: moduleTemplate.verificationStatus } };
     }
 
     case "deploy_clinic_configuration": {
       const tenantId = session.tenant_id;
       if (!tenantId) {
-        return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before clinic configuration." };
+        return {
+          ok: false,
+          errorCode: "tenant_missing",
+          error: "Tenant must be provisioned before clinic configuration.",
+        };
       }
       const plan =
-        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ?? buildClinicDeploymentPlan(input);
+        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ??
+        buildClinicDeploymentPlan(input);
       const deployed = await deployDefaultClinicConfiguration(supabase, tenantId, plan);
       if (!deployed.ok) {
         return { ok: false, errorCode: "clinic_config_failed", error: deployed.error };
@@ -873,7 +937,8 @@ async function executeStepLogic(
 
     case "assign_academy_training": {
       const plan =
-        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ?? buildClinicDeploymentPlan(input);
+        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ??
+        buildClinicDeploymentPlan(input);
       const academyPlan = assignAcademyTrainingTracks(plan);
       return {
         ok: true,
@@ -886,10 +951,15 @@ async function executeStepLogic(
 
     case "prepare_sandbox_seed": {
       const plan =
-        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ?? buildClinicDeploymentPlan(input);
+        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ??
+        buildClinicDeploymentPlan(input);
       const template = buildClinicDeploymentTemplate(plan.templateCode);
       if (!template) {
-        return { ok: false, errorCode: "template_missing", error: "Deployment template not found for sandbox seed." };
+        return {
+          ok: false,
+          errorCode: "template_missing",
+          error: "Deployment template not found for sandbox seed.",
+        };
       }
       const stepPlan: SandboxSeedStepPlan = buildSandboxSeedStepPlan(template, input);
       if (!stepPlan.enabled) {
@@ -924,7 +994,11 @@ async function executeStepLogic(
     case "finalize": {
       const tenantId = session.tenant_id;
       if (!tenantId) {
-        return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before finalize." };
+        return {
+          ok: false,
+          errorCode: "tenant_missing",
+          error: "Tenant must be provisioned before finalize.",
+        };
       }
       const completedAt = new Date().toISOString();
       await supabase
@@ -940,7 +1014,10 @@ async function executeStepLogic(
           updated_at: completedAt,
         })
         .eq("id", session.id);
-      return { ok: true, output: { finalized: true, tenant_id: tenantId, completed_at: completedAt } };
+      return {
+        ok: true,
+        output: { finalized: true, tenant_id: tenantId, completed_at: completedAt },
+      };
     }
 
     default:
@@ -961,7 +1038,11 @@ export async function runTenantProvisioningStep(
   if (!id || !code) return { ok: false, error: "sessionId and stepCode are required." };
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
-  const loaded = await loadTenantProvisioningSessionDetail(id, { ...opts, skipAuthCheck: true, actorAuthUserId: auth.actorAuthUserId });
+  const loaded = await loadTenantProvisioningSessionDetail(id, {
+    ...opts,
+    skipAuthCheck: true,
+    actorAuthUserId: auth.actorAuthUserId,
+  });
   if (!loaded.ok) return loaded;
 
   const { session, steps } = loaded.detail;
@@ -1002,7 +1083,12 @@ export async function runTenantProvisioningStep(
     actorAuthUserId: auth.actorAuthUserId,
   })) as { ok: true; detail: TenantProvisioningSessionDetail };
 
-  const exec = await executeStepLogic(supabase, freshSession.detail.session, step, auth.actorAuthUserId);
+  const exec = await executeStepLogic(
+    supabase,
+    freshSession.detail.session,
+    step,
+    auth.actorAuthUserId
+  );
   const finishedAt = new Date().toISOString();
 
   if (!exec.ok) {
@@ -1080,7 +1166,11 @@ export async function retryTenantProvisioningStep(
   if (!id || !code) return { ok: false, error: "sessionId and stepCode are required." };
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
-  const loaded = await loadTenantProvisioningSessionDetail(id, { ...opts, skipAuthCheck: true, actorAuthUserId: auth.actorAuthUserId });
+  const loaded = await loadTenantProvisioningSessionDetail(id, {
+    ...opts,
+    skipAuthCheck: true,
+    actorAuthUserId: auth.actorAuthUserId,
+  });
   if (!loaded.ok) return loaded;
 
   const step = loaded.detail.steps.find((s) => s.step_code === code);
@@ -1123,7 +1213,11 @@ export async function retryTenantProvisioningStep(
     detail: { attempt_count: step.attempt_count },
   });
 
-  return runTenantProvisioningStep(id, code, { ...opts, actorAuthUserId: auth.actorAuthUserId, skipAuthCheck: true });
+  return runTenantProvisioningStep(id, code, {
+    ...opts,
+    actorAuthUserId: auth.actorAuthUserId,
+    skipAuthCheck: true,
+  });
 }
 
 export async function markProvisioningReadyForReview(

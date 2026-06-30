@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 /** TITAN Global Command Centre — gold-accent enterprise dashboard tokens. */
 export const globalCommandCentreClasses = {
   page: "mx-auto max-w-[1920px] space-y-6 pb-10",
-  header: "flex flex-col gap-3 border-b border-amber-400/15 pb-5 lg:flex-row lg:items-end lg:justify-between",
+  header:
+    "flex flex-col gap-3 border-b border-amber-400/15 pb-5 lg:flex-row lg:items-end lg:justify-between",
   kicker: "text-xs font-semibold uppercase tracking-[0.32em] text-amber-300/90",
   title: "mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl",
   subtitle: "mt-1 text-sm text-slate-400",
@@ -70,5 +71,10 @@ export function formatCommandCentreNumber(value: number): string {
 export function formatAlertTimestamp(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

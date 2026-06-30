@@ -36,7 +36,11 @@ function ProtocolMetricsGrid({
   dark: boolean;
 }) {
   const tiles = [
-    { label: "Sessions (window)", value: String(summary.total_sessions), sub: "Including cancelled" },
+    {
+      label: "Sessions (window)",
+      value: String(summary.total_sessions),
+      sub: "Including cancelled",
+    },
     {
       label: "Completion rate",
       value: pct(summary.protocol_completion_rate),
@@ -49,8 +53,16 @@ function ProtocolMetricsGrid({
       sub: "Not complete & not cancelled",
       tone: summary.incomplete_session_count > 0 ? ("warning" as const) : ("neutral" as const),
     },
-    { label: "Needs retake (req.)", value: String(summary.needs_retake_count), sub: "Required slot rows" },
-    { label: "Needs review (req.)", value: String(summary.needs_review_count), sub: "Captured below strong threshold" },
+    {
+      label: "Needs retake (req.)",
+      value: String(summary.needs_retake_count),
+      sub: "Required slot rows",
+    },
+    {
+      label: "Needs review (req.)",
+      value: String(summary.needs_review_count),
+      sub: "Captured below strong threshold",
+    },
     {
       label: "Most missed slot",
       value: summary.most_commonly_missed_slot_slug ?? "—",
@@ -125,7 +137,9 @@ export function PhotoProtocolAnalyticsCard({
         </Link>
       </div>
       {scanNote ? (
-        <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-950/25 p-2 text-xs text-amber-100/90">{scanNote}</p>
+        <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-950/25 p-2 text-xs text-amber-100/90">
+          {scanNote}
+        </p>
       ) : null}
       <ProtocolMetricsGrid summary={summary} dark={dark} />
       <div className="mt-6">
@@ -136,7 +150,11 @@ export function PhotoProtocolAnalyticsCard({
           <ul className="mt-2 max-h-56 divide-y divide-white/[0.06] overflow-auto rounded-lg border border-white/[0.06] bg-[#0a101f]/50 text-sm">
             {topAlerts.map((a, i) => (
               <li key={`${a.session_id}-${a.type}-${i}`} className="px-3 py-2 text-slate-400">
-                <span className={`text-xs font-semibold uppercase ${severityClass(a.severity, true)}`}>{a.severity}</span>
+                <span
+                  className={`text-xs font-semibold uppercase ${severityClass(a.severity, true)}`}
+                >
+                  {a.severity}
+                </span>
                 <span className="text-xs text-slate-400"> · {a.type.replace(/_/g, " ")}</span>
                 <p className="mt-0.5 text-slate-200">{a.message}</p>
                 <p className="mt-1 text-xs text-slate-500">{a.recommended_action}</p>
@@ -160,7 +178,8 @@ export function PhotoProtocolAnalyticsCard({
         <div>
           <h2 className="text-sm font-semibold text-slate-100">Clinical photography protocol</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Stage 8C analytics for Smart Clinical Photography — completion, gaps, and operational alerts.
+            Stage 8C analytics for Smart Clinical Photography — completion, gaps, and operational
+            alerts.
           </p>
         </div>
         <Link
@@ -171,7 +190,9 @@ export function PhotoProtocolAnalyticsCard({
         </Link>
       </div>
       {scanNote ? (
-        <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 p-2 text-xs text-amber-200">{scanNote}</p>
+        <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 p-2 text-xs text-amber-200">
+          {scanNote}
+        </p>
       ) : null}
       <ProtocolMetricsGrid summary={summary} dark={false} />
       <div className="mt-6">
@@ -182,7 +203,9 @@ export function PhotoProtocolAnalyticsCard({
           <ul className="mt-2 max-h-56 divide-y divide-white/[0.06] overflow-auto rounded-lg border border-white/[0.06] text-sm">
             {topAlerts.map((a, i) => (
               <li key={`${a.session_id}-${a.type}-${i}`} className="px-3 py-2 text-slate-300">
-                <span className={`text-xs font-semibold uppercase ${severityClass(a.severity)}`}>{a.severity}</span>
+                <span className={`text-xs font-semibold uppercase ${severityClass(a.severity)}`}>
+                  {a.severity}
+                </span>
                 <span className="text-xs text-slate-500"> · {a.type.replace(/_/g, " ")}</span>
                 <p className="mt-0.5 text-slate-200">{a.message}</p>
                 <p className="mt-1 text-xs text-slate-500">{a.recommended_action}</p>

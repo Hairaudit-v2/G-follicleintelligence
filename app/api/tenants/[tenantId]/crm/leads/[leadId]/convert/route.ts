@@ -3,15 +3,24 @@
  */
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
 import { crmConvertLeadBodySchema } from "@/src/lib/crm/crmApiSchemas";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { executeCrmLeadConversion } from "@/src/lib/crm/server";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string; leadId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; leadId: string }> }
+) {
   try {
     const { tenantId, leadId } = await params;
-    if (!tenantId?.trim() || !leadId?.trim()) return crmJsonError(400, "Missing tenantId or leadId.");
+    if (!tenantId?.trim() || !leadId?.trim())
+      return crmJsonError(400, "Missing tenantId or leadId.");
 
     const body = await req.json().catch(() => ({}));
     const adminKey = extractAdminKeyFromRequest(req, body);

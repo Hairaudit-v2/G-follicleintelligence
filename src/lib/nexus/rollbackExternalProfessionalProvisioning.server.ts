@@ -8,7 +8,9 @@ import {
   writeNexusProvisioningAudit,
 } from "@/src/lib/nexus/readExternalProfessionalState.server";
 
-function validateRollbackPayload(payload: NexusRollbackPayload): { ok: true } | { ok: false; error: string } {
+function validateRollbackPayload(
+  payload: NexusRollbackPayload
+): { ok: true } | { ok: false; error: string } {
   const globalProfessionalId = payload.globalProfessionalId?.trim() ?? "";
   if (!GLOBAL_PROFESSIONAL_ID_RE.test(globalProfessionalId)) {
     return { ok: false, error: "Invalid globalProfessionalId." };
@@ -74,7 +76,8 @@ export async function rollbackExternalProfessionalProvisioning(
 
     if (membershipErr) throw new Error(membershipErr.message);
 
-    const { markNexusIdentityLinkRevoked } = await import("@/src/lib/workforce-os/nexusFiStaffBridge.server");
+    const { markNexusIdentityLinkRevoked } =
+      await import("@/src/lib/workforce-os/nexusFiStaffBridge.server");
     await markNexusIdentityLinkRevoked(tenantId, globalProfessionalId, supabase);
 
     const stateResult = await readExternalProfessionalState(globalProfessionalId, supabase);
@@ -86,7 +89,10 @@ export async function rollbackExternalProfessionalProvisioning(
       {
         globalProfessionalId,
         actionType: "rollback",
-        payload: { ...payload, reason: payload.reason.trim() } as unknown as Record<string, unknown>,
+        payload: { ...payload, reason: payload.reason.trim() } as unknown as Record<
+          string,
+          unknown
+        >,
         beforeState: beforeState as unknown as Record<string, unknown> | null,
         afterState: stateResult.state as unknown as Record<string, unknown>,
         result: "success",

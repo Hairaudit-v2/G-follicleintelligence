@@ -18,7 +18,13 @@ import { ArrowRight } from "lucide-react";
 
 const c = HOME_PAGE_CONTENT.globalHealthcareInfrastructure;
 
-function ModuleStatusCard({ index, mod }: { index: number; mod: (typeof PLATFORM_PROGRESS_MODULES)[number] }) {
+function ModuleStatusCard({
+  index,
+  mod,
+}: {
+  index: number;
+  mod: (typeof PLATFORM_PROGRESS_MODULES)[number];
+}) {
   return (
     <FadeIn delay={0.03 * (index % 6)}>
       <GlassCard
@@ -48,10 +54,16 @@ function ModuleStatusCard({ index, mod }: { index: number; mod: (typeof PLATFORM
         </div>
 
         <div className="mt-3">
-          <PlatformProgressAnimatedBar percent={mod.completionPercent} status={mod.status} delay={0.06 + index * 0.03} />
+          <PlatformProgressAnimatedBar
+            percent={mod.completionPercent}
+            status={mod.status}
+            delay={0.06 + index * 0.03}
+          />
         </div>
 
-        <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">{mod.description}</p>
+        <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">
+          {mod.description}
+        </p>
       </GlassCard>
     </FadeIn>
   );
@@ -87,9 +99,14 @@ export function FiMarketingGlobalHealthcareSection() {
 
         <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Live delivery status across every FI OS module — updated as infrastructure milestones ship.
+            Live delivery status across every FI OS module — updated as infrastructure milestones
+            ship.
           </p>
-          <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>
+          <Button
+            asChild
+            size="lg"
+            className={cn(MARKETING_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:shrink-0")}
+          >
             <Link href={c.cta.href}>
               {c.cta.label}
               <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />

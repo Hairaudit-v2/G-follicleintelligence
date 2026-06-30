@@ -1,7 +1,13 @@
 export const HIE_HAIR_LOSS_SOURCE_SYSTEMS = ["fi_os", "hairaudit", "hair_longevity"] as const;
 export type HieHairLossSourceSystem = (typeof HIE_HAIR_LOSS_SOURCE_SYSTEMS)[number];
 
-export const HIE_CLASSIFICATION_SYSTEMS = ["norwood", "ludwig", "sinclair", "olsen", "custom"] as const;
+export const HIE_CLASSIFICATION_SYSTEMS = [
+  "norwood",
+  "ludwig",
+  "sinclair",
+  "olsen",
+  "custom",
+] as const;
 export type HieHairLossClassificationSystem = (typeof HIE_CLASSIFICATION_SYSTEMS)[number];
 
 export const HIE_HAIR_LOSS_PATTERN_TYPES = [
@@ -16,14 +22,29 @@ export const HIE_HAIR_LOSS_PATTERN_TYPES = [
 ] as const;
 export type HieHairLossPatternType = (typeof HIE_HAIR_LOSS_PATTERN_TYPES)[number];
 
-export const HIE_HAIR_LOSS_REVIEW_STATUSES = ["pending", "accepted", "corrected", "rejected"] as const;
+export const HIE_HAIR_LOSS_REVIEW_STATUSES = [
+  "pending",
+  "accepted",
+  "corrected",
+  "rejected",
+] as const;
 export type HieHairLossReviewStatus = (typeof HIE_HAIR_LOSS_REVIEW_STATUSES)[number];
 
 export const HIE_SEX_CLASSIFICATIONS = ["male", "female", "unknown"] as const;
 export type HieSexClassification = (typeof HIE_SEX_CLASSIFICATIONS)[number];
 
 /** Norwood Hamilton scale grades (male pattern). */
-export const HIE_NORWOOD_GRADES = ["I", "II", "III", "III Vertex", "IV", "V", "VI", "VII", "unknown"] as const;
+export const HIE_NORWOOD_GRADES = [
+  "I",
+  "II",
+  "III",
+  "III Vertex",
+  "IV",
+  "V",
+  "VI",
+  "VII",
+  "unknown",
+] as const;
 export type HieNorwoodGrade = (typeof HIE_NORWOOD_GRADES)[number];
 
 export const HIE_LUDWIG_GRADES = ["I", "II", "III", "unknown"] as const;
@@ -79,8 +100,9 @@ export type HairIntelligenceHairLossClassificationInsert = {
   classifier_version: string | null;
 };
 
-export type HairIntelligenceHairLossClassificationRow = HairIntelligenceHairLossClassificationInsert & {
-  id: string;
-  created_at: string;
-  updated_at: string;
-};
+export type HairIntelligenceHairLossClassificationRow =
+  HairIntelligenceHairLossClassificationInsert & {
+    id: string;
+    created_at: string;
+    updated_at: string;
+  };

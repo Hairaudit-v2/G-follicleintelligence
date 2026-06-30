@@ -59,7 +59,11 @@ function NetworkCoreVisual() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_0%_100%,rgb(70_110_160_/0.08),transparent_42%)]" />
 
         {/* Orbital rings — abstract, not a geographic map */}
-        <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.35]" viewBox="0 0 100 100" aria-hidden>
+        <svg
+          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.35]"
+          viewBox="0 0 100 100"
+          aria-hidden
+        >
           <circle
             cx="50"
             cy="50"
@@ -83,7 +87,10 @@ function NetworkCoreVisual() {
         {!reduceMotion ? (
           <motion.div
             className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[min(78%,420px)] w-[min(78%,420px)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10"
-            style={{ background: "conic-gradient(from 0deg, transparent, hsl(var(--primary) / 0.06), transparent 40%)" }}
+            style={{
+              background:
+                "conic-gradient(from 0deg, transparent, hsl(var(--primary) / 0.06), transparent 40%)",
+            }}
             animate={{ rotate: 360 }}
             transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
             aria-hidden
@@ -152,7 +159,9 @@ function NetworkCoreVisual() {
             animate={reduceMotion ? {} : { y: [0, -3, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary/88">Intelligence core</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary/88">
+              Intelligence core
+            </p>
             <p className="mt-2 font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
               Follicle Intelligence Core
             </p>
@@ -286,7 +295,9 @@ export function FiHomeGlobalIntelligenceSection() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" aria-hidden />
                 </div>
-                <h3 className="mt-5 font-display text-lg font-semibold tracking-tight text-foreground">{card.title}</h3>
+                <h3 className="mt-5 font-display text-lg font-semibold tracking-tight text-foreground">
+                  {card.title}
+                </h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[15px] md:leading-relaxed">
                   {card.body}
                 </p>
@@ -305,7 +316,8 @@ export function FiHomeGlobalIntelligenceSection() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_50%,hsl(var(--primary)/0.1),transparent_55%)]" />
           <div className="relative text-center">
             <p className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl md:leading-snug">
-              A global structured dataset—owned by the Follicle Intelligence platform, deepened by outcome, diagnostic, and training layers.
+              A global structured dataset—owned by the Follicle Intelligence platform, deepened by
+              outcome, diagnostic, and training layers.
             </p>
           </div>
         </motion.div>

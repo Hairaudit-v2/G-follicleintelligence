@@ -65,7 +65,9 @@ export function AppointmentProcedureSection({
 
   return (
     <section className={appointmentCardClass}>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Procedure fields</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Procedure fields
+      </h3>
       {canMutate ? (
         <form className="space-y-2 text-xs" onSubmit={onSubmit}>
           <label className="block text-slate-400">

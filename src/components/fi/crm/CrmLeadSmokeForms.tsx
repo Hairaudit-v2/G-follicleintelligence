@@ -46,7 +46,11 @@ export function CrmLeadSmokeForms({
     }
     setBusy(true);
     try {
-      const r = await crmMoveLeadStageAction(tenantId, leadId, withAdmin({ toStageId, changedBy: fiUserId }));
+      const r = await crmMoveLeadStageAction(
+        tenantId,
+        leadId,
+        withAdmin({ toStageId, changedBy: fiUserId })
+      );
       setFeedback(r.ok ? "Stage updated." : r.error);
       if (r.ok) router.refresh();
     } finally {
@@ -59,7 +63,11 @@ export function CrmLeadSmokeForms({
     setFeedback(null);
     setBusy(true);
     try {
-      const r = await crmCreateNoteAction(tenantId, leadId, withAdmin({ body: noteBody, visibility: "team" }));
+      const r = await crmCreateNoteAction(
+        tenantId,
+        leadId,
+        withAdmin({ body: noteBody, visibility: "team" })
+      );
       setFeedback(r.ok ? "Note added." : r.error);
       if (r.ok) {
         setNoteBody("");
@@ -104,51 +112,111 @@ export function CrmLeadSmokeForms({
       <p className="mb-3 text-xs text-amber-300">All calls go through gated server actions only.</p>
       <label className="mb-4 block max-w-md text-xs">
         <span className="text-slate-400">FI admin key (optional)</span>
-        <input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1" />
+        <input
+          type="password"
+          value={adminKey}
+          onChange={(e) => setAdminKey(e.target.value)}
+          className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1"
+        />
       </label>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <form onSubmit={doMove} className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm">
+        <form
+          onSubmit={doMove}
+          className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm"
+        >
           <h3 className="font-medium text-slate-100">Move stage</h3>
           {stages.length === 0 ? (
             <p className="text-xs text-slate-400">No stages available.</p>
           ) : (
             <>
-              <select value={toStageId} onChange={(e) => setToStageId(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1">
+              <select
+                value={toStageId}
+                onChange={(e) => setToStageId(e.target.value)}
+                className="w-full rounded border border-slate-700 px-2 py-1"
+              >
                 {stages.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.label} ({s.slug})
                   </option>
                 ))}
               </select>
-              <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+              <button
+                type="submit"
+                disabled={busy}
+                className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+              >
                 Move to stage
               </button>
             </>
           )}
         </form>
 
-        <form onSubmit={doNote} className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm">
+        <form
+          onSubmit={doNote}
+          className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm"
+        >
           <h3 className="font-medium text-slate-100">Foundation note (fi_crm_notes)</h3>
-          <p className="text-xs text-slate-400">Smoke path for the general notes table — internal lead notes use the dedicated section on this page.</p>
-          <textarea value={noteBody} onChange={(e) => setNoteBody(e.target.value)} rows={3} className="w-full rounded border border-slate-700 px-2 py-1 text-sm" placeholder="Note body" required />
-          <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+          <p className="text-xs text-slate-400">
+            Smoke path for the general notes table — internal lead notes use the dedicated section
+            on this page.
+          </p>
+          <textarea
+            value={noteBody}
+            onChange={(e) => setNoteBody(e.target.value)}
+            rows={3}
+            className="w-full rounded border border-slate-700 px-2 py-1 text-sm"
+            placeholder="Note body"
+            required
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+          >
             Save note
           </button>
         </form>
 
-        <form onSubmit={doMsg} className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm">
+        <form
+          onSubmit={doMsg}
+          className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm"
+        >
           <h3 className="font-medium text-slate-100">Message preview</h3>
           <div className="flex flex-wrap gap-2">
-            <input value={msgChannel} onChange={(e) => setMsgChannel(e.target.value)} className="w-24 rounded border border-slate-700 px-2 py-1 text-xs" placeholder="channel" />
-            <select value={msgDirection} onChange={(e) => setMsgDirection(e.target.value as "inbound" | "outbound")} className="rounded border border-slate-700 px-2 py-1 text-xs">
+            <input
+              value={msgChannel}
+              onChange={(e) => setMsgChannel(e.target.value)}
+              className="w-24 rounded border border-slate-700 px-2 py-1 text-xs"
+              placeholder="channel"
+            />
+            <select
+              value={msgDirection}
+              onChange={(e) => setMsgDirection(e.target.value as "inbound" | "outbound")}
+              className="rounded border border-slate-700 px-2 py-1 text-xs"
+            >
               <option value="inbound">inbound</option>
               <option value="outbound">outbound</option>
             </select>
           </div>
-          <input value={msgSubject} onChange={(e) => setMsgSubject(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1 text-xs" placeholder="Subject (optional)" />
-          <textarea value={msgPreview} onChange={(e) => setMsgPreview(e.target.value)} rows={2} className="w-full rounded border border-slate-700 px-2 py-1 text-xs" placeholder="body_preview only" />
-          <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+          <input
+            value={msgSubject}
+            onChange={(e) => setMsgSubject(e.target.value)}
+            className="w-full rounded border border-slate-700 px-2 py-1 text-xs"
+            placeholder="Subject (optional)"
+          />
+          <textarea
+            value={msgPreview}
+            onChange={(e) => setMsgPreview(e.target.value)}
+            rows={2}
+            className="w-full rounded border border-slate-700 px-2 py-1 text-xs"
+            placeholder="body_preview only"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+          >
             Save preview
           </button>
         </form>

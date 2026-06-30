@@ -28,7 +28,10 @@ const ACTIVE_CASE_STATUSES = new Set(["draft", "submitted", "processing"]);
 
 const TERMINAL_BOOKING = new Set(["cancelled", "completed", "no_show"]);
 
-export function countLinkedLeadsForPatient(leads: readonly { patient_id: string | null }[], patientId: string): number {
+export function countLinkedLeadsForPatient(
+  leads: readonly { patient_id: string | null }[],
+  patientId: string
+): number {
   const pid = patientId.trim();
   return leads.filter((l) => l.patient_id && String(l.patient_id) === pid).length;
 }
@@ -93,5 +96,7 @@ export function splitBookingsUpcomingPast<T extends BookingLike>(
 }
 
 export function sortActivityEventsNewestFirst<T extends ActivityLike>(events: readonly T[]): T[] {
-  return [...events].sort((a, b) => Date.parse(String(b.occurred_at)) - Date.parse(String(a.occurred_at)));
+  return [...events].sort(
+    (a, b) => Date.parse(String(b.occurred_at)) - Date.parse(String(a.occurred_at))
+  );
 }

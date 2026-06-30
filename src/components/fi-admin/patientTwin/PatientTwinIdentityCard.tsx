@@ -8,7 +8,9 @@ function row(label: string, value: string | null | undefined) {
   return (
     <div className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] py-1.5 last:border-b-0">
       <dt className="text-[#94A3B8]">{label}</dt>
-      <dd className="max-w-[min(100%,20rem)] text-right text-[#E2E8F0]">{v && v.length > 0 ? v : "—"}</dd>
+      <dd className="max-w-[min(100%,20rem)] text-right text-[#E2E8F0]">
+        {v && v.length > 0 ? v : "—"}
+      </dd>
     </div>
   );
 }
@@ -32,18 +34,24 @@ export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] pb-2">
           <dt className="text-[#94A3B8]">Foundation patient</dt>
-          <dd className="break-all font-mono text-xs text-[#CBD5E1]">{idn.foundation_patient_id ?? "—"}</dd>
+          <dd className="break-all font-mono text-xs text-[#CBD5E1]">
+            {idn.foundation_patient_id ?? "—"}
+          </dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] pb-2">
           <dt className="text-[#94A3B8]">Global patient</dt>
-          <dd className="break-all font-mono text-xs text-[#CBD5E1]">{idn.global_patient_id ?? "—"}</dd>
+          <dd className="break-all font-mono text-xs text-[#CBD5E1]">
+            {idn.global_patient_id ?? "—"}
+          </dd>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[#94A3B8]">Duplicate risk</span>
           <span
             className={cn(
               "inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-              idn.duplicate_risk ? fiBadgeIntentClassNames.warning : fiBadgeIntentClassNames.complete
+              idn.duplicate_risk
+                ? fiBadgeIntentClassNames.warning
+                : fiBadgeIntentClassNames.complete
             )}
           >
             {idn.duplicate_risk ? "Elevated" : "Low"}
@@ -52,7 +60,9 @@ export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
       </dl>
 
       <div className="mt-4 border-t border-white/[0.06] pt-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Contact & profile</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+          Contact & profile
+        </h3>
         <dl className="mt-2 text-sm">
           {row("Display name", person.display_name)}
           {row("Email", person.email)}
@@ -62,7 +72,11 @@ export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
           {row("Preferred contact", person.preferred_contact_method)}
           {row(
             "Reminder consent",
-            person.reminder_consent === true ? "Yes" : person.reminder_consent === false ? "No" : null
+            person.reminder_consent === true
+              ? "Yes"
+              : person.reminder_consent === false
+                ? "No"
+                : null
           )}
           {row("HubSpot record ID", person.hubspot_record_id)}
           {row("Lifecycle stage", person.lifecycle_stage)}
@@ -75,7 +89,9 @@ export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
       <div className="mt-4">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Source IDs</h3>
         {!hasSources ? (
-          <p className="mt-2 text-sm text-[#94A3B8]">No mapped patient-level source identifiers for this patient.</p>
+          <p className="mt-2 text-sm text-[#94A3B8]">
+            No mapped patient-level source identifiers for this patient.
+          </p>
         ) : (
           <ul className="mt-2 flex flex-wrap gap-2">
             {idn.source_ids.map((s) => (

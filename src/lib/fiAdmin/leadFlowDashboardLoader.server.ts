@@ -55,7 +55,10 @@ function mapActivityRow(row: Record<string, unknown>): LeadFlowActivityRow {
   };
 }
 
-async function loadRecentLeadFlowActivity(tenantId: string, limit = RECENT_ACTIVITY_LIMIT): Promise<LeadFlowActivityRow[]> {
+async function loadRecentLeadFlowActivity(
+  tenantId: string,
+  limit = RECENT_ACTIVITY_LIMIT
+): Promise<LeadFlowActivityRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_crm_activity_events")
@@ -78,9 +81,15 @@ function readDryRunDuplicateCounts(report: unknown): {
   }
   const o = report as Record<string, unknown>;
   return {
-    duplicateEmailCount: Array.isArray(o.duplicateEmailsInFile) ? o.duplicateEmailsInFile.length : 0,
-    duplicatePhoneCount: Array.isArray(o.duplicatePhonesInFile) ? o.duplicatePhonesInFile.length : 0,
-    duplicateRecordIdCount: Array.isArray(o.duplicateRecordIdsInFile) ? o.duplicateRecordIdsInFile.length : 0,
+    duplicateEmailCount: Array.isArray(o.duplicateEmailsInFile)
+      ? o.duplicateEmailsInFile.length
+      : 0,
+    duplicatePhoneCount: Array.isArray(o.duplicatePhonesInFile)
+      ? o.duplicatePhonesInFile.length
+      : 0,
+    duplicateRecordIdCount: Array.isArray(o.duplicateRecordIdsInFile)
+      ? o.duplicateRecordIdsInFile.length
+      : 0,
   };
 }
 
@@ -154,14 +163,20 @@ export async function loadLeadFlowDashboardPayload(
   const tid = tenantId.trim();
   const staleLeadThresholdDays = options?.staleLeadStageDays ?? DEFAULT_STALE_LEAD_STAGE_DAYS;
 
-  const operational = await loadTenantOperationalDashboard(tid, { staleLeadStageDays: staleLeadThresholdDays });
+  const operational = await loadTenantOperationalDashboard(tid, {
+    staleLeadStageDays: staleLeadThresholdDays,
+  });
 
   const [conversion, stages, enrichedLeads, recentActivity, hubspotImport] = await Promise.all([
     settle("conversion board", () => loadConsultationConversionBoardPayload(tid), null),
     loadCrmShellPipelineStages(tid),
     settle("enriched leads", () => loadEnrichedActiveLeads(tid), [] as CrmKanbanLeadCard[]),
     settle("recent activity", () => loadRecentLeadFlowActivity(tid), [] as LeadFlowActivityRow[]),
-    settle("hubspot import diagnostics", () => loadHubspotImportDiagnostics(tid), EMPTY_HUBSPOT_DIAGNOSTICS),
+    settle(
+      "hubspot import diagnostics",
+      () => loadHubspotImportDiagnostics(tid),
+      EMPTY_HUBSPOT_DIAGNOSTICS
+    ),
   ]);
 
   return {

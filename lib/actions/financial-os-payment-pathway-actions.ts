@@ -44,7 +44,11 @@ const createPathwaySchema = optionalAdminKey.extend({
   status: z.enum(PATHWAY_STATUSES).optional(),
   provider: z.string().max(200).optional().nullable(),
   provider_reference: z.string().max(200).optional().nullable(),
-  expected_settlement_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  expected_settlement_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
   currency_code: z.string().max(8).optional().nullable(),
   expected_amount_cents: z.number().int().nonnegative().optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
@@ -53,7 +57,11 @@ const createPathwaySchema = optionalAdminKey.extend({
 const updateStatusSchema = optionalAdminKey.extend({
   pathway_id: z.string().uuid(),
   status: z.enum(PATHWAY_STATUSES),
-  actual_settlement_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  actual_settlement_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
   settled_amount_cents: z.number().int().nonnegative().optional().nullable(),
   provider_reference: z.string().max(200).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),

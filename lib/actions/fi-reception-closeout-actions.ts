@@ -40,7 +40,9 @@ async function assertCloseoutAccess(tenantId: string, adminKey?: string) {
   await assertCrmTenantReadAllowed({ tenantId: tid, adminKey, request: undefined });
   const viewer = await resolveReceptionOsViewerContext(tid);
   if (!viewer.canAccessReceptionOs) {
-    throw new Error("ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+    throw new Error(
+      "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+    );
   }
   const member = await getFiTenantMemberSessionIfAllowed(tid);
   return { role: viewer.receptionOsRole, actorFiUserId: member?.fiUserId ?? null };
@@ -48,7 +50,7 @@ async function assertCloseoutAccess(tenantId: string, adminKey?: string) {
 
 export async function closeReceptionOperatingDayAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; closeoutId: string } | { ok: false; error: string }> {
   try {
     const parsed = closeDaySchema.parse(body);
@@ -91,9 +93,12 @@ export async function closeReceptionOperatingDayAction(
 
 export async function loadReceptionCloseoutPreviewAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<
-  | { ok: true; snapshot: Awaited<ReturnType<typeof loadReceptionCloseoutSnapshotForCommandCentre>> }
+  | {
+      ok: true;
+      snapshot: Awaited<ReturnType<typeof loadReceptionCloseoutSnapshotForCommandCentre>>;
+    }
   | { ok: false; error: string }
 > {
   try {

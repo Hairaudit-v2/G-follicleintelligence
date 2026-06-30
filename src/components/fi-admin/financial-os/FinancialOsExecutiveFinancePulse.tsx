@@ -20,7 +20,11 @@ function sourceLabel(source: string | null): string {
   return source.replace(/_/g, " ");
 }
 
-function ComparisonBadge(props: { direction: "up" | "down" | "flat"; label: string; invert?: boolean }) {
+function ComparisonBadge(props: {
+  direction: "up" | "down" | "flat";
+  label: string;
+  invert?: boolean;
+}) {
   const { direction, label, invert } = props;
   if (direction === "flat") {
     return <span className="text-[10px] text-slate-500">{label}</span>;
@@ -64,7 +68,10 @@ export function FinancialOsExecutiveFinancePulse(props: { data: ExecutiveFinance
           label="Collected revenue"
           value={fmtMoney(snapshot.collected_revenue_cents, data.currency)}
           foot={
-            <ComparisonBadge direction={comparison.badges.collected_vs_previous} label={collectedDeltaPct} />
+            <ComparisonBadge
+              direction={comparison.badges.collected_vs_previous}
+              label={collectedDeltaPct}
+            />
           }
         />
         <FinancialOsMetricTile
@@ -116,7 +123,9 @@ export function FinancialOsExecutiveFinancePulse(props: { data: ExecutiveFinance
 
       {data.insights.length > 0 ? (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Executive insights</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Executive insights
+          </p>
           <ul className="space-y-1.5">
             {data.insights.slice(0, 4).map((insight) => (
               <li
@@ -124,7 +133,7 @@ export function FinancialOsExecutiveFinancePulse(props: { data: ExecutiveFinance
                 className={cn(
                   financialOsClasses.subPanel,
                   insight.severity === "critical" && "border-rose-500/20",
-                  insight.severity === "warning" && "border-amber-500/20",
+                  insight.severity === "warning" && "border-amber-500/20"
                 )}
               >
                 <p className="text-xs font-semibold text-slate-200">{insight.title}</p>
@@ -138,7 +147,10 @@ export function FinancialOsExecutiveFinancePulse(props: { data: ExecutiveFinance
       <div className="mt-4 flex flex-wrap gap-2">
         <Link
           href={`${base}/executive`}
-          className={cn(fiOsChromeClasses.toolbarControlSurface, "px-3 py-1.5 text-xs font-semibold text-cyan-100/95")}
+          className={cn(
+            fiOsChromeClasses.toolbarControlSurface,
+            "px-3 py-1.5 text-xs font-semibold text-cyan-100/95"
+          )}
         >
           Executive detail
         </Link>

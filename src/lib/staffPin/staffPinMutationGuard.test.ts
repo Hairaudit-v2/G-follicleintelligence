@@ -69,7 +69,10 @@ describe("evaluateStaffPinMutationAccess", () => {
   it("blocks prescribing and pharmacy send under PIN session", () => {
     for (const action of ["prescriptions.send", "data.export", "records.delete"] as const) {
       assert.throws(
-        () => assertStaffPinMutationDecision(evaluateStaffPinMutationAccess(activePinSession(), action)),
+        () =>
+          assertStaffPinMutationDecision(
+            evaluateStaffPinMutationAccess(activePinSession(), action)
+          ),
         StaffPinMutationBlockedError
       );
     }
@@ -103,7 +106,9 @@ describe("evaluateStaffPinMutationAccess", () => {
 
   it("does not expose internal permission details in blocked error", () => {
     try {
-      assertStaffPinMutationDecision(evaluateStaffPinMutationAccess(activePinSession(), "admin.dashboard"));
+      assertStaffPinMutationDecision(
+        evaluateStaffPinMutationAccess(activePinSession(), "admin.dashboard")
+      );
       assert.fail("expected block");
     } catch (e: unknown) {
       assert.ok(e instanceof StaffPinMutationBlockedError);

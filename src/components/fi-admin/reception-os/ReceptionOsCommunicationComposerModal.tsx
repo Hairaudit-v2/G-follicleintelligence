@@ -124,16 +124,22 @@ export function ReceptionOsCommunicationComposerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal
+    >
       <div
         className={cn(
           fiOsChromeClasses.toolbarControlSurface,
-          "max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/10 bg-slate-950 p-4 shadow-2xl",
+          "max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/10 bg-slate-950 p-4 shadow-2xl"
         )}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/80">ReceptionOS</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/80">
+              ReceptionOS
+            </p>
             <h2 className="text-lg font-semibold text-slate-50">{CHANNEL_LABELS[channel]}</h2>
             <p className="mt-0.5 text-sm text-slate-500">{context.label}</p>
           </div>
@@ -168,11 +174,16 @@ export function ReceptionOsCommunicationComposerModal({
                   }
                 });
               }}
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+              )}
             >
               {RECEPTION_COMMUNICATION_TEMPLATE_KEYS.map((key) => (
                 <option key={key} value={key}>
-                  {key === preview.suggestedTemplateKey ? `Suggested: ${key}` : key.replace(/_/g, " ")}
+                  {key === preview.suggestedTemplateKey
+                    ? `Suggested: ${key}`
+                    : key.replace(/_/g, " ")}
                 </option>
               ))}
             </select>
@@ -192,7 +203,10 @@ export function ReceptionOsCommunicationComposerModal({
               value={smsBody}
               onChange={(e) => setSmsBody(e.target.value)}
               rows={5}
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+              )}
             />
           </label>
         ) : null}
@@ -204,7 +218,10 @@ export function ReceptionOsCommunicationComposerModal({
               <input
                 value={emailSubject}
                 onChange={(e) => setEmailSubject(e.target.value)}
-                className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+                className={cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+                )}
               />
             </label>
             <label className="block text-xs text-slate-500">
@@ -213,7 +230,10 @@ export function ReceptionOsCommunicationComposerModal({
                 value={emailBody}
                 onChange={(e) => setEmailBody(e.target.value)}
                 rows={8}
-                className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+                className={cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+                )}
               />
             </label>
           </div>
@@ -228,7 +248,10 @@ export function ReceptionOsCommunicationComposerModal({
                 onChange={(e) => setManualPreview(e.target.value)}
                 placeholder="What was discussed?"
                 rows={4}
-                className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+                className={cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+                )}
               />
             </label>
             <label className="block text-xs text-slate-500">
@@ -236,7 +259,10 @@ export function ReceptionOsCommunicationComposerModal({
               <select
                 value={callOutcome}
                 onChange={(e) => setCallOutcome(e.target.value)}
-                className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+                className={cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+                )}
               >
                 <option value="connected">Connected</option>
                 <option value="voicemail">Voicemail</option>
@@ -254,15 +280,18 @@ export function ReceptionOsCommunicationComposerModal({
               value={manualPreview}
               onChange={(e) => setManualPreview(e.target.value)}
               rows={4}
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-1 w-full px-2 py-1.5 text-sm text-slate-200")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "mt-1 w-full px-2 py-1.5 text-sm text-slate-200"
+              )}
             />
           </label>
         ) : null}
 
         {!maySubmit && preview && (channel === "sms" || channel === "email") ? (
           <p className="mt-2 text-xs text-amber-400/90">
-            Your role can preview this message. Sending SMS/email requires consultant or manager permissions for this
-            template.
+            Your role can preview this message. Sending SMS/email requires consultant or manager
+            permissions for this template.
           </p>
         ) : null}
 
@@ -272,7 +301,10 @@ export function ReceptionOsCommunicationComposerModal({
           <button
             type="button"
             onClick={onClose}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "px-3 py-1.5 text-sm text-slate-300")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "px-3 py-1.5 text-sm text-slate-300"
+            )}
           >
             Cancel
           </button>
@@ -282,7 +314,7 @@ export function ReceptionOsCommunicationComposerModal({
             onClick={runSend}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-cyan-100 disabled:opacity-50",
+              "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-cyan-100 disabled:opacity-50"
             )}
           >
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

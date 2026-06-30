@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { assertStaffFeatureAccessMutationAllowed } from "@/src/lib/fi-os/featureAccess.server";
 import { buildPositionTypeChangedAuditInsert } from "@/src/lib/fi-os/staffFeatureAccessAuditPayload";
-import { resolveActorIdsForFiOsAudit, tryInsertFiStaffFeatureAccessAuditEvent } from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
+import {
+  resolveActorIdsForFiOsAudit,
+  tryInsertFiStaffFeatureAccessAuditEvent,
+} from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
 import { loadStaffMemberForTenant, updateFiStaff } from "@/src/lib/staff/staff.server";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 
@@ -24,7 +27,10 @@ export async function saveStaffPositionTypeAction(
     const tid = tenantId.trim();
     const sid = staffId.trim();
     if (!tid || !sid) return { ok: false, error: "Missing tenant or staff id." };
-    await assertStaffFeatureAccessMutationAllowed({ tenantId: tid, adminKey: adminKey ?? undefined });
+    await assertStaffFeatureAccessMutationAllowed({
+      tenantId: tid,
+      adminKey: adminKey ?? undefined,
+    });
     const staffBefore = await loadStaffMemberForTenant(tid, sid);
     if (!staffBefore) return { ok: false, error: "Staff not found." };
     const oldPt = staffBefore.position_type_id?.trim() || null;

@@ -27,7 +27,7 @@ export function receptionOwnerValueVisible(role: ReceptionOsViewerRole): boolean
 }
 
 export function buildPilotFeedbackScore(
-  feedbackRows: ReadonlyArray<{ feedbackKind: ReceptionPilotFeedbackKind }>,
+  feedbackRows: ReadonlyArray<{ feedbackKind: ReceptionPilotFeedbackKind }>
 ): number {
   if (feedbackRows.length === 0) return 0;
   const useful = feedbackRows.filter((f) => f.feedbackKind === "useful").length;
@@ -52,7 +52,7 @@ export function buildReceptionOwnerValueDashboard(input: {
     input.report.tasksCreated > 0 ? input.report.risksClosed / input.report.tasksCreated : 0;
   const estimatedRevenueProtected = Math.min(
     input.report.revenueAtRiskIdentified,
-    Math.round(input.report.revenueAtRiskIdentified * Math.max(closureRatio, 0.15)),
+    Math.round(input.report.revenueAtRiskIdentified * Math.max(closureRatio, 0.15))
   );
 
   return {

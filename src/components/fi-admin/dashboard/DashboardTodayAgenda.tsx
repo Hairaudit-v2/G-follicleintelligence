@@ -2,7 +2,10 @@ import Link from "next/link";
 import { Calendar } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { AgendaBucket, DashboardBookingItem } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import type {
+  AgendaBucket,
+  DashboardBookingItem,
+} from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { DashboardEmptyState } from "@/src/components/fi-admin/dashboard/DashboardEmptyState";
 
@@ -25,7 +28,9 @@ function formatDayLabel(iso: string, tz: string | null): string {
   if (!Number.isFinite(d.getTime())) return "";
   const today = new Date();
   const sameDay =
-    d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate();
   return new Intl.DateTimeFormat(undefined, {
     weekday: sameDay ? undefined : "short",
     month: "short",
@@ -52,7 +57,11 @@ function bookingDetailHref(tenantId: string, row: DashboardBookingItem): string 
   return `${base}/calendar`;
 }
 
-function AgendaTimelineRow(props: { tenantId: string; row: DashboardBookingItem; bucket: AgendaBucket }) {
+function AgendaTimelineRow(props: {
+  tenantId: string;
+  row: DashboardBookingItem;
+  bucket: AgendaBucket;
+}) {
   const { tenantId, row, bucket } = props;
   const href = bookingDetailHref(tenantId, row);
 
@@ -62,23 +71,30 @@ function AgendaTimelineRow(props: { tenantId: string; row: DashboardBookingItem;
         <span className="font-mono text-sm font-semibold tabular-nums text-slate-200">
           {formatSlot(row.start_at, row.timezone)}
         </span>
-        <span className="mt-0.5 text-[0.65rem] text-slate-500">{formatDayLabel(row.start_at, row.timezone)}</span>
+        <span className="mt-0.5 text-[0.65rem] text-slate-500">
+          {formatDayLabel(row.start_at, row.timezone)}
+        </span>
       </div>
       <div className="relative flex min-w-0 flex-1 flex-col">
         <span
-          className={cn("absolute -left-[1.125rem] top-2 h-2.5 w-2.5 rounded-full border-2", BUCKET_ACCENT[bucket])}
+          className={cn(
+            "absolute -left-[1.125rem] top-2 h-2.5 w-2.5 rounded-full border-2",
+            BUCKET_ACCENT[bucket]
+          )}
           aria-hidden
         />
         <Link
           href={href}
           className={cn(
             "block rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 shadow-sm shadow-black/20 transition",
-            "hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+            "hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]"
           )}
         >
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-100">{row.title?.trim() || "Booking"}</p>
+              <p className="truncate text-sm font-semibold text-slate-100">
+                {row.title?.trim() || "Booking"}
+              </p>
               <p className="mt-0.5 text-xs text-slate-500">
                 {BUCKET_LABEL[bucket]} · {row.booking_status.replace(/_/g, " ")}
               </p>
@@ -115,7 +131,7 @@ export function DashboardTodayAgenda(props: {
         "p-4 sm:p-5",
         variant === "launch" &&
           "flex min-h-[min(52vh,560px)] flex-col border-cyan-500/10 bg-gradient-to-b from-[#0b1528]/96 to-[#060d18]/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]",
-        className,
+        className
       )}
       role="region"
       aria-labelledby="dash-agenda-heading"
@@ -141,8 +157,13 @@ export function DashboardTodayAgenda(props: {
           actionHref={`${base}/calendar`}
         />
       ) : (
-        <div className={cn("relative min-h-0", variant === "launch" && "flex-1 overflow-y-auto pr-1")}>
-          <div className="absolute bottom-2 left-[4.35rem] top-2 w-px bg-white/[0.08]" aria-hidden />
+        <div
+          className={cn("relative min-h-0", variant === "launch" && "flex-1 overflow-y-auto pr-1")}
+        >
+          <div
+            className="absolute bottom-2 left-[4.35rem] top-2 w-px bg-white/[0.08]"
+            aria-hidden
+          />
           <ol className="relative space-y-0 pl-2">
             {flat.map(({ bucket, row }) => (
               <AgendaTimelineRow key={row.id} tenantId={tenantId} row={row} bucket={bucket} />

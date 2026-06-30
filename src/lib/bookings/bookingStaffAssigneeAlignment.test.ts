@@ -86,7 +86,11 @@ test("booking display prefers staff provider over legacy user id", () => {
     },
   ];
   const users = [{ id: USER_ID, email: "dr@example.com", full_name: "Dr Smith" }];
-  const display = bookingAssignmentDisplay(staff, users, bookingRow({ assigned_staff_id: STAFF_ID, assigned_user_id: USER_ID }));
+  const display = bookingAssignmentDisplay(
+    staff,
+    users,
+    bookingRow({ assigned_staff_id: STAFF_ID, assigned_user_id: USER_ID })
+  );
   assert.equal(display.providerLabel, "Dr Smith");
   assert.equal(display.ownerLabel, null);
   assert.equal(display.summaryLine, "Provider: Dr Smith");

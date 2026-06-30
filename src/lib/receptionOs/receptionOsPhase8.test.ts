@@ -25,7 +25,10 @@ import {
   serializeReceptionPilotExportCsv,
   serializeReceptionPilotExportJson,
 } from "@/src/lib/receptionOs/receptionPilotExportModel";
-import { buildReceptionPilotManagerScores, aggregateReceptionPilotMetrics } from "@/src/lib/receptionOs/receptionPilotMetricsModel";
+import {
+  buildReceptionPilotManagerScores,
+  aggregateReceptionPilotMetrics,
+} from "@/src/lib/receptionOs/receptionPilotMetricsModel";
 import { parseReceptionOsCommandCentrePayload } from "@/src/lib/receptionOs/receptionOsBoardPayloadSchema";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -274,8 +277,14 @@ describe("receptionOwnerValueModel", () => {
 describe("receptionOsDemoModeModel", () => {
   it("anonymises patient labels and redacts contact details", () => {
     assert.notEqual(anonymizeDisplayLabel("Jane Real Patient", 0), "Jane Real Patient");
-    assert.match(redactContactText("Call +61 400 123 456 or email jane@clinic.com") ?? "", /\[phone hidden\]/);
-    assert.match(redactContactText("Call +61 400 123 456 or email jane@clinic.com") ?? "", /\[email hidden\]/);
+    assert.match(
+      redactContactText("Call +61 400 123 456 or email jane@clinic.com") ?? "",
+      /\[phone hidden\]/
+    );
+    assert.match(
+      redactContactText("Call +61 400 123 456 or email jane@clinic.com") ?? "",
+      /\[email hidden\]/
+    );
   });
 
   it("masks currency amounts when enabled", () => {
@@ -354,18 +363,27 @@ describe("receptionPilotExportModel", () => {
     assert.doesNotMatch(json, /patientName|smsBody|emailBody|phone/);
     assert.doesNotMatch(csv, /patientName|smsBody|emailBody|phone/);
     assert.match(csv, /^metric,value/m);
-    assert.throws(() => assertNoSensitiveExportKeys({ patientName: "secret" }), /Sensitive export key/);
+    assert.throws(
+      () => assertNoSensitiveExportKeys({ patientName: "secret" }),
+      /Sensitive export key/
+    );
   });
 });
 
 describe("Phase 1–7 regression guard", () => {
   it("keeps command centre loader additive for Phase 8", async () => {
     const { readFileSync } = await import("node:fs");
-    const loader = readFileSync("src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts", "utf8");
+    const loader = readFileSync(
+      "src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts",
+      "utf8"
+    );
     assert.match(loader, /loadReceptionOsBoardPayload/);
     assert.match(loader, /loadReceptionPilotMetricsForCommandCentre/);
     assert.match(loader, /loadReceptionPhase8PayloadForCommandCentre/);
-    assert.doesNotMatch(readFileSync("src/lib/receptionOs/receptionOsBoardLoader.server.ts", "utf8"), /fi_reception_usage_events/);
+    assert.doesNotMatch(
+      readFileSync("src/lib/receptionOs/receptionOsBoardLoader.server.ts", "utf8"),
+      /fi_reception_usage_events/
+    );
   });
 
   it("parses Phase 8 payload fields in command centre schema", () => {

@@ -34,7 +34,8 @@ function mapPrivilegeRow(raw: Record<string, unknown>): FiStaffProcedurePrivileg
     privilegeLevel: String(raw.privilege_level) as PrivilegeLevel,
     privilegeStatus: String(raw.privilege_status) as PrivilegeStatus,
     sourceSystem: String(raw.source_system),
-    sourceCompetencyKey: raw.source_competency_key != null ? String(raw.source_competency_key) : null,
+    sourceCompetencyKey:
+      raw.source_competency_key != null ? String(raw.source_competency_key) : null,
     sourceProjectionId: raw.source_projection_id != null ? String(raw.source_projection_id) : null,
     grantedBy: raw.granted_by != null ? String(raw.granted_by) : null,
     grantedAt: String(raw.granted_at),
@@ -82,7 +83,10 @@ function resolveRequirementsForContext(input: {
   const clinicId = input.clinicId?.trim() || null;
 
   const matching = input.requirements.filter(
-    (r) => r.isActive && r.eventType.trim().toLowerCase() === eventType && normalizeRole(r.assignedRole) === role
+    (r) =>
+      r.isActive &&
+      r.eventType.trim().toLowerCase() === eventType &&
+      normalizeRole(r.assignedRole) === role
   );
 
   if (clinicId) {
@@ -123,7 +127,11 @@ export async function loadProcedurePrivilegeRequirements(
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = client ?? supabaseAdmin();
 
-  let query = supabase.from("fi_procedure_privilege_requirements").select("*").eq("tenant_id", tid).eq("is_active", true);
+  let query = supabase
+    .from("fi_procedure_privilege_requirements")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("is_active", true);
 
   if (eventType?.trim()) {
     query = query.eq("event_type", eventType.trim().toLowerCase());
@@ -267,7 +275,9 @@ async function updatePrivilegeStatus(
 
   void publishAcademyProcedurePrivilegeEvent({
     eventType:
-      input.privilegeStatus === "suspended" ? "procedure_privilege_suspended" : "procedure_privilege_revoked",
+      input.privilegeStatus === "suspended"
+        ? "procedure_privilege_suspended"
+        : "procedure_privilege_revoked",
     tenantId: tid,
     staffId: input.staffId,
     privilege: row,

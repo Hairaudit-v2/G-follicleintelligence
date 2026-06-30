@@ -2,7 +2,10 @@
  * Pure MedicationOS → Patient Twin clinical slice (bounded caps, no I/O).
  */
 import { toPatientTherapyEventPreview } from "../medicationOs/medicationOsMappers";
-import type { ActiveTherapyPlanSummary, PatientTherapyEventRow } from "../medicationOs/medicationOsTypes";
+import type {
+  ActiveTherapyPlanSummary,
+  PatientTherapyEventRow,
+} from "../medicationOs/medicationOsTypes";
 import type {
   PatientTwinMedicationActiveItem,
   PatientTwinMedicationsSection,
@@ -17,7 +20,10 @@ export const PATIENT_TWIN_MEDICATION_OS_EVENTS_READ_CAP = 32;
 const ITEM_CAP_HARD_MAX = 80;
 const EVENT_PREVIEW_HARD_MAX = 100;
 
-function medicationSourceTables(): readonly ["fi_patient_therapy_plan_items", "fi_medication_os_canonical"] {
+function medicationSourceTables(): readonly [
+  "fi_patient_therapy_plan_items",
+  "fi_medication_os_canonical",
+] {
   return ["fi_patient_therapy_plan_items", "fi_medication_os_canonical"] as const;
 }
 

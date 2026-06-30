@@ -1,9 +1,17 @@
 import { z } from "zod";
 
-import { PLAN_STATUSES, THERAPY_EVENT_TYPES, type PlanStatus, type TherapyEventType } from "./medicationOsTypes";
+import {
+  PLAN_STATUSES,
+  THERAPY_EVENT_TYPES,
+  type PlanStatus,
+  type TherapyEventType,
+} from "./medicationOsTypes";
 
 const planStatusTuple = PLAN_STATUSES as unknown as [PlanStatus, ...PlanStatus[]];
-const therapyEventTypeTuple = THERAPY_EVENT_TYPES as unknown as [TherapyEventType, ...TherapyEventType[]];
+const therapyEventTypeTuple = THERAPY_EVENT_TYPES as unknown as [
+  TherapyEventType,
+  ...TherapyEventType[],
+];
 
 const uuid = z.string().uuid();
 

@@ -1,4 +1,8 @@
-import type { ConsultationFormField, ConsultationFormOption, ConsultationFormSchema } from "../consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormOption,
+  ConsultationFormSchema,
+} from "../consultationFormTypes";
 
 function fld(field: ConsultationFormField): ConsultationFormField {
   return field;
@@ -104,7 +108,11 @@ export const hairLossTreatmentConsultationSchemaV1: ConsultationFormSchema = {
           label: "Norwood classification (male-pattern zones)",
           type: "visual_norwood",
           optionSet: "norwood_scale",
-          showWhen: { fieldId: "pattern_type", operator: "in", value: [...MALE_PATTERN_NORWOOD_TRIGGERS] },
+          showWhen: {
+            fieldId: "pattern_type",
+            operator: "in",
+            value: [...MALE_PATTERN_NORWOOD_TRIGGERS],
+          },
         }),
         fld({
           id: "ludwig_classification",
@@ -263,7 +271,8 @@ export const hairLossTreatmentConsultationSchemaV1: ConsultationFormSchema = {
           id: "clinician_voice_note",
           label: "Clinician dictation (voice / text)",
           type: "voice_note",
-          description: "Optional adjunct; use “Save to clinical notes” when persisting to DoctorOS.",
+          description:
+            "Optional adjunct; use “Save to clinical notes” when persisting to DoctorOS.",
         }),
         fld({
           id: "follow_up_required_explicit",

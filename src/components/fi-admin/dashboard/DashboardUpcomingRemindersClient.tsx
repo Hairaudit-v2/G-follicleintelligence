@@ -74,7 +74,9 @@ export function DashboardUpcomingRemindersClient(props: {
   const [adminKey, setAdminKey] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
   const [dismissed, setDismissed] = useState<Set<string>>(() => new Set());
-  const [overrides, setOverrides] = useState<Partial<Record<string, Partial<DashboardReminderItem>>>>({});
+  const [overrides, setOverrides] = useState<
+    Partial<Record<string, Partial<DashboardReminderItem>>>
+  >({});
   const [rescheduleFor, setRescheduleFor] = useState<string | null>(null);
   const [rescheduleLocal, setRescheduleLocal] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
@@ -92,7 +94,11 @@ export function DashboardUpcomingRemindersClient(props: {
 
   function runMutation(
     fn: () => Promise<{ ok: true } | { ok: false; error: string }>,
-    opts: { optimisticDismissJobId?: string; onSuccess?: () => void; rollbackOverrideJobId?: string }
+    opts: {
+      optimisticDismissJobId?: string;
+      onSuccess?: () => void;
+      rollbackOverrideJobId?: string;
+    }
   ) {
     setActionError(null);
     if (opts.optimisticDismissJobId) {
@@ -150,7 +156,9 @@ export function DashboardUpcomingRemindersClient(props: {
             type="button"
             onClick={() => setFilter("mine")}
             disabled={!viewerFiUserId}
-            title={!viewerFiUserId ? "Sign in as a tenant member to filter by ownership." : undefined}
+            title={
+              !viewerFiUserId ? "Sign in as a tenant member to filter by ownership." : undefined
+            }
             className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
               filter === "mine"
                 ? "border-[#22C1FF]/45 bg-[#22C1FF]/10 text-[#22C1FF]"
@@ -181,7 +189,10 @@ export function DashboardUpcomingRemindersClient(props: {
       {items.length === 0 ? (
         <p className="text-sm leading-relaxed text-[#94A3B8]">
           No reminder jobs in the next week. Configure{" "}
-          <Link href={`/fi-admin/${tenantId}/settings/reminders`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/settings/reminders`}
+            className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
+          >
             templates
           </Link>{" "}
           and confirm patient consent on the patient profile.
@@ -204,7 +215,9 @@ export function DashboardUpcomingRemindersClient(props: {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-sm font-medium text-[#F8FAFC]">{row.recipientLabel}</p>
+                      <p className="truncate text-sm font-medium text-[#F8FAFC]">
+                        {row.recipientLabel}
+                      </p>
                       <span
                         className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusBadgeClass(row.status)}`}
                       >
@@ -218,7 +231,9 @@ export function DashboardUpcomingRemindersClient(props: {
                       Send {formatScheduled(row.scheduled_at)}
                     </p>
                     {row.clinicalSummaryLine ? (
-                      <p className="mt-1 text-xs leading-snug text-[#64748B]">{row.clinicalSummaryLine}</p>
+                      <p className="mt-1 text-xs leading-snug text-[#64748B]">
+                        {row.clinicalSummaryLine}
+                      </p>
                     ) : null}
                     {bookingLine ? (
                       <p className="mt-1 text-xs text-[#64748B]">
@@ -306,9 +321,13 @@ export function DashboardUpcomingRemindersClient(props: {
                     disabled={isPending}
                     className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-100 hover:bg-emerald-500/15 disabled:opacity-50"
                     onClick={() => {
-                      if (!window.confirm("Mark this reminder as sent? It will leave the queue.")) return;
+                      if (!window.confirm("Mark this reminder as sent? It will leave the queue."))
+                        return;
                       runMutation(
-                        () => markReminderJobSentAction(tenantId, row.jobId, { adminKey: adminKey.trim() || undefined }),
+                        () =>
+                          markReminderJobSentAction(tenantId, row.jobId, {
+                            adminKey: adminKey.trim() || undefined,
+                          }),
                         { optimisticDismissJobId: row.jobId }
                       );
                     }}
@@ -336,7 +355,11 @@ export function DashboardUpcomingRemindersClient(props: {
                   <button
                     type="button"
                     disabled={isPending || row.status !== "pending"}
-                    title={row.status !== "pending" ? "Only pending jobs can be rescheduled here." : undefined}
+                    title={
+                      row.status !== "pending"
+                        ? "Only pending jobs can be rescheduled here."
+                        : undefined
+                    }
                     className="rounded-lg border border-[#22C1FF]/25 bg-[#22C1FF]/5 px-2.5 py-1 text-[11px] font-semibold text-[#22C1FF] hover:bg-[#22C1FF]/10 disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => {
                       setRescheduleFor(row.jobId);
@@ -354,7 +377,10 @@ export function DashboardUpcomingRemindersClient(props: {
 
       <p className="mt-4 text-xs text-[#64748B]">
         Manage templates and cadence in{" "}
-        <Link href={`/fi-admin/${tenantId}/settings/reminders`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/settings/reminders`}
+          className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
+        >
           Settings → Reminders
         </Link>
         . Automated delivery still uses the cron processor when wired.

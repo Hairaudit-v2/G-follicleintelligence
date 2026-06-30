@@ -40,7 +40,8 @@ export type PatientClinicalDetailsRow = {
 };
 
 function mapFlags(meta: unknown): Record<string, unknown> {
-  if (meta && typeof meta === "object" && !Array.isArray(meta)) return meta as Record<string, unknown>;
+  if (meta && typeof meta === "object" && !Array.isArray(meta))
+    return meta as Record<string, unknown>;
   return {};
 }
 
@@ -75,16 +76,19 @@ function mapRow(data: Record<string, unknown>): PatientClinicalDetailsRow {
     tenant_id: String(data.tenant_id),
     patient_id: String(data.patient_id),
     person_id: data.person_id != null ? String(data.person_id) : null,
-    primary_hair_concern: data.primary_hair_concern != null ? String(data.primary_hair_concern) : null,
+    primary_hair_concern:
+      data.primary_hair_concern != null ? String(data.primary_hair_concern) : null,
     treatment_interest: data.treatment_interest != null ? String(data.treatment_interest) : null,
     hair_loss_duration: data.hair_loss_duration != null ? String(data.hair_loss_duration) : null,
     family_history: data.family_history != null ? String(data.family_history) : null,
-    relevant_medical_history: data.relevant_medical_history != null ? String(data.relevant_medical_history) : null,
+    relevant_medical_history:
+      data.relevant_medical_history != null ? String(data.relevant_medical_history) : null,
     current_medications: data.current_medications != null ? String(data.current_medications) : null,
     allergies: data.allergies != null ? String(data.allergies) : null,
     contraindications: data.contraindications != null ? String(data.contraindications) : null,
     scalp_conditions: data.scalp_conditions != null ? String(data.scalp_conditions) : null,
-    previous_hair_treatments: data.previous_hair_treatments != null ? String(data.previous_hair_treatments) : null,
+    previous_hair_treatments:
+      data.previous_hair_treatments != null ? String(data.previous_hair_treatments) : null,
     norwood_scale: data.norwood_scale != null ? String(data.norwood_scale) : null,
     ludwig_scale: data.ludwig_scale != null ? String(data.ludwig_scale) : null,
     hairline_pattern: data.hairline_pattern != null ? String(data.hairline_pattern) : null,
@@ -173,7 +177,10 @@ async function assertPatientInTenant(
     .eq("id", patientId)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data || !clinicalDetailsPatientRowMatchesTenant(tenantId, patientId, data as Record<string, unknown>)) {
+  if (
+    !data ||
+    !clinicalDetailsPatientRowMatchesTenant(tenantId, patientId, data as Record<string, unknown>)
+  ) {
     throw new Error("Patient not found for tenant.");
   }
   return { person_id: String((data as { person_id: string }).person_id) };
@@ -196,7 +203,8 @@ export async function loadPatientClinicalDetails(
     .eq("patient_id", pid)
     .maybeSingle();
   if (error) {
-    if (error.message?.includes("does not exist") || error.message?.includes("schema cache")) return null;
+    if (error.message?.includes("does not exist") || error.message?.includes("schema cache"))
+      return null;
     throw new Error(error.message);
   }
   if (!data) return null;
@@ -225,7 +233,11 @@ export async function upsertPatientClinicalDetails(
 
   if (!existing) {
     const insert = payloadToInsertColumns(tid, pid, person_id, after, params.actingUserId);
-    const { data, error } = await supabase.from("fi_patient_clinical_details").insert(insert).select("*").single();
+    const { data, error } = await supabase
+      .from("fi_patient_clinical_details")
+      .insert(insert)
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { row: mapRow(data as Record<string, unknown>), changedKeys, created: true };
   }
@@ -261,5 +273,8 @@ export async function updatePatientClinicalDetails(
   const existing = await loadPatientClinicalDetails(tid, pid, supabase);
   const base = existing ? rowToPayload(existing) : emptyPayload();
   const merged = mergeClinicalDetailsPatch(base, params.patch);
-  return upsertPatientClinicalDetails({ tenantId: tid, patientId: pid, payload: merged, actingUserId }, supabase);
+  return upsertPatientClinicalDetails(
+    { tenantId: tid, patientId: pid, payload: merged, actingUserId },
+    supabase
+  );
 }

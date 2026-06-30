@@ -6,7 +6,10 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveCanManageStaffFeatureAccessSettings } from "@/src/lib/fi-os/featureAccess.server";
-import { loadFeatureTemplateDefaultsForStaff, loadFiStaffPositionTypesForTenant } from "@/src/lib/fi-os/organisationalProfile.server";
+import {
+  loadFeatureTemplateDefaultsForStaff,
+  loadFiStaffPositionTypesForTenant,
+} from "@/src/lib/fi-os/organisationalProfile.server";
 import type { FiStaffPositionTypeRow } from "@/src/lib/fi-os/organisationalProfile.schema";
 import {
   loadStaffIntelligenceViewsForTenantStaff,
@@ -15,7 +18,10 @@ import {
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
-import { buildStaffPayrollSourceDisplay, type StaffPayrollSourceDisplay } from "@/src/lib/staff/staffPayrollSourceDisplay";
+import {
+  buildStaffPayrollSourceDisplay,
+  type StaffPayrollSourceDisplay,
+} from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { loadStaffPinMetadataMap, type StaffPinMetadata } from "@/src/lib/staffPin/staffPin.server";
 import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
 import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
@@ -69,7 +75,10 @@ async function loadFiUserRow(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 async function loadPayrollSourceByStaffId(
@@ -129,15 +138,22 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   const supabase = supabaseAdmin();
   const [staffRes, usersRes, clinics] = await Promise.all([
     loadAllStaffForTenant(tid),
-    supabase.from("fi_users").select("id, email").eq("tenant_id", tid).order("email", { ascending: true }).limit(200),
+    supabase
+      .from("fi_users")
+      .select("id, email")
+      .eq("tenant_id", tid)
+      .order("email", { ascending: true })
+      .limit(200),
     loadClinicsForTenant(tid),
   ]);
   if (usersRes.error) throw new Error(usersRes.error.message);
 
-  const fiUsersForLink = ((usersRes.data ?? []) as { id: string; email: string | null }[]).map((r) => ({
-    id: String(r.id),
-    email: r.email != null ? String(r.email) : null,
-  }));
+  const fiUsersForLink = ((usersRes.data ?? []) as { id: string; email: string | null }[]).map(
+    (r) => ({
+      id: String(r.id),
+      email: r.email != null ? String(r.email) : null,
+    })
+  );
 
   const authId = await resolveAuthUserId(null);
   let canManageStaff = false;
@@ -166,7 +182,10 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   const canManageStaffFeatureVisibility = await resolveCanManageStaffFeatureAccessSettings(tid);
 
   const staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
-  const staffFeatureTemplateDefaultsByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
+  const staffFeatureTemplateDefaultsByStaffId: Record<
+    string,
+    Partial<Record<FiFeatureKey, boolean>>
+  > = {};
   let staffPositionTypes: FiStaffPositionTypeRow[] = [];
   let staffOrganisationalIntelligenceByStaffId: Record<string, StaffIntelligenceViewModel> = {};
 
@@ -196,7 +215,10 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     await Promise.all(
       staffIds.map(async (sid) => {
         try {
-          staffFeatureTemplateDefaultsByStaffId[sid] = await loadFeatureTemplateDefaultsForStaff(tid, sid);
+          staffFeatureTemplateDefaultsByStaffId[sid] = await loadFeatureTemplateDefaultsForStaff(
+            tid,
+            sid
+          );
         } catch {
           staffFeatureTemplateDefaultsByStaffId[sid] = {};
         }
@@ -204,7 +226,11 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     );
 
     try {
-      staffOrganisationalIntelligenceByStaffId = await loadStaffIntelligenceViewsForTenantStaff(tid, staffRes, staffPositionTypes);
+      staffOrganisationalIntelligenceByStaffId = await loadStaffIntelligenceViewsForTenantStaff(
+        tid,
+        staffRes,
+        staffPositionTypes
+      );
     } catch {
       staffOrganisationalIntelligenceByStaffId = {};
     }
@@ -220,7 +246,11 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     tenantOverview: null,
   };
   try {
-    workforceIntelligence = await loadWorkforceCommandCentreIntelligence(tid, staffRes, hrNotificationByStaffId);
+    workforceIntelligence = await loadWorkforceCommandCentreIntelligence(
+      tid,
+      staffRes,
+      hrNotificationByStaffId
+    );
   } catch {
     workforceIntelligence = { perStaff: {}, tenantOverview: null };
   }

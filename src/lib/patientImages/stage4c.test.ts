@@ -33,11 +33,23 @@ describe("Stage 4C — patient images foundation (pure)", () => {
   });
 
   it("content type validation", () => {
-    assert.equal(resolvePatientImageContentType({ name: "x.jpg", type: "image/jpeg" }), "image/jpeg");
+    assert.equal(
+      resolvePatientImageContentType({ name: "x.jpg", type: "image/jpeg" }),
+      "image/jpeg"
+    );
     assert.equal(resolvePatientImageContentType({ name: "x.jpg", type: "" }), "image/jpeg");
-    assert.equal(resolvePatientImageContentType({ name: "x.heic", type: "application/octet-stream" }), "image/heic");
-    assert.equal(resolvePatientImageContentType({ name: "x.bin", type: "application/octet-stream" }), null);
-    assert.equal(assertAllowedPatientImageContentType({ name: "a.png", type: "image/png", size: 10 }), "image/png");
+    assert.equal(
+      resolvePatientImageContentType({ name: "x.heic", type: "application/octet-stream" }),
+      "image/heic"
+    );
+    assert.equal(
+      resolvePatientImageContentType({ name: "x.bin", type: "application/octet-stream" }),
+      null
+    );
+    assert.equal(
+      assertAllowedPatientImageContentType({ name: "a.png", type: "image/png", size: 10 }),
+      "image/png"
+    );
   });
 
   it("file size validation", () => {
@@ -68,7 +80,10 @@ describe("Stage 4C — patient images foundation (pure)", () => {
   });
 
   it("changed_keys generation", () => {
-    const base: Omit<PatientImageEditableSnapshot, "image_category" | "caption" | "taken_at" | "metadata"> = {
+    const base: Omit<
+      PatientImageEditableSnapshot,
+      "image_category" | "caption" | "taken_at" | "metadata"
+    > = {
       imaging_library_axis: "general_clinical",
       clinic_id: null,
       captured_by_staff_id: null,
@@ -96,10 +111,12 @@ describe("Stage 4C — patient images foundation (pure)", () => {
     };
     const keys = patientImageDetailChangedKeys(before, after).sort();
     assert.deepEqual(keys, ["caption", "image_category", "metadata", "taken_at"]);
-    assert.deepEqual(
-      [...patientImageArchiveChangedKeys()].sort(),
-      ["archive_reason", "archived_at", "archived_by_user_id", "image_status"]
-    );
+    assert.deepEqual([...patientImageArchiveChangedKeys()].sort(), [
+      "archive_reason",
+      "archived_at",
+      "archived_by_user_id",
+      "image_status",
+    ]);
   });
 
   it("archived edit guard", () => {

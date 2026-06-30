@@ -43,7 +43,11 @@ export {
   validateCrmMessagePreviewInput,
   type ValidatedCrmMessagePreviewInput,
 } from "./validation";
-export { normaliseOrgClinicScope, stageRowMatchesOrgClinicScope, type OrgClinicScopeColumns } from "./scope";
+export {
+  normaliseOrgClinicScope,
+  stageRowMatchesOrgClinicScope,
+  type OrgClinicScopeColumns,
+} from "./scope";
 export { mapFiCrmLeadRow } from "./leadRow";
 export {
   attachSearchPattern,
@@ -77,8 +81,15 @@ export {
   type LeadDetailComparableSnapshot,
   type LeadDetailTrackedKey,
 } from "./crmLeadDetailsPolicy";
-export { assertMessagePayloadHasNoForbiddenBodyKeys, FORBIDDEN_MESSAGE_BODY_KEYS_LOWER } from "./messageBodyKeysPolicy";
-export { groupCrmTasksByBuckets, type CrmTaskUiBucket, type CrmTasksGroupedByBucket } from "./crmTaskBuckets";
+export {
+  assertMessagePayloadHasNoForbiddenBodyKeys,
+  FORBIDDEN_MESSAGE_BODY_KEYS_LOWER,
+} from "./messageBodyKeysPolicy";
+export {
+  groupCrmTasksByBuckets,
+  type CrmTaskUiBucket,
+  type CrmTasksGroupedByBucket,
+} from "./crmTaskBuckets";
 export {
   assertCompleteReopenBodyHasNoExtraKeys,
   assertCrmTaskStatusAllowedForWrite,

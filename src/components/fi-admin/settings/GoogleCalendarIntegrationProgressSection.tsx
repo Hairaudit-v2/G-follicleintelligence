@@ -1,19 +1,19 @@
 import { PlatformProgressStatusBadge } from "@/components/platform/PlatformProgressPrimitives";
-import {
-  ProgressChecklist,
-  ProgressChecklistItem,
-} from "@/src/components/fi-admin/dashboard-ui";
+import { ProgressChecklist, ProgressChecklistItem } from "@/src/components/fi-admin/dashboard-ui";
 import { GOOGLE_CALENDAR_INTEGRATION_PROGRESS } from "@/src/lib/googleCalendar/googleCalendarIntegrationProgress";
 
 export function GoogleCalendarIntegrationProgressSection() {
-  const { name, status, progressPercent, completed, remaining } = GOOGLE_CALENDAR_INTEGRATION_PROGRESS;
+  const { name, status, progressPercent, completed, remaining } =
+    GOOGLE_CALENDAR_INTEGRATION_PROGRESS;
 
   return (
     <div className="mt-4 rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[#F8FAFC]">{name}</p>
-          <p className="mt-0.5 text-xs text-[#64748B]">CalendarOS native connector delivery tracker</p>
+          <p className="mt-0.5 text-xs text-[#64748B]">
+            CalendarOS native connector delivery tracker
+          </p>
         </div>
         <PlatformProgressStatusBadge status={status} />
       </div>

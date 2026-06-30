@@ -21,14 +21,21 @@ describe("receptionCommunicationTemplates", () => {
   });
 
   it("replaces unknown tokens with empty string", () => {
-    const out = renderReceptionCommunicationTemplate("Hello {{patient_first_name}} {{unknown_var}}", {
-      patient_first_name: "Sam",
-    });
+    const out = renderReceptionCommunicationTemplate(
+      "Hello {{patient_first_name}} {{unknown_var}}",
+      {
+        patient_first_name: "Sam",
+      }
+    );
     assert.equal(out, "Hello Sam ");
   });
 
   it("ships all seven default template keys", () => {
     assert.equal(Object.keys(RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES).length, 7);
-    assert.ok(RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES.payment_link_follow_up.smsBody?.includes("{{payment_link}}"));
+    assert.ok(
+      RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES.payment_link_follow_up.smsBody?.includes(
+        "{{payment_link}}"
+      )
+    );
   });
 });

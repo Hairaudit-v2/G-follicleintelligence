@@ -113,7 +113,10 @@ describe("Lead Index operator UI regression guard", () => {
 
     for (const label of FORBIDDEN_OPERATOR_LABELS) {
       assert.doesNotMatch(leadIndexPage, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-      assert.doesNotMatch(newEnquiryDialog, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      assert.doesNotMatch(
+        newEnquiryDialog,
+        new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      );
     }
   });
 

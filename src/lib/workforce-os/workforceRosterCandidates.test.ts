@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
-  buildStaffHrNotificationSummary,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import {
   isDuplicateRosterAssignment,
@@ -20,7 +18,9 @@ function workingHours(): Record<string, unknown> {
 }
 
 function freshReadinessInput(
-  overrides: Partial<import("@/src/lib/workforce-os/workforceReadinessEngine").WorkforceReadinessScoreInput> = {}
+  overrides: Partial<
+    import("@/src/lib/workforce-os/workforceReadinessEngine").WorkforceReadinessScoreInput
+  > = {}
 ) {
   const hr = buildStaffHrNotificationSummary(
     {
@@ -180,7 +180,9 @@ test("isDuplicateRosterAssignment detects active duplicate rows", () => {
     isDuplicateRosterAssignment({
       staffId: "staff-1",
       assignedRole: "Nurse",
-      existingAssignments: [{ staffId: "staff-1", assignedRole: "nurse", assignmentStatus: "scheduled" }],
+      existingAssignments: [
+        { staffId: "staff-1", assignedRole: "nurse", assignmentStatus: "scheduled" },
+      ],
     }),
     true
   );
@@ -188,7 +190,9 @@ test("isDuplicateRosterAssignment detects active duplicate rows", () => {
     isDuplicateRosterAssignment({
       staffId: "staff-1",
       assignedRole: "nurse",
-      existingAssignments: [{ staffId: "staff-1", assignedRole: "nurse", assignmentStatus: "cancelled" }],
+      existingAssignments: [
+        { staffId: "staff-1", assignedRole: "nurse", assignmentStatus: "cancelled" },
+      ],
     }),
     false
   );

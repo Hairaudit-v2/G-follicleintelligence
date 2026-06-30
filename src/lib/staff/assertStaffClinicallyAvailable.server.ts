@@ -15,7 +15,10 @@ import {
   type ProcedureTeamSlotKind,
 } from "@/src/lib/staff/clinicalStaffPicker";
 import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
-import { assertFiStaffBelongsToTenant, loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
+import {
+  assertFiStaffBelongsToTenant,
+  loadStaffMemberForTenant,
+} from "@/src/lib/staff/staff.server";
 
 export class StaffClinicalAvailabilityError extends Error {
   constructor(message: string) {
@@ -67,7 +70,9 @@ export async function assertStaffClinicallyAvailableForAssignment(
     hr,
   });
   if (!readiness.clinically_available) {
-    throw new StaffClinicalAvailabilityError(clinicalAssignmentErrorMessage(readiness.block_reason));
+    throw new StaffClinicalAvailabilityError(
+      clinicalAssignmentErrorMessage(readiness.block_reason)
+    );
   }
 }
 
@@ -90,7 +95,9 @@ export async function assertStaffAllowedForProcedureSlot(
   }
   if (slot === "support") {
     if (!isStaffBookableForClinicalWorkflow(staff)) {
-      throw new StaffClinicalAvailabilityError(clinicalAssignmentErrorMessage("Inactive or role needs review"));
+      throw new StaffClinicalAvailabilityError(
+        clinicalAssignmentErrorMessage("Inactive or role needs review")
+      );
     }
     return;
   }
@@ -201,11 +208,7 @@ export async function assertAppointmentProcedureStaffAssignments(
   client?: SupabaseClient
 ): Promise<void> {
   const supabase = client ?? supabaseAdmin();
-  for (const staffId of [
-    input.surgeonStaffId,
-    input.consultantStaffId,
-    input.techStaffId,
-  ]) {
+  for (const staffId of [input.surgeonStaffId, input.consultantStaffId, input.techStaffId]) {
     if (!staffId?.trim()) continue;
     await assertStaffAllowedForProcedureSlot(tenantId, staffId, "clinical", supabase);
   }

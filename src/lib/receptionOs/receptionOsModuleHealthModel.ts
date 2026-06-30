@@ -41,14 +41,16 @@ export const RECEPTION_OS_MODULE_LABELS: Record<ReceptionOsModuleKey, string> = 
   export: "Pilot export",
 };
 
-export function createEmptyReceptionOsModuleHealth(coreBoardLoaded = false): ReceptionOsModuleHealth {
+export function createEmptyReceptionOsModuleHealth(
+  coreBoardLoaded = false
+): ReceptionOsModuleHealth {
   return { coreBoardLoaded, unavailableModules: [] };
 }
 
 export function markReceptionOsModuleUnavailable(
   health: ReceptionOsModuleHealth,
   module: ReceptionOsModuleKey,
-  message: string,
+  message: string
 ): ReceptionOsModuleHealth {
   const label = RECEPTION_OS_MODULE_LABELS[module];
   const filtered = health.unavailableModules.filter((item) => item.module !== module);

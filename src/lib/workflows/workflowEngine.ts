@@ -26,7 +26,10 @@ function normalizeContext(ctx: WorkflowInvokeContext): WorkflowInvokeContext {
     pathologyResultId: trimOrUndefined(ctx.pathologyResultId),
     bookingId: trimOrUndefined(ctx.bookingId),
     actorUserId: trimOrUndefined(ctx.actorUserId),
-    payload: ctx.payload && typeof ctx.payload === "object" && !Array.isArray(ctx.payload) ? ctx.payload : {},
+    payload:
+      ctx.payload && typeof ctx.payload === "object" && !Array.isArray(ctx.payload)
+        ? ctx.payload
+        : {},
     occurredAt: String(ctx.occurredAt).trim(),
     idempotencyKey: trimOrUndefined(ctx.idempotencyKey),
     dryRun: Boolean(ctx.dryRun),
@@ -38,7 +41,10 @@ function normalizeHandlerResult(raw: WorkflowHandlerResult): WorkflowHandlerResu
     return {
       status: "failed",
       summary: "Invalid handler result",
-      error: { message: "Handler must return an object-shaped WorkflowHandlerResult.", code: "invalid_result" },
+      error: {
+        message: "Handler must return an object-shaped WorkflowHandlerResult.",
+        code: "invalid_result",
+      },
     };
   }
   const status = raw.status;
@@ -46,7 +52,10 @@ function normalizeHandlerResult(raw: WorkflowHandlerResult): WorkflowHandlerResu
     return {
       status: "failed",
       summary: "Invalid handler status",
-      error: { message: 'Handler result.status must be "skipped", "success", or "failed".', code: "invalid_status" },
+      error: {
+        message: 'Handler result.status must be "skipped", "success", or "failed".',
+        code: "invalid_status",
+      },
     };
   }
   return { ...raw, status };
@@ -146,7 +155,11 @@ export class WorkflowEngine {
     if (!tenantId) throw new Error("WorkflowInvokeContext.tenantId is required.");
     if (!occurredAt) throw new Error("WorkflowInvokeContext.occurredAt is required.");
 
-    if (this.ephemeralIdempotency && idempotencyKey && this.processedIdempotencyKeys.has(idempotencyKey)) {
+    if (
+      this.ephemeralIdempotency &&
+      idempotencyKey &&
+      this.processedIdempotencyKeys.has(idempotencyKey)
+    ) {
       return {
         eventName,
         tenantId,

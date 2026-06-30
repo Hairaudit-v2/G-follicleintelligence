@@ -80,10 +80,12 @@ function operationalReadinessScore(signals: DeploymentIntelligenceInputSignals):
   const max = 4;
 
   if (signals.provisioningProgressPercent >= 80) points += 1;
-  else blockers.push(`Provisioning ${signals.provisioningProgressPercent}% complete (target 80%+).`);
+  else
+    blockers.push(`Provisioning ${signals.provisioningProgressPercent}% complete (target 80%+).`);
 
   const clinicDeployed =
-    signals.goLiveReadiness.checks.find((c) => c.code === "service_catalog_deployed")?.state === "pass";
+    signals.goLiveReadiness.checks.find((c) => c.code === "service_catalog_deployed")?.state ===
+    "pass";
   if (clinicDeployed) points += 1;
   else blockers.push("Clinic configuration not fully deployed.");
 
@@ -99,9 +101,11 @@ function operationalReadinessScore(signals: DeploymentIntelligenceInputSignals):
 }
 
 /** Map Phase E go-live readiness into executive approval domain score. */
-export function mapGoLiveReadinessToExecutiveApproval(
-  snapshot: GoLiveReadinessSnapshot
-): { scorePercent: number; summary: string; blockers: string[] } {
+export function mapGoLiveReadinessToExecutiveApproval(snapshot: GoLiveReadinessSnapshot): {
+  scorePercent: number;
+  summary: string;
+  blockers: string[];
+} {
   const blockers: string[] = [];
   let score = 0;
 
@@ -188,9 +192,11 @@ export function applyConnectorAuthAdoptionBonus(
 }
 
 /** Map Guided Assist usage into adoption confidence domain score. */
-export function mapGuidedAssistSummaryToAdoptionConfidence(
-  input: GuidedAssistAdoptionInput
-): { scorePercent: number; summary: string; blockers: string[] } {
+export function mapGuidedAssistSummaryToAdoptionConfidence(input: GuidedAssistAdoptionInput): {
+  scorePercent: number;
+  summary: string;
+  blockers: string[];
+} {
   const blockers: string[] = [];
 
   if (!input.guidedAssistConfigured) {
@@ -221,7 +227,10 @@ export function mapGuidedAssistSummaryToAdoptionConfidence(
   else blockers.push("High Guided Assist dismiss rate — review onboarding paths.");
 
   if (input.modulesNeedingGuidanceReviewCount === 0) score += 10;
-  else blockers.push(`${input.modulesNeedingGuidanceReviewCount} module(s) flagged for guidance review.`);
+  else
+    blockers.push(
+      `${input.modulesNeedingGuidanceReviewCount} module(s) flagged for guidance review.`
+    );
 
   return {
     scorePercent: Math.min(100, score),
@@ -260,7 +269,10 @@ export function buildDeploymentIntelligenceDomains(
   const checks = signals.goLiveReadiness.checks;
 
   const infra = checkScoreFromCodes(checks, INFRASTRUCTURE_CHECKS, { treatSkippedAsPass: false });
-  const infraBoost = applyConnectorAuthInfrastructureBonus(infra.percent, signals.connectorAuthReadiness);
+  const infraBoost = applyConnectorAuthInfrastructureBonus(
+    infra.percent,
+    signals.connectorAuthReadiness
+  );
   const workflow = checkScoreFromCodes(checks, WORKFLOW_CHECKS, { treatSkippedAsPass: true });
   const staff = checkScoreFromCodes(checks, STAFF_CHECKS);
   const operational = operationalReadinessScore(signals);
@@ -286,7 +298,9 @@ export function buildDeploymentIntelligenceDomains(
     buildDomainScore(
       "workflow_readiness",
       workflow.percent,
-      workflow.percent >= 80 ? "Workflows and service catalog aligned." : "Workflow deployment needs work.",
+      workflow.percent >= 80
+        ? "Workflows and service catalog aligned."
+        : "Workflow deployment needs work.",
       workflow.blockers
     ),
     buildDomainScore(
@@ -298,7 +312,9 @@ export function buildDeploymentIntelligenceDomains(
     buildDomainScore(
       "operational_readiness",
       operational.percent,
-      operational.percent >= 75 ? "Operational testing signals are healthy." : "Operational testing in early stages.",
+      operational.percent >= 75
+        ? "Operational testing signals are healthy."
+        : "Operational testing in early stages.",
       operational.blockers
     ),
     buildDomainScore(
@@ -355,7 +371,10 @@ export function buildDeploymentIntelligenceSnapshot(
   const domainScores = buildDeploymentIntelligenceDomains(signals);
   const scoreBreakdown = calculateDeploymentScore(domainScores);
   const deploymentStatus = resolveDeploymentStatus(scoreBreakdown.overallScore);
-  const recommendations = generateDeploymentIntelligenceRecommendations(domainScores, signals.goLiveReadiness);
+  const recommendations = generateDeploymentIntelligenceRecommendations(
+    domainScores,
+    signals.goLiveReadiness
+  );
 
   const adoptionDomain = domainScores.find((d) => d.domain === "adoption_confidence");
   const executiveDomain = domainScores.find((d) => d.domain === "executive_approval");
@@ -411,7 +430,10 @@ export function generateDeploymentIntelligenceRecommendations(
     });
   }
 
-  if (isProductionReadyScore(calculateDeploymentScore(domainScores).overallScore) && !goLive.reviews.goLiveApproved) {
+  if (
+    isProductionReadyScore(calculateDeploymentScore(domainScores).overallScore) &&
+    !goLive.reviews.goLiveApproved
+  ) {
     recs.push({
       code: "production_ready_pending_approval",
       severity: "info",

@@ -91,7 +91,9 @@ function truncate(s: string | null | undefined, max: number): string | null {
 /**
  * Builds versioned bounded metadata for FI `metadata_snapshot` (no documents, no PII beyond summaries).
  */
-export function buildBoundedMetadataSnapshotV1(record: IiohrHrPortalStaffRecord): IiohrFiStaffSyncMetadataSnapshotV1 {
+export function buildBoundedMetadataSnapshotV1(
+  record: IiohrHrPortalStaffRecord
+): IiohrFiStaffSyncMetadataSnapshotV1 {
   return {
     schema_version: 1,
     employment_type: truncate(trimStr(record.employment_type), 120),
@@ -104,7 +106,9 @@ export function buildBoundedMetadataSnapshotV1(record: IiohrHrPortalStaffRecord)
 }
 
 /** Validated HR/training readiness fields for FI OS staff directory notifications. */
-export function buildHrReadinessMetadataSnapshot(record: IiohrHrPortalStaffRecord): Record<string, unknown> {
+export function buildHrReadinessMetadataSnapshot(
+  record: IiohrHrPortalStaffRecord
+): Record<string, unknown> {
   return extractValidatedHrReadinessFields({
     onboarding_status: record.onboarding_status,
     onboarding_completed_at: record.onboarding_completed_at,
@@ -136,7 +140,9 @@ export function mapIiohrHrStaffToFiSyncRow(record: IiohrHrPortalStaffRecord): Ii
     source_url: trimStr(record.source_url),
     default_timezone: trimStr(record.default_timezone),
     working_hours:
-      record.working_hours && typeof record.working_hours === "object" && !Array.isArray(record.working_hours)
+      record.working_hours &&
+      typeof record.working_hours === "object" &&
+      !Array.isArray(record.working_hours)
         ? record.working_hours
         : undefined,
     metadata_snapshot: {
@@ -150,6 +156,8 @@ export function mapIiohrHrStaffToFiSyncRow(record: IiohrHrPortalStaffRecord): Ii
   };
 }
 
-export function mapIiohrHrStaffRecordsToFiSyncRows(records: IiohrHrPortalStaffRecord[]): IiohrHrStaffSyncRow[] {
+export function mapIiohrHrStaffRecordsToFiSyncRows(
+  records: IiohrHrPortalStaffRecord[]
+): IiohrHrStaffSyncRow[] {
   return records.map(mapIiohrHrStaffToFiSyncRow);
 }

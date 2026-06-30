@@ -7,7 +7,11 @@ import {
   canonicalFemaleRecommendedTreatments,
   canonicalFemaleRiskFlagValues,
 } from "../normalize/femaleHairLossConsultationNormalize";
-import type { ConsultationCompletionInput, ConsultationCompletionSummary, ConsultationOutcomeType } from "./consultationCompletionTypes";
+import type {
+  ConsultationCompletionInput,
+  ConsultationCompletionSummary,
+  ConsultationOutcomeType,
+} from "./consultationCompletionTypes";
 import { CONSULTATION_OUTCOME_TYPES } from "./consultationCompletionTypes";
 import {
   buildClinicianNotesPreview,
@@ -69,13 +73,19 @@ function buildFemaleDiagnosisImpression(values: Record<string, unknown>): string
   const cls = canonicalFemalePatternClassificationLines(values).join("\n");
   const body = canonicalFemaleDiagnosisBody(values);
 
-  return [durLine, shedLine, ppLine, cls, body].map((s) => s.trim()).filter(Boolean).join("\n\n").trim();
+  return [durLine, shedLine, ppLine, cls, body]
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
 }
 
 /**
  * Rules-based completion summary for {@link FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG}.
  */
-export function buildFemaleHairLossCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildFemaleHairLossCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   const v = input.values ?? {};
   const base = emptyFemaleSummaryBase(input);
 
@@ -86,11 +96,15 @@ export function buildFemaleHairLossCompletionSummary(input: ConsultationCompleti
   const outcomeType = parseOutcomeDefaultMedical(v.consultation_outcome_type);
 
   const primaryFocus = readString(v.priority_focus);
-  const primaryConcern = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.female_priority_focus, primaryFocus);
+  const primaryConcern = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.female_priority_focus,
+    primaryFocus
+  );
 
   const patternKey = readString(v.female_pattern_type).trim();
   const hairLossPatternTypeLabel =
-    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.female_hair_loss_pattern_type, patternKey) || patternKey;
+    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.female_hair_loss_pattern_type, patternKey) ||
+    patternKey;
 
   const diagnosisImpression = buildFemaleDiagnosisImpression(v);
 
@@ -138,17 +152,21 @@ export function buildFemaleHairLossCompletionSummary(input: ConsultationCompleti
   const hormonalSelected = readStringArray(v.hormonal_flags);
   const hormonalSystemicSummary = hormonalSelected.length
     ? hormonalSelected
-        .map((h) => labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.female_hormonal_flags, h) || h)
+        .map(
+          (h) => labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.female_hormonal_flags, h) || h
+        )
         .join("; ")
     : "None selected on hormonal screen.";
 
   const ferritinKey = readString(v.ferritin_history_known).trim();
   const ferritinLabel =
-    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.ferritin_history_known, ferritinKey) || ferritinKey;
+    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.ferritin_history_known, ferritinKey) ||
+    ferritinKey;
 
   const thyroidKey = readString(v.thyroid_history_known).trim();
   const thyroidLabel =
-    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.thyroid_history_known, thyroidKey) || thyroidKey;
+    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.thyroid_history_known, thyroidKey) ||
+    thyroidKey;
 
   const ludwigKey = readString(v.ludwig_classification).trim();
   const ludwigLabel = ludwigKey
@@ -160,20 +178,29 @@ export function buildFemaleHairLossCompletionSummary(input: ConsultationCompleti
     ? labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.sinclair_scale, sinclairKey) || sinclairKey
     : "";
 
-  const femaleScaleSummary = [ludwigLabel && `Ludwig: ${ludwigLabel}`, sinclairLabel && `Sinclair: ${sinclairLabel}`]
+  const femaleScaleSummary = [
+    ludwigLabel && `Ludwig: ${ludwigLabel}`,
+    sinclairLabel && `Sinclair: ${sinclairLabel}`,
+  ]
     .filter(Boolean)
     .join(" · ");
 
   const sheddingLabel =
-    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.shedding_severity, readString(v.shedding_reported).trim()) ||
-    readString(v.shedding_reported).trim();
+    labelForOptionValue(
+      CONSULTATION_FORM_OPTION_SETS.shedding_severity,
+      readString(v.shedding_reported).trim()
+    ) || readString(v.shedding_reported).trim();
 
   const durationLabel =
-    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.consultation_duration_band, readString(v.duration_band).trim()) ||
-    readString(v.duration_band).trim();
+    labelForOptionValue(
+      CONSULTATION_FORM_OPTION_SETS.consultation_duration_band,
+      readString(v.duration_band).trim()
+    ) || readString(v.duration_band).trim();
 
   const bloodPathologySummary = pathologyRecommended
-    ? [bloodAnalysis ? "Blood analysis recommended" : null, pathologyReason || null].filter(Boolean).join(" — ")
+    ? [bloodAnalysis ? "Blood analysis recommended" : null, pathologyReason || null]
+        .filter(Boolean)
+        .join(" — ")
     : "Not flagged as required from this form.";
 
   const followUpUrgencyLabel =

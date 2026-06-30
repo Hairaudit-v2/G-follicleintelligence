@@ -14,8 +14,16 @@ describe("patientJourneyGallery", () => {
       ai_image_review_status: "accepted",
       ai_image_classified_at: "2026-01-10T12:00:00.000Z",
     };
-    const donor = { id: "00000000-0000-4000-8000-000000000001", ...base, ai_image_category: "donor" };
-    const hairline = { id: "00000000-0000-4000-8000-000000000002", ...base, ai_image_category: "front" };
+    const donor = {
+      id: "00000000-0000-4000-8000-000000000001",
+      ...base,
+      ai_image_category: "donor",
+    };
+    const hairline = {
+      id: "00000000-0000-4000-8000-000000000002",
+      ...base,
+      ai_image_category: "front",
+    };
     const fu = {
       id: "00000000-0000-4000-8000-000000000003",
       ...base,

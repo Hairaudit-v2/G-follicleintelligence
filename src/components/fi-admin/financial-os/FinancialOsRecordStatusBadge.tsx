@@ -14,7 +14,9 @@ export function FinancialOsRecordStatusBadge(props: {
   const label = props.label ?? props.status.replace(/_/g, " ");
 
   return (
-    <span className={cn(financialOsStatusBadgeBase, financialOsStatusBadgeTones[tone], props.className)}>
+    <span
+      className={cn(financialOsStatusBadgeBase, financialOsStatusBadgeTones[tone], props.className)}
+    >
       {label}
     </span>
   );

@@ -72,10 +72,9 @@ export function RepairWireframeVisualAssessmentField({
     </label>
   );
 
-  const desc =
-    description?.trim() ? (
-      <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
-    ) : null;
+  const desc = description?.trim() ? (
+    <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
+  ) : null;
 
   return (
     <div className="space-y-3">
@@ -86,8 +85,8 @@ export function RepairWireframeVisualAssessmentField({
 
       <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
         <p className={cn("mb-2 text-xs", fiOsLightFormSurfaceClassNames.helper)}>
-          1) Choose an issue tag. 2) Tap scalp zones on the wireframe to add/remove that tag for the zone. Optional
-          reference:
+          1) Choose an issue tag. 2) Tap scalp zones on the wireframe to add/remove that tag for the
+          zone. Optional reference:
         </p>
         <div className="-mx-1 mb-3 overflow-x-auto px-1 pb-1">
           <div className="flex min-w-min flex-wrap gap-2">
@@ -144,7 +143,9 @@ export function RepairWireframeVisualAssessmentField({
                     className="rounded border border-white/[0.06] bg-white/[0.03] px-2 py-2 text-[11px] leading-snug text-slate-300"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold capitalize text-slate-200">{z.replaceAll("_", " ")}</span>
+                      <span className="font-semibold capitalize text-slate-200">
+                        {z.replaceAll("_", " ")}
+                      </span>
                       <button
                         type="button"
                         className="shrink-0 text-[11px] font-medium text-rose-300 underline"
@@ -154,7 +155,9 @@ export function RepairWireframeVisualAssessmentField({
                         Clear
                       </button>
                     </div>
-                    <p className="mt-1 text-slate-400">{(annotations[z] ?? []).map((t) => repairTagLabel(t)).join(", ")}</p>
+                    <p className="mt-1 text-slate-400">
+                      {(annotations[z] ?? []).map((t) => repairTagLabel(t)).join(", ")}
+                    </p>
                   </li>
                 ))
               )}
@@ -163,7 +166,9 @@ export function RepairWireframeVisualAssessmentField({
         </div>
 
         <div className="space-y-1 border-t border-white/[0.06] pt-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Raw JSON (read-only)</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Raw JSON (read-only)
+          </span>
           <pre className="max-h-28 overflow-auto rounded border border-white/[0.08] bg-white/[0.03] p-2 text-[11px] text-slate-200">
             {JSON.stringify(annotations, null, 2)}
           </pre>

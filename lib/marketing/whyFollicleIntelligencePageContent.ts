@@ -135,15 +135,9 @@ export const WHY_FOLLICLE_INTELLIGENCE_PAGE_CONTENT = {
       "Better patient outcomes",
       "Better clinic performance benchmarking",
     ],
-    closingStatement: "At scale, the intelligence network becomes more valuable than the software itself.",
-    networkNodes: [
-      "Clinics",
-      "Patients",
-      "Surgeries",
-      "Treatments",
-      "Staff",
-      "Outcomes",
-    ],
+    closingStatement:
+      "At scale, the intelligence network becomes more valuable than the software itself.",
+    networkNodes: ["Clinics", "Patients", "Surgeries", "Treatments", "Staff", "Outcomes"],
   },
 
   mission: {

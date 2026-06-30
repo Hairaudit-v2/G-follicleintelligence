@@ -26,7 +26,10 @@ import {
 import { renderPharmacyOrderPdfBytes } from "@/src/lib/prescribing/pharmacyOrderPdf.server";
 import { FI_RESEND_PUBLIC_SEND_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
 import { sendResendEmailHttp } from "@/src/lib/email/resendHttpSend.server";
-import { buildResendFromAddress, isEmailDeliveryConfigured } from "@/src/lib/reminders/reminderDeliveryConfig";
+import {
+  buildResendFromAddress,
+  isEmailDeliveryConfigured,
+} from "@/src/lib/reminders/reminderDeliveryConfig";
 import { loadReminderDeliveryConfig } from "@/src/lib/reminders/reminderDeliveryConfig.server";
 
 function errMsg(e: unknown): string {
@@ -35,14 +38,22 @@ function errMsg(e: unknown): string {
   return "Request failed.";
 }
 
-function revalidatePrescriptionPaths(tenantId: string, patientId?: string | null, caseId?: string | null): void {
+function revalidatePrescriptionPaths(
+  tenantId: string,
+  patientId?: string | null,
+  caseId?: string | null
+): void {
   const base = `/fi-admin/${tenantId.trim()}`;
   revalidatePath(`${base}/prescriptions`);
   if (patientId?.trim()) revalidatePath(`${base}/patients/${patientId.trim()}`);
   if (caseId?.trim()) revalidatePath(`${base}/cases/${caseId.trim()}`);
 }
 
-async function hasPendingTransmission(supabase: ReturnType<typeof supabaseAdmin>, tenantId: string, rxId: string) {
+async function hasPendingTransmission(
+  supabase: ReturnType<typeof supabaseAdmin>,
+  tenantId: string,
+  rxId: string
+) {
   const { count, error } = await supabase
     .from("fi_pharmacy_transmissions")
     .select("id", { count: "exact", head: true })
@@ -80,11 +91,15 @@ function buildPharmacyEmailText(snap: PharmacyOrderPayloadSnapshotV1): string {
       ];
       if (it.repeats_instructions?.trim()) bits.push(`   Repeats: ${it.repeats_instructions}`);
       if (it.reorder_rule?.trim()) bits.push(`   Reorder rule: ${it.reorder_rule}`);
-      bits.push(`   Prescriber confirmed repeat rules: ${it.repeat_rules_prescriber_confirmed ? "Yes" : "No"}`);
+      bits.push(
+        `   Prescriber confirmed repeat rules: ${it.repeat_rules_prescriber_confirmed ? "Yes" : "No"}`
+      );
       return bits.join("\n");
     }),
     "",
-    snap.prescription.clinical_notes?.trim() ? `CLINICAL NOTES\n${snap.prescription.clinical_notes}` : "",
+    snap.prescription.clinical_notes?.trim()
+      ? `CLINICAL NOTES\n${snap.prescription.clinical_notes}`
+      : "",
     "",
     "—",
     "This structured summary accompanies the PDF attachment generated from Follicle Intelligence (DoctorOS).",
@@ -102,7 +117,10 @@ async function trySendPharmacyEmail(params: {
 }): Promise<{ ok: true; resendId: string | null } | { ok: false; error: string }> {
   const cfg = loadReminderDeliveryConfig();
   if (!isEmailDeliveryConfigured(cfg)) {
-    return { ok: false, error: "Email delivery is not configured (RESEND_API_KEY / RESEND_FROM_EMAIL)." };
+    return {
+      ok: false,
+      error: "Email delivery is not configured (RESEND_API_KEY / RESEND_FROM_EMAIL).",
+    };
   }
   const fromHeader = buildResendFromAddress(cfg.resend);
   if (!fromHeader) return { ok: false, error: "RESEND_FROM_EMAIL is not configured." };
@@ -126,7 +144,7 @@ async function trySendPharmacyEmail(params: {
         tenant_id: params.tenantId.trim(),
         prescription_id: params.prescriptionId.trim(),
         recipient_email_domain: params.pharmacyEmail.includes("@")
-          ? params.pharmacyEmail.split("@")[1]?.toLowerCase() ?? null
+          ? (params.pharmacyEmail.split("@")[1]?.toLowerCase() ?? null)
           : null,
         delivery_path: "pharmacy_compound_order",
       }
@@ -211,7 +229,8 @@ async function markRxSentToPharmacyIfNeeded(opts: {
 export async function sendPrescriptionToPharmacyAction(
   body: unknown
 ): Promise<
-  { ok: true; transmissionId: string; mode: "completed" | "manual_pending" } | { ok: false; error: string }
+  | { ok: true; transmissionId: string; mode: "completed" | "manual_pending" }
+  | { ok: false; error: string }
 > {
   try {
     const parsed = pharmacySendBodySchema.parse(body);
@@ -225,7 +244,10 @@ export async function sendPrescriptionToPharmacyAction(
     if (bundle.prescription.status === "draft") {
       return { ok: false, error: "Draft prescriptions cannot be sent to a pharmacy." };
     }
-    if (bundle.prescription.status !== "signed" && bundle.prescription.status !== "sent_to_pharmacy") {
+    if (
+      bundle.prescription.status !== "signed" &&
+      bundle.prescription.status !== "sent_to_pharmacy"
+    ) {
       return { ok: false, error: "Only a signed prescription can be transmitted to the pharmacy." };
     }
     if (bundle.prescription.status === "sent_to_pharmacy") {
@@ -244,11 +266,15 @@ export async function sendPrescriptionToPharmacyAction(
     if (repeatErr) return { ok: false, error: repeatErr };
 
     if (await hasPendingTransmission(supabase, tid, rid)) {
-      return { ok: false, error: "Complete or cancel the pending pharmacy transmission before starting another." };
+      return {
+        ok: false,
+        error: "Complete or cancel the pending pharmacy transmission before starting another.",
+      };
     }
 
     const pharmacy = await loadCompoundPharmacyById(tid, parsed.pharmacyId.trim());
-    if (!pharmacy || !pharmacy.active) return { ok: false, error: "Pharmacy not found or inactive." };
+    if (!pharmacy || !pharmacy.active)
+      return { ok: false, error: "Pharmacy not found or inactive." };
 
     const snapshot = await buildPharmacyOrderPayloadSnapshotV1({
       tenantId: tid,
@@ -268,7 +294,8 @@ export async function sendPrescriptionToPharmacyAction(
       })
       .select("id")
       .single();
-    if (insErr || !inserted) return { ok: false, error: insErr?.message ?? "Could not create transmission." };
+    if (insErr || !inserted)
+      return { ok: false, error: insErr?.message ?? "Could not create transmission." };
     const transmissionId = String((inserted as { id: string }).id);
 
     if (parsed.method === "manual_export") {
@@ -290,7 +317,9 @@ export async function sendPrescriptionToPharmacyAction(
     const pdfBytes = await renderPharmacyOrderPdfBytes(pdfCtx);
     const emailBody = buildPharmacyEmailText(snapshot);
     const clinicName =
-      branding.clinic_display_name?.trim() || branding.brand_name?.trim() || "Follicle Intelligence clinic";
+      branding.clinic_display_name?.trim() ||
+      branding.brand_name?.trim() ||
+      "Follicle Intelligence clinic";
 
     if (parsed.method === "email") {
       const mail = await trySendPharmacyEmail({
@@ -311,7 +340,11 @@ export async function sendPrescriptionToPharmacyAction(
           })
           .eq("tenant_id", tid)
           .eq("id", transmissionId);
-        revalidatePrescriptionPaths(tid, bundle.prescription.patient_id, bundle.prescription.case_id);
+        revalidatePrescriptionPaths(
+          tid,
+          bundle.prescription.patient_id,
+          bundle.prescription.case_id
+        );
         return { ok: false, error: mail.error };
       }
       const sentAt = new Date().toISOString();
@@ -358,7 +391,11 @@ export async function sendPrescriptionToPharmacyAction(
           })
           .eq("tenant_id", tid)
           .eq("id", transmissionId);
-        revalidatePrescriptionPaths(tid, bundle.prescription.patient_id, bundle.prescription.case_id);
+        revalidatePrescriptionPaths(
+          tid,
+          bundle.prescription.patient_id,
+          bundle.prescription.case_id
+        );
         return { ok: false, error: "Pharmacy has no API endpoint configured." };
       }
       const api = await trySendPharmacyApi({ endpoint: ep, snapshot });
@@ -372,7 +409,11 @@ export async function sendPrescriptionToPharmacyAction(
           })
           .eq("tenant_id", tid)
           .eq("id", transmissionId);
-        revalidatePrescriptionPaths(tid, bundle.prescription.patient_id, bundle.prescription.case_id);
+        revalidatePrescriptionPaths(
+          tid,
+          bundle.prescription.patient_id,
+          bundle.prescription.case_id
+        );
         return { ok: false, error: api.error };
       }
       const sentAt = new Date().toISOString();
@@ -425,8 +466,10 @@ export async function confirmManualPharmacyTransmissionAction(
 
     const tx = await loadPharmacyTransmissionById(tid, txid);
     if (!tx) return { ok: false, error: "Transmission not found." };
-    if (tx.method !== "manual_export") return { ok: false, error: "Only manual export transmissions use this confirmation." };
-    if (tx.status !== "pending") return { ok: false, error: "Transmission is not awaiting manual confirmation." };
+    if (tx.method !== "manual_export")
+      return { ok: false, error: "Only manual export transmissions use this confirmation." };
+    if (tx.status !== "pending")
+      return { ok: false, error: "Transmission is not awaiting manual confirmation." };
 
     const bundle = await loadPrescriptionDetail(tid, tx.prescription_id);
     if (!bundle) return { ok: false, error: "Prescription not found." };
@@ -483,7 +526,10 @@ export async function acknowledgePharmacyTransmissionAction(
     const tx = await loadPharmacyTransmissionById(tid, txid);
     if (!tx) return { ok: false, error: "Transmission not found." };
     if (tx.status !== "sent") {
-      return { ok: false, error: "Only a successfully sent transmission can be marked acknowledged." };
+      return {
+        ok: false,
+        error: "Only a successfully sent transmission can be marked acknowledged.",
+      };
     }
 
     const ts = new Date().toISOString();
@@ -519,7 +565,10 @@ export async function acknowledgePharmacyTransmissionAction(
 
 export async function resendFailedPharmacyTransmissionAction(
   body: unknown
-): Promise<{ ok: true; transmissionId: string; mode: "completed" | "manual_pending" } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; transmissionId: string; mode: "completed" | "manual_pending" }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = transmissionIdBodySchema.parse(body);
     await requireFiPrescribingActor(parsed.tenantId);
@@ -528,7 +577,8 @@ export async function resendFailedPharmacyTransmissionAction(
 
     const tx = await loadPharmacyTransmissionById(tid, txid);
     if (!tx) return { ok: false, error: "Transmission not found." };
-    if (tx.status !== "failed") return { ok: false, error: "Only failed transmissions can be resent." };
+    if (tx.status !== "failed")
+      return { ok: false, error: "Only failed transmissions can be resent." };
 
     return sendPrescriptionToPharmacyAction({
       tenantId: tid,

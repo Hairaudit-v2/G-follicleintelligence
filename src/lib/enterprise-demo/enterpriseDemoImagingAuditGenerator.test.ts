@@ -45,7 +45,9 @@ test("completed Sydney surgeries have excellent protocol completion", () => {
   for (const bundle of sydneyCompleted) {
     assert.equal(bundle.protocolSession?.protocolCompletionStatus, "excellent");
     assert.deepEqual(bundle.protocolSession?.missingSlots, []);
-    assert.ok(bundle.protocolSession?.slotsFilled === ENTERPRISE_DEMO_IMAGING_PROTOCOL_SLOTS.length);
+    assert.ok(
+      bundle.protocolSession?.slotsFilled === ENTERPRISE_DEMO_IMAGING_PROTOCOL_SLOTS.length
+    );
   }
 });
 
@@ -87,11 +89,14 @@ test("Bangkok completed surgeries miss follow-up imaging slots", () => {
 test("Dubai completed surgeries flag graft-tray mismatch", () => {
   const bundles = buildEnterpriseDemoImagingAuditBundles();
   const dubaiCompleted = bundles.filter(
-    (b) => b.surgery.clinicSlug === "dubai-hair-institute" && b.surgery.surgeryStatus === "completed"
+    (b) =>
+      b.surgery.clinicSlug === "dubai-hair-institute" && b.surgery.surgeryStatus === "completed"
   );
 
   assert.ok(
-    dubaiCompleted.every((b) => b.protocolSession?.protocolCompletionStatus === "graft_tray_mismatch")
+    dubaiCompleted.every(
+      (b) => b.protocolSession?.protocolCompletionStatus === "graft_tray_mismatch"
+    )
   );
   assert.ok(
     dubaiCompleted.some((b) =>

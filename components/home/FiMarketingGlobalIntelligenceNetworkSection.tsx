@@ -23,12 +23,17 @@ function IntelligenceNetworkColumn({
         <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
+        <span
+          className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent"
+          aria-hidden
+        />
       </div>
       <h3 className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
         {title}
       </h3>
-      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Track</p>
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        Track
+      </p>
       <ul className="mt-5 flex-1 space-y-2 border-t border-white/[0.06] pt-4">
         {tracks.map((item) => (
           <li
@@ -62,7 +67,11 @@ export function FiMarketingGlobalIntelligenceNetworkSection() {
         <ul className="mt-12 grid list-none gap-4 p-0 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
           {c.columns.map((column, index) => (
             <li key={column.title}>
-              <IntelligenceNetworkColumn index={index} title={column.title} tracks={column.tracks} />
+              <IntelligenceNetworkColumn
+                index={index}
+                title={column.title}
+                tracks={column.tracks}
+              />
             </li>
           ))}
         </ul>

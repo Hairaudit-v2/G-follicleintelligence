@@ -18,7 +18,8 @@ export const VIE_PROTOCOL_REQUIRED_CAPTURE_SOURCES = [
   "surgery_os",
 ] as const;
 
-export type VieProtocolRequiredCaptureSource = (typeof VIE_PROTOCOL_REQUIRED_CAPTURE_SOURCES)[number];
+export type VieProtocolRequiredCaptureSource =
+  (typeof VIE_PROTOCOL_REQUIRED_CAPTURE_SOURCES)[number];
 
 export function normalizeCaptureSource(raw: unknown): string {
   return String(raw ?? "")

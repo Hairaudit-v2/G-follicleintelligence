@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { PatientImageProfileTile, PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
+import type {
+  PatientImageProfileTile,
+  PatientImagesProfileBundle,
+} from "@/src/lib/patientImages/patientImageTypes";
 import { PatientImageCategoryBadge } from "@/src/components/fi/patient-images/PatientImageCategoryBadge";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
 
@@ -28,7 +31,8 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
       <section className={crmLeadCardClass}>
         <h2 className="text-sm font-semibold text-slate-100">Before / after compare</h2>
         <p className="mt-2 text-sm text-slate-400">
-          Tag images as <strong>before</strong> and <strong>after</strong> to use the comparison viewer.
+          Tag images as <strong>before</strong> and <strong>after</strong> to use the comparison
+          viewer.
         </p>
       </section>
     );
@@ -37,7 +41,9 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
   return (
     <section className={crmLeadCardClass}>
       <h2 className="text-sm font-semibold text-slate-100">Before / after compare</h2>
-      <p className="mt-1 text-xs text-slate-400">Side-by-side or drag the slider to compare progress photos.</p>
+      <p className="mt-1 text-xs text-slate-400">
+        Side-by-side or drag the slider to compare progress photos.
+      </p>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block text-xs font-medium text-slate-300">
@@ -82,7 +88,11 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
           <div className="relative mt-4 aspect-[4/3] max-w-xl overflow-hidden rounded border border-white/[0.08] bg-white/[0.06]">
             {beforeTile.signed?.url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={beforeTile.signed.url} alt="Before" className="absolute inset-0 h-full w-full object-cover" />
+              <img
+                src={beforeTile.signed.url}
+                alt="Before"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             ) : null}
             {afterTile.signed?.url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -112,7 +122,9 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
           </label>
         </>
       ) : (
-        <p className="mt-3 text-sm text-slate-400">Select both a before and an after image to compare.</p>
+        <p className="mt-3 text-sm text-slate-400">
+          Select both a before and an after image to compare.
+        </p>
       )}
     </section>
   );
@@ -127,7 +139,9 @@ function ComparePane({ label, tile }: { label: string; tile: PatientImageProfile
           // eslint-disable-next-line @next/next/no-img-element
           <img src={tile.signed.url} alt={label} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-gray-500">No preview</div>
+          <div className="flex h-full items-center justify-center text-xs text-gray-500">
+            No preview
+          </div>
         )}
       </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-300">

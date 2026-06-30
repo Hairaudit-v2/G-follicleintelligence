@@ -2,11 +2,17 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { PatientTwinRecipientCandidacyReviewRow, PatientTwinRecipientCandidacySection } from "./patientTwinTypes";
+import type {
+  PatientTwinRecipientCandidacyReviewRow,
+  PatientTwinRecipientCandidacySection,
+} from "./patientTwinTypes";
 
 function parseTopics(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean);
+  return raw
+    .filter((x): x is string => typeof x === "string")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function mapRow(x: Record<string, unknown>): PatientTwinRecipientCandidacyReviewRow {
@@ -14,14 +20,17 @@ function mapRow(x: Record<string, unknown>): PatientTwinRecipientCandidacyReview
     id: String(x.id),
     source_record_id: x.source_record_id != null ? String(x.source_record_id) : null,
     recipient_quality_rating: String(x.recipient_quality_rating ?? ""),
-    confidence_score: typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
+    confidence_score:
+      typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
     diffuse_thinning_risk: x.diffuse_thinning_risk != null ? String(x.diffuse_thinning_risk) : null,
     shock_loss_risk: x.shock_loss_risk != null ? String(x.shock_loss_risk) : null,
-    density_expectation_risk: x.density_expectation_risk != null ? String(x.density_expectation_risk) : null,
+    density_expectation_risk:
+      x.density_expectation_risk != null ? String(x.density_expectation_risk) : null,
     medication_stabilisation_needed: Boolean(x.medication_stabilisation_needed),
     pathology_review_recommended: Boolean(x.pathology_review_recommended),
     surgical_timing_risk: x.surgical_timing_risk != null ? String(x.surgical_timing_risk) : null,
-    patient_expectation_risk: x.patient_expectation_risk != null ? String(x.patient_expectation_risk) : null,
+    patient_expectation_risk:
+      x.patient_expectation_risk != null ? String(x.patient_expectation_risk) : null,
     documentation_gap_detected: Boolean(x.documentation_gap_detected),
     review_topics: parseTopics(x.review_topics),
     candidacy_summary: x.candidacy_summary != null ? String(x.candidacy_summary) : null,

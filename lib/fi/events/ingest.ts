@@ -22,7 +22,9 @@ function readStringField(input: unknown, key: string): string | undefined {
   return typeof value === "string" ? value.trim() || undefined : undefined;
 }
 
-function getRawEnvelopeMetadata(input: unknown): Pick<FiEventIngestResult, "eventType" | "sourceSystem"> {
+function getRawEnvelopeMetadata(
+  input: unknown
+): Pick<FiEventIngestResult, "eventType" | "sourceSystem"> {
   return {
     eventType: readStringField(input, "event_type") ?? "unknown",
     sourceSystem: readStringField(input, "source_system") ?? "unknown",

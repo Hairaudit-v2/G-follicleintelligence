@@ -39,7 +39,9 @@ export function StaffPayrollMetadataPanel({
           <dd className="mt-1 font-mono text-xs">{payroll.employee_id}</dd>
         </div>
         <div>
-          <dt className={`text-xs font-medium uppercase tracking-wide ${label}`}>Employment type</dt>
+          <dt className={`text-xs font-medium uppercase tracking-wide ${label}`}>
+            Employment type
+          </dt>
           <dd className="mt-1">{payroll.employment_type ?? "—"}</dd>
         </div>
         <div>
@@ -56,7 +58,9 @@ export function StaffPayrollMetadataPanel({
         </div>
         {payroll.clinic_display_name ? (
           <div className="sm:col-span-2">
-            <dt className={`text-xs font-medium uppercase tracking-wide ${label}`}>Clinic (payroll metadata)</dt>
+            <dt className={`text-xs font-medium uppercase tracking-wide ${label}`}>
+              Clinic (payroll metadata)
+            </dt>
             <dd className="mt-1">{payroll.clinic_display_name}</dd>
           </div>
         ) : null}

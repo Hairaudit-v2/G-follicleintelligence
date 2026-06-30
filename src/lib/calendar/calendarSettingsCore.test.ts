@@ -84,9 +84,13 @@ describe("applyCalendarSettingsToQuery", () => {
   });
 
   it("preserves explicit view param over tenant default", () => {
-    const base = parseCalendarSearchParams({ view: "month" }, new Date("2026-06-10T12:00:00.000Z"), {
-      calendarTimezone: "UTC",
-    });
+    const base = parseCalendarSearchParams(
+      { view: "month" },
+      new Date("2026-06-10T12:00:00.000Z"),
+      {
+        calendarTimezone: "UTC",
+      }
+    );
     const next = applyCalendarSettingsToQuery(
       base,
       { ...DEFAULT_CALENDAR_SETTINGS, defaultView: "day" },

@@ -60,12 +60,24 @@ export function AppointmentListTable({
       <table className="min-w-full divide-y divide-white/[0.08] text-sm">
         <thead className="bg-white/[0.03]">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">When</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Appointment</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Type</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Status</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Provider</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Clinic</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              When
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Appointment
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Type
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Status
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Provider
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Clinic
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.06]">
@@ -74,7 +86,10 @@ export function AppointmentListTable({
             const title = row.title?.trim() || bookingTypeLabel(row.booking_type);
             const when = `${fmtTs(row.start_at)} → ${fmtTs(row.end_at)}`;
             const titleCell = slide ? (
-              <AppointmentSlideOverTrigger appointmentId={row.id} className="text-left font-medium text-blue-300 hover:underline">
+              <AppointmentSlideOverTrigger
+                appointmentId={row.id}
+                className="text-left font-medium text-blue-300 hover:underline"
+              >
                 {title}
               </AppointmentSlideOverTrigger>
             ) : (
@@ -101,7 +116,9 @@ export function AppointmentListTable({
                 <td className="px-3 py-2">
                   <BookingStatusBadge status={row.booking_status} />
                 </td>
-                <td className="px-3 py-2 text-slate-300">{assigneeLabel(clinicalStaffOptions, userAssignees, row)}</td>
+                <td className="px-3 py-2 text-slate-300">
+                  {assigneeLabel(clinicalStaffOptions, userAssignees, row)}
+                </td>
                 <td className="px-3 py-2 text-slate-300">{clinicLabel(clinics, row)}</td>
               </tr>
             );

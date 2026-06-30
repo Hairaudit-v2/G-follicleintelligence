@@ -3,15 +3,17 @@ import { Activity } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import {
-  SURGERY_OS_LIVE_STATUS_SURFACE,
-} from "@/src/components/fi-admin/surgery-os/surgeryOsSeverityStyles";
+import { SURGERY_OS_LIVE_STATUS_SURFACE } from "@/src/components/fi-admin/surgery-os/surgeryOsSeverityStyles";
 import type { SurgeryOsLiveSurgery } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
 
 function formatTime(iso: string | null): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
+    return new Date(iso).toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   } catch {
     return "—";
   }
@@ -21,7 +23,11 @@ function primaryHref(hrefs: SurgeryOsLiveSurgery["hrefs"]): string | null {
   return hrefs.case ?? hrefs.patient ?? hrefs.calendar ?? null;
 }
 
-export function SurgeryOsLiveSurgeryBoardWidget({ surgeries }: { surgeries: SurgeryOsLiveSurgery[] }) {
+export function SurgeryOsLiveSurgeryBoardWidget({
+  surgeries,
+}: {
+  surgeries: SurgeryOsLiveSurgery[];
+}) {
   return (
     <DashboardCard className="flex h-full min-h-[320px] flex-col overflow-hidden">
       <div className="border-b border-white/[0.06] px-4 py-3">
@@ -39,7 +45,9 @@ export function SurgeryOsLiveSurgeryBoardWidget({ surgeries }: { surgeries: Surg
         ) : (
           <ul className="space-y-1.5">
             {surgeries.map((s) => {
-              const liveStyles = SURGERY_OS_LIVE_STATUS_SURFACE[s.liveStatus] ?? SURGERY_OS_LIVE_STATUS_SURFACE.waiting;
+              const liveStyles =
+                SURGERY_OS_LIVE_STATUS_SURFACE[s.liveStatus] ??
+                SURGERY_OS_LIVE_STATUS_SURFACE.waiting;
               const href = primaryHref(s.hrefs);
               const inner = (
                 <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3">
@@ -52,14 +60,25 @@ export function SurgeryOsLiveSurgeryBoardWidget({ surgeries }: { surgeries: Surg
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className={cn("h-2 w-2 rounded-full", liveStyles.dot)} aria-hidden />
-                      <span className={cn("text-xs font-semibold", liveStyles.text)}>{s.liveStatusLabel}</span>
+                      <span className={cn("text-xs font-semibold", liveStyles.text)}>
+                        {s.liveStatusLabel}
+                      </span>
                     </div>
                   </div>
                   <div className="mt-2 grid gap-1 text-xs text-slate-500 sm:grid-cols-2">
-                    <span>Phase: <span className="text-slate-300">{s.procedurePhaseLabel}</span></span>
-                    <span>Start: <span className="text-slate-300">{formatTime(s.scheduledStartAt)}</span></span>
-                    <span>Grafts: <span className="text-slate-300">{s.targetGrafts ?? "—"}</span></span>
-                    <span>Team: <span className="text-slate-300">{s.assignedTeamSummary ?? "—"}</span></span>
+                    <span>
+                      Phase: <span className="text-slate-300">{s.procedurePhaseLabel}</span>
+                    </span>
+                    <span>
+                      Start:{" "}
+                      <span className="text-slate-300">{formatTime(s.scheduledStartAt)}</span>
+                    </span>
+                    <span>
+                      Grafts: <span className="text-slate-300">{s.targetGrafts ?? "—"}</span>
+                    </span>
+                    <span>
+                      Team: <span className="text-slate-300">{s.assignedTeamSummary ?? "—"}</span>
+                    </span>
                   </div>
                 </div>
               );

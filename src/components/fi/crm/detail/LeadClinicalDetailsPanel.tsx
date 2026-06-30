@@ -37,8 +37,8 @@ export function LeadClinicalDetailsPanel({
       <section className={crmLeadCardClass}>
         <h2 className="text-sm font-semibold text-slate-100">Clinical profile</h2>
         <p className="mt-2 text-sm text-slate-400">
-          No foundation patient linked yet. Convert this lead to unlock full medical history, Norwood scale, and the photo
-          gallery.
+          No foundation patient linked yet. Convert this lead to unlock full medical history,
+          Norwood scale, and the photo gallery.
         </p>
       </section>
     );
@@ -50,7 +50,8 @@ export function LeadClinicalDetailsPanel({
       norwood_scale: clinicalDetails?.norwood_scale ?? null,
       ludwig_scale: clinicalDetails?.ludwig_scale ?? null,
       hairline_pattern: clinicalDetails?.hairline_pattern ?? null,
-      primary_concern: clinicalDetails?.primary_concern ?? clinicalDetails?.primary_hair_concern ?? null,
+      primary_concern:
+        clinicalDetails?.primary_concern ?? clinicalDetails?.primary_hair_concern ?? null,
     });
 
   return (
@@ -62,7 +63,10 @@ export function LeadClinicalDetailsPanel({
             <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-300 hover:underline">
               Patient directory
             </Link>
-            <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-300 hover:underline">
+            <Link
+              href={`/fi-admin/${tenantId}/patients/${patientId}`}
+              className="text-blue-300 hover:underline"
+            >
               Open profile →
             </Link>
           </p>
@@ -71,7 +75,9 @@ export function LeadClinicalDetailsPanel({
       </section>
 
       <section className={crmLeadCardClass}>
-        <h2 className="mb-3 text-sm font-semibold text-slate-100">Medical history & hair characteristics</h2>
+        <h2 className="mb-3 text-sm font-semibold text-slate-100">
+          Medical history & hair characteristics
+        </h2>
         {!clinicalDetails ? (
           <p className="text-sm text-slate-400">No clinical details row yet for this patient.</p>
         ) : (
@@ -80,7 +86,10 @@ export function LeadClinicalDetailsPanel({
               const raw = clinicalDetails[key];
               const text = raw != null && String(raw).trim() ? String(raw).trim() : "—";
               return (
-                <div key={key} className={key === "relevant_medical_history" ? "sm:col-span-2" : undefined}>
+                <div
+                  key={key}
+                  className={key === "relevant_medical_history" ? "sm:col-span-2" : undefined}
+                >
                   <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {CLINICAL_DETAIL_FIELD_LABELS[key]}
                   </dt>

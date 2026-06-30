@@ -38,7 +38,8 @@ export function ReceptionOsCommunicationActionBar({
   const copyPaymentLink = async () => {
     setCopyMsg(null);
     const res = await resolveReceptionPaymentLinkAction(tenantId, {
-      paymentRecordId: paymentRecordId ?? (context.sourceKind === "deposit" ? context.sourceId : undefined),
+      paymentRecordId:
+        paymentRecordId ?? (context.sourceKind === "deposit" ? context.sourceId : undefined),
       context,
     });
     if (!res.ok) {
@@ -100,7 +101,7 @@ function ActionBtn({
       onClick={onClick}
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
-        "inline-flex items-center gap-1 px-2 py-1 text-[0.68rem] font-semibold text-slate-300",
+        "inline-flex items-center gap-1 px-2 py-1 text-[0.68rem] font-semibold text-slate-300"
       )}
     >
       <Icon className="h-3 w-3" aria-hidden />

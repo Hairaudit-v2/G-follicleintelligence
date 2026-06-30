@@ -76,21 +76,26 @@ export async function assessFiOsPatientDonorAndPersist(
   const patientId = mapped.patient_id != null ? String(mapped.patient_id) : null;
   const caseId = mapped.case_id != null ? String(mapped.case_id) : null;
 
-  const imageClassificationId = await latestDonorImageClassificationIdForFiPatientImage(supabase, iid);
+  const imageClassificationId = await latestDonorImageClassificationIdForFiPatientImage(
+    supabase,
+    iid
+  );
   const hairLossClassificationId =
-    patientId != null ? await latestHairLossClassificationIdForPatient(supabase, tid, patientId) : null;
+    patientId != null
+      ? await latestHairLossClassificationIdForPatient(supabase, tid, patientId)
+      : null;
 
   const { result, assessorVersion, usedOpenAi, persisted } = await assessDonor({
-      source_system: "fi_os",
-      source_record_id: iid,
-      tenant_id: tid,
-      patient_id: patientId,
-      case_id: caseId,
-      image_classification_id: imageClassificationId,
-      hair_loss_classification_id: hairLossClassificationId,
-      patient_image_id: iid,
-      client: supabase,
-    });
+    source_system: "fi_os",
+    source_record_id: iid,
+    tenant_id: tid,
+    patient_id: patientId,
+    case_id: caseId,
+    image_classification_id: imageClassificationId,
+    hair_loss_classification_id: hairLossClassificationId,
+    patient_image_id: iid,
+    client: supabase,
+  });
 
   return { result, assessorVersion, usedOpenAi, persistedId: persisted.id };
 }

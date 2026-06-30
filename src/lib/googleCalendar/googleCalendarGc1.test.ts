@@ -141,9 +141,7 @@ function createMockSupabase() {
 
       if (table === "fi_calendar_inbound_sync_calendars") {
         const filterInbound = (filters: Record<string, string | boolean>) =>
-          inboundCalendars.filter((r) =>
-            Object.entries(filters).every(([k, v]) => r[k] === v)
-          );
+          inboundCalendars.filter((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
 
         const buildInboundChain = (filters: Record<string, string | boolean> = {}) => {
           const chain = {
@@ -235,9 +233,7 @@ function createMockSupabase() {
                               maybeSingle: async () => {
                                 const row = integrations.find(
                                   (r) =>
-                                    r.tenant_id === val &&
-                                    r[col2] === val2 &&
-                                    r.status === "active"
+                                    r.tenant_id === val && r[col2] === val2 && r.status === "active"
                                 );
                                 return { data: row ?? null, error: null };
                               },
@@ -370,7 +366,16 @@ function createMockSupabase() {
                 e.external_event_id === full.external_event_id
             );
             if (dup) {
-              return { select() { return { single: async () => ({ data: null, error: { code: "23505", message: "duplicate" } }) }; } };
+              return {
+                select() {
+                  return {
+                    single: async () => ({
+                      data: null,
+                      error: { code: "23505", message: "duplicate" },
+                    }),
+                  };
+                },
+              };
             }
             events.push(full);
             return {
@@ -484,9 +489,7 @@ describe("CalendarOS GC-1 — Google Meet and mapping", () => {
     assert.equal(
       extractGoogleMeetUrl({
         conferenceData: {
-          entryPoints: [
-            { entryPointType: "video", uri: "https://meet.google.com/xyz-uvw-rst" },
-          ],
+          entryPoints: [{ entryPointType: "video", uri: "https://meet.google.com/xyz-uvw-rst" }],
         },
       }),
       "https://meet.google.com/xyz-uvw-rst"
@@ -537,10 +540,9 @@ describe("CalendarOS GC-1 — deduplication and sync detection", () => {
 
   it("isDuplicateFiCalendarEvent matches external id and title+start", () => {
     assert.equal(
-      isDuplicateFiCalendarEvent(
-        { externalEventId: "ext-1", title: "Other", startTime: null },
-        [baseEvent]
-      ),
+      isDuplicateFiCalendarEvent({ externalEventId: "ext-1", title: "Other", startTime: null }, [
+        baseEvent,
+      ]),
       true
     );
 
@@ -623,7 +625,10 @@ describe("CalendarOS GC-1 — deduplication and sync detection", () => {
   });
 
   it("buildDeletedFromProviderMetadata marks sync_status deleted_external", () => {
-    const meta = buildDeletedFromProviderMetadata({ source: "google_sync" }, "2026-06-22T12:00:00.000Z");
+    const meta = buildDeletedFromProviderMetadata(
+      { source: "google_sync" },
+      "2026-06-22T12:00:00.000Z"
+    );
     assert.equal(meta.deleted_from_provider, true);
     assert.equal(meta.sync_status, "deleted_external");
   });
@@ -653,7 +658,8 @@ describe("CalendarOS GC-1 — OAuth and token refresh", () => {
     process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
     process.env.GOOGLE_CALENDAR_CLIENT_ID = "client-id";
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = "client-secret";
-    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/oauth/callback";
+    process.env.GOOGLE_CALENDAR_REDIRECT_URI =
+      "https://app.example.com/api/google-calendar/oauth/callback";
   });
 
   afterEach(() => {
@@ -756,10 +762,9 @@ describe("CalendarOS GC-1 — event CRUD via service layer", () => {
       const path = String(url);
 
       if (path.includes("oauth2.googleapis.com/token")) {
-        return new Response(
-          JSON.stringify({ access_token: "live-access", expires_in: 3600 }),
-          { status: 200 }
-        );
+        return new Response(JSON.stringify({ access_token: "live-access", expires_in: 3600 }), {
+          status: 200,
+        });
       }
 
       if (method === "POST" && path.includes("/events") && path.includes("conferenceDataVersion")) {
@@ -901,11 +906,10 @@ describe("CalendarOS GC-1 — event CRUD via service layer", () => {
     assert.equal(created.ok, true);
     if (!created.ok) return;
 
-    const deleted = await deleteGoogleCalendarEvent(
-      TENANT,
-      created.data.event.id,
-      { supabaseClientForTests: mock.client, fetchOverride }
-    );
+    const deleted = await deleteGoogleCalendarEvent(TENANT, created.data.event.id, {
+      supabaseClientForTests: mock.client,
+      fetchOverride,
+    });
 
     assert.equal(deleted.ok, true);
     if (!deleted.ok) return;
@@ -1050,10 +1054,9 @@ describe("CalendarOS GC-3 — sync reconciliation", () => {
       const path = parsed.pathname;
 
       if (String(url).includes("oauth2.googleapis.com/token")) {
-        return new Response(
-          JSON.stringify({ access_token: "live-access", expires_in: 3600 }),
-          { status: 200 }
-        );
+        return new Response(JSON.stringify({ access_token: "live-access", expires_in: 3600 }), {
+          status: 200,
+        });
       }
 
       if (method === "GET" && /\/events\/[^/]+$/.test(path) && !path.endsWith("/events")) {
@@ -1405,7 +1408,9 @@ describe("CalendarOS GC-3 — sync reconciliation", () => {
     assert.equal(result.data.result.created, 2);
     assert.equal(result.data.result.perCalendar?.length, 3);
 
-    const consultationsRow = mock.events.find((e) => e.external_event_id === "native-consultations");
+    const consultationsRow = mock.events.find(
+      (e) => e.external_event_id === "native-consultations"
+    );
     assert.ok(consultationsRow);
     assert.equal(consultationsRow!.calendar_id, "consultations@follicleintelligence.ai");
     const consultMeta = consultationsRow!.metadata as Record<string, unknown>;

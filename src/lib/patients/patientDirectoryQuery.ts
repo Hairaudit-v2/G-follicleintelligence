@@ -1,4 +1,8 @@
-import { isNorwoodScaleValue, NORWOOD_SCALE_VALUES, type NorwoodScaleValue } from "./hairLossScales";
+import {
+  isNorwoodScaleValue,
+  NORWOOD_SCALE_VALUES,
+  type NorwoodScaleValue,
+} from "./hairLossScales";
 import { isAllowedPatientStatus, type PatientStatusValue } from "./patientPolicy";
 
 export type PatientDirectorySort = "created_desc" | "created_asc";
@@ -48,14 +52,14 @@ export function norwoodValuesInRange(
 export function patientDirectoryHasActiveFilters(q: PatientDirectoryQuery): boolean {
   return Boolean(
     q.search.trim() ||
-      q.patientStatus ||
-      q.hasActiveCase != null ||
-      q.hasFutureBooking != null ||
-      q.norwoodMin ||
-      q.norwoodMax ||
-      q.lastVisitFrom ||
-      q.lastVisitTo ||
-      q.leadSource
+    q.patientStatus ||
+    q.hasActiveCase != null ||
+    q.hasFutureBooking != null ||
+    q.norwoodMin ||
+    q.norwoodMax ||
+    q.lastVisitFrom ||
+    q.lastVisitTo ||
+    q.leadSource
   );
 }
 
@@ -107,8 +111,12 @@ export function parsePatientDirectoryQuery(
 
   const lastVisitFromRaw = (firstString(sp.lastVisitFrom) ?? "").trim();
   const lastVisitToRaw = (firstString(sp.lastVisitTo) ?? "").trim();
-  const lastVisitFrom = /^\d{4}-\d{2}-\d{2}$/.test(lastVisitFromRaw) ? `${lastVisitFromRaw}T00:00:00.000Z` : null;
-  const lastVisitTo = /^\d{4}-\d{2}-\d{2}$/.test(lastVisitToRaw) ? `${lastVisitToRaw}T23:59:59.999Z` : null;
+  const lastVisitFrom = /^\d{4}-\d{2}-\d{2}$/.test(lastVisitFromRaw)
+    ? `${lastVisitFromRaw}T00:00:00.000Z`
+    : null;
+  const lastVisitTo = /^\d{4}-\d{2}-\d{2}$/.test(lastVisitToRaw)
+    ? `${lastVisitToRaw}T23:59:59.999Z`
+    : null;
 
   const leadSourceRaw = (firstString(sp.leadSource) ?? "").trim();
   const leadSource = leadSourceRaw ? leadSourceRaw.slice(0, 128) : null;

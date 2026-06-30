@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { loadMedicationOsCanonicalForTenant, loadTherapyPlanById } from "./medicationOsLoaders.server";
+import {
+  loadMedicationOsCanonicalForTenant,
+  loadTherapyPlanById,
+} from "./medicationOsLoaders.server";
 import {
   mirrorTherapyEventRowToTimeline,
   type TherapyTimelineMirrorOutcome,
@@ -13,7 +16,11 @@ import {
   normaliseTherapyPlanItems,
   type PlanLifecycleAction,
 } from "./medicationOsMutationPolicy";
-import { toPatientTherapyEventRow, toPatientTherapyPlanItemRow, toPatientTherapyPlanRow } from "./medicationOsMappers";
+import {
+  toPatientTherapyEventRow,
+  toPatientTherapyPlanItemRow,
+  toPatientTherapyPlanRow,
+} from "./medicationOsMappers";
 import type {
   DraftTherapyPlanItemInput,
   PatientTherapyEventRow,
@@ -24,7 +31,10 @@ import type {
   PlanType,
   TherapyEventType,
 } from "./medicationOsTypes";
-import { PATIENT_THERAPY_EVENT_SELECT, PATIENT_THERAPY_PLAN_ITEM_SELECT } from "./medicationOsTypes";
+import {
+  PATIENT_THERAPY_EVENT_SELECT,
+  PATIENT_THERAPY_PLAN_ITEM_SELECT,
+} from "./medicationOsTypes";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -197,7 +207,7 @@ export async function appendTherapyEvent(
   if (error) throw new Error(error.message);
   const row = toPatientTherapyEventRow(created as Record<string, unknown>);
   const planTypeForCompleted =
-    row.event_type === "plan_completed" ? planBundle?.plan.plan_type ?? null : null;
+    row.event_type === "plan_completed" ? (planBundle?.plan.plan_type ?? null) : null;
   const therapyTimelineMirror = await mirrorTherapyEventRowToTimeline(supabase, {
     tenantId: tid,
     patientId: pid,
@@ -277,7 +287,10 @@ export type CreateDraftTherapyPlanInput = {
 export async function createDraftTherapyPlan(
   supabase: SupabaseClient,
   input: CreateDraftTherapyPlanInput
-): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   const tid = input.tenantId.trim();
   const pid = input.patientId.trim();
   if (input.case_id?.trim()) {
@@ -335,7 +348,11 @@ export async function createDraftTherapyPlan(
     });
     return { plan, therapyTimelineMirrors: [appendResult.therapyTimelineMirror] };
   } catch (e) {
-    await supabase.from("fi_patient_therapy_plan_items").delete().eq("tenant_id", tid).eq("plan_id", plan.id);
+    await supabase
+      .from("fi_patient_therapy_plan_items")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", plan.id);
     await supabase.from("fi_patient_therapy_plans").delete().eq("tenant_id", tid).eq("id", plan.id);
     throw e;
   }
@@ -362,7 +379,9 @@ export async function updateDraftTherapyPlan(
   input: UpdateDraftTherapyPlanInput
 ): Promise<{ plan: PatientTherapyPlanRow }> {
   const tid = input.tenantId.trim();
-  const bundle = await loadTherapyPlanById(supabase, tid, input.planId.trim(), { includeItems: true });
+  const bundle = await loadTherapyPlanById(supabase, tid, input.planId.trim(), {
+    includeItems: true,
+  });
   if (!bundle) throw new Error("Therapy plan not found.");
   if (bundle.plan.status !== "draft") {
     throw new Error("Only draft therapy plans can be updated.");
@@ -375,11 +394,14 @@ export async function updateDraftTherapyPlan(
   if (input.plan_type != null) patch.plan_type = input.plan_type;
   if (input.title != null) patch.title = input.title.trim();
   if (input.case_id !== undefined) patch.case_id = input.case_id?.trim() || null;
-  if (input.consultation_id !== undefined) patch.consultation_id = input.consultation_id?.trim() || null;
-  if (input.surgery_plan_id !== undefined) patch.surgery_plan_id = input.surgery_plan_id?.trim() || null;
+  if (input.consultation_id !== undefined)
+    patch.consultation_id = input.consultation_id?.trim() || null;
+  if (input.surgery_plan_id !== undefined)
+    patch.surgery_plan_id = input.surgery_plan_id?.trim() || null;
   if (input.valid_from !== undefined) patch.valid_from = input.valid_from?.trim() || null;
   if (input.valid_until !== undefined) patch.valid_until = input.valid_until?.trim() || null;
-  if (input.surgery_anchor_date !== undefined) patch.surgery_anchor_date = input.surgery_anchor_date?.trim() || null;
+  if (input.surgery_anchor_date !== undefined)
+    patch.surgery_anchor_date = input.surgery_anchor_date?.trim() || null;
   if (input.metadata !== undefined) patch.metadata = asObjectRecord(input.metadata);
 
   const { data: patchRows, error: uErr } = await supabase
@@ -404,7 +426,9 @@ export async function updateDraftTherapyPlan(
     await replacePlanItems(supabase, tid, bundle.plan.id, normalised);
   }
 
-  const refreshed = await loadTherapyPlanById(supabase, tid, bundle.plan.id, { includeItems: false });
+  const refreshed = await loadTherapyPlanById(supabase, tid, bundle.plan.id, {
+    includeItems: false,
+  });
   if (!refreshed) throw new Error("Therapy plan not found after update.");
   return { plan: refreshed.plan };
 }
@@ -418,7 +442,10 @@ async function transitionPlanWithEvent(params: {
   actor_user_id?: string | null;
   assertAction: PlanLifecycleAction;
   detail?: Record<string, unknown>;
-}): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+}): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   const tid = params.tenantId.trim();
   const sb = params.supabase;
   const bundle = await loadTherapyPlanById(sb, tid, params.planId.trim(), { includeItems: false });
@@ -435,7 +462,9 @@ async function transitionPlanWithEvent(params: {
     .select("id");
   if (uErr) throw new Error(uErr.message);
   if (!updatedRows?.length) {
-    throw new Error("Therapy plan status could not be updated (concurrent change or invalid state).");
+    throw new Error(
+      "Therapy plan status could not be updated (concurrent change or invalid state)."
+    );
   }
   try {
     const appendResult = await appendTherapyEvent(sb, {
@@ -460,7 +489,10 @@ async function transitionPlanWithEvent(params: {
 export async function activateTherapyPlan(
   supabase: SupabaseClient,
   params: { tenantId: string; planId: string; actor_user_id?: string | null }
-): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   return transitionPlanWithEvent({
     supabase,
     tenantId: params.tenantId,
@@ -475,7 +507,10 @@ export async function activateTherapyPlan(
 export async function pauseTherapyPlan(
   supabase: SupabaseClient,
   params: { tenantId: string; planId: string; actor_user_id?: string | null }
-): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   return transitionPlanWithEvent({
     supabase,
     tenantId: params.tenantId,
@@ -490,7 +525,10 @@ export async function pauseTherapyPlan(
 export async function resumeTherapyPlan(
   supabase: SupabaseClient,
   params: { tenantId: string; planId: string; actor_user_id?: string | null }
-): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   return transitionPlanWithEvent({
     supabase,
     tenantId: params.tenantId,
@@ -505,7 +543,10 @@ export async function resumeTherapyPlan(
 export async function completeTherapyPlan(
   supabase: SupabaseClient,
   params: { tenantId: string; planId: string; actor_user_id?: string | null }
-): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   return transitionPlanWithEvent({
     supabase,
     tenantId: params.tenantId,
@@ -519,8 +560,16 @@ export async function completeTherapyPlan(
 
 export async function cancelTherapyPlan(
   supabase: SupabaseClient,
-  params: { tenantId: string; planId: string; actor_user_id?: string | null; reason?: string | null }
-): Promise<{ plan: PatientTherapyPlanRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+  params: {
+    tenantId: string;
+    planId: string;
+    actor_user_id?: string | null;
+    reason?: string | null;
+  }
+): Promise<{
+  plan: PatientTherapyPlanRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   return transitionPlanWithEvent({
     supabase,
     tenantId: params.tenantId,
@@ -562,11 +611,14 @@ export async function supersedeTherapyPlan(
   therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
 }> {
   const tid = input.tenantId.trim();
-  const oldBundle = await loadTherapyPlanById(supabase, tid, input.oldPlanId.trim(), { includeItems: false });
+  const oldBundle = await loadTherapyPlanById(supabase, tid, input.oldPlanId.trim(), {
+    includeItems: false,
+  });
   if (!oldBundle) throw new Error("Therapy plan not found.");
   assertPlanCanTransition(oldBundle.plan.status, "supersede");
   const patientId = oldBundle.plan.patient_id;
-  const caseId = input.newPlan.case_id !== undefined ? input.newPlan.case_id : oldBundle.plan.case_id;
+  const caseId =
+    input.newPlan.case_id !== undefined ? input.newPlan.case_id : oldBundle.plan.case_id;
   if (caseId?.trim()) {
     await assertCaseMatchesPatient(supabase, tid, caseId.trim(), patientId);
   }
@@ -602,13 +654,18 @@ export async function supersedeTherapyPlan(
     })
     .select("*")
     .single();
-  if (cErr || !created) throw new Error(cErr?.message ?? "Failed to create replacement therapy plan.");
+  if (cErr || !created)
+    throw new Error(cErr?.message ?? "Failed to create replacement therapy plan.");
   const newPlan = toPatientTherapyPlanRow(created as Record<string, unknown>);
   const therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] = [];
   try {
     await replacePlanItems(supabase, tid, newPlan.id, normalised);
   } catch (e) {
-    await supabase.from("fi_patient_therapy_plans").delete().eq("tenant_id", tid).eq("id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plans")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", newPlan.id);
     throw e;
   }
   try {
@@ -620,7 +677,11 @@ export async function supersedeTherapyPlan(
       consultation_id: newPlan.consultation_id,
       event_type: "plan_created",
       actor_user_id: input.actor_user_id ?? null,
-      detail: { title: newPlan.title, plan_type: newPlan.plan_type, supersedes_plan_id: oldBundle.plan.id },
+      detail: {
+        title: newPlan.title,
+        plan_type: newPlan.plan_type,
+        supersedes_plan_id: oldBundle.plan.id,
+      },
     });
     therapyTimelineMirrors.push(createdEv.therapyTimelineMirror);
     if (input.newPlan.initialStatus === "active") {
@@ -637,9 +698,21 @@ export async function supersedeTherapyPlan(
       therapyTimelineMirrors.push(activatedEv.therapyTimelineMirror);
     }
   } catch (e) {
-    await supabase.from("fi_patient_therapy_plan_items").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_events").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_plans").delete().eq("tenant_id", tid).eq("id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plan_items")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_events")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plans")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", newPlan.id);
     throw e;
   }
 
@@ -653,15 +726,39 @@ export async function supersedeTherapyPlan(
     .select("id");
   if (oErr) {
     /** Best-effort rollback of new plan if old plan could not be superseded. */
-    await supabase.from("fi_patient_therapy_plan_items").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_events").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_plans").delete().eq("tenant_id", tid).eq("id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plan_items")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_events")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plans")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", newPlan.id);
     throw new Error(oErr.message);
   }
   if (!oldUpdated?.length) {
-    await supabase.from("fi_patient_therapy_plan_items").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_events").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_plans").delete().eq("tenant_id", tid).eq("id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plan_items")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_events")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plans")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", newPlan.id);
     throw new Error("Could not supersede therapy plan (concurrent change or invalid state).");
   }
   try {
@@ -682,13 +779,27 @@ export async function supersedeTherapyPlan(
       .update({ status: oldPrevious, updated_at: nowIso() })
       .eq("tenant_id", tid)
       .eq("id", oldBundle.plan.id);
-    await supabase.from("fi_patient_therapy_plan_items").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_events").delete().eq("tenant_id", tid).eq("plan_id", newPlan.id);
-    await supabase.from("fi_patient_therapy_plans").delete().eq("tenant_id", tid).eq("id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plan_items")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_events")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("plan_id", newPlan.id);
+    await supabase
+      .from("fi_patient_therapy_plans")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", newPlan.id);
     throw e;
   }
 
-  const oldOut = await loadTherapyPlanById(supabase, tid, oldBundle.plan.id, { includeItems: false });
+  const oldOut = await loadTherapyPlanById(supabase, tid, oldBundle.plan.id, {
+    includeItems: false,
+  });
   const newOut = await loadTherapyPlanById(supabase, tid, newPlan.id, { includeItems: false });
   if (!oldOut || !newOut) throw new Error("Therapy plan reload failed after supersede.");
   return { oldPlan: oldOut.plan, newPlan: newOut.plan, therapyTimelineMirrors };
@@ -705,7 +816,10 @@ export type LinkTherapyPlanItemToPrescriptionInput = {
 export async function linkTherapyPlanItemToPrescription(
   supabase: SupabaseClient,
   input: LinkTherapyPlanItemToPrescriptionInput
-): Promise<{ item: PatientTherapyPlanItemRow; therapyTimelineMirrors: TherapyTimelineMirrorOutcome[] }> {
+): Promise<{
+  item: PatientTherapyPlanItemRow;
+  therapyTimelineMirrors: TherapyTimelineMirrorOutcome[];
+}> {
   const tid = input.tenantId.trim();
   const itemId = input.planItemId.trim();
   const rxId = input.prescription_id.trim();

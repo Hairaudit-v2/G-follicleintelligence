@@ -57,7 +57,10 @@ export function FinancialFinanceApplicationTable(props: {
     () => props.pathways.filter((p) => p.pathway_type === "medical_finance"),
     [props.pathways]
   );
-  const activeProviders = useMemo(() => props.providers.filter((p) => p.is_active), [props.providers]);
+  const activeProviders = useMemo(
+    () => props.providers.filter((p) => p.is_active),
+    [props.providers]
+  );
 
   const filtered = useMemo(() => {
     if (statusFilter === "all") return props.rows;
@@ -137,10 +140,20 @@ export function FinancialFinanceApplicationTable(props: {
                 />
               </label>
             </div>
-            <button type="submit" disabled={pending} className={`mt-3 ${financialOsClasses.primaryButton}`}>
+            <button
+              type="submit"
+              disabled={pending}
+              className={`mt-3 ${financialOsClasses.primaryButton}`}
+            >
               {pending ? "Creating…" : "Create application"}
             </button>
-            {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} className="mt-2" /> : null}
+            {feedback ? (
+              <FinancialOsFeedbackText
+                message={feedback.message}
+                tone={feedback.tone}
+                className="mt-2"
+              />
+            ) : null}
           </form>
         </FinancialOsFormPanel>
       ) : null}
@@ -158,10 +171,12 @@ export function FinancialFinanceApplicationTable(props: {
         emptyMessage={financialOsFilteredEmptyMessage(
           props.rows.length > 0,
           "No finance applications yet.",
-          "No finance applications match this status filter.",
+          "No finance applications match this status filter."
         )}
         emptyHint={
-          props.rows.length > 0 && filtered.length === 0 ? "Try clearing the status filter to see all applications." : undefined
+          props.rows.length > 0 && filtered.length === 0
+            ? "Try clearing the status filter to see all applications."
+            : undefined
         }
         head={
           <>
@@ -184,9 +199,15 @@ export function FinancialFinanceApplicationTable(props: {
               <td className={financialOsClasses.tableCell}>
                 <FinancialFinanceApplicationStatusBadge status={row.application_status} />
               </td>
-              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.requested_amount_cents)}</td>
-              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.approved_amount_cents)}</td>
-              <td className={financialOsClasses.tableCellMono}>{row.expected_settlement_date ?? "—"}</td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.requested_amount_cents)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.approved_amount_cents)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {row.expected_settlement_date ?? "—"}
+              </td>
               <td className={financialOsClasses.tableCell}>{row.updated_at.slice(0, 10)}</td>
               <td className={financialOsClasses.tableCell}>
                 <button
@@ -201,7 +222,11 @@ export function FinancialFinanceApplicationTable(props: {
             {expandedId === row.id ? (
               <tr>
                 <td colSpan={7} className={financialOsClasses.tableCell}>
-                  <FinancialFinanceApplicationDocuments tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
+                  <FinancialFinanceApplicationDocuments
+                    tenantId={props.tenantId}
+                    application={row}
+                    canMutate={props.canMutate}
+                  />
                 </td>
               </tr>
             ) : null}

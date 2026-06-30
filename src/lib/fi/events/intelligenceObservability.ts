@@ -33,7 +33,10 @@ function mapFiStatusToProcessingStatus(
  */
 export function fiEventRowToIntelligenceLogRecord(row: FiEventRow): IntelligenceEventLogRecord {
   const warnings: { code: string; message: string }[] = [];
-  const source = mapFiSourceSystemToIntelligenceSource(row.source_system as FiSourceSystem | string, warnings);
+  const source = mapFiSourceSystemToIntelligenceSource(
+    row.source_system as FiSourceSystem | string,
+    warnings
+  );
 
   return {
     id: row.id,

@@ -2,7 +2,11 @@
  * OnboardingOS Phase C — deterministic sandbox demo data packs (pure data, test-safe).
  */
 
-import type { ClinicDeploymentTemplateCode, SandboxSeedEntityType, SandboxSeedPack } from "./tenantProvisioningTypes";
+import type {
+  ClinicDeploymentTemplateCode,
+  SandboxSeedEntityType,
+  SandboxSeedPack,
+} from "./tenantProvisioningTypes";
 import { SANDBOX_SEED_PACK_CODES } from "./tenantProvisioningTypes";
 
 export { SANDBOX_SEED_PACK_CODES };
@@ -53,25 +57,30 @@ const ENTERPRISE_COUNTS: SandboxSeedPack["counts"] = {
   financial_os_metrics: 10,
 };
 
-export const SANDBOX_SEED_PACKS: Readonly<Record<(typeof SANDBOX_SEED_PACK_CODES)[number], SandboxSeedPack>> = {
+export const SANDBOX_SEED_PACKS: Readonly<
+  Record<(typeof SANDBOX_SEED_PACK_CODES)[number], SandboxSeedPack>
+> = {
   light_demo: {
     code: "light_demo",
     displayName: "Light demo",
-    description: "Minimal walkthrough dataset for consultation-led clinics and quick training sessions.",
+    description:
+      "Minimal walkthrough dataset for consultation-led clinics and quick training sessions.",
     counts: LIGHT_COUNTS,
     recommendedTemplateCodes: ["growth_consultation", "standard_hair_restoration"],
   },
   standard_demo: {
     code: "standard_demo",
     displayName: "Standard demo",
-    description: "Balanced dataset with patients, bookings, consultations, and light surgical/financial samples.",
+    description:
+      "Balanced dataset with patients, bookings, consultations, and light surgical/financial samples.",
     counts: STANDARD_COUNTS,
     recommendedTemplateCodes: ["standard_hair_restoration", "surgical_hair_restoration"],
   },
   enterprise_demo: {
     code: "enterprise_demo",
     displayName: "Enterprise demo",
-    description: "Rich multi-workflow dataset for enterprise groups exploring SurgeryOS and FinancialOS.",
+    description:
+      "Rich multi-workflow dataset for enterprise groups exploring SurgeryOS and FinancialOS.",
     counts: ENTERPRISE_COUNTS,
     recommendedTemplateCodes: ["enterprise_multi_clinic", "surgical_hair_restoration"],
   },
@@ -101,8 +110,12 @@ export const SANDBOX_SEED_ENTITY_LABELS: Readonly<Record<SandboxSeedEntityType, 
   financial_os_metrics: "FinancialOS metric placeholders",
 };
 
-export function isSandboxSeedPackCode(value: string | null | undefined): value is (typeof SANDBOX_SEED_PACK_CODES)[number] {
-  return SANDBOX_SEED_PACK_CODES.includes(String(value ?? "").trim() as (typeof SANDBOX_SEED_PACK_CODES)[number]);
+export function isSandboxSeedPackCode(
+  value: string | null | undefined
+): value is (typeof SANDBOX_SEED_PACK_CODES)[number] {
+  return SANDBOX_SEED_PACK_CODES.includes(
+    String(value ?? "").trim() as (typeof SANDBOX_SEED_PACK_CODES)[number]
+  );
 }
 
 export function listSandboxSeedPackSummaries(): readonly {

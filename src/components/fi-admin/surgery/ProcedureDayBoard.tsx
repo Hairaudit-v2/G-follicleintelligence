@@ -6,7 +6,10 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
-import type { ProcedureDayBoardPayload, ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import type {
+  ProcedureDayBoardPayload,
+  ProcedureDayScheduleCard,
+} from "@/src/lib/surgery/procedureDayBoardLoader.server";
 import {
   buildPostOpDischargeReadiness,
   buildProcedureDayFlowBoardItems,
@@ -29,7 +32,10 @@ function ProcedureDayPrimaryActions({ base, todayYmd }: { base: string; todayYmd
       <Link href={`${base}/reception`} className={surgeryLinkButtonClass}>
         Open Reception Board
       </Link>
-      <Link href={`${base}/calendar?date=${encodeURIComponent(todayYmd)}`} className={surgeryLinkButtonClass}>
+      <Link
+        href={`${base}/calendar?date=${encodeURIComponent(todayYmd)}`}
+        className={surgeryLinkButtonClass}
+      >
         Open Calendar
       </Link>
       <Link href={`${base}/surgery-readiness`} className={surgeryLinkButtonClass}>
@@ -44,7 +50,8 @@ function ProcedureDayPrimaryActions({ base, todayYmd }: { base: string; todayYmd
 
 function FlowProcedureCard({ base, item }: { base: string; item: ProcedureDayFlowBoardItem }) {
   const { card } = item;
-  const teamLabel = [card.procedureSurgeonLabel, card.calendarAssigneeLabel].filter(Boolean).join(" · ") || "—";
+  const teamLabel =
+    [card.procedureSurgeonLabel, card.calendarAssigneeLabel].filter(Boolean).join(" · ") || "—";
   return (
     <article className="rounded-lg border border-white/[0.08] bg-[#0c1220]/80 p-3 text-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -65,7 +72,10 @@ function FlowProcedureCard({ base, item }: { base: string; item: ProcedureDayFlo
       {item.blockers.length ? (
         <ul className="mt-2 flex flex-wrap gap-1">
           {item.blockers.map((b) => (
-            <li key={b} className="rounded border border-amber-500/20 bg-amber-500/[0.06] px-1.5 py-0.5 text-[0.65rem] text-amber-100/90">
+            <li
+              key={b}
+              className="rounded border border-amber-500/20 bg-amber-500/[0.06] px-1.5 py-0.5 text-[0.65rem] text-amber-100/90"
+            >
               {b}
             </li>
           ))}
@@ -121,10 +131,15 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS · Surgery</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Procedure Day</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+            FI OS · Surgery
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            Procedure Day
+          </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Live surgical day coordination across arrivals, preparation, procedure progress, rooms, team, and recovery.
+            Live surgical day coordination across arrivals, preparation, procedure progress, rooms,
+            team, and recovery.
           </p>
           <p className="mt-2 text-sm text-[#64748B]">{dateLine}</p>
           <ProcedureDayPrimaryActions base={base} todayYmd={data.window.todayYmd} />
@@ -144,7 +159,9 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
             const inner = (
               <>
                 <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {card.value}
+                </p>
                 <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               </>
             );
@@ -160,7 +177,10 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
               );
             }
             return (
-              <div key={card.id} className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4">
+              <div
+                key={card.id}
+                className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
+              >
                 {inner}
               </div>
             );
@@ -179,7 +199,9 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
         {priorityItems.length === 0 ? (
           <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
-            <p className="text-sm leading-relaxed text-[#CBD5E1]">Today&apos;s surgical flow is under control.</p>
+            <p className="text-sm leading-relaxed text-[#CBD5E1]">
+              Today&apos;s surgical flow is under control.
+            </p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -191,7 +213,9 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                   <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                 </Link>
@@ -254,7 +278,10 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
           />
           <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#0c1220]/75">
             {roomTeamRows.map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm"
+              >
                 <div className="min-w-0">
                   <Link href={row.href} className="font-medium text-[#F8FAFC] hover:text-[#22C1FF]">
                     {row.patientLabel}
@@ -265,7 +292,12 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
                 </div>
                 <div className="text-right text-xs">
                   <p className="text-[#94A3B8]">{row.handoffLabel}</p>
-                  <p className={cn("mt-0.5", row.readinessLabel.includes("gap") ? "text-amber-300" : "text-[#64748B]")}>
+                  <p
+                    className={cn(
+                      "mt-0.5",
+                      row.readinessLabel.includes("gap") ? "text-amber-300" : "text-[#64748B]"
+                    )}
+                  >
                     {row.readinessLabel}
                   </p>
                 </div>

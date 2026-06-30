@@ -41,7 +41,11 @@ export async function assessPatientRecipientCandidacyAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const iid = patientImageId.trim();
@@ -58,7 +62,11 @@ export async function assessPatientRecipientCandidacyAction(
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Image not found for this patient.");
 
-    await assessFiOsPatientRecipientAndPersist({ tenantId: tid, patientImageId: iid, client: supabase });
+    await assessFiOsPatientRecipientAndPersist({
+      tenantId: tid,
+      patientImageId: iid,
+      client: supabase,
+    });
     revalidatePatientTwinAndImaging(tid, pid);
     return { ok: true };
   } catch (e) {
@@ -99,7 +107,9 @@ export async function updateRecipientAssessmentReviewAction(
       : [];
 
     const merged = {
-      recipient_quality_rating: normalizeHieRecipientQualityRating(parsed.recipient_quality_rating ?? x.recipient_quality_rating),
+      recipient_quality_rating: normalizeHieRecipientQualityRating(
+        parsed.recipient_quality_rating ?? x.recipient_quality_rating
+      ),
       confidence_score:
         parsed.confidence_score !== undefined
           ? clampRecipientConfidence(parsed.confidence_score)
@@ -136,7 +146,10 @@ export async function updateRecipientAssessmentReviewAction(
         parsed.documentation_gap_detected !== undefined
           ? parsed.documentation_gap_detected
           : Boolean(x.documentation_gap_detected),
-      candidacy_summary: parsed.candidacy_summary !== undefined ? parsed.candidacy_summary : (x.candidacy_summary as string | null),
+      candidacy_summary:
+        parsed.candidacy_summary !== undefined
+          ? parsed.candidacy_summary
+          : (x.candidacy_summary as string | null),
       ai_notes: parsed.ai_notes !== undefined ? parsed.ai_notes : (x.ai_notes as string | null),
       review_topics: parsed.review_topics !== undefined ? parsed.review_topics : existingTopics,
       review_status: parsed.review_status,

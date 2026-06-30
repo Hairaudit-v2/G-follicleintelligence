@@ -8,7 +8,9 @@ import type { PathologyTemplateId } from "@/src/lib/pathology/pathologyTypes";
 type Line = { clientId: string; code: string; label: string };
 
 function uid(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `t-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return (
+    globalThis.crypto?.randomUUID?.() ?? `t-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  );
 }
 
 function linesFromTemplate(id: PathologyTemplateId): Line[] {
@@ -71,17 +73,24 @@ export function BloodPathologyRequestClient({
     }
     setSaving(true);
     try {
-      const res = await fetch(`/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/pathology-requests`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          template_used: templateId,
-          request_date: requestDate,
-          tests,
-          clinical_notes: clinicalNotes.trim() ? clinicalNotes.trim() : null,
-        }),
-      });
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; pathology_request?: { id: string } };
+      const res = await fetch(
+        `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/pathology-requests`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            template_used: templateId,
+            request_date: requestDate,
+            tests,
+            clinical_notes: clinicalNotes.trim() ? clinicalNotes.trim() : null,
+          }),
+        }
+      );
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        pathology_request?: { id: string };
+      };
       if (!res.ok || json.ok !== true) {
         setError(typeof json?.error === "string" ? json.error : `Save failed (${res.status}).`);
         return;
@@ -104,13 +113,17 @@ export function BloodPathologyRequestClient({
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="space-y-4 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-slate-100">Template</h2>
-        <p className="text-xs text-slate-400">Pick a panel to populate the test list. You can edit tests before saving.</p>
+        <p className="text-xs text-slate-400">
+          Pick a panel to populate the test list. You can edit tests before saving.
+        </p>
         <div className="space-y-2">
           {PATHOLOGY_TEMPLATES.map((t) => (
             <label
               key={t.id}
               className={`flex cursor-pointer flex-col rounded border p-3 text-sm ${
-                templateId === t.id ? "border-blue-500 bg-blue-500/10" : "border-white/[0.08] hover:border-slate-700"
+                templateId === t.id
+                  ? "border-blue-500 bg-blue-500/10"
+                  : "border-white/[0.08] hover:border-slate-700"
               }`}
             >
               <div className="flex items-start gap-2">
@@ -177,7 +190,9 @@ export function BloodPathologyRequestClient({
           {lines.map((line) => (
             <li key={line.clientId} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-end">
               <div className="min-w-0 flex-1 space-y-1">
-                <label className="text-[10px] font-semibold uppercase text-gray-500">Test name</label>
+                <label className="text-[10px] font-semibold uppercase text-gray-500">
+                  Test name
+                </label>
                 <input
                   className="w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   value={line.label}

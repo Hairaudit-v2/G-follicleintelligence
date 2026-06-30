@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  resolveAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import {
   type IiohrHrStaffImportRunResult,
   runIiohrHrStaffImport,
@@ -40,10 +44,12 @@ function revalidateStaffImportSurfaces(tenantId: string): void {
 /**
  * Dry-run HR staff import for Evolved / IIOHR rows. Gated by `assertCrmTenantWriteAllowed`.
  */
-export async function previewHrStaffImportAction(
-  body: unknown
-): Promise<
-  | { ok: true; result: IiohrHrStaffImportRunResult; validatedPackedRows: NonNullable<IiohrHrStaffImportRunResult["validatedPackedRows"]> }
+export async function previewHrStaffImportAction(body: unknown): Promise<
+  | {
+      ok: true;
+      result: IiohrHrStaffImportRunResult;
+      validatedPackedRows: NonNullable<IiohrHrStaffImportRunResult["validatedPackedRows"]>;
+    }
   | { ok: false; error: string }
 > {
   try {

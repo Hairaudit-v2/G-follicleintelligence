@@ -17,11 +17,7 @@ export const ANALYTICS_MODULE_NAMES = [
 
 export type AnalyticsModuleName = (typeof ANALYTICS_MODULE_NAMES)[number];
 
-export const WORKFORCE_EVENTS = [
-  "staff_assigned",
-  "shift_created",
-  "readiness_changed",
-] as const;
+export const WORKFORCE_EVENTS = ["staff_assigned", "shift_created", "readiness_changed"] as const;
 export type WorkforceAnalyticsEventType = (typeof WORKFORCE_EVENTS)[number];
 
 export const SURGERY_EVENTS = [
@@ -138,7 +134,10 @@ export function isAnalyticsModuleName(value: string): value is AnalyticsModuleNa
   return (ANALYTICS_MODULE_NAMES as readonly string[]).includes(value);
 }
 
-export function isEventTypeAllowedForModule(moduleName: AnalyticsModuleName, eventType: string): boolean {
+export function isEventTypeAllowedForModule(
+  moduleName: AnalyticsModuleName,
+  eventType: string
+): boolean {
   const allowed = MODULE_EVENT_TYPES[moduleName];
   if (!allowed.length) return eventType.trim().length > 0;
   return allowed.includes(eventType);

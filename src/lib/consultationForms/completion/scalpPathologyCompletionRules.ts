@@ -1,7 +1,15 @@
 import { SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG } from "../consultationFormConstants";
-import type { ConsultationCompletionInput, ConsultationCompletionSummary, ConsultationOutcomeType } from "./consultationCompletionTypes";
+import type {
+  ConsultationCompletionInput,
+  ConsultationCompletionSummary,
+  ConsultationOutcomeType,
+} from "./consultationCompletionTypes";
 import { CONSULTATION_OUTCOME_TYPES } from "./consultationCompletionTypes";
-import { buildClinicianNotesPreview, readBoolean, readString } from "./consultationCompletionExtractors";
+import {
+  buildClinicianNotesPreview,
+  readBoolean,
+  readString,
+} from "./consultationCompletionExtractors";
 
 const SYMPTOM_TYPE_LABELS: { value: string; label: string }[] = [
   { value: "inflammatory_dermatitis", label: "Inflammatory scalp dermatitis" },
@@ -108,7 +116,9 @@ function emptyBase(input: ConsultationCompletionInput): ConsultationCompletionSu
 /**
  * Rules-based completion summary for {@link SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG}.
  */
-export function buildScalpPathologyCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildScalpPathologyCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   const v = input.values ?? {};
   const base = emptyBase(input);
 
@@ -132,8 +142,12 @@ export function buildScalpPathologyCompletionSummary(input: ConsultationCompleti
 
   const autoimmuneKeys = readStringArray(v.autoimmune_flags);
   const infectionKeys = readStringArray(v.infection_risk_flags);
-  const autoimmuneLabels = autoimmuneKeys.map((k) => optLabel(AUTOIMMUNE_FLAG_LABELS, k)).filter(Boolean);
-  const infectionLabels = infectionKeys.map((k) => optLabel(INFECTION_FLAG_LABELS, k)).filter(Boolean);
+  const autoimmuneLabels = autoimmuneKeys
+    .map((k) => optLabel(AUTOIMMUNE_FLAG_LABELS, k))
+    .filter(Boolean);
+  const infectionLabels = infectionKeys
+    .map((k) => optLabel(INFECTION_FLAG_LABELS, k))
+    .filter(Boolean);
 
   const biopsy = readBoolean(v.biopsy_recommended);
   const blood = readBoolean(v.blood_analysis_recommended);
@@ -159,7 +173,9 @@ export function buildScalpPathologyCompletionSummary(input: ConsultationCompleti
     pathologyReason = parts.join(" ");
   }
 
-  const primaryConcern = [symptomLabel, durationLabel ? `Duration: ${durationLabel}` : ""].filter(Boolean).join(" · ");
+  const primaryConcern = [symptomLabel, durationLabel ? `Duration: ${durationLabel}` : ""]
+    .filter(Boolean)
+    .join(" · ");
 
   const diagnosisImpression = [
     `Symptoms: itch ${itch ? "yes" : "no"}, pain ${pain ? "yes" : "no"}, scaling ${scale ? "yes" : "no"}, patchy loss ${patchy ? "yes" : "no"}.`,
@@ -196,8 +212,10 @@ export function buildScalpPathologyCompletionSummary(input: ConsultationCompleti
   }
 
   const riskParts: string[] = [];
-  if (autoimmuneKeys.some((k) => k && k !== "none_documented")) riskParts.push("Autoimmune context flagged.");
-  if (infectionKeys.some((k) => k && k !== "none_documented")) riskParts.push("Infection risk flagged.");
+  if (autoimmuneKeys.some((k) => k && k !== "none_documented"))
+    riskParts.push("Autoimmune context flagged.");
+  if (infectionKeys.some((k) => k && k !== "none_documented"))
+    riskParts.push("Infection risk flagged.");
   if (scarSuspect) riskParts.push("Scarring alopecia suspected.");
 
   const investigationsLine = [
@@ -225,10 +243,14 @@ export function buildScalpPathologyCompletionSummary(input: ConsultationCompleti
 
   const scarringAutoimmuneRiskLine = [
     scarSuspect ? "Scarring alopecia suspected on exam." : "No scarring suspicion documented.",
-    autoimmuneLabels.filter((l) => !/none documented/i.test(l)).join("; ") || "No autoimmune flags beyond 'none'.",
+    autoimmuneLabels.filter((l) => !/none documented/i.test(l)).join("; ") ||
+      "No autoimmune flags beyond 'none'.",
   ].join(" ");
 
-  const treatmentPlanLine = [treatLabels.length ? treatLabels.join(", ") : "No draft treatments selected.", aiPlan ? `AI draft: ${aiPlan}` : ""]
+  const treatmentPlanLine = [
+    treatLabels.length ? treatLabels.join(", ") : "No draft treatments selected.",
+    aiPlan ? `AI draft: ${aiPlan}` : "",
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -239,7 +261,11 @@ export function buildScalpPathologyCompletionSummary(input: ConsultationCompleti
     outcomeType,
     primaryConcern,
     diagnosisImpression,
-    medicalSuitability: urgentDerm ? "needs_review" : scarSuspect ? "suitable_with_caution" : "suitable",
+    medicalSuitability: urgentDerm
+      ? "needs_review"
+      : scarSuspect
+        ? "suitable_with_caution"
+        : "suitable",
     recommendedProcedure,
     recommendedTreatments: treatLabels,
     pathologyRecommended,
@@ -256,7 +282,9 @@ export function buildScalpPathologyCompletionSummary(input: ConsultationCompleti
       investigationsLine: investigationsLine || "No investigations explicitly flagged.",
       treatmentPlanLine,
       followUpUrgencyLabel,
-      urgencyContextLine: urgentDerm ? "Urgent dermatology referral set to yes." : "Urgent dermatology referral not indicated.",
+      urgencyContextLine: urgentDerm
+        ? "Urgent dermatology referral set to yes."
+        : "Urgent dermatology referral not indicated.",
     },
   };
 }

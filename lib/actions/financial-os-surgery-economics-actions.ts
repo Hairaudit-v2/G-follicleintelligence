@@ -38,7 +38,9 @@ const costModelFieldsSchema = z.object({
 });
 
 const createCostModelSchema = optionalAdminKey.merge(costModelFieldsSchema);
-const updateCostModelSchema = optionalAdminKey.extend({ model_id: z.string().uuid() }).merge(costModelFieldsSchema.partial());
+const updateCostModelSchema = optionalAdminKey
+  .extend({ model_id: z.string().uuid() })
+  .merge(costModelFieldsSchema.partial());
 const modelIdSchema = optionalAdminKey.extend({ model_id: z.string().uuid() });
 const caseSnapshotSchema = optionalAdminKey.extend({ case_id: z.string().uuid() });
 
@@ -195,7 +197,10 @@ export async function loadSurgeryProfitabilitySnapshotHistoryAction(
   try {
     const parsed = caseSnapshotSchema.parse(body);
     await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
-    const snapshots = await loadProfitabilitySnapshotHistoryForCase(tenantId.trim(), parsed.case_id);
+    const snapshots = await loadProfitabilitySnapshotHistoryForCase(
+      tenantId.trim(),
+      parsed.case_id
+    );
     return { ok: true, snapshots };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

@@ -30,7 +30,9 @@ export function isFiTenantAdminRoleString(v: string | null | undefined): v is Fi
 }
 
 export function normalizeFiTenantAdminRole(v: string | null | undefined): FiTenantAdminRole | null {
-  const t = String(v ?? "").trim().toLowerCase();
+  const t = String(v ?? "")
+    .trim()
+    .toLowerCase();
   return isFiTenantAdminRoleString(t) ? t : null;
 }
 
@@ -39,7 +41,9 @@ export function canManageTenantAdminUsersFromProfiles(opts: {
   tenantFiUserRole: string | null | undefined;
   activeTenantAdminRole: FiTenantAdminRole | null;
 }): boolean {
-  const r = String(opts.tenantFiUserRole ?? "").trim().toLowerCase();
+  const r = String(opts.tenantFiUserRole ?? "")
+    .trim()
+    .toLowerCase();
   if (r === "admin" || r === "fi_admin") return true;
   return opts.activeTenantAdminRole === "clinic_admin";
 }

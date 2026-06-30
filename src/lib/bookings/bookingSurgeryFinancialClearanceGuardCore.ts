@@ -46,7 +46,10 @@ export function isSurgeryWithinClearanceWindow(ctx: SurgeryConfirmationGuardCont
  * Does not block `unavailable` (no safe financial signal) or other clearance states.
  */
 export function shouldBlockSurgeryConfirmationForFinancialClearance(
-  clearance: Pick<FinancialClearanceResult, "clearance_state" | "clearance_reason" | "next_required_action">,
+  clearance: Pick<
+    FinancialClearanceResult,
+    "clearance_state" | "clearance_reason" | "next_required_action"
+  >,
   surgeryWithinClearanceWindow: boolean
 ): boolean {
   if (!surgeryWithinClearanceWindow) return false;

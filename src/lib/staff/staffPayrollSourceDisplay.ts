@@ -52,7 +52,11 @@ export function buildStaffPayrollSourceDisplay(input: {
 }
 
 export function pickPayrollSourceDisplayFromRows(
-  rows: { source_system: string; source_staff_id: string; metadata: Record<string, unknown> | null | undefined }[]
+  rows: {
+    source_system: string;
+    source_staff_id: string;
+    metadata: Record<string, unknown> | null | undefined;
+  }[]
 ): StaffPayrollSourceDisplay | null {
   for (const row of rows) {
     const d = buildStaffPayrollSourceDisplay(row);

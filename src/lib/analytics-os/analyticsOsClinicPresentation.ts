@@ -2,8 +2,14 @@
  * AnalyticsOS — clinic-facing presentation helpers (UI copy only; no loader changes).
  */
 
-import type { AnalyticsExecutiveDashboardPayload, AnalyticsExecutiveInsight } from "./analyticsExecutiveTypes";
-import type { AnalyticsExecutiveScore, AnalyticsExecutiveSnapshot } from "./analyticsExecutiveTypes";
+import type {
+  AnalyticsExecutiveDashboardPayload,
+  AnalyticsExecutiveInsight,
+} from "./analyticsExecutiveTypes";
+import type {
+  AnalyticsExecutiveScore,
+  AnalyticsExecutiveSnapshot,
+} from "./analyticsExecutiveTypes";
 import type {
   AnalyticsOsDashboardPayload,
   AnalyticsOsModuleHealthCard,
@@ -40,7 +46,9 @@ const LINK_BTN =
 
 export { LINK_BTN as analyticsOsLinkButtonClass };
 
-export function clinicModuleStatusLabel(status: AnalyticsOsModuleHealthStatus): ClinicModuleHealthRow["statusLabel"] {
+export function clinicModuleStatusLabel(
+  status: AnalyticsOsModuleHealthStatus
+): ClinicModuleHealthRow["statusLabel"] {
   if (status === "healthy") return "Ready";
   if (status === "attention") return "Needs attention";
   return "Limited data";
@@ -67,7 +75,9 @@ export function formatPctRatio(ratio: number | null | undefined): string {
 }
 
 function mapInsightToClinicAttention(insight: AnalyticsExecutiveInsight): ClinicAttentionItem {
-  const byType: Partial<Record<AnalyticsExecutiveInsight["type"], { headline: string; detail?: string }>> = {
+  const byType: Partial<
+    Record<AnalyticsExecutiveInsight["type"], { headline: string; detail?: string }>
+  > = {
     conversion_gap: {
       headline: "Consultation conversion needs attention.",
       detail: insight.description,
@@ -118,11 +128,14 @@ function mapInsightToClinicAttention(insight: AnalyticsExecutiveInsight): Clinic
 
 function mapRiskRowToClinicAttention(row: AnalyticsOsRiskRow): ClinicAttentionItem {
   const labelMap: Record<string, string> = {
-    "Stale leads (pipeline hygiene)": "Lead follow-up is overdue — review consultation pipeline hygiene.",
+    "Stale leads (pipeline hygiene)":
+      "Lead follow-up is overdue — review consultation pipeline hygiene.",
     "CRM tasks due (horizon)": "Open follow-up tasks need attention in LeadFlow.",
-    "Surgery readiness alerts (cases)": "Surgery readiness needs review before upcoming procedures.",
+    "Surgery readiness alerts (cases)":
+      "Surgery readiness needs review before upcoming procedures.",
     "Pending HairAudit reviews": "Independent audit reviews are waiting in AuditOS.",
-    "Cases missing foundation patient link": "Some patient records still need linking for a complete journey view.",
+    "Cases missing foundation patient link":
+      "Some patient records still need linking for a complete journey view.",
   };
 
   return {
@@ -217,7 +230,9 @@ export function buildOperationalMetricGroups(
       metrics: [
         {
           label: "30-day conversion",
-          value: op ? formatPctRatio(op.quickStats.conversionRateLast30d) : "Not enough history yet",
+          value: op
+            ? formatPctRatio(op.quickStats.conversionRateLast30d)
+            : "Not enough history yet",
         },
         {
           label: "Consultations booked",
@@ -231,7 +246,9 @@ export function buildOperationalMetricGroups(
         {
           label: "Quotes sent",
           value:
-            quoteMetric && quoteMetric.value > 0 ? String(quoteMetric.value) : "Not enough history yet",
+            quoteMetric && quoteMetric.value > 0
+              ? String(quoteMetric.value)
+              : "Not enough history yet",
         },
       ],
     },
@@ -292,7 +309,9 @@ export function buildOperationalMetricGroups(
     },
   ];
 
-  return groups.filter((g) => g.metrics.some((m) => m.value !== "Not enough history yet") || g.id === "conversion");
+  return groups.filter(
+    (g) => g.metrics.some((m) => m.value !== "Not enough history yet") || g.id === "conversion"
+  );
 }
 
 export function countVisibleOperationalMetrics(groups: ClinicOperationalMetricGroup[]): number {

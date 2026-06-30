@@ -26,10 +26,15 @@ async function loadFiUserRow(
     .maybeSingle();
   if (error) return null;
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
-async function loadWorkspaceProfileKeyForViewerImpl(tenantId: string): Promise<FiWorkspaceProfileKey> {
+async function loadWorkspaceProfileKeyForViewerImpl(
+  tenantId: string
+): Promise<FiWorkspaceProfileKey> {
   const tid = tenantId.trim();
   if (!tid) return "default";
   try {
@@ -37,7 +42,9 @@ async function loadWorkspaceProfileKeyForViewerImpl(tenantId: string): Promise<F
     if (!authId) return "default";
 
     const fiUser = await loadFiUserRow(tid, authId);
-    const staff = fiUser ? await loadLinkedStaffOrganisationalSignalsForFiUser(tid, fiUser.id) : null;
+    const staff = fiUser
+      ? await loadLinkedStaffOrganisationalSignalsForFiUser(tid, fiUser.id)
+      : null;
     const tenantAdmin = await loadActiveTenantAdminProfileForSession(tid, authId);
     const os = await loadFiOsIdentity(authId);
 
@@ -68,9 +75,14 @@ export async function persistStaffWorkspaceProfileOverride(opts: {
   const sid = opts.staffId.trim();
   if (!tid || !sid) throw new Error("tenantId and staffId are required.");
   if (opts.profile !== "default" && opts.profile === "platform_admin") {
-    throw new Error("platform_admin workspace is implicit for platform operators and cannot be assigned on staff rows.");
+    throw new Error(
+      "platform_admin workspace is implicit for platform operators and cannot be assigned on staff rows."
+    );
   }
-  await assertStaffFeatureAccessMutationAllowed({ tenantId: tid, adminKey: opts.adminKey ?? undefined });
+  await assertStaffFeatureAccessMutationAllowed({
+    tenantId: tid,
+    adminKey: opts.adminKey ?? undefined,
+  });
   const staff = await loadStaffMemberForTenant(tid, sid);
   if (!staff) throw new Error("Staff not found.");
   const nextMeta = { ...staff.staff_metadata };
@@ -82,7 +94,9 @@ export async function persistStaffWorkspaceProfileOverride(opts: {
   await updateFiStaff(tid, sid, { staff_metadata: nextMeta });
 }
 
-export function assertAssignableWorkspaceProfileKey(raw: string): FiWorkspaceProfileKey | "default" {
+export function assertAssignableWorkspaceProfileKey(
+  raw: string
+): FiWorkspaceProfileKey | "default" {
   const t = raw.trim().toLowerCase();
   if (!t || t === "default") return "default";
   if (!isFiWorkspaceProfileKey(t)) throw new Error("Invalid workspace profile.");

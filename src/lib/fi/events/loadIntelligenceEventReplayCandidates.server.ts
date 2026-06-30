@@ -44,7 +44,8 @@ export async function loadIntelligenceEventReplayCandidates(
   options: LoadIntelligenceEventReplayCandidatesOptions
 ): Promise<LoadIntelligenceEventReplayCandidatesResult> {
   if (!options.omitPlatformAdminAssertForOperatorCli) {
-    const { assertFiPlatformAdminSystemAccess } = await import("@/src/lib/fiOs/fiOsPlatformSystemGate.server");
+    const { assertFiPlatformAdminSystemAccess } =
+      await import("@/src/lib/fiOs/fiOsPlatformSystemGate.server");
     await assertFiPlatformAdminSystemAccess();
   }
 

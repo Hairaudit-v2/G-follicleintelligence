@@ -44,7 +44,9 @@ export default async function PatientTimelineRoutePage({
     <div className="mx-auto max-w-3xl space-y-5 py-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Activity timeline</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+            Activity timeline
+          </p>
           <h1 className="mt-1 text-xl font-semibold text-slate-100">{displayName}</h1>
           <p className="mt-1 text-sm text-gray-500">
             Communication and CRM activity history synced from external systems (read-only).

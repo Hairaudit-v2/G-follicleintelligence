@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 
 import type { HomeProductShowcaseShell } from "@/lib/marketing/homePageContent";
 
-const shellBase = "relative h-full min-h-[168px] w-full overflow-hidden rounded-b-[10px] bg-[linear-gradient(145deg,rgb(8_12_20)_0%,rgb(5_8_14)_55%,rgb(4_7_12)_100%)] sm:min-h-[188px]";
+const shellBase =
+  "relative h-full min-h-[168px] w-full overflow-hidden rounded-b-[10px] bg-[linear-gradient(145deg,rgb(8_12_20)_0%,rgb(5_8_14)_55%,rgb(4_7_12)_100%)] sm:min-h-[188px]";
 
 function ShellChrome({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn(shellBase, className)}>{children}</div>;
@@ -33,9 +34,14 @@ function FakeSidebar({ narrow }: { narrow?: boolean }) {
 
 function TopBar({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-white/[0.06] bg-[rgb(7_10_16_/0.95)] px-2 py-1.5 sm:px-2.5" aria-hidden>
+    <div
+      className="flex items-center justify-between border-b border-white/[0.06] bg-[rgb(7_10_16_/0.95)] px-2 py-1.5 sm:px-2.5"
+      aria-hidden
+    >
       <div className="flex min-w-0 items-center gap-2">
-        <span className="truncate font-mono text-[7px] font-medium uppercase tracking-[0.14em] text-amber-200/55 sm:text-[8px]">{title}</span>
+        <span className="truncate font-mono text-[7px] font-medium uppercase tracking-[0.14em] text-amber-200/55 sm:text-[8px]">
+          {title}
+        </span>
       </div>
       <div className="flex gap-1">
         <span className="h-1.5 w-6 rounded-full bg-white/[0.06]" />
@@ -56,7 +62,10 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
             <div className="flex min-w-0 flex-1 flex-col p-2 sm:p-2.5">
               <div className="flex gap-1">
                 {["Mon", "Tue", "Wed", "Thu", "Fri"].map((d) => (
-                  <div key={d} className="flex-1 text-center font-mono text-[6px] font-semibold uppercase tracking-wider text-white/35 sm:text-[7px]">
+                  <div
+                    key={d}
+                    className="flex-1 text-center font-mono text-[6px] font-semibold uppercase tracking-wider text-white/35 sm:text-[7px]"
+                  >
                     {d}
                   </div>
                 ))}
@@ -67,7 +76,8 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
                     key={i}
                     className={cn(
                       "rounded border border-white/[0.05] bg-white/[0.02]",
-                      i === 7 && "border-amber-400/35 bg-amber-400/[0.12] shadow-[inset_0_0_0_1px_rgb(212_175_55_/0.12)]",
+                      i === 7 &&
+                        "border-amber-400/35 bg-amber-400/[0.12] shadow-[inset_0_0_0_1px_rgb(212_175_55_/0.12)]",
                       i === 11 && "border-white/[0.08] bg-white/[0.04]"
                     )}
                   />
@@ -75,7 +85,9 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
               </div>
               <div className="mt-2 flex items-center gap-1.5">
                 <span className="h-1.5 flex-1 rounded-full bg-white/[0.05]" />
-                <span className="font-mono text-[5px] font-semibold uppercase tracking-wider text-emerald-400/45 sm:text-[6px]">3 on</span>
+                <span className="font-mono text-[5px] font-semibold uppercase tracking-wider text-emerald-400/45 sm:text-[6px]">
+                  3 on
+                </span>
                 <span className="h-1.5 w-8 rounded-full bg-amber-400/25" />
               </div>
             </div>
@@ -94,7 +106,9 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
                   key={t}
                   className={cn(
                     "rounded border px-1 py-0.5 font-mono text-[5px] font-semibold uppercase tracking-wider sm:text-[6px]",
-                    ti === 0 ? "border-amber-400/25 bg-amber-400/10 text-amber-100/80" : "border-white/[0.06] bg-white/[0.03] text-white/40"
+                    ti === 0
+                      ? "border-amber-400/25 bg-amber-400/10 text-amber-100/80"
+                      : "border-white/[0.06] bg-white/[0.03] text-white/40"
                   )}
                 >
                   {t}
@@ -107,10 +121,17 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
                 { label: "Qualified", n: 3, hot: 0 },
                 { label: "Booked", n: 2, hot: 1 },
               ].map((col) => (
-                <div key={col.label} className="flex min-w-0 flex-1 flex-col rounded-lg border border-white/[0.06] bg-white/[0.02] p-1.5">
+                <div
+                  key={col.label}
+                  className="flex min-w-0 flex-1 flex-col rounded-lg border border-white/[0.06] bg-white/[0.02] p-1.5"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/45 sm:text-[7px]">{col.label}</span>
-                    <span className="rounded bg-white/[0.06] px-1 py-px font-mono text-[6px] text-white/55">{col.n}</span>
+                    <span className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/45 sm:text-[7px]">
+                      {col.label}
+                    </span>
+                    <span className="rounded bg-white/[0.06] px-1 py-px font-mono text-[6px] text-white/55">
+                      {col.n}
+                    </span>
                   </div>
                   <div className="mt-1.5 flex flex-1 flex-col gap-1">
                     {Array.from({ length: col.n }).map((_, i) => (
@@ -149,8 +170,13 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
               </div>
               <div className="grid flex-1 grid-cols-2 gap-1.5">
                 {["Timeline", "Imaging", "Labs", "Meds"].map((label) => (
-                  <div key={label} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-1.5">
-                    <p className="font-mono text-[6px] font-semibold uppercase tracking-wider text-amber-200/45 sm:text-[7px]">{label}</p>
+                  <div
+                    key={label}
+                    className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-1.5"
+                  >
+                    <p className="font-mono text-[6px] font-semibold uppercase tracking-wider text-amber-200/45 sm:text-[7px]">
+                      {label}
+                    </p>
                     <div className="mt-1.5 space-y-1">
                       <div className="h-0.5 w-full rounded bg-white/[0.06]" />
                       <div className="h-0.5 w-[72%] rounded bg-white/[0.05]" />
@@ -175,11 +201,17 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
                   key={step}
                   className={cn(
                     "flex items-center gap-1 rounded border px-1 py-1",
-                    i <= 1 ? "border-amber-400/28 bg-amber-400/[0.08]" : "border-white/[0.05] bg-transparent"
+                    i <= 1
+                      ? "border-amber-400/28 bg-amber-400/[0.08]"
+                      : "border-white/[0.05] bg-transparent"
                   )}
                 >
-                  <span className="font-mono text-[6px] font-bold text-white/35">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/55 sm:text-[7px]">{step}</span>
+                  <span className="font-mono text-[6px] font-bold text-white/35">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/55 sm:text-[7px]">
+                    {step}
+                  </span>
                 </div>
               ))}
             </div>
@@ -242,8 +274,13 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
               </div>
               <div className="flex flex-col gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2">
                 {["Grafts", "Density", "Donor", "OR day"].map((label) => (
-                  <div key={label} className="flex items-center justify-between rounded border border-white/[0.05] bg-[rgb(8_11_18_/0.85)] px-1.5 py-1">
-                    <span className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/40 sm:text-[7px]">{label}</span>
+                  <div
+                    key={label}
+                    className="flex items-center justify-between rounded border border-white/[0.05] bg-[rgb(8_11_18_/0.85)] px-1.5 py-1"
+                  >
+                    <span className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/40 sm:text-[7px]">
+                      {label}
+                    </span>
                     <span className="h-1 w-8 rounded bg-white/[0.1]" />
                   </div>
                 ))}
@@ -300,10 +337,14 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
                   key={k}
                   className={cn(
                     "rounded-lg border p-1.5",
-                    accent ? "border-amber-400/18 bg-amber-400/[0.06]" : "border-white/[0.06] bg-white/[0.03]"
+                    accent
+                      ? "border-amber-400/18 bg-amber-400/[0.06]"
+                      : "border-white/[0.06] bg-white/[0.03]"
                   )}
                 >
-                  <p className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/40 sm:text-[7px]">{k}</p>
+                  <p className="font-mono text-[6px] font-semibold uppercase tracking-wider text-white/40 sm:text-[7px]">
+                    {k}
+                  </p>
                   <div className="mt-1 h-2 w-[55%] rounded bg-amber-400/25" />
                   <div className="mt-1 h-0.5 w-[40%] rounded bg-emerald-400/15" />
                 </div>
@@ -311,7 +352,11 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
             </div>
             <div className="flex flex-1 items-end gap-0.5 rounded-lg border border-white/[0.06] bg-[rgb(7_10_16_/0.55)] p-2 pt-3">
               {[40, 65, 48, 78, 55, 88, 62, 92, 70, 84, 58, 95].map((h, i) => (
-                <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-amber-400/15 to-amber-200/35" style={{ height: `${h}%` }} />
+                <div
+                  key={i}
+                  className="flex-1 rounded-t bg-gradient-to-t from-amber-400/15 to-amber-200/35"
+                  style={{ height: `${h}%` }}
+                />
               ))}
             </div>
           </div>
@@ -328,10 +373,17 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
               { title: "Technician CPD", pct: 45 },
               { title: "Competency review", pct: 88 },
             ].map((row) => (
-              <div key={row.title} className="rounded-lg border border-white/[0.06] bg-white/[0.025] p-1.5 sm:p-2">
+              <div
+                key={row.title}
+                className="rounded-lg border border-white/[0.06] bg-white/[0.025] p-1.5 sm:p-2"
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="min-w-0 truncate font-mono text-[6px] font-semibold uppercase tracking-wider text-white/55 sm:text-[7px]">{row.title}</p>
-                  <span className="shrink-0 font-mono text-[7px] font-bold tabular-nums text-amber-200/75 sm:text-[8px]">{row.pct}%</span>
+                  <p className="min-w-0 truncate font-mono text-[6px] font-semibold uppercase tracking-wider text-white/55 sm:text-[7px]">
+                    {row.title}
+                  </p>
+                  <span className="shrink-0 font-mono text-[7px] font-bold tabular-nums text-amber-200/75 sm:text-[8px]">
+                    {row.pct}%
+                  </span>
                 </div>
                 <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
                   <div
@@ -343,8 +395,13 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
             ))}
             <div className="mt-auto grid grid-cols-3 gap-1">
               {["Gate", "Badge", "Log"].map((label) => (
-                <div key={label} className="rounded border border-white/[0.05] bg-[rgb(8_11_18_/0.85)] px-1 py-1.5 text-center">
-                  <span className="font-mono text-[5px] font-semibold uppercase tracking-wider text-white/35 sm:text-[6px]">{label}</span>
+                <div
+                  key={label}
+                  className="rounded border border-white/[0.05] bg-[rgb(8_11_18_/0.85)] px-1 py-1.5 text-center"
+                >
+                  <span className="font-mono text-[5px] font-semibold uppercase tracking-wider text-white/35 sm:text-[6px]">
+                    {label}
+                  </span>
                 </div>
               ))}
             </div>

@@ -268,7 +268,9 @@ export async function getGoogleInboundCalendarScopesForIntegration(
     return [
       {
         calendarId: fallbackId,
-        summary: integration.googleAccountEmail?.trim() || (fallbackId === "primary" ? "primary" : fallbackId),
+        summary:
+          integration.googleAccountEmail?.trim() ||
+          (fallbackId === "primary" ? "primary" : fallbackId),
         isPrimary: true,
         inboundRowId: null,
       },

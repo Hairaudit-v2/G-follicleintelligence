@@ -12,7 +12,11 @@ export function canCompleteRequiredSessionSlots(params: {
     const def = params.slotsById.get(ss.slot_id);
     if (!def?.is_required) continue;
     if (ss.status === "accepted") continue;
-    if (ss.status === "captured" && (ss.ai_match_confidence ?? 0) >= PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE) continue;
+    if (
+      ss.status === "captured" &&
+      (ss.ai_match_confidence ?? 0) >= PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE
+    )
+      continue;
     return false;
   }
   return true;

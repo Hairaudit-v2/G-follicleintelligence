@@ -27,7 +27,15 @@ export async function backfillFoundationFromProcessedEventsAction(
   tenantId: string,
   adminKey: string
 ): Promise<
-  | { ok: true; scanned: number; attempted: number; succeeded: number; skipped: number; failed: number; errors: string[] }
+  | {
+      ok: true;
+      scanned: number;
+      attempted: number;
+      succeeded: number;
+      skipped: number;
+      failed: number;
+      errors: string[];
+    }
   | { ok: false; error: string }
 > {
   const expected = process.env.FI_ADMIN_API_KEY?.trim();
@@ -39,15 +47,22 @@ export async function backfillFoundationFromProcessedEventsAction(
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (te) return { ok: false, error: te.message };
   if (!tenant) return { ok: false, error: "Tenant not found." };
 
   try {
-    const result = await backfillFoundationFromProcessedEvents({ tenantId: tenantId.trim(), batchSize: 50, client: supabase });
+    const result = await backfillFoundationFromProcessedEvents({
+      tenantId: tenantId.trim(),
+      batchSize: 50,
+      client: supabase,
+    });
     return { ok: true, ...result };
   } catch (e: unknown) {
     return { ok: false, error: e instanceof Error ? e.message : "Backfill failed." };
   }
 }
-

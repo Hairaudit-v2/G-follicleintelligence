@@ -92,8 +92,8 @@ export function FinancialSuperReleaseTable(props: {
       {props.canMutate ? (
         <FinancialOsFormPanel title="New super release application">
           <p className={financialOsClasses.formHint}>
-            Linked to a <code className={financialOsClasses.code}>super_release</code> payment pathway. Provider-neutral
-            workflow — no live API integration.
+            Linked to a <code className={financialOsClasses.code}>super_release</code> payment
+            pathway. Provider-neutral workflow — no live API integration.
           </p>
           <form onSubmit={createApplication}>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -132,10 +132,20 @@ export function FinancialSuperReleaseTable(props: {
                 />
               </label>
             </div>
-            <button type="submit" disabled={pending} className={`mt-3 ${financialOsClasses.primaryButton}`}>
+            <button
+              type="submit"
+              disabled={pending}
+              className={`mt-3 ${financialOsClasses.primaryButton}`}
+            >
               {pending ? "Creating…" : "Create application"}
             </button>
-            {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} className="mt-2" /> : null}
+            {feedback ? (
+              <FinancialOsFeedbackText
+                message={feedback.message}
+                tone={feedback.tone}
+                className="mt-2"
+              />
+            ) : null}
           </form>
         </FinancialOsFormPanel>
       ) : null}
@@ -153,10 +163,12 @@ export function FinancialSuperReleaseTable(props: {
         emptyMessage={financialOsFilteredEmptyMessage(
           props.rows.length > 0,
           "No super release applications yet.",
-          "No super release applications match this status filter.",
+          "No super release applications match this status filter."
         )}
         emptyHint={
-          props.rows.length > 0 && filtered.length === 0 ? "Try clearing the status filter to see all applications." : undefined
+          props.rows.length > 0 && filtered.length === 0
+            ? "Try clearing the status filter to see all applications."
+            : undefined
         }
         head={
           <>
@@ -177,9 +189,15 @@ export function FinancialSuperReleaseTable(props: {
               <td className={financialOsClasses.tableCell}>
                 <FinancialSuperReleaseStatusBadge status={row.application_status} />
               </td>
-              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.requested_amount_cents)}</td>
-              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.approved_amount_cents)}</td>
-              <td className={financialOsClasses.tableCellMono}>{row.expected_release_date ?? "—"}</td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.requested_amount_cents)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.approved_amount_cents)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {row.expected_release_date ?? "—"}
+              </td>
               <td className={financialOsClasses.tableCell}>{row.updated_at.slice(0, 10)}</td>
               <td className={financialOsClasses.tableCell}>
                 <button
@@ -194,8 +212,16 @@ export function FinancialSuperReleaseTable(props: {
             {expandedId === row.id ? (
               <tr>
                 <td colSpan={7} className={`space-y-3 ${financialOsClasses.tableCell}`}>
-                  <FinancialSuperReleaseDocuments tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
-                  <FinancialSuperReleaseClinicalLetterPanel tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
+                  <FinancialSuperReleaseDocuments
+                    tenantId={props.tenantId}
+                    application={row}
+                    canMutate={props.canMutate}
+                  />
+                  <FinancialSuperReleaseClinicalLetterPanel
+                    tenantId={props.tenantId}
+                    application={row}
+                    canMutate={props.canMutate}
+                  />
                 </td>
               </tr>
             ) : null}

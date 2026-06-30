@@ -8,11 +8,14 @@ import { PATIENT_TWIN_VERSION } from "./patientTwinTypes";
 import { patientTwinHairProgressionSectionSchema } from "./patientTwinHairProgressionSchema";
 import { VIE_ENGINE_VERSION } from "@/src/lib/vie/vieProtocolTypes";
 
-const hliPhotoProtocolClinicalContextSchema: z.ZodType<HliPhotoProtocolClinicalContext> = z.custom<HliPhotoProtocolClinicalContext>(
-  (val): val is HliPhotoProtocolClinicalContext =>
-    typeof val === "string" &&
-    (HLI_PHOTO_PROTOCOL_CLINICAL_CONTEXTS as readonly string[]).includes(val as HliPhotoProtocolClinicalContext)
-);
+const hliPhotoProtocolClinicalContextSchema: z.ZodType<HliPhotoProtocolClinicalContext> =
+  z.custom<HliPhotoProtocolClinicalContext>(
+    (val): val is HliPhotoProtocolClinicalContext =>
+      typeof val === "string" &&
+      (HLI_PHOTO_PROTOCOL_CLINICAL_CONTEXTS as readonly string[]).includes(
+        val as HliPhotoProtocolClinicalContext
+      )
+  );
 
 const warningCodeSchema = z.enum([
   "missing_foundation_patient",
@@ -169,9 +172,9 @@ const patientTwinPhotoProtocolSuggestedMatchSchema = z.object({
   reasons: z.array(z.string()),
 });
 
-const patientTwinPhotoProtocolMissingSlotsSchema: z.ZodType<HliPhotoProtocolSlot[]> = z.custom<HliPhotoProtocolSlot[]>(
-  (val): val is HliPhotoProtocolSlot[] => Array.isArray(val)
-);
+const patientTwinPhotoProtocolMissingSlotsSchema: z.ZodType<HliPhotoProtocolSlot[]> = z.custom<
+  HliPhotoProtocolSlot[]
+>((val): val is HliPhotoProtocolSlot[] => Array.isArray(val));
 
 export const patientTwinPhotoProtocolComplianceSchema = z.object({
   required_count: z.number().int().nonnegative(),
@@ -285,7 +288,10 @@ export const patientTwinMedicationActiveItemSchema = z.object({
   sessions_completed: z.number().int(),
   prescription_id: z.string().uuid().nullable(),
   prescription_item_id: z.string().uuid().nullable(),
-  source_tables: z.tuple([z.literal("fi_patient_therapy_plan_items"), z.literal("fi_medication_os_canonical")]),
+  source_tables: z.tuple([
+    z.literal("fi_patient_therapy_plan_items"),
+    z.literal("fi_medication_os_canonical"),
+  ]),
 });
 
 export const patientTwinTherapyEventPreviewSchema = z.object({

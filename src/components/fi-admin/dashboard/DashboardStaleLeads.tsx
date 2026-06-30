@@ -56,7 +56,9 @@ export function DashboardStaleLeads(props: {
                     <p className="truncate font-medium text-[#F8FAFC]">{row.title}</p>
                   </td>
                   <td className="px-3 py-2.5 text-[#94A3B8]">{row.stageLabel}</td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-[#F8FAFC]">{row.daysInStage}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums text-[#F8FAFC]">
+                    {row.daysInStage}
+                  </td>
                   <td className="px-3 py-2.5 text-right">
                     <Link
                       href={`/fi-admin/${tenantId}/crm/leads/${row.leadId}`}

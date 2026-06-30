@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 
 import { FinancialPaymentPathwayForm } from "@/src/components/fi/financial/FinancialPaymentPathwayForm";
 import { FinancialPaymentPathwayTimeline } from "@/src/components/fi/financial/FinancialPaymentPathwayTimeline";
-import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  FinancialOsSubPageHeader,
+  financialOsClasses,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadPaymentPathwaysForTenant } from "@/src/lib/financialOs/financialPaymentPathways.server";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
@@ -15,7 +18,11 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function FinancialOsPaymentPathwaysPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsPaymentPathwaysPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
@@ -33,8 +40,9 @@ export default async function FinancialOsPaymentPathwaysPage({ params }: { param
         description={
           <>
             Records how a patient intends to pay after quote/invoice acceptance (
-            <code className={financialOsClasses.code}>fi_payment_pathways</code>). This is staff-recorded settlement intent — it does not drive Stripe
-            checkout, ConsultationOS, Clinical Intelligence, or SurgeryOS behaviour.
+            <code className={financialOsClasses.code}>fi_payment_pathways</code>). This is
+            staff-recorded settlement intent — it does not drive Stripe checkout, ConsultationOS,
+            Clinical Intelligence, or SurgeryOS behaviour.
           </>
         }
       />

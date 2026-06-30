@@ -57,7 +57,9 @@ function drawWrapped(
 /**
  * Compound pharmacy order summary (DoctorOS 1B) — pdf-lib, no external render service.
  */
-export async function renderPharmacyOrderPdfBytes(ctx: PharmacyOrderPdfContext): Promise<Uint8Array> {
+export async function renderPharmacyOrderPdfBytes(
+  ctx: PharmacyOrderPdfContext
+): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
@@ -66,7 +68,13 @@ export async function renderPharmacyOrderPdfBytes(ctx: PharmacyOrderPdfContext):
   let page = doc.addPage([PAGE_W, PAGE_H]);
   const yRef = { y: PAGE_H - MARGIN };
 
-  page.drawRectangle({ x: 0, y: PAGE_H - 48, width: PAGE_W, height: 48, color: rgb(0.06, 0.1, 0.16) });
+  page.drawRectangle({
+    x: 0,
+    y: PAGE_H - 48,
+    width: PAGE_W,
+    height: 48,
+    color: rgb(0.06, 0.1, 0.16),
+  });
   page.drawText(ctx.clinicName.slice(0, 80), {
     x: MARGIN,
     y: PAGE_H - 30,
@@ -109,9 +117,16 @@ export async function renderPharmacyOrderPdfBytes(ctx: PharmacyOrderPdfContext):
       page = doc.addPage([PAGE_W, PAGE_H]);
       yRef.y = PAGE_H - MARGIN;
     }
-    drawWrapped(page, yRef, `• ${it.medication_name} — ${it.quantity_label} (${it.form_type})`, 9, fontBold);
+    drawWrapped(
+      page,
+      yRef,
+      `• ${it.medication_name} — ${it.quantity_label} (${it.form_type})`,
+      9,
+      fontBold
+    );
     drawWrapped(page, yRef, `  Dose: ${it.dose_instructions}`, 9, font);
-    if (it.repeats_instructions) drawWrapped(page, yRef, `  Repeats: ${it.repeats_instructions}`, 9, font);
+    if (it.repeats_instructions)
+      drawWrapped(page, yRef, `  Repeats: ${it.repeats_instructions}`, 9, font);
     if (it.reorder_rule) drawWrapped(page, yRef, `  Reorder: ${it.reorder_rule}`, 9, font);
     drawWrapped(
       page,

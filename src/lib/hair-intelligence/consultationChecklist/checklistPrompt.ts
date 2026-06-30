@@ -2,7 +2,8 @@
  * Single prompt source for HIE Stage 10 consultation checklist generation.
  * Model must emit discussion checklist topics only — no surgery plans, graft counts, hairlines, outcomes, or treatment directives.
  */
-export const HIE_CONSULTATION_CHECKLIST_PROMPT_VERSION = "hie-consultation-checklist-prompt@1.0.0" as const;
+export const HIE_CONSULTATION_CHECKLIST_PROMPT_VERSION =
+  "hie-consultation-checklist-prompt@1.0.0" as const;
 
 export function buildConsultationChecklistUserPrompt(structuredContextJson: string): string {
   return [

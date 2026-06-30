@@ -7,7 +7,10 @@
  * `warnings` as signals for partial coverage, not as errors.
  */
 
-import type { HliPhotoProtocolClinicalContext, HliPhotoProtocolComplianceSummary } from "@/src/lib/hair-intelligence/photoProtocols/types";
+import type {
+  HliPhotoProtocolClinicalContext,
+  HliPhotoProtocolComplianceSummary,
+} from "@/src/lib/hair-intelligence/photoProtocols/types";
 import type { HairProgressionIntelligence } from "@/src/lib/hair-intelligence/hairProgressionIntelligence";
 
 export const PATIENT_TWIN_VERSION = "patient-twin.v1" as const;

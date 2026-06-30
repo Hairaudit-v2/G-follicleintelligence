@@ -103,7 +103,11 @@ describe("financialRevenueAttributionCore", () => {
 
   it("campaign attribution from lead metadata", () => {
     const result = resolveCampaignAttribution({
-      lead_metadata: { campaign_name: "Spring FUE", campaign_id: "camp-99", keyword: "hair transplant" },
+      lead_metadata: {
+        campaign_name: "Spring FUE",
+        campaign_id: "camp-99",
+        keyword: "hair transplant",
+      },
       consultation_metadata: {},
       manual_campaign_name: null,
       manual_campaign_id: null,
@@ -207,13 +211,16 @@ describe("financialRevenueAttributionCore", () => {
       idempotency_key: key,
     });
     assert.equal(event.idempotency_key, key);
-    assert.equal(calculateAttributionConfidence({
-      has_manual_override: false,
-      lead_resolution_channel: "lead_source_system",
-      has_direct_lead_source: true,
-      has_campaign: false,
-      trigger_source: "payment_received",
-    }), "direct");
+    assert.equal(
+      calculateAttributionConfidence({
+        has_manual_override: false,
+        lead_resolution_channel: "lead_source_system",
+        has_direct_lead_source: true,
+        has_campaign: false,
+        trigger_source: "payment_received",
+      }),
+      "direct"
+    );
   });
 
   it("aggregate dashboard computes unknown attribution percentage", () => {

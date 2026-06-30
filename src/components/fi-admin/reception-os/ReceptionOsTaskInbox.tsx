@@ -1,7 +1,15 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { CheckCircle2, Clock, Inbox, Loader2, MessageSquarePlus, Play, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Inbox,
+  Loader2,
+  MessageSquarePlus,
+  Play,
+  XCircle,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -17,7 +25,10 @@ import { buildContextFromTask } from "@/src/components/fi-admin/reception-os/rec
 import type { ReceptionOsTaskItem } from "@/src/lib/receptionOs/receptionOsBoardModel.types";
 import type { ReceptionOsViewerRole } from "@/src/lib/receptionOs/receptionOsBoardModel";
 import { compareReceptionOsSeverity } from "@/src/lib/receptionOs/receptionOsBoardModel";
-import { receptionTaskActionAllowed, type ReceptionTaskStatus } from "@/src/lib/receptionOs/receptionTaskPolicy";
+import {
+  receptionTaskActionAllowed,
+  type ReceptionTaskStatus,
+} from "@/src/lib/receptionOs/receptionTaskPolicy";
 
 function snoozeUntilTomorrow(): string {
   const d = new Date();
@@ -114,14 +125,20 @@ function TaskRow({
         </span>
       </div>
       <p className="mt-1 font-medium text-slate-100">{task.title}</p>
-      {task.description ? <p className="mt-0.5 text-xs text-slate-500">{task.description}</p> : null}
+      {task.description ? (
+        <p className="mt-0.5 text-xs text-slate-500">{task.description}</p>
+      ) : null}
       <div className="mt-2 flex flex-wrap gap-1.5">
         {receptionTaskActionAllowed(role, "mark_in_progress") && task.status === "open" ? (
           <TaskChip
             icon={Play}
             label="In progress"
             disabled={pending}
-            onClick={() => run(() => setReceptionTaskStatusAction(tenantId, { task_id: task.id, status: "in_progress" }))}
+            onClick={() =>
+              run(() =>
+                setReceptionTaskStatusAction(tenantId, { task_id: task.id, status: "in_progress" })
+              )
+            }
           />
         ) : null}
         {receptionTaskActionAllowed(role, "snooze") ? (
@@ -130,7 +147,12 @@ function TaskRow({
             label="Snooze"
             disabled={pending}
             onClick={() =>
-              run(() => snoozeReceptionTaskAction(tenantId, { task_id: task.id, snoozed_until: snoozeUntilTomorrow() }))
+              run(() =>
+                snoozeReceptionTaskAction(tenantId, {
+                  task_id: task.id,
+                  snoozed_until: snoozeUntilTomorrow(),
+                })
+              )
             }
           />
         ) : null}
@@ -139,7 +161,11 @@ function TaskRow({
             icon={CheckCircle2}
             label="Resolve"
             disabled={pending}
-            onClick={() => run(() => setReceptionTaskStatusAction(tenantId, { task_id: task.id, status: "resolved" }))}
+            onClick={() =>
+              run(() =>
+                setReceptionTaskStatusAction(tenantId, { task_id: task.id, status: "resolved" })
+              )
+            }
           />
         ) : null}
         {receptionTaskActionAllowed(role, "dismiss") ? (
@@ -147,11 +173,20 @@ function TaskRow({
             icon={XCircle}
             label="Dismiss"
             disabled={pending}
-            onClick={() => run(() => setReceptionTaskStatusAction(tenantId, { task_id: task.id, status: "dismissed" }))}
+            onClick={() =>
+              run(() =>
+                setReceptionTaskStatusAction(tenantId, { task_id: task.id, status: "dismissed" })
+              )
+            }
           />
         ) : null}
         {receptionTaskActionAllowed(role, "add_note") ? (
-          <TaskChip icon={MessageSquarePlus} label="Note" disabled={pending} onClick={() => setNoteOpen((v) => !v)} />
+          <TaskChip
+            icon={MessageSquarePlus}
+            label="Note"
+            disabled={pending}
+            onClick={() => setNoteOpen((v) => !v)}
+          />
         ) : null}
         {pending ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" aria-hidden /> : null}
       </div>
@@ -171,7 +206,10 @@ function TaskRow({
             e.preventDefault();
             if (!note.trim()) return;
             run(async () => {
-              const res = await addReceptionTaskNoteAction(tenantId, { task_id: task.id, note: note.trim() });
+              const res = await addReceptionTaskNoteAction(tenantId, {
+                task_id: task.id,
+                note: note.trim(),
+              });
               if (res.ok) {
                 setNote("");
                 setNoteOpen(false);
@@ -184,12 +222,18 @@ function TaskRow({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Internal note…"
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "min-w-0 flex-1 px-2 py-1.5 text-xs text-slate-200")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "min-w-0 flex-1 px-2 py-1.5 text-xs text-slate-200"
+            )}
           />
           <button
             type="submit"
             disabled={pending || !note.trim()}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2 py-1.5 text-xs font-semibold text-cyan-100")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "px-2 py-1.5 text-xs font-semibold text-cyan-100"
+            )}
           >
             Save
           </button>
@@ -218,7 +262,7 @@ function TaskChip({
       onClick={onClick}
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
-        "inline-flex items-center gap-1 px-2 py-1 text-[0.68rem] font-semibold text-slate-300 disabled:opacity-50",
+        "inline-flex items-center gap-1 px-2 py-1 text-[0.68rem] font-semibold text-slate-300 disabled:opacity-50"
       )}
     >
       <Icon className="h-3 w-3" aria-hidden />

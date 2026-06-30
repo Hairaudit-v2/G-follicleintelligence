@@ -50,7 +50,10 @@ export default async function AppointmentDetailRoutePage({
         <p className="text-sm text-slate-400">
           No appointment <code className="font-mono text-xs">{appointmentId}</code> for this tenant.
         </p>
-        <Link href={`/fi-admin/${tenantId}/appointments`} className="text-sm text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/appointments`}
+          className="text-sm text-blue-300 hover:underline"
+        >
           ← Appointments
         </Link>
       </div>
@@ -69,7 +72,15 @@ export default async function AppointmentDetailRoutePage({
       calendarTimezone={payload.calendarTimezone}
       services={services}
     >
-      <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="mx-auto max-w-6xl animate-pulse space-y-4 py-6"
+            aria-busy="true"
+            aria-hidden
+          />
+        }
+      >
         <AppointmentDetailPageView
           tenantId={tenantId}
           appointmentId={appointmentId}

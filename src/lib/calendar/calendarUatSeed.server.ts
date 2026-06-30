@@ -25,12 +25,12 @@ const UAT_STAFF_PREFIX = "UAT Seed —";
 const UAT_BOOKING_TITLE_TAG = "UAT Seed";
 
 export function isCalendarUatSeedEnvironmentEnabled(): boolean {
-  return process.env.NODE_ENV === "development" || process.env.FI_ALLOW_CALENDAR_UAT_SEED === "true";
+  return (
+    process.env.NODE_ENV === "development" || process.env.FI_ALLOW_CALENDAR_UAT_SEED === "true"
+  );
 }
 
-export type CalendarUatSeedResult =
-  | { ok: true; lines: string[] }
-  | { ok: false; error: string };
+export type CalendarUatSeedResult = { ok: true; lines: string[] } | { ok: false; error: string };
 
 /**
  * Idempotent demo rows for clinic calendar UAT (development or `FI_ALLOW_CALENDAR_UAT_SEED=true` only).
@@ -50,11 +50,18 @@ export async function runCalendarUatSeed(
   }
 
   try {
-    await assertFiServicesManageAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertFiServicesManageAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Not allowed to run UAT seed (service catalogue admin access required).",
+      error:
+        e instanceof Error
+          ? e.message
+          : "Not allowed to run UAT seed (service catalogue admin access required).",
     };
   }
 
@@ -63,10 +70,17 @@ export async function runCalendarUatSeed(
   const supabase = supabaseAdmin();
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const tenantTz = normalizeCalendarTimezone(calendarTimezone.trim() || "Australia/Perth");
-  const workingDoc = serializeStaffWeeklyHours(defaultPerthClinicWeeklyHours()) as Record<string, unknown>;
+  const workingDoc = serializeStaffWeeklyHours(defaultPerthClinicWeeklyHours()) as Record<
+    string,
+    unknown
+  >;
 
   const existingStaff = await loadAllStaffForTenant(tid);
-  const uatNames = [`${UAT_STAFF_PREFIX} Clinician A`, `${UAT_STAFF_PREFIX} Clinician B`, `${UAT_STAFF_PREFIX} Clinician C`];
+  const uatNames = [
+    `${UAT_STAFF_PREFIX} Clinician A`,
+    `${UAT_STAFF_PREFIX} Clinician B`,
+    `${UAT_STAFF_PREFIX} Clinician C`,
+  ];
   const uatStaffIds: string[] = [];
   const palette = ["#0ea5e9", "#8b5cf6", "#10b981"];
 
@@ -101,15 +115,41 @@ export async function runCalendarUatSeed(
       .filter((bt): bt is string => Boolean(bt))
   );
 
-  const serviceSpecs: { name: string; booking_type: string; duration: number; color: string; category: string }[] = [
-    { name: "UAT Seed — Consultation", booking_type: "consultation", duration: 45, color: "#0ea5e9", category: "UAT" },
-    { name: "UAT Seed — PRP", booking_type: "prp", duration: 60, color: "#8b5cf6", category: "UAT" },
-    { name: "UAT Seed — Surgery block", booking_type: "surgery", duration: 240, color: "#f97316", category: "UAT" },
+  const serviceSpecs: {
+    name: string;
+    booking_type: string;
+    duration: number;
+    color: string;
+    category: string;
+  }[] = [
+    {
+      name: "UAT Seed — Consultation",
+      booking_type: "consultation",
+      duration: 45,
+      color: "#0ea5e9",
+      category: "UAT",
+    },
+    {
+      name: "UAT Seed — PRP",
+      booking_type: "prp",
+      duration: 60,
+      color: "#8b5cf6",
+      category: "UAT",
+    },
+    {
+      name: "UAT Seed — Surgery block",
+      booking_type: "surgery",
+      duration: 240,
+      color: "#f97316",
+      category: "UAT",
+    },
   ];
 
   for (const spec of serviceSpecs) {
     if (bookedTypes.has(spec.booking_type)) {
-      lines.push(`Service: booking_type “${spec.booking_type}” already has an active row — skipped.`);
+      lines.push(
+        `Service: booking_type “${spec.booking_type}” already has an active row — skipped.`
+      );
       continue;
     }
     try {
@@ -125,7 +165,9 @@ export async function runCalendarUatSeed(
       bookedTypes.add(spec.booking_type);
       lines.push(`Service: created ${row.name} (${spec.booking_type}, ${spec.duration}m).`);
     } catch (e) {
-      lines.push(`Service: could not create ${spec.name}: ${e instanceof Error ? e.message : String(e)}`);
+      lines.push(
+        `Service: could not create ${spec.name}: ${e instanceof Error ? e.message : String(e)}`
+      );
     }
   }
 
@@ -138,7 +180,9 @@ export async function runCalendarUatSeed(
     .maybeSingle();
   if (le) return { ok: false, error: le.message };
   if (!lead) {
-    lines.push("Bookings: skipped — no CRM lead with person_id (create a lead for full booking samples).");
+    lines.push(
+      "Bookings: skipped — no CRM lead with person_id (create a lead for full booking samples)."
+    );
     return { ok: true, lines };
   }
 
@@ -181,13 +225,19 @@ export async function runCalendarUatSeed(
   const mid0 = zonedMidnightUtcMs(ymd0, staffTz);
   const ymd1 =
     mid0 != null
-      ? nextStaffWorkingLocalDayYmd(staffTz, weekly, mid0 + 30 * 3_600_000) ?? ymd0
+      ? (nextStaffWorkingLocalDayYmd(staffTz, weekly, mid0 + 30 * 3_600_000) ?? ymd0)
       : ymd0;
   const ymdSurgery = ymd1 !== ymd0 ? ymd1 : addDaysToCalendarDate(ymd0, 1, staffTz);
 
   const createdByUserId = await tryResolveFiUserIdForTenant(tid, undefined);
 
-  const bookingsPlan: { procedure: string; ymd: string; startMin: number; endMin: number; title: string }[] = [
+  const bookingsPlan: {
+    procedure: string;
+    ymd: string;
+    startMin: number;
+    endMin: number;
+    title: string;
+  }[] = [
     {
       procedure: "consultation",
       ymd: ymd0,

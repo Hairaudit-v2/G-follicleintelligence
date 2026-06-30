@@ -53,7 +53,10 @@ export type ExecutiveFinanceDetailPayload = ExecutiveFinancePulsePayload & {
   snapshotHistory: FiFinancialExecutiveSnapshotRow[];
 };
 
-function resolvePeriod(filters?: ExecutiveFinanceDashboardFilters, asOf = new Date()): {
+function resolvePeriod(
+  filters?: ExecutiveFinanceDashboardFilters,
+  asOf = new Date()
+): {
   period_start: string;
   period_end: string;
   as_of_ymd: string;
@@ -71,7 +74,7 @@ async function loadExecutiveLedgerTransactions(
   periodStart: string,
   periodEnd: string,
   clinicId?: string | null,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ) {
   const supabase = client ?? supabaseAdmin();
   const startIso = `${periodStart}T00:00:00.000Z`;
@@ -112,7 +115,7 @@ async function loadExecutiveInvoices(
   tenantId: string,
   periodStart: string,
   clinicId?: string | null,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ) {
   const supabase = client ?? supabaseAdmin();
   let q = supabase.from("fi_invoices").select("*").eq("tenant_id", tenantId).limit(5000);
@@ -145,7 +148,7 @@ async function loadExecutiveProfitabilitySnapshots(
   periodStart: string,
   periodEnd: string,
   filters?: ExecutiveFinanceDashboardFilters,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ) {
   const supabase = client ?? supabaseAdmin();
   const startIso = `${periodStart}T00:00:00.000Z`;
@@ -169,25 +172,27 @@ async function loadExecutiveProfitabilitySnapshots(
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((r) => {
-    const snap = mapProfitabilitySnapshotRow(r as Record<string, unknown>);
-    const clinicId =
-      typeof snap.source_metadata.clinic_id === "string" ? snap.source_metadata.clinic_id : null;
-    return {
-      tenant_id: snap.tenant_id,
-      case_id: snap.case_id,
-      procedure_type: snap.procedure_type,
-      revenue_cents: snap.revenue_cents,
-      collected_cents: snap.collected_cents,
-      outstanding_cents: snap.outstanding_cents,
-      gross_profit_cents: snap.gross_profit_cents,
-      gross_margin_percentage: snap.gross_margin_percentage,
-      graft_count: snap.graft_count,
-      revenue_per_graft_cents: snap.revenue_per_graft_cents,
-      calculated_at: snap.calculated_at,
-      clinic_id: clinicId,
-    };
-  }).filter((s) => !filters?.clinicId?.trim() || s.clinic_id === filters.clinicId.trim());
+  return (data ?? [])
+    .map((r) => {
+      const snap = mapProfitabilitySnapshotRow(r as Record<string, unknown>);
+      const clinicId =
+        typeof snap.source_metadata.clinic_id === "string" ? snap.source_metadata.clinic_id : null;
+      return {
+        tenant_id: snap.tenant_id,
+        case_id: snap.case_id,
+        procedure_type: snap.procedure_type,
+        revenue_cents: snap.revenue_cents,
+        collected_cents: snap.collected_cents,
+        outstanding_cents: snap.outstanding_cents,
+        gross_profit_cents: snap.gross_profit_cents,
+        gross_margin_percentage: snap.gross_margin_percentage,
+        graft_count: snap.graft_count,
+        revenue_per_graft_cents: snap.revenue_per_graft_cents,
+        calculated_at: snap.calculated_at,
+        clinic_id: clinicId,
+      };
+    })
+    .filter((s) => !filters?.clinicId?.trim() || s.clinic_id === filters.clinicId.trim());
 }
 
 async function loadExecutiveAttributionEvents(
@@ -195,7 +200,7 @@ async function loadExecutiveAttributionEvents(
   periodStart: string,
   periodEnd: string,
   filters?: ExecutiveFinanceDashboardFilters,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ) {
   const supabase = client ?? supabaseAdmin();
   const startIso = `${periodStart}T00:00:00.000Z`;
@@ -210,7 +215,8 @@ async function loadExecutiveAttributionEvents(
     .limit(5000);
 
   if (filters?.source?.trim()) q = q.eq("attribution_source", filters.source.trim());
-  if (filters?.consultantFiUserId?.trim()) q = q.eq("consultant_fi_user_id", filters.consultantFiUserId.trim());
+  if (filters?.consultantFiUserId?.trim())
+    q = q.eq("consultant_fi_user_id", filters.consultantFiUserId.trim());
   if (filters?.clinicId?.trim()) q = q.eq("clinic_id", filters.clinicId.trim());
 
   const { data, error } = await q;
@@ -219,36 +225,52 @@ async function loadExecutiveAttributionEvents(
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((r) => {
-    const raw = r as Record<string, unknown>;
-    const meta =
-      raw.source_metadata && typeof raw.source_metadata === "object" && !Array.isArray(raw.source_metadata)
-        ? (raw.source_metadata as Record<string, unknown>)
-        : {};
-    const procedureType = typeof meta.procedure_type === "string" ? meta.procedure_type : null;
-    if (filters?.procedureType?.trim() && procedureType?.toLowerCase() !== filters.procedureType.trim().toLowerCase()) {
-      return null;
-    }
-    return {
-      tenant_id: String(raw.tenant_id),
-      attribution_source: String(raw.attribution_source) as FiRevenueAttributionSource,
-      attributed_revenue_cents: Number(raw.attributed_revenue_cents ?? 0),
-      attributed_collected_cents: Number(raw.attributed_collected_cents ?? 0),
-      gross_profit_cents: raw.gross_profit_cents != null ? Number(raw.gross_profit_cents) : null,
-      lead_id: raw.lead_id != null ? String(raw.lead_id) : null,
-      consultation_id: raw.consultation_id != null ? String(raw.consultation_id) : null,
-      invoice_id: raw.invoice_id != null ? String(raw.invoice_id) : null,
-      procedure_type: procedureType,
-      clinic_id: raw.clinic_id != null ? String(raw.clinic_id) : null,
-      consultant_fi_user_id: raw.consultant_fi_user_id != null ? String(raw.consultant_fi_user_id) : null,
-      occurred_at: String(raw.occurred_at ?? ""),
-    };
-  }).filter((x): x is NonNullable<typeof x> => x != null);
+  return (data ?? [])
+    .map((r) => {
+      const raw = r as Record<string, unknown>;
+      const meta =
+        raw.source_metadata &&
+        typeof raw.source_metadata === "object" &&
+        !Array.isArray(raw.source_metadata)
+          ? (raw.source_metadata as Record<string, unknown>)
+          : {};
+      const procedureType = typeof meta.procedure_type === "string" ? meta.procedure_type : null;
+      if (
+        filters?.procedureType?.trim() &&
+        procedureType?.toLowerCase() !== filters.procedureType.trim().toLowerCase()
+      ) {
+        return null;
+      }
+      return {
+        tenant_id: String(raw.tenant_id),
+        attribution_source: String(raw.attribution_source) as FiRevenueAttributionSource,
+        attributed_revenue_cents: Number(raw.attributed_revenue_cents ?? 0),
+        attributed_collected_cents: Number(raw.attributed_collected_cents ?? 0),
+        gross_profit_cents: raw.gross_profit_cents != null ? Number(raw.gross_profit_cents) : null,
+        lead_id: raw.lead_id != null ? String(raw.lead_id) : null,
+        consultation_id: raw.consultation_id != null ? String(raw.consultation_id) : null,
+        invoice_id: raw.invoice_id != null ? String(raw.invoice_id) : null,
+        procedure_type: procedureType,
+        clinic_id: raw.clinic_id != null ? String(raw.clinic_id) : null,
+        consultant_fi_user_id:
+          raw.consultant_fi_user_id != null ? String(raw.consultant_fi_user_id) : null,
+        occurred_at: String(raw.occurred_at ?? ""),
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x != null);
 }
 
-async function loadExecutiveArCases(tenantId: string, clinicId?: string | null, client?: SupabaseClient) {
+async function loadExecutiveArCases(
+  tenantId: string,
+  clinicId?: string | null,
+  client?: SupabaseClient
+) {
   const supabase = client ?? supabaseAdmin();
-  let q = supabase.from("fi_accounts_receivable_cases").select("*").eq("tenant_id", tenantId).limit(2000);
+  let q = supabase
+    .from("fi_accounts_receivable_cases")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .limit(2000);
   if (clinicId?.trim()) q = q.eq("clinic_id", clinicId.trim());
 
   const { data, error } = await q;
@@ -276,7 +298,7 @@ async function loadScheduledSurgeriesForForecast(
   periodEnd: string,
   asOfYmd: string,
   clinicId?: string | null,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ) {
   const supabase = client ?? supabaseAdmin();
   const q = supabase
@@ -293,7 +315,11 @@ async function loadScheduledSurgeriesForForecast(
     throw new Error(error.message);
   }
 
-  const surgeries = (data ?? []) as Array<{ id: string; case_id: string | null; scheduled_date: string }>;
+  const surgeries = (data ?? []) as Array<{
+    id: string;
+    case_id: string | null;
+    scheduled_date: string;
+  }>;
   const caseIds = [...new Set(surgeries.map((s) => s.case_id).filter(Boolean))] as string[];
   if (!caseIds.length) return [];
 
@@ -309,7 +335,12 @@ async function loadScheduledSurgeriesForForecast(
 
   const invoiceByCase = new Map<string, number>();
   for (const inv of invData ?? []) {
-    const raw = inv as { case_id: string; total_cents?: number; remaining_balance_cents?: number; clinic_id?: string | null };
+    const raw = inv as {
+      case_id: string;
+      total_cents?: number;
+      remaining_balance_cents?: number;
+      clinic_id?: string | null;
+    };
     if (clinicId?.trim() && raw.clinic_id !== clinicId.trim()) continue;
     const value = Math.max(0, Number(raw.remaining_balance_cents ?? raw.total_cents ?? 0));
     invoiceByCase.set(raw.case_id, (invoiceByCase.get(raw.case_id) ?? 0) + value);
@@ -326,7 +357,7 @@ async function loadScheduledSurgeriesForForecast(
 export async function loadLatestExecutiveSnapshot(
   tenantId: string,
   clinicId?: string | null,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ): Promise<FiFinancialExecutiveSnapshotRow | null> {
   const supabase = client ?? supabaseAdmin();
   let q = supabase
@@ -356,7 +387,7 @@ export async function loadExecutiveSnapshotForPeriod(
   periodStart: string,
   periodEnd: string,
   clinicId?: string | null,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ): Promise<FiFinancialExecutiveSnapshotRow | null> {
   const supabase = client ?? supabaseAdmin();
   let q = supabase
@@ -382,7 +413,7 @@ export async function loadExecutiveSnapshotForPeriod(
 
 export async function persistExecutiveFinanceSnapshot(
   snapshot: Omit<FiFinancialExecutiveSnapshotRow, "id">,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ): Promise<FiFinancialExecutiveSnapshotRow> {
   const supabase = client ?? supabaseAdmin();
   const row = {
@@ -414,7 +445,11 @@ export async function persistExecutiveFinanceSnapshot(
     calculated_at: snapshot.calculated_at,
   };
 
-  const { data, error } = await supabase.from("fi_financial_executive_snapshots").insert(row).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_financial_executive_snapshots")
+    .insert(row)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapExecutiveSnapshotRow(data as Record<string, unknown>);
 }
@@ -423,7 +458,7 @@ export async function buildAndPersistExecutiveSnapshot(
   tenantId: string,
   filters?: ExecutiveFinanceDashboardFilters,
   asOf = new Date(),
-  options?: { skipPersist?: boolean },
+  options?: { skipPersist?: boolean }
 ): Promise<Omit<FiFinancialExecutiveSnapshotRow, "id">> {
   const tid = tenantId.trim();
   const { period_start, period_end, as_of_ymd } = resolvePeriod(filters, asOf);
@@ -474,7 +509,7 @@ export async function buildAndPersistExecutiveSnapshot(
 export async function loadExecutiveFinancePulsePayload(
   tenantId: string,
   filters?: ExecutiveFinanceDashboardFilters,
-  asOf = new Date(),
+  asOf = new Date()
 ): Promise<ExecutiveFinancePulsePayload> {
   const detail = await loadExecutiveFinanceDetailPayload(tenantId, filters, asOf);
   return {
@@ -491,22 +526,29 @@ export async function loadExecutiveFinancePulsePayload(
 export async function loadExecutiveFinanceDetailPayload(
   tenantId: string,
   filters?: ExecutiveFinanceDashboardFilters,
-  asOf = new Date(),
+  asOf = new Date()
 ): Promise<ExecutiveFinanceDetailPayload> {
   const tid = tenantId.trim();
   const { period_start, period_end, as_of_ymd } = resolvePeriod(filters, asOf);
   const clinicId = filters?.clinicId ?? null;
 
-  const [ledger, invoices, profitability, attributionEvents, arCases, scheduled] = await Promise.all([
-    loadExecutiveLedgerTransactions(tid, period_start, period_end, clinicId),
-    loadExecutiveInvoices(tid, period_start, clinicId),
-    loadExecutiveProfitabilitySnapshots(tid, period_start, period_end, filters),
-    loadExecutiveAttributionEvents(tid, period_start, period_end, filters),
-    loadExecutiveArCases(tid, clinicId),
-    loadScheduledSurgeriesForForecast(tid, period_end, as_of_ymd, clinicId),
-  ]);
+  const [ledger, invoices, profitability, attributionEvents, arCases, scheduled] =
+    await Promise.all([
+      loadExecutiveLedgerTransactions(tid, period_start, period_end, clinicId),
+      loadExecutiveInvoices(tid, period_start, clinicId),
+      loadExecutiveProfitabilitySnapshots(tid, period_start, period_end, filters),
+      loadExecutiveAttributionEvents(tid, period_start, period_end, filters),
+      loadExecutiveArCases(tid, clinicId),
+      loadScheduledSurgeriesForForecast(tid, period_end, as_of_ymd, clinicId),
+    ]);
 
-  assertExecutiveDataTenantScoped(tid, [...ledger, ...invoices, ...profitability, ...attributionEvents, ...arCases]);
+  assertExecutiveDataTenantScoped(tid, [
+    ...ledger,
+    ...invoices,
+    ...profitability,
+    ...attributionEvents,
+    ...arCases,
+  ]);
 
   let snapshot: Omit<FiFinancialExecutiveSnapshotRow, "id">;
   try {
@@ -541,7 +583,12 @@ export async function loadExecutiveFinanceDetailPayload(
   const prevPeriod = previousMonthPeriod(period_start);
   let previousSnapshot: FiFinancialExecutiveSnapshotRow | null = null;
   try {
-    previousSnapshot = await loadExecutiveSnapshotForPeriod(tid, prevPeriod.period_start, prevPeriod.period_end, clinicId);
+    previousSnapshot = await loadExecutiveSnapshotForPeriod(
+      tid,
+      prevPeriod.period_start,
+      prevPeriod.period_end,
+      clinicId
+    );
   } catch {
     previousSnapshot = null;
   }
@@ -597,7 +644,11 @@ export async function loadExecutiveFinanceFilterOptions(tenantId: string): Promi
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
 
-  const { data: clinics } = await supabase.from("fi_clinics").select("id, name").eq("tenant_id", tid).order("name");
+  const { data: clinics } = await supabase
+    .from("fi_clinics")
+    .select("id, name")
+    .eq("tenant_id", tid)
+    .order("name");
   const clinicOptions = (clinics ?? []).map((c) => {
     const raw = c as { id: string; name?: string | null };
     return { value: raw.id, label: raw.name?.trim() || raw.id.slice(0, 8) };
@@ -660,6 +711,9 @@ export async function loadExecutiveFinanceFilterOptions(tenantId: string): Promi
       "direct",
       "unknown",
     ],
-    consultantOptions: [...consultantIds].map((id) => ({ value: id, label: userLabels.get(id) ?? id })),
+    consultantOptions: [...consultantIds].map((id) => ({
+      value: id,
+      label: userLabels.get(id) ?? id,
+    })),
   };
 }

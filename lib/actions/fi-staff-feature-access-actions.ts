@@ -10,7 +10,10 @@ import {
   persistStaffFeatureAccessPatch,
 } from "@/src/lib/fi-os/featureAccess.server";
 import { buildFeatureOverrideChangedAuditInsert } from "@/src/lib/fi-os/staffFeatureAccessAuditPayload";
-import { resolveActorIdsForFiOsAudit, tryInsertFiStaffFeatureAccessAuditEvent } from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
+import {
+  resolveActorIdsForFiOsAudit,
+  tryInsertFiStaffFeatureAccessAuditEvent,
+} from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof Error) return e.message;
@@ -27,7 +30,10 @@ export async function saveStaffFeatureAccessPatchAction(
     const tid = tenantId.trim();
     const sid = staffId.trim();
     if (!tid || !sid) return { ok: false, error: "Missing tenant or staff id." };
-    await assertStaffFeatureAccessMutationAllowed({ tenantId: tid, adminKey: adminKey ?? undefined });
+    await assertStaffFeatureAccessMutationAllowed({
+      tenantId: tid,
+      adminKey: adminKey ?? undefined,
+    });
     const normalized: Partial<Record<FiFeatureKey, boolean>> = {};
     for (const [k, v] of Object.entries(patch)) {
       if (!isFiFeatureKey(k)) continue;

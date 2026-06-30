@@ -1,7 +1,11 @@
 import { Activity, ShieldCheck } from "lucide-react";
 
 import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { AuditActivityRow, AuditDashboardSnapshot, AuditQueueItem } from "@/src/lib/fiAdmin/auditDashboardTypes";
+import type {
+  AuditActivityRow,
+  AuditDashboardSnapshot,
+  AuditQueueItem,
+} from "@/src/lib/fiAdmin/auditDashboardTypes";
 import { formatAuditDateTime } from "@/src/lib/fiAdmin/auditIntelligencePresentation";
 
 function formatShortId(id: string): string {
@@ -41,11 +45,13 @@ export function AuditOsSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support audit intelligence integrity and do not affect
-              day-to-day clinical review.
+              For platform operators only. These checks support audit intelligence integrity and do
+              not affect day-to-day clinical review.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-[#22C1FF]/80">
@@ -68,7 +74,8 @@ export function AuditOsSystemDiagnostics({
             <StatCard label="Runs complete" value={pipeline.model_runs.complete} />
           </div>
           <p className="mt-4 text-sm text-[#94A3B8]">
-            <span className="font-semibold text-[#F8FAFC]">{pipeline.scorecards_total}</span> scorecard
+            <span className="font-semibold text-[#F8FAFC]">{pipeline.scorecards_total}</span>{" "}
+            scorecard
             {pipeline.scorecards_total === 1 ? "" : "s"} recorded (fi_scorecards).
           </p>
           {(pipelineBusy || pipelineHasFailures) && (
@@ -99,9 +106,14 @@ export function AuditOsSystemDiagnostics({
                   : "—",
               },
             ].map((row) => (
-              <div key={row.label} className="rounded-lg border border-white/[0.06] bg-[#0c1220]/80 px-3 py-2">
+              <div
+                key={row.label}
+                className="rounded-lg border border-white/[0.06] bg-[#0c1220]/80 px-3 py-2"
+              >
                 <dt className="text-xs text-[#64748B]">{row.label}</dt>
-                <dd className="mt-1 text-sm font-semibold tabular-nums text-[#F8FAFC]">{row.value}</dd>
+                <dd className="mt-1 text-sm font-semibold tabular-nums text-[#F8FAFC]">
+                  {row.value}
+                </dd>
               </div>
             ))}
           </dl>
@@ -135,7 +147,10 @@ export function AuditOsSystemDiagnostics({
 
         <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#0c1220]/40 px-4 py-3 text-xs text-[#64748B]">
           <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
-          <p>Diagnostics expose internal identifiers and job state for operators. Clinical staff should use the sections above.</p>
+          <p>
+            Diagnostics expose internal identifiers and job state for operators. Clinical staff
+            should use the sections above.
+          </p>
           <Activity className="ml-auto h-4 w-4 shrink-0 opacity-50" aria-hidden />
         </div>
       </div>
@@ -160,11 +175,19 @@ function QueueTable({ queue }: { queue: AuditQueueItem[] }) {
         <tbody className="divide-y divide-white/[0.06]">
           {queue.map((q) => (
             <tr key={q.report_id} className="hover:bg-white/[0.02]">
-              <td className="px-3 py-2.5 font-mono text-xs text-[#94A3B8]">{formatShortId(q.report_id)}</td>
-              <td className="px-3 py-2.5 font-mono text-xs text-[#94A3B8]">{formatShortId(q.case_id)}</td>
+              <td className="px-3 py-2.5 font-mono text-xs text-[#94A3B8]">
+                {formatShortId(q.report_id)}
+              </td>
+              <td className="px-3 py-2.5 font-mono text-xs text-[#94A3B8]">
+                {formatShortId(q.case_id)}
+              </td>
               <td className="max-w-[220px] px-3 py-2.5 text-[#CBD5E1]">
-                <span className="block truncate font-medium">{q.patient?.full_name?.trim() || "—"}</span>
-                <span className="block truncate text-xs text-[#64748B]">{q.patient?.email?.trim() || "—"}</span>
+                <span className="block truncate font-medium">
+                  {q.patient?.full_name?.trim() || "—"}
+                </span>
+                <span className="block truncate text-xs text-[#64748B]">
+                  {q.patient?.email?.trim() || "—"}
+                </span>
               </td>
               <td className="px-3 py-2.5">
                 <span
@@ -173,8 +196,12 @@ function QueueTable({ queue }: { queue: AuditQueueItem[] }) {
                   {q.report_status}
                 </span>
               </td>
-              <td className="whitespace-nowrap px-3 py-2.5 text-[#94A3B8]">{formatAuditDateTime(q.created_at)}</td>
-              <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-[#94A3B8]">{q.version}</td>
+              <td className="whitespace-nowrap px-3 py-2.5 text-[#94A3B8]">
+                {formatAuditDateTime(q.created_at)}
+              </td>
+              <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-[#94A3B8]">
+                {q.version}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -187,7 +214,10 @@ function ActivityList({ rows }: { rows: AuditActivityRow[] }) {
   return (
     <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.08]">
       {rows.map((row) => (
-        <li key={row.id} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-start sm:justify-between">
+        <li
+          key={row.id}
+          className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-start sm:justify-between"
+        >
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span
@@ -204,7 +234,9 @@ function ActivityList({ rows }: { rows: AuditActivityRow[] }) {
             <p className="mt-1 font-mono text-xs text-[#94A3B8]">
               Report {formatShortId(row.report_id)} · Case {formatShortId(row.case_id)}
             </p>
-            {row.note ? <p className="mt-1 text-xs text-[#CBD5E1] line-clamp-2">{row.note}</p> : null}
+            {row.note ? (
+              <p className="mt-1 text-xs text-[#CBD5E1] line-clamp-2">{row.note}</p>
+            ) : null}
           </div>
         </li>
       ))}

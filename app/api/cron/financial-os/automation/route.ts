@@ -39,7 +39,9 @@ async function handle(req: NextRequest) {
     "failed_payment_recovery",
     "payment_escalation_alerts",
   ] as const;
-  const job = jobs.includes(jobRaw as (typeof jobs)[number]) ? (jobRaw as (typeof jobs)[number]) : null;
+  const job = jobs.includes(jobRaw as (typeof jobs)[number])
+    ? (jobRaw as (typeof jobs)[number])
+    : null;
   if (!job) {
     return NextResponse.json({ ok: false, error: "Invalid job parameter." }, { status: 400 });
   }
@@ -53,7 +55,12 @@ async function handle(req: NextRequest) {
     return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     const message = e instanceof Error ? e.message : "unknown_error";
-    logStructured("error", "financial_os_automation_cron_failed", { message, job, dry_run: dryRun, tenant_id: tenantId });
+    logStructured("error", "financial_os_automation_cron_failed", {
+      message,
+      job,
+      dry_run: dryRun,
+      tenant_id: tenantId,
+    });
     return NextResponse.json({ ok: false, error: "Processor unavailable." }, { status: 500 });
   }
 }

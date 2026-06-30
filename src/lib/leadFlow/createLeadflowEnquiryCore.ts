@@ -109,8 +109,11 @@ function optionalTrimmed(value: string | undefined): string | null {
 }
 
 /** Operator-safe lead metadata written from the enquiry UI. */
-export function buildLeadflowEnquiryLeadMetadata(input: CreateLeadflowEnquiryInput): Record<string, unknown> {
-  const interestLabel = labelForValue(LEADFLOW_ENQUIRY_INTEREST_OPTIONS, input.interest) ?? input.interest;
+export function buildLeadflowEnquiryLeadMetadata(
+  input: CreateLeadflowEnquiryInput
+): Record<string, unknown> {
+  const interestLabel =
+    labelForValue(LEADFLOW_ENQUIRY_INTEREST_OPTIONS, input.interest) ?? input.interest;
   const metadata: Record<string, unknown> = {
     created_via: "leadflow_enquiry_ui",
     interest: input.interest,
@@ -130,12 +133,15 @@ export function buildLeadflowEnquiryLeadMetadata(input: CreateLeadflowEnquiryInp
 }
 
 /** Maps operator-facing enquiry fields to the low-level CRM create payload. */
-export function mapLeadflowEnquiryToCrmCreateBody(input: CreateLeadflowEnquiryInput): Record<string, unknown> {
+export function mapLeadflowEnquiryToCrmCreateBody(
+  input: CreateLeadflowEnquiryInput
+): Record<string, unknown> {
   const name = input.name.trim();
   const phone = optionalTrimmed(input.phone);
   const email = optionalTrimmed(input.email);
   const notes = optionalTrimmed(input.notes);
-  const interestLabel = labelForValue(LEADFLOW_ENQUIRY_INTEREST_OPTIONS, input.interest) ?? input.interest;
+  const interestLabel =
+    labelForValue(LEADFLOW_ENQUIRY_INTEREST_OPTIONS, input.interest) ?? input.interest;
   const summary = `${interestLabel} — ${name}`;
 
   const person: Record<string, unknown> = {

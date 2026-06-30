@@ -62,7 +62,10 @@ export function deriveGoogleCalendarSyncHealth(
   const nowMs = input.nowMs ?? Date.now();
 
   if (input.manuallyPaused || input.autoPaused) {
-    return { healthScore: Math.max(0, 100 - input.consecutiveFailures * 10), healthStatus: "paused" };
+    return {
+      healthScore: Math.max(0, 100 - input.consecutiveFailures * 10),
+      healthStatus: "paused",
+    };
   }
 
   if (input.tokenInvalid) {
@@ -105,7 +108,10 @@ export function deriveGoogleCalendarSyncHealth(
     return { healthScore: score, healthStatus: "warning" };
   }
 
-  return { healthScore: score, healthStatus: input.consecutiveFailures > 0 ? "warning" : "healthy" };
+  return {
+    healthScore: score,
+    healthStatus: input.consecutiveFailures > 0 ? "warning" : "healthy",
+  };
 }
 
 /** Whether a tenant integration is due for scheduled sync based on frequency and last start. */

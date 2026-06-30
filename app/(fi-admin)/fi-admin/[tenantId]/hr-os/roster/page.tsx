@@ -49,7 +49,12 @@ export default async function RosterCommandCentrePage({ params, searchParams }: 
 
   const eventDetails: Record<
     string,
-    { candidatesByRole: Record<string, import("@/src/lib/workforce-os/workforceRosterCandidates").RosterAssignableCandidate[]> }
+    {
+      candidatesByRole: Record<
+        string,
+        import("@/src/lib/workforce-os/workforceRosterCandidates").RosterAssignableCandidate[]
+      >;
+    }
   > = {};
 
   const keysToHydrate = new Set<string>();

@@ -13,7 +13,7 @@ export function DashboardQuickLeadBarButton(props: { label: string; className?: 
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
         "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-2 text-sm font-semibold text-cyan-50",
-        className,
+        className
       )}
     >
       <span className="text-cyan-400/90" aria-hidden>

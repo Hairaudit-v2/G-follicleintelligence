@@ -22,11 +22,14 @@ export function DashboardStaffIntelligenceSummary(props: Props) {
         description="Operational support signals for managers — surfaced from clinic activity (no automated permission changes)."
       />
       <p className="mt-3 text-sm text-slate-400">
-        Staff intelligence will surface operational support signals once enough activity is available. Use the staff
-        directory to review individual queues and recommended next steps.
+        Staff intelligence will surface operational support signals once enough activity is
+        available. Use the staff directory to review individual queues and recommended next steps.
       </p>
       <p className="mt-4">
-        <Link href={staffHref} className="text-sm font-semibold text-cyan-400/90 underline-offset-2 hover:underline">
+        <Link
+          href={staffHref}
+          className="text-sm font-semibold text-cyan-400/90 underline-offset-2 hover:underline"
+        >
           Open staff directory
         </Link>
       </p>

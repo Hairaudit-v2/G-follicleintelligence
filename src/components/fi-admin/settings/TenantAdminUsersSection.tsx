@@ -11,7 +11,10 @@ import {
   updateTenantAdminUserRoleAction,
 } from "@/lib/actions/fi-tenant-admin-actions";
 import type { FiTenantAdminUserRow } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
-import { FI_TENANT_ADMIN_ROLES, FI_TENANT_ADMIN_ROLE_CAPABILITIES } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import {
+  FI_TENANT_ADMIN_ROLES,
+  FI_TENANT_ADMIN_ROLE_CAPABILITIES,
+} from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";
@@ -52,7 +55,10 @@ export function TenantAdminUsersSection({
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  const sorted = useMemo(() => [...rows].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [rows]);
+  const sorted = useMemo(
+    () => [...rows].sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    [rows]
+  );
 
   function submitInvite() {
     setError(null);
@@ -80,11 +86,14 @@ export function TenantAdminUsersSection({
   return (
     <div className="space-y-4">
       <details className={sectionClass}>
-        <summary className="cursor-pointer text-sm font-medium text-[#CBD5E1]">Role capabilities</summary>
+        <summary className="cursor-pointer text-sm font-medium text-[#CBD5E1]">
+          Role capabilities
+        </summary>
         <ul className="mt-3 list-inside list-disc space-y-1.5 text-xs text-[#94A3B8]">
           {FI_TENANT_ADMIN_ROLES.map((r) => (
             <li key={r}>
-              <span className="font-medium text-slate-300">{ROLE_LABEL[r] ?? r}:</span> {FI_TENANT_ADMIN_ROLE_CAPABILITIES[r]}
+              <span className="font-medium text-slate-300">{ROLE_LABEL[r] ?? r}:</span>{" "}
+              {FI_TENANT_ADMIN_ROLE_CAPABILITIES[r]}
             </li>
           ))}
         </ul>
@@ -104,9 +113,11 @@ export function TenantAdminUsersSection({
         <div className={sectionClass}>
           <h2 className="mb-2 text-base font-semibold text-[#F8FAFC]">Invite user</h2>
           <p className="mb-3 text-xs text-[#94A3B8]">
-            Grants platform access via this tenant&apos;s existing Supabase login — no separate auth system. Creates or
-            reuses a <span className="text-[#CBD5E1]">fi_users</span> row and a <span className="text-[#CBD5E1]">fi_tenant_admin_users</span> role; does not create{" "}
-            <span className="text-[#CBD5E1]">fi_staff</span>. Sends an auth invite when the account is not linked yet.
+            Grants platform access via this tenant&apos;s existing Supabase login — no separate auth
+            system. Creates or reuses a <span className="text-[#CBD5E1]">fi_users</span> row and a{" "}
+            <span className="text-[#CBD5E1]">fi_tenant_admin_users</span> role; does not create{" "}
+            <span className="text-[#CBD5E1]">fi_staff</span>. Sends an auth invite when the account
+            is not linked yet.
           </p>
           <div className="grid max-w-lg gap-3">
             <label className="grid gap-1 text-xs font-medium text-[#CBD5E1]">
@@ -188,8 +199,8 @@ export function TenantAdminUsersSection({
             {sorted.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-3 py-6 text-center text-slate-500">
-                  No admin users yet. Invite a trusted user for CFO, finance, operations, compliance, or read-only
-                  analytics access — without adding them as clinical staff.
+                  No admin users yet. Invite a trusted user for CFO, finance, operations,
+                  compliance, or read-only analytics access — without adding them as clinical staff.
                 </td>
               </tr>
             ) : (
@@ -198,7 +209,9 @@ export function TenantAdminUsersSection({
                   key={r.id}
                   tenantId={tenantId}
                   row={r}
-                  lastLogin={r.fiUserAuthUserId ? lastLoginByAuthUserId[r.fiUserAuthUserId] ?? null : null}
+                  lastLogin={
+                    r.fiUserAuthUserId ? (lastLoginByAuthUserId[r.fiUserAuthUserId] ?? null) : null
+                  }
                 />
               ))
             )}
@@ -289,13 +302,16 @@ function TenantAdminUserRow({
             onClick={() => {
               if (
                 !window.confirm(
-                  "Revoke admin access for this user? Their FI login row stays; only this tenant admin role is removed. Staff records are unchanged.",
+                  "Revoke admin access for this user? Their FI login row stays; only this tenant admin role is removed. Staff records are unchanged."
                 )
               ) {
                 return;
               }
               startTransition(async () => {
-                const res = await revokeTenantAdminUserAccessAction({ tenantId, adminUserId: row.id });
+                const res = await revokeTenantAdminUserAccessAction({
+                  tenantId,
+                  adminUserId: row.id,
+                });
                 if (!res.ok) {
                   window.alert(res.error);
                   return;

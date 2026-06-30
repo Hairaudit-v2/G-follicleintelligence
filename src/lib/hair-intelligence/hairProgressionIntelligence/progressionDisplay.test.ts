@@ -31,13 +31,22 @@ test("formatStabilityClinicalLabel uses clinical wording", () => {
   assert.equal(formatStabilityClinicalLabel("stable"), "Stable");
   assert.equal(formatStabilityClinicalLabel("slow_progression"), "Slow progression");
   assert.equal(formatStabilityClinicalLabel("rapid_progression"), "Rapid progression");
-  assert.equal(formatStabilityClinicalLabel("diffuse_unstable_progression"), "Diffuse unstable progression");
+  assert.equal(
+    formatStabilityClinicalLabel("diffuse_unstable_progression"),
+    "Diffuse unstable progression"
+  );
   assert.equal(formatStabilityClinicalLabel("insufficient_data"), "Insufficient longitudinal data");
 });
 
 test("hairProgressionIsInsufficientLongitudinalData tracks engine insufficient_data label", () => {
-  assert.equal(hairProgressionIsInsufficientLongitudinalData({ stability: { label: "insufficient_data" } }), true);
-  assert.equal(hairProgressionIsInsufficientLongitudinalData({ stability: { label: "stable" } }), false);
+  assert.equal(
+    hairProgressionIsInsufficientLongitudinalData({ stability: { label: "insufficient_data" } }),
+    true
+  );
+  assert.equal(
+    hairProgressionIsInsufficientLongitudinalData({ stability: { label: "stable" } }),
+    false
+  );
 });
 
 test("hairProgressionAnalysedTimebounds prefers dominant-system ordinals", () => {

@@ -7,7 +7,12 @@ import {
   updateFinanceApplicationDocumentAction,
   updateFinanceApplicationStatusAction,
 } from "@/lib/actions/financial-os-finance-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  financialOsActionFeedback,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialFinanceApplicationStatusBadge } from "@/src/components/fi/financial/FinancialFinanceApplicationStatusBadge";
 import type { FinanceApplicationRecord } from "@/src/lib/financialOs/financialFinanceApplications.server";
 
@@ -88,9 +93,12 @@ export function FinancialFinanceApplicationDocuments(props: {
     <div className={`space-y-4 ${financialOsClasses.formPanel}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className={financialOsClasses.formTitle}>{application.provider_name ?? "Finance application"}</p>
+          <p className={financialOsClasses.formTitle}>
+            {application.provider_name ?? "Finance application"}
+          </p>
           <p className={financialOsClasses.bodyTextXs}>
-            Ref {application.application_reference ?? "—"} · Requested {fmtMoney(application.requested_amount_cents)} · Approved{" "}
+            Ref {application.application_reference ?? "—"} · Requested{" "}
+            {fmtMoney(application.requested_amount_cents)} · Approved{" "}
             {fmtMoney(application.approved_amount_cents)}
           </p>
         </div>
@@ -103,7 +111,9 @@ export function FinancialFinanceApplicationDocuments(props: {
             Application status
             <select
               defaultValue={application.application_status}
-              onChange={(e) => updateStatus(e.target.value as (typeof APPLICATION_STATUSES)[number])}
+              onChange={(e) =>
+                updateStatus(e.target.value as (typeof APPLICATION_STATUSES)[number])
+              }
               disabled={pending}
               className={financialOsClasses.select}
             >
@@ -121,14 +131,21 @@ export function FinancialFinanceApplicationDocuments(props: {
         <h4 className={financialOsClasses.metricLabel}>Documents</h4>
         <ul className="mt-2 space-y-2">
           {(application.documents ?? []).map((doc) => (
-            <li key={doc.id} className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}>
-              <span className="font-medium text-slate-100">{doc.document_type.replace(/_/g, " ")}</span>
+            <li
+              key={doc.id}
+              className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}
+            >
+              <span className="font-medium text-slate-100">
+                {doc.document_type.replace(/_/g, " ")}
+              </span>
               <span className={financialOsClasses.bodyTextXs}>{doc.status}</span>
               {canMutate ? (
                 <select
                   defaultValue={doc.status}
                   disabled={pending}
-                  onChange={(e) => updateDocStatus(doc.id, e.target.value as (typeof DOCUMENT_STATUSES)[number])}
+                  onChange={(e) =>
+                    updateDocStatus(doc.id, e.target.value as (typeof DOCUMENT_STATUSES)[number])
+                  }
                   className={financialOsClasses.inlineSelect}
                 >
                   {DOCUMENT_STATUSES.map((s) => (
@@ -140,7 +157,9 @@ export function FinancialFinanceApplicationDocuments(props: {
               ) : null}
             </li>
           ))}
-          {!application.documents?.length ? <li className={financialOsClasses.mutedMeta}>No documents tracked yet.</li> : null}
+          {!application.documents?.length ? (
+            <li className={financialOsClasses.mutedMeta}>No documents tracked yet.</li>
+          ) : null}
         </ul>
       </div>
 
@@ -160,7 +179,12 @@ export function FinancialFinanceApplicationDocuments(props: {
               ))}
             </select>
           </label>
-          <button type="button" disabled={pending} onClick={addDocument} className={financialOsClasses.primaryButton}>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={addDocument}
+            className={financialOsClasses.primaryButton}
+          >
             Add document
           </button>
         </div>

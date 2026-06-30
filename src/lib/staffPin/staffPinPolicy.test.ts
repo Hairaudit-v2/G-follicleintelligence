@@ -24,12 +24,19 @@ describe("staffPinPolicy", () => {
   });
 
   it("disabled PIN status blocks floor login eligibility", () => {
-    const status = resolveStaffPinPublicStatus({ hasPinRow: true, isActive: false, lockedUntil: null });
+    const status = resolveStaffPinPublicStatus({
+      hasPinRow: true,
+      isActive: false,
+      lockedUntil: null,
+    });
     assert.equal(status, "disabled");
   });
 
   it("resolveStaffPinPublicStatus covers lifecycle states", () => {
-    assert.equal(resolveStaffPinPublicStatus({ hasPinRow: false, isActive: false, lockedUntil: null }), "not_set");
+    assert.equal(
+      resolveStaffPinPublicStatus({ hasPinRow: false, isActive: false, lockedUntil: null }),
+      "not_set"
+    );
     assert.equal(
       resolveStaffPinPublicStatus({ hasPinRow: true, isActive: false, lockedUntil: null }),
       "disabled"

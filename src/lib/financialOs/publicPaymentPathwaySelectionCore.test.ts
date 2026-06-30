@@ -73,8 +73,16 @@ function basePaymentRequest(overrides: Partial<FiPaymentRequestRow> = {}): FiPay
 }
 
 function basePathway(
-  overrides: Partial<FiPaymentPathwayRow & { source?: FiPaymentPathwaySource; source_payment_request_id?: string | null }> = {}
-): FiPaymentPathwayRow & { source?: FiPaymentPathwaySource; source_payment_request_id?: string | null } {
+  overrides: Partial<
+    FiPaymentPathwayRow & {
+      source?: FiPaymentPathwaySource;
+      source_payment_request_id?: string | null;
+    }
+  > = {}
+): FiPaymentPathwayRow & {
+  source?: FiPaymentPathwaySource;
+  source_payment_request_id?: string | null;
+} {
   return {
     id: "pw-1",
     pathway_type: "installment_plan",
@@ -183,7 +191,12 @@ describe("publicPaymentPathwaySelectionCore", () => {
 
   it("creates when no patient pathway exists for token", () => {
     const existing = [
-      basePathway({ id: "pw-staff", source: "staff", source_payment_request_id: null, status: "selected" }),
+      basePathway({
+        id: "pw-staff",
+        source: "staff",
+        source_payment_request_id: null,
+        status: "selected",
+      }),
     ];
     const target = resolvePatientPathwayUpsertTarget({
       existingPathways: existing,
@@ -214,7 +227,10 @@ describe("publicPaymentPathwaySelectionCore", () => {
       }),
       false
     );
-    assert.equal(getPatientPathwayConfirmationMessage("installment_plan"), "Your clinic will review this request and contact you.");
+    assert.equal(
+      getPatientPathwayConfirmationMessage("installment_plan"),
+      "Your clinic will review this request and contact you."
+    );
   });
 
   it("detects deposit payment request when amount below balance", () => {

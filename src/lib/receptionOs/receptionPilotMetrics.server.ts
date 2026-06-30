@@ -17,7 +17,7 @@ import { isMissingDatabaseRelationError } from "@/src/lib/receptionOs/receptionO
 
 export async function loadReceptionPilotMetricsForCommandCentre(
   payload: ReceptionOsCommandCentrePayload,
-  viewerRole: ReceptionOsViewerRole,
+  viewerRole: ReceptionOsViewerRole
 ): Promise<ReceptionPilotMetricsPayload> {
   const visible = receptionPilotManagerWidgetVisible(viewerRole);
   if (!visible) return emptyReceptionPilotMetricsPayload(false);
@@ -57,26 +57,32 @@ export async function loadReceptionPilotMetricsForCommandCentre(
   ]);
 
   if (eventsRes.error) {
-    if (isMissingDatabaseRelationError(eventsRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    if (isMissingDatabaseRelationError(eventsRes.error))
+      return emptyReceptionPilotMetricsPayload(true);
     throw new Error(eventsRes.error.message);
   }
   if (tasksRes.error) {
-    if (isMissingDatabaseRelationError(tasksRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    if (isMissingDatabaseRelationError(tasksRes.error))
+      return emptyReceptionPilotMetricsPayload(true);
     throw new Error(tasksRes.error.message);
   }
   if (deliveriesRes.error) {
-    if (isMissingDatabaseRelationError(deliveriesRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    if (isMissingDatabaseRelationError(deliveriesRes.error))
+      return emptyReceptionPilotMetricsPayload(true);
     throw new Error(deliveriesRes.error.message);
   }
   if (closeoutsRes.error) {
-    if (isMissingDatabaseRelationError(closeoutsRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    if (isMissingDatabaseRelationError(closeoutsRes.error))
+      return emptyReceptionPilotMetricsPayload(true);
     throw new Error(closeoutsRes.error.message);
   }
 
   const tasks = tasksRes.data ?? [];
   const resolvedStatuses = new Set(["resolved", "dismissed"]);
   const tasksCreatedInPeriod = tasks.length;
-  const tasksResolvedInPeriod = tasks.filter((t) => resolvedStatuses.has(String((t as { status: string }).status))).length;
+  const tasksResolvedInPeriod = tasks.filter((t) =>
+    resolvedStatuses.has(String((t as { status: string }).status))
+  ).length;
 
   const resolutionMinutes: number[] = [];
   for (const raw of tasks) {
@@ -94,13 +100,22 @@ export async function loadReceptionPilotMetricsForCommandCentre(
       : null;
 
   const unresolvedCriticalRisks =
-    payload.receptionTasks.filter((t) => t.status === "open" && (t.severity === "critical" || t.severity === "blocked"))
-      .length + payload.actionAlerts.filter((a) => a.severity === "critical" || a.severity === "blocked").length;
+    payload.receptionTasks.filter(
+      (t) => t.status === "open" && (t.severity === "critical" || t.severity === "blocked")
+    ).length +
+    payload.actionAlerts.filter((a) => a.severity === "critical" || a.severity === "blocked")
+      .length;
 
   const deliveries = deliveriesRes.data ?? [];
-  const communicationsDrafted = deliveries.filter((d) => String((d as { delivery_status: string }).delivery_status) === "draft").length;
-  const communicationsSent = deliveries.filter((d) => String((d as { delivery_status: string }).delivery_status) === "sent").length;
-  const communicationsDryRun = deliveries.filter((d) => String((d as { delivery_status: string }).delivery_status) === "dry_run").length;
+  const communicationsDrafted = deliveries.filter(
+    (d) => String((d as { delivery_status: string }).delivery_status) === "draft"
+  ).length;
+  const communicationsSent = deliveries.filter(
+    (d) => String((d as { delivery_status: string }).delivery_status) === "sent"
+  ).length;
+  const communicationsDryRun = deliveries.filter(
+    (d) => String((d as { delivery_status: string }).delivery_status) === "dry_run"
+  ).length;
 
   const usageEvents = (eventsRes.data ?? []).map((raw) => {
     const row = raw as {
@@ -126,7 +141,10 @@ export async function loadReceptionPilotMetricsForCommandCentre(
     periodStart: localStartIso,
     periodEnd: localEndIso,
     usageEvents,
-    feedbackRows: feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind, createdAt: f.created_at })),
+    feedbackRows: feedbackRows.map((f) => ({
+      feedbackKind: f.feedback_kind,
+      createdAt: f.created_at,
+    })),
     tasksCreatedInPeriod,
     tasksResolvedInPeriod,
     avgTaskResolutionMinutes,
@@ -139,7 +157,7 @@ export async function loadReceptionPilotMetricsForCommandCentre(
 
   const managerScores = buildReceptionPilotManagerScores(
     summary,
-    feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind })),
+    feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind }))
   );
 
   return { visible: true, summary, managerScores };

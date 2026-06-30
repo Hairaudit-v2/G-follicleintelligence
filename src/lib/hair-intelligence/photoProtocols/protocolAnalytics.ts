@@ -1,5 +1,10 @@
 import { PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE } from "./protocolSessionRules";
-import type { HliPhotoProtocolSession, HliPhotoProtocolSessionSlot, HliPhotoProtocolSlot, HliPhotoProtocolTemplate } from "./types";
+import type {
+  HliPhotoProtocolSession,
+  HliPhotoProtocolSessionSlot,
+  HliPhotoProtocolSlot,
+  HliPhotoProtocolTemplate,
+} from "./types";
 
 /** Plain rows for pure analytics (no DB client). */
 export type PhotoProtocolAnalyticsInput = {
@@ -67,7 +72,11 @@ export function isRequiredSessionSlotSatisfied(
 ): boolean {
   if (!def?.is_required) return true;
   if (ss.status === "accepted") return true;
-  if (ss.status === "captured" && (ss.ai_match_confidence ?? 0) >= PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE) return true;
+  if (
+    ss.status === "captured" &&
+    (ss.ai_match_confidence ?? 0) >= PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE
+  )
+    return true;
   return false;
 }
 
@@ -138,7 +147,9 @@ function auditReadinessScoreFromCounts(p: {
  * Pure rollup over sessions + slot rows + template definitions.
  * Optional slots never affect completion, missing counts, or retake/review tallies.
  */
-export function calculatePhotoProtocolAnalytics(input: PhotoProtocolAnalyticsInput): PhotoProtocolAnalyticsSummary {
+export function calculatePhotoProtocolAnalytics(
+  input: PhotoProtocolAnalyticsInput
+): PhotoProtocolAnalyticsSummary {
   const slotsBySession = new Map<string, HliPhotoProtocolSessionSlot[]>();
   for (const ss of input.sessionSlots) {
     const list = slotsBySession.get(ss.session_id) ?? [];
@@ -206,7 +217,10 @@ export function calculatePhotoProtocolAnalytics(input: PhotoProtocolAnalyticsInp
     const cid = input.patientPrimaryClinicByPatientId.get(s.patient_id);
     return cid ?? null;
   });
-  const byUser = bucketCompletionRates(input.sessions, (s) => s.created_by_user_id ?? "__unassigned__");
+  const byUser = bucketCompletionRates(
+    input.sessions,
+    (s) => s.created_by_user_id ?? "__unassigned__"
+  );
 
   const audit_readiness_score = auditReadinessScoreFromCounts({
     completion_rate: protocol_completion_rate,

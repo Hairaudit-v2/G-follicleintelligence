@@ -41,14 +41,18 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
       <header className="space-y-2">
         <h1 className="text-lg font-semibold text-slate-100">System Status</h1>
         <p className="max-w-3xl text-sm text-slate-400">
-          Tenant-safe operational snapshot: schema presence, row volumes, calendar stack, and planned product areas.
-          Generated <time dateTime={data.generatedAtIso}>{data.generatedAtIso}</time>.
+          Tenant-safe operational snapshot: schema presence, row volumes, calendar stack, and
+          planned product areas. Generated{" "}
+          <time dateTime={data.generatedAtIso}>{data.generatedAtIso}</time>.
         </p>
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
           <Link href={`/fi-admin/${data.tenantId}/crm`} className="text-blue-300 hover:underline">
             ← CRM
           </Link>
-          <Link href={`/fi-admin/${data.tenantId}/patients`} className="text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${data.tenantId}/patients`}
+            className="text-blue-300 hover:underline"
+          >
             Patients
           </Link>
         </p>
@@ -56,8 +60,12 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
 
       <div className="grid gap-4 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 md:grid-cols-[1fr_2fr]">
         <div className="flex flex-col justify-center space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">System readiness score</p>
-          <p className="text-4xl font-semibold tabular-nums text-slate-100">{data.readiness.scorePercent}%</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            System readiness score
+          </p>
+          <p className="text-4xl font-semibold tabular-nums text-slate-100">
+            {data.readiness.scorePercent}%
+          </p>
           <p className="text-sm text-slate-400">{data.readiness.headline}</p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
@@ -66,9 +74,13 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
               key={s.id}
               className={`rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-2 border-l-4 ${stripBorder(s.traffic)}`}
             >
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">{s.label}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                {s.label}
+              </div>
               <div className="mt-1">
-                <SystemStatusBadge traffic={s.traffic}>{s.traffic === "green" ? "OK" : s.traffic === "amber" ? "Watch" : "Gap"}</SystemStatusBadge>
+                <SystemStatusBadge traffic={s.traffic}>
+                  {s.traffic === "green" ? "OK" : s.traffic === "amber" ? "Watch" : "Gap"}
+                </SystemStatusBadge>
               </div>
             </div>
           ))}
@@ -89,17 +101,19 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
                   .map((f) => {
                     const tr = featureTraffic(f.status);
                     return (
-                    <li key={f.id} className="flex items-center justify-between gap-2 text-sm">
-                      <span className="text-slate-200">{f.label}</span>
-                      {tr ? (
-                        <SystemStatusBadge traffic={tr}>{featureLabel(f.status)}</SystemStatusBadge>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2.5 py-0.5 text-xs font-medium text-slate-200 ring-1 ring-inset ring-slate-500/20">
-                          {featureLabel(f.status)}
-                        </span>
-                      )}
-                    </li>
-                  );
+                      <li key={f.id} className="flex items-center justify-between gap-2 text-sm">
+                        <span className="text-slate-200">{f.label}</span>
+                        {tr ? (
+                          <SystemStatusBadge traffic={tr}>
+                            {featureLabel(f.status)}
+                          </SystemStatusBadge>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2.5 py-0.5 text-xs font-medium text-slate-200 ring-1 ring-inset ring-slate-500/20">
+                            {featureLabel(f.status)}
+                          </span>
+                        )}
+                      </li>
+                    );
                   })}
               </ul>
             </SystemStatusCard>
@@ -107,10 +121,16 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
         </div>
       </SystemStatusSection>
 
-      <SystemStatusSection id="crm" title="1. CRM" description="Commercial module tables and row counts for this tenant.">
+      <SystemStatusSection
+        id="crm"
+        title="1. CRM"
+        description="Commercial module tables and row counts for this tenant."
+      >
         <SystemStatusCard title="CRM tables" subtitle={data.crm.overallLabel}>
           <div className="flex flex-wrap gap-2">
-            <SystemStatusBadge traffic={data.crm.traffic}>{data.crm.overallLabel}</SystemStatusBadge>
+            <SystemStatusBadge traffic={data.crm.traffic}>
+              {data.crm.overallLabel}
+            </SystemStatusBadge>
           </div>
           <ul className="list-inside list-disc text-sm text-slate-300">
             {data.crm.tables.map((t) => (
@@ -123,25 +143,55 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
             <SystemStatusMetric label="Leads" value={fmt(data.crm.counts.leads)} />
             <SystemStatusMetric label="Tasks" value={fmt(data.crm.counts.tasks)} />
             <SystemStatusMetric label="Notes" value={fmt(data.crm.counts.notes)} />
-            <SystemStatusMetric label="Communications" value={fmt(data.crm.counts.communications)} />
+            <SystemStatusMetric
+              label="Communications"
+              value={fmt(data.crm.counts.communications)}
+            />
           </div>
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="conversion" title="2. Conversion" description="Lead conversion signals (requires `fi_crm_leads` + conversion columns).">
+      <SystemStatusSection
+        id="conversion"
+        title="2. Conversion"
+        description="Lead conversion signals (requires `fi_crm_leads` + conversion columns)."
+      >
         <SystemStatusCard title="Conversion metrics">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <SystemStatusMetric label="Converted leads" value={fmt(data.conversion.convertedLeads)} />
-            <SystemStatusMetric label="Leads w/ person_id" value={fmt(data.conversion.leadsWithPersonId)} />
-            <SystemStatusMetric label="Leads w/ patient_id" value={fmt(data.conversion.leadsWithPatientId)} />
-            <SystemStatusMetric label="Leads w/ case_id" value={fmt(data.conversion.leadsWithCaseId)} />
+            <SystemStatusMetric
+              label="Converted leads"
+              value={fmt(data.conversion.convertedLeads)}
+            />
+            <SystemStatusMetric
+              label="Leads w/ person_id"
+              value={fmt(data.conversion.leadsWithPersonId)}
+            />
+            <SystemStatusMetric
+              label="Leads w/ patient_id"
+              value={fmt(data.conversion.leadsWithPatientId)}
+            />
+            <SystemStatusMetric
+              label="Leads w/ case_id"
+              value={fmt(data.conversion.leadsWithCaseId)}
+            />
           </div>
-          {!data.conversion.readable ? <p className="text-xs text-amber-300">Lead table not readable — conversion metrics unavailable.</p> : null}
+          {!data.conversion.readable ? (
+            <p className="text-xs text-amber-300">
+              Lead table not readable — conversion metrics unavailable.
+            </p>
+          ) : null}
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="bookings" title="3. Bookings" description="Platform scheduling layer (`fi_bookings`).">
-        <SystemStatusCard title="Bookings" subtitle={data.bookings.tableExists ? "Table present" : "Table missing"}>
+      <SystemStatusSection
+        id="bookings"
+        title="3. Bookings"
+        description="Platform scheduling layer (`fi_bookings`)."
+      >
+        <SystemStatusCard
+          title="Bookings"
+          subtitle={data.bookings.tableExists ? "Table present" : "Table missing"}
+        >
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <SystemStatusMetric label="Total" value={fmt(data.bookings.counts.total)} />
             <SystemStatusMetric label="Future" value={fmt(data.bookings.counts.future)} />
@@ -151,27 +201,42 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="calendar" title="4. Calendar" description="FI Admin calendar route and server loaders.">
+      <SystemStatusSection
+        id="calendar"
+        title="4. Calendar"
+        description="FI Admin calendar route and server loaders."
+      >
         <SystemStatusCard title="Calendar stack" subtitle={data.calendar.label}>
           <div className="flex flex-wrap gap-2 text-sm text-slate-300">
             <span>Route: {data.calendar.routeEnabled ? "enabled" : "disabled"}</span>
             <span>·</span>
             <span>Loaders: {data.calendar.loadersAvailable ? "available" : "unavailable"}</span>
           </div>
-          <SystemStatusBadge traffic={data.calendar.traffic}>{data.calendar.label}</SystemStatusBadge>
+          <SystemStatusBadge traffic={data.calendar.traffic}>
+            {data.calendar.label}
+          </SystemStatusBadge>
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="patients" title="5. Patients" description="Foundation persons and clinical patients.">
+      <SystemStatusSection
+        id="patients"
+        title="5. Patients"
+        description="Foundation persons and clinical patients."
+      >
         <SystemStatusCard title="Patients & persons" subtitle={data.patients.label}>
           <p className="mt-2 text-sm text-slate-300">
             Open the{" "}
-            <Link href={`/fi-admin/${data.tenantId}/patients`} className="text-blue-300 hover:underline">
+            <Link
+              href={`/fi-admin/${data.tenantId}/patients`}
+              className="text-blue-300 hover:underline"
+            >
               patient directory
             </Link>{" "}
             for foundation profiles (Stage 4A).
           </p>
-          <SystemStatusBadge traffic={data.patients.traffic}>{data.patients.label}</SystemStatusBadge>
+          <SystemStatusBadge traffic={data.patients.traffic}>
+            {data.patients.label}
+          </SystemStatusBadge>
           <div className="grid grid-cols-2 gap-2">
             <SystemStatusMetric label="fi_persons rows" value={fmt(data.patients.personsCount)} />
             <SystemStatusMetric label="fi_patients rows" value={fmt(data.patients.patientsCount)} />
@@ -179,33 +244,66 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
               label="fi_patient_clinical_details"
               value={data.patients.clinicalDetailsTable ? "present" : "missing"}
             />
-            <SystemStatusMetric label="fi_patient_images" value={data.patients.patientImagesTable ? "present" : "missing"} />
-            <SystemStatusMetric label="Patient images (total)" value={fmt(data.patients.patientImagesTotal)} />
-            <SystemStatusMetric label="Patient images (active)" value={fmt(data.patients.patientImagesActive)} />
-            <SystemStatusMetric label="Patient images (archived)" value={fmt(data.patients.patientImagesArchived)} />
+            <SystemStatusMetric
+              label="fi_patient_images"
+              value={data.patients.patientImagesTable ? "present" : "missing"}
+            />
+            <SystemStatusMetric
+              label="Patient images (total)"
+              value={fmt(data.patients.patientImagesTotal)}
+            />
+            <SystemStatusMetric
+              label="Patient images (active)"
+              value={fmt(data.patients.patientImagesActive)}
+            />
+            <SystemStatusMetric
+              label="Patient images (archived)"
+              value={fmt(data.patients.patientImagesArchived)}
+            />
           </div>
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="cases" title="6. Patients" description="Hair audit / intake patients (`fi_cases.status` buckets).">
+      <SystemStatusSection
+        id="cases"
+        title="6. Patients"
+        description="Hair audit / intake patients (`fi_cases.status` buckets)."
+      >
         <SystemStatusCard title="Patients">
           <div className="grid grid-cols-2 gap-2">
-            <SystemStatusMetric label="Active (draft / submitted / processing)" value={fmt(data.cases.active)} />
+            <SystemStatusMetric
+              label="Active (draft / submitted / processing)"
+              value={fmt(data.cases.active)}
+            />
             <SystemStatusMetric label="Completed" value={fmt(data.cases.completed)} />
           </div>
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="activity" title="7. Activity stream" description="CRM-native activity (`fi_crm_activity_events`).">
-        <SystemStatusCard title="Activity" subtitle={data.activity.tableExists ? "Table present" : "Table missing"}>
+      <SystemStatusSection
+        id="activity"
+        title="7. Activity stream"
+        description="CRM-native activity (`fi_crm_activity_events`)."
+      >
+        <SystemStatusCard
+          title="Activity"
+          subtitle={data.activity.tableExists ? "Table present" : "Table missing"}
+        >
           <div className="grid grid-cols-2 gap-2">
             <SystemStatusMetric label="Events today (UTC)" value={fmt(data.activity.eventsToday)} />
-            <SystemStatusMetric label="Events last 7 days" value={fmt(data.activity.eventsLast7Days)} />
+            <SystemStatusMetric
+              label="Events last 7 days"
+              value={fmt(data.activity.eventsLast7Days)}
+            />
           </div>
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="users" title="8. Users" description="Tenant membership in `fi_users` (active = linked auth user).">
+      <SystemStatusSection
+        id="users"
+        title="8. Users"
+        description="Tenant membership in `fi_users` (active = linked auth user)."
+      >
         <SystemStatusCard title="FI users">
           <div className="grid grid-cols-2 gap-2">
             <SystemStatusMetric label="Active (auth linked)" value={fmt(data.users.activeUsers)} />
@@ -214,28 +312,42 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="db-health" title="9. Database health" description="Core tables required for CRM + bookings + foundation admin.">
+      <SystemStatusSection
+        id="db-health"
+        title="9. Database health"
+        description="Core tables required for CRM + bookings + foundation admin."
+      >
         <SystemStatusCard title="Table presence">
           <ul className="grid gap-1 sm:grid-cols-2">
             {data.databaseHealth.map((r) => (
               <li key={r.table} className="flex items-center justify-between gap-2 text-sm">
                 <code className="text-xs text-slate-200">{r.table}</code>
-                <span className={r.present ? "text-emerald-300" : "text-rose-300"}>{r.present ? "Present" : "Missing"}</span>
+                <span className={r.present ? "text-emerald-300" : "text-rose-300"}>
+                  {r.present ? "Present" : "Missing"}
+                </span>
               </li>
             ))}
           </ul>
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="migrations" title="10. Migration health" description="Latest SQL migration filename from repo `supabase/migrations` (best-effort on this host).">
+      <SystemStatusSection
+        id="migrations"
+        title="10. Migration health"
+        description="Latest SQL migration filename from repo `supabase/migrations` (best-effort on this host)."
+      >
         <SystemStatusCard title="Migrations">
           <p className="text-sm text-slate-300">
             Status: <strong>{data.migrationHealth.label}</strong>
           </p>
           {data.migrationHealth.latestMigrationFilename ? (
-            <p className="break-all font-mono text-xs text-slate-400">{data.migrationHealth.latestMigrationFilename}</p>
+            <p className="break-all font-mono text-xs text-slate-400">
+              {data.migrationHealth.latestMigrationFilename}
+            </p>
           ) : (
-            <p className="text-xs text-gray-500">No migration metadata available on this deployment path.</p>
+            <p className="text-xs text-gray-500">
+              No migration metadata available on this deployment path.
+            </p>
           )}
         </SystemStatusCard>
       </SystemStatusSection>

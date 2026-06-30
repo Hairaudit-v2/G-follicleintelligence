@@ -40,27 +40,47 @@ export function PhotoProtocolIncompleteSessionsTable({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={7} className={`py-6 text-center ${dark ? "text-slate-500" : "text-slate-500"}`}>
+              <td
+                colSpan={7}
+                className={`py-6 text-center ${dark ? "text-slate-500" : "text-slate-500"}`}
+              >
                 No incomplete sessions in this window.
               </td>
             </tr>
           ) : (
             rows.map((r) => (
-              <tr key={r.session_id} className={dark ? "border-b border-white/[0.06]" : "border-b border-white/[0.06]"}>
-                <td className={`py-2 pr-4 ${dark ? "text-slate-200" : "text-slate-100"}`}>{r.patient_display}</td>
-                <td className={`py-2 pr-4 ${dark ? "text-slate-400" : "text-slate-300"}`}>{r.clinical_context.replace(/_/g, " ")}</td>
+              <tr
+                key={r.session_id}
+                className={dark ? "border-b border-white/[0.06]" : "border-b border-white/[0.06]"}
+              >
+                <td className={`py-2 pr-4 ${dark ? "text-slate-200" : "text-slate-100"}`}>
+                  {r.patient_display}
+                </td>
+                <td className={`py-2 pr-4 ${dark ? "text-slate-400" : "text-slate-300"}`}>
+                  {r.clinical_context.replace(/_/g, " ")}
+                </td>
                 <td className={`py-2 pr-4 ${dark ? "text-slate-400" : "text-slate-300"}`}>
                   <span className="font-medium">{r.protocol_name}</span>
-                  <span className={`ml-1 text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>({r.protocol_template_slug})</span>
+                  <span className={`ml-1 text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>
+                    ({r.protocol_template_slug})
+                  </span>
                 </td>
-                <td className={`py-2 pr-4 font-mono ${dark ? "text-slate-300" : "text-slate-200"}`}>{r.missing_required_count}</td>
-                <td className={`py-2 pr-4 ${dark ? "text-slate-400" : "text-slate-300"}`}>{r.status.replace(/_/g, " ")}</td>
+                <td className={`py-2 pr-4 font-mono ${dark ? "text-slate-300" : "text-slate-200"}`}>
+                  {r.missing_required_count}
+                </td>
+                <td className={`py-2 pr-4 ${dark ? "text-slate-400" : "text-slate-300"}`}>
+                  {r.status.replace(/_/g, " ")}
+                </td>
                 <td className={`py-2 pr-4 ${dark ? "text-slate-500" : "text-slate-400"}`}>
                   {r.started_at ? new Date(r.started_at).toLocaleString() : "—"}
                 </td>
                 <td className="py-2">
                   <Link
-                    href={r.patient_id ? fiOsPatientTwinPhotoProtocolHref(tid, r.patient_id) : r.patient_twin_href}
+                    href={
+                      r.patient_id
+                        ? fiOsPatientTwinPhotoProtocolHref(tid, r.patient_id)
+                        : r.patient_twin_href
+                    }
                     className={`font-medium hover:underline ${dark ? "text-cyan-300 hover:text-cyan-200" : "text-cyan-300"}`}
                   >
                     Patient Twin
@@ -90,7 +110,8 @@ export function PhotoProtocolIncompleteSessionsTable({
     <FiCard>
       <h2 className="text-sm font-semibold text-slate-100">Incomplete protocol sessions</h2>
       <p className="mt-1 text-sm text-slate-400">
-        Draft, in progress, or incomplete sessions in the analytics window (required-slot gaps drive “missing” counts).
+        Draft, in progress, or incomplete sessions in the analytics window (required-slot gaps drive
+        “missing” counts).
       </p>
       {table}
     </FiCard>

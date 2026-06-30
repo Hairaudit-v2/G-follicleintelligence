@@ -26,7 +26,9 @@ export function PatientProfileSummaryCards({ data }: { data: PatientProfileFound
       </div>
       {patternLine ? (
         <div className="rounded border border-indigo-500/20 bg-indigo-500/10 p-3 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-300">Hair loss pattern</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-300">
+            Hair loss pattern
+          </p>
           <p className="mt-1 text-sm font-semibold leading-snug text-indigo-200">{patternLine}</p>
         </div>
       ) : null}

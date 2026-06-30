@@ -6,10 +6,18 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import type { ConsultationConversionBoardColumnId } from "@/src/lib/consultations/consultationConversionBoardModel";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
-import { computeEffectivePaymentStatus, paymentRecordNeedsCollection } from "@/src/lib/payments/paymentRecordModel";
+import {
+  computeEffectivePaymentStatus,
+  paymentRecordNeedsCollection,
+} from "@/src/lib/payments/paymentRecordModel";
 
 /** ReceptionOS operational persona for widget visibility (maps from workspace profiles + tenant roles). */
-export const RECEPTION_OS_VIEWER_ROLES = ["receptionist", "admin", "consultant", "clinic_manager"] as const;
+export const RECEPTION_OS_VIEWER_ROLES = [
+  "receptionist",
+  "admin",
+  "consultant",
+  "clinic_manager",
+] as const;
 export type ReceptionOsViewerRole = (typeof RECEPTION_OS_VIEWER_ROLES)[number];
 
 export const RECEPTION_OS_WIDGET_KEYS = [
@@ -72,15 +80,25 @@ export const RECEPTION_OS_DEFAULT_REFRESH_MS = 30_000;
  * Default ReceptionOS widget stacks per persona (workspace profile defaults).
  * Used by {@link visibleWidgetsForReceptionOsRole} and staff workspace assignment UX.
  */
-export const RECEPTION_OS_PERSONA_WIDGET_DEFAULTS: Record<ReceptionOsViewerRole, readonly ReceptionOsWidgetKey[]> = {
+export const RECEPTION_OS_PERSONA_WIDGET_DEFAULTS: Record<
+  ReceptionOsViewerRole,
+  readonly ReceptionOsWidgetKey[]
+> = {
   receptionist: ["todays_patients", "communication_timeline", "action_alerts", "upcoming_surgery"],
-  consultant: ["todays_patients", "communication_timeline", "consultation_pipeline", "action_alerts"],
+  consultant: [
+    "todays_patients",
+    "communication_timeline",
+    "consultation_pipeline",
+    "action_alerts",
+  ],
   clinic_manager: RECEPTION_OS_WIDGET_KEYS,
   admin: RECEPTION_OS_WIDGET_KEYS,
 };
 
 /** Maps FI OS workspace profiles to ReceptionOS operational personas. */
-export const RECEPTION_OS_WORKSPACE_PROFILE_TO_PERSONA: Partial<Record<FiWorkspaceProfileKey, ReceptionOsViewerRole>> = {
+export const RECEPTION_OS_WORKSPACE_PROFILE_TO_PERSONA: Partial<
+  Record<FiWorkspaceProfileKey, ReceptionOsViewerRole>
+> = {
   reception: "receptionist",
   consultant: "consultant",
   clinic_manager: "clinic_manager",
@@ -88,7 +106,9 @@ export const RECEPTION_OS_WORKSPACE_PROFILE_TO_PERSONA: Partial<Record<FiWorkspa
   platform_admin: "admin",
 };
 
-export function resolveReceptionOsPersonaFromWorkspaceProfile(profile: FiWorkspaceProfileKey): ReceptionOsViewerRole | null {
+export function resolveReceptionOsPersonaFromWorkspaceProfile(
+  profile: FiWorkspaceProfileKey
+): ReceptionOsViewerRole | null {
   return RECEPTION_OS_WORKSPACE_PROFILE_TO_PERSONA[profile] ?? null;
 }
 
@@ -100,7 +120,11 @@ export function mapConversionColumnToReceptionPipeline(input: {
 }): ReceptionOsPipelineColumnId {
   if (input.surgeryBooked || input.conversionColumn === "surgery_booked") return "surgery_booked";
   if (input.depositNeedsCollection) return "deposit_pending";
-  if (input.conversionColumn === "quote_sent" || input.conversionColumn === "quote_accepted" || input.conversionColumn === "quote_drafted") {
+  if (
+    input.conversionColumn === "quote_sent" ||
+    input.conversionColumn === "quote_accepted" ||
+    input.conversionColumn === "quote_drafted"
+  ) {
     return "quote_sent";
   }
   if (input.conversionColumn === "consultation_completed") return "consultation_completed";
@@ -110,17 +134,24 @@ export function mapConversionColumnToReceptionPipeline(input: {
 
 export function depositRecordIsOutstanding(
   record: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid">,
-  todayYmd: string,
+  todayYmd: string
 ): boolean {
   return paymentRecordNeedsCollection(record, todayYmd);
 }
 
-export function depositIsOverdue(record: Pick<PaymentRecordRow, "status" | "due_date">, todayYmd: string): boolean {
+export function depositIsOverdue(
+  record: Pick<PaymentRecordRow, "status" | "due_date">,
+  todayYmd: string
+): boolean {
   const eff = computeEffectivePaymentStatus(record, todayYmd);
   return eff === "overdue" || eff === "overdue_derived";
 }
 
-export function depositSeverity(input: { isOverdue: boolean; dueDate: string | null; todayYmd: string }): ReceptionOsSeverity {
+export function depositSeverity(input: {
+  isOverdue: boolean;
+  dueDate: string | null;
+  todayYmd: string;
+}): ReceptionOsSeverity {
   if (input.isOverdue) return "critical";
   if (input.dueDate?.trim() && input.dueDate.trim() <= input.todayYmd.trim()) return "warning";
   return "info";
@@ -178,12 +209,19 @@ export function alertSeverityForContext(input: {
 }
 
 export function compareReceptionOsSeverity(a: ReceptionOsSeverity, b: ReceptionOsSeverity): number {
-  const rank: Record<ReceptionOsSeverity, number> = { info: 1, warning: 2, critical: 3, blocked: 4 };
+  const rank: Record<ReceptionOsSeverity, number> = {
+    info: 1,
+    warning: 2,
+    critical: 3,
+    blocked: 4,
+  };
   return rank[b] - rank[a];
 }
 
 /** Widget visibility by ReceptionOS persona — sourced from {@link RECEPTION_OS_PERSONA_WIDGET_DEFAULTS}. */
-export function visibleWidgetsForReceptionOsRole(role: ReceptionOsViewerRole): readonly ReceptionOsWidgetKey[] {
+export function visibleWidgetsForReceptionOsRole(
+  role: ReceptionOsViewerRole
+): readonly ReceptionOsWidgetKey[] {
   return RECEPTION_OS_PERSONA_WIDGET_DEFAULTS[role] ?? RECEPTION_OS_WIDGET_KEYS;
 }
 
@@ -211,11 +249,17 @@ export function alertSeverityRank(kind: ReceptionOsAlertKind): number {
 }
 
 /** Ensures cross-tenant rows are never merged into a tenant payload. */
-export function assertReceptionOsTenantRowScope(expectedTenantId: string, rowTenantId: string, entity: string): void {
+export function assertReceptionOsTenantRowScope(
+  expectedTenantId: string,
+  rowTenantId: string,
+  entity: string
+): void {
   const expected = expectedTenantId.trim();
   const actual = rowTenantId.trim();
   if (!expected || !actual || expected !== actual) {
-    throw new Error(`ReceptionOS tenant scope violation for ${entity}: expected ${expected}, got ${actual || "empty"}.`);
+    throw new Error(
+      `ReceptionOS tenant scope violation for ${entity}: expected ${expected}, got ${actual || "empty"}.`
+    );
   }
 }
 
@@ -227,5 +271,13 @@ export function primaryRecordHref(hrefs: {
   appointment?: string | null;
   calendar?: string | null;
 }): string | null {
-  return hrefs.patient ?? hrefs.case ?? hrefs.lead ?? hrefs.consultation ?? hrefs.appointment ?? hrefs.calendar ?? null;
+  return (
+    hrefs.patient ??
+    hrefs.case ??
+    hrefs.lead ??
+    hrefs.consultation ??
+    hrefs.appointment ??
+    hrefs.calendar ??
+    null
+  );
 }

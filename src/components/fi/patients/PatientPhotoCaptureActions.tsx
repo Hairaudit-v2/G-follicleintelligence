@@ -76,7 +76,11 @@ export function PatientPhotoCaptureActions({
   }
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)} role="group" aria-label="Protocol capture">
+    <div
+      className={cn("flex flex-wrap items-center gap-2", className)}
+      role="group"
+      aria-label="Protocol capture"
+    >
       <StartCaptureProtocolButton
         tenantId={tenantId}
         patientId={patientId}

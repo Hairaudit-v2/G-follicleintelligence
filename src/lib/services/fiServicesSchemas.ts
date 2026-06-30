@@ -15,7 +15,11 @@ export const fiServiceCreateBodySchema = z
   .object({
     adminKey: z.string().optional(),
     name: z.string().trim().min(1, "Name is required.").max(200),
-    duration_minutes: z.coerce.number().int().min(1, "Duration must be at least 1 minute.").max(1440),
+    duration_minutes: z.coerce
+      .number()
+      .int()
+      .min(1, "Duration must be at least 1 minute.")
+      .max(1440),
     base_price: z.coerce.number().min(0, "Price cannot be negative.").max(1_000_000),
     color: hexColor,
     category: z.string().trim().max(120).nullable().optional(),

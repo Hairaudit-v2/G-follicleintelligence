@@ -8,7 +8,10 @@ import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles
 import { isBookingCancelled } from "@/src/lib/bookings/bookingPolicy";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+} from "@/src/lib/cases/caseDetailNavConstants";
 
 function fmt(iso: string): string {
   try {
@@ -55,7 +58,11 @@ function BookingLine({
     <li className="flex flex-wrap items-center justify-between gap-2 py-2">
       <div className="min-w-0">
         {slide ? (
-          <button type="button" className="font-medium text-blue-300 hover:underline" onClick={() => slide.openAppointment(b.id)}>
+          <button
+            type="button"
+            className="font-medium text-blue-300 hover:underline"
+            onClick={() => slide.openAppointment(b.id)}
+          >
             {title}
           </button>
         ) : (
@@ -89,7 +96,11 @@ function Section({
   return (
     <div className="mt-3">
       <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</h3>
-      <ul className="mt-1 divide-y divide-white/[0.06] text-sm">{rows.map((b) => <BookingLine key={b.id} tenantId={tenantId} b={b} slide={slide} />)}</ul>
+      <ul className="mt-1 divide-y divide-white/[0.06] text-sm">
+        {rows.map((b) => (
+          <BookingLine key={b.id} tenantId={tenantId} b={b} slide={slide} />
+        ))}
+      </ul>
     </div>
   );
 }
@@ -123,7 +134,9 @@ export function CaseAppointmentsCard({
       .sort((a, b) => a.start_at.localeCompare(b.start_at));
     const nextAppt = upcoming[0] ?? null;
     const activeForCategories = nonCancelled.filter((b) => !isCompletedLike(b));
-    const surgeryRows = activeForCategories.filter((b) => b.booking_type.trim().toLowerCase() === "surgery");
+    const surgeryRows = activeForCategories.filter(
+      (b) => b.booking_type.trim().toLowerCase() === "surgery"
+    );
     const prpRows = activeForCategories.filter((b) => isPrpFamily(b.booking_type));
     const followRows = activeForCategories.filter((b) => isFollowUpFamily(b.booking_type));
     const completedRows = nonCancelled
@@ -149,7 +162,10 @@ export function CaseAppointmentsCard({
           Case appointments
         </h2>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/appointments`}
+            className="text-blue-300 hover:underline"
+          >
             Appointments
           </Link>
           <span className="text-gray-300">·</span>
@@ -160,7 +176,11 @@ export function CaseAppointmentsCard({
       </div>
 
       <p className="mt-1 text-xs text-gray-500">
-        Anchored on <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">fi_bookings.case_id</code> for this case
+        Anchored on{" "}
+        <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">
+          fi_bookings.case_id
+        </code>{" "}
+        for this case
         {prefillPatientId ? "; patient bookings are merged for scheduling overlap checks." : "."}
       </p>
 
@@ -191,14 +211,17 @@ export function CaseAppointmentsCard({
 
       {next ? (
         <div className="mt-4 rounded-md border border-cyan-500/20 bg-cyan-500/10 p-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Next appointment</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">
+            Next appointment
+          </h3>
           <ul className="mt-1 text-sm">
             <BookingLine tenantId={tenantId} b={next} slide={slide} />
           </ul>
         </div>
       ) : (
         <p className="mt-3 text-sm text-slate-400">
-          No upcoming appointments for this case. Use &quot;New appointment for this case&quot; when you have booking access, or open{" "}
+          No upcoming appointments for this case. Use &quot;New appointment for this case&quot; when
+          you have booking access, or open{" "}
           <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-300 hover:underline">
             Calendar
           </Link>
@@ -206,10 +229,34 @@ export function CaseAppointmentsCard({
         </p>
       )}
 
-      <Section title="Surgery" rows={surgery} tenantId={tenantId} slide={slide} empty="No surgery bookings on this case." />
-      <Section title="PRP & related" rows={prp} tenantId={tenantId} slide={slide} empty="No PRP / PRF / mesotherapy / exosomes bookings on this case." />
-      <Section title="Follow-up & review" rows={followUp} tenantId={tenantId} slide={slide} empty="No follow-up or review bookings on this case." />
-      <Section title="Completed" rows={completed} tenantId={tenantId} slide={slide} empty="No completed appointments on this case." />
+      <Section
+        title="Surgery"
+        rows={surgery}
+        tenantId={tenantId}
+        slide={slide}
+        empty="No surgery bookings on this case."
+      />
+      <Section
+        title="PRP & related"
+        rows={prp}
+        tenantId={tenantId}
+        slide={slide}
+        empty="No PRP / PRF / mesotherapy / exosomes bookings on this case."
+      />
+      <Section
+        title="Follow-up & review"
+        rows={followUp}
+        tenantId={tenantId}
+        slide={slide}
+        empty="No follow-up or review bookings on this case."
+      />
+      <Section
+        title="Completed"
+        rows={completed}
+        tenantId={tenantId}
+        slide={slide}
+        empty="No completed appointments on this case."
+      />
 
       <div className="mt-4">
         <button
@@ -235,7 +282,8 @@ export function CaseAppointmentsCard({
       </div>
 
       <p className="mt-3 text-xs text-gray-500">
-        Open an appointment to reschedule, cancel, or mark complete using the slide-over (same actions as Appointments).
+        Open an appointment to reschedule, cancel, or mark complete using the slide-over (same
+        actions as Appointments).
       </p>
     </div>
   );

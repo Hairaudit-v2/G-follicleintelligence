@@ -26,7 +26,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
 
     const viewer = await resolveReceptionOsViewerContext(tenantId.trim());
     if (!viewer.canAccessReceptionOs) {
-      return crmJsonError(403, "ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+      return crmJsonError(
+        403,
+        "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+      );
     }
     if (!receptionPilotReviewVisible(viewer.receptionOsRole)) {
       return crmJsonError(403, "Pilot export requires admin or clinic manager access.");

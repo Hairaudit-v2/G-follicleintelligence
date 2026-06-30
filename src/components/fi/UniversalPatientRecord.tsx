@@ -42,12 +42,17 @@ export function UniversalPatientRecord({
     p?.display_name ?? readPersonDisplayName(person?.metadata ?? {}) ?? "Unknown patient";
   const headerEmail = p?.email ?? readPersonEmail(person?.metadata ?? {}) ?? "—";
   const headerPhone = p?.phone ?? readPersonPhone(person?.metadata ?? {}) ?? "—";
-  const sourceSystems = Array.from(new Set(record.resolution_rows.map((r) => r.source_system).filter(Boolean)));
+  const sourceSystems = Array.from(
+    new Set(record.resolution_rows.map((r) => r.source_system).filter(Boolean))
+  );
 
   return (
     <div className="space-y-8 text-sm">
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-        <Link href={`${base}/foundation-integrity`} className="hover:text-slate-100 hover:underline">
+        <Link
+          href={`${base}/foundation-integrity`}
+          className="hover:text-slate-100 hover:underline"
+        >
           ← Foundation integrity
         </Link>
         <span className="text-gray-300">|</span>
@@ -82,12 +87,16 @@ export function UniversalPatientRecord({
           </div>
           <div>
             <dt className="text-xs text-gray-500">Person id</dt>
-            <dd className="font-mono text-xs">{record.anchor.person_id ?? person?.person_id ?? "—"}</dd>
+            <dd className="font-mono text-xs">
+              {record.anchor.person_id ?? person?.person_id ?? "—"}
+            </dd>
           </div>
           <div className="sm:col-span-2">
             <dt className="text-xs text-gray-500">Global patient id(s)</dt>
             <dd className="font-mono text-xs break-all">
-              {record.linked_global_patient_ids.length ? record.linked_global_patient_ids.join(", ") : "—"}
+              {record.linked_global_patient_ids.length
+                ? record.linked_global_patient_ids.join(", ")
+                : "—"}
             </dd>
           </div>
           <div>
@@ -99,7 +108,9 @@ export function UniversalPatientRecord({
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
         <h2 className="mb-3 text-base font-medium text-slate-100">Clinical timeline</h2>
-        <p className="mb-2 text-xs text-gray-500">fi_timeline_events, newest first. Source is read from event detail when present.</p>
+        <p className="mb-2 text-xs text-gray-500">
+          fi_timeline_events, newest first. Source is read from event detail when present.
+        </p>
         {record.timeline_events.length === 0 ? (
           <p className="text-gray-500">No timeline rows for resolved clinical patients.</p>
         ) : (
@@ -122,7 +133,10 @@ export function UniversalPatientRecord({
                     <td className="py-2 pr-3">{ev.title ?? "—"}</td>
                     <td className="py-2 pr-3">{ev.source_system ?? "—"}</td>
                     <td className="py-2 pr-3 font-mono">
-                      <Link href={`${base}/cases/${ev.case_id}`} className="text-blue-300 hover:underline">
+                      <Link
+                        href={`${base}/cases/${ev.case_id}`}
+                        className="text-blue-300 hover:underline"
+                      >
                         {ev.case_id.slice(0, 8)}…
                       </Link>
                     </td>
@@ -157,7 +171,10 @@ export function UniversalPatientRecord({
                 {record.cases.map((c) => (
                   <tr key={c.case_id} className="border-b border-white/[0.06]">
                     <td className="py-2 pr-3 font-mono">
-                      <Link href={`${base}/cases/${c.case_id}`} className="text-blue-300 hover:underline">
+                      <Link
+                        href={`${base}/cases/${c.case_id}`}
+                        className="text-blue-300 hover:underline"
+                      >
                         {c.case_id.slice(0, 8)}…
                       </Link>
                     </td>
@@ -178,7 +195,9 @@ export function UniversalPatientRecord({
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
         <h2 className="mb-3 text-base font-medium text-slate-100">Media (unified view)</h2>
-        <p className="mb-2 text-xs text-gray-500">v_fi_media_unified — legacy uploads and fi_media_assets.</p>
+        <p className="mb-2 text-xs text-gray-500">
+          v_fi_media_unified — legacy uploads and fi_media_assets.
+        </p>
         {record.media_unified.length === 0 ? (
           <p className="text-gray-500">No media rows in scope.</p>
         ) : (
@@ -196,16 +215,25 @@ export function UniversalPatientRecord({
               </thead>
               <tbody>
                 {record.media_unified.map((m, idx) => (
-                  <tr key={`${m.media_asset_id ?? ""}-${m.legacy_upload_id ?? ""}-${idx}`} className="border-b border-white/[0.06]">
+                  <tr
+                    key={`${m.media_asset_id ?? ""}-${m.legacy_upload_id ?? ""}-${idx}`}
+                    className="border-b border-white/[0.06]"
+                  >
                     <td className="py-2 pr-3 font-mono">{m.asset_type ?? "—"}</td>
                     <td className="py-2 pr-3">{m.file_name ?? "—"}</td>
-                    <td className="py-2 pr-3 max-w-xs truncate font-mono" title={m.storage_path ?? ""}>
+                    <td
+                      className="py-2 pr-3 max-w-xs truncate font-mono"
+                      title={m.storage_path ?? ""}
+                    >
                       {m.storage_path ?? "—"}
                     </td>
                     <td className="py-2 pr-3">{m.source_system ?? "—"}</td>
                     <td className="py-2 pr-3 font-mono">
                       {m.case_id ? (
-                        <Link href={`${base}/cases/${m.case_id}`} className="text-blue-300 hover:underline">
+                        <Link
+                          href={`${base}/cases/${m.case_id}`}
+                          className="text-blue-300 hover:underline"
+                        >
                           {m.case_id.slice(0, 8)}…
                         </Link>
                       ) : (
@@ -223,7 +251,9 @@ export function UniversalPatientRecord({
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
         <h2 className="mb-3 text-base font-medium text-slate-100">Media (fi_media_assets)</h2>
-        <p className="mb-2 text-xs text-gray-500">Direct rows tied to resolved patient ids or case ids in scope.</p>
+        <p className="mb-2 text-xs text-gray-500">
+          Direct rows tied to resolved patient ids or case ids in scope.
+        </p>
         {record.media_assets_direct.length === 0 ? (
           <p className="text-gray-500">No fi_media_assets rows in scope.</p>
         ) : (
@@ -250,7 +280,10 @@ export function UniversalPatientRecord({
                     <td className="py-2 pr-3">{m.source_system ?? "—"}</td>
                     <td className="py-2 pr-3 font-mono">
                       {m.case_id ? (
-                        <Link href={`${base}/cases/${m.case_id}`} className="text-blue-300 hover:underline">
+                        <Link
+                          href={`${base}/cases/${m.case_id}`}
+                          className="text-blue-300 hover:underline"
+                        >
                           {m.case_id.slice(0, 8)}…
                         </Link>
                       ) : (
@@ -281,7 +314,9 @@ export function UniversalPatientRecord({
 
       {record.source_identifiers.length > 0 && (
         <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
-          <h2 className="mb-2 text-base font-medium text-slate-100">Source identifiers (fi_patient_source_ids)</h2>
+          <h2 className="mb-2 text-base font-medium text-slate-100">
+            Source identifiers (fi_patient_source_ids)
+          </h2>
           <ul className="space-y-1 font-mono text-xs">
             {record.source_identifiers.map((s, i) => (
               <li key={`${s.source_system}-${s.source_patient_id}-${i}`}>

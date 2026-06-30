@@ -69,9 +69,10 @@ function parseDeploymentPlan(snapshot: Record<string, unknown>): ClinicDeploymen
   return plan as ClinicDeploymentPlan;
 }
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string; isPlatformAdmin: true }
-  | { ok: false; error: string }
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<
+  { ok: true; actorAuthUserId: string; isPlatformAdmin: true } | { ok: false; error: string }
 > {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
@@ -110,14 +111,16 @@ async function resolveTenantAdminAuth(
   if (error || !data) return { ok: false, error: "Tenant membership required." };
 
   const adminProf = await loadActiveTenantAdminProfileForSession(tenantId, authId);
-  if (
-    adminProf?.adminRole !== "clinic_admin" &&
-    adminProf?.adminRole !== "operations_admin"
-  ) {
+  if (adminProf?.adminRole !== "clinic_admin" && adminProf?.adminRole !== "operations_admin") {
     return { ok: false, error: "Tenant admin access is required." };
   }
 
-  return { ok: true, actorAuthUserId: authId, fiUserId: String((data as { id: string }).id), isPlatformAdmin: false };
+  return {
+    ok: true,
+    actorAuthUserId: authId,
+    fiUserId: String((data as { id: string }).id),
+    isPlatformAdmin: false,
+  };
 }
 
 async function resolveReadAuth(
@@ -259,10 +262,23 @@ async function gatherSignals(
 
   if (tenantId) {
     const [clinics, services, modules, users, admins, assist] = await Promise.all([
-      supabase.from("fi_clinics").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-      supabase.from("fi_services").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-      supabase.from("fi_tenant_modules").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
-      supabase.from("fi_users").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+      supabase
+        .from("fi_clinics")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenantId),
+      supabase
+        .from("fi_services")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenantId),
+      supabase
+        .from("fi_tenant_modules")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenantId)
+        .eq("enabled", true),
+      supabase
+        .from("fi_users")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenantId),
       supabase
         .from("fi_tenant_admin_users")
         .select("id", { count: "exact", head: true })
@@ -434,10 +450,19 @@ async function resolveActorLabel(
   fiUserId?: string | null
 ): Promise<string | null> {
   if (fiUserId) {
-    const { data } = await supabase.from("fi_users").select("email").eq("id", fiUserId).maybeSingle();
+    const { data } = await supabase
+      .from("fi_users")
+      .select("email")
+      .eq("id", fiUserId)
+      .maybeSingle();
     if (data?.email) return String((data as { email: string }).email);
   }
-  const { data } = await supabase.from("fi_users").select("email").eq("auth_user_id", authUserId).limit(1).maybeSingle();
+  const { data } = await supabase
+    .from("fi_users")
+    .select("email")
+    .eq("auth_user_id", authUserId)
+    .limit(1)
+    .maybeSingle();
   if (data?.email) return String((data as { email: string }).email);
   return authUserId.slice(0, 8);
 }
@@ -465,7 +490,10 @@ export async function loadGoLiveReadinessSnapshot(
 
     return { ok: true, snapshot };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load go-live readiness." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load go-live readiness.",
+    };
   }
 }
 
@@ -488,7 +516,10 @@ export async function loadGoLiveReadinessSnapshotForTenant(
       persistSnapshot: opts.persistSnapshot ?? false,
     });
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load go-live readiness." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load go-live readiness.",
+    };
   }
 }
 
@@ -505,7 +536,8 @@ export async function markGoLiveChecklistItemReviewed(
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const session = await loadSessionById(supabase, sessionId.trim());
-  if (!session?.tenant_id) return { ok: false, error: "Tenant must be provisioned before checklist review." };
+  if (!session?.tenant_id)
+    return { ok: false, error: "Tenant must be provisioned before checklist review." };
 
   const platformAuth = await resolvePlatformAdminAuth(opts);
   let actorAuthUserId: string;
@@ -559,7 +591,8 @@ export async function markOwnerReviewComplete(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const session = await loadSessionById(supabase, sessionId.trim());
-  if (!session?.tenant_id) return { ok: false, error: "Tenant must be provisioned before owner review." };
+  if (!session?.tenant_id)
+    return { ok: false, error: "Tenant must be provisioned before owner review." };
 
   const platformAuth = await resolvePlatformAdminAuth(opts);
   let actorAuthUserId: string;
@@ -614,7 +647,8 @@ export async function markPlatformReviewComplete(
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const session = await loadSessionById(supabase, sessionId.trim());
-  if (!session?.tenant_id) return { ok: false, error: "Tenant must be provisioned before platform review." };
+  if (!session?.tenant_id)
+    return { ok: false, error: "Tenant must be provisioned before platform review." };
 
   const label = await resolveActorLabel(supabase, auth.actorAuthUserId);
 
@@ -654,7 +688,8 @@ export async function approveTenantGoLive(
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const session = await loadSessionById(supabase, sessionId.trim());
-  if (!session?.tenant_id) return { ok: false, error: "Tenant must be provisioned before go-live approval." };
+  if (!session?.tenant_id)
+    return { ok: false, error: "Tenant must be provisioned before go-live approval." };
 
   const loaded = await loadGoLiveReadinessSnapshot(sessionId, {
     ...opts,
@@ -689,7 +724,9 @@ export async function approveTenantGoLive(
     .eq("tenant_id", session.tenant_id)
     .maybeSingle();
   const existingMeta =
-    settingsRow?.metadata && typeof settingsRow.metadata === "object" && !Array.isArray(settingsRow.metadata)
+    settingsRow?.metadata &&
+    typeof settingsRow.metadata === "object" &&
+    !Array.isArray(settingsRow.metadata)
       ? (settingsRow.metadata as Record<string, unknown>)
       : {};
 

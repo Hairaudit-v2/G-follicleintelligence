@@ -20,13 +20,17 @@ function authHelpBlock(code: string | undefined, message: string) {
         <p>
           <strong className="text-amber-50">Production mode</strong> (
           <code className="rounded bg-black/30 px-1 text-xs">NODE_ENV=production</code>, e.g.{" "}
-          <code className="text-xs">next start</code>): use <code className="text-xs">/fi-login</code>, then ensure your user is
-          provisioned in <code className="text-xs">fi_users</code> and/or <code className="text-xs">fi_os_identities</code>.
+          <code className="text-xs">next start</code>): use{" "}
+          <code className="text-xs">/fi-login</code>, then ensure your user is provisioned in{" "}
+          <code className="text-xs">fi_users</code> and/or{" "}
+          <code className="text-xs">fi_os_identities</code>.
         </p>
         <p className="mt-2">
-          For <strong className="text-amber-50">local</strong> tenant picking <em>without</em> login, run{" "}
-          <code className="text-xs">next dev</code> (not <code className="text-xs">next start</code>) and set{" "}
-          <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code> in <code className="text-xs">.env.local</code> — see{" "}
+          For <strong className="text-amber-50">local</strong> tenant picking <em>without</em>{" "}
+          login, run <code className="text-xs">next dev</code> (not{" "}
+          <code className="text-xs">next start</code>) and set{" "}
+          <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code> in{" "}
+          <code className="text-xs">.env.local</code> — see{" "}
           <code className="text-xs">docs/dev-local-fi-admin.md</code> in this repository.
         </p>
       </InfoNotice>
@@ -37,7 +41,11 @@ function authHelpBlock(code: string | undefined, message: string) {
       <InfoNotice variant="danger" title="Access denied" className="mt-3 max-w-xl">
         <p>{message}</p>
         <p className="mt-2">
-          Use <Link href="/fi-login" className="font-semibold text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
+          Use{" "}
+          <Link
+            href="/fi-login"
+            className="font-semibold text-cyan-300 underline underline-offset-2 hover:text-cyan-200"
+          >
             /fi-login
           </Link>{" "}
           with a provisioned account, or sign out and try a different account.
@@ -47,7 +55,11 @@ function authHelpBlock(code: string | undefined, message: string) {
   }
   if (code === "AUTH_OR_DEV_FLAG_REQUIRED") {
     return (
-      <InfoNotice variant="warning" title="Authentication or dev flag required" className="mt-3 max-w-xl">
+      <InfoNotice
+        variant="warning"
+        title="Authentication or dev flag required"
+        className="mt-3 max-w-xl"
+      >
         <p>{message}</p>
         <p className="mt-2">
           See <code className="text-xs">docs/dev-local-fi-admin.md</code> in the repo for details.
@@ -74,10 +86,7 @@ export default function FiAdminPage() {
       .then(async (r) => {
         const d = (await r.json()) as TenantsJson;
         if (!r.ok || !d.ok) {
-          const msg =
-            !d.ok && "error" in d && d.error
-              ? d.error
-              : `Request failed (${r.status})`;
+          const msg = !d.ok && "error" in d && d.error ? d.error : `Request failed (${r.status})`;
           setError(msg);
           setErrorCode(!d.ok && "code" in d ? d.code : undefined);
           setTenants([]);
@@ -129,14 +138,22 @@ export default function FiAdminPage() {
         ) : null}
         {devTenantListFallback ? (
           <p className="text-sm text-slate-500">
-            No rows in <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs text-slate-200">fi_tenants</code>. Create one via
-            SQL: insert into fi_tenants (name, slug) values (&apos;Demo&apos;, &apos;demo&apos;);
+            No rows in{" "}
+            <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs text-slate-200">
+              fi_tenants
+            </code>
+            . Create one via SQL: insert into fi_tenants (name, slug) values (&apos;Demo&apos;,
+            &apos;demo&apos;);
           </p>
         ) : (
           <p className="text-sm text-slate-500">
-            No tenants linked to your account. Ask an administrator to add your Supabase Auth user to{" "}
-            <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs text-slate-200">fi_users</code> for a tenant, or for local
-            development without login see <code className="text-xs">docs/dev-local-fi-admin.md</code> (
+            No tenants linked to your account. Ask an administrator to add your Supabase Auth user
+            to{" "}
+            <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs text-slate-200">
+              fi_users
+            </code>{" "}
+            for a tenant, or for local development without login see{" "}
+            <code className="text-xs">docs/dev-local-fi-admin.md</code> (
             <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code>).
           </p>
         )}
@@ -149,16 +166,20 @@ export default function FiAdminPage() {
       {devTenantListFallback ? (
         <InfoNotice variant="warning" title="Development access">
           <p className="text-xs sm:text-sm">
-            <strong className="text-amber-50">No authenticated FI user session.</strong> Listing all rows from{" "}
-            <code className="text-xs">fi_tenants</code> because <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code> and{" "}
-            <code className="text-xs">NODE_ENV</code> is not production. Sign in to use tenant-scoped membership instead.
+            <strong className="text-amber-50">No authenticated FI user session.</strong> Listing all
+            rows from <code className="text-xs">fi_tenants</code> because{" "}
+            <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code> and{" "}
+            <code className="text-xs">NODE_ENV</code> is not production. Sign in to use
+            tenant-scoped membership instead.
           </p>
         </InfoNotice>
       ) : null}
       <div>
         <p className={fiOsChromeClasses.sectionEyebrow}>Workspaces</p>
         <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-50">Select tenant</h2>
-        <p className="mt-1 text-xs text-slate-500">Opens the tenant console. Access rules are unchanged.</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Opens the tenant console. Access rules are unchanged.
+        </p>
       </div>
       <ul className="flex flex-wrap gap-3">
         {tenants.map((t) => (

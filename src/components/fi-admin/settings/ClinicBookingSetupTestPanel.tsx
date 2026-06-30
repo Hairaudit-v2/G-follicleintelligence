@@ -37,9 +37,17 @@ const STATUS_COLOR: Record<ClinicBookingSetupTestRowStatus, string> = {
 };
 
 function overallBadgeClass(status: ClinicBookingSetupTestRowStatus, isDark: boolean): string {
-  if (status === "pass") return isDark ? "bg-emerald-500/15 text-emerald-200 ring-emerald-500/30" : "bg-emerald-500/10 text-emerald-300 ring-emerald-200";
-  if (status === "warning") return isDark ? "bg-amber-500/15 text-amber-100 ring-amber-500/30" : "bg-amber-400/10 text-amber-200 ring-amber-200";
-  return isDark ? "bg-rose-500/15 text-rose-100 ring-rose-500/35" : "bg-rose-500/10 text-rose-200 ring-rose-200";
+  if (status === "pass")
+    return isDark
+      ? "bg-emerald-500/15 text-emerald-200 ring-emerald-500/30"
+      : "bg-emerald-500/10 text-emerald-300 ring-emerald-200";
+  if (status === "warning")
+    return isDark
+      ? "bg-amber-500/15 text-amber-100 ring-amber-500/30"
+      : "bg-amber-400/10 text-amber-200 ring-amber-200";
+  return isDark
+    ? "bg-rose-500/15 text-rose-100 ring-rose-500/35"
+    : "bg-rose-500/10 text-rose-200 ring-rose-200";
 }
 
 function collectAutoFixKeys(
@@ -72,9 +80,7 @@ function hygieneRowHasPerthAliasFix(h: ClinicBookingSetupHygieneRow): boolean {
 function formatAutofixSummary(outcome: ClinicBookingSetupAutoFixResult): string {
   const parts: string[] = [];
   if (outcome.applied.length) {
-    parts.push(
-      `Applied: ${outcome.applied.map((a) => a.message).join(" ")}`.trim()
-    );
+    parts.push(`Applied: ${outcome.applied.map((a) => a.message).join(" ")}`.trim());
   }
   if (outcome.skipped.length) {
     parts.push(`Skipped: ${outcome.skipped.map((s) => `${s.key} (${s.reason})`).join("; ")}`);
@@ -147,7 +153,9 @@ export function ClinicBookingSetupTestPanel({
     });
   };
 
-  const allSafeKeys = result ? collectAutoFixKeys(result, { includePerthAliases: perthPhysicalAliasConfirmed }) : [];
+  const allSafeKeys = result
+    ? collectAutoFixKeys(result, { includePerthAliases: perthPhysicalAliasConfirmed })
+    : [];
   const showFixAll = allSafeKeys.length >= 2;
 
   return (
@@ -160,7 +168,12 @@ export function ClinicBookingSetupTestPanel({
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-gray-500")}>
+          <p
+            className={cn(
+              "text-[10px] font-semibold uppercase tracking-wider",
+              isDark ? "text-slate-500" : "text-gray-500"
+            )}
+          >
             Booking setup test
           </p>
           <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>
@@ -175,15 +188,22 @@ export function ClinicBookingSetupTestPanel({
               onClick={() =>
                 applyFixes(allSafeKeys, {
                   confirmPerthAliases:
-                    perthPhysicalAliasConfirmed && allSafeKeys.includes(PERTH_PHYSICAL_ALIASES_FIX_KEY),
+                    perthPhysicalAliasConfirmed &&
+                    allSafeKeys.includes(PERTH_PHYSICAL_ALIASES_FIX_KEY),
                 })
               }
               className={cn(
                 "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50",
-                isDark ? "bg-violet-600 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
+                isDark
+                  ? "bg-violet-600 text-white hover:bg-violet-500"
+                  : "bg-violet-600 text-white hover:bg-violet-500"
               )}
             >
-              {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : <Wrench className="h-3.5 w-3.5" aria-hidden />}
+              {pending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+              ) : (
+                <Wrench className="h-3.5 w-3.5" aria-hidden />
+              )}
               Fix all safe issues
             </button>
           ) : null}
@@ -193,7 +213,9 @@ export function ClinicBookingSetupTestPanel({
             onClick={run}
             className={cn(
               "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50",
-              isDark ? "bg-cyan-600 text-white hover:bg-cyan-500" : "bg-sky-600 text-white hover:bg-sky-500"
+              isDark
+                ? "bg-cyan-600 text-white hover:bg-cyan-500"
+                : "bg-sky-600 text-white hover:bg-sky-500"
             )}
           >
             {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
@@ -202,17 +224,24 @@ export function ClinicBookingSetupTestPanel({
         </div>
       </div>
 
-      <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
-        Checks consultation, PRP / exosomes, surgery, and follow-up paths: catalogue service, room links, preferred room,
-        staff rules, calendar-visible clinical assignees (reception excluded), and the same next-slot search used in the
-        calendar — read-only.
+      <p
+        className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}
+      >
+        Checks consultation, PRP / exosomes, surgery, and follow-up paths: catalogue service, room
+        links, preferred room, staff rules, calendar-visible clinical assignees (reception
+        excluded), and the same next-slot search used in the calendar — read-only.
       </p>
 
-      {error ? (
-        <p className="mt-2 text-xs text-rose-300">{error}</p>
-      ) : null}
+      {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
       {autofixSummary ? (
-        <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-300" : "text-slate-300")}>{autofixSummary}</p>
+        <p
+          className={cn(
+            "mt-2 text-xs leading-relaxed",
+            isDark ? "text-slate-300" : "text-slate-300"
+          )}
+        >
+          {autofixSummary}
+        </p>
       ) : null}
 
       {result ? (
@@ -224,7 +253,12 @@ export function ClinicBookingSetupTestPanel({
                 overallBadgeClass(result.overallStatus, isDark)
               )}
             >
-              Overall: {result.overallStatus === "pass" ? "Pass" : result.overallStatus === "warning" ? "Warning" : "Fail"}
+              Overall:{" "}
+              {result.overallStatus === "pass"
+                ? "Pass"
+                : result.overallStatus === "warning"
+                  ? "Warning"
+                  : "Fail"}
             </span>
           </div>
           <ul className="space-y-2">
@@ -233,23 +267,47 @@ export function ClinicBookingSetupTestPanel({
                 key={t.profile}
                 className={cn(
                   "flex flex-col gap-1 rounded-md border px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between",
-                  isDark ? "border-white/[0.06] bg-slate-950/40" : "border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md"
+                  isDark
+                    ? "border-white/[0.06] bg-slate-950/40"
+                    : "border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md"
                 )}
               >
                 <div className="flex min-w-0 gap-2">
                   {(() => {
                     const Icon = STATUS_ICON[t.status];
-                    return <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[t.status])} aria-hidden />;
+                    return (
+                      <Icon
+                        className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[t.status])}
+                        aria-hidden
+                      />
+                    );
                   })()}
                   <div className="min-w-0">
-                    <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>
+                    <p
+                      className={cn(
+                        "text-sm font-medium",
+                        isDark ? "text-slate-100" : "text-slate-100"
+                      )}
+                    >
                       {t.label}: <span className="font-semibold">{rowHeadline(t.status)}</span>
                     </p>
-                    <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
+                    <p
+                      className={cn(
+                        "mt-0.5 text-xs leading-relaxed",
+                        isDark ? "text-slate-400" : "text-slate-400"
+                      )}
+                    >
                       {t.message}
                     </p>
                     {t.suggestedAction ? (
-                      <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-200")}>{t.suggestedAction}</p>
+                      <p
+                        className={cn(
+                          "mt-1 text-xs",
+                          isDark ? "text-amber-100/90" : "text-amber-200"
+                        )}
+                      >
+                        {t.suggestedAction}
+                      </p>
                     ) : null}
                     {t.status !== "pass" && t.fixKeys?.length ? (
                       <div className="mt-2">
@@ -259,10 +317,16 @@ export function ClinicBookingSetupTestPanel({
                           onClick={() => applyFixes(t.fixKeys ?? [])}
                           className={cn(
                             "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50",
-                            isDark ? "bg-violet-600/90 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
+                            isDark
+                              ? "bg-violet-600/90 text-white hover:bg-violet-500"
+                              : "bg-violet-600 text-white hover:bg-violet-500"
                           )}
                         >
-                          {pending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : <Wrench className="h-3 w-3" aria-hidden />}
+                          {pending ? (
+                            <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                          ) : (
+                            <Wrench className="h-3 w-3" aria-hidden />
+                          )}
                           Fix automatically
                         </button>
                       </div>
@@ -286,7 +350,12 @@ export function ClinicBookingSetupTestPanel({
 
           {result.hygiene.length ? (
             <div className="mt-3 space-y-2">
-              <p className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-gray-500")}>
+              <p
+                className={cn(
+                  "text-[10px] font-semibold uppercase tracking-wider",
+                  isDark ? "text-slate-500" : "text-gray-500"
+                )}
+              >
                 Clinic hygiene
               </p>
               <ul className="space-y-2">
@@ -295,21 +364,47 @@ export function ClinicBookingSetupTestPanel({
                     key={h.id}
                     className={cn(
                       "flex flex-col gap-1 rounded-md border px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between",
-                      isDark ? "border-white/[0.06] bg-slate-950/40" : "border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md"
+                      isDark
+                        ? "border-white/[0.06] bg-slate-950/40"
+                        : "border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md"
                     )}
                   >
                     <div className="flex min-w-0 gap-2">
                       {(() => {
                         const Icon = STATUS_ICON[h.status];
-                        return <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[h.status])} aria-hidden />;
+                        return (
+                          <Icon
+                            className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[h.status])}
+                            aria-hidden
+                          />
+                        );
                       })()}
                       <div className="min-w-0">
-                        <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>{h.label}</p>
-                        <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
+                        <p
+                          className={cn(
+                            "text-sm font-medium",
+                            isDark ? "text-slate-100" : "text-slate-100"
+                          )}
+                        >
+                          {h.label}
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-0.5 text-xs leading-relaxed",
+                            isDark ? "text-slate-400" : "text-slate-400"
+                          )}
+                        >
                           {h.message}
                         </p>
                         {h.suggestedAction ? (
-                          <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-200")}>{h.suggestedAction}</p>
+                          <p
+                            className={cn(
+                              "mt-1 text-xs",
+                              isDark ? "text-amber-100/90" : "text-amber-200"
+                            )}
+                          >
+                            {h.suggestedAction}
+                          </p>
                         ) : null}
                         {h.status !== "pass" && h.fixKeys?.length ? (
                           <div className="mt-2 space-y-2">
@@ -330,11 +425,13 @@ export function ClinicBookingSetupTestPanel({
                                         : "border-slate-600 bg-[#0F1629]/80 backdrop-blur-md accent-violet-600"
                                     )}
                                     checked={perthPhysicalAliasConfirmed}
-                                    onChange={(e) => setPerthPhysicalAliasConfirmed(e.target.checked)}
+                                    onChange={(e) =>
+                                      setPerthPhysicalAliasConfirmed(e.target.checked)
+                                    }
                                   />
                                   <span>
-                                    Confirm Consult Room 2 / Patient Room 2 and PRP Room 2 / Surgery 2 are shared
-                                    physical rooms.
+                                    Confirm Consult Room 2 / Patient Room 2 and PRP Room 2 / Surgery
+                                    2 are shared physical rooms.
                                   </span>
                                 </label>
                                 <p
@@ -343,8 +440,8 @@ export function ClinicBookingSetupTestPanel({
                                     isDark ? "text-slate-500" : "text-slate-400"
                                   )}
                                 >
-                                  This prevents FI OS from double-booking the same physical room under two different
-                                  room names.
+                                  This prevents FI OS from double-booking the same physical room
+                                  under two different room names.
                                 </p>
                               </>
                             ) : null}
@@ -363,7 +460,9 @@ export function ClinicBookingSetupTestPanel({
                               }
                               className={cn(
                                 "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50",
-                                isDark ? "bg-violet-600/90 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
+                                isDark
+                                  ? "bg-violet-600/90 text-white hover:bg-violet-500"
+                                  : "bg-violet-600 text-white hover:bg-violet-500"
                               )}
                             >
                               {pending ? (

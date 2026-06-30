@@ -14,17 +14,26 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function FiAdminSurgeryOsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FiAdminSurgeryOsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccessUnlessStaffPinSession(tenantId);
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
-        <p className="text-sm">Supabase environment variables are missing. Check deployment configuration.</p>
+        <p className="text-sm">
+          Supabase environment variables are missing. Check deployment configuration.
+        </p>
       </InfoNotice>
     );
   }
@@ -45,8 +54,8 @@ export default async function FiAdminSurgeryOsPage({ params }: { params: Promise
       <div className="p-4 sm:p-6">
         <InfoNotice variant="danger" title="SurgeryOS could not load">
           <p className="text-sm">
-            The surgical command centre failed to load. Check production Supabase migrations and Vercel function logs
-            for the server error digest.
+            The surgical command centre failed to load. Check production Supabase migrations and
+            Vercel function logs for the server error digest.
           </p>
           {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}
         </InfoNotice>

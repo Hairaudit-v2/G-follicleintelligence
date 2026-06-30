@@ -12,7 +12,9 @@ export type FiOutboundStaffSyncDisplay = {
   warnings: string[];
 };
 
-export function parseFiOutboundStaffSyncDisplay(fi: PushStaffSyncToFiResult): FiOutboundStaffSyncDisplay {
+export function parseFiOutboundStaffSyncDisplay(
+  fi: PushStaffSyncToFiResult
+): FiOutboundStaffSyncDisplay {
   const summary = fi.raw.summary;
   const counts =
     summary && typeof summary === "object" && !Array.isArray(summary) && "counts" in summary
@@ -22,16 +24,22 @@ export function parseFiOutboundStaffSyncDisplay(fi: PushStaffSyncToFiResult): Fi
     counts && typeof counts === "object" && !Array.isArray(counts)
       ? (counts as { createdCount?: unknown; updatedCount?: unknown; linkedCount?: unknown })
       : undefined;
-  const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  const num = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
   const skippedRaw =
-    summary && typeof summary === "object" && !Array.isArray(summary) && "skippedRowCount" in summary
+    summary &&
+    typeof summary === "object" &&
+    !Array.isArray(summary) &&
+    "skippedRowCount" in summary
       ? (summary as { skippedRowCount?: unknown }).skippedRowCount
       : null;
   const warningsRaw =
     summary && typeof summary === "object" && !Array.isArray(summary) && "warnings" in summary
       ? (summary as { warnings?: unknown }).warnings
       : null;
-  const warnings = Array.isArray(warningsRaw) ? warningsRaw.filter((w): w is string => typeof w === "string") : [];
+  const warnings = Array.isArray(warningsRaw)
+    ? warningsRaw.filter((w): w is string => typeof w === "string")
+    : [];
 
   return {
     rowsSent: fi.rowsSent,

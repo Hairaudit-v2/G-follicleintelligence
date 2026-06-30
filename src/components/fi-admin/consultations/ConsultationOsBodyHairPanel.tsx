@@ -11,7 +11,11 @@ const FIELDS = [
   { key: "expected_yield", label: "Expected yield" },
 ] as const;
 
-export function ConsultationOsBodyHairPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsBodyHairPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Body hair" headingId="consultation-os-body-hair-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

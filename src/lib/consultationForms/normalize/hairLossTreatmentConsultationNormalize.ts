@@ -3,7 +3,11 @@
  */
 
 import { getClinicalNoteText } from "../consultationFormNoteModel";
-import { mergeUniqueStrings, readString, readStringArray } from "../completion/consultationCompletionExtractors";
+import {
+  mergeUniqueStrings,
+  readString,
+  readStringArray,
+} from "../completion/consultationCompletionExtractors";
 
 export function canonicalHliRiskFlagValues(values: Record<string, unknown>): string[] {
   return mergeUniqueStrings(
@@ -59,7 +63,9 @@ export function canonicalHliRecommendedPlanText(values: Record<string, unknown>)
 /**
  * Shallow-normalized value map for adapters / debugging.
  */
-export function normalizeHairLossTreatmentConsultationValues(values: Record<string, unknown>): Record<string, unknown> {
+export function normalizeHairLossTreatmentConsultationValues(
+  values: Record<string, unknown>
+): Record<string, unknown> {
   return {
     ...values,
     _canonical: {

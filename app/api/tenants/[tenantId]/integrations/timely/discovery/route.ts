@@ -7,9 +7,15 @@ import { ZodError } from "zod";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { assertTimelyWebhookAuthorized, TimelyWebhookAuthError } from "@/src/lib/integrations/timely/timelyWebhookAuth.server";
+import {
+  assertTimelyWebhookAuthorized,
+  TimelyWebhookAuthError,
+} from "@/src/lib/integrations/timely/timelyWebhookAuth.server";
 import { extractTimelyDiscoveryEventType } from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
-import { TIMELY_WEBHOOK_ROUTES, withTimelyWebhookAudit } from "@/src/lib/integrations/timely/timelyWebhookAudit.server";
+import {
+  TIMELY_WEBHOOK_ROUTES,
+  withTimelyWebhookAudit,
+} from "@/src/lib/integrations/timely/timelyWebhookAudit.server";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +28,11 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
     const tenantId = tenantIdParamSchema.parse(rawTenant?.trim());
 
     const supabase = supabaseAdmin();
-    const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+    const { data: tenant, error: te } = await supabase
+      .from("fi_tenants")
+      .select("id")
+      .eq("id", tenantId)
+      .maybeSingle();
     if (te || !tenant) {
       return NextResponse.json({ success: false, error: "Tenant not found." }, { status: 404 });
     }

@@ -143,7 +143,8 @@ export function GuidedAssistWidget({
 
           {!payload.assistEnabled ? (
             <p className="text-sm text-slate-300">
-              Turn Guided Assist on for deterministic setup steps tailored to your role and current page.
+              Turn Guided Assist on for deterministic setup steps tailored to your role and current
+              page.
             </p>
           ) : null}
 
@@ -151,13 +152,17 @@ export function GuidedAssistWidget({
             <section className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3">
               <div className="mb-2 flex items-center gap-2 text-cyan-200">
                 <Compass className="h-4 w-4 shrink-0" aria-hidden />
-                <h3 className="text-xs font-semibold uppercase tracking-wide">What should I do next?</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide">
+                  What should I do next?
+                </h3>
               </div>
               <p className="text-sm font-medium text-slate-100">{payload.nextAction.title}</p>
               <p className="mt-1 text-xs text-slate-400">{payload.nextAction.description}</p>
               <Link
                 href={payload.nextAction.href}
-                onClick={() => onNextActionClick(payload.nextAction!.code, payload.nextAction!.area)}
+                onClick={() =>
+                  onNextActionClick(payload.nextAction!.code, payload.nextAction!.area)
+                }
                 className="mt-3 inline-flex text-sm font-medium text-cyan-300 hover:text-cyan-200"
               >
                 Continue →
@@ -219,8 +224,8 @@ export function GuidedAssistWidget({
 
           {payload.assistEnabled && payload.tips.length === 0 && !payload.nextAction ? (
             <p className="text-sm text-slate-400">
-              No tips for this page right now. Navigate to another module or check back after setup tasks
-              progress.
+              No tips for this page right now. Navigate to another module or check back after setup
+              tasks progress.
             </p>
           ) : null}
 

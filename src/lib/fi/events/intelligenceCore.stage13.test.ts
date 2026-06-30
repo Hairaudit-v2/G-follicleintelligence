@@ -19,7 +19,10 @@ import {
 } from "./sanitizeIntelligenceEventForPersistence";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const MIGRATION_PATH = join(__dirname, "../../../../supabase/migrations/20260816120001_fi_intelligence_event_logs.sql");
+const MIGRATION_PATH = join(
+  __dirname,
+  "../../../../supabase/migrations/20260816120001_fi_intelligence_event_logs.sql"
+);
 
 const sampleEnvelope = {
   schema_version: 1,
@@ -73,7 +76,9 @@ describe("persistentEventLogEnv (Stage 13)", () => {
 
 describe("sanitizeIntelligenceEventForPersistence (Stage 13)", () => {
   it("excludes sensitive key names from key_sample and counts safe keys only", () => {
-    const shape = sanitizeIntelligencePayloadKeysForPersistence(sampleEnvelope.payload as Record<string, unknown>);
+    const shape = sanitizeIntelligencePayloadKeysForPersistence(
+      sampleEnvelope.payload as Record<string, unknown>
+    );
     assert.equal(shape.key_sample.includes("images"), false);
     assert.equal(shape.key_sample.includes("patient_notes"), false);
     assert.equal(shape.key_sample.includes("case_id"), true);
@@ -81,7 +86,10 @@ describe("sanitizeIntelligenceEventForPersistence (Stage 13)", () => {
   });
 
   it("envelope sanitizer never embeds raw payload values", () => {
-    const r = sanitizeIntelligenceEventForPersistence({ kind: "envelope", envelope: sampleEnvelope });
+    const r = sanitizeIntelligenceEventForPersistence({
+      kind: "envelope",
+      envelope: sampleEnvelope,
+    });
     assert.equal(JSON.stringify(r.payload_summary).includes("secret"), false);
     assert.equal(JSON.stringify(r.payload_summary).includes("/phi"), false);
   });
@@ -107,7 +115,10 @@ describe("sanitizeIntelligenceEventForPersistence (Stage 13)", () => {
   });
 });
 
-function insertStubCapturingPayload(): { client: SupabaseClient; lastRow: () => Record<string, unknown> | null } {
+function insertStubCapturingPayload(): {
+  client: SupabaseClient;
+  lastRow: () => Record<string, unknown> | null;
+} {
   let row: Record<string, unknown> | null = null;
   const client = {
     from(table: string) {
@@ -200,7 +211,10 @@ describe("fi_intelligence_event_logs migration (Stage 13)", () => {
     assert.match(sql, /enable row level security/i);
     assert.match(sql, /idx_fi_intelligence_event_logs_event_name_created/i);
     assert.match(sql, /idx_fi_intelligence_event_logs_correlation_id/i);
-    assert.match(sql, /grant select, insert on public\.fi_intelligence_event_logs to service_role/i);
+    assert.match(
+      sql,
+      /grant select, insert on public\.fi_intelligence_event_logs to service_role/i
+    );
   });
 });
 

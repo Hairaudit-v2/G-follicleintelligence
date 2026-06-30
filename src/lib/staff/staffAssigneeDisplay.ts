@@ -2,12 +2,18 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 
 function humanizeRole(role: string | null | undefined): string {
-  const t = String(role ?? "").trim().toLowerCase().replace(/_/g, " ");
+  const t = String(role ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, " ");
   if (!t.length) return "Staff";
   return t.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function userDisplayLabel(users: CrmShellUserPickerOption[], userId: string | null | undefined): string | null {
+function userDisplayLabel(
+  users: CrmShellUserPickerOption[],
+  userId: string | null | undefined
+): string | null {
   const uid = userId?.trim() || null;
   if (!uid) return null;
   const u = users.find((x) => x.id === uid);
@@ -16,7 +22,10 @@ function userDisplayLabel(users: CrmShellUserPickerOption[], userId: string | nu
   return `User ${uid.slice(0, 8)}…`;
 }
 
-function staffDisplayLabel(staffOptions: CrmShellUserPickerOption[], staffId: string | null | undefined): string | null {
+function staffDisplayLabel(
+  staffOptions: CrmShellUserPickerOption[],
+  staffId: string | null | undefined
+): string | null {
   const sid = staffId?.trim() || null;
   if (!sid) return null;
   const s = staffOptions.find((x) => x.id === sid);

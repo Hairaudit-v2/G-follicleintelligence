@@ -12,11 +12,7 @@ export const metadata: Metadata = {
   title: "FI Admin",
 };
 
-export default async function FiAdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function FiAdminLayout({ children }: { children: React.ReactNode }) {
   await assertFiAdminShellAccess();
   const userEmail = await resolveFiOsAuthUserEmail();
   let showSystemAdminEntry = false;

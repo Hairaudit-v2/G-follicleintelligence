@@ -27,7 +27,8 @@ export const RECEPTION_OS_CONVERSION_ENRICHMENT_COLUMN_IDS = [
   "lost",
 ] as const;
 
-export type ReceptionOsConversionEnrichmentColumnId = (typeof RECEPTION_OS_CONVERSION_ENRICHMENT_COLUMN_IDS)[number];
+export type ReceptionOsConversionEnrichmentColumnId =
+  (typeof RECEPTION_OS_CONVERSION_ENRICHMENT_COLUMN_IDS)[number];
 
 /** Optional conversion-board enrichment — mapped in command centre loader (keeps this module client-safe). */
 export type ReceptionOsConversionEnrichmentCard = {
@@ -59,12 +60,17 @@ export const RECEPTION_OS_REVENUE_RISK_ALERT_KINDS = [
   "quote_followup_sla_breach",
 ] as const;
 
-export type ReceptionOsRevenueRiskAlertKind = (typeof RECEPTION_OS_REVENUE_RISK_ALERT_KINDS)[number];
+export type ReceptionOsRevenueRiskAlertKind =
+  (typeof RECEPTION_OS_REVENUE_RISK_ALERT_KINDS)[number];
 
 export const RECEPTION_OS_REVENUE_CONFIDENCE_LEVELS = ["low", "medium", "high"] as const;
-export type ReceptionOsRevenueConfidenceLevel = (typeof RECEPTION_OS_REVENUE_CONFIDENCE_LEVELS)[number];
+export type ReceptionOsRevenueConfidenceLevel =
+  (typeof RECEPTION_OS_REVENUE_CONFIDENCE_LEVELS)[number];
 
-export const RECEPTION_OS_PHASE3_WIDGET_KEYS = ["revenue_intelligence", "conversion_scoreboard"] as const;
+export const RECEPTION_OS_PHASE3_WIDGET_KEYS = [
+  "revenue_intelligence",
+  "conversion_scoreboard",
+] as const;
 export type ReceptionOsPhase3WidgetKey = (typeof RECEPTION_OS_PHASE3_WIDGET_KEYS)[number];
 
 export type ReceptionOsRevenueIntelligenceAccess = "full" | "summary" | "none";
@@ -147,7 +153,9 @@ export type ReceptionOsRevenueIntelligencePayload = {
 
 export type ReceptionOsRevenueBuildInput = {
   board: ReceptionOsBoardPayload;
-  conversionColumns?: Partial<Record<ReceptionOsConversionEnrichmentColumnId, readonly ReceptionOsConversionEnrichmentCard[]>>;
+  conversionColumns?: Partial<
+    Record<ReceptionOsConversionEnrichmentColumnId, readonly ReceptionOsConversionEnrichmentCard[]>
+  >;
   depositsCollectedToday?: number;
   surgeryBookingsCreatedToday?: number;
   highValueQuoteThreshold?: number;
@@ -189,7 +197,10 @@ function leadIdFromHref(href: string | null | undefined): string | null {
   return m?.[1] ?? null;
 }
 
-function buildCommunicationIndex(events: readonly ReceptionOsCommunicationEvent[], todayYmd: string): Map<string, { count: number; daysSinceLast: number | null }> {
+function buildCommunicationIndex(
+  events: readonly ReceptionOsCommunicationEvent[],
+  todayYmd: string
+): Map<string, { count: number; daysSinceLast: number | null }> {
   const byLead = new Map<string, { count: number; latestContactAt: string | null }>();
   for (const event of events) {
     const leadId = leadIdFromHref(event.hrefs.lead);
@@ -217,7 +228,7 @@ function buildCommunicationIndex(events: readonly ReceptionOsCommunicationEvent[
 
 function findMatchingDeposit(
   deposits: readonly ReceptionOsDepositItem[],
-  hrefs: ReceptionOsRevenueSubjectSignals["hrefs"],
+  hrefs: ReceptionOsRevenueSubjectSignals["hrefs"]
 ): ReceptionOsDepositItem | null {
   for (const dep of deposits) {
     if (hrefs.lead && dep.hrefs.lead === hrefs.lead) return dep;
@@ -229,7 +240,7 @@ function findMatchingDeposit(
 
 function findMatchingSurgery(
   surgeries: readonly ReceptionOsSurgeryItem[],
-  hrefs: ReceptionOsRevenueSubjectSignals["hrefs"],
+  hrefs: ReceptionOsRevenueSubjectSignals["hrefs"]
 ): ReceptionOsSurgeryItem | null {
   for (const surgery of surgeries) {
     if (hrefs.case && surgery.hrefs.case === hrefs.case) return surgery;
@@ -238,10 +249,14 @@ function findMatchingSurgery(
   return null;
 }
 
-function pipelineColumnFromConversion(col: ReceptionOsConversionEnrichmentColumnId, depositNeedsCollection: boolean): ReceptionOsPipelineColumnId {
+function pipelineColumnFromConversion(
+  col: ReceptionOsConversionEnrichmentColumnId,
+  depositNeedsCollection: boolean
+): ReceptionOsPipelineColumnId {
   if (col === "surgery_booked") return "surgery_booked";
   if (depositNeedsCollection) return "deposit_pending";
-  if (col === "quote_sent" || col === "quote_accepted" || col === "quote_drafted") return "quote_sent";
+  if (col === "quote_sent" || col === "quote_accepted" || col === "quote_drafted")
+    return "quote_sent";
   if (col === "consultation_completed") return "consultation_completed";
   if (col === "consultation_booked") return "consultation_booked";
   return "new_lead";
@@ -256,7 +271,12 @@ function hasPaymentLinkFromDepositLine(line: string): boolean {
   const lower = line.toLowerCase();
   if (lower.includes("no manual deposit record")) return false;
   if (lower.includes("no tracking")) return false;
-  return lower.includes("paid") || lower.includes("pending") || lower.includes("partial") || lower.includes("waived");
+  return (
+    lower.includes("paid") ||
+    lower.includes("pending") ||
+    lower.includes("partial") ||
+    lower.includes("waived")
+  );
 }
 
 function estimateQuoteValue(input: {
@@ -269,7 +289,9 @@ function estimateQuoteValue(input: {
   }
 
   const graft = input.graftOrTreatmentLine ?? "";
-  const moneyMatch = graft.match(/(?:AUD|\$)\s*([\d,]+(?:\.\d+)?)/i) ?? graft.match(/([\d,]+(?:\.\d+)?)\s*(?:AUD|\$)/i);
+  const moneyMatch =
+    graft.match(/(?:AUD|\$)\s*([\d,]+(?:\.\d+)?)/i) ??
+    graft.match(/([\d,]+(?:\.\d+)?)\s*(?:AUD|\$)/i);
   if (moneyMatch?.[1]) {
     const parsed = Number(moneyMatch[1].replace(/,/g, ""));
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
@@ -280,16 +302,20 @@ function estimateQuoteValue(input: {
 
 function subjectFromPipelineCard(
   card: ReceptionOsPipelineCard,
-  board: Pick<ReceptionOsBoardPayload, "outstandingDeposits" | "upcomingSurgeries" | "communicationTimeline" | "operationalDay">,
-  commIndex: Map<string, { count: number; daysSinceLast: number | null }>,
+  board: Pick<
+    ReceptionOsBoardPayload,
+    "outstandingDeposits" | "upcomingSurgeries" | "communicationTimeline" | "operationalDay"
+  >,
+  commIndex: Map<string, { count: number; daysSinceLast: number | null }>
 ): ReceptionOsRevenueSubjectSignals {
   const leadId = leadIdFromHref(card.hrefs.lead);
   const comm = leadId ? commIndex.get(leadId) : undefined;
   const deposit = findMatchingDeposit(board.outstandingDeposits, card.hrefs);
   const surgery = findMatchingSurgery(board.upcomingSurgeries, card.hrefs);
-  const leadStatus = card.column === "new_lead" && card.detailLine?.startsWith("CRM · ")
-    ? card.detailLine.replace("CRM · ", "").trim()
-    : null;
+  const leadStatus =
+    card.column === "new_lead" && card.detailLine?.startsWith("CRM · ")
+      ? card.detailLine.replace("CRM · ", "").trim()
+      : null;
 
   return {
     subjectId: card.id,
@@ -300,7 +326,10 @@ function subjectFromPipelineCard(
       card.column === "quote_sent" ||
       card.column === "deposit_pending" ||
       card.column === "surgery_booked",
-    quoteSent: card.column === "quote_sent" || card.column === "deposit_pending" || card.column === "surgery_booked",
+    quoteSent:
+      card.column === "quote_sent" ||
+      card.column === "deposit_pending" ||
+      card.column === "surgery_booked",
     depositRequested: Boolean(deposit) || card.column === "deposit_pending",
     depositOverdue: Boolean(deposit?.isOverdue),
     upcomingSurgeryDate: surgery?.surgeryDate ?? null,
@@ -316,7 +345,8 @@ function subjectFromPipelineCard(
     }),
     currency: deposit?.currency ?? DEFAULT_CURRENCY,
     daysSinceConsultation: null,
-    hasPaymentLink: Boolean(deposit) || card.column === "deposit_pending" || card.column === "surgery_booked",
+    hasPaymentLink:
+      Boolean(deposit) || card.column === "deposit_pending" || card.column === "surgery_booked",
     hrefs: {
       patient: card.hrefs.patient,
       case: card.hrefs.case,
@@ -328,8 +358,11 @@ function subjectFromPipelineCard(
 
 function subjectFromConversionCard(
   card: ReceptionOsConversionEnrichmentCard,
-  board: Pick<ReceptionOsBoardPayload, "outstandingDeposits" | "upcomingSurgeries" | "communicationTimeline" | "operationalDay">,
-  commIndex: Map<string, { count: number; daysSinceLast: number | null }>,
+  board: Pick<
+    ReceptionOsBoardPayload,
+    "outstandingDeposits" | "upcomingSurgeries" | "communicationTimeline" | "operationalDay"
+  >,
+  commIndex: Map<string, { count: number; daysSinceLast: number | null }>
 ): ReceptionOsRevenueSubjectSignals {
   const depositNeeds = depositNeedsCollectionFromLine(card.depositBoardLine);
   const pipelineColumn = pipelineColumnFromConversion(card.primaryColumn, depositNeeds);
@@ -360,7 +393,7 @@ function subjectFromConversionCard(
     communicationCount: comm?.count ?? 0,
     daysSinceLastCommunication: comm?.daysSinceLast ?? null,
     leadStatus: card.leadStageLabel,
-    caseStatus: card.caseId ? card.caseLabel ?? "linked" : null,
+    caseStatus: card.caseId ? (card.caseLabel ?? "linked") : null,
     estimatedQuoteValue: estimateQuoteValue({
       pipelineColumn,
       deposit,
@@ -378,8 +411,13 @@ function subjectFromConversionCard(
   };
 }
 
-export function buildReceptionOsRevenueSubjects(input: ReceptionOsRevenueBuildInput): ReceptionOsRevenueSubjectSignals[] {
-  const commIndex = buildCommunicationIndex(input.board.communicationTimeline, input.board.operationalDay.todayYmd);
+export function buildReceptionOsRevenueSubjects(
+  input: ReceptionOsRevenueBuildInput
+): ReceptionOsRevenueSubjectSignals[] {
+  const commIndex = buildCommunicationIndex(
+    input.board.communicationTimeline,
+    input.board.operationalDay.todayYmd
+  );
   const byId = new Map<string, ReceptionOsRevenueSubjectSignals>();
 
   if (input.conversionColumns) {
@@ -391,7 +429,9 @@ export function buildReceptionOsRevenueSubjects(input: ReceptionOsRevenueBuildIn
     }
   }
 
-  for (const colId of Object.keys(input.board.consultationPipeline.columns) as ReceptionOsPipelineColumnId[]) {
+  for (const colId of Object.keys(
+    input.board.consultationPipeline.columns
+  ) as ReceptionOsPipelineColumnId[]) {
     for (const card of input.board.consultationPipeline.columns[colId]) {
       if (!byId.has(card.id)) {
         byId.set(card.id, subjectFromPipelineCard(card, input.board, commIndex));
@@ -402,7 +442,9 @@ export function buildReceptionOsRevenueSubjects(input: ReceptionOsRevenueBuildIn
   return [...byId.values()];
 }
 
-export function scoreReceptionOsRevenueSubject(subject: ReceptionOsRevenueSubjectSignals): ReceptionOsRevenueScore {
+export function scoreReceptionOsRevenueSubject(
+  subject: ReceptionOsRevenueSubjectSignals
+): ReceptionOsRevenueScore {
   const column = subject.pipelineColumn ?? "new_lead";
   let probability = STAGE_BASE_PROBABILITY[column];
   const riskFlags: string[] = [];
@@ -434,10 +476,16 @@ export function scoreReceptionOsRevenueSubject(subject: ReceptionOsRevenueSubjec
     probability += 6;
   }
 
-  if (subject.daysSinceLastCommunication != null && subject.daysSinceLastCommunication >= LEAD_INACTIVE_DAYS) {
+  if (
+    subject.daysSinceLastCommunication != null &&
+    subject.daysSinceLastCommunication >= LEAD_INACTIVE_DAYS
+  ) {
     probability -= 18;
     riskFlags.push("lead_inactive");
-  } else if (subject.daysSinceLastCommunication != null && subject.daysSinceLastCommunication <= 2) {
+  } else if (
+    subject.daysSinceLastCommunication != null &&
+    subject.daysSinceLastCommunication <= 2
+  ) {
     probability += 6;
   }
 
@@ -456,7 +504,11 @@ export function scoreReceptionOsRevenueSubject(subject: ReceptionOsRevenueSubjec
     probability -= 5;
   }
 
-  if (subject.quoteSent && subject.daysSinceLastCommunication != null && subject.daysSinceLastCommunication * 24 >= FOLLOW_UP_SLA_HOURS) {
+  if (
+    subject.quoteSent &&
+    subject.daysSinceLastCommunication != null &&
+    subject.daysSinceLastCommunication * 24 >= FOLLOW_UP_SLA_HOURS
+  ) {
     riskFlags.push("quote_followup_gap");
     probability -= 8;
   }
@@ -488,21 +540,31 @@ export function scoreReceptionOsRevenueSubject(subject: ReceptionOsRevenueSubjec
   };
 }
 
-function recommendNextAction(subject: ReceptionOsRevenueSubjectSignals, riskFlags: string[]): string {
-  if (riskFlags.includes("deposit_overdue")) return "Chase overdue deposit and confirm payment pathway.";
-  if (riskFlags.includes("surgery_without_deposit")) return "Secure surgery deposit before the held date slips.";
-  if (riskFlags.includes("no_quote_after_consult")) return "Send quote and schedule follow-up within 48 hours.";
-  if (riskFlags.includes("quote_followup_gap")) return "Follow up on sent quote — no contact in 48+ hours.";
-  if (riskFlags.includes("missing_payment_link")) return "Send finance/payment link for requested deposit.";
+function recommendNextAction(
+  subject: ReceptionOsRevenueSubjectSignals,
+  riskFlags: string[]
+): string {
+  if (riskFlags.includes("deposit_overdue"))
+    return "Chase overdue deposit and confirm payment pathway.";
+  if (riskFlags.includes("surgery_without_deposit"))
+    return "Secure surgery deposit before the held date slips.";
+  if (riskFlags.includes("no_quote_after_consult"))
+    return "Send quote and schedule follow-up within 48 hours.";
+  if (riskFlags.includes("quote_followup_gap"))
+    return "Follow up on sent quote — no contact in 48+ hours.";
+  if (riskFlags.includes("missing_payment_link"))
+    return "Send finance/payment link for requested deposit.";
   if (riskFlags.includes("lead_inactive")) return "Re-engage lead — no communication in 7+ days.";
-  if (subject.pipelineColumn === "quote_sent") return "Confirm quote acceptance and move to deposit.";
+  if (subject.pipelineColumn === "quote_sent")
+    return "Confirm quote acceptance and move to deposit.";
   if (subject.pipelineColumn === "consultation_completed") return "Draft and send treatment quote.";
-  if (subject.pipelineColumn === "deposit_pending") return "Confirm deposit receipt and book surgery.";
+  if (subject.pipelineColumn === "deposit_pending")
+    return "Confirm deposit receipt and book surgery.";
   return "Maintain cadence and advance to next conversion step.";
 }
 
 export function detectReceptionOsFollowUpSlaBreaches(
-  subjects: readonly ReceptionOsRevenueSubjectSignals[],
+  subjects: readonly ReceptionOsRevenueSubjectSignals[]
 ): ReceptionOsRevenueRiskAlert[] {
   const alerts: ReceptionOsRevenueRiskAlert[] = [];
 
@@ -527,7 +589,11 @@ export function detectReceptionOsFollowUpSlaBreaches(
       });
     }
 
-    if (subject.quoteSent && subject.daysSinceLastCommunication != null && subject.daysSinceLastCommunication * 24 >= FOLLOW_UP_SLA_HOURS) {
+    if (
+      subject.quoteSent &&
+      subject.daysSinceLastCommunication != null &&
+      subject.daysSinceLastCommunication * 24 >= FOLLOW_UP_SLA_HOURS
+    ) {
       alerts.push({
         id: `sla-quote-followup-${subject.subjectId}`,
         kind: "quote_followup_sla_breach",
@@ -644,7 +710,9 @@ export function buildReceptionOsLostRevenueAlerts(input: {
 
 export function buildReceptionOsConversionScoreboard(input: {
   board: Pick<ReceptionOsBoardPayload, "operationalDay" | "consultationPipeline">;
-  conversionColumns?: Partial<Record<ReceptionOsConversionEnrichmentColumnId, readonly ReceptionOsConversionEnrichmentCard[]>>;
+  conversionColumns?: Partial<
+    Record<ReceptionOsConversionEnrichmentColumnId, readonly ReceptionOsConversionEnrichmentCard[]>
+  >;
   scores: readonly ReceptionOsRevenueScore[];
   revenueRiskAlerts: readonly ReceptionOsRevenueRiskAlert[];
   depositsCollectedToday?: number;
@@ -660,7 +728,8 @@ export function buildReceptionOsConversionScoreboard(input: {
     }
     for (const col of ["quote_sent", "quote_accepted"] as const) {
       for (const card of input.conversionColumns[col] ?? []) {
-        if (card.consultationDateYmd === todayYmd || card.daysSinceConsultation === 0) quotesSentToday += 1;
+        if (card.consultationDateYmd === todayYmd || card.daysSinceConsultation === 0)
+          quotesSentToday += 1;
       }
     }
   } else {
@@ -669,7 +738,10 @@ export function buildReceptionOsConversionScoreboard(input: {
   }
 
   const projectedWeightedRevenue = input.scores.reduce((sum, s) => sum + s.weightedRevenue, 0);
-  const atRiskRevenue = input.revenueRiskAlerts.reduce((sum, a) => sum + (a.estimatedRevenueAtRisk ?? 0), 0);
+  const atRiskRevenue = input.revenueRiskAlerts.reduce(
+    (sum, a) => sum + (a.estimatedRevenueAtRisk ?? 0),
+    0
+  );
 
   return {
     consultsCompletedToday,
@@ -689,16 +761,22 @@ export function buildReceptionOsRevenueSummary(input: {
   const { scores, subjects } = input;
   const currency = scores[0]?.currency ?? DEFAULT_CURRENCY;
   const totalWeightedRevenue = scores.reduce((sum, s) => sum + s.weightedRevenue, 0);
-  const atRiskSubjectIds = new Set(scores.filter((s) => s.riskFlags.length > 0).map((s) => s.subjectId));
+  const atRiskSubjectIds = new Set(
+    scores.filter((s) => s.riskFlags.length > 0).map((s) => s.subjectId)
+  );
   const totalAtRiskRevenue = subjects
     .filter((s) => atRiskSubjectIds.has(s.subjectId))
     .reduce((sum, s) => sum + s.estimatedQuoteValue, 0);
   const averageProbabilityPercent =
-    scores.length > 0 ? Math.round(scores.reduce((sum, s) => sum + s.probabilityPercent, 0) / scores.length) : 0;
+    scores.length > 0
+      ? Math.round(scores.reduce((sum, s) => sum + s.probabilityPercent, 0) / scores.length)
+      : 0;
 
   const topOpportunities = scores
     .slice()
-    .sort((a, b) => b.weightedRevenue - a.weightedRevenue || b.probabilityPercent - a.probabilityPercent)
+    .sort(
+      (a, b) => b.weightedRevenue - a.weightedRevenue || b.probabilityPercent - a.probabilityPercent
+    )
     .slice(0, 8);
 
   return {
@@ -711,7 +789,9 @@ export function buildReceptionOsRevenueSummary(input: {
   };
 }
 
-export function buildReceptionOsRevenueIntelligence(input: ReceptionOsRevenueBuildInput): ReceptionOsRevenueIntelligencePayload {
+export function buildReceptionOsRevenueIntelligence(
+  input: ReceptionOsRevenueBuildInput
+): ReceptionOsRevenueIntelligencePayload {
   const subjects = buildReceptionOsRevenueSubjects(input);
   const scores = subjects.map(scoreReceptionOsRevenueSubject);
   const revenueRiskAlerts = buildReceptionOsLostRevenueAlerts({
@@ -732,7 +812,9 @@ export function buildReceptionOsRevenueIntelligence(input: ReceptionOsRevenueBui
   return { revenueSummary, conversionScoreboard, revenueRiskAlerts };
 }
 
-export function revenueIntelligenceAccessForRole(role: ReceptionOsViewerRole): ReceptionOsRevenueIntelligenceAccess {
+export function revenueIntelligenceAccessForRole(
+  role: ReceptionOsViewerRole
+): ReceptionOsRevenueIntelligenceAccess {
   if (role === "admin" || role === "clinic_manager") return "full";
   if (role === "consultant") return "summary";
   return "none";
@@ -742,7 +824,9 @@ export function conversionScoreboardVisibleForRole(role: ReceptionOsViewerRole):
   return revenueIntelligenceAccessForRole(role) !== "none";
 }
 
-export function phase3WidgetsForRole(role: ReceptionOsViewerRole): readonly ReceptionOsPhase3WidgetKey[] {
+export function phase3WidgetsForRole(
+  role: ReceptionOsViewerRole
+): readonly ReceptionOsPhase3WidgetKey[] {
   const access = revenueIntelligenceAccessForRole(role);
   if (access === "full") return RECEPTION_OS_PHASE3_WIDGET_KEYS;
   if (access === "summary") return ["conversion_scoreboard"];

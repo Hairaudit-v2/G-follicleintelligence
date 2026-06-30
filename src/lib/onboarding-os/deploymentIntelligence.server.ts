@@ -55,10 +55,9 @@ const ACTIVE_PROVISIONING_STATUSES: ProvisioningSessionStatus[] = [
   "failed",
 ];
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
@@ -96,7 +95,10 @@ async function resolveReadAuth(
   return { ok: true };
 }
 
-async function loadSessionById(supabase: SupabaseClient, sessionId: string): Promise<SessionRow | null> {
+async function loadSessionById(
+  supabase: SupabaseClient,
+  sessionId: string
+): Promise<SessionRow | null> {
   const { data, error } = await supabase
     .from("fi_tenant_provisioning_sessions")
     .select(
@@ -249,7 +251,9 @@ export async function persistDeploymentIntelligenceSnapshot(
     .single();
 
   if (error) {
-    logStructured("warn", "deployment_intelligence.snapshot_persist_failed", { error: error.message });
+    logStructured("warn", "deployment_intelligence.snapshot_persist_failed", {
+      error: error.message,
+    });
     return null;
   }
   return String((data as { id: string }).id);
@@ -280,7 +284,10 @@ export async function loadDeploymentIntelligenceSnapshot(
 
     return { ok: true, snapshot };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load deployment intelligence." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load deployment intelligence.",
+    };
   }
 }
 
@@ -299,7 +306,10 @@ export async function loadDeploymentIntelligenceSnapshotForTenant(
       persistSnapshot: opts.persistSnapshot ?? false,
     });
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load deployment intelligence." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load deployment intelligence.",
+    };
   }
 }
 
@@ -312,7 +322,9 @@ function resolveGoLiveApprovalState(
   return "pending";
 }
 
-function snapshotToDashboardRow(snapshot: DeploymentIntelligenceSnapshot): PlatformDeploymentDashboardRow {
+function snapshotToDashboardRow(
+  snapshot: DeploymentIntelligenceSnapshot
+): PlatformDeploymentDashboardRow {
   const criticalBlockers = snapshot.recommendations
     .filter((r) => r.severity === "blocker")
     .map((r) => r.message)
@@ -369,7 +381,9 @@ export async function loadPlatformDeploymentDashboard(
         tenantId: session.tenant_id,
         tenantName: session.tenant_name,
         tenantSlug: session.tenant_slug,
-        countryLabel: inferCountryLabelFromTimezone((session.input_snapshot as ProvisioningInput).defaultTimezone),
+        countryLabel: inferCountryLabelFromTimezone(
+          (session.input_snapshot as ProvisioningInput).defaultTimezone
+        ),
         provisioningStatus: session.status as ProvisioningSessionStatus,
         provisioningProgressPercent: session.progress_percent ?? 0,
         deploymentScore: 0,

@@ -80,7 +80,9 @@ export class AnalyticsEventValidationError extends Error {
 
 function mapRow(raw: Record<string, unknown>): FiAnalyticsEventRow {
   const metadata =
-    raw.event_metadata && typeof raw.event_metadata === "object" && !Array.isArray(raw.event_metadata)
+    raw.event_metadata &&
+    typeof raw.event_metadata === "object" &&
+    !Array.isArray(raw.event_metadata)
       ? (raw.event_metadata as Record<string, unknown>)
       : {};
   return {
@@ -209,10 +211,13 @@ export async function publishAnalyticsEvent(
   }
 }
 
-function applyEventFilters<T extends { eq: (col: string, val: unknown) => T; gte: (col: string, val: string) => T; lte: (col: string, val: string) => T }>(
-  query: T,
-  filters: GetAnalyticsEventsFilters
-): T {
+function applyEventFilters<
+  T extends {
+    eq: (col: string, val: unknown) => T;
+    gte: (col: string, val: string) => T;
+    lte: (col: string, val: string) => T;
+  },
+>(query: T, filters: GetAnalyticsEventsFilters): T {
   let q = query.eq("tenant_id", filters.tenantId);
   if (filters.clinicId?.trim()) q = q.eq("clinic_id", filters.clinicId.trim());
   if (filters.moduleName) q = q.eq("module_name", filters.moduleName);
@@ -243,7 +248,11 @@ export async function getAnalyticsEvents(
 export async function getAnalyticsEventsByModule(
   tenantId: string,
   moduleName: AnalyticsModuleName,
-  options?: AnalyticsEventCoreOptions & { limit?: number; occurredAfter?: string; occurredBefore?: string }
+  options?: AnalyticsEventCoreOptions & {
+    limit?: number;
+    occurredAfter?: string;
+    occurredBefore?: string;
+  }
 ): Promise<FiAnalyticsEventRow[]> {
   return getAnalyticsEvents(
     {
@@ -334,7 +343,9 @@ export function assertAnalyticsEventsTenantScoped(
   const tid = tenantId.trim();
   for (const event of events) {
     if (event.tenant_id !== tid) {
-      throw new Error(`Analytics event ${event.id} belongs to tenant ${event.tenant_id}, not ${tid}.`);
+      throw new Error(
+        `Analytics event ${event.id} belongs to tenant ${event.tenant_id}, not ${tid}.`
+      );
     }
   }
 }

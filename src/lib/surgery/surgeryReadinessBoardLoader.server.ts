@@ -17,11 +17,18 @@ import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstan
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
-import { buildFinancialClearanceMapFromPipeline, type FinancialClearanceResult } from "@/src/lib/financialOs/financialClearance.server";
+import {
+  buildFinancialClearanceMapFromPipeline,
+  type FinancialClearanceResult,
+} from "@/src/lib/financialOs/financialClearance.server";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
-import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
+import {
+  paymentRecordNeedsCollection,
+  surgeryDepositBoardLabel,
+  SURGERY_DEPOSIT_BOARD_COPY,
+} from "@/src/lib/payments/paymentRecordModel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { loadClinicalStaffingSummariesForBookings } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 import {
@@ -116,11 +123,18 @@ export async function loadPatientLabelsForBookings(
   }
   const out = new Map<string, string>();
   if (personIds.size) {
-    const { data, error } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid).in("id", Array.from(personIds));
+    const { data, error } = await supabase
+      .from("fi_persons")
+      .select("id, metadata")
+      .eq("tenant_id", tid)
+      .in("id", Array.from(personIds));
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; metadata: unknown };
-      const m = r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
+      const m =
+        r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : {};
       out.set(`person:${String(r.id)}`, displayFromPersonMetadata(m).name);
     }
   }
@@ -138,12 +152,19 @@ export async function loadPatientLabelsForBookings(
     }
     const extraPersonIds = uniqueStrings(Array.from(pToPerson.values()));
     if (extraPersonIds.length) {
-      const { data: persons, error: pe } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid).in("id", extraPersonIds);
+      const { data: persons, error: pe } = await supabase
+        .from("fi_persons")
+        .select("id, metadata")
+        .eq("tenant_id", tid)
+        .in("id", extraPersonIds);
       if (pe) throw new Error(pe.message);
       const labelByPerson = new Map<string, string>();
       for (const raw of persons ?? []) {
         const r = raw as { id: string; metadata: unknown };
-        const m = r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
+        const m =
+          r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+            ? (r.metadata as Record<string, unknown>)
+            : {};
         labelByPerson.set(String(r.id), displayFromPersonMetadata(m).name);
       }
       pToPerson.forEach((personId, pid) => {
@@ -173,15 +194,26 @@ export async function loadStaffAndUserLabels(
   const staffNames = new Map<string, string>();
   const userEmails = new Map<string, string>();
   if (staffIds.length) {
-    const { data, error } = await supabase.from("fi_staff").select("id, full_name, email").eq("tenant_id", tid).in("id", staffIds);
+    const { data, error } = await supabase
+      .from("fi_staff")
+      .select("id, full_name, email")
+      .eq("tenant_id", tid)
+      .in("id", staffIds);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; full_name: string | null; email: string | null };
-      staffNames.set(String(r.id), String(r.full_name ?? "").trim() || String(r.email ?? "").trim() || "Staff");
+      staffNames.set(
+        String(r.id),
+        String(r.full_name ?? "").trim() || String(r.email ?? "").trim() || "Staff"
+      );
     }
   }
   if (userIds.length) {
-    const { data, error } = await supabase.from("fi_users").select("id, email").eq("tenant_id", tid).in("id", userIds);
+    const { data, error } = await supabase
+      .from("fi_users")
+      .select("id, email")
+      .eq("tenant_id", tid)
+      .in("id", userIds);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; email: string | null };
@@ -202,7 +234,11 @@ export async function loadPathologyPatientSets(
   const abnormalTotalByPatient = new Map<string, number>();
   if (ids.length === 0) return { withResult, abnormalTotalByPatient };
 
-  const { data: resRows, error } = await supabase.from("fi_pathology_results").select("id, patient_id").eq("tenant_id", tid).in("patient_id", ids);
+  const { data: resRows, error } = await supabase
+    .from("fi_pathology_results")
+    .select("id, patient_id")
+    .eq("tenant_id", tid)
+    .in("patient_id", ids);
   if (error) throw new Error(error.message);
   const resultIds: string[] = [];
   for (const raw of resRows ?? []) {
@@ -256,7 +292,10 @@ export async function loadConsultationsByCaseId(
     const r = raw as { case_id: string | null; status: string; quote_data: unknown };
     const cid = r.case_id != null ? String(r.case_id) : null;
     if (!cid) continue;
-    const qd = r.quote_data && typeof r.quote_data === "object" && !Array.isArray(r.quote_data) ? (r.quote_data as Record<string, unknown>) : {};
+    const qd =
+      r.quote_data && typeof r.quote_data === "object" && !Array.isArray(r.quote_data)
+        ? (r.quote_data as Record<string, unknown>)
+        : {};
     const row: ConsultationConsentInput = { status: String(r.status ?? ""), quote_data: qd };
     const list = map.get(cid) ?? [];
     list.push(row);
@@ -265,7 +304,10 @@ export async function loadConsultationsByCaseId(
   return map;
 }
 
-export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Date = new Date()): Promise<SurgeryReadinessBoardPayload> {
+export async function loadSurgeryReadinessBoardPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<SurgeryReadinessBoardPayload> {
   const tid = tenantId.trim();
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const window = computeSurgeryReadinessBoardWindow(now, calendarTimezone);
@@ -283,7 +325,12 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
     (b) =>
       b.booking_type.trim().toLowerCase() === "surgery" &&
       isActiveSurgeryBookingStatus(b.booking_status) &&
-      isInstantInTenantInclusiveDayWindow(Date.parse(b.start_at), window.calendarTimezone, window.todayYmd, window.windowEndYmd)
+      isInstantInTenantInclusiveDayWindow(
+        Date.parse(b.start_at),
+        window.calendarTimezone,
+        window.todayYmd,
+        window.windowEndYmd
+      )
   );
 
   const supabase = supabaseAdmin();
@@ -312,8 +359,13 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
   }
 
   const surgeryBookingIds = surgeryBookings.map((b) => b.id);
-  const [pathologySets, consultationsByCase, surgeryPayments, financialByBooking, clinicalStaffingByBooking] =
-    await Promise.all([
+  const [
+    pathologySets,
+    consultationsByCase,
+    surgeryPayments,
+    financialByBooking,
+    clinicalStaffingByBooking,
+  ] = await Promise.all([
     loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology)),
     loadConsultationsByCaseId(supabase, tid, caseIds),
     loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
@@ -359,11 +411,14 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
 
   for (const b of surgeryBookings) {
     const caseId = b.case_id?.trim() || null;
-    const work = caseId ? worklistById.get(caseId) ?? null : null;
+    const work = caseId ? (worklistById.get(caseId) ?? null) : null;
     const surgeryLocalYmd = calendarDateStringFromInstant(new Date(b.start_at), tz);
     const daysUntil = calendarDaysUntilSurgery(tz, window.todayYmd, b.start_at);
 
-    const patientLabelFromCase = work?.person_label?.trim() && work.person_label.trim() !== "—" ? work.person_label.trim() : null;
+    const patientLabelFromCase =
+      work?.person_label?.trim() && work.person_label.trim() !== "—"
+        ? work.person_label.trim()
+        : null;
     const pl =
       patientLabelFromCase ||
       (b.patient_id?.trim() ? bookingLabels.get(`patient:${b.patient_id.trim()}`) : null) ||
@@ -379,15 +434,20 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       assignee = assigneeLabels.userEmails.get(b.assigned_user_id.trim()) ?? null;
     }
 
-    const patientIdForPathology = b.patient_id?.trim() || (work ? resolvePatientIdForCaseRow(work) : null);
-    const hasPathology = patientIdForPathology ? pathologySets.withResult.has(patientIdForPathology) : false;
-    const consultRows = caseId ? consultationsByCase.get(caseId) ?? [] : [];
+    const patientIdForPathology =
+      b.patient_id?.trim() || (work ? resolvePatientIdForCaseRow(work) : null);
+    const hasPathology = patientIdForPathology
+      ? pathologySets.withResult.has(patientIdForPathology)
+      : false;
+    const consultRows = caseId ? (consultationsByCase.get(caseId) ?? []) : [];
     const hasConsent = hasConsultationConsentSignal(consultRows);
 
-    const abnormalN = patientIdForPathology ? pathologySets.abnormalTotalByPatient.get(patientIdForPathology) ?? 0 : 0;
+    const abnormalN = patientIdForPathology
+      ? (pathologySets.abnormalTotalByPatient.get(patientIdForPathology) ?? 0)
+      : 0;
 
     const payByBooking = surgeryPayments.byBookingId.get(b.id) ?? null;
-    const payByCase = caseId ? surgeryPayments.byCaseId.get(caseId) ?? null : null;
+    const payByCase = caseId ? (surgeryPayments.byCaseId.get(caseId) ?? null) : null;
     const surgeryPaymentRow: PaymentRecordRow | null = payByBooking ?? payByCase;
     if (surgeryPaymentRow) {
       depositTracked += 1;
@@ -460,12 +520,17 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
   }
 
   for (const k of Object.keys(columns) as SurgeryReadinessBoardColumnId[]) {
-    columns[k].sort((a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel));
+    columns[k].sort(
+      (a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel)
+    );
   }
 
   return {
     window,
     columns,
-    kpis: aggregateSurgeryReadinessKpis(columns, { tracked: depositTracked, pending: depositPending }),
+    kpis: aggregateSurgeryReadinessKpis(columns, {
+      tracked: depositTracked,
+      pending: depositPending,
+    }),
   };
 }

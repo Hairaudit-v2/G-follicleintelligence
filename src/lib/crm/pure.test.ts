@@ -30,7 +30,11 @@ describe("CRM pipeline defaults", () => {
       clinicId: null,
     });
     assert.equal(rows.length, defaultHairRestorationPipelineDefinitions().length);
-    assert.ok(rows.every((r) => r.tenant_id === tenantId && r.organisation_id === orgId && r.clinic_id === null));
+    assert.ok(
+      rows.every(
+        (r) => r.tenant_id === tenantId && r.organisation_id === orgId && r.clinic_id === null
+      )
+    );
     const sorted = sortPipelineStagesByOrder(rows);
     for (let i = 1; i < sorted.length; i++) {
       assert.ok(sorted[i].sort_order > sorted[i - 1].sort_order);

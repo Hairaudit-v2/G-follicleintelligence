@@ -42,7 +42,10 @@ function BrandingBlock({
           aria-hidden
         />
       ) : null}
-      <div className="relative flex flex-wrap items-start gap-3 border-l-4 pl-3" style={{ borderLeftColor: accent }}>
+      <div
+        className="relative flex flex-wrap items-start gap-3 border-l-4 pl-3"
+        style={{ borderLeftColor: accent }}
+      >
         {logoSrc ? (
           <div className="shrink-0 pt-0.5">
             <BrandLogoImage
@@ -55,18 +58,28 @@ function BrandingBlock({
           </div>
         ) : null}
         <div className="min-w-0 flex-1 space-y-1">
-          <p className={`text-base font-semibold tracking-tight ${density === "layout" ? "text-[#F8FAFC]" : "text-slate-100"}`}>
+          <p
+            className={`text-base font-semibold tracking-tight ${density === "layout" ? "text-[#F8FAFC]" : "text-slate-100"}`}
+          >
             {headline}
           </p>
           {clinicLine ? (
             <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-slate-400"}`}>
-              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-slate-300"}`}>Clinic:</span>{" "}
+              <span
+                className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-slate-300"}`}
+              >
+                Clinic:
+              </span>{" "}
               {clinicLine}
             </p>
           ) : null}
           {support ? (
             <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-slate-400"}`}>
-              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-slate-300"}`}>Support:</span>{" "}
+              <span
+                className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-slate-300"}`}
+              >
+                Support:
+              </span>{" "}
               <a
                 href={`mailto:${encodeURIComponent(support)}`}
                 className="underline decoration-dotted underline-offset-2 hover:opacity-90"
@@ -103,7 +116,9 @@ export function FiTenantBrandFrame({
   if (variant === "page-preview") {
     return (
       <div className="space-y-1" style={buildBrandingCssVariables(effective)}>
-        <p className="text-xs font-medium uppercase tracking-wide text-amber-200">Cascade preview</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-amber-200">
+          Cascade preview
+        </p>
         <BrandingBlock effective={effective} density="preview" />
       </div>
     );

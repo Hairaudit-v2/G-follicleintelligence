@@ -1,7 +1,13 @@
 import "server-only";
 
-import { classifyHairRestorationImageWithOpenAi, HLI_IMAGE_CLASSIFIER_VERSION } from "./openAiHairImageClassifier.server";
-import { hairImageClassificationNotConfiguredResult, isOpenAiApiKeyConfigured } from "./classifyClinicalHairImageFallback";
+import {
+  classifyHairRestorationImageWithOpenAi,
+  HLI_IMAGE_CLASSIFIER_VERSION,
+} from "./openAiHairImageClassifier.server";
+import {
+  hairImageClassificationNotConfiguredResult,
+  isOpenAiApiKeyConfigured,
+} from "./classifyClinicalHairImageFallback";
 import type { FiAiImageClassificationResult } from "./types";
 
 export type ClassifyClinicalHairImageOutcome = {

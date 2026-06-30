@@ -2,9 +2,17 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { buildPhotoProtocolAlerts } from "./protocolAlerts";
-import { calculatePhotoProtocolAnalytics, type PhotoProtocolAnalyticsInput } from "./protocolAnalytics";
+import {
+  calculatePhotoProtocolAnalytics,
+  type PhotoProtocolAnalyticsInput,
+} from "./protocolAnalytics";
 import { PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE } from "./protocolSessionRules";
-import type { HliPhotoProtocolSession, HliPhotoProtocolSessionSlot, HliPhotoProtocolSlot, HliPhotoProtocolTemplate } from "./types";
+import type {
+  HliPhotoProtocolSession,
+  HliPhotoProtocolSessionSlot,
+  HliPhotoProtocolSlot,
+  HliPhotoProtocolTemplate,
+} from "./types";
 
 const TEMPLATE_ID = "00000000-0000-4000-8000-000000000001";
 
@@ -23,7 +31,10 @@ function tpl(overrides: Partial<HliPhotoProtocolTemplate> = {}): HliPhotoProtoco
   };
 }
 
-function slotDef(p: Partial<HliPhotoProtocolSlot> & Pick<HliPhotoProtocolSlot, "id" | "slot_slug" | "label" | "is_required">): HliPhotoProtocolSlot {
+function slotDef(
+  p: Partial<HliPhotoProtocolSlot> &
+    Pick<HliPhotoProtocolSlot, "id" | "slot_slug" | "label" | "is_required">
+): HliPhotoProtocolSlot {
   return {
     protocol_template_id: TEMPLATE_ID,
     required_image_category: "front",
@@ -38,7 +49,9 @@ function slotDef(p: Partial<HliPhotoProtocolSlot> & Pick<HliPhotoProtocolSlot, "
   };
 }
 
-function session(p: Partial<HliPhotoProtocolSession> & Pick<HliPhotoProtocolSession, "id" | "status">): HliPhotoProtocolSession {
+function session(
+  p: Partial<HliPhotoProtocolSession> & Pick<HliPhotoProtocolSession, "id" | "status">
+): HliPhotoProtocolSession {
   return {
     source_system: "fi_os",
     source_record_id: "x",
@@ -56,7 +69,10 @@ function session(p: Partial<HliPhotoProtocolSession> & Pick<HliPhotoProtocolSess
   };
 }
 
-function ss(p: Partial<HliPhotoProtocolSessionSlot> & Pick<HliPhotoProtocolSessionSlot, "id" | "session_id" | "slot_id" | "status">): HliPhotoProtocolSessionSlot {
+function ss(
+  p: Partial<HliPhotoProtocolSessionSlot> &
+    Pick<HliPhotoProtocolSessionSlot, "id" | "session_id" | "slot_id" | "status">
+): HliPhotoProtocolSessionSlot {
   return {
     patient_image_id: null,
     ai_match_confidence: null,
@@ -134,7 +150,9 @@ describe("protocolAnalytics (Stage 8C)", () => {
   });
 
   it("counts needs review for captured required slots below strong threshold", () => {
-    const slots = [slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 })];
+    const slots = [
+      slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 }),
+    ];
     const sessions = [session({ id: "e1", status: "in_progress" })];
     const sessionSlots = [
       ss({
@@ -150,7 +168,9 @@ describe("protocolAnalytics (Stage 8C)", () => {
   });
 
   it("computes audit readiness score in 0–100 range", () => {
-    const slots = [slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 })];
+    const slots = [
+      slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 }),
+    ];
     const sessions = [session({ id: "e1", status: "complete" })];
     const sessionSlots = [ss({ id: "1", session_id: "e1", slot_id: "s1", status: "accepted" })];
     const r = calculatePhotoProtocolAnalytics(inputFrom(sessions, sessionSlots, slots));
@@ -160,12 +180,22 @@ describe("protocolAnalytics (Stage 8C)", () => {
 
 describe("protocolAlerts (Stage 8C)", () => {
   it("emits protocol_incomplete_over_24h for old in_progress sessions", () => {
-    const slots = [slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 })];
+    const slots = [
+      slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 }),
+    ];
     const slotsByTemplateId = new Map([[TEMPLATE_ID, slots]]);
     const started = "2026-06-01T10:00:00.000Z";
     const now = new Date("2026-06-03T12:00:00.000Z");
     const sessions = [session({ id: "e1", status: "in_progress", started_at: started })];
-    const sessionSlots = [ss({ id: "1", session_id: "e1", slot_id: "s1", status: "captured", ai_match_confidence: 0.9 })];
+    const sessionSlots = [
+      ss({
+        id: "1",
+        session_id: "e1",
+        slot_id: "s1",
+        status: "captured",
+        ai_match_confidence: 0.9,
+      }),
+    ];
     const alerts = buildPhotoProtocolAlerts({ sessions, sessionSlots, slotsByTemplateId, now });
     const t = alerts.find((a) => a.type === "protocol_incomplete_over_24h");
     assert.ok(t);
@@ -173,9 +203,13 @@ describe("protocolAlerts (Stage 8C)", () => {
   });
 
   it("emits needs_retake alert when required slot flagged", () => {
-    const slots = [slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 })];
+    const slots = [
+      slotDef({ id: "s1", slot_slug: "front", label: "Front", is_required: true, sort_order: 1 }),
+    ];
     const slotsByTemplateId = new Map([[TEMPLATE_ID, slots]]);
-    const sessions = [session({ id: "e1", status: "in_progress", started_at: new Date().toISOString() })];
+    const sessions = [
+      session({ id: "e1", status: "in_progress", started_at: new Date().toISOString() }),
+    ];
     const sessionSlots = [ss({ id: "1", session_id: "e1", slot_id: "s1", status: "needs_retake" })];
     const alerts = buildPhotoProtocolAlerts({ sessions, sessionSlots, slotsByTemplateId });
     assert.ok(alerts.some((a) => a.type === "needs_retake"));

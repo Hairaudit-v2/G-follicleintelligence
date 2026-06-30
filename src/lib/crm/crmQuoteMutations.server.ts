@@ -33,17 +33,28 @@ export async function markCrmQuoteAcceptedForTenant(
   const tid = assertNonEmptyUuid(args.tenantId, "tenantId");
   const qid = assertNonEmptyUuid(args.quoteId, "quoteId");
 
-  const { data: qRow, error: qe } = await supabase.from("fi_crm_quotes").select("*").eq("tenant_id", tid).eq("id", qid).maybeSingle();
+  const { data: qRow, error: qe } = await supabase
+    .from("fi_crm_quotes")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", qid)
+    .maybeSingle();
   if (qe) throw new Error(qe.message);
   if (!qRow) throw new Error("Quote not found.");
 
   const status = String((qRow as { status?: unknown }).status ?? "").trim();
-  const rowCaseId = (qRow as { case_id?: string | null }).case_id != null ? String((qRow as { case_id: string }).case_id) : null;
+  const rowCaseId =
+    (qRow as { case_id?: string | null }).case_id != null
+      ? String((qRow as { case_id: string }).case_id)
+      : null;
   const rowConsultationId =
     (qRow as { consultation_id?: string | null }).consultation_id != null
       ? String((qRow as { consultation_id: string }).consultation_id)
       : null;
-  const rowLeadId = (qRow as { lead_id?: string | null }).lead_id != null ? String((qRow as { lead_id: string }).lead_id) : null;
+  const rowLeadId =
+    (qRow as { lead_id?: string | null }).lead_id != null
+      ? String((qRow as { lead_id: string }).lead_id)
+      : null;
 
   if (status === "accepted") {
     return {
@@ -89,7 +100,12 @@ export async function markCrmQuoteAcceptedForTenant(
       supabase
     );
 
-    const { data: leadRaw, error: le } = await supabase.from("fi_crm_leads").select("*").eq("tenant_id", tid).eq("id", leadId).maybeSingle();
+    const { data: leadRaw, error: le } = await supabase
+      .from("fi_crm_leads")
+      .select("*")
+      .eq("tenant_id", tid)
+      .eq("id", leadId)
+      .maybeSingle();
     if (!le && leadRaw) {
       const lead = leadRaw as Record<string, unknown>;
       const orgClinic = normaliseOrgClinicScope({

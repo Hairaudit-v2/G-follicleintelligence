@@ -91,14 +91,24 @@ export function PatientDetailPageView({
       />
 
       <Suspense fallback={null}>
-        <PatientDetailPreviewUrlSync currentPatientId={patientId} previewPatientId={previewPatientId} />
+        <PatientDetailPreviewUrlSync
+          currentPatientId={patientId}
+          previewPatientId={previewPatientId}
+        />
       </Suspense>
 
       <Suspense fallback={null}>
         <PatientPhotoAddedFeedback />
       </Suspense>
 
-      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
+            aria-hidden
+          />
+        }
+      >
         <PatientDetailTabNav tenantId={tenantId} patientId={patientId} activeTab={activeTab} />
       </Suspense>
 
@@ -117,10 +127,16 @@ export function PatientDetailPageView({
 
       {activeTab === "clinical" ? (
         <div className="space-y-4">
-          <PatientVoiceClinicalNotesCard tenantId={tenantId} items={initialPayload.voiceClinicalNotes} />
+          <PatientVoiceClinicalNotesCard
+            tenantId={tenantId}
+            items={initialPayload.voiceClinicalNotes}
+          />
           <PatientClinicalDetailsCard tenantId={tenantId} data={profile} />
           <PatientPreviousProceduresCard procedures={initialPayload.previousProcedures} />
-          <PatientConsultationsCard tenantId={tenantId} consultations={initialPayload.consultations} />
+          <PatientConsultationsCard
+            tenantId={tenantId}
+            consultations={initialPayload.consultations}
+          />
         </div>
       ) : null}
 
@@ -143,23 +159,35 @@ export function PatientDetailPageView({
             items={initialPayload.personLeadHistory}
             activity={initialPayload.personCrmActivity}
           />
-          <PatientConsultationsCard tenantId={tenantId} consultations={initialPayload.consultations} />
+          <PatientConsultationsCard
+            tenantId={tenantId}
+            consultations={initialPayload.consultations}
+          />
           <PatientPreviousProceduresCard procedures={initialPayload.previousProcedures} />
           <PatientCasesCard tenantId={tenantId} data={profile} />
         </div>
       ) : null}
 
       {activeTab === "timeline" ? (
-        <PatientTreatmentTimelineCard patientTimeline={profile.patientTimeline} patientImages={profile.patientImages} />
+        <PatientTreatmentTimelineCard
+          patientTimeline={profile.patientTimeline}
+          patientImages={profile.patientImages}
+        />
       ) : null}
 
       {activeTab === "prescriptions" ? prescriptionsTab : null}
 
       {activeTab === "payments" ? (
-        <PatientRevenueInvoicesPanel tenantId={tenantId} patientId={patientId} summary={patientInvoiceSummary} />
+        <PatientRevenueInvoicesPanel
+          tenantId={tenantId}
+          patientId={patientId}
+          summary={patientInvoiceSummary}
+        />
       ) : null}
 
-      {activeTab === "documents" ? <PatientDocumentsTab tenantId={tenantId} data={profile} /> : null}
+      {activeTab === "documents" ? (
+        <PatientDocumentsTab tenantId={tenantId} data={profile} />
+      ) : null}
 
       <PatientPhotoCaptureActions
         tenantId={tenantId}

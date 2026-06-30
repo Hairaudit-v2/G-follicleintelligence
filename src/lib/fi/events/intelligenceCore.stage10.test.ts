@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it, beforeEach, afterEach } from "node:test";
 
-import { INTELLIGENCE_EVENT_NAMES, parseIntelligenceEventEnvelope } from "@follicle/intelligence-core";
+import {
+  INTELLIGENCE_EVENT_NAMES,
+  parseIntelligenceEventEnvelope,
+} from "@follicle/intelligence-core";
 import { fiEventTypeSchema, FI_INGEST_CROSS_SYSTEM_EVENT_TYPES } from "@/lib/fi/events/schema";
 import { FI_EVENT_TYPES, FI_VOCABULARY_OUTSIDE_INTELLIGENCE_CORE } from "@/src/lib/fi/vocabulary";
 import {

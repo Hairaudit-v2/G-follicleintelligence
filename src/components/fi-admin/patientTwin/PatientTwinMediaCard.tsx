@@ -23,7 +23,9 @@ export function PatientTwinMediaCard({ twin }: { twin: PatientTwinV1 }) {
             >
               <div>
                 <p className="text-sm font-medium text-white">{assetType}</p>
-                <p className="text-xs text-[#64748B]">{bucket.count} file{bucket.count === 1 ? "" : "s"}</p>
+                <p className="text-xs text-[#64748B]">
+                  {bucket.count} file{bucket.count === 1 ? "" : "s"}
+                </p>
               </div>
               <div className="min-w-0 text-right text-xs text-[#94A3B8]">
                 {bucket.latest?.file_name ? (
@@ -34,7 +36,9 @@ export function PatientTwinMediaCard({ twin }: { twin: PatientTwinV1 }) {
                   <p>Latest: —</p>
                 )}
                 {bucket.latest?.created_at ? (
-                  <p className="text-[#64748B]">{new Date(bucket.latest.created_at).toLocaleDateString()}</p>
+                  <p className="text-[#64748B]">
+                    {new Date(bucket.latest.created_at).toLocaleDateString()}
+                  </p>
                 ) : null}
               </div>
             </li>

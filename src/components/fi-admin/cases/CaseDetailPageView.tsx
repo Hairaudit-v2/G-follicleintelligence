@@ -118,9 +118,13 @@ export function CaseDetailPageView({
   caseRevenueAttributionConsultantOptions?: Array<{ value: string; label: string }>;
   caseAccountsReceivable: CaseAccountsReceivableSummary;
 }) {
-  const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
+  const patientId =
+    detail.patient?.foundation_patient_id ??
+    detail.foundation_patient_id ??
+    detail.legacy_patient_id;
   /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
-  const twinFoundationPatientId = detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null;
+  const twinFoundationPatientId =
+    detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null;
   const prefillPatientId = detail.patient?.foundation_patient_id ?? null;
   const prefillPersonId = detail.patient?.person_id ?? null;
   const prefillLeadId =
@@ -141,11 +145,17 @@ export function CaseDetailPageView({
           </>
         ) : null}
         <span className="text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/surgery-readiness`}
+          className="text-blue-300 hover:underline"
+        >
           Surgery readiness
         </Link>
         <span className="text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/procedure-day`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/procedure-day`}
+          className="text-blue-300 hover:underline"
+        >
           Procedure day board
         </Link>
       </p>
@@ -175,10 +185,12 @@ export function CaseDetailPageView({
           </div>
         </div>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
-          Tenant-scoped patient profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
-          day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, Stage 5G–5I
-          worklist navigation polish, patient-level planning notes, and Stage 5J read-only summary / print. HairAudit
-          scoring, formal audit grading, AI outcome scoring, and certification scoring are not part of this surface.
+          Tenant-scoped patient profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery
+          planning, Stage 5C procedure day, Stage 5D post-op / outcome tracking, Stage 5E unified
+          timeline, Stage 5F readiness indicators, Stage 5G–5I worklist navigation polish,
+          patient-level planning notes, and Stage 5J read-only summary / print. HairAudit scoring,
+          formal audit grading, AI outcome scoring, and certification scoring are not part of this
+          surface.
         </p>
       </div>
 
@@ -232,7 +244,8 @@ export function CaseDetailPageView({
           <div className="mt-6 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
             <h3 className="text-sm font-semibold text-slate-100">FinancialOS · Surgery pipeline</h3>
             <p className="mt-1 text-xs text-slate-400">
-              Revenue invoices and booking financial overlay — additive to manual payment records above.
+              Revenue invoices and booking financial overlay — additive to manual payment records
+              above.
             </p>
             <div className="mt-3">
               <FinancialSurgeryPipelineInline
@@ -251,7 +264,10 @@ export function CaseDetailPageView({
                 />
               </div>
               <div className="mt-2">
-                <FinancialPaymentPathwayBadge summary={caseFinancialPipeline.paymentPathway} variant="light" />
+                <FinancialPaymentPathwayBadge
+                  summary={caseFinancialPipeline.paymentPathway}
+                  variant="light"
+                />
               </div>
               <div className="mt-3">
                 <FinancialSurgeryEconomicsCard
@@ -370,7 +386,9 @@ export function CaseDetailPageView({
           <CasePrescriptionsSection
             tenantId={tenantId}
             caseId={detail.id}
-            foundationPatientId={detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null}
+            foundationPatientId={
+              detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null
+            }
           />
         </CaseDetailSection>
 
@@ -386,7 +404,10 @@ export function CaseDetailPageView({
 
       {!foundationRecord ? (
         <p className="text-xs text-gray-500">
-          <Link className="text-blue-300 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery, { foundation: "1" })}`}>
+          <Link
+            className="text-blue-300 hover:underline"
+            href={`${casePath}${caseSelfQuery(casesListReturnQuery, { foundation: "1" })}`}
+          >
             Load universal patient record
           </Link>{" "}
           (read-only timeline, media, identifiers).
@@ -396,15 +417,20 @@ export function CaseDetailPageView({
       {foundationRecord ? (
         <div className="space-y-2">
           <p className="text-right text-xs">
-            <Link className="text-blue-300 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery)}`}>
+            <Link
+              className="text-blue-300 hover:underline"
+              href={`${casePath}${caseSelfQuery(casesListReturnQuery)}`}
+            >
               Hide foundation view
             </Link>
           </p>
           <details className="rounded border border-white/[0.08] bg-white/[0.03] p-3 text-sm">
-            <summary className="cursor-pointer font-medium text-slate-200">Advanced: universal patient record (read-only)</summary>
+            <summary className="cursor-pointer font-medium text-slate-200">
+              Advanced: universal patient record (read-only)
+            </summary>
             <p className="mt-2 text-xs text-slate-400">
-              Full foundation aggregate (timeline, unified media, identifiers) for operators who need ingest-level
-              context.
+              Full foundation aggregate (timeline, unified media, identifiers) for operators who
+              need ingest-level context.
             </p>
             <div className="mt-4">
               <UniversalCaseRecord tenantId={tenantId} record={foundationRecord} />

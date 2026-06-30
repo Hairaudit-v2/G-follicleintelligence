@@ -26,7 +26,9 @@ export interface ReceptionCommunicationProvider {
 
 /** Stub provider — logs intent; no external API calls (Phase 4 default / tests). */
 export class StubReceptionCommunicationProvider implements ReceptionCommunicationProvider {
-  async send(request: ReceptionCommunicationSendRequest): Promise<ReceptionCommunicationSendResult> {
+  async send(
+    request: ReceptionCommunicationSendRequest
+  ): Promise<ReceptionCommunicationSendResult> {
     const id = `stub-${request.channel}-${Date.now()}`;
     return {
       delivered: false,
@@ -39,7 +41,9 @@ export class StubReceptionCommunicationProvider implements ReceptionCommunicatio
 
 /** Dry-run provider — no external API calls; preserves Phase 4 stub semantics in send result. */
 export class DryRunReceptionCommunicationProvider implements ReceptionCommunicationProvider {
-  async send(request: ReceptionCommunicationSendRequest): Promise<ReceptionCommunicationSendResult> {
+  async send(
+    request: ReceptionCommunicationSendRequest
+  ): Promise<ReceptionCommunicationSendResult> {
     const id = `dry-run-${request.channel}-${Date.now()}`;
     return {
       delivered: false,
@@ -66,7 +70,7 @@ export function getReceptionCommunicationProvider(): ReceptionCommunicationProvi
 }
 
 export async function sendReceptionCommunication(
-  request: ReceptionCommunicationSendRequest,
+  request: ReceptionCommunicationSendRequest
 ): Promise<ReceptionCommunicationSendResult> {
   const body = request.body.trim();
   if (!body) throw new Error("Message body is required.");

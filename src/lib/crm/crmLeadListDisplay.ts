@@ -4,7 +4,9 @@
 
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 
-export function personMetadataDisplayLabel(metadata: Record<string, unknown> | null | undefined): string {
+export function personMetadataDisplayLabel(
+  metadata: Record<string, unknown> | null | undefined
+): string {
   if (!metadata || typeof metadata !== "object") return "—";
   return derivePatientIdentityContact({ personMetadata: metadata, patientMetadata: {} }).fullName;
 }

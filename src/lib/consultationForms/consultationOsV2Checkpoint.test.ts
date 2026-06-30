@@ -29,15 +29,27 @@ function allFieldIdsFromSchema(schema: { sections: { fields: { id: string }[] }[
 
 describe("ConsultationOS v2 consolidation checkpoint", () => {
   it("HT v2.1 (latest alias) omits clinician_voice_note; v2 snapshot still includes it for historical rows", () => {
-    assert.equal(allFieldIdsFromSchema(hairTransplantConsultationSchemaV2_1).includes("clinician_voice_note"), false);
-    assert.equal(allFieldIdsFromSchema(hairTransplantConsultationSchema).includes("clinician_voice_note"), false);
-    assert.equal(allFieldIdsFromSchema(hairTransplantConsultationSchemaV2).includes("clinician_voice_note"), true);
+    assert.equal(
+      allFieldIdsFromSchema(hairTransplantConsultationSchemaV2_1).includes("clinician_voice_note"),
+      false
+    );
+    assert.equal(
+      allFieldIdsFromSchema(hairTransplantConsultationSchema).includes("clinician_voice_note"),
+      false
+    );
+    assert.equal(
+      allFieldIdsFromSchema(hairTransplantConsultationSchemaV2).includes("clinician_voice_note"),
+      true
+    );
     assert.equal(hairTransplantConsultationSchemaV2_1.schemaRevision, 6);
   });
 
   it("HT v1 legacy schema object is unchanged and still distinct from v2 pathway", () => {
     assert.ok(allFieldIdsFromSchema(hairTransplantConsultationSchemaV1).length > 20);
-    assert.equal(hairTransplantConsultationSchemaV1.sections.some((s) => s.id === "clinical_summary_handoff"), false);
+    assert.equal(
+      hairTransplantConsultationSchemaV1.sections.some((s) => s.id === "clinical_summary_handoff"),
+      false
+    );
   });
 
   it("legacy clinician_voice_note values still contribute to HT completion preview (dual-read)", () => {
@@ -80,7 +92,10 @@ describe("ConsultationOS v2 consolidation checkpoint", () => {
         treatment_timeline: "2_4_weeks",
         hli_pathway_recommended: "patient_twin_full",
         consultation_outcome_type: "medical_management",
-        structured_clinical_note: { mode: "clinical_note", note: "AGA pattern; discuss finasteride." },
+        structured_clinical_note: {
+          mode: "clinical_note",
+          note: "AGA pattern; discuss finasteride.",
+        },
         follow_up_urgency: "routine",
       },
       completedAt: "2026-06-16T12:00:00.000Z",

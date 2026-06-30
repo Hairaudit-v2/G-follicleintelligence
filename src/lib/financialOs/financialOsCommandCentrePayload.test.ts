@@ -44,7 +44,10 @@ describe("FinancialOS command centre smoke payload", () => {
         unmatchedPayments: { count: 0, items: [] },
         overdueInvoices: { count: 0, items: [] },
         failedGatewayPayments: { count: 0, items: [] },
-        depositDeadlines48h: { count: 1, items: [{ id: "d1", label: "Deposit due", severity: "warning" }] },
+        depositDeadlines48h: {
+          count: 1,
+          items: [{ id: "d1", label: "Deposit due", severity: "warning" }],
+        },
         needsReviewCount: 0,
       },
       surgeryEconomics: {

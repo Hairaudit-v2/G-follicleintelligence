@@ -14,7 +14,9 @@ type UseReceptionOsUsageTrackingOptions = {
 /**
  * Fire dashboard_viewed once per mount. Failures are swallowed — tracking must not break the UI.
  */
-export function useReceptionOsDashboardViewTracking(opts: UseReceptionOsUsageTrackingOptions): void {
+export function useReceptionOsDashboardViewTracking(
+  opts: UseReceptionOsUsageTrackingOptions
+): void {
   const fired = useRef(false);
   const { tenantId, operatingMode, enabled = true } = opts;
 
@@ -31,7 +33,7 @@ export function useReceptionOsDashboardViewTracking(opts: UseReceptionOsUsageTra
 export function trackReceptionWidgetViewed(
   tenantId: string,
   widgetKey: string,
-  operatingMode: ReceptionOsOperatingMode,
+  operatingMode: ReceptionOsOperatingMode
 ): void {
   if (!tenantId.trim() || !widgetKey.trim()) return;
   void trackReceptionUsageEventAction(tenantId, {
@@ -43,7 +45,7 @@ export function trackReceptionWidgetViewed(
 export function trackReceptionRefreshFailed(
   tenantId: string,
   operatingMode: ReceptionOsOperatingMode,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): void {
   if (!tenantId.trim()) return;
   void trackReceptionUsageEventAction(tenantId, {

@@ -23,7 +23,10 @@ export type StaffFiUserLinkPageModel = {
   canPerformAdminActions: boolean;
 };
 
-async function loadStaffCandidates(tenantId: string, client: SupabaseClient): Promise<StaffFiUserLinkCandidate[]> {
+async function loadStaffCandidates(
+  tenantId: string,
+  client: SupabaseClient
+): Promise<StaffFiUserLinkCandidate[]> {
   const tid = tenantId.trim();
   const { data, error } = await client
     .from("fi_staff")
@@ -32,7 +35,12 @@ async function loadStaffCandidates(tenantId: string, client: SupabaseClient): Pr
     .order("full_name", { ascending: true });
   if (error) throw new Error(error.message);
   return (data ?? []).map((raw) => {
-    const r = raw as { id: string; full_name: string | null; email: string | null; fi_user_id: string | null };
+    const r = raw as {
+      id: string;
+      full_name: string | null;
+      email: string | null;
+      fi_user_id: string | null;
+    };
     return {
       staffId: String(r.id),
       fullName: String(r.full_name ?? "").trim() || "Staff",
@@ -42,9 +50,15 @@ async function loadStaffCandidates(tenantId: string, client: SupabaseClient): Pr
   });
 }
 
-async function loadTenantFiUsers(tenantId: string, client: SupabaseClient): Promise<StaffFiUserLinkExistingUser[]> {
+async function loadTenantFiUsers(
+  tenantId: string,
+  client: SupabaseClient
+): Promise<StaffFiUserLinkExistingUser[]> {
   const tid = tenantId.trim();
-  const { data, error } = await client.from("fi_users").select("id, email, tenant_id").eq("tenant_id", tid);
+  const { data, error } = await client
+    .from("fi_users")
+    .select("id, email, tenant_id")
+    .eq("tenant_id", tid);
   if (error) throw new Error(error.message);
   return (data ?? []).map((raw) => {
     const r = raw as { id: string; email: string | null; tenant_id: string };
@@ -59,7 +73,10 @@ async function loadTenantFiUsers(tenantId: string, client: SupabaseClient): Prom
 export async function loadStaffFiUserLinkPage(tenantId: string): Promise<StaffFiUserLinkPageModel> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
-  const [staff, users] = await Promise.all([loadStaffCandidates(tid, supabase), loadTenantFiUsers(tid, supabase)]);
+  const [staff, users] = await Promise.all([
+    loadStaffCandidates(tid, supabase),
+    loadTenantFiUsers(tid, supabase),
+  ]);
   const unlinked = listUnlinkedStaffWithEmail(staff);
   const plan = planStaffFiUserLinks({
     tenantId: tid,
@@ -102,7 +119,10 @@ export async function bulkLinkStaffToFiUsers(
     throw new Error("Select at least one staff member to link.");
   }
 
-  const [staff, users] = await Promise.all([loadStaffCandidates(tid, supabase), loadTenantFiUsers(tid, supabase)]);
+  const [staff, users] = await Promise.all([
+    loadStaffCandidates(tid, supabase),
+    loadTenantFiUsers(tid, supabase),
+  ]);
   const beforePlan = planStaffFiUserLinks({ tenantId: tid, staff, users, selectedStaffIds: [] });
   const plan = planStaffFiUserLinks({ tenantId: tid, staff, users, selectedStaffIds: selected });
   const selectedSet = new Set(selected);

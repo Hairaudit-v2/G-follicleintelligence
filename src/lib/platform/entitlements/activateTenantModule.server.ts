@@ -47,7 +47,9 @@ async function loadModuleId(
  * Manual tenant module activation (admin-only until Stripe).
  * Sets verification, billing status, and enables the module for the tenant.
  */
-export async function activateTenantModule(opts: ActivateTenantModuleInput): Promise<ModuleActivationResult> {
+export async function activateTenantModule(
+  opts: ActivateTenantModuleInput
+): Promise<ModuleActivationResult> {
   const tenantId = opts.tenantId.trim();
   const moduleCode = opts.moduleCode.trim();
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
@@ -55,7 +57,11 @@ export async function activateTenantModule(opts: ActivateTenantModuleInput): Pro
   if (!tenantId) return { ok: false, message: "tenantId is required." };
   if (!isFiModuleCode(moduleCode)) return { ok: false, message: "Unknown module code." };
 
-  const { data: tenant, error: tenantErr } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: tenantErr } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (tenantErr) return { ok: false, message: "Could not verify tenant." };
   if (!tenant) return { ok: false, message: "Tenant not found." };
 
@@ -92,7 +98,8 @@ export async function activateTenantModule(opts: ActivateTenantModuleInput): Pro
   );
   if (moduleErr) return { ok: false, message: "Could not enable module for tenant." };
 
-  const auditSource = moduleCode === "hr_os" ? "hr_os_module_manual_enable" : "module_manual_enable";
+  const auditSource =
+    moduleCode === "hr_os" ? "hr_os_module_manual_enable" : "module_manual_enable";
   const audit = await writeEntitlementAuditEvent(
     {
       tenantId,
@@ -116,7 +123,9 @@ export async function activateTenantModule(opts: ActivateTenantModuleInput): Pro
 /**
  * Manual tenant module deactivation (admin-only until Stripe).
  */
-export async function deactivateTenantModule(opts: DeactivateTenantModuleInput): Promise<ModuleActivationResult> {
+export async function deactivateTenantModule(
+  opts: DeactivateTenantModuleInput
+): Promise<ModuleActivationResult> {
   const tenantId = opts.tenantId.trim();
   const moduleCode = opts.moduleCode.trim();
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
@@ -140,7 +149,8 @@ export async function deactivateTenantModule(opts: DeactivateTenantModuleInput):
   );
   if (moduleErr) return { ok: false, message: "Could not disable module for tenant." };
 
-  const auditSource = moduleCode === "hr_os" ? "hr_os_module_manual_disable" : "module_manual_disable";
+  const auditSource =
+    moduleCode === "hr_os" ? "hr_os_module_manual_disable" : "module_manual_disable";
   const audit = await writeEntitlementAuditEvent(
     {
       tenantId,

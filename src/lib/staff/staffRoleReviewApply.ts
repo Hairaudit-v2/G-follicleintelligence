@@ -3,11 +3,11 @@
  */
 
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
-import { mergeStaffWorkingHoursDocument, type StaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import {
-  isStaffRoleNeedsReview,
-  NEEDS_REVIEW_STAFF_ROLE,
-} from "@/src/lib/staff/staffRolePolicy";
+  mergeStaffWorkingHoursDocument,
+  type StaffProfileExtras,
+} from "@/src/lib/staff/staffProfileExtras";
+import { isStaffRoleNeedsReview, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
 import {
   parseStaffWeeklyHours,
   serializeStaffWeeklyHours,
@@ -64,7 +64,9 @@ export function buildStaffRoleReviewEditableRow(
   };
 }
 
-export function computeStaffRoleReviewProgress(rows: StaffRoleReviewEditableRow[]): StaffRoleReviewProgress {
+export function computeStaffRoleReviewProgress(
+  rows: StaffRoleReviewEditableRow[]
+): StaffRoleReviewProgress {
   const total = rows.length;
   const assigned = rows.filter((r) => !isStaffRoleNeedsReview(r.staff_role)).length;
   return {
@@ -75,7 +77,9 @@ export function computeStaffRoleReviewProgress(rows: StaffRoleReviewEditableRow[
   };
 }
 
-export function validateStaffRoleReviewSave(row: Pick<StaffRoleReviewEditableRow, "staff_role">): string | null {
+export function validateStaffRoleReviewSave(
+  row: Pick<StaffRoleReviewEditableRow, "staff_role">
+): string | null {
   if (isStaffRoleNeedsReview(row.staff_role)) {
     return "Choose an operational role before saving — needs_review is not allowed.";
   }

@@ -22,17 +22,38 @@ test("cron rejects missing cron secret configuration", async () => {
     }),
     {
       getEnv: envMap({ EVOLVED_PERTH_TENANT_ID: TENANT }),
-      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+      runScheduled: async () => ({
+        ok: true,
+        rowsSent: 0,
+        runId: null,
+        created: null,
+        updated: null,
+        linked: null,
+        skipped: null,
+        warnings: [],
+      }),
     }
   );
   assert.equal(res.status, 503);
 });
 
 test("cron rejects missing Authorization", async () => {
-  const res = await handleIiohrHrPerthStaffSyncCronPost(new NextRequest("https://fi.example/api/cron", { method: "POST" }), {
-    getEnv: envMap({ CRON_SECRET: CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
-    runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
-  });
+  const res = await handleIiohrHrPerthStaffSyncCronPost(
+    new NextRequest("https://fi.example/api/cron", { method: "POST" }),
+    {
+      getEnv: envMap({ CRON_SECRET: CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
+      runScheduled: async () => ({
+        ok: true,
+        rowsSent: 0,
+        runId: null,
+        created: null,
+        updated: null,
+        linked: null,
+        skipped: null,
+        warnings: [],
+      }),
+    }
+  );
   assert.equal(res.status, 401);
 });
 
@@ -44,7 +65,16 @@ test("cron rejects invalid Authorization", async () => {
     }),
     {
       getEnv: envMap({ CRON_SECRET: CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
-      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+      runScheduled: async () => ({
+        ok: true,
+        rowsSent: 0,
+        runId: null,
+        created: null,
+        updated: null,
+        linked: null,
+        skipped: null,
+        warnings: [],
+      }),
     }
   );
   assert.equal(res.status, 401);
@@ -58,7 +88,16 @@ test("cron accepts FI_HR_SYNC_CRON_SECRET when CRON_SECRET unset", async () => {
     }),
     {
       getEnv: envMap({ FI_HR_SYNC_CRON_SECRET: HR_CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
-      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+      runScheduled: async () => ({
+        ok: true,
+        rowsSent: 0,
+        runId: null,
+        created: null,
+        updated: null,
+        linked: null,
+        skipped: null,
+        warnings: [],
+      }),
     }
   );
   assert.equal(res.status, 200);
@@ -72,7 +111,16 @@ test("cron rejects missing EVOLVED_PERTH_TENANT_ID", async () => {
     }),
     {
       getEnv: envMap({ CRON_SECRET: CRON }),
-      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+      runScheduled: async () => ({
+        ok: true,
+        rowsSent: 0,
+        runId: null,
+        created: null,
+        updated: null,
+        linked: null,
+        skipped: null,
+        warnings: [],
+      }),
     }
   );
   assert.equal(res.status, 503);
@@ -86,7 +134,16 @@ test("cron rejects invalid EVOLVED_PERTH_TENANT_ID", async () => {
     }),
     {
       getEnv: envMap({ CRON_SECRET: CRON, EVOLVED_PERTH_TENANT_ID: "not-a-uuid" }),
-      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+      runScheduled: async () => ({
+        ok: true,
+        rowsSent: 0,
+        runId: null,
+        created: null,
+        updated: null,
+        linked: null,
+        skipped: null,
+        warnings: [],
+      }),
     }
   );
   assert.equal(res.status, 503);
@@ -95,7 +152,8 @@ test("cron rejects invalid EVOLVED_PERTH_TENANT_ID", async () => {
 test("cron returns 400 when scheduled run refuses empty feed", async () => {
   const body: ScheduledIiohrHrStaffSyncCoreResult = {
     ok: false,
-    error: "HR staff feed returned no rows; refusing sync (set ALLOW_EMPTY_HR_SYNC=true to allow no-op).",
+    error:
+      "HR staff feed returned no rows; refusing sync (set ALLOW_EMPTY_HR_SYNC=true to allow no-op).",
     rowsSent: 0,
     runId: null,
     created: null,

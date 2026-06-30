@@ -24,7 +24,11 @@ function fmtMoney(cents: number, currency: string): string {
   return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export default async function FinancialOsPaymentRequestsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsPaymentRequestsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();

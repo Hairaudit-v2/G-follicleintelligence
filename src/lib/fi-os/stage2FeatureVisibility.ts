@@ -1,13 +1,19 @@
 import type { FiDashboardWidgetKey } from "@/src/config/fiDashboardRegistry";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
-import type { DashboardQuickActionKey, ResolvedDashboardQuickAction } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
+import type {
+  DashboardQuickActionKey,
+  ResolvedDashboardQuickAction,
+} from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
 
 function on(access: ReadonlyMap<FiFeatureKey, boolean> | null, key: FiFeatureKey): boolean {
   if (!access) return true;
   return access.get(key) !== false;
 }
 
-function onAny(access: ReadonlyMap<FiFeatureKey, boolean> | null, keys: readonly FiFeatureKey[]): boolean {
+function onAny(
+  access: ReadonlyMap<FiFeatureKey, boolean> | null,
+  keys: readonly FiFeatureKey[]
+): boolean {
   if (!access) return true;
   return keys.some((k) => access.get(k) !== false);
 }

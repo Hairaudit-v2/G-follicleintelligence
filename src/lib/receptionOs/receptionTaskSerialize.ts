@@ -27,6 +27,8 @@ export function serializeReceptionTaskRow(row: ReceptionTaskRow): ReceptionOsTas
   };
 }
 
-export function serializeReceptionTaskRows(rows: readonly ReceptionTaskRow[]): ReceptionOsTaskItem[] {
+export function serializeReceptionTaskRows(
+  rows: readonly ReceptionTaskRow[]
+): ReceptionOsTaskItem[] {
   return rows.map(serializeReceptionTaskRow);
 }

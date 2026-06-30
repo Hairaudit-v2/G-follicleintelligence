@@ -62,7 +62,9 @@ export function FiModuleAccessDenied({
         <h1 className="mt-2 text-lg font-semibold tracking-tight text-[#F8FAFC]">{copy.title}</h1>
         <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{copy.body}</p>
         {platformAdminPreview ? (
-          <p className="mt-2 text-xs text-[#64748B]">Platform operator preview is not available for this denial state.</p>
+          <p className="mt-2 text-xs text-[#64748B]">
+            Platform operator preview is not available for this denial state.
+          </p>
         ) : null}
         <div className="mt-6 flex flex-wrap gap-2">
           <Link

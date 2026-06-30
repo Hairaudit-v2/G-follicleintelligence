@@ -33,7 +33,11 @@ export async function createStaffAction(
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   try {
     const parsed = staffCreateBodySchema.parse(body);
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
 
     const row = await insertFiStaff(tenantId.trim(), {
       full_name: parsed.full_name,
@@ -67,18 +71,25 @@ export async function updateStaffAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = staffPatchBodySchema.parse(body);
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
 
     const patch: Parameters<typeof updateFiStaff>[2] = {};
     if (parsed.full_name !== undefined) patch.full_name = parsed.full_name;
     if (parsed.staff_role !== undefined) patch.staff_role = parsed.staff_role;
     if (parsed.email !== undefined) patch.email = normalizeEmail(parsed.email ?? null);
     if (parsed.mobile !== undefined) patch.mobile = parsed.mobile?.trim() || null;
-    if (parsed.default_timezone !== undefined) patch.default_timezone = parsed.default_timezone?.trim() || null;
+    if (parsed.default_timezone !== undefined)
+      patch.default_timezone = parsed.default_timezone?.trim() || null;
     if (parsed.working_hours !== undefined) patch.working_hours = parsed.working_hours ?? {};
     if (parsed.is_active !== undefined) patch.is_active = parsed.is_active;
-    if (parsed.calendar_color !== undefined) patch.calendar_color = parsed.calendar_color?.trim() || null;
-    if (parsed.fi_user_id !== undefined) patch.fi_user_id = normalizeOptionalUuid(parsed.fi_user_id);
+    if (parsed.calendar_color !== undefined)
+      patch.calendar_color = parsed.calendar_color?.trim() || null;
+    if (parsed.fi_user_id !== undefined)
+      patch.fi_user_id = normalizeOptionalUuid(parsed.fi_user_id);
 
     await updateFiStaff(tenantId.trim(), staffId.trim(), patch);
 

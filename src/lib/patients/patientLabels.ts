@@ -25,6 +25,9 @@ export function displayFromPersonMetadata(
   email: string | null;
   phone: string | null;
 } {
-  const v = derivePatientIdentityContact({ personMetadata: personMeta, patientMetadata: patientMeta ?? {} });
+  const v = derivePatientIdentityContact({
+    personMetadata: personMeta,
+    patientMetadata: patientMeta ?? {},
+  });
   return { name: v.fullName, email: v.primaryEmail, phone: v.primaryPhone };
 }

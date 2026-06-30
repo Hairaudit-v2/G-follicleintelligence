@@ -45,14 +45,21 @@ export type TomorrowOperationalWindow = {
 /**
  * Tenant-local tomorrow clinic day as UTC half-open bounds `[localStartIso, localEndIso)`.
  */
-export function computeTomorrowOperationalWindow(now: Date, calendarTimezone: string): TomorrowOperationalWindow {
+export function computeTomorrowOperationalWindow(
+  now: Date,
+  calendarTimezone: string
+): TomorrowOperationalWindow {
   const tz = normalizeCalendarTimezone(calendarTimezone);
   const { todayYmd } = computeOperationalLocalDayUtcWindow(now, tz);
   const tomorrowYmd = addDaysToCalendarDate(todayYmd, 1, tz);
   const startMs = zonedMidnightUtcMs(tomorrowYmd, tz);
   const endMs = zonedNextDayUtcMs(tomorrowYmd, tz);
-  const localStartIso = (startMs != null ? new Date(startMs) : new Date(now.getTime() + 86_400_000)).toISOString();
-  const localEndIso = (endMs != null ? new Date(endMs) : new Date(now.getTime() + 2 * 86_400_000)).toISOString();
+  const localStartIso = (
+    startMs != null ? new Date(startMs) : new Date(now.getTime() + 86_400_000)
+  ).toISOString();
+  const localEndIso = (
+    endMs != null ? new Date(endMs) : new Date(now.getTime() + 2 * 86_400_000)
+  ).toISOString();
   return { calendarTimezone: tz, todayYmd, tomorrowYmd, localStartIso, localEndIso };
 }
 
@@ -60,12 +67,23 @@ export function isTomorrowAgendaBooking(
   booking: Pick<FiBookingRow, "start_at" | "booking_status">,
   window: TomorrowOperationalWindow
 ): boolean {
-  const st = String(booking.booking_status ?? "").trim().toLowerCase();
+  const st = String(booking.booking_status ?? "")
+    .trim()
+    .toLowerCase();
   if (!AGENDA_SET.has(st)) return false;
-  return bookingStartFallsOnOperationalWindow(booking.start_at, window.localStartIso, window.localEndIso);
+  return bookingStartFallsOnOperationalWindow(
+    booking.start_at,
+    window.localStartIso,
+    window.localEndIso
+  );
 }
 
-export type TomorrowSummaryCategory = "consultation" | "surgery" | "prp_treatment" | "follow_up" | "other";
+export type TomorrowSummaryCategory =
+  | "consultation"
+  | "surgery"
+  | "prp_treatment"
+  | "follow_up"
+  | "other";
 
 export function tomorrowSummaryCategory(bookingType: string): TomorrowSummaryCategory {
   const t = bookingType.trim().toLowerCase();
@@ -94,28 +112,46 @@ export type BuildTomorrowSurgeryReadinessInput = {
   worklistByCaseId: Map<string, CaseWorklistRow>;
   pathology: { withResult: Set<string>; abnormalTotalByPatient: Map<string, number> };
   consultationsByCaseId: Map<string, ConsultationConsentInput[]>;
-  surgeryPayments: { byBookingId: Map<string, PaymentRecordRow>; byCaseId: Map<string, PaymentRecordRow> };
+  surgeryPayments: {
+    byBookingId: Map<string, PaymentRecordRow>;
+    byCaseId: Map<string, PaymentRecordRow>;
+  };
   resolvePatientIdForCaseRow: (row: CaseWorklistRow) => string | null;
   patientLabelForBooking: (b: FiBookingRow, work: CaseWorklistRow | null) => string;
 };
 
-export function buildTomorrowSurgeryReadinessRows(input: BuildTomorrowSurgeryReadinessInput): TomorrowSurgeryReadinessDerived[] {
-  const { window, surgeryBookings, worklistByCaseId, pathology, consultationsByCaseId, surgeryPayments, resolvePatientIdForCaseRow, patientLabelForBooking } =
-    input;
+export function buildTomorrowSurgeryReadinessRows(
+  input: BuildTomorrowSurgeryReadinessInput
+): TomorrowSurgeryReadinessDerived[] {
+  const {
+    window,
+    surgeryBookings,
+    worklistByCaseId,
+    pathology,
+    consultationsByCaseId,
+    surgeryPayments,
+    resolvePatientIdForCaseRow,
+    patientLabelForBooking,
+  } = input;
   const tz = window.calendarTimezone;
   const out: TomorrowSurgeryReadinessDerived[] = [];
 
   for (const b of surgeryBookings) {
     if (!isActiveSurgeryBookingStatus(b.booking_status)) continue;
     const caseId = b.case_id?.trim() || null;
-    const work = caseId ? worklistByCaseId.get(caseId) ?? null : null;
-    const patientIdForPathology = b.patient_id?.trim() || (work ? resolvePatientIdForCaseRow(work) : null);
-    const hasPathology = patientIdForPathology ? pathology.withResult.has(patientIdForPathology) : false;
-    const consultRows = caseId ? consultationsByCaseId.get(caseId) ?? [] : [];
+    const work = caseId ? (worklistByCaseId.get(caseId) ?? null) : null;
+    const patientIdForPathology =
+      b.patient_id?.trim() || (work ? resolvePatientIdForCaseRow(work) : null);
+    const hasPathology = patientIdForPathology
+      ? pathology.withResult.has(patientIdForPathology)
+      : false;
+    const consultRows = caseId ? (consultationsByCaseId.get(caseId) ?? []) : [];
     const hasConsent = hasConsultationConsentSignal(consultRows);
-    const abnormalN = patientIdForPathology ? pathology.abnormalTotalByPatient.get(patientIdForPathology) ?? 0 : 0;
+    const abnormalN = patientIdForPathology
+      ? (pathology.abnormalTotalByPatient.get(patientIdForPathology) ?? 0)
+      : 0;
     const payByBooking = surgeryPayments.byBookingId.get(b.id) ?? null;
-    const payByCase = caseId ? surgeryPayments.byCaseId.get(caseId) ?? null : null;
+    const payByCase = caseId ? (surgeryPayments.byCaseId.get(caseId) ?? null) : null;
     const surgeryPaymentRow = payByBooking ?? payByCase;
     const daysUntil = calendarDaysUntilSurgery(tz, window.todayYmd, b.start_at);
     const rawIssues = buildSurgeryReadinessIssues({
@@ -144,7 +180,11 @@ export function buildTomorrowSurgeryReadinessRows(input: BuildTomorrowSurgeryRea
       isHighRisk: hasHighRiskSeverity(issues),
     });
   }
-  out.sort((a, b) => a.bookingTimeKey.localeCompare(b.bookingTimeKey) || a.patientLabel.localeCompare(b.patientLabel));
+  out.sort(
+    (a, b) =>
+      a.bookingTimeKey.localeCompare(b.bookingTimeKey) ||
+      a.patientLabel.localeCompare(b.patientLabel)
+  );
   return out;
 }
 
@@ -167,7 +207,10 @@ export type DeriveTomorrowActionsInput = {
   /** All tomorrow agenda bookings (any type). */
   agendaBookings: FiBookingRow[];
   surgeryReadiness: TomorrowSurgeryReadinessDerived[];
-  surgeryPayments: { byBookingId: Map<string, PaymentRecordRow>; byCaseId: Map<string, PaymentRecordRow> };
+  surgeryPayments: {
+    byBookingId: Map<string, PaymentRecordRow>;
+    byCaseId: Map<string, PaymentRecordRow>;
+  };
   /** Display label for action rows. */
   bookingLabel: (b: FiBookingRow) => string;
 };
@@ -181,7 +224,12 @@ export function deriveTomorrowActionItems(input: DeriveTomorrowActionsInput): To
     return `${kind}:${bookingId}`;
   }
 
-  function pushAction(kind: TomorrowActionKind, label: string, bookingId: string, patientLabel: string): void {
+  function pushAction(
+    kind: TomorrowActionKind,
+    label: string,
+    bookingId: string,
+    patientLabel: string
+  ): void {
     const k = key(kind, bookingId);
     if (seen.has(k)) return;
     seen.add(k);
@@ -191,7 +239,10 @@ export function deriveTomorrowActionItems(input: DeriveTomorrowActionsInput): To
   for (const b of agendaBookings) {
     const st = b.booking_status.trim().toLowerCase();
     if (st === "scheduled") {
-      const label = b.booking_type.trim().toLowerCase() === "surgery" ? "Call patient — surgery not confirmed" : "Call patient — appointment not confirmed";
+      const label =
+        b.booking_type.trim().toLowerCase() === "surgery"
+          ? "Call patient — surgery not confirmed"
+          : "Call patient — appointment not confirmed";
       pushAction("call_unconfirmed", label, b.id, bookingLabel(b));
     }
   }
@@ -208,15 +259,33 @@ export function deriveTomorrowActionItems(input: DeriveTomorrowActionsInput): To
       pushAction("link_case", "Link SurgeryOS case to booking", row.bookingId, patientLabel);
     }
     const pay =
-      surgeryPayments.byBookingId.get(row.bookingId) ?? (row.caseId ? surgeryPayments.byCaseId.get(row.caseId) ?? null : null);
-    if (pay && hasIssueKind(row.issues, "surgery_deposit_pending") && paymentRecordNeedsCollection(pay, window.todayYmd)) {
-      pushAction("chase_deposit", "Chase surgery deposit (manual record)", row.bookingId, patientLabel);
+      surgeryPayments.byBookingId.get(row.bookingId) ??
+      (row.caseId ? (surgeryPayments.byCaseId.get(row.caseId) ?? null) : null);
+    if (
+      pay &&
+      hasIssueKind(row.issues, "surgery_deposit_pending") &&
+      paymentRecordNeedsCollection(pay, window.todayYmd)
+    ) {
+      pushAction(
+        "chase_deposit",
+        "Chase surgery deposit (manual record)",
+        row.bookingId,
+        patientLabel
+      );
     }
   }
 
   return actions.sort((a, b) => {
     const rank = (k: TomorrowActionKind) =>
-      k === "review_abnormal_bloods" ? 0 : k === "chase_pathology" ? 1 : k === "chase_deposit" ? 2 : k === "link_case" ? 3 : 4;
+      k === "review_abnormal_bloods"
+        ? 0
+        : k === "chase_pathology"
+          ? 1
+          : k === "chase_deposit"
+            ? 2
+            : k === "link_case"
+              ? 3
+              : 4;
     const d = rank(a.kind) - rank(b.kind);
     if (d !== 0) return d;
     return a.patientLabel.localeCompare(b.patientLabel);
@@ -245,13 +314,23 @@ export type BuildTomorrowChecklistInput = {
   bookingLabel: (b: FiBookingRow) => string;
 };
 
-export function buildTomorrowFrontDeskChecklist(input: BuildTomorrowChecklistInput): TomorrowChecklistItem[] {
-  const { agendaBookings, consultationsByCaseId, paymentByBookingId, todayYmd, personContactByPersonId, bookingLabel } = input;
+export function buildTomorrowFrontDeskChecklist(
+  input: BuildTomorrowChecklistInput
+): TomorrowChecklistItem[] {
+  const {
+    agendaBookings,
+    consultationsByCaseId,
+    paymentByBookingId,
+    todayYmd,
+    personContactByPersonId,
+    bookingLabel,
+  } = input;
   const rows: TomorrowChecklistItem[] = [];
 
   for (const b of agendaBookings) {
     const flags: TomorrowChecklistFlag[] = [];
-    if (b.booking_status.trim().toLowerCase() === "scheduled") flags.push("confirmation_incomplete");
+    if (b.booking_status.trim().toLowerCase() === "scheduled")
+      flags.push("confirmation_incomplete");
     const hasAnchor = Boolean(
       b.patient_id?.trim() || b.lead_id?.trim() || b.person_id?.trim() || b.case_id?.trim()
     );
@@ -285,7 +364,9 @@ export function buildTomorrowFrontDeskChecklist(input: BuildTomorrowChecklistInp
 
 export type TomorrowDistinctPatientKey = string;
 
-export function distinctTomorrowPatientKeys(bookings: FiBookingRow[]): Set<TomorrowDistinctPatientKey> {
+export function distinctTomorrowPatientKeys(
+  bookings: FiBookingRow[]
+): Set<TomorrowDistinctPatientKey> {
   const s = new Set<TomorrowDistinctPatientKey>();
   for (const b of bookings) {
     if (b.patient_id?.trim()) s.add(`patient:${b.patient_id.trim()}`);
@@ -313,7 +394,10 @@ export function summarizeTomorrowBoard(
   agendaBookings: FiBookingRow[],
   surgeryReadiness: TomorrowSurgeryReadinessDerived[],
   todayYmd: string,
-  surgeryPayments: { byBookingId: Map<string, PaymentRecordRow>; byCaseId: Map<string, PaymentRecordRow> }
+  surgeryPayments: {
+    byBookingId: Map<string, PaymentRecordRow>;
+    byCaseId: Map<string, PaymentRecordRow>;
+  }
 ): TomorrowBoardSummary {
   let consultations = 0;
   let surgeries = 0;
@@ -334,8 +418,13 @@ export function summarizeTomorrowBoard(
   for (const row of surgeryReadiness) {
     if (row.isHighRisk) highRiskSurgeryItems += 1;
     const pay =
-      surgeryPayments.byBookingId.get(row.bookingId) ?? (row.caseId ? surgeryPayments.byCaseId.get(row.caseId) ?? null : null);
-    if (pay && hasIssueKind(row.issues, "surgery_deposit_pending") && paymentRecordNeedsCollection(pay, todayYmd)) {
+      surgeryPayments.byBookingId.get(row.bookingId) ??
+      (row.caseId ? (surgeryPayments.byCaseId.get(row.caseId) ?? null) : null);
+    if (
+      pay &&
+      hasIssueKind(row.issues, "surgery_deposit_pending") &&
+      paymentRecordNeedsCollection(pay, todayYmd)
+    ) {
       paymentsDueSurgery += 1;
     }
   }
@@ -356,7 +445,9 @@ export function reminderJobsNeedAttention(
 ): boolean {
   if (!jobs?.length) return false;
   return jobs.some((j) => {
-    const st = String(j.status ?? "").trim().toLowerCase();
+    const st = String(j.status ?? "")
+      .trim()
+      .toLowerCase();
     return st === "pending" || st === "failed" || st === "processing";
   });
 }

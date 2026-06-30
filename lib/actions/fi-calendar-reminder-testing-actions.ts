@@ -115,7 +115,8 @@ export async function sendTestCalendarBookingReminderEmailAction(
   if (!isReminderTestSendOverrideEnabled()) {
     return {
       ok: false,
-      error: "Test send is disabled. Set FI_REMINDERS_TEST_SEND=true and FI_REMINDER_TEST_EMAIL in the server environment.",
+      error:
+        "Test send is disabled. Set FI_REMINDERS_TEST_SEND=true and FI_REMINDER_TEST_EMAIL in the server environment.",
     };
   }
   const to = reminderTestEmailOverride();
@@ -125,14 +126,20 @@ export async function sendTestCalendarBookingReminderEmailAction(
 
   const cfg = loadReminderDeliveryConfig();
   if (!isDeliveryChannelConfigured(cfg, "email")) {
-    return { ok: false, error: "Email delivery is not configured (Resend API key / from address)." };
+    return {
+      ok: false,
+      error: "Email delivery is not configured (Resend API key / from address).",
+    };
   }
 
   try {
     const p = await renderBookingReminderJobPreview(tid, parsed.data.jobId);
     if (!p) return { ok: false, error: "Job not found or not a booking-anchored reminder." };
     if (p.channel !== "email") {
-      return { ok: false, error: "Test send from Calendar UAT supports email templates only (this job is SMS)." };
+      return {
+        ok: false,
+        error: "Test send from Calendar UAT supports email templates only (this job is SMS).",
+      };
     }
     await sendTestReminderEmailToOverride({
       cfg,

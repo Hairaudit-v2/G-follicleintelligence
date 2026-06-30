@@ -36,7 +36,10 @@ export async function loadTenantDeploymentIntelligenceAction(
     return { ok: true, snapshot: result.snapshot };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load deployment intelligence." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load deployment intelligence.",
+    };
   }
 }
 
@@ -60,11 +63,17 @@ export async function loadSessionDeploymentIntelligenceAction(
     return { ok: true, snapshot: result.snapshot };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid session." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load deployment intelligence." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load deployment intelligence.",
+    };
   }
 }
 
-export async function revalidateDeploymentIntelligencePaths(sessionId: string, tenantId?: string | null) {
+export async function revalidateDeploymentIntelligencePaths(
+  sessionId: string,
+  tenantId?: string | null
+) {
   revalidatePath("/fi-admin/platform/deployments");
   revalidatePath(`/fi-admin/platform/onboarding/${sessionId}`);
   if (tenantId) revalidatePath(`/fi-admin/${tenantId}/configuration`);

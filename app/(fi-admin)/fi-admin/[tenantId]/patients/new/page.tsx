@@ -10,7 +10,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function NewPatientEntryRoutePage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function NewPatientEntryRoutePage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 

@@ -43,7 +43,9 @@ function successFetch(): typeof fetch {
   return async (input) => {
     const url = String(input);
     if (url.includes("oauth2.googleapis.com/token")) {
-      return new Response(JSON.stringify({ access_token: "refreshed", expires_in: 3600 }), { status: 200 });
+      return new Response(JSON.stringify({ access_token: "refreshed", expires_in: 3600 }), {
+        status: 200,
+      });
     }
     if (url.includes("/events/watch") && (input as Request).method === "POST") {
       return new Response(
@@ -139,7 +141,9 @@ describe("CalendarOS GC-10 — event bus integration", () => {
     );
 
     assert.equal(result.ok, true);
-    assert.ok(mock.eventBus.events.some((e) => e.event_name === "calendar.webhook.subscription.created"));
+    assert.ok(
+      mock.eventBus.events.some((e) => e.event_name === "calendar.webhook.subscription.created")
+    );
   });
 
   it("reconciliation conflict emits conflict_detected", async () => {

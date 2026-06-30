@@ -99,7 +99,10 @@ const SURGICAL_EVENT_ALIASES: Record<string, ImagingOsSurgicalImageEventType> = 
 };
 
 function normalizeSurgicalEventKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 /** Normalize external surgical event labels to canonical ImagingOS surgical events (pure). */
@@ -144,8 +147,7 @@ export const IMAGING_SURGICAL_READINESS_DOMAINS = [
   "revision_review",
 ] as const;
 
-export type ImagingOsSurgicalReadinessDomain =
-  (typeof IMAGING_SURGICAL_READINESS_DOMAINS)[number];
+export type ImagingOsSurgicalReadinessDomain = (typeof IMAGING_SURGICAL_READINESS_DOMAINS)[number];
 
 export type ImagingSurgicalReadinessRequirements = {
   required_events: ImagingOsSurgicalImageEventType[];
@@ -175,7 +177,13 @@ const IMAGING_SURGICAL_READINESS_REQUIREMENTS_MAP: Record<
     description: "Intraoperative graft, extraction, and implantation documentation",
   },
   donor_recovery: {
-    required_events: ["pre_op", "immediate_post_op", "day_14_review", "month_6_review", "month_12_outcome"],
+    required_events: [
+      "pre_op",
+      "immediate_post_op",
+      "day_14_review",
+      "month_6_review",
+      "month_12_outcome",
+    ],
     required_categories: ["donor"],
     optional_categories: ["microscopic"],
     minimum_usable_images_per_event: 1,
@@ -258,7 +266,9 @@ function isSurgicalImageUsable(image: ImagingOsSurgicalImage): boolean {
   return image.quality_status === "excellent" || image.quality_status === "acceptable";
 }
 
-function uniqueEvents(values: ImagingOsSurgicalImageEventType[]): ImagingOsSurgicalImageEventType[] {
+function uniqueEvents(
+  values: ImagingOsSurgicalImageEventType[]
+): ImagingOsSurgicalImageEventType[] {
   return [...new Set(values)];
 }
 
@@ -379,8 +389,7 @@ export function evaluateSurgicalImageReadiness(
 
   const completenessScore = Math.round((eventCoverage + categoryCoverage + minCountCoverage) / 3);
 
-  const isReady =
-    missingEvents.length === 0 && allCategoriesPresent && allMinimumCountsMet;
+  const isReady = missingEvents.length === 0 && allCategoriesPresent && allMinimumCountsMet;
 
   let readinessStatus: ImagingOsSurgicalReadinessStatus;
   if (isReady) {

@@ -22,11 +22,15 @@ export function DashboardPerformanceKpis(props: { kpis: readonly PerformanceKpi[
             href={kpi.href}
             className={cn(
               "flex min-w-0 flex-col rounded-xl border border-white/[0.07] bg-[#0c1426]/70 px-3 py-3 shadow-inner shadow-black/20 backdrop-blur-sm transition",
-              "hover:border-cyan-500/25 hover:bg-[#141c33]/80",
+              "hover:border-cyan-500/25 hover:bg-[#141c33]/80"
             )}
           >
-            <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{kpi.label}</p>
-            <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">{kpi.value}</p>
+            <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              {kpi.label}
+            </p>
+            <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">
+              {kpi.value}
+            </p>
             <p className="mt-1 text-[0.65rem] leading-relaxed text-slate-600">{kpi.detail}</p>
           </Link>
         ))}

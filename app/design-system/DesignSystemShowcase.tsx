@@ -94,10 +94,19 @@ export function DesignSystemShowcase() {
       <div className="space-y-6 px-4 sm:px-6">
         <h2 className="font-display text-xl font-semibold">Cards and metrics</h2>
         <FeatureGrid>
-          <FeatureCard title="Glass surface" description="Default marketing card with controlled translucency." />
-          <MetricCard label="Signal depth" value="Stage 9+" hint="Hair intelligence engines online" />
+          <FeatureCard
+            title="Glass surface"
+            description="Default marketing card with controlled translucency."
+          />
+          <MetricCard
+            label="Signal depth"
+            value="Stage 9+"
+            hint="Hair intelligence engines online"
+          />
           <Card variant="elevated" className="p-5">
-            <p className="text-sm text-muted-foreground">Elevated panel for dense operational summaries.</p>
+            <p className="text-sm text-muted-foreground">
+              Elevated panel for dense operational summaries.
+            </p>
           </Card>
         </FeatureGrid>
       </div>
@@ -105,9 +114,25 @@ export function DesignSystemShowcase() {
       <div className="space-y-6 px-4 sm:px-6">
         <h2 className="font-display text-xl font-semibold">Product pills</h2>
         <div className="flex flex-wrap gap-3">
-          <ProductPill slug="follicle-intelligence" name="Follicle Intelligence" category="Operating System" href="#fi" active />
-          <ProductPill slug="hairaudit" name="HairAudit" category="Outcome Verification" href="#hairaudit" />
-          <ProductPill slug="hli" name="Hair Longevity Institute" category="Diagnostics" href="#hli" />
+          <ProductPill
+            slug="follicle-intelligence"
+            name="Follicle Intelligence"
+            category="Operating System"
+            href="#fi"
+            active
+          />
+          <ProductPill
+            slug="hairaudit"
+            name="HairAudit"
+            category="Outcome Verification"
+            href="#hairaudit"
+          />
+          <ProductPill
+            slug="hli"
+            name="Hair Longevity Institute"
+            category="Diagnostics"
+            href="#hli"
+          />
           <ProductPill slug="iiohr" name="IIOHR" category="Education" href="#iiohr" />
         </div>
       </div>
@@ -116,20 +141,29 @@ export function DesignSystemShowcase() {
         <h2 className="font-display text-xl font-semibold">Platform shells</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {(["fi", "hairaudit", "hli", "iiohr"] as const).map((p) => (
-            <div key={p} className={`rounded-2xl border border-border/40 p-5 ${platformSurfaceClasses(p)}`}>
+            <div
+              key={p}
+              className={`rounded-2xl border border-border/40 p-5 ${platformSurfaceClasses(p)}`}
+            >
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{p}</p>
               <p className="mt-3 text-sm">Sample body copy for {p} theme tokens.</p>
             </div>
           ))}
         </div>
-        <div className={`rounded-2xl border border-emerald-500/20 p-5 ${platformSurfaceClasses("hli", "light")}`}>
+        <div
+          className={`rounded-2xl border border-emerald-500/20 p-5 ${platformSurfaceClasses("hli", "light")}`}
+        >
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-800">HLI light</p>
-          <p className="mt-3 text-sm text-slate-700">Clinical light shell for longevity diagnostics.</p>
+          <p className="mt-3 text-sm text-slate-700">
+            Clinical light shell for longevity diagnostics.
+          </p>
         </div>
       </div>
 
       <div className="space-y-6 px-4 sm:px-6">
-        <h2 className="font-display text-xl font-semibold">Testimonial, pricing, stats, timeline</h2>
+        <h2 className="font-display text-xl font-semibold">
+          Testimonial, pricing, stats, timeline
+        </h2>
         <FeatureGrid columnsClassName="lg:grid-cols-3">
           <TestimonialCard
             quote="The network finally gives us comparable outcomes across surgeons and sites."
@@ -141,7 +175,11 @@ export function DesignSystemShowcase() {
             price="$—"
             cadence="/ month"
             description="Host-supplied copy only."
-            features={["Dedicated review workspace", "Outcome intelligence hooks", "Governed reporting"]}
+            features={[
+              "Dedicated review workspace",
+              "Outcome intelligence hooks",
+              "Governed reporting",
+            ]}
             highlighted
             cta={<Button variant="secondary">Talk to us</Button>}
           />
@@ -149,8 +187,16 @@ export function DesignSystemShowcase() {
             <StatBlock label="Cases under review" value="128" detail="Rolling 30 days" />
             <Timeline
               items={[
-                { title: "Intake normalised", description: "Signals mapped to FI schema.", meta: "T+0" },
-                { title: "Verification layer", description: "HairAudit scoring engaged.", meta: "T+7d" },
+                {
+                  title: "Intake normalised",
+                  description: "Signals mapped to FI schema.",
+                  meta: "T+0",
+                },
+                {
+                  title: "Verification layer",
+                  description: "HairAudit scoring engaged.",
+                  meta: "T+7d",
+                },
               ]}
             />
           </div>
@@ -162,8 +208,14 @@ export function DesignSystemShowcase() {
         <LogoCloud
           title="Trusted by host-defined partners"
           logos={[
-            { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='40'%3E%3Crect fill='%231e293b' width='160' height='40' rx='6'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='sans-serif' font-size='12'%3EClinic%3C/text%3E%3C/svg%3E", alt: "Clinic A" },
-            { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='40'%3E%3Crect fill='%230f172a' width='160' height='40' rx='6'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' fill='%23cbd5e1' font-family='sans-serif' font-size='12'%3ELab%3C/text%3E%3C/svg%3E", alt: "Lab partner" },
+            {
+              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='40'%3E%3Crect fill='%231e293b' width='160' height='40' rx='6'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='sans-serif' font-size='12'%3EClinic%3C/text%3E%3C/svg%3E",
+              alt: "Clinic A",
+            },
+            {
+              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='40'%3E%3Crect fill='%230f172a' width='160' height='40' rx='6'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' fill='%23cbd5e1' font-family='sans-serif' font-size='12'%3ELab%3C/text%3E%3C/svg%3E",
+              alt: "Lab partner",
+            },
           ]}
         />
       </div>
@@ -173,7 +225,11 @@ export function DesignSystemShowcase() {
         <FAQAccordion
           items={[
             { question: "Is this route indexed?", answer: "No. Metadata sets robots to noindex." },
-            { question: "How do other sites consume the library?", answer: "Import from `@/packages/ui` and supply href resolvers plus copy from each brand." },
+            {
+              question: "How do other sites consume the library?",
+              answer:
+                "Import from `@/packages/ui` and supply href resolvers plus copy from each brand.",
+            },
           ]}
         />
       </div>
@@ -197,7 +253,11 @@ export function DesignSystemShowcase() {
           { label: "Privacy", href: "/privacy" },
           { label: "Terms", href: "/terms" },
         ]}
-        newsletterSlot={<p className="text-sm text-muted-foreground">Optional newsletter slot from the host layout.</p>}
+        newsletterSlot={
+          <p className="text-sm text-muted-foreground">
+            Optional newsletter slot from the host layout.
+          </p>
+        }
       />
     </div>
   );

@@ -41,15 +41,12 @@ export function FinancialSuperReleaseStatusBadge(props: {
   variant?: "dark" | "light";
 }) {
   const { variant = "dark" } = props;
-  const tone = variant === "dark" ? STATUS_TONE_DARK[props.status] : STATUS_TONE_LIGHT[props.status];
+  const tone =
+    variant === "dark" ? STATUS_TONE_DARK[props.status] : STATUS_TONE_LIGHT[props.status];
   const base =
     variant === "dark"
       ? financialOsStatusBadgeBase
       : "inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
 
-  return (
-    <span className={cn(base, tone, props.className)}>
-      {props.status.replace(/_/g, " ")}
-    </span>
-  );
+  return <span className={cn(base, tone, props.className)}>{props.status.replace(/_/g, " ")}</span>;
 }

@@ -1,4 +1,7 @@
-import { buildCasesWorklistQueryString, parseCasesIndexQuery } from "@/src/lib/cases/casesIndexFilters";
+import {
+  buildCasesWorklistQueryString,
+  parseCasesIndexQuery,
+} from "@/src/lib/cases/casesIndexFilters";
 
 /** Keys allowed when round-tripping the cases worklist through `fromCases` (prevents open redirects / junk). */
 const FROM_CASES_ALLOWED = [
@@ -18,7 +21,9 @@ const FROM_CASES_ALLOWED = [
 /**
  * Reads optional `fromCases` search param (URL-encoded cases index query string), parses and re-serializes safely.
  */
-export function sanitizeFromCasesSearchParam(raw: string | string[] | undefined): string | undefined {
+export function sanitizeFromCasesSearchParam(
+  raw: string | string[] | undefined
+): string | undefined {
   const s = Array.isArray(raw) ? raw[0] : raw;
   if (!s?.trim()) return undefined;
   try {
@@ -43,14 +48,22 @@ export function caseDetailCasesListHref(tenantId: string, returnQueryString?: st
   return returnQueryString ? `${base}?${returnQueryString}` : base;
 }
 
-export function caseDetailPageHref(tenantId: string, caseId: string, casesListReturnQuery?: string): string {
+export function caseDetailPageHref(
+  tenantId: string,
+  caseId: string,
+  casesListReturnQuery?: string
+): string {
   const base = `/fi-admin/${tenantId.trim()}/cases/${caseId.trim()}`;
   if (!casesListReturnQuery) return base;
   return `${base}?fromCases=${encodeURIComponent(casesListReturnQuery)}`;
 }
 
 /** Read-only case summary / print view (Stage 5J). */
-export function caseSummaryDocumentPageHref(tenantId: string, caseId: string, casesListReturnQuery?: string): string {
+export function caseSummaryDocumentPageHref(
+  tenantId: string,
+  caseId: string,
+  casesListReturnQuery?: string
+): string {
   const base = `/fi-admin/${tenantId.trim()}/cases/${caseId.trim()}/summary`;
   if (!casesListReturnQuery) return base;
   return `${base}?fromCases=${encodeURIComponent(casesListReturnQuery)}`;

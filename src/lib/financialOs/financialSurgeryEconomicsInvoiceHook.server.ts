@@ -23,7 +23,8 @@ export async function maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettle
       tenantId: tid,
       caseId,
       trigger: {
-        source: inv.invoice_kind === "surgery_balance" ? "invoice_paid_in_full" : "surgery_deposit_paid",
+        source:
+          inv.invoice_kind === "surgery_balance" ? "invoice_paid_in_full" : "surgery_deposit_paid",
         actorFiUserId: args.actorFiUserId,
         metadata: {
           invoice_id: inv.id,

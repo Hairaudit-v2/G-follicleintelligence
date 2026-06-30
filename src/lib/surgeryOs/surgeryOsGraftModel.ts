@@ -2,7 +2,10 @@
  * SurgeryOS Phase 2 — pure graft count model, reconciliation, and alert derivation.
  */
 
-import type { SurgeryOsProcedurePhase, SurgeryOsSeverity } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
+import type {
+  SurgeryOsProcedurePhase,
+  SurgeryOsSeverity,
+} from "@/src/lib/surgeryOs/surgeryOsBoardModel";
 
 export const SURGERY_OS_GRAFT_SESSION_PHASES = [
   "extraction",
@@ -51,7 +54,10 @@ export const SURGERY_OS_GRAFT_TYPE_HAIR_WEIGHTS: Record<SurgeryOsGraftType, numb
 export const SURGERY_OS_GRAFT_LARGE_CORRECTION_THRESHOLD = 10;
 export type SurgeryOsGraftCountEventType = (typeof SURGERY_OS_GRAFT_COUNT_EVENT_TYPES)[number];
 
-export const SURGERY_OS_GRAFT_COUNT_EVENT_TYPE_LABELS: Record<SurgeryOsGraftCountEventType, string> = {
+export const SURGERY_OS_GRAFT_COUNT_EVENT_TYPE_LABELS: Record<
+  SurgeryOsGraftCountEventType,
+  string
+> = {
   count_update: "Count update",
   tray_count: "Tray count",
   tray_confirmed: "Tray confirmed",
@@ -67,9 +73,13 @@ export const SURGERY_OS_GRAFT_RECONCILIATION_STATUSES = [
   "mismatch",
   "completed",
 ] as const;
-export type SurgeryOsGraftReconciliationStatus = (typeof SURGERY_OS_GRAFT_RECONCILIATION_STATUSES)[number];
+export type SurgeryOsGraftReconciliationStatus =
+  (typeof SURGERY_OS_GRAFT_RECONCILIATION_STATUSES)[number];
 
-export const SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS: Record<SurgeryOsGraftReconciliationStatus, string> = {
+export const SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS: Record<
+  SurgeryOsGraftReconciliationStatus,
+  string
+> = {
   pending: "Pending",
   balanced: "Balanced",
   mismatch: "Mismatch",
@@ -116,7 +126,8 @@ export const SURGERY_OS_GRAFT_COUNTING_ELIGIBLE_STATUSES = [
   "in_progress",
   "paused",
 ] as const;
-export type SurgeryOsGraftCountingEligibleStatus = (typeof SURGERY_OS_GRAFT_COUNTING_ELIGIBLE_STATUSES)[number];
+export type SurgeryOsGraftCountingEligibleStatus =
+  (typeof SURGERY_OS_GRAFT_COUNTING_ELIGIBLE_STATUSES)[number];
 
 export type SurgeryOsGraftCountSessionLockKind = "extraction" | "implantation";
 
@@ -195,20 +206,20 @@ export type SurgeryOsGraftValidationResult =
 export function computeRemainingGrafts(
   extracted: number,
   implanted: number,
-  discarded: number,
+  discarded: number
 ): number {
   return extracted - implanted - discarded;
 }
 
-export function computeAverageHairsPerGraft(
-  totalHairs: number,
-  graftCount: number,
-): number | null {
+export function computeAverageHairsPerGraft(totalHairs: number, graftCount: number): number | null {
   if (graftCount <= 0 || totalHairs <= 0) return null;
   return Math.round((totalHairs / graftCount) * 100) / 100;
 }
 
-export function computeGraftProgressPercent(extracted: number, target: number | null): number | null {
+export function computeGraftProgressPercent(
+  extracted: number,
+  target: number | null
+): number | null {
   if (target == null || target <= 0) return null;
   return Math.min(100, Math.round((extracted / target) * 100));
 }
@@ -229,7 +240,7 @@ export function computeTrayHairTotal(composition: SurgeryOsGraftComposition): nu
 export function applyGraftTypeDelta(
   composition: SurgeryOsGraftComposition,
   graftType: SurgeryOsGraftType,
-  count: number,
+  count: number
 ): SurgeryOsGraftComposition {
   const next = { ...composition };
   switch (graftType) {
@@ -256,7 +267,7 @@ export function computeGraftCorrectionMagnitude(input: {
   return Math.max(
     Math.abs(input.next.extracted - input.previous.extracted),
     Math.abs(input.next.implanted - input.previous.implanted),
-    Math.abs(input.next.discarded - input.previous.discarded),
+    Math.abs(input.next.discarded - input.previous.discarded)
   );
 }
 
@@ -281,7 +292,12 @@ export function parseTrayNumberFromNote(note: string | null | undefined): number
 export type TrayReviewStatus = "pending" | "confirmed" | "rejected";
 
 export function deriveTrayReviewStatuses(
-  events: Array<{ id: string; eventType: SurgeryOsGraftCountEventType; note: string | null; createdAt: string }>,
+  events: Array<{
+    id: string;
+    eventType: SurgeryOsGraftCountEventType;
+    note: string | null;
+    createdAt: string;
+  }>
 ): Map<string, TrayReviewStatus> {
   const out = new Map<string, TrayReviewStatus>();
   const sorted = [...events].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -309,7 +325,7 @@ export function deriveTrayReviewStatuses(
 
 export function isSurgeryStatusEligibleForGraftCounting(
   status: string,
-  options?: { allowAdminOverride?: boolean },
+  options?: { allowAdminOverride?: boolean }
 ): boolean {
   if (options?.allowAdminOverride) return true;
   return (SURGERY_OS_GRAFT_COUNTING_ELIGIBLE_STATUSES as readonly string[]).includes(status);
@@ -383,13 +399,13 @@ export function assertGraftCountSessionLock(input: {
   ) {
     const phase = input.kind === "extraction" ? "extraction" : "implantation";
     throw new Error(
-      `Another tablet holds the active ${phase} count session. Sync or wait for the lock to expire before counting.`,
+      `Another tablet holds the active ${phase} count session. Sync or wait for the lock to expire before counting.`
     );
   }
 }
 
 export function countTrayReviewBuckets(
-  events: Array<{ eventType: SurgeryOsGraftCountEventType; reviewStatus?: TrayReviewStatus | null }>,
+  events: Array<{ eventType: SurgeryOsGraftCountEventType; reviewStatus?: TrayReviewStatus | null }>
 ): { pending: number; confirmed: number; rejected: number; total: number } {
   let pending = 0;
   let confirmed = 0;
@@ -414,7 +430,7 @@ export function computeConfirmedTrayTotals(
     multiples: number | null;
     totalHairs: number | null;
     deltaDiscarded: number;
-  }>,
+  }>
 ): SurgeryOsConfirmedTrayTotals {
   const out: SurgeryOsConfirmedTrayTotals = {
     singles: 0,
@@ -442,7 +458,12 @@ export function computeConfirmedTrayTotals(
 
 export function deriveTrayReviewStatusForEvent(
   trayEventId: string,
-  events: Array<{ id: string; eventType: SurgeryOsGraftCountEventType; note: string | null; createdAt: string }>,
+  events: Array<{
+    id: string;
+    eventType: SurgeryOsGraftCountEventType;
+    note: string | null;
+    createdAt: string;
+  }>
 ): TrayReviewStatus {
   return deriveTrayReviewStatuses(events).get(trayEventId) ?? "pending";
 }
@@ -465,11 +486,11 @@ export function assessGraftReconciliationGate(input: {
   const expectedRemaining = computeRemainingGrafts(
     input.extractedGrafts,
     input.implantedGrafts,
-    input.discardedGrafts,
+    input.discardedGrafts
   );
   if (input.remainingGrafts !== 0 || expectedRemaining !== 0) {
     reasons.push(
-      `Graft balance unresolved: ${input.remainingGrafts} graft(s) unaccounted (extracted − implanted − discarded must equal zero).`,
+      `Graft balance unresolved: ${input.remainingGrafts} graft(s) unaccounted (extracted − implanted − discarded must equal zero).`
     );
   }
 
@@ -559,7 +580,7 @@ export function deriveReconciliationStatus(
   implanted: number,
   discarded: number,
   remaining: number,
-  explicitlyCompleted: boolean,
+  explicitlyCompleted: boolean
 ): SurgeryOsGraftReconciliationStatus {
   if (explicitlyCompleted) return "completed";
   if (remaining === 0 && extracted === implanted + discarded) return "balanced";
@@ -581,7 +602,11 @@ export function validateGraftCountUpdate(input: {
     return { ok: false, reason: "Graft count deltas cannot be negative.", code: "negative_count" };
   }
   if (deltaExtracted === 0 && deltaImplanted === 0 && deltaDiscarded === 0) {
-    return { ok: false, reason: "At least one graft count delta is required.", code: "invalid_delta" };
+    return {
+      ok: false,
+      reason: "At least one graft count delta is required.",
+      code: "invalid_delta",
+    };
   }
 
   const nextExtracted = input.currentExtracted + deltaExtracted;
@@ -650,7 +675,7 @@ export function buildGraftTotalsFromSession(input: {
   const remainingGrafts = computeRemainingGrafts(
     input.extractedGrafts,
     input.implantedGrafts,
-    input.discardedGrafts,
+    input.discardedGrafts
   );
   const compositionTotal = computeGraftCompositionTotal({
     singles: input.singles,
@@ -772,7 +797,7 @@ export function deriveGraftAlerts(input: {
 
   const discardedThreshold = Math.max(
     SURGERY_OS_GRAFT_DISCARDED_THRESHOLD_ABSOLUTE,
-    Math.ceil(totals.extractedGrafts * SURGERY_OS_GRAFT_DISCARDED_THRESHOLD_PERCENT),
+    Math.ceil(totals.extractedGrafts * SURGERY_OS_GRAFT_DISCARDED_THRESHOLD_PERCENT)
   );
   if (totals.discardedGrafts > 0 && totals.discardedGrafts >= discardedThreshold) {
     alerts.push({
@@ -830,10 +855,7 @@ export function deriveGraftAlerts(input: {
     });
   }
 
-  if (
-    input.procedurePhase === "recovery" ||
-    input.procedurePhase === "completed"
-  ) {
+  if (input.procedurePhase === "recovery" || input.procedurePhase === "completed") {
     if (input.reconciliationStatus !== "completed" && input.reconciliationStatus !== "balanced") {
       alerts.push({
         id: `${surgeryId}:graft_reconciliation_incomplete`,
@@ -851,8 +873,12 @@ export function deriveGraftAlerts(input: {
 }
 
 export function graftEventTypeToTimelineKind(
-  eventType: SurgeryOsGraftCountEventType,
-): "graft_count_update" | "tray_count_recorded" | "graft_reconciliation_completed" | "graft_correction" {
+  eventType: SurgeryOsGraftCountEventType
+):
+  | "graft_count_update"
+  | "tray_count_recorded"
+  | "graft_reconciliation_completed"
+  | "graft_correction" {
   switch (eventType) {
     case "tray_count":
     case "tray_confirmed":
@@ -869,7 +895,7 @@ export function graftEventTypeToTimelineKind(
 
 export function graftTimelineLabel(
   eventType: SurgeryOsGraftCountEventType,
-  deltas: { extracted: number; implanted: number; discarded: number },
+  deltas: { extracted: number; implanted: number; discarded: number }
 ): string {
   switch (eventType) {
     case "tray_count":

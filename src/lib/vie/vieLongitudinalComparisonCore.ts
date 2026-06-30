@@ -16,7 +16,11 @@ import {
   type VieSurgeryComparisonStatus,
 } from "./vieComparisonTypes";
 
-const BASELINE_STAGES: ReadonlySet<VieJourneyStage> = new Set(["baseline", "consultation", "planning"]);
+const BASELINE_STAGES: ReadonlySet<VieJourneyStage> = new Set([
+  "baseline",
+  "consultation",
+  "planning",
+]);
 const FOLLOW_UP_STAGES: ReadonlySet<VieJourneyStage> = new Set([
   "follow_up_3m",
   "follow_up_6m",
@@ -94,7 +98,9 @@ export function deriveSlotFamily(slotSlug: string): string {
 }
 
 export function deriveSlotFraming(slotSlug: string, protocolSlug?: string): VieCaptureFraming {
-  const catalogSlot = protocolSlug ? getVieProtocol(protocolSlug)?.slots.find((s) => s.slug === slotSlug) : null;
+  const catalogSlot = protocolSlug
+    ? getVieProtocol(protocolSlug)?.slots.find((s) => s.slug === slotSlug)
+    : null;
   if (catalogSlot) return catalogSlot.framing;
   const s = slotSlug.trim().toLowerCase();
   if (s.endsWith("_close") || s.includes("_close_")) return "close_up";
@@ -132,7 +138,8 @@ export function deriveJourneyStage(input: {
   }
 
   if (protocol === "surgery_day") {
-    const phase = getVieProtocol("surgery_day")?.slots.find((s) => s.slug === slot)?.surgery_phase ?? null;
+    const phase =
+      getVieProtocol("surgery_day")?.slots.find((s) => s.slug === slot)?.surgery_phase ?? null;
     if (phase === "immediate_post_op") return "immediate_post_op";
     return "surgery_day";
   }
@@ -155,7 +162,9 @@ export function deriveJourneyStage(input: {
 }
 
 export function deriveSurgeryPhase(protocolSlug: string, slotSlug: string): VieSurgeryPhase | null {
-  return getVieProtocol(protocolSlug)?.slots.find((s) => s.slug === slotSlug)?.surgery_phase ?? null;
+  return (
+    getVieProtocol(protocolSlug)?.slots.find((s) => s.slug === slotSlug)?.surgery_phase ?? null
+  );
 }
 
 export function buildComparisonCaptureRecord(input: {
@@ -215,12 +224,18 @@ function captureTimestampMs(record: VieComparisonCaptureRecord): number {
   return Number.isFinite(ms) ? ms : 0;
 }
 
-function daysBetween(before: VieComparisonCaptureRecord, after: VieComparisonCaptureRecord): number {
+function daysBetween(
+  before: VieComparisonCaptureRecord,
+  after: VieComparisonCaptureRecord
+): number {
   const diff = captureTimestampMs(after) - captureTimestampMs(before);
   return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
 }
 
-function framingMatchStatus(a: VieComparisonCaptureRecord, b: VieComparisonCaptureRecord): VieFramingMatchStatus {
+function framingMatchStatus(
+  a: VieComparisonCaptureRecord,
+  b: VieComparisonCaptureRecord
+): VieFramingMatchStatus {
   if (a.framing === b.framing) return "match";
   return "mismatch";
 }
@@ -242,7 +257,9 @@ function qualityWarnings(
     ["After", after],
   ] as const) {
     if (rec.quality_score < minimumScore) {
-      warnings.push(`${label} image quality below threshold (${rec.quality_score}/${minimumScore})`);
+      warnings.push(
+        `${label} image quality below threshold (${rec.quality_score}/${minimumScore})`
+      );
     }
     if (rec.quality_band === "retake_recommended") {
       warnings.push(`${label} image flagged retake_recommended`);
@@ -251,7 +268,10 @@ function qualityWarnings(
   return warnings;
 }
 
-export function computeQualityMatchScore(before: VieComparisonCaptureRecord, after: VieComparisonCaptureRecord): number {
+export function computeQualityMatchScore(
+  before: VieComparisonCaptureRecord,
+  after: VieComparisonCaptureRecord
+): number {
   const avg = (before.quality_score + after.quality_score) / 2;
   const delta = Math.abs(before.quality_score - after.quality_score);
   const symmetryPenalty = Math.min(25, delta * 0.5);
@@ -262,7 +282,10 @@ export function computeQualityMatchScore(before: VieComparisonCaptureRecord, aft
 }
 
 export function computeConfidenceBand(
-  pair: Pick<VieComparisonPair, "quality_match_score" | "framing_match_status" | "warnings" | "days_between">
+  pair: Pick<
+    VieComparisonPair,
+    "quality_match_score" | "framing_match_status" | "warnings" | "days_between"
+  >
 ): VieComparisonConfidenceBand {
   let score = pair.quality_match_score;
   if (pair.framing_match_status === "mismatch") score -= 25;
@@ -313,11 +336,17 @@ function sameCasePreference(a: VieComparisonCaptureRecord, b: VieComparisonCaptu
   return a.case_id === b.case_id;
 }
 
-function canMatchFraming(before: VieComparisonCaptureRecord, after: VieComparisonCaptureRecord): boolean {
+function canMatchFraming(
+  before: VieComparisonCaptureRecord,
+  after: VieComparisonCaptureRecord
+): boolean {
   return before.framing === after.framing;
 }
 
-function canMatchRegionAndFamily(before: VieComparisonCaptureRecord, after: VieComparisonCaptureRecord): boolean {
+function canMatchRegionAndFamily(
+  before: VieComparisonCaptureRecord,
+  after: VieComparisonCaptureRecord
+): boolean {
   return (
     before.anatomical_region === after.anatomical_region &&
     before.slot_family === after.slot_family &&
@@ -371,7 +400,10 @@ function filterAccepted(records: VieComparisonCaptureRecord[]): VieComparisonCap
   return records.filter(isAcceptedForComparison);
 }
 
-function findBySlot(records: VieComparisonCaptureRecord[], slotSlug: string): VieComparisonCaptureRecord[] {
+function findBySlot(
+  records: VieComparisonCaptureRecord[],
+  slotSlug: string
+): VieComparisonCaptureRecord[] {
   return records.filter((r) => r.protocol_slot_slug === slotSlug);
 }
 
@@ -402,7 +434,8 @@ export function generateVieComparisonPairs(
 
   // pre-op vs post-op
   for (const before of accepted) {
-    if (before.surgery_phase !== "pre_op" && before.protocol_template_slug !== "post_op_review") continue;
+    if (before.surgery_phase !== "pre_op" && before.protocol_template_slug !== "post_op_review")
+      continue;
     if (before.protocol_template_slug === "post_op_review") continue;
     for (const after of accepted) {
       const postOp =
@@ -430,9 +463,15 @@ export function generateVieComparisonPairs(
     if (before.surgery_phase !== "pre_op") continue;
     if (before.slot_family === "donor" || before.slot_family === "graft_tray") continue;
     for (const after of accepted) {
-      if (after.surgery_phase !== "immediate_post_op" && after.journey_stage !== "immediate_post_op") continue;
+      if (
+        after.surgery_phase !== "immediate_post_op" &&
+        after.journey_stage !== "immediate_post_op"
+      )
+        continue;
       if (!canMatchRegionAndFamily(before, after)) continue;
-      addPair(buildPair(before, after, "recipient_before_vs_after_implantation", minimumQualityScore));
+      addPair(
+        buildPair(before, after, "recipient_before_vs_after_implantation", minimumQualityScore)
+      );
     }
   }
 
@@ -590,7 +629,9 @@ function inferNextRecommendedCapture(
   timeline: VieProgressionTimeline,
   _minimumQualityScore: number
 ): VieComparisonReadinessSummary["next_recommended_capture"] {
-  const hasBaseline = timeline.stages.some((s) => s.stage === "baseline" || s.stage === "consultation");
+  const hasBaseline = timeline.stages.some(
+    (s) => s.stage === "baseline" || s.stage === "consultation"
+  );
   const hasFollowUp = timeline.stages.some((s) => FOLLOW_UP_STAGES.has(s.stage));
 
   if (hasBaseline && !hasFollowUp) {
@@ -626,10 +667,13 @@ function inferNextRecommendedCapture(
   return { protocol_slug: null, slot_slug: null, label: null };
 }
 
-export function deriveSurgeryComparisonStatus(pairs: VieComparisonPair[]): VieSurgeryComparisonStatus {
+export function deriveSurgeryComparisonStatus(
+  pairs: VieComparisonPair[]
+): VieSurgeryComparisonStatus {
   const hasCategory = (cat: VieComparisonCategory, partialOk = false) => {
     const matches = pairs.filter((p) => p.comparison_category === cat);
-    if (matches.some((p) => p.confidence_band !== "low" && p.warnings.length === 0)) return "ready" as const;
+    if (matches.some((p) => p.confidence_band !== "low" && p.warnings.length === 0))
+      return "ready" as const;
     if (partialOk && matches.length > 0) return "partial" as const;
     return "missing" as const;
   };

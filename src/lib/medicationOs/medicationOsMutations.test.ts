@@ -56,10 +56,7 @@ describe("medicationOsMutationPolicy", () => {
     });
     it("throws when canonical_code blank", () => {
       assert.throws(
-        () =>
-          normaliseTherapyPlanItems([
-            { canonical_code: "  ", role: "continuous" },
-          ]),
+        () => normaliseTherapyPlanItems([{ canonical_code: "  ", role: "continuous" }]),
         /canonical_code/
       );
     });

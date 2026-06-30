@@ -78,13 +78,18 @@ test("trialing billing = allowed", () => {
 });
 
 test("requiredRoles further restricts access", () => {
-  const denied = evaluateModuleAccess(baseContext({ userRole: "crm_operator", allowedRoles: ["admin", "crm_operator"] }), {
-    requiredRoles: ["admin"],
-  });
+  const denied = evaluateModuleAccess(
+    baseContext({ userRole: "crm_operator", allowedRoles: ["admin", "crm_operator"] }),
+    {
+      requiredRoles: ["admin"],
+    }
+  );
   assert.equal(denied.ok, false);
   if (!denied.ok) assert.equal(denied.reason, "role_not_allowed");
 
-  const allowed = evaluateModuleAccess(baseContext({ userRole: "admin" }), { requiredRoles: ["admin"] });
+  const allowed = evaluateModuleAccess(baseContext({ userRole: "admin" }), {
+    requiredRoles: ["admin"],
+  });
   assert.equal(allowed.ok, true);
 });
 

@@ -40,7 +40,9 @@ export type ExecuteFiStaffSyncPostResult = {
 /**
  * POST JSON to FI staff-sync. Does not log `secret`. Error messages are scrubbed if they ever contained the secret.
  */
-export async function executeFiStaffSyncPost(input: ExecuteFiStaffSyncPostInput): Promise<ExecuteFiStaffSyncPostResult> {
+export async function executeFiStaffSyncPost(
+  input: ExecuteFiStaffSyncPostInput
+): Promise<ExecuteFiStaffSyncPostResult> {
   const secret = input.secret;
   const timeoutMs = input.timeoutMs ?? 25_000;
   const fetchFn = input.fetchImpl ?? fetch;

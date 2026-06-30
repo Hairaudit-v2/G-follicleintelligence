@@ -143,20 +143,34 @@ export function isPackageOrRedemptionRow(category: string, name: string): boolea
   return REDEMPTION_RE.test(blob);
 }
 
-export function isLikelyNegativeAdjustment(category: string, name: string, gross: number | null, net: number | null): boolean {
+export function isLikelyNegativeAdjustment(
+  category: string,
+  name: string,
+  gross: number | null,
+  net: number | null
+): boolean {
   const blob = `${category} ${name}`.toLowerCase();
   const neg = (gross != null && gross < 0) || (net != null && net < 0);
   if (!neg) return false;
-  if (/adjustment|credit\s*note|reversal|refund|write[\s-]?off|discount\s*adjust/i.test(blob)) return true;
+  if (/adjustment|credit\s*note|reversal|refund|write[\s-]?off|discount\s*adjust/i.test(blob))
+    return true;
   return true;
 }
 
 export function classifyRowDisposition(extract: TimelyServiceSalesExtract): TimelyRowDisposition {
   const { timelyCategory: cat, timelyServiceName: name } = extract;
-  if (isStubOrPivotLabel(cat, name)) return { kind: "excluded", reason: "Summary / header / pivot stub row" };
-  if (isPackageOrRedemptionRow(cat, name)) return { kind: "excluded", reason: "Package / gift / membership redemption or similar (deduped import)" };
+  if (isStubOrPivotLabel(cat, name))
+    return { kind: "excluded", reason: "Summary / header / pivot stub row" };
+  if (isPackageOrRedemptionRow(cat, name))
+    return {
+      kind: "excluded",
+      reason: "Package / gift / membership redemption or similar (deduped import)",
+    };
   if (isLikelyNegativeAdjustment(cat, name, extract.grossAmount, extract.netAmount)) {
-    return { kind: "excluded", reason: "Negative adjustment / refund aggregate — excluded from active seed list" };
+    return {
+      kind: "excluded",
+      reason: "Negative adjustment / refund aggregate — excluded from active seed list",
+    };
   }
   return { kind: "seed" };
 }
@@ -164,25 +178,33 @@ export function classifyRowDisposition(extract: TimelyServiceSalesExtract): Time
 function mapTimelyBlobToFiCategory(cat: string, name: string): FiServiceCategory {
   const b = `${cat} ${name}`.toLowerCase();
   /** Strong clinical cues in the service name (or combined blob) win over Timely category labels such as "Consultation". */
-  if (/\b(fue|follicular|transplant|hair\s*transplant|strip|day\s*surgery)\b/i.test(b)) return "Surgery";
-  if (/\bconsultation\b|hair\s*consult|\b(assessment|first\s*visit|initial\s*visit)\b/i.test(b)) return "Consultation";
+  if (/\b(fue|follicular|transplant|hair\s*transplant|strip|day\s*surgery)\b/i.test(b))
+    return "Surgery";
+  if (/\bconsultation\b|hair\s*consult|\b(assessment|first\s*visit|initial\s*visit)\b/i.test(b))
+    return "Consultation";
   if (/\b(follow[\s-]?up|post[\s-]?op|review\b|aftercare)\b/i.test(b)) return "Follow-up";
   if (/\b(trichoscopy|diagnostic|scope|biopsy|blood|lab|analysis)\b/i.test(b)) return "Diagnostics";
-  if (/\b(prp|prf|mesotherapy|exosome|injection|laser|led|microneed|therapy|treatment)\b/i.test(b)) return "Treatment";
+  if (/\b(prp|prf|mesotherapy|exosome|injection|laser|led|microneed|therapy|treatment)\b/i.test(b))
+    return "Treatment";
   if (/\b(product|retail|shampoo|supplement)\b/i.test(b)) return "Other";
   return "Other";
 }
 
-function suggestBookingType(cat: string, name: string): { booking: BookingType | null; flags: string[] } {
+function suggestBookingType(
+  cat: string,
+  name: string
+): { booking: BookingType | null; flags: string[] } {
   const flags: string[] = [];
   const b = `${cat} ${name}`.toLowerCase();
   if (/\bprp\b/i.test(name) || /\bprp\b/i.test(cat)) return { booking: "prp", flags };
   if (/\bprf\b/i.test(b)) return { booking: "prf", flags };
   if (/\bmesotherapy\b/i.test(b)) return { booking: "mesotherapy", flags };
   if (/\bexosome\b/i.test(b)) return { booking: "exosomes", flags };
-  if (/\b(fue|follicular|transplant|hair\s*transplant|strip\b|surgery\b)\b/i.test(b)) return { booking: "surgery", flags };
+  if (/\b(fue|follicular|transplant|hair\s*transplant|strip\b|surgery\b)\b/i.test(b))
+    return { booking: "surgery", flags };
   if (/\bfollow[\s-]?up\b/i.test(b)) return { booking: "follow_up", flags };
-  if (/\b(review|check[\s-]?up)\b/i.test(b) && !/\bconsult/i.test(b)) return { booking: "review", flags: [...flags, "booking_type_assumption_review"] };
+  if (/\b(review|check[\s-]?up)\b/i.test(b) && !/\bconsult/i.test(b))
+    return { booking: "review", flags: [...flags, "booking_type_assumption_review"] };
   if (/\bconsult/i.test(b)) return { booking: "consultation", flags };
   flags.push("booking_type_uncertain");
   return { booking: null, flags };
@@ -266,7 +288,10 @@ function isBookable(fiCat: FiServiceCategory, name: string): boolean {
   return true;
 }
 
-export function extractRowsFromGrid(rows: string[][], startLine = 1): { extracts: TimelyServiceSalesExtract[]; headerMap: HeaderMap | null; warnings: string[] } {
+export function extractRowsFromGrid(
+  rows: string[][],
+  startLine = 1
+): { extracts: TimelyServiceSalesExtract[]; headerMap: HeaderMap | null; warnings: string[] } {
   const warnings: string[] = [];
   if (rows.length < 2) return { extracts: [], headerMap: null, warnings: ["CSV has no data rows"] };
 
@@ -306,7 +331,9 @@ function mergeKey(e: TimelyServiceSalesExtract): string {
 }
 
 /** Merge duplicate service lines (e.g. split periods) by summing qty and gross, recomputing avg. */
-export function mergeExtractsForSeed(extracts: TimelyServiceSalesExtract[]): TimelyServiceSalesExtract[] {
+export function mergeExtractsForSeed(
+  extracts: TimelyServiceSalesExtract[]
+): TimelyServiceSalesExtract[] {
   const map = new Map<string, TimelyServiceSalesExtract>();
   for (const e of extracts) {
     const k = mergeKey(e);
@@ -363,7 +390,11 @@ export function buildFiServiceSeedFromTimelyGrid(rows: string[][]): FiServiceSee
 
     const { booking, flags: bf } = suggestBookingType(ex.timelyCategory, ex.timelyServiceName);
     const booking_type = booking && BOOKING_SET.has(booking) ? booking : null;
-    const { price, flags: pf } = suggestBasePrice(ex.usageQuantity, ex.averageAmount, ex.grossAmount);
+    const { price, flags: pf } = suggestBasePrice(
+      ex.usageQuantity,
+      ex.averageAmount,
+      ex.grossAmount
+    );
     const review_flags = [...bf, ...pf];
     if (fiCat === "Other" && !booking_type) review_flags.push("fi_category_other_review");
 
@@ -436,7 +467,10 @@ export function seedRowsToCsv(seedRows: FiServiceSeedReviewRow[]): string {
   return lines.join("\n");
 }
 
-export function buildMarkdownReport(result: FiServiceSeedBuildResult, meta: { inputPath: string; generatedAtIso: string }): string {
+export function buildMarkdownReport(
+  result: FiServiceSeedBuildResult,
+  meta: { inputPath: string; generatedAtIso: string }
+): string {
   const lines: string[] = [];
   lines.push(`# Stage 7A.1 — Timely ServiceSales → FI catalogue seed (review)`);
   lines.push("");
@@ -455,23 +489,35 @@ export function buildMarkdownReport(result: FiServiceSeedBuildResult, meta: { in
   lines.push(`- Dropped package / gift / membership redemption style rows.`);
   lines.push(`- Excluded negative adjustment / refund aggregates from the **active** seed list.`);
   lines.push(`- Merged duplicate Timely category+service keys by summing quantity and gross.`);
-  lines.push(`- **\`base_price\`:** prefers average when consistent with gross÷qty; otherwise gross÷qty; else 0 with flag.`);
-  lines.push(`- **\`booking_type\`:** only set when mapping is confident; otherwise \`null\` + \`review_flags\`.`);
-  lines.push(`- **\`is_bookable\` / \`source\` / \`notes\`:** review metadata — **not** columns on current \`fi_services\` (Stage 7A.1 is pre-DB).`);
+  lines.push(
+    `- **\`base_price\`:** prefers average when consistent with gross÷qty; otherwise gross÷qty; else 0 with flag.`
+  );
+  lines.push(
+    `- **\`booking_type\`:** only set when mapping is confident; otherwise \`null\` + \`review_flags\`.`
+  );
+  lines.push(
+    `- **\`is_bookable\` / \`source\` / \`notes\`:** review metadata — **not** columns on current \`fi_services\` (Stage 7A.1 is pre-DB).`
+  );
   lines.push("");
   lines.push(`## FI category mapping (Timely → FI)`);
   lines.push(`| FI category | Heuristic |`);
   lines.push(`|-------------|-----------|`);
   lines.push(`| Consultation | consult / assessment / first visit |`);
   lines.push(`| Treatment | PRP/PRF/meso/exosome/injection/laser/therapy |`);
-  lines.push(`| Surgery | FUE / follicular / transplant / strip / day surgery (name wins over Timely "Consultation" label) |`);
+  lines.push(
+    `| Surgery | FUE / follicular / transplant / strip / day surgery (name wins over Timely "Consultation" label) |`
+  );
   lines.push(`| Follow-up | follow-up/post-op/review |`);
   lines.push(`| Diagnostics | trichoscopy/diagnostic/lab |`);
   lines.push(`| Other | fallback / retail product |`);
   lines.push("");
   lines.push(`## Seed list (preview)`);
-  lines.push(`| # | name | category | booking_type | duration_min | base_price | is_active | is_bookable | flags |`);
-  lines.push(`|---|------|----------|----------------|--------------|------------|-----------|---------------|-------|`);
+  lines.push(
+    `| # | name | category | booking_type | duration_min | base_price | is_active | is_bookable | flags |`
+  );
+  lines.push(
+    `|---|------|----------|----------------|--------------|------------|-----------|---------------|-------|`
+  );
   result.seedRows.forEach((r, i) => {
     const fl = r.review_flags.join(", ") || "—";
     lines.push(
@@ -485,13 +531,19 @@ export function buildMarkdownReport(result: FiServiceSeedBuildResult, meta: { in
     lines.push(`| line | summary | reason |`);
     lines.push(`|------|---------|--------|`);
     for (const e of result.excluded) {
-      lines.push(`| ${e.line} | ${e.summary.replace(/\|/g, "\\|")} | ${e.reason.replace(/\|/g, "\\|")} |`);
+      lines.push(
+        `| ${e.line} | ${e.summary.replace(/\|/g, "\\|")} | ${e.reason.replace(/\|/g, "\\|")} |`
+      );
     }
   }
   lines.push("");
   lines.push(`## Next steps`);
   lines.push(`1. Human-review rows with \`review_flags\`.`);
-  lines.push(`2. Align \`booking_type\` with Evolved clinical naming (max one row per type per tenant in \`fi_services\`).`);
-  lines.push(`3. When approved, add a guarded import path (separate task) — **this stage does not insert into the database.**`);
+  lines.push(
+    `2. Align \`booking_type\` with Evolved clinical naming (max one row per type per tenant in \`fi_services\`).`
+  );
+  lines.push(
+    `3. When approved, add a guarded import path (separate task) — **this stage does not insert into the database.**`
+  );
   return lines.join("\n");
 }

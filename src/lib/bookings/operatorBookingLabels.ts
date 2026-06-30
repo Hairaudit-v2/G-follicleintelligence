@@ -2,7 +2,12 @@
  * Staff-facing labels for booking operator UI (Stage 3B). Pure.
  */
 
-import { BOOKING_STATUSES, BOOKING_TYPES, isAllowedBookingStatus, isAllowedBookingType } from "./bookingPolicy";
+import {
+  BOOKING_STATUSES,
+  BOOKING_TYPES,
+  isAllowedBookingStatus,
+  isAllowedBookingType,
+} from "./bookingPolicy";
 
 const TYPE_LABELS: Record<string, string> = {
   consultation: "Consultation",

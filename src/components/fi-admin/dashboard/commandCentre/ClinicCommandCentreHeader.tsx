@@ -8,7 +8,7 @@ import type { ResolvedDashboardQuickAction } from "@/src/lib/fiAdmin/dashboardQu
 
 const headerAction = cn(
   fiOsChromeClasses.toolbarControlSurface,
-  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-50",
+  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-50"
 );
 
 export function ClinicCommandCentreHeader(props: {
@@ -40,10 +40,15 @@ export function ClinicCommandCentreHeader(props: {
     <header className="space-y-5 border-b border-white/[0.07] pb-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">Clinic Command Center</p>
-          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">{tenantName}</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
+            Clinic Command Center
+          </p>
+          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
+            {tenantName}
+          </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-            Live operational overview of your clinic, patients, team activity, consultations, and procedures.
+            Live operational overview of your clinic, patients, team activity, consultations, and
+            procedures.
           </p>
           <p className="mt-1.5 text-sm text-slate-500">{dateLine}</p>
           {workspaceBadge ? (
@@ -77,7 +82,10 @@ export function ClinicCommandCentreHeader(props: {
           Open SurgeryOS
         </Link>
         {bookingAction ? (
-          <Link href={bookingAction.href} className={cn(headerAction, "border-cyan-500/25 bg-cyan-950/20")}>
+          <Link
+            href={bookingAction.href}
+            className={cn(headerAction, "border-cyan-500/25 bg-cyan-950/20")}
+          >
             <Plus className="h-4 w-4 text-cyan-400" aria-hidden />
             Quick Create Booking
           </Link>

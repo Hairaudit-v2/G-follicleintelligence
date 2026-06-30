@@ -167,7 +167,14 @@ test("buildClinicRiskTable surfaces Dubai and Bangkok anomaly labels", () => {
     },
   ];
 
-  const aggregates = aggregateClinicRows(clinics, financialRows, caseRiskRows, protocolRows, [], []);
+  const aggregates = aggregateClinicRows(
+    clinics,
+    financialRows,
+    caseRiskRows,
+    protocolRows,
+    [],
+    []
+  );
   const rows = buildClinicRiskTable(aggregates);
 
   const dubai = rows.find((r) => r.clinicSlug === "dubai-hair-institute");
@@ -181,10 +188,11 @@ test("buildClinicRiskTable surfaces Dubai and Bangkok anomaly labels", () => {
 });
 
 test("buildEnterpriseDemoGlobalCommandCentreAlerts returns curated franchise alerts", () => {
-  const clinicRiskRows = buildClinicRiskTable(
-    aggregateClinicRows(clinics, [], [], [], [], [])
+  const clinicRiskRows = buildClinicRiskTable(aggregateClinicRows(clinics, [], [], [], [], []));
+  const alerts = buildEnterpriseDemoGlobalCommandCentreAlerts(
+    new Date("2026-06-19T12:00:00.000Z"),
+    clinicRiskRows
   );
-  const alerts = buildEnterpriseDemoGlobalCommandCentreAlerts(new Date("2026-06-19T12:00:00.000Z"), clinicRiskRows);
 
   assert.equal(alerts.length, 5);
   assert.ok(alerts.some((a) => a.id === "dubai-graft-invoice-variance"));

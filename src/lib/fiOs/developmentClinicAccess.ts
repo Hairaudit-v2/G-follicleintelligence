@@ -35,7 +35,9 @@ export type DevelopmentClinicAccessContext = {
 };
 
 function normRole(role: string | null | undefined): string {
-  return String(role ?? "").trim().toLowerCase();
+  return String(role ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 export function isConfiguredDevelopmentAdminAuthUser(
@@ -75,7 +77,9 @@ export function canUseDevelopmentClinicFeatures(ctx: DevelopmentClinicAccessCont
 }
 
 /** Client/server helper when only `fi_users.role` is known (e.g. CRM shell session). */
-export function canUseDevelopmentClinicFeaturesFromFiUserRole(role: string | null | undefined): boolean {
+export function canUseDevelopmentClinicFeaturesFromFiUserRole(
+  role: string | null | undefined
+): boolean {
   return canUseDevelopmentClinicFeatures({
     isAuthenticated: true,
     fiUserRole: role,

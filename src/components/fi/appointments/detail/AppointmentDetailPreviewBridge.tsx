@@ -8,7 +8,8 @@ import type { AppointmentShellRelatedAppointmentItem } from "@/src/lib/bookings/
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { useAppointmentSlideOver } from "../AppointmentSlideOver";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";
 
 type Props = {
   tenantId: string;
@@ -98,12 +99,18 @@ export function AppointmentDetailPreviewBridge({
     <section className={card} aria-label="Related appointments">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Related appointments</h2>
-          <p className="mt-1 text-xs text-slate-400">Same lead or patient — peek in the slide-over without leaving this page.</p>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Related appointments
+          </h2>
+          <p className="mt-1 text-xs text-slate-400">
+            Same lead or patient — peek in the slide-over without leaving this page.
+          </p>
         </div>
         <p className="text-xs text-gray-500">
           Tip: share{" "}
-          <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">?preview=&lt;appointment-id&gt;</code>
+          <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">
+            ?preview=&lt;appointment-id&gt;
+          </code>
         </p>
       </div>
       <ul className="mt-3 flex flex-col gap-2">
@@ -117,12 +124,17 @@ export function AppointmentDetailPreviewBridge({
               }`}
             >
               <div className="min-w-0">
-                <p className="truncate font-medium text-slate-100">{r.title?.trim() || bookingTypeLabel(r.booking_type)}</p>
+                <p className="truncate font-medium text-slate-100">
+                  {r.title?.trim() || bookingTypeLabel(r.booking_type)}
+                </p>
                 <p className="text-xs text-slate-400">
                   {bookingStatusLabel(r.booking_status)} · {bookingTypeLabel(r.booking_type)}
                   {" · "}
                   <span className="text-gray-500">
-                    {new Date(r.start_at).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                    {new Date(r.start_at).toLocaleString(undefined, {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
                   </span>
                 </p>
               </div>

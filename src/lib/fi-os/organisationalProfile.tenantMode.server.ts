@@ -43,7 +43,9 @@ export async function loadTenantOperatingModeRowByKey(
   return global ? mapOperatingMode(global) : null;
 }
 
-export async function resolveTenantOperatingModeFeatureDefaults(tenantId: string): Promise<Partial<Record<FiFeatureKey, boolean>>> {
+export async function resolveTenantOperatingModeFeatureDefaults(
+  tenantId: string
+): Promise<Partial<Record<FiFeatureKey, boolean>>> {
   const tid = tenantId.trim();
   if (!tid) return {};
   const supabase = supabaseAdmin();

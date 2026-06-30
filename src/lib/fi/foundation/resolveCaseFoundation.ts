@@ -15,12 +15,14 @@ function asCaseRow(row: Record<string, unknown>): FiCaseRowMinimal {
     tenant_id: String(row.tenant_id),
     status: String(row.status),
     external_id: row.external_id == null ? null : String(row.external_id),
-    foundation_patient_id: row.foundation_patient_id == null ? null : String(row.foundation_patient_id),
+    foundation_patient_id:
+      row.foundation_patient_id == null ? null : String(row.foundation_patient_id),
     clinic_id: row.clinic_id == null ? null : String(row.clinic_id),
     organisation_id: row.organisation_id == null ? null : String(row.organisation_id),
-    metadata: (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
-      ? (row.metadata as Record<string, unknown>)
-      : {}) ?? {},
+    metadata:
+      (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {}) ?? {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -49,7 +51,8 @@ export async function resolveOrCreateCaseFoundation(
       .eq("id", id)
       .eq("tenant_id", tenantId)
       .single();
-    if (existing.error || !existing.data) throw new Error(existing.error?.message ?? "Case not found.");
+    if (existing.error || !existing.data)
+      throw new Error(existing.error?.message ?? "Case not found.");
 
     const row = existing.data as Record<string, unknown>;
     const patch: Record<string, unknown> = {
@@ -75,9 +78,19 @@ export async function resolveOrCreateCaseFoundation(
       patch.status = input.status;
     }
 
-    const updated = await supabase.from("fi_cases").update(patch).eq("id", id).eq("tenant_id", tenantId).select().single();
+    const updated = await supabase
+      .from("fi_cases")
+      .update(patch)
+      .eq("id", id)
+      .eq("tenant_id", tenantId)
+      .select()
+      .single();
     if (updated.error) throw new Error(updated.error.message);
-    return { case: asCaseRow(updated.data as Record<string, unknown>), created: false, updated: true };
+    return {
+      case: asCaseRow(updated.data as Record<string, unknown>),
+      created: false,
+      updated: true,
+    };
   }
 
   if (sourceCaseId) {
@@ -99,7 +112,11 @@ export async function resolveOrCreateCaseFoundation(
         .eq("tenant_id", tenantId)
         .single();
       if (row.data) {
-        return { case: asCaseRow(row.data as Record<string, unknown>), created: false, updated: false };
+        return {
+          case: asCaseRow(row.data as Record<string, unknown>),
+          created: false,
+          updated: false,
+        };
       }
     }
 
@@ -114,12 +131,18 @@ export async function resolveOrCreateCaseFoundation(
       .maybeSingle();
     if (byExt.error) throw new Error(byExt.error.message);
     if (byExt.data) {
-      return { case: asCaseRow(byExt.data as Record<string, unknown>), created: false, updated: false };
+      return {
+        case: asCaseRow(byExt.data as Record<string, unknown>),
+        created: false,
+        updated: false,
+      };
     }
   }
 
   if (!sourceCaseId) {
-    throw new Error("resolveOrCreateCaseFoundation: source_case_id is required when existing_case_id is absent.");
+    throw new Error(
+      "resolveOrCreateCaseFoundation: source_case_id is required when existing_case_id is absent."
+    );
   }
 
   const externalId = buildCaseExternalId(sourceSystem, sourceCaseId);
@@ -160,10 +183,18 @@ export async function resolveOrCreateCaseFoundation(
       .eq("external_id", externalId)
       .single();
     if (retry.data) {
-      return { case: asCaseRow(retry.data as Record<string, unknown>), created: false, updated: false };
+      return {
+        case: asCaseRow(retry.data as Record<string, unknown>),
+        created: false,
+        updated: false,
+      };
     }
   }
 
   if (inserted.error) throw new Error(inserted.error.message);
-  return { case: asCaseRow(inserted.data as Record<string, unknown>), created: true, updated: false };
+  return {
+    case: asCaseRow(inserted.data as Record<string, unknown>),
+    created: true,
+    updated: false,
+  };
 }

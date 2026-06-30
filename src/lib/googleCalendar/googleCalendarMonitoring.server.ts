@@ -57,7 +57,8 @@ function deriveWebhookHealth(
     };
   }
 
-  const status = (subscription?.status ?? "none") as GoogleCalendarWebhookHealthModel["subscriptionStatus"];
+  const status = (subscription?.status ??
+    "none") as GoogleCalendarWebhookHealthModel["subscriptionStatus"];
   const expirationAt = subscription?.expiration_at ?? null;
   const expMs = expirationAt ? Date.parse(expirationAt) : NaN;
   const isExpiredByTime = Number.isFinite(expMs) && expMs <= nowMs;
@@ -105,7 +106,11 @@ async function loadIntegrationRow(
   return (data as IntegrationRow | null) ?? null;
 }
 
-async function countOpenAlerts(tenantId: string, integrationId: string, opts: ServerOpts): Promise<number> {
+async function countOpenAlerts(
+  tenantId: string,
+  integrationId: string,
+  opts: ServerOpts
+): Promise<number> {
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const { count, error } = await supabase
     .from("fi_admin_notifications")
@@ -125,7 +130,9 @@ export async function loadGoogleCalendarMonitoringPage(
   opts: ServerOpts & { canManage?: boolean } = {}
 ): Promise<GoogleCalendarMonitoringPageModel> {
   const integration = await loadIntegrationRow(tenantId, opts);
-  const connected = Boolean(integration?.access_token_encrypted?.trim() && integration.status !== "disconnected");
+  const connected = Boolean(
+    integration?.access_token_encrypted?.trim() && integration.status !== "disconnected"
+  );
 
   if (!integration || !connected) {
     return {
@@ -135,7 +142,8 @@ export async function loadGoogleCalendarMonitoringPage(
       integrationId: integration?.id ?? null,
       syncEnabled: integration?.sync_enabled ?? true,
       scheduledSyncEnabled: integration?.scheduled_sync_enabled ?? true,
-      syncFrequencyMinutes: (integration?.sync_frequency_minutes ?? 15) as FiCalendarSyncFrequencyMinutes,
+      syncFrequencyMinutes: (integration?.sync_frequency_minutes ??
+        15) as FiCalendarSyncFrequencyMinutes,
       schedulerPaused: Boolean(integration?.scheduled_sync_paused_at),
       schedulerPausedReason: integration?.scheduled_sync_paused_reason ?? null,
       healthStatus: "warning",
@@ -171,7 +179,10 @@ export async function loadGoogleCalendarMonitoringPage(
 
   const totalRuns = health?.total_sync_runs ?? 0;
   const failedSyncs = health?.consecutive_failures ?? 0;
-  const successRuns = Math.max(0, totalRuns - (runs.filter((r) => r.status === "failed").length ?? 0));
+  const successRuns = Math.max(
+    0,
+    totalRuns - (runs.filter((r) => r.status === "failed").length ?? 0)
+  );
 
   const totalEventsProcessed =
     (health?.total_events_fetched ?? 0) +
@@ -352,9 +363,8 @@ export async function enableGoogleCalendarRealtimeSync(
   input: { tenantId: string },
   opts: ServerOpts = {}
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { createGoogleCalendarWebhookSubscription } = await import(
-    "./googleCalendarWebhookSubscriptions.server"
-  );
+  const { createGoogleCalendarWebhookSubscription } =
+    await import("./googleCalendarWebhookSubscriptions.server");
   const result = await createGoogleCalendarWebhookSubscription({ tenantId: input.tenantId }, opts);
   if (!result.ok) return result;
   return { ok: true };
@@ -370,9 +380,8 @@ export async function renewGoogleCalendarRealtimeSync(
     return enableGoogleCalendarRealtimeSync({ tenantId: input.tenantId }, opts);
   }
 
-  const { renewGoogleCalendarWebhookSubscription } = await import(
-    "./googleCalendarWebhookSubscriptions.server"
-  );
+  const { renewGoogleCalendarWebhookSubscription } =
+    await import("./googleCalendarWebhookSubscriptions.server");
   const result = await renewGoogleCalendarWebhookSubscription(
     { tenantId: input.tenantId, subscriptionId },
     opts

@@ -53,7 +53,8 @@ export function CaseProcedureTechnicianPanel({
     <div className="space-y-2">
       <h3 className="text-xs font-semibold text-slate-200">Technicians / assistants</h3>
       <p className="text-xs text-gray-500">
-        Structured technician roster for procedure day (separate from the circulating nurse and surgeon).
+        Structured technician roster for procedure day (separate from the circulating nurse and
+        surgeon).
       </p>
       <div className="flex flex-wrap gap-2">
         <label htmlFor={TECH_ADD_SELECT.id} className="sr-only">

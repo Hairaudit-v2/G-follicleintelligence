@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { hashStaffPin, staffPinStorageDiffersFromRawPin, verifyStaffPinHash } from "./staffPinCrypto";
+import {
+  hashStaffPin,
+  staffPinStorageDiffersFromRawPin,
+  verifyStaffPinHash,
+} from "./staffPinCrypto";
 
 describe("staffPinCrypto", () => {
   it("hashes PIN without storing raw value", () => {

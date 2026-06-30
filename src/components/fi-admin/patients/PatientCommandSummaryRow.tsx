@@ -23,7 +23,10 @@ const JOURNEY_TONE_CLASSES: Record<PatientJourneyStatus["tone"], string> = {
 
 function fmtAppt(appt: PatientDetailNextAppointment): string {
   try {
-    return new Date(appt.startAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    return new Date(appt.startAt).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   } catch {
     return appt.startAt;
   }
@@ -56,10 +59,7 @@ function SummaryCard({
         <p className={pwsValue}>{value}</p>
         {caption && <p className={pwsValueMuted}>{caption}</p>}
       </div>
-      <Link
-        href={ctaHref}
-        className={`self-start ${ctaVariant === "cyan" ? pwsCtaCyan : pwsCta}`}
-      >
+      <Link href={ctaHref} className={`self-start ${ctaVariant === "cyan" ? pwsCtaCyan : pwsCta}`}>
         {ctaLabel}
       </Link>
     </div>

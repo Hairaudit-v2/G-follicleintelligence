@@ -2,15 +2,26 @@
  * Pure model for Surgery Readiness Board V1.1 — explicit issues, severities, escalation, and manager filters.
  */
 
-import { addDaysToCalendarDate, calendarDateStringFromInstant, zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  addDaysToCalendarDate,
+  calendarDateStringFromInstant,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection } from "@/src/lib/payments/paymentRecordModel";
 
-export const SURGERY_READINESS_ACTIVE_BOOKING_STATUSES = ["scheduled", "confirmed", "arrived"] as const;
+export const SURGERY_READINESS_ACTIVE_BOOKING_STATUSES = [
+  "scheduled",
+  "confirmed",
+  "arrived",
+] as const;
 
-export type SurgeryReadinessActiveBookingStatus = (typeof SURGERY_READINESS_ACTIVE_BOOKING_STATUSES)[number];
+export type SurgeryReadinessActiveBookingStatus =
+  (typeof SURGERY_READINESS_ACTIVE_BOOKING_STATUSES)[number];
 
-export function isActiveSurgeryBookingStatus(status: string): status is SurgeryReadinessActiveBookingStatus {
+export function isActiveSurgeryBookingStatus(
+  status: string
+): status is SurgeryReadinessActiveBookingStatus {
   const s = status.trim().toLowerCase();
   return (SURGERY_READINESS_ACTIVE_BOOKING_STATUSES as readonly string[]).includes(s);
 }
@@ -77,7 +88,10 @@ export type SurgeryReadinessBoardWindow = {
 /**
  * 14 calendar days inclusive of today in the tenant operational timezone.
  */
-export function computeSurgeryReadinessBoardWindow(now: Date, calendarTimezone: string): SurgeryReadinessBoardWindow {
+export function computeSurgeryReadinessBoardWindow(
+  now: Date,
+  calendarTimezone: string
+): SurgeryReadinessBoardWindow {
   const tz = calendarTimezone.trim();
   const todayYmd = calendarDateStringFromInstant(now, tz);
   const windowEndYmd = addDaysToCalendarDate(todayYmd, 13, tz);
@@ -85,7 +99,9 @@ export function computeSurgeryReadinessBoardWindow(now: Date, calendarTimezone: 
   const startMs = zonedMidnightUtcMs(todayYmd, tz);
   const endMs = zonedMidnightUtcMs(dayAfterEndYmd, tz);
   const rangeStartIso = (startMs != null ? new Date(startMs) : now).toISOString();
-  const rangeEndIso = (endMs != null ? new Date(endMs) : new Date(now.getTime() + 14 * 86_400_000)).toISOString();
+  const rangeEndIso = (
+    endMs != null ? new Date(endMs) : new Date(now.getTime() + 14 * 86_400_000)
+  ).toISOString();
   return { calendarTimezone: tz, todayYmd, windowEndYmd, rangeStartIso, rangeEndIso };
 }
 
@@ -101,7 +117,11 @@ export function isInstantInTenantInclusiveDayWindow(
 }
 
 /** Whole calendar days from tenant “today” to the surgery local day (negative if surgery is in the past). */
-export function calendarDaysUntilSurgery(tz: string, todayYmd: string, surgeryStartIso: string): number {
+export function calendarDaysUntilSurgery(
+  tz: string,
+  todayYmd: string,
+  surgeryStartIso: string
+): number {
   const surgeryYmd = calendarDateStringFromInstant(new Date(surgeryStartIso), tz);
   const t0 = zonedMidnightUtcMs(todayYmd, tz);
   const t1 = zonedMidnightUtcMs(surgeryYmd, tz);
@@ -142,7 +162,10 @@ export type BuildSurgeryReadinessIssuesInput = {
   bookingStatus: string;
   surgeryPlanPlanningStatus: string | null;
   /** Manual surgery deposit row when present (`payment_context = surgery`). */
-  surgeryPaymentRecord: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid"> | null;
+  surgeryPaymentRecord: Pick<
+    PaymentRecordRow,
+    "status" | "due_date" | "amount_expected" | "amount_paid"
+  > | null;
   /** Tenant-local `YYYY-MM-DD` for overdue derivation on manual payment rows. */
   todayYmd: string;
 };
@@ -151,7 +174,9 @@ export type BuildSurgeryReadinessIssuesInput = {
  * Base severities before days-to-surgery escalation.
  * Deposit blocking signals apply only when a manual payment record exists.
  */
-export function buildSurgeryReadinessIssues(input: BuildSurgeryReadinessIssuesInput): SurgeryReadinessIssue[] {
+export function buildSurgeryReadinessIssues(
+  input: BuildSurgeryReadinessIssuesInput
+): SurgeryReadinessIssue[] {
   const issues: SurgeryReadinessIssue[] = [];
   const todayY = input.todayYmd.trim();
 
@@ -222,7 +247,9 @@ export function escalateSurgeryReadinessIssues(
   });
 }
 
-export function maxSurgeryReadinessIssueSeverity(issues: SurgeryReadinessIssue[]): SurgeryReadinessIssueSeverity {
+export function maxSurgeryReadinessIssueSeverity(
+  issues: SurgeryReadinessIssue[]
+): SurgeryReadinessIssueSeverity {
   let rank = 0;
   for (const it of issues) {
     const r = it.severity === "high_risk" ? 3 : it.severity === "warning" ? 2 : 1;
@@ -231,7 +258,10 @@ export function maxSurgeryReadinessIssueSeverity(issues: SurgeryReadinessIssue[]
   return rank >= 3 ? "high_risk" : rank === 2 ? "warning" : "info";
 }
 
-export function hasIssueKind(issues: SurgeryReadinessIssue[], kind: SurgeryReadinessIssueKind): boolean {
+export function hasIssueKind(
+  issues: SurgeryReadinessIssue[],
+  kind: SurgeryReadinessIssueKind
+): boolean {
   return issues.some((i) => i.kind === kind);
 }
 
@@ -247,7 +277,9 @@ export type PickPrimaryColumnInput = {
 /**
  * Single swimlane column per card (V1.1 — driven by escalated issues + readiness).
  */
-export function pickSurgeryReadinessPrimaryColumn(input: PickPrimaryColumnInput): SurgeryReadinessBoardColumnId {
+export function pickSurgeryReadinessPrimaryColumn(
+  input: PickPrimaryColumnInput
+): SurgeryReadinessBoardColumnId {
   const { issues } = input;
   if (hasIssueKind(issues, "missing_case_link")) return "on_hold_not_linked";
   if (hasHighRiskSeverity(issues)) return "high_risk";
@@ -260,7 +292,11 @@ export function pickSurgeryReadinessPrimaryColumn(input: PickPrimaryColumnInput)
     hasIssueKind(issues, "booking_unconfirmed") ||
     hasIssueKind(issues, "surgery_deposit_pending");
 
-  if (input.readinessBucket === "needs_attention" || input.readinessBucket === "in_progress" || structural) {
+  if (
+    input.readinessBucket === "needs_attention" ||
+    input.readinessBucket === "in_progress" ||
+    structural
+  ) {
     return "needs_attention";
   }
   if (input.readinessBucket === "ready") return "ready";

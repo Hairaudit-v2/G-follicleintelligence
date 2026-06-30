@@ -47,7 +47,9 @@ export async function loadPatientTimeline(
 
   const { data, error } = await supabase
     .from("fi_patient_timeline")
-    .select("id, source, event_type, event_timestamp, title, description, crm_lead_id, metadata, created_at")
+    .select(
+      "id, source, event_type, event_timestamp, title, description, crm_lead_id, metadata, created_at"
+    )
     .eq("tenant_id", tid)
     .or(`patient_id.eq.${pid},person_id.eq.${personId}`)
     .order("event_timestamp", { ascending: false })

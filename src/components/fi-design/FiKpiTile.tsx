@@ -16,7 +16,13 @@ export type FiKpiTileProps = {
   className?: string;
 };
 
-export function FiKpiTile({ label, value, description, tone = "neutral", className }: FiKpiTileProps) {
+export function FiKpiTile({
+  label,
+  value,
+  description,
+  tone = "neutral",
+  className,
+}: FiKpiTileProps) {
   return (
     <div
       className={cn(
@@ -26,7 +32,9 @@ export function FiKpiTile({ label, value, description, tone = "neutral", classNa
       )}
     >
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-200">{value}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-200">
+        {value}
+      </p>
       {description ? <p className="mt-1 text-xs text-slate-500">{description}</p> : null}
     </div>
   );

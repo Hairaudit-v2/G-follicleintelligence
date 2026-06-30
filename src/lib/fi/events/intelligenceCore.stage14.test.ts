@@ -8,12 +8,18 @@ import {
   compareIntelligenceEventLogsToFiEvents,
   computeCompareIntelligenceLogsToFiEventsSummary,
 } from "./compareIntelligenceEventLogsToFiEvents.server";
-import { __resetInternalIntelligenceEventQueueForTests, getInternalIntelligenceQueueSnapshot } from "./internalBusQueue";
+import {
+  __resetInternalIntelligenceEventQueueForTests,
+  getInternalIntelligenceQueueSnapshot,
+} from "./internalBusQueue";
 import { parseIntelligenceEventLogReplayCliArgs } from "./intelligenceEventLogReplayCliArgs";
 import type { IntelligenceEventLogReplayCandidate } from "./intelligenceEventLogReplayTypes";
 import { clampIntelligenceEventLogReplayLimit } from "./loadIntelligenceEventReplayCandidates.server";
 import { loadIntelligenceEventReplayCandidates } from "./loadIntelligenceEventReplayCandidates.server";
-import { buildShadowReplayEnvelopeFromCandidate, replayIntelligenceEventLogs } from "./replayIntelligenceEventLogs.server";
+import {
+  buildShadowReplayEnvelopeFromCandidate,
+  replayIntelligenceEventLogs,
+} from "./replayIntelligenceEventLogs.server";
 
 function thenableResult<T>(result: T): { then: (fn: (v: T) => unknown) => Promise<unknown> } {
   return {
@@ -73,7 +79,15 @@ const validCandidate: IntelligenceEventLogReplayCandidate = {
 
 describe("intelligenceEventLogReplayCliArgs (Stage 14)", () => {
   it("defaults to dry_run and parses filters", () => {
-    const r = parseIntelligenceEventLogReplayCliArgs(["node", "x.js", "--event-name", "a.b", "--limit", "3", "--json"]);
+    const r = parseIntelligenceEventLogReplayCliArgs([
+      "node",
+      "x.js",
+      "--event-name",
+      "a.b",
+      "--limit",
+      "3",
+      "--json",
+    ]);
     assert.equal(r.ok, true);
     if (!r.ok) return;
     assert.equal(r.value.mode, "dry_run");
@@ -241,7 +255,15 @@ describe("computeCompareIntelligenceLogsToFiEventsSummary (Stage 14)", () => {
           created_at: "2026-01-01",
         },
       ],
-      [{ id: "f1", event_type: "only_fi", source_system: "hli", status: "processed", created_at: "2026-01-01" }]
+      [
+        {
+          id: "f1",
+          event_type: "only_fi",
+          source_system: "hli",
+          status: "processed",
+          created_at: "2026-01-01",
+        },
+      ]
     );
     assert.equal(s.source_system, FI_EVENTS_SOURCE_FIELD);
     assert.equal(s.source, FI_INTELLIGENCE_EVENT_LOGS_SOURCE_FIELD);
@@ -266,7 +288,15 @@ describe("compareIntelligenceEventLogsToFiEvents dual mock (Stage 14)", () => {
           created_at: "2026-01-01",
         },
       ],
-      [{ id: "f1", event_type: "hairaudit.audit.completed", source_system: "hairaudit", status: "processed", created_at: "2026-01-01" }]
+      [
+        {
+          id: "f1",
+          event_type: "hairaudit.audit.completed",
+          source_system: "hairaudit",
+          status: "processed",
+          created_at: "2026-01-01",
+        },
+      ]
     );
     const r = await compareIntelligenceEventLogsToFiEvents({
       limit: 50,

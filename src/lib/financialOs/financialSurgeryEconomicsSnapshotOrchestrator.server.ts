@@ -66,7 +66,10 @@ async function loadGraftReconciliationCompleted(
     .eq("surgery_id", surgeryId.trim())
     .maybeSingle();
   if (error) return false;
-  return String((data as { reconciliation_status?: string } | null)?.reconciliation_status ?? "") === "completed";
+  return (
+    String((data as { reconciliation_status?: string } | null)?.reconciliation_status ?? "") ===
+    "completed"
+  );
 }
 
 async function loadSurgeryBookingStatus(
@@ -111,11 +114,18 @@ async function loadSnapshotCaseContext(
     loadSurgeryPlanForCase(tid, cid, supabase),
     loadProcedureDayForCase(tid, cid, supabase),
     loadLiveSurgeryForCase(tid, cid, supabase),
-    supabase.from("fi_cases").select("patient_id, clinic_id").eq("tenant_id", tid).eq("id", cid).maybeSingle(),
+    supabase
+      .from("fi_cases")
+      .select("patient_id, clinic_id")
+      .eq("tenant_id", tid)
+      .eq("id", cid)
+      .maybeSingle(),
   ]);
 
   const procedureType = resolveProcedureType({ surgeryPlan, procedureDay });
-  const activeCostModel = procedureType ? await loadActiveSurgeryCostModel(tid, procedureType, supabase) : null;
+  const activeCostModel = procedureType
+    ? await loadActiveSurgeryCostModel(tid, procedureType, supabase)
+    : null;
 
   let surgeryStatus: string | null = null;
   let surgeryLiveStatus: string | null = null;
@@ -129,12 +139,17 @@ async function loadSnapshotCaseContext(
       .maybeSingle();
     if (surgeryRow) {
       surgeryStatus = String((surgeryRow as { status?: string }).status ?? "").trim() || null;
-      surgeryLiveStatus = String((surgeryRow as { live_status?: string }).live_status ?? "").trim() || null;
+      surgeryLiveStatus =
+        String((surgeryRow as { live_status?: string }).live_status ?? "").trim() || null;
     }
   }
 
   const bookingStatus = await loadSurgeryBookingStatus(tid, surgeryId, supabase);
-  const graftReconciliationCompleted = await loadGraftReconciliationCompleted(tid, surgeryId, supabase);
+  const graftReconciliationCompleted = await loadGraftReconciliationCompleted(
+    tid,
+    surgeryId,
+    supabase
+  );
 
   const c = caseRow.data as { patient_id?: string | null; clinic_id?: string | null } | null;
 
@@ -156,7 +171,9 @@ async function loadSnapshotCaseContext(
   };
 }
 
-export function buildSnapshotReadinessFromContext(ctx: SnapshotCaseContext): SurgeryProfitabilitySnapshotReadiness {
+export function buildSnapshotReadinessFromContext(
+  ctx: SnapshotCaseContext
+): SurgeryProfitabilitySnapshotReadiness {
   const surgeryInvoices = surgeryInvoicesFromReadiness(ctx.paymentReadiness);
   const revenueAgg = aggregateSurgeryInvoiceRevenue(surgeryInvoices);
   const completion: SurgeryCompletionContext = {
@@ -259,10 +276,12 @@ export async function triggerSurgeryProfitabilitySnapshotForCase(args: {
 
   const surgeryInvoices = surgeryInvoicesFromReadiness(ctx.paymentReadiness);
   const revenueAgg = aggregateSurgeryInvoiceRevenue(surgeryInvoices);
-  const checklist =
-    ctx.liveSurgery?.treatment_addons
-      ? { prp_prepared: ctx.liveSurgery.treatment_addons.prp, exosomes_prepared: ctx.liveSurgery.treatment_addons.exosome }
-      : {};
+  const checklist = ctx.liveSurgery?.treatment_addons
+    ? {
+        prp_prepared: ctx.liveSurgery.treatment_addons.prp,
+        exosomes_prepared: ctx.liveSurgery.treatment_addons.exosome,
+      }
+    : {};
 
   const snapshot = await calculateAndPersistSurgeryProfitabilitySnapshot({
     tenantId: ctx.tenantId,

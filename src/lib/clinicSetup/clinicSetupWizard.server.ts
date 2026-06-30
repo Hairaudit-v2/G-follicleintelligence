@@ -42,7 +42,10 @@ export {
 function isManualRoom(room: FiClinicRoomRow): boolean {
   const m = room.metadata;
   return Boolean(
-    m && typeof m === "object" && !Array.isArray(m) && (m as { manual_room_override?: boolean }).manual_room_override
+    m &&
+    typeof m === "object" &&
+    !Array.isArray(m) &&
+    (m as { manual_room_override?: boolean }).manual_room_override
   );
 }
 
@@ -76,7 +79,12 @@ export async function loadClinicSetupWizardBootstrap(args: {
       .eq("tenant_id", tid)
       .eq("is_active", true)
       .order("full_name"),
-    supabase.from("fi_clinic_settings").select("metadata").eq("tenant_id", tid).eq("clinic_id", cid).maybeSingle(),
+    supabase
+      .from("fi_clinic_settings")
+      .select("metadata")
+      .eq("tenant_id", tid)
+      .eq("clinic_id", cid)
+      .maybeSingle(),
   ]);
 
   if (staffRes.error) throw new Error(staffRes.error.message);
@@ -84,7 +92,9 @@ export async function loadClinicSetupWizardBootstrap(args: {
 
   const metaRaw = settingsRes.data?.metadata;
   const clinicSettingsMetadata =
-    metaRaw && typeof metaRaw === "object" && !Array.isArray(metaRaw) ? (metaRaw as Record<string, unknown>) : {};
+    metaRaw && typeof metaRaw === "object" && !Array.isArray(metaRaw)
+      ? (metaRaw as Record<string, unknown>)
+      : {};
 
   const staff = (staffRes.data ?? []).map((raw) => {
     const r = raw as {
@@ -115,7 +125,10 @@ function staffMatchesServiceCategory(
   return false;
 }
 
-function resolveCalendarVisibleValue(staffRole: string | null, showOnCalendar: boolean): boolean | null {
+function resolveCalendarVisibleValue(
+  staffRole: string | null,
+  showOnCalendar: boolean
+): boolean | null {
   if (showOnCalendar) return true;
   if (isNonCalendarSupportRole(staffRole)) return false;
   return null;
@@ -141,7 +154,10 @@ async function deleteWizardStaffEligibilityForServices(
     })
     .map((raw) => String((raw as { id: string }).id));
   if (ids.length === 0) return;
-  const { error: delErr } = await supabase.from("fi_service_staff_eligibility").delete().in("id", ids);
+  const { error: delErr } = await supabase
+    .from("fi_service_staff_eligibility")
+    .delete()
+    .in("id", ids);
   if (delErr) throw new Error(delErr.message);
 }
 
@@ -165,7 +181,10 @@ async function deleteWizardRoomEligibilityForServices(
     })
     .map((raw) => String((raw as { id: string }).id));
   if (ids.length === 0) return;
-  const { error: delErr } = await supabase.from("fi_service_room_eligibility").delete().in("id", ids);
+  const { error: delErr } = await supabase
+    .from("fi_service_room_eligibility")
+    .delete()
+    .in("id", ids);
   if (delErr) throw new Error(delErr.message);
 }
 
@@ -225,7 +244,10 @@ export async function applyClinicSetupWizard(args: {
         roomsSkippedManual += 1;
         warnings.push(`Skipped updating room ${pr.room_code} (marked manual override).`);
       } else {
-        const exMeta = ex.metadata && typeof ex.metadata === "object" && !Array.isArray(ex.metadata) ? ex.metadata : {};
+        const exMeta =
+          ex.metadata && typeof ex.metadata === "object" && !Array.isArray(ex.metadata)
+            ? ex.metadata
+            : {};
         const src = String((exMeta as { source?: string }).source ?? "");
         const keys = Object.keys(exMeta);
         if (keys.length > 0 && src !== CLINIC_SETUP_WIZARD_SOURCE) {
@@ -254,7 +276,9 @@ export async function applyClinicSetupWizard(args: {
     }
   }
 
-  const roomsAfter = args.dryRun ? existingBefore : await loadClinicRoomsForTenant(tid, { clinicId: cid }, supabase);
+  const roomsAfter = args.dryRun
+    ? existingBefore
+    : await loadClinicRoomsForTenant(tid, { clinicId: cid }, supabase);
   const roomIdByCode = new Map(roomsAfter.map((r) => [r.room_code.trim(), r.id]));
 
   const plans = buildServiceRoomPlans({ services, plannedRooms: planned });
@@ -263,7 +287,9 @@ export async function applyClinicSetupWizard(args: {
   for (const p of plans) {
     const missing = p.roomCodes.filter((code) => !roomIdByCode.has(code));
     if (missing.length) {
-      warnings.push(`Service “${p.serviceName}”: missing rooms ${missing.join(", ")} — skipped room mapping.`);
+      warnings.push(
+        `Service “${p.serviceName}”: missing rooms ${missing.join(", ")} — skipped room mapping.`
+      );
     }
   }
 
@@ -277,7 +303,9 @@ export async function applyClinicSetupWizard(args: {
 
     const now = new Date().toISOString();
     for (const p of plans) {
-      const resolvedIds = p.roomCodes.map((c) => roomIdByCode.get(c)).filter((x): x is string => Boolean(x));
+      const resolvedIds = p.roomCodes
+        .map((c) => roomIdByCode.get(c))
+        .filter((x): x is string => Boolean(x));
       if (resolvedIds.length === 0) continue;
 
       for (const roomId of resolvedIds) {
@@ -410,10 +438,11 @@ export async function buildClinicSetupWizardPreview(args: {
 }): Promise<ClinicSetupWizardPreviewPayload> {
   const tid = assertNonEmptyUuid(args.tenantId, "tenantId");
   const cid = assertNonEmptyUuid(args.clinicId, "clinicId");
-  const { services, eligibilityMaps, clinicSettingsMetadata } = await loadClinicSetupWizardBootstrap({
-    tenantId: tid,
-    clinicId: cid,
-  });
+  const { services, eligibilityMaps, clinicSettingsMetadata } =
+    await loadClinicSetupWizardBootstrap({
+      tenantId: tid,
+      clinicId: cid,
+    });
 
   const planned = buildPlannedRoomsFromCounts({
     clinicId: cid,
@@ -429,7 +458,9 @@ export async function buildClinicSetupWizardPreview(args: {
     const nonWizard = forClinic.filter((r) => {
       const m = r.metadata;
       const src =
-        m && typeof m === "object" && !Array.isArray(m) ? String((m as { source?: string }).source ?? "") : "";
+        m && typeof m === "object" && !Array.isArray(m)
+          ? String((m as { source?: string }).source ?? "")
+          : "";
       return src.length > 0 && src !== CLINIC_SETUP_WIZARD_SOURCE;
     });
     return {
@@ -440,9 +471,13 @@ export async function buildClinicSetupWizardPreview(args: {
     };
   });
 
-  const wizardMeta = clinicSettingsMetadata.clinic_setup_wizard as { completed_at?: string } | undefined;
+  const wizardMeta = clinicSettingsMetadata.clinic_setup_wizard as
+    | { completed_at?: string }
+    | undefined;
   const completedAt =
-    wizardMeta?.completed_at && String(wizardMeta.completed_at).trim() ? String(wizardMeta.completed_at) : null;
+    wizardMeta?.completed_at && String(wizardMeta.completed_at).trim()
+      ? String(wizardMeta.completed_at)
+      : null;
 
   const warnings: string[] = [];
   const c = args.counts;

@@ -78,7 +78,12 @@ export type ClinicalStaffingTemplateRecord = {
 };
 
 export type SchedulingConflict = {
-  kind: "shift_overlap" | "assignment_overlap" | "unavailable_block" | "leave_block" | "sick_leave_block";
+  kind:
+    | "shift_overlap"
+    | "assignment_overlap"
+    | "unavailable_block"
+    | "leave_block"
+    | "sick_leave_block";
   message: string;
   relatedId?: string;
 };
@@ -182,13 +187,21 @@ export type AssignStaffToClinicalEventResult =
       blockingIssues: StaffClinicalAssignmentResult["blocking_issues"];
       eligibilitySnapshot: Record<string, unknown>;
     }
-  | { ok: false; reason: string; readiness: StaffClinicalAssignmentResult; conflicts: SchedulingConflict[] };
+  | {
+      ok: false;
+      reason: string;
+      readiness: StaffClinicalAssignmentResult;
+      conflicts: SchedulingConflict[];
+    };
 
 // ---------------------------------------------------------------------------
 // Time helpers
 // ---------------------------------------------------------------------------
 
-export function parseTimeRangeMs(startsAt: string, endsAt: string): { startMs: number; endMs: number } | null {
+export function parseTimeRangeMs(
+  startsAt: string,
+  endsAt: string
+): { startMs: number; endMs: number } | null {
   const startMs = Date.parse(startsAt);
   const endMs = Date.parse(endsAt);
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return null;
@@ -216,7 +229,9 @@ const UNAVAILABLE_BLOCK_TYPES: AvailabilityBlockType[] = [
 // Core functions
 // ---------------------------------------------------------------------------
 
-export function getStaffAvailabilityForRange(input: StaffAvailabilityRangeInput): StaffAvailabilityRangeResult {
+export function getStaffAvailabilityForRange(
+  input: StaffAvailabilityRangeInput
+): StaffAvailabilityRangeResult {
   const range = parseTimeRangeMs(input.startsAt, input.endsAt);
   const reasons: string[] = [];
   const activeBlocks = input.availabilityBlocks.filter((b) => b.status === "active");
@@ -233,7 +248,9 @@ export function getStaffAvailabilityForRange(input: StaffAvailabilityRangeInput)
   });
 
   const hasOverride = overlappingBlocks.some((b) => b.block_type === "available_override");
-  const blockingBlocks = overlappingBlocks.filter((b) => UNAVAILABLE_BLOCK_TYPES.includes(b.block_type));
+  const blockingBlocks = overlappingBlocks.filter((b) =>
+    UNAVAILABLE_BLOCK_TYPES.includes(b.block_type)
+  );
 
   if (blockingBlocks.length > 0) {
     for (const b of blockingBlocks) {
@@ -268,7 +285,9 @@ export function getStaffAvailabilityForRange(input: StaffAvailabilityRangeInput)
   };
 }
 
-export function detectStaffSchedulingConflicts(input: SchedulingConflictInput): SchedulingConflict[] {
+export function detectStaffSchedulingConflicts(
+  input: SchedulingConflictInput
+): SchedulingConflict[] {
   const range = parseTimeRangeMs(input.startsAt, input.endsAt);
   if (!range) return [{ kind: "unavailable_block", message: "Invalid time range" }];
 
@@ -334,7 +353,9 @@ export function resolveClinicalStaffingTemplate(
 ): ClinicalStaffingTemplateRecord | null {
   const eventType = input.eventType.trim().toLowerCase();
   const clinicId = input.clinicId?.trim() || null;
-  const active = input.templates.filter((t) => t.is_active && t.event_type.trim().toLowerCase() === eventType);
+  const active = input.templates.filter(
+    (t) => t.is_active && t.event_type.trim().toLowerCase() === eventType
+  );
 
   if (clinicId) {
     const clinicSpecific = active.find((t) => t.clinic_id === clinicId);
@@ -344,7 +365,9 @@ export function resolveClinicalStaffingTemplate(
   return active.find((t) => t.clinic_id == null) ?? null;
 }
 
-export function countAssignedRoles(assignments: Array<{ assignedRole: string }>): ClinicalStaffingRequiredRoles {
+export function countAssignedRoles(
+  assignments: Array<{ assignedRole: string }>
+): ClinicalStaffingRequiredRoles {
   const counts: ClinicalStaffingRequiredRoles = {};
   for (const a of assignments) {
     const role = a.assignedRole.trim().toLowerCase();

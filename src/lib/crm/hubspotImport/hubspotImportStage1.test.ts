@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { splitHubspotDealIds } from "@/src/lib/crm/hubspotImport/hubspotDealIds";
-import { mapLeadStatusToKey, mapStageOfJourneyToPipelineSlug } from "@/src/lib/crm/hubspotImport/hubspotImportMappings";
+import {
+  mapLeadStatusToKey,
+  mapStageOfJourneyToPipelineSlug,
+} from "@/src/lib/crm/hubspotImport/hubspotImportMappings";
 import { parseHubspotContactsCsv } from "@/src/lib/crm/hubspotImport/parseHubspotContactsCsv";
 import { parseCsvRows } from "@/src/lib/crm/hubspotImport/parseDelimitedText";
 import { validateHubspotContactsRows } from "@/src/lib/crm/hubspotImport/validateHubspotContactsImport";
@@ -12,7 +15,9 @@ import type { HubspotContactParsedRow } from "@/src/lib/crm/hubspotImport/hubspo
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeRow(overrides: Partial<HubspotContactParsedRow> & { rowIndex?: number; recordId?: string }): HubspotContactParsedRow {
+function makeRow(
+  overrides: Partial<HubspotContactParsedRow> & { rowIndex?: number; recordId?: string }
+): HubspotContactParsedRow {
   // Use "key" in overrides for fields that tests may explicitly set to null,
   // so null is preserved rather than falling back to the default via ??.
   return {
@@ -21,15 +26,18 @@ function makeRow(overrides: Partial<HubspotContactParsedRow> & { rowIndex?: numb
     firstName: "firstName" in overrides ? (overrides.firstName as string) : "Test",
     lastName: "lastName" in overrides ? (overrides.lastName as string) : "User",
     email: "email" in overrides ? (overrides.email as string | null) : "test@example.com",
-    phoneNumber: "phoneNumber" in overrides ? (overrides.phoneNumber as string | null) : "+61 412 345 678",
+    phoneNumber:
+      "phoneNumber" in overrides ? (overrides.phoneNumber as string | null) : "+61 412 345 678",
     contactOwner: null,
     leadStatus: "leadStatus" in overrides ? (overrides.leadStatus as string | null) : "New",
     createDate: null,
     lastModifiedDate: null,
     contactType: "contactType" in overrides ? (overrides.contactType as string | null) : null,
-    lifecycleStage: "lifecycleStage" in overrides ? (overrides.lifecycleStage as string | null) : null,
+    lifecycleStage:
+      "lifecycleStage" in overrides ? (overrides.lifecycleStage as string | null) : null,
     leadSource: null,
-    stageOfJourney: "stageOfJourney" in overrides ? (overrides.stageOfJourney as string | null) : null,
+    stageOfJourney:
+      "stageOfJourney" in overrides ? (overrides.stageOfJourney as string | null) : null,
     nextAppointmentDate: null,
     associatedDeal: null,
     associatedCompany: null,
@@ -78,10 +86,7 @@ test("validateHubspotContactsRows flags duplicate phone as warning only", () => 
 });
 
 test("validateHubspotContactsRows flags duplicate record id as blocking", () => {
-  const rows = [
-    makeRow({ rowIndex: 1, recordId: "X" }),
-    makeRow({ rowIndex: 2, recordId: "X" }),
-  ];
+  const rows = [makeRow({ rowIndex: 1, recordId: "X" }), makeRow({ rowIndex: 2, recordId: "X" })];
   const rep = validateHubspotContactsRows(rows);
   const dup = rep.rowResults[0].issues.filter((i) => i.code === "duplicate_record_id");
   assert.equal(dup.length, 1);
@@ -96,19 +101,35 @@ test("validateHubspotContactsRows classification patient when contact type menti
 });
 
 test("validateHubspotContactsRows classification mixed when surgery booked and lifecycle is lead", () => {
-  const rows = [makeRow({ rowIndex: 1, recordId: "11", stageOfJourney: "Surgery booked", lifecycleStage: "Lead" })];
+  const rows = [
+    makeRow({
+      rowIndex: 1,
+      recordId: "11",
+      stageOfJourney: "Surgery booked",
+      lifecycleStage: "Lead",
+    }),
+  ];
   const rep = validateHubspotContactsRows(rows);
   assert.equal(rep.rowResults[0].classification, "mixed_patient_lead");
 });
 
 test("validateHubspotContactsRows classification patient when surgery done despite lead lifecycle", () => {
-  const rows = [makeRow({ rowIndex: 1, recordId: "12", stageOfJourney: "Surgery done", lifecycleStage: "Lead" })];
+  const rows = [
+    makeRow({
+      rowIndex: 1,
+      recordId: "12",
+      stageOfJourney: "Surgery done",
+      lifecycleStage: "Lead",
+    }),
+  ];
   const rep = validateHubspotContactsRows(rows);
   assert.equal(rep.rowResults[0].classification, "patient");
 });
 
 test("validateHubspotContactsRows classification lead_only for welcome journey and lead", () => {
-  const rows = [makeRow({ rowIndex: 1, recordId: "13", stageOfJourney: "Welcome", lifecycleStage: "Lead" })];
+  const rows = [
+    makeRow({ rowIndex: 1, recordId: "13", stageOfJourney: "Welcome", lifecycleStage: "Lead" }),
+  ];
   const rep = validateHubspotContactsRows(rows);
   assert.equal(rep.rowResults[0].classification, "lead_only");
 });
@@ -228,7 +249,9 @@ test("email in last name field produces email_in_last_name warning", () => {
 test("normal names do not produce email_in_name issues", () => {
   const rows = [makeRow({ rowIndex: 1, recordId: "402", firstName: "John", lastName: "Smith" })];
   const rep = validateHubspotContactsRows(rows);
-  const issues = rep.rowResults[0].issues.filter((i) => i.code === "email_in_first_name" || i.code === "email_in_last_name");
+  const issues = rep.rowResults[0].issues.filter(
+    (i) => i.code === "email_in_first_name" || i.code === "email_in_last_name"
+  );
   assert.equal(issues.length, 0);
 });
 
@@ -310,10 +333,7 @@ test("parseHubspotContactsCsv parses Non-Surgical column when present", () => {
 });
 
 test("parseHubspotContactsCsv sets nonSurgical to null when column absent", () => {
-  const csv = [
-    "Record ID,First Name,Email",
-    "333,Carol,carol@test.com",
-  ].join("\n");
+  const csv = ["Record ID,First Name,Email", "333,Carol,carol@test.com"].join("\n");
   const r = parseHubspotContactsCsv(csv);
   assert.equal(r.error, undefined);
   assert.equal(r.rows[0].nonSurgical, null);

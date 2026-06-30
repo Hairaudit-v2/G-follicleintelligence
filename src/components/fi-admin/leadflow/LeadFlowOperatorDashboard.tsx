@@ -20,7 +20,9 @@ function formatDateTime(value: string | null | undefined): string {
 }
 
 function priorityBadgeClass(band: string | null | undefined): string {
-  const normalized = String(band ?? "").trim().toLowerCase();
+  const normalized = String(band ?? "")
+    .trim()
+    .toLowerCase();
   if (normalized === "urgent") return "bg-rose-500/15 text-rose-200 ring-rose-400/30";
   if (normalized === "high") return "bg-amber-500/15 text-amber-100 ring-amber-400/30";
   if (normalized === "medium") return "bg-sky-500/15 text-sky-100 ring-sky-400/30";
@@ -61,13 +63,19 @@ function StatusChip({
             : "border-white/10 bg-white/[0.04] text-[#CBD5E1]";
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${toneClass}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${toneClass}`}
+    >
       {label}
     </span>
   );
 }
 
-export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperatorDashboardPayload }) {
+export function LeadFlowOperatorDashboard({
+  payload,
+}: {
+  payload: LeadFlowOperatorDashboardPayload;
+}) {
   const queueStatus = queueHealthLabel(payload);
   const hasLeads = payload.summary.totalLeads > 0;
   const hasFailedEvents = payload.failedDiagnostics.length > 0;
@@ -81,8 +89,12 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
         />
         <div className="relative space-y-5">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">LeadFlow</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">LeadFlow</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+              LeadFlow
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+              LeadFlow
+            </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
               HubSpot-first lead intelligence for hair restoration clinics
             </p>
@@ -109,8 +121,16 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
           className="mb-4"
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Total leads" value={payload.summary.totalLeads} icon={<Activity className="h-5 w-5" />} />
-          <StatCard label="New leads" value={payload.summary.newLeads} icon={<Zap className="h-5 w-5" />} />
+          <StatCard
+            label="Total leads"
+            value={payload.summary.totalLeads}
+            icon={<Activity className="h-5 w-5" />}
+          />
+          <StatCard
+            label="New leads"
+            value={payload.summary.newLeads}
+            icon={<Zap className="h-5 w-5" />}
+          />
           <StatCard
             label="High / urgent priority"
             value={payload.summary.highUrgentPriorityLeads}
@@ -121,7 +141,11 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
             value={payload.summary.consultationBooked}
             icon={<Clock className="h-5 w-5" />}
           />
-          <StatCard label="Quote sent" value={payload.summary.quoteSent} icon={<Radio className="h-5 w-5" />} />
+          <StatCard
+            label="Quote sent"
+            value={payload.summary.quoteSent}
+            icon={<Radio className="h-5 w-5" />}
+          />
           <StatCard
             label="Procedure booked"
             value={payload.summary.procedureBooked}
@@ -146,7 +170,8 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-5">
             <p className="font-medium text-[#F8FAFC]">Your pipeline is ready for its first lead</p>
             <p className="mt-2 text-sm text-[#94A3B8]">
-              Once HubSpot events are processed, leads will appear here with stage, score, and priority intelligence.
+              Once HubSpot events are processed, leads will appear here with stage, score, and
+              priority intelligence.
             </p>
           </div>
         ) : (
@@ -183,7 +208,9 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
                           >
                             {labelLeadFlowOperatorPriority(lead.priorityBand)}
                           </span>
-                          <span className="text-xs tabular-nums text-[#64748B]">Score {lead.leadScore}</span>
+                          <span className="text-xs tabular-nums text-[#64748B]">
+                            Score {lead.leadScore}
+                          </span>
                         </div>
                       </li>
                     ))
@@ -253,7 +280,8 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
         {payload.highPriorityLeads.length === 0 ? (
           <div className="px-5 py-8 sm:px-6">
             <p className="text-sm text-[#94A3B8]">
-              No high-priority leads right now. That is a good sign — keep response times tight as new enquiries arrive.
+              No high-priority leads right now. That is a good sign — keep response times tight as
+              new enquiries arrive.
             </p>
           </div>
         ) : (
@@ -275,7 +303,9 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
               <tbody className="divide-y divide-white/[0.06]">
                 {payload.highPriorityLeads.map((lead) => (
                   <tr key={lead.id} className="text-[#CBD5E1]">
-                    <td className="whitespace-nowrap px-5 py-3 font-medium text-[#F8FAFC] sm:px-6">{lead.name}</td>
+                    <td className="whitespace-nowrap px-5 py-3 font-medium text-[#F8FAFC] sm:px-6">
+                      {lead.name}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-3">{lead.contact ?? "—"}</td>
                     <td className="px-3 py-3">{lead.procedureInterest?.trim() || "—"}</td>
                     <td className="px-3 py-3">{lead.source?.trim() || "—"}</td>
@@ -314,11 +344,16 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
         ) : (
           <ul className="divide-y divide-white/[0.06]">
             {payload.recentActivity.map((row) => (
-              <li key={row.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <li
+                key={row.id}
+                className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[#F8FAFC]">
                     {row.activityLabel}
-                    {row.leadName ? <span className="text-[#94A3B8]"> · {row.leadName}</span> : null}
+                    {row.leadName ? (
+                      <span className="text-[#94A3B8]"> · {row.leadName}</span>
+                    ) : null}
                   </p>
                   <p className="text-xs text-[#64748B]">{row.metadataSummary}</p>
                 </div>
@@ -344,8 +379,14 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
           <StatCard label="Processing" value={payload.queueHealth.counts.processing} />
           <StatCard label="Processed (24h)" value={payload.queueHealth.processed_last_24h} />
           <StatCard label="Failed (24h)" value={payload.queueHealth.failed_last_24h} />
-          <StatCard label="Oldest pending" value={formatDateTime(payload.queueHealth.oldest_pending_at)} />
-          <StatCard label="Newest processed" value={formatDateTime(payload.queueHealth.newest_processed_at)} />
+          <StatCard
+            label="Oldest pending"
+            value={formatDateTime(payload.queueHealth.oldest_pending_at)}
+          />
+          <StatCard
+            label="Newest processed"
+            value={formatDateTime(payload.queueHealth.newest_processed_at)}
+          />
         </div>
 
         {hasFailedEvents ? (
@@ -355,7 +396,8 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
                 <div>
                   <p className="text-sm font-semibold text-[#F8FAFC]">Failed event diagnostics</p>
                   <p className="mt-1 text-xs text-[#94A3B8]">
-                    Last {payload.failedDiagnostics.length} failed ingestion events — expand for details.
+                    Last {payload.failedDiagnostics.length} failed ingestion events — expand for
+                    details.
                   </p>
                 </div>
                 <span className="text-xs font-medium text-[#22C1FF]/80">Expand</span>
@@ -378,9 +420,13 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
                     <tr key={event.id} className="text-[#CBD5E1]">
                       <td className="whitespace-nowrap px-4 py-3 sm:px-5">{event.provider}</td>
                       <td className="whitespace-nowrap px-3 py-3">{event.eventType}</td>
-                      <td className="whitespace-nowrap px-3 py-3 font-mono text-xs">{event.externalId ?? "—"}</td>
+                      <td className="whitespace-nowrap px-3 py-3 font-mono text-xs">
+                        {event.externalId ?? "—"}
+                      </td>
                       <td className="max-w-xs px-3 py-3 text-xs">{event.errorMessage ?? "—"}</td>
-                      <td className="whitespace-nowrap px-3 py-3 tabular-nums">{event.retryCount}</td>
+                      <td className="whitespace-nowrap px-3 py-3 tabular-nums">
+                        {event.retryCount}
+                      </td>
                       <td className="whitespace-nowrap px-3 py-3 text-xs text-[#94A3B8] sm:pr-5">
                         <time dateTime={event.createdAt}>{formatDateTime(event.createdAt)}</time>
                       </td>
@@ -391,7 +437,9 @@ export function LeadFlowOperatorDashboard({ payload }: { payload: LeadFlowOperat
             </div>
           </details>
         ) : (
-          <p className="mt-4 text-sm text-[#94A3B8]">No failed ingestion events — your queue is running cleanly.</p>
+          <p className="mt-4 text-sm text-[#94A3B8]">
+            No failed ingestion events — your queue is running cleanly.
+          </p>
         )}
       </DashboardCard>
     </div>

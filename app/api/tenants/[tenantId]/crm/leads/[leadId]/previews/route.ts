@@ -2,15 +2,28 @@
  * GET …/previews — tasks, notes, and message previews for a lead.
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
-import { loadCrmMessagesForLead, loadCrmNotesForLead, loadCrmTasksForLead } from "@/src/lib/crm/server";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
+import {
+  loadCrmMessagesForLead,
+  loadCrmNotesForLead,
+  loadCrmTasksForLead,
+} from "@/src/lib/crm/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string; leadId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; leadId: string }> }
+) {
   try {
     const { tenantId, leadId } = await params;
-    if (!tenantId?.trim() || !leadId?.trim()) return crmJsonError(400, "Missing tenantId or leadId.");
+    if (!tenantId?.trim() || !leadId?.trim())
+      return crmJsonError(400, "Missing tenantId or leadId.");
 
     const adminKey = extractAdminKeyFromRequest(req);
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });

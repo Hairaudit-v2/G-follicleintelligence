@@ -98,7 +98,9 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
   redirect(dest);
 }
 
-export async function fiOsRequestPasswordResetAction(formData: FormData): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function fiOsRequestPasswordResetAction(
+  formData: FormData
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) {
     return { ok: false, error: "Enter the email address for your OS account." };

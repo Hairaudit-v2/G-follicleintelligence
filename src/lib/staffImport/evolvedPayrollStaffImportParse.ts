@@ -11,7 +11,10 @@ import {
   PAYROLL_SENSITIVE_EXPORT_FIELDS,
   type PayrollSensitiveExportField,
 } from "./evolvedPayrollStaffImportConstants";
-import type { EvolvedPayrollStaffImportRow, EvolvedPayrollStaffParseResult } from "./evolvedPayrollStaffImportTypes";
+import type {
+  EvolvedPayrollStaffImportRow,
+  EvolvedPayrollStaffParseResult,
+} from "./evolvedPayrollStaffImportTypes";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 
@@ -75,7 +78,9 @@ export function normalizePayrollMobile(v: unknown): string | null {
   return s || null;
 }
 
-export function listPresentSensitivePayrollFields(raw: Record<string, unknown>): PayrollSensitiveExportField[] {
+export function listPresentSensitivePayrollFields(
+  raw: Record<string, unknown>
+): PayrollSensitiveExportField[] {
   const present: PayrollSensitiveExportField[] = [];
   for (const key of PAYROLL_SENSITIVE_EXPORT_FIELDS) {
     const v = raw[key];
@@ -171,7 +176,9 @@ export function parseEvolvedPayrollExportRows(rows: unknown[]): EvolvedPayrollSt
 }
 
 /** Read the first worksheet of an Evolved payroll `.xlsx` buffer. */
-export function parseEvolvedPayrollExportXlsxBuffer(buffer: ArrayBuffer | Buffer): EvolvedPayrollStaffParseResult {
+export function parseEvolvedPayrollExportXlsxBuffer(
+  buffer: ArrayBuffer | Buffer
+): EvolvedPayrollStaffParseResult {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const XLSX = require("xlsx") as typeof import("xlsx");
   const wb = XLSX.read(buffer, { type: "buffer", cellDates: false });

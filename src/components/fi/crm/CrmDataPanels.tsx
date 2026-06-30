@@ -1,13 +1,22 @@
-import type { FiCrmActivityEventRow, FiCrmLeadRow, FiCrmMessageRow, FiCrmNoteRow, FiCrmPipelineStageRow } from "@/src/lib/crm";
+import type {
+  FiCrmActivityEventRow,
+  FiCrmLeadRow,
+  FiCrmMessageRow,
+  FiCrmNoteRow,
+  FiCrmPipelineStageRow,
+} from "@/src/lib/crm";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function CrmPipelinePanel({ stages }: { stages: FiCrmPipelineStageRow[] }) {
   if (stages.length === 0) {
     return (
       <section className={card}>
         <h2 className="mb-2 text-sm font-semibold text-slate-100">Pipeline stages</h2>
-        <p className="text-sm text-slate-400">No pipeline stages returned. Default seeding may be misconfigured for this scope.</p>
+        <p className="text-sm text-slate-400">
+          No pipeline stages returned. Default seeding may be misconfigured for this scope.
+        </p>
       </section>
     );
   }
@@ -79,10 +88,13 @@ export function CrmActivityPanel({ events }: { events: FiCrmActivityEventRow[] }
           <li key={e.id} className="border-l-2 border-white/[0.08] pl-3">
             <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
               <time dateTime={e.occurred_at}>{e.occurred_at}</time>
-              <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-slate-300">{e.activity_kind}</span>
+              <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-slate-300">
+                {e.activity_kind}
+              </span>
             </div>
             {e.title ? <p className="mt-0.5 font-medium text-slate-100">{e.title}</p> : null}
-            {"changed_keys" in e.detail && Array.isArray((e.detail as { changed_keys: unknown }).changed_keys) ? (
+            {"changed_keys" in e.detail &&
+            Array.isArray((e.detail as { changed_keys: unknown }).changed_keys) ? (
               <p className="mt-0.5 text-xs text-slate-400">
                 Fields: {(e.detail as { changed_keys: string[] }).changed_keys.join(", ")}
               </p>
@@ -138,7 +150,11 @@ export function CrmMessagesPanel({ messages }: { messages: FiCrmMessageRow[] }) 
               <span>{m.direction}</span>
               {m.subject ? <span className="font-medium text-slate-200">{m.subject}</span> : null}
             </div>
-            {m.body_preview ? <p className="mt-1 text-slate-200">{m.body_preview}</p> : <p className="mt-1 text-gray-400">No preview text</p>}
+            {m.body_preview ? (
+              <p className="mt-1 text-slate-200">{m.body_preview}</p>
+            ) : (
+              <p className="mt-1 text-gray-400">No preview text</p>
+            )}
           </li>
         ))}
       </ul>

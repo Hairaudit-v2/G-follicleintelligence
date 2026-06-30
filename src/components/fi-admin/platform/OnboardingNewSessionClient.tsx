@@ -32,7 +32,8 @@ export function OnboardingNewSessionClient() {
   const [timezone, setTimezone] = useState("Australia/Perth");
   const [adminEmail, setAdminEmail] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
-  const [deploymentTemplateCode, setDeploymentTemplateCode] = useState<ClinicDeploymentTemplateCode>(DEFAULT_TEMPLATE);
+  const [deploymentTemplateCode, setDeploymentTemplateCode] =
+    useState<ClinicDeploymentTemplateCode>(DEFAULT_TEMPLATE);
   const [modulesTouched, setModulesTouched] = useState(false);
   const [sandboxSeedEnabled, setSandboxSeedEnabled] = useState<boolean | null>(null);
 
@@ -92,7 +93,9 @@ export function OnboardingNewSessionClient() {
 
   function toggleModule(code: string) {
     setModulesTouched(true);
-    setEnabledModules((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+    setEnabledModules((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
+    );
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -125,12 +128,17 @@ export function OnboardingNewSessionClient() {
     <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-slate-200">New provisioning session</h2>
       <p className="mt-1 text-xs text-slate-500">
-        Phase B — choose a clinic deployment template. Service catalog deploys automatically; CRM workflows and sandbox
-        seeds remain template-only until connectors ship.
+        Phase B — choose a clinic deployment template. Service catalog deploys automatically; CRM
+        workflows and sandbox seeds remain template-only until connectors ship.
       </p>
 
       {message ? (
-        <p className={message.kind === "ok" ? "mt-3 text-sm text-emerald-400" : "mt-3 text-sm text-red-400"} role="status">
+        <p
+          className={
+            message.kind === "ok" ? "mt-3 text-sm text-emerald-400" : "mt-3 text-sm text-red-400"
+          }
+          role="status"
+        >
           {message.text}
         </p>
       ) : null}
@@ -149,18 +157,24 @@ export function OnboardingNewSessionClient() {
               </option>
             ))}
           </select>
-          {selectedTemplate ? <p className="mt-1 text-xs text-slate-500">{selectedTemplate.description}</p> : null}
+          {selectedTemplate ? (
+            <p className="mt-1 text-xs text-slate-500">{selectedTemplate.description}</p>
+          ) : null}
         </label>
 
         {selectedTemplate ? (
           <div className="sm:col-span-2 rounded-lg border border-white/[0.08] bg-[#030810]/50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Template includes</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Template includes
+            </p>
             <dl className="mt-2 grid gap-3 text-xs sm:grid-cols-2">
               <div>
                 <dt className="font-medium text-slate-400">Modules</dt>
                 <dd className="mt-1 text-slate-300">
                   {(modulesTouched ? enabledModules : defaultModules)
-                    .map((c) => FI_MODULE_DISPLAY_NAMES[c as keyof typeof FI_MODULE_DISPLAY_NAMES] ?? c)
+                    .map(
+                      (c) => FI_MODULE_DISPLAY_NAMES[c as keyof typeof FI_MODULE_DISPLAY_NAMES] ?? c
+                    )
                     .join(", ")}
                 </dd>
               </div>
@@ -195,7 +209,9 @@ export function OnboardingNewSessionClient() {
               <div>
                 <dt className="font-medium text-slate-400">Sandbox seed</dt>
                 <dd className="mt-1 text-slate-300">
-                  {sandboxSeedEnabled ?? selectedTemplate.sandboxSeed.enabled ? "Enabled" : "Disabled"}
+                  {(sandboxSeedEnabled ?? selectedTemplate.sandboxSeed.enabled)
+                    ? "Enabled"
+                    : "Disabled"}
                 </dd>
               </div>
             </dl>
@@ -281,17 +297,24 @@ export function OnboardingNewSessionClient() {
         </label>
 
         <fieldset className="sm:col-span-2">
-          <legend className="text-xs font-medium text-slate-400">Module overrides (optional)</legend>
+          <legend className="text-xs font-medium text-slate-400">
+            Module overrides (optional)
+          </legend>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {moduleCodes.map((code) => (
-              <label key={code} className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/[0.08] bg-[#030810]/60 px-3 py-2 text-sm text-slate-300">
+              <label
+                key={code}
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/[0.08] bg-[#030810]/60 px-3 py-2 text-sm text-slate-300"
+              >
                 <input
                   type="checkbox"
                   checked={(modulesTouched ? enabledModules : defaultModules).includes(code)}
                   onChange={() => toggleModule(code)}
                   className="rounded border-white/20"
                 />
-                <span>{FI_MODULE_DISPLAY_NAMES[code as keyof typeof FI_MODULE_DISPLAY_NAMES] ?? code}</span>
+                <span>
+                  {FI_MODULE_DISPLAY_NAMES[code as keyof typeof FI_MODULE_DISPLAY_NAMES] ?? code}
+                </span>
               </label>
             ))}
           </div>

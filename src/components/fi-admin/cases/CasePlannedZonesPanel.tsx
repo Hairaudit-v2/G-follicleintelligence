@@ -28,7 +28,9 @@ export function CasePlannedZonesPanel({
           Add zone
         </button>
       </div>
-      <p className="text-xs text-gray-500">Recipient-area keys (e.g. hairline, midscalp, crown). Labels are optional.</p>
+      <p className="text-xs text-gray-500">
+        Recipient-area keys (e.g. hairline, midscalp, crown). Labels are optional.
+      </p>
       {zones.length === 0 ? (
         <p className="text-xs text-gray-400">No zones yet.</p>
       ) : (
@@ -37,36 +39,42 @@ export function CasePlannedZonesPanel({
             const keyField = caseFormField(`planned-zone-${i}-key`);
             const labelField = caseFormField(`planned-zone-${i}-label`);
             return (
-            <li key={i} className="flex flex-wrap items-end gap-2 rounded border border-white/[0.06] bg-white/[0.03] p-2">
-              <label htmlFor={keyField.id} className="text-xs text-slate-400">
-                Key
-                <input
-                  {...keyField}
-                  value={z.key}
-                  onChange={(e) => updateAt(i, { key: e.target.value })}
-                  className="mt-0.5 block w-36 rounded border border-slate-700 px-2 py-1 text-sm"
-                  placeholder="hairline"
-                />
-              </label>
-              <label htmlFor={labelField.id} className="min-w-[8rem] flex-1 text-xs text-slate-400">
-                Label
-                <input
-                  {...labelField}
-                  value={z.label ?? ""}
-                  onChange={(e) => updateAt(i, { label: e.target.value || null })}
-                  className="mt-0.5 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
-                  placeholder="Optional display name"
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() => onChange(zones.filter((_, j) => j !== i))}
-                className="text-xs text-rose-300 hover:underline"
+              <li
+                key={i}
+                className="flex flex-wrap items-end gap-2 rounded border border-white/[0.06] bg-white/[0.03] p-2"
               >
-                Remove
-              </button>
-            </li>
-          );
+                <label htmlFor={keyField.id} className="text-xs text-slate-400">
+                  Key
+                  <input
+                    {...keyField}
+                    value={z.key}
+                    onChange={(e) => updateAt(i, { key: e.target.value })}
+                    className="mt-0.5 block w-36 rounded border border-slate-700 px-2 py-1 text-sm"
+                    placeholder="hairline"
+                  />
+                </label>
+                <label
+                  htmlFor={labelField.id}
+                  className="min-w-[8rem] flex-1 text-xs text-slate-400"
+                >
+                  Label
+                  <input
+                    {...labelField}
+                    value={z.label ?? ""}
+                    onChange={(e) => updateAt(i, { label: e.target.value || null })}
+                    className="mt-0.5 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
+                    placeholder="Optional display name"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => onChange(zones.filter((_, j) => j !== i))}
+                  className="text-xs text-rose-300 hover:underline"
+                >
+                  Remove
+                </button>
+              </li>
+            );
           })}
         </ul>
       )}

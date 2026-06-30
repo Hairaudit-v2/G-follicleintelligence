@@ -14,7 +14,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function ConsultationOsNewRoutePage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function ConsultationOsNewRoutePage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
@@ -25,7 +29,10 @@ export default async function ConsultationOsNewRoutePage({ params }: { params: P
     loadClinicalStaffPickerOptions(tenantId.trim()),
     loadTenantOperationalCalendarSettings(tenantId.trim()),
   ]);
-  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
+  const operationalTodayYmd = calendarDateStringFromInstant(
+    new Date(),
+    calendarSettings.calendarTimezone
+  );
 
   return (
     <ConsultationOsCreatePage

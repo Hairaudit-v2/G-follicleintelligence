@@ -15,7 +15,9 @@ function envMap(m: Record<string, string | undefined>): (k: string) => string | 
   return (k) => m[k];
 }
 
-function emptyDrainResult(overrides?: Partial<HubSpotLeadFlowDrainResult>): HubSpotLeadFlowDrainResult {
+function emptyDrainResult(
+  overrides?: Partial<HubSpotLeadFlowDrainResult>
+): HubSpotLeadFlowDrainResult {
   return {
     success: true,
     processed: 0,
@@ -50,10 +52,13 @@ function emptyDrainResult(overrides?: Partial<HubSpotLeadFlowDrainResult>): HubS
 
 describe("LeadFlow HubSpot events cron", () => {
   it("rejects missing secret", async () => {
-    const res = await handleLeadFlowHubspotEventsCronGet(new NextRequest(ROUTE, { method: "GET" }), {
-      getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-      drainQueue: async () => emptyDrainResult(),
-    });
+    const res = await handleLeadFlowHubspotEventsCronGet(
+      new NextRequest(ROUTE, { method: "GET" }),
+      {
+        getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
+        drainQueue: async () => emptyDrainResult(),
+      }
+    );
     assert.equal(res.status, 401);
     const json = (await res.json()) as { ok: boolean; error?: string };
     assert.equal(json.ok, false);

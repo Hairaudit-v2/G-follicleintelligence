@@ -85,5 +85,7 @@ export function parseIhrgDemoProfile(value: string | undefined): IhrgDemoProfile
   if (raw === "light" || raw === "standard" || raw === "alive" || raw === "enterprise") {
     return raw;
   }
-  throw new Error(`Unknown IHRG demo profile "${value}". Use light, standard, alive, or enterprise.`);
+  throw new Error(
+    `Unknown IHRG demo profile "${value}". Use light, standard, alive, or enterprise.`
+  );
 }

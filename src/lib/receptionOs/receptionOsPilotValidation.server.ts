@@ -23,7 +23,7 @@ async function tableExists(tableName: string): Promise<boolean> {
 
 export async function runReceptionOsPilotValidation(
   tenantId: string,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): Promise<ReceptionOsPilotValidationReport> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const checks: ReceptionOsPilotValidationReport["checks"] = [];
@@ -77,7 +77,7 @@ export async function runReceptionOsPilotValidation(
         .map((p) => p.hrefs.lead)
         .filter(Boolean)
         .map((href) => href!.match(/\/crm\/leads\/([0-9a-f-]{36})/i)?.[1] ?? null)
-        .filter(Boolean) as string[],
+        .filter(Boolean) as string[]
     ),
   ].slice(0, 5);
 
@@ -86,14 +86,16 @@ export async function runReceptionOsPilotValidation(
       id: "contact_fields",
       label: "Patient/lead contact fields resolvable",
       severity: "warn",
-      detail: "Today's patients include lead links but lead IDs could not be parsed for contact checks.",
+      detail:
+        "Today's patients include lead links but lead IDs could not be parsed for contact checks.",
     });
   } else if (!leadIds.length) {
     appendPilotValidationCheck(checks, {
       id: "contact_fields",
       label: "Patient/lead contact fields resolvable",
       severity: "warn",
-      detail: "No linked leads on today's patients — SMS/email sends will require explicit recipients.",
+      detail:
+        "No linked leads on today's patients — SMS/email sends will require explicit recipients.",
     });
   } else {
     let withEmail = 0;
@@ -199,7 +201,10 @@ export async function runReceptionOsPilotValidation(
     id: "tenant_scope",
     label: "Payload tenant scope",
     severity: payload.tenantId === tid ? "pass" : "fail",
-    detail: payload.tenantId === tid ? "Command centre payload tenant matches request." : "Tenant mismatch detected.",
+    detail:
+      payload.tenantId === tid
+        ? "Command centre payload tenant matches request."
+        : "Tenant mismatch detected.",
   });
 
   return finalizePilotValidationReport({

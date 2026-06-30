@@ -56,9 +56,7 @@ function bookingRow(p: Partial<FiBookingRow>): FiBookingRow {
 }
 
 test("u: user column maps to s: staff column when linked", () => {
-  const { staffIdByUserId } = buildStaffUserLinkIndex([
-    { id: STAFF_ID, fi_user_id: USER_ID },
-  ]);
+  const { staffIdByUserId } = buildStaffUserLinkIndex([{ id: STAFF_ID, fi_user_id: USER_ID }]);
   assert.equal(resolveUserColumnToStaffColumnId(USER_ID, staffIdByUserId), `s:${STAFF_ID}`);
   assert.equal(
     resourceColumnIdForBooking(bookingRow({ assigned_user_id: USER_ID }), { staffIdByUserId }),
@@ -70,7 +68,9 @@ test("unlinked u: user column stays legacy", () => {
   const { staffIdByUserId } = buildStaffUserLinkIndex([{ id: STAFF_ID, fi_user_id: USER_ID }]);
   assert.equal(resolveUserColumnToStaffColumnId(UNLINKED_USER, staffIdByUserId), null);
   assert.equal(
-    resourceColumnIdForBooking(bookingRow({ assigned_user_id: UNLINKED_USER }), { staffIdByUserId }),
+    resourceColumnIdForBooking(bookingRow({ assigned_user_id: UNLINKED_USER }), {
+      staffIdByUserId,
+    }),
     legacyUserColumnId(UNLINKED_USER)
   );
 });
@@ -101,7 +101,10 @@ test("blocked staff cannot be selected in clinical picker", () => {
 test("staffId URL filter resolves from legacy assignedUserId when linked", () => {
   const { staffIdByUserId } = buildStaffUserLinkIndex([{ id: STAFF_ID, fi_user_id: USER_ID }]);
   const parsed = parseCalendarSearchParams({ assignedUserId: USER_ID });
-  const { query, shouldCanonicalizeToStaffId } = normalizeCalendarStaffFilter(parsed, staffIdByUserId);
+  const { query, shouldCanonicalizeToStaffId } = normalizeCalendarStaffFilter(
+    parsed,
+    staffIdByUserId
+  );
   assert.equal(query.staffId, STAFF_ID);
   assert.equal(query.assignedUserId, null);
   assert.equal(shouldCanonicalizeToStaffId, true);
@@ -110,7 +113,10 @@ test("staffId URL filter resolves from legacy assignedUserId when linked", () =>
 test("legacy assignedUserId filter still works for unlinked user", () => {
   const { staffIdByUserId } = buildStaffUserLinkIndex([{ id: STAFF_ID, fi_user_id: USER_ID }]);
   const parsed = parseCalendarSearchParams({ assignedUserId: UNLINKED_USER });
-  const { query, shouldCanonicalizeToStaffId } = normalizeCalendarStaffFilter(parsed, staffIdByUserId);
+  const { query, shouldCanonicalizeToStaffId } = normalizeCalendarStaffFilter(
+    parsed,
+    staffIdByUserId
+  );
   assert.equal(query.staffId, null);
   assert.equal(query.assignedUserId, UNLINKED_USER);
   assert.equal(shouldCanonicalizeToStaffId, false);

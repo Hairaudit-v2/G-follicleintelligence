@@ -13,9 +13,15 @@ export function normalizePhoneDigits(value: string | null | undefined): string |
   return d.length >= 6 ? d : null;
 }
 
-export function extractPersonIdentitySignals(personMetadata: Record<string, unknown> | null | undefined): PersonIdentitySignals {
-  const m = personMetadata && typeof personMetadata === "object" && !Array.isArray(personMetadata) ? personMetadata : {};
-  const fromNorm = typeof m.email_normalized === "string" ? m.email_normalized.trim().toLowerCase() : null;
+export function extractPersonIdentitySignals(
+  personMetadata: Record<string, unknown> | null | undefined
+): PersonIdentitySignals {
+  const m =
+    personMetadata && typeof personMetadata === "object" && !Array.isArray(personMetadata)
+      ? personMetadata
+      : {};
+  const fromNorm =
+    typeof m.email_normalized === "string" ? m.email_normalized.trim().toLowerCase() : null;
   const emailFromField = normalizeEmail(typeof m.email === "string" ? m.email : null);
   let emailNormalized = fromNorm && fromNorm.length ? fromNorm : emailFromField;
   if (emailNormalized && isPlaceholderEmail(emailNormalized)) {
@@ -38,13 +44,17 @@ export async function findPersonIdsWithEmailInTenant(
   emailNormalized: string | null
 ): Promise<string[]> {
   if (!emailNormalized || isPlaceholderEmail(emailNormalized)) return [];
-  const { data, error } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tenantId.trim());
+  const { data, error } = await supabase
+    .from("fi_persons")
+    .select("id, metadata")
+    .eq("tenant_id", tenantId.trim());
   if (error) throw new Error(error.message);
   const ids = new Set<string>();
   for (const row of data ?? []) {
     const r = row as { id: string; metadata: unknown };
     const m = r.metadata as Record<string, unknown> | undefined;
-    const en = typeof m?.email_normalized === "string" ? m.email_normalized.trim().toLowerCase() : null;
+    const en =
+      typeof m?.email_normalized === "string" ? m.email_normalized.trim().toLowerCase() : null;
     const fallback = normalizeEmail(typeof m?.email === "string" ? m.email : null);
     const match = (en && en === emailNormalized) || (fallback && fallback === emailNormalized);
     if (match) ids.add(String(r.id));
@@ -58,7 +68,10 @@ export async function findPersonIdsWithPhoneDigitsInTenant(
   phoneDigits: string | null
 ): Promise<string[]> {
   if (!phoneDigits) return [];
-  const { data, error } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tenantId.trim());
+  const { data, error } = await supabase
+    .from("fi_persons")
+    .select("id, metadata")
+    .eq("tenant_id", tenantId.trim());
   if (error) throw new Error(error.message);
   const ids = new Set<string>();
   for (const row of data ?? []) {
@@ -75,7 +88,11 @@ export async function findPersonIdsWithPhoneDigitsInTenant(
  * Throws when email/phone resolution maps to zero or multiple persons other than the lead person.
  * Pure: pass precomputed id lists from {@link findPersonIdsWithEmailInTenant} / {@link findPersonIdsWithPhoneDigitsInTenant}.
  */
-export function assertIdentityMatchesLeadPersonOnly(leadPersonId: string, emailIds: string[], phoneIds: string[]): void {
+export function assertIdentityMatchesLeadPersonOnly(
+  leadPersonId: string,
+  emailIds: string[],
+  phoneIds: string[]
+): void {
   const lid = leadPersonId.trim();
   const union = new Set<string>([...emailIds, ...phoneIds]);
   if (union.size > 1) {
@@ -99,7 +116,15 @@ export async function assertNoAmbiguousPersonIdentityInTenant(
   leadPersonId: string,
   signals: PersonIdentitySignals
 ): Promise<void> {
-  const emailIds = await findPersonIdsWithEmailInTenant(supabase, tenantId, signals.emailNormalized);
-  const phoneIds = await findPersonIdsWithPhoneDigitsInTenant(supabase, tenantId, signals.phoneDigits);
+  const emailIds = await findPersonIdsWithEmailInTenant(
+    supabase,
+    tenantId,
+    signals.emailNormalized
+  );
+  const phoneIds = await findPersonIdsWithPhoneDigitsInTenant(
+    supabase,
+    tenantId,
+    signals.phoneDigits
+  );
   assertIdentityMatchesLeadPersonOnly(leadPersonId, emailIds, phoneIds);
 }

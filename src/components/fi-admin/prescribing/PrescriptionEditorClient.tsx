@@ -14,7 +14,10 @@ import { PrescriptionPharmacySendPanel } from "@/src/components/fi-admin/prescri
 import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
-import type { FiCompoundPharmacyRow, FiPharmacyTransmissionRow } from "@/src/lib/prescribing/fiPharmacyLoaders.server";
+import type {
+  FiCompoundPharmacyRow,
+  FiPharmacyTransmissionRow,
+} from "@/src/lib/prescribing/fiPharmacyLoaders.server";
 import type {
   FiMedicationCatalogueRow,
   FiPrescriptionStatusEventRow,
@@ -115,9 +118,13 @@ export function PrescriptionEditorClient({
   const [doctorId, setDoctorId] = useState(initialDoctorId);
   const [clinicalNotes, setClinicalNotes] = useState(initialClinicalNotes);
   const [deliveryType, setDeliveryType] = useState(initialDeliveryType);
-  const [patientShippingAddress, setPatientShippingAddress] = useState(initialPatientShippingAddress);
+  const [patientShippingAddress, setPatientShippingAddress] = useState(
+    initialPatientShippingAddress
+  );
   const [pharmacyName, setPharmacyName] = useState(initialPharmacyName);
-  const [readyForPharmacyAt, setReadyForPharmacyAt] = useState<string | null>(initialReadyForPharmacyAt);
+  const [readyForPharmacyAt, setReadyForPharmacyAt] = useState<string | null>(
+    initialReadyForPharmacyAt
+  );
   const [signedAt, setSignedAt] = useState<string | null>(initialSignedAt);
   const [events, setEvents] = useState(initialEvents);
 
@@ -130,8 +137,12 @@ export function PrescriptionEditorClient({
     initialReorderValidUntil ? initialReorderValidUntil.slice(0, 16) : ""
   );
   const [reorderReviewRequired, setReorderReviewRequired] = useState(initialReorderReviewRequired);
-  const [patientReorderFeePence, setPatientReorderFeePence] = useState(initialPatientReorderFeePence);
-  const [reorderFeePaymentRequired, setReorderFeePaymentRequired] = useState(initialReorderFeePaymentRequired);
+  const [patientReorderFeePence, setPatientReorderFeePence] = useState(
+    initialPatientReorderFeePence
+  );
+  const [reorderFeePaymentRequired, setReorderFeePaymentRequired] = useState(
+    initialReorderFeePaymentRequired
+  );
 
   const [lines, setLines] = useState<PrescriptionEditorLine[]>(() =>
     initialItems.length
@@ -212,13 +223,19 @@ export function PrescriptionEditorClient({
         repeatsAllowed,
         repeatLimit,
         reorderValidFrom: reorderValidFrom.trim()
-          ? (Number.isNaN(Date.parse(reorderValidFrom)) ? null : new Date(reorderValidFrom).toISOString())
+          ? Number.isNaN(Date.parse(reorderValidFrom))
+            ? null
+            : new Date(reorderValidFrom).toISOString()
           : null,
         reorderValidUntil: reorderValidUntil.trim()
-          ? (Number.isNaN(Date.parse(reorderValidUntil)) ? null : new Date(reorderValidUntil).toISOString())
+          ? Number.isNaN(Date.parse(reorderValidUntil))
+            ? null
+            : new Date(reorderValidUntil).toISOString()
           : null,
         reorderReviewRequired,
-        patientReorderFeePence: patientReorderFeePence.trim() ? Number(patientReorderFeePence.trim()) : null,
+        patientReorderFeePence: patientReorderFeePence.trim()
+          ? Number(patientReorderFeePence.trim())
+          : null,
         reorderFeePaymentRequired,
         items,
       });
@@ -323,19 +340,28 @@ export function PrescriptionEditorClient({
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId}`} className="text-cyan-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId.trim()}/patients/${patientId}`}
+          className="text-cyan-300 hover:underline"
+        >
           ← Patient profile
         </Link>
         {caseId ? (
           <>
             <span className="mx-2 text-slate-300">·</span>
-            <Link href={`/fi-admin/${tenantId.trim()}/cases/${caseId}`} className="text-cyan-300 hover:underline">
+            <Link
+              href={`/fi-admin/${tenantId.trim()}/cases/${caseId}`}
+              className="text-cyan-300 hover:underline"
+            >
               Case
             </Link>
           </>
         ) : null}
         <span className="mx-2 text-slate-300">·</span>
-        <Link href={`/fi-admin/${tenantId.trim()}/prescriptions`} className="text-cyan-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId.trim()}/prescriptions`}
+          className="text-cyan-300 hover:underline"
+        >
           Prescriptions workspace
         </Link>
       </p>
@@ -374,7 +400,10 @@ export function PrescriptionEditorClient({
               const selected = staffOptions.find((s) => s.id === doctorId);
               if (!selected || selected.clinicallyAvailable !== false) return null;
               return (
-                <StaffReadinessPickerWarning tenantId={tenantId} blockReason={selected.blockReason ?? null} />
+                <StaffReadinessPickerWarning
+                  tenantId={tenantId}
+                  blockReason={selected.blockReason ?? null}
+                />
               );
             })()}
           </label>
@@ -426,8 +455,8 @@ export function PrescriptionEditorClient({
       <FiCard>
         <h2 className="text-sm font-semibold text-slate-100">Patient reorder programme (portal)</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Controls whether this signed prescription appears in the patient portal for refills. Requires repeat limit ≥ 1
-          when repeats are allowed.
+          Controls whether this signed prescription appears in the patient portal for refills.
+          Requires repeat limit ≥ 1 when repeats are allowed.
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-200 md:col-span-2">
@@ -534,14 +563,15 @@ export function PrescriptionEditorClient({
                       const rows = catalogueByCategory.get(cat) ?? [];
                       if (!rows.length) return null;
                       return (
-                      <optgroup key={cat} label={MEDICATION_CATEGORY_LABELS[cat]}>
-                        {rows.map((r) => (
-                          <option key={r.id} value={r.id}>
-                            {r.medication_name} — {r.quantity_label} (${Number(r.base_price).toFixed(2)})
-                            {r.requires_doctor_approval ? " (MD approval)" : ""}
-                          </option>
-                        ))}
-                      </optgroup>
+                        <optgroup key={cat} label={MEDICATION_CATEGORY_LABELS[cat]}>
+                          {rows.map((r) => (
+                            <option key={r.id} value={r.id}>
+                              {r.medication_name} — {r.quantity_label} ($
+                              {Number(r.base_price).toFixed(2)})
+                              {r.requires_doctor_approval ? " (MD approval)" : ""}
+                            </option>
+                          ))}
+                        </optgroup>
                       );
                     })}
                   </select>
@@ -598,10 +628,13 @@ export function PrescriptionEditorClient({
                     className="mt-0.5"
                     checked={line.repeatRulesPrescriberConfirmed}
                     disabled={!canEditBody}
-                    onChange={(e) => updateLine(line.key, { repeatRulesPrescriberConfirmed: e.target.checked })}
+                    onChange={(e) =>
+                      updateLine(line.key, { repeatRulesPrescriberConfirmed: e.target.checked })
+                    }
                   />
                   <span>
-                    Prescriber confirms repeat / reorder rules for this line (required to sign and send to pharmacy).
+                    Prescriber confirms repeat / reorder rules for this line (required to sign and
+                    send to pharmacy).
                   </span>
                 </label>
               ) : null}
@@ -669,7 +702,9 @@ export function PrescriptionEditorClient({
         <ul className="mt-3 space-y-2 text-sm text-slate-300">
           {events.map((ev) => (
             <li key={ev.id} className="border-b border-white/[0.06] pb-2 last:border-0">
-              <span className="font-mono text-xs text-slate-500">{new Date(ev.created_at).toLocaleString()}</span>
+              <span className="font-mono text-xs text-slate-500">
+                {new Date(ev.created_at).toLocaleString()}
+              </span>
               {ev.from_status ? (
                 <span className="ml-2 text-xs">
                   {formatRxEventStatus(ev.from_status)} → {formatRxEventStatus(ev.to_status)}

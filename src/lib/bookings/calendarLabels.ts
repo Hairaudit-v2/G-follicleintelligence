@@ -2,7 +2,10 @@
  * Staff-facing strings and design-token class maps for the booking calendar (Stage 3C). Pure.
  */
 
-import { DEFAULT_CALENDAR_TIMEZONE, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  DEFAULT_CALENDAR_TIMEZONE,
+  normalizeCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { BOOKING_TYPES, type BookingType } from "./bookingPolicy";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { CalendarDayLane } from "./calendarView";
@@ -30,11 +33,7 @@ const TYPE_SET = new Set<string>(BOOKING_TYPES);
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace("#", "").trim();
   const full =
-    h.length === 3
-      ? `${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`
-      : h.length === 6
-        ? h
-        : "000000";
+    h.length === 3 ? `${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}` : h.length === 6 ? h : "000000";
   const r = parseInt(full.slice(0, 2), 16);
   const g = parseInt(full.slice(2, 4), 16);
   const b = parseInt(full.slice(4, 6), 16);
@@ -51,11 +50,15 @@ export type BookingCalendarChipSurface = {
 };
 
 /** Event chip colours: tenant catalog hex overrides tint; otherwise semantic tone per booking type. */
-export function bookingCalendarChipSurface(bookingType: string, catalogColor?: string | null): BookingCalendarChipSurface {
+export function bookingCalendarChipSurface(
+  bookingType: string,
+  catalogColor?: string | null
+): BookingCalendarChipSurface {
   const t = bookingType.trim();
   const hex = catalogColor?.trim();
   if (hex && CATALOG_HEX.test(hex)) {
-    const border = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    const border =
+      hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
     return {
       toneClasses: "border-slate-700 text-slate-100",
       chipStyle: { borderColor: border, backgroundColor: hexToRgba(border, 0.2) },
@@ -112,15 +115,25 @@ export function formatCalendarRangeTitle(
   const b = lanes[lanes.length - 1].endMs - 1;
   const start = new Date(a);
   const end = new Date(b);
-  const startParts = new Intl.DateTimeFormat("en-GB", { month: "numeric", year: "numeric", timeZone: tz }).formatToParts(start);
-  const endParts = new Intl.DateTimeFormat("en-GB", { month: "numeric", year: "numeric", timeZone: tz }).formatToParts(end);
+  const startParts = new Intl.DateTimeFormat("en-GB", {
+    month: "numeric",
+    year: "numeric",
+    timeZone: tz,
+  }).formatToParts(start);
+  const endParts = new Intl.DateTimeFormat("en-GB", {
+    month: "numeric",
+    year: "numeric",
+    timeZone: tz,
+  }).formatToParts(end);
   const startMonth = startParts.find((p) => p.type === "month")?.value;
   const endMonth = endParts.find((p) => p.type === "month")?.value;
   const startYear = startParts.find((p) => p.type === "year")?.value;
   const endYear = endParts.find((p) => p.type === "year")?.value;
   const sameMonth = startMonth === endMonth && startYear === endYear;
   if (sameMonth) {
-    const startDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(start);
+    const startDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(
+      start
+    );
     const endDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(end);
     const monthLabel = start.toLocaleDateString("en-GB", { month: "long", timeZone: tz });
     return `${startDay}–${endDay} ${monthLabel} ${startYear}`;

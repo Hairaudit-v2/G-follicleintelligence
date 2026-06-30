@@ -78,9 +78,14 @@ function templateSatisfies(
   }
   const active = templates.filter((t) => t.is_active);
   const hit = active.find((t) => triggers.includes(t.trigger_event));
-  if (hit) return { ok: true, detail: `Active template: “${hit.name}” (${hit.type}, ${hit.trigger_event}).` };
+  if (hit)
+    return {
+      ok: true,
+      detail: `Active template: “${hit.name}” (${hit.type}, ${hit.trigger_event}).`,
+    };
   const inactive = templates.find((t) => triggers.includes(t.trigger_event));
-  if (inactive) return { ok: false, detail: `Template exists but is inactive: “${inactive.name}”.` };
+  if (inactive)
+    return { ok: false, detail: `Template exists but is inactive: “${inactive.name}”.` };
   return { ok: false, detail: `No active template for: ${triggers.join(", ")}.` };
 }
 
@@ -88,7 +93,9 @@ function isJobStatus(s: string): s is ReminderJobStatus {
   return (REMINDER_JOB_STATUSES as readonly string[]).includes(s);
 }
 
-export async function loadCalendarReminderTestingPayload(tenantId: string): Promise<CalendarReminderTestingPayload> {
+export async function loadCalendarReminderTestingPayload(
+  tenantId: string
+): Promise<CalendarReminderTestingPayload> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
   const deliveryCfg: ReminderDeliveryConfig = loadReminderDeliveryConfig();
@@ -131,7 +138,9 @@ export async function loadCalendarReminderTestingPayload(tenantId: string): Prom
     tplTrig.set(String(tr.id), String(tr.trigger_event ?? ""));
   }
 
-  const mapJob = (r: Record<string, unknown>): CalendarReminderJobListItem & { updated_at: string } => ({
+  const mapJob = (
+    r: Record<string, unknown>
+  ): CalendarReminderJobListItem & { updated_at: string } => ({
     id: String(r.id),
     scheduled_at: String(r.scheduled_at ?? ""),
     template_name: tplName.get(String(r.template_id)) || "—",

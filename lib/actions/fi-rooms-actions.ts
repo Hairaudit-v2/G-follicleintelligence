@@ -13,7 +13,11 @@ import {
   updateClinicRoom,
 } from "@/src/lib/rooms/fiClinicRooms.server";
 import { loadClinicRoomsForPicker } from "@/src/lib/rooms/roomAvailability.server";
-import { CLINIC_ROOM_TYPES, type ClinicRoomType, type RoomPickerOption } from "@/src/lib/rooms/roomTypes";
+import {
+  CLINIC_ROOM_TYPES,
+  type ClinicRoomType,
+  type RoomPickerOption,
+} from "@/src/lib/rooms/roomTypes";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 function errMsg(e: unknown): string {
@@ -62,7 +66,9 @@ const roomUpsertSchema = z
 export async function createClinicRoomAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; room: Awaited<ReturnType<typeof insertClinicRoom>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; room: Awaited<ReturnType<typeof insertClinicRoom>> } | { ok: false; error: string }
+> {
   try {
     const parsed = roomUpsertSchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -86,9 +92,14 @@ export async function updateClinicRoomAction(
   tenantId: string,
   roomId: string,
   body: unknown
-): Promise<{ ok: true; room: Awaited<ReturnType<typeof updateClinicRoom>> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; room: Awaited<ReturnType<typeof updateClinicRoom>> } | { ok: false; error: string }
+> {
   try {
-    const parsed = roomUpsertSchema.partial({ clinicId: true }).extend({ adminKey: z.string().optional() }).parse(body);
+    const parsed = roomUpsertSchema
+      .partial({ clinicId: true })
+      .extend({ adminKey: z.string().optional() })
+      .parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
     const room = await updateClinicRoom(tenantId, roomId, {
       roomCode: parsed.roomCode,
@@ -238,7 +249,11 @@ export async function saveServiceStaffEligibilityAction(
     const supabase = supabaseAdmin();
     const now = new Date().toISOString();
 
-    await supabase.from("fi_service_staff_eligibility").delete().eq("tenant_id", tid).eq("service_id", sid);
+    await supabase
+      .from("fi_service_staff_eligibility")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("service_id", sid);
 
     if (parsed.rows.length > 0) {
       const { error } = await supabase.from("fi_service_staff_eligibility").insert(

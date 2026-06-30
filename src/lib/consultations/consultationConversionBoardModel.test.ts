@@ -21,7 +21,7 @@ test("booking without consultation row → Consultation booked", () => {
       isBookingOnly: true,
       bookingCompletedOrPast: false,
     }),
-    "consultation_booked",
+    "consultation_booked"
   );
 });
 
@@ -37,12 +37,18 @@ test("completed consultation without quote → Consultation completed", () => {
       isBookingOnly: false,
       bookingCompletedOrPast: true,
     }),
-    "consultation_completed",
+    "consultation_completed"
   );
 });
 
 test("quote_sent maps to Quote sent", () => {
-  assert.equal(normalizeQuoteStatusFromSignals({ consultationStatus: "completed", quoteStatusRaw: "quote_sent" }), "sent");
+  assert.equal(
+    normalizeQuoteStatusFromSignals({
+      consultationStatus: "completed",
+      quoteStatusRaw: "quote_sent",
+    }),
+    "sent"
+  );
   assert.equal(
     pickConsultationConversionColumn({
       crmLost: false,
@@ -54,14 +60,17 @@ test("quote_sent maps to Quote sent", () => {
       isBookingOnly: false,
       bookingCompletedOrPast: true,
     }),
-    "quote_sent",
+    "quote_sent"
   );
 });
 
 test("quote_accepted maps to Quote accepted", () => {
   assert.equal(
-    normalizeQuoteStatusFromSignals({ consultationStatus: "completed", quoteStatusRaw: "quote_accepted" }),
-    "accepted",
+    normalizeQuoteStatusFromSignals({
+      consultationStatus: "completed",
+      quoteStatusRaw: "quote_accepted",
+    }),
+    "accepted"
   );
   assert.equal(
     pickConsultationConversionColumn({
@@ -74,7 +83,7 @@ test("quote_accepted maps to Quote accepted", () => {
       isBookingOnly: false,
       bookingCompletedOrPast: true,
     }),
-    "quote_accepted",
+    "quote_accepted"
   );
 });
 
@@ -90,7 +99,7 @@ test("linked case or surgery booking maps to Surgery booked", () => {
       isBookingOnly: false,
       bookingCompletedOrPast: true,
     }),
-    "surgery_booked",
+    "surgery_booked"
   );
 });
 
@@ -107,7 +116,7 @@ test("lost CRM stage maps to Lost / not proceeding", () => {
       isBookingOnly: false,
       bookingCompletedOrPast: true,
     }),
-    "lost",
+    "lost"
   );
 });
 

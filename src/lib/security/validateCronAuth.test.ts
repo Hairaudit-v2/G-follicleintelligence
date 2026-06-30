@@ -35,7 +35,10 @@ afterEach(() => {
 function cronRequest(bearer?: string) {
   const headers: Record<string, string> = {};
   if (bearer !== undefined) headers.authorization = `Bearer ${bearer}`;
-  return new NextRequest("https://x.test/api/cron/financial-os/automation", { method: "GET", headers });
+  return new NextRequest("https://x.test/api/cron/financial-os/automation", {
+    method: "GET",
+    headers,
+  });
 }
 
 describe("validateCronAuth", () => {

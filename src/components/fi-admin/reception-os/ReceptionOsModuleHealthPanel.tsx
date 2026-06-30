@@ -9,11 +9,14 @@ export function ReceptionOsModuleHealthPanel({ health }: { health: ReceptionOsMo
   if (!health.coreBoardLoaded || health.unavailableModules.length === 0) return null;
 
   return (
-    <InfoNotice variant="warning" title="ReceptionOS core board loaded, optional module unavailable">
+    <InfoNotice
+      variant="warning"
+      title="ReceptionOS core board loaded, optional module unavailable"
+    >
       <div className="space-y-2 text-sm">
         <p>
-          The front-desk command centre is available. Some add-on modules could not load, usually because ReceptionOS
-          migrations are pending or a non-critical query failed.
+          The front-desk command centre is available. Some add-on modules could not load, usually
+          because ReceptionOS migrations are pending or a non-critical query failed.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           {health.unavailableModules.map((item) => (
@@ -25,7 +28,8 @@ export function ReceptionOsModuleHealthPanel({ health }: { health: ReceptionOsMo
         </ul>
         <p className="flex items-center gap-2 text-xs text-slate-500">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          Apply migrations `20260919120001` through `20260919120004` on production Supabase, then redeploy.
+          Apply migrations `20260919120001` through `20260919120004` on production Supabase, then
+          redeploy.
         </p>
       </div>
     </InfoNotice>

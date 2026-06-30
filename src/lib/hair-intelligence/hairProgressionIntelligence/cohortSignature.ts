@@ -1,8 +1,17 @@
 import type { HieHairLossPatternType } from "../hairLossClassification/types";
 
-export type HairProgressionAgeBand = "under_25" | "25_35" | "36_45" | "46_55" | "56_plus" | "unknown";
+export type HairProgressionAgeBand =
+  | "under_25"
+  | "25_35"
+  | "36_45"
+  | "46_55"
+  | "56_plus"
+  | "unknown";
 
-export function dateOfBirthToAgeBand(isoDob: string | null | undefined, asOf: Date): HairProgressionAgeBand {
+export function dateOfBirthToAgeBand(
+  isoDob: string | null | undefined,
+  asOf: Date
+): HairProgressionAgeBand {
   if (!isoDob || !isoDob.trim()) return "unknown";
   const d = new Date(isoDob.trim());
   if (Number.isNaN(d.getTime())) return "unknown";

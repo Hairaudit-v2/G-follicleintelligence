@@ -83,7 +83,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "surgery-os",
     pageKeyPrefix: true,
     priority: 10,
-    roleScope: { workspaceProfiles: ["surgeon", "clinic_manager", "director", "nurse"], anyRole: false },
+    roleScope: {
+      workspaceProfiles: ["surgeon", "clinic_manager", "director", "nurse"],
+      anyRole: false,
+    },
     dismissible: true,
     snoozeHours: 24,
     actionLabel: "Open SurgeryOS",
@@ -139,7 +142,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "payments",
     pageKeyPrefix: true,
     priority: 20,
-    roleScope: { tenantAdminRoles: ["finance_admin", "clinic_admin"], workspaceProfiles: ["director"] },
+    roleScope: {
+      tenantAdminRoles: ["finance_admin", "clinic_admin"],
+      workspaceProfiles: ["director"],
+    },
     dismissible: true,
     snoozeHours: 24,
   },
@@ -152,7 +158,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "academy",
     pageKeyPrefix: true,
     priority: 10,
-    roleScope: { workspaceProfiles: ["academy_trainer", "director", "clinic_manager"], anyRole: false },
+    roleScope: {
+      workspaceProfiles: ["academy_trainer", "director", "clinic_manager"],
+      anyRole: false,
+    },
     dismissible: true,
     snoozeHours: 72,
     actionLabel: "Open AcademyOS",
@@ -182,7 +191,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "hr-os",
     pageKeyPrefix: true,
     priority: 20,
-    roleScope: { workspaceProfiles: ["clinic_manager", "director"], tenantAdminRoles: ["operations_admin"] },
+    roleScope: {
+      workspaceProfiles: ["clinic_manager", "director"],
+      tenantAdminRoles: ["operations_admin"],
+    },
     dismissible: true,
     snoozeHours: 72,
   },
@@ -209,7 +221,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     body: "Your FI home dashboard shows foundation checklist progress. Complete each item to unlock the full operational workspace.",
     pageKey: "",
     priority: 5,
-    roleScope: { workspaceProfiles: ["director", "clinic_manager"], tenantAdminRoles: ["clinic_admin"] },
+    roleScope: {
+      workspaceProfiles: ["director", "clinic_manager"],
+      tenantAdminRoles: ["clinic_admin"],
+    },
     dismissible: true,
     snoozeHours: 24,
   },
@@ -222,7 +237,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "configuration",
     pageKeyPrefix: true,
     priority: 1,
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     dismissible: true,
     snoozeHours: 12,
     actionLabel: "Open configuration",
@@ -235,7 +253,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     body: "Run the new case wizard to add a person, patient record, and case in one flow. This unlocks consultations, imaging, and surgery workflows.",
     pageKey: "cases/new",
     priority: 2,
-    roleScope: { workspaceProfiles: ["director", "clinic_manager", "reception"], tenantAdminRoles: ["clinic_admin"] },
+    roleScope: {
+      workspaceProfiles: ["director", "clinic_manager", "reception"],
+      tenantAdminRoles: ["clinic_admin"],
+    },
     dismissible: true,
     snoozeHours: 12,
     actionLabel: "New case wizard",
@@ -249,7 +270,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "configuration",
     pageKeyPrefix: true,
     priority: 3,
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     dismissible: true,
     snoozeHours: 24,
     actionLabel: "Connect systems",
@@ -263,7 +287,10 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     pageKey: "configuration",
     pageKeyPrefix: true,
     priority: 4,
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     dismissible: true,
     snoozeHours: 24,
     actionLabel: "Verify connectors",
@@ -278,7 +305,10 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     title: "Create an organisation",
     description: "Every clinic belongs to an organisation. Start in the directory.",
     hrefSuffix: "directory",
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     priority: 1,
     requiresSetupFlags: { organisationCreated: false },
   },
@@ -288,7 +318,10 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     title: "Create a clinic",
     description: "Add at least one clinic under your organisation.",
     hrefSuffix: "directory",
-    roleScope: { tenantAdminRoles: ["clinic_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     priority: 2,
     requiresSetupFlags: { organisationCreated: true, clinicCreated: false },
   },
@@ -298,7 +331,10 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     title: "Complete clinic configuration",
     description: "Finish clinic contact, timezone, and branding settings.",
     hrefSuffix: "configuration",
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     priority: 3,
     requiresSetupFlags: { clinicCreated: true, clinicSettingsComplete: false },
   },
@@ -306,9 +342,13 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     code: "next_connect_existing_systems",
     area: "analytics_os",
     title: "Connect existing systems",
-    description: "Register legacy CRM, calendar, finance, or marketing tools without immediate migration.",
+    description:
+      "Register legacy CRM, calendar, finance, or marketing tools without immediate migration.",
     hrefSuffix: "configuration",
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     priority: 4,
     requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
   },
@@ -318,7 +358,10 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     title: "Verify connector permissions",
     description: "Confirm external system credentials and required API scopes before live sync.",
     hrefSuffix: "configuration",
-    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    roleScope: {
+      tenantAdminRoles: ["clinic_admin", "operations_admin"],
+      workspaceProfiles: ["director", "clinic_manager"],
+    },
     priority: 5,
     requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
   },
@@ -358,7 +401,10 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     title: "Review FinancialOS",
     description: "Confirm invoices, deposits, and receivables are configured.",
     hrefSuffix: "financial-os",
-    roleScope: { tenantAdminRoles: ["finance_admin", "clinic_admin"], workspaceProfiles: ["director"] },
+    roleScope: {
+      tenantAdminRoles: ["finance_admin", "clinic_admin"],
+      workspaceProfiles: ["director"],
+    },
     priority: 12,
     requiresSetupFlags: { firstCaseCreated: true },
   },
@@ -374,7 +420,9 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
   },
 ];
 
-export function listGuidedAssistTipsForArea(area: GuidedAssistArea): readonly GuidedAssistTipDefinition[] {
+export function listGuidedAssistTipsForArea(
+  area: GuidedAssistArea
+): readonly GuidedAssistTipDefinition[] {
   return GUIDED_ASSIST_TIPS.filter((t) => t.area === area);
 }
 

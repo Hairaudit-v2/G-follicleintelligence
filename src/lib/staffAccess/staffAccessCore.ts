@@ -91,7 +91,13 @@ export function computeEffectiveAccess(input: ComputeEffectiveAccessInput): Effe
   for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
     const fromRole = template[moduleKey];
     map[moduleKey] = fromRole
-      ? { module: moduleKey, level: fromRole.level, scope: fromRole.scope, source: "role", tabs: {} }
+      ? {
+          module: moduleKey,
+          level: fromRole.level,
+          scope: fromRole.scope,
+          source: "role",
+          tabs: {},
+        }
       : emptyModuleAccess(moduleKey);
   }
 
@@ -128,7 +134,13 @@ export function computeEffectiveAccess(input: ComputeEffectiveAccessInput): Effe
   // Admin override wins over everything.
   if (input.isAdminOverride) {
     for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
-      map[moduleKey] = { module: moduleKey, level: "admin", scope: "tenant", source: "override", tabs: {} };
+      map[moduleKey] = {
+        module: moduleKey,
+        level: "admin",
+        scope: "tenant",
+        source: "override",
+        tabs: {},
+      };
     }
   }
 

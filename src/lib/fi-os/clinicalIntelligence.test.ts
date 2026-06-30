@@ -5,7 +5,10 @@ import {
   FI_CLINICAL_INTELLIGENCE_SIGNAL_KEYS,
   FI_CLINICAL_INTELLIGENCE_SIGNALS,
 } from "@/src/config/fiClinicalIntelligenceSignals";
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import { recordClinicalIntelligenceEventInputSchema } from "@/src/lib/fi-os/clinicalIntelligenceEventsSchema";
 import {
@@ -40,11 +43,11 @@ test("recommendation copy: registry lines avoid treatment-like phrasing", () => 
     assert.equal(
       clinicalRecommendationLooksTreatmentLike(s.recommendedNextStep),
       false,
-      `signal ${s.key}`,
+      `signal ${s.key}`
     );
     assert.equal(
       clinicalRecommendationLooksTreatmentLike(recommendedNextStepForClinicalSignal(s.key)),
-      false,
+      false
     );
   }
 });
@@ -52,7 +55,7 @@ test("recommendation copy: registry lines avoid treatment-like phrasing", () => 
 test("normalize tenant count signal returns null when count is zero", () => {
   assert.equal(
     normalizeTenantCountSignal({ key: "consultation_completion_attention", count: 0 }),
-    null,
+    null
   );
   const one = normalizeTenantCountSignal({ key: "consultation_completion_attention", count: 2 });
   assert.ok(one && one.severity === "attention");
@@ -91,7 +94,12 @@ test("patient twin signal normalization: pathology drafts", () => {
       last_result_reviewed_at: null,
       latest_ai_interpretation: null,
     },
-    imaging: { active_image_total: 0, by_library_axis: {}, latest_captured_at: null, imaging_workspace_href: "/x" },
+    imaging: {
+      active_image_total: 0,
+      by_library_axis: {},
+      latest_captured_at: null,
+      imaging_workspace_href: "/x",
+    },
     cases: [{ case_id: "c1" } as PatientTwinV1["cases"][number]],
   } as unknown as PatientTwinV1;
   const sigs = derivePatientTwinIntegritySignals(twin);
@@ -124,7 +132,10 @@ test("dashboard widget visibility: clinical intelligence needs dashboard + clini
     imaging: false,
     audit: false,
   });
-  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", off), false);
+  assert.equal(
+    fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", off),
+    false
+  );
 
   const on = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     dashboard: true,
@@ -140,7 +151,7 @@ test("event payload validation: rejects bad severity", () => {
       signalKey: "post_op_pending",
       title: "x",
       severity: "high",
-    }),
+    })
   );
 });
 

@@ -53,7 +53,9 @@ export function buildPhotoProtocolAlertDeliveryPayload(
 ): PhotoProtocolAlertDeliveryPayload {
   const tid = ev.tenant_id?.trim() || null;
   const patientTwin =
-    tid && ev.patient_id?.trim() ? fiOsPatientTwinPhotoProtocolHref(tid, ev.patient_id.trim()) : null;
+    tid && ev.patient_id?.trim()
+      ? fiOsPatientTwinPhotoProtocolHref(tid, ev.patient_id.trim())
+      : null;
   const foundation = tid ? fiOsFoundationPhotoProtocolAnalyticsHref(tid) : null;
   const hairaudit =
     ev.case_id?.trim() && ev.source_system === "hairaudit"
@@ -92,7 +94,10 @@ export function buildPhotoProtocolAlertDeliveryPayload(
 /**
  * Stub gate for future delivery — today only `in_app` is considered potentially deliverable for **open** alerts.
  */
-export function shouldDeliverPhotoProtocolAlert(ev: HliPhotoProtocolAlertEvent, channel: PhotoProtocolAlertDeliveryChannel): boolean {
+export function shouldDeliverPhotoProtocolAlert(
+  ev: HliPhotoProtocolAlertEvent,
+  channel: PhotoProtocolAlertDeliveryChannel
+): boolean {
   if (ev.status !== "open") return false;
   if (channel === "in_app") return true;
   return false;

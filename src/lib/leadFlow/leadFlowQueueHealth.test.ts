@@ -32,7 +32,10 @@ function makeExternalEvent(overrides: Partial<FiExternalEventRow> = {}): FiExter
   };
 }
 
-function matchesHealthFilters(row: Record<string, unknown>, filters: Record<string, unknown>): boolean {
+function matchesHealthFilters(
+  row: Record<string, unknown>,
+  filters: Record<string, unknown>
+): boolean {
   for (const [key, value] of Object.entries(filters)) {
     if (key === "__in") {
       const inFilters = value as Record<string, string[]>;
@@ -194,6 +197,8 @@ describe("LeadFlow event meta", () => {
       },
     };
     assert.equal(typeof merged._leadflow, "object");
-    assert.ok(String((merged._leadflow as { processing_error?: string }).processing_error).length > 0);
+    assert.ok(
+      String((merged._leadflow as { processing_error?: string }).processing_error).length > 0
+    );
   });
 });

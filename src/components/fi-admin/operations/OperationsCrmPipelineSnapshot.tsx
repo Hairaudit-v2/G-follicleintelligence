@@ -7,7 +7,10 @@ import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationa
 export function OperationsCrmPipelineSnapshot(props: {
   base: string;
   showCrmNav: boolean;
-  data: Pick<TenantOperationalDashboard, "crmPipelineStages" | "crmPipelineLeadVolume" | "staleLeads">;
+  data: Pick<
+    TenantOperationalDashboard,
+    "crmPipelineStages" | "crmPipelineLeadVolume" | "staleLeads"
+  >;
 }) {
   const { base, showCrmNav, data } = props;
   const crmHref = showCrmNav ? `${base}/crm` : `${base}/calendar`;
@@ -43,14 +46,14 @@ export function OperationsCrmPipelineSnapshot(props: {
                     "flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-sm transition",
                     n > 0
                       ? "border-cyan-500/15 bg-cyan-500/[0.04] hover:border-cyan-400/35"
-                      : "border-white/[0.06] bg-white/[0.02] hover:border-cyan-500/25",
+                      : "border-white/[0.06] bg-white/[0.02] hover:border-cyan-500/25"
                   )}
                 >
                   <span className="min-w-0 truncate font-medium text-slate-200">{stage.label}</span>
                   <span
                     className={cn(
                       "shrink-0 rounded-lg px-2 py-0.5 font-mono text-xs font-semibold tabular-nums",
-                      n > 0 ? "bg-cyan-500/12 text-cyan-100" : "bg-white/[0.04] text-slate-500",
+                      n > 0 ? "bg-cyan-500/12 text-cyan-100" : "bg-white/[0.04] text-slate-500"
                     )}
                   >
                     {n}
@@ -61,7 +64,8 @@ export function OperationsCrmPipelineSnapshot(props: {
           })}
         </ul>
       )}
-      {(data.crmPipelineLeadVolume.activeUnassignedStage > 0 || data.crmPipelineLeadVolume.activeOtherPipelineStage > 0) ? (
+      {data.crmPipelineLeadVolume.activeUnassignedStage > 0 ||
+      data.crmPipelineLeadVolume.activeOtherPipelineStage > 0 ? (
         <div className="mt-3 space-y-1 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-xs text-slate-400">
           {data.crmPipelineLeadVolume.activeUnassignedStage > 0 ? (
             <p>

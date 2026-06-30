@@ -131,7 +131,9 @@ export function GoogleCalendarConnectorPanel({
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [snapshot, setSnapshot] = useState<GoogleCalendarConnectorSnapshot | null>(initialSnapshot ?? null);
+  const [snapshot, setSnapshot] = useState<GoogleCalendarConnectorSnapshot | null>(
+    initialSnapshot ?? null
+  );
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [queueFilter, setQueueFilter] = useState<"staged" | "all">("staged");
 
@@ -178,13 +180,21 @@ export function GoogleCalendarConnectorPanel({
   function approveEvent(eventId: string) {
     setMessage(null);
     startTransition(async () => {
-      const res = await approveExternalCalendarEventAction(tenantId, integrationId, eventId, sessionId);
+      const res = await approveExternalCalendarEventAction(
+        tenantId,
+        integrationId,
+        eventId,
+        sessionId
+      );
       if (!res.ok) {
         setMessage({ kind: "err", text: res.error });
         return;
       }
       refreshSnapshot(res.snapshot);
-      setMessage({ kind: "ok", text: "Event approved — remains in staging only; no FI booking created." });
+      setMessage({
+        kind: "ok",
+        text: "Event approved — remains in staging only; no FI booking created.",
+      });
       router.refresh();
     });
   }
@@ -192,7 +202,12 @@ export function GoogleCalendarConnectorPanel({
   function rejectEvent(eventId: string) {
     setMessage(null);
     startTransition(async () => {
-      const res = await rejectExternalCalendarEventAction(tenantId, integrationId, eventId, sessionId);
+      const res = await rejectExternalCalendarEventAction(
+        tenantId,
+        integrationId,
+        eventId,
+        sessionId
+      );
       if (!res.ok) {
         setMessage({ kind: "err", text: res.error });
         return;
@@ -209,8 +224,8 @@ export function GoogleCalendarConnectorPanel({
         <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F3</p>
         <h2 className="text-lg font-semibold text-slate-50">{integrationLabel} — Read-only sync</h2>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
-          Discover external calendar events and stage them for human review. Read-only access — never writes back to
-          Google Calendar and never creates FI bookings automatically.
+          Discover external calendar events and stage them for human review. Read-only access —
+          never writes back to Google Calendar and never creates FI bookings automatically.
         </p>
       </div>
 
@@ -219,7 +234,9 @@ export function GoogleCalendarConnectorPanel({
       </div>
 
       {message ? (
-        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>{message.text}</p>
+        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>
+          {message.text}
+        </p>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -231,17 +248,23 @@ export function GoogleCalendarConnectorPanel({
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Events discovered</p>
-          <p className="mt-1 text-sm font-medium text-slate-100">{latestRun?.eventsDiscovered ?? 0}</p>
+          <p className="mt-1 text-sm font-medium text-slate-100">
+            {latestRun?.eventsDiscovered ?? 0}
+          </p>
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Sync health</p>
-          <p className={`mt-1 text-sm font-medium ${HEALTH_BAND_CLASSES[health?.healthBand ?? "unknown"]}`}>
+          <p
+            className={`mt-1 text-sm font-medium ${HEALTH_BAND_CLASSES[health?.healthBand ?? "unknown"]}`}
+          >
             {health?.healthScore ?? 0}% · {health?.healthBand ?? "unknown"}
           </p>
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Pending review</p>
-          <p className="mt-1 text-sm font-medium text-cyan-300">{health?.stagedPendingReview ?? 0}</p>
+          <p className="mt-1 text-sm font-medium text-cyan-300">
+            {health?.stagedPendingReview ?? 0}
+          </p>
         </div>
       </div>
 
@@ -293,7 +316,8 @@ export function GoogleCalendarConnectorPanel({
           </div>
         ) : (
           <p className="text-sm text-slate-500">
-            No events in staging queue. Run a manual sync after verifying Google Calendar credentials.
+            No events in staging queue. Run a manual sync after verifying Google Calendar
+            credentials.
           </p>
         )}
       </div>

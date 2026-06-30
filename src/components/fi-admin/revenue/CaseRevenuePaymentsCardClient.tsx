@@ -11,7 +11,10 @@ import {
   updateInvoiceDueDateAction,
 } from "@/lib/actions/fi-revenue-invoice-actions";
 import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 function formatMoney(cents: number, currency: string): string {
   const v = cents / 100;
@@ -41,7 +44,10 @@ export function CaseRevenuePaymentsCardClient(props: {
   const [err, setErr] = useState<string | null>(null);
 
   const open = useMemo(
-    () => readiness.invoices.filter((i) => isInvoiceOpenForCollection(i.status) && invoiceBalanceDueCents(i) > 0),
+    () =>
+      readiness.invoices.filter(
+        (i) => isInvoiceOpenForCollection(i.status) && invoiceBalanceDueCents(i) > 0
+      ),
     [readiness.invoices]
   );
 
@@ -57,7 +63,9 @@ export function CaseRevenuePaymentsCardClient(props: {
   async function sendFullBalanceForKind(kind: "surgery_deposit" | "surgery_balance") {
     const inv = open.find((i) => i.invoice_kind === kind);
     if (!inv) {
-      setBanner(`No open ${kind === "surgery_deposit" ? "deposit" : "balance"} invoice — create one first.`);
+      setBanner(
+        `No open ${kind === "surgery_deposit" ? "deposit" : "balance"} invoice — create one first.`
+      );
       return;
     }
     const cents = invoiceBalanceDueCents(inv);
@@ -90,7 +98,9 @@ export function CaseRevenuePaymentsCardClient(props: {
   return (
     <div className="space-y-4">
       {readiness.depositReadinessMessage ? (
-        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">{readiness.depositReadinessMessage}</p>
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          {readiness.depositReadinessMessage}
+        </p>
       ) : null}
       {err ? <p className="text-sm font-medium text-rose-300">{err}</p> : null}
       {banner ? <p className="text-xs font-medium text-emerald-300">{banner}</p> : null}
@@ -113,18 +123,24 @@ export function CaseRevenuePaymentsCardClient(props: {
           >
             Send balance payment link
           </button>
-          <span className="self-center text-xs text-slate-500">Custom amount: use per-invoice row below.</span>
+          <span className="self-center text-xs text-slate-500">
+            Custom amount: use per-invoice row below.
+          </span>
         </div>
       ) : null}
 
       {!canMutate ? (
-        <p className="text-sm text-slate-400">Finance or manager access is required to create payment links and invoices.</p>
+        <p className="text-sm text-slate-400">
+          Finance or manager access is required to create payment links and invoices.
+        </p>
       ) : (
         <div className="rounded border border-white/[0.08] bg-white/[0.03] p-3 text-sm text-slate-200">
           <p className="font-medium text-slate-100">Create case invoices</p>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <p className="text-xs text-slate-400">Surgery deposit (when no deposit invoice exists)</p>
+              <p className="text-xs text-slate-400">
+                Surgery deposit (when no deposit invoice exists)
+              </p>
               <input
                 type="date"
                 className="w-full rounded border border-slate-700 px-2 py-1 text-xs"
@@ -238,7 +254,10 @@ export function CaseRevenuePaymentsCardClient(props: {
 
       {patientFoundationId ? (
         <p className="text-xs text-slate-400">
-          <Link href={`/fi-admin/${tenantId}/patients/${patientFoundationId}?tab=payments`} className="font-medium text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/patients/${patientFoundationId}?tab=payments`}
+            className="font-medium text-blue-300 hover:underline"
+          >
             Open patient payments tab
           </Link>
         </p>
@@ -282,7 +301,8 @@ function InvoicePaymentRow(props: {
             {inv.invoice_kind} · <span className="font-semibold">{inv.status}</span>
           </p>
           <p className="text-xs text-slate-400">
-            Balance {formatMoney(bal, inv.currency)} of {formatMoney(inv.total_cents, inv.currency)} total
+            Balance {formatMoney(bal, inv.currency)} of {formatMoney(inv.total_cents, inv.currency)}{" "}
+            total
           </p>
         </div>
       </div>
@@ -306,7 +326,9 @@ function InvoicePaymentRow(props: {
               onClick={async () => {
                 setBusy(`rs-${latest.id}`);
                 try {
-                  const res = await resendPaymentRequestAction(tenantId, { payment_request_id: latest.id });
+                  const res = await resendPaymentRequestAction(tenantId, {
+                    payment_request_id: latest.id,
+                  });
                   if (!res.ok) onError(res.error);
                   else {
                     onError(null);
@@ -328,7 +350,12 @@ function InvoicePaymentRow(props: {
           <label className="block text-xs text-slate-400">
             Due date
             <div className="mt-1 flex gap-1">
-              <input type="date" className="w-full rounded border border-slate-700 px-2 py-1 text-xs" value={due} onChange={(e) => setDue(e.target.value)} />
+              <input
+                type="date"
+                className="w-full rounded border border-slate-700 px-2 py-1 text-xs"
+                value={due}
+                onChange={(e) => setDue(e.target.value)}
+              />
               <button
                 type="button"
                 className="shrink-0 rounded border border-slate-700 px-2 text-xs font-medium text-slate-200 hover:bg-white/[0.06] disabled:opacity-50"
@@ -336,7 +363,10 @@ function InvoicePaymentRow(props: {
                 onClick={async () => {
                   setBusy(`due-${inv.id}`);
                   try {
-                    const res = await updateInvoiceDueDateAction(tenantId, { invoice_id: inv.id, due_date_ymd: due });
+                    const res = await updateInvoiceDueDateAction(tenantId, {
+                      invoice_id: inv.id,
+                      due_date_ymd: due,
+                    });
                     if (!res.ok) onError(res.error);
                     else {
                       onError(null);
@@ -361,7 +391,12 @@ function InvoicePaymentRow(props: {
           </label>
           <label className="block text-xs text-slate-400 sm:col-span-2">
             Optional note to include with the request (stored as metadata)
-            <textarea className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-xs" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+            <textarea
+              className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-xs"
+              rows={2}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </label>
           <label className="block text-xs text-slate-400 sm:col-span-2">
             Link expiry (optional, local time)

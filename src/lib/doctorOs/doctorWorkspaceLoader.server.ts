@@ -3,12 +3,19 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { calendarDateStringFromInstant, zonedMidnightUtcMs, zonedNextDayUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  calendarDateStringFromInstant,
+  zonedMidnightUtcMs,
+  zonedNextDayUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { casePersonDisplayFromMetadata } from "@/src/lib/cases/caseLabels";
 import { parseClinicalNoteSections } from "@/src/lib/clinicalNotes/clinicalNoteSchemas";
 import { CRM_TASK_ACTIVE_STATUS_VALUES } from "@/src/lib/crm/crmTaskPolicy";
-import { listConsultationsForTenant, type ConsultationIndexRow } from "@/src/lib/consultations/consultationLoaders.server";
+import {
+  listConsultationsForTenant,
+  type ConsultationIndexRow,
+} from "@/src/lib/consultations/consultationLoaders.server";
 import { loadMedicationReorderRequestsForTenant } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import type { FiMedicationReorderRequestRow } from "@/src/lib/medicationReorder/medicationReorderTypes";
 import { validateRepeatRulesPrescriberConfirmed } from "@/src/lib/prescribing/prescribingRepeatRules";
@@ -20,7 +27,10 @@ function addHours(d: Date, hours: number): Date {
   return new Date(d.getTime() + hours * 3_600_000);
 }
 
-async function loadPatientLabels(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
+async function loadPatientLabels(
+  tenantId: string,
+  patientIds: string[]
+): Promise<Map<string, string>> {
   const uniq = Array.from(new Set(patientIds.filter(Boolean)));
   const map = new Map<string, string>();
   if (uniq.length === 0) return map;
@@ -32,7 +42,9 @@ async function loadPatientLabels(tenantId: string, patientIds: string[]): Promis
     .in("id", uniq);
   if (pe || !pRows?.length) return map;
 
-  const personIds = Array.from(new Set(pRows.map((r) => String((r as { person_id: string }).person_id))));
+  const personIds = Array.from(
+    new Set(pRows.map((r) => String((r as { person_id: string }).person_id)))
+  );
   const { data: personRows, error: e2 } = await supabase
     .from("fi_persons")
     .select("id, metadata")
@@ -128,7 +140,8 @@ function asItemRow(raw: Record<string, unknown>): FiPrescriptionItemRow {
     form_type: raw.form_type as FiPrescriptionItemRow["form_type"],
     quantity_label: String(raw.quantity_label ?? ""),
     dose_instructions: String(raw.dose_instructions ?? ""),
-    repeats_instructions: raw.repeats_instructions != null ? String(raw.repeats_instructions) : null,
+    repeats_instructions:
+      raw.repeats_instructions != null ? String(raw.repeats_instructions) : null,
     reorder_rule: raw.reorder_rule != null ? String(raw.reorder_rule) : null,
     repeat_rules_prescriber_confirmed: Boolean(raw.repeat_rules_prescriber_confirmed),
     sort_order: Number(raw.sort_order ?? 0),
@@ -136,21 +149,32 @@ function asItemRow(raw: Record<string, unknown>): FiPrescriptionItemRow {
   };
 }
 
-async function loadTodayPatients(tenantId: string, now: Date): Promise<DoctorWorkspaceTodayPatient[]> {
+async function loadTodayPatients(
+  tenantId: string,
+  now: Date
+): Promise<DoctorWorkspaceTodayPatient[]> {
   const tid = tenantId.trim();
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
   const localDayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone);
   const localDayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone);
-  const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  const dayStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+  );
   const dayEnd = addHours(dayStart, 24);
-  const localStartIso = localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart.toISOString();
-  const localEndIso = localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd.toISOString();
+  const localStartIso =
+    localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart.toISOString();
+  const localEndIso =
+    localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd.toISOString();
 
   const raw = await loadBookingsForTenantRange(tid, localStartIso, localEndIso);
   const filtered = raw.filter((b: FiBookingRow) => {
     if (!b.patient_id?.trim()) return false;
-    if (b.booking_status === "cancelled" || b.booking_status === "completed" || b.booking_status === "no_show") {
+    if (
+      b.booking_status === "cancelled" ||
+      b.booking_status === "completed" ||
+      b.booking_status === "no_show"
+    ) {
       return false;
     }
     return AGENDA_BOOKING_STATUSES.has(b.booking_status);
@@ -283,7 +307,7 @@ async function loadPharmacyQueue(tenantId: string): Promise<DoctorWorkspacePharm
       transmissionId: r.id,
       prescriptionId: r.prescription_id,
       patientId: pid,
-      patientLabel: pid ? labels.get(pid) ?? `Patient ${pid.slice(0, 8)}…` : "Unknown patient",
+      patientLabel: pid ? (labels.get(pid) ?? `Patient ${pid.slice(0, 8)}…`) : "Unknown patient",
       status: r.status,
       errorMessage: r.error_message,
       updatedAt: r.updated_at,
@@ -408,7 +432,9 @@ export async function loadDoctorWorkspace(
     listConsultationsForTenant(tid, { statusIn: ["draft", "in_progress"], limit: 20 }),
     loadDraftPrescriptionBuckets(tid),
     loadPharmacyQueue(tid),
-    loadMedicationReorderRequestsForTenant(tid, { statusIn: ["requested", "doctor_review_required"] }),
+    loadMedicationReorderRequestsForTenant(tid, {
+      statusIn: ["requested", "doctor_review_required"],
+    }),
     loadFollowUpTasks(tid, opts.viewerFiUserId, now, opts.includeCrmTasks),
     loadVoiceDrafts(tid),
   ]);

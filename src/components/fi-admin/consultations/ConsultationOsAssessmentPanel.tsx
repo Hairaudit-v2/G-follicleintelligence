@@ -11,7 +11,11 @@ const FIELDS = [
   { key: "initial_observations", label: "Initial observations", wide: true },
 ] as const;
 
-export function ConsultationOsAssessmentPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsAssessmentPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Assessment" headingId="consultation-os-assessment-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

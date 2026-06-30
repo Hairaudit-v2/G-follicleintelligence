@@ -19,7 +19,11 @@ export interface FiMarketingOsHeroVisualProps {
   coreTitle: string;
 }
 
-export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiMarketingOsHeroVisualProps) {
+export function FiMarketingOsHeroVisual({
+  modules,
+  coreEyebrow,
+  coreTitle,
+}: FiMarketingOsHeroVisualProps) {
   const reduceMotion = useReducedMotion();
 
   const nodes = useMemo(() => {
@@ -36,10 +40,12 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
   const ariaLabel = `${coreTitle} at the centre, connected to ${modules.map((m) => m.label).join(", ")}.`;
 
   return (
-    <div className="relative mx-auto w-full max-w-[min(100%,560px)]" role="img" aria-label={ariaLabel}>
-      <div
-        className="relative aspect-[1/1.05] min-h-[300px] w-full overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-gradient-to-br from-[rgb(16_20_32_/0.97)] via-[rgb(8_12_20_/0.94)] to-[rgb(4_7_12_/0.98)] shadow-[0_32px_100px_rgb(0_0_0_/0.55),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-xl sm:min-h-[360px] md:min-h-[400px]"
-      >
+    <div
+      className="relative mx-auto w-full max-w-[min(100%,560px)]"
+      role="img"
+      aria-label={ariaLabel}
+    >
+      <div className="relative aspect-[1/1.05] min-h-[300px] w-full overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-gradient-to-br from-[rgb(16_20_32_/0.97)] via-[rgb(8_12_20_/0.94)] to-[rgb(4_7_12_/0.98)] shadow-[0_32px_100px_rgb(0_0_0_/0.55),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-xl sm:min-h-[360px] md:min-h-[400px]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 fi-grid opacity-[0.22] [mask-image:radial-gradient(ellipse_at_50%_45%,black_15%,transparent_70%)]"
@@ -121,7 +127,9 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
             }
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
-            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-amber-200/90">{coreEyebrow}</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-amber-200/90">
+              {coreEyebrow}
+            </p>
             <p className="mt-2 font-display text-sm font-semibold leading-snug tracking-tight text-foreground sm:text-base">
               {coreTitle}
             </p>
@@ -144,7 +152,9 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
               }}
             >
               <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-[rgb(8_12_20_/0.72)] px-2.5 py-2 text-center shadow-[0_14px_38px_rgb(0_0_0_/0.4),inset_0_1px_0_rgb(255_255_255_/0.08)] backdrop-blur-md transition-[border-color,box-shadow,transform] duration-300 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amber-300/45 before:to-transparent hover:border-amber-300/28 hover:shadow-[0_16px_44px_rgb(212_175_55_/0.12)] sm:px-3 sm:py-2.5">
-                <p className="text-[10px] font-semibold leading-tight text-foreground/95 sm:text-[11px]">{n.label}</p>
+                <p className="text-[10px] font-semibold leading-tight text-foreground/95 sm:text-[11px]">
+                  {n.label}
+                </p>
                 <p className="mt-0.5 text-[8px] font-medium leading-snug text-amber-100/75 sm:text-[9px]">
                   {n.subtitle}
                 </p>

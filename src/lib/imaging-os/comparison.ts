@@ -100,8 +100,7 @@ const IMAGING_COMPARISON_REQUIREMENTS_MAP: Record<
     minimum_images_per_comparison: 2,
     requires_same_category_match: true,
     requires_quality_threshold: true,
-    description:
-      "Scalp visibility comparison across baseline and follow-up overhead views",
+    description: "Scalp visibility comparison across baseline and follow-up overhead views",
   },
   graft_survival_change: {
     required_baseline_timepoint: "immediate_post_op",
@@ -140,9 +139,7 @@ export const IMAGING_COMPARISON_REQUIREMENTS: Readonly<
   Record<Exclude<ImagingOsComparisonDomain, "unknown">, ImagingComparisonRequirements>
 > = IMAGING_COMPARISON_REQUIREMENTS_MAP;
 
-export function isImagingOsComparisonDomain(
-  value: string
-): value is ImagingOsComparisonDomain {
+export function isImagingOsComparisonDomain(value: string): value is ImagingOsComparisonDomain {
   return (IMAGING_COMPARISON_DOMAINS as readonly string[]).includes(value);
 }
 
@@ -202,8 +199,7 @@ export type ImagingOsComparisonReadinessStatus =
   | "insufficient_data"
   | "invalid";
 
-export const IMAGING_COMPARISON_EVALUATOR_VERSION =
-  "imaging-comparison-contract-v1" as const;
+export const IMAGING_COMPARISON_EVALUATOR_VERSION = "imaging-comparison-contract-v1" as const;
 
 export type ImagingOsComparisonReadinessResult = {
   domain: ImagingOsComparisonDomain;
@@ -259,10 +255,7 @@ function timepointOrder(timepoint: ImagingOsTimepoint): number {
   return TIMEPOINT_ORDER[timepoint] ?? 50;
 }
 
-function formatTimepointDelta(
-  baseline: ImagingOsTimepoint,
-  followup: ImagingOsTimepoint
-): string {
+function formatTimepointDelta(baseline: ImagingOsTimepoint, followup: ImagingOsTimepoint): string {
   return `${baseline} → ${followup}`;
 }
 
@@ -434,21 +427,14 @@ export function evaluateVisualComparisonReadiness(
     }
 
     if (!baselineImage || !followupImage) {
-      if (
-        baselineImage &&
-        !followupImage &&
-        requirements.requires_same_category_match
-      ) {
+      if (baselineImage && !followupImage && requirements.requires_same_category_match) {
         const mismatchedFollowup = findBestFollowupImage(
           input.images,
           requirements.allowed_followup_timepoints,
           category,
           false
         );
-        if (
-          mismatchedFollowup &&
-          mismatchedFollowup.canonical_category !== category
-        ) {
+        if (mismatchedFollowup && mismatchedFollowup.canonical_category !== category) {
           detectedFollowups.add(mismatchedFollowup.timepoint);
           const candidate = buildComparisonCandidate(
             baselineImage,
@@ -476,9 +462,7 @@ export function evaluateVisualComparisonReadiness(
           `Missing baseline image for ${category} at ${requirements.required_baseline_timepoint}.`
         );
       } else {
-        warnings.push(
-          `Missing baseline and follow-up images for ${category} comparison pair.`
-        );
+        warnings.push(`Missing baseline and follow-up images for ${category} comparison pair.`);
       }
       continue;
     }

@@ -104,8 +104,15 @@ export async function resolveHubspotContactIdentity(
   if (leadId) {
     const lead = await loadLead(supabase, tid, leadId);
     if (lead) {
-      const patient = lead.patient_id ?? (lead.person_id ? await patientIdForPerson(supabase, tid, lead.person_id) : null);
-      return { person_id: lead.person_id, patient_id: patient, crm_lead_id: lead.id, matchedBy: "crm_lead_link" };
+      const patient =
+        lead.patient_id ??
+        (lead.person_id ? await patientIdForPerson(supabase, tid, lead.person_id) : null);
+      return {
+        person_id: lead.person_id,
+        patient_id: patient,
+        crm_lead_id: lead.id,
+        matchedBy: "crm_lead_link",
+      };
     }
   }
 
@@ -124,8 +131,14 @@ export async function resolveHubspotContactIdentity(
       const lead = await loadLead(supabase, tid, String((data as { lead_id: string }).lead_id));
       if (lead) {
         const patient =
-          lead.patient_id ?? (lead.person_id ? await patientIdForPerson(supabase, tid, lead.person_id) : null);
-        return { person_id: lead.person_id, patient_id: patient, crm_lead_id: lead.id, matchedBy: "hubspot_deal_id" };
+          lead.patient_id ??
+          (lead.person_id ? await patientIdForPerson(supabase, tid, lead.person_id) : null);
+        return {
+          person_id: lead.person_id,
+          patient_id: patient,
+          crm_lead_id: lead.id,
+          matchedBy: "hubspot_deal_id",
+        };
       }
     }
   }

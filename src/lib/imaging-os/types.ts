@@ -25,12 +25,7 @@ export type ImagingOsSourceSystem =
 export type ImagingOsActorType = "patient" | "staff" | "system" | "external_client";
 
 /** Actor type on universal ingestion requests (IM-2). */
-export type ImagingOsUploadedByActorType =
-  | "patient"
-  | "staff"
-  | "clinician"
-  | "system"
-  | "unknown";
+export type ImagingOsUploadedByActorType = "patient" | "staff" | "clinician" | "system" | "unknown";
 
 export type ImagingOsUploadSurface =
   | "fi_patient_profile"

@@ -42,7 +42,11 @@ export type ExecuteCrmLeadConversionResult = {
   conversionMode: CrmLeadConversionMode;
 };
 
-async function assertFiUserInTenant(supabase: SupabaseClient, tenantId: string, fiUserId: string): Promise<void> {
+async function assertFiUserInTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  fiUserId: string
+): Promise<void> {
   const { data, error } = await supabase
     .from("fi_users")
     .select("id")
@@ -78,7 +82,10 @@ export async function loadCrmLeadConversionState(
           (personRow as { metadata: unknown }).metadata &&
           typeof (personRow as { metadata: unknown }).metadata === "object" &&
           !Array.isArray((personRow as { metadata: unknown }).metadata)
-            ? ((personRow as { metadata: Record<string, unknown> }).metadata as Record<string, unknown>)
+            ? ((personRow as { metadata: Record<string, unknown> }).metadata as Record<
+                string,
+                unknown
+              >)
             : {},
       }
     : null;
@@ -144,7 +151,9 @@ export async function executeCrmLeadConversion(
   if (!personData) throw new Error("Lead person not found in this tenant.");
 
   const personMeta =
-    personData.metadata && typeof personData.metadata === "object" && !Array.isArray(personData.metadata)
+    personData.metadata &&
+    typeof personData.metadata === "object" &&
+    !Array.isArray(personData.metadata)
       ? (personData.metadata as Record<string, unknown>)
       : {};
 
@@ -163,7 +172,9 @@ export async function executeCrmLeadConversion(
       throw new Error("Lead references a patient that no longer exists.");
     }
     if (String((existingPat as { person_id: string }).person_id) !== lead.person_id) {
-      throw new Error("Lead patient link does not match the lead person; resolve before converting.");
+      throw new Error(
+        "Lead patient link does not match the lead person; resolve before converting."
+      );
     }
   }
 
@@ -180,10 +191,14 @@ export async function executeCrmLeadConversion(
   );
 
   if (lead.patient_id && lead.patient_id !== patient.id) {
-    throw new Error("Lead patient link conflicts with resolved patient; resolve before converting.");
+    throw new Error(
+      "Lead patient link conflicts with resolved patient; resolve before converting."
+    );
   }
 
-  const conversionMode: CrmLeadConversionMode = patientCreated ? "patient_created" : "patient_linked";
+  const conversionMode: CrmLeadConversionMode = patientCreated
+    ? "patient_created"
+    : "patient_linked";
 
   let caseSeeded = false;
   let newCaseId: string | null = null;
@@ -193,9 +208,8 @@ export async function executeCrmLeadConversion(
     if (lead.case_id) {
       // Lead already linked to a case — do not create another shell from this action.
     } else {
-      const caseMeta =
-        params.treatmentInterest?.trim() ?
-          { treatment_interest: params.treatmentInterest.trim() }
+      const caseMeta = params.treatmentInterest?.trim()
+        ? { treatment_interest: params.treatmentInterest.trim() }
         : undefined;
       const { case: caseRow, created } = await resolveOrCreateCaseFoundation(
         {

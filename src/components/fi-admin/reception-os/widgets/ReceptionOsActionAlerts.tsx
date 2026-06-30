@@ -3,7 +3,10 @@ import { AlertCircle, Bell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import { ReceptionOsRecordLinks, receptionOsPrimaryHref } from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
+import {
+  ReceptionOsRecordLinks,
+  receptionOsPrimaryHref,
+} from "@/src/components/fi-admin/reception-os/ReceptionOsRecordLinks";
 import {
   ReceptionOsSeverityBadge,
   RECEPTION_OS_SEVERITY_SURFACE,
@@ -12,14 +15,20 @@ import { RECEPTION_OS_ALERT_LABELS } from "@/src/lib/receptionOs/receptionOsBoar
 import type { ReceptionOsActionAlert } from "@/src/lib/receptionOs/receptionOsBoardPayloadSchema";
 
 export function ReceptionOsActionAlertsWidget({ alerts }: { alerts: ReceptionOsActionAlert[] }) {
-  const criticalCount = alerts.filter((a) => a.severity === "critical" || a.severity === "blocked").length;
+  const criticalCount = alerts.filter(
+    (a) => a.severity === "critical" || a.severity === "blocked"
+  ).length;
 
   return (
     <DashboardCard className="flex h-full min-h-[280px] flex-col overflow-hidden">
       <div className="border-b border-white/[0.06] px-4 py-3">
         <SectionHeader
           title="Action required"
-          description={criticalCount > 0 ? `${criticalCount} critical · ${alerts.length} total` : `${alerts.length} items`}
+          description={
+            criticalCount > 0
+              ? `${criticalCount} critical · ${alerts.length} total`
+              : `${alerts.length} items`
+          }
         />
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-2">
@@ -34,7 +43,13 @@ export function ReceptionOsActionAlertsWidget({ alerts }: { alerts: ReceptionOsA
               const styles = RECEPTION_OS_SEVERITY_SURFACE[a.severity];
               const primaryHref = a.href ?? receptionOsPrimaryHref(a.hrefs ?? {});
               const inner = (
-                <div className={cn("flex gap-3 rounded-lg border px-3 py-2.5", styles.border, styles.bg)}>
+                <div
+                  className={cn(
+                    "flex gap-3 rounded-lg border px-3 py-2.5",
+                    styles.border,
+                    styles.bg
+                  )}
+                >
                   <AlertCircle className={cn("mt-0.5 h-4 w-4 shrink-0", styles.text)} aria-hidden />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

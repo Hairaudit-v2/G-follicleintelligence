@@ -13,7 +13,10 @@ import {
 import { loadRecentPrescriptionsForTenant } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
 import { PRESCRIPTION_STATUS_LABELS } from "@/src/lib/prescribing/fiPrescribingTypes";
 
-async function loadPatientLabels(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
+async function loadPatientLabels(
+  tenantId: string,
+  patientIds: string[]
+): Promise<Map<string, string>> {
   const uniq = Array.from(new Set(patientIds.filter(Boolean)));
   const map = new Map<string, string>();
   if (uniq.length === 0) return map;
@@ -25,7 +28,9 @@ async function loadPatientLabels(tenantId: string, patientIds: string[]): Promis
     .in("id", uniq);
   if (pe || !pRows?.length) return map;
 
-  const personIds = Array.from(new Set(pRows.map((r) => String((r as { person_id: string }).person_id))));
+  const personIds = Array.from(
+    new Set(pRows.map((r) => String((r as { person_id: string }).person_id)))
+  );
   const { data: personRows, error: e2 } = await supabase
     .from("fi_persons")
     .select("id, metadata")
@@ -37,7 +42,9 @@ async function loadPatientLabels(tenantId: string, patientIds: string[]): Promis
   for (const raw of personRows ?? []) {
     const r = raw as { id: string; metadata: unknown };
     const m =
-      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
+      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+        ? (r.metadata as Record<string, unknown>)
+        : {};
     personMeta.set(String(r.id), m);
   }
 
@@ -52,7 +59,12 @@ async function loadPatientLabels(tenantId: string, patientIds: string[]): Promis
 function formatShortDate(iso: string): string {
   const d = Date.parse(iso);
   if (!Number.isFinite(d)) return "—";
-  return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(d).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export async function PrescriptionsWorkspacePage({ tenantId }: { tenantId: string }) {
@@ -66,7 +78,12 @@ export async function PrescriptionsWorkspacePage({ tenantId }: { tenantId: strin
 
   const patientIds = recentPrescriptions.map((r) => r.patient_id);
   const labels = await loadPatientLabels(tid, patientIds);
-  const prescriptionModel = buildDoctorPrescriptionWorkspace(base, bundle, recentPrescriptions, labels);
+  const prescriptionModel = buildDoctorPrescriptionWorkspace(
+    base,
+    bundle,
+    recentPrescriptions,
+    labels
+  );
 
   return (
     <div className="mx-auto min-w-0 max-w-[88rem] space-y-6 pb-10 sm:space-y-8 sm:pb-12">
@@ -80,9 +97,12 @@ export async function PrescriptionsWorkspacePage({ tenantId }: { tenantId: strin
             <Pill className="h-4 w-4" aria-hidden />
             FI OS · Medication
           </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Prescription workspace</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            Prescription workspace
+          </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Medication approvals, active prescriptions, renewals, and recent prescribing activity across patients.
+            Medication approvals, active prescriptions, renewals, and recent prescribing activity
+            across patients.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href={`${base}/prescriptions/new`} className={doctorWorkspaceLinkButtonClass}>
@@ -99,7 +119,11 @@ export async function PrescriptionsWorkspacePage({ tenantId }: { tenantId: strin
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="prescriptions-workspace-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="prescriptions-workspace-heading"
+      >
         <SectionHeader
           id="prescriptions-workspace-heading"
           kicker="Workflow"
@@ -111,7 +135,11 @@ export async function PrescriptionsWorkspacePage({ tenantId }: { tenantId: strin
       </DashboardCard>
 
       {recentPrescriptions.length > 0 ? (
-        <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="prescriptions-history-heading">
+        <DashboardCard
+          className="p-5 sm:p-6"
+          role="region"
+          aria-labelledby="prescriptions-history-heading"
+        >
           <SectionHeader
             id="prescriptions-history-heading"
             kicker="History"
@@ -121,9 +149,14 @@ export async function PrescriptionsWorkspacePage({ tenantId }: { tenantId: strin
           />
           <ul className="divide-y divide-white/[0.06]">
             {recentPrescriptions.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+              <li
+                key={r.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+              >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[#F8FAFC]">{labels.get(r.patient_id) ?? "Patient"}</p>
+                  <p className="truncate text-sm font-semibold text-[#F8FAFC]">
+                    {labels.get(r.patient_id) ?? "Patient"}
+                  </p>
                   <p className="mt-0.5 text-xs text-[#64748B]">
                     {PRESCRIPTION_STATUS_LABELS[r.status]} · {formatShortDate(r.updated_at)}
                   </p>

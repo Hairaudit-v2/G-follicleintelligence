@@ -37,11 +37,19 @@ test("demo invoice and payment keys are unique", () => {
   }
 
   for (const bundle of bundles.surgeryBundles) {
-    for (const invoice of [bundle.depositInvoice, bundle.balanceInvoice, bundle.adjustmentInvoice].filter(Boolean)) {
+    for (const invoice of [
+      bundle.depositInvoice,
+      bundle.balanceInvoice,
+      bundle.adjustmentInvoice,
+    ].filter(Boolean)) {
       assert.ok(!invoiceKeys.has(invoice!.demoInvoiceKey));
       invoiceKeys.add(invoice!.demoInvoiceKey);
     }
-    for (const payment of [bundle.depositPayment, bundle.balancePayment, bundle.refundPayment].filter(Boolean)) {
+    for (const payment of [
+      bundle.depositPayment,
+      bundle.balancePayment,
+      bundle.refundPayment,
+    ].filter(Boolean)) {
       assert.ok(!paymentKeys.has(payment!.demoPaymentKey));
       paymentKeys.add(payment!.demoPaymentKey);
     }
@@ -50,7 +58,9 @@ test("demo invoice and payment keys are unique", () => {
 
 test("Sydney surgeries reconcile cleanly with low franchise risk", () => {
   const bundles = buildEnterpriseDemoFinancialBundles();
-  const sydney = bundles.surgeryBundles.filter((b) => b.surgery.clinicSlug === "sydney-hair-institute");
+  const sydney = bundles.surgeryBundles.filter(
+    (b) => b.surgery.clinicSlug === "sydney-hair-institute"
+  );
 
   assert.ok(sydney.length > 0);
   for (const bundle of sydney) {
@@ -61,7 +71,9 @@ test("Sydney surgeries reconcile cleanly with low franchise risk", () => {
 
 test("Dubai surgeries flag graft and revenue variance", () => {
   const bundles = buildEnterpriseDemoFinancialBundles();
-  const dubai = bundles.surgeryBundles.filter((b) => b.surgery.clinicSlug === "dubai-hair-institute");
+  const dubai = bundles.surgeryBundles.filter(
+    (b) => b.surgery.clinicSlug === "dubai-hair-institute"
+  );
 
   assert.ok(dubai.every((b) => b.franchiseRisk.inventoryToGraftVarianceFlag));
   assert.ok(dubai.some((b) => b.franchiseRisk.revenueVarianceFlag));
@@ -121,6 +133,9 @@ test("surgery invoices link to demo surgery and case keys", () => {
   for (const bundle of bundles.surgeryBundles) {
     assert.equal(bundle.depositInvoice.demoSurgeryKey, bundle.surgery.demoSurgeryKey);
     assert.equal(bundle.balanceInvoice.demoCaseKey, bundle.surgery.demoCaseKey);
-    assert.equal(bundle.franchiseRisk.demoFinancialRiskKey, `${bundle.surgery.demoSurgeryKey}-financial-risk`);
+    assert.equal(
+      bundle.franchiseRisk.demoFinancialRiskKey,
+      `${bundle.surgery.demoSurgeryKey}-financial-risk`
+    );
   }
 });

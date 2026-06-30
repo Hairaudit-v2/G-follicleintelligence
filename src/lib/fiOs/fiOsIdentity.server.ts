@@ -10,7 +10,11 @@ export async function loadFiOsIdentity(authUserId: string): Promise<FiOsIdentity
   const id = authUserId.trim();
   if (!id) return null;
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_os_identities").select("os_role").eq("auth_user_id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_os_identities")
+    .select("os_role")
+    .eq("auth_user_id", id)
+    .maybeSingle();
   if (error || !data) return null;
   const raw = (data as { os_role: string | null }).os_role;
   const norm = normalizeFiOsRole(raw);

@@ -12,7 +12,9 @@ import {
   type ComputeTenantOutcomeAggregateDraftInput,
 } from "@/src/lib/fi-os/outcomeIntelligenceEventsSchema";
 
-export function computeTenantOutcomeAggregateDraft(raw: ComputeTenantOutcomeAggregateDraftInput): Record<string, unknown> {
+export function computeTenantOutcomeAggregateDraft(
+  raw: ComputeTenantOutcomeAggregateDraftInput
+): Record<string, unknown> {
   const input = computeTenantOutcomeAggregateDraftInputSchema.parse(raw);
   const metric_summary = aggregateOutcomeMetricSummaries(input.measurements);
   const protocol_mix: Record<string, number> = {};
@@ -39,7 +41,9 @@ export function computeTenantOutcomeAggregateDraft(raw: ComputeTenantOutcomeAggr
 }
 
 /** Merges per-tenant summaries into a draft global row (no persistence). */
-export function computeGlobalOutcomeAggregateDraft(raw: ComputeGlobalOutcomeAggregateDraftInput): Record<string, unknown> {
+export function computeGlobalOutcomeAggregateDraft(
+  raw: ComputeGlobalOutcomeAggregateDraftInput
+): Record<string, unknown> {
   const input = computeGlobalOutcomeAggregateDraftInputSchema.parse(raw);
   const parsedSummaries = input.tenantMetricSummaries.map((s) => parseOutcomeMetricSummary(s));
   const metric_summary = mergeOutcomeMetricSummaries(parsedSummaries);
@@ -63,6 +67,9 @@ export function computeGlobalOutcomeAggregateDraft(raw: ComputeGlobalOutcomeAggr
     confidence_level: input.sampleSize >= 100 ? "medium" : "low",
     anonymisation_threshold_met,
     computed_by: "system",
-    metadata: { ...input.metadata, gate: gate.ok ? { ok: true } : { ok: false, reasons: gate.reasons } },
+    metadata: {
+      ...input.metadata,
+      gate: gate.ok ? { ok: true } : { ok: false, reasons: gate.reasons },
+    },
   };
 }

@@ -59,15 +59,17 @@ export default function FutureVerticalsPage() {
       />
       <Section>
         <FadeIn>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">Disciplined roadmap</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">
+            Disciplined roadmap
+          </p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             Reuse the engine; respect the specialty.
           </h2>
           <p className="mt-4 max-w-3xl text-muted-foreground leading-relaxed">
-            Investors should see expansion as leverage on fixed R&amp;D: the same infrastructure compounds when
-            new verticals share scoring discipline and enterprise relationships. Operators should see a
-            credible path—without distracting the hair restoration mission that builds proprietary depth
-            today.
+            Investors should see expansion as leverage on fixed R&amp;D: the same infrastructure
+            compounds when new verticals share scoring discipline and enterprise relationships.
+            Operators should see a credible path—without distracting the hair restoration mission
+            that builds proprietary depth today.
           </p>
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -79,7 +81,9 @@ export default function FutureVerticalsPage() {
                   <CardTitle className="text-lg">{vertical.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-sm leading-relaxed">{vertical.desc}</CardDescription>
+                  <CardDescription className="text-sm leading-relaxed">
+                    {vertical.desc}
+                  </CardDescription>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -90,12 +94,14 @@ export default function FutureVerticalsPage() {
       <Section className="border-y border-border/40">
         <FadeIn>
           <div className="fi-panel rounded-2xl p-8 md:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">Strategic posture</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/85">
+              Strategic posture
+            </p>
             <p className="mt-4 max-w-4xl leading-relaxed text-muted-foreground">
-              Each future vertical inherits the same architectural commitments: structured evidence, benchmark
-              logic, confidence posture, and governance guardrails. Rollout stays standards-aligned and
-              evidence-led—so FI remains category infrastructure, not a logo stretched across unrelated
-              workflows.
+              Each future vertical inherits the same architectural commitments: structured evidence,
+              benchmark logic, confidence posture, and governance guardrails. Rollout stays
+              standards-aligned and evidence-led—so FI remains category infrastructure, not a logo
+              stretched across unrelated workflows.
             </p>
             <div className="mt-7 flex flex-wrap gap-4">
               <Button asChild>

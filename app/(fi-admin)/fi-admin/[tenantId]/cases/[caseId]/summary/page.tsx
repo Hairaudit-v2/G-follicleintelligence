@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CaseSummaryDocumentPage } from "@/src/components/fi-admin/cases/CaseSummaryDocumentPage";
-import { caseDetailPageHref, sanitizeFromCasesSearchParam } from "@/src/lib/cases/caseDetailFromCasesParam";
+import {
+  caseDetailPageHref,
+  sanitizeFromCasesSearchParam,
+} from "@/src/lib/cases/caseDetailFromCasesParam";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
@@ -30,22 +33,30 @@ export default async function CaseSummaryDocumentRoutePage({
 
   if (!tenantId?.trim() || !caseId?.trim()) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
-  const [detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineExtra] = await Promise.all([
-    loadCaseAdminDetail(tenantId, caseId),
-    loadSurgeryPlanForCase(tenantId, caseId),
-    loadProcedureDayForCase(tenantId, caseId),
-    loadPostOpTrackingForCase(tenantId, caseId),
-    loadFollowUpsForCase(tenantId, caseId),
-    loadCaseTimelineExtraSources(tenantId, caseId),
-  ]);
+  const [detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineExtra] =
+    await Promise.all([
+      loadCaseAdminDetail(tenantId, caseId),
+      loadSurgeryPlanForCase(tenantId, caseId),
+      loadProcedureDayForCase(tenantId, caseId),
+      loadPostOpTrackingForCase(tenantId, caseId),
+      loadFollowUpsForCase(tenantId, caseId),
+      loadCaseTimelineExtraSources(tenantId, caseId),
+    ]);
   if (!detail) notFound();
 
   const timelineItems = buildCaseTimeline({

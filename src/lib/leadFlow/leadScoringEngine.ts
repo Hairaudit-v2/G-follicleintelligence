@@ -44,7 +44,8 @@ const PRP_INTEREST = /\bprp\b|platelet/i;
 const EXOSOME_INTEREST = /exosome/i;
 const CONSULT_ONLY_INTEREST = /consult|unsure|not\s*sure|explor|information/i;
 
-const HIGH_BUDGET = /high|surgery[-\s]?ready|premium|\$?\s*1[5-9]\d{3}|\$?\s*[2-9]\d{4,}|15\s*k|20\s*k|25\s*k/i;
+const HIGH_BUDGET =
+  /high|surgery[-\s]?ready|premium|\$?\s*1[5-9]\d{3}|\$?\s*[2-9]\d{4,}|15\s*k|20\s*k|25\s*k/i;
 const LOW_BUDGET = /low|unknown|unsure|tbd|n\/a|none|^$/i;
 
 const AUSTRALIA_COUNTRY = /australia|\bau\b|aus\b/i;
@@ -86,7 +87,10 @@ function isLowOrUnknownBudget(budgetRange: string | null | undefined): boolean {
   return LOW_BUDGET.test(b);
 }
 
-function stageScoreBonus(stage: string | null | undefined): { points: number; reason: string | null } {
+function stageScoreBonus(stage: string | null | undefined): {
+  points: number;
+  reason: string | null;
+} {
   const s = norm(stage).toLowerCase();
   if (!s) return { points: 0, reason: null };
   if (PROCEDURE_BOOKED_STAGES.test(s)) {
@@ -111,13 +115,21 @@ function resolvePredictedProcedure(interest: string): PredictedProcedure {
   return "unknown";
 }
 
-function procedureIntentBonus(interest: string): { points: number; reason: string | null; procedure: PredictedProcedure } {
+function procedureIntentBonus(interest: string): {
+  points: number;
+  reason: string | null;
+  procedure: PredictedProcedure;
+} {
   const predicted = resolvePredictedProcedure(interest);
   if (!interest) {
     return { points: 0, reason: null, procedure: "unknown" };
   }
   if (predicted === "repair_case") {
-    return { points: 30, reason: "Repair or corrective case interest (+30)", procedure: "repair_case" };
+    return {
+      points: 30,
+      reason: "Repair or corrective case interest (+30)",
+      procedure: "repair_case",
+    };
   }
   if (predicted === "prp") {
     return { points: 15, reason: "PRP treatment interest (+15)", procedure: "prp" };
@@ -189,7 +201,9 @@ export function scoreLead(input: LeadScoringInput): LeadScoringResult {
   stagePoints += stageBonus.points;
   if (stageBonus.reason) scoringReasons.push(stageBonus.reason);
 
-  const leadScore = clampLeadScore(contactPoints + intentPoints + budgetPoints + locationPoints + stagePoints);
+  const leadScore = clampLeadScore(
+    contactPoints + intentPoints + budgetPoints + locationPoints + stagePoints
+  );
 
   const conversionProbability = clampLeadScore(
     Math.round(
@@ -211,7 +225,10 @@ export function scoreLead(input: LeadScoringInput): LeadScoringResult {
   };
 }
 
-export function leadScoringRowFromResult(result: LeadScoringResult, scoredAt?: string): Record<string, unknown> {
+export function leadScoringRowFromResult(
+  result: LeadScoringResult,
+  scoredAt?: string
+): Record<string, unknown> {
   return {
     lead_score: result.lead_score,
     conversion_probability: result.conversion_probability,

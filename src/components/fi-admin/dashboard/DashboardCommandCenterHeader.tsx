@@ -9,7 +9,7 @@ import type { TenantOperationalDay } from "@/src/lib/fiOs/tenantOperationalDashb
 
 const primaryActionClass = cn(
   fiOsChromeClasses.toolbarControlSurface,
-  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-50",
+  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-50"
 );
 
 const primaryAccentClass = cn(primaryActionClass, fiOsChromeClasses.toolbarPrimaryAccent);
@@ -54,11 +54,33 @@ export function DashboardCommandCenterHeader(props: {
 
   const actions: CommandCenterAction[] = [
     ...(showCalendarShortcut
-      ? [{ key: "calendar", label: "Open Calendar", href: `${base}/calendar`, icon: <Calendar className="h-4 w-4 text-cyan-400" /> }]
+      ? [
+          {
+            key: "calendar",
+            label: "Open Calendar",
+            href: `${base}/calendar`,
+            icon: <Calendar className="h-4 w-4 text-cyan-400" />,
+          },
+        ]
       : []),
-    { key: "operations", label: "Open Operations Centre", href: `${base}/operations`, icon: <LayoutGrid className="h-4 w-4 text-cyan-400" /> },
-    { key: "reception", label: "Open Reception Board", href: `${base}/reception`, icon: <Users className="h-4 w-4 text-cyan-400" /> },
-    { key: "surgery-os", label: "Open SurgeryOS", href: `${base}/surgery-os`, icon: <Scissors className="h-4 w-4 text-cyan-400" /> },
+    {
+      key: "operations",
+      label: "Open Operations Centre",
+      href: `${base}/operations`,
+      icon: <LayoutGrid className="h-4 w-4 text-cyan-400" />,
+    },
+    {
+      key: "reception",
+      label: "Open Reception Board",
+      href: `${base}/reception`,
+      icon: <Users className="h-4 w-4 text-cyan-400" />,
+    },
+    {
+      key: "surgery-os",
+      label: "Open SurgeryOS",
+      href: `${base}/surgery-os`,
+      icon: <Scissors className="h-4 w-4 text-cyan-400" />,
+    },
   ];
 
   const bookingHref = bookingQuickAction?.enabled ? bookingQuickAction.href : `${base}/calendar`;
@@ -76,10 +98,15 @@ export function DashboardCommandCenterHeader(props: {
       />
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">Clinic command centre</p>
-          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Clinic Command Center</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
+            Clinic command centre
+          </p>
+          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
+            Clinic Command Center
+          </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-            Live operational overview of your clinic, patients, team activity, consultations, and procedures.
+            Live operational overview of your clinic, patients, team activity, consultations, and
+            procedures.
           </p>
           <p className="mt-2 text-sm text-slate-500">
             {tenantName}
@@ -98,7 +125,10 @@ export function DashboardCommandCenterHeader(props: {
         <div className="flex flex-col gap-2 sm:items-end">
           <div className="flex flex-wrap items-center gap-2">
             {canQuickCallIn ? (
-              <TenantHomeQuickCallIn tenantId={tenantId} calendarTimezone={operationalDay.calendarTimezone} />
+              <TenantHomeQuickCallIn
+                tenantId={tenantId}
+                calendarTimezone={operationalDay.calendarTimezone}
+              />
             ) : null}
             {actions.map((action) => (
               <Link key={action.key} href={action.href} className={primaryActionClass}>

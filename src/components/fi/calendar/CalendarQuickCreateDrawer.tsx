@@ -4,7 +4,11 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import Link from "next/link";
 import { X } from "lucide-react";
 
-import { calendarQuickCreateBookingAction, loadServiceResourceRequirementsAction, suggestResourceAssignmentsAction } from "@/lib/actions/fi-calendar-quick-create-actions";
+import {
+  calendarQuickCreateBookingAction,
+  loadServiceResourceRequirementsAction,
+  suggestResourceAssignmentsAction,
+} from "@/lib/actions/fi-calendar-quick-create-actions";
 import { findNextAvailableBookingSlotsAction } from "@/lib/actions/fi-next-available-booking-slots-actions";
 import { loadRoomPickerOptionsAction } from "@/lib/actions/fi-rooms-actions";
 import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
@@ -40,7 +44,10 @@ import {
 } from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
-import { quickTemplateDurationMinutes, serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
+import {
+  quickTemplateDurationMinutes,
+  serviceForBookingType,
+} from "@/src/lib/bookings/servicesCatalog";
 import type {
   FiServiceResourceRequirementRow,
   SuggestResourceAssignmentsResult,
@@ -108,10 +115,20 @@ function columnResourceDefaults(
   const col = columnId?.trim() ?? "";
   const assignment = columnPrefillAssignment(col, staffIdByUserId);
   if (col.startsWith("r:")) {
-    return { clinicId: "", roomId: col.slice(2), assignedStaffId: assignment.assignedStaffId, legacyOwnerUserId: assignment.legacyOwnerUserId };
+    return {
+      clinicId: "",
+      roomId: col.slice(2),
+      assignedStaffId: assignment.assignedStaffId,
+      legacyOwnerUserId: assignment.legacyOwnerUserId,
+    };
   }
   if (col.startsWith("c:")) {
-    return { clinicId: col.slice(2), roomId: "", assignedStaffId: assignment.assignedStaffId, legacyOwnerUserId: assignment.legacyOwnerUserId };
+    return {
+      clinicId: col.slice(2),
+      roomId: "",
+      assignedStaffId: assignment.assignedStaffId,
+      legacyOwnerUserId: assignment.legacyOwnerUserId,
+    };
   }
   return {
     clinicId: "",
@@ -225,7 +242,10 @@ export function CalendarQuickCreateDrawer({
   const titleId = useId();
   const tz = calendarTimezone.trim();
   const tzLabel = displayCalendarTimezoneSubtitle(tz);
-  const { staffIdByUserId } = useMemo(() => buildStaffUserLinkIndex(staffDirectory), [staffDirectory]);
+  const { staffIdByUserId } = useMemo(
+    () => buildStaffUserLinkIndex(staffDirectory),
+    [staffDirectory]
+  );
 
   const visibleStaffColumnIds = useMemo(() => {
     return new Set(
@@ -256,7 +276,9 @@ export function CalendarQuickCreateDrawer({
   const [manualEndOverride, setManualEndOverride] = useState(false);
   const skipOneEndSyncRef = useRef(false);
   const [clinicId, setClinicId] = useState("");
-  const [clinicResolveBlocked, setClinicResolveBlocked] = useState<"no_clinics" | "ambiguous" | null>(null);
+  const [clinicResolveBlocked, setClinicResolveBlocked] = useState<
+    "no_clinics" | "ambiguous" | null
+  >(null);
   const [roomId, setRoomId] = useState("");
   const [roomOptions, setRoomOptions] = useState<RoomPickerOption[]>([]);
   const [roomLoading, setRoomLoading] = useState(false);
@@ -279,8 +301,12 @@ export function CalendarQuickCreateDrawer({
   const [conflictPreview, setConflictPreview] = useState<BookingConflictPreviewResult | null>(null);
   const [conflictLoading, setConflictLoading] = useState(false);
 
-  const [serviceResourceReqs, setServiceResourceReqs] = useState<FiServiceResourceRequirementRow[]>([]);
-  const [resourceSuggest, setResourceSuggest] = useState<SuggestResourceAssignmentsResult | null>(null);
+  const [serviceResourceReqs, setServiceResourceReqs] = useState<FiServiceResourceRequirementRow[]>(
+    []
+  );
+  const [resourceSuggest, setResourceSuggest] = useState<SuggestResourceAssignmentsResult | null>(
+    null
+  );
   const [resourcePicks, setResourcePicks] = useState<Record<string, string>>({});
 
   const clinicLocale = useMemo(
@@ -323,17 +349,25 @@ export function CalendarQuickCreateDrawer({
     setLegacyOwnerUserId(colDefaults.legacyOwnerUserId);
     const unsetType = Boolean(prefill.appointmentTypeUnset);
     const explicitTpl = prefill.templateId ? calendarQuickTemplateById(prefill.templateId) : null;
-    const nextTpl: CalendarQuickTemplateId | null = unsetType ? null : explicitTpl?.id ?? "consultation";
+    const nextTpl: CalendarQuickTemplateId | null = unsetType
+      ? null
+      : (explicitTpl?.id ?? "consultation");
     setTemplateId(nextTpl);
     setNotes("");
     setManualEndOverride(false);
     const startRaw = normalizeQuickBookDatetimeLocal(prefill.localStart.trim());
     const dayKey = startRaw.slice(0, 10);
     const tplForDur = nextTpl ? calendarQuickTemplateById(nextTpl) : null;
-    const durMin = tplForDur ? quickTemplateDurationMinutes(tplForDur, services) : PLACEHOLDER_DURATION_MIN;
+    const durMin = tplForDur
+      ? quickTemplateDurationMinutes(tplForDur, services)
+      : PLACEHOLDER_DURATION_MIN;
     const start = clampStartToNearestOption(dayKey, startRaw, gridConfig, durMin);
     setStartLocal(start);
-    const endDerived = deriveQuickBookEndLocal({ startLocal: start, durationMinutes: durMin, timeZone: tz });
+    const endDerived = deriveQuickBookEndLocal({
+      startLocal: start,
+      durationMinutes: durMin,
+      timeZone: tz,
+    });
     setEndLocal(endDerived ?? "");
     const startIso = fromDatetimeLocalValueInTimezone(start, tz);
     setPatientName("");
@@ -497,7 +531,9 @@ export function CalendarQuickCreateDrawer({
         return;
       }
       setRoomOptions(r.options);
-      const auto = r.options.find((o) => o.eligible && o.available && o.room.is_active && o.preferred);
+      const auto = r.options.find(
+        (o) => o.eligible && o.available && o.room.is_active && o.preferred
+      );
       const only = r.options.filter((o) => o.eligible && o.available && o.room.is_active);
       if (!roomId.trim()) {
         if (auto) setRoomId(auto.room.id);
@@ -531,7 +567,11 @@ export function CalendarQuickCreateDrawer({
     if (!resourceSuggest || serviceResourceReqs.length === 0) return [];
     const primStaff = assignedStaffId.trim();
     const primRoom = roomId.trim();
-    const out: { resource_type: "staff" | "room"; resource_id: string; role_label?: string | null }[] = [];
+    const out: {
+      resource_type: "staff" | "room";
+      resource_id: string;
+      role_label?: string | null;
+    }[] = [];
     for (const req of serviceResourceReqs) {
       const pick = resourcePicks[req.id]?.trim();
       if (!pick) continue;
@@ -561,7 +601,16 @@ export function CalendarQuickCreateDrawer({
       endAt: endIso,
       ...(builtResourceExtras.length > 0 ? { extraResourceAssignments: builtResourceExtras } : {}),
     };
-  }, [assignedStaffId, builtResourceExtras, clinicId, endLocal, roomId, startLocal, tplForRooms, tz]);
+  }, [
+    assignedStaffId,
+    builtResourceExtras,
+    clinicId,
+    endLocal,
+    roomId,
+    startLocal,
+    tplForRooms,
+    tz,
+  ]);
   const debouncedConflictKey = useDebouncedValue(
     conflictPreviewBody ? JSON.stringify(conflictPreviewBody) : "",
     350
@@ -596,8 +645,9 @@ export function CalendarQuickCreateDrawer({
       const startWall = toDatetimeLocalValueInTimezone(slot.startAt, tz);
       setStartLocal(startWall);
       const slotEnd = slot.endAt?.trim();
-      const dur =
-        tplForRooms ? quickTemplateDurationMinutes(tplForRooms, services) : PLACEHOLDER_DURATION_MIN;
+      const dur = tplForRooms
+        ? quickTemplateDurationMinutes(tplForRooms, services)
+        : PLACEHOLDER_DURATION_MIN;
       const endWall = slotEnd
         ? toDatetimeLocalValueInTimezone(slot.endAt, tz)
         : deriveQuickBookEndLocal({ startLocal: startWall, durationMinutes: dur, timeZone: tz });
@@ -621,7 +671,16 @@ export function CalendarQuickCreateDrawer({
       preferredStartAt: startIso,
       durationMinutes: selectedDurationMinutes,
     };
-  }, [assignedStaffId, catalogService?.id, clinicId, roomId, selectedDurationMinutes, startLocal, tplForRooms, tz]);
+  }, [
+    assignedStaffId,
+    catalogService?.id,
+    clinicId,
+    roomId,
+    selectedDurationMinutes,
+    startLocal,
+    tplForRooms,
+    tz,
+  ]);
 
   const onTemplateChange = useCallback(
     (id: CalendarQuickTemplateId) => {
@@ -678,7 +737,8 @@ export function CalendarQuickCreateDrawer({
   const isFiOsFlow = workflowVariant === "fiOs";
 
   const hasRoomConflict = useMemo(
-    () => Boolean(conflictPreview?.messages?.some((m) => m.type === "room" && m.severity === "error")),
+    () =>
+      Boolean(conflictPreview?.messages?.some((m) => m.type === "room" && m.severity === "error")),
     [conflictPreview]
   );
 
@@ -756,14 +816,13 @@ export function CalendarQuickCreateDrawer({
       return;
     }
     const startNorm = normalizeQuickBookDatetimeLocal(startLocal);
-    const resolvedEndLocal =
-      manualEndOverride
-        ? normalizeQuickBookDatetimeLocal(endLocal)
-        : deriveQuickBookEndLocal({
-            startLocal: startNorm,
-            durationMinutes: selectedDurationMinutes,
-            timeZone: tz,
-          }) ?? normalizeQuickBookDatetimeLocal(endLocal);
+    const resolvedEndLocal = manualEndOverride
+      ? normalizeQuickBookDatetimeLocal(endLocal)
+      : (deriveQuickBookEndLocal({
+          startLocal: startNorm,
+          durationMinutes: selectedDurationMinutes,
+          timeZone: tz,
+        }) ?? normalizeQuickBookDatetimeLocal(endLocal));
     const startIso = fromDatetimeLocalValueInTimezone(startNorm, tz);
     const endIso = fromDatetimeLocalValueInTimezone(resolvedEndLocal, tz);
     if (!startIso || !endIso) {
@@ -796,7 +855,9 @@ export function CalendarQuickCreateDrawer({
     if (staffId) {
       const staff = staffDirectory.find((s) => s.id === staffId);
       if (staff && !canSelectStaffForClinicalPicker(staff)) {
-        setFormErr(staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available.");
+        setFormErr(
+          staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available."
+        );
         return;
       }
     }
@@ -867,8 +928,12 @@ export function CalendarQuickCreateDrawer({
   const clinicSetupHref = `/fi-admin/${tenantId.trim()}/settings/clinic-setup`;
   const showClinicOverride = clinics.length > 1;
   const isLightFiOsDrawer = workflowVariant === "fiOs" && calendarWorkspaceDisplayTheme === "light";
-  const os = isLightFiOsDrawer ? fiPageHeaderVariantClassNames.clinicLight : fiPageHeaderVariantClassNames.osDark;
-  const drawerSurfaceClass = isLightFiOsDrawer ? fiSurfaceVariantClassNames.crmLight : fiSurfaceVariantClassNames.darkGlass;
+  const os = isLightFiOsDrawer
+    ? fiPageHeaderVariantClassNames.clinicLight
+    : fiPageHeaderVariantClassNames.osDark;
+  const drawerSurfaceClass = isLightFiOsDrawer
+    ? fiSurfaceVariantClassNames.crmLight
+    : fiSurfaceVariantClassNames.darkGlass;
   const inputClass = isLightFiOsDrawer
     ? "mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/35"
     : "mt-1 w-full rounded-lg border border-white/[0.12] bg-slate-950/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#22C1FF]/45";
@@ -878,7 +943,12 @@ export function CalendarQuickCreateDrawer({
 
   return (
     <div className="fixed inset-0 z-[125] flex justify-end" role="presentation">
-      <button type="button" className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" aria-label="Close" onClick={() => !busy && onClose()} />
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+        aria-label="Close"
+        onClick={() => !busy && onClose()}
+      />
       <div
         role="dialog"
         aria-modal="true"
@@ -910,11 +980,16 @@ export function CalendarQuickCreateDrawer({
           </button>
         </div>
 
-        <form onSubmit={(e) => void onSubmit(e)} className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-5">
+        <form
+          onSubmit={(e) => void onSubmit(e)}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-5"
+        >
           <div className="space-y-4">
             {setupRecommendations.length > 0 ? (
               <div className="rounded-xl border border-amber-500/30 bg-amber-950/25 px-3 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">Setup recommendation</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">
+                  Setup recommendation
+                </p>
                 <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs leading-snug text-amber-100/90">
                   {setupRecommendations.map((line) => (
                     <li key={line}>{line}</li>
@@ -926,7 +1001,13 @@ export function CalendarQuickCreateDrawer({
             <div>
               <p className={cn(os.eyebrow, "mb-2")}>Patient or lead</p>
               <div className="grid gap-2">
-                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium",
+                    isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                    os.meta
+                  )}
+                >
                   Name <span className="text-rose-300">*</span>
                   <input
                     className={inputClass}
@@ -940,7 +1021,13 @@ export function CalendarQuickCreateDrawer({
                     autoComplete="name"
                   />
                 </label>
-                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium",
+                    isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                    os.meta
+                  )}
+                >
                   Mobile
                   <input
                     className={inputClass}
@@ -954,7 +1041,13 @@ export function CalendarQuickCreateDrawer({
                     placeholder="Optional"
                   />
                 </label>
-                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium",
+                    isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                    os.meta
+                  )}
+                >
                   Email
                   <input
                     type="email"
@@ -1040,7 +1133,9 @@ export function CalendarQuickCreateDrawer({
             <div>
               <p className={cn(os.eyebrow, "mb-2")}>Appointment type</p>
               {!templateId ? (
-                <p className="mb-2 text-xs text-slate-400">Pick a type — duration updates from the service catalog.</p>
+                <p className="mb-2 text-xs text-slate-400">
+                  Pick a type — duration updates from the service catalog.
+                </p>
               ) : null}
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
                 {CALENDAR_QUICK_TEMPLATES.map((t) => (
@@ -1067,7 +1162,9 @@ export function CalendarQuickCreateDrawer({
             <div>
               <p className={cn(os.eyebrow, "mb-1")}>Time</p>
               <p className="text-xs text-slate-500">Selected from calendar. Adjust if needed.</p>
-              <p className="mt-3 text-base font-semibold leading-snug text-slate-50">{dateHeadingLong}</p>
+              <p className="mt-3 text-base font-semibold leading-snug text-slate-50">
+                {dateHeadingLong}
+              </p>
               {dateHeadingShort ? (
                 <p className="mt-0.5 text-sm tabular-nums text-slate-400">{dateHeadingShort}</p>
               ) : null}
@@ -1097,7 +1194,13 @@ export function CalendarQuickCreateDrawer({
               <p className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums" role="status">
                 {timeSummary}
               </p>
-              <label className={cn("mt-3 block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+              <label
+                className={cn(
+                  "mt-3 block text-xs font-medium",
+                  isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                  os.meta
+                )}
+              >
                 Start time
                 <select
                   className={cn(inputClass, "text-base font-semibold tabular-nums")}
@@ -1173,7 +1276,9 @@ export function CalendarQuickCreateDrawer({
                   <span>Room will be assigned automatically.</span>
                 )}
                 {assignedRoomLabel && !hasRoomConflict ? (
-                  <span className="mt-1 block text-[11px] font-normal text-slate-500">Planned: {assignedRoomLabel}</span>
+                  <span className="mt-1 block text-[11px] font-normal text-slate-500">
+                    Planned: {assignedRoomLabel}
+                  </span>
                 ) : null}
               </summary>
               <div className="space-y-2 border-t border-white/[0.08] px-3 pb-3 pt-2 text-xs leading-snug text-slate-400">
@@ -1190,7 +1295,13 @@ export function CalendarQuickCreateDrawer({
             </details>
 
             {providerOptions.length > 0 ? (
-              <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+              <label
+                className={cn(
+                  "block text-xs font-medium",
+                  isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                  os.meta
+                )}
+              >
                 Provider
                 <StaffClinicalSelect
                   tenantId={tenantId}
@@ -1201,12 +1312,20 @@ export function CalendarQuickCreateDrawer({
                   className={inputClass}
                 />
                 {legacyOwnerLabel && !assignedStaffId.trim() ? (
-                  <p className="mt-1 text-[11px] text-slate-500">From calendar column: {legacyOwnerLabel}</p>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    From calendar column: {legacyOwnerLabel}
+                  </p>
                 ) : null}
               </label>
             ) : null}
 
-            <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+            <label
+              className={cn(
+                "block text-xs font-medium",
+                isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                os.meta
+              )}
+            >
               Notes <span className="font-normal text-slate-500">(optional)</span>
               <textarea
                 className={cn(inputClass, "min-h-[72px] resize-y")}
@@ -1227,7 +1346,13 @@ export function CalendarQuickCreateDrawer({
                 Advanced scheduling (full booking)
               </summary>
               <div className="space-y-3 border-t border-white/[0.08] px-3 pb-3 pt-2">
-                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium",
+                    isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                    os.meta
+                  )}
+                >
                   Start (exact)
                   <input
                     type="datetime-local"
@@ -1239,7 +1364,13 @@ export function CalendarQuickCreateDrawer({
                     }}
                   />
                 </label>
-                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium",
+                    isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                    os.meta
+                  )}
+                >
                   End (exact)
                   <input
                     type="datetime-local"
@@ -1252,7 +1383,13 @@ export function CalendarQuickCreateDrawer({
                   />
                 </label>
                 {showClinicOverride ? (
-                  <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                  <label
+                    className={cn(
+                      "block text-xs font-medium",
+                      isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                      os.meta
+                    )}
+                  >
                     Clinic override
                     <select
                       className={inputClass}
@@ -1273,7 +1410,13 @@ export function CalendarQuickCreateDrawer({
                   </label>
                 ) : null}
                 {clinicId.trim() ? (
-                  <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                  <label
+                    className={cn(
+                      "block text-xs font-medium",
+                      isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                      os.meta
+                    )}
+                  >
                     Room
                     <select
                       className={inputClass}
@@ -1283,9 +1426,17 @@ export function CalendarQuickCreateDrawer({
                     >
                       <option value="">{roomLoading ? "Loading rooms…" : "Select room"}</option>
                       {roomOptions.map((o) => (
-                        <option key={o.room.id} value={o.room.id} disabled={Boolean(o.disabledReason)}>
+                        <option
+                          key={o.room.id}
+                          value={o.room.id}
+                          disabled={Boolean(o.disabledReason)}
+                        >
                           {o.room.display_name}
-                          {o.disabledReason ? ` — ${o.disabledReason}` : o.preferred ? " (preferred)" : ""}
+                          {o.disabledReason
+                            ? ` — ${o.disabledReason}`
+                            : o.preferred
+                              ? " (preferred)"
+                              : ""}
                         </option>
                       ))}
                     </select>
@@ -1296,16 +1447,30 @@ export function CalendarQuickCreateDrawer({
                     <p className="text-xs font-semibold text-amber-100/95">Required resources</p>
                     {serviceResourceReqs.map((req) => {
                       const val = resourcePicks[req.id] ?? "";
-                      if (req.resource_type === "staff_role" || req.resource_type === "staff_member") {
+                      if (
+                        req.resource_type === "staff_role" ||
+                        req.resource_type === "staff_member"
+                      ) {
                         const ids = resourceSuggest.staffOptionsByRequirementId[req.id] ?? [];
                         return (
-                          <label key={req.id} className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                          <label
+                            key={req.id}
+                            className={cn(
+                              "block text-xs font-medium",
+                              isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                              os.meta
+                            )}
+                          >
                             {req.requirement_label}
-                            {!req.is_required ? <span className="text-slate-500"> (optional)</span> : null}
+                            {!req.is_required ? (
+                              <span className="text-slate-500"> (optional)</span>
+                            ) : null}
                             <select
                               className={inputClass}
                               value={val}
-                              onChange={(e) => setResourcePicks((p) => ({ ...p, [req.id]: e.target.value }))}
+                              onChange={(e) =>
+                                setResourcePicks((p) => ({ ...p, [req.id]: e.target.value }))
+                              }
                             >
                               <option value="">—</option>
                               {ids.map((sid) => {
@@ -1322,13 +1487,24 @@ export function CalendarQuickCreateDrawer({
                       }
                       const rooms = resourceSuggest.roomOptionsByRequirementId[req.id] ?? [];
                       return (
-                        <label key={req.id} className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-300" : "text-slate-300", os.meta)}>
+                        <label
+                          key={req.id}
+                          className={cn(
+                            "block text-xs font-medium",
+                            isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
+                            os.meta
+                          )}
+                        >
                           {req.requirement_label}
-                          {!req.is_required ? <span className="text-slate-500"> (optional)</span> : null}
+                          {!req.is_required ? (
+                            <span className="text-slate-500"> (optional)</span>
+                          ) : null}
                           <select
                             className={inputClass}
                             value={val}
-                            onChange={(e) => setResourcePicks((p) => ({ ...p, [req.id]: e.target.value }))}
+                            onChange={(e) =>
+                              setResourcePicks((p) => ({ ...p, [req.id]: e.target.value }))
+                            }
                           >
                             <option value="">—</option>
                             {rooms.map((r) => (
@@ -1355,7 +1531,10 @@ export function CalendarQuickCreateDrawer({
               tenantId={tenantId}
               calendarTimezone={tz}
               request={nextSlotsRequest}
-              show={Boolean(nextSlotsRequest) && (conflictPreview?.status === "blocked" || hasRoomConflict)}
+              show={
+                Boolean(nextSlotsRequest) &&
+                (conflictPreview?.status === "blocked" || hasRoomConflict)
+              }
               onApplySlot={onApplySuggestedSlot}
               variant="dark"
             />
@@ -1372,7 +1551,11 @@ export function CalendarQuickCreateDrawer({
             >
               Cancel
             </button>
-            <button type="submit" className={fiButtonVariantClassNames.osPrimary} disabled={busy || !clinicId.trim()}>
+            <button
+              type="submit"
+              className={fiButtonVariantClassNames.osPrimary}
+              disabled={busy || !clinicId.trim()}
+            >
               {busy ? "Saving…" : "Save"}
             </button>
           </div>

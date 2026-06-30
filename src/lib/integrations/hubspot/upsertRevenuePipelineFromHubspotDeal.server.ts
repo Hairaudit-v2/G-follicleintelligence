@@ -60,7 +60,9 @@ export async function upsertRevenuePipelineFromHubspotDeal(
 
   const { data: existingRaw, error: loadErr } = await supabase
     .from("fi_revenue_pipeline")
-    .select("id, stage, expected_revenue, deposit_amount, balance_amount, probability_score, procedure_type, forecast_date, patient_id, crm_lead_id")
+    .select(
+      "id, stage, expected_revenue, deposit_amount, balance_amount, probability_score, procedure_type, forecast_date, patient_id, crm_lead_id"
+    )
     .eq("tenant_id", tid)
     .eq("hubspot_deal_id", dealId)
     .maybeSingle();
@@ -93,7 +95,11 @@ export async function upsertRevenuePipelineFromHubspotDeal(
   };
 
   if (!existing) {
-    const { data, error } = await supabase.from("fi_revenue_pipeline").insert(row).select("id").single();
+    const { data, error } = await supabase
+      .from("fi_revenue_pipeline")
+      .insert(row)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return {
       id: data ? String((data as { id: string }).id) : null,

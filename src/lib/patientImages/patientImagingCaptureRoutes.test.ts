@@ -20,7 +20,10 @@ test("buildPatientImagingCaptureHref encodes tenant, patient, intent, and source
 
 test("buildPatientImagingCaptureHref supports library upload intent from slide-over", () => {
   const href = buildPatientImagingCaptureHref("t", "p", "library", "patient_slide_over");
-  assert.equal(href, "/fi-admin/t/patients/p/imaging?tab=capture&intent=library&source=patient_slide_over");
+  assert.equal(
+    href,
+    "/fi-admin/t/patients/p/imaging?tab=capture&intent=library&source=patient_slide_over"
+  );
 });
 
 test("parseImagingWorkspaceTab accepts capture tab only", () => {

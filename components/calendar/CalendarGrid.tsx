@@ -9,9 +9,15 @@
  * @see lib/calendar/time-slots.ts — slot rows and body height helpers
  * @see components/calendar/WeekView.tsx — underlying implementation
  */
-export { WeekView as CalendarGrid, type WeekViewProps as CalendarGridProps } from "@/components/calendar/WeekView";
+export {
+  WeekView as CalendarGrid,
+  type WeekViewProps as CalendarGridProps,
+} from "@/components/calendar/WeekView";
 
-export { BusinessTimeSlotGrid, BusinessTimeGutter } from "@/components/calendar/BusinessTimeSlotGrid";
+export {
+  BusinessTimeSlotGrid,
+  BusinessTimeGutter,
+} from "@/components/calendar/BusinessTimeSlotGrid";
 export {
   CALENDAR_TIME_SLOTS,
   generateCalendarTimeSlots,

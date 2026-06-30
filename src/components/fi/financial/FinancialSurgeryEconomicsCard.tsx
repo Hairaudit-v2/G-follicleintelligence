@@ -52,20 +52,36 @@ export function FinancialSurgeryEconomicsCard(props: {
   variant?: "light" | "dark";
   className?: string;
 }) {
-  const { summary, readiness, snapshotCount, canMutate = false, variant = "light", className } = props;
+  const {
+    summary,
+    readiness,
+    snapshotCount,
+    canMutate = false,
+    variant = "light",
+    className,
+  } = props;
   const currency = summary.currency;
   const muted = !summary.financialDataAvailable;
   const panelCls =
     variant === "dark"
       ? "rounded-lg border border-white/[0.08] bg-white/[0.02] p-3"
       : "rounded border border-white/[0.08] bg-white/[0.03] p-3";
-  const labelCls = variant === "dark" ? "text-[0.62rem] uppercase tracking-wide text-slate-500" : "text-[0.62rem] uppercase tracking-wide text-gray-500";
-  const valueCls = variant === "dark" ? "text-sm font-semibold text-slate-100" : "text-sm font-semibold text-slate-100";
+  const labelCls =
+    variant === "dark"
+      ? "text-[0.62rem] uppercase tracking-wide text-slate-500"
+      : "text-[0.62rem] uppercase tracking-wide text-gray-500";
+  const valueCls =
+    variant === "dark"
+      ? "text-sm font-semibold text-slate-100"
+      : "text-sm font-semibold text-slate-100";
   const metaCls = variant === "dark" ? "text-xs text-slate-400" : "text-xs text-slate-400";
 
-  const displayCost = summary.latest_snapshot?.total_cost_cents ?? summary.estimated_total_cost_cents;
-  const displayProfit = summary.latest_snapshot?.gross_profit_cents ?? summary.estimated_gross_profit_cents;
-  const displayMargin = summary.latest_snapshot?.gross_margin_percentage ?? summary.estimated_gross_margin_percentage;
+  const displayCost =
+    summary.latest_snapshot?.total_cost_cents ?? summary.estimated_total_cost_cents;
+  const displayProfit =
+    summary.latest_snapshot?.gross_profit_cents ?? summary.estimated_gross_profit_cents;
+  const displayMargin =
+    summary.latest_snapshot?.gross_margin_percentage ?? summary.estimated_gross_margin_percentage;
 
   const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -76,7 +92,9 @@ export function FinancialSurgeryEconomicsCard(props: {
     setFeedback(null);
     start(async () => {
       const fn =
-        action === "create" ? createSurgeryProfitabilitySnapshotAction : recalculateSurgeryProfitabilitySnapshotAction;
+        action === "create"
+          ? createSurgeryProfitabilitySnapshotAction
+          : recalculateSurgeryProfitabilitySnapshotAction;
       const res = await fn(props.tenantId, { case_id: props.caseId });
       if (!res.ok) {
         const detail = res.reasons?.length ? `${res.error} — ${res.reasons.join("; ")}` : res.error;
@@ -94,7 +112,9 @@ export function FinancialSurgeryEconomicsCard(props: {
     setHistoryOpen(true);
     setFeedback(null);
     start(async () => {
-      const res = await loadSurgeryProfitabilitySnapshotHistoryAction(props.tenantId, { case_id: props.caseId });
+      const res = await loadSurgeryProfitabilitySnapshotHistoryAction(props.tenantId, {
+        case_id: props.caseId,
+      });
       if (!res.ok) {
         setFeedback({ message: res.error, tone: "error" });
         return;
@@ -106,7 +126,13 @@ export function FinancialSurgeryEconomicsCard(props: {
   return (
     <div className={cn(panelCls, className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h4 className={variant === "dark" ? "text-sm font-semibold text-slate-50" : "text-sm font-semibold text-slate-100"}>
+        <h4
+          className={
+            variant === "dark"
+              ? "text-sm font-semibold text-slate-50"
+              : "text-sm font-semibold text-slate-100"
+          }
+        >
           FinancialOS · Surgery economics
         </h4>
         <span
@@ -133,7 +159,9 @@ export function FinancialSurgeryEconomicsCard(props: {
         <div
           className={cn(
             "mt-2 rounded border px-3 py-2 text-xs",
-            variant === "dark" ? "border-amber-500/30 bg-amber-500/10 text-amber-200" : "border-amber-400/20 bg-amber-400/10 text-amber-200"
+            variant === "dark"
+              ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+              : "border-amber-400/20 bg-amber-400/10 text-amber-200"
           )}
         >
           <p className="font-semibold">Needs configuration</p>
@@ -151,7 +179,11 @@ export function FinancialSurgeryEconomicsCard(props: {
             type="button"
             disabled={pending || !readiness.ready}
             onClick={() => runSnapshot("create")}
-            className={variant === "dark" ? financialOsClasses.secondaryButton : "rounded border border-slate-700 px-2 py-1 text-xs font-semibold text-slate-200 disabled:opacity-50"}
+            className={
+              variant === "dark"
+                ? financialOsClasses.secondaryButton
+                : "rounded border border-slate-700 px-2 py-1 text-xs font-semibold text-slate-200 disabled:opacity-50"
+            }
           >
             Create snapshot
           </button>
@@ -159,7 +191,11 @@ export function FinancialSurgeryEconomicsCard(props: {
             type="button"
             disabled={pending || !readiness.ready}
             onClick={() => runSnapshot("recalculate")}
-            className={variant === "dark" ? financialOsClasses.secondaryButton : "rounded border border-slate-700 px-2 py-1 text-xs font-semibold text-slate-200 disabled:opacity-50"}
+            className={
+              variant === "dark"
+                ? financialOsClasses.secondaryButton
+                : "rounded border border-slate-700 px-2 py-1 text-xs font-semibold text-slate-200 disabled:opacity-50"
+            }
           >
             Recalculate snapshot
           </button>
@@ -167,7 +203,11 @@ export function FinancialSurgeryEconomicsCard(props: {
             type="button"
             disabled={pending}
             onClick={openHistory}
-            className={variant === "dark" ? financialOsClasses.textButton : "text-xs font-medium text-cyan-700 hover:text-cyan-900"}
+            className={
+              variant === "dark"
+                ? financialOsClasses.textButton
+                : "text-xs font-medium text-cyan-700 hover:text-cyan-900"
+            }
           >
             View snapshot history ({snapshotCount})
           </button>
@@ -181,7 +221,10 @@ export function FinancialSurgeryEconomicsCard(props: {
       ) : null}
 
       {muted ? (
-        <p className={cn("mt-2", metaCls)}>Surgery economics unavailable — link procedure type and surgery invoices to enable estimates.</p>
+        <p className={cn("mt-2", metaCls)}>
+          Surgery economics unavailable — link procedure type and surgery invoices to enable
+          estimates.
+        </p>
       ) : (
         <>
           {summary.procedure_type ? (
@@ -203,20 +246,28 @@ export function FinancialSurgeryEconomicsCard(props: {
               <dd className={valueCls}>{formatMoney(summary.outstanding_cents, currency)}</dd>
             </div>
             <div>
-              <dt className={labelCls}>{summary.snapshot_status === "snapshot" ? "Recorded cost" : "Estimated cost"}</dt>
+              <dt className={labelCls}>
+                {summary.snapshot_status === "snapshot" ? "Recorded cost" : "Estimated cost"}
+              </dt>
               <dd className={valueCls}>{formatMoney(displayCost, currency)}</dd>
             </div>
             <div>
-              <dt className={labelCls}>{summary.snapshot_status === "snapshot" ? "Recorded profit" : "Estimated margin"}</dt>
+              <dt className={labelCls}>
+                {summary.snapshot_status === "snapshot" ? "Recorded profit" : "Estimated margin"}
+              </dt>
               <dd className={valueCls}>
                 {formatMoney(displayProfit, currency)}
-                <span className={cn("ml-1 font-normal", metaCls)}>({formatPct(displayMargin)})</span>
+                <span className={cn("ml-1 font-normal", metaCls)}>
+                  ({formatPct(displayMargin)})
+                </span>
               </dd>
             </div>
             {summary.latest_snapshot?.calculated_at ? (
               <div>
                 <dt className={labelCls}>Last snapshot</dt>
-                <dd className={metaCls}>{new Date(summary.latest_snapshot.calculated_at).toLocaleString()}</dd>
+                <dd className={metaCls}>
+                  {new Date(summary.latest_snapshot.calculated_at).toLocaleString()}
+                </dd>
               </div>
             ) : null}
           </dl>
@@ -224,22 +275,35 @@ export function FinancialSurgeryEconomicsCard(props: {
       )}
 
       {historyOpen ? (
-        <div className={cn("mt-3 rounded border p-3", variant === "dark" ? "border-white/10" : "border-white/[0.08]")}>
+        <div
+          className={cn(
+            "mt-3 rounded border p-3",
+            variant === "dark" ? "border-white/10" : "border-white/[0.08]"
+          )}
+        >
           <div className="flex items-center justify-between gap-2">
             <p className={labelCls}>Snapshot history (immutable versions)</p>
-            <button type="button" onClick={() => setHistoryOpen(false)} className={metaCls}>Close</button>
+            <button type="button" onClick={() => setHistoryOpen(false)} className={metaCls}>
+              Close
+            </button>
           </div>
           {history.length === 0 ? (
             <p className={cn("mt-2", metaCls)}>{pending ? "Loading…" : "No snapshots recorded."}</p>
           ) : (
             <ul className="mt-2 space-y-2 text-xs">
               {history.map((s, idx) => (
-                <li key={s.id ?? idx} className={cn("rounded px-2 py-1.5", variant === "dark" ? "bg-white/[0.03]" : "bg-[#0F1629]/80 backdrop-blur-md")}>
+                <li
+                  key={s.id ?? idx}
+                  className={cn(
+                    "rounded px-2 py-1.5",
+                    variant === "dark" ? "bg-white/[0.03]" : "bg-[#0F1629]/80 backdrop-blur-md"
+                  )}
+                >
                   <span className="font-medium">{new Date(s.calculated_at).toLocaleString()}</span>
                   <span className={metaCls}>
                     {" "}
-                    · profit {formatMoney(s.gross_profit_cents, currency)} ({formatPct(s.gross_margin_percentage)})
-                    · grafts {s.graft_count ?? "—"}
+                    · profit {formatMoney(s.gross_profit_cents, currency)} (
+                    {formatPct(s.gross_margin_percentage)}) · grafts {s.graft_count ?? "—"}
                   </span>
                 </li>
               ))}

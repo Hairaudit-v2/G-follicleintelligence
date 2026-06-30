@@ -1,6 +1,9 @@
 import "server-only";
 
-import { loadCrmShellScopePickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import {
+  loadCrmShellScopePickerOptions,
+  loadCrmShellUserPickerOptions,
+} from "@/src/lib/crm/crmShellLoaders";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
   addUtcDays,
@@ -9,10 +12,20 @@ import {
   utcDayBoundsMs,
   type ParsedOperatorBookingQuery,
 } from "./operatorBookingQuery";
-import { computeOperatorBookingSummaryCounts, type OperatorBookingSummaryCounts } from "./operatorBookingSummary";
-import { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
+import {
+  computeOperatorBookingSummaryCounts,
+  type OperatorBookingSummaryCounts,
+} from "./operatorBookingSummary";
+import {
+  DEFAULT_OPERATOR_BOOKINGS_LIMIT,
+  MAX_OPERATOR_BOOKINGS_LIMIT,
+} from "./operatorBookingConstants";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { calendarDateStringFromInstant, zonedMidnightUtcMs, zonedNextDayUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  calendarDateStringFromInstant,
+  zonedMidnightUtcMs,
+  zonedNextDayUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
@@ -64,10 +77,14 @@ export async function loadBookingsOperatorPageData(
   const query = parseOperatorBookingSearchParams(searchParams, now);
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
-  const dayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone) ?? utcDayBoundsMs(now).dayStartMs;
+  const dayStartMs =
+    zonedMidnightUtcMs(todayYmd, calendarTimezone) ?? utcDayBoundsMs(now).dayStartMs;
   const dayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone) ?? utcDayBoundsMs(now).dayEndMs;
 
-  const summaryStartIso = addUtcDays(startOfUtcDayFromDate(now), -OPERATOR_SUMMARY_DAYS_BACK).toISOString();
+  const summaryStartIso = addUtcDays(
+    startOfUtcDayFromDate(now),
+    -OPERATOR_SUMMARY_DAYS_BACK
+  ).toISOString();
   const tomorrowStartIso = addUtcDays(startOfUtcDayFromDate(now), 1).toISOString();
   const summaryEndIso = maxIso(query.endIso, tomorrowStartIso);
 
@@ -82,23 +99,24 @@ export async function loadBookingsOperatorPageData(
     includeCancelled: query.includeCancelled,
   });
 
-  const [summaryRows, assignees, clinicalStaffOptions, scope, reminderMap, services] = await Promise.all([
-    loadBookingsForOperatorView({
-      tenantId: tid,
-      rangeStartIso: summaryStartIso,
-      rangeEndIso: summaryEndIso,
-      includeCancelled: true,
-      limit: MAX_OPERATOR_BOOKINGS_LIMIT,
-    }),
-    loadCrmShellUserPickerOptions(tid),
-    loadClinicalStaffPickerOptions(tid),
-    loadCrmShellScopePickerOptions(tid),
-    loadReminderJobsForBookings(
-      tid,
-      bookings.map((b) => b.id)
-    ),
-    loadFiServicesForTenant(tid),
-  ]);
+  const [summaryRows, assignees, clinicalStaffOptions, scope, reminderMap, services] =
+    await Promise.all([
+      loadBookingsForOperatorView({
+        tenantId: tid,
+        rangeStartIso: summaryStartIso,
+        rangeEndIso: summaryEndIso,
+        includeCancelled: true,
+        limit: MAX_OPERATOR_BOOKINGS_LIMIT,
+      }),
+      loadCrmShellUserPickerOptions(tid),
+      loadClinicalStaffPickerOptions(tid),
+      loadCrmShellScopePickerOptions(tid),
+      loadReminderJobsForBookings(
+        tid,
+        bookings.map((b) => b.id)
+      ),
+      loadFiServicesForTenant(tid),
+    ]);
 
   const summaryCounts = computeOperatorBookingSummaryCounts(summaryRows, {
     nowMs: now.getTime(),

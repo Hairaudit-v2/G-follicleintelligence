@@ -50,7 +50,10 @@ test("pickSurgeryReadinessPrimaryColumn: missing case_id → on_hold_not_linked"
     surgeryPaymentRecord: null,
     todayYmd: TODAY_YMD,
   });
-  assert.equal(pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }), "on_hold_not_linked");
+  assert.equal(
+    pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }),
+    "on_hold_not_linked"
+  );
 });
 
 test("pickSurgeryReadinessPrimaryColumn: missing pathology before consent", () => {
@@ -68,7 +71,10 @@ test("pickSurgeryReadinessPrimaryColumn: missing pathology before consent", () =
     todayYmd: TODAY_YMD,
   });
   const issues = escalateSurgeryReadinessIssues(raw, 10, "confirmed");
-  assert.equal(pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "needs_attention" }), "missing_pathology");
+  assert.equal(
+    pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "needs_attention" }),
+    "missing_pathology"
+  );
 });
 
 test("pickSurgeryReadinessPrimaryColumn: missing consent when pathology satisfied", () => {
@@ -86,7 +92,10 @@ test("pickSurgeryReadinessPrimaryColumn: missing consent when pathology satisfie
     todayYmd: TODAY_YMD,
   });
   const issues = escalateSurgeryReadinessIssues(raw, 10, "confirmed");
-  assert.equal(pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }), "missing_consent");
+  assert.equal(
+    pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }),
+    "missing_consent"
+  );
 });
 
 test("calendarDaysUntilSurgery: whole-day delta in tenant zone", () => {
@@ -98,7 +107,12 @@ test("calendarDaysUntilSurgery: whole-day delta in tenant zone", () => {
 test("hasConsultationConsentSignal: accepted / converted statuses", () => {
   assert.equal(hasConsultationConsentSignal([{ status: "draft", quote_data: {} }]), false);
   assert.equal(hasConsultationConsentSignal([{ status: "accepted", quote_data: {} }]), true);
-  assert.equal(hasConsultationConsentSignal([{ status: "completed", quote_data: { quote_status: "Accepted by patient" } }]), true);
+  assert.equal(
+    hasConsultationConsentSignal([
+      { status: "completed", quote_data: { quote_status: "Accepted by patient" } },
+    ]),
+    true
+  );
 });
 
 test("V1.1: abnormal pathology is always high_risk severity", () => {
@@ -156,8 +170,18 @@ test("V1.1: missing consent proxy within 7 days escalates to high_risk", () => {
     surgeryPaymentRecord: surgeryDepositSatisfied,
     todayYmd: TODAY_YMD,
   });
-  assert.equal(escalateSurgeryReadinessIssues(raw, 8, "confirmed").find((i) => i.kind === "missing_consent_proxy")?.severity, "warning");
-  assert.equal(escalateSurgeryReadinessIssues(raw, 7, "confirmed").find((i) => i.kind === "missing_consent_proxy")?.severity, "high_risk");
+  assert.equal(
+    escalateSurgeryReadinessIssues(raw, 8, "confirmed").find(
+      (i) => i.kind === "missing_consent_proxy"
+    )?.severity,
+    "warning"
+  );
+  assert.equal(
+    escalateSurgeryReadinessIssues(raw, 7, "confirmed").find(
+      (i) => i.kind === "missing_consent_proxy"
+    )?.severity,
+    "high_risk"
+  );
 });
 
 test("V1.1: unconfirmed surgery (scheduled) within 3 days escalates booking_unconfirmed to high_risk", () => {
@@ -174,8 +198,18 @@ test("V1.1: unconfirmed surgery (scheduled) within 3 days escalates booking_unco
     surgeryPaymentRecord: surgeryDepositSatisfied,
     todayYmd: TODAY_YMD,
   });
-  assert.equal(escalateSurgeryReadinessIssues(raw, 4, "scheduled").find((i) => i.kind === "booking_unconfirmed")?.severity, "warning");
-  assert.equal(escalateSurgeryReadinessIssues(raw, 3, "scheduled").find((i) => i.kind === "booking_unconfirmed")?.severity, "high_risk");
+  assert.equal(
+    escalateSurgeryReadinessIssues(raw, 4, "scheduled").find(
+      (i) => i.kind === "booking_unconfirmed"
+    )?.severity,
+    "warning"
+  );
+  assert.equal(
+    escalateSurgeryReadinessIssues(raw, 3, "scheduled").find(
+      (i) => i.kind === "booking_unconfirmed"
+    )?.severity,
+    "high_risk"
+  );
 });
 
 test("V1.1: missing case link matches Not Linked manager filter", () => {
@@ -240,7 +274,10 @@ test("pending tracked surgery deposit adds surgery_deposit_pending (not no_payme
     todayYmd: TODAY_YMD,
   });
   assert.ok(raw.some((i) => i.kind === "surgery_deposit_pending"));
-  assert.equal(raw.some((i) => i.kind === "no_payment_tracking"), false);
+  assert.equal(
+    raw.some((i) => i.kind === "no_payment_tracking"),
+    false
+  );
 });
 
 test("paid tracked surgery deposit clears deposit collection issues", () => {
@@ -262,8 +299,14 @@ test("paid tracked surgery deposit clears deposit collection issues", () => {
     },
     todayYmd: TODAY_YMD,
   });
-  assert.equal(raw.some((i) => i.kind === "surgery_deposit_pending"), false);
-  assert.equal(raw.some((i) => i.kind === "no_payment_tracking"), false);
+  assert.equal(
+    raw.some((i) => i.kind === "surgery_deposit_pending"),
+    false
+  );
+  assert.equal(
+    raw.some((i) => i.kind === "no_payment_tracking"),
+    false
+  );
 });
 
 test("surgery_deposit_pending escalates to high_risk within 7 days of surgery", () => {

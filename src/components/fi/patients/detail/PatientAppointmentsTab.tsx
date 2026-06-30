@@ -58,7 +58,9 @@ export function PatientAppointmentsTab({
                   const href = `/fi-admin/${tenantId}/appointments/${b.id}`;
                   return (
                     <tr key={b.id} className="hover:bg-white/[0.03]">
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-400">{fmt(b.start_at)}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-slate-400">
+                        {fmt(b.start_at)}
+                      </td>
                       <td className="px-3 py-2">
                         {slide ? (
                           <button
@@ -74,7 +76,9 @@ export function PatientAppointmentsTab({
                           </Link>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-slate-300">{bookingTypeLabel(b.booking_type)}</td>
+                      <td className="px-3 py-2 text-slate-300">
+                        {bookingTypeLabel(b.booking_type)}
+                      </td>
                       <td className="px-3 py-2 text-slate-300">{b.booking_status}</td>
                     </tr>
                   );
@@ -86,7 +90,10 @@ export function PatientAppointmentsTab({
       </section>
 
       <p className="text-xs text-gray-500">
-        <Link href={`/fi-admin/${tenantId}/bookings/new?patientId=${encodeURIComponent(patientId)}`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/bookings/new?patientId=${encodeURIComponent(patientId)}`}
+          className="text-blue-300 hover:underline"
+        >
           Book a new appointment
         </Link>
         {" · "}

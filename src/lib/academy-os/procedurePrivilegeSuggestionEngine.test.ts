@@ -8,7 +8,9 @@ import {
 } from "@/src/lib/academy-os/procedurePrivilegeSuggestionEngine";
 import type { FiStaffProcedurePrivilegeRow } from "@/src/lib/academy-os/procedurePrivilegeTypes";
 
-function projection(overrides: Partial<FiStaffCompetencyProjectionRow>): FiStaffCompetencyProjectionRow {
+function projection(
+  overrides: Partial<FiStaffCompetencyProjectionRow>
+): FiStaffCompetencyProjectionRow {
   return {
     id: overrides.id ?? "proj-1",
     tenantId: overrides.tenantId ?? "tenant-1",
@@ -48,10 +50,10 @@ test("suggestProcedurePrivilegesFromProjection maps theatre assistant to multipl
   );
 
   assert.equal(result.suggestedPrivileges.length, 2);
-  assert.deepEqual(
-    result.suggestedPrivileges.map((s) => s.procedureKey).sort(),
-    ["graft_sorting", "theatre_setup"]
-  );
+  assert.deepEqual(result.suggestedPrivileges.map((s) => s.procedureKey).sort(), [
+    "graft_sorting",
+    "theatre_setup",
+  ]);
 });
 
 test("suggestProcedurePrivilegesFromProjection skips expired competency", () => {
@@ -64,7 +66,9 @@ test("suggestProcedurePrivilegesFromProjection skips expired competency", () => 
 
 test("filterNovelPrivilegeSuggestions removes already granted privileges", () => {
   const suggestions = [
-    suggestProcedurePrivilegesFromProjection(projection({ competencyKey: "fue_extraction_level_1" })),
+    suggestProcedurePrivilegesFromProjection(
+      projection({ competencyKey: "fue_extraction_level_1" })
+    ),
   ];
   const existing: FiStaffProcedurePrivilegeRow[] = [
     {

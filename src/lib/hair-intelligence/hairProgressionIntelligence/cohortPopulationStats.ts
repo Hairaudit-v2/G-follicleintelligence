@@ -19,8 +19,12 @@ function quantileSorted(sorted: number[], q: number): number | null {
 }
 
 /** Summarises a list of observed progression velocities (grades per year). */
-export function summariseVelocityDistribution(gradesPerYear: number[]): VelocityDistributionSummary {
-  const arr = gradesPerYear.filter((x) => typeof x === "number" && Number.isFinite(x)).sort((a, b) => a - b);
+export function summariseVelocityDistribution(
+  gradesPerYear: number[]
+): VelocityDistributionSummary {
+  const arr = gradesPerYear
+    .filter((x) => typeof x === "number" && Number.isFinite(x))
+    .sort((a, b) => a - b);
   if (arr.length === 0) return { n: 0, mean: null, p25: null, p75: null };
   const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
   return {

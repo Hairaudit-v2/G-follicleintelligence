@@ -61,7 +61,8 @@ export const FI_CALENDAR_EVENTS_OVERLAP_SELECT =
 /** Hard cap for CalendarOS overlap reads — month grid should stay well under this after range scoping. */
 export const CALENDAR_OS_EVENTS_OVERLAP_CAP = 1000;
 
-const TOKEN_KEY_PATTERN = /token|secret|credential|password|authorization|refresh_token|access_token/i;
+const TOKEN_KEY_PATTERN =
+  /token|secret|credential|password|authorization|refresh_token|access_token/i;
 const RAW_GOOGLE_PAYLOAD_KEYS = new Set([
   "raw_google_event",
   "google_event",
@@ -87,12 +88,16 @@ export function isCalendarOsEventRow(row: Pick<FiBookingRow, "metadata">): boole
 export function resolveCalendarOsProviderKind(
   metadata: Record<string, unknown> | null | undefined
 ): CalendarOsProviderKind {
-  const source = String(metadata?.source ?? "").trim().toLowerCase();
+  const source = String(metadata?.source ?? "")
+    .trim()
+    .toLowerCase();
   if (source === "fi_calendar_create") return "fi";
   return "google";
 }
 
-export function calendarOsSourceLabelForProvider(provider: CalendarOsProviderKind): CalendarOsSourceLabel {
+export function calendarOsSourceLabelForProvider(
+  provider: CalendarOsProviderKind
+): CalendarOsSourceLabel {
   return provider === "fi" ? "FI OS" : "Google Calendar";
 }
 
@@ -153,7 +158,8 @@ export function calendarOsClientFieldsFromEvent(
     googleMeetUrl:
       ("google_meet_url" in event ? event.google_meet_url : event.googleMeetUrl)?.trim() || null,
     externalEventId:
-      ("external_event_id" in event ? event.external_event_id : event.externalEventId)?.trim() || null,
+      ("external_event_id" in event ? event.external_event_id : event.externalEventId)?.trim() ||
+      null,
     eventType,
     calendarOsStatus: statusRaw || "scheduled",
   };
@@ -271,7 +277,9 @@ export function calendarOsBookingRowExposesSecrets(row: FiBookingRow): boolean {
 }
 
 /** Minimal booking stubs so display-context loaders can resolve patient/lead labels without full mapping. */
-export function calendarOsOverlapRowsForDisplayContext(rows: FiCalendarEventOverlapRow[]): FiBookingRow[] {
+export function calendarOsOverlapRowsForDisplayContext(
+  rows: FiCalendarEventOverlapRow[]
+): FiBookingRow[] {
   return rows.map((row) => ({
     id: row.id,
     tenant_id: row.tenant_id,

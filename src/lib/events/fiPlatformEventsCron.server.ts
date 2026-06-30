@@ -23,7 +23,9 @@ export type PlatformEventsProcessCronOptions = {
   processDeliveries?: typeof processFiEventDeliveries;
 };
 
-function resolveGetEnv(opts?: PlatformEventsProcessCronOptions): (key: string) => string | undefined {
+function resolveGetEnv(
+  opts?: PlatformEventsProcessCronOptions
+): (key: string) => string | undefined {
   return opts?.getEnv ?? ((key) => process.env[key]);
 }
 

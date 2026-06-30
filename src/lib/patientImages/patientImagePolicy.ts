@@ -1,5 +1,11 @@
-import type { ImagingAnatomicalRegion, ImagingLibraryAxis } from "@/src/lib/imagingOs/imagingOsConstants";
-import { IMAGING_ANATOMICAL_REGIONS, IMAGING_LIBRARY_AXES } from "@/src/lib/imagingOs/imagingOsConstants";
+import type {
+  ImagingAnatomicalRegion,
+  ImagingLibraryAxis,
+} from "@/src/lib/imagingOs/imagingOsConstants";
+import {
+  IMAGING_ANATOMICAL_REGIONS,
+  IMAGING_LIBRARY_AXES,
+} from "@/src/lib/imagingOs/imagingOsConstants";
 import type { PatientImageCategory, PatientImageStatus } from "./patientImageTypes";
 
 export const PATIENT_IMAGES_BUCKET_DEFAULT = "patient-images";
@@ -17,7 +23,10 @@ export const PATIENT_IMAGE_CATEGORIES: readonly PatientImageCategory[] = [
   "other",
 ] as const;
 
-export const PATIENT_IMAGE_STATUSES: readonly PatientImageStatus[] = ["active", "archived"] as const;
+export const PATIENT_IMAGE_STATUSES: readonly PatientImageStatus[] = [
+  "active",
+  "archived",
+] as const;
 
 export function isImagingLibraryAxis(value: unknown): value is ImagingLibraryAxis {
   return typeof value === "string" && (IMAGING_LIBRARY_AXES as readonly string[]).includes(value);
@@ -29,7 +38,9 @@ export function normalizeImagingLibraryAxis(raw: unknown): ImagingLibraryAxis {
 }
 
 export function isImagingAnatomicalRegion(value: unknown): value is ImagingAnatomicalRegion {
-  return typeof value === "string" && (IMAGING_ANATOMICAL_REGIONS as readonly string[]).includes(value);
+  return (
+    typeof value === "string" && (IMAGING_ANATOMICAL_REGIONS as readonly string[]).includes(value)
+  );
 }
 
 export function normalizeImagingAnatomicalRegion(raw: unknown): ImagingAnatomicalRegion | null {
@@ -82,7 +93,10 @@ export function isPatientImageMetadataObject(value: unknown): value is Record<st
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-export function assertPatientImageMetadataObject(name: string, value: unknown): Record<string, unknown> {
+export function assertPatientImageMetadataObject(
+  name: string,
+  value: unknown
+): Record<string, unknown> {
   if (value === undefined) return {};
   if (!isPatientImageMetadataObject(value)) {
     throw new Error(`${name} must be a JSON object.`);
@@ -126,7 +140,10 @@ const WEBP_EXT = /\.webp$/i;
  * Resolves a canonical allowed MIME type. Accepts HEIC uploads that arrive as
  * `application/octet-stream` when the filename extension matches.
  */
-export function resolvePatientImageContentType(file: { name: string; type: string }): string | null {
+export function resolvePatientImageContentType(file: {
+  name: string;
+  type: string;
+}): string | null {
   const t = (file.type ?? "").trim().toLowerCase();
   if (t && MIME_SET.has(t)) return t;
   const name = file.name ?? "";
@@ -137,7 +154,11 @@ export function resolvePatientImageContentType(file: { name: string; type: strin
   return null;
 }
 
-export function assertAllowedPatientImageContentType(file: { name: string; type: string; size: number }): string {
+export function assertAllowedPatientImageContentType(file: {
+  name: string;
+  type: string;
+  size: number;
+}): string {
   assertFileSizeWithinPolicy(file.size);
   const ct = resolvePatientImageContentType(file);
   if (!ct) {

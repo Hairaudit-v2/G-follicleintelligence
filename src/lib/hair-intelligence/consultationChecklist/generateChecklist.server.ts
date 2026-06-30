@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { loadActiveTherapyPlanSummary, loadPatientTherapyEventsForPatient } from "@/src/lib/medicationOs/medicationOsLoaders.server";
+import {
+  loadActiveTherapyPlanSummary,
+  loadPatientTherapyEventsForPatient,
+} from "@/src/lib/medicationOs/medicationOsLoaders.server";
 import type { PatientTherapyEventRow } from "@/src/lib/medicationOs/medicationOsTypes";
 import { loadPatientTwinHairProgressionSection } from "@/src/lib/patientTwin/patientTwinHairProgression.server";
 import { consultationChecklistFallbackResult } from "./generateChecklistFallback";
@@ -54,7 +57,10 @@ function buildTherapySignals(
     const stabMods = stabilisationModalitiesFromEvent(e);
     if (
       stabMods.length > 0 &&
-      (e.event_type === "therapy_stopped" || e.event_type === "plan_cancelled" || e.event_type === "therapy_on_hold" || e.event_type === "adverse_event")
+      (e.event_type === "therapy_stopped" ||
+        e.event_type === "plan_cancelled" ||
+        e.event_type === "therapy_on_hold" ||
+        e.event_type === "adverse_event")
     ) {
       stabilisationStopOrHold += 1;
     }
@@ -63,7 +69,18 @@ function buildTherapySignals(
   let activePlanTracked = false;
   for (const c of activeCanonicalCodes) {
     const hits = modalityHits(c, c);
-    if (hits.some((h) => ["finasteride", "dutasteride", "oral_minoxidil", "topical_minoxidil", "prp", "exosomes"].includes(h))) {
+    if (
+      hits.some((h) =>
+        [
+          "finasteride",
+          "dutasteride",
+          "oral_minoxidil",
+          "topical_minoxidil",
+          "prp",
+          "exosomes",
+        ].includes(h)
+      )
+    ) {
       activePlanTracked = true;
       break;
     }
@@ -252,28 +269,30 @@ export async function generateConsultationChecklistAndPersist(
       generator_version: `${HIE_CONSULTATION_CHECKLIST_GENERATOR_VERSION};fallback=no_patient_context`,
     };
     const persisted = await insertHairIntelligenceConsultationChecklistRow(row, supabase);
-    return { result: fb, generatorVersion: row.generator_version ?? "", usedOpenAi: false, persisted };
+    return {
+      result: fb,
+      generatorVersion: row.generator_version ?? "",
+      usedOpenAi: false,
+      persisted,
+    };
   }
 
-  const [
-    hairLoss,
-    donor,
-    recipient,
-    progression,
-    therapyEvents,
-    activeSummary,
-    pathologySignals,
-  ] = await Promise.all([
-    latestHairLossClassificationBundle(supabase, tenantId, patientId),
-    latestDonorAssessmentBundle(supabase, tenantId, patientId),
-    latestRecipientReviewBundle(supabase, tenantId, patientId),
-    loadPatientTwinHairProgressionSection(tenantId, patientId, {}, supabase).catch(() => null),
-    loadPatientTherapyEventsForPatient(supabase, tenantId, patientId, { limit: 200 }).catch(() => [] as PatientTherapyEventRow[]),
-    loadActiveTherapyPlanSummary(supabase, tenantId, patientId).catch(() => null),
-    pathologyWorkflowSignals(supabase, tenantId, patientId),
-  ]);
+  const [hairLoss, donor, recipient, progression, therapyEvents, activeSummary, pathologySignals] =
+    await Promise.all([
+      latestHairLossClassificationBundle(supabase, tenantId, patientId),
+      latestDonorAssessmentBundle(supabase, tenantId, patientId),
+      latestRecipientReviewBundle(supabase, tenantId, patientId),
+      loadPatientTwinHairProgressionSection(tenantId, patientId, {}, supabase).catch(() => null),
+      loadPatientTherapyEventsForPatient(supabase, tenantId, patientId, { limit: 200 }).catch(
+        () => [] as PatientTherapyEventRow[]
+      ),
+      loadActiveTherapyPlanSummary(supabase, tenantId, patientId).catch(() => null),
+      pathologyWorkflowSignals(supabase, tenantId, patientId),
+    ]);
 
-  const activeCodes = (activeSummary?.plans ?? []).flatMap((p) => p.items.map((i) => i.canonical_code));
+  const activeCodes = (activeSummary?.plans ?? []).flatMap((p) =>
+    p.items.map((i) => i.canonical_code)
+  );
   const therapy_signals = buildTherapySignals(therapyEvents, activeCodes);
 
   const progressionDto = progression
@@ -281,9 +300,11 @@ export async function generateConsultationChecklistAndPersist(
         stability_label: progression.stability.label,
         stability_rationale: progression.stability.rationale,
         progression_velocity_grades_per_year: progression.progression_velocity.grades_per_year,
-        progression_velocity_weighted_grades_per_year: progression.progression_velocity.confidence_weighted_grades_per_year,
+        progression_velocity_weighted_grades_per_year:
+          progression.progression_velocity.confidence_weighted_grades_per_year,
         rapid_progression_signal: progression.stability.label === "rapid_progression",
-        diffuse_unstable_progression_signal: progression.stability.label === "diffuse_unstable_progression",
+        diffuse_unstable_progression_signal:
+          progression.stability.label === "diffuse_unstable_progression",
         analysis_basis: progression.analysis_basis,
       }
     : null;
@@ -291,7 +312,9 @@ export async function generateConsultationChecklistAndPersist(
   const context = {
     hair_loss_classification: hairLoss.summary,
     donor_assessment: donor.summary ? { donor_assessment_id: donor.id, ...donor.summary } : null,
-    recipient_candidacy_review: recipient.summary ? { recipient_review_id: recipient.id, ...recipient.summary } : null,
+    recipient_candidacy_review: recipient.summary
+      ? { recipient_review_id: recipient.id, ...recipient.summary }
+      : null,
     hair_progression: progressionDto,
     therapy_signals,
     pathology_workflow_presence: pathologySignals,

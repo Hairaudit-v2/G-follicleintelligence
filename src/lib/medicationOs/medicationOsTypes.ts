@@ -10,7 +10,14 @@ export type TherapyTrack = (typeof THERAPY_TRACKS)[number];
 export const PLAN_TYPES = ["maintenance", "peri_procedural", "post_operative", "mixed"] as const;
 export type PlanType = (typeof PLAN_TYPES)[number];
 
-export const PLAN_STATUSES = ["draft", "active", "paused", "completed", "cancelled", "superseded"] as const;
+export const PLAN_STATUSES = [
+  "draft",
+  "active",
+  "paused",
+  "completed",
+  "cancelled",
+  "superseded",
+] as const;
 export type PlanStatus = (typeof PLAN_STATUSES)[number];
 
 export const PLAN_SOURCES = [

@@ -44,7 +44,11 @@ export async function loadStaffPinStatusAction(
   try {
     const parsed = staffIdBodySchema.parse(body ?? {});
     await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const metadata = await loadStaffPinMetadataForStaff(tenantId.trim(), staffId.trim());
     return { ok: true, metadata };
   } catch (e) {
@@ -60,7 +64,11 @@ export async function setStaffPinAction(
   try {
     const parsed = pinBodySchema.parse(body);
     await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const actor = await getFiTenantMemberSessionIfAllowed(tenantId.trim());
     assertStaffPinFormat(parsed.newPin);
     if (!staffPinsMatch(parsed.newPin, parsed.confirmPin)) {
@@ -90,7 +98,11 @@ export async function resetStaffPinAction(
   try {
     const parsed = pinBodySchema.parse(body);
     await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const actor = await getFiTenantMemberSessionIfAllowed(tenantId.trim());
     assertStaffPinFormat(parsed.newPin);
     if (!staffPinsMatch(parsed.newPin, parsed.confirmPin)) {
@@ -120,7 +132,11 @@ export async function disableStaffPinAction(
   try {
     const parsed = staffIdBodySchema.parse(body ?? {});
     await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const actor = await getFiTenantMemberSessionIfAllowed(tenantId.trim());
 
     await disableStaffPinForTenant({
@@ -141,7 +157,8 @@ export async function staffPinLogoutAction(
 ): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
   try {
     const member = await getFiTenantMemberSessionIfAllowed(tenantId);
-    const { clearStaffPinClinicSessionCookie } = await import("@/src/lib/staffPin/staffPinSession.server");
+    const { clearStaffPinClinicSessionCookie } =
+      await import("@/src/lib/staffPin/staffPinSession.server");
     await clearStaffPinClinicSessionCookie();
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}`);

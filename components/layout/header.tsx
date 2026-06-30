@@ -44,7 +44,10 @@ export function Header() {
       className="sticky top-0 z-50 border-b border-border/60 bg-background/88 backdrop-blur-xl"
     >
       <div className="mx-auto flex min-h-20 max-w-6xl items-center justify-between gap-4 px-4 py-6 sm:gap-5 sm:px-6">
-        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-4 font-semibold tracking-tight">
+        <Link
+          href="/"
+          className="flex min-w-0 shrink-0 items-center gap-4 font-semibold tracking-tight"
+        >
           <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
             <Image
               src={PUBLIC_IMAGES.favicon32}
@@ -56,7 +59,9 @@ export function Header() {
             />
           </div>
           <div className="min-w-0 leading-none">
-            <span className="block text-sm text-foreground md:text-base">Follicle Intelligence</span>
+            <span className="block text-sm text-foreground md:text-base">
+              Follicle Intelligence
+            </span>
             <span className="mt-1 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground md:text-[11px]">
               Hair restoration operating system
             </span>
@@ -88,7 +93,12 @@ export function Header() {
                     {HEADER_PRODUCTS_LINKS.map((item) =>
                       item.external ? (
                         <DropdownMenuItem key={item.href} asChild>
-                          <a href={item.href} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cursor-pointer"
+                          >
                             {item.label}
                           </a>
                         </DropdownMenuItem>
@@ -109,7 +119,9 @@ export function Header() {
                     href={item.href}
                     className={cn(
                       navLinkClass,
-                      navItemIsActive(pathname, item.href) ? "text-foreground" : "text-muted-foreground"
+                      navItemIsActive(pathname, item.href)
+                        ? "text-foreground"
+                        : "text-muted-foreground"
                     )}
                   >
                     {item.label}
@@ -130,16 +142,31 @@ export function Header() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="shrink-0 rounded-xl border border-border/70" aria-label="Open menu">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 rounded-xl border border-border/70"
+                  aria-label="Open menu"
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[min(100vw-2rem,20rem)] max-h-[min(70vh,28rem)] overflow-y-auto">
-                <DropdownMenuLabel className="text-[10px] tracking-[0.2em]">Products</DropdownMenuLabel>
+              <DropdownMenuContent
+                align="end"
+                className="w-[min(100vw-2rem,20rem)] max-h-[min(70vh,28rem)] overflow-y-auto"
+              >
+                <DropdownMenuLabel className="text-[10px] tracking-[0.2em]">
+                  Products
+                </DropdownMenuLabel>
                 {HEADER_PRODUCTS_LINKS.map((item) =>
                   item.external ? (
                     <DropdownMenuItem key={`m:${item.href}`} asChild>
-                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer"
+                      >
                         {item.label}
                       </a>
                     </DropdownMenuItem>

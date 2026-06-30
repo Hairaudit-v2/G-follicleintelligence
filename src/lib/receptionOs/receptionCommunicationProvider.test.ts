@@ -53,7 +53,7 @@ describe("receptionCommunicationProvider", () => {
         toAddress: "a@b.com",
         subject: "Hi",
         body: "   ",
-      }),
+      })
     );
   });
 });

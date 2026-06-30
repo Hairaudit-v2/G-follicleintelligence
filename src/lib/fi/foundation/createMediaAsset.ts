@@ -1,11 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { shallowMergeMetadata } from "./internal";
-import type {
-  CreateMediaAssetInput,
-  CreateMediaAssetResult,
-  FoundationSupabase,
-} from "./types";
+import type { CreateMediaAssetInput, CreateMediaAssetResult, FoundationSupabase } from "./types";
 
 function fileNameFromPath(storagePath: string, fileName?: string | null): string {
   if (fileName?.trim()) return fileName.trim();
@@ -71,7 +67,10 @@ export async function createMediaAsset(
       filename: fileNameFromPath(storagePath, input.file_name),
       storage_path: storagePath,
       mime_type: input.mime_type?.trim() || null,
-      size_bytes: typeof input.size_bytes === "number" && Number.isFinite(input.size_bytes) ? input.size_bytes : null,
+      size_bytes:
+        typeof input.size_bytes === "number" && Number.isFinite(input.size_bytes)
+          ? input.size_bytes
+          : null,
       source_system: sourceSystem,
       source_asset_id: sourceAssetId,
       metadata,

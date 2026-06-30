@@ -1,6 +1,9 @@
 import type { ConsultationFormOption, ConsultationFormOptionSetId } from "./consultationFormTypes";
 
-export const CONSULTATION_FORM_OPTION_SETS: Record<ConsultationFormOptionSetId, ConsultationFormOption[]> = {
+export const CONSULTATION_FORM_OPTION_SETS: Record<
+  ConsultationFormOptionSetId,
+  ConsultationFormOption[]
+> = {
   /** Clinical scalp zones — used by Visual Assessment `selected_zones` (string[]). */
   consultation_scalp_zones: [
     { value: "frontal", label: "Frontal / hairline" },
@@ -251,7 +254,10 @@ export const CONSULTATION_FORM_OPTION_SETS: Record<ConsultationFormOptionSetId, 
   female_primary_objective: [
     { value: "stabilise_shedding", label: "Stabilise shedding & reduce triggers" },
     { value: "improve_density_aesthetic", label: "Improve visible density / cosmetic balance" },
-    { value: "hormonal_evaluation_alignment", label: "Align care with hormonal & systemic context" },
+    {
+      value: "hormonal_evaluation_alignment",
+      label: "Align care with hormonal & systemic context",
+    },
     { value: "patient_twin_baseline", label: "Patient Twin / HLI baseline mapping" },
     { value: "pathology_first", label: "Investigations-first (labs / dermatology)" },
     { value: "medication_optimisation", label: "Medication review & tolerability-led plan" },

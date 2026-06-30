@@ -26,7 +26,9 @@ export async function loadFiServicesForTenant(tenantId: string): Promise<FiServi
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_services")
-    .select("id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at")
+    .select(
+      "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at"
+    )
     .eq("tenant_id", tid)
     .order("category", { ascending: true, nullsFirst: false })
     .order("name", { ascending: true });
@@ -63,7 +65,9 @@ export async function insertFiService(
       created_at: now,
       updated_at: now,
     })
-    .select("id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at")
+    .select(
+      "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at"
+    )
     .single();
   if (error) throw new Error(error.message);
   return mapRow(data as Record<string, unknown>);
@@ -100,7 +104,9 @@ export async function updateFiService(
     .update(body)
     .eq("tenant_id", tid)
     .eq("id", sid)
-    .select("id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at")
+    .select(
+      "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at"
+    )
     .single();
   if (error) throw new Error(error.message);
   return mapRow(data as Record<string, unknown>);

@@ -12,7 +12,9 @@ const STYLES: Record<PatientStatusValue, string> = {
 export function PatientStatusBadge({ status }: { status: PatientStatusValue }) {
   const cls = STYLES[status] ?? STYLES.active;
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${cls}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${cls}`}
+    >
       {patientStatusLabel(status)}
     </span>
   );

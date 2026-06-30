@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { loadBookingsForOperatorView, MAX_OPERATOR_BOOKINGS_LIMIT } from "@/src/lib/bookings/bookings";
+import {
+  loadBookingsForOperatorView,
+  MAX_OPERATOR_BOOKINGS_LIMIT,
+} from "@/src/lib/bookings/bookings";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { buildCaseWorklistRows } from "@/src/lib/cases/casesIndexBuild";
@@ -28,7 +31,10 @@ import {
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
-import { buildFinancialClearanceMapFromPipeline, type FinancialClearanceResult } from "@/src/lib/financialOs/financialClearance.server";
+import {
+  buildFinancialClearanceMapFromPipeline,
+  type FinancialClearanceResult,
+} from "@/src/lib/financialOs/financialClearance.server";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import {
   loadLatestPaymentRecordsByBookingIds,
@@ -101,7 +107,11 @@ async function loadPersonContactFlags(
   const ids = uniqueStrings(personIds);
   const out = new Map<string, { hasEmail: boolean; hasPhone: boolean }>();
   if (!ids.length) return out;
-  const { data, error } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid).in("id", ids);
+  const { data, error } = await supabase
+    .from("fi_persons")
+    .select("id, metadata")
+    .eq("tenant_id", tid)
+    .in("id", ids);
   if (error) throw new Error(error.message);
   for (const raw of data ?? []) {
     const r = raw as { id: string; metadata: unknown };
@@ -170,7 +180,10 @@ export type TomorrowBoardPayload = {
   actions: TomorrowActionItem[];
 };
 
-export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new Date()): Promise<TomorrowBoardPayload> {
+export async function loadTomorrowBoardPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<TomorrowBoardPayload> {
   const tid = tenantId.trim();
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const window = computeTomorrowOperationalWindow(now, calendarTimezone);
@@ -184,7 +197,9 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
   });
 
   const agendaBookings = rawBookings.filter((b) => isTomorrowAgendaBooking(b, window));
-  const surgeryBookings = agendaBookings.filter((b) => b.booking_type.trim().toLowerCase() === "surgery");
+  const surgeryBookings = agendaBookings.filter(
+    (b) => b.booking_type.trim().toLowerCase() === "surgery"
+  );
 
   const supabase = supabaseAdmin();
   const caseIds = uniqueStrings(surgeryBookings.map((b) => b.case_id));
@@ -203,35 +218,47 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
   const personIds = uniqueStrings(agendaBookings.map((b) => b.person_id));
   const roomIds = uniqueStrings(agendaBookings.map((b) => b.room_id));
 
-  const [bookingLabels, assigneeLabels, pathologySets, consultationsByCase, surgeryPayments, paymentByBookingId, reminderMap, roomNames, personContacts] =
-    await Promise.all([
-      loadPatientLabelsForBookings(supabase, tid, agendaBookings),
-      loadStaffAndUserLabels(supabase, tid, agendaBookings),
-      (async () => {
-        const patientIdsForPathology = new Set<string>();
-        for (const b of surgeryBookings) {
-          const wid = b.case_id?.trim() ? worklistById.get(b.case_id.trim()) : undefined;
-          const pid = b.patient_id?.trim() || (wid ? resolvePatientIdForCaseRow(wid) : null);
-          if (pid) patientIdsForPathology.add(pid);
-        }
-        return loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology));
-      })(),
-      loadConsultationsByCaseId(supabase, tid, caseIds),
-      loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
-      loadLatestPaymentRecordsByBookingIds(
-        tid,
-        agendaBookings.map((b) => b.id)
-      ),
-      loadReminderJobsForBookings(
-        tid,
-        agendaBookings.map((b) => b.id)
-      ),
-      loadRoomDisplayNamesById(supabase, tid, roomIds),
-      loadPersonContactFlags(supabase, tid, personIds),
-    ]);
+  const [
+    bookingLabels,
+    assigneeLabels,
+    pathologySets,
+    consultationsByCase,
+    surgeryPayments,
+    paymentByBookingId,
+    reminderMap,
+    roomNames,
+    personContacts,
+  ] = await Promise.all([
+    loadPatientLabelsForBookings(supabase, tid, agendaBookings),
+    loadStaffAndUserLabels(supabase, tid, agendaBookings),
+    (async () => {
+      const patientIdsForPathology = new Set<string>();
+      for (const b of surgeryBookings) {
+        const wid = b.case_id?.trim() ? worklistById.get(b.case_id.trim()) : undefined;
+        const pid = b.patient_id?.trim() || (wid ? resolvePatientIdForCaseRow(wid) : null);
+        if (pid) patientIdsForPathology.add(pid);
+      }
+      return loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology));
+    })(),
+    loadConsultationsByCaseId(supabase, tid, caseIds),
+    loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
+    loadLatestPaymentRecordsByBookingIds(
+      tid,
+      agendaBookings.map((b) => b.id)
+    ),
+    loadReminderJobsForBookings(
+      tid,
+      agendaBookings.map((b) => b.id)
+    ),
+    loadRoomDisplayNamesById(supabase, tid, roomIds),
+    loadPersonContactFlags(supabase, tid, personIds),
+  ]);
 
   function patientLabelForBooking(b: FiBookingRow, work: CaseWorklistRow | null): string {
-    const fromCase = work?.person_label?.trim() && work.person_label.trim() !== "—" ? work.person_label.trim() : null;
+    const fromCase =
+      work?.person_label?.trim() && work.person_label.trim() !== "—"
+        ? work.person_label.trim()
+        : null;
     return (
       fromCase ||
       (b.patient_id?.trim() ? bookingLabels.get(`patient:${b.patient_id.trim()}`) : null) ||
@@ -243,7 +270,7 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
 
   function bookingLabel(b: FiBookingRow): string {
     const caseId = b.case_id?.trim() || null;
-    const work = caseId ? worklistById.get(caseId) ?? null : null;
+    const work = caseId ? (worklistById.get(caseId) ?? null) : null;
     return patientLabelForBooking(b, work);
   }
 
@@ -258,7 +285,12 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     patientLabelForBooking,
   });
 
-  const summary = summarizeTomorrowBoard(agendaBookings, surgeryReadiness, window.todayYmd, surgeryPayments);
+  const summary = summarizeTomorrowBoard(
+    agendaBookings,
+    surgeryReadiness,
+    window.todayYmd,
+    surgeryPayments
+  );
 
   const checklist = buildTomorrowFrontDeskChecklist({
     agendaBookings,
@@ -303,16 +335,22 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     { todayYmd: window.todayYmd, calendarTimezone: window.calendarTimezone }
   );
 
-  const clinicalStaffingByBooking = await loadClinicalStaffingSummariesForBookings(tid, agendaBookings, {
-    syncExistingStaff: true,
-  });
+  const clinicalStaffingByBooking = await loadClinicalStaffingSummariesForBookings(
+    tid,
+    agendaBookings,
+    {
+      syncExistingStaff: true,
+    }
+  );
 
-  const surgeryReadinessWithFinancial: TomorrowSurgeryReadinessBoardRow[] = surgeryReadiness.map((row) => ({
-    ...row,
-    financialPipeline: financialByBooking.get(row.bookingId) ?? null,
-    financialClearance: financialClearanceByBooking.get(row.bookingId) ?? null,
-    clinicalStaffing: clinicalStaffingByBooking.get(row.bookingId) ?? null,
-  }));
+  const surgeryReadinessWithFinancial: TomorrowSurgeryReadinessBoardRow[] = surgeryReadiness.map(
+    (row) => ({
+      ...row,
+      financialPipeline: financialByBooking.get(row.bookingId) ?? null,
+      financialClearance: financialClearanceByBooking.get(row.bookingId) ?? null,
+      clinicalStaffing: clinicalStaffingByBooking.get(row.bookingId) ?? null,
+    })
+  );
 
   let assignedBookings = 0;
   let unassignedBookings = 0;
@@ -324,8 +362,10 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     if (hasStaff) {
       assignedBookings += 1;
       let assignee: string | null = null;
-      if (b.assigned_staff_id?.trim()) assignee = assigneeLabels.staffNames.get(b.assigned_staff_id.trim()) ?? null;
-      if (!assignee && b.assigned_user_id?.trim()) assignee = assigneeLabels.userEmails.get(b.assigned_user_id.trim()) ?? null;
+      if (b.assigned_staff_id?.trim())
+        assignee = assigneeLabels.staffNames.get(b.assigned_staff_id.trim()) ?? null;
+      if (!assignee && b.assigned_user_id?.trim())
+        assignee = assigneeLabels.userEmails.get(b.assigned_user_id.trim()) ?? null;
       const label = assignee ?? "Staff";
       assigneeTally.set(label, (assigneeTally.get(label) ?? 0) + 1);
     } else {
@@ -350,17 +390,21 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
 
   const scheduleRows: TomorrowScheduleRow[] = agendaBookings.map((b) => {
     let assignee: string | null = null;
-    if (b.assigned_staff_id?.trim()) assignee = assigneeLabels.staffNames.get(b.assigned_staff_id.trim()) ?? null;
-    if (!assignee && b.assigned_user_id?.trim()) assignee = assigneeLabels.userEmails.get(b.assigned_user_id.trim()) ?? null;
+    if (b.assigned_staff_id?.trim())
+      assignee = assigneeLabels.staffNames.get(b.assigned_staff_id.trim()) ?? null;
+    if (!assignee && b.assigned_user_id?.trim())
+      assignee = assigneeLabels.userEmails.get(b.assigned_user_id.trim()) ?? null;
 
     const pay = paymentByBookingId.get(b.id) ?? null;
     let paymentBadge: string | null = null;
     if (pay) {
-      paymentBadge = paymentRecordNeedsCollection(pay, window.todayYmd) ? "Payment due" : "Payment on file";
+      paymentBadge = paymentRecordNeedsCollection(pay, window.todayYmd)
+        ? "Payment due"
+        : "Payment on file";
     }
 
     const rid = b.room_id?.trim();
-    const roomLabel = rid ? roomNames.get(rid) ?? null : null;
+    const roomLabel = rid ? (roomNames.get(rid) ?? null) : null;
 
     const jobs = reminderMap.get(b.id);
 
@@ -380,14 +424,16 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
       paymentBadge,
       reminderAttention: reminderJobsNeedAttention(jobs),
       href: `${baseHref}/appointments/${encodeURIComponent(b.id)}`,
-      financialPipeline: isSurgery ? financialByBooking.get(b.id) ?? null : null,
-      financialClearance: isSurgery ? financialClearanceByBooking.get(b.id) ?? null : null,
+      financialPipeline: isSurgery ? (financialByBooking.get(b.id) ?? null) : null,
+      financialClearance: isSurgery ? (financialClearanceByBooking.get(b.id) ?? null) : null,
       caseId: b.case_id?.trim() || null,
       clinicalStaffing: clinicalStaffingByBooking.get(b.id) ?? null,
     };
   });
 
-  scheduleRows.sort((a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel));
+  scheduleRows.sort(
+    (a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel)
+  );
 
   const groupMap = new Map<string, TomorrowScheduleRow[]>();
   for (const row of scheduleRows) {

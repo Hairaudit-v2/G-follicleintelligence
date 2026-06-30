@@ -9,10 +9,7 @@ import type { ImagingOsVisualMeasurementResult } from "./measurement";
 import type { ImagingOsOutcomeMeasurementResult } from "./outcomes";
 import type { ImagingOsProtocolEvaluationResult } from "./protocol";
 import type { ImagingOsProgressionEvaluationResult } from "./progression";
-import type {
-  ImagingOsImageQualityEvaluationResult,
-  ImagingOsImageQualityStatus,
-} from "./quality";
+import type { ImagingOsImageQualityEvaluationResult, ImagingOsImageQualityStatus } from "./quality";
 import type { ImagingOsSurgicalReadinessResult } from "./surgical";
 
 // ---------------------------------------------------------------------------
@@ -274,8 +271,7 @@ function resolveOverallStatus(
 ): ImagingOsOverallStatus {
   const hasInvalidCritical = componentScores.some(
     (entry) =>
-      CRITICAL_COMPONENTS.has(entry.component) &&
-      (entry.status === "invalid" || entry.score === 0)
+      CRITICAL_COMPONENTS.has(entry.component) && (entry.status === "invalid" || entry.score === 0)
   );
 
   if (hasInvalidCritical) {
@@ -481,9 +477,7 @@ export function calculateOverallImagingScore(
 
   const sorted = [...componentScores].sort((a, b) => b.score - a.score);
   const strongestComponents = sorted.slice(0, 3);
-  const weakestComponents = [...componentScores]
-    .sort((a, b) => a.score - b.score)
-    .slice(0, 3);
+  const weakestComponents = [...componentScores].sort((a, b) => a.score - b.score).slice(0, 3);
 
   return {
     overall_score: overallScore,
@@ -497,9 +491,7 @@ export function calculateOverallImagingScore(
   };
 }
 
-function buildMissingRequirementMessages(
-  componentScores: ImagingOsComponentScore[]
-): string[] {
+function buildMissingRequirementMessages(componentScores: ImagingOsComponentScore[]): string[] {
   const requirements: string[] = [];
 
   for (const [component, threshold] of Object.entries(HAIRAUDIT_READINESS_THRESHOLDS)) {
@@ -597,9 +589,7 @@ export function buildDigitalTwinImagingSummary(
   const pendingMeasurements = (input.measurement_results ?? [])
     .filter(
       (result) =>
-        result.requires_human_review ||
-        result.value == null ||
-        result.validation_status !== "valid"
+        result.requires_human_review || result.value == null || result.validation_status !== "valid"
     )
     .map((result) => result.domain);
 
@@ -635,7 +625,9 @@ export function buildDigitalTwinImagingSummary(
   };
 }
 
-function inferActionForComponent(entry: ImagingOsComponentScore): ImagingOsRecommendedAction | null {
+function inferActionForComponent(
+  entry: ImagingOsComponentScore
+): ImagingOsRecommendedAction | null {
   const priority: ImagingOsRecommendedActionPriority =
     entry.score < 40 ? "high" : entry.score < 70 ? "medium" : "low";
 
@@ -649,12 +641,8 @@ function inferActionForComponent(entry: ImagingOsComponentScore): ImagingOsRecom
   }
 
   if (entry.component === "quality" && entry.score < 75) {
-    const donorBlocker = entry.blockers.find((blocker) =>
-      blocker.toLowerCase().includes("donor")
-    );
-    const scalpBlocker = entry.warnings.find((warning) =>
-      warning.toLowerCase().includes("scalp")
-    );
+    const donorBlocker = entry.blockers.find((blocker) => blocker.toLowerCase().includes("donor"));
+    const scalpBlocker = entry.warnings.find((warning) => warning.toLowerCase().includes("scalp"));
     return {
       priority,
       component: "quality",

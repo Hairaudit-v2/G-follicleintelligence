@@ -48,20 +48,21 @@ export default function VisionPage() {
         body={
           <div className="space-y-5">
             <p>
-              Hair restoration medicine has evolved into a global healthcare category serving millions of patients every
-              year.
+              Hair restoration medicine has evolved into a global healthcare category serving
+              millions of patients every year.
             </p>
             <p>Yet the infrastructure supporting the industry has not evolved with it.</p>
             <p>
-              There is no unified intelligence system connecting diagnostics, patient outcomes, clinical operations,
-              professional training, and accountability.
+              There is no unified intelligence system connecting diagnostics, patient outcomes,
+              clinical operations, professional training, and accountability.
             </p>
             <p className="font-medium text-foreground">
               We believe the future of this industry depends on building that infrastructure.
             </p>
             <p className="font-medium text-foreground">That is why Follicle Intelligence exists.</p>
             <p className="pt-1 text-muted-foreground">
-              Follicle Intelligence is building the connected intelligence infrastructure for hair restoration medicine.
+              Follicle Intelligence is building the connected intelligence infrastructure for hair
+              restoration medicine.
             </p>
           </div>
         }
@@ -69,13 +70,12 @@ export default function VisionPage() {
 
       <VisionShowcaseSection />
 
-      <Section
-        className="py-24 sm:py-28 md:py-32"
-        aria-labelledby="vision-ecosystem-heading"
-      >
+      <Section className="py-24 sm:py-28 md:py-32" aria-labelledby="vision-ecosystem-heading">
         <div className="mx-auto max-w-4xl text-center">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/90">Ecosystem</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/90">
+              Ecosystem
+            </p>
             <h2
               id="vision-ecosystem-heading"
               className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] md:leading-[1.1]"
@@ -134,7 +134,9 @@ export default function VisionPage() {
       >
         <div className="mx-auto max-w-3xl">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/72">Position</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/72">
+              Position
+            </p>
             <h2
               id="vision-not-software-heading"
               className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
@@ -142,22 +144,35 @@ export default function VisionPage() {
               We Are Not Building Software
             </h2>
             <div className="mt-8 space-y-6 text-base leading-relaxed text-muted-foreground sm:text-lg md:leading-relaxed">
-              <p>We are building the infrastructure layer for the future of hair restoration medicine.</p>
               <p>
-                A connected intelligence system designed to improve clinical decision making, patient outcomes, surgical
-                accountability, professional education, clinic operations, and long-term industry standards.
+                We are building the infrastructure layer for the future of hair restoration
+                medicine.
               </p>
-              <p className="font-medium text-foreground/95">The future will belong to connected healthcare systems.</p>
-              <p className="font-medium text-foreground/95">Hair restoration medicine deserves one of its own.</p>
+              <p>
+                A connected intelligence system designed to improve clinical decision making,
+                patient outcomes, surgical accountability, professional education, clinic
+                operations, and long-term industry standards.
+              </p>
+              <p className="font-medium text-foreground/95">
+                The future will belong to connected healthcare systems.
+              </p>
+              <p className="font-medium text-foreground/95">
+                Hair restoration medicine deserves one of its own.
+              </p>
             </div>
           </FadeIn>
         </div>
       </Section>
 
-      <Section className="py-24 sm:py-28 md:py-32" aria-labelledby="vision-future-connected-heading">
+      <Section
+        className="py-24 sm:py-28 md:py-32"
+        aria-labelledby="vision-future-connected-heading"
+      >
         <div className="mx-auto max-w-3xl">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/90">Direction</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/90">
+              Direction
+            </p>
             <h2
               id="vision-future-connected-heading"
               className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
@@ -165,7 +180,9 @@ export default function VisionPage() {
               The Future Is Connected Intelligence
             </h2>
             <div className="mt-10 space-y-5 text-base leading-relaxed text-muted-foreground sm:text-lg md:leading-relaxed">
-              <p className="font-medium text-foreground/90">Imagine a world where every patient journey contributes to improving the next.</p>
+              <p className="font-medium text-foreground/90">
+                Imagine a world where every patient journey contributes to improving the next.
+              </p>
               <ul className="space-y-4 border-l-2 border-primary/20 pl-6">
                 <li>Where diagnostics improve treatment decisions.</li>
                 <li>Where surgical performance becomes measurable.</li>
@@ -173,7 +190,9 @@ export default function VisionPage() {
                 <li>Where education is connected directly to real-world competency.</li>
                 <li>Where an entire medical industry learns from itself.</li>
               </ul>
-              <p className="pt-4 font-medium text-foreground">This is the future we are building.</p>
+              <p className="pt-4 font-medium text-foreground">
+                This is the future we are building.
+              </p>
             </div>
           </FadeIn>
         </div>

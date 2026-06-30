@@ -1,4 +1,7 @@
-import type { EditableClinicalDetailKey, EditableClinicalDetailsPayload } from "./clinicalDetailsPolicy";
+import type {
+  EditableClinicalDetailKey,
+  EditableClinicalDetailsPayload,
+} from "./clinicalDetailsPolicy";
 import { EDITABLE_CLINICAL_DETAIL_KEYS } from "./clinicalDetailsPolicy";
 
 function stableJsonStringify(obj: Record<string, unknown>): string {

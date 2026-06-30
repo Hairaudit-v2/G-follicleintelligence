@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { PathologyAiInterpretationRow } from "@/src/lib/pathology/pathologyAiInterpretationTypes";
-import type { PathologyRequestOptionRow, PathologyResultDetailBundle, PathologyResultItemRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyRequestOptionRow,
+  PathologyResultDetailBundle,
+  PathologyResultItemRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 
 type Flag = PathologyResultItemRow["flag"];
 
@@ -43,7 +47,11 @@ function ScorePill({ label, value }: { label: string; value: number | null }) {
   );
 }
 
-function ContributorList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["likely_contributors"] }) {
+function ContributorList({
+  items,
+}: {
+  items: PathologyAiInterpretationRow["interpretation_json"]["likely_contributors"];
+}) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
     <ul className="space-y-1 text-sm text-slate-200">
@@ -56,7 +64,11 @@ function ContributorList({ items }: { items: PathologyAiInterpretationRow["inter
   );
 }
 
-function MarkerList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["abnormal_markers"] }) {
+function MarkerList({
+  items,
+}: {
+  items: PathologyAiInterpretationRow["interpretation_json"]["abnormal_markers"];
+}) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
     <ul className="space-y-1 text-sm text-slate-200">
@@ -68,14 +80,20 @@ function MarkerList({ items }: { items: PathologyAiInterpretationRow["interpreta
           {item.reference_range ? ` (ref ${item.reference_range})` : ""}
           {item.flag ? ` · ${item.flag}` : ""}
           <span className="block text-xs text-slate-400">{item.hair_relevance}</span>
-          {item.suggested_next_step ? <span className="block text-xs text-gray-500">Next: {item.suggested_next_step}</span> : null}
+          {item.suggested_next_step ? (
+            <span className="block text-xs text-gray-500">Next: {item.suggested_next_step}</span>
+          ) : null}
         </li>
       ))}
     </ul>
   );
 }
 
-function ConsiderationList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["treatment_considerations"] }) {
+function ConsiderationList({
+  items,
+}: {
+  items: PathologyAiInterpretationRow["interpretation_json"]["treatment_considerations"];
+}) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
     <ul className="list-disc space-y-1 pl-4 text-sm text-slate-200">
@@ -89,7 +107,11 @@ function ConsiderationList({ items }: { items: PathologyAiInterpretationRow["int
   );
 }
 
-function RepeatTestingList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["repeat_testing_recommendations"] }) {
+function RepeatTestingList({
+  items,
+}: {
+  items: PathologyAiInterpretationRow["interpretation_json"]["repeat_testing_recommendations"];
+}) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
     <ul className="list-disc space-y-1 pl-4 text-sm text-slate-200">
@@ -97,7 +119,9 @@ function RepeatTestingList({ items }: { items: PathologyAiInterpretationRow["int
         <li key={`${item.marker_or_panel}-${idx}`}>
           <span className="font-medium">{item.marker_or_panel}</span>
           <span className="text-slate-400"> · {item.rationale}</span>
-          {item.suggested_timing ? <span className="text-gray-500"> · {item.suggested_timing}</span> : null}
+          {item.suggested_timing ? (
+            <span className="text-gray-500"> · {item.suggested_timing}</span>
+          ) : null}
         </li>
       ))}
     </ul>
@@ -120,13 +144,21 @@ export function BloodPathologyResultDetailClient({
   const router = useRouter();
   const [bundle, setBundle] = useState(initialBundle);
   const [rows, setRows] = useState<EditableRow[]>(() => rowsFromItems(initialBundle.items));
-  const [clinicalSummary, setClinicalSummary] = useState(initialBundle.result.clinical_summary ?? "");
+  const [clinicalSummary, setClinicalSummary] = useState(
+    initialBundle.result.clinical_summary ?? ""
+  );
   const [providerName, setProviderName] = useState(initialBundle.result.provider_name ?? "");
   const [resultDate, setResultDate] = useState(initialBundle.result.result_date);
-  const [pathologyRequestId, setPathologyRequestId] = useState(initialBundle.result.pathology_request_id ?? "");
-  const [aiInterpretation, setAiInterpretation] = useState<PathologyAiInterpretationRow | null>(initialAiInterpretation);
+  const [pathologyRequestId, setPathologyRequestId] = useState(
+    initialBundle.result.pathology_request_id ?? ""
+  );
+  const [aiInterpretation, setAiInterpretation] = useState<PathologyAiInterpretationRow | null>(
+    initialAiInterpretation
+  );
   const [doctorSummary, setDoctorSummary] = useState(initialAiInterpretation?.doctor_summary ?? "");
-  const [patientFriendlySummary, setPatientFriendlySummary] = useState(initialAiInterpretation?.patient_friendly_summary ?? "");
+  const [patientFriendlySummary, setPatientFriendlySummary] = useState(
+    initialAiInterpretation?.patient_friendly_summary ?? ""
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -232,7 +264,11 @@ export function BloodPathologyResultDetailClient({
           }),
         }
       );
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; pathology_result?: PathologyResultDetailBundle["result"] };
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        pathology_result?: PathologyResultDetailBundle["result"];
+      };
       if (!res.ok || json.ok !== true) {
         setError(typeof json?.error === "string" ? json.error : `Update failed (${res.status}).`);
         return;
@@ -261,7 +297,11 @@ export function BloodPathologyResultDetailClient({
           body: JSON.stringify({ action: "archive" }),
         }
       );
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; pathology_result?: PathologyResultDetailBundle["result"] };
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        pathology_result?: PathologyResultDetailBundle["result"];
+      };
       if (!res.ok || json.ok !== true) {
         setError(typeof json?.error === "string" ? json.error : `Archive failed (${res.status}).`);
         return;
@@ -283,10 +323,20 @@ export function BloodPathologyResultDetailClient({
     setError(null);
     setBusy(true);
     try {
-      const res = await fetch(aiEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; interpretation?: PathologyAiInterpretationRow };
+      const res = await fetch(aiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        interpretation?: PathologyAiInterpretationRow;
+      };
       if (!res.ok || json.ok !== true || !json.interpretation) {
-        setError(typeof json?.error === "string" ? json.error : `AI generation failed (${res.status}).`);
+        setError(
+          typeof json?.error === "string" ? json.error : `AI generation failed (${res.status}).`
+        );
         return;
       }
       setAiInterpretation(json.interpretation);
@@ -300,7 +350,9 @@ export function BloodPathologyResultDetailClient({
     }
   };
 
-  const patchAiInterpretation = async (action: "update_summaries" | "mark_reviewed" | "archive") => {
+  const patchAiInterpretation = async (
+    action: "update_summaries" | "mark_reviewed" | "archive"
+  ) => {
     if (!aiInterpretation) return;
     setError(null);
     setBusy(true);
@@ -311,7 +363,9 @@ export function BloodPathologyResultDetailClient({
               action,
               interpretation_id: aiInterpretation.id,
               doctor_summary: doctorSummary.trim() ? doctorSummary.trim() : null,
-              patient_friendly_summary: patientFriendlySummary.trim() ? patientFriendlySummary.trim() : null,
+              patient_friendly_summary: patientFriendlySummary.trim()
+                ? patientFriendlySummary.trim()
+                : null,
             }
           : { action, interpretation_id: aiInterpretation.id };
       const res = await fetch(aiEndpoint, {
@@ -319,9 +373,15 @@ export function BloodPathologyResultDetailClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; interpretation?: PathologyAiInterpretationRow };
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        interpretation?: PathologyAiInterpretationRow;
+      };
       if (!res.ok || json.ok !== true || !json.interpretation) {
-        setError(typeof json?.error === "string" ? json.error : `AI update failed (${res.status}).`);
+        setError(
+          typeof json?.error === "string" ? json.error : `AI update failed (${res.status}).`
+        );
         return;
       }
       if (action === "archive") {
@@ -341,12 +401,16 @@ export function BloodPathologyResultDetailClient({
     }
   };
 
-  const abnormalCount = bundle.items.filter((i) => i.flag === "low" || i.flag === "high" || i.flag === "critical").length;
+  const abnormalCount = bundle.items.filter(
+    (i) => i.flag === "low" || i.flag === "high" || i.flag === "critical"
+  ).length;
 
   return (
     <div className="space-y-6">
       {isArchived ? (
-        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">This result is archived.</p>
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          This result is archived.
+        </p>
       ) : null}
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-2 text-sm">
@@ -410,7 +474,9 @@ export function BloodPathologyResultDetailClient({
                   href={`/fi-admin/${tenantId}/patients/${patientId}/blood-request/${bundle.linkedRequest.id}`}
                   className="font-medium text-cyan-300 hover:underline"
                 >
-                  {bundle.linkedRequest.request_date} · {bundle.linkedRequest.template_used.replace(/_/g, " ")} ({bundle.linkedRequest.status})
+                  {bundle.linkedRequest.request_date} ·{" "}
+                  {bundle.linkedRequest.template_used.replace(/_/g, " ")} (
+                  {bundle.linkedRequest.status})
                 </Link>
               ) : (
                 "—"
@@ -457,11 +523,16 @@ export function BloodPathologyResultDetailClient({
             Open PDF (signed link, expires in ~1 hour)
           </a>
           {typeof bundle.result.metadata.original_filename === "string" ? (
-            <p className="mt-1 text-xs text-gray-500">Original file: {bundle.result.metadata.original_filename}</p>
+            <p className="mt-1 text-xs text-gray-500">
+              Original file: {bundle.result.metadata.original_filename}
+            </p>
           ) : null}
         </section>
       ) : bundle.result.uploaded_file_path ? (
-        <p className="text-sm text-amber-300">PDF is stored but a signed link could not be generated. Refresh the page or check storage permissions.</p>
+        <p className="text-sm text-amber-300">
+          PDF is stored but a signed link could not be generated. Refresh the page or check storage
+          permissions.
+        </p>
       ) : null}
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-2">
@@ -474,7 +545,9 @@ export function BloodPathologyResultDetailClient({
             onChange={(e) => setClinicalSummary(e.target.value)}
           />
         ) : (
-          <p className="text-sm text-slate-200 whitespace-pre-wrap">{bundle.result.clinical_summary?.trim() ? bundle.result.clinical_summary : "—"}</p>
+          <p className="text-sm text-slate-200 whitespace-pre-wrap">
+            {bundle.result.clinical_summary?.trim() ? bundle.result.clinical_summary : "—"}
+          </p>
         )}
       </section>
 
@@ -483,7 +556,8 @@ export function BloodPathologyResultDetailClient({
           <div>
             <h2 className="text-sm font-semibold text-slate-100">AI Hair Loss Interpretation</h2>
             <p className="mt-1 text-xs text-slate-400">
-              This interpretation is clinical decision support only and must be reviewed by the treating clinician.
+              This interpretation is clinical decision support only and must be reviewed by the
+              treating clinician.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -528,7 +602,8 @@ export function BloodPathologyResultDetailClient({
 
         {!aiInterpretation ? (
           <p className="text-sm text-slate-400">
-            No AI interpretation has been generated for this result yet. Generate uses the structured marker rows only and creates a new draft.
+            No AI interpretation has been generated for this result yet. Generate uses the
+            structured marker rows only and creates a new draft.
           </p>
         ) : (
           <>
@@ -536,24 +611,40 @@ export function BloodPathologyResultDetailClient({
               <span className="rounded-full bg-white/[0.06] px-2 py-1 text-xs font-medium capitalize text-slate-200">
                 {aiInterpretation.status.replace(/_/g, " ")}
               </span>
-              <ScorePill label="Hair relevance" value={aiInterpretation.hair_loss_relevance_score} />
-              <ScorePill label="Surgery readiness" value={aiInterpretation.surgical_readiness_score} />
+              <ScorePill
+                label="Hair relevance"
+                value={aiInterpretation.hair_loss_relevance_score}
+              />
+              <ScorePill
+                label="Surgery readiness"
+                value={aiInterpretation.surgical_readiness_score}
+              />
             </div>
 
             <div className="rounded border border-sky-100 bg-cyan-500/10 p-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Overview</h3>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-cyan-200">{aiInterpretation.interpretation_json.overview}</p>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">
+                Overview
+              </h3>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-cyan-200">
+                {aiInterpretation.interpretation_json.overview}
+              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Likely contributors</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Likely contributors
+                </h3>
                 <div className="mt-2">
-                  <ContributorList items={aiInterpretation.interpretation_json.likely_contributors} />
+                  <ContributorList
+                    items={aiInterpretation.interpretation_json.likely_contributors}
+                  />
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Risk flags</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Risk flags
+                </h3>
                 {aiInterpretation.interpretation_json.risk_flags.length === 0 ? (
                   <p className="mt-2 text-sm text-gray-500">None listed.</p>
                 ) : (
@@ -561,7 +652,10 @@ export function BloodPathologyResultDetailClient({
                     {aiInterpretation.interpretation_json.risk_flags.map((f, idx) => (
                       <li key={`${f.label}-${idx}`}>
                         <span className="font-medium">{f.label}</span>
-                        <span className="text-slate-400"> · {f.urgency.replace(/_/g, " ")} · {f.rationale}</span>
+                        <span className="text-slate-400">
+                          {" "}
+                          · {f.urgency.replace(/_/g, " ")} · {f.rationale}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -571,56 +665,84 @@ export function BloodPathologyResultDetailClient({
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Abnormal markers</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Abnormal markers
+                </h3>
                 <div className="mt-2">
                   <MarkerList items={aiInterpretation.interpretation_json.abnormal_markers} />
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Suboptimal for hair</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Suboptimal for hair
+                </h3>
                 <div className="mt-2">
-                  <MarkerList items={aiInterpretation.interpretation_json.suboptimal_markers_for_hair} />
+                  <MarkerList
+                    items={aiInterpretation.interpretation_json.suboptimal_markers_for_hair}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Treatment</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Treatment
+                </h3>
                 <div className="mt-2">
-                  <ConsiderationList items={aiInterpretation.interpretation_json.treatment_considerations} />
+                  <ConsiderationList
+                    items={aiInterpretation.interpretation_json.treatment_considerations}
+                  />
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Supplements</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Supplements
+                </h3>
                 <div className="mt-2">
-                  <ConsiderationList items={aiInterpretation.interpretation_json.supplement_considerations} />
+                  <ConsiderationList
+                    items={aiInterpretation.interpretation_json.supplement_considerations}
+                  />
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Medications</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Medications
+                </h3>
                 <div className="mt-2">
-                  <ConsiderationList items={aiInterpretation.interpretation_json.medication_considerations} />
+                  <ConsiderationList
+                    items={aiInterpretation.interpretation_json.medication_considerations}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Surgery readiness</h3>
-                <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">{aiInterpretation.interpretation_json.surgery_readiness.narrative}</p>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Surgery readiness
+                </h3>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">
+                  {aiInterpretation.interpretation_json.surgery_readiness.narrative}
+                </p>
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Repeat testing</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Repeat testing
+                </h3>
                 <div className="mt-2">
-                  <RepeatTestingList items={aiInterpretation.interpretation_json.repeat_testing_recommendations} />
+                  <RepeatTestingList
+                    items={aiInterpretation.interpretation_json.repeat_testing_recommendations}
+                  />
                 </div>
               </div>
             </div>
 
             {aiInterpretation.interpretation_json.missing_markers.length > 0 ? (
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Missing markers to consider</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Missing markers to consider
+                </h3>
                 <div className="mt-2">
                   <MarkerList items={aiInterpretation.interpretation_json.missing_markers} />
                 </div>
@@ -629,7 +751,9 @@ export function BloodPathologyResultDetailClient({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Doctor summary</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Doctor summary
+                </span>
                 <textarea
                   className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   rows={5}
@@ -638,7 +762,9 @@ export function BloodPathologyResultDetailClient({
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Patient-friendly summary</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Patient-friendly summary
+                </span>
                 <textarea
                   className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   rows={5}
@@ -725,7 +851,9 @@ export function BloodPathologyResultDetailClient({
                         <input
                           className="w-24 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.reference_range}
-                          onChange={(e) => patchRow(r.clientId, { reference_range: e.target.value })}
+                          onChange={(e) =>
+                            patchRow(r.clientId, { reference_range: e.target.value })
+                          }
                         />
                       </td>
                       <td className="py-1 pr-2">
@@ -751,7 +879,15 @@ export function BloodPathologyResultDetailClient({
                       <td className="py-1 pr-2">{i.result_unit || "—"}</td>
                       <td className="py-1 pr-2">{i.reference_range || "—"}</td>
                       <td className="py-1 pr-2">
-                        <span className={i.flag === "normal" || i.flag === "unknown" ? "" : "font-semibold text-amber-200"}>{i.flag}</span>
+                        <span
+                          className={
+                            i.flag === "normal" || i.flag === "unknown"
+                              ? ""
+                              : "font-semibold text-amber-200"
+                          }
+                        >
+                          {i.flag}
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -797,7 +933,8 @@ export function BloodPathologyResultDetailClient({
 
       {isDraft ? (
         <p className="text-xs text-slate-400">
-          Save draft to persist marker rows, the linked request, and summary fields before marking reviewed.
+          Save draft to persist marker rows, the linked request, and summary fields before marking
+          reviewed.
         </p>
       ) : null}
     </div>

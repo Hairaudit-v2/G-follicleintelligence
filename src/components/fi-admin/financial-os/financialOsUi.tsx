@@ -9,7 +9,8 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
 /** Shared FinancialOS command-centre styling — aligned with ReceptionOS / FI OS chrome. */
 export const financialOsClasses = {
-  pageShell: "mx-auto w-full max-w-[1920px] space-y-6 pb-10 xl:space-y-7 2xl:max-w-[2200px] 2xl:space-y-8",
+  pageShell:
+    "mx-auto w-full max-w-[1920px] space-y-6 pb-10 xl:space-y-7 2xl:max-w-[2200px] 2xl:space-y-8",
   pageSection: "space-y-6 xl:space-y-7 2xl:space-y-8",
   dashboardGrid: "2xl:grid 2xl:grid-cols-2 2xl:items-start 2xl:gap-x-8",
   dashboardGridWide: "2xl:col-span-2",
@@ -39,16 +40,18 @@ export const financialOsClasses = {
   checkboxLabel: "flex items-center gap-2 text-xs text-slate-300",
   primaryButton: cn(
     fiOsChromeClasses.toolbarControlSurface,
-    "inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-cyan-100/95 disabled:opacity-50",
+    "inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-cyan-100/95 disabled:opacity-50"
   ),
   secondaryButton: cn(
     fiOsChromeClasses.toolbarControlSurface,
-    "inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-slate-100 disabled:opacity-50",
+    "inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-slate-100 disabled:opacity-50"
   ),
   textButton: "text-xs font-medium text-cyan-400/95 hover:text-cyan-300",
-  tableShell: "overflow-x-auto rounded-xl border border-white/[0.07] bg-[#0c1426]/80 backdrop-blur-md",
+  tableShell:
+    "overflow-x-auto rounded-xl border border-white/[0.07] bg-[#0c1426]/80 backdrop-blur-md",
   table: "min-w-full text-xs text-slate-300",
-  tableHead: "sticky top-0 z-10 border-b border-white/[0.06] bg-[#0c1426]/95 text-left backdrop-blur-sm",
+  tableHead:
+    "sticky top-0 z-10 border-b border-white/[0.06] bg-[#0c1426]/95 text-left backdrop-blur-sm",
   tableHeadCell:
     "px-3 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-slate-500",
   tableRow: "border-b border-white/[0.04] transition hover:bg-white/[0.02]",
@@ -62,7 +65,8 @@ export const financialOsClasses = {
   warningText: "text-xs text-amber-300",
   infoText: "text-xs text-slate-400",
   drawerOverlay: "fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm",
-  drawerPanel: "flex h-full w-full max-w-md flex-col border-l border-white/[0.08] bg-[#0a101f] shadow-2xl shadow-black/60",
+  drawerPanel:
+    "flex h-full w-full max-w-md flex-col border-l border-white/[0.08] bg-[#0a101f] shadow-2xl shadow-black/60",
   drawerHeader: "flex items-center justify-between border-b border-white/[0.06] px-4 py-3",
   drawerBody: "flex-1 space-y-4 overflow-y-auto p-4 text-sm text-slate-300",
   subPanel: "rounded-lg border border-white/[0.06] bg-white/[0.02] p-3",
@@ -77,7 +81,7 @@ export type FinancialOsFeedback = {
 
 export function financialOsActionFeedback(
   res: { ok: true } | { ok: false; error: string },
-  successMessage: string,
+  successMessage: string
 ): FinancialOsFeedback {
   if (res.ok) return { message: successMessage, tone: "success" };
   return { message: res.error, tone: "error" };
@@ -86,7 +90,7 @@ export function financialOsActionFeedback(
 export function financialOsFilteredEmptyMessage(
   hasSourceRows: boolean,
   zeroMessage: string,
-  filteredMessage: string,
+  filteredMessage: string
 ): string {
   return hasSourceRows ? filteredMessage : zeroMessage;
 }
@@ -121,7 +125,9 @@ export function financialOsFeedbackClassForTone(tone: FinancialOsFeedbackTone): 
 export function financialOsFeedbackClassName(message: string, explicitSuccess?: boolean): string {
   if (explicitSuccess === true) return financialOsClasses.successText;
   if (explicitSuccess === false) return financialOsClasses.errorText;
-  return isFinancialOsSuccessFeedback(message) ? financialOsClasses.successText : financialOsClasses.errorText;
+  return isFinancialOsSuccessFeedback(message)
+    ? financialOsClasses.successText
+    : financialOsClasses.errorText;
 }
 
 export function FinancialOsFeedbackText(props: {
@@ -181,29 +187,49 @@ export function FinancialOsSectionCard(props: {
   return (
     <DashboardCard className={cn("flex flex-col", props.className)}>
       <div className="border-b border-white/[0.06] px-4 py-3">
-        <SectionHeader title={props.title} description={typeof props.description === "string" ? props.description : undefined} kicker={props.kicker} />
+        <SectionHeader
+          title={props.title}
+          description={typeof props.description === "string" ? props.description : undefined}
+          kicker={props.kicker}
+        />
         {props.description && typeof props.description !== "string" ? (
-          <div className="mt-1 max-w-3xl text-[11px] leading-relaxed text-slate-400 sm:text-xs">{props.description}</div>
+          <div className="mt-1 max-w-3xl text-[11px] leading-relaxed text-slate-400 sm:text-xs">
+            {props.description}
+          </div>
         ) : null}
       </div>
       <div className={cn("px-4 py-4", props.bodyClassName)}>{props.children}</div>
-      {props.footer ? <div className="border-t border-white/[0.06] px-4 py-3">{props.footer}</div> : null}
+      {props.footer ? (
+        <div className="border-t border-white/[0.06] px-4 py-3">{props.footer}</div>
+      ) : null}
     </DashboardCard>
   );
 }
 
-export function FinancialOsSubPageHeader(props: { title: string; description?: ReactNode; kicker?: string }) {
+export function FinancialOsSubPageHeader(props: {
+  title: string;
+  description?: ReactNode;
+  kicker?: string;
+}) {
   return (
     <header className="space-y-1 border-b border-white/[0.07] pb-4">
       {props.kicker ? (
-        <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-cyan-400/85">{props.kicker}</p>
+        <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-cyan-400/85">
+          {props.kicker}
+        </p>
       ) : null}
-      <h2 className="text-xs font-semibold tracking-tight text-slate-50 sm:text-sm">{props.title}</h2>
+      <h2 className="text-xs font-semibold tracking-tight text-slate-50 sm:text-sm">
+        {props.title}
+      </h2>
       {props.description ? (
         typeof props.description === "string" ? (
-          <p className="max-w-3xl text-[11px] leading-relaxed text-slate-400 sm:text-xs">{props.description}</p>
+          <p className="max-w-3xl text-[11px] leading-relaxed text-slate-400 sm:text-xs">
+            {props.description}
+          </p>
         ) : (
-          <div className="max-w-3xl text-[11px] leading-relaxed text-slate-400 sm:text-xs">{props.description}</div>
+          <div className="max-w-3xl text-[11px] leading-relaxed text-slate-400 sm:text-xs">
+            {props.description}
+          </div>
         )
       ) : null}
     </header>
@@ -219,11 +245,18 @@ export function FinancialOsTableShell(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function FinancialOsFormPanel(props: { title: string; description?: string; children: ReactNode; className?: string }) {
+export function FinancialOsFormPanel(props: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div className={cn(financialOsClasses.formPanel, props.className)}>
       <h3 className={financialOsClasses.formTitle}>{props.title}</h3>
-      {props.description ? <p className={financialOsClasses.formHint}>{props.description}</p> : null}
+      {props.description ? (
+        <p className={financialOsClasses.formHint}>{props.description}</p>
+      ) : null}
       <div className="mt-3">{props.children}</div>
     </div>
   );
@@ -263,5 +296,7 @@ export function FinancialOsTable(props: {
 }
 
 export function FinancialOsTh(props: { children?: ReactNode; className?: string }) {
-  return <th className={cn(financialOsClasses.tableHeadCell, props.className)}>{props.children}</th>;
+  return (
+    <th className={cn(financialOsClasses.tableHeadCell, props.className)}>{props.children}</th>
+  );
 }

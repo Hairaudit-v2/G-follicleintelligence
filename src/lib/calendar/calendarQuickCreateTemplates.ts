@@ -90,6 +90,8 @@ export const CALENDAR_QUICK_TEMPLATES: CalendarQuickTemplate[] = [
   },
 ];
 
-export function calendarQuickTemplateById(id: CalendarQuickTemplateId): CalendarQuickTemplate | undefined {
+export function calendarQuickTemplateById(
+  id: CalendarQuickTemplateId
+): CalendarQuickTemplate | undefined {
   return CALENDAR_QUICK_TEMPLATES.find((t) => t.id === id);
 }

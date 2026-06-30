@@ -11,7 +11,8 @@ export const PATHOLOGY_TEMPLATES: readonly PathologyTemplateDefinition[] = [
   {
     id: "hair_loss_investigation",
     label: "Hair Loss Investigation",
-    description: "Baseline haematology, iron studies, thyroid, and key androgens commonly used in male-pattern workup.",
+    description:
+      "Baseline haematology, iron studies, thyroid, and key androgens commonly used in male-pattern workup.",
     defaultTests: [
       { code: "FBC", label: "Full blood count" },
       { code: "UE", label: "Urea & electrolytes" },
@@ -74,7 +75,8 @@ export const PATHOLOGY_TEMPLATES: readonly PathologyTemplateDefinition[] = [
   {
     id: "trt_monitoring",
     label: "TRT Monitoring",
-    description: "Typical monitoring cadence markers for testosterone therapy (clinic protocol applies).",
+    description:
+      "Typical monitoring cadence markers for testosterone therapy (clinic protocol applies).",
     defaultTests: [
       { code: "FBC", label: "Full blood count (Hb/Hct focus)" },
       { code: "UE", label: "Urea & electrolytes" },
@@ -96,6 +98,8 @@ export const PATHOLOGY_TEMPLATES: readonly PathologyTemplateDefinition[] = [
   },
 ] as const;
 
-export function getPathologyTemplate(id: PathologyTemplateId): PathologyTemplateDefinition | undefined {
+export function getPathologyTemplate(
+  id: PathologyTemplateId
+): PathologyTemplateDefinition | undefined {
   return PATHOLOGY_TEMPLATES.find((t) => t.id === id);
 }

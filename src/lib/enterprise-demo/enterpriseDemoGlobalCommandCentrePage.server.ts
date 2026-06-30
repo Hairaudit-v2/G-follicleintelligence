@@ -9,12 +9,18 @@ import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/
 import { isNonEmptyUuid } from "@/src/lib/crm/validation";
 
 export type GlobalCommandCentrePageResult =
-  | { ok: true; tenantKey: string; data: Awaited<ReturnType<typeof loadGlobalCommandCentrePayload>> }
+  | {
+      ok: true;
+      tenantKey: string;
+      data: Awaited<ReturnType<typeof loadGlobalCommandCentrePayload>>;
+    }
   | { ok: false; kind: "not_found" }
   | { ok: false; kind: "misconfigured" }
   | { ok: false; kind: "load_failed"; message: string };
 
-export async function resolveGlobalCommandCentrePage(tenantId: string): Promise<GlobalCommandCentrePageResult> {
+export async function resolveGlobalCommandCentrePage(
+  tenantId: string
+): Promise<GlobalCommandCentrePageResult> {
   const key = tenantId?.trim();
   if (!key) return { ok: false, kind: "not_found" };
 
@@ -31,7 +37,10 @@ export async function resolveGlobalCommandCentrePage(tenantId: string): Promise<
   const demoTenant = await resolveEnterpriseDemoTenant(key);
   if (!demoTenant) return { ok: false, kind: "not_found" };
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return { ok: false, kind: "misconfigured" };
   }
 
@@ -46,12 +55,16 @@ export async function resolveGlobalCommandCentrePage(tenantId: string): Promise<
   }
 }
 
-export function assertGlobalCommandCentrePage(result: GlobalCommandCentrePageResult): asserts result is {
+export function assertGlobalCommandCentrePage(
+  result: GlobalCommandCentrePageResult
+): asserts result is {
   ok: true;
   tenantKey: string;
   data: Awaited<ReturnType<typeof loadGlobalCommandCentrePayload>>;
 } {
   if (result.ok) return;
   if (result.kind === "not_found") notFound();
-  throw new Error(result.kind === "load_failed" ? result.message : "Global Command Centre unavailable");
+  throw new Error(
+    result.kind === "load_failed" ? result.message : "Global Command Centre unavailable"
+  );
 }

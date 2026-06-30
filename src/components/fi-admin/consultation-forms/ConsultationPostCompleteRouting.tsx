@@ -85,11 +85,15 @@ export function ConsultationPostCompleteRouting({
             <FiCard
               className={cn(
                 "flex h-full flex-col gap-2 p-4 transition",
-                enabled ? "border-white/[0.08] hover:border-sky-300 hover:shadow-sm" : "border-white/[0.06] bg-white/[0.03] opacity-80"
+                enabled
+                  ? "border-white/[0.08] hover:border-sky-300 hover:shadow-sm"
+                  : "border-white/[0.06] bg-white/[0.03] opacity-80"
               )}
             >
               <h4 className="text-sm font-semibold text-slate-100">{t.title}</h4>
-              <p className={cn("flex-1 text-xs", fiOsLightFormSurfaceClassNames.helper)}>{t.body}</p>
+              <p className={cn("flex-1 text-xs", fiOsLightFormSurfaceClassNames.helper)}>
+                {t.body}
+              </p>
               {enabled ? (
                 <Link
                   href={t.href!}

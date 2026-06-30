@@ -5,7 +5,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModuleAccessResult } from "./entitlementTypes";
 import { writeEntitlementAuditEvent } from "./entitlementAudit.server";
 import { evaluateModuleAccess } from "./modules";
-import { finalizeModuleAccessResult, loadEntitlementAccessContext } from "./tenantEntitlements.server";
+import {
+  finalizeModuleAccessResult,
+  loadEntitlementAccessContext,
+} from "./tenantEntitlements.server";
 
 export type RequireModuleAccessInput = {
   tenantId: string;
@@ -24,7 +27,9 @@ export type RequireModuleAccessInput = {
  * Server-side module gate. Returns a safe access result; never exposes billing internals.
  * Writes entitlement audit events for allowed and denied checks by default.
  */
-export async function requireModuleAccess(opts: RequireModuleAccessInput): Promise<ModuleAccessResult> {
+export async function requireModuleAccess(
+  opts: RequireModuleAccessInput
+): Promise<ModuleAccessResult> {
   const tenantId = opts.tenantId.trim();
   const userId = opts.userId.trim();
   const moduleCode = opts.moduleCode.trim();

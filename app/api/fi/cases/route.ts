@@ -126,10 +126,12 @@ export async function POST(req: Request) {
       );
 
     if (partner_id && referral_code) {
-      await supabase.from("fi_referrals").upsert(
-        { partner_id, case_id: caseData.id, referral_code },
-        { onConflict: "case_id", ignoreDuplicates: true }
-      );
+      await supabase
+        .from("fi_referrals")
+        .upsert(
+          { partner_id, case_id: caseData.id, referral_code },
+          { onConflict: "case_id", ignoreDuplicates: true }
+        );
     }
 
     return NextResponse.json({

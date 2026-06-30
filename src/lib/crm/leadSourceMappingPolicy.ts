@@ -25,7 +25,10 @@ export function normaliseOptionalLeadSource(
   return { source_system: ss, source_lead_id: sl };
 }
 
-export function leadSourceDuplicateErrorMessage(ref: NormalisedLeadSource, existingLeadId: string): string {
+export function leadSourceDuplicateErrorMessage(
+  ref: NormalisedLeadSource,
+  existingLeadId: string
+): string {
   return `A lead already exists for source “${ref.source_system}” with external id “${ref.source_lead_id}”. Open lead ${existingLeadId} instead of creating a duplicate.`;
 }
 

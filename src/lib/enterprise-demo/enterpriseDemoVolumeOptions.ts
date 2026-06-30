@@ -13,7 +13,9 @@ export function resolveEnterpriseDemoVolume(
   volume?: Partial<EnterpriseDemoVolumeOptions>
 ): EnterpriseDemoVolumeOptions {
   return {
-    patientsPerClinic: volume?.patientsPerClinic ?? ENTERPRISE_DEMO_DEFAULT_VOLUME.patientsPerClinic,
-    surgeriesPerClinic: volume?.surgeriesPerClinic ?? ENTERPRISE_DEMO_DEFAULT_VOLUME.surgeriesPerClinic,
+    patientsPerClinic:
+      volume?.patientsPerClinic ?? ENTERPRISE_DEMO_DEFAULT_VOLUME.patientsPerClinic,
+    surgeriesPerClinic:
+      volume?.surgeriesPerClinic ?? ENTERPRISE_DEMO_DEFAULT_VOLUME.surgeriesPerClinic,
   };
 }

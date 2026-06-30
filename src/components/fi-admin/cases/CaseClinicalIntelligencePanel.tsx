@@ -3,7 +3,10 @@ import Link from "next/link";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import { deriveCaseClinicalSignals } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
 import { recommendedNextStepForClinicalSignal } from "@/src/lib/fi-os/clinicalIntelligenceRecommendations";
-import { CASE_DETAIL_SECTION_IDS, CASE_PROCEDURE_DAY_DETAIL_HASH } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  CASE_PROCEDURE_DAY_DETAIL_HASH,
+} from "@/src/lib/cases/caseDetailNavConstants";
 
 export function CaseClinicalIntelligencePanel(props: {
   tenantId: string;
@@ -26,13 +29,18 @@ export function CaseClinicalIntelligencePanel(props: {
         Support signals from existing readiness data only — not a substitute for clinical judgement.
       </p>
       {signals.length === 0 ? (
-        <p className="mt-3 text-sm text-indigo-300">No open journey signals detected from current case data.</p>
+        <p className="mt-3 text-sm text-indigo-300">
+          No open journey signals detected from current case data.
+        </p>
       ) : (
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-indigo-200">
           {signals.map((s) => (
             <li key={`${s.signalKey}-${s.title}`}>
               <span className="font-medium">{s.title}</span>
-              <span className="text-indigo-300"> — {recommendedNextStepForClinicalSignal(s.signalKey)}</span>
+              <span className="text-indigo-300">
+                {" "}
+                — {recommendedNextStepForClinicalSignal(s.signalKey)}
+              </span>
             </li>
           ))}
         </ul>

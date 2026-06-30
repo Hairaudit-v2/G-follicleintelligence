@@ -2,9 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { FI_DASHBOARD_HOME_WIDGET_ORDER } from "@/src/config/fiDashboardRegistry";
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import { resolveDashboardQuickActions } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
-import { filterFiOsPrimarySidebarItemsByFeatureAccess, resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import {
+  filterFiOsPrimarySidebarItemsByFeatureAccess,
+  resolveFiOsPrimarySidebarItems,
+} from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import {
   fiDashboardWidgetVisibleByFeatureAccess,
   filterResolvedQuickActionsByFeatureAccess,
@@ -21,7 +27,10 @@ test("dashboard widgets: clinical_intelligence_summary needs dashboard plus clin
     imaging: false,
     audit: false,
   });
-  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", off), false);
+  assert.equal(
+    fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", off),
+    false
+  );
 
   const on = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     dashboard: true,
@@ -48,7 +57,9 @@ test("dashboard widgets: outcome_intelligence_summary needs dashboard plus analy
 });
 
 test("dashboard widgets: null access keeps full order", () => {
-  const filtered = FI_DASHBOARD_HOME_WIDGET_ORDER.filter((w) => fiDashboardWidgetVisibleByFeatureAccess(w, null));
+  const filtered = FI_DASHBOARD_HOME_WIDGET_ORDER.filter((w) =>
+    fiDashboardWidgetVisibleByFeatureAccess(w, null)
+  );
   assert.deepEqual(filtered, [...FI_DASHBOARD_HOME_WIDGET_ORDER]);
 });
 
@@ -79,7 +90,10 @@ test("dashboard widgets: staff_intelligence_summary requires dashboard and staff
     dashboard: true,
     staff: false,
   });
-  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("staff_intelligence_summary", offStaff), false);
+  assert.equal(
+    fiDashboardWidgetVisibleByFeatureAccess("staff_intelligence_summary", offStaff),
+    false
+  );
 
   const on = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     dashboard: true,
@@ -92,7 +106,9 @@ test("quick actions: filters enabled booking when calendar feature off", () => {
   const items = resolveDashboardQuickActions(base, { showCrmNav: true, showBookingsBoard: true });
   const booking = items.find((i) => i.key === "booking");
   assert.ok(booking?.enabled);
-  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { calendar: false });
+  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    calendar: false,
+  });
   const next = filterResolvedQuickActionsByFeatureAccess(items, m);
   assert.ok(!next.some((i) => i.key === "booking"));
 });
@@ -122,7 +138,9 @@ test("sidebar: null access leaves items in place", () => {
 test("sidebar: procedure_day sub removed when procedure_day off", () => {
   const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true);
   const cases = raw.find((i) => i.id === "cases");
-  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { procedure_day: false });
+  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    procedure_day: false,
+  });
   const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, m);
   const cases2 = filtered.find((i) => i.id === "cases");
   assert.ok(cases?.subItems?.some((s) => s.id === "procedure-day-board"));

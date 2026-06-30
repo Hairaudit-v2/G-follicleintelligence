@@ -82,7 +82,9 @@ export function receptionPilotManagerWidgetVisible(role: ReceptionOsViewerRole):
   return role === "admin" || role === "clinic_manager";
 }
 
-export function aggregateReceptionPilotMetrics(input: AggregateReceptionPilotMetricsInput): ReceptionPilotMetricsSummary {
+export function aggregateReceptionPilotMetrics(
+  input: AggregateReceptionPilotMetricsInput
+): ReceptionPilotMetricsSummary {
   const activeProfiles = new Set<string>();
   const widgetCounts = new Map<string, number>();
   const feedbackCounts = new Map<ReceptionPilotFeedbackKind, number>();
@@ -133,7 +135,7 @@ export function aggregateReceptionPilotMetrics(input: AggregateReceptionPilotMet
 
 export function buildReceptionPilotManagerScores(
   summary: ReceptionPilotMetricsSummary,
-  feedbackRows: ReadonlyArray<{ feedbackKind: ReceptionPilotFeedbackKind }>,
+  feedbackRows: ReadonlyArray<{ feedbackKind: ReceptionPilotFeedbackKind }>
 ): ReceptionPilotManagerScores {
   const feedbackCount = feedbackRows.length;
   const usefulCount = feedbackRows.filter((f) => f.feedbackKind === "useful").length;
@@ -141,15 +143,21 @@ export function buildReceptionPilotManagerScores(
   const adoptionDenominator = Math.max(summary.dailyActiveUsers, 1);
   const dashboardViewsPerUser =
     summary.mostUsedWidgets.reduce((acc, w) => acc + w.viewCount, 0) / adoptionDenominator;
-  const adoptionScore = clampScore(Math.round(Math.min(100, 20 + dashboardViewsPerUser * 15 + summary.dailyActiveUsers * 8)));
+  const adoptionScore = clampScore(
+    Math.round(Math.min(100, 20 + dashboardViewsPerUser * 15 + summary.dailyActiveUsers * 8))
+  );
 
   const workflowActions = summary.tasksCreated + summary.tasksResolved + summary.closeoutsCompleted;
   const workflowCompletionScore = clampScore(
     Math.round(
       workflowActions === 0
         ? 0
-        : Math.min(100, (summary.tasksResolved / Math.max(summary.tasksCreated, 1)) * 50 + summary.closeoutsCompleted * 25),
-    ),
+        : Math.min(
+            100,
+            (summary.tasksResolved / Math.max(summary.tasksCreated, 1)) * 50 +
+              summary.closeoutsCompleted * 25
+          )
+    )
   );
 
   const riskDenominator = summary.unresolvedCriticalRisks + summary.tasksResolved;
@@ -157,8 +165,8 @@ export function buildReceptionPilotManagerScores(
     Math.round(
       riskDenominator === 0
         ? 100
-        : (summary.tasksResolved / riskDenominator) * 100 - summary.unresolvedCriticalRisks * 5,
-    ),
+        : (summary.tasksResolved / riskDenominator) * 100 - summary.unresolvedCriticalRisks * 5
+    )
   );
 
   const frictionMap = new Map<string, number>();

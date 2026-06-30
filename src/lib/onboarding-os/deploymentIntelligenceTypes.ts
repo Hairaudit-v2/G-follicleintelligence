@@ -16,14 +16,15 @@ export const DEPLOYMENT_INTELLIGENCE_DOMAINS = [
 
 export type DeploymentIntelligenceDomain = (typeof DEPLOYMENT_INTELLIGENCE_DOMAINS)[number];
 
-export const DEPLOYMENT_INTELLIGENCE_DOMAIN_WEIGHTS: Record<DeploymentIntelligenceDomain, number> = {
-  infrastructure_readiness: 25,
-  workflow_readiness: 20,
-  staff_readiness: 20,
-  operational_readiness: 15,
-  adoption_confidence: 10,
-  executive_approval: 10,
-};
+export const DEPLOYMENT_INTELLIGENCE_DOMAIN_WEIGHTS: Record<DeploymentIntelligenceDomain, number> =
+  {
+    infrastructure_readiness: 25,
+    workflow_readiness: 20,
+    staff_readiness: 20,
+    operational_readiness: 15,
+    adoption_confidence: 10,
+    executive_approval: 10,
+  };
 
 export const DEPLOYMENT_INTELLIGENCE_STATUSES = [
   "early_setup",

@@ -52,7 +52,9 @@ export function resolveReceptionOsDemoModeState(input: {
   };
 }
 
-export function buildReceptionOsDemoBanner(state: Pick<ReceptionOsDemoModeState, "maskAmounts" | "usingSampleData">): ReceptionOsPilotBanner {
+export function buildReceptionOsDemoBanner(
+  state: Pick<ReceptionOsDemoModeState, "maskAmounts" | "usingSampleData">
+): ReceptionOsPilotBanner {
   const amountNote = state.maskAmounts ? " Dollar amounts are masked." : "";
   const sampleNote = state.usingSampleData ? " Showing sample records — no live clinic data." : "";
   return {
@@ -100,7 +102,7 @@ function boardHasOperationalData(payload: ReceptionOsCommandCentrePayload): bool
 }
 
 export function buildReceptionOsDemoSamplePayload(
-  payload: ReceptionOsCommandCentrePayload,
+  payload: ReceptionOsCommandCentrePayload
 ): ReceptionOsCommandCentrePayload {
   const tenantId = payload.tenantId;
   const base = `/fi-admin/${tenantId}`;
@@ -251,7 +253,7 @@ export function buildReceptionOsDemoSamplePayload(
 
 export function applyReceptionOsDemoMode(
   payload: ReceptionOsCommandCentrePayload,
-  state: ReceptionOsDemoModeState,
+  state: ReceptionOsDemoModeState
 ): ReceptionOsCommandCentrePayload {
   if (!state.active) return payload;
 
@@ -306,7 +308,7 @@ export function applyReceptionOsDemoMode(
           patientOrLeadLabel: nextName(),
           hrefs: { lead: null, patient: null, consultation: null, case: null },
         })),
-      ]),
+      ])
     ) as ReceptionOsCommandCentrePayload["consultationPipeline"]["columns"],
     counts: working.consultationPipeline.counts,
   };
@@ -355,7 +357,8 @@ export function applyReceptionOsDemoMode(
     ...a,
     title: redactContactText(a.title) ?? a.title,
     detail: redactContactText(a.detail) ?? a.detail,
-    estimatedRevenueAtRisk: a.estimatedRevenueAtRisk != null ? maskAmt(a.estimatedRevenueAtRisk) : null,
+    estimatedRevenueAtRisk:
+      a.estimatedRevenueAtRisk != null ? maskAmt(a.estimatedRevenueAtRisk) : null,
     href: null,
     hrefs: { patient: null, case: null, lead: null, consultation: null },
   }));
@@ -371,7 +374,10 @@ export function applyReceptionOsDemoMode(
     })),
   };
 
-  const demoBanner = buildReceptionOsDemoBanner({ maskAmounts: state.maskAmounts, usingSampleData });
+  const demoBanner = buildReceptionOsDemoBanner({
+    maskAmounts: state.maskAmounts,
+    usingSampleData,
+  });
 
   return {
     ...working,

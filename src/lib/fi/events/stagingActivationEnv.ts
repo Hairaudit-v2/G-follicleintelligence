@@ -11,7 +11,10 @@ export type StagingActivationEnvOptions = {
 };
 
 function resolveEnv(options?: StagingActivationEnvOptions): Record<string, string | undefined> {
-  return options?.env ?? (typeof process !== "undefined" ? (process.env as Record<string, string | undefined>) : {});
+  return (
+    options?.env ??
+    (typeof process !== "undefined" ? (process.env as Record<string, string | undefined>) : {})
+  );
 }
 
 function resolveNodeEnv(options?: StagingActivationEnvOptions): string {
@@ -24,7 +27,9 @@ function resolveNodeEnv(options?: StagingActivationEnvOptions): string {
  * governed replay is on, staging activation flag is on, and the staging allowed-event
  * env var matches the single fixed allow-list value (explicit operator contract).
  */
-export function isStagingIntelligenceActivationEnabled(options?: StagingActivationEnvOptions): boolean {
+export function isStagingIntelligenceActivationEnabled(
+  options?: StagingActivationEnvOptions
+): boolean {
   const nodeEnv = resolveNodeEnv(options);
   if (nodeEnv === "production") {
     return false;

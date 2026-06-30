@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  buildCalendarHref,
-  type ParsedCalendarQuery,
-} from "@/src/lib/bookings/calendarQuery";
+import { buildCalendarHref, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import {
   allBookingStatusOptions,
   allBookingTypeOptions,
@@ -14,8 +11,16 @@ import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 const FILTER_HEADING_ID = "operational-calendar-filters-heading";
 
 const FILTER_FIELDS = {
-  q: { inputId: "operational-calendar-filter-q", labelId: "operational-calendar-filter-q-label", label: "Search" },
-  type: { inputId: "operational-calendar-filter-type", labelId: "operational-calendar-filter-type-label", label: "Type" },
+  q: {
+    inputId: "operational-calendar-filter-q",
+    labelId: "operational-calendar-filter-q-label",
+    label: "Search",
+  },
+  type: {
+    inputId: "operational-calendar-filter-type",
+    labelId: "operational-calendar-filter-type-label",
+    label: "Type",
+  },
   status: {
     inputId: "operational-calendar-filter-status",
     labelId: "operational-calendar-filter-status-label",
@@ -62,7 +67,10 @@ export function OperationalCalendarFilters({
       className="space-y-3 rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 dark:border-slate-800 dark:bg-slate-950"
       aria-labelledby={FILTER_HEADING_ID}
     >
-      <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-slate-100 dark:text-slate-100">
+      <h2
+        id={FILTER_HEADING_ID}
+        className="text-sm font-semibold text-slate-100 dark:text-slate-100"
+      >
         Filter calendar bookings
       </h2>
       <input type="hidden" name="view" value={query.view} />
@@ -200,12 +208,16 @@ export function OperationalCalendarFilters({
       </div>
       <p className="text-xs leading-snug text-slate-500 dark:text-slate-400">
         Grid uses clinic-local business hours from{" "}
-        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">fi_tenant_settings.default_timezone</code>{" "}
+        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">
+          fi_tenant_settings.default_timezone
+        </code>{" "}
         (IANA). Optional window overrides live in{" "}
-        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">fi_tenant_settings.metadata.operational_calendar</code>{" "}
+        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">
+          fi_tenant_settings.metadata.operational_calendar
+        </code>{" "}
         (<code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">dayStartHourUtc</code> /{" "}
-        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">dayEndHourUtc</code> are wall-clock hours in that
-        zone). Same booking overlap query as the tenant dashboard agenda.
+        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">dayEndHourUtc</code> are
+        wall-clock hours in that zone). Same booking overlap query as the tenant dashboard agenda.
       </p>
     </form>
   );

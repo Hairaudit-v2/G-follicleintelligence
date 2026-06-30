@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  getIndexNowKey,
-  isIndexNowKeyFileRequest,
-} from "@/lib/seo/indexnow";
+import { getIndexNowKey, isIndexNowKeyFileRequest } from "@/lib/seo/indexnow";
 
 export const dynamic = "force-dynamic";
 

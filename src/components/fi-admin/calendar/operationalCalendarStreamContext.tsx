@@ -8,7 +8,8 @@ export type OperationalCalendarStreamContextValue = {
   applyGridPatch: (patch: OperationalCalendarGridPatch) => void;
 };
 
-const OperationalCalendarStreamContext = createContext<OperationalCalendarStreamContextValue | null>(null);
+const OperationalCalendarStreamContext =
+  createContext<OperationalCalendarStreamContextValue | null>(null);
 
 export function OperationalCalendarStreamProvider({
   value,
@@ -18,7 +19,9 @@ export function OperationalCalendarStreamProvider({
   children: React.ReactNode;
 }) {
   return (
-    <OperationalCalendarStreamContext.Provider value={value}>{children}</OperationalCalendarStreamContext.Provider>
+    <OperationalCalendarStreamContext.Provider value={value}>
+      {children}
+    </OperationalCalendarStreamContext.Provider>
   );
 }
 

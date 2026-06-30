@@ -174,34 +174,52 @@ export function PayrollStaffImportClient({
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">HR · Payroll import</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">Evolved payroll staff import</h1>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
+          HR · Payroll import
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
+          Evolved payroll staff import
+        </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Import operational staff from an Evolved payroll <span className="font-mono text-xs">EmployeeData</span> export
-          for tenant <strong className="text-[#E2E8F0]">Evolved Hair Restoration</strong>, clinic{" "}
-          <strong className="text-[#E2E8F0]">Evolved Hair Restoration Perth</strong>. TFN, DOB, address, bank, super, tax,
-          and salary fields are never imported or shown here.
+          Import operational staff from an Evolved payroll{" "}
+          <span className="font-mono text-xs">EmployeeData</span> export for tenant{" "}
+          <strong className="text-[#E2E8F0]">Evolved Hair Restoration</strong>, clinic{" "}
+          <strong className="text-[#E2E8F0]">Evolved Hair Restoration Perth</strong>. TFN, DOB,
+          address, bank, super, tax, and salary fields are never imported or shown here.
         </p>
         {pageModel.hasPerthClinic ? (
           <InfoNotice variant="info" title="Perth clinic detected">
             Payroll source rows will link to{" "}
-            <span className="font-medium text-[#E2E8F0]">{pageModel.perthClinicDisplayName ?? "Perth clinic"}</span> via{" "}
-            <span className="font-mono text-xs">fi_staff_source_ids.metadata.primary_fi_clinic_id</span>.
+            <span className="font-medium text-[#E2E8F0]">
+              {pageModel.perthClinicDisplayName ?? "Perth clinic"}
+            </span>{" "}
+            via{" "}
+            <span className="font-mono text-xs">
+              fi_staff_source_ids.metadata.primary_fi_clinic_id
+            </span>
+            .
           </InfoNotice>
         ) : (
           <InfoNotice variant="warning" title="No Perth clinic match">
-            Staff still import at tenant level; clinic display name is stored in payroll metadata only.
+            Staff still import at tenant level; clinic display name is stored in payroll metadata
+            only.
           </InfoNotice>
         )}
         <p className="text-sm text-[#64748B]">
-          <Link href={`${base}/hr/staff-import`} className="text-[#94A3B8] underline-offset-2 hover:underline">
+          <Link
+            href={`${base}/hr/staff-import`}
+            className="text-[#94A3B8] underline-offset-2 hover:underline"
+          >
             ← IIOHR HR import
           </Link>
         </p>
       </header>
 
       {error ? (
-        <div className="rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
+        <div
+          className="rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -211,8 +229,8 @@ export function PayrollStaffImportClient({
           <div>
             <h2 className="text-lg font-semibold text-[#F8FAFC]">Payroll export file</h2>
             <p className="mt-1 text-xs text-[#64748B]">
-              Upload <span className="font-mono">EVOLVEDCLINICSPTYLTD_EmployeeData_*.xlsx</span>. Preview runs automatically
-              after upload.
+              Upload <span className="font-mono">EVOLVEDCLINICSPTYLTD_EmployeeData_*.xlsx</span>.
+              Preview runs automatically after upload.
             </p>
           </div>
           <input
@@ -259,8 +277,14 @@ export function PayrollStaffImportClient({
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
             {(
               [
-                ["Created", preview.appliedCounts?.createdStaff ?? preview.dryRunCounts.createdStaff],
-                ["Updated", preview.appliedCounts?.updatedStaff ?? preview.dryRunCounts.updatedStaff],
+                [
+                  "Created",
+                  preview.appliedCounts?.createdStaff ?? preview.dryRunCounts.createdStaff,
+                ],
+                [
+                  "Updated",
+                  preview.appliedCounts?.updatedStaff ?? preview.dryRunCounts.updatedStaff,
+                ],
                 [
                   "Skipped",
                   preview.skippedRowCount +
@@ -270,8 +294,13 @@ export function PayrollStaffImportClient({
                 ["Needs role assignment", buckets.needs_role_assignment.length],
               ] as const
             ).map(([k, v]) => (
-              <div key={k} className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
-                <dt className="text-[11px] font-medium uppercase tracking-wide text-emerald-200/80">{k}</dt>
+              <div
+                key={k}
+                className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2"
+              >
+                <dt className="text-[11px] font-medium uppercase tracking-wide text-emerald-200/80">
+                  {k}
+                </dt>
                 <dd className="mt-1 font-mono text-xl text-[#F8FAFC]">{v}</dd>
               </div>
             ))}
@@ -294,8 +323,8 @@ export function PayrollStaffImportClient({
           </div>
           {buckets.needs_role_assignment.length > 0 ? (
             <p className="mt-2 text-xs text-[#64748B]">
-              Staff readiness shows payroll links, HR onboarding, and clinical availability. Assign roles for imported
-              staff with <span className="font-mono">needs_review</span>.
+              Staff readiness shows payroll links, HR onboarding, and clinical availability. Assign
+              roles for imported staff with <span className="font-mono">needs_review</span>.
             </p>
           ) : (
             <p className="mt-2 text-xs text-[#64748B]">
@@ -310,8 +339,12 @@ export function PayrollStaffImportClient({
           <DashboardCard className="p-5 sm:p-6">
             <h2 className="text-lg font-semibold text-[#F8FAFC]">Summary</h2>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className={chipClass(preview.commit ? "ok" : "info")}>{preview.commit ? "Committed" : "Dry-run"}</span>
-              <span className={chipClass("neutral")}>Rows: {preview.validatedPackedRows?.length ?? 0}</span>
+              <span className={chipClass(preview.commit ? "ok" : "info")}>
+                {preview.commit ? "Committed" : "Dry-run"}
+              </span>
+              <span className={chipClass("neutral")}>
+                Rows: {preview.validatedPackedRows?.length ?? 0}
+              </span>
             </div>
             {counts ? (
               <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
@@ -323,8 +356,13 @@ export function PayrollStaffImportClient({
                     ["Deactivated", counts.deactivatedStaff],
                   ] as const
                 ).map(([k, v]) => (
-                  <div key={k} className="rounded-lg border border-white/[0.05] bg-[#0a1020]/50 px-3 py-2">
-                    <dt className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">{k}</dt>
+                  <div
+                    key={k}
+                    className="rounded-lg border border-white/[0.05] bg-[#0a1020]/50 px-3 py-2"
+                  >
+                    <dt className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">
+                      {k}
+                    </dt>
                     <dd className="mt-1 font-mono text-base text-[#F8FAFC]">{v}</dd>
                   </div>
                 ))}
@@ -335,7 +373,9 @@ export function PayrollStaffImportClient({
           {buckets.skipped_sensitive_fields.length > 0 ? (
             <DashboardCard className="p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-[#F8FAFC]">Skipped sensitive fields</h3>
-              <p className="mt-1 text-xs text-[#64748B]">Column names present in the export but never imported or displayed.</p>
+              <p className="mt-1 text-xs text-[#64748B]">
+                Column names present in the export but never imported or displayed.
+              </p>
               <p className="mt-2 font-mono text-xs leading-relaxed text-[#94A3B8]">
                 {buckets.skipped_sensitive_fields.join(", ")}
               </p>
@@ -344,29 +384,57 @@ export function PayrollStaffImportClient({
 
           <div className="grid gap-4 lg:grid-cols-2">
             <DashboardCard className="p-5 sm:p-6">
-              <h3 className="text-sm font-semibold text-[#F8FAFC]">New staff ({buckets.new_staff.length})</h3>
+              <h3 className="text-sm font-semibold text-[#F8FAFC]">
+                New staff ({buckets.new_staff.length})
+              </h3>
               <ul className="mt-3 space-y-2">
-                {buckets.new_staff.length ? buckets.new_staff.map((p) => <PayrollRowPreviewCard key={`n-${p.rowIndex}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}
+                {buckets.new_staff.length ? (
+                  buckets.new_staff.map((p) => (
+                    <PayrollRowPreviewCard key={`n-${p.rowIndex}`} p={p} />
+                  ))
+                ) : (
+                  <li className="text-sm text-[#64748B]">None</li>
+                )}
               </ul>
             </DashboardCard>
             <DashboardCard className="p-5 sm:p-6">
-              <h3 className="text-sm font-semibold text-[#F8FAFC]">Matched existing staff ({buckets.matched_existing_staff.length})</h3>
+              <h3 className="text-sm font-semibold text-[#F8FAFC]">
+                Matched existing staff ({buckets.matched_existing_staff.length})
+              </h3>
               <ul className="mt-3 space-y-2">
-                {buckets.matched_existing_staff.length ? buckets.matched_existing_staff.map((p) => <PayrollRowPreviewCard key={`m-${p.rowIndex}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}
+                {buckets.matched_existing_staff.length ? (
+                  buckets.matched_existing_staff.map((p) => (
+                    <PayrollRowPreviewCard key={`m-${p.rowIndex}`} p={p} />
+                  ))
+                ) : (
+                  <li className="text-sm text-[#64748B]">None</li>
+                )}
               </ul>
             </DashboardCard>
             <DashboardCard className="p-5 sm:p-6">
-              <h3 className="text-sm font-semibold text-[#F8FAFC]">Needs role assignment ({buckets.needs_role_assignment.length})</h3>
+              <h3 className="text-sm font-semibold text-[#F8FAFC]">
+                Needs role assignment ({buckets.needs_role_assignment.length})
+              </h3>
               <p className="mt-1 text-xs text-[#64748B]">
-                Imported with <span className="font-mono">staff_role = needs_review</span>. Paul can assign roles in Staff directory.
+                Imported with <span className="font-mono">staff_role = needs_review</span>. Paul can
+                assign roles in Staff directory.
               </p>
               <ul className="mt-3 space-y-2">
-                {buckets.needs_role_assignment.length ? buckets.needs_role_assignment.map((p) => <PayrollRowPreviewCard key={`r-${p.rowIndex}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}
+                {buckets.needs_role_assignment.length ? (
+                  buckets.needs_role_assignment.map((p) => (
+                    <PayrollRowPreviewCard key={`r-${p.rowIndex}`} p={p} />
+                  ))
+                ) : (
+                  <li className="text-sm text-[#64748B]">None</li>
+                )}
               </ul>
             </DashboardCard>
             <DashboardCard className="p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-[#F8FAFC]">Email issues</h3>
-              <p className="mt-1 text-xs text-[#64748B]">Missing: {buckets.missing_email.length} · Invalid: {buckets.invalid_email.length} · Duplicate skipped: {buckets.duplicate_email_skipped.length}</p>
+              <p className="mt-1 text-xs text-[#64748B]">
+                Missing: {buckets.missing_email.length} · Invalid: {buckets.invalid_email.length} ·
+                Duplicate skipped: {buckets.duplicate_email_skipped.length}
+              </p>
             </DashboardCard>
           </div>
         </div>
@@ -376,11 +444,15 @@ export function PayrollStaffImportClient({
         <h2 className="text-sm font-semibold text-[#F8FAFC]">Assign roles after import</h2>
         <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
           Use the{" "}
-          <Link href={`${base}/staff/role-review`} className="text-[#CBD5E1] underline-offset-2 hover:underline">
+          <Link
+            href={`${base}/staff/role-review`}
+            className="text-[#CBD5E1] underline-offset-2 hover:underline"
+          >
             Assign staff roles
           </Link>{" "}
-          workflow to set <span className="font-mono text-xs">staff_role</span> for each imported member (e.g. surgeon,
-          nurse, consultant, technician). Payroll job titles are not mapped automatically.
+          workflow to set <span className="font-mono text-xs">staff_role</span> for each imported
+          member (e.g. surgeon, nurse, consultant, technician). Payroll job titles are not mapped
+          automatically.
         </p>
       </DashboardCard>
     </div>

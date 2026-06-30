@@ -3,16 +3,25 @@
  * POST …/activity — append activity event
  */
 import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { crmAppendActivityBodySchema } from "@/src/lib/crm/crmApiSchemas";
 import { appendCrmActivityEvent, loadCrmActivityTimelineForLead } from "@/src/lib/crm/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string; leadId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; leadId: string }> }
+) {
   try {
     const { tenantId, leadId } = await params;
-    if (!tenantId?.trim() || !leadId?.trim()) return crmJsonError(400, "Missing tenantId or leadId.");
+    if (!tenantId?.trim() || !leadId?.trim())
+      return crmJsonError(400, "Missing tenantId or leadId.");
 
     const adminKey = extractAdminKeyFromRequest(req);
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
@@ -21,17 +30,23 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
     const limitRaw = url.searchParams.get("limit");
     const limit = limitRaw ? Number.parseInt(limitRaw, 10) : undefined;
 
-    const events = await loadCrmActivityTimelineForLead(tenantId, leadId, { limit: Number.isFinite(limit) ? limit : undefined });
+    const events = await loadCrmActivityTimelineForLead(tenantId, leadId, {
+      limit: Number.isFinite(limit) ? limit : undefined,
+    });
     return crmJsonOk({ events });
   } catch (e) {
     return mapCrmRouteError(e);
   }
 }
 
-export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string; leadId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; leadId: string }> }
+) {
   try {
     const { tenantId, leadId } = await params;
-    if (!tenantId?.trim() || !leadId?.trim()) return crmJsonError(400, "Missing tenantId or leadId.");
+    if (!tenantId?.trim() || !leadId?.trim())
+      return crmJsonError(400, "Missing tenantId or leadId.");
 
     const body = await req.json().catch(() => ({}));
     const adminKey = extractAdminKeyFromRequest(req, body);

@@ -2,10 +2,20 @@
  * Platform entitlements — shared types (safe for client + server imports).
  */
 
-export const FI_TENANT_VERIFICATION_STATUSES = ["unverified", "verified", "enterprise_verified"] as const;
+export const FI_TENANT_VERIFICATION_STATUSES = [
+  "unverified",
+  "verified",
+  "enterprise_verified",
+] as const;
 export type FiTenantVerificationStatus = (typeof FI_TENANT_VERIFICATION_STATUSES)[number];
 
-export const FI_SUBSCRIPTION_STATUSES = ["inactive", "trialing", "active", "past_due", "canceled"] as const;
+export const FI_SUBSCRIPTION_STATUSES = [
+  "inactive",
+  "trialing",
+  "active",
+  "past_due",
+  "canceled",
+] as const;
 export type FiSubscriptionStatus = (typeof FI_SUBSCRIPTION_STATUSES)[number];
 
 export const MODULE_ACCESS_DENIAL_REASONS = [

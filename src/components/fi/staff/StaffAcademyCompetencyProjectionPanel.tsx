@@ -55,14 +55,14 @@ export function StaffAcademyCompetencyProjectionPanel({
     <div>
       <h2 className={`text-lg font-semibold ${titleClass}`}>Academy Competency Projection</h2>
       <p className={`mt-1 text-sm ${mutedClass}`}>
-        Operational competency intelligence exported from IIOHR Academy. Read-only — IIOHR remains the educational
-        system of record.
+        Operational competency intelligence exported from IIOHR Academy. Read-only — IIOHR remains
+        the educational system of record.
       </p>
 
       {projections.length === 0 ? (
         <p className={`mt-4 text-sm ${mutedClass}`}>
-          No competency projections received yet. Projections appear when IIOHR exports verified competency
-          intelligence.
+          No competency projections received yet. Projections appear when IIOHR exports verified
+          competency intelligence.
         </p>
       ) : (
         <ul className="mt-4 space-y-3">
@@ -70,7 +70,9 @@ export function StaffAcademyCompetencyProjectionPanel({
             <li key={row.id} className={rowClass}>
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <p className={`font-mono text-sm font-medium ${valueClass}`}>{row.competencyKey}</p>
-                <span className={statusBadgeClass(row.competencyStatus)}>{statusLabel(row.competencyStatus)}</span>
+                <span className={statusBadgeClass(row.competencyStatus)}>
+                  {statusLabel(row.competencyStatus)}
+                </span>
               </div>
               <dl className={`mt-3 grid gap-2 text-xs sm:grid-cols-2 ${labelClass}`}>
                 <div>
@@ -87,7 +89,9 @@ export function StaffAcademyCompetencyProjectionPanel({
                 </div>
                 <div>
                   <dt>Last verified</dt>
-                  <dd className={`mt-0.5 ${valueClass}`}>{formatIsoDateTime(row.lastVerifiedAt)}</dd>
+                  <dd className={`mt-0.5 ${valueClass}`}>
+                    {formatIsoDateTime(row.lastVerifiedAt)}
+                  </dd>
                 </div>
               </dl>
             </li>

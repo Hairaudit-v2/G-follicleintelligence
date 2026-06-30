@@ -3,12 +3,19 @@
 import { revalidatePath } from "next/cache";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { assertFiTenantExists, isFiAdminUuid, requireFiAdminKey } from "@/lib/server/fiAdminKeyGate";
+import {
+  assertFiTenantExists,
+  isFiAdminUuid,
+  requireFiAdminKey,
+} from "@/lib/server/fiAdminKeyGate";
 import { mergeTenantConfigJsonWithOperatingModeKey } from "@/lib/fi/tenantConfig";
 import { isFiTenantOperatingModeKey } from "@/src/config/fiTenantOperatingModeUi";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { buildTenantOperatingModeChangedAuditInsert } from "@/src/lib/fi-os/staffFeatureAccessAuditPayload";
-import { resolveActorIdsForFiOsAudit, tryInsertFiStaffFeatureAccessAuditEvent } from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
+import {
+  resolveActorIdsForFiOsAudit,
+  tryInsertFiStaffFeatureAccessAuditEvent,
+} from "@/src/lib/fi-os/staffFeatureAccessAudit.server";
 
 export async function saveTenantFiOsOperatingModeAction(input: {
   adminKey: string;
@@ -32,19 +39,29 @@ export async function saveTenantFiOsOperatingModeAction(input: {
 
   try {
     const supabase = supabaseAdmin();
-    const { data: row, error: rErr } = await supabase.from("fi_tenants").select("config_json").eq("id", tenantId).maybeSingle();
+    const { data: row, error: rErr } = await supabase
+      .from("fi_tenants")
+      .select("config_json")
+      .eq("id", tenantId)
+      .maybeSingle();
     if (rErr) return { ok: false, error: rErr.message };
 
     const rawCfg = (row as { config_json?: unknown } | null)?.config_json;
     const oldFlat =
-      rawCfg && typeof rawCfg === "object" && !Array.isArray(rawCfg) ? (rawCfg as Record<string, unknown>) : {};
+      rawCfg && typeof rawCfg === "object" && !Array.isArray(rawCfg)
+        ? (rawCfg as Record<string, unknown>)
+        : {};
     const oldMode =
-      typeof oldFlat.fi_os_operating_mode_key === "string" && oldFlat.fi_os_operating_mode_key.trim()
+      typeof oldFlat.fi_os_operating_mode_key === "string" &&
+      oldFlat.fi_os_operating_mode_key.trim()
         ? oldFlat.fi_os_operating_mode_key.trim()
         : null;
 
     const merged = mergeTenantConfigJsonWithOperatingModeKey(rawCfg, nextKey);
-    const { error: uErr } = await supabase.from("fi_tenants").update({ config_json: merged }).eq("id", tenantId);
+    const { error: uErr } = await supabase
+      .from("fi_tenants")
+      .update({ config_json: merged })
+      .eq("id", tenantId);
     if (uErr) return { ok: false, error: uErr.message };
 
     const authId = await resolveAuthUserId(null);

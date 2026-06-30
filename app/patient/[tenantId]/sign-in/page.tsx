@@ -37,7 +37,9 @@ export default async function PatientPortalSignInPage({
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/90">Patient portal</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/90">
+          Patient portal
+        </p>
         <h1 className="mt-2 text-2xl font-semibold text-slate-100">Sign in</h1>
       </div>
       <div className="rounded-2xl border border-white/[0.08] bg-slate-900/50 p-6 shadow-xl">

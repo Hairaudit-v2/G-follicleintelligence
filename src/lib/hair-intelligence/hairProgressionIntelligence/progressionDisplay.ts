@@ -1,4 +1,7 @@
-import type { HairProgressionIntelligence, HairProgressionStabilityLabel } from "./progressionEngine";
+import type {
+  HairProgressionIntelligence,
+  HairProgressionStabilityLabel,
+} from "./progressionEngine";
 
 /**
  * Numeric grades/year for display tables (no unit suffix).
@@ -39,7 +42,9 @@ export function formatStabilityClinicalLabel(label: HairProgressionStabilityLabe
  * True when the engine labels the window as non-informative for longitudinal velocity
  * (clinicians should rely on the empty-state copy, not implied slopes).
  */
-export function hairProgressionIsInsufficientLongitudinalData(dto: { stability: { label: HairProgressionStabilityLabel } }): boolean {
+export function hairProgressionIsInsufficientLongitudinalData(dto: {
+  stability: { label: HairProgressionStabilityLabel };
+}): boolean {
   return dto.stability.label === "insufficient_data";
 }
 
@@ -68,7 +73,11 @@ export function hairProgressionLatestGradePresentation(dto: HairProgressionIntel
   const analysed = dto.timepoints.filter(
     (t) => Boolean(sys && t.classification_system === sys) && t.progression_ordinal != null
   );
-  const last = analysed.length ? analysed[analysed.length - 1] : dto.timepoints.length ? dto.timepoints[dto.timepoints.length - 1] : null;
+  const last = analysed.length
+    ? analysed[analysed.length - 1]
+    : dto.timepoints.length
+      ? dto.timepoints[dto.timepoints.length - 1]
+      : null;
   if (!last) return { grade: null, ordinal: null };
   return { grade: last.grade, ordinal: last.progression_ordinal };
 }

@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { PatientTwinHairLossClassificationRow, PatientTwinHairLossSection } from "./patientTwinTypes";
+import type {
+  PatientTwinHairLossClassificationRow,
+  PatientTwinHairLossSection,
+} from "./patientTwinTypes";
 
 function mapRow(x: Record<string, unknown>): PatientTwinHairLossClassificationRow {
   return {
@@ -11,12 +14,15 @@ function mapRow(x: Record<string, unknown>): PatientTwinHairLossClassificationRo
     classification_system: String(x.classification_system ?? ""),
     pattern_type: String(x.pattern_type ?? ""),
     classification_grade: String(x.classification_grade ?? ""),
-    confidence_score: typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
+    confidence_score:
+      typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
     frontal_loss_score: x.frontal_loss_score != null ? Number(x.frontal_loss_score) : null,
-    temporal_recession_score: x.temporal_recession_score != null ? Number(x.temporal_recession_score) : null,
+    temporal_recession_score:
+      x.temporal_recession_score != null ? Number(x.temporal_recession_score) : null,
     mid_scalp_score: x.mid_scalp_score != null ? Number(x.mid_scalp_score) : null,
     crown_loss_score: x.crown_loss_score != null ? Number(x.crown_loss_score) : null,
-    diffuse_thinning_score: x.diffuse_thinning_score != null ? Number(x.diffuse_thinning_score) : null,
+    diffuse_thinning_score:
+      x.diffuse_thinning_score != null ? Number(x.diffuse_thinning_score) : null,
     retrograde_pattern_detected: Boolean(x.retrograde_pattern_detected),
     suspected_scarring_pattern: Boolean(x.suspected_scarring_pattern),
     sex_classification: x.sex_classification != null ? String(x.sex_classification) : null,

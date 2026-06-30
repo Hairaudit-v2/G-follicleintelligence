@@ -3,7 +3,10 @@
  */
 
 import { mapExternalCategoryToCanonical } from "@/src/lib/imaging-os/categories";
-import { normalizeImagingOsTimepoint, type ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import {
+  normalizeImagingOsTimepoint,
+  type ImagingOsTimepoint,
+} from "@/src/lib/imaging-os/progression";
 import { evaluateImageQualityFromMetadata } from "@/src/lib/imaging-os/quality";
 import type { ImagingOsImageQualityEvaluationResult } from "@/src/lib/imaging-os/quality";
 import {
@@ -35,32 +38,48 @@ export const DEFAULT_FI_IMAGE_ATTRIBUTION_SETTINGS: FiImageAttributionSettings =
 };
 
 export function normalizeFiImageCaptureType(raw: unknown): FiImageCaptureType {
-  const s = String(raw ?? "").trim().toLowerCase();
-  return (FI_IMAGE_CAPTURE_TYPES as readonly string[]).includes(s) ? (s as FiImageCaptureType) : "upload";
+  const s = String(raw ?? "")
+    .trim()
+    .toLowerCase();
+  return (FI_IMAGE_CAPTURE_TYPES as readonly string[]).includes(s)
+    ? (s as FiImageCaptureType)
+    : "upload";
 }
 
 export function normalizeFiImageCaptureSource(raw: unknown): FiImageCaptureSource {
-  const s = String(raw ?? "").trim().toLowerCase();
-  return (FI_IMAGE_CAPTURE_SOURCES as readonly string[]).includes(s) ? (s as FiImageCaptureSource) : "unknown";
+  const s = String(raw ?? "")
+    .trim()
+    .toLowerCase();
+  return (FI_IMAGE_CAPTURE_SOURCES as readonly string[]).includes(s)
+    ? (s as FiImageCaptureSource)
+    : "unknown";
 }
 
 export function normalizeFiImageWatermarkPosition(raw: unknown): FiImageWatermarkPosition {
-  const s = String(raw ?? "").trim().toLowerCase();
+  const s = String(raw ?? "")
+    .trim()
+    .toLowerCase();
   return (FI_IMAGE_WATERMARK_POSITIONS as readonly string[]).includes(s)
     ? (s as FiImageWatermarkPosition)
     : "bottom_right";
 }
 
 export function clampWatermarkOpacity(raw: unknown): number {
-  if (raw == null || String(raw).trim() === "") return DEFAULT_FI_IMAGE_ATTRIBUTION_SETTINGS.watermark_opacity;
+  if (raw == null || String(raw).trim() === "")
+    return DEFAULT_FI_IMAGE_ATTRIBUTION_SETTINGS.watermark_opacity;
   const n = typeof raw === "number" ? raw : Number(String(raw).trim());
   if (!Number.isFinite(n) || n <= 0) return DEFAULT_FI_IMAGE_ATTRIBUTION_SETTINGS.watermark_opacity;
   return Math.max(0.15, Math.min(0.35, n));
 }
 
-export function parseFiImageAttributionSettings(metadata: Record<string, unknown> | null | undefined): FiImageAttributionSettings {
+export function parseFiImageAttributionSettings(
+  metadata: Record<string, unknown> | null | undefined
+): FiImageAttributionSettings {
   const root = metadata?.imaging_attribution;
-  const src = root && typeof root === "object" && !Array.isArray(root) ? (root as Record<string, unknown>) : {};
+  const src =
+    root && typeof root === "object" && !Array.isArray(root)
+      ? (root as Record<string, unknown>)
+      : {};
   return {
     enable_watermark: src.enable_watermark !== false,
     watermark_opacity: clampWatermarkOpacity(src.watermark_opacity),
@@ -75,7 +94,9 @@ export function parseFiImageAttributionSettings(metadata: Record<string, unknown
 export function formatFiImageCaptureDate(iso: string, locale = "en-AU"): string {
   const ms = Date.parse(iso);
   if (!Number.isFinite(ms)) return iso;
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", year: "numeric" }).format(new Date(ms));
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", year: "numeric" }).format(
+    new Date(ms)
+  );
 }
 
 export function inferFiImageProcedureStage(args: {
@@ -85,15 +106,32 @@ export function inferFiImageProcedureStage(args: {
   follow_up_interval?: string | null;
   imaging_library_axis?: string | null;
 }): FiImageProcedureStage {
-  const visit = String(args.visit_type ?? "").trim().toLowerCase();
-  const template = String(args.imaging_protocol_template_slug ?? "").trim().toLowerCase();
-  const category = String(args.image_category ?? "").trim().toLowerCase();
-  const followUp = String(args.follow_up_interval ?? "").trim().toLowerCase();
-  const axis = String(args.imaging_library_axis ?? "").trim().toLowerCase();
+  const visit = String(args.visit_type ?? "")
+    .trim()
+    .toLowerCase();
+  const template = String(args.imaging_protocol_template_slug ?? "")
+    .trim()
+    .toLowerCase();
+  const category = String(args.image_category ?? "")
+    .trim()
+    .toLowerCase();
+  const followUp = String(args.follow_up_interval ?? "")
+    .trim()
+    .toLowerCase();
+  const axis = String(args.imaging_library_axis ?? "")
+    .trim()
+    .toLowerCase();
 
-  if (axis.includes("audit") || visit.includes("audit") || template.includes("audit")) return "audit";
-  if (template.includes("surgery_day") || visit.includes("surgery_day") || visit.includes("intra")) return "surgery_day";
-  if (category === "post_op" || visit.includes("post_op") || visit.includes("post-op") || template.includes("post")) {
+  if (axis.includes("audit") || visit.includes("audit") || template.includes("audit"))
+    return "audit";
+  if (template.includes("surgery_day") || visit.includes("surgery_day") || visit.includes("intra"))
+    return "surgery_day";
+  if (
+    category === "post_op" ||
+    visit.includes("post_op") ||
+    visit.includes("post-op") ||
+    template.includes("post")
+  ) {
     return "post_op";
   }
   if (
@@ -106,10 +144,19 @@ export function inferFiImageProcedureStage(args: {
   ) {
     return "follow_up";
   }
-  if (template.includes("transplant_planning") || template.includes("pre_op") || visit.includes("pre_op") || category === "before") {
+  if (
+    template.includes("transplant_planning") ||
+    template.includes("pre_op") ||
+    visit.includes("pre_op") ||
+    category === "before"
+  ) {
     return "pre_op";
   }
-  if (template.includes("hair_loss_consultation") || visit.includes("baseline") || category === "consult") {
+  if (
+    template.includes("hair_loss_consultation") ||
+    visit.includes("baseline") ||
+    category === "consult"
+  ) {
     return "baseline";
   }
   return "unknown";
@@ -157,11 +204,16 @@ export function mapToFiImageAttributionType(args: {
     args.protocol_slot_slug,
     args.image_category,
   ]
-    .map((v) => String(v ?? "").trim().toLowerCase())
+    .map((v) =>
+      String(v ?? "")
+        .trim()
+        .toLowerCase()
+    )
     .filter(Boolean);
 
   for (const c of candidates) {
-    if ((FI_IMAGE_ATTRIBUTION_TYPES as readonly string[]).includes(c)) return c as FiImageAttributionType;
+    if ((FI_IMAGE_ATTRIBUTION_TYPES as readonly string[]).includes(c))
+      return c as FiImageAttributionType;
     const mapped = ATTRIBUTION_TYPE_ALIASES[c];
     if (mapped) return mapped;
     const canonical = mapExternalCategoryToCanonical(c).canonical;
@@ -240,7 +292,9 @@ export function evaluateFiImageQuality(args: {
   };
 }
 
-export function buildFiImageQualityAlertMessage(quality: ImagingOsImageQualityEvaluationResult): string | null {
+export function buildFiImageQualityAlertMessage(
+  quality: ImagingOsImageQualityEvaluationResult
+): string | null {
   if (quality.is_clinically_usable) return null;
   if (quality.blockers.some((b) => /blur/i.test(b))) {
     return "Image quality too low. Please retake photo — image appears blurry.";
@@ -349,7 +403,9 @@ function timelineSortOrder(
   return base + (tpOrder[tp] ?? 0);
 }
 
-export function sortFiImageTimelineEntries(entries: FiImageTimelineEntry[]): FiImageTimelineEntry[] {
+export function sortFiImageTimelineEntries(
+  entries: FiImageTimelineEntry[]
+): FiImageTimelineEntry[] {
   return [...entries].sort((a, b) => {
     if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
     return Date.parse(a.capture_timestamp) - Date.parse(b.capture_timestamp);
@@ -370,7 +426,10 @@ export function buildMarketingExportCaption(args: {
   });
   return {
     headline: clinic,
-    subline: stageLabel.includes("Month") || stageLabel.includes("Day") ? `${stageLabel} Results` : stageLabel,
+    subline:
+      stageLabel.includes("Month") || stageLabel.includes("Day")
+        ? `${stageLabel} Results`
+        : stageLabel,
   };
 }
 
@@ -386,7 +445,9 @@ export function buildFiImageAiDatasetFields(args: {
       ? (pm.clinical as Record<string, unknown>)
       : {};
   const hair =
-    pm.hair && typeof pm.hair === "object" && !Array.isArray(pm.hair) ? (pm.hair as Record<string, unknown>) : {};
+    pm.hair && typeof pm.hair === "object" && !Array.isArray(pm.hair)
+      ? (pm.hair as Record<string, unknown>)
+      : {};
 
   const read = (...vals: unknown[]): string | null => {
     for (const v of vals) {

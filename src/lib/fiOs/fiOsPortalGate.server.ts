@@ -57,7 +57,9 @@ async function assertTenantBackendPortalAllowed(
     .maybeSingle();
   if (error || !adm) return false;
 
-  const st = String((adm as { status: string }).status).trim().toLowerCase();
+  const st = String((adm as { status: string }).status)
+    .trim()
+    .toLowerCase();
   if (st === "suspended") return false;
   if (st === "active") return true;
 
@@ -83,7 +85,11 @@ async function assertTenantBackendPortalAllowed(
 
 async function assertTenantRowExists(tenantId: string): Promise<boolean> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (error) return false;
   return Boolean(data);
 }
@@ -162,7 +168,9 @@ export async function assertFiTenantPortalAccess(tenantId: string): Promise<void
  * Supabase operator user (e.g. reception kiosk). When a valid PIN cookie is present, skip the
  * normal FI portal membership check; otherwise require {@link assertFiTenantPortalAccess}.
  */
-export async function assertFiTenantPortalAccessUnlessStaffPinSession(tenantId: string): Promise<void> {
+export async function assertFiTenantPortalAccessUnlessStaffPinSession(
+  tenantId: string
+): Promise<void> {
   const pin = await getStaffPinClinicSessionIfValid(tenantId.trim());
   if (pin) return;
   await assertFiTenantPortalAccess(tenantId);
@@ -180,7 +188,9 @@ export async function assertHairAuditOsAdminAccess(): Promise<void> {
   }
 
   const os = await loadFiOsIdentity(authId);
-  const r = String(os?.osRole ?? "").trim().toLowerCase();
+  const r = String(os?.osRole ?? "")
+    .trim()
+    .toLowerCase();
   if (r !== "fi_auditor" && r !== "fi_admin" && r !== "fi_platform_admin") {
     redirect("/follicle-intelligence/login?notice=no_audit_access");
   }

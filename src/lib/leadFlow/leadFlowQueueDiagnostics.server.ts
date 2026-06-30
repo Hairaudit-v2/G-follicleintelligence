@@ -58,13 +58,16 @@ export async function loadLeadFlowQueueDiagnostics(opts?: {
     provider: String((row as { provider: string }).provider),
     event_type: String((row as { event_type: string }).event_type),
     external_id: ((row as { external_id?: string | null }).external_id ?? null) as string | null,
-    provider_event_id: ((row as { provider_event_id?: string | null }).provider_event_id ?? null) as
+    provider_event_id: ((row as { provider_event_id?: string | null }).provider_event_id ??
+      null) as string | null,
+    error_message: ((row as { error_message?: string | null }).error_message ?? null) as
       | string
       | null,
-    error_message: ((row as { error_message?: string | null }).error_message ?? null) as string | null,
     retry_count: Number((row as { retry_count?: number }).retry_count ?? 0),
     created_at: String((row as { created_at: string }).created_at),
-    last_retry_at: ((row as { last_retry_at?: string | null }).last_retry_at ?? null) as string | null,
+    last_retry_at: ((row as { last_retry_at?: string | null }).last_retry_at ?? null) as
+      | string
+      | null,
   }));
 
   return { tenant_id: tenantId, failed_events };

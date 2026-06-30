@@ -3,7 +3,10 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createPaymentRequestForInvoice } from "@/src/lib/revenueOs/revenueInvoiceMutations.server";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 /**
  * FinancialOS deposit path: create a (Stripe) payment request for a consultation quote invoice
@@ -21,12 +24,19 @@ export async function startConsultationQuoteDepositPaymentRequest(args: {
   if (!tid || !iid) throw new Error("tenantId and invoiceId are required.");
 
   const supabase = supabaseAdmin();
-  const { data: raw, error } = await supabase.from("fi_invoices").select("*").eq("tenant_id", tid).eq("id", iid).maybeSingle();
+  const { data: raw, error } = await supabase
+    .from("fi_invoices")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", iid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!raw) throw new Error("Invoice not found.");
   const inv = mapInvoiceRow(raw as Record<string, unknown>);
-  if (inv.invoice_kind !== "consultation_quote") throw new Error("Only consultation quote invoices support this deposit flow.");
-  if (!isInvoiceOpenForCollection(inv.status)) throw new Error("Invoice is not open for collection.");
+  if (inv.invoice_kind !== "consultation_quote")
+    throw new Error("Only consultation quote invoices support this deposit flow.");
+  if (!isInvoiceOpenForCollection(inv.status))
+    throw new Error("Invoice is not open for collection.");
 
   const bal = invoiceBalanceDueCents(inv);
   const dep = Math.max(0, Math.floor(args.depositAmountCents));

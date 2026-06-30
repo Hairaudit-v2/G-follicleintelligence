@@ -9,7 +9,10 @@ import {
   deriveExternalConnectorMasterKey,
   encryptExternalConnectorSecret,
 } from "@/src/lib/onboarding-os/externalConnectorSecretCrypto.server";
-import { completeGoogleCalendarOAuth, storeGoogleCalendarCredentials } from "./googleCalendarAuth.server";
+import {
+  completeGoogleCalendarOAuth,
+  storeGoogleCalendarCredentials,
+} from "./googleCalendarAuth.server";
 import { loadGoogleCalendarConnectionStatus } from "./googleCalendarConnectionStatus.server";
 import {
   handleGoogleCalendarSyncCronGet,
@@ -18,7 +21,10 @@ import {
   syncGoogleCalendarForAllTenants,
   syncGoogleCalendarForTenant,
 } from "./googleCalendarSync.server";
-import { createGc8MonitoringMockTables, withGc8IntegrationDefaults } from "./googleCalendarGc8MockTables";
+import {
+  createGc8MonitoringMockTables,
+  withGc8IntegrationDefaults,
+} from "./googleCalendarGc8MockTables";
 
 const TENANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TENANT_INACTIVE = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
@@ -31,8 +37,8 @@ type IntegrationRow = Record<string, unknown>;
 type EventRow = Record<string, unknown>;
 
 function createGc3MockSupabase(seed?: IntegrationRow[]) {
-  const integrations: IntegrationRow[] = [...(seed ?? [])].map((row) =>
-    withGc8IntegrationDefaults(row) as IntegrationRow
+  const integrations: IntegrationRow[] = [...(seed ?? [])].map(
+    (row) => withGc8IntegrationDefaults(row) as IntegrationRow
   );
   const events: EventRow[] = [];
   const inboundCalendars: Record<string, unknown>[] = [];
@@ -44,9 +50,7 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
       if (gc8Handler) return gc8Handler;
       if (table === "fi_calendar_inbound_sync_calendars") {
         const filterInbound = (filters: Record<string, string | boolean>) =>
-          inboundCalendars.filter((r) =>
-            Object.entries(filters).every(([k, v]) => r[k] === v)
-          );
+          inboundCalendars.filter((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
 
         const buildInboundChain = (filters: Record<string, string | boolean> = {}) => {
           const chain = {
@@ -201,25 +205,20 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
                         return {
                           single: async () => {
                             const result = await applyUpdate();
-                            if (!result.data) return { data: null, error: { message: "not found" } };
+                            if (!result.data)
+                              return { data: null, error: { message: "not found" } };
                             return { data: result.data, error: null };
                           },
                         };
                       },
-                      then(
-                        resolve: (v: { error: null }) => void,
-                        reject?: (e: unknown) => void
-                      ) {
+                      then(resolve: (v: { error: null }) => void, reject?: (e: unknown) => void) {
                         applyUpdate()
                           .then(() => resolve({ error: null }))
                           .catch(reject);
                       },
                     };
                   },
-                  then(
-                    resolve: (v: { error: null }) => void,
-                    reject?: (e: unknown) => void
-                  ) {
+                  then(resolve: (v: { error: null }) => void, reject?: (e: unknown) => void) {
                     try {
                       const row = integrations.find((r) => r[col] === val);
                       if (row) Object.assign(row, patch);
@@ -300,10 +299,7 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
                 return {
                   eq(col2: string, val2: string) {
                     return {
-                      then(
-                        resolve: (v: { error: null }) => void,
-                        reject?: (e: unknown) => void
-                      ) {
+                      then(resolve: (v: { error: null }) => void, reject?: (e: unknown) => void) {
                         try {
                           const row = events.find((r) => r[col] === val && r[col2] === val2);
                           if (row) Object.assign(row, patch);
@@ -354,10 +350,9 @@ function googleSyncFetchHandler(opts: {
 
     if (url.includes("oauth2.googleapis.com/token") && method === "POST") {
       if (opts.refreshCalled) opts.refreshCalled.value = true;
-      return new Response(
-        JSON.stringify({ access_token: "refreshed-access", expires_in: 3600 }),
-        { status: 200 }
-      );
+      return new Response(JSON.stringify({ access_token: "refreshed-access", expires_in: 3600 }), {
+        status: 200,
+      });
     }
 
     if (url.includes("/calendars/") && url.includes("/events")) {
@@ -398,7 +393,14 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
   it("rejects missing secret", async () => {
     const res = await handleGoogleCalendarSyncCronGet(new NextRequest(ROUTE, { method: "GET" }), {
       getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-      runScheduledSync: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
+      runScheduledSync: async () => ({
+        success: true,
+        synced: 0,
+        failed: 0,
+        skipped: 0,
+        tenants: [],
+        source: "scheduled" as const,
+      }),
     });
     assert.equal(res.status, 401);
     const json = (await res.json()) as { ok: boolean; error?: string };
@@ -414,7 +416,14 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-        runScheduledSync: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
+        runScheduledSync: async () => ({
+          success: true,
+          synced: 0,
+          failed: 0,
+          skipped: 0,
+          tenants: [],
+          source: "scheduled" as const,
+        }),
       }
     );
     assert.equal(res.status, 401);
@@ -428,7 +437,14 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-        runScheduledSync: async () => ({ success: true, synced: 1, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
+        runScheduledSync: async () => ({
+          success: true,
+          synced: 1,
+          failed: 0,
+          skipped: 0,
+          tenants: [],
+          source: "scheduled" as const,
+        }),
       }
     );
     assert.equal(res.status, 200);
@@ -444,7 +460,14 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ FI_GOOGLE_CALENDAR_CRON_SECRET: GC_SECRET }),
-        runScheduledSync: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
+        runScheduledSync: async () => ({
+          success: true,
+          synced: 0,
+          failed: 0,
+          skipped: 0,
+          tenants: [],
+          source: "scheduled" as const,
+        }),
       }
     );
     assert.equal(res.status, 200);
@@ -518,10 +541,13 @@ describe("CalendarOS GC-3 — sync service", () => {
     const refreshCalled = { value: false };
     const fetchOverride = googleSyncFetchHandler({ refreshCalled, events: [] });
 
-    const result = await syncGoogleCalendarForAllTenants({}, {
-      supabaseClientForTests: client,
-      fetchOverride,
-    });
+    const result = await syncGoogleCalendarForAllTenants(
+      {},
+      {
+        supabaseClientForTests: client,
+        fetchOverride,
+      }
+    );
 
     assert.equal(result.synced, 1);
     assert.equal(result.failed, 0);
@@ -538,10 +564,13 @@ describe("CalendarOS GC-3 — sync service", () => {
     const refreshCalled = { value: false };
     const fetchOverride = googleSyncFetchHandler({ refreshCalled, events: [] });
 
-    const summary = await syncGoogleCalendarForTenant({ tenantId: TENANT_A }, {
-      supabaseClientForTests: client,
-      fetchOverride,
-    });
+    const summary = await syncGoogleCalendarForTenant(
+      { tenantId: TENANT_A },
+      {
+        supabaseClientForTests: client,
+        fetchOverride,
+      }
+    );
 
     assert.equal(summary.outcome, "synced");
     assert.equal(refreshCalled.value, true);
@@ -563,10 +592,13 @@ describe("CalendarOS GC-3 — sync service", () => {
       ],
     });
 
-    const summary = await syncGoogleCalendarForTenant({ tenantId: TENANT_A }, {
-      supabaseClientForTests: client,
-      fetchOverride,
-    });
+    const summary = await syncGoogleCalendarForTenant(
+      { tenantId: TENANT_A },
+      {
+        supabaseClientForTests: client,
+        fetchOverride,
+      }
+    );
 
     assert.equal(summary.outcome, "synced");
     const row = integrations[0];
@@ -583,17 +615,23 @@ describe("CalendarOS GC-3 — sync service", () => {
     const fetchOverride: typeof fetch = async () =>
       new Response("Bearer secret-token-leak", { status: 500 });
 
-    const summary = await syncGoogleCalendarForTenant({ tenantId: TENANT_A }, {
-      supabaseClientForTests: client,
-      fetchOverride,
-    });
+    const summary = await syncGoogleCalendarForTenant(
+      { tenantId: TENANT_A },
+      {
+        supabaseClientForTests: client,
+        fetchOverride,
+      }
+    );
 
     assert.equal(summary.outcome, "failed");
     const row = integrations[0];
     assert.equal(row.last_sync_status, "failed");
     assert.equal(row.sync_failure_count, 1);
     assert.ok(row.last_sync_error);
-    assert.ok(!String(row.last_sync_error).includes("secret-token-leak") || String(row.last_sync_error).length <= 500);
+    assert.ok(
+      !String(row.last_sync_error).includes("secret-token-leak") ||
+        String(row.last_sync_error).length <= 500
+    );
   });
 });
 
@@ -620,9 +658,12 @@ describe("CalendarOS GC-3 — health and diagnostics", () => {
       { supabaseClientForTests: client }
     );
 
-    const health = await loadGoogleCalendarSyncHealth({ tenantId: TENANT_A }, {
-      supabaseClientForTests: client,
-    });
+    const health = await loadGoogleCalendarSyncHealth(
+      { tenantId: TENANT_A },
+      {
+        supabaseClientForTests: client,
+      }
+    );
 
     assert.equal(health.connected, true);
     assert.ok(!("access_token_encrypted" in health));
@@ -645,17 +686,25 @@ describe("CalendarOS GC-3 — health and diagnostics", () => {
     );
 
     integrations[0].last_sync_status = "failed";
-    integrations[0].last_sync_error = "Google Calendar API error (403): access denied for Bearer abc123xyz";
+    integrations[0].last_sync_error =
+      "Google Calendar API error (403): access denied for Bearer abc123xyz";
     integrations[0].sync_failure_count = 2;
 
-    const diagnostics = await loadGoogleCalendarSyncDiagnostics({ tenantId: TENANT_A }, {
-      supabaseClientForTests: client,
-    });
+    const diagnostics = await loadGoogleCalendarSyncDiagnostics(
+      { tenantId: TENANT_A },
+      {
+        supabaseClientForTests: client,
+      }
+    );
 
     assert.equal(diagnostics.last_sync_status, "failed");
     assert.equal(diagnostics.sync_failure_count, 2);
     assert.ok(diagnostics.last_sync_error_summary);
-    assert.ok(!diagnostics.last_sync_error_summary!.includes("abc123xyz") || diagnostics.last_sync_error_summary!.includes("[redacted]") || diagnostics.last_sync_error_summary!.length <= 120);
+    assert.ok(
+      !diagnostics.last_sync_error_summary!.includes("abc123xyz") ||
+        diagnostics.last_sync_error_summary!.includes("[redacted]") ||
+        diagnostics.last_sync_error_summary!.length <= 120
+    );
     assert.ok(!("access_token_encrypted" in diagnostics));
   });
 

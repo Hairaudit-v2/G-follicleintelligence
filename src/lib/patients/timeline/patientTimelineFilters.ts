@@ -16,7 +16,9 @@ export function sortPatientTimelineItems(
 ): PatientTimelineItem[] {
   const copy = [...items];
   const mul = direction === "newest_first" ? -1 : 1;
-  copy.sort((a, b) => mul * (Date.parse(String(a.occurred_at)) - Date.parse(String(b.occurred_at))));
+  copy.sort(
+    (a, b) => mul * (Date.parse(String(a.occurred_at)) - Date.parse(String(b.occurred_at)))
+  );
   return copy;
 }
 
@@ -25,7 +27,8 @@ export function filterPatientTimelineItems(
   filters: PatientTimelineFilterState
 ): PatientTimelineItem[] {
   const types = filters.itemTypes && filters.itemTypes.length ? new Set(filters.itemTypes) : null;
-  const sources = filters.sourceTypes && filters.sourceTypes.length ? new Set(filters.sourceTypes) : null;
+  const sources =
+    filters.sourceTypes && filters.sourceTypes.length ? new Set(filters.sourceTypes) : null;
   return items.filter((it) => {
     if (types && !types.has(it.item_type)) return false;
     if (sources && !sources.has(it.source_type)) return false;
@@ -35,7 +38,10 @@ export function filterPatientTimelineItems(
 
 export type PatientTimelinePeriodGroup = "today" | "this_week" | "earlier";
 
-export function patientTimelinePeriodForOccurredAt(occurredAtIso: string, nowMs: number): PatientTimelinePeriodGroup {
+export function patientTimelinePeriodForOccurredAt(
+  occurredAtIso: string,
+  nowMs: number
+): PatientTimelinePeriodGroup {
   const t = Date.parse(String(occurredAtIso));
   if (Number.isNaN(t)) return "earlier";
   const startOfToday = new Date(nowMs);

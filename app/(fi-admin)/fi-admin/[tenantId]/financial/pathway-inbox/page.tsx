@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FinancialPaymentPathwayInboxTable } from "@/src/components/fi/financial/FinancialPaymentPathwayInboxTable";
-import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  FinancialOsSubPageHeader,
+  financialOsClasses,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadPaymentPathwayInbox } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
@@ -15,7 +18,11 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function FinancialOsPathwayInboxPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsPathwayInboxPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
@@ -35,12 +42,18 @@ export default async function FinancialOsPathwayInboxPage({ params }: { params: 
         description={
           <>
             Staff workflow queue for non-standard payment pathways (
-            <code className={financialOsClasses.code}>fi_payment_pathway_tasks</code>). Tasks are auto-created when patients or staff select medical
-            finance, super release, international transfer, installment plan, or manual pathways — not for pay-in-full or deposit/balance.
+            <code className={financialOsClasses.code}>fi_payment_pathway_tasks</code>). Tasks are
+            auto-created when patients or staff select medical finance, super release, international
+            transfer, installment plan, or manual pathways — not for pay-in-full or deposit/balance.
           </>
         }
       />
-      <FinancialPaymentPathwayInboxTable tenantId={tid} rows={rows} users={users} canMutate={canMutate} />
+      <FinancialPaymentPathwayInboxTable
+        tenantId={tid}
+        rows={rows}
+        users={users}
+        canMutate={canMutate}
+      />
     </div>
   );
 }

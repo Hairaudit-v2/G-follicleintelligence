@@ -43,7 +43,14 @@ export const FI_GATEWAY_PAYMENT_STATUSES = [
 ] as const;
 export type FiGatewayPaymentStatus = (typeof FI_GATEWAY_PAYMENT_STATUSES)[number];
 
-export const FI_PAYMENT_REQUEST_STATUSES = ["draft", "sent", "viewed", "paid", "expired", "cancelled"] as const;
+export const FI_PAYMENT_REQUEST_STATUSES = [
+  "draft",
+  "sent",
+  "viewed",
+  "paid",
+  "expired",
+  "cancelled",
+] as const;
 export type FiPaymentRequestStatus = (typeof FI_PAYMENT_REQUEST_STATUSES)[number];
 
 export type FiInvoiceRow = {
@@ -111,7 +118,9 @@ export type FiPaymentRequestRow = {
   updated_at: string;
 };
 
-export function invoiceBalanceDueCents(row: Pick<FiInvoiceRow, "total_cents" | "amount_paid_cents">): number {
+export function invoiceBalanceDueCents(
+  row: Pick<FiInvoiceRow, "total_cents" | "amount_paid_cents">
+): number {
   return Math.max(0, row.total_cents - row.amount_paid_cents);
 }
 

@@ -3,11 +3,19 @@
 import { useMemo, useState } from "react";
 import { createBookingAction, updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES } from "@/src/lib/bookings";
-import { serviceForBookingType, formatPriceAud, defaultProcedureDurationMinutes } from "@/src/lib/bookings/servicesCatalog";
+import {
+  serviceForBookingType,
+  formatPriceAud,
+  defaultProcedureDurationMinutes,
+} from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
-import type { CrmShellClinicOption, CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
+import type {
+  CrmShellClinicOption,
+  CrmShellUserPickerOption,
+  FiCrmLeadRow,
+} from "@/src/lib/crm/types";
 import {
   defaultRangeIso,
   endLocalFromStartLocalAndProcedure,
@@ -16,7 +24,8 @@ import {
 } from "./bookingFormUtils";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function BookingCreatePanel({
   tenantId,
@@ -57,7 +66,9 @@ export function BookingCreatePanel({
   const [startLocal, setStartLocal] = useState(() =>
     toDatetimeLocalValue(initialBooking?.start_at ?? def.start, clinicTz)
   );
-  const [endLocal, setEndLocal] = useState(() => toDatetimeLocalValue(initialBooking?.end_at ?? def.end, clinicTz));
+  const [endLocal, setEndLocal] = useState(() =>
+    toDatetimeLocalValue(initialBooking?.end_at ?? def.end, clinicTz)
+  );
   const [timezone, setTimezone] = useState(initialBooking?.timezone ?? clinicTz ?? "");
   const [location, setLocation] = useState(initialBooking?.location ?? "");
   const [assignee, setAssignee] = useState(initialBooking?.assigned_user_id ?? "");
@@ -74,7 +85,10 @@ export function BookingCreatePanel({
     return Array.from(u);
   }, [bookingType]);
 
-  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+  const selectedCatalog = useMemo(
+    () => serviceForBookingType(services, bookingType),
+    [services, bookingType]
+  );
 
   function wallClockTz(): string | null {
     return clinicTz || timezone.trim() || null;
@@ -82,7 +96,12 @@ export function BookingCreatePanel({
 
   function onProcedureTypeChange(nextType: string) {
     setBookingType(nextType);
-    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, wallClockTz(), services);
+    const nextEnd = endLocalFromStartLocalAndProcedure(
+      startLocal,
+      nextType,
+      wallClockTz(),
+      services
+    );
     if (nextEnd) setEndLocal(nextEnd);
   }
 
@@ -148,7 +167,9 @@ export function BookingCreatePanel({
 
   return (
     <div className={card}>
-      <h3 className="text-sm font-semibold text-slate-100">{mode === "create" ? "New booking" : "Edit booking"}</h3>
+      <h3 className="text-sm font-semibold text-slate-100">
+        {mode === "create" ? "New booking" : "Edit booking"}
+      </h3>
       <form className="mt-3 space-y-3" onSubmit={(e) => void onSubmit(e)}>
         <label className="block text-xs text-slate-400">
           Type
@@ -165,7 +186,9 @@ export function BookingCreatePanel({
             ))}
           </select>
         </label>
-        {!converted ? <p className="text-xs text-gray-500">Only consultation is available before conversion.</p> : null}
+        {!converted ? (
+          <p className="text-xs text-gray-500">Only consultation is available before conversion.</p>
+        ) : null}
         <label className="block text-xs text-slate-400">
           Title
           <input
@@ -203,8 +226,9 @@ export function BookingCreatePanel({
             />
             {converted ? (
               <p className="mt-1 text-[11px] text-gray-500">
-                Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min (end
-                updates when you change type).
+                Default slot for this procedure type:{" "}
+                {defaultProcedureDurationMinutes(bookingType, services)} min (end updates when you
+                change type).
                 {selectedCatalog && selectedCatalog.base_price > 0 ? (
                   <> Suggested price: {formatPriceAud(selectedCatalog.base_price)}.</>
                 ) : null}

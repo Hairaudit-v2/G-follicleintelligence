@@ -25,14 +25,24 @@ test("deriveClinicalStaffingDisplayStatus maps engine output to UI states", () =
   );
   assert.equal(
     deriveClinicalStaffingDisplayStatus(
-      { ready: false, missingRoles: [{ role: "nurse", required: 1, assigned: 0 }], blockedAssignments: [], warnings: [] },
+      {
+        ready: false,
+        missingRoles: [{ role: "nurse", required: 1, assigned: 0 }],
+        blockedAssignments: [],
+        warnings: [],
+      },
       true
     ),
     "missing_roles"
   );
   assert.equal(
     deriveClinicalStaffingDisplayStatus(
-      { ready: false, missingRoles: [], blockedAssignments: [{ staffId: "s1", role: "nurse", reason: "Blocked" }], warnings: [] },
+      {
+        ready: false,
+        missingRoles: [],
+        blockedAssignments: [{ staffId: "s1", role: "nurse", reason: "Blocked" }],
+        warnings: [],
+      },
       true
     ),
     "blocked"

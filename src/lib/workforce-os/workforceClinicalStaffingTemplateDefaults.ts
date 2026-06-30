@@ -45,7 +45,9 @@ export const DEFAULT_CLINICAL_STAFFING_TEMPLATES: DefaultClinicalStaffingTemplat
   },
 ];
 
-export function normalizeRequiredRoles(raw: Record<string, unknown> | null | undefined): ClinicalStaffingRequiredRoles {
+export function normalizeRequiredRoles(
+  raw: Record<string, unknown> | null | undefined
+): ClinicalStaffingRequiredRoles {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const out: ClinicalStaffingRequiredRoles = {};
   for (const [role, count] of Object.entries(raw)) {

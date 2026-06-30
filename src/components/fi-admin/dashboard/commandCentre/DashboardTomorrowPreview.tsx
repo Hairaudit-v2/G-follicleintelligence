@@ -6,7 +6,10 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { TomorrowPreviewLine } from "@/src/lib/fiAdmin/dashboardCommandCentreDerive";
 import { cn } from "@/lib/utils";
 
-export function DashboardTomorrowPreview(props: { base: string; lines: readonly TomorrowPreviewLine[] }) {
+export function DashboardTomorrowPreview(props: {
+  base: string;
+  lines: readonly TomorrowPreviewLine[];
+}) {
   const { base, lines } = props;
 
   return (
@@ -22,7 +25,7 @@ export function DashboardTomorrowPreview(props: { base: string; lines: readonly 
           href={`${base}/tomorrow`}
           className={cn(
             fiOsChromeClasses.toolbarControlSurface,
-            "inline-flex shrink-0 items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-50",
+            "inline-flex shrink-0 items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-50"
           )}
         >
           <Sunrise className="h-4 w-4 text-cyan-400" aria-hidden />

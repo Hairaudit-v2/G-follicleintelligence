@@ -68,7 +68,12 @@ export function FiCaseCard({
   }
 
   return (
-    <div className={cn(shell, "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md")}>
+    <div
+      className={cn(
+        shell,
+        "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md"
+      )}
+    >
       {main}
       {tail}
     </div>

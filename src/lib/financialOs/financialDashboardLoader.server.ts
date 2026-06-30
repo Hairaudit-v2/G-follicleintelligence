@@ -3,7 +3,11 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+  openCollectionStatusFilter,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
   loadFinancialPaymentPathwayDashboardCounts,
   type FinancialPaymentPathwayDashboardCounts,
@@ -56,7 +60,9 @@ function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } 
 /**
  * Aggregates FinancialOS dashboard metrics for a tenant (read-only; uses service role after portal gate).
  */
-export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise<FinancialOsDashboardMetrics> {
+export async function loadFinancialOsDashboardMetrics(
+  tenantId: string
+): Promise<FinancialOsDashboardMetrics> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
   // SA-2 field-level redaction (follow-up): gate financial.revenue / financial.margin /
@@ -147,7 +153,10 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
       .eq("status", "succeeded")
       .gte("created_at", start)
       .lt("created_at", end);
-    const sum = (pays ?? []).reduce((acc, p) => acc + Math.max(0, Number((p as { total_cents?: unknown }).total_cents ?? 0)), 0);
+    const sum = (pays ?? []).reduce(
+      (acc, p) => acc + Math.max(0, Number((p as { total_cents?: unknown }).total_cents ?? 0)),
+      0
+    );
     totals.push(sum);
   }
   const monthlyRevenueForecastCents =
@@ -155,16 +164,19 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
 
   const paymentPathways = await loadFinancialPaymentPathwayDashboardCounts(tid);
   const pathwayInbox = await loadPaymentPathwayInboxDashboardCounts(tid);
-  const [financeApplications, superRelease, internationalTransfer, financialClearance] = await Promise.all([
-    loadFinanceApplicationsDashboardCounts(tid),
-    loadSuperReleaseDashboardCounts(tid),
-    loadInternationalTransferDashboardCounts(tid),
-    loadFinancialClearanceDashboardMetrics(tid),
-  ]);
+  const [financeApplications, superRelease, internationalTransfer, financialClearance] =
+    await Promise.all([
+      loadFinanceApplicationsDashboardCounts(tid),
+      loadSuperReleaseDashboardCounts(tid),
+      loadInternationalTransferDashboardCounts(tid),
+      loadFinancialClearanceDashboardMetrics(tid),
+    ]);
 
   return {
     outstandingRevenueCents: outstandingRevenueCents,
-    outstandingInvoiceCount: invoices.filter((r) => isInvoiceOpenForCollection(r.status) && invoiceBalanceDueCents(r) > 0).length,
+    outstandingInvoiceCount: invoices.filter(
+      (r) => isInvoiceOpenForCollection(r.status) && invoiceBalanceDueCents(r) > 0
+    ).length,
     upcomingPaymentRequestCount: prCount ?? 0,
     upcomingInstallmentCount: instCount ?? 0,
     failedPaymentCount: failedPay ?? 0,

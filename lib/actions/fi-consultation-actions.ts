@@ -1,9 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
-import { completeConsultationDraft, createConsultationDraft, createConsultationFromBooking, updateConsultationDraft } from "@/src/lib/consultations/consultationMutations.server";
+import {
+  completeConsultationDraft,
+  createConsultationDraft,
+  createConsultationFromBooking,
+  updateConsultationDraft,
+} from "@/src/lib/consultations/consultationMutations.server";
 import {
   consultationCompleteBodySchema,
   consultationCreateDraftBodySchema,
@@ -64,7 +73,10 @@ export async function updateConsultationDraftAction(
     const { adminKey, ...patch } = parsed;
     void adminKey;
     if (patch.consultant_staff_id?.trim()) {
-      await assertStaffClinicallyAvailableForAssignment(tenantId.trim(), patch.consultant_staff_id.trim());
+      await assertStaffClinicallyAvailableForAssignment(
+        tenantId.trim(),
+        patch.consultant_staff_id.trim()
+      );
     }
     await updateConsultationDraft(tenantId, consultationId, {
       ...patch,
@@ -106,10 +118,7 @@ export async function createConsultationFromBookingAction(
   tenantId: string,
   bookingId: string,
   body?: unknown
-): Promise<
-  | { ok: true; consultationId: string; created: boolean }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; consultationId: string; created: boolean } | { ok: false; error: string }> {
   try {
     const adminKey =
       body && typeof body === "object" && body !== null && "adminKey" in body
@@ -118,9 +127,13 @@ export async function createConsultationFromBookingAction(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
 
     const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
-    const { consultation, created } = await createConsultationFromBooking(tenantId.trim(), bookingId.trim(), {
-      createdByFiUserId: fiUserId,
-    });
+    const { consultation, created } = await createConsultationFromBooking(
+      tenantId.trim(),
+      bookingId.trim(),
+      {
+        createdByFiUserId: fiUserId,
+      }
+    );
 
     const tid = tenantId.trim();
     const cid = consultation.id;

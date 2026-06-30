@@ -5,7 +5,10 @@
 
 import { defaultIntelligenceExportPolicy } from "@follicle/intelligence-core/policy";
 
-import type { ReceptionOsAlertKind, ReceptionOsWidgetKey } from "@/src/lib/receptionOs/receptionOsBoardModel";
+import type {
+  ReceptionOsAlertKind,
+  ReceptionOsWidgetKey,
+} from "@/src/lib/receptionOs/receptionOsBoardModel";
 
 export type ReceptionOsIntelligenceSignalKind =
   | "patient_flow_bottleneck"
@@ -106,7 +109,9 @@ export function deriveReceptionOsIntelligenceHints(input: {
   return hints;
 }
 
-export function mapAlertKindToIntelligenceSignal(kind: ReceptionOsAlertKind): ReceptionOsIntelligenceSignalKind {
+export function mapAlertKindToIntelligenceSignal(
+  kind: ReceptionOsAlertKind
+): ReceptionOsIntelligenceSignalKind {
   switch (kind) {
     case "missing_deposit":
       return "deposit_collection_risk";

@@ -43,9 +43,13 @@ function SectionIntro({
   return (
     <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -69,13 +73,7 @@ function ScoreBar({ label, value, width }: { label: string; value: string; width
 }
 
 /** Design handoff: replace inner content with screenshot or Figma embed */
-function VisualPlaceholder({
-  label,
-  className,
-}: {
-  label: string;
-  className?: string;
-}) {
+function VisualPlaceholder({ label, className }: { label: string; className?: string }) {
   return (
     <div
       className={cn(
@@ -83,33 +81,33 @@ function VisualPlaceholder({
         className
       )}
     >
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary/80">Suggested visual</p>
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary/80">
+        Suggested visual
+      </p>
       <p className="mt-2 max-w-md text-xs leading-relaxed text-muted-foreground">{label}</p>
     </div>
   );
 }
 
-function ExplainGrid({
-  see,
-  mean,
-  action,
-}: {
-  see: string;
-  mean: string;
-  action: string;
-}) {
+function ExplainGrid({ see, mean, action }: { see: string; mean: string; action: string }) {
   return (
     <div className="mt-8 grid gap-4 md:grid-cols-3">
       <div className="rounded-[1.25rem] border border-border/70 bg-card/40 p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/85">What you see</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/85">
+          What you see
+        </p>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{see}</p>
       </div>
       <div className="rounded-[1.25rem] border border-border/70 bg-card/40 p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/85">What it means</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/85">
+          What it means
+        </p>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mean}</p>
       </div>
       <div className="rounded-[1.25rem] border border-border/70 bg-card/40 p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/85">What action it enables</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/85">
+          What action it enables
+        </p>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{action}</p>
       </div>
     </div>
@@ -161,9 +159,9 @@ export default function DashboardDemoPage() {
           <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
             Under the UI, the same intelligence core connects{" "}
             <strong className="font-medium text-foreground">HairAudit</strong> surgical evidence,{" "}
-            <strong className="font-medium text-foreground">HLI</strong> longitudinal biology where integrated,
-            and <strong className="font-medium text-foreground">IIOHR</strong>-aligned standards programs. The
-            dashboard is how that compound signal becomes decisions.
+            <strong className="font-medium text-foreground">HLI</strong> longitudinal biology where
+            integrated, and <strong className="font-medium text-foreground">IIOHR</strong>-aligned
+            standards programs. The dashboard is how that compound signal becomes decisions.
           </p>
           <VisualPlaceholder
             className="mt-8"
@@ -185,12 +183,18 @@ export default function DashboardDemoPage() {
           <div className="fi-panel rounded-[1.75rem] p-6 md:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Portfolio executive score</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  Portfolio executive score
+                </p>
                 <div className="mt-4 flex items-end gap-4">
                   <p className="text-5xl font-semibold text-foreground">92.4</p>
                   <div className="mb-1 rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-primary/80">Vs cohort</p>
-                    <p className="text-sm font-semibold text-primary">+4.1 vs trailing 90-day mean</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-primary/80">
+                      Vs cohort
+                    </p>
+                    <p className="text-sm font-semibold text-primary">
+                      +4.1 vs trailing 90-day mean
+                    </p>
                   </div>
                 </div>
               </div>
@@ -218,7 +222,9 @@ export default function DashboardDemoPage() {
                 ["Last adjudication", "12 days ago"],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-xl border border-border/60 bg-card/35 px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{k}</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {k}
+                  </p>
                   <p className="mt-1 text-sm font-medium text-foreground">{v}</p>
                 </div>
               ))}
@@ -248,7 +254,9 @@ export default function DashboardDemoPage() {
         <FadeIn delay={0.06} className="mt-10">
           <div className="fi-panel rounded-[1.75rem] p-6 md:p-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Domain breakdown</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                Domain breakdown
+              </p>
               <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-primary/85">
                 24 domains
               </span>
@@ -260,8 +268,9 @@ export default function DashboardDemoPage() {
               <ScoreBar label="Documentation quality" value="87" width="87%" />
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              Lowest domain this period: <span className="text-foreground">Extraction integrity</span> — drives
-              review queue priority below.
+              Lowest domain this period:{" "}
+              <span className="text-foreground">Extraction integrity</span> — drives review queue
+              priority below.
             </p>
           </div>
           <VisualPlaceholder
@@ -314,9 +323,9 @@ export default function DashboardDemoPage() {
                 Drift watch
               </div>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Cohort definitions are versioned. When membership rules change, standing is recomputed with an
-                explicit breakpoint—so month-to-month movement reflects performance, not a silent denominator
-                shift.
+                Cohort definitions are versioned. When membership rules change, standing is
+                recomputed with an explicit breakpoint—so month-to-month movement reflects
+                performance, not a silent denominator shift.
               </p>
               <div className="mt-6 rounded-xl border border-border/60 bg-background/50 p-4 text-xs text-muted-foreground">
                 Active rule set: <span className="text-foreground">HT peer v2</span> · Effective{" "}
@@ -349,13 +358,27 @@ export default function DashboardDemoPage() {
           <div className="fi-panel rounded-[1.75rem] p-6 md:p-8">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-amber-400/90" aria-hidden />
-              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Governance queue</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                Governance queue
+              </p>
             </div>
             <div className="mt-6 space-y-3">
               {[
-                ["P1 · Pattern break", "Extraction integrity · 3 cases · same week", "Awaiting lead reviewer"],
-                ["P2 · Evidence gap", "Case HT-2401 · post-op set incomplete", "Request documentation"],
-                ["P3 · Recurring domain", "Documentation · below floor 2nd month", "Schedule coaching"],
+                [
+                  "P1 · Pattern break",
+                  "Extraction integrity · 3 cases · same week",
+                  "Awaiting lead reviewer",
+                ],
+                [
+                  "P2 · Evidence gap",
+                  "Case HT-2401 · post-op set incomplete",
+                  "Request documentation",
+                ],
+                [
+                  "P3 · Recurring domain",
+                  "Documentation · below floor 2nd month",
+                  "Schedule coaching",
+                ],
               ].map(([sev, body, status]) => (
                 <div
                   key={body}
@@ -396,7 +419,9 @@ export default function DashboardDemoPage() {
             <div className="fi-panel rounded-[1.75rem] p-6 md:p-8">
               <div className="flex items-center gap-2">
                 <Layers3 className="h-5 w-5 text-primary/85" aria-hidden />
-                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Internal reporting</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  Internal reporting
+                </p>
               </div>
               <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
                 <li className="flex gap-2">
@@ -412,7 +437,9 @@ export default function DashboardDemoPage() {
             <div className="fi-panel rounded-[1.75rem] p-6 md:p-8">
               <div className="flex items-center gap-2">
                 <FileLock className="h-5 w-5 text-emerald-400/90" aria-hidden />
-                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">External / public layer</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  External / public layer
+                </p>
               </div>
               <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
                 <li className="flex gap-2">
@@ -425,8 +452,8 @@ export default function DashboardDemoPage() {
                 </li>
               </ul>
               <p className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/5 px-3 py-2 text-xs text-muted-foreground">
-                Public view <span className="font-medium text-foreground">locked</span> until governance queue
-                clears for cohort HT-Q1.
+                Public view <span className="font-medium text-foreground">locked</span> until
+                governance queue clears for cohort HT-Q1.
               </p>
             </div>
           </div>
@@ -457,7 +484,9 @@ export default function DashboardDemoPage() {
               <div className="h-full rounded-[1.4rem] border border-border/70 bg-card/45 p-6 md:p-7">
                 <item.icon className="h-6 w-6 text-primary/85" aria-hidden />
                 <h3 className="mt-4 text-lg font-semibold text-foreground">{item.title}</h3>
-                <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-primary/80">{item.focus}</p>
+                <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-primary/80">
+                  {item.focus}
+                </p>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{item.example}</p>
               </div>
             </FadeIn>
@@ -499,7 +528,9 @@ export default function DashboardDemoPage() {
                   <span className="absolute -left-[25px] top-0 flex h-6 w-6 items-center justify-center rounded-full border border-primary/30 bg-background text-[11px] font-semibold text-primary md:-left-[33px]">
                     {idx + 1}
                   </span>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/85">{row.step}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/85">
+                    {row.step}
+                  </p>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{row.text}</p>
                 </li>
               ))}
@@ -523,12 +554,13 @@ export default function DashboardDemoPage() {
                   Proof of depth
                 </div>
                 <p className="mt-4 text-lg font-medium text-foreground">
-                  This walkthrough is representative of how Follicle Intelligence is meant to be deployed: one
-                  command layer for benchmarked quality, not a chart library bolted onto a database.
+                  This walkthrough is representative of how Follicle Intelligence is meant to be
+                  deployed: one command layer for benchmarked quality, not a chart library bolted
+                  onto a database.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  Live demos cover tenant configuration, cohort rule sets, reviewer permissions, and export
-                  behavior—aligned to your governance model.
+                  Live demos cover tenant configuration, cohort rule sets, reviewer permissions, and
+                  export behavior—aligned to your governance model.
                 </p>
               </div>
               <div className="flex flex-col gap-3">

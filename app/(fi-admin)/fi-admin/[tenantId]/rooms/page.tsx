@@ -17,7 +17,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function RoomsCatalogRoutePage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function RoomsCatalogRoutePage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();

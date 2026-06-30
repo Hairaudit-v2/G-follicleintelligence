@@ -21,6 +21,8 @@ export async function hairLongevityPhotoProtocolCompliance(params: {
   });
 }
 
-export function hairLongevityClinicalContext(phase: "intake" | "progress"): HliPhotoProtocolClinicalContext {
+export function hairLongevityClinicalContext(
+  phase: "intake" | "progress"
+): HliPhotoProtocolClinicalContext {
   return phase === "intake" ? "hli_intake" : "hli_progress";
 }

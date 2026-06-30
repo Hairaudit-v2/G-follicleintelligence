@@ -3,7 +3,11 @@ import "server-only";
 import type { CaseAdminDetail, CaseLeadLink } from "@/src/lib/cases/caseLoaders";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
-import { followUpCheckpointLabel, followUpStatusLabel, postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
+import {
+  followUpCheckpointLabel,
+  followUpStatusLabel,
+  postOpStatusLabel,
+} from "@/src/lib/cases/postOpLabels";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
@@ -73,8 +77,19 @@ const TIMELINE_PREVIEW = 18;
 /**
  * Assembles a read-only case summary document from data already loaded for the case (Stages 5A–5I).
  */
-export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): CaseSummaryDocument {
-  const { tenantId, detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineItems, readiness } = input;
+export function buildCaseSummaryDocument(
+  input: BuildCaseSummaryDocumentInput
+): CaseSummaryDocument {
+  const {
+    tenantId,
+    detail,
+    surgeryPlan,
+    procedureDay,
+    postOpTracking,
+    followUps,
+    timelineItems,
+    readiness,
+  } = input;
   const tid = tenantId.trim();
   const cid = detail.id;
 
@@ -88,7 +103,10 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
     row("Updated", formatIsoShort(detail.updated_at)),
   ];
 
-  const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
+  const patientId =
+    detail.patient?.foundation_patient_id ??
+    detail.foundation_patient_id ??
+    detail.legacy_patient_id;
   const linkedPatient = {
     linked: !!detail.patient,
     rows: detail.patient
@@ -140,9 +158,18 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
         row("Extraction method", procedureDay.extraction_method),
         row("Implantation method", procedureDay.implantation_method),
         row("Punch size", procedureDay.punch_size),
-        row("Grafts extracted", procedureDay.grafts_extracted != null ? String(procedureDay.grafts_extracted) : null),
-        row("Grafts implanted", procedureDay.grafts_implanted != null ? String(procedureDay.grafts_implanted) : null),
-        row("Hairs implanted", procedureDay.hairs_implanted != null ? String(procedureDay.hairs_implanted) : null),
+        row(
+          "Grafts extracted",
+          procedureDay.grafts_extracted != null ? String(procedureDay.grafts_extracted) : null
+        ),
+        row(
+          "Grafts implanted",
+          procedureDay.grafts_implanted != null ? String(procedureDay.grafts_implanted) : null
+        ),
+        row(
+          "Hairs implanted",
+          procedureDay.hairs_implanted != null ? String(procedureDay.hairs_implanted) : null
+        ),
       ]
     : [];
 
@@ -152,7 +179,9 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
         row("Instructions given", postOpTracking.instructions_given ? "Yes" : "No"),
         row(
           "Patient satisfaction (1–10)",
-          postOpTracking.patient_satisfaction_score != null ? String(postOpTracking.patient_satisfaction_score) : null
+          postOpTracking.patient_satisfaction_score != null
+            ? String(postOpTracking.patient_satisfaction_score)
+            : null
         ),
         row("Aftercare notes", postOpTracking.aftercare_notes),
         row("Donor recovery notes", postOpTracking.donor_recovery_notes),
@@ -171,12 +200,14 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
     linkedImages: fu.linked_image_ids.length,
   }));
 
-  const preview: CaseSummaryTimelinePreviewLine[] = timelineItems.slice(0, TIMELINE_PREVIEW).map((it) => ({
-    occurredOn: formatIsoShort(it.occurred_at),
-    title: it.title,
-    status: it.status ?? null,
-    sensitive: it.is_sensitive === true,
-  }));
+  const preview: CaseSummaryTimelinePreviewLine[] = timelineItems
+    .slice(0, TIMELINE_PREVIEW)
+    .map((it) => ({
+      occurredOn: formatIsoShort(it.occurred_at),
+      title: it.title,
+      status: it.status ?? null,
+      sensitive: it.is_sensitive === true,
+    }));
 
   const readinessSections = readiness.sections.map((s) => ({
     title: s.title,
@@ -200,12 +231,16 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
       rows: surgeryRows,
       zones: plannedZoneLabels(surgeryPlan),
       graftEstimate: graftEstimate(surgeryPlan),
-      surgicalPlanSummary: surgeryPlan?.surgical_plan_summary?.trim() ? surgeryPlan.surgical_plan_summary.trim() : null,
+      surgicalPlanSummary: surgeryPlan?.surgical_plan_summary?.trim()
+        ? surgeryPlan.surgical_plan_summary.trim()
+        : null,
     },
     procedureDay: {
       present: !!procedureDay,
       rows: procedureRows,
-      completionSummary: procedureDay?.completion_summary?.trim() ? procedureDay.completion_summary.trim() : null,
+      completionSummary: procedureDay?.completion_summary?.trim()
+        ? procedureDay.completion_summary.trim()
+        : null,
     },
     postOp: {
       present: !!postOpTracking,

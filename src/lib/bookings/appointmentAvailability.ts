@@ -15,7 +15,7 @@ export function bookingAssigneeIdentity(
   const sid = row.assigned_staff_id?.trim() || null;
   const uid = row.assigned_user_id?.trim() || null;
   if (sid) {
-    const linked = staffIdToUserId.has(sid) ? staffIdToUserId.get(sid) ?? null : null;
+    const linked = staffIdToUserId.has(sid) ? (staffIdToUserId.get(sid) ?? null) : null;
     return { kind: "staff", staffId: sid, linkedUserId: linked?.trim() || null };
   }
   if (uid) return { kind: "user", userId: uid };

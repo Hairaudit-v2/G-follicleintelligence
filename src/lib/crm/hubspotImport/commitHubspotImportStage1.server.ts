@@ -3,13 +3,21 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
-import { ensureDefaultPipelineStages, getEntryPipelineStage, loadPipelineStages } from "@/src/lib/crm/pipeline";
+import {
+  ensureDefaultPipelineStages,
+  getEntryPipelineStage,
+  loadPipelineStages,
+} from "@/src/lib/crm/pipeline";
 import { appendCrmLeadStageHistory } from "@/src/lib/crm/stageHistory";
 import { mapFiCrmLeadRow } from "@/src/lib/crm/leadRow";
 import type { CrmPipelineScope } from "@/src/lib/crm/types";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { syncLeadCreatedReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
-import { isPlaceholderEmail, normalizeEmail, normalizeWhitespaceName } from "@/src/lib/fi/foundation/normalize";
+import {
+  isPlaceholderEmail,
+  normalizeEmail,
+  normalizeWhitespaceName,
+} from "@/src/lib/fi/foundation/normalize";
 import type { HubspotContactParsedRow } from "./hubspotContactCsvColumns";
 import type { HubspotContactRowValidation } from "./validateHubspotContactsImport";
 import { rowHasBlockingIssues } from "./validateHubspotContactsImport";
@@ -110,7 +118,11 @@ function leadSummary(row: HubspotContactParsedRow, recordId: string): string {
   return ("HubSpot contact " + recordId).slice(0, 500);
 }
 
-async function deletePersonCascade(supabase: SupabaseClient, tenantId: string, personId: string): Promise<void> {
+async function deletePersonCascade(
+  supabase: SupabaseClient,
+  tenantId: string,
+  personId: string
+): Promise<void> {
   await supabase.from("fi_crm_leads").delete().eq("tenant_id", tenantId).eq("person_id", personId);
   await supabase.from("fi_patients").delete().eq("tenant_id", tenantId).eq("person_id", personId);
   await supabase.from("fi_persons").delete().eq("tenant_id", tenantId).eq("id", personId);
@@ -158,7 +170,9 @@ export async function commitHubspotImportStage1Rows(params: {
     }
     if (await hubspotRecordIdExists(tenantId, recordId, supabase)) {
       skipped++;
-      errors.push("Row " + String(row.rowIndex) + ": skipped -- HubSpot Record ID already imported.");
+      errors.push(
+        "Row " + String(row.rowIndex) + ": skipped -- HubSpot Record ID already imported."
+      );
       continue;
     }
 
@@ -167,7 +181,12 @@ export async function commitHubspotImportStage1Rows(params: {
     let leadId: string | null = null;
 
     try {
-      const personMeta = buildHubspotPersonMetadata({ importBatchId, recordId, row, validation: v });
+      const personMeta = buildHubspotPersonMetadata({
+        importBatchId,
+        recordId,
+        row,
+        validation: v,
+      });
       const { data: pIns, error: pErr } = await supabase
         .from("fi_persons")
         .insert({ tenant_id: tenantId, metadata: personMeta })
@@ -279,11 +298,19 @@ export async function commitHubspotImportStage1Rows(params: {
       if (personId) {
         try {
           if (leadId) {
-            await supabase.from("fi_crm_lead_source_ids").delete().eq("tenant_id", tenantId).eq("lead_id", leadId);
+            await supabase
+              .from("fi_crm_lead_source_ids")
+              .delete()
+              .eq("tenant_id", tenantId)
+              .eq("lead_id", leadId);
             await supabase.from("fi_crm_leads").delete().eq("tenant_id", tenantId).eq("id", leadId);
           }
           if (patientId) {
-            await supabase.from("fi_patients").delete().eq("tenant_id", tenantId).eq("id", patientId);
+            await supabase
+              .from("fi_patients")
+              .delete()
+              .eq("tenant_id", tenantId)
+              .eq("id", patientId);
           }
           await deletePersonCascade(supabase, tenantId, personId);
         } catch {

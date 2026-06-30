@@ -33,7 +33,12 @@ export async function approveClinicalVoiceNoteAction(
 
     return { ok: true };
   } catch (e) {
-    const msg = e instanceof z.ZodError ? e.errors[0]?.message ?? "Invalid input." : e instanceof Error ? e.message : "Request failed.";
+    const msg =
+      e instanceof z.ZodError
+        ? (e.errors[0]?.message ?? "Invalid input.")
+        : e instanceof Error
+          ? e.message
+          : "Request failed.";
     return { ok: false, error: msg };
   }
 }

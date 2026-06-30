@@ -111,9 +111,12 @@ export function VoiceNoteField({
     const rec = new Ctor();
     rec.continuous = true;
     rec.interimResults = true;
-    rec.lang = typeof navigator !== "undefined" && navigator.language ? navigator.language : "en-US";
+    rec.lang =
+      typeof navigator !== "undefined" && navigator.language ? navigator.language : "en-US";
     rec.onerror = (ev) => {
-      setSpeechError(ev.error === "not-allowed" ? "Microphone access denied." : `Speech error: ${ev.error}`);
+      setSpeechError(
+        ev.error === "not-allowed" ? "Microphone access denied." : `Speech error: ${ev.error}`
+      );
       setListening(false);
     };
     rec.onend = () => {
@@ -167,12 +170,16 @@ export function VoiceNoteField({
     setSaveStatus("saving");
     setSaveMessage(null);
     const existing = normalizeVoiceNoteValue(valueRef.current).clinicalNoteId ?? null;
-    const res = await upsertConsultationFormClinicalNoteAction(persistence.tenantId, persistence.consultationId, {
-      formInstanceId: persistence.formInstanceId,
-      formFieldId: fieldId,
-      transcriptRaw: transcript,
-      clinicalNoteId: existing,
-    });
+    const res = await upsertConsultationFormClinicalNoteAction(
+      persistence.tenantId,
+      persistence.consultationId,
+      {
+        formInstanceId: persistence.formInstanceId,
+        formFieldId: fieldId,
+        transcriptRaw: transcript,
+        clinicalNoteId: existing,
+      }
+    );
     if (!res.ok) {
       setSaveStatus("error");
       setSaveMessage(res.error);
@@ -193,14 +200,17 @@ export function VoiceNoteField({
       <div>
         <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
-          {required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+          {required ? (
+            <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+          ) : null}
         </div>
         {description?.trim() ? (
           <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
         ) : null}
       </div>
       <p className={fiOsLightFormSurfaceClassNames.helper}>
-        Dictation availability depends on browser/device support. Use the text area if speech is unavailable.
+        Dictation availability depends on browser/device support. Use the text area if speech is
+        unavailable.
       </p>
       {!disabled && hasSpeech ? (
         <div className="flex flex-wrap gap-2">
@@ -260,7 +270,9 @@ export function VoiceNoteField({
             {saveStatus === "saving" ? "Saving…" : "Save to clinical notes"}
           </button>
           {normalized.clinicalNoteId?.trim() ? (
-            <span className={fiOsLightFormSurfaceClassNames.meta}>Linked note ID: {normalized.clinicalNoteId.slice(0, 8)}…</span>
+            <span className={fiOsLightFormSurfaceClassNames.meta}>
+              Linked note ID: {normalized.clinicalNoteId.slice(0, 8)}…
+            </span>
           ) : null}
         </div>
       ) : null}
@@ -285,7 +297,9 @@ export function VoiceNoteReadOnlySummary({ label, value }: { label: string; valu
       <p className="font-semibold text-slate-100">{label}</p>
       <p className="mt-2 whitespace-pre-wrap text-slate-300">{transcript.trim() || "—"}</p>
       {clinicalNoteId?.trim() ? (
-        <p className={cn("mt-2", fiOsLightFormSurfaceClassNames.meta)}>Clinical note: {clinicalNoteId}</p>
+        <p className={cn("mt-2", fiOsLightFormSurfaceClassNames.meta)}>
+          Clinical note: {clinicalNoteId}
+        </p>
       ) : null}
     </div>
   );

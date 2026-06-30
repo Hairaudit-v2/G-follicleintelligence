@@ -14,7 +14,13 @@ type QuickActionCardProps = Omit<ComponentProps<typeof Link>, "className"> & {
 /**
  * Primary navigation tile — glass card with cyan hover affordance, optional lift on hover.
  */
-export function QuickActionCard({ title, description, icon, className, ...link }: QuickActionCardProps) {
+export function QuickActionCard({
+  title,
+  description,
+  icon,
+  className,
+  ...link
+}: QuickActionCardProps) {
   return (
     <Link
       {...link}
@@ -22,7 +28,7 @@ export function QuickActionCard({ title, description, icon, className, ...link }
         "group block rounded-2xl border border-white/[0.08] bg-[#0F1629]/70 p-4 shadow-lg shadow-black/30 backdrop-blur-md",
         "transition duration-200 ease-out will-change-transform",
         "hover:-translate-y-0.5 hover:border-[#22C1FF]/40 hover:bg-[#141C33]/90 hover:shadow-xl hover:shadow-cyan-500/15",
-        className,
+        className
       )}
     >
       {icon ? (
@@ -33,7 +39,9 @@ export function QuickActionCard({ title, description, icon, className, ...link }
       <div className="text-sm font-semibold tracking-tight text-[#F8FAFC] transition group-hover:text-[#22C1FF] sm:text-base">
         {title}
       </div>
-      <p className="mt-1.5 text-sm leading-relaxed text-[#94A3B8] group-hover:text-[#CBD5E1]">{description}</p>
+      <p className="mt-1.5 text-sm leading-relaxed text-[#94A3B8] group-hover:text-[#CBD5E1]">
+        {description}
+      </p>
     </Link>
   );
 }

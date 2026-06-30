@@ -1,8 +1,14 @@
 import "server-only";
 
-import { loadSurgeryPlanForCase, type CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
+import {
+  loadSurgeryPlanForCase,
+  type CaseSurgeryPlanRow,
+} from "@/src/lib/cases/surgeryPlanningLoaders";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { loadCrmShellPipelineStages, loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import {
+  loadCrmShellPipelineStages,
+  loadCrmShellScopePickerOptions,
+} from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
@@ -26,7 +32,10 @@ import type {
 } from "@/src/lib/crm/types";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
-import { loadPatientClinicalDetails, type PatientClinicalDetailsRow } from "@/src/lib/patients/clinicalDetailsServer";
+import {
+  loadPatientClinicalDetails,
+  type PatientClinicalDetailsRow,
+} from "@/src/lib/patients/clinicalDetailsServer";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForAppointment } from "@/src/lib/reminders/reminderJobs.server";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
@@ -40,8 +49,14 @@ import {
 } from "./appointmentMetadata";
 import { loadBookingsForLead, loadBookingsForPatient, loadBookingForTenant } from "./bookings";
 import { appointmentTitleFromBooking } from "./appointmentDisplay";
-import { parseAppointmentInvoicePreview, type AppointmentInvoicePreview } from "./appointmentInvoicePreview";
-import { loadPostOpTrackingForCase, type CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
+import {
+  parseAppointmentInvoicePreview,
+  type AppointmentInvoicePreview,
+} from "./appointmentInvoicePreview";
+import {
+  loadPostOpTrackingForCase,
+  type CasePostOpTrackingRow,
+} from "@/src/lib/cases/postOpLoaders";
 import type { FiBookingRow } from "./types";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { loadBookingClinicalStaffingSummary } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
@@ -108,7 +123,10 @@ function clinicalLineFromDetails(row: PatientClinicalDetailsRow | null): string 
   return parts.length ? parts.join(" · ") : null;
 }
 
-async function loadClinicalScalesSummaryForPatient(tenantId: string, patientId: string): Promise<string | null> {
+async function loadClinicalScalesSummaryForPatient(
+  tenantId: string,
+  patientId: string
+): Promise<string | null> {
   const row = await loadPatientClinicalDetails(tenantId, patientId);
   if (!row) return null;
   return formatClinicalScalesSummary({

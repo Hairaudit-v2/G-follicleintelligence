@@ -14,7 +14,9 @@ export const recordOutcomeMeasurementInputSchema = z.object({
   sourceTable: z.string().nullable().optional(),
   sourceId: z.string().uuid().nullable().optional(),
   confidenceLevel: confidenceSchema.optional(),
-  visibilityScope: z.enum(["tenant_clinical", "tenant_aggregate", "anonymised_network_candidate"]).optional(),
+  visibilityScope: z
+    .enum(["tenant_clinical", "tenant_aggregate", "anonymised_network_candidate"])
+    .optional(),
   metadata: z.record(z.unknown()).default({}),
 });
 
@@ -61,7 +63,9 @@ export const computeTenantOutcomeAggregateDraftInputSchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
-export type ComputeTenantOutcomeAggregateDraftInput = z.infer<typeof computeTenantOutcomeAggregateDraftInputSchema>;
+export type ComputeTenantOutcomeAggregateDraftInput = z.infer<
+  typeof computeTenantOutcomeAggregateDraftInputSchema
+>;
 
 export const computeGlobalOutcomeAggregateDraftInputSchema = z.object({
   cohortKey: z.string().min(1),
@@ -76,4 +80,6 @@ export const computeGlobalOutcomeAggregateDraftInputSchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
-export type ComputeGlobalOutcomeAggregateDraftInput = z.infer<typeof computeGlobalOutcomeAggregateDraftInputSchema>;
+export type ComputeGlobalOutcomeAggregateDraftInput = z.infer<
+  typeof computeGlobalOutcomeAggregateDraftInputSchema
+>;

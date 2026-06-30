@@ -7,7 +7,11 @@ import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders"
 /** URL sentinel for “no row yet” in filter selects. */
 export const CASES_INDEX_NONE_VALUE = "__none__";
 
-export type CasesWorklistSort = "updated_desc" | "created_desc" | "procedure_date_desc" | "readiness_attention_desc";
+export type CasesWorklistSort =
+  | "updated_desc"
+  | "created_desc"
+  | "procedure_date_desc"
+  | "readiness_attention_desc";
 
 export type CasesWorklistReadinessBucket = "ready" | "in_progress" | "needs_attention";
 

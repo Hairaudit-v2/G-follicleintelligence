@@ -7,7 +7,9 @@ export type LeadNoteDetailComparableSnapshot = {
   is_pinned: boolean;
 };
 
-export function noteDetailSnapshotFromRowLike(row: Pick<FiCrmLeadNoteRow, "note_body" | "note_visibility" | "is_pinned">): LeadNoteDetailComparableSnapshot {
+export function noteDetailSnapshotFromRowLike(
+  row: Pick<FiCrmLeadNoteRow, "note_body" | "note_visibility" | "is_pinned">
+): LeadNoteDetailComparableSnapshot {
   return {
     note_body: String(row.note_body).trim(),
     note_visibility: String(row.note_visibility).trim(),

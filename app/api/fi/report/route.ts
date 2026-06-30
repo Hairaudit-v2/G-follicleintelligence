@@ -54,7 +54,9 @@ export async function GET(req: Request) {
     if (report_id && !case_id) {
       const { data } = await supabase
         .from("fi_reports")
-        .select("id, version, status, storage_path, storage_url, created_at, approved_at, released_at, report_json")
+        .select(
+          "id, version, status, storage_path, storage_url, created_at, approved_at, released_at, report_json"
+        )
         .eq("id", report_id)
         .eq("tenant_id", tenant_id)
         .single();
@@ -71,7 +73,9 @@ export async function GET(req: Request) {
         return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });
       const { data } = await supabase
         .from("fi_reports")
-        .select("id, version, status, storage_path, storage_url, created_at, approved_at, released_at, report_json")
+        .select(
+          "id, version, status, storage_path, storage_url, created_at, approved_at, released_at, report_json"
+        )
         .eq("id", report_id)
         .eq("case_id", case_id)
         .eq("tenant_id", tenant_id)
@@ -89,7 +93,9 @@ export async function GET(req: Request) {
         return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });
       const { data } = await supabase
         .from("fi_reports")
-        .select("id, version, status, storage_path, storage_url, created_at, approved_at, released_at, report_json")
+        .select(
+          "id, version, status, storage_path, storage_url, created_at, approved_at, released_at, report_json"
+        )
         .eq("case_id", case_id)
         .eq("tenant_id", tenant_id)
         .in("status", ["approved", "released"])

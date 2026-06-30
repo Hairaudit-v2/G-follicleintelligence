@@ -84,22 +84,34 @@ export function FiMarketingHealthcareStackSection() {
           </p>
           <div className="relative mt-10 space-y-2">
             {c.layers.map((layer, bandIdx) => (
-              <LayerBand key={layer.title} layer={layer} bandIdx={bandIdx} totalBands={c.layers.length} />
+              <LayerBand
+                key={layer.title}
+                layer={layer}
+                bandIdx={bandIdx}
+                totalBands={c.layers.length}
+              />
             ))}
           </div>
         </div>
 
         <GlassCard className="mt-8 border-cyan-400/12 bg-[linear-gradient(135deg,rgb(34_211_238_/0.05),transparent_55%)] !p-5 sm:!p-6">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/75">Enterprise deployment model</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/75">
+            Enterprise deployment model
+          </p>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Each layer is tenant-isolated, role-governed, and designed for multi-clinic operators who need infrastructure
-            that scales without fragmenting clinical truth — the same architecture pattern used by serious enterprise
-            platforms.
+            Each layer is tenant-isolated, role-governed, and designed for multi-clinic operators
+            who need infrastructure that scales without fragmenting clinical truth — the same
+            architecture pattern used by serious enterprise platforms.
           </p>
         </GlassCard>
 
         <div className="relative mt-8 flex justify-center sm:mt-10">
-          <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+          >
             <Link href={c.secondaryCta.href}>
               {c.secondaryCta.label}
               <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />

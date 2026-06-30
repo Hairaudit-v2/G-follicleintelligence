@@ -9,7 +9,9 @@ export type CrmLeadConversionMode = "patient_linked" | "patient_created";
 
 export function assertLeadNotYetConverted(lead: Pick<FiCrmLeadRow, "converted_at">): void {
   if (lead.converted_at != null && String(lead.converted_at).trim() !== "") {
-    throw new Error("This lead has already been converted. Contact an administrator to relink if needed.");
+    throw new Error(
+      "This lead has already been converted. Contact an administrator to relink if needed."
+    );
   }
 }
 

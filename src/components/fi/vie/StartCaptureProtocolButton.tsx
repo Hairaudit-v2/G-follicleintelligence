@@ -40,9 +40,10 @@ export function StartCaptureProtocolButton({
   const [step, setStep] = useState<"pick" | "capture">("pick");
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
-  const [activeSession, setActiveSession] = useState<{ sessionId: string; templateSlug: VieProtocolSlug } | null>(
-    null
-  );
+  const [activeSession, setActiveSession] = useState<{
+    sessionId: string;
+    templateSlug: VieProtocolSlug;
+  } | null>(null);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -113,26 +114,37 @@ export function StartCaptureProtocolButton({
               <>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h2 id="vie-capture-dialog-title" className="text-base font-semibold text-slate-100">
+                    <h2
+                      id="vie-capture-dialog-title"
+                      className="text-base font-semibold text-slate-100"
+                    >
                       Start capture protocol
                     </h2>
                     <p className="mt-1 text-xs text-slate-400">
-                      All clinical photography is protocol-driven. Select the visit type to begin guided capture with
-                      visual framing guides and instant quality checks.
+                      All clinical photography is protocol-driven. Select the visit type to begin
+                      guided capture with visual framing guides and instant quality checks.
                     </p>
                   </div>
-                  <button type="button" onClick={close} className="text-sm text-gray-500 hover:text-slate-200">
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="text-sm text-gray-500 hover:text-slate-200"
+                  >
                     Close
                   </button>
                 </div>
 
                 <div className="mt-4 space-y-5">
                   {VIE_PROTOCOL_PICKER_GROUPS.map((group) => {
-                    const protocols = VIE_PROTOCOL_CATALOG.filter((p) => p.picker_category === group.category);
+                    const protocols = VIE_PROTOCOL_CATALOG.filter(
+                      (p) => p.picker_category === group.category
+                    );
                     if (protocols.length === 0) return null;
                     return (
                       <section key={group.category}>
-                        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-800">{group.label}</h3>
+                        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-800">
+                          {group.label}
+                        </h3>
                         <p className="mt-0.5 text-[0.65rem] text-gray-500">{group.hint}</p>
                         <ul className="mt-2 space-y-2">
                           {protocols.map((p) => (
@@ -143,7 +155,9 @@ export function StartCaptureProtocolButton({
                                 onClick={() => startProtocol(p.slug)}
                                 className="w-full rounded-lg border border-white/[0.08] px-3 py-2.5 text-left hover:border-cyan-400 hover:bg-cyan-50/50 disabled:opacity-50"
                               >
-                                <span className="block text-sm font-semibold text-slate-100">{p.name}</span>
+                                <span className="block text-sm font-semibold text-slate-100">
+                                  {p.name}
+                                </span>
                                 <span className="mt-0.5 block text-xs text-slate-400">
                                   {protocolSlotSummary(p.slug)} · {p.description}
                                 </span>

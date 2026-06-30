@@ -103,7 +103,9 @@ async function resolveCanPerformAdminActions(tenantId: string): Promise<boolean>
   });
 }
 
-export async function loadHrStaffReadinessPageModel(tenantId: string): Promise<HrStaffReadinessPageModel> {
+export async function loadHrStaffReadinessPageModel(
+  tenantId: string
+): Promise<HrStaffReadinessPageModel> {
   const tid = tenantId.trim();
   await assertCrmTenantWriteAllowed({ tenantId: tid, request: undefined });
 

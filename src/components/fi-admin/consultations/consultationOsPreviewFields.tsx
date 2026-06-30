@@ -77,7 +77,10 @@ export function LabeledTextInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={cn(editableInputClass, disabled && "cursor-not-allowed bg-white/[0.03] opacity-80")}
+        className={cn(
+          editableInputClass,
+          disabled && "cursor-not-allowed bg-white/[0.03] opacity-80"
+        )}
       />
     </div>
   );
@@ -117,7 +120,11 @@ export function LabeledTextarea({
         rows={rows}
         placeholder={placeholder}
         disabled={disabled}
-        className={cn(editableInputClass, "min-h-[10rem] resize-y", disabled && "cursor-not-allowed bg-white/[0.03] opacity-80")}
+        className={cn(
+          editableInputClass,
+          "min-h-[10rem] resize-y",
+          disabled && "cursor-not-allowed bg-white/[0.03] opacity-80"
+        )}
       />
       {hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
     </div>

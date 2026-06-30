@@ -5,7 +5,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 
-import type { FiClinicRoomRow, FiServiceRoomEligibilityRow, FiServiceStaffEligibilityRow } from "./roomTypes";
+import type {
+  FiClinicRoomRow,
+  FiServiceRoomEligibilityRow,
+  FiServiceStaffEligibilityRow,
+} from "./roomTypes";
 
 function mapRoomRow(raw: Record<string, unknown>): FiClinicRoomRow {
   const caps = raw.capabilities;
@@ -22,7 +26,9 @@ function mapRoomRow(raw: Record<string, unknown>): FiClinicRoomRow {
     is_active: Boolean(raw.is_active),
     sort_order: Number(raw.sort_order ?? 0),
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: raw.created_at != null ? String(raw.created_at) : undefined,
     updated_at: raw.updated_at != null ? String(raw.updated_at) : undefined,
   };
@@ -39,7 +45,9 @@ function mapServiceRoomEligibilityRow(raw: Record<string, unknown>): FiServiceRo
     is_preferred: Boolean(raw.is_preferred),
     is_active: Boolean(raw.is_active),
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
   };
 }
 
@@ -54,7 +62,9 @@ function mapServiceStaffEligibilityRow(raw: Record<string, unknown>): FiServiceS
     is_required: Boolean(raw.is_required),
     is_active: Boolean(raw.is_active),
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
   };
 }
 

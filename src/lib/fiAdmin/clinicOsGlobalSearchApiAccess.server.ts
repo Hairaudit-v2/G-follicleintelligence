@@ -6,7 +6,10 @@ import { isInsecureFiApiBypassAllowed } from "@/src/lib/fiAdmin/insecureFiApiByp
 import { isFiOsCrossTenantDirectoryRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
-async function loadFiUserRow(tenantId: string, authUserId: string): Promise<{ id: string; role: string } | null> {
+async function loadFiUserRow(
+  tenantId: string,
+  authUserId: string
+): Promise<{ id: string; role: string } | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
@@ -16,12 +19,19 @@ async function loadFiUserRow(tenantId: string, authUserId: string): Promise<{ id
     .maybeSingle();
   if (error) return null;
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 async function assertTenantRowExists(tenantId: string): Promise<boolean> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (error) return false;
   return Boolean(data);
 }
@@ -33,7 +43,10 @@ export type FiTenantPortalApiAccess = { ok: true } | { ok: false; status: number
  * **Insecure bypass:** only when **`FI_ALLOW_INSECURE_API`** is `true` / `1` / `yes` and **`NODE_ENV` is not `production`**.
  * Public preview/staging with `NODE_ENV=production` therefore always requires a session + tenant gate.
  */
-export async function checkFiTenantPortalApiAccess(request: Request, tenantId: string): Promise<FiTenantPortalApiAccess> {
+export async function checkFiTenantPortalApiAccess(
+  request: Request,
+  tenantId: string
+): Promise<FiTenantPortalApiAccess> {
   const tid = tenantId.trim();
   if (!tid) return { ok: false, status: 400, message: "Missing tenant." };
 

@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { publishConsultationEvent, publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import {
+  publishConsultationEvent,
+  publishLeadFlowEvent,
+} from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { createTimelineEvent } from "@/src/lib/fi/foundation/createTimelineEvent";
 import { appendCrmActivityEvent } from "./activity";
 import { mapFiCrmLeadRow } from "./leadRow";

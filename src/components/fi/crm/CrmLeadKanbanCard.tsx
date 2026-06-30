@@ -55,7 +55,8 @@ export function CrmLeadKanbanCard({
   const href = `/fi-admin/${tenantId}/crm/leads/${card.lead.id}`;
   const name = card.person ? personMetadataDisplayLabel(card.person.metadata) : "—";
   const nwShort = getNorwoodShortLabel(card.norwoodScale);
-  const subtitle = card.primaryConcernLine ?? card.clinicalSummaryLine ?? card.lead.summary?.trim() ?? null;
+  const subtitle =
+    card.primaryConcernLine ?? card.clinicalSummaryLine ?? card.lead.summary?.trim() ?? null;
   const ownerLabel = card.owner?.email ?? card.lead.primary_owner_user_id?.slice(0, 8) ?? "—";
 
   const longPressArmed = useRef(false);
@@ -163,7 +164,9 @@ export function CrmLeadKanbanCard({
                     {name}
                   </Link>
                 )}
-                <p className="truncate text-xs text-gray-500">{leadTitleFromRow(card.lead.summary, card.lead.id)}</p>
+                <p className="truncate text-xs text-gray-500">
+                  {leadTitleFromRow(card.lead.summary, card.lead.id)}
+                </p>
               </div>
               {nwShort ? (
                 <span
@@ -175,11 +178,17 @@ export function CrmLeadKanbanCard({
                 </span>
               ) : null}
             </div>
-            {subtitle ? <p className="mt-1 line-clamp-2 text-xs text-slate-300">{subtitle}</p> : null}
+            {subtitle ? (
+              <p className="mt-1 line-clamp-2 text-xs text-slate-300">{subtitle}</p>
+            ) : null}
             <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-400">
-              <span title="Last activity (lead update or CRM timeline)">Act: {fmtRelative(card.lastActivityAtIso)}</span>
+              <span title="Last activity (lead update or CRM timeline)">
+                Act: {fmtRelative(card.lastActivityAtIso)}
+              </span>
               {card.daysInStage != null ? (
-                <span className="rounded bg-white/[0.06] px-1 py-0.5 text-slate-300">{card.daysInStage}d in stage</span>
+                <span className="rounded bg-white/[0.06] px-1 py-0.5 text-slate-300">
+                  {card.daysInStage}d in stage
+                </span>
               ) : null}
               {card.overdueTaskCount > 0 ? (
                 <span className="inline-flex items-center gap-0.5 rounded bg-rose-500/15 px-1.5 py-0.5 font-medium text-rose-300">
@@ -191,7 +200,10 @@ export function CrmLeadKanbanCard({
             <p className="mt-1 truncate text-[11px] text-gray-500">Owner: {ownerLabel}</p>
           </div>
           {canMutate ? (
-            <div className="flex shrink-0 flex-col border-l border-white/[0.06]" data-kanban-interactive>
+            <div
+              className="flex shrink-0 flex-col border-l border-white/[0.06]"
+              data-kanban-interactive
+            >
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button

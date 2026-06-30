@@ -35,10 +35,9 @@ export function NorwoodVisualAssessmentField({
     </label>
   );
 
-  const desc =
-    description?.trim() ? (
-      <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
-    ) : null;
+  const desc = description?.trim() ? (
+    <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
+  ) : null;
 
   return (
     <div className="space-y-3">
@@ -50,8 +49,8 @@ export function NorwoodVisualAssessmentField({
       <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
         <div className="border-b border-white/[0.06] bg-white/[0.03] px-3 py-2">
           <p className={cn("text-xs", fiOsLightFormSurfaceClassNames.helper)}>
-            Tap the stage that best matches the pattern (reference diagram). Legacy dropdown remains below for precise
-            coding.
+            Tap the stage that best matches the pattern (reference diagram). Legacy dropdown remains
+            below for precise coding.
           </p>
         </div>
         <div className="p-3">
@@ -103,7 +102,9 @@ export function NorwoodVisualAssessmentField({
       </div>
 
       <div className="space-y-1">
-        <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>Fallback (dropdown)</span>
+        <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>
+          Fallback (dropdown)
+        </span>
         <select
           className={cn(fiOsLightFormSurfaceClassNames.controlInset, "max-w-lg")}
           value={str}
@@ -111,11 +112,7 @@ export function NorwoodVisualAssessmentField({
           onChange={(e) => onChange(normalizePatternClassificationString(e.target.value))}
         >
           <option value="">— Select —</option>
-          {hasLegacyUnknown ? (
-            <option value={str}>
-              (Legacy) {str}
-            </option>
-          ) : null}
+          {hasLegacyUnknown ? <option value={str}>(Legacy) {str}</option> : null}
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

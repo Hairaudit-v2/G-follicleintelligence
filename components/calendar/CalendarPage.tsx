@@ -17,13 +17,19 @@ import {
   type CalendarRoute,
 } from "@/src/lib/bookings/calendarQuery";
 import type { OperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarTypes";
-import { buildStaffUserLinkIndex, calendarFilterColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
+import {
+  buildStaffUserLinkIndex,
+  calendarFilterColumnId,
+} from "@/src/lib/calendar/operationalCalendarColumns";
 import { monthEmptyDayQuickCreateLocalStart } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
 import { QuickCallInBookingModal } from "@/src/components/fi/appointments/QuickCallInBookingModal";
-import { CalendarQuickCreateDrawer, type CalendarQuickCreatePrefill } from "@/src/components/fi/calendar/CalendarQuickCreateDrawer";
+import {
+  CalendarQuickCreateDrawer,
+  type CalendarQuickCreatePrefill,
+} from "@/src/components/fi/calendar/CalendarQuickCreateDrawer";
 import { CalendarSlotContextMenu } from "@/src/components/fi/calendar/CalendarSlotContextMenu";
 import {
   calendarQuickTemplateById,
@@ -94,7 +100,9 @@ function CalendarPageImpl({
     assignedStaffId?: string;
   }>({});
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
-  const [quickCreatePrefill, setQuickCreatePrefill] = useState<CalendarQuickCreatePrefill | null>(null);
+  const [quickCreatePrefill, setQuickCreatePrefill] = useState<CalendarQuickCreatePrefill | null>(
+    null
+  );
   const [slotContextMenu, setSlotContextMenu] = useState<{
     x: number;
     y: number;
@@ -113,10 +121,15 @@ function CalendarPageImpl({
     setDrawer(b);
   }, []);
 
-  const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh, pendingIds, upsertBooking } = useCalendarAppointments(
-    data,
-    { useSampleData: sampleMode }
-  );
+  const {
+    bookings,
+    bookingDisplay,
+    buckets,
+    rescheduleBooking,
+    refresh,
+    pendingIds,
+    upsertBooking,
+  } = useCalendarAppointments(data, { useSampleData: sampleMode });
 
   const renderCountRef = useRef(0);
   const renderStartedAtRef = useRef(0);
@@ -138,11 +151,23 @@ function CalendarPageImpl({
       rangeEndIso: data.rangeEndIso,
       bookingCount: bookings.length,
     });
-  }, [bookings.length, data.query.dateAnchor, data.query.view, data.rangeEndIso, data.rangeStartIso]);
+  }, [
+    bookings.length,
+    data.query.dateAnchor,
+    data.query.view,
+    data.rangeEndIso,
+    data.rangeStartIso,
+  ]);
 
-  const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
+  const slotPrefillLocal = useMemo(
+    () => `${data.query.dateAnchor.trim()}T09:00`,
+    [data.query.dateAnchor]
+  );
 
-  const { staffIdByUserId } = useMemo(() => buildStaffUserLinkIndex(data.staffDirectory), [data.staffDirectory]);
+  const { staffIdByUserId } = useMemo(
+    () => buildStaffUserLinkIndex(data.staffDirectory),
+    [data.staffDirectory]
+  );
 
   const quickCreateColumnIdFromFilters = useMemo(() => {
     const fromStaff = calendarFilterColumnId(data.query, staffIdByUserId);
@@ -166,8 +191,7 @@ function CalendarPageImpl({
   const calendarWorkspaceDisplayTheme = fiCalendarTheme?.theme ?? "dark";
   const prefersReducedMotion = useReducedMotion();
   /** FI OS + accessibility: skip view enter/exit motion so Month/Week/Day toggles swap immediately. */
-  const instantCalendarViewTransition =
-    isFiOsWorkspace || prefersReducedMotion === true;
+  const instantCalendarViewTransition = isFiOsWorkspace || prefersReducedMotion === true;
 
   useEffect(() => {
     if (!highlightedBookingId) return;
@@ -236,7 +260,13 @@ function CalendarPageImpl({
   );
 
   const handleEmptySlotContextMenu = useCallback(
-    (info: { clientX: number; clientY: number; dayKey: string; columnId: string; localStart: string }) => {
+    (info: {
+      clientX: number;
+      clientY: number;
+      dayKey: string;
+      columnId: string;
+      localStart: string;
+    }) => {
       setSlotContextMenu({
         x: info.clientX,
         y: info.clientY,
@@ -295,7 +325,15 @@ function CalendarPageImpl({
         )}
       />
     ),
-    [base, bookingDisplay, bookings, data.calendarTimezone, data.canMutateBookings, isFiOsWorkspace, openBookingDrawer]
+    [
+      base,
+      bookingDisplay,
+      bookings,
+      data.calendarTimezone,
+      data.canMutateBookings,
+      isFiOsWorkspace,
+      openBookingDrawer,
+    ]
   );
 
   const rightPanel = useMemo(
@@ -358,11 +396,22 @@ function CalendarPageImpl({
       />
 
       {isFiOsWorkspace ? (
-        <FiOsCalendarQuickFilters tenantId={data.tenantId} query={data.query} clinics={data.clinics} route={route} />
+        <FiOsCalendarQuickFilters
+          tenantId={data.tenantId}
+          query={data.query}
+          clinics={data.clinics}
+          route={route}
+        />
       ) : null}
 
       {isFiOsWorkspace ? (
-        <FiOsCalendarTodayCommandStrip tenantId={data.tenantId} query={data.query} bookings={bookings} lanes={data.lanes} route={route} />
+        <FiOsCalendarTodayCommandStrip
+          tenantId={data.tenantId}
+          query={data.query}
+          bookings={bookings}
+          lanes={data.lanes}
+          route={route}
+        />
       ) : null}
 
       {sampleMode ? (
@@ -370,8 +419,9 @@ function CalendarPageImpl({
           className="border-b border-sky-500/25 bg-sky-950/35 px-4 py-2 text-xs font-medium text-sky-200"
           role="status"
         >
-          Demo mode — sample consults, PRP, and transplant appointments merged. Drag-and-drop updates locally; real
-          bookings PATCH to the server with optimistic UI and rollback on error.
+          Demo mode — sample consults, PRP, and transplant appointments merged. Drag-and-drop
+          updates locally; real bookings PATCH to the server with optimistic UI and rollback on
+          error.
         </p>
       ) : null}
 
@@ -408,7 +458,9 @@ function CalendarPageImpl({
                 showWeekends={data.calendarSettings.showWeekends}
                 calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
-                onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}
+                onEmptyDayQuickCreate={
+                  quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined
+                }
               />
             </div>
           ) : (
@@ -445,63 +497,69 @@ function CalendarPageImpl({
           )
         ) : (
           <AnimatePresence mode="sync">
-              {isMonthView ? (
-                <motion.div key="month" className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
-                  <MonthView
-                    sidebar={sidebarForGrid}
-                    rightPanel={rightPanelForGrid}
-                    monthAnchor={data.query.dateAnchor}
-                    bookings={bookings}
-                    bookingDisplay={bookingDisplay}
-                    resourceColumns={data.resourceColumns}
-                    staffIdByUserId={staffIdByUserId}
-                    gridConfig={data.gridConfig}
-                    canMutateBookings={data.canMutateBookings}
-                    onSelectBooking={openBookingDrawer}
-                    onRescheduleBooking={rescheduleBooking}
-                    pendingAppointmentIds={pendingIds}
-                    tenantId={data.tenantId}
-                    query={data.query}
-                    calendarRoute={route}
-                showWeekends={data.calendarSettings.showWeekends}
-                    calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
-                    fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
-                    onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}
-                  />
-                </motion.div>
-              ) : (
-                <motion.div key={data.query.view} className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
-                  <CalendarGrid
-                    sidebar={sidebarForGrid}
-                    rightPanel={rightPanelForGrid}
-                    view={data.query.view as "day" | "3day" | "week"}
-                    lanes={data.lanes}
-                    buckets={buckets}
-                    gridConfig={data.gridConfig}
-                    bookingDisplay={bookingDisplay}
-                    resourceColumns={data.resourceColumns}
-                    resourceView={data.query.resourceView}
-                    staffIdByUserId={staffIdByUserId}
-                    canMutateBookings={data.canMutateBookings}
-                    bookings={bookings}
-                    highlightedColumnId={highlightedColumnId}
-                    onSelectBooking={openBookingDrawer}
-                    onRescheduleBooking={rescheduleBooking}
-                    pendingAppointmentIds={pendingIds}
-                    shortcuts={{
-                      tenantId: data.tenantId,
-                      query: data.query,
-                      addAppointmentHref: `${base}/bookings/new`,
-                    }}
-                    highlightedBookingId={highlightedBookingId}
-                    onEmptySlotClick={onEmptySlotClick}
-                    onEmptySlotContextMenu={onEmptySlotContextMenu}
-                    calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
-                    fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isMonthView ? (
+              <motion.div key="month" className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
+                <MonthView
+                  sidebar={sidebarForGrid}
+                  rightPanel={rightPanelForGrid}
+                  monthAnchor={data.query.dateAnchor}
+                  bookings={bookings}
+                  bookingDisplay={bookingDisplay}
+                  resourceColumns={data.resourceColumns}
+                  staffIdByUserId={staffIdByUserId}
+                  gridConfig={data.gridConfig}
+                  canMutateBookings={data.canMutateBookings}
+                  onSelectBooking={openBookingDrawer}
+                  onRescheduleBooking={rescheduleBooking}
+                  pendingAppointmentIds={pendingIds}
+                  tenantId={data.tenantId}
+                  query={data.query}
+                  calendarRoute={route}
+                  showWeekends={data.calendarSettings.showWeekends}
+                  calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+                  fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
+                  onEmptyDayQuickCreate={
+                    quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined
+                  }
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key={data.query.view}
+                className="flex min-h-0 flex-1 flex-col"
+                {...viewMotion}
+              >
+                <CalendarGrid
+                  sidebar={sidebarForGrid}
+                  rightPanel={rightPanelForGrid}
+                  view={data.query.view as "day" | "3day" | "week"}
+                  lanes={data.lanes}
+                  buckets={buckets}
+                  gridConfig={data.gridConfig}
+                  bookingDisplay={bookingDisplay}
+                  resourceColumns={data.resourceColumns}
+                  resourceView={data.query.resourceView}
+                  staffIdByUserId={staffIdByUserId}
+                  canMutateBookings={data.canMutateBookings}
+                  bookings={bookings}
+                  highlightedColumnId={highlightedColumnId}
+                  onSelectBooking={openBookingDrawer}
+                  onRescheduleBooking={rescheduleBooking}
+                  pendingAppointmentIds={pendingIds}
+                  shortcuts={{
+                    tenantId: data.tenantId,
+                    query: data.query,
+                    addAppointmentHref: `${base}/bookings/new`,
+                  }}
+                  highlightedBookingId={highlightedBookingId}
+                  onEmptySlotClick={onEmptySlotClick}
+                  onEmptySlotContextMenu={onEmptySlotContextMenu}
+                  calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+                  fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
       </div>
 
@@ -512,13 +570,97 @@ function CalendarPageImpl({
           y={slotContextMenu.y}
           onClose={() => setSlotContextMenu(null)}
           items={[
-            { id: "phone", label: "Phone Consultation", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "phone_consult") },
-            { id: "consult", label: "Consultation", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "consultation") },
-            { id: "prp", label: "PRP", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "prp") },
-            { id: "exo", label: "Exosomes", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "exosomes") },
-            { id: "follow", label: "Follow Up", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "follow_up") },
-            { id: "review", label: "Surgery Review", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "surgery_review") },
-            { id: "surg", label: "Surgery", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "surgery") },
+            {
+              id: "phone",
+              label: "Phone Consultation",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "phone_consult"
+                ),
+            },
+            {
+              id: "consult",
+              label: "Consultation",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "consultation"
+                ),
+            },
+            {
+              id: "prp",
+              label: "PRP",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "prp"
+                ),
+            },
+            {
+              id: "exo",
+              label: "Exosomes",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "exosomes"
+                ),
+            },
+            {
+              id: "follow",
+              label: "Follow Up",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "follow_up"
+                ),
+            },
+            {
+              id: "review",
+              label: "Surgery Review",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "surgery_review"
+                ),
+            },
+            {
+              id: "surg",
+              label: "Surgery",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "surgery"
+                ),
+            },
           ]}
         />
       ) : null}
@@ -547,14 +689,17 @@ function CalendarPageImpl({
           calendarWorkspaceDisplayTheme={isFiOsWorkspace ? calendarWorkspaceDisplayTheme : "dark"}
           onCreated={(booking, displayLabel) => {
             const tpl = calendarQuickTemplateById(
-              (booking.metadata?.quick_template_id as CalendarQuickTemplateId | undefined) ?? "consultation"
+              (booking.metadata?.quick_template_id as CalendarQuickTemplateId | undefined) ??
+                "consultation"
             );
             upsertBooking(booking, {
               anchorLabel: displayLabel.trim() || booking.title?.trim() || tpl?.label || "Booking",
               scalesSummary: null,
               durationMin: Math.max(
                 1,
-                Math.round((Date.parse(booking.end_at) - Date.parse(booking.start_at)) / 60000) || tpl?.durationMinutes || 30
+                Math.round((Date.parse(booking.end_at) - Date.parse(booking.start_at)) / 60000) ||
+                  tpl?.durationMinutes ||
+                  30
               ),
               reminderHint: null,
               procedureCatalogName: tpl?.label ?? null,
@@ -576,19 +721,33 @@ function CalendarPageImpl({
         onChanged={refresh}
         onEdit={(b) => setEditing(b)}
         variant={isFiOsWorkspace ? "fiOs" : "default"}
-        patientSummary={drawer ? data.bookingDisplay[drawer.id]?.anchorLabel ?? null : null}
+        patientSummary={drawer ? (data.bookingDisplay[drawer.id]?.anchorLabel ?? null) : null}
         staffDirectory={data.staffDirectory}
         canMutateBookings={data.canMutateBookings}
-        procedureLabel={drawer ? data.bookingDisplay[drawer.id]?.procedureCatalogName ?? null : null}
-        patientContactEmail={drawer ? data.bookingDisplay[drawer.id]?.patientEmail ?? null : null}
-        patientContactPhone={drawer ? data.bookingDisplay[drawer.id]?.patientPhone ?? null : null}
-        clinicalStaffing={drawer ? data.bookingDisplay[drawer.id]?.clinicalStaffing ?? null : null}
-        calendarOsSourceLabel={drawer ? data.bookingDisplay[drawer.id]?.calendarOsSourceLabel ?? null : null}
-        googleMeetUrl={drawer ? data.bookingDisplay[drawer.id]?.googleMeetUrl ?? null : null}
-        calendarOsCalendarId={drawer ? data.bookingDisplay[drawer.id]?.calendarOsCalendarId ?? null : null}
-        calendarOsEventTypeLabel={drawer ? data.bookingDisplay[drawer.id]?.calendarOsEventTypeLabel ?? null : null}
-        calendarOsExternalEventId={drawer ? data.bookingDisplay[drawer.id]?.calendarOsExternalEventId ?? null : null}
-        calendarOsStatus={drawer ? data.bookingDisplay[drawer.id]?.calendarOsStatus ?? null : null}
+        procedureLabel={
+          drawer ? (data.bookingDisplay[drawer.id]?.procedureCatalogName ?? null) : null
+        }
+        patientContactEmail={drawer ? (data.bookingDisplay[drawer.id]?.patientEmail ?? null) : null}
+        patientContactPhone={drawer ? (data.bookingDisplay[drawer.id]?.patientPhone ?? null) : null}
+        clinicalStaffing={
+          drawer ? (data.bookingDisplay[drawer.id]?.clinicalStaffing ?? null) : null
+        }
+        calendarOsSourceLabel={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsSourceLabel ?? null) : null
+        }
+        googleMeetUrl={drawer ? (data.bookingDisplay[drawer.id]?.googleMeetUrl ?? null) : null}
+        calendarOsCalendarId={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsCalendarId ?? null) : null
+        }
+        calendarOsEventTypeLabel={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsEventTypeLabel ?? null) : null
+        }
+        calendarOsExternalEventId={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsExternalEventId ?? null) : null
+        }
+        calendarOsStatus={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsStatus ?? null) : null
+        }
         onBookingUpdated={(b) => {
           upsertBooking(b);
           setDrawer(b);

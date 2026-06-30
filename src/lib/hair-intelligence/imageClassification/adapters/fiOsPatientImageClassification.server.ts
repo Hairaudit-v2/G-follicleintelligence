@@ -29,7 +29,9 @@ export type ClassifyFiPatientImageResult = {
 /**
  * FI OS adapter: tenant-safe load, signed URL for model only, persist `hli_image_classifications` + `fi_patient_images`.
  */
-export async function classifyFiPatientImageAndPersist(params: ClassifyFiPatientImageParams): Promise<ClassifyFiPatientImageResult> {
+export async function classifyFiPatientImageAndPersist(
+  params: ClassifyFiPatientImageParams
+): Promise<ClassifyFiPatientImageResult> {
   const supabase = params.client ?? supabaseAdmin();
   const tid = params.tenantId.trim();
   const iid = params.patientImageId.trim();
@@ -49,7 +51,10 @@ export async function classifyFiPatientImageAndPersist(params: ClassifyFiPatient
   const path = String(mapped.storage_path ?? "");
   if (!path) throw new Error("Image storage path missing.");
 
-  const signedMap = await createPatientImageSignedUrls([{ id: iid, storage_bucket: bucket, storage_path: path }], supabase);
+  const signedMap = await createPatientImageSignedUrls(
+    [{ id: iid, storage_bucket: bucket, storage_path: path }],
+    supabase
+  );
   const signed = signedMap.get(iid);
   if (!signed?.url) throw new Error("Could not create signed URL for classification.");
 

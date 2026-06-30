@@ -50,7 +50,10 @@ function toIsoTimestamp(raw: string | undefined | null): string {
 
 function hasAnyIdentity(input: HubspotIdentityInput): boolean {
   return Boolean(
-    input.hubspotContactId?.trim() || input.email?.trim() || input.hubspotDealId?.trim() || input.crmLeadId?.trim()
+    input.hubspotContactId?.trim() ||
+    input.email?.trim() ||
+    input.hubspotDealId?.trim() ||
+    input.crmLeadId?.trim()
   );
 }
 
@@ -71,7 +74,8 @@ async function runTimelineSync(
     return {
       ok: false,
       status: 422,
-      message: "No HubSpot identity provided (hubspot_contact_id, email, hubspot_deal_id, or crm_lead_id required).",
+      message:
+        "No HubSpot identity provided (hubspot_contact_id, email, hubspot_deal_id, or crm_lead_id required).",
     };
   }
 
@@ -144,7 +148,11 @@ export async function processHubspotContactWebhook(
   const tid = tenantId.trim();
   const eventType = payload.event_type?.trim() || "contact_activity";
   const eventTimestamp = toIsoTimestamp(payload.occurred_at);
-  const anchor = payload.hubspot_contact_id?.trim() || payload.email?.trim() || payload.crm_lead_id?.trim() || "unknown";
+  const anchor =
+    payload.hubspot_contact_id?.trim() ||
+    payload.email?.trim() ||
+    payload.crm_lead_id?.trim() ||
+    "unknown";
 
   return runTimelineSync(supabase, tid, identityFromPayload(payload), {
     eventType,
@@ -193,7 +201,8 @@ export async function processHubspotDealWebhook(
     return {
       ok: false,
       status: 422,
-      message: "No HubSpot identity provided (hubspot_contact_id, email, hubspot_deal_id, or crm_lead_id required).",
+      message:
+        "No HubSpot identity provided (hubspot_contact_id, email, hubspot_deal_id, or crm_lead_id required).",
     };
   }
 

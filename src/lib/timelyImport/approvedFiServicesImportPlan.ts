@@ -41,9 +41,14 @@ const HEX = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
 
 export function validateApprovedRowForSchema(row: FiServiceApprovedImportRow): string | null {
   if (!row.name?.trim()) return "Missing name.";
-  if (row.duration_minutes < 1 || row.duration_minutes > 1440) return "duration_minutes out of range (1–1440).";
+  if (row.duration_minutes < 1 || row.duration_minutes > 1440)
+    return "duration_minutes out of range (1–1440).";
   if (!Number.isFinite(row.base_price) || row.base_price < 0) return "base_price invalid.";
-  if (row.booking_type != null && row.booking_type.trim() && !isAllowedBookingType(row.booking_type)) {
+  if (
+    row.booking_type != null &&
+    row.booking_type.trim() &&
+    !isAllowedBookingType(row.booking_type)
+  ) {
     return `booking_type not allowed: ${row.booking_type}`;
   }
   if (row.color != null && row.color.trim() && !HEX.test(row.color.trim())) {
@@ -153,9 +158,18 @@ export function buildApprovedServicesImportPlan(
     if (bt) {
       const hit = byBookingType.get(bt);
       if (hit) {
-        entries.push({ approved: row, action: "update", existingId: hit.id, detail: `Matched existing booking_type=${bt}.` });
+        entries.push({
+          approved: row,
+          action: "update",
+          existingId: hit.id,
+          detail: `Matched existing booking_type=${bt}.`,
+        });
       } else {
-        entries.push({ approved: row, action: "create", detail: `New row with booking_type=${bt}.` });
+        entries.push({
+          approved: row,
+          action: "create",
+          detail: `New row with booking_type=${bt}.`,
+        });
       }
       continue;
     }

@@ -40,7 +40,9 @@ export function DashboardTodayTimeline(props: { entries: readonly TimelineEntry[
                 <div className="min-w-0 flex-1">
                   {entry.href ? (
                     <Link href={entry.href} className="group block">
-                      <p className="text-sm font-semibold text-slate-100 group-hover:text-cyan-100">{entry.title}</p>
+                      <p className="text-sm font-semibold text-slate-100 group-hover:text-cyan-100">
+                        {entry.title}
+                      </p>
                       <p className="mt-0.5 text-xs text-slate-500">{entry.detail}</p>
                     </Link>
                   ) : (

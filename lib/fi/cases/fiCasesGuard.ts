@@ -41,9 +41,7 @@ export type SoftDeleteCaseOptions = {
   reason: string;
 };
 
-export type SoftDeleteCaseResult =
-  | { ok: true; archivedAt: string }
-  | { ok: false; error: string };
+export type SoftDeleteCaseResult = { ok: true; archivedAt: string } | { ok: false; error: string };
 
 // ---------------------------------------------------------------------------
 // softDeleteFiCase
@@ -56,9 +54,7 @@ export type SoftDeleteCaseResult =
  * Idempotent: if the case is already soft-deleted, this is a no-op and
  * returns ok: true with the original archivedAt timestamp.
  */
-export async function softDeleteFiCase(
-  opts: SoftDeleteCaseOptions
-): Promise<SoftDeleteCaseResult> {
+export async function softDeleteFiCase(opts: SoftDeleteCaseOptions): Promise<SoftDeleteCaseResult> {
   const { tenantId, caseId, deletedByUserId, reason } = opts;
 
   if (!tenantId?.trim() || !caseId?.trim()) {
@@ -111,5 +107,3 @@ export async function softDeleteFiCase(
 
   return { ok: true, archivedAt: now };
 }
-
-

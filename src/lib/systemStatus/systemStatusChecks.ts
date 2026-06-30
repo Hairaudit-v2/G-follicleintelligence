@@ -34,14 +34,21 @@ function isMissingRelationError(message: string | undefined): boolean {
 }
 
 async function probeTable(supabase: SupabaseClient, table: string): Promise<boolean> {
-  const { error } = await supabase.from(table).select("id", { head: true, count: "exact" }).limit(1);
+  const { error } = await supabase
+    .from(table)
+    .select("id", { head: true, count: "exact" })
+    .limit(1);
   if (!error) return true;
   if (isMissingRelationError(error.message)) return false;
   // Permissions or transient errors: treat as present to avoid false "missing".
   return true;
 }
 
-async function countEq(supabase: SupabaseClient, table: string, tenantId: string): Promise<number | null> {
+async function countEq(
+  supabase: SupabaseClient,
+  table: string,
+  tenantId: string
+): Promise<number | null> {
   const { error, count } = await supabase
     .from(table)
     .select("*", { head: true, count: "exact" })
@@ -53,7 +60,10 @@ async function countEq(supabase: SupabaseClient, table: string, tenantId: string
   return count ?? 0;
 }
 
-async function countConvertedLeads(supabase: SupabaseClient, tenantId: string): Promise<number | null> {
+async function countConvertedLeads(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<number | null> {
   const { error, count } = await supabase
     .from("fi_crm_leads")
     .select("*", { head: true, count: "exact" })
@@ -66,7 +76,11 @@ async function countConvertedLeads(supabase: SupabaseClient, tenantId: string): 
   return count ?? 0;
 }
 
-async function countLeadsColumnSet(supabase: SupabaseClient, tenantId: string, column: string): Promise<number | null> {
+async function countLeadsColumnSet(
+  supabase: SupabaseClient,
+  tenantId: string,
+  column: string
+): Promise<number | null> {
   const { error, count } = await supabase
     .from("fi_crm_leads")
     .select("*", { head: true, count: "exact" })
@@ -96,7 +110,11 @@ async function countBookingsByStatuses(
   return count ?? 0;
 }
 
-async function countFutureBookings(supabase: SupabaseClient, tenantId: string, nowIso: string): Promise<number | null> {
+async function countFutureBookings(
+  supabase: SupabaseClient,
+  tenantId: string,
+  nowIso: string
+): Promise<number | null> {
   const { error, count } = await supabase
     .from("fi_bookings")
     .select("*", { head: true, count: "exact" })
@@ -146,8 +164,15 @@ async function countActivitySince(
   return count ?? 0;
 }
 
-async function countFiUsers(supabase: SupabaseClient, tenantId: string, withAuth: boolean): Promise<number | null> {
-  let q = supabase.from("fi_users").select("*", { head: true, count: "exact" }).eq("tenant_id", tenantId);
+async function countFiUsers(
+  supabase: SupabaseClient,
+  tenantId: string,
+  withAuth: boolean
+): Promise<number | null> {
+  let q = supabase
+    .from("fi_users")
+    .select("*", { head: true, count: "exact" })
+    .eq("tenant_id", tenantId);
   if (withAuth) {
     q = q.not("auth_user_id", "is", null);
   }
@@ -164,7 +189,10 @@ async function countPatientImages(
   tenantId: string,
   status?: "active" | "archived"
 ): Promise<number | null> {
-  let q = supabase.from("fi_patient_images").select("*", { head: true, count: "exact" }).eq("tenant_id", tenantId);
+  let q = supabase
+    .from("fi_patient_images")
+    .select("*", { head: true, count: "exact" })
+    .eq("tenant_id", tenantId);
   if (status) {
     q = q.eq("image_status", status);
   }
@@ -176,12 +204,18 @@ async function countPatientImages(
   return count ?? 0;
 }
 
-function emptySnapshot(tenantId: string, partial?: { supabaseConfigured?: boolean }): SystemStatusDbSnapshot {
+function emptySnapshot(
+  tenantId: string,
+  partial?: { supabaseConfigured?: boolean }
+): SystemStatusDbSnapshot {
   const z = null;
   return {
     tenantId,
     generatedAtIso: new Date().toISOString(),
-    tablePresence: Object.fromEntries(TABLES_TO_PROBE.map((t) => [t, false])) as Record<string, boolean>,
+    tablePresence: Object.fromEntries(TABLES_TO_PROBE.map((t) => [t, false])) as Record<
+      string,
+      boolean
+    >,
     counts: {
       crmLeads: z,
       crmTasks: z,
@@ -230,7 +264,9 @@ export async function runSystemStatusDbQueries(tenantId: string): Promise<System
 
   const now = new Date();
   const nowIso = now.toISOString();
-  const startUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  const startUtc = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+  );
   const nextUtc = new Date(startUtc);
   nextUtc.setUTCDate(nextUtc.getUTCDate() + 1);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -270,8 +306,12 @@ export async function runSystemStatusDbQueries(tenantId: string): Promise<System
   ] = await Promise.all([
     leadsTable ? countEq(supabase, "fi_crm_leads", tid) : Promise.resolve(null),
     tablePresence.fi_crm_tasks ? countEq(supabase, "fi_crm_tasks", tid) : Promise.resolve(null),
-    tablePresence.fi_crm_lead_notes ? countEq(supabase, "fi_crm_lead_notes", tid) : Promise.resolve(null),
-    tablePresence.fi_crm_lead_communications ? countEq(supabase, "fi_crm_lead_communications", tid) : Promise.resolve(null),
+    tablePresence.fi_crm_lead_notes
+      ? countEq(supabase, "fi_crm_lead_notes", tid)
+      : Promise.resolve(null),
+    tablePresence.fi_crm_lead_communications
+      ? countEq(supabase, "fi_crm_lead_communications", tid)
+      : Promise.resolve(null),
     leadsTable ? countConvertedLeads(supabase, tid) : Promise.resolve(null),
     leadsTable ? countLeadsColumnSet(supabase, tid, "person_id") : Promise.resolve(null),
     leadsTable ? countLeadsColumnSet(supabase, tid, "patient_id") : Promise.resolve(null),
@@ -282,14 +322,24 @@ export async function runSystemStatusDbQueries(tenantId: string): Promise<System
     bookingsTable ? countBookingsByStatuses(supabase, tid, ["cancelled"]) : Promise.resolve(null),
     tablePresence.fi_persons ? countEq(supabase, "fi_persons", tid) : Promise.resolve(null),
     tablePresence.fi_patients ? countEq(supabase, "fi_patients", tid) : Promise.resolve(null),
-    tablePresence.fi_cases ? countCasesByStatuses(supabase, tid, ["draft", "submitted", "processing"]) : Promise.resolve(null),
-    tablePresence.fi_cases ? countCasesByStatuses(supabase, tid, ["complete"]) : Promise.resolve(null),
-    activityTable ? countActivitySince(supabase, tid, sevenDaysAgo.toISOString()) : Promise.resolve(null),
+    tablePresence.fi_cases
+      ? countCasesByStatuses(supabase, tid, ["draft", "submitted", "processing"])
+      : Promise.resolve(null),
+    tablePresence.fi_cases
+      ? countCasesByStatuses(supabase, tid, ["complete"])
+      : Promise.resolve(null),
+    activityTable
+      ? countActivitySince(supabase, tid, sevenDaysAgo.toISOString())
+      : Promise.resolve(null),
     tablePresence.fi_users ? countFiUsers(supabase, tid, false) : Promise.resolve(null),
     tablePresence.fi_users ? countFiUsers(supabase, tid, true) : Promise.resolve(null),
     tablePresence.fi_patient_images ? countPatientImages(supabase, tid) : Promise.resolve(null),
-    tablePresence.fi_patient_images ? countPatientImages(supabase, tid, "active") : Promise.resolve(null),
-    tablePresence.fi_patient_images ? countPatientImages(supabase, tid, "archived") : Promise.resolve(null),
+    tablePresence.fi_patient_images
+      ? countPatientImages(supabase, tid, "active")
+      : Promise.resolve(null),
+    tablePresence.fi_patient_images
+      ? countPatientImages(supabase, tid, "archived")
+      : Promise.resolve(null),
   ]);
 
   let activityTodayFinal: number | null = null;

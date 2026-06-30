@@ -27,7 +27,9 @@ import type { FiCrmLeadCommunicationRow } from "./types";
 const TID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const LID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-function commRow(p: Partial<FiCrmLeadCommunicationRow> & Pick<FiCrmLeadCommunicationRow, "id">): FiCrmLeadCommunicationRow {
+function commRow(
+  p: Partial<FiCrmLeadCommunicationRow> & Pick<FiCrmLeadCommunicationRow, "id">
+): FiCrmLeadCommunicationRow {
   return {
     tenant_id: TID,
     lead_id: LID,
@@ -121,14 +123,22 @@ describe("Stage 2K — metadata object (pure)", () => {
 describe("Stage 2K — changed_keys (pure)", () => {
   it("lists only changed comparable fields", () => {
     const before = leadCommunicationDetailSnapshotFromRowLike(
-      commRow({ id: "x", communication_type: "phone", direction: "outbound", outcome: null, metadata: {} })
+      commRow({
+        id: "x",
+        communication_type: "phone",
+        direction: "outbound",
+        outcome: null,
+        metadata: {},
+      })
     );
     const after = { ...before, direction: "inbound" };
     assert.deepEqual(collectChangedLeadCommunicationDetailKeys(before, after), ["direction"]);
   });
 
   it("detects metadata change via fingerprint", () => {
-    const before = leadCommunicationDetailSnapshotFromRowLike(commRow({ id: "a", metadata: { x: 1 } }));
+    const before = leadCommunicationDetailSnapshotFromRowLike(
+      commRow({ id: "a", metadata: { x: 1 } })
+    );
     const after = { ...before, metadata: { x: 2 } };
     assert.deepEqual(collectChangedLeadCommunicationDetailKeys(before, after), ["metadata"]);
   });
@@ -137,7 +147,10 @@ describe("Stage 2K — changed_keys (pure)", () => {
 describe("Stage 2K — archived guard (pure)", () => {
   it("blocks edits when archived_at set", () => {
     assert.throws(
-      () => assertLeadCommunicationNotArchived(commRow({ id: "a", archived_at: "2026-02-01T00:00:00.000Z" })),
+      () =>
+        assertLeadCommunicationNotArchived(
+          commRow({ id: "a", archived_at: "2026-02-01T00:00:00.000Z" })
+        ),
       /Archived contact log/
     );
   });
@@ -158,8 +171,18 @@ describe("Stage 2K — sort newest contact_at first (pure)", () => {
 describe("Stage 2K — tenant/lead scope helper (pure)", () => {
   it("matches tenant and lead", () => {
     assert.equal(isLeadCommunicationOwnedByLeadTenant(commRow({ id: "1" }), TID, LID), true);
-    assert.equal(isLeadCommunicationOwnedByLeadTenant(commRow({ id: "1" }), TID, "cccccccc-cccc-4ccc-8ccc-cccccccccccc"), false);
-    assert.equal(isLeadCommunicationOwnedByLeadTenant(commRow({ id: "1", tenant_id: "other" }), TID, LID), false);
+    assert.equal(
+      isLeadCommunicationOwnedByLeadTenant(
+        commRow({ id: "1" }),
+        TID,
+        "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+      ),
+      false
+    );
+    assert.equal(
+      isLeadCommunicationOwnedByLeadTenant(commRow({ id: "1", tenant_id: "other" }), TID, LID),
+      false
+    );
   });
 });
 
@@ -216,7 +239,10 @@ describe("Stage 2K — Zod schemas", () => {
 
   it("archive body is strict", () => {
     crmArchiveLeadCommunicationBodySchema.parse({});
-    assert.throws(() => crmArchiveLeadCommunicationBodySchema.parse({ extra: 1 }), /Unrecognized key/);
+    assert.throws(
+      () => crmArchiveLeadCommunicationBodySchema.parse({ extra: 1 }),
+      /Unrecognized key/
+    );
   });
 
   it("create rejects non-object metadata", () => {

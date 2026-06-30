@@ -41,7 +41,12 @@ export type WorkforceCommandCentreViewProps = {
 
 function StatusPill({ children, className }: { children: ReactNode; className: string }) {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset", className)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset",
+        className
+      )}
+    >
       {children}
     </span>
   );
@@ -83,23 +88,31 @@ function StaffDirectoryCard({
           />
           <div className="min-w-0">
             <h3 className="truncate font-medium text-[#F8FAFC]">{row.full_name}</h3>
-            <p className="mt-0.5 text-sm capitalize text-[#94A3B8]">{row.staff_role.replace(/_/g, " ")}</p>
+            <p className="mt-0.5 text-sm capitalize text-[#94A3B8]">
+              {row.staff_role.replace(/_/g, " ")}
+            </p>
             {row.email ? <p className="mt-1 truncate text-xs text-[#64748B]">{row.email}</p> : null}
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 sm:justify-end">
           <StatusPill
             className={
-              row.is_active ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25" : "bg-slate-500/15 text-slate-400 ring-slate-500/20"
+              row.is_active
+                ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+                : "bg-slate-500/15 text-slate-400 ring-slate-500/20"
             }
           >
             {row.is_active ? "Active" : "Inactive"}
           </StatusPill>
           {row.needsReview ? (
-            <StatusPill className="bg-amber-500/15 text-amber-200 ring-amber-500/25">Needs review</StatusPill>
+            <StatusPill className="bg-amber-500/15 text-amber-200 ring-amber-500/25">
+              Needs review
+            </StatusPill>
           ) : null}
           {intel.readinessBandLabel ? (
-            <StatusPill className={readinessScorePillClass(intel.readinessScore)}>{intel.readinessBandLabel}</StatusPill>
+            <StatusPill className={readinessScorePillClass(intel.readinessScore)}>
+              {intel.readinessBandLabel}
+            </StatusPill>
           ) : null}
         </div>
       </div>
@@ -180,8 +193,12 @@ export function WorkforceCommandCentreView({
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">WorkforceOS · Settings</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">Workforce Command Centre</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+            WorkforceOS · Settings
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">
+            Workforce Command Centre
+          </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
             Manage clinical readiness, compliance, permissions and workforce allocation.
           </p>
@@ -192,7 +209,10 @@ export function WorkforceCommandCentreView({
             {canManage ? (
               <>
                 <span className="mx-2">·</span>
-                <Link href={`${base}/hr/staff-readiness`} className="text-[#22C1FF] hover:underline">
+                <Link
+                  href={`${base}/hr/staff-readiness`}
+                  className="text-[#22C1FF] hover:underline"
+                >
                   Staff readiness
                 </Link>
                 <span className="mx-2">·</span>
@@ -235,7 +255,9 @@ export function WorkforceCommandCentreView({
               </Button>
             </>
           ) : (
-            <p className="text-xs text-[#64748B]">View only — admin or fi_admin can add or edit staff.</p>
+            <p className="text-xs text-[#64748B]">
+              View only — admin or fi_admin can add or edit staff.
+            </p>
           )}
         </div>
       </header>
@@ -265,15 +287,21 @@ export function WorkforceCommandCentreView({
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[#64748B]">Surgery-ready</dt>
-            <dd className="mt-1 text-2xl font-semibold tabular-nums text-emerald-300">{panel.surgeryReadyCount}</dd>
+            <dd className="mt-1 text-2xl font-semibold tabular-nums text-emerald-300">
+              {panel.surgeryReadyCount}
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[#64748B]">Training required</dt>
-            <dd className="mt-1 text-2xl font-semibold tabular-nums text-amber-200">{panel.trainingRequiredCount}</dd>
+            <dd className="mt-1 text-2xl font-semibold tabular-nums text-amber-200">
+              {panel.trainingRequiredCount}
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[#64748B]">Compliance attention</dt>
-            <dd className="mt-1 text-2xl font-semibold tabular-nums text-rose-300">{panel.complianceAttentionCount}</dd>
+            <dd className="mt-1 text-2xl font-semibold tabular-nums text-rose-300">
+              {panel.complianceAttentionCount}
+            </dd>
           </div>
         </dl>
         <p className="mt-5 rounded-lg border border-[#22C1FF]/20 bg-[#22C1FF]/5 px-4 py-3 text-sm text-[#CBD5E1]">
@@ -350,10 +378,14 @@ export function WorkforceCommandCentreView({
                 <DashboardCard className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-[#F8FAFC]">{item.fullName}</p>
-                    <p className="text-xs capitalize text-[#64748B]">{item.staffRole.replace(/_/g, " ")}</p>
+                    <p className="text-xs capitalize text-[#64748B]">
+                      {item.staffRole.replace(/_/g, " ")}
+                    </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <StatusPill className="bg-amber-500/15 text-amber-200 ring-amber-500/25">{item.primaryLabel}</StatusPill>
+                    <StatusPill className="bg-amber-500/15 text-amber-200 ring-amber-500/25">
+                      {item.primaryLabel}
+                    </StatusPill>
                     {canManage ? (
                       <Link
                         href={`${base}/staff/${item.staffId}/twin`}

@@ -33,7 +33,9 @@ function cloneValues(v: Record<string, unknown>): Record<string, unknown> {
   return { ...v };
 }
 
-function parseStoredCompletion(raw: Record<string, unknown> | undefined): ConsultationCompletionSummary | null {
+function parseStoredCompletion(
+  raw: Record<string, unknown> | undefined
+): ConsultationCompletionSummary | null {
   if (!raw || typeof raw !== "object") return null;
   if (typeof raw.consultationId !== "string" || typeof raw.completedAt !== "string") return null;
   return raw as unknown as ConsultationCompletionSummary;
@@ -49,7 +51,10 @@ function ConsultationWorkflowStepper({ phase }: { phase: WorkflowPhase }) {
   ];
   const activeIdx = phase === "editing" ? 0 : phase === "review" ? 1 : 2;
   return (
-    <nav aria-label="Consultation workflow" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
+    <nav
+      aria-label="Consultation workflow"
+      className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3"
+    >
       <ol className="flex flex-wrap items-stretch gap-2 sm:gap-3">
         {steps.map((s, i) => {
           const active = i === activeIdx;
@@ -61,13 +66,21 @@ function ConsultationWorkflowStepper({ phase }: { phase: WorkflowPhase }) {
                 "flex min-h-[44px] min-w-[140px] flex-1 flex-col justify-center rounded-lg border px-3 py-2 text-left text-xs sm:text-sm",
                 active && "border-sky-500 bg-cyan-500/10 font-semibold text-cyan-200 shadow-sm",
                 done && !active && "border-emerald-500/20 bg-emerald-500/10 text-emerald-200",
-                !active && !done && "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-400"
+                !active &&
+                  !done &&
+                  "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-400"
               )}
             >
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Step {s.n}</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">
+                Step {s.n}
+              </span>
               <span className="mt-0.5 leading-snug">{s.title}</span>
-              {done ? <span className="mt-1 text-[0.65rem] font-medium text-emerald-300">Done</span> : null}
-              {active ? <span className="mt-1 text-[0.65rem] font-medium text-cyan-200">Current</span> : null}
+              {done ? (
+                <span className="mt-1 text-[0.65rem] font-medium text-emerald-300">Done</span>
+              ) : null}
+              {active ? (
+                <span className="mt-1 text-[0.65rem] font-medium text-cyan-200">Current</span>
+              ) : null}
             </li>
           );
         })}
@@ -115,7 +128,9 @@ export function ConsultationFormRunner({
 
   const [activeSectionId, setActiveSectionId] = useState(() => sections[0]?.id ?? "");
 
-  const [values, setValues] = useState<Record<string, unknown>>(() => cloneValues(initialInstance.values));
+  const [values, setValues] = useState<Record<string, unknown>>(() =>
+    cloneValues(initialInstance.values)
+  );
 
   const visibleSections = useMemo(
     () => sections.filter((s) => evaluateConsultationFormCondition(s.showWhen, values)),
@@ -130,7 +145,9 @@ export function ConsultationFormRunner({
   useEffect(() => {
     if (!sections.length) return;
     if (!visibleSections.length) return;
-    setActiveSectionId((prev) => (visibleSections.some((s) => s.id === prev) ? prev : visibleSections[0]!.id));
+    setActiveSectionId((prev) =>
+      visibleSections.some((s) => s.id === prev) ? prev : visibleSections[0]!.id
+    );
   }, [sections, visibleSections]);
 
   const [status, setStatus] = useState(initialInstance.status);
@@ -170,7 +187,9 @@ export function ConsultationFormRunner({
         void (async () => {
           setAutosaveState("saving");
           setAutosaveError(null);
-          const res = await autosaveConsultationFormInstanceAction(tid, cid, initialInstance.id, { values: nextValues });
+          const res = await autosaveConsultationFormInstanceAction(tid, cid, initialInstance.id, {
+            values: nextValues,
+          });
           if (!res.ok) {
             setAutosaveState("error");
             setAutosaveError(res.error);
@@ -206,7 +225,9 @@ export function ConsultationFormRunner({
   const bodyAreaMapFields = useMemo(
     () =>
       sections.flatMap((sec) =>
-        sec.fields.filter((f) => f.type === "body_area_map").map((f) => ({ id: f.id, label: f.label, views: f.bodyAreaMapViews }))
+        sec.fields
+          .filter((f) => f.type === "body_area_map")
+          .map((f) => ({ id: f.id, label: f.label, views: f.bodyAreaMapViews }))
       ),
     [sections]
   );
@@ -226,7 +247,8 @@ export function ConsultationFormRunner({
   };
 
   const canShowHandoffs = useMemo(
-    () => formIsLocked && Boolean(persistedCompletion) && persistedCompletion!.source === "rules_v1",
+    () =>
+      formIsLocked && Boolean(persistedCompletion) && persistedCompletion!.source === "rules_v1",
     [formIsLocked, persistedCompletion]
   );
 
@@ -247,12 +269,7 @@ export function ConsultationFormRunner({
     if (formIsLocked) return previewCompletionSummary;
     if (!formIsLocked && status === "submitted") return previewCompletionSummary;
     return null;
-  }, [
-    formIsLocked,
-    persistedCompletion,
-    previewCompletionSummary,
-    status,
-  ]);
+  }, [formIsLocked, persistedCompletion, previewCompletionSummary, status]);
 
   const showCompleteConsultationCta =
     initialInstance.status === "submitted" && !initialInstance.completed_at;
@@ -271,7 +288,9 @@ export function ConsultationFormRunner({
     setCompleteError(null);
     setBusyComplete(true);
     try {
-      const res = await completeConsultationFormInstanceAction(tid, cid, { formInstanceId: initialInstance.id });
+      const res = await completeConsultationFormInstanceAction(tid, cid, {
+        formInstanceId: initialInstance.id,
+      });
       if (!res.ok) {
         setCompleteError(res.error);
         return;
@@ -280,7 +299,9 @@ export function ConsultationFormRunner({
       await router.refresh();
       if (typeof document !== "undefined") {
         requestAnimationFrame(() => {
-          document.getElementById("consultation-guided-handoffs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          document
+            .getElementById("consultation-guided-handoffs")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
       }
     } finally {
@@ -293,7 +314,9 @@ export function ConsultationFormRunner({
     setSubmitError(null);
     setBusySubmit(true);
     try {
-      const res = await submitConsultationFormInstanceAction(tid, cid, initialInstance.id, { values });
+      const res = await submitConsultationFormInstanceAction(tid, cid, initialInstance.id, {
+        values,
+      });
       if (!res.ok) {
         setSubmitError(res.error);
         return;
@@ -348,7 +371,9 @@ export function ConsultationFormRunner({
             <div>
               <h2 className={fiOsLightFormSurfaceClassNames.sectionTitle}>{activeSection.title}</h2>
               {activeSection.description?.trim() ? (
-                <p className={`mt-1 ${fiOsLightFormSurfaceClassNames.bodyMuted}`}>{activeSection.description}</p>
+                <p className={`mt-1 ${fiOsLightFormSurfaceClassNames.bodyMuted}`}>
+                  {activeSection.description}
+                </p>
               ) : null}
             </div>
             <div className="space-y-5">
@@ -407,12 +432,18 @@ export function ConsultationFormRunner({
           {autosaveError?.trim() ? ` — ${autosaveError.trim()}` : null}
         </p>
         {submitError?.trim() ? (
-          <p className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+          <p
+            className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+            role="alert"
+          >
             {submitError.trim()}
           </p>
         ) : null}
         {completeError?.trim() ? (
-          <p className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+          <p
+            className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+            role="alert"
+          >
             {completeError.trim()}
           </p>
         ) : null}
@@ -422,10 +453,16 @@ export function ConsultationFormRunner({
 
       {workflowPhase === "review" && displayCompletionSummary ? (
         <section className="space-y-4" aria-labelledby="consultation-review-heading">
-          <h2 id="consultation-review-heading" className={fiOsLightFormSurfaceClassNames.panelCaption}>
+          <h2
+            id="consultation-review-heading"
+            className={fiOsLightFormSurfaceClassNames.panelCaption}
+          >
             Clinical review
           </h2>
-          <ConsultationCompletionSummaryCard summary={displayCompletionSummary} isPreview={showCompleteConsultationCta} />
+          <ConsultationCompletionSummaryCard
+            summary={displayCompletionSummary}
+            isPreview={showCompleteConsultationCta}
+          />
           {showCompleteConsultationCta ? (
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -437,8 +474,9 @@ export function ConsultationFormRunner({
                 {busyComplete ? "Completing…" : "Complete consultation"}
               </button>
               <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
-                Locks this form, persists the rules-based snapshot, and unlocks routing plus optional CRM, pathology, and
-                SurgeryOS hand-offs. Nothing downstream runs automatically.
+                Locks this form, persists the rules-based snapshot, and unlocks routing plus
+                optional CRM, pathology, and SurgeryOS hand-offs. Nothing downstream runs
+                automatically.
               </p>
             </div>
           ) : null}
@@ -476,7 +514,9 @@ export function ConsultationFormRunner({
               Chart snapshot and guided form record
             </summary>
             <div className="mt-4 space-y-6">
-              {persistedCompletion ? <ConsultationCompletionSummaryCard summary={persistedCompletion} /> : null}
+              {persistedCompletion ? (
+                <ConsultationCompletionSummaryCard summary={persistedCompletion} />
+              ) : null}
               {areaMapReadOnlyBlock}
               {formWorkspace}
             </div>

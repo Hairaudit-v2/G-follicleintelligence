@@ -44,7 +44,10 @@ function buildLane(dayKey: string, timeZone: string): CalendarDayLane | null {
 }
 
 /** Single clinic-local day lane for day view. */
-export function buildCalendarDay(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+export function buildCalendarDay(
+  dateAnchor: string,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): CalendarDayLane[] {
   const tz = normalizeCalendarTimezone(timeZone);
   const ymd = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
   const lane = buildLane(ymd, tz);
@@ -52,7 +55,10 @@ export function buildCalendarDay(dateAnchor: string, timeZone: string = DEFAULT_
 }
 
 /** Three consecutive clinic-local day lanes starting at `dateAnchor`. */
-export function buildCalendarThreeDay(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+export function buildCalendarThreeDay(
+  dateAnchor: string,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): CalendarDayLane[] {
   const tz = normalizeCalendarTimezone(timeZone);
   const ymd = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
   const days: CalendarDayLane[] = [];
@@ -65,7 +71,10 @@ export function buildCalendarThreeDay(dateAnchor: string, timeZone: string = DEF
 }
 
 /** Monday→Sunday lanes for the week containing `dateAnchor` in clinic timezone. */
-export function buildCalendarWeek(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+export function buildCalendarWeek(
+  dateAnchor: string,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): CalendarDayLane[] {
   const tz = normalizeCalendarTimezone(timeZone);
   const ymd = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
   const anchorStart = zonedMidnightUtcMs(ymd, tz);
@@ -93,7 +102,10 @@ export function buildCalendarLanesForView(
 }
 
 /** Six-week Monday-start grid cells as day lanes (for month view bucketing). */
-export function buildCalendarMonth(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+export function buildCalendarMonth(
+  dateAnchor: string,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): CalendarDayLane[] {
   const tz = normalizeCalendarTimezone(timeZone);
   const anchor = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
   const anchorMs = zonedMidnightUtcMs(anchor, tz);
@@ -173,7 +185,7 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
     assignedUserId: q.assignedUserId ?? undefined,
     staffId: q.staffId ?? undefined,
     clinicId: q.clinicId ?? undefined,
-    role: q.staffId?.trim() ? undefined : q.staffRoleBucket ?? undefined,
+    role: q.staffId?.trim() ? undefined : (q.staffRoleBucket ?? undefined),
     includeCancelled: q.includeCancelled ? true : undefined,
     q: q.search?.trim() ? q.search.trim() : undefined,
     sample: q.sampleMode ? true : undefined,
@@ -218,7 +230,10 @@ export const calendarNavigationHelpers = {
       ...filtersPatchFromQuery(q),
     };
   },
-  goToToday(now: Date = new Date(), timeZone: string = DEFAULT_CALENDAR_TIMEZONE): Pick<CalendarHrefQuery, "date"> {
+  goToToday(
+    now: Date = new Date(),
+    timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+  ): Pick<CalendarHrefQuery, "date"> {
     return { date: calendarDateStringFromInstant(now, timeZone) };
   },
 };

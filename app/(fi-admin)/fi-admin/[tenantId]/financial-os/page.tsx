@@ -19,7 +19,9 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-function parseSurgeryEconomicsFilters(sp: Record<string, string | string[] | undefined>): SurgeryEconomicsDashboardFilters {
+function parseSurgeryEconomicsFilters(
+  sp: Record<string, string | string[] | undefined>
+): SurgeryEconomicsDashboardFilters {
   const one = (key: string) => {
     const v = sp[key];
     if (typeof v === "string") return v.trim() || null;
@@ -27,7 +29,9 @@ function parseSurgeryEconomicsFilters(sp: Record<string, string | string[] | und
   };
   const status = one("se_status");
   const snapshotStatus =
-    status === "paid_in_full" || status === "outstanding" || status === "needs_configuration" ? status : "all";
+    status === "paid_in_full" || status === "outstanding" || status === "needs_configuration"
+      ? status
+      : "all";
   return {
     dateFrom: one("se_from"),
     dateTo: one("se_to"),
@@ -38,7 +42,9 @@ function parseSurgeryEconomicsFilters(sp: Record<string, string | string[] | und
   };
 }
 
-function parseRevenueAttributionFilters(sp: Record<string, string | string[] | undefined>): RevenueAttributionDashboardFilters {
+function parseRevenueAttributionFilters(
+  sp: Record<string, string | string[] | undefined>
+): RevenueAttributionDashboardFilters {
   const one = (key: string) => {
     const v = sp[key];
     if (typeof v === "string") return v.trim() || null;
@@ -70,10 +76,15 @@ export default async function FiAdminFinancialOsPage({
 
   await assertFiTenantPortalAccess(tid);
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
-        <p className="text-sm">Supabase environment variables are missing. Check deployment configuration.</p>
+        <p className="text-sm">
+          Supabase environment variables are missing. Check deployment configuration.
+        </p>
       </InfoNotice>
     );
   }
@@ -101,7 +112,9 @@ export default async function FiAdminFinancialOsPage({
         <InfoNotice variant="danger" title="FinancialOS could not load">
           <p className="text-sm">
             The command centre failed to load. Apply migration{" "}
-            <code className="rounded bg-white/10 px-1 text-xs">20260920120001_fi_financial_os_core_infrastructure.sql</code>{" "}
+            <code className="rounded bg-white/10 px-1 text-xs">
+              20260920120001_fi_financial_os_core_infrastructure.sql
+            </code>{" "}
             and check server logs.
           </p>
           {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}

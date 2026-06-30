@@ -72,7 +72,13 @@ describe("Stage 3A — booking type / status allow-list", () => {
 describe("Stage 3A — anchor + time guards", () => {
   it("requires at least one anchor", () => {
     assert.throws(
-      () => assertAtLeastOneBookingAnchor({ lead_id: null, person_id: null, patient_id: null, case_id: null }),
+      () =>
+        assertAtLeastOneBookingAnchor({
+          lead_id: null,
+          person_id: null,
+          patient_id: null,
+          case_id: null,
+        }),
       /at least one/
     );
   });
@@ -135,7 +141,10 @@ describe("Stage 3A — consultation-only before conversion", () => {
 describe("Stage 3A — cancelled edit guard", () => {
   it("blocks edits when cancelled", () => {
     assert.throws(
-      () => assertNonCancelledBookingMutable(row({ id: "1", booking_status: "cancelled", cancelled_at: null })),
+      () =>
+        assertNonCancelledBookingMutable(
+          row({ id: "1", booking_status: "cancelled", cancelled_at: null })
+        ),
       /Cancelled/
     );
   });
@@ -159,14 +168,20 @@ describe("Stage 3A — changed_keys (pure)", () => {
   it("returns only changed keys", () => {
     const a = row({ id: "1", title: "A", booking_type: "consultation" });
     const b = { ...a, title: "B" };
-    const keys = collectChangedBookingDetailKeys(bookingDetailSnapshotFromRowLike(a), bookingDetailSnapshotFromRowLike(b));
+    const keys = collectChangedBookingDetailKeys(
+      bookingDetailSnapshotFromRowLike(a),
+      bookingDetailSnapshotFromRowLike(b)
+    );
     assert.deepEqual(keys, ["title"]);
   });
 
   it("maps metadata_json to metadata label", () => {
     const a = row({ id: "1", metadata: { x: 1 } });
     const b = { ...a, metadata: { x: 2 } };
-    const keys = collectChangedBookingDetailKeys(bookingDetailSnapshotFromRowLike(a), bookingDetailSnapshotFromRowLike(b));
+    const keys = collectChangedBookingDetailKeys(
+      bookingDetailSnapshotFromRowLike(a),
+      bookingDetailSnapshotFromRowLike(b)
+    );
     assert.deepEqual(keys, ["metadata"]);
   });
 });
@@ -184,7 +199,10 @@ describe("Stage 3A — metadata object validation", () => {
 describe("Stage 3A — tenant ownership helper", () => {
   it("matches tenant id", () => {
     assert.equal(isBookingRowForTenant(row({ id: "1" }), TID), true);
-    assert.equal(isBookingRowForTenant(row({ id: "1" }), "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), false);
+    assert.equal(
+      isBookingRowForTenant(row({ id: "1" }), "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+      false
+    );
   });
 });
 

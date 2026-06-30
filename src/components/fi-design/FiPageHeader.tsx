@@ -37,7 +37,9 @@ export function FiPageHeader({
   const t = fiPageHeaderVariantClassNames[variant];
 
   return (
-    <div className={cn("flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between", className)}>
+    <div
+      className={cn("flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between", className)}
+    >
       <div className="flex min-w-0 flex-1 flex-wrap items-start gap-3">
         {leading ? <div className="shrink-0">{leading}</div> : null}
         <div className={cn("flex-1", t.root)}>

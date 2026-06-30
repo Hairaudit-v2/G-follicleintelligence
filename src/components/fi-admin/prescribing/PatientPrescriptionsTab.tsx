@@ -37,14 +37,22 @@ export async function PatientPrescriptionsTab({
       <FiCard>
         <h2 className="text-sm font-semibold text-slate-100">Recent prescriptions</h2>
         {rows.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-400">No prescriptions recorded for this patient yet.</p>
+          <p className="mt-2 text-sm text-slate-400">
+            No prescriptions recorded for this patient yet.
+          </p>
         ) : (
           <ul className="mt-3 divide-y divide-white/[0.08] border border-white/[0.08] rounded-lg bg-[#0F1629]/80 backdrop-blur-md">
             {rows.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm">
+              <li
+                key={r.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm"
+              >
                 <div className="min-w-0">
                   <p className="font-medium text-slate-100">
-                    {new Date(r.updated_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                    {new Date(r.updated_at).toLocaleString(undefined, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
                   </p>
                   <p className="text-xs text-slate-500">
                     {PRESCRIPTION_STATUS_LABELS[r.status]}

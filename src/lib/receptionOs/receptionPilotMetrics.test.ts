@@ -124,7 +124,10 @@ describe("receptionPilotMetricsModel", () => {
     assert.equal(summary.mostUsedWidgets[0]?.widgetKey, "action_alerts");
     assert.equal(summary.mostUsedWidgets[0]?.viewCount, 2);
     assert.equal(summary.topFeedbackIssues[0]?.feedbackKind, "wrong_alert");
-    assert.equal(summary.topFeedbackIssues.some((i) => i.feedbackKind === "useful"), false);
+    assert.equal(
+      summary.topFeedbackIssues.some((i) => i.feedbackKind === "useful"),
+      false
+    );
   });
 
   it("builds manager scores from summary and feedback", () => {
@@ -166,7 +169,7 @@ describe("receptionPilotMetricsModel", () => {
   it("enforces tenant scope on feedback rows", () => {
     assert.throws(
       () => assertReceptionPilotFeedbackTenantScope(TENANT, "99999999-9999-4999-8999-999999999999"),
-      /tenant scope violation/,
+      /tenant scope violation/
     );
   });
 });
@@ -185,10 +188,16 @@ describe("receptionUsageEvents safe failure mode", () => {
 describe("Phase 1–7 regression guard", () => {
   it("keeps command centre loader additive for Phase 7 metrics", async () => {
     const { readFileSync } = await import("node:fs");
-    const loader = readFileSync("src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts", "utf8");
+    const loader = readFileSync(
+      "src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts",
+      "utf8"
+    );
     assert.match(loader, /loadReceptionOsBoardPayload/);
     assert.match(loader, /loadReceptionPilotMetricsForCommandCentre/);
     assert.match(loader, /loadReceptionPhase8PayloadForCommandCentre/);
-    assert.doesNotMatch(readFileSync("src/lib/receptionOs/receptionOsBoardLoader.server.ts", "utf8"), /fi_reception_usage_events/);
+    assert.doesNotMatch(
+      readFileSync("src/lib/receptionOs/receptionOsBoardLoader.server.ts", "utf8"),
+      /fi_reception_usage_events/
+    );
   });
 });

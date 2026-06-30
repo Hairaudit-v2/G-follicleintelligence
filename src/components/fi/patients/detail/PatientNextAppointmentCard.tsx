@@ -51,11 +51,15 @@ export function PatientNextAppointmentCard({
 
       <section className={crmLeadCardClass}>
         <h2 className="text-sm font-semibold text-slate-100">Next appointment & plan</h2>
-        <p className="mt-1 text-xs text-slate-400">Operational summary for front-desk and clinical coordinators.</p>
+        <p className="mt-1 text-xs text-slate-400">
+          Operational summary for front-desk and clinical coordinators.
+        </p>
 
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Next appointment</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              Next appointment
+            </dt>
             <dd className="mt-1 font-medium text-slate-100">
               {nextAppointment ? (
                 slide ? (
@@ -64,28 +68,36 @@ export function PatientNextAppointmentCard({
                     className="text-left text-blue-300 hover:underline"
                     onClick={() => slide.openAppointment(nextAppointment.id)}
                   >
-                    {bookingTypeLabel(nextAppointment.bookingType)} · {fmtWhen(nextAppointment.startAt)}
+                    {bookingTypeLabel(nextAppointment.bookingType)} ·{" "}
+                    {fmtWhen(nextAppointment.startAt)}
                   </button>
                 ) : (
                   <Link
                     href={`/fi-admin/${tenantId}/appointments/${nextAppointment.id}`}
                     className="text-blue-300 hover:underline"
                   >
-                    {bookingTypeLabel(nextAppointment.bookingType)} · {fmtWhen(nextAppointment.startAt)}
+                    {bookingTypeLabel(nextAppointment.bookingType)} ·{" "}
+                    {fmtWhen(nextAppointment.startAt)}
                   </Link>
                 )
               ) : (
                 "No upcoming visits"
               )}
             </dd>
-            {nextAppointment?.title ? <dd className="text-xs text-gray-500">{nextAppointment.title}</dd> : null}
+            {nextAppointment?.title ? (
+              <dd className="text-xs text-gray-500">{nextAppointment.title}</dd>
+            ) : null}
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Treatment plan</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              Treatment plan
+            </dt>
             <dd className="mt-1 text-slate-200">{treatmentPlanSummary ?? "Not documented yet"}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Lifetime value (CRM)</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              Lifetime value (CRM)
+            </dt>
             <dd className="mt-1 font-medium tabular-nums text-slate-100">{lifetimeValueLabel}</dd>
           </div>
         </dl>

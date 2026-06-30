@@ -43,7 +43,10 @@ describe("hubspotLeadFlowCore", () => {
 
   it("flattens HubSpot batch webhook bodies", () => {
     const batch = flattenHubSpotLeadFlowWebhookBody({
-      events: [{ eventId: "1", objectId: "501" }, { eventId: "2", objectId: "502" }],
+      events: [
+        { eventId: "1", objectId: "501" },
+        { eventId: "2", objectId: "502" },
+      ],
     });
     assert.equal(batch.length, 2);
   });

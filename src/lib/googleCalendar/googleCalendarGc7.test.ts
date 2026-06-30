@@ -271,9 +271,7 @@ function createGc7MockSupabase() {
                               maybeSingle: async () => {
                                 const row = integrations.find(
                                   (r) =>
-                                    r.tenant_id === val &&
-                                    r[col2] === val2 &&
-                                    r.status === "active"
+                                    r.tenant_id === val && r[col2] === val2 && r.status === "active"
                                 );
                                 return { data: row ?? null, error: null };
                               },
@@ -320,7 +318,11 @@ function createGc7MockSupabase() {
               eq(_col: string, _val: string) {
                 return {
                   eq() {
-                    return { select() { return { single: async () => ({ data: patch, error: null }) }; } };
+                    return {
+                      select() {
+                        return { single: async () => ({ data: patch, error: null }) };
+                      },
+                    };
                   },
                 };
               },
@@ -379,7 +381,11 @@ function createGc7MockSupabase() {
               updated_at: new Date().toISOString(),
             };
             events.push(full);
-            return { select() { return { single: async () => ({ data: full, error: null }) }; } };
+            return {
+              select() {
+                return { single: async () => ({ data: full, error: null }) };
+              },
+            };
           },
           update(patch: EventRow) {
             return {
@@ -590,19 +596,19 @@ describe("CalendarOS GC-7 — review queue helpers", () => {
         googleCalendarSummary: null,
         externalEventId: "review-dismiss",
         googleEvent: { id: "review-dismiss", summary: "X" },
-        detection: { ...detection, mappedFields: { ...detection.mappedFields, externalEventId: "review-dismiss" } },
+        detection: {
+          ...detection,
+          mappedFields: { ...detection.mappedFields, externalEventId: "review-dismiss" },
+        },
       },
       { supabaseClientForTests: mock.client }
     );
     assert.equal(upsert.ok, true);
     if (!upsert.ok) return;
 
-    const dismissed = await dismissGoogleCalendarSyncReviewItem(
-      TENANT,
-      upsert.item.id,
-      AUTH_USER,
-      { supabaseClientForTests: mock.client }
-    );
+    const dismissed = await dismissGoogleCalendarSyncReviewItem(TENANT, upsert.item.id, AUTH_USER, {
+      supabaseClientForTests: mock.client,
+    });
     assert.equal(dismissed.ok, true);
     if (!dismissed.ok) return;
     assert.equal(dismissed.item.status, "dismissed");
@@ -639,12 +645,9 @@ describe("CalendarOS GC-7 — review queue helpers", () => {
     assert.equal(upsert.ok, true);
     if (!upsert.ok) return;
 
-    const imported = await importGoogleCalendarSyncReviewItem(
-      TENANT,
-      upsert.item.id,
-      AUTH_USER,
-      { supabaseClientForTests: mock.client }
-    );
+    const imported = await importGoogleCalendarSyncReviewItem(TENANT, upsert.item.id, AUTH_USER, {
+      supabaseClientForTests: mock.client,
+    });
     assert.equal(imported.ok, true);
     if (!imported.ok) return;
     assert.equal(imported.item.status, "imported");

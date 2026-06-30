@@ -3,12 +3,20 @@
  * Query: protocol_template_slug, protocol_slot_slug
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { loadVieCaptureReferenceGuidance } from "@/src/lib/vie/vieSameAngleAlignment.server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string; patientId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; patientId: string }> }
+) {
   try {
     const { tenantId, patientId } = await params;
     const tid = tenantId?.trim() ?? "";

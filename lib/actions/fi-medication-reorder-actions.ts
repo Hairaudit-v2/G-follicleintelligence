@@ -25,12 +25,15 @@ const submitReorderSchema = z.object({
 
 export async function submitPatientMedicationReorderAction(
   raw: unknown
-): Promise<{ ok: true; id: string; status: MedicationReorderStatus } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; id: string; status: MedicationReorderStatus } | { ok: false; error: string }
+> {
   try {
     const parsed = submitReorderSchema.parse(raw);
     const tid = parsed.tenantId.trim();
     const portal = await loadPatientPortalPatientRow(tid);
-    if (!portal) return { ok: false, error: "Sign in with a patient-linked portal account to reorder." };
+    if (!portal)
+      return { ok: false, error: "Sign in with a patient-linked portal account to reorder." };
 
     const supabase = supabaseAdmin();
     const { data: itemRow, error: ie } = await supabase
@@ -41,7 +44,10 @@ export async function submitPatientMedicationReorderAction(
       .maybeSingle();
     if (ie || !itemRow) return { ok: false, error: "Medication line not found." };
 
-    const bundle = await loadPrescriptionDetail(tid, String((itemRow as { prescription_id: string }).prescription_id));
+    const bundle = await loadPrescriptionDetail(
+      tid,
+      String((itemRow as { prescription_id: string }).prescription_id)
+    );
     if (!bundle) return { ok: false, error: "Prescription not found." };
     if (bundle.prescription.patient_id !== portal.patientId) {
       return { ok: false, error: "This medication does not belong to your patient record." };
@@ -62,15 +68,26 @@ export async function submitPatientMedicationReorderAction(
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
       .eq("source_prescription_item_id", item.id)
-      .in("status", ["requested", "doctor_review_required", "approved", "sent_to_pharmacy", "posted"]);
+      .in("status", [
+        "requested",
+        "doctor_review_required",
+        "approved",
+        "sent_to_pharmacy",
+        "posted",
+      ]);
     if (pe) return { ok: false, error: pe.message };
     if ((pendingCount ?? 0) > 0) {
-      return { ok: false, error: "You already have an active reorder request for this medication." };
+      return {
+        ok: false,
+        error: "You already have an active reorder request for this medication.",
+      };
     }
 
     const rx = bundle.prescription;
-    const feePence = rx.patient_reorder_fee_pence != null ? Number(rx.patient_reorder_fee_pence) : null;
-    const feeRequired = Boolean(rx.reorder_fee_payment_required) && feePence != null && feePence > 0;
+    const feePence =
+      rx.patient_reorder_fee_pence != null ? Number(rx.patient_reorder_fee_pence) : null;
+    const feeRequired =
+      Boolean(rx.reorder_fee_payment_required) && feePence != null && feePence > 0;
     let paymentStatus: "not_required" | "pending" | "paid" | "waived" = "not_required";
     if (feeRequired) {
       if (!parsed.paymentAcknowledged) {
@@ -79,7 +96,9 @@ export async function submitPatientMedicationReorderAction(
       paymentStatus = "paid";
     }
 
-    const initialStatus: MedicationReorderStatus = rx.reorder_review_required ? "doctor_review_required" : "requested";
+    const initialStatus: MedicationReorderStatus = rx.reorder_review_required
+      ? "doctor_review_required"
+      : "requested";
 
     const { data: ins, error: insE } = await supabase
       .from("fi_medication_reorder_requests")
@@ -96,7 +115,8 @@ export async function submitPatientMedicationReorderAction(
       })
       .select("id, status")
       .single();
-    if (insE || !ins) return { ok: false, error: insE?.message ?? "Could not create reorder request." };
+    if (insE || !ins)
+      return { ok: false, error: insE?.message ?? "Could not create reorder request." };
 
     const newId = String((ins as { id: string }).id);
 

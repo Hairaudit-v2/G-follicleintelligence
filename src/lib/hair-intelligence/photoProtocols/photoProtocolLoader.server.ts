@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { PatientTwinImagingGalleryItem, PatientTwinPhotoProtocolSection } from "@/src/lib/patientTwin/patientTwinTypes";
+import type {
+  PatientTwinImagingGalleryItem,
+  PatientTwinPhotoProtocolSection,
+} from "@/src/lib/patientTwin/patientTwinTypes";
 import { calculatePhotoProtocolCompliance } from "./protocolCompliance";
 import { resolveDefaultTemplateSlugForClinicalContext } from "./protocolTemplates";
 import { canCompleteRequiredSessionSlots } from "./protocolSessionRules";
@@ -36,10 +39,17 @@ export async function loadPatientTwinPhotoProtocolSection(params: {
   const ctx: HliPhotoProtocolClinicalContext = params.clinicalContext ?? "consultation";
   const slugDefault = resolveDefaultTemplateSlugForClinicalContext(ctx);
 
-  const active = await loadLatestActivePhotoSessionForPatient(params.tenantId, params.patientId, supabase);
+  const active = await loadLatestActivePhotoSessionForPatient(
+    params.tenantId,
+    params.patientId,
+    supabase
+  );
   let loaded = await loadTemplateWithSlotsBySlug(slugDefault, supabase);
   if (active) {
-    const byId = await loadTemplateWithSlotsByTemplateId(active.session.protocol_template_id, supabase);
+    const byId = await loadTemplateWithSlotsByTemplateId(
+      active.session.protocol_template_id,
+      supabase
+    );
     if (byId) loaded = byId;
   }
   if (!loaded) return null;
@@ -102,7 +112,10 @@ export async function loadPatientTwinPhotoProtocolSection(params: {
   }
 
   const can_complete_session = active
-    ? canCompleteRequiredSessionSlots({ sessionSlots: active.sessionSlots, slotsById: active.slotsById })
+    ? canCompleteRequiredSessionSlots({
+        sessionSlots: active.sessionSlots,
+        slotsById: active.slotsById,
+      })
     : false;
 
   return {

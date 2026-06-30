@@ -3,7 +3,10 @@
  */
 
 import type { FiEventBusHealthClientModel } from "@/src/lib/events/fiEventBusHealthCore";
-import type { FiCalendarSyncFrequencyMinutes, FiCalendarSyncHealthStatus } from "./googleCalendarSyncHealthCore";
+import type {
+  FiCalendarSyncFrequencyMinutes,
+  FiCalendarSyncHealthStatus,
+} from "./googleCalendarSyncHealthCore";
 
 export type GoogleCalendarSyncRunClientRow = {
   id: string;
@@ -124,7 +127,9 @@ export function formatRunStatusLabel(status: string): string {
   return status;
 }
 
-export function formatWebhookSyncModeLabel(mode: GoogleCalendarWebhookHealthModel["syncMode"]): string {
+export function formatWebhookSyncModeLabel(
+  mode: GoogleCalendarWebhookHealthModel["syncMode"]
+): string {
   if (mode === "realtime_active") return "Real-time active";
   if (mode === "fallback_polling") return "Fallback polling";
   if (mode === "expired") return "Expired";
@@ -132,7 +137,9 @@ export function formatWebhookSyncModeLabel(mode: GoogleCalendarWebhookHealthMode
   return "Disabled";
 }
 
-export function webhookSyncModeBadgeClass(mode: GoogleCalendarWebhookHealthModel["syncMode"]): string {
+export function webhookSyncModeBadgeClass(
+  mode: GoogleCalendarWebhookHealthModel["syncMode"]
+): string {
   if (mode === "realtime_active") return "bg-emerald-500/15 text-emerald-300";
   if (mode === "fallback_polling") return "bg-sky-500/15 text-sky-300";
   if (mode === "expired" || mode === "failed") return "bg-red-500/15 text-red-300";

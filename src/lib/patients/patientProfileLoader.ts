@@ -4,7 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { mapFiCrmLeadRow } from "@/src/lib/crm/leadRow";
 import type { FiCrmLeadRow } from "@/src/lib/crm/types";
-import { computePatientProfileSummaryMetrics, sortActivityEventsNewestFirst, splitBookingsUpcomingPast } from "./patientProfileSummary";
+import {
+  computePatientProfileSummaryMetrics,
+  sortActivityEventsNewestFirst,
+  splitBookingsUpcomingPast,
+} from "./patientProfileSummary";
 import { normalizePatientStatus, type PatientStatusValue } from "./patientPolicy";
 
 function normalizePreferredContact(raw: unknown): "email" | "sms" | "both" | null {
@@ -19,7 +23,10 @@ import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patient
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import { loadViePatientImagingCompleteness } from "@/src/lib/vie/vieCompleteness.server";
 import type { ViePatientImagingCompleteness } from "@/src/lib/vie/vieProtocolTypes";
-import { buildPatientTimeline, mapActivityRowForTimeline } from "@/src/lib/patients/timeline/patientTimelineBuild";
+import {
+  buildPatientTimeline,
+  mapActivityRowForTimeline,
+} from "@/src/lib/patients/timeline/patientTimelineBuild";
 import type { PatientTimelineBuildResult } from "@/src/lib/patients/timeline/patientTimelineTypes";
 
 export type PatientProfilePerson = {
@@ -123,11 +130,21 @@ async function resolveSlugToFoundationOrGlobal(
 > {
   const tid = tenantId.trim();
   const s = slug.trim();
-  const { data: asPatient, error: pErr } = await supabase.from("fi_patients").select("id").eq("tenant_id", tid).eq("id", s).maybeSingle();
+  const { data: asPatient, error: pErr } = await supabase
+    .from("fi_patients")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", s)
+    .maybeSingle();
   if (pErr) throw new Error(pErr.message);
   if (asPatient) return { kind: "foundation", foundationPatientId: s };
 
-  const { data: asGlobal, error: gErr } = await supabase.from("fi_global_patients").select("id").eq("tenant_id", tid).eq("id", s).maybeSingle();
+  const { data: asGlobal, error: gErr } = await supabase
+    .from("fi_global_patients")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", s)
+    .maybeSingle();
   if (gErr) throw new Error(gErr.message);
   if (!asGlobal) return { kind: "none" };
 
@@ -150,7 +167,9 @@ function mapPerson(row: Record<string, unknown>): PatientProfilePerson {
   return {
     id: String(row.id),
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -166,14 +185,20 @@ export async function loadPatientProfile(
   const anchor = await resolveSlugToFoundationOrGlobal(supabase, tid, patientSlug);
   if (anchor.kind === "none") return { ok: false, error: "not_found" };
   if (anchor.kind === "legacy_global") {
-    return { ok: true, mode: "legacy_global", data: { tenantId: tid, globalPatientId: anchor.globalPatientId } };
+    return {
+      ok: true,
+      mode: "legacy_global",
+      data: { tenantId: tid, globalPatientId: anchor.globalPatientId },
+    };
   }
 
   const foundationPatientId = anchor.foundationPatientId;
 
   const { data: patRow, error: pe } = await supabase
     .from("fi_patients")
-    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, reminder_consent, preferred_contact_method, created_at, updated_at")
+    .select(
+      "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, reminder_consent, preferred_contact_method, created_at, updated_at"
+    )
     .eq("tenant_id", tid)
     .eq("id", foundationPatientId)
     .maybeSingle();
@@ -202,7 +227,9 @@ export async function loadPatientProfile(
         ? (pr.metadata as Record<string, unknown>)
         : {},
     admin_note: pr.admin_note != null ? String(pr.admin_note) : null,
-    patient_status: normalizePatientStatus(pr.patient_status != null ? String(pr.patient_status) : undefined),
+    patient_status: normalizePatientStatus(
+      pr.patient_status != null ? String(pr.patient_status) : undefined
+    ),
     reminder_consent: Boolean(pr.reminder_consent),
     preferred_contact_method: normalizePreferredContact(pr.preferred_contact_method),
     created_at: String(pr.created_at),
@@ -213,7 +240,11 @@ export async function loadPatientProfile(
 
   const clinicalRow = await loadPatientClinicalDetails(tid, foundationPatientId, supabase);
   const patientImages = await loadPatientImagesProfileBundle(tid, foundationPatientId, supabase);
-  const vieImagingCompleteness = await loadViePatientImagingCompleteness(tid, foundationPatientId, supabase);
+  const vieImagingCompleteness = await loadViePatientImagingCompleteness(
+    tid,
+    foundationPatientId,
+    supabase
+  );
   let clinicalDetailsUpdatedByLabel: string | null = null;
   if (clinicalRow?.updated_by_user_id) {
     const { data: updater, error: ueUp } = await supabase
@@ -237,12 +268,20 @@ export async function loadPatientProfile(
   if (le) throw new Error(le.message);
 
   const leadsMapped = (leadRows ?? []).map((r) => mapFiCrmLeadRow(r as Record<string, unknown>));
-  const stageIds = Array.from(new Set(leadsMapped.map((l) => l.current_stage_id).filter(Boolean) as string[]));
-  const ownerIds = Array.from(new Set(leadsMapped.map((l) => l.primary_owner_user_id).filter(Boolean) as string[]));
+  const stageIds = Array.from(
+    new Set(leadsMapped.map((l) => l.current_stage_id).filter(Boolean) as string[])
+  );
+  const ownerIds = Array.from(
+    new Set(leadsMapped.map((l) => l.primary_owner_user_id).filter(Boolean) as string[])
+  );
 
   const stageLabelById = new Map<string, string>();
   if (stageIds.length) {
-    const { data: stages, error: se } = await supabase.from("fi_crm_pipeline_stages").select("id, label").eq("tenant_id", tid).in("id", stageIds);
+    const { data: stages, error: se } = await supabase
+      .from("fi_crm_pipeline_stages")
+      .select("id, label")
+      .eq("tenant_id", tid)
+      .in("id", stageIds);
     if (se) throw new Error(se.message);
     for (const s of stages ?? []) {
       stageLabelById.set(String((s as { id: string }).id), String((s as { label: string }).label));
@@ -251,7 +290,11 @@ export async function loadPatientProfile(
 
   const ownerLabelById = new Map<string, string>();
   if (ownerIds.length) {
-    const { data: users, error: ue } = await supabase.from("fi_users").select("id, email, role").eq("tenant_id", tid).in("id", ownerIds);
+    const { data: users, error: ue } = await supabase
+      .from("fi_users")
+      .select("id, email, role")
+      .eq("tenant_id", tid)
+      .in("id", ownerIds);
     if (ue) throw new Error(ue.message);
     for (const u of users ?? []) {
       const id = String((u as { id: string }).id);
@@ -262,8 +305,10 @@ export async function loadPatientProfile(
 
   const leads: PatientProfileLeadCard[] = leadsMapped.map((lead) => ({
     lead,
-    stageLabel: lead.current_stage_id ? stageLabelById.get(lead.current_stage_id) ?? null : null,
-    ownerLabel: lead.primary_owner_user_id ? ownerLabelById.get(lead.primary_owner_user_id) ?? null : null,
+    stageLabel: lead.current_stage_id ? (stageLabelById.get(lead.current_stage_id) ?? null) : null,
+    ownerLabel: lead.primary_owner_user_id
+      ? (ownerLabelById.get(lead.primary_owner_user_id) ?? null)
+      : null,
   }));
 
   const { data: caseRows, error: ce } = await supabase
@@ -285,7 +330,11 @@ export async function loadPatientProfile(
       .eq("tenant_id", tid)
       .in("case_id", caseIds);
     if (lce) throw new Error(lce.message);
-    leadForCases = (lrows ?? []) as { id: string; summary: string | null; case_id: string | null }[];
+    leadForCases = (lrows ?? []) as {
+      id: string;
+      summary: string | null;
+      case_id: string | null;
+    }[];
   }
 
   const leadByCaseId = new Map<string, { id: string; summary: string | null }>();
@@ -319,7 +368,9 @@ export async function loadPatientProfile(
 
   const { data: bookingRows, error: be } = await supabase
     .from("fi_bookings")
-    .select("id, start_at, end_at, booking_status, booking_type, title, lead_id, case_id, created_at, updated_at, cancelled_at")
+    .select(
+      "id, start_at, end_at, booking_status, booking_type, title, lead_id, case_id, created_at, updated_at, cancelled_at"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", foundationPatientId)
     .order("start_at", { ascending: false });
@@ -331,12 +382,24 @@ export async function loadPatientProfile(
     end_at: String((b as { end_at: string }).end_at),
     booking_status: String((b as { booking_status: string }).booking_status),
     booking_type: String((b as { booking_type: string }).booking_type),
-    title: (b as { title: string | null }).title != null ? String((b as { title: string | null }).title) : null,
-    lead_id: (b as { lead_id: string | null }).lead_id != null ? String((b as { lead_id: string | null }).lead_id) : null,
-    case_id: (b as { case_id: string | null }).case_id != null ? String((b as { case_id: string | null }).case_id) : null,
+    title:
+      (b as { title: string | null }).title != null
+        ? String((b as { title: string | null }).title)
+        : null,
+    lead_id:
+      (b as { lead_id: string | null }).lead_id != null
+        ? String((b as { lead_id: string | null }).lead_id)
+        : null,
+    case_id:
+      (b as { case_id: string | null }).case_id != null
+        ? String((b as { case_id: string | null }).case_id)
+        : null,
     created_at: String((b as { created_at: string }).created_at),
     updated_at: String((b as { updated_at: string }).updated_at),
-    cancelled_at: (b as { cancelled_at: string | null }).cancelled_at != null ? String((b as { cancelled_at: string | null }).cancelled_at) : null,
+    cancelled_at:
+      (b as { cancelled_at: string | null }).cancelled_at != null
+        ? String((b as { cancelled_at: string | null }).cancelled_at)
+        : null,
   }));
 
   const split = splitBookingsUpcomingPast(bookingsRaw);
@@ -377,14 +440,27 @@ export async function loadPatientProfile(
     id: String((a as { id: string }).id),
     occurred_at: String((a as { occurred_at: string }).occurred_at),
     activity_kind: String((a as { activity_kind: string }).activity_kind),
-    title: (a as { title: string | null }).title != null ? String((a as { title: string | null }).title) : null,
-    lead_id: (a as { lead_id: string | null }).lead_id != null ? String((a as { lead_id: string | null }).lead_id) : null,
-    case_id: (a as { case_id: string | null }).case_id != null ? String((a as { case_id: string | null }).case_id) : null,
+    title:
+      (a as { title: string | null }).title != null
+        ? String((a as { title: string | null }).title)
+        : null,
+    lead_id:
+      (a as { lead_id: string | null }).lead_id != null
+        ? String((a as { lead_id: string | null }).lead_id)
+        : null,
+    case_id:
+      (a as { case_id: string | null }).case_id != null
+        ? String((a as { case_id: string | null }).case_id)
+        : null,
   }));
 
-  const activity: PatientProfileActivityItem[] = sortActivityEventsNewestFirst(activityMapped).slice(0, 80);
+  const activity: PatientProfileActivityItem[] = sortActivityEventsNewestFirst(
+    activityMapped
+  ).slice(0, 80);
 
-  const timelineActivity = (actRows ?? []).slice(0, 120).map((a) => mapActivityRowForTimeline(a as Record<string, unknown>));
+  const timelineActivity = (actRows ?? [])
+    .slice(0, 120)
+    .map((a) => mapActivityRowForTimeline(a as Record<string, unknown>));
 
   const timelineImages = [
     ...patientImages.activeWithSignedUrls.map(({ image }) => ({
@@ -423,7 +499,9 @@ export async function loadPatientProfile(
         converted_at: lead.converted_at,
         converted_case_id: lead.converted_case_id,
         current_stage_id: lead.current_stage_id,
-        stageLabel: lead.current_stage_id ? stageLabelById.get(lead.current_stage_id) ?? null : null,
+        stageLabel: lead.current_stage_id
+          ? (stageLabelById.get(lead.current_stage_id) ?? null)
+          : null,
       })),
       cases: cases.map((c) => ({
         id: c.id,

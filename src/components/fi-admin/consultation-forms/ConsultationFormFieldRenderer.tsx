@@ -2,9 +2,18 @@
 
 import { cn } from "@/lib/utils";
 import { AiGeneratedClinicalNoteField } from "@/src/components/fi-admin/consultation-forms/AiGeneratedClinicalNoteField";
-import { BodyAreaMapAnnotationsSummary, BodyAreaMapField } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
-import { ClinicalNoteField, ClinicalNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
-import { VoiceNoteField, VoiceNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
+import {
+  BodyAreaMapAnnotationsSummary,
+  BodyAreaMapField,
+} from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
+import {
+  ClinicalNoteField,
+  ClinicalNoteReadOnlySummary,
+} from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
+import {
+  VoiceNoteField,
+  VoiceNoteReadOnlySummary,
+} from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
 import { LudwigVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/LudwigVisualAssessmentField";
 import { NorwoodVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/NorwoodVisualAssessmentField";
 import { RepairWireframeVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/RepairWireframeVisualAssessmentField";
@@ -19,7 +28,10 @@ import {
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
   SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
-import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormPersistenceContext,
+} from "@/src/lib/consultationForms/consultationFormTypes";
 
 function readStringArray(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
@@ -29,7 +41,9 @@ function readStringArray(v: unknown): string[] {
 function PlaceholderCard({ title, body }: { title: string; body: string }) {
   return (
     <FiCard className="border border-dashed border-slate-700 bg-white/[0.03] p-4">
-      <p className={cn("text-sm font-semibold", fiOsLightFormSurfaceClassNames.labelInline)}>{title}</p>
+      <p className={cn("text-sm font-semibold", fiOsLightFormSurfaceClassNames.labelInline)}>
+        {title}
+      </p>
       <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.helper)}>{body}</p>
     </FiCard>
   );
@@ -62,7 +76,8 @@ export function ConsultationFormFieldRenderer({
   const slug = templateSlug?.trim() ?? "";
   const sec = sectionId?.trim() ?? "";
   const hairTransplantHandoffUx =
-    (slug === HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG || slug === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) &&
+    (slug === HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG ||
+      slug === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) &&
     sec === "clinical_summary_handoff";
 
   const followUpAiNoteUx =
@@ -71,13 +86,18 @@ export function ConsultationFormFieldRenderer({
   const scalpPathologyAiNoteUx =
     slug === SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG && sec === "clinical_summary_handoff";
 
-  const aiGeneratedClinicalNoteUx = hairTransplantHandoffUx || followUpAiNoteUx || scalpPathologyAiNoteUx;
+  const aiGeneratedClinicalNoteUx =
+    hairTransplantHandoffUx || followUpAiNoteUx || scalpPathologyAiNoteUx;
 
   if (hairTransplantHandoffUx && field.id === "clinician_voice_note") {
     return null;
   }
 
-  if (aiGeneratedClinicalNoteUx && field.type === "clinical_note" && field.id === "structured_clinical_note") {
+  if (
+    aiGeneratedClinicalNoteUx &&
+    field.type === "clinical_note" &&
+    field.id === "structured_clinical_note"
+  ) {
     return (
       <AiGeneratedClinicalNoteField
         label={field.label}
@@ -95,14 +115,15 @@ export function ConsultationFormFieldRenderer({
   const commonLabel = (
     <label className={fiOsLightFormSurfaceClassNames.label}>
       {field.label}
-      {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+      {field.required ? (
+        <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+      ) : null}
     </label>
   );
 
-  const description =
-    field.description?.trim() ? (
-      <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{field.description}</p>
-    ) : null;
+  const description = field.description?.trim() ? (
+    <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{field.description}</p>
+  ) : null;
 
   switch (field.type) {
     case "text":
@@ -191,9 +212,14 @@ export function ConsultationFormFieldRenderer({
             onChange={(e) => onChange(e.target.checked)}
           />
           <div>
-            <label htmlFor={`cf-${field.id}`} className={fiOsLightFormSurfaceClassNames.labelInline}>
+            <label
+              htmlFor={`cf-${field.id}`}
+              className={fiOsLightFormSurfaceClassNames.labelInline}
+            >
               {field.label}
-              {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+              {field.required ? (
+                <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+              ) : null}
             </label>
             {description}
           </div>
@@ -226,7 +252,9 @@ export function ConsultationFormFieldRenderer({
         <fieldset className="space-y-2" disabled={disabled}>
           <legend className={fiOsLightFormSurfaceClassNames.legend}>
             {field.label}
-            {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+            {field.required ? (
+              <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+            ) : null}
           </legend>
           {description}
           <div className="grid gap-2 sm:grid-cols-2">
@@ -259,7 +287,9 @@ export function ConsultationFormFieldRenderer({
         <fieldset className="space-y-2" disabled={disabled}>
           <legend className={fiOsLightFormSurfaceClassNames.legend}>
             {field.label}
-            {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+            {field.required ? (
+              <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+            ) : null}
           </legend>
           {description}
           <div className="flex flex-col gap-2">
@@ -440,7 +470,9 @@ export function ConsultationFormFieldRenderer({
       return (
         <p className="text-xs text-amber-200">
           Unsupported field type:{" "}
-          <code className="rounded bg-amber-400/15 px-1 font-mono text-[0.8rem] text-amber-200">{field.type}</code>
+          <code className="rounded bg-amber-400/15 px-1 font-mono text-[0.8rem] text-amber-200">
+            {field.type}
+          </code>
         </p>
       );
   }

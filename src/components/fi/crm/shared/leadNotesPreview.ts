@@ -21,5 +21,7 @@ export function buildLeadNotesPreview(
   const ln = leadNotes
     .filter((x) => x.archived_at == null)
     .map((n) => ({ id: n.id, kind: "lead_note" as const, at: n.created_at, text: n.note_body }));
-  return [...general, ...ln].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, limit);
+  return [...general, ...ln]
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .slice(0, limit);
 }

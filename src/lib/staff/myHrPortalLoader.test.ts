@@ -27,7 +27,9 @@ test("linked staff with iiohr_hr URL", () => {
 });
 
 test("linked staff with no HR URL (no matching safe link)", () => {
-  const r = pickHrPortalFromSourceIds([{ source_system: "iiohr_academy", source_url: "https://academy.example" }]);
+  const r = pickHrPortalFromSourceIds([
+    { source_system: "iiohr_academy", source_url: "https://academy.example" },
+  ]);
   assert.equal(r.hasHrLink, false);
   assert.equal(r.hrPortalUrl, null);
   assert.equal(r.sourceSystem, null);
@@ -67,10 +69,20 @@ test("source_system priority: iiohr_hr over iiohr over hr", () => {
     { source_system: "hr", source_url: "https://hr.example" },
     { source_system: "iiohr", source_url: "https://iiohr.example" },
   ]);
-  assert.deepEqual(b, { hasHrLink: true, hrPortalUrl: "https://iiohr.example", sourceSystem: "iiohr" });
+  assert.deepEqual(b, {
+    hasHrLink: true,
+    hrPortalUrl: "https://iiohr.example",
+    sourceSystem: "iiohr",
+  });
 
-  const c = pickHrPortalFromSourceIds([{ source_system: "hr", source_url: "https://generic-hr.example" }]);
-  assert.deepEqual(c, { hasHrLink: true, hrPortalUrl: "https://generic-hr.example", sourceSystem: "hr" });
+  const c = pickHrPortalFromSourceIds([
+    { source_system: "hr", source_url: "https://generic-hr.example" },
+  ]);
+  assert.deepEqual(c, {
+    hasHrLink: true,
+    hrPortalUrl: "https://generic-hr.example",
+    sourceSystem: "hr",
+  });
 });
 
 test("iiohr_hr with bad URL falls through to next tier", () => {
@@ -78,7 +90,11 @@ test("iiohr_hr with bad URL falls through to next tier", () => {
     { source_system: "iiohr_hr", source_url: "javascript:evil()" },
     { source_system: "iiohr", source_url: "https://fallback.example" },
   ]);
-  assert.deepEqual(r, { hasHrLink: true, hrPortalUrl: "https://fallback.example", sourceSystem: "iiohr" });
+  assert.deepEqual(r, {
+    hasHrLink: true,
+    hrPortalUrl: "https://fallback.example",
+    sourceSystem: "iiohr",
+  });
 });
 
 test("iiohr_hr row with empty URL falls through to lower tier", () => {
@@ -86,7 +102,11 @@ test("iiohr_hr row with empty URL falls through to lower tier", () => {
     { source_system: "iiohr_hr", source_url: "   " },
     { source_system: "hr", source_url: "https://hr.example/only" },
   ]);
-  assert.deepEqual(r, { hasHrLink: true, hrPortalUrl: "https://hr.example/only", sourceSystem: "hr" });
+  assert.deepEqual(r, {
+    hasHrLink: true,
+    hrPortalUrl: "https://hr.example/only",
+    sourceSystem: "hr",
+  });
 });
 
 test("normalises source_system case", () => {

@@ -1,20 +1,44 @@
 export const HIE_RECIPIENT_SOURCE_SYSTEMS = ["fi_os", "hairaudit", "hair_longevity"] as const;
 export type HieRecipientSourceSystem = (typeof HIE_RECIPIENT_SOURCE_SYSTEMS)[number];
 
-export const HIE_RECIPIENT_QUALITY_RATINGS = ["excellent", "good", "moderate", "poor", "unsuitable", "unknown"] as const;
+export const HIE_RECIPIENT_QUALITY_RATINGS = [
+  "excellent",
+  "good",
+  "moderate",
+  "poor",
+  "unsuitable",
+  "unknown",
+] as const;
 export type HieRecipientQualityRating = (typeof HIE_RECIPIENT_QUALITY_RATINGS)[number];
 
 export const HIE_RECIPIENT_RISK_LEVELS = ["low", "moderate", "high", "unknown"] as const;
 export type HieRecipientRiskLevel = (typeof HIE_RECIPIENT_RISK_LEVELS)[number];
 
-export const HIE_RECIPIENT_SURGICAL_TIMING_RISKS = ["low", "moderate", "high", "delay_recommended", "unknown"] as const;
+export const HIE_RECIPIENT_SURGICAL_TIMING_RISKS = [
+  "low",
+  "moderate",
+  "high",
+  "delay_recommended",
+  "unknown",
+] as const;
 export type HieRecipientSurgicalTimingRisk = (typeof HIE_RECIPIENT_SURGICAL_TIMING_RISKS)[number];
 
-export const HIE_RECIPIENT_REVIEW_STATUSES = ["pending", "accepted", "corrected", "rejected"] as const;
+export const HIE_RECIPIENT_REVIEW_STATUSES = [
+  "pending",
+  "accepted",
+  "corrected",
+  "rejected",
+] as const;
 export type HieRecipientReviewStatus = (typeof HIE_RECIPIENT_REVIEW_STATUSES)[number];
 
 /** HLI `image_category` values used as recipient-area context (frontal / mid / vertex). */
-export const HIE_RECIPIENT_AREA_IMAGE_CATEGORIES = ["front", "crown", "top", "left_profile", "right_profile"] as const;
+export const HIE_RECIPIENT_AREA_IMAGE_CATEGORIES = [
+  "front",
+  "crown",
+  "top",
+  "left_profile",
+  "right_profile",
+] as const;
 export type HieRecipientAreaImageCategory = (typeof HIE_RECIPIENT_AREA_IMAGE_CATEGORIES)[number];
 
 export type RecipientAssessmentModelResult = {

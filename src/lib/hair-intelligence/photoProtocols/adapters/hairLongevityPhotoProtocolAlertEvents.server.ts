@@ -18,7 +18,11 @@ export async function upsertHairLongevityPhotoProtocolAlertEventsForTenant(
   filters: Omit<PhotoProtocolAlertEventsFilters, "source_system"> = {},
   client?: SupabaseClient
 ): Promise<UpsertPhotoProtocolAlertEventsResult> {
-  return upsertPhotoProtocolAlertEventsForTenant(tenantId, { ...filters, source_system: "hair_longevity" }, client);
+  return upsertPhotoProtocolAlertEventsForTenant(
+    tenantId,
+    { ...filters, source_system: "hair_longevity" },
+    client
+  );
 }
 
 export async function loadHairLongevityPhotoProtocolAlertEventsForTenant(
@@ -26,5 +30,9 @@ export async function loadHairLongevityPhotoProtocolAlertEventsForTenant(
   filters: Omit<PhotoProtocolAlertEventsFilters, "source_system"> = {},
   client?: SupabaseClient
 ) {
-  return loadPhotoProtocolAlertEventsForTenant(tenantId, { ...filters, source_system: "hair_longevity" }, client);
+  return loadPhotoProtocolAlertEventsForTenant(
+    tenantId,
+    { ...filters, source_system: "hair_longevity" },
+    client
+  );
 }

@@ -31,7 +31,10 @@ const LEGACY_ALIASES: Record<string, WorkforceIdentitySourceSystem> = {
   evolved_payroll: WORKFORCE_IDENTITY_SOURCE_SYSTEMS.EVOLVED_PAYROLL,
 };
 
-export const WORKFORCE_IDENTITY_SOURCE_SYSTEM_LABELS: Record<WorkforceIdentitySourceSystem, string> = {
+export const WORKFORCE_IDENTITY_SOURCE_SYSTEM_LABELS: Record<
+  WorkforceIdentitySourceSystem,
+  string
+> = {
   iiohr_hr: "IIOHR HR",
   iiohr_academy: "IIOHR Academy",
   iiohr_nexus: "Nexus global professional",
@@ -40,7 +43,9 @@ export const WORKFORCE_IDENTITY_SOURCE_SYSTEM_LABELS: Record<WorkforceIdentitySo
   evolved_payroll: "Evolved payroll",
 };
 
-export function isWorkforceIdentitySourceSystem(value: string): value is WorkforceIdentitySourceSystem {
+export function isWorkforceIdentitySourceSystem(
+  value: string
+): value is WorkforceIdentitySourceSystem {
   return CANONICAL_SET.has(normalizeFiStaffSourceSystem(value));
 }
 

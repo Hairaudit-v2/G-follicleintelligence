@@ -58,5 +58,8 @@ test("buildEnterpriseDemoPatientEmail is stable per demo patient key", () => {
   const specs = buildEnterpriseDemoPatientConsultationSpecs();
   const emails = new Set(specs.map((s) => buildEnterpriseDemoPatientEmail(s.demoPatientKey)));
   assert.equal(emails.size, specs.length);
-  assert.match(buildEnterpriseDemoPatientEmail("london-central-institute-patient-01"), /^titan\.patient\./);
+  assert.match(
+    buildEnterpriseDemoPatientEmail("london-central-institute-patient-01"),
+    /^titan\.patient\./
+  );
 });

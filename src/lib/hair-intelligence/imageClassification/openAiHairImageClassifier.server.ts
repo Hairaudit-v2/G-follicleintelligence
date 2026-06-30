@@ -25,7 +25,11 @@ const openAiVisionResponseSchema = z.object({
 export const HLI_IMAGE_CLASSIFIER_VERSION = "hli-image-classifier@1.0.0" as const;
 
 function visionModel(): string {
-  return process.env.OPENAI_HAIR_IMAGE_CLASSIFIER_MODEL?.trim() || process.env.OPENAI_CLINICAL_NOTE_MODEL?.trim() || "gpt-4o-mini";
+  return (
+    process.env.OPENAI_HAIR_IMAGE_CLASSIFIER_MODEL?.trim() ||
+    process.env.OPENAI_CLINICAL_NOTE_MODEL?.trim() ||
+    "gpt-4o-mini"
+  );
 }
 
 function requireOpenAiKey(): string {
@@ -34,7 +38,9 @@ function requireOpenAiKey(): string {
   return k;
 }
 
-function shapeOpenAiResult(raw: z.infer<typeof openAiVisionResponseSchema>): FiAiImageClassificationResult {
+function shapeOpenAiResult(
+  raw: z.infer<typeof openAiVisionResponseSchema>
+): FiAiImageClassificationResult {
   return {
     category: normalizeFiAiImageCategory(raw.category),
     categoryConfidence: clampConfidence(raw.category_confidence),
@@ -101,7 +107,9 @@ export async function classifyHairRestorationImageWithOpenAi(params: {
   }
   const zod = openAiVisionResponseSchema.safeParse(parsed);
   if (!zod.success) {
-    throw new Error(`Classification JSON failed validation: ${zod.error.issues[0]?.message ?? "invalid"}`);
+    throw new Error(
+      `Classification JSON failed validation: ${zod.error.issues[0]?.message ?? "invalid"}`
+    );
   }
   return { result: shapeOpenAiResult(zod.data), model };
 }

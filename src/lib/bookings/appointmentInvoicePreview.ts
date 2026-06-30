@@ -25,7 +25,8 @@ function strOrNull(v: unknown): string | null {
 export function parseAppointmentInvoicePreview(booking: FiBookingRow): AppointmentInvoicePreview {
   const meta = booking.metadata ?? {};
   const inv = meta.invoice;
-  const block = inv && typeof inv === "object" && !Array.isArray(inv) ? (inv as Record<string, unknown>) : meta;
+  const block =
+    inv && typeof inv === "object" && !Array.isArray(inv) ? (inv as Record<string, unknown>) : meta;
 
   const lineItems: AppointmentInvoiceLineItem[] = [];
   const rawLines = block.line_items ?? block.lineItems;

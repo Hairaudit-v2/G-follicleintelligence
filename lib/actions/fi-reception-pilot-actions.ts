@@ -54,7 +54,9 @@ async function assertPilotFeedbackAccess(tenantId: string, adminKey?: string) {
   await assertCrmTenantReadAllowed({ tenantId: tid, adminKey, request: undefined });
   const viewer = await resolveReceptionOsViewerContext(tid);
   if (!viewer.canAccessReceptionOs) {
-    throw new Error("ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+    throw new Error(
+      "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+    );
   }
   const member = await getFiTenantMemberSessionIfAllowed(tid);
   return { actorFiUserId: member?.fiUserId ?? null };
@@ -62,7 +64,7 @@ async function assertPilotFeedbackAccess(tenantId: string, adminKey?: string) {
 
 export async function trackReceptionUsageEventAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = trackUsageSchema.parse(body);
@@ -85,7 +87,7 @@ export async function trackReceptionUsageEventAction(
 
 export async function submitReceptionPilotFeedbackAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; feedbackId: string } | { ok: false; error: string }> {
   try {
     const parsed = feedbackSchema.parse(body);

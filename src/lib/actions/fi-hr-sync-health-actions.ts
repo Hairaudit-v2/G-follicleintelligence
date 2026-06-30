@@ -6,7 +6,10 @@ import { z, ZodError } from "zod";
 import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
 import { mapIiohrHrStaffRecordsToFiSyncRows } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
 import { loadEvolvedPerthHrStaffRecordsForFiPush } from "@/src/lib/hr/loadEvolvedPerthHrStaffSnapshot.server";
-import { buildRelinkSyncRowsByEmail, buildRelinkSyncRowsBySourceStaffId } from "@/src/lib/hr/hrStaffRelink";
+import {
+  buildRelinkSyncRowsByEmail,
+  buildRelinkSyncRowsBySourceStaffId,
+} from "@/src/lib/hr/hrStaffRelink";
 import { pushStaffSyncToFi } from "@/src/lib/hr/iiohrFiStaffSyncPush";
 import { runScheduledIiohrHrStaffSyncCore } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
@@ -37,7 +40,9 @@ function revalidateHrSyncHealthSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}`);
 }
 
-async function assertHrSyncHealthAdmin(body: unknown): Promise<{ tenantId: string; adminKey?: string }> {
+async function assertHrSyncHealthAdmin(
+  body: unknown
+): Promise<{ tenantId: string; adminKey?: string }> {
   const parsed = tenantBodySchema.parse(body);
   await assertCrmTenantWriteAllowed({
     tenantId: parsed.tenantId,
@@ -52,7 +57,9 @@ export type RunHrStaffSyncNowActionResult =
   | { ok: false; error: string };
 
 /** Fetch HR feed and commit sync to FI (same pipeline as scheduled cron). */
-export async function runHrStaffSyncNowAction(body: unknown): Promise<RunHrStaffSyncNowActionResult> {
+export async function runHrStaffSyncNowAction(
+  body: unknown
+): Promise<RunHrStaffSyncNowActionResult> {
   try {
     const { tenantId } = await assertHrSyncHealthAdmin(body);
     const allowEmptyFeed = process.env.ALLOW_EMPTY_HR_SYNC?.trim() === "true";
@@ -96,7 +103,9 @@ export type PreviewHrStaffFeedActionResult =
   | { ok: false; error: string };
 
 /** Preview latest HR feed — safe operational fields only. */
-export async function previewHrStaffFeedAction(body: unknown): Promise<PreviewHrStaffFeedActionResult> {
+export async function previewHrStaffFeedAction(
+  body: unknown
+): Promise<PreviewHrStaffFeedActionResult> {
   try {
     await assertHrSyncHealthAdmin(body);
     const hrRows = await loadEvolvedPerthHrStaffRecordsForFiPush();
@@ -176,7 +185,9 @@ async function commitRelinkRows(
   if (!summary.result.ok || !summary.result.commit) {
     const err =
       summary.result.error ??
-      (summary.result.validationErrors.length ? summary.result.validationErrors.join("; ") : "Re-link sync failed.");
+      (summary.result.validationErrors.length
+        ? summary.result.validationErrors.join("; ")
+        : "Re-link sync failed.");
     return { ok: false, error: err };
   }
   revalidateHrSyncHealthSurfaces(tenantId);
@@ -187,7 +198,9 @@ async function commitRelinkRows(
   };
 }
 
-export async function relinkHrStaffByEmailAction(body: unknown): Promise<RelinkHrStaffActionResult> {
+export async function relinkHrStaffByEmailAction(
+  body: unknown
+): Promise<RelinkHrStaffActionResult> {
   try {
     const { tenantId } = await assertHrSyncHealthAdmin(body);
     const { staff, feedRows } = await loadTenantStaffAndFeed(tenantId);
@@ -205,7 +218,9 @@ export async function relinkHrStaffByEmailAction(body: unknown): Promise<RelinkH
   }
 }
 
-export async function relinkHrStaffBySourceStaffIdAction(body: unknown): Promise<RelinkHrStaffActionResult> {
+export async function relinkHrStaffBySourceStaffIdAction(
+  body: unknown
+): Promise<RelinkHrStaffActionResult> {
   try {
     const { tenantId } = await assertHrSyncHealthAdmin(body);
     const [staffFeed, sourceIds] = await Promise.all([

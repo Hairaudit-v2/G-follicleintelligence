@@ -31,14 +31,19 @@ export type HairLossModelJsonParseFailure = { ok: false; error: string };
 /**
  * Parse and normalise OpenAI (or test) JSON object for hair loss classification.
  */
-export function parseHairLossClassificationModelJson(parsed: unknown): HairLossModelJsonParseSuccess | HairLossModelJsonParseFailure {
+export function parseHairLossClassificationModelJson(
+  parsed: unknown
+): HairLossModelJsonParseSuccess | HairLossModelJsonParseFailure {
   const zod = rawSchema.safeParse(parsed);
   if (!zod.success) {
     return { ok: false, error: zod.error.issues[0]?.message ?? "invalid json" };
   }
   const d = zod.data;
   const classification_system = normalizeHieHairLossClassificationSystem(d.classification_system);
-  const classification_grade = normalizeClassificationGradeForSystem(classification_system, d.classification_grade);
+  const classification_grade = normalizeClassificationGradeForSystem(
+    classification_system,
+    d.classification_grade
+  );
   const out: HairLossClassificationModelResult = {
     sex_classification: normalizeHieSexClassification(d.sex_classification),
     classification_system,

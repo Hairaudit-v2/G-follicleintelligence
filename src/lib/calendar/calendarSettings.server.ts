@@ -98,9 +98,9 @@ export async function upsertCalendarSettings(opts: {
   if (insErr) throw new Error(insErr.message);
 }
 
-export async function loadClinicsForCalendarSettings(tenantId: string): Promise<
-  { id: string; displayName: string }[]
-> {
+export async function loadClinicsForCalendarSettings(
+  tenantId: string
+): Promise<{ id: string; displayName: string }[]> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
   const { data, error } = await supabase

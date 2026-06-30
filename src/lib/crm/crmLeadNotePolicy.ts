@@ -14,7 +14,9 @@ export function isCrmLeadNoteVisibility(v: string): v is CrmLeadNoteVisibility {
 export function assertCrmLeadNoteVisibilityAllowed(visibility: string): void {
   const v = visibility.trim();
   if (!isCrmLeadNoteVisibility(v)) {
-    throw new Error(`Invalid note visibility "${visibility}". Allowed: ${CRM_LEAD_NOTE_VISIBILITY_VALUES.join(", ")}.`);
+    throw new Error(
+      `Invalid note visibility "${visibility}". Allowed: ${CRM_LEAD_NOTE_VISIBILITY_VALUES.join(", ")}.`
+    );
   }
 }
 

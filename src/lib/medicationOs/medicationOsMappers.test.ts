@@ -117,8 +117,14 @@ describe("medicationOsMappers", () => {
     assert.equal(summary.active_plan_count, 1);
     assert.equal(summary.plans[0]?.items[0]?.display_name, "Finasteride (display)");
     assert.equal(summary.plans[0]?.items[0]?.dosing_summary, "1 mg daily");
-    assert.equal(summary.plans[0]?.items[0]?.prescription_id, "99999999-9999-4999-8999-999999999999");
-    assert.equal(summary.plans[0]?.items[0]?.prescription_item_id, "88888888-8888-4888-8888-888888888888");
+    assert.equal(
+      summary.plans[0]?.items[0]?.prescription_id,
+      "99999999-9999-4999-8999-999999999999"
+    );
+    assert.equal(
+      summary.plans[0]?.items[0]?.prescription_item_id,
+      "88888888-8888-4888-8888-888888888888"
+    );
   });
 
   it("buildActiveTherapyPlanSummary falls back to canonical_code when no display map", () => {

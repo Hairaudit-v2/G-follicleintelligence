@@ -2,7 +2,10 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import { ReceptionPatientFlowBoard, type ReceptionMutationMode } from "@/src/components/fi-admin/reception/ReceptionPatientFlowBoard";
+import {
+  ReceptionPatientFlowBoard,
+  type ReceptionMutationMode,
+} from "@/src/components/fi-admin/reception/ReceptionPatientFlowBoard";
 import { ReceptionSystemDiagnostics } from "@/src/components/fi-admin/reception/ReceptionSystemDiagnostics";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import {
@@ -55,9 +58,19 @@ export function ReceptionBoardDashboard(props: {
   const cards = data.receptionBoard.cards;
 
   const snapshotCards = buildReceptionSnapshotCards(base, cards, data.paymentCommercialKpis);
-  const priorityItems = buildReceptionPriorities(base, cards, data.paymentCommercialKpis, data.actionCentre, 5);
+  const priorityItems = buildReceptionPriorities(
+    base,
+    cards,
+    data.paymentCommercialKpis,
+    data.actionCentre,
+    5
+  );
   const flowHasPatients = receptionFlowBoardHasPatients(buildReceptionFlowBoardItems(cards));
-  const readinessBlockers = buildReceptionReadinessBlockers(base, cards, data.paymentCommercialKpis);
+  const readinessBlockers = buildReceptionReadinessBlockers(
+    base,
+    cards,
+    data.paymentCommercialKpis
+  );
   const handoffSummary = buildReceptionHandoffSummary(cards);
   const appointmentList = buildReceptionAppointmentList(base, cards, tz);
   const collapseAppointmentList = flowHasPatients && cards.length <= 12;
@@ -71,10 +84,15 @@ export function ReceptionBoardDashboard(props: {
         />
         <div className="relative flex flex-col gap-4">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Reception Board</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+              FI OS
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+              Reception Board
+            </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-              Front-desk patient flow across arrivals, waiting status, forms, payments, rooms, and handoff.
+              Front-desk patient flow across arrivals, waiting status, forms, payments, rooms, and
+              handoff.
             </p>
             <p className="mt-2 text-sm text-[#64748B]">
               {data.tenantName} · {dateLine}
@@ -86,8 +104,9 @@ export function ReceptionBoardDashboard(props: {
 
       {mutationMode === "pin_reception" ? (
         <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3 text-sm text-emerald-100/95">
-          PIN session: you can run today&apos;s reception flow (check in, consult/treatment phase, complete, no-show).{" "}
-          <span className="font-medium text-emerald-50">Cancel</span> needs a full team login.
+          PIN session: you can run today&apos;s reception flow (check in, consult/treatment phase,
+          complete, no-show). <span className="font-medium text-emerald-50">Cancel</span> needs a
+          full team login.
         </p>
       ) : null}
       {mutationMode === "none" ? (
@@ -96,7 +115,11 @@ export function ReceptionBoardDashboard(props: {
         </p>
       ) : null}
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="reception-snapshot-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="reception-snapshot-heading"
+      >
         <SectionHeader
           id="reception-snapshot-heading"
           kicker="Today"
@@ -109,7 +132,9 @@ export function ReceptionBoardDashboard(props: {
             const inner = (
               <>
                 <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {card.value}
+                </p>
                 <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               </>
             );
@@ -139,7 +164,11 @@ export function ReceptionBoardDashboard(props: {
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="reception-priorities-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="reception-priorities-heading"
+      >
         <SectionHeader
           id="reception-priorities-heading"
           kicker="Priorities"
@@ -150,7 +179,9 @@ export function ReceptionBoardDashboard(props: {
         {priorityItems.length === 0 ? (
           <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
-            <p className="text-sm leading-relaxed text-[#CBD5E1]">Reception flow is currently under control.</p>
+            <p className="text-sm leading-relaxed text-[#CBD5E1]">
+              Reception flow is currently under control.
+            </p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -163,14 +194,20 @@ export function ReceptionBoardDashboard(props: {
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                      {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                      {item.detail ? (
+                        <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                      ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                   </Link>
                 ) : (
-                  <div className={`rounded-xl border px-4 py-4 ${receptionAttentionSeverityClass(item.severity)}`}>
+                  <div
+                    className={`rounded-xl border px-4 py-4 ${receptionAttentionSeverityClass(item.severity)}`}
+                  >
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                 )}
               </li>
@@ -197,7 +234,11 @@ export function ReceptionBoardDashboard(props: {
       </DashboardCard>
 
       {readinessBlockers.length > 0 ? (
-        <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="reception-readiness-heading">
+        <DashboardCard
+          className="p-5 sm:p-6"
+          role="region"
+          aria-labelledby="reception-readiness-heading"
+        >
           <SectionHeader
             id="reception-readiness-heading"
             kicker="Readiness"
@@ -220,13 +261,20 @@ export function ReceptionBoardDashboard(props: {
               </li>
             ))}
           </ul>
-          <Link href={`${base}/financial/dashboard`} className={`mt-4 inline-flex ${receptionBoardLinkButtonClass}`}>
+          <Link
+            href={`${base}/financial/dashboard`}
+            className={`mt-4 inline-flex ${receptionBoardLinkButtonClass}`}
+          >
             Open FinancialOS
           </Link>
         </DashboardCard>
       ) : null}
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="reception-handoff-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="reception-handoff-heading"
+      >
         <SectionHeader
           id="reception-handoff-heading"
           kicker="Handoff"
@@ -272,9 +320,14 @@ export function ReceptionBoardDashboard(props: {
           <DashboardCard className="-mt-6 border-t-0 rounded-t-none p-5 sm:p-6">
             <ul className="divide-y divide-white/[0.06]">
               {appointmentList.map((appt) => (
-                <li key={appt.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <li
+                  key={appt.id}
+                  className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[#F8FAFC]">{appt.patientName}</p>
+                    <p className="truncate text-sm font-semibold text-[#F8FAFC]">
+                      {appt.patientName}
+                    </p>
                     <p className="mt-0.5 text-xs text-[#64748B]">
                       {appt.timeLabel} · {appt.serviceLabel} · {appt.statusLabel}
                     </p>

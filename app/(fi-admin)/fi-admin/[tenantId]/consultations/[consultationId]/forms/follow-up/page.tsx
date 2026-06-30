@@ -37,13 +37,19 @@ export default async function FollowUpReviewGuidedFormPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <p className="mb-4 text-sm text-slate-400">
-        ConsultationOS pathway 5 — interval follow-up and outcome capture (Patient Twin, HairAudit, HLI). For primary surgical
-        intake use the{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms`} className="font-semibold text-emerald-300 underline">
+        ConsultationOS pathway 5 — interval follow-up and outcome capture (Patient Twin, HairAudit,
+        HLI). For primary surgical intake use the{" "}
+        <Link
+          href={`/fi-admin/${tid}/consultations/${cid}/forms`}
+          className="font-semibold text-emerald-300 underline"
+        >
           hair transplant form
         </Link>
         ; for repair-specific audit use{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms/repair`} className="font-semibold text-emerald-300 underline">
+        <Link
+          href={`/fi-admin/${tid}/consultations/${cid}/forms/repair`}
+          className="font-semibold text-emerald-300 underline"
+        >
           repair consultation
         </Link>
         .

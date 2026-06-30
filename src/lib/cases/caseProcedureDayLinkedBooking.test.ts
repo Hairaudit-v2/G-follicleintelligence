@@ -4,7 +4,10 @@ import test from "node:test";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { pickPrimaryLinkedSurgeryBookingYmd } from "@/src/lib/cases/caseProcedureDayLinkedBooking";
 
-function row(partial: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "start_at" | "booking_type" | "booking_status">): FiBookingRow {
+function row(
+  partial: Partial<FiBookingRow> &
+    Pick<FiBookingRow, "id" | "start_at" | "booking_type" | "booking_status">
+): FiBookingRow {
   return {
     tenant_id: "t",
     lead_id: null,

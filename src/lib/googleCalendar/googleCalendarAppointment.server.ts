@@ -102,10 +102,12 @@ export function normalizeFiAppointmentInput(
   if (!title) return { ok: false, error: "Title is required." };
 
   const startTime = parseIsoTime(input.startTime);
-  if (!startTime) return { ok: false, error: "Start time is required and must be a valid ISO datetime." };
+  if (!startTime)
+    return { ok: false, error: "Start time is required and must be a valid ISO datetime." };
 
   const endTime = parseIsoTime(input.endTime);
-  if (!endTime) return { ok: false, error: "End time is required and must be a valid ISO datetime." };
+  if (!endTime)
+    return { ok: false, error: "End time is required and must be a valid ISO datetime." };
 
   if (Date.parse(endTime) <= Date.parse(startTime)) {
     return { ok: false, error: "End time must be after start time." };
@@ -169,9 +171,7 @@ export function buildGoogleCalendarEventPayload(
 }
 
 /** Strip sensitive fields — API-safe appointment object only. */
-export function sanitizeFiAppointmentForResponse(
-  event: FiCalendarEvent
-): SanitizedFiAppointment {
+export function sanitizeFiAppointmentForResponse(event: FiCalendarEvent): SanitizedFiAppointment {
   return {
     id: event.id,
     title: event.title,
@@ -436,7 +436,10 @@ export async function createFiCalendarAppointment(
       },
     };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to mirror appointment locally." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to mirror appointment locally.",
+    };
   }
 }
 

@@ -36,7 +36,9 @@ function mapPlan(raw: Record<string, unknown>): FiInstallmentPlanRow {
   };
 }
 
-export async function loadInstallmentPlansForTenant(tenantId: string): Promise<FiInstallmentPlanRow[]> {
+export async function loadInstallmentPlansForTenant(
+  tenantId: string
+): Promise<FiInstallmentPlanRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_installment_plans")
@@ -58,7 +60,12 @@ export async function createInstallmentPlanForInvoice(args: {
   const tid = args.tenantId.trim();
   const iid = args.invoiceId.trim();
   const supabase = supabaseAdmin();
-  const { data: invRaw, error: ie } = await supabase.from("fi_invoices").select("*").eq("tenant_id", tid).eq("id", iid).maybeSingle();
+  const { data: invRaw, error: ie } = await supabase
+    .from("fi_invoices")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", iid)
+    .maybeSingle();
   if (ie) throw new Error(ie.message);
   if (!invRaw) throw new Error("Invoice not found.");
   const inv = mapInvoiceRow(invRaw as Record<string, unknown>);

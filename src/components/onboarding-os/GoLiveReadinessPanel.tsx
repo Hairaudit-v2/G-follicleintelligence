@@ -46,8 +46,12 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
   const isReadOnly = mode === "tenant";
   const isApproved = snapshot.reviews.goLiveApproved;
 
-  const blockedChecks = snapshot.checks.filter((c) => c.state === "fail" && c.severity === "required");
-  const warningChecks = snapshot.checks.filter((c) => c.state === "fail" && c.severity === "optional");
+  const blockedChecks = snapshot.checks.filter(
+    (c) => c.state === "fail" && c.severity === "required"
+  );
+  const warningChecks = snapshot.checks.filter(
+    (c) => c.state === "fail" && c.severity === "optional"
+  );
   const readyChecks = snapshot.checks.filter((c) => c.state === "pass" || c.state === "skipped");
 
   const approvalGate = canPlatformAdminApproveGoLive({
@@ -55,7 +59,10 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
     snapshot,
   });
 
-  function runAction(label: string, fn: () => Promise<{ ok: boolean; error?: string; snapshot?: GoLiveReadinessSnapshot }>) {
+  function runAction(
+    label: string,
+    fn: () => Promise<{ ok: boolean; error?: string; snapshot?: GoLiveReadinessSnapshot }>
+  ) {
     setMessage(null);
     startTransition(async () => {
       const res = await fn();
@@ -96,7 +103,11 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
         <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/[0.06]">
           <div
             className={`h-full rounded-full transition-all ${
-              snapshot.status === "blocked" ? "bg-red-500" : snapshot.status === "warning" ? "bg-amber-500" : "bg-emerald-500"
+              snapshot.status === "blocked"
+                ? "bg-red-500"
+                : snapshot.status === "warning"
+                  ? "bg-amber-500"
+                  : "bg-emerald-500"
             }`}
             style={{ width: `${snapshot.score.percent}%` }}
           />
@@ -109,7 +120,9 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
 
       {message ? (
         <p
-          className={message.kind === "ok" ? "mt-3 text-sm text-emerald-400" : "mt-3 text-sm text-red-400"}
+          className={
+            message.kind === "ok" ? "mt-3 text-sm text-emerald-400" : "mt-3 text-sm text-red-400"
+          }
           role="status"
         >
           {message.text}
@@ -137,7 +150,9 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
             <button
               type="button"
               disabled={pending}
-              onClick={() => runAction("Owner review", () => markOwnerReviewCompleteAction(snapshot.sessionId))}
+              onClick={() =>
+                runAction("Owner review", () => markOwnerReviewCompleteAction(snapshot.sessionId))
+              }
               className="rounded-lg border border-amber-500/40 px-3 py-1.5 text-sm font-medium text-amber-300 hover:bg-amber-500/10 disabled:opacity-50"
             >
               Mark owner review complete
@@ -147,7 +162,11 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
             <button
               type="button"
               disabled={pending}
-              onClick={() => runAction("Platform review", () => markPlatformReviewCompleteAction(snapshot.sessionId))}
+              onClick={() =>
+                runAction("Platform review", () =>
+                  markPlatformReviewCompleteAction(snapshot.sessionId)
+                )
+              }
               className="rounded-lg border border-cyan-500/40 px-3 py-1.5 text-sm font-medium text-cyan-300 hover:bg-cyan-500/10 disabled:opacity-50"
             >
               Mark platform review complete
@@ -157,7 +176,9 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
             type="button"
             disabled={pending || !approvalGate.allowed}
             title={approvalGate.reason ?? undefined}
-            onClick={() => runAction("Go-live approval", () => approveTenantGoLiveAction(snapshot.sessionId))}
+            onClick={() =>
+              runAction("Go-live approval", () => approveTenantGoLiveAction(snapshot.sessionId))
+            }
             className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
           >
             Approve go-live
@@ -181,7 +202,9 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
 
       {snapshot.recommendations.length > 0 ? (
         <div className="mt-5 border-t border-white/[0.06] pt-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommendations</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Recommendations
+          </h4>
           <ul className="mt-3 space-y-2">
             {snapshot.recommendations.map((rec) => (
               <li
@@ -202,9 +225,30 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
         </div>
       ) : null}
 
-      <ChecklistGroup title="Blocked" checks={blockedChecks} snapshot={snapshot} isReadOnly={isReadOnly} pending={pending} onReview={runAction} />
-      <ChecklistGroup title="Warnings" checks={warningChecks} snapshot={snapshot} isReadOnly={isReadOnly} pending={pending} onReview={runAction} />
-      <ChecklistGroup title="Ready" checks={readyChecks} snapshot={snapshot} isReadOnly={isReadOnly} pending={pending} onReview={runAction} />
+      <ChecklistGroup
+        title="Blocked"
+        checks={blockedChecks}
+        snapshot={snapshot}
+        isReadOnly={isReadOnly}
+        pending={pending}
+        onReview={runAction}
+      />
+      <ChecklistGroup
+        title="Warnings"
+        checks={warningChecks}
+        snapshot={snapshot}
+        isReadOnly={isReadOnly}
+        pending={pending}
+        onReview={runAction}
+      />
+      <ChecklistGroup
+        title="Ready"
+        checks={readyChecks}
+        snapshot={snapshot}
+        isReadOnly={isReadOnly}
+        pending={pending}
+        onReview={runAction}
+      />
     </section>
   );
 }
@@ -259,14 +303,19 @@ function ChecklistGroup({
       <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h4>
       <ul className="mt-3 divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
         {checks.map((check) => (
-          <li key={check.code} className="flex flex-wrap items-start justify-between gap-3 px-3 py-2.5">
+          <li
+            key={check.code}
+            className="flex flex-wrap items-start justify-between gap-3 px-3 py-2.5"
+          >
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-slate-200">{check.label}</p>
                 <span className="text-[10px] uppercase tracking-wide text-slate-400">
                   {GO_LIVE_READINESS_AREA_LABELS[check.area]}
                 </span>
-                <span className={`text-xs font-medium ${CHECK_STATE_CLASSES[check.state] ?? "text-slate-400"}`}>
+                <span
+                  className={`text-xs font-medium ${CHECK_STATE_CLASSES[check.state] ?? "text-slate-400"}`}
+                >
                   {check.state}
                 </span>
               </div>

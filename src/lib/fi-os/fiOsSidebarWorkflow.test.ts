@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { resolveFiOsPrimarySidebarItems, filterFiOsPrimarySidebarItemsByFeatureAccess } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  resolveFiOsPrimarySidebarItems,
+  filterFiOsPrimarySidebarItemsByFeatureAccess,
+} from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import {
   buildFiOsSidebarWorkflowSections,
   orderedWorkflowGroupsForWorkspace,
@@ -41,7 +47,9 @@ test("workflow: empty groups omitted when all items filtered by Stage 2", () => 
 
 test("workflow: sections include staff when feature on", () => {
   const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true);
-  const access = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { staff: true });
+  const access = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    staff: true,
+  });
   const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, access);
   const sections = buildFiOsSidebarWorkflowSections(filtered, "clinic_manager");
   const team = sections.find((s) => s.groupId === "TEAM");

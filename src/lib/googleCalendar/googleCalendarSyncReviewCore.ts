@@ -34,7 +34,8 @@ export const GOOGLE_CALENDAR_SYNC_REVIEW_STATUSES = [
 export type GoogleCalendarSyncReviewStatus = (typeof GOOGLE_CALENDAR_SYNC_REVIEW_STATUSES)[number];
 
 export const GOOGLE_CALENDAR_SYNC_REVIEW_SEVERITIES = ["review", "warning", "block"] as const;
-export type GoogleCalendarSyncReviewSeverity = (typeof GOOGLE_CALENDAR_SYNC_REVIEW_SEVERITIES)[number];
+export type GoogleCalendarSyncReviewSeverity =
+  (typeof GOOGLE_CALENDAR_SYNC_REVIEW_SEVERITIES)[number];
 
 /** Default overlap buffer when comparing Google events to local FI appointments (minutes). */
 export const GOOGLE_CALENDAR_SYNC_OVERLAP_THRESHOLD_MINUTES = 0;
@@ -151,7 +152,13 @@ function findTimeOverlapMatch(
     }
     if (!row.startTime || !row.endTime) continue;
     if (
-      eventsOverlap(candidate.startTime, candidate.endTime, row.startTime, row.endTime, thresholdMinutes)
+      eventsOverlap(
+        candidate.startTime,
+        candidate.endTime,
+        row.startTime,
+        row.endTime,
+        thresholdMinutes
+      )
     ) {
       return row;
     }
@@ -165,8 +172,7 @@ function isRiskyGoogleUpdate(
 ): boolean {
   if (!isFiCreatedCalendarSource(local.metadata?.source)) return false;
 
-  const titleChanged =
-    local.title.trim().toLowerCase() !== mapped.title.trim().toLowerCase();
+  const titleChanged = local.title.trim().toLowerCase() !== mapped.title.trim().toLowerCase();
   const startChanged = Boolean(
     local.startTime && mapped.startTime && local.startTime !== mapped.startTime
   );

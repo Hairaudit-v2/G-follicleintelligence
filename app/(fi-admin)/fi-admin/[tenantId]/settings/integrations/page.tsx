@@ -64,7 +64,10 @@ export default async function TenantIntegrationsSettingsPage({
     notFound();
   }
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>
@@ -73,12 +76,16 @@ export default async function TenantIntegrationsSettingsPage({
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const sp = await searchParams;
   const connectedFlash = sp.connected === "google-calendar";
-  const errorFlash = sp.error === "google-calendar" ? sp.reason ?? "unknown" : null;
+  const errorFlash = sp.error === "google-calendar" ? (sp.reason ?? "unknown") : null;
 
   const googleCalendarStatus = await loadGoogleCalendarConnectionStatus(tenantId);
   const oauthConfigured = isGoogleCalendarOAuthConfigured();
@@ -113,15 +120,20 @@ export default async function TenantIntegrationsSettingsPage({
     <div className="space-y-4">
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
-          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-[#22C1FF] hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/configuration`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Settings
           </Link>{" "}
           / <span className="text-[#CBD5E1]">Integrations</span>
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Integrations</h1>
+        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          Integrations
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Connect external systems to this clinic. OAuth secrets and tokens stay on the server — status only is shown
-          here.
+          Connect external systems to this clinic. OAuth secrets and tokens stay on the server —
+          status only is shown here.
         </p>
       </div>
 

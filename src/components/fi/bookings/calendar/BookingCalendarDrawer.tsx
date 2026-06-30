@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { cancelBookingAction, completeBookingAction, updateBookingAction } from "@/lib/actions/fi-booking-actions";
+import {
+  cancelBookingAction,
+  completeBookingAction,
+  updateBookingAction,
+} from "@/lib/actions/fi-booking-actions";
 import { createConsultationFromBookingAction } from "@/lib/actions/fi-consultation-actions";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -44,7 +48,12 @@ function formatOsWhenSummary(startIso: string, endIso: string, tz: string): stri
   try {
     const start = new Date(startIso);
     const end = new Date(endIso);
-    const dateOpts: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric", timeZone: tz };
+    const dateOpts: Intl.DateTimeFormatOptions = {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      timeZone: tz,
+    };
     const timeOpts: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: tz };
     const dateStr = start.toLocaleString(undefined, dateOpts);
     const t1 = start.toLocaleString(undefined, timeOpts);
@@ -55,10 +64,20 @@ function formatOsWhenSummary(startIso: string, endIso: string, tz: string): stri
   }
 }
 
-function anchorSummary(tenantId: string, row: FiBookingRow, variant: "default" | "fiOs"): ReactNode {
-  const link = variant === "fiOs" ? "text-cyan-300 hover:text-cyan-200 hover:underline" : "text-blue-300 hover:underline";
+function anchorSummary(
+  tenantId: string,
+  row: FiBookingRow,
+  variant: "default" | "fiOs"
+): ReactNode {
+  const link =
+    variant === "fiOs"
+      ? "text-cyan-300 hover:text-cyan-200 hover:underline"
+      : "text-blue-300 hover:underline";
   const muted = variant === "fiOs" ? "text-slate-400" : "text-slate-300";
-  const code = variant === "fiOs" ? "rounded bg-white/[0.06] px-0.5 text-xs text-slate-200" : "rounded bg-white/[0.06] px-0.5 text-xs";
+  const code =
+    variant === "fiOs"
+      ? "rounded bg-white/[0.06] px-0.5 text-xs text-slate-200"
+      : "rounded bg-white/[0.06] px-0.5 text-xs";
   const parts: ReactNode[] = [];
   if (row.lead_id) {
     parts.push(
@@ -76,7 +95,11 @@ function anchorSummary(tenantId: string, row: FiBookingRow, variant: "default" |
   }
   if (row.patient_id) {
     parts.push(
-      <Link key="patient" className={link} href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}>
+      <Link
+        key="patient"
+        className={link}
+        href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}
+      >
         Patient record
       </Link>
     );
@@ -88,7 +111,8 @@ function anchorSummary(tenantId: string, row: FiBookingRow, variant: "default" |
       </Link>
     );
   }
-  if (parts.length === 0) return <span className={variant === "fiOs" ? "text-slate-500" : "text-gray-400"}>—</span>;
+  if (parts.length === 0)
+    return <span className={variant === "fiOs" ? "text-slate-500" : "text-gray-400"}>—</span>;
   return <span className="flex flex-wrap gap-x-2 gap-y-1 text-xs">{parts}</span>;
 }
 
@@ -195,7 +219,9 @@ export function BookingCalendarDrawer({
   const clinicLabel = clinicName(clinics, row);
   const roomLabel = row.location?.trim() || "—";
   const typeLabel =
-    calendarOsEventTypeLabel?.trim() || procedureLabel?.trim() || humanizeBookingType(row.booking_type);
+    calendarOsEventTypeLabel?.trim() ||
+    procedureLabel?.trim() ||
+    humanizeBookingType(row.booking_type);
   const headerName = patientSummary?.trim() || row.title?.trim() || typeLabel;
   const locationLabel = row.location?.trim() || "—";
   const sourceLabel = calendarOsSourceLabel?.trim() || "—";
@@ -240,7 +266,11 @@ export function BookingCalendarDrawer({
     setBusy(true);
     setFeedback(null);
     try {
-      const r = await updateBookingAction(tenantId, row.id, withAdmin({ bookingStatus: "arrived" }));
+      const r = await updateBookingAction(
+        tenantId,
+        row.id,
+        withAdmin({ bookingStatus: "arrived" })
+      );
       if (!r.ok) setFeedback(r.error);
       else {
         onBookingUpdated?.(r.booking);
@@ -261,7 +291,9 @@ export function BookingCalendarDrawer({
         return;
       }
       onClose();
-      router.push(`/fi-admin/${tenantId.trim()}/consultations/${encodeURIComponent(r.consultationId)}`);
+      router.push(
+        `/fi-admin/${tenantId.trim()}/consultations/${encodeURIComponent(r.consultationId)}`
+      );
     } finally {
       setBusy(false);
     }
@@ -269,12 +301,16 @@ export function BookingCalendarDrawer({
 
   const mut = canMutateBookings;
   const canMarkArrived =
-    mut && !cancelled && !completed && (row.booking_status === "scheduled" || row.booking_status === "confirmed");
+    mut &&
+    !cancelled &&
+    !completed &&
+    (row.booking_status === "scheduled" || row.booking_status === "confirmed");
   const canRescheduleOrComplete = mut && !cancelled && !completed;
 
   const osActionClass =
     "inline-flex w-full items-center justify-center rounded-md border border-white/[0.12] bg-white/[0.05] px-2 py-2 text-xs font-medium text-slate-100 transition hover:bg-white/[0.09] disabled:pointer-events-none disabled:opacity-40";
-  const osActionMuted = "inline-flex w-full items-center justify-center rounded-md border border-white/[0.08] px-2 py-2 text-xs text-slate-400";
+  const osActionMuted =
+    "inline-flex w-full items-center justify-center rounded-md border border-white/[0.08] px-2 py-2 text-xs text-slate-400";
   const osActionGood =
     "inline-flex w-full items-center justify-center rounded-md border border-emerald-400/25 bg-emerald-500/10 px-2 py-2 text-xs font-medium text-emerald-100 transition hover:bg-emerald-500/18 disabled:pointer-events-none disabled:opacity-40";
   const osActionDanger =
@@ -305,7 +341,9 @@ export function BookingCalendarDrawer({
             <header className="shrink-0 border-b border-white/[0.08] px-3 py-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-1.5">
-                  <p className="truncate text-[15px] font-semibold leading-tight text-slate-50">{headerName}</p>
+                  <p className="truncate text-[15px] font-semibold leading-tight text-slate-50">
+                    {headerName}
+                  </p>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="truncate text-[11px] font-medium uppercase tracking-wide text-slate-500">
                       {typeLabel}
@@ -327,80 +365,94 @@ export function BookingCalendarDrawer({
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
               {calendarOsEvent ? (
                 <p className="mb-3 rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-2 text-[11px] leading-snug text-cyan-100/90">
-                  CalendarOS event — read-only in this phase. Edit in Google Calendar or the CalendarOS test panel.
+                  CalendarOS event — read-only in this phase. Edit in Google Calendar or the
+                  CalendarOS test panel.
                 </p>
               ) : null}
 
               {!calendarOsEvent ? (
-              <div className="grid grid-cols-2 gap-2">
-                {row.patient_id ? (
-                  <Link href={`/fi-admin/${tenantId}/patients/${row.patient_id}`} className={osActionClass}>
-                    Open patient
+                <div className="grid grid-cols-2 gap-2">
+                  {row.patient_id ? (
+                    <Link
+                      href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}
+                      className={osActionClass}
+                    >
+                      Open patient
+                    </Link>
+                  ) : (
+                    <span className={osActionMuted} title="No linked patient">
+                      Open patient
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className={osActionClass}
+                    disabled={busy || !mut}
+                    title={!mut ? "No booking edit permission" : undefined}
+                    onClick={() => void onStartConsultation()}
+                  >
+                    Start consultation
+                  </button>
+                  <Link
+                    href={`/fi-admin/${tenantId}/foundation-integrity`}
+                    className={osActionClass}
+                  >
+                    Patient twin
                   </Link>
-                ) : (
-                  <span className={osActionMuted} title="No linked patient">
-                    Open patient
-                  </span>
-                )}
-                <button
-                  type="button"
-                  className={osActionClass}
-                  disabled={busy || !mut}
-                  title={!mut ? "No booking edit permission" : undefined}
-                  onClick={() => void onStartConsultation()}
-                >
-                  Start consultation
-                </button>
-                <Link href={`/fi-admin/${tenantId}/foundation-integrity`} className={osActionClass}>
-                  Patient twin
-                </Link>
-                {row.case_id ? (
-                  <Link href={`/fi-admin/${tenantId}/cases/${row.case_id}`} className={osActionClass}>
-                    Open case
-                  </Link>
-                ) : (
-                  <span className={osActionMuted} title="No linked case">
-                    Open case
-                  </span>
-                )}
-                <button
-                  type="button"
-                  className={osActionClass}
-                  disabled={busy || !canRescheduleOrComplete}
-                  title={!mut ? "No booking edit permission" : undefined}
-                  onClick={() => {
-                    onEdit(row);
-                    onClose();
-                  }}
-                >
-                  Reschedule
-                </button>
-                <button
-                  type="button"
-                  className={osActionClass}
-                  disabled={busy || !canMarkArrived}
-                  title={!canMarkArrived && mut && !cancelled && !completed ? "Only from scheduled or confirmed" : undefined}
-                  onClick={() => void onMarkArrived()}
-                >
-                  Mark arrived
-                </button>
-                <button
-                  type="button"
-                  className={osActionGood}
-                  disabled={busy || !canRescheduleOrComplete}
-                  onClick={() => void onComplete()}
-                >
-                  Mark completed
-                </button>
-                <button
-                  type="button"
-                  className={osActionDanger}
-                  disabled={busy || !canRescheduleOrComplete}
-                  onClick={() => void onCancel()}
-                >
-                  Cancel booking
-                </button>
-              </div>
+                  {row.case_id ? (
+                    <Link
+                      href={`/fi-admin/${tenantId}/cases/${row.case_id}`}
+                      className={osActionClass}
+                    >
+                      Open case
+                    </Link>
+                  ) : (
+                    <span className={osActionMuted} title="No linked case">
+                      Open case
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className={osActionClass}
+                    disabled={busy || !canRescheduleOrComplete}
+                    title={!mut ? "No booking edit permission" : undefined}
+                    onClick={() => {
+                      onEdit(row);
+                      onClose();
+                    }}
+                  >
+                    Reschedule
+                  </button>
+                  <button
+                    type="button"
+                    className={osActionClass}
+                    disabled={busy || !canMarkArrived}
+                    title={
+                      !canMarkArrived && mut && !cancelled && !completed
+                        ? "Only from scheduled or confirmed"
+                        : undefined
+                    }
+                    onClick={() => void onMarkArrived()}
+                  >
+                    Mark arrived
+                  </button>
+                  <button
+                    type="button"
+                    className={osActionGood}
+                    disabled={busy || !canRescheduleOrComplete}
+                    onClick={() => void onComplete()}
+                  >
+                    Mark completed
+                  </button>
+                  <button
+                    type="button"
+                    className={osActionDanger}
+                    disabled={busy || !canRescheduleOrComplete}
+                    onClick={() => void onCancel()}
+                  >
+                    Cancel booking
+                  </button>
+                </div>
               ) : null}
 
               <dl className="mt-4 space-y-2.5 border-t border-white/[0.06] pt-3 text-xs">
@@ -446,7 +498,10 @@ export function BookingCalendarDrawer({
                     {calendarOsExternalEventId?.trim() ? (
                       <div className="flex gap-2">
                         <dt className="w-24 shrink-0 text-slate-500">External id</dt>
-                        <dd className="min-w-0 break-all font-mono text-[10px] text-slate-500" title="Diagnostic only">
+                        <dd
+                          className="min-w-0 break-all font-mono text-[10px] text-slate-500"
+                          title="Diagnostic only"
+                        >
                           {shortId(calendarOsExternalEventId.trim())}
                         </dd>
                       </div>
@@ -458,34 +513,43 @@ export function BookingCalendarDrawer({
                   <dd className="min-w-0 text-slate-200">{calendarOsEvent ? "—" : clinicLabel}</dd>
                 </div>
                 {!calendarOsEvent ? (
-                <>
-                <div className="flex gap-2">
-                  <dt className="w-24 shrink-0 text-slate-500">Provider</dt>
-                  <dd className="min-w-0 text-slate-200">{providerLabel}</dd>
-                </div>
-                <div className="flex gap-2">
-                  <dt className="w-24 shrink-0 text-slate-500">Room</dt>
-                  <dd className="min-w-0 text-slate-200">{roomLabel}</dd>
-                </div>
-                <div className="flex gap-2">
-                  <dt className="w-24 shrink-0 text-slate-500">Phone</dt>
-                  <dd className="min-w-0 break-all text-slate-200">{patientContactPhone?.trim() || "—"}</dd>
-                </div>
-                <div className="flex gap-2">
-                  <dt className="w-24 shrink-0 text-slate-500">Email</dt>
-                  <dd className="min-w-0 break-all text-slate-200">{patientContactEmail?.trim() || "—"}</dd>
-                </div>
-                <div className="flex gap-2">
-                  <dt className="w-24 shrink-0 text-slate-500">Notes</dt>
-                  <dd className="min-w-0 whitespace-pre-wrap text-slate-300">{row.description?.trim() || "—"}</dd>
-                </div>
-                </>
+                  <>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Provider</dt>
+                      <dd className="min-w-0 text-slate-200">{providerLabel}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Room</dt>
+                      <dd className="min-w-0 text-slate-200">{roomLabel}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Phone</dt>
+                      <dd className="min-w-0 break-all text-slate-200">
+                        {patientContactPhone?.trim() || "—"}
+                      </dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Email</dt>
+                      <dd className="min-w-0 break-all text-slate-200">
+                        {patientContactEmail?.trim() || "—"}
+                      </dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Notes</dt>
+                      <dd className="min-w-0 whitespace-pre-wrap text-slate-300">
+                        {row.description?.trim() || "—"}
+                      </dd>
+                    </div>
+                  </>
                 ) : null}
                 {row.patient_id ? (
                   <div className="flex gap-2">
                     <dt className="w-24 shrink-0 text-slate-500">Patient id</dt>
                     <dd className="min-w-0 font-mono text-[11px] text-slate-300">
-                      <Link className="text-cyan-300 hover:underline" href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}>
+                      <Link
+                        className="text-cyan-300 hover:underline"
+                        href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}
+                      >
                         {shortId(row.patient_id)}
                       </Link>
                     </dd>
@@ -495,7 +559,10 @@ export function BookingCalendarDrawer({
                   <div className="flex gap-2">
                     <dt className="w-24 shrink-0 text-slate-500">Lead</dt>
                     <dd className="min-w-0 font-mono text-[11px] text-slate-300">
-                      <Link className="text-cyan-300 hover:underline" href={`/fi-admin/${tenantId}/crm/leads/${row.lead_id}`}>
+                      <Link
+                        className="text-cyan-300 hover:underline"
+                        href={`/fi-admin/${tenantId}/crm/leads/${row.lead_id}`}
+                      >
                         {shortId(row.lead_id)}
                       </Link>
                     </dd>
@@ -504,14 +571,19 @@ export function BookingCalendarDrawer({
                 {row.person_id ? (
                   <div className="flex gap-2">
                     <dt className="w-24 shrink-0 text-slate-500">Person</dt>
-                    <dd className="min-w-0 font-mono text-[11px] text-slate-300">{shortId(row.person_id)}</dd>
+                    <dd className="min-w-0 font-mono text-[11px] text-slate-300">
+                      {shortId(row.person_id)}
+                    </dd>
                   </div>
                 ) : null}
                 {row.case_id ? (
                   <div className="flex gap-2">
                     <dt className="w-24 shrink-0 text-slate-500">Case</dt>
                     <dd className="min-w-0 font-mono text-[11px] text-slate-300">
-                      <Link className="text-cyan-300 hover:underline" href={`/fi-admin/${tenantId}/cases/${row.case_id}`}>
+                      <Link
+                        className="text-cyan-300 hover:underline"
+                        href={`/fi-admin/${tenantId}/cases/${row.case_id}`}
+                      >
                         {shortId(row.case_id)}
                       </Link>
                     </dd>
@@ -540,18 +612,28 @@ export function BookingCalendarDrawer({
               {cancelled ? (
                 <div className="mt-3 rounded-md border border-amber-500/25 bg-amber-950/40 p-2.5 text-[11px] text-amber-100">
                   <p className="font-medium">Cancelled</p>
-                  {row.cancellation_reason?.trim() ? <p className="mt-1 text-amber-100/90">Reason: {row.cancellation_reason}</p> : null}
+                  {row.cancellation_reason?.trim() ? (
+                    <p className="mt-1 text-amber-100/90">Reason: {row.cancellation_reason}</p>
+                  ) : null}
                 </div>
               ) : null}
-              {completed ? <p className="mt-3 text-[11px] text-slate-500">Completed — read-only.</p> : null}
+              {completed ? (
+                <p className="mt-3 text-[11px] text-slate-500">Completed — read-only.</p>
+              ) : null}
               {feedback ? <p className="mt-3 text-xs text-red-300">{feedback}</p> : null}
             </div>
           </>
         ) : (
           <>
             <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
-              <h2 className="text-sm font-semibold text-slate-100">{row.title?.trim() || "Booking"}</h2>
-              <button type="button" className="text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+              <h2 className="text-sm font-semibold text-slate-100">
+                {row.title?.trim() || "Booking"}
+              </h2>
+              <button
+                type="button"
+                className="text-sm text-slate-400 hover:text-slate-100"
+                onClick={onClose}
+              >
                 Close
               </button>
             </div>
@@ -560,7 +642,8 @@ export function BookingCalendarDrawer({
               {calendarOsEvent ? (
                 <>
                   <p className="rounded border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-200">
-                    CalendarOS event — read-only display. No edits from the calendar UI in this phase.
+                    CalendarOS event — read-only display. No edits from the calendar UI in this
+                    phase.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <BookingTypeBadge type={row.booking_type} />
@@ -590,7 +673,12 @@ export function BookingCalendarDrawer({
                     <div>
                       <p className="text-xs font-medium uppercase text-gray-500">Google Meet</p>
                       <p className="mt-1">
-                        <a href={googleMeetUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:underline">
+                        <a
+                          href={googleMeetUrl.trim()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-300 hover:underline"
+                        >
                           Join meeting
                         </a>
                       </p>
@@ -602,12 +690,17 @@ export function BookingCalendarDrawer({
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">Calendar id</p>
-                    <p className="mt-1 font-mono text-xs text-slate-300">{calendarOsCalendarId?.trim() || "—"}</p>
+                    <p className="mt-1 font-mono text-xs text-slate-300">
+                      {calendarOsCalendarId?.trim() || "—"}
+                    </p>
                   </div>
                   {calendarOsExternalEventId?.trim() ? (
                     <div>
                       <p className="text-xs font-medium uppercase text-gray-500">External id</p>
-                      <p className="mt-1 font-mono text-[11px] text-gray-500" title="Diagnostic only">
+                      <p
+                        className="mt-1 font-mono text-[11px] text-gray-500"
+                        title="Diagnostic only"
+                      >
                         {shortId(calendarOsExternalEventId.trim())}
                       </p>
                     </div>
@@ -615,88 +708,96 @@ export function BookingCalendarDrawer({
                 </>
               ) : (
                 <>
-              <div className="flex flex-wrap gap-2">
-                <BookingTypeBadge type={row.booking_type} />
-                <BookingStatusBadge status={row.booking_status} />
-              </div>
+                  <div className="flex flex-wrap gap-2">
+                    <BookingTypeBadge type={row.booking_type} />
+                    <BookingStatusBadge status={row.booking_status} />
+                  </div>
 
-              {patientSummary?.trim() ? (
-                <div>
-                  <p className="text-xs font-medium uppercase text-gray-500">Patient / anchor</p>
-                  <p className="mt-1 text-base font-medium text-slate-100">{patientSummary.trim()}</p>
-                </div>
-              ) : null}
+                  {patientSummary?.trim() ? (
+                    <div>
+                      <p className="text-xs font-medium uppercase text-gray-500">
+                        Patient / anchor
+                      </p>
+                      <p className="mt-1 text-base font-medium text-slate-100">
+                        {patientSummary.trim()}
+                      </p>
+                    </div>
+                  ) : null}
 
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-500">When</p>
-                <p className="mt-1">{range}</p>
-              </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">When</p>
+                    <p className="mt-1">{range}</p>
+                  </div>
 
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-500">Linked</p>
-                <div className="mt-1">{anchorSummary(tenantId, row, variant)}</div>
-              </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Linked</p>
+                    <div className="mt-1">{anchorSummary(tenantId, row, variant)}</div>
+                  </div>
 
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-500">Provider</p>
-                <p className="mt-1">{assignment.summaryLine}</p>
-              </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Provider</p>
+                    <p className="mt-1">{assignment.summaryLine}</p>
+                  </div>
 
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-500">Location / clinic</p>
-                <p className="mt-1">{clinicOrLocation(clinics, row)}</p>
-              </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Location / clinic</p>
+                    <p className="mt-1">{clinicOrLocation(clinics, row)}</p>
+                  </div>
 
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-500">Notes</p>
-                <p className="mt-1 whitespace-pre-wrap text-slate-300">{row.description?.trim() || "—"}</p>
-              </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Notes</p>
+                    <p className="mt-1 whitespace-pre-wrap text-slate-300">
+                      {row.description?.trim() || "—"}
+                    </p>
+                  </div>
 
-              {cancelled ? (
-                <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
-                  <p className="font-medium">Cancelled</p>
-                  {row.cancellation_reason?.trim() ? <p className="mt-2">Reason: {row.cancellation_reason}</p> : null}
-                </div>
-              ) : null}
+                  {cancelled ? (
+                    <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
+                      <p className="font-medium">Cancelled</p>
+                      {row.cancellation_reason?.trim() ? (
+                        <p className="mt-2">Reason: {row.cancellation_reason}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
 
-              <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
-                {!cancelled && !completed ? (
-                  <>
-                    <button
-                      type="button"
-                      className="rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
-                      disabled={busy}
-                      onClick={() => {
-                        onEdit(row);
-                        onClose();
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded border border-emerald-600 px-3 py-1.5 text-sm text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
-                      disabled={busy}
-                      onClick={() => void onComplete()}
-                    >
-                      Complete
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded border border-red-300 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
-                      disabled={busy}
-                      onClick={() => void onCancel()}
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : completed ? (
-                  <p className="text-xs text-gray-500">This booking is completed.</p>
-                ) : (
-                  <p className="text-xs text-gray-500">Cancelled bookings are locked.</p>
-                )}
-              </div>
-              {feedback ? <p className="text-sm text-rose-300">{feedback}</p> : null}
+                  <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+                    {!cancelled && !completed ? (
+                      <>
+                        <button
+                          type="button"
+                          className="rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
+                          disabled={busy}
+                          onClick={() => {
+                            onEdit(row);
+                            onClose();
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded border border-emerald-600 px-3 py-1.5 text-sm text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
+                          disabled={busy}
+                          onClick={() => void onComplete()}
+                        >
+                          Complete
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded border border-red-300 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
+                          disabled={busy}
+                          onClick={() => void onCancel()}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : completed ? (
+                      <p className="text-xs text-gray-500">This booking is completed.</p>
+                    ) : (
+                      <p className="text-xs text-gray-500">Cancelled bookings are locked.</p>
+                    )}
+                  </div>
+                  {feedback ? <p className="text-sm text-rose-300">{feedback}</p> : null}
                 </>
               )}
             </div>

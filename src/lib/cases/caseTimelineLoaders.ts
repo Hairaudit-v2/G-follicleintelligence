@@ -30,7 +30,11 @@ export async function loadCaseTimelineExtraSources(
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const cid = assertNonEmptyUuid(caseId, "caseId");
 
-  const [{ data: tlRows, error: tle }, { data: actRows, error: ae }, { data: leadRows, error: le }] = await Promise.all([
+  const [
+    { data: tlRows, error: tle },
+    { data: actRows, error: ae },
+    { data: leadRows, error: le },
+  ] = await Promise.all([
     supabase
       .from("fi_timeline_events")
       .select("id, event_kind, title, occurred_at, detail")
@@ -47,7 +51,9 @@ export async function loadCaseTimelineExtraSources(
       .limit(CRM_ACTIVITY_LIMIT),
     supabase
       .from("fi_crm_leads")
-      .select("id, summary, status, created_at, updated_at, case_id, converted_case_id, converted_at")
+      .select(
+        "id, summary, status, created_at, updated_at, case_id, converted_case_id, converted_at"
+      )
       .eq("tenant_id", tid)
       .or(`case_id.eq.${cid},converted_case_id.eq.${cid}`),
   ]);

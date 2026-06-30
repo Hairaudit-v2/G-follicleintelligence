@@ -88,10 +88,9 @@ function resolveMasterKey(): Buffer | null {
   return deriveExternalConnectorMasterKey(process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY);
 }
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
@@ -158,7 +157,12 @@ async function resolveWriteAuth(
 > {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) {
-    return { ok: true, actorAuthUserId: platform.actorAuthUserId, fiUserId: null, actorLabel: "Platform admin" };
+    return {
+      ok: true,
+      actorAuthUserId: platform.actorAuthUserId,
+      fiUserId: null,
+      actorLabel: "Platform admin",
+    };
   }
   const tenant = await resolveTenantAdminAuth(tenantId, opts);
   if (!tenant.ok) return tenant;
@@ -442,7 +446,11 @@ export async function createExternalConnector(
 
   return {
     ok: true,
-    integration: mapIntegrationRow(row, syncMap.get(row.id) ?? null, credentialFlags.get(row.id) ?? false),
+    integration: mapIntegrationRow(
+      row,
+      syncMap.get(row.id) ?? null,
+      credentialFlags.get(row.id) ?? false
+    ),
   };
 }
 
@@ -549,7 +557,11 @@ export async function updateExternalConnector(
 
   return {
     ok: true,
-    integration: mapIntegrationRow(updated as IntegrationRow, syncMap.get(integrationId) ?? null, credFlags.get(integrationId) ?? false),
+    integration: mapIntegrationRow(
+      updated as IntegrationRow,
+      syncMap.get(integrationId) ?? null,
+      credFlags.get(integrationId) ?? false
+    ),
   };
 }
 
@@ -558,8 +570,7 @@ export async function loadTenantExternalConnectors(
   tenantId: string,
   opts: ServerOpts = {}
 ): Promise<
-  | { ok: true; snapshot: TenantExternalConnectorsSnapshot }
-  | { ok: false; error: string }
+  { ok: true; snapshot: TenantExternalConnectorsSnapshot } | { ok: false; error: string }
 > {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (!platform.ok) {
@@ -629,10 +640,7 @@ export async function loadConnectorHealthStatus(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; health: ExternalConnectorHealthStatus }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; health: ExternalConnectorHealthStatus } | { ok: false; error: string }> {
   const loaded = await loadTenantExternalConnectors(tenantId, opts);
   if (!loaded.ok) return loaded;
 

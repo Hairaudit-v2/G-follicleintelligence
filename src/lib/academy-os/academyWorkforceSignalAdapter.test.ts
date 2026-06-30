@@ -7,7 +7,8 @@ import type { FiStaffCompetencyProjectionRow } from "./academyCompetencyTypes";
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 
 function projection(
-  overrides: Partial<FiStaffCompetencyProjectionRow> & Pick<FiStaffCompetencyProjectionRow, "competencyKey" | "competencyStatus">
+  overrides: Partial<FiStaffCompetencyProjectionRow> &
+    Pick<FiStaffCompetencyProjectionRow, "competencyKey" | "competencyStatus">
 ): FiStaffCompetencyProjectionRow {
   return {
     id: "proj-1",
@@ -69,8 +70,18 @@ test("detects expiring certifications soon", () => {
 test("resolves highest readiness band", () => {
   const signals = buildAcademyCompetencySignalsFromProjections(
     [
-      projection({ id: "1", competencyKey: "a", competencyStatus: "active", readinessBand: "developing" }),
-      projection({ id: "2", competencyKey: "b", competencyStatus: "active", readinessBand: "advanced" }),
+      projection({
+        id: "1",
+        competencyKey: "a",
+        competencyStatus: "active",
+        readinessBand: "developing",
+      }),
+      projection({
+        id: "2",
+        competencyKey: "b",
+        competencyStatus: "active",
+        readinessBand: "advanced",
+      }),
     ],
     NOW
   );

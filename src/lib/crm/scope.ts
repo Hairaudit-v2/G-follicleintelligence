@@ -23,6 +23,7 @@ export function stageRowMatchesOrgClinicScope(
   scope: { organisationId: string | null; clinicId: string | null }
 ): boolean {
   return (
-    (stage.organisation_id ?? null) === scope.organisationId && (stage.clinic_id ?? null) === scope.clinicId
+    (stage.organisation_id ?? null) === scope.organisationId &&
+    (stage.clinic_id ?? null) === scope.clinicId
   );
 }

@@ -14,7 +14,10 @@ import { buildHrStaffAutomationStatus } from "@/src/lib/hr/hrStaffAutomationStat
 import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
-import { listRecentStaffSyncRunsForTenant, type FiStaffSyncRunRow } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
+import {
+  listRecentStaffSyncRunsForTenant,
+  type FiStaffSyncRunRow,
+} from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
 
 export type HrSyncHealthPageModel = {
   overview: HrSyncHealthOverview;

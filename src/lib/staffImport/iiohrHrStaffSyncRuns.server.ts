@@ -25,7 +25,9 @@ export type FinishStaffSyncRunInput = {
   metadataPatch?: Record<string, unknown>;
 };
 
-export async function createStaffSyncRun(input: CreateStaffSyncRunInput): Promise<{ id: string } | null> {
+export async function createStaffSyncRun(
+  input: CreateStaffSyncRunInput
+): Promise<{ id: string } | null> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const sys = (input.sourceSystem ?? "iiohr_hr").trim() || "iiohr_hr";
   const meta =
@@ -68,7 +70,11 @@ export async function finishStaffSyncRun(input: FinishStaffSyncRunInput): Promis
     const m = (existing as { metadata: unknown }).metadata;
     if (m && !Array.isArray(m)) mergedMeta = { ...(m as Record<string, unknown>) };
   }
-  if (input.metadataPatch && typeof input.metadataPatch === "object" && !Array.isArray(input.metadataPatch)) {
+  if (
+    input.metadataPatch &&
+    typeof input.metadataPatch === "object" &&
+    !Array.isArray(input.metadataPatch)
+  ) {
     mergedMeta = { ...mergedMeta, ...input.metadataPatch };
   }
 
@@ -113,7 +119,10 @@ export type FiStaffSyncRunRow = {
 };
 
 /** Last N sync runs for HR admin UI (tenant-scoped). */
-export async function listRecentStaffSyncRunsForTenant(tenantId: string, limit = 5): Promise<FiStaffSyncRunRow[]> {
+export async function listRecentStaffSyncRunsForTenant(
+  tenantId: string,
+  limit = 5
+): Promise<FiStaffSyncRunRow[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const { data, error } = await supabaseAdmin()
     .from("fi_staff_sync_runs")
@@ -146,7 +155,8 @@ export async function listRecentStaffSyncRunsForTenant(tenantId: string, limit =
       error_message: x.error_message != null ? String(x.error_message) : null,
       started_at: String(x.started_at ?? ""),
       finished_at: x.finished_at != null ? String(x.finished_at) : null,
-      metadata: md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : {},
+      metadata:
+        md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : {},
     };
   });
 }

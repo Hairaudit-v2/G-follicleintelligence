@@ -43,25 +43,38 @@ async function loadFiUserRow(
     .maybeSingle();
   if (error) return null;
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 /**
  * Schedulable staff row linked to the tenant member, if any.
  */
-export async function tryResolveViewerStaffIdForTenant(tenantId: string, fiUserId: string): Promise<string | null> {
+export async function tryResolveViewerStaffIdForTenant(
+  tenantId: string,
+  fiUserId: string
+): Promise<string | null> {
   const tid = tenantId.trim();
   const uid = fiUserId.trim();
   if (!tid || !uid) return null;
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_staff").select("id").eq("tenant_id", tid).eq("fi_user_id", uid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("fi_user_id", uid)
+    .maybeSingle();
   if (error || !data) return null;
   return String((data as { id: string }).id);
 }
 
 export { loadStaffFeatureAccessOverrides } from "@/src/lib/fi-os/staffFeatureAccessOverrides.server";
 
-export function mergeEffectiveFeatureAccessMap(overrides: Partial<Record<FiFeatureKey, boolean>>): Map<FiFeatureKey, boolean> {
+export function mergeEffectiveFeatureAccessMap(
+  overrides: Partial<Record<FiFeatureKey, boolean>>
+): Map<FiFeatureKey, boolean> {
   return applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), overrides);
 }
 
@@ -70,7 +83,9 @@ export function mergeEffectiveFeatureAccessMap(overrides: Partial<Record<FiFeatu
  * Platform operators, cross-tenant OS directory roles, and platform-admin full bypass always receive `null`
  * so every module stays discoverable.
  */
-async function loadFiOsFeatureAccessMapOrNullForViewerImpl(tenantId: string): Promise<FiOsFeatureAccessMap | null> {
+async function loadFiOsFeatureAccessMapOrNullForViewerImpl(
+  tenantId: string
+): Promise<FiOsFeatureAccessMap | null> {
   const tid = tenantId.trim();
   if (!tid) return null;
 
@@ -97,7 +112,9 @@ async function loadFiOsFeatureAccessMapOrNullForViewerImpl(tenantId: string): Pr
     try {
       const [tenantModeDefaults, templateDefaults] = await Promise.all([
         resolveTenantOperatingModeFeatureDefaults(tid),
-        staffId ? loadFeatureTemplateDefaultsForStaff(tid, staffId) : Promise.resolve({} as Partial<Record<FiFeatureKey, boolean>>),
+        staffId
+          ? loadFeatureTemplateDefaultsForStaff(tid, staffId)
+          : Promise.resolve({} as Partial<Record<FiFeatureKey, boolean>>),
       ]);
       return mergeFeatureAccessWithOrganisationalLayers({
         tenantModeDefaults,
@@ -113,9 +130,13 @@ async function loadFiOsFeatureAccessMapOrNullForViewerImpl(tenantId: string): Pr
 }
 
 /** Deduped per request (layout + home page). */
-export const loadFiOsFeatureAccessMapOrNullForViewer = cache(loadFiOsFeatureAccessMapOrNullForViewerImpl);
+export const loadFiOsFeatureAccessMapOrNullForViewer = cache(
+  loadFiOsFeatureAccessMapOrNullForViewerImpl
+);
 
-export async function resolveCanManageStaffFeatureAccessSettings(tenantId: string): Promise<boolean> {
+export async function resolveCanManageStaffFeatureAccessSettings(
+  tenantId: string
+): Promise<boolean> {
   const tid = tenantId.trim();
   const authId = await resolveAuthUserId(null);
   if (!tid || !authId) return false;
@@ -131,7 +152,10 @@ export async function resolveCanManageStaffFeatureAccessSettings(tenantId: strin
 export async function assertCanManageStaffFeatureAccessSettings(tenantId: string): Promise<void> {
   const ok = await resolveCanManageStaffFeatureAccessSettings(tenantId);
   if (!ok) {
-    throw new CrmAccessError(403, "Admin or tenant administrator access is required to edit staff feature visibility.");
+    throw new CrmAccessError(
+      403,
+      "Admin or tenant administrator access is required to edit staff feature visibility."
+    );
   }
 }
 
@@ -168,7 +192,7 @@ export async function persistStaffFeatureAccessPatch(opts: {
   if (!tid || !sid) throw new Error("tenantId and staffId are required.");
   const supabase = supabaseAdmin();
   const editorFiUserId = opts.editorAuthUserId?.trim()
-    ? (await loadFiUserRow(tid, opts.editorAuthUserId.trim()))?.id ?? null
+    ? ((await loadFiUserRow(tid, opts.editorAuthUserId.trim()))?.id ?? null)
     : null;
 
   for (const [raw, enabled] of Object.entries(opts.patch)) {

@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BloodPathologyRequestDetailClient } from "@/src/components/fi/patients/pathology/BloodPathologyRequestDetailClient";
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { loadPathologyRequestAuditEvents, loadPathologyRequestDetail } from "@/src/lib/pathology/pathologyRequestLoad.server";
+import {
+  loadPathologyRequestAuditEvents,
+  loadPathologyRequestDetail,
+} from "@/src/lib/pathology/pathologyRequestLoad.server";
 
 export const dynamic = "force-dynamic";
 
@@ -34,10 +37,18 @@ export default async function BloodPathologyRequestDetailPage({
 
   await assertCrmTenantReadAllowed({ tenantId: tenantId.trim() });
 
-  const bundle = await loadPathologyRequestDetail(tenantId.trim(), patientId.trim(), requestId.trim());
+  const bundle = await loadPathologyRequestDetail(
+    tenantId.trim(),
+    patientId.trim(),
+    requestId.trim()
+  );
   if (!bundle) notFound();
 
-  const auditRaw = await loadPathologyRequestAuditEvents(tenantId.trim(), patientId.trim(), requestId.trim());
+  const auditRaw = await loadPathologyRequestAuditEvents(
+    tenantId.trim(),
+    patientId.trim(),
+    requestId.trim()
+  );
   const audit = auditRaw.map((a) => ({
     id: a.id,
     occurred_at: a.occurred_at,
@@ -48,7 +59,10 @@ export default async function BloodPathologyRequestDetailPage({
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`}
+          className="text-blue-300 hover:underline"
+        >
           ← Patient profile
         </Link>
         <span className="mx-2 text-gray-300">·</span>

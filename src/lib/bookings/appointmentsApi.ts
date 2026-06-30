@@ -7,7 +7,10 @@ import {
   loadBookingForTenant,
   updateBooking,
 } from "./bookings";
-import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
+import {
+  checkAppointmentAvailability,
+  DEFAULT_APPOINTMENT_BUFFER_MINUTES,
+} from "./appointmentAvailability";
 import { loadStaffFiUserIdMap, resolveBookingStaffAssignment } from "@/src/lib/staff/staff.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
@@ -21,9 +24,7 @@ import {
   mapBookingsToCalendarAppointments,
   type CalendarAppointment,
 } from "./appointmentDto";
-import {
-  mergeAppointmentProcedureMetadata,
-} from "./appointmentMetadata";
+import { mergeAppointmentProcedureMetadata } from "./appointmentMetadata";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { FiBookingRow } from "./types";
 import { AppointmentConflictError } from "./bookingErrors";
@@ -31,7 +32,10 @@ import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffS
 
 export { AppointmentConflictError, AppointmentStaffHoursError } from "./bookingErrors";
 
-export function utcCalendarDayRangeIso(dateYmd: string): { rangeStartIso: string; rangeEndIso: string } {
+export function utcCalendarDayRangeIso(dateYmd: string): {
+  rangeStartIso: string;
+  rangeEndIso: string;
+} {
   const normalized = parseUtcCalendarDateString(dateYmd);
   if (!normalized) throw new Error("Invalid date (expected YYYY-MM-DD).");
   const y = Number(normalized.slice(0, 4));
@@ -77,7 +81,10 @@ export async function listCalendarAppointments(
   return { date, appointments: mapBookingsToCalendarAppointments(rows) };
 }
 
-function collectStaffIdsForAvailability(rows: FiBookingRow[], candidateStaffId: string | null): string[] {
+function collectStaffIdsForAvailability(
+  rows: FiBookingRow[],
+  candidateStaffId: string | null
+): string[] {
   const s = new Set<string>();
   if (candidateStaffId?.trim()) s.add(candidateStaffId.trim());
   for (const b of rows) {
@@ -97,7 +104,13 @@ async function assertSlotAvailable(args: {
   const supabase = supabaseAdmin();
   const sid = args.candidateStaffId?.trim() || null;
   if (sid) {
-    await assertStaffAppointmentWithinWorkingHours(args.tenantId, sid, args.startAt, args.endAt, supabase);
+    await assertStaffAppointmentWithinWorkingHours(
+      args.tenantId,
+      sid,
+      args.startAt,
+      args.endAt,
+      supabase
+    );
   }
 
   const { rangeStartIso, rangeEndIso } = utcCalendarDayRangeIso(
@@ -282,7 +295,8 @@ export async function rescheduleCalendarAppointment(
 
   if (!nextEnd) {
     const procedureChanged =
-      Boolean(params.procedure?.trim()) && params.procedure!.trim() !== existing.booking_type.trim();
+      Boolean(params.procedure?.trim()) &&
+      params.procedure!.trim() !== existing.booking_type.trim();
     if (procedureChanged) {
       nextEnd = endIsoFromStartAndProcedure(nextStart, procedure, catalog);
     } else if (params.startAt && !params.endAt) {

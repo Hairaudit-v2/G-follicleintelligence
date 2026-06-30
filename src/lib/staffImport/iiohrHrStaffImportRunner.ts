@@ -16,7 +16,10 @@ import {
   normalizeFiStaffSourceStaffId,
   normalizeFiStaffSourceSystem,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
-import { IIOHR_HR_SOURCE_SYSTEM, planIiohrHrStaffImport } from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
+import {
+  IIOHR_HR_SOURCE_SYSTEM,
+  planIiohrHrStaffImport,
+} from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
 import type {
   IiohrHrStaffImportAction,
   IiohrHrStaffImportPlanResult,
@@ -35,11 +38,16 @@ export type EvolvedHrPerthClinicPick = { clinicId: string | null; displayName: s
  * Resolves a Perth clinic row for Evolved HR imports: prefers exact
  * "Evolved Hair Restoration Perth", then name containing Perth + Evolved/Hair/Restoration, then any "Perth".
  */
-export async function resolveEvolvedHrPerthClinicForTenant(tenantId: string): Promise<EvolvedHrPerthClinicPick> {
+export async function resolveEvolvedHrPerthClinicForTenant(
+  tenantId: string
+): Promise<EvolvedHrPerthClinicPick> {
   try {
     const tid = assertNonEmptyUuid(tenantId, "tenantId");
     const supabase = supabaseAdmin();
-    const { data, error } = await supabase.from("fi_clinics").select("id, display_name").eq("tenant_id", tid);
+    const { data, error } = await supabase
+      .from("fi_clinics")
+      .select("id, display_name")
+      .eq("tenant_id", tid);
     if (error) return { clinicId: null, displayName: null };
     const rows = (data ?? []) as { id: string; display_name: string }[];
     const lower = (s: string) => s.trim().toLowerCase();
@@ -51,7 +59,10 @@ export async function resolveEvolvedHrPerthClinicForTenant(tenantId: string): Pr
     if (exact) return pick(exact);
     const evolvedPerth = rows.find((r) => {
       const d = lower(r.display_name);
-      return d.includes("perth") && (d.includes("evolved") || d.includes("restoration") || d.includes("hair"));
+      return (
+        d.includes("perth") &&
+        (d.includes("evolved") || d.includes("restoration") || d.includes("hair"))
+      );
     });
     if (evolvedPerth) return pick(evolvedPerth);
     const anyPerth = rows.find((r) => lower(r.display_name).includes("perth"));
@@ -62,7 +73,10 @@ export async function resolveEvolvedHrPerthClinicForTenant(tenantId: string): Pr
 }
 
 /** Mutates plan: tags `iiohr_hr` source-id actions with `primary_fi_clinic_id` when a Perth clinic exists; otherwise appends a warning. */
-export function attachEvolvedPerthClinicMetadataToPlan(plan: IiohrHrStaffImportPlanResult, clinicId: string | null): void {
+export function attachEvolvedPerthClinicMetadataToPlan(
+  plan: IiohrHrStaffImportPlanResult,
+  clinicId: string | null
+): void {
   if (!clinicId) {
     plan.warnings.push(
       "No Perth clinic record matched for this tenant (expected a clinic name including “Perth”, e.g. Evolved Hair Restoration Perth). Staff are imported at tenant level only — add or rename a Perth clinic in Foundation to link HR imports."
@@ -72,13 +86,15 @@ export function attachEvolvedPerthClinicMetadataToPlan(plan: IiohrHrStaffImportP
   for (const pr of plan.perRow) {
     for (const a of pr.actions) {
       if (a.type === "create_staff_source_id") {
-        if (normalizeFiStaffSourceSystem(a.payload.source_system) !== IIOHR_HR_SOURCE_SYSTEM) continue;
+        if (normalizeFiStaffSourceSystem(a.payload.source_system) !== IIOHR_HR_SOURCE_SYSTEM)
+          continue;
         a.payload.metadata = normalizeFiStaffSourceMetadata({
           ...normalizeFiStaffSourceMetadata(a.payload.metadata),
           [HR_IMPORT_PRIMARY_CLINIC_META_KEY]: clinicId,
         });
       } else if (a.type === "update_staff_source_id") {
-        const base = a.payload.metadata != null ? normalizeFiStaffSourceMetadata(a.payload.metadata) : {};
+        const base =
+          a.payload.metadata != null ? normalizeFiStaffSourceMetadata(a.payload.metadata) : {};
         a.payload.metadata = normalizeFiStaffSourceMetadata({
           ...base,
           [HR_IMPORT_PRIMARY_CLINIC_META_KEY]: clinicId,
@@ -197,7 +213,11 @@ function emptyPlan(): IiohrHrStaffImportPlanResult {
 async function assertTenantExists(tenantId: string): Promise<void> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tid)
+    .maybeSingle();
   if (error) throw new Error("Could not verify tenant.");
   if (!data) throw new Error("Tenant not found.");
 }
@@ -271,7 +291,8 @@ function validateImportRows(rows: unknown): {
     candidates.push({
       external_staff_id: String(r.external_staff_id).trim(),
       iiohr_user_id: r.iiohr_user_id != null ? String(r.iiohr_user_id).trim() : null,
-      email: r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
+      email:
+        r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
       full_name: String(r.full_name ?? "").trim(),
       staff_role: r.staff_role != null ? String(r.staff_role).trim() : null,
       employment_status: r.employment_status != null ? String(r.employment_status).trim() : null,
@@ -308,7 +329,12 @@ async function assertFiStaffBelongsToTenant(
 ): Promise<void> {
   const tid = tenantId.trim();
   const sid = staffId.trim();
-  const { data, error } = await supabase.from("fi_staff").select("id").eq("tenant_id", tid).eq("id", sid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Staff id must belong to the tenant.");
 }
@@ -323,7 +349,9 @@ async function insertFiStaffRow(
   if (fiUserId) await assertFiUserBelongsToTenant(supabase, tid, fiUserId);
 
   const wh =
-    input.working_hours && typeof input.working_hours === "object" && !Array.isArray(input.working_hours)
+    input.working_hours &&
+    typeof input.working_hours === "object" &&
+    !Array.isArray(input.working_hours)
       ? input.working_hours
       : {};
   const payload = {
@@ -355,14 +383,19 @@ async function updateFiStaffRow(
   await assertFiStaffBelongsToTenant(supabase, tid, sid);
 
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (patch.full_name !== undefined) row.full_name = String(patch.full_name ?? "").trim() || "Staff";
-  if (patch.staff_role !== undefined) row.staff_role = String(patch.staff_role ?? "consultant").trim() || "consultant";
+  if (patch.full_name !== undefined)
+    row.full_name = String(patch.full_name ?? "").trim() || "Staff";
+  if (patch.staff_role !== undefined)
+    row.staff_role = String(patch.staff_role ?? "consultant").trim() || "consultant";
   if (patch.email !== undefined) row.email = patch.email?.trim() || null;
   if (patch.mobile !== undefined) row.mobile = patch.mobile?.trim() || null;
-  if (patch.default_timezone !== undefined) row.default_timezone = patch.default_timezone?.trim() || null;
+  if (patch.default_timezone !== undefined)
+    row.default_timezone = patch.default_timezone?.trim() || null;
   if (patch.working_hours !== undefined) {
     const wh =
-      patch.working_hours && typeof patch.working_hours === "object" && !Array.isArray(patch.working_hours)
+      patch.working_hours &&
+      typeof patch.working_hours === "object" &&
+      !Array.isArray(patch.working_hours)
         ? patch.working_hours
         : {};
     row.working_hours = wh;
@@ -406,9 +439,14 @@ export async function loadSnapshotsForPlan(tenantId: string): Promise<{
     supabase.from("fi_users").select("id, email, role").eq("tenant_id", tid),
     supabase
       .from("fi_staff")
-      .select("id, fi_user_id, full_name, staff_role, email, mobile, is_active, default_timezone, working_hours")
+      .select(
+        "id, fi_user_id, full_name, staff_role, email, mobile, is_active, default_timezone, working_hours"
+      )
       .eq("tenant_id", tid),
-    supabase.from("fi_staff_source_ids").select("id, staff_id, source_system, source_staff_id, source_url, metadata").eq("tenant_id", tid),
+    supabase
+      .from("fi_staff_source_ids")
+      .select("id, staff_id, source_system, source_staff_id, source_url, metadata")
+      .eq("tenant_id", tid),
   ]);
   if (usersRes.error) throw new Error(usersRes.error.message);
   if (staffRes.error) throw new Error(staffRes.error.message);
@@ -416,7 +454,11 @@ export async function loadSnapshotsForPlan(tenantId: string): Promise<{
 
   const existingUsers = (usersRes.data ?? []).map((r) => {
     const x = r as { id: string; email: string | null; role: string | null };
-    return { id: String(x.id), email: x.email != null ? String(x.email) : null, role: x.role != null ? String(x.role) : null };
+    return {
+      id: String(x.id),
+      email: x.email != null ? String(x.email) : null,
+      role: x.role != null ? String(x.role) : null,
+    };
   });
   const existingStaff = (staffRes.data ?? []).map((r) => {
     const x = r as Record<string, unknown>;
@@ -495,7 +537,11 @@ export async function applyIiohrHrStaffImportPlanForTests(
         const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
         if (email !== undefined) row.email = email?.trim() || null;
         if (role !== undefined) row.role = role?.trim() || "member";
-        const { error } = await supabase.from("fi_users").update(row).eq("id", userId.trim()).eq("tenant_id", tid);
+        const { error } = await supabase
+          .from("fi_users")
+          .update(row)
+          .eq("id", userId.trim())
+          .eq("tenant_id", tid);
         if (error) throw new Error(`update_fi_user: ${error.message}`);
         applied.updatedUsers += 1;
         break;
@@ -547,9 +593,13 @@ export async function applyIiohrHrStaffImportPlanForTests(
         const p = action.payload;
         const staffId =
           p.staffId?.trim() ||
-          (p.staffFromRowIndex != null ? rowIndexToNewFiStaffId.get(p.staffFromRowIndex) : undefined);
+          (p.staffFromRowIndex != null
+            ? rowIndexToNewFiStaffId.get(p.staffFromRowIndex)
+            : undefined);
         if (!staffId) {
-          throw new Error(`create_staff_source_id: could not resolve staff_id (row ${action.sourceRowIndex}).`);
+          throw new Error(
+            `create_staff_source_id: could not resolve staff_id (row ${action.sourceRowIndex}).`
+          );
         }
         const now = new Date().toISOString();
         const { error } = await supabase.from("fi_staff_source_ids").insert({
@@ -622,7 +672,9 @@ export type RunIiohrHrStaffImportParams = {
  * Tenant-scoped IIOHR HR staff import: plan, optionally apply via service role.
  * Callers must pass `commit: true` and `confirm: true` to perform writes.
  */
-export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams): Promise<IiohrHrStaffImportRunResult> {
+export async function runIiohrHrStaffImport(
+  params: RunIiohrHrStaffImportParams
+): Promise<IiohrHrStaffImportRunResult> {
   const tenantParse = tenantIdSchema.safeParse(params.tenantId?.trim());
   if (!tenantParse.success) {
     return {
@@ -675,7 +727,8 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
     };
   }
 
-  const { existingUsers, existingStaff, existingStaffSourceIds } = await loadSnapshotsForPlan(tenantId);
+  const { existingUsers, existingStaff, existingStaffSourceIds } =
+    await loadSnapshotsForPlan(tenantId);
 
   const plan =
     rows.length === 0
@@ -699,7 +752,9 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
     plan.actions = plan.perRow.flatMap((p) => p.actions);
   }
 
-  const skippedRowCount = plan.perRow.filter((p) => p.skippedDuplicate || p.skippedValidation).length;
+  const skippedRowCount = plan.perRow.filter(
+    (p) => p.skippedDuplicate || p.skippedValidation
+  ).length;
   const dryRunCounts = countFromActions(plan.actions);
 
   const commit = params.commit === true;
@@ -814,7 +869,9 @@ export function logIiohrHrStaffImportReport(result: IiohrHrStaffImportRunResult)
   console.log(`  Updated source_ids:   ${counts.updatedSourceIds}`);
 
   if (result.commit && result.appliedCounts && !result.ok) {
-    console.log("\nNote: import aborted part-way; counts reflect actions completed before the error.");
+    console.log(
+      "\nNote: import aborted part-way; counts reflect actions completed before the error."
+    );
   }
 
   console.log("");

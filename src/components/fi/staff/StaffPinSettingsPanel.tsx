@@ -87,7 +87,10 @@ export function StaffPinSettingsPanel({
   };
 
   return (
-    <section className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40" aria-label={`PIN access for ${staffName}`}>
+    <section
+      className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
+      aria-label={`PIN access for ${staffName}`}
+    >
       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-sm font-semibold text-slate-100">Clinic PIN access</h3>
@@ -114,7 +117,10 @@ export function StaffPinSettingsPanel({
       </dl>
 
       {error ? (
-        <div className="mb-3 rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+        <div
+          className="mb-3 rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -152,12 +158,20 @@ export function StaffPinSettingsPanel({
 
       <div className="mt-4 flex flex-wrap gap-2">
         {canSet ? (
-          <Button type="button" disabled={pending || newPin.length !== 4} onClick={() => submitPin("set")}>
+          <Button
+            type="button"
+            disabled={pending || newPin.length !== 4}
+            onClick={() => submitPin("set")}
+          >
             {pending ? "Saving…" : "Set PIN"}
           </Button>
         ) : null}
         {canReset ? (
-          <Button type="button" disabled={pending || newPin.length !== 4} onClick={() => submitPin("reset")}>
+          <Button
+            type="button"
+            disabled={pending || newPin.length !== 4}
+            onClick={() => submitPin("reset")}
+          >
             {pending ? "Saving…" : "Reset PIN"}
           </Button>
         ) : null}

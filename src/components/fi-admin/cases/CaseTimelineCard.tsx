@@ -1,9 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+} from "@/src/lib/cases/caseDetailNavConstants";
 import type { CaseTimelineFilterPreset, CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
-import { CASE_TIMELINE_FILTER_PRESETS, caseTimelinePresetIncludesKind } from "@/src/lib/cases/caseTimelineLabels";
+import {
+  CASE_TIMELINE_FILTER_PRESETS,
+  caseTimelinePresetIncludesKind,
+} from "@/src/lib/cases/caseTimelineLabels";
 import { CaseTimelineItemList } from "./CaseTimelineItemList";
 
 export function CaseTimelineFilters({
@@ -53,9 +59,9 @@ export function CaseTimelineCard({ items }: { items: CaseTimelineItem[] }) {
             Patient timeline
           </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
-            Stage 5E: read-only clinical journey (newest first). Aggregates case, CRM, bookings, media, planning,
-            procedure, post-op, follow-ups, and foundation timeline rows. No HairAudit scores, audit grading, AI
-            outcome scoring, or certification logic.
+            Stage 5E: read-only clinical journey (newest first). Aggregates case, CRM, bookings,
+            media, planning, procedure, post-op, follow-ups, and foundation timeline rows. No
+            HairAudit scores, audit grading, AI outcome scoring, or certification logic.
           </p>
         </div>
         <p className="text-xs text-gray-500">

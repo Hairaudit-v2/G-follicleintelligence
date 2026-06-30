@@ -78,7 +78,9 @@ export function GoogleCalendarMonitoringCard({
     return (
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/40 p-4 sm:p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Google Calendar Monitoring</h2>
-        <p className="mt-2 text-sm text-[#94A3B8]">Connect Google Calendar to view sync health and history.</p>
+        <p className="mt-2 text-sm text-[#94A3B8]">
+          Connect Google Calendar to view sync health and history.
+        </p>
       </section>
     );
   }
@@ -102,9 +104,9 @@ export function GoogleCalendarMonitoringCard({
             {formatWebhookSyncModeLabel(pageModel.webhook.syncMode)}
           </span>
           {pageModel.openAlertCount > 0 ? (
-          <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-300">
-            {pageModel.openAlertCount} open alert{pageModel.openAlertCount === 1 ? "" : "s"}
-          </span>
+            <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-300">
+              {pageModel.openAlertCount} open alert{pageModel.openAlertCount === 1 ? "" : "s"}
+            </span>
           ) : null}
         </div>
       </div>
@@ -115,27 +117,41 @@ export function GoogleCalendarMonitoringCard({
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
           <div className="text-xs uppercase tracking-wide text-[#64748B]">Health</div>
-          <div className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-sm font-medium ${healthBadgeClass(pageModel.healthStatus)}`}>
+          <div
+            className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-sm font-medium ${healthBadgeClass(pageModel.healthStatus)}`}
+          >
             {formatHealthStatusLabel(pageModel.healthStatus)}
           </div>
           <div className="mt-2 text-xs text-[#94A3B8]">Score {pageModel.healthScore}/100</div>
         </div>
         <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
           <div className="text-xs uppercase tracking-wide text-[#64748B]">Last successful sync</div>
-          <div className="mt-1 text-sm text-[#F8FAFC]">{formatRelativeTime(pageModel.lastSuccessfulSyncAt)}</div>
+          <div className="mt-1 text-sm text-[#F8FAFC]">
+            {formatRelativeTime(pageModel.lastSuccessfulSyncAt)}
+          </div>
         </div>
         <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
           <div className="text-xs uppercase tracking-wide text-[#64748B]">Scheduler</div>
-          <div className="mt-1 text-sm text-[#F8FAFC]">{schedulerActive ? "Active" : "Inactive"}</div>
+          <div className="mt-1 text-sm text-[#F8FAFC]">
+            {schedulerActive ? "Active" : "Inactive"}
+          </div>
           <div className="mt-1 text-xs text-[#94A3B8]">
-            {pageModel.schedulerPaused ? pageModel.schedulerPausedReason ?? "Paused" : "Running on schedule"}
+            {pageModel.schedulerPaused
+              ? (pageModel.schedulerPausedReason ?? "Paused")
+              : "Running on schedule"}
           </div>
         </div>
         <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
           <div className="text-xs uppercase tracking-wide text-[#64748B]">Frequency</div>
-          <div className="mt-1 text-sm text-[#F8FAFC]">{formatSyncFrequencyLabel(pageModel.syncFrequencyMinutes)}</div>
-          <div className="mt-1 text-xs text-[#94A3B8]">Success rate {pageModel.successRatePercent}%</div>
-          <div className="mt-1 text-xs text-[#94A3B8]">Consecutive failures {pageModel.consecutiveFailures}</div>
+          <div className="mt-1 text-sm text-[#F8FAFC]">
+            {formatSyncFrequencyLabel(pageModel.syncFrequencyMinutes)}
+          </div>
+          <div className="mt-1 text-xs text-[#94A3B8]">
+            Success rate {pageModel.successRatePercent}%
+          </div>
+          <div className="mt-1 text-xs text-[#94A3B8]">
+            Consecutive failures {pageModel.consecutiveFailures}
+          </div>
         </div>
         <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
           <div className="text-xs uppercase tracking-wide text-[#64748B]">Real-time webhook</div>
@@ -156,7 +172,10 @@ export function GoogleCalendarMonitoringCard({
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Total sync runs" value={String(pageModel.metrics.totalSyncRuns)} />
         <StatCard label="Events processed" value={String(pageModel.metrics.totalEventsProcessed)} />
-        <StatCard label="Review items created" value={String(pageModel.metrics.totalReviewItemsCreated)} />
+        <StatCard
+          label="Review items created"
+          value={String(pageModel.metrics.totalReviewItemsCreated)}
+        />
         <StatCard label="Failed syncs" value={String(pageModel.metrics.failedSyncs)} />
         <StatCard
           label="Average sync time"
@@ -175,7 +194,9 @@ export function GoogleCalendarMonitoringCard({
                   setGoogleCalendarScheduledSyncEnabledAction(tenantId, {
                     enabled: !pageModel.scheduledSyncEnabled,
                   }),
-                pageModel.scheduledSyncEnabled ? "Scheduled sync disabled." : "Scheduled sync enabled."
+                pageModel.scheduledSyncEnabled
+                  ? "Scheduled sync disabled."
+                  : "Scheduled sync enabled."
               )
             }
             className="rounded-lg border border-white/[0.12] px-3 py-1.5 text-xs font-medium text-[#CBD5E1] hover:bg-white/[0.04] disabled:opacity-50"
@@ -187,7 +208,10 @@ export function GoogleCalendarMonitoringCard({
               type="button"
               disabled={pending}
               onClick={() =>
-                runAction(() => resumeGoogleCalendarScheduledSyncAction(tenantId), "Scheduled sync resumed.")
+                runAction(
+                  () => resumeGoogleCalendarScheduledSyncAction(tenantId),
+                  "Scheduled sync resumed."
+                )
               }
               className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-50"
             >
@@ -198,7 +222,10 @@ export function GoogleCalendarMonitoringCard({
               type="button"
               disabled={pending}
               onClick={() =>
-                runAction(() => pauseGoogleCalendarScheduledSyncAction(tenantId), "Scheduled sync paused.")
+                runAction(
+                  () => pauseGoogleCalendarScheduledSyncAction(tenantId),
+                  "Scheduled sync paused."
+                )
               }
               className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 hover:bg-amber-500/20 disabled:opacity-50"
             >
@@ -273,27 +300,50 @@ export function GoogleCalendarMonitoringCard({
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
               <div className="text-xs uppercase tracking-wide text-[#64748B]">Emitted (24h)</div>
-              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">{pageModel.eventBus.emittedLast24h}</div>
+              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">
+                {pageModel.eventBus.emittedLast24h}
+              </div>
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
-              <div className="text-xs uppercase tracking-wide text-[#64748B]">Pending deliveries</div>
-              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">{pageModel.eventBus.pendingDeliveries}</div>
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">
+                Pending deliveries
+              </div>
+              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">
+                {pageModel.eventBus.pendingDeliveries}
+              </div>
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
-              <div className="text-xs uppercase tracking-wide text-[#64748B]">Failed deliveries</div>
-              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">{pageModel.eventBus.failedDeliveries}</div>
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">
+                Failed deliveries
+              </div>
+              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">
+                {pageModel.eventBus.failedDeliveries}
+              </div>
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
-              <div className="text-xs uppercase tracking-wide text-[#64748B]">Last emitted event</div>
-              <div className="mt-1 text-sm text-[#F8FAFC]">{pageModel.eventBus.lastEventName ?? "—"}</div>
-              <div className="mt-1 text-xs text-[#94A3B8]">{formatRelativeTime(pageModel.eventBus.lastEventAt)}</div>
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">
+                Last emitted event
+              </div>
+              <div className="mt-1 text-sm text-[#F8FAFC]">
+                {pageModel.eventBus.lastEventName ?? "—"}
+              </div>
+              <div className="mt-1 text-xs text-[#94A3B8]">
+                {formatRelativeTime(pageModel.eventBus.lastEventAt)}
+              </div>
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
-              <div className="text-xs uppercase tracking-wide text-[#64748B]">Last failed event</div>
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">
+                Last failed event
+              </div>
               {pageModel.eventBus.lastFailure ? (
                 <>
-                  <div className="mt-1 text-sm text-[#F8FAFC]">{pageModel.eventBus.lastFailure.eventName}</div>
-                  <div className="mt-1 text-xs text-red-300/80 truncate" title={pageModel.eventBus.lastFailure.error ?? undefined}>
+                  <div className="mt-1 text-sm text-[#F8FAFC]">
+                    {pageModel.eventBus.lastFailure.eventName}
+                  </div>
+                  <div
+                    className="mt-1 text-xs text-red-300/80 truncate"
+                    title={pageModel.eventBus.lastFailure.error ?? undefined}
+                  >
                     {pageModel.eventBus.lastFailure.error ?? "Unknown error"}
                   </div>
                 </>
@@ -327,7 +377,9 @@ export function GoogleCalendarMonitoringCard({
             <tbody>
               {pageModel.recentRuns.map((run) => (
                 <tr key={run.id} className="border-b border-white/[0.04] text-[#CBD5E1]">
-                  <td className="px-2 py-1.5 whitespace-nowrap">{formatRelativeTime(run.startedAt)}</td>
+                  <td className="px-2 py-1.5 whitespace-nowrap">
+                    {formatRelativeTime(run.startedAt)}
+                  </td>
                   <td className="px-2 py-1.5 tabular-nums">{formatDurationMs(run.durationMs)}</td>
                   <td className="px-2 py-1.5 tabular-nums">{run.calendarsScanned}</td>
                   <td className="px-2 py-1.5 tabular-nums">{run.eventsFetched}</td>

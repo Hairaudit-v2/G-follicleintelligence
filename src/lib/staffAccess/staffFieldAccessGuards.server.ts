@@ -8,7 +8,10 @@ import {
   fieldPermissionSatisfies,
 } from "./staffFieldAccessCore";
 import { getStaffEffectiveFieldAccess, getStaffFieldPermission } from "./staffFieldAccess.server";
-import { getStaffFieldDefinition, type StaffFieldPermissionLevel } from "./staffFieldAccessRegistry";
+import {
+  getStaffFieldDefinition,
+  type StaffFieldPermissionLevel,
+} from "./staffFieldAccessRegistry";
 
 /**
  * SA-2 field guards.

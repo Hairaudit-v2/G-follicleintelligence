@@ -10,7 +10,10 @@ import type { FiInvoiceRow, FiPaymentRequestRow } from "@/src/lib/revenueOs/reve
 const TID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const CASE = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-function baseInvoice(p: Partial<FiInvoiceRow> & Pick<FiInvoiceRow, "id" | "invoice_kind" | "status" | "total_cents" | "amount_paid_cents">): FiInvoiceRow {
+function baseInvoice(
+  p: Partial<FiInvoiceRow> &
+    Pick<FiInvoiceRow, "id" | "invoice_kind" | "status" | "total_cents" | "amount_paid_cents">
+): FiInvoiceRow {
   return {
     tenant_id: TID,
     clinic_id: null,
@@ -134,7 +137,12 @@ describe("financialSurgeryPipelineStatusCore", () => {
           }),
         ],
         installmentPlans: [
-          { invoice_id: invId, status: "active", next_payment_date: "2026-07-01", remaining_balance: 4000_00 },
+          {
+            invoice_id: invId,
+            status: "active",
+            next_payment_date: "2026-07-01",
+            remaining_balance: 4000_00,
+          },
         ],
       })
     );
@@ -159,7 +167,12 @@ describe("financialSurgeryPipelineStatusCore", () => {
           }),
         ],
         installmentPlans: [
-          { invoice_id: invId, status: "active", next_payment_date: "2026-06-01", remaining_balance: 4000_00 },
+          {
+            invoice_id: invId,
+            status: "active",
+            next_payment_date: "2026-06-01",
+            remaining_balance: 4000_00,
+          },
         ],
       })
     );

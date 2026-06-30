@@ -68,9 +68,7 @@ function createMockSupabase() {
                               maybeSingle: async () => {
                                 const row = integrations.find(
                                   (r) =>
-                                    r.tenant_id === val &&
-                                    r[col2] === val2 &&
-                                    r.status === "active"
+                                    r.tenant_id === val && r[col2] === val2 && r.status === "active"
                                 );
                                 return { data: row ?? null, error: null };
                               },
@@ -229,10 +227,9 @@ function googleFetchHandler(opts?: { meet?: boolean; eventId?: string }): typeof
     const path = String(url);
 
     if (path.includes("oauth2.googleapis.com/token")) {
-      return new Response(
-        JSON.stringify({ access_token: "live-access", expires_in: 3600 }),
-        { status: 200 }
-      );
+      return new Response(JSON.stringify({ access_token: "live-access", expires_in: 3600 }), {
+        status: 200,
+      });
     }
 
     if (method === "POST" && path.includes("/events")) {
@@ -415,10 +412,7 @@ describe("CalendarOS GC-4 — appointment creation", () => {
     const first = await createFiCalendarAppointment(validInput, opts);
     assert.equal(first.ok, true);
 
-    const second = await createFiCalendarAppointment(
-      { ...validInput, title: "Retry title" },
-      opts
-    );
+    const second = await createFiCalendarAppointment({ ...validInput, title: "Retry title" }, opts);
     assert.equal(second.ok, true);
     if (!second.ok) return;
     assert.equal(mock.events.length, 1);

@@ -10,10 +10,7 @@ import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmH
 
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     if (!tenantId)
@@ -34,15 +31,13 @@ export async function GET(
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
 
-    if (status)
-      query = query.eq("status", status);
+    if (status) query = query.eq("status", status);
 
     const { data: cases, error } = await query;
 
     if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
 
-    if (!cases?.length)
-      return NextResponse.json({ ok: true, cases: [] });
+    if (!cases?.length) return NextResponse.json({ ok: true, cases: [] });
 
     const caseIds = cases.map((c) => c.id);
     const { data: intakes } = await supabase

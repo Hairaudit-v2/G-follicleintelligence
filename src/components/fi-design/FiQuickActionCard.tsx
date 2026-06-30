@@ -71,7 +71,9 @@ function CardBody({
         </span>
       ) : null}
       {disabledReason ? (
-        <span className="mt-3 text-[11px] font-medium leading-snug text-slate-500">{disabledReason}</span>
+        <span className="mt-3 text-[11px] font-medium leading-snug text-slate-500">
+          {disabledReason}
+        </span>
       ) : null}
       {showComingSoon ? (
         <span className="mt-3 inline-flex w-fit rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
@@ -79,9 +81,10 @@ function CardBody({
         </span>
       ) : null}
       {isLink && showOpenAffordance ? (
-        <span className={cn("mt-4 inline-flex items-center gap-1 text-sm font-semibold", openRowClass)}>
-          {openAffordanceLabel}{" "}
-          <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span
+          className={cn("mt-4 inline-flex items-center gap-1 text-sm font-semibold", openRowClass)}
+        >
+          {openAffordanceLabel} <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
         </span>
       ) : null}
     </>
@@ -109,8 +112,9 @@ export function FiQuickActionCard({
   const openRow = showOpenAffordance !== false;
   const dark = isDarkSurface(surfaceVariant);
   const surface = fiSurfaceVariantClassNames[surfaceVariant];
-  const padWhenNeeded =
-    !SURFACE_WITH_BUILTIN_PADDING.has(surfaceVariant) ? "p-4 sm:p-5" : undefined;
+  const padWhenNeeded = !SURFACE_WITH_BUILTIN_PADDING.has(surfaceVariant)
+    ? "p-4 sm:p-5"
+    : undefined;
 
   const linkSurfaceHover =
     surfaceVariant === "clinicLight"

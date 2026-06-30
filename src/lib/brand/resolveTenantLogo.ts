@@ -11,7 +11,9 @@ export type TenantLogoSource =
 /**
  * Resolves tenant `logo_url` for Next.js `Image`: bundled public assets first, then http(s) URLs.
  */
-export function resolveTenantLogoSource(logoUrl: string | null | undefined): TenantLogoSource | null {
+export function resolveTenantLogoSource(
+  logoUrl: string | null | undefined
+): TenantLogoSource | null {
   const local = resolvePublicStaticImage(logoUrl);
   if (local) return { kind: "static", image: local };
 

@@ -23,7 +23,9 @@ export function FiOsForgotPasswordForm() {
             try {
               const r = await fiOsRequestPasswordResetAction(fd);
               if (r.ok) {
-                setMessage("If an account exists for that email, we sent a reset link. Check your inbox and spam folder.");
+                setMessage(
+                  "If an account exists for that email, we sent a reset link. Check your inbox and spam folder."
+                );
               } else {
                 setError(r.error);
               }
@@ -35,7 +37,10 @@ export function FiOsForgotPasswordForm() {
       }}
     >
       <div>
-        <label htmlFor="reset-email" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+        <label
+          htmlFor="reset-email"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+        >
           Work email
         </label>
         <input
@@ -51,13 +56,19 @@ export function FiOsForgotPasswordForm() {
       </div>
 
       {error ? (
-        <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-100">
+        <div
+          role="alert"
+          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-100"
+        >
           {error}
         </div>
       ) : null}
 
       {message ? (
-        <div role="status" className="rounded-lg border border-emerald-500/25 bg-emerald-950/35 px-4 py-3 text-sm text-emerald-100">
+        <div
+          role="status"
+          className="rounded-lg border border-emerald-500/25 bg-emerald-950/35 px-4 py-3 text-sm text-emerald-100"
+        >
           {message}
         </div>
       ) : null}
@@ -72,7 +83,10 @@ export function FiOsForgotPasswordForm() {
       </button>
 
       <p className="text-center text-sm text-slate-400">
-        <Link href="/follicle-intelligence/login" className="text-cyan-400/90 hover:text-cyan-300 hover:underline">
+        <Link
+          href="/follicle-intelligence/login"
+          className="text-cyan-400/90 hover:text-cyan-300 hover:underline"
+        >
           Back to sign in
         </Link>
       </p>

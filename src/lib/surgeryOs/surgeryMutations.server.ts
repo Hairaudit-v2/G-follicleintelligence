@@ -96,13 +96,22 @@ function mapSurgeryRow(raw: Record<string, unknown>): SurgeryMutationRow {
   };
 }
 
-async function loadSurgeryForMutation(tenantId: string, surgeryId: string): Promise<SurgeryMutationRow> {
+async function loadSurgeryForMutation(
+  tenantId: string,
+  surgeryId: string
+): Promise<SurgeryMutationRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const sid = assertNonEmptyUuid(surgeryId, "surgeryId").trim();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_surgeries").select("*").eq("tenant_id", tid).eq("id", sid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_surgeries")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .maybeSingle();
   if (error) {
-    if (isMissingDatabaseRelationError(error)) throw new Error("SurgeryOS tables are not available.");
+    if (isMissingDatabaseRelationError(error))
+      throw new Error("SurgeryOS tables are not available.");
     throw new Error(error.message);
   }
   if (!data) throw new Error("Surgery not found.");
@@ -140,7 +149,8 @@ async function insertProcedureEvent(input: {
     surgery_id: String(row.surgery_id),
     event_kind: String(row.event_kind),
     occurred_at: String(row.occurred_at),
-    recorded_by_fi_user_id: row.recorded_by_fi_user_id != null ? String(row.recorded_by_fi_user_id) : null,
+    recorded_by_fi_user_id:
+      row.recorded_by_fi_user_id != null ? String(row.recorded_by_fi_user_id) : null,
     metadata:
       row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, unknown>)
@@ -155,7 +165,7 @@ async function applySurgeryStatePatch(
   sourceAction: SurgeryOsAction,
   actorFiUserId: string | null,
   eventKind: SurgeryOsProcedureEventKind = "phase_transition",
-  extraMetadata?: Record<string, unknown>,
+  extraMetadata?: Record<string, unknown>
 ): Promise<{ surgery: SurgeryMutationRow; event: ProcedureEventRow }> {
   const update: Record<string, unknown> = {
     status: patch.status,
@@ -224,7 +234,7 @@ export async function createSurgeryFromBooking(input: {
   const { data: booking, error: bookErr } = await supabase
     .from("fi_bookings")
     .select(
-      "id, tenant_id, patient_id, case_id, clinic_id, assigned_user_id, booking_type, booking_status, start_at, end_at, metadata",
+      "id, tenant_id, patient_id, case_id, clinic_id, assigned_user_id, booking_type, booking_status, start_at, end_at, metadata"
     )
     .eq("tenant_id", tid)
     .eq("id", bookingId)
@@ -236,7 +246,8 @@ export async function createSurgeryFromBooking(input: {
   assertSurgeryOsTenantRowScope(tid, String(b.tenant_id), "fi_bookings");
 
   const bookingType = String(b.booking_type ?? "");
-  if (bookingType !== "surgery") throw new Error("Only surgery bookings can be synced to SurgeryOS.");
+  if (bookingType !== "surgery")
+    throw new Error("Only surgery bookings can be synced to SurgeryOS.");
 
   const bookingStatus = String(b.booking_status ?? "");
   if (!["confirmed", "scheduled", "arrived"].includes(bookingStatus)) {
@@ -248,7 +259,9 @@ export async function createSurgeryFromBooking(input: {
       ? (b.metadata as Record<string, unknown>)
       : {};
   const procedureMeta = parseAppointmentProcedureMetadata(meta);
-  const surgeonId = procedureMeta.surgeon_user_id ?? (b.assigned_user_id != null ? String(b.assigned_user_id) : null);
+  const surgeonId =
+    procedureMeta.surgeon_user_id ??
+    (b.assigned_user_id != null ? String(b.assigned_user_id) : null);
   const targetGrafts = parseTargetGraftsFromEstimate(procedureMeta.graft_count_estimate);
   const startAt = String(b.start_at);
   const scheduledDate = startAt.slice(0, 10);
@@ -274,7 +287,11 @@ export async function createSurgeryFromBooking(input: {
     },
   };
 
-  const { data: created, error: insertErr } = await supabase.from("fi_surgeries").insert(insertRow).select("*").single();
+  const { data: created, error: insertErr } = await supabase
+    .from("fi_surgeries")
+    .insert(insertRow)
+    .select("*")
+    .single();
   if (insertErr) {
     if (insertErr.code === "23505") {
       const { data: raced } = await supabase
@@ -283,7 +300,8 @@ export async function createSurgeryFromBooking(input: {
         .eq("tenant_id", tid)
         .eq("booking_id", bookingId)
         .maybeSingle();
-      if (raced) return { surgery: mapSurgeryRow(raced as Record<string, unknown>), created: false };
+      if (raced)
+        return { surgery: mapSurgeryRow(raced as Record<string, unknown>), created: false };
     }
     throw new Error(insertErr.message);
   }
@@ -320,7 +338,10 @@ export async function transitionSurgeryPhase(input: {
   }
   const toPhase = input.toPhase as SurgeryOsMajorPhase;
   const surgery = await loadSurgeryForMutation(input.tenantId, input.surgeryId);
-  const fromPhase = resolveCurrentMajorPhase({ status: surgery.status, procedurePhase: surgery.procedure_phase });
+  const fromPhase = resolveCurrentMajorPhase({
+    status: surgery.status,
+    procedurePhase: surgery.procedure_phase,
+  });
   assertSurgeryMajorPhaseTransition(fromPhase, toPhase);
   await assertGraftReconciliationForPhaseTransition({
     tenantId: input.tenantId,
@@ -329,10 +350,18 @@ export async function transitionSurgeryPhase(input: {
   });
 
   const patch = majorPhaseToSurgeryPatch(toPhase);
-  return applySurgeryStatePatch(input.tenantId, surgery, patch, "transition_phase", input.actorFiUserId, "phase_transition", {
-    from_major_phase: fromPhase,
-    to_major_phase: toPhase,
-  });
+  return applySurgeryStatePatch(
+    input.tenantId,
+    surgery,
+    patch,
+    "transition_phase",
+    input.actorFiUserId,
+    "phase_transition",
+    {
+      from_major_phase: fromPhase,
+      to_major_phase: toPhase,
+    }
+  );
 }
 
 export async function logSurgeryProcedureEvent(input: {
@@ -376,7 +405,7 @@ export async function logSurgeryProcedureEvent(input: {
       "log_event",
       input.actorFiUserId,
       input.eventKind,
-      metadata,
+      metadata
     );
     if (input.occurredAt) {
       const supabase = supabaseAdmin();
@@ -435,7 +464,9 @@ export async function addSurgeryOperationalNote(input: {
       severity: input.severity ?? "info",
       recorded_by_fi_user_id: input.actorFiUserId,
     })
-    .select("id, tenant_id, surgery_id, note_kind, severity, body, recorded_at, recorded_by_fi_user_id")
+    .select(
+      "id, tenant_id, surgery_id, note_kind, severity, body, recorded_at, recorded_by_fi_user_id"
+    )
     .single();
   if (error) throw new Error(error.message);
   const row = data as Record<string, unknown>;
@@ -447,7 +478,8 @@ export async function addSurgeryOperationalNote(input: {
     severity: String(row.severity),
     body: String(row.body),
     recorded_at: String(row.recorded_at),
-    recorded_by_fi_user_id: row.recorded_by_fi_user_id != null ? String(row.recorded_by_fi_user_id) : null,
+    recorded_by_fi_user_id:
+      row.recorded_by_fi_user_id != null ? String(row.recorded_by_fi_user_id) : null,
   };
 }
 
@@ -472,7 +504,10 @@ export async function updateSurgeryTeamStatus(input: {
 
   const row = existing as TeamAssignmentRow;
   assertSurgeryOsTenantRowScope(tid, row.tenant_id, "fi_surgery_team_assignments");
-  assertTeamAssignmentStatusTransition(row.assignment_status as SurgeryOsAssignmentStatus, input.status);
+  assertTeamAssignmentStatusTransition(
+    row.assignment_status as SurgeryOsAssignmentStatus,
+    input.status
+  );
 
   const { data: updated, error: updateErr } = await supabase
     .from("fi_surgery_team_assignments")

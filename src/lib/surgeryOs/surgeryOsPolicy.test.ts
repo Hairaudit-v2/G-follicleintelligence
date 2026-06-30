@@ -29,11 +29,26 @@ describe("surgeryOsPolicy", () => {
   });
 
   it("resolves current major phase from surgery row state", () => {
-    assert.equal(resolveCurrentMajorPhase({ status: "scheduled", procedurePhase: "pre_op" }), "scheduled");
-    assert.equal(resolveCurrentMajorPhase({ status: "pre_op", procedurePhase: "design" }), "pre_op");
-    assert.equal(resolveCurrentMajorPhase({ status: "in_progress", procedurePhase: "extraction" }), "extraction");
-    assert.equal(resolveCurrentMajorPhase({ status: "in_progress", procedurePhase: "recovery" }), "recovery");
-    assert.equal(resolveCurrentMajorPhase({ status: "completed", procedurePhase: "completed" }), "complete");
+    assert.equal(
+      resolveCurrentMajorPhase({ status: "scheduled", procedurePhase: "pre_op" }),
+      "scheduled"
+    );
+    assert.equal(
+      resolveCurrentMajorPhase({ status: "pre_op", procedurePhase: "design" }),
+      "pre_op"
+    );
+    assert.equal(
+      resolveCurrentMajorPhase({ status: "in_progress", procedurePhase: "extraction" }),
+      "extraction"
+    );
+    assert.equal(
+      resolveCurrentMajorPhase({ status: "in_progress", procedurePhase: "recovery" }),
+      "recovery"
+    );
+    assert.equal(
+      resolveCurrentMajorPhase({ status: "completed", procedurePhase: "completed" }),
+      "complete"
+    );
   });
 
   it("returns next major phase in sequence", () => {
@@ -59,10 +74,26 @@ describe("surgeryOsPolicy", () => {
   });
 
   it("gates actions by viewer role and staff category", () => {
-    const surgeonCtx = { viewerRole: "surgeon" as const, staffRoleCategory: null, actorFiUserId: "u1" };
-    const nurseCtx = { viewerRole: "coordinator" as const, staffRoleCategory: "nurse" as const, actorFiUserId: "u2" };
-    const techCtx = { viewerRole: "coordinator" as const, staffRoleCategory: "technician" as const, actorFiUserId: "u3" };
-    const coordCtx = { viewerRole: "coordinator" as const, staffRoleCategory: null, actorFiUserId: "u4" };
+    const surgeonCtx = {
+      viewerRole: "surgeon" as const,
+      staffRoleCategory: null,
+      actorFiUserId: "u1",
+    };
+    const nurseCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: "nurse" as const,
+      actorFiUserId: "u2",
+    };
+    const techCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: "technician" as const,
+      actorFiUserId: "u3",
+    };
+    const coordCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: null,
+      actorFiUserId: "u4",
+    };
 
     assert.equal(surgeryOsActionAllowed(surgeonCtx, "transition_phase"), true);
     assert.equal(surgeryOsActionAllowed(nurseCtx, "log_event"), true);
@@ -75,7 +106,11 @@ describe("surgeryOsPolicy", () => {
   });
 
   it("allows technician self team status updates only", () => {
-    const techCtx = { viewerRole: "coordinator" as const, staffRoleCategory: "technician" as const, actorFiUserId: "tech-1" };
+    const techCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: "technician" as const,
+      actorFiUserId: "tech-1",
+    };
     assert.equal(surgeryOsTeamStatusUpdateAllowed(techCtx, "tech-1"), true);
     assert.equal(surgeryOsTeamStatusUpdateAllowed(techCtx, "other-1"), false);
   });
@@ -96,10 +131,26 @@ describe("surgeryOsPolicy", () => {
   });
 
   it("gates graft actions by role", () => {
-    const surgeonCtx = { viewerRole: "surgeon" as const, staffRoleCategory: null, actorFiUserId: "u1" };
-    const nurseCtx = { viewerRole: "coordinator" as const, staffRoleCategory: "nurse" as const, actorFiUserId: "u2" };
-    const techCtx = { viewerRole: "coordinator" as const, staffRoleCategory: "technician" as const, actorFiUserId: "u3" };
-    const coordCtx = { viewerRole: "coordinator" as const, staffRoleCategory: null, actorFiUserId: "u4" };
+    const surgeonCtx = {
+      viewerRole: "surgeon" as const,
+      staffRoleCategory: null,
+      actorFiUserId: "u1",
+    };
+    const nurseCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: "nurse" as const,
+      actorFiUserId: "u2",
+    };
+    const techCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: "technician" as const,
+      actorFiUserId: "u3",
+    };
+    const coordCtx = {
+      viewerRole: "coordinator" as const,
+      staffRoleCategory: null,
+      actorFiUserId: "u4",
+    };
     const adminCtx = { viewerRole: "admin" as const, staffRoleCategory: null, actorFiUserId: "u5" };
 
     assert.equal(surgeryOsGraftActionAllowed(surgeonCtx, "correct_graft_count"), true);

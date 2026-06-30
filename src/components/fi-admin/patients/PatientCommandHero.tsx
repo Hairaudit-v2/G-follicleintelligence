@@ -32,8 +32,7 @@ const chip =
 const chipGhost = `${chip} bg-white/[0.05] text-slate-400 ring-1 ring-white/[0.08] hover:bg-white/[0.09] hover:text-slate-200`;
 const chipIndigo = `${chip} bg-indigo-950/60 text-indigo-300 ring-1 ring-indigo-500/25 hover:bg-indigo-900/70`;
 const chipViolet = `${chip} bg-violet-950/60 text-violet-300 ring-1 ring-violet-500/25 hover:bg-violet-900/70`;
-const chipCyanPrimary =
-  `${chip} bg-cyan-600/20 text-cyan-300 ring-1 ring-cyan-400/40 hover:bg-cyan-600/30 font-semibold`;
+const chipCyanPrimary = `${chip} bg-cyan-600/20 text-cyan-300 ring-1 ring-cyan-400/40 hover:bg-cyan-600/30 font-semibold`;
 
 export function PatientCommandHero({
   tenantId,
@@ -63,7 +62,6 @@ export function PatientCommandHero({
 
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/90 p-5 shadow-xl shadow-black/50 backdrop-blur-md sm:p-6">
-
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-1.5">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -108,22 +106,20 @@ export function PatientCommandHero({
             </p>
           </div>
           <div className="w-full min-w-[12rem] sm:w-56">
-            <PatientImagingCompletenessSummary completeness={data.vieImagingCompleteness} variant="dark" />
+            <PatientImagingCompletenessSummary
+              completeness={data.vieImagingCompleteness}
+              variant="dark"
+            />
           </div>
         </div>
       </div>
 
       <div className="mt-5 space-y-2 border-t border-white/[0.06] pt-4">
-
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
             Clinical
           </span>
-          <VoiceNoteEntryButton
-            tenantId={tenantId}
-            patientId={patientId}
-            className={chipViolet}
-          />
+          <VoiceNoteEntryButton tenantId={tenantId} patientId={patientId} className={chipViolet} />
           <StartCaptureProtocolButton
             tenantId={tenantId}
             patientId={patientId}
@@ -162,7 +158,6 @@ export function PatientCommandHero({
             Surgery readiness
           </Link>
         </div>
-
       </div>
     </div>
   );

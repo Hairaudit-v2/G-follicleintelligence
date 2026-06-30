@@ -3,10 +3,18 @@
  */
 
 import { getClinicalNoteText } from "../consultationFormNoteModel";
-import { mergeUniqueStrings, readBoolean, readString, readStringArray } from "../completion/consultationCompletionExtractors";
+import {
+  mergeUniqueStrings,
+  readBoolean,
+  readString,
+  readStringArray,
+} from "../completion/consultationCompletionExtractors";
 
 export function canonicalFemaleRiskFlagValues(values: Record<string, unknown>): string[] {
-  return mergeUniqueStrings(readStringArray(values.medical_flags), readStringArray(values.hormonal_flags));
+  return mergeUniqueStrings(
+    readStringArray(values.medical_flags),
+    readStringArray(values.hormonal_flags)
+  );
 }
 
 export function canonicalFemaleRecommendedTreatments(values: Record<string, unknown>): string[] {
@@ -17,7 +25,9 @@ export function canonicalFemaleDiagnosisBody(values: Record<string, unknown>): s
   return getClinicalNoteText(values.structured_clinical_note).trim();
 }
 
-export function canonicalFemalePatternClassificationLines(values: Record<string, unknown>): string[] {
+export function canonicalFemalePatternClassificationLines(
+  values: Record<string, unknown>
+): string[] {
   const lines: string[] = [];
   const pt = readString(values.female_pattern_type).trim();
   if (pt) lines.push(`Pattern: ${pt.replace(/_/g, " ")}.`);
@@ -51,7 +61,9 @@ export function canonicalFemaleRecommendedPlanText(values: Record<string, unknow
   return "";
 }
 
-export function normalizeFemaleHairLossConsultationValues(values: Record<string, unknown>): Record<string, unknown> {
+export function normalizeFemaleHairLossConsultationValues(
+  values: Record<string, unknown>
+): Record<string, unknown> {
   return {
     ...values,
     _canonical: {

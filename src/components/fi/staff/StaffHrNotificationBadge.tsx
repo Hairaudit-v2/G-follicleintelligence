@@ -85,8 +85,8 @@ export function StaffHrNotificationDetailCard({
           IIOHR HR &amp; Training
         </h2>
         <p className={`mt-1 text-sm ${muted}`}>
-          Snapshot from linked <span className="font-mono text-xs">fi_staff_source_ids</span> — HR remains the system of
-          record.
+          Snapshot from linked <span className="font-mono text-xs">fi_staff_source_ids</span> — HR
+          remains the system of record.
         </p>
         <p className={`mt-6 text-sm ${muted}`}>No IIOHR HR link recorded for this staff member.</p>
         <div className="mt-4">
@@ -104,7 +104,8 @@ export function StaffHrNotificationDetailCard({
             IIOHR HR &amp; Training
           </h2>
           <p className={`mt-1 text-sm ${muted}`}>
-            Bounded metadata from <span className="font-mono text-xs">iiohr_hr</span> sync — not the legal HR record.
+            Bounded metadata from <span className="font-mono text-xs">iiohr_hr</span> sync — not the
+            legal HR record.
           </p>
         </div>
         <StaffHrNotificationBadge summary={summary} />
@@ -126,29 +127,41 @@ export function StaffHrNotificationDetailCard({
           ))}
         </ul>
       ) : (
-        <p className={`text-sm ${muted}`}>Ready / complete — no outstanding HR tasks in this snapshot.</p>
+        <p className={`text-sm ${muted}`}>
+          Ready / complete — no outstanding HR tasks in this snapshot.
+        </p>
       )}
 
       <dl className={`grid grid-cols-2 gap-3 text-xs sm:grid-cols-3 ${label}`}>
         <div>
           <dt>Onboarding</dt>
-          <dd className={`mt-0.5 font-semibold ${value}`}>{onboardingLabel(summary.onboardingStatus)}</dd>
+          <dd className={`mt-0.5 font-semibold ${value}`}>
+            {onboardingLabel(summary.onboardingStatus)}
+          </dd>
         </div>
         <div>
           <dt>Documents missing</dt>
-          <dd className={`mt-0.5 font-semibold ${value}`}>{summary.required_documents_missing_count ?? "—"}</dd>
+          <dd className={`mt-0.5 font-semibold ${value}`}>
+            {summary.required_documents_missing_count ?? "—"}
+          </dd>
         </div>
         <div>
           <dt>Training required</dt>
-          <dd className={`mt-0.5 font-semibold ${value}`}>{summary.training_required_count ?? "—"}</dd>
+          <dd className={`mt-0.5 font-semibold ${value}`}>
+            {summary.training_required_count ?? "—"}
+          </dd>
         </div>
         <div>
           <dt>Certificates outstanding</dt>
-          <dd className={`mt-0.5 font-semibold ${value}`}>{summary.certificates_outstanding_count ?? "—"}</dd>
+          <dd className={`mt-0.5 font-semibold ${value}`}>
+            {summary.certificates_outstanding_count ?? "—"}
+          </dd>
         </div>
         <div className="sm:col-span-2">
           <dt>Last synced</dt>
-          <dd className={`mt-0.5 font-semibold ${value}`}>{formatSyncedAt(summary.last_synced_at)}</dd>
+          <dd className={`mt-0.5 font-semibold ${value}`}>
+            {formatSyncedAt(summary.last_synced_at)}
+          </dd>
         </div>
       </dl>
 

@@ -20,7 +20,12 @@ import {
 } from "@/src/lib/staff/staffWeeklyHours";
 
 /** Roles that deliver clinical care — HR/training policy blocks clinical availability. */
-export const CLINICAL_PROVIDER_STAFF_ROLES = ["surgeon", "consultant", "nurse", "technician"] as const;
+export const CLINICAL_PROVIDER_STAFF_ROLES = [
+  "surgeon",
+  "consultant",
+  "nurse",
+  "technician",
+] as const;
 
 export type StaffReadinessState =
   | "ready"
@@ -106,7 +111,9 @@ export type StaffReadinessTableRow = {
 };
 
 export function isClinicalProviderStaffRole(staffRole: string | null | undefined): boolean {
-  const role = String(staffRole ?? "").trim().toLowerCase();
+  const role = String(staffRole ?? "")
+    .trim()
+    .toLowerCase();
   return (CLINICAL_PROVIDER_STAFF_ROLES as readonly string[]).includes(role);
 }
 
@@ -149,18 +156,22 @@ export function isStaffClinicallyAvailable(input: {
   working_hours: Record<string, unknown> | null | undefined;
   hr: StaffHrNotificationSummary;
 }): boolean {
-  if (!isStaffBookableForClinicalWorkflow({
-    is_active: input.is_active,
-    staff_role: input.staff_role,
-  })) {
+  if (
+    !isStaffBookableForClinicalWorkflow({
+      is_active: input.is_active,
+      staff_role: input.staff_role,
+    })
+  ) {
     return false;
   }
   if (!staffHasConfiguredWorkingHours(input.working_hours)) return false;
   if (input.hr.hasHrLink && input.hr.isSyncStale) return false;
-  if (isBlockedByHrTrainingPolicyForClinicalRole({
-    staff_role: input.staff_role,
-    hr: input.hr,
-  })) {
+  if (
+    isBlockedByHrTrainingPolicyForClinicalRole({
+      staff_role: input.staff_role,
+      hr: input.hr,
+    })
+  ) {
     return false;
   }
   return true;
@@ -294,7 +305,9 @@ export function buildStaffReadinessTableRows(input: {
   return rows;
 }
 
-export function buildStaffReadinessOverview(rows: StaffReadinessTableRow[]): StaffReadinessOverview {
+export function buildStaffReadinessOverview(
+  rows: StaffReadinessTableRow[]
+): StaffReadinessOverview {
   let totalActiveStaff = 0;
   let needsRoleAssignment = 0;
   let hrOnboardingIncomplete = 0;

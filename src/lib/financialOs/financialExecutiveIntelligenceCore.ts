@@ -229,7 +229,11 @@ function isInPeriod(iso: string, periodStart: string, periodEnd: string): boolea
   return day >= periodStart && day <= periodEnd;
 }
 
-function signedLedgerAmount(kind: FiFinancialTransactionKind, amount: number, direction: FiFinancialTransactionDirection): number {
+function signedLedgerAmount(
+  kind: FiFinancialTransactionKind,
+  amount: number,
+  direction: FiFinancialTransactionDirection
+): number {
   const amt = Math.max(0, Math.floor(amount));
   if (kind === "refund_processed") return direction === "debit" ? amt : -amt;
   return direction === "debit" ? -amt : amt;
@@ -325,7 +329,11 @@ export function aggregateExecutiveRevenue(args: {
   total_paid_invoices = Math.max(total_paid_invoices, paidInvoiceIds.size);
   total_consults = Math.max(total_consults, consultIds.size);
 
-  const gross_revenue_cents = Math.max(gross_from_invoices, gross_from_ledger, collected_revenue_cents);
+  const gross_revenue_cents = Math.max(
+    gross_from_invoices,
+    gross_from_ledger,
+    collected_revenue_cents
+  );
 
   return {
     gross_revenue_cents,
@@ -346,7 +354,9 @@ export function aggregateExecutiveProfitability(args: {
   period_end: string;
   snapshots: ExecutiveProfitabilitySnapshotInput[];
 }): ExecutiveProfitabilityAggregation {
-  const inPeriod = args.snapshots.filter((s) => isInPeriod(s.calculated_at, args.period_start, args.period_end));
+  const inPeriod = args.snapshots.filter((s) =>
+    isInPeriod(s.calculated_at, args.period_start, args.period_end)
+  );
 
   if (!inPeriod.length) {
     return {
@@ -398,7 +408,8 @@ export function aggregateExecutiveProfitability(args: {
   return {
     gross_profit_cents,
     average_margin_percentage: round2(marginSum / inPeriod.length),
-    average_revenue_per_case_cents: total_surgeries > 0 ? Math.round(revenueSum / total_surgeries) : 0,
+    average_revenue_per_case_cents:
+      total_surgeries > 0 ? Math.round(revenueSum / total_surgeries) : 0,
     average_revenue_per_graft_cents:
       revenuePerGraftCount > 0 ? Math.round(revenuePerGraftSum / revenuePerGraftCount) : null,
     total_surgeries,
@@ -421,8 +432,14 @@ export function aggregateExecutiveAttribution(args: {
     if (!isInPeriod(ev.occurred_at, args.period_start, args.period_end)) continue;
     const collected = Math.max(0, ev.attributed_collected_cents);
     const profit = ev.gross_profit_cents ?? 0;
-    revenueBySource.set(ev.attribution_source, (revenueBySource.get(ev.attribution_source) ?? 0) + collected);
-    profitBySource.set(ev.attribution_source, (profitBySource.get(ev.attribution_source) ?? 0) + profit);
+    revenueBySource.set(
+      ev.attribution_source,
+      (revenueBySource.get(ev.attribution_source) ?? 0) + collected
+    );
+    profitBySource.set(
+      ev.attribution_source,
+      (profitBySource.get(ev.attribution_source) ?? 0) + profit
+    );
     totalCollected += collected;
     if (ev.attribution_source === "unknown") unknownCollected += collected;
   }
@@ -462,9 +479,13 @@ export function aggregateExecutiveAttribution(args: {
 }
 
 /** Aggregate executive accounts receivable exposure. */
-export function aggregateExecutiveAccountsReceivable(cases: ExecutiveArCaseInput[]): ExecutiveArAggregation {
+export function aggregateExecutiveAccountsReceivable(
+  cases: ExecutiveArCaseInput[]
+): ExecutiveArAggregation {
   const open = cases.filter(
-    (c) => FI_AR_OPEN_STATUSES.includes(c.status as (typeof FI_AR_OPEN_STATUSES)[number]) && c.outstanding_amount_cents > 0,
+    (c) =>
+      FI_AR_OPEN_STATUSES.includes(c.status as (typeof FI_AR_OPEN_STATUSES)[number]) &&
+      c.outstanding_amount_cents > 0
   );
 
   const total_outstanding_cents = open.reduce((acc, c) => acc + c.outstanding_amount_cents, 0);
@@ -472,9 +493,13 @@ export function aggregateExecutiveAccountsReceivable(cases: ExecutiveArCaseInput
   const overdue_revenue_cents = overdue.reduce((acc, c) => acc + c.outstanding_amount_cents, 0);
   const critical_case_count = open.filter((c) => c.risk_level === "critical").length;
   const average_days_overdue =
-    overdue.length > 0 ? Math.round(overdue.reduce((acc, c) => acc + c.days_overdue, 0) / overdue.length) : 0;
+    overdue.length > 0
+      ? Math.round(overdue.reduce((acc, c) => acc + c.days_overdue, 0) / overdue.length)
+      : 0;
   const surgery_balance_outstanding_cents = open
-    .filter((c) => c.receivable_type === "surgery_balance" || c.receivable_type === "surgery_deposit")
+    .filter(
+      (c) => c.receivable_type === "surgery_balance" || c.receivable_type === "surgery_deposit"
+    )
     .reduce((acc, c) => acc + c.outstanding_amount_cents, 0);
 
   return {
@@ -505,8 +530,7 @@ export function calculateArRiskScore(args: {
   const criticalRatio = ar.open_case_count > 0 ? ar.critical_case_count / ar.open_case_count : 0;
   const daysFactor = Math.min(1, ar.average_days_overdue / 30);
 
-  const raw =
-    overdueRatio * 35 + revenueExposure * 25 + criticalRatio * 25 + daysFactor * 15;
+  const raw = overdueRatio * 35 + revenueExposure * 25 + criticalRatio * 25 + daysFactor * 15;
   return round2(Math.min(100, Math.max(0, raw)));
 }
 
@@ -548,29 +572,51 @@ export function calculateRevenueForecast(args: {
   const runRateProjection = Math.round(dailyRunRate * remainingDays);
 
   const scheduledInPeriod = args.scheduled_surgeries.filter(
-    (s) => s.scheduled_date >= args.as_of_ymd && s.scheduled_date <= args.period_end,
+    (s) => s.scheduled_date >= args.as_of_ymd && s.scheduled_date <= args.period_end
   );
-  const scheduledGross = scheduledInPeriod.reduce((acc, s) => acc + Math.max(0, s.invoice_value_cents), 0);
+  const scheduledGross = scheduledInPeriod.reduce(
+    (acc, s) => acc + Math.max(0, s.invoice_value_cents),
+    0
+  );
   const scheduledContribution = Math.round(scheduledGross * historical_collection_rate);
 
   const openCases = args.ar_cases.filter(
-    (c) => FI_AR_OPEN_STATUSES.includes(c.status as (typeof FI_AR_OPEN_STATUSES)[number]) && c.outstanding_amount_cents > 0,
+    (c) =>
+      FI_AR_OPEN_STATUSES.includes(c.status as (typeof FI_AR_OPEN_STATUSES)[number]) &&
+      c.outstanding_amount_cents > 0
   );
   let weightedOpenBalance = 0;
   for (const c of openCases) {
     const weight = AR_RISK_WEIGHTS[c.risk_level] ?? 0.5;
     weightedOpenBalance += Math.round(c.outstanding_amount_cents * weight);
   }
-  const openBalanceContribution = Math.round(weightedOpenBalance * historical_collection_rate * 0.5);
+  const openBalanceContribution = Math.round(
+    weightedOpenBalance * historical_collection_rate * 0.5
+  );
 
   const forecast_revenue_cents =
-    args.collected_revenue_cents + runRateProjection + scheduledContribution + openBalanceContribution;
+    args.collected_revenue_cents +
+    runRateProjection +
+    scheduledContribution +
+    openBalanceContribution;
 
   const explanation_factors: RevenueForecastResult["explanation_factors"] = [
     { factor: "collected_to_date", contribution_cents: args.collected_revenue_cents, weight: 1 },
-    { factor: "run_rate_projection", contribution_cents: runRateProjection, weight: round2(remainingDays / totalDays) },
-    { factor: "scheduled_surgeries", contribution_cents: scheduledContribution, weight: historical_collection_rate },
-    { factor: "risk_weighted_open_balances", contribution_cents: openBalanceContribution, weight: historical_collection_rate * 0.5 },
+    {
+      factor: "run_rate_projection",
+      contribution_cents: runRateProjection,
+      weight: round2(remainingDays / totalDays),
+    },
+    {
+      factor: "scheduled_surgeries",
+      contribution_cents: scheduledContribution,
+      weight: historical_collection_rate,
+    },
+    {
+      factor: "risk_weighted_open_balances",
+      contribution_cents: openBalanceContribution,
+      weight: historical_collection_rate * 0.5,
+    },
   ];
 
   let dataPoints = 0;
@@ -579,7 +625,9 @@ export function calculateRevenueForecast(args: {
   if (openCases.length > 0) dataPoints += 1;
   if (args.gross_revenue_cents > 0) dataPoints += 1;
 
-  const forecast_confidence = round2(Math.min(95, 35 + dataPoints * 15 + historical_collection_rate * 20));
+  const forecast_confidence = round2(
+    Math.min(95, 35 + dataPoints * 15 + historical_collection_rate * 20)
+  );
 
   return {
     forecast_revenue_cents,
@@ -590,10 +638,9 @@ export function calculateRevenueForecast(args: {
 }
 
 /** Build a complete executive finance snapshot from aggregated inputs. */
-export function buildExecutiveFinanceSnapshot(input: BuildExecutiveFinanceSnapshotInput): Omit<
-  FiFinancialExecutiveSnapshotRow,
-  "id"
-> {
+export function buildExecutiveFinanceSnapshot(
+  input: BuildExecutiveFinanceSnapshotInput
+): Omit<FiFinancialExecutiveSnapshotRow, "id"> {
   const revenue = aggregateExecutiveRevenue({
     period_start: input.period_start,
     period_end: input.period_end,
@@ -614,7 +661,10 @@ export function buildExecutiveFinanceSnapshot(input: BuildExecutiveFinanceSnapsh
   });
 
   const ar = aggregateExecutiveAccountsReceivable(input.ar_cases);
-  const ar_risk_score = calculateArRiskScore({ ar, gross_revenue_cents: revenue.gross_revenue_cents });
+  const ar_risk_score = calculateArRiskScore({
+    ar,
+    gross_revenue_cents: revenue.gross_revenue_cents,
+  });
 
   const forecast = calculateRevenueForecast({
     period_start: input.period_start,
@@ -685,7 +735,7 @@ export function compareExecutivePeriods(
     | "ar_risk_score"
     | "forecast_revenue_cents"
     | "best_revenue_source"
-  > | null,
+  > | null
 ): ExecutivePeriodComparison {
   if (!previous) {
     return {
@@ -770,7 +820,9 @@ export function generateExecutiveFinanceInsights(args: {
 
   const totalRevenue = args.attribution.revenue_by_source.reduce((acc, x) => acc + x.cents, 0);
   if (totalRevenue > 0 && args.snapshot.best_revenue_source) {
-    const top = args.attribution.revenue_by_source.find((x) => x.source === args.snapshot.best_revenue_source);
+    const top = args.attribution.revenue_by_source.find(
+      (x) => x.source === args.snapshot.best_revenue_source
+    );
     const share = top ? (top.cents / totalRevenue) * 100 : 0;
     if (share >= depThreshold) {
       insights.push({
@@ -782,7 +834,11 @@ export function generateExecutiveFinanceInsights(args: {
     }
   }
 
-  if (args.comparison && args.comparison.outstanding_delta_cents > 0 && args.comparison.badges.outstanding === "up") {
+  if (
+    args.comparison &&
+    args.comparison.outstanding_delta_cents > 0 &&
+    args.comparison.badges.outstanding === "up"
+  ) {
     insights.push({
       kind: "overdue_revenue_rising",
       severity: args.snapshot.overdue_revenue_cents > 0 ? "warning" : "info",
@@ -848,9 +904,13 @@ export function generateExecutiveFinanceInsights(args: {
   return insights;
 }
 
-export function mapExecutiveSnapshotRow(raw: Record<string, unknown>): FiFinancialExecutiveSnapshotRow {
+export function mapExecutiveSnapshotRow(
+  raw: Record<string, unknown>
+): FiFinancialExecutiveSnapshotRow {
   const metadata =
-    raw.source_metadata && typeof raw.source_metadata === "object" && !Array.isArray(raw.source_metadata)
+    raw.source_metadata &&
+    typeof raw.source_metadata === "object" &&
+    !Array.isArray(raw.source_metadata)
       ? (raw.source_metadata as Record<string, unknown>)
       : {};
   return {
@@ -869,7 +929,9 @@ export function mapExecutiveSnapshotRow(raw: Record<string, unknown>): FiFinanci
     average_margin_percentage: Number(raw.average_margin_percentage ?? 0),
     average_revenue_per_case_cents: Number(raw.average_revenue_per_case_cents ?? 0),
     average_revenue_per_graft_cents:
-      raw.average_revenue_per_graft_cents != null ? Number(raw.average_revenue_per_graft_cents) : null,
+      raw.average_revenue_per_graft_cents != null
+        ? Number(raw.average_revenue_per_graft_cents)
+        : null,
     total_surgeries: Number(raw.total_surgeries ?? 0),
     total_consults: Number(raw.total_consults ?? 0),
     total_paid_invoices: Number(raw.total_paid_invoices ?? 0),
@@ -877,7 +939,9 @@ export function mapExecutiveSnapshotRow(raw: Record<string, unknown>): FiFinanci
     best_revenue_source: raw.best_revenue_source
       ? (String(raw.best_revenue_source) as FiRevenueAttributionSource)
       : null,
-    best_profit_source: raw.best_profit_source ? (String(raw.best_profit_source) as FiRevenueAttributionSource) : null,
+    best_profit_source: raw.best_profit_source
+      ? (String(raw.best_profit_source) as FiRevenueAttributionSource)
+      : null,
     highest_margin_procedure_type:
       raw.highest_margin_procedure_type != null ? String(raw.highest_margin_procedure_type) : null,
     ar_risk_score: Number(raw.ar_risk_score ?? 0),
@@ -888,7 +952,10 @@ export function mapExecutiveSnapshotRow(raw: Record<string, unknown>): FiFinanci
   };
 }
 
-export function assertExecutiveDataTenantScoped(tenantId: string, rows: Array<{ tenant_id: string }>): void {
+export function assertExecutiveDataTenantScoped(
+  tenantId: string,
+  rows: Array<{ tenant_id: string }>
+): void {
   const tid = tenantId.trim();
   for (const row of rows) {
     if (row.tenant_id.trim() !== tid) {
@@ -897,10 +964,11 @@ export function assertExecutiveDataTenantScoped(tenantId: string, rows: Array<{ 
   }
 }
 
-export function executiveZeroDataSnapshot(tenantId: string, periodStart: string, periodEnd: string): Omit<
-  FiFinancialExecutiveSnapshotRow,
-  "id"
-> {
+export function executiveZeroDataSnapshot(
+  tenantId: string,
+  periodStart: string,
+  periodEnd: string
+): Omit<FiFinancialExecutiveSnapshotRow, "id"> {
   return buildExecutiveFinanceSnapshot({
     tenant_id: tenantId,
     period_start: periodStart,
@@ -923,7 +991,10 @@ export function monthPeriodForYmd(ymd: string): { period_start: string; period_e
   return { period_start: start, period_end: end };
 }
 
-export function previousMonthPeriod(periodStart: string): { period_start: string; period_end: string } {
+export function previousMonthPeriod(periodStart: string): {
+  period_start: string;
+  period_end: string;
+} {
   const [y, m] = periodStart.split("-").map((x) => Number(x));
   const dt = new Date(Date.UTC(y, m - 2, 1));
   const py = dt.getUTCFullYear();

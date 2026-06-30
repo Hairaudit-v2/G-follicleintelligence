@@ -79,7 +79,9 @@ export function CaseProcedureDayForm({
   const [surgeonId, setSurgeonId] = useState(initial?.surgeon_user_id ?? "");
   const [nurseId, setNurseId] = useState(initial?.nurse_user_id ?? "");
   const [technicianIds, setTechnicianIds] = useState<string[]>(initial?.technician_user_ids ?? []);
-  const [milestones, setMilestones] = useState<Record<string, string>>(() => ({ ...(initial?.procedure_milestones ?? {}) }));
+  const [milestones, setMilestones] = useState<Record<string, string>>(() => ({
+    ...(initial?.procedure_milestones ?? {}),
+  }));
   const [teamIds, setTeamIds] = useState<string[]>(initial?.team_member_user_ids ?? []);
   const [location, setLocation] = useState(initial?.procedure_location ?? "");
   const [room, setRoom] = useState(initial?.procedure_room ?? "");
@@ -191,12 +193,16 @@ export function CaseProcedureDayForm({
   const graftsOk = ge == null || gi == null || gi <= ge;
   const startIso = datetimeLocalToIso(startLocal);
   const finishIso = datetimeLocalToIso(finishLocal);
-  const timesOk = !startIso || !finishIso || new Date(finishIso).getTime() >= new Date(startIso).getTime();
+  const timesOk =
+    !startIso || !finishIso || new Date(finishIso).getTime() >= new Date(startIso).getTime();
 
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.procedureDate.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.procedureDate.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Procedure date
           <input
             {...PROCEDURE_DAY_FIELDS.procedureDate}
@@ -206,7 +212,10 @@ export function CaseProcedureDayForm({
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.procedureStatus.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.procedureStatus.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Procedure status
           <select
             {...PROCEDURE_DAY_FIELDS.procedureStatus}
@@ -214,7 +223,9 @@ export function CaseProcedureDayForm({
             onChange={(e) => setProcedureStatus(e.target.value)}
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
-            {!isProcedureStatus(procedureStatus) ? <option value={procedureStatus}>{procedureStatus} (legacy)</option> : null}
+            {!isProcedureStatus(procedureStatus) ? (
+              <option value={procedureStatus}>{procedureStatus} (legacy)</option>
+            ) : null}
             {PROCEDURE_STATUS_VALUES.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -225,7 +236,10 @@ export function CaseProcedureDayForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.surgeonId.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.surgeonId.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Surgeon
           <ProcedureTeamSelect
             id={PROCEDURE_DAY_FIELDS.surgeonId.id}
@@ -236,7 +250,10 @@ export function CaseProcedureDayForm({
             slot="clinical"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.nurseId.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.nurseId.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Circulating / recovery nurse
           <ProcedureTeamSelect
             id={PROCEDURE_DAY_FIELDS.nurseId.id}
@@ -249,7 +266,10 @@ export function CaseProcedureDayForm({
         </label>
       </div>
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.room.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.room.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Procedure room
         <input
           {...PROCEDURE_DAY_FIELDS.room}
@@ -260,7 +280,10 @@ export function CaseProcedureDayForm({
         />
       </label>
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.location.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.location.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Procedure location / site
         <input
           {...PROCEDURE_DAY_FIELDS.location}
@@ -296,8 +319,13 @@ export function CaseProcedureDayForm({
           {PROCEDURE_MILESTONE_KEYS.map((key) => {
             const ts = milestones[key]?.trim();
             return (
-              <li key={key} className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] pb-2 text-xs last:border-0 last:pb-0">
-                <span className="min-w-0 flex-1 text-slate-200">{PROCEDURE_MILESTONE_LABEL[key]}</span>
+              <li
+                key={key}
+                className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] pb-2 text-xs last:border-0 last:pb-0"
+              >
+                <span className="min-w-0 flex-1 text-slate-200">
+                  {PROCEDURE_MILESTONE_LABEL[key]}
+                </span>
                 <span className="text-gray-500">
                   {ts ? (Number.isNaN(Date.parse(ts)) ? ts : new Date(ts).toLocaleString()) : "—"}
                 </span>
@@ -336,7 +364,9 @@ export function CaseProcedureDayForm({
       <div className="rounded border border-sky-100 bg-cyan-500/10 p-3 text-xs text-slate-200">
         <p className="font-semibold text-slate-100">Finishing the case</p>
         <ol className="mt-2 list-decimal space-y-1 pl-4 text-slate-300">
-          <li className={ge != null && gi != null ? "" : "text-amber-200"}>Capture extracted and implanted graft counts.</li>
+          <li className={ge != null && gi != null ? "" : "text-amber-200"}>
+            Capture extracted and implanted graft counts.
+          </li>
           <li className={milestoneCompletionCount(milestones) >= 3 ? "" : "text-amber-200"}>
             Log at least three procedure milestones (or explain gaps in intraoperative notes).
           </li>
@@ -354,7 +384,10 @@ export function CaseProcedureDayForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.startLocal.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.startLocal.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Start time
           <input
             {...PROCEDURE_DAY_FIELDS.startLocal}
@@ -364,7 +397,10 @@ export function CaseProcedureDayForm({
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.finishLocal.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.finishLocal.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Finish time
           <input
             {...PROCEDURE_DAY_FIELDS.finishLocal}
@@ -377,7 +413,10 @@ export function CaseProcedureDayForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.punchSize.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.punchSize.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Punch size
           <input
             {...PROCEDURE_DAY_FIELDS.punchSize}
@@ -387,7 +426,10 @@ export function CaseProcedureDayForm({
             placeholder="e.g. 0.85mm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.extractionMethod.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.extractionMethod.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Extraction method
           <input
             {...PROCEDURE_DAY_FIELDS.extractionMethod}
@@ -396,7 +438,10 @@ export function CaseProcedureDayForm({
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.implantationMethod.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.implantationMethod.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Implantation method
           <input
             {...PROCEDURE_DAY_FIELDS.implantationMethod}
@@ -407,7 +452,10 @@ export function CaseProcedureDayForm({
         </label>
       </div>
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.medicationNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.medicationNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Anaesthetic / medication notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.medicationNotes}
@@ -417,7 +465,10 @@ export function CaseProcedureDayForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={PROCEDURE_DAY_FIELDS.intraNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.intraNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Intraoperative notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.intraNotes}
@@ -429,7 +480,10 @@ export function CaseProcedureDayForm({
       </label>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.graftsExtracted.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.graftsExtracted.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Grafts extracted
           <input
             {...PROCEDURE_DAY_FIELDS.graftsExtracted}
@@ -439,7 +493,10 @@ export function CaseProcedureDayForm({
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.graftsImplanted.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.graftsImplanted.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Grafts implanted
           <input
             {...PROCEDURE_DAY_FIELDS.graftsImplanted}
@@ -449,7 +506,10 @@ export function CaseProcedureDayForm({
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.hairsImplanted.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={PROCEDURE_DAY_FIELDS.hairsImplanted.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Hairs implanted
           <input
             {...PROCEDURE_DAY_FIELDS.hairsImplanted}
@@ -460,10 +520,17 @@ export function CaseProcedureDayForm({
           />
         </label>
       </div>
-      {!graftsOk ? <p className="text-xs text-amber-300">Implanted grafts cannot exceed extracted grafts.</p> : null}
-      {!timesOk ? <p className="text-xs text-amber-300">Finish time must be on or after start time.</p> : null}
+      {!graftsOk ? (
+        <p className="text-xs text-amber-300">Implanted grafts cannot exceed extracted grafts.</p>
+      ) : null}
+      {!timesOk ? (
+        <p className="text-xs text-amber-300">Finish time must be on or after start time.</p>
+      ) : null}
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.handlingNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.handlingNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Graft survival / handling notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.handlingNotes}
@@ -473,7 +540,10 @@ export function CaseProcedureDayForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={PROCEDURE_DAY_FIELDS.complicationsNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.complicationsNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Complications / incidents notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.complicationsNotes}
@@ -483,7 +553,10 @@ export function CaseProcedureDayForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={PROCEDURE_DAY_FIELDS.completionSummary.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={PROCEDURE_DAY_FIELDS.completionSummary.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Procedure completion summary
         <textarea
           {...PROCEDURE_DAY_FIELDS.completionSummary}

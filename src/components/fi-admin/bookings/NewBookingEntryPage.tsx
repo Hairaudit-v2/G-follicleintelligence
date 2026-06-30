@@ -17,7 +17,11 @@ type NewBookingEntryPageProps = {
  * Stage 1E: safe booking pathway launcher (UI only). No inserts or server actions.
  * Shown under `/fi-admin/[tenantId]/bookings/new` for staff choosing how to proceed.
  */
-export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }: NewBookingEntryPageProps) {
+export function NewBookingEntryPage({
+  tenantId,
+  showCrmNav,
+  showBookingsBoard,
+}: NewBookingEntryPageProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
   const crmHref = `${base}/crm`;
   const bookingsHref = `${base}/bookings`;
@@ -70,7 +74,8 @@ export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }:
               Use this when the appointment is connected to a new enquiry or sales pipeline.
             </p>
             <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-snug text-amber-200">
-              CRM workspace access is required to open leads. Ask an administrator if you need this path.
+              CRM workspace access is required to open leads. Ask an administrator if you need this
+              path.
             </p>
             <button
               type="button"
@@ -96,8 +101,8 @@ export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }:
               Use this for new consultations, assessments, or follow-up appointments.
             </p>
             <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-snug text-amber-200">
-              Scheduling access requires an Administrator or CRM operator role, or an active link to this tenant in Staff.
-              Ask an administrator if you need this path.
+              Scheduling access requires an Administrator or CRM operator role, or an active link to
+              this tenant in Staff. Ask an administrator if you need this path.
             </p>
             <button
               type="button"

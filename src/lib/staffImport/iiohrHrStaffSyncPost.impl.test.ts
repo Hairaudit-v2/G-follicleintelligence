@@ -34,7 +34,10 @@ function emptyResult(over: Partial<IiohrHrStaffImportRunResult> = {}): IiohrHrSt
   };
 }
 
-function makeSummary(mode: "preview" | "commit", result: IiohrHrStaffImportRunResult): IiohrHrStaffSyncSummary {
+function makeSummary(
+  mode: "preview" | "commit",
+  result: IiohrHrStaffImportRunResult
+): IiohrHrStaffSyncSummary {
   return { mode, lastSyncedAt: "2026-06-08T12:00:00.000Z", result };
 }
 

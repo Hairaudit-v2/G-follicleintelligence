@@ -184,7 +184,9 @@ function mapTemplate(row: Record<string, unknown>): FiClinicalStaffingTemplateRo
 
 function mapAssignment(row: Record<string, unknown>): FiStaffEventAssignmentRow {
   const snapshot =
-    row.eligibility_snapshot && typeof row.eligibility_snapshot === "object" && !Array.isArray(row.eligibility_snapshot)
+    row.eligibility_snapshot &&
+    typeof row.eligibility_snapshot === "object" &&
+    !Array.isArray(row.eligibility_snapshot)
       ? (row.eligibility_snapshot as Record<string, unknown>)
       : {};
   const window = extractEventWindowFromSnapshot(snapshot);
@@ -357,7 +359,9 @@ export async function loadWorkforceRosterOverview(
   if (blocksRes.error) throw new Error(blocksRes.error.message);
   if (assignmentsRes.error) throw new Error(assignmentsRes.error.message);
 
-  const assignments = (assignmentsRes.data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
+  const assignments = (assignmentsRes.data ?? []).map((r) =>
+    mapAssignment(r as Record<string, unknown>)
+  );
   const uniqueStaffAssigned = new Set(assignments.map((a) => a.staff_id)).size;
 
   let eventsWithStaffingWarnings = 0;
@@ -503,7 +507,9 @@ export async function loadStaffRosterProfile(
 
   return {
     upcomingShifts: (shiftsRes.data ?? []).map((r) => mapShift(r as Record<string, unknown>)),
-    activeAvailabilityBlocks: (blocksRes.data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>)),
+    activeAvailabilityBlocks: (blocksRes.data ?? []).map((r) =>
+      mapAvailabilityBlock(r as Record<string, unknown>)
+    ),
     recentClinicalAssignments,
     assignmentWarnings: [...new Set(assignmentWarnings)],
   };
@@ -588,7 +594,10 @@ export async function cancelAvailabilityBlock(
   return mapAvailabilityBlock(data as Record<string, unknown>);
 }
 
-export async function cancelStaffShift(tenantId: string, shiftId: string): Promise<FiStaffShiftRow> {
+export async function cancelStaffShift(
+  tenantId: string,
+  shiftId: string
+): Promise<FiStaffShiftRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const sid = assertNonEmptyUuid(shiftId, "shiftId");
   const supabase = supabaseAdmin();
@@ -709,9 +718,13 @@ export async function assignStaffToClinicalEventAction(input: {
   if (shiftsRes.error) throw new Error(shiftsRes.error.message);
   if (assignmentsRes.error) throw new Error(assignmentsRes.error.message);
 
-  const blocks = (blocksRes.data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>));
+  const blocks = (blocksRes.data ?? []).map((r) =>
+    mapAvailabilityBlock(r as Record<string, unknown>)
+  );
   const shifts = (shiftsRes.data ?? []).map((r) => mapShift(r as Record<string, unknown>));
-  const assignments = (assignmentsRes.data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
+  const assignments = (assignmentsRes.data ?? []).map((r) =>
+    mapAssignment(r as Record<string, unknown>)
+  );
 
   const conflicts = detectStaffSchedulingConflicts({
     staffId: sid,
@@ -803,7 +816,9 @@ export async function assignStaffToClinicalEventAction(input: {
 
 export type ClinicalEventStaffingStatusPreload = {
   templates?: FiClinicalStaffingTemplateRow[];
-  privilegeRequirements?: Awaited<ReturnType<typeof loadAllProcedurePrivilegeRequirementsForTenant>>;
+  privilegeRequirements?: Awaited<
+    ReturnType<typeof loadAllProcedurePrivilegeRequirementsForTenant>
+  >;
   staffById?: Map<string, FiStaffRow>;
   availabilityBlocksByStaffId?: Map<string, StaffAvailabilityBlockRecord[]>;
   shiftsByStaffId?: Map<string, StaffShiftRecord[]>;
@@ -830,7 +845,8 @@ export async function loadClinicalEventStaffingStatus(input: {
   });
   const requiredRoles = template?.required_roles ?? {};
   const allPrivilegeRequirements =
-    input.preload?.privilegeRequirements ?? (await loadAllProcedurePrivilegeRequirementsForTenant(tid));
+    input.preload?.privilegeRequirements ??
+    (await loadAllProcedurePrivilegeRequirementsForTenant(tid));
 
   const availabilityByStaff = new Map<
     string,
@@ -884,9 +900,13 @@ export async function loadClinicalEventStaffingStatus(input: {
       if (shiftsRes.error) throw new Error(shiftsRes.error.message);
       if (assignmentsRes.error) throw new Error(assignmentsRes.error.message);
 
-      blocks = (blocksRes.data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>));
+      blocks = (blocksRes.data ?? []).map((r) =>
+        mapAvailabilityBlock(r as Record<string, unknown>)
+      );
       shifts = (shiftsRes.data ?? []).map((r) => mapShift(r as Record<string, unknown>));
-      assignments = (assignmentsRes.data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
+      assignments = (assignmentsRes.data ?? []).map((r) =>
+        mapAssignment(r as Record<string, unknown>)
+      );
     }
 
     availabilityByStaff.set(candidate.staffId, {

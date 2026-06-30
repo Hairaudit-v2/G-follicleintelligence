@@ -6,7 +6,11 @@ import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceKind, FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+  openCollectionStatusFilter,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type PatientInvoiceSummary = {
   invoices: FiInvoiceRow[];
@@ -15,7 +19,10 @@ export type PatientInvoiceSummary = {
   overdueCount: number;
 };
 
-export async function loadPatientInvoiceSummary(tenantId: string, patientId: string): Promise<PatientInvoiceSummary> {
+export async function loadPatientInvoiceSummary(
+  tenantId: string,
+  patientId: string
+): Promise<PatientInvoiceSummary> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const pid = assertNonEmptyUuid(patientId, "patientId").trim();
   const supabase = supabaseAdmin();
@@ -44,7 +51,9 @@ export async function loadPatientInvoiceSummary(tenantId: string, patientId: str
   return { invoices, outstandingCentsAud, unpaidOpenCount, overdueCount };
 }
 
-export type CasePaymentRequestWithInvoiceKind = FiPaymentRequestRow & { invoice_kind: FiInvoiceKind };
+export type CasePaymentRequestWithInvoiceKind = FiPaymentRequestRow & {
+  invoice_kind: FiInvoiceKind;
+};
 
 export type CasePaymentReadiness = {
   invoices: FiInvoiceRow[];
@@ -55,19 +64,29 @@ export type CasePaymentReadiness = {
   depositReadinessMessage: string | null;
 };
 
-export async function loadCasePaymentReadiness(tenantId: string, caseId: string): Promise<CasePaymentReadiness> {
+export async function loadCasePaymentReadiness(
+  tenantId: string,
+  caseId: string
+): Promise<CasePaymentReadiness> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const cid = assertNonEmptyUuid(caseId, "caseId").trim();
   const supabase = supabaseAdmin();
   const [{ data: invs, error: ie }, { data: rules, error: re }] = await Promise.all([
-    supabase.from("fi_invoices").select("*").eq("tenant_id", tid).eq("case_id", cid).order("created_at", { ascending: false }),
+    supabase
+      .from("fi_invoices")
+      .select("*")
+      .eq("tenant_id", tid)
+      .eq("case_id", cid)
+      .order("created_at", { ascending: false }),
     supabase.from("fi_deposit_rules").select("*").eq("tenant_id", tid).eq("is_active", true),
   ]);
   if (ie) throw new Error(ie.message);
   if (re) throw new Error(re.message);
   const invoices = (invs ?? []).map((r) => mapInvoiceRow(r as Record<string, unknown>));
-  const ruleBlocks = (rules ?? []).some(
-    (r) => Boolean((r as { blocks_surgery_readiness_when_unpaid?: boolean }).blocks_surgery_readiness_when_unpaid)
+  const ruleBlocks = (rules ?? []).some((r) =>
+    Boolean(
+      (r as { blocks_surgery_readiness_when_unpaid?: boolean }).blocks_surgery_readiness_when_unpaid
+    )
   );
   const unpaidDeposit = invoices.some(
     (inv) =>

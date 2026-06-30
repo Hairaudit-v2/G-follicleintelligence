@@ -60,7 +60,8 @@ export async function appendCrmLeadStageHistory(
     changed_by: row.changed_by != null ? String(row.changed_by) : null,
     reason: row.reason != null ? String(row.reason) : null,
     source: String(row.source),
-    fi_timeline_event_id: row.fi_timeline_event_id != null ? String(row.fi_timeline_event_id) : null,
+    fi_timeline_event_id:
+      row.fi_timeline_event_id != null ? String(row.fi_timeline_event_id) : null,
     metadata:
       row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, unknown>)
@@ -96,7 +97,8 @@ export async function loadCrmLeadStageHistory(
     changed_by: row.changed_by != null ? String(row.changed_by) : null,
     reason: row.reason != null ? String(row.reason) : null,
     source: String(row.source),
-    fi_timeline_event_id: row.fi_timeline_event_id != null ? String(row.fi_timeline_event_id) : null,
+    fi_timeline_event_id:
+      row.fi_timeline_event_id != null ? String(row.fi_timeline_event_id) : null,
     metadata:
       row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, unknown>)

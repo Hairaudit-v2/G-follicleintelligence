@@ -11,14 +11,17 @@ import {
   buildEnterpriseDemoSurgerySpecs,
   type EnterpriseDemoSurgerySpec,
 } from "./enterpriseDemoSurgeriesGenerator";
-import {
-  ENTERPRISE_DEMO_CLINICS,
-} from "./enterpriseDemoConstants";
+import { ENTERPRISE_DEMO_CLINICS } from "./enterpriseDemoConstants";
 import {
   ENTERPRISE_DEMO_DEFAULT_VOLUME,
   type EnterpriseDemoVolumeOptions,
 } from "./enterpriseDemoVolumeOptions";
-import type { FiGatewayPaymentStatus, FiInvoiceKind, FiInvoiceStatus, FiPaymentRequestStatus } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import type {
+  FiGatewayPaymentStatus,
+  FiInvoiceKind,
+  FiInvoiceStatus,
+  FiPaymentRequestStatus,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export const ENTERPRISE_DEMO_CONSULTATION_QUOTE_INVOICES = 240;
 export const ENTERPRISE_DEMO_SURGERY_FINANCIAL_BUNDLES = 96;
@@ -274,7 +277,10 @@ function resolveConsultationQuoteLifecycle(
         paymentStatus: null,
       };
     }
-    if (spec.conversionOutcome === "quoted_declined" || spec.conversionOutcome === "lost_to_competitor") {
+    if (
+      spec.conversionOutcome === "quoted_declined" ||
+      spec.conversionOutcome === "lost_to_competitor"
+    ) {
       return {
         status: "cancelled",
         lifecycle: "quote_expired",
@@ -287,7 +293,10 @@ function resolveConsultationQuoteLifecycle(
     }
   }
 
-  if (spec.consultationStatus === "converted_to_case" || spec.conversionOutcome === "converted_to_case") {
+  if (
+    spec.consultationStatus === "converted_to_case" ||
+    spec.conversionOutcome === "converted_to_case"
+  ) {
     return {
       status: "paid",
       lifecycle: "paid",
@@ -362,7 +371,8 @@ function buildConsultationQuoteInvoice(
     amountPaidCents: lifecycle.amountPaidCents,
     currency,
     dueDate: lifecycle.dueDate,
-    issuedAt: lifecycle.status !== "draft" ? isoDaysAgo(10 + (stableHash(demoInvoiceKey) % 20)) : null,
+    issuedAt:
+      lifecycle.status !== "draft" ? isoDaysAgo(10 + (stableHash(demoInvoiceKey) % 20)) : null,
     title,
     lineDescription: spec.quotedTreatment ?? spec.consultationType,
     demoFinancialLifecycle: lifecycle.lifecycle,
@@ -457,8 +467,7 @@ function resolveSurgeryFinancials(
     return {
       depositStatus: overdue && hash % 2 === 0 ? "partially_paid" : "paid",
       balanceStatus: overdue ? "overdue" : hash % 3 === 0 ? "partially_paid" : "paid",
-      depositPaidCents:
-        overdue && hash % 2 === 0 ? Math.floor(depositCents * 0.5) : depositCents,
+      depositPaidCents: overdue && hash % 2 === 0 ? Math.floor(depositCents * 0.5) : depositCents,
       balancePaidCents: overdue ? Math.floor(depositCents * 0.5) : balanceCents,
       depositLifecycle: overdue && hash % 2 === 0 ? "partial" : "paid",
       balanceLifecycle: overdue ? "overdue" : hash % 3 === 0 ? "partial" : "paid",
@@ -474,24 +483,47 @@ function resolveSurgeryFinancials(
     const writtenOff = surgeryIndex === 3;
     return {
       depositStatus: refunded ? "refunded" : "paid",
-      balanceStatus: refunded ? "refunded" : writtenOff ? "cancelled" : hash % 4 === 0 ? "partially_paid" : "paid",
+      balanceStatus: refunded
+        ? "refunded"
+        : writtenOff
+          ? "cancelled"
+          : hash % 4 === 0
+            ? "partially_paid"
+            : "paid",
       depositPaidCents: depositCents,
-      balancePaidCents: refunded ? balanceCents : writtenOff ? 0 : hash % 4 === 0 ? Math.floor(balanceCents * 0.7) : balanceCents,
+      balancePaidCents: refunded
+        ? balanceCents
+        : writtenOff
+          ? 0
+          : hash % 4 === 0
+            ? Math.floor(balanceCents * 0.7)
+            : balanceCents,
       depositLifecycle: refunded ? "refunded" : "paid",
-      balanceLifecycle: refunded ? "refunded" : writtenOff ? "written_off" : hash % 4 === 0 ? "partial" : "paid",
+      balanceLifecycle: refunded
+        ? "refunded"
+        : writtenOff
+          ? "written_off"
+          : hash % 4 === 0
+            ? "partial"
+            : "paid",
       adjustment: refunded
         ? { amountCents: Math.floor(procedureCents * 0.08), status: "awaiting_payment" }
         : null,
       refundPayment: refunded,
       writtenOff,
-      bookingFinancialOsStatus: refunded ? "confirmed" : writtenOff ? "deposit_pending" : "paid_in_full",
+      bookingFinancialOsStatus: refunded
+        ? "confirmed"
+        : writtenOff
+          ? "deposit_pending"
+          : "paid_in_full",
     };
   }
 
   if (profile === "graft_invoice_variance") {
     return {
       depositStatus: "paid",
-      balanceStatus: surgery.surgeryStatus === "completed" && hash % 2 === 0 ? "partially_paid" : "paid",
+      balanceStatus:
+        surgery.surgeryStatus === "completed" && hash % 2 === 0 ? "partially_paid" : "paid",
       depositPaidCents: depositCents,
       balancePaidCents:
         surgery.surgeryStatus === "completed" && hash % 2 === 0
@@ -510,11 +542,17 @@ function resolveSurgeryFinancials(
   const partial = hash % 6 === 0;
   return {
     depositStatus: partial ? "partially_paid" : "paid",
-    balanceStatus: surgery.surgeryStatus === "scheduled" ? "awaiting_payment" : partial ? "partially_paid" : "paid",
+    balanceStatus:
+      surgery.surgeryStatus === "scheduled"
+        ? "awaiting_payment"
+        : partial
+          ? "partially_paid"
+          : "paid",
     depositPaidCents: partial ? Math.floor(depositCents * 0.6) : depositCents,
     balancePaidCents: partial ? Math.floor(balanceCents * 0.4) : balanceCents,
     depositLifecycle: partial ? "partial" : "paid",
-    balanceLifecycle: surgery.surgeryStatus === "scheduled" ? "balance" : partial ? "partial" : "paid",
+    balanceLifecycle:
+      surgery.surgeryStatus === "scheduled" ? "balance" : partial ? "partial" : "paid",
     adjustment: null,
     refundPayment: false,
     writtenOff: false,
@@ -567,10 +605,10 @@ function buildFranchiseRisk(
   const hash = stableHash(surgery.demoSurgeryKey);
   const revenueVariance =
     profile === "graft_invoice_variance" ||
-    (surgery.invoiceGraftPlaceholder != null && surgery.graftTarget !== surgery.invoiceGraftPlaceholder);
+    (surgery.invoiceGraftPlaceholder != null &&
+      surgery.graftTarget !== surgery.invoiceGraftPlaceholder);
   const inventoryVariance =
-    profile === "graft_invoice_variance" ||
-    surgery.performanceProfile === "graft_count_vs_quote";
+    profile === "graft_invoice_variance" || surgery.performanceProfile === "graft_count_vs_quote";
   const reconciliationStatus: EnterpriseDemoPaymentReconciliationStatus =
     profile === "clean_reconciliation"
       ? "reconciled"
@@ -699,12 +737,7 @@ function buildSurgeryBundle(
 
   const depositPaymentRequest =
     depositInvoice.amountPaidCents < depositInvoice.totalCents
-      ? buildPaymentRequestForInvoice(
-          depositInvoice,
-          "sent",
-          isoDaysAgo(6),
-          ymdDaysAhead(10)
-        )
+      ? buildPaymentRequestForInvoice(depositInvoice, "sent", isoDaysAgo(6), ymdDaysAhead(10))
       : depositInvoice.amountPaidCents > 0
         ? buildPaymentRequestForInvoice(depositInvoice, "paid", isoDaysAgo(18), isoDaysAgo(2))
         : null;
@@ -821,7 +854,10 @@ export function validateEnterpriseDemoFinancialBundles(
     invoiceKeys.add(key);
     if (bundle.payment) {
       if (paymentKeys.has(bundle.payment.demoPaymentKey)) {
-        return { ok: false, reason: `Duplicate ${ENTERPRISE_DEMO_PAYMENT_KEY_METADATA}: ${bundle.payment.demoPaymentKey}` };
+        return {
+          ok: false,
+          reason: `Duplicate ${ENTERPRISE_DEMO_PAYMENT_KEY_METADATA}: ${bundle.payment.demoPaymentKey}`,
+        };
       }
       paymentKeys.add(bundle.payment.demoPaymentKey);
     }
@@ -834,7 +870,10 @@ export function validateEnterpriseDemoFinancialBundles(
       bundle.adjustmentInvoice,
     ].filter((row): row is EnterpriseDemoInvoiceSpec => row != null)) {
       if (invoiceKeys.has(invoice.demoInvoiceKey)) {
-        return { ok: false, reason: `Duplicate ${ENTERPRISE_DEMO_INVOICE_KEY_METADATA}: ${invoice.demoInvoiceKey}` };
+        return {
+          ok: false,
+          reason: `Duplicate ${ENTERPRISE_DEMO_INVOICE_KEY_METADATA}: ${invoice.demoInvoiceKey}`,
+        };
       }
       invoiceKeys.add(invoice.demoInvoiceKey);
     }
@@ -845,34 +884,48 @@ export function validateEnterpriseDemoFinancialBundles(
       bundle.refundPayment,
     ].filter((row): row is EnterpriseDemoPaymentSpec => row != null)) {
       if (paymentKeys.has(payment.demoPaymentKey)) {
-        return { ok: false, reason: `Duplicate ${ENTERPRISE_DEMO_PAYMENT_KEY_METADATA}: ${payment.demoPaymentKey}` };
+        return {
+          ok: false,
+          reason: `Duplicate ${ENTERPRISE_DEMO_PAYMENT_KEY_METADATA}: ${payment.demoPaymentKey}`,
+        };
       }
       paymentKeys.add(payment.demoPaymentKey);
     }
 
     const riskKey = bundle.franchiseRisk.demoFinancialRiskKey;
     if (riskKeys.has(riskKey)) {
-      return { ok: false, reason: `Duplicate ${ENTERPRISE_DEMO_FINANCIAL_RISK_KEY_METADATA}: ${riskKey}` };
+      return {
+        ok: false,
+        reason: `Duplicate ${ENTERPRISE_DEMO_FINANCIAL_RISK_KEY_METADATA}: ${riskKey}`,
+      };
     }
     riskKeys.add(riskKey);
   }
 
-  const sydney = bundles.surgeryBundles.filter((b) => b.surgery.clinicSlug === "sydney-hair-institute");
+  const sydney = bundles.surgeryBundles.filter(
+    (b) => b.surgery.clinicSlug === "sydney-hair-institute"
+  );
   if (!sydney.every((b) => b.franchiseRisk.paymentReconciliationStatus === "reconciled")) {
     return { ok: false, reason: "Sydney surgeries should have reconciled payment status." };
   }
 
-  const dubai = bundles.surgeryBundles.filter((b) => b.surgery.clinicSlug === "dubai-hair-institute");
+  const dubai = bundles.surgeryBundles.filter(
+    (b) => b.surgery.clinicSlug === "dubai-hair-institute"
+  );
   if (!dubai.some((b) => b.franchiseRisk.inventoryToGraftVarianceFlag)) {
     return { ok: false, reason: "Dubai surgeries should include graft variance flags." };
   }
 
-  const bangkok = bundles.surgeryBundles.filter((b) => b.surgery.clinicSlug === "bangkok-restoration-centre");
+  const bangkok = bundles.surgeryBundles.filter(
+    (b) => b.surgery.clinicSlug === "bangkok-restoration-centre"
+  );
   if (!bangkok.some((b) => b.balanceInvoice.status === "overdue")) {
     return { ok: false, reason: "Bangkok surgeries should include overdue balance invoices." };
   }
 
-  const london = bundles.surgeryBundles.filter((b) => b.surgery.clinicSlug === "london-central-institute");
+  const london = bundles.surgeryBundles.filter(
+    (b) => b.surgery.clinicSlug === "london-central-institute"
+  );
   if (!london.some((b) => b.refundPayment != null || b.adjustmentInvoice != null)) {
     return { ok: false, reason: "London surgeries should include refunds or adjustments." };
   }

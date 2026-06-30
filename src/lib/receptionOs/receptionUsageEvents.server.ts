@@ -41,6 +41,8 @@ export async function trackReceptionUsageEvent(opts: {
 }
 
 /** Fire-and-forget wrapper for non-blocking callers. */
-export function trackReceptionUsageEventSafe(opts: Parameters<typeof trackReceptionUsageEvent>[0]): void {
+export function trackReceptionUsageEventSafe(
+  opts: Parameters<typeof trackReceptionUsageEvent>[0]
+): void {
   void trackReceptionUsageEvent(opts);
 }

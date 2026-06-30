@@ -3,14 +3,12 @@ import { describe, it } from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-  assertFiEventBelongsToTenant,
-  getLatestFiEventLink,
-  linkEventToEntities,
-} from "./mapping";
+import { assertFiEventBelongsToTenant, getLatestFiEventLink, linkEventToEntities } from "./mapping";
 
 /** Minimal thenable query builder that resolves to `{ data, error }`. */
-function builderResult<T>(result: { data: T; error: null } | { data: null; error: { message: string } }) {
+function builderResult<T>(
+  result: { data: T; error: null } | { data: null; error: { message: string } }
+) {
   const b = {
     select: () => b,
     eq: () => b,
@@ -80,7 +78,10 @@ describe("getLatestFiEventLink", () => {
       },
     } as unknown as SupabaseClient;
 
-    await assert.rejects(() => getLatestFiEventLink(supabase, "ev-1", "wrong-tenant"), /ownership mismatch/i);
+    await assert.rejects(
+      () => getLatestFiEventLink(supabase, "ev-1", "wrong-tenant"),
+      /ownership mismatch/i
+    );
   });
 });
 

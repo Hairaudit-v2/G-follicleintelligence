@@ -4,12 +4,16 @@ import { describe, it } from "node:test";
 import { followUpReviewConsultationSchemaV1 } from "./followUpReviewConsultationTemplate";
 import { evaluateConsultationFormCondition } from "../consultationFormCondition";
 
-function allFields(schema: { sections: { fields: { id: string; type: string; showWhen?: unknown }[] }[] }): {
+function allFields(schema: {
+  sections: { fields: { id: string; type: string; showWhen?: unknown }[] }[];
+}): {
   id: string;
   type: string;
   showWhen?: unknown;
 }[] {
-  return schema.sections.flatMap((s) => s.fields.map((f) => ({ id: f.id, type: f.type, showWhen: f.showWhen })));
+  return schema.sections.flatMap((s) =>
+    s.fields.map((f) => ({ id: f.id, type: f.type, showWhen: f.showWhen }))
+  );
 }
 
 describe("followUpReviewConsultationTemplate", () => {
@@ -29,10 +33,18 @@ describe("followUpReviewConsultationTemplate", () => {
   });
 
   it("shows side_effects_notes only when side_effects_present is true", () => {
-    const sec = followUpReviewConsultationSchemaV1.sections.find((s) => s.id === "progress_assessment");
+    const sec = followUpReviewConsultationSchemaV1.sections.find(
+      (s) => s.id === "progress_assessment"
+    );
     const notes = sec?.fields.find((f) => f.id === "side_effects_notes");
     assert.ok(notes?.showWhen);
-    assert.equal(evaluateConsultationFormCondition(notes!.showWhen, { side_effects_present: false }), false);
-    assert.equal(evaluateConsultationFormCondition(notes!.showWhen, { side_effects_present: true }), true);
+    assert.equal(
+      evaluateConsultationFormCondition(notes!.showWhen, { side_effects_present: false }),
+      false
+    );
+    assert.equal(
+      evaluateConsultationFormCondition(notes!.showWhen, { side_effects_present: true }),
+      true
+    );
   });
 });

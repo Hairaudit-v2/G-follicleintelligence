@@ -67,7 +67,9 @@ export function isSurgeryOsAction(v: string): v is SurgeryOsAction {
   return (SURGERY_OS_ACTIONS as readonly string[]).includes(v);
 }
 
-export function resolveSurgeryOsStaffRoleCategory(staffRole: string | null | undefined): SurgeryOsStaffRoleCategory {
+export function resolveSurgeryOsStaffRoleCategory(
+  staffRole: string | null | undefined
+): SurgeryOsStaffRoleCategory {
   const sr = (staffRole ?? "").trim().toLowerCase();
   if (!sr) return null;
   if (sr.includes("nurse")) return "nurse";
@@ -85,18 +87,25 @@ export function resolveCurrentMajorPhase(input: {
   if (input.procedurePhase === "implantation") return "implantation";
   if (input.procedurePhase === "site_making") return "site_creation";
   if (input.procedurePhase === "break") return "break";
-  if (input.procedurePhase === "extraction" || input.procedurePhase === "extraction_paused") return "extraction";
+  if (input.procedurePhase === "extraction" || input.procedurePhase === "extraction_paused")
+    return "extraction";
   if (input.procedurePhase === "anaesthetic") return "anaesthetic";
   if (input.status === "scheduled") return "scheduled";
   return "pre_op";
 }
 
-export function canTransitionSurgeryMajorPhase(from: SurgeryOsMajorPhase, to: SurgeryOsMajorPhase): boolean {
+export function canTransitionSurgeryMajorPhase(
+  from: SurgeryOsMajorPhase,
+  to: SurgeryOsMajorPhase
+): boolean {
   if (from === to) return true;
   return PHASE_TRANSITIONS[from].includes(to);
 }
 
-export function assertSurgeryMajorPhaseTransition(from: SurgeryOsMajorPhase, to: SurgeryOsMajorPhase): void {
+export function assertSurgeryMajorPhaseTransition(
+  from: SurgeryOsMajorPhase,
+  to: SurgeryOsMajorPhase
+): void {
   if (!canTransitionSurgeryMajorPhase(from, to)) {
     throw new Error(`Invalid surgery phase transition: ${from} → ${to}.`);
   }
@@ -120,7 +129,12 @@ export function majorPhaseToSurgeryPatch(phase: SurgeryOsMajorPhase): {
     case "pre_op":
       return { status: "pre_op", procedurePhase: "pre_op", liveStatus: "waiting" };
     case "anaesthetic":
-      return { status: "in_progress", procedurePhase: "anaesthetic", liveStatus: "active", setActualStart: true };
+      return {
+        status: "in_progress",
+        procedurePhase: "anaesthetic",
+        liveStatus: "active",
+        setActualStart: true,
+      };
     case "extraction":
       return { status: "in_progress", procedurePhase: "extraction", liveStatus: "active" };
     case "break":
@@ -132,7 +146,12 @@ export function majorPhaseToSurgeryPatch(phase: SurgeryOsMajorPhase): {
     case "recovery":
       return { status: "in_progress", procedurePhase: "recovery", liveStatus: "active" };
     case "complete":
-      return { status: "completed", procedurePhase: "completed", liveStatus: "completed", setActualEnd: true };
+      return {
+        status: "completed",
+        procedurePhase: "completed",
+        liveStatus: "completed",
+        setActualEnd: true,
+      };
   }
 }
 
@@ -151,7 +170,12 @@ export function eventKindToSurgeryPatch(eventKind: SurgeryOsProcedureEventKind):
     case "anaesthetic_complete":
       return { procedurePhase: "anaesthetic", liveStatus: "active", setActualStart: true };
     case "extraction_started":
-      return { status: "in_progress", procedurePhase: "extraction", liveStatus: "active", setActualStart: true };
+      return {
+        status: "in_progress",
+        procedurePhase: "extraction",
+        liveStatus: "active",
+        setActualStart: true,
+      };
     case "extraction_paused":
       return { status: "paused", procedurePhase: "extraction_paused", liveStatus: "break" };
     case "extraction_resumed":
@@ -166,7 +190,12 @@ export function eventKindToSurgeryPatch(eventKind: SurgeryOsProcedureEventKind):
     case "implantation_started":
       return { status: "in_progress", procedurePhase: "implantation", liveStatus: "active" };
     case "procedure_completed":
-      return { status: "completed", procedurePhase: "completed", liveStatus: "completed", setActualEnd: true };
+      return {
+        status: "completed",
+        procedurePhase: "completed",
+        liveStatus: "completed",
+        setActualEnd: true,
+      };
     default:
       return null;
   }
@@ -174,7 +203,10 @@ export function eventKindToSurgeryPatch(eventKind: SurgeryOsProcedureEventKind):
 
 const TECHNICIAN_NOTE_KINDS: readonly SurgeryOsNoteKind[] = ["graft_issue", "general"];
 
-export function surgeryOsGraftActionAllowed(ctx: SurgeryOsMutationContext, action: SurgeryOsAction): boolean {
+export function surgeryOsGraftActionAllowed(
+  ctx: SurgeryOsMutationContext,
+  action: SurgeryOsAction
+): boolean {
   if (ctx.viewerRole === "admin" || ctx.viewerRole === "theatre_manager") return true;
   if (ctx.viewerRole === "surgeon" || ctx.staffRoleCategory === "surgeon") return true;
 
@@ -196,7 +228,10 @@ export function surgeryOsGraftActionAllowed(ctx: SurgeryOsMutationContext, actio
   }
 }
 
-export function surgeryOsActionAllowed(ctx: SurgeryOsMutationContext, action: SurgeryOsAction): boolean {
+export function surgeryOsActionAllowed(
+  ctx: SurgeryOsMutationContext,
+  action: SurgeryOsAction
+): boolean {
   const { viewerRole, staffRoleCategory } = ctx;
 
   if (viewerRole === "admin" || viewerRole === "theatre_manager") return true;
@@ -219,7 +254,9 @@ export function surgeryOsActionAllowed(ctx: SurgeryOsMutationContext, action: Su
     case "transition_phase":
       return viewerRole === "surgeon" || staffRoleCategory === "surgeon";
     case "log_event":
-      return viewerRole === "surgeon" || staffRoleCategory === "surgeon" || staffRoleCategory === "nurse";
+      return (
+        viewerRole === "surgeon" || staffRoleCategory === "surgeon" || staffRoleCategory === "nurse"
+      );
     case "add_note":
       return (
         viewerRole === "surgeon" ||
@@ -228,15 +265,25 @@ export function surgeryOsActionAllowed(ctx: SurgeryOsMutationContext, action: Su
         staffRoleCategory === "technician"
       );
     case "update_team_status":
-      return viewerRole === "surgeon" || staffRoleCategory === "surgeon" || staffRoleCategory === "nurse";
+      return (
+        viewerRole === "surgeon" || staffRoleCategory === "surgeon" || staffRoleCategory === "nurse"
+      );
     default:
       return false;
   }
 }
 
-export function surgeryOsNoteKindAllowed(ctx: SurgeryOsMutationContext, noteKind: SurgeryOsNoteKind): boolean {
+export function surgeryOsNoteKindAllowed(
+  ctx: SurgeryOsMutationContext,
+  noteKind: SurgeryOsNoteKind
+): boolean {
   if (!surgeryOsActionAllowed(ctx, "add_note")) return false;
-  if (ctx.viewerRole === "admin" || ctx.viewerRole === "theatre_manager" || ctx.viewerRole === "surgeon") return true;
+  if (
+    ctx.viewerRole === "admin" ||
+    ctx.viewerRole === "theatre_manager" ||
+    ctx.viewerRole === "surgeon"
+  )
+    return true;
   if (ctx.staffRoleCategory === "surgeon" || ctx.staffRoleCategory === "nurse") return true;
   if (ctx.staffRoleCategory === "technician") return TECHNICIAN_NOTE_KINDS.includes(noteKind);
   return false;
@@ -244,7 +291,7 @@ export function surgeryOsNoteKindAllowed(ctx: SurgeryOsMutationContext, noteKind
 
 export function surgeryOsTeamStatusUpdateAllowed(
   ctx: SurgeryOsMutationContext,
-  assignmentFiUserId: string,
+  assignmentFiUserId: string
 ): boolean {
   if (
     ctx.staffRoleCategory === "technician" &&
@@ -255,12 +302,16 @@ export function surgeryOsTeamStatusUpdateAllowed(
   }
   if (!surgeryOsActionAllowed(ctx, "update_team_status")) return false;
   if (ctx.viewerRole === "admin" || ctx.viewerRole === "theatre_manager") return true;
-  return ctx.viewerRole === "surgeon" || ctx.staffRoleCategory === "surgeon" || ctx.staffRoleCategory === "nurse";
+  return (
+    ctx.viewerRole === "surgeon" ||
+    ctx.staffRoleCategory === "surgeon" ||
+    ctx.staffRoleCategory === "nurse"
+  );
 }
 
 export function canTransitionTeamAssignmentStatus(
   from: SurgeryOsAssignmentStatus,
-  to: SurgeryOsAssignmentStatus,
+  to: SurgeryOsAssignmentStatus
 ): boolean {
   if (from === to) return true;
   const allowed: Record<SurgeryOsAssignmentStatus, readonly SurgeryOsAssignmentStatus[]> = {
@@ -275,7 +326,10 @@ export function canTransitionTeamAssignmentStatus(
   return allowed[from]?.includes(to) ?? false;
 }
 
-export function assertTeamAssignmentStatusTransition(from: SurgeryOsAssignmentStatus, to: SurgeryOsAssignmentStatus): void {
+export function assertTeamAssignmentStatusTransition(
+  from: SurgeryOsAssignmentStatus,
+  to: SurgeryOsAssignmentStatus
+): void {
   if (!canTransitionTeamAssignmentStatus(from, to)) {
     throw new Error(`Invalid team assignment status transition: ${from} → ${to}.`);
   }

@@ -14,7 +14,8 @@ export const RECEPTION_COMMUNICATION_TEMPLATE_KEYS = [
   "appointment_reminder",
 ] as const;
 
-export type ReceptionCommunicationTemplateKey = (typeof RECEPTION_COMMUNICATION_TEMPLATE_KEYS)[number];
+export type ReceptionCommunicationTemplateKey =
+  (typeof RECEPTION_COMMUNICATION_TEMPLATE_KEYS)[number];
 
 export const RECEPTION_COMMUNICATION_TEMPLATE_VARIABLES = [
   "patient_first_name",
@@ -26,7 +27,8 @@ export const RECEPTION_COMMUNICATION_TEMPLATE_VARIABLES = [
   "clinic_name",
 ] as const;
 
-export type ReceptionCommunicationTemplateVariable = (typeof RECEPTION_COMMUNICATION_TEMPLATE_VARIABLES)[number];
+export type ReceptionCommunicationTemplateVariable =
+  (typeof RECEPTION_COMMUNICATION_TEMPLATE_VARIABLES)[number];
 
 export type ReceptionCommunicationTemplateVariables = Partial<
   Record<ReceptionCommunicationTemplateVariable, string>
@@ -111,14 +113,16 @@ export const RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES: Record<
 
 const VARIABLE_PATTERN = /\{\{([a-z_]+)\}\}/g;
 
-export function isReceptionCommunicationTemplateKey(v: string): v is ReceptionCommunicationTemplateKey {
+export function isReceptionCommunicationTemplateKey(
+  v: string
+): v is ReceptionCommunicationTemplateKey {
   return (RECEPTION_COMMUNICATION_TEMPLATE_KEYS as readonly string[]).includes(v.trim());
 }
 
 /** Replace {{variable}} tokens; unknown tokens are left unchanged. */
 export function renderReceptionCommunicationTemplate(
   template: string,
-  variables: ReceptionCommunicationTemplateVariables,
+  variables: ReceptionCommunicationTemplateVariables
 ): string {
   return template.replace(VARIABLE_PATTERN, (_match, key: string) => {
     const val = variables[key as ReceptionCommunicationTemplateVariable];
@@ -129,7 +133,7 @@ export function renderReceptionCommunicationTemplate(
 /** Format optional amount fields for natural insertion in copy. */
 export function formatTemplateAmountField(
   amount: string | number | null | undefined,
-  currency?: string | null,
+  currency?: string | null
 ): string {
   if (amount == null || amount === "") return "";
   const n = typeof amount === "number" ? amount : Number(String(amount).replace(/[^0-9.-]/g, ""));
@@ -140,7 +144,7 @@ export function formatTemplateAmountField(
 
 export function renderReceptionCommunicationTemplateContent(
   content: ReceptionCommunicationTemplateContent,
-  variables: ReceptionCommunicationTemplateVariables,
+  variables: ReceptionCommunicationTemplateVariables
 ): ReceptionCommunicationRenderedMessage {
   const enriched: ReceptionCommunicationTemplateVariables = { ...variables };
   if (enriched.quote_amount && !String(enriched.quote_amount).startsWith(" of ")) {
@@ -152,17 +156,21 @@ export function renderReceptionCommunicationTemplateContent(
 
   return {
     templateKey: content.templateKey,
-    smsBody: content.smsBody ? renderReceptionCommunicationTemplate(content.smsBody, enriched) : null,
+    smsBody: content.smsBody
+      ? renderReceptionCommunicationTemplate(content.smsBody, enriched)
+      : null,
     emailSubject: content.emailSubject
       ? renderReceptionCommunicationTemplate(content.emailSubject, enriched)
       : null,
-    emailBody: content.emailBody ? renderReceptionCommunicationTemplate(content.emailBody, enriched) : null,
+    emailBody: content.emailBody
+      ? renderReceptionCommunicationTemplate(content.emailBody, enriched)
+      : null,
   };
 }
 
 export function resolveReceptionCommunicationTemplate(
   templateKey: ReceptionCommunicationTemplateKey,
-  tenantOverride?: ReceptionCommunicationTemplateContent | null,
+  tenantOverride?: ReceptionCommunicationTemplateContent | null
 ): ReceptionCommunicationTemplateContent {
   if (tenantOverride?.templateKey === templateKey) return tenantOverride;
   return RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES[templateKey];

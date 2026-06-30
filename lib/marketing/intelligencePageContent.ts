@@ -76,18 +76,54 @@ export const INTELLIGENCE_PAGE_CONTENT = {
     eyebrow: "Longitudinal record",
     headline: "Every patient becomes a longitudinal intelligence record.",
     cards: [
-      { title: "Baseline photography", body: "Protocol-aware capture that anchors later comparison—explicit about timing and capture quality." },
-      { title: "Trichoscopy", body: "Structured scalp imaging signals where your workflow records them, alongside clinical interpretation." },
-      { title: "Family history", body: "Pattern context that can support risk conversations when the chart supports it." },
-      { title: "Medical history", body: "Comorbidities and contraindications surfaced in the same intelligence envelope as treatment planning." },
-      { title: "Blood markers", body: "Labs tied to restoration-relevant interpretation—not a disconnected PDF in another tab." },
-      { title: "Medication history", body: "Chronology and adherence signals that can support longitudinal medication response review." },
-      { title: "Treatment response", body: "Checkpoints that make non-surgical and medical management discussable over time." },
-      { title: "Regenerative treatments", body: "Structured capture for adjunct therapies where your organisation documents them." },
-      { title: "Surgical history", body: "Prior procedures and donor posture connected to planning—not a one-line free text field." },
-      { title: "Follow-up outcomes", body: "Time-stamped evidence that respects how results mature—honest gaps included." },
-      { title: "Audit evidence", body: "Independent review inputs where your governance model connects them to the twin." },
-      { title: "Patient satisfaction", body: "Structured feedback complementary to clinical evidence—not a substitute for it." },
+      {
+        title: "Baseline photography",
+        body: "Protocol-aware capture that anchors later comparison—explicit about timing and capture quality.",
+      },
+      {
+        title: "Trichoscopy",
+        body: "Structured scalp imaging signals where your workflow records them, alongside clinical interpretation.",
+      },
+      {
+        title: "Family history",
+        body: "Pattern context that can support risk conversations when the chart supports it.",
+      },
+      {
+        title: "Medical history",
+        body: "Comorbidities and contraindications surfaced in the same intelligence envelope as treatment planning.",
+      },
+      {
+        title: "Blood markers",
+        body: "Labs tied to restoration-relevant interpretation—not a disconnected PDF in another tab.",
+      },
+      {
+        title: "Medication history",
+        body: "Chronology and adherence signals that can support longitudinal medication response review.",
+      },
+      {
+        title: "Treatment response",
+        body: "Checkpoints that make non-surgical and medical management discussable over time.",
+      },
+      {
+        title: "Regenerative treatments",
+        body: "Structured capture for adjunct therapies where your organisation documents them.",
+      },
+      {
+        title: "Surgical history",
+        body: "Prior procedures and donor posture connected to planning—not a one-line free text field.",
+      },
+      {
+        title: "Follow-up outcomes",
+        body: "Time-stamped evidence that respects how results mature—honest gaps included.",
+      },
+      {
+        title: "Audit evidence",
+        body: "Independent review inputs where your governance model connects them to the twin.",
+      },
+      {
+        title: "Patient satisfaction",
+        body: "Structured feedback complementary to clinical evidence—not a substitute for it.",
+      },
     ],
   },
 

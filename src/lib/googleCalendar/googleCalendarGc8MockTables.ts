@@ -83,10 +83,7 @@ export function createGc8MonitoringMockTables() {
           range(from: number, to: number) {
             return Promise.resolve({ data: sorted.slice(from, to + 1), error: null });
           },
-          then(
-            resolve: (v: { data: Row[]; error: null }) => void,
-            reject?: (e: unknown) => void
-          ) {
+          then(resolve: (v: { data: Row[]; error: null }) => void, reject?: (e: unknown) => void) {
             try {
               resolve({ data: sorted, error: null });
             } catch (e) {
@@ -173,7 +170,10 @@ export function createGc8MonitoringMockTables() {
           error: null,
           select() {
             return {
-              single: async () => ({ data: inserted[0] ?? null, error: inserted[0] ? null : { message: "not found" } }),
+              single: async () => ({
+                data: inserted[0] ?? null,
+                error: inserted[0] ? null : { message: "not found" },
+              }),
             };
           },
         };
@@ -182,11 +182,16 @@ export function createGc8MonitoringMockTables() {
         return {
           eq(col: string, val: unknown) {
             const matched = rows.filter((r) => r[col] === val);
-            matched.forEach((r) => Object.assign(r, patch, { updated_at: new Date().toISOString() }));
+            matched.forEach((r) =>
+              Object.assign(r, patch, { updated_at: new Date().toISOString() })
+            );
             return {
               select() {
                 return {
-                  single: async () => ({ data: matched[0] ?? null, error: matched[0] ? null : { message: "not found" } }),
+                  single: async () => ({
+                    data: matched[0] ?? null,
+                    error: matched[0] ? null : { message: "not found" },
+                  }),
                 };
               },
               then(resolve: (v: { error: null }) => void) {
@@ -223,7 +228,8 @@ export function createGc8MonitoringMockTables() {
       if (table === "fi_calendar_sync_runs") return buildGenericChain(syncRuns);
       if (table === "fi_admin_notifications") return buildGenericChain(adminNotifications);
       if (table === "fi_calendar_sync_review_items") return buildGenericChain(reviewItems);
-      if (table === "fi_calendar_webhook_subscriptions") return buildGenericChain(webhookSubscriptions);
+      if (table === "fi_calendar_webhook_subscriptions")
+        return buildGenericChain(webhookSubscriptions);
       return null;
     },
   };

@@ -34,7 +34,9 @@ export function normalizeHieRecipientRiskLevel(v: unknown): HieRecipientRiskLeve
   return "unknown";
 }
 
-export function normalizeHieRecipientSurgicalTimingRisk(v: unknown): HieRecipientSurgicalTimingRisk | null {
+export function normalizeHieRecipientSurgicalTimingRisk(
+  v: unknown
+): HieRecipientSurgicalTimingRisk | null {
   if (v == null) return null;
   const s = typeof v === "string" ? v.trim().toLowerCase() : "";
   if (!s || s === "null") return null;

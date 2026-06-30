@@ -9,7 +9,11 @@ import type { ImageClassificationResult } from "./classification";
 import type { ImagingOsImageIngestionRequest, ImagingOsNormalizedImageIntake } from "./intake";
 import { normalizeImageIngestionRequest } from "./intake";
 import { evaluateImageProtocolStub } from "./protocol";
-import type { ImageProtocolEvaluation, ImagingOsProtocolEvaluationResult, ImagingOsProtocolType } from "./protocol";
+import type {
+  ImageProtocolEvaluation,
+  ImagingOsProtocolEvaluationResult,
+  ImagingOsProtocolType,
+} from "./protocol";
 import { evaluateImageProtocolCompleteness } from "./protocol";
 import {
   evaluateImageQualityFromMetadata,
@@ -46,7 +50,9 @@ export type ImagingOsIngestionPipelineResult = {
 const CLINICAL_QUALITY_WARNING =
   "Image quality is not clinically usable for downstream intelligence." as const;
 
-function evaluateQualityForIntake(intake: ImagingOsNormalizedImageIntake): ImagingOsPipelineQualityResult {
+function evaluateQualityForIntake(
+  intake: ImagingOsNormalizedImageIntake
+): ImagingOsPipelineQualityResult {
   if (
     !hasMetadataForQualityEvaluation({
       width: intake.width,
@@ -99,8 +105,7 @@ function classifyFromRequest(
   intake: ImagingOsNormalizedImageIntake
 ): ImageClassificationResult {
   const externalCategory =
-    request.canonical_category_hint &&
-    isCanonicalHairImageCategory(request.canonical_category_hint)
+    request.canonical_category_hint && isCanonicalHairImageCategory(request.canonical_category_hint)
       ? request.canonical_category_hint
       : intake.external_category?.trim() ||
         request.external_category?.trim() ||

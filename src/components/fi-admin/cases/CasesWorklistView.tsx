@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery } from "@/src/lib/cases/casesIndexTypes";
+import type {
+  CaseWorklistRow,
+  CasesIndexFilterOptions,
+  CasesIndexQuery,
+} from "@/src/lib/cases/casesIndexTypes";
 import { CasesWorklistFilters } from "./CasesWorklistFilters";
 import { CasesWorklistMobileCards } from "./CasesWorklistMobileCards";
 import { CasesWorklistPagination } from "./CasesWorklistPagination";
@@ -56,9 +60,12 @@ export function CasesWorklistView({
       <CasesWorklistFilters tenantId={tenantId} query={query} filterOptions={filterOptions} />
       {totalMatching === 0 && emptyTenantNoFilters && firstCaseWizardHref ? (
         <DashboardCard className="border-dashed border-[#22C1FF]/25 bg-[#0F1629]/90 p-8 text-center shadow-[0_0_40px_rgba(34,193,255,0.06)]">
-          <p className="text-lg font-semibold tracking-tight text-[#F8FAFC] sm:text-xl">No surgery cases yet</p>
+          <p className="text-lg font-semibold tracking-tight text-[#F8FAFC] sm:text-xl">
+            No surgery cases yet
+          </p>
           <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-[#94A3B8]">
-            Start a surgery case to plan procedures, track the day-of flow, and coordinate post-op follow-ups.
+            Start a surgery case to plan procedures, track the day-of flow, and coordinate post-op
+            follow-ups.
           </p>
           <Link
             href={firstCaseWizardHref}
@@ -75,7 +82,8 @@ export function CasesWorklistView({
               <p>No surgery cases in this tenant yet.</p>
             ) : (
               <DashboardCard className="border-dashed border-white/[0.12] bg-[#0F1629]/70 p-4 text-base leading-relaxed text-[#CBD5E1]">
-                No cases match the current filters. Clear search or reset filters to see more of your worklist.
+                No cases match the current filters. Clear search or reset filters to see more of
+                your worklist.
               </DashboardCard>
             )
           ) : (
@@ -87,7 +95,8 @@ export function CasesWorklistView({
               {!allInTenantUnfiltered ? (
                 <>
                   {" "}
-                  · <span className="font-medium text-[#F8FAFC]">{totalBeforeFilters}</span> in this tenant
+                  · <span className="font-medium text-[#F8FAFC]">{totalBeforeFilters}</span> in this
+                  tenant
                 </>
               ) : null}
               {hasActiveFilters ? <span className="text-[#64748B]"> (filters applied)</span> : null}
@@ -97,8 +106,16 @@ export function CasesWorklistView({
       ) : null}
       {totalMatching > 0 ? (
         <>
-          <CasesWorklistTable tenantId={tenantId} rows={rows} worklistQueryString={worklistQueryString} />
-          <CasesWorklistMobileCards tenantId={tenantId} rows={rows} worklistQueryString={worklistQueryString} />
+          <CasesWorklistTable
+            tenantId={tenantId}
+            rows={rows}
+            worklistQueryString={worklistQueryString}
+          />
+          <CasesWorklistMobileCards
+            tenantId={tenantId}
+            rows={rows}
+            worklistQueryString={worklistQueryString}
+          />
         </>
       ) : null}
       <CasesWorklistPagination tenantId={tenantId} query={query} totalMatching={totalMatching} />

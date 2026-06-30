@@ -7,7 +7,10 @@ import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import type { FiStaffPositionTypeRow } from "@/src/lib/fi-os/organisationalProfile.schema";
 import { resolveWorkspaceProfileKeyFromSignals } from "@/src/lib/fi-os/workspaceProfileDerivation";
 import { resolveCanManageStaffFeatureAccessSettings } from "@/src/lib/fi-os/featureAccess.server";
-import { buildStaffSignalCards, type FiStaffSignalCountMap } from "@/src/lib/fi-os/staffIntelligenceSignals";
+import {
+  buildStaffSignalCards,
+  type FiStaffSignalCountMap,
+} from "@/src/lib/fi-os/staffIntelligenceSignals";
 import { buildStaffIntelligenceRecommendations } from "@/src/lib/fi-os/staffIntelligenceRecommendations";
 
 const CRM_TERMINAL_LEAD_STATUSES = ["archived", "lost", "converted"] as const;
@@ -22,7 +25,9 @@ export type StaffIntelligenceViewModel = {
   latestProfile: { computed_at: string; visibility_scope: string } | null;
 };
 
-export async function resolveCanViewStaffOrganisationalIntelligencePanel(tenantId: string): Promise<boolean> {
+export async function resolveCanViewStaffOrganisationalIntelligencePanel(
+  tenantId: string
+): Promise<boolean> {
   return resolveCanManageStaffFeatureAccessSettings(tenantId);
 }
 
@@ -38,7 +43,10 @@ async function safeCount(
   }
 }
 
-async function loadRawCountsForStaff(tenantId: string, staff: FiStaffRow): Promise<FiStaffSignalCountMap> {
+async function loadRawCountsForStaff(
+  tenantId: string,
+  staff: FiStaffRow
+): Promise<FiStaffSignalCountMap> {
   const tid = tenantId.trim();
   const sid = staff.id.trim();
   const uid = staff.fi_user_id?.trim() ?? "";
@@ -164,7 +172,10 @@ async function loadLatestPerformanceProfile(
       .maybeSingle();
     if (error || !data) return null;
     const row = data as { computed_at: string; visibility_scope: string };
-    return { computed_at: String(row.computed_at), visibility_scope: String(row.visibility_scope ?? "manager_only") };
+    return {
+      computed_at: String(row.computed_at),
+      visibility_scope: String(row.visibility_scope ?? "manager_only"),
+    };
   } catch {
     return null;
   }
@@ -214,7 +225,7 @@ export async function loadStaffIntelligenceViewsForTenantStaff(
   const limit = Math.min(staffRows.length, 48);
   for (let i = 0; i < limit; i++) {
     const s = staffRows[i]!;
-    const pt = s.position_type_id ? posById.get(s.position_type_id) ?? null : null;
+    const pt = s.position_type_id ? (posById.get(s.position_type_id) ?? null) : null;
     try {
       out[s.id] = await loadStaffIntelligenceViewModel(tenantId, s, pt);
     } catch {

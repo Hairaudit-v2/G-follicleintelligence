@@ -120,7 +120,7 @@ export function staffColumnReadinessMeta(
     clinicallyAvailable: readiness.clinically_available,
     readinessWarning: readiness.clinically_available
       ? readiness.warning_label
-      : readiness.block_reason ?? readiness.warning_label,
+      : (readiness.block_reason ?? readiness.warning_label),
   };
 }
 
@@ -196,8 +196,7 @@ export function buildLegacyUserResourceColumns(input: {
   const cols: OperationalCalendarResourceColumn[] = [];
   for (const uid of Array.from(userIds)) {
     const u = input.userAssignees.find((x) => x.id === uid);
-    const label =
-      u?.full_name?.trim() || u?.email?.trim() || `User ${uid.slice(0, 8)}…`;
+    const label = u?.full_name?.trim() || u?.email?.trim() || `User ${uid.slice(0, 8)}…`;
     cols.push({
       id: legacyUserColumnId(uid),
       kind: "fi_user",

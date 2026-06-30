@@ -3,7 +3,12 @@
  * FinancialOS command centre payload (tenant-scoped, smoke-testable).
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { loadFinancialOsCommandCentrePayload } from "@/src/lib/financialOs/financialOsCommandCentreLoader.server";
 import { parseFinancialOsCommandCentrePayload } from "@/src/lib/financialOs/financialOsCommandCentrePayloadSchema";
 

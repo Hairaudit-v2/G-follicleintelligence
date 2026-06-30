@@ -26,7 +26,14 @@ describe("femaleHairLossConsultationSchemaV1", () => {
 
   it("does not define surgery, donor, graft, or quote-builder fields", () => {
     const joined = allFieldIds(femaleHairLossConsultationSchemaV1).join(" ");
-    const banned = ["donor", "graft", "quote_builder", "quote", "surgical_suitability", "body_area_map"];
+    const banned = [
+      "donor",
+      "graft",
+      "quote_builder",
+      "quote",
+      "surgical_suitability",
+      "body_area_map",
+    ];
     for (const b of banned) {
       assert.equal(joined.includes(b), false, `unexpected token ${b}`);
     }

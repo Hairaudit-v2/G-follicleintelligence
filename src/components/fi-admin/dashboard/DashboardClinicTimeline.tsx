@@ -15,7 +15,11 @@ export function DashboardClinicTimeline(props: { base: string; data: TenantOpera
   });
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-clinic-timeline-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="dash-clinic-timeline-heading"
+    >
       <SectionHeader
         id="dash-clinic-timeline-heading"
         kicker="Today"
@@ -39,10 +43,15 @@ export function DashboardClinicTimeline(props: { base: string; data: TenantOpera
                 aria-hidden
               />
               <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-4">
-                <time className="shrink-0 font-mono text-xs font-semibold tabular-nums text-cyan-400/90">{entry.timeLabel}</time>
+                <time className="shrink-0 font-mono text-xs font-semibold tabular-nums text-cyan-400/90">
+                  {entry.timeLabel}
+                </time>
                 <div className="min-w-0">
                   {entry.href ? (
-                    <Link href={entry.href} className="text-sm font-medium text-slate-200 hover:text-cyan-100 hover:underline">
+                    <Link
+                      href={entry.href}
+                      className="text-sm font-medium text-slate-200 hover:text-cyan-100 hover:underline"
+                    >
                       {entry.title}
                     </Link>
                   ) : (

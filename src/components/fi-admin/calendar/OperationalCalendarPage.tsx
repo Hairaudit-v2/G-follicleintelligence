@@ -5,7 +5,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { CalendarPage } from "@/components/calendar/CalendarPage";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
-import type { OperationalCalendarGridPatch, OperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarTypes";
+import type {
+  OperationalCalendarGridPatch,
+  OperationalCalendarPageData,
+} from "@/src/lib/calendar/operationalCalendarTypes";
 import { mergeOperationalCalendarShellAndGrid } from "@/src/lib/calendar/operationalCalendarMerge";
 import type { CrmShellSession } from "@/src/lib/crm/crmShellAccess";
 import {
@@ -63,7 +66,12 @@ export function OperationalCalendarPage({
 
   const page = (
     <OperationalCalendarStreamProvider value={streamValue}>
-      <CalendarPage data={mergedData} route="fi-admin" crmShellSession={session} workspaceVariant="fiOs" />
+      <CalendarPage
+        data={mergedData}
+        route="fi-admin"
+        crmShellSession={session}
+        workspaceVariant="fiOs"
+      />
       {children}
     </OperationalCalendarStreamProvider>
   );

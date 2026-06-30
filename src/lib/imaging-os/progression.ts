@@ -88,7 +88,10 @@ const TIMEPOINT_ALIASES: Record<string, ImagingOsTimepoint> = {
 };
 
 function normalizeTimepointKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 /** Normalize external timepoint labels to canonical ImagingOS timepoints (pure). */
@@ -111,7 +114,9 @@ function mapFollowupMonth(month: number): ImagingOsTimepoint {
   return "unknown";
 }
 
-function detectTimepointFromMetadata(metadata: Record<string, unknown>): ImagingOsTimepoint | undefined {
+function detectTimepointFromMetadata(
+  metadata: Record<string, unknown>
+): ImagingOsTimepoint | undefined {
   const timepointRaw = metadata.timepoint ?? metadata.assessment_timepoint;
   if (typeof timepointRaw === "string" && timepointRaw.trim().length > 0) {
     const normalized = normalizeImagingOsTimepoint(timepointRaw);
@@ -263,7 +268,9 @@ export type ImagingOsProgressionEvaluationResult = {
   present_timepoints: ImagingOsTimepoint[];
   missing_timepoints: ImagingOsTimepoint[];
   required_categories: CanonicalHairImageCategory[];
-  missing_categories_by_timepoint: Partial<Record<ImagingOsTimepoint, CanonicalHairImageCategory[]>>;
+  missing_categories_by_timepoint: Partial<
+    Record<ImagingOsTimepoint, CanonicalHairImageCategory[]>
+  >;
   usable_images_by_timepoint: Partial<Record<ImagingOsTimepoint, number>>;
   unusable_images_by_timepoint: Partial<Record<ImagingOsTimepoint, number>>;
   quality_blockers: string[];
@@ -425,10 +432,7 @@ export function evaluateLongitudinalProgressionReadiness(
     (timepointCoverage + categoryCoverage + minCountCoverage) / 3
   );
 
-  const isReady =
-    missingTimepoints.length === 0 &&
-    allCategoriesPresent &&
-    allMinimumCountsMet;
+  const isReady = missingTimepoints.length === 0 && allCategoriesPresent && allMinimumCountsMet;
 
   let readinessStatus: ImagingOsProgressionReadinessStatus;
   if (isReady) {

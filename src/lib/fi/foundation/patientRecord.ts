@@ -200,12 +200,19 @@ export async function enrichCasesWithExternalAndNames(
       .in("id", slice);
     if (error) throw new Error(error.message);
     for (const row of data ?? []) {
-      extByCase.set(String((row as { id: string }).id), (row as { external_id: string | null }).external_id);
+      extByCase.set(
+        String((row as { id: string }).id),
+        (row as { external_id: string | null }).external_id
+      );
     }
   }
 
-  const clinicIds = uniqueStrings(viewRows.map((r) => (r as { clinic_id: string | null }).clinic_id));
-  const orgIds = uniqueStrings(viewRows.map((r) => (r as { organisation_id: string | null }).organisation_id));
+  const clinicIds = uniqueStrings(
+    viewRows.map((r) => (r as { clinic_id: string | null }).clinic_id)
+  );
+  const orgIds = uniqueStrings(
+    viewRows.map((r) => (r as { organisation_id: string | null }).organisation_id)
+  );
   const clinicName = new Map<string, string>();
   for (let i = 0; i < clinicIds.length; i += CHUNK) {
     const slice = clinicIds.slice(i, i + CHUNK);
@@ -217,7 +224,10 @@ export async function enrichCasesWithExternalAndNames(
       .in("id", slice);
     if (error) throw new Error(error.message);
     for (const row of data ?? []) {
-      clinicName.set(String((row as { id: string }).id), String((row as { display_name: string }).display_name));
+      clinicName.set(
+        String((row as { id: string }).id),
+        String((row as { display_name: string }).display_name)
+      );
     }
   }
   const orgName = new Map<string, string>();
@@ -252,8 +262,8 @@ export async function enrichCasesWithExternalAndNames(
       source_system: (r as { source_system: string | null }).source_system,
       source_case_id: (r as { source_case_id: string | null }).source_case_id,
       external_id: extByCase.get(caseId) ?? null,
-      clinic_display_name: clinicId ? clinicName.get(clinicId) ?? null : null,
-      organisation_name: orgId ? orgName.get(orgId) ?? null : null,
+      clinic_display_name: clinicId ? (clinicName.get(clinicId) ?? null) : null,
+      organisation_name: orgId ? (orgName.get(orgId) ?? null) : null,
       created_at: String((r as { created_at: string }).created_at),
       updated_at: String((r as { updated_at: string }).updated_at),
     };
@@ -294,7 +304,11 @@ export async function loadUniversalPatientRecord(
     if (peErr) throw new Error(peErr.message);
     foundationIds = uniqueStrings((pats ?? []).map((r) => String((r as { id: string }).id)));
     if (foundationIds.length === 0) {
-      return { ok: false, error: "not_found", message: "No fi_patients rows for this person_id in tenant." };
+      return {
+        ok: false,
+        error: "not_found",
+        message: "No fi_patients rows for this person_id in tenant.",
+      };
     }
   } else if (params.foundationPatientId?.trim()) {
     const id = params.foundationPatientId.trim();
@@ -324,7 +338,9 @@ export async function loadUniversalPatientRecord(
       .eq("global_patient_id", gp);
     if (rErr) throw new Error(rErr.message);
     const fids = uniqueStrings(
-      (resRows ?? []).map((r) => (r as { foundation_patient_id: string | null }).foundation_patient_id)
+      (resRows ?? []).map(
+        (r) => (r as { foundation_patient_id: string | null }).foundation_patient_id
+      )
     );
     if (fids.length > 0) {
       foundationIds = fids;
@@ -353,7 +369,11 @@ export async function loadUniversalPatientRecord(
         .maybeSingle();
       if (gErr) throw new Error(gErr.message);
       if (!asGlobal) {
-        return { ok: false, error: "not_found", message: "patientId is not a foundation or global patient in this tenant." };
+        return {
+          ok: false,
+          error: "not_found",
+          message: "patientId is not a foundation or global patient in this tenant.",
+        };
       }
       primaryGlobalId = slug;
       const { data: resRows, error: rErr } = await supabase
@@ -363,7 +383,9 @@ export async function loadUniversalPatientRecord(
         .eq("global_patient_id", slug);
       if (rErr) throw new Error(rErr.message);
       const fids = uniqueStrings(
-        (resRows ?? []).map((r) => (r as { foundation_patient_id: string | null }).foundation_patient_id)
+        (resRows ?? []).map(
+          (r) => (r as { foundation_patient_id: string | null }).foundation_patient_id
+        )
       );
       if (fids.length > 0) {
         foundationIds = fids;
@@ -374,14 +396,20 @@ export async function loadUniversalPatientRecord(
       }
     }
   } else {
-    return { ok: false, error: "bad_request", message: "Provide patientId, foundationPatientId, globalPatientId, or personId." };
+    return {
+      ok: false,
+      error: "bad_request",
+      message: "Provide patientId, foundationPatientId, globalPatientId, or personId.",
+    };
   }
 
   const warnings: string[] = [];
   const primaryFoundationId = foundationIds[0] ?? null;
 
   if (anchorMode === "person" && foundationIds.length > 1) {
-    warnings.push("Multiple fi_patients rows share this person_id; cases, media, and timeline are merged across all of them.");
+    warnings.push(
+      "Multiple fi_patients rows share this person_id; cases, media, and timeline are merged across all of them."
+    );
   }
 
   let resolutionQuery = supabase.from("v_fi_patient_resolution").select("*").eq("tenant_id", tid);
@@ -418,7 +446,10 @@ export async function loadUniversalPatientRecord(
     globalCountByKey.set(k, (globalCountByKey.get(k) ?? 0) + 1);
   }
   for (const [k, c] of Array.from(globalCountByKey.entries())) {
-    if (c > 1) warnings.push(`Multiple resolution rows for source mapping ${k} (${c}); review fi_global_patients / fi_patient_source_ids.`);
+    if (c > 1)
+      warnings.push(
+        `Multiple resolution rows for source mapping ${k} (${c}); review fi_global_patients / fi_patient_source_ids.`
+      );
   }
 
   let patient: PatientSummary = null;
@@ -516,11 +547,15 @@ export async function loadUniversalPatientRecord(
         updated_at: String((g as { created_at: string }).created_at),
       };
     }
-    warnings.push("No foundation patient linked; showing global stub and any cases reachable via fi_global_cases only.");
+    warnings.push(
+      "No foundation patient linked; showing global stub and any cases reachable via fi_global_cases only."
+    );
   }
 
   if (!person?.person_id && patient?.foundation_patient_id) {
-    warnings.push("No person_id resolved for this foundation patient (check fi_patients.person_id).");
+    warnings.push(
+      "No person_id resolved for this foundation patient (check fi_patients.person_id)."
+    );
   }
 
   const caseIdSet = new Set<string>();
@@ -638,7 +673,8 @@ export async function loadUniversalPatientRecord(
         addMedia({
           media_asset_id: (row as { media_asset_id: string | null }).media_asset_id,
           legacy_upload_id: (row as { legacy_upload_id: string | null }).legacy_upload_id,
-          foundation_patient_id: (row as { foundation_patient_id: string | null }).foundation_patient_id,
+          foundation_patient_id: (row as { foundation_patient_id: string | null })
+            .foundation_patient_id,
           case_id: (row as { case_id: string | null }).case_id,
           source_system: (row as { source_system: string | null }).source_system,
           asset_type: (row as { asset_type: string | null }).asset_type,
@@ -664,7 +700,8 @@ export async function loadUniversalPatientRecord(
         addMedia({
           media_asset_id: (row as { media_asset_id: string | null }).media_asset_id,
           legacy_upload_id: (row as { legacy_upload_id: string | null }).legacy_upload_id,
-          foundation_patient_id: (row as { foundation_patient_id: string | null }).foundation_patient_id,
+          foundation_patient_id: (row as { foundation_patient_id: string | null })
+            .foundation_patient_id,
           case_id: (row as { case_id: string | null }).case_id,
           source_system: (row as { source_system: string | null }).source_system,
           asset_type: (row as { asset_type: string | null }).asset_type,
@@ -684,7 +721,9 @@ export async function loadUniversalPatientRecord(
 
   const unifiedNoCase = media_unified.filter((m) => !m.case_id).length;
   if (unifiedNoCase > 0) {
-    warnings.push(`${unifiedNoCase} unified media row(s) have no case_id (legacy or unlinked assets).`);
+    warnings.push(
+      `${unifiedNoCase} unified media row(s) have no case_id (legacy or unlinked assets).`
+    );
   }
 
   const media_assets_direct: UniversalPatientRecordResult["media_assets_direct"] = [];
@@ -694,7 +733,9 @@ export async function loadUniversalPatientRecord(
         const slice = foundationIds.slice(i, i + CHUNK);
         const { data: assets, error: aErr } = await supabase
           .from("fi_media_assets")
-          .select("id, case_id, patient_id, asset_type, filename, storage_path, source_system, created_at")
+          .select(
+            "id, case_id, patient_id, asset_type, filename, storage_path, source_system, created_at"
+          )
           .eq("tenant_id", tid)
           .in("patient_id", slice);
         if (aErr) throw new Error(aErr.message);
@@ -717,7 +758,9 @@ export async function loadUniversalPatientRecord(
         const slice = caseIds.slice(i, i + CHUNK);
         const { data: assets, error: aErr } = await supabase
           .from("fi_media_assets")
-          .select("id, case_id, patient_id, asset_type, filename, storage_path, source_system, created_at")
+          .select(
+            "id, case_id, patient_id, asset_type, filename, storage_path, source_system, created_at"
+          )
           .eq("tenant_id", tid)
           .in("case_id", slice);
         if (aErr) throw new Error(aErr.message);
@@ -758,7 +801,9 @@ export async function loadUniversalPatientRecord(
       updated_at: rr.created_at,
     };
   } else if (patientOut && resolution_rows.length > 0) {
-    const rr = resolution_rows.find((r) => r.foundation_patient_id === patientOut?.foundation_patient_id) ?? resolution_rows[0];
+    const rr =
+      resolution_rows.find((r) => r.foundation_patient_id === patientOut?.foundation_patient_id) ??
+      resolution_rows[0];
     patientOut = {
       ...patientOut,
       display_name: patientOut.display_name ?? rr.display_name,
@@ -771,11 +816,20 @@ export async function loadUniversalPatientRecord(
     ok: true,
     tenant_id: tid,
     anchor: {
-      mode: anchorMode === "person" ? "person" : anchorMode === "global_stub" ? "global_stub" : "foundation",
+      mode:
+        anchorMode === "person"
+          ? "person"
+          : anchorMode === "global_stub"
+            ? "global_stub"
+            : "foundation",
       primary_foundation_patient_id: primaryFoundationId,
       all_foundation_patient_ids: foundationIds,
       primary_global_patient_id: primaryGlobalId ?? linked_global_patient_ids[0] ?? null,
-      person_id: explicitPerson ?? person?.person_id ?? resolution_rows.find((r) => r.person_id)?.person_id ?? null,
+      person_id:
+        explicitPerson ??
+        person?.person_id ??
+        resolution_rows.find((r) => r.person_id)?.person_id ??
+        null,
     },
     patient: patientOut,
     person,

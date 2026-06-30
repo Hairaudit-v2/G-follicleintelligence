@@ -42,7 +42,8 @@ export function MedicationReorderQueueClient({
                   <p className="font-medium text-slate-100">{r.medication_name}</p>
                   <p className="text-xs text-slate-500">
                     Patient <span className="font-mono">{r.patient_id.slice(0, 8)}…</span> ·{" "}
-                    {MEDICATION_REORDER_STATUS_LABELS[r.status]} · {new Date(r.created_at).toLocaleString()}
+                    {MEDICATION_REORDER_STATUS_LABELS[r.status]} ·{" "}
+                    {new Date(r.created_at).toLocaleString()}
                   </p>
                   {r.fee_pence != null && r.fee_pence > 0 ? (
                     <p className="text-xs text-slate-400">
@@ -182,7 +183,11 @@ export function MedicationReorderQueueClient({
                   >
                     Confirm reject
                   </button>
-                  <button type="button" className="text-xs text-slate-400" onClick={() => setRejectId(null)}>
+                  <button
+                    type="button"
+                    className="text-xs text-slate-400"
+                    onClick={() => setRejectId(null)}
+                  >
                     Cancel
                   </button>
                 </div>

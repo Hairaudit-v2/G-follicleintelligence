@@ -25,9 +25,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -66,8 +70,14 @@ export default function AboutPage() {
             />
             <ul className="mt-6 space-y-3 border-l-2 border-primary/25 pl-5 text-sm leading-relaxed text-muted-foreground md:text-base">
               <li>Technical quality varies widely under the same commercial language.</li>
-              <li>Comparison is difficult for patients and painful for serious operators competing on merit.</li>
-              <li>Standards exist, but visibility of who meets them—consistently and reviewably—is weak.</li>
+              <li>
+                Comparison is difficult for patients and painful for serious operators competing on
+                merit.
+              </li>
+              <li>
+                Standards exist, but visibility of who meets them—consistently and reviewably—is
+                weak.
+              </li>
             </ul>
           </FadeIn>
 
@@ -102,7 +112,9 @@ export default function AboutPage() {
               ))}
             </div>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-              Siloed tools would recreate the same fragmentation. FI is the central layer where those streams compound—benchmarks sharpen, review depth grows, and institutional programs become implementable.
+              Siloed tools would recreate the same fragmentation. FI is the central layer where
+              those streams compound—benchmarks sharpen, review depth grows, and institutional
+              programs become implementable.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
@@ -136,17 +148,19 @@ export default function AboutPage() {
 
           <FadeIn delay={0.18}>
             <div className="fi-panel rounded-[1.5rem] p-7 md:p-9">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-primary/90">Long-term mission</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-primary/90">
+                Long-term mission
+              </p>
               <p className="mt-5 text-lg font-medium leading-relaxed text-foreground md:text-xl">
-                Make accountable quality the default expectation in hair restoration—and extend the same
-                disciplined infrastructure to adjacent procedural medicine only when evidence and governance models
-                justify it.
+                Make accountable quality the default expectation in hair restoration—and extend the
+                same disciplined infrastructure to adjacent procedural medicine only when evidence
+                and governance models justify it.
               </p>
               <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-                We measure success by whether operators, institutions, and partners can run quality programs
-                that hold up to scrutiny: benchmarks that deepen over time, governance that leaves a trace, and
-                standards that translate into training—not slogans. Hair is the live category focus; the mission is
-                broader, but the expansion bar stays high.
+                We measure success by whether operators, institutions, and partners can run quality
+                programs that hold up to scrutiny: benchmarks that deepen over time, governance that
+                leaves a trace, and standards that translate into training—not slogans. Hair is the
+                live category focus; the mission is broader, but the expansion bar stays high.
               </p>
             </div>
           </FadeIn>
@@ -162,7 +176,10 @@ export default function AboutPage() {
                   key={p}
                   className="flex gap-3 text-sm leading-relaxed text-muted-foreground md:text-base"
                 >
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70" aria-hidden />
+                  <span
+                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70"
+                    aria-hidden
+                  />
                   {p}
                 </li>
               ))}
@@ -183,15 +200,16 @@ export default function AboutPage() {
                 Intent & diligence
               </p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Follicle Intelligence was organized around a specific market failure and a specific class of
-                solution—infrastructure for evidence-led quality, not opportunistic software. We are deliberate
-                about scope, standards alignment, and how we engage institutions and strategic partners.
+                Follicle Intelligence was organized around a specific market failure and a specific
+                class of solution—infrastructure for evidence-led quality, not opportunistic
+                software. We are deliberate about scope, standards alignment, and how we engage
+                institutions and strategic partners.
               </p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                We do not use this page as a biography. Investors, boards, and enterprise buyers who need
-                background on leadership, governance, and company history can obtain appropriate materials
-                through procurement and partnership channels—we treat that conversation with the same rigor we
-                ask of clinical quality.
+                We do not use this page as a biography. Investors, boards, and enterprise buyers who
+                need background on leadership, governance, and company history can obtain
+                appropriate materials through procurement and partnership channels—we treat that
+                conversation with the same rigor we ask of clinical quality.
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
                 <Button asChild variant="outline" className="rounded-xl">

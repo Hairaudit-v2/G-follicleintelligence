@@ -23,7 +23,9 @@ export function isCrmTaskType(s: string): s is CrmTaskType {
 /** Allowed on create / update (not terminal). */
 export function assertCrmTaskStatusAllowedForWrite(status: string): void {
   if (!isCrmTaskActiveStatus(status)) {
-    throw new Error(`Invalid task status. Use one of: ${CRM_TASK_ACTIVE_STATUS_VALUES.join(", ")}.`);
+    throw new Error(
+      `Invalid task status. Use one of: ${CRM_TASK_ACTIVE_STATUS_VALUES.join(", ")}.`
+    );
   }
 }
 

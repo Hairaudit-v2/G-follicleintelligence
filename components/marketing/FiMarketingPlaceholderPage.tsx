@@ -3,7 +3,10 @@ import Link from "next/link";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
@@ -76,24 +79,38 @@ export function FiMarketingPlaceholderPage({
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-200/90 sm:text-[11px]">
               {eyebrow}
             </p>
-            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+            <div
+              className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+              aria-hidden
+            />
             <h1 className="mt-6 max-w-4xl font-display text-3xl font-semibold leading-[1.12] tracking-tight text-foreground text-balance sm:text-4xl md:text-5xl">
               {headline}
             </h1>
             {description ? (
-              <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">{description}</p>
+              <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {description}
+              </p>
             ) : null}
 
             <div className="mt-10 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-4">
               {isDemo ? (
                 <>
-                  <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}>
+                  <Button
+                    asChild
+                    size="lg"
+                    className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}
+                  >
                     <Link href="mailto:hello@follicleintelligence.ai?subject=Enterprise%20demo%20request">
                       Email hello@follicleintelligence.ai
                       <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+                  >
                     <Link href="/contact?intent=demo">
                       Contact form
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -102,13 +119,22 @@ export function FiMarketingPlaceholderPage({
                 </>
               ) : (
                 <>
-                  <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}>
+                  <Button
+                    asChild
+                    size="lg"
+                    className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}
+                  >
                     <Link href="/platform">
                       Explore The Platform
                       <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+                  >
                     <Link href="/demo">
                       Book Enterprise Demo
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -125,12 +151,15 @@ export function FiMarketingPlaceholderPage({
         <FadeIn>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">Roadmap preview</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">
+                Roadmap preview
+              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
                 Coming next on this page
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                This route is intentional architecture for the rebuilt public story—so your link stays stable while the narrative deepens.
+                This route is intentional architecture for the rebuilt public story—so your link
+                stays stable while the narrative deepens.
               </p>
             </div>
           </div>
@@ -153,9 +182,13 @@ export function FiMarketingPlaceholderPage({
             />
             <div className="relative flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-200/80">Continue exploring</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-200/80">
+                  Continue exploring
+                </p>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                  See how the full operating system connects commercial, clinical, surgical, training, audit, and intelligence layers—or book a conversation scoped to your organisation.
+                  See how the full operating system connects commercial, clinical, surgical,
+                  training, audit, and intelligence layers—or book a conversation scoped to your
+                  organisation.
                 </p>
               </div>
               <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row md:w-auto md:max-w-none">
@@ -165,7 +198,12 @@ export function FiMarketingPlaceholderPage({
                     <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className={MARKETING_CTA_SECONDARY_CLASS}>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className={MARKETING_CTA_SECONDARY_CLASS}
+                >
                   <Link href="/demo">
                     Book Enterprise Demo
                     <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />

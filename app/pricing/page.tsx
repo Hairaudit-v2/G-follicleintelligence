@@ -29,22 +29,28 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
 }
 
-const PRICING_REQUEST_HREF = "mailto:sales@follicleintelligence.ai?subject=Enterprise%20Pricing%20Request";
+const PRICING_REQUEST_HREF =
+  "mailto:sales@follicleintelligence.ai?subject=Enterprise%20Pricing%20Request";
 const BOOK_DEMO_HREF = "mailto:sales@follicleintelligence.ai?subject=Enterprise%20Demo%20Request";
 
 const PLAN_CARDS = [
   {
     icon: Building2,
     title: "Core Clinic Platform",
-    description: "For clinics ready to centralise CRM, scheduling, patient records and consultations.",
+    description:
+      "For clinics ready to centralise CRM, scheduling, patient records and consultations.",
   },
   {
     icon: Stethoscope,
@@ -102,7 +108,9 @@ export default function PricingPage() {
                   <CardTitle className="mt-4 text-xl">{plan.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col">
-                  <p className="text-sm leading-relaxed text-muted-foreground md:text-base">{plan.description}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+                    {plan.description}
+                  </p>
                   <div className="mt-auto pt-8">
                     <Button asChild className="w-full">
                       <a href={PRICING_REQUEST_HREF}>Request Pricing</a>

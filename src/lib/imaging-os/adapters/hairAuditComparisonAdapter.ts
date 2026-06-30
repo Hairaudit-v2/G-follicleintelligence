@@ -19,9 +19,7 @@ export type HairAuditComparisonImageInput = {
   is_clinically_usable?: boolean;
 };
 
-function resolveQualityStatus(
-  qualityStatus?: string
-): ImagingOsImageQualityStatus | undefined {
+function resolveQualityStatus(qualityStatus?: string): ImagingOsImageQualityStatus | undefined {
   if (qualityStatus == null || qualityStatus.trim().length === 0) {
     return undefined;
   }

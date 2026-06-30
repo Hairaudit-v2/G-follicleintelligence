@@ -43,7 +43,10 @@ type HandoffCardModel = {
   result: ConsultationHandoffMutationResult | null;
 };
 
-function surgeryBlockReason(summary: ConsultationCompletionSummary, caseId: string | null | undefined): string | null {
+function surgeryBlockReason(
+  summary: ConsultationCompletionSummary,
+  caseId: string | null | undefined
+): string | null {
   const cid = caseId?.trim();
   if (summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) {
     if (!cid) return "Create/link a case before sending to SurgeryOS.";
@@ -115,10 +118,14 @@ export function ConsultationHandoffPanel({
     return null;
   }, [tid, lid, kase]);
   const pathologyHrefFor = useCallback(
-    (requestId: string) => (pid ? `/fi-admin/${tid}/patients/${pid}/blood-request/${requestId}` : null),
+    (requestId: string) =>
+      pid ? `/fi-admin/${tid}/patients/${pid}/blood-request/${requestId}` : null,
     [tid, pid]
   );
-  const surgeryHref = useCallback(() => (kase ? `/fi-admin/${tid}/cases/${kase}` : null), [tid, kase]);
+  const surgeryHref = useCallback(
+    () => (kase ? `/fi-admin/${tid}/cases/${kase}` : null),
+    [tid, kase]
+  );
 
   const [busy, setBusy] = useState<HandoffKey | null>(null);
   const [errors, setErrors] = useState<Partial<Record<HandoffKey, string>>>({});
@@ -154,7 +161,12 @@ export function ConsultationHandoffPanel({
   const pathologyRequirementsMet = Boolean(pid);
 
   const run = useCallback(
-    async (key: HandoffKey, fn: () => Promise<{ ok: true; result: ConsultationHandoffMutationResult } | { ok: false; error: string }>) => {
+    async (
+      key: HandoffKey,
+      fn: () => Promise<
+        { ok: true; result: ConsultationHandoffMutationResult } | { ok: false; error: string }
+      >
+    ) => {
       setErrors((e) => ({ ...e, [key]: undefined }));
       setBusy(key);
       try {
@@ -178,95 +190,107 @@ export function ConsultationHandoffPanel({
 
   const body = useMemo(() => ({ formInstanceId: fid }), [fid]);
 
-  const cards = useMemo((): HandoffCardModel[] => [
-      {
-        key: "followUp" as const,
-        title: "Follow-up task",
-        why: followUpRecommended
-          ? "Summary indicates follow-up, review later, undecided, or blood tests — a CRM task helps the team close the loop."
-          : "Not recommended from this summary — follow-up was not required and outcome does not imply a standing task.",
-        requirements: (
-          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
-            <li>CRM lead linked: {followUpRequirementsMet ? "yes" : "no (required)"}</li>
-            <li>Guided form locked with completion summary: yes</li>
-          </ul>
-        ),
-        blocked: !followUpRecommended || !followUpRequirementsMet,
-        blockedDetail: !followUpRequirementsMet
-          ? "Link a CRM lead on the consultation to create follow-up tasks."
-          : !followUpRecommended
-            ? null
+  const cards = useMemo(
+    (): HandoffCardModel[] =>
+      [
+        {
+          key: "followUp" as const,
+          title: "Follow-up task",
+          why: followUpRecommended
+            ? "Summary indicates follow-up, review later, undecided, or blood tests — a CRM task helps the team close the loop."
+            : "Not recommended from this summary — follow-up was not required and outcome does not imply a standing task.",
+          requirements: (
+            <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
+              <li>CRM lead linked: {followUpRequirementsMet ? "yes" : "no (required)"}</li>
+              <li>Guided form locked with completion summary: yes</li>
+            </ul>
+          ),
+          blocked: !followUpRecommended || !followUpRequirementsMet,
+          blockedDetail: !followUpRequirementsMet
+            ? "Link a CRM lead on the consultation to create follow-up tasks."
+            : !followUpRecommended
+              ? null
+              : null,
+          cta: "Create follow-up task",
+          onClick: (): void => {
+            void run("followUp", () =>
+              createConsultationFollowUpTaskFromSummaryAction(tid, cid, body)
+            );
+          },
+          result: followUpRes,
+        },
+        {
+          key: "quote" as const,
+          title: "Quote draft",
+          why: "Capture consultation plan, graft range, and treatments as a draft quote for pricing and consent workflows.",
+          requirements: (
+            <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
+              <li>
+                CRM lead or case linked: {quoteRequirementsMet ? "yes" : "no (need at least one)"}
+              </li>
+            </ul>
+          ),
+          blocked: !quoteRequirementsMet,
+          blockedDetail: !quoteRequirementsMet
+            ? "Link a CRM lead or a case on the consultation before creating a quote draft."
             : null,
-        cta: "Create follow-up task",
-        onClick: (): void => {
-          void run("followUp", () => createConsultationFollowUpTaskFromSummaryAction(tid, cid, body));
+          cta: "Create quote draft",
+          onClick: (): void => {
+            void run("quote", () => createConsultationQuoteDraftFromSummaryAction(tid, cid, body));
+          },
+          result: quoteRes,
         },
-        result: followUpRes,
-      },
-      {
-        key: "quote" as const,
-        title: "Quote draft",
-        why: "Capture consultation plan, graft range, and treatments as a draft quote for pricing and consent workflows.",
-        requirements: (
-          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
-            <li>CRM lead or case linked: {quoteRequirementsMet ? "yes" : "no (need at least one)"}</li>
-          </ul>
-        ),
-        blocked: !quoteRequirementsMet,
-        blockedDetail: !quoteRequirementsMet
-          ? "Link a CRM lead or a case on the consultation before creating a quote draft."
-          : null,
-        cta: "Create quote draft",
-        onClick: (): void => {
-          void run("quote", () => createConsultationQuoteDraftFromSummaryAction(tid, cid, body));
+        {
+          key: "pathology" as const,
+          title: "Pathology request",
+          why: pathologyRecommended
+            ? "Screening or labs were flagged — this opens a saved blood/pathology request draft for clinical review."
+            : "Not recommended from this summary — pathology was not flagged.",
+          requirements: (
+            <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
+              <li>Patient linked: {pathologyRequirementsMet ? "yes" : "no (required)"}</li>
+              <li>Pathology recommended in summary: {pathologyRecommended ? "yes" : "no"}</li>
+            </ul>
+          ),
+          blocked: !pathologyRecommended || !pathologyRequirementsMet,
+          blockedDetail: !pathologyRequirementsMet
+            ? "Link a patient on the consultation before preparing a pathology request."
+            : !pathologyRecommended
+              ? null
+              : null,
+          cta: "Prepare pathology request",
+          onClick: (): void => {
+            void run("pathology", () =>
+              createConsultationPathologyRecommendationFromSummaryAction(tid, cid, body)
+            );
+          },
+          result: pathologyRes,
         },
-        result: quoteRes,
-      },
-      {
-        key: "pathology" as const,
-        title: "Pathology request",
-        why: pathologyRecommended
-          ? "Screening or labs were flagged — this opens a saved blood/pathology request draft for clinical review."
-          : "Not recommended from this summary — pathology was not flagged.",
-        requirements: (
-          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
-            <li>Patient linked: {pathologyRequirementsMet ? "yes" : "no (required)"}</li>
-            <li>Pathology recommended in summary: {pathologyRecommended ? "yes" : "no"}</li>
-          </ul>
-        ),
-        blocked: !pathologyRecommended || !pathologyRequirementsMet,
-        blockedDetail: !pathologyRequirementsMet
-          ? "Link a patient on the consultation before preparing a pathology request."
-          : !pathologyRecommended
-            ? null
-            : null,
-        cta: "Prepare pathology request",
-        onClick: (): void => {
-          void run("pathology", () => createConsultationPathologyRecommendationFromSummaryAction(tid, cid, body));
+        {
+          key: "surgery" as const,
+          title: "SurgeryOS planning",
+          why: "Push structured zones, graft estimates, and strategy notes into the case surgery plan as a draft (does not approve the case).",
+          requirements: (
+            <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
+              <li>Case linked: {kase ? "yes" : "no (required)"}</li>
+              <li>
+                Outcome proceed to surgery with plan details: {surgeryEligible ? "yes" : "no"}
+              </li>
+            </ul>
+          ),
+          blocked: !surgeryEligible,
+          blockedDetail: surgeryReason,
+          cta: "Send to SurgeryOS planning",
+          onClick: (): void => {
+            void run("surgery", () =>
+              createSurgeryPlanningDraftFromConsultationSummaryAction(tid, cid, body)
+            );
+          },
+          result: surgeryRes,
         },
-        result: pathologyRes,
-      },
-      {
-        key: "surgery" as const,
-        title: "SurgeryOS planning",
-        why: "Push structured zones, graft estimates, and strategy notes into the case surgery plan as a draft (does not approve the case).",
-        requirements: (
-          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
-            <li>Case linked: {kase ? "yes" : "no (required)"}</li>
-            <li>Outcome proceed to surgery with plan details: {surgeryEligible ? "yes" : "no"}</li>
-          </ul>
-        ),
-        blocked: !surgeryEligible,
-        blockedDetail: surgeryReason,
-        cta: "Send to SurgeryOS planning",
-        onClick: (): void => {
-          void run("surgery", () => createSurgeryPlanningDraftFromConsultationSummaryAction(tid, cid, body));
-        },
-        result: surgeryRes,
-      },
-    ]
-      .filter((c) => !(quoteHidden && c.key === "quote"))
-      .filter((c) => !(surgeryHandoffHidden && c.key === "surgery")),
+      ]
+        .filter((c) => !(quoteHidden && c.key === "quote"))
+        .filter((c) => !(surgeryHandoffHidden && c.key === "surgery")),
     [
       body,
       cid,
@@ -293,8 +317,8 @@ export function ConsultationHandoffPanel({
     <div className="space-y-4">
       <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Guided hand-offs</h3>
       <p className={fiOsLightFormSurfaceClassNames.helper}>
-        Actions below are clinician-triggered. Nothing is created automatically when you complete the consultation. No patient
-        emails are sent from here.
+        Actions below are clinician-triggered. Nothing is created automatically when you complete
+        the consultation. No patient emails are sent from here.
       </p>
       <div className="grid gap-4 md:grid-cols-2">
         {cards.map((c) => (
@@ -304,7 +328,9 @@ export function ConsultationHandoffPanel({
               <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.helper)}>{c.why}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Requirements</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Requirements
+              </p>
               {c.requirements}
             </div>
             {c.blockedDetail ? (
@@ -313,7 +339,10 @@ export function ConsultationHandoffPanel({
               </p>
             ) : null}
             {errors[c.key] ? (
-              <p className="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1.5 text-xs text-rose-300" role="alert">
+              <p
+                className="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1.5 text-xs text-rose-300"
+                role="alert"
+              >
                 {errors[c.key]}
               </p>
             ) : null}
@@ -333,7 +362,10 @@ export function ConsultationHandoffPanel({
                   {c.result.href ? (
                     <>
                       {" · "}
-                      <Link href={c.result.href} className="font-semibold text-cyan-300 underline hover:text-cyan-200">
+                      <Link
+                        href={c.result.href}
+                        className="font-semibold text-cyan-300 underline hover:text-cyan-200"
+                      >
                         Open
                       </Link>
                     </>

@@ -33,10 +33,7 @@ export const httpUrlSchema = z
     }
   }, "Must be a valid http(s) URL.");
 
-export const optionalHttpUrl = z.preprocess(
-  emptyToUndefined,
-  httpUrlSchema.optional()
-);
+export const optionalHttpUrl = z.preprocess(emptyToUndefined, httpUrlSchema.optional());
 
 export function shouldSkipEnvValidation(env: NodeJS.ProcessEnv = process.env): boolean {
   const flag = env.SKIP_ENV_VALIDATION?.trim().toLowerCase();

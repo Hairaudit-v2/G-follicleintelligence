@@ -63,7 +63,8 @@ function readNestedString(payload: Record<string, unknown>, path: string[]): str
 function extractOrganisationHints(
   payload: Record<string, unknown>
 ): { source_organisation_id?: string; name?: string } | null {
-  const soid = typeof payload.source_organisation_id === "string" ? payload.source_organisation_id.trim() : "";
+  const soid =
+    typeof payload.source_organisation_id === "string" ? payload.source_organisation_id.trim() : "";
   const oid = typeof payload.organisation_id === "string" ? payload.organisation_id.trim() : "";
   const orgName = readNestedString(payload, ["organisation", "name"]);
   const orgId = readNestedString(payload, ["organisation", "id"]);
@@ -84,7 +85,9 @@ function extractClinicDisplayName(payload: Record<string, unknown>): string | un
   return (
     readNestedString(payload, ["clinic", "name"]) ||
     readNestedString(payload, ["clinic", "display_name"]) ||
-    (typeof payload.clinic_name === "string" && payload.clinic_name.trim() ? payload.clinic_name.trim() : undefined)
+    (typeof payload.clinic_name === "string" && payload.clinic_name.trim()
+      ? payload.clinic_name.trim()
+      : undefined)
   );
 }
 

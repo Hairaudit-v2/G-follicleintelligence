@@ -23,7 +23,10 @@ export type ReminderSendResult = {
   externalId: string | null;
 };
 
-function requireContactForType(type: ReminderTemplateType, contact: PatientReminderContact): string {
+function requireContactForType(
+  type: ReminderTemplateType,
+  contact: PatientReminderContact
+): string {
   if (type === "email") {
     const email = contact.email?.trim();
     if (!email) throw new Error("Patient has no email on file for this reminder.");
@@ -112,13 +115,17 @@ export async function sendTwilioSmsViaReminderConfig(params: {
 }): Promise<ReminderSendResult> {
   const cfg = params.cfg ?? loadReminderDeliveryConfig();
   if (!isDeliveryChannelConfigured(cfg, "sms")) {
-    throw new Error("SMS delivery is not configured (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER).");
+    throw new Error(
+      "SMS delivery is not configured (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER)."
+    );
   }
   return sendReminderSms({ cfg, to: params.to.trim(), body: params.body.trim() });
 }
 
 /** Sends a rendered reminder via Resend (email) or Twilio (SMS). */
-export async function sendReminderDelivery(params: ReminderSendParams): Promise<ReminderSendResult> {
+export async function sendReminderDelivery(
+  params: ReminderSendParams
+): Promise<ReminderSendResult> {
   const cfg = params.cfg ?? loadReminderDeliveryConfig();
   if (!isDeliveryChannelConfigured(cfg, params.type)) {
     const missing =

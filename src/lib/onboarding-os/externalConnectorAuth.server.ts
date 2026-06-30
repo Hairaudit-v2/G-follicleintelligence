@@ -92,13 +92,16 @@ export type ConnectorAuthActionResult<T = void> =
   | { ok: false; error: string };
 
 export type VerifyConnectorCredentialsResult =
-  | { ok: true; verification: ExternalConnectorVerificationResult; authSession: ExternalConnectorAuthSession }
+  | {
+      ok: true;
+      verification: ExternalConnectorVerificationResult;
+      authSession: ExternalConnectorAuthSession;
+    }
   | { ok: false; error: string };
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
@@ -165,7 +168,12 @@ async function resolveWriteAuth(
 > {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) {
-    return { ok: true, actorAuthUserId: platform.actorAuthUserId, fiUserId: null, actorLabel: "Platform admin" };
+    return {
+      ok: true,
+      actorAuthUserId: platform.actorAuthUserId,
+      fiUserId: null,
+      actorLabel: "Platform admin",
+    };
   }
   const tenant = await resolveTenantAdminAuth(tenantId, opts);
   if (!tenant.ok) return tenant;
@@ -177,7 +185,10 @@ async function resolveWriteAuth(
   };
 }
 
-async function resolveReadAuth(tenantId: string, opts: ServerOpts): Promise<{ ok: true } | { ok: false; error: string }> {
+async function resolveReadAuth(
+  tenantId: string,
+  opts: ServerOpts
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) return { ok: true };
 
@@ -201,8 +212,12 @@ async function resolveReadAuth(tenantId: string, opts: ServerOpts): Promise<{ ok
 
 function mapAuthSessionRow(row: AuthSessionRow): ExternalConnectorAuthSession {
   const provider = isExternalConnectorProvider(row.provider) ? row.provider : "pabau";
-  const authMethod = isExternalConnectorAuthMethod(row.auth_method) ? row.auth_method : "manual_placeholder";
-  const authStatus = isExternalConnectorAuthStatus(row.auth_status) ? row.auth_status : "not_started";
+  const authMethod = isExternalConnectorAuthMethod(row.auth_method)
+    ? row.auth_method
+    : "manual_placeholder";
+  const authStatus = isExternalConnectorAuthStatus(row.auth_status)
+    ? row.auth_status
+    : "not_started";
   const scopesRaw = row.scopes_granted;
   const scopesGranted = Array.isArray(scopesRaw) ? scopesRaw.map(String) : [];
 
@@ -299,10 +314,7 @@ export async function createConnectorAuthSession(
   tenantId: string,
   authMethod?: ExternalConnectorAuthMethod | null,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; authSession: ExternalConnectorAuthSession }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; authSession: ExternalConnectorAuthSession } | { ok: false; error: string }> {
   const auth = await resolveWriteAuth(tenantId, opts);
   if (!auth.ok) return auth;
 
@@ -318,9 +330,10 @@ export async function createConnectorAuthSession(
     return { ok: true, authSession: mapAuthSessionRow(existing) };
   }
 
-  const method = authMethod && isExternalConnectorAuthMethod(authMethod)
-    ? authMethod
-    : defaultAuthMethodForProvider(provider);
+  const method =
+    authMethod && isExternalConnectorAuthMethod(authMethod)
+      ? authMethod
+      : defaultAuthMethodForProvider(provider);
 
   const { data, error } = await supabase
     .from("fi_external_connector_auth_sessions")
@@ -433,7 +446,8 @@ export async function recordConnectorVerificationEvent(
     .select("id")
     .single();
 
-  if (error || !data) return { ok: false, error: error?.message ?? "Failed to record verification event." };
+  if (error || !data)
+    return { ok: false, error: error?.message ?? "Failed to record verification event." };
   return { ok: true, data: { eventId: String((data as { id: string }).id) } };
 }
 
@@ -550,10 +564,7 @@ export async function revokeConnectorAuthSession(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; authSession: ExternalConnectorAuthSession }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; authSession: ExternalConnectorAuthSession } | { ok: false; error: string }> {
   const auth = await resolveWriteAuth(tenantId, opts);
   if (!auth.ok) return auth;
 
@@ -576,7 +587,8 @@ export async function revokeConnectorAuthSession(
     .select("*")
     .single();
 
-  if (error || !data) return { ok: false, error: error?.message ?? "Failed to revoke auth session." };
+  if (error || !data)
+    return { ok: false, error: error?.message ?? "Failed to revoke auth session." };
 
   await recordConnectorVerificationEvent(
     sessionRow.id,
@@ -619,7 +631,9 @@ async function buildAuthSummaryForIntegration(
   }
 
   const grantedScopes =
-    scopeRows.length > 0 ? mapScopeRows(scopeRows) : requiredScopes.map((s) => ({ ...s, granted: false }));
+    scopeRows.length > 0
+      ? mapScopeRows(scopeRows)
+      : requiredScopes.map((s) => ({ ...s, granted: false }));
 
   let latestVerificationEvent: ExternalConnectorVerificationEvent | null = null;
   if (sessionRow) {
@@ -630,7 +644,8 @@ async function buildAuthSummaryForIntegration(
       .order("occurred_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (eventRow) latestVerificationEvent = mapVerificationEventRow(eventRow as VerificationEventRow);
+    if (eventRow)
+      latestVerificationEvent = mapVerificationEventRow(eventRow as VerificationEventRow);
   }
 
   const permissionCoveragePercent = calculatePermissionCoverage(
@@ -660,10 +675,7 @@ async function buildAuthSummaryForIntegration(
 export async function loadConnectorAuthSummary(
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; snapshot: TenantConnectorAuthSnapshot }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; snapshot: TenantConnectorAuthSnapshot } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, opts);
   if (!read.ok) return read;
 
@@ -697,10 +709,7 @@ export async function refreshConnectorAuthStatus(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; authSession: ExternalConnectorAuthSession }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; authSession: ExternalConnectorAuthSession } | { ok: false; error: string }> {
   const auth = await resolveWriteAuth(tenantId, opts);
   if (!auth.ok) return auth;
 
@@ -749,7 +758,8 @@ export async function refreshConnectorAuthStatus(
     .select("*")
     .single();
 
-  if (error || !data) return { ok: false, error: error?.message ?? "Failed to refresh auth status." };
+  if (error || !data)
+    return { ok: false, error: error?.message ?? "Failed to refresh auth status." };
   return { ok: true, authSession: mapAuthSessionRow(data as AuthSessionRow) };
 }
 

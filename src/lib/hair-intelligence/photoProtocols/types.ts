@@ -1,9 +1,19 @@
-import type { FiAiHairState, FiAiImageCategory, FiAiShaveState, FiAiSurgeryStage } from "@/src/lib/imaging/aiImageClassificationTypes";
+import type {
+  FiAiHairState,
+  FiAiImageCategory,
+  FiAiShaveState,
+  FiAiSurgeryStage,
+} from "@/src/lib/imaging/aiImageClassificationTypes";
 
 export const HLI_PHOTO_PROTOCOL_SOURCE_SYSTEMS = ["fi_os", "hairaudit", "hair_longevity"] as const;
 export type HliPhotoProtocolSourceSystem = (typeof HLI_PHOTO_PROTOCOL_SOURCE_SYSTEMS)[number];
 
-export const HLI_PHOTO_PROTOCOL_TEMPLATE_SCOPES = ["shared", "fi_os", "hairaudit", "hair_longevity"] as const;
+export const HLI_PHOTO_PROTOCOL_TEMPLATE_SCOPES = [
+  "shared",
+  "fi_os",
+  "hairaudit",
+  "hair_longevity",
+] as const;
 export type HliPhotoProtocolTemplateScope = (typeof HLI_PHOTO_PROTOCOL_TEMPLATE_SCOPES)[number];
 
 export const HLI_PHOTO_PROTOCOL_CLINICAL_CONTEXTS = [
@@ -123,11 +133,18 @@ export type HliPhotoProtocolComplianceSummary = {
   warnings: string[];
 };
 
-export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_STATUSES = ["open", "acknowledged", "resolved", "dismissed"] as const;
-export type HliPhotoProtocolAlertEventStatus = (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_STATUSES)[number];
+export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_STATUSES = [
+  "open",
+  "acknowledged",
+  "resolved",
+  "dismissed",
+] as const;
+export type HliPhotoProtocolAlertEventStatus =
+  (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_STATUSES)[number];
 
 export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_SEVERITIES = ["low", "medium", "high"] as const;
-export type HliPhotoProtocolAlertEventSeverity = (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_SEVERITIES)[number];
+export type HliPhotoProtocolAlertEventSeverity =
+  (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_SEVERITIES)[number];
 
 export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_TYPES = [
   "missing_required_images",

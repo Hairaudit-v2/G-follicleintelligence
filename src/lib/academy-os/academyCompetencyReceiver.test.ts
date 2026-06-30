@@ -3,7 +3,12 @@ import { test } from "node:test";
 
 import { FI_COMPETENCY_EXPORT_PAYLOAD_V1_VERSION } from "@follicle/intelligence-core/contracts";
 
-import { receiveIiohrCompetencyExport, resolveStaffByAcademyProfile, resolveStaffByGlobalProfessionalId, resolveStaffByIiohrUserId } from "./academyCompetencyReceiver.server";
+import {
+  receiveIiohrCompetencyExport,
+  resolveStaffByAcademyProfile,
+  resolveStaffByGlobalProfessionalId,
+  resolveStaffByIiohrUserId,
+} from "./academyCompetencyReceiver.server";
 import { buildAcademyCompetencySignalsFromProjections } from "./academyWorkforceSignalAdapter";
 import { buildWorkforceIdentityReadinessSignals } from "@/src/lib/workforce-os/workforceIdentityReadinessSignals";
 import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
@@ -16,7 +21,11 @@ const NOW = new Date("2026-06-09T12:00:00.000Z");
 
 type MockRow = Record<string, unknown>;
 
-function createMockSupabase(initial: { sourceIds?: MockRow[]; staff?: MockRow[]; projections?: MockRow[] }) {
+function createMockSupabase(initial: {
+  sourceIds?: MockRow[];
+  staff?: MockRow[];
+  projections?: MockRow[];
+}) {
   const store = {
     sourceIds: [...(initial.sourceIds ?? [])],
     staff: [...(initial.staff ?? [])],
@@ -26,7 +35,12 @@ function createMockSupabase(initial: { sourceIds?: MockRow[]; staff?: MockRow[];
 
   const client = {
     from(table: string) {
-      const state: { filters: [string, string, unknown][]; op: string; payload?: MockRow; limitN?: number } = {
+      const state: {
+        filters: [string, string, unknown][];
+        op: string;
+        payload?: MockRow;
+        limitN?: number;
+      } = {
         filters: [],
         op: "select",
       };
@@ -179,10 +193,18 @@ test("identity resolution priority prefers global professional id", async () => 
     ],
   });
 
-  const byGlobal = await resolveStaffByGlobalProfessionalId(TENANT_ID, "gp-priority", client as never);
+  const byGlobal = await resolveStaffByGlobalProfessionalId(
+    TENANT_ID,
+    "gp-priority",
+    client as never
+  );
   assert.equal(byGlobal, STAFF_ID);
 
-  const byAcademy = await resolveStaffByAcademyProfile(TENANT_ID, "academy-profile-99", client as never);
+  const byAcademy = await resolveStaffByAcademyProfile(
+    TENANT_ID,
+    "academy-profile-99",
+    client as never
+  );
   assert.equal(byAcademy, "other-staff");
 });
 

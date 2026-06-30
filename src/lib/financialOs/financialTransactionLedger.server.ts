@@ -37,7 +37,9 @@ export type AppendFinancialTransactionArgs = {
  * Append-only master ledger write with mandatory audit event.
  * Idempotent when idempotencyKey is provided and already exists.
  */
-export async function appendFinancialTransaction(args: AppendFinancialTransactionArgs): Promise<FiFinancialTransactionRow | null> {
+export async function appendFinancialTransaction(
+  args: AppendFinancialTransactionArgs
+): Promise<FiFinancialTransactionRow | null> {
   const tid = args.tenantId.trim();
   if (!tid) throw new Error("tenantId is required.");
 
@@ -86,7 +88,11 @@ export async function appendFinancialTransaction(args: AppendFinancialTransactio
     created_by_fi_user_id: args.createdByFiUserId?.trim() || null,
   };
 
-  const { data, error } = await supabase.from("fi_financial_transactions").insert(insert).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_financial_transactions")
+    .insert(insert)
+    .select("*")
+    .single();
   if (error) {
     if (idempotencyKey && error.code === "23505") {
       const { data: dup } = await supabase

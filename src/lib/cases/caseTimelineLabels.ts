@@ -17,7 +17,11 @@ export function caseTimelineKindLabel(kind: CaseTimelineItemKind): string {
   return KIND_LABELS[kind] ?? kind;
 }
 
-export const CASE_TIMELINE_FILTER_PRESETS: { id: CaseTimelineFilterPreset; label: string; hint: string }[] = [
+export const CASE_TIMELINE_FILTER_PRESETS: {
+  id: CaseTimelineFilterPreset;
+  label: string;
+  hint: string;
+}[] = [
   { id: "all", label: "All", hint: "Everything linked to this patient." },
   {
     id: "clinical",
@@ -27,7 +31,10 @@ export const CASE_TIMELINE_FILTER_PRESETS: { id: CaseTimelineFilterPreset; label
   { id: "crm", label: "CRM", hint: "Leads and CRM activity rows anchored on this patient." },
 ];
 
-export function caseTimelinePresetIncludesKind(preset: CaseTimelineFilterPreset, kind: CaseTimelineItemKind): boolean {
+export function caseTimelinePresetIncludesKind(
+  preset: CaseTimelineFilterPreset,
+  kind: CaseTimelineItemKind
+): boolean {
   if (preset === "all") return true;
   if (preset === "crm") {
     return kind === "lead" || kind === "crm_activity";

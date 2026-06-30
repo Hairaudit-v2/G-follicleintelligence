@@ -266,7 +266,9 @@ function resolveProtocolStatus(
   return { status: "incomplete", workflow_readiness: "not_ready" };
 }
 
-function buildInvalidProtocolResult(protocol: ImagingOsProtocolType): ImagingOsProtocolEvaluationResult {
+function buildInvalidProtocolResult(
+  protocol: ImagingOsProtocolType
+): ImagingOsProtocolEvaluationResult {
   return {
     protocol,
     protocol_description: "",
@@ -342,7 +344,11 @@ export function recommendProtocolForWorkflow(
   if (source === "hairaudit" || surface === "audit_upload" || surface === "hairaudit_case_upload") {
     return "hairaudit_baseline";
   }
-  if (source === "consultation_os" || surface === "consultation_form" || surface === "fi_consultation") {
+  if (
+    source === "consultation_os" ||
+    surface === "consultation_form" ||
+    surface === "fi_consultation"
+  ) {
     return "consultation_basic";
   }
   if (source === "surgery_os" || surface === "surgery_workflow") {

@@ -9,7 +9,10 @@ import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPri
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { WHY_FOLLICLE_INTELLIGENCE_PAGE_CONTENT } from "@/lib/marketing/whyFollicleIntelligencePageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
@@ -43,10 +46,23 @@ function IntelligenceNetworkViz({ nodes }: { nodes: readonly string[] }) {
       aria-label="Intelligence network: clinics, patients, surgeries, treatments, staff, and outcomes connected to a central learning system."
     >
       <div className="relative aspect-square min-h-[280px] w-full overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-[radial-gradient(ellipse_at_50%_40%,rgb(212_175_55_/0.14),transparent_55%),linear-gradient(180deg,rgb(255_255_255_/0.04),transparent)] shadow-[0_24px_80px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.05)] sm:min-h-[320px]">
-        <svg className="absolute inset-0 h-full w-full text-amber-400" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
+        <svg
+          className="absolute inset-0 h-full w-full text-amber-400"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="xMidYMid meet"
+          aria-hidden
+        >
           {layout.map((n) => (
             <g key={n.label}>
-              <line x1="50" y1="50" x2={n.x} y2={n.y} stroke="rgb(212 175 55 / 0.12)" strokeWidth="0.45" vectorEffect="non-scaling-stroke" />
+              <line
+                x1="50"
+                y1="50"
+                x2={n.x}
+                y2={n.y}
+                stroke="rgb(212 175 55 / 0.12)"
+                strokeWidth="0.45"
+                vectorEffect="non-scaling-stroke"
+              />
               <line
                 x1="50"
                 y1="50"
@@ -57,7 +73,11 @@ function IntelligenceNetworkViz({ nodes }: { nodes: readonly string[] }) {
                 strokeDasharray="0.8 2"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-                className={reduceMotion ? "text-amber-400/30" : "fi-hero-network-line-out text-amber-400/45 [animation-duration:3.2s]"}
+                className={
+                  reduceMotion
+                    ? "text-amber-400/30"
+                    : "fi-hero-network-line-out text-amber-400/45 [animation-duration:3.2s]"
+                }
               />
             </g>
           ))}
@@ -65,8 +85,12 @@ function IntelligenceNetworkViz({ nodes }: { nodes: readonly string[] }) {
 
         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
           <div className="rounded-full border border-amber-400/30 bg-[rgb(8_12_20_/0.92)] px-4 py-2.5 text-center shadow-[0_0_32px_rgb(212_175_55_/0.18),inset_0_1px_0_rgb(255_255_255_/0.08)] sm:px-5 sm:py-3">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-200/70 sm:text-[10px]">Central</p>
-            <p className="mt-0.5 font-display text-[0.7rem] font-semibold leading-tight text-foreground sm:text-sm">Intelligence Network</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-200/70 sm:text-[10px]">
+              Central
+            </p>
+            <p className="mt-0.5 font-display text-[0.7rem] font-semibold leading-tight text-foreground sm:text-sm">
+              Intelligence Network
+            </p>
           </div>
         </div>
 
@@ -81,7 +105,9 @@ function IntelligenceNetworkViz({ nodes }: { nodes: readonly string[] }) {
             transition={{ delay: n.delay, duration: 0.45, ease: "easeOut" }}
           >
             <div className="rounded-lg border border-white/[0.08] bg-[rgb(10_14_22_/0.88)] px-2.5 py-1.5 text-center shadow-[0_8px_24px_rgb(0_0_0_/0.35)] backdrop-blur-sm sm:px-3 sm:py-2">
-              <p className="whitespace-nowrap text-[0.65rem] font-medium text-foreground/90 sm:text-xs">{n.label}</p>
+              <p className="whitespace-nowrap text-[0.65rem] font-medium text-foreground/90 sm:text-xs">
+                {n.label}
+              </p>
             </div>
           </motion.div>
         ))}
@@ -103,15 +129,23 @@ function PatientIntelligenceTimeline({ stages }: { stages: readonly string[] }) 
             {stages.map((stage, index) => (
               <Fragment key={stage}>
                 <li className="flex w-[7.35rem] shrink-0 flex-col xl:w-[7.75rem]">
-                  <GlassCard variant="default" className="h-full border-amber-400/10 !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)] sm:!p-4">
+                  <GlassCard
+                    variant="default"
+                    className="h-full border-amber-400/10 !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)] sm:!p-4"
+                  >
                     <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/55">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <p className="mt-2 text-[0.75rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">{stage}</p>
+                    <p className="mt-2 text-[0.75rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">
+                      {stage}
+                    </p>
                   </GlassCard>
                 </li>
                 {index < stages.length - 1 ? (
-                  <li className="flex w-6 shrink-0 items-center justify-center self-center pt-6 xl:w-7" aria-hidden>
+                  <li
+                    className="flex w-6 shrink-0 items-center justify-center self-center pt-6 xl:w-7"
+                    aria-hidden
+                  >
                     <ChevronRight className="h-3.5 w-3.5 text-amber-400/45" strokeWidth={2} />
                   </li>
                 ) : null}
@@ -128,11 +162,16 @@ function PatientIntelligenceTimeline({ stages }: { stages: readonly string[] }) 
               aria-hidden
               className="absolute -left-[19px] top-2 flex h-3 w-3 items-center justify-center rounded-full border border-amber-300/45 bg-gradient-to-br from-amber-200/55 to-amber-800/30 shadow-[0_0_16px_rgb(212_175_55_/0.35)] sm:-left-[21px]"
             />
-            <GlassCard variant="default" className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]">
+            <GlassCard
+              variant="default"
+              className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]"
+            >
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
                 Stage {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">{stage}</p>
+              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">
+                {stage}
+              </p>
             </GlassCard>
           </li>
         ))}
@@ -153,7 +192,10 @@ function ComparisonListCard({
   const isHighlight = variant === "highlight";
 
   return (
-    <GlassCard variant={isHighlight ? "os" : "default"} className={cn("h-full !p-5 sm:!p-6 md:!p-8", isHighlight && "border-amber-400/15")}>
+    <GlassCard
+      variant={isHighlight ? "os" : "default"}
+      className={cn("h-full !p-5 sm:!p-6 md:!p-8", isHighlight && "border-amber-400/15")}
+    >
       <p
         className={cn(
           "text-[10px] font-semibold uppercase tracking-[0.22em]",
@@ -197,8 +239,13 @@ export function WhyFollicleIntelligenceView() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 md:py-24">
           <FadeIn>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">{c.hero.eyebrow}</p>
-            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">
+              {c.hero.eyebrow}
+            </p>
+            <div
+              className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+              aria-hidden
+            />
             <h1
               id={`${c.hero.id}-heading`}
               className="mt-5 max-w-4xl font-display text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance drop-shadow-[0_2px_36px_rgb(0_0_0_/0.45)] sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
@@ -227,7 +274,12 @@ export function WhyFollicleIntelligenceView() {
                   <ChevronRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.secondaryCta.href}>
                   {c.hero.secondaryCta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -258,7 +310,9 @@ export function WhyFollicleIntelligenceView() {
                     <h3 className="font-display text-base font-semibold leading-snug tracking-tight text-foreground md:text-lg">
                       {card.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">{card.body}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -273,10 +327,22 @@ export function WhyFollicleIntelligenceView() {
         aria-labelledby={`${c.brokenStack.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.brokenStack.id}-heading`} eyebrow={c.brokenStack.eyebrow} title={c.brokenStack.headline} />
+          <SectionHeading
+            id={`${c.brokenStack.id}-heading`}
+            eyebrow={c.brokenStack.eyebrow}
+            title={c.brokenStack.headline}
+          />
           <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:gap-8">
-            <ComparisonListCard title={c.brokenStack.currentStack.title} items={c.brokenStack.currentStack.items} variant="muted" />
-            <ComparisonListCard title={c.brokenStack.neededStack.title} items={c.brokenStack.neededStack.items} variant="highlight" />
+            <ComparisonListCard
+              title={c.brokenStack.currentStack.title}
+              items={c.brokenStack.currentStack.items}
+              variant="muted"
+            />
+            <ComparisonListCard
+              title={c.brokenStack.neededStack.title}
+              items={c.brokenStack.neededStack.items}
+              variant="highlight"
+            />
           </div>
         </FadeIn>
       </Section>
@@ -295,8 +361,12 @@ export function WhyFollicleIntelligenceView() {
           />
           <PatientIntelligenceTimeline stages={c.digitalTwin.stages} />
           <GlassCard className="mx-auto mt-12 max-w-2xl border-amber-400/14 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">At scale</p>
-            <p className="mt-4 font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{c.digitalTwin.atScale}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
+              At scale
+            </p>
+            <p className="mt-4 font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              {c.digitalTwin.atScale}
+            </p>
           </GlassCard>
         </FadeIn>
       </Section>
@@ -342,7 +412,9 @@ export function WhyFollicleIntelligenceView() {
           />
           <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:gap-14">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">{c.networkEffect.overTimeLabel}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
+                {c.networkEffect.overTimeLabel}
+              </p>
               <ul className="mt-5 space-y-3">
                 {c.networkEffect.outcomes.map((outcome, index) => (
                   <li key={outcome}>
@@ -351,7 +423,9 @@ export function WhyFollicleIntelligenceView() {
                         <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.2em] text-amber-200/50">
                           {String(index + 1).padStart(2, "0")}
                         </span>
-                        <p className="text-sm leading-relaxed text-foreground sm:text-[0.9375rem]">{outcome}</p>
+                        <p className="text-sm leading-relaxed text-foreground sm:text-[0.9375rem]">
+                          {outcome}
+                        </p>
                       </div>
                     </GlassCard>
                   </li>
@@ -361,7 +435,9 @@ export function WhyFollicleIntelligenceView() {
             <IntelligenceNetworkViz nodes={c.networkEffect.networkNodes} />
           </div>
           <GlassCard className="mx-auto mt-12 max-w-3xl border-amber-400/14">
-            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">{c.networkEffect.closingStatement}</p>
+            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">
+              {c.networkEffect.closingStatement}
+            </p>
           </GlassCard>
         </FadeIn>
       </Section>
@@ -372,7 +448,11 @@ export function WhyFollicleIntelligenceView() {
         aria-labelledby={`${c.mission.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.mission.id}-heading`} eyebrow={c.mission.eyebrow} title={c.mission.headline} />
+          <SectionHeading
+            id={`${c.mission.id}-heading`}
+            eyebrow={c.mission.eyebrow}
+            title={c.mission.headline}
+          />
           <GlassCard className="mt-10 max-w-3xl border-amber-400/12">
             <div className="space-y-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
               {c.mission.paragraphs.map((paragraph) => (
@@ -393,8 +473,13 @@ export function WhyFollicleIntelligenceView() {
             <div className="rounded-[1.75rem] border border-amber-400/18 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.48),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">{c.finalCta.eyebrow}</p>
-                  <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">
+                    {c.finalCta.eyebrow}
+                  </p>
+                  <div
+                    className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+                    aria-hidden
+                  />
                   <h2
                     id={`${c.finalCta.id}-heading`}
                     className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-4xl lg:text-5xl"
@@ -409,7 +494,12 @@ export function WhyFollicleIntelligenceView() {
                       <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className={MARKETING_CTA_SECONDARY_CLASS}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={MARKETING_CTA_SECONDARY_CLASS}
+                  >
                     <Link href={c.finalCta.secondaryCta.href}>
                       {c.finalCta.secondaryCta.label}
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />

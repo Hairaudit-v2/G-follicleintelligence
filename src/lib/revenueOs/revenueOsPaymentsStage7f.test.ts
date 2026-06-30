@@ -8,7 +8,10 @@ import {
   invoiceAmountPaidAfterAllocation,
   invoiceLineTotalCents,
 } from "@/src/lib/revenueOs/revenueInvoiceMath";
-import { derivePublicPaymentPageState, isPaymentPublicTokenFormat } from "@/src/lib/revenueOs/publicPaymentRequestModel";
+import {
+  derivePublicPaymentPageState,
+  isPaymentPublicTokenFormat,
+} from "@/src/lib/revenueOs/publicPaymentRequestModel";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
@@ -32,17 +35,32 @@ test("invoiceAmountPaidAfterAllocation", () => {
 
 test("computeNextInvoiceStatus: partial and overdue transitions", () => {
   const awaiting = computeNextInvoiceStatus(
-    { status: "awaiting_payment", total_cents: 10000, amount_paid_cents: 3000, due_date: "2099-01-01" },
+    {
+      status: "awaiting_payment",
+      total_cents: 10000,
+      amount_paid_cents: 3000,
+      due_date: "2099-01-01",
+    },
     "2026-06-12"
   );
   assert.equal(awaiting, "partially_paid");
   const overdue = computeNextInvoiceStatus(
-    { status: "awaiting_payment", total_cents: 10000, amount_paid_cents: 0, due_date: "2020-01-01" },
+    {
+      status: "awaiting_payment",
+      total_cents: 10000,
+      amount_paid_cents: 0,
+      due_date: "2020-01-01",
+    },
     "2026-06-12"
   );
   assert.equal(overdue, "overdue");
   const paid = computeNextInvoiceStatus(
-    { status: "awaiting_payment", total_cents: 10000, amount_paid_cents: 10000, due_date: "2020-01-01" },
+    {
+      status: "awaiting_payment",
+      total_cents: 10000,
+      amount_paid_cents: 10000,
+      due_date: "2020-01-01",
+    },
     "2026-06-12"
   );
   assert.equal(paid, "paid");
@@ -108,25 +126,40 @@ test("derivePublicPaymentPageState: manual vs payable", () => {
 test("isStripeWebhookDuplicateInsert", () => {
   assert.equal(isStripeWebhookDuplicateInsert({ code: "23505", message: "duplicate" }), true);
   assert.equal(isStripeWebhookDuplicateInsert({ code: "23505" }), true);
-  assert.equal(isStripeWebhookDuplicateInsert({ message: "duplicate key value violates unique constraint" }), true);
+  assert.equal(
+    isStripeWebhookDuplicateInsert({ message: "duplicate key value violates unique constraint" }),
+    true
+  );
   assert.equal(isStripeWebhookDuplicateInsert({ code: "22P02" }), false);
 });
 
 test("isFiStripeGatewayPaymentIntentDuplicateInsert", () => {
   assert.equal(
-    isFiStripeGatewayPaymentIntentDuplicateInsert({ code: "23505" }, { provider: "stripe", paymentIntentId: "pi_1" }),
-    true,
+    isFiStripeGatewayPaymentIntentDuplicateInsert(
+      { code: "23505" },
+      { provider: "stripe", paymentIntentId: "pi_1" }
+    ),
+    true
   );
   assert.equal(
-    isFiStripeGatewayPaymentIntentDuplicateInsert({ message: "duplicate key" }, { provider: "Stripe", paymentIntentId: "pi_1" }),
-    true,
+    isFiStripeGatewayPaymentIntentDuplicateInsert(
+      { message: "duplicate key" },
+      { provider: "Stripe", paymentIntentId: "pi_1" }
+    ),
+    true
   );
   assert.equal(
-    isFiStripeGatewayPaymentIntentDuplicateInsert({ code: "23505" }, { provider: "stripe", paymentIntentId: "  " }),
-    false,
+    isFiStripeGatewayPaymentIntentDuplicateInsert(
+      { code: "23505" },
+      { provider: "stripe", paymentIntentId: "  " }
+    ),
+    false
   );
   assert.equal(
-    isFiStripeGatewayPaymentIntentDuplicateInsert({ code: "23505" }, { provider: "manual", paymentIntentId: "pi_1" }),
-    false,
+    isFiStripeGatewayPaymentIntentDuplicateInsert(
+      { code: "23505" },
+      { provider: "manual", paymentIntentId: "pi_1" }
+    ),
+    false
   );
 });

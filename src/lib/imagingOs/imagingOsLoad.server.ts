@@ -4,7 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
-import { parseProtocolSlots, protocolRequiredCompletionPercent, type ProtocolSlotDef } from "./imagingOsProtocol";
+import {
+  parseProtocolSlots,
+  protocolRequiredCompletionPercent,
+  type ProtocolSlotDef,
+} from "./imagingOsProtocol";
 import type { VieComparisonPairRow } from "@/src/lib/vie/vieComparisonTypes";
 
 export type ImagingProtocolTemplateRow = {
@@ -80,28 +84,35 @@ export async function loadImagingOsPatientPayload(
 
   const bundle = await loadPatientImagesProfileBundle(tid, pid, supabase);
 
-  const [{ data: tplRows, error: tplErr }, { data: sessRows, error: sessErr }, { data: mapRows, error: mapErr }] =
-    await Promise.all([
-      supabase
-        .from("fi_imaging_protocol_templates")
-        .select("id, tenant_id, slug, name, description, slots")
-        .or(`tenant_id.eq.${tid},tenant_id.is.null`)
-        .order("slug", { ascending: true }),
-      supabase
-        .from("fi_imaging_protocol_sessions")
-        .select("id, tenant_id, patient_id, case_id, consultation_id, template_slug, progress, created_at, updated_at")
-        .eq("tenant_id", tid)
-        .eq("patient_id", pid)
-        .order("updated_at", { ascending: false })
-        .limit(40),
-      supabase
-        .from("fi_imaging_scalp_maps")
-        .select("id, tenant_id, patient_id, consultation_id, case_id, title, state_json, created_at, updated_at")
-        .eq("tenant_id", tid)
-        .eq("patient_id", pid)
-        .order("updated_at", { ascending: false })
-        .limit(20),
-    ]);
+  const [
+    { data: tplRows, error: tplErr },
+    { data: sessRows, error: sessErr },
+    { data: mapRows, error: mapErr },
+  ] = await Promise.all([
+    supabase
+      .from("fi_imaging_protocol_templates")
+      .select("id, tenant_id, slug, name, description, slots")
+      .or(`tenant_id.eq.${tid},tenant_id.is.null`)
+      .order("slug", { ascending: true }),
+    supabase
+      .from("fi_imaging_protocol_sessions")
+      .select(
+        "id, tenant_id, patient_id, case_id, consultation_id, template_slug, progress, created_at, updated_at"
+      )
+      .eq("tenant_id", tid)
+      .eq("patient_id", pid)
+      .order("updated_at", { ascending: false })
+      .limit(40),
+    supabase
+      .from("fi_imaging_scalp_maps")
+      .select(
+        "id, tenant_id, patient_id, consultation_id, case_id, title, state_json, created_at, updated_at"
+      )
+      .eq("tenant_id", tid)
+      .eq("patient_id", pid)
+      .order("updated_at", { ascending: false })
+      .limit(20),
+  ]);
 
   const protocolTemplates: ImagingProtocolTemplateRow[] = [];
   if (!tplErr && tplRows) {
@@ -147,7 +158,8 @@ export async function loadImagingOsPatientPayload(
         consultation_id: r.consultation_id != null ? String(r.consultation_id) : null,
         case_id: r.case_id != null ? String(r.case_id) : null,
         title: String(r.title ?? "Scalp map"),
-        state_json: sj && typeof sj === "object" && !Array.isArray(sj) ? (sj as Record<string, unknown>) : {},
+        state_json:
+          sj && typeof sj === "object" && !Array.isArray(sj) ? (sj as Record<string, unknown>) : {},
         created_at: String(r.created_at ?? ""),
         updated_at: String(r.updated_at ?? ""),
       });
@@ -166,7 +178,10 @@ export async function loadImagingOsPatientPayload(
       for (const raw of annRows) {
         const r = raw as Record<string, unknown>;
         const iid = String(r.patient_image_id ?? "");
-        const payload = r.payload && typeof r.payload === "object" && !Array.isArray(r.payload) ? (r.payload as Record<string, unknown>) : {};
+        const payload =
+          r.payload && typeof r.payload === "object" && !Array.isArray(r.payload)
+            ? (r.payload as Record<string, unknown>)
+            : {};
         annotationsByImageId[iid] = {
           patient_image_id: iid,
           schema_version: String(r.schema_version ?? "imaging-annotation.v1"),
@@ -179,14 +194,20 @@ export async function loadImagingOsPatientPayload(
 
   let comparisonPairs: VieComparisonPairRow[] = [];
   try {
-    const { generateVieComparisonPairsForPatient, loadVieComparisonPairsForPatient } = await import(
-      "@/src/lib/vie/vieLongitudinalComparison.server"
-    );
+    const { generateVieComparisonPairsForPatient, loadVieComparisonPairsForPatient } =
+      await import("@/src/lib/vie/vieLongitudinalComparison.server");
     await generateVieComparisonPairsForPatient({ tenantId: tid, patientId: pid, client: supabase });
     comparisonPairs = await loadVieComparisonPairsForPatient(tid, pid, { client: supabase });
   } catch {
     // best-effort — table may be unavailable during migration rollout
   }
 
-  return { bundle, protocolTemplates, protocolSessions, scalpMaps, annotationsByImageId, comparisonPairs };
+  return {
+    bundle,
+    protocolTemplates,
+    protocolSessions,
+    scalpMaps,
+    annotationsByImageId,
+    comparisonPairs,
+  };
 }

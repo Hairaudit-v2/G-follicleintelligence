@@ -15,7 +15,10 @@ export const PARTNERS_PAGE_CONTENT = {
       "Follicle Intelligence is building infrastructure designed to connect clinics, educators, researchers, enterprise groups, and strategic partners into one continuously improving ecosystem.",
     ],
     primaryCta: { label: "Explore The Platform", href: "/platform/ecosystem" as const },
-    secondaryCta: { label: "Why Follicle Intelligence Exists", href: "/why-follicle-intelligence" as const },
+    secondaryCta: {
+      label: "Why Follicle Intelligence Exists",
+      href: "/why-follicle-intelligence" as const,
+    },
   },
 
   whyPartnerships: {
@@ -72,13 +75,34 @@ export const PARTNERS_PAGE_CONTENT = {
     description:
       "Large clinic groups require more than CRM systems. They need connected operational intelligence.",
     benefits: [
-      { title: "Multi-clinic operational visibility", body: "Unified intelligence across locations, teams, and patient journeys" },
-      { title: "Standardised surgical protocols", body: "Shared procedural frameworks enforced consistently across the network" },
-      { title: "Shared benchmarking systems", body: "Comparative performance intelligence across clinics and regions" },
-      { title: "Workforce competency tracking", body: "Staff development linked to certification and clinical outcomes" },
-      { title: "Outcome auditing infrastructure", body: "Structured audit trails connecting procedures to long-term results" },
-      { title: "Financial intelligence systems", body: "Operational and revenue intelligence correlated with clinical quality" },
-      { title: "Quality control frameworks", body: "Governance systems for maintaining standards at scale" },
+      {
+        title: "Multi-clinic operational visibility",
+        body: "Unified intelligence across locations, teams, and patient journeys",
+      },
+      {
+        title: "Standardised surgical protocols",
+        body: "Shared procedural frameworks enforced consistently across the network",
+      },
+      {
+        title: "Shared benchmarking systems",
+        body: "Comparative performance intelligence across clinics and regions",
+      },
+      {
+        title: "Workforce competency tracking",
+        body: "Staff development linked to certification and clinical outcomes",
+      },
+      {
+        title: "Outcome auditing infrastructure",
+        body: "Structured audit trails connecting procedures to long-term results",
+      },
+      {
+        title: "Financial intelligence systems",
+        body: "Operational and revenue intelligence correlated with clinical quality",
+      },
+      {
+        title: "Quality control frameworks",
+        body: "Governance systems for maintaining standards at scale",
+      },
     ],
   },
 
@@ -102,17 +126,35 @@ export const PARTNERS_PAGE_CONTENT = {
     id: "partners-research",
     eyebrow: "Intelligence frontier",
     headline: "The largest intelligence opportunities are still ahead",
-    description:
-      "As structured data systems mature, new research opportunities begin emerging.",
+    description: "As structured data systems mature, new research opportunities begin emerging.",
     opportunities: [
-      { title: "Global treatment efficacy research", body: "Cross-clinic studies comparing treatment outcomes at scale" },
-      { title: "Surgical technique benchmarking", body: "Objective comparison of procedural approaches and results" },
-      { title: "Hair loss progression modelling", body: "Longitudinal datasets for understanding disease progression" },
-      { title: "AI diagnostic model training", body: "Structured imaging data powering next-generation diagnostics" },
-      { title: "Outcome prediction systems", body: "Predictive intelligence from historical procedural and patient data" },
-      { title: "Longitudinal patient intelligence studies", body: "Multi-year patient journeys informing treatment pathways" },
+      {
+        title: "Global treatment efficacy research",
+        body: "Cross-clinic studies comparing treatment outcomes at scale",
+      },
+      {
+        title: "Surgical technique benchmarking",
+        body: "Objective comparison of procedural approaches and results",
+      },
+      {
+        title: "Hair loss progression modelling",
+        body: "Longitudinal datasets for understanding disease progression",
+      },
+      {
+        title: "AI diagnostic model training",
+        body: "Structured imaging data powering next-generation diagnostics",
+      },
+      {
+        title: "Outcome prediction systems",
+        body: "Predictive intelligence from historical procedural and patient data",
+      },
+      {
+        title: "Longitudinal patient intelligence studies",
+        body: "Multi-year patient journeys informing treatment pathways",
+      },
     ],
-    closingStatement: "Structured medical intelligence unlocks entirely new research possibilities.",
+    closingStatement:
+      "Structured medical intelligence unlocks entirely new research possibilities.",
   },
 
   deviceTechnologyPartnerships: {
@@ -122,12 +164,30 @@ export const PARTNERS_PAGE_CONTENT = {
     description:
       "Future clinical technology will increasingly integrate directly with intelligence infrastructure.",
     opportunities: [
-      { title: "Imaging system integrations", body: "Diagnostic imaging connected to structured patient intelligence" },
-      { title: "Surgical device integrations", body: "Procedural devices feeding data into audit and outcome systems" },
-      { title: "Diagnostic device integrations", body: "Assessment tools linked to treatment pathway intelligence" },
-      { title: "Automated data capture systems", body: "Clinical workflows that eliminate manual data fragmentation" },
-      { title: "AI-assisted analysis systems", body: "Intelligent analysis layered on structured clinical datasets" },
-      { title: "Clinical workflow integrations", body: "End-to-end connectivity from consultation through long-term outcomes" },
+      {
+        title: "Imaging system integrations",
+        body: "Diagnostic imaging connected to structured patient intelligence",
+      },
+      {
+        title: "Surgical device integrations",
+        body: "Procedural devices feeding data into audit and outcome systems",
+      },
+      {
+        title: "Diagnostic device integrations",
+        body: "Assessment tools linked to treatment pathway intelligence",
+      },
+      {
+        title: "Automated data capture systems",
+        body: "Clinical workflows that eliminate manual data fragmentation",
+      },
+      {
+        title: "AI-assisted analysis systems",
+        body: "Intelligent analysis layered on structured clinical datasets",
+      },
+      {
+        title: "Clinical workflow integrations",
+        body: "End-to-end connectivity from consultation through long-term outcomes",
+      },
     ],
   },
 
@@ -138,12 +198,30 @@ export const PARTNERS_PAGE_CONTENT = {
     description:
       "The future of hair restoration medicine will increasingly require measurable standards shared across clinics, educators, and practitioners worldwide.",
     standards: [
-      { title: "Surgical quality benchmarks", body: "Objective criteria for evaluating procedural excellence" },
-      { title: "Outcome audit scoring", body: "Standardised frameworks for measuring and comparing results" },
-      { title: "Training accreditation frameworks", body: "Recognised pathways for competency and certification" },
-      { title: "Certification systems", body: "Portable credentials validated across the global network" },
-      { title: "Global procedural standards", body: "Shared protocols for consistent clinical practice worldwide" },
-      { title: "Transparent quality scoring systems", body: "Open, measurable quality indicators for patients and providers" },
+      {
+        title: "Surgical quality benchmarks",
+        body: "Objective criteria for evaluating procedural excellence",
+      },
+      {
+        title: "Outcome audit scoring",
+        body: "Standardised frameworks for measuring and comparing results",
+      },
+      {
+        title: "Training accreditation frameworks",
+        body: "Recognised pathways for competency and certification",
+      },
+      {
+        title: "Certification systems",
+        body: "Portable credentials validated across the global network",
+      },
+      {
+        title: "Global procedural standards",
+        body: "Shared protocols for consistent clinical practice worldwide",
+      },
+      {
+        title: "Transparent quality scoring systems",
+        body: "Open, measurable quality indicators for patients and providers",
+      },
     ],
     closingStatement: "Better standards improve outcomes for everyone.",
   },
@@ -177,6 +255,9 @@ export const PARTNERS_PAGE_CONTENT = {
       "Follicle Intelligence is building that foundation.",
     ],
     primaryCta: { label: "Explore Platform Architecture", href: "/platform/ecosystem" as const },
-    secondaryCta: { label: "View The Future Of Hair Restoration", href: "/the-future-of-hair-restoration" as const },
+    secondaryCta: {
+      label: "View The Future Of Hair Restoration",
+      href: "/the-future-of-hair-restoration" as const,
+    },
   },
 } as const;

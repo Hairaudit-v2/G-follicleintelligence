@@ -11,7 +11,11 @@ const FIELDS = [
   { key: "donor_suitability", label: "Donor suitability", wide: true },
 ] as const;
 
-export function ConsultationOsBrowDesignPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsBrowDesignPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Brow design" headingId="consultation-os-brow-design-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

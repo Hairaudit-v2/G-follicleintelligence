@@ -23,7 +23,11 @@ import {
 } from "./reminderPatientContact.server";
 
 function bookingIsReminderEligible(row: FiBookingRow): boolean {
-  if (row.booking_status === "cancelled" || row.booking_status === "completed" || row.booking_status === "no_show") {
+  if (
+    row.booking_status === "cancelled" ||
+    row.booking_status === "completed" ||
+    row.booking_status === "no_show"
+  ) {
     return false;
   }
   return true;
@@ -45,7 +49,8 @@ async function loadPatientReminderPrefs(
   const r = data as Record<string, unknown>;
   return {
     consent: Boolean(r.reminder_consent),
-    preferred_contact_method: r.preferred_contact_method != null ? String(r.preferred_contact_method) : null,
+    preferred_contact_method:
+      r.preferred_contact_method != null ? String(r.preferred_contact_method) : null,
   };
 }
 
@@ -53,7 +58,10 @@ async function loadPatientReminderPrefs(
  * Rebuilds pending `fi_reminder_jobs` for a booking from active templates when the patient has opted in.
  * Best-effort: failures are swallowed (booking flow must not break).
  */
-export async function syncBookingReminderJobs(booking: FiBookingRow, client?: SupabaseClient): Promise<void> {
+export async function syncBookingReminderJobs(
+  booking: FiBookingRow,
+  client?: SupabaseClient
+): Promise<void> {
   try {
     const supabase = client ?? supabaseAdmin();
     const tid = assertNonEmptyUuid(booking.tenant_id, "tenantId");
@@ -126,7 +134,10 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
 /**
  * Enqueues `lead_created` templates once per new lead when the linked patient has reminder consent.
  */
-export async function syncLeadCreatedReminderJobs(lead: FiCrmLeadRow, client?: SupabaseClient): Promise<void> {
+export async function syncLeadCreatedReminderJobs(
+  lead: FiCrmLeadRow,
+  client?: SupabaseClient
+): Promise<void> {
   try {
     const supabase = client ?? supabaseAdmin();
     const tid = assertNonEmptyUuid(lead.tenant_id, "tenantId");
@@ -181,7 +192,10 @@ export async function syncLeadCreatedReminderJobs(lead: FiCrmLeadRow, client?: S
 /**
  * Fires `post_consult` templates when a consultation is marked completed (patient consent required).
  */
-export async function syncPostConsultReminderJobs(consultation: ConsultationRow, client?: SupabaseClient): Promise<void> {
+export async function syncPostConsultReminderJobs(
+  consultation: ConsultationRow,
+  client?: SupabaseClient
+): Promise<void> {
   try {
     const supabase = client ?? supabaseAdmin();
     const tid = assertNonEmptyUuid(consultation.tenant_id, "tenantId");

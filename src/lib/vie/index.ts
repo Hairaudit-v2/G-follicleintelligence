@@ -42,10 +42,7 @@ export {
   vieProtocolCatalogForDbSeed,
 } from "./vieProtocolCatalog";
 
-export {
-  VIE_PROTOCOL_PICKER_GROUPS,
-  VIE_SURGERY_PHASE_GROUPS,
-} from "./vieProtocolTypes";
+export { VIE_PROTOCOL_PICKER_GROUPS, VIE_SURGERY_PHASE_GROUPS } from "./vieProtocolTypes";
 
 export {
   computeConsultationCompleteness,
@@ -78,7 +75,10 @@ export { VIE_FUTURE_ARCHITECTURE, VIE_FUTURE_ENGINE_VERSION } from "./vieFutureA
 export type { VieFutureArchitecture } from "./vieFutureArchitecture";
 
 export { loadPatientTwinVieSection } from "./viePatientTwinSection.server";
-export type { PatientTwinVieSection, VieLatestIntelligenceRow } from "./viePatientTwinSection.server";
+export type {
+  PatientTwinVieSection,
+  VieLatestIntelligenceRow,
+} from "./viePatientTwinSection.server";
 
 export {
   VIE_PLATFORM_CHANGELOG_IDS,
@@ -88,7 +88,11 @@ export {
   buildViePlatformProgressModule,
   listViePhasesByStatus,
 } from "./viePlatformProgress";
-export type { ViePlatformPhase, ViePlatformPhaseStatus, ViePlatformProgress } from "./viePlatformProgress";
+export type {
+  ViePlatformPhase,
+  ViePlatformPhaseStatus,
+  ViePlatformProgress,
+} from "./viePlatformProgress";
 
 export type {
   VieComparisonCategory,
@@ -126,10 +130,7 @@ export {
   updateVieComparisonReviewStatus,
 } from "./vieLongitudinalComparison.server";
 
-export {
-  VIE_ALIGNMENT_ENGINE_VERSION,
-  VIE_ALIGNMENT_STATUSES,
-} from "./vieAlignmentTypes";
+export { VIE_ALIGNMENT_ENGINE_VERSION, VIE_ALIGNMENT_STATUSES } from "./vieAlignmentTypes";
 export type {
   VieAlignmentResultRow,
   VieAlignmentStatus,

@@ -7,7 +7,10 @@ import { FiKpiTile } from "@/src/components/fi-design/FiKpiTile";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 import { CaseSectionHealthBadge } from "@/src/components/fi-admin/cases/CaseSectionHealthBadge";
-import { caseDetailPageHref, caseSummaryDocumentPageHref } from "@/src/lib/cases/caseDetailFromCasesParam";
+import {
+  caseDetailPageHref,
+  caseSummaryDocumentPageHref,
+} from "@/src/lib/cases/caseDetailFromCasesParam";
 import { casesWorklistHref, parseCasesIndexQuery } from "@/src/lib/cases/casesIndexFilters";
 import type { CaseReadinessHealth } from "@/src/lib/cases/caseReadinessTypes";
 import {
@@ -59,7 +62,9 @@ function CaseDashRow({
           {entry.procedureDate ? ` · ${entry.procedureDate}` : ""}
           {entry.procedureStatusLabel ? ` · ${entry.procedureStatusLabel}` : ""}
         </p>
-        {entry.zonesLabel ? <p className="mt-0.5 text-xs text-slate-400">Zones: {entry.zonesLabel}</p> : null}
+        {entry.zonesLabel ? (
+          <p className="mt-0.5 text-xs text-slate-400">Zones: {entry.zonesLabel}</p>
+        ) : null}
         {extra}
       </div>
       <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-end sm:gap-1.5">
@@ -68,7 +73,10 @@ function CaseDashRow({
           <Link href={href} className="text-cyan-300 hover:underline">
             Case
           </Link>
-          <Link href={caseSummaryDocumentPageHref(tenantId, entry.caseId, worklistQueryString)} className="text-slate-400 hover:underline">
+          <Link
+            href={caseSummaryDocumentPageHref(tenantId, entry.caseId, worklistQueryString)}
+            className="text-slate-400 hover:underline"
+          >
             Summary
           </Link>
         </div>
@@ -77,7 +85,15 @@ function CaseDashRow({
   );
 }
 
-function SectionCard({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function SectionCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
     <FiCard>
       <h2 className="text-sm font-semibold text-slate-100">{title}</h2>
@@ -101,7 +117,10 @@ export function SurgeryOsDashboard({
   const model = deriveSurgeryOsDashboardModel(rows);
   const dq = defaultCasesQuery();
 
-  const readinessHref = casesWorklistHref(tid, dq, { readiness: "needs_attention", sort: "readiness_attention_desc" });
+  const readinessHref = casesWorklistHref(tid, dq, {
+    readiness: "needs_attention",
+    sort: "readiness_attention_desc",
+  });
   const planningHref = casesWorklistHref(tid, dq, {
     planning_status: CASES_INDEX_NONE_VALUE,
     sort: "readiness_attention_desc",
@@ -134,7 +153,11 @@ export function SurgeryOsDashboard({
       />
 
       <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        <FiKpiTile label="Active cases" value={String(model.metrics.totalActiveCases)} description="Excludes complete / failed" />
+        <FiKpiTile
+          label="Active cases"
+          value={String(model.metrics.totalActiveCases)}
+          description="Excludes complete / failed"
+        />
         <FiKpiTile
           label="Upcoming surgeries"
           value={String(model.metrics.upcomingSurgeries)}
@@ -163,13 +186,24 @@ export function SurgeryOsDashboard({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="space-y-5 lg:col-span-8">
-          <SectionCard title="Today’s surgeries" description="Procedure date is today (local server date); cancelled / aborted excluded.">
+          <SectionCard
+            title="Today’s surgeries"
+            description="Procedure date is today (local server date); cancelled / aborted excluded."
+          >
             {model.todaySurgeries.length === 0 ? (
-              <FiEmptyState title="Nothing on the board today" description="When procedures are dated for today, they will appear here." />
+              <FiEmptyState
+                title="Nothing on the board today"
+                description="When procedures are dated for today, they will appear here."
+              />
             ) : (
               <ul className="divide-y divide-white/[0.06]">
                 {model.todaySurgeries.map((r) => (
-                  <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
+                  <CaseDashRow
+                    key={r.caseId}
+                    tenantId={tid}
+                    worklistQueryString={worklistQueryString}
+                    entry={r}
+                  />
                 ))}
               </ul>
             )}
@@ -187,7 +221,12 @@ export function SurgeryOsDashboard({
             ) : (
               <ul className="divide-y divide-white/[0.06]">
                 {model.upcomingSurgeries.map((r) => (
-                  <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
+                  <CaseDashRow
+                    key={r.caseId}
+                    tenantId={tid}
+                    worklistQueryString={worklistQueryString}
+                    entry={r}
+                  />
                 ))}
               </ul>
             )}
@@ -228,7 +267,9 @@ export function SurgeryOsDashboard({
           >
             <div className="space-y-5">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Follow-ups due</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Follow-ups due
+                </h3>
                 {model.followUpQueue.length === 0 ? (
                   <FiEmptyState
                     className="mt-2 border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md py-6"
@@ -238,13 +279,20 @@ export function SurgeryOsDashboard({
                 ) : (
                   <ul className="mt-2 divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                     {model.followUpQueue.map((r) => (
-                      <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
+                      <CaseDashRow
+                        key={r.caseId}
+                        tenantId={tid}
+                        worklistQueryString={worklistQueryString}
+                        entry={r}
+                      />
                     ))}
                   </ul>
                 )}
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recently completed</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Recently completed
+                </h3>
                 {model.recentCompleted.length === 0 ? (
                   <FiEmptyState
                     className="mt-2 border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md py-6"
@@ -289,11 +337,19 @@ export function SurgeryOsDashboard({
             description="Cases with no surgery plan row yet, or planning checklist not complete per existing readiness rules."
           >
             {model.planningQueue.length === 0 ? (
-              <FiEmptyState title="Planning looks clear" description="No active cases are missing core planning completion." />
+              <FiEmptyState
+                title="Planning looks clear"
+                description="No active cases are missing core planning completion."
+              />
             ) : (
               <ul className="divide-y divide-white/[0.06]">
                 {model.planningQueue.map((r) => (
-                  <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
+                  <CaseDashRow
+                    key={r.caseId}
+                    tenantId={tid}
+                    worklistQueryString={worklistQueryString}
+                    entry={r}
+                  />
                 ))}
               </ul>
             )}
@@ -304,7 +360,10 @@ export function SurgeryOsDashboard({
               <span className="hidden sm:inline" aria-hidden>
                 ·
               </span>
-              <Link href={casesWorklistHref(tid, dq, { sort: "readiness_attention_desc" })} className="font-medium text-cyan-300 hover:underline">
+              <Link
+                href={casesWorklistHref(tid, dq, { sort: "readiness_attention_desc" })}
+                className="font-medium text-cyan-300 hover:underline"
+              >
                 Full worklist (readiness sort)
               </Link>
             </p>

@@ -22,7 +22,13 @@ function svc(
   name: string,
   booking_type: string | null,
   id = name
-): { id: string; name: string; booking_type: string | null; category: string | null; is_active: boolean } {
+): {
+  id: string;
+  name: string;
+  booking_type: string | null;
+  category: string | null;
+  is_active: boolean;
+} {
   return { id, name, booking_type, category: null, is_active: true };
 }
 
@@ -30,7 +36,10 @@ describe("evolvedPerthServiceEligibilitySeedPlan", () => {
   it("maps PRP by booking_type with PRP Room 1 preferred", () => {
     const profile = matchEligibilityProfileId(svc("PRP Treatment", "prp"));
     assert.equal(profile, "regenerative");
-    const { planned } = buildEvolvedPerthServiceEligibilitySeedPlan([svc("PRP Treatment", "prp")], PERTH_ROOMS);
+    const { planned } = buildEvolvedPerthServiceEligibilitySeedPlan(
+      [svc("PRP Treatment", "prp")],
+      PERTH_ROOMS
+    );
     assert.equal(planned.length, 1);
     assert.equal(planned[0]!.preferredRoomCode, "prp_1");
     assert.deepEqual(planned[0]!.roomCodes, ["prp_1", "prp_2"]);
@@ -60,7 +69,10 @@ describe("evolvedPerthServiceEligibilitySeedPlan", () => {
 
   it("skips room eligibility for phone consultation with warning", () => {
     assert.equal(isNonRoomRequiredService(svc("Phone Consultation", null)), true);
-    const { planned } = buildEvolvedPerthServiceEligibilitySeedPlan([svc("Phone Consultation", null)], PERTH_ROOMS);
+    const { planned } = buildEvolvedPerthServiceEligibilitySeedPlan(
+      [svc("Phone Consultation", null)],
+      PERTH_ROOMS
+    );
     assert.equal(planned[0]!.skipRoomEligibility, true);
     assert.match(planned[0]!.warning ?? "", /room_required=false/i);
   });

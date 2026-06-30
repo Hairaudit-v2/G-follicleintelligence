@@ -7,11 +7,14 @@ export function ReceptionOsDemoBanner({ demoMode }: { demoMode: ReceptionOsDemoM
   if (!demoMode.active) return null;
 
   const amountNote = demoMode.maskAmounts ? " Dollar amounts are masked." : "";
-  const sampleNote = demoMode.usingSampleData ? " Showing sample records — no live clinic data." : "";
+  const sampleNote = demoMode.usingSampleData
+    ? " Showing sample records — no live clinic data."
+    : "";
 
   return (
     <InfoNotice variant="info" title="Demo Mode">
-      Patient names are anonymised and contact details are hidden for external demonstrations.{amountNote}
+      Patient names are anonymised and contact details are hidden for external demonstrations.
+      {amountNote}
       {sampleNote} Live sends remain disabled by default.
     </InfoNotice>
   );

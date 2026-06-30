@@ -24,7 +24,10 @@ import {
   isInstantInTenantInclusiveDayWindow,
 } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
-export type { FinancialClearanceResult, FinancialClearanceDashboardMetrics } from "@/src/lib/financialOs/financialClearanceCore";
+export type {
+  FinancialClearanceResult,
+  FinancialClearanceDashboardMetrics,
+} from "@/src/lib/financialOs/financialClearanceCore";
 
 const BOARD_LIMIT = 240;
 
@@ -234,7 +237,10 @@ async function loadUpcomingSurgeryBookingsForClearance(
   tenantId: string,
   args: { todayYmd: string; calendarTimezone: string; horizonDays: number; limit: number }
 ): Promise<BookingClearanceContext[]> {
-  const window = computeSurgeryReadinessBoardWindow(new Date(`${args.todayYmd}T12:00:00.000Z`), args.calendarTimezone);
+  const window = computeSurgeryReadinessBoardWindow(
+    new Date(`${args.todayYmd}T12:00:00.000Z`),
+    args.calendarTimezone
+  );
   const rawBookings = await loadBookingsForOperatorView({
     tenantId: tenantId.trim(),
     rangeStartIso: window.rangeStartIso,
@@ -266,7 +272,10 @@ async function loadUpcomingSurgeryBookingsForClearance(
     }));
 }
 
-export async function loadFinancialClearanceAttentionCount(tenantId: string, now: Date = new Date()): Promise<number> {
+export async function loadFinancialClearanceAttentionCount(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<number> {
   try {
     const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tenantId.trim());
     const window = computeSurgeryReadinessBoardWindow(now, calendarTimezone);
@@ -413,7 +422,9 @@ export async function runFinancialClearanceSnapshotCron(args: {
     }
 
     if (!args.dryRun && rows.length) {
-      const { error: insertError } = await supabase.from("fi_financial_clearance_snapshots").insert(rows);
+      const { error: insertError } = await supabase
+        .from("fi_financial_clearance_snapshots")
+        .insert(rows);
       if (insertError) throw new Error(insertError.message);
       inserted += rows.length;
     }

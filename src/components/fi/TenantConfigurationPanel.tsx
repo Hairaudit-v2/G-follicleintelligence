@@ -10,7 +10,10 @@ import {
 } from "@/lib/actions/fi-configuration-actions";
 import { FiTenantOperatingModePanel } from "@/src/components/fi-os/FiTenantOperatingModePanel";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { EffectiveBranding, TenantConfigurationOverview } from "@/src/lib/fi/foundation/tenantSettings";
+import type {
+  EffectiveBranding,
+  TenantConfigurationOverview,
+} from "@/src/lib/fi/foundation/tenantSettings";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -150,7 +153,9 @@ export function TenantConfigurationPanel({
   const [busy, setBusy] = useState<string | null>(null);
   const [tenantFb, setTenantFb] = useState<{ ok: boolean; text: string } | null>(null);
   const [orgFb, setOrgFb] = useState<Record<string, { ok: boolean; text: string } | null>>({});
-  const [clinicFb, setClinicFb] = useState<Record<string, { ok: boolean; text: string } | null>>({});
+  const [clinicFb, setClinicFb] = useState<Record<string, { ok: boolean; text: string } | null>>(
+    {}
+  );
 
   const tenantKey = overview.tenant_settings?.updated_at ?? "no-row";
 
@@ -160,14 +165,24 @@ export function TenantConfigurationPanel({
         Branding and operational URLs for this tenant cascade from tenant → organisation → clinic.{" "}
         <strong className="text-[#E2E8F0]">Everyone can review</strong> the sections below.{" "}
         <strong className="text-[#E2E8F0]">Saving changes</strong> uses the deployment{" "}
-        <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#22C1FF]">FI_ADMIN_API_KEY</code> in the operator panel — paste the key only when you intend to write. All writes run server-side with the Supabase service role.
+        <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#22C1FF]">
+          FI_ADMIN_API_KEY
+        </code>{" "}
+        in the operator panel — paste the key only when you intend to write. All writes run
+        server-side with the Supabase service role.
       </p>
 
       <DashboardCard elevated className="border-violet-500/25 bg-[#120a1e]/55 p-4 sm:p-5">
-        <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-violet-300/90">Deployment operators</p>
-        <h2 className="mt-1 text-base font-semibold text-[#F8FAFC]">Admin API key (optional until you save)</h2>
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-violet-300/90">
+          Deployment operators
+        </p>
+        <h2 className="mt-1 text-base font-semibold text-[#F8FAFC]">
+          Admin API key (optional until you save)
+        </h2>
         <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#94A3B8] sm:text-sm">
-          This is <strong className="text-[#E2E8F0]">not</strong> a login for day-to-day staff. It gates configuration writes the same way as secure server tooling — leave blank while browsing; paste only for saves or scripted migrations.
+          This is <strong className="text-[#E2E8F0]">not</strong> a login for day-to-day staff. It
+          gates configuration writes the same way as secure server tooling — leave blank while
+          browsing; paste only for saves or scripted migrations.
         </p>
         <label className="mt-4 block max-w-md space-y-1.5">
           <span className="text-xs font-medium text-[#94A3B8]">FI_ADMIN_API_KEY</span>
@@ -179,7 +194,9 @@ export function TenantConfigurationPanel({
             placeholder="Paste when saving — never committed to git"
             autoComplete="off"
           />
-          <span className="block text-xs text-[#64748B]">Required only when you click a Save button. Never share in chat or tickets.</span>
+          <span className="block text-xs text-[#64748B]">
+            Required only when you click a Save button. Never share in chat or tickets.
+          </span>
         </label>
       </DashboardCard>
 
@@ -206,7 +223,9 @@ export function TenantConfigurationPanel({
                 <KeyVal k="Default timezone" v={overview.tenant_settings.default_timezone} />
               </dl>
             ) : (
-              <p className="text-xs text-[#64748B]">No tenant settings row yet — saving the form will create one.</p>
+              <p className="text-xs text-[#64748B]">
+                No tenant settings row yet — saving the form will create one.
+              </p>
             )}
           </div>
           <div>
@@ -239,22 +258,52 @@ export function TenantConfigurationPanel({
                 }
               }}
             >
-              <Field label="Brand / display name" name="brand_name" defaultValue={overview.tenant_settings?.brand_name} />
-              <Field label="Logo URL" name="logo_url" defaultValue={overview.tenant_settings?.logo_url} hint="http(s) only" />
-              <Field label="Primary colour" name="primary_colour" defaultValue={overview.tenant_settings?.primary_colour} hint="#rgb or #rrggbb" />
-              <Field label="Secondary colour" name="secondary_colour" defaultValue={overview.tenant_settings?.secondary_colour} />
-              <Field label="Accent colour" name="accent_colour" defaultValue={overview.tenant_settings?.accent_colour} />
-              <Field label="Support email" name="support_email" defaultValue={overview.tenant_settings?.support_email} />
-              <Field label="Default timezone" name="default_timezone" defaultValue={overview.tenant_settings?.default_timezone} hint="e.g. Europe/London" />
-              <button
-                type="submit"
-                disabled={busy !== null}
-                className={saveButtonClass}
-              >
+              <Field
+                label="Brand / display name"
+                name="brand_name"
+                defaultValue={overview.tenant_settings?.brand_name}
+              />
+              <Field
+                label="Logo URL"
+                name="logo_url"
+                defaultValue={overview.tenant_settings?.logo_url}
+                hint="http(s) only"
+              />
+              <Field
+                label="Primary colour"
+                name="primary_colour"
+                defaultValue={overview.tenant_settings?.primary_colour}
+                hint="#rgb or #rrggbb"
+              />
+              <Field
+                label="Secondary colour"
+                name="secondary_colour"
+                defaultValue={overview.tenant_settings?.secondary_colour}
+              />
+              <Field
+                label="Accent colour"
+                name="accent_colour"
+                defaultValue={overview.tenant_settings?.accent_colour}
+              />
+              <Field
+                label="Support email"
+                name="support_email"
+                defaultValue={overview.tenant_settings?.support_email}
+              />
+              <Field
+                label="Default timezone"
+                name="default_timezone"
+                defaultValue={overview.tenant_settings?.default_timezone}
+                hint="e.g. Europe/London"
+              />
+              <button type="submit" disabled={busy !== null} className={saveButtonClass}>
                 {busy === "tenant" ? "Saving…" : "Save tenant settings"}
               </button>
               <div className="pt-2">
-                <Feedback message={tenantFb?.text ?? null} ok={tenantFb === null ? null : tenantFb.ok} />
+                <Feedback
+                  message={tenantFb?.text ?? null}
+                  ok={tenantFb === null ? null : tenantFb.ok}
+                />
               </div>
             </form>
           </div>
@@ -266,7 +315,9 @@ export function TenantConfigurationPanel({
           <DashboardCard className="border-dashed border-white/[0.12] p-5 text-sm text-[#94A3B8]">
             <p className="font-medium text-[#E2E8F0]">No organisations for this tenant</p>
             <p className="mt-2 text-xs leading-relaxed sm:text-sm">
-              Add an organisation from <span className="text-[#22C1FF]">Directory → Foundation records</span> to unlock organisation-level branding and settings here.
+              Add an organisation from{" "}
+              <span className="text-[#22C1FF]">Directory → Foundation records</span> to unlock
+              organisation-level branding and settings here.
             </p>
           </DashboardCard>
         ) : (
@@ -275,10 +326,16 @@ export function TenantConfigurationPanel({
               const fk = settings?.updated_at ?? `none-${organisation.id}`;
               const fb = orgFb[organisation.id];
               return (
-                <li key={organisation.id} className="rounded-xl border border-white/[0.08] bg-[#141C33]/40 p-3">
+                <li
+                  key={organisation.id}
+                  className="rounded-xl border border-white/[0.08] bg-[#141C33]/40 p-3"
+                >
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-[#F8FAFC]">{organisation.name}</span>
-                    <Link href={`${base}?organisationId=${organisation.id}`} className="text-xs text-[#22C1FF] hover:underline">
+                    <Link
+                      href={`${base}?organisationId=${organisation.id}`}
+                      className="text-xs text-[#22C1FF] hover:underline"
+                    >
                       Preview cascade (org)
                     </Link>
                   </div>
@@ -299,10 +356,16 @@ export function TenantConfigurationPanel({
                         </dl>
                       ) : (
                         <dl className="text-xs text-[#CBD5E1]">
-                          <KeyVal k="Legal / registry name (fi_organisations)" v={organisation.name} />
+                          <KeyVal
+                            k="Legal / registry name (fi_organisations)"
+                            v={organisation.name}
+                          />
                           <p className="mt-2 text-xs text-[#64748B]">
                             No organisation settings row yet — saving the form creates{" "}
-                            <code className="rounded bg-[#141C33] px-1 text-[#22C1FF]">fi_organisation_settings</code>.
+                            <code className="rounded bg-[#141C33] px-1 text-[#22C1FF]">
+                              fi_organisation_settings
+                            </code>
+                            .
                           </p>
                         </dl>
                       )}
@@ -331,10 +394,16 @@ export function TenantConfigurationPanel({
                           });
                           setBusy(null);
                           if (res.ok) {
-                            setOrgFb((m) => ({ ...m, [organisation.id]: { ok: true, text: "Organisation settings saved." } }));
+                            setOrgFb((m) => ({
+                              ...m,
+                              [organisation.id]: { ok: true, text: "Organisation settings saved." },
+                            }));
                             router.refresh();
                           } else {
-                            setOrgFb((m) => ({ ...m, [organisation.id]: { ok: false, text: res.error } }));
+                            setOrgFb((m) => ({
+                              ...m,
+                              [organisation.id]: { ok: false, text: res.error },
+                            }));
                           }
                         }}
                       >
@@ -344,20 +413,41 @@ export function TenantConfigurationPanel({
                           defaultValue={settings?.brand_name ?? organisation.name}
                         />
                         <Field label="Logo URL" name="logo_url" defaultValue={settings?.logo_url} />
-                        <Field label="Primary colour" name="primary_colour" defaultValue={settings?.primary_colour} />
-                        <Field label="Secondary colour" name="secondary_colour" defaultValue={settings?.secondary_colour} />
-                        <Field label="Accent colour" name="accent_colour" defaultValue={settings?.accent_colour} />
-                        <Field label="Website URL" name="website_url" defaultValue={settings?.website_url} />
-                        <Field label="Support email" name="support_email" defaultValue={settings?.support_email} />
-                        <button
-                          type="submit"
-                          disabled={busy !== null}
-                          className={saveButtonClass}
-                        >
-                          {busy === `org:${organisation.id}` ? "Saving…" : `Save — ${organisation.name}`}
+                        <Field
+                          label="Primary colour"
+                          name="primary_colour"
+                          defaultValue={settings?.primary_colour}
+                        />
+                        <Field
+                          label="Secondary colour"
+                          name="secondary_colour"
+                          defaultValue={settings?.secondary_colour}
+                        />
+                        <Field
+                          label="Accent colour"
+                          name="accent_colour"
+                          defaultValue={settings?.accent_colour}
+                        />
+                        <Field
+                          label="Website URL"
+                          name="website_url"
+                          defaultValue={settings?.website_url}
+                        />
+                        <Field
+                          label="Support email"
+                          name="support_email"
+                          defaultValue={settings?.support_email}
+                        />
+                        <button type="submit" disabled={busy !== null} className={saveButtonClass}>
+                          {busy === `org:${organisation.id}`
+                            ? "Saving…"
+                            : `Save — ${organisation.name}`}
                         </button>
                         <div className="pt-2">
-                          <Feedback message={fb?.text ?? null} ok={fb === null || fb === undefined ? null : fb.ok} />
+                          <Feedback
+                            message={fb?.text ?? null}
+                            ok={fb === null || fb === undefined ? null : fb.ok}
+                          />
                         </div>
                       </form>
                     </div>
@@ -374,7 +464,9 @@ export function TenantConfigurationPanel({
           <DashboardCard className="border-dashed border-white/[0.12] p-5 text-sm text-[#94A3B8]">
             <p className="font-medium text-[#E2E8F0]">No clinics for this tenant</p>
             <p className="mt-2 text-xs leading-relaxed sm:text-sm">
-              Create a clinic from <span className="text-[#22C1FF]">Directory → Foundation records</span> after you have at least one organisation (recommended).
+              Create a clinic from{" "}
+              <span className="text-[#22C1FF]">Directory → Foundation records</span> after you have
+              at least one organisation (recommended).
             </p>
           </DashboardCard>
         ) : (
@@ -383,11 +475,17 @@ export function TenantConfigurationPanel({
               const fk = settings?.updated_at ?? `none-${clinic.id}`;
               const fb = clinicFb[clinic.id];
               return (
-                <li key={clinic.id} className="rounded-xl border border-white/[0.08] bg-[#141C33]/40 p-3">
+                <li
+                  key={clinic.id}
+                  className="rounded-xl border border-white/[0.08] bg-[#141C33]/40 p-3"
+                >
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-[#F8FAFC]">{clinic.display_name}</span>
                     <div className="flex gap-2 text-xs">
-                      <Link href={`${base}?clinicId=${clinic.id}`} className="text-[#22C1FF] hover:underline">
+                      <Link
+                        href={`${base}?clinicId=${clinic.id}`}
+                        className="text-[#22C1FF] hover:underline"
+                      >
                         Preview (clinic)
                       </Link>
                       {clinic.organisation_id ? (
@@ -418,7 +516,10 @@ export function TenantConfigurationPanel({
                           <KeyVal k="Display name (fi_clinics)" v={clinic.display_name} />
                           <p className="mt-2 text-xs text-[#64748B]">
                             No clinic settings row yet — saving the form creates{" "}
-                            <code className="rounded bg-[#141C33] px-1 text-[#22C1FF]">fi_clinic_settings</code> for this clinic.
+                            <code className="rounded bg-[#141C33] px-1 text-[#22C1FF]">
+                              fi_clinic_settings
+                            </code>{" "}
+                            for this clinic.
                           </p>
                         </dl>
                       )}
@@ -453,7 +554,10 @@ export function TenantConfigurationPanel({
                             }));
                             router.refresh();
                           } else {
-                            setClinicFb((m) => ({ ...m, [clinic.id]: { ok: false, text: res.error } }));
+                            setClinicFb((m) => ({
+                              ...m,
+                              [clinic.id]: { ok: false, text: res.error },
+                            }));
                           }
                         }}
                       >
@@ -462,21 +566,34 @@ export function TenantConfigurationPanel({
                           name="display_name"
                           defaultValue={settings?.display_name ?? clinic.display_name}
                         />
-                        <Field label="Booking URL" name="booking_url" defaultValue={settings?.booking_url} />
-                        <Field label="Public intake URL" name="public_intake_url" defaultValue={settings?.public_intake_url} />
+                        <Field
+                          label="Booking URL"
+                          name="booking_url"
+                          defaultValue={settings?.booking_url}
+                        />
+                        <Field
+                          label="Public intake URL"
+                          name="public_intake_url"
+                          defaultValue={settings?.public_intake_url}
+                        />
                         <Field label="Phone" name="phone" defaultValue={settings?.phone} />
                         <Field label="Email" name="email" defaultValue={settings?.email} />
-                        <TextAreaField label="Address" name="address" defaultValue={settings?.address} />
+                        <TextAreaField
+                          label="Address"
+                          name="address"
+                          defaultValue={settings?.address}
+                        />
                         <Field label="Timezone" name="timezone" defaultValue={settings?.timezone} />
-                        <button
-                          type="submit"
-                          disabled={busy !== null}
-                          className={saveButtonClass}
-                        >
-                          {busy === `clinic:${clinic.id}` ? "Saving…" : `Save — ${clinic.display_name}`}
+                        <button type="submit" disabled={busy !== null} className={saveButtonClass}>
+                          {busy === `clinic:${clinic.id}`
+                            ? "Saving…"
+                            : `Save — ${clinic.display_name}`}
                         </button>
                         <div className="pt-2">
-                          <Feedback message={fb?.text ?? null} ok={fb === null || fb === undefined ? null : fb.ok} />
+                          <Feedback
+                            message={fb?.text ?? null}
+                            ok={fb === null || fb === undefined ? null : fb.ok}
+                          />
                         </div>
                       </form>
                     </div>
@@ -490,10 +607,12 @@ export function TenantConfigurationPanel({
 
       <Section title="Effective branding preview">
         <p className="mb-3 text-xs leading-relaxed text-[#94A3B8] sm:text-sm">
-          Cascade: clinic display name (if set) overrides brand name; colours flow organisation → tenant; contact and
-          timezone prefer clinic where set. Current preview:{" "}
+          Cascade: clinic display name (if set) overrides brand name; colours flow organisation →
+          tenant; contact and timezone prefer clinic where set. Current preview:{" "}
           <span className="font-mono text-[#CBD5E1]">
-            {previewOrganisationId ? `organisation=${previewOrganisationId.slice(0, 8)}…` : "no organisation"}
+            {previewOrganisationId
+              ? `organisation=${previewOrganisationId.slice(0, 8)}…`
+              : "no organisation"}
             {previewClinicId ? ` · clinic=${previewClinicId.slice(0, 8)}…` : ""}
           </span>
           {previewFromUrl ? (
@@ -506,7 +625,9 @@ export function TenantConfigurationPanel({
           ) : null}
         </p>
         <div className="rounded-xl border border-dashed border-white/[0.12] bg-[#081020]/60 p-4">
-          <p className="text-lg font-semibold text-[#F8FAFC]">{effective.brand_name ?? "Untitled brand"}</p>
+          <p className="text-lg font-semibold text-[#F8FAFC]">
+            {effective.brand_name ?? "Untitled brand"}
+          </p>
           <div className="mt-3 flex flex-wrap gap-4">
             <ColourSwatch label="Primary" hex={effective.primary_colour} />
             <ColourSwatch label="Secondary" hex={effective.secondary_colour} />
@@ -515,7 +636,10 @@ export function TenantConfigurationPanel({
           <dl className="mt-4 space-y-1 text-xs">
             <KeyVal k="Logo URL" v={effective.logo_url} />
             <KeyVal k="Support email" v={effective.support_email} />
-            <KeyVal k="Default / clinic timezone" v={effective.default_timezone ?? effective.clinic_timezone} />
+            <KeyVal
+              k="Default / clinic timezone"
+              v={effective.default_timezone ?? effective.clinic_timezone}
+            />
             <KeyVal k="Website" v={effective.website_url} />
             <KeyVal k="Booking URL" v={effective.booking_url} />
             <KeyVal k="Public intake URL" v={effective.public_intake_url} />

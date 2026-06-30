@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateCaseProfileAction } from "@/lib/actions/fi-case-actions";
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+} from "@/src/lib/cases/caseDetailNavConstants";
 
 import { caseFormField } from "./caseFormFieldProps";
 
@@ -29,15 +32,22 @@ export function CasePlanningNotesPanel({
     setNotes(initialPlanningNotes ?? "");
   }, [initialPlanningNotes, updatedAt]);
 
-  const dirty = useMemo(() => notes !== (initialPlanningNotes ?? ""), [notes, initialPlanningNotes]);
+  const dirty = useMemo(
+    () => notes !== (initialPlanningNotes ?? ""),
+    [notes, initialPlanningNotes]
+  );
 
   return (
     <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
-      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.notes)} className="text-sm font-semibold text-slate-100">
+      <h2
+        id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.notes)}
+        className="text-sm font-semibold text-slate-100"
+      >
         Planning notes
       </h2>
       <p className="mt-1 text-xs text-gray-500">
-        High-level coordination and clinical intent — not graft counts or surgical audit scoring (Stage 5B+).
+        High-level coordination and clinical intent — not graft counts or surgical audit scoring
+        (Stage 5B+).
       </p>
       <label htmlFor={PLANNING_NOTES_FIELD.id} className="sr-only">
         Planning notes

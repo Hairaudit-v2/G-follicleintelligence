@@ -10,8 +10,7 @@ import { isFiOsPlatformAdminRole } from "./fiOsRoles";
 /** HttpOnly cookie set by POST /api/fi-os/impersonation/start (server only). */
 export const FI_OS_IMPERSONATION_COOKIE = "fi_os_impersonation";
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(s: string): boolean {
   return UUID_RE.test(s.trim());
@@ -21,7 +20,9 @@ function isUuid(s: string): boolean {
  * When the signed-in user is `fi_platform_admin` and a valid impersonation cookie is present,
  * returns the target auth user id. Otherwise null.
  */
-export async function getFiOsImpersonationTargetAuthUserId(sessionAuthUserId: string | null): Promise<string | null> {
+export async function getFiOsImpersonationTargetAuthUserId(
+  sessionAuthUserId: string | null
+): Promise<string | null> {
   const sid = sessionAuthUserId?.trim() ?? "";
   if (!sid) return null;
   const os = await loadFiOsIdentity(sid);

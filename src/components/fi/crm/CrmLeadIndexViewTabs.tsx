@@ -40,13 +40,22 @@ export function CrmLeadIndexViewTabs({
           : "inline-flex rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-0.5 text-sm shadow-lg shadow-black/40"
       }
     >
-      <Link href={workspaceHref} className={`rounded-md px-3 py-1.5 font-medium ${tabClass(isWorkspace, dark)}`}>
+      <Link
+        href={workspaceHref}
+        className={`rounded-md px-3 py-1.5 font-medium ${tabClass(isWorkspace, dark)}`}
+      >
         Workspace
       </Link>
-      <Link href={listHref} className={`rounded-md px-3 py-1.5 font-medium ${tabClass(isList, dark)}`}>
+      <Link
+        href={listHref}
+        className={`rounded-md px-3 py-1.5 font-medium ${tabClass(isList, dark)}`}
+      >
         List
       </Link>
-      <Link href={boardHref} className={`rounded-md px-3 py-1.5 font-medium ${tabClass(isBoard, dark)}`}>
+      <Link
+        href={boardHref}
+        className={`rounded-md px-3 py-1.5 font-medium ${tabClass(isBoard, dark)}`}
+      >
         Board
       </Link>
     </div>

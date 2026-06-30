@@ -124,7 +124,10 @@ function stageSlug(card: CrmKanbanLeadCard): string {
   return card.stage?.slug?.trim().toLowerCase() ?? "";
 }
 
-export function deriveBookingReadiness(card: CrmKanbanLeadCard, staleThresholdDays: number): {
+export function deriveBookingReadiness(
+  card: CrmKanbanLeadCard,
+  staleThresholdDays: number
+): {
   label: BookingReadinessLabel;
   nextAction: string;
   priorityScore: number;
@@ -160,7 +163,10 @@ export function deriveBookingReadiness(card: CrmKanbanLeadCard, staleThresholdDa
   if (slug === "qualified" || slug === "consult_scheduled") {
     return {
       label: "Ready to book",
-      nextAction: slug === "consult_scheduled" ? "Confirm consultation attendance and prep." : "Book the consultation while momentum is high.",
+      nextAction:
+        slug === "consult_scheduled"
+          ? "Confirm consultation attendance and prep."
+          : "Book the consultation while momentum is high.",
       priorityScore: 92 - Math.min(15, daysInStage),
     };
   }
@@ -182,13 +188,19 @@ export function deriveBookingReadiness(card: CrmKanbanLeadCard, staleThresholdDa
 
 function countFollowUpsDueToday(tasksDue: TaskDueItem[]): number {
   const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
+  const start = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  ).toISOString();
+  const end = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+  ).toISOString();
   return tasksDue.filter((t) => isTaskDueToday(t, start, end)).length;
 }
 
 function countReadyToBook(leads: CrmKanbanLeadCard[], staleThresholdDays: number): number {
-  return leads.filter((c) => deriveBookingReadiness(c, staleThresholdDays).label === "Ready to book").length;
+  return leads.filter(
+    (c) => deriveBookingReadiness(c, staleThresholdDays).label === "Ready to book"
+  ).length;
 }
 
 function countHighValue(leads: CrmKanbanLeadCard[]): number {
@@ -212,7 +224,11 @@ export function buildLeadFlowHealthCards(
   const followUpsToday = countFollowUpsDueToday(tasksDue);
   const readyToBook = countReadyToBook(enrichedLeads, staleLeadThresholdDays);
   const highValue = countHighValue(enrichedLeads);
-  const atRisk = staleLeads.length + enrichedLeads.filter((c) => deriveBookingReadiness(c, staleLeadThresholdDays).label === "Going cold").length;
+  const atRisk =
+    staleLeads.length +
+    enrichedLeads.filter(
+      (c) => deriveBookingReadiness(c, staleLeadThresholdDays).label === "Going cold"
+    ).length;
 
   return [
     {
@@ -229,14 +245,18 @@ export function buildLeadFlowHealthCards(
       id: "follow_ups_today",
       label: "Follow-ups due today",
       value: String(followUpsToday),
-      detail: followUpsToday > 0 ? "CRM tasks due for attention today" : "No follow-up tasks due today",
+      detail:
+        followUpsToday > 0 ? "CRM tasks due for attention today" : "No follow-up tasks due today",
       href: `${base}/crm?view=list`,
     },
     {
       id: "ready_to_book",
       label: "Ready to book",
       value: String(readyToBook),
-      detail: readyToBook > 0 ? "Qualified leads close to consultation booking" : "No leads flagged as ready to book",
+      detail:
+        readyToBook > 0
+          ? "Qualified leads close to consultation booking"
+          : "No leads flagged as ready to book",
       href: `${base}/crm?view=board`,
     },
     {
@@ -250,14 +270,20 @@ export function buildLeadFlowHealthCards(
       id: "high_value",
       label: "High-value opportunities",
       value: String(highValue),
-      detail: highValue > 0 ? "Priority enquiries needing attentive follow-up" : "No high-priority leads in the active queue",
+      detail:
+        highValue > 0
+          ? "Priority enquiries needing attentive follow-up"
+          : "No high-priority leads in the active queue",
       href: `${base}/crm?view=list&priority=high`,
     },
     {
       id: "at_risk",
       label: "At-risk leads",
       value: String(atRisk),
-      detail: atRisk > 0 ? "Leads going quiet or overdue for follow-up" : "No leads currently flagged as at-risk",
+      detail:
+        atRisk > 0
+          ? "Leads going quiet or overdue for follow-up"
+          : "No leads currently flagged as at-risk",
       href: `${base}/crm?view=list`,
     },
   ];
@@ -269,8 +295,15 @@ export function buildLeadFlowAttentionPriorities(
   maxItems = 5
 ): LeadFlowAttentionItem[] {
   const items: LeadFlowAttentionItem[] = [];
-  const { tasksDue, enrichedLeads, staleLeads, actionCentre, conversionKpis, hubspotImport, staleLeadThresholdDays } =
-    payload;
+  const {
+    tasksDue,
+    enrichedLeads,
+    staleLeads,
+    actionCentre,
+    conversionKpis,
+    hubspotImport,
+    staleLeadThresholdDays,
+  } = payload;
 
   const followUpsToday = countFollowUpsDueToday(tasksDue);
   if (followUpsToday > 0) {
@@ -285,7 +318,15 @@ export function buildLeadFlowAttentionPriorities(
   }
 
   const highValueUnbooked = enrichedLeads.filter(
-    (c) => c.isHighValue && !["consult_scheduled", "consult_completed", "deposit_or_booked", "in_treatment", "won_closed"].includes(stageSlug(c))
+    (c) =>
+      c.isHighValue &&
+      ![
+        "consult_scheduled",
+        "consult_completed",
+        "deposit_or_booked",
+        "in_treatment",
+        "won_closed",
+      ].includes(stageSlug(c))
   ).length;
   if (highValueUnbooked > 0) {
     items.push({
@@ -316,7 +357,10 @@ export function buildLeadFlowAttentionPriorities(
   }
 
   if (conversionKpis.quotesSent > conversionKpis.quotesAccepted) {
-    const needingQuoteFollowUp = Math.max(0, conversionKpis.quotesSent - conversionKpis.quotesAccepted);
+    const needingQuoteFollowUp = Math.max(
+      0,
+      conversionKpis.quotesSent - conversionKpis.quotesAccepted
+    );
     if (needingQuoteFollowUp > 0) {
       items.push({
         id: "quote_follow_up",
@@ -401,7 +445,11 @@ export function buildBookingReadinessItems(
     .slice(0, maxItems);
 }
 
-export function buildAtRiskLeadItems(base: string, payload: LeadFlowDashboardPayload, maxItems = 5): LeadFlowAtRiskItem[] {
+export function buildAtRiskLeadItems(
+  base: string,
+  payload: LeadFlowDashboardPayload,
+  maxItems = 5
+): LeadFlowAtRiskItem[] {
   const { enrichedLeads, staleLeads, staleLeadThresholdDays, actionCentre } = payload;
   const items: LeadFlowAtRiskItem[] = [];
 
@@ -455,9 +503,7 @@ export function buildConversionSnapshotMetrics(
   lostCount: number
 ): LeadFlowConversionMetric[] {
   const enquiryToConsult =
-    kpis.consultationsBookedNext30Days > 0
-      ? `${kpis.consultationsBookedNext30Days} booked`
-      : "—";
+    kpis.consultationsBookedNext30Days > 0 ? `${kpis.consultationsBookedNext30Days} booked` : "—";
 
   const consultToInterest =
     kpis.consultationsCompletedLast30Days > 0
@@ -489,13 +535,17 @@ export function buildConversionSnapshotMetrics(
       id: "quote_follow_up",
       label: "Quote follow-up needed",
       value: String(quoteFollowUpNeeded),
-      detail: quoteFollowUpNeeded > 0 ? "Outstanding quote decisions to chase" : "No outstanding quote follow-ups",
+      detail:
+        quoteFollowUpNeeded > 0
+          ? "Outstanding quote decisions to chase"
+          : "No outstanding quote follow-ups",
     },
     {
       id: "lost_stalled",
       label: "Lost / stalled leads",
       value: String(lostCount),
-      detail: lostCount > 0 ? "Marked lost in the conversion board window" : "No lost leads in window",
+      detail:
+        lostCount > 0 ? "Marked lost in the conversion board window" : "No lost leads in window",
     },
   ];
 }
@@ -559,7 +609,9 @@ export function attentionSeverityClass(severity: LeadFlowAttentionItem["severity
 export function summarizeHubspotDiagnostics(diag: LeadFlowHubspotDiagnostics): string {
   if (!diag.latestBatch) return "No HubSpot import batches recorded for this clinic.";
   const b = diag.latestBatch;
-  if (b.imported_at) return `Last import committed ${formatLeadFlowDateTime(b.imported_at)} (${b.imported_row_count} contacts).`;
-  if (b.dry_run_at) return `Latest batch dry-run ${b.dry_run_passed ? "passed" : "needs review"} — ${diag.stagingRowCount} contacts staged.`;
+  if (b.imported_at)
+    return `Last import committed ${formatLeadFlowDateTime(b.imported_at)} (${b.imported_row_count} contacts).`;
+  if (b.dry_run_at)
+    return `Latest batch dry-run ${b.dry_run_passed ? "passed" : "needs review"} — ${diag.stagingRowCount} contacts staged.`;
   return `Latest batch uploaded — ${b.row_count} contacts awaiting validation.`;
 }

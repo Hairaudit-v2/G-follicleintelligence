@@ -33,8 +33,9 @@ export function FiSection({
   surfaceVariant = "darkGlass",
 }: FiSectionProps) {
   const surface = fiSurfaceVariantClassNames[surfaceVariant];
-  const padWhenNeeded =
-    !SURFACE_WITH_BUILTIN_PADDING.has(surfaceVariant) ? "p-4 sm:p-5" : undefined;
+  const padWhenNeeded = !SURFACE_WITH_BUILTIN_PADDING.has(surfaceVariant)
+    ? "p-4 sm:p-5"
+    : undefined;
   const darkHeading = surfaceVariant === "darkGlass" || surfaceVariant === "auditDark";
 
   return (

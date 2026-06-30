@@ -113,7 +113,7 @@ export function BodyAreaMapField({
   const [activeView, setActiveView] = useState<BodyAreaMapViewId>(() => {
     const n = normalizeBodyAreaMapValue(value, allowedViews);
     const v = n.view;
-    return allowedViews.includes(v) ? v : allowedViews[0] ?? "frontal_hairline";
+    return allowedViews.includes(v) ? v : (allowedViews[0] ?? "frontal_hairline");
   });
 
   useEffect(() => {
@@ -213,7 +213,9 @@ export function BodyAreaMapField({
       if (!selectedId) return;
       commit({
         ...normalized,
-        annotations: normalized.annotations.map((a) => (a.id === selectedId ? { ...a, ...patch } : a)),
+        annotations: normalized.annotations.map((a) =>
+          a.id === selectedId ? { ...a, ...patch } : a
+        ),
       });
     },
     [commit, normalized, selectedId]
@@ -231,18 +233,16 @@ export function BodyAreaMapField({
       <div>
         <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
-          {required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+          {required ? (
+            <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+          ) : null}
         </div>
         {description?.trim() ? (
           <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
         ) : null}
       </div>
 
-      <div
-        role="tablist"
-        aria-label="Wireframe view"
-        className="flex flex-wrap gap-2"
-      >
+      <div role="tablist" aria-label="Wireframe view" className="flex flex-wrap gap-2">
         {allowedViews.map((v) => {
           const count = countsByView.get(v) ?? 0;
           const active = v === activeView;
@@ -261,7 +261,12 @@ export function BodyAreaMapField({
               )}
             >
               <span className="block leading-tight">{BODY_AREA_MAP_VIEW_LABELS[v]}</span>
-              <span className={cn("mt-0.5 block text-xs font-normal", fiOsLightFormSurfaceClassNames.meta)}>
+              <span
+                className={cn(
+                  "mt-0.5 block text-xs font-normal",
+                  fiOsLightFormSurfaceClassNames.meta
+                )}
+              >
                 {count} marker{count === 1 ? "" : "s"}
               </span>
             </button>
@@ -300,7 +305,9 @@ export function BodyAreaMapField({
                 <circle
                   r={sel ? 4.2 : 3.2}
                   className={cn(
-                    sel ? "fill-sky-600 stroke-white stroke-1" : "fill-amber-500 stroke-white stroke-1",
+                    sel
+                      ? "fill-sky-600 stroke-white stroke-1"
+                      : "fill-amber-500 stroke-white stroke-1",
                     "drop-shadow-sm"
                   )}
                 />
@@ -450,7 +457,8 @@ export function BodyAreaMapAnnotationsSummary({
               ) : null}
             </div>
             <div className="mt-0.5 text-xs text-slate-400">
-              Severity: <span className="font-medium capitalize">{row.severity.replace(/_/g, " ")}</span>
+              Severity:{" "}
+              <span className="font-medium capitalize">{row.severity.replace(/_/g, " ")}</span>
             </div>
             {row.combinedNotes.trim() ? (
               <div className="mt-1 text-xs text-slate-300">Notes: {row.combinedNotes.trim()}</div>

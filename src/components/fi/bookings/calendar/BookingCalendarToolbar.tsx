@@ -25,7 +25,10 @@ export function BookingCalendarToolbar({
 }) {
   const prev = buildCalendarHref(tenantId, calendarNavigationHelpers.previousPeriod(query));
   const next = buildCalendarHref(tenantId, calendarNavigationHelpers.nextPeriod(query));
-  const today = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, calendarNavigationHelpers.goToToday()));
+  const today = buildCalendarHref(
+    tenantId,
+    mergeCalendarHrefQuery(query, calendarNavigationHelpers.goToToday())
+  );
 
   const dayHref = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: "day" }));
   const weekHref = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: "week" }));
@@ -58,7 +61,9 @@ export function BookingCalendarToolbar({
         <Link
           href={dayHref}
           className={`rounded px-2 py-1 text-sm ${
-            query.view === "day" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
+            query.view === "day"
+              ? "bg-gray-900 text-white"
+              : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
           }`}
         >
           Day
@@ -66,7 +71,9 @@ export function BookingCalendarToolbar({
         <Link
           href={weekHref}
           className={`rounded px-2 py-1 text-sm ${
-            query.view === "week" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
+            query.view === "week"
+              ? "bg-gray-900 text-white"
+              : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
           }`}
         >
           Week
@@ -78,7 +85,9 @@ export function BookingCalendarToolbar({
           type="button"
           onClick={onToggleFilters}
           className={`rounded px-2 py-1 text-sm ${
-            showFilters ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
+            showFilters
+              ? "bg-gray-900 text-white"
+              : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
           }`}
         >
           Filters
@@ -92,7 +101,9 @@ export function BookingCalendarToolbar({
         </button>
       </div>
 
-      <p className="w-full text-center text-sm text-slate-300 sm:w-auto sm:text-right">{rangeTitle}</p>
+      <p className="w-full text-center text-sm text-slate-300 sm:w-auto sm:text-right">
+        {rangeTitle}
+      </p>
     </div>
   );
 }

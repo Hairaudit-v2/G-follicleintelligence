@@ -21,9 +21,7 @@ export type FiEventHandlerContext = {
   };
 };
 
-export type FiEventHandlerResult =
-  | { ok: true; skipped?: boolean }
-  | { ok: false; error: string };
+export type FiEventHandlerResult = { ok: true; skipped?: boolean } | { ok: false; error: string };
 
 type HandlerFn = (
   ctx: FiEventHandlerContext,
@@ -40,8 +38,12 @@ async function handleAnalyticsCalendarEventCaptured(
         tenantId: ctx.tenantId,
         moduleName: "clinic_os",
         eventType: ctx.event.eventName.replace(/\./g, "_"),
-        entityId: typeof ctx.event.payload.entityId === "string" ? ctx.event.payload.entityId : null,
-        entityType: typeof ctx.event.payload.entityType === "string" ? ctx.event.payload.entityType : "calendar",
+        entityId:
+          typeof ctx.event.payload.entityId === "string" ? ctx.event.payload.entityId : null,
+        entityType:
+          typeof ctx.event.payload.entityType === "string"
+            ? ctx.event.payload.entityType
+            : "calendar",
         eventMetadata: {
           platformEventId: ctx.event.id,
           sourceModule: ctx.event.sourceModule,
@@ -78,14 +80,18 @@ async function handleNotificationsCalendarConflictDetected(
 ): Promise<FiEventHandlerResult> {
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const integrationId =
-    typeof ctx.event.payload.integrationId === "string" ? ctx.event.payload.integrationId.trim() : null;
+    typeof ctx.event.payload.integrationId === "string"
+      ? ctx.event.payload.integrationId.trim()
+      : null;
 
   if (!integrationId) {
     return { ok: true, skipped: true };
   }
 
   const externalEventId =
-    typeof ctx.event.payload.externalEventId === "string" ? ctx.event.payload.externalEventId : "unknown";
+    typeof ctx.event.payload.externalEventId === "string"
+      ? ctx.event.payload.externalEventId
+      : "unknown";
   const idempotencyKey =
     typeof ctx.event.metadata.idempotencyKey === "string"
       ? ctx.event.metadata.idempotencyKey
@@ -135,7 +141,9 @@ async function handleAuditCalendarWebhookReceived(
 ): Promise<FiEventHandlerResult> {
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const integrationId =
-    typeof ctx.event.payload.integrationId === "string" ? ctx.event.payload.integrationId.trim() : null;
+    typeof ctx.event.payload.integrationId === "string"
+      ? ctx.event.payload.integrationId.trim()
+      : null;
 
   if (!integrationId) {
     return { ok: true, skipped: true };

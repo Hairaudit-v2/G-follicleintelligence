@@ -5,7 +5,9 @@
 import type { WorkforceClinicalEventSource } from "@/src/lib/workforce-os/workforceClinicalEventMapping";
 import type { ClinicalStaffingDisplayStatus } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 
-export type RosterStaffingStatusFilter = Exclude<ClinicalStaffingDisplayStatus, "not_configured"> | "no_template";
+export type RosterStaffingStatusFilter =
+  | Exclude<ClinicalStaffingDisplayStatus, "not_configured">
+  | "no_template";
 
 export type RosterCommandCentreSearchParams = {
   dateFrom?: string;
@@ -85,7 +87,12 @@ export function parseRosterCommandCentreSearchParams(
       : undefined;
 
   const eventSourceRaw = pick("eventSource");
-  const allowedSources = new Set<WorkforceClinicalEventSource>(["booking", "surgery", "calendar", "manual"]);
+  const allowedSources = new Set<WorkforceClinicalEventSource>([
+    "booking",
+    "surgery",
+    "calendar",
+    "manual",
+  ]);
   const eventSource =
     eventSourceRaw && allowedSources.has(eventSourceRaw as WorkforceClinicalEventSource)
       ? (eventSourceRaw as WorkforceClinicalEventSource)
@@ -114,7 +121,10 @@ export function resolveRosterPreselectedEventKey(
 }
 
 /** Default command centre window: start of today through end of day +7 (UTC). */
-export function defaultRosterCommandCentreDateRange(now: Date = new Date()): { startsAt: string; endsAt: string } {
+export function defaultRosterCommandCentreDateRange(now: Date = new Date()): {
+  startsAt: string;
+  endsAt: string;
+} {
   const start = new Date(now);
   start.setUTCHours(0, 0, 0, 0);
   const end = new Date(start);

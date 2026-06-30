@@ -70,7 +70,9 @@ export function AppointmentCoreDetailsSection({
 
   return (
     <section className={appointmentCardClass}>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Schedule & team</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Schedule & team
+      </h3>
       <p className="text-sm text-slate-100">{range}</p>
       <p className="mt-1 text-xs text-slate-400">
         Duration: {durationMin > 0 ? `${durationMin} min` : "—"}
@@ -102,7 +104,11 @@ export function AppointmentCoreDetailsSection({
 
       {canMutate ? (
         <div className="mt-3 border-t border-white/[0.06] pt-2">
-          <button type="button" className="text-xs font-medium text-blue-300 hover:underline" onClick={onToggleReschedule}>
+          <button
+            type="button"
+            className="text-xs font-medium text-blue-300 hover:underline"
+            onClick={onToggleReschedule}
+          >
             {rescheduleOpen ? "Hide reschedule" : "Reschedule / update status"}
           </button>
           {rescheduleOpen ? (
@@ -137,7 +143,9 @@ export function AppointmentCoreDetailsSection({
                       {s}
                     </option>
                   ))}
-                  {!WRITABLE_STATUSES.includes(bookingStatus as (typeof WRITABLE_STATUSES)[number]) ? (
+                  {!WRITABLE_STATUSES.includes(
+                    bookingStatus as (typeof WRITABLE_STATUSES)[number]
+                  ) ? (
                     <option value={bookingStatus}>{bookingStatus}</option>
                   ) : null}
                 </select>
@@ -156,14 +164,17 @@ export function AppointmentCoreDetailsSection({
       ) : null}
 
       <div className="mt-3 border-t border-white/[0.06] pt-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Status history</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Status history
+        </p>
         {statusHistory.length === 0 ? (
           <p className="mt-1 text-xs text-slate-400">No history recorded yet.</p>
         ) : (
           <ul className="mt-2 max-h-32 space-y-1.5 overflow-y-auto text-xs">
             {statusHistory.slice(0, 12).map((h, i) => (
               <li key={`${h.at}-${h.status}-${i}`} className="border-l-2 border-white/[0.06] pl-2">
-                <span className="text-gray-500">{h.at}</span> · <span className="font-medium">{h.status}</span>
+                <span className="text-gray-500">{h.at}</span> ·{" "}
+                <span className="font-medium">{h.status}</span>
                 {h.note ? <span className="text-slate-400"> — {h.note}</span> : null}
               </li>
             ))}

@@ -7,4 +7,5 @@ export const CONSULTATION_PATHWAY_LAUNCHER_PATH_KEYS = [
   "scalp_pathology",
 ] as const;
 
-export type ConsultationPathwayLauncherPathKey = (typeof CONSULTATION_PATHWAY_LAUNCHER_PATH_KEYS)[number];
+export type ConsultationPathwayLauncherPathKey =
+  (typeof CONSULTATION_PATHWAY_LAUNCHER_PATH_KEYS)[number];

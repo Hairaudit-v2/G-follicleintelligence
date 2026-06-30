@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { FI_DASHBOARD_HOME_WIDGET_ORDER, FI_DASHBOARD_WIDGET_KEYS } from "@/src/config/fiDashboardRegistry";
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  FI_DASHBOARD_HOME_WIDGET_ORDER,
+  FI_DASHBOARD_WIDGET_KEYS,
+} from "@/src/config/fiDashboardRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import { composeWorkspaceDashboardWidgets } from "@/src/lib/fi-os/workspaceDashboardComposer";
 
 test("composer: surgeon profile includes clinical intelligence widget", () => {

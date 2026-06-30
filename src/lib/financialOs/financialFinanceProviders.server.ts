@@ -27,7 +27,10 @@ function mapRow(raw: Record<string, unknown>): FinanceProviderRecord {
     provider_type: raw.provider_type as FiFinanceProviderType,
     country_code: raw.country_code ? String(raw.country_code) : null,
     is_active: Boolean(raw.is_active),
-    metadata: meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+    metadata:
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
   };

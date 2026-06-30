@@ -14,7 +14,9 @@ function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
 }
 
-export function mapConsultationFormTemplateRow(raw: Record<string, unknown>): ConsultationFormTemplate {
+export function mapConsultationFormTemplateRow(
+  raw: Record<string, unknown>
+): ConsultationFormTemplate {
   return {
     id: String(raw.id),
     tenant_id: raw.tenant_id == null ? null : String(raw.tenant_id),
@@ -29,10 +31,15 @@ export function mapConsultationFormTemplateRow(raw: Record<string, unknown>): Co
   };
 }
 
-export function mapConsultationFormTemplateVersionRow(raw: Record<string, unknown>): ConsultationFormTemplateVersion {
+export function mapConsultationFormTemplateVersionRow(
+  raw: Record<string, unknown>
+): ConsultationFormTemplateVersion {
   const schemaRaw = raw.schema;
   const schema: ConsultationFormSchema =
-    schemaRaw && typeof schemaRaw === "object" && !Array.isArray(schemaRaw) && "sections" in (schemaRaw as object)
+    schemaRaw &&
+    typeof schemaRaw === "object" &&
+    !Array.isArray(schemaRaw) &&
+    "sections" in (schemaRaw as object)
       ? (schemaRaw as ConsultationFormSchema)
       : { sections: [] };
 
@@ -49,7 +56,9 @@ export function mapConsultationFormTemplateVersionRow(raw: Record<string, unknow
   };
 }
 
-export function mapConsultationFormInstanceRow(raw: Record<string, unknown>): ConsultationFormInstance {
+export function mapConsultationFormInstanceRow(
+  raw: Record<string, unknown>
+): ConsultationFormInstance {
   const completionRaw = raw.completion_summary;
   const completion_summary =
     completionRaw && typeof completionRaw === "object" && !Array.isArray(completionRaw)
@@ -66,9 +75,11 @@ export function mapConsultationFormInstanceRow(raw: Record<string, unknown>): Co
     computed: asRecord(raw.computed),
     started_at: String(raw.started_at),
     submitted_at: raw.submitted_at == null ? null : String(raw.submitted_at),
-    submitted_by_user_id: raw.submitted_by_user_id == null ? null : String(raw.submitted_by_user_id),
+    submitted_by_user_id:
+      raw.submitted_by_user_id == null ? null : String(raw.submitted_by_user_id),
     completed_at: raw.completed_at == null ? null : String(raw.completed_at),
-    completed_by_user_id: raw.completed_by_user_id == null ? null : String(raw.completed_by_user_id),
+    completed_by_user_id:
+      raw.completed_by_user_id == null ? null : String(raw.completed_by_user_id),
     completion_summary,
     created_at: String(raw.created_at),
     updated_at: String(raw.updated_at),

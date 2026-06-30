@@ -3,9 +3,15 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { assertTimelyWebhookAuthorized, TimelyWebhookAuthError } from "./timelyWebhookAuth.server";
-import { extractTimelyDiscoveryEventType, stableStringifyForWebhookHash } from "./timelyWebhookEvents.server";
+import {
+  extractTimelyDiscoveryEventType,
+  stableStringifyForWebhookHash,
+} from "./timelyWebhookEvents.server";
 import { timelyAppointmentWebhookSchema, timelyPatientWebhookSchema } from "./timelyWebhookSchemas";
-import { processTimelyAppointmentWebhook, resolveTimelyStaffIdByName } from "./timelyAppointmentWebhook.server";
+import {
+  processTimelyAppointmentWebhook,
+  resolveTimelyStaffIdByName,
+} from "./timelyAppointmentWebhook.server";
 import { withTimelyWebhookAudit } from "./timelyWebhookAudit.server";
 import { processTimelyPatientWebhook } from "./timelyPatientWebhook.server";
 import { resolveTimelyBookingLead } from "./resolveTimelyBookingLead.server";
@@ -41,14 +47,16 @@ describe("Timely webhook auth", () => {
   it("rejects invalid secret", () => {
     assert.throws(
       () => assertTimelyWebhookAuthorized(reqWithAuth("wrong-secret")),
-      (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 401
+      (e: unknown) =>
+        e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 401
     );
   });
 
   it("rejects missing bearer", () => {
     assert.throws(
       () => assertTimelyWebhookAuthorized(reqWithAuth(null)),
-      (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 401
+      (e: unknown) =>
+        e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 401
     );
   });
 
@@ -61,7 +69,8 @@ describe("Timely webhook auth", () => {
     env.NODE_ENV = "production";
     assert.throws(
       () => assertTimelyWebhookAuthorized(reqWithAuth(SECRET)),
-      (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
+      (e: unknown) =>
+        e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
     );
   });
 
@@ -70,7 +79,8 @@ describe("Timely webhook auth", () => {
     env.NODE_ENV = "test";
     assert.throws(
       () => assertTimelyWebhookAuthorized(reqWithAuth("short_secret")),
-      (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
+      (e: unknown) =>
+        e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
     );
   });
 });
@@ -173,20 +183,15 @@ describe("Timely patient webhook (mocked foundation)", () => {
       last_name: "Test",
       email: "ann@example.com",
     });
-    const r = await processTimelyPatientWebhook(
-      TENANT,
-      payload,
-      supabase,
-      {
-        resolveOrCreatePerson: async () => {
-          personCalls += 1;
-          return { person, created: true, mapping_created: true };
-        },
-        resolveOrCreatePatient: async () => {
-          return { patient, created: true, mapping_created: true };
-        },
-      }
-    );
+    const r = await processTimelyPatientWebhook(TENANT, payload, supabase, {
+      resolveOrCreatePerson: async () => {
+        personCalls += 1;
+        return { person, created: true, mapping_created: true };
+      },
+      resolveOrCreatePatient: async () => {
+        return { patient, created: true, mapping_created: true };
+      },
+    });
     assert.equal(r.ok, true);
     if (!r.ok || "duplicate" in r) return;
     assert.equal(r.patient_id, patient.id);
@@ -203,7 +208,10 @@ describe("Timely patient webhook (mocked foundation)", () => {
     };
     const a = await processTimelyPatientWebhook(TENANT, payload, supabase, ports);
     const b = await processTimelyPatientWebhook(TENANT, payload, supabase, ports);
-    assert.equal(a.ok && b.ok && a.patient_id === b.patient_id && a.person_id === b.person_id, true);
+    assert.equal(
+      a.ok && b.ok && a.patient_id === b.patient_id && a.person_id === b.person_id,
+      true
+    );
   });
 });
 
@@ -250,7 +258,8 @@ function makeAppointmentMockSupabase(
 ): SupabaseClient {
   const serviceName = opts?.serviceName ?? "Consultation";
   const serviceCategory = opts?.serviceCategory ?? "Consultation";
-  const serviceBookingType = opts?.serviceBookingType !== undefined ? opts.serviceBookingType : "consultation";
+  const serviceBookingType =
+    opts?.serviceBookingType !== undefined ? opts.serviceBookingType : "consultation";
   const crmLeads = opts?.crmLeads ?? [];
   let insertedBookingId: string | null = null;
   let claimed = false;
@@ -263,7 +272,10 @@ function makeAppointmentMockSupabase(
           eq: () => ({
             maybeSingle: async () => {
               if (mode === "existing") {
-                return { data: { id: "map-existing", internal_id: existingBooking.id }, error: null };
+                return {
+                  data: { id: "map-existing", internal_id: existingBooking.id },
+                  error: null,
+                };
               }
               if (mode === "create" && insertedBookingId) {
                 return { data: { id: "map-new", internal_id: insertedBookingId }, error: null };
@@ -293,7 +305,10 @@ function makeAppointmentMockSupabase(
     eq: () => ({
       eq: () => ({
         maybeSingle: async () => ({
-          data: { id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", person_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" },
+          data: {
+            id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+            person_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          },
           error: null,
         }),
       }),
@@ -376,7 +391,8 @@ function makeAppointmentMockSupabase(
         update: (patch: { internal_id?: string }) => ({
           eq: () => ({
             eq: async () => {
-              if (patch && typeof patch.internal_id === "string") insertedBookingId = patch.internal_id;
+              if (patch && typeof patch.internal_id === "string")
+                insertedBookingId = patch.internal_id;
               return { error: null };
             },
           }),
@@ -433,7 +449,9 @@ describe("Timely appointment webhook (mocked data path)", () => {
     };
   }
 
-  function appointmentPorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+  function appointmentPorts(
+    overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}
+  ) {
     const existing = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
     return {
       loadActiveStaffForTenant: async () => [],
@@ -445,7 +463,10 @@ describe("Timely appointment webhook (mocked data path)", () => {
         consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
         created: true,
       }),
-      advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+        action: "skipped" as const,
+        stageSlug: null,
+      }),
       ...overrides,
     };
   }
@@ -600,7 +621,9 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
     };
   }
 
-  function consultationPorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+  function consultationPorts(
+    overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}
+  ) {
     const existing = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
     return {
       loadActiveStaffForTenant: async () => [],
@@ -612,7 +635,10 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
         consultation: { id: CONSULTATION_ID },
         created: true,
       }),
-      advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+        action: "skipped" as const,
+        stageSlug: null,
+      }),
       ...overrides,
     };
   }
@@ -828,13 +854,18 @@ describe("Timely appointment webhook — booking_type derivation from service", 
           consultation: { id: CONSULTATION_ID },
           created: true,
         }),
-        advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+          action: "skipped" as const,
+          stageSlug: null,
+        }),
       },
     };
   }
 
   it("derives hair_transplant_consultation when fi_services.booking_type is null", async () => {
-    const { capturedBookingType, ports } = portsForBookingTypeCapture("hair_transplant_consultation");
+    const { capturedBookingType, ports } = portsForBookingTypeCapture(
+      "hair_transplant_consultation"
+    );
     const r = await processTimelyAppointmentWebhook(
       TENANT,
       hairTransplantPayload,
@@ -975,7 +1006,9 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
     };
   }
 
-  function leadPorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+  function leadPorts(
+    overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}
+  ) {
     const existing = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
     return {
       loadActiveStaffForTenant: async () => [],
@@ -987,7 +1020,10 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
         consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
         created: true,
       }),
-      advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+        action: "skipped" as const,
+        stageSlug: null,
+      }),
       ...overrides,
     };
   }
@@ -1016,12 +1052,17 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
     assert.equal(r.lead_id, LEAD_ID);
     assert.equal(r.lead_resolution, "matched");
     assert.equal(capturedLeadId, LEAD_ID);
-    assert.equal((capturedMetadata?.timely_lead_resolution as { status?: string })?.status, "matched");
+    assert.equal(
+      (capturedMetadata?.timely_lead_resolution as { status?: string })?.status,
+      "matched"
+    );
   });
 
   it("does not overwrite an existing booking lead_id on update", async () => {
     const existingLead = "88888888-8888-4888-8888-888888888888";
-    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { lead_id: existingLead });
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      lead_id: existingLead,
+    });
     let updatedLeadId: string | null | undefined = "unset";
     const r = await processTimelyAppointmentWebhook(
       TENANT,
@@ -1104,7 +1145,8 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
           eq: () => ({
             eq: async () => {
               if (patch.lead_id !== undefined) patchedLeadId = patch.lead_id as string | null;
-              if (patch.metadata !== undefined) patchedMetadata = patch.metadata as Record<string, unknown>;
+              if (patch.metadata !== undefined)
+                patchedMetadata = patch.metadata as Record<string, unknown>;
               return { error: null };
             },
           }),
@@ -1123,7 +1165,10 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
     assert.equal(r.lead_id, LEAD_ID);
     assert.equal(r.lead_resolution, "matched");
     assert.equal(patchedLeadId, LEAD_ID);
-    assert.equal((patchedMetadata?.timely_lead_resolution as { status?: string })?.status, "matched");
+    assert.equal(
+      (patchedMetadata?.timely_lead_resolution as { status?: string })?.status,
+      "matched"
+    );
   });
 
   it("skips lead resolution safely when person is missing", async () => {
@@ -1174,7 +1219,9 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
     };
   }
 
-  function crmStagePorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+  function crmStagePorts(
+    overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}
+  ) {
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
     return {
       loadActiveStaffForTenant: async () => [],
@@ -1246,7 +1293,9 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
 
   it("skips CRM stage advance for non-consultation booking", async () => {
     let crmCalls = 0;
-    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { booking_type: "prp" });
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      booking_type: "prp",
+    });
     const r = await processTimelyAppointmentWebhook(
       TENANT,
       payloadBase,
@@ -1283,7 +1332,10 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
       makeAppointmentMockSupabase("existing", row),
       crmStagePorts({
         loadBooking: async () => row,
-        advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped", stageSlug: null }),
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+          action: "skipped",
+          stageSlug: null,
+        }),
       })
     );
     assert.equal(r.ok, true);
@@ -1292,14 +1344,19 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
   });
 
   it("skips CRM stage advance for no_show consultation booking", async () => {
-    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { booking_status: "no_show" });
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      booking_status: "no_show",
+    });
     const r = await processTimelyAppointmentWebhook(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row),
       crmStagePorts({
         loadBooking: async () => row,
-        advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped", stageSlug: null }),
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+          action: "skipped",
+          stageSlug: null,
+        }),
       })
     );
     assert.equal(r.ok, true);
@@ -1369,7 +1426,10 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
       syncBookingReminders: async () => {},
       createConsultationFromBooking: async () => {
         counters.consultations += 1;
-        return { consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" }, created: counters.consultations === 1 };
+        return {
+          consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
+          created: counters.consultations === 1,
+        };
       },
       advanceCrmLeadOnTimelyConsultationBooking: async () => {
         counters.crm += 1;
@@ -1381,7 +1441,10 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
 
   it("sequential duplicate appointment_created creates exactly one booking", async () => {
     const counters = { creates: 0, consultations: 0, crm: 0 };
-    const supabase = makeAppointmentMockSupabase("create", bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd"));
+    const supabase = makeAppointmentMockSupabase(
+      "create",
+      bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd")
+    );
     const ports = countingPorts(counters);
 
     const a = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
@@ -1389,14 +1452,21 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
 
     assert.equal(a.ok, true);
     assert.equal(b.ok, true);
-    assert.equal(counters.creates, 1, "only one booking should be created across duplicate deliveries");
+    assert.equal(
+      counters.creates,
+      1,
+      "only one booking should be created across duplicate deliveries"
+    );
     if (!a.ok || "duplicate" in a) return;
     assert.equal(a.action, "created");
   });
 
   it("concurrent appointment_created creates exactly one booking (no orphan)", async () => {
     const counters = { creates: 0, consultations: 0, crm: 0 };
-    const supabase = makeAppointmentMockSupabase("create", bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd"));
+    const supabase = makeAppointmentMockSupabase(
+      "create",
+      bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd")
+    );
     const ports = countingPorts(counters);
 
     const [a, b] = await Promise.all([
@@ -1433,7 +1503,11 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
     const supabase = {
       from: (table: string) => {
         if (table === "fi_tenants") {
-          return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: TENANT }, error: null }) }) }) };
+          return {
+            select: () => ({
+              eq: () => ({ maybeSingle: async () => ({ data: { id: TENANT }, error: null }) }),
+            }),
+          };
         }
         if (table === "fi_external_entity_mappings") {
           return {
@@ -1442,7 +1516,10 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
                 eq: () => ({
                   eq: () => ({
                     eq: () => ({
-                      maybeSingle: async () => ({ data: { id: "map-inflight", internal_id: null }, error: null }),
+                      maybeSingle: async () => ({
+                        data: { id: "map-inflight", internal_id: null },
+                        error: null,
+                      }),
                     }),
                   }),
                 }),
@@ -1455,7 +1532,12 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
     } as unknown as SupabaseClient;
 
     const counters = { creates: 0, consultations: 0, crm: 0 };
-    const r = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, countingPorts(counters));
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      supabase,
+      countingPorts(counters)
+    );
     assert.equal(r.ok, true);
     assert.equal(counters.creates, 0);
     assert.equal("duplicate" in r && r.duplicate, true);
@@ -1465,7 +1547,10 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
   });
 
   it("releases the claim when booking creation fails, allowing repair without duplicate", async () => {
-    const supabase = makeAppointmentMockSupabase("create", bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd"));
+    const supabase = makeAppointmentMockSupabase(
+      "create",
+      bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd")
+    );
     let attempts = 0;
     const ports = countingPorts(
       { creates: 0, consultations: 0, crm: 0 },
@@ -1498,15 +1583,29 @@ function makeWebhookAuditMock(opts?: { finalizeError?: boolean }) {
   const from = (table: string) => {
     if (table !== "fi_integration_webhook_events") throw new Error(`unexpected table ${table}`);
     return {
-      insert: (row: { tenant_id: string; route: string; payload_hash: string; status: string }) => ({
+      insert: (row: {
+        tenant_id: string;
+        route: string;
+        payload_hash: string;
+        status: string;
+      }) => ({
         select: () => ({
           single: async () => {
             const dup = rows.find(
-              (r) => r.tenant_id === row.tenant_id && r.route === row.route && r.payload_hash === row.payload_hash
+              (r) =>
+                r.tenant_id === row.tenant_id &&
+                r.route === row.route &&
+                r.payload_hash === row.payload_hash
             );
             if (dup) return { data: null, error: { code: "23505", message: "duplicate key" } };
             const id = `evt-${++seq}`;
-            rows.push({ id, tenant_id: row.tenant_id, route: row.route, payload_hash: row.payload_hash, status: row.status });
+            rows.push({
+              id,
+              tenant_id: row.tenant_id,
+              route: row.route,
+              payload_hash: row.payload_hash,
+              status: row.status,
+            });
             return { data: { id }, error: null };
           },
         }),
@@ -1523,7 +1622,9 @@ function makeWebhookAuditMock(opts?: { finalizeError?: boolean }) {
           maybeSingle: async () => {
             const found = rows.find(
               (r) =>
-                r.tenant_id === filters.tenant_id && r.route === filters.route && r.payload_hash === filters.payload_hash
+                r.tenant_id === filters.tenant_id &&
+                r.route === filters.route &&
+                r.payload_hash === filters.payload_hash
             );
             return { data: found ? { id: found.id, status: found.status } : null, error: null };
           },
@@ -1567,7 +1668,11 @@ describe("withTimelyWebhookAudit — P0 idempotency & retry safety", () => {
 
     assert.equal(a.ok, true);
     assert.equal(b.ok, true);
-    assert.equal(handlerCalls, 1, "handler (booking/CRM/consultation side effects) must not re-run on replay");
+    assert.equal(
+      handlerCalls,
+      1,
+      "handler (booking/CRM/consultation side effects) must not re-run on replay"
+    );
     assert.equal("duplicate" in b && b.duplicate, true);
   });
 
@@ -1579,8 +1684,20 @@ describe("withTimelyWebhookAudit — P0 idempotency & retry safety", () => {
       return { ok: true as const, value: { booking_id: "b1" } };
     };
     const [a, b] = await Promise.all([
-      withTimelyWebhookAudit({ tenantId: TENANT, route: ROUTE, payload, supabase: client, handler }),
-      withTimelyWebhookAudit({ tenantId: TENANT, route: ROUTE, payload, supabase: client, handler }),
+      withTimelyWebhookAudit({
+        tenantId: TENANT,
+        route: ROUTE,
+        payload,
+        supabase: client,
+        handler,
+      }),
+      withTimelyWebhookAudit({
+        tenantId: TENANT,
+        route: ROUTE,
+        payload,
+        supabase: client,
+        handler,
+      }),
     ]);
     assert.equal(a.ok, true);
     assert.equal(b.ok, true);
@@ -1601,6 +1718,10 @@ describe("withTimelyWebhookAudit — P0 idempotency & retry safety", () => {
       },
     });
     assert.equal(handlerCalls, 1);
-    assert.equal(result.ok, true, "finalization failure must not surface as an error/500 after work committed");
+    assert.equal(
+      result.ok,
+      true,
+      "finalization failure must not surface as an error/500 after work committed"
+    );
   });
 });

@@ -1,15 +1,15 @@
 "use client";
 
-import {
-  buildCalendarHref,
-  type ParsedCalendarQuery,
-} from "@/src/lib/bookings/calendarQuery";
+import { buildCalendarHref, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import {
   allBookingStatusOptions,
   allBookingTypeOptions,
 } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
-import { formatClinicalPickerOptionLabel, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import {
+  formatClinicalPickerOptionLabel,
+  type ClinicalStaffPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
 
 export function BookingCalendarFilters({
   tenantId,
@@ -29,7 +29,11 @@ export function BookingCalendarFilters({
   });
 
   return (
-    <form method="get" action={action} className="space-y-3 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
+    <form
+      method="get"
+      action={action}
+      className="space-y-3 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4"
+    >
       <input type="hidden" name="view" value={query.view} />
       <input type="hidden" name="date" value={query.dateAnchor} />
       {query.sampleMode ? <input type="hidden" name="sample" value="1" /> : null}
@@ -95,12 +99,20 @@ export function BookingCalendarFilters({
           </select>
         </label>
         <label className="flex items-center gap-2 text-xs text-slate-300">
-          <input type="checkbox" name="includeCancelled" value="1" defaultChecked={query.includeCancelled} />
+          <input
+            type="checkbox"
+            name="includeCancelled"
+            value="1"
+            defaultChecked={query.includeCancelled}
+          />
           Include cancelled
         </label>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">
+        <button
+          type="submit"
+          className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800"
+        >
           Apply filters
         </button>
         <a
@@ -115,8 +127,8 @@ export function BookingCalendarFilters({
         </a>
       </div>
       <p className="text-xs text-gray-500">
-        Times use the tenant clinic timezone ({query.calendarTimezone}). Create and quick-edit fields use the same
-        wall clock.
+        Times use the tenant clinic timezone ({query.calendarTimezone}). Create and quick-edit
+        fields use the same wall clock.
       </p>
     </form>
   );

@@ -15,7 +15,11 @@ export type HeaderProductLink = HeaderNavItem & { external?: boolean };
 export const HEADER_PRODUCTS_LINKS: HeaderProductLink[] = [
   { href: "https://hairaudit.com", label: "HairAudit", external: true },
   { href: "https://hairlongevityinstitute.com", label: "Hair Longevity Institute", external: true },
-  { href: "https://iiohr.com", label: "International Institute of Hair Restoration", external: true },
+  {
+    href: "https://iiohr.com",
+    label: "International Institute of Hair Restoration",
+    external: true,
+  },
   { href: "/platform", label: "FI OS" },
 ];
 
@@ -75,10 +79,30 @@ export type EcosystemSiteId = "iiohr" | "hairaudit" | "follicleintelligence" | "
 export const ECOSYSTEM_BAND = {
   tagline: "Connected intelligence across outcomes, diagnostics, and standards",
   links: [
-    { id: "iiohr" as EcosystemSiteId, label: "International Institute of Hair Restoration", role: "training", href: "https://iiohr.com" },
-    { id: "hairaudit" as EcosystemSiteId, label: "HairAudit", role: "measurement", href: "https://hairaudit.com" },
-    { id: "follicleintelligence" as EcosystemSiteId, label: "Follicle Intelligence", role: "analysis", href: "/" },
-    { id: "hli" as EcosystemSiteId, label: "Hair Longevity Institute", role: "biology", href: "https://hairlongevityinstitute.com" },
+    {
+      id: "iiohr" as EcosystemSiteId,
+      label: "International Institute of Hair Restoration",
+      role: "training",
+      href: "https://iiohr.com",
+    },
+    {
+      id: "hairaudit" as EcosystemSiteId,
+      label: "HairAudit",
+      role: "measurement",
+      href: "https://hairaudit.com",
+    },
+    {
+      id: "follicleintelligence" as EcosystemSiteId,
+      label: "Follicle Intelligence",
+      role: "analysis",
+      href: "/",
+    },
+    {
+      id: "hli" as EcosystemSiteId,
+      label: "Hair Longevity Institute",
+      role: "biology",
+      href: "https://hairlongevityinstitute.com",
+    },
   ],
 };
 

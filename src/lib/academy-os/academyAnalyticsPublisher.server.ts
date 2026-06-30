@@ -32,7 +32,9 @@ export async function publishAcademyEvent(input: {
   }
 }
 
-function eventTypeForProjection(row: FiStaffCompetencyProjectionRow): AcademyAnalyticsEventType | null {
+function eventTypeForProjection(
+  row: FiStaffCompetencyProjectionRow
+): AcademyAnalyticsEventType | null {
   switch (row.competencyStatus) {
     case "active":
       return row.certificationLevel ? "certification_verified" : "competency_verified";

@@ -20,10 +20,7 @@ describe("machineIngestCanonical", () => {
       nonce: "n-1",
       bodySha256Hex: "abc".repeat(10),
     });
-    assert.equal(
-      c,
-      `POST\n/api/ingest/tenant-1/partners\n1700000000000\nn-1\n${"abc".repeat(10)}`
-    );
+    assert.equal(c, `POST\n/api/ingest/tenant-1/partners\n1700000000000\nn-1\n${"abc".repeat(10)}`);
   });
 
   it("verifyMachineIngestHmacTimingSafe accepts matching signature", () => {
@@ -64,11 +61,19 @@ describe("machineIngestCanonical", () => {
     const now = 1_700_000_000_000;
     assert.equal(verifyMachineIngestTimestamp(now, now, MACHINE_INGEST_TIMESTAMP_SKEW_MS), true);
     assert.equal(
-      verifyMachineIngestTimestamp(now - MACHINE_INGEST_TIMESTAMP_SKEW_MS - 1, now, MACHINE_INGEST_TIMESTAMP_SKEW_MS),
+      verifyMachineIngestTimestamp(
+        now - MACHINE_INGEST_TIMESTAMP_SKEW_MS - 1,
+        now,
+        MACHINE_INGEST_TIMESTAMP_SKEW_MS
+      ),
       false
     );
     assert.equal(
-      verifyMachineIngestTimestamp(now + MACHINE_INGEST_TIMESTAMP_SKEW_MS + 1, now, MACHINE_INGEST_TIMESTAMP_SKEW_MS),
+      verifyMachineIngestTimestamp(
+        now + MACHINE_INGEST_TIMESTAMP_SKEW_MS + 1,
+        now,
+        MACHINE_INGEST_TIMESTAMP_SKEW_MS
+      ),
       false
     );
   });

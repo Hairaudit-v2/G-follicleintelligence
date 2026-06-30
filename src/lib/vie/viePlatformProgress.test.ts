@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildViePlatformProgressModule, VIE_PLATFORM_PHASES, VIE_PLATFORM_PROGRESS } from "./viePlatformProgress";
+import {
+  buildViePlatformProgressModule,
+  VIE_PLATFORM_PHASES,
+  VIE_PLATFORM_PROGRESS,
+} from "./viePlatformProgress";
 
 describe("viePlatformProgress", () => {
   it("buildViePlatformProgressModule mirrors canonical tracker", () => {

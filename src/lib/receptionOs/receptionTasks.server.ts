@@ -39,10 +39,16 @@ function mapRow(raw: Record<string, unknown>): ReceptionTaskRow {
     resolution_notes: raw.resolution_notes != null ? String(raw.resolution_notes) : null,
     internal_notes: raw.internal_notes != null ? String(raw.internal_notes) : null,
     snoozed_until: raw.snoozed_until != null ? String(raw.snoozed_until) : null,
-    metadata: raw.metadata && typeof raw.metadata === "object" && !Array.isArray(raw.metadata) ? (raw.metadata as Record<string, unknown>) : {},
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
-    resolved_by_fi_user_id: raw.resolved_by_fi_user_id != null ? String(raw.resolved_by_fi_user_id) : null,
-    dismissed_by_fi_user_id: raw.dismissed_by_fi_user_id != null ? String(raw.dismissed_by_fi_user_id) : null,
+    metadata:
+      raw.metadata && typeof raw.metadata === "object" && !Array.isArray(raw.metadata)
+        ? (raw.metadata as Record<string, unknown>)
+        : {},
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    resolved_by_fi_user_id:
+      raw.resolved_by_fi_user_id != null ? String(raw.resolved_by_fi_user_id) : null,
+    dismissed_by_fi_user_id:
+      raw.dismissed_by_fi_user_id != null ? String(raw.dismissed_by_fi_user_id) : null,
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
     resolved_at: raw.resolved_at != null ? String(raw.resolved_at) : null,
@@ -81,7 +87,10 @@ function anchorsFromAlert(alert: ReceptionOsActionAlert): Partial<ReceptionTaskR
   };
 }
 
-export async function loadReceptionTasksForTenant(tenantId: string, limit = 120): Promise<ReceptionTaskRow[]> {
+export async function loadReceptionTasksForTenant(
+  tenantId: string,
+  limit = 120
+): Promise<ReceptionTaskRow[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -101,16 +110,26 @@ export async function loadReceptionTasksForTenant(tenantId: string, limit = 120)
   });
 }
 
-export async function loadOpenReceptionTasksForTenant(tenantId: string): Promise<ReceptionTaskRow[]> {
+export async function loadOpenReceptionTasksForTenant(
+  tenantId: string
+): Promise<ReceptionTaskRow[]> {
   const all = await loadReceptionTasksForTenant(tenantId, 200);
   return all.filter((t) => OPEN_RECEPTION_TASK_STATUSES.includes(t.status));
 }
 
-export async function getReceptionTaskById(tenantId: string, taskId: string): Promise<ReceptionTaskRow | null> {
+export async function getReceptionTaskById(
+  tenantId: string,
+  taskId: string
+): Promise<ReceptionTaskRow | null> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(taskId, "taskId").trim();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_reception_tasks").select("*").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_reception_tasks")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   const row = mapRow(data as Record<string, unknown>);
@@ -170,7 +189,10 @@ export async function createReceptionTaskFromAlert(opts: {
   return row;
 }
 
-async function getReceptionTaskBySourceRef(tenantId: string, sourceRefId: string): Promise<ReceptionTaskRow | null> {
+async function getReceptionTaskBySourceRef(
+  tenantId: string,
+  sourceRefId: string
+): Promise<ReceptionTaskRow | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_reception_tasks")
@@ -186,7 +208,11 @@ async function updateReceptionTask(
   tenantId: string,
   taskId: string,
   patch: Record<string, unknown>,
-  audit: { eventKind: Parameters<typeof insertReceptionTaskAuditEvent>[0]["eventKind"]; actorFiUserId?: string | null; detail?: Record<string, unknown> },
+  audit: {
+    eventKind: Parameters<typeof insertReceptionTaskAuditEvent>[0]["eventKind"];
+    actorFiUserId?: string | null;
+    detail?: Record<string, unknown>;
+  }
 ): Promise<ReceptionTaskRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(taskId, "taskId").trim();
@@ -194,7 +220,13 @@ async function updateReceptionTask(
   if (!existing) throw new Error("Reception task not found.");
 
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_reception_tasks").update(patch).eq("tenant_id", tid).eq("id", id).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_reception_tasks")
+    .update(patch)
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   const row = mapRow(data as Record<string, unknown>);
   await insertReceptionTaskAuditEvent({
@@ -217,7 +249,11 @@ export async function assignReceptionTask(opts: {
     opts.tenantId,
     opts.taskId,
     { owner_fi_user_id: opts.ownerFiUserId?.trim() || null },
-    { eventKind: "assigned", actorFiUserId: opts.actorFiUserId, detail: { owner_fi_user_id: opts.ownerFiUserId } },
+    {
+      eventKind: "assigned",
+      actorFiUserId: opts.actorFiUserId,
+      detail: { owner_fi_user_id: opts.ownerFiUserId },
+    }
   );
 }
 
@@ -234,7 +270,11 @@ export async function snoozeReceptionTask(opts: {
     opts.tenantId,
     opts.taskId,
     { status: "snoozed", snoozed_until: opts.snoozedUntil },
-    { eventKind: "snoozed", actorFiUserId: opts.actorFiUserId, detail: { snoozed_until: opts.snoozedUntil } },
+    {
+      eventKind: "snoozed",
+      actorFiUserId: opts.actorFiUserId,
+      detail: { snoozed_until: opts.snoozedUntil },
+    }
   );
 }
 
@@ -264,7 +304,11 @@ export async function setReceptionTaskStatus(opts: {
   }
 
   const eventKind =
-    opts.status === "resolved" ? "resolved" : opts.status === "dismissed" ? "dismissed" : "status_changed";
+    opts.status === "resolved"
+      ? "resolved"
+      : opts.status === "dismissed"
+        ? "dismissed"
+        : "status_changed";
 
   return updateReceptionTask(opts.tenantId, opts.taskId, patch, {
     eventKind,
@@ -283,12 +327,14 @@ export async function addReceptionTaskNote(opts: {
   if (!note) throw new Error("Note is required.");
   const existing = await getReceptionTaskById(opts.tenantId, opts.taskId);
   if (!existing) throw new Error("Reception task not found.");
-  const merged = existing.internal_notes?.trim() ? `${existing.internal_notes.trim()}\n${note}` : note;
+  const merged = existing.internal_notes?.trim()
+    ? `${existing.internal_notes.trim()}\n${note}`
+    : note;
   return updateReceptionTask(
     opts.tenantId,
     opts.taskId,
     { internal_notes: merged },
-    { eventKind: "note_added", actorFiUserId: opts.actorFiUserId, detail: { note } },
+    { eventKind: "note_added", actorFiUserId: opts.actorFiUserId, detail: { note } }
   );
 }
 

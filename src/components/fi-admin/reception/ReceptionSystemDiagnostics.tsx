@@ -24,11 +24,13 @@ export function ReceptionSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support reception board integrity and do not affect front-desk
-              workflow.
+              For platform operators only. These checks support reception board integrity and do not
+              affect front-desk workflow.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-[#22C1FF]/80">
@@ -50,7 +52,9 @@ export function ReceptionSystemDiagnostics({
               <StatCard key={col} label={col.replace(/_/g, " ")} value={count} />
             ))}
             {Object.keys(columnCounts).length === 0 ? (
-              <p className="col-span-full text-sm text-[#64748B]">No reception board cards loaded for today.</p>
+              <p className="col-span-full text-sm text-[#64748B]">
+                No reception board cards loaded for today.
+              </p>
             ) : null}
           </div>
         </DashboardCard>
@@ -85,7 +89,8 @@ export function ReceptionSystemDiagnostics({
                   key={c.id}
                   className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 font-mono text-[#94A3B8]"
                 >
-                  <span className="text-[#64748B]">{c.id.slice(0, 8)}…</span> · {c.bookingStatus} → {c.receptionColumn}
+                  <span className="text-[#64748B]">{c.id.slice(0, 8)}…</span> · {c.bookingStatus} →{" "}
+                  {c.receptionColumn}
                   {c.roomLabel ? ` · room: ${c.roomLabel}` : ""}
                 </li>
               ))}

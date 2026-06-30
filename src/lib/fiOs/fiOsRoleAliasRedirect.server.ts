@@ -18,7 +18,9 @@ export type FiOsEntryAliasPath = "/fi_clinic_admin" | "/crm_operator";
  * Redirect legacy role-alias entry URLs to `/fi-admin/[tenantId]/cases` (or `/fi-admin` when no membership).
  * Production requires a Supabase session; unauthenticated users are sent to FI OS login with `next` preserved.
  */
-export async function redirectFiOsRoleAliasToFiAdmin(entryPath: FiOsEntryAliasPath): Promise<never> {
+export async function redirectFiOsRoleAliasToFiAdmin(
+  entryPath: FiOsEntryAliasPath
+): Promise<never> {
   if (process.env.NODE_ENV === "production") {
     const authId = await resolveAuthUserId(null);
     if (!authId) redirect(fiOsLoginUrl(entryPath));

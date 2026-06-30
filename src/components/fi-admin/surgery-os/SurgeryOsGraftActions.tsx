@@ -64,7 +64,7 @@ export function SurgeryOsGraftActions({
       staffRoleCategory: staffCategory,
       actorFiUserId: null,
     }),
-    [viewerRole, staffCategory],
+    [viewerRole, staffCategory]
   );
 
   const allowedActions = GRAFT_ACTIONS.filter((a) => surgeryOsGraftActionAllowed(ctx, a.action));
@@ -101,11 +101,16 @@ export function SurgeryOsGraftActions({
     <div className="rounded-xl border border-violet-500/20 bg-violet-950/20 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <Scissors className="h-4 w-4 text-violet-400" aria-hidden />
-        <span className="text-xs font-semibold uppercase tracking-wider text-violet-400/90">Graft capture</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-violet-400/90">
+          Graft capture
+        </span>
         <select
           value={effectiveSurgeryId}
           onChange={(e) => setSurgeryId(e.target.value)}
-          className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2 py-1.5 text-xs text-slate-200")}
+          className={cn(
+            fiOsChromeClasses.toolbarControlSurface,
+            "px-2 py-1.5 text-xs text-slate-200"
+          )}
         >
           {surgeries.map((s) => (
             <option key={s.id} value={s.id}>
@@ -120,7 +125,7 @@ export function SurgeryOsGraftActions({
             onClick={() => setModal(a.key)}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "px-2.5 py-1.5 text-xs font-semibold text-violet-100",
+              "px-2.5 py-1.5 text-xs font-semibold text-violet-100"
             )}
           >
             {a.label}
@@ -131,7 +136,10 @@ export function SurgeryOsGraftActions({
             <button
               type="button"
               onClick={() => setShowSecondary((v) => !v)}
-              className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2.5 py-1.5 text-xs font-semibold text-slate-400")}
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "px-2.5 py-1.5 text-xs font-semibold text-slate-400"
+              )}
             >
               More graft tools
             </button>
@@ -158,8 +166,8 @@ export function SurgeryOsGraftActions({
       </div>
       {selectedGraft ? (
         <p className="mt-2 text-xs text-slate-500">
-          Current: {selectedGraft.extractedGrafts} extracted · {selectedGraft.implantedGrafts} implanted ·{" "}
-          {selectedGraft.remainingGrafts} remaining
+          Current: {selectedGraft.extractedGrafts} extracted · {selectedGraft.implantedGrafts}{" "}
+          implanted · {selectedGraft.remainingGrafts} remaining
         </p>
       ) : null}
       {error ? <p className="mt-2 text-xs text-rose-400">{error}</p> : null}
@@ -175,7 +183,7 @@ export function SurgeryOsGraftActions({
                 surgery_id: effectiveSurgeryId,
                 count,
                 note,
-              }),
+              })
             )
           }
         />
@@ -192,7 +200,7 @@ export function SurgeryOsGraftActions({
                 surgery_id: effectiveSurgeryId,
                 count,
                 note,
-              }),
+              })
             )
           }
         />
@@ -209,7 +217,7 @@ export function SurgeryOsGraftActions({
                 surgery_id: effectiveSurgeryId,
                 count,
                 note,
-              }),
+              })
             )
           }
         />
@@ -224,7 +232,7 @@ export function SurgeryOsGraftActions({
               enterTrayGraftCountAction(tenantId, {
                 surgery_id: effectiveSurgeryId,
                 ...values,
-              }),
+              })
             )
           }
         />
@@ -240,7 +248,7 @@ export function SurgeryOsGraftActions({
               correctGraftCountAction(tenantId, {
                 surgery_id: effectiveSurgeryId,
                 ...values,
-              }),
+              })
             )
           }
         />
@@ -256,7 +264,7 @@ export function SurgeryOsGraftActions({
               reconcileGraftsAction(tenantId, {
                 surgery_id: effectiveSurgeryId,
                 note,
-              }),
+              })
             )
           }
         />
@@ -275,11 +283,18 @@ function ModalShell({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+    >
       <div className="w-full max-w-md rounded-xl border border-white/10 bg-slate-900 p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
-          <button type="button" onClick={onClose} className="text-xs text-slate-500 hover:text-slate-300">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs text-slate-500 hover:text-slate-300"
+          >
             Close
           </button>
         </div>
@@ -328,7 +343,10 @@ function CountModal({
         type="button"
         disabled={pending || !count || Number.parseInt(count, 10) <= 0}
         onClick={() => onSubmit(Number.parseInt(count, 10), note.trim() || null)}
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-violet-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-violet-100"
+        )}
       >
         Save
       </button>
@@ -414,7 +432,10 @@ function TrayModal({
             note: note.trim() || null,
           })
         }
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-violet-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-violet-100"
+        )}
       >
         Record tray count
       </button>
@@ -450,7 +471,9 @@ function CorrectModal({
 
   return (
     <ModalShell title="Correct graft counts" onClose={onClose}>
-      <p className="text-xs text-slate-500">Set authoritative totals. Requires surgeon or theatre manager role.</p>
+      <p className="text-xs text-slate-500">
+        Set authoritative totals. Requires surgeon or theatre manager role.
+      </p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         {(
           [
@@ -491,7 +514,10 @@ function CorrectModal({
             note: note.trim() || null,
           })
         }
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-violet-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-violet-100"
+        )}
       >
         Apply correction
       </button>
@@ -532,7 +558,10 @@ function ReconcileModal({
         type="button"
         disabled={pending || remaining !== 0}
         onClick={() => onSubmit(note.trim() || null)}
-        className={cn(fiOsChromeClasses.toolbarControlSurface, "mt-4 px-4 py-2 text-sm font-semibold text-violet-100")}
+        className={cn(
+          fiOsChromeClasses.toolbarControlSurface,
+          "mt-4 px-4 py-2 text-sm font-semibold text-violet-100"
+        )}
       >
         Complete reconciliation
       </button>

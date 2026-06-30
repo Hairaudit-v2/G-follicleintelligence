@@ -41,7 +41,11 @@ export async function classifyPatientHairLossAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const iid = patientImageId.trim();
@@ -58,7 +62,11 @@ export async function classifyPatientHairLossAction(
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Image not found for this patient.");
 
-    await classifyFiOsPatientImageHairLossAndPersist({ tenantId: tid, patientImageId: iid, client: supabase });
+    await classifyFiOsPatientImageHairLossAndPersist({
+      tenantId: tid,
+      patientImageId: iid,
+      client: supabase,
+    });
     revalidatePatientTwin(tid, pid);
     return { ok: true };
   } catch (e) {
@@ -110,15 +118,25 @@ export async function updateHairLossClassificationReviewAction(
           ? clampHairLossConfidence(parsed.confidence_score)
           : clampHairLossConfidence(Number(x.confidence_score ?? 0)),
       frontal_loss_score:
-        parsed.frontal_loss_score !== undefined ? parsed.frontal_loss_score : (x.frontal_loss_score as number | null),
+        parsed.frontal_loss_score !== undefined
+          ? parsed.frontal_loss_score
+          : (x.frontal_loss_score as number | null),
       temporal_recession_score:
         parsed.temporal_recession_score !== undefined
           ? parsed.temporal_recession_score
           : (x.temporal_recession_score as number | null),
-      mid_scalp_score: parsed.mid_scalp_score !== undefined ? parsed.mid_scalp_score : (x.mid_scalp_score as number | null),
-      crown_loss_score: parsed.crown_loss_score !== undefined ? parsed.crown_loss_score : (x.crown_loss_score as number | null),
+      mid_scalp_score:
+        parsed.mid_scalp_score !== undefined
+          ? parsed.mid_scalp_score
+          : (x.mid_scalp_score as number | null),
+      crown_loss_score:
+        parsed.crown_loss_score !== undefined
+          ? parsed.crown_loss_score
+          : (x.crown_loss_score as number | null),
       diffuse_thinning_score:
-        parsed.diffuse_thinning_score !== undefined ? parsed.diffuse_thinning_score : (x.diffuse_thinning_score as number | null),
+        parsed.diffuse_thinning_score !== undefined
+          ? parsed.diffuse_thinning_score
+          : (x.diffuse_thinning_score as number | null),
       retrograde_pattern_detected:
         parsed.retrograde_pattern_detected !== undefined
           ? parsed.retrograde_pattern_detected

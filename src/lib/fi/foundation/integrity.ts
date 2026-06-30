@@ -139,7 +139,10 @@ async function computeCoverageFromCaseMap(
     }
   }
 
-  const foundationByCase = new Map<string, { foundation_patient_id: string | null; person_id: string | null }>();
+  const foundationByCase = new Map<
+    string,
+    { foundation_patient_id: string | null; person_id: string | null }
+  >();
   const caseIdList = Array.from(caseIds);
   for (let i = 0; i < caseIdList.length; i += CHUNK) {
     const slice = caseIdList.slice(i, i + CHUNK);
@@ -152,7 +155,8 @@ async function computeCoverageFromCaseMap(
     if (error) throw new Error(error.message);
     for (const row of data ?? []) {
       foundationByCase.set(String((row as { id: string }).id), {
-        foundation_patient_id: (row as { foundation_patient_id: string | null }).foundation_patient_id,
+        foundation_patient_id: (row as { foundation_patient_id: string | null })
+          .foundation_patient_id,
         person_id: null,
       });
     }
@@ -174,14 +178,20 @@ async function computeCoverageFromCaseMap(
       .in("id", ps);
     if (pr.error) throw new Error(pr.error.message);
     for (const p of pr.data ?? []) {
-      personByPatient.set(String((p as { id: string }).id), String((p as { person_id: string }).person_id));
+      personByPatient.set(
+        String((p as { id: string }).id),
+        String((p as { person_id: string }).person_id)
+      );
     }
   }
 
   for (const [cid, v] of Array.from(foundationByCase.entries())) {
     const pid = v.foundation_patient_id;
-    const personId = pid ? personByPatient.get(pid) ?? null : null;
-    foundationByCase.set(cid, { foundation_patient_id: v.foundation_patient_id, person_id: personId });
+    const personId = pid ? (personByPatient.get(pid) ?? null) : null;
+    foundationByCase.set(cid, {
+      foundation_patient_id: v.foundation_patient_id,
+      person_id: personId,
+    });
   }
 
   let events_with_foundation_patient_on_linked_case = 0;
@@ -318,7 +328,8 @@ export async function loadFoundationIntegrityMetrics(
   if (t1) throw new Error(t1.message);
   let fi_timeline_events_detail_empty_or_null = 0;
   for (const row of timelineRows ?? []) {
-    if (isDetailEmpty((row as { detail: unknown }).detail)) fi_timeline_events_detail_empty_or_null += 1;
+    if (isDetailEmpty((row as { detail: unknown }).detail))
+      fi_timeline_events_detail_empty_or_null += 1;
   }
   if ((timelineRows ?? []).length >= 50_000) {
     notes.push("Sparse timeline detail count sampled on first 50k timeline rows only.");

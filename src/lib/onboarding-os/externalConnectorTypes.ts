@@ -28,10 +28,22 @@ export const EXTERNAL_CONNECTOR_STATUSES = [
 ] as const;
 export type ExternalConnectorStatus = (typeof EXTERNAL_CONNECTOR_STATUSES)[number];
 
-export const EXTERNAL_CONNECTOR_SYNC_MODES = ["manual", "scheduled", "webhook", "disabled"] as const;
+export const EXTERNAL_CONNECTOR_SYNC_MODES = [
+  "manual",
+  "scheduled",
+  "webhook",
+  "disabled",
+] as const;
 export type ExternalConnectorSyncMode = (typeof EXTERNAL_CONNECTOR_SYNC_MODES)[number];
 
-export const EXTERNAL_SYNC_STATUSES = ["idle", "pending", "syncing", "success", "partial", "failed"] as const;
+export const EXTERNAL_SYNC_STATUSES = [
+  "idle",
+  "pending",
+  "syncing",
+  "success",
+  "partial",
+  "failed",
+] as const;
 export type ExternalSyncStatus = (typeof EXTERNAL_SYNC_STATUSES)[number];
 
 export const EXTERNAL_SYNC_EVENT_KINDS = [

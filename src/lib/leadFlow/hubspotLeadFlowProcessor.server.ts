@@ -7,7 +7,10 @@ import {
   buildPriorityBandChangedActivityMetadata,
   type FiLeadActivityType,
 } from "@/src/lib/leadFlow/leadFlowFoundationCore";
-import { mergeLeadFlowEventMeta, readLeadFlowEventMeta } from "@/src/lib/leadFlow/leadFlowEventMeta";
+import {
+  mergeLeadFlowEventMeta,
+  readLeadFlowEventMeta,
+} from "@/src/lib/leadFlow/leadFlowEventMeta";
 import type { FiExternalEventRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 import {
   buildLeadUpsertPlan,
@@ -99,7 +102,9 @@ async function appendLeadScoringActivities(
   }
 }
 
-function scoringFieldsForNormalizedInput(input: NormalizedHubSpotLeadInput): Record<string, unknown> {
+function scoringFieldsForNormalizedInput(
+  input: NormalizedHubSpotLeadInput
+): Record<string, unknown> {
   const scoring = scoreLead(
     leadScoringInputFromLeadRow({
       procedure_interest: input.procedureInterest,
@@ -126,7 +131,10 @@ function scoringFieldsForLeadUpdate(
 }
 
 function normalizeProcessBatchLimit(limit?: number): number {
-  return Math.min(Math.max(limit ?? LEADFLOW_HUBSPOT_PROCESS_DEFAULT_BATCH, 1), LEADFLOW_HUBSPOT_PROCESS_MAX_BATCH);
+  return Math.min(
+    Math.max(limit ?? LEADFLOW_HUBSPOT_PROCESS_DEFAULT_BATCH, 1),
+    LEADFLOW_HUBSPOT_PROCESS_MAX_BATCH
+  );
 }
 
 export async function loadPendingExternalEvents(opts?: {

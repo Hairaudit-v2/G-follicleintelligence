@@ -44,7 +44,9 @@ function normalizeTopics(raw: unknown[]): string[] {
   return out;
 }
 
-export function parseRecipientAssessmentModelJson(parsed: unknown): RecipientModelJsonParseSuccess | RecipientModelJsonParseFailure {
+export function parseRecipientAssessmentModelJson(
+  parsed: unknown
+): RecipientModelJsonParseSuccess | RecipientModelJsonParseFailure {
   const zod = rawSchema.safeParse(parsed);
   if (!zod.success) {
     return { ok: false, error: zod.error.issues[0]?.message ?? "invalid json" };
@@ -62,7 +64,10 @@ export function parseRecipientAssessmentModelJson(parsed: unknown): RecipientMod
     patient_expectation_risk: normalizeHieRecipientRiskLevel(d.patient_expectation_risk ?? null),
     documentation_gap_detected: Boolean(d.documentation_gap_detected),
     review_topics: normalizeTopics(d.review_topics),
-    candidacy_summary: sliceText(typeof d.candidacy_summary === "string" ? d.candidacy_summary : "", 8000),
+    candidacy_summary: sliceText(
+      typeof d.candidacy_summary === "string" ? d.candidacy_summary : "",
+      8000
+    ),
     ai_notes: sliceText(typeof d.ai_notes === "string" ? d.ai_notes : "", 8000),
   };
   return { ok: true, data: out };

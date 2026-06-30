@@ -25,8 +25,7 @@ export const pwsTitle = "text-sm font-semibold text-slate-100";
 export const pwsMeta = "mt-0.5 text-xs text-slate-500";
 
 /** Uppercase field label (e.g. "Next appointment"). */
-export const pwsLabel =
-  "text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500";
+export const pwsLabel = "text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500";
 
 /** Primary field value. */
 export const pwsValue = "text-sm font-medium text-slate-200";
@@ -41,14 +40,11 @@ export const pwsDivider = "border-t border-white/[0.06]";
 export const pwsEmpty = "text-sm text-slate-500";
 
 /** Small metric tile (2×2 grid inside cards). */
-export const pwsMetricTile =
-  "rounded-lg border border-white/[0.06] bg-white/[0.04] p-2.5";
+export const pwsMetricTile = "rounded-lg border border-white/[0.06] bg-white/[0.04] p-2.5";
 
-export const pwsMetricLabel =
-  "text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500";
+export const pwsMetricLabel = "text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500";
 
-export const pwsMetricValue =
-  "mt-0.5 text-lg font-bold tabular-nums text-slate-100";
+export const pwsMetricValue = "mt-0.5 text-lg font-bold tabular-nums text-slate-100";
 
 /** Ghost CTA chip — dark surface, muted text. */
 export const pwsCta =

@@ -3,14 +3,20 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
-import { loadPatientDirectorySummary, type PatientDirectorySummary } from "@/src/lib/patients/patientDirectoryLoader";
+import {
+  loadPatientDirectorySummary,
+  type PatientDirectorySummary,
+} from "@/src/lib/patients/patientDirectoryLoader";
 import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
 import { dashboardTodayYmd } from "@/src/lib/cases/surgeryOsDashboardDerive";
 
 const TERMINAL_BOOKING = new Set(["cancelled", "completed", "no_show"]);
 const MS_DAY = 86_400_000;
 
-function personMetaContact(meta: Record<string, unknown>): { email: string | null; phone: string | null } {
+function personMetaContact(meta: Record<string, unknown>): {
+  email: string | null;
+  phone: string | null;
+} {
   const email =
     typeof meta.email === "string"
       ? meta.email.trim() || null
@@ -25,7 +31,10 @@ async function loadPersonDisplayByPatientIds(
   tenantId: string,
   patientIds: string[]
 ): Promise<Map<string, { displayName: string; email: string | null; phone: string | null }>> {
-  const out = new Map<string, { displayName: string; email: string | null; phone: string | null }>();
+  const out = new Map<
+    string,
+    { displayName: string; email: string | null; phone: string | null }
+  >();
   const tid = tenantId.trim();
   const ids = patientIds.filter(Boolean);
   if (!ids.length) return out;
@@ -38,7 +47,9 @@ async function loadPersonDisplayByPatientIds(
     .in("id", ids);
   if (pe) throw new Error(pe.message);
 
-  const personIds = Array.from(new Set((pats ?? []).map((r) => String((r as { person_id: string }).person_id))));
+  const personIds = Array.from(
+    new Set((pats ?? []).map((r) => String((r as { person_id: string }).person_id)))
+  );
   if (!personIds.length) return out;
 
   const { data: persons, error: e2 } = await supabase
@@ -52,7 +63,10 @@ async function loadPersonDisplayByPatientIds(
   for (const row of persons ?? []) {
     const id = String((row as { id: string }).id);
     const m = (row as { metadata: unknown }).metadata;
-    personMeta.set(id, m && typeof m === "object" && !Array.isArray(m) ? (m as Record<string, unknown>) : {});
+    personMeta.set(
+      id,
+      m && typeof m === "object" && !Array.isArray(m) ? (m as Record<string, unknown>) : {}
+    );
   }
 
   for (const pr of pats ?? []) {
@@ -122,7 +136,9 @@ export type PatientOsOverviewModel = {
 };
 
 /** Safe fallback when overview sections cannot load; KPIs align with directory summary when provided. */
-export function buildPatientOsOverviewFallback(summary: PatientDirectorySummary): PatientOsOverviewModel {
+export function buildPatientOsOverviewFallback(
+  summary: PatientDirectorySummary
+): PatientOsOverviewModel {
   return {
     kpis: {
       totalPatients: summary.totalPatients,
@@ -197,7 +213,10 @@ async function countPatientsNeedingFollowUp(tenantId: string, todayYmd: string):
   return patients.size;
 }
 
-async function loadRecentPatients(tenantId: string, limit: number): Promise<PatientOsRecentPatientRow[]> {
+async function loadRecentPatients(
+  tenantId: string,
+  limit: number
+): Promise<PatientOsRecentPatientRow[]> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const { data: pats, error } = await supabase
@@ -242,7 +261,12 @@ async function loadActiveJourneys(tenantId: string, limit: number): Promise<Pati
     .limit(40);
   if (error) throw new Error(error.message);
 
-  const rows = (cases ?? []) as { id: string; status: string; updated_at: string; foundation_patient_id: string }[];
+  const rows = (cases ?? []) as {
+    id: string;
+    status: string;
+    updated_at: string;
+    foundation_patient_id: string;
+  }[];
   const patientIds = Array.from(new Set(rows.map((c) => String(c.foundation_patient_id))));
   const display = await loadPersonDisplayByPatientIds(tid, patientIds);
 
@@ -266,7 +290,11 @@ async function loadActiveJourneys(tenantId: string, limit: number): Promise<Pati
   return out;
 }
 
-async function loadUpcomingBookings(tenantId: string, limit: number, nowIso: string): Promise<PatientOsUpcomingBookingRow[]> {
+async function loadUpcomingBookings(
+  tenantId: string,
+  limit: number,
+  nowIso: string
+): Promise<PatientOsUpcomingBookingRow[]> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const { data: books, error } = await supabase
@@ -305,7 +333,10 @@ async function loadUpcomingBookings(tenantId: string, limit: number, nowIso: str
   }));
 }
 
-async function loadTimelineHighlights(tenantId: string, limit: number): Promise<PatientOsTimelineHighlight[]> {
+async function loadTimelineHighlights(
+  tenantId: string,
+  limit: number
+): Promise<PatientOsTimelineHighlight[]> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const { data, error } = await supabase
@@ -340,7 +371,9 @@ async function loadTimelineHighlights(tenantId: string, limit: number): Promise<
     };
   });
 
-  const pids = Array.from(new Set(base.map((h) => h.patientId).filter((x): x is string => Boolean(x))));
+  const pids = Array.from(
+    new Set(base.map((h) => h.patientId).filter((x): x is string => Boolean(x)))
+  );
   if (pids.length) {
     const names = await loadPersonDisplayByPatientIds(tid, pids);
     for (const h of base) {
@@ -375,18 +408,27 @@ export async function loadPatientOsOverview(
   // Apply at the render boundary so masked/summary placeholders don't reach typed consumers.
   // Field access is clamped to PatientOS module access by the engine.
 
-  const summaryPromise = opts?.summary ? Promise.resolve(opts.summary) : loadPatientDirectorySummary(tid);
+  const summaryPromise = opts?.summary
+    ? Promise.resolve(opts.summary)
+    : loadPatientDirectorySummary(tid);
 
-  const [summary, recentCount, followUpPatients, recentPatients, activeJourneys, upcomingBookings, timelineHighlights] =
-    await Promise.all([
-      summaryPromise,
-      countRecentlyCreatedPatients(tid, thirtyAgo),
-      countPatientsNeedingFollowUp(tid, todayYmd),
-      loadRecentPatients(tid, 8),
-      loadActiveJourneys(tid, 10),
-      loadUpcomingBookings(tid, 10, nowIso),
-      loadTimelineHighlights(tid, 12),
-    ]);
+  const [
+    summary,
+    recentCount,
+    followUpPatients,
+    recentPatients,
+    activeJourneys,
+    upcomingBookings,
+    timelineHighlights,
+  ] = await Promise.all([
+    summaryPromise,
+    countRecentlyCreatedPatients(tid, thirtyAgo),
+    countPatientsNeedingFollowUp(tid, todayYmd),
+    loadRecentPatients(tid, 8),
+    loadActiveJourneys(tid, 10),
+    loadUpcomingBookings(tid, 10, nowIso),
+    loadTimelineHighlights(tid, 12),
+  ]);
 
   return {
     kpis: {

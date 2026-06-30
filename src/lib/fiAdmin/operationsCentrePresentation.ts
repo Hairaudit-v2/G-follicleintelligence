@@ -43,7 +43,12 @@ export type CoordinationPriorityItem = {
   priorityScore: number;
 };
 
-export type MovementLaneId = "expected" | "arrived" | "in_consultation" | "in_procedure" | "completed";
+export type MovementLaneId =
+  | "expected"
+  | "arrived"
+  | "in_consultation"
+  | "in_procedure"
+  | "completed";
 
 export type MovementLane = {
   id: MovementLaneId;
@@ -113,7 +118,7 @@ function formatSlot(iso: string, tz: string | null): string {
 
 function todayAgendaRows(
   agendaByBucket: Record<AgendaBucket, DashboardBookingItem[]>,
-  operationalDay: TenantOperationalDay,
+  operationalDay: TenantOperationalDay
 ): Array<{ row: DashboardBookingItem; bucket: AgendaBucket }> {
   const { localStartIso, localEndIso } = operationalDay;
   const rows: Array<{ row: DashboardBookingItem; bucket: AgendaBucket }> = [];
@@ -128,10 +133,15 @@ function todayAgendaRows(
 }
 
 function bookingStatusNorm(status: string): string {
-  return String(status ?? "").trim().toLowerCase();
+  return String(status ?? "")
+    .trim()
+    .toLowerCase();
 }
 
-function movementLaneForRow(row: DashboardBookingItem, bucket: AgendaBucket): MovementLaneId | null {
+function movementLaneForRow(
+  row: DashboardBookingItem,
+  bucket: AgendaBucket
+): MovementLaneId | null {
   const st = bookingStatusNorm(row.booking_status);
   if (st === "cancelled" || st === "no_show") return null;
   if (st === "completed") return "completed";
@@ -176,7 +186,8 @@ function nextActionForLane(laneId: MovementLaneId): string {
 
 function resolvePatientHref(base: string, row: DashboardBookingItem): string | null {
   if (row.patient_id?.trim()) return `${base}/patients/${row.patient_id.trim()}`;
-  if (row.lead_id?.trim() && row.patient_id == null) return `${base}/crm/leads/${row.lead_id.trim()}`;
+  if (row.lead_id?.trim() && row.patient_id == null)
+    return `${base}/crm/leads/${row.lead_id.trim()}`;
   return null;
 }
 
@@ -198,9 +209,10 @@ export function buildLiveClinicFlowCards(
   data: Pick<
     TenantOperationalDashboard,
     "agendaByBucket" | "operationalDay" | "clinicToday" | "paymentCommercialKpis" | "receptionBoard"
-  >,
+  >
 ): LiveClinicFlowCard[] {
-  const { agendaByBucket, operationalDay, clinicToday, paymentCommercialKpis, receptionBoard } = data;
+  const { agendaByBucket, operationalDay, clinicToday, paymentCommercialKpis, receptionBoard } =
+    data;
   const todayRows = todayAgendaRows(agendaByBucket, operationalDay);
   const tz = operationalDay.calendarTimezone;
 
@@ -209,15 +221,18 @@ export function buildLiveClinicFlowCards(
     return st === "scheduled" || st === "confirmed";
   }).length;
 
-  const arrived = todayRows.filter(({ row }) => bookingStatusNorm(row.booking_status) === "arrived").length;
+  const arrived = todayRows.filter(
+    ({ row }) => bookingStatusNorm(row.booking_status) === "arrived"
+  ).length;
 
   const consultationsInProgress = todayRows.filter(
     ({ row, bucket }) =>
-      bookingStatusNorm(row.booking_status) === "arrived" && (bucket === "consult" || bucket === "follow_up"),
+      bookingStatusNorm(row.booking_status) === "arrived" &&
+      (bucket === "consult" || bucket === "follow_up")
   ).length;
 
   const proceduresActive = todayRows.filter(
-    ({ row, bucket }) => bookingStatusNorm(row.booking_status) === "arrived" && bucket === "surgery",
+    ({ row, bucket }) => bookingStatusNorm(row.booking_status) === "arrived" && bucket === "surgery"
   ).length;
 
   const roomsInUse = receptionBoard.cards.filter((c) => c.roomLabel?.trim()).length;
@@ -258,7 +273,10 @@ export function buildLiveClinicFlowCards(
       id: "rooms",
       label: "Rooms in use",
       value: roomsInUse,
-      detail: roomsInUse > 0 ? "Bookings with a room assigned today" : "Assign rooms on the calendar as visits are confirmed",
+      detail:
+        roomsInUse > 0
+          ? "Bookings with a room assigned today"
+          : "Assign rooms on the calendar as visits are confirmed",
       href: `${base}/reception`,
     },
     {
@@ -296,13 +314,17 @@ export function buildCoordinationPriorities(
     | "clinicToday"
   >,
   showCrmNav: boolean,
-  maxItems = 5,
+  maxItems = 5
 ): CoordinationPriorityItem[] {
   const todayRows = todayAgendaRows(data.agendaByBucket, data.operationalDay);
-  const patientsWaiting = todayRows.filter(({ row, bucket }) => movementLaneForRow(row, bucket) === "arrived").length;
-  const needConfirmation = todayRows.filter(({ row }) => bookingStatusNorm(row.booking_status) === "scheduled").length;
+  const patientsWaiting = todayRows.filter(
+    ({ row, bucket }) => movementLaneForRow(row, bucket) === "arrived"
+  ).length;
+  const needConfirmation = todayRows.filter(
+    ({ row }) => bookingStatusNorm(row.booking_status) === "scheduled"
+  ).length;
   const todaySurgeriesBlocked = todayRows.filter(
-    ({ row, bucket }) => bucket === "surgery" && !row.case_id?.trim(),
+    ({ row, bucket }) => bucket === "surgery" && !row.case_id?.trim()
   ).length;
   const paymentsBeforeTreatment =
     data.paymentCommercialKpis.depositsDueCount + data.paymentCommercialKpis.overduePaymentsCount;
@@ -328,7 +350,8 @@ export function buildCoordinationPriorities(
       count: todaySurgeriesBlocked,
       priorityScore: 95,
       severity: "critical",
-      headline: (n) => plural(n, "procedure", "procedures") + " blocked by preparation requirements",
+      headline: (n) =>
+        plural(n, "procedure", "procedures") + " blocked by preparation requirements",
       detail: "Link cases and complete preparation before procedure day.",
       href: `${base}/surgery-readiness`,
     },
@@ -411,7 +434,7 @@ export function attentionSeverityClass(severity: CoordinationPriorityItem["sever
 export function buildMovementBoardItems(
   base: string,
   data: Pick<TenantOperationalDashboard, "agendaByBucket" | "operationalDay">,
-  maxPerLane = 4,
+  maxPerLane = 4
 ): Record<MovementLaneId, MovementBoardItem[]> {
   const { operationalDay } = data;
   const tz = operationalDay.calendarTimezone;
@@ -444,18 +467,24 @@ export function buildMovementBoardItems(
   }
 
   for (const laneId of Object.keys(lanes) as MovementLaneId[]) {
-    lanes[laneId] = lanes[laneId].sort((a, b) => a.sortKey.localeCompare(b.sortKey)).slice(0, maxPerLane);
+    lanes[laneId] = lanes[laneId]
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+      .slice(0, maxPerLane);
   }
 
   return lanes;
 }
 
 export function buildRoomOverview(
-  receptionCards: readonly ReceptionBoardCard[],
+  receptionCards: readonly ReceptionBoardCard[]
 ): RoomOverviewSummary {
   const withRoom = receptionCards.filter((c) => c.roomLabel?.trim());
-  const procedureRooms = withRoom.filter((c) => c.bookingType.toLowerCase().includes("surgery")).length;
-  const treatmentRooms = withRoom.filter((c) => !c.bookingType.toLowerCase().includes("surgery")).length;
+  const procedureRooms = withRoom.filter((c) =>
+    c.bookingType.toLowerCase().includes("surgery")
+  ).length;
+  const treatmentRooms = withRoom.filter(
+    (c) => !c.bookingType.toLowerCase().includes("surgery")
+  ).length;
   const roomLabels = new Set(withRoom.map((c) => c.roomLabel!.trim()));
 
   return {
@@ -471,7 +500,7 @@ export function buildRoomOverview(
 export function buildStaffCoordinationSummary(
   quickStats: TenantQuickStats,
   actionCentre: TenantActionCentre,
-  visitsToday: number,
+  visitsToday: number
 ): StaffCoordinationSummary {
   const staffScheduled = quickStats.staffOnDutyToday;
   const coverageWarning =
@@ -493,7 +522,7 @@ export function buildStaffCoordinationSummary(
 export function buildFinancialBlockers(
   base: string,
   paymentCommercialKpis: TenantPaymentCommercialKpis,
-  actionCentre: TenantActionCentre,
+  actionCentre: TenantActionCentre
 ): FinancialBlockerItem[] {
   const items: FinancialBlockerItem[] = [
     {
@@ -527,8 +556,12 @@ export function buildFinancialBlockers(
 
 /** Agenda bucket counts for diagnostics panels. */
 export function agendaBucketCountsForOperationalDay(
-  data: Pick<TenantOperationalDashboard, "agendaByBucket" | "operationalDay">,
+  data: Pick<TenantOperationalDashboard, "agendaByBucket" | "operationalDay">
 ): Record<AgendaBucket, number> {
   const { todayYmd, calendarTimezone } = data.operationalDay;
-  return countAgendaBookingsOnOperationalDayByBucket(data.agendaByBucket, todayYmd, calendarTimezone);
+  return countAgendaBookingsOnOperationalDayByBucket(
+    data.agendaByBucket,
+    todayYmd,
+    calendarTimezone
+  );
 }

@@ -33,7 +33,9 @@ export function SystemAdminNav() {
       className="w-full shrink-0 space-y-1 rounded-xl border border-white/[0.08] bg-[#060d18]/90 p-2 lg:w-56"
       aria-label="System administration"
     >
-      <p className={cn(fiOsChromeClasses.sectionEyebrow, "px-2 pb-1 pt-1")}>System administration</p>
+      <p className={cn(fiOsChromeClasses.sectionEyebrow, "px-2 pb-1 pt-1")}>
+        System administration
+      </p>
       {LINKS.map((l) => {
         const active =
           l.href === "/fi-admin/system"
@@ -45,7 +47,9 @@ export function SystemAdminNav() {
             href={l.href}
             className={cn(
               "block rounded-lg px-2 py-2 text-sm font-medium transition",
-              active ? "bg-[#22C1FF]/12 text-[#22C1FF]" : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+              active
+                ? "bg-[#22C1FF]/12 text-[#22C1FF]"
+                : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
             )}
           >
             {l.label}

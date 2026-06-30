@@ -28,9 +28,24 @@ export function mapHairAuditImageToAssetType(imageType: string): FoundationCaseT
     .trim()
     .replace(/[\s-]+/g, "_");
   if (!n) return "media";
-  const surgeryHints = ["transplant", "fue", "graft", "surgery", "surgical", "postop", "post_op", "post-op", "strip"];
+  const surgeryHints = [
+    "transplant",
+    "fue",
+    "graft",
+    "surgery",
+    "surgical",
+    "postop",
+    "post_op",
+    "post-op",
+    "strip",
+  ];
   if (surgeryHints.some((h) => n.includes(h))) {
-    if (n.includes("post") || n.includes("immediate") || n.includes("day0") || n.includes("day_0")) {
+    if (
+      n.includes("post") ||
+      n.includes("immediate") ||
+      n.includes("day0") ||
+      n.includes("day_0")
+    ) {
       return "surgery_evidence";
     }
     return "hair_transplant";
@@ -40,7 +55,9 @@ export function mapHairAuditImageToAssetType(imageType: string): FoundationCaseT
 
 /** HLI document kind → foundation media asset_type. */
 export function mapHliDocumentKindToMediaAssetType(kind: string): FoundationCaseType {
-  const k = String(kind ?? "").toLowerCase().trim();
+  const k = String(kind ?? "")
+    .toLowerCase()
+    .trim();
   if (k === "blood_pdf" || k === "blood_csv") return "hair_loss_assessment";
   return "media";
 }
@@ -92,7 +109,10 @@ export function getHairAuditImagesTimelineSpec(imageTypes: string[]): Foundation
     return at === "hair_transplant" || at === "surgery_evidence";
   });
   if (anySurgery) {
-    return { event_kind: "surgery_evidence_uploaded", title: "Surgery / transplant evidence uploaded" };
+    return {
+      event_kind: "surgery_evidence_uploaded",
+      title: "Surgery / transplant evidence uploaded",
+    };
   }
   return { event_kind: "hairaudit_media_uploaded", title: "HairAudit images uploaded" };
 }

@@ -3,16 +3,27 @@ import { Layers } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import {
-  SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import { SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
 import type { SurgeryOsGraftSummary } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
 
-function StatCell({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+function StatCell({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: boolean;
+}) {
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-      <p className={cn("mt-0.5 text-lg font-semibold tabular-nums", accent ? "text-cyan-300" : "text-slate-100")}>
+      <p
+        className={cn(
+          "mt-0.5 text-lg font-semibold tabular-nums",
+          accent ? "text-cyan-300" : "text-slate-100"
+        )}
+      >
         {value}
       </p>
     </div>
@@ -31,7 +42,11 @@ function reconciliationTone(status: SurgeryOsGraftSummary["reconciliationStatus"
   }
 }
 
-export function SurgeryOsGraftIntelligenceWidget({ graftSummary }: { graftSummary: SurgeryOsGraftSummary[] }) {
+export function SurgeryOsGraftIntelligenceWidget({
+  graftSummary,
+}: {
+  graftSummary: SurgeryOsGraftSummary[];
+}) {
   return (
     <DashboardCard className="flex h-full min-h-[360px] flex-col overflow-hidden">
       <div className="border-b border-white/[0.06] px-4 py-3">
@@ -61,7 +76,12 @@ export function SurgeryOsGraftIntelligenceWidget({ graftSummary }: { graftSummar
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-slate-500">Reconciliation</p>
-                      <p className={cn("text-xs font-semibold", reconciliationTone(g.reconciliationStatus))}>
+                      <p
+                        className={cn(
+                          "text-xs font-semibold",
+                          reconciliationTone(g.reconciliationStatus)
+                        )}
+                      >
                         {SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS[g.reconciliationStatus]}
                       </p>
                     </div>
@@ -88,7 +108,9 @@ export function SurgeryOsGraftIntelligenceWidget({ graftSummary }: { graftSummar
                     <StatCell label="Total hairs" value={g.totalHairs} />
                     <StatCell
                       label="Avg hairs/graft"
-                      value={g.averageHairsPerGraft != null ? g.averageHairsPerGraft.toFixed(2) : "—"}
+                      value={
+                        g.averageHairsPerGraft != null ? g.averageHairsPerGraft.toFixed(2) : "—"
+                      }
                     />
                   </div>
                 </div>

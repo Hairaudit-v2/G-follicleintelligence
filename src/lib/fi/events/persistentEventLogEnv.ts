@@ -14,7 +14,9 @@ export type PersistentEventLogEnvOptions = {
  * Production persistence remains disabled until a future documented policy stage; tests may
  * override `nodeEnv` / `env` via {@link PersistentEventLogEnvOptions}.
  */
-export function isFiIntelligenceEventLogPersistEnabled(options?: PersistentEventLogEnvOptions): boolean {
+export function isFiIntelligenceEventLogPersistEnabled(
+  options?: PersistentEventLogEnvOptions
+): boolean {
   const env = options?.env ?? (process.env as Record<string, string | undefined>);
   const nodeEnv = options?.nodeEnv ?? env.NODE_ENV ?? "";
   if (nodeEnv === "production") return false;

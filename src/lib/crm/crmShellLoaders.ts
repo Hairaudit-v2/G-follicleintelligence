@@ -20,7 +20,10 @@ import {
   loadCrmTasksForLead,
 } from "./server";
 import { loadReminderJobsForLead } from "@/src/lib/reminders/reminderJobs.server";
-import { loadPatientClinicalDetails, type PatientClinicalDetailsRow } from "@/src/lib/patients/clinicalDetailsServer";
+import {
+  loadPatientClinicalDetails,
+  type PatientClinicalDetailsRow,
+} from "@/src/lib/patients/clinicalDetailsServer";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
@@ -45,7 +48,11 @@ import type {
   FiCrmTaskRow,
 } from "./types";
 import { DEFAULT_CRM_PIPELINE_KEY } from "./types";
-import { attachSearchPattern, parseCrmLeadListQuery, type ParsedCrmLeadListQuery } from "./crmLeadListQuery";
+import {
+  attachSearchPattern,
+  parseCrmLeadListQuery,
+  type ParsedCrmLeadListQuery,
+} from "./crmLeadListQuery";
 import { enrichCrmKanbanCards } from "./crmKanbanExtras.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -53,7 +60,9 @@ import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePol
 
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
 
-export async function loadCrmShellPipelineStages(tenantId: string): Promise<FiCrmPipelineStageRow[]> {
+export async function loadCrmShellPipelineStages(
+  tenantId: string
+): Promise<FiCrmPipelineStageRow[]> {
   const scope = {
     tenantId,
     organisationId: null as string | null,
@@ -84,7 +93,10 @@ export type CrmLeadShellDetailPageData = CrmLeadShellBundle & {
   clinics: CrmShellClinicOption[];
 };
 
-export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): Promise<CrmLeadShellBundle> {
+export async function loadCrmShellLeadBundle(
+  tenantId: string,
+  leadId: string
+): Promise<CrmLeadShellBundle> {
   const lid = leadId.trim();
   const lead = await loadCrmLeadById(lid, tenantId);
   if (!lead) {
@@ -100,18 +112,36 @@ export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): 
       leadBookings: [],
     };
   }
-  const [events, tasks, notes, leadNotes, leadCommunications, messages, conversionState, leadBookings] =
-    await Promise.all([
-      loadCrmActivityTimelineForLead(tenantId, lid, { limit: 80 }),
-      loadCrmTasksForLead(tenantId, lid, { limit: 40 }),
-      loadCrmNotesForLead(tenantId, lid, { limit: 40 }),
-      loadCrmLeadNotesForLead(tenantId, lid, { limit: 80 }),
-      loadCrmLeadCommunicationsForLead(tenantId, lid, { limit: 80 }),
-      loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
-      loadCrmLeadConversionState(tenantId, lid),
-      loadBookingsForLead(tenantId, lid),
-    ]);
-  return { lead, events, tasks, notes, leadNotes, leadCommunications, messages, conversionState, leadBookings };
+  const [
+    events,
+    tasks,
+    notes,
+    leadNotes,
+    leadCommunications,
+    messages,
+    conversionState,
+    leadBookings,
+  ] = await Promise.all([
+    loadCrmActivityTimelineForLead(tenantId, lid, { limit: 80 }),
+    loadCrmTasksForLead(tenantId, lid, { limit: 40 }),
+    loadCrmNotesForLead(tenantId, lid, { limit: 40 }),
+    loadCrmLeadNotesForLead(tenantId, lid, { limit: 80 }),
+    loadCrmLeadCommunicationsForLead(tenantId, lid, { limit: 80 }),
+    loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
+    loadCrmLeadConversionState(tenantId, lid),
+    loadBookingsForLead(tenantId, lid),
+  ]);
+  return {
+    lead,
+    events,
+    tasks,
+    notes,
+    leadNotes,
+    leadCommunications,
+    messages,
+    conversionState,
+    leadBookings,
+  };
 }
 
 export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {
@@ -127,7 +157,6 @@ export type CrmShellLeadsBoardIndexResult = {
   truncated: boolean;
   query: ParsedCrmLeadListQuery;
 };
-
 
 /**
  * Lead index for CRM shell home: lazy default pipeline seed + paginated list (Stage 2F).
@@ -187,7 +216,9 @@ export async function loadCrmShellLeadsBoardIndex(
   return { cards, total, truncated, query: parsedBase };
 }
 
-export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<CrmShellUserPickerOption[]> {
+export async function loadCrmShellUserPickerOptions(
+  tenantId: string
+): Promise<CrmShellUserPickerOption[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
@@ -199,49 +230,56 @@ export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<C
   return rows.map((r) => ({ id: String(r.id), email: r.email != null ? String(r.email) : null }));
 }
 
-export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<CrmShellUserPickerOption[]> {
+export async function loadCrmShellStaffPickerOptions(
+  tenantId: string
+): Promise<CrmShellUserPickerOption[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
-    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours, is_active, calendar_visible")
+    .select(
+      "id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours, is_active, calendar_visible"
+    )
     .eq("tenant_id", tenantId.trim())
     .eq("is_active", true)
     .order("full_name", { ascending: true });
   if (error) throw new Error(error.message);
   return (data ?? [])
     .map((raw) => {
-    const r = raw as {
-      id: string;
-      full_name: string;
-      staff_role: string;
-      email: string | null;
-      mobile: string | null;
-      calendar_color: string | null;
-      fi_user_id: string | null;
-      default_timezone: string | null;
-      working_hours: Record<string, unknown> | null;
-      is_active: boolean;
-      calendar_visible: boolean | null;
-    };
-    const wh =
-      r.working_hours && typeof r.working_hours === "object" && !Array.isArray(r.working_hours)
-        ? (r.working_hours as Record<string, unknown>)
-        : null;
-    return {
-      id: String(r.id),
-      email: r.email != null ? String(r.email) : null,
-      full_name: String(r.full_name ?? "").trim() || null,
-      staff_role: String(r.staff_role ?? "consultant").trim() || "consultant",
-      mobile: r.mobile != null ? String(r.mobile) : null,
-      calendar_color: r.calendar_color != null ? String(r.calendar_color) : null,
-      fi_user_id: r.fi_user_id != null ? String(r.fi_user_id) : null,
-      default_timezone: r.default_timezone != null ? String(r.default_timezone).trim() || null : null,
-      working_hours: wh,
-      is_active: Boolean(r.is_active),
-      calendar_visible: r.calendar_visible == null ? null : Boolean(r.calendar_visible),
-    };
-  })
-    .filter((s) => isStaffBookableForClinicalWorkflow({ is_active: s.is_active, staff_role: s.staff_role }));
+      const r = raw as {
+        id: string;
+        full_name: string;
+        staff_role: string;
+        email: string | null;
+        mobile: string | null;
+        calendar_color: string | null;
+        fi_user_id: string | null;
+        default_timezone: string | null;
+        working_hours: Record<string, unknown> | null;
+        is_active: boolean;
+        calendar_visible: boolean | null;
+      };
+      const wh =
+        r.working_hours && typeof r.working_hours === "object" && !Array.isArray(r.working_hours)
+          ? (r.working_hours as Record<string, unknown>)
+          : null;
+      return {
+        id: String(r.id),
+        email: r.email != null ? String(r.email) : null,
+        full_name: String(r.full_name ?? "").trim() || null,
+        staff_role: String(r.staff_role ?? "consultant").trim() || "consultant",
+        mobile: r.mobile != null ? String(r.mobile) : null,
+        calendar_color: r.calendar_color != null ? String(r.calendar_color) : null,
+        fi_user_id: r.fi_user_id != null ? String(r.fi_user_id) : null,
+        default_timezone:
+          r.default_timezone != null ? String(r.default_timezone).trim() || null : null,
+        working_hours: wh,
+        is_active: Boolean(r.is_active),
+        calendar_visible: r.calendar_visible == null ? null : Boolean(r.calendar_visible),
+      };
+    })
+    .filter((s) =>
+      isStaffBookableForClinicalWorkflow({ is_active: s.is_active, staff_role: s.staff_role })
+    );
 }
 
 export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<{
@@ -251,7 +289,11 @@ export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const [orgsRes, clinicsRes] = await Promise.all([
-    supabase.from("fi_organisations").select("id, name").eq("tenant_id", tid).order("name", { ascending: true }),
+    supabase
+      .from("fi_organisations")
+      .select("id, name")
+      .eq("tenant_id", tid)
+      .order("name", { ascending: true }),
     supabase
       .from("fi_clinics")
       .select("id, display_name, organisation_id, metadata")
@@ -275,14 +317,20 @@ export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<
       id: String(r.id),
       display_name: String(r.display_name),
       organisation_id: r.organisation_id != null ? String(r.organisation_id) : null,
-      metadata: r.metadata != null && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : null,
+      metadata:
+        r.metadata != null && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : null,
     };
   });
   return { organisations, clinics };
 }
 
 /** Lead detail page: bundle + owner/org/clinic pickers for the edit panel (Stage 2H). */
-export async function loadCrmShellLeadDetailPageData(tenantId: string, leadId: string): Promise<CrmLeadShellDetailPageData> {
+export async function loadCrmShellLeadDetailPageData(
+  tenantId: string,
+  leadId: string
+): Promise<CrmLeadShellDetailPageData> {
   const [bundle, owners, staffDirectory, scope] = await Promise.all([
     loadCrmShellLeadBundle(tenantId, leadId),
     loadCrmShellUserPickerOptions(tenantId),
@@ -360,7 +408,10 @@ export async function loadCrmShellRelatedLeads(
   });
 }
 
-async function loadClinicalScalesSummaryForPatient(tenantId: string, patientId: string): Promise<string | null> {
+async function loadClinicalScalesSummaryForPatient(
+  tenantId: string,
+  patientId: string
+): Promise<string | null> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const pid = patientId.trim();

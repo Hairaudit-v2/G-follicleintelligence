@@ -224,7 +224,10 @@ export const fiProcedureFamilyLabels: Record<FiProcedureFamily, string> = {
  * Core hue per procedure — Tailwind palette key.
  * indigo · rose · emerald · sky · amber
  */
-export const fiProcedureHue: Record<FiProcedureFamily, "indigo" | "rose" | "emerald" | "sky" | "amber"> = {
+export const fiProcedureHue: Record<
+  FiProcedureFamily,
+  "indigo" | "rose" | "emerald" | "sky" | "amber"
+> = {
   pre_surgery_consult: "indigo",
   full_transplant: "rose",
   prp_session: "emerald",
@@ -233,7 +236,10 @@ export const fiProcedureHue: Record<FiProcedureFamily, "indigo" | "rose" | "emer
 };
 
 /** HSL triplets (no `hsl()` wrapper) for CSS variables — light mode defaults. */
-export const fiProcedureCssVarsLight: Record<FiProcedureFamily, { base: string; foreground: string; muted: string }> = {
+export const fiProcedureCssVarsLight: Record<
+  FiProcedureFamily,
+  { base: string; foreground: string; muted: string }
+> = {
   pre_surgery_consult: { base: "239 84% 67%", foreground: "243 75% 18%", muted: "226 100% 97%" },
   full_transplant: { base: "350 89% 60%", foreground: "343 84% 17%", muted: "356 100% 97%" },
   prp_session: { base: "160 84% 39%", foreground: "166 91% 9%", muted: "152 81% 96%" },
@@ -242,7 +248,10 @@ export const fiProcedureCssVarsLight: Record<FiProcedureFamily, { base: string; 
 };
 
 /** HSL triplets for dark mode surfaces — base hues align with Tailwind *-400 accents. */
-export const fiProcedureCssVarsDark: Record<FiProcedureFamily, { base: string; foreground: string; muted: string }> = {
+export const fiProcedureCssVarsDark: Record<
+  FiProcedureFamily,
+  { base: string; foreground: string; muted: string }
+> = {
   pre_surgery_consult: { base: "239 84% 67%", foreground: "226 100% 94%", muted: "243 47% 20%" },
   full_transplant: { base: "351 95% 71%", foreground: "356 100% 94%", muted: "343 50% 18%" },
   prp_session: { base: "158 64% 52%", foreground: "152 81% 92%", muted: "166 50% 14%" },
@@ -275,11 +284,16 @@ export const fiProcedureBorderClassNames: Record<FiProcedureFamily, string> = {
 
 /** Calendar event background tint — per procedure family. */
 export const fiProcedureBackgroundTintClassNames: Record<FiProcedureFamily, string> = {
-  pre_surgery_consult: "bg-indigo-100/90 dark:bg-indigo-950/50 dark:ring-1 dark:ring-inset dark:ring-indigo-400/10",
-  full_transplant: "bg-rose-100/90 dark:bg-rose-950/50 dark:ring-1 dark:ring-inset dark:ring-rose-400/10",
-  prp_session: "bg-emerald-100/90 dark:bg-emerald-950/50 dark:ring-1 dark:ring-inset dark:ring-emerald-400/10",
-  follow_up_nurse_prp: "bg-sky-100/90 dark:bg-sky-950/50 dark:ring-1 dark:ring-inset dark:ring-sky-400/10",
-  virtual_zoom: "bg-amber-100/90 dark:bg-amber-950/50 dark:ring-1 dark:ring-inset dark:ring-amber-400/10",
+  pre_surgery_consult:
+    "bg-indigo-100/90 dark:bg-indigo-950/50 dark:ring-1 dark:ring-inset dark:ring-indigo-400/10",
+  full_transplant:
+    "bg-rose-100/90 dark:bg-rose-950/50 dark:ring-1 dark:ring-inset dark:ring-rose-400/10",
+  prp_session:
+    "bg-emerald-100/90 dark:bg-emerald-950/50 dark:ring-1 dark:ring-inset dark:ring-emerald-400/10",
+  follow_up_nurse_prp:
+    "bg-sky-100/90 dark:bg-sky-950/50 dark:ring-1 dark:ring-inset dark:ring-sky-400/10",
+  virtual_zoom:
+    "bg-amber-100/90 dark:bg-amber-950/50 dark:ring-1 dark:ring-inset dark:ring-amber-400/10",
 };
 
 /** Calendar event foreground text — per procedure family. */
@@ -343,14 +357,20 @@ export const fiAppointmentStatusLabels: Record<FiAppointmentStatus, string> = {
 };
 
 /** HSL triplets for status CSS variables (light). */
-export const fiStatusCssVarsLight: Record<FiAppointmentStatus, { base: string; foreground: string; muted: string }> = {
+export const fiStatusCssVarsLight: Record<
+  FiAppointmentStatus,
+  { base: string; foreground: string; muted: string }
+> = {
   confirmed: { base: "217 91% 60%", foreground: "224 76% 18%", muted: "214 100% 97%" },
   arrived: { base: "38 92% 50%", foreground: "26 83% 14%", muted: "48 100% 96%" },
   completed: { base: "160 84% 39%", foreground: "166 91% 9%", muted: "152 81% 96%" },
   no_show: { base: "0 72% 51%", foreground: "0 74% 18%", muted: "0 86% 97%" },
 };
 
-export const fiStatusCssVarsDark: Record<FiAppointmentStatus, { base: string; foreground: string; muted: string }> = {
+export const fiStatusCssVarsDark: Record<
+  FiAppointmentStatus,
+  { base: string; foreground: string; muted: string }
+> = {
   confirmed: { base: "217 91% 60%", foreground: "214 100% 94%", muted: "224 50% 18%" },
   arrived: { base: "38 92% 50%", foreground: "48 100% 92%", muted: "32 55% 16%" },
   completed: { base: "160 84% 39%", foreground: "152 81% 92%", muted: "166 50% 14%" },
@@ -487,8 +507,7 @@ export type FiCrmDarkCardVariant = keyof typeof fiCrmDarkCardClassNames;
 
 /** Empty calendar / list states — light grid pattern over deep background. */
 export const fiCrmEmptyStateClassNames = {
-  root:
-    "fi-crm-empty-grid flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/50 bg-[#0f172a] text-center dark:border-slate-700/50 dark:bg-[#0f172a]",
+  root: "fi-crm-empty-grid flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/50 bg-[#0f172a] text-center dark:border-slate-700/50 dark:bg-[#0f172a]",
   compact: "px-3 py-6",
   default: "px-6 py-10",
   iconWrap:
@@ -588,20 +607,32 @@ export function appointmentStatusRingClasses(status: string): string {
   return "";
 }
 
-export function bookingTypeProcedureBadgeClasses(bookingType: string, opts?: { isVirtual?: boolean }): string {
+export function bookingTypeProcedureBadgeClasses(
+  bookingType: string,
+  opts?: { isVirtual?: boolean }
+): string {
   return procedureBadgeClasses(resolveProcedureFamily({ bookingType, isVirtual: opts?.isVirtual }));
 }
 
-export function bookingTypeProcedureEventClasses(bookingType: string, opts?: { isVirtual?: boolean }): string {
+export function bookingTypeProcedureEventClasses(
+  bookingType: string,
+  opts?: { isVirtual?: boolean }
+): string {
   return procedureEventClasses(resolveProcedureFamily({ bookingType, isVirtual: opts?.isVirtual }));
 }
 
 /** CSS custom property names for globals.css — `--fi-procedure-{family}-{role}`. */
-export function fiProcedureCssVarName(family: FiProcedureFamily, role: "base" | "foreground" | "muted"): string {
+export function fiProcedureCssVarName(
+  family: FiProcedureFamily,
+  role: "base" | "foreground" | "muted"
+): string {
   return `--fi-procedure-${family.replace(/_/g, "-")}-${role}`;
 }
 
-export function fiStatusCssVarName(status: FiAppointmentStatus, role: "base" | "foreground" | "muted"): string {
+export function fiStatusCssVarName(
+  status: FiAppointmentStatus,
+  role: "base" | "foreground" | "muted"
+): string {
   return `--fi-status-${status.replace(/_/g, "-")}-${role}`;
 }
 

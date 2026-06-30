@@ -1,8 +1,17 @@
 import Link from "next/link";
 import type { CasePatientLink } from "@/src/lib/cases/caseLoaders";
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+} from "@/src/lib/cases/caseDetailNavConstants";
 
-export function CaseLinkedPatientCard({ tenantId, patient }: { tenantId: string; patient: CasePatientLink | null }) {
+export function CaseLinkedPatientCard({
+  tenantId,
+  patient,
+}: {
+  tenantId: string;
+  patient: CasePatientLink | null;
+}) {
   return (
     <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <h2
@@ -12,7 +21,9 @@ export function CaseLinkedPatientCard({ tenantId, patient }: { tenantId: string;
         Linked patient / person
       </h2>
       {!patient ? (
-        <p className="mt-2 text-sm text-gray-500">No foundation patient is linked to this clinical patient yet.</p>
+        <p className="mt-2 text-sm text-gray-500">
+          No foundation patient is linked to this clinical patient yet.
+        </p>
       ) : (
         <dl className="mt-3 space-y-2 text-sm">
           <div>

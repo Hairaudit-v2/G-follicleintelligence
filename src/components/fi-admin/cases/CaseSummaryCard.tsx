@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateCaseProfileAction } from "@/lib/actions/fi-case-actions";
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+} from "@/src/lib/cases/caseDetailNavConstants";
 import { FI_CASE_STATUS_VALUES, isFiCaseStatus } from "@/src/lib/cases/caseTypes";
 
 import { caseFormField } from "./caseFormFieldProps";
@@ -27,7 +30,13 @@ export type CaseSummaryCardModel = {
   partner_id: string | null;
 };
 
-export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initial: CaseSummaryCardModel }) {
+export function CaseSummaryCard({
+  tenantId,
+  initial,
+}: {
+  tenantId: string;
+  initial: CaseSummaryCardModel;
+}) {
   const router = useRouter();
   const [status, setStatus] = useState(initial.status);
   const [treatmentType, setTreatmentType] = useState(initial.treatment_type ?? "");
@@ -53,11 +62,15 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
 
   return (
     <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
-      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.summary)} className="text-sm font-semibold text-slate-100">
+      <h2
+        id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.summary)}
+        className="text-sm font-semibold text-slate-100"
+      >
         Patient summary
       </h2>
       <p className="mt-1 text-xs text-gray-500">
-        Stage 5A profile fields. Graft planning, procedure-day workflow, and audit scoring ship in later stages.
+        Stage 5A profile fields. Graft planning, procedure-day workflow, and audit scoring ship in
+        later stages.
       </p>
 
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
@@ -67,15 +80,21 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
         </div>
         <div>
           <dt className="text-xs font-medium text-gray-500">External id</dt>
-          <dd className="text-slate-200">{initial.external_id?.trim() ? initial.external_id : "—"}</dd>
+          <dd className="text-slate-200">
+            {initial.external_id?.trim() ? initial.external_id : "—"}
+          </dd>
         </div>
         <div>
           <dt className="text-xs font-medium text-gray-500">Created</dt>
-          <dd className="text-slate-200">{initial.created_at ? new Date(initial.created_at).toLocaleString() : "—"}</dd>
+          <dd className="text-slate-200">
+            {initial.created_at ? new Date(initial.created_at).toLocaleString() : "—"}
+          </dd>
         </div>
         <div>
           <dt className="text-xs font-medium text-gray-500">Updated</dt>
-          <dd className="text-slate-200">{initial.updated_at ? new Date(initial.updated_at).toLocaleString() : "—"}</dd>
+          <dd className="text-slate-200">
+            {initial.updated_at ? new Date(initial.updated_at).toLocaleString() : "—"}
+          </dd>
         </div>
         {initial.clinic_id ? (
           <div>
@@ -98,7 +117,10 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
       </dl>
 
       <div className="mt-6 space-y-3 border-t border-white/[0.06] pt-4">
-        <label htmlFor={SUMMARY_FIELDS.status.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SUMMARY_FIELDS.status.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Patient status
           <select
             {...SUMMARY_FIELDS.status}
@@ -107,9 +129,7 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
             className="mt-1 block w-full max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             {!isFiCaseStatus(status) ? (
-              <option value={status}>
-                {status} (non-standard)
-              </option>
+              <option value={status}>{status} (non-standard)</option>
             ) : null}
             {FI_CASE_STATUS_VALUES.map((s) => (
               <option key={s} value={s}>
@@ -118,7 +138,10 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
             ))}
           </select>
         </label>
-        <label htmlFor={SUMMARY_FIELDS.treatmentType.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SUMMARY_FIELDS.treatmentType.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Treatment type
           <input
             {...SUMMARY_FIELDS.treatmentType}
@@ -128,7 +151,10 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
             placeholder="e.g. FUE, consultation pathway…"
           />
         </label>
-        <label htmlFor={SUMMARY_FIELDS.caseType.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SUMMARY_FIELDS.caseType.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Patient type
           <input
             {...SUMMARY_FIELDS.caseType}
@@ -143,7 +169,8 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
       {msg ? <p className="mt-3 text-xs text-slate-300">{msg}</p> : null}
       {!isFiCaseStatus(status) ? (
         <p className="mt-2 text-xs text-amber-300">
-          This case&apos;s status is not in the standard set. Choose a standard status before saving profile fields.
+          This case&apos;s status is not in the standard set. Choose a standard status before saving
+          profile fields.
         </p>
       ) : null}
       <button

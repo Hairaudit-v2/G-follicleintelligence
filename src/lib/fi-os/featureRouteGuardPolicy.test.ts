@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import { resolveFiFeatureRouteDecision } from "@/src/lib/fi-os/featureRouteGuardPolicy";
 
 const base = "/fi-admin/t1";
@@ -28,7 +31,9 @@ test("decision: unknown route allows with concrete map", () => {
 });
 
 test("decision: disabled feature denies", () => {
-  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { calendar: false });
+  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    calendar: false,
+  });
   const d = resolveFiFeatureRouteDecision({
     pathname: `${base}/calendar`,
     tenantBase: base,
@@ -40,7 +45,9 @@ test("decision: disabled feature denies", () => {
 });
 
 test("decision: tenant admin may access settings routes when settings feature off", () => {
-  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { settings: false });
+  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    settings: false,
+  });
   const d = resolveFiFeatureRouteDecision({
     pathname: `${base}/configuration`,
     tenantBase: base,
@@ -51,7 +58,9 @@ test("decision: tenant admin may access settings routes when settings feature of
 });
 
 test("decision: non-admin blocked from settings when settings off", () => {
-  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { settings: false });
+  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    settings: false,
+  });
   const d = resolveFiFeatureRouteDecision({
     pathname: `${base}/settings/reminders`,
     tenantBase: base,
@@ -62,7 +71,9 @@ test("decision: non-admin blocked from settings when settings off", () => {
 });
 
 test("decision: module-unavailable always allows", () => {
-  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), { calendar: false });
+  const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    calendar: false,
+  });
   const d = resolveFiFeatureRouteDecision({
     pathname: `${base}/module-unavailable?featureDenied=calendar`,
     tenantBase: base,

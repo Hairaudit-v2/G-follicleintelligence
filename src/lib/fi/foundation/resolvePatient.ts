@@ -15,14 +15,16 @@ function asPatientRow(row: Record<string, unknown>): FiPatientRow {
     tenant_id: String(row.tenant_id),
     person_id: String(row.person_id),
     primary_clinic_id: row.primary_clinic_id == null ? null : String(row.primary_clinic_id),
-    metadata: (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
-      ? (row.metadata as Record<string, unknown>)
-      : {}) ?? {},
+    metadata:
+      (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {}) ?? {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
   if ("admin_note" in row) out.admin_note = row.admin_note != null ? String(row.admin_note) : null;
-  if ("patient_status" in row && row.patient_status != null) out.patient_status = String(row.patient_status);
+  if ("patient_status" in row && row.patient_status != null)
+    out.patient_status = String(row.patient_status);
   return out;
 }
 
@@ -75,12 +77,19 @@ export async function resolveOrCreatePatient(
     if (mapped.data?.patient_id) {
       const row = await supabase
         .from("fi_patients")
-        .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
+        .select(
+          "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at"
+        )
         .eq("id", mapped.data.patient_id)
         .eq("tenant_id", tenantId)
         .single();
-      if (row.error || !row.data) throw new Error(row.error?.message ?? "Patient not found for mapping.");
-      return { patient: asPatientRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
+      if (row.error || !row.data)
+        throw new Error(row.error?.message ?? "Patient not found for mapping.");
+      return {
+        patient: asPatientRow(row.data as Record<string, unknown>),
+        created: false,
+        mapping_created: false,
+      };
     }
   }
 
@@ -106,12 +115,18 @@ export async function resolveOrCreatePatient(
       if (mapped.data?.patient_id) {
         const row = await supabase
           .from("fi_patients")
-          .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
+          .select(
+            "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at"
+          )
           .eq("id", mapped.data.patient_id)
           .eq("tenant_id", tenantId)
           .single();
         if (row.data) {
-          return { patient: asPatientRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
+          return {
+            patient: asPatientRow(row.data as Record<string, unknown>),
+            created: false,
+            mapping_created: false,
+          };
         }
       }
     }
@@ -119,7 +134,9 @@ export async function resolveOrCreatePatient(
 
   const existingByPerson = await supabase
     .from("fi_patients")
-    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
+    .select(
+      "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at"
+    )
     .eq("tenant_id", tenantId)
     .eq("person_id", personId)
     .maybeSingle();
@@ -155,13 +172,17 @@ export async function resolveOrCreatePatient(
   const inserted = await supabase
     .from("fi_patients")
     .insert(insertRow)
-    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
+    .select(
+      "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at"
+    )
     .single();
 
   if (inserted.error?.code === "23505") {
     const retry = await supabase
       .from("fi_patients")
-      .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
+      .select(
+        "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at"
+      )
       .eq("tenant_id", tenantId)
       .eq("person_id", personId)
       .single();

@@ -25,7 +25,10 @@ function resolveDefaultMode(): InternalIntelligenceDeliveryMode {
 /**
  * Registers a handler for an `event_name`. Not used by production ingest in Stage 10.
  */
-export function registerInternalIntelligenceHandler(eventName: string, handler: Handler): () => void {
+export function registerInternalIntelligenceHandler(
+  eventName: string,
+  handler: Handler
+): () => void {
   let set = handlers.get(eventName);
   if (!set) {
     set = new Set();

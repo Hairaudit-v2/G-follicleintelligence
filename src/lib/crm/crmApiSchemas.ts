@@ -38,10 +38,10 @@ function hasPersonResolutionSignal(p: z.infer<typeof personResolutionSchema>): b
   const display = p.display_name?.trim();
   return Boolean(
     p.source_person_id?.trim() ||
-      p.source_patient_id?.trim() ||
-      (email && email.length > 0) ||
-      (phone && phone.length > 0) ||
-      (display && display.length > 0)
+    p.source_patient_id?.trim() ||
+    (email && email.length > 0) ||
+    (phone && phone.length > 0) ||
+    (display && display.length > 0)
   );
 }
 
@@ -78,7 +78,8 @@ export const crmCreateLeadBodySchema = z
     if (val.person && hasPersonResolutionSignal(val.person)) return;
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Provide personId or person with at least one of: email, phone, display_name, source_person_id, source_patient_id.",
+      message:
+        "Provide personId or person with at least one of: email, phone, display_name, source_person_id, source_patient_id.",
     });
   });
 
@@ -107,7 +108,11 @@ export const crmAppendActivityBodySchema = z
 const taskActiveStatusTuple = CRM_TASK_ACTIVE_STATUS_VALUES as unknown as [string, ...string[]];
 const taskTypeTuple = CRM_TASK_TYPE_VALUES as unknown as [string, ...string[]];
 
-function refineDueAtString(val: string | null | undefined, ctx: z.RefinementCtx, path: (string | number)[]) {
+function refineDueAtString(
+  val: string | null | undefined,
+  ctx: z.RefinementCtx,
+  path: (string | number)[]
+) {
   if (val === undefined || val === null) return;
   const s = String(val).trim();
   if (!s) return;
@@ -200,7 +205,10 @@ export const crmUpdateLeadNoteBodySchema = z
   })
   .strict()
   .superRefine((body, ctx) => {
-    const any = body.noteBody !== undefined || body.noteVisibility !== undefined || body.isPinned !== undefined;
+    const any =
+      body.noteBody !== undefined ||
+      body.noteVisibility !== undefined ||
+      body.isPinned !== undefined;
     if (!any) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -220,7 +228,11 @@ const commTypeTuple = CRM_LEAD_COMMUNICATION_TYPE_VALUES as unknown as [string, 
 const commDirTuple = CRM_LEAD_COMMUNICATION_DIRECTION_VALUES as unknown as [string, ...string[]];
 const commOutcomeTuple = CRM_LEAD_COMMUNICATION_OUTCOME_VALUES as unknown as [string, ...string[]];
 
-function refineContactAtString(val: string | null | undefined, ctx: z.RefinementCtx, path: (string | number)[]) {
+function refineContactAtString(
+  val: string | null | undefined,
+  ctx: z.RefinementCtx,
+  path: (string | number)[]
+) {
   if (val === undefined || val === null) return;
   const s = String(val).trim();
   if (!s) return;
@@ -258,7 +270,11 @@ export const crmCreateLeadCommunicationBodySchema = z
     }
     if (body.metadata !== undefined && body.metadata !== null) {
       if (typeof body.metadata !== "object" || Array.isArray(body.metadata)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "metadata must be a JSON object.", path: ["metadata"] });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "metadata must be a JSON object.",
+          path: ["metadata"],
+        });
       }
     }
   });
@@ -308,7 +324,11 @@ export const crmUpdateLeadCommunicationBodySchema = z
     }
     if (body.metadata !== undefined && body.metadata !== null) {
       if (typeof body.metadata !== "object" || Array.isArray(body.metadata)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "metadata must be a JSON object.", path: ["metadata"] });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "metadata must be a JSON object.",
+          path: ["metadata"],
+        });
       }
     }
   });
@@ -329,7 +349,8 @@ export const crmConvertLeadBodySchema = z
   })
   .strict()
   .superRefine((body, ctx) => {
-    const wantsCaseFields = Boolean(body.caseType?.trim()) || Boolean(body.treatmentInterest?.trim());
+    const wantsCaseFields =
+      Boolean(body.caseType?.trim()) || Boolean(body.treatmentInterest?.trim());
     if (wantsCaseFields && !body.seedCase) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -339,18 +360,16 @@ export const crmConvertLeadBodySchema = z
     }
   });
 
-const previewRecordSchema = z
-  .record(z.string(), z.any())
-  .superRefine((val, ctx) => {
-    try {
-      assertMessagePayloadHasNoForbiddenBodyKeys(val as Record<string, unknown>);
-    } catch (e) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: e instanceof Error ? e.message : "Invalid message preview payload.",
-      });
-    }
-  });
+const previewRecordSchema = z.record(z.string(), z.any()).superRefine((val, ctx) => {
+  try {
+    assertMessagePayloadHasNoForbiddenBodyKeys(val as Record<string, unknown>);
+  } catch (e) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: e instanceof Error ? e.message : "Invalid message preview payload.",
+    });
+  }
+});
 
 export const crmMessagePreviewBodySchema = z
   .object({

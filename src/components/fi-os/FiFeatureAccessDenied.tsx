@@ -17,15 +17,18 @@ export function FiFeatureAccessDenied({
 }) {
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}`;
-  const label = featureKey ? FI_FEATURE_REGISTRY[featureKey]?.label ?? featureKey : "this area";
+  const label = featureKey ? (FI_FEATURE_REGISTRY[featureKey]?.label ?? featureKey) : "this area";
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-10">
       <div className={cardClass}>
         <h1 className="text-lg font-semibold tracking-tight text-[#F8FAFC]">Focused workspace</h1>
-        <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">This workspace is focused on other workflows.</p>
+        <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">
+          This workspace is focused on other workflows.
+        </p>
         <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
-          You do not currently have <span className="text-[#E2E8F0]">{label}</span> in your workspace.
+          You do not currently have <span className="text-[#E2E8F0]">{label}</span> in your
+          workspace.
         </p>
         <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
           If you need this for your role, ask an FI OS administrator to update your access.

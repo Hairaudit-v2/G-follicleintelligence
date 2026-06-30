@@ -21,7 +21,10 @@ import { assertNonEmptyUuid } from "./validation";
 
 const MAX_EXTERNAL_REF_LEN = 512;
 
-function assertOptionalExternalRef(value: string | null | undefined, fieldName: string): string | null {
+function assertOptionalExternalRef(
+  value: string | null | undefined,
+  fieldName: string
+): string | null {
   if (value === undefined || value === null) return null;
   const t = String(value).trim();
   if (t.length > MAX_EXTERNAL_REF_LEN) {
@@ -135,7 +138,11 @@ export async function loadCrmLeadCommunicationForLead(
   return mapLeadCommunicationRow(data as Record<string, unknown>);
 }
 
-async function assertActorBelongsToTenant(supabase: SupabaseClient, tenantId: string, fiUserId: string): Promise<void> {
+async function assertActorBelongsToTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  fiUserId: string
+): Promise<void> {
   const { data, error } = await supabase
     .from("fi_users")
     .select("id")
@@ -175,7 +182,10 @@ export async function createCrmLeadCommunication(
   const outcome = assertCrmLeadCommunicationOutcomeAllowed(params.outcome);
   const subject = assertCrmLeadCommunicationSubjectBounded(params.subject);
   const preview = assertCrmLeadCommunicationPreviewBounded(params.preview);
-  const externalMessageId = assertOptionalExternalRef(params.externalMessageId, "externalMessageId");
+  const externalMessageId = assertOptionalExternalRef(
+    params.externalMessageId,
+    "externalMessageId"
+  );
   const externalThreadId = assertOptionalExternalRef(params.externalThreadId, "externalThreadId");
   const metadata = assertCrmLeadCommunicationMetadataObject(params.metadata);
 
@@ -227,7 +237,11 @@ export async function createCrmLeadCommunication(
       leadId,
       activityKind: "lead_communication.created",
       title: "Contact log entry created",
-      detail: { communication_id: row.id, communication_type: row.communication_type, direction: row.direction },
+      detail: {
+        communication_id: row.id,
+        communication_type: row.communication_type,
+        direction: row.direction,
+      },
     },
     supabase
   );
@@ -240,7 +254,12 @@ export async function updateCrmLeadCommunication(
   client?: SupabaseClient
 ): Promise<FiCrmLeadCommunicationRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
-  const row = await loadCrmLeadCommunicationForLead(params.tenantId, params.leadId, params.communicationId, supabase);
+  const row = await loadCrmLeadCommunicationForLead(
+    params.tenantId,
+    params.leadId,
+    params.communicationId,
+    supabase
+  );
   if (!row) throw new Error("Contact log entry not found for this lead.");
 
   assertLeadCommunicationNotArchived(row);
@@ -362,7 +381,12 @@ export async function archiveCrmLeadCommunication(
   client?: SupabaseClient
 ): Promise<FiCrmLeadCommunicationRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
-  const row = await loadCrmLeadCommunicationForLead(params.tenantId, params.leadId, params.communicationId, supabase);
+  const row = await loadCrmLeadCommunicationForLead(
+    params.tenantId,
+    params.leadId,
+    params.communicationId,
+    supabase
+  );
   if (!row) throw new Error("Contact log entry not found for this lead.");
 
   if (row.archived_at) {

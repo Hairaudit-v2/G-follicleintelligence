@@ -44,7 +44,9 @@ function revalidateStaffRoleReviewSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}/appointments`);
 }
 
-function parseWeekly(raw: Record<string, z.infer<typeof staffDayHoursSchema>> | undefined): StaffWeeklyHoursMap {
+function parseWeekly(
+  raw: Record<string, z.infer<typeof staffDayHoursSchema>> | undefined
+): StaffWeeklyHoursMap {
   if (!raw) return {};
   return raw as StaffWeeklyHoursMap;
 }

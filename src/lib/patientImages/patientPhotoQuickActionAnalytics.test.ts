@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
 import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
-import { isEventTypeAllowedForModule, PATIENT_EVENTS } from "@/src/lib/analytics-os/analyticsEventTypes";
+import {
+  isEventTypeAllowedForModule,
+  PATIENT_EVENTS,
+} from "@/src/lib/analytics-os/analyticsEventTypes";
 
 const TENANT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const PATIENT = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";

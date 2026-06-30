@@ -10,7 +10,12 @@ export function DoctorWorkspaceHome(props: {
   patientLabels?: ReadonlyMap<string, string>;
   showDiagnosticsExpanded?: boolean;
 }) {
-  const { bundle, recentPrescriptions = [], patientLabels = new Map(), showDiagnosticsExpanded = false } = props;
+  const {
+    bundle,
+    recentPrescriptions = [],
+    patientLabels = new Map(),
+    showDiagnosticsExpanded = false,
+  } = props;
   return (
     <DoctorWorkspaceDashboard
       bundle={bundle}

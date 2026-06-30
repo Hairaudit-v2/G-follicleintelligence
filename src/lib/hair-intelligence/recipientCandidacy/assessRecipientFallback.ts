@@ -1,6 +1,8 @@
 import type { RecipientAssessmentModelResult } from "./types";
 
-export function recipientAssessmentNotConfiguredResult(reason: "no_api_key" | "no_image"): RecipientAssessmentModelResult {
+export function recipientAssessmentNotConfiguredResult(
+  reason: "no_api_key" | "no_image"
+): RecipientAssessmentModelResult {
   const note =
     reason === "no_api_key"
       ? "Recipient candidacy assessor unavailable (OPENAI_API_KEY missing). Values default to unknown pending clinical review."

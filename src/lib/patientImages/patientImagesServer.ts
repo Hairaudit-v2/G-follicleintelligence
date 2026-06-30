@@ -61,13 +61,16 @@ export function mapRow(data: Record<string, unknown>): PatientImageRow {
     image_status: (data.image_status === "archived" ? "archived" : "active") as PatientImageStatus,
     imaging_library_axis: normalizeImagingLibraryAxis(data.imaging_library_axis),
     clinic_id: data.clinic_id != null ? String(data.clinic_id) : null,
-    captured_by_staff_id: data.captured_by_staff_id != null ? String(data.captured_by_staff_id) : null,
+    captured_by_staff_id:
+      data.captured_by_staff_id != null ? String(data.captured_by_staff_id) : null,
     device_type: data.device_type != null ? String(data.device_type) : null,
     anatomical_region: normalizeImagingAnatomicalRegion(data.anatomical_region),
     visit_type: data.visit_type != null ? String(data.visit_type) : null,
     follow_up_interval: data.follow_up_interval != null ? String(data.follow_up_interval) : null,
     imaging_protocol_template_slug:
-      data.imaging_protocol_template_slug != null ? String(data.imaging_protocol_template_slug) : null,
+      data.imaging_protocol_template_slug != null
+        ? String(data.imaging_protocol_template_slug)
+        : null,
     imaging_protocol_slot_slug:
       data.imaging_protocol_slot_slug != null ? String(data.imaging_protocol_slot_slug) : null,
     storage_bucket: String(data.storage_bucket ?? PATIENT_IMAGES_BUCKET_DEFAULT),
@@ -81,7 +84,9 @@ export function mapRow(data: Record<string, unknown>): PatientImageRow {
     caption: data.caption != null ? String(data.caption) : null,
     taken_at: data.taken_at != null ? String(data.taken_at) : null,
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     uploaded_by_user_id: data.uploaded_by_user_id != null ? String(data.uploaded_by_user_id) : null,
     archived_at: data.archived_at != null ? String(data.archived_at) : null,
     archived_by_user_id: data.archived_by_user_id != null ? String(data.archived_by_user_id) : null,
@@ -97,7 +102,9 @@ export function mapRow(data: Record<string, unknown>): PatientImageRow {
         ? Number(data.ai_image_category_confidence)
         : null,
     ai_hair_state:
-      data.ai_hair_state != null && String(data.ai_hair_state).trim() ? normalizeFiAiHairState(data.ai_hair_state) : null,
+      data.ai_hair_state != null && String(data.ai_hair_state).trim()
+        ? normalizeFiAiHairState(data.ai_hair_state)
+        : null,
     ai_shave_state:
       data.ai_shave_state != null && String(data.ai_shave_state).trim()
         ? normalizeFiAiShaveState(data.ai_shave_state)
@@ -107,11 +114,17 @@ export function mapRow(data: Record<string, unknown>): PatientImageRow {
         ? normalizeFiAiSurgeryStage(data.ai_surgery_stage)
         : null,
     ai_image_ai_notes: data.ai_image_ai_notes != null ? String(data.ai_image_ai_notes) : null,
-    ai_image_review_status: normalizeFiAiImageReviewStatus(data.ai_image_review_status ?? "pending"),
+    ai_image_review_status: normalizeFiAiImageReviewStatus(
+      data.ai_image_review_status ?? "pending"
+    ),
     ai_image_reviewed_by_staff_id:
-      data.ai_image_reviewed_by_staff_id != null ? String(data.ai_image_reviewed_by_staff_id) : null,
-    ai_image_reviewed_at: data.ai_image_reviewed_at != null ? String(data.ai_image_reviewed_at) : null,
-    ai_image_classified_at: data.ai_image_classified_at != null ? String(data.ai_image_classified_at) : null,
+      data.ai_image_reviewed_by_staff_id != null
+        ? String(data.ai_image_reviewed_by_staff_id)
+        : null,
+    ai_image_reviewed_at:
+      data.ai_image_reviewed_at != null ? String(data.ai_image_reviewed_at) : null,
+    ai_image_classified_at:
+      data.ai_image_classified_at != null ? String(data.ai_image_classified_at) : null,
     ai_image_classifier_version:
       data.ai_image_classifier_version != null ? String(data.ai_image_classifier_version) : null,
   };
@@ -131,7 +144,11 @@ async function assertPatientInTenant(
     .eq("id", pid)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data || String((data as { tenant_id: string }).tenant_id) !== tid || String((data as { id: string }).id) !== pid) {
+  if (
+    !data ||
+    String((data as { tenant_id: string }).tenant_id) !== tid ||
+    String((data as { id: string }).id) !== pid
+  ) {
     throw new Error("Patient not found for tenant.");
   }
   return { person_id: String((data as { person_id: string }).person_id) };
@@ -161,7 +178,10 @@ async function assertOptionalCaseForPatient(
     .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data || String((data as { foundation_patient_id: string | null }).foundation_patient_id) !== patientId) {
+  if (
+    !data ||
+    String((data as { foundation_patient_id: string | null }).foundation_patient_id) !== patientId
+  ) {
     throw new Error("Case not found for this patient.");
   }
 }
@@ -223,7 +243,11 @@ async function assertOptionalConsultationForPatient(
   }
 }
 
-async function assertOptionalClinicForTenant(supabase: SupabaseClient, tenantId: string, clinicId: string | null): Promise<void> {
+async function assertOptionalClinicForTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  clinicId: string | null
+): Promise<void> {
   if (!clinicId) return;
   const { data, error } = await supabase
     .from("fi_clinics")
@@ -235,7 +259,11 @@ async function assertOptionalClinicForTenant(supabase: SupabaseClient, tenantId:
   if (!data) throw new Error("Clinic not found for tenant.");
 }
 
-async function assertOptionalStaffForTenant(supabase: SupabaseClient, tenantId: string, staffId: string | null): Promise<void> {
+async function assertOptionalStaffForTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  staffId: string | null
+): Promise<void> {
   if (!staffId) return;
   const { data, error } = await supabase
     .from("fi_staff")
@@ -247,7 +275,11 @@ async function assertOptionalStaffForTenant(supabase: SupabaseClient, tenantId: 
   if (!data) throw new Error("Staff member not found for tenant.");
 }
 
-function normalizeBoundedOptText(raw: string | null | undefined, max: number, label: string): string | null {
+function normalizeBoundedOptText(
+  raw: string | null | undefined,
+  max: number,
+  label: string
+): string | null {
   if (raw == null) return null;
   const s = String(raw).trim();
   if (!s) return null;
@@ -279,7 +311,8 @@ export async function loadPatientImages(
     .eq("patient_id", pid)
     .order("created_at", { ascending: false });
   if (error) {
-    if (error.message?.includes("does not exist") || error.message?.includes("schema cache")) return [];
+    if (error.message?.includes("does not exist") || error.message?.includes("schema cache"))
+      return [];
     throw new Error(error.message);
   }
   return (data ?? []).map((r) => mapRow(r as Record<string, unknown>));
@@ -303,7 +336,8 @@ export async function loadPatientImageForPatient(
     .eq("id", iid)
     .maybeSingle();
   if (error) {
-    if (error.message?.includes("does not exist") || error.message?.includes("schema cache")) return null;
+    if (error.message?.includes("does not exist") || error.message?.includes("schema cache"))
+      return null;
     throw new Error(error.message);
   }
   if (!data) return null;
@@ -326,7 +360,9 @@ export async function createPatientImageSignedUrl(
 ): Promise<PatientImageSignedDescriptor | null> {
   const supabase = client ?? supabaseAdmin();
   const bucket = row.storage_bucket?.trim() || PATIENT_IMAGES_BUCKET_DEFAULT;
-  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(row.storage_path, SIGNED_URL_TTL_SEC);
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(row.storage_path, SIGNED_URL_TTL_SEC);
   if (error || !data?.signedUrl) {
     if (isMissingStorageObjectError(error?.message)) return null;
     throw new Error(error?.message ?? "Could not create signed URL.");
@@ -356,22 +392,29 @@ export async function loadPatientImagesProfileBundle(
   const tid = tenantId.trim();
   const pid = patientId.trim();
 
-  const [{ count: totalCount, error: totalErr }, { count: activeCount, error: activeErr }, { count: archivedCount, error: archErr }] =
-    await Promise.all([
-      supabase.from("fi_patient_images").select("*", { head: true, count: "exact" }).eq("tenant_id", tid).eq("patient_id", pid),
-      supabase
-        .from("fi_patient_images")
-        .select("*", { head: true, count: "exact" })
-        .eq("tenant_id", tid)
-        .eq("patient_id", pid)
-        .eq("image_status", "active"),
-      supabase
-        .from("fi_patient_images")
-        .select("*", { head: true, count: "exact" })
-        .eq("tenant_id", tid)
-        .eq("patient_id", pid)
-        .eq("image_status", "archived"),
-    ]);
+  const [
+    { count: totalCount, error: totalErr },
+    { count: activeCount, error: activeErr },
+    { count: archivedCount, error: archErr },
+  ] = await Promise.all([
+    supabase
+      .from("fi_patient_images")
+      .select("*", { head: true, count: "exact" })
+      .eq("tenant_id", tid)
+      .eq("patient_id", pid),
+    supabase
+      .from("fi_patient_images")
+      .select("*", { head: true, count: "exact" })
+      .eq("tenant_id", tid)
+      .eq("patient_id", pid)
+      .eq("image_status", "active"),
+    supabase
+      .from("fi_patient_images")
+      .select("*", { head: true, count: "exact" })
+      .eq("tenant_id", tid)
+      .eq("patient_id", pid)
+      .eq("image_status", "archived"),
+  ]);
 
   const isMissingRel = (err: { message?: string } | null) =>
     Boolean(err?.message?.includes("does not exist") || err?.message?.includes("schema cache"));
@@ -410,7 +453,11 @@ export async function loadPatientImagesProfileBundle(
 
   const activeMapped = (activeRows ?? []).map((r) => mapRow(r as Record<string, unknown>));
   const signedMap = await createPatientImageSignedUrls(
-    activeMapped.map((m) => ({ id: m.id, storage_bucket: m.storage_bucket, storage_path: m.storage_path })),
+    activeMapped.map((m) => ({
+      id: m.id,
+      storage_bucket: m.storage_bucket,
+      storage_path: m.storage_path,
+    })),
     supabase
   );
 
@@ -473,9 +520,21 @@ export async function createPatientImageRecord(
   const anatomicalRegion = normalizeImagingAnatomicalRegion(input.anatomicalRegion);
   const deviceType = normalizeBoundedOptText(input.deviceType ?? null, 160, "device_type");
   const visitType = normalizeBoundedOptText(input.visitType ?? null, 160, "visit_type");
-  const followUpInterval = normalizeBoundedOptText(input.followUpInterval ?? null, 64, "follow_up_interval");
-  const imagingProtocolTemplateSlug = normalizeBoundedOptText(input.imagingProtocolTemplateSlug ?? null, 128, "protocol template");
-  const imagingProtocolSlotSlug = normalizeBoundedOptText(input.imagingProtocolSlotSlug ?? null, 128, "protocol slot");
+  const followUpInterval = normalizeBoundedOptText(
+    input.followUpInterval ?? null,
+    64,
+    "follow_up_interval"
+  );
+  const imagingProtocolTemplateSlug = normalizeBoundedOptText(
+    input.imagingProtocolTemplateSlug ?? null,
+    128,
+    "protocol template"
+  );
+  const imagingProtocolSlotSlug = normalizeBoundedOptText(
+    input.imagingProtocolSlotSlug ?? null,
+    128,
+    "protocol slot"
+  );
   const caption = assertCaptionLength(input.caption ?? null);
   const takenAt = normalizeTakenAt(input.takenAt ?? null);
   const metadata = assertPatientImageMetadataObject("metadata", input.metadata ?? {});
@@ -535,9 +594,16 @@ export async function createPatientImageRecord(
     updated_at: now,
   };
 
-  const { data: ins, error: insErr } = await supabase.from("fi_patient_images").insert(insert).select("*").single();
+  const { data: ins, error: insErr } = await supabase
+    .from("fi_patient_images")
+    .insert(insert)
+    .select("*")
+    .single();
   if (insErr) {
-    await supabase.storage.from(bucket).remove([storagePath]).catch(() => undefined);
+    await supabase.storage
+      .from(bucket)
+      .remove([storagePath])
+      .catch(() => undefined);
     throw new Error(insErr.message);
   }
 
@@ -574,8 +640,13 @@ export async function createPatientImageRecord(
 
     if (pipeline.quality_blocked) {
       await supabase.from("fi_patient_images").delete().eq("tenant_id", tid).eq("id", imageId);
-      await supabase.storage.from(bucket).remove([storagePath]).catch(() => undefined);
-      throw new Error(pipeline.quality.alert_message ?? "Image quality too low. Please retake photo.");
+      await supabase.storage
+        .from(bucket)
+        .remove([storagePath])
+        .catch(() => undefined);
+      throw new Error(
+        pipeline.quality.alert_message ?? "Image quality too low. Please retake photo."
+      );
     }
 
     finalRow = mapRow(pipeline.updatedRow);
@@ -641,9 +712,18 @@ export async function updatePatientImageDetails(
 
   const before = editableSnapshotFromRow(existing);
   const after: PatientImageEditableSnapshot = {
-    image_category: params.patch.image_category !== undefined ? normalizePatientImageCategory(params.patch.image_category) : before.image_category,
-    caption: params.patch.caption !== undefined ? assertCaptionLength(params.patch.caption) : before.caption,
-    taken_at: params.patch.taken_at !== undefined ? normalizeTakenAt(params.patch.taken_at) : before.taken_at,
+    image_category:
+      params.patch.image_category !== undefined
+        ? normalizePatientImageCategory(params.patch.image_category)
+        : before.image_category,
+    caption:
+      params.patch.caption !== undefined
+        ? assertCaptionLength(params.patch.caption)
+        : before.caption,
+    taken_at:
+      params.patch.taken_at !== undefined
+        ? normalizeTakenAt(params.patch.taken_at)
+        : before.taken_at,
     metadata:
       params.patch.metadata !== undefined
         ? assertPatientImageMetadataObject("metadata", params.patch.metadata)
@@ -652,29 +732,46 @@ export async function updatePatientImageDetails(
       params.patch.imaging_library_axis !== undefined
         ? normalizeImagingLibraryAxis(params.patch.imaging_library_axis)
         : before.imaging_library_axis,
-    clinic_id: params.patch.clinic_id !== undefined ? parseUuidOpt(params.patch.clinic_id) : before.clinic_id,
+    clinic_id:
+      params.patch.clinic_id !== undefined
+        ? parseUuidOpt(params.patch.clinic_id)
+        : before.clinic_id,
     captured_by_staff_id:
-      params.patch.captured_by_staff_id !== undefined ? parseUuidOpt(params.patch.captured_by_staff_id) : before.captured_by_staff_id,
-    device_type: params.patch.device_type !== undefined ? normalizeBoundedOptText(params.patch.device_type, 160, "device_type") : before.device_type,
+      params.patch.captured_by_staff_id !== undefined
+        ? parseUuidOpt(params.patch.captured_by_staff_id)
+        : before.captured_by_staff_id,
+    device_type:
+      params.patch.device_type !== undefined
+        ? normalizeBoundedOptText(params.patch.device_type, 160, "device_type")
+        : before.device_type,
     anatomical_region:
       params.patch.anatomical_region !== undefined
         ? normalizeImagingAnatomicalRegion(params.patch.anatomical_region)
         : before.anatomical_region,
-    visit_type: params.patch.visit_type !== undefined ? normalizeBoundedOptText(params.patch.visit_type, 160, "visit_type") : before.visit_type,
+    visit_type:
+      params.patch.visit_type !== undefined
+        ? normalizeBoundedOptText(params.patch.visit_type, 160, "visit_type")
+        : before.visit_type,
     follow_up_interval:
       params.patch.follow_up_interval !== undefined
         ? normalizeBoundedOptText(params.patch.follow_up_interval, 64, "follow_up_interval")
         : before.follow_up_interval,
     imaging_protocol_template_slug:
       params.patch.imaging_protocol_template_slug !== undefined
-        ? normalizeBoundedOptText(params.patch.imaging_protocol_template_slug, 128, "protocol template")
+        ? normalizeBoundedOptText(
+            params.patch.imaging_protocol_template_slug,
+            128,
+            "protocol template"
+          )
         : before.imaging_protocol_template_slug,
     imaging_protocol_slot_slug:
       params.patch.imaging_protocol_slot_slug !== undefined
         ? normalizeBoundedOptText(params.patch.imaging_protocol_slot_slug, 128, "protocol slot")
         : before.imaging_protocol_slot_slug,
     consultation_id:
-      params.patch.consultation_id !== undefined ? parseUuidOpt(params.patch.consultation_id) : before.consultation_id,
+      params.patch.consultation_id !== undefined
+        ? parseUuidOpt(params.patch.consultation_id)
+        : before.consultation_id,
   };
 
   await assertOptionalConsultationForPatient(supabase, tid, pid, after.consultation_id);
@@ -759,5 +856,8 @@ export async function archivePatientImage(
     .single();
   if (error) throw new Error(error.message);
 
-  return { row: mapRow(data as Record<string, unknown>), changed_keys: patientImageArchiveChangedKeys() };
+  return {
+    row: mapRow(data as Record<string, unknown>),
+    changed_keys: patientImageArchiveChangedKeys(),
+  };
 }

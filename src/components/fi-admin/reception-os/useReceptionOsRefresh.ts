@@ -7,9 +7,7 @@ import {
   parseReceptionOsCommandCentrePayload,
   type ReceptionOsCommandCentrePayload,
 } from "@/src/lib/receptionOs/receptionOsBoardPayloadSchema";
-import {
-  trackReceptionRefreshFailed,
-} from "@/src/components/fi-admin/reception-os/useReceptionOsUsageTracking";
+import { trackReceptionRefreshFailed } from "@/src/components/fi-admin/reception-os/useReceptionOsUsageTracking";
 import type { ReceptionOsOperatingMode } from "@/src/lib/receptionOs/receptionOperatingMode";
 
 export type ReceptionOsRefreshState = {
@@ -63,7 +61,7 @@ export function useReceptionOsRefresh(opts: UseReceptionOsRefreshOptions): Recep
         {
           cache: "no-store",
           credentials: "same-origin",
-        },
+        }
       );
       if (!res.ok) {
         throw new Error(`Refresh failed (${res.status})`);

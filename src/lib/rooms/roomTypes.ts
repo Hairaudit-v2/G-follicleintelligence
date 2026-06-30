@@ -1,4 +1,11 @@
-export const CLINIC_ROOM_TYPES = ["consult", "prp", "surgery", "patient", "multi_use", "other"] as const;
+export const CLINIC_ROOM_TYPES = [
+  "consult",
+  "prp",
+  "surgery",
+  "patient",
+  "multi_use",
+  "other",
+] as const;
 
 export type ClinicRoomType = (typeof CLINIC_ROOM_TYPES)[number];
 

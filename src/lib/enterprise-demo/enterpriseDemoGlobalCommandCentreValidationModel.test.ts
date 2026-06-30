@@ -99,11 +99,17 @@ test("buildTenantGlobalCommandCentreRoutes exposes dashboard and presentation pa
   const routes = buildTenantGlobalCommandCentreRoutes("uuid-tenant");
   assert.equal(routes.dashboard, "/fi-admin/uuid-tenant/global-command-centre");
   assert.equal(routes.presentation, "/fi-admin/uuid-tenant/global-command-centre/presentation");
-  assert.equal(routes.presentationQueryRedirect, "/fi-admin/uuid-tenant/global-command-centre?presentation=true");
+  assert.equal(
+    routes.presentationQueryRedirect,
+    "/fi-admin/uuid-tenant/global-command-centre?presentation=true"
+  );
 });
 
 test("TITAN_GLOBAL_COMMAND_CENTRE_ROUTES uses ihrg-global friendly slug", () => {
-  assert.equal(TITAN_GLOBAL_COMMAND_CENTRE_ROUTES.friendlyDashboard, "/fi-admin/ihrg-global/global-command-centre");
+  assert.equal(
+    TITAN_GLOBAL_COMMAND_CENTRE_ROUTES.friendlyDashboard,
+    "/fi-admin/ihrg-global/global-command-centre"
+  );
   assert.equal(
     TITAN_GLOBAL_COMMAND_CENTRE_ROUTES.friendlyPresentation,
     "/fi-admin/ihrg-global/global-command-centre/presentation"

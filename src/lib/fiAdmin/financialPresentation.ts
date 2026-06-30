@@ -86,7 +86,12 @@ export function fmtFinancialWhen(iso: string): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function countPaymentBlockers(alerts: FinancialOsCommandCentreAlertStrip): number {
@@ -102,7 +107,9 @@ function invoiceKindLabel(kind: string): string {
   return kind.replace(/_/g, " ");
 }
 
-function invoiceDueStatus(inv: FinancialOsCommandCentrePayload["recentOpenInvoices"][number]): string {
+function invoiceDueStatus(
+  inv: FinancialOsCommandCentrePayload["recentOpenInvoices"][number]
+): string {
   if (inv.status === "overdue" || inv.days_overdue > 0) {
     return inv.days_overdue > 0 ? `${inv.days_overdue} days overdue` : "Overdue";
   }
@@ -122,10 +129,16 @@ function arNextAction(row: AccountsReceivableWorkQueueRow): string {
 
 function arPriorityScore(row: AccountsReceivableWorkQueueRow): number {
   const riskScore = { critical: 100, high: 80, medium: 55, low: 30 }[row.risk_level] ?? 30;
-  return riskScore + Math.min(30, row.days_overdue) + Math.min(20, Math.floor(row.outstanding_amount_cents / 100_000));
+  return (
+    riskScore +
+    Math.min(30, row.days_overdue) +
+    Math.min(20, Math.floor(row.outstanding_amount_cents / 100_000))
+  );
 }
 
-function invoicePriorityScore(inv: FinancialOsCommandCentrePayload["recentOpenInvoices"][number]): number {
+function invoicePriorityScore(
+  inv: FinancialOsCommandCentrePayload["recentOpenInvoices"][number]
+): number {
   let score = 40;
   if (inv.status === "overdue") score += 35;
   score += Math.min(25, inv.days_overdue);
@@ -162,9 +175,19 @@ function activityDetailForTransaction(tx: FiFinancialTransactionRow, currency: s
   return `${prefix}${amount}`;
 }
 
-export function buildFinancialHealthCards(base: string, data: FinancialOsCommandCentrePayload): FinancialHealthCard[] {
-  const { currency, executiveFinance, outstandingInvoices, depositsAwaitingPayment, alerts, surgeryEconomics, accountsReceivable } =
-    data;
+export function buildFinancialHealthCards(
+  base: string,
+  data: FinancialOsCommandCentrePayload
+): FinancialHealthCard[] {
+  const {
+    currency,
+    executiveFinance,
+    outstandingInvoices,
+    depositsAwaitingPayment,
+    alerts,
+    surgeryEconomics,
+    accountsReceivable,
+  } = data;
   const financialModule = `${base}/financial`;
   const blockers = countPaymentBlockers(alerts);
   const snapshotCount = surgeryEconomics.recentSnapshots.length;
@@ -231,11 +254,18 @@ export function buildFinancialHealthCards(base: string, data: FinancialOsCommand
 export function buildFinancialAttentionPriorities(
   base: string,
   data: FinancialOsCommandCentrePayload,
-  maxItems = 5,
+  maxItems = 5
 ): FinancialAttentionItem[] {
   const items: FinancialAttentionItem[] = [];
-  const { alerts, outstandingInvoices, overdueInvoices, depositsAwaitingPayment, accountsReceivable, surgeryEconomics, executiveFinance } =
-    data;
+  const {
+    alerts,
+    outstandingInvoices,
+    overdueInvoices,
+    depositsAwaitingPayment,
+    accountsReceivable,
+    surgeryEconomics,
+    executiveFinance,
+  } = data;
   const financialModule = `${base}/financial`;
 
   if (alerts.depositDeadlines48h.count > 0) {
@@ -345,7 +375,9 @@ export function hasUrgentFinancialAttention(items: FinancialAttentionItem[]): bo
   return items.some((i) => i.severity === "critical" || i.severity === "warning");
 }
 
-export function financialAttentionSeverityClass(severity: FinancialAttentionItem["severity"]): string {
+export function financialAttentionSeverityClass(
+  severity: FinancialAttentionItem["severity"]
+): string {
   if (severity === "critical") return "border-rose-500/25 bg-rose-500/[0.06]";
   if (severity === "warning") return "border-amber-500/25 bg-amber-500/[0.05]";
   return "border-white/[0.08] bg-[#0c1220]/50";
@@ -354,7 +386,7 @@ export function financialAttentionSeverityClass(severity: FinancialAttentionItem
 export function buildCollectionPriorities(
   base: string,
   data: FinancialOsCommandCentrePayload,
-  maxItems = 5,
+  maxItems = 5
 ): CollectionPriorityItem[] {
   const financialModule = `${base}/financial`;
   const paymentsInboxHref = `${base}/payments`;
@@ -363,7 +395,12 @@ export function buildCollectionPriorities(
   const items: CollectionPriorityItem[] = [];
 
   for (const row of data.accountsReceivable.rows) {
-    if (row.outstanding_amount_cents <= 0 || row.status === "resolved" || row.status === "written_off") continue;
+    if (
+      row.outstanding_amount_cents <= 0 ||
+      row.status === "resolved" ||
+      row.status === "written_off"
+    )
+      continue;
     items.push({
       id: `ar-${row.id}`,
       patientLabel: row.patient_label ?? "Patient",
@@ -387,7 +424,8 @@ export function buildCollectionPriorities(
       amountDueCents: inv.remaining_balance_cents,
       dueStatus: invoiceDueStatus(inv),
       relatedContext: invoiceKindLabel(inv.invoice_kind),
-      nextAction: inv.status === "overdue" ? "Send payment request or call patient" : "Send payment reminder",
+      nextAction:
+        inv.status === "overdue" ? "Send payment request or call patient" : "Send payment reminder",
       invoiceHref: invoiceListHref,
       patientHref: null,
       paymentRequestHref,
@@ -399,7 +437,9 @@ export function buildCollectionPriorities(
   return items.sort((a, b) => b.priorityScore - a.priorityScore).slice(0, maxItems);
 }
 
-export function buildProcedureProfitabilitySummary(data: FinancialOsCommandCentrePayload): ProcedureProfitabilitySummary {
+export function buildProcedureProfitabilitySummary(
+  data: FinancialOsCommandCentrePayload
+): ProcedureProfitabilitySummary {
   const { recentSnapshots, metrics } = data.surgeryEconomics;
   const completedWithData = recentSnapshots.length;
 
@@ -441,18 +481,33 @@ export function buildProcedureProfitabilitySummary(data: FinancialOsCommandCentr
     averageRevenueCents,
     averageMarginPct: metrics.average_margin_percentage,
     casesMissingCostData,
-    bestMarginSignal: best ? `${best.type.replace(/_/g, " ")} · ${best.margin.toFixed(1)}% margin` : null,
-    worstMarginSignal: worst && worst.type !== best?.type ? `${worst.type.replace(/_/g, " ")} · ${worst.margin.toFixed(1)}% margin` : null,
+    bestMarginSignal: best
+      ? `${best.type.replace(/_/g, " ")} · ${best.margin.toFixed(1)}% margin`
+      : null,
+    worstMarginSignal:
+      worst && worst.type !== best?.type
+        ? `${worst.type.replace(/_/g, " ")} · ${worst.margin.toFixed(1)}% margin`
+        : null,
     hasLimitedData: completedWithData < 3 || casesMissingCostData > completedWithData / 2,
   };
 }
 
-export function buildConsultationRevenueBridge(data: FinancialOsCommandCentrePayload): ConsultationRevenueBridgeItem[] {
-  const quoteAwaiting = data.recentOpenInvoices.filter((inv) => inv.invoice_kind === "consultation_quote").length;
-  const consultsWithDeposit = data.revenueAttribution.rows.reduce((acc, row) => acc + (row.invoices > 0 && row.consults > 0 ? 1 : 0), 0);
+export function buildConsultationRevenueBridge(
+  data: FinancialOsCommandCentrePayload
+): ConsultationRevenueBridgeItem[] {
+  const quoteAwaiting = data.recentOpenInvoices.filter(
+    (inv) => inv.invoice_kind === "consultation_quote"
+  ).length;
+  const consultsWithDeposit = data.revenueAttribution.rows.reduce(
+    (acc, row) => acc + (row.invoices > 0 && row.consults > 0 ? 1 : 0),
+    0
+  );
   const proceduresWithoutDeposit = data.depositsAwaitingPayment.count;
   const highValueOpen = data.accountsReceivable.rows.filter(
-    (r) => r.outstanding_amount_cents >= FI_AR_HIGH_VALUE_THRESHOLD_CENTS && r.status !== "resolved" && r.status !== "written_off",
+    (r) =>
+      r.outstanding_amount_cents >= FI_AR_HIGH_VALUE_THRESHOLD_CENTS &&
+      r.status !== "resolved" &&
+      r.status !== "written_off"
   ).length;
 
   return [
@@ -460,7 +515,10 @@ export function buildConsultationRevenueBridge(data: FinancialOsCommandCentrePay
       id: "quotes_awaiting",
       label: "Quotes awaiting payment",
       value: String(quoteAwaiting),
-      detail: quoteAwaiting > 0 ? "Consultation quotes with open balances" : "No open consultation quotes",
+      detail:
+        quoteAwaiting > 0
+          ? "Consultation quotes with open balances"
+          : "No open consultation quotes",
     },
     {
       id: "consult_deposit",
@@ -481,14 +539,17 @@ export function buildConsultationRevenueBridge(data: FinancialOsCommandCentrePay
       id: "high_value_opportunities",
       label: "High-value opportunities awaiting financial action",
       value: String(highValueOpen),
-      detail: highValueOpen > 0 ? "Outstanding balances above clinic high-value threshold" : "No high-value balances flagged",
+      detail:
+        highValueOpen > 0
+          ? "Outstanding balances above clinic high-value threshold"
+          : "No high-value balances flagged",
     },
   ];
 }
 
 export function buildRecentFinancialActivity(
   data: FinancialOsCommandCentrePayload,
-  maxItems = 8,
+  maxItems = 8
 ): RecentFinancialActivityItem[] {
   return data.recentTransactions.slice(0, maxItems).map((tx) => ({
     id: tx.id,

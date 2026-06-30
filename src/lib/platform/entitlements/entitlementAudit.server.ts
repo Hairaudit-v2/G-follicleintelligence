@@ -27,7 +27,7 @@ export async function writeEntitlementAuditEvent(
     fi_user_id: input.fiUserId?.trim() || null,
     module_code: moduleCode,
     outcome: input.outcome,
-    denial_reason: input.outcome === "denied" ? input.denialReason ?? null : null,
+    denial_reason: input.outcome === "denied" ? (input.denialReason ?? null) : null,
     source: input.source?.trim() || "require_module_access",
     metadata: input.metadata ?? {},
   });

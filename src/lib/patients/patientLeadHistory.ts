@@ -13,7 +13,10 @@ export type {
   PatientPersonCrmActivityItem,
   PatientPersonLeadHistoryItem,
 } from "./patientLeadHistoryShared";
-export { buildPatientLeadHistoryTimeline, pickPrimaryLeadForPatient } from "./patientLeadHistoryShared";
+export {
+  buildPatientLeadHistoryTimeline,
+  pickPrimaryLeadForPatient,
+} from "./patientLeadHistoryShared";
 
 export async function loadPatientPersonLeadHistory(
   supabase: SupabaseClient,
@@ -30,8 +33,12 @@ export async function loadPatientPersonLeadHistory(
   if (error) throw new Error(error.message);
 
   const leads = (data ?? []).map((r) => mapFiCrmLeadRow(r as Record<string, unknown>));
-  const stageIds = Array.from(new Set(leads.map((l) => l.current_stage_id).filter(Boolean) as string[]));
-  const ownerIds = Array.from(new Set(leads.map((l) => l.primary_owner_user_id).filter(Boolean) as string[]));
+  const stageIds = Array.from(
+    new Set(leads.map((l) => l.current_stage_id).filter(Boolean) as string[])
+  );
+  const ownerIds = Array.from(
+    new Set(leads.map((l) => l.primary_owner_user_id).filter(Boolean) as string[])
+  );
 
   const stageLabelById = new Map<string, string>();
   if (stageIds.length) {
@@ -63,8 +70,10 @@ export async function loadPatientPersonLeadHistory(
 
   return leads.map((lead) => ({
     lead,
-    stageLabel: lead.current_stage_id ? stageLabelById.get(lead.current_stage_id) ?? null : null,
-    ownerLabel: lead.primary_owner_user_id ? ownerLabelById.get(lead.primary_owner_user_id) ?? null : null,
+    stageLabel: lead.current_stage_id ? (stageLabelById.get(lead.current_stage_id) ?? null) : null,
+    ownerLabel: lead.primary_owner_user_id
+      ? (ownerLabelById.get(lead.primary_owner_user_id) ?? null)
+      : null,
     linkedToThisPatient: lead.patient_id?.trim() === foundationPatientId,
   }));
 }
@@ -87,7 +96,10 @@ export async function loadPersonCrmActivityForLeads(
       .order("occurred_at", { ascending: false })
       .limit(limit);
     if (error) throw new Error(error.message);
-    return mapPersonCrmActivityRows((data ?? []) as Record<string, unknown>[], leadItems).slice(0, limit);
+    return mapPersonCrmActivityRows((data ?? []) as Record<string, unknown>[], leadItems).slice(
+      0,
+      limit
+    );
   }
 
   const orParts = [`patient_id.eq.${foundationPatientId}`, `lead_id.in.(${leadIds.join(",")})`];
@@ -100,5 +112,8 @@ export async function loadPersonCrmActivityForLeads(
     .limit(limit);
   if (error) throw new Error(error.message);
 
-  return mapPersonCrmActivityRows((data ?? []) as Record<string, unknown>[], leadItems).slice(0, limit);
+  return mapPersonCrmActivityRows((data ?? []) as Record<string, unknown>[], leadItems).slice(
+    0,
+    limit
+  );
 }

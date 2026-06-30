@@ -27,7 +27,10 @@ function normalizeDateInput(v: string | null | undefined): string | null {
   return v;
 }
 
-async function assertFoundationPatient(tenantId: string, patientId: string): Promise<{ id: string; person_id: string }> {
+async function assertFoundationPatient(
+  tenantId: string,
+  patientId: string
+): Promise<{ id: string; person_id: string }> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const pid = patientId.trim();
@@ -47,7 +50,12 @@ async function assertPersonInTenant(tenantId: string, personId: string): Promise
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const id = personId.trim();
-  const { data, error } = await supabase.from("fi_persons").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_persons")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Person not found for this tenant.");
 }
@@ -56,7 +64,12 @@ async function assertLeadInTenant(tenantId: string, leadId: string): Promise<voi
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const id = leadId.trim();
-  const { data, error } = await supabase.from("fi_crm_leads").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_crm_leads")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Lead not found for this tenant.");
 }
@@ -65,12 +78,20 @@ async function assertBookingInTenant(tenantId: string, bookingId: string): Promi
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const id = bookingId.trim();
-  const { data, error } = await supabase.from("fi_bookings").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_bookings")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Booking not found for this tenant.");
 }
 
-export async function loadConsultationByBookingId(tenantId: string, bookingId: string): Promise<ConsultationRow | null> {
+export async function loadConsultationByBookingId(
+  tenantId: string,
+  bookingId: string
+): Promise<ConsultationRow | null> {
   const tid = tenantId.trim();
   const bid = bookingId.trim();
   if (!tid || !bid) return null;
@@ -102,7 +123,8 @@ export async function createConsultationDraft(
   if (!tid) throw new Error("tenantId is required.");
 
   const typeParse = consultationTypeIdSchema.safeParse(input.consultation_type);
-  if (!typeParse.success) throw new Error(typeParse.error.errors[0]?.message ?? "Invalid consultation_type.");
+  if (!typeParse.success)
+    throw new Error(typeParse.error.errors[0]?.message ?? "Invalid consultation_type.");
 
   const insertRow: Record<string, unknown> = {
     tenant_id: tid,
@@ -145,12 +167,18 @@ export async function createConsultationDraft(
 
   if (input.consultation_date !== undefined) {
     insertRow.consultation_date = normalizeDateInput(
-      input.consultation_date === "" || input.consultation_date === null ? null : input.consultation_date
+      input.consultation_date === "" || input.consultation_date === null
+        ? null
+        : input.consultation_date
     );
   }
 
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_consultations").insert(insertRow).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .insert(insertRow)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   if (!data || typeof data !== "object") throw new Error("Insert failed.");
 
@@ -176,7 +204,9 @@ export async function updateConsultationDraft(
   if (!existing) throw new Error("Consultation not found.");
 
   if (!isEditableStatus(existing.status)) {
-    throw new Error("This consultation can no longer be edited (only draft or in-progress rows are mutable in this stage).");
+    throw new Error(
+      "This consultation can no longer be edited (only draft or in-progress rows are mutable in this stage)."
+    );
   }
 
   const updatePayload: Record<string, unknown> = {
@@ -274,9 +304,14 @@ export async function updateConsultationDraft(
   const loaded = await loadConsultationForTenant(tid, cid);
   if (!loaded) throw new Error("Could not load consultation after update.");
 
-  if ((patch.structured_data !== undefined || patch.patient_id !== undefined) && loaded.patient_id?.trim()) {
+  if (
+    (patch.structured_data !== undefined || patch.patient_id !== undefined) &&
+    loaded.patient_id?.trim()
+  ) {
     const sd =
-      loaded.structured_data && typeof loaded.structured_data === "object" && !Array.isArray(loaded.structured_data)
+      loaded.structured_data &&
+      typeof loaded.structured_data === "object" &&
+      !Array.isArray(loaded.structured_data)
         ? (loaded.structured_data as Record<string, unknown>)
         : {};
     await syncConsultationMedicalHairLossToPatientClinicalDetails({
@@ -312,7 +347,10 @@ export async function createConsultationFromBooking(
   const row = await createConsultationDraft(tid, {
     consultation_type: consultationTypeForBookingType(booking.booking_type),
     patient_id: booking.patient_id?.trim() || undefined,
-    person_id: !booking.patient_id?.trim() && booking.person_id?.trim() ? booking.person_id.trim() : undefined,
+    person_id:
+      !booking.patient_id?.trim() && booking.person_id?.trim()
+        ? booking.person_id.trim()
+        : undefined,
     lead_id: booking.lead_id?.trim() || undefined,
     booking_id: bid,
     createdByFiUserId: opts?.createdByFiUserId ?? null,
@@ -367,7 +405,8 @@ export async function completeConsultationDraft(
   const loaded = await loadConsultationForTenant(tid, cid);
   if (!loaded) throw new Error("Could not load consultation after completion.");
   await syncPostConsultReminderJobs(loaded, supabase);
-  const { advanceCrmLeadOnConsultationComplete } = await import("./advanceCrmLeadOnConsultationComplete.server");
+  const { advanceCrmLeadOnConsultationComplete } =
+    await import("./advanceCrmLeadOnConsultationComplete.server");
   await advanceCrmLeadOnConsultationComplete(tid, loaded, supabase);
   return loaded;
 }

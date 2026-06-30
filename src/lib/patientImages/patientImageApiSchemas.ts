@@ -55,14 +55,22 @@ export const patientImagePatchBodySchema = z
     anatomical_region: z.union([z.string(), z.null()]).optional(),
     visit_type: boundedOptString(160, "visit_type").nullable().optional(),
     follow_up_interval: boundedOptString(64, "follow_up_interval").nullable().optional(),
-    imaging_protocol_template_slug: boundedOptString(128, "imaging_protocol_template_slug").nullable().optional(),
-    imaging_protocol_slot_slug: boundedOptString(128, "imaging_protocol_slot_slug").nullable().optional(),
+    imaging_protocol_template_slug: boundedOptString(128, "imaging_protocol_template_slug")
+      .nullable()
+      .optional(),
+    imaging_protocol_slot_slug: boundedOptString(128, "imaging_protocol_slot_slug")
+      .nullable()
+      .optional(),
     consultation_id: z.union([z.string().uuid(), z.null()]).optional(),
   })
   .strict()
   .superRefine((b, ctx) => {
     if (b.image_category !== undefined && !isPatientImageCategory(b.image_category)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid image_category.", path: ["image_category"] });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid image_category.",
+        path: ["image_category"],
+      });
     }
     if (b.imaging_library_axis !== undefined && !isImagingLibraryAxis(b.imaging_library_axis)) {
       ctx.addIssue({
@@ -85,7 +93,9 @@ export type PatientImagePatchBody = z.infer<typeof patientImagePatchBodySchema>;
 export const patientImageArchiveBodySchema = z
   .object({
     adminKey: z.string().optional(),
-    archive_reason: boundedOptString(PATIENT_IMAGE_ARCHIVE_REASON_MAX, "archive_reason").nullable().optional(),
+    archive_reason: boundedOptString(PATIENT_IMAGE_ARCHIVE_REASON_MAX, "archive_reason")
+      .nullable()
+      .optional(),
   })
   .strict();
 

@@ -9,7 +9,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseReplayIntelligenceEventLogsScriptArgs } from "./governedIntelligenceReplayCliArgs";
 import { replayIntelligenceEventLogs } from "./replayIntelligenceEventLogs.server";
 import { runStagingIntelligenceReplay } from "./runStagingIntelligenceReplay.server";
-import { isStagingActivationEventAllowed, getStagingActivationAllowedEvents } from "./stagingActivationAllowlist";
+import {
+  isStagingActivationEventAllowed,
+  getStagingActivationAllowedEvents,
+} from "./stagingActivationAllowlist";
 import { isStagingIntelligenceActivationEnabled } from "./stagingActivationEnv";
 import type { IntelligenceEventLogReplayCandidate } from "./intelligenceEventLogReplayTypes";
 
@@ -126,7 +129,11 @@ const fullStagingEnv = {
 
 function approvedEnqueueShadowRow(
   id: string,
-  overrides: Partial<{ event_name: string | null; replay_mode: string; approval_status: string }> = {}
+  overrides: Partial<{
+    event_name: string | null;
+    replay_mode: string;
+    approval_status: string;
+  }> = {}
 ) {
   return {
     id,
@@ -188,7 +195,10 @@ describe("stagingActivationEnv (Stage 17)", () => {
   });
 
   it("is true only with governed replay + staging flags + exact allowed event (non-production)", () => {
-    assert.equal(isStagingIntelligenceActivationEnabled({ env: { ...fullStagingEnv }, nodeEnv: "test" }), true);
+    assert.equal(
+      isStagingIntelligenceActivationEnabled({ env: { ...fullStagingEnv }, nodeEnv: "test" }),
+      true
+    );
   });
 });
 
@@ -255,7 +265,9 @@ describe("runStagingIntelligenceReplay (Stage 17)", () => {
 
   it("rejects wrong replay_mode", async () => {
     const id = "00000000-0000-4000-8000-0000000000de";
-    const replay = createReplayRunsMock(new Map([[id, approvedEnqueueShadowRow(id, { replay_mode: "dry_run" })]]));
+    const replay = createReplayRunsMock(
+      new Map([[id, approvedEnqueueShadowRow(id, { replay_mode: "dry_run" })]])
+    );
     const client = mockSupabaseReplayRunsAndIntel(replay, [validCandidate]);
     const r = await runStagingIntelligenceReplay(id, null, {
       supabaseClientForTests: client,
@@ -271,7 +283,9 @@ describe("runStagingIntelligenceReplay (Stage 17)", () => {
   it("rejects wrong event_name for staging allow-list", async () => {
     const id = "00000000-0000-4000-8000-0000000000ef";
     const replay = createReplayRunsMock(
-      new Map([[id, approvedEnqueueShadowRow(id, { event_name: "hli.progression.review.completed" })]])
+      new Map([
+        [id, approvedEnqueueShadowRow(id, { event_name: "hli.progression.review.completed" })],
+      ])
     );
     const client = mockSupabaseReplayRunsAndIntel(replay, [validCandidate]);
     const r = await runStagingIntelligenceReplay(id, null, {

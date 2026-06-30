@@ -16,7 +16,10 @@ export type UpdateCaseProfileParams = {
 /**
  * Updates Stage 5A case profile fields only (no graft planning, audit, or procedure-day columns).
  */
-export async function updateCaseProfile(params: UpdateCaseProfileParams, client?: SupabaseClient): Promise<void> {
+export async function updateCaseProfile(
+  params: UpdateCaseProfileParams,
+  client?: SupabaseClient
+): Promise<void> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const cid = assertNonEmptyUuid(params.caseId, "caseId");
@@ -34,7 +37,9 @@ export async function updateCaseProfile(params: UpdateCaseProfileParams, client?
 
   const meta = (existing as { metadata: unknown }).metadata;
   const baseMeta =
-    meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {};
+    meta && typeof meta === "object" && !Array.isArray(meta)
+      ? (meta as Record<string, unknown>)
+      : {};
 
   const updateRow: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
@@ -65,7 +70,11 @@ export async function updateCaseProfile(params: UpdateCaseProfileParams, client?
     return;
   }
 
-  const { error: ue } = await supabase.from("fi_cases").update(updateRow).eq("tenant_id", tid).eq("id", cid);
+  const { error: ue } = await supabase
+    .from("fi_cases")
+    .update(updateRow)
+    .eq("tenant_id", tid)
+    .eq("id", cid);
   if (ue) throw new Error(ue.message);
 
   const priorStatus = String((existing as { status?: string }).status ?? "");

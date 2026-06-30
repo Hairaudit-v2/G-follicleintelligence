@@ -71,6 +71,9 @@ describe("Stage 2D message body key policy", () => {
   it("rejects content/html/text/fullbody-style keys", () => {
     assert.throws(() => assertMessagePayloadHasNoForbiddenBodyKeys({ content: "x" }), /full-body/);
     assert.throws(() => assertMessagePayloadHasNoForbiddenBodyKeys({ HTML: "x" }), /full-body/);
-    assert.throws(() => validateCrmMessagePreviewInput({ channel: "x", direction: "inbound", text: "t" }), /full-body/);
+    assert.throws(
+      () => validateCrmMessagePreviewInput({ channel: "x", direction: "inbound", text: "t" }),
+      /full-body/
+    );
   });
 });

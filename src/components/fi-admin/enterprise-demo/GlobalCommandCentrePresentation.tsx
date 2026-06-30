@@ -25,9 +25,7 @@ function StorySectionBlock({ section }: { section: PresentationStorySection }) {
       className={pc.storySection}
       aria-labelledby={`titan-story-title-${section.id}`}
     >
-      <p className={pc.storyIndex}>
-        {String(section.index).padStart(2, "0")} · Executive story
-      </p>
+      <p className={pc.storyIndex}>{String(section.index).padStart(2, "0")} · Executive story</p>
       <h2 id={`titan-story-title-${section.id}`} className={pc.storyTitle}>
         {section.title}
       </h2>
@@ -45,13 +43,19 @@ function StorySectionBlock({ section }: { section: PresentationStorySection }) {
   );
 }
 
-export function GlobalCommandCentrePresentation({ data, dashboardHref }: GlobalCommandCentrePresentationProps) {
+export function GlobalCommandCentrePresentation({
+  data,
+  dashboardHref,
+}: GlobalCommandCentrePresentationProps) {
   const view = useMemo(() => buildGlobalCommandCentrePresentationView(data), [data]);
-  const [activeSectionId, setActiveSectionId] = useState<PresentationStorySectionId>("network_health");
+  const [activeSectionId, setActiveSectionId] =
+    useState<PresentationStorySectionId>("network_health");
 
   const scrollToSection = useCallback((sectionId: PresentationStorySectionId) => {
     setActiveSectionId(sectionId);
-    document.getElementById(`titan-story-${sectionId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(`titan-story-${sectionId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   return (
@@ -60,9 +64,7 @@ export function GlobalCommandCentrePresentation({ data, dashboardHref }: GlobalC
 
       <header className={pc.topBar}>
         <div className="min-w-0">
-          <p className={pc.brandKicker}>
-            {data.codename} · Presentation mode
-          </p>
+          <p className={pc.brandKicker}>{data.codename} · Presentation mode</p>
           <h1 className={pc.brandTitle}>{data.tenantName}</h1>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -111,8 +113,9 @@ export function GlobalCommandCentrePresentation({ data, dashboardHref }: GlobalC
       </main>
 
       <footer className={pc.footer}>
-        Read-only presentation · {data.todayYmd} · Generated {formatAlertTimestamp(data.generatedAt)} ·{" "}
-        {data.networkKpis.activeClinics} clinics simulated
+        Read-only presentation · {data.todayYmd} · Generated{" "}
+        {formatAlertTimestamp(data.generatedAt)} · {data.networkKpis.activeClinics} clinics
+        simulated
       </footer>
     </div>
   );

@@ -6,7 +6,11 @@ import { Rocket } from "lucide-react";
 
 export function DashboardRecentPlatformReleases() {
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-platform-releases-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="dash-platform-releases-heading"
+    >
       <SectionHeader
         id="dash-platform-releases-heading"
         kicker="FI OS platform"
@@ -27,7 +31,10 @@ export function DashboardRecentPlatformReleases() {
                 <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-300">
                   {release.module}
                 </span>
-                <time dateTime={release.date} className="font-mono text-[11px] tabular-nums text-slate-500">
+                <time
+                  dateTime={release.date}
+                  className="font-mono text-[11px] tabular-nums text-slate-500"
+                >
                   {release.date}
                 </time>
               </div>

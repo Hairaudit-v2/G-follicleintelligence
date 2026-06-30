@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
-import { buildCalendarHref, mergeCalendarHrefQuery, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import {
+  buildCalendarHref,
+  mergeCalendarHrefQuery,
+  type ParsedCalendarQuery,
+} from "@/src/lib/bookings/calendarQuery";
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +26,10 @@ export function OperationalCalendarToolbar({
 }) {
   const prev = buildCalendarHref(tenantId, calendarNavigationHelpers.previousPeriod(query));
   const next = buildCalendarHref(tenantId, calendarNavigationHelpers.nextPeriod(query));
-  const today = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, calendarNavigationHelpers.goToToday()));
+  const today = buildCalendarHref(
+    tenantId,
+    mergeCalendarHrefQuery(query, calendarNavigationHelpers.goToToday())
+  );
 
   const dayHref = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: "day" }));
   const weekHref = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: "week" }));
@@ -53,7 +60,9 @@ export function OperationalCalendarToolbar({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">View</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          View
+        </span>
         <Link
           href={weekHref}
           className={cn(
@@ -94,7 +103,9 @@ export function OperationalCalendarToolbar({
         </button>
       </div>
 
-      <p className="w-full text-center text-sm font-medium text-slate-200 dark:text-slate-100 sm:w-auto sm:text-right">{rangeTitle}</p>
+      <p className="w-full text-center text-sm font-medium text-slate-200 dark:text-slate-100 sm:w-auto sm:text-right">
+        {rangeTitle}
+      </p>
     </div>
   );
 }

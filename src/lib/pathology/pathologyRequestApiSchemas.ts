@@ -39,4 +39,6 @@ export const sendPathologyRequestToPatientBodySchema = z.object({
 
 export type CreatePathologyRequestBody = z.infer<typeof createPathologyRequestBodySchema>;
 export type PatchPathologyRequestBody = z.infer<typeof patchPathologyRequestBodySchema>;
-export type SendPathologyRequestToPatientBody = z.infer<typeof sendPathologyRequestToPatientBodySchema>;
+export type SendPathologyRequestToPatientBody = z.infer<
+  typeof sendPathologyRequestToPatientBodySchema
+>;

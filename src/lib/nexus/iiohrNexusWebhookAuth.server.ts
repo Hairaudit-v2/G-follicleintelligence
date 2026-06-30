@@ -23,7 +23,11 @@ function timingSafeHexEqual(expectedHex: string, providedHex: string): boolean {
   }
 }
 
-export function verifyIiohrNexusHmacTimingSafe(secret: string, material: string, signatureHex: string): boolean {
+export function verifyIiohrNexusHmacTimingSafe(
+  secret: string,
+  material: string,
+  signatureHex: string
+): boolean {
   const expectedHex = computeIiohrNexusHmacHex(secret, material);
   return timingSafeHexEqual(expectedHex, signatureHex);
 }
@@ -38,7 +42,11 @@ export function parseIiohrNexusTimestampMs(raw: string): number | null {
   return n;
 }
 
-export function verifyIiohrNexusTimestamp(timestampMs: number, nowMs: number, skewMs: number): boolean {
+export function verifyIiohrNexusTimestamp(
+  timestampMs: number,
+  nowMs: number,
+  skewMs: number
+): boolean {
   return Math.abs(nowMs - timestampMs) <= skewMs;
 }
 

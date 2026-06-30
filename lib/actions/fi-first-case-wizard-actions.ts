@@ -177,7 +177,10 @@ export async function createFirstPatientCaseWizardAction(
 
   if (timelineErr) {
     // Best-effort: case + patient remain valid if timeline insert fails (permissions, drift, etc.).
-    console.error("[createFirstPatientCaseWizardAction] fi_timeline_events insert failed:", timelineErr.message);
+    console.error(
+      "[createFirstPatientCaseWizardAction] fi_timeline_events insert failed:",
+      timelineErr.message
+    );
   }
 
   revalidatePath(`/fi-admin/${tenantId}/cases`);

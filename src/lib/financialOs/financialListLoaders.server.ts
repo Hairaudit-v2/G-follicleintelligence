@@ -4,7 +4,10 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
-export async function loadFinancialOsInvoices(tenantId: string, limit = 300): Promise<FiInvoiceRow[]> {
+export async function loadFinancialOsInvoices(
+  tenantId: string,
+  limit = 300
+): Promise<FiInvoiceRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_invoices")
@@ -16,7 +19,10 @@ export async function loadFinancialOsInvoices(tenantId: string, limit = 300): Pr
   return (data ?? []).map((x) => mapInvoiceRow(x as Record<string, unknown>));
 }
 
-export async function loadFinancialOsPayments(tenantId: string, limit = 300): Promise<
+export async function loadFinancialOsPayments(
+  tenantId: string,
+  limit = 300
+): Promise<
   {
     id: string;
     status: string;
@@ -46,7 +52,10 @@ export async function loadFinancialOsPayments(tenantId: string, limit = 300): Pr
   }));
 }
 
-export async function loadFinancialOsPaymentRequests(tenantId: string, limit = 300): Promise<FiPaymentRequestRow[]> {
+export async function loadFinancialOsPaymentRequests(
+  tenantId: string,
+  limit = 300
+): Promise<FiPaymentRequestRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_payment_requests")
@@ -58,7 +67,9 @@ export async function loadFinancialOsPaymentRequests(tenantId: string, limit = 3
   return (data ?? []).map((x) => mapPaymentRequestRow(x as Record<string, unknown>));
 }
 
-export async function loadFinancialOsDepositRules(tenantId: string): Promise<Record<string, unknown>[]> {
+export async function loadFinancialOsDepositRules(
+  tenantId: string
+): Promise<Record<string, unknown>[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_deposit_rules")

@@ -6,7 +6,11 @@ import { randomUUID } from "node:crypto";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { GOVERNED_DISPATCH_FUTURE_ALLOWLIST, GOVERNED_ENQUEUE_SHADOW_EVENT_ALLOWLIST, isEnqueueShadowEventNameAllowlisted } from "./governedReplayAllowlist";
+import {
+  GOVERNED_DISPATCH_FUTURE_ALLOWLIST,
+  GOVERNED_ENQUEUE_SHADOW_EVENT_ALLOWLIST,
+  isEnqueueShadowEventNameAllowlisted,
+} from "./governedReplayAllowlist";
 import {
   canExecuteGovernedReplayRun,
   isDispatchFutureExecutionPolicyAllowed,
@@ -22,10 +26,16 @@ import {
   submitReplayRunForApproval,
 } from "./intelligenceReplayRunService.server";
 import type { IntelligenceEventLogReplayCandidate } from "./intelligenceEventLogReplayTypes";
-import { buildShadowReplayEnvelopeFromCandidate, replayIntelligenceEventLogs } from "./replayIntelligenceEventLogs.server";
+import {
+  buildShadowReplayEnvelopeFromCandidate,
+  replayIntelligenceEventLogs,
+} from "./replayIntelligenceEventLogs.server";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const MIGRATION_PATH = join(__dirname, "../../../../supabase/migrations/20260818120001_fi_intelligence_replay_runs.sql");
+const MIGRATION_PATH = join(
+  __dirname,
+  "../../../../supabase/migrations/20260818120001_fi_intelligence_replay_runs.sql"
+);
 
 function thenableResult<T>(result: T): { then: (fn: (v: T) => unknown) => Promise<unknown> } {
   return {
@@ -140,7 +150,10 @@ describe("fi_intelligence_replay_runs migration (Stage 15)", () => {
     assert.match(sql, /idx_fi_intelligence_replay_runs_requested_by_created/i);
     assert.match(sql, /idx_fi_intelligence_replay_runs_approved_by_created/i);
     assert.match(sql, /enable row level security/i);
-    assert.match(sql, /grant select, insert, update, delete on public\.fi_intelligence_replay_runs to service_role/i);
+    assert.match(
+      sql,
+      /grant select, insert, update, delete on public\.fi_intelligence_replay_runs to service_role/i
+    );
   });
 });
 
@@ -153,7 +166,10 @@ describe("governedReplayEnv (Stage 15)", () => {
 
   it("enables governed execute when FI_INTELLIGENCE_GOVERNED_REPLAY_ENABLED=1", () => {
     assert.equal(
-      canExecuteGovernedReplayRun({ env: { FI_INTELLIGENCE_GOVERNED_REPLAY_ENABLED: "1" }, nodeEnv: "test" }),
+      canExecuteGovernedReplayRun({
+        env: { FI_INTELLIGENCE_GOVERNED_REPLAY_ENABLED: "1" },
+        nodeEnv: "test",
+      }),
       true
     );
   });
@@ -230,9 +246,12 @@ describe("parseIntelligenceEventLogReplayCliArgs dispatch_future (Stage 15)", ()
   });
 
   it("accepts dispatch_future when includeDispatchFutureReplayMode", () => {
-    const r = parseIntelligenceEventLogReplayCliArgs(["node", "x.js", "--mode", "dispatch_future"], {
-      includeDispatchFutureReplayMode: true,
-    });
+    const r = parseIntelligenceEventLogReplayCliArgs(
+      ["node", "x.js", "--mode", "dispatch_future"],
+      {
+        includeDispatchFutureReplayMode: true,
+      }
+    );
     assert.equal(r.ok, true);
   });
 });
@@ -305,8 +324,24 @@ describe("intelligenceReplayRunService (Stage 15)", () => {
     if (!created.ok) return;
     const runId = created.data.id;
 
-    assert.equal((await submitReplayRunForApproval(runId, "actor", { supabaseClientForTests: client, omitPlatformAdminAssertForOperatorCli: true })).ok, true);
-    assert.equal((await approveReplayRun(runId, "actor2", { supabaseClientForTests: client, omitPlatformAdminAssertForOperatorCli: true })).ok, true);
+    assert.equal(
+      (
+        await submitReplayRunForApproval(runId, "actor", {
+          supabaseClientForTests: client,
+          omitPlatformAdminAssertForOperatorCli: true,
+        })
+      ).ok,
+      true
+    );
+    assert.equal(
+      (
+        await approveReplayRun(runId, "actor2", {
+          supabaseClientForTests: client,
+          omitPlatformAdminAssertForOperatorCli: true,
+        })
+      ).ok,
+      true
+    );
 
     const ex = await executeApprovedReplayRun(runId, "actor2", {
       supabaseClientForTests: client,

@@ -82,10 +82,7 @@ export function createGc9MockTables() {
           },
         };
       },
-      then(
-        resolve: (v: { data: Row[]; error: null }) => void,
-        reject?: (e: unknown) => void
-      ) {
+      then(resolve: (v: { data: Row[]; error: null }) => void, reject?: (e: unknown) => void) {
         try {
           resolve({ data: applyEqFilters(rows, filters), error: null });
         } catch (e) {
@@ -141,11 +138,16 @@ export function createGc9MockTables() {
         return {
           eq(col: string, val: unknown) {
             const matched = rows.filter((r) => r[col] === val);
-            matched.forEach((r) => Object.assign(r, patch, { updated_at: new Date().toISOString() }));
+            matched.forEach((r) =>
+              Object.assign(r, patch, { updated_at: new Date().toISOString() })
+            );
             return {
               select() {
                 return {
-                  single: async () => ({ data: matched[0] ?? null, error: matched[0] ? null : { message: "not found" } }),
+                  single: async () => ({
+                    data: matched[0] ?? null,
+                    error: matched[0] ? null : { message: "not found" },
+                  }),
                 };
               },
               then(resolve: (v: { error: null }) => void) {
@@ -167,7 +169,8 @@ export function createGc9MockTables() {
     eventVersions,
     reconciliationLogs,
     tableHandler(table: string) {
-      if (table === "fi_calendar_webhook_subscriptions") return buildGenericChain(webhookSubscriptions);
+      if (table === "fi_calendar_webhook_subscriptions")
+        return buildGenericChain(webhookSubscriptions);
       if (table === "fi_calendar_event_versions") return buildGenericChain(eventVersions);
       if (table === "fi_calendar_reconciliation_logs") return buildGenericChain(reconciliationLogs);
       const gc8Handler = gc8.tableHandler(table);

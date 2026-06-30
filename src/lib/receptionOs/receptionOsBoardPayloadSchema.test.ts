@@ -22,7 +22,12 @@ const samplePayload = {
   },
   viewer: {
     role: "receptionist",
-    visibleWidgets: ["todays_patients", "communication_timeline", "action_alerts", "upcoming_surgery"],
+    visibleWidgets: [
+      "todays_patients",
+      "communication_timeline",
+      "action_alerts",
+      "upcoming_surgery",
+    ],
   },
   todaysPatients: [
     {
@@ -37,7 +42,8 @@ const samplePayload = {
         patient: "/fi-admin/11111111-1111-4111-8111-111111111111/patients/p1",
         case: null,
         lead: null,
-        appointment: "/fi-admin/11111111-1111-4111-8111-111111111111/appointments?bookingId=22222222-2222-4222-8222-222222222222",
+        appointment:
+          "/fi-admin/11111111-1111-4111-8111-111111111111/appointments?bookingId=22222222-2222-4222-8222-222222222222",
       },
     },
   ],
@@ -50,7 +56,11 @@ const samplePayload = {
       preview: "See you today",
       patientOrLeadLabel: "Alex Patient",
       contactAt: "2026-06-19T08:00:00.000Z",
-      hrefs: { patient: null, case: null, lead: "/fi-admin/11111111-1111-4111-8111-111111111111/crm/leads/l1" },
+      hrefs: {
+        patient: null,
+        case: null,
+        lead: "/fi-admin/11111111-1111-4111-8111-111111111111/crm/leads/l1",
+      },
     },
   ],
   consultationPipeline: {
@@ -83,7 +93,11 @@ const samplePayload = {
       isOverdue: true,
       statusLabel: "Overdue",
       severity: "critical",
-      hrefs: { patient: "/fi-admin/11111111-1111-4111-8111-111111111111/patients/p1", case: null, lead: null },
+      hrefs: {
+        patient: "/fi-admin/11111111-1111-4111-8111-111111111111/patients/p1",
+        case: null,
+        lead: null,
+      },
     },
   ],
   upcomingSurgeries: [
@@ -315,7 +329,10 @@ describe("receptionOsBoardPayloadSchema", () => {
 
 describe("reception board regression guard", () => {
   it("keeps legacy /reception board on tenant operational dashboard loader", () => {
-    const receptionPage = readFileSync("app/(fi-admin)/fi-admin/[tenantId]/reception/page.tsx", "utf8");
+    const receptionPage = readFileSync(
+      "app/(fi-admin)/fi-admin/[tenantId]/reception/page.tsx",
+      "utf8"
+    );
     assert.match(receptionPage, /loadTenantOperationalDashboard/);
     assert.match(receptionPage, /ReceptionBoardDashboard/);
     assert.doesNotMatch(receptionPage, /loadReceptionOsBoardPayload/);
@@ -323,7 +340,10 @@ describe("reception board regression guard", () => {
   });
 
   it("routes ReceptionOS command centre separately from kanban reception board", () => {
-    const receptionOsPage = readFileSync("app/(fi-admin)/fi-admin/[tenantId]/reception-os/page.tsx", "utf8");
+    const receptionOsPage = readFileSync(
+      "app/(fi-admin)/fi-admin/[tenantId]/reception-os/page.tsx",
+      "utf8"
+    );
     assert.match(receptionOsPage, /loadReceptionOsCommandCentrePayload/);
     assert.match(receptionOsPage, /ReceptionOsDashboard/);
     assert.doesNotMatch(receptionOsPage, /ReceptionBoardClient/);
@@ -334,7 +354,10 @@ describe("reception board regression guard", () => {
     const loader = readFileSync("src/lib/receptionOs/receptionOsBoardLoader.server.ts", "utf8");
     assert.doesNotMatch(loader, /fi_reception_tasks/);
     assert.doesNotMatch(loader, /receptionOsRevenueModel/);
-    const wrapper = readFileSync("src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts", "utf8");
+    const wrapper = readFileSync(
+      "src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts",
+      "utf8"
+    );
     assert.match(wrapper, /loadReceptionOsBoardPayload/);
     assert.match(wrapper, /loadOpenReceptionTasksForTenant/);
     assert.match(wrapper, /buildReceptionOsRevenueIntelligence/);

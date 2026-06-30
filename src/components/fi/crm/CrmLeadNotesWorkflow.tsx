@@ -2,11 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { archiveCrmLeadNoteAction, createCrmLeadNoteAction, updateCrmLeadNoteAction } from "@/lib/actions/fi-crm-actions";
+import {
+  archiveCrmLeadNoteAction,
+  createCrmLeadNoteAction,
+  updateCrmLeadNoteAction,
+} from "@/lib/actions/fi-crm-actions";
 import type { FiCrmLeadNoteRow } from "@/src/lib/crm";
 import { CRM_LEAD_NOTE_VISIBILITY_VALUES, sortCrmLeadNotesForDisplay } from "@/src/lib/crm";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 function visibilitiesWithFallback(current: string): string[] {
   const u = new Set<string>([...CRM_LEAD_NOTE_VISIBILITY_VALUES]);
@@ -91,7 +96,12 @@ export function CrmLeadNotesWorkflow({
     setFeedback(null);
     setBusy(true);
     try {
-      const r = await updateCrmLeadNoteAction(tenantId, leadId, noteId, withAdmin({ noteBody: editBody, noteVisibility: editVis, isPinned: editPinned }));
+      const r = await updateCrmLeadNoteAction(
+        tenantId,
+        leadId,
+        noteId,
+        withAdmin({ noteBody: editBody, noteVisibility: editVis, isPinned: editPinned })
+      );
       setFeedback(r.ok ? "Note updated." : r.error);
       if (r.ok) {
         setEditingId(null);
@@ -132,7 +142,10 @@ export function CrmLeadNotesWorkflow({
         />
       </label>
 
-      <form onSubmit={onCreate} className="mb-6 space-y-2 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-sm">
+      <form
+        onSubmit={onCreate}
+        className="mb-6 space-y-2 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-sm"
+      >
         <h3 className="font-medium text-slate-100">New note</h3>
         <textarea
           value={createBody}
@@ -145,7 +158,11 @@ export function CrmLeadNotesWorkflow({
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs text-slate-400">
             Visibility
-            <select value={createVis} onChange={(e) => setCreateVis(e.target.value)} className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs">
+            <select
+              value={createVis}
+              onChange={(e) => setCreateVis(e.target.value)}
+              className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs"
+            >
               {CRM_LEAD_NOTE_VISIBILITY_VALUES.map((v) => (
                 <option key={v} value={v}>
                   {v}
@@ -154,16 +171,26 @@ export function CrmLeadNotesWorkflow({
             </select>
           </label>
           <label className="flex items-center gap-1 text-xs text-slate-400">
-            <input type="checkbox" checked={createPinned} onChange={(e) => setCreatePinned(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={createPinned}
+              onChange={(e) => setCreatePinned(e.target.checked)}
+            />
             Pinned
           </label>
         </div>
-        <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+        >
           Add note
         </button>
       </form>
 
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Active notes</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Active notes
+      </h3>
       {sortedActive.length === 0 ? (
         <p className="mb-4 text-sm text-slate-400">No active internal notes yet.</p>
       ) : (
@@ -172,9 +199,18 @@ export function CrmLeadNotesWorkflow({
             <li key={n.id} className="rounded border border-white/[0.06] p-3">
               {editingId === n.id ? (
                 <div className="space-y-2">
-                  <textarea value={editBody} onChange={(e) => setEditBody(e.target.value)} rows={3} className="w-full rounded border border-slate-700 px-2 py-1" />
+                  <textarea
+                    value={editBody}
+                    onChange={(e) => setEditBody(e.target.value)}
+                    rows={3}
+                    className="w-full rounded border border-slate-700 px-2 py-1"
+                  />
                   <div className="flex flex-wrap items-center gap-3">
-                    <select value={editVis} onChange={(e) => setEditVis(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
+                    <select
+                      value={editVis}
+                      onChange={(e) => setEditVis(e.target.value)}
+                      className="rounded border border-slate-700 px-2 py-1 text-xs"
+                    >
                       {visibilitiesWithFallback(editVis).map((v) => (
                         <option key={v} value={v}>
                           {v}
@@ -182,15 +218,29 @@ export function CrmLeadNotesWorkflow({
                       ))}
                     </select>
                     <label className="flex items-center gap-1 text-xs text-slate-400">
-                      <input type="checkbox" checked={editPinned} onChange={(e) => setEditPinned(e.target.checked)} />
+                      <input
+                        type="checkbox"
+                        checked={editPinned}
+                        onChange={(e) => setEditPinned(e.target.checked)}
+                      />
                       Pinned
                     </label>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" disabled={busy} onClick={() => onSaveEdit(n.id)} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onSaveEdit(n.id)}
+                      className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+                    >
                       Save
                     </button>
-                    <button type="button" disabled={busy} onClick={cancelEdit} className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-50">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={cancelEdit}
+                      className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-50"
+                    >
                       Cancel
                     </button>
                   </div>
@@ -199,16 +249,28 @@ export function CrmLeadNotesWorkflow({
                 <>
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      {n.is_pinned ? <span className="mr-2 text-xs font-medium text-amber-300">Pinned</span> : null}
+                      {n.is_pinned ? (
+                        <span className="mr-2 text-xs font-medium text-amber-300">Pinned</span>
+                      ) : null}
                       <span className="text-xs text-gray-500">{n.note_visibility}</span>
                       <p className="mt-1 whitespace-pre-wrap text-slate-200">{n.note_body}</p>
                       <p className="mt-1 text-xs text-gray-400">{n.created_at}</p>
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
-                      <button type="button" disabled={busy} onClick={() => startEdit(n)} className="rounded border border-slate-700 px-2 py-0.5 text-xs disabled:opacity-50">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => startEdit(n)}
+                        className="rounded border border-slate-700 px-2 py-0.5 text-xs disabled:opacity-50"
+                      >
                         Edit
                       </button>
-                      <button type="button" disabled={busy} onClick={() => onArchive(n.id)} className="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-xs text-rose-300 disabled:opacity-50">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => onArchive(n.id)}
+                        className="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-xs text-rose-300 disabled:opacity-50"
+                      >
                         Archive
                       </button>
                     </div>
@@ -226,19 +288,27 @@ export function CrmLeadNotesWorkflow({
           className="text-xs font-medium text-blue-300 hover:underline"
           onClick={() => setShowArchived((v) => !v)}
         >
-          {showArchived ? "Hide" : "Show"} archived notes{archivedNotes.length ? ` (${archivedNotes.length})` : ""}
+          {showArchived ? "Hide" : "Show"} archived notes
+          {archivedNotes.length ? ` (${archivedNotes.length})` : ""}
         </button>
         {showArchived && sortedArchived.length > 0 ? (
           <ul className="mt-2 space-y-2 text-sm text-slate-400">
             {sortedArchived.map((n) => (
-              <li key={n.id} className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] p-2">
+              <li
+                key={n.id}
+                className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] p-2"
+              >
                 <p className="text-xs text-gray-500">Archived {n.archived_at}</p>
-                <p className="mt-1 whitespace-pre-wrap line-through decoration-gray-400">{n.note_body}</p>
+                <p className="mt-1 whitespace-pre-wrap line-through decoration-gray-400">
+                  {n.note_body}
+                </p>
               </li>
             ))}
           </ul>
         ) : null}
-        {showArchived && sortedArchived.length === 0 ? <p className="mt-2 text-xs text-gray-500">No archived notes.</p> : null}
+        {showArchived && sortedArchived.length === 0 ? (
+          <p className="mt-2 text-xs text-gray-500">No archived notes.</p>
+        ) : null}
       </div>
 
       {feedback ? <p className="mt-3 text-sm text-slate-200">{feedback}</p> : null}

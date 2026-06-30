@@ -66,7 +66,9 @@ export function assertAtLeastOneBookingAnchor(input: {
     nonEmpty(input.patient_id) ||
     nonEmpty(input.case_id);
   if (!has) {
-    throw new Error("Booking must link to at least one of lead_id, person_id, patient_id, or case_id.");
+    throw new Error(
+      "Booking must link to at least one of lead_id, person_id, patient_id, or case_id."
+    );
   }
 }
 
@@ -81,7 +83,9 @@ export function assertEndAfterStart(startAtIso: string, endAtIso: string): void 
   if (b <= a) throw new Error("end_at must be after start_at.");
 }
 
-export function assertMetadataJsonObject(metadata: unknown): asserts metadata is Record<string, unknown> {
+export function assertMetadataJsonObject(
+  metadata: unknown
+): asserts metadata is Record<string, unknown> {
   if (metadata == null || typeof metadata !== "object" || Array.isArray(metadata)) {
     throw new Error("metadata must be a JSON object.");
   }
@@ -106,17 +110,24 @@ export function assertBookingTypeAllowedForLeadConversion(opts: {
   }
 }
 
-export function isBookingCancelled(row: Pick<FiBookingRow, "booking_status" | "cancelled_at">): boolean {
+export function isBookingCancelled(
+  row: Pick<FiBookingRow, "booking_status" | "cancelled_at">
+): boolean {
   return row.booking_status.trim() === "cancelled" || Boolean(row.cancelled_at?.trim());
 }
 
 /**
  * Cancelled rows reject general edits (Stage 3A). Cancellation metadata is set only via `cancelBooking`.
  */
-export function assertNonCancelledBookingMutable(row: Pick<FiBookingRow, "booking_status" | "cancelled_at">): void {
+export function assertNonCancelledBookingMutable(
+  row: Pick<FiBookingRow, "booking_status" | "cancelled_at">
+): void {
   if (isBookingCancelled(row)) throw new Error("Cancelled bookings cannot be edited.");
 }
 
-export function isBookingRowForTenant(row: Pick<FiBookingRow, "tenant_id">, tenantId: string): boolean {
+export function isBookingRowForTenant(
+  row: Pick<FiBookingRow, "tenant_id">,
+  tenantId: string
+): boolean {
   return row.tenant_id.trim() === tenantId.trim();
 }

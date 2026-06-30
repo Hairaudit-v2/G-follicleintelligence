@@ -13,7 +13,9 @@ export function pickPrimaryLinkedSurgeryBookingYmd(
   bookings: FiBookingRow[],
   calendarTimezone: string
 ): { ymd: string | null; bookingId: string | null } {
-  const surgery = bookings.filter((b) => b.booking_type.trim().toLowerCase() === "surgery" && !isCancelledBooking(b));
+  const surgery = bookings.filter(
+    (b) => b.booking_type.trim().toLowerCase() === "surgery" && !isCancelledBooking(b)
+  );
   if (!surgery.length) return { ymd: null, bookingId: null };
   surgery.sort((a, b) => a.start_at.localeCompare(b.start_at));
   const b = surgery[0]!;

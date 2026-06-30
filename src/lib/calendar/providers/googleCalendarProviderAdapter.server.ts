@@ -54,7 +54,9 @@ async function callGoogleApi(
   opts: ServerOpts,
   body?: Record<string, unknown>,
   query?: Record<string, string>
-): Promise<{ ok: true; json: unknown; status: number } | { ok: false; error: string; status?: number }> {
+): Promise<
+  { ok: true; json: unknown; status: number } | { ok: false; error: string; status?: number }
+> {
   const fetchFn = opts.fetchOverride ?? fetch;
   const params = query ? `?${new URLSearchParams(query).toString()}` : "";
   const url = `${GOOGLE_CALENDAR_API_BASE}${path}${params}`;
@@ -116,7 +118,9 @@ function buildGoogleEventBody(input: {
 }
 
 /** Google Calendar implementation of CalendarProviderAdapter (wraps existing GC-1/GC-8 logic). */
-export function createGoogleCalendarProviderAdapter(opts: ServerOpts = {}): CalendarProviderAdapter {
+export function createGoogleCalendarProviderAdapter(
+  opts: ServerOpts = {}
+): CalendarProviderAdapter {
   return {
     provider: "google",
 
@@ -302,7 +306,9 @@ export function createGoogleCalendarProviderAdapter(opts: ServerOpts = {}): Cale
       const expirationMs = body.expiration ? Number(body.expiration) : NaN;
       const expirationAt = Number.isFinite(expirationMs)
         ? new Date(expirationMs).toISOString()
-        : new Date(Date.now() + (input.ttlSeconds ?? DEFAULT_WATCH_TTL_SECONDS) * 1000).toISOString();
+        : new Date(
+            Date.now() + (input.ttlSeconds ?? DEFAULT_WATCH_TTL_SECONDS) * 1000
+          ).toISOString();
 
       return {
         ok: true,

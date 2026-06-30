@@ -10,16 +10,27 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function FirstCaseWizardPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FirstCaseWizardPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const { data: clinicRows, error: ce } = await supabase
@@ -32,7 +43,10 @@ export default async function FirstCaseWizardPage({ params }: { params: Promise<
     return (
       <div className="mx-auto max-w-2xl py-6">
         <p className="text-sm text-rose-300">Could not load clinics for this tenant.</p>
-        <Link href={`/fi-admin/${tenantId}/cases`} className="mt-2 inline-block text-sm text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/cases`}
+          className="mt-2 inline-block text-sm text-blue-300 hover:underline"
+        >
           Back to patients
         </Link>
       </div>

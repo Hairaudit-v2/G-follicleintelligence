@@ -24,7 +24,9 @@ export function parseStaffDirectoryFiltersFromSearchParams(sp: {
 }): StaffDirectoryFilterState {
   const staffRoleRaw = sp.staff_role?.trim() || null;
   const staffRole =
-    staffRoleRaw?.toLowerCase() === NEEDS_REVIEW_STAFF_ROLE ? NEEDS_REVIEW_STAFF_ROLE : staffRoleRaw;
+    staffRoleRaw?.toLowerCase() === NEEDS_REVIEW_STAFF_ROLE
+      ? NEEDS_REVIEW_STAFF_ROLE
+      : staffRoleRaw;
   const payrollOnly = sp.payroll === "1" || sp.payroll === "true";
   const activeRaw = sp.active?.trim();
   const activeFilter =
@@ -36,7 +38,9 @@ export function parseStaffDirectoryFiltersFromSearchParams(sp: {
   return { staffRole, payrollOnly, activeFilter };
 }
 
-export function buildStaffDirectorySearchParams(filters: StaffDirectoryFilterState): URLSearchParams {
+export function buildStaffDirectorySearchParams(
+  filters: StaffDirectoryFilterState
+): URLSearchParams {
   const q = new URLSearchParams();
   if (filters.staffRole) q.set("staff_role", filters.staffRole);
   if (filters.payrollOnly) q.set("payroll", "1");
@@ -67,7 +71,8 @@ export function filterStaffDirectoryRows(
   filters: StaffDirectoryFilterState
 ): StaffDirectoryRowView[] {
   return rows.filter((row) => {
-    if (filters.staffRole && row.staff_role.toLowerCase() !== filters.staffRole.toLowerCase()) return false;
+    if (filters.staffRole && row.staff_role.toLowerCase() !== filters.staffRole.toLowerCase())
+      return false;
     if (filters.payrollOnly && !row.payrollImported) return false;
     if (filters.activeFilter === "active" && !row.is_active) return false;
     if (filters.activeFilter === "inactive" && row.is_active) return false;

@@ -4,9 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { Suspense } from "react";
 
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
-import {
-  loadOperationalCalendarShellData,
-} from "@/src/lib/calendar/operationalCalendarLoader.server";
+import { loadOperationalCalendarShellData } from "@/src/lib/calendar/operationalCalendarLoader.server";
 import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
 import { CalendarBookingsSection } from "./CalendarBookingsSection";
 import { FiOsCalendarGridSkeleton } from "@/src/components/fi-admin/calendar/FiOsCalendarGridSkeleton";

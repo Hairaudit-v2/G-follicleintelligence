@@ -6,8 +6,16 @@ import { useCallback, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { createClinicRoomAction, loadRoomsCatalogAction, updateClinicRoomAction } from "@/lib/actions/fi-rooms-actions";
-import { CLINIC_ROOM_TYPES, type ClinicRoomType, type FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
+import {
+  createClinicRoomAction,
+  loadRoomsCatalogAction,
+  updateClinicRoomAction,
+} from "@/lib/actions/fi-rooms-actions";
+import {
+  CLINIC_ROOM_TYPES,
+  type ClinicRoomType,
+  type FiClinicRoomRow,
+} from "@/src/lib/rooms/roomTypes";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 
 type Mode = "idle" | "create" | "edit";
@@ -60,7 +68,8 @@ export function RoomsCatalogClient({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const clinicName = (id: string) => clinics.find((c) => c.id === id)?.display_name ?? id.slice(0, 8);
+  const clinicName = (id: string) =>
+    clinics.find((c) => c.id === id)?.display_name ?? id.slice(0, 8);
 
   const refresh = useCallback(() => {
     startTransition(async () => {
@@ -122,7 +131,8 @@ export function RoomsCatalogClient({
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Settings</p>
           <h1 className="text-2xl font-semibold text-slate-100">Rooms</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-400">
-            Manage bookable clinic rooms. Rooms sharing the same physical key cannot overlap in time.
+            Manage bookable clinic rooms. Rooms sharing the same physical key cannot overlap in
+            time.
           </p>
         </div>
         {canManage ? (
@@ -165,15 +175,28 @@ export function RoomsCatalogClient({
                 <td className="px-4 py-3 font-medium">{row.display_name}</td>
                 <td className="px-4 py-3 text-slate-400">{clinicName(row.clinic_id)}</td>
                 <td className="px-4 py-3 capitalize">{row.room_type.replace(/_/g, " ")}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-500">{row.physical_room_key}</td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                  {row.physical_room_key}
+                </td>
                 <td className="px-4 py-3">
-                  <span className={cn("rounded-full px-2 py-0.5 text-xs", row.is_active ? "bg-emerald-500/15 text-emerald-200" : "bg-slate-500/20 text-slate-400")}>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs",
+                      row.is_active
+                        ? "bg-emerald-500/15 text-emerald-200"
+                        : "bg-slate-500/20 text-slate-400"
+                    )}
+                  >
                     {row.is_active ? "Active" : "Inactive"}
                   </span>
                 </td>
                 {canManage ? (
                   <td className="px-4 py-3 text-right">
-                    <button type="button" className="text-cyan-400 hover:underline" onClick={() => openEdit(row)}>
+                    <button
+                      type="button"
+                      className="text-cyan-400 hover:underline"
+                      onClick={() => openEdit(row)}
+                    >
                       Edit
                     </button>
                   </td>
@@ -193,11 +216,17 @@ export function RoomsCatalogClient({
 
       {mode !== "idle" ? (
         <div className="rounded-xl border border-white/10 bg-slate-950/60 p-4">
-          <h2 className="text-lg font-semibold text-slate-100">{mode === "create" ? "New room" : "Edit room"}</h2>
+          <h2 className="text-lg font-semibold text-slate-100">
+            {mode === "create" ? "New room" : "Edit room"}
+          </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block text-xs text-slate-400">
               Clinic
-              <select className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" value={form.clinicId} onChange={(e) => onField("clinicId", e.target.value)}>
+              <select
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm"
+                value={form.clinicId}
+                onChange={(e) => onField("clinicId", e.target.value)}
+              >
                 {clinics.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.display_name}
@@ -207,19 +236,35 @@ export function RoomsCatalogClient({
             </label>
             <label className="block text-xs text-slate-400">
               Room code
-              <input className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" value={form.roomCode} onChange={(e) => onField("roomCode", e.target.value)} />
+              <input
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm"
+                value={form.roomCode}
+                onChange={(e) => onField("roomCode", e.target.value)}
+              />
             </label>
             <label className="block text-xs text-slate-400">
               Display name
-              <input className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" value={form.displayName} onChange={(e) => onField("displayName", e.target.value)} />
+              <input
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm"
+                value={form.displayName}
+                onChange={(e) => onField("displayName", e.target.value)}
+              />
             </label>
             <label className="block text-xs text-slate-400">
               Physical room key
-              <input className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm font-mono" value={form.physicalRoomKey} onChange={(e) => onField("physicalRoomKey", e.target.value)} />
+              <input
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm font-mono"
+                value={form.physicalRoomKey}
+                onChange={(e) => onField("physicalRoomKey", e.target.value)}
+              />
             </label>
             <label className="block text-xs text-slate-400">
               Room type
-              <select className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" value={form.roomType} onChange={(e) => onField("roomType", e.target.value)}>
+              <select
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm"
+                value={form.roomType}
+                onChange={(e) => onField("roomType", e.target.value)}
+              >
                 {CLINIC_ROOM_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -229,14 +274,27 @@ export function RoomsCatalogClient({
             </label>
             <label className="block text-xs text-slate-400">
               Sort order
-              <input type="number" className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" value={form.sortOrder} onChange={(e) => onField("sortOrder", e.target.value)} />
+              <input
+                type="number"
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm"
+                value={form.sortOrder}
+                onChange={(e) => onField("sortOrder", e.target.value)}
+              />
             </label>
             <label className="block text-xs text-slate-400 sm:col-span-2">
               Capabilities (comma-separated)
-              <input className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" value={form.capabilities} onChange={(e) => onField("capabilities", e.target.value)} />
+              <input
+                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm"
+                value={form.capabilities}
+                onChange={(e) => onField("capabilities", e.target.value)}
+              />
             </label>
             <label className="flex items-center gap-2 text-sm text-slate-300">
-              <input type="checkbox" checked={form.isActive === "on"} onChange={(e) => onField("isActive", e.target.checked ? "on" : "")} />
+              <input
+                type="checkbox"
+                checked={form.isActive === "on"}
+                onChange={(e) => onField("isActive", e.target.checked ? "on" : "")}
+              />
               Active
             </label>
           </div>
@@ -245,7 +303,12 @@ export function RoomsCatalogClient({
             <Button type="button" onClick={save} disabled={pending}>
               Save
             </Button>
-            <Button type="button" variant="ghost" onClick={() => setMode("idle")} disabled={pending}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setMode("idle")}
+              disabled={pending}
+            >
               Cancel
             </Button>
           </div>

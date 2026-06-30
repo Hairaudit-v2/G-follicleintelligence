@@ -11,11 +11,17 @@ import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
-import { resolveFiOsAuthUserDisplayNameById, resolveFiOsAuthUserEmail } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
+import {
+  resolveFiOsAuthUserDisplayNameById,
+  resolveFiOsAuthUserEmail,
+} from "@/src/lib/fiOs/fiOsAuthDisplay.server";
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
-import { assertFiTenantExists, assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import {
+  assertFiTenantExists,
+  assertFiTenantPortalAccess,
+} from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermissions";
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
@@ -123,7 +129,20 @@ export default async function TenantAdminLayout({
     workspaceProfileKey,
     showHrOsNav,
   ] = pinFloorMode
-    ? [false, true, pinSession!.staffName, false, null, false, false, false, false, null, "default" as const, false]
+    ? [
+        false,
+        true,
+        pinSession!.staffName,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        null,
+        "default" as const,
+        false,
+      ]
     : await Promise.all([
         getCrmShellNavAllowed(tenantId),
         getBookingsBoardNavAllowed(tenantId),
@@ -140,7 +159,7 @@ export default async function TenantAdminLayout({
         loadWorkspaceProfileKeyForViewer(tenantId),
         loadHrOsNavVisibleForViewer(tenantId),
       ]);
-  const tenantBackendAdminRole = pinFloorMode ? null : adminProf?.adminRole ?? null;
+  const tenantBackendAdminRole = pinFloorMode ? null : (adminProf?.adminRole ?? null);
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
 
   let featureAccessRecord =
@@ -162,7 +181,10 @@ export default async function TenantAdminLayout({
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    if (
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    ) {
       effective = await resolveEffectiveBranding({ tenantId });
     }
   } catch {
@@ -172,14 +194,26 @@ export default async function TenantAdminLayout({
   const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
 
   const mainSurface = (
-    <div className={cn(fiOsChromeClasses.tenantMainSurface, "flex min-h-0 min-w-0 flex-1 flex-col")}>
+    <div
+      className={cn(fiOsChromeClasses.tenantMainSurface, "flex min-h-0 min-w-0 flex-1 flex-col")}
+    >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.38]"
         style={fiAdminAmbientBackgroundStyle}
         aria-hidden
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1528]/45 via-transparent to-[#02060d]/85" aria-hidden />
-      <div className={cn(fiOsChromeClasses.tenantMainSurfaceInner, "flex min-h-0 min-w-0 flex-1 flex-col")}>{children}</div>
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1528]/45 via-transparent to-[#02060d]/85"
+        aria-hidden
+      />
+      <div
+        className={cn(
+          fiOsChromeClasses.tenantMainSurfaceInner,
+          "flex min-h-0 min-w-0 flex-1 flex-col"
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 
@@ -205,13 +239,13 @@ export default async function TenantAdminLayout({
         userEmail={userEmail}
         impersonationDisplayName={impersonationDisplayName}
         showFiPlatformSystemLink={pinFloorMode ? false : showFiPlatformSystemLink}
-        staffPinSessionLabel={
-          pinFloorMode ? `${pinSession!.staffName} · PIN session` : null
-        }
+        staffPinSessionLabel={pinFloorMode ? `${pinSession!.staffName} · PIN session` : null}
         staffPinLogoutTenantId={pinFloorMode ? tenantId : null}
       >
         {mainSurface}
-        {!pinFloorMode && !isCommandCentrePresentation ? <GuidedAssistMount tenantId={tenantId} /> : null}
+        {!pinFloorMode && !isCommandCentrePresentation ? (
+          <GuidedAssistMount tenantId={tenantId} />
+        ) : null}
       </FiOsAppShell>
     </div>
   );

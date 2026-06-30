@@ -3,7 +3,12 @@
  * Deterministic metadata-driven pairing; no AI vision yet.
  */
 
-import type { VieCaptureAcceptanceStatus, VieCaptureFraming, VieProtocolSlug, VieSurgeryPhase } from "./vieProtocolTypes";
+import type {
+  VieCaptureAcceptanceStatus,
+  VieCaptureFraming,
+  VieProtocolSlug,
+  VieSurgeryPhase,
+} from "./vieProtocolTypes";
 
 export const VIE_COMPARISON_ENGINE_VERSION = "vie-comparison.v1" as const;
 

@@ -19,7 +19,10 @@ export type RevenuePipelineStage = (typeof REVENUE_PIPELINE_STAGES)[number];
 const CANONICAL = new Set<string>(REVENUE_PIPELINE_STAGES);
 
 const STAGE_PATTERNS: ReadonlyArray<{ re: RegExp; stage: RevenuePipelineStage }> = [
-  { re: /appointment.*sched|consult.*sched|booked.*consult|schedul.*appointment/i, stage: "appointment_scheduled" },
+  {
+    re: /appointment.*sched|consult.*sched|booked.*consult|schedul.*appointment/i,
+    stage: "appointment_scheduled",
+  },
   { re: /consult.*(done|complete)|post[-\s]?consult/i, stage: "consult_completed" },
   { re: /quote.*sent|sent.*quote|proposal|treatment.*plan/i, stage: "quote_sent" },
   { re: /deposit.*pend|await.*deposit|pending.*deposit/i, stage: "deposit_pending" },
@@ -93,7 +96,10 @@ export function parseHubspotDealAmount(raw: string | number | null | undefined):
   }
   const s0 = String(raw).trim();
   if (!s0) return null;
-  const stripped = s0.replace(/aud|nzd|usd|gbp|eur/gi, "").replace(/[$€£,\s]/g, "").trim();
+  const stripped = s0
+    .replace(/aud|nzd|usd|gbp|eur/gi, "")
+    .replace(/[$€£,\s]/g, "")
+    .trim();
   if (!stripped) return null;
   const n = Number.parseFloat(stripped);
   if (!Number.isFinite(n) || n < 0) return null;

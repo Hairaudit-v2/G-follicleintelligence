@@ -10,10 +10,15 @@ import {
 } from "./bookingDisplayContext";
 
 function asMeta(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
-async function loadPersonMetaMap(tenantId: string, personIds: string[]): Promise<Map<string, Record<string, unknown>>> {
+async function loadPersonMetaMap(
+  tenantId: string,
+  personIds: string[]
+): Promise<Map<string, Record<string, unknown>>> {
   const out = new Map<string, Record<string, unknown>>();
   const ids = Array.from(new Set(personIds.map((x) => x.trim()).filter(Boolean)));
   if (!ids.length) return out;
@@ -107,7 +112,7 @@ export async function loadBookingDisplayContextMaps(
     const personId = patientPersonByPatientId.get(patientId);
     patients.set(patientId, {
       ...record,
-      personMeta: personId ? persons.get(personId) ?? null : null,
+      personMeta: personId ? (persons.get(personId) ?? null) : null,
     });
   }
 
@@ -115,7 +120,7 @@ export async function loadBookingDisplayContextMaps(
     const personId = leadPersonByLeadId.get(leadId);
     leads.set(leadId, {
       ...record,
-      personMeta: personId ? persons.get(personId) ?? null : null,
+      personMeta: personId ? (persons.get(personId) ?? null) : null,
     });
   }
 

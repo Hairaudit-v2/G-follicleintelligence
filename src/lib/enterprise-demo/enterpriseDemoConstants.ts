@@ -1,7 +1,6 @@
 export const ENTERPRISE_DEMO_TENANT_SLUG = "ihrg-global";
 
-export const ENTERPRISE_DEMO_TENANT_NAME =
-  "International Hair Restoration Group";
+export const ENTERPRISE_DEMO_TENANT_NAME = "International Hair Restoration Group";
 
 export const ENTERPRISE_DEMO_CODE_NAME = "TITAN";
 

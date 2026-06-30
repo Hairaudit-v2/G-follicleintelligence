@@ -34,8 +34,15 @@ test("resolveDashboardQuickActions: lead modal gated by CRM nav", () => {
 });
 
 test("filterDashboardQuickActionDefinitions: subset before resolve", () => {
-  const subset = filterDashboardQuickActionDefinitions(DASHBOARD_QUICK_ACTION_DEFINITIONS, (d) => d.key === "booking");
-  const items = resolveDashboardQuickActions(base, { showCrmNav: false, showBookingsBoard: false }, subset);
+  const subset = filterDashboardQuickActionDefinitions(
+    DASHBOARD_QUICK_ACTION_DEFINITIONS,
+    (d) => d.key === "booking"
+  );
+  const items = resolveDashboardQuickActions(
+    base,
+    { showCrmNav: false, showBookingsBoard: false },
+    subset
+  );
   assert.equal(items.length, 1);
   assert.equal(items[0]?.key, "booking");
 });

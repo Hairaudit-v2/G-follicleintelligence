@@ -79,7 +79,9 @@ export function defaultReceiptSettings(): FiReceiptSettings {
   };
 }
 
-export function buildDefaultTaxLocalisationDocument(country: FiTaxCountryRegion = "AU"): FiTaxLocalisationDocument {
+export function buildDefaultTaxLocalisationDocument(
+  country: FiTaxCountryRegion = "AU"
+): FiTaxLocalisationDocument {
   const currency = inferDefaultCurrencyForCountry(country);
   const now = new Date().toISOString();
   return {

@@ -6,10 +6,21 @@ import {
   addInternationalTransferProofAction,
   updateInternationalTransferProofAction,
 } from "@/lib/actions/financial-os-international-transfer-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  financialOsActionFeedback,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import type { InternationalTransferApplicationRecord } from "@/src/lib/financialOs/financialInternationalTransfer.server";
 
-const PROOF_TYPES = ["payment_receipt", "bank_confirmation", "wise_receipt", "swift_confirmation", "custom"] as const;
+const PROOF_TYPES = [
+  "payment_receipt",
+  "bank_confirmation",
+  "wise_receipt",
+  "swift_confirmation",
+  "custom",
+] as const;
 
 const PROOF_STATUSES = ["pending", "requested", "received", "verified", "rejected"] as const;
 
@@ -54,11 +65,21 @@ export function FinancialInternationalTransferProofs(props: {
       <h4 className={financialOsClasses.formTitle}>Proof of payment</h4>
       <ul className="space-y-2">
         {(application.proofs ?? []).map((proof) => (
-          <li key={proof.id} className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}>
-            <span className="font-medium text-slate-100">{proof.proof_type.replace(/_/g, " ")}</span>
+          <li
+            key={proof.id}
+            className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}
+          >
+            <span className="font-medium text-slate-100">
+              {proof.proof_type.replace(/_/g, " ")}
+            </span>
             <span className={financialOsClasses.bodyTextXs}>{proof.status}</span>
             {proof.file_url ? (
-              <a href={proof.file_url} target="_blank" rel="noreferrer" className={financialOsClasses.inlineLink}>
+              <a
+                href={proof.file_url}
+                target="_blank"
+                rel="noreferrer"
+                className={financialOsClasses.inlineLink}
+              >
                 View file
               </a>
             ) : null}
@@ -66,7 +87,9 @@ export function FinancialInternationalTransferProofs(props: {
               <select
                 defaultValue={proof.status}
                 disabled={pending}
-                onChange={(e) => updateProofStatus(proof.id, e.target.value as (typeof PROOF_STATUSES)[number])}
+                onChange={(e) =>
+                  updateProofStatus(proof.id, e.target.value as (typeof PROOF_STATUSES)[number])
+                }
                 className={financialOsClasses.inlineSelect}
               >
                 {PROOF_STATUSES.map((s) => (
@@ -78,7 +101,9 @@ export function FinancialInternationalTransferProofs(props: {
             ) : null}
           </li>
         ))}
-        {!application.proofs?.length ? <li className={financialOsClasses.mutedMeta}>No proof documents tracked yet.</li> : null}
+        {!application.proofs?.length ? (
+          <li className={financialOsClasses.mutedMeta}>No proof documents tracked yet.</li>
+        ) : null}
       </ul>
 
       {canMutate ? (
@@ -106,7 +131,12 @@ export function FinancialInternationalTransferProofs(props: {
               placeholder="https://…"
             />
           </label>
-          <button type="button" disabled={pending} onClick={addProof} className={financialOsClasses.primaryButton}>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={addProof}
+            className={financialOsClasses.primaryButton}
+          >
             Add proof
           </button>
         </div>

@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeEmail } from "@/src/lib/fi/foundation/normalize";
 import type { HubspotContactParsedRow } from "./hubspotContactCsvColumns";
-import type { HubspotContactsDryRunReport, HubspotContactRowValidation } from "./validateHubspotContactsImport";
+import type {
+  HubspotContactsDryRunReport,
+  HubspotContactRowValidation,
+} from "./validateHubspotContactsImport";
 
 const HUBSPOT_SOURCE = "hubspot";
 
@@ -16,7 +19,9 @@ export async function extendHubspotDryRunWithDatabase(
 ): Promise<HubspotContactsDryRunReport> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
-  const recordIds = Array.from(new Set(rows.map((r) => r.recordId?.trim()).filter(Boolean))) as string[];
+  const recordIds = Array.from(
+    new Set(rows.map((r) => r.recordId?.trim()).filter(Boolean))
+  ) as string[];
 
   const existingRecordIds = new Set<string>();
   if (recordIds.length) {
@@ -36,7 +41,9 @@ export async function extendHubspotDryRunWithDatabase(
     }
   }
 
-  const emails = Array.from(new Set(rows.map((r) => normalizeEmail(r.email)).filter(Boolean))) as string[];
+  const emails = Array.from(
+    new Set(rows.map((r) => normalizeEmail(r.email)).filter(Boolean))
+  ) as string[];
   const emailToPersonId = new Map<string, string>();
   if (emails.length) {
     const { data: persons, error: pe } = await supabase
@@ -47,7 +54,8 @@ export async function extendHubspotDryRunWithDatabase(
     for (const p of persons ?? []) {
       const row = p as { id: string; metadata: unknown };
       const m = row.metadata as Record<string, unknown> | null;
-      const en = typeof m?.email_normalized === "string" ? m.email_normalized.trim().toLowerCase() : null;
+      const en =
+        typeof m?.email_normalized === "string" ? m.email_normalized.trim().toLowerCase() : null;
       if (en && emails.includes(en)) {
         emailToPersonId.set(en, row.id);
       }

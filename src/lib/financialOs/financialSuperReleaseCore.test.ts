@@ -33,7 +33,10 @@ describe("financialSuperReleaseCore — lifecycle transitions", () => {
   it("marks unresolved applications as requiring surgery pipeline attention", () => {
     const summary = buildSuperReleaseAttentionSummary({
       todayYmd: "2026-06-10",
-      application: baseApp({ application_status: "submitted", submitted_at: "2026-06-09T00:00:00.000Z" }),
+      application: baseApp({
+        application_status: "submitted",
+        submitted_at: "2026-06-09T00:00:00.000Z",
+      }),
     });
     assert.equal(summary.super_release_attention_required, true);
     assert.ok(summary.super_release_attention_labels.includes("Super Release Approval Pending"));
@@ -250,7 +253,10 @@ describe("financialSuperReleaseCore — dashboard aggregation", () => {
   it("counts open applications and attention", () => {
     const counts = aggregateSuperReleaseDashboardCounts(
       [
-        baseApp({ application_status: "documents_pending", updated_at: "2026-06-01T00:00:00.000Z" }),
+        baseApp({
+          application_status: "documents_pending",
+          updated_at: "2026-06-01T00:00:00.000Z",
+        }),
         baseApp({ id: "app-2", application_status: "funds_released" }),
       ],
       "2026-06-10"

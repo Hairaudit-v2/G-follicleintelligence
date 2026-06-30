@@ -27,7 +27,9 @@ export type ConsultationHubLayoutPlan = {
   showIntelligenceSummary: boolean;
 };
 
-export function buildConsultationHubLayoutPlan(hasPathwayCompletionSummary: boolean): ConsultationHubLayoutPlan {
+export function buildConsultationHubLayoutPlan(
+  hasPathwayCompletionSummary: boolean
+): ConsultationHubLayoutPlan {
   if (!hasPathwayCompletionSummary) {
     return {
       hasPathwayCompletionSummary: false,
@@ -44,6 +46,9 @@ export function buildConsultationHubLayoutPlan(hasPathwayCompletionSummary: bool
   };
 }
 
-export function consultationHubSectionIndex(plan: ConsultationHubLayoutPlan, id: ConsultationHubSectionId): number {
+export function consultationHubSectionIndex(
+  plan: ConsultationHubLayoutPlan,
+  id: ConsultationHubSectionId
+): number {
   return plan.orderedSections.indexOf(id);
 }

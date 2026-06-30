@@ -21,13 +21,21 @@ export {
 export { updateCrmLeadDetails, type UpdateCrmLeadDetailsInput } from "./leadDetailsUpdate";
 export { loadCrmLeadsShellPage } from "./leadList";
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
-export { appendCrmActivityEvent, loadCrmActivityTimelineForLead, type AppendCrmActivityEventParams } from "./activity";
+export {
+  appendCrmActivityEvent,
+  loadCrmActivityTimelineForLead,
+  type AppendCrmActivityEventParams,
+} from "./activity";
 export {
   appendCrmLeadStageHistory,
   loadCrmLeadStageHistory,
   type AppendCrmLeadStageHistoryParams,
 } from "./stageHistory";
-export { moveCrmLeadToStage, type MoveCrmLeadToStageParams, type MoveCrmLeadToStageResult } from "./stageMovement";
+export {
+  moveCrmLeadToStage,
+  type MoveCrmLeadToStageParams,
+  type MoveCrmLeadToStageResult,
+} from "./stageMovement";
 export {
   advanceCrmLeadStageIfEarlier,
   type AdvanceCrmLeadStageIfEarlierParams,
@@ -43,7 +51,11 @@ export {
   type CreateCrmTaskParams,
   type UpdateCrmTaskParams,
 } from "./tasks";
-export { createCrmNoteForLead, loadCrmNotesForLead, type CreateCrmNoteForLeadParams } from "./notes";
+export {
+  createCrmNoteForLead,
+  loadCrmNotesForLead,
+  type CreateCrmNoteForLeadParams,
+} from "./notes";
 export {
   archiveCrmLeadNote,
   createCrmLeadNote,
@@ -70,4 +82,8 @@ export {
   type ExecuteCrmLeadConversionParams,
   type ExecuteCrmLeadConversionResult,
 } from "./leadConversion";
-export { createCrmMessagePreview, loadCrmMessagesForLead, type CreateCrmMessagePreviewParams } from "./messages";
+export {
+  createCrmMessagePreview,
+  loadCrmMessagesForLead,
+  type CreateCrmMessagePreviewParams,
+} from "./messages";

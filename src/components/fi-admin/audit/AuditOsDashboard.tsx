@@ -49,7 +49,11 @@ function outcomeStatusLabel(status: "strong" | "building" | "limited"): string {
   return "Limited";
 }
 
-export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiagnosticsExpanded?: boolean }) {
+export function AuditOsDashboard({
+  showDiagnosticsExpanded = false,
+}: {
+  showDiagnosticsExpanded?: boolean;
+}) {
   const params = useParams();
   const tenantId = (params.tenantId as string)?.trim() ?? "";
   const base = `/fi-admin/${tenantId}`;
@@ -87,7 +91,9 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
     return (
       <FiEmptyState
         title="Could not load dashboard"
-        description={data && !data.ok ? (data.error ?? "Unknown error.") : "No response from server."}
+        description={
+          data && !data.ok ? (data.error ?? "Unknown error.") : "No response from server."
+        }
         action={
           <button
             type="button"
@@ -126,12 +132,18 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
-          <h1 id="auditos-dashboard-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+            FI OS
+          </p>
+          <h1
+            id="auditos-dashboard-heading"
+            className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl"
+          >
             Audit Intelligence
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Clinical quality, outcome review, patient evidence, and audit readiness across surgical cases.
+            Clinical quality, outcome review, patient evidence, and audit readiness across surgical
+            cases.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href="/hair-audit/admin" className={auditOsLinkButtonClass}>
@@ -182,7 +194,9 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
               className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
             >
               <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                {card.value}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
             </div>
           ))}
@@ -200,7 +214,8 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
           <div className="flex gap-3 rounded-xl border border-emerald-500/25 bg-emerald-950/20 px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
             <p className="text-sm leading-relaxed text-emerald-50/95">
-              No urgent audit issues detected. Continue capturing consistent evidence to strengthen outcome intelligence.
+              No urgent audit issues detected. Continue capturing consistent evidence to strengthen
+              outcome intelligence.
             </p>
           </div>
         ) : (
@@ -213,13 +228,19 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
                 <div className="flex min-w-0 gap-3">
                   <AlertCircle
                     className={`mt-0.5 h-5 w-5 shrink-0 ${
-                      item.severity === "critical" ? "text-orange-300" : item.severity === "warning" ? "text-amber-200" : "text-sky-300"
+                      item.severity === "critical"
+                        ? "text-orange-300"
+                        : item.severity === "warning"
+                          ? "text-amber-200"
+                          : "text-sky-300"
                     }`}
                     aria-hidden
                   />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{item.detail}</p>
+                    ) : null}
                   </div>
                 </div>
                 {item.href ? (
@@ -274,7 +295,11 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
           className="mb-4"
         />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard label="Complete evidence sets" value={evidence.completeSets} icon={<FileCheck size={18} />} />
+          <StatCard
+            label="Complete evidence sets"
+            value={evidence.completeSets}
+            icon={<FileCheck size={18} />}
+          />
           <StatCard label="Incomplete evidence sets" value={evidence.incompleteSets} />
           <StatCard label="Missing follow-up photos" value={evidence.missingFollowUp} />
           <StatCard label="Ready for auditor review" value={evidence.readyForReview} />
@@ -289,7 +314,9 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
           className="mb-4"
         />
         {recentCases.length === 0 ? (
-          <p className="text-sm text-[#64748B]">No cases in audit review yet. Link surgery cases to begin outcome tracking.</p>
+          <p className="text-sm text-[#64748B]">
+            No cases in audit review yet. Link surgery cases to begin outcome tracking.
+          </p>
         ) : (
           <ul className="space-y-3">
             {recentCases.map((row) => (
@@ -318,7 +345,9 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
                       </div>
                       <div>
                         <dt className="text-[#64748B]">Last updated</dt>
-                        <dd className="mt-0.5 font-medium text-[#CBD5E1]">{formatAuditDateTime(row.updatedAt)}</dd>
+                        <dd className="mt-0.5 font-medium text-[#CBD5E1]">
+                          {formatAuditDateTime(row.updatedAt)}
+                        </dd>
                       </div>
                     </dl>
                   </div>
@@ -355,12 +384,16 @@ export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiag
           </div>
         ) : (
           <p className="text-sm leading-relaxed text-[#64748B]">
-            Quality trend intelligence will appear once more reports and follow-up evidence are completed.
+            Quality trend intelligence will appear once more reports and follow-up evidence are
+            completed.
           </p>
         )}
       </DashboardCard>
 
-      <AuditOsSystemDiagnostics snapshot={snapshot} showDiagnosticsExpanded={showDiagnosticsExpanded} />
+      <AuditOsSystemDiagnostics
+        snapshot={snapshot}
+        showDiagnosticsExpanded={showDiagnosticsExpanded}
+      />
     </div>
   );
 }

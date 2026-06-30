@@ -28,11 +28,20 @@ describe("evaluateConsultationFormCondition", () => {
 
   it("supports equals and isEmpty", () => {
     assert.equal(
-      evaluateConsultationFormCondition({ fieldId: "x", operator: "equals", value: "a" }, { x: "a" }),
+      evaluateConsultationFormCondition(
+        { fieldId: "x", operator: "equals", value: "a" },
+        { x: "a" }
+      ),
       true
     );
-    assert.equal(evaluateConsultationFormCondition({ fieldId: "x", operator: "isEmpty" }, { x: "" }), true);
-    assert.equal(evaluateConsultationFormCondition({ fieldId: "x", operator: "isNotEmpty" }, { x: "z" }), true);
+    assert.equal(
+      evaluateConsultationFormCondition({ fieldId: "x", operator: "isEmpty" }, { x: "" }),
+      true
+    );
+    assert.equal(
+      evaluateConsultationFormCondition({ fieldId: "x", operator: "isNotEmpty" }, { x: "z" }),
+      true
+    );
   });
 
   it("supports in for single-value membership", () => {

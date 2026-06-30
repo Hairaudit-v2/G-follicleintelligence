@@ -27,7 +27,7 @@ function DiagnosticAttentionLink(props: {
         "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition",
         alert
           ? "border-amber-500/25 bg-amber-500/[0.06] hover:border-amber-400/40"
-          : "border-white/[0.08] bg-white/[0.03] hover:border-[#22C1FF]/30",
+          : "border-white/[0.08] bg-white/[0.03] hover:border-[#22C1FF]/30"
       )}
     >
       <div className="min-w-0">
@@ -56,7 +56,7 @@ export function OperationsSystemDiagnostics({
   const leadBookingsToday = countDistinctLeadBookingsOnOperationalDay(
     data.agendaByBucket,
     data.operationalDay.todayYmd,
-    data.operationalDay.calendarTimezone,
+    data.operationalDay.calendarTimezone
   );
   const ac = data.actionCentre;
 
@@ -68,11 +68,13 @@ export function OperationsSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support platform integrity and do not affect day-to-day clinic
-              coordination.
+              For platform operators only. These checks support platform integrity and do not affect
+              day-to-day clinic coordination.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-[#22C1FF]/80">
@@ -89,7 +91,8 @@ export function OperationsSystemDiagnostics({
             className="mb-3"
           />
           <p className="text-xs text-[#94A3B8]">
-            Day: <span className="font-mono text-[#CBD5E1]">{data.operationalDay.todayYmd}</span> · TZ:{" "}
+            Day: <span className="font-mono text-[#CBD5E1]">{data.operationalDay.todayYmd}</span> ·
+            TZ:{" "}
             <span className="font-mono text-[#CBD5E1]">{data.operationalDay.calendarTimezone}</span>
           </p>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -116,11 +119,21 @@ export function OperationsSystemDiagnostics({
         </DashboardCard>
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-          <SectionHeader title="Recorded payment status" description="Internal payment row counts." className="mb-3" />
+          <SectionHeader
+            title="Recorded payment status"
+            description="Internal payment row counts."
+            className="mb-3"
+          />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <StatCard label="Deposits due" value={data.paymentCommercialKpis.depositsDueCount} />
-            <StatCard label="Deposits paid today" value={data.paymentCommercialKpis.depositsPaidTodayCount} />
-            <StatCard label="Overdue payments" value={data.paymentCommercialKpis.overduePaymentsCount} />
+            <StatCard
+              label="Deposits paid today"
+              value={data.paymentCommercialKpis.depositsPaidTodayCount}
+            />
+            <StatCard
+              label="Overdue payments"
+              value={data.paymentCommercialKpis.overduePaymentsCount}
+            />
           </div>
         </DashboardCard>
 
@@ -190,7 +203,10 @@ export function OperationsSystemDiagnostics({
             />
           </div>
           <p className="mt-3">
-            <Link href={`${base}/financial/dashboard`} className="text-sm font-semibold text-[#22C1FF] hover:underline">
+            <Link
+              href={`${base}/financial/dashboard`}
+              className="text-sm font-semibold text-[#22C1FF] hover:underline"
+            >
               Open FinancialOS →
             </Link>
             {" · "}

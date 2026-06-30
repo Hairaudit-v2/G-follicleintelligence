@@ -1,5 +1,8 @@
 import type { FiInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, normalizeInvoiceStatusValue } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  normalizeInvoiceStatusValue,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 function collectibleBaseStatus(status: FiInvoiceStatus): FiInvoiceStatus {
   const normalized = normalizeInvoiceStatusValue(status);
@@ -43,10 +46,16 @@ export function invoiceLineTotalCents(amountCents: number, taxCents: number): nu
   return Math.max(0, Math.floor(amountCents)) + Math.max(0, Math.floor(taxCents));
 }
 
-export function invoiceAmountPaidAfterAllocation(currentPaidCents: number, paymentCents: number): number {
+export function invoiceAmountPaidAfterAllocation(
+  currentPaidCents: number,
+  paymentCents: number
+): number {
   return Math.max(0, Math.floor(currentPaidCents)) + Math.max(0, Math.floor(paymentCents));
 }
 
-export function deriveCaseDepositReadinessBlock(ruleBlocksSurgeryWhenUnpaid: boolean, hasUnpaidOpenDeposit: boolean): boolean {
+export function deriveCaseDepositReadinessBlock(
+  ruleBlocksSurgeryWhenUnpaid: boolean,
+  hasUnpaidOpenDeposit: boolean
+): boolean {
   return Boolean(ruleBlocksSurgeryWhenUnpaid && hasUnpaidOpenDeposit);
 }

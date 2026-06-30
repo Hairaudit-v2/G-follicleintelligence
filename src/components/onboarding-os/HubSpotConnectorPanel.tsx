@@ -81,9 +81,7 @@ function ContactReviewCard({
           <p className="text-xs text-slate-400">{contact.phone ?? "No phone"}</p>
         </div>
         <div className="flex flex-wrap gap-1">
-          {contact.duplicateRisk ? (
-            <StatusBadge label="Duplicate risk" tone="warning" />
-          ) : null}
+          {contact.duplicateRisk ? <StatusBadge label="Duplicate risk" tone="warning" /> : null}
           <StatusBadge label={badge.label} tone={badge.tone} />
         </div>
       </div>
@@ -165,9 +163,7 @@ function DealReviewCard({
           <p className="text-xs text-slate-400">Stage: {deal.dealStage ?? "Unknown"}</p>
         </div>
         <div className="flex flex-wrap gap-1">
-          {deal.duplicateRisk ? (
-            <StatusBadge label="Duplicate risk" tone="warning" />
-          ) : null}
+          {deal.duplicateRisk ? <StatusBadge label="Duplicate risk" tone="warning" /> : null}
           <StatusBadge label={badge.label} tone={badge.tone} />
         </div>
       </div>
@@ -233,7 +229,9 @@ export function HubSpotConnectorPanel({
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [snapshot, setSnapshot] = useState<HubspotConnectorSnapshot | null>(initialSnapshot ?? null);
+  const [snapshot, setSnapshot] = useState<HubspotConnectorSnapshot | null>(
+    initialSnapshot ?? null
+  );
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [queueFilter, setQueueFilter] = useState<"staged" | "all">("staged");
   const [activeTab, setActiveTab] = useState<"contacts" | "deals">("contacts");
@@ -294,7 +292,10 @@ export function HubSpotConnectorPanel({
         return;
       }
       refreshSnapshot(res.snapshot);
-      setMessage({ kind: "ok", text: "Contact approved — remains in staging only; no FI lead created." });
+      setMessage({
+        kind: "ok",
+        text: "Contact approved — remains in staging only; no FI lead created.",
+      });
       router.refresh();
     });
   }
@@ -322,7 +323,10 @@ export function HubSpotConnectorPanel({
         return;
       }
       refreshSnapshot(res.snapshot);
-      setMessage({ kind: "ok", text: "Deal approved — remains in staging only; no FI opportunity created." });
+      setMessage({
+        kind: "ok",
+        text: "Deal approved — remains in staging only; no FI opportunity created.",
+      });
       router.refresh();
     });
   }
@@ -347,17 +351,20 @@ export function HubSpotConnectorPanel({
         <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F4</p>
         <h2 className="text-lg font-semibold text-slate-50">{integrationLabel} — Read-only sync</h2>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
-          Pull HubSpot contacts and deals into staging for human review. Read-only access — never writes back to HubSpot
-          and never creates FI leads automatically.
+          Pull HubSpot contacts and deals into staging for human review. Read-only access — never
+          writes back to HubSpot and never creates FI leads automatically.
         </p>
       </div>
 
       <div className="rounded border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-200/90">
-        Staging only — all records require manual approval. No automatic lead creation or duplicate merging.
+        Staging only — all records require manual approval. No automatic lead creation or duplicate
+        merging.
       </div>
 
       {message ? (
-        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>{message.text}</p>
+        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>
+          {message.text}
+        </p>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -369,21 +376,29 @@ export function HubSpotConnectorPanel({
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Contacts pulled</p>
-          <p className="mt-1 text-sm font-medium text-slate-100">{latestRun?.contactsDiscovered ?? 0}</p>
+          <p className="mt-1 text-sm font-medium text-slate-100">
+            {latestRun?.contactsDiscovered ?? 0}
+          </p>
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Deals pulled</p>
-          <p className="mt-1 text-sm font-medium text-slate-100">{latestRun?.dealsDiscovered ?? 0}</p>
+          <p className="mt-1 text-sm font-medium text-slate-100">
+            {latestRun?.dealsDiscovered ?? 0}
+          </p>
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Sync health</p>
-          <p className={`mt-1 text-sm font-medium ${HEALTH_BAND_CLASSES[health?.healthBand ?? "unknown"]}`}>
+          <p
+            className={`mt-1 text-sm font-medium ${HEALTH_BAND_CLASSES[health?.healthBand ?? "unknown"]}`}
+          >
             {health?.healthScore ?? 0}% · {health?.healthBand ?? "unknown"}
           </p>
         </div>
         <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
           <p className="text-xs text-slate-500">Duplicate risks</p>
-          <p className="mt-1 text-sm font-medium text-amber-300">{health?.duplicateRiskCount ?? 0}</p>
+          <p className="mt-1 text-sm font-medium text-amber-300">
+            {health?.duplicateRiskCount ?? 0}
+          </p>
         </div>
       </div>
 

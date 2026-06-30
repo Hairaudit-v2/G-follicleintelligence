@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { bookingAgendaBucket, computeOperationalAgendaUtcRange } from "./tenantOperationalDashboardHelpers";
+import {
+  bookingAgendaBucket,
+  computeOperationalAgendaUtcRange,
+} from "./tenantOperationalDashboardHelpers";
 
 describe("tenant operational dashboard — agenda helpers", () => {
   it("maps booking types to agenda buckets", () => {

@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { FoundationSearchFilter, FoundationSearchGroupedResult, FoundationSearchHit } from "@/src/lib/fi/foundation/search";
+import type {
+  FoundationSearchFilter,
+  FoundationSearchGroupedResult,
+  FoundationSearchHit,
+} from "@/src/lib/fi/foundation/search";
 
 const FILTERS: { value: FoundationSearchFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -36,7 +40,9 @@ function HitRow({ hit }: { hit: FoundationSearchHit }) {
             </div>
           )}
         </div>
-        <span className="rounded bg-white/[0.06] px-2 py-0.5 text-xs capitalize text-slate-300">{hit.type}</span>
+        <span className="rounded bg-white/[0.06] px-2 py-0.5 text-xs capitalize text-slate-300">
+          {hit.type}
+        </span>
       </div>
       {hit.warning && <p className="mt-2 text-xs text-amber-300">{hit.warning}</p>}
       {!isCard && (
@@ -115,13 +121,20 @@ export function FoundationSearchDirectory({
   }, [result.tenant_id, result.query, result.filter, qFromUrl]);
 
   const total =
-    result.patients.length + result.cases.length + result.clinics.length + result.organisations.length;
+    result.patients.length +
+    result.cases.length +
+    result.clinics.length +
+    result.organisations.length;
   const noMatches = total === 0 && Boolean(result.query?.trim());
   const noData = total === 0 && !result.query?.trim();
 
   return (
     <div className="space-y-8 text-sm">
-      <form action={`/fi-admin/${tenantId}/directory`} method="get" className="flex flex-wrap items-end gap-3">
+      <form
+        action={`/fi-admin/${tenantId}/directory`}
+        method="get"
+        className="flex flex-wrap items-end gap-3"
+      >
         <label className="flex min-w-[200px] flex-1 flex-col text-xs text-slate-400">
           Search
           <input
@@ -161,7 +174,9 @@ export function FoundationSearchDirectory({
             key={f.value}
             href={buildDirectoryHref(tenantId, qFromUrl, f.value)}
             className={`rounded border px-2 py-1 no-underline ${
-              result.filter === f.value ? "border-gray-900 bg-gray-900 text-white" : "border-white/[0.08] text-slate-300 hover:bg-white/[0.03]"
+              result.filter === f.value
+                ? "border-gray-900 bg-gray-900 text-white"
+                : "border-white/[0.08] text-slate-300 hover:bg-white/[0.03]"
             }`}
           >
             {f.label}
@@ -172,17 +187,20 @@ export function FoundationSearchDirectory({
       {noMatches ? (
         <DashboardCard className="border-dashed border-white/[0.12] p-6 text-center">
           <p className="text-base leading-relaxed text-[#94A3B8]">
-            No matches for this query in the selected scope. Try another term, clear the search, or widen the scope to{" "}
-            <span className="text-[#E2E8F0]">All</span>.
+            No matches for this query in the selected scope. Try another term, clear the search, or
+            widen the scope to <span className="text-[#E2E8F0]">All</span>.
           </p>
         </DashboardCard>
       ) : noData ? (
         <DashboardCard className="border-dashed border-[#22C1FF]/20 bg-[#0F1629]/90 p-6 sm:p-8">
-          <p className="text-center text-lg font-semibold text-[#F8FAFC] sm:text-xl">No foundation records yet</p>
+          <p className="text-center text-lg font-semibold text-[#F8FAFC] sm:text-xl">
+            No foundation records yet
+          </p>
           <p className="mx-auto mt-3 max-w-xl text-center text-base leading-relaxed text-[#94A3B8]">
-            Your directory will list patients, cases, clinics, and organisations as they are created. Start by adding an{" "}
-            <strong className="text-[#E2E8F0]">organisation</strong> (your business or network), then a{" "}
-            <strong className="text-[#E2E8F0]">clinic</strong> (each site or brand that sees patients).
+            Your directory will list patients, cases, clinics, and organisations as they are
+            created. Start by adding an <strong className="text-[#E2E8F0]">organisation</strong>{" "}
+            (your business or network), then a <strong className="text-[#E2E8F0]">clinic</strong>{" "}
+            (each site or brand that sees patients).
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
             <a
@@ -199,33 +217,40 @@ export function FoundationSearchDirectory({
             </a>
           </div>
           <p className="mt-4 text-center text-sm text-[#64748B]">
-            Forms live in <a className="text-[#22C1FF] underline decoration-[#22C1FF]/40 underline-offset-2" href="#foundation-tools">Foundation records</a> below — these links scroll there.
+            Forms live in{" "}
+            <a
+              className="text-[#22C1FF] underline decoration-[#22C1FF]/40 underline-offset-2"
+              href="#foundation-tools"
+            >
+              Foundation records
+            </a>{" "}
+            below — these links scroll there.
           </p>
         </DashboardCard>
       ) : null}
 
       {total > 0 && (
         <>
-      {(result.filter === "all" || result.filter === "patients") && (
-        <Group
-          title="Patients"
-          hits={result.patients}
-          empty="No patient rows in this scope."
-        />
-      )}
-      {(result.filter === "all" || result.filter === "cases") && (
-        <Group title="Clinical patients" hits={result.cases} empty="No clinical patients in this scope." />
-      )}
-      {(result.filter === "all" || result.filter === "clinics") && (
-        <Group title="Clinics" hits={result.clinics} empty="No clinics in this scope." />
-      )}
-      {(result.filter === "all" || result.filter === "organisations") && (
-        <Group
-          title="Organisations"
-          hits={result.organisations}
-          empty="No organisations in this scope."
-        />
-      )}
+          {(result.filter === "all" || result.filter === "patients") && (
+            <Group title="Patients" hits={result.patients} empty="No patient rows in this scope." />
+          )}
+          {(result.filter === "all" || result.filter === "cases") && (
+            <Group
+              title="Clinical patients"
+              hits={result.cases}
+              empty="No clinical patients in this scope."
+            />
+          )}
+          {(result.filter === "all" || result.filter === "clinics") && (
+            <Group title="Clinics" hits={result.clinics} empty="No clinics in this scope." />
+          )}
+          {(result.filter === "all" || result.filter === "organisations") && (
+            <Group
+              title="Organisations"
+              hits={result.organisations}
+              empty="No organisations in this scope."
+            />
+          )}
         </>
       )}
     </div>

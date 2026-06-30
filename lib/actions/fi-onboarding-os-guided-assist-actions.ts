@@ -48,7 +48,10 @@ export async function setGuidedAssistEnabledAction(
     return { ok: true, assistEnabled: result.assistEnabled };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to update assist setting." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update assist setting.",
+    };
   }
 }
 
@@ -161,7 +164,10 @@ export async function setGuidedAssistTenantDefaultsAction(
     return { ok: true };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to update tenant defaults." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update tenant defaults.",
+    };
   }
 }
 

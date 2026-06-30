@@ -21,7 +21,11 @@ export type BusinessTimeSlotGridProps = {
 /**
  * Visible business-day slot grid (30-min rows). Lines and labels use wall-clock minutes only.
  */
-export function BusinessTimeSlotGrid({ bodyHeightPx, className, gridHours }: BusinessTimeSlotGridProps) {
+export function BusinessTimeSlotGrid({
+  bodyHeightPx,
+  className,
+  gridHours,
+}: BusinessTimeSlotGridProps) {
   const { dayStartHourUtc, dayEndHourUtc } = gridHours;
   const slots = useMemo(
     () => generateOperationalCalendarTimeSlots({ dayStartHourUtc, dayEndHourUtc }),
@@ -32,7 +36,10 @@ export function BusinessTimeSlotGrid({ bodyHeightPx, className, gridHours }: Bus
 
   return (
     <div
-      className={cn("pointer-events-none absolute inset-0 bg-[var(--fi-cal-ws-grid-bg,#0f172a)]", className)}
+      className={cn(
+        "pointer-events-none absolute inset-0 bg-[var(--fi-cal-ws-grid-bg,#0f172a)]",
+        className
+      )}
       style={{ minHeight: height }}
       aria-hidden
     >
@@ -89,17 +96,19 @@ export function BusinessTimeGutter({
         aria-hidden
       />
       <div className="relative" style={{ height }}>
-        {slots.filter((_, i) => i % 2 === 0).map((slot, hourIndex) => (
-          <div
-            key={`gutter-${gridHours.dayStartHourUtc}-${hourIndex}`}
-            className="absolute left-0 right-0 flex items-start justify-end pr-2 pt-1"
-            style={{ top: hourIndex * 2 * slotH, height: slotH * 2 }}
-          >
-            <span className="text-[11px] font-medium tabular-nums text-[var(--fi-cal-ws-time-label,#64748b)]">
-              {slot.start}
-            </span>
-          </div>
-        ))}
+        {slots
+          .filter((_, i) => i % 2 === 0)
+          .map((slot, hourIndex) => (
+            <div
+              key={`gutter-${gridHours.dayStartHourUtc}-${hourIndex}`}
+              className="absolute left-0 right-0 flex items-start justify-end pr-2 pt-1"
+              style={{ top: hourIndex * 2 * slotH, height: slotH * 2 }}
+            >
+              <span className="text-[11px] font-medium tabular-nums text-[var(--fi-cal-ws-time-label,#64748b)]">
+                {slot.start}
+              </span>
+            </div>
+          ))}
       </div>
     </div>
   );

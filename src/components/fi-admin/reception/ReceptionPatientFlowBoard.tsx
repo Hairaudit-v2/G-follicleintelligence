@@ -37,7 +37,7 @@ export function ReceptionPatientFlowBoard(props: {
         minute: "2-digit",
         timeZone: calendarTimezone.trim() || undefined,
       }),
-    [calendarTimezone],
+    [calendarTimezone]
   );
 
   async function run(id: string, fn: () => Promise<{ ok: boolean; error?: string }>) {
@@ -63,7 +63,10 @@ export function ReceptionPatientFlowBoard(props: {
     return (
       <p className="rounded-xl border border-white/[0.08] bg-[#0c1220]/60 px-4 py-4 text-sm text-[#94A3B8]">
         No active patient flow for this operational day. Confirm visits are scheduled in{" "}
-        <Link className="font-medium text-[#22C1FF]/90 underline-offset-2 hover:underline" href={`${base}/calendar`}>
+        <Link
+          className="font-medium text-[#22C1FF]/90 underline-offset-2 hover:underline"
+          href={`${base}/calendar`}
+        >
           Calendar
         </Link>
         .
@@ -80,10 +83,15 @@ export function ReceptionPatientFlowBoard(props: {
           aria-labelledby={`reception-lane-${lane.id}`}
         >
           <header className="border-b border-white/[0.06] px-3 py-2.5">
-            <h3 id={`reception-lane-${lane.id}`} className="text-xs font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
+            <h3
+              id={`reception-lane-${lane.id}`}
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-[#94A3B8]"
+            >
               {lane.label}
             </h3>
-            <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#F8FAFC]">{lanes[lane.id].length}</p>
+            <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#F8FAFC]">
+              {lanes[lane.id].length}
+            </p>
           </header>
           <ul className="flex max-h-[70vh] min-h-[10rem] flex-col gap-2 overflow-y-auto p-2">
             {lanes[lane.id].map((item) => (
@@ -126,7 +134,9 @@ function ReceptionFlowPatientCard(props: {
     <article
       className={cn(
         "rounded-lg border px-2.5 py-2 text-left shadow-sm transition",
-        terminal ? "border-white/[0.05] bg-white/[0.02]" : "border-cyan-500/15 bg-[#141c33]/90 hover:border-cyan-500/30",
+        terminal
+          ? "border-white/[0.05] bg-white/[0.02]"
+          : "border-cyan-500/15 bg-[#141c33]/90 hover:border-cyan-500/30"
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -152,10 +162,16 @@ function ReceptionFlowPatientCard(props: {
           <ActionChip
             label="Check in"
             disabled={busy}
-            onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "mark_arrived" }))}
+            onPress={() =>
+              onAction(() =>
+                receptionBoardFlowAction(tenantId, card.id, { action: "mark_arrived" })
+              )
+            }
           />
         ) : null}
-        {!terminal && canFlo ? renderFlowActions(card, tenantId, busy, canCancel, canFlo, onAction) : null}
+        {!terminal && canFlo
+          ? renderFlowActions(card, tenantId, busy, canCancel, canFlo, onAction)
+          : null}
       </div>
 
       <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-[0.65rem] font-semibold">
@@ -181,7 +197,7 @@ function renderFlowActions(
   busy: boolean,
   canCancel: boolean,
   canFlo: boolean,
-  onAction: (fn: () => Promise<{ ok: boolean; error?: string }>) => void,
+  onAction: (fn: () => Promise<{ ok: boolean; error?: string }>) => void
 ): ReactNode[] {
   const col = card.receptionColumn;
   const chips: ReactNode[] = [];
@@ -192,14 +208,20 @@ function renderFlowActions(
         key="consult"
         label="Start consult"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_consultation" }))}
+        onPress={() =>
+          onAction(() =>
+            receptionBoardFlowAction(tenantId, card.id, { action: "start_consultation" })
+          )
+        }
       />,
       <ActionChip
         key="treatment"
         label="Start treatment"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))}
-      />,
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))
+        }
+      />
     );
   }
 
@@ -209,14 +231,20 @@ function renderFlowActions(
         key="consult"
         label="Start consult"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_consultation" }))}
+        onPress={() =>
+          onAction(() =>
+            receptionBoardFlowAction(tenantId, card.id, { action: "start_consultation" })
+          )
+        }
       />,
       <ActionChip
         key="treatment"
         label="Start treatment"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))}
-      />,
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))
+        }
+      />
     );
   }
 
@@ -226,48 +254,76 @@ function renderFlowActions(
         key="treatment"
         label="Start treatment"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))}
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))
+        }
       />,
       <ActionChip
         key="handoff"
         label="Mark ready"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "complete" }))}
-      />,
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "complete" }))
+        }
+      />
     );
   }
 
-  if ((col === "arrived" || col === "in_consultation" || col === "in_treatment" || col === "expected") && canFlo) {
+  if (
+    (col === "arrived" ||
+      col === "in_consultation" ||
+      col === "in_treatment" ||
+      col === "expected") &&
+    canFlo
+  ) {
     chips.push(
       <ActionChip
         key="complete"
         label="Complete"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "complete" }))}
-      />,
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "complete" }))
+        }
+      />
     );
   }
 
-  if ((col === "expected" || col === "arrived" || col === "in_consultation" || col === "in_treatment") && canFlo) {
+  if (
+    (col === "expected" ||
+      col === "arrived" ||
+      col === "in_consultation" ||
+      col === "in_treatment") &&
+    canFlo
+  ) {
     chips.push(
       <ActionChip
         key="no_show"
         label="No show"
         disabled={busy}
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "mark_no_show" }))}
-      />,
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "mark_no_show" }))
+        }
+      />
     );
   }
 
-  if ((col === "expected" || col === "arrived" || col === "in_consultation" || col === "in_treatment") && canCancel) {
+  if (
+    (col === "expected" ||
+      col === "arrived" ||
+      col === "in_consultation" ||
+      col === "in_treatment") &&
+    canCancel
+  ) {
     chips.push(
       <ActionChip
         key="cancel"
         label="Cancel"
         disabled={busy}
         tone="danger"
-        onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "cancel" }))}
-      />,
+        onPress={() =>
+          onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "cancel" }))
+        }
+      />
     );
   }
 
@@ -290,7 +346,7 @@ function ActionChip(props: {
         "rounded-md px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-wide transition disabled:opacity-40",
         tone === "danger"
           ? "border border-red-500/30 bg-red-500/10 text-red-100/95 hover:bg-red-500/15"
-          : "border border-white/[0.08] bg-white/[0.04] text-slate-200 hover:border-cyan-500/25 hover:bg-cyan-500/10",
+          : "border border-white/[0.08] bg-white/[0.04] text-slate-200 hover:border-cyan-500/25 hover:bg-cyan-500/10"
       )}
     >
       {label}

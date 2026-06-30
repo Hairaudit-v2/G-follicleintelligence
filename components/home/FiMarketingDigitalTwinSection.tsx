@@ -18,7 +18,9 @@ function DigitalTwinJourneyFlow({ stages }: { stages: readonly string[] }) {
               <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/55">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 text-base font-medium leading-snug text-foreground sm:text-lg">{stage}</p>
+              <p className="mt-2 text-base font-medium leading-snug text-foreground sm:text-lg">
+                {stage}
+              </p>
             </GlassCard>
             {index < stages.length - 1 ? (
               <span className="py-3 text-xl font-light text-amber-400/55 sm:py-4" aria-hidden>

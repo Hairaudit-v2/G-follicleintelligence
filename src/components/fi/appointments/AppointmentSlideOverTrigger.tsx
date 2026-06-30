@@ -15,7 +15,12 @@ type Props = {
  * Button-style trigger that opens the appointment slide-over when a provider is mounted.
  * Use inside {@link AppointmentSlideOverProvider}, or set `requireProvider` to surface a clear error during development.
  */
-export function AppointmentSlideOverTrigger({ appointmentId, children, className, requireProvider }: Props) {
+export function AppointmentSlideOverTrigger({
+  appointmentId,
+  children,
+  className,
+  requireProvider,
+}: Props) {
   const slide = useAppointmentSlideOverOptional();
   if (!slide) {
     if (requireProvider) {
@@ -24,7 +29,11 @@ export function AppointmentSlideOverTrigger({ appointmentId, children, className
     return <span className={className}>{children}</span>;
   }
   return (
-    <button type="button" className={className} onClick={() => slide.openAppointment(appointmentId)}>
+    <button
+      type="button"
+      className={className}
+      onClick={() => slide.openAppointment(appointmentId)}
+    >
       {children}
     </button>
   );

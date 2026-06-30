@@ -34,14 +34,17 @@ export const RECEPTION_OS_SEVERITY_SURFACE: Record<
   },
 };
 
-export function ReceptionOsSeverityBadge(props: { severity: ReceptionOsSeverity; className?: string }) {
+export function ReceptionOsSeverityBadge(props: {
+  severity: ReceptionOsSeverity;
+  className?: string;
+}) {
   const styles = RECEPTION_OS_SEVERITY_SURFACE[props.severity];
   return (
     <span
       className={cn(
         "rounded px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
         styles.badge,
-        props.className,
+        props.className
       )}
     >
       {RECEPTION_OS_SEVERITY_LABELS[props.severity]}

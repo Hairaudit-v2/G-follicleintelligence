@@ -41,7 +41,9 @@ export function PatientTwinImagingCard({
         </Link>
       </div>
       {axes.length === 0 ? (
-        <p className="mt-3 text-sm text-[#94A3B8]">No active patient images yet — upload from ImagingOS or the patient profile.</p>
+        <p className="mt-3 text-sm text-[#94A3B8]">
+          No active patient images yet — upload from ImagingOS or the patient profile.
+        </p>
       ) : (
         <ul className="mt-4 space-y-2">
           {axes.map(([axis, count]) => (
@@ -60,19 +62,33 @@ export function PatientTwinImagingCard({
 
       {imaging.gallery.items.length > 0 ? (
         <div className="mt-6 border-t border-white/10 pt-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Most recent</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">
+            Most recent
+          </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {imaging.gallery.items.slice(0, 8).map((img) => (
-              <li key={img.id} className="h-16 w-16 overflow-hidden rounded-md ring-1 ring-white/10">
+              <li
+                key={img.id}
+                className="h-16 w-16 overflow-hidden rounded-md ring-1 ring-white/10"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                <img
+                  src={img.thumbnail_url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </li>
             ))}
           </ul>
         </div>
       ) : null}
 
-      <PatientTwinImagingGalleryClient tenantId={tenantId} patientId={patientId} uiSections={imaging.gallery.ui_sections} />
+      <PatientTwinImagingGalleryClient
+        tenantId={tenantId}
+        patientId={patientId}
+        uiSections={imaging.gallery.ui_sections}
+      />
     </FiSection>
   );
 }

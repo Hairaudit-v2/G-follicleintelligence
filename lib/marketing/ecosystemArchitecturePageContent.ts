@@ -10,8 +10,7 @@ export const ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT = {
     headline: "The operating system behind modern hair restoration medicine",
     subheadline:
       "Follicle Intelligence connects acquisition, consultation, imaging, surgery, audit, workforce, training, finance, and analytics into one clinical intelligence infrastructure layer.",
-    body:
-      "Follicle Intelligence is not a CRM, booking tool, or reporting dashboard. It is a connected infrastructure layer designed to help clinics acquire patients, deliver measurable clinical quality, train teams, manage operations, and improve outcomes over time.",
+    body: "Follicle Intelligence is not a CRM, booking tool, or reporting dashboard. It is a connected infrastructure layer designed to help clinics acquire patients, deliver measurable clinical quality, train teams, manage operations, and improve outcomes over time.",
     primaryCta: { label: "Explore Platform Progress", href: "/platform/progress" },
     secondaryCta: { label: "View Modules", href: "#module-architecture" },
   },
@@ -101,8 +100,7 @@ export const ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT = {
     id: "ecosystem-final-cta",
     eyebrow: "Platform progress",
     headline: "One infrastructure layer. Thirteen connected systems.",
-    body:
-      "Follicle Intelligence is being built as a living healthcare operating system for clinics, educators, auditors, and industry leaders who want to raise the standard of hair restoration globally.",
+    body: "Follicle Intelligence is being built as a living healthcare operating system for clinics, educators, auditors, and industry leaders who want to raise the standard of hair restoration globally.",
     cta: { label: "View live platform progress", href: "/platform/progress" },
   },
 } as const;

@@ -55,7 +55,13 @@ function ReadinessPrimaryActions({ base }: { base: string }) {
   );
 }
 
-function UpcomingProcedureCard({ tenantId, item }: { tenantId: string; item: ReturnType<typeof buildUpcomingProcedureReadinessList>[number] }) {
+function UpcomingProcedureCard({
+  tenantId,
+  item,
+}: {
+  tenantId: string;
+  item: ReturnType<typeof buildUpcomingProcedureReadinessList>[number];
+}) {
   const { card } = item;
   const base = `/fi-admin/${tenantId}`;
   return (
@@ -75,7 +81,7 @@ function UpcomingProcedureCard({ tenantId, item }: { tenantId: string; item: Ret
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
                 : card.primaryColumn === "high_risk"
                   ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
-                  : "border-amber-500/25 bg-amber-500/10 text-amber-100",
+                  : "border-amber-500/25 bg-amber-500/10 text-amber-100"
             )}
           >
             {item.readinessLabel}
@@ -126,7 +132,13 @@ function UpcomingProcedureCard({ tenantId, item }: { tenantId: string; item: Ret
   );
 }
 
-export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; data: SurgeryReadinessBoardPayload }) {
+export function SurgeryReadinessBoard({
+  tenantId,
+  data,
+}: {
+  tenantId: string;
+  data: SurgeryReadinessBoardPayload;
+}) {
   const base = `/fi-admin/${tenantId}`;
   const { window } = data;
   const [filter, setFilter] = useState<SurgeryReadinessManagerFilter>("all");
@@ -140,7 +152,7 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
     const list = buildUpcomingProcedureReadinessList(data);
     if (filter === "all") return list;
     return list.filter((item) =>
-      cardMatchesManagerFilter(item.card.issues, item.card.primaryColumn, filter),
+      cardMatchesManagerFilter(item.card.issues, item.card.primaryColumn, filter)
     );
   }, [data, filter]);
 
@@ -152,10 +164,15 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS · Surgery</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Surgery Readiness</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+            FI OS · Surgery
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            Surgery Readiness
+          </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Upcoming procedure preparation, blockers, clearance, and patient readiness before surgery day.
+            Upcoming procedure preparation, blockers, clearance, and patient readiness before
+            surgery day.
           </p>
           <p className="mt-2 text-sm text-[#64748B]">
             Next 14 days · {window.todayYmd} → {window.windowEndYmd}
@@ -164,7 +181,11 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-snapshot-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="readiness-snapshot-heading"
+      >
         <SectionHeader
           id="readiness-snapshot-heading"
           kicker="Upcoming"
@@ -177,7 +198,9 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
             const inner = (
               <>
                 <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {card.value}
+                </p>
                 <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               </>
             );
@@ -196,7 +219,10 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
               );
             }
             return (
-              <div key={card.id} className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4">
+              <div
+                key={card.id}
+                className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
+              >
                 {inner}
               </div>
             );
@@ -204,7 +230,11 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-priorities-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="readiness-priorities-heading"
+      >
         <SectionHeader
           id="readiness-priorities-heading"
           kicker="Clearance"
@@ -215,7 +245,9 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
         {priorityItems.length === 0 ? (
           <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
-            <p className="text-sm leading-relaxed text-[#CBD5E1]">All upcoming procedures are cleared for preparation.</p>
+            <p className="text-sm leading-relaxed text-[#CBD5E1]">
+              All upcoming procedures are cleared for preparation.
+            </p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -227,7 +259,9 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                   <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                 </Link>
@@ -237,7 +271,11 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
         )}
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-upcoming-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="readiness-upcoming-heading"
+      >
         <SectionHeader
           id="readiness-upcoming-heading"
           kicker="Board"
@@ -255,7 +293,7 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
                 "rounded-lg border px-3 py-1.5 text-xs font-semibold transition",
                 filter === c.id
                   ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-100"
-                  : "border-white/[0.08] bg-white/[0.04] text-slate-400 hover:border-white/15 hover:text-slate-200",
+                  : "border-white/[0.08] bg-white/[0.04] text-slate-400 hover:border-white/15 hover:text-slate-200"
               )}
             >
               {c.label}
@@ -263,7 +301,9 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
           ))}
         </div>
         {upcomingList.length === 0 ? (
-          <p className="text-sm text-[#64748B]">No procedures match this filter in the upcoming window.</p>
+          <p className="text-sm text-[#64748B]">
+            No procedures match this filter in the upcoming window.
+          </p>
         ) : (
           <ul className="space-y-3">
             {upcomingList.map((item) => (
@@ -275,7 +315,11 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
         )}
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-checklist-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="readiness-checklist-heading"
+      >
         <SectionHeader
           id="readiness-checklist-heading"
           kicker="Summary"
@@ -291,10 +335,12 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
                 "rounded-xl border px-3 py-3",
                 g.blockedCount > 0
                   ? "border-amber-500/25 bg-amber-500/[0.06]"
-                  : "border-white/[0.08] bg-[#0c1220]/75",
+                  : "border-white/[0.08] bg-[#0c1220]/75"
               )}
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">{g.label}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+                {g.label}
+              </p>
               <p className="mt-2 text-lg font-semibold tabular-nums text-[#F8FAFC]">
                 {g.blockedCount > 0 ? `${g.blockedCount} blocked` : "Clear"}
               </p>

@@ -5,7 +5,10 @@ import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadConsultationConversionBoardPayload } from "@/src/lib/consultations/consultationConversionBoardLoader.server";
 import type { ConsultationConversionBoardColumnId } from "@/src/lib/consultations/consultationConversionBoardModel";
-import { loadTenantOperationalDashboard, type ReceptionBoardCard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import {
+  loadTenantOperationalDashboard,
+  type ReceptionBoardCard,
+} from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { loadSurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import type { SurgeryReadinessBoardCard } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import {
@@ -65,7 +68,11 @@ const COMMUNICATION_LIMIT = 40;
 const DEPOSIT_LIMIT = 50;
 const NEW_LEAD_LIMIT = 40;
 
-async function loadBoardSectionSafe<T>(scope: string, loader: () => Promise<T>, fallback: T): Promise<T> {
+async function loadBoardSectionSafe<T>(
+  scope: string,
+  loader: () => Promise<T>,
+  fallback: T
+): Promise<T> {
   try {
     return await loader();
   } catch (error) {
@@ -102,7 +109,7 @@ function mapReceptionCardToPatient(
   card: ReceptionBoardCard,
   base: string,
   tz: string,
-  caseId: string | null,
+  caseId: string | null
 ): ReceptionOsTodaysPatient {
   return todaysPatientSchema.parse({
     id: card.id,
@@ -121,7 +128,10 @@ function mapReceptionCardToPatient(
   });
 }
 
-async function loadBookingCaseIds(tenantId: string, bookingIds: string[]): Promise<Map<string, string>> {
+async function loadBookingCaseIds(
+  tenantId: string,
+  bookingIds: string[]
+): Promise<Map<string, string>> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const out = new Map<string, string>();
   if (!bookingIds.length) return out;
@@ -154,7 +164,10 @@ function emptyPipelineColumns(): Record<ReceptionOsPipelineColumnId, ReceptionOs
   };
 }
 
-async function loadRecentCommunications(tenantId: string, base: string): Promise<ReceptionOsCommunicationEvent[]> {
+async function loadRecentCommunications(
+  tenantId: string,
+  base: string
+): Promise<ReceptionOsCommunicationEvent[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
 
@@ -167,9 +180,14 @@ async function loadRecentCommunications(tenantId: string, base: string): Promise
     .limit(COMMUNICATION_LIMIT);
   if (error) throw new Error(error.message);
 
-  const leadIds = [...new Set((comms ?? []).map((c) => String((c as { lead_id: string }).lead_id)))];
+  const leadIds = [
+    ...new Set((comms ?? []).map((c) => String((c as { lead_id: string }).lead_id))),
+  ];
   const leadLabels = new Map<string, string>();
-  const leadHrefs = new Map<string, { patient: string | null; case: string | null; lead: string }>();
+  const leadHrefs = new Map<
+    string,
+    { patient: string | null; case: string | null; lead: string }
+  >();
   if (leadIds.length) {
     const { data: leads } = await supabase
       .from("fi_crm_leads")
@@ -229,12 +247,17 @@ async function loadRecentCommunications(tenantId: string, base: string): Promise
           patient: null,
           case: null,
         },
-      }),
+      })
     );
   }
 
   for (const raw of notes ?? []) {
-    const r = raw as { id: string; lead_id: string; body_preview: string | null; created_at: string };
+    const r = raw as {
+      id: string;
+      lead_id: string;
+      body_preview: string | null;
+      created_at: string;
+    };
     events.push(
       communicationEventSchema.parse({
         id: `note-${r.id}`,
@@ -249,7 +272,7 @@ async function loadRecentCommunications(tenantId: string, base: string): Promise
           patient: null,
           case: null,
         },
-      }),
+      })
     );
   }
 
@@ -257,7 +280,10 @@ async function loadRecentCommunications(tenantId: string, base: string): Promise
   return events.slice(0, COMMUNICATION_LIMIT);
 }
 
-async function loadNewLeadPipelineCards(tenantId: string, base: string): Promise<ReceptionOsPipelineCard[]> {
+async function loadNewLeadPipelineCards(
+  tenantId: string,
+  base: string
+): Promise<ReceptionOsPipelineCard[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
 
@@ -285,7 +311,7 @@ async function loadNewLeadPipelineCards(tenantId: string, base: string): Promise
           consultation: null,
           case: null,
         },
-      }),
+      })
     );
   }
   return cards;
@@ -293,20 +319,26 @@ async function loadNewLeadPipelineCards(tenantId: string, base: string): Promise
 
 function buildPipelineFromConversion(
   conversionPayload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>,
-  newLeads: ReceptionOsPipelineCard[],
+  newLeads: ReceptionOsPipelineCard[]
 ): ReceptionOsBoardPayload["consultationPipeline"] {
   const columns = emptyPipelineColumns();
   columns.new_lead = newLeads;
 
   const conversionToDeposit = new Map<string, boolean>();
-  for (const colId of Object.keys(conversionPayload.columns) as ConsultationConversionBoardColumnId[]) {
+  for (const colId of Object.keys(
+    conversionPayload.columns
+  ) as ConsultationConversionBoardColumnId[]) {
     for (const card of conversionPayload.columns[colId]) {
-      const depositNeeds = card.depositBoardLine.toLowerCase().includes("pending") || card.depositBoardLine.toLowerCase().includes("overdue");
+      const depositNeeds =
+        card.depositBoardLine.toLowerCase().includes("pending") ||
+        card.depositBoardLine.toLowerCase().includes("overdue");
       conversionToDeposit.set(card.id, depositNeeds);
     }
   }
 
-  for (const colId of Object.keys(conversionPayload.columns) as ConsultationConversionBoardColumnId[]) {
+  for (const colId of Object.keys(
+    conversionPayload.columns
+  ) as ConsultationConversionBoardColumnId[]) {
     for (const card of conversionPayload.columns[colId]) {
       if (colId === "lost") continue;
       const depositNeeds = conversionToDeposit.get(card.id) ?? false;
@@ -328,7 +360,7 @@ function buildPipelineFromConversion(
             consultation: card.hrefs.consultation,
             case: card.hrefs.case,
           },
-        }),
+        })
       );
     }
   }
@@ -341,7 +373,11 @@ function buildPipelineFromConversion(
   return { columns, counts };
 }
 
-async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base: string): Promise<ReceptionOsDepositItem[]> {
+async function loadOutstandingDeposits(
+  tenantId: string,
+  todayYmd: string,
+  base: string
+): Promise<ReceptionOsDepositItem[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
 
@@ -369,20 +405,39 @@ async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base:
     return depositRecordIsOutstanding(row, todayYmd);
   });
 
-  const patientIds = [...new Set(outstanding.map((r) => (r.patient_id != null ? String(r.patient_id) : null)).filter(Boolean))] as string[];
-  const leadIds = [...new Set(outstanding.map((r) => (r.lead_id != null ? String(r.lead_id) : null)).filter(Boolean))] as string[];
+  const patientIds = [
+    ...new Set(
+      outstanding.map((r) => (r.patient_id != null ? String(r.patient_id) : null)).filter(Boolean)
+    ),
+  ] as string[];
+  const leadIds = [
+    ...new Set(
+      outstanding.map((r) => (r.lead_id != null ? String(r.lead_id) : null)).filter(Boolean)
+    ),
+  ] as string[];
 
   const patientLabels = new Map<string, string>();
   if (patientIds.length) {
-    const { data: patients } = await supabase.from("fi_patients").select("id, person_id").eq("tenant_id", tid).in("id", patientIds);
+    const { data: patients } = await supabase
+      .from("fi_patients")
+      .select("id, person_id")
+      .eq("tenant_id", tid)
+      .in("id", patientIds);
     const personIds = (patients ?? []).map((p) => String((p as { person_id: string }).person_id));
     const { data: persons } = personIds.length
-      ? await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid).in("id", personIds)
+      ? await supabase
+          .from("fi_persons")
+          .select("id, metadata")
+          .eq("tenant_id", tid)
+          .in("id", personIds)
       : { data: [] };
     const personLabel = new Map<string, string>();
     for (const raw of persons ?? []) {
       const r = raw as { id: string; metadata: unknown };
-      const m = r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
+      const m =
+        r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : {};
       personLabel.set(String(r.id), displayFromPersonMetadata(m).name);
     }
     for (const raw of patients ?? []) {
@@ -393,7 +448,11 @@ async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base:
 
   const leadLabels = new Map<string, string>();
   if (leadIds.length) {
-    const { data: leads } = await supabase.from("fi_crm_leads").select("id, summary, metadata").eq("tenant_id", tid).in("id", leadIds);
+    const { data: leads } = await supabase
+      .from("fi_crm_leads")
+      .select("id, summary, metadata")
+      .eq("tenant_id", tid)
+      .in("id", leadIds);
     for (const raw of leads ?? []) {
       const r = raw as { id: string; summary: string | null; metadata: unknown };
       leadLabels.set(String(r.id), leadTitleFromRow(r.summary, String(r.id)));
@@ -403,7 +462,7 @@ async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base:
   const items: ReceptionOsDepositItem[] = [];
   const paymentLinks = await resolvePaymentLinksForPaymentRecords(
     tid,
-    outstanding.map((raw) => String((raw as { id: string }).id)),
+    outstanding.map((raw) => String((raw as { id: string }).id))
   );
 
   for (const raw of outstanding) {
@@ -413,7 +472,11 @@ async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base:
     const lid = row.lead_id?.trim() || null;
     const label = (pid && patientLabels.get(pid)) || (lid && leadLabels.get(lid)) || "Unknown";
     const overdue = depositIsOverdue(row, todayYmd);
-    const severity = depositSeverity({ isOverdue: overdue, dueDate: row.due_date?.trim() || null, todayYmd });
+    const severity = depositSeverity({
+      isOverdue: overdue,
+      dueDate: row.due_date?.trim() || null,
+      todayYmd,
+    });
     const caseId = row.case_id?.trim() || null;
     items.push(
       depositItemSchema.parse({
@@ -433,7 +496,7 @@ async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base:
           case: caseId ? `${base}/cases/${caseId}` : null,
           lead: lid ? `${base}/crm/leads/${lid}` : null,
         },
-      }),
+      })
     );
   }
   return items;
@@ -477,7 +540,10 @@ function mapSurgeryCard(card: SurgeryReadinessBoardCard): ReceptionOsSurgeryItem
   });
 }
 
-async function loadMissingFormsAlerts(tenantId: string, base: string): Promise<ReceptionOsActionAlert[]> {
+async function loadMissingFormsAlerts(
+  tenantId: string,
+  base: string
+): Promise<ReceptionOsActionAlert[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
 
@@ -490,7 +556,9 @@ async function loadMissingFormsAlerts(tenantId: string, base: string): Promise<R
     .limit(20);
   if (error) return [];
 
-  const consultIds = [...new Set((data ?? []).map((d) => String((d as { consultation_id: string }).consultation_id)))];
+  const consultIds = [
+    ...new Set((data ?? []).map((d) => String((d as { consultation_id: string }).consultation_id))),
+  ];
   if (!consultIds.length) return [];
 
   const { data: consults } = await supabase
@@ -502,9 +570,9 @@ async function loadMissingFormsAlerts(tenantId: string, base: string): Promise<R
   const alerts: ReceptionOsActionAlert[] = [];
   for (const raw of data ?? []) {
     const r = raw as { id: string; consultation_id: string; template_slug: string | null };
-    const consult = (consults ?? []).find((c) => String((c as { id: string }).id) === String(r.consultation_id)) as
-      | { id: string; patient_id: string | null; lead_id: string | null }
-      | undefined;
+    const consult = (consults ?? []).find(
+      (c) => String((c as { id: string }).id) === String(r.consultation_id)
+    ) as { id: string; patient_id: string | null; lead_id: string | null } | undefined;
     const patientId = consult?.patient_id?.trim() || null;
     const severity = alertSeverityForContext({ kind: "missing_forms" });
     alerts.push(
@@ -512,7 +580,9 @@ async function loadMissingFormsAlerts(tenantId: string, base: string): Promise<R
         id: `form-${r.id}`,
         kind: "missing_forms",
         title: "Missing or draft form",
-        detail: r.template_slug ? `Form "${r.template_slug}" not submitted` : "Consultation form draft incomplete",
+        detail: r.template_slug
+          ? `Form "${r.template_slug}" not submitted`
+          : "Consultation form draft incomplete",
         severity,
         href: consult ? `${base}/consultations/${consult.id}` : null,
         hrefs: {
@@ -521,7 +591,7 @@ async function loadMissingFormsAlerts(tenantId: string, base: string): Promise<R
           lead: consult?.lead_id?.trim() ? `${base}/crm/leads/${consult.lead_id.trim()}` : null,
           consultation: consult ? `${base}/consultations/${consult.id}` : null,
         },
-      }),
+      })
     );
   }
   return alerts;
@@ -537,7 +607,10 @@ function buildActionAlerts(input: {
   const alerts: ReceptionOsActionAlert[] = [...input.missingForms];
 
   for (const dep of input.deposits.filter((d) => d.isOverdue)) {
-    const severity = alertSeverityForContext({ kind: "missing_deposit", isOverdueDeposit: dep.isOverdue });
+    const severity = alertSeverityForContext({
+      kind: "missing_deposit",
+      isOverdueDeposit: dep.isOverdue,
+    });
     alerts.push(
       actionAlertSchema.parse({
         id: `deposit-${dep.id}`,
@@ -552,7 +625,7 @@ function buildActionAlerts(input: {
           lead: dep.hrefs.lead,
           consultation: null,
         },
-      }),
+      })
     );
   }
 
@@ -576,7 +649,7 @@ function buildActionAlerts(input: {
             lead: card.hrefs.lead,
             consultation: card.hrefs.consultation,
           },
-        }),
+        })
       );
     }
   }
@@ -601,20 +674,26 @@ function buildActionAlerts(input: {
           lead: null,
           consultation: null,
         },
-      }),
+      })
     );
   }
 
   alerts.sort((a, b) => {
     const sd = compareReceptionOsSeverity(a.severity, b.severity);
     if (sd !== 0) return sd;
-    return alertSeverityRank(b.kind as ReceptionOsAlertKind) - alertSeverityRank(a.kind as ReceptionOsAlertKind);
+    return (
+      alertSeverityRank(b.kind as ReceptionOsAlertKind) -
+      alertSeverityRank(a.kind as ReceptionOsAlertKind)
+    );
   });
 
   return alerts.slice(0, 30);
 }
 
-export async function loadReceptionOsBoardPayload(tenantId: string, now: Date = new Date()): Promise<ReceptionOsBoardPayload> {
+export async function loadReceptionOsBoardPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<ReceptionOsBoardPayload> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const viewerContext = await resolveReceptionOsViewerContext(tid);
   const base = `/fi-admin/${tid}`;
@@ -623,22 +702,23 @@ export async function loadReceptionOsBoardPayload(tenantId: string, now: Date = 
   const todayYmd = operational.operationalDay.todayYmd;
   const tz = operational.operationalDay.calendarTimezone;
 
-  const [conversionPayload, surgeryPayload, communications, newLeads, deposits, missingForms] = await Promise.all([
-    loadBoardSectionSafe(
-      "conversion",
-      () => loadConsultationConversionBoardPayload(tid, now),
-      emptyConsultationConversionBoardPayload(tz, todayYmd),
-    ),
-    loadBoardSectionSafe(
-      "surgery",
-      () => loadSurgeryReadinessBoardPayload(tid, now),
-      emptySurgeryReadinessBoardPayload(tz, todayYmd),
-    ),
-    loadBoardSectionSafe("communications", () => loadRecentCommunications(tid, base), []),
-    loadBoardSectionSafe("pipeline_leads", () => loadNewLeadPipelineCards(tid, base), []),
-    loadBoardSectionSafe("deposits", () => loadOutstandingDeposits(tid, todayYmd, base), []),
-    loadBoardSectionSafe("missing_forms", () => loadMissingFormsAlerts(tid, base), []),
-  ]);
+  const [conversionPayload, surgeryPayload, communications, newLeads, deposits, missingForms] =
+    await Promise.all([
+      loadBoardSectionSafe(
+        "conversion",
+        () => loadConsultationConversionBoardPayload(tid, now),
+        emptyConsultationConversionBoardPayload(tz, todayYmd)
+      ),
+      loadBoardSectionSafe(
+        "surgery",
+        () => loadSurgeryReadinessBoardPayload(tid, now),
+        emptySurgeryReadinessBoardPayload(tz, todayYmd)
+      ),
+      loadBoardSectionSafe("communications", () => loadRecentCommunications(tid, base), []),
+      loadBoardSectionSafe("pipeline_leads", () => loadNewLeadPipelineCards(tid, base), []),
+      loadBoardSectionSafe("deposits", () => loadOutstandingDeposits(tid, todayYmd, base), []),
+      loadBoardSectionSafe("missing_forms", () => loadMissingFormsAlerts(tid, base), []),
+    ]);
 
   const bookingIds = operational.receptionBoard.cards.map((c) => c.id);
   const caseByBooking = await loadBookingCaseIds(tid, bookingIds);
@@ -670,14 +750,18 @@ export async function loadReceptionOsBoardPayload(tenantId: string, now: Date = 
   });
 
   const patientsWaitingCount = operational.receptionBoard.cards.filter(
-    (c) => c.receptionColumn === "expected" || c.receptionColumn === "arrived" || c.receptionColumn === "in_consultation",
+    (c) =>
+      c.receptionColumn === "expected" ||
+      c.receptionColumn === "arrived" ||
+      c.receptionColumn === "in_consultation"
   ).length;
 
   const intelligenceBase = createReceptionOsIntelligenceContext();
   const hints = deriveReceptionOsIntelligenceHints({
     overdueDepositCount: deposits.filter((d) => d.isOverdue).length,
     surgeryRiskAlertCount: actionAlerts.filter((a) => a.kind === "surgery_risk").length,
-    noFollowUpCount: actionAlerts.filter((a) => a.kind === "no_follow_up_after_consultation").length,
+    noFollowUpCount: actionAlerts.filter((a) => a.kind === "no_follow_up_after_consultation")
+      .length,
     missingFormsCount: actionAlerts.filter((a) => a.kind === "missing_forms").length,
     patientsWaitingCount,
   });

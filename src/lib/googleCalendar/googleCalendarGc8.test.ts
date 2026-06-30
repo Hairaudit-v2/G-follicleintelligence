@@ -20,7 +20,10 @@ import {
   isGoogleCalendarSyncDue,
   shouldAutoPauseScheduledSync,
 } from "./googleCalendarSyncHealthCore";
-import { createGc8MonitoringMockTables, withGc8IntegrationDefaults } from "./googleCalendarGc8MockTables";
+import {
+  createGc8MonitoringMockTables,
+  withGc8IntegrationDefaults,
+} from "./googleCalendarGc8MockTables";
 import {
   attachFiEventBusMockToClient,
   createFiEventBusMockTables,
@@ -30,7 +33,11 @@ import {
   loadGoogleCalendarSyncRunHistory,
   updateGoogleCalendarSyncHealth,
 } from "./googleCalendarSyncHealth.server";
-import { loadGoogleCalendarMonitoringPage, pauseGoogleCalendarScheduledSync, resumeGoogleCalendarScheduledSync } from "./googleCalendarMonitoring.server";
+import {
+  loadGoogleCalendarMonitoringPage,
+  pauseGoogleCalendarScheduledSync,
+  resumeGoogleCalendarScheduledSync,
+} from "./googleCalendarMonitoring.server";
 import { runScheduledGoogleCalendarSync } from "./googleCalendarSyncScheduler.server";
 import { syncGoogleCalendarForTenant } from "./googleCalendarSync.server";
 
@@ -293,7 +300,9 @@ function successFetch(): typeof fetch {
   return async (input) => {
     const url = String(input);
     if (url.includes("oauth2.googleapis.com/token")) {
-      return new Response(JSON.stringify({ access_token: "refreshed", expires_in: 3600 }), { status: 200 });
+      return new Response(JSON.stringify({ access_token: "refreshed", expires_in: 3600 }), {
+        status: 200,
+      });
     }
     if (url.includes("/calendars/") && url.includes("/events")) {
       return new Response(JSON.stringify({ items: [] }), { status: 200 });
@@ -365,11 +374,16 @@ describe("CalendarOS GC-8 — retry core", () => {
       return new Response(JSON.stringify({ items: [] }), { status: 200 });
     };
 
-    const result = await fetchGoogleCalendarWithRetry(fetchFn, "https://example.com", { method: "GET" }, {
-      sleep: async (ms) => {
-        sleeps.push(ms);
-      },
-    });
+    const result = await fetchGoogleCalendarWithRetry(
+      fetchFn,
+      "https://example.com",
+      { method: "GET" },
+      {
+        sleep: async (ms) => {
+          sleeps.push(ms);
+        },
+      }
+    );
 
     assert.equal(result.ok, true);
     assert.equal(calls, 3);
@@ -415,7 +429,9 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
     assert.equal(summary.outcome, "failed");
     assert.equal(mock.gc8.syncHealth[0].consecutive_failures, 1);
     assert.equal(mock.gc8.syncRuns[0].status, "failed");
-    assert.ok(mock.gc8.adminNotifications.some((n) => n.event_type === "google_calendar_sync_failed"));
+    assert.ok(
+      mock.gc8.adminNotifications.some((n) => n.event_type === "google_calendar_sync_failed")
+    );
   });
 
   it("5 failures pauses scheduled sync", async () => {
@@ -558,9 +574,7 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
     );
 
     assert.ok(
-      mock.gc8.adminNotifications.some(
-        (n) => n.title === "Google Calendar review queue backlog"
-      )
+      mock.gc8.adminNotifications.some((n) => n.title === "Google Calendar review queue backlog")
     );
   });
 });

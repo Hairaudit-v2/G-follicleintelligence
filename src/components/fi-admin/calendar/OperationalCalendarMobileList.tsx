@@ -20,10 +20,17 @@ export function OperationalCalendarMobileList({
   return (
     <div className="space-y-4 lg:hidden">
       {lanes.map((lane) => {
-        const items = [...(buckets[lane.dayKey] ?? [])].sort((a, b) => a.start_at.localeCompare(b.start_at));
+        const items = [...(buckets[lane.dayKey] ?? [])].sort((a, b) =>
+          a.start_at.localeCompare(b.start_at)
+        );
         return (
-          <section key={lane.dayKey} className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 dark:border-slate-800 dark:bg-slate-950">
-            <h2 className="text-sm font-semibold text-slate-100 dark:text-slate-100">{calendarDayHeading(lane)}</h2>
+          <section
+            key={lane.dayKey}
+            className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 dark:border-slate-800 dark:bg-slate-950"
+          >
+            <h2 className="text-sm font-semibold text-slate-100 dark:text-slate-100">
+              {calendarDayHeading(lane)}
+            </h2>
             {items.length === 0 ? (
               <p className="mt-2 text-sm text-slate-500">No bookings in this range.</p>
             ) : (
@@ -41,13 +48,19 @@ export function OperationalCalendarMobileList({
                           "flex w-full flex-col gap-0.5 py-2.5 text-left text-sm transition hover:bg-white/[0.03] dark:hover:bg-slate-900/60"
                         )}
                       >
-                        <span className="font-medium text-slate-100 dark:text-slate-100">{label}</span>
+                        <span className="font-medium text-slate-100 dark:text-slate-100">
+                          {label}
+                        </span>
                         <span className="text-xs text-slate-400 dark:text-slate-400">{range}</span>
                         {d?.scalesSummary ? (
-                          <span className="text-xs text-slate-300 dark:text-slate-300">{d.scalesSummary}</span>
+                          <span className="text-xs text-slate-300 dark:text-slate-300">
+                            {d.scalesSummary}
+                          </span>
                         ) : null}
                         {d?.reminderHint ? (
-                          <span className="text-[11px] font-medium text-cyan-200 dark:text-sky-300">{d.reminderHint}</span>
+                          <span className="text-[11px] font-medium text-cyan-200 dark:text-sky-300">
+                            {d.reminderHint}
+                          </span>
                         ) : null}
                       </button>
                     </li>

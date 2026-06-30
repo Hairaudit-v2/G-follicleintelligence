@@ -34,11 +34,13 @@ export function ConsultationOsSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support consultation integrity and do not affect day-to-day
-              clinical planning.
+              For platform operators only. These checks support consultation integrity and do not
+              affect day-to-day clinical planning.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-violet-300/80">
@@ -124,8 +126,14 @@ export function ConsultationOsSystemDiagnostics({
           />
           <ul className="max-h-48 space-y-1 overflow-y-auto font-mono text-xs text-[#64748B]">
             {payload.consultations.slice(0, 12).map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/[0.04] px-2 py-1">
-                <Link href={`/fi-admin/${tenantId}/consultations/${r.id}`} className="text-violet-300/90 hover:underline">
+              <li
+                key={r.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/[0.04] px-2 py-1"
+              >
+                <Link
+                  href={`/fi-admin/${tenantId}/consultations/${r.id}`}
+                  className="text-violet-300/90 hover:underline"
+                >
                   {r.id}
                 </Link>
                 <span>

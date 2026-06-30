@@ -4,12 +4,20 @@
  */
 import { revalidatePath } from "next/cache";
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { retakeVieProtocolCapture } from "@/src/lib/vie/vieGuidedCapture.server";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string; patientId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; patientId: string }> }
+) {
   try {
     const { tenantId, patientId } = await params;
     const tid = tenantId?.trim() ?? "";

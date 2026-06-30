@@ -9,12 +9,19 @@ import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
 async function assertTenantRowExists(tenantId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (error) throw new CrmAccessError(500, "Could not verify tenant.");
   if (!data) throw new CrmAccessError(404, "Tenant not found.");
 }
 
-async function loadFiUserForTenant(tenantId: string, authUserId: string): Promise<{ id: string; role: string } | null> {
+async function loadFiUserForTenant(
+  tenantId: string,
+  authUserId: string
+): Promise<{ id: string; role: string } | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
@@ -24,7 +31,10 @@ async function loadFiUserForTenant(tenantId: string, authUserId: string): Promis
     .maybeSingle();
   if (error) throw new CrmAccessError(500, "Could not verify tenant membership.");
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 export type FiServicesManageAccessOpts = {
@@ -36,11 +46,16 @@ export type FiServicesManageAccessOpts = {
 /**
  * Throws {@link CrmAccessError} when the caller may not mutate the tenant service catalogue.
  */
-export async function assertFiServicesManageAllowed(opts: FiServicesManageAccessOpts): Promise<void> {
+export async function assertFiServicesManageAllowed(
+  opts: FiServicesManageAccessOpts
+): Promise<void> {
   const tenantId = opts.tenantId.trim();
   if (!tenantId) throw new CrmAccessError(400, "tenantId is required.");
 
-  const adminKeyValid = isFiAdminApiKeyMatch(opts.adminKey ?? undefined, process.env.FI_ADMIN_API_KEY);
+  const adminKeyValid = isFiAdminApiKeyMatch(
+    opts.adminKey ?? undefined,
+    process.env.FI_ADMIN_API_KEY
+  );
   if (adminKeyValid) {
     await assertTenantRowExists(tenantId);
     return;
@@ -67,7 +82,9 @@ export async function assertFiServicesManageAllowed(opts: FiServicesManageAccess
     return;
   }
 
-  const osNorm = String(os?.osRole ?? "").trim().toLowerCase();
+  const osNorm = String(os?.osRole ?? "")
+    .trim()
+    .toLowerCase();
   if (osNorm === "fi_auditor") {
     throw new CrmAccessError(403, "Admin role required to manage services.");
   }
@@ -79,7 +96,9 @@ export async function assertFiServicesManageAllowed(opts: FiServicesManageAccess
   throw new CrmAccessError(403, "Admin role required to manage services.");
 }
 
-export async function canManageFiServicesCatalog(opts: FiServicesManageAccessOpts): Promise<boolean> {
+export async function canManageFiServicesCatalog(
+  opts: FiServicesManageAccessOpts
+): Promise<boolean> {
   try {
     await assertFiServicesManageAllowed(opts);
     return true;

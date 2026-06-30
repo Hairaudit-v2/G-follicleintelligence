@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { ArrowRight, Briefcase, LineChart, Loader2, Search, User, X } from "lucide-react";
 import type { ClinicOsGlobalSearchPayload } from "@/src/lib/fiAdmin/clinicOsGlobalSearchTypes";
 import { FiCaseCard } from "@/src/components/fi-design/FiCaseCard";
@@ -116,7 +123,9 @@ export function ClinicOsGlobalSearch({
         } & Partial<ClinicOsGlobalSearchPayload>;
         if (!res.ok || !json.ok) {
           if (res.status >= 500) {
-            throw new Error(json.error?.trim() || "Search could not be completed. Please try again.");
+            throw new Error(
+              json.error?.trim() || "Search could not be completed. Please try again."
+            );
           }
           throw new Error(json.error?.trim() || "Search failed.");
         }
@@ -205,7 +214,9 @@ export function ClinicOsGlobalSearch({
     (e: ReactKeyboardEvent<HTMLDivElement>) => {
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
       const links = flatResultHrefs
-        .map(({ key }) => panelRef.current?.querySelector<HTMLElement>(`[data-result-key="${key}"]`))
+        .map(({ key }) =>
+          panelRef.current?.querySelector<HTMLElement>(`[data-result-key="${key}"]`)
+        )
         .filter(Boolean) as HTMLElement[];
       if (links.length === 0) return;
       e.preventDefault();
@@ -254,10 +265,15 @@ export function ClinicOsGlobalSearch({
         <header className="shrink-0 border-b border-white/[0.06] px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <h2 id={CLINIC_OS_SEARCH_DIALOG_TITLE_ID} className="text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">
+              <h2
+                id={CLINIC_OS_SEARCH_DIALOG_TITLE_ID}
+                className="text-lg font-semibold tracking-tight text-slate-100 sm:text-xl"
+              >
                 Search patients, leads, bookings and cases
               </h2>
-              <p className="text-xs text-slate-500 sm:text-sm">Read-only search · no changes are made from this panel.</p>
+              <p className="text-xs text-slate-500 sm:text-sm">
+                Read-only search · no changes are made from this panel.
+              </p>
             </div>
             <button
               type="button"
@@ -269,10 +285,17 @@ export function ClinicOsGlobalSearch({
             </button>
           </div>
           <div className="relative mt-4">
-            <label id="clinic-os-global-search-label" htmlFor="clinic-os-global-search-query" className="sr-only">
+            <label
+              id="clinic-os-global-search-label"
+              htmlFor="clinic-os-global-search-query"
+              className="sr-only"
+            >
               Search patients or commands
             </label>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden />
+            <Search
+              className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+              aria-hidden
+            />
             <input
               ref={searchInputRef}
               id="clinic-os-global-search-query"
@@ -288,7 +311,9 @@ export function ClinicOsGlobalSearch({
               onKeyDown={(e) => {
                 if (e.key !== "ArrowDown") return;
                 if (!data || flatResultHrefs.length === 0) return;
-                const first = panelRef.current?.querySelector<HTMLElement>(`[data-result-key="${flatResultHrefs[0].key}"]`);
+                const first = panelRef.current?.querySelector<HTMLElement>(
+                  `[data-result-key="${flatResultHrefs[0].key}"]`
+                );
                 if (first) {
                   e.preventDefault();
                   first.focus();
@@ -320,7 +345,9 @@ export function ClinicOsGlobalSearch({
                 <span className="text-sm">Searching…</span>
               </div>
             ) : error ? (
-              <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p>
+              <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+                {error}
+              </p>
             ) : !hasResults ? (
               <FiEmptyState
                 title="No matches"
@@ -330,7 +357,10 @@ export function ClinicOsGlobalSearch({
               <div className="space-y-8">
                 {data!.patients.length > 0 ? (
                   <section aria-labelledby={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID}>
-                    <h3 id={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <h3
+                      id={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID}
+                      className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                    >
                       <User className="h-3.5 w-3.5" aria-hidden />
                       PatientOS
                     </h3>
@@ -353,7 +383,10 @@ export function ClinicOsGlobalSearch({
 
                 {data!.cases.length > 0 ? (
                   <section aria-labelledby={CLINIC_OS_SEARCH_CASES_HEADING_ID}>
-                    <h3 id={CLINIC_OS_SEARCH_CASES_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <h3
+                      id={CLINIC_OS_SEARCH_CASES_HEADING_ID}
+                      className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                    >
                       <Briefcase className="h-3.5 w-3.5" aria-hidden />
                       SurgeryOS
                     </h3>
@@ -376,7 +409,10 @@ export function ClinicOsGlobalSearch({
 
                 {data!.leads.length > 0 ? (
                   <section aria-labelledby={CLINIC_OS_SEARCH_LEADS_HEADING_ID}>
-                    <h3 id={CLINIC_OS_SEARCH_LEADS_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <h3
+                      id={CLINIC_OS_SEARCH_LEADS_HEADING_ID}
+                      className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                    >
                       <LineChart className="h-3.5 w-3.5" aria-hidden />
                       LeadFlow
                     </h3>
@@ -400,7 +436,9 @@ export function ClinicOsGlobalSearch({
           </div>
 
           <aside className="shrink-0 border-t border-white/[0.06] bg-white/[0.03] px-4 py-4 sm:px-5 lg:w-56 lg:border-l lg:border-t-0 lg:py-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick actions</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Quick actions
+            </p>
             <ul className="mt-3 space-y-1">
               <li>
                 <Link
@@ -465,7 +503,9 @@ export function ClinicOsGlobalSearch({
         </div>
 
         <footer className="shrink-0 border-t border-white/[0.06] bg-white/[0.03] px-4 py-3 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recent patients</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Recent patients
+          </p>
           <p className="mt-0.5 text-[10px] text-slate-400">Preview · not connected to live data</p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {RECENT_PLACEHOLDERS.map((row) => (

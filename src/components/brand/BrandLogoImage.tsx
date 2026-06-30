@@ -25,7 +25,10 @@ type BrandLogoImageProps = {
 function resolveNextImageLoading(
   priority: boolean | undefined,
   loading: "lazy" | "eager"
-): { priority: true } | { priority: false; loading: "lazy" | "eager" } | { loading: "lazy" | "eager" } {
+):
+  | { priority: true }
+  | { priority: false; loading: "lazy" | "eager" }
+  | { loading: "lazy" | "eager" } {
   if (priority) return { priority: true };
   if (priority === false) return { priority: false, loading };
   return { loading };

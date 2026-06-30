@@ -4,8 +4,14 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 import { PatientTwinDashboard } from "@/src/components/fi-admin/patientTwin/PatientTwinDashboard";
-import { derivePatientTwinIntegritySignals, type PatientClinicalIntelligenceView } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
-import { loadPatientOutcomeMeasurements, loadPatientOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import {
+  derivePatientTwinIntegritySignals,
+  type PatientClinicalIntelligenceView,
+} from "@/src/lib/fi-os/clinicalIntelligenceSignals";
+import {
+  loadPatientOutcomeMeasurements,
+  loadPatientOutcomeProtocols,
+} from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadPatientTwinV1 } from "@/src/lib/patientTwin/patientTwinLoader.server";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +43,10 @@ export default async function PatientTwinV1RoutePage({
   const pid = patientId?.trim();
   if (!tid || !pid) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <p className="text-sm text-amber-200/90">
         Server misconfigured (Supabase). Patient Twin cannot be loaded.

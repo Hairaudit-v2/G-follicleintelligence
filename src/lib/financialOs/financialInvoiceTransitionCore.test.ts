@@ -38,10 +38,7 @@ describe("FinancialOS invoice lifecycle transition guards", () => {
   });
 
   it("assertInvoiceTransitionAllowed throws on blocked transition", () => {
-    assert.throws(
-      () => assertInvoiceTransitionAllowed("paid", "awaiting_payment"),
-      /not allowed/,
-    );
+    assert.throws(() => assertInvoiceTransitionAllowed("paid", "awaiting_payment"), /not allowed/);
     assert.doesNotThrow(() => assertInvoiceTransitionAllowed("paid", "paid"));
   });
 

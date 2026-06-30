@@ -2,7 +2,12 @@
  * PATCH /api/tenants/[tenantId]/patients/[patientId]/images/[imageId]
  */
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { patientImagePatchBodySchema } from "@/src/lib/patientImages/patientImageApiSchemas";
 import { updatePatientImageDetails } from "@/src/lib/patientImages/patientImagesServer";
 

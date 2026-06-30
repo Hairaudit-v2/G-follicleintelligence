@@ -18,8 +18,7 @@ export const FI_OUTCOME_FORBIDDEN_IDENTIFIER_KEYS = [
   "auth_user_id",
 ] as const;
 
-const UUID_RE =
-  /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i;
+const UUID_RE = /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i;
 
 export type OutcomeTenantMeasurementInput = {
   metric_values: Record<string, unknown>;
@@ -47,7 +46,9 @@ function forbiddenKeyInObject(obj: unknown): string | null {
 }
 
 /** Deep scan for forbidden keys and UUID-like strings in JSON structure. */
-export function detectOutcomeIdentifierLeakage(payload: unknown): { ok: true } | { ok: false; reason: string } {
+export function detectOutcomeIdentifierLeakage(
+  payload: unknown
+): { ok: true } | { ok: false; reason: string } {
   const walk = (node: unknown, path: string): { ok: false; reason: string } | null => {
     if (node === null || node === undefined) return null;
     if (typeof node === "string") {
@@ -77,7 +78,11 @@ export function detectOutcomeIdentifierLeakage(payload: unknown): { ok: true } |
   return { ok: true };
 }
 
-export function buildOutcomeCohortKey(parts: { periodStart: string; periodEnd: string; label: string }): string {
+export function buildOutcomeCohortKey(parts: {
+  periodStart: string;
+  periodEnd: string;
+  label: string;
+}): string {
   const a = parts.periodStart.trim();
   const b = parts.periodEnd.trim();
   const slug = parts.label
@@ -89,7 +94,9 @@ export function buildOutcomeCohortKey(parts: { periodStart: string; periodEnd: s
   return `cohort:${a}:${b}:${slug || "default"}`;
 }
 
-export function aggregateOutcomeMetricSummaries(rows: readonly OutcomeTenantMeasurementInput[]): OutcomeMetricSummary {
+export function aggregateOutcomeMetricSummaries(
+  rows: readonly OutcomeTenantMeasurementInput[]
+): OutcomeMetricSummary {
   const summary: OutcomeMetricSummary = {};
   for (const row of rows) {
     const mv = row.metric_values ?? {};
@@ -146,7 +153,9 @@ export function outcomeAnonymisationThresholdsMet(input: OutcomeAnonymisationGat
   return true;
 }
 
-export function refuseNetworkOutcomeAggregation(input: OutcomeAnonymisationGateInput): { ok: true } | { ok: false; reasons: string[] } {
+export function refuseNetworkOutcomeAggregation(
+  input: OutcomeAnonymisationGateInput
+): { ok: true } | { ok: false; reasons: string[] } {
   const reasons: string[] = [];
   if (input.sampleSize < FI_OUTCOME_ANONYMISATION_MIN_SAMPLE) {
     reasons.push(`sample_size_lt_${FI_OUTCOME_ANONYMISATION_MIN_SAMPLE}`);
@@ -197,7 +206,9 @@ export function parseOutcomeMetricSummary(raw: unknown): OutcomeMetricSummary {
 }
 
 /** Merges per-tenant metric summaries for anonymised network draft rows. */
-export function mergeOutcomeMetricSummaries(summaries: readonly OutcomeMetricSummary[]): OutcomeMetricSummary {
+export function mergeOutcomeMetricSummaries(
+  summaries: readonly OutcomeMetricSummary[]
+): OutcomeMetricSummary {
   const out: OutcomeMetricSummary = {};
   for (const s of summaries) {
     for (const [k, slot] of Object.entries(s)) {
@@ -205,8 +216,10 @@ export function mergeOutcomeMetricSummaries(summaries: readonly OutcomeMetricSum
       const dst = out[k];
       dst.n += slot.n;
       if (slot.sum !== undefined) dst.sum = (dst.sum ?? 0) + slot.sum;
-      if (slot.min !== undefined) dst.min = dst.min === undefined ? slot.min : Math.min(dst.min, slot.min);
-      if (slot.max !== undefined) dst.max = dst.max === undefined ? slot.max : Math.max(dst.max, slot.max);
+      if (slot.min !== undefined)
+        dst.min = dst.min === undefined ? slot.min : Math.min(dst.min, slot.min);
+      if (slot.max !== undefined)
+        dst.max = dst.max === undefined ? slot.max : Math.max(dst.max, slot.max);
       if (slot.trueCount !== undefined) dst.trueCount = (dst.trueCount ?? 0) + slot.trueCount;
       if (slot.falseCount !== undefined) dst.falseCount = (dst.falseCount ?? 0) + slot.falseCount;
     }
@@ -214,7 +227,9 @@ export function mergeOutcomeMetricSummaries(summaries: readonly OutcomeMetricSum
   return out;
 }
 
-export function mergeProtocolMixMaps(mixes: readonly Record<string, unknown>[]): Record<string, number> {
+export function mergeProtocolMixMaps(
+  mixes: readonly Record<string, unknown>[]
+): Record<string, number> {
   const out: Record<string, number> = {};
   for (const mix of mixes) {
     for (const [k, v] of Object.entries(mix)) {

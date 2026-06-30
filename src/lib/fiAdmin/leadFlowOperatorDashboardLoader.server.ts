@@ -80,7 +80,9 @@ async function loadRecentLeadFlowOperatorActivity(
 ): Promise<LeadFlowOperatorActivityRow[]> {
   const { data, error } = await supabase
     .from("fi_lead_activity")
-    .select("id, activity_type, metadata, created_at, fi_leads!inner(first_name, last_name, tenant_id)")
+    .select(
+      "id, activity_type, metadata, created_at, fi_leads!inner(first_name, last_name, tenant_id)"
+    )
     .eq("fi_leads.tenant_id", tenantId.trim())
     .order("created_at", { ascending: false })
     .limit(RECENT_ACTIVITY_LIMIT);
@@ -99,7 +101,10 @@ async function loadRecentLeadFlowOperatorActivity(
       activityType: String(typed.activity_type),
       activityLabel: labelLeadFlowOperatorActivityType(String(typed.activity_type)),
       leadName: lead ? formatLeadFlowOperatorName(lead) : null,
-      metadataSummary: summarizeLeadFlowOperatorActivityMetadata(String(typed.activity_type), metadata),
+      metadataSummary: summarizeLeadFlowOperatorActivityMetadata(
+        String(typed.activity_type),
+        metadata
+      ),
       createdAt: String(typed.created_at),
     };
   });

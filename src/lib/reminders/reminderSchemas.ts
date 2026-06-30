@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { PATIENT_PREFERRED_CONTACT, REMINDER_TEMPLATE_TYPES, REMINDER_TRIGGER_EVENTS } from "./reminderConstants";
+import {
+  PATIENT_PREFERRED_CONTACT,
+  REMINDER_TEMPLATE_TYPES,
+  REMINDER_TRIGGER_EVENTS,
+} from "./reminderConstants";
 
 export const reminderTemplateCreateBodySchema = z
   .object({
@@ -16,7 +20,10 @@ export const reminderTemplateCreateBodySchema = z
     if (val.type === "email") {
       const s = val.subject?.trim() ?? "";
       if (!s) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "subject is required for email templates." });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "subject is required for email templates.",
+        });
       }
     }
   });

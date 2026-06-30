@@ -25,7 +25,8 @@ function mapRequest(row: Record<string, unknown>): PathologyRequestRow {
     template_used: String(row.template_used) as PathologyRequestRow["template_used"],
     status: String(row.status) as PathologyRequestRow["status"],
     clinical_notes: row.clinical_notes != null ? String(row.clinical_notes) : null,
-    emailed_to_patient_at: row.emailed_to_patient_at != null ? String(row.emailed_to_patient_at) : null,
+    emailed_to_patient_at:
+      row.emailed_to_patient_at != null ? String(row.emailed_to_patient_at) : null,
     cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
     pdf_storage_bucket: row.pdf_storage_bucket != null ? String(row.pdf_storage_bucket) : null,
     pdf_storage_path: row.pdf_storage_path != null ? String(row.pdf_storage_path) : null,
@@ -101,7 +102,9 @@ export async function loadPathologyRequestDetail(
     .maybeSingle();
   if (perr) throw new Error(perr.message);
   const meta =
-    personRow && typeof (personRow as { metadata: unknown }).metadata === "object" && !Array.isArray((personRow as { metadata: unknown }).metadata)
+    personRow &&
+    typeof (personRow as { metadata: unknown }).metadata === "object" &&
+    !Array.isArray((personRow as { metadata: unknown }).metadata)
       ? ((personRow as { metadata: Record<string, unknown> }).metadata ?? {})
       : {};
   const { name, email, phone } = displayFromPersonMetadata(meta);
@@ -120,20 +123,36 @@ export async function loadPathologyRequestDetail(
     if (st && (st as { full_name: string }).full_name?.trim()) {
       doctorDisplayName = String((st as { full_name: string }).full_name).trim();
     } else {
-      const { data: u } = await supabase.from("fi_users").select("email").eq("tenant_id", tid).eq("id", uid).maybeSingle();
+      const { data: u } = await supabase
+        .from("fi_users")
+        .select("email")
+        .eq("tenant_id", tid)
+        .eq("id", uid)
+        .maybeSingle();
       const em = u ? String((u as { email: string | null }).email ?? "").trim() : "";
       doctorDisplayName = em || `User ${uid.slice(0, 8)}…`;
     }
   }
 
-  const { data: tenantRow } = await supabase.from("fi_tenants").select("name").eq("id", tid).maybeSingle();
-  const tenantDisplayName = tenantRow ? String((tenantRow as { name: string }).name).trim() : "Clinic";
+  const { data: tenantRow } = await supabase
+    .from("fi_tenants")
+    .select("name")
+    .eq("id", tid)
+    .maybeSingle();
+  const tenantDisplayName = tenantRow
+    ? String((tenantRow as { name: string }).name).trim()
+    : "Clinic";
 
   const clinicLines: string[] = [];
   let clinicName = tenantDisplayName;
   let accentHex = "#C6A75E";
   if (primaryClinicId) {
-    const { data: clinic } = await supabase.from("fi_clinics").select("display_name, metadata").eq("tenant_id", tid).eq("id", primaryClinicId).maybeSingle();
+    const { data: clinic } = await supabase
+      .from("fi_clinics")
+      .select("display_name, metadata")
+      .eq("tenant_id", tid)
+      .eq("id", primaryClinicId)
+      .maybeSingle();
     if (clinic) {
       const dn = String((clinic as { display_name: string }).display_name ?? "").trim();
       if (dn) clinicName = dn;
@@ -175,7 +194,9 @@ export async function loadPathologyRequestDetail(
   };
 }
 
-export function buildPathologyPdfInputFromDetail(bundle: PathologyRequestDetailBundle): PathologyPdfInput {
+export function buildPathologyPdfInputFromDetail(
+  bundle: PathologyRequestDetailBundle
+): PathologyPdfInput {
   return {
     branding: bundle.branding,
     patientName: bundle.patientName,
@@ -216,7 +237,9 @@ export async function loadPathologyRequestAuditEvents(
     const r = raw as Record<string, unknown>;
     const detailRaw = r.detail;
     const detail =
-      detailRaw && typeof detailRaw === "object" && !Array.isArray(detailRaw) ? (detailRaw as Record<string, unknown>) : {};
+      detailRaw && typeof detailRaw === "object" && !Array.isArray(detailRaw)
+        ? (detailRaw as Record<string, unknown>)
+        : {};
     const prid = detail.pathology_request_id;
     if (typeof prid !== "string" || prid.trim() !== rid) continue;
     out.push({
@@ -232,7 +255,11 @@ export async function loadPathologyRequestAuditEvents(
 
 export const PATHOLOGY_PATIENT_PDF_BUCKET = "patient-images";
 
-export function buildPathologyPdfStoragePath(tenantId: string, patientId: string, requestId: string): string {
+export function buildPathologyPdfStoragePath(
+  tenantId: string,
+  patientId: string,
+  requestId: string
+): string {
   const tid = tenantId.trim();
   const pid = patientId.trim();
   const rid = requestId.trim();

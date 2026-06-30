@@ -34,7 +34,9 @@ export const procedureDayUpsertBodySchema = z
     procedure_milestones: z
       .record(z.string().max(80), z.string().max(64))
       .optional()
-      .refine((m) => !m || Object.keys(m).length <= 48, { message: "Too many procedure milestone keys." }),
+      .refine((m) => !m || Object.keys(m).length <= 48, {
+        message: "Too many procedure milestone keys.",
+      }),
     procedure_location: z.string().max(512).nullable().optional(),
     procedure_room: z.string().max(256).nullable().optional(),
     start_time: z.string().max(80).nullable().optional(),

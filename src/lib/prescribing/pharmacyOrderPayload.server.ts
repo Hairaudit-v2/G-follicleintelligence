@@ -3,7 +3,10 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { casePersonDisplayFromMetadata } from "@/src/lib/cases/caseLabels";
 import { loadPrescriptionDetail } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
-import type { FiCompoundPharmacyRow, PharmacyOrderPayloadSnapshotV1 } from "@/src/lib/prescribing/fiPharmacyLoaders.server";
+import type {
+  FiCompoundPharmacyRow,
+  PharmacyOrderPayloadSnapshotV1,
+} from "@/src/lib/prescribing/fiPharmacyLoaders.server";
 
 export type PharmacyOrderPdfContext = {
   clinicName: string;
@@ -33,7 +36,10 @@ export type PharmacyOrderPdfContext = {
   signedAt: string | null;
 };
 
-async function loadPatientPersonDisplay(tenantId: string, patientId: string): Promise<{ label: string; email: string | null }> {
+async function loadPatientPersonDisplay(
+  tenantId: string,
+  patientId: string
+): Promise<{ label: string; email: string | null }> {
   const supabase = supabaseAdmin();
   const { data: pat, error: pe } = await supabase
     .from("fi_patients")
@@ -60,7 +66,10 @@ async function loadPatientPersonDisplay(tenantId: string, patientId: string): Pr
   return { label: d.label, email: d.email };
 }
 
-async function loadPrescriberLabel(tenantId: string, staffId: string): Promise<{ full_name: string; staff_role: string }> {
+async function loadPrescriberLabel(
+  tenantId: string,
+  staffId: string
+): Promise<{ full_name: string; staff_role: string }> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
@@ -119,7 +128,11 @@ export async function buildPharmacyOrderPdfContext(params: {
   tenantId: string;
   prescriptionId: string;
   pharmacy: FiCompoundPharmacyRow;
-  branding: { brand_name: string | null; clinic_display_name: string | null; accent_colour: string | null };
+  branding: {
+    brand_name: string | null;
+    clinic_display_name: string | null;
+    accent_colour: string | null;
+  };
 }): Promise<PharmacyOrderPdfContext> {
   const tid = params.tenantId.trim();
   const rid = params.prescriptionId.trim();
@@ -165,10 +178,16 @@ export async function buildPharmacyOrderPdfContext(params: {
 
 export function pharmacyOrderPdfContextFromSnapshot(
   snap: PharmacyOrderPayloadSnapshotV1,
-  branding: { brand_name: string | null; clinic_display_name: string | null; accent_colour: string | null }
+  branding: {
+    brand_name: string | null;
+    clinic_display_name: string | null;
+    accent_colour: string | null;
+  }
 ): PharmacyOrderPdfContext {
   const clinicName =
-    branding.clinic_display_name?.trim() || branding.brand_name?.trim() || "Follicle Intelligence clinic";
+    branding.clinic_display_name?.trim() ||
+    branding.brand_name?.trim() ||
+    "Follicle Intelligence clinic";
   return {
     clinicName,
     clinicLines: [snap.pharmacy.pharmacy_name, "Compound pharmacy order"],

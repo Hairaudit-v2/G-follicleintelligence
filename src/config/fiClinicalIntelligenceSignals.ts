@@ -16,7 +16,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNAL_CATEGORIES = [
   "patient_twin",
 ] as const;
 
-export type FiClinicalIntelligenceSignalCategory = (typeof FI_CLINICAL_INTELLIGENCE_SIGNAL_CATEGORIES)[number];
+export type FiClinicalIntelligenceSignalCategory =
+  (typeof FI_CLINICAL_INTELLIGENCE_SIGNAL_CATEGORIES)[number];
 
 export type FiClinicalIntelligenceSignalVisibilityBand = "clinician" | "manager" | "director";
 
@@ -75,9 +76,25 @@ const V = {
   leadership: { clinician: false, manager: true, director: true } as const,
 };
 
-const clinicalProfiles = ["surgeon", "doctor", "nurse", "clinic_manager", "director"] as const satisfies readonly FiWorkspaceProfileKey[];
-const surgeryProfiles = ["surgeon", "doctor", "clinic_manager", "director"] as const satisfies readonly FiWorkspaceProfileKey[];
-const pathProfiles = ["doctor", "surgeon", "clinic_manager", "director"] as const satisfies readonly FiWorkspaceProfileKey[];
+const clinicalProfiles = [
+  "surgeon",
+  "doctor",
+  "nurse",
+  "clinic_manager",
+  "director",
+] as const satisfies readonly FiWorkspaceProfileKey[];
+const surgeryProfiles = [
+  "surgeon",
+  "doctor",
+  "clinic_manager",
+  "director",
+] as const satisfies readonly FiWorkspaceProfileKey[];
+const pathProfiles = [
+  "doctor",
+  "surgeon",
+  "clinic_manager",
+  "director",
+] as const satisfies readonly FiWorkspaceProfileKey[];
 
 export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
   {
@@ -89,7 +106,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
     visibility: V.all,
     relatedWorkspaceProfiles: ["consultant", "doctor", "clinic_manager", "director"],
     sourceModule: "ConsultationOS",
-    recommendedNextStep: "Review open consultation workspaces and complete remaining sections when ready.",
+    recommendedNextStep:
+      "Review open consultation workspaces and complete remaining sections when ready.",
   },
   {
     key: "pathology_review_pending",
@@ -111,7 +129,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
     visibility: V.clinical,
     relatedWorkspaceProfiles: clinicalProfiles,
     sourceModule: "MedicationOS",
-    recommendedNextStep: "Open MedicationOS items that are awaiting review and document decisions as appropriate.",
+    recommendedNextStep:
+      "Open MedicationOS items that are awaiting review and document decisions as appropriate.",
   },
   {
     key: "surgery_readiness_attention",
@@ -166,7 +185,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
     visibility: V.clinical,
     relatedWorkspaceProfiles: surgeryProfiles,
     sourceModule: "SurgeryOS",
-    recommendedNextStep: "Record implantation method details your team uses for continuity of care.",
+    recommendedNextStep:
+      "Record implantation method details your team uses for continuity of care.",
   },
   {
     key: "post_op_pending",
@@ -177,7 +197,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
     visibility: V.clinical,
     relatedWorkspaceProfiles: clinicalProfiles,
     sourceModule: "SurgeryOS",
-    recommendedNextStep: "Update post-operative documentation when follow-up milestones are reached.",
+    recommendedNextStep:
+      "Update post-operative documentation when follow-up milestones are reached.",
   },
   {
     key: "follow_up_overdue",
@@ -221,7 +242,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
     visibility: V.leadership,
     relatedWorkspaceProfiles: ["director", "clinic_manager", "auditor"],
     sourceModule: "AuditOS",
-    recommendedNextStep: "Review outstanding audit items in the compliance workspace when scheduled.",
+    recommendedNextStep:
+      "Review outstanding audit items in the compliance workspace when scheduled.",
   },
   {
     key: "outcome_data_missing",
@@ -237,7 +259,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
   {
     key: "satisfaction_low",
     label: "Satisfaction signal",
-    description: "Recorded satisfaction may be below the neutral band and merits a supportive review.",
+    description:
+      "Recorded satisfaction may be below the neutral band and merits a supportive review.",
     category: "outcome",
     severityThresholds: null,
     visibility: V.leadership,
@@ -248,13 +271,15 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
   {
     key: "complication_attention",
     label: "Complication notes",
-    description: "Complication or incident notes may be present for awareness and governance review.",
+    description:
+      "Complication or incident notes may be present for awareness and governance review.",
     category: "outcome",
     severityThresholds: null,
     visibility: V.clinical,
     relatedWorkspaceProfiles: surgeryProfiles,
     sourceModule: "SurgeryOS",
-    recommendedNextStep: "Review complication documentation with the clinical team using local protocols.",
+    recommendedNextStep:
+      "Review complication documentation with the clinical team using local protocols.",
   },
   {
     key: "treatment_response_unknown",
@@ -281,13 +306,15 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
   {
     key: "exosome_follow_up_due",
     label: "Exosome follow-up",
-    description: "Exosome-related follow-up scheduling may need attention when services are in use.",
+    description:
+      "Exosome-related follow-up scheduling may need attention when services are in use.",
     category: "follow_up",
     severityThresholds: null,
     visibility: V.clinical,
     relatedWorkspaceProfiles: clinicalProfiles,
     sourceModule: "CalendarOS",
-    recommendedNextStep: "Confirm exosome follow-up bookings or notes when your services include exosome care.",
+    recommendedNextStep:
+      "Confirm exosome follow-up bookings or notes when your services include exosome care.",
   },
   {
     key: "donor_safety_attention",
@@ -303,7 +330,8 @@ export const FI_CLINICAL_INTELLIGENCE_SIGNALS = [
   {
     key: "density_outcome_attention",
     label: "Density outcome capture",
-    description: "Density-oriented outcome capture may be incomplete where your protocol expects it.",
+    description:
+      "Density-oriented outcome capture may be incomplete where your protocol expects it.",
     category: "outcome",
     severityThresholds: null,
     visibility: V.clinical,

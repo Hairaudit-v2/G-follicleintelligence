@@ -248,7 +248,10 @@ const CLINIC_STAFF_NAMES: Record<string, Record<ClinicStaffRoleKey, string>> = {
 };
 
 export function buildEnterpriseDemoStaffEmail(key: string): string {
-  const local = key.trim().toLowerCase().replace(/[^a-z0-9]+/g, ".");
+  const local = key
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ".");
   return `titan.${local}@${ENTERPRISE_DEMO_STAFF_EMAIL_DOMAIN}`;
 }
 

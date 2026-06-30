@@ -70,7 +70,10 @@ export function mergeUniqueStrings(...groups: string[][]): string[] {
   return out;
 }
 
-export function extractBodyAreaMapHighlights(concernMap: unknown, limit = 12): { view: string; label: string; severity: string }[] {
+export function extractBodyAreaMapHighlights(
+  concernMap: unknown,
+  limit = 12
+): { view: string; label: string; severity: string }[] {
   if (!concernMap || typeof concernMap !== "object" || Array.isArray(concernMap)) return [];
   const { annotations } = normalizeBodyAreaMapValue(concernMap);
   const agg = aggregateBodyAreaMapByRegionLabel(annotations);

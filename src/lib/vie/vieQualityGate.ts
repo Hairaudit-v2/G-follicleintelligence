@@ -52,12 +52,15 @@ export function deriveClinicalUsability(
   }
 
   if (intel.classification.status === "pending_ai") {
-    warnings.push("View classification pending AI — follow the capture guide and review before accepting.");
+    warnings.push(
+      "View classification pending AI — follow the capture guide and review before accepting."
+    );
   }
 
   const clinically_usable =
     status !== "unusable" &&
-    (!policy.block_clinically_unusable_images || intel.quality_score >= policy.minimum_capture_quality_score);
+    (!policy.block_clinically_unusable_images ||
+      intel.quality_score >= policy.minimum_capture_quality_score);
 
   if (policy.block_clinically_unusable_images && !clinically_usable && status !== "unusable") {
     status = "unusable";
@@ -65,7 +68,7 @@ export function deriveClinicalUsability(
 
   const retake_recommendation =
     status === "unusable" || intel.quality_band === "retake_recommended"
-      ? warnings[0] ?? "Retake recommended for clinical documentation quality."
+      ? (warnings[0] ?? "Retake recommended for clinical documentation quality.")
       : status === "warning"
         ? "Acceptable with caution — consider retaking if any check looks wrong."
         : null;
@@ -98,7 +101,9 @@ export function canAcceptVieCapture(params: {
     return {
       allowed: false,
       requires_override: true,
-      reason: clinical.retake_recommendation ?? "Capture is not clinically usable. Retake or ask an admin to enable quality override.",
+      reason:
+        clinical.retake_recommendation ??
+        "Capture is not clinically usable. Retake or ask an admin to enable quality override.",
     };
   }
 

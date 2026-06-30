@@ -3,9 +3,7 @@
 import { z, ZodError } from "zod";
 
 import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
-import {
-  runClinicBookingSetupTest,
-} from "@/src/lib/clinicSetup/clinicBookingSetupTest.server";
+import { runClinicBookingSetupTest } from "@/src/lib/clinicSetup/clinicBookingSetupTest.server";
 import type { ClinicBookingSetupTestResult } from "@/src/lib/clinicSetup/clinicBookingSetupTestTypes";
 
 function errMsg(e: unknown): string {

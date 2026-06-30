@@ -6,7 +6,11 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { isPostgresUniqueViolation } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import { upsertArCaseFromInvoice } from "@/src/lib/financialOs/financialAccountsReceivable.server";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+  openCollectionStatusFilter,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type FiFinancialAutomationCronResult = {
   job: string;
@@ -72,7 +76,14 @@ export async function runFinancialOsDepositOverdueJob(opts: {
     const inv = mapInvoiceRow(raw as Record<string, unknown>);
     if (!isInvoiceOpenForCollection(inv.status)) continue;
     if (invoiceBalanceDueCents(inv) <= 0) continue;
-    const ins = await insertRun(inv.tenant_id, "deposit_or_balance_overdue", "invoice", inv.id, runDate, opts.dryRun);
+    const ins = await insertRun(
+      inv.tenant_id,
+      "deposit_or_balance_overdue",
+      "invoice",
+      inv.id,
+      runDate,
+      opts.dryRun
+    );
     if (ins === "duplicate") {
       skippedDuplicate += 1;
       continue;
@@ -103,7 +114,8 @@ export async function runFinancialOsDepositOverdueJob(opts: {
           tenantId: inv.tenant_id,
           invoice: inv,
           todayYmd: runDate,
-          trigger: inv.invoice_kind === "surgery_deposit" ? "deposit_deadline_missed" : "invoice_overdue",
+          trigger:
+            inv.invoice_kind === "surgery_deposit" ? "deposit_deadline_missed" : "invoice_overdue",
         });
       } catch {
         /* AR case best-effort */
@@ -153,10 +165,14 @@ export async function runFinancialOsBalanceDueRemindersJob(opts: {
     if (!due) continue;
     const hints = inv.automation_hints ?? {};
     const balDays = Array.isArray(hints.balance_due_reminder_days)
-      ? (hints.balance_due_reminder_days as unknown[]).map((x) => Number(x)).filter((n) => Number.isFinite(n) && n >= 0)
+      ? (hints.balance_due_reminder_days as unknown[])
+          .map((x) => Number(x))
+          .filter((n) => Number.isFinite(n) && n >= 0)
       : [];
     const depDays = Array.isArray(hints.deposit_due_reminder_days)
-      ? (hints.deposit_due_reminder_days as unknown[]).map((x) => Number(x)).filter((n) => Number.isFinite(n) && n >= 0)
+      ? (hints.deposit_due_reminder_days as unknown[])
+          .map((x) => Number(x))
+          .filter((n) => Number.isFinite(n) && n >= 0)
       : [];
     const offsets = balDays.length ? balDays : depDays;
     if (!offsets.length) continue;
@@ -170,7 +186,14 @@ export async function runFinancialOsBalanceDueRemindersJob(opts: {
     }
     if (!hit) continue;
 
-    const ins = await insertRun(inv.tenant_id, "balance_due_reminder", "invoice", inv.id, runDate, opts.dryRun);
+    const ins = await insertRun(
+      inv.tenant_id,
+      "balance_due_reminder",
+      "invoice",
+      inv.id,
+      runDate,
+      opts.dryRun
+    );
     if (ins === "duplicate") {
       skippedDuplicate += 1;
       continue;
@@ -192,7 +215,13 @@ export async function runFinancialOsBalanceDueRemindersJob(opts: {
       }
     }
   }
-  return { job: "balance_due_reminders", examined, recorded, skippedDuplicate, dryRun: opts.dryRun };
+  return {
+    job: "balance_due_reminders",
+    examined,
+    recorded,
+    skippedDuplicate,
+    dryRun: opts.dryRun,
+  };
 }
 
 /** Failed Stripe checkout rows (metadata) — recovery nudge. */
@@ -224,7 +253,14 @@ export async function runFinancialOsFailedPaymentRecoveryJob(opts: {
     const meta = (raw as { metadata?: Record<string, unknown> }).metadata ?? {};
     if (!meta.stripe_checkout_failed_at) continue;
 
-    const ins = await insertRun(tid, "failed_checkout_recovery", "payment_request", id, runDate, opts.dryRun);
+    const ins = await insertRun(
+      tid,
+      "failed_checkout_recovery",
+      "payment_request",
+      id,
+      runDate,
+      opts.dryRun
+    );
     if (ins === "duplicate") {
       skippedDuplicate += 1;
       continue;
@@ -239,14 +275,24 @@ export async function runFinancialOsFailedPaymentRecoveryJob(opts: {
           caseId: null,
           activityKind: "fi_os_financial_failed_checkout_recovery",
           title: "FinancialOS: failed checkout recovery",
-          detail: { payment_request_id: id, invoice_id: (raw as { invoice_id?: string }).invoice_id ?? null, run_date: runDate },
+          detail: {
+            payment_request_id: id,
+            invoice_id: (raw as { invoice_id?: string }).invoice_id ?? null,
+            run_date: runDate,
+          },
         });
       } catch {
         /* optional */
       }
     }
   }
-  return { job: "failed_payment_recovery", examined, recorded, skippedDuplicate, dryRun: opts.dryRun };
+  return {
+    job: "failed_payment_recovery",
+    examined,
+    recorded,
+    skippedDuplicate,
+    dryRun: opts.dryRun,
+  };
 }
 
 /** Escalation: multiple failures on same invoice (metadata on latest PR). */
@@ -278,7 +324,14 @@ export async function runFinancialOsEscalationAlertsJob(opts: {
 
     const id = String((raw as { id: string }).id);
     const tid = String((raw as { tenant_id: string }).tenant_id);
-    const ins = await insertRun(tid, "payment_escalation", "payment_request", id, runDate, opts.dryRun);
+    const ins = await insertRun(
+      tid,
+      "payment_escalation",
+      "payment_request",
+      id,
+      runDate,
+      opts.dryRun
+    );
     if (ins === "duplicate") {
       skippedDuplicate += 1;
       continue;
@@ -293,18 +346,32 @@ export async function runFinancialOsEscalationAlertsJob(opts: {
           caseId: null,
           activityKind: "fi_os_financial_payment_escalation",
           title: "FinancialOS: payment escalation",
-          detail: { payment_request_id: id, invoice_id: (raw as { invoice_id?: string }).invoice_id ?? null, run_date: runDate },
+          detail: {
+            payment_request_id: id,
+            invoice_id: (raw as { invoice_id?: string }).invoice_id ?? null,
+            run_date: runDate,
+          },
         });
       } catch {
         /* optional */
       }
     }
   }
-  return { job: "payment_escalation_alerts", examined, recorded, skippedDuplicate, dryRun: opts.dryRun };
+  return {
+    job: "payment_escalation_alerts",
+    examined,
+    recorded,
+    skippedDuplicate,
+    dryRun: opts.dryRun,
+  };
 }
 
 export async function runFinancialOsAutomationJob(
-  job: "deposit_overdue" | "balance_due_reminders" | "failed_payment_recovery" | "payment_escalation_alerts",
+  job:
+    | "deposit_overdue"
+    | "balance_due_reminders"
+    | "failed_payment_recovery"
+    | "payment_escalation_alerts",
   opts: { runDateYmd: string; dryRun: boolean; limit: number; tenantId?: string | null }
 ): Promise<FiFinancialAutomationCronResult> {
   if (opts.tenantId?.trim()) assertNonEmptyUuid(opts.tenantId, "tenantId");

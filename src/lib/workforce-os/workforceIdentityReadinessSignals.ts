@@ -45,7 +45,10 @@ function metaStr(meta: Record<string, unknown> | null | undefined, key: string):
   return s || null;
 }
 
-function pickRow(rows: WorkforceIdentitySourceRowInput[], system: string): WorkforceIdentitySourceRowInput | undefined {
+function pickRow(
+  rows: WorkforceIdentitySourceRowInput[],
+  system: string
+): WorkforceIdentitySourceRowInput | undefined {
   return rows.find((r) => canonicaliseWorkforceSourceSystem(r.source_system) === system);
 }
 
@@ -81,7 +84,8 @@ export function buildWorkforceIdentityReadinessSignals(
     metaStr(academyMeta, "training_source") ?? metaStr(hrMeta, "training_source") ?? null;
   const certificationSource =
     metaStr(academyMeta, "certification_source") ?? metaStr(hrMeta, "certification_source") ?? null;
-  const competencySource = metaStr(hrMeta, "competency_source") ?? metaStr(nexusMeta, "competency_source") ?? null;
+  const competencySource =
+    metaStr(hrMeta, "competency_source") ?? metaStr(nexusMeta, "competency_source") ?? null;
 
   const primaryMeta = nexusMeta ?? hrMeta ?? academyMeta;
   const syncStatus = parseWorkforceIdentitySyncStatus(primaryMeta?.sync_status) ?? null;

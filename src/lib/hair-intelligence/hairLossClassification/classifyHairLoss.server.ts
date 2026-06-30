@@ -2,9 +2,16 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { hairLossClassificationNotConfiguredResult } from "./classifyHairLossFallback";
-import { HIE_HAIR_LOSS_CLASSIFIER_VERSION, classifyHairLossWithOpenAi, isHairLossOpenAiConfigured } from "./openAiHairLossClassifier.server";
+import {
+  HIE_HAIR_LOSS_CLASSIFIER_VERSION,
+  classifyHairLossWithOpenAi,
+  isHairLossOpenAiConfigured,
+} from "./openAiHairLossClassifier.server";
 import { insertHairIntelligenceHairLossClassificationRow } from "./persistHairLossClassification.server";
-import type { HairIntelligenceHairLossClassificationInsert, HairLossClassificationModelResult } from "./types";
+import type {
+  HairIntelligenceHairLossClassificationInsert,
+  HairLossClassificationModelResult,
+} from "./types";
 
 export type ClassifyHairLossFromModelUrlOutcome = {
   result: HairLossClassificationModelResult;
@@ -16,7 +23,9 @@ export type ClassifyHairLossFromModelUrlOutcome = {
  * Classify from a model-ready URL (short-lived signed URL from Supabase service role).
  * Never pass durable public bucket URLs.
  */
-export async function classifyHairLossFromModelUrl(params: { imageUrlForModel: string }): Promise<ClassifyHairLossFromModelUrlOutcome> {
+export async function classifyHairLossFromModelUrl(params: {
+  imageUrlForModel: string;
+}): Promise<ClassifyHairLossFromModelUrlOutcome> {
   if (!isHairLossOpenAiConfigured()) {
     return {
       result: hairLossClassificationNotConfiguredResult(),
@@ -48,7 +57,9 @@ export async function classifyAndPersistHairLossClassification(
   client?: SupabaseClient
 ): Promise<ClassifyPersistHairLossOutcome> {
   const { imageUrlForModel, ...row } = params;
-  const { result, classifierVersion, usedOpenAi } = await classifyHairLossFromModelUrl({ imageUrlForModel });
+  const { result, classifierVersion, usedOpenAi } = await classifyHairLossFromModelUrl({
+    imageUrlForModel,
+  });
   const persisted = await insertHairIntelligenceHairLossClassificationRow(
     {
       ...row,

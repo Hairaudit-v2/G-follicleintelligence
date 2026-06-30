@@ -5,7 +5,9 @@ import { updatePatientClinicalDetails } from "./clinicalDetailsServer";
 
 const SYNC_KEYS = ["norwood_scale", "ludwig_scale", "hairline_pattern", "primary_concern"] as const;
 
-function readMedicalHairLossSection(structuredData: Record<string, unknown>): Record<string, unknown> | null {
+function readMedicalHairLossSection(
+  structuredData: Record<string, unknown>
+): Record<string, unknown> | null {
   const raw = structuredData.medical_hair_loss;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   return raw as Record<string, unknown>;

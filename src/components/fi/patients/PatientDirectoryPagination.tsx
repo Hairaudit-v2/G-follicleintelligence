@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { buildPatientDirectoryHref, type PatientDirectoryQuery } from "@/src/lib/patients/patientDirectoryQuery";
+import {
+  buildPatientDirectoryHref,
+  type PatientDirectoryQuery,
+} from "@/src/lib/patients/patientDirectoryQuery";
 
 export function PatientDirectoryPagination({
   tenantId,
@@ -19,9 +22,13 @@ export function PatientDirectoryPagination({
   const to = total === 0 ? 0 : Math.min(current * pageSize, total);
   const listOpts = listView ? { view: "list" as const } : undefined;
   const prevHref =
-    current > 1 ? buildPatientDirectoryHref(tenantId, { ...query, page: current - 1 }, listOpts) : null;
+    current > 1
+      ? buildPatientDirectoryHref(tenantId, { ...query, page: current - 1 }, listOpts)
+      : null;
   const nextHref =
-    current < pageCount ? buildPatientDirectoryHref(tenantId, { ...query, page: current + 1 }, listOpts) : null;
+    current < pageCount
+      ? buildPatientDirectoryHref(tenantId, { ...query, page: current + 1 }, listOpts)
+      : null;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300">

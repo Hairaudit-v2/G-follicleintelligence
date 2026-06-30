@@ -2,7 +2,10 @@
  * ReceptionOS Phase 7 — usage event kinds and validation (pure).
  */
 
-import { RECEPTION_OS_OPERATING_MODES, type ReceptionOsOperatingMode } from "@/src/lib/receptionOs/receptionOperatingMode";
+import {
+  RECEPTION_OS_OPERATING_MODES,
+  type ReceptionOsOperatingMode,
+} from "@/src/lib/receptionOs/receptionOperatingMode";
 
 export const RECEPTION_USAGE_EVENT_KINDS = [
   "dashboard_viewed",
@@ -49,14 +52,17 @@ export function isReceptionUsageEventKind(v: unknown): v is ReceptionUsageEventK
 }
 
 export function sanitizeReceptionUsageEventContext(
-  ctx: ReceptionUsageEventContext | undefined,
+  ctx: ReceptionUsageEventContext | undefined
 ): Omit<ReceptionUsageEventContext, "metadata"> & { metadata: Record<string, unknown> } {
   const operatingMode =
     ctx?.operatingMode && OPERATING_MODE_SET.has(ctx.operatingMode) ? ctx.operatingMode : null;
-  const widgetKey = typeof ctx?.widgetKey === "string" ? ctx.widgetKey.trim().slice(0, 64) || null : null;
+  const widgetKey =
+    typeof ctx?.widgetKey === "string" ? ctx.widgetKey.trim().slice(0, 64) || null : null;
   const taskId = typeof ctx?.taskId === "string" ? ctx.taskId.trim() || null : null;
-  const alertKind = typeof ctx?.alertKind === "string" ? ctx.alertKind.trim().slice(0, 64) || null : null;
-  const sourceRefId = typeof ctx?.sourceRefId === "string" ? ctx.sourceRefId.trim().slice(0, 128) || null : null;
+  const alertKind =
+    typeof ctx?.alertKind === "string" ? ctx.alertKind.trim().slice(0, 64) || null : null;
+  const sourceRefId =
+    typeof ctx?.sourceRefId === "string" ? ctx.sourceRefId.trim().slice(0, 128) || null : null;
   const metadata =
     ctx?.metadata && typeof ctx.metadata === "object" && !Array.isArray(ctx.metadata)
       ? sanitizeOperationalMetadata(ctx.metadata)
@@ -65,7 +71,9 @@ export function sanitizeReceptionUsageEventContext(
 }
 
 /** Strip keys that could carry sensitive patient or message content. */
-export function sanitizeOperationalMetadata(input: Record<string, unknown>): Record<string, unknown> {
+export function sanitizeOperationalMetadata(
+  input: Record<string, unknown>
+): Record<string, unknown> {
   const blocked = new Set([
     "body",
     "message",
@@ -91,7 +99,10 @@ export function sanitizeOperationalMetadata(input: Record<string, unknown>): Rec
   return out;
 }
 
-export function assertReceptionUsageEventTenantScope(expectedTenantId: string, rowTenantId: string): void {
+export function assertReceptionUsageEventTenantScope(
+  expectedTenantId: string,
+  rowTenantId: string
+): void {
   if (expectedTenantId.trim() !== rowTenantId.trim()) {
     throw new Error("ReceptionOS usage event tenant scope violation.");
   }

@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { FI_ORGANISATIONAL_INTELLIGENCE_SIGNAL_KEYS } from "@/src/config/fiOrganisationalIntelligenceSignals";
-import { buildStaffSignalCards, severityForSignalCount } from "@/src/lib/fi-os/staffIntelligenceSignals";
+import {
+  buildStaffSignalCards,
+  severityForSignalCount,
+} from "@/src/lib/fi-os/staffIntelligenceSignals";
 
 test("severity: zero count is always info", () => {
   for (const k of FI_ORGANISATIONAL_INTELLIGENCE_SIGNAL_KEYS) {

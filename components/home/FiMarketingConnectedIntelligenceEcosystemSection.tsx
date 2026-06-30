@@ -30,12 +30,17 @@ function EcosystemSystemCard({
         <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
+        <span
+          className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent"
+          aria-hidden
+        />
       </div>
       <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
         {name}
       </p>
-      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/65">{label}</p>
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/65">
+        {label}
+      </p>
       <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
     </GlassCard>
   );
@@ -59,12 +64,60 @@ function ConnectedEcosystemGrid() {
           preserveAspectRatio="none"
           aria-hidden
         >
-          <line x1="25" y1="25" x2="75" y2="25" stroke="rgb(212 175 55 / 0.12)" strokeWidth="0.35" vectorEffect="non-scaling-stroke" />
-          <line x1="25" y1="75" x2="75" y2="75" stroke="rgb(212 175 55 / 0.12)" strokeWidth="0.35" vectorEffect="non-scaling-stroke" />
-          <line x1="25" y1="25" x2="25" y2="75" stroke="rgb(212 175 55 / 0.12)" strokeWidth="0.35" vectorEffect="non-scaling-stroke" />
-          <line x1="75" y1="25" x2="75" y2="75" stroke="rgb(212 175 55 / 0.12)" strokeWidth="0.35" vectorEffect="non-scaling-stroke" />
-          <line x1="25" y1="25" x2="75" y2="75" stroke="rgb(212 175 55 / 0.08)" strokeWidth="0.25" vectorEffect="non-scaling-stroke" />
-          <line x1="75" y1="25" x2="25" y2="75" stroke="rgb(212 175 55 / 0.08)" strokeWidth="0.25" vectorEffect="non-scaling-stroke" />
+          <line
+            x1="25"
+            y1="25"
+            x2="75"
+            y2="25"
+            stroke="rgb(212 175 55 / 0.12)"
+            strokeWidth="0.35"
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1="25"
+            y1="75"
+            x2="75"
+            y2="75"
+            stroke="rgb(212 175 55 / 0.12)"
+            strokeWidth="0.35"
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1="25"
+            y1="25"
+            x2="25"
+            y2="75"
+            stroke="rgb(212 175 55 / 0.12)"
+            strokeWidth="0.35"
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1="75"
+            y1="25"
+            x2="75"
+            y2="75"
+            stroke="rgb(212 175 55 / 0.12)"
+            strokeWidth="0.35"
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1="25"
+            y1="25"
+            x2="75"
+            y2="75"
+            stroke="rgb(212 175 55 / 0.08)"
+            strokeWidth="0.25"
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1="75"
+            y1="25"
+            x2="25"
+            y2="75"
+            stroke="rgb(212 175 55 / 0.08)"
+            strokeWidth="0.25"
+            vectorEffect="non-scaling-stroke"
+          />
           <line
             x1="50"
             y1="50"
@@ -74,7 +127,11 @@ function ConnectedEcosystemGrid() {
             strokeWidth="0.28"
             strokeDasharray="0.85 2"
             vectorEffect="non-scaling-stroke"
-            className={reduceMotion ? "text-primary/20" : "fi-hero-network-line-out text-primary/35 [animation-duration:3.2s]"}
+            className={
+              reduceMotion
+                ? "text-primary/20"
+                : "fi-hero-network-line-out text-primary/35 [animation-duration:3.2s]"
+            }
           />
           <line
             x1="50"
@@ -85,7 +142,11 @@ function ConnectedEcosystemGrid() {
             strokeWidth="0.28"
             strokeDasharray="0.85 2"
             vectorEffect="non-scaling-stroke"
-            className={reduceMotion ? "text-primary/20" : "fi-hero-network-line-in text-primary/35 [animation-duration:2.8s]"}
+            className={
+              reduceMotion
+                ? "text-primary/20"
+                : "fi-hero-network-line-in text-primary/35 [animation-duration:2.8s]"
+            }
           />
           <line
             x1="50"
@@ -96,7 +157,11 @@ function ConnectedEcosystemGrid() {
             strokeWidth="0.28"
             strokeDasharray="0.85 2"
             vectorEffect="non-scaling-stroke"
-            className={reduceMotion ? "text-primary/20" : "fi-hero-network-line-out text-primary/35 [animation-duration:3.6s]"}
+            className={
+              reduceMotion
+                ? "text-primary/20"
+                : "fi-hero-network-line-out text-primary/35 [animation-duration:3.6s]"
+            }
           />
           <line
             x1="50"
@@ -107,7 +172,11 @@ function ConnectedEcosystemGrid() {
             strokeWidth="0.28"
             strokeDasharray="0.85 2"
             vectorEffect="non-scaling-stroke"
-            className={reduceMotion ? "text-primary/20" : "fi-hero-network-line-in text-primary/35 [animation-duration:3s]"}
+            className={
+              reduceMotion
+                ? "text-primary/20"
+                : "fi-hero-network-line-in text-primary/35 [animation-duration:3s]"
+            }
           />
         </svg>
 

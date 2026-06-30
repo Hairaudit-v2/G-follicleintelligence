@@ -193,7 +193,9 @@ describe("internalBusObservability (Stage 12)", () => {
       result: {
         status: "drained",
         drained: 1,
-        items: [{ queue_item_id: "x", event_name: "hairaudit.audit.completed", handler_errors: ["e1"] }],
+        items: [
+          { queue_item_id: "x", event_name: "hairaudit.audit.completed", handler_errors: ["e1"] },
+        ],
       },
       created_at: "2026-06-01T12:00:02.000Z",
     });
@@ -212,7 +214,9 @@ describe("internalBusObservability (Stage 12)", () => {
       result: {
         status: "drained",
         drained: 1,
-        items: [{ queue_item_id: "x", event_name: "hairaudit.audit.completed", handler_errors: [] }],
+        items: [
+          { queue_item_id: "x", event_name: "hairaudit.audit.completed", handler_errors: [] },
+        ],
       },
     });
     assert.equal(ok.status, "processed");

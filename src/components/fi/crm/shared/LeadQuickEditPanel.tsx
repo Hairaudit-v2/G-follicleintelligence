@@ -1,7 +1,11 @@
 "use client";
 
 import type { CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
-import { crmLeadCardClass, crmPrioritySelectOptions, crmStatusSelectOptions } from "./crmSharedStyles";
+import {
+  crmLeadCardClass,
+  crmPrioritySelectOptions,
+  crmStatusSelectOptions,
+} from "./crmSharedStyles";
 
 export type LeadQuickEditPanelProps = {
   lead: FiCrmLeadRow;
@@ -40,7 +44,9 @@ export function LeadQuickEditPanel({
 
   return (
     <section className={crmLeadCardClass}>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Quick edit</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Quick edit
+      </h3>
       <form className="space-y-2" onSubmit={onSubmit}>
         <label className="block">
           <span className="text-xs font-medium text-slate-300">Summary</span>

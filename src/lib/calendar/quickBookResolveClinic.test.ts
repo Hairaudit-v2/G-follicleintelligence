@@ -44,6 +44,9 @@ describe("quickBookResolveClinic", () => {
   });
 
   it("findEvolvedPerthStyleClinicId is case-insensitive on evolved+perth", () => {
-    assert.equal(findEvolvedPerthStyleClinicId([{ id: "x", display_name: "EVOLVED hair (Perth)" }]), "x");
+    assert.equal(
+      findEvolvedPerthStyleClinicId([{ id: "x", display_name: "EVOLVED hair (Perth)" }]),
+      "x"
+    );
   });
 });

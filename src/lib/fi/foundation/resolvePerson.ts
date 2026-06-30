@@ -13,9 +13,10 @@ function asPersonRow(row: Record<string, unknown>): FiPersonRow {
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
-    metadata: (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
-      ? (row.metadata as Record<string, unknown>)
-      : {}) ?? {},
+    metadata:
+      (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {}) ?? {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -70,8 +71,13 @@ export async function resolveOrCreatePerson(
         .eq("id", mapped.data.person_id)
         .eq("tenant_id", tenantId)
         .single();
-      if (row.error || !row.data) throw new Error(row.error?.message ?? "Person not found for mapping.");
-      return { person: asPersonRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
+      if (row.error || !row.data)
+        throw new Error(row.error?.message ?? "Person not found for mapping.");
+      return {
+        person: asPersonRow(row.data as Record<string, unknown>),
+        created: false,
+        mapping_created: false,
+      };
     }
   }
 
@@ -106,7 +112,11 @@ export async function resolveOrCreatePerson(
             sourceSystem,
             sourcePersonId
           );
-          return { person: asPersonRow(row.data as Record<string, unknown>), created: false, mapping_created: mappingCreated };
+          return {
+            person: asPersonRow(row.data as Record<string, unknown>),
+            created: false,
+            mapping_created: mappingCreated,
+          };
         }
       }
     }
@@ -127,7 +137,13 @@ export async function resolveOrCreatePerson(
     });
     if (emailMatches.length === 1) {
       const person = asPersonRow(emailMatches[0]);
-      const mappingCreated = await ensurePersonSourceMapping(supabase, tenantId, person.id, sourceSystem, sourcePersonId);
+      const mappingCreated = await ensurePersonSourceMapping(
+        supabase,
+        tenantId,
+        person.id,
+        sourceSystem,
+        sourcePersonId
+      );
       return { person, created: false, mapping_created: mappingCreated };
     }
   }
@@ -176,12 +192,23 @@ export async function resolveOrCreatePerson(
         .eq("id", retry.data.person_id)
         .eq("tenant_id", tenantId)
         .single();
-      if (row.data) return { person: asPersonRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
+      if (row.data)
+        return {
+          person: asPersonRow(row.data as Record<string, unknown>),
+          created: false,
+          mapping_created: false,
+        };
     }
   }
 
   if (inserted.error) throw new Error(inserted.error.message);
   const person = asPersonRow(inserted.data as Record<string, unknown>);
-  const mappingCreated = await ensurePersonSourceMapping(supabase, tenantId, person.id, sourceSystem, sourcePersonId);
+  const mappingCreated = await ensurePersonSourceMapping(
+    supabase,
+    tenantId,
+    person.id,
+    sourceSystem,
+    sourcePersonId
+  );
   return { person, created: true, mapping_created: mappingCreated };
 }

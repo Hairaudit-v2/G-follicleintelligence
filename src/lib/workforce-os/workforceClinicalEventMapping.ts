@@ -46,7 +46,9 @@ function isTheatreDayKind(kind: string): boolean {
 }
 
 /** Map a booking row to a WorkforceOS template `event_type`. */
-export function resolveWorkforceEventTypeFromBooking(booking: Pick<FiBookingRow, "booking_type" | "metadata">): WorkforceClinicalEventType {
+export function resolveWorkforceEventTypeFromBooking(
+  booking: Pick<FiBookingRow, "booking_type" | "metadata">
+): WorkforceClinicalEventType {
   const bookingType = normalizeBookingType(booking.booking_type);
   const dayKind = readMetadataDayKind(booking.metadata);
 
@@ -63,7 +65,9 @@ export function resolveWorkforceEventTypeFromSurgery(
 ): WorkforceClinicalEventType {
   const meta = surgery.metadata;
   if (meta && typeof meta === "object" && !Array.isArray(meta)) {
-    const dayKind = String(meta.procedure_day_kind ?? meta.event_kind ?? "").trim().toLowerCase();
+    const dayKind = String(meta.procedure_day_kind ?? meta.event_kind ?? "")
+      .trim()
+      .toLowerCase();
     if (isTheatreDayKind(dayKind)) return "surgery";
   }
   const phase = (surgery.procedure_phase ?? "").trim().toLowerCase();
@@ -77,10 +81,10 @@ export function resolveWorkforceEventSource(entity: {
   return entity.kind === "booking" ? "booking" : "surgery";
 }
 
-export function getWorkforceEventWindow(entity: {
-  start_at: string;
-  end_at: string;
-}): { startsAt: string; endsAt: string } {
+export function getWorkforceEventWindow(entity: { start_at: string; end_at: string }): {
+  startsAt: string;
+  endsAt: string;
+} {
   return { startsAt: entity.start_at, endsAt: entity.end_at };
 }
 
@@ -107,7 +111,8 @@ export function resolveWorkforceAssignedRole(input: {
 
   const bookingType = normalizeBookingType(input.bookingType);
   if (bookingType === "surgery") return role || "surgeon";
-  if (bookingType === "prp" || bookingType === "exosomes" || bookingType === "prf") return role || "doctor";
+  if (bookingType === "prp" || bookingType === "exosomes" || bookingType === "prf")
+    return role || "doctor";
   return role || "consultant";
 }
 
@@ -161,7 +166,9 @@ export function buildWorkforceCandidateAssignments(input: {
   return out;
 }
 
-export function isBookingActiveForStaffing(booking: Pick<FiBookingRow, "booking_status" | "cancelled_at">): boolean {
+export function isBookingActiveForStaffing(
+  booking: Pick<FiBookingRow, "booking_status" | "cancelled_at">
+): boolean {
   const status = booking.booking_status.trim().toLowerCase();
   if (status === "cancelled" || booking.cancelled_at) return false;
   return true;

@@ -6,7 +6,10 @@ import {
   FI_OUTCOME_CHECKPOINT_KEYS,
   fiOutcomeCheckpointOrderIndex,
 } from "@/src/config/fiOutcomeIntelligenceRegistry";
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import {
   aggregateOutcomeMetricSummaries,
   detectOutcomeIdentifierLeakage,
@@ -33,7 +36,9 @@ import { fiDashboardWidgetVisibleByFeatureAccess } from "@/src/lib/fi-os/stage2F
 test("registry: complete and checkpoint ordering is chronological", () => {
   assertFiOutcomeIntelligenceRegistryComplete();
   const order = [...FI_OUTCOME_CHECKPOINT_KEYS];
-  const sorted = [...order].sort((a, b) => fiOutcomeCheckpointOrderIndex(a) - fiOutcomeCheckpointOrderIndex(b));
+  const sorted = [...order].sort(
+    (a, b) => fiOutcomeCheckpointOrderIndex(a) - fiOutcomeCheckpointOrderIndex(b)
+  );
   assert.deepEqual(sorted, order);
   assert.ok(fiOutcomeCheckpointOrderIndex("baseline") < fiOutcomeCheckpointOrderIndex("month_24"));
 });
@@ -93,7 +98,9 @@ test("aggregation: refuse network when sample or tenants too small", () => {
 });
 
 test("aggregation: identifier leakage rejects UUID-like strings", () => {
-  const bad = detectOutcomeIdentifierLeakage({ note: "patient 123e4567-e89b-12d3-a456-426614174000 seen" });
+  const bad = detectOutcomeIdentifierLeakage({
+    note: "patient 123e4567-e89b-12d3-a456-426614174000 seen",
+  });
   assert.equal(bad.ok, false);
   const badKey = detectOutcomeIdentifierLeakage({ patient_id: "x" });
   assert.equal(badKey.ok, false);
@@ -108,7 +115,10 @@ test("aggregation: tenant + global drafts", () => {
     aggregatePeriodEnd: "2026-01-31",
     cohortKey: "month:2026-01:fue",
     cohortDescription: "FUE cohort",
-    measurements: [{ metric_values: { patient_satisfaction_score: 8 } }, { metric_values: { patient_satisfaction_score: 9 } }],
+    measurements: [
+      { metric_values: { patient_satisfaction_score: 8 } },
+      { metric_values: { patient_satisfaction_score: 9 } },
+    ],
     protocols: [{ protocol_key: "fue" }, { protocol_key: "fue" }],
     visibilityScope: "tenant_only",
     metadata: {},
@@ -131,7 +141,9 @@ test("aggregation: tenant + global drafts", () => {
     metadata: {},
   });
   assert.equal(globalDraft.anonymisation_threshold_met, true);
-  assert.ok((globalDraft.metric_summary as Record<string, { n: number }>).patient_satisfaction_score.n >= 25);
+  assert.ok(
+    (globalDraft.metric_summary as Record<string, { n: number }>).patient_satisfaction_score.n >= 25
+  );
 });
 
 test("aggregation: global draft fails threshold when merged payload would leak (direct gate)", () => {
@@ -171,7 +183,10 @@ test("case view: buildCaseOutcomeIntelligenceView empty fallback", () => {
     linkedImageCount: 0,
   });
   assert.ok(v.checkpointsMissing.length > 0);
-  assert.equal(missingOutcomeCheckpoints(v.checkpointsCaptured).length, v.checkpointsMissing.length);
+  assert.equal(
+    missingOutcomeCheckpoints(v.checkpointsCaptured).length,
+    v.checkpointsMissing.length
+  );
   assert.equal(v.networkEligibleHint, "insufficient_data");
 });
 

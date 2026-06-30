@@ -34,7 +34,8 @@ function mapDeliveryRow(raw: Record<string, unknown>): ReceptionCommunicationDel
     tenant_id: String(raw.tenant_id),
     lead_id: raw.lead_id != null ? String(raw.lead_id) : null,
     patient_id: raw.patient_id != null ? String(raw.patient_id) : null,
-    crm_communication_id: raw.crm_communication_id != null ? String(raw.crm_communication_id) : null,
+    crm_communication_id:
+      raw.crm_communication_id != null ? String(raw.crm_communication_id) : null,
     task_id: raw.task_id != null ? String(raw.task_id) : null,
     channel: String(raw.channel) as "sms" | "email",
     provider: String(raw.provider) as "stub" | "resend" | "twilio",
@@ -45,14 +46,16 @@ function mapDeliveryRow(raw: Record<string, unknown>): ReceptionCommunicationDel
     template_key: raw.template_key != null ? String(raw.template_key) : null,
     to_address: raw.to_address != null ? String(raw.to_address) : null,
     metadata:
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {},
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {},
     created_at: String(raw.created_at),
     updated_at: String(raw.updated_at),
   };
 }
 
 export async function persistReceptionCommunicationDelivery(
-  params: PersistReceptionCommunicationDeliveryParams,
+  params: PersistReceptionCommunicationDeliveryParams
 ): Promise<ReceptionCommunicationDeliveryRow> {
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
@@ -85,7 +88,9 @@ export async function persistReceptionCommunicationDelivery(
 
   if (error) {
     if (error.message.includes("does not exist")) {
-      throw new Error("Reception communication delivery tracking is not available (migration pending).");
+      throw new Error(
+        "Reception communication delivery tracking is not available (migration pending)."
+      );
     }
     throw new Error(error.message);
   }
@@ -95,7 +100,7 @@ export async function persistReceptionCommunicationDelivery(
 
 export async function loadFailedReceptionCommunicationsForOperationalDay(
   tenantId: string,
-  operationalDay: { localStartIso: string; localEndIso: string },
+  operationalDay: { localStartIso: string; localEndIso: string }
 ): Promise<ReceptionCommunicationDeliverySummary[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
@@ -103,7 +108,7 @@ export async function loadFailedReceptionCommunicationsForOperationalDay(
   const { data, error } = await supabase
     .from("fi_reception_communication_deliveries")
     .select(
-      "id, channel, provider, delivery_status, error_message, sent_at, template_key, to_address, external_message_id, lead_id, patient_id, created_at",
+      "id, channel, provider, delivery_status, error_message, sent_at, template_key, to_address, external_message_id, lead_id, patient_id, created_at"
     )
     .eq("tenant_id", tid)
     .eq("delivery_status", "failed")

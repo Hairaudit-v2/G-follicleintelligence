@@ -28,9 +28,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -119,7 +123,9 @@ export default function IntegrationPage() {
                   <CardTitle className="text-xl">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-base leading-relaxed">{item.desc}</CardDescription>
+                  <CardDescription className="text-base leading-relaxed">
+                    {item.desc}
+                  </CardDescription>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -175,10 +181,13 @@ export default function IntegrationPage() {
         </div>
         <div className="mt-10 rounded-xl border border-border/60 bg-muted/20 px-5 py-4 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Cross-boundary flows: </span>
-          HairAudit, HLI, and IIOHR-connected systems each emit signal at different edges. APIs and events should
-          preserve tenant and source identifiers so the same FI core can aggregate without collapsing governance
-          boundaries—see{" "}
-          <Link href="/platform" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+          HairAudit, HLI, and IIOHR-connected systems each emit signal at different edges. APIs and
+          events should preserve tenant and source identifiers so the same FI core can aggregate
+          without collapsing governance boundaries—see{" "}
+          <Link
+            href="/platform"
+            className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+          >
             platform
           </Link>{" "}
           for architecture context.
@@ -205,8 +214,12 @@ export default function IntegrationPage() {
           </Button>
         </FadeIn>
         <FadeIn delay={0.1} className="mt-8 text-sm text-muted-foreground">
-          Deployment-specific integration guides and endpoint catalogs are issued after commercial alignment.{" "}
-          <Link href="/contact?intent=demo" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+          Deployment-specific integration guides and endpoint catalogs are issued after commercial
+          alignment.{" "}
+          <Link
+            href="/contact?intent=demo"
+            className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+          >
             Contact
           </Link>{" "}
           with your integration context (systems, regions, volume expectations).

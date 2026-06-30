@@ -12,7 +12,7 @@ export type ReceptionComposerChannel = "sms" | "email" | "phone" | "note";
 
 export function buildContextFromTask(
   task: ReceptionOsTaskItem,
-  clinicName: string,
+  clinicName: string
 ): ReceptionCommunicationContextInput {
   return {
     sourceKind: "task",
@@ -29,7 +29,7 @@ export function buildContextFromTask(
 export function buildContextFromActionAlert(
   alert: ReceptionOsActionAlert,
   task: ReceptionOsTaskItem | null,
-  clinicName: string,
+  clinicName: string
 ): ReceptionCommunicationContextInput {
   return {
     sourceKind: "action_alert",
@@ -45,7 +45,7 @@ export function buildContextFromActionAlert(
 export function buildContextFromRevenueAlert(
   alert: ReceptionOsRevenueRiskAlert,
   task: ReceptionOsTaskItem | null,
-  clinicName: string,
+  clinicName: string
 ): ReceptionCommunicationContextInput {
   return {
     sourceKind: "revenue_alert",
@@ -58,7 +58,10 @@ export function buildContextFromRevenueAlert(
   };
 }
 
-export function buildContextFromDeposit(deposit: ReceptionOsDepositItem, clinicName: string): ReceptionCommunicationContextInput {
+export function buildContextFromDeposit(
+  deposit: ReceptionOsDepositItem,
+  clinicName: string
+): ReceptionCommunicationContextInput {
   return {
     sourceKind: "deposit",
     sourceId: deposit.id,
@@ -71,7 +74,10 @@ export function buildContextFromDeposit(deposit: ReceptionOsDepositItem, clinicN
   };
 }
 
-export function buildContextFromSurgery(item: ReceptionOsSurgeryItem, clinicName: string): ReceptionCommunicationContextInput {
+export function buildContextFromSurgery(
+  item: ReceptionOsSurgeryItem,
+  clinicName: string
+): ReceptionCommunicationContextInput {
   return {
     sourceKind: "surgery",
     sourceId: item.bookingId,

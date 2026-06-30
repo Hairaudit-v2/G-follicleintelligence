@@ -39,10 +39,20 @@ export type PaymentRecordRow = {
 };
 
 /** Roles allowed to create/update payment rows (server + RLS). */
-export const PAYMENT_MUTATION_ROLES_LOWER = new Set(["fi_admin", "admin", "manager", "finance", "owner"]);
+export const PAYMENT_MUTATION_ROLES_LOWER = new Set([
+  "fi_admin",
+  "admin",
+  "manager",
+  "finance",
+  "owner",
+]);
 
 export function isPaymentMutationRole(role: string | null | undefined): boolean {
-  return PAYMENT_MUTATION_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());
+  return PAYMENT_MUTATION_ROLES_LOWER.has(
+    String(role ?? "")
+      .trim()
+      .toLowerCase()
+  );
 }
 
 export type EffectivePaymentStatus = PaymentStatus | "overdue_derived";
@@ -165,7 +175,10 @@ export type TenantPaymentOperationsSummary = {
  * Absence of a row for an entity is not counted as “due” or “unpaid” here.
  */
 export function summarizePaymentRecordsForOperations(
-  rows: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid" | "updated_at">[],
+  rows: Pick<
+    PaymentRecordRow,
+    "status" | "due_date" | "amount_expected" | "amount_paid" | "updated_at"
+  >[],
   todayYmd: string,
   operationalLocalStartIso: string,
   operationalLocalEndIso: string
@@ -189,7 +202,13 @@ export function summarizePaymentRecordsForOperations(
     }
     if (r.status === "paid") {
       const u = Date.parse(r.updated_at);
-      if (Number.isFinite(u) && Number.isFinite(startMs) && Number.isFinite(endMs) && u >= startMs && u < endMs) {
+      if (
+        Number.isFinite(u) &&
+        Number.isFinite(startMs) &&
+        Number.isFinite(endMs) &&
+        u >= startMs &&
+        u < endMs
+      ) {
         depositsPaidTodayCount += 1;
       }
     }

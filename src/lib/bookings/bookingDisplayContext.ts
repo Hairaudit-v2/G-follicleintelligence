@@ -31,7 +31,7 @@ export function bookingDisplayContextForRow(
 
   const patient = pid ? maps.patients.get(pid) : undefined;
   const lead = lid ? maps.leads.get(lid) : undefined;
-  const personMeta = personId ? maps.persons.get(personId) ?? null : null;
+  const personMeta = personId ? (maps.persons.get(personId) ?? null) : null;
 
   return {
     patientPersonMeta: patient?.personMeta ?? null,
@@ -44,7 +44,10 @@ export function bookingDisplayContextForRow(
   };
 }
 
-export function anchorLabelForBookingRow(row: FiBookingRow, maps: BookingDisplayContextMaps): string {
+export function anchorLabelForBookingRow(
+  row: FiBookingRow,
+  maps: BookingDisplayContextMaps
+): string {
   return getBookingDisplayName(bookingDisplayContextForRow(row, maps));
 }
 

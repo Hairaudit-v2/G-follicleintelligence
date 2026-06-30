@@ -8,11 +8,16 @@ import type { FiEventEnvelope } from "@/src/types/fi-events";
 import type { IntelligenceEventEnvelope } from "@follicle/intelligence-core";
 import { toIntelligenceEventEnvelope } from "./intelligenceCoreAdapter";
 import { emitInternalIntelligenceEvent } from "./internalBus";
-import { isInternalIntelligenceBusShadowEnabled, type InternalBusShadowEnvOptions } from "./internalBusEnv";
+import {
+  isInternalIntelligenceBusShadowEnabled,
+  type InternalBusShadowEnvOptions,
+} from "./internalBusEnv";
 import { enqueueInternalIntelligenceEvent } from "./internalBusQueue";
 import { isInternalIntelligenceInternalBusQueueEnabled } from "./internalBusQueueEnv";
 
-export type FiHairAuditImagesUploadedEnvelope = FiEventEnvelope & { event_type: "hairaudit.images.uploaded" };
+export type FiHairAuditImagesUploadedEnvelope = FiEventEnvelope & {
+  event_type: "hairaudit.images.uploaded";
+};
 
 /**
  * Builds a canonical intelligence envelope for `hairaudit.audit.completed` using the

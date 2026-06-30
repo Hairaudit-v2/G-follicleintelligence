@@ -8,11 +8,20 @@ export const dynamic = "force-dynamic";
 
 export default async function SystemTenantsPage() {
   const supabase = supabaseAdmin();
-  const { data: tenants, error } = await supabase.from("fi_tenants").select("id, name, slug, created_at").order("name").limit(500);
+  const { data: tenants, error } = await supabase
+    .from("fi_tenants")
+    .select("id, name, slug, created_at")
+    .order("name")
+    .limit(500);
   if (error) {
     return <p className="text-sm text-red-400">Could not load tenants: {error.message}</p>;
   }
-  const rows = (tenants ?? []) as { id: string; name: string; slug: string; created_at: string | null }[];
+  const rows = (tenants ?? []) as {
+    id: string;
+    name: string;
+    slug: string;
+    created_at: string | null;
+  }[];
 
   return (
     <div className="space-y-8">
@@ -20,8 +29,8 @@ export default async function SystemTenantsPage() {
         <p className={fiOsChromeClasses.sectionEyebrow}>Platform</p>
         <h1 className="mt-1 text-xl font-semibold text-slate-50">Tenant management</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          Create tenants, default clinics, tenant settings, and the first clinic admin user. All mutations run on the server;
-          the browser never receives a service-role key.
+          Create tenants, default clinics, tenant settings, and the first clinic admin user. All
+          mutations run on the server; the browser never receives a service-role key.
         </p>
       </div>
 
@@ -36,10 +45,15 @@ export default async function SystemTenantsPage() {
                 <p className="font-medium text-slate-100">{t.name}</p>
                 <p className="text-xs text-slate-500">
                   <span className="font-mono">{t.slug}</span>
-                  {t.created_at ? <span className="text-slate-600"> · {t.created_at.slice(0, 10)}</span> : null}
+                  {t.created_at ? (
+                    <span className="text-slate-600"> · {t.created_at.slice(0, 10)}</span>
+                  ) : null}
                 </p>
               </div>
-              <Link href={`/fi-admin/${t.id}`} className="text-sm font-medium text-cyan-400 hover:text-cyan-300">
+              <Link
+                href={`/fi-admin/${t.id}`}
+                className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+              >
                 Tenant home →
               </Link>
             </li>

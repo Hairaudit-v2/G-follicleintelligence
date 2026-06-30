@@ -6,12 +6,23 @@ import { attachSearchPattern, parseCrmLeadListQuery } from "@/src/lib/crm/crmLea
 import { loadCrmLeadsShellPage } from "@/src/lib/crm/leadList";
 import { escapeIlikePattern, searchFoundationRecords } from "@/src/lib/fi/foundation/search";
 import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
-import type { ClinicOsGlobalSearchCase, ClinicOsGlobalSearchLead, ClinicOsGlobalSearchPatient, ClinicOsGlobalSearchPayload } from "./clinicOsGlobalSearchTypes";
+import type {
+  ClinicOsGlobalSearchCase,
+  ClinicOsGlobalSearchLead,
+  ClinicOsGlobalSearchPatient,
+  ClinicOsGlobalSearchPayload,
+} from "./clinicOsGlobalSearchTypes";
 
-function patientEmailPhoneFromSubtitle(subtitle: string): { email: string | null; phone: string | null } {
+function patientEmailPhoneFromSubtitle(subtitle: string): {
+  email: string | null;
+  phone: string | null;
+} {
   const s = subtitle.trim();
   if (!s) return { email: null, phone: null };
-  const parts = s.split(" · ").map((p) => p.trim()).filter(Boolean);
+  const parts = s
+    .split(" · ")
+    .map((p) => p.trim())
+    .filter(Boolean);
   if (parts.length === 0) return { email: null, phone: null };
   if (parts.length === 1) {
     const p = parts[0];
@@ -72,14 +83,17 @@ async function enrichCaseRows(
   if (eErr) throw new Error(eErr.message);
   const extByCase = new Map<string, string | null>();
   for (const row of extRows ?? []) {
-    extByCase.set(String((row as { id: string }).id), (row as { external_id: string | null }).external_id ?? null);
+    extByCase.set(
+      String((row as { id: string }).id),
+      (row as { external_id: string | null }).external_id ?? null
+    );
   }
 
   for (const row of viewRows ?? []) {
     const caseId = String((row as { case_id: string }).case_id);
     const fp = (row as { foundation_patient_id: string | null }).foundation_patient_id;
     const status = String((row as { status: string }).status ?? "");
-    const patientName = fp ? nameByFp.get(fp) ?? "—" : "—";
+    const patientName = fp ? (nameByFp.get(fp) ?? "—") : "—";
     out.set(caseId, {
       externalId: extByCase.get(caseId) ?? null,
       patientName,
@@ -94,7 +108,10 @@ async function enrichCaseRows(
  * Read-only Clinic OS command palette search (patients + cases via foundation search;
  * leads via existing CRM shell RPC when CRM nav is allowed).
  */
-export async function loadClinicOsGlobalSearchResults(tenantId: string, queryRaw: string): Promise<ClinicOsGlobalSearchPayload> {
+export async function loadClinicOsGlobalSearchResults(
+  tenantId: string,
+  queryRaw: string
+): Promise<ClinicOsGlobalSearchPayload> {
   const tid = tenantId.trim();
   const query = queryRaw.trim().slice(0, 120);
   if (!query) {

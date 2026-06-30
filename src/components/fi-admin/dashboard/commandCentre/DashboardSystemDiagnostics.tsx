@@ -10,12 +10,16 @@ export function DashboardSystemDiagnostics(props: { children: ReactNode }) {
   const { children } = props;
 
   return (
-    <DashboardCard className="overflow-hidden p-0" role="region" aria-labelledby="system-diagnostics-heading">
+    <DashboardCard
+      className="overflow-hidden p-0"
+      role="region"
+      aria-labelledby="system-diagnostics-heading"
+    >
       <details className="group">
         <summary
           className={cn(
             "flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 sm:px-5",
-            "[&::-webkit-details-marker]:hidden",
+            "[&::-webkit-details-marker]:hidden"
           )}
         >
           <div>
@@ -31,7 +35,9 @@ export function DashboardSystemDiagnostics(props: { children: ReactNode }) {
             aria-hidden
           />
         </summary>
-        <div className="space-y-4 border-t border-white/[0.07] px-4 py-4 sm:px-5 sm:py-5">{children}</div>
+        <div className="space-y-4 border-t border-white/[0.07] px-4 py-4 sm:px-5 sm:py-5">
+          {children}
+        </div>
       </details>
     </DashboardCard>
   );

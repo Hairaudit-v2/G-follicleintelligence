@@ -5,7 +5,10 @@ import { ConsultationOsDashboard } from "@/src/components/fi-admin/consultations
 import { ConsultationOsListView } from "@/src/components/fi-admin/consultations/ConsultationOsListView";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { listConsultationsForTenant } from "@/src/lib/consultations/consultationLoaders.server";
-import { CONSULTATION_STATUSES, type ConsultationStatus } from "@/src/lib/consultations/consultationTypes";
+import {
+  CONSULTATION_STATUSES,
+  type ConsultationStatus,
+} from "@/src/lib/consultations/consultationTypes";
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { loadConsultationDashboardPayload } from "@/src/lib/fiAdmin/consultationDashboardLoader.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
@@ -21,7 +24,9 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-function parseStatusFilter(sp: Record<string, string | string[] | undefined>): ConsultationStatus | null {
+function parseStatusFilter(
+  sp: Record<string, string | string[] | undefined>
+): ConsultationStatus | null {
   const raw = sp.status;
   const s = Array.isArray(raw) ? raw[0] : raw;
   if (!s?.trim()) return null;
@@ -55,7 +60,10 @@ export default async function ConsultationsIndexRoutePage({
   const viewMode = parseViewMode(sp);
 
   if (viewMode === "list" || statusFilter != null) {
-    const rows = await listConsultationsForTenant(tid, statusFilter ? { status: statusFilter } : { limit: 200 });
+    const rows = await listConsultationsForTenant(
+      tid,
+      statusFilter ? { status: statusFilter } : { limit: 200 }
+    );
     return <ConsultationOsListView tenantId={tid} rows={rows} activeStatus={statusFilter} />;
   }
 

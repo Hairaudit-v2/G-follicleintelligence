@@ -90,7 +90,9 @@ export function toPatientTherapyPlanRow(raw: Record<string, unknown>): PatientTh
   };
 }
 
-export function toPatientTherapyPlanItemRow(raw: Record<string, unknown>): PatientTherapyPlanItemRow {
+export function toPatientTherapyPlanItemRow(
+  raw: Record<string, unknown>
+): PatientTherapyPlanItemRow {
   return {
     id: String(raw.id ?? ""),
     tenant_id: String(raw.tenant_id ?? ""),
@@ -99,13 +101,20 @@ export function toPatientTherapyPlanItemRow(raw: Record<string, unknown>): Patie
     role: parsePlanItemRole(raw.role),
     dosing_summary: raw.dosing_summary != null ? String(raw.dosing_summary) : null,
     sessions_planned:
-      raw.sessions_planned != null && raw.sessions_planned !== "" ? Number(raw.sessions_planned) : null,
+      raw.sessions_planned != null && raw.sessions_planned !== ""
+        ? Number(raw.sessions_planned)
+        : null,
     sessions_completed: Number(raw.sessions_completed ?? 0),
-    day_offset_start: raw.day_offset_start != null && raw.day_offset_start !== "" ? Number(raw.day_offset_start) : null,
-    day_offset_end: raw.day_offset_end != null && raw.day_offset_end !== "" ? Number(raw.day_offset_end) : null,
+    day_offset_start:
+      raw.day_offset_start != null && raw.day_offset_start !== ""
+        ? Number(raw.day_offset_start)
+        : null,
+    day_offset_end:
+      raw.day_offset_end != null && raw.day_offset_end !== "" ? Number(raw.day_offset_end) : null,
     pathology_gate: raw.pathology_gate != null ? String(raw.pathology_gate) : null,
     prescription_id: raw.prescription_id != null ? String(raw.prescription_id) : null,
-    prescription_item_id: raw.prescription_item_id != null ? String(raw.prescription_item_id) : null,
+    prescription_item_id:
+      raw.prescription_item_id != null ? String(raw.prescription_item_id) : null,
     sort_order: Number(raw.sort_order ?? 0),
     metadata: asObjectRecord(raw.metadata),
     created_at: String(raw.created_at ?? ""),
@@ -123,8 +132,10 @@ export function toPatientTherapyEventRow(raw: Record<string, unknown>): PatientT
     plan_id: raw.plan_id != null ? String(raw.plan_id) : null,
     plan_item_id: raw.plan_item_id != null ? String(raw.plan_item_id) : null,
     prescription_id: raw.prescription_id != null ? String(raw.prescription_id) : null,
-    prescription_item_id: raw.prescription_item_id != null ? String(raw.prescription_item_id) : null,
-    pathology_request_id: raw.pathology_request_id != null ? String(raw.pathology_request_id) : null,
+    prescription_item_id:
+      raw.prescription_item_id != null ? String(raw.prescription_item_id) : null,
+    pathology_request_id:
+      raw.pathology_request_id != null ? String(raw.pathology_request_id) : null,
     pathology_result_id: raw.pathology_result_id != null ? String(raw.pathology_result_id) : null,
     event_type: parseTherapyEventType(raw.event_type),
     canonical_code: raw.canonical_code != null ? String(raw.canonical_code) : null,
@@ -159,7 +170,9 @@ export function therapyEventPreviewTitle(eventType: TherapyEventType): string {
   return EVENT_TITLE[eventType] ?? eventType;
 }
 
-export function toPatientTherapyEventPreview(row: PatientTherapyEventRow): PatientTherapyEventPreview {
+export function toPatientTherapyEventPreview(
+  row: PatientTherapyEventRow
+): PatientTherapyEventPreview {
   return {
     id: row.id,
     event_type: row.event_type,
@@ -180,7 +193,9 @@ export function buildActiveTherapyPlanSummary(params: {
   displayNameByCanonicalCode: Map<string, string>;
 }): ActiveTherapyPlanSummary {
   const plans = params.activePlans.map((plan) => {
-    const items = (params.itemsByPlanId.get(plan.id) ?? []).slice().sort((a, b) => a.sort_order - b.sort_order);
+    const items = (params.itemsByPlanId.get(plan.id) ?? [])
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order);
     const mapped: ActiveTherapyItemSummary[] = items.map((it) => ({
       planItemId: it.id,
       planId: plan.id,

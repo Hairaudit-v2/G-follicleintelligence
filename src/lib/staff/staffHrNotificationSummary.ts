@@ -115,7 +115,9 @@ function isHrSourceSystem(sourceSystem: string): boolean {
   return (HR_PORTAL_SOURCE_SYSTEM_PRIORITY as readonly string[]).includes(norm);
 }
 
-function pickHrSourceRow(rows: StaffHrNotificationSourceRow[]): StaffHrNotificationSourceRow | null {
+function pickHrSourceRow(
+  rows: StaffHrNotificationSourceRow[]
+): StaffHrNotificationSourceRow | null {
   for (const sys of HR_PORTAL_SOURCE_SYSTEM_PRIORITY) {
     const match = rows.find((r) => normalizeFiStaffSourceSystem(r.source_system) === sys);
     if (match) return match;
@@ -143,7 +145,10 @@ function isSyncStale(lastSyncedAt: string | null, now: Date): boolean {
   return ageMs > STAFF_HR_SYNC_STALE_DAYS * 86_400_000;
 }
 
-function pickHrPortalUrl(row: StaffHrNotificationSourceRow, metadata: Record<string, unknown>): string | null {
+function pickHrPortalUrl(
+  row: StaffHrNotificationSourceRow,
+  metadata: Record<string, unknown>
+): string | null {
   const fromMeta = str(metadata.hr_profile_url);
   if (fromMeta && isAllowedHrPortalUrl(fromMeta)) return fromMeta;
   const fromRow = row.source_url != null ? String(row.source_url).trim() : "";
@@ -162,7 +167,9 @@ export function extractSafeHrNotificationMetadata(
   return out;
 }
 
-export function staffHrNotificationSummaryHasSensitiveKeys(summary: StaffHrNotificationSummary): boolean {
+export function staffHrNotificationSummaryHasSensitiveKeys(
+  summary: StaffHrNotificationSummary
+): boolean {
   const blob = JSON.stringify(summary).toLowerCase();
   return STAFF_HR_SENSITIVE_METADATA_KEYS.some((k) => blob.includes(k));
 }
@@ -213,7 +220,10 @@ export function buildStaffHrNotificationSummary(
 
   const onboardingIncompleteCount = onboardingStatus === "incomplete" ? 1 : 0;
   const outstandingTaskCount =
-    (docsMissing ?? 0) + (trainingRequired ?? 0) + (certsOutstanding ?? 0) + onboardingIncompleteCount;
+    (docsMissing ?? 0) +
+    (trainingRequired ?? 0) +
+    (certsOutstanding ?? 0) +
+    onboardingIncompleteCount;
 
   const isStale = isSyncStale(lastSyncedAt, now);
   const isComplete = outstandingTaskCount === 0 && onboardingStatus !== "incomplete";
@@ -224,7 +234,11 @@ export function buildStaffHrNotificationSummary(
 
   if (outstandingTaskCount > 0) {
     variant = "outstanding";
-    if (trainingRequired != null && trainingRequired > 0 && outstandingTaskCount === trainingRequired) {
+    if (
+      trainingRequired != null &&
+      trainingRequired > 0 &&
+      outstandingTaskCount === trainingRequired
+    ) {
       badgeLabel = "Training incomplete";
       shortLabel = "Training";
     } else if (outstandingTaskCount === 1 && alerts.length === 1) {

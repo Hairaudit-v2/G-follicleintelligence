@@ -15,7 +15,10 @@ import { mergeClinicalDetailsPatch } from "./clinicalDetailsMerge";
 describe("Stage 4B — patient clinical details foundation (pure)", () => {
   it("text field max length enforcement", () => {
     assert.doesNotThrow(() =>
-      assertClinicalTextWithinBounds("primary_hair_concern", "x".repeat(CLINICAL_DETAILS_TEXT_MAX.primary_hair_concern))
+      assertClinicalTextWithinBounds(
+        "primary_hair_concern",
+        "x".repeat(CLINICAL_DETAILS_TEXT_MAX.primary_hair_concern)
+      )
     );
     assert.throws(() =>
       assertClinicalTextWithinBounds(
@@ -78,7 +81,10 @@ describe("Stage 4B — patient clinical details foundation (pure)", () => {
   });
 
   it("patientClinicalDetailsPatchBodySchema strict rejects unknown keys", () => {
-    const bad = patientClinicalDetailsPatchBodySchema.safeParse({ primary_hair_concern: "a", extra: 1 });
+    const bad = patientClinicalDetailsPatchBodySchema.safeParse({
+      primary_hair_concern: "a",
+      extra: 1,
+    });
     assert.equal(bad.success, false);
   });
 

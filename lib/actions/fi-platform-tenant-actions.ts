@@ -22,7 +22,9 @@ export type FiPlatformTenantActionResult =
   | { ok: true; tenantId: string }
   | { ok: false; error: string };
 
-export async function createPlatformTenantAction(body: unknown): Promise<FiPlatformTenantActionResult> {
+export async function createPlatformTenantAction(
+  body: unknown
+): Promise<FiPlatformTenantActionResult> {
   try {
     const parsed = createBodySchema.parse(body);
     const authId = await resolveAuthUserId(null);

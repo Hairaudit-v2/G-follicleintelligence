@@ -19,10 +19,17 @@ export type PatientDirectoryBookingLike = {
   title: string | null;
 };
 
-const TREATMENT_VALUE_KEYS = ["treatment_value_gbp", "treatment_value", "estimated_value", "deal_value"] as const;
+const TREATMENT_VALUE_KEYS = [
+  "treatment_value_gbp",
+  "treatment_value",
+  "estimated_value",
+  "deal_value",
+] as const;
 
 /** Parse GBP treatment value from CRM lead `metadata` (shell convention). */
-export function parseTreatmentValueGbp(metadata: Record<string, unknown> | null | undefined): number | null {
+export function parseTreatmentValueGbp(
+  metadata: Record<string, unknown> | null | undefined
+): number | null {
   const meta = metadata ?? {};
   for (const k of TREATMENT_VALUE_KEYS) {
     const v = meta[k];
@@ -38,7 +45,9 @@ export function parseTreatmentValueGbp(metadata: Record<string, unknown> | null 
 }
 
 /** Sum treatment values across linked leads; null when no values recorded. */
-export function sumPatientLifetimeValueGbp(leadMetadatas: readonly Record<string, unknown>[]): number | null {
+export function sumPatientLifetimeValueGbp(
+  leadMetadatas: readonly Record<string, unknown>[]
+): number | null {
   let sum = 0;
   let any = false;
   for (const meta of leadMetadatas) {
@@ -52,7 +61,11 @@ export function sumPatientLifetimeValueGbp(leadMetadatas: readonly Record<string
 
 export function formatPatientLifetimeValueGbp(amount: number | null | undefined): string {
   if (amount == null || !Number.isFinite(amount)) return "—";
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 export function countCompletedProcedures(bookings: readonly PatientDirectoryBookingLike[]): number {
@@ -60,7 +73,9 @@ export function countCompletedProcedures(bookings: readonly PatientDirectoryBook
   for (const b of bookings) {
     const st = String(b.booking_status ?? "").toLowerCase();
     if (st !== "completed") continue;
-    const type = String(b.booking_type ?? "").trim().toLowerCase();
+    const type = String(b.booking_type ?? "")
+      .trim()
+      .toLowerCase();
     if (PATIENT_PROCEDURE_BOOKING_TYPES.has(type)) n += 1;
   }
   return n;
@@ -84,7 +99,10 @@ export function pickNextAppointment(
 }
 
 /** Latest attended visit: prefer latest completed booking, else latest past non-terminal booking. */
-export function pickLastVisitAt(bookings: readonly PatientDirectoryBookingLike[], nowIso: string): string | null {
+export function pickLastVisitAt(
+  bookings: readonly PatientDirectoryBookingLike[],
+  nowIso: string
+): string | null {
   const now = Date.parse(nowIso);
   let lastCompleted: string | null = null;
   let lastPast: string | null = null;

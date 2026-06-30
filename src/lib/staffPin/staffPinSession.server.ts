@@ -12,8 +12,7 @@ import { staffPinSessionIsExpired } from "./staffPinPermissions";
 
 export const FI_STAFF_PIN_SESSION_COOKIE = "fi_staff_pin_session";
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(s: string): boolean {
   return UUID_RE.test(s.trim());
@@ -45,7 +44,9 @@ async function loadActiveSessionRow(sessionToken: string): Promise<SessionRow | 
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_pin_sessions")
-    .select("id, tenant_id, staff_id, session_token, staff_full_name, staff_role, expires_at, ended_at")
+    .select(
+      "id, tenant_id, staff_id, session_token, staff_full_name, staff_role, expires_at, ended_at"
+    )
     .eq("session_token", sessionToken.trim())
     .is("ended_at", null)
     .maybeSingle();
@@ -103,7 +104,9 @@ export async function createStaffPinClinicSession(opts: {
   };
 }
 
-export async function getStaffPinClinicSessionIfValid(tenantId?: string): Promise<StaffPinClinicSession | null> {
+export async function getStaffPinClinicSessionIfValid(
+  tenantId?: string
+): Promise<StaffPinClinicSession | null> {
   try {
     const raw = cookies().get(FI_STAFF_PIN_SESSION_COOKIE)?.value?.trim() ?? "";
     if (!raw || !isUuid(raw)) return null;

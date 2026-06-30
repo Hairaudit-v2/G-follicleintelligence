@@ -51,7 +51,12 @@ export function buildInvoiceLifecyclePatch(
   if (remaining <= 0 && row.total_cents > 0 && !row.paid_at) {
     patch.paid_at = new Date().toISOString();
   }
-  if (remaining > 0 && nextStatus !== "paid" && nextStatus !== "cancelled" && nextStatus !== "refunded") {
+  if (
+    remaining > 0 &&
+    nextStatus !== "paid" &&
+    nextStatus !== "cancelled" &&
+    nextStatus !== "refunded"
+  ) {
     patch.paid_at = null;
   }
   return patch;
@@ -67,7 +72,10 @@ export function resolveInvoiceSentAtPatch(
   return issuedAtIso ?? new Date().toISOString();
 }
 
-export function depositDueDateFromRule(depositDueDays: number | null | undefined, issueYmd: string): string | null {
+export function depositDueDateFromRule(
+  depositDueDays: number | null | undefined,
+  issueYmd: string
+): string | null {
   const days = depositDueDays != null ? Math.max(0, Math.floor(depositDueDays)) : null;
   if (days == null) return null;
   const base = Date.parse(`${issueYmd}T00:00:00.000Z`);
@@ -77,7 +85,9 @@ export function depositDueDateFromRule(depositDueDays: number | null | undefined
   return d.toISOString().slice(0, 10);
 }
 
-export function resolveSourceModuleFromInvoiceKind(invoiceKind: FiInvoiceKind): "consultation_os" | "surgery_os" | "revenue_os" {
+export function resolveSourceModuleFromInvoiceKind(
+  invoiceKind: FiInvoiceKind
+): "consultation_os" | "surgery_os" | "revenue_os" {
   if (invoiceKind === "consultation_quote") return "consultation_os";
   if (invoiceKind === "surgery_deposit" || invoiceKind === "surgery_balance") return "surgery_os";
   return "revenue_os";

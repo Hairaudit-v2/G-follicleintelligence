@@ -23,7 +23,10 @@ export function parseHubspotContactsCsv(content: string): ParseHubspotContactsCs
     return {
       headers,
       rows: [],
-      error: "Unrecognised headers: " + unknown.slice(0, 5).join(", ") + (unknown.length > 5 ? "..." : ""),
+      error:
+        "Unrecognised headers: " +
+        unknown.slice(0, 5).join(", ") +
+        (unknown.length > 5 ? "..." : ""),
     };
   }
 

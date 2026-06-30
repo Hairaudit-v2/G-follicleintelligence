@@ -11,7 +11,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function NewBookingEntryRoutePage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function NewBookingEntryRoutePage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
@@ -21,5 +25,11 @@ export default async function NewBookingEntryRoutePage({ params }: { params: Pro
     getBookingsBoardNavAllowed(tenantId),
   ]);
 
-  return <NewBookingEntryPage tenantId={tenantId} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />;
+  return (
+    <NewBookingEntryPage
+      tenantId={tenantId}
+      showCrmNav={showCrmNav}
+      showBookingsBoard={showBookingsBoard}
+    />
+  );
 }

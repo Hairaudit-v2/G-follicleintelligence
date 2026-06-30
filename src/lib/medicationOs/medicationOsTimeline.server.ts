@@ -49,7 +49,9 @@ export function mapTherapyEventToTimelineKind(
     case "session_completed":
       return "therapy.procedure_session_completed";
     case "plan_completed":
-      return planType === "post_operative" ? "therapy.postop_protocol_completed" : "therapy.plan_completed";
+      return planType === "post_operative"
+        ? "therapy.postop_protocol_completed"
+        : "therapy.plan_completed";
     case "plan_cancelled":
     case "plan_superseded":
       return "therapy.plan_stopped";
@@ -73,7 +75,9 @@ export type TherapyTimelineDetailInput = {
  * Stable `fi_timeline_events.detail` payload for dedupe and Twin consumers.
  * Uses `source_table` + `source_id` (no dedicated columns on `fi_timeline_events` v1).
  */
-export function buildTherapyTimelineDetail(input: TherapyTimelineDetailInput): Record<string, unknown> {
+export function buildTherapyTimelineDetail(
+  input: TherapyTimelineDetailInput
+): Record<string, unknown> {
   const id = input.therapyEventId.trim();
   return {
     source_table: "fi_patient_therapy_events",
@@ -198,7 +202,8 @@ export async function mirrorTherapyEventRowToTimeline(
       tenantId: input.tenantId,
       patientId: input.patientId,
       caseId: effectiveCaseId,
-      planTypeForCompleted: input.row.event_type === "plan_completed" ? input.planTypeForCompleted ?? null : null,
+      planTypeForCompleted:
+        input.row.event_type === "plan_completed" ? (input.planTypeForCompleted ?? null) : null,
       therapyEvent: {
         id: input.row.id,
         event_type: input.row.event_type,
@@ -231,7 +236,7 @@ export async function createTherapyTimelineEvent(
 
   const kind = mapTherapyEventToTimelineKind(
     input.therapyEvent.event_type,
-    input.therapyEvent.event_type === "plan_completed" ? input.planTypeForCompleted ?? null : null
+    input.therapyEvent.event_type === "plan_completed" ? (input.planTypeForCompleted ?? null) : null
   );
 
   if (!kind) {

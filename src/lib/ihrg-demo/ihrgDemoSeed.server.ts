@@ -7,7 +7,10 @@ import {
   type EnterpriseDemoSeedResult,
 } from "@/src/lib/enterprise-demo/enterpriseDemoSeed.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { seedIhrgDemoExpansion, type IhrgDemoExpansionSeedResult } from "./ihrgDemoExpansionSeed.server";
+import {
+  seedIhrgDemoExpansion,
+  type IhrgDemoExpansionSeedResult,
+} from "./ihrgDemoExpansionSeed.server";
 import {
   IHRG_DEMO_DEFAULT_PROFILE,
   ihrgDemoProfileConfig,

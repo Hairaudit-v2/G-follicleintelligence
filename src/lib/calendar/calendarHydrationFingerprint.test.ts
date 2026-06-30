@@ -52,14 +52,22 @@ describe("calendarBookingsHydrationFingerprint", () => {
 
   it("changes when booking_status changes even if updated_at is unchanged", () => {
     const base = { id: "a", updated_at: "2026-06-10T00:00:00.000Z" as const };
-    const fp1 = calendarBookingsHydrationFingerprint([booking({ ...base, booking_status: "scheduled" })]);
-    const fp2 = calendarBookingsHydrationFingerprint([booking({ ...base, booking_status: "cancelled" })]);
+    const fp1 = calendarBookingsHydrationFingerprint([
+      booking({ ...base, booking_status: "scheduled" }),
+    ]);
+    const fp2 = calendarBookingsHydrationFingerprint([
+      booking({ ...base, booking_status: "cancelled" }),
+    ]);
     assert.notEqual(fp1, fp2);
   });
 
   it("changes when start_at changes", () => {
-    const fp1 = calendarBookingsHydrationFingerprint([booking({ id: "a", start_at: "2026-06-10T01:00:00.000Z" })]);
-    const fp2 = calendarBookingsHydrationFingerprint([booking({ id: "a", start_at: "2026-06-10T02:00:00.000Z" })]);
+    const fp1 = calendarBookingsHydrationFingerprint([
+      booking({ id: "a", start_at: "2026-06-10T01:00:00.000Z" }),
+    ]);
+    const fp2 = calendarBookingsHydrationFingerprint([
+      booking({ id: "a", start_at: "2026-06-10T02:00:00.000Z" }),
+    ]);
     assert.notEqual(fp1, fp2);
   });
 });
@@ -84,6 +92,9 @@ describe("calendarBookingDisplayHydrationFingerprint", () => {
         procedureCatalogName: "Consultation",
       },
     };
-    assert.notEqual(calendarBookingDisplayHydrationFingerprint(d1), calendarBookingDisplayHydrationFingerprint(d2));
+    assert.notEqual(
+      calendarBookingDisplayHydrationFingerprint(d1),
+      calendarBookingDisplayHydrationFingerprint(d2)
+    );
   });
 });

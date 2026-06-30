@@ -125,7 +125,9 @@ function hubspotLifecycleIsLeadPipeline(lifecycleStage: string | null | undefine
   if (/\bcustomer\b/.test(t)) return false;
   if (/\bevangelist\b/.test(t)) return false;
   if (/\bpatient\b/.test(t) && !/\blead\b/.test(t)) return false;
-  return /\blead\b|subscriber|\b(sql|mql)\b|marketing qualified|sales qualified|opportunity\b/.test(t);
+  return /\blead\b|subscriber|\b(sql|mql)\b|marketing qualified|sales qualified|opportunity\b/.test(
+    t
+  );
 }
 
 function hubspotMarketingLeadContactType(contactType: string | null | undefined): boolean {
@@ -156,7 +158,9 @@ function lifecycleIndicatesPatient(lifecycleStage: string | null | undefined): b
   return /\bcustomer\b/.test(t) || /\bpatient\b/.test(t);
 }
 
-function associatedDealIndicatesSurgeryCompleted(associatedDeal: string | null | undefined): boolean {
+function associatedDealIndicatesSurgeryCompleted(
+  associatedDeal: string | null | undefined
+): boolean {
   const d = (associatedDeal ?? "").trim();
   if (!d) return false;
   const x = d.toLowerCase();
@@ -171,7 +175,8 @@ function hasCompletedConsultAndQuoteAccepted(row: HubspotContactParsedRow): bool
   const j = lc(row.stageOfJourney);
   const ls = lc(row.leadStatus);
   const consultDone =
-    journeySlug === "consult_completed" || /consultation?\s*(done|complete)|post[\s-]?consult/.test(j + " " + ls);
+    journeySlug === "consult_completed" ||
+    /consultation?\s*(done|complete)|post[\s-]?consult/.test(j + " " + ls);
   if (!consultDone) return false;
   if (leadKey === "customer") return true;
   if (
@@ -181,7 +186,11 @@ function hasCompletedConsultAndQuoteAccepted(row: HubspotContactParsedRow): bool
   ) {
     return true;
   }
-  if (/quote\s*accepted|accepted\s*quote|treatment\s*accepted|deposit\s*(paid|received|taken)/.test(j + " " + ls)) {
+  if (
+    /quote\s*accepted|accepted\s*quote|treatment\s*accepted|deposit\s*(paid|received|taken)/.test(
+      j + " " + ls
+    )
+  ) {
     return true;
   }
   if (/signed\s*contract|contract\s*signed|booking\s*(fee\s*)?(paid|received)/.test(j + " " + ls)) {
@@ -218,10 +227,13 @@ function hasHubspotPatientSignal(row: HubspotContactParsedRow): boolean {
   return false;
 }
 
-export function classifyHubspotContactRow(row: HubspotContactParsedRow): HubspotImportClassification {
+export function classifyHubspotContactRow(
+  row: HubspotContactParsedRow
+): HubspotImportClassification {
   if (!hasHubspotPatientSignal(row)) return "lead_only";
   const leadFraming =
-    hubspotLifecycleIsLeadPipeline(row.lifecycleStage) || hubspotMarketingLeadContactType(row.contactType);
+    hubspotLifecycleIsLeadPipeline(row.lifecycleStage) ||
+    hubspotMarketingLeadContactType(row.contactType);
   if (leadFraming && !hasStrongPatientSignal(row)) return "mixed_patient_lead";
   return "patient";
 }
@@ -246,7 +258,9 @@ function missingPhone(row: HubspotContactParsedRow): boolean {
 // Main validator
 // ---------------------------------------------------------------------------
 
-export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): HubspotContactsDryRunReport {
+export function validateHubspotContactsRows(
+  rows: HubspotContactParsedRow[]
+): HubspotContactsDryRunReport {
   const generatedAt = new Date().toISOString();
   const recordIdCounts = new Map<string, number>();
   const emailKeyCounts = new Map<string, number>();
@@ -330,7 +344,11 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
     }
 
     // --- Phone: in-file duplicate (only for valid, non-placeholder phones) ---
-    if (effectivePhoneDigits && !isPlaceholderPhone(effectivePhoneDigits) && (phoneKeyCounts.get(effectivePhoneDigits) ?? 0) > 1) {
+    if (
+      effectivePhoneDigits &&
+      !isPlaceholderPhone(effectivePhoneDigits) &&
+      (phoneKeyCounts.get(effectivePhoneDigits) ?? 0) > 1
+    ) {
       issues.push({
         code: "duplicate_phone",
         message: "Duplicate normalised phone number in file.",
@@ -387,7 +405,11 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
     // --- Dates ---
     const cd = parseOptionalDate(row.createDate);
     if (cd.invalid) {
-      issues.push({ code: "invalid_create_date", message: "Create Date is not parseable.", blocking: false });
+      issues.push({
+        code: "invalid_create_date",
+        message: "Create Date is not parseable.",
+        blocking: false,
+      });
     }
     const md = parseOptionalDate(row.lastModifiedDate);
     if (md.invalid) {
@@ -446,7 +468,10 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
       journeyUnmapped: Boolean(row.stageOfJourney?.trim() && journey.unmapped),
       leadStatusUnmapped: Boolean(row.leadStatus?.trim() && leadMap.unmapped),
       phoneCorrupted,
-      effectivePhoneDigits: effectivePhoneDigits && !isPlaceholderPhone(effectivePhoneDigits) ? effectivePhoneDigits : null,
+      effectivePhoneDigits:
+        effectivePhoneDigits && !isPlaceholderPhone(effectivePhoneDigits)
+          ? effectivePhoneDigits
+          : null,
     });
   }
 

@@ -284,13 +284,11 @@ async function seedDemoClinics(
   return { createdClinics, existingClinics, warnings };
 }
 
-export async function seedEnterpriseDemoTenant(
-  opts?: {
-    supabase?: SupabaseClient;
-    env?: NodeJS.ProcessEnv;
-    volume?: EnterpriseDemoVolumeOptions;
-  }
-): Promise<EnterpriseDemoSeedResult> {
+export async function seedEnterpriseDemoTenant(opts?: {
+  supabase?: SupabaseClient;
+  env?: NodeJS.ProcessEnv;
+  volume?: EnterpriseDemoVolumeOptions;
+}): Promise<EnterpriseDemoSeedResult> {
   const env = opts?.env ?? process.env;
   const volume: EnterpriseDemoVolumeOptions = opts?.volume ?? ENTERPRISE_DEMO_DEFAULT_VOLUME;
   const warnings: string[] = [];
@@ -447,7 +445,11 @@ export async function seedEnterpriseDemoTenant(
     warnings.push(...patientsResult.warnings);
 
     console.log("[enterprise-demo] Seeding surgeries...");
-    const surgeriesResult = await seedEnterpriseDemoSurgeries(supabase, tenantResult.tenantId, volume);
+    const surgeriesResult = await seedEnterpriseDemoSurgeries(
+      supabase,
+      tenantResult.tenantId,
+      volume
+    );
     warnings.push(...surgeriesResult.warnings);
 
     console.log("[enterprise-demo] Seeding imaging and audit...");
@@ -459,7 +461,11 @@ export async function seedEnterpriseDemoTenant(
     warnings.push(...imagingAuditResult.warnings);
 
     console.log("[enterprise-demo] Seeding financial OS...");
-    const financialResult = await seedEnterpriseDemoFinancialOs(supabase, tenantResult.tenantId, volume);
+    const financialResult = await seedEnterpriseDemoFinancialOs(
+      supabase,
+      tenantResult.tenantId,
+      volume
+    );
     warnings.push(...financialResult.warnings);
     console.log("[enterprise-demo] Core seed completed successfully");
 

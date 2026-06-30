@@ -44,7 +44,9 @@ function row(overrides: Partial<ConsultationIndexRow> = {}): ConsultationIndexRo
   };
 }
 
-function emptyPayload(overrides: Partial<ConsultationDashboardPayload> = {}): ConsultationDashboardPayload {
+function emptyPayload(
+  overrides: Partial<ConsultationDashboardPayload> = {}
+): ConsultationDashboardPayload {
   return {
     todayYmd: "2026-06-23",
     calendarTimezone: "UTC",
@@ -82,7 +84,10 @@ function emptyPayload(overrides: Partial<ConsultationDashboardPayload> = {}): Co
 }
 
 test("buildConsultationHealthCards returns six cards", () => {
-  const cards = buildConsultationHealthCards("/fi-admin/t", emptyPayload({ consultations: [row()] }));
+  const cards = buildConsultationHealthCards(
+    "/fi-admin/t",
+    emptyPayload({ consultations: [row()] })
+  );
   assert.equal(cards.length, 6);
   assert.equal(cards[0].label, "Consultations today");
 });
@@ -92,7 +97,10 @@ test("deriveConsultationFlowState maps draft today without progress to scheduled
 });
 
 test("deriveConsultationFlowState maps in_progress today to in_consultation", () => {
-  assert.equal(deriveConsultationFlowState(row({ status: "in_progress" }), "2026-06-23"), "in_consultation");
+  assert.equal(
+    deriveConsultationFlowState(row({ status: "in_progress" }), "2026-06-23"),
+    "in_consultation"
+  );
 });
 
 test("buildConsultationAttentionPriorities surfaces preparation for today's drafts", () => {

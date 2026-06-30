@@ -24,7 +24,9 @@ export function FinancialOsSurgeryEconomicsFilters(props: {
       procedureType: searchParams.get("se_procedure") ?? null,
       surgeonUserId: searchParams.get("se_surgeon") ?? null,
       clinicId: searchParams.get("se_clinic") ?? null,
-      snapshotStatus: (searchParams.get("se_status") as SurgeryEconomicsDashboardFilters["snapshotStatus"]) ?? "all",
+      snapshotStatus:
+        (searchParams.get("se_status") as SurgeryEconomicsDashboardFilters["snapshotStatus"]) ??
+        "all",
     }),
     [searchParams]
   );
@@ -42,7 +44,8 @@ export function FinancialOsSurgeryEconomicsFilters(props: {
       setOrDelete("se_procedure", merged.procedureType);
       setOrDelete("se_surgeon", merged.surgeonUserId);
       setOrDelete("se_clinic", merged.clinicId);
-      if (merged.snapshotStatus && merged.snapshotStatus !== "all") setOrDelete("se_status", merged.snapshotStatus);
+      if (merged.snapshotStatus && merged.snapshotStatus !== "all")
+        setOrDelete("se_status", merged.snapshotStatus);
       else params.delete("se_status");
       router.push(`/fi-admin/${props.tenantId}/financial-os?${params.toString()}`);
     },
@@ -78,7 +81,9 @@ export function FinancialOsSurgeryEconomicsFilters(props: {
         >
           <option value="">All</option>
           {props.procedureTypes.map((p) => (
-            <option key={p} value={p}>{p}</option>
+            <option key={p} value={p}>
+              {p}
+            </option>
           ))}
         </select>
       </label>
@@ -91,7 +96,9 @@ export function FinancialOsSurgeryEconomicsFilters(props: {
         >
           <option value="">All</option>
           {props.surgeonOptions.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
           ))}
         </select>
       </label>
@@ -104,7 +111,9 @@ export function FinancialOsSurgeryEconomicsFilters(props: {
         >
           <option value="">All</option>
           {props.clinicOptions.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
           ))}
         </select>
       </label>

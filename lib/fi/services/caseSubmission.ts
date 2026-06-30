@@ -1,8 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  validateIntakeRequirements,
-  type MissingRequirement,
-} from "@/src/lib/fi/requirements";
+import { validateIntakeRequirements, type MissingRequirement } from "@/src/lib/fi/requirements";
 import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type FiCaseSubmissionState =

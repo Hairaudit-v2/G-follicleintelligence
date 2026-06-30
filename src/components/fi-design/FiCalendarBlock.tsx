@@ -74,7 +74,9 @@ export function FiCalendarBlock({
         ) : null}
       </div>
       {timeLabel ? (
-        <span className="shrink-0 rounded-md bg-white/[0.06] px-2 py-1 text-xs font-medium text-slate-400">{timeLabel}</span>
+        <span className="shrink-0 rounded-md bg-white/[0.06] px-2 py-1 text-xs font-medium text-slate-400">
+          {timeLabel}
+        </span>
       ) : null}
     </div>
   );

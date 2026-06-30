@@ -10,7 +10,10 @@ import { loadPatientTwinV1 } from "@/src/lib/patientTwin/patientTwinLoader.serve
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request, { params }: { params: Promise<{ patientId: string }> }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ patientId: string }> }
+) {
   try {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ ok: false, error: "Server misconfigured." }, { status: 500 });
@@ -25,7 +28,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ pati
     const url = new URL(request.url);
     const tenant_id = url.searchParams.get("tenant_id");
     if (!tenant_id?.trim()) {
-      return NextResponse.json({ ok: false, error: "tenant_id query param is required." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "tenant_id query param is required." },
+        { status: 400 }
+      );
     }
 
     const access = await checkFiTenantPortalApiAccess(request, tenant_id);

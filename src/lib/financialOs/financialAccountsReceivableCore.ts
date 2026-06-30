@@ -116,16 +116,22 @@ export type ClassifyReceivableTypeInput = {
  */
 export function classifyReceivableType(input: ClassifyReceivableTypeInput): FiArReceivableType {
   const meta = input.metadata ?? {};
-  const metaType = typeof meta.ar_receivable_type === "string" ? meta.ar_receivable_type.trim() : "";
+  const metaType =
+    typeof meta.ar_receivable_type === "string" ? meta.ar_receivable_type.trim() : "";
   if (FI_AR_RECEIVABLE_TYPES.includes(metaType as FiArReceivableType)) {
     return metaType as FiArReceivableType;
   }
-  if (typeof meta.receivable_type === "string" && FI_AR_RECEIVABLE_TYPES.includes(meta.receivable_type.trim() as FiArReceivableType)) {
+  if (
+    typeof meta.receivable_type === "string" &&
+    FI_AR_RECEIVABLE_TYPES.includes(meta.receivable_type.trim() as FiArReceivableType)
+  ) {
     return meta.receivable_type.trim() as FiArReceivableType;
   }
   if (meta.subscription === true || meta.source === "subscription") return "subscription";
-  if (meta.cancellation_fee === true || meta.source === "cancellation_fee") return "cancellation_fee";
-  if (meta.treatment_package === true || meta.source === "treatment_package") return "treatment_package";
+  if (meta.cancellation_fee === true || meta.source === "cancellation_fee")
+    return "cancellation_fee";
+  if (meta.treatment_package === true || meta.source === "treatment_package")
+    return "treatment_package";
 
   switch (input.invoice_kind) {
     case "consultation_quote":
@@ -163,7 +169,9 @@ export type CalculateReceivableRiskLevelInput = {
  * Risk engine — deposit overdue < 2 days = medium; surgery balance > 7 days = high;
  * balance > 14 days = critical; high-value (>$5k) overdue escalates to high/critical.
  */
-export function calculateReceivableRiskLevel(input: CalculateReceivableRiskLevelInput): FiArRiskLevel {
+export function calculateReceivableRiskLevel(
+  input: CalculateReceivableRiskLevelInput
+): FiArRiskLevel {
   const days = Math.max(0, Math.floor(input.days_overdue));
   const outstanding = Math.max(0, Math.floor(input.outstanding_amount_cents));
   if (days <= 0 || outstanding <= 0) return "low";
@@ -176,7 +184,10 @@ export function calculateReceivableRiskLevel(input: CalculateReceivableRiskLevel
     return "critical";
   }
 
-  if (input.receivable_type === "surgery_balance" || input.receivable_type === "consultation_invoice") {
+  if (
+    input.receivable_type === "surgery_balance" ||
+    input.receivable_type === "consultation_invoice"
+  ) {
     if (days > 14) return "critical";
     if (days > 7) return "high";
     if (highValue) return days >= 7 ? "critical" : "high";
@@ -205,32 +216,62 @@ export type RecommendNextArActionResult = {
   days_until_next_action: number;
 };
 
-export function recommendNextArAction(input: RecommendNextArActionInput): RecommendNextArActionResult {
+export function recommendNextArAction(
+  input: RecommendNextArActionInput
+): RecommendNextArActionResult {
   if (FI_AR_TERMINAL_STATUSES.includes(input.status)) {
-    return { action: "No action — case closed", suggested_status: input.status, days_until_next_action: 0 };
+    return {
+      action: "No action — case closed",
+      suggested_status: input.status,
+      days_until_next_action: 0,
+    };
   }
 
   if (input.status === "payment_plan") {
-    return { action: "Monitor payment plan instalments", suggested_status: "payment_plan", days_until_next_action: 7 };
+    return {
+      action: "Monitor payment plan instalments",
+      suggested_status: "payment_plan",
+      days_until_next_action: 7,
+    };
   }
 
   if (input.risk_level === "critical" || input.days_overdue > 14) {
-    return { action: "Escalate — senior collections call", suggested_status: "escalated", days_until_next_action: 1 };
+    return {
+      action: "Escalate — senior collections call",
+      suggested_status: "escalated",
+      days_until_next_action: 1,
+    };
   }
 
   if (input.risk_level === "high" || input.days_overdue > 7) {
-    return { action: "Phone call required", suggested_status: "call_required", days_until_next_action: 2 };
+    return {
+      action: "Phone call required",
+      suggested_status: "call_required",
+      days_until_next_action: 2,
+    };
   }
 
   if (input.receivable_type === "surgery_deposit" && input.days_overdue >= 1) {
-    return { action: "Send deposit reminder", suggested_status: "reminder_sent", days_until_next_action: 1 };
+    return {
+      action: "Send deposit reminder",
+      suggested_status: "reminder_sent",
+      days_until_next_action: 1,
+    };
   }
 
   if (input.status === "open" && input.days_overdue >= 1) {
-    return { action: "Send payment reminder", suggested_status: "reminder_sent", days_until_next_action: 3 };
+    return {
+      action: "Send payment reminder",
+      suggested_status: "reminder_sent",
+      days_until_next_action: 3,
+    };
   }
 
-  return { action: "Monitor — not yet overdue", suggested_status: input.status, days_until_next_action: 7 };
+  return {
+    action: "Monitor — not yet overdue",
+    suggested_status: input.status,
+    days_until_next_action: 7,
+  };
 }
 
 function ymdAddDays(ymd: string, days: number): string {
@@ -269,7 +310,9 @@ export type BuildAccountsReceivableCaseInput = {
 export function buildAccountsReceivableCase(input: BuildAccountsReceivableCaseInput): Omit<
   FiAccountsReceivableCaseRow,
   "id" | "created_at" | "updated_at" | "resolved_at"
-> & { resolved_at: string | null } {
+> & {
+  resolved_at: string | null;
+} {
   const outstanding = Math.max(0, Math.floor(input.outstanding_amount_cents));
   const original = Math.max(0, Math.floor(input.original_amount_cents));
   const daysOverdue = Math.max(0, Math.floor(input.days_overdue));
@@ -285,7 +328,9 @@ export function buildAccountsReceivableCase(input: BuildAccountsReceivableCaseIn
 
   const nextActionAt =
     input.next_action_at?.trim() ||
-    (FI_AR_TERMINAL_STATUSES.includes(status) ? null : computeNextActionAtIso(input.todayYmd, recommendation.days_until_next_action));
+    (FI_AR_TERMINAL_STATUSES.includes(status)
+      ? null
+      : computeNextActionAtIso(input.todayYmd, recommendation.days_until_next_action));
 
   return {
     tenant_id: input.tenant_id.trim(),
@@ -303,7 +348,10 @@ export function buildAccountsReceivableCase(input: BuildAccountsReceivableCaseIn
     status,
     next_action_at: nextActionAt,
     last_contacted_at: input.last_contacted_at?.trim() || null,
-    source_metadata: input.source_metadata && typeof input.source_metadata === "object" ? { ...input.source_metadata } : {},
+    source_metadata:
+      input.source_metadata && typeof input.source_metadata === "object"
+        ? { ...input.source_metadata }
+        : {},
     resolved_at: FI_AR_TERMINAL_STATUSES.includes(status) ? new Date().toISOString() : null,
   };
 }
@@ -316,10 +364,9 @@ export type BuildAccountsReceivableEventInput = {
   detail?: Record<string, unknown>;
 };
 
-export function buildAccountsReceivableEvent(input: BuildAccountsReceivableEventInput): Omit<
-  FiAccountsReceivableEventRow,
-  "id" | "created_at"
-> {
+export function buildAccountsReceivableEvent(
+  input: BuildAccountsReceivableEventInput
+): Omit<FiAccountsReceivableEventRow, "id" | "created_at"> {
   return {
     tenant_id: input.tenant_id.trim(),
     ar_case_id: input.ar_case_id.trim(),
@@ -349,17 +396,16 @@ export type DeriveArCaseFromInvoiceInput = {
   trigger?: "invoice_overdue" | "deposit_deadline_missed" | "payment_mismatch" | "manual";
 };
 
-export function deriveArCaseFromInvoice(input: DeriveArCaseFromInvoiceInput): Omit<
-  FiAccountsReceivableCaseRow,
-  "id" | "created_at" | "updated_at"
-> | null {
+export function deriveArCaseFromInvoice(
+  input: DeriveArCaseFromInvoiceInput
+): Omit<FiAccountsReceivableCaseRow, "id" | "created_at" | "updated_at"> | null {
   const outstanding = Math.max(
     0,
     input.invoice.remaining_balance_cents ??
       invoiceBalanceDueCents({
         total_cents: input.invoice.total_cents,
         amount_paid_cents: input.invoice.amount_paid_cents,
-      }),
+      })
   );
   if (outstanding <= 0) return null;
 
@@ -407,7 +453,11 @@ export function deriveArCaseFromInvoice(input: DeriveArCaseFromInvoiceInput): Om
   return built;
 }
 
-export function arCaseDedupeKey(tenantId: string, invoiceId: string, receivableType: FiArReceivableType): string {
+export function arCaseDedupeKey(
+  tenantId: string,
+  invoiceId: string,
+  receivableType: FiArReceivableType
+): string {
   return `${tenantId.trim()}:${invoiceId.trim()}:${receivableType}`;
 }
 
@@ -416,7 +466,10 @@ export function isOpenArCaseStatus(status: FiArCaseStatus): boolean {
 }
 
 export type ApplyPaymentToArCaseInput = {
-  case: Pick<FiAccountsReceivableCaseRow, "outstanding_amount_cents" | "status" | "original_amount_cents">;
+  case: Pick<
+    FiAccountsReceivableCaseRow,
+    "outstanding_amount_cents" | "status" | "original_amount_cents"
+  >;
   payment_amount_cents: number;
   todayYmd: string;
   receivable_type: FiArReceivableType;
@@ -537,7 +590,7 @@ export function buildReminderDraft(input: BuildReminderDraftInput): FiArReminder
 }
 
 export function buildCaseArDisplayStatus(
-  cases: Pick<FiAccountsReceivableCaseRow, "status" | "risk_level" | "outstanding_amount_cents">[],
+  cases: Pick<FiAccountsReceivableCaseRow, "status" | "risk_level" | "outstanding_amount_cents">[]
 ): FiCaseArDisplayStatus {
   if (!cases.length) return "no_ar_issue";
 
@@ -548,11 +601,14 @@ export function buildCaseArDisplayStatus(
   }
 
   if (open.some((c) => c.status === "payment_plan")) return "payment_plan_active";
-  if (open.some((c) => c.risk_level === "high" || c.risk_level === "critical")) return "high_risk_overdue";
+  if (open.some((c) => c.risk_level === "high" || c.risk_level === "critical"))
+    return "high_risk_overdue";
   return "open_ar_case";
 }
 
-export function mapAccountsReceivableCaseRow(raw: Record<string, unknown>): FiAccountsReceivableCaseRow {
+export function mapAccountsReceivableCaseRow(
+  raw: Record<string, unknown>
+): FiAccountsReceivableCaseRow {
   return {
     id: String(raw.id),
     tenant_id: String(raw.tenant_id),
@@ -571,7 +627,9 @@ export function mapAccountsReceivableCaseRow(raw: Record<string, unknown>): FiAc
     next_action_at: raw.next_action_at != null ? String(raw.next_action_at) : null,
     last_contacted_at: raw.last_contacted_at != null ? String(raw.last_contacted_at) : null,
     source_metadata:
-      raw.source_metadata && typeof raw.source_metadata === "object" && !Array.isArray(raw.source_metadata)
+      raw.source_metadata &&
+      typeof raw.source_metadata === "object" &&
+      !Array.isArray(raw.source_metadata)
         ? (raw.source_metadata as Record<string, unknown>)
         : {},
     created_at: String(raw.created_at ?? ""),
@@ -580,7 +638,9 @@ export function mapAccountsReceivableCaseRow(raw: Record<string, unknown>): FiAc
   };
 }
 
-export function mapAccountsReceivableEventRow(raw: Record<string, unknown>): FiAccountsReceivableEventRow {
+export function mapAccountsReceivableEventRow(
+  raw: Record<string, unknown>
+): FiAccountsReceivableEventRow {
   return {
     id: String(raw.id),
     tenant_id: String(raw.tenant_id),
@@ -608,7 +668,7 @@ export function aggregateAccountsReceivableMetrics(
   cases: Pick<
     FiAccountsReceivableCaseRow,
     "outstanding_amount_cents" | "days_overdue" | "risk_level" | "receivable_type" | "status"
-  >[],
+  >[]
 ): AccountsReceivableDashboardMetrics {
   const open = cases.filter((c) => isOpenArCaseStatus(c.status) && c.outstanding_amount_cents > 0);
   const totalOutstandingCents = open.reduce((acc, c) => acc + c.outstanding_amount_cents, 0);
@@ -616,9 +676,14 @@ export function aggregateAccountsReceivableMetrics(
   const overdueRevenueCents = overdue.reduce((acc, c) => acc + c.outstanding_amount_cents, 0);
   const criticalCaseCount = open.filter((c) => c.risk_level === "critical").length;
   const depositsAtRisk = open.filter((c) => c.receivable_type === "surgery_deposit");
-  const depositsAtRiskCents = depositsAtRisk.reduce((acc, c) => acc + c.outstanding_amount_cents, 0);
+  const depositsAtRiskCents = depositsAtRisk.reduce(
+    (acc, c) => acc + c.outstanding_amount_cents,
+    0
+  );
   const averageDaysOverdue =
-    overdue.length > 0 ? Math.round(overdue.reduce((acc, c) => acc + c.days_overdue, 0) / overdue.length) : 0;
+    overdue.length > 0
+      ? Math.round(overdue.reduce((acc, c) => acc + c.days_overdue, 0) / overdue.length)
+      : 0;
 
   return {
     totalOutstandingCents,

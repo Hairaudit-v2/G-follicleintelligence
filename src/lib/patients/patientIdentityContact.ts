@@ -41,7 +41,10 @@ function readHubspot(meta: Record<string, unknown>): Record<string, unknown> {
 }
 
 /** Patient hubspot wins for patient-only keys; person hubspot overlays contact names from person. */
-function mergedHubspot(personMeta: Record<string, unknown>, patientMeta: Record<string, unknown>): Record<string, unknown> {
+function mergedHubspot(
+  personMeta: Record<string, unknown>,
+  patientMeta: Record<string, unknown>
+): Record<string, unknown> {
   return { ...readHubspot(patientMeta), ...readHubspot(personMeta) };
 }
 
@@ -89,7 +92,10 @@ function normalizePreferredContact(raw: unknown): PatientPreferredContactMethod 
 /**
  * Computes whole-year age from a calendar date string (YYYY-MM-DD prefix or full ISO).
  */
-export function computeAgeYearsFromDobString(dob: string | null | undefined, reference = new Date()): number | null {
+export function computeAgeYearsFromDobString(
+  dob: string | null | undefined,
+  reference = new Date()
+): number | null {
   if (!dob?.trim()) return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dob.trim());
   if (!m) return null;
@@ -112,10 +118,14 @@ export type DerivePatientIdentityContactParams = {
   hubspotSourcePersonId?: string | null;
 };
 
-export function derivePatientIdentityContact(args: DerivePatientIdentityContactParams): PatientIdentityContactView {
+export function derivePatientIdentityContact(
+  args: DerivePatientIdentityContactParams
+): PatientIdentityContactView {
   const person = args.personMetadata;
   const patient =
-    args.patientMetadata && typeof args.patientMetadata === "object" && !Array.isArray(args.patientMetadata)
+    args.patientMetadata &&
+    typeof args.patientMetadata === "object" &&
+    !Array.isArray(args.patientMetadata)
       ? (args.patientMetadata as Record<string, unknown>)
       : {};
 
@@ -167,9 +177,15 @@ export function derivePatientIdentityContact(args: DerivePatientIdentityContactP
     addressFromUnknown(hub.address)
   );
 
-  const importBatchId = coalesceString(asTrimmedString(person.import_batch_id), asTrimmedString(patient.import_batch_id));
+  const importBatchId = coalesceString(
+    asTrimmedString(person.import_batch_id),
+    asTrimmedString(patient.import_batch_id)
+  );
 
-  const hubspotRecordId = coalesceString(asTrimmedString(hub.record_id), args.hubspotSourcePersonId ?? null);
+  const hubspotRecordId = coalesceString(
+    asTrimmedString(hub.record_id),
+    args.hubspotSourcePersonId ?? null
+  );
 
   const lifecycleStage = asTrimmedString(hub.lifecycle_stage);
   const leadStatus = asTrimmedString(hub.lead_status);

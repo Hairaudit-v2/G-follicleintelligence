@@ -16,7 +16,11 @@ function formatTimestamp(iso: string): string {
   }
 }
 
-export function SurgeryOsProcedureTimelineWidget({ events }: { events: SurgeryOsProcedureTimelineEvent[] }) {
+export function SurgeryOsProcedureTimelineWidget({
+  events,
+}: {
+  events: SurgeryOsProcedureTimelineEvent[];
+}) {
   const sorted = [...events].sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt));
 
   return (
@@ -35,13 +39,21 @@ export function SurgeryOsProcedureTimelineWidget({ events }: { events: SurgeryOs
             {sorted.map((ev, idx) => (
               <li key={ev.id} className="relative flex gap-3 pb-4">
                 {idx < sorted.length - 1 ? (
-                  <span className="absolute left-[7px] top-4 h-full w-px bg-white/[0.08]" aria-hidden />
+                  <span
+                    className="absolute left-[7px] top-4 h-full w-px bg-white/[0.08]"
+                    aria-hidden
+                  />
                 ) : null}
-                <span className="relative z-10 mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-cyan-400/60 bg-[#081020]" aria-hidden />
+                <span
+                  className="relative z-10 mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-cyan-400/60 bg-[#081020]"
+                  aria-hidden
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <p className="text-sm font-medium text-slate-100">{ev.eventLabel}</p>
-                    <span className="text-xs tabular-nums text-cyan-400/80">{formatTimestamp(ev.occurredAt)}</span>
+                    <span className="text-xs tabular-nums text-cyan-400/80">
+                      {formatTimestamp(ev.occurredAt)}
+                    </span>
                   </div>
                   <p className="text-xs text-slate-500">{ev.patientLabel}</p>
                   {ev.recordedByLabel ? (

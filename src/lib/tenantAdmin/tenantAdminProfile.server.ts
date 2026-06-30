@@ -7,7 +7,10 @@ import {
   loadProxyFiUserRowForPlatformAdminTenant,
   resolveAuthUserId,
 } from "@/src/lib/crm/crmGate";
-import type { FiTenantAdminRole, FiTenantAdminUserStatus } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import type {
+  FiTenantAdminRole,
+  FiTenantAdminUserStatus,
+} from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { normalizeFiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import {
   ALL_TENANT_ADMIN_CAPABILITIES,
@@ -50,7 +53,12 @@ async function loadFiUserRow(
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   if (error || !data) return null;
-  const r = data as { id: string; role: string | null; email: string | null; auth_user_id: string | null };
+  const r = data as {
+    id: string;
+    role: string | null;
+    email: string | null;
+    auth_user_id: string | null;
+  };
   return {
     id: String(r.id),
     role: String(r.role ?? "member"),
@@ -65,7 +73,11 @@ async function loadFiUserRow(
 export async function loadActiveTenantAdminProfileForSession(
   tenantId: string,
   sessionAuthUserId: string
-): Promise<{ fiUserId: string; adminRole: FiTenantAdminRole; status: FiTenantAdminUserStatus } | null> {
+): Promise<{
+  fiUserId: string;
+  adminRole: FiTenantAdminRole;
+  status: FiTenantAdminUserStatus;
+} | null> {
   const tid = tenantId.trim();
   const sid = sessionAuthUserId.trim();
   if (!tid || !sid) return null;
@@ -85,12 +97,16 @@ export async function loadActiveTenantAdminProfileForSession(
   if (error || !data) return null;
   const row = data as { admin_role: string; status: string };
   const adminRole = normalizeFiTenantAdminRole(row.admin_role);
-  const st = String(row.status ?? "").trim().toLowerCase();
+  const st = String(row.status ?? "")
+    .trim()
+    .toLowerCase();
   if (!adminRole || st !== "active") return null;
   return { fiUserId: u.id, adminRole, status: "active" };
 }
 
-export async function loadTenantAdminUserRowsForTenant(tenantId: string): Promise<FiTenantAdminUserRow[]> {
+export async function loadTenantAdminUserRowsForTenant(
+  tenantId: string
+): Promise<FiTenantAdminUserRow[]> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -102,7 +118,9 @@ export async function loadTenantAdminUserRowsForTenant(tenantId: string): Promis
     .order("created_at", { ascending: true });
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as Record<string, unknown>[];
-  const fiUserIds = Array.from(new Set(rows.map((r) => String(r.fi_user_id ?? "")).filter(Boolean)));
+  const fiUserIds = Array.from(
+    new Set(rows.map((r) => String(r.fi_user_id ?? "")).filter(Boolean))
+  );
   const emailByFiUser = new Map<string, { email: string | null; auth_user_id: string | null }>();
   if (fiUserIds.length) {
     const { data: users, error: ue } = await supabase
@@ -121,7 +139,9 @@ export async function loadTenantAdminUserRowsForTenant(tenantId: string): Promis
   }
   return rows.map((r) => {
     const role = normalizeFiTenantAdminRole(String(r.admin_role ?? ""));
-    const st = String(r.status ?? "").trim().toLowerCase();
+    const st = String(r.status ?? "")
+      .trim()
+      .toLowerCase();
     if (!role || !["invited", "active", "suspended"].includes(st)) {
       throw new Error("Invalid fi_tenant_admin_users row.");
     }
@@ -149,7 +169,9 @@ export type AuthUserLastLogin = { authUserId: string; lastSignInAt: string | nul
 /**
  * Best-effort last sign-in from auth.users (service role). Skips missing users.
  */
-export async function loadAuthLastSignInAtForUserIds(authUserIds: string[]): Promise<Map<string, string | null>> {
+export async function loadAuthLastSignInAtForUserIds(
+  authUserIds: string[]
+): Promise<Map<string, string | null>> {
   const out = new Map<string, string | null>();
   const ids = Array.from(new Set(authUserIds.map((x) => x.trim()).filter(Boolean)));
   if (!ids.length) return out;
@@ -180,7 +202,9 @@ function isTenantBackendFiRole(role: string): boolean {
  * Clinical members (`fi_users.role` ≠ `tenant_backend`) get an empty set here; route helpers union
  * legacy paths (e.g. reminders) where appropriate.
  */
-export async function resolveSessionTenantAdminCapabilities(tenantId: string): Promise<ReadonlySet<FiTenantAdminCapability>> {
+export async function resolveSessionTenantAdminCapabilities(
+  tenantId: string
+): Promise<ReadonlySet<FiTenantAdminCapability>> {
   const tid = tenantId.trim();
   const authId = await resolveAuthUserId(null);
   if (!authId || !tid) return new Set();
@@ -295,7 +319,9 @@ export async function canViewSecurityAuditNav(tenantId: string): Promise<boolean
 /**
  * Resolves actor fi_users.id for tenant admin mutations (respects impersonation + platform admin proxy row).
  */
-export async function resolveActorFiUserIdForTenantAdminActions(tenantId: string): Promise<string | null> {
+export async function resolveActorFiUserIdForTenantAdminActions(
+  tenantId: string
+): Promise<string | null> {
   const tid = tenantId.trim();
   const authId = await resolveAuthUserId(null);
   if (!authId) return null;

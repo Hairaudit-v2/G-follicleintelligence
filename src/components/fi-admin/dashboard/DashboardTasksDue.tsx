@@ -12,7 +12,11 @@ function formatDue(iso: string | null): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(d);
 }
 
-export function DashboardTasksDue(props: { tenantId: string; tasks: TaskDueItem[]; viewerFiUserId: string | null }) {
+export function DashboardTasksDue(props: {
+  tenantId: string;
+  tasks: TaskDueItem[];
+  viewerFiUserId: string | null;
+}) {
   const { tenantId, tasks, viewerFiUserId } = props;
 
   return (
@@ -44,14 +48,19 @@ export function DashboardTasksDue(props: { tenantId: string; tasks: TaskDueItem[
               className="flex flex-col gap-2 rounded-xl border border-white/[0.08] bg-[#081020]/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 gap-3">
-                <span className="mt-0.5 hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] text-[#22C1FF] sm:flex" aria-hidden>
+                <span
+                  className="mt-0.5 hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] text-[#22C1FF] sm:flex"
+                  aria-hidden
+                >
                   <ListTodo size={18} strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-[#F8FAFC]">{t.title}</p>
                   <p className="text-xs text-[#94A3B8]">
                     {formatDue(t.dueAt)} · {t.taskType.replace(/_/g, " ")} · {t.status}
-                    {t.isUnassigned ? <span className="text-amber-200/90"> · Unassigned</span> : null}
+                    {t.isUnassigned ? (
+                      <span className="text-amber-200/90"> · Unassigned</span>
+                    ) : null}
                   </p>
                 </div>
               </div>

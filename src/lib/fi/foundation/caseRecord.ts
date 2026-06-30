@@ -191,9 +191,7 @@ async function loadLinkedPatientBlock(
   if (resErr) throw new Error(resErr.message);
   const resolution_rows = (resData ?? []) as unknown as PatientResolutionRow[];
   const global_patient_ids = Array.from(
-    new Set(
-      resolution_rows.map((r) => r.global_patient_id).filter((g): g is string => Boolean(g))
-    )
+    new Set(resolution_rows.map((r) => r.global_patient_id).filter((g): g is string => Boolean(g)))
   );
 
   if (patient && resolution_rows.length > 0) {
@@ -234,7 +232,9 @@ export async function loadUniversalCaseRecord(
     return { ok: false, error: "not_found", message: "Case not found for tenant." };
   }
 
-  const [caseSummary] = await enrichCasesWithExternalAndNames(supabase, tid, [viewRow as Record<string, unknown>]);
+  const [caseSummary] = await enrichCasesWithExternalAndNames(supabase, tid, [
+    viewRow as Record<string, unknown>,
+  ]);
   const warnings: string[] = [];
 
   const case_source_identifiers: CaseSourceIdentifierRow[] = [];
@@ -274,7 +274,9 @@ export async function loadUniversalCaseRecord(
     warnings.push("No foundation_patient_id on this case (foundation layer link missing).");
   }
   if (!caseSummary.source_case_id) {
-    warnings.push("No source_case_id in case foundation view (metadata or global bridge may be incomplete).");
+    warnings.push(
+      "No source_case_id in case foundation view (metadata or global bridge may be incomplete)."
+    );
   }
   if (!caseSummary.clinic_id) {
     warnings.push("No clinic_id on this case.");
@@ -328,7 +330,9 @@ export async function loadUniversalCaseRecord(
       );
     }
     if (linked_patient.patient && !linked_patient.person?.person_id) {
-      warnings.push("Linked patient has no resolved fi_persons row (person_id missing or orphaned).");
+      warnings.push(
+        "Linked patient has no resolved fi_persons row (person_id missing or orphaned)."
+      );
     }
   }
 
@@ -383,7 +387,9 @@ export async function loadUniversalCaseRecord(
 
   const { data: mAssets, error: aErr } = await supabase
     .from("fi_media_assets")
-    .select("id, case_id, patient_id, asset_type, filename, storage_path, source_system, created_at")
+    .select(
+      "id, case_id, patient_id, asset_type, filename, storage_path, source_system, created_at"
+    )
     .eq("tenant_id", tid)
     .eq("case_id", caseId);
   if (aErr) throw new Error(aErr.message);

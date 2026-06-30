@@ -27,9 +27,17 @@ export function canMutateClinicFromOperatorContext(opts: {
 }
 
 export function isCrmStaffManageRole(role: string | null | undefined): boolean {
-  return CRM_STAFF_MANAGE_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());
+  return CRM_STAFF_MANAGE_ROLES_LOWER.has(
+    String(role ?? "")
+      .trim()
+      .toLowerCase()
+  );
 }
 
 export function isCrmShellNavRole(role: string | null | undefined): boolean {
-  return CRM_SHELL_NAV_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());
+  return CRM_SHELL_NAV_ROLES_LOWER.has(
+    String(role ?? "")
+      .trim()
+      .toLowerCase()
+  );
 }

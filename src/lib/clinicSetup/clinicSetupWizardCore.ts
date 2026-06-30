@@ -70,7 +70,12 @@ export function categorizeServiceForWizard(service: FiServiceRow): WizardService
     const bt = service.booking_type?.trim() ?? "";
     const name = service.name.trim().toLowerCase();
     if (bt === "consultation" || /\btrichology\b/.test(name)) return "consult_strict";
-    if (bt === "follow_up" || bt === "review" || /\bfollow[- ]?up\b/.test(name) || /\breview\b/.test(name)) {
+    if (
+      bt === "follow_up" ||
+      bt === "review" ||
+      /\bfollow[- ]?up\b/.test(name) ||
+      /\breview\b/.test(name)
+    ) {
       return "consult_loose";
     }
     return "consult_loose";
@@ -98,7 +103,11 @@ export function buildPlannedRoomsFromCounts(args: {
   const pre = `cs_${clinicKeyShort(args.clinicId)}`;
   const c = args.counts;
   const alias =
-    args.useStandardSecondRoomAliases && c.consult >= 2 && c.patient >= 2 && c.prp >= 2 && c.surgery >= 2;
+    args.useStandardSecondRoomAliases &&
+    c.consult >= 2 &&
+    c.patient >= 2 &&
+    c.prp >= 2 &&
+    c.surgery >= 2;
 
   const rows: PlannedClinicRoomRow[] = [];
   let order = 10;
@@ -106,9 +115,11 @@ export function buildPlannedRoomsFromCounts(args: {
   for (let i = 1; i <= Math.max(0, Math.min(c.consult, 20)); i++) {
     const room_code = `cons_${i}`;
     const isSecond = i === 2;
-    const physical =
-      alias && isSecond ? `${pre}_phys_cons2_patient2` : `${pre}_phys_cons_${i}`;
-    const caps = alias && isSecond ? (["consultation", "patient"] as string[]) : (["consultation"] as string[]);
+    const physical = alias && isSecond ? `${pre}_phys_cons2_patient2` : `${pre}_phys_cons_${i}`;
+    const caps =
+      alias && isSecond
+        ? (["consultation", "patient"] as string[])
+        : (["consultation"] as string[]);
     rows.push({
       room_code,
       display_name: `Consult Room ${i}`,
@@ -123,8 +134,7 @@ export function buildPlannedRoomsFromCounts(args: {
   for (let i = 1; i <= Math.max(0, Math.min(c.prp, 20)); i++) {
     const room_code = `prp_${i}`;
     const isSecond = i === 2;
-    const physical =
-      alias && isSecond ? `${pre}_phys_prp2_surgery2` : `${pre}_phys_prp_${i}`;
+    const physical = alias && isSecond ? `${pre}_phys_prp2_surgery2` : `${pre}_phys_prp_${i}`;
     const caps =
       alias && isSecond
         ? (["prp", "exosomes", "prf", "surgery"] as string[])
@@ -143,12 +153,9 @@ export function buildPlannedRoomsFromCounts(args: {
   for (let i = 1; i <= Math.max(0, Math.min(c.surgery, 20)); i++) {
     const room_code = `surgery_${i}`;
     const isSecond = i === 2;
-    const physical =
-      alias && isSecond ? `${pre}_phys_prp2_surgery2` : `${pre}_phys_surgery_${i}`;
+    const physical = alias && isSecond ? `${pre}_phys_prp2_surgery2` : `${pre}_phys_surgery_${i}`;
     const caps =
-      alias && isSecond
-        ? (["surgery", "prp", "exosomes"] as string[])
-        : (["surgery"] as string[]);
+      alias && isSecond ? (["surgery", "prp", "exosomes"] as string[]) : (["surgery"] as string[]);
     rows.push({
       room_code,
       display_name: `Surgery Room ${i}`,
@@ -163,8 +170,7 @@ export function buildPlannedRoomsFromCounts(args: {
   for (let i = 1; i <= Math.max(0, Math.min(c.patient, 20)); i++) {
     const room_code = `patient_room_${i}`;
     const isSecond = i === 2;
-    const physical =
-      alias && isSecond ? `${pre}_phys_cons2_patient2` : `${pre}_phys_patient_${i}`;
+    const physical = alias && isSecond ? `${pre}_phys_cons2_patient2` : `${pre}_phys_patient_${i}`;
     const caps = ["patient", "follow_up"] as string[];
     rows.push({
       room_code,

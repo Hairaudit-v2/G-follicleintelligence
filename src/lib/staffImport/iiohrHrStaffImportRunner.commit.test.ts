@@ -12,7 +12,9 @@ import {
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 
-function row(p: Partial<IiohrHrStaffImportRow> & Pick<IiohrHrStaffImportRow, "external_staff_id" | "full_name">): IiohrHrStaffImportRow {
+function row(
+  p: Partial<IiohrHrStaffImportRow> & Pick<IiohrHrStaffImportRow, "external_staff_id" | "full_name">
+): IiohrHrStaffImportRow {
   return {
     staff_role: "consultant",
     employment_status: "active",
@@ -31,7 +33,10 @@ test("attachEvolvedPerthClinicMetadataToPlan adds primary_fi_clinic_id to create
   attachEvolvedPerthClinicMetadataToPlan(plan, "clinic-perth-1");
   const sid = plan.actions.find((a) => a.type === "create_staff_source_id");
   assert.ok(sid && sid.type === "create_staff_source_id");
-  assert.equal((sid.payload.metadata as { primary_fi_clinic_id?: string }).primary_fi_clinic_id, "clinic-perth-1");
+  assert.equal(
+    (sid.payload.metadata as { primary_fi_clinic_id?: string }).primary_fi_clinic_id,
+    "clinic-perth-1"
+  );
 });
 
 test("attachEvolvedPerthClinicMetadataToPlan warns when no clinic", () => {
@@ -81,7 +86,13 @@ test("commit path creates fi_staff_source_ids (mock supabase)", async () => {
 
   const plan = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [row({ external_staff_id: "COMMIT-1", email: "brandnew-commit@x.com", full_name: "Commit Hire" })],
+    rows: [
+      row({
+        external_staff_id: "COMMIT-1",
+        email: "brandnew-commit@x.com",
+        full_name: "Commit Hire",
+      }),
+    ],
     existingUsers: [],
     existingStaff: [],
     existingStaffSourceIds: [],
@@ -104,7 +115,10 @@ test("commit path creates fi_staff_source_ids (mock supabase)", async () => {
   assert.equal(srcInserts.length, 1);
   assert.equal(srcInserts[0]?.payload.source_system, "iiohr_hr");
   assert.equal(srcInserts[0]?.payload.staff_id, "new-staff-1");
-  assert.equal((srcInserts[0]?.payload.metadata as { primary_fi_clinic_id?: string }).primary_fi_clinic_id, "clinic-99");
+  assert.equal(
+    (srcInserts[0]?.payload.metadata as { primary_fi_clinic_id?: string }).primary_fi_clinic_id,
+    "clinic-99"
+  );
   assert.equal(applied.createdSourceIds, 1);
 });
 

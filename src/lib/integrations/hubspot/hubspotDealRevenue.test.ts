@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { processHubspotDealWebhook, type HubspotDealTimelineOutcome } from "./hubspotTimelineProcessors.server";
+import {
+  processHubspotDealWebhook,
+  type HubspotDealTimelineOutcome,
+} from "./hubspotTimelineProcessors.server";
 import { hubspotDealWebhookSchema } from "./hubspotTimelineSchemas";
 import { upsertRevenuePipelineFromHubspotDeal } from "./upsertRevenuePipelineFromHubspotDeal.server";
 
@@ -51,7 +54,8 @@ function makeSupabase(resolve: (ctx: QueryCtx) => Resolved): SupabaseClient {
     select: () => buildSelect(table),
     insert: (row: Record<string, unknown>) => ({
       select: () => ({
-        single: async () => resolve({ table, filters: {}, ordered: false, op: "insert", insertRow: row }),
+        single: async () =>
+          resolve({ table, filters: {}, ordered: false, op: "insert", insertRow: row }),
       }),
     }),
     update: (row: Record<string, unknown>) => {

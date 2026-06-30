@@ -22,24 +22,22 @@ function portaledMenuStyles(
   if (variant === "fiOs") {
     if (displayTheme === "light") {
       return {
-        content: "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg",
-        item:
-          "text-slate-100 focus:bg-white/[0.06] focus:text-slate-100 data-[highlighted]:bg-white/[0.06] data-[highlighted]:text-slate-100",
+        content:
+          "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg",
+        item: "text-slate-100 focus:bg-white/[0.06] focus:text-slate-100 data-[highlighted]:bg-white/[0.06] data-[highlighted]:text-slate-100",
         itemActive: "bg-cyan-500/15 font-semibold text-cyan-900",
       };
     }
     return {
       content: "border border-slate-700 bg-[#0f172a] text-white shadow-lg",
-      item:
-        "text-slate-100 focus:bg-slate-800 focus:text-white data-[highlighted]:bg-slate-800 data-[highlighted]:text-white",
+      item: "text-slate-100 focus:bg-slate-800 focus:text-white data-[highlighted]:bg-slate-800 data-[highlighted]:text-white",
       itemActive: "bg-cyan-500/15 font-semibold text-cyan-100",
     };
   }
 
   return {
     content: "border border-[#1e2937] bg-[#0f172a] text-slate-100 shadow-lg",
-    item:
-      "text-slate-200 focus:bg-slate-800 focus:text-white data-[highlighted]:bg-slate-800 data-[highlighted]:text-white",
+    item: "text-slate-200 focus:bg-slate-800 focus:text-white data-[highlighted]:bg-slate-800 data-[highlighted]:text-white",
     itemActive: "bg-sky-500/20 font-semibold text-sky-100",
   };
 }
@@ -101,7 +99,10 @@ export function CalendarToolbarFilterSelect({
         {options.map((o) => (
           <DropdownMenuItem
             key={o.value}
-            className={cn("cursor-pointer", value === o.value ? menuStyles.itemActive : menuStyles.item)}
+            className={cn(
+              "cursor-pointer",
+              value === o.value ? menuStyles.itemActive : menuStyles.item
+            )}
             onSelect={() => onValueChange(o.value)}
           >
             {o.label}

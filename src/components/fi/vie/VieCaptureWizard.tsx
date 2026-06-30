@@ -77,7 +77,8 @@ function slotTierLabel(tier: VieSlotTier): string {
 }
 
 function slotCaption(slot: WizardSlot, requiredComplete: number, requiredTotal: number): string {
-  if (slot.required === false) return "Optional view — skipping does not affect protocol completeness";
+  if (slot.required === false)
+    return "Optional view — skipping does not affect protocol completeness";
   if (slot.slot_tier === "addon") return "Required add-on view";
   return `Required primary view · ${Math.min(requiredComplete + 1, requiredTotal)} of ${requiredTotal}`;
 }
@@ -99,7 +100,9 @@ function wizardSlotFromDef(s: VieProtocolSlotDef): WizardSlot {
 function groupSlots(slots: WizardSlot[]) {
   return {
     primary: slots.filter(
-      (s) => s.slot_tier === "primary" || (s.required !== false && s.slot_tier !== "addon" && s.slot_tier !== "optional")
+      (s) =>
+        s.slot_tier === "primary" ||
+        (s.required !== false && s.slot_tier !== "addon" && s.slot_tier !== "optional")
     ),
     addon: slots.filter((s) => s.slot_tier === "addon"),
     optional: slots.filter((s) => s.required === false || s.slot_tier === "optional"),
@@ -124,7 +127,9 @@ function SlotChecklist({
   if (slots.length === 0) return null;
   return (
     <div>
-      <p className="mb-1 text-[0.65rem] font-semibold uppercase tracking-wide text-gray-500">{title}</p>
+      <p className="mb-1 text-[0.65rem] font-semibold uppercase tracking-wide text-gray-500">
+        {title}
+      </p>
       <ul className="grid gap-1 sm:grid-cols-2">
         {slots.map((s) => {
           const done = slotIsSatisfied(s, progress);
@@ -185,7 +190,9 @@ export function VieCaptureWizard({
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [captureReview, setCaptureReview] = useState<VieCaptureReviewPayload | null>(null);
   const [reviewSlotSlug, setReviewSlotSlug] = useState<string | null>(null);
-  const [referenceGuidance, setReferenceGuidance] = useState<VieCaptureReferenceGuidance | null>(null);
+  const [referenceGuidance, setReferenceGuidance] = useState<VieCaptureReferenceGuidance | null>(
+    null
+  );
   const camRef = useRef<HTMLInputElement>(null);
 
   const protocol = useMemo(() => getVieProtocol(templateSlug), [templateSlug]);
@@ -197,7 +204,8 @@ export function VieCaptureWizard({
 
   const grouped = useMemo(() => groupSlots(slots), [slots]);
   const surgeryPhaseGroups = useMemo(
-    () => (templateSlug === "surgery_day" && protocol ? groupSurgeryDaySlotsByPhase(protocol.slots) : []),
+    () =>
+      templateSlug === "surgery_day" && protocol ? groupSurgeryDaySlotsByPhase(protocol.slots) : [],
     [protocol, templateSlug]
   );
   const meta = useMemo(() => parseProgressMeta(progress), [progress]);
@@ -205,12 +213,16 @@ export function VieCaptureWizard({
   const pendingSlotSlug = Object.keys(meta.vie_pending ?? {})[0] ?? null;
   const currentSlug = captureReview
     ? reviewSlotSlug
-    : pendingSlotSlug ?? slotOverride ?? computedNext ?? slots[0]?.slug ?? null;
+    : (pendingSlotSlug ?? slotOverride ?? computedNext ?? slots[0]?.slug ?? null);
   const currentSlot = slots.find((s) => s.slug === currentSlug) ?? null;
   const { requiredComplete, requiredTotal } = parseSlotProgress(progress, slots);
   const optionalTotal = slots.filter((s) => s.required === false).length;
-  const optionalComplete = slots.filter((s) => s.required === false && slotIsSatisfied(s, progress)).length;
-  const captureGuide = currentSlug ? captureGuideForSlot(templateSlug, currentSlug) : "front_hairline";
+  const optionalComplete = slots.filter(
+    (s) => s.required === false && slotIsSatisfied(s, progress)
+  ).length;
+  const captureGuide = currentSlug
+    ? captureGuideForSlot(templateSlug, currentSlug)
+    : "front_hairline";
   const awaitingReview = Boolean(captureReview && reviewSlotSlug);
 
   useEffect(() => {
@@ -289,7 +301,9 @@ export function VieCaptureWizard({
           }
 
           const imageId =
-            captureReview?.patient_image_id ?? meta.vie_pending?.[reviewSlotSlug]?.patient_image_id ?? null;
+            captureReview?.patient_image_id ??
+            meta.vie_pending?.[reviewSlotSlug]?.patient_image_id ??
+            null;
           const clearedMeta = { ...parseProgressMeta(progress) };
           const pendingMap = { ...(clearedMeta.vie_pending ?? {}) };
           delete pendingMap[reviewSlotSlug];
@@ -306,7 +320,17 @@ export function VieCaptureWizard({
         }
       });
     },
-    [captureReview?.patient_image_id, meta.vie_pending, patientId, progress, reviewSlotSlug, router, sessionId, syncProgressFromServer, tenantId]
+    [
+      captureReview?.patient_image_id,
+      meta.vie_pending,
+      patientId,
+      progress,
+      reviewSlotSlug,
+      router,
+      sessionId,
+      syncProgressFromServer,
+      tenantId,
+    ]
   );
 
   const retakeCapture = useCallback(() => {
@@ -356,7 +380,9 @@ export function VieCaptureWizard({
       const fields = buildGuidedImageUploadFields({
         templateSlug,
         slotSlug: currentSlug,
-        deviceType: inferCaptureDeviceType(typeof navigator !== "undefined" ? navigator.userAgent : ""),
+        deviceType: inferCaptureDeviceType(
+          typeof navigator !== "undefined" ? navigator.userAgent : ""
+        ),
         suggestedRegion: currentSlot?.suggested_region ?? null,
       });
 
@@ -380,7 +406,8 @@ export function VieCaptureWizard({
           fd.set("capture_source", captureSource);
           if (surgeryContext?.caseId) fd.set("case_id", surgeryContext.caseId);
           if (surgeryContext?.bookingId) fd.set("booking_id", surgeryContext.bookingId);
-          if (surgeryContext?.procedureDayId) fd.set("procedure_day_id", surgeryContext.procedureDayId);
+          if (surgeryContext?.procedureDayId)
+            fd.set("procedure_day_id", surgeryContext.procedureDayId);
           if (dims.width) fd.set("image_width", String(dims.width));
           if (dims.height) fd.set("image_height", String(dims.height));
           if (hasAccepted || hasPending) fd.set("guided_replace", "1");
@@ -430,7 +457,19 @@ export function VieCaptureWizard({
         }
       });
     },
-    [awaitingReview, captureSource, currentSlot, currentSlug, patientId, progress, router, sessionId, surgeryContext, templateSlug, tenantId]
+    [
+      awaitingReview,
+      captureSource,
+      currentSlot,
+      currentSlug,
+      patientId,
+      progress,
+      router,
+      sessionId,
+      surgeryContext,
+      templateSlug,
+      tenantId,
+    ]
   );
 
   if (!protocol || !currentSlot) {
@@ -445,7 +484,9 @@ export function VieCaptureWizard({
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">Visual Intelligence Engine</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">
+            Visual Intelligence Engine
+          </p>
           <h3 className="text-base font-semibold text-slate-100">{protocol.name}</h3>
           <p className="mt-1 text-xs text-slate-400">
             Required: {requiredComplete}/{requiredTotal} accepted
@@ -453,7 +494,11 @@ export function VieCaptureWizard({
             {sessionCompleted ? " — protocol complete" : null}
           </p>
         </div>
-        <button type="button" onClick={onClose} className="text-sm text-gray-500 hover:text-slate-200">
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-sm text-gray-500 hover:text-slate-200"
+        >
           Close
         </button>
       </div>
@@ -470,15 +515,20 @@ export function VieCaptureWizard({
             {slotCaption(currentSlot, requiredComplete, requiredTotal)}
           </p>
           <p className="mt-1 text-center text-[0.65rem] text-slate-500">
-            {currentSlot.framing === "close_up" ? "Close-up" : "Overview"} · {currentSlot.capture_distance_hint}
+            {currentSlot.framing === "close_up" ? "Close-up" : "Overview"} ·{" "}
+            {currentSlot.capture_distance_hint}
             {currentSlot.suggested_timing ? ` · ${currentSlot.suggested_timing}` : null}
           </p>
           {referenceGuidance?.has_reference ? (
             <div className="mt-3 rounded-md border border-cyan-500/30 bg-cyan-950/40 px-3 py-2 text-left">
-              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">Try to match prior image</p>
-              {referenceGuidance.reference_slot_label && referenceGuidance.days_since_reference != null ? (
+              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
+                Try to match prior image
+              </p>
+              {referenceGuidance.reference_slot_label &&
+              referenceGuidance.days_since_reference != null ? (
                 <p className="mt-1 text-xs text-cyan-100/90">
-                  Reference: {referenceGuidance.reference_slot_label} ({referenceGuidance.days_since_reference} day
+                  Reference: {referenceGuidance.reference_slot_label} (
+                  {referenceGuidance.days_since_reference} day
                   {referenceGuidance.days_since_reference === 1 ? "" : "s"} ago)
                 </p>
               ) : null}
@@ -534,7 +584,12 @@ export function VieCaptureWizard({
               progress={progress}
               currentSlug={currentSlug}
             />
-            <SlotChecklist title="Optional views" slots={grouped.optional} progress={progress} currentSlug={currentSlug} />
+            <SlotChecklist
+              title="Optional views"
+              slots={grouped.optional}
+              progress={progress}
+              currentSlug={currentSlug}
+            />
           </>
         )}
       </div>

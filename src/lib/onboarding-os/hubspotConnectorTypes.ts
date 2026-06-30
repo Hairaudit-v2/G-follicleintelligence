@@ -25,7 +25,12 @@ export type HubspotImportStatus = (typeof HUBSPOT_IMPORT_STATUSES)[number];
 export const HUBSPOT_SYNC_RUN_STATUSES = ["started", "completed", "partial", "failed"] as const;
 export type HubspotSyncRunStatus = (typeof HUBSPOT_SYNC_RUN_STATUSES)[number];
 
-export const HUBSPOT_PIPELINE_MAPPING_STATUSES = ["pending", "approved", "rejected", "linked"] as const;
+export const HUBSPOT_PIPELINE_MAPPING_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "linked",
+] as const;
 export type HubspotPipelineMappingStatus = (typeof HUBSPOT_PIPELINE_MAPPING_STATUSES)[number];
 
 export const HUBSPOT_IMPORT_AUDIT_ACTIONS = [

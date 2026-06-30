@@ -23,8 +23,7 @@ export const HAIRAUDIT_CLASSIFIER_SOURCE_SYSTEM = "hairaudit" as const;
 
 export const STUB_CLASSIFIER_VERSION = "fi-os-stub-v1" as const;
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export type HairAuditImageClassifyRequest = {
   source_system: typeof HAIRAUDIT_CLASSIFIER_SOURCE_SYSTEM;
@@ -169,10 +168,18 @@ export function parseHairAuditImageClassifyRequest(
   const storagePath = readNonEmptyString(body.storage_path);
 
   if (storageBucket && !storagePath) {
-    return { ok: false, error: "storage_path is required when storage_bucket is set", field: "storage_path" };
+    return {
+      ok: false,
+      error: "storage_path is required when storage_bucket is set",
+      field: "storage_path",
+    };
   }
   if (storagePath && !storageBucket) {
-    return { ok: false, error: "storage_bucket is required when storage_path is set", field: "storage_bucket" };
+    return {
+      ok: false,
+      error: "storage_bucket is required when storage_path is set",
+      field: "storage_bucket",
+    };
   }
 
   let imageContentType: string | null | undefined;
@@ -216,9 +223,7 @@ export function parseHairAuditImageClassifyRequest(
   return { ok: true, data };
 }
 
-export function isSafeClassificationResponseBody(
-  body: Record<string, unknown>
-): boolean {
+export function isSafeClassificationResponseBody(body: Record<string, unknown>): boolean {
   const keys = Object.keys(body);
   if (keys.length !== RESPONSE_FIELD_KEYS.length) return false;
   if (!RESPONSE_FIELD_KEYS.every((key) => keys.includes(key))) return false;

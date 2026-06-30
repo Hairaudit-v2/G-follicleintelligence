@@ -38,9 +38,7 @@ import { ReceptionOsPilotReviewPanel } from "@/src/components/fi-admin/reception
 import { ReceptionOsOwnerValueDashboardWidget } from "@/src/components/fi-admin/reception-os/widgets/ReceptionOsOwnerValueDashboard";
 import { ReceptionOsDemoBanner } from "@/src/components/fi-admin/reception-os/ReceptionOsDemoBanner";
 import { ReceptionOsModuleHealthPanel } from "@/src/components/fi-admin/reception-os/ReceptionOsModuleHealthPanel";
-import {
-  useReceptionOsDashboardViewTracking,
-} from "@/src/components/fi-admin/reception-os/useReceptionOsUsageTracking";
+import { useReceptionOsDashboardViewTracking } from "@/src/components/fi-admin/reception-os/useReceptionOsUsageTracking";
 import { revenueIntelligenceAccessForRole } from "@/src/lib/receptionOs/receptionOsRevenueModel";
 
 function formatRefreshTime(d: Date | null): string {
@@ -48,12 +46,21 @@ function formatRefreshTime(d: Date | null): string {
   return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-function widgetVisible(visible: readonly ReceptionOsWidgetKey[], key: ReceptionOsWidgetKey): boolean {
+function widgetVisible(
+  visible: readonly ReceptionOsWidgetKey[],
+  key: ReceptionOsWidgetKey
+): boolean {
   return visible.includes(key);
 }
 
-export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsCommandCentrePayload }) {
-  const [operatingMode, setOperatingMode] = useState<ReceptionOsOperatingMode>(initialData.suggestedOperatingMode);
+export function ReceptionOsDashboard({
+  data: initialData,
+}: {
+  data: ReceptionOsCommandCentrePayload;
+}) {
+  const [operatingMode, setOperatingMode] = useState<ReceptionOsOperatingMode>(
+    initialData.suggestedOperatingMode
+  );
 
   const { data, lastRefreshedAt, isRefreshing, refreshError, refresh } = useReceptionOsRefresh({
     tenantId: initialData.tenantId,
@@ -64,7 +71,7 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
 
   const modeWidgets = useMemo(
     () => widgetsForOperatingMode(operatingMode, data.viewer.visibleWidgets),
-    [operatingMode, data.viewer.visibleWidgets],
+    [operatingMode, data.viewer.visibleWidgets]
   );
 
   const taskStatuses = taskStatusesForOperatingMode(operatingMode);
@@ -84,8 +91,12 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
     <div className="mx-auto max-w-[1920px] space-y-6 pb-10">
       <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">ReceptionOS · Command centre</p>
-          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">{data.tenantName}</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
+            ReceptionOS · Command centre
+          </p>
+          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
+            {data.tenantName}
+          </h1>
           <p className="mt-1 text-sm text-slate-500">{dateLine}</p>
           <p className="mt-0.5 text-xs text-slate-600">
             Live front desk · auto-refresh · role:{" "}
@@ -99,19 +110,21 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
             disabled={isRefreshing}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95 disabled:opacity-60",
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95 disabled:opacity-60"
             )}
           >
             <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} aria-hidden />
             Refresh
           </button>
-          <span className="text-xs text-slate-600">Updated {formatRefreshTime(lastRefreshedAt)}</span>
+          <span className="text-xs text-slate-600">
+            Updated {formatRefreshTime(lastRefreshedAt)}
+          </span>
           {refreshError ? <span className="text-xs text-rose-400">{refreshError}</span> : null}
           <Link
             href={`${base}/reception`}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95",
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95"
             )}
           >
             Reception board
@@ -120,7 +133,7 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
             href={`${base}/calendar`}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95",
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95"
             )}
           >
             Calendar
@@ -131,7 +144,7 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
                 href={`${base}/reception-os`}
                 className={cn(
                   fiOsChromeClasses.toolbarControlSurface,
-                  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-amber-100/95",
+                  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-amber-100/95"
                 )}
               >
                 Exit demo
@@ -141,7 +154,7 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
                 href={`${base}/reception-os?demo=1`}
                 className={cn(
                   fiOsChromeClasses.toolbarControlSurface,
-                  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-amber-100/95",
+                  "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-amber-100/95"
                 )}
               >
                 Demo mode
@@ -159,7 +172,10 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
         <ReceptionOsPilotBanner banner={data.systemStatus.pilotBanner} />
       ) : null}
 
-      <ReceptionOsSystemStatusPanel status={data.systemStatus} clientLastRefreshedAt={lastRefreshedAt} />
+      <ReceptionOsSystemStatusPanel
+        status={data.systemStatus}
+        clientLastRefreshedAt={lastRefreshedAt}
+      />
 
       <ReceptionOsOperatingModeTabs
         mode={operatingMode}
@@ -185,7 +201,11 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
         <ReceptionOsPilotReviewPanel tenantId={data.tenantId} report={data.pilotReview.report} />
       ) : null}
 
-      <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="daily_brief" operatingMode={operatingMode}>
+      <ReceptionOsWidgetTracker
+        tenantId={data.tenantId}
+        widgetKey="daily_brief"
+        operatingMode={operatingMode}
+      >
         <div>
           <ReceptionOsDailyBriefWidget brief={data.dailyBrief} />
           <ReceptionOsPilotFeedbackControls
@@ -198,7 +218,11 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
       </ReceptionOsWidgetTracker>
 
       {operatingMode === "end_of_day" ? (
-        <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="end_of_day_closeout" operatingMode={operatingMode}>
+        <ReceptionOsWidgetTracker
+          tenantId={data.tenantId}
+          widgetKey="end_of_day_closeout"
+          operatingMode={operatingMode}
+        >
           <ReceptionOsEndOfDayCloseoutWidget
             tenantId={data.tenantId}
             closeout={data.endOfDayCloseout}
@@ -229,7 +253,9 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
           <div className="flex items-start gap-2">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" aria-hidden />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300/90">Intelligence hints</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300/90">
+                Intelligence hints
+              </p>
               <ul className="mt-2 space-y-1">
                 {data.intelligence.hints.slice(0, 3).map((h) => (
                   <li key={h.signalKind} className="text-sm text-slate-300">
@@ -245,7 +271,11 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="reception_tasks" operatingMode={operatingMode}>
+        <ReceptionOsWidgetTracker
+          tenantId={data.tenantId}
+          widgetKey="reception_tasks"
+          operatingMode={operatingMode}
+        >
           <ReceptionOsTaskInbox
             tenantId={data.tenantId}
             tenantName={data.tenantName}
@@ -256,7 +286,11 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
           />
         </ReceptionOsWidgetTracker>
         {show("action_alerts") ? (
-          <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="action_alerts" operatingMode={operatingMode}>
+          <ReceptionOsWidgetTracker
+            tenantId={data.tenantId}
+            widgetKey="action_alerts"
+            operatingMode={operatingMode}
+          >
             <ReceptionOsActionAlertsPanel
               tenantId={data.tenantId}
               tenantName={data.tenantName}
@@ -272,26 +306,45 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
 
       <div className="grid gap-4 xl:grid-cols-2">
         {show("todays_patients") ? (
-          <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="todays_patients" operatingMode={operatingMode}>
+          <ReceptionOsWidgetTracker
+            tenantId={data.tenantId}
+            widgetKey="todays_patients"
+            operatingMode={operatingMode}
+          >
             <ReceptionOsTodaysPatientsWidget patients={data.todaysPatients} />
           </ReceptionOsWidgetTracker>
         ) : null}
         {show("communication_timeline") ? (
-          <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="communication_timeline" operatingMode={operatingMode}>
+          <ReceptionOsWidgetTracker
+            tenantId={data.tenantId}
+            widgetKey="communication_timeline"
+            operatingMode={operatingMode}
+          >
             <ReceptionOsCommunicationTimelineWidget events={data.communicationTimeline} />
           </ReceptionOsWidgetTracker>
         ) : null}
       </div>
 
       {show("consultation_pipeline") ? (
-        <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="consultation_pipeline" operatingMode={operatingMode}>
-          <ReceptionOsConsultationPipelineWidget columns={data.consultationPipeline.columns} counts={data.consultationPipeline.counts} />
+        <ReceptionOsWidgetTracker
+          tenantId={data.tenantId}
+          widgetKey="consultation_pipeline"
+          operatingMode={operatingMode}
+        >
+          <ReceptionOsConsultationPipelineWidget
+            columns={data.consultationPipeline.columns}
+            counts={data.consultationPipeline.counts}
+          />
         </ReceptionOsWidgetTracker>
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-2">
         {show("outstanding_deposits") ? (
-          <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="outstanding_deposits" operatingMode={operatingMode}>
+          <ReceptionOsWidgetTracker
+            tenantId={data.tenantId}
+            widgetKey="outstanding_deposits"
+            operatingMode={operatingMode}
+          >
             <ReceptionOsOutstandingDepositsWidget
               tenantId={data.tenantId}
               tenantName={data.tenantName}
@@ -301,7 +354,11 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
           </ReceptionOsWidgetTracker>
         ) : null}
         {show("upcoming_surgery") ? (
-          <ReceptionOsWidgetTracker tenantId={data.tenantId} widgetKey="upcoming_surgery" operatingMode={operatingMode}>
+          <ReceptionOsWidgetTracker
+            tenantId={data.tenantId}
+            widgetKey="upcoming_surgery"
+            operatingMode={operatingMode}
+          >
             <ReceptionOsUpcomingSurgeryWidget
               tenantId={data.tenantId}
               tenantName={data.tenantName}

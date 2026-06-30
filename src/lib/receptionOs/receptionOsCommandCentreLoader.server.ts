@@ -43,9 +43,13 @@ import {
 } from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 
 function mapConversionColumnsForRevenue(
-  payload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>,
-): Partial<Record<ReceptionOsConversionEnrichmentColumnId, readonly ReceptionOsConversionEnrichmentCard[]>> {
-  const out: Partial<Record<ReceptionOsConversionEnrichmentColumnId, ReceptionOsConversionEnrichmentCard[]>> = {};
+  payload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>
+): Partial<
+  Record<ReceptionOsConversionEnrichmentColumnId, readonly ReceptionOsConversionEnrichmentCard[]>
+> {
+  const out: Partial<
+    Record<ReceptionOsConversionEnrichmentColumnId, ReceptionOsConversionEnrichmentCard[]>
+  > = {};
   for (const colId of Object.keys(payload.columns) as ReceptionOsConversionEnrichmentColumnId[]) {
     out[colId] = payload.columns[colId].map((card) => ({
       id: card.id,
@@ -66,7 +70,7 @@ function mapConversionColumnsForRevenue(
 
 async function loadTodayRevenueActivityCounts(
   tenantId: string,
-  operationalDay: { localStartIso: string; localEndIso: string },
+  operationalDay: { localStartIso: string; localEndIso: string }
 ): Promise<{
   depositsCollectedToday: number;
   surgeryBookingsCreatedToday: number;
@@ -105,7 +109,9 @@ async function loadTodayRevenueActivityCounts(
   }
 
   const surgeryBookingsCreatedToday = (bookingsRes.data ?? []).filter((raw) => {
-    const type = String((raw as { booking_type?: string }).booking_type ?? "").trim().toLowerCase();
+    const type = String((raw as { booking_type?: string }).booking_type ?? "")
+      .trim()
+      .toLowerCase();
     return type.includes("surgery") || type.includes("procedure");
   }).length;
 
@@ -123,9 +129,11 @@ function noteModuleFailure(
   health: ReceptionOsModuleHealth,
   module: Parameters<typeof markReceptionOsModuleUnavailable>[1],
   error: unknown,
-  fallbackMessage: string,
+  fallbackMessage: string
 ): ReceptionOsModuleHealth {
-  const message = isMissingDatabaseRelationError(error) ? fallbackMessage : normalizeLoaderErrorMessage(error);
+  const message = isMissingDatabaseRelationError(error)
+    ? fallbackMessage
+    : normalizeLoaderErrorMessage(error);
   logModuleFailure(module, error);
   return markReceptionOsModuleUnavailable(health, module, message);
 }
@@ -141,7 +149,7 @@ export type LoadReceptionOsCommandCentreOptions = {
 export async function loadReceptionOsCommandCentrePayload(
   tenantId: string,
   now: Date = new Date(),
-  options: LoadReceptionOsCommandCentreOptions = {},
+  options: LoadReceptionOsCommandCentreOptions = {}
 ): Promise<ReceptionOsCommandCentrePayload> {
   let moduleHealth = createEmptyReceptionOsModuleHealth(false);
 
@@ -156,7 +164,7 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "tasks",
       error,
-      missingTableMessage("fi_reception_tasks"),
+      missingTableMessage("fi_reception_tasks")
     );
   }
 
@@ -167,7 +175,7 @@ export async function loadReceptionOsCommandCentrePayload(
       timeZone: board.operationalDay.calendarTimezone,
       hour: "numeric",
       hour12: false,
-    }).format(now),
+    }).format(now)
   );
 
   let conversionPayload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>;
@@ -219,7 +227,7 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "revenue_activity",
       error,
-      "Revenue activity counters unavailable.",
+      "Revenue activity counters unavailable."
     );
   }
 
@@ -243,7 +251,7 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "closeout",
       error,
-      missingTableMessage("fi_reception_daily_closeouts"),
+      missingTableMessage("fi_reception_daily_closeouts")
     );
   }
 
@@ -257,7 +265,7 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "system_status",
       error,
-      "System status unavailable.",
+      "System status unavailable."
     );
   }
 
@@ -288,7 +296,7 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "pilot_metrics",
       error,
-      missingTableMessage("fi_reception_usage_events"),
+      missingTableMessage("fi_reception_usage_events")
     );
   }
 
@@ -299,7 +307,10 @@ export async function loadReceptionOsCommandCentrePayload(
   };
 
   try {
-    const phase8 = await loadReceptionPhase8PayloadForCommandCentre(composedForPhase8, board.viewer.role);
+    const phase8 = await loadReceptionPhase8PayloadForCommandCentre(
+      composedForPhase8,
+      board.viewer.role
+    );
     pilotReview = phase8.pilotReview;
     ownerValue = phase8.ownerValue;
   } catch (error) {
@@ -307,12 +318,12 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "pilot_review",
       error,
-      "Pilot review reporting unavailable.",
+      "Pilot review reporting unavailable."
     );
     moduleHealth = markReceptionOsModuleUnavailable(
       moduleHealth,
       "owner_value",
-      normalizeLoaderErrorMessage(error),
+      normalizeLoaderErrorMessage(error)
     );
   }
 
@@ -330,7 +341,7 @@ export async function loadReceptionOsCommandCentrePayload(
       moduleHealth,
       "demo_mode",
       error,
-      "Demo mode sanitisation unavailable.",
+      "Demo mode sanitisation unavailable."
     );
     finalPayload = {
       ...finalPayload,

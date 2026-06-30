@@ -21,9 +21,7 @@ function IntegrationBridgeVisual() {
       <div className="pointer-events-none absolute left-[12%] right-[12%] top-[52%] h-px bg-gradient-to-r from-transparent via-amber-400/20 to-transparent sm:left-[8%] sm:right-[8%]" />
 
       <div className="relative flex flex-col items-center">
-        <div
-          className="relative rounded-2xl border border-amber-400/25 bg-[rgb(6_10_18_/0.92)] px-6 py-4 shadow-[0_0_40px_rgb(212_175_55_/0.12),inset_0_1px_0_rgb(255_255_255_/0.06)] sm:px-8 sm:py-5"
-        >
+        <div className="relative rounded-2xl border border-amber-400/25 bg-[rgb(6_10_18_/0.92)] px-6 py-4 shadow-[0_0_40px_rgb(212_175_55_/0.12),inset_0_1px_0_rgb(255_255_255_/0.06)] sm:px-8 sm:py-5">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-400/20 bg-amber-400/10">
               <Link2 className="h-4 w-4 text-amber-200/90" strokeWidth={2} />
@@ -106,7 +104,9 @@ export function FiMarketingIntegrationSection() {
                     <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-amber-50">
                       {card.title}
                     </p>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{card.copy}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {card.copy}
+                    </p>
                   </div>
                 </div>
               </GlassCard>

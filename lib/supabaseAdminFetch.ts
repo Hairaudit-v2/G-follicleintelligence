@@ -24,7 +24,10 @@ function describeUnderlyingFetchError(err: unknown): string {
   return bits.join(" | ");
 }
 
-export async function supabaseAdminFetchWithRetry(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+export async function supabaseAdminFetchWithRetry(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> {
   let last: unknown;
   for (let attempt = 1; attempt <= 6; attempt++) {
     try {

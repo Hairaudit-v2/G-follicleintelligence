@@ -41,7 +41,9 @@ function baseCostModel(overrides: Partial<FiSurgeryCostModel> = {}): FiSurgeryCo
   };
 }
 
-function baseInput(overrides: Partial<SurgeryEconomicsCalculationInput> = {}): SurgeryEconomicsCalculationInput {
+function baseInput(
+  overrides: Partial<SurgeryEconomicsCalculationInput> = {}
+): SurgeryEconomicsCalculationInput {
   return {
     tenant_id: TENANT_A,
     procedure_type: "FUE",
@@ -121,7 +123,10 @@ describe("financialSurgeryEconomicsCore", () => {
   });
 
   it("calculateRoomCost — duration-based room cost", () => {
-    assert.equal(calculateRoomCost({ room_hourly_cost_cents: 12_000, duration_minutes: 90 }), 18_000);
+    assert.equal(
+      calculateRoomCost({ room_hourly_cost_cents: 12_000, duration_minutes: 90 }),
+      18_000
+    );
   });
 
   it("calculateTreatmentAddonCost — addon treatment costs", () => {
@@ -173,14 +178,17 @@ describe("financialSurgeryEconomicsCore", () => {
   });
 
   it("zero revenue safety — margin percentage is zero", () => {
-    const result = calculateSurgeryProfitability(baseInput({ revenue: { revenue_cents: 0, collected_cents: 0, outstanding_cents: 0 } }));
+    const result = calculateSurgeryProfitability(
+      baseInput({ revenue: { revenue_cents: 0, collected_cents: 0, outstanding_cents: 0 } })
+    );
     assert.equal(result.gross_margin_percentage, 0);
     assert.equal(calculateGrossMarginPercentage(0, -50_000), 0);
   });
 
   it("margin percentage calculation", () => {
     const result = calculateSurgeryProfitability(baseInput());
-    const expectedMargin = Math.round((result.gross_profit_cents / result.revenue_cents) * 10_000) / 100;
+    const expectedMargin =
+      Math.round((result.gross_profit_cents / result.revenue_cents) * 10_000) / 100;
     assert.equal(result.gross_margin_percentage, expectedMargin);
     assert.ok(result.gross_margin_percentage > 0);
   });
@@ -213,10 +221,7 @@ describe("financialSurgeryEconomicsCore", () => {
   });
 
   it("tenant isolation — assertProfitabilitySnapshotsTenantScoped", () => {
-    const rows = [
-      { tenant_id: TENANT_A },
-      { tenant_id: TENANT_A },
-    ];
+    const rows = [{ tenant_id: TENANT_A }, { tenant_id: TENANT_A }];
     assert.equal(assertProfitabilitySnapshotsTenantScoped(rows, TENANT_A), true);
     assert.equal(assertProfitabilitySnapshotsTenantScoped(rows, TENANT_B), false);
   });

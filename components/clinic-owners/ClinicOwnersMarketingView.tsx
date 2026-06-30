@@ -8,7 +8,10 @@ import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPri
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { CLINIC_OWNERS_PAGE_CONTENT } from "@/lib/marketing/clinicOwnersPageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
@@ -65,15 +68,23 @@ function ClinicWorkflowTimeline({ steps }: { steps: readonly string[] }) {
             {steps.map((step, index) => (
               <Fragment key={step}>
                 <li className="flex w-[6.85rem] shrink-0 flex-col xl:w-[7.25rem]">
-                  <GlassCard variant="default" className="h-full border-white/[0.08] !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.32)] sm:!p-4">
+                  <GlassCard
+                    variant="default"
+                    className="h-full border-white/[0.08] !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.32)] sm:!p-4"
+                  >
                     <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/50">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <p className="mt-2 text-[0.72rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">{step}</p>
+                    <p className="mt-2 text-[0.72rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">
+                      {step}
+                    </p>
                   </GlassCard>
                 </li>
                 {index < steps.length - 1 ? (
-                  <li className="flex w-5 shrink-0 items-center justify-center self-center pt-6 xl:w-6" aria-hidden>
+                  <li
+                    className="flex w-5 shrink-0 items-center justify-center self-center pt-6 xl:w-6"
+                    aria-hidden
+                  >
                     <ChevronRight className="h-3 w-3 text-amber-400/40" strokeWidth={2} />
                   </li>
                 ) : null}
@@ -90,11 +101,16 @@ function ClinicWorkflowTimeline({ steps }: { steps: readonly string[] }) {
               aria-hidden
               className="absolute -left-[19px] top-2 flex h-3 w-3 items-center justify-center rounded-full border border-white/25 bg-gradient-to-br from-white/30 to-amber-900/40 shadow-[0_0_14px_rgb(212_175_55_/0.25)] sm:-left-[21px]"
             />
-            <GlassCard variant="default" className="border-white/[0.08] !shadow-[0_12px_40px_rgb(0_0_0_/0.3)]">
+            <GlassCard
+              variant="default"
+              className="border-white/[0.08] !shadow-[0_12px_40px_rgb(0_0_0_/0.3)]"
+            >
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
                 Step {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">{step}</p>
+              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">
+                {step}
+              </p>
             </GlassCard>
           </li>
         ))}
@@ -119,8 +135,13 @@ export function ClinicOwnersMarketingView() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 md:py-24">
           <FadeIn>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/85 sm:text-[11px]">{c.hero.eyebrow}</p>
-            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/65 via-amber-400/22 to-transparent" aria-hidden />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/85 sm:text-[11px]">
+              {c.hero.eyebrow}
+            </p>
+            <div
+              className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/65 via-amber-400/22 to-transparent"
+              aria-hidden
+            />
             <h1
               id={`${c.hero.id}-heading`}
               className="mt-5 max-w-4xl font-display text-[2.05rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance drop-shadow-[0_2px_36px_rgb(0_0_0_/0.5)] sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
@@ -144,7 +165,12 @@ export function ClinicOwnersMarketingView() {
                   <ChevronRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.secondaryCta.href}>
                   {c.hero.secondaryCta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -161,16 +187,25 @@ export function ClinicOwnersMarketingView() {
         aria-labelledby={`${c.problem.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.problem.id}-heading`} eyebrow={c.problem.eyebrow} title={c.problem.headline} />
+          <SectionHeading
+            id={`${c.problem.id}-heading`}
+            eyebrow={c.problem.eyebrow}
+            title={c.problem.headline}
+          />
           <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {c.problem.cards.map((card, i) => (
               <li key={card.title}>
                 <FadeIn delay={0.04 * (i % 4)}>
-                  <GlassCard variant="problem" className="flex h-full flex-col border-amber-400/[0.07]">
+                  <GlassCard
+                    variant="problem"
+                    className="flex h-full flex-col border-amber-400/[0.07]"
+                  >
                     <h3 className="font-display text-base font-semibold leading-snug tracking-tight text-foreground md:text-lg">
                       {card.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">{card.body}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -185,7 +220,11 @@ export function ClinicOwnersMarketingView() {
         aria-labelledby={`${c.operatingSystem.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.operatingSystem.id}-heading`} eyebrow={c.operatingSystem.eyebrow} title={c.operatingSystem.headline} />
+          <SectionHeading
+            id={`${c.operatingSystem.id}-heading`}
+            eyebrow={c.operatingSystem.eyebrow}
+            title={c.operatingSystem.headline}
+          />
           <ClinicOsBands />
         </FadeIn>
       </Section>
@@ -196,7 +235,11 @@ export function ClinicOwnersMarketingView() {
         aria-labelledby={`${c.workflow.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.workflow.id}-heading`} eyebrow={c.workflow.eyebrow} title={c.workflow.headline} />
+          <SectionHeading
+            id={`${c.workflow.id}-heading`}
+            eyebrow={c.workflow.eyebrow}
+            title={c.workflow.headline}
+          />
           <ClinicWorkflowTimeline steps={c.workflow.steps} />
         </FadeIn>
       </Section>
@@ -207,7 +250,11 @@ export function ClinicOwnersMarketingView() {
         aria-labelledby={`${c.dashboard.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.dashboard.id}-heading`} eyebrow={c.dashboard.eyebrow} title={c.dashboard.headline} />
+          <SectionHeading
+            id={`${c.dashboard.id}-heading`}
+            eyebrow={c.dashboard.eyebrow}
+            title={c.dashboard.headline}
+          />
           <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2 xl:grid-cols-5">
             {c.dashboard.cards.map((card, i) => (
               <li key={card.title}>
@@ -220,10 +267,15 @@ export function ClinicOwnersMarketingView() {
                       <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.16em] text-amber-200/45">
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="h-px flex-1 bg-gradient-to-r from-amber-400/25 to-transparent" aria-hidden />
+                      <span
+                        className="h-px flex-1 bg-gradient-to-r from-amber-400/25 to-transparent"
+                        aria-hidden
+                      />
                     </div>
                     <p className="mt-3 text-sm font-semibold text-foreground">{card.title}</p>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{card.body}</p>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -238,7 +290,11 @@ export function ClinicOwnersMarketingView() {
         aria-labelledby={`${c.accountability.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.accountability.id}-heading`} eyebrow={c.accountability.eyebrow} title={c.accountability.headline} />
+          <SectionHeading
+            id={`${c.accountability.id}-heading`}
+            eyebrow={c.accountability.eyebrow}
+            title={c.accountability.headline}
+          />
           <GlassCard className="mt-10 max-w-3xl border-white/[0.08]">
             <div className="space-y-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
               {c.accountability.paragraphs.map((p, idx) => (
@@ -248,7 +304,10 @@ export function ClinicOwnersMarketingView() {
             <ul className="mt-8 grid list-none gap-3 border-t border-white/[0.06] p-0 pt-8 sm:grid-cols-2">
               {c.accountability.signals.map((signal) => (
                 <li key={signal} className="flex gap-3 text-sm leading-snug text-foreground/90">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/55" aria-hidden />
+                  <span
+                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/55"
+                    aria-hidden
+                  />
                   <span>{signal}</span>
                 </li>
               ))}
@@ -263,14 +322,22 @@ export function ClinicOwnersMarketingView() {
         aria-labelledby={`${c.audiences.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.audiences.id}-heading`} eyebrow={c.audiences.eyebrow} title={c.audiences.headline} />
+          <SectionHeading
+            id={`${c.audiences.id}-heading`}
+            eyebrow={c.audiences.eyebrow}
+            title={c.audiences.headline}
+          />
           <ul className="mt-12 grid list-none gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {c.audiences.cards.map((card, i) => (
               <li key={card.title}>
                 <FadeIn delay={0.05 * (i % 3)}>
                   <GlassCard className="group flex h-full flex-col border-white/[0.07] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amber-400/18">
-                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">{card.title}</h3>
-                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground md:text-base">{card.body}</p>
+                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
+                      {card.title}
+                    </h3>
+                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground md:text-base">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -289,8 +356,13 @@ export function ClinicOwnersMarketingView() {
             <div className="rounded-[1.75rem] border border-white/[0.1] bg-gradient-to-br from-white/[0.05] via-white/[0.015] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.05)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/80">{c.finalCta.eyebrow}</p>
-                  <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/65 via-amber-400/22 to-transparent" aria-hidden />
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/80">
+                    {c.finalCta.eyebrow}
+                  </p>
+                  <div
+                    className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/65 via-amber-400/22 to-transparent"
+                    aria-hidden
+                  />
                   <h2
                     id={`${c.finalCta.id}-heading`}
                     className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-4xl lg:text-5xl"
@@ -305,7 +377,12 @@ export function ClinicOwnersMarketingView() {
                       <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className={MARKETING_CTA_SECONDARY_CLASS}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={MARKETING_CTA_SECONDARY_CLASS}
+                  >
                     <Link href={c.finalCta.secondaryCta.href}>
                       {c.finalCta.secondaryCta.label}
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />

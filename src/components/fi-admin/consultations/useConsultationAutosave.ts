@@ -96,61 +96,58 @@ export function useConsultationAutosave(args: {
     invalidateInFlight();
   }, [enabled, consultationId, cancelPendingDebounce, invalidateInFlight]);
 
-  const runPersist = useCallback(
-    async () => {
-      if (!enabled) return;
-      const opId = ++opGeneration.current;
+  const runPersist = useCallback(async () => {
+    if (!enabled) return;
+    const opId = ++opGeneration.current;
 
-      const body = withAdmin({ ...getPayloadRef.current() });
-      const parsed = consultationUpsertBodySchema.safeParse(body);
-      if (!parsed.success) {
-        if (opId === opGeneration.current) {
-          setPersistStatus("unsaved");
-        }
-        return;
-      }
-
-      const sig = stableConsultationPayloadSignature(getPayloadRef.current());
-      if (sig === lastSavedSig.current) {
-        if (opId === opGeneration.current) {
-          setPersistStatus("saved");
-          setAutosaveWarning(null);
-        }
-        return;
-      }
-
-      persistDepthRef.current += 1;
-      setAutosaveSaving(true);
+    const body = withAdmin({ ...getPayloadRef.current() });
+    const parsed = consultationUpsertBodySchema.safeParse(body);
+    if (!parsed.success) {
       if (opId === opGeneration.current) {
-        setPersistStatus("saving");
+        setPersistStatus("unsaved");
       }
+      return;
+    }
 
-      try {
-        const res = await updateConsultationDraftAction(tenantId, consultationId.trim(), body);
-        if (opId !== opGeneration.current) return;
-        if (!res.ok) {
-          setPersistStatus("failed");
-          setAutosaveWarning(res.error);
-          return;
-        }
-        lastSavedSig.current = stableConsultationPayloadSignature(getPayloadRef.current());
+    const sig = stableConsultationPayloadSignature(getPayloadRef.current());
+    if (sig === lastSavedSig.current) {
+      if (opId === opGeneration.current) {
         setPersistStatus("saved");
         setAutosaveWarning(null);
-      } catch (e) {
-        if (opId !== opGeneration.current) return;
-        const msg = e instanceof Error ? e.message : "Autosave failed.";
-        setPersistStatus("failed");
-        setAutosaveWarning(msg);
-      } finally {
-        persistDepthRef.current -= 1;
-        if (persistDepthRef.current <= 0) {
-          persistDepthRef.current = 0;
-          setAutosaveSaving(false);
-        }
       }
-    },
-    [enabled, tenantId, consultationId, withAdmin]
-  );
+      return;
+    }
+
+    persistDepthRef.current += 1;
+    setAutosaveSaving(true);
+    if (opId === opGeneration.current) {
+      setPersistStatus("saving");
+    }
+
+    try {
+      const res = await updateConsultationDraftAction(tenantId, consultationId.trim(), body);
+      if (opId !== opGeneration.current) return;
+      if (!res.ok) {
+        setPersistStatus("failed");
+        setAutosaveWarning(res.error);
+        return;
+      }
+      lastSavedSig.current = stableConsultationPayloadSignature(getPayloadRef.current());
+      setPersistStatus("saved");
+      setAutosaveWarning(null);
+    } catch (e) {
+      if (opId !== opGeneration.current) return;
+      const msg = e instanceof Error ? e.message : "Autosave failed.";
+      setPersistStatus("failed");
+      setAutosaveWarning(msg);
+    } finally {
+      persistDepthRef.current -= 1;
+      if (persistDepthRef.current <= 0) {
+        persistDepthRef.current = 0;
+        setAutosaveSaving(false);
+      }
+    }
+  }, [enabled, tenantId, consultationId, withAdmin]);
 
   useEffect(() => {
     if (!enabled || blockAutoschedule) {

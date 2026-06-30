@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  CONFIGURATION_TAB_LABELS,
-  parseConfigurationTab,
-} from "@/src/lib/fi/configurationTabs";
+import { CONFIGURATION_TAB_LABELS, parseConfigurationTab } from "@/src/lib/fi/configurationTabs";
 
 describe("parseConfigurationTab", () => {
   it("defaults to branding when tab is absent", () => {

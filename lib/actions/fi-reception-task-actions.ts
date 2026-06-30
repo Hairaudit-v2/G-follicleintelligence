@@ -26,7 +26,12 @@ const usageContextSchema = z.object({
 
 const actionAlertSchema = z.object({
   id: z.string(),
-  kind: z.enum(["missing_deposit", "no_follow_up_after_consultation", "missing_forms", "surgery_risk"]),
+  kind: z.enum([
+    "missing_deposit",
+    "no_follow_up_after_consultation",
+    "missing_forms",
+    "surgery_risk",
+  ]),
   title: z.string(),
   detail: z.string(),
   severity: z.enum(["info", "warning", "critical", "blocked"]),
@@ -79,7 +84,7 @@ function trackTaskUsage(
   eventKind: "task_created" | "task_actioned",
   taskId: string,
   operatingMode?: string | null,
-  extra?: Record<string, unknown>,
+  extra?: Record<string, unknown>
 ): void {
   trackReceptionUsageEventSafe({
     tenantId,
@@ -87,7 +92,12 @@ function trackTaskUsage(
     eventKind,
     context: {
       taskId,
-      operatingMode: operatingMode as "morning_prep" | "live_clinic" | "end_of_day" | null | undefined,
+      operatingMode: operatingMode as
+        | "morning_prep"
+        | "live_clinic"
+        | "end_of_day"
+        | null
+        | undefined,
       metadata: extra,
     },
   });
@@ -108,7 +118,7 @@ async function withMutation<T>(
   tenantId: string,
   action: ReceptionTaskAction,
   adminKey: string | undefined,
-  fn: (actorFiUserId: string | null) => Promise<T>,
+  fn: (actorFiUserId: string | null) => Promise<T>
 ): Promise<{ ok: true; data?: T } | { ok: false; error: string }> {
   try {
     const { actorFiUserId } = await assertReceptionTaskMutationAllowed(tenantId, action, adminKey);
@@ -122,74 +132,114 @@ async function withMutation<T>(
 
 export async function createReceptionTaskFromAlertAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true; taskId: string } | { ok: false; error: string }> {
-  const result = await withMutation(tenantId, "create_from_alert", (body as { adminKey?: string })?.adminKey, async (actorFiUserId) => {
-    const parsed = createFromAlertSchema.parse(body);
-    const row = await createReceptionTaskFromAlert({
-      tenantId: tenantId.trim(),
-      alert: parsed.alert as ReceptionOsActionAlert,
-      actorFiUserId,
-      ownerFiUserId: parsed.owner_fi_user_id ?? null,
-      dueAt: parsed.due_at ?? null,
-    });
-    trackTaskUsage(tenantId.trim(), actorFiUserId, "task_created", row.id, parsed.usageContext?.operatingMode, {
-      action: "create_from_alert",
-      alertKind: parsed.alert.kind,
-    });
-    return row.id;
-  });
+  const result = await withMutation(
+    tenantId,
+    "create_from_alert",
+    (body as { adminKey?: string })?.adminKey,
+    async (actorFiUserId) => {
+      const parsed = createFromAlertSchema.parse(body);
+      const row = await createReceptionTaskFromAlert({
+        tenantId: tenantId.trim(),
+        alert: parsed.alert as ReceptionOsActionAlert,
+        actorFiUserId,
+        ownerFiUserId: parsed.owner_fi_user_id ?? null,
+        dueAt: parsed.due_at ?? null,
+      });
+      trackTaskUsage(
+        tenantId.trim(),
+        actorFiUserId,
+        "task_created",
+        row.id,
+        parsed.usageContext?.operatingMode,
+        {
+          action: "create_from_alert",
+          alertKind: parsed.alert.kind,
+        }
+      );
+      return row.id;
+    }
+  );
   if (!result.ok) return result;
   return { ok: true, taskId: result.data! };
 }
 
 export async function assignReceptionTaskAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const result = await withMutation(tenantId, "assign", (body as { adminKey?: string })?.adminKey, async (actorFiUserId) => {
-    const parsed = assignSchema.parse(body);
-    await assignReceptionTask({
-      tenantId: tenantId.trim(),
-      taskId: parsed.task_id,
-      ownerFiUserId: parsed.owner_fi_user_id,
-      actorFiUserId,
-    });
-    trackTaskUsage(tenantId.trim(), actorFiUserId, "task_actioned", parsed.task_id, parsed.usageContext?.operatingMode, {
-      action: "assign",
-    });
-  });
+  const result = await withMutation(
+    tenantId,
+    "assign",
+    (body as { adminKey?: string })?.adminKey,
+    async (actorFiUserId) => {
+      const parsed = assignSchema.parse(body);
+      await assignReceptionTask({
+        tenantId: tenantId.trim(),
+        taskId: parsed.task_id,
+        ownerFiUserId: parsed.owner_fi_user_id,
+        actorFiUserId,
+      });
+      trackTaskUsage(
+        tenantId.trim(),
+        actorFiUserId,
+        "task_actioned",
+        parsed.task_id,
+        parsed.usageContext?.operatingMode,
+        {
+          action: "assign",
+        }
+      );
+    }
+  );
   return result.ok ? { ok: true } : result;
 }
 
 export async function snoozeReceptionTaskAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const result = await withMutation(tenantId, "snooze", (body as { adminKey?: string })?.adminKey, async (actorFiUserId) => {
-    const parsed = snoozeSchema.parse(body);
-    await snoozeReceptionTask({
-      tenantId: tenantId.trim(),
-      taskId: parsed.task_id,
-      snoozedUntil: parsed.snoozed_until,
-      actorFiUserId,
-    });
-    trackTaskUsage(tenantId.trim(), actorFiUserId, "task_actioned", parsed.task_id, parsed.usageContext?.operatingMode, {
-      action: "snooze",
-    });
-  });
+  const result = await withMutation(
+    tenantId,
+    "snooze",
+    (body as { adminKey?: string })?.adminKey,
+    async (actorFiUserId) => {
+      const parsed = snoozeSchema.parse(body);
+      await snoozeReceptionTask({
+        tenantId: tenantId.trim(),
+        taskId: parsed.task_id,
+        snoozedUntil: parsed.snoozed_until,
+        actorFiUserId,
+      });
+      trackTaskUsage(
+        tenantId.trim(),
+        actorFiUserId,
+        "task_actioned",
+        parsed.task_id,
+        parsed.usageContext?.operatingMode,
+        {
+          action: "snooze",
+        }
+      );
+    }
+  );
   return result.ok ? { ok: true } : result;
 }
 
 export async function setReceptionTaskStatusAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const parsedRaw = statusSchema.safeParse(body);
   if (!parsedRaw.success) return { ok: false, error: errMsg(parsedRaw.error) };
   const parsed = parsedRaw.data;
   const action: ReceptionTaskAction =
-    parsed.status === "resolved" ? "resolve" : parsed.status === "dismissed" ? "dismiss" : "mark_in_progress";
+    parsed.status === "resolved"
+      ? "resolve"
+      : parsed.status === "dismissed"
+        ? "dismiss"
+        : "mark_in_progress";
 
   const result = await withMutation(tenantId, action, parsed.adminKey, async (actorFiUserId) => {
     await setReceptionTaskStatus({
@@ -199,29 +249,48 @@ export async function setReceptionTaskStatusAction(
       actorFiUserId,
       resolutionNotes: parsed.resolution_notes ?? null,
     });
-    trackTaskUsage(tenantId.trim(), actorFiUserId, "task_actioned", parsed.task_id, parsed.usageContext?.operatingMode, {
-      action,
-      status: parsed.status,
-    });
+    trackTaskUsage(
+      tenantId.trim(),
+      actorFiUserId,
+      "task_actioned",
+      parsed.task_id,
+      parsed.usageContext?.operatingMode,
+      {
+        action,
+        status: parsed.status,
+      }
+    );
   });
   return result.ok ? { ok: true } : result;
 }
 
 export async function addReceptionTaskNoteAction(
   tenantId: string,
-  body: unknown,
+  body: unknown
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const result = await withMutation(tenantId, "add_note", (body as { adminKey?: string })?.adminKey, async (actorFiUserId) => {
-    const parsed = noteSchema.parse(body);
-    await addReceptionTaskNote({
-      tenantId: tenantId.trim(),
-      taskId: parsed.task_id,
-      note: parsed.note,
-      actorFiUserId,
-    });
-    trackTaskUsage(tenantId.trim(), actorFiUserId, "task_actioned", parsed.task_id, parsed.usageContext?.operatingMode, {
-      action: "add_note",
-    });
-  });
+  const result = await withMutation(
+    tenantId,
+    "add_note",
+    (body as { adminKey?: string })?.adminKey,
+    async (actorFiUserId) => {
+      const parsed = noteSchema.parse(body);
+      await addReceptionTaskNote({
+        tenantId: tenantId.trim(),
+        taskId: parsed.task_id,
+        note: parsed.note,
+        actorFiUserId,
+      });
+      trackTaskUsage(
+        tenantId.trim(),
+        actorFiUserId,
+        "task_actioned",
+        parsed.task_id,
+        parsed.usageContext?.operatingMode,
+        {
+          action: "add_note",
+        }
+      );
+    }
+  );
   return result.ok ? { ok: true } : result;
 }

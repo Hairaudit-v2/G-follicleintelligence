@@ -70,7 +70,11 @@ describe("bookingSurgeryFinancialClearanceGuardCore", () => {
   it("blocks only explicit not_ready within clearance window", () => {
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
-        { clearance_state: "not_ready", clearance_reason: "Deposit not collected", next_required_action: "Collect surgery deposit" },
+        {
+          clearance_state: "not_ready",
+          clearance_reason: "Deposit not collected",
+          next_required_action: "Collect surgery deposit",
+        },
         true
       ),
       true
@@ -84,14 +88,22 @@ describe("bookingSurgeryFinancialClearanceGuardCore", () => {
     );
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
-        { clearance_state: "attention_required", clearance_reason: "Balance overdue", next_required_action: "Collect balance" },
+        {
+          clearance_state: "attention_required",
+          clearance_reason: "Balance overdue",
+          next_required_action: "Collect balance",
+        },
         true
       ),
       false
     );
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
-        { clearance_state: "not_ready", clearance_reason: "Deposit not collected", next_required_action: null },
+        {
+          clearance_state: "not_ready",
+          clearance_reason: "Deposit not collected",
+          next_required_action: null,
+        },
         false
       ),
       false

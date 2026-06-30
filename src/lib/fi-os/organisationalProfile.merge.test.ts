@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { mergeFeatureAccessWithOrganisationalLayers, parseFeatureAccessJsonObject } from "@/src/lib/fi-os/organisationalProfile.merge";
+import {
+  mergeFeatureAccessWithOrganisationalLayers,
+  parseFeatureAccessJsonObject,
+} from "@/src/lib/fi-os/organisationalProfile.merge";
 
 test("parseFeatureAccessJsonObject ignores unknown keys", () => {
   assert.deepEqual(parseFeatureAccessJsonObject({ crm: false, unknown: true }), { crm: false });

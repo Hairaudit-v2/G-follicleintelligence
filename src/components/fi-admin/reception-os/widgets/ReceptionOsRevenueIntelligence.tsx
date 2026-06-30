@@ -59,7 +59,9 @@ function ScoreStat({
 }) {
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </p>
       <p
         className={`mt-1 text-xl font-semibold tabular-nums sm:text-2xl ${
           warn ? "text-amber-300" : highlight ? "text-emerald-300" : "text-slate-50"
@@ -80,7 +82,9 @@ export function ReceptionOsRevenueSummaryStrip({
 }) {
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-sm text-slate-400">
-      <span className="font-medium text-slate-200">{readOnly ? "Revenue snapshot" : "Revenue intelligence"}</span>
+      <span className="font-medium text-slate-200">
+        {readOnly ? "Revenue snapshot" : "Revenue intelligence"}
+      </span>
       <span className="text-slate-600"> · </span>
       {summary.scoredSubjectCount} active lead{summary.scoredSubjectCount === 1 ? "" : "s"}
       <span className="text-slate-600"> · </span>
@@ -90,7 +94,9 @@ export function ReceptionOsRevenueSummaryStrip({
       {summary.totalAtRiskRevenue > 0 ? (
         <>
           <span className="text-slate-600"> · </span>
-          <span className="text-amber-300">{summary.currency} {summary.totalAtRiskRevenue.toLocaleString()} at risk</span>
+          <span className="text-amber-300">
+            {summary.currency} {summary.totalAtRiskRevenue.toLocaleString()} at risk
+          </span>
         </>
       ) : null}
     </div>
@@ -129,7 +135,9 @@ export function ReceptionOsRevenueIntelligenceWidget({
 
         {!readOnly && revenueRiskAlerts.length > 0 ? (
           <section>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-rose-400/90">Lost revenue alerts</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-rose-400/90">
+              Lost revenue alerts
+            </p>
             <ul className="space-y-2">
               {revenueRiskAlerts.slice(0, 6).map((alert) => (
                 <li
@@ -143,7 +151,10 @@ export function ReceptionOsRevenueIntelligenceWidget({
                       <p className="mt-1 text-xs text-cyan-300/90">{alert.recommendedAction}</p>
                     </div>
                     {alert.href ? (
-                      <Link href={alert.href} className="text-xs font-semibold text-cyan-400 hover:text-cyan-300">
+                      <Link
+                        href={alert.href}
+                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300"
+                      >
                         Open record
                       </Link>
                     ) : null}
@@ -153,7 +164,8 @@ export function ReceptionOsRevenueIntelligenceWidget({
                     clinicName={tenantName}
                     context={buildContextFromRevenueAlert(alert, null, tenantName)}
                     showPaymentLink={
-                      alert.kind === "deposit_overdue" || alert.kind === "missing_finance_payment_link"
+                      alert.kind === "deposit_overdue" ||
+                      alert.kind === "missing_finance_payment_link"
                     }
                     onMutated={onMutated}
                     className="mt-2"
@@ -184,13 +196,16 @@ export function ReceptionOsRevenueIntelligenceWidget({
                 <div className="text-right text-sm tabular-nums">
                   <p className="font-semibold text-emerald-300">{score.probabilityPercent}%</p>
                   <p className="text-xs text-slate-500">
-                    {score.currency} {score.weightedRevenue.toLocaleString()} · {score.confidenceLevel}
+                    {score.currency} {score.weightedRevenue.toLocaleString()} ·{" "}
+                    {score.confidenceLevel}
                   </p>
                 </div>
               </li>
             ))}
             {summary.topOpportunities.length === 0 ? (
-              <li className="text-sm text-slate-500">No scored opportunities in the current pipeline window.</li>
+              <li className="text-sm text-slate-500">
+                No scored opportunities in the current pipeline window.
+              </li>
             ) : null}
           </ul>
         </section>

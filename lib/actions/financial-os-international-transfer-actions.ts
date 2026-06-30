@@ -32,7 +32,13 @@ const TRANSFER_STATUSES = [
   "cancelled",
 ] as const;
 
-const PROOF_TYPES = ["payment_receipt", "bank_confirmation", "wise_receipt", "swift_confirmation", "custom"] as const;
+const PROOF_TYPES = [
+  "payment_receipt",
+  "bank_confirmation",
+  "wise_receipt",
+  "swift_confirmation",
+  "custom",
+] as const;
 
 const PROOF_STATUSES = ["pending", "requested", "received", "verified", "rejected"] as const;
 

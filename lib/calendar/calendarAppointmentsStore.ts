@@ -100,7 +100,9 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
               start_at: patch.start_at,
               end_at: patch.end_at,
               assigned_staff_id:
-                patch.assigned_staff_id !== undefined ? patch.assigned_staff_id : b.assigned_staff_id,
+                patch.assigned_staff_id !== undefined
+                  ? patch.assigned_staff_id
+                  : b.assigned_staff_id,
               assigned_user_id:
                 patch.assigned_user_id !== undefined ? patch.assigned_user_id : b.assigned_user_id,
               clinic_id: patch.clinic_id !== undefined ? patch.clinic_id : b.clinic_id,
@@ -121,7 +123,9 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
   upsertBooking: (row, display) => {
     set((state) => {
       const has = state.bookings.some((b) => b.id === row.id);
-      const bookings = has ? state.bookings.map((b) => (b.id === row.id ? row : b)) : [...state.bookings, row];
+      const bookings = has
+        ? state.bookings.map((b) => (b.id === row.id ? row : b))
+        : [...state.bookings, row];
       const durationMin = bookingDurationMinutesUtc(row.start_at, row.end_at) ?? 30;
       const existing = state.bookingDisplay[row.id];
       const hint: OperationalCalendarBookingDisplay =

@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clampRecipientConfidence, normalizeHieRecipientQualityRating, normalizeHieRecipientRiskLevel } from "./enumValidation";
+import {
+  clampRecipientConfidence,
+  normalizeHieRecipientQualityRating,
+  normalizeHieRecipientRiskLevel,
+} from "./enumValidation";
 
 test("clampRecipientConfidence", () => {
   assert.equal(clampRecipientConfidence(1.2), 1);

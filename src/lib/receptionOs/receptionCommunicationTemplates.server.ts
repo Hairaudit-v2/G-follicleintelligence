@@ -25,7 +25,7 @@ function mapTemplateRow(raw: Record<string, unknown>): ReceptionCommunicationTem
 
 export async function loadReceptionCommunicationTemplatesForTenant(
   tenantId: string,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ): Promise<ReceptionCommunicationTemplateContent[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
@@ -43,21 +43,24 @@ export async function loadReceptionCommunicationTemplatesForTenant(
     throw new Error(error.message);
   }
 
-  const overrides = new Map<ReceptionCommunicationTemplateKey, ReceptionCommunicationTemplateContent>();
+  const overrides = new Map<
+    ReceptionCommunicationTemplateKey,
+    ReceptionCommunicationTemplateContent
+  >();
   for (const raw of data ?? []) {
     const mapped = mapTemplateRow(raw as Record<string, unknown>);
     overrides.set(mapped.templateKey, mapped);
   }
 
-  return (Object.keys(RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES) as ReceptionCommunicationTemplateKey[]).map(
-    (key) => overrides.get(key) ?? RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES[key],
-  );
+  return (
+    Object.keys(RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES) as ReceptionCommunicationTemplateKey[]
+  ).map((key) => overrides.get(key) ?? RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES[key]);
 }
 
 export async function loadReceptionCommunicationTemplateForTenant(
   tenantId: string,
   templateKey: ReceptionCommunicationTemplateKey,
-  client?: SupabaseClient,
+  client?: SupabaseClient
 ): Promise<ReceptionCommunicationTemplateContent> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");

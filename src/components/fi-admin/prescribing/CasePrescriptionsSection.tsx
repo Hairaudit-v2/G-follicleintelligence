@@ -53,10 +53,16 @@ export async function CasePrescriptionsSection({
       ) : (
         <ul className="mt-4 divide-y divide-white/[0.08] border border-white/[0.08] rounded-lg bg-[#0F1629]/80 backdrop-blur-md">
           {rows.map((r) => (
-            <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm">
+            <li
+              key={r.id}
+              className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm"
+            >
               <div className="min-w-0">
                 <p className="font-medium text-slate-100">
-                  {new Date(r.updated_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                  {new Date(r.updated_at).toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 </p>
                 <p className="text-xs text-slate-500">
                   Status: {PRESCRIPTION_STATUS_LABELS[r.status]}

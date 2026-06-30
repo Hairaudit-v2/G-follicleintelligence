@@ -37,15 +37,27 @@ export function SectionHeading({
     <header className="max-w-4xl">
       {eyebrow ? (
         <div>
-          <p className={cn("text-[11px] font-semibold uppercase tracking-[0.26em]", toneClass.eyebrow)}>{eyebrow}</p>
-          <div className={cn("mt-3 h-px w-14 bg-gradient-to-r to-transparent", toneClass.rule)} aria-hidden />
+          <p
+            className={cn(
+              "text-[11px] font-semibold uppercase tracking-[0.26em]",
+              toneClass.eyebrow
+            )}
+          >
+            {eyebrow}
+          </p>
+          <div
+            className={cn("mt-3 h-px w-14 bg-gradient-to-r to-transparent", toneClass.rule)}
+            aria-hidden
+          />
         </div>
       ) : null}
       <h2
         id={id}
         className={cn(
           "max-w-[52rem] font-display font-semibold tracking-tight text-foreground text-balance",
-          eyebrow ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]" : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
+          eyebrow
+            ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
+            : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
         )}
       >
         {title}

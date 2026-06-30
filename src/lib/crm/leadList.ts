@@ -26,7 +26,9 @@ function mapPerson(v: unknown): CrmShellLeadListItem["person"] {
   const id = o.id != null ? String(o.id) : "";
   if (!id) return null;
   const meta =
-    o.metadata && typeof o.metadata === "object" && !Array.isArray(o.metadata) ? (o.metadata as Record<string, unknown>) : {};
+    o.metadata && typeof o.metadata === "object" && !Array.isArray(o.metadata)
+      ? (o.metadata as Record<string, unknown>)
+      : {};
   return { id, metadata: meta };
 }
 

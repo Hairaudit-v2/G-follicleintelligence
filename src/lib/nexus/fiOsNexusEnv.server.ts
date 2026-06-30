@@ -27,7 +27,9 @@ export type FiOsNexusEnvSnapshot = {
   createAuthUser: boolean;
 };
 
-export function readFiOsNexusEnvSnapshot(env: NodeJS.ProcessEnv = process.env): FiOsNexusEnvSnapshot {
+export function readFiOsNexusEnvSnapshot(
+  env: NodeJS.ProcessEnv = process.env
+): FiOsNexusEnvSnapshot {
   const secret = env.FI_OS_NEXUS_SECRET?.trim() ?? "";
   return {
     enabled: truthyEnv(env.FI_OS_NEXUS_ENABLED),

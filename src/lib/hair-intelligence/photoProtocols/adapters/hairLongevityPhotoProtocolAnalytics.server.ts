@@ -17,5 +17,9 @@ export async function loadHairLongevityPhotoProtocolAnalyticsForTenant(
   filters: Omit<PhotoProtocolAnalyticsFilters, "source_system"> = {},
   client?: SupabaseClient
 ): Promise<PhotoProtocolAnalyticsForTenantResult> {
-  return loadPhotoProtocolAnalyticsForTenant(tenantId, { ...filters, source_system: "hair_longevity" }, client);
+  return loadPhotoProtocolAnalyticsForTenant(
+    tenantId,
+    { ...filters, source_system: "hair_longevity" },
+    client
+  );
 }

@@ -1,4 +1,8 @@
-import type { ConsultationFormField, ConsultationFormOption, ConsultationFormSchema } from "../consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormOption,
+  ConsultationFormSchema,
+} from "../consultationFormTypes";
 
 function fld(field: ConsultationFormField): ConsultationFormField {
   return field;
@@ -47,7 +51,11 @@ const RECOMMENDED_ZONE_OPTIONS = HAIR_TRANSPLANT_V2_RECOMMENDED_ZONE_OPTIONS;
 const RECOMMENDED_TREATMENT_OPTIONS = HAIR_TRANSPLANT_V2_RECOMMENDED_TREATMENT_OPTIONS;
 
 /** Primary objectives that open the surgical assessment pathway (donor / recipient / map). */
-export const HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES = ["ht_primary", "ht_plus_medical", "repair_revision"] as const;
+export const HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES = [
+  "ht_primary",
+  "ht_plus_medical",
+  "repair_revision",
+] as const;
 
 /**
  * Immutable published JSON schema for Hair Transplant Consultation **version 1** (16 sections).
@@ -337,7 +345,8 @@ export const hairTransplantConsultationSchemaV1: ConsultationFormSchema = {
           label: "Consultation outcome (completion)",
           type: "select",
           options: COMPLETION_OUTCOME_OPTIONS,
-          description: "Used for rules-based completion summary (Stage 4). Defaults to undecided if not set.",
+          description:
+            "Used for rules-based completion summary (Stage 4). Defaults to undecided if not set.",
         }),
         fld({
           id: "surgical_suitability",
@@ -424,7 +433,8 @@ export const hairTransplantConsultationSchemaV1: ConsultationFormSchema = {
           id: "pathology_recommended_explicit",
           label: "Recommend pathology / blood screening",
           type: "boolean",
-          description: "Explicit clinician toggle for completion summary (in addition to risk flags).",
+          description:
+            "Explicit clinician toggle for completion summary (in addition to risk flags).",
         }),
         fld({
           id: "pathology_reason",
@@ -503,7 +513,8 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
     {
       id: "rapid_intake",
       title: "Rapid Intake",
-      description: "Triage what matters today — under five minutes from here to handoff when familiar.",
+      description:
+        "Triage what matters today — under five minutes from here to handoff when familiar.",
       fields: [
         fld({
           id: "priority_focus",
@@ -560,7 +571,8 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
           type: "visual_norwood",
           optionSet: "norwood_scale",
           required: true,
-          description: "Single canonical Norwood capture for this consultation (replaces duplicate confirm fields).",
+          description:
+            "Single canonical Norwood capture for this consultation (replaces duplicate confirm fields).",
         }),
         fld({
           id: "shedding_reported",
@@ -669,7 +681,8 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
           id: "concern_map",
           label: "Concern / zone map",
           type: "body_area_map",
-          description: "Mark priority zones; recommended zones can be edited independently in the next step.",
+          description:
+            "Mark priority zones; recommended zones can be edited independently in the next step.",
           bodyAreaMapViews: ["frontal_hairline", "top_scalp", "crown", "donor_back"],
         }),
         fld({
@@ -732,7 +745,8 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
           id: "ai_recommended_plan_summary",
           label: "Plan summary (AI draft — clinician editable)",
           type: "textarea",
-          placeholder: "Short narrative plan for the chart. AI-generated content will land here later.",
+          placeholder:
+            "Short narrative plan for the chart. AI-generated content will land here later.",
         }),
       ],
     },
@@ -745,13 +759,15 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
           label: "Structured clinical note (canonical)",
           type: "clinical_note",
           required: true,
-          description: "Single primary note for this encounter. Replaces scattered diagnosis / final comment fields.",
+          description:
+            "Single primary note for this encounter. Replaces scattered diagnosis / final comment fields.",
         }),
         fld({
           id: "clinician_voice_note",
           label: "Clinician dictation (voice / text)",
           type: "voice_note",
-          description: "Optional adjunct; use “Save to clinical notes” when persisting to DoctorOS.",
+          description:
+            "Optional adjunct; use “Save to clinical notes” when persisting to DoctorOS.",
         }),
         fld({
           id: "follow_up_required_explicit",

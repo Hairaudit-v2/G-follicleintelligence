@@ -63,7 +63,9 @@ export function ClinicalNoteField({
       <div>
         <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
-          {required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
+          {required ? (
+            <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span>
+          ) : null}
         </div>
         {description?.trim() ? (
           <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>

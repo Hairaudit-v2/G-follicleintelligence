@@ -35,19 +35,20 @@ export function resolveReceptionOsDemoModeForViewer(input: {
 
 export function applyReceptionOsDemoModeForPayload(
   payload: ReceptionOsCommandCentrePayload,
-  demoState: ReceptionOsDemoModeState,
+  demoState: ReceptionOsDemoModeState
 ): ReceptionOsCommandCentrePayload {
   const withDemoField = {
     ...payload,
-    demoMode: demoState.active
-      ? demoState
-      : defaultReceptionOsDemoModeState(demoState.canToggle),
+    demoMode: demoState.active ? demoState : defaultReceptionOsDemoModeState(demoState.canToggle),
   };
   if (!demoState.active) return withDemoField;
   try {
     return applyReceptionOsDemoMode(withDemoField, demoState);
   } catch (error) {
-    console.error("[applyReceptionOsDemoModeForPayload]", error instanceof Error ? error.message : "unknown error");
+    console.error(
+      "[applyReceptionOsDemoModeForPayload]",
+      error instanceof Error ? error.message : "unknown error"
+    );
     return withDemoField;
   }
 }

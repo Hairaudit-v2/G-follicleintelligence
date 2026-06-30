@@ -20,7 +20,11 @@ type ClinicOsDashboardHomeProps = {
  * Feature-flagged clinic command-centre home (UI only, no data fetches).
  * Rendered from the tenant FI admin home route when `NEXT_PUBLIC_FI_CLINIC_OS_SHELL` is enabled.
  */
-export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: ClinicOsDashboardHomeProps) {
+export function ClinicOsDashboardHome({
+  tenantId,
+  clinicLabel,
+  showCrmNav,
+}: ClinicOsDashboardHomeProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
   const workspaceName = clinicLabel?.trim() || "Your clinic";
 
@@ -34,7 +38,8 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
   return (
     <div className="space-y-4">
       <p id="clinic-os-dash-preview-note" className="sr-only">
-        Dashboard figures and schedule rows are placeholders only. They are not live clinical or operational data.
+        Dashboard figures and schedule rows are placeholders only. They are not live clinical or
+        operational data.
       </p>
 
       <FiCard>
@@ -42,7 +47,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
           titleId="clinic-os-welcome-heading"
           eyebrow="Welcome back"
           title={workspaceName}
-          description="Manage today&apos;s bookings, patients, clinical records and follow-ups from one place."
+          description="Manage today's bookings, patients, clinical records and follow-ups from one place."
           primaryAction={
             <Link
               href={newBookingLauncherHref}
@@ -73,28 +78,41 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
         />
       </FiCard>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5" aria-describedby="clinic-os-dash-preview-note">
+      <div
+        className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5"
+        aria-describedby="clinic-os-dash-preview-note"
+      >
         <FiSection
           className="lg:col-span-4"
           title="Today"
-          description="Today&apos;s clinic flow"
+          description="Today's clinic flow"
           headingId="clinic-os-today-heading"
         >
-            <div>
-              <FiCalendarBlock title="Consultations" timeLabel="AM" tone="consult" placeholder />
-              <FiCalendarBlock title="PRP / Treatment" timeLabel="Midday" tone="treatment" placeholder />
-              <FiCalendarBlock title="Hair transplant patients" timeLabel="PM" tone="surgery" placeholder />
-              <FiCalendarBlock title="Follow-ups" timeLabel="PM" tone="followup" placeholder />
-            </div>
-            <div className="mt-4 border-t border-white/[0.06] pt-4">
-              <Link
-                href={calendarHref}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] py-2.5 text-sm font-medium text-slate-200 transition hover:border-cyan-500/20 hover:bg-cyan-500/10 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40"
-              >
-                <Calendar className="h-4 w-4 text-cyan-300" aria-hidden />
-                Open Calendar
-              </Link>
-            </div>
+          <div>
+            <FiCalendarBlock title="Consultations" timeLabel="AM" tone="consult" placeholder />
+            <FiCalendarBlock
+              title="PRP / Treatment"
+              timeLabel="Midday"
+              tone="treatment"
+              placeholder
+            />
+            <FiCalendarBlock
+              title="Hair transplant patients"
+              timeLabel="PM"
+              tone="surgery"
+              placeholder
+            />
+            <FiCalendarBlock title="Follow-ups" timeLabel="PM" tone="followup" placeholder />
+          </div>
+          <div className="mt-4 border-t border-white/[0.06] pt-4">
+            <Link
+              href={calendarHref}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] py-2.5 text-sm font-medium text-slate-200 transition hover:border-cyan-500/20 hover:bg-cyan-500/10 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40"
+            >
+              <Calendar className="h-4 w-4 text-cyan-300" aria-hidden />
+              Open Calendar
+            </Link>
+          </div>
         </FiSection>
 
         <FiSection
@@ -103,38 +121,43 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
           description="Shortcuts to common tasks"
           headingId="clinic-os-actions-heading"
         >
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <FiQuickActionCard
-                title="Start consultation"
-                description="Open the ConsultationOS workspace (preview — fields not saved yet)"
-                href={newConsultationHref}
-                badge="Preview"
-              />
-              <FiQuickActionCard
-                title="Add new patient"
-                description="Choose how to start — lead, booking, or profile"
-                href={newPatientHref}
-              />
-              <FiQuickActionCard
-                title="Book appointment"
-                description="Choose how to book — patient, lead, consultation, or clinical patient"
-                href={newBookingLauncherHref}
-              />
-              <FiQuickActionCard
-                title="New enquiry"
-                description="CRM pipeline and new enquiry"
-                href={crmHref ?? undefined}
-                disabled={!crmHref}
-                disabledReason={!crmHref ? "Requires CRM workspace access (fi_admin or crm_operator)." : undefined}
-              />
-              <FiQuickActionCard
-                title="Open active patients"
-                description="Patient list and worklists"
-                href={casesHref}
-              />
-              <FiQuickActionCard title="Send message" description="Team and patient messaging" />
-              <FiQuickActionCard title="View reports" description="Operational and clinical summaries" />
-            </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <FiQuickActionCard
+              title="Start consultation"
+              description="Open the ConsultationOS workspace (preview — fields not saved yet)"
+              href={newConsultationHref}
+              badge="Preview"
+            />
+            <FiQuickActionCard
+              title="Add new patient"
+              description="Choose how to start — lead, booking, or profile"
+              href={newPatientHref}
+            />
+            <FiQuickActionCard
+              title="Book appointment"
+              description="Choose how to book — patient, lead, consultation, or clinical patient"
+              href={newBookingLauncherHref}
+            />
+            <FiQuickActionCard
+              title="New enquiry"
+              description="CRM pipeline and new enquiry"
+              href={crmHref ?? undefined}
+              disabled={!crmHref}
+              disabledReason={
+                !crmHref ? "Requires CRM workspace access (fi_admin or crm_operator)." : undefined
+              }
+            />
+            <FiQuickActionCard
+              title="Open active patients"
+              description="Patient list and worklists"
+              href={casesHref}
+            />
+            <FiQuickActionCard title="Send message" description="Team and patient messaging" />
+            <FiQuickActionCard
+              title="View reports"
+              description="Operational and clinical summaries"
+            />
+          </div>
         </FiSection>
 
         <FiSection
@@ -143,14 +166,39 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
           description="Preview tiles · not connected to live metrics"
           headingId="clinic-os-snapshot-heading"
         >
-            <div className="grid grid-cols-1 gap-3">
-              <FiKpiTile label="Unassigned leads" value="—" description="Leads awaiting owner" tone="info" />
-              <FiKpiTile label="Pending follow-ups" value="—" description="Tasks due this week" tone="info" />
-              <FiKpiTile label="Upcoming hair transplants" value="—" description="Next 14 days" tone="info" />
-              <FiKpiTile label="Open tasks" value="—" description="Across teams" tone="info" />
-              <FiKpiTile label="Training reminders" value="—" description="Compliance and CPD" tone="info" />
-              <FiKpiTile label="Audit alerts" value="—" description="Items needing review" tone="info" />
-            </div>
+          <div className="grid grid-cols-1 gap-3">
+            <FiKpiTile
+              label="Unassigned leads"
+              value="—"
+              description="Leads awaiting owner"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Pending follow-ups"
+              value="—"
+              description="Tasks due this week"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Upcoming hair transplants"
+              value="—"
+              description="Next 14 days"
+              tone="info"
+            />
+            <FiKpiTile label="Open tasks" value="—" description="Across teams" tone="info" />
+            <FiKpiTile
+              label="Training reminders"
+              value="—"
+              description="Compliance and CPD"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Audit alerts"
+              value="—"
+              description="Items needing review"
+              tone="info"
+            />
+          </div>
         </FiSection>
       </div>
     </div>

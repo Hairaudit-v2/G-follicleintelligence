@@ -1,4 +1,7 @@
-import { mergeCheckpointKeys, missingOutcomeCheckpoints } from "@/src/lib/fi-os/outcomeIntelligenceSignals";
+import {
+  mergeCheckpointKeys,
+  missingOutcomeCheckpoints,
+} from "@/src/lib/fi-os/outcomeIntelligenceSignals";
 
 export type OutcomeMeasurementRow = {
   id: string;
@@ -22,7 +25,15 @@ export type OutcomeProtocolRow = {
   completed_at: string | null;
 };
 
-const TWELVE_MONTH_CHECKPOINTS = new Set(["baseline", "day_1", "day_7", "month_1", "month_3", "month_6", "month_12"]);
+const TWELVE_MONTH_CHECKPOINTS = new Set([
+  "baseline",
+  "day_1",
+  "day_7",
+  "month_1",
+  "month_3",
+  "month_6",
+  "month_12",
+]);
 
 export type CaseOutcomeIntelligenceView = {
   checkpointsCaptured: string[];

@@ -27,7 +27,10 @@ function isoAtUtcDayHour(ymd: string, hour: number, minute = 0): string {
 
 function baseRow(
   tenantId: string,
-  partial: Pick<FiBookingRow, "id" | "booking_type" | "booking_status" | "title" | "start_at" | "end_at"> &
+  partial: Pick<
+    FiBookingRow,
+    "id" | "booking_type" | "booking_status" | "title" | "start_at" | "end_at"
+  > &
     Partial<
       Pick<
         FiBookingRow,
@@ -90,7 +93,10 @@ function addDays(ymd: string, days: number): string {
  * Generate a realistic week of sample appointments anchored to `dateAnchor`.
  * IDs are prefixed with {@link SAMPLE_BOOKING_ID_PREFIX} — persisted server updates are skipped.
  */
-export function generateSampleCalendarBookings(tenantId: string, dateAnchor: string): FiBookingRow[] {
+export function generateSampleCalendarBookings(
+  tenantId: string,
+  dateAnchor: string
+): FiBookingRow[] {
   const mon = weekMondayYmd(dateAnchor);
   const tue = addDays(mon, 1);
   const wed = addDays(mon, 2);
@@ -178,7 +184,9 @@ export function generateSampleCalendarBookings(tenantId: string, dateAnchor: str
   ];
 }
 
-export function sampleBookingDisplayMap(bookings: FiBookingRow[]): Record<string, OperationalCalendarBookingDisplay> {
+export function sampleBookingDisplayMap(
+  bookings: FiBookingRow[]
+): Record<string, OperationalCalendarBookingDisplay> {
   const out: Record<string, OperationalCalendarBookingDisplay> = {};
   for (const b of bookings) {
     if (!isSampleBookingId(b.id)) continue;

@@ -14,7 +14,15 @@ export type FiLeadCardProps = {
   onNavigate?: () => void;
 };
 
-export function FiLeadCard({ name, stage, href, meta, className, dataResultKey, onNavigate }: FiLeadCardProps) {
+export function FiLeadCard({
+  name,
+  stage,
+  href,
+  meta,
+  className,
+  dataResultKey,
+  onNavigate,
+}: FiLeadCardProps) {
   const shell = cn(
     "group flex flex-col rounded-xl border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2.5 outline-none transition hover:border-cyan-400/30 hover:bg-cyan-500/10 focus-visible:ring-2 focus-visible:ring-sky-400/40 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
     className
@@ -48,9 +56,17 @@ export function FiLeadCard({ name, stage, href, meta, className, dataResultKey, 
   }
 
   return (
-    <div className={cn(shell, "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md")}>
+    <div
+      className={cn(
+        shell,
+        "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md"
+      )}
+    >
       {main}
-      <ArrowRight className="ml-auto mt-1 hidden h-4 w-4 shrink-0 text-slate-300 sm:mt-0 sm:block" aria-hidden />
+      <ArrowRight
+        className="ml-auto mt-1 hidden h-4 w-4 shrink-0 text-slate-300 sm:mt-0 sm:block"
+        aria-hidden
+      />
     </div>
   );
 }

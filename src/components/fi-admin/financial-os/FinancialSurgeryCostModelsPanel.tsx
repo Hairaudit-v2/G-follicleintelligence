@@ -93,7 +93,10 @@ function payloadFromForm(form: FormState) {
     prp_cost_cents: dollarsToCents(form.prp_cost),
     exosome_cost_cents: dollarsToCents(form.exosome_cost),
     medication_cost_cents: dollarsToCents(form.medication_cost),
-    default_duration_minutes: Math.max(1, Math.min(1440, Number(form.default_duration_minutes) || 480)),
+    default_duration_minutes: Math.max(
+      1,
+      Math.min(1440, Number(form.default_duration_minutes) || 480)
+    ),
   };
 }
 
@@ -103,14 +106,21 @@ export function FinancialSurgeryCostModelForm(props: { tenantId: string; canMuta
   const [pending, start] = useTransition();
 
   if (!props.canMutate) {
-    return <p className={financialOsClasses.mutedMeta}>Finance or manager role required to manage cost models.</p>;
+    return (
+      <p className={financialOsClasses.mutedMeta}>
+        Finance or manager role required to manage cost models.
+      </p>
+    );
   }
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFeedback(null);
     start(async () => {
-      const res = await createSurgeryCostModelAction(props.tenantId, { ...payloadFromForm(form), activate: true });
+      const res = await createSurgeryCostModelAction(props.tenantId, {
+        ...payloadFromForm(form),
+        activate: true,
+      });
       if (!res.ok) {
         setFeedback({ message: res.error, tone: "error" });
         return;
@@ -142,7 +152,9 @@ export function FinancialSurgeryCostModelForm(props: { tenantId: string; canMuta
               className={financialOsClasses.select}
             >
               {SURGEON_COST_TYPES.map((t) => (
-                <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+                <option key={t} value={t}>
+                  {t.replace(/_/g, " ")}
+                </option>
               ))}
             </select>
           </label>
@@ -159,43 +171,113 @@ export function FinancialSurgeryCostModelForm(props: { tenantId: string; canMuta
           </label>
           <label className={financialOsClasses.formLabel}>
             RN hourly (AUD)
-            <input value={form.rn_hourly} onChange={(e) => setForm((f) => ({ ...f, rn_hourly: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.rn_hourly}
+              onChange={(e) => setForm((f) => ({ ...f, rn_hourly: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Technician hourly (AUD)
-            <input value={form.tech_hourly} onChange={(e) => setForm((f) => ({ ...f, tech_hourly: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.tech_hourly}
+              onChange={(e) => setForm((f) => ({ ...f, tech_hourly: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Assistant hourly (AUD)
-            <input value={form.assistant_hourly} onChange={(e) => setForm((f) => ({ ...f, assistant_hourly: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.assistant_hourly}
+              onChange={(e) => setForm((f) => ({ ...f, assistant_hourly: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Room hourly (AUD)
-            <input value={form.room_hourly} onChange={(e) => setForm((f) => ({ ...f, room_hourly: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.room_hourly}
+              onChange={(e) => setForm((f) => ({ ...f, room_hourly: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Consumables base (AUD)
-            <input value={form.consumables_base} onChange={(e) => setForm((f) => ({ ...f, consumables_base: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.consumables_base}
+              onChange={(e) => setForm((f) => ({ ...f, consumables_base: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Graft consumable (AUD/graft)
-            <input value={form.graft_consumable} onChange={(e) => setForm((f) => ({ ...f, graft_consumable: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.graft_consumable}
+              onChange={(e) => setForm((f) => ({ ...f, graft_consumable: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             PRP cost (AUD)
-            <input value={form.prp_cost} onChange={(e) => setForm((f) => ({ ...f, prp_cost: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.prp_cost}
+              onChange={(e) => setForm((f) => ({ ...f, prp_cost: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Exosome cost (AUD)
-            <input value={form.exosome_cost} onChange={(e) => setForm((f) => ({ ...f, exosome_cost: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.exosome_cost}
+              onChange={(e) => setForm((f) => ({ ...f, exosome_cost: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Medication cost (AUD)
-            <input value={form.medication_cost} onChange={(e) => setForm((f) => ({ ...f, medication_cost: e.target.value }))} className={financialOsClasses.input} type="number" min={0} step="0.01" />
+            <input
+              value={form.medication_cost}
+              onChange={(e) => setForm((f) => ({ ...f, medication_cost: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={0}
+              step="0.01"
+            />
           </label>
           <label className={financialOsClasses.formLabel}>
             Default duration (minutes)
-            <input value={form.default_duration_minutes} onChange={(e) => setForm((f) => ({ ...f, default_duration_minutes: e.target.value }))} className={financialOsClasses.input} type="number" min={1} max={1440} />
+            <input
+              value={form.default_duration_minutes}
+              onChange={(e) => setForm((f) => ({ ...f, default_duration_minutes: e.target.value }))}
+              className={financialOsClasses.input}
+              type="number"
+              min={1}
+              max={1440}
+            />
           </label>
         </div>
         <div className="flex items-center gap-3">
@@ -240,9 +322,13 @@ export function FinancialSurgeryCostModelHistory(props: {
 
   return (
     <div className="space-y-4">
-      {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} /> : null}
+      {feedback ? (
+        <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} />
+      ) : null}
       {props.groups.length === 0 ? (
-        <p className={financialOsClasses.mutedMeta}>No cost models yet. Create one above to enable profitability snapshots.</p>
+        <p className={financialOsClasses.mutedMeta}>
+          No cost models yet. Create one above to enable profitability snapshots.
+        </p>
       ) : null}
       {props.groups.map((group) => (
         <div key={group.procedure_type} className={financialOsClasses.formPanel}>
@@ -250,7 +336,8 @@ export function FinancialSurgeryCostModelHistory(props: {
           {group.active ? (
             <div className="mt-3 space-y-2">
               <p className={financialOsClasses.bodyTextXs}>
-                Active model · surgeon {group.active.surgeon_cost_type} · duration {group.active.default_duration_minutes}m
+                Active model · surgeon {group.active.surgeon_cost_type} · duration{" "}
+                {group.active.default_duration_minutes}m
               </p>
               {props.canMutate ? (
                 <div className="flex flex-wrap gap-2">
@@ -269,7 +356,10 @@ export function FinancialSurgeryCostModelHistory(props: {
                     className={financialOsClasses.secondaryButton}
                     onClick={() =>
                       runAction(
-                        () => archiveSurgeryCostModelAction(props.tenantId, { model_id: group.active!.id }),
+                        () =>
+                          archiveSurgeryCostModelAction(props.tenantId, {
+                            model_id: group.active!.id,
+                          }),
                         "Model archived."
                       )
                     }
@@ -280,7 +370,9 @@ export function FinancialSurgeryCostModelHistory(props: {
               ) : null}
             </div>
           ) : (
-            <p className={financialOsClasses.warningText}>No active model — snapshots will show Needs Configuration.</p>
+            <p className={financialOsClasses.warningText}>
+              No active model — snapshots will show Needs Configuration.
+            </p>
           )}
 
           {editingId === group.active?.id && editForm ? (
@@ -300,13 +392,23 @@ export function FinancialSurgeryCostModelHistory(props: {
             >
               <label className={financialOsClasses.formLabel}>
                 Surgeon fee value
-                <input value={editForm.surgeon_cost_value} onChange={(e) => setEditForm({ ...editForm, surgeon_cost_value: e.target.value })} className={financialOsClasses.input} />
+                <input
+                  value={editForm.surgeon_cost_value}
+                  onChange={(e) => setEditForm({ ...editForm, surgeon_cost_value: e.target.value })}
+                  className={financialOsClasses.input}
+                />
               </label>
               <label className={financialOsClasses.formLabel}>
                 Room hourly (AUD)
-                <input value={editForm.room_hourly} onChange={(e) => setEditForm({ ...editForm, room_hourly: e.target.value })} className={financialOsClasses.input} />
+                <input
+                  value={editForm.room_hourly}
+                  onChange={(e) => setEditForm({ ...editForm, room_hourly: e.target.value })}
+                  className={financialOsClasses.input}
+                />
               </label>
-              <button type="submit" disabled={pending} className={financialOsClasses.primaryButton}>Save changes</button>
+              <button type="submit" disabled={pending} className={financialOsClasses.primaryButton}>
+                Save changes
+              </button>
             </form>
           ) : null}
 
@@ -315,11 +417,16 @@ export function FinancialSurgeryCostModelHistory(props: {
               <p className={financialOsClasses.metricLabel}>Previous versions</p>
               <ul className="mt-2 space-y-2 text-xs text-slate-400">
                 {group.history.map((m) => (
-                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/[0.06] px-2 py-1.5">
+                  <li
+                    key={m.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/[0.06] px-2 py-1.5"
+                  >
                     <span>
                       Created {new Date(m.created_at).toLocaleString()} · archived{" "}
                       {m.archived_at ? new Date(m.archived_at).toLocaleString() : "—"}
-                      {m.created_by_fi_user_id ? ` · ${props.creatorLabels[m.created_by_fi_user_id] ?? m.created_by_fi_user_id}` : ""}
+                      {m.created_by_fi_user_id
+                        ? ` · ${props.creatorLabels[m.created_by_fi_user_id] ?? m.created_by_fi_user_id}`
+                        : ""}
                     </span>
                     {props.canMutate ? (
                       <button
@@ -327,7 +434,8 @@ export function FinancialSurgeryCostModelHistory(props: {
                         className={financialOsClasses.textButton}
                         onClick={() =>
                           runAction(
-                            () => activateSurgeryCostModelAction(props.tenantId, { model_id: m.id }),
+                            () =>
+                              activateSurgeryCostModelAction(props.tenantId, { model_id: m.id }),
                             "Model activated."
                           )
                         }

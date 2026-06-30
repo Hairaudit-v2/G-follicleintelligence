@@ -24,12 +24,22 @@ export async function bulkLinkStaffToFiUsersAction(
   tenantId: string,
   body: unknown
 ): Promise<
-  | { ok: true; linkedCount: number; createdUsers: number; unlinkedBefore: number; unlinkedAfter: number }
+  | {
+      ok: true;
+      linkedCount: number;
+      createdUsers: number;
+      unlinkedBefore: number;
+      unlinkedAfter: number;
+    }
   | { ok: false; error: string }
 > {
   try {
     const parsed = bulkLinkBodySchema.parse(body);
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantStaffManageAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const result = await bulkLinkStaffToFiUsers(tenantId.trim(), parsed.staffIds);
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}/staff`);

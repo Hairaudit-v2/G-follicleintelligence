@@ -2,18 +2,25 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { PathologyRequestOptionRow, PathologyResultDetailBundle, PathologyResultItemRow, PathologyResultRow } from "./pathologyResultTypes";
+import type {
+  PathologyRequestOptionRow,
+  PathologyResultDetailBundle,
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "./pathologyResultTypes";
 
 function mapResult(row: Record<string, unknown>): PathologyResultRow {
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
     patient_id: String(row.patient_id),
-    pathology_request_id: row.pathology_request_id != null ? String(row.pathology_request_id) : null,
+    pathology_request_id:
+      row.pathology_request_id != null ? String(row.pathology_request_id) : null,
     result_date: String(row.result_date ?? "").slice(0, 10),
     provider_name: row.provider_name != null ? String(row.provider_name) : null,
     source_type: String(row.source_type) as PathologyResultRow["source_type"],
-    uploaded_file_bucket: row.uploaded_file_bucket != null ? String(row.uploaded_file_bucket) : null,
+    uploaded_file_bucket:
+      row.uploaded_file_bucket != null ? String(row.uploaded_file_bucket) : null,
     uploaded_file_path: row.uploaded_file_path != null ? String(row.uploaded_file_path) : null,
     status: String(row.status) as PathologyResultRow["status"],
     clinical_summary: row.clinical_summary != null ? String(row.clinical_summary) : null,
@@ -74,12 +81,26 @@ export async function loadPathologyRequestOptionsForPatient(
   });
 }
 
-async function resolveUserDisplayName(supabase: SupabaseClient, tenantId: string, userId: string): Promise<string | null> {
-  const { data: st } = await supabase.from("fi_staff").select("full_name").eq("tenant_id", tenantId).eq("fi_user_id", userId).maybeSingle();
+async function resolveUserDisplayName(
+  supabase: SupabaseClient,
+  tenantId: string,
+  userId: string
+): Promise<string | null> {
+  const { data: st } = await supabase
+    .from("fi_staff")
+    .select("full_name")
+    .eq("tenant_id", tenantId)
+    .eq("fi_user_id", userId)
+    .maybeSingle();
   if (st && (st as { full_name: string }).full_name?.trim()) {
     return String((st as { full_name: string }).full_name).trim();
   }
-  const { data: u } = await supabase.from("fi_users").select("email").eq("tenant_id", tenantId).eq("id", userId).maybeSingle();
+  const { data: u } = await supabase
+    .from("fi_users")
+    .select("email")
+    .eq("tenant_id", tenantId)
+    .eq("id", userId)
+    .maybeSingle();
   const em = u ? String((u as { email: string | null }).email ?? "").trim() : "";
   return em || `User ${userId.slice(0, 8)}…`;
 }
@@ -144,7 +165,9 @@ export async function loadPathologyResultDetail(
   const bucket = result.uploaded_file_bucket?.trim();
   const path = result.uploaded_file_path?.trim();
   if (bucket && path) {
-    const { data: signed, error: se } = await supabase.storage.from(bucket).createSignedUrl(path, 3600);
+    const { data: signed, error: se } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(path, 3600);
     if (!se && signed?.signedUrl) {
       pdfSignedUrl = signed.signedUrl;
     }

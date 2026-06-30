@@ -5,7 +5,10 @@ import {
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
   SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "../consultationFormConstants";
-import type { ConsultationCompletionInput, ConsultationCompletionSummary } from "./consultationCompletionTypes";
+import type {
+  ConsultationCompletionInput,
+  ConsultationCompletionSummary,
+} from "./consultationCompletionTypes";
 import { buildFemaleHairLossCompletionSummary } from "./femaleHairLossCompletionRules";
 import { buildFollowUpReviewCompletionSummary } from "./followUpReviewCompletionRules";
 import { buildHairLossTreatmentCompletionSummary } from "./hairLossTreatmentCompletionRules";
@@ -16,7 +19,9 @@ import { buildScalpPathologyCompletionSummary } from "./scalpPathologyCompletion
 /**
  * Dispatches rules-based completion summary by global template slug.
  */
-export function buildConsultationCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildConsultationCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   if (input.templateSlug.trim() === HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG) {
     return buildHairLossTreatmentCompletionSummary(input);
   }

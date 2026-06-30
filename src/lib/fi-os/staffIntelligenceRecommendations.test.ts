@@ -46,5 +46,7 @@ test("recommendations: director + productivity composite", () => {
 });
 
 test("recommendations: rejects punitive language", () => {
-  assert.throws(() => assertRecommendationCopyIsNonPunitive("This staff member is a poor performer"));
+  assert.throws(() =>
+    assertRecommendationCopyIsNonPunitive("This staff member is a poor performer")
+  );
 });

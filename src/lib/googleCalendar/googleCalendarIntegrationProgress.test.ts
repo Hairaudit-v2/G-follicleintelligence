@@ -22,6 +22,8 @@ describe("googleCalendarIntegrationProgress", () => {
   it("tracks Operational beta at 90% with GC-11 in completed scope", () => {
     assert.equal(GOOGLE_CALENDAR_INTEGRATION_PROGRESS.status, "Operational beta");
     assert.equal(GOOGLE_CALENDAR_INTEGRATION_PROGRESS.progressPercent, 90);
-    assert.ok(GOOGLE_CALENDAR_INTEGRATION_PROGRESS.completed.some((item) => item.includes("GC-11")));
+    assert.ok(
+      GOOGLE_CALENDAR_INTEGRATION_PROGRESS.completed.some((item) => item.includes("GC-11"))
+    );
   });
 });

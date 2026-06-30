@@ -113,7 +113,9 @@ export type ExtractHrReadinessInput = {
 };
 
 /** Validates readiness fields from a feed row or metadata snapshot. Invalid values are omitted. */
-export function extractValidatedHrReadinessFields(input: ExtractHrReadinessInput): Record<string, unknown> {
+export function extractValidatedHrReadinessFields(
+  input: ExtractHrReadinessInput
+): Record<string, unknown> {
   const out: Record<string, unknown> = {};
 
   const onboardingStatus = parseOnboardingStatus(input.onboarding_status);
@@ -160,7 +162,11 @@ export function sanitizeIiohrHrMetadataSnapshot(
     Object.assign(out, extractWorkforceIdentityMetadataFields(raw));
     for (const [key, value] of Object.entries(raw)) {
       if (isSensitiveMetadataKey(key)) continue;
-      if ((HR_STAFF_READINESS_METADATA_KEYS as readonly string[]).includes(key as (typeof HR_STAFF_READINESS_METADATA_KEYS)[number])) {
+      if (
+        (HR_STAFF_READINESS_METADATA_KEYS as readonly string[]).includes(
+          key as (typeof HR_STAFF_READINESS_METADATA_KEYS)[number]
+        )
+      ) {
         continue;
       }
       if (WORKFORCE_IDENTITY_SAFE_METADATA_KEYS.has(key)) continue;

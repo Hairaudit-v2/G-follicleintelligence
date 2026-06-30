@@ -102,9 +102,7 @@ async function loadClinicIdBySlug(
   return map;
 }
 
-async function loadGlobalPositionTypeIds(
-  supabase: SupabaseClient
-): Promise<Map<string, string>> {
+async function loadGlobalPositionTypeIds(supabase: SupabaseClient): Promise<Map<string, string>> {
   const { data, error } = await supabase
     .from("fi_staff_position_types")
     .select("id, code")
@@ -121,10 +119,7 @@ async function loadGlobalPositionTypeIds(
   return map;
 }
 
-async function loadExistingStaff(
-  supabase: SupabaseClient,
-  tenantId: string
-): Promise<StaffRow[]> {
+async function loadExistingStaff(supabase: SupabaseClient, tenantId: string): Promise<StaffRow[]> {
   const { data, error } = await supabase
     .from("fi_staff")
     .select("id, email, staff_metadata")
@@ -134,7 +129,9 @@ async function loadExistingStaff(
   return (data ?? []).map((row) => {
     const raw = row as { id: string; email: string | null; staff_metadata: unknown };
     const metadata =
-      raw.staff_metadata && typeof raw.staff_metadata === "object" && !Array.isArray(raw.staff_metadata)
+      raw.staff_metadata &&
+      typeof raw.staff_metadata === "object" &&
+      !Array.isArray(raw.staff_metadata)
         ? (raw.staff_metadata as Record<string, unknown>)
         : null;
     return {
@@ -209,7 +206,7 @@ export async function seedEnterpriseDemoStaffHierarchy(
       continue;
     }
 
-    const clinicId = node.clinicSlug ? clinicIdBySlug.get(node.clinicSlug) ?? null : null;
+    const clinicId = node.clinicSlug ? (clinicIdBySlug.get(node.clinicSlug) ?? null) : null;
     const workingHours = buildWorkingHours(node, clinicId);
     const staffMetadata = buildStaffMetadata(node, null);
 
@@ -250,11 +247,9 @@ export async function seedEnterpriseDemoStaffHierarchy(
     const staffId = idByKey.get(node.key);
     if (!staffId) continue;
 
-    const reportsToStaffId = node.reportsToKey ? idByKey.get(node.reportsToKey) ?? null : null;
+    const reportsToStaffId = node.reportsToKey ? (idByKey.get(node.reportsToKey) ?? null) : null;
     if (node.reportsToKey && !reportsToStaffId) {
-      warnings.push(
-        `Could not resolve reports_to for "${node.key}" → "${node.reportsToKey}".`
-      );
+      warnings.push(`Could not resolve reports_to for "${node.key}" → "${node.reportsToKey}".`);
       continue;
     }
 

@@ -67,7 +67,9 @@ function buildLinkStatusFromRow(
   if (!row) return emptyLinkStatus(canonicalSystem);
 
   const lastSyncedAt =
-    row.metadata?.last_synced_at != null ? String(row.metadata.last_synced_at).trim() || null : null;
+    row.metadata?.last_synced_at != null
+      ? String(row.metadata.last_synced_at).trim() || null
+      : null;
   const syncStatus = parseWorkforceIdentitySyncStatus(row.metadata?.sync_status) ?? null;
 
   return {

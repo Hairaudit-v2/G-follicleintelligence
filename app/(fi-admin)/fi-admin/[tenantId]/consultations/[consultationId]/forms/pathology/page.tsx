@@ -37,13 +37,19 @@ export default async function ScalpPathologyGuidedFormPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <p className="mb-4 text-sm text-slate-400">
-        Scalp disorder / pathology pathway (HLI + pathology + Patient Twin). For pattern male hair loss without scalp
-        disease features, use{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms/hair-loss-treatment`} className="font-semibold text-violet-300 underline">
+        Scalp disorder / pathology pathway (HLI + pathology + Patient Twin). For pattern male hair
+        loss without scalp disease features, use{" "}
+        <Link
+          href={`/fi-admin/${tid}/consultations/${cid}/forms/hair-loss-treatment`}
+          className="font-semibold text-violet-300 underline"
+        >
           hair loss treatment
         </Link>
         ; for female-context assessment, use{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms/female-hair-loss`} className="font-semibold text-violet-300 underline">
+        <Link
+          href={`/fi-admin/${tid}/consultations/${cid}/forms/female-hair-loss`}
+          className="font-semibold text-violet-300 underline"
+        >
           female hair loss
         </Link>
         .

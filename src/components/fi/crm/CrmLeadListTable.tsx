@@ -25,14 +25,30 @@ export function CrmLeadListTable({
       <table className="min-w-full divide-y divide-white/[0.08] text-sm">
         <thead className="bg-white/[0.03]">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Lead</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Person / patient</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Stage</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Status</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Priority</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Owner</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Updated</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Created</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Lead
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Person / patient
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Stage
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Status
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Priority
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Owner
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Updated
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Created
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.06]">
@@ -71,9 +87,15 @@ export function CrmLeadListTable({
                 <td className="px-3 py-2 text-slate-200">{row.stage?.label ?? "—"}</td>
                 <td className="px-3 py-2 text-slate-300">{row.lead.status}</td>
                 <td className="px-3 py-2 text-slate-300">{row.lead.priority ?? "—"}</td>
-                <td className="px-3 py-2 text-slate-300">{row.owner?.email ?? row.lead.primary_owner_user_id ?? "—"}</td>
-                <td className="px-3 py-2 whitespace-nowrap text-slate-400">{fmtTs(row.lead.updated_at)}</td>
-                <td className="px-3 py-2 whitespace-nowrap text-slate-400">{fmtTs(row.lead.created_at)}</td>
+                <td className="px-3 py-2 text-slate-300">
+                  {row.owner?.email ?? row.lead.primary_owner_user_id ?? "—"}
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap text-slate-400">
+                  {fmtTs(row.lead.updated_at)}
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap text-slate-400">
+                  {fmtTs(row.lead.created_at)}
+                </td>
               </tr>
             );
           })}

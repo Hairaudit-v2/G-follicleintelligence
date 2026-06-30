@@ -39,7 +39,9 @@ function mapPairRow(row: Record<string, unknown>): VieComparisonPairRow {
     case_id: row.case_id != null ? String(row.case_id) : null,
     before_image_id: String(row.before_image_id),
     after_image_id: String(row.after_image_id),
-    comparison_category: String(row.comparison_category) as VieComparisonPairRow["comparison_category"],
+    comparison_category: String(
+      row.comparison_category
+    ) as VieComparisonPairRow["comparison_category"],
     anatomical_region: String(row.anatomical_region),
     slot_family: String(row.slot_family),
     before_timepoint: String(row.before_timepoint) as VieComparisonPairRow["before_timepoint"],
@@ -47,8 +49,12 @@ function mapPairRow(row: Record<string, unknown>): VieComparisonPairRow {
     days_between: Number(row.days_between ?? 0),
     quality_match_score: Number(row.quality_match_score ?? 0),
     angle_match_status: "pending_ai",
-    framing_match_status: String(row.framing_match_status ?? "unknown") as VieComparisonPairRow["framing_match_status"],
-    confidence_band: String(row.confidence_band ?? "medium") as VieComparisonPairRow["confidence_band"],
+    framing_match_status: String(
+      row.framing_match_status ?? "unknown"
+    ) as VieComparisonPairRow["framing_match_status"],
+    confidence_band: String(
+      row.confidence_band ?? "medium"
+    ) as VieComparisonPairRow["confidence_band"],
     recommended_use: Array.isArray(row.recommended_use)
       ? (row.recommended_use as VieComparisonPairRow["recommended_use"])
       : [],
@@ -122,7 +128,9 @@ export async function loadVieComparisonCaptureRecords(
     const slot =
       String(ir.protocol_slot_slug ?? image.imaging_protocol_slot_slug ?? "").trim() || null;
 
-    const capturedAt = String(ir.accepted_at ?? ir.created_at ?? image.taken_at ?? image.created_at);
+    const capturedAt = String(
+      ir.accepted_at ?? ir.created_at ?? image.taken_at ?? image.created_at
+    );
 
     const record = buildComparisonCaptureRecord({
       patient_image_id: imageId,
@@ -136,7 +144,8 @@ export async function loadVieComparisonCaptureRecords(
       clinically_usable: ir.clinically_usable !== false,
       acceptance_status: "accepted",
       captured_at: capturedAt,
-      follow_up_interval: image.follow_up_interval != null ? String(image.follow_up_interval) : null,
+      follow_up_interval:
+        image.follow_up_interval != null ? String(image.follow_up_interval) : null,
       visit_type: image.visit_type != null ? String(image.visit_type) : null,
       imaging_library_axis: String(image.imaging_library_axis ?? "general_clinical"),
     });
@@ -238,7 +247,10 @@ async function pruneStaleSuggestedPairs(
     .map((row) => String((row as Record<string, unknown>).id));
 
   if (staleIds.length === 0) return;
-  const { error: delErr } = await client.from("fi_vie_comparison_pairs").delete().in("id", staleIds);
+  const { error: delErr } = await client
+    .from("fi_vie_comparison_pairs")
+    .delete()
+    .in("id", staleIds);
   if (delErr) throw new Error(delErr.message);
 }
 
@@ -266,7 +278,11 @@ export async function generateVieComparisonPairsForPatient(params: {
 export async function loadVieComparisonPairsForPatient(
   tenantId: string,
   patientId: string,
-  opts?: { caseId?: string | null; reviewStatus?: VieComparisonReviewStatus | "all"; client?: SupabaseClient }
+  opts?: {
+    caseId?: string | null;
+    reviewStatus?: VieComparisonReviewStatus | "all";
+    client?: SupabaseClient;
+  }
 ): Promise<VieComparisonPairRow[]> {
   const supabase = opts?.client ?? supabaseAdmin();
   let query = supabase
@@ -354,7 +370,8 @@ export async function regenerateVieComparisonsBestEffort(params: {
 }): Promise<void> {
   try {
     await generateVieComparisonPairsForPatient(params);
-    const { regenerateVieOutcomeSummaryBestEffort } = await import("./vieOutcomeIntelligence.server");
+    const { regenerateVieOutcomeSummaryBestEffort } =
+      await import("./vieOutcomeIntelligence.server");
     await regenerateVieOutcomeSummaryBestEffort(params);
   } catch {
     // best-effort — must not block capture accept

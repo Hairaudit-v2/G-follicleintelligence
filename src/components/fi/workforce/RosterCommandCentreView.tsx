@@ -83,10 +83,13 @@ export function RosterCommandCentreView({
     <div className="space-y-8">
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">Roster Command Centre</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
+          Roster Command Centre
+        </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Operational staffing command centre for clinical days, surgeries, consultations, and procedure events.
-          Review gaps, rank eligible staff, assign safely, and manage shifts and availability.
+          Operational staffing command centre for clinical days, surgeries, consultations, and
+          procedure events. Review gaps, rank eligible staff, assign safely, and manage shifts and
+          availability.
         </p>
         <p className="mt-2 text-xs text-slate-500">
           <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">
@@ -149,7 +152,9 @@ export function RosterCommandCentreView({
             Staffing status
             <select
               value={filters.status}
-              onChange={(e) => pushFilters({ status: e.target.value as RosterStaffingStatusFilter | "" })}
+              onChange={(e) =>
+                pushFilters({ status: e.target.value as RosterStaffingStatusFilter | "" })
+              }
               className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
             >
               {STATUS_FILTERS.map((f) => (
@@ -166,12 +171,21 @@ export function RosterCommandCentreView({
         {[
           { label: "Clinical events", value: payload.summary.totalClinicalEvents },
           { label: "Ready", value: payload.summary.readyEvents, tone: "text-emerald-300" },
-          { label: "Missing roles", value: payload.summary.missingRoleEvents, tone: "text-amber-300" },
+          {
+            label: "Missing roles",
+            value: payload.summary.missingRoleEvents,
+            tone: "text-amber-300",
+          },
           { label: "Open roles", value: payload.summary.openRequiredRoles, tone: "text-rose-300" },
         ].map((tile) => (
-          <div key={tile.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <div
+            key={tile.label}
+            className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+          >
             <p className="text-xs text-slate-500">{tile.label}</p>
-            <p className={`mt-2 text-2xl font-semibold ${tile.tone ?? "text-slate-100"}`}>{tile.value}</p>
+            <p className={`mt-2 text-2xl font-semibold ${tile.tone ?? "text-slate-100"}`}>
+              {tile.value}
+            </p>
           </div>
         ))}
       </section>
@@ -180,7 +194,9 @@ export function RosterCommandCentreView({
         <div>
           <h2 className="text-sm font-semibold text-slate-100">Clinical events</h2>
           {payload.events.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">No clinical events match the current filters.</p>
+            <p className="mt-3 text-sm text-slate-500">
+              No clinical events match the current filters.
+            </p>
           ) : (
             <div className="mt-3 space-y-3">
               {payload.events.map((event) => (

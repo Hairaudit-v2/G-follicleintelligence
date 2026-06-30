@@ -62,13 +62,19 @@ function buildHliDiagnosisImpression(values: Record<string, unknown>): string {
   const cls = canonicalHliPatternClassificationLines(values).join("\n");
   const body = canonicalHliDiagnosisBody(values);
 
-  return [durLine, cls, body].map((s) => s.trim()).filter(Boolean).join("\n\n").trim();
+  return [durLine, cls, body]
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
 }
 
 /**
  * Rules-based completion summary for {@link HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG}.
  */
-export function buildHairLossTreatmentCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildHairLossTreatmentCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   const v = input.values ?? {};
   const base = emptyHliSummaryBase(input);
 
@@ -79,11 +85,15 @@ export function buildHairLossTreatmentCompletionSummary(input: ConsultationCompl
   const outcomeType = parseOutcome(v.consultation_outcome_type);
 
   const primaryFocus = readString(v.priority_focus);
-  const primaryConcern = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.consultation_priority, primaryFocus);
+  const primaryConcern = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.consultation_priority,
+    primaryFocus
+  );
 
   const patternKey = readString(v.pattern_type).trim();
   const hairLossPatternTypeLabel =
-    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.hair_loss_pattern_type, patternKey) || patternKey;
+    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.hair_loss_pattern_type, patternKey) ||
+    patternKey;
 
   const diagnosisImpression = buildHliDiagnosisImpression(v);
 
@@ -98,7 +108,8 @@ export function buildHairLossTreatmentCompletionSummary(input: ConsultationCompl
   const pathologyFromRiskFlags =
     riskFlags.includes("medical_review_required") || riskFlags.includes("blood_tests_recommended");
   const pathologyFromOutcome = outcomeType === "needs_blood_tests";
-  const pathologyRecommended = pathologyExplicit || bloodAnalysis || pathologyFromRiskFlags || pathologyFromOutcome;
+  const pathologyRecommended =
+    pathologyExplicit || bloodAnalysis || pathologyFromRiskFlags || pathologyFromOutcome;
 
   let pathologyReason = readString(v.pathology_reason).trim();
   if (pathologyRecommended && !pathologyReason) {

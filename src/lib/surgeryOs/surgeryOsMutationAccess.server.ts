@@ -13,7 +13,9 @@ import {
 } from "@/src/lib/surgeryOs/surgeryOsPolicy";
 import type { SurgeryOsNoteKind } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
 
-export async function buildSurgeryOsMutationContext(tenantId: string): Promise<SurgeryOsMutationContext & { canAccess: boolean }> {
+export async function buildSurgeryOsMutationContext(
+  tenantId: string
+): Promise<SurgeryOsMutationContext & { canAccess: boolean }> {
   const tid = tenantId.trim();
   const viewer = await resolveSurgeryOsViewerContext(tid);
   const member = viewer.authUserId ? await getFiTenantMemberSessionIfAllowed(tid) : null;
@@ -28,10 +30,14 @@ export async function buildSurgeryOsMutationContext(tenantId: string): Promise<S
 export async function assertSurgeryOsMutationAllowed(
   tenantId: string,
   action: SurgeryOsAction,
-  adminKey?: string | null,
+  adminKey?: string | null
 ): Promise<SurgeryOsMutationContext> {
   const tid = tenantId.trim();
-  await assertCrmTenantReadAllowed({ tenantId: tid, adminKey: adminKey ?? undefined, request: undefined });
+  await assertCrmTenantReadAllowed({
+    tenantId: tid,
+    adminKey: adminKey ?? undefined,
+    request: undefined,
+  });
 
   const ctx = await buildSurgeryOsMutationContext(tid);
   if (!ctx.canAccess) {
@@ -51,7 +57,7 @@ export async function assertSurgeryOsMutationAllowed(
 export async function assertSurgeryOsNoteMutationAllowed(
   tenantId: string,
   noteKind: SurgeryOsNoteKind,
-  adminKey?: string | null,
+  adminKey?: string | null
 ): Promise<SurgeryOsMutationContext> {
   const ctx = await assertSurgeryOsMutationAllowed(tenantId, "add_note", adminKey);
   if (!surgeryOsNoteKindAllowed(ctx, noteKind)) {
@@ -63,10 +69,14 @@ export async function assertSurgeryOsNoteMutationAllowed(
 export async function assertSurgeryOsTeamStatusMutationAllowed(
   tenantId: string,
   assignmentFiUserId: string,
-  adminKey?: string | null,
+  adminKey?: string | null
 ): Promise<SurgeryOsMutationContext> {
   const tid = tenantId.trim();
-  await assertCrmTenantReadAllowed({ tenantId: tid, adminKey: adminKey ?? undefined, request: undefined });
+  await assertCrmTenantReadAllowed({
+    tenantId: tid,
+    adminKey: adminKey ?? undefined,
+    request: undefined,
+  });
 
   const ctx = await buildSurgeryOsMutationContext(tid);
   if (!ctx.canAccess) {

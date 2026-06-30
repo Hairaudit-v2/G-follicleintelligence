@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { convertCrmLeadAction } from "@/lib/actions/fi-crm-actions";
 import type { CrmLeadConversionState } from "@/src/lib/crm/types";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 function personLabel(person: CrmLeadConversionState["person"]): string {
   if (!person) return "—";
@@ -80,8 +81,8 @@ export function CrmLeadConversionPanel({
     <section className={card}>
       <h2 className="mb-1 text-sm font-semibold text-slate-100">Lead conversion</h2>
       <p className="mb-3 text-xs text-slate-400">
-        Conversion preserves the CRM lead history and creates the patient foundation for bookings, clinical records, images,
-        and treatment planning.
+        Conversion preserves the CRM lead history and creates the patient foundation for bookings,
+        clinical records, images, and treatment planning.
       </p>
 
       <div className="mb-3 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-xs text-slate-300">
@@ -117,7 +118,10 @@ export function CrmLeadConversionPanel({
               Seeded patient: <span className="font-mono">{lead.converted_case_id}</span>
             </p>
           ) : null}
-          <p className="text-xs text-gray-500">This lead cannot be converted again from this panel. Contact an administrator to relink if needed.</p>
+          <p className="text-xs text-gray-500">
+            This lead cannot be converted again from this panel. Contact an administrator to relink
+            if needed.
+          </p>
         </div>
       ) : (
         <form onSubmit={onConvert} className="space-y-3 text-sm">
@@ -132,11 +136,21 @@ export function CrmLeadConversionPanel({
           </label>
 
           <label className="flex items-center gap-2 text-xs text-slate-300">
-            <input type="checkbox" checked={seedCase && canSeedCase} disabled={!canSeedCase} onChange={(e) => setSeedCase(e.target.checked)} />
-            Create draft patient record now (adds a <code className="rounded bg-white/[0.06] px-0.5">fi_cases</code> shell in{" "}
+            <input
+              type="checkbox"
+              checked={seedCase && canSeedCase}
+              disabled={!canSeedCase}
+              onChange={(e) => setSeedCase(e.target.checked)}
+            />
+            Create draft patient record now (adds a{" "}
+            <code className="rounded bg-white/[0.06] px-0.5">fi_cases</code> shell in{" "}
             <code className="rounded bg-white/[0.06] px-0.5">draft</code> status)
           </label>
-          {!canSeedCase ? <p className="text-xs text-amber-300">This lead already has a patient link; a second shell is not created here.</p> : null}
+          {!canSeedCase ? (
+            <p className="text-xs text-amber-300">
+              This lead already has a patient link; a second shell is not created here.
+            </p>
+          ) : null}
 
           {seedCase && canSeedCase ? (
             <div className="grid gap-2 sm:grid-cols-2">
@@ -172,7 +186,11 @@ export function CrmLeadConversionPanel({
             />
           </label>
 
-          <button type="submit" disabled={busy} className="rounded bg-gray-800 px-3 py-1.5 text-xs text-white disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={busy}
+            className="rounded bg-gray-800 px-3 py-1.5 text-xs text-white disabled:opacity-50"
+          >
             Convert lead to patient
           </button>
         </form>

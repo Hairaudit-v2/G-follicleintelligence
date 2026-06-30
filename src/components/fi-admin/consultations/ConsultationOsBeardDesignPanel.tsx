@@ -11,7 +11,11 @@ const FIELDS = [
   { key: "style_preference", label: "Style preference" },
 ] as const;
 
-export function ConsultationOsBeardDesignPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsBeardDesignPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Beard design" headingId="consultation-os-beard-design-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

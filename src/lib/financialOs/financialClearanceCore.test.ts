@@ -19,7 +19,10 @@ import {
   buildPaymentPathwayAttentionSummary,
   type FiPaymentPathwayRow,
 } from "@/src/lib/financialOs/financialPaymentPathwayCore";
-import { buildPathwayTaskAttentionSummary, type FiPaymentPathwayTaskRow } from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
+import {
+  buildPathwayTaskAttentionSummary,
+  type FiPaymentPathwayTaskRow,
+} from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
 import {
   buildSuperReleaseAttentionSummary,
   type FiSuperReleaseApplicationRow,
@@ -35,7 +38,8 @@ const TODAY = "2026-06-16";
 const TZ = "Australia/Brisbane";
 
 function baseInvoice(
-  p: Partial<FiInvoiceRow> & Pick<FiInvoiceRow, "id" | "invoice_kind" | "status" | "total_cents" | "amount_paid_cents">
+  p: Partial<FiInvoiceRow> &
+    Pick<FiInvoiceRow, "id" | "invoice_kind" | "status" | "total_cents" | "amount_paid_cents">
 ): FiInvoiceRow {
   return {
     tenant_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
@@ -78,10 +82,20 @@ function emptyAttentionInput(): Omit<
   | "installment_overdue"
 > {
   return {
-    paymentPathway: buildPaymentPathwayAttentionSummary({ todayYmd: TODAY, surgeryDateYmd: null, pathway: null }),
+    paymentPathway: buildPaymentPathwayAttentionSummary({
+      todayYmd: TODAY,
+      surgeryDateYmd: null,
+      pathway: null,
+    }),
     pathwayTaskAttention: buildPathwayTaskAttentionSummary([]),
-    financeApplicationAttention: buildFinanceApplicationAttentionSummary({ todayYmd: TODAY, application: null }),
-    superReleaseApplicationAttention: buildSuperReleaseAttentionSummary({ todayYmd: TODAY, application: null }),
+    financeApplicationAttention: buildFinanceApplicationAttentionSummary({
+      todayYmd: TODAY,
+      application: null,
+    }),
+    superReleaseApplicationAttention: buildSuperReleaseAttentionSummary({
+      todayYmd: TODAY,
+      application: null,
+    }),
     internationalTransferApplicationAttention: buildInternationalTransferAttentionSummary({
       todayYmd: TODAY,
       application: null,
@@ -280,7 +294,10 @@ describe("financialClearanceCore", () => {
         }),
       ],
     });
-    const c = clearanceFromPipeline(pipeline, { surgeryDateYmd: "2026-09-01", financeRejected: true });
+    const c = clearanceFromPipeline(pipeline, {
+      surgeryDateYmd: "2026-09-01",
+      financeRejected: true,
+    });
     assert.equal(c.clearance_state, "attention_required");
     assert.equal(c.requires_staff_attention, true);
   });

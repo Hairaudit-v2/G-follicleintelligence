@@ -2,14 +2,20 @@
 
 import { cn } from "@/lib/utils";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { bookingCalendarChipSurface, bookingTypeCalendarLegendLabel } from "@/src/lib/bookings/calendarLabels";
+import {
+  bookingCalendarChipSurface,
+  bookingTypeCalendarLegendLabel,
+} from "@/src/lib/bookings/calendarLabels";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
-import { formatTimeRangeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatTimeRangeInTimezone,
+  normalizeCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 
 export function BookingCalendarEventCard({
   booking,
@@ -47,7 +53,9 @@ export function BookingCalendarEventCard({
     >
       <div className="truncate font-medium leading-tight">{booking.title?.trim() || "Booking"}</div>
       <div className="mt-0.5 flex flex-wrap items-center gap-1">
-        <span className="truncate text-[10px] font-medium uppercase tracking-wide opacity-90">{typeLabel}</span>
+        <span className="truncate text-[10px] font-medium uppercase tracking-wide opacity-90">
+          {typeLabel}
+        </span>
         <BookingStatusBadge status={booking.booking_status} />
       </div>
       <div className="mt-0.5 truncate text-[10px] opacity-90">{range}</div>

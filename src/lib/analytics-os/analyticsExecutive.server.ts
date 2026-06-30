@@ -95,8 +95,7 @@ export async function loadAnalyticsExecutiveSnapshot(
   const periodEnd = input.periodEnd?.trim() || defaults.periodEnd;
   const comparisonPeriodStart =
     input.comparisonPeriodStart?.trim() || defaults.comparisonPeriodStart;
-  const comparisonPeriodEnd =
-    input.comparisonPeriodEnd?.trim() || defaults.comparisonPeriodEnd;
+  const comparisonPeriodEnd = input.comparisonPeriodEnd?.trim() || defaults.comparisonPeriodEnd;
 
   const [currentEvents, comparisonEvents, workforceReadiness] = await Promise.all([
     loadEventsForPeriod(tid, input.clinicId, periodStart, periodEnd, options),

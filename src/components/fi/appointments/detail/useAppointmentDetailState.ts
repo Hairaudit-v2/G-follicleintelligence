@@ -26,7 +26,10 @@ import {
   applyLeadUpdatesAfterAppointmentComplete,
   type AppointmentCompletionLeadOpts,
 } from "@/src/lib/crm/appointmentCompletionLeadClient";
-import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import {
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/src/components/fi/bookings/bookingFormUtils";
 import { defaultAppointmentCompletionLeadOpts } from "../shared";
 import { useAppointmentSlideOver } from "../AppointmentSlideOver";
 
@@ -67,18 +70,26 @@ export function useAppointmentDetailState(
   const [descBusy, setDescBusy] = useState(false);
   const [descErr, setDescErr] = useState<string | null>(null);
 
-  const [graftCountEstimate, setGraftCountEstimate] = useState(payload.procedure.graft_count_estimate ?? "");
+  const [graftCountEstimate, setGraftCountEstimate] = useState(
+    payload.procedure.graft_count_estimate ?? ""
+  );
   const [donorArea, setDonorArea] = useState(payload.procedure.donor_area ?? "");
   const [technique, setTechnique] = useState(payload.procedure.technique ?? "");
-  const [specialInstructions, setSpecialInstructions] = useState(payload.procedure.special_instructions ?? "");
+  const [specialInstructions, setSpecialInstructions] = useState(
+    payload.procedure.special_instructions ?? ""
+  );
   const [surgeonUserId, setSurgeonUserId] = useState(payload.procedure.surgeon_user_id ?? "");
-  const [consultantUserId, setConsultantUserId] = useState(payload.procedure.consultant_user_id ?? "");
+  const [consultantUserId, setConsultantUserId] = useState(
+    payload.procedure.consultant_user_id ?? ""
+  );
   const [techUserId, setTechUserId] = useState(payload.procedure.tech_user_id ?? "");
   const [procedureBusy, setProcedureBusy] = useState(false);
   const [procedureErr, setProcedureErr] = useState<string | null>(null);
 
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
-  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(booking.start_at, calendarTimezone));
+  const [startLocal, setStartLocal] = useState(
+    toDatetimeLocalValue(booking.start_at, calendarTimezone)
+  );
   const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(booking.end_at, calendarTimezone));
   const [bookingStatus, setBookingStatus] = useState(booking.booking_status);
   const [rescheduleBusy, setRescheduleBusy] = useState(false);
@@ -103,7 +114,8 @@ export function useAppointmentDetailState(
   const [leadNoteBody, setLeadNoteBody] = useState("");
   const [leadNoteBusy, setLeadNoteBusy] = useState(false);
   const [leadNoteErr, setLeadNoteErr] = useState<string | null>(null);
-  const [completionLeadOpts, setCompletionLeadOpts] = useState<AppointmentCompletionLeadOpts | null>(null);
+  const [completionLeadOpts, setCompletionLeadOpts] =
+    useState<AppointmentCompletionLeadOpts | null>(null);
   const [crmCompleteErr, setCrmCompleteErr] = useState<string | null>(null);
 
   const linkedLead = payload.leadAnchor?.lead ?? null;
@@ -111,14 +123,21 @@ export function useAppointmentDetailState(
   useEffect(() => {
     if (linkedLead && payload.pipelineStages.length) {
       setCompletionLeadOpts(
-        defaultAppointmentCompletionLeadOpts(linkedLead, payload.pipelineStages, booking.booking_type)
+        defaultAppointmentCompletionLeadOpts(
+          linkedLead,
+          payload.pipelineStages,
+          booking.booking_type
+        )
       );
     } else {
       setCompletionLeadOpts(null);
     }
   }, [linkedLead, booking.booking_type, payload.pipelineStages]);
 
-  const procedureLabel = useMemo(() => bookingTypeLabel(booking.booking_type), [booking.booking_type]);
+  const procedureLabel = useMemo(
+    () => bookingTypeLabel(booking.booking_type),
+    [booking.booking_type]
+  );
 
   const nextScheduledLabel = useMemo(() => {
     const s = new Date(booking.start_at);
@@ -319,7 +338,9 @@ export function useAppointmentDetailState(
     setActionErr(null);
     setActionBusy(true);
     try {
-      const r = await cancelBookingAction(tenantId, booking.id, { cancellationReason: reason.trim() || null });
+      const r = await cancelBookingAction(tenantId, booking.id, {
+        cancellationReason: reason.trim() || null,
+      });
       if (!r.ok) setActionErr(r.error);
       else await refreshPayload();
     } finally {
@@ -394,7 +415,10 @@ export function useAppointmentDetailState(
         if (!r.ok) setTaskErr(r.error);
         else {
           setTaskTitle("");
-          setPayload((p) => ({ ...p, timeline: { ...p.timeline, tasks: [r.task, ...p.timeline.tasks] } }));
+          setPayload((p) => ({
+            ...p,
+            timeline: { ...p.timeline, tasks: [r.task, ...p.timeline.tasks] },
+          }));
           router.refresh();
         }
       } finally {
@@ -409,7 +433,9 @@ export function useAppointmentDetailState(
       if (!leadId || !canMutate) return;
       const snap = payload.timeline.tasks;
       const optimistic = snap.map((t) =>
-        t.id === taskId ? { ...t, status: "done" as const, completed_at: new Date().toISOString() } : t
+        t.id === taskId
+          ? { ...t, status: "done" as const, completed_at: new Date().toISOString() }
+          : t
       );
       setPayload((p) => ({ ...p, timeline: { ...p.timeline, tasks: optimistic } }));
       const r = await completeCrmTaskAction(tenantId, leadId, taskId, {});
@@ -419,7 +445,10 @@ export function useAppointmentDetailState(
       }
       setPayload((p) => ({
         ...p,
-        timeline: { ...p.timeline, tasks: p.timeline.tasks.map((t) => (t.id === taskId ? r.task : t)) },
+        timeline: {
+          ...p.timeline,
+          tasks: p.timeline.tasks.map((t) => (t.id === taskId ? r.task : t)),
+        },
       }));
       router.refresh();
     },
@@ -439,7 +468,10 @@ export function useAppointmentDetailState(
         if (!r.ok) setNoteErr(r.error);
         else {
           setNoteBody("");
-          setPayload((p) => ({ ...p, timeline: { ...p.timeline, notes: [r.note, ...p.timeline.notes] } }));
+          setPayload((p) => ({
+            ...p,
+            timeline: { ...p.timeline, notes: [r.note, ...p.timeline.notes] },
+          }));
           router.refresh();
         }
       } finally {

@@ -34,7 +34,9 @@ export type OnboardingOsActionResult =
   | { ok: true; sessionId?: string; tenantId?: string | null }
   | { ok: false; error: string };
 
-async function assertPlatformAdmin(): Promise<{ ok: true; authId: string } | { ok: false; error: string }> {
+async function assertPlatformAdmin(): Promise<
+  { ok: true; authId: string } | { ok: false; error: string }
+> {
   const authId = await resolveAuthUserId(null);
   if (!authId) return { ok: false, error: "Authentication required." };
   const os = await loadFiOsIdentity(authId);
@@ -49,7 +51,9 @@ function revalidateOnboardingPaths(sessionId?: string) {
   if (sessionId) revalidatePath(`/fi-admin/platform/onboarding/${sessionId}`);
 }
 
-export async function createOnboardingSessionAction(body: unknown): Promise<OnboardingOsActionResult> {
+export async function createOnboardingSessionAction(
+  body: unknown
+): Promise<OnboardingOsActionResult> {
   try {
     const auth = await assertPlatformAdmin();
     if (!auth.ok) return auth;
@@ -82,7 +86,10 @@ export async function createOnboardingSessionAction(body: unknown): Promise<Onbo
   }
 }
 
-export async function runOnboardingStepAction(sessionId: string, stepCode: string): Promise<OnboardingOsActionResult> {
+export async function runOnboardingStepAction(
+  sessionId: string,
+  stepCode: string
+): Promise<OnboardingOsActionResult> {
   const auth = await assertPlatformAdmin();
   if (!auth.ok) return auth;
 
@@ -95,7 +102,10 @@ export async function runOnboardingStepAction(sessionId: string, stepCode: strin
   return { ok: true, sessionId };
 }
 
-export async function retryOnboardingStepAction(sessionId: string, stepCode: string): Promise<OnboardingOsActionResult> {
+export async function retryOnboardingStepAction(
+  sessionId: string,
+  stepCode: string
+): Promise<OnboardingOsActionResult> {
   const auth = await assertPlatformAdmin();
   if (!auth.ok) return auth;
 
@@ -108,7 +118,9 @@ export async function retryOnboardingStepAction(sessionId: string, stepCode: str
   return { ok: true, sessionId };
 }
 
-export async function markOnboardingReadyForReviewAction(sessionId: string): Promise<OnboardingOsActionResult> {
+export async function markOnboardingReadyForReviewAction(
+  sessionId: string
+): Promise<OnboardingOsActionResult> {
   const auth = await assertPlatformAdmin();
   if (!auth.ok) return auth;
 
@@ -121,7 +133,9 @@ export async function markOnboardingReadyForReviewAction(sessionId: string): Pro
   return { ok: true, sessionId };
 }
 
-export async function finalizeOnboardingSessionAction(sessionId: string): Promise<OnboardingOsActionResult> {
+export async function finalizeOnboardingSessionAction(
+  sessionId: string
+): Promise<OnboardingOsActionResult> {
   const auth = await assertPlatformAdmin();
   if (!auth.ok) return auth;
 
@@ -134,7 +148,9 @@ export async function finalizeOnboardingSessionAction(sessionId: string): Promis
   return { ok: true, sessionId, tenantId: result.tenantId };
 }
 
-export async function runAllOnboardingStepsAction(sessionId: string): Promise<OnboardingOsActionResult> {
+export async function runAllOnboardingStepsAction(
+  sessionId: string
+): Promise<OnboardingOsActionResult> {
   const auth = await assertPlatformAdmin();
   if (!auth.ok) return auth;
 

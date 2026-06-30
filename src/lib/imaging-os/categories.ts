@@ -127,7 +127,10 @@ const LEGACY_UPLOAD_TYPE_ALIASES: Record<string, CanonicalHairImageCategory> = {
 };
 
 function normalizeExternalKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 /**

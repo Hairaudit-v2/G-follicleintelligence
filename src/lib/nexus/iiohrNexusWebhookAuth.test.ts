@@ -29,7 +29,11 @@ describe("iiohrNexusWebhookAuth", () => {
     const now = 1_700_000_000_000;
     assert.equal(verifyIiohrNexusTimestamp(now, now, IIOHR_NEXUS_TIMESTAMP_SKEW_MS), true);
     assert.equal(
-      verifyIiohrNexusTimestamp(now - IIOHR_NEXUS_TIMESTAMP_SKEW_MS - 1, now, IIOHR_NEXUS_TIMESTAMP_SKEW_MS),
+      verifyIiohrNexusTimestamp(
+        now - IIOHR_NEXUS_TIMESTAMP_SKEW_MS - 1,
+        now,
+        IIOHR_NEXUS_TIMESTAMP_SKEW_MS
+      ),
       false
     );
   });

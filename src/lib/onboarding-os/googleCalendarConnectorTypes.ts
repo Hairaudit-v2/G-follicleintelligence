@@ -30,7 +30,12 @@ export const EXTERNAL_CALENDAR_SYNC_RUN_STATUSES = [
 ] as const;
 export type ExternalCalendarSyncRunStatus = (typeof EXTERNAL_CALENDAR_SYNC_RUN_STATUSES)[number];
 
-export const EXTERNAL_CALENDAR_MAPPING_STATUSES = ["pending", "approved", "rejected", "linked"] as const;
+export const EXTERNAL_CALENDAR_MAPPING_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "linked",
+] as const;
 export type ExternalCalendarMappingStatus = (typeof EXTERNAL_CALENDAR_MAPPING_STATUSES)[number];
 
 export const EXTERNAL_CALENDAR_IMPORT_AUDIT_ACTIONS = [
@@ -43,9 +48,15 @@ export const EXTERNAL_CALENDAR_IMPORT_AUDIT_ACTIONS = [
   "event_rejected",
   "event_reviewed",
 ] as const;
-export type ExternalCalendarImportAuditAction = (typeof EXTERNAL_CALENDAR_IMPORT_AUDIT_ACTIONS)[number];
+export type ExternalCalendarImportAuditAction =
+  (typeof EXTERNAL_CALENDAR_IMPORT_AUDIT_ACTIONS)[number];
 
-export const EXTERNAL_CALENDAR_SYNC_HEALTH_BANDS = ["healthy", "degraded", "unhealthy", "unknown"] as const;
+export const EXTERNAL_CALENDAR_SYNC_HEALTH_BANDS = [
+  "healthy",
+  "degraded",
+  "unhealthy",
+  "unknown",
+] as const;
 export type ExternalCalendarSyncHealthBand = (typeof EXTERNAL_CALENDAR_SYNC_HEALTH_BANDS)[number];
 
 /** Raw Google Calendar API event shape (subset used for normalization). */
@@ -192,10 +203,14 @@ export function isExternalCalendarEventType(value: string): value is ExternalCal
   return (EXTERNAL_CALENDAR_EVENT_TYPES as readonly string[]).includes(value);
 }
 
-export function isExternalCalendarImportStatus(value: string): value is ExternalCalendarImportStatus {
+export function isExternalCalendarImportStatus(
+  value: string
+): value is ExternalCalendarImportStatus {
   return (EXTERNAL_CALENDAR_IMPORT_STATUSES as readonly string[]).includes(value);
 }
 
-export function isExternalCalendarSyncRunStatus(value: string): value is ExternalCalendarSyncRunStatus {
+export function isExternalCalendarSyncRunStatus(
+  value: string
+): value is ExternalCalendarSyncRunStatus {
   return (EXTERNAL_CALENDAR_SYNC_RUN_STATUSES as readonly string[]).includes(value);
 }

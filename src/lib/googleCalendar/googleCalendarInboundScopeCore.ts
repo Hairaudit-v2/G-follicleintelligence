@@ -84,7 +84,9 @@ function readMetadataString(metadata: Record<string, unknown> | null, key: strin
   return value.trim();
 }
 
-export function inboundSyncCalendarRowToClient(row: InboundSyncCalendarDbRow): InboundSyncCalendarClientRow {
+export function inboundSyncCalendarRowToClient(
+  row: InboundSyncCalendarDbRow
+): InboundSyncCalendarClientRow {
   const metadata = row.metadata ?? {};
   return {
     id: row.id,

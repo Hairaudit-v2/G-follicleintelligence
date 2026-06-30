@@ -72,7 +72,10 @@ export async function loadHubspotConnectorSnapshotAction(
     return { ok: true, snapshot: result.snapshot };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid input." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load HubSpot connector." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load HubSpot connector.",
+    };
   }
 }
 
@@ -274,7 +277,10 @@ export async function loadHubspotStagingContactsAction(
     };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid input." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load staging contacts." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load staging contacts.",
+    };
   }
 }
 

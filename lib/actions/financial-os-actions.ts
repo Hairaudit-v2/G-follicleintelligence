@@ -5,7 +5,10 @@ import { ZodError, z } from "zod";
 
 import { assertPaymentRecordWriteAllowed } from "@/src/lib/payments/paymentRecordAccess.server";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
-import { startConsultationQuoteDepositPaymentRequest, setBookingFinancialOsStatus } from "@/src/lib/financialOs/financialDepositWorkflow.server";
+import {
+  startConsultationQuoteDepositPaymentRequest,
+  setBookingFinancialOsStatus,
+} from "@/src/lib/financialOs/financialDepositWorkflow.server";
 import { createInstallmentPlanForInvoice } from "@/src/lib/financialOs/financialInstallmentPlans.server";
 
 const optionalAdminKey = z.object({ adminKey: z.string().optional() });
@@ -20,7 +23,11 @@ const installmentSchema = optionalAdminKey.extend({
   invoice_id: z.string().uuid(),
   frequency: z.enum(["weekly", "biweekly", "monthly"]),
   installment_amount_cents: z.number().int().positive(),
-  next_payment_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  next_payment_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
 });
 
 const bookingStatusSchema = optionalAdminKey.extend({
@@ -50,7 +57,9 @@ function revalidateFinancialPaths(tenantId: string) {
 export async function startConsultationQuoteDepositPaymentRequestAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; payment_request_id: string; booking_id: string | null } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; payment_request_id: string; booking_id: string | null } | { ok: false; error: string }
+> {
   try {
     const parsed = depositQuoteSchema.parse(body);
     await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);

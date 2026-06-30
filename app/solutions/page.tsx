@@ -7,14 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import type { LucideIcon } from "lucide-react";
-import {
-  Building2,
-  Cpu,
-  Landmark,
-  Network,
-  Stethoscope,
-  TrendingUp,
-} from "lucide-react";
+import { Building2, Cpu, Landmark, Network, Stethoscope, TrendingUp } from "lucide-react";
 
 export const metadata = buildPageMetadata({
   title: "Solutions by Buyer: Clinical, Enterprise & Institutional | Follicle Intelligence",
@@ -37,9 +30,13 @@ function SectionIntro({
   return (
     <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -77,9 +74,18 @@ const BUYER_SEGMENTS: BuyerSegment[] = [
     ],
     ecosystem: [
       { label: "HairAudit", detail: "Primary evidence and scoring entry point for surgical work." },
-      { label: "Follicle Intelligence", detail: "Benchmarks, confidence, and review-ready outputs." },
-      { label: "IIOHR", detail: "Training and standards alignment when improvement is formalized." },
-      { label: "HLI", detail: "Longitudinal biology where your practice integrates treatment pathways." },
+      {
+        label: "Follicle Intelligence",
+        detail: "Benchmarks, confidence, and review-ready outputs.",
+      },
+      {
+        label: "IIOHR",
+        detail: "Training and standards alignment when improvement is formalized.",
+      },
+      {
+        label: "HLI",
+        detail: "Longitudinal biology where your practice integrates treatment pathways.",
+      },
     ],
     ctaLabel: "Clinical workflow conversation",
     ctaHref: "/contact?intent=demo",
@@ -103,7 +109,10 @@ const BUYER_SEGMENTS: BuyerSegment[] = [
     ecosystem: [
       { label: "FI", detail: "Governance, reporting separation, and tenant policy envelope." },
       { label: "HairAudit", detail: "Surgical audit and case-level evidence." },
-      { label: "IIOHR", detail: "Standards and training alignment for staff development and trust." },
+      {
+        label: "IIOHR",
+        detail: "Standards and training alignment for staff development and trust.",
+      },
       { label: "HLI", detail: "Biology and follow-up intelligence for integrated clinics." },
     ],
     ctaLabel: "Clinic and brand scoping",
@@ -151,10 +160,17 @@ const BUYER_SEGMENTS: BuyerSegment[] = [
       "Committees can export defensible packets for oversight without exposing raw operational chaos.",
     ],
     ecosystem: [
-      { label: "IIOHR", detail: "Standards programs, training, and governance alignment—often the institutional anchor." },
+      {
+        label: "IIOHR",
+        detail:
+          "Standards programs, training, and governance alignment—often the institutional anchor.",
+      },
       { label: "FI", detail: "Audit infrastructure, versioning, and review traceability." },
       { label: "HairAudit", detail: "Operational surgical evidence for member practices." },
-      { label: "HLI", detail: "Longitudinal and biological dimensions when standards span surgery and medicine." },
+      {
+        label: "HLI",
+        detail: "Longitudinal and biological dimensions when standards span surgery and medicine.",
+      },
     ],
     ctaLabel: "Institutional alignment",
     ctaHref: "/contact?intent=institution",
@@ -171,14 +187,20 @@ const BUYER_SEGMENTS: BuyerSegment[] = [
     howFiHelps:
       "License FI as infrastructure: APIs, events, and configurable pipelines that embed scoring and benchmarks into your workflows. Partners ship faster with governance primitives (roles, review states, reporting separation) already modeled. HairAudit demonstrates production depth in hair; the same engine pattern extends where your roadmap overlaps procedural evidence. HLI and IIOHR integrations are explicit when your customers run combined programs.",
     outcomes: [
-      "Shorter time-to-value for \"quality and benchmarking\" product lines.",
+      'Shorter time-to-value for "quality and benchmarking" product lines.',
       "Differentiated enterprise features: cohort intelligence, not generic dashboards.",
       "A partner roadmap that compounds as FI's surfaces and rule sets mature.",
     ],
     ecosystem: [
       { label: "FI", detail: "Core APIs, events, tenant controls, and benchmark engine." },
-      { label: "HairAudit", detail: "Reference application and workflow patterns for surgical audit." },
-      { label: "HLI / IIOHR", detail: "Optional pathways when your stack serves biology or standards programs." },
+      {
+        label: "HairAudit",
+        detail: "Reference application and workflow patterns for surgical audit.",
+      },
+      {
+        label: "HLI / IIOHR",
+        detail: "Optional pathways when your stack serves biology or standards programs.",
+      },
     ],
     ctaLabel: "Partner technical scoping",
     ctaHref: "/contact?intent=partnership",
@@ -190,7 +212,7 @@ const BUYER_SEGMENTS: BuyerSegment[] = [
     pains: [
       "Healthcare investors need to see why quality data compounds and why incumbents cannot replicate it overnight.",
       "Strategic acquirers need clarity on integration surface area and expansion discipline.",
-      "Narratives built only on \"AI\" collapse under diligence; workflow and standards depth do not.",
+      'Narratives built only on "AI" collapse under diligence; workflow and standards depth do not.',
     ],
     howFiHelps:
       "FI sits at the intersection of evidence (HairAudit), biology over time (HLI), and professional standards (IIOHR). That multi-surface integration increases switching costs as cohorts deepen and governance workflows embed. Hair remains the live category focus; the modular architecture extends to adjacent procedural categories when evidence patterns justify expansion.",
@@ -201,7 +223,10 @@ const BUYER_SEGMENTS: BuyerSegment[] = [
     ],
     ecosystem: [
       { label: "FI", detail: "Central intelligence, benchmarks, and governance substrate." },
-      { label: "HairAudit + HLI + IIOHR", detail: "Three demand-side surfaces feeding compounding signal." },
+      {
+        label: "HairAudit + HLI + IIOHR",
+        detail: "Three demand-side surfaces feeding compounding signal.",
+      },
     ],
     ctaLabel: "Strategic briefing",
     ctaHref: "/contact?intent=partnership",
@@ -299,8 +324,12 @@ export default function SolutionsPage() {
                       <seg.icon className="h-6 w-6 text-primary/90" aria-hidden />
                     </div>
                     <div>
-                      <h2 className="text-xl font-semibold text-foreground md:text-2xl">{seg.title}</h2>
-                      <p className="mt-2 text-sm font-medium text-primary/90 md:text-base">{seg.hook}</p>
+                      <h2 className="text-xl font-semibold text-foreground md:text-2xl">
+                        {seg.title}
+                      </h2>
+                      <p className="mt-2 text-sm font-medium text-primary/90 md:text-base">
+                        {seg.hook}
+                      </p>
                     </div>
                   </div>
                   <Button asChild variant="outline" size="sm" className="shrink-0 rounded-xl">
@@ -338,7 +367,9 @@ export default function SolutionsPage() {
                 </div>
 
                 <p className="mt-8 text-sm leading-relaxed text-muted-foreground md:text-base">
-                  <span className="font-medium text-foreground">How Follicle Intelligence helps. </span>
+                  <span className="font-medium text-foreground">
+                    How Follicle Intelligence helps.{" "}
+                  </span>
                   {seg.howFiHelps}
                 </p>
 
@@ -375,18 +406,30 @@ export default function SolutionsPage() {
               <thead>
                 <tr className="border-b border-border/60 bg-background/60">
                   <th className="px-4 py-3 font-semibold text-foreground md:px-5">Buyer motion</th>
-                  <th className="px-4 py-3 font-semibold text-foreground md:px-5">Commercial shape</th>
+                  <th className="px-4 py-3 font-semibold text-foreground md:px-5">
+                    Commercial shape
+                  </th>
                   <th className="px-4 py-3 font-semibold text-foreground md:px-5">Integration</th>
-                  <th className="px-4 py-3 font-semibold text-foreground md:px-5">Governance emphasis</th>
+                  <th className="px-4 py-3 font-semibold text-foreground md:px-5">
+                    Governance emphasis
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {DEPLOYMENT_BY_BUYER.map((row) => (
                   <tr key={row.buyer} className="border-b border-border/40 last:border-0">
-                    <td className="px-4 py-4 align-top font-medium text-foreground md:px-5">{row.buyer}</td>
-                    <td className="px-4 py-4 align-top text-muted-foreground md:px-5">{row.commercial}</td>
-                    <td className="px-4 py-4 align-top text-muted-foreground md:px-5">{row.integration}</td>
-                    <td className="px-4 py-4 align-top text-muted-foreground md:px-5">{row.governance}</td>
+                    <td className="px-4 py-4 align-top font-medium text-foreground md:px-5">
+                      {row.buyer}
+                    </td>
+                    <td className="px-4 py-4 align-top text-muted-foreground md:px-5">
+                      {row.commercial}
+                    </td>
+                    <td className="px-4 py-4 align-top text-muted-foreground md:px-5">
+                      {row.integration}
+                    </td>
+                    <td className="px-4 py-4 align-top text-muted-foreground md:px-5">
+                      {row.governance}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -394,11 +437,17 @@ export default function SolutionsPage() {
           </div>
           <p className="mt-6 text-xs text-muted-foreground">
             Exact SKUs, SLAs, and security terms are set in contract. See{" "}
-            <Link className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary" href="/licensing">
+            <Link
+              className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              href="/licensing"
+            >
               licensing
             </Link>{" "}
             and{" "}
-            <Link className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary" href="/integration">
+            <Link
+              className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              href="/integration"
+            >
               integration
             </Link>{" "}
             for technical and commercial primitives.
@@ -431,9 +480,9 @@ export default function SolutionsPage() {
           <div className="fi-panel rounded-[1.75rem] p-8 md:p-10">
             <h2 className="text-xl font-semibold text-foreground md:text-2xl">Next conversation</h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Tell us which row matches your organization—we will route the right demo, security packet, and
-              commercial path. For portfolio and platform deals, expect a joint session across solution design
-              and integration architecture.
+              Tell us which row matches your organization—we will route the right demo, security
+              packet, and commercial path. For portfolio and platform deals, expect a joint session
+              across solution design and integration architecture.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="rounded-xl">

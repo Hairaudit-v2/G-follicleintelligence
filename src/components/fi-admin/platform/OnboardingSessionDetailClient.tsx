@@ -13,7 +13,10 @@ import {
   runAllOnboardingStepsAction,
   runOnboardingStepAction,
 } from "@/lib/actions/fi-onboarding-os-provisioning-actions";
-import { listSandboxSeedPackSummaries, SANDBOX_SEED_PACK_CODES } from "@/src/lib/onboarding-os/sandboxSeedCatalog";
+import {
+  listSandboxSeedPackSummaries,
+  SANDBOX_SEED_PACK_CODES,
+} from "@/src/lib/onboarding-os/sandboxSeedCatalog";
 import {
   canRetryProvisioningStep,
   resolveProvisioningStatusBadge,
@@ -40,7 +43,9 @@ const BADGE_CLASSES: Record<string, string> = {
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
   return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_CLASSES[tone] ?? BADGE_CLASSES.neutral}`}>
+    <span
+      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_CLASSES[tone] ?? BADGE_CLASSES.neutral}`}
+    >
       {label}
     </span>
   );
@@ -152,13 +157,21 @@ export function OnboardingSessionDetailClient({
             <span>{progressPercent}%</span>
           </div>
           <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-            <div className="h-full rounded-full bg-cyan-500 transition-all" style={{ width: `${progressPercent}%` }} />
+            <div
+              className="h-full rounded-full bg-cyan-500 transition-all"
+              style={{ width: `${progressPercent}%` }}
+            />
           </div>
         </div>
 
         {errorMessage ? <p className="mt-3 text-sm text-red-400">{errorMessage}</p> : null}
         {message ? (
-          <p className={message.kind === "ok" ? "mt-3 text-sm text-emerald-400" : "mt-3 text-sm text-red-400"} role="status">
+          <p
+            className={
+              message.kind === "ok" ? "mt-3 text-sm text-emerald-400" : "mt-3 text-sm text-red-400"
+            }
+            role="status"
+          >
             {message.text}
           </p>
         ) : null}
@@ -166,7 +179,10 @@ export function OnboardingSessionDetailClient({
         {tenantId ? (
           <p className="mt-3 text-sm text-slate-400">
             Tenant:{" "}
-            <Link href={`/fi-admin/${tenantId}`} className="font-mono text-cyan-400 hover:text-cyan-300">
+            <Link
+              href={`/fi-admin/${tenantId}`}
+              className="font-mono text-cyan-400 hover:text-cyan-300"
+            >
               {tenantId}
             </Link>
           </p>
@@ -177,7 +193,9 @@ export function OnboardingSessionDetailClient({
             <button
               type="button"
               disabled={pending}
-              onClick={() => runAction("Run all core steps", () => runAllOnboardingStepsAction(sessionId))}
+              onClick={() =>
+                runAction("Run all core steps", () => runAllOnboardingStepsAction(sessionId))
+              }
               className="rounded-lg bg-cyan-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
             >
               Run all core steps
@@ -185,7 +203,11 @@ export function OnboardingSessionDetailClient({
             <button
               type="button"
               disabled={pending}
-              onClick={() => runAction("Mark ready for review", () => markOnboardingReadyForReviewAction(sessionId))}
+              onClick={() =>
+                runAction("Mark ready for review", () =>
+                  markOnboardingReadyForReviewAction(sessionId)
+                )
+              }
               className="rounded-lg border border-amber-500/40 px-3 py-1.5 text-sm font-medium text-amber-300 hover:bg-amber-500/10 disabled:opacity-50"
             >
               Ready for review
@@ -193,7 +215,9 @@ export function OnboardingSessionDetailClient({
             <button
               type="button"
               disabled={pending}
-              onClick={() => runAction("Finalize", () => finalizeOnboardingSessionAction(sessionId))}
+              onClick={() =>
+                runAction("Finalize", () => finalizeOnboardingSessionAction(sessionId))
+              }
               className="rounded-lg border border-emerald-500/40 px-3 py-1.5 text-sm font-medium text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
             >
               Finalize provisioning
@@ -208,12 +232,16 @@ export function OnboardingSessionDetailClient({
             <div>
               <h3 className="text-sm font-semibold text-slate-200">Deployment template</h3>
               <p className="mt-1 text-sm text-slate-300">{deploymentPlan.templateDisplayName}</p>
-              <p className="mt-0.5 font-mono text-xs text-slate-600">{deploymentPlan.templateCode}</p>
+              <p className="mt-0.5 font-mono text-xs text-slate-600">
+                {deploymentPlan.templateCode}
+              </p>
             </div>
             {templateReadiness ? (
               <span
                 className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                  templateReadiness.ready ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+                  templateReadiness.ready
+                    ? "bg-emerald-500/15 text-emerald-300"
+                    : "bg-amber-500/15 text-amber-300"
                 }`}
               >
                 {templateReadiness.score}% {templateReadiness.ready ? "Ready" : "Review"}
@@ -232,21 +260,30 @@ export function OnboardingSessionDetailClient({
           <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <dt className="font-medium text-slate-500">Modules</dt>
-              <dd className="mt-1 text-slate-300">{deploymentPlan.moduleBundle.enabledModules.join(", ")}</dd>
+              <dd className="mt-1 text-slate-300">
+                {deploymentPlan.moduleBundle.enabledModules.join(", ")}
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-slate-500">Roles</dt>
               <dd className="mt-1 text-slate-300">
-                {[deploymentPlan.rolePack.primaryAdminRole, ...deploymentPlan.rolePack.additionalRoles].join(", ")}
+                {[
+                  deploymentPlan.rolePack.primaryAdminRole,
+                  ...deploymentPlan.rolePack.additionalRoles,
+                ].join(", ")}
               </dd>
             </div>
             <div>
               <dt className="font-medium text-slate-500">Services</dt>
-              <dd className="mt-1 text-slate-300">{deploymentPlan.serviceTemplates.map((s) => s.name).join(", ")}</dd>
+              <dd className="mt-1 text-slate-300">
+                {deploymentPlan.serviceTemplates.map((s) => s.name).join(", ")}
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-slate-500">Workflows</dt>
-              <dd className="mt-1 text-slate-300">{deploymentPlan.workflowTemplates.map((w) => w.name).join(", ")}</dd>
+              <dd className="mt-1 text-slate-300">
+                {deploymentPlan.workflowTemplates.map((w) => w.name).join(", ")}
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-slate-500">Academy tracks</dt>
@@ -258,7 +295,9 @@ export function OnboardingSessionDetailClient({
             </div>
             <div>
               <dt className="font-medium text-slate-500">Sandbox seed</dt>
-              <dd className="mt-1 text-slate-300">{deploymentPlan.sandboxSeed.enabled ? "Enabled" : "Disabled"}</dd>
+              <dd className="mt-1 text-slate-300">
+                {deploymentPlan.sandboxSeed.enabled ? "Enabled" : "Disabled"}
+              </dd>
             </div>
           </dl>
         </section>
@@ -270,7 +309,8 @@ export function OnboardingSessionDetailClient({
             <div>
               <h3 className="text-sm font-semibold text-slate-200">Sandbox demo data</h3>
               <p className="mt-1 text-xs text-slate-500">
-                Preview and apply obviously fake training data. Blocked after go-live (session finalized).
+                Preview and apply obviously fake training data. Blocked after go-live (session
+                finalized).
               </p>
             </div>
             {preview ? (
@@ -321,14 +361,17 @@ export function OnboardingSessionDetailClient({
               </div>
             ) : (
               <p className="text-xs text-amber-400">
-                {!tenantId ? "Provision tenant core before applying seed." : "Session is closed — seed apply disabled."}
+                {!tenantId
+                  ? "Provision tenant core before applying seed."
+                  : "Session is closed — seed apply disabled."}
               </p>
             )}
           </div>
 
           {preview?.alreadyApplied && !forceApply ? (
             <p className="mt-3 text-xs text-amber-400">
-              This pack was already applied for this session. Enable force re-apply to insert again (idempotent keys skip duplicates).
+              This pack was already applied for this session. Enable force re-apply to insert again
+              (idempotent keys skip duplicates).
             </p>
           ) : null}
 
@@ -360,7 +403,10 @@ export function OnboardingSessionDetailClient({
               <h4 className="text-xs font-semibold text-slate-400">Seed history</h4>
               <ul className="mt-2 space-y-2">
                 {history.map((entry, idx) => (
-                  <li key={`${entry.packCode}-${entry.appliedAt}-${idx}`} className="rounded-lg bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                  <li
+                    key={`${entry.packCode}-${entry.appliedAt}-${idx}`}
+                    className="rounded-lg bg-white/[0.03] px-3 py-2 text-xs text-slate-400"
+                  >
                     <span className="font-medium text-slate-300">{entry.packCode}</span>
                     <span className="mx-2">·</span>
                     <span>{new Date(entry.appliedAt).toLocaleString()}</span>
@@ -386,8 +432,12 @@ export function OnboardingSessionDetailClient({
               key={step.id}
               step={step}
               disabled={pending || isClosed}
-              onRun={(stepCode) => runAction(`Run ${stepCode}`, () => runOnboardingStepAction(sessionId, stepCode))}
-              onRetry={(stepCode) => runAction(`Retry ${stepCode}`, () => retryOnboardingStepAction(sessionId, stepCode))}
+              onRun={(stepCode) =>
+                runAction(`Run ${stepCode}`, () => runOnboardingStepAction(sessionId, stepCode))
+              }
+              onRetry={(stepCode) =>
+                runAction(`Retry ${stepCode}`, () => retryOnboardingStepAction(sessionId, stepCode))
+              }
             />
           ))}
         </ul>
@@ -424,7 +474,9 @@ function StepRow({
           <StatusBadge label={badge.label} tone={badge.tone} />
         </div>
         <p className="mt-0.5 font-mono text-xs text-slate-600">{step.step_code}</p>
-        {step.error_message ? <p className="mt-1 text-xs text-red-400">{step.error_message}</p> : null}
+        {step.error_message ? (
+          <p className="mt-1 text-xs text-red-400">{step.error_message}</p>
+        ) : null}
       </div>
       <div className="flex shrink-0 gap-2">
         {canRun ? (

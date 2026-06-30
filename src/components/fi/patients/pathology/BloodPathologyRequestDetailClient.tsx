@@ -19,8 +19,16 @@ export function BloodPathologyRequestDetailClient({
   audit: { id: string; occurred_at: string; activity_kind: string; title: string | null }[];
 }) {
   const router = useRouter();
-  const { request, items, patientName, dateOfBirth, patientEmail, patientPhone, doctorDisplayName, templateLabel } =
-    bundle;
+  const {
+    request,
+    items,
+    patientName,
+    dateOfBirth,
+    patientEmail,
+    patientPhone,
+    doctorDisplayName,
+    templateLabel,
+  } = bundle;
   const [notes, setNotes] = useState(request.clinical_notes ?? "");
   const [notesSaving, setNotesSaving] = useState(false);
   const [notesMsg, setNotesMsg] = useState<string | null>(null);
@@ -100,7 +108,11 @@ export function BloodPathologyRequestDetailClient({
     setErr(null);
     setBusy("cancel");
     try {
-      const res = await fetch(`${base}/cancel`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const res = await fetch(`${base}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
       const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       if (!res.ok || json.ok !== true) {
         setErr(json.error ?? `Cancel failed (${res.status}).`);
@@ -152,11 +164,16 @@ export function BloodPathologyRequestDetailClient({
         </div>
       </div>
 
-      {err ? <p className="rounded border border-rose-500/20 bg-rose-500/10 p-2 text-sm text-rose-300">{err}</p> : null}
+      {err ? (
+        <p className="rounded border border-rose-500/20 bg-rose-500/10 p-2 text-sm text-rose-300">
+          {err}
+        </p>
+      ) : null}
 
       {!cancelled && !patientEmail ? (
         <p className="rounded border border-amber-400/20 bg-amber-400/10 p-2 text-sm text-amber-200">
-          No email is stored on the linked person record — add one to enable emailing this PDF to the patient.
+          No email is stored on the linked person record — add one to enable emailing this PDF to
+          the patient.
         </p>
       ) : null}
 
@@ -191,17 +208,23 @@ export function BloodPathologyRequestDetailClient({
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Emailed to patient</dt>
               <dd className="text-right text-xs text-slate-100">
-                {request.emailed_to_patient_at ? request.emailed_to_patient_at.slice(0, 19).replace("T", " ") : "—"}
+                {request.emailed_to_patient_at
+                  ? request.emailed_to_patient_at.slice(0, 19).replace("T", " ")
+                  : "—"}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Stored PDF</dt>
-              <dd className="text-right text-xs text-slate-300">{request.pdf_storage_path ? "Yes (private bucket)" : "—"}</dd>
+              <dd className="text-right text-xs text-slate-300">
+                {request.pdf_storage_path ? "Yes (private bucket)" : "—"}
+              </dd>
             </div>
             {request.cancelled_at ? (
               <div className="flex justify-between gap-2">
                 <dt className="text-gray-500">Cancelled at</dt>
-                <dd className="text-right text-xs text-slate-100">{request.cancelled_at.slice(0, 19).replace("T", " ")}</dd>
+                <dd className="text-right text-xs text-slate-100">
+                  {request.cancelled_at.slice(0, 19).replace("T", " ")}
+                </dd>
               </div>
             ) : null}
           </dl>
@@ -209,7 +232,9 @@ export function BloodPathologyRequestDetailClient({
 
         <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
           <h2 className="text-sm font-semibold text-slate-100">Clinical notes / indication</h2>
-          <p className="mt-1 text-xs text-slate-400">Shown on the PDF. {cancelled ? "Read-only (cancelled)." : null}</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Shown on the PDF. {cancelled ? "Read-only (cancelled)." : null}
+          </p>
           <textarea
             className="mt-2 w-full rounded border border-slate-700 px-2 py-2 text-sm"
             rows={6}
@@ -238,7 +263,8 @@ export function BloodPathologyRequestDetailClient({
         <section className="rounded border border-blue-100 bg-blue-500/10 p-4">
           <h2 className="text-sm font-semibold text-slate-100">Email to patient</h2>
           <p className="mt-1 text-xs text-slate-400">
-            Sends a short message with the PDF attached. Requires Resend (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`).
+            Sends a short message with the PDF attached. Requires Resend (`RESEND_API_KEY`,
+            `RESEND_FROM_EMAIL`).
           </p>
           <textarea
             className="mt-2 w-full rounded border border-slate-700 px-2 py-2 text-sm"
@@ -263,7 +289,9 @@ export function BloodPathologyRequestDetailClient({
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-slate-100">
           {items.map((it) => (
             <li key={it.id}>
-              {it.test_code ? <span className="font-mono text-xs text-slate-400">{it.test_code}</span> : null}
+              {it.test_code ? (
+                <span className="font-mono text-xs text-slate-400">{it.test_code}</span>
+              ) : null}
               {it.test_code ? " · " : null}
               {it.test_label}
             </li>
@@ -273,7 +301,9 @@ export function BloodPathologyRequestDetailClient({
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-slate-100">Audit trail (this request)</h2>
-        <p className="mt-1 text-xs text-slate-400">CRM activity rows scoped to this pathology request id.</p>
+        <p className="mt-1 text-xs text-slate-400">
+          CRM activity rows scoped to this pathology request id.
+        </p>
         {audit.length === 0 ? (
           <p className="mt-2 text-sm text-slate-400">No matching events.</p>
         ) : (
@@ -281,7 +311,9 @@ export function BloodPathologyRequestDetailClient({
             {audit.map((a) => (
               <li key={a.id} className="py-2 text-sm">
                 <div className="flex flex-wrap justify-between gap-2">
-                  <span className="font-medium text-slate-100">{a.title?.trim() || a.activity_kind}</span>
+                  <span className="font-medium text-slate-100">
+                    {a.title?.trim() || a.activity_kind}
+                  </span>
                   <time className="text-xs text-gray-500" dateTime={a.occurred_at}>
                     {a.occurred_at.slice(0, 19).replace("T", " ")}
                   </time>
@@ -294,7 +326,10 @@ export function BloodPathologyRequestDetailClient({
       </section>
 
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}`}
+          className="text-blue-300 hover:underline"
+        >
           ← Back to patient profile
         </Link>
       </p>

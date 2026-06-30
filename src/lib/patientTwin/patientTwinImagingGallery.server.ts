@@ -3,7 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createPatientImageSignedUrls, mapRow } from "@/src/lib/patientImages/patientImagesServer";
-import type { PatientTwinImagingGallerySection, PatientTwinImagingGalleryUiSection } from "@/src/lib/patientTwin/patientTwinTypes";
+import type {
+  PatientTwinImagingGallerySection,
+  PatientTwinImagingGalleryUiSection,
+} from "@/src/lib/patientTwin/patientTwinTypes";
 import {
   buildPatientJourneyGallery,
   buildTwinImagingUiSections,
@@ -94,11 +97,17 @@ export async function loadPatientTwinImagingGallerySection(
     return emptyGallerySection();
   }
 
-  const caseIds = Array.from(new Set(mapped.map((m) => m.case_id).filter((x): x is string => Boolean(x))));
+  const caseIds = Array.from(
+    new Set(mapped.map((m) => m.case_id).filter((x): x is string => Boolean(x)))
+  );
   const procByCase = await loadProcedureYmdByCaseId(supabase, tid, caseIds);
 
   const signedMap = await createPatientImageSignedUrls(
-    mapped.map((m) => ({ id: m.id, storage_bucket: m.storage_bucket, storage_path: m.storage_path })),
+    mapped.map((m) => ({
+      id: m.id,
+      storage_bucket: m.storage_bucket,
+      storage_path: m.storage_path,
+    })),
     supabase
   );
 
@@ -134,17 +143,17 @@ export async function loadPatientTwinImagingGallerySection(
   const journeyInputs: PatientJourneyGalleryImageInput[] = mapped
     .filter((img) => signedIds.has(img.id))
     .map((img) => ({
-    id: img.id,
-    taken_at: img.taken_at,
-    created_at: img.created_at,
-    case_id: img.case_id,
-    procedure_date_ymd: img.case_id ? procByCase.get(img.case_id) ?? null : null,
-    ai_image_category: img.ai_image_category ?? null,
-    ai_image_category_confidence: img.ai_image_category_confidence ?? null,
-    ai_surgery_stage: img.ai_surgery_stage ?? null,
-    ai_image_review_status: img.ai_image_review_status,
-    ai_image_classified_at: img.ai_image_classified_at ?? null,
-  }));
+      id: img.id,
+      taken_at: img.taken_at,
+      created_at: img.created_at,
+      case_id: img.case_id,
+      procedure_date_ymd: img.case_id ? (procByCase.get(img.case_id) ?? null) : null,
+      ai_image_category: img.ai_image_category ?? null,
+      ai_image_category_confidence: img.ai_image_category_confidence ?? null,
+      ai_surgery_stage: img.ai_surgery_stage ?? null,
+      ai_image_review_status: img.ai_image_review_status,
+      ai_image_classified_at: img.ai_image_classified_at ?? null,
+    }));
 
   const journey = buildPatientJourneyGallery(journeyInputs);
   const uiMeta = buildTwinImagingUiSections(journey);

@@ -5,7 +5,10 @@ import type { CSSProperties } from "react";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { OperationalCalendarBookingDisplay, OperationalCalendarResourceColumn } from "@/src/lib/calendar/operationalCalendarTypes";
+import type {
+  OperationalCalendarBookingDisplay,
+  OperationalCalendarResourceColumn,
+} from "@/src/lib/calendar/operationalCalendarTypes";
 import {
   businessGridBodyHeightPx,
   layoutBookingInBusinessDayUtc,
@@ -82,7 +85,8 @@ function SlotDropLayer({
           onDrop={(e) => {
             if (disabled) return;
             e.preventDefault();
-            const raw = e.dataTransfer.getData("text/fi-booking") || e.dataTransfer.getData("text/plain");
+            const raw =
+              e.dataTransfer.getData("text/fi-booking") || e.dataTransfer.getData("text/plain");
             if (!raw?.trim()) return;
             let id: string;
             let durMs: number;
@@ -127,7 +131,11 @@ export function CalendarWeekView({
   canMutateBookings: boolean;
   bookings: FiBookingRow[];
   onSelectBooking: (b: FiBookingRow) => void;
-  onRescheduleBooking: (booking: FiBookingRow, startIso: string, endIso: string) => Promise<{ ok: boolean; error?: string }>;
+  onRescheduleBooking: (
+    booking: FiBookingRow,
+    startIso: string,
+    endIso: string
+  ) => Promise<{ ok: boolean; error?: string }>;
 }) {
   const bodyH = businessGridBodyHeightPx(gridConfig);
 
@@ -146,10 +154,19 @@ export function CalendarWeekView({
         <div className="flex min-w-[720px] flex-1">
           {resourceColumns.map((col) => {
             const colBookings = (buckets[dayKey] ?? []).filter(
-              (b) => resolveDisplayResourceColumnId(b, resourceColumns.map((c) => c.id)) === col.id
+              (b) =>
+                resolveDisplayResourceColumnId(
+                  b,
+                  resourceColumns.map((c) => c.id)
+                ) === col.id
             );
             return (
-              <CalendarResourceColumn key={col.id} label={col.label} subtitle={col.subtitle} bodyMinHeightPx={bodyH}>
+              <CalendarResourceColumn
+                key={col.id}
+                label={col.label}
+                subtitle={col.subtitle}
+                bodyMinHeightPx={bodyH}
+              >
                 <SlotDropLayer
                   dayKey={dayKey}
                   gridConfig={gridConfig}
@@ -179,7 +196,9 @@ export function CalendarWeekView({
                           const startMs = Date.parse(b.start_at);
                           const endMs = Date.parse(b.end_at);
                           const durMs =
-                            Number.isFinite(startMs) && Number.isFinite(endMs) ? Math.max(60_000, endMs - startMs) : 30 * 60_000;
+                            Number.isFinite(startMs) && Number.isFinite(endMs)
+                              ? Math.max(60_000, endMs - startMs)
+                              : 30 * 60_000;
                           const payload = JSON.stringify({ id: b.id, durMs });
                           e.dataTransfer.setData("text/fi-booking", payload);
                           e.dataTransfer.setData("text/plain", payload);
@@ -239,7 +258,9 @@ export function CalendarWeekView({
                         const startMs = Date.parse(b.start_at);
                         const endMs = Date.parse(b.end_at);
                         const durMs =
-                          Number.isFinite(startMs) && Number.isFinite(endMs) ? Math.max(60_000, endMs - startMs) : 30 * 60_000;
+                          Number.isFinite(startMs) && Number.isFinite(endMs)
+                            ? Math.max(60_000, endMs - startMs)
+                            : 30 * 60_000;
                         const payload = JSON.stringify({ id: b.id, durMs });
                         e.dataTransfer.setData("text/fi-booking", payload);
                         e.dataTransfer.setData("text/plain", payload);

@@ -12,7 +12,10 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-function mergeBookingsForAvailability(operatorRows: FiBookingRow[], calendarRows: FiBookingRow[] | null): FiBookingRow[] {
+function mergeBookingsForAvailability(
+  operatorRows: FiBookingRow[],
+  calendarRows: FiBookingRow[] | null
+): FiBookingRow[] {
   const byId = new Map<string, FiBookingRow>();
   for (const b of operatorRows) byId.set(b.id, b);
   for (const b of calendarRows ?? []) byId.set(b.id, b);
@@ -30,7 +33,10 @@ export default async function AppointmentsOperatorRoutePage({
   const session = await getClinicFloorPageSession(tenantId);
   const sp = (await searchParams) ?? {};
   const data = await loadAppointmentsPageData(tenantId, sp);
-  const existingBookings = mergeBookingsForAvailability(data.operator.bookings, data.calendar?.bookings ?? null);
+  const existingBookings = mergeBookingsForAvailability(
+    data.operator.bookings,
+    data.calendar?.bookings ?? null
+  );
 
   return (
     <AppointmentSlideOverProvider
@@ -44,7 +50,11 @@ export default async function AppointmentsOperatorRoutePage({
       calendarTimezone={data.operator.calendarTimezone}
       services={data.services}
     >
-      <Suspense fallback={<div className="mx-auto max-w-7xl animate-pulse space-y-4 py-6" aria-busy="true" />}>
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl animate-pulse space-y-4 py-6" aria-busy="true" />
+        }
+      >
         <AppointmentsPage data={data} />
       </Suspense>
     </AppointmentSlideOverProvider>

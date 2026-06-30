@@ -27,7 +27,12 @@ type UseSurgeryOsRefreshOptions = {
  * SurgeryOS live refresh — SSR seeds initial payload; client polls tenant JSON API every 30s.
  */
 export function useSurgeryOsRefresh(opts: UseSurgeryOsRefreshOptions): SurgeryOsRefreshState {
-  const { tenantId, initialData, intervalMs = SURGERY_OS_DEFAULT_REFRESH_MS, enabled = true } = opts;
+  const {
+    tenantId,
+    initialData,
+    intervalMs = SURGERY_OS_DEFAULT_REFRESH_MS,
+    enabled = true,
+  } = opts;
   const [data, setData] = useState(initialData);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);

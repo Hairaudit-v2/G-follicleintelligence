@@ -1,5 +1,10 @@
 import { PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE } from "./protocolSessionRules";
-import type { HliPhotoProtocolSession, HliPhotoProtocolSessionSlot, HliPhotoProtocolSlot, HliPhotoProtocolSourceSystem } from "./types";
+import type {
+  HliPhotoProtocolSession,
+  HliPhotoProtocolSessionSlot,
+  HliPhotoProtocolSlot,
+  HliPhotoProtocolSourceSystem,
+} from "./types";
 import {
   clinicalContextFromSession,
   isRequiredSessionSlotMissing,
@@ -50,7 +55,9 @@ function severityForHoursOpen(hours: number): PhotoProtocolAlertSeverity {
 /**
  * Deterministic computed alerts (no persistence). One session may yield multiple alert rows.
  */
-export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): PhotoProtocolAlert[] {
+export function buildPhotoProtocolAlerts(
+  input: BuildPhotoProtocolAlertsInput
+): PhotoProtocolAlert[] {
   const now = input.now ?? new Date();
   const detected_at = now.toISOString();
   const slotsBySession = new Map<string, HliPhotoProtocolSessionSlot[]>();
@@ -93,7 +100,8 @@ export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): 
         type: "missing_required_images",
         severity: session.status === "complete" ? "medium" : "high",
         message: "One or more required protocol images are still missing or not accepted.",
-        recommended_action: "Open Patient Twin → Smart Photography Protocol and capture or accept each required view.",
+        recommended_action:
+          "Open Patient Twin → Smart Photography Protocol and capture or accept each required view.",
       });
     }
 
@@ -103,7 +111,8 @@ export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): 
         type: "needs_retake",
         severity: "high",
         message: "Staff marked at least one required view as needs retake.",
-        recommended_action: "Re-shoot the flagged angles and link the new images to the protocol checklist.",
+        recommended_action:
+          "Re-shoot the flagged angles and link the new images to the protocol checklist.",
       });
     }
 
@@ -113,11 +122,15 @@ export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): 
         type: "low_confidence_capture",
         severity: "medium",
         message: `At least one required slot is captured with AI match confidence below ${PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE}.`,
-        recommended_action: "Review the matched image in Patient Twin and accept or retake before completing the session.",
+        recommended_action:
+          "Review the matched image in Patient Twin and accept or retake before completing the session.",
       });
     }
 
-    const open = session.status === "draft" || session.status === "in_progress" || session.status === "incomplete";
+    const open =
+      session.status === "draft" ||
+      session.status === "in_progress" ||
+      session.status === "incomplete";
     if (open && session.started_at) {
       const started = Date.parse(session.started_at);
       if (Number.isFinite(started) && now.getTime() - started >= MS_24H) {
@@ -127,7 +140,8 @@ export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): 
           type: "protocol_incomplete_over_24h",
           severity: severityForHoursOpen(hours),
           message: "Protocol session has been open for more than 24 hours without completion.",
-          recommended_action: "Close out captures, accept strong matches, or cancel the session if abandoned.",
+          recommended_action:
+            "Close out captures, accept strong matches, or cancel the session if abandoned.",
         });
       }
     }
@@ -138,7 +152,8 @@ export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): 
         type: "hairaudit_not_ready",
         severity: anyMissing ? "high" : "medium",
         message: "HairAudit-linked protocol session is not marked complete.",
-        recommended_action: "Finish required HairAudit photography in the source workflow or complete the FI checklist.",
+        recommended_action:
+          "Finish required HairAudit photography in the source workflow or complete the FI checklist.",
       });
     }
 
@@ -148,7 +163,8 @@ export function buildPhotoProtocolAlerts(input: BuildPhotoProtocolAlertsInput): 
         type: "follow_up_missing_images",
         severity: "medium",
         message: "Follow-up clinical context protocol still has missing required images.",
-        recommended_action: "Schedule recapture for follow-up documentation before closing the visit.",
+        recommended_action:
+          "Schedule recapture for follow-up documentation before closing the visit.",
       });
     }
   }

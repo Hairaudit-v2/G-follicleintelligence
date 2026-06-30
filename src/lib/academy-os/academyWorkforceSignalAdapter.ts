@@ -1,4 +1,7 @@
-import type { AcademyReadinessBand, FiStaffCompetencyProjectionRow } from "./academyCompetencyTypes";
+import type {
+  AcademyReadinessBand,
+  FiStaffCompetencyProjectionRow,
+} from "./academyCompetencyTypes";
 
 export type AcademyCompetencyRisk = "low" | "medium" | "high" | "critical";
 

@@ -23,7 +23,9 @@ async function loadClinicDisplayName(tenantId: string): Promise<string | null> {
 /**
  * Resolves whether the current Supabase user can access the patient portal for a tenant.
  */
-export async function resolvePatientPortalAccess(tenantId: string): Promise<PatientPortalAccessState> {
+export async function resolvePatientPortalAccess(
+  tenantId: string
+): Promise<PatientPortalAccessState> {
   const tid = tenantId.trim();
   const clinicName = await loadClinicDisplayName(tid);
   const authId = await resolveAuthUserId(null);
@@ -53,7 +55,9 @@ export async function resolvePatientPortalAccess(tenantId: string): Promise<Pati
 /**
  * Resolves the foundation patient row for the current Supabase user when `fi_patients.portal_auth_user_id` is set.
  */
-export async function loadPatientPortalPatientRow(tenantId: string): Promise<{ patientId: string } | null> {
+export async function loadPatientPortalPatientRow(
+  tenantId: string
+): Promise<{ patientId: string } | null> {
   const access = await resolvePatientPortalAccess(tenantId);
   if (access.status !== "linked") return null;
   return { patientId: access.patientId };

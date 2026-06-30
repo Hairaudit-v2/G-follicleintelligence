@@ -23,7 +23,10 @@ export function AppointmentDetailBreadcrumbs({
           /
         </li>
         <li>
-          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/appointments`}
+            className="text-blue-300 hover:underline"
+          >
             Appointments
           </Link>
         </li>

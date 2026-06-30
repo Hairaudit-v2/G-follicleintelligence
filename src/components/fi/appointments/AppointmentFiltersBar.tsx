@@ -1,13 +1,19 @@
 "use client";
 
 import { buildAppointmentsHref } from "@/src/lib/bookings/appointmentsQuery";
-import type { AppointmentsTab, ParsedAppointmentsQuery } from "@/src/lib/bookings/appointmentsQuery";
+import type {
+  AppointmentsTab,
+  ParsedAppointmentsQuery,
+} from "@/src/lib/bookings/appointmentsQuery";
 import {
   allBookingStatusOptions,
   allBookingTypeOptions,
 } from "@/src/lib/bookings/operatorBookingLabels";
 import { toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
-import { formatClinicalPickerOptionLabel, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import {
+  formatClinicalPickerOptionLabel,
+  type ClinicalStaffPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 
 export function AppointmentFiltersBar({
@@ -29,7 +35,11 @@ export function AppointmentFiltersBar({
   const action = buildAppointmentsHref(tenantId, { tab });
 
   return (
-    <form method="get" action={action} className="space-y-3 rounded border border-white/[0.08] bg-white/[0.03] p-4">
+    <form
+      method="get"
+      action={action}
+      className="space-y-3 rounded border border-white/[0.08] bg-white/[0.03] p-4"
+    >
       <input type="hidden" name="tab" value={tab} />
       {tab === "calendar" ? (
         <>
@@ -130,7 +140,10 @@ export function AppointmentFiltersBar({
           Include cancelled
         </label>
       </div>
-      <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-800">
+      <button
+        type="submit"
+        className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-800"
+      >
         Apply filters
       </button>
     </form>

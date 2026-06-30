@@ -43,7 +43,9 @@ describe("postopMedicationBundles", () => {
   });
 
   it("does not embed specific controlled-drug names in template text", () => {
-    const blob = collectPostopBundleTemplateText([...DEFAULT_SURGERY_POSTOP_MEDICATION_BUNDLE_V1]).join("\n");
+    const blob = collectPostopBundleTemplateText([
+      ...DEFAULT_SURGERY_POSTOP_MEDICATION_BUNDLE_V1,
+    ]).join("\n");
     assert.match(blob, /analgesia|pain/i);
     assert.doesNotMatch(blob, FORBIDDEN_ANALGESIC_NAMES);
   });

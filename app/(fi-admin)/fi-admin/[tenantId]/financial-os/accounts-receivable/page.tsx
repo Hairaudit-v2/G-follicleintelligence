@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FinancialOsAccountsReceivableWorkQueue } from "@/src/components/fi-admin/financial-os/FinancialOsAccountsReceivableWorkQueue";
-import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  FinancialOsSubPageHeader,
+  financialOsClasses,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadAccountsReceivableWorkQueue } from "@/src/lib/financialOs/financialAccountsReceivable.server";
@@ -53,7 +56,11 @@ export default async function FinancialOsAccountsReceivablePage({
   ]);
 
   const supabase = supabaseAdmin();
-  const { data: clinicsRaw } = await supabase.from("fi_clinics").select("id, name").eq("tenant_id", tid).order("name");
+  const { data: clinicsRaw } = await supabase
+    .from("fi_clinics")
+    .select("id, name")
+    .eq("tenant_id", tid)
+    .order("name");
   const clinicOptions = (clinicsRaw ?? []).map((c) => {
     const raw = c as { id: string; name?: string | null };
     return { value: raw.id, label: raw.name?.trim() || raw.id.slice(0, 8) };
@@ -66,12 +73,20 @@ export default async function FinancialOsAccountsReceivablePage({
         title="Accounts receivable work queue"
         description={
           <>
-            Prioritise and recover outstanding revenue. Reminders are draft-only in Phase 4 — no live SMS or email is sent (
-            <code className={financialOsClasses.code}>fi_accounts_receivable_events</code> append-only ledger).
+            Prioritise and recover outstanding revenue. Reminders are draft-only in Phase 4 — no
+            live SMS or email is sent (
+            <code className={financialOsClasses.code}>fi_accounts_receivable_events</code>{" "}
+            append-only ledger).
           </>
         }
       />
-      <FinancialOsAccountsReceivableWorkQueue tenantId={tid} rows={rows} users={users} clinicOptions={clinicOptions} canMutate={canMutate} />
+      <FinancialOsAccountsReceivableWorkQueue
+        tenantId={tid}
+        rows={rows}
+        users={users}
+        clinicOptions={clinicOptions}
+        canMutate={canMutate}
+      />
     </div>
   );
 }

@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import {
   cancelBookingAction,
   completeBookingAction,
@@ -19,7 +28,11 @@ import {
   crmCreateTaskAction,
   createCrmLeadNoteAction,
 } from "@/lib/actions/fi-crm-actions";
-import { defaultRangeIso, fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import {
+  defaultRangeIso,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/src/components/fi/bookings/bookingFormUtils";
 import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
 import {
   LeadActivityFeed,
@@ -77,7 +90,8 @@ const AppointmentSlideOverContext = createContext<SlideOverCtx | null>(null);
 
 export function useAppointmentSlideOver(): SlideOverCtx {
   const v = useContext(AppointmentSlideOverContext);
-  if (!v) throw new Error("useAppointmentSlideOver must be used within AppointmentSlideOverProvider");
+  if (!v)
+    throw new Error("useAppointmentSlideOver must be used within AppointmentSlideOverProvider");
   return v;
 }
 
@@ -151,8 +165,10 @@ export function AppointmentSlideOverProvider({
         patientId: prefill?.patientId !== undefined ? prefill.patientId : base.patientId,
         caseId: prefill?.caseId !== undefined ? prefill.caseId : base.caseId,
         description: prefill?.description !== undefined ? prefill.description : base.description,
-        consultationId: prefill?.consultationId !== undefined ? prefill.consultationId : base.consultationId,
-        initialMetadata: prefill?.initialMetadata !== undefined ? prefill.initialMetadata : base.initialMetadata,
+        consultationId:
+          prefill?.consultationId !== undefined ? prefill.consultationId : base.consultationId,
+        initialMetadata:
+          prefill?.initialMetadata !== undefined ? prefill.initialMetadata : base.initialMetadata,
       });
     },
     [calendarTimezone]
@@ -175,7 +191,17 @@ export function AppointmentSlideOverProvider({
       openCreateAppointment,
       close,
     }),
-    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, appointmentId, createPrefill, openAppointment, openCreateAppointment, close]
+    [
+      tenantId,
+      operatorFiUserId,
+      userRole,
+      canUseClinicFeatures,
+      appointmentId,
+      createPrefill,
+      openAppointment,
+      openCreateAppointment,
+      close,
+    ]
   );
 
   const shellOpen = appointmentId != null || createPrefill != null;
@@ -258,7 +284,11 @@ function AppointmentSlideOverShell({
           <h2 className="truncate text-sm font-semibold text-slate-100">
             {createPrefill ? "New appointment" : "Appointment preview"}
           </h2>
-          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+          <button
+            type="button"
+            className="shrink-0 text-sm text-slate-400 hover:text-slate-100"
+            onClick={onClose}
+          >
             Close
           </button>
         </div>
@@ -306,7 +336,10 @@ function syncProcedureForm(payload: AppointmentSlideOverPayload) {
   };
 }
 
-function syncScheduleForm(booking: AppointmentSlideOverPayload["booking"], calendarTimezone: string) {
+function syncScheduleForm(
+  booking: AppointmentSlideOverPayload["booking"],
+  calendarTimezone: string
+) {
   return {
     startLocal: toDatetimeLocalValue(booking.start_at, calendarTimezone),
     endLocal: toDatetimeLocalValue(booking.end_at, calendarTimezone),
@@ -378,7 +411,8 @@ export function AppointmentSlideOverPanel({
   const [leadNoteBody, setLeadNoteBody] = useState("");
   const [leadNoteBusy, setLeadNoteBusy] = useState(false);
   const [leadNoteErr, setLeadNoteErr] = useState<string | null>(null);
-  const [completionLeadOpts, setCompletionLeadOpts] = useState<AppointmentCompletionLeadOpts | null>(null);
+  const [completionLeadOpts, setCompletionLeadOpts] =
+    useState<AppointmentCompletionLeadOpts | null>(null);
   const [crmCompleteErr, setCrmCompleteErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -468,7 +502,13 @@ export function AppointmentSlideOverPanel({
 
   async function onRescheduleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!booking || !payload || !canMutate || isBookingCancelled(booking) || booking.booking_status === "completed")
+    if (
+      !booking ||
+      !payload ||
+      !canMutate ||
+      isBookingCancelled(booking) ||
+      booking.booking_status === "completed"
+    )
       return;
     const tz = payload.calendarTimezone;
     const startIso = fromDatetimeLocalValue(startLocal, tz);
@@ -520,7 +560,9 @@ export function AppointmentSlideOverPanel({
         return;
       }
       setPayload((p) =>
-        p ? { ...p, booking: r.booking, statusHistory: buildAppointmentStatusHistory(r.booking) } : p
+        p
+          ? { ...p, booking: r.booking, statusHistory: buildAppointmentStatusHistory(r.booking) }
+          : p
       );
       await refreshPayload();
       router.refresh();
@@ -588,7 +630,11 @@ export function AppointmentSlideOverPanel({
     setActionErr(null);
     setCrmCompleteErr(null);
     const snap = booking;
-    patchBookingOptimistic({ ...booking, booking_status: "completed", updated_at: new Date().toISOString() });
+    patchBookingOptimistic({
+      ...booking,
+      booking_status: "completed",
+      updated_at: new Date().toISOString(),
+    });
     setActionBusy(true);
     try {
       const r = await completeBookingAction(tenantId, booking.id, {});
@@ -629,7 +675,9 @@ export function AppointmentSlideOverPanel({
     });
     setActionBusy(true);
     try {
-      const r = await cancelBookingAction(tenantId, booking.id, { cancellationReason: reason.trim() || null });
+      const r = await cancelBookingAction(tenantId, booking.id, {
+        cancellationReason: reason.trim() || null,
+      });
       if (!r.ok) {
         patchBookingOptimistic(snap);
         setActionErr(r.error);
@@ -748,7 +796,9 @@ export function AppointmentSlideOverPanel({
         return;
       }
       setTaskTitle("");
-      setPayload((p) => (p ? { ...p, timeline: { ...p.timeline, tasks: [r.task, ...p.timeline.tasks] } } : p));
+      setPayload((p) =>
+        p ? { ...p, timeline: { ...p.timeline, tasks: [r.task, ...p.timeline.tasks] } } : p
+      );
       router.refresh();
     } finally {
       setTaskBusy(false);
@@ -769,7 +819,9 @@ export function AppointmentSlideOverPanel({
         return;
       }
       setNoteBody("");
-      setPayload((p) => (p ? { ...p, timeline: { ...p.timeline, notes: [r.note, ...p.timeline.notes] } } : p));
+      setPayload((p) =>
+        p ? { ...p, timeline: { ...p.timeline, notes: [r.note, ...p.timeline.notes] } } : p
+      );
       router.refresh();
     } finally {
       setNoteBusy(false);
@@ -807,7 +859,9 @@ export function AppointmentSlideOverPanel({
     if (!leadId || !canMutate) return;
     const snap = payload?.timeline.tasks ?? [];
     const optimistic = snap.map((t) =>
-      t.id === taskId ? { ...t, status: "done" as const, completed_at: new Date().toISOString() } : t
+      t.id === taskId
+        ? { ...t, status: "done" as const, completed_at: new Date().toISOString() }
+        : t
     );
     setPayload((p) => (p ? { ...p, timeline: { ...p.timeline, tasks: optimistic } } : p));
     const r = await completeCrmTaskAction(tenantId, leadId, taskId, {});
@@ -839,7 +893,11 @@ export function AppointmentSlideOverPanel({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="min-w-0">
             {booking ? (
-              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
+              <Link
+                href={href}
+                className="text-xs text-blue-300 hover:underline"
+                onClick={() => onClose()}
+              >
                 Open full page →
               </Link>
             ) : null}
@@ -848,180 +906,194 @@ export function AppointmentSlideOverPanel({
       ) : null}
       {loading ? <p className="text-slate-400">Loading…</p> : null}
       {loadError ? (
-        <div className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300" role="alert">
+        <div
+          className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300"
+          role="alert"
+        >
           {loadError}
         </div>
       ) : null}
 
       {!loading && booking && payload ? (
         <div className="space-y-4">
-              <AppointmentHeader
-                tenantId={tenantId}
-                booking={booking}
-                lead={lead}
-                personName={payload.leadAnchor?.personName ?? null}
-                clinicalScalesSummary={payload.clinicalScalesSummary}
+          <AppointmentHeader
+            tenantId={tenantId}
+            booking={booking}
+            lead={lead}
+            personName={payload.leadAnchor?.personName ?? null}
+            clinicalScalesSummary={payload.clinicalScalesSummary}
+          />
+
+          {payload.leadAnchor ? (
+            <AppointmentLinkedLeadSection
+              tenantId={tenantId}
+              leadAnchor={payload.leadAnchor}
+              pipelineStages={payload.pipelineStages}
+              bookingType={booking.booking_type}
+            />
+          ) : null}
+
+          <AppointmentCoreDetailsSection
+            booking={booking}
+            assignees={payload.assignees}
+            clinics={payload.clinics}
+            statusHistory={payload.statusHistory}
+            canMutate={canMutate && !cancelled && booking.booking_status !== "completed"}
+            rescheduleOpen={rescheduleOpen}
+            onToggleReschedule={() => setRescheduleOpen((v) => !v)}
+            startLocal={startLocal}
+            endLocal={endLocal}
+            bookingStatus={bookingStatus}
+            onStartLocalChange={setStartLocal}
+            onEndLocalChange={setEndLocal}
+            onBookingStatusChange={setBookingStatus}
+            onRescheduleSubmit={onRescheduleSubmit}
+            rescheduleBusy={rescheduleBusy}
+            rescheduleErr={rescheduleErr}
+          />
+
+          <AppointmentClinicalSection
+            clinicalScalesSummary={payload.clinicalScalesSummary}
+            clinicalLine={payload.clinicalLine}
+            surgeryPlan={payload.surgeryPlan}
+          />
+
+          <AppointmentProcedureSection
+            tenantId={tenantId}
+            assignees={payload.assignees}
+            graftCountEstimate={graftCountEstimate}
+            donorArea={donorArea}
+            technique={technique}
+            specialInstructions={specialInstructions}
+            surgeonUserId={surgeonUserId}
+            consultantUserId={consultantUserId}
+            techUserId={techUserId}
+            canMutate={canMutate && !cancelled && booking.booking_status !== "completed"}
+            busy={procedureBusy}
+            error={procedureErr}
+            onGraftCountEstimateChange={setGraftCountEstimate}
+            onDonorAreaChange={setDonorArea}
+            onTechniqueChange={setTechnique}
+            onSpecialInstructionsChange={setSpecialInstructions}
+            onSurgeonUserIdChange={setSurgeonUserId}
+            onConsultantUserIdChange={setConsultantUserId}
+            onTechUserIdChange={setTechUserId}
+            onSubmit={onSaveProcedure}
+          />
+
+          {booking.description?.trim() ? (
+            <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Appointment notes
+              </h3>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">
+                {booking.description}
+              </p>
+            </section>
+          ) : null}
+
+          <AppointmentGallerySection
+            tenantId={tenantId}
+            patientId={booking.patient_id}
+            bundle={payload.patientImages}
+          />
+
+          {leadId ? (
+            <>
+              <LeadActivityFeed
+                events={payload.timeline.events}
+                limit={8}
+                emptyMessage="No CRM activity on the linked lead yet."
               />
-
-              {payload.leadAnchor ? (
-                <AppointmentLinkedLeadSection
-                  tenantId={tenantId}
-                  leadAnchor={payload.leadAnchor}
-                  pipelineStages={payload.pipelineStages}
-                  bookingType={booking.booking_type}
-                />
-              ) : null}
-
-              <AppointmentCoreDetailsSection
-                booking={booking}
-                assignees={payload.assignees}
-                clinics={payload.clinics}
-                statusHistory={payload.statusHistory}
-                canMutate={canMutate && !cancelled && booking.booking_status !== "completed"}
-                rescheduleOpen={rescheduleOpen}
-                onToggleReschedule={() => setRescheduleOpen((v) => !v)}
-                startLocal={startLocal}
-                endLocal={endLocal}
-                bookingStatus={bookingStatus}
-                onStartLocalChange={setStartLocal}
-                onEndLocalChange={setEndLocal}
-                onBookingStatusChange={setBookingStatus}
-                onRescheduleSubmit={onRescheduleSubmit}
-                rescheduleBusy={rescheduleBusy}
-                rescheduleErr={rescheduleErr}
-              />
-
-              <AppointmentClinicalSection
-                clinicalScalesSummary={payload.clinicalScalesSummary}
-                clinicalLine={payload.clinicalLine}
-                surgeryPlan={payload.surgeryPlan}
-              />
-
-              <AppointmentProcedureSection
-                tenantId={tenantId}
-                assignees={payload.assignees}
-                graftCountEstimate={graftCountEstimate}
-                donorArea={donorArea}
-                technique={technique}
-                specialInstructions={specialInstructions}
-                surgeonUserId={surgeonUserId}
-                consultantUserId={consultantUserId}
-                techUserId={techUserId}
-                canMutate={canMutate && !cancelled && booking.booking_status !== "completed"}
-                busy={procedureBusy}
-                error={procedureErr}
-                onGraftCountEstimateChange={setGraftCountEstimate}
-                onDonorAreaChange={setDonorArea}
-                onTechniqueChange={setTechnique}
-                onSpecialInstructionsChange={setSpecialInstructions}
-                onSurgeonUserIdChange={setSurgeonUserId}
-                onConsultantUserIdChange={setConsultantUserId}
-                onTechUserIdChange={setTechUserId}
-                onSubmit={onSaveProcedure}
-              />
-
-              {booking.description?.trim() ? (
-                <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Appointment notes</h3>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">{booking.description}</p>
-                </section>
-              ) : null}
-
-              <AppointmentGallerySection
-                tenantId={tenantId}
-                patientId={booking.patient_id}
-                bundle={payload.patientImages}
-              />
-
-              {leadId ? (
-                <>
-                  <LeadActivityFeed
-                    events={payload.timeline.events}
-                    limit={8}
-                    emptyMessage="No CRM activity on the linked lead yet."
-                  />
-                  <LeadTasksSection
-                    tasks={payload.timeline.tasks}
-                    canMutate={canMutate}
-                    taskTitle={taskTitle}
-                    taskBusy={taskBusy}
-                    taskErr={taskErr}
-                    onTaskTitleChange={setTaskTitle}
-                    onAddTask={onAddTask}
-                    onCompleteTask={onCompleteTask}
-                  />
-                  <LeadNotesSection
-                    notes={payload.timeline.notes}
-                    leadNotes={payload.timeline.leadNotes}
-                    canMutate={canMutate}
-                    noteBody={noteBody}
-                    leadNoteBody={leadNoteBody}
-                    noteBusy={noteBusy}
-                    leadNoteBusy={leadNoteBusy}
-                    noteErr={noteErr}
-                    leadNoteErr={leadNoteErr}
-                    onNoteBodyChange={setNoteBody}
-                    onLeadNoteBodyChange={setLeadNoteBody}
-                    onAddGeneralNote={onAddGeneralNote}
-                    onAddLeadNote={onAddLeadNote}
-                  />
-                </>
-              ) : (
-                <LeadActivityFeed events={[]} emptyMessage="Link a lead to see CRM activity, tasks, and notes here." />
-              )}
-
-              <LeadRemindersSection
-                reminderJobs={payload.reminderJobs}
-                emptyMessage="No pending reminder jobs for this appointment or linked lead."
-              />
-
-              <AppointmentAnchorFlowsSection
-                booking={booking}
-                lead={lead}
-                instructionsSent={payload.instructionsSent}
+              <LeadTasksSection
+                tasks={payload.timeline.tasks}
                 canMutate={canMutate}
-                linkBusy={linkBusy}
-                linkErr={linkErr}
-                convBusy={convBusy}
-                convErr={convErr}
-                seedCase={seedCase}
-                onSeedCaseChange={setSeedCase}
-                onLinkPatient={() => void onLinkPatient()}
-                onConvert={onConvert}
+                taskTitle={taskTitle}
+                taskBusy={taskBusy}
+                taskErr={taskErr}
+                onTaskTitleChange={setTaskTitle}
+                onAddTask={onAddTask}
+                onCompleteTask={onCompleteTask}
               />
-
-              {lead && completionLeadOpts && payload.pipelineStages.length > 0 && !cancelled && booking.booking_status !== "completed" ? (
-                <AppointmentCompletionLeadWorkflow
-                  lead={lead}
-                  pipelineStages={payload.pipelineStages}
-                  bookingType={booking.booking_type}
-                  value={completionLeadOpts}
-                  onChange={setCompletionLeadOpts}
-                  disabled={actionBusy}
-                />
-              ) : null}
-
-              <AppointmentActionsSection
-                booking={booking}
-                instructionsSent={payload.instructionsSent}
+              <LeadNotesSection
+                notes={payload.timeline.notes}
+                leadNotes={payload.timeline.leadNotes}
                 canMutate={canMutate}
-                actionBusy={actionBusy}
-                actionErr={actionErr ?? crmCompleteErr}
-                instructionsBusy={instructionsBusy}
-                instructionsErr={instructionsErr}
-                onRescheduleToggle={() => setRescheduleOpen(true)}
-                onComplete={() => void onComplete()}
-                onCancel={() => void onCancel()}
-                onSendPreOp={() => void onSendInstructions("pre_op")}
-                onSendPostOp={() => void onSendInstructions("post_op")}
+                noteBody={noteBody}
+                leadNoteBody={leadNoteBody}
+                noteBusy={noteBusy}
+                leadNoteBusy={leadNoteBusy}
+                noteErr={noteErr}
+                leadNoteErr={leadNoteErr}
+                onNoteBodyChange={setNoteBody}
+                onLeadNoteBodyChange={setLeadNoteBody}
+                onAddGeneralNote={onAddGeneralNote}
+                onAddLeadNote={onAddLeadNote}
               />
+            </>
+          ) : (
+            <LeadActivityFeed
+              events={[]}
+              emptyMessage="Link a lead to see CRM activity, tasks, and notes here."
+            />
+          )}
 
-              {cancelled && booking.cancellation_reason?.trim() ? (
-                <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
-                  <p className="font-medium">Cancelled</p>
-                  <p className="mt-1 text-slate-200">{booking.cancellation_reason}</p>
-                </div>
-              ) : null}
+          <LeadRemindersSection
+            reminderJobs={payload.reminderJobs}
+            emptyMessage="No pending reminder jobs for this appointment or linked lead."
+          />
+
+          <AppointmentAnchorFlowsSection
+            booking={booking}
+            lead={lead}
+            instructionsSent={payload.instructionsSent}
+            canMutate={canMutate}
+            linkBusy={linkBusy}
+            linkErr={linkErr}
+            convBusy={convBusy}
+            convErr={convErr}
+            seedCase={seedCase}
+            onSeedCaseChange={setSeedCase}
+            onLinkPatient={() => void onLinkPatient()}
+            onConvert={onConvert}
+          />
+
+          {lead &&
+          completionLeadOpts &&
+          payload.pipelineStages.length > 0 &&
+          !cancelled &&
+          booking.booking_status !== "completed" ? (
+            <AppointmentCompletionLeadWorkflow
+              lead={lead}
+              pipelineStages={payload.pipelineStages}
+              bookingType={booking.booking_type}
+              value={completionLeadOpts}
+              onChange={setCompletionLeadOpts}
+              disabled={actionBusy}
+            />
+          ) : null}
+
+          <AppointmentActionsSection
+            booking={booking}
+            instructionsSent={payload.instructionsSent}
+            canMutate={canMutate}
+            actionBusy={actionBusy}
+            actionErr={actionErr ?? crmCompleteErr}
+            instructionsBusy={instructionsBusy}
+            instructionsErr={instructionsErr}
+            onRescheduleToggle={() => setRescheduleOpen(true)}
+            onComplete={() => void onComplete()}
+            onCancel={() => void onCancel()}
+            onSendPreOp={() => void onSendInstructions("pre_op")}
+            onSendPostOp={() => void onSendInstructions("post_op")}
+          />
+
+          {cancelled && booking.cancellation_reason?.trim() ? (
+            <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
+              <p className="font-medium">Cancelled</p>
+              <p className="mt-1 text-slate-200">{booking.cancellation_reason}</p>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </>
@@ -1048,12 +1120,20 @@ export function AppointmentSlideOverPanel({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Appointment preview</h2>
             {booking ? (
-              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
+              <Link
+                href={href}
+                className="text-xs text-blue-300 hover:underline"
+                onClick={() => onClose()}
+              >
                 Open full page →
               </Link>
             ) : null}
           </div>
-          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+          <button
+            type="button"
+            className="shrink-0 text-sm text-slate-400 hover:text-slate-100"
+            onClick={onClose}
+          >
             Close
           </button>
         </div>

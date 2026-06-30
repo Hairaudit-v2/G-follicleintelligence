@@ -1,13 +1,19 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readFiPaymentsEnabled, readFiPaymentProviderId } from "@/src/lib/payments/fiPaymentEnv.server";
+import {
+  readFiPaymentsEnabled,
+  readFiPaymentProviderId,
+} from "@/src/lib/payments/fiPaymentEnv.server";
 import {
   createPaymentPathway,
   loadPaymentPathwaysForInvoice,
   updatePaymentPathwaySelection,
 } from "@/src/lib/financialOs/financialPaymentPathways.server";
-import type { FiPaymentPathwayStatus, FiPaymentPathwayType } from "@/src/lib/financialOs/financialPaymentPathwayCore";
+import type {
+  FiPaymentPathwayStatus,
+  FiPaymentPathwayType,
+} from "@/src/lib/financialOs/financialPaymentPathwayCore";
 import {
   PUBLIC_PAYMENT_PATHWAY_OPTIONS,
   buildPatientPathwayUpsertPayload,
@@ -49,7 +55,10 @@ export type PublicPaymentPathwaySelectionResult =
       checkoutUrl: string | null;
     };
 
-async function resolveBookingIdForInvoice(tenantId: string, invoice: FiInvoiceRow): Promise<string | null> {
+async function resolveBookingIdForInvoice(
+  tenantId: string,
+  invoice: FiInvoiceRow
+): Promise<string | null> {
   const supabase = supabaseAdmin();
   const cid = invoice.consultation_id?.trim();
   if (!cid) return null;
@@ -77,7 +86,11 @@ async function loadPaymentContextByToken(rawToken: string): Promise<LoadedPaymen
   if (!isPaymentPublicTokenFormat(token)) return { ok: false, reason: "invalid_token" };
 
   const supabase = supabaseAdmin();
-  const { data: prRaw, error: pe } = await supabase.from("fi_payment_requests").select("*").eq("public_token", token).maybeSingle();
+  const { data: prRaw, error: pe } = await supabase
+    .from("fi_payment_requests")
+    .select("*")
+    .eq("public_token", token)
+    .maybeSingle();
   if (pe || !prRaw) return { ok: false, reason: "not_found" };
   const paymentRequest = mapPaymentRequestRow(prRaw as Record<string, unknown>);
 
@@ -102,12 +115,16 @@ async function loadPaymentContextByToken(rawToken: string): Promise<LoadedPaymen
 
   const stripeCheckoutEnabled = readFiPaymentsEnabled() && readFiPaymentProviderId() === "stripe";
   const checkoutUrl =
-    stripeCheckoutEnabled && paymentRequest.checkout_url?.trim() ? paymentRequest.checkout_url.trim() : null;
+    stripeCheckoutEnabled && paymentRequest.checkout_url?.trim()
+      ? paymentRequest.checkout_url.trim()
+      : null;
 
   return { ok: true, paymentRequest, invoice, checkoutUrl };
 }
 
-export async function loadPublicPaymentPathwaySelectionByToken(rawToken: string): Promise<PublicPaymentPathwaySelectionView> {
+export async function loadPublicPaymentPathwaySelectionByToken(
+  rawToken: string
+): Promise<PublicPaymentPathwaySelectionView> {
   const ctx = await loadPaymentContextByToken(rawToken);
   if (!ctx.ok) return { ok: false, reason: ctx.reason };
 
@@ -127,7 +144,9 @@ export async function loadPublicPaymentPathwaySelectionByToken(rawToken: string)
 
   const selectedType = active?.pathway_type ?? null;
   const selectedStatus = active?.status ?? null;
-  const confirmationMessage = selectedType ? getPatientPathwayConfirmationMessage(selectedType) : null;
+  const confirmationMessage = selectedType
+    ? getPatientPathwayConfirmationMessage(selectedType)
+    : null;
 
   return {
     ok: true,

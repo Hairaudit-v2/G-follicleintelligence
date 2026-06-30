@@ -67,7 +67,10 @@ describe("Stage 3C — calendar query & URL", () => {
 
   it("mergeCalendarHrefQuery clears staffId when setting role bucket", () => {
     const now = new Date("2026-06-01T00:00:00.000Z");
-    const q = parseCalendarSearchParams({ staffId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", role: "doctor" }, now);
+    const q = parseCalendarSearchParams(
+      { staffId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", role: "doctor" },
+      now
+    );
     assert.equal(q.staffId, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
     const merged = mergeCalendarHrefQuery(q, { role: "doctor", staffId: null });
     assert.equal(merged.staffId, undefined);
@@ -112,8 +115,14 @@ describe("Stage 3C — calendar query & URL", () => {
 
   it("mergeCalendarHrefQuery overlays partial patch", () => {
     const now = new Date("2026-06-01T00:00:00.000Z");
-    const q = parseCalendarSearchParams({ type: "surgery", assignedUserId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" }, now);
-    const merged = mergeCalendarHrefQuery(q, calendarNavigationHelpers.goToToday(new Date("2026-06-09T00:00:00.000Z")));
+    const q = parseCalendarSearchParams(
+      { type: "surgery", assignedUserId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" },
+      now
+    );
+    const merged = mergeCalendarHrefQuery(
+      q,
+      calendarNavigationHelpers.goToToday(new Date("2026-06-09T00:00:00.000Z"))
+    );
     assert.equal(merged.date, "2026-06-09");
     assert.equal(merged.view, "week");
     assert.equal(merged.type, "surgery");
@@ -122,14 +131,20 @@ describe("Stage 3C — calendar query & URL", () => {
   it("mergeCalendarHrefQuery preserves sample=1 when navigating", () => {
     const now = new Date("2026-06-01T00:00:00.000Z");
     const q = parseCalendarSearchParams({ sample: "1", type: "prp" }, now);
-    const merged = mergeCalendarHrefQuery(q, calendarNavigationHelpers.goToToday(new Date("2026-06-09T00:00:00.000Z")));
+    const merged = mergeCalendarHrefQuery(
+      q,
+      calendarNavigationHelpers.goToToday(new Date("2026-06-09T00:00:00.000Z"))
+    );
     assert.equal(merged.date, "2026-06-09");
     assert.equal(merged.sample, true);
     assert.equal(merged.type, "prp");
   });
 
   it("parseCalendarRangeOverride accepts valid start/end override", () => {
-    const fb = { rangeStartIso: "2026-01-01T00:00:00.000Z", rangeEndIso: "2026-01-02T00:00:00.000Z" };
+    const fb = {
+      rangeStartIso: "2026-01-01T00:00:00.000Z",
+      rangeEndIso: "2026-01-02T00:00:00.000Z",
+    };
     const r = parseCalendarRangeOverride(
       { start: "2026-03-01T00:00:00.000Z", end: "2026-03-10T00:00:00.000Z" },
       fb
@@ -139,7 +154,10 @@ describe("Stage 3C — calendar query & URL", () => {
   });
 
   it("parseCalendarRangeOverride rejects invalid range", () => {
-    const fb = { rangeStartIso: "2026-01-01T00:00:00.000Z", rangeEndIso: "2026-01-02T00:00:00.000Z" };
+    const fb = {
+      rangeStartIso: "2026-01-01T00:00:00.000Z",
+      rangeEndIso: "2026-01-02T00:00:00.000Z",
+    };
     const r = parseCalendarRangeOverride(
       { start: "2026-03-10T00:00:00.000Z", end: "2026-03-01T00:00:00.000Z" },
       fb
@@ -152,14 +170,22 @@ describe("Stage 3C — visible range & week boundaries (UTC)", () => {
   const utcOpts = { calendarTimezone: "UTC" as const };
 
   it("day view covers single UTC day", () => {
-    const q = parseCalendarSearchParams({ view: "day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"), utcOpts);
+    const q = parseCalendarSearchParams(
+      { view: "day", date: "2026-06-10" },
+      new Date("2026-01-01T00:00:00.000Z"),
+      utcOpts
+    );
     const { rangeStartMs, rangeEndMs } = calendarVisibleUtcRangeMs(q);
     assert.equal(rangeEndMs - rangeStartMs, 86400000);
     assert.equal(new Date(rangeStartMs).toISOString(), "2026-06-10T00:00:00.000Z");
   });
 
   it("week view is Monday 00:00 UTC through the following Monday (exclusive)", () => {
-    const q = parseCalendarSearchParams({ view: "week", date: "2026-06-04" }, new Date("2026-01-01T00:00:00.000Z"), utcOpts);
+    const q = parseCalendarSearchParams(
+      { view: "week", date: "2026-06-04" },
+      new Date("2026-01-01T00:00:00.000Z"),
+      utcOpts
+    );
     const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(q);
     assert.equal(rangeStartIso, "2026-06-01T00:00:00.000Z");
     assert.equal(rangeEndIso, "2026-06-08T00:00:00.000Z");
@@ -179,7 +205,11 @@ describe("Stage 3C — visible range & week boundaries (UTC)", () => {
   });
 
   it("3day view covers three UTC days from anchor", () => {
-    const q = parseCalendarSearchParams({ view: "3day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"), utcOpts);
+    const q = parseCalendarSearchParams(
+      { view: "3day", date: "2026-06-10" },
+      new Date("2026-01-01T00:00:00.000Z"),
+      utcOpts
+    );
     const { rangeStartMs, rangeEndMs } = calendarVisibleUtcRangeMs(q);
     assert.equal(rangeEndMs - rangeStartMs, 3 * 86400000);
     assert.equal(new Date(rangeStartMs).toISOString(), "2026-06-10T00:00:00.000Z");
@@ -195,7 +225,10 @@ describe("Stage 3C — visible range & week boundaries (UTC)", () => {
 
 describe("Stage 3C — navigation helpers", () => {
   it("shifts day anchor by one for day view", () => {
-    const q = parseCalendarSearchParams({ view: "day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"));
+    const q = parseCalendarSearchParams(
+      { view: "day", date: "2026-06-10" },
+      new Date("2026-01-01T00:00:00.000Z")
+    );
     const prev = calendarNavigationHelpers.previousPeriod(q);
     assert.equal(prev.date, "2026-06-09");
     const next = calendarNavigationHelpers.nextPeriod(q);
@@ -203,7 +236,10 @@ describe("Stage 3C — navigation helpers", () => {
   });
 
   it("shifts week anchor by seven for week view", () => {
-    const q = parseCalendarSearchParams({ view: "week", date: "2026-06-04" }, new Date("2026-01-01T00:00:00.000Z"));
+    const q = parseCalendarSearchParams(
+      { view: "week", date: "2026-06-04" },
+      new Date("2026-01-01T00:00:00.000Z")
+    );
     const prev = calendarNavigationHelpers.previousPeriod(q);
     assert.equal(prev.date, "2026-05-28");
   });
@@ -225,8 +261,14 @@ describe("Stage 3C — bucketing & layout", () => {
       row({ id: "b", start_at: "2026-06-07T12:00:00.000Z", end_at: "2026-06-07T13:00:00.000Z" }),
     ];
     const map = bucketBookingsIntoCalendar(bookings, lanes);
-    assert.equal((map.get("2026-06-02") ?? []).some((x) => x.id === "a"), true);
-    assert.equal((map.get("2026-06-03") ?? []).some((x) => x.id === "a"), true);
+    assert.equal(
+      (map.get("2026-06-02") ?? []).some((x) => x.id === "a"),
+      true
+    );
+    assert.equal(
+      (map.get("2026-06-03") ?? []).some((x) => x.id === "a"),
+      true
+    );
     assert.equal((map.get("2026-06-08") ?? []).length, 0);
     assert.equal((map.get("2026-06-07") ?? []).length, 1);
   });

@@ -2,11 +2,7 @@ import { FiMarketingHomeView } from "@/components/home/FiMarketingHomeView";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_URL } from "@/lib/seo/constants";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
-import {
-  buildFAQPageSchema,
-  HOME_PAGE_FAQS,
-  SITE_SEO_KEYWORDS,
-} from "@/lib/structured-data";
+import { buildFAQPageSchema, HOME_PAGE_FAQS, SITE_SEO_KEYWORDS } from "@/lib/structured-data";
 
 // Homepage-specific positioning. Distinct OG / Twitter copy is supported via the optional
 // override fields on buildPageMetadata; the shared SITE_SEO_* constants remain unchanged so the

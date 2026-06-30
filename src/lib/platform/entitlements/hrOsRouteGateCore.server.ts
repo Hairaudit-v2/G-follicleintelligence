@@ -77,7 +77,7 @@ async function writeHrOsRouteAudit(
       fiUserId: opts.fiUserId,
       moduleCode: HR_OS_MODULE_CODE,
       outcome: opts.outcome,
-      denialReason: opts.outcome === "denied" ? opts.denialReason ?? null : null,
+      denialReason: opts.outcome === "denied" ? (opts.denialReason ?? null) : null,
       source: "hr_os_route_access",
     },
     { supabaseClientForTests }
@@ -95,7 +95,9 @@ export async function resolveHrOsRouteAccessWithOptions(
   const tid = tenantId.trim();
   const supabaseClientForTests = testOptions?.supabaseClientForTests;
   const authUserId =
-    testOptions && "authUserId" in testOptions ? testOptions.authUserId ?? null : await resolveAuthUserId(null);
+    testOptions && "authUserId" in testOptions
+      ? (testOptions.authUserId ?? null)
+      : await resolveAuthUserId(null);
 
   if (!authUserId) {
     const access: ModuleAccessDenied = {

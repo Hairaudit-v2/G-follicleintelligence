@@ -124,7 +124,8 @@ export async function createStaffCalendarLink(
     calendar_id: calendarId,
     calendar_label: input.calendarLabel?.trim() || null,
     google_account_email: input.googleAccountEmail?.trim() || null,
-    source_system: input.sourceSystem?.trim() || (provider === "timely" ? "timely_ics" : "google_calendar"),
+    source_system:
+      input.sourceSystem?.trim() || (provider === "timely" ? "timely_ics" : "google_calendar"),
     status: "active",
     metadata: input.metadata ?? {},
   };
@@ -162,7 +163,8 @@ export async function updateStaffCalendarLink(
     patch.staff_member_id = input.staffMemberId.trim();
   }
   if (input.calendarLabel !== undefined) patch.calendar_label = input.calendarLabel?.trim() || null;
-  if (input.googleAccountEmail !== undefined) patch.google_account_email = input.googleAccountEmail?.trim() || null;
+  if (input.googleAccountEmail !== undefined)
+    patch.google_account_email = input.googleAccountEmail?.trim() || null;
   if (input.status) patch.status = input.status;
   if (input.metadata) patch.metadata = input.metadata;
 

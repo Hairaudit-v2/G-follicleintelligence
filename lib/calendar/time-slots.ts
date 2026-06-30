@@ -47,7 +47,9 @@ export function formatWallClockMinutesFromMidnight(totalMinutes: number): string
 /**
  * Build 30-minute slot rows between configured clinic-local open/close hours (labels are wall-clock only).
  */
-export function generateOperationalCalendarTimeSlots(grid: OperationalGridHours): CalendarTimeSlot[] {
+export function generateOperationalCalendarTimeSlots(
+  grid: OperationalGridHours
+): CalendarTimeSlot[] {
   const startH = Math.floor(Number(grid.dayStartHourUtc));
   const endH = Math.floor(Number(grid.dayEndHourUtc));
   const startMinutes = Math.max(0, Math.min(23, startH)) * 60;
@@ -121,6 +123,9 @@ export function calendarSlotIndexFromMinutes(totalMinutes: number): number {
 }
 
 /** Top offset (px) for a slot index in the grid. */
-export function calendarSlotTopPx(slotIndex: number, pxPerHour: number = CALENDAR_PX_PER_HOUR): number {
+export function calendarSlotTopPx(
+  slotIndex: number,
+  pxPerHour: number = CALENDAR_PX_PER_HOUR
+): number {
   return slotIndex * calendarSlotHeightPx(pxPerHour);
 }

@@ -1,17 +1,11 @@
 import type { PhotoProtocolAlert } from "./protocolAlerts";
-import type {
-  HliPhotoProtocolAlertEventStatus,
-  HliPhotoProtocolSession,
-} from "./types";
+import type { HliPhotoProtocolAlertEventStatus, HliPhotoProtocolSession } from "./types";
 
 const KEY_VERSION = "v1";
 
 /** Statuses that must be preserved across detection refresh upserts. */
-export const PHOTO_PROTOCOL_ALERT_PERSISTED_WORKFLOW_STATUSES: ReadonlySet<HliPhotoProtocolAlertEventStatus> = new Set([
-  "acknowledged",
-  "resolved",
-  "dismissed",
-]);
+export const PHOTO_PROTOCOL_ALERT_PERSISTED_WORKFLOW_STATUSES: ReadonlySet<HliPhotoProtocolAlertEventStatus> =
+  new Set(["acknowledged", "resolved", "dismissed"]);
 
 export type PhotoProtocolAlertIdempotencyParts = {
   source_system: PhotoProtocolAlert["source_system"];
@@ -26,7 +20,9 @@ export type PhotoProtocolAlertIdempotencyParts = {
 /**
  * Deterministic idempotency key for alert persistence (stable across runs for the same logical condition).
  */
-export function buildPhotoProtocolAlertIdempotencyKey(parts: PhotoProtocolAlertIdempotencyParts): string {
+export function buildPhotoProtocolAlertIdempotencyKey(
+  parts: PhotoProtocolAlertIdempotencyParts
+): string {
   const tenantSeg = parts.tenant_id?.trim() || "global";
   const pat = parts.patient_id?.trim() || "-";
   const cas = parts.case_id?.trim() || "-";
@@ -131,7 +127,9 @@ export function mergePhotoProtocolAlertUpsertCandidate(
   }
 
   const preserveStatus = PHOTO_PROTOCOL_ALERT_PERSISTED_WORKFLOW_STATUSES.has(existing.status);
-  const status: HliPhotoProtocolAlertEventStatus = preserveStatus ? existing.status : candidate.status;
+  const status: HliPhotoProtocolAlertEventStatus = preserveStatus
+    ? existing.status
+    : candidate.status;
 
   return {
     ...candidate,
@@ -157,7 +155,8 @@ export function assertPhotoProtocolAlertStatusTransition(
     return;
   }
   if (to === "resolved") {
-    if (from !== "open" && from !== "acknowledged") throw new Error(`Cannot resolve from status "${from}".`);
+    if (from !== "open" && from !== "acknowledged")
+      throw new Error(`Cannot resolve from status "${from}".`);
     return;
   }
   if (to === "dismissed") {

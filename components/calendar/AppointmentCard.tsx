@@ -15,10 +15,7 @@ import {
   crmDarkProcedureClasses,
   type FiProcedureFamily,
 } from "@/lib/design-system";
-import {
-  durationMinutesFromPx,
-  pxFromDurationMinutes,
-} from "@/lib/calendar/dndMath";
+import { durationMinutesFromPx, pxFromDurationMinutes } from "@/lib/calendar/dndMath";
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import { bookingCalendarChipSurface } from "@/src/lib/bookings/calendarLabels";
 import { cn } from "@/lib/utils";
@@ -131,15 +128,20 @@ function formatDuration(minutes: number): string {
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
-function formatPrice(price: string | null | undefined, currency: string | null | undefined): string | null {
+function formatPrice(
+  price: string | null | undefined,
+  currency: string | null | undefined
+): string | null {
   if (!price?.trim()) return null;
   const cur = (currency?.trim() || "GBP").toUpperCase();
   const numeric = Number(price.replace(/[^0-9.-]/g, ""));
   if (Number.isFinite(numeric)) {
     try {
-      return new Intl.NumberFormat("en-GB", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(
-        numeric
-      );
+      return new Intl.NumberFormat("en-GB", {
+        style: "currency",
+        currency: cur,
+        maximumFractionDigits: 0,
+      }).format(numeric);
     } catch {
       return `${cur} ${price}`;
     }
@@ -171,7 +173,10 @@ export function appointmentCardDataFromBooking(
   const invoice = parseAppointmentInvoicePreview(booking);
   const meta = booking.metadata ?? {};
   const isVirtual = Boolean(
-    meta.is_virtual ?? meta.virtual ?? meta.zoom ?? (typeof meta.google_meet_url === "string" && meta.google_meet_url)
+    meta.is_virtual ??
+    meta.virtual ??
+    meta.zoom ??
+    (typeof meta.google_meet_url === "string" && meta.google_meet_url)
   );
 
   return {
@@ -272,7 +277,9 @@ function ResizeHandle({
       onPointerDown={onPointerDown}
       className={cn(
         "absolute inset-x-1 bottom-0 z-20 flex cursor-ns-resize touch-none items-center justify-center rounded-b-xl",
-        touchFriendly ? "h-6 opacity-100" : "h-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
+        touchFriendly
+          ? "h-6 opacity-100"
+          : "h-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
         isResizing && "opacity-100"
       )}
     >
@@ -320,13 +327,7 @@ function StatusBadge({ status, compact }: { status: string; compact?: boolean })
   );
 }
 
-function CalendarOsSourceBadge({
-  label,
-  compact,
-}: {
-  label: string;
-  compact?: boolean;
-}) {
+function CalendarOsSourceBadge({ label, compact }: { label: string; compact?: boolean }) {
   return (
     <Badge
       variant="outline"
@@ -340,13 +341,7 @@ function CalendarOsSourceBadge({
   );
 }
 
-function GoogleMeetBadge({
-  meetUrl,
-  compact,
-}: {
-  meetUrl: string;
-  compact?: boolean;
-}) {
+function GoogleMeetBadge({ meetUrl, compact }: { meetUrl: string; compact?: boolean }) {
   return (
     <a
       href={meetUrl}
@@ -385,18 +380,32 @@ function AppointmentCardInner({
   calendarTimezone,
 }: AppointmentCardProps) {
   const style = getAppointmentStyle(appointment);
-  const catalog = bookingCalendarChipSurface(appointment.procedureType, appointment.procedureCatalogColor ?? null);
+  const catalog = bookingCalendarChipSurface(
+    appointment.procedureType,
+    appointment.procedureCatalogColor ?? null
+  );
   const darkProcedure = crmDarkProcedureClasses(style.procedureFamily);
   const ProcedureIcon = style.icon;
   const procedureLabel = style.procedureLabel;
-  const durationMin = appointment.durationMin ?? durationFromRange(appointment.startAt, appointment.endAt);
-  const timeLabel = formatTimeRangeInTimezone(appointment.startAt, appointment.endAt, calendarTimezone ?? "");
+  const durationMin =
+    appointment.durationMin ?? durationFromRange(appointment.startAt, appointment.endAt);
+  const timeLabel = formatTimeRangeInTimezone(
+    appointment.startAt,
+    appointment.endAt,
+    calendarTimezone ?? ""
+  );
   const priceLabel = formatPrice(appointment.price, appointment.currency);
 
   const isTerminal = dimTerminal && style.isTerminal;
 
   const canDrag = draggable && !isTerminal && !isDragPreview && !isPendingSave;
-  const canResize = resizable && !isTerminal && layout != null && Boolean(onResizeEnd) && !isDragPreview && !isPendingSave;
+  const canResize =
+    resizable &&
+    !isTerminal &&
+    layout != null &&
+    Boolean(onResizeEnd) &&
+    !isDragPreview &&
+    !isPendingSave;
   const [resizeHeightPx, setResizeHeightPx] = React.useState<number | null>(null);
   const displayHeightPx = resizeHeightPx ?? layout?.heightPx;
 
@@ -430,7 +439,9 @@ function AppointmentCardInner({
           zIndex: isDragging ? 50 : layout.zIndex,
         }
       : undefined),
-    ...(transform ? { transform: CSS.Translate.toString(transform), zIndex: isDragging ? 50 : undefined } : undefined),
+    ...(transform
+      ? { transform: CSS.Translate.toString(transform), zIndex: isDragging ? 50 : undefined }
+      : undefined),
   };
 
   const room = appointment.room?.trim();
@@ -472,12 +483,17 @@ function AppointmentCardInner({
         PROCEDURE_HOVER_GLOW[style.procedureFamily],
         layout &&
           cn(
-            catalog.chipStyle ? catalog.toneClasses : cn(style.borderColor, style.backgroundTint, style.textColor),
+            catalog.chipStyle
+              ? catalog.toneClasses
+              : cn(style.borderColor, style.backgroundTint, style.textColor),
             style.statusRing
           ),
-        layout && !isDragPreview && (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
+        layout &&
+          !isDragPreview &&
+          (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
         isDragging && "scale-[1.02] opacity-90 shadow-xl ring-2 ring-sky-400/35",
-        isDragPreview && "w-full rotate-[0.5deg] shadow-2xl ring-2 ring-sky-400/30 dark:shadow-black/50",
+        isDragPreview &&
+          "w-full rotate-[0.5deg] shadow-2xl ring-2 ring-sky-400/30 dark:shadow-black/50",
         isTerminal && "opacity-55 saturate-[0.8]",
         isPendingSave && "opacity-80 ring-2 ring-amber-400/35",
         isHighlighted && "ring-2 ring-cyan-400/70 shadow-lg shadow-cyan-500/20",
@@ -523,7 +539,11 @@ function AppointmentCardInner({
           {...attributes}
           onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical className={cn(touchFriendly ? "h-4 w-4" : "h-3.5 w-3.5")} strokeWidth={2} aria-hidden />
+          <GripVertical
+            className={cn(touchFriendly ? "h-4 w-4" : "h-3.5 w-3.5")}
+            strokeWidth={2}
+            aria-hidden
+          />
         </button>
       ) : null}
 
@@ -583,24 +603,35 @@ function AppointmentCardInner({
               {showMeta ? (
                 <div className={cn("mt-0.5 flex items-center gap-1.5", darkProcedure.accent)}>
                   <ProcedureIcon
-                    className={cn("shrink-0 opacity-90", layout || isMedium ? "h-3 w-3" : "h-3.5 w-3.5")}
+                    className={cn(
+                      "shrink-0 opacity-90",
+                      layout || isMedium ? "h-3 w-3" : "h-3.5 w-3.5"
+                    )}
                     strokeWidth={2}
                     aria-hidden
                   />
-                  <p className={cn("truncate font-semibold text-slate-300 dark:text-slate-200", textSize)}>
+                  <p
+                    className={cn(
+                      "truncate font-semibold text-slate-300 dark:text-slate-200",
+                      textSize
+                    )}
+                  >
                     {procedureLabel}
                   </p>
                 </div>
               ) : (
-                <p className={cn("truncate font-medium text-slate-400 dark:text-slate-400", textSize)}>
+                <p
+                  className={cn(
+                    "truncate font-medium text-slate-400 dark:text-slate-400",
+                    textSize
+                  )}
+                >
                   {procedureLabel}
                 </p>
               )}
             </div>
 
-            {!isCompact && !layout ? (
-              <StatusBadge status={appointment.status} />
-            ) : null}
+            {!isCompact && !layout ? <StatusBadge status={appointment.status} /> : null}
           </div>
 
           {/* Time + duration */}
@@ -615,13 +646,20 @@ function AppointmentCardInner({
               {timeLabel}
             </span>
             {durationMin > 0 ? (
-              <span className={cn("font-medium tabular-nums", textSize)}>{formatDuration(durationMin)}</span>
+              <span className={cn("font-medium tabular-nums", textSize)}>
+                {formatDuration(durationMin)}
+              </span>
             ) : null}
           </div>
 
           {/* Room + provider */}
           {showMeta && (room || provider) ? (
-            <div className={cn("mt-1 flex flex-col gap-0.5 text-slate-500 dark:text-slate-400", textSize)}>
+            <div
+              className={cn(
+                "mt-1 flex flex-col gap-0.5 text-slate-500 dark:text-slate-400",
+                textSize
+              )}
+            >
               {room ? (
                 <p className="inline-flex items-center gap-1 truncate">
                   <DoorOpen className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
@@ -641,12 +679,20 @@ function AppointmentCardInner({
           {showFooter ? (
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
               <div className="flex min-w-0 flex-wrap items-center gap-1">
-                {priceLabel ? <PriceBadge label={priceLabel} compact={Boolean(layout || isMedium)} /> : null}
+                {priceLabel ? (
+                  <PriceBadge label={priceLabel} compact={Boolean(layout || isMedium)} />
+                ) : null}
                 {appointment.calendarOsSourceLabel ? (
-                  <CalendarOsSourceBadge label={appointment.calendarOsSourceLabel} compact={Boolean(layout || isMedium)} />
+                  <CalendarOsSourceBadge
+                    label={appointment.calendarOsSourceLabel}
+                    compact={Boolean(layout || isMedium)}
+                  />
                 ) : null}
                 {appointment.googleMeetUrl ? (
-                  <GoogleMeetBadge meetUrl={appointment.googleMeetUrl} compact={Boolean(layout || isMedium)} />
+                  <GoogleMeetBadge
+                    meetUrl={appointment.googleMeetUrl}
+                    compact={Boolean(layout || isMedium)}
+                  />
                 ) : null}
               </div>
               {layout || isMedium ? (

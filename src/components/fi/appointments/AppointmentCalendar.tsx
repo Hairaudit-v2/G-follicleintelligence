@@ -94,7 +94,10 @@ function DraggableCalendarEvent({
 
     function onMove(ev: PointerEvent) {
       const delta = ev.clientY - startY;
-      const next = Math.max(0, Math.min(CALENDAR_DAY_COLUMN_HEIGHT_PX - layout.heightPx, startTopRef.current + delta));
+      const next = Math.max(
+        0,
+        Math.min(CALENDAR_DAY_COLUMN_HEIGHT_PX - layout.heightPx, startTopRef.current + delta)
+      );
       setDragTop(next);
     }
 
@@ -172,7 +175,9 @@ function DraggableCalendarEvent({
       style={{ top: topPx, height: layout.heightPx, ...(chip.chipStyle ?? {}) }}
       title={canDrag && !terminal ? "Drag to reschedule (UTC)" : undefined}
     >
-      <div className="truncate font-medium leading-tight">{booking.title?.trim() || "Appointment"}</div>
+      <div className="truncate font-medium leading-tight">
+        {booking.title?.trim() || "Appointment"}
+      </div>
       <div className="mt-0.5 flex flex-wrap items-center gap-1">
         <span className="truncate text-[10px] font-medium uppercase tracking-wide opacity-90">
           {svc?.name?.trim() || bookingTypeCalendarLegendLabel(booking.booking_type)}
@@ -180,16 +185,14 @@ function DraggableCalendarEvent({
         <BookingStatusBadge status={booking.booking_status} />
       </div>
       <div className="mt-0.5 truncate text-[10px] opacity-90">{range}</div>
-      <div className="truncate text-[10px] opacity-90">{assigneeLabel(assignees, booking.assigned_user_id)}</div>
+      <div className="truncate text-[10px] opacity-90">
+        {assigneeLabel(assignees, booking.assigned_user_id)}
+      </div>
     </button>
   );
 }
 
-export function AppointmentCalendar({
-  data,
-}: {
-  data: CalendarViewData;
-}) {
+export function AppointmentCalendar({ data }: { data: CalendarViewData }) {
   const router = useRouter();
   const slide = useAppointmentSlideOver();
   const [showFilters, setShowFilters] = useState(false);
@@ -272,10 +275,15 @@ export function AppointmentCalendar({
   return (
     <div className="space-y-4">
       {listTruncated ? (
-        <p className="text-xs text-amber-300">Calendar row cap reached — narrow filters or date range.</p>
+        <p className="text-xs text-amber-300">
+          Calendar row cap reached — narrow filters or date range.
+        </p>
       ) : null}
       {conflictMsg ? (
-        <div className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200" role="alert">
+        <div
+          className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200"
+          role="alert"
+        >
           {conflictMsg}
           <button type="button" className="ml-2 underline" onClick={() => setConflictMsg(null)}>
             Dismiss
@@ -285,25 +293,42 @@ export function AppointmentCalendar({
 
       <div className="flex flex-col gap-3 rounded border border-white/[0.08] bg-white/[0.03] p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={prev} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]">
+          <Link
+            href={prev}
+            className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]"
+          >
             Previous
           </Link>
-          <Link href={todayHref} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]">
+          <Link
+            href={todayHref}
+            className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]"
+          >
             Today
           </Link>
-          <Link href={next} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]">
+          <Link
+            href={next}
+            className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]"
+          >
             Next
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={buildAppointmentsHref(tenantId, { tab: "calendar", view: "day", date: query.dateAnchor })}
+            href={buildAppointmentsHref(tenantId, {
+              tab: "calendar",
+              view: "day",
+              date: query.dateAnchor,
+            })}
             className={`rounded px-2 py-1 text-sm ${query.view === "day" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
           >
             Day
           </Link>
           <Link
-            href={buildAppointmentsHref(tenantId, { tab: "calendar", view: "week", date: query.dateAnchor })}
+            href={buildAppointmentsHref(tenantId, {
+              tab: "calendar",
+              view: "week",
+              date: query.dateAnchor,
+            })}
             className={`rounded px-2 py-1 text-sm ${query.view === "week" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
           >
             Week
@@ -325,11 +350,15 @@ export function AppointmentCalendar({
             New appointment
           </button>
         </div>
-        <p className="w-full text-center text-sm text-slate-300 sm:text-right">{rangeTitle} · drag to reschedule</p>
+        <p className="w-full text-center text-sm text-slate-300 sm:text-right">
+          {rangeTitle} · drag to reschedule
+        </p>
       </div>
 
       {showFilters ? (
-        <p className="text-xs text-slate-400">Use the shared filters panel above the tabs for staff, type, and status.</p>
+        <p className="text-xs text-slate-400">
+          Use the shared filters panel above the tabs for staff, type, and status.
+        </p>
       ) : null}
 
       <div className="flex flex-wrap gap-2 text-[10px] text-slate-400">
@@ -338,7 +367,11 @@ export function AppointmentCalendar({
           const chip = bookingCalendarChipSurface(t, row?.color);
           const label = row?.name?.trim() || bookingTypeCalendarLegendLabel(t);
           return (
-            <span key={t} className={cn("rounded border px-1.5 py-0.5", chip.toneClasses)} style={chip.chipStyle}>
+            <span
+              key={t}
+              className={cn("rounded border px-1.5 py-0.5", chip.toneClasses)}
+              style={chip.chipStyle}
+            >
               {label}
             </span>
           );
@@ -376,7 +409,10 @@ export function AppointmentCalendar({
                       type="button"
                       aria-label={`New appointment ${lane.dayKey} ${h}:00`}
                       className="absolute left-0 right-0 border-t border-white/[0.06] hover:bg-primary/5"
-                      style={{ top: h * CALENDAR_GRID_PX_PER_HOUR, height: CALENDAR_GRID_PX_PER_HOUR }}
+                      style={{
+                        top: h * CALENDAR_GRID_PX_PER_HOUR,
+                        height: CALENDAR_GRID_PX_PER_HOUR,
+                      }}
                       onClick={() => openCreateFromSlot(lane.dayKey, h)}
                     />
                   ))}

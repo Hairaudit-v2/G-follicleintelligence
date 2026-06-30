@@ -21,7 +21,10 @@ import {
   PLATFORM_PROGRESS_MODULES,
   PLATFORM_PROGRESS_PAGE_CONTENT,
 } from "@/lib/marketing/platformProgressPageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, GitCommitHorizontal } from "lucide-react";
 
@@ -56,7 +59,10 @@ function LatestPlatformUpdateCard() {
 
         <div className="mt-4 grid gap-4 md:grid-cols-[7rem_1fr] md:gap-6">
           <div>
-            <time dateTime={latestUpdate.date} className="font-mono text-xs tabular-nums text-amber-200/75">
+            <time
+              dateTime={latestUpdate.date}
+              className="font-mono text-xs tabular-nums text-amber-200/75"
+            >
               {latestUpdate.date}
             </time>
             <p className="mt-2 inline-flex rounded-md border border-cyan-400/20 bg-cyan-950/25 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-200/85">
@@ -67,7 +73,9 @@ function LatestPlatformUpdateCard() {
             <h3 className="font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
               {latestUpdate.title}
             </h3>
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{latestUpdate.summary}</p>
+            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+              {latestUpdate.summary}
+            </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {latestUpdate.modules.map((mod) => (
                 <span
@@ -93,24 +101,37 @@ export function FiMarketingPlatformProgressSection() {
       aria-labelledby={`${c.id}-heading`}
     >
       <FadeIn>
-        <SectionHeading id={`${c.id}-heading`} eyebrow={c.eyebrow} title={c.headline} description={getPlatformProgressHomepageDescription()} />
+        <SectionHeading
+          id={`${c.id}-heading`}
+          eyebrow={c.eyebrow}
+          title={c.headline}
+          description={getPlatformProgressHomepageDescription()}
+        />
 
         <EcosystemCompletionSnapshot variant="marketing" className="mt-10" />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
-            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">FI OS modules tracked</p>
+            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">
+              FI OS modules tracked
+            </p>
             <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
               {snapshot.activeModuleCount}
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Connected systems in the delivery registry</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Connected systems in the delivery registry
+            </p>
           </GlassCard>
           <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
-            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">Ecosystem completion</p>
+            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">
+              Ecosystem completion
+            </p>
             <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
               {snapshot.fiOsCorePlatformPercent}%
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">FI OS core platform delivery rollup</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              FI OS core platform delivery rollup
+            </p>
           </GlassCard>
         </div>
 
@@ -126,68 +147,82 @@ export function FiMarketingPlatformProgressSection() {
               const deploymentStatus = getPlatformInfrastructureDeploymentStatus(mod.id);
 
               return (
-              <li key={mod.id}>
-                <FadeIn delay={0.04 * index}>
-                  <GlassCard variant="os" className="h-full border-white/[0.07] !p-5 sm:!p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.2em] text-amber-200/50">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <h3 className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
-                          {mod.name}
-                        </h3>
+                <li key={mod.id}>
+                  <FadeIn delay={0.04 * index}>
+                    <GlassCard variant="os" className="h-full border-white/[0.07] !p-5 sm:!p-6">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.2em] text-amber-200/50">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          <h3 className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
+                            {mod.name}
+                          </h3>
+                        </div>
+                        <PlatformProgressStatusBadge status={mod.status} label={mod.statusLabel} />
                       </div>
-                      <PlatformProgressStatusBadge status={mod.status} label={mod.statusLabel} />
-                    </div>
-                    {hidePercent && deploymentStatus ? (
-                      <div className="mt-4">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</p>
-                        <p className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground">
-                          {deploymentStatus}
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                          <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">
-                            {mod.completionPercent}
-                            <span className="text-base text-muted-foreground">%</span>
+                      {hidePercent && deploymentStatus ? (
+                        <div className="mt-4">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            Status
                           </p>
-                          <p className="max-w-none text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-amber-100/75 sm:max-w-[10rem] sm:text-right">
-                            {mod.stage}
+                          <p className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground">
+                            {deploymentStatus}
                           </p>
                         </div>
-                        <div className="mt-3">
-                          <PlatformProgressAnimatedBar
-                            percent={mod.completionPercent}
-                            status={mod.status}
-                            delay={0.1 + index * 0.05}
-                          />
-                        </div>
-                      </>
-                    )}
-                    <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{mod.description}</p>
-                  </GlassCard>
-                </FadeIn>
-              </li>
-            );
+                      ) : (
+                        <>
+                          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                            <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">
+                              {mod.completionPercent}
+                              <span className="text-base text-muted-foreground">%</span>
+                            </p>
+                            <p className="max-w-none text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-amber-100/75 sm:max-w-[10rem] sm:text-right">
+                              {mod.stage}
+                            </p>
+                          </div>
+                          <div className="mt-3">
+                            <PlatformProgressAnimatedBar
+                              percent={mod.completionPercent}
+                              status={mod.status}
+                              delay={0.1 + index * 0.05}
+                            />
+                          </div>
+                        </>
+                      )}
+                      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                        {mod.description}
+                      </p>
+                    </GlassCard>
+                  </FadeIn>
+                </li>
+              );
             })}
           </ul>
         </div>
 
         <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Full architecture stack, layered system registry, and engineering deployment log on the platform progress page.
+            Full architecture stack, layered system registry, and engineering deployment log on the
+            platform progress page.
           </p>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-            <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={cn(MARKETING_CTA_SECONDARY_CLASS, "w-full sm:w-auto sm:shrink-0")}
+            >
               <Link href={c.secondaryCta.href}>
                 {c.secondaryCta.label}
                 <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               </Link>
             </Button>
-            <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>
+            <Button
+              asChild
+              size="lg"
+              className={cn(MARKETING_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:shrink-0")}
+            >
               <Link href={c.cta.href}>
                 {c.cta.label}
                 <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />

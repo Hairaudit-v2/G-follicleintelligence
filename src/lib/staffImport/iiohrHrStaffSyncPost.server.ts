@@ -4,12 +4,22 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { processIiohrHrStaffSyncPost } from "@/src/lib/staffImport/iiohrHrStaffSyncPost.impl";
 import { syncIiohrHrStaffForTenant } from "@/src/lib/staffImport/iiohrHrStaffSync.server";
-import { createStaffSyncRun, finishStaffSyncRun } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
+import {
+  createStaffSyncRun,
+  finishStaffSyncRun,
+} from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
+import {
+  CRON_OR_WEBHOOK_SECRET_MIN_LENGTH,
+  timingSafeUtf8Equal,
+} from "@/src/lib/security/timingSafeSecret";
 
 async function assertTenantExists(tenantId: string): Promise<boolean> {
   const tid = tenantId.trim();
-  const { data, error } = await supabaseAdmin().from("fi_tenants").select("id").eq("id", tid).maybeSingle();
+  const { data, error } = await supabaseAdmin()
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tid)
+    .maybeSingle();
   if (error) return false;
   return Boolean(data);
 }

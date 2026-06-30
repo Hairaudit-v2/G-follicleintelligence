@@ -52,7 +52,11 @@ export function ConsultationQuoteRevenueActions(props: {
       })
     );
     setBusy(null);
-    setMsg(res.ok ? `Deposit invoice created (${res.invoice_id.slice(0, 8)}…). Create a payment request from the case screen if needed.` : res.error);
+    setMsg(
+      res.ok
+        ? `Deposit invoice created (${res.invoice_id.slice(0, 8)}…). Create a payment request from the case screen if needed.`
+        : res.error
+    );
   }
 
   return (
@@ -80,7 +84,8 @@ export function ConsultationQuoteRevenueActions(props: {
         </button>
       </div>
       <p className="mt-2 text-xs text-slate-500">
-        Deposit amounts follow active deposit rules or explicit amounts passed from the case workspace. Nothing here auto-charges a card.
+        Deposit amounts follow active deposit rules or explicit amounts passed from the case
+        workspace. Nothing here auto-charges a card.
       </p>
       {msg ? <p className="mt-2 text-sm text-slate-300">{msg}</p> : null}
     </FiSection>

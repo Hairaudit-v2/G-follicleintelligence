@@ -32,4 +32,6 @@ export const hairLossClassificationReviewBodySchema = z
   })
   .strict();
 
-export type HairLossClassificationReviewBody = z.infer<typeof hairLossClassificationReviewBodySchema>;
+export type HairLossClassificationReviewBody = z.infer<
+  typeof hairLossClassificationReviewBodySchema
+>;

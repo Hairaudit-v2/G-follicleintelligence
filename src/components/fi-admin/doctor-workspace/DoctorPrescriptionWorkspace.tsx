@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Pill } from "lucide-react";
 
-import type { DoctorPrescriptionItem, DoctorPrescriptionWorkspaceModel } from "@/src/lib/fiAdmin/doctorWorkspacePresentation";
+import type {
+  DoctorPrescriptionItem,
+  DoctorPrescriptionWorkspaceModel,
+} from "@/src/lib/fiAdmin/doctorWorkspacePresentation";
 import { doctorWorkspaceLinkButtonClass } from "@/src/lib/fiAdmin/doctorWorkspacePresentation";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +24,7 @@ function PrescriptionItemRow({ item }: { item: DoctorPrescriptionItem }) {
           ? "border-rose-500/25 bg-rose-500/[0.06]"
           : item.tone === "warn"
             ? "border-amber-500/20 bg-amber-500/[0.04]"
-            : "border-white/[0.06] bg-[#0c1220]/60",
+            : "border-white/[0.06] bg-[#0c1220]/60"
       )}
     >
       <div className="min-w-0">
@@ -41,7 +44,9 @@ function PrescriptionGroup({ title, items }: { title: string; items: DoctorPresc
   }
   return (
     <div>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">{title}</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+        {title}
+      </h3>
       <ul className="space-y-2">
         {items.map((item) => (
           <li key={item.id}>

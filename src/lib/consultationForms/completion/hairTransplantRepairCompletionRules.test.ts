@@ -38,15 +38,23 @@ describe("hairTransplantRepairCompletionRules", () => {
       consultationId: "c-rep",
       formInstanceId: "f-rep",
       templateSlug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
-      values: baseValues({ ai_recommended_plan_summary: "Stage FUE correction after counselling." }),
+      values: baseValues({
+        ai_recommended_plan_summary: "Stage FUE correction after counselling.",
+      }),
       completedAt: "2026-06-16T12:00:00.000Z",
     });
     assert.equal(s.templateSlug, HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG);
     assert.equal(s.outcomeType, "proceed_surgery");
-    assert.ok(s.repairConsultationCompletionSnapshot?.priorSurgeryHistoryLine.includes("Prior procedures"));
+    assert.ok(
+      s.repairConsultationCompletionSnapshot?.priorSurgeryHistoryLine.includes("Prior procedures")
+    );
     assert.ok(s.repairConsultationCompletionSnapshot?.mainRepairConcernLabel.length);
-    assert.ok(s.repairConsultationCompletionSnapshot?.donorRecipientRiskLine.includes("Donor depletion"));
-    assert.deepEqual(s.repairConsultationCompletionSnapshot?.correctiveOptionsLabels, ["Focal FUE / revision grafting"]);
+    assert.ok(
+      s.repairConsultationCompletionSnapshot?.donorRecipientRiskLine.includes("Donor depletion")
+    );
+    assert.deepEqual(s.repairConsultationCompletionSnapshot?.correctiveOptionsLabels, [
+      "Focal FUE / revision grafting",
+    ]);
     assert.equal(s.repairConsultationCompletionSnapshot?.hairauditRecommended, true);
     assert.equal(s.repairConsultationCompletionSnapshot?.surgeryosPlanningRecommended, true);
     assert.ok(s.repairConsultationCompletionSnapshot?.followUpUrgencyLabel.length);

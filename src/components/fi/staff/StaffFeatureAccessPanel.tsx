@@ -35,7 +35,10 @@ function recordFromMap(m: Map<FiFeatureKey, boolean>): Record<FiFeatureKey, bool
   return Object.fromEntries(m) as Record<FiFeatureKey, boolean>;
 }
 
-function diffPatch(before: Record<FiFeatureKey, boolean>, after: Record<FiFeatureKey, boolean>): Partial<Record<FiFeatureKey, boolean>> {
+function diffPatch(
+  before: Record<FiFeatureKey, boolean>,
+  after: Record<FiFeatureKey, boolean>
+): Partial<Record<FiFeatureKey, boolean>> {
   const patch: Partial<Record<FiFeatureKey, boolean>> = {};
   for (const k of listFiFeatureKeys()) {
     if (before[k] !== after[k]) patch[k] = after[k];
@@ -68,20 +71,33 @@ export function StaffFeatureAccessPanel(props: {
   const [workspacePending, startWorkspaceTransition] = useTransition();
   const [positionPending, startPositionTransition] = useTransition();
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [workspaceMessage, setWorkspaceMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [positionMessage, setPositionMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [workspaceMessage, setWorkspaceMessage] = useState<{
+    kind: "ok" | "err";
+    text: string;
+  } | null>(null);
+  const [positionMessage, setPositionMessage] = useState<{
+    kind: "ok" | "err";
+    text: string;
+  } | null>(null);
 
   const baseline = useMemo(() => {
-    const withTemplate = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), featureTemplateDefaults);
+    const withTemplate = applyPartialFeatureOverrides(
+      buildDefaultFeatureAccessAllEnabled(),
+      featureTemplateDefaults
+    );
     return recordFromMap(applyPartialFeatureOverrides(withTemplate, dbOverrides));
   }, [dbOverrides, featureTemplateDefaults]);
 
   const [values, setValues] = useState<Record<FiFeatureKey, boolean>>(baseline);
 
-  const initialWorkspaceSelection: FiWorkspaceProfileKey = initialExplicitWorkspaceProfile ?? "default";
-  const [workspaceSelection, setWorkspaceSelection] = useState<FiWorkspaceProfileKey>(initialWorkspaceSelection);
+  const initialWorkspaceSelection: FiWorkspaceProfileKey =
+    initialExplicitWorkspaceProfile ?? "default";
+  const [workspaceSelection, setWorkspaceSelection] =
+    useState<FiWorkspaceProfileKey>(initialWorkspaceSelection);
 
-  const [positionTypeSelection, setPositionTypeSelection] = useState<string>(staffPositionTypeId ?? "");
+  const [positionTypeSelection, setPositionTypeSelection] = useState<string>(
+    staffPositionTypeId ?? ""
+  );
 
   useEffect(() => {
     setValues(baseline);
@@ -141,7 +157,12 @@ export function StaffFeatureAccessPanel(props: {
       return;
     }
     startTransition(async () => {
-      const r = await saveStaffFeatureAccessPatchAction(tenantId, staffId, patch as Record<string, boolean>, null);
+      const r = await saveStaffFeatureAccessPatchAction(
+        tenantId,
+        staffId,
+        patch as Record<string, boolean>,
+        null
+      );
       if (!r.ok) {
         setMessage({ kind: "err", text: r.error });
         return;
@@ -182,8 +203,8 @@ export function StaffFeatureAccessPanel(props: {
     <div className="mt-6 border-t border-white/[0.08] pt-4">
       <h3 className="text-sm font-semibold text-slate-100">Position type (FI OS Stage 3.5)</h3>
       <p className="mt-1 text-xs text-slate-400">
-        Position type sets default workspace and feature visibility templates. Manual feature toggles below override those
-        defaults; per-staff feature access rows always win.
+        Position type sets default workspace and feature visibility templates. Manual feature
+        toggles below override those defaults; per-staff feature access rows always win.
       </p>
       <div className="mt-3 flex flex-wrap items-end gap-3">
         <label className="block min-w-[14rem]">
@@ -197,8 +218,7 @@ export function StaffFeatureAccessPanel(props: {
             <option value="">(none — use legacy staff role text only)</option>
             {positionTypes.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.title} ({p.code})
-                {p.tenant_id ? " — clinic-specific" : ""}
+                {p.title} ({p.code}){p.tenant_id ? " — clinic-specific" : ""}
               </option>
             ))}
           </select>
@@ -230,11 +250,18 @@ export function StaffFeatureAccessPanel(props: {
           </li>
         </ul>
       ) : (
-        <p className="mt-2 text-xs text-gray-500">No position type selected — workspace derivation falls back to legacy staff role heuristics.</p>
+        <p className="mt-2 text-xs text-gray-500">
+          No position type selected — workspace derivation falls back to legacy staff role
+          heuristics.
+        </p>
       )}
       {positionMessage ? (
         <p
-          className={positionMessage.kind === "ok" ? "mt-2 text-xs text-emerald-300" : "mt-2 text-xs text-rose-300"}
+          className={
+            positionMessage.kind === "ok"
+              ? "mt-2 text-xs text-emerald-300"
+              : "mt-2 text-xs text-rose-300"
+          }
           role="status"
         >
           {positionMessage.text}
@@ -243,17 +270,21 @@ export function StaffFeatureAccessPanel(props: {
 
       <h3 className="mt-8 text-sm font-semibold text-slate-100">Workspace profile (FI OS)</h3>
       <p className="mt-1 text-xs text-slate-400">
-        Suggests home layout and quick-action order. When set, this manual profile overrides automatic layout (including
-        position-type defaults). Stage 2 feature access overrides still apply — disabled modules stay hidden.
+        Suggests home layout and quick-action order. When set, this manual profile overrides
+        automatic layout (including position-type defaults). Stage 2 feature access overrides still
+        apply — disabled modules stay hidden.
       </p>
       {initialExplicitWorkspaceProfile ? (
         <p className="mt-1 text-xs font-medium text-amber-300">
-          Manual workspace override active: {FI_WORKSPACE_PROFILES[initialExplicitWorkspaceProfile].label}
+          Manual workspace override active:{" "}
+          {FI_WORKSPACE_PROFILES[initialExplicitWorkspaceProfile].label}
         </p>
       ) : inheritedWorkspaceFromPosition && selectedPosition ? (
         <p className="mt-1 text-xs text-slate-400">
           Inherited layout persona from position (until you choose a manual workspace below):{" "}
-          <span className="font-medium text-slate-200">{FI_WORKSPACE_PROFILES[inheritedWorkspaceFromPosition].label}</span>
+          <span className="font-medium text-slate-200">
+            {FI_WORKSPACE_PROFILES[inheritedWorkspaceFromPosition].label}
+          </span>
         </p>
       ) : null}
       <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -284,7 +315,11 @@ export function StaffFeatureAccessPanel(props: {
       </div>
       {workspaceMessage ? (
         <p
-          className={workspaceMessage.kind === "ok" ? "mt-2 text-xs text-emerald-300" : "mt-2 text-xs text-rose-300"}
+          className={
+            workspaceMessage.kind === "ok"
+              ? "mt-2 text-xs text-emerald-300"
+              : "mt-2 text-xs text-rose-300"
+          }
           role="status"
         >
           {workspaceMessage.text}
@@ -294,8 +329,8 @@ export function StaffFeatureAccessPanel(props: {
       <div className="mt-8 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
         <h3 className="text-sm font-semibold text-slate-100">Preview experience</h3>
         <p className="mt-1 text-xs text-slate-400">
-          How the FI OS shell will feel with the toggles above — layout order is suggestive; Stage 2 and route guards still
-          apply.
+          How the FI OS shell will feel with the toggles above — layout order is suggestive; Stage 2
+          and route guards still apply.
         </p>
         <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-slate-200">
           {experiencePreviewLines.map((line) => (
@@ -306,8 +341,8 @@ export function StaffFeatureAccessPanel(props: {
 
       <h3 className="mt-8 text-sm font-semibold text-slate-100">Feature access (FI OS)</h3>
       <p className="mt-1 text-xs text-slate-400">
-        Position type sets defaults; manual toggles override defaults. This is visibility only — route permissions are
-        unchanged.
+        Position type sets defaults; manual toggles override defaults. This is visibility only —
+        route permissions are unchanged.
       </p>
       <div className="mt-3 space-y-4">
         {FI_FEATURE_CATEGORY_ORDER.map((cat) => {
@@ -336,7 +371,9 @@ export function StaffFeatureAccessPanel(props: {
                       />
                       <span>
                         <span className="text-sm font-medium text-slate-100">{meta.label}</span>
-                        <span className="mt-0.5 block text-xs text-slate-400">{meta.description}</span>
+                        <span className="mt-0.5 block text-xs text-slate-400">
+                          {meta.description}
+                        </span>
                       </span>
                     </label>
                   );
@@ -356,7 +393,10 @@ export function StaffFeatureAccessPanel(props: {
           {pending ? "Saving…" : "Save feature access"}
         </button>
         {message ? (
-          <span className={message.kind === "ok" ? "text-xs text-emerald-300" : "text-xs text-rose-300"} role="status">
+          <span
+            className={message.kind === "ok" ? "text-xs text-emerald-300" : "text-xs text-rose-300"}
+            role="status"
+          >
             {message.text}
           </span>
         ) : null}

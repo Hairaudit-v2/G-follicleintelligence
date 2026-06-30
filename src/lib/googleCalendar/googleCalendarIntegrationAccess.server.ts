@@ -25,10 +25,9 @@ export class GoogleCalendarIntegrationAccessError extends Error {
   }
 }
 
-async function resolvePlatformAdminAuth(opts: GoogleCalendarIntegrationAccessOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: GoogleCalendarIntegrationAccessOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(opts.request ?? null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {

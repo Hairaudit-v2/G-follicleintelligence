@@ -4,14 +4,8 @@ import { describe, it, beforeEach, afterEach } from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-  buildGoogleCalendarOAuthScopes,
-  buildGoogleOAuthAuthorizeUrl,
-} from "./googleCalendarCore";
-import {
-  connectGoogleCalendar,
-  storeGoogleCalendarCredentials,
-} from "./googleCalendarAuth.server";
+import { buildGoogleCalendarOAuthScopes, buildGoogleOAuthAuthorizeUrl } from "./googleCalendarCore";
+import { connectGoogleCalendar, storeGoogleCalendarCredentials } from "./googleCalendarAuth.server";
 import { loadGoogleCalendarConnectionStatus } from "./googleCalendarConnectionStatus.server";
 import {
   handleGoogleCalendarOAuthCallback,
@@ -225,7 +219,8 @@ describe("CalendarOS GC-2 — OAuth authorize URL scopes", () => {
     process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
     process.env.GOOGLE_CALENDAR_CLIENT_ID = "client-id";
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = "client-secret";
-    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/oauth/callback";
+    process.env.GOOGLE_CALENDAR_REDIRECT_URI =
+      "https://app.example.com/api/google-calendar/oauth/callback";
     process.env.GOOGLE_CALENDAR_OAUTH_STATE_SECRET = STATE_SECRET;
   });
 
@@ -265,7 +260,8 @@ describe("CalendarOS GC-2 — OAuth callback route", () => {
     process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
     process.env.GOOGLE_CALENDAR_CLIENT_ID = "client-id";
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = "client-secret";
-    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/oauth/callback";
+    process.env.GOOGLE_CALENDAR_REDIRECT_URI =
+      "https://app.example.com/api/google-calendar/oauth/callback";
     process.env.GOOGLE_CALENDAR_OAUTH_STATE_SECRET = STATE_SECRET;
   });
 
@@ -391,7 +387,8 @@ describe("CalendarOS GC-2 — validate route", () => {
     process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
     process.env.GOOGLE_CALENDAR_CLIENT_ID = "client-id";
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = "client-secret";
-    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/oauth/callback";
+    process.env.GOOGLE_CALENDAR_REDIRECT_URI =
+      "https://app.example.com/api/google-calendar/oauth/callback";
     process.env.GOOGLE_CALENDAR_OAUTH_STATE_SECRET = STATE_SECRET;
   });
 
@@ -424,10 +421,9 @@ describe("CalendarOS GC-2 — validate route", () => {
     const fetchOverride: typeof fetch = async (input) => {
       const url = String(input);
       if (url.includes("oauth2.googleapis.com/token")) {
-        return new Response(
-          JSON.stringify({ access_token: "fresh-access", expires_in: 3600 }),
-          { status: 200 }
-        );
+        return new Response(JSON.stringify({ access_token: "fresh-access", expires_in: 3600 }), {
+          status: 200,
+        });
       }
       if (url.includes("googleapis.com/calendar/v3/calendars")) {
         return new Response(JSON.stringify({ summary: "Clinic Calendar" }), { status: 200 });

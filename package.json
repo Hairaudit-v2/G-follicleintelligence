@@ -46,6 +46,8 @@
     "calendar:perf-smoke": "cross-env NODE_ENV=development node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/calendar-loader-perf-smoke.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "format:ci": "prettier --write \"app/**/*.{ts,tsx,js,jsx,mjs}\" \"src/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"middleware.ts\" \"instrumentation.ts\" \".github/workflows/*.{yml,yaml}\"",
+    "format:check:ci": "prettier --check \"app/**/*.{ts,tsx,js,jsx,mjs}\" \"src/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"middleware.ts\" \"instrumentation.ts\" \".github/workflows/*.{yml,yaml}\"",
     "copy-check": "tsx scripts/copy-check.ts",
     "verify:fi-events": "tsx scripts/verify-fi-event-ingestion.ts",
     "supabase:start": "npx supabase start",

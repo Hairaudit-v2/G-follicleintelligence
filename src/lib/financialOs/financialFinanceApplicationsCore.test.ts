@@ -31,7 +31,10 @@ describe("financialFinanceApplicationsCore — application lifecycle attention",
   it("marks unresolved applications as requiring surgery pipeline attention", () => {
     const summary = buildFinanceApplicationAttentionSummary({
       todayYmd: "2026-06-10",
-      application: baseApp({ application_status: "submitted", submitted_at: "2026-06-09T00:00:00.000Z" }),
+      application: baseApp({
+        application_status: "submitted",
+        submitted_at: "2026-06-09T00:00:00.000Z",
+      }),
     });
     assert.equal(summary.finance_attention_required, true);
     assert.ok(summary.finance_attention_labels.includes("Finance Approval Pending"));
@@ -40,7 +43,10 @@ describe("financialFinanceApplicationsCore — application lifecycle attention",
   it("does not require attention for settled applications", () => {
     const summary = buildFinanceApplicationAttentionSummary({
       todayYmd: "2026-06-10",
-      application: baseApp({ application_status: "settled", settled_at: "2026-06-09T00:00:00.000Z" }),
+      application: baseApp({
+        application_status: "settled",
+        settled_at: "2026-06-09T00:00:00.000Z",
+      }),
     });
     assert.equal(summary.finance_attention_required, false);
   });
@@ -110,9 +116,27 @@ describe("financialFinanceApplicationsCore — application lifecycle attention",
 describe("financialFinanceApplicationsCore — analytics", () => {
   it("computes provider approval and rejection rates", () => {
     const apps = [
-      baseApp({ id: "a1", finance_provider_id: "p1", application_status: "approved", submitted_at: "2026-06-01T00:00:00.000Z", approved_at: "2026-06-05T00:00:00.000Z" }),
-      baseApp({ id: "a2", finance_provider_id: "p1", application_status: "rejected", submitted_at: "2026-06-01T00:00:00.000Z" }),
-      baseApp({ id: "a3", finance_provider_id: "p2", application_status: "settled", submitted_at: "2026-06-01T00:00:00.000Z", approved_at: "2026-06-03T00:00:00.000Z", settled_at: "2026-06-10T00:00:00.000Z" }),
+      baseApp({
+        id: "a1",
+        finance_provider_id: "p1",
+        application_status: "approved",
+        submitted_at: "2026-06-01T00:00:00.000Z",
+        approved_at: "2026-06-05T00:00:00.000Z",
+      }),
+      baseApp({
+        id: "a2",
+        finance_provider_id: "p1",
+        application_status: "rejected",
+        submitted_at: "2026-06-01T00:00:00.000Z",
+      }),
+      baseApp({
+        id: "a3",
+        finance_provider_id: "p2",
+        application_status: "settled",
+        submitted_at: "2026-06-01T00:00:00.000Z",
+        approved_at: "2026-06-03T00:00:00.000Z",
+        settled_at: "2026-06-10T00:00:00.000Z",
+      }),
     ];
     const names = new Map([
       ["p1", "Provider One"],
@@ -146,7 +170,10 @@ describe("financialFinanceApplicationsCore — surgery pipeline propagation", ()
       paymentRequests: [],
       payments: [],
       installmentPlans: [],
-      financeApplication: baseApp({ application_status: "under_review", submitted_at: "2026-06-09T00:00:00.000Z" }),
+      financeApplication: baseApp({
+        application_status: "under_review",
+        submitted_at: "2026-06-09T00:00:00.000Z",
+      }),
     });
     assert.equal(status.payment_attention_required, true);
     assert.ok(status.financeApplicationAttention.finance_attention_labels.length > 0);

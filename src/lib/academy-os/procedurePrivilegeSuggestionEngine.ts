@@ -27,58 +27,138 @@ type CompetencyMappingRule = {
 const COMPETENCY_TO_PRIVILEGE_RULES: CompetencyMappingRule[] = [
   {
     pattern: /^fue_extraction_level_1$/i,
-    suggestions: [{ procedureKey: "fue_extraction", privilegeLevel: "perform_supervised", reason: "Level 1 FUE extraction competency" }],
+    suggestions: [
+      {
+        procedureKey: "fue_extraction",
+        privilegeLevel: "perform_supervised",
+        reason: "Level 1 FUE extraction competency",
+      },
+    ],
   },
   {
     pattern: /^fue_extraction_level_[2-9]$/i,
-    suggestions: [{ procedureKey: "fue_extraction", privilegeLevel: "perform_independent", reason: "Advanced FUE extraction competency" }],
+    suggestions: [
+      {
+        procedureKey: "fue_extraction",
+        privilegeLevel: "perform_independent",
+        reason: "Advanced FUE extraction competency",
+      },
+    ],
   },
   {
     pattern: /^fue_implantation_level_1$/i,
-    suggestions: [{ procedureKey: "fue_implantation", privilegeLevel: "perform_supervised", reason: "Level 1 FUE implantation competency" }],
+    suggestions: [
+      {
+        procedureKey: "fue_implantation",
+        privilegeLevel: "perform_supervised",
+        reason: "Level 1 FUE implantation competency",
+      },
+    ],
   },
   {
     pattern: /^fue_implantation_level_2$/i,
-    suggestions: [{ procedureKey: "fue_implantation", privilegeLevel: "perform_independent", reason: "Level 2 FUE implantation competency" }],
+    suggestions: [
+      {
+        procedureKey: "fue_implantation",
+        privilegeLevel: "perform_independent",
+        reason: "Level 2 FUE implantation competency",
+      },
+    ],
   },
   {
     pattern: /^fue_implantation_level_[3-9]$/i,
-    suggestions: [{ procedureKey: "fue_implantation", privilegeLevel: "perform_independent", reason: "Advanced FUE implantation competency" }],
+    suggestions: [
+      {
+        procedureKey: "fue_implantation",
+        privilegeLevel: "perform_independent",
+        reason: "Advanced FUE implantation competency",
+      },
+    ],
   },
   {
     pattern: /^theatre_assistant_level_[12]$/i,
     suggestions: [
-      { procedureKey: "theatre_setup", privilegeLevel: "assist", reason: "Theatre assistant competency" },
-      { procedureKey: "graft_sorting", privilegeLevel: "assist", reason: "Theatre assistant competency" },
+      {
+        procedureKey: "theatre_setup",
+        privilegeLevel: "assist",
+        reason: "Theatre assistant competency",
+      },
+      {
+        procedureKey: "graft_sorting",
+        privilegeLevel: "assist",
+        reason: "Theatre assistant competency",
+      },
     ],
   },
   {
     pattern: /^hair_consultation_certified$/i,
-    suggestions: [{ procedureKey: "consultation", privilegeLevel: "perform_independent", reason: "Hair consultation certification" }],
+    suggestions: [
+      {
+        procedureKey: "consultation",
+        privilegeLevel: "perform_independent",
+        reason: "Hair consultation certification",
+      },
+    ],
   },
   {
     pattern: /^infection_control_protocol$/i,
-    suggestions: [{ procedureKey: "theatre_setup", privilegeLevel: "assist", reason: "Infection control protocol competency" }],
+    suggestions: [
+      {
+        procedureKey: "theatre_setup",
+        privilegeLevel: "assist",
+        reason: "Infection control protocol competency",
+      },
+    ],
   },
   {
     pattern: /^donor_assessment/i,
-    suggestions: [{ procedureKey: "donor_assessment", privilegeLevel: "perform_supervised", reason: "Donor assessment competency" }],
+    suggestions: [
+      {
+        procedureKey: "donor_assessment",
+        privilegeLevel: "perform_supervised",
+        reason: "Donor assessment competency",
+      },
+    ],
   },
   {
     pattern: /^hairline_design/i,
-    suggestions: [{ procedureKey: "hairline_design", privilegeLevel: "perform_supervised", reason: "Hairline design competency" }],
+    suggestions: [
+      {
+        procedureKey: "hairline_design",
+        privilegeLevel: "perform_supervised",
+        reason: "Hairline design competency",
+      },
+    ],
   },
   {
     pattern: /^graft_sorting/i,
-    suggestions: [{ procedureKey: "graft_sorting", privilegeLevel: "assist", reason: "Graft sorting competency" }],
+    suggestions: [
+      {
+        procedureKey: "graft_sorting",
+        privilegeLevel: "assist",
+        reason: "Graft sorting competency",
+      },
+    ],
   },
   {
     pattern: /^prp/i,
-    suggestions: [{ procedureKey: "prp_assistance", privilegeLevel: "perform_supervised", reason: "PRP competency projection" }],
+    suggestions: [
+      {
+        procedureKey: "prp_assistance",
+        privilegeLevel: "perform_supervised",
+        reason: "PRP competency projection",
+      },
+    ],
   },
   {
     pattern: /^exosomes/i,
-    suggestions: [{ procedureKey: "exosomes_assistance", privilegeLevel: "perform_supervised", reason: "Exosomes competency projection" }],
+    suggestions: [
+      {
+        procedureKey: "exosomes_assistance",
+        privilegeLevel: "perform_supervised",
+        reason: "Exosomes competency projection",
+      },
+    ],
   },
 ];
 

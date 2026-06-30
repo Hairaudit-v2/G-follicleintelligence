@@ -2,8 +2,17 @@
  * GET /api/tenants/[tenantId]/bookings?start=&end=
  * POST /api/tenants/[tenantId]/bookings
  */
-import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  assertCrmTenantReadAllowed,
+  assertCrmTenantWriteAllowed,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import {
   bookingCreateBodySchema,
   bookingListQuerySchema,

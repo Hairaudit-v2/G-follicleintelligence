@@ -71,7 +71,9 @@ export type ImagingOsImageQualityMetadataInput = {
   metadata?: Record<string, unknown>;
 };
 
-export type ImagingOsPipelineQualityResult = ImageQualityResult | ImagingOsImageQualityEvaluationResult;
+export type ImagingOsPipelineQualityResult =
+  | ImageQualityResult
+  | ImagingOsImageQualityEvaluationResult;
 
 const ALLOWED_CONTENT_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 
@@ -95,7 +97,10 @@ function normalizeContentType(value: string | undefined): string | undefined {
   return value.trim().toLowerCase();
 }
 
-function readMetadataNumber(metadata: Record<string, unknown> | undefined, key: string): number | undefined {
+function readMetadataNumber(
+  metadata: Record<string, unknown> | undefined,
+  key: string
+): number | undefined {
   const value = metadata?.[key];
   if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
   return value;
@@ -204,7 +209,13 @@ export function evaluateImageQualityFromMetadata(
     pushSignal(signals, "content_type", "fail", score, message);
     blockers.push(message);
   } else {
-    pushSignal(signals, "content_type", "pass", score, `Supported content type: ${normalizedContentType}`);
+    pushSignal(
+      signals,
+      "content_type",
+      "pass",
+      score,
+      `Supported content type: ${normalizedContentType}`
+    );
   }
 
   const width = input.width;
@@ -279,11 +290,19 @@ export function evaluateImageQualityFromMetadata(
       score,
       `File size below category expectation for ${input.canonical_category ?? "unknown"}`
     );
-    warnings.push(`File size below category expectation for ${input.canonical_category ?? "unknown"}`);
+    warnings.push(
+      `File size below category expectation for ${input.canonical_category ?? "unknown"}`
+    );
   }
 
   if (!hasWidth || !hasHeight) {
-    pushSignal(signals, "aspect_ratio", "unknown", score, "Aspect ratio not evaluated (dimensions missing)");
+    pushSignal(
+      signals,
+      "aspect_ratio",
+      "unknown",
+      score,
+      "Aspect ratio not evaluated (dimensions missing)"
+    );
   } else if (!impossibleDimensions) {
     const aspectRatio = width! / height!;
     if (aspectRatio > EXTREME_ASPECT_RATIO_MAX || aspectRatio < EXTREME_ASPECT_RATIO_MIN) {
@@ -297,7 +316,13 @@ export function evaluateImageQualityFromMetadata(
       );
       warnings.push("Extreme aspect ratio may reduce clinical usefulness");
     } else {
-      pushSignal(signals, "aspect_ratio", "pass", score, `Aspect ratio acceptable (${aspectRatio.toFixed(2)})`);
+      pushSignal(
+        signals,
+        "aspect_ratio",
+        "pass",
+        score,
+        `Aspect ratio acceptable (${aspectRatio.toFixed(2)})`
+      );
     }
   }
 
@@ -331,10 +356,22 @@ export function evaluateImageQualityFromMetadata(
       blockers.push(message);
     } else if (blurScore >= 0.4) {
       score -= 15;
-      pushSignal(signals, "blur_score", "warning", score, `Moderate blur score (${blurScore.toFixed(2)})`);
+      pushSignal(
+        signals,
+        "blur_score",
+        "warning",
+        score,
+        `Moderate blur score (${blurScore.toFixed(2)})`
+      );
       warnings.push("Moderate blur detected in metadata");
     } else {
-      pushSignal(signals, "blur_score", "pass", score, `Blur score acceptable (${blurScore.toFixed(2)})`);
+      pushSignal(
+        signals,
+        "blur_score",
+        "pass",
+        score,
+        `Blur score acceptable (${blurScore.toFixed(2)})`
+      );
     }
   }
 
@@ -452,9 +489,11 @@ export function evaluateImageQualityFromMetadata(
   };
 }
 
-export function canUseImageForClinicalIntelligence(
-  result: ImagingOsImageQualityEvaluationResult
-): { usable: boolean; reason: string; blockers: string[] } {
+export function canUseImageForClinicalIntelligence(result: ImagingOsImageQualityEvaluationResult): {
+  usable: boolean;
+  reason: string;
+  blockers: string[];
+} {
   if (result.quality_status === "invalid") {
     return {
       usable: false,

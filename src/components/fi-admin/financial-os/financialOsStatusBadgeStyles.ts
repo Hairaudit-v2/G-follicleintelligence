@@ -52,11 +52,27 @@ export function resolveFinancialOsRecordStatusTone(status: string): FinancialOsS
   if (!normalized) return "neutral";
   if (EXACT_STATUS_TONES[normalized]) return EXACT_STATUS_TONES[normalized];
   if (normalized.includes("cancel")) return "cancelled";
-  if (normalized.includes("fail") || normalized.includes("reject") || normalized.includes("overdue")) return "danger";
-  if (normalized.includes("pending") || normalized.includes("wait") || normalized.includes("draft")) return "pending";
-  if (normalized.includes("approv") || normalized.includes("success") || normalized.includes("paid") || normalized.includes("settl")) {
+  if (
+    normalized.includes("fail") ||
+    normalized.includes("reject") ||
+    normalized.includes("overdue")
+  )
+    return "danger";
+  if (normalized.includes("pending") || normalized.includes("wait") || normalized.includes("draft"))
+    return "pending";
+  if (
+    normalized.includes("approv") ||
+    normalized.includes("success") ||
+    normalized.includes("paid") ||
+    normalized.includes("settl")
+  ) {
     return "success";
   }
-  if (normalized.includes("review") || normalized.includes("progress") || normalized.includes("partial")) return "review";
+  if (
+    normalized.includes("review") ||
+    normalized.includes("progress") ||
+    normalized.includes("partial")
+  )
+    return "review";
   return "neutral";
 }

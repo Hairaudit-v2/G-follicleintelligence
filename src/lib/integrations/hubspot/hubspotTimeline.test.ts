@@ -58,7 +58,8 @@ function makeSupabase(resolve: (ctx: QueryCtx) => Resolved): SupabaseClient {
     select: () => buildSelect(table),
     insert: (row: Record<string, unknown>) => ({
       select: () => ({
-        single: async () => resolve({ table, filters: {}, ordered: false, op: "insert", insertRow: row }),
+        single: async () =>
+          resolve({ table, filters: {}, ordered: false, op: "insert", insertRow: row }),
       }),
     }),
     update: () => ({
@@ -76,7 +77,8 @@ describe("resolveHubspotContactIdentity", () => {
     const supabase = makeSupabase((ctx) => {
       if (ctx.table === "fi_person_source_ids") return { data: { person_id: PERSON }, error: null };
       if (ctx.table === "fi_patients") return { data: { id: PATIENT }, error: null };
-      if (ctx.table === "fi_crm_leads") return { data: { id: LEAD, patient_id: PATIENT }, error: null };
+      if (ctx.table === "fi_crm_leads")
+        return { data: { id: LEAD, patient_id: PATIENT }, error: null };
       return OK_NULL;
     });
     const r = await resolveHubspotContactIdentity(supabase, TENANT, { hubspotContactId: "HS-1" });
@@ -130,7 +132,10 @@ describe("resolveHubspotContactIdentity", () => {
 
   it("returns null when nothing matches", async () => {
     const supabase = makeSupabase(() => OK_NULL);
-    const r = await resolveHubspotContactIdentity(supabase, TENANT, { hubspotContactId: "nope", email: "no@x.com" });
+    const r = await resolveHubspotContactIdentity(supabase, TENANT, {
+      hubspotContactId: "nope",
+      email: "no@x.com",
+    });
     assert.equal(r, null);
   });
 });
@@ -172,7 +177,12 @@ describe("appendPatientTimelineEvent", () => {
   it("rejects when no anchor is provided", async () => {
     const supabase = makeSupabase(() => OK_NULL);
     await assert.rejects(() =>
-      appendPatientTimelineEvent(supabase, { ...base, patientId: null, personId: null, crmLeadId: null })
+      appendPatientTimelineEvent(supabase, {
+        ...base,
+        patientId: null,
+        personId: null,
+        crmLeadId: null,
+      })
     );
   });
 });
@@ -183,7 +193,8 @@ describe("processHubspotContactWebhook", () => {
     const supabase = makeSupabase((ctx) => {
       if (ctx.table === "fi_person_source_ids") return { data: { person_id: PERSON }, error: null };
       if (ctx.table === "fi_patients") return { data: { id: PATIENT }, error: null };
-      if (ctx.table === "fi_crm_leads") return { data: { id: LEAD, patient_id: PATIENT }, error: null };
+      if (ctx.table === "fi_crm_leads")
+        return { data: { id: LEAD, patient_id: PATIENT }, error: null };
       if (ctx.table === "fi_patient_timeline" && ctx.op === "insert") {
         inserts += 1;
         return { data: { id: "TL-9" }, error: null };
@@ -260,7 +271,8 @@ describe("withHubspotTimelineAudit", () => {
     const supabase = makeSupabase((ctx) => {
       if (ctx.table === "fi_integration_webhook_events" && ctx.op === "insert") {
         const hash = String(ctx.insertRow?.payload_hash);
-        if (rows.some((r) => r.hash === hash)) return { data: null, error: { code: "23505", message: "dup" } };
+        if (rows.some((r) => r.hash === hash))
+          return { data: null, error: { code: "23505", message: "dup" } };
         const id = `E-${++seq}`;
         rows.push({ id, status: "received", hash });
         return { data: { id }, error: null };
@@ -301,7 +313,8 @@ describe("withHubspotTimelineAudit", () => {
 describe("loadPatientTimeline", () => {
   it("returns rows anchored on the patient or its person", async () => {
     const supabase = makeSupabase((ctx) => {
-      if (ctx.table === "fi_patients") return { data: { id: PATIENT, person_id: PERSON }, error: null };
+      if (ctx.table === "fi_patients")
+        return { data: { id: PATIENT, person_id: PERSON }, error: null };
       if (ctx.table === "fi_patient_timeline") {
         return {
           data: [

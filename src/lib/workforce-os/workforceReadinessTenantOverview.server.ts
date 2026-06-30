@@ -78,7 +78,12 @@ export async function buildTenantWorkforceReadinessOverview(
 
   const rowsByStaff = new Map<
     string,
-    Array<{ source_system: string; source_staff_id: string; source_url: string | null; metadata: unknown }>
+    Array<{
+      source_system: string;
+      source_staff_id: string;
+      source_url: string | null;
+      metadata: unknown;
+    }>
   >();
 
   for (const raw of data ?? []) {

@@ -233,7 +233,11 @@ export async function renewGoogleCalendarWebhookSubscription(
 
   const row = existing as WebhookSubscriptionRow;
   const result = await createGoogleCalendarWebhookSubscription(
-    { tenantId: input.tenantId, googleCalendarId: row.google_calendar_id, integrationId: row.integration_id },
+    {
+      tenantId: input.tenantId,
+      googleCalendarId: row.google_calendar_id,
+      integrationId: row.integration_id,
+    },
     opts
   );
 
@@ -352,7 +356,12 @@ export async function handleGoogleCalendarWebhookNotification(
   const resourceId = input.resourceId.trim();
 
   if (!channelId || !resourceId) {
-    return { ok: false, status: 400, outcome: "rejected", error: "Missing channel or resource id." };
+    return {
+      ok: false,
+      status: 400,
+      outcome: "rejected",
+      error: "Missing channel or resource id.",
+    };
   }
 
   const { data: subscription, error: loadError } = await supabase
@@ -465,14 +474,21 @@ export async function handleGoogleCalendarWebhookNotification(
     opts
   );
 
-  return { ok: true, status: 200, outcome: resourceState === "sync" ? "sync_triggered" : "accepted" };
+  return {
+    ok: true,
+    status: 200,
+    outcome: resourceState === "sync" ? "sync_triggered" : "accepted",
+  };
 }
 
 /** Renew all expiring webhook subscriptions (called from scheduled cron). */
 export async function renewExpiringGoogleCalendarWebhookSubscriptions(
   opts: ServerOpts = {}
 ): Promise<{ renewed: number; failed: number }> {
-  const expiring = await listExpiringGoogleCalendarWebhookSubscriptions({ thresholdHours: 24 }, opts);
+  const expiring = await listExpiringGoogleCalendarWebhookSubscriptions(
+    { thresholdHours: 24 },
+    opts
+  );
   let renewed = 0;
   let failed = 0;
 

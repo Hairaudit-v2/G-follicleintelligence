@@ -10,7 +10,9 @@ import {
 const TENANT = "00000000-0000-4000-8000-000000000001";
 const NOW = new Date("2026-06-10T12:00:00.000Z").getTime();
 
-function cronRun(p: Partial<StaffSyncRunHealthRef> & Pick<StaffSyncRunHealthRef, "status" | "started_at">): StaffSyncRunHealthRef {
+function cronRun(
+  p: Partial<StaffSyncRunHealthRef> & Pick<StaffSyncRunHealthRef, "status" | "started_at">
+): StaffSyncRunHealthRef {
   return {
     finished_at: null,
     error_message: null,
@@ -84,7 +86,11 @@ test("recent_failure_count counts failed cron rows in window", () => {
     runs: [
       cronRun({ status: "failed", started_at: "2026-06-10T09:00:00.000Z", error_message: "a" }),
       cronRun({ status: "failed", started_at: "2026-06-09T09:00:00.000Z", error_message: "b" }),
-      cronRun({ status: "success", started_at: "2026-06-08T09:00:00.000Z", finished_at: "2026-06-08T09:01:00.000Z" }),
+      cronRun({
+        status: "success",
+        started_at: "2026-06-08T09:00:00.000Z",
+        finished_at: "2026-06-08T09:01:00.000Z",
+      }),
     ],
     staleWarningHours: 48,
     nowMs: NOW,
@@ -105,6 +111,16 @@ test("missing env tenant yields not ok and descriptive last_error", () => {
 });
 
 test("parseStaffSyncStaleWarningHours respects env", () => {
-  assert.equal(parseStaffSyncStaleWarningHours((k) => (k === "STAFF_SYNC_STALE_WARNING_HOURS" ? "72" : undefined)), 72);
-  assert.equal(parseStaffSyncStaleWarningHours((k) => (k === "STAFF_SYNC_STALE_WARNING_HOURS" ? "0" : undefined)), 48);
+  assert.equal(
+    parseStaffSyncStaleWarningHours((k) =>
+      k === "STAFF_SYNC_STALE_WARNING_HOURS" ? "72" : undefined
+    ),
+    72
+  );
+  assert.equal(
+    parseStaffSyncStaleWarningHours((k) =>
+      k === "STAFF_SYNC_STALE_WARNING_HOURS" ? "0" : undefined
+    ),
+    48
+  );
 });

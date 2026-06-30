@@ -3,10 +3,7 @@ import { randomUUID } from "node:crypto";
 import { describe, it, beforeEach } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-  publishFiEvent,
-  FiEventValidationError,
-} from "@/src/lib/events/fiEventPublisher.server";
+import { publishFiEvent, FiEventValidationError } from "@/src/lib/events/fiEventPublisher.server";
 import {
   computeFiEventRetryDelayMs,
   processFiEventDeliveries,

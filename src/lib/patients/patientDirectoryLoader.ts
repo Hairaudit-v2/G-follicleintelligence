@@ -76,7 +76,10 @@ async function loadPersonIdsMatchingSearch(
   return (data ?? []).map((r) => String((r as { id: string }).id));
 }
 
-async function loadPatientIdsWithActiveCases(supabase: SupabaseClient, tenantId: string): Promise<string[]> {
+async function loadPatientIdsWithActiveCases(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<string[]> {
   const { data, error } = await supabase
     .from("fi_cases")
     .select("foundation_patient_id, status")
@@ -93,7 +96,11 @@ async function loadPatientIdsWithActiveCases(supabase: SupabaseClient, tenantId:
   return Array.from(out);
 }
 
-async function loadPatientIdsWithFutureBookings(supabase: SupabaseClient, tenantId: string, nowIso: string): Promise<string[]> {
+async function loadPatientIdsWithFutureBookings(
+  supabase: SupabaseClient,
+  tenantId: string,
+  nowIso: string
+): Promise<string[]> {
   const { data, error } = await supabase
     .from("fi_bookings")
     .select("patient_id, start_at, booking_status")
@@ -192,7 +199,9 @@ async function loadPatientIdsWithLeadSource(
     .eq("tenant_id", tenantId)
     .eq("source_system", src);
   if (mapErr) throw new Error(mapErr.message);
-  const leadIds = uniqueStrings((mapRows ?? []).map((r) => String((r as { lead_id: string }).lead_id)));
+  const leadIds = uniqueStrings(
+    (mapRows ?? []).map((r) => String((r as { lead_id: string }).lead_id))
+  );
   if (leadIds.length) {
     const { data: leads, error: le } = await supabase
       .from("fi_crm_leads")
@@ -216,7 +225,9 @@ async function loadPatientIdsWithLeadSource(
   for (const row of metaLeads ?? []) {
     const meta = (row as { metadata: unknown }).metadata;
     const m =
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {};
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {};
     const sys =
       typeof m.source_system === "string"
         ? m.source_system.trim()
@@ -232,7 +243,10 @@ async function loadPatientIdsWithLeadSource(
   return Array.from(out);
 }
 
-export async function loadPatientDirectoryLeadSourceOptions(tenantId: string, client?: SupabaseClient): Promise<string[]> {
+export async function loadPatientDirectoryLeadSourceOptions(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<string[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
   const { data, error } = await supabase
@@ -282,7 +296,10 @@ export async function loadPatientDirectorySummary(
 
 const MAX_IDS_IN_NOT_IN = 180;
 
-function applyPatientIdNotIn(query: { not: (col: string, op: string, val: string) => unknown }, ids: string[]): unknown {
+function applyPatientIdNotIn(
+  query: { not: (col: string, op: string, val: string) => unknown },
+  ids: string[]
+): unknown {
   if (!ids.length) return query;
   const slice = ids.slice(0, MAX_IDS_IN_NOT_IN);
   return query.not("id", "in", `(${slice.join(",")})`);
@@ -318,13 +335,22 @@ export async function loadPatientDirectoryPage(
   let restrictPatientIds: string[] | null = null;
 
   if (query.hasActiveCase === true) {
-    restrictPatientIds = intersectSets(restrictPatientIds, await loadPatientIdsWithActiveCases(supabase, tid));
+    restrictPatientIds = intersectSets(
+      restrictPatientIds,
+      await loadPatientIdsWithActiveCases(supabase, tid)
+    );
   }
   if (query.hasFutureBooking === true) {
-    restrictPatientIds = intersectSets(restrictPatientIds, await loadPatientIdsWithFutureBookings(supabase, tid, nowIso));
+    restrictPatientIds = intersectSets(
+      restrictPatientIds,
+      await loadPatientIdsWithFutureBookings(supabase, tid, nowIso)
+    );
   }
   if (query.norwoodMin || query.norwoodMax) {
-    restrictPatientIds = intersectSets(restrictPatientIds, await loadPatientIdsInNorwoodRange(supabase, tid, query));
+    restrictPatientIds = intersectSets(
+      restrictPatientIds,
+      await loadPatientIdsInNorwoodRange(supabase, tid, query)
+    );
   }
   if (query.lastVisitFrom || query.lastVisitTo) {
     restrictPatientIds = intersectSets(
@@ -343,9 +369,12 @@ export async function loadPatientDirectoryPage(
     return emptyResult();
   }
 
-  const excludeActiveCase = query.hasActiveCase === false ? await loadPatientIdsWithActiveCases(supabase, tid) : [];
+  const excludeActiveCase =
+    query.hasActiveCase === false ? await loadPatientIdsWithActiveCases(supabase, tid) : [];
   const excludeFutureBooking =
-    query.hasFutureBooking === false ? await loadPatientIdsWithFutureBookings(supabase, tid, nowIso) : [];
+    query.hasFutureBooking === false
+      ? await loadPatientIdsWithFutureBookings(supabase, tid, nowIso)
+      : [];
 
   const ascending = query.sort === "created_asc";
   const from = (query.page - 1) * query.pageSize;
@@ -382,7 +411,9 @@ export async function loadPatientDirectoryPage(
     return { rows: [], total: count ?? 0, query, summary, leadSourceOptions };
   }
 
-  const personIds = uniqueStrings((patRows ?? []).map((r) => String((r as { person_id: string }).person_id)));
+  const personIds = uniqueStrings(
+    (patRows ?? []).map((r) => String((r as { person_id: string }).person_id))
+  );
 
   const { data: personRows, error: pe } = await supabase
     .from("fi_persons")
@@ -401,25 +432,32 @@ export async function loadPatientDirectoryPage(
     );
   }
 
-  const [{ data: caseRows }, { data: leadRows }, { data: bookRows }, { data: clinicalRows }] = await Promise.all([
-    supabase
-      .from("fi_cases")
-      .select("foundation_patient_id, status")
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .in("foundation_patient_id", patientIds),
-    supabase.from("fi_crm_leads").select("id, patient_id, metadata").eq("tenant_id", tid).in("patient_id", patientIds),
-    supabase
-      .from("fi_bookings")
-      .select("id, patient_id, start_at, booking_status, booking_type, title")
-      .eq("tenant_id", tid)
-      .in("patient_id", patientIds),
-    supabase
-      .from("fi_patient_clinical_details")
-      .select("patient_id, norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern")
-      .eq("tenant_id", tid)
-      .in("patient_id", patientIds),
-  ]);
+  const [{ data: caseRows }, { data: leadRows }, { data: bookRows }, { data: clinicalRows }] =
+    await Promise.all([
+      supabase
+        .from("fi_cases")
+        .select("foundation_patient_id, status")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .in("foundation_patient_id", patientIds),
+      supabase
+        .from("fi_crm_leads")
+        .select("id, patient_id, metadata")
+        .eq("tenant_id", tid)
+        .in("patient_id", patientIds),
+      supabase
+        .from("fi_bookings")
+        .select("id, patient_id, start_at, booking_status, booking_type, title")
+        .eq("tenant_id", tid)
+        .in("patient_id", patientIds),
+      supabase
+        .from("fi_patient_clinical_details")
+        .select(
+          "patient_id, norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern"
+        )
+        .eq("tenant_id", tid)
+        .in("patient_id", patientIds),
+    ]);
 
   const pageLeadIds = uniqueStrings((leadRows ?? []).map((r) => String((r as { id: string }).id)));
   const leadSourceByLeadId = new Map<string, string>();
@@ -456,7 +494,9 @@ export async function loadPatientDirectoryPage(
     leadCountByPatient.set(pidStr, (leadCountByPatient.get(pidStr) ?? 0) + 1);
     const meta = (row as { metadata: unknown }).metadata;
     const metaObj =
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : {};
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : {};
     const metas = leadMetasByPatient.get(pidStr) ?? [];
     metas.push(metaObj);
     leadMetasByPatient.set(pidStr, metas);

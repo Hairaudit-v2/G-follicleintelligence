@@ -4,7 +4,10 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
+import {
+  CRON_OR_WEBHOOK_SECRET_MIN_LENGTH,
+  timingSafeUtf8Equal,
+} from "@/src/lib/security/timingSafeSecret";
 
 export class CronEnvError extends Error {
   constructor(public readonly envKey: string) {
@@ -63,7 +66,9 @@ export function assertCronAuthorized(
   const altName = options?.alternateTimingSafeHeaderName?.trim();
   const alt = altName ? req.headers.get(altName)?.trim() || null : null;
 
-  const candidates = [...new Set([bearer, alt].filter((x): x is string => Boolean(x && x.length > 0)))];
+  const candidates = [
+    ...new Set([bearer, alt].filter((x): x is string => Boolean(x && x.length > 0))),
+  ];
   if (candidates.length === 0) {
     return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
   }

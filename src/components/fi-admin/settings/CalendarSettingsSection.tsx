@@ -121,9 +121,7 @@ export function CalendarSettingsSection(props: {
               className={inputClass}
               value={settings.dayStartHour}
               disabled={disabled}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, dayStartHour: Number(e.target.value) }))
-              }
+              onChange={(e) => setSettings((s) => ({ ...s, dayStartHour: Number(e.target.value) }))}
             />
           </label>
           <label className={labelClass}>
@@ -135,9 +133,7 @@ export function CalendarSettingsSection(props: {
               className={inputClass}
               value={settings.dayEndHour}
               disabled={disabled}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, dayEndHour: Number(e.target.value) }))
-              }
+              onChange={(e) => setSettings((s) => ({ ...s, dayEndHour: Number(e.target.value) }))}
             />
           </label>
           <label className={labelClass}>
@@ -192,7 +188,8 @@ export function CalendarSettingsSection(props: {
               onChange={(e) =>
                 setSettings((s) => ({
                   ...s,
-                  resourceColumnMode: e.target.value as FiCalendarSettingsDocument["resourceColumnMode"],
+                  resourceColumnMode: e.target
+                    .value as FiCalendarSettingsDocument["resourceColumnMode"],
                 }))
               }
             >
@@ -221,7 +218,9 @@ export function CalendarSettingsSection(props: {
             type="checkbox"
             checked={settings.showCancelledBookings}
             disabled={disabled}
-            onChange={(e) => setSettings((s) => ({ ...s, showCancelledBookings: e.target.checked }))}
+            onChange={(e) =>
+              setSettings((s) => ({ ...s, showCancelledBookings: e.target.checked }))
+            }
             className="rounded border-white/20"
           />
           Show cancelled bookings by default
@@ -235,9 +234,7 @@ export function CalendarSettingsSection(props: {
             className={`${inputClass} max-w-xs`}
             value={settings.bufferMinutes}
             disabled={disabled}
-            onChange={(e) =>
-              setSettings((s) => ({ ...s, bufferMinutes: Number(e.target.value) }))
-            }
+            onChange={(e) => setSettings((s) => ({ ...s, bufferMinutes: Number(e.target.value) }))}
           />
         </label>
       </section>

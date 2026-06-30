@@ -12,7 +12,10 @@ type ReceptionOsPilotReviewPanelProps = {
   report: ReceptionPilotReviewReport;
 };
 
-export function ReceptionOsPilotReviewPanel({ tenantId, report }: ReceptionOsPilotReviewPanelProps) {
+export function ReceptionOsPilotReviewPanel({
+  tenantId,
+  report,
+}: ReceptionOsPilotReviewPanelProps) {
   const exportBase = `/api/tenants/${tenantId}/reception-os/export`;
 
   return (
@@ -67,7 +70,10 @@ export function ReceptionOsPilotReviewPanel({ tenantId, report }: ReceptionOsPil
           icon={FileBarChart}
           items={
             report.topWorkflowIssues.length > 0
-              ? report.topWorkflowIssues.map((issue) => ({ label: issue.label, value: String(issue.count) }))
+              ? report.topWorkflowIssues.map((issue) => ({
+                  label: issue.label,
+                  value: String(issue.count),
+                }))
               : [{ label: "No workflow friction reported", value: "—" }]
           }
         />
@@ -94,7 +100,7 @@ function ExportLink({ href, label }: { href: string; label: string }) {
       href={href}
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
-        "inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-cyan-100/95",
+        "inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-cyan-100/95"
       )}
       download
     >
@@ -117,7 +123,9 @@ function MetricsList({
     <div>
       <div className="mb-2 flex items-center gap-2">
         {Icon ? <Icon className="h-3.5 w-3.5 text-cyan-400/70" aria-hidden /> : null}
-        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</p>
+        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          {title}
+        </p>
       </div>
       <ul className="space-y-1.5">
         {items.map((item) => (
@@ -133,7 +141,11 @@ function MetricsList({
 
 function formatMoney(amount: number, currency: string): string {
   try {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
   } catch {
     return `${currency} ${amount.toLocaleString()}`;
   }

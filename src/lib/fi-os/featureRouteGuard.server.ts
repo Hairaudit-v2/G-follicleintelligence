@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
-import { buildFiOsModuleUnavailableHref, resolveFiFeatureRouteDecision } from "@/src/lib/fi-os/featureRouteGuardPolicy";
+import {
+  buildFiOsModuleUnavailableHref,
+  resolveFiFeatureRouteDecision,
+} from "@/src/lib/fi-os/featureRouteGuardPolicy";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export async function enforceFiFeatureRouteOrRedirect(opts: {

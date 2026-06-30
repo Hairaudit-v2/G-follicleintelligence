@@ -20,7 +20,9 @@ export const RECEPTION_BOARD_COLUMN_IDS = [
 
 export type ReceptionBoardColumnId = (typeof RECEPTION_BOARD_COLUMN_IDS)[number];
 
-export function parseReceptionFlowPhase(metadata: Record<string, unknown> | null | undefined): ReceptionFlowPhase | null {
+export function parseReceptionFlowPhase(
+  metadata: Record<string, unknown> | null | undefined
+): ReceptionFlowPhase | null {
   const v = metadata?.[FI_RECEPTION_FLOW_PHASE_KEY];
   if (v === "consultation" || v === "treatment") return v;
   return null;

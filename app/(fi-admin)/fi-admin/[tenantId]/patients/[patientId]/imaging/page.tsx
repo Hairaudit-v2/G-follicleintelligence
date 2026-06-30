@@ -32,7 +32,10 @@ export default async function ImagingOsPatientPage({
   const pid = patientId?.trim();
   if (!tid || !pid) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
@@ -50,15 +53,27 @@ export default async function ImagingOsPatientPage({
       </Link>
 
       <header className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">ImagingOS</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">Clinical imaging workspace</h1>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">
+          ImagingOS
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+          Clinical imaging workspace
+        </h1>
         <p className="max-w-3xl text-sm text-slate-400">
-          Longitudinal image library, photography protocols, scalp mapping, annotations, compare modes, and AI-ready job
-          hooks — all tenant-scoped and linked to this foundation patient for Patient Twin and AuditOS.
+          Longitudinal image library, photography protocols, scalp mapping, annotations, compare
+          modes, and AI-ready job hooks — all tenant-scoped and linked to this foundation patient
+          for Patient Twin and AuditOS.
         </p>
       </header>
 
-      <Suspense fallback={<div className="h-48 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="h-48 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
+            aria-hidden
+          />
+        }
+      >
         <ImagingOsWorkspace tenantId={tid} patientId={pid} initial={initial} />
       </Suspense>
     </div>

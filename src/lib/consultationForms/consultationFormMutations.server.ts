@@ -18,8 +18,14 @@ import {
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
   SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "./consultationFormConstants";
-import { loadConsultationFormInstance, mapConsultationFormInstanceRow } from "./consultationFormLoad.server";
-import type { ConsultationFormChannel, ConsultationFormInstanceWithTemplate } from "./consultationFormTypes";
+import {
+  loadConsultationFormInstance,
+  mapConsultationFormInstanceRow,
+} from "./consultationFormLoad.server";
+import type {
+  ConsultationFormChannel,
+  ConsultationFormInstanceWithTemplate,
+} from "./consultationFormTypes";
 import {
   hairTransplantConsultationSchemaV1,
   hairTransplantConsultationSchemaV2,
@@ -144,10 +150,12 @@ export async function ensureGlobalHairTransplantConsultationTemplate(
     if (!error) return;
     const msg = error.message ?? "";
     if (!msg.includes("duplicate") && !msg.includes("unique")) {
-      throw new Error(msg || `Could not insert Hair Transplant Consultation template version ${version} (${errCtx}).`);
+      throw new Error(
+        msg ||
+          `Could not insert Hair Transplant Consultation template version ${version} (${errCtx}).`
+      );
     }
   };
-
 
   let latest = await fetchLatestPublished();
 
@@ -162,24 +170,38 @@ export async function ensureGlobalHairTransplantConsultationTemplate(
       "v2.1 — remove dictation field"
     );
     latest = await fetchLatestPublished();
-    if (!latest || latest.version < 3) throw new Error("Hair Transplant template version 3 missing after publish.");
+    if (!latest || latest.version < 3)
+      throw new Error("Hair Transplant template version 3 missing after publish.");
     return { templateVersionId: String(latest.id) };
   }
 
   if (latest && latest.version === 1) {
-    await ensurePublishedVersionId(2, hairTransplantConsultationSchemaV2 as unknown as Record<string, unknown>, "v2 adaptive");
+    await ensurePublishedVersionId(
+      2,
+      hairTransplantConsultationSchemaV2 as unknown as Record<string, unknown>,
+      "v2 adaptive"
+    );
     await ensurePublishedVersionId(
       3,
       hairTransplantConsultationSchemaV2_1 as unknown as Record<string, unknown>,
       "v2.1 — remove dictation field"
     );
     latest = await fetchLatestPublished();
-    if (!latest || latest.version < 3) throw new Error("Hair Transplant template version 3 missing after v1 chain.");
+    if (!latest || latest.version < 3)
+      throw new Error("Hair Transplant template version 3 missing after v1 chain.");
     return { templateVersionId: String(latest.id) };
   }
 
-  await ensurePublishedVersionId(1, hairTransplantConsultationSchemaV1 as unknown as Record<string, unknown>, "v1 legacy");
-  await ensurePublishedVersionId(2, hairTransplantConsultationSchemaV2 as unknown as Record<string, unknown>, "v2 adaptive");
+  await ensurePublishedVersionId(
+    1,
+    hairTransplantConsultationSchemaV1 as unknown as Record<string, unknown>,
+    "v1 legacy"
+  );
+  await ensurePublishedVersionId(
+    2,
+    hairTransplantConsultationSchemaV2 as unknown as Record<string, unknown>,
+    "v2 adaptive"
+  );
   await ensurePublishedVersionId(
     3,
     hairTransplantConsultationSchemaV2_1 as unknown as Record<string, unknown>,
@@ -200,12 +222,14 @@ export async function createConsultationFormInstance(
   const tid = input.tenantId.trim();
   const cid = input.consultationId.trim();
   const vid = input.templateVersionId.trim();
-  if (!tid || !cid || !vid) throw new Error("tenantId, consultationId, and templateVersionId are required.");
+  if (!tid || !cid || !vid)
+    throw new Error("tenantId, consultationId, and templateVersionId are required.");
 
   const cons = await loadConsultationForTenant(tid, cid);
   if (!cons) throw new Error("Consultation not found for tenant.");
 
-  const values = input.initialValues && typeof input.initialValues === "object" ? input.initialValues : {};
+  const values =
+    input.initialValues && typeof input.initialValues === "object" ? input.initialValues : {};
 
   const { data: raw, error } = await supabase
     .from("fi_consultation_form_instances")
@@ -372,7 +396,8 @@ export async function ensureGlobalHairLossTreatmentConsultationTemplate(
     .eq("version", 1)
     .maybeSingle();
   if (re) throw new Error(re.message);
-  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Hair Loss Treatment template version.");
+  if (!recovered?.id)
+    throw new Error(ve?.message ?? "Could not resolve Hair Loss Treatment template version.");
   return { templateVersionId: String((recovered as { id: string }).id) };
 }
 
@@ -520,7 +545,8 @@ export async function ensureGlobalFemaleHairLossConsultationTemplate(
     .eq("version", 1)
     .maybeSingle();
   if (re) throw new Error(re.message);
-  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Female Hair Loss template version.");
+  if (!recovered?.id)
+    throw new Error(ve?.message ?? "Could not resolve Female Hair Loss template version.");
   return { templateVersionId: String((recovered as { id: string }).id) };
 }
 
@@ -659,7 +685,9 @@ export async function ensureGlobalHairTransplantRepairConsultationTemplate(
   }
   const msg = ve?.message ?? "";
   if (!msg.includes("duplicate") && !msg.includes("unique")) {
-    throw new Error(msg || "Could not insert Hair Transplant Repair Consultation template version.");
+    throw new Error(
+      msg || "Could not insert Hair Transplant Repair Consultation template version."
+    );
   }
   const { data: recovered, error: re } = await supabase
     .from("fi_consultation_form_template_versions")
@@ -668,7 +696,8 @@ export async function ensureGlobalHairTransplantRepairConsultationTemplate(
     .eq("version", 1)
     .maybeSingle();
   if (re) throw new Error(re.message);
-  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Hair Transplant Repair template version.");
+  if (!recovered?.id)
+    throw new Error(ve?.message ?? "Could not resolve Hair Transplant Repair template version.");
   return { templateVersionId: String((recovered as { id: string }).id) };
 }
 
@@ -685,7 +714,8 @@ export async function ensureInRoomHairTransplantRepairConsultationFormInstance(
   const cid = consultationId.trim();
   if (!tid || !cid) throw new Error("tenantId and consultationId are required.");
 
-  const { templateVersionId } = await ensureGlobalHairTransplantRepairConsultationTemplate(supabase);
+  const { templateVersionId } =
+    await ensureGlobalHairTransplantRepairConsultationTemplate(supabase);
 
   const { data: existing, error: ee } = await supabase
     .from("fi_consultation_form_instances")
@@ -816,7 +846,8 @@ export async function ensureGlobalFollowUpReviewConsultationTemplate(
     .eq("version", 1)
     .maybeSingle();
   if (re) throw new Error(re.message);
-  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Follow-up / Review template version.");
+  if (!recovered?.id)
+    throw new Error(ve?.message ?? "Could not resolve Follow-up / Review template version.");
   return { templateVersionId: String((recovered as { id: string }).id) };
 }
 
@@ -964,7 +995,8 @@ export async function ensureGlobalScalpPathologyConsultationTemplate(
     .eq("version", 1)
     .maybeSingle();
   if (re) throw new Error(re.message);
-  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Scalp Pathology template version.");
+  if (!recovered?.id)
+    throw new Error(ve?.message ?? "Could not resolve Scalp Pathology template version.");
   return { templateVersionId: String((recovered as { id: string }).id) };
 }
 
@@ -1038,7 +1070,9 @@ export async function autosaveConsultationFormInstance(
   }
 
   const patchComputed =
-    input.computed && typeof input.computed === "object" && !Array.isArray(input.computed) ? input.computed : {};
+    input.computed && typeof input.computed === "object" && !Array.isArray(input.computed)
+      ? input.computed
+      : {};
   const computed = { ...existing.computed, ...patchComputed };
 
   const { data: raw, error } = await supabase
@@ -1079,15 +1113,24 @@ export async function submitConsultationFormInstance(
     validateConsultationFormRequiredFields,
     validateVoiceNoteClinicalNoteShapesInValues,
   } = await import("./consultationFormValidation");
-  const issues = validateConsultationFormRequiredFields(existing.template_version.schema, input.values);
+  const issues = validateConsultationFormRequiredFields(
+    existing.template_version.schema,
+    input.values
+  );
   if (issues.length > 0) {
     throw new Error(issues.map((i) => i.message).join(" "));
   }
-  const shapeIssues = validateBodyAreaMapShapesInValues(existing.template_version.schema, input.values);
+  const shapeIssues = validateBodyAreaMapShapesInValues(
+    existing.template_version.schema,
+    input.values
+  );
   if (shapeIssues.length > 0) {
     throw new Error(shapeIssues.map((i) => i.message).join(" "));
   }
-  const noteShapeIssues = validateVoiceNoteClinicalNoteShapesInValues(existing.template_version.schema, input.values);
+  const noteShapeIssues = validateVoiceNoteClinicalNoteShapesInValues(
+    existing.template_version.schema,
+    input.values
+  );
   if (noteShapeIssues.length > 0) {
     throw new Error(noteShapeIssues.map((i) => i.message).join(" "));
   }
@@ -1150,7 +1193,9 @@ export async function upsertClinicalNoteForFormField(
   if (!consultation) throw new Error("Consultation not found.");
   const patientId = consultation.patient_id?.trim();
   if (!patientId) {
-    throw new Error("Link a patient on the consultation workspace before saving to clinical notes.");
+    throw new Error(
+      "Link a patient on the consultation workspace before saving to clinical notes."
+    );
   }
 
   const { data: inst, error: ie } = await supabase
@@ -1196,9 +1241,11 @@ export async function upsertClinicalNoteForFormField(
     form_field_id: fieldId,
   };
 
-  const sectionsPayload = (input.sections && typeof input.sections === "object" && !Array.isArray(input.sections)
-    ? input.sections
-    : {}) as Record<string, unknown>;
+  const sectionsPayload = (
+    input.sections && typeof input.sections === "object" && !Array.isArray(input.sections)
+      ? input.sections
+      : {}
+  ) as Record<string, unknown>;
 
   const existingId = input.existingClinicalNoteId?.trim() || null;
 
@@ -1216,8 +1263,10 @@ export async function upsertClinicalNoteForFormField(
     }
     const fi = (existing as { form_instance_id: string | null }).form_instance_id;
     const ff = (existing as { form_field_id: string | null }).form_field_id;
-    if (fi != null && String(fi) !== fid) throw new Error("Clinical note is linked to a different form instance.");
-    if (ff != null && String(ff) !== fieldId) throw new Error("Clinical note is linked to a different form field.");
+    if (fi != null && String(fi) !== fid)
+      throw new Error("Clinical note is linked to a different form instance.");
+    if (ff != null && String(ff) !== fieldId)
+      throw new Error("Clinical note is linked to a different form field.");
 
     const now = new Date().toISOString();
     const { error: upErr } = await supabase
@@ -1279,20 +1328,30 @@ function toJsonObject(summary: ConsultationCompletionSummary): Record<string, un
 export async function completeConsultationFormInstance(
   input: CompleteConsultationFormInstanceInput,
   client?: SupabaseClient
-): Promise<{ instance: ConsultationFormInstanceWithTemplate; summary: ConsultationCompletionSummary }> {
+): Promise<{
+  instance: ConsultationFormInstanceWithTemplate;
+  summary: ConsultationCompletionSummary;
+}> {
   const supabase = client ?? supabaseAdmin();
   const tid = input.tenantId.trim();
   const cid = input.consultationId.trim();
   const iid = input.formInstanceId.trim();
-  if (!tid || !cid || !iid) throw new Error("tenantId, consultationId, and formInstanceId are required.");
+  if (!tid || !cid || !iid)
+    throw new Error("tenantId, consultationId, and formInstanceId are required.");
 
   const existing = await loadConsultationFormInstance(tid, iid);
   if (!existing) throw new Error("Form instance not found.");
-  if (String(existing.consultation_id) !== cid) throw new Error("Form instance does not belong to this consultation.");
+  if (String(existing.consultation_id) !== cid)
+    throw new Error("Form instance does not belong to this consultation.");
 
   if (existing.status === "locked" && existing.completed_at) {
     const cs = existing.completion_summary;
-    if (cs && typeof cs === "object" && "consultationId" in cs && String((cs as { consultationId: unknown }).consultationId) === cid) {
+    if (
+      cs &&
+      typeof cs === "object" &&
+      "consultationId" in cs &&
+      String((cs as { consultationId: unknown }).consultationId) === cid
+    ) {
       return { instance: existing, summary: cs as unknown as ConsultationCompletionSummary };
     }
     throw new Error("This form is locked but has no valid completion summary.");
@@ -1354,11 +1413,18 @@ export async function completeConsultationFormInstance(
 
   const existingRec = cons.recommendation_notes?.trim();
   if (!existingRec) {
-    const hint = [summary.recommendedProcedure, summary.diagnosisImpression].filter(Boolean).join("\n\n").trim();
+    const hint = [summary.recommendedProcedure, summary.diagnosisImpression]
+      .filter(Boolean)
+      .join("\n\n")
+      .trim();
     if (hint) consPatch.recommendation_notes = hint.slice(0, 12000);
   }
 
-  const { error: consErr } = await supabase.from("fi_consultations").update(consPatch).eq("tenant_id", tid).eq("id", cid);
+  const { error: consErr } = await supabase
+    .from("fi_consultations")
+    .update(consPatch)
+    .eq("tenant_id", tid)
+    .eq("id", cid);
   if (consErr) throw new Error(consErr.message);
 
   const caseId = cons.case_id?.trim();
@@ -1399,9 +1465,8 @@ export async function completeConsultationFormInstance(
 
   const reloadedConsultation = await loadConsultationForTenant(tid, cid);
   if (reloadedConsultation) {
-    const { advanceCrmLeadOnConsultationComplete } = await import(
-      "@/src/lib/consultations/advanceCrmLeadOnConsultationComplete.server"
-    );
+    const { advanceCrmLeadOnConsultationComplete } =
+      await import("@/src/lib/consultations/advanceCrmLeadOnConsultationComplete.server");
     await advanceCrmLeadOnConsultationComplete(tid, reloadedConsultation, supabase);
   }
 

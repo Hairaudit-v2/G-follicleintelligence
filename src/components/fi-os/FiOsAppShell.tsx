@@ -4,9 +4,15 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
-import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
+import {
+  FI_ADMIN_NEUTRAL_ACCENT,
+  safeBrandingColourHex,
+} from "@/src/lib/fi/foundation/brandingCss";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
-import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  applyPartialFeatureOverrides,
+  buildDefaultFeatureAccessAllEnabled,
+} from "@/src/config/fiFeatureAccessRegistry";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { buildFiOsSidebarWorkflowSections } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 import { buildFiOsWorkspaceFocusLine } from "@/src/lib/fi-os/fiOsWorkspaceFocusCopy";
@@ -145,7 +151,11 @@ export function FiOsAppShell({
   );
 
   const workspaceFocusLine = useMemo(
-    () => buildFiOsWorkspaceFocusLine({ workspaceProfile: workspaceProfileKey, featureAccess: featureAccessMap }),
+    () =>
+      buildFiOsWorkspaceFocusLine({
+        workspaceProfile: workspaceProfileKey,
+        featureAccess: featureAccessMap,
+      }),
     [workspaceProfileKey, featureAccessMap]
   );
   const activeSidebarId = getFiOsShellActiveSidebarId(pathname, base);
@@ -192,7 +202,8 @@ export function FiOsAppShell({
       setCreateLeadOpen(true);
     }
     window.addEventListener(CLINIC_OS_OPEN_CREATE_LEAD_EVENT, onOpenCreateLeadEvent);
-    return () => window.removeEventListener(CLINIC_OS_OPEN_CREATE_LEAD_EVENT, onOpenCreateLeadEvent);
+    return () =>
+      window.removeEventListener(CLINIC_OS_OPEN_CREATE_LEAD_EVENT, onOpenCreateLeadEvent);
   }, []);
 
   useEffect(() => {
@@ -239,7 +250,9 @@ export function FiOsAppShell({
           />
           <main
             className={cn(
-              isCalendarMainLocked ? fiOsChromeClasses.mainScrollCalendarLock : fiOsChromeClasses.mainScroll,
+              isCalendarMainLocked
+                ? fiOsChromeClasses.mainScrollCalendarLock
+                : fiOsChromeClasses.mainScroll,
               "flex min-h-0 flex-col"
             )}
           >
@@ -258,7 +271,12 @@ export function FiOsAppShell({
       </div>
 
       {mobileNav ? (
-        <div className="fixed inset-0 z-50 flex lg:hidden" role="dialog" aria-modal="true" aria-label="FI OS navigation">
+        <div
+          className="fixed inset-0 z-50 flex lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="FI OS navigation"
+        >
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"

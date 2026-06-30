@@ -46,7 +46,7 @@ export async function insertReceptionPilotFeedback(opts: {
 export async function loadReceptionPilotFeedbackForPeriod(
   tenantId: string,
   periodStartIso: string,
-  periodEndIso: string,
+  periodEndIso: string
 ): Promise<ReceptionPilotFeedbackRow[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
@@ -63,10 +63,14 @@ export async function loadReceptionPilotFeedbackForPeriod(
     if (isMissingDatabaseRelationError(error)) return [];
     throw new Error(error.message);
   }
-  return (data ?? []).map((raw) => serializeReceptionPilotFeedbackRow(raw as Record<string, unknown>));
+  return (data ?? []).map((raw) =>
+    serializeReceptionPilotFeedbackRow(raw as Record<string, unknown>)
+  );
 }
 
-function serializeReceptionPilotFeedbackRow(raw: Record<string, unknown>): ReceptionPilotFeedbackRow {
+function serializeReceptionPilotFeedbackRow(
+  raw: Record<string, unknown>
+): ReceptionPilotFeedbackRow {
   return {
     id: String(raw.id),
     tenant_id: String(raw.tenant_id),

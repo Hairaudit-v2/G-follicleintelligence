@@ -25,11 +25,23 @@ export type FiSuperReleaseDocumentType =
   | "bank_details"
   | "custom";
 
-export type FiSuperReleaseDocumentStatus = "pending" | "requested" | "received" | "verified" | "rejected";
+export type FiSuperReleaseDocumentStatus =
+  | "pending"
+  | "requested"
+  | "received"
+  | "verified"
+  | "rejected";
 
-export type FiSuperReleaseClinicalLetterStatus = "draft" | "review_required" | "approved" | "issued";
+export type FiSuperReleaseClinicalLetterStatus =
+  | "draft"
+  | "review_required"
+  | "approved"
+  | "issued";
 
-export const RESOLVED_SUPER_RELEASE_STATUSES: readonly FiSuperReleaseApplicationStatus[] = ["funds_released", "cancelled"];
+export const RESOLVED_SUPER_RELEASE_STATUSES: readonly FiSuperReleaseApplicationStatus[] = [
+  "funds_released",
+  "cancelled",
+];
 
 export const SUPER_RELEASE_ELIGIBILITY_REVIEW_LABEL = "Super Release Eligibility Review" as const;
 export const SUPER_RELEASE_DOCUMENTS_PENDING_LABEL = "Super Release Documents Pending" as const;
@@ -89,7 +101,9 @@ export function isResolvedSuperReleaseStatus(status: FiSuperReleaseApplicationSt
   return RESOLVED_SUPER_RELEASE_STATUSES.includes(status);
 }
 
-export function isUnresolvedSuperReleaseApplication(application: FiSuperReleaseApplicationRow | null | undefined): boolean {
+export function isUnresolvedSuperReleaseApplication(
+  application: FiSuperReleaseApplicationRow | null | undefined
+): boolean {
   if (!application) return false;
   return !isResolvedSuperReleaseStatus(application.application_status);
 }
@@ -106,12 +120,20 @@ function statusAnchorIso(application: FiSuperReleaseApplicationRow): string {
     return application.submitted_at || application.updated_at || application.created_at;
   }
   if (status === "approved" || status === "release_pending") {
-    return application.approved_at || application.submitted_at || application.updated_at || application.created_at;
+    return (
+      application.approved_at ||
+      application.submitted_at ||
+      application.updated_at ||
+      application.created_at
+    );
   }
   return application.updated_at || application.created_at;
 }
 
-export function computeDaysInStatus(application: FiSuperReleaseApplicationRow, todayYmd: string): number {
+export function computeDaysInStatus(
+  application: FiSuperReleaseApplicationRow,
+  todayYmd: string
+): number {
   return daysSinceIso(statusAnchorIso(application), todayYmd);
 }
 
@@ -126,7 +148,9 @@ export function computeDaysInStatus(application: FiSuperReleaseApplicationRow, t
  * - rejected application
  * - release_pending + surgery within 14 days
  */
-export function requiresEscalatedSuperReleaseAttention(input: BuildSuperReleaseAttentionInput): boolean {
+export function requiresEscalatedSuperReleaseAttention(
+  input: BuildSuperReleaseAttentionInput
+): boolean {
   const { todayYmd, application, surgeryDateYmd = null } = input;
   if (!application || isResolvedSuperReleaseStatus(application.application_status)) return false;
 
@@ -166,7 +190,13 @@ export function buildSuperReleaseAttentionLabels(input: BuildSuperReleaseAttenti
   if (status === "documents_pending") labels.push(SUPER_RELEASE_DOCUMENTS_PENDING_LABEL);
   if (status === "clinical_letter_required") labels.push(CLINICAL_LETTER_REQUIRED_LABEL);
 
-  if (status === "submitted" || status === "under_review" || status === "rejected" || status === "approved" || status === "ready_for_submission") {
+  if (
+    status === "submitted" ||
+    status === "under_review" ||
+    status === "rejected" ||
+    status === "approved" ||
+    status === "ready_for_submission"
+  ) {
     if (!["approved", "release_pending", "funds_released"].includes(status)) {
       labels.push(SUPER_RELEASE_APPROVAL_PENDING_LABEL);
     }
@@ -180,7 +210,11 @@ export function buildSuperReleaseAttentionLabels(input: BuildSuperReleaseAttenti
 
   if (status === "release_pending" && surgery) {
     const daysToSurgery = daysBetween(todayYmd, surgery);
-    if (daysToSurgery >= 0 && daysToSurgery <= 14 && !labels.includes(FUNDS_RELEASE_PENDING_LABEL)) {
+    if (
+      daysToSurgery >= 0 &&
+      daysToSurgery <= 14 &&
+      !labels.includes(FUNDS_RELEASE_PENDING_LABEL)
+    ) {
       labels.push(FUNDS_RELEASE_PENDING_LABEL);
     }
   }
@@ -222,7 +256,9 @@ function summaryLabelForStatus(status: FiSuperReleaseApplicationStatus): string 
 /**
  * Surgery pipeline: any unresolved super release application blocks financial clearance.
  */
-export function buildSuperReleaseAttentionSummary(input: BuildSuperReleaseAttentionInput): SuperReleaseAttentionSummary {
+export function buildSuperReleaseAttentionSummary(
+  input: BuildSuperReleaseAttentionInput
+): SuperReleaseAttentionSummary {
   const { application } = input;
   if (!application || isResolvedSuperReleaseStatus(application.application_status)) {
     return {
@@ -291,7 +327,14 @@ export function aggregateSuperReleaseAnalytics(
   clinicalLetters: FiSuperReleaseClinicalLetterRow[] = []
 ): SuperReleaseAnalytics {
   const submitted = applications.filter((r) =>
-    ["submitted", "under_review", "approved", "rejected", "release_pending", "funds_released"].includes(r.application_status)
+    [
+      "submitted",
+      "under_review",
+      "approved",
+      "rejected",
+      "release_pending",
+      "funds_released",
+    ].includes(r.application_status)
   );
   const approved = applications.filter((r) =>
     ["approved", "release_pending", "funds_released"].includes(r.application_status)
@@ -327,9 +370,13 @@ export function aggregateSuperReleaseAnalytics(
     approvalRate: decided > 0 ? approved.length / decided : null,
     rejectionRate: decided > 0 ? rejected.length / decided : null,
     averageApprovalDays:
-      approvalDays.length > 0 ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length) : null,
+      approvalDays.length > 0
+        ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length)
+        : null,
     averageReleaseDays:
-      releaseDays.length > 0 ? Math.round(releaseDays.reduce((a, b) => a + b, 0) / releaseDays.length) : null,
+      releaseDays.length > 0
+        ? Math.round(releaseDays.reduce((a, b) => a + b, 0) / releaseDays.length)
+        : null,
     averageClinicalLetterTurnaroundDays:
       letterTurnaround.length > 0
         ? Math.round(letterTurnaround.reduce((a, b) => a + b, 0) / letterTurnaround.length)
@@ -355,12 +402,23 @@ export function aggregateSuperReleaseDashboardCounts(
     if (!isResolvedSuperReleaseStatus(app.application_status)) openCount += 1;
     if (app.application_status === "clinical_letter_required") clinicalLettersPendingCount += 1;
     if (app.application_status === "documents_pending") awaitingDocumentsCount += 1;
-    if (["submitted", "under_review", "approved", "rejected", "release_pending", "funds_released"].includes(app.application_status)) {
+    if (
+      [
+        "submitted",
+        "under_review",
+        "approved",
+        "rejected",
+        "release_pending",
+        "funds_released",
+      ].includes(app.application_status)
+    ) {
       submittedCount += 1;
     }
     if (app.application_status === "release_pending") fundsReleasePendingCount += 1;
 
-    const surgeryYmd = app.booking_id ? surgeryDatesByBookingId.get(app.booking_id) ?? null : null;
+    const surgeryYmd = app.booking_id
+      ? (surgeryDatesByBookingId.get(app.booking_id) ?? null)
+      : null;
     if (
       resolveSuperReleaseAttention({
         todayYmd,
@@ -375,7 +433,9 @@ export function aggregateSuperReleaseDashboardCounts(
     if (ad != null) approvalDays.push(ad);
   }
 
-  const pendingLetters = clinicalLetters.filter((l) => ["draft", "review_required"].includes(l.letter_status));
+  const pendingLetters = clinicalLetters.filter((l) =>
+    ["draft", "review_required"].includes(l.letter_status)
+  );
   clinicalLettersPendingCount = Math.max(clinicalLettersPendingCount, pendingLetters.length);
 
   return {
@@ -386,7 +446,9 @@ export function aggregateSuperReleaseDashboardCounts(
     fundsReleasePendingCount,
     attentionCount,
     averageApprovalDays:
-      approvalDays.length > 0 ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length) : null,
+      approvalDays.length > 0
+        ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length)
+        : null,
   };
 }
 

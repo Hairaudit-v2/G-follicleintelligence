@@ -23,9 +23,15 @@ const CHECKLIST_FLAG_LABEL: Record<string, string> = {
 function SummaryTile(props: { label: string; value: number | string; sub?: string }) {
   return (
     <div className="flex min-w-0 flex-col rounded-xl border border-white/[0.07] bg-[#0c1426]/70 px-3 py-3 shadow-inner shadow-black/25 backdrop-blur-sm">
-      <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{props.label}</p>
-      <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">{props.value}</p>
-      {props.sub ? <p className="mt-1 text-[0.7rem] leading-snug text-slate-500">{props.sub}</p> : null}
+      <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {props.label}
+      </p>
+      <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">
+        {props.value}
+      </p>
+      {props.sub ? (
+        <p className="mt-1 text-[0.7rem] leading-snug text-slate-500">{props.sub}</p>
+      ) : null}
     </div>
   );
 }
@@ -39,11 +45,16 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
     <div className="space-y-6 pb-8 sm:space-y-7">
       <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">ClinicOS · Tomorrow board</p>
-          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Tomorrow readiness</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
+            ClinicOS · Tomorrow board
+          </p>
+          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
+            Tomorrow readiness
+          </h1>
           <p className="mt-1 text-sm text-slate-500">{dateLine}</p>
           <p className="mt-0.5 text-xs text-slate-600">
-            Operational tomorrow <span className="font-mono text-slate-400">{data.window.tomorrowYmd}</span>
+            Operational tomorrow{" "}
+            <span className="font-mono text-slate-400">{data.window.tomorrowYmd}</span>
             <span className="text-slate-600"> · </span>
             <span className="font-mono text-slate-400">{tz}</span>
           </p>
@@ -51,33 +62,53 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Link
             href={`${base}/calendar?date=${encodeURIComponent(data.window.tomorrowYmd)}`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95"
+            )}
           >
             Open calendar
           </Link>
           <Link
             href={`${base}/operations`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
+            )}
           >
             Operations centre
           </Link>
           <Link
             href={`${base}/surgery-readiness`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
+            )}
           >
             Surgery readiness
           </Link>
           <Link
             href={`${base}/procedure-day`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200")}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
+            )}
           >
             Procedure day
           </Link>
         </div>
       </header>
 
-      <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="tomorrow-summary-heading">
-        <SectionHeader id="tomorrow-summary-heading" title="Tomorrow summary" description="Counts for tenant-local tomorrow (active agenda statuses)." />
+      <DashboardCard
+        className="p-4 sm:p-5"
+        role="region"
+        aria-labelledby="tomorrow-summary-heading"
+      >
+        <SectionHeader
+          id="tomorrow-summary-heading"
+          title="Tomorrow summary"
+          description="Counts for tenant-local tomorrow (active agenda statuses)."
+        />
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryTile label="Consultations" value={data.summary.consultations} />
           <SummaryTile label="Surgeries" value={data.summary.surgeries} />
@@ -98,10 +129,20 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="tomorrow-schedule-heading">
-        <SectionHeader id="tomorrow-schedule-heading" title="Tomorrow schedule" description="Grouped by local start time." />
+      <DashboardCard
+        className="p-4 sm:p-5"
+        role="region"
+        aria-labelledby="tomorrow-schedule-heading"
+      >
+        <SectionHeader
+          id="tomorrow-schedule-heading"
+          title="Tomorrow schedule"
+          description="Grouped by local start time."
+        />
         {data.scheduleGroups.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">No active bookings for tomorrow in this window.</p>
+          <p className="mt-4 text-sm text-slate-500">
+            No active bookings for tomorrow in this window.
+          </p>
         ) : (
           <div className="mt-4 space-y-6">
             {data.scheduleGroups.map((g) => (
@@ -109,11 +150,17 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                 <h3 className="text-sm font-semibold text-cyan-200/90">{g.timeLabel}</h3>
                 <ul className="mt-2 divide-y divide-white/[0.06] rounded-lg border border-white/[0.06] bg-[#0a101f]/80">
                   {g.rows.map((r) => (
-                    <li key={r.bookingId} className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-start sm:justify-between">
+                    <li
+                      key={r.bookingId}
+                      className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-start sm:justify-between"
+                    >
                       <div className="flex min-w-0 flex-1 flex-col gap-2">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0">
-                            <Link href={r.href} className="font-medium text-slate-100 hover:text-cyan-200">
+                            <Link
+                              href={r.href}
+                              className="font-medium text-slate-100 hover:text-cyan-200"
+                            >
                               {r.patientLabel}
                             </Link>
                             <p className="mt-0.5 text-xs text-slate-500">
@@ -142,7 +189,7 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                                   "rounded-md border px-2 py-0.5 text-[0.65rem]",
                                   r.paymentBadge === "Payment due"
                                     ? "border-amber-500/35 bg-amber-500/10 text-amber-100"
-                                    : "border-slate-600/40 bg-slate-800/60 text-slate-300",
+                                    : "border-slate-600/40 bg-slate-800/60 text-slate-300"
                                 )}
                               >
                                 {r.paymentBadge}
@@ -154,7 +201,10 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                               </span>
                             ) : null}
                             {r.clinicalStaffing ? (
-                              <ClinicalStaffingStatusBadge status={r.clinicalStaffing.displayStatus} compact />
+                              <ClinicalStaffingStatusBadge
+                                status={r.clinicalStaffing.displayStatus}
+                                compact
+                              />
                             ) : null}
                           </div>
                         </div>
@@ -176,7 +226,10 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                               />
                             ) : null}
                             <div className="mt-1.5">
-                              <FinancialPaymentPathwayBadge summary={r.financialPipeline.paymentPathway} variant="dark" />
+                              <FinancialPaymentPathwayBadge
+                                summary={r.financialPipeline.paymentPathway}
+                                variant="dark"
+                              />
                             </div>
                           </>
                         ) : null}
@@ -190,7 +243,11 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
         )}
       </DashboardCard>
 
-      <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="tomorrow-surgery-heading">
+      <DashboardCard
+        className="p-4 sm:p-5"
+        role="region"
+        aria-labelledby="tomorrow-surgery-heading"
+      >
         <SectionHeader
           id="tomorrow-surgery-heading"
           title="Surgery readiness (tomorrow)"
@@ -201,7 +258,10 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
         ) : (
           <ul className="mt-4 space-y-3">
             {data.surgeryReadiness.map((row) => (
-              <li key={row.bookingId} className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm text-slate-200">
+              <li
+                key={row.bookingId}
+                className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm text-slate-200"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold text-slate-50">{row.patientLabel}</p>
@@ -222,22 +282,33 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                     {row.bookingStatus}
                   </span>
                   {row.clinicalStaffing ? (
-                    <ClinicalStaffingStatusBadge status={row.clinicalStaffing.displayStatus} compact />
+                    <ClinicalStaffingStatusBadge
+                      status={row.clinicalStaffing.displayStatus}
+                      compact
+                    />
                   ) : null}
                 </div>
                 <div
                   className={cn(
                     "mt-2",
                     row.financialPipeline?.payment_attention_required &&
-                      "rounded-md border border-rose-500/40 bg-rose-500/[0.12] py-2 pl-3 pr-2 shadow-[inset_3px_0_0_0_rgba(251,113,133,0.85)]",
+                      "rounded-md border border-rose-500/40 bg-rose-500/[0.12] py-2 pl-3 pr-2 shadow-[inset_3px_0_0_0_rgba(251,113,133,0.85)]"
                   )}
                   role={row.financialPipeline?.payment_attention_required ? "status" : undefined}
                   aria-label={
-                    row.financialPipeline?.payment_attention_required ? "Financial pipeline requires attention" : undefined
+                    row.financialPipeline?.payment_attention_required
+                      ? "Financial pipeline requires attention"
+                      : undefined
                   }
                 >
                   {row.financialPipeline ? (
-                    <div className={row.financialPipeline.payment_attention_required ? "[&>div]:mt-0" : undefined}>
+                    <div
+                      className={
+                        row.financialPipeline.payment_attention_required
+                          ? "[&>div]:mt-0"
+                          : undefined
+                      }
+                    >
                       <FinancialSurgeryPipelineInline
                         tenantId={data.tenantId}
                         caseId={row.caseId}
@@ -255,11 +326,16 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                         />
                       ) : null}
                       <div className="mt-1.5">
-                        <FinancialPaymentPathwayBadge summary={row.financialPipeline.paymentPathway} variant="dark" />
+                        <FinancialPaymentPathwayBadge
+                          summary={row.financialPipeline.paymentPathway}
+                          variant="dark"
+                        />
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[0.65rem] leading-snug text-slate-500">{FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY}</p>
+                    <p className="text-[0.65rem] leading-snug text-slate-500">
+                      {FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY}
+                    </p>
                   )}
                 </div>
                 <ul className="mt-2 space-y-1">
@@ -282,7 +358,10 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                     ))}
                 </ul>
                 <div className="mt-2">
-                  <Link href={`${base}/appointments/${encodeURIComponent(row.bookingId)}`} className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">
+                  <Link
+                    href={`${base}/appointments/${encodeURIComponent(row.bookingId)}`}
+                    className="text-xs font-semibold text-cyan-300 hover:text-cyan-200"
+                  >
                     Open appointment
                   </Link>
                 </div>
@@ -293,7 +372,11 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
       </DashboardCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="tomorrow-checklist-heading">
+        <DashboardCard
+          className="p-4 sm:p-5"
+          role="region"
+          aria-labelledby="tomorrow-checklist-heading"
+        >
           <SectionHeader
             id="tomorrow-checklist-heading"
             title="Front-desk preparation"
@@ -304,8 +387,14 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
           ) : (
             <ul className="mt-4 space-y-3">
               {data.checklist.map((c) => (
-                <li key={c.bookingId} className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm">
-                  <Link href={`${base}/appointments/${encodeURIComponent(c.bookingId)}`} className="font-medium text-slate-100 hover:text-cyan-200">
+                <li
+                  key={c.bookingId}
+                  className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm"
+                >
+                  <Link
+                    href={`${base}/appointments/${encodeURIComponent(c.bookingId)}`}
+                    className="font-medium text-slate-100 hover:text-cyan-200"
+                  >
                     {c.patientLabel}
                   </Link>
                   <ul className="mt-2 list-inside list-disc text-xs text-amber-100/90">
@@ -319,8 +408,16 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
           )}
         </DashboardCard>
 
-        <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="tomorrow-staff-heading">
-          <SectionHeader id="tomorrow-staff-heading" title="Staff & room preparation" description="Assignments and room gaps for tomorrow." />
+        <DashboardCard
+          className="p-4 sm:p-5"
+          role="region"
+          aria-labelledby="tomorrow-staff-heading"
+        >
+          <SectionHeader
+            id="tomorrow-staff-heading"
+            title="Staff & room preparation"
+            description="Assignments and room gaps for tomorrow."
+          />
           <dl className="mt-4 space-y-2 text-sm text-slate-300">
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Assigned bookings</dt>
@@ -337,7 +434,9 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
           </dl>
           {data.staffPrep.assigneeCounts.length ? (
             <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">By assignee</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                By assignee
+              </p>
               <ul className="mt-2 space-y-1 text-sm text-slate-400">
                 {data.staffPrep.assigneeCounts.map((a) => (
                   <li key={a.label} className="flex justify-between gap-2">
@@ -351,7 +450,11 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
         </DashboardCard>
       </div>
 
-      <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="tomorrow-actions-heading">
+      <DashboardCard
+        className="p-4 sm:p-5"
+        role="region"
+        aria-labelledby="tomorrow-actions-heading"
+      >
         <SectionHeader
           id="tomorrow-actions-heading"
           title="End-of-day action list"
@@ -367,7 +470,10 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                 <span className="text-slate-600"> — </span>
                 <span className="text-slate-400">{a.patientLabel}</span>
                 {" · "}
-                <Link href={`${base}/appointments/${encodeURIComponent(a.bookingId)}`} className="text-cyan-300 hover:text-cyan-200">
+                <Link
+                  href={`${base}/appointments/${encodeURIComponent(a.bookingId)}`}
+                  className="text-cyan-300 hover:text-cyan-200"
+                >
                   Open
                 </Link>
               </li>

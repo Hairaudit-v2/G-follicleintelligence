@@ -303,8 +303,7 @@ export async function handleHliDocumentUploaded(
   inputOrSupabase: HandlerInput | SupabaseClient,
   legacyEnvelope?: FiEventEnvelope
 ): Promise<HliDocumentUploadedResult> {
-  const envelope =
-    "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
+  const envelope = "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
 
   if (!envelope) {
     throw new Error("Missing envelope for handleHliDocumentUploaded.");

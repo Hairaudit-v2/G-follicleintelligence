@@ -6,7 +6,10 @@ import {
   type PushStaffSyncToFiResult,
 } from "@/src/lib/hr/iiohrFiStaffSyncClient";
 import { parseFiOutboundStaffSyncDisplay } from "@/src/lib/hr/fiStaffSyncOutboundSummary";
-import { mapIiohrHrStaffRecordsToFiSyncRows, type IiohrHrPortalStaffRecord } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
+import {
+  mapIiohrHrStaffRecordsToFiSyncRows,
+  type IiohrHrPortalStaffRecord,
+} from "@/src/lib/hr/iiohrFiStaffSyncMapper";
 
 export type ScheduledIiohrHrStaffSyncCoreResult = {
   ok: boolean;
@@ -51,7 +54,17 @@ export async function runScheduledIiohrHrStaffSyncCore(input: {
 }): Promise<ScheduledIiohrHrStaffSyncCoreResult> {
   const tidParse = z.string().uuid().safeParse(input.tenantId.trim());
   if (!tidParse.success) {
-    return { ok: false, error: "Invalid tenant id.", rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] };
+    return {
+      ok: false,
+      error: "Invalid tenant id.",
+      rowsSent: 0,
+      runId: null,
+      created: null,
+      updated: null,
+      linked: null,
+      skipped: null,
+      warnings: [],
+    };
   }
   const tenantId = tidParse.data;
   const secret = input.syncSecretForScrub;
@@ -78,7 +91,8 @@ export async function runScheduledIiohrHrStaffSyncCore(input: {
     if (!input.allowEmptyFeed) {
       return {
         ok: false,
-        error: "HR staff feed returned no rows; refusing sync (set ALLOW_EMPTY_HR_SYNC=true to allow no-op).",
+        error:
+          "HR staff feed returned no rows; refusing sync (set ALLOW_EMPTY_HR_SYNC=true to allow no-op).",
         rowsSent: 0,
         runId: null,
         created: null,
@@ -109,7 +123,9 @@ export async function runScheduledIiohrHrStaffSyncCore(input: {
       syncTrigger: "cron",
     });
     const d = parseFiOutboundStaffSyncDisplay(fi);
-    const fiError = !d.fiOk ? summaryErrorLine(fi, secret) ?? "FI staff sync reported failure." : undefined;
+    const fiError = !d.fiOk
+      ? (summaryErrorLine(fi, secret) ?? "FI staff sync reported failure.")
+      : undefined;
     return {
       ok: d.fiOk,
       rowsSent: d.rowsSent,

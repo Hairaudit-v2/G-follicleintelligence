@@ -8,7 +8,8 @@ export const FI_STAFF_FEATURE_ACCESS_AUDIT_EVENT_TYPES = [
   "tenant_operating_mode_changed",
 ] as const;
 
-export type FiStaffFeatureAccessAuditEventType = (typeof FI_STAFF_FEATURE_ACCESS_AUDIT_EVENT_TYPES)[number];
+export type FiStaffFeatureAccessAuditEventType =
+  (typeof FI_STAFF_FEATURE_ACCESS_AUDIT_EVENT_TYPES)[number];
 
 export type FiStaffFeatureAccessAuditTargetType = "staff" | "tenant";
 

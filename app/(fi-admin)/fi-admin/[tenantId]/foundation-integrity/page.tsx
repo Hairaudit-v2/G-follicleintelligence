@@ -16,13 +16,18 @@ import {
 
 export const metadata = {
   title: "Patient Twin",
-  description: "Unified patient identity, media, clinical timeline, and treatment history across FI OS.",
+  description:
+    "Unified patient identity, media, clinical timeline, and treatment history across FI OS.",
   robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function FoundationIntegrityPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FoundationIntegrityPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
@@ -44,7 +49,9 @@ export default async function FoundationIntegrityPage({ params }: { params: Prom
       withFutureBooking: 0,
     });
 
-  const showDiagnosticsExpanded = authUserId ? await isFiOsPlatformAdminFullSessionBypass(authUserId) : false;
+  const showDiagnosticsExpanded = authUserId
+    ? await isFiOsPlatformAdminFullSessionBypass(authUserId)
+    : false;
 
   let analytics: Awaited<ReturnType<typeof loadPhotoProtocolAnalyticsForTenant>> | null = null;
   let incomplete: Awaited<ReturnType<typeof loadIncompletePhotoProtocolSessionsForTenant>> = [];

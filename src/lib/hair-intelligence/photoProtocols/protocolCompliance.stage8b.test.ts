@@ -3,7 +3,10 @@ import { describe, it } from "node:test";
 
 import { calculatePhotoProtocolCompliance } from "./protocolCompliance";
 import { compareMatchQuality, scoreImageForProtocolSlot } from "./protocolSlotMatching";
-import { canCompleteRequiredSessionSlots, PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE } from "./protocolSessionRules";
+import {
+  canCompleteRequiredSessionSlots,
+  PROTOCOL_STRONG_CAPTURE_MIN_CONFIDENCE,
+} from "./protocolSessionRules";
 import type {
   HliPhotoProtocolSessionSlot,
   HliPhotoProtocolSlot,
@@ -28,7 +31,9 @@ function baseTemplate(overrides: Partial<HliPhotoProtocolTemplate> = {}): HliPho
   };
 }
 
-function slot(p: Partial<HliPhotoProtocolSlot> & Pick<HliPhotoProtocolSlot, "id" | "slot_slug" | "label">): HliPhotoProtocolSlot {
+function slot(
+  p: Partial<HliPhotoProtocolSlot> & Pick<HliPhotoProtocolSlot, "id" | "slot_slug" | "label">
+): HliPhotoProtocolSlot {
   return {
     protocol_template_id: TEMPLATE_ID,
     required_image_category: "front",
@@ -44,7 +49,9 @@ function slot(p: Partial<HliPhotoProtocolSlot> & Pick<HliPhotoProtocolSlot, "id"
   };
 }
 
-function img(p: Partial<ProtocolComplianceImage> & Pick<ProtocolComplianceImage, "id">): ProtocolComplianceImage {
+function img(
+  p: Partial<ProtocolComplianceImage> & Pick<ProtocolComplianceImage, "id">
+): ProtocolComplianceImage {
   return {
     ai_image_category: "front",
     ai_image_category_confidence: 0.95,
@@ -59,12 +66,32 @@ function img(p: Partial<ProtocolComplianceImage> & Pick<ProtocolComplianceImage,
 describe("calculatePhotoProtocolCompliance (Stage 8B)", () => {
   it("reports complete when all required categories have strong matches", () => {
     const slots: HliPhotoProtocolSlot[] = [
-      slot({ id: "00000000-0000-4000-8000-000000000011", slot_slug: "front", label: "Front", required_image_category: "front", sort_order: 1 }),
-      slot({ id: "00000000-0000-4000-8000-000000000012", slot_slug: "donor", label: "Donor", required_image_category: "donor", sort_order: 2 }),
+      slot({
+        id: "00000000-0000-4000-8000-000000000011",
+        slot_slug: "front",
+        label: "Front",
+        required_image_category: "front",
+        sort_order: 1,
+      }),
+      slot({
+        id: "00000000-0000-4000-8000-000000000012",
+        slot_slug: "donor",
+        label: "Donor",
+        required_image_category: "donor",
+        sort_order: 2,
+      }),
     ];
     const images: ProtocolComplianceImage[] = [
-      img({ id: "00000000-0000-4000-8000-0000000000a1", ai_image_category: "front", ai_surgery_stage: "pre_op" }),
-      img({ id: "00000000-0000-4000-8000-0000000000a2", ai_image_category: "donor", ai_surgery_stage: "pre_op" }),
+      img({
+        id: "00000000-0000-4000-8000-0000000000a1",
+        ai_image_category: "front",
+        ai_surgery_stage: "pre_op",
+      }),
+      img({
+        id: "00000000-0000-4000-8000-0000000000a2",
+        ai_image_category: "donor",
+        ai_surgery_stage: "pre_op",
+      }),
     ];
     const r = calculatePhotoProtocolCompliance({
       template: baseTemplate(),
@@ -78,9 +105,17 @@ describe("calculatePhotoProtocolCompliance (Stage 8B)", () => {
 
   it("reports missing slots when required category is absent", () => {
     const slots: HliPhotoProtocolSlot[] = [
-      slot({ id: "00000000-0000-4000-8000-000000000021", slot_slug: "crown", label: "Crown", required_image_category: "crown", sort_order: 1 }),
+      slot({
+        id: "00000000-0000-4000-8000-000000000021",
+        slot_slug: "crown",
+        label: "Crown",
+        required_image_category: "crown",
+        sort_order: 1,
+      }),
     ];
-    const images: ProtocolComplianceImage[] = [img({ id: "00000000-0000-4000-8000-0000000000b1", ai_image_category: "front" })];
+    const images: ProtocolComplianceImage[] = [
+      img({ id: "00000000-0000-4000-8000-0000000000b1", ai_image_category: "front" }),
+    ];
     const r = calculatePhotoProtocolCompliance({ template: baseTemplate(), slots, images });
     assert.equal(r.complete, false);
     assert.equal(r.missing_count, 1);
@@ -89,10 +124,20 @@ describe("calculatePhotoProtocolCompliance (Stage 8B)", () => {
 
   it("does not let unknown category satisfy a required slot", () => {
     const slots: HliPhotoProtocolSlot[] = [
-      slot({ id: "00000000-0000-4000-8000-000000000031", slot_slug: "front", label: "Front", required_image_category: "front", sort_order: 1 }),
+      slot({
+        id: "00000000-0000-4000-8000-000000000031",
+        slot_slug: "front",
+        label: "Front",
+        required_image_category: "front",
+        sort_order: 1,
+      }),
     ];
     const images: ProtocolComplianceImage[] = [
-      img({ id: "00000000-0000-4000-8000-0000000000c1", ai_image_category: "unknown", ai_image_category_confidence: 0.99 }),
+      img({
+        id: "00000000-0000-4000-8000-0000000000c1",
+        ai_image_category: "unknown",
+        ai_image_category_confidence: 0.99,
+      }),
     ];
     const r = calculatePhotoProtocolCompliance({ template: baseTemplate(), slots, images });
     assert.equal(r.missing_count, 1);
@@ -100,7 +145,14 @@ describe("calculatePhotoProtocolCompliance (Stage 8B)", () => {
 
   it("optional slots do not block completion", () => {
     const slots: HliPhotoProtocolSlot[] = [
-      slot({ id: "00000000-0000-4000-8000-000000000041", slot_slug: "front", label: "Front", required_image_category: "front", is_required: true, sort_order: 1 }),
+      slot({
+        id: "00000000-0000-4000-8000-000000000041",
+        slot_slug: "front",
+        label: "Front",
+        required_image_category: "front",
+        is_required: true,
+        sort_order: 1,
+      }),
       slot({
         id: "00000000-0000-4000-8000-000000000042",
         slot_slug: "graft_tray",
@@ -110,7 +162,9 @@ describe("calculatePhotoProtocolCompliance (Stage 8B)", () => {
         sort_order: 2,
       }),
     ];
-    const images: ProtocolComplianceImage[] = [img({ id: "00000000-0000-4000-8000-0000000000d1", ai_image_category: "front" })];
+    const images: ProtocolComplianceImage[] = [
+      img({ id: "00000000-0000-4000-8000-0000000000d1", ai_image_category: "front" }),
+    ];
     const r = calculatePhotoProtocolCompliance({ template: baseTemplate(), slots, images });
     assert.equal(r.complete, true);
     assert.equal(r.missing_count, 0);

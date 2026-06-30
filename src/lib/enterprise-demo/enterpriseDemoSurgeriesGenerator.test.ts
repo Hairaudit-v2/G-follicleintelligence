@@ -2,9 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { ENTERPRISE_DEMO_CLINICS } from "./enterpriseDemoConstants";
-import {
-  buildEnterpriseDemoPatientConsultationSpecs,
-} from "./enterpriseDemoPatientsGenerator";
+import { buildEnterpriseDemoPatientConsultationSpecs } from "./enterpriseDemoPatientsGenerator";
 import {
   buildEnterpriseDemoSurgerySpecs,
   ENTERPRISE_DEMO_SURGERIES_PER_CLINIC,
@@ -49,7 +47,10 @@ test("each clinic surgery maps to quoted, accepted, or converted consultation pa
         ["quoted", "accepted", "converted_to_case"].includes(patient.consultationStatus),
         `unexpected consultation status ${patient.consultationStatus}`
       );
-      assert.ok(patient.patientIndex >= clinicSurgeries.length, `expected late-funnel patient index for ${surgery.demoPatientKey}`);
+      assert.ok(
+        patient.patientIndex >= clinicSurgeries.length,
+        `expected late-funnel patient index for ${surgery.demoPatientKey}`
+      );
       assert.equal(surgery.leadSurgeonStaffKey, `${clinic.slug}-lead-surgeon`);
       assert.equal(surgery.team.length, 3);
     }
@@ -67,13 +68,21 @@ test("anomaly clinics carry expected performance profiles", () => {
   assert.ok(london.some((s) => s.transectionRatePercent != null && s.transectionRatePercent >= 12));
 
   assert.ok(bangkok.some((s) => s.graftSession?.skipReconciliationEvent));
-  assert.ok(bangkok.some((s) => s.graftSession?.reconciliationStatus === "pending" || s.graftSession?.reconciliationStatus === "mismatch"));
+  assert.ok(
+    bangkok.some(
+      (s) =>
+        s.graftSession?.reconciliationStatus === "pending" ||
+        s.graftSession?.reconciliationStatus === "mismatch"
+    )
+  );
 
   assert.ok(dubai.every((s) => s.performanceProfile === "graft_count_vs_quote"));
   assert.ok(dubai.some((s) => s.invoiceGraftPlaceholder != null));
 
   assert.ok(sydney.every((s) => s.performanceProfile === "benchmark"));
-  assert.ok(sydney.every((s) => !s.graftSession?.skipReconciliationEvent || s.graftSession == null));
+  assert.ok(
+    sydney.every((s) => !s.graftSession?.skipReconciliationEvent || s.graftSession == null)
+  );
 });
 
 test("graft sessions include count, tray, and reconciliation events when active", () => {

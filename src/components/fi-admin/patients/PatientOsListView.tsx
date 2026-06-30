@@ -24,7 +24,11 @@ export function PatientOsListView({
   const { rows, total, query } = data;
   const filtered = patientDirectoryHasActiveFilters(query);
   const base = `/fi-admin/${tenantId}`;
-  const firstPageHref = buildPatientDirectoryHref(tenantId, { ...query, page: 1 }, { view: "list" });
+  const firstPageHref = buildPatientDirectoryHref(
+    tenantId,
+    { ...query, page: 1 },
+    { view: "list" }
+  );
   return (
     <div className="mx-auto min-w-0 max-w-[88rem] space-y-6 pb-10 sm:space-y-8 sm:pb-14">
       <DashboardCard className="p-5 sm:p-6">
@@ -69,7 +73,9 @@ export function PatientOsListView({
           {total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
               <p className="font-medium text-[#F8FAFC]">No patients yet</p>
-              <p className="mt-2">Create a patient or convert a lead to begin coordinating journeys.</p>
+              <p className="mt-2">
+                Create a patient or convert a lead to begin coordinating journeys.
+              </p>
             </div>
           ) : total === 0 && filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
@@ -94,13 +100,19 @@ export function PatientOsListView({
           ) : (
             <>
               <PatientDirectoryTable tenantId={tenantId} rows={rows} />
-              <PatientDirectoryPagination tenantId={tenantId} query={query} total={total} listView />
+              <PatientDirectoryPagination
+                tenantId={tenantId}
+                query={query}
+                total={total}
+                listView
+              />
             </>
           )}
         </section>
 
         <p className="mt-3 text-xs text-[#64748B]">
-          Tip: click a patient name for slide-over preview; ⌘/Ctrl-click opens the full profile in a new tab.
+          Tip: click a patient name for slide-over preview; ⌘/Ctrl-click opens the full profile in a
+          new tab.
         </p>
       </DashboardCard>
     </div>

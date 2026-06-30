@@ -1,13 +1,18 @@
 import type { PreviousProcedureRow } from "@/src/lib/patients/previousProcedures";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
 
-export function PatientPreviousProceduresCard({ procedures }: { procedures: PreviousProcedureRow[] }) {
+export function PatientPreviousProceduresCard({
+  procedures,
+}: {
+  procedures: PreviousProcedureRow[];
+}) {
   return (
     <section className={crmLeadCardClass}>
       <h2 className="text-sm font-semibold text-slate-100">Previous procedures</h2>
       <p className="mt-1 text-xs text-slate-400">
-        Structured history from <code className="rounded bg-white/[0.06] px-1">clinical_flags.previous_procedures</code>. Legacy
-        free-text still shown when structured rows are empty.
+        Structured history from{" "}
+        <code className="rounded bg-white/[0.06] px-1">clinical_flags.previous_procedures</code>.
+        Legacy free-text still shown when structured rows are empty.
       </p>
 
       {procedures.length === 0 ? (
@@ -30,7 +35,9 @@ export function PatientPreviousProceduresCard({ procedures }: { procedures: Prev
                   <td className="py-2 pr-3 font-medium text-slate-100">{p.procedureType}</td>
                   <td className="py-2 pr-3 text-slate-300">{p.performedAt ?? "—"}</td>
                   <td className="py-2 pr-3 text-slate-300">{p.clinic ?? "—"}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-slate-200">{p.graftCount ?? "—"}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums text-slate-200">
+                    {p.graftCount ?? "—"}
+                  </td>
                   <td className="py-2 text-slate-300">
                     {[p.outcome, p.notes].filter(Boolean).join(" · ") || "—"}
                   </td>

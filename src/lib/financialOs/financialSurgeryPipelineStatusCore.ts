@@ -5,7 +5,10 @@
 
 import { addDaysToCalendarDate } from "@/src/lib/calendar/calendarTimezone";
 import type { FiInvoiceRow, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
   buildPaymentPathwayAttentionSummary,
   resolveActivePaymentPathway,
@@ -37,7 +40,12 @@ export const AWAITING_FINANCIAL_WORKFLOW_COPY = "Awaiting financial workflow com
 
 export const FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY = "Financial status unavailable" as const;
 
-export type FinancialInvoicePaymentState = "none" | "paid" | "pending" | "overdue" | "not_applicable";
+export type FinancialInvoicePaymentState =
+  | "none"
+  | "paid"
+  | "pending"
+  | "overdue"
+  | "not_applicable";
 
 export type FinancialSurgeryPipelineStatus = {
   /** False when resolver failed or there is no FinancialOS / revenue signal for this context. */
@@ -79,7 +87,11 @@ function ymd(s: string | null | undefined): string | null {
   return t.length >= 10 ? t.slice(0, 10) : t;
 }
 
-function invoiceMatchesBookingContext(inv: FiInvoiceRow, caseId: string | null, patientId: string | null): boolean {
+function invoiceMatchesBookingContext(
+  inv: FiInvoiceRow,
+  caseId: string | null,
+  patientId: string | null
+): boolean {
   const cid = caseId?.trim() || null;
   const pid = patientId?.trim() || null;
   if (cid) {
@@ -95,7 +107,11 @@ function isSurgeryRevenueKind(inv: FiInvoiceRow): boolean {
 }
 
 function depositOpen(inv: FiInvoiceRow): boolean {
-  return inv.invoice_kind === "surgery_deposit" && isInvoiceOpenForCollection(inv.status) && invoiceBalanceDueCents(inv) > 0;
+  return (
+    inv.invoice_kind === "surgery_deposit" &&
+    isInvoiceOpenForCollection(inv.status) &&
+    invoiceBalanceDueCents(inv) > 0
+  );
 }
 
 function invoiceOverdue(inv: FiInvoiceRow, todayYmd: string): boolean {
@@ -153,7 +169,9 @@ function foldInvoiceStates(
 ): FinancialInvoicePaymentState {
   const rows = ctxInvoices.filter((i) => i.invoice_kind === kind);
   if (rows.length === 0) return "none";
-  const open = rows.filter((i) => isInvoiceOpenForCollection(i.status) && invoiceBalanceDueCents(i) > 0);
+  const open = rows.filter(
+    (i) => isInvoiceOpenForCollection(i.status) && invoiceBalanceDueCents(i) > 0
+  );
   if (open.length === 0) return "paid";
   if (kind === "surgery_balance") {
     if (open.some((i) => invoiceOverdue(i, todayYmd))) return "overdue";
@@ -164,7 +182,9 @@ function foldInvoiceStates(
 /**
  * Derives surgery pipeline financial snapshot for a single booking (or case-only context with synthetic booking fields).
  */
-export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgeryPipelineStatusInput): FinancialSurgeryPipelineStatus {
+export function buildFinancialSurgeryPipelineStatus(
+  input: BuildFinancialSurgeryPipelineStatusInput
+): FinancialSurgeryPipelineStatus {
   const {
     todayYmd,
     calendarTimezone,
@@ -185,7 +205,9 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
   } = input;
 
   const fos = financial_os_status?.trim() || null;
-  const ctxInvoices = invoices.filter((inv) => isSurgeryRevenueKind(inv) && invoiceMatchesBookingContext(inv, case_id, patient_id));
+  const ctxInvoices = invoices.filter(
+    (inv) => isSurgeryRevenueKind(inv) && invoiceMatchesBookingContext(inv, case_id, patient_id)
+  );
 
   const activePathway = resolveActivePaymentPathway(paymentPathways);
   const paymentPathway = buildPaymentPathwayAttentionSummary({
@@ -268,14 +290,17 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
 
   const balanceRows = ctxInvoices.filter((i) => i.invoice_kind === "surgery_balance");
   const balance_overdue = balanceRows.some((i) => invoiceOverdue(i, todayYmd));
-  const balance_due_within_14_days = balanceRows.some((i) => balanceDueWithinHorizon(i, todayYmd, horizonYmd));
+  const balance_due_within_14_days = balanceRows.some((i) =>
+    balanceDueWithinHorizon(i, todayYmd, horizonYmd)
+  );
 
   const invIds = new Set(ctxInvoices.map((i) => i.id));
   const ctxPrs = paymentRequests.filter((pr) => invIds.has(pr.invoice_id));
   const latest_payment_request_status =
     ctxPrs.length === 0
       ? null
-      : [...ctxPrs].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]?.status?.trim() ?? null;
+      : ([...ctxPrs].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]?.status?.trim() ??
+        null);
 
   const failedCutoff = new Date();
   failedCutoff.setUTCDate(failedCutoff.getUTCDate() - 60);
@@ -287,7 +312,9 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
       String(p.created_at ?? "").trim() >= failedIso
   );
 
-  const ctxPlans = installmentPlans.filter((p) => invIds.has(p.invoice_id) && String(p.status ?? "").toLowerCase() === "active");
+  const ctxPlans = installmentPlans.filter(
+    (p) => invIds.has(p.invoice_id) && String(p.status ?? "").toLowerCase() === "active"
+  );
   const installment_active = ctxPlans.some((p) => Number(p.remaining_balance ?? 0) > 0);
   const installment_overdue = ctxPlans.some((p) => {
     const next = ymd(p.next_payment_date);
@@ -295,14 +322,17 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     return Boolean(next && next < todayYmd && rem > 0);
   });
 
-  const bookingSt = String(booking_status ?? "").trim().toLowerCase();
+  const bookingSt = String(booking_status ?? "")
+    .trim()
+    .toLowerCase();
   const depositPendingFromInvoices = ctxInvoices.some((i) => depositOpen(i));
   const deposit_pending_for_confirmed_surgery =
     bookingSt === "confirmed" && (depositPendingFromInvoices || fos === "deposit_pending");
 
   const task_attention_required = pathwayTaskAttention.task_attention_required;
   const finance_attention_required = financeApplicationAttention.finance_attention_required;
-  const super_release_attention_required = superReleaseApplicationAttention.super_release_attention_required;
+  const super_release_attention_required =
+    superReleaseApplicationAttention.super_release_attention_required;
   const international_transfer_attention_required =
     internationalTransferApplicationAttention.international_transfer_attention_required;
 
@@ -332,13 +362,22 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
   const next_payment_due_date = dueCandidates.length ? dueCandidates.sort()[0]! : null;
 
   let summary_label = "Review finances";
-  if (task_attention_required || finance_attention_required || super_release_attention_required || international_transfer_attention_required) {
+  if (
+    task_attention_required ||
+    finance_attention_required ||
+    super_release_attention_required ||
+    international_transfer_attention_required
+  ) {
     summary_label = AWAITING_FINANCIAL_WORKFLOW_COPY;
   } else if (fos === "paid_in_full" && balance_due_cents <= 0 && !depositPendingFromInvoices) {
     summary_label = "Paid in full";
   } else if (payment_attention_required) {
     summary_label = "Payment attention required";
-  } else if (balance_due_cents <= 0 && depositInvoiceState === "paid" && balanceInvoiceState === "paid") {
+  } else if (
+    balance_due_cents <= 0 &&
+    depositInvoiceState === "paid" &&
+    balanceInvoiceState === "paid"
+  ) {
     summary_label = "Paid in full";
   } else if (balanceInvoiceState === "overdue") {
     summary_label = "Balance overdue";

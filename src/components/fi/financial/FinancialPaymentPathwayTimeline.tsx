@@ -6,7 +6,10 @@ import {
   cancelPaymentPathwayAction,
   updatePaymentPathwayStatusAction,
 } from "@/lib/actions/financial-os-payment-pathway-actions";
-import { pathwayStatusLabel, pathwayTypeLabel } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
+import {
+  pathwayStatusLabel,
+  pathwayTypeLabel,
+} from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import {
   FinancialOsEmptyState,
   FinancialOsFeedbackText,
@@ -85,7 +88,10 @@ export function FinancialPaymentPathwayTimeline(props: {
     setFeedback(null);
     setBusyId(pathwayId);
     start(async () => {
-      const res = await updatePaymentPathwayStatusAction(tenantId, { pathway_id: pathwayId, status });
+      const res = await updatePaymentPathwayStatusAction(tenantId, {
+        pathway_id: pathwayId,
+        status,
+      });
       setFeedback(financialOsActionFeedback(res, "Status updated."));
       setBusyId(null);
     });
@@ -133,14 +139,19 @@ export function FinancialPaymentPathwayTimeline(props: {
               <td className={financialOsClasses.tableCell}>{sourceLabel(p.source)}</td>
               <td className={financialOsClasses.tableCell}>{p.provider ?? "—"}</td>
               <td className={financialOsClasses.tableCell}>{p.expected_settlement_date ?? "—"}</td>
-              <td className={financialOsClasses.tableCellMono}>{fmtMoney(p.expected_amount_cents, p.currency_code)}</td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(p.expected_amount_cents, p.currency_code)}
+              </td>
               <td className={`${financialOsClasses.tableCellMono} text-[10px]`}>
                 {p.case_id ? `case:${p.case_id.slice(0, 8)}… ` : ""}
                 {p.invoice_id ? `inv:${p.invoice_id.slice(0, 8)}… ` : ""}
                 {p.booking_id ? `bk:${p.booking_id.slice(0, 8)}…` : ""}
                 {!p.case_id && !p.invoice_id && !p.booking_id ? "—" : ""}
               </td>
-              <td className={`${financialOsClasses.tableCell} max-w-[16rem] truncate`} title={notes ?? undefined}>
+              <td
+                className={`${financialOsClasses.tableCell} max-w-[16rem] truncate`}
+                title={notes ?? undefined}
+              >
                 {notes ?? "—"}
               </td>
               {canMutate ? (

@@ -17,7 +17,13 @@ function fmtTs(iso: string | null | undefined): string {
   return d.toISOString().slice(0, 16).replace("T", " ");
 }
 
-export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; rows: PatientDirectoryRowModel[] }) {
+export function PatientDirectoryTable({
+  tenantId,
+  rows,
+}: {
+  tenantId: string;
+  rows: PatientDirectoryRowModel[];
+}) {
   const slide = usePatientSlideOverOptional();
 
   return (
@@ -25,11 +31,15 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
       <table className="min-w-full divide-y divide-white/[0.08] text-sm">
         <thead className="bg-white/[0.03]">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Patient</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Patient
+            </th>
             <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 md:table-cell">
               Contact
             </th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Status</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Status
+            </th>
             <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 sm:table-cell">
               Norwood summary
             </th>
@@ -39,14 +49,18 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
             <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 xl:table-cell">
               Last visit
             </th>
-            <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-400">Procedures</th>
+            <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Procedures
+            </th>
             <th className="hidden px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-400 sm:table-cell">
               Lifetime value
             </th>
             <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 lg:table-cell">
               Lead source
             </th>
-            <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-400">Patients</th>
+            <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Patients
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.06]">
@@ -58,7 +72,10 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
             const contact = [row.email, row.phone].filter(Boolean).join(" · ") || "—";
             const norwoodLine = truncateClinicalSummary(row.clinicalScalesSummary);
             const nameCell = slide ? (
-              <PatientSlideOverTrigger patientId={row.patientId} className="text-left font-medium text-blue-300 hover:underline">
+              <PatientSlideOverTrigger
+                patientId={row.patientId}
+                className="text-left font-medium text-blue-300 hover:underline"
+              >
                 {row.displayName}
               </PatientSlideOverTrigger>
             ) : (
@@ -91,7 +108,11 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
                 </td>
                 <td className="hidden px-3 py-2 lg:table-cell">
                   {apptHref ? (
-                    <Link href={apptHref} className="text-xs text-blue-300 hover:underline" title={row.nextAppointmentTitle ?? undefined}>
+                    <Link
+                      href={apptHref}
+                      className="text-xs text-blue-300 hover:underline"
+                      title={row.nextAppointmentTitle ?? undefined}
+                    >
                       {fmtTs(row.nextAppointmentAt)}
                     </Link>
                   ) : (
@@ -101,12 +122,18 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
                 <td className="hidden whitespace-nowrap px-3 py-2 text-xs text-slate-400 xl:table-cell">
                   {fmtTs(row.lastVisitAt)}
                 </td>
-                <td className="px-3 py-2 text-center text-xs tabular-nums text-slate-200">{row.totalProcedures}</td>
+                <td className="px-3 py-2 text-center text-xs tabular-nums text-slate-200">
+                  {row.totalProcedures}
+                </td>
                 <td className="hidden px-3 py-2 text-right text-xs tabular-nums text-slate-200 sm:table-cell">
                   {formatPatientLifetimeValueGbp(row.lifetimeValueGbp)}
                 </td>
-                <td className="hidden px-3 py-2 text-xs text-slate-300 lg:table-cell">{row.primaryLeadSource ?? "—"}</td>
-                <td className="px-3 py-2 text-center text-xs tabular-nums text-slate-300">{row.activeCaseCount}</td>
+                <td className="hidden px-3 py-2 text-xs text-slate-300 lg:table-cell">
+                  {row.primaryLeadSource ?? "—"}
+                </td>
+                <td className="px-3 py-2 text-center text-xs tabular-nums text-slate-300">
+                  {row.activeCaseCount}
+                </td>
               </tr>
             );
           })}

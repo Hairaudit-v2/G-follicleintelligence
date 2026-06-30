@@ -155,7 +155,8 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
   {
     slug: "full_clinical_head_series",
     name: "Full Clinical Head Series",
-    description: "Ten primary head views — wide and close-up — for comprehensive clinical documentation.",
+    description:
+      "Ten primary head views — wide and close-up — for comprehensive clinical documentation.",
     picker_category: "full_clinical_head_series",
     imaging_library_axis: "consultation",
     slots: [
@@ -304,7 +305,11 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
         "Document the donor area before extraction with hair clipped and landmarks visible.",
         "donor",
         "donor",
-        { slot_tier: "addon", suggested_timing: "Pre-op — before extraction", surgery_phase: "pre_op" }
+        {
+          slot_tier: "addon",
+          suggested_timing: "Pre-op — before extraction",
+          surgery_phase: "pre_op",
+        }
       ),
       slot(
         "pre_op_donor_close",
@@ -312,7 +317,11 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
         "Close-up pre-op donor view for punch spacing and follicle calibre reference.",
         "donor_close",
         "donor",
-        { slot_tier: "addon", suggested_timing: "Pre-op — before extraction", surgery_phase: "pre_op" }
+        {
+          slot_tier: "addon",
+          suggested_timing: "Pre-op — before extraction",
+          surgery_phase: "pre_op",
+        }
       ),
       slot(
         "hairline_design",
@@ -376,7 +385,10 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
         "Frontal view immediately after procedure showing graft placement and hairline.",
         "healing_progress",
         "hairline",
-        { suggested_timing: "End of procedure — before patient leaves OR", surgery_phase: "immediate_post_op" }
+        {
+          suggested_timing: "End of procedure — before patient leaves OR",
+          surgery_phase: "immediate_post_op",
+        }
       ),
       slot(
         "immediate_post_op_donor",
@@ -384,7 +396,11 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
         "Donor area immediately after procedure showing harvest sites or closure.",
         "donor",
         "donor",
-        { slot_tier: "addon", suggested_timing: "End of procedure — before patient leaves OR", surgery_phase: "immediate_post_op" }
+        {
+          slot_tier: "addon",
+          suggested_timing: "End of procedure — before patient leaves OR",
+          surgery_phase: "immediate_post_op",
+        }
       ),
       slot(
         "immediate_post_op_close",
@@ -392,7 +408,10 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
         "Close-up of a representative recipient zone showing graft crusting and placement density.",
         "front_close",
         "frontal_third",
-        { suggested_timing: "End of procedure — before patient leaves OR", surgery_phase: "immediate_post_op" }
+        {
+          suggested_timing: "End of procedure — before patient leaves OR",
+          surgery_phase: "immediate_post_op",
+        }
       ),
     ],
   },
@@ -512,7 +531,9 @@ export function getVieProtocolOrThrow(slug: string): VieProtocolDef {
   return p;
 }
 
-export function getProtocolsByPickerCategory(category: VieProtocolPickerCategory): VieProtocolDef[] {
+export function getProtocolsByPickerCategory(
+  category: VieProtocolPickerCategory
+): VieProtocolDef[] {
   return VIE_PROTOCOL_CATALOG.filter((p) => p.picker_category === category);
 }
 

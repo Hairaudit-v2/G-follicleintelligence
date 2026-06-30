@@ -43,7 +43,7 @@ export type ReceptionPhase8Payload = {
 export async function loadReceptionPhase8PayloadForCommandCentre(
   payload: ReceptionOsCommandCentrePayload,
   viewerRole: ReceptionOsViewerRole,
-  periodDays: number = RECEPTION_PILOT_REVIEW_DEFAULT_PERIOD_DAYS,
+  periodDays: number = RECEPTION_PILOT_REVIEW_DEFAULT_PERIOD_DAYS
 ): Promise<ReceptionPhase8Payload> {
   const reviewVisible = receptionPilotReviewVisible(viewerRole);
   const ownerVisible = receptionOwnerValueVisible(viewerRole);
@@ -91,19 +91,23 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
   ]);
 
   if (eventsRes.error) {
-    if (isMissingDatabaseRelationError(eventsRes.error)) throw new Error(missingTableMessage("fi_reception_usage_events"));
+    if (isMissingDatabaseRelationError(eventsRes.error))
+      throw new Error(missingTableMessage("fi_reception_usage_events"));
     throw new Error(eventsRes.error.message);
   }
   if (tasksRes.error) {
-    if (isMissingDatabaseRelationError(tasksRes.error)) throw new Error(missingTableMessage("fi_reception_tasks"));
+    if (isMissingDatabaseRelationError(tasksRes.error))
+      throw new Error(missingTableMessage("fi_reception_tasks"));
     throw new Error(tasksRes.error.message);
   }
   if (deliveriesRes.error) {
-    if (isMissingDatabaseRelationError(deliveriesRes.error)) throw new Error(missingTableMessage("fi_reception_communication_deliveries"));
+    if (isMissingDatabaseRelationError(deliveriesRes.error))
+      throw new Error(missingTableMessage("fi_reception_communication_deliveries"));
     throw new Error(deliveriesRes.error.message);
   }
   if (closeoutsRes.error) {
-    if (isMissingDatabaseRelationError(closeoutsRes.error)) throw new Error(missingTableMessage("fi_reception_daily_closeouts"));
+    if (isMissingDatabaseRelationError(closeoutsRes.error))
+      throw new Error(missingTableMessage("fi_reception_daily_closeouts"));
     throw new Error(closeoutsRes.error.message);
   }
 
@@ -112,7 +116,9 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
   const criticalSeverities = new Set(["critical", "blocked"]);
 
   const tasksCreatedInPeriod = tasks.length;
-  const tasksResolvedInPeriod = tasks.filter((t) => resolvedStatuses.has(String((t as { status: string }).status))).length;
+  const tasksResolvedInPeriod = tasks.filter((t) =>
+    resolvedStatuses.has(String((t as { status: string }).status))
+  ).length;
   const risksClosedInPeriod = tasks.filter((raw) => {
     const row = raw as { status: string; severity: string };
     return resolvedStatuses.has(row.status) && criticalSeverities.has(row.severity);
@@ -134,11 +140,17 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
       : null;
 
   const deliveries = deliveriesRes.data ?? [];
-  const communicationsDrafted = deliveries.filter((d) => String((d as { delivery_status: string }).delivery_status) === "draft").length;
-  const communicationsSent = deliveries.filter((d) => String((d as { delivery_status: string }).delivery_status) === "sent").length;
-  const communicationsDryRun = deliveries.filter((d) => String((d as { delivery_status: string }).delivery_status) === "dry_run").length;
+  const communicationsDrafted = deliveries.filter(
+    (d) => String((d as { delivery_status: string }).delivery_status) === "draft"
+  ).length;
+  const communicationsSent = deliveries.filter(
+    (d) => String((d as { delivery_status: string }).delivery_status) === "sent"
+  ).length;
+  const communicationsDryRun = deliveries.filter(
+    (d) => String((d as { delivery_status: string }).delivery_status) === "dry_run"
+  ).length;
   const depositsChased = deliveries.filter((d) =>
-    isDepositChaseTemplateKey(String((d as { template_key?: string }).template_key ?? "")),
+    isDepositChaseTemplateKey(String((d as { template_key?: string }).template_key ?? ""))
   ).length;
 
   const revenueAtRiskIdentified = payload.revenueSummary.totalAtRiskRevenue;
@@ -166,7 +178,10 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
     currency: payload.revenueSummary.currency,
     revenueAtRiskIdentified,
     usageEvents,
-    feedbackRows: feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind, createdAt: f.created_at })),
+    feedbackRows: feedbackRows.map((f) => ({
+      feedbackKind: f.feedback_kind,
+      createdAt: f.created_at,
+    })),
     tasksCreatedInPeriod,
     tasksResolvedInPeriod,
     risksClosedInPeriod,
@@ -182,7 +197,10 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
     periodStart,
     periodEnd,
     usageEvents,
-    feedbackRows: feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind, createdAt: f.created_at })),
+    feedbackRows: feedbackRows.map((f) => ({
+      feedbackKind: f.feedback_kind,
+      createdAt: f.created_at,
+    })),
     tasksCreatedInPeriod,
     tasksResolvedInPeriod,
     avgTaskResolutionMinutes,
@@ -195,11 +213,11 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
 
   const managerScores = buildReceptionPilotManagerScores(
     dailySummary,
-    feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind })),
+    feedbackRows.map((f) => ({ feedbackKind: f.feedback_kind }))
   );
 
   const conversionEventCount = usageEvents.filter(
-    (ev) => ev.eventKind === "task_actioned" || ev.eventKind === "communication_dry_run_sent",
+    (ev) => ev.eventKind === "task_actioned" || ev.eventKind === "communication_dry_run_sent"
   ).length;
 
   const ownerDashboard = buildReceptionOwnerValueDashboard({

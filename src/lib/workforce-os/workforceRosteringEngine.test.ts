@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
-  buildStaffHrNotificationSummary,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { normalizeRequiredRoles } from "@/src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults";
 import {
@@ -29,7 +27,11 @@ function workingHours(): Record<string, unknown> {
   return { weekly: { mon: { enabled: true, start: "09:00", end: "17:00" } } };
 }
 
-function freshReadinessInput(overrides: Partial<import("@/src/lib/workforce-os/workforceReadinessEngine").WorkforceReadinessScoreInput> = {}) {
+function freshReadinessInput(
+  overrides: Partial<
+    import("@/src/lib/workforce-os/workforceReadinessEngine").WorkforceReadinessScoreInput
+  > = {}
+) {
   const hr = buildStaffHrNotificationSummary(
     {
       source_system: "iiohr_hr",
@@ -76,7 +78,8 @@ function freshReadinessInput(overrides: Partial<import("@/src/lib/workforce-os/w
 }
 
 function block(
-  overrides: Partial<StaffAvailabilityBlockRecord> & Pick<StaffAvailabilityBlockRecord, "block_type">
+  overrides: Partial<StaffAvailabilityBlockRecord> &
+    Pick<StaffAvailabilityBlockRecord, "block_type">
 ): StaffAvailabilityBlockRecord {
   return {
     id: overrides.id ?? "block-1",
@@ -99,7 +102,10 @@ function shift(overrides: Partial<StaffShiftRecord> = {}): StaffShiftRecord {
 }
 
 test("normalizeRequiredRoles coerces and filters invalid entries", () => {
-  assert.deepEqual(normalizeRequiredRoles({ surgeon: 1, nurse: "2", bad: 0 }), { surgeon: 1, nurse: 2 });
+  assert.deepEqual(normalizeRequiredRoles({ surgeon: 1, nurse: "2", bad: 0 }), {
+    surgeon: 1,
+    nurse: 2,
+  });
 });
 
 test("resolveClinicalStaffingTemplate prefers clinic-specific template", () => {
@@ -155,7 +161,11 @@ test("detectMissingRoles identifies under-staffed roles", () => {
 
 test("countAssignedRoles aggregates by role", () => {
   assert.deepEqual(
-    countAssignedRoles([{ assignedRole: "Nurse" }, { assignedRole: "nurse" }, { assignedRole: "surgeon" }]),
+    countAssignedRoles([
+      { assignedRole: "Nurse" },
+      { assignedRole: "nurse" },
+      { assignedRole: "surgeon" },
+    ]),
     { nurse: 2, surgeon: 1 }
   );
 });

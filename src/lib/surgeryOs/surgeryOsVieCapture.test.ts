@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { getSlotImageIds, mergeProgressForSlotCapture, slotIsSatisfied } from "@/src/lib/imagingOs/imagingOsProtocol";
+import {
+  getSlotImageIds,
+  mergeProgressForSlotCapture,
+  slotIsSatisfied,
+} from "@/src/lib/imagingOs/imagingOsProtocol";
 import { assertVieProtocolCapturePolicy } from "@/src/lib/vie/vieCapturePolicy.server";
 import {
   buildSurgeryOsVieCaptureSummary,
@@ -117,11 +121,17 @@ describe("SurgeryOS VIE capture completeness", () => {
 
   it("retake replace keeps a single surgery slot image id", () => {
     const progress = { graft_tray_overview: ["old-id"] };
-    const prev = mergeProgressForSlotCapture.extractPreviousSlotImageIds(progress, "graft_tray_overview");
+    const prev = mergeProgressForSlotCapture.extractPreviousSlotImageIds(
+      progress,
+      "graft_tray_overview"
+    );
     assert.deepEqual(prev, ["old-id"]);
     const next = mergeProgressForSlotCapture.apply(progress, "graft_tray_overview", "new-id");
     assert.deepEqual(getSlotImageIds(next, "graft_tray_overview"), ["new-id"]);
-    assert.equal(slotIsSatisfied({ slug: "graft_tray_overview", label: "Graft tray", required: true }, next), true);
+    assert.equal(
+      slotIsSatisfied({ slug: "graft_tray_overview", label: "Graft tray", required: true }, next),
+      true
+    );
   });
 
   it("graft tray slots are surfaced in SurgeryOS status", () => {

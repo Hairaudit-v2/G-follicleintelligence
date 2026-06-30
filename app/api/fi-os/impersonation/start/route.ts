@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
-import { StaffPinMutationBlockedError, STAFF_PIN_RESTRICTED_MUTATION_MESSAGE } from "@/src/lib/staffPin/staffPinMutationGuard";
+import {
+  StaffPinMutationBlockedError,
+  STAFF_PIN_RESTRICTED_MUTATION_MESSAGE,
+} from "@/src/lib/staffPin/staffPinMutationGuard";
 import { rejectAnyActiveStaffPinSession } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
@@ -15,8 +18,7 @@ import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 
 export const dynamic = "force-dynamic";
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(s: string): boolean {
   return UUID_RE.test(s.trim());
@@ -38,14 +40,20 @@ export async function POST(req: Request) {
     }
     const os = await loadFiOsIdentity(sessionId);
     if (!os || !isFiOsPlatformAdminRole(os.osRole)) {
-      return NextResponse.json({ ok: false, error: "Platform administrator role required." }, { status: 403 });
+      return NextResponse.json(
+        { ok: false, error: "Platform administrator role required." },
+        { status: 403 }
+      );
     }
 
     const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     const target = typeof body.targetAuthUserId === "string" ? body.targetAuthUserId.trim() : "";
     const tenantId = typeof body.tenantId === "string" ? body.tenantId.trim() : undefined;
     if (!isUuid(target)) {
-      return NextResponse.json({ ok: false, error: "targetAuthUserId must be a UUID." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "targetAuthUserId must be a UUID." },
+        { status: 400 }
+      );
     }
 
     const supabase = supabaseAdmin();
@@ -75,7 +83,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
     if (e instanceof StaffPinMutationBlockedError) {
-      return NextResponse.json({ ok: false, error: STAFF_PIN_RESTRICTED_MUTATION_MESSAGE }, { status: 403 });
+      return NextResponse.json(
+        { ok: false, error: STAFF_PIN_RESTRICTED_MUTATION_MESSAGE },
+        { status: 403 }
+      );
     }
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },

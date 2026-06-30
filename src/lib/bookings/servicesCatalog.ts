@@ -41,7 +41,10 @@ export function servicesByBookingType(services: FiServiceRow[]): Map<string, FiS
   return m;
 }
 
-export function serviceForBookingType(services: FiServiceRow[], bookingType: string): FiServiceRow | null {
+export function serviceForBookingType(
+  services: FiServiceRow[],
+  bookingType: string
+): FiServiceRow | null {
   return servicesByBookingType(services).get(bookingType.trim()) ?? null;
 }
 
@@ -69,7 +72,11 @@ export function quickTemplateDurationMinutes(
 ): number {
   if (services?.length) {
     if (template.catalogName?.trim()) {
-      const byName = serviceForCatalogName(services, template.catalogName, template.catalogCategory ?? null);
+      const byName = serviceForCatalogName(
+        services,
+        template.catalogName,
+        template.catalogCategory ?? null
+      );
       if (byName && byName.duration_minutes > 0) return byName.duration_minutes;
     }
     const byType = serviceForBookingType(services, template.bookingType);
@@ -83,7 +90,8 @@ export function defaultProcedureDurationMinutes(
   services?: FiServiceRow[] | Map<string, FiServiceRow> | null
 ): number {
   const key = procedure.trim();
-  const map = services == null ? null : services instanceof Map ? services : servicesByBookingType(services);
+  const map =
+    services == null ? null : services instanceof Map ? services : servicesByBookingType(services);
   const row = map?.get(key);
   if (row && row.duration_minutes > 0) return row.duration_minutes;
   const bt = key as BookingType;

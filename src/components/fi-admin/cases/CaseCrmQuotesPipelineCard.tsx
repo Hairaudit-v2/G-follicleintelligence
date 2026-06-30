@@ -97,10 +97,14 @@ export function CaseCrmQuotesPipelineCard(props: {
         <h2 className="text-sm font-semibold text-slate-100">Quotes &amp; booking handoff</h2>
         <p className={`text-xs ${fiOsLightFormSurfaceClassNames.helper}`}>
           No CRM quotes are linked to this case yet. Complete a guided consultation, then use{" "}
-          <strong>Create quote draft</strong> on the consultation form hand-offs (requires a linked lead or this case).
+          <strong>Create quote draft</strong> on the consultation form hand-offs (requires a linked
+          lead or this case).
         </p>
         <p className={`text-xs ${fiOsLightFormSurfaceClassNames.helper}`}>
-          <Link href={`/fi-admin/${tid}/consultations`} className="font-semibold text-cyan-300 underline">
+          <Link
+            href={`/fi-admin/${tid}/consultations`}
+            className="font-semibold text-cyan-300 underline"
+          >
             Open consultations
           </Link>
         </p>
@@ -123,12 +127,16 @@ export function CaseCrmQuotesPipelineCard(props: {
         </label>
       </div>
       <p className={`text-xs ${fiOsLightFormSurfaceClassNames.helper}`}>
-        CRM quotes from consultations linked to this case. Mark accepted to log CRM activity (and advance the lead when it
-        is on <span className="font-mono">quote_sent</span>). Use surgery scheduling when the quote is accepted. Deposit
-        invoices and payment links live in <strong>Payments &amp; invoices</strong> below.
+        CRM quotes from consultations linked to this case. Mark accepted to log CRM activity (and
+        advance the lead when it is on <span className="font-mono">quote_sent</span>). Use surgery
+        scheduling when the quote is accepted. Deposit invoices and payment links live in{" "}
+        <strong>Payments &amp; invoices</strong> below.
       </p>
       {msg ? (
-        <p className="rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200" role="status">
+        <p
+          className="rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
+          role="status"
+        >
           {msg}
         </p>
       ) : null}
@@ -158,7 +166,11 @@ export function CaseCrmQuotesPipelineCard(props: {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    disabled={Boolean(busyId) || accepted || ["declined", "expired", "cancelled"].includes(q.status.trim().toLowerCase())}
+                    disabled={
+                      Boolean(busyId) ||
+                      accepted ||
+                      ["declined", "expired", "cancelled"].includes(q.status.trim().toLowerCase())
+                    }
                     onClick={() => void onAccept(q.id)}
                     className="rounded bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-white disabled:opacity-50"
                   >
@@ -168,7 +180,11 @@ export function CaseCrmQuotesPipelineCard(props: {
                     type="button"
                     disabled={!slide || !accepted}
                     onClick={() => openSurgeryFromQuote(q)}
-                    title={!slide ? "Sign in with booking permissions to schedule from this page." : undefined}
+                    title={
+                      !slide
+                        ? "Sign in with booking permissions to schedule from this page."
+                        : undefined
+                    }
                     className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2.5 py-1.5 text-[11px] font-semibold text-slate-100 disabled:opacity-50"
                   >
                     Schedule surgery

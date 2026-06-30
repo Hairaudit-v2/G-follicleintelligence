@@ -16,7 +16,10 @@ export async function GET(
   try {
     const { tenantId, caseId } = await params;
     if (!tenantId || !caseId)
-      return NextResponse.json({ ok: false, error: "Missing tenantId or caseId." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Missing tenantId or caseId." },
+        { status: 400 }
+      );
 
     const adminKey = extractAdminKeyFromRequest(req);
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
@@ -82,14 +85,13 @@ export async function GET(
       uploads: uploadsRes.data ?? [],
       blood_signals: bloodRes.data?.payload ?? null,
       image_signals: imageRes.data ?? [],
-      scorecard:
-        scorecardRes.data
-          ? {
-              overall_score: scorecardRes.data.overall_score,
-              risk_tier: scorecardRes.data.risk_tier,
-              payload: scorecardRes.data.payload_json,
-            }
-          : null,
+      scorecard: scorecardRes.data
+        ? {
+            overall_score: scorecardRes.data.overall_score,
+            risk_tier: scorecardRes.data.risk_tier,
+            payload: scorecardRes.data.payload_json,
+          }
+        : null,
       latest_report: reportRes.data ?? null,
     });
   } catch (e: unknown) {

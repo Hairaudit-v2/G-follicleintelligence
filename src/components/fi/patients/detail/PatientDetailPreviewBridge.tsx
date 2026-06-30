@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePatientSlideOver } from "../PatientSlideOver";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";
 
 type RelatedPatientPeek = {
   patientId: string;
@@ -18,7 +19,12 @@ type Props = {
 };
 
 /** Optional related-patient peek strip (URL sync handled by {@link PatientDetailPreviewUrlSync}). */
-export function PatientDetailPreviewBridge({ tenantId, currentPatientId, relatedPatients, onOpenPreview }: Props) {
+export function PatientDetailPreviewBridge({
+  tenantId,
+  currentPatientId,
+  relatedPatients,
+  onOpenPreview,
+}: Props) {
   const { activePatientId } = usePatientSlideOver();
   const others = relatedPatients.filter((r) => r.patientId !== currentPatientId);
 
@@ -30,11 +36,18 @@ export function PatientDetailPreviewBridge({ tenantId, currentPatientId, related
     <section className={card} aria-label="Related patient records">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Related records</h2>
-          <p className="mt-1 text-xs text-slate-400">Peek another patient in the slide-over without leaving this page.</p>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Related records
+          </h2>
+          <p className="mt-1 text-xs text-slate-400">
+            Peek another patient in the slide-over without leaving this page.
+          </p>
         </div>
         <p className="text-xs text-gray-500">
-          Tip: share <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">?preview=&lt;patient-id&gt;</code>
+          Tip: share{" "}
+          <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">
+            ?preview=&lt;patient-id&gt;
+          </code>
         </p>
       </div>
       <ul className="mt-3 flex flex-col gap-2">
@@ -59,7 +72,10 @@ export function PatientDetailPreviewBridge({ tenantId, currentPatientId, related
                 >
                   Preview
                 </button>
-                <Link href={`/fi-admin/${tenantId}/patients/${r.patientId}`} className="text-blue-300 hover:underline">
+                <Link
+                  href={`/fi-admin/${tenantId}/patients/${r.patientId}`}
+                  className="text-blue-300 hover:underline"
+                >
                   Open →
                 </Link>
               </div>

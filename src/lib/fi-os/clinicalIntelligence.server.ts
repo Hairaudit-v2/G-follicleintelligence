@@ -4,7 +4,10 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { TenantActionCentre } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { loadPatientTwinV1 } from "@/src/lib/patientTwin/patientTwinLoader.server";
 import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
-import { derivePatientTwinIntegritySignals, type PatientClinicalIntelligenceView } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
+import {
+  derivePatientTwinIntegritySignals,
+  type PatientClinicalIntelligenceView,
+} from "@/src/lib/fi-os/clinicalIntelligenceSignals";
 
 export type TenantClinicalIntelligenceSummary = {
   readinessAttention: number;
@@ -31,7 +34,10 @@ export const EMPTY_TENANT_CLINICAL_INTELLIGENCE_SUMMARY: TenantClinicalIntellige
  */
 export async function loadTenantClinicalIntelligenceSummary(
   tenantId: string,
-  actionCentre?: Pick<TenantActionCentre, "consultationsAwaitingCompletion" | "followUpsDue" | "surgeryReadinessAlerts">
+  actionCentre?: Pick<
+    TenantActionCentre,
+    "consultationsAwaitingCompletion" | "followUpsDue" | "surgeryReadinessAlerts"
+  >
 ): Promise<TenantClinicalIntelligenceSummary> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();

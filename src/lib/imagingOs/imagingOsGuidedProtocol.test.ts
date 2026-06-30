@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildGuidedImageUploadFields, assertGuidedSessionUploadPreconditions } from "./imagingOsGuidedFields";
+import {
+  buildGuidedImageUploadFields,
+  assertGuidedSessionUploadPreconditions,
+} from "./imagingOsGuidedFields";
 import {
   assertSlotBelongsToTemplate,
   mergeProgressForSlotCapture,

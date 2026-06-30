@@ -164,7 +164,9 @@ export async function syncGoogleCalendarIncrementalForWebhook(
       .eq("external_event_id", event.externalEventId)
       .maybeSingle();
 
-    const localEvent = localRow ? mapLocalEventRow(localRow as Record<string, unknown>, input.tenantId) : null;
+    const localEvent = localRow
+      ? mapLocalEventRow(localRow as Record<string, unknown>, input.tenantId)
+      : null;
 
     const { data: versionRow } = await supabase
       .from("fi_calendar_event_versions")

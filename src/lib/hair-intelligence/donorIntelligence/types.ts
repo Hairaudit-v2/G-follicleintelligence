@@ -13,10 +13,24 @@ export const HIE_DONOR_REGIONS = [
 ] as const;
 export type HieDonorRegion = (typeof HIE_DONOR_REGIONS)[number];
 
-export const HIE_DONOR_QUALITY_RATINGS = ["excellent", "good", "moderate", "poor", "unsafe", "unknown"] as const;
+export const HIE_DONOR_QUALITY_RATINGS = [
+  "excellent",
+  "good",
+  "moderate",
+  "poor",
+  "unsafe",
+  "unknown",
+] as const;
 export type HieDonorQualityRating = (typeof HIE_DONOR_QUALITY_RATINGS)[number];
 
-export const HIE_DONOR_DENSITY_BANDS = ["very_low", "low", "moderate", "high", "very_high", "unknown"] as const;
+export const HIE_DONOR_DENSITY_BANDS = [
+  "very_low",
+  "low",
+  "moderate",
+  "high",
+  "very_high",
+  "unknown",
+] as const;
 export type HieDonorDensityBand = (typeof HIE_DONOR_DENSITY_BANDS)[number];
 
 export const HIE_DONOR_RISK_LEVELS = ["low", "moderate", "high", "unknown"] as const;
@@ -32,10 +46,22 @@ export const HIE_SAFE_DONOR_CAPACITY_BANDS = [
 ] as const;
 export type HieSafeDonorCapacityBand = (typeof HIE_SAFE_DONOR_CAPACITY_BANDS)[number];
 
-export const HIE_LIFETIME_GRAFT_BUDGET_BANDS = ["under_3000", "3000_5000", "5000_7000", "over_7000", "unknown"] as const;
+export const HIE_LIFETIME_GRAFT_BUDGET_BANDS = [
+  "under_3000",
+  "3000_5000",
+  "5000_7000",
+  "over_7000",
+  "unknown",
+] as const;
 export type HieLifetimeGraftBudgetBand = (typeof HIE_LIFETIME_GRAFT_BUDGET_BANDS)[number];
 
-export const HIE_EXTRACTION_CAUTION_LEVELS = ["low", "moderate", "high", "avoid", "unknown"] as const;
+export const HIE_EXTRACTION_CAUTION_LEVELS = [
+  "low",
+  "moderate",
+  "high",
+  "avoid",
+  "unknown",
+] as const;
 export type HieExtractionCautionLevel = (typeof HIE_EXTRACTION_CAUTION_LEVELS)[number];
 
 export const HIE_DONOR_REVIEW_STATUSES = ["pending", "accepted", "corrected", "rejected"] as const;

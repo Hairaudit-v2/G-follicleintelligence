@@ -32,7 +32,14 @@ function SectionBlock({ title, children }: { title: string; children: ReactNode 
   return (
     <section className="border-b border-white/[0.06] pb-4 last:border-0 last:pb-0">
       <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h4>
-      <div className={cn("mt-1.5 text-sm leading-relaxed text-slate-200", fiOsLightFormSurfaceClassNames.body)}>{children}</div>
+      <div
+        className={cn(
+          "mt-1.5 text-sm leading-relaxed text-slate-200",
+          fiOsLightFormSurfaceClassNames.body
+        )}
+      >
+        {children}
+      </div>
     </section>
   );
 }
@@ -50,7 +57,8 @@ function FollowUpReviewCompletionBrief({
     <div className="space-y-4">
       {isPreview ? (
         <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
-          Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
+          Review mode — summary reflects current answers. Complete consultation to persist to the
+          chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
@@ -78,7 +86,9 @@ function FollowUpReviewCompletionBrief({
           </SectionBlock>
 
           <SectionBlock title="Satisfaction (1–10)">
-            <p className="font-medium">{snap?.satisfactionScore != null ? String(snap.satisfactionScore) : "—"}</p>
+            <p className="font-medium">
+              {snap?.satisfactionScore != null ? String(snap.satisfactionScore) : "—"}
+            </p>
           </SectionBlock>
 
           <SectionBlock title="Treatment response">
@@ -86,7 +96,9 @@ function FollowUpReviewCompletionBrief({
           </SectionBlock>
 
           <SectionBlock title="Outcome intelligence">
-            <p className="whitespace-pre-wrap">{snap?.outcomeIntelligenceStatusLine?.trim() || "—"}</p>
+            <p className="whitespace-pre-wrap">
+              {snap?.outcomeIntelligenceStatusLine?.trim() || "—"}
+            </p>
           </SectionBlock>
 
           <SectionBlock title="Next recommended pathway">
@@ -98,7 +110,9 @@ function FollowUpReviewCompletionBrief({
           </SectionBlock>
 
           <SectionBlock title="Integration (placeholder)">
-            <p className="text-xs text-slate-400">{snap?.integrationPlaceholderLine?.trim() || "—"}</p>
+            <p className="text-xs text-slate-400">
+              {snap?.integrationPlaceholderLine?.trim() || "—"}
+            </p>
           </SectionBlock>
 
           <SectionBlock title="Outcome (rules)">
@@ -127,12 +141,15 @@ function ScalpPathologyCompletionBrief({
     <div className="space-y-4">
       {isPreview ? (
         <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
-          Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
+          Review mode — summary reflects current answers. Complete consultation to persist to the
+          chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
         <header>
-          <h3 className="text-base font-semibold text-slate-100">Scalp disorder / pathology snapshot</h3>
+          <h3 className="text-base font-semibold text-slate-100">
+            Scalp disorder / pathology snapshot
+          </h3>
           <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
             {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
@@ -196,16 +213,23 @@ function HairTransplantRepairCompletionBrief({
   isPreview?: boolean;
 }) {
   const snap = summary.repairConsultationCompletionSnapshot;
-  const corrective = snap?.correctiveOptionsLabels?.length ? snap.correctiveOptionsLabels.join(", ") : "—";
-  const hairAudit = snap?.hairauditRecommended ? "Yes — baseline documentation recommended" : "Not flagged";
-  const surgeryOs = snap?.surgeryosPlanningRecommended ? "Yes — corrective planning in SurgeryOS recommended" : "Not flagged";
+  const corrective = snap?.correctiveOptionsLabels?.length
+    ? snap.correctiveOptionsLabels.join(", ")
+    : "—";
+  const hairAudit = snap?.hairauditRecommended
+    ? "Yes — baseline documentation recommended"
+    : "Not flagged";
+  const surgeryOs = snap?.surgeryosPlanningRecommended
+    ? "Yes — corrective planning in SurgeryOS recommended"
+    : "Not flagged";
   const urgency = snap?.followUpUrgencyLabel?.trim() || "—";
 
   return (
     <div className="space-y-4">
       {isPreview ? (
         <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
-          Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
+          Review mode — summary reflects current answers. Complete consultation to persist to the
+          chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
@@ -270,7 +294,12 @@ function HairTransplantCompletionBrief({
       ? `${summary.estimatedGraftsMin}–${summary.estimatedGraftsMax} grafts discussed`
       : null;
 
-  const zonesTreats = [summary.recommendedZones.join(", "), summary.recommendedTreatments.join(", ")].filter(Boolean).join(" · ");
+  const zonesTreats = [
+    summary.recommendedZones.join(", "),
+    summary.recommendedTreatments.join(", "),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   const mapLine =
     summary.areaMapHighlights.length === 0
@@ -279,16 +308,22 @@ function HairTransplantCompletionBrief({
           .map((h) => `${labelDisplayForBodyAreaMap(h.label)} (${fmt(h.severity)}) — ${h.view}`)
           .join(" · ");
 
-  const risksLine = summary.riskFlags.length ? summary.riskFlags.map((x) => fmt(x)).join(", ") : "None recorded on checklist.";
+  const risksLine = summary.riskFlags.length
+    ? summary.riskFlags.map((x) => fmt(x)).join(", ")
+    : "None recorded on checklist.";
 
   const nextParts: string[] = [];
   if (summary.pathologyRecommended) {
-    nextParts.push(`Screening / labs: recommended${summary.pathologyReason.trim() ? ` — ${summary.pathologyReason.trim()}` : ""}.`);
+    nextParts.push(
+      `Screening / labs: recommended${summary.pathologyReason.trim() ? ` — ${summary.pathologyReason.trim()}` : ""}.`
+    );
   } else {
     nextParts.push("Screening / labs: not flagged from this encounter.");
   }
   if (summary.followUpRequired) {
-    nextParts.push(`Follow-up: yes${summary.followUpReason.trim() ? ` — ${summary.followUpReason.trim()}` : ""}.`);
+    nextParts.push(
+      `Follow-up: yes${summary.followUpReason.trim() ? ` — ${summary.followUpReason.trim()}` : ""}.`
+    );
   } else {
     nextParts.push("Follow-up: not explicitly required.");
   }
@@ -300,7 +335,8 @@ function HairTransplantCompletionBrief({
     <div className="space-y-4">
       {isPreview ? (
         <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
-          Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
+          Review mode — summary reflects current answers. Complete consultation to persist to the
+          chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
@@ -324,19 +360,25 @@ function HairTransplantCompletionBrief({
             <p className="whitespace-pre-wrap font-medium">
               {summary.recommendedProcedure.trim() || "—"}
               {summary.outcomeType && summary.outcomeType !== "undecided" ? (
-                <span className="mt-1 block text-xs font-normal text-slate-400">Outcome: {fmt(summary.outcomeType)}</span>
+                <span className="mt-1 block text-xs font-normal text-slate-400">
+                  Outcome: {fmt(summary.outcomeType)}
+                </span>
               ) : null}
             </p>
           </SectionBlock>
 
           <SectionBlock title="Surgical assessment">
             <p>
-              Surgical suitability: <span className="font-medium">{fmt(summary.surgicalSuitability)}</span>
+              Surgical suitability:{" "}
+              <span className="font-medium">{fmt(summary.surgicalSuitability)}</span>
               {" · "}
-              Medical suitability: <span className="font-medium">{fmt(summary.medicalSuitability)}</span>
+              Medical suitability:{" "}
+              <span className="font-medium">{fmt(summary.medicalSuitability)}</span>
             </p>
             {graftLine ? <p className="mt-2">{graftLine}</p> : null}
-            {zonesTreats ? <p className="mt-2 text-xs text-slate-400">Zones / therapies: {zonesTreats}</p> : null}
+            {zonesTreats ? (
+              <p className="mt-2 text-xs text-slate-400">Zones / therapies: {zonesTreats}</p>
+            ) : null}
             {mapLine ? <p className="mt-2 text-xs text-slate-400">Concern map: {mapLine}</p> : null}
           </SectionBlock>
 
@@ -385,71 +427,102 @@ export function ConsultationCompletionSummaryCard({
     <div className="space-y-4">
       {isPreview ? (
         <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
-          Preview — rules-based summary from current form answers. Click “Complete consultation” to save to the chart
-          and lock this form.
+          Preview — rules-based summary from current form answers. Click “Complete consultation” to
+          save to the chart and lock this form.
         </p>
       ) : null}
       <FiCard className="space-y-4 p-4 sm:p-5">
         <div>
-          <h3 className="text-base font-semibold text-slate-100">Consultation completion summary</h3>
+          <h3 className="text-base font-semibold text-slate-100">
+            Consultation completion summary
+          </h3>
           <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.meta)}>
-            Source: {summary.source} · Completed {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
+            Source: {summary.source} · Completed{" "}
+            {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
         </div>
         <dl className="grid gap-3 sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Outcome</dt>
-            <dd className={cn("mt-0.5 text-sm font-medium", fiOsLightFormSurfaceClassNames.body)}>{fmt(summary.outcomeType)}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Outcome
+            </dt>
+            <dd className={cn("mt-0.5 text-sm font-medium", fiOsLightFormSurfaceClassNames.body)}>
+              {fmt(summary.outcomeType)}
+            </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Surgical / medical suitability</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Surgical / medical suitability
+            </dt>
             <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
               {fmt(summary.surgicalSuitability)} · {fmt(summary.medicalSuitability)}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Primary concern</dt>
-            <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>{summary.primaryConcern.trim() || "—"}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Primary concern
+            </dt>
+            <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
+              {summary.primaryConcern.trim() || "—"}
+            </dd>
           </div>
           {summary.templateSlug === HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG ||
           summary.templateSlug === FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG ? (
             <>
               <div className="sm:col-span-2">
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hair loss pattern</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Hair loss pattern
+                </dt>
                 <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.hairLossPatternTypeLabel?.trim() || "—"}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Blood analysis</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Blood analysis
+                </dt>
                 <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.bloodAnalysisRecommended ? "Recommended" : "Not flagged"}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Treatment priority</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Treatment priority
+                </dt>
                 <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.treatmentPriorityLabel?.trim() || "—"}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Treatment timeline</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Treatment timeline
+                </dt>
                 <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.treatmentTimelineLabel?.trim() || "—"}
                 </dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">HLI / Patient Twin pathway</dt>
-                <dd className={cn("mt-0.5 text-sm font-medium text-violet-300", fiOsLightFormSurfaceClassNames.body)}>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  HLI / Patient Twin pathway
+                </dt>
+                <dd
+                  className={cn(
+                    "mt-0.5 text-sm font-medium text-violet-300",
+                    fiOsLightFormSurfaceClassNames.body
+                  )}
+                >
                   {summary.hliPathwayRecommendedLabel?.trim() || "—"}
                 </dd>
               </div>
             </>
           ) : null}
-          {summary.templateSlug === FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG && summary.femaleHairLossCompletionSnapshot ? (
+          {summary.templateSlug === FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG &&
+          summary.femaleHairLossCompletionSnapshot ? (
             <>
               <div className="sm:col-span-2">
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Female pathway snapshot</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Female pathway snapshot
+                </dt>
                 <dd className={cn("mt-0.5 space-y-1 text-sm", fiOsLightFormSurfaceClassNames.body)}>
                   <p>
                     <span className="font-medium">Duration: </span>
@@ -488,19 +561,35 @@ export function ConsultationCompletionSummaryCard({
             </>
           ) : null}
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Diagnosis impression</dt>
-            <dd className={cn("mt-0.5 whitespace-pre-wrap text-sm", fiOsLightFormSurfaceClassNames.body)}>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Diagnosis impression
+            </dt>
+            <dd
+              className={cn(
+                "mt-0.5 whitespace-pre-wrap text-sm",
+                fiOsLightFormSurfaceClassNames.body
+              )}
+            >
               {summary.diagnosisImpression.trim() || "—"}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended procedure / plan</dt>
-            <dd className={cn("mt-0.5 whitespace-pre-wrap text-sm", fiOsLightFormSurfaceClassNames.body)}>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Recommended procedure / plan
+            </dt>
+            <dd
+              className={cn(
+                "mt-0.5 whitespace-pre-wrap text-sm",
+                fiOsLightFormSurfaceClassNames.body
+              )}
+            >
               {summary.recommendedProcedure.trim() || "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Estimated grafts</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Estimated grafts
+            </dt>
             <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
               {summary.estimatedGraftsMin != null && summary.estimatedGraftsMax != null
                 ? `${summary.estimatedGraftsMin} – ${summary.estimatedGraftsMax}`
@@ -508,45 +597,64 @@ export function ConsultationCompletionSummaryCard({
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pathology / screening</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Pathology / screening
+            </dt>
             <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
               {summary.pathologyRecommended ? "Recommended" : "Not flagged"}
               {summary.pathologyReason.trim() ? ` — ${summary.pathologyReason}` : null}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Follow-up</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Follow-up
+            </dt>
             <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>
               {summary.followUpRequired ? "Required" : "Not required"}
               {summary.followUpReason.trim() ? ` — ${summary.followUpReason}` : null}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quote notes</dt>
-            <dd className={cn("mt-0.5 whitespace-pre-wrap text-sm", fiOsLightFormSurfaceClassNames.body)}>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Quote notes
+            </dt>
+            <dd
+              className={cn(
+                "mt-0.5 whitespace-pre-wrap text-sm",
+                fiOsLightFormSurfaceClassNames.body
+              )}
+            >
               {summary.quoteNotes.trim() || "—"}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Risk flags</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Risk flags
+            </dt>
             <dd className="mt-1">
               <ListOrDash items={summary.riskFlags} />
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended zones</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Recommended zones
+            </dt>
             <dd className="mt-1">
               <ListOrDash items={summary.recommendedZones} />
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended treatments</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Recommended treatments
+            </dt>
             <dd className="mt-1">
               <ListOrDash items={summary.recommendedTreatments} />
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Area map highlights</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Area map highlights
+            </dt>
             <dd className="mt-1">
               {summary.areaMapHighlights.length === 0 ? (
                 <span className={fiOsLightFormSurfaceClassNames.meta}>—</span>
@@ -554,7 +662,8 @@ export function ConsultationCompletionSummaryCard({
                 <ul className={cn("space-y-1 text-sm", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.areaMapHighlights.map((h, i) => (
                     <li key={`${h.view}-${h.label}-${i}`}>
-                      <span className="font-medium">{h.view}</span>: {labelDisplayForBodyAreaMap(h.label)} ({fmt(h.severity)})
+                      <span className="font-medium">{h.view}</span>:{" "}
+                      {labelDisplayForBodyAreaMap(h.label)} ({fmt(h.severity)})
                     </li>
                   ))}
                 </ul>
@@ -562,8 +671,15 @@ export function ConsultationCompletionSummaryCard({
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Clinician notes preview</dt>
-            <dd className={cn("mt-0.5 whitespace-pre-wrap text-sm", fiOsLightFormSurfaceClassNames.body)}>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Clinician notes preview
+            </dt>
+            <dd
+              className={cn(
+                "mt-0.5 whitespace-pre-wrap text-sm",
+                fiOsLightFormSurfaceClassNames.body
+              )}
+            >
               {summary.clinicianNotesPreview.trim() || "—"}
             </dd>
           </div>

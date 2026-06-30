@@ -68,8 +68,14 @@ describe("CRM stage auto-advance policy", () => {
     assert.ok(scheduled && completed);
     assert.equal(shouldAdvanceCrmLeadToTargetSortOrder(null, scheduled.sort_order), true);
     assert.equal(shouldAdvanceCrmLeadToTargetSortOrder(0, scheduled.sort_order), true);
-    assert.equal(shouldAdvanceCrmLeadToTargetSortOrder(scheduled.sort_order, scheduled.sort_order), false);
-    assert.equal(shouldAdvanceCrmLeadToTargetSortOrder(completed.sort_order, scheduled.sort_order), false);
+    assert.equal(
+      shouldAdvanceCrmLeadToTargetSortOrder(scheduled.sort_order, scheduled.sort_order),
+      false
+    );
+    assert.equal(
+      shouldAdvanceCrmLeadToTargetSortOrder(completed.sort_order, scheduled.sort_order),
+      false
+    );
   });
 
   it("isConsultationCrmCompleteStatus accepts completed", () => {
@@ -82,8 +88,14 @@ describe("CRM stage auto-advance policy", () => {
     const won = findPipelineStageBySlug(stageRows(), "won_closed");
     const completed = findPipelineStageBySlug(stageRows(), "consult_completed");
     assert.ok(deposit && won && completed);
-    assert.equal(shouldAdvanceCrmLeadToTargetSortOrder(deposit.sort_order, completed.sort_order), false);
-    assert.equal(shouldAdvanceCrmLeadToTargetSortOrder(won.sort_order, completed.sort_order), false);
+    assert.equal(
+      shouldAdvanceCrmLeadToTargetSortOrder(deposit.sort_order, completed.sort_order),
+      false
+    );
+    assert.equal(
+      shouldAdvanceCrmLeadToTargetSortOrder(won.sort_order, completed.sort_order),
+      false
+    );
   });
 });
 
@@ -93,7 +105,10 @@ describe("timelyConsultationBookingEligibleForCrmAdvance", () => {
   });
 
   it("skips non-consultation booking types", () => {
-    assert.equal(timelyConsultationBookingEligibleForCrmAdvance(bookingBase({ booking_type: "prp" })), false);
+    assert.equal(
+      timelyConsultationBookingEligibleForCrmAdvance(bookingBase({ booking_type: "prp" })),
+      false
+    );
   });
 
   it("skips cancelled bookings", () => {
@@ -106,7 +121,10 @@ describe("timelyConsultationBookingEligibleForCrmAdvance", () => {
   });
 
   it("skips no_show bookings", () => {
-    assert.equal(timelyConsultationBookingEligibleForCrmAdvance(bookingBase({ booking_status: "no_show" })), false);
+    assert.equal(
+      timelyConsultationBookingEligibleForCrmAdvance(bookingBase({ booking_status: "no_show" })),
+      false
+    );
   });
 });
 
@@ -116,7 +134,13 @@ describe("consultationEligibleForCrmCompleteAdvance", () => {
       consultationEligibleForCrmCompleteAdvance({ lead_id: LEAD_ID, status: "completed" }),
       true
     );
-    assert.equal(consultationEligibleForCrmCompleteAdvance({ lead_id: LEAD_ID, status: "draft" }), false);
-    assert.equal(consultationEligibleForCrmCompleteAdvance({ lead_id: null, status: "completed" }), false);
+    assert.equal(
+      consultationEligibleForCrmCompleteAdvance({ lead_id: LEAD_ID, status: "draft" }),
+      false
+    );
+    assert.equal(
+      consultationEligibleForCrmCompleteAdvance({ lead_id: null, status: "completed" }),
+      false
+    );
   });
 });

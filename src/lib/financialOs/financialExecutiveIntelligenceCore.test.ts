@@ -370,12 +370,18 @@ describe("financialExecutiveIntelligenceCore", () => {
         ar_risk_score: 0,
         forecast_revenue_cents: 200_000,
         best_revenue_source: "google_ads",
-      },
+      }
     );
 
     const insights = generateExecutiveFinanceInsights({
       snapshot,
-      attribution: { best_revenue_source: null, best_profit_source: null, unknown_attribution_percentage: 0, revenue_by_source: [], profit_by_source: [] },
+      attribution: {
+        best_revenue_source: null,
+        best_profit_source: null,
+        unknown_attribution_percentage: 0,
+        revenue_by_source: [],
+        profit_by_source: [],
+      },
       ar: { surgery_balance_outstanding_cents: 0 },
       profitability_snapshots: [],
       comparison,

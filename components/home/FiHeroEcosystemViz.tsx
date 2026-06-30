@@ -44,9 +44,7 @@ export function FiHeroEcosystemViz() {
       role="img"
       aria-label="Follicle Intelligence at the centre: HairAudit Outcome Intelligence Layer, HLI Diagnostic Intelligence Layer, IIOHR Training Intelligence Layer, plus Patient Twin, SurgeryOS, ClinicOS, and AnalyticsOS—with animated data connections."
     >
-      <div
-        className="relative aspect-[1/1.05] min-h-[320px] w-full overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-gradient-to-br from-[rgb(12_18_28_/0.92)] via-[rgb(8_13_22_/0.88)] to-[rgb(6_10_18_/0.95)] shadow-[0_24px_80px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-xl sm:min-h-[380px] md:min-h-[420px]"
-      >
+      <div className="relative aspect-[1/1.05] min-h-[320px] w-full overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-gradient-to-br from-[rgb(12_18_28_/0.92)] via-[rgb(8_13_22_/0.88)] to-[rgb(6_10_18_/0.95)] shadow-[0_24px_80px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-xl sm:min-h-[380px] md:min-h-[420px]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,hsl(var(--primary)/0.14),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_80%_10%,rgb(120_160_200_/0.08),transparent_40%)]" />
 
@@ -120,7 +118,9 @@ export function FiHeroEcosystemViz() {
             }
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
-            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-primary/85">Intelligence core</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-primary/85">
+              Intelligence core
+            </p>
             <p className="mt-1.5 font-display text-sm font-semibold leading-snug tracking-tight text-foreground sm:text-base">
               {CENTRAL}
             </p>
@@ -144,7 +144,9 @@ export function FiHeroEcosystemViz() {
             >
               <div className="rounded-xl border border-white/[0.09] bg-[rgb(8_13_22_/0.5)] px-2 py-1.5 text-center shadow-[inset_0_1px_0_rgb(255_255_255_/0.05)] backdrop-blur-sm sm:px-2.5 sm:py-2">
                 {typeof n.label === "string" ? (
-                  <p className="font-medium leading-tight text-foreground/95 text-[10px] sm:text-[11px]">{n.label}</p>
+                  <p className="font-medium leading-tight text-foreground/95 text-[10px] sm:text-[11px]">
+                    {n.label}
+                  </p>
                 ) : (
                   <>
                     <p className="text-[10px] font-medium leading-tight text-foreground/95 sm:text-[11px]">

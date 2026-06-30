@@ -4,11 +4,19 @@
  */
 import { revalidatePath } from "next/cache";
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { assertGuidedSessionUploadPreconditions } from "@/src/lib/imagingOs/imagingOsGuidedFields";
 import { applyGuidedCaptureToSession } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
 import { createPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
-import { assertVieProtocolCapturePolicy, normalizeCaptureSource } from "@/src/lib/vie/vieCapturePolicy.server";
+import {
+  assertVieProtocolCapturePolicy,
+  normalizeCaptureSource,
+} from "@/src/lib/vie/vieCapturePolicy.server";
 import { isVieProtocolSlug, getVieProtocol } from "@/src/lib/vie/vieProtocolCatalog";
 import {
   buildCaptureReviewPayload,
@@ -17,11 +25,17 @@ import {
 import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
 import { runVieInstantIntelligence } from "@/src/lib/vie/vieInstantIntelligence.server";
 import { previewVieSameAngleAlignment } from "@/src/lib/vie/vieSameAngleAlignment.server";
-import { buildVieSurgeryImageMetadata, isVieCaptureSource } from "@/src/lib/surgeryOs/surgeryOsVieCaptureCore";
+import {
+  buildVieSurgeryImageMetadata,
+  isVieCaptureSource,
+} from "@/src/lib/surgeryOs/surgeryOsVieCaptureCore";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string; patientId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; patientId: string }> }
+) {
   try {
     const { tenantId, patientId } = await params;
     const tid = tenantId?.trim() ?? "";
@@ -65,10 +79,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     const imageHeightRaw = form.get("image_height");
     const metadataRaw = form.get("metadata");
 
-    const protocolSessionId = protocolSessionIdRaw != null ? String(protocolSessionIdRaw).trim() : "";
+    const protocolSessionId =
+      protocolSessionIdRaw != null ? String(protocolSessionIdRaw).trim() : "";
     const captureSourceStr = captureSource == null ? null : String(captureSource);
-    const templateSlugStr = imagingProtocolTemplateSlug != null ? String(imagingProtocolTemplateSlug).trim() : null;
-    const slotSlugStr = imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : null;
+    const templateSlugStr =
+      imagingProtocolTemplateSlug != null ? String(imagingProtocolTemplateSlug).trim() : null;
+    const slotSlugStr =
+      imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : null;
 
     try {
       assertVieProtocolCapturePolicy({
@@ -148,8 +165,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       anatomicalRegion,
       visitType: visitType == null ? null : String(visitType),
       followUpInterval: followUpInterval == null ? null : String(followUpInterval),
-      imagingProtocolTemplateSlug: imagingProtocolTemplateSlug == null ? null : String(imagingProtocolTemplateSlug),
-      imagingProtocolSlotSlug: imagingProtocolSlotSlug == null ? null : String(imagingProtocolSlotSlug),
+      imagingProtocolTemplateSlug:
+        imagingProtocolTemplateSlug == null ? null : String(imagingProtocolTemplateSlug),
+      imagingProtocolSlotSlug:
+        imagingProtocolSlotSlug == null ? null : String(imagingProtocolSlotSlug),
       actingUserId,
       captureType: captureType == null ? null : String(captureType),
       captureSource: captureSource == null ? null : String(captureSource),
@@ -172,7 +191,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       | undefined;
 
     if (protocolSessionId) {
-      const slotSlug = imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : "";
+      const slotSlug =
+        imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : "";
       const replacePrevious =
         guidedReplaceRaw === "1" ||
         guidedReplaceRaw === "true" ||

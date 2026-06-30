@@ -45,7 +45,8 @@ export async function loadPipelineStages(
     organisationId: scope.organisationId,
     clinicId: scope.clinicId,
   });
-  const pipelineKey = (scope.pipelineKey ?? DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
+  const pipelineKey =
+    (scope.pipelineKey ?? DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
 
   let q = supabase
     .from("fi_crm_pipeline_stages")
@@ -85,9 +86,13 @@ export async function ensureDefaultPipelineStages(
     organisationId: scope.organisationId,
     clinicId: scope.clinicId,
   });
-  const pipelineKey = (scope.pipelineKey ?? DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
+  const pipelineKey =
+    (scope.pipelineKey ?? DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
 
-  const existing = await loadPipelineStages({ tenantId, organisationId, clinicId, pipelineKey }, supabase);
+  const existing = await loadPipelineStages(
+    { tenantId, organisationId, clinicId, pipelineKey },
+    supabase
+  );
   if (existing.length > 0) {
     return { seeded: false, stages: existing };
   }
@@ -103,13 +108,19 @@ export async function ensureDefaultPipelineStages(
   if (insertError) {
     // Concurrent first requests: unique index / race — reload and treat as already seeded.
     if (insertError.code === "23505") {
-      const after = await loadPipelineStages({ tenantId, organisationId, clinicId, pipelineKey }, supabase);
+      const after = await loadPipelineStages(
+        { tenantId, organisationId, clinicId, pipelineKey },
+        supabase
+      );
       return { seeded: false, stages: after };
     }
     throw new Error(insertError.message);
   }
 
-  const stages = await loadPipelineStages({ tenantId, organisationId, clinicId, pipelineKey }, supabase);
+  const stages = await loadPipelineStages(
+    { tenantId, organisationId, clinicId, pipelineKey },
+    supabase
+  );
   return { seeded: true, stages };
 }
 

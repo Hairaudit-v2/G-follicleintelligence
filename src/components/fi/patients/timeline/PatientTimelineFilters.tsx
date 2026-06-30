@@ -1,7 +1,14 @@
 "use client";
 
-import type { PatientTimelineItemType, PatientTimelineSourceType, PatientTimelineSortDirection } from "@/src/lib/patients/timeline/patientTimelineTypes";
-import { patientTimelineItemTypeLabel, patientTimelineSourceLabel } from "@/src/lib/patients/timeline/patientTimelineLabels";
+import type {
+  PatientTimelineItemType,
+  PatientTimelineSourceType,
+  PatientTimelineSortDirection,
+} from "@/src/lib/patients/timeline/patientTimelineTypes";
+import {
+  patientTimelineItemTypeLabel,
+  patientTimelineSourceLabel,
+} from "@/src/lib/patients/timeline/patientTimelineLabels";
 import type { PatientTimelineFilterState } from "@/src/lib/patients/timeline/patientTimelineFilters";
 
 const ITEM_TYPES: PatientTimelineItemType[] = [
@@ -100,7 +107,9 @@ export function PatientTimelineFilters({
           <button
             type="button"
             className={`rounded px-3 py-1.5 text-xs font-medium ${
-              sortDirection === "newest_first" ? "bg-blue-600 text-white" : "bg-white/[0.06] text-slate-200"
+              sortDirection === "newest_first"
+                ? "bg-blue-600 text-white"
+                : "bg-white/[0.06] text-slate-200"
             }`}
             onClick={() => onSortDirectionChange("newest_first")}
           >
@@ -109,7 +118,9 @@ export function PatientTimelineFilters({
           <button
             type="button"
             className={`rounded px-3 py-1.5 text-xs font-medium ${
-              sortDirection === "oldest_first" ? "bg-blue-600 text-white" : "bg-white/[0.06] text-slate-200"
+              sortDirection === "oldest_first"
+                ? "bg-blue-600 text-white"
+                : "bg-white/[0.06] text-slate-200"
             }`}
             onClick={() => onSortDirectionChange("oldest_first")}
           >

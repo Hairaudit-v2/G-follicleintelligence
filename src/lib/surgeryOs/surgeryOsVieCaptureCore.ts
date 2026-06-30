@@ -25,7 +25,10 @@ import { pickSurgeryOutcomeDomains } from "@/src/lib/vie/vieOutcomeIntelligenceC
 import { deriveSurgeryComparisonStatus } from "@/src/lib/vie/vieLongitudinalComparisonCore";
 
 const GRAFT_TRAY_SLOTS = ["graft_tray_overview", "graft_tray_close"] as const;
-const IMMEDIATE_POST_OP_REQUIRED_SLOTS = ["immediate_post_op_front", "immediate_post_op_close"] as const;
+const IMMEDIATE_POST_OP_REQUIRED_SLOTS = [
+  "immediate_post_op_front",
+  "immediate_post_op_close",
+] as const;
 
 function toProtocolSlotDef(slot: VieProtocolSlotDef): ProtocolSlotDef {
   return {
@@ -86,7 +89,9 @@ function evidenceGroupStatus(
   return "missing";
 }
 
-export function buildSurgeryOsViePhaseStatuses(progress: Record<string, unknown>): SurgeryOsViePhaseCaptureStatus[] {
+export function buildSurgeryOsViePhaseStatuses(
+  progress: Record<string, unknown>
+): SurgeryOsViePhaseCaptureStatus[] {
   const protocol = getVieProtocol("surgery_day");
   if (!protocol) return [];
 
@@ -171,7 +176,11 @@ export function deriveSurgeryOsVieWarnings(
   const warnings: SurgeryOsVieCaptureWarning[] = [];
   const meta = parseProgressMeta(progress);
 
-  const warnIfMissing = (slotSlug: string, kind: SurgeryOsVieCaptureWarning["kind"], label: string) => {
+  const warnIfMissing = (
+    slotSlug: string,
+    kind: SurgeryOsVieCaptureWarning["kind"],
+    label: string
+  ) => {
     if (!slotAccepted(slotSlug, progress) && !slotPending(slotSlug, progress)) {
       warnings.push({ kind, label, severity: "warning", slotSlug });
     }
@@ -182,7 +191,11 @@ export function deriveSurgeryOsVieWarnings(
     "missing_donor_final_extraction",
     "Missing donor final extraction image"
   );
-  warnIfMissing("graft_tray_overview", "missing_graft_tray_overview", "Missing graft tray overview");
+  warnIfMissing(
+    "graft_tray_overview",
+    "missing_graft_tray_overview",
+    "Missing graft tray overview"
+  );
   warnIfMissing("graft_tray_close", "missing_graft_tray_close", "Missing graft tray close-up");
 
   const missingPostOp = IMMEDIATE_POST_OP_REQUIRED_SLOTS.filter(
@@ -216,7 +229,9 @@ export function deriveSurgeryOsVieWarnings(
   return warnings;
 }
 
-function mapSurgeryOutcomeReadiness(outcome: VieOutcomeSummary | null | undefined): SurgeryOsVieCaptureSummary["outcomeReadiness"] {
+function mapSurgeryOutcomeReadiness(
+  outcome: VieOutcomeSummary | null | undefined
+): SurgeryOsVieCaptureSummary["outcomeReadiness"] {
   if (!outcome) return null;
   const picked = pickSurgeryOutcomeDomains(outcome.domains);
   return {
@@ -259,9 +274,13 @@ export function buildSurgeryOsVieCaptureSummary(input: {
   const donor = computeDonorDocumentationCompleteness(sessions);
   const protocol = getVieProtocol("surgery_day");
   const protocolSlots = protocol?.slots.map(toProtocolSlotDef) ?? [];
-  const globalNextSlug = protocolSlots.length ? nextRecommendedSlotSlug(protocolSlots, input.progress) : null;
+  const globalNextSlug = protocolSlots.length
+    ? nextRecommendedSlotSlug(protocolSlots, input.progress)
+    : null;
   const globalNextLabel =
-    globalNextSlug != null ? protocol?.slots.find((s) => s.slug === globalNextSlug)?.label ?? globalNextSlug : null;
+    globalNextSlug != null
+      ? (protocol?.slots.find((s) => s.slug === globalNextSlug)?.label ?? globalNextSlug)
+      : null;
 
   return {
     surgeryId: input.surgeryId,

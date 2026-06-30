@@ -7,7 +7,11 @@ import {
   drainHubSpotLeadFlowQueue,
   summarizeLeadFlowDrainResults,
 } from "@/src/lib/leadFlow/hubspotLeadFlowQueueDrain.server";
-import type { FiExternalEventRow, FiLeadActivityRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
+import type {
+  FiExternalEventRow,
+  FiLeadActivityRow,
+  FiLeadRow,
+} from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const TENANT_B = "22222222-2222-4222-8222-222222222222";
@@ -18,7 +22,10 @@ type Store = {
   activity: FiLeadActivityRow[];
 };
 
-function makeExternalEvent(payload: Record<string, unknown>, overrides: Partial<FiExternalEventRow> = {}): FiExternalEventRow {
+function makeExternalEvent(
+  payload: Record<string, unknown>,
+  overrides: Partial<FiExternalEventRow> = {}
+): FiExternalEventRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT,
@@ -37,7 +44,10 @@ function makeExternalEvent(payload: Record<string, unknown>, overrides: Partial<
   };
 }
 
-function matchesFilters(row: Record<string, unknown>, filters: Record<string, string | string[]>): boolean {
+function matchesFilters(
+  row: Record<string, unknown>,
+  filters: Record<string, string | string[]>
+): boolean {
   for (const [key, value] of Object.entries(filters)) {
     if (key.startsWith("__in:")) continue;
     if (Array.isArray(value)) {
@@ -138,13 +148,20 @@ function makeDrainStoreSupabase(store: Store): SupabaseClient {
   const from = (table: string) => ({
     select: (_cols?: string, opts?: { count?: string; head?: boolean }) => buildSelect(table, opts),
     insert: (row: Record<string, unknown>) => {
-      const insertedRow = { id: randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...row };
+      const insertedRow = {
+        id: randomUUID(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...row,
+      };
       if (table === "fi_leads") store.leads.push(insertedRow as FiLeadRow);
-      if (table === "fi_lead_activity") store.activity.push(insertedRow as unknown as FiLeadActivityRow);
+      if (table === "fi_lead_activity")
+        store.activity.push(insertedRow as unknown as FiLeadActivityRow);
       const result = { data: insertedRow, error: null };
       return {
         select: () => ({ maybeSingle: async () => result, single: async () => result }),
-        then: (onF: (v: unknown) => unknown, onR?: (e: unknown) => unknown) => Promise.resolve(result).then(onF, onR),
+        then: (onF: (v: unknown) => unknown, onR?: (e: unknown) => unknown) =>
+          Promise.resolve(result).then(onF, onR),
       };
     },
     update: (patch: Record<string, unknown>) => {

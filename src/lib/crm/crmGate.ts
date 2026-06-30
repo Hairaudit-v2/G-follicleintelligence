@@ -37,7 +37,11 @@ function requireFiAdminKey(adminKey: string | undefined | null): boolean {
 
 async function assertTenantRowExists(tenantId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (error) throw new CrmAccessError(500, "Could not verify tenant.");
   if (!data) throw new CrmAccessError(404, "Tenant not found.");
 }
@@ -90,7 +94,10 @@ export async function resolveAuthUserId(request?: Request | null): Promise<strin
   }
 }
 
-async function loadFiUserForTenant(tenantId: string, authUserId: string): Promise<{ id: string; role: string } | null> {
+async function loadFiUserForTenant(
+  tenantId: string,
+  authUserId: string
+): Promise<{ id: string; role: string } | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
@@ -100,11 +107,16 @@ async function loadFiUserForTenant(tenantId: string, authUserId: string): Promis
     .maybeSingle();
   if (error) throw new CrmAccessError(500, "Could not verify tenant membership.");
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 /** `fi_platform_admin` without an active impersonation cookie — full tenant API access (server-enforced). */
-export async function isFiOsPlatformAdminFullSessionBypass(sessionAuthUserId: string): Promise<boolean> {
+export async function isFiOsPlatformAdminFullSessionBypass(
+  sessionAuthUserId: string
+): Promise<boolean> {
   const id = sessionAuthUserId.trim();
   if (!id) return false;
   const os = await loadFiOsIdentity(id);
@@ -136,7 +148,11 @@ export async function loadProxyFiUserRowForPlatformAdminTenant(
     const r = admins[0] as { id: string; role: string | null };
     return { id: String(r.id), role: String(r.role ?? "fi_admin") };
   }
-  const { data: anyRow, error: e2 } = await supabase.from("fi_users").select("id, role").eq("tenant_id", tid).limit(1);
+  const { data: anyRow, error: e2 } = await supabase
+    .from("fi_users")
+    .select("id, role")
+    .eq("tenant_id", tid)
+    .limit(1);
   if (!e2 && anyRow?.[0]) {
     const r = anyRow[0] as { id: string; role: string | null };
     return { id: String(r.id), role: String(r.role ?? "member") };
@@ -218,7 +234,10 @@ export async function assertCrmTenantWriteAllowed(opts: {
 
   const access = await resolveDevelopmentClinicAccessForTenant(tenantId, authUserId);
   if (!access.allowed) {
-    throw new CrmAccessError(403, access.blockedReason ?? "ClinicOS operator role required for this action.");
+    throw new CrmAccessError(
+      403,
+      access.blockedReason ?? "ClinicOS operator role required for this action."
+    );
   }
 }
 
@@ -226,7 +245,10 @@ export async function assertCrmTenantWriteAllowed(opts: {
  * Resolves `fi_users.id` for the signed-in tenant member (cookies or Bearer on `request`).
  * Returns null when unauthenticated or the user has no row in this tenant.
  */
-export async function tryResolveFiUserIdForTenant(tenantId: string, request?: Request | null): Promise<string | null> {
+export async function tryResolveFiUserIdForTenant(
+  tenantId: string,
+  request?: Request | null
+): Promise<string | null> {
   const sessionAuthUserId = await resolveAuthUserId(request ?? null);
   if (!sessionAuthUserId) return null;
   const os = await loadFiOsIdentity(sessionAuthUserId);

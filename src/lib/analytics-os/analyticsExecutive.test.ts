@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { describe, it } from "node:test";
 
-import { buildAnalyticsExecutiveSnapshot, buildModuleCoverage } from "@/src/lib/analytics-os/analyticsExecutiveEngine";
+import {
+  buildAnalyticsExecutiveSnapshot,
+  buildModuleCoverage,
+} from "@/src/lib/analytics-os/analyticsExecutiveEngine";
 import { generateAnalyticsExecutiveInsights } from "@/src/lib/analytics-os/analyticsExecutiveInsights";
 import {
   buildExecutiveScoringEventSummary,
@@ -216,12 +219,25 @@ describe("analyticsExecutiveScoring", () => {
         moduleCoverage: buildModuleCoverage([
           event({ module_name: "financial_os", event_type: "payment_received" }),
         ]),
-        current: buildExecutiveScoringEventSummary([event({ module_name: "financial_os", event_type: "payment_received" })]),
+        current: buildExecutiveScoringEventSummary([
+          event({ module_name: "financial_os", event_type: "payment_received" }),
+        ]),
       })
     );
-    const richModules = ["financial_os", "workforce_os", "surgery_os", "consultation_os", "leadflow", "patient_os", "imaging_os", "audit_os"] as const;
+    const richModules = [
+      "financial_os",
+      "workforce_os",
+      "surgery_os",
+      "consultation_os",
+      "leadflow",
+      "patient_os",
+      "imaging_os",
+      "audit_os",
+    ] as const;
     const richEvents = richModules.flatMap((moduleName) =>
-      Array.from({ length: 25 }, () => event({ module_name: moduleName, event_type: "payment_received" }))
+      Array.from({ length: 25 }, () =>
+        event({ module_name: moduleName, event_type: "payment_received" })
+      )
     );
     const rich = calculateDataCompletenessScore(
       baseScoringInput({

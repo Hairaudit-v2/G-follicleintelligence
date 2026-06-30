@@ -29,10 +29,7 @@
  * an explicit `export` grant (within an export-capable module) or an admin override.
  */
 
-import {
-  type StaffAccessLevel,
-  type StaffAccessModuleKey,
-} from "./staffAccessRegistry";
+import { type StaffAccessLevel, type StaffAccessModuleKey } from "./staffAccessRegistry";
 import {
   EXPORT_FORBIDDEN_MODULES,
   SENSITIVITY_DEFAULT_HIDDEN,
@@ -161,7 +158,11 @@ export function mergeRoleFieldTemplatesWithGrants(
 ): Record<string, MergedFieldEntry> {
   const out: Record<string, MergedFieldEntry> = {};
   for (const [fieldKey, level] of Object.entries(roleTemplate)) {
-    out[fieldKey] = { level: normalizeFieldPermissionLevel(level), scope: "tenant", source: "role" };
+    out[fieldKey] = {
+      level: normalizeFieldPermissionLevel(level),
+      scope: "tenant",
+      source: "role",
+    };
   }
   for (const g of grants) {
     if (g.revokedAt) continue; // revoked grants never apply
@@ -245,7 +246,8 @@ export function getEffectiveFieldPermission(
   // Admin override bypasses the module ceiling (they hold module-admin everywhere). Everyone
   // else is clamped: field access can NEVER exceed module access.
   const level = input.isAdminOverride ? requested : minFieldPermission(requested, ceiling);
-  const clamped = !input.isAdminOverride && fieldPermissionRank(requested) > fieldPermissionRank(ceiling);
+  const clamped =
+    !input.isAdminOverride && fieldPermissionRank(requested) > fieldPermissionRank(ceiling);
 
   return {
     moduleKey: field.moduleKey,
@@ -322,11 +324,15 @@ export function getFieldPermission(
 // ---------------------------------------------------------------------------
 
 /** Can the person see the REAL value of this field (read or above)? */
-export function canViewField(level: StaffFieldPermissionLevel | string | null | undefined): boolean {
+export function canViewField(
+  level: StaffFieldPermissionLevel | string | null | undefined
+): boolean {
   return fieldPermissionSatisfies(level, "read");
 }
 
-export function canEditField(level: StaffFieldPermissionLevel | string | null | undefined): boolean {
+export function canEditField(
+  level: StaffFieldPermissionLevel | string | null | undefined
+): boolean {
   return fieldPermissionSatisfies(level, "edit");
 }
 

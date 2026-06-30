@@ -24,22 +24,26 @@ export const PLATFORM_PAGE_CONTENT = {
     bands: [
       {
         title: "Acquisition & Operations",
-        summary: "Demand, pipeline discipline, scheduling, services, and day-to-day clinic rhythm—wired into the same tenant policy and record spine.",
+        summary:
+          "Demand, pipeline discipline, scheduling, services, and day-to-day clinic rhythm—wired into the same tenant policy and record spine.",
         modules: ["LeadFlowOS", "ClinicOS"],
       },
       {
         title: "Clinical & Patient Intelligence",
-        summary: "Structured assessments, longitudinal records, Patient Twin™, and AI-assisted pathways—without divorcing clinical nuance from operational reality.",
+        summary:
+          "Structured assessments, longitudinal records, Patient Twin™, and AI-assisted pathways—without divorcing clinical nuance from operational reality.",
         modules: ["PatientOS / FoundationOS", "ConsultationOS", "HairIntel"],
       },
       {
         title: "Surgery & Outcome Governance",
-        summary: "Planning, procedure-day execution, photography and evidence, independent review, and quality scoring that institutions can run under scrutiny.",
+        summary:
+          "Planning, procedure-day execution, photography and evidence, independent review, and quality scoring that institutions can run under scrutiny.",
         modules: ["SurgeryOS", "AuditOS"],
       },
       {
         title: "Training, Analytics & Global Intelligence",
-        summary: "Competency programs, revenue and conversion intelligence, productivity KPIs, and the structured outcome substrate that sharpens cohorts over time.",
+        summary:
+          "Competency programs, revenue and conversion intelligence, productivity KPIs, and the structured outcome substrate that sharpens cohorts over time.",
         modules: ["AcademyOS", "AnalyticsOS", "Global Intelligence Network"],
       },
     ],
@@ -58,7 +62,8 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "CRM, lead capture, pipeline, tasks, follow-ups, patient acquisition.",
         description:
           "LeadFlowOS is the acquisition control plane: enquiry capture, pipeline stages, ownership, tasks, and follow-up rhythm tied to real clinic capacity.",
-        connects: "ClinicOS availability, PatientOS identity, AnalyticsOS funnel and cohort reporting.",
+        connects:
+          "ClinicOS availability, PatientOS identity, AnalyticsOS funnel and cohort reporting.",
         why: "Growth without operational coupling creates leakage. LeadFlowOS keeps demand, accountability, and downstream clinical context aligned.",
         learnMoreHref: "/platform/leadflow",
         learnMoreLabel: "LeadFlow module",
@@ -69,7 +74,8 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "Scheduling, appointments, staff availability, services, daily operations.",
         description:
           "ClinicOS runs the operational heartbeat: calendars, services, rooms and roles, appointment lifecycle, and the constraints that consultation and surgery inherit.",
-        connects: "LeadFlowOS pipeline, PatientOS records, ConsultationOS bookings, AnalyticsOS operational KPIs.",
+        connects:
+          "LeadFlowOS pipeline, PatientOS records, ConsultationOS bookings, AnalyticsOS operational KPIs.",
         why: "When scheduling is disconnected from clinical workflow, capacity lies. ClinicOS makes operational truth portable across modules.",
         learnMoreHref: "/platform/clinic-os",
         learnMoreLabel: "ClinicOS module",
@@ -80,7 +86,8 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "Patient records, timelines, Patient Twin, longitudinal intelligence.",
         description:
           "PatientOS is the longitudinal substrate: demographics, encounters, media, assessments, procedures, and the Patient Twin™ narrative that other modules read and enrich.",
-        connects: "Every clinical and governance module—consultation, imaging, surgery, audit, analytics.",
+        connects:
+          "Every clinical and governance module—consultation, imaging, surgery, audit, analytics.",
         why: "Hair restoration is a multi-year story. A fragmented chart makes every downstream module weaker; a unified record compounds intelligence responsibly.",
         learnMoreHref: "/platform/patient-os",
         learnMoreLabel: "PatientOS module",
@@ -91,7 +98,8 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "Assessment workflows, diagnosis, recommendations, quotes, clinical handoff.",
         description:
           "ConsultationOS structures the consult lifecycle: discovery, clinical assessment, recommendations, pricing and quotes, consent posture, and handoff into planning and scheduling.",
-        connects: "PatientOS history, ClinicOS appointments, HairIntel pathways, SurgeryOS planning inputs.",
+        connects:
+          "PatientOS history, ClinicOS appointments, HairIntel pathways, SurgeryOS planning inputs.",
         why: "The consult is where expectations are set. Structuring it reduces variance, improves traceability, and feeds better planning and audit evidence later.",
         learnMoreHref: "/patient-twin",
         learnMoreLabel: "Patient Twin & records",
@@ -99,10 +107,12 @@ export const PLATFORM_PAGE_CONTENT = {
       {
         id: "hair-intel",
         name: "HairIntel",
-        tagline: "AI intake, diagnostic pathways, blood interpretation, risk scoring, treatment planning.",
+        tagline:
+          "AI intake, diagnostic pathways, blood interpretation, risk scoring, treatment planning.",
         description:
           "HairIntel brings model-assisted intake and classification alongside human judgment—standardising history capture, triage, and documentation density before clinicians commit time.",
-        connects: "ConsultationOS assessments, PatientOS timelines, SurgeryOS planning context, AuditOS evidence expectations.",
+        connects:
+          "ConsultationOS assessments, PatientOS timelines, SurgeryOS planning context, AuditOS evidence expectations.",
         why: "AI value is not a chat window; it is consistent structure at scale. HairIntel increases signal quality entering human decision points.",
         learnMoreHref: "/hair-intelligence",
         learnMoreLabel: "Hair intelligence",
@@ -110,10 +120,12 @@ export const PLATFORM_PAGE_CONTENT = {
       {
         id: "surgery-os",
         name: "SurgeryOS",
-        tagline: "Surgical planning, graft targets, donor intelligence, procedure day tracking, follow-ups.",
+        tagline:
+          "Surgical planning, graft targets, donor intelligence, procedure day tracking, follow-ups.",
         description:
           "SurgeryOS carries the surgical programme: targets, donor assessment, day-of workflow, graft accounting, post-operative milestones, and continuity into outcomes.",
-        connects: "ConsultationOS plans, PatientOS record, imaging and photography surfaces, AuditOS review packets.",
+        connects:
+          "ConsultationOS plans, PatientOS record, imaging and photography surfaces, AuditOS review packets.",
         why: "Surgical quality is where reputation is won or lost. SurgeryOS aligns planning, execution telemetry, and follow-up in one governable thread.",
         learnMoreHref: "/platform/surgery-os",
         learnMoreLabel: "SurgeryOS module",
@@ -121,10 +133,12 @@ export const PLATFORM_PAGE_CONTENT = {
       {
         id: "audit-os",
         name: "AuditOS",
-        tagline: "HairAudit integration, independent review, evidence capture, quality scoring, benchmarking.",
+        tagline:
+          "HairAudit integration, independent review, evidence capture, quality scoring, benchmarking.",
         description:
           "AuditOS is the governance and evidence layer: HairAudit-aligned review, structured scoring, disclosure separation, and benchmark-ready cohort participation where policy allows.",
-        connects: "SurgeryOS cases, imaging evidence, PatientOS outcomes over time, AcademyOS remediation tracks, AnalyticsOS standing.",
+        connects:
+          "SurgeryOS cases, imaging evidence, PatientOS outcomes over time, AcademyOS remediation tracks, AnalyticsOS standing.",
         why: "Benchmarks without review discipline are marketing. AuditOS encodes the institutional habits regulators and boards expect to see under diligence.",
         learnMoreHref: "/hair-intelligence",
         learnMoreLabel: "HairAudit & intelligence",
@@ -132,10 +146,12 @@ export const PLATFORM_PAGE_CONTENT = {
       {
         id: "academy-os",
         name: "AcademyOS",
-        tagline: "International Institute of Hair Restoration training, certification, competency tracking.",
+        tagline:
+          "International Institute of Hair Restoration training, certification, competency tracking.",
         description:
           "AcademyOS links standards-led training and certification to real-world performance signals—so education is not detached from cases, audits, and operational reality.",
-        connects: "AuditOS findings, ClinicOS staffing roles, AnalyticsOS competency and productivity views.",
+        connects:
+          "AuditOS findings, ClinicOS staffing roles, AnalyticsOS competency and productivity views.",
         why: "Training that does not close the loop on outcomes decays. AcademyOS ties curriculum, credentialing, and improvement cycles to the same platform spine.",
         learnMoreHref: "/methodology",
         learnMoreLabel: "Methodology & standards",
@@ -157,7 +173,8 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "Enterprise clinic deployment, module activation, and sandbox onboarding.",
         description:
           "OnboardingOS is the enterprise deployment engine for new clinic tenants—guided provisioning sessions, clinic configuration templates, module bundle planning, role packs, and sandbox training environments that accelerate safe adoption.",
-        connects: "ClinicOS services, module entitlements, AcademyOS training tracks, WorkforceOS bootstrap, and platform admin governance.",
+        connects:
+          "ClinicOS services, module entitlements, AcademyOS training tracks, WorkforceOS bootstrap, and platform admin governance.",
         why: "Multi-clinic groups cannot scale on manual setup. OnboardingOS standardises how new organisations enter the FI ecosystem with repeatable, reviewable deployment templates.",
         learnMoreHref: "/platform/progress#progress-onboarding-os",
         learnMoreLabel: "OnboardingOS progress",
@@ -168,7 +185,8 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "Structured outcome data, benchmarking, predictive intelligence foundation.",
         description:
           "The Global Intelligence Network is the cross-tenant, policy-governed layer where anonymised or consented structured outcomes can sharpen cohorts, baselines, and standing—without collapsing clinical judgment into a single score.",
-        connects: "AuditOS cohorts, AnalyticsOS aggregates, research and standards partners where contractually enabled.",
+        connects:
+          "AuditOS cohorts, AnalyticsOS aggregates, research and standards partners where contractually enabled.",
         why: "Category leadership compounds when evidence depth and governance history grow together. The network is the long-range substrate for defensible benchmarks.",
         learnMoreHref: "/technology",
         learnMoreLabel: "Technology & architecture",

@@ -11,7 +11,8 @@ import {
 
 const WEBHOOK_SECRET = "test-hubspot-webhook-secret-32!";
 const CLIENT_SECRET = "test-hubspot-client-secret-value";
-const WEBHOOK_URL = "https://example.com/api/tenants/11111111-1111-4111-8111-111111111111/integrations/hubspot/webhook";
+const WEBHOOK_URL =
+  "https://example.com/api/tenants/11111111-1111-4111-8111-111111111111/integrations/hubspot/webhook";
 const RAW_BODY = `[{"objectId":12345,"subscriptionType":"contact.creation"}]`;
 
 function reqWithBearer(token: string | null, init?: RequestInit): Request {

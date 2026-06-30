@@ -24,31 +24,37 @@ export const FI_TENANT_OPERATING_MODE_UI_OPTIONS: readonly FiTenantOperatingMode
   {
     modeKey: "full_fi_os",
     label: "Full FI OS",
-    description: "All modules remain available at the tenant-default layer. Staff templates and explicit overrides still apply.",
+    description:
+      "All modules remain available at the tenant-default layer. Staff templates and explicit overrides still apply.",
     defaultModulesLine: "All FI OS modules (subject to per-layer defaults).",
   },
   {
     modeKey: "hair_transplant_clinic",
     label: "Hair transplant clinic",
-    description: "Surgery-forward defaults: SurgeryOS, procedure day, imaging, audit intelligence, and patient twin workflows.",
-    defaultModulesLine: "SurgeryOS, cases, procedure day, imaging, audit intelligence, patient twin.",
+    description:
+      "Surgery-forward defaults: SurgeryOS, procedure day, imaging, audit intelligence, and patient twin workflows.",
+    defaultModulesLine:
+      "SurgeryOS, cases, procedure day, imaging, audit intelligence, patient twin.",
   },
   {
     modeKey: "medical_hair_clinic",
     label: "Medical hair clinic",
-    description: "Consultation and medical hair journeys: consultations, prescriptions, pathology, patients, and CRM defaults.",
+    description:
+      "Consultation and medical hair journeys: consultations, prescriptions, pathology, patients, and CRM defaults.",
     defaultModulesLine: "Consultations, prescriptions, pathology, patients, CRM.",
   },
   {
     modeKey: "training_academy",
     label: "Training academy",
-    description: "Academy and training delivery defaults with reduced surgical and diagnostics emphasis.",
+    description:
+      "Academy and training delivery defaults with reduced surgical and diagnostics emphasis.",
     defaultModulesLine: "Academy, staff, calendar, patients (lighter surgical defaults).",
   },
   {
     modeKey: "audit_partner",
     label: "Audit partner",
-    description: "Partner organisations focused on audit and analytics with reduced scheduling and CRM defaults.",
+    description:
+      "Partner organisations focused on audit and analytics with reduced scheduling and CRM defaults.",
     defaultModulesLine: "Audit intelligence, analytics, patient safety review surfaces.",
   },
 ] as const;
@@ -59,8 +65,10 @@ const MODE_PREVIEW: Record<FiTenantOperatingModeKey, string> = {
     "This operating mode emphasises: SurgeryOS, cases, procedure day, imaging, audit intelligence, and patient twin.",
   medical_hair_clinic:
     "This operating mode emphasises: consultations, prescriptions, pathology, patients, and CRM-led growth workflows.",
-  training_academy: "This operating mode emphasises: academy delivery, staff coordination, and teaching-friendly surfaces.",
-  audit_partner: "This operating mode emphasises: audit intelligence, analytics, and governance-friendly review.",
+  training_academy:
+    "This operating mode emphasises: academy delivery, staff coordination, and teaching-friendly surfaces.",
+  audit_partner:
+    "This operating mode emphasises: audit intelligence, analytics, and governance-friendly review.",
 };
 
 export function buildFiOsOperatingModePreviewLine(modeKey: string | null | undefined): string {

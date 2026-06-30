@@ -7,7 +7,7 @@ import { DashboardQuickLeadBarButton } from "@/src/components/fi-admin/dashboard
 
 const compactControl = cn(
   fiOsChromeClasses.toolbarControlSurface,
-  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-2 text-sm font-semibold text-cyan-50",
+  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-2 text-sm font-semibold text-cyan-50"
 );
 
 function PlusPrefix() {
@@ -18,7 +18,9 @@ function PlusPrefix() {
   );
 }
 
-export function DashboardQuickActionsBar(props: { items: readonly ResolvedDashboardQuickAction[] }) {
+export function DashboardQuickActionsBar(props: {
+  items: readonly ResolvedDashboardQuickAction[];
+}) {
   const { items } = props;
 
   return (

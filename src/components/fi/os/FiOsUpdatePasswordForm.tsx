@@ -18,7 +18,10 @@ const EXPIRED_MESSAGE =
 export function FiOsUpdatePasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const afterPasswordPath = safeInternalPath(searchParams.get("next"), "/follicle-intelligence/login");
+  const afterPasswordPath = safeInternalPath(
+    searchParams.get("next"),
+    "/follicle-intelligence/login"
+  );
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -122,10 +125,15 @@ export function FiOsUpdatePasswordForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {!ready && !error ? <p className="text-center text-sm text-slate-400">Verifying reset link…</p> : null}
+      {!ready && !error ? (
+        <p className="text-center text-sm text-slate-400">Verifying reset link…</p>
+      ) : null}
 
       {error ? (
-        <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-100">
+        <div
+          role="alert"
+          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-100"
+        >
           {error}
         </div>
       ) : null}
@@ -133,7 +141,10 @@ export function FiOsUpdatePasswordForm() {
       {ready ? (
         <>
           <div>
-            <label htmlFor="np1" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+            <label
+              htmlFor="np1"
+              className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+            >
               New password
             </label>
             <input
@@ -147,7 +158,10 @@ export function FiOsUpdatePasswordForm() {
             />
           </div>
           <div>
-            <label htmlFor="np2" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
+            <label
+              htmlFor="np2"
+              className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+            >
               Confirm password
             </label>
             <input
@@ -171,7 +185,10 @@ export function FiOsUpdatePasswordForm() {
       ) : null}
 
       <p className="text-center text-sm text-slate-400">
-        <Link href="/follicle-intelligence/forgot-password" className="text-cyan-400/90 hover:underline">
+        <Link
+          href="/follicle-intelligence/forgot-password"
+          className="text-cyan-400/90 hover:underline"
+        >
           Request a new link
         </Link>
       </p>

@@ -45,18 +45,25 @@ export function PaymentRecordPanel(props: {
     >
       <div className="space-y-3 text-sm text-slate-300">
         {props.initialRows.length === 0 ? (
-          <p className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-400">{emptyCopy}</p>
+          <p className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-400">
+            {emptyCopy}
+          </p>
         ) : (
           <ul className="divide-y divide-white/[0.06] rounded border border-white/[0.08]">
             {props.initialRows.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+              <li
+                key={r.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
+              >
                 <div className="min-w-0">
                   <p className="font-mono text-xs text-slate-500">{r.id}</p>
                   <p className="mt-1 text-xs text-slate-400">
                     {r.currency}{" "}
                     <span className="font-semibold text-slate-100">{r.amount_paid}</span> paid of{" "}
                     <span className="font-semibold">{r.amount_expected}</span> expected
-                    {r.due_date ? <span className="text-slate-500"> · due {r.due_date}</span> : null}
+                    {r.due_date ? (
+                      <span className="text-slate-500"> · due {r.due_date}</span>
+                    ) : null}
                   </p>
                   {r.recorded_at ? (
                     <p className="mt-1 text-[0.65rem] text-slate-500">
@@ -70,7 +77,11 @@ export function PaymentRecordPanel(props: {
                     </p>
                   ) : null}
                 </div>
-                <PaymentStatusBadge status={r.status} dueDate={r.due_date} todayYmd={props.todayYmd} />
+                <PaymentStatusBadge
+                  status={r.status}
+                  dueDate={r.due_date}
+                  todayYmd={props.todayYmd}
+                />
               </li>
             ))}
           </ul>
@@ -101,7 +112,9 @@ export function PaymentRecordPanel(props: {
             />
           </>
         ) : (
-          <p className="text-xs text-slate-500">You can view recorded payment status; finance or a manager must sign in to edit.</p>
+          <p className="text-xs text-slate-500">
+            You can view recorded payment status; finance or a manager must sign in to edit.
+          </p>
         )}
       </div>
     </FiSection>

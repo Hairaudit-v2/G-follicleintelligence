@@ -31,12 +31,15 @@ export function PatientImportedSourceSection({ data }: { data: PatientProfileFou
       <summary className="cursor-pointer select-none px-4 py-3 font-medium text-slate-300 outline-none hover:bg-white/[0.06]">
         Source details
         {idc.hasHubspotSlice ? (
-          <span className="ml-2 rounded bg-white/[0.08] px-2 py-0.5 text-xs font-normal text-slate-300">HubSpot</span>
+          <span className="ml-2 rounded bg-white/[0.08] px-2 py-0.5 text-xs font-normal text-slate-300">
+            HubSpot
+          </span>
         ) : null}
       </summary>
       <div className="border-t border-white/[0.08] px-4 pb-4 pt-2">
         <p className="mb-3 text-xs text-slate-400">
-          Values below come from normalised import metadata on the person/patient records. Raw JSON is not shown here.
+          Values below come from normalised import metadata on the person/patient records. Raw JSON
+          is not shown here.
         </p>
         {items.length === 0 ? (
           <p className="text-xs text-slate-400">No additional source fields to list.</p>

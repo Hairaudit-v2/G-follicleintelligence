@@ -28,7 +28,11 @@ export async function rollbackHubspotImportBatch(
     const chunk = 100;
     for (let i = 0; i < leadIds.length; i += chunk) {
       const slice = leadIds.slice(i, i + chunk);
-      const { error: d1 } = await supabase.from("fi_crm_leads").delete().eq("tenant_id", tid).in("id", slice);
+      const { error: d1 } = await supabase
+        .from("fi_crm_leads")
+        .delete()
+        .eq("tenant_id", tid)
+        .in("id", slice);
       if (d1) throw new Error(d1.message);
     }
   }
@@ -44,7 +48,11 @@ export async function rollbackHubspotImportBatch(
     const chunk = 100;
     for (let i = 0; i < patientIds.length; i += chunk) {
       const slice = patientIds.slice(i, i + chunk);
-      const { error: d2 } = await supabase.from("fi_patients").delete().eq("tenant_id", tid).in("id", slice);
+      const { error: d2 } = await supabase
+        .from("fi_patients")
+        .delete()
+        .eq("tenant_id", tid)
+        .in("id", slice);
       if (d2) throw new Error(d2.message);
     }
   }
@@ -60,7 +68,11 @@ export async function rollbackHubspotImportBatch(
     const chunk = 100;
     for (let i = 0; i < personIds.length; i += chunk) {
       const slice = personIds.slice(i, i + chunk);
-      const { error: d3 } = await supabase.from("fi_persons").delete().eq("tenant_id", tid).in("id", slice);
+      const { error: d3 } = await supabase
+        .from("fi_persons")
+        .delete()
+        .eq("tenant_id", tid)
+        .in("id", slice);
       if (d3) throw new Error(d3.message);
     }
   }

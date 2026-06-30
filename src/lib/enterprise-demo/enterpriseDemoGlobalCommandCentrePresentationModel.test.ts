@@ -149,5 +149,8 @@ test("isGlobalCommandCentrePresentationPath detects presentation route", () => {
     isGlobalCommandCentrePresentationPath("/fi-admin/uuid/global-command-centre/presentation"),
     true
   );
-  assert.equal(isGlobalCommandCentrePresentationPath("/fi-admin/uuid/global-command-centre"), false);
+  assert.equal(
+    isGlobalCommandCentrePresentationPath("/fi-admin/uuid/global-command-centre"),
+    false
+  );
 });

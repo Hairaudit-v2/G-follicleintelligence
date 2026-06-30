@@ -2,7 +2,11 @@
  * Pure model for Consultation Conversion Board V1 — column assignment, window helpers, KPIs.
  */
 
-import { addDaysToCalendarDate, calendarDateStringFromInstant, zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  addDaysToCalendarDate,
+  calendarDateStringFromInstant,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 
 export const CONVERSION_BOARD_LOOKBACK_DAYS = 90;
 export const CONVERSION_BOARD_FORWARD_DAYS = 30;
@@ -35,7 +39,8 @@ export function normalizeQuoteStatusFromSignals(input: {
   const st = input.consultationStatus.trim().toLowerCase();
   if (st === "accepted" || st === "converted_to_case") return "accepted";
 
-  const raw = typeof input.quoteStatusRaw === "string" ? input.quoteStatusRaw.trim().toLowerCase() : "";
+  const raw =
+    typeof input.quoteStatusRaw === "string" ? input.quoteStatusRaw.trim().toLowerCase() : "";
   if (!raw) {
     if (st === "quoted") return "sent";
     return "neutral";
@@ -49,7 +54,12 @@ export function normalizeQuoteStatusFromSignals(input: {
 }
 
 export function hasQuoteDraftSignals(quoteData: Record<string, unknown>): boolean {
-  const keys: (keyof typeof quoteData)[] = ["graft_estimate", "session_size", "price_quoted", "other_services"];
+  const keys: (keyof typeof quoteData)[] = [
+    "graft_estimate",
+    "session_size",
+    "price_quoted",
+    "other_services",
+  ];
   for (const k of keys) {
     const v = quoteData[k];
     if (typeof v === "string" && v.trim().length > 0) return true;
@@ -116,7 +126,10 @@ export function pickConsultationConversionColumn(input: {
   return "consultation_booked";
 }
 
-export function computeConsultationConversionBoardWindow(now: Date, calendarTimezone: string): ConsultationConversionBoardWindow {
+export function computeConsultationConversionBoardWindow(
+  now: Date,
+  calendarTimezone: string
+): ConsultationConversionBoardWindow {
   const tz = calendarTimezone.trim();
   const todayYmd = calendarDateStringFromInstant(now, tz);
   const ymdPast90 = addDaysToCalendarDate(todayYmd, -CONVERSION_BOARD_LOOKBACK_DAYS, tz);
@@ -125,18 +138,29 @@ export function computeConsultationConversionBoardWindow(now: Date, calendarTime
   const startMs = zonedMidnightUtcMs(ymdPast90, tz);
   const endMs = zonedMidnightUtcMs(dayAfterFuture, tz);
   const rangeStartIso = (startMs != null ? new Date(startMs) : now).toISOString();
-  const rangeEndIso = (endMs != null ? new Date(endMs) : new Date(now.getTime() + (CONVERSION_BOARD_FORWARD_DAYS + 1) * 86_400_000)).toISOString();
+  const rangeEndIso = (
+    endMs != null
+      ? new Date(endMs)
+      : new Date(now.getTime() + (CONVERSION_BOARD_FORWARD_DAYS + 1) * 86_400_000)
+  ).toISOString();
   return { calendarTimezone: tz, todayYmd, ymdPast90, ymdFuture30, rangeStartIso, rangeEndIso };
 }
 
 /** Inclusive YYYY-MM-DD string compare (valid for ISO dates). */
-export function calendarYmdInInclusiveRange(ymd: string | null | undefined, minYmd: string, maxYmd: string): boolean {
+export function calendarYmdInInclusiveRange(
+  ymd: string | null | undefined,
+  minYmd: string,
+  maxYmd: string
+): boolean {
   const y = ymd?.trim();
   if (!y) return false;
   return y >= minYmd && y <= maxYmd;
 }
 
-export function calendarYmdFromIsoInstant(iso: string | null | undefined, tz: string): string | null {
+export function calendarYmdFromIsoInstant(
+  iso: string | null | undefined,
+  tz: string
+): string | null {
   if (!iso?.trim()) return null;
   const ms = Date.parse(iso);
   if (!Number.isFinite(ms)) return null;

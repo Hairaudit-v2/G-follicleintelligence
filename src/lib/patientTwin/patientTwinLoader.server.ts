@@ -15,7 +15,10 @@ import {
   type UniversalPatientRecordResult,
 } from "@/src/lib/fi/foundation/patientRecord";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
-import { calculatePatientTwinCompleteness, type PatientTwinV1ForCompleteness } from "./patientTwinCompleteness";
+import {
+  calculatePatientTwinCompleteness,
+  type PatientTwinV1ForCompleteness,
+} from "./patientTwinCompleteness";
 import { buildPatientJourneyGallery, buildTwinImagingUiSections } from "./patientJourneyGallery";
 import { patientTwinV1Schema } from "./patientTwinSchema";
 import {
@@ -110,7 +113,11 @@ function emptyTwinImagingGalleryShell(): PatientTwinImagingSection["gallery"] {
   const j = buildPatientJourneyGallery([]);
   return {
     items: [],
-    ui_sections: buildTwinImagingUiSections(j).map((s) => ({ key: s.key, title: s.title, items: [] })),
+    ui_sections: buildTwinImagingUiSections(j).map((s) => ({
+      key: s.key,
+      title: s.title,
+      items: [],
+    })),
   };
 }
 
@@ -137,7 +144,10 @@ function mapLegacyWarnings(messages: string[], out: PatientTwinWarning[]) {
       code = "missing_foundation_patient";
     } else if (m.includes("Global patient") && m.includes("no foundation_patient_id")) {
       code = "unresolved_global_patient";
-    } else if (m.includes("Multiple resolution rows") || m.includes("Multiple fi_patients rows share")) {
+    } else if (
+      m.includes("Multiple resolution rows") ||
+      m.includes("Multiple fi_patients rows share")
+    ) {
       code = "resolution_anomaly";
     } else if (m.includes("unified media row") || m.includes("fi_media_assets row")) {
       code = "duplicate_media_risk";
@@ -146,7 +156,9 @@ function mapLegacyWarnings(messages: string[], out: PatientTwinWarning[]) {
   }
 }
 
-function buildMediaSection(rows: UniversalPatientRecordResult["media_unified"]): PatientTwinMediaSection {
+function buildMediaSection(
+  rows: UniversalPatientRecordResult["media_unified"]
+): PatientTwinMediaSection {
   const by_asset_type: PatientTwinMediaSection["by_asset_type"] = {};
   const sorted = [...rows].sort((a, b) => {
     const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
@@ -190,7 +202,9 @@ function buildFoundationTimeline(base: UniversalPatientRecordResult): PatientTwi
   return items;
 }
 
-function latestMilestoneByCaseId(base: UniversalPatientRecordResult): Map<string, PatientTwinCaseMilestone> {
+function latestMilestoneByCaseId(
+  base: UniversalPatientRecordResult
+): Map<string, PatientTwinCaseMilestone> {
   const map = new Map<string, PatientTwinCaseMilestone>();
   for (const ev of base.timeline_events) {
     const cid = ev.case_id;
@@ -236,7 +250,11 @@ async function aggregateStatusForCases(
   if (caseIds.length === 0) return out;
   for (let i = 0; i < caseIds.length; i += CHUNK) {
     const slice = caseIds.slice(i, i + CHUNK);
-    const { data, error } = await supabase.from(table).select(column).eq("tenant_id", tenantId).in("case_id", slice);
+    const { data, error } = await supabase
+      .from(table)
+      .select(column)
+      .eq("tenant_id", tenantId)
+      .in("case_id", slice);
     if (error) throw new Error(error.message);
     for (const row of data ?? []) {
       const r = row as Record<string, unknown>;
@@ -275,7 +293,9 @@ async function loadLatestReleasedReport(
         released_at: string | null;
         created_at: string;
       };
-      const t = r.released_at ? new Date(r.released_at).getTime() : new Date(r.created_at).getTime();
+      const t = r.released_at
+        ? new Date(r.released_at).getTime()
+        : new Date(r.created_at).getTime();
       if (!best || t > bestTs) {
         best = {
           report_id: String(r.id),
@@ -302,13 +322,18 @@ export type LoadPatientTwinV1Params = {
  * Loads PatientTwin V1 for a foundation patient. Returns `null` when the patient row does not
  * exist in the tenant (caller should map to HTTP 404).
  */
-export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promise<PatientTwinV1 | null> {
+export async function loadPatientTwinV1(
+  params: LoadPatientTwinV1Params
+): Promise<PatientTwinV1 | null> {
   const supabase = params.client ?? supabaseAdmin();
   const tid = params.tenantId.trim();
   const pid = params.foundationPatientId.trim();
   if (!tid || !pid) return null;
 
-  const base = await loadUniversalPatientRecord({ tenantId: tid, foundationPatientId: pid }, supabase);
+  const base = await loadUniversalPatientRecord(
+    { tenantId: tid, foundationPatientId: pid },
+    supabase
+  );
   if (!base.ok) {
     if (base.error === "not_found") return null;
     throw new Error(base.message);
@@ -322,7 +347,11 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
   const caseIds = uniqueStrings(base.cases.map((c) => c.case_id));
 
   if (caseIds.length === 0) {
-    pushWarning(warnings, "missing_case_linkage", "No fi_cases linked for this foundation patient in this tenant.");
+    pushWarning(
+      warnings,
+      "missing_case_linkage",
+      "No fi_cases linked for this foundation patient in this tenant."
+    );
   }
 
   const milestoneByCase = latestMilestoneByCaseId(base);
@@ -346,7 +375,9 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       ? (base.person.metadata as Record<string, unknown>)
       : {};
   const patientMeta =
-    base.patient && typeof base.patient.metadata === "object" && !Array.isArray(base.patient.metadata)
+    base.patient &&
+    typeof base.patient.metadata === "object" &&
+    !Array.isArray(base.patient.metadata)
       ? (base.patient.metadata as Record<string, unknown>)
       : {};
 
@@ -359,7 +390,11 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     .eq("id", primaryFoundation)
     .maybeSingle();
   if (patPrefsRes.error) {
-    pushWarning(warnings, "generic", `Patient preferences lookup skipped: ${patPrefsRes.error.message}`);
+    pushWarning(
+      warnings,
+      "generic",
+      `Patient preferences lookup skipped: ${patPrefsRes.error.message}`
+    );
   }
 
   let hubspotSourcePersonId: string | null = null;
@@ -372,18 +407,28 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       .eq("source_system", "hubspot")
       .maybeSingle();
     if (hubspotPersonSrcRes.error) {
-      pushWarning(warnings, "generic", `HubSpot person source id lookup skipped: ${hubspotPersonSrcRes.error.message}`);
+      pushWarning(
+        warnings,
+        "generic",
+        `HubSpot person source id lookup skipped: ${hubspotPersonSrcRes.error.message}`
+      );
     } else if (hubspotPersonSrcRes.data) {
-      hubspotSourcePersonId = String((hubspotPersonSrcRes.data as { source_person_id: string }).source_person_id);
+      hubspotSourcePersonId = String(
+        (hubspotPersonSrcRes.data as { source_person_id: string }).source_person_id
+      );
     }
   }
 
-  const prefs = patPrefsRes.data as { preferred_contact_method?: unknown; reminder_consent?: boolean | null } | null;
+  const prefs = patPrefsRes.data as {
+    preferred_contact_method?: unknown;
+    reminder_consent?: boolean | null;
+  } | null;
 
   const idc = derivePatientIdentityContact({
     personMetadata: personMeta,
     patientMetadata: patientMeta,
-    preferredContactMethod: prefs?.preferred_contact_method != null ? String(prefs.preferred_contact_method) : null,
+    preferredContactMethod:
+      prefs?.preferred_contact_method != null ? String(prefs.preferred_contact_method) : null,
     reminderConsent: prefs?.reminder_consent ?? null,
     hubspotSourcePersonId,
   });
@@ -391,7 +436,9 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
   const display_name =
     (idc.fullName !== "—" ? idc.fullName : null) ??
     (base.patient?.display_name?.trim() ? base.patient.display_name.trim() : null) ??
-    (base.resolution_rows[0]?.display_name?.trim() ? base.resolution_rows[0]!.display_name!.trim() : null) ??
+    (base.resolution_rows[0]?.display_name?.trim()
+      ? base.resolution_rows[0]!.display_name!.trim()
+      : null) ??
     null;
   const email = idc.primaryEmail ?? base.resolution_rows[0]?.email ?? null;
   const phone = idc.primaryPhone ?? base.resolution_rows[0]?.phone ?? null;
@@ -419,7 +466,8 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
 
   const identity_resolution: PatientTwinV1["identity_resolution"] = {
     foundation_patient_id: primaryFoundation,
-    global_patient_id: base.anchor.primary_global_patient_id ?? base.linked_global_patient_ids[0] ?? null,
+    global_patient_id:
+      base.anchor.primary_global_patient_id ?? base.linked_global_patient_ids[0] ?? null,
     source_ids: base.source_identifiers.map((s) => ({
       source_system: s.source_system,
       source_patient_id: s.source_patient_id,
@@ -465,15 +513,20 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     current_stage_id: row.current_stage_id != null ? String(row.current_stage_id) : null,
     updated_at: String(row.updated_at ?? row.created_at),
     created_at: String(row.created_at),
-    primary_owner_user_id: row.primary_owner_user_id != null ? String(row.primary_owner_user_id) : null,
+    primary_owner_user_id:
+      row.primary_owner_user_id != null ? String(row.primary_owner_user_id) : null,
     clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
     organisation_id: row.organisation_id != null ? String(row.organisation_id) : null,
     summary: row.summary != null ? String(row.summary) : null,
   }));
 
-  const active_leads_count = leadsMapped.filter((l) => !CRM_TERMINAL_LEAD_STATUSES.has(l.status.toLowerCase())).length;
+  const active_leads_count = leadsMapped.filter(
+    (l) => !CRM_TERMINAL_LEAD_STATUSES.has(l.status.toLowerCase())
+  ).length;
 
-  const leadsSorted = [...leadsMapped].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  const leadsSorted = [...leadsMapped].sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
   const latestLead = leadsSorted[0] ?? null;
 
   const stageIds = uniqueStrings(leadsMapped.map((l) => l.current_stage_id));
@@ -488,7 +541,10 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       pushWarning(warnings, "generic", `CRM pipeline stages lookup skipped: ${se.message}`);
     } else {
       for (const s of stages ?? []) {
-        stageLabelById.set(String((s as { id: string }).id), String((s as { label: string }).label));
+        stageLabelById.set(
+          String((s as { id: string }).id),
+          String((s as { label: string }).label)
+        );
       }
     }
   }
@@ -542,7 +598,10 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       .eq("id", latestLead.primary_owner_user_id)
       .maybeSingle();
     if (!ue && u) {
-      primary_owner_email = (u as { email: string | null }).email != null ? String((u as { email: string | null }).email) : null;
+      primary_owner_email =
+        (u as { email: string | null }).email != null
+          ? String((u as { email: string | null }).email)
+          : null;
     }
   }
   if (latestLead?.clinic_id) {
@@ -572,7 +631,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     active_leads_count,
     latest_lead_status: latestLead?.status ?? null,
     latest_lead_stage_label: latestLead?.current_stage_id
-      ? stageLabelById.get(latestLead.current_stage_id) ?? null
+      ? (stageLabelById.get(latestLead.current_stage_id) ?? null)
       : null,
     open_tasks_count,
     latest_activity_summary,
@@ -730,12 +789,18 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     }
   }
 
-  let hair_progression: PatientTwinV1["intelligence"]["hair_progression"] = emptyPatientTwinHairProgressionIntelligence();
+  let hair_progression: PatientTwinV1["intelligence"]["hair_progression"] =
+    emptyPatientTwinHairProgressionIntelligence();
   try {
-    hair_progression = await loadPatientTwinHairProgressionSection(tid, primaryFoundation, {
-      patientDateOfBirthIso: date_of_birth,
-      patientSexClassification: null,
-    }, supabase);
+    hair_progression = await loadPatientTwinHairProgressionSection(
+      tid,
+      primaryFoundation,
+      {
+        patientDateOfBirthIso: date_of_birth,
+        patientSexClassification: null,
+      },
+      supabase
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
@@ -749,7 +814,11 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     recent_cap: 5,
   };
   try {
-    recipient_candidacy = await loadPatientTwinRecipientCandidacySection(tid, primaryFoundation, supabase);
+    recipient_candidacy = await loadPatientTwinRecipientCandidacySection(
+      tid,
+      primaryFoundation,
+      supabase
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
@@ -763,7 +832,11 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     recent_cap: 5,
   };
   try {
-    consultation_checklist = await loadPatientTwinConsultationChecklistSection(tid, primaryFoundation, supabase);
+    consultation_checklist = await loadPatientTwinConsultationChecklistSection(
+      tid,
+      primaryFoundation,
+      supabase
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
@@ -787,7 +860,9 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
 
   const { data: pthRows, error: pthErr } = await supabase
     .from("fi_pathology_requests")
-    .select("id, request_date, template_used, status, emailed_to_patient_at, cancelled_at, created_at")
+    .select(
+      "id, request_date, template_used, status, emailed_to_patient_at, cancelled_at, created_at"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", primaryFoundation)
     .order("created_at", { ascending: false })
@@ -805,7 +880,8 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
           request_date: String(x.request_date ?? "").slice(0, 10),
           template_used: String(x.template_used ?? ""),
           status: String(x.status ?? ""),
-          emailed_to_patient_at: x.emailed_to_patient_at != null ? String(x.emailed_to_patient_at) : null,
+          emailed_to_patient_at:
+            x.emailed_to_patient_at != null ? String(x.emailed_to_patient_at) : null,
           cancelled_at: x.cancelled_at != null ? String(x.cancelled_at) : null,
           created_at: String(x.created_at ?? ""),
         };
@@ -815,7 +891,9 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
 
   const { data: prRows, error: prErr } = await supabase
     .from("fi_pathology_results")
-    .select("id, result_date, provider_name, status, pathology_request_id, source_type, reviewed_at, created_at")
+    .select(
+      "id, result_date, provider_name, status, pathology_request_id, source_type, reviewed_at, created_at"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", primaryFoundation)
     .order("created_at", { ascending: false })
@@ -855,7 +933,8 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
         result_date: String(x.result_date ?? "").slice(0, 10),
         provider_name: x.provider_name != null ? String(x.provider_name) : null,
         status: String(x.status ?? ""),
-        pathology_request_id: x.pathology_request_id != null ? String(x.pathology_request_id) : null,
+        pathology_request_id:
+          x.pathology_request_id != null ? String(x.pathology_request_id) : null,
         marker_count: markerCountByResult.get(id) ?? 0,
         abnormal_marker_count: abnormalByResult.get(id) ?? 0,
         source_type: String(x.source_type ?? ""),
@@ -886,7 +965,9 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
 
   const { data: aiRow, error: aiErr } = await supabase
     .from("fi_pathology_ai_interpretations")
-    .select("id, pathology_result_id, status, hair_loss_relevance_score, surgical_readiness_score, interpretation_json, created_at, reviewed_at")
+    .select(
+      "id, pathology_result_id, status, hair_loss_relevance_score, surgical_readiness_score, interpretation_json, created_at, reviewed_at"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", primaryFoundation)
     .neq("status", "archived")
@@ -898,7 +979,9 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
   } else if (aiRow) {
     const x = aiRow as Record<string, unknown>;
     const blob =
-      x.interpretation_json && typeof x.interpretation_json === "object" && !Array.isArray(x.interpretation_json)
+      x.interpretation_json &&
+      typeof x.interpretation_json === "object" &&
+      !Array.isArray(x.interpretation_json)
         ? (x.interpretation_json as Record<string, unknown>)
         : {};
     const contributorsRaw = Array.isArray(blob.likely_contributors) ? blob.likely_contributors : [];
@@ -921,7 +1004,8 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
         pathology_result_id: String(x.pathology_result_id),
         status: String(x.status ?? ""),
         hair_loss_relevance_score:
-          x.hair_loss_relevance_score != null && Number.isFinite(Number(x.hair_loss_relevance_score))
+          x.hair_loss_relevance_score != null &&
+          Number.isFinite(Number(x.hair_loss_relevance_score))
             ? Number(x.hair_loss_relevance_score)
             : null,
         surgical_readiness_score:

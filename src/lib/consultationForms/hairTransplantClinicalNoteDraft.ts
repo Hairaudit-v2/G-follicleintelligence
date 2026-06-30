@@ -14,17 +14,26 @@ import {
   HAIR_TRANSPLANT_V2_RECOMMENDED_TREATMENT_OPTIONS,
   HAIR_TRANSPLANT_V2_RECOMMENDED_ZONE_OPTIONS,
 } from "./templates/hairTransplantConsultationTemplate";
-import { labelForOptionValue, readString, readStringArray } from "./completion/consultationCompletionExtractors";
+import {
+  labelForOptionValue,
+  readString,
+  readStringArray,
+} from "./completion/consultationCompletionExtractors";
 
 function line(...parts: string[]): string {
-  const s = parts.map((p) => p.trim()).filter(Boolean).join(" ");
+  const s = parts
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join(" ");
   return s.trim();
 }
 
 /**
  * Builds a chart-ready narrative from current form values (Hair Transplant template v2 fields).
  */
-export function buildHairTransplantDeterministicClinicalNoteDraft(values: Record<string, unknown>): string {
+export function buildHairTransplantDeterministicClinicalNoteDraft(
+  values: Record<string, unknown>
+): string {
   const priority = labelForOptionValue(
     CONSULTATION_FORM_OPTION_SETS.consultation_priority,
     readString(values.priority_focus)
@@ -38,22 +47,40 @@ export function buildHairTransplantDeterministicClinicalNoteDraft(values: Record
     readString(values.duration_band)
   );
   const nwKey = canonicalHairTransplantNorwoodKey(values);
-  const pattern = nwKey ? labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.norwood_scale, nwKey) || nwKey : "";
+  const pattern = nwKey
+    ? labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.norwood_scale, nwKey) || nwKey
+    : "";
   const onset = labelForOptionValue(
     CONSULTATION_FORM_OPTION_SETS.hair_loss_onset_pattern,
     readString(values.onset_pattern)
   );
-  const scalp = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.scalp_condition, readString(values.scalp_condition));
-  const calibre = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.hair_calibre, readString(values.hair_calibre));
+  const scalp = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.scalp_condition,
+    readString(values.scalp_condition)
+  );
+  const calibre = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.hair_calibre,
+    readString(values.hair_calibre)
+  );
 
   const treatments = canonicalHairTransplantTreatmentValues(values)
-    .map((t) => labelForOptionValue(HAIR_TRANSPLANT_V2_RECOMMENDED_TREATMENT_OPTIONS, t) || t.replace(/_/g, " "))
+    .map(
+      (t) =>
+        labelForOptionValue(HAIR_TRANSPLANT_V2_RECOMMENDED_TREATMENT_OPTIONS, t) ||
+        t.replace(/_/g, " ")
+    )
     .filter(Boolean);
   const zones = readStringArray(values.recommended_zones)
-    .map((z) => labelForOptionValue(HAIR_TRANSPLANT_V2_RECOMMENDED_ZONE_OPTIONS, z) || z.replace(/_/g, " "))
+    .map(
+      (z) =>
+        labelForOptionValue(HAIR_TRANSPLANT_V2_RECOMMENDED_ZONE_OPTIONS, z) || z.replace(/_/g, " ")
+    )
     .filter(Boolean);
 
-  const donor = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.donor_quality, readString(values.donor_quality));
+  const donor = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.donor_quality,
+    readString(values.donor_quality)
+  );
   const recipient = labelForOptionValue(
     CONSULTATION_FORM_OPTION_SETS.recipient_area_quality,
     readString(values.recipient_quality)
@@ -89,7 +116,13 @@ export function buildHairTransplantDeterministicClinicalNoteDraft(values: Record
   );
 
   if (donor || recipient) {
-    paras.push(line("Donor / recipient:", donor ? `Donor ${donor}.` : "", recipient ? `Recipient ${recipient}.` : ""));
+    paras.push(
+      line(
+        "Donor / recipient:",
+        donor ? `Donor ${donor}.` : "",
+        recipient ? `Recipient ${recipient}.` : ""
+      )
+    );
   }
 
   if (treatments.length || zones.length) {
@@ -102,7 +135,14 @@ export function buildHairTransplantDeterministicClinicalNoteDraft(values: Record
     );
   }
 
-  paras.push(line("Disposition:", outcome ? `Outcome direction: ${outcome}.` : "", `Surgical suitability: ${surg || "not assessed"}.`, `Medical suitability: ${med || "not assessed"}.`));
+  paras.push(
+    line(
+      "Disposition:",
+      outcome ? `Outcome direction: ${outcome}.` : "",
+      `Surgical suitability: ${surg || "not assessed"}.`,
+      `Medical suitability: ${med || "not assessed"}.`
+    )
+  );
 
   if (risks.length) {
     paras.push(`Flags / counselling topics: ${risks.join(", ")}.`);

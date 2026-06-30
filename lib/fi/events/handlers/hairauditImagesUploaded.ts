@@ -66,10 +66,7 @@ async function loadLinkedEntities(eventId: string): Promise<{
   };
 }
 
-async function loadLinkedUploadIds(
-  fiCaseId: string,
-  storagePaths: string[]
-): Promise<string[]> {
+async function loadLinkedUploadIds(fiCaseId: string, storagePaths: string[]): Promise<string[]> {
   if (storagePaths.length === 0) return [];
 
   const { data } = await supabaseAdmin()
@@ -352,8 +349,7 @@ export async function handleHairAuditImagesUploaded(
   inputOrSupabase: HandlerInput | SupabaseClient,
   legacyEnvelope?: FiEventEnvelope
 ): Promise<HairAuditImagesUploadedResult> {
-  const envelope =
-    "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
+  const envelope = "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
 
   if (!envelope) {
     throw new Error("Missing envelope for handleHairAuditImagesUploaded.");

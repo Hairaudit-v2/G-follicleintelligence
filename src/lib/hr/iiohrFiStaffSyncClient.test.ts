@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { executeFiStaffSyncPost, scrubSecretFromMessage } from "@/src/lib/hr/iiohrFiStaffSyncClient";
+import {
+  executeFiStaffSyncPost,
+  scrubSecretFromMessage,
+} from "@/src/lib/hr/iiohrFiStaffSyncClient";
 import { pushStaffSyncToFi } from "@/src/lib/hr/iiohrFiStaffSyncPush";
 
 test("scrubSecretFromMessage redacts the shared secret substring", () => {
@@ -168,7 +171,9 @@ test("pushStaffSyncToFi: non-2xx error message is scrubbed of secret", async () 
   process.env.IIOHR_HR_SYNC_SECRET = secret;
   const origFetch = globalThis.fetch;
   globalThis.fetch = (async () =>
-    new Response(JSON.stringify({ ok: false, error: `denied ${secret}` }), { status: 401 })) as typeof fetch;
+    new Response(JSON.stringify({ ok: false, error: `denied ${secret}` }), {
+      status: 401,
+    })) as typeof fetch;
   try {
     await assert.rejects(
       () =>

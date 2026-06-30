@@ -63,7 +63,9 @@ describe("financialSurgeryEconomics Phase 2B", () => {
   });
 
   it("missing cost model returns Needs Configuration", () => {
-    const r = assessSurgeryProfitabilitySnapshotReadiness(readyInput({ has_active_cost_model: false }));
+    const r = assessSurgeryProfitabilitySnapshotReadiness(
+      readyInput({ has_active_cost_model: false })
+    );
     assert.equal(r.ready, false);
     assert.equal(r.status, "needs_configuration");
     assert.ok(r.reasons.some((x) => x.includes("cost model")));
@@ -120,7 +122,10 @@ describe("financialSurgeryEconomics Phase 2B", () => {
     const profitability = calculateSurgeryProfitability({
       tenant_id: TENANT_A,
       procedure_type: "fue",
-      cost_model: { ...defaultCostModelForProcedure(TENANT_A, "fue"), surgeon_cost_value_cents: 10_000 },
+      cost_model: {
+        ...defaultCostModelForProcedure(TENANT_A, "fue"),
+        surgeon_cost_value_cents: 10_000,
+      },
       revenue: { revenue_cents: 800_000, collected_cents: 800_000, outstanding_cents: 0 },
       duration_minutes: 360,
       staff_counts: { rn_count: 1, technician_count: 1, assistant_count: 0 },
@@ -144,7 +149,10 @@ describe("financialSurgeryEconomics Phase 2B", () => {
       surgeryId: null,
       patientId: null,
       invoiceId: null,
-      profitability: { ...profitability, gross_profit_cents: profitability.gross_profit_cents - 5_000 },
+      profitability: {
+        ...profitability,
+        gross_profit_cents: profitability.gross_profit_cents - 5_000,
+      },
       sourceMetadata: { trigger_source: "manual_recalculate", version: 2 },
       calculatedAt: "2026-06-19T11:00:00.000Z",
     });

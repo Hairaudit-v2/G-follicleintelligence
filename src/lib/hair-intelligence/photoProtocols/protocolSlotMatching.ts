@@ -1,4 +1,9 @@
-import { normalizeFiAiHairState, normalizeFiAiImageCategory, normalizeFiAiShaveState, normalizeFiAiSurgeryStage } from "@/src/lib/hair-intelligence/imageClassification/enumValidation";
+import {
+  normalizeFiAiHairState,
+  normalizeFiAiImageCategory,
+  normalizeFiAiShaveState,
+  normalizeFiAiSurgeryStage,
+} from "@/src/lib/hair-intelligence/imageClassification/enumValidation";
 import type { FiAiImageCategory } from "@/src/lib/imaging/aiImageClassificationTypes";
 import type { HliPhotoProtocolSlot, ProtocolComplianceImage } from "./types";
 
@@ -27,7 +32,11 @@ export function scoreImageForProtocolSlot(
 ): { score: number; reasons: string[] } {
   const reasons: string[] = [];
   const cat = normalizeFiAiImageCategory(image.ai_image_category);
-  if (cat === "unknown" || image.ai_image_category == null || !String(image.ai_image_category).trim()) {
+  if (
+    cat === "unknown" ||
+    image.ai_image_category == null ||
+    !String(image.ai_image_category).trim()
+  ) {
     return { score: 0, reasons: ["AI category unknown or missing"] };
   }
 
@@ -69,7 +78,8 @@ export function scoreImageForProtocolSlot(
   }
 
   const conf =
-    typeof image.ai_image_category_confidence === "number" && Number.isFinite(image.ai_image_category_confidence)
+    typeof image.ai_image_category_confidence === "number" &&
+    Number.isFinite(image.ai_image_category_confidence)
       ? Math.max(0, Math.min(1, image.ai_image_category_confidence))
       : 0;
   score *= 0.45 + conf * 0.55;
@@ -88,12 +98,16 @@ export function scoreImageForProtocolSlot(
 }
 
 /** Sort matches: higher score first; tie-break by review status then confidence. */
-export function compareMatchQuality(a: ProtocolComplianceImage, b: ProtocolComplianceImage): number {
+export function compareMatchQuality(
+  a: ProtocolComplianceImage,
+  b: ProtocolComplianceImage
+): number {
   const rank = (img: ProtocolComplianceImage) => {
     const rs = (img.ai_image_review_status ?? "").toLowerCase();
     const rev = rs === "accepted" || rs === "corrected" ? 2 : rs === "pending" ? 1 : 0;
     const conf =
-      typeof img.ai_image_category_confidence === "number" && Number.isFinite(img.ai_image_category_confidence)
+      typeof img.ai_image_category_confidence === "number" &&
+      Number.isFinite(img.ai_image_category_confidence)
         ? img.ai_image_category_confidence
         : 0;
     return rev * 10 + conf;

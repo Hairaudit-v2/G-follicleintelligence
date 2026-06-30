@@ -11,10 +11,7 @@ function formatPct(ratio: number | null): string {
   return `${Math.round(ratio * 100)}%`;
 }
 
-export function DashboardQuickStats(props: {
-  tenantId: string;
-  stats: TenantQuickStats;
-}) {
+export function DashboardQuickStats(props: { tenantId: string; stats: TenantQuickStats }) {
   const { tenantId, stats } = props;
 
   return (
@@ -56,20 +53,31 @@ export function DashboardQuickStats(props: {
       <p className="mt-4 text-xs leading-relaxed text-[#64748B]">
         Conversion uses the most recent won/lost stage transition per lead in the last 30 days (
         {stats.conversionWonLast30d} won / {stats.conversionClosedLast30d} closed).{" "}
-        <Link className="text-[#22C1FF] underline-offset-2 hover:underline" href={`/fi-admin/${tenantId}/consultations`}>
+        <Link
+          className="text-[#22C1FF] underline-offset-2 hover:underline"
+          href={`/fi-admin/${tenantId}/consultations`}
+        >
           Consultations
         </Link>{" "}
         and{" "}
-        <Link className="text-[#22C1FF] underline-offset-2 hover:underline" href={`/fi-admin/${tenantId}/crm`}>
+        <Link
+          className="text-[#22C1FF] underline-offset-2 hover:underline"
+          href={`/fi-admin/${tenantId}/crm`}
+        >
           CRM
         </Link>{" "}
         for detail.{" "}
-        <Link className="text-[#22C1FF] underline-offset-2 hover:underline" href={`/fi-admin/${tenantId}/staff`}>
+        <Link
+          className="text-[#22C1FF] underline-offset-2 hover:underline"
+          href={`/fi-admin/${tenantId}/staff`}
+        >
           Staff
         </Link>{" "}
-        lists schedulable team. No-shows use the UTC calendar day; staff-on-duty counts distinct assignees with bookings
-        starting today in the tenant IANA timezone (
-        <code className="rounded bg-slate-800/60 px-1 text-[11px]">fi_tenant_settings.default_timezone</code>
+        lists schedulable team. No-shows use the UTC calendar day; staff-on-duty counts distinct
+        assignees with bookings starting today in the tenant IANA timezone (
+        <code className="rounded bg-slate-800/60 px-1 text-[11px]">
+          fi_tenant_settings.default_timezone
+        </code>
         ).
       </p>
     </DashboardCard>

@@ -8,7 +8,9 @@ function Dl({ rows }: { rows: { label: string; value: string }[] }) {
     <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
       {rows.map((r) => (
         <div key={r.label} className="sm:contents">
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 print:text-gray-700">{r.label}</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 print:text-gray-700">
+            {r.label}
+          </dt>
           <dd className="text-sm text-gray-900 print:text-black">{r.value}</dd>
         </div>
       ))}
@@ -40,7 +42,9 @@ export function CaseSummaryDocumentPage({
   caseDetailHref: string;
 }) {
   const generated = new Date(doc.meta.generatedAtIso);
-  const generatedLabel = Number.isNaN(generated.getTime()) ? doc.meta.generatedAtIso : generated.toLocaleString();
+  const generatedLabel = Number.isNaN(generated.getTime())
+    ? doc.meta.generatedAtIso
+    : generated.toLocaleString();
 
   return (
     <div className="case-summary-document mx-auto max-w-4xl bg-white px-4 py-8 print:max-w-none print:px-6 print:py-4">
@@ -51,7 +55,9 @@ export function CaseSummaryDocumentPage({
               ← Back to patient
             </Link>
           </p>
-          <h1 className="mt-2 text-xl font-semibold text-gray-900 print:mt-0 print:text-black">Patient summary</h1>
+          <h1 className="mt-2 text-xl font-semibold text-gray-900 print:mt-0 print:text-black">
+            Patient summary
+          </h1>
           <p className="mt-1 text-sm text-gray-600 print:text-gray-800">
             Read-only handover view · Generated {generatedLabel}
           </p>
@@ -72,7 +78,10 @@ export function CaseSummaryDocumentPage({
         <CaseSummaryDocumentSection title="Linked patient / person">
           {doc.linkedPatient.patientProfileHref ? (
             <p className="print:hidden">
-              <Link href={doc.linkedPatient.patientProfileHref} className="text-sm text-blue-600 hover:underline">
+              <Link
+                href={doc.linkedPatient.patientProfileHref}
+                className="text-sm text-blue-600 hover:underline"
+              >
                 Open patient profile
               </Link>
             </p>
@@ -86,7 +95,10 @@ export function CaseSummaryDocumentPage({
           ) : (
             <ul className="list-none space-y-3">
               {doc.linkedLeads.leads.map((L) => (
-                <li key={L.leadDetailHref} className="rounded border border-gray-100 p-3 print:border-gray-300">
+                <li
+                  key={L.leadDetailHref}
+                  className="rounded border border-gray-100 p-3 print:border-gray-300"
+                >
                   <p className="font-medium text-gray-900 print:text-black">{L.title}</p>
                   <p className="text-xs text-gray-500 print:text-gray-700">
                     {L.linkReasonLabel} · Status: {L.status}
@@ -192,9 +204,15 @@ export function CaseSummaryDocumentPage({
               <table className="w-full min-w-[32rem] border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 print:border-gray-800">
-                    <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">Checkpoint</th>
-                    <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">Scheduled</th>
-                    <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">Completed</th>
+                    <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">
+                      Checkpoint
+                    </th>
+                    <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">
+                      Scheduled
+                    </th>
+                    <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">
+                      Completed
+                    </th>
                     <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">Status</th>
                     <th className="py-2 pr-3 font-medium text-gray-900 print:text-black">Images</th>
                     <th className="py-2 font-medium text-gray-900 print:text-black">Notes</th>
@@ -202,13 +220,18 @@ export function CaseSummaryDocumentPage({
                 </thead>
                 <tbody>
                   {doc.followUpCheckpoints.map((fu, idx) => (
-                    <tr key={`${fu.checkpointLabel}-${idx}`} className="border-b border-gray-100 print:border-gray-300">
+                    <tr
+                      key={`${fu.checkpointLabel}-${idx}`}
+                      className="border-b border-gray-100 print:border-gray-300"
+                    >
                       <td className="py-2 pr-3 align-top">{fu.checkpointLabel}</td>
                       <td className="py-2 pr-3 align-top">{fu.scheduled}</td>
                       <td className="py-2 pr-3 align-top">{fu.completed}</td>
                       <td className="py-2 pr-3 align-top">{fu.statusLabel}</td>
                       <td className="py-2 pr-3 align-top">{fu.linkedImages}</td>
-                      <td className="py-2 align-top whitespace-pre-wrap text-gray-800">{fu.notes ?? "—"}</td>
+                      <td className="py-2 align-top whitespace-pre-wrap text-gray-800">
+                        {fu.notes ?? "—"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -220,14 +243,17 @@ export function CaseSummaryDocumentPage({
         <CaseSummaryDocumentSection title="Linked images">
           <p className="text-sm text-gray-900 print:text-black">
             <span className="font-medium">{doc.linkedImageCount}</span> patient-linked image
-            {doc.linkedImageCount === 1 ? "" : "s"} (loaded for this summary; list capped in source query).
+            {doc.linkedImageCount === 1 ? "" : "s"} (loaded for this summary; list capped in source
+            query).
           </p>
         </CaseSummaryDocumentSection>
 
         <CaseSummaryDocumentSection title="Timeline summary">
           <p className="text-sm text-gray-700 print:text-gray-900">
-            <span className="font-medium text-gray-900 print:text-black">{doc.timeline.eventCount}</span> timeline
-            event{doc.timeline.eventCount === 1 ? "" : "s"} (newest first; preview below).
+            <span className="font-medium text-gray-900 print:text-black">
+              {doc.timeline.eventCount}
+            </span>{" "}
+            timeline event{doc.timeline.eventCount === 1 ? "" : "s"} (newest first; preview below).
           </p>
           {doc.timeline.preview.length ? (
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">
@@ -236,12 +262,7 @@ export function CaseSummaryDocumentPage({
                   <span className="text-gray-500 print:text-gray-700">{line.occurredOn}</span>
                   {" — "}
                   <span className="font-medium text-gray-900 print:text-black">{line.title}</span>
-                  {line.status ? (
-                    <span className="text-gray-600">
-                      {" "}
-                      ({line.status})
-                    </span>
-                  ) : null}
+                  {line.status ? <span className="text-gray-600"> ({line.status})</span> : null}
                   {line.sensitive ? (
                     <span className="mt-0.5 block text-xs text-amber-800 print:text-amber-900">
                       Sensitive CRM activity — detail text omitted from this summary view.
@@ -263,13 +284,20 @@ export function CaseSummaryDocumentPage({
             </span>{" "}
             ({doc.readiness.overallPercent}%).
           </p>
-          <p className="mt-2 text-sm text-gray-800 print:text-black">{doc.readiness.nextRecommendedStep}</p>
+          <p className="mt-2 text-sm text-gray-800 print:text-black">
+            {doc.readiness.nextRecommendedStep}
+          </p>
           <ul className="mt-4 space-y-2 text-sm">
             {doc.readiness.sections.map((s) => (
-              <li key={s.title} className="rounded border border-gray-100 p-2 print:border-gray-300">
+              <li
+                key={s.title}
+                className="rounded border border-gray-100 p-2 print:border-gray-300"
+              >
                 <span className="font-medium text-gray-900 print:text-black">{s.title}</span>
                 <span className="text-gray-500"> · </span>
-                <span className="text-gray-700 print:text-gray-900">{readinessHealthLabel(s.health)}</span>
+                <span className="text-gray-700 print:text-gray-900">
+                  {readinessHealthLabel(s.health)}
+                </span>
                 <p className="mt-1 text-gray-600 print:text-gray-800">{s.summary}</p>
               </li>
             ))}
@@ -278,8 +306,8 @@ export function CaseSummaryDocumentPage({
       </div>
 
       <footer className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500 print:mt-8 print:border-gray-800 print:text-gray-700">
-        Follicle Intelligence · SurgeryOS patient summary · Internal use only. This view does not include HairAudit, formal
-        audit grading, AI outcome scoring, or certification scoring.
+        Follicle Intelligence · SurgeryOS patient summary · Internal use only. This view does not
+        include HairAudit, formal audit grading, AI outcome scoring, or certification scoring.
       </footer>
     </div>
   );

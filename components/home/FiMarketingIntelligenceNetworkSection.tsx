@@ -5,7 +5,15 @@ import { HOME_PAGE_CONTENT } from "@/lib/marketing/homePageContent";
 
 const c = HOME_PAGE_CONTENT.intelligenceNetwork;
 
-function IntelligenceCard({ index, title, description }: { index: number; title: string; description: string }) {
+function IntelligenceCard({
+  index,
+  title,
+  description,
+}: {
+  index: number;
+  title: string;
+  description: string;
+}) {
   return (
     <GlassCard
       variant="os"
@@ -15,7 +23,10 @@ function IntelligenceCard({ index, title, description }: { index: number; title:
         <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
+        <span
+          className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent"
+          aria-hidden
+        />
       </div>
       <h3 className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
         {title}

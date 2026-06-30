@@ -70,13 +70,14 @@ export async function handleCreateCalendarAppointment(
     });
 
     if (!result.ok) {
-      const status = result.error.includes("not connected") || result.error.includes("expired")
-        ? 503
-        : result.error.includes("required") ||
-            result.error.includes("Invalid") ||
-            result.error.includes("after start")
-          ? 400
-          : 502;
+      const status =
+        result.error.includes("not connected") || result.error.includes("expired")
+          ? 503
+          : result.error.includes("required") ||
+              result.error.includes("Invalid") ||
+              result.error.includes("after start")
+            ? 400
+            : 502;
       return NextResponse.json({ success: false, error: result.error }, { status });
     }
 

@@ -28,7 +28,9 @@ export function ClinicalHairLossScaleFields({
 }: Props) {
   return (
     <div className="space-y-4 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Pattern & classification</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        Pattern & classification
+      </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="block text-xs font-medium text-slate-200">
           Hamilton–Norwood

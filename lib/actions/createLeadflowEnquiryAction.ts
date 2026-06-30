@@ -40,10 +40,8 @@ export async function createLeadflowEnquiryAction(
 
     const phoneRaw = person.phone;
     const emailRaw = person.email;
-    const phone =
-      phoneRaw != null && String(phoneRaw).trim() ? String(phoneRaw).trim() : null;
-    const email =
-      emailRaw != null && String(emailRaw).trim() ? String(emailRaw).trim() : null;
+    const phone = phoneRaw != null && String(phoneRaw).trim() ? String(phoneRaw).trim() : null;
+    const email = emailRaw != null && String(emailRaw).trim() ? String(emailRaw).trim() : null;
 
     const lead = await createCrmLeadWithPerson({
       tenantId: tid,
@@ -70,10 +68,12 @@ export async function createLeadflowEnquiryAction(
   }
 }
 
-export async function loadLeadflowEnquiryFormOptionsAction(
-  tenantId: string
-): Promise<
-  | { ok: true; owners: Awaited<ReturnType<typeof loadCrmShellUserPickerOptions>>; defaultOwnerUserId: string }
+export async function loadLeadflowEnquiryFormOptionsAction(tenantId: string): Promise<
+  | {
+      ok: true;
+      owners: Awaited<ReturnType<typeof loadCrmShellUserPickerOptions>>;
+      defaultOwnerUserId: string;
+    }
   | { ok: false; error: string }
 > {
   try {

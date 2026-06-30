@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { PushStaffSyncToFiInput, PushStaffSyncToFiResult } from "@/src/lib/hr/iiohrFiStaffSyncClient";
+import type {
+  PushStaffSyncToFiInput,
+  PushStaffSyncToFiResult,
+} from "@/src/lib/hr/iiohrFiStaffSyncClient";
 import { runScheduledIiohrHrStaffSyncCore } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
 import type { IiohrHrPortalStaffRecord } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
 

@@ -59,7 +59,8 @@ export async function buildVieInstantIntelligenceStub(
   const qualityBand = qualityBandFromScore(qualityScore);
 
   const focusFail =
-    signalNames.has("resolution") && qualityEval.signals.some((s) => s.name === "resolution" && s.status === "fail");
+    signalNames.has("resolution") &&
+    qualityEval.signals.some((s) => s.name === "resolution" && s.status === "fail");
   const lightingFail = qualityEval.signals.some(
     (s) => s.status === "fail" && (s.name === "file_size" || s.name === "aspect_ratio")
   );
@@ -70,7 +71,9 @@ export async function buildVieInstantIntelligenceStub(
     focus_verification: {
       status: focusFail ? ("heuristic_fail" as const) : ("heuristic_pass" as const),
       blur_score: null,
-      message: focusFail ? "Image may be blurry or low resolution — consider retaking." : "Focus check passed basic heuristics.",
+      message: focusFail
+        ? "Image may be blurry or low resolution — consider retaking."
+        : "Focus check passed basic heuristics.",
     },
     lighting_verification: {
       status: lightingFail ? ("heuristic_fail" as const) : ("heuristic_pass" as const),
@@ -81,7 +84,8 @@ export async function buildVieInstantIntelligenceStub(
       status: "pending_ai" as const,
       expected_slot: input.protocolSlotSlug,
       expected_region: slot?.suggested_region ?? "unknown",
-      message: "AI classification queued — slot and region will be verified when vision engine is enabled.",
+      message:
+        "AI classification queued — slot and region will be verified when vision engine is enabled.",
     },
     angle_verification: {
       status: "pending_ai" as const,

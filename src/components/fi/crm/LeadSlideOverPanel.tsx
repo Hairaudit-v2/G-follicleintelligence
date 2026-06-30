@@ -151,13 +151,19 @@ export function LeadSlideOverPanel({
       setDetailErr("Lead title / summary is required.");
       return;
     }
-    if (!CRM_LEAD_DETAIL_STATUS_VALUES.includes(status as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number])) {
+    if (
+      !CRM_LEAD_DETAIL_STATUS_VALUES.includes(
+        status as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number]
+      )
+    ) {
       setDetailErr("Pick a standard status from the list.");
       return;
     }
     if (
       priority.trim() !== "" &&
-      !CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(priority as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number])
+      !CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(
+        priority as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number]
+      )
     ) {
       setDetailErr("Pick a standard priority or None.");
       return;
@@ -170,7 +176,9 @@ export function LeadSlideOverPanel({
       priority: priority.trim() === "" ? null : priority.trim(),
       primary_owner_user_id: ownerId.trim() === "" ? null : ownerId.trim(),
     };
-    setPayload((p) => (p && p.detail.lead ? { ...p, detail: { ...p.detail, lead: optimistic } } : p));
+    setPayload((p) =>
+      p && p.detail.lead ? { ...p, detail: { ...p.detail, lead: optimistic } } : p
+    );
     setDetailBusy(true);
     try {
       const r = await updateCrmLeadDetailsAction(tenantId, lead.id, {
@@ -232,7 +240,9 @@ export function LeadSlideOverPanel({
         source: "fi_admin_lead_slideover",
       });
       if (!r.ok) {
-        setPayload((p) => (p ? { ...p, detail: { ...p.detail, lead: snapLead }, stageHistory: snapHist } : p));
+        setPayload((p) =>
+          p ? { ...p, detail: { ...p.detail, lead: snapLead }, stageHistory: snapHist } : p
+        );
         setStageErr(r.error);
         return;
       }
@@ -262,7 +272,9 @@ export function LeadSlideOverPanel({
         return;
       }
       setTaskTitle("");
-      setPayload((p) => (p ? { ...p, detail: { ...p.detail, tasks: [r.task, ...p.detail.tasks] } } : p));
+      setPayload((p) =>
+        p ? { ...p, detail: { ...p.detail, tasks: [r.task, ...p.detail.tasks] } } : p
+      );
       router.refresh();
     } finally {
       setTaskBusy(false);
@@ -283,7 +295,9 @@ export function LeadSlideOverPanel({
         return;
       }
       setNoteBody("");
-      setPayload((p) => (p ? { ...p, detail: { ...p.detail, notes: [r.note, ...p.detail.notes] } } : p));
+      setPayload((p) =>
+        p ? { ...p, detail: { ...p.detail, notes: [r.note, ...p.detail.notes] } } : p
+      );
       router.refresh();
     } finally {
       setNoteBusy(false);
@@ -308,7 +322,9 @@ export function LeadSlideOverPanel({
         return;
       }
       setLeadNoteBody("");
-      setPayload((p) => (p ? { ...p, detail: { ...p.detail, leadNotes: [r.note, ...p.detail.leadNotes] } } : p));
+      setPayload((p) =>
+        p ? { ...p, detail: { ...p.detail, leadNotes: [r.note, ...p.detail.leadNotes] } } : p
+      );
       router.refresh();
     } finally {
       setLeadNoteBusy(false);
@@ -319,7 +335,9 @@ export function LeadSlideOverPanel({
     if (!lead || !canMutate) return;
     const snap = payload?.detail.tasks ?? [];
     const optimistic = snap.map((t) =>
-      t.id === taskId ? { ...t, status: "done" as const, completed_at: new Date().toISOString() } : t
+      t.id === taskId
+        ? { ...t, status: "done" as const, completed_at: new Date().toISOString() }
+        : t
     );
     setPayload((p) => (p ? { ...p, detail: { ...p.detail, tasks: optimistic } } : p));
     const r = await completeCrmTaskAction(tenantId, lead.id, taskId, {});
@@ -327,7 +345,17 @@ export function LeadSlideOverPanel({
       setPayload((p) => (p ? { ...p, detail: { ...p.detail, tasks: snap } } : p));
       return;
     }
-    setPayload((p) => (p ? { ...p, detail: { ...p.detail, tasks: p.detail.tasks.map((t) => (t.id === taskId ? r.task : t)) } } : p));
+    setPayload((p) =>
+      p
+        ? {
+            ...p,
+            detail: {
+              ...p.detail,
+              tasks: p.detail.tasks.map((t) => (t.id === taskId ? r.task : t)),
+            },
+          }
+        : p
+    );
     router.refresh();
   }
 
@@ -371,12 +399,20 @@ export function LeadSlideOverPanel({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Lead preview</h2>
             {lead ? (
-              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
+              <Link
+                href={href}
+                className="text-xs text-blue-300 hover:underline"
+                onClick={() => onClose()}
+              >
                 Open full page →
               </Link>
             ) : null}
           </div>
-          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+          <button
+            type="button"
+            className="shrink-0 text-sm text-slate-400 hover:text-slate-100"
+            onClick={onClose}
+          >
             Close
           </button>
         </div>
@@ -384,7 +420,10 @@ export function LeadSlideOverPanel({
         <div className="min-h-0 flex-1 overflow-y-auto p-4 text-sm">
           {loading ? <p className="text-slate-400">Loading…</p> : null}
           {loadError ? (
-            <div className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300" role="alert">
+            <div
+              className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300"
+              role="alert"
+            >
               {loadError}
             </div>
           ) : null}
@@ -460,14 +499,20 @@ export function LeadSlideOverPanel({
 
               {payload.detail.conversionState && !lead.converted_at ? (
                 <section className={crmLeadCardClass}>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Convert to patient</h3>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Convert to patient
+                  </h3>
                   <p className="mb-2 text-xs text-slate-400">
                     Creates the patient foundation from this lead when not yet converted.
                   </p>
                   {canMutate ? (
                     <form className="space-y-2" onSubmit={onConvert}>
                       <label className="flex items-center gap-2 text-xs">
-                        <input type="checkbox" checked={seedCase} onChange={(e) => setSeedCase(e.target.checked)} />
+                        <input
+                          type="checkbox"
+                          checked={seedCase}
+                          onChange={(e) => setSeedCase(e.target.checked)}
+                        />
                         Seed a case when converting
                       </label>
                       {convErr ? <p className="text-xs text-rose-300">{convErr}</p> : null}

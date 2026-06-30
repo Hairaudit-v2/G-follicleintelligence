@@ -22,7 +22,11 @@ export function DashboardAttentionPriorities(props: {
   const items = buildAttentionPriorities({ base, actionCentre, showCrmNav, maxItems: 5 });
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-attention-priorities-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="dash-attention-priorities-heading"
+    >
       <SectionHeader
         id="dash-attention-priorities-heading"
         kicker="Priority"
@@ -49,15 +53,20 @@ export function DashboardAttentionPriorities(props: {
                     ? "border-red-400/30 bg-red-950/25 hover:border-red-300/45 hover:bg-red-950/35"
                     : item.severity === "warning"
                       ? "border-orange-400/25 bg-orange-950/15 hover:border-orange-300/40 hover:bg-orange-950/25"
-                      : "border-white/[0.07] bg-white/[0.02] hover:border-cyan-500/20 hover:bg-white/[0.04]",
+                      : "border-white/[0.07] bg-white/[0.02] hover:border-cyan-500/20 hover:bg-white/[0.04]"
                 )}
               >
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] font-mono text-xs font-semibold text-slate-400">
                   {index + 1}
                 </span>
-                <span className={cn("h-2 w-2 shrink-0 rounded-full", severityDot[item.severity])} aria-hidden />
+                <span
+                  className={cn("h-2 w-2 shrink-0 rounded-full", severityDot[item.severity])}
+                  aria-hidden
+                />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium leading-snug text-slate-100">{item.label}</span>
+                  <span className="block text-sm font-medium leading-snug text-slate-100">
+                    {item.label}
+                  </span>
                   <span className="mt-0.5 block text-xs text-slate-500">{item.detail}</span>
                 </span>
                 <ChevronRight className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />

@@ -4,8 +4,7 @@
 
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function isNonEmptyUuid(value: string | null | undefined): boolean {
   return typeof value === "string" && UUID_RE.test(value.trim());
@@ -37,7 +36,9 @@ const MAX_BODY_PREVIEW_CHARS = 512;
 /**
  * Phase 1: preview/metadata only — reject obvious full-body keys and cap preview length.
  */
-export function validateCrmMessagePreviewInput(raw: Record<string, unknown>): ValidatedCrmMessagePreviewInput {
+export function validateCrmMessagePreviewInput(
+  raw: Record<string, unknown>
+): ValidatedCrmMessagePreviewInput {
   assertMessagePayloadHasNoForbiddenBodyKeys(raw);
 
   const channel = typeof raw.channel === "string" ? raw.channel.trim() : "";
@@ -53,7 +54,8 @@ export function validateCrmMessagePreviewInput(raw: Record<string, unknown>): Va
 
   let body_preview: string | null = null;
   if (raw.body_preview != null) {
-    if (typeof raw.body_preview !== "string") throw new Error("body_preview must be a string when provided.");
+    if (typeof raw.body_preview !== "string")
+      throw new Error("body_preview must be a string when provided.");
     const t = raw.body_preview.trim();
     if (t.length > MAX_BODY_PREVIEW_CHARS) {
       throw new Error(`body_preview must be at most ${MAX_BODY_PREVIEW_CHARS} characters.`);
@@ -96,7 +98,10 @@ export function validateCrmMessagePreviewInput(raw: Record<string, unknown>): Va
   };
 }
 
-export function truncateCrmBodyPreview(text: string, maxChars: number = MAX_BODY_PREVIEW_CHARS): string {
+export function truncateCrmBodyPreview(
+  text: string,
+  maxChars: number = MAX_BODY_PREVIEW_CHARS
+): string {
   const t = text.trim();
   if (t.length <= maxChars) return t;
   return t.slice(0, maxChars);

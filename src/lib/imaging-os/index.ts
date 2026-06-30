@@ -60,7 +60,9 @@ export function runImagingOsStubPipeline(
   classifyInput: Omit<ClassifyImageCategoryStubInput, "external_category"> & {
     external_category?: string;
   } = {}
-): { ok: true; snapshot: ImagingOsAnalysisSnapshot } | { ok: false; error: string; field?: string } {
+):
+  | { ok: true; snapshot: ImagingOsAnalysisSnapshot }
+  | { ok: false; error: string; field?: string } {
   const intakeResult = buildImagingIntakeRecord(intakeInput);
   if (!intakeResult.ok) return intakeResult;
 

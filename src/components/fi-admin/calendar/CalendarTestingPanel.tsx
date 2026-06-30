@@ -4,12 +4,19 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import Link from "next/link";
 import { ClipboardCheck, FlaskConical, RefreshCw } from "lucide-react";
 
-import { runCalendarConsultationSmokeTestAction, runCalendarUatSeedAction } from "@/lib/actions/fi-calendar-testing-actions";
+import {
+  runCalendarConsultationSmokeTestAction,
+  runCalendarUatSeedAction,
+} from "@/lib/actions/fi-calendar-testing-actions";
 import { CalendarReminderTestingSection } from "@/src/components/fi-admin/calendar/CalendarReminderTestingSection";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
-import type { CalendarQaRow, CalendarQaStatus, CalendarTestingPagePayload } from "@/src/lib/calendar/calendarTestingTypes";
+import type {
+  CalendarQaRow,
+  CalendarQaStatus,
+  CalendarTestingPagePayload,
+} from "@/src/lib/calendar/calendarTestingTypes";
 
 import { cn } from "@/lib/utils";
 
@@ -78,7 +85,9 @@ function QaRowView({
         {row.description ? <p className="text-xs text-slate-500">{row.description}</p> : null}
         {row.detail ? <p className="text-sm leading-relaxed text-slate-400">{row.detail}</p> : null}
       </div>
-      {children ? <div className="flex shrink-0 flex-wrap items-center gap-2 sm:pt-0.5">{children}</div> : null}
+      {children ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:pt-0.5">{children}</div>
+      ) : null}
     </div>
   );
 }
@@ -244,8 +253,11 @@ export function CalendarTestingPanel({
           <div className="min-w-0 text-sm text-cyan-200">
             <p className="font-semibold text-cyan-200">Internal UAT only</p>
             <p className="mt-1 leading-relaxed text-cyan-200">
-              The consultation smoke test creates a real booking and immediately cancels it (audit trail may still list the event). Manual checklist progress is stored in{" "}
-              <code className="rounded bg-white/80 px-1 font-mono text-xs">localStorage</code> for this browser — not synced to the server. Public booking, SMS, and payments are out of scope here.
+              The consultation smoke test creates a real booking and immediately cancels it (audit
+              trail may still list the event). Manual checklist progress is stored in{" "}
+              <code className="rounded bg-white/80 px-1 font-mono text-xs">localStorage</code> for
+              this browser — not synced to the server. Public booking, SMS, and payments are out of
+              scope here.
             </p>
             <button
               type="button"
@@ -260,11 +272,16 @@ export function CalendarTestingPanel({
 
       {uatSeedEnabled ? (
         <FiCard className="border-amber-400/20 bg-amber-400/10">
-          <h2 className="text-base font-semibold text-amber-200">Optional demo seed (dev / staging)</h2>
+          <h2 className="text-base font-semibold text-amber-200">
+            Optional demo seed (dev / staging)
+          </h2>
           <p className="mt-1 text-sm text-amber-200">
-            Creates up to three schedulable staff rows, three catalog services (consultation / PRP / surgery), and sample
-            bookings when a CRM lead with <code className="font-mono text-xs">person_id</code> and at least one clinic exist.
-            Requires tenant <strong>admin</strong> or <strong>fi_admin</strong>, or a valid <code className="font-mono text-xs">FI_ADMIN_API_KEY</code> in the field below. Idempotent for matching staff names and UAT-titled bookings.
+            Creates up to three schedulable staff rows, three catalog services (consultation / PRP /
+            surgery), and sample bookings when a CRM lead with{" "}
+            <code className="font-mono text-xs">person_id</code> and at least one clinic exist.
+            Requires tenant <strong>admin</strong> or <strong>fi_admin</strong>, or a valid{" "}
+            <code className="font-mono text-xs">FI_ADMIN_API_KEY</code> in the field below.
+            Idempotent for matching staff names and UAT-titled bookings.
           </p>
           <label className="mt-3 block text-xs font-medium text-amber-200">
             FI Admin API key (optional)
@@ -283,14 +300,21 @@ export function CalendarTestingPanel({
               onClick={onUatSeed}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
-                seedBusy ? "cursor-not-allowed bg-white/[0.08] text-slate-500" : "bg-amber-700 text-white hover:bg-amber-800"
+                seedBusy
+                  ? "cursor-not-allowed bg-white/[0.08] text-slate-500"
+                  : "bg-amber-700 text-white hover:bg-amber-800"
               )}
             >
               {seedBusy ? "Seeding…" : "Run UAT seed"}
             </button>
           </div>
           {seedLines?.length ? (
-            <ul className={cn("mt-3 list-inside list-disc space-y-1 text-sm", seedOk ? "text-emerald-300" : "text-rose-300")}>
+            <ul
+              className={cn(
+                "mt-3 list-inside list-disc space-y-1 text-sm",
+                seedOk ? "text-emerald-300" : "text-rose-300"
+              )}
+            >
               {seedLines.map((line, i) => (
                 <li key={`${i}-${line}`}>{line}</li>
               ))}
@@ -305,7 +329,9 @@ export function CalendarTestingPanel({
             <ClipboardCheck className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" aria-hidden />
             <div>
               <h2 className="text-base font-semibold text-slate-100">{section.title}</h2>
-              {section.description ? <p className="mt-1 text-sm text-slate-400">{section.description}</p> : null}
+              {section.description ? (
+                <p className="mt-1 text-sm text-slate-400">{section.description}</p>
+              ) : null}
             </div>
           </div>
           <div className="mt-1 divide-y divide-white/[0.06]">
@@ -322,7 +348,9 @@ export function CalendarTestingPanel({
                       onClick={onSmokeTest}
                       className={cn(
                         "rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2",
-                        smokeBusy ? "cursor-not-allowed bg-white/[0.08] text-slate-500" : "bg-sky-600 text-white hover:bg-sky-700"
+                        smokeBusy
+                          ? "cursor-not-allowed bg-white/[0.08] text-slate-500"
+                          : "bg-sky-600 text-white hover:bg-sky-700"
                       )}
                     >
                       {smokeBusy ? "Running…" : "Run smoke test"}
@@ -365,7 +393,10 @@ export function CalendarTestingPanel({
             })}
           </div>
           {section.id === "validation" && smokeMessage ? (
-            <p className={cn("mt-3 text-sm", smokeOk ? "text-emerald-300" : "text-rose-300")} role="status">
+            <p
+              className={cn("mt-3 text-sm", smokeOk ? "text-emerald-300" : "text-rose-300")}
+              role="status"
+            >
               {smokeMessage}
             </p>
           ) : null}

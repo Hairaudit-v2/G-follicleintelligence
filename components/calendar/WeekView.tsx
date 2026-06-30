@@ -26,7 +26,11 @@ import { useCalendarKeyboardShortcuts } from "@/hooks/useCalendarKeyboardShortcu
 import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
 import { useScrollViewport } from "@/hooks/useScrollViewport";
 import { calendarShellVariants } from "@/lib/calendar/calendarMotion";
-import { calendarPointerSensorOptions, calendarTouchSensorOptions, isSwipeCalendarLayout } from "@/lib/calendar/calendarResponsive";
+import {
+  calendarPointerSensorOptions,
+  calendarTouchSensorOptions,
+  isSwipeCalendarLayout,
+} from "@/lib/calendar/calendarResponsive";
 import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import {
@@ -61,7 +65,10 @@ import {
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { resolveDisplayResourceColumnId, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import {
+  resolveDisplayResourceColumnId,
+  type BusinessGridConfig,
+} from "@/src/lib/calendar/operationalCalendarLayout";
 import { assigneeMetaFromResourceColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
 import type {
   OperationalCalendarBookingDisplay,
@@ -120,7 +127,13 @@ export type WeekViewProps = {
   /** Click an empty time cell to open quick booking (parent supplies modal). */
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
   /** Right-click empty cell — context menu (parent supplies drawer presets). */
-  onEmptySlotContextMenu?: (info: { dayKey: string; columnId: string; localStart: string; clientX: number; clientY: number }) => void;
+  onEmptySlotContextMenu?: (info: {
+    dayKey: string;
+    columnId: string;
+    localStart: string;
+    clientX: number;
+    clientY: number;
+  }) => void;
   /** FI OS: agenda + insights render as overlays; grid uses full workspace width (no centered max-width rail). */
   calendarShellMode?: "default" | "fiOs";
   /** FI OS: closes agenda + insights backdrop (both panels). */
@@ -227,7 +240,10 @@ function WeekViewInner({
 
   const columnsForView = useMemo((): CalendarColumn[] => {
     const weekLike = view === "week" || view === "3day";
-    const matrixCells = weekLike && lanes.length > 0 && resourceColumns.length > 1 ? lanes.length * resourceColumns.length : 0;
+    const matrixCells =
+      weekLike && lanes.length > 0 && resourceColumns.length > 1
+        ? lanes.length * resourceColumns.length
+        : 0;
     const useWeekResourceMatrix =
       weekLike &&
       !swipeLayout &&
@@ -278,7 +294,9 @@ function WeekViewInner({
   }, [view, lanes, resourceColumns, gridConfig.timeZone, swipeLayout]);
 
   const filterColBookingsByResource = useMemo(
-    () => usesProviderColumns(view) || (columnsForView.length > 0 && Boolean(columnsForView[0]?.matrixKey)),
+    () =>
+      usesProviderColumns(view) ||
+      (columnsForView.length > 0 && Boolean(columnsForView[0]?.matrixKey)),
     [view, columnsForView]
   );
 
@@ -340,7 +358,10 @@ function WeekViewInner({
   const navigateCalendar = useCallback(
     (patch: Parameters<typeof mergeCalendarHrefQuery>[1]) => {
       if (!shortcuts) return;
-      pushCalendarHref(router, buildCalendarHref(shortcuts.tenantId, mergeCalendarHrefQuery(shortcuts.query, patch)));
+      pushCalendarHref(
+        router,
+        buildCalendarHref(shortcuts.tenantId, mergeCalendarHrefQuery(shortcuts.query, patch))
+      );
     },
     [router, shortcuts]
   );
@@ -461,10 +482,15 @@ function WeekViewInner({
       const endIso = clinicLocalSlotToUtcIso(drop.dayKey, newEndMin, gridConfig.timeZone);
       if (!startIso || !endIso) return;
 
-      const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);
+      const targetColumn = columnsForView.find(
+        (c) => c.id === drop.columnId && c.dayKey === drop.dayKey
+      );
       const meta: WeekViewRescheduleMeta | undefined =
         filterColBookingsByResource && targetColumn
-          ? { ...assigneeFromColumn(targetColumn, staffIdByUserId), clearWaitlist: Boolean(waitlistBookingId) }
+          ? {
+              ...assigneeFromColumn(targetColumn, staffIdByUserId),
+              clearWaitlist: Boolean(waitlistBookingId),
+            }
           : waitlistBookingId
             ? { clearWaitlist: true }
             : undefined;
@@ -496,17 +522,23 @@ function WeekViewInner({
 
   const renderProviderColumn = useCallback(
     (col: CalendarColumn) => {
-      const lane = usesProviderColumns(view) ? primaryLane! : lanes.find((l) => l.dayKey === col.dayKey);
+      const lane = usesProviderColumns(view)
+        ? primaryLane!
+        : lanes.find((l) => l.dayKey === col.dayKey);
       if (!lane) return null;
 
       const dayBookings = buckets[lane.dayKey] ?? [];
       const colBookings = filterColBookingsByResource
         ? dayBookings.filter(
             (b) =>
-              resolveDisplayResourceColumnId(b, resourceColumns.map((c) => c.id), {
-                resourceView,
-                staffIdByUserId,
-              }) === col.id
+              resolveDisplayResourceColumnId(
+                b,
+                resourceColumns.map((c) => c.id),
+                {
+                  resourceView,
+                  staffIdByUserId,
+                }
+              ) === col.id
           )
         : dayBookings;
 
@@ -584,7 +616,11 @@ function WeekViewInner({
         className="rounded-2xl border border-dashed border-white/[0.08] px-4 py-12"
         style={{ backgroundColor: "var(--fi-cal-ws-grid-bg, #0f172a)" }}
       >
-        <CalendarEmptyState preset="day" title="No day selected" description="Pick a date to load the schedule." />
+        <CalendarEmptyState
+          preset="day"
+          title="No day selected"
+          description="Pick a date to load the schedule."
+        />
       </div>
     );
   }
@@ -615,12 +651,18 @@ function WeekViewInner({
         />
       ) : null}
 
-      <div ref={gridScrollRef} className="flex min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
+      <div
+        ref={gridScrollRef}
+        className="flex min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain"
+      >
         <div className="flex min-h-0 min-w-0 w-full flex-1" style={{ height: bodyHeightPx }}>
           <BusinessTimeGutter
             bodyHeightPx={bodyHeightPx}
             headerHeightPx={CALENDAR_HEADER_HEIGHT_PX}
-            gridHours={{ dayStartHourUtc: gridConfig.dayStartHourUtc, dayEndHourUtc: gridConfig.dayEndHourUtc }}
+            gridHours={{
+              dayStartHourUtc: gridConfig.dayStartHourUtc,
+              dayEndHourUtc: gridConfig.dayEndHourUtc,
+            }}
           />
 
           {swipeLayout ? (
@@ -649,7 +691,10 @@ function WeekViewInner({
               }}
             >
               {columnsForView.map((col) => (
-                <div key={`${col.matrixKey ?? `${col.dayKey}-${col.id}`}-cell`} className="min-h-0 min-w-0">
+                <div
+                  key={`${col.matrixKey ?? `${col.dayKey}-${col.id}`}-cell`}
+                  className="min-h-0 min-w-0"
+                >
                   {renderProviderColumn(col)}
                 </div>
               ))}

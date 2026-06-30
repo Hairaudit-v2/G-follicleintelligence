@@ -28,7 +28,9 @@ export type LeadFlowHubspotEventsCronOptions = {
   drainQueue?: typeof drainHubSpotLeadFlowQueue;
 };
 
-function resolveGetEnv(opts?: LeadFlowHubspotEventsCronOptions): (key: string) => string | undefined {
+function resolveGetEnv(
+  opts?: LeadFlowHubspotEventsCronOptions
+): (key: string) => string | undefined {
   return opts?.getEnv ?? ((key) => process.env[key]);
 }
 

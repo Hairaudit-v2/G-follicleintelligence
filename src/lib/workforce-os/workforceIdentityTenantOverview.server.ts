@@ -47,9 +47,17 @@ export async function buildTenantWorkforceIdentityOverview(
 
   if (error) throw new Error(error.message);
 
-  const rowsByStaff = new Map<string, Array<{ source_system: string; source_staff_id: string; metadata: unknown }>>();
+  const rowsByStaff = new Map<
+    string,
+    Array<{ source_system: string; source_staff_id: string; metadata: unknown }>
+  >();
   for (const raw of data ?? []) {
-    const r = raw as { staff_id: string; source_system: string; source_staff_id: string; metadata: unknown };
+    const r = raw as {
+      staff_id: string;
+      source_system: string;
+      source_staff_id: string;
+      metadata: unknown;
+    };
     const sid = String(r.staff_id);
     const list = rowsByStaff.get(sid) ?? [];
     list.push({

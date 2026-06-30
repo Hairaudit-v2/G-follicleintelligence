@@ -8,7 +8,14 @@ import {
 } from "@/src/lib/actions/workforce-roster-actions";
 import type { FiStaffAvailabilityBlockRow } from "@/src/lib/workforce-os/workforceRostering.server";
 
-const BLOCK_TYPES = ["unavailable", "leave", "sick_leave", "training", "admin", "available_override"] as const;
+const BLOCK_TYPES = [
+  "unavailable",
+  "leave",
+  "sick_leave",
+  "training",
+  "admin",
+  "available_override",
+] as const;
 
 export type RosterAvailabilityPanelProps = {
   tenantId: string;
@@ -83,7 +90,9 @@ export function RosterAvailabilityPanel({
   return (
     <section className="rounded-xl border border-white/[0.08] bg-[#0F1629]/60 p-4">
       <h3 className="text-sm font-semibold text-slate-100">Availability blocks</h3>
-      <p className="mt-1 text-xs text-slate-400">Leave, sick leave, training, and unavailable windows.</p>
+      <p className="mt-1 text-xs text-slate-400">
+        Leave, sick leave, training, and unavailable windows.
+      </p>
 
       <form onSubmit={handleCreate} className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="block text-xs text-slate-400">
@@ -173,7 +182,9 @@ export function RosterAvailabilityPanel({
       {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
 
       <div className="mt-5">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Active blocks</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Active blocks
+        </h4>
         {blocks.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">No availability blocks in this window.</p>
         ) : (
@@ -184,7 +195,9 @@ export function RosterAvailabilityPanel({
                 className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-xs"
               >
                 <div>
-                  <p className="font-medium capitalize text-slate-200">{block.block_type.replace(/_/g, " ")}</p>
+                  <p className="font-medium capitalize text-slate-200">
+                    {block.block_type.replace(/_/g, " ")}
+                  </p>
                   <p className="text-slate-400">
                     {formatDateTime(block.starts_at)} → {formatDateTime(block.ends_at)}
                   </p>

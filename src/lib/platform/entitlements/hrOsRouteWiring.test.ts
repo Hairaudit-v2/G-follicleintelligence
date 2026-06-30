@@ -115,7 +115,9 @@ function createMockSupabase(state: MockState): SupabaseClient {
   return { from } as unknown as SupabaseClient;
 }
 
-function entitledContext(overrides: Partial<EntitlementAccessContext> = {}): EntitlementAccessContext {
+function entitledContext(
+  overrides: Partial<EntitlementAccessContext> = {}
+): EntitlementAccessContext {
   return {
     tenantExists: true,
     verificationStatus: "verified",
@@ -168,7 +170,9 @@ test("verified + active + disabled module denied", () => {
 });
 
 test("unverified tenant denied", () => {
-  const result = evaluateHrOsModuleEntitlement(entitledContext({ verificationStatus: "unverified" }));
+  const result = evaluateHrOsModuleEntitlement(
+    entitledContext({ verificationStatus: "unverified" })
+  );
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.reason, "tenant_unverified");
 });
@@ -250,7 +254,10 @@ test("manual activation enables HR OS", async () => {
   assert.equal(state.tenantModuleUpserts.length, 1);
   assert.equal(state.tenantModuleUpserts[0]?.enabled, true);
   assert.equal(state.billingUpserts[0]?.subscription_status, "active");
-  assert.equal(state.auditInserts.some((row) => row.source === "hr_os_module_manual_enable"), true);
+  assert.equal(
+    state.auditInserts.some((row) => row.source === "hr_os_module_manual_enable"),
+    true
+  );
 });
 
 test("manual deactivation writes disable audit", async () => {
@@ -265,7 +272,10 @@ test("manual deactivation writes disable audit", async () => {
 
   assert.equal(result.ok, true);
   assert.equal(state.tenantModuleUpserts[0]?.enabled, false);
-  assert.equal(state.auditInserts.some((row) => row.source === "hr_os_module_manual_disable"), true);
+  assert.equal(
+    state.auditInserts.some((row) => row.source === "hr_os_module_manual_disable"),
+    true
+  );
 });
 
 test("audit written on route denial", async () => {

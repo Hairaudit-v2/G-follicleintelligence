@@ -48,7 +48,10 @@ const HEADER_CLASSES: Record<
   },
 };
 
-function severityIconClass(severity: BookingConflictMessage["severity"], variant: BookingConflictPreviewVariant): string {
+function severityIconClass(
+  severity: BookingConflictMessage["severity"],
+  variant: BookingConflictPreviewVariant
+): string {
   if (severity === "error") return variant === "dark" ? "text-rose-300" : "text-rose-300";
   if (severity === "warning") return variant === "dark" ? "text-amber-300" : "text-amber-300";
   return variant === "dark" ? "text-sky-300" : "text-cyan-300";
@@ -135,7 +138,9 @@ export function BookingConflictPreview({
           ))}
         </ul>
       ) : (
-        <p className="mt-1 text-xs opacity-80">No conflicts for the selected time, room, and staff.</p>
+        <p className="mt-1 text-xs opacity-80">
+          No conflicts for the selected time, room, and staff.
+        </p>
       )}
     </div>
   );

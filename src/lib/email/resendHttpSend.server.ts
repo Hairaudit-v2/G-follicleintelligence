@@ -27,7 +27,9 @@ function recipientDomainFromToList(to: string[]): string | null {
   return first.split("@")[1]?.toLowerCase() ?? null;
 }
 
-function mergeLogFields(base: ResendHttpSendLogFields): Record<string, string | number | boolean | null | undefined> {
+function mergeLogFields(
+  base: ResendHttpSendLogFields
+): Record<string, string | number | boolean | null | undefined> {
   const out: Record<string, string | number | boolean | null | undefined> = {};
   for (const [k, v] of Object.entries(base)) {
     if (v !== undefined) out[k] = v;
@@ -84,7 +86,8 @@ export async function sendResendEmailHttp(
     logStructured("error", "fi_resend_email_send_failed", {
       ...mergeLogFields({
         ...logFields,
-        recipient_email_domain: logFields.recipient_email_domain ?? recipientDomainFromToList(input.to),
+        recipient_email_domain:
+          logFields.recipient_email_domain ?? recipientDomainFromToList(input.to),
       }),
       http_status: res.status,
       resend_error_name: apiName,

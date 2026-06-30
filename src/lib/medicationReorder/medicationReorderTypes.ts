@@ -10,7 +10,12 @@ export const MEDICATION_REORDER_STATUSES = [
 
 export type MedicationReorderStatus = (typeof MEDICATION_REORDER_STATUSES)[number];
 
-export const MEDICATION_REORDER_PAYMENT_STATUSES = ["not_required", "pending", "paid", "waived"] as const;
+export const MEDICATION_REORDER_PAYMENT_STATUSES = [
+  "not_required",
+  "pending",
+  "paid",
+  "waived",
+] as const;
 
 export type MedicationReorderPaymentStatus = (typeof MEDICATION_REORDER_PAYMENT_STATUSES)[number];
 

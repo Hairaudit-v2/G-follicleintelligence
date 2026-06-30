@@ -29,10 +29,12 @@ function mapClassificationRow(x: Record<string, unknown>): HairProgressionTimepo
     classification_system: String(x.classification_system ?? ""),
     pattern_type: String(x.pattern_type ?? ""),
     classification_grade: String(x.classification_grade ?? ""),
-    confidence_score: typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
+    confidence_score:
+      typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
     review_status: String(x.review_status ?? "pending"),
     sex_classification: x.sex_classification != null ? String(x.sex_classification) : null,
-    diffuse_thinning_score: x.diffuse_thinning_score != null ? Number(x.diffuse_thinning_score) : null,
+    diffuse_thinning_score:
+      x.diffuse_thinning_score != null ? Number(x.diffuse_thinning_score) : null,
   };
 }
 
@@ -60,7 +62,9 @@ async function loadLatestNetworkBucketForCohort(
     week_bucket: String(row.week_bucket ?? "").slice(0, 10),
     sample_count: Number(row.sample_count ?? 0),
     mean_velocity:
-      row.mean_velocity != null && Number.isFinite(Number(row.mean_velocity)) ? Number(row.mean_velocity) : null,
+      row.mean_velocity != null && Number.isFinite(Number(row.mean_velocity))
+        ? Number(row.mean_velocity)
+        : null,
   };
 }
 
@@ -87,7 +91,9 @@ export async function loadPatientTwinHairProgressionSection(
       .eq("patient_id", pid)
       .order("created_at", { ascending: true })
       .limit(TIMELINE_CAP),
-    loadPatientTherapyEventsForPatient(supabase, tid, pid, { limit: THERAPY_EVENTS_CAP }).catch(() => []),
+    loadPatientTherapyEventsForPatient(supabase, tid, pid, { limit: THERAPY_EVENTS_CAP }).catch(
+      () => []
+    ),
   ]);
 
   if (clsErr) {
@@ -104,7 +110,9 @@ export async function loadPatientTwinHairProgressionSection(
     throw new Error(clsErr.message);
   }
 
-  const timepointsRaw = (clsRows ?? []).map((r) => mapClassificationRow(r as Record<string, unknown>));
+  const timepointsRaw = (clsRows ?? []).map((r) =>
+    mapClassificationRow(r as Record<string, unknown>)
+  );
   const therapyMapped: HairProgressionTherapyEventInput[] = (therapyEvents ?? []).map((e) => ({
     occurred_at: e.occurred_at,
     event_type: e.event_type,
@@ -120,9 +128,16 @@ export async function loadPatientTwinHairProgressionSection(
     patientSexClassification: opts.patientSexClassification ?? null,
   });
 
-  let networkBucket: { week_bucket: string; sample_count: number; mean_velocity: number | null } | null = null;
+  let networkBucket: {
+    week_bucket: string;
+    sample_count: number;
+    mean_velocity: number | null;
+  } | null = null;
   try {
-    networkBucket = await loadLatestNetworkBucketForCohort(supabase, draft.cohort_context.cohort_signature);
+    networkBucket = await loadLatestNetworkBucketForCohort(
+      supabase,
+      draft.cohort_context.cohort_signature
+    );
   } catch {
     networkBucket = null;
   }

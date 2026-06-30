@@ -10,7 +10,8 @@ export const FINANCIAL_OS_PATHWAY_FIXTURE_LEAD_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbb
 export const FINANCIAL_OS_PATHWAY_FIXTURE_CONSULTATION_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 export const FINANCIAL_OS_PATHWAY_FIXTURE_CASE_ID = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 export const FINANCIAL_OS_PATHWAY_FIXTURE_QUOTE_INVOICE_ID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
-export const FINANCIAL_OS_PATHWAY_FIXTURE_DEPOSIT_INVOICE_ID = "ffffffff-ffff-4fff-8fff-ffffffffffff";
+export const FINANCIAL_OS_PATHWAY_FIXTURE_DEPOSIT_INVOICE_ID =
+  "ffffffff-ffff-4fff-8fff-ffffffffffff";
 
 const ts = (offsetMinutes: number) =>
   new Date(Date.UTC(2026, 5, 19, 8, 0, offsetMinutes)).toISOString();
@@ -25,7 +26,10 @@ export type FinancialOsPathwayFixture = {
   ledgerTimeline: FiFinancialTransactionRow[];
 };
 
-function baseInvoice(partial: Partial<FiInvoiceRow> & Pick<FiInvoiceRow, "id" | "invoice_kind" | "status" | "total_cents">): FiInvoiceRow {
+function baseInvoice(
+  partial: Partial<FiInvoiceRow> &
+    Pick<FiInvoiceRow, "id" | "invoice_kind" | "status" | "total_cents">
+): FiInvoiceRow {
   return {
     tenant_id: FINANCIAL_OS_PATHWAY_FIXTURE_TENANT_ID,
     clinic_id: null,
@@ -55,7 +59,10 @@ function baseInvoice(partial: Partial<FiInvoiceRow> & Pick<FiInvoiceRow, "id" | 
 }
 
 function ledgerTx(
-  partial: Pick<FiFinancialTransactionRow, "id" | "transaction_kind" | "amount_cents" | "created_at"> &
+  partial: Pick<
+    FiFinancialTransactionRow,
+    "id" | "transaction_kind" | "amount_cents" | "created_at"
+  > &
     Partial<FiFinancialTransactionRow>
 ): FiFinancialTransactionRow {
   return {
@@ -184,6 +191,8 @@ export function assertPathwayFixtureInvariants(fixture: FinancialOsPathwayFixtur
 
 function assertTimelineOrder(actual: string[], expected: string[]): void {
   if (actual.length !== expected.length || actual.some((k, i) => k !== expected[i])) {
-    throw new Error(`Ledger timeline order mismatch: got [${actual.join(", ")}] expected [${expected.join(", ")}]`);
+    throw new Error(
+      `Ledger timeline order mismatch: got [${actual.join(", ")}] expected [${expected.join(", ")}]`
+    );
   }
 }

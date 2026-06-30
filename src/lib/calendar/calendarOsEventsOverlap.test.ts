@@ -24,7 +24,9 @@ import {
 const TENANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const STAFF_A = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
-function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiCalendarEventOverlapRow {
+function sampleEventRow(
+  overrides: Partial<FiCalendarEventOverlapRow> = {}
+): FiCalendarEventOverlapRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT_A,
@@ -47,7 +49,9 @@ function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiC
   };
 }
 
-function sampleLink(overrides: Partial<StaffCalendarLinkLookupRow> = {}): StaffCalendarLinkLookupRow {
+function sampleLink(
+  overrides: Partial<StaffCalendarLinkLookupRow> = {}
+): StaffCalendarLinkLookupRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT_A,
@@ -244,8 +248,14 @@ describe("CalendarOS provider link assignment — O(n) map lookup", () => {
       staffCalendarLinks: links,
     });
     assert.equal(mapped.bookings.length, 100);
-    assert.equal(mapped.bookings.every((b) => b.assigned_staff_id === STAFF_A), true);
-    assert.equal(mapped.bookings.every((b) => !calendarOsBookingRowExposesSecrets(b)), true);
+    assert.equal(
+      mapped.bookings.every((b) => b.assigned_staff_id === STAFF_A),
+      true
+    );
+    assert.equal(
+      mapped.bookings.every((b) => !calendarOsBookingRowExposesSecrets(b)),
+      true
+    );
   });
 
   it("merges calendar events with fi bookings without duplicate ids", () => {

@@ -2,7 +2,10 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { pickStaffHrNotificationFromSourceRows, buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import {
+  pickStaffHrNotificationFromSourceRows,
+  buildStaffHrNotificationNoLinkSummary,
+} from "@/src/lib/staff/staffHrNotificationSummary";
 import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
@@ -32,7 +35,11 @@ type SourceRow = {
 function formatNextShiftLabel(startsAt: string, shiftType: string): string {
   const d = new Date(startsAt);
   if (Number.isNaN(d.getTime())) return shiftType.replace(/_/g, " ");
-  const date = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const date = d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
   const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   const typeLabel = shiftType.replace(/_/g, " ");
   return `${date} · ${time} (${typeLabel})`;

@@ -37,7 +37,10 @@ function revalidateReviewSurfaces(tenantId: string): void {
 export async function dismissGoogleCalendarSyncReviewItemAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; item: GoogleCalendarSyncReviewClientItem; message: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; item: GoogleCalendarSyncReviewClientItem; message: string }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = reviewItemBodySchema.parse(body);
     const { actorAuthUserId } = await assertGoogleCalendarTenantAdminAccess(tenantId);
@@ -57,7 +60,10 @@ export async function dismissGoogleCalendarSyncReviewItemAction(
 export async function ignoreGoogleCalendarSyncReviewItemAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; item: GoogleCalendarSyncReviewClientItem; message: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; item: GoogleCalendarSyncReviewClientItem; message: string }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = reviewItemBodySchema.parse(body);
     const { actorAuthUserId } = await assertGoogleCalendarTenantAdminAccess(tenantId);
@@ -77,7 +83,10 @@ export async function ignoreGoogleCalendarSyncReviewItemAction(
 export async function linkGoogleCalendarSyncReviewItemAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; item: GoogleCalendarSyncReviewClientItem; message: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; item: GoogleCalendarSyncReviewClientItem; message: string }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = reviewItemBodySchema.parse(body);
     const { actorAuthUserId } = await assertGoogleCalendarTenantAdminAccess(tenantId);
@@ -97,7 +106,10 @@ export async function linkGoogleCalendarSyncReviewItemAction(
 export async function importGoogleCalendarSyncReviewItemAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; item: GoogleCalendarSyncReviewClientItem; message: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; item: GoogleCalendarSyncReviewClientItem; message: string }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = reviewItemBodySchema.parse(body);
     const { actorAuthUserId } = await assertGoogleCalendarTenantAdminAccess(tenantId);

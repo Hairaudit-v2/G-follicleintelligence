@@ -32,7 +32,7 @@ function integrationsSettingsUrl(
   const path = `/fi-admin/${tenantId.trim()}/settings/integrations`;
   const origin = requestUrl
     ? new URL(requestUrl).origin
-    : (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000");
+    : process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
   const base = `${origin.replace(/\/+$/, "")}${path}`;
   if (!query || Object.keys(query).length === 0) return base;
   const params = new URLSearchParams(query);
@@ -80,7 +80,10 @@ export async function handleGoogleCalendarOAuthCallback(
 
   const statePayload = verifyGoogleCalendarOAuthState(stateRaw, stateSecret);
   if (!statePayload) {
-    return NextResponse.json({ ok: false, error: "Invalid or expired OAuth state." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Invalid or expired OAuth state." },
+      { status: 400 }
+    );
   }
 
   const tenantId = statePayload.tenantId;
@@ -90,7 +93,10 @@ export async function handleGoogleCalendarOAuthCallback(
 
     if (oauthError) {
       return NextResponse.redirect(
-        integrationsSettingsUrl(tenantId, request.url, { error: "google-calendar", reason: oauthError })
+        integrationsSettingsUrl(tenantId, request.url, {
+          error: "google-calendar",
+          reason: oauthError,
+        })
       );
     }
 
@@ -106,7 +112,10 @@ export async function handleGoogleCalendarOAuthCallback(
 
     if (!completed.ok) {
       return NextResponse.redirect(
-        integrationsSettingsUrl(tenantId, request.url, { error: "google-calendar", reason: "store_failed" })
+        integrationsSettingsUrl(tenantId, request.url, {
+          error: "google-calendar",
+          reason: "store_failed",
+        })
       );
     }
 

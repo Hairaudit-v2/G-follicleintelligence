@@ -86,7 +86,8 @@ const IMAGING_OUTCOME_MEASUREMENT_REQUIREMENTS_MAP: Record<
     minimum_usable_images_per_timepoint: 2,
     requires_baseline: false,
     requires_quality_threshold: true,
-    description: "Recipient graft survival tracking from immediate post-op through 12-month outcome",
+    description:
+      "Recipient graft survival tracking from immediate post-op through 12-month outcome",
   },
   hairline_design_review: {
     required_timepoints: ["pre_op", "month_12"],
@@ -126,7 +127,8 @@ const IMAGING_OUTCOME_MEASUREMENT_REQUIREMENTS_MAP: Record<
     minimum_usable_images_per_timepoint: 2,
     requires_baseline: false,
     requires_quality_threshold: true,
-    description: "Revision outcome review with pre-operative baseline and revision-specific documentation",
+    description:
+      "Revision outcome review with pre-operative baseline and revision-specific documentation",
   },
   longitudinal_medical_response: {
     required_timepoints: ["baseline", "month_3", "month_6", "month_12"],
@@ -180,8 +182,7 @@ export type ImagingOsOutcomeMeasurementStatus =
   | "insufficient_evidence"
   | "invalid";
 
-export const IMAGING_OUTCOME_MEASUREMENT_EVALUATOR_VERSION =
-  "imaging-outcome-contract-v1" as const;
+export const IMAGING_OUTCOME_MEASUREMENT_EVALUATOR_VERSION = "imaging-outcome-contract-v1" as const;
 
 export type ImagingOsOutcomeMeasurementResult = {
   domain: ImagingOsOutcomeMeasurementDomain;
@@ -414,24 +415,26 @@ export function evaluateOutcomeMeasurementReadiness(
     measurementStatus = "insufficient_evidence";
   }
 
-  const resultWithoutRecommendation: Omit<ImagingOsOutcomeMeasurementResult, "recommended_next_capture"> =
-    {
-      domain: input.domain,
-      description: requirements.description,
-      measurement_status: measurementStatus,
-      readiness_score: readinessScore,
-      required_timepoints: requiredTimepoints,
-      present_timepoints: presentTimepoints,
-      missing_timepoints: missingTimepoints,
-      required_categories: requiredCategories,
-      missing_categories_by_timepoint: missingCategoriesByTimepoint,
-      required_surgical_events: requiredSurgicalEvents,
-      missing_surgical_events: missingSurgicalEvents,
-      usable_evidence_count: usableEvidenceCount,
-      unusable_evidence_count: unusableEvidenceCount,
-      quality_blockers: qualityBlockers,
-      evaluator_version: IMAGING_OUTCOME_MEASUREMENT_EVALUATOR_VERSION,
-    };
+  const resultWithoutRecommendation: Omit<
+    ImagingOsOutcomeMeasurementResult,
+    "recommended_next_capture"
+  > = {
+    domain: input.domain,
+    description: requirements.description,
+    measurement_status: measurementStatus,
+    readiness_score: readinessScore,
+    required_timepoints: requiredTimepoints,
+    present_timepoints: presentTimepoints,
+    missing_timepoints: missingTimepoints,
+    required_categories: requiredCategories,
+    missing_categories_by_timepoint: missingCategoriesByTimepoint,
+    required_surgical_events: requiredSurgicalEvents,
+    missing_surgical_events: missingSurgicalEvents,
+    usable_evidence_count: usableEvidenceCount,
+    unusable_evidence_count: unusableEvidenceCount,
+    quality_blockers: qualityBlockers,
+    evaluator_version: IMAGING_OUTCOME_MEASUREMENT_EVALUATOR_VERSION,
+  };
 
   const recommendation = recommendNextCaptureRequirements(resultWithoutRecommendation);
 
@@ -563,9 +566,7 @@ export function buildOutcomeEvidenceFromSurgicalImage(
   };
 }
 
-function mapSurgicalEventToTimepoint(
-  event: ImagingOsSurgicalImageEventType
-): ImagingOsTimepoint {
+function mapSurgicalEventToTimepoint(event: ImagingOsSurgicalImageEventType): ImagingOsTimepoint {
   switch (event) {
     case "pre_op":
     case "recipient_design":

@@ -14,7 +14,10 @@ import {
   RECEPTION_OS_REVENUE_CONFIDENCE_LEVELS,
   RECEPTION_OS_REVENUE_RISK_ALERT_KINDS,
 } from "@/src/lib/receptionOs/receptionOsRevenueModel";
-import { RECEPTION_TASK_SOURCE_TYPES, RECEPTION_TASK_STATUSES } from "@/src/lib/receptionOs/receptionTaskPolicy";
+import {
+  RECEPTION_TASK_SOURCE_TYPES,
+  RECEPTION_TASK_STATUSES,
+} from "@/src/lib/receptionOs/receptionTaskPolicy";
 
 export {
   type ReceptionOsActionAlert,
@@ -130,7 +133,12 @@ const surgeryItemSchema = z.object({
 
 const actionAlertSchema = z.object({
   id: z.string(),
-  kind: z.enum(["missing_deposit", "no_follow_up_after_consultation", "missing_forms", "surgery_risk"]),
+  kind: z.enum([
+    "missing_deposit",
+    "no_follow_up_after_consultation",
+    "missing_forms",
+    "surgery_risk",
+  ]),
   title: z.string(),
   detail: z.string(),
   severity: z.enum(["info", "warning", "critical", "blocked"]),
@@ -328,7 +336,7 @@ const systemStatusSchema = z.object({
       label: z.string(),
       present: z.boolean(),
       optional: z.boolean().optional(),
-    }),
+    })
   ),
 });
 
@@ -348,14 +356,14 @@ const pilotMetricsSummarySchema = z.object({
     z.object({
       widgetKey: z.string(),
       viewCount: z.number().int().nonnegative(),
-    }),
+    })
   ),
   topFeedbackIssues: z.array(
     z.object({
       feedbackKind: z.enum(["useful", "missing_information", "wrong_alert", "workflow_friction"]),
       count: z.number().int().nonnegative(),
       label: z.string(),
-    }),
+    })
   ),
 });
 
@@ -368,7 +376,7 @@ const pilotManagerScoresSchema = z.object({
     z.object({
       label: z.string(),
       count: z.number().int().nonnegative(),
-    }),
+    })
   ),
 });
 
@@ -399,13 +407,13 @@ const pilotReviewReportSchema = z.object({
       feedbackKind: z.enum(["useful", "missing_information", "wrong_alert", "workflow_friction"]),
       count: z.number().int().nonnegative(),
       label: z.string(),
-    }),
+    })
   ),
   mostValuableWidgets: z.array(
     z.object({
       widgetKey: z.string(),
       viewCount: z.number().int().nonnegative(),
-    }),
+    })
   ),
 });
 
@@ -455,7 +463,7 @@ const moduleHealthSchema = z.object({
       ]),
       label: z.string(),
       message: z.string(),
-    }),
+    })
   ),
 });
 
@@ -474,7 +482,7 @@ export const receptionOsBoardPayloadSchema = z.object({
         "outstanding_deposits",
         "upcoming_surgery",
         "action_alerts",
-      ]),
+      ])
     ),
   }),
   todaysPatients: z.array(todaysPatientSchema),
@@ -524,7 +532,9 @@ export function parseReceptionOsBoardPayload(raw: unknown): ReceptionOsBoardPayl
   return receptionOsBoardPayloadSchema.parse(raw) as ReceptionOsBoardPayload;
 }
 
-export function parseReceptionOsCommandCentrePayload(raw: unknown): ReceptionOsCommandCentrePayload {
+export function parseReceptionOsCommandCentrePayload(
+  raw: unknown
+): ReceptionOsCommandCentrePayload {
   return receptionOsCommandCentrePayloadSchema.parse(raw) as ReceptionOsCommandCentrePayload;
 }
 

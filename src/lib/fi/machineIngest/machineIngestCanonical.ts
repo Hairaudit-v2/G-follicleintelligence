@@ -64,7 +64,11 @@ export function parseMachineIngestTimestampMs(raw: string | undefined | null): n
   return n;
 }
 
-export function verifyMachineIngestTimestamp(timestampMs: number, nowMs: number, skewMs: number): boolean {
+export function verifyMachineIngestTimestamp(
+  timestampMs: number,
+  nowMs: number,
+  skewMs: number
+): boolean {
   if (!Number.isFinite(timestampMs) || !Number.isFinite(nowMs)) return false;
   return Math.abs(nowMs - timestampMs) <= skewMs;
 }

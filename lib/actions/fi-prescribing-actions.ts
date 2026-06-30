@@ -21,14 +21,22 @@ function errMsg(e: unknown): string {
   return "Request failed.";
 }
 
-function revalidatePrescriptionPaths(tenantId: string, patientId?: string | null, caseId?: string | null): void {
+function revalidatePrescriptionPaths(
+  tenantId: string,
+  patientId?: string | null,
+  caseId?: string | null
+): void {
   const base = `/fi-admin/${tenantId.trim()}`;
   revalidatePath(`${base}/prescriptions`);
   if (patientId?.trim()) revalidatePath(`${base}/patients/${patientId.trim()}`);
   if (caseId?.trim()) revalidatePath(`${base}/cases/${caseId.trim()}`);
 }
 
-async function assertPatientTenant(supabase: ReturnType<typeof supabaseAdmin>, tenantId: string, patientId: string) {
+async function assertPatientTenant(
+  supabase: ReturnType<typeof supabaseAdmin>,
+  tenantId: string,
+  patientId: string
+) {
   const { data, error } = await supabase
     .from("fi_patients")
     .select("id")
@@ -39,7 +47,11 @@ async function assertPatientTenant(supabase: ReturnType<typeof supabaseAdmin>, t
   if (!data) throw new Error("Patient not found for this tenant.");
 }
 
-async function assertStaffTenant(supabase: ReturnType<typeof supabaseAdmin>, tenantId: string, staffId: string) {
+async function assertStaffTenant(
+  supabase: ReturnType<typeof supabaseAdmin>,
+  tenantId: string,
+  staffId: string
+) {
   await assertStaffClinicallyAvailableForAssignment(tenantId, staffId, supabase);
 }
 
@@ -80,9 +92,14 @@ async function loadCatalogueRowMap(
   supabase: ReturnType<typeof supabaseAdmin>,
   tenantId: string,
   catalogueIds: string[]
-): Promise<Map<string, { medication_name: string; form_type: MedicationFormType; quantity_label: string }>> {
+): Promise<
+  Map<string, { medication_name: string; form_type: MedicationFormType; quantity_label: string }>
+> {
   const uniq = Array.from(new Set(catalogueIds.map((id) => id.trim()).filter(Boolean)));
-  const map = new Map<string, { medication_name: string; form_type: MedicationFormType; quantity_label: string }>();
+  const map = new Map<
+    string,
+    { medication_name: string; form_type: MedicationFormType; quantity_label: string }
+  >();
   if (uniq.length === 0) return map;
   const { data, error } = await supabase
     .from("fi_medication_catalogue")
@@ -129,7 +146,10 @@ export async function savePrescriptionDraftAction(
     if (repeatDraftErr) return { ok: false, error: repeatDraftErr };
 
     if (parsed.repeatsAllowed && parsed.repeatLimit < 1) {
-      return { ok: false, error: "Repeat limit must be at least 1 when patient repeats are allowed." };
+      return {
+        ok: false,
+        error: "Repeat limit must be at least 1 when patient repeats are allowed.",
+      };
     }
 
     const catIds = parsed.items.map((i) => i.catalogueId);
@@ -197,7 +217,11 @@ export async function savePrescriptionDraftAction(
         if (i1) return { ok: false, error: i1.message };
       }
 
-      revalidatePrescriptionPaths(tid, parsed.patientId, parsed.caseId ?? existing.prescription.case_id);
+      revalidatePrescriptionPaths(
+        tid,
+        parsed.patientId,
+        parsed.caseId ?? existing.prescription.case_id
+      );
       return { ok: true, id: parsed.prescriptionId.trim() };
     }
 
@@ -377,7 +401,11 @@ export async function cancelPrescriptionAction(
     if (bundle.prescription.status === "cancelled") {
       return { ok: false, error: "Already cancelled." };
     }
-    if (bundle.prescription.status === "sent_to_pharmacy" || bundle.prescription.status === "dispensed" || bundle.prescription.status === "posted") {
+    if (
+      bundle.prescription.status === "sent_to_pharmacy" ||
+      bundle.prescription.status === "dispensed" ||
+      bundle.prescription.status === "posted"
+    ) {
       return { ok: false, error: "This prescription cannot be cancelled from FI Admin." };
     }
 

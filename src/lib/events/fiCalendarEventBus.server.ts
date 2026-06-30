@@ -75,7 +75,10 @@ export async function emitCalendarSyncCompleted(
       entityType: "calendar_integration",
       entityId: input.integrationId,
       correlationId: input.correlationId,
-      payload: calendarPayload({ source: input.source, ...(input.result ?? {}) }, input.integrationId),
+      payload: calendarPayload(
+        { source: input.source, ...(input.result ?? {}) },
+        input.integrationId
+      ),
       metadata: {
         idempotencyKey: `calendar-sync-completed:${input.integrationId}:${input.correlationId ?? "run"}`,
       },
@@ -148,7 +151,12 @@ export async function emitCalendarWebhookReceived(
 }
 
 export async function emitCalendarWebhookSubscriptionCreated(
-  input: { tenantId: string; integrationId: string; subscriptionId: string; googleCalendarId: string },
+  input: {
+    tenantId: string;
+    integrationId: string;
+    subscriptionId: string;
+    googleCalendarId: string;
+  },
   opts?: { supabaseClientForTests?: import("@supabase/supabase-js").SupabaseClient }
 ): Promise<string | null> {
   return publishCalendarOsFiEvent(
@@ -157,10 +165,7 @@ export async function emitCalendarWebhookSubscriptionCreated(
       eventName: "calendar.webhook.subscription.created",
       entityType: "webhook_subscription",
       entityId: input.subscriptionId,
-      payload: calendarPayload(
-        { googleCalendarId: input.googleCalendarId },
-        input.integrationId
-      ),
+      payload: calendarPayload({ googleCalendarId: input.googleCalendarId }, input.integrationId),
       metadata: { idempotencyKey: `calendar-webhook-created:${input.subscriptionId}` },
     },
     opts
@@ -168,7 +173,12 @@ export async function emitCalendarWebhookSubscriptionCreated(
 }
 
 export async function emitCalendarWebhookSubscriptionRenewed(
-  input: { tenantId: string; integrationId: string; subscriptionId: string; googleCalendarId: string },
+  input: {
+    tenantId: string;
+    integrationId: string;
+    subscriptionId: string;
+    googleCalendarId: string;
+  },
   opts?: { supabaseClientForTests?: import("@supabase/supabase-js").SupabaseClient }
 ): Promise<string | null> {
   return publishCalendarOsFiEvent(
@@ -177,10 +187,7 @@ export async function emitCalendarWebhookSubscriptionRenewed(
       eventName: "calendar.webhook.subscription.renewed",
       entityType: "webhook_subscription",
       entityId: input.subscriptionId,
-      payload: calendarPayload(
-        { googleCalendarId: input.googleCalendarId },
-        input.integrationId
-      ),
+      payload: calendarPayload({ googleCalendarId: input.googleCalendarId }, input.integrationId),
       metadata: {
         idempotencyKey: `calendar-webhook-renewed:${input.subscriptionId}:${Date.now()}`,
       },
@@ -190,7 +197,12 @@ export async function emitCalendarWebhookSubscriptionRenewed(
 }
 
 export async function emitCalendarWebhookSubscriptionExpired(
-  input: { tenantId: string; integrationId: string; subscriptionId: string; googleCalendarId: string },
+  input: {
+    tenantId: string;
+    integrationId: string;
+    subscriptionId: string;
+    googleCalendarId: string;
+  },
   opts?: { supabaseClientForTests?: import("@supabase/supabase-js").SupabaseClient }
 ): Promise<string | null> {
   return publishCalendarOsFiEvent(
@@ -199,10 +211,7 @@ export async function emitCalendarWebhookSubscriptionExpired(
       eventName: "calendar.webhook.subscription.expired",
       entityType: "webhook_subscription",
       entityId: input.subscriptionId,
-      payload: calendarPayload(
-        { googleCalendarId: input.googleCalendarId },
-        input.integrationId
-      ),
+      payload: calendarPayload({ googleCalendarId: input.googleCalendarId }, input.integrationId),
       metadata: { idempotencyKey: `calendar-webhook-expired:${input.subscriptionId}` },
     },
     opts

@@ -53,18 +53,32 @@ function baseRow(over: Partial<ConsultationRow>): ConsultationRow {
 }
 
 test("recommendConsultationPathwayKey prefers transplant consultation types", () => {
-  assert.equal(recommendConsultationPathwayKey(baseRow({ consultation_type: "scalp_hair_transplant" })), "hair_transplant");
-  assert.equal(recommendConsultationPathwayKey(baseRow({ consultation_type: "medical_hair_loss" })), "hair_loss_hli");
+  assert.equal(
+    recommendConsultationPathwayKey(baseRow({ consultation_type: "scalp_hair_transplant" })),
+    "hair_transplant"
+  );
+  assert.equal(
+    recommendConsultationPathwayKey(baseRow({ consultation_type: "medical_hair_loss" })),
+    "hair_loss_hli"
+  );
 });
 
 test("recommendConsultationPathwayKey reads conservative note signals", () => {
   assert.equal(
-    recommendConsultationPathwayKey(baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Discuss FUE hairline plan" })),
+    recommendConsultationPathwayKey(
+      baseRow({
+        consultation_type: "scalp_hair_transplant",
+        live_notes: "Discuss FUE hairline plan",
+      })
+    ),
     "hair_transplant"
   );
   assert.equal(
     recommendConsultationPathwayKey(
-      baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Diffuse shedding, labs and minoxidil first" })
+      baseRow({
+        consultation_type: "scalp_hair_transplant",
+        live_notes: "Diffuse shedding, labs and minoxidil first",
+      })
     ),
     "hair_loss_hli"
   );
@@ -85,7 +99,10 @@ test("recommendConsultationPathwayKey returns null when surgery and treatment si
 test("recommendConsultationPathwayKey can elevate HT from medical type when notes are clearly surgical", () => {
   assert.equal(
     recommendConsultationPathwayKey(
-      baseRow({ consultation_type: "medical_hair_loss", live_notes: "Strip harvest donor planning; planning FUT hairline restoration" })
+      baseRow({
+        consultation_type: "medical_hair_loss",
+        live_notes: "Strip harvest donor planning; planning FUT hairline restoration",
+      })
     ),
     "hair_transplant"
   );
@@ -121,7 +138,13 @@ test("pickLatestInRoomInstanceForTemplateSlug chooses newest updated in-room row
 
   const older = mk("a", "2020-01-02T00:00:00Z");
   const newer = mk("b", "2020-01-03T00:00:00Z");
-  assert.equal(pickLatestInRoomInstanceForTemplateSlug([older, newer], HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG)?.id, "b");
+  assert.equal(
+    pickLatestInRoomInstanceForTemplateSlug(
+      [older, newer],
+      HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG
+    )?.id,
+    "b"
+  );
 });
 
 test("buildConsultationPathwayLauncherViewModel marks HT submitted when instance locked", () => {
@@ -248,11 +271,21 @@ test("buildConsultationPathwayLauncherViewModel HT card uses template version 3 
 
 test("recommendConsultationPathwayKey suggests female pathway on postpartum / Ludwig signals without surgery text", () => {
   assert.equal(
-    recommendConsultationPathwayKey(baseRow({ consultation_type: "medical_hair_loss", live_notes: "Postpartum shedding assessment" })),
+    recommendConsultationPathwayKey(
+      baseRow({
+        consultation_type: "medical_hair_loss",
+        live_notes: "Postpartum shedding assessment",
+      })
+    ),
     "female_hair_loss"
   );
   assert.equal(
-    recommendConsultationPathwayKey(baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Ludwig II pattern — medical management first" })),
+    recommendConsultationPathwayKey(
+      baseRow({
+        consultation_type: "scalp_hair_transplant",
+        live_notes: "Ludwig II pattern — medical management first",
+      })
+    ),
     "female_hair_loss"
   );
 });
@@ -357,13 +390,19 @@ test("buildConsultationPathwayLauncherViewModel female card shows Review when in
 test("recommendConsultationPathwayKey prefers repair when revision / failed transplant signals appear", () => {
   assert.equal(
     recommendConsultationPathwayKey(
-      baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Patient wants revision after pluggy hairline" })
+      baseRow({
+        consultation_type: "scalp_hair_transplant",
+        live_notes: "Patient wants revision after pluggy hairline",
+      })
     ),
     "repair"
   );
   assert.equal(
     recommendConsultationPathwayKey(
-      baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Poor growth after prior FUE — overharvesting concern" })
+      baseRow({
+        consultation_type: "scalp_hair_transplant",
+        live_notes: "Poor growth after prior FUE — overharvesting concern",
+      })
     ),
     "repair"
   );
@@ -415,11 +454,18 @@ test("buildConsultationPathwayLauncherViewModel repair card is active with Start
 
 test("recommendConsultationPathwayKey prefers follow-up when review / progress language appears", () => {
   assert.equal(
-    recommendConsultationPathwayKey(baseRow({ consultation_type: "prp_prf", live_notes: "PRP review — check progress" })),
+    recommendConsultationPathwayKey(
+      baseRow({ consultation_type: "prp_prf", live_notes: "PRP review — check progress" })
+    ),
     "follow_up_review"
   );
   assert.equal(
-    recommendConsultationPathwayKey(baseRow({ consultation_type: "medical_hair_loss", live_notes: "Annual review on finasteride" })),
+    recommendConsultationPathwayKey(
+      baseRow({
+        consultation_type: "medical_hair_loss",
+        live_notes: "Annual review on finasteride",
+      })
+    ),
     "follow_up_review"
   );
 });
@@ -551,7 +597,10 @@ test("buildConsultationPathwayLauncherViewModel scalp pathology card is active w
   const vm = buildConsultationPathwayLauncherViewModel({
     tenantId: "tenant-a",
     consultationId: "consult-a",
-    row: baseRow({ consultation_type: "medical_hair_loss", live_notes: "Scalp psoriasis with heavy scaling" }),
+    row: baseRow({
+      consultation_type: "medical_hair_loss",
+      live_notes: "Scalp psoriasis with heavy scaling",
+    }),
     instances: [sp],
   });
 
@@ -569,7 +618,10 @@ test("buildConsultationPathwayLauncherViewModel scalp pathology card shows Start
   const vm = buildConsultationPathwayLauncherViewModel({
     tenantId: "tenant-a",
     consultationId: "consult-a",
-    row: baseRow({ consultation_type: "medical_hair_loss", live_notes: "itchy inflamed scalp dermatitis" }),
+    row: baseRow({
+      consultation_type: "medical_hair_loss",
+      live_notes: "itchy inflamed scalp dermatitis",
+    }),
     instances: [],
   });
   const card = vm.cards.find((c) => c.pathKey === "scalp_pathology");
@@ -588,11 +640,19 @@ test("pathway 6 scalp template has five sections and no quote/graft/donor fields
 });
 
 test("pathway 6 pathology_reason field is gated on pathology_recommended_explicit", () => {
-  const sec = scalpPathologyConsultationSchemaV1.sections.find((s) => s.id === "investigation_treatment_plan");
+  const sec = scalpPathologyConsultationSchemaV1.sections.find(
+    (s) => s.id === "investigation_treatment_plan"
+  );
   const reason = sec?.fields.find((f) => f.id === "pathology_reason");
   assert.ok(reason?.showWhen);
-  assert.equal(evaluateConsultationFormCondition(reason!.showWhen, { pathology_recommended_explicit: false }), false);
-  assert.equal(evaluateConsultationFormCondition(reason!.showWhen, { pathology_recommended_explicit: true }), true);
+  assert.equal(
+    evaluateConsultationFormCondition(reason!.showWhen, { pathology_recommended_explicit: false }),
+    false
+  );
+  assert.equal(
+    evaluateConsultationFormCondition(reason!.showWhen, { pathology_recommended_explicit: true }),
+    true
+  );
 });
 
 test("pathway 6 completion flags pathology when biopsy recommended", () => {

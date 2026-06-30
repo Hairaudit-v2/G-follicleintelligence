@@ -172,7 +172,10 @@ export const SURGEONS_PAGE_CONTENT = {
       "Follicle Intelligence connects those habits to audit scoring and cohort context where policy allows—so improvement conversations reference evidence completeness and trend, not vibes alone.",
       "HairAudit is the surgical audit surface in this ecosystem: domain-level evidence, scoring discipline, and benchmarking aligned to how serious operators prove quality under scrutiny—not marketing claims in isolation.",
     ],
-    hairAuditCta: { label: "Learn about HairAudit & intelligence", href: "/hair-intelligence" as const },
+    hairAuditCta: {
+      label: "Learn about HairAudit & intelligence",
+      href: "/hair-intelligence" as const,
+    },
   },
 
   audiences: {

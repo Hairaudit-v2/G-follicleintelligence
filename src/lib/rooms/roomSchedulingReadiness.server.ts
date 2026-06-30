@@ -4,7 +4,10 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { EVOLVED_PERTH_CLINIC_DISPLAY_NAME } from "@/src/lib/staffImport/evolvedPayrollStaffImportConstants";
-import { loadClinicRoomsForTenant, loadServiceEligibilityMapsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
+import {
+  loadClinicRoomsForTenant,
+  loadServiceEligibilityMapsForTenant,
+} from "@/src/lib/rooms/fiClinicRooms.server";
 import {
   buildRoomSchedulingReadinessResult,
   type RoomSchedulingReadinessResult,
@@ -14,7 +17,11 @@ import {
 } from "@/src/lib/rooms/roomSchedulingReadinessCore";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
-export type { RoomSchedulingReadinessCheck, RoomSchedulingReadinessResult, OverallReadinessStatus } from "@/src/lib/rooms/roomSchedulingReadinessCore";
+export type {
+  RoomSchedulingReadinessCheck,
+  RoomSchedulingReadinessResult,
+  OverallReadinessStatus,
+} from "@/src/lib/rooms/roomSchedulingReadinessCore";
 
 async function resolveClinicForReadiness(
   tenantId: string,
@@ -35,7 +42,10 @@ async function resolveClinicForReadiness(
   const lower = (s: string) => s.trim().toLowerCase();
   const evolvedPerth = clinics.find((c) => {
     const d = lower(c.display_name);
-    return d.includes("perth") && (d.includes("evolved") || d.includes("restoration") || d.includes("hair"));
+    return (
+      d.includes("perth") &&
+      (d.includes("evolved") || d.includes("restoration") || d.includes("hair"))
+    );
   });
   if (evolvedPerth) return { id: evolvedPerth.id, display_name: evolvedPerth.display_name };
 
@@ -100,11 +110,18 @@ export async function getRoomSchedulingReadiness(args: {
   for (const [serviceId, rows] of Array.from(eligibilityMaps.roomByServiceId.entries())) {
     roomEligibilityByServiceId.set(
       serviceId,
-      rows.map((r) => ({ room_id: r.room_id, is_preferred: r.is_preferred, is_active: r.is_active }))
+      rows.map((r) => ({
+        room_id: r.room_id,
+        is_preferred: r.is_preferred,
+        is_active: r.is_active,
+      }))
     );
   }
 
-  const staffEligibilityByServiceId = new Map<string, RoomSchedulingReadinessStaffEligibilityRow[]>();
+  const staffEligibilityByServiceId = new Map<
+    string,
+    RoomSchedulingReadinessStaffEligibilityRow[]
+  >();
   for (const [serviceId, rows] of Array.from(eligibilityMaps.staffByServiceId.entries())) {
     staffEligibilityByServiceId.set(
       serviceId,

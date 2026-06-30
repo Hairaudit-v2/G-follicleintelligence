@@ -41,21 +41,21 @@ export default function AIHairTransplantAnalysisPage() {
             What is hair transplant analysis?
           </h2>
           <p className="mt-6 max-w-4xl text-lg leading-relaxed text-muted-foreground">
-            Hair transplant analysis is the systematic assessment of procedural evidence and outcomes
-            in hair restoration surgery. It covers the full arc of a case: pre-operative planning,
-            intra-operative technique (extraction, handling, implantation), and post-operative
-            results over time. The goal is to turn raw evidence—images, notes, follow-up
-            documentation—into structured, comparable insights that support quality assurance,
-            training, and patient-centred care.
+            Hair transplant analysis is the systematic assessment of procedural evidence and
+            outcomes in hair restoration surgery. It covers the full arc of a case: pre-operative
+            planning, intra-operative technique (extraction, handling, implantation), and
+            post-operative results over time. The goal is to turn raw evidence—images, notes,
+            follow-up documentation—into structured, comparable insights that support quality
+            assurance, training, and patient-centred care.
           </p>
           <p className="mt-4 max-w-4xl leading-relaxed text-muted-foreground">
-            In practice, analysis has historically relied on expert review: experienced
-            clinicians or panels assess cases using implicit criteria and narrative feedback. That
-            approach has value but does not scale, and it rarely produces consistent, benchmarkable
-            scores across reviewers or institutions. Today, AI-supported analysis does not
-            replace clinical judgment; it structures evidence, normalises dimensions (density,
-            donor management, design, survival signals), and attaches confidence levels so that
-            human reviewers and quality programmes can focus on what matters.
+            In practice, analysis has historically relied on expert review: experienced clinicians
+            or panels assess cases using implicit criteria and narrative feedback. That approach has
+            value but does not scale, and it rarely produces consistent, benchmarkable scores across
+            reviewers or institutions. Today, AI-supported analysis does not replace clinical
+            judgment; it structures evidence, normalises dimensions (density, donor management,
+            design, survival signals), and attaches confidence levels so that human reviewers and
+            quality programmes can focus on what matters.
           </p>
         </FadeIn>
       </Section>
@@ -75,11 +75,11 @@ export default function AIHairTransplantAnalysisPage() {
           </p>
           <p className="mt-4 max-w-4xl leading-relaxed text-muted-foreground">
             In addition, evidence is frequently unstructured. Photographs and notes are stored in
-            silos; follow-up intervals and documentation quality vary. Without a consistent
-            evidence model, even well-intentioned audits struggle to produce defensible,
-            repeatable assessments. That inconsistency undermines trust—among peers, institutions,
-            and patients—and makes it difficult to use evaluation as a lever for training and
-            quality improvement.
+            silos; follow-up intervals and documentation quality vary. Without a consistent evidence
+            model, even well-intentioned audits struggle to produce defensible, repeatable
+            assessments. That inconsistency undermines trust—among peers, institutions, and
+            patients—and makes it difficult to use evaluation as a lever for training and quality
+            improvement.
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
@@ -106,7 +106,9 @@ export default function AIHairTransplantAnalysisPage() {
                     <CardTitle className="text-lg">{item.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-sm leading-relaxed">{item.desc}</CardDescription>
+                    <CardDescription className="text-sm leading-relaxed">
+                      {item.desc}
+                    </CardDescription>
                   </CardContent>
                 </Card>
               </FadeIn>
@@ -123,20 +125,20 @@ export default function AIHairTransplantAnalysisPage() {
           <p className="mt-6 max-w-4xl leading-relaxed text-muted-foreground">
             AI-supported hair transplant analysis does two things: it structures evidence into
             machine-readable dimensions, and it applies consistent scoring and confidence logic
-            across cases. Images and associated metadata are ingested into a pipeline that
-            extracts signals—density proxies, donor patterns, design alignment, quality
-            indicators—and normalises them against defined schemas. Those signals feed into
-            domain-level scores (e.g. donor management, extraction quality, implantation quality,
-            design, post-operative protocol) that can be compared across cases and over time.
+            across cases. Images and associated metadata are ingested into a pipeline that extracts
+            signals—density proxies, donor patterns, design alignment, quality indicators—and
+            normalises them against defined schemas. Those signals feed into domain-level scores
+            (e.g. donor management, extraction quality, implantation quality, design, post-operative
+            protocol) that can be compared across cases and over time.
           </p>
           <p className="mt-4 max-w-4xl leading-relaxed text-muted-foreground">
-            Consistency comes from fixed rules and weights: the same evidence type produces the
-            same structural output, and scores are computed the same way for every case. Visibility
-            comes from dashboards and reports that surface domain scores, benchmarks (e.g. against
-            peer cohorts or internal baselines), and confidence indicators so that clinicians and
-            quality leads can see where performance sits and where improvement opportunities lie.
-            The result is not autonomous decision-making—it is a structured intelligence layer that
-            supports human review, training, and governance.
+            Consistency comes from fixed rules and weights: the same evidence type produces the same
+            structural output, and scores are computed the same way for every case. Visibility comes
+            from dashboards and reports that surface domain scores, benchmarks (e.g. against peer
+            cohorts or internal baselines), and confidence indicators so that clinicians and quality
+            leads can see where performance sits and where improvement opportunities lie. The result
+            is not autonomous decision-making—it is a structured intelligence layer that supports
+            human review, training, and governance.
           </p>
           <div className="mt-10 rounded-2xl border border-border/60 bg-card/60 p-8 md:p-10">
             <p className="text-xs uppercase tracking-[0.22em] text-primary/85">
@@ -174,11 +176,11 @@ export default function AIHairTransplantAnalysisPage() {
             Metrics that matter
           </h2>
           <p className="mt-6 max-w-4xl leading-relaxed text-muted-foreground">
-            Effective hair transplant analysis rests on a clear set of dimensions that reflect
-            what clinicians and quality programmes care about. These are not invented for the sake
-            of automation; they align with established concepts in hair restoration—donor
-            management, extraction and implantation quality, design logic, and follow-up
-            outcomes—expressed in a way that can be consistently measured and scored.
+            Effective hair transplant analysis rests on a clear set of dimensions that reflect what
+            clinicians and quality programmes care about. These are not invented for the sake of
+            automation; they align with established concepts in hair restoration—donor management,
+            extraction and implantation quality, design logic, and follow-up outcomes—expressed in a
+            way that can be consistently measured and scored.
           </p>
           <div className="mt-10 space-y-8">
             {[
@@ -213,7 +215,9 @@ export default function AIHairTransplantAnalysisPage() {
                   <item.icon className="h-8 w-8 shrink-0 text-primary/85" />
                   <div>
                     <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {item.desc}
+                    </p>
                   </div>
                 </div>
               </FadeIn>
@@ -249,17 +253,13 @@ export default function AIHairTransplantAnalysisPage() {
             Transparency does not mean publishing raw case data; it means having a clear, repeatable
             way to assess quality and to demonstrate improvement. Practices that adopt structured
             analysis can show trajectory over time, compare themselves to peer cohorts where
-            appropriate, and use outlier detection to prioritise review and learning. That
-            posture supports both internal quality programmes and the broader move toward
-            outcome-focused, evidence-based care in procedural medicine.
+            appropriate, and use outlier detection to prioritise review and learning. That posture
+            supports both internal quality programmes and the broader move toward outcome-focused,
+            evidence-based care in procedural medicine.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild variant="outline">
-              <Link
-                href="https://iiohr.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link href="https://iiohr.com" target="_blank" rel="noopener noreferrer">
                 Learn about IIOHR standards
               </Link>
             </Button>
@@ -273,10 +273,10 @@ export default function AIHairTransplantAnalysisPage() {
             Connection to the broader platform
           </h2>
           <p className="mt-6 max-w-4xl leading-relaxed text-muted-foreground">
-            AI hair transplant analysis does not sit in isolation. It fits into the broader
-            clinical intelligence stack that spans audit and scoring, biological and
-            treatment-pathway insight, and training and certification. Follicle Intelligence
-            provides the core engine—scoring logic, workflow orchestration, and infrastructure—that powers
+            AI hair transplant analysis does not sit in isolation. It fits into the broader clinical
+            intelligence stack that spans audit and scoring, biological and treatment-pathway
+            insight, and training and certification. Follicle Intelligence provides the core
+            engine—scoring logic, workflow orchestration, and infrastructure—that powers
             applications and partners across that stack.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -294,16 +294,12 @@ export default function AIHairTransplantAnalysisPage() {
                   >
                     HairAudit
                   </Link>{" "}
-                  is the first production application built on this engine. It delivers
-                  case-level audit scorecards, benchmark positioning, and quality signals for hair
+                  is the first production application built on this engine. It delivers case-level
+                  audit scorecards, benchmark positioning, and quality signals for hair
                   restoration—exactly the kind of structured evaluation this page describes.
                 </CardDescription>
                 <Button asChild variant="outline" size="sm" className="mt-4">
-                  <Link
-                    href="https://hairaudit.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <Link href="https://hairaudit.com" target="_blank" rel="noopener noreferrer">
                     Visit HairAudit
                   </Link>
                 </Button>
@@ -324,8 +320,8 @@ export default function AIHairTransplantAnalysisPage() {
                     Hair Longevity Institute
                   </Link>{" "}
                   focuses on diagnosis, biology, and treatment pathways. Analysis of surgical
-                  outcomes can complement biological and medical insights to support
-                  patient-centred care across the full pathway.
+                  outcomes can complement biological and medical insights to support patient-centred
+                  care across the full pathway.
                 </CardDescription>
                 <Button asChild variant="outline" size="sm" className="mt-4">
                   <Link
@@ -352,16 +348,12 @@ export default function AIHairTransplantAnalysisPage() {
                   >
                     IIOHR
                   </Link>{" "}
-                  provides training and certification frameworks. The scoring and review standards underlying
-                  AI-based analysis are aligned with IIOHR advisory and standards, so that audit
-                  outputs support institutional and training use cases.
+                  provides training and certification frameworks. The scoring and review standards
+                  underlying AI-based analysis are aligned with IIOHR advisory and standards, so
+                  that audit outputs support institutional and training use cases.
                 </CardDescription>
                 <Button asChild variant="outline" size="sm" className="mt-4">
-                  <Link
-                    href="https://iiohr.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <Link href="https://iiohr.com" target="_blank" rel="noopener noreferrer">
                     Visit IIOHR
                   </Link>
                 </Button>
@@ -379,8 +371,8 @@ export default function AIHairTransplantAnalysisPage() {
             </h2>
             <p className="mt-4 max-w-3xl text-muted-foreground">
               If you are a clinic, group, or institution interested in structured hair transplant
-              analysis and audit intelligence, we can walk you through the platform, governance model, and
-              how it connects to HairAudit, Hair Longevity Institute, and IIOHR.
+              analysis and audit intelligence, we can walk you through the platform, governance
+              model, and how it connects to HairAudit, Hair Longevity Institute, and IIOHR.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild>

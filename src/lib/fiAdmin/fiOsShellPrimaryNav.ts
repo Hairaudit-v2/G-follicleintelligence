@@ -49,24 +49,87 @@ function primaryNavClinicalBlocks(role: FiTenantAdminRole | null | undefined): {
   audit: boolean;
 } {
   if (!role) {
-    return { calendar: false, cases: false, rx: false, doctor: false, patients: false, patientTwin: false, analytics: false, audit: false };
+    return {
+      calendar: false,
+      cases: false,
+      rx: false,
+      doctor: false,
+      patients: false,
+      patientTwin: false,
+      analytics: false,
+      audit: false,
+    };
   }
   if (role === "clinic_admin") {
-    return { calendar: false, cases: false, rx: false, doctor: false, patients: false, patientTwin: false, analytics: false, audit: false };
+    return {
+      calendar: false,
+      cases: false,
+      rx: false,
+      doctor: false,
+      patients: false,
+      patientTwin: false,
+      analytics: false,
+      audit: false,
+    };
   }
   if (role === "operations_admin") {
-    return { calendar: false, cases: false, rx: true, doctor: true, patients: false, patientTwin: false, analytics: false, audit: false };
+    return {
+      calendar: false,
+      cases: false,
+      rx: true,
+      doctor: true,
+      patients: false,
+      patientTwin: false,
+      analytics: false,
+      audit: false,
+    };
   }
   if (role === "finance_admin") {
-    return { calendar: true, cases: true, rx: true, doctor: true, patients: true, patientTwin: true, analytics: false, audit: false };
+    return {
+      calendar: true,
+      cases: true,
+      rx: true,
+      doctor: true,
+      patients: true,
+      patientTwin: true,
+      analytics: false,
+      audit: false,
+    };
   }
   if (role === "dashboard_viewer") {
-    return { calendar: true, cases: true, rx: true, doctor: true, patients: true, patientTwin: true, analytics: false, audit: false };
+    return {
+      calendar: true,
+      cases: true,
+      rx: true,
+      doctor: true,
+      patients: true,
+      patientTwin: true,
+      analytics: false,
+      audit: false,
+    };
   }
   if (role === "data_safety_admin") {
-    return { calendar: true, cases: true, rx: true, doctor: true, patients: true, patientTwin: true, analytics: false, audit: false };
+    return {
+      calendar: true,
+      cases: true,
+      rx: true,
+      doctor: true,
+      patients: true,
+      patientTwin: true,
+      analytics: false,
+      audit: false,
+    };
   }
-  return { calendar: false, cases: false, rx: false, doctor: false, patients: false, patientTwin: false, analytics: false, audit: false };
+  return {
+    calendar: false,
+    cases: false,
+    rx: false,
+    doctor: false,
+    patients: false,
+    patientTwin: false,
+    analytics: false,
+    audit: false,
+  };
 }
 
 /**
@@ -85,11 +148,18 @@ export function resolveFiOsPrimarySidebarItems(
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
-  const auditDisabled =
-    tenantBackendAdminRole != null ? !showAuditOsNav : blocks.audit;
-  const calendarEligible = showBookingsBoard || tenantAdminRoleAllowsBookingsBoardNav(tenantBackendAdminRole ?? null);
+  const auditDisabled = tenantBackendAdminRole != null ? !showAuditOsNav : blocks.audit;
+  const calendarEligible =
+    showBookingsBoard || tenantAdminRoleAllowsBookingsBoardNav(tenantBackendAdminRole ?? null);
   const items: FiOsPrimarySidebarItem[] = [
-    { id: "dashboard", featureKey: "dashboard", label: "Dashboard", shortLabel: "Home", href: b, disabled: false },
+    {
+      id: "dashboard",
+      featureKey: "dashboard",
+      label: "Dashboard",
+      shortLabel: "Home",
+      href: b,
+      disabled: false,
+    },
     {
       id: "doctor-workspace",
       featureKey: "consultations",
@@ -161,7 +231,10 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Patients",
       href: hrefFor(b, "patients"),
       disabled: !showBookingsBoard || blocks.patients,
-      hint: !showBookingsBoard || blocks.patients ? "Requires bookings operator access for this tenant." : undefined,
+      hint:
+        !showBookingsBoard || blocks.patients
+          ? "Requires bookings operator access for this tenant."
+          : undefined,
     },
     {
       id: "crm",
@@ -195,7 +268,9 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Tasks",
       href: hrefFor(b, "crm"),
       disabled: !showCrmNav,
-      hint: !showCrmNav ? "Requires CRM shell role for this tenant." : "Lead pipeline and follow-up tasks live in the same workspace.",
+      hint: !showCrmNav
+        ? "Requires CRM shell role for this tenant."
+        : "Lead pipeline and follow-up tasks live in the same workspace.",
     },
     {
       id: "consultations",
@@ -231,7 +306,12 @@ export function resolveFiOsPrimarySidebarItems(
       subItems: blocks.cases
         ? undefined
         : [
-            { id: "cases-worklist", featureKey: "cases", label: "Case worklist", href: hrefFor(b, "cases") },
+            {
+              id: "cases-worklist",
+              featureKey: "cases",
+              label: "Case worklist",
+              href: hrefFor(b, "cases"),
+            },
             {
               id: "surgery-os-command-centre",
               featureKey: "surgery_pipeline",
@@ -279,7 +359,9 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Twin",
       href: hrefFor(b, "foundation-integrity"),
       disabled: blocks.patientTwin,
-      hint: blocks.patientTwin ? "Foundation integrity workspace is not enabled for this admin role." : undefined,
+      hint: blocks.patientTwin
+        ? "Foundation integrity workspace is not enabled for this admin role."
+        : undefined,
       anyOfFeatures: ["patient_twin", "imaging"],
     },
     {
@@ -289,7 +371,9 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Audit",
       href: hrefFor(b, "audit"),
       disabled: auditDisabled,
-      hint: auditDisabled ? "Audit intelligence requires security review access or a clinical tenant role." : undefined,
+      hint: auditDisabled
+        ? "Audit intelligence requires security review access or a clinical tenant role."
+        : undefined,
     },
     {
       id: "academyos",
@@ -306,7 +390,9 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Pay",
       href: hrefFor(b, "payments"),
       disabled: !showFiPaymentsInboxNav,
-      hint: !showFiPaymentsInboxNav ? "RevenueOS payments are disabled (FI_PAYMENTS_ENABLED)." : undefined,
+      hint: !showFiPaymentsInboxNav
+        ? "RevenueOS payments are disabled (FI_PAYMENTS_ENABLED)."
+        : undefined,
     },
     {
       id: "financial-os",
@@ -361,12 +447,18 @@ export function resolveFiOsPrimarySidebarItems(
   return items;
 }
 
-function fiFeatureVisibleForNav(access: ReadonlyMap<FiFeatureKey, boolean> | null, key?: FiFeatureKey): boolean {
+function fiFeatureVisibleForNav(
+  access: ReadonlyMap<FiFeatureKey, boolean> | null,
+  key?: FiFeatureKey
+): boolean {
   if (!access || !key) return true;
   return access.get(key) !== false;
 }
 
-function primarySidebarItemVisibleByFeatures(item: FiOsPrimarySidebarItem, access: ReadonlyMap<FiFeatureKey, boolean>): boolean {
+function primarySidebarItemVisibleByFeatures(
+  item: FiOsPrimarySidebarItem,
+  access: ReadonlyMap<FiFeatureKey, boolean>
+): boolean {
   const keys =
     item.anyOfFeatures && item.anyOfFeatures.length > 0
       ? [...item.anyOfFeatures]
@@ -392,7 +484,11 @@ export function filterFiOsPrimarySidebarItemsByFeatureAccess(
     const rawSubs = item.subItems;
     if (rawSubs?.length) {
       const subs = rawSubs.filter((s) => fiFeatureVisibleForNav(access, s.featureKey));
-      out.push(subs.length === rawSubs.length ? item : { ...item, subItems: subs.length ? subs : undefined });
+      out.push(
+        subs.length === rawSubs.length
+          ? item
+          : { ...item, subItems: subs.length ? subs : undefined }
+      );
     } else {
       out.push(item);
     }
@@ -431,7 +527,12 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "surgery-os") return "surgery-os";
   if (legacy === "reception-board") return "reception-board";
   if (legacy === "tomorrow-board") return "tomorrow-board";
-  if (legacy === "surgeryos" || legacy === "surgery-readiness-board" || legacy === "procedure-day-board") return "cases";
+  if (
+    legacy === "surgeryos" ||
+    legacy === "surgery-readiness-board" ||
+    legacy === "procedure-day-board"
+  )
+    return "cases";
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";

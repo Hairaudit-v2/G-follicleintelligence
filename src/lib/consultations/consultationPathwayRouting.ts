@@ -12,7 +12,10 @@ export const PATHWAY_FORM_RELATIVE_HREF: Record<ConsultationPathwayLauncherPathK
 };
 
 /** Default `fi_consultations.consultation_type` for each pathway (existing enum — no schema change). */
-export const PATHWAY_DEFAULT_CONSULTATION_TYPE: Record<ConsultationPathwayLauncherPathKey, ConsultationTypeId> = {
+export const PATHWAY_DEFAULT_CONSULTATION_TYPE: Record<
+  ConsultationPathwayLauncherPathKey,
+  ConsultationTypeId
+> = {
   hair_transplant: "scalp_hair_transplant",
   hair_loss_hli: "medical_hair_loss",
   female_hair_loss: "medical_hair_loss",
@@ -43,7 +46,8 @@ export function consultationPathwayCreateCards(): readonly ConsultationPathwayCr
     {
       pathKey: "female_hair_loss",
       title: "Female Hair Loss",
-      subtitle: "Female-pattern context, hormones, shedding, and Ludwig / Sinclair–oriented visits.",
+      subtitle:
+        "Female-pattern context, hormones, shedding, and Ludwig / Sinclair–oriented visits.",
     },
     {
       pathKey: "repair",

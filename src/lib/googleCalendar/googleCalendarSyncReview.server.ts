@@ -49,7 +49,10 @@ async function resolveFiUserId(
 export async function upsertGoogleCalendarSyncReviewItem(
   input: GoogleCalendarSyncReviewUpsertInput,
   opts: ServerOpts = {}
-): Promise<{ ok: true; created: boolean; item: GoogleCalendarSyncReviewClientItem } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; created: boolean; item: GoogleCalendarSyncReviewClientItem }
+  | { ok: false; error: string }
+> {
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const now = new Date().toISOString();
   const payload = buildGoogleCalendarSyncReviewRowPayload(input, now);
@@ -176,14 +179,23 @@ export async function countOpenGoogleCalendarSyncReviewItems(
 
 export async function loadGoogleCalendarSyncReviewPage(
   tenantId: string,
-  opts: ServerOpts & { canManage?: boolean; connected?: boolean; integrationId?: string | null } = {}
+  opts: ServerOpts & {
+    canManage?: boolean;
+    connected?: boolean;
+    integrationId?: string | null;
+  } = {}
 ): Promise<GoogleCalendarSyncReviewPageModel> {
   const tid = tenantId.trim();
-  const openCount = opts.connected === false ? 0 : await countOpenGoogleCalendarSyncReviewItems(tid, opts);
+  const openCount =
+    opts.connected === false ? 0 : await countOpenGoogleCalendarSyncReviewItems(tid, opts);
   const items =
     opts.connected === false
       ? []
-      : await listGoogleCalendarSyncReviewItemsForTenant(tid, { ...opts, status: "open", limit: 50 });
+      : await listGoogleCalendarSyncReviewItemsForTenant(tid, {
+          ...opts,
+          status: "open",
+          limit: 50,
+        });
 
   return {
     tenantId: tid,
@@ -240,7 +252,10 @@ export async function resolveGoogleCalendarSyncReviewItem(
 
   if (input.status === "linked") {
     if (!row.matched_local_event_id) {
-      return { ok: false, error: "No suggested local match — link is not available for this item." };
+      return {
+        ok: false,
+        error: "No suggested local match — link is not available for this item.",
+      };
     }
 
     const { data: local, error: localError } = await supabase
@@ -295,7 +310,8 @@ export async function resolveGoogleCalendarSyncReviewItem(
     }
 
     const calendarId = (mapped.calendarId ?? row.google_calendar_id ?? "").trim();
-    if (!calendarId) return { ok: false, error: "Review item is missing a calendar id for import." };
+    if (!calendarId)
+      return { ok: false, error: "Review item is missing a calendar id for import." };
 
     const { data: inserted, error: insertError } = await supabase
       .from("fi_calendar_events")

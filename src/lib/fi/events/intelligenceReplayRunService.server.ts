@@ -1,12 +1,17 @@
-
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-import { isEnqueueShadowEventNameAllowlisted, isGovernedPrivacyFilterSafeForShadowEnqueue } from "./governedReplayAllowlist";
+import {
+  isEnqueueShadowEventNameAllowlisted,
+  isGovernedPrivacyFilterSafeForShadowEnqueue,
+} from "./governedReplayAllowlist";
 import { canExecuteGovernedReplayRun } from "./governedReplayEnv";
 import type { IntelligenceEventLogReplayFilters } from "./intelligenceEventLogReplayTypes";
-import type { FiIntelligenceReplayRunMode, FiIntelligenceReplayRunRow } from "./intelligenceReplayRunTypes";
+import type {
+  FiIntelligenceReplayRunMode,
+  FiIntelligenceReplayRunRow,
+} from "./intelligenceReplayRunTypes";
 import { filtersFromReplayRunRow } from "./intelligenceReplayRunTypes";
 import { replayIntelligenceEventLogs } from "./replayIntelligenceEventLogs.server";
 
@@ -26,7 +31,9 @@ export type CreateReplayRunDraftInput = {
 
 function assertAdmin(omit?: boolean): Promise<void> {
   if (omit) return Promise.resolve();
-  return import("@/src/lib/fiOs/fiOsPlatformSystemGate.server").then((m) => m.assertFiPlatformAdminSystemAccess());
+  return import("@/src/lib/fiOs/fiOsPlatformSystemGate.server").then((m) =>
+    m.assertFiPlatformAdminSystemAccess()
+  );
 }
 
 function validateDraftPolicies(
@@ -46,7 +53,8 @@ function validateDraftPolicies(
       return {
         ok: false,
         code: "enqueue_shadow_privacy_required",
-        message: "enqueue_shadow requires an explicit privacy_level filter that excludes operational_clinical risk tier.",
+        message:
+          "enqueue_shadow requires an explicit privacy_level filter that excludes operational_clinical risk tier.",
       };
     }
     if (!isGovernedPrivacyFilterSafeForShadowEnqueue(filters.privacy_level)) {
@@ -84,7 +92,11 @@ export async function createReplayRunDraft(
     limit_count: input.filters.limit ?? 25,
   };
 
-  const { data, error } = await supabase.from("fi_intelligence_replay_runs").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_intelligence_replay_runs")
+    .insert(row)
+    .select("id")
+    .single();
 
   if (error || !data?.id) {
     return { ok: false, code: "insert_failed", message: error?.message ?? "insert_failed" };
@@ -95,7 +107,10 @@ export async function createReplayRunDraft(
 export async function submitReplayRunForApproval(
   runId: string,
   actorId: string | null,
-  options?: { supabaseClientForTests?: SupabaseClient; omitPlatformAdminAssertForOperatorCli?: boolean }
+  options?: {
+    supabaseClientForTests?: SupabaseClient;
+    omitPlatformAdminAssertForOperatorCli?: boolean;
+  }
 ): Promise<IntelligenceReplayRunServiceResult<{ id: string }>> {
   await assertAdmin(options?.omitPlatformAdminAssertForOperatorCli);
 
@@ -110,7 +125,11 @@ export async function submitReplayRunForApproval(
     return { ok: false, code: "not_found", message: loadErr?.message ?? "run not found" };
   }
   if (existing.approval_status !== "draft") {
-    return { ok: false, code: "invalid_state", message: `expected draft, got ${existing.approval_status}` };
+    return {
+      ok: false,
+      code: "invalid_state",
+      message: `expected draft, got ${existing.approval_status}`,
+    };
   }
 
   const prevSummary =
@@ -126,7 +145,10 @@ export async function submitReplayRunForApproval(
     },
   };
 
-  const { error } = await supabase.from("fi_intelligence_replay_runs").update(patch).eq("id", runId);
+  const { error } = await supabase
+    .from("fi_intelligence_replay_runs")
+    .update(patch)
+    .eq("id", runId);
 
   if (error) {
     return { ok: false, code: "update_failed", message: error.message };
@@ -137,7 +159,10 @@ export async function submitReplayRunForApproval(
 export async function approveReplayRun(
   runId: string,
   actorId: string | null,
-  options?: { supabaseClientForTests?: SupabaseClient; omitPlatformAdminAssertForOperatorCli?: boolean }
+  options?: {
+    supabaseClientForTests?: SupabaseClient;
+    omitPlatformAdminAssertForOperatorCli?: boolean;
+  }
 ): Promise<IntelligenceReplayRunServiceResult<{ id: string }>> {
   await assertAdmin(options?.omitPlatformAdminAssertForOperatorCli);
 
@@ -152,7 +177,11 @@ export async function approveReplayRun(
     return { ok: false, code: "not_found", message: loadErr?.message ?? "run not found" };
   }
   if (existing.approval_status !== "pending_approval") {
-    return { ok: false, code: "invalid_state", message: `expected pending_approval, got ${existing.approval_status}` };
+    return {
+      ok: false,
+      code: "invalid_state",
+      message: `expected pending_approval, got ${existing.approval_status}`,
+    };
   }
 
   const now = new Date().toISOString();
@@ -175,7 +204,10 @@ export async function rejectReplayRun(
   runId: string,
   actorId: string | null,
   reason: string | undefined,
-  options?: { supabaseClientForTests?: SupabaseClient; omitPlatformAdminAssertForOperatorCli?: boolean }
+  options?: {
+    supabaseClientForTests?: SupabaseClient;
+    omitPlatformAdminAssertForOperatorCli?: boolean;
+  }
 ): Promise<IntelligenceReplayRunServiceResult<{ id: string }>> {
   await assertAdmin(options?.omitPlatformAdminAssertForOperatorCli);
 
@@ -190,10 +222,18 @@ export async function rejectReplayRun(
     return { ok: false, code: "not_found", message: loadErr?.message ?? "run not found" };
   }
   if (existing.approval_status !== "pending_approval") {
-    return { ok: false, code: "invalid_state", message: `expected pending_approval, got ${existing.approval_status}` };
+    return {
+      ok: false,
+      code: "invalid_state",
+      message: `expected pending_approval, got ${existing.approval_status}`,
+    };
   }
 
-  const summary = { ...(existing.summary as Record<string, unknown>), rejection_reason: reason ?? null, rejected_by: actorId };
+  const summary = {
+    ...(existing.summary as Record<string, unknown>),
+    rejection_reason: reason ?? null,
+    rejected_by: actorId,
+  };
 
   const { error } = await supabase
     .from("fi_intelligence_replay_runs")
@@ -268,7 +308,11 @@ export async function executeApprovedReplayRun(
   }
 
   const supabase = options?.supabaseClientForTests ?? supabaseAdmin();
-  const { data: row, error: loadErr } = await supabase.from("fi_intelligence_replay_runs").select("*").eq("id", runId).maybeSingle();
+  const { data: row, error: loadErr } = await supabase
+    .from("fi_intelligence_replay_runs")
+    .select("*")
+    .eq("id", runId)
+    .maybeSingle();
 
   if (loadErr || !row) {
     return { ok: false, code: "not_found", message: loadErr?.message ?? "run not found" };
@@ -281,7 +325,11 @@ export async function executeApprovedReplayRun(
       : {};
 
   if (run.approval_status !== "approved") {
-    return { ok: false, code: "invalid_state", message: `expected approved, got ${run.approval_status}` };
+    return {
+      ok: false,
+      code: "invalid_state",
+      message: `expected approved, got ${run.approval_status}`,
+    };
   }
 
   if (run.replay_mode === "dispatch_future") {
@@ -302,13 +350,21 @@ export async function executeApprovedReplayRun(
         .update({
           approval_status: "failed",
           completed_at: new Date().toISOString(),
-          summary: { ...baseSummary, execute_blocked: "enqueue_shadow_event_not_allowlisted", executed_by: actorId },
+          summary: {
+            ...baseSummary,
+            execute_blocked: "enqueue_shadow_event_not_allowlisted",
+            executed_by: actorId,
+          },
         })
         .eq("id", runId);
       if (e.error) {
         return { ok: false, code: "update_failed", message: e.error.message };
       }
-      return { ok: false, code: "enqueue_shadow_event_not_allowlisted", message: "Run row failed validation at execute time." };
+      return {
+        ok: false,
+        code: "enqueue_shadow_event_not_allowlisted",
+        message: "Run row failed validation at execute time.",
+      };
     }
     if (!isGovernedPrivacyFilterSafeForShadowEnqueue(run.privacy_level)) {
       const e = await supabase
@@ -316,13 +372,21 @@ export async function executeApprovedReplayRun(
         .update({
           approval_status: "failed",
           completed_at: new Date().toISOString(),
-          summary: { ...baseSummary, execute_blocked: "enqueue_shadow_privacy_blocked", executed_by: actorId },
+          summary: {
+            ...baseSummary,
+            execute_blocked: "enqueue_shadow_privacy_blocked",
+            executed_by: actorId,
+          },
         })
         .eq("id", runId);
       if (e.error) {
         return { ok: false, code: "update_failed", message: e.error.message };
       }
-      return { ok: false, code: "enqueue_shadow_privacy_blocked", message: "operational_clinical is blocked for shadow enqueue." };
+      return {
+        ok: false,
+        code: "enqueue_shadow_privacy_blocked",
+        message: "operational_clinical is blocked for shadow enqueue.",
+      };
     }
   }
 
@@ -335,7 +399,11 @@ export async function executeApprovedReplayRun(
     omitPlatformAdminAssertForOperatorCli: options?.omitPlatformAdminAssertForOperatorCli,
   });
 
-  const { candidate, processed, failed } = countsFromReplay(run.replay_mode, replay.summary, replay.load_error);
+  const { candidate, processed, failed } = countsFromReplay(
+    run.replay_mode,
+    replay.summary,
+    replay.load_error
+  );
   const warningLinesOut = warningLines(replay.warnings);
   const finalStatus = replay.load_error || failed > 0 ? "failed" : "completed";
   const summaryOut = {

@@ -5,13 +5,19 @@ import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { Download, Upload } from "lucide-react";
 
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
-import { commitHrStaffImportAction, previewHrStaffImportAction } from "@/src/lib/actions/fi-hr-staff-import-actions";
+import {
+  commitHrStaffImportAction,
+  previewHrStaffImportAction,
+} from "@/src/lib/actions/fi-hr-staff-import-actions";
 import { syncIiohrHrStaffPayloadAction } from "@/src/lib/actions/fi-hr-staff-sync-actions";
 import { pushCurrentHrStaffToFiAction } from "@/src/lib/actions/push-current-hr-staff-to-fi-actions";
 import type { HrStaffImportPageModel } from "@/src/lib/staff/staffHrImportPage.server";
 import type { IiohrHrStaffImportRowPlan } from "@/src/lib/staffImport/iiohrHrStaffImportTypes";
 import type { IiohrHrStaffImportRunResult } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
-import type { IiohrHrStaffSyncPayload, IiohrHrStaffSyncSummary } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
+import type {
+  IiohrHrStaffSyncPayload,
+  IiohrHrStaffSyncSummary,
+} from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
 
 /** Sample CSV for Evolved Perth HR import (client download only). */
 const HR_STAFF_IMPORT_SAMPLE_CSV =
@@ -61,7 +67,9 @@ function parseCsvToRowObjects(text: string): unknown[] {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   if (lines.length < 2) return [];
-  const headers = parseDelimitedLine(lines[0]!, ",").map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
+  const headers = parseDelimitedLine(lines[0]!, ",").map((h) =>
+    h.trim().toLowerCase().replace(/\s+/g, "_")
+  );
   const rows: Record<string, unknown>[] = [];
   for (let i = 1; i < lines.length; i++) {
     const cells = parseDelimitedLine(lines[i]!, ",");
@@ -91,18 +99,28 @@ function parseInputToRows(raw: string): { rows: unknown[]; error: string | null 
   try {
     const parsed = JSON.parse(t) as unknown;
     if (Array.isArray(parsed)) return { rows: parsed, error: null };
-    if (parsed && typeof parsed === "object" && Array.isArray((parsed as { rows?: unknown }).rows)) {
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      Array.isArray((parsed as { rows?: unknown }).rows)
+    ) {
       return { rows: (parsed as { rows: unknown[] }).rows, error: null };
     }
-    return { rows: [], error: "JSON must be an array of row objects, or an object with a `rows` array." };
+    return {
+      rows: [],
+      error: "JSON must be an array of row objects, or an object with a `rows` array.",
+    };
   } catch {
     const csvRows = parseCsvToRowObjects(t);
-    if (csvRows.length === 0) return { rows: [], error: "Could not parse as JSON or CSV (need a header row + data rows)." };
+    if (csvRows.length === 0)
+      return { rows: [], error: "Could not parse as JSON or CSV (need a header row + data rows)." };
     return { rows: csvRows, error: null };
   }
 }
 
-function rowGroup(p: IiohrHrStaffImportRowPlan): "linked_staff" | "linked_user" | "new_staff" | "skipped" {
+function rowGroup(
+  p: IiohrHrStaffImportRowPlan
+): "linked_staff" | "linked_user" | "new_staff" | "skipped" {
   if (p.skippedDuplicate || p.skippedValidation) return "skipped";
   if (p.matchKind === "user_email") return "linked_user";
   if (p.matchKind === "source_id" || p.matchKind === "staff_email") return "linked_staff";
@@ -148,7 +166,9 @@ function RowPreviewCard({ p }: { p: IiohrHrStaffImportRowPlan }) {
   return (
     <li className="rounded-lg border border-white/[0.06] bg-[#0a1020]/60 px-3 py-2.5 text-sm text-[#CBD5E1]">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={chipClass(g === "skipped" ? "bad" : g === "new_staff" ? "info" : "ok")}>{label}</span>
+        <span className={chipClass(g === "skipped" ? "bad" : g === "new_staff" ? "info" : "ok")}>
+          {label}
+        </span>
         <span className="text-xs text-[#64748B]">source row {p.rowIndex}</span>
         {p.matchKind !== "none" ? (
           <span className={chipClass("neutral")}>match: {p.matchKind.replace("_", " ")}</span>
@@ -157,20 +177,12 @@ function RowPreviewCard({ p }: { p: IiohrHrStaffImportRowPlan }) {
       <p className="mt-1.5 font-medium text-[#F1F5F9]">{p.row.full_name}</p>
       <p className="mt-0.5 text-xs text-[#94A3B8]">
         <span className="font-mono">{p.row.external_staff_id}</span>
-        {p.row.email ? (
-          <>
-            {" "}
-            · {p.row.email}
-          </>
-        ) : null}
-        {p.row.staff_role ? (
-          <>
-            {" "}
-            · role {p.row.staff_role}
-          </>
-        ) : null}
+        {p.row.email ? <> · {p.row.email}</> : null}
+        {p.row.staff_role ? <> · role {p.row.staff_role}</> : null}
       </p>
-      {p.skippedDuplicate ? <p className="mt-1 text-xs text-amber-200/90">Duplicate match — no actions.</p> : null}
+      {p.skippedDuplicate ? (
+        <p className="mt-1 text-xs text-amber-200/90">Duplicate match — no actions.</p>
+      ) : null}
       {p.skippedValidation && p.actions[0]?.type === "skip_row" ? (
         <p className="mt-1 text-xs text-rose-200/90">{p.actions[0].payload.reason}</p>
       ) : null}
@@ -205,7 +217,7 @@ export function StaffImportClient({
 
   const [fiOutboundError, setFiOutboundError] = useState<string | null>(null);
   const [fiOutboundOk, setFiOutboundOk] = useState<
-    Awaited<ReturnType<typeof pushCurrentHrStaffToFiAction>> & { ok: true } | null
+    (Awaited<ReturnType<typeof pushCurrentHrStaffToFiAction>> & { ok: true }) | null
   >(null);
   const [fiOutboundPending, startFiOutboundTransition] = useTransition();
 
@@ -365,32 +377,43 @@ export function StaffImportClient({
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">HR</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">Staff import</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
+          Staff import
+        </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Import <strong className="text-[#E2E8F0]">Evolved Hair Restoration Perth</strong> HR exports into Follicle
-          Intelligence. Rows link to <span className="font-mono text-xs">fi_staff</span>,{" "}
+          Import <strong className="text-[#E2E8F0]">Evolved Hair Restoration Perth</strong> HR
+          exports into Follicle Intelligence. Rows link to{" "}
+          <span className="font-mono text-xs">fi_staff</span>,{" "}
           <span className="font-mono text-xs">fi_users</span> (by email when present), and{" "}
-          <span className="font-mono text-xs">fi_staff_source_ids</span> with <span className="font-mono text-xs">iiohr_hr</span>.
-          Review the plan, then commit — nothing is written until you confirm.
+          <span className="font-mono text-xs">fi_staff_source_ids</span> with{" "}
+          <span className="font-mono text-xs">iiohr_hr</span>. Review the plan, then commit —
+          nothing is written until you confirm.
         </p>
         {pageModel.hasPerthClinic ? (
           <InfoNotice variant="info" title="Perth clinic detected">
             Imports will tag HR source rows with{" "}
             <span className="font-mono text-xs text-[#E2E8F0]">primary_fi_clinic_id</span> for{" "}
-            <span className="font-medium text-[#E2E8F0]">{pageModel.perthClinicDisplayName ?? "Perth clinic"}</span>.
+            <span className="font-medium text-[#E2E8F0]">
+              {pageModel.perthClinicDisplayName ?? "Perth clinic"}
+            </span>
+            .
           </InfoNotice>
         ) : (
           <InfoNotice variant="warning" title="No Perth clinic match">
-            We could not find a clinic whose name includes &quot;Perth&quot; for this tenant. Staff will still import at
-            tenant level; add or rename a Perth site in Foundation if you need clinic linkage metadata on HR source ids.
+            We could not find a clinic whose name includes &quot;Perth&quot; for this tenant. Staff
+            will still import at tenant level; add or rename a Perth site in Foundation if you need
+            clinic linkage metadata on HR source ids.
           </InfoNotice>
         )}
         <InfoNotice variant="info" title="Outbound: IIOHR HR → FI (Evolved Perth)">
-          When Perth staff changes in the IIOHR HR portal, use <span className="font-mono text-[#94A3B8]">Preview FI staff sync</span> then{" "}
-          <span className="font-mono text-[#94A3B8]">Push FI staff sync</span> in the card below. Requires{" "}
-          <span className="font-mono text-[#94A3B8]">IIOHR_HR_PERTH_STAFF_FEED_URL</span> on this host, and{" "}
-          <span className="font-mono text-[#94A3B8]">FI_BASE_URL</span> plus <span className="font-mono text-[#94A3B8]">IIOHR_HR_SYNC_SECRET</span> matching
-          the FI staff-sync API. Only the operational projection is sent — no contracts, letters, or payroll payloads.
+          When Perth staff changes in the IIOHR HR portal, use{" "}
+          <span className="font-mono text-[#94A3B8]">Preview FI staff sync</span> then{" "}
+          <span className="font-mono text-[#94A3B8]">Push FI staff sync</span> in the card below.
+          Requires <span className="font-mono text-[#94A3B8]">IIOHR_HR_PERTH_STAFF_FEED_URL</span>{" "}
+          on this host, and <span className="font-mono text-[#94A3B8]">FI_BASE_URL</span> plus{" "}
+          <span className="font-mono text-[#94A3B8]">IIOHR_HR_SYNC_SECRET</span> matching the FI
+          staff-sync API. Only the operational projection is sent — no contracts, letters, or
+          payroll payloads.
         </InfoNotice>
       </header>
 
@@ -406,22 +429,34 @@ export function StaffImportClient({
           title={pageModel.cronBanner.title}
         >
           {pageModel.cronBanner.message}{" "}
-          <Link href={`${base}/hr/sync-health`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+          <Link
+            href={`${base}/hr/sync-health`}
+            className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
+          >
             Open HR sync health
           </Link>
           {" · "}
-          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+          <Link
+            href={`${base}/hr/staff-readiness`}
+            className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
+          >
             Staff readiness
           </Link>
         </InfoNotice>
       ) : (
         <InfoNotice variant="info" title="HR sync monitoring">
           Track cron runs, staff HR link issues, and environment readiness on the{" "}
-          <Link href={`${base}/hr/sync-health`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+          <Link
+            href={`${base}/hr/sync-health`}
+            className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
+          >
             HR sync health
           </Link>{" "}
           dashboard, or review operational staff readiness on{" "}
-          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+          <Link
+            href={`${base}/hr/staff-readiness`}
+            className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
+          >
             Staff readiness
           </Link>
           .
@@ -431,21 +466,34 @@ export function StaffImportClient({
       <DashboardCard className="p-4 sm:p-5">
         <h2 className="text-sm font-semibold text-[#F8FAFC]">Automation status</h2>
         <p className="mt-1 text-xs text-[#64748B]">
-          Scheduled job: <span className="font-mono text-[#94A3B8]">POST {pageModel.automation.cronPath}</span> with{" "}
-          <span className="font-mono text-[#94A3B8]">Authorization: Bearer CRON_SECRET</span>. See{" "}
-          <span className="font-mono text-[#94A3B8]">docs/iiohr-hr-perth-staff-sync-cron.md</span> and{" "}
-          <span className="font-mono text-[#94A3B8]">docs/runbooks/iiohr-hr-staff-sync.md</span>.
+          Scheduled job:{" "}
+          <span className="font-mono text-[#94A3B8]">POST {pageModel.automation.cronPath}</span>{" "}
+          with <span className="font-mono text-[#94A3B8]">Authorization: Bearer CRON_SECRET</span>.
+          See{" "}
+          <span className="font-mono text-[#94A3B8]">docs/iiohr-hr-perth-staff-sync-cron.md</span>{" "}
+          and <span className="font-mono text-[#94A3B8]">docs/runbooks/iiohr-hr-staff-sync.md</span>
+          .
         </p>
         <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
           {(
             [
-              ["Cron secret (16+ chars)", pageModel.automation.cronSecretConfigured && pageModel.automation.cronSecretLengthOk],
-              ["Evolved Perth tenant env matches this page", pageModel.automation.evolvedPerthTenantMatchesPageTenant],
+              [
+                "Cron secret (16+ chars)",
+                pageModel.automation.cronSecretConfigured &&
+                  pageModel.automation.cronSecretLengthOk,
+              ],
+              [
+                "Evolved Perth tenant env matches this page",
+                pageModel.automation.evolvedPerthTenantMatchesPageTenant,
+              ],
               ["Outbound push env (FI + feed)", pageModel.automation.allOutboundEnvConfigured],
               ["Full cron stack ready", pageModel.automation.allCronEnvConfigured],
             ] as const
           ).map(([label, ok]) => (
-            <div key={label} className="flex items-center justify-between gap-2 rounded border border-white/[0.06] bg-[#0a1020]/40 px-2 py-1.5">
+            <div
+              key={label}
+              className="flex items-center justify-between gap-2 rounded border border-white/[0.06] bg-[#0a1020]/40 px-2 py-1.5"
+            >
               <dt className="text-[#94A3B8]">{label}</dt>
               <dd>
                 <span className={chipClass(ok ? "ok" : "warn")}>{ok ? "Yes" : "No"}</span>
@@ -469,7 +517,8 @@ export function StaffImportClient({
             <span className="text-[#64748B]">Last scheduled (cron) sync</span>{" "}
             {pageModel.automation.lastCronRun ? (
               <span className="font-mono text-[#CBD5E1]">
-                {formatStaffSyncRunTime(pageModel.automation.lastCronRun.started_at)} · {pageModel.automation.lastCronRun.status}
+                {formatStaffSyncRunTime(pageModel.automation.lastCronRun.started_at)} ·{" "}
+                {pageModel.automation.lastCronRun.status}
               </span>
             ) : (
               <span className="text-[#64748B]">—</span>
@@ -478,14 +527,19 @@ export function StaffImportClient({
           {pageModel.automation.lastSuccessfulRunAt ? (
             <p>
               <span className="text-[#64748B]">Last successful cron sync</span>{" "}
-              <span className="font-mono text-[#CBD5E1]">{formatStaffSyncRunTime(pageModel.automation.lastSuccessfulRunAt)}</span>
+              <span className="font-mono text-[#CBD5E1]">
+                {formatStaffSyncRunTime(pageModel.automation.lastSuccessfulRunAt)}
+              </span>
             </p>
           ) : null}
         </div>
       </DashboardCard>
 
       {error ? (
-        <div className="rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
+        <div
+          className="rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -495,13 +549,14 @@ export function StaffImportClient({
           <div>
             <h2 className="text-lg font-semibold text-[#F8FAFC]">Data</h2>
             <p className="mt-1 text-xs text-[#64748B]">
-              Upload a CSV (header row) or paste JSON / CSV. Required columns: <span className="font-mono">external_staff_id</span>,{" "}
+              Upload a CSV (header row) or paste JSON / CSV. Required columns:{" "}
+              <span className="font-mono">external_staff_id</span>,{" "}
               <span className="font-mono">full_name</span>.
             </p>
             <p className="mt-2 max-w-xl text-xs leading-relaxed text-[#64748B]">
-              Keep <span className="font-mono text-[#94A3B8]">external_staff_id</span> stable across exports — it is the key
-              for matching and updating the same person on future re-imports (via{" "}
-              <span className="font-mono text-[#94A3B8]">fi_staff_source_ids</span>).
+              Keep <span className="font-mono text-[#94A3B8]">external_staff_id</span> stable across
+              exports — it is the key for matching and updating the same person on future re-imports
+              (via <span className="font-mono text-[#94A3B8]">fi_staff_source_ids</span>).
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2 sm:shrink-0">
@@ -513,7 +568,13 @@ export function StaffImportClient({
               <Download className="h-4 w-4 opacity-80" aria-hidden />
               Download sample CSV
             </button>
-            <input ref={fileRef} type="file" accept=".csv,.json,.txt,text/csv,application/json" className="hidden" onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv,.json,.txt,text/csv,application/json"
+              className="hidden"
+              onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+            />
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -555,20 +616,29 @@ export function StaffImportClient({
           </button>
         </div>
         <p className="mt-3 text-xs text-[#64748B]">
-          Commit uses the exact row set returned from your last successful preview. Edit the text area after preview to discard the lock and preview again.
+          Commit uses the exact row set returned from your last successful preview. Edit the text
+          area after preview to discard the lock and preview again.
         </p>
       </DashboardCard>
 
       <DashboardCard className="p-5 sm:p-6">
-        <h2 className="text-lg font-semibold text-[#F8FAFC]">Outbound: IIOHR HR → Follicle Intelligence</h2>
+        <h2 className="text-lg font-semibold text-[#F8FAFC]">
+          Outbound: IIOHR HR → Follicle Intelligence
+        </h2>
         <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
           Reads the configured Evolved Perth HR JSON feed, maps to FI staff-sync rows, and POSTs to{" "}
-          <span className="font-mono text-xs text-[#CBD5E1]">POST …/integrations/iiohr-hr/staff-sync</span> on the FI
-          deployment (<span className="font-mono text-xs">FI_BASE_URL</span>). Preview is dry-run on FI; push applies when FI accepts the commit.
+          <span className="font-mono text-xs text-[#CBD5E1]">
+            POST …/integrations/iiohr-hr/staff-sync
+          </span>{" "}
+          on the FI deployment (<span className="font-mono text-xs">FI_BASE_URL</span>). Preview is
+          dry-run on FI; push applies when FI accepts the commit.
         </p>
 
         {fiOutboundError ? (
-          <div className="mt-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
+          <div
+            className="mt-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100"
+            role="alert"
+          >
             {fiOutboundError}
           </div>
         ) : null}
@@ -613,8 +683,13 @@ export function StaffImportClient({
                   ["Skipped rows", fiOutboundOk.display.skipped ?? "—"],
                 ] as const
               ).map(([k, v]) => (
-                <div key={k} className="rounded border border-white/[0.05] bg-[#0a1020]/40 px-2 py-1.5">
-                  <dt className="text-[10px] font-medium uppercase tracking-wide text-[#64748B]">{k}</dt>
+                <div
+                  key={k}
+                  className="rounded border border-white/[0.05] bg-[#0a1020]/40 px-2 py-1.5"
+                >
+                  <dt className="text-[10px] font-medium uppercase tracking-wide text-[#64748B]">
+                    {k}
+                  </dt>
                   <dd className="font-mono text-sm text-[#F8FAFC]">{v}</dd>
                 </div>
               ))}
@@ -630,7 +705,8 @@ export function StaffImportClient({
               </div>
             ) : null}
             <p className="text-xs text-[#64748B]">
-              Mapped <span className="font-mono text-[#94A3B8]">{fiOutboundOk.mappedRowCount}</span> HR feed row(s) before POST.
+              Mapped <span className="font-mono text-[#94A3B8]">{fiOutboundOk.mappedRowCount}</span>{" "}
+              HR feed row(s) before POST.
             </p>
           </div>
         ) : null}
@@ -640,9 +716,11 @@ export function StaffImportClient({
         <h2 className="text-lg font-semibold text-[#F8FAFC]">IIOHR HR Sync</h2>
         <div className="mt-3 space-y-2 text-sm leading-relaxed text-[#94A3B8]">
           <p>
-            <strong className="text-[#E2E8F0]">IIOHR HR</strong> remains the HR system of record. Follicle Intelligence keeps only{" "}
-            <span className="font-mono text-xs text-[#CBD5E1]">fi_staff</span> (operational scheduling),{" "}
-            <span className="font-mono text-xs text-[#CBD5E1]">fi_users</span> (tenant membership), and the identity bridge{" "}
+            <strong className="text-[#E2E8F0]">IIOHR HR</strong> remains the HR system of record.
+            Follicle Intelligence keeps only{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">fi_staff</span> (operational
+            scheduling), <span className="font-mono text-xs text-[#CBD5E1]">fi_users</span> (tenant
+            membership), and the identity bridge{" "}
             <span className="font-mono text-xs text-[#CBD5E1]">fi_staff_source_ids</span> with{" "}
             <span className="font-mono text-xs text-[#CBD5E1]">source_system = iiohr_hr</span> and{" "}
             <span className="font-mono text-xs text-[#CBD5E1]">source_staff_id</span> = your stable{" "}
@@ -650,13 +728,18 @@ export function StaffImportClient({
           </p>
           <p>
             HR documents, contracts, letters, and full training history stay in IIOHR. Optional{" "}
-            <span className="font-mono text-xs text-[#CBD5E1]">metadata_snapshot</span> is merged only into that source-id row as a{" "}
-            <strong className="text-[#E2E8F0]">bounded</strong> JSON snapshot (plus <span className="font-mono text-xs">last_synced_at</span> on each sync).
+            <span className="font-mono text-xs text-[#CBD5E1]">metadata_snapshot</span> is merged
+            only into that source-id row as a <strong className="text-[#E2E8F0]">bounded</strong>{" "}
+            JSON snapshot (plus <span className="font-mono text-xs">last_synced_at</span> on each
+            sync).
           </p>
         </div>
 
         {syncError ? (
-          <div className="mt-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
+          <div
+            className="mt-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100"
+            role="alert"
+          >
             {syncError}
           </div>
         ) : null}
@@ -692,7 +775,8 @@ export function StaffImportClient({
           </button>
         </div>
         <p className="mt-3 text-xs text-[#64748B]">
-          Commit applies the same row objects from your last successful sync preview. Uses the same planner as staff import, then stamps sync metadata on{" "}
+          Commit applies the same row objects from your last successful sync preview. Uses the same
+          planner as staff import, then stamps sync metadata on{" "}
           <span className="font-mono text-[#94A3B8]">fi_staff_source_ids</span> only.
         </p>
 
@@ -703,7 +787,8 @@ export function StaffImportClient({
                 {syncSummary.result.commit ? "Committed" : "Sync preview"}
               </span>
               <span className="text-xs text-[#64748B]">
-                last_synced_at stamp: <span className="font-mono text-[#94A3B8]">{syncSummary.lastSyncedAt}</span>
+                last_synced_at stamp:{" "}
+                <span className="font-mono text-[#94A3B8]">{syncSummary.lastSyncedAt}</span>
               </span>
             </div>
             {!syncSummary.result.ok && syncSummary.result.error ? (
@@ -722,8 +807,13 @@ export function StaffImportClient({
                   ["Updated source ids", syncCounts.updatedSourceIds],
                 ] as const
               ).map(([k, v]) => (
-                <div key={k} className="rounded border border-white/[0.05] bg-[#0a1020]/40 px-2 py-1.5">
-                  <dt className="text-[10px] font-medium uppercase tracking-wide text-[#64748B]">{k}</dt>
+                <div
+                  key={k}
+                  className="rounded border border-white/[0.05] bg-[#0a1020]/40 px-2 py-1.5"
+                >
+                  <dt className="text-[10px] font-medium uppercase tracking-wide text-[#64748B]">
+                    {k}
+                  </dt>
                   <dd className="font-mono text-sm text-[#F8FAFC]">{v}</dd>
                 </div>
               ))}
@@ -745,9 +835,11 @@ export function StaffImportClient({
           <h3 className="text-sm font-semibold text-[#F8FAFC]">Recent IIOHR HR API sync runs</h3>
           <p className="mt-1 text-xs text-[#64748B]">
             Last five producer POSTs to{" "}
-            <span className="font-mono text-[#94A3B8]">/api/tenants/…/integrations/iiohr-hr/staff-sync</span> (header{" "}
-            <span className="font-mono text-[#94A3B8]">x-iiohr-sync-secret</span>), stored in{" "}
-            <span className="font-mono text-[#94A3B8]">fi_staff_sync_runs</span>.
+            <span className="font-mono text-[#94A3B8]">
+              /api/tenants/…/integrations/iiohr-hr/staff-sync
+            </span>{" "}
+            (header <span className="font-mono text-[#94A3B8]">x-iiohr-sync-secret</span>), stored
+            in <span className="font-mono text-[#94A3B8]">fi_staff_sync_runs</span>.
           </p>
           {pageModel.recentStaffSyncRuns.length === 0 ? (
             <p className="mt-3 text-sm text-[#64748B]">No API sync runs recorded yet.</p>
@@ -771,12 +863,20 @@ export function StaffImportClient({
                 <tbody>
                   {pageModel.recentStaffSyncRuns.map((r) => (
                     <tr key={r.id} className="border-b border-white/[0.04] last:border-0">
-                      <td className="whitespace-nowrap px-3 py-2 text-[#94A3B8]">{formatStaffSyncRunTime(r.started_at)}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-[#94A3B8]">
+                        {formatStaffSyncRunTime(r.started_at)}
+                      </td>
                       <td className="px-3 py-2 font-mono text-[11px] text-[#E2E8F0]">{r.mode}</td>
                       <td className="px-3 py-2">
                         <span
                           className={chipClass(
-                            r.status === "success" ? "ok" : r.status === "failed" ? "bad" : r.status === "running" ? "warn" : "neutral"
+                            r.status === "success"
+                              ? "ok"
+                              : r.status === "failed"
+                                ? "bad"
+                                : r.status === "running"
+                                  ? "warn"
+                                  : "neutral"
                           )}
                         >
                           {r.status}
@@ -788,7 +888,10 @@ export function StaffImportClient({
                       <td className="px-3 py-2 text-right font-mono">{r.linked_count ?? "—"}</td>
                       <td className="px-3 py-2 text-right font-mono">{r.skipped_count ?? "—"}</td>
                       <td className="px-3 py-2 text-right font-mono">{r.warning_count ?? "—"}</td>
-                      <td className="max-w-[200px] truncate px-3 py-2 text-rose-200/90" title={r.error_message ?? undefined}>
+                      <td
+                        className="max-w-[200px] truncate px-3 py-2 text-rose-200/90"
+                        title={r.error_message ?? undefined}
+                      >
                         {r.error_message ?? "—"}
                       </td>
                     </tr>
@@ -805,11 +908,15 @@ export function StaffImportClient({
           <DashboardCard className="p-5 sm:p-6">
             <h2 className="text-lg font-semibold text-[#F8FAFC]">Summary</h2>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className={chipClass(preview.commit ? "ok" : "info")}>{preview.commit ? "Committed" : "Dry-run"}</span>
+              <span className={chipClass(preview.commit ? "ok" : "info")}>
+                {preview.commit ? "Committed" : "Dry-run"}
+              </span>
               {preview.skippedRowCount > 0 ? (
                 <span className={chipClass("warn")}>Skipped rows: {preview.skippedRowCount}</span>
               ) : null}
-              <span className={chipClass("neutral")}>Planned actions: {preview.plan.actions.length}</span>
+              <span className={chipClass("neutral")}>
+                Planned actions: {preview.plan.actions.length}
+              </span>
             </div>
             <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
               {(
@@ -824,14 +931,21 @@ export function StaffImportClient({
                   ["Updated source ids", preview.dryRunCounts.updatedSourceIds],
                 ] as const
               ).map(([k, v]) => (
-                <div key={k} className="rounded-lg border border-white/[0.05] bg-[#0a1020]/50 px-3 py-2">
-                  <dt className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">{k}</dt>
+                <div
+                  key={k}
+                  className="rounded-lg border border-white/[0.05] bg-[#0a1020]/50 px-3 py-2"
+                >
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">
+                    {k}
+                  </dt>
                   <dd className="mt-1 font-mono text-base text-[#F8FAFC]">{v}</dd>
                 </div>
               ))}
             </dl>
             {preview.commit && preview.appliedCounts ? (
-              <p className="mt-4 text-xs text-emerald-200/90">Applied counts match the summary above for this run.</p>
+              <p className="mt-4 text-xs text-emerald-200/90">
+                Applied counts match the summary above for this run.
+              </p>
             ) : null}
           </DashboardCard>
 
@@ -875,22 +989,60 @@ export function StaffImportClient({
             <div className="grid gap-4 lg:grid-cols-2">
               <DashboardCard className="p-5 sm:p-6">
                 <h3 className="text-sm font-semibold text-[#F8FAFC]">Linked existing FI staff</h3>
-                <p className="mt-1 text-xs text-[#64748B]">Matched by HR external id or staff email.</p>
-                <ul className="mt-3 space-y-2">{groupedRows.linked_staff.length ? groupedRows.linked_staff.map((p) => <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}</ul>
+                <p className="mt-1 text-xs text-[#64748B]">
+                  Matched by HR external id or staff email.
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {groupedRows.linked_staff.length ? (
+                    groupedRows.linked_staff.map((p) => (
+                      <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />
+                    ))
+                  ) : (
+                    <li className="text-sm text-[#64748B]">None</li>
+                  )}
+                </ul>
               </DashboardCard>
               <DashboardCard className="p-5 sm:p-6">
                 <h3 className="text-sm font-semibold text-[#F8FAFC]">Linked existing FI user</h3>
-                <p className="mt-1 text-xs text-[#64748B]">Email matched a tenant user; a new staff row is created and linked.</p>
-                <ul className="mt-3 space-y-2">{groupedRows.linked_user.length ? groupedRows.linked_user.map((p) => <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}</ul>
+                <p className="mt-1 text-xs text-[#64748B]">
+                  Email matched a tenant user; a new staff row is created and linked.
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {groupedRows.linked_user.length ? (
+                    groupedRows.linked_user.map((p) => (
+                      <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />
+                    ))
+                  ) : (
+                    <li className="text-sm text-[#64748B]">None</li>
+                  )}
+                </ul>
               </DashboardCard>
               <DashboardCard className="p-5 sm:p-6">
                 <h3 className="text-sm font-semibold text-[#F8FAFC]">New staff to create</h3>
-                <p className="mt-1 text-xs text-[#64748B]">No existing staff or user match — creates staff (and user when email is new).</p>
-                <ul className="mt-3 space-y-2">{groupedRows.new_staff.length ? groupedRows.new_staff.map((p) => <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}</ul>
+                <p className="mt-1 text-xs text-[#64748B]">
+                  No existing staff or user match — creates staff (and user when email is new).
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {groupedRows.new_staff.length ? (
+                    groupedRows.new_staff.map((p) => (
+                      <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />
+                    ))
+                  ) : (
+                    <li className="text-sm text-[#64748B]">None</li>
+                  )}
+                </ul>
               </DashboardCard>
               <DashboardCard className="p-5 sm:p-6">
                 <h3 className="text-sm font-semibold text-[#F8FAFC]">Skipped / duplicates</h3>
-                <ul className="mt-3 space-y-2">{groupedRows.skipped.length ? groupedRows.skipped.map((p) => <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />) : <li className="text-sm text-[#64748B]">None</li>}</ul>
+                <ul className="mt-3 space-y-2">
+                  {groupedRows.skipped.length ? (
+                    groupedRows.skipped.map((p) => (
+                      <RowPreviewCard key={`${p.rowIndex}-${p.row.external_staff_id}`} p={p} />
+                    ))
+                  ) : (
+                    <li className="text-sm text-[#64748B]">None</li>
+                  )}
+                </ul>
               </DashboardCard>
             </div>
           ) : null}
@@ -903,16 +1055,25 @@ export function StaffImportClient({
         </DashboardCard>
       ) : null}
 
-        <p className="text-center text-sm text-[#64748B]">
-        <Link href={`${base}/hr/staff-import/payroll`} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+      <p className="text-center text-sm text-[#64748B]">
+        <Link
+          href={`${base}/hr/staff-import/payroll`}
+          className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline"
+        >
           Evolved payroll import (.xlsx)
         </Link>
         <span className="mx-2 text-[#475569]">·</span>
-        <Link href={`${base}/staff`} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+        <Link
+          href={`${base}/staff`}
+          className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline"
+        >
           Staff directory
         </Link>
         <span className="mx-2 text-[#475569]">·</span>
-        <Link href={base} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+        <Link
+          href={base}
+          className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline"
+        >
           Dashboard
         </Link>
       </p>

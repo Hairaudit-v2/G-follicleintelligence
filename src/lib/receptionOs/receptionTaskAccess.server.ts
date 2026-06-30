@@ -11,14 +11,20 @@ import {
 export async function assertReceptionTaskMutationAllowed(
   tenantId: string,
   action: ReceptionTaskAction,
-  adminKey?: string | null,
+  adminKey?: string | null
 ): Promise<{ actorFiUserId: string | null }> {
   const tid = tenantId.trim();
-  await assertCrmTenantReadAllowed({ tenantId: tid, adminKey: adminKey ?? undefined, request: undefined });
+  await assertCrmTenantReadAllowed({
+    tenantId: tid,
+    adminKey: adminKey ?? undefined,
+    request: undefined,
+  });
 
   const viewer = await resolveReceptionOsViewerContext(tid);
   if (!viewer.canAccessReceptionOs) {
-    throw new Error("ReceptionOS access requires an active staff or CRM shell role for this tenant.");
+    throw new Error(
+      "ReceptionOS access requires an active staff or CRM shell role for this tenant."
+    );
   }
   if (!receptionTaskActionAllowed(viewer.receptionOsRole, action)) {
     throw new Error(`Action "${action}" is not permitted for your role.`);

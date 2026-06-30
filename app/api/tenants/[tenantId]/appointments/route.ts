@@ -4,8 +4,17 @@
  *
  * Calendar-first appointment API for Evolved Hair Clinics (PRP, transplant, consults).
  */
-import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  assertCrmTenantReadAllowed,
+  assertCrmTenantWriteAllowed,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import {
   appointmentCreateBodySchema,
   parseAppointmentListQuery,

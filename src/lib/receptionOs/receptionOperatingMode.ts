@@ -20,8 +20,18 @@ export type ReceptionOsPhase2WidgetKey = (typeof RECEPTION_OS_PHASE2_WIDGET_KEYS
 
 const MODE_WIDGET_PRIORITY: Record<ReceptionOsOperatingMode, readonly ReceptionOsWidgetKey[]> = {
   morning_prep: ["todays_patients", "upcoming_surgery", "outstanding_deposits", "action_alerts"],
-  live_clinic: ["todays_patients", "communication_timeline", "action_alerts", "consultation_pipeline"],
-  end_of_day: ["action_alerts", "consultation_pipeline", "outstanding_deposits", "upcoming_surgery"],
+  live_clinic: [
+    "todays_patients",
+    "communication_timeline",
+    "action_alerts",
+    "consultation_pipeline",
+  ],
+  end_of_day: [
+    "action_alerts",
+    "consultation_pipeline",
+    "outstanding_deposits",
+    "upcoming_surgery",
+  ],
 };
 
 const MODE_TASK_STATUSES: Record<ReceptionOsOperatingMode, readonly ReceptionTaskStatus[]> = {
@@ -39,7 +49,7 @@ export function inferDefaultOperatingMode(localHour: number): ReceptionOsOperati
 /** Intersect persona-visible widgets with mode priority ordering. Phase 2 widgets always included. */
 export function widgetsForOperatingMode(
   mode: ReceptionOsOperatingMode,
-  personaWidgets: readonly ReceptionOsWidgetKey[],
+  personaWidgets: readonly ReceptionOsWidgetKey[]
 ): ReceptionOsWidgetKey[] {
   const allowed = new Set(personaWidgets);
   const ordered = MODE_WIDGET_PRIORITY[mode].filter((w) => allowed.has(w));
@@ -49,7 +59,9 @@ export function widgetsForOperatingMode(
   return ordered;
 }
 
-export function taskStatusesForOperatingMode(mode: ReceptionOsOperatingMode): readonly ReceptionTaskStatus[] {
+export function taskStatusesForOperatingMode(
+  mode: ReceptionOsOperatingMode
+): readonly ReceptionTaskStatus[] {
   return MODE_TASK_STATUSES[mode];
 }
 

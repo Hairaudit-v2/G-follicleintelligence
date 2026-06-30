@@ -24,7 +24,8 @@ const severityRowClasses = {
 
 function iconForItem(id: string): ReactNode {
   if (id.includes("surgery") || id.includes("readiness")) return <Scissors className="h-4 w-4" />;
-  if (id.includes("payment") || id.includes("finance") || id.includes("clearance")) return <Banknote className="h-4 w-4" />;
+  if (id.includes("payment") || id.includes("finance") || id.includes("clearance"))
+    return <Banknote className="h-4 w-4" />;
   if (id.includes("consult")) return <ClipboardList className="h-4 w-4" />;
   if (id.includes("lead")) return <Phone className="h-4 w-4" />;
   return <AlertTriangle className="h-4 w-4" />;
@@ -35,10 +36,16 @@ function AttentionRow({ item }: { item: AttentionPriorityItem }) {
   return (
     <Link
       href={item.href}
-      className={cn("flex items-start gap-3 rounded-xl border px-3 py-3 transition sm:px-4", tone.row)}
+      className={cn(
+        "flex items-start gap-3 rounded-xl border px-3 py-3 transition sm:px-4",
+        tone.row
+      )}
     >
       <span
-        className={cn("mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", tone.icon)}
+        className={cn(
+          "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border",
+          tone.icon
+        )}
         aria-hidden
       >
         {iconForItem(item.id)}
@@ -51,11 +58,18 @@ function AttentionRow({ item }: { item: AttentionPriorityItem }) {
   );
 }
 
-export function DashboardAttentionPriorities(props: { items: readonly AttentionPriorityItem[]; base: string }) {
+export function DashboardAttentionPriorities(props: {
+  items: readonly AttentionPriorityItem[];
+  base: string;
+}) {
   const { items, base } = props;
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="attention-priorities-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="attention-priorities-heading"
+    >
       <SectionHeader
         id="attention-priorities-heading"
         kicker="Priority"

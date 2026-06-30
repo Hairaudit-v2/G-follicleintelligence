@@ -5,13 +5,19 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { DoctorWorkspaceHome } from "@/src/components/fi-admin/doctor-workspace/DoctorWorkspaceHome";
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { casePersonDisplayFromMetadata } from "@/src/lib/cases/caseLabels";
-import { assertBookingsOperatorPageAccess, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import {
+  assertBookingsOperatorPageAccess,
+  getCrmShellNavAllowed,
+} from "@/src/lib/crm/crmShellAccess";
 import { loadDoctorWorkspace } from "@/src/lib/doctorOs/doctorWorkspaceLoader.server";
 import { loadRecentPrescriptionsForTenant } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
 
 export const dynamic = "force-dynamic";
 
-async function loadPatientLabels(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
+async function loadPatientLabels(
+  tenantId: string,
+  patientIds: string[]
+): Promise<Map<string, string>> {
   const uniq = Array.from(new Set(patientIds.filter(Boolean)));
   const map = new Map<string, string>();
   if (uniq.length === 0) return map;
@@ -23,7 +29,9 @@ async function loadPatientLabels(tenantId: string, patientIds: string[]): Promis
     .in("id", uniq);
   if (pe || !pRows?.length) return map;
 
-  const personIds = Array.from(new Set(pRows.map((r) => String((r as { person_id: string }).person_id))));
+  const personIds = Array.from(
+    new Set(pRows.map((r) => String((r as { person_id: string }).person_id)))
+  );
   const { data: personRows, error: e2 } = await supabase
     .from("fi_persons")
     .select("id, metadata")
@@ -61,12 +69,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function DoctorWorkspacePage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function DoctorWorkspacePage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="p-6 text-sm text-red-600">Server misconfigured (Supabase).</p>;
   }
 

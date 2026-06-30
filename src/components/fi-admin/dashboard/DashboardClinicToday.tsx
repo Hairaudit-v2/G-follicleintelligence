@@ -22,16 +22,20 @@ function TodayTile({
       href={href}
       className={cn(
         "group flex flex-col justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4 shadow-sm shadow-black/25 backdrop-blur-sm transition",
-        "hover:-translate-y-0.5 hover:border-cyan-500/35 hover:bg-cyan-500/[0.08] hover:shadow-cyan-500/10",
+        "hover:-translate-y-0.5 hover:border-cyan-500/35 hover:bg-cyan-500/[0.08] hover:shadow-cyan-500/10"
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          {label}
+        </p>
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-500/15 bg-cyan-500/10 text-cyan-400 transition group-hover:border-cyan-400/35">
           {icon}
         </span>
       </div>
-      <p className="mt-3 font-mono text-2xl font-semibold tabular-nums tracking-tight text-slate-50 sm:text-3xl">{value}</p>
+      <p className="mt-3 font-mono text-2xl font-semibold tabular-nums tracking-tight text-slate-50 sm:text-3xl">
+        {value}
+      </p>
     </Link>
   );
 }

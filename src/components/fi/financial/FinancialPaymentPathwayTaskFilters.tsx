@@ -108,13 +108,21 @@ export function FinancialPaymentPathwayTaskFilters(props: {
   );
 }
 
-export function filterPathwayInboxRows(rows: PaymentPathwayInboxRow[], filters: PathwayInboxFilterState): PaymentPathwayInboxRow[] {
+export function filterPathwayInboxRows(
+  rows: PaymentPathwayInboxRow[],
+  filters: PathwayInboxFilterState
+): PaymentPathwayInboxRow[] {
   return rows.filter((row) => {
     if (filters.status !== "all" && row.status !== filters.status) return false;
     if (filters.priority !== "all" && row.priority !== filters.priority) return false;
     if (filters.pathway_type !== "all" && row.pathway_type !== filters.pathway_type) return false;
     if (filters.assigned_to === "unassigned" && row.assigned_to) return false;
-    if (filters.assigned_to !== "all" && filters.assigned_to !== "unassigned" && row.assigned_to !== filters.assigned_to) return false;
+    if (
+      filters.assigned_to !== "all" &&
+      filters.assigned_to !== "unassigned" &&
+      row.assigned_to !== filters.assigned_to
+    )
+      return false;
     return true;
   });
 }

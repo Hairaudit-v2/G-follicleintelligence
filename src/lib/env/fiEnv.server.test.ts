@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  assertFiServerEnv,
-  FiEnvValidationError,
-  validateFiServerEnv,
-} from "./fiEnv.server";
+import { assertFiServerEnv, FiEnvValidationError, validateFiServerEnv } from "./fiEnv.server";
 
 const validProdBase = (): NodeJS.ProcessEnv => ({
   NODE_ENV: "production",
@@ -184,7 +180,9 @@ describe("assertFiServerEnv", () => {
           NODE_ENV: "production",
           NEXT_PUBLIC_SUPABASE_URL: "",
         }),
-      (e: unknown) => e instanceof FiEnvValidationError && (e as FiEnvValidationError).errors.includes("NEXT_PUBLIC_SUPABASE_URL")
+      (e: unknown) =>
+        e instanceof FiEnvValidationError &&
+        (e as FiEnvValidationError).errors.includes("NEXT_PUBLIC_SUPABASE_URL")
     );
   });
 });

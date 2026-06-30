@@ -16,15 +16,22 @@ import {
   parseEvolvedPayrollExportRows,
   parseEvolvedPayrollExportXlsxBuffer,
 } from "./evolvedPayrollStaffImportParse";
-import { EVOLVED_PAYROLL_SOURCE_SYSTEM_NORMALIZED, planEvolvedPayrollStaffImport } from "./evolvedPayrollStaffImportPlan";
-import type { EvolvedPayrollImportExistingStaff, EvolvedPayrollStaffImportRow } from "./evolvedPayrollStaffImportTypes";
+import {
+  EVOLVED_PAYROLL_SOURCE_SYSTEM_NORMALIZED,
+  planEvolvedPayrollStaffImport,
+} from "./evolvedPayrollStaffImportPlan";
+import type {
+  EvolvedPayrollImportExistingStaff,
+  EvolvedPayrollStaffImportRow,
+} from "./evolvedPayrollStaffImportTypes";
 import { applyIiohrHrStaffImportPlanForTests } from "./iiohrHrStaffImportRunner";
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 const CLINIC = "Evolved Hair Restoration Perth";
 
 function payrollRow(
-  p: Partial<EvolvedPayrollStaffImportRow> & Pick<EvolvedPayrollStaffImportRow, "external_staff_id" | "full_name">
+  p: Partial<EvolvedPayrollStaffImportRow> &
+    Pick<EvolvedPayrollStaffImportRow, "external_staff_id" | "full_name">
 ): EvolvedPayrollStaffImportRow {
   return {
     email: null,
@@ -88,7 +95,11 @@ test("parse export lists skipped sensitive field names only", () => {
   assert.ok(r.skippedSensitiveFields.includes("TaxFileNumber"));
   assert.ok(r.skippedSensitiveFields.includes("DateOfBirth"));
   for (const name of r.skippedSensitiveFields) {
-    assert.ok(PAYROLL_SENSITIVE_EXPORT_FIELDS.includes(name as (typeof PAYROLL_SENSITIVE_EXPORT_FIELDS)[number]));
+    assert.ok(
+      PAYROLL_SENSITIVE_EXPORT_FIELDS.includes(
+        name as (typeof PAYROLL_SENSITIVE_EXPORT_FIELDS)[number]
+      )
+    );
   }
 });
 
@@ -131,7 +142,9 @@ test("EmployeeId links through fi_staff_source_ids evolved_payroll", () => {
   ];
   const plan = planEvolvedPayrollStaffImport({
     tenantId: TENANT,
-    rows: [payrollRow({ external_staff_id: "4491810", full_name: "Updated", email: "new@example.com" })],
+    rows: [
+      payrollRow({ external_staff_id: "4491810", full_name: "Updated", email: "new@example.com" }),
+    ],
     existingUsers: [],
     existingStaff: staff,
     existingStaffSourceIds: [
@@ -147,7 +160,9 @@ test("EmployeeId links through fi_staff_source_ids evolved_payroll", () => {
     primaryFiClinicId: null,
   });
   assert.equal(plan.perRow[0]?.matchKind, "source_id");
-  const src = plan.actions.find((a) => a.type === "update_staff_source_id" || a.type === "create_staff_source_id");
+  const src = plan.actions.find(
+    (a) => a.type === "update_staff_source_id" || a.type === "create_staff_source_id"
+  );
   assert.ok(src);
 });
 
@@ -209,7 +224,9 @@ test("existing staff email match does not create duplicate fi_staff", async () =
 
   const plan = planEvolvedPayrollStaffImport({
     tenantId: TENANT,
-    rows: [payrollRow({ external_staff_id: "EXT-DUP", email: "existing@x.com", full_name: "Existing" })],
+    rows: [
+      payrollRow({ external_staff_id: "EXT-DUP", email: "existing@x.com", full_name: "Existing" }),
+    ],
     existingUsers: [],
     existingStaff,
     existingStaffSourceIds: [],
@@ -234,7 +251,13 @@ test("existing staff email match does not create duplicate fi_staff", async () =
 test("new staff defaults staff_role to needs_review and evolved_payroll source id", () => {
   const plan = planEvolvedPayrollStaffImport({
     tenantId: TENANT,
-    rows: [payrollRow({ external_staff_id: "12891032", full_name: "Evie Shackleton", email: "evie@example.com" })],
+    rows: [
+      payrollRow({
+        external_staff_id: "12891032",
+        full_name: "Evie Shackleton",
+        email: "evie@example.com",
+      }),
+    ],
     existingUsers: [],
     existingStaff: [],
     existingStaffSourceIds: [],
@@ -254,7 +277,8 @@ test("new staff defaults staff_role to needs_review and evolved_payroll source i
 });
 
 test("real export sample parses 10 Perth staff rows", () => {
-  const path = "c:/Users/thelo/OneDrive/Desktop/EVOLVEDCLINICSPTYLTD_EmployeeData_20260609182701.xlsx";
+  const path =
+    "c:/Users/thelo/OneDrive/Desktop/EVOLVEDCLINICSPTYLTD_EmployeeData_20260609182701.xlsx";
   let buffer: Buffer;
   try {
     buffer = readFileSync(path);
@@ -269,7 +293,12 @@ test("real export sample parses 10 Perth staff rows", () => {
 
 test("buildPayrollFullName prefixes Dr when Title is Dr", () => {
   assert.equal(
-    buildPayrollFullName({ Title: "Dr", FirstName: "Anita", MiddleName: "Katherine", Surname: "Cottee" }),
+    buildPayrollFullName({
+      Title: "Dr",
+      FirstName: "Anita",
+      MiddleName: "Katherine",
+      Surname: "Cottee",
+    }),
     "Dr Anita Katherine Cottee"
   );
 });

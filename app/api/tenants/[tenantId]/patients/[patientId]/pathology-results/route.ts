@@ -4,16 +4,28 @@
  * status (draft|reviewed), items (JSON string), file (optional PDF), adminKey (optional)
  */
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
-import { createPathologyResultFormSchema, pathologyResultItemInputSchema } from "@/src/lib/pathology/pathologyResultApiSchemas";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
+import {
+  createPathologyResultFormSchema,
+  pathologyResultItemInputSchema,
+} from "@/src/lib/pathology/pathologyResultApiSchemas";
 import { createPathologyResult } from "@/src/lib/pathology/pathologyResultMutations.server";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string; patientId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ tenantId: string; patientId: string }> }
+) {
   try {
     const { tenantId, patientId } = await params;
-    if (!tenantId?.trim() || !patientId?.trim()) return crmJsonError(400, "Missing tenantId or patientId.");
+    if (!tenantId?.trim() || !patientId?.trim())
+      return crmJsonError(400, "Missing tenantId or patientId.");
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return crmJsonError(500, "Server misconfigured.");
@@ -50,22 +62,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     for (const row of itemsArr) {
       const ir = pathologyResultItemInputSchema.safeParse(row);
       if (!ir.success) {
-        return crmJsonError(400, ir.error.issues.map((i) => i.message).join(" ") || "Invalid marker row.");
+        return crmJsonError(
+          400,
+          ir.error.issues.map((i) => i.message).join(" ") || "Invalid marker row."
+        );
       }
       items.push(ir.data);
     }
 
     const parsed = createPathologyResultFormSchema.safeParse({
       result_date: resultDate == null ? "" : String(resultDate),
-      provider_name: providerName == null || String(providerName).trim() === "" ? null : String(providerName),
+      provider_name:
+        providerName == null || String(providerName).trim() === "" ? null : String(providerName),
       pathology_request_id:
-        pathologyRequestId == null || String(pathologyRequestId).trim() === "" ? null : String(pathologyRequestId),
-      clinical_summary: clinicalSummary == null || String(clinicalSummary).trim() === "" ? null : String(clinicalSummary),
+        pathologyRequestId == null || String(pathologyRequestId).trim() === ""
+          ? null
+          : String(pathologyRequestId),
+      clinical_summary:
+        clinicalSummary == null || String(clinicalSummary).trim() === ""
+          ? null
+          : String(clinicalSummary),
       status: statusRaw == null ? "draft" : String(statusRaw),
       items,
     });
     if (!parsed.success) {
-      return crmJsonError(400, parsed.error.issues.map((i) => i.message).join(" ") || "Invalid form.");
+      return crmJsonError(
+        400,
+        parsed.error.issues.map((i) => i.message).join(" ") || "Invalid form."
+      );
     }
 
     const file = form.get("file");

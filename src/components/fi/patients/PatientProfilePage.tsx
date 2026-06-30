@@ -14,7 +14,13 @@ import { PatientProfileHeader } from "./PatientProfileHeader";
 import { PatientProfileSummaryCards } from "./PatientProfileSummaryCards";
 import { PatientTreatmentTimelineCard } from "./timeline/PatientTreatmentTimelineCard";
 
-export function PatientProfilePage({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
+export function PatientProfilePage({
+  tenantId,
+  data,
+}: {
+  tenantId: string;
+  data: PatientProfileFoundationData;
+}) {
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
@@ -33,8 +39,8 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
       <PatientImportedSourceSection data={data} />
 
       <p className="rounded border border-blue-100 bg-blue-500/10 p-3 text-sm text-blue-200">
-        Patient profiles are the foundation for future clinical records, images, treatment plans, HLI assessments,
-        HairAudit outcomes, and SurgeryOS workflows.
+        Patient profiles are the foundation for future clinical records, images, treatment plans,
+        HLI assessments, HairAudit outcomes, and SurgeryOS workflows.
       </p>
 
       <PatientProfileSummaryCards data={data} />
@@ -43,7 +49,10 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
 
       <PatientImagesCard tenantId={tenantId} data={data} />
 
-      <PatientTreatmentTimelineCard patientTimeline={data.patientTimeline} patientImages={data.patientImages} />
+      <PatientTreatmentTimelineCard
+        patientTimeline={data.patientTimeline}
+        patientImages={data.patientImages}
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <PatientPersonDetailsCard data={data} />

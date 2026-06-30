@@ -39,7 +39,9 @@ export async function enrichCrmKanbanCards(
   if (items.length === 0) return [];
 
   const leadIds = items.map((i) => i.lead.id);
-  const patientIds = Array.from(new Set(items.map((i) => i.lead.patient_id).filter((x): x is string => !!x)));
+  const patientIds = Array.from(
+    new Set(items.map((i) => i.lead.patient_id).filter((x): x is string => !!x))
+  );
 
   const clinicalByPatient = new Map<
     string,
@@ -56,7 +58,9 @@ export async function enrichCrmKanbanCards(
     if (batch.length === 0) continue;
     const { data, error } = await supabase
       .from("fi_patient_clinical_details")
-      .select("patient_id, norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern")
+      .select(
+        "patient_id, norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern"
+      )
       .eq("tenant_id", tid)
       .in("patient_id", batch);
     if (error) throw new Error(error.message);
@@ -69,7 +73,8 @@ export async function enrichCrmKanbanCards(
         ludwig_scale: r.ludwig_scale != null ? String(r.ludwig_scale) : null,
         hairline_pattern: r.hairline_pattern != null ? String(r.hairline_pattern) : null,
         primary_concern: r.primary_concern != null ? String(r.primary_concern) : null,
-        primary_hair_concern: r.primary_hair_concern != null ? String(r.primary_hair_concern) : null,
+        primary_hair_concern:
+          r.primary_hair_concern != null ? String(r.primary_hair_concern) : null,
       });
     }
   }
@@ -97,7 +102,9 @@ export async function enrichCrmKanbanCards(
     if (!cur) continue;
     const rows = historyByLead.get(lid);
     if (!rows?.length) continue;
-    const sorted = [...rows].sort((a, b) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime());
+    const sorted = [...rows].sort(
+      (a, b) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime()
+    );
     const hit = sorted.find((r) => r.to_stage_id === cur);
     if (hit) stageEnteredByLead.set(lid, hit.changed_at);
   }

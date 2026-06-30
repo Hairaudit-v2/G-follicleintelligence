@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { createEmptyReceptionOsModuleHealth, markReceptionOsModuleUnavailable } from "@/src/lib/receptionOs/receptionOsModuleHealthModel";
+import {
+  createEmptyReceptionOsModuleHealth,
+  markReceptionOsModuleUnavailable,
+} from "@/src/lib/receptionOs/receptionOsModuleHealthModel";
 import {
   emptyReceptionCloseoutSnapshot,
   emptyRevenueIntelligenceForBoard,
@@ -13,8 +16,16 @@ import { parseReceptionOsCommandCentrePayload } from "@/src/lib/receptionOs/rece
 
 describe("receptionOsLoaderResilience", () => {
   it("detects missing relation errors from Supabase/Postgres messages", () => {
-    assert.equal(isMissingDatabaseRelationError(new Error('relation "fi_reception_tasks" does not exist')), true);
-    assert.equal(isMissingDatabaseRelationError(new Error("Could not find the table public.fi_reception_usage_events")), true);
+    assert.equal(
+      isMissingDatabaseRelationError(new Error('relation "fi_reception_tasks" does not exist')),
+      true
+    );
+    assert.equal(
+      isMissingDatabaseRelationError(
+        new Error("Could not find the table public.fi_reception_usage_events")
+      ),
+      true
+    );
     assert.equal(isMissingDatabaseRelationError(new Error("PGRST205")), true);
     assert.equal(isMissingDatabaseRelationError(new Error("permission denied")), false);
   });
@@ -26,7 +37,11 @@ describe("receptionOsLoaderResilience", () => {
 
   it("tracks unavailable optional modules without breaking core board flag", () => {
     let health = createEmptyReceptionOsModuleHealth(true);
-    health = markReceptionOsModuleUnavailable(health, "tasks", missingTableMessage("fi_reception_tasks"));
+    health = markReceptionOsModuleUnavailable(
+      health,
+      "tasks",
+      missingTableMessage("fi_reception_tasks")
+    );
     assert.equal(health.coreBoardLoaded, true);
     assert.equal(health.unavailableModules.length, 1);
     assert.equal(health.unavailableModules[0]?.module, "tasks");

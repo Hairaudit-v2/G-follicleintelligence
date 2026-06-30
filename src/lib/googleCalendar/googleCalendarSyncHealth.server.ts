@@ -94,7 +94,9 @@ function sanitizeError(message: string): string {
     .slice(0, 500);
 }
 
-function mapSyncResultMetrics(result: GoogleCalendarSyncResult | undefined): GoogleCalendarSyncRunMetrics {
+function mapSyncResultMetrics(
+  result: GoogleCalendarSyncResult | undefined
+): GoogleCalendarSyncRunMetrics {
   const review = result?.reviewSummary;
   return {
     calendarsScanned: result?.calendarsScanned ?? result?.perCalendar?.length ?? 0,
@@ -145,7 +147,11 @@ async function loadOrCreateHealthRow(
 async function loadIntegrationSchedulerFlags(
   supabase: SupabaseClient,
   integrationId: string
-): Promise<{ scheduledSyncPausedAt: string | null; scheduledSyncPausedReason: string | null; status: string }> {
+): Promise<{
+  scheduledSyncPausedAt: string | null;
+  scheduledSyncPausedReason: string | null;
+  status: string;
+}> {
   const { data, error } = await supabase
     .from("fi_calendar_integrations")
     .select("scheduled_sync_paused_at, scheduled_sync_paused_reason, status")
@@ -182,13 +188,19 @@ async function trimSyncRunHistory(supabase: SupabaseClient, tenantId: string): P
     .select("id")
     .eq("tenant_id", tenantId)
     .order("started_at", { ascending: false })
-    .range(GOOGLE_CALENDAR_SYNC_RUN_RETENTION_PER_TENANT, GOOGLE_CALENDAR_SYNC_RUN_RETENTION_PER_TENANT + 49);
+    .range(
+      GOOGLE_CALENDAR_SYNC_RUN_RETENTION_PER_TENANT,
+      GOOGLE_CALENDAR_SYNC_RUN_RETENTION_PER_TENANT + 49
+    );
 
   if (error) throw new Error(error.message);
   const staleIds = (data ?? []).map((row) => String(row.id));
   if (staleIds.length === 0) return;
 
-  const { error: deleteError } = await supabase.from("fi_calendar_sync_runs").delete().in("id", staleIds);
+  const { error: deleteError } = await supabase
+    .from("fi_calendar_sync_runs")
+    .delete()
+    .in("id", staleIds);
   if (deleteError) throw new Error(deleteError.message);
 }
 
@@ -266,7 +278,11 @@ export async function updateGoogleCalendarSyncHealth(
   const totalRuns = health.total_sync_runs + (input.skipped ? 0 : 1);
   const averageDuration = input.skipped
     ? health.average_sync_duration_ms
-    : computeRollingAverageDurationMs(health.average_sync_duration_ms, health.total_sync_runs, durationMs);
+    : computeRollingAverageDurationMs(
+        health.average_sync_duration_ms,
+        health.total_sync_runs,
+        durationMs
+      );
 
   const tokenInvalid = isTokenInvalidSyncError(sanitizedError) || scheduler.status === "expired";
   const autoPaused =
@@ -311,7 +327,8 @@ export async function updateGoogleCalendarSyncHealth(
     consecutive_failures: consecutiveFailures,
     total_sync_runs: totalRuns,
     total_events_fetched: health.total_events_fetched + (input.skipped ? 0 : metrics.eventsFetched),
-    total_events_inserted: health.total_events_inserted + (input.skipped ? 0 : metrics.eventsInserted),
+    total_events_inserted:
+      health.total_events_inserted + (input.skipped ? 0 : metrics.eventsInserted),
     total_events_updated: health.total_events_updated + (input.skipped ? 0 : metrics.eventsUpdated),
     total_events_skipped: health.total_events_skipped + (input.skipped ? 0 : metrics.eventsSkipped),
     total_review_items_created:
@@ -387,7 +404,9 @@ export async function updateGoogleCalendarSyncHealth(
       shouldFire:
         !input.ok &&
         !input.skipped &&
-        Boolean(sanitizedError?.toLowerCase().includes("(429)") || sanitizedError?.includes("quota")),
+        Boolean(
+          sanitizedError?.toLowerCase().includes("(429)") || sanitizedError?.includes("quota")
+        ),
       title: "Google Calendar API quota exceeded",
       message: sanitizedError ?? "Google API rate limit or quota exceeded.",
       severity: "warning",

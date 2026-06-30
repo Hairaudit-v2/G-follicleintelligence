@@ -79,8 +79,7 @@ const IMAGING_MEASUREMENT_REQUIREMENTS_MAP: Record<
     minimum_confidence: 0.75,
     requires_comparison_pair: true,
     requires_human_review_below_confidence: 0.85,
-    description:
-      "Scalp hair density measurement from baseline and follow-up comparison pairs",
+    description: "Scalp hair density measurement from baseline and follow-up comparison pairs",
   },
   coverage: {
     allowed_units: ["percent", "score_0_100"],
@@ -197,9 +196,7 @@ export const IMAGING_MEASUREMENT_REQUIREMENTS: Readonly<
   Record<Exclude<ImagingOsMeasurementDomain, "unknown">, ImagingMeasurementRequirements>
 > = IMAGING_MEASUREMENT_REQUIREMENTS_MAP;
 
-export function isImagingOsMeasurementDomain(
-  value: string
-): value is ImagingOsMeasurementDomain {
+export function isImagingOsMeasurementDomain(value: string): value is ImagingOsMeasurementDomain {
   return (IMAGING_MEASUREMENT_DOMAINS as readonly string[]).includes(value);
 }
 
@@ -207,9 +204,7 @@ export function isImagingOsMeasurementUnit(value: string): value is ImagingOsMea
   return (IMAGING_MEASUREMENT_UNITS as readonly string[]).includes(value);
 }
 
-export function isImagingOsMeasurementMethod(
-  value: string
-): value is ImagingOsMeasurementMethod {
+export function isImagingOsMeasurementMethod(value: string): value is ImagingOsMeasurementMethod {
   return (IMAGING_MEASUREMENT_METHODS as readonly string[]).includes(value);
 }
 
@@ -314,8 +309,10 @@ function buildEvidencePairId(candidate?: ImagingOsComparisonCandidate): string |
   if (!candidate) {
     return undefined;
   }
-  const baselineId = candidate.baseline_image.image_id ?? candidate.baseline_image.canonical_category;
-  const followupId = candidate.followup_image.image_id ?? candidate.followup_image.canonical_category;
+  const baselineId =
+    candidate.baseline_image.image_id ?? candidate.baseline_image.canonical_category;
+  const followupId =
+    candidate.followup_image.image_id ?? candidate.followup_image.canonical_category;
   return `${slugifyMeasurementIdPart(baselineId)}__${slugifyMeasurementIdPart(followupId)}`;
 }
 
@@ -474,9 +471,7 @@ export function createVisualMeasurementStub(
   const value = input.value !== undefined ? input.value : null;
   const requirements = resolveMeasurementRequirements(input.domain);
   const unit =
-    input.unit ??
-    requirements?.preferred_unit ??
-    ("unknown" satisfies ImagingOsMeasurementUnit);
+    input.unit ?? requirements?.preferred_unit ?? ("unknown" satisfies ImagingOsMeasurementUnit);
 
   const evidencePairId = buildEvidencePairId(input.comparison_candidate);
   const baselineImageId = input.comparison_candidate?.baseline_image.image_id;
@@ -527,10 +522,7 @@ function mapComparisonTargetToMeasurementDomain(
 export function buildMeasurementStubsFromComparisonResult(
   input: ImagingOsComparisonReadinessResult
 ): ImagingOsVisualMeasurementResult[] {
-  if (
-    input.comparison_status !== "ready" &&
-    input.comparison_status !== "partial"
-  ) {
+  if (input.comparison_status !== "ready" && input.comparison_status !== "partial") {
     return [];
   }
 

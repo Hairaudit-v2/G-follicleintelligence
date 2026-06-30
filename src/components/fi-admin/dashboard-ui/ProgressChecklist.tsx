@@ -35,8 +35,14 @@ type ProgressChecklistProps = {
   progressLabel?: string;
 };
 
-export function ProgressChecklist({ children, className = "", percentComplete, progressLabel }: ProgressChecklistProps) {
-  const pct = percentComplete != null ? Math.min(100, Math.max(0, Math.round(percentComplete))) : null;
+export function ProgressChecklist({
+  children,
+  className = "",
+  percentComplete,
+  progressLabel,
+}: ProgressChecklistProps) {
+  const pct =
+    percentComplete != null ? Math.min(100, Math.max(0, Math.round(percentComplete))) : null;
 
   return (
     <div className={`space-y-4 ${className}`.trim()}>

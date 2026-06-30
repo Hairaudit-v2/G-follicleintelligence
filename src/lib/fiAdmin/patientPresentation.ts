@@ -104,7 +104,10 @@ function plural(count: number, singular: string, pluralForm?: string): string {
 }
 
 function patientsWithoutNextAppointment(summary: PatientDirectorySummary): number {
-  return Math.max(0, summary.withActiveCase - Math.min(summary.withActiveCase, summary.withFutureBooking));
+  return Math.max(
+    0,
+    summary.withActiveCase - Math.min(summary.withActiveCase, summary.withFutureBooking)
+  );
 }
 
 function countMissingContactRecords(recentPatients: readonly PatientOsRecentPatientRow[]): number {
@@ -127,7 +130,9 @@ function countPostOpChecks(journeys: readonly PatientOsJourneyRow[]): number {
 }
 
 function countOutcomeAuditSignals(highlights: readonly PatientOsTimelineHighlight[]): number {
-  return highlights.filter((h) => AUDIT_EVENT_KIND_RE.test(h.eventKind) || AUDIT_EVENT_KIND_RE.test(h.title ?? "")).length;
+  return highlights.filter(
+    (h) => AUDIT_EVENT_KIND_RE.test(h.eventKind) || AUDIT_EVENT_KIND_RE.test(h.title ?? "")
+  ).length;
 }
 
 function upcomingBookingForPatient(
@@ -179,7 +184,8 @@ function timelineActivityLabel(highlight: PatientOsTimelineHighlight): string {
   if (kind.includes("consultation")) return "Consultation activity recorded";
   if (kind.includes("surgery") || kind.includes("case")) return "Surgery case activity recorded";
   if (kind.includes("audit") || kind.includes("report")) return "Audit report activity recorded";
-  if (kind.includes("media") || kind.includes("photo") || kind.includes("image")) return "Photos uploaded";
+  if (kind.includes("media") || kind.includes("photo") || kind.includes("image"))
+    return "Photos uploaded";
   if (kind.includes("prescription") || kind.includes("medication")) return "Prescription issued";
   if (kind.includes("booking") || kind.includes("appointment") || kind.includes("follow")) {
     return "Follow-up booked";
@@ -190,7 +196,9 @@ function timelineActivityLabel(highlight: PatientOsTimelineHighlight): string {
 export function formatPatientWhen(iso: string): string {
   const d = Date.parse(iso);
   if (!Number.isFinite(d)) return iso;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(d));
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
+    new Date(d)
+  );
 }
 
 export function formatPatientDate(iso: string | null | undefined): string {
@@ -310,7 +318,8 @@ export function buildPatientAttentionPriorities(
       count: missingContact,
       priorityScore: 90,
       severity: "warning",
-      headline: (n) => plural(n, "patient record", "patient records") + " need contact details updated",
+      headline: (n) =>
+        plural(n, "patient record", "patient records") + " need contact details updated",
       detail: "Confirm email and phone so the clinic can reach the patient.",
       href: `${base}/patients?view=list`,
     },
@@ -328,7 +337,9 @@ export function buildPatientAttentionPriorities(
       count: surgeryPrepGaps,
       priorityScore: 84,
       severity: "warning",
-      headline: (n) => plural(n, "surgery-pathway patient", "surgery-pathway patients") + " may need preparation steps",
+      headline: (n) =>
+        plural(n, "surgery-pathway patient", "surgery-pathway patients") +
+        " may need preparation steps",
       detail: "Confirm pre-operative readiness in SurgeryOS before procedure day.",
       href: `${base}/cases`,
     },
@@ -447,7 +458,8 @@ export function buildJourneyStageOverview(
   const consultationStage = overview.kpis.patientsWithUpcomingBookings;
   const treatmentPlanning = countTreatmentPlanning(overview.activeJourneys);
   const surgeryPreparation = countSurgeryPrepGaps(overview.activeJourneys);
-  const postProcedure = overview.kpis.patientsNeedingFollowUp + countPostOpChecks(overview.activeJourneys);
+  const postProcedure =
+    overview.kpis.patientsNeedingFollowUp + countPostOpChecks(overview.activeJourneys);
   const outcomeAudit = countOutcomeAuditSignals(overview.timelineHighlights);
 
   return [
@@ -577,7 +589,11 @@ export function buildRecentPatientActivityItems(
       activityLabel: timelineActivityLabel(h),
       occurredAt: h.occurredAt,
       whenLabel: formatPatientWhen(h.occurredAt),
-      href: h.patientId ? `${base}/patients/${h.patientId}` : h.caseId ? `${base}/cases/${h.caseId}` : null,
+      href: h.patientId
+        ? `${base}/patients/${h.patientId}`
+        : h.caseId
+          ? `${base}/cases/${h.caseId}`
+          : null,
       sortKey: h.occurredAt,
     });
   }

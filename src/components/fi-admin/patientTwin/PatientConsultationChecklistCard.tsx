@@ -16,7 +16,9 @@ import {
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>
+  );
 }
 
 function priorityBadgeClass(p: string): string {
@@ -108,18 +110,23 @@ export function PatientConsultationChecklistCard({
       description="Stage 10 engine combines hair loss, progression, donor, recipient, therapy, and pathology presence into discussion-only checklist topics. Stored in hair_intelligence_consultation_checklists."
     >
       <p className="mb-3 rounded-md border border-rose-500/35 bg-rose-500/10 px-3 py-2 text-xs text-rose-100/95">
-        Checklist intelligence supports clinician preparation and does not replace medical judgement. It does not recommend surgery, graft counts,
-        hairline design, outcomes, or autonomous treatment decisions.
+        Checklist intelligence supports clinician preparation and does not replace medical
+        judgement. It does not recommend surgery, graft counts, hairline design, outcomes, or
+        autonomous treatment decisions.
       </p>
 
       {message ? <p className="mb-2 text-xs text-amber-200/90">{message}</p> : null}
 
       {displayLatest ? (
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${priorityBadgeClass(displayLatest.priority_level)}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${priorityBadgeClass(displayLatest.priority_level)}`}
+          >
             Priority: {displayLatest.priority_level}
           </span>
-          <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-slate-200">Status: {displayLatest.checklist_status}</span>
+          <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-slate-200">
+            Status: {displayLatest.checklist_status}
+          </span>
         </div>
       ) : null}
 
@@ -149,27 +156,39 @@ export function PatientConsultationChecklistCard({
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
             <FieldLabel>Medication discussion</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.medication_discussion_required ? "Yes" : "No"}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.medication_discussion_required ? "Yes" : "No"}
+            </p>
           </div>
           <div>
             <FieldLabel>Stabilisation discussion</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.stabilisation_discussion_required ? "Yes" : "No"}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.stabilisation_discussion_required ? "Yes" : "No"}
+            </p>
           </div>
           <div>
             <FieldLabel>Donor preservation discussion</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.donor_preservation_discussion_required ? "Yes" : "No"}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.donor_preservation_discussion_required ? "Yes" : "No"}
+            </p>
           </div>
           <div>
             <FieldLabel>Expectation management</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.expectation_management_required ? "Yes" : "No"}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.expectation_management_required ? "Yes" : "No"}
+            </p>
           </div>
           <div>
             <FieldLabel>Consent complexity</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.consent_complexity_level ?? "—"}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.consent_complexity_level ?? "—"}
+            </p>
           </div>
           <div>
             <FieldLabel>Delay recommended (discussion)</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.delay_recommended ? "Yes" : "No"}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.delay_recommended ? "Yes" : "No"}
+            </p>
           </div>
           <div>
             <FieldLabel>Review status</FieldLabel>
@@ -177,7 +196,9 @@ export function PatientConsultationChecklistCard({
           </div>
           <div>
             <FieldLabel>Confidence</FieldLabel>
-            <p className="mt-0.5 text-sm text-slate-200">{displayLatest.confidence_score.toFixed(2)}</p>
+            <p className="mt-0.5 text-sm text-slate-200">
+              {displayLatest.confidence_score.toFixed(2)}
+            </p>
           </div>
         </div>
       ) : null}
@@ -196,7 +217,11 @@ export function PatientConsultationChecklistCard({
         </div>
       ) : null}
 
-      {!displayLatest ? <p className="mt-3 text-sm text-[#94A3B8]">No consultation checklists yet for this patient.</p> : null}
+      {!displayLatest ? (
+        <p className="mt-3 text-sm text-[#94A3B8]">
+          No consultation checklists yet for this patient.
+        </p>
+      ) : null}
 
       <div className="mt-5 border-t border-white/10 pt-4">
         <button
@@ -296,15 +321,27 @@ export function PatientConsultationChecklistCard({
                   Medication discussion required
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={stab} onChange={(e) => setStab(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={stab}
+                    onChange={(e) => setStab(e.target.checked)}
+                  />
                   Stabilisation discussion required
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={donor} onChange={(e) => setDonor(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={donor}
+                    onChange={(e) => setDonor(e.target.checked)}
+                  />
                   Donor preservation discussion required
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={expect} onChange={(e) => setExpect(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={expect}
+                    onChange={(e) => setExpect(e.target.checked)}
+                  />
                   Expectation management required
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
@@ -312,11 +349,19 @@ export function PatientConsultationChecklistCard({
                   Documentation required
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={follow}
+                    onChange={(e) => setFollow(e.target.checked)}
+                  />
                   Follow-up required
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={delay} onChange={(e) => setDelay(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={delay}
+                    onChange={(e) => setDelay(e.target.checked)}
+                  />
                   Delay recommended (discussion flag)
                 </label>
               </div>
@@ -385,24 +430,31 @@ export function PatientConsultationChecklistCard({
                     .map((s) => s.trim())
                     .filter(Boolean)
                     .slice(0, 40);
-                  const res = await updateConsultationChecklistReviewAction(tenantId, patientId, editId, {
-                    review_status: review as (typeof HIE_CONSULTATION_REVIEW_STATUSES)[number],
-                    priority_level: priority as (typeof HIE_CONSULTATION_PRIORITY_LEVELS)[number],
-                    checklist_status: checklistStatus as (typeof HIE_CONSULTATION_CHECKLIST_STATUSES)[number],
-                    confidence_score: Number.isFinite(c) ? c : 0,
-                    consent_complexity_level: consent as (typeof HIE_CONSULTATION_CONSENT_COMPLEXITY_LEVELS)[number],
-                    medication_discussion_required: med,
-                    stabilisation_discussion_required: stab,
-                    donor_preservation_discussion_required: donor,
-                    expectation_management_required: expect,
-                    documentation_required: doc,
-                    follow_up_required: follow,
-                    delay_recommended: delay,
-                    consultation_summary: summary || null,
-                    ai_notes: aiNotes || null,
-                    checklist_items: items,
-                    risk_flags: flags,
-                  });
+                  const res = await updateConsultationChecklistReviewAction(
+                    tenantId,
+                    patientId,
+                    editId,
+                    {
+                      review_status: review as (typeof HIE_CONSULTATION_REVIEW_STATUSES)[number],
+                      priority_level: priority as (typeof HIE_CONSULTATION_PRIORITY_LEVELS)[number],
+                      checklist_status:
+                        checklistStatus as (typeof HIE_CONSULTATION_CHECKLIST_STATUSES)[number],
+                      confidence_score: Number.isFinite(c) ? c : 0,
+                      consent_complexity_level:
+                        consent as (typeof HIE_CONSULTATION_CONSENT_COMPLEXITY_LEVELS)[number],
+                      medication_discussion_required: med,
+                      stabilisation_discussion_required: stab,
+                      donor_preservation_discussion_required: donor,
+                      expectation_management_required: expect,
+                      documentation_required: doc,
+                      follow_up_required: follow,
+                      delay_recommended: delay,
+                      consultation_summary: summary || null,
+                      ai_notes: aiNotes || null,
+                      checklist_items: items,
+                      risk_flags: flags,
+                    }
+                  );
                   if (!res.ok) setMessage(res.error);
                 });
               }}

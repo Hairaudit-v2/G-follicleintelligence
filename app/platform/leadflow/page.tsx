@@ -5,15 +5,7 @@ import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
-import {
-  ArrowRight,
-  BarChart3,
-  BellRing,
-  Inbox,
-  Kanban,
-  Share2,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, BarChart3, BellRing, Inbox, Kanban, Share2, Zap } from "lucide-react";
 
 export const metadata = buildPageMetadata({
   title: "LeadFlow: Patient Acquisition & CRM for Hair Restoration Clinics | Follicle Intelligence",
@@ -36,9 +28,13 @@ function SectionIntro({
   return (
     <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -94,8 +90,8 @@ export default function LeadFlowPage() {
               Capture, nurture and convert every patient enquiry.
             </p>
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
-              Manage website leads, Meta leads, Google Ads, referrals, chatbot conversations, pipeline management,
-              follow-ups and conversion analytics.
+              Manage website leads, Meta leads, Google Ads, referrals, chatbot conversations,
+              pipeline management, follow-ups and conversion analytics.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">

@@ -15,11 +15,16 @@ export type TimelyAppointmentLifecycleEvent = (typeof TIMELY_APPOINTMENT_LIFECYC
 const LIFECYCLE_EVENT_SET = new Set<string>(TIMELY_APPOINTMENT_LIFECYCLE_EVENTS);
 
 function normalizeToken(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s_-]+/g, " ");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, " ");
 }
 
 /** Map Timely status text to FI `booking_status`. */
-export function mapTimelyStatusToBookingStatus(status: string | undefined | null): BookingStatus | null {
+export function mapTimelyStatusToBookingStatus(
+  status: string | undefined | null
+): BookingStatus | null {
   const raw = status?.trim();
   if (!raw) return null;
 
@@ -43,7 +48,12 @@ export function mapTimelyStatusToBookingStatus(status: string | undefined | null
   ) {
     return "completed";
   }
-  if (token === "no show" || token === "noshow" || token === "no_show" || token.includes("no show")) {
+  if (
+    token === "no show" ||
+    token === "noshow" ||
+    token === "no_show" ||
+    token.includes("no show")
+  ) {
     return "no_show";
   }
   if (token === "confirmed" || token === "confirm") {
@@ -63,7 +73,9 @@ export function mapTimelyStatusToBookingStatus(status: string | undefined | null
 }
 
 /** Normalize explicit lifecycle event strings from Zapier payloads. */
-export function normalizeTimelyLifecycleEventType(raw: string | undefined | null): TimelyAppointmentLifecycleEvent | null {
+export function normalizeTimelyLifecycleEventType(
+  raw: string | undefined | null
+): TimelyAppointmentLifecycleEvent | null {
   const v = raw?.trim();
   if (!v) return null;
 

@@ -2,7 +2,11 @@
  * Calendar-facing appointment DTO — maps `fi_bookings` rows for CRM calendar clients.
  */
 
-import { resolveProcedureFamily, fiProcedureFamilyLabels, type FiProcedureFamily } from "@/lib/design-system";
+import {
+  resolveProcedureFamily,
+  fiProcedureFamilyLabels,
+  type FiProcedureFamily,
+} from "@/lib/design-system";
 import {
   bookingDurationMinutes,
   parseAppointmentProcedureMetadata,

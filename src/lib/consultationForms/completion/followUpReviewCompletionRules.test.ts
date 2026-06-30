@@ -45,6 +45,8 @@ describe("followUpReviewCompletionRules", () => {
     assert.ok(s.followUpReviewCompletionSnapshot?.complianceLabel.length);
     assert.ok(s.followUpReviewCompletionSnapshot?.nextPathwayLabel.length);
     assert.ok(s.recommendedTreatments.includes("PRP"));
-    assert.ok(s.followUpReviewCompletionSnapshot?.integrationPlaceholderLine.includes("Patient Twin"));
+    assert.ok(
+      s.followUpReviewCompletionSnapshot?.integrationPlaceholderLine.includes("Patient Twin")
+    );
   });
 });

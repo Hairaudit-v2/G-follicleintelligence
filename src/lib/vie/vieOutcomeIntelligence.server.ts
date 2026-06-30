@@ -9,7 +9,10 @@ import {
   mapComparisonPairToOutcomeInput,
 } from "./vieOutcomeIntelligenceCore";
 import type { VieOutcomeSummary, VieOutcomeSummaryRow } from "./vieOutcomeTypes";
-import { loadVieComparisonPairsForPatient, loadVieComparisonReadinessForPatient } from "./vieLongitudinalComparison.server";
+import {
+  loadVieComparisonPairsForPatient,
+  loadVieComparisonReadinessForPatient,
+} from "./vieLongitudinalComparison.server";
 import { loadPatientTwinAlignmentSummary } from "./vieSameAngleAlignment.server";
 
 function mapOutcomeRow(row: Record<string, unknown>): VieOutcomeSummaryRow {
@@ -28,7 +31,9 @@ function mapOutcomeRow(row: Record<string, unknown>): VieOutcomeSummaryRow {
     patient_id: String(row.patient_id),
     case_id: row.case_id != null ? String(row.case_id) : null,
     overall_outcome_readiness_score: Number(row.overall_outcome_readiness_score ?? 0),
-    confidence_band: String(row.confidence_band ?? "low") as VieOutcomeSummaryRow["confidence_band"],
+    confidence_band: String(
+      row.confidence_band ?? "low"
+    ) as VieOutcomeSummaryRow["confidence_band"],
     domains: domains as VieOutcomeSummaryRow["domains"],
     audit_ready: row.audit_ready === true,
     clinical_review_recommended: row.clinical_review_recommended === true,
@@ -85,12 +90,8 @@ export async function generateVieOutcomeSummaryForPatient(params: {
   const tid = params.tenantId.trim();
   const pid = params.patientId.trim();
 
-  const { pairInputs, completeness, alignmentConsistencyScore, caseId } = await assembleOutcomeInputs(
-    tid,
-    pid,
-    params.caseId,
-    client
-  );
+  const { pairInputs, completeness, alignmentConsistencyScore, caseId } =
+    await assembleOutcomeInputs(tid, pid, params.caseId, client);
 
   const summary = buildVieOutcomeSummary({
     patientId: pid,
@@ -175,12 +176,8 @@ export async function computeVieOutcomeSummaryForPatient(
   opts?: { caseId?: string | null; client?: SupabaseClient }
 ): Promise<VieOutcomeSummary> {
   const client = opts?.client ?? supabaseAdmin();
-  const { pairInputs, completeness, alignmentConsistencyScore, caseId } = await assembleOutcomeInputs(
-    tenantId,
-    patientId,
-    opts?.caseId,
-    client
-  );
+  const { pairInputs, completeness, alignmentConsistencyScore, caseId } =
+    await assembleOutcomeInputs(tenantId, patientId, opts?.caseId, client);
 
   return buildVieOutcomeSummary({
     patientId: patientId.trim(),

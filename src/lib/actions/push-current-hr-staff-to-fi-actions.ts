@@ -43,14 +43,21 @@ function revalidateStaffOutboundSurfaces(tenantId: string): void {
 }
 
 export type PushCurrentHrStaffToFiActionResult =
-  | { ok: true; fi: PushStaffSyncToFiResult; mappedRowCount: number; display: FiOutboundStaffSyncDisplay }
+  | {
+      ok: true;
+      fi: PushStaffSyncToFiResult;
+      mappedRowCount: number;
+      display: FiOutboundStaffSyncDisplay;
+    }
   | { ok: false; error: string };
 
 /**
  * Loads Evolved Perth staff from the configured IIOHR HR feed, maps to FI operational rows, and POSTs to FI staff-sync.
  * Preview by default; commit only when `confirm: true`.
  */
-export async function pushCurrentHrStaffToFiAction(body: unknown): Promise<PushCurrentHrStaffToFiActionResult> {
+export async function pushCurrentHrStaffToFiAction(
+  body: unknown
+): Promise<PushCurrentHrStaffToFiActionResult> {
   try {
     const parsed = bodySchema.parse(body);
     await assertCrmTenantWriteAllowed({
@@ -79,13 +86,21 @@ export async function pushCurrentHrStaffToFiAction(body: unknown): Promise<PushC
     if (parsed.mode === "commit" && fi.ok) {
       const sum = fi.raw.summary;
       const committed =
-        sum && typeof sum === "object" && !Array.isArray(sum) && (sum as { commit?: unknown }).commit === true;
+        sum &&
+        typeof sum === "object" &&
+        !Array.isArray(sum) &&
+        (sum as { commit?: unknown }).commit === true;
       if (committed) {
         revalidateStaffOutboundSurfaces(parsed.tenantId);
       }
     }
 
-    return { ok: true, fi, mappedRowCount: rows.length, display: parseFiOutboundStaffSyncDisplay(fi) };
+    return {
+      ok: true,
+      fi,
+      mappedRowCount: rows.length,
+      display: parseFiOutboundStaffSyncDisplay(fi),
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

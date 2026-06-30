@@ -1,5 +1,8 @@
 import type { ReceptionOsSeverity } from "@/src/lib/receptionOs/receptionOsBoardModel";
-import type { ReceptionTaskSourceType, ReceptionTaskStatus } from "@/src/lib/receptionOs/receptionTaskPolicy";
+import type {
+  ReceptionTaskSourceType,
+  ReceptionTaskStatus,
+} from "@/src/lib/receptionOs/receptionTaskPolicy";
 
 export type ReceptionTaskRow = {
   id: string;

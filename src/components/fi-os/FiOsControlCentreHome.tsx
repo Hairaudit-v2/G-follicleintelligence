@@ -25,7 +25,10 @@ import {
   buildTomorrowPreview,
 } from "@/src/lib/fiAdmin/dashboardCommandCentreDerive";
 import { filterResolvedQuickActionsByFeatureAccess } from "@/src/lib/fi-os/stage2FeatureVisibility";
-import { EMPTY_TENANT_CLINICAL_INTELLIGENCE_SUMMARY, type TenantClinicalIntelligenceSummary } from "@/src/lib/fi-os/clinicalIntelligence.server";
+import {
+  EMPTY_TENANT_CLINICAL_INTELLIGENCE_SUMMARY,
+  type TenantClinicalIntelligenceSummary,
+} from "@/src/lib/fi-os/clinicalIntelligence.server";
 import {
   EMPTY_TENANT_OUTCOME_INTELLIGENCE_SUMMARY,
   type TenantOutcomeIntelligenceSummary,
@@ -138,7 +141,11 @@ export function FiOsControlCentreHome(props: {
 
       <DashboardPerformanceKpis kpis={performanceKpis} />
 
-      <DashboardModuleNavigation base={base} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />
+      <DashboardModuleNavigation
+        base={base}
+        showCrmNav={showCrmNav}
+        showBookingsBoard={showBookingsBoard}
+      />
 
       <DashboardTomorrowPreview base={base} lines={tomorrowLines} />
 

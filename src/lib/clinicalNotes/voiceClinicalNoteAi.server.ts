@@ -30,7 +30,10 @@ export async function transcribeAudioWithOpenAIWhisper(params: {
     headers: { Authorization: `Bearer ${key}` },
     body: form,
   });
-  const body = (await res.json().catch(() => ({}))) as { text?: string; error?: { message?: string } };
+  const body = (await res.json().catch(() => ({}))) as {
+    text?: string;
+    error?: { message?: string };
+  };
   if (!res.ok) {
     throw new Error(body.error?.message?.trim() || `Whisper HTTP ${res.status}`);
   }

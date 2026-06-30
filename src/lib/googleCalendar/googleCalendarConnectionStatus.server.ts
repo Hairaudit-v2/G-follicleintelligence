@@ -42,7 +42,9 @@ export type GoogleCalendarConnectionStatus = {
   sync_health_label: "healthy" | "needs_attention" | "not_synced";
 };
 
-function deriveDisplayStatus(row: IntegrationStatusRow | null): GoogleCalendarConnectionStatus["status"] {
+function deriveDisplayStatus(
+  row: IntegrationStatusRow | null
+): GoogleCalendarConnectionStatus["status"] {
   if (!row) return "not_connected";
   const status = row.status as FiCalendarIntegrationStatus;
   if (status === "disconnected") return "not_connected";

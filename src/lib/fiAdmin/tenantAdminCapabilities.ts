@@ -21,7 +21,8 @@ export type FiTenantAdminCapability = (typeof FI_TENANT_ADMIN_CAPABILITIES)[numb
 const ALL: FiTenantAdminCapability[] = [...FI_TENANT_ADMIN_CAPABILITIES];
 
 /** Every capability (used for clinic_admin + legacy full-access roles). */
-export const ALL_TENANT_ADMIN_CAPABILITIES: ReadonlySet<FiTenantAdminCapability> = new Set<FiTenantAdminCapability>(ALL);
+export const ALL_TENANT_ADMIN_CAPABILITIES: ReadonlySet<FiTenantAdminCapability> =
+  new Set<FiTenantAdminCapability>(ALL);
 
 const CLINIC_ADMIN: ReadonlySet<FiTenantAdminCapability> = new Set<FiTenantAdminCapability>(ALL);
 
@@ -57,7 +58,9 @@ const BY_ROLE: Record<FiTenantAdminRole, ReadonlySet<FiTenantAdminCapability>> =
   data_safety_admin: DATA_SAFETY_ADMIN,
 };
 
-export function capabilitiesForTenantAdminRole(role: FiTenantAdminRole): ReadonlySet<FiTenantAdminCapability> {
+export function capabilitiesForTenantAdminRole(
+  role: FiTenantAdminRole
+): ReadonlySet<FiTenantAdminCapability> {
   return BY_ROLE[role];
 }
 

@@ -79,10 +79,13 @@ export function HrStaffReadinessClient({
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">HR</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">Staff readiness</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
+          Staff readiness
+        </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Operational view of payroll links, FI role assignment, HR onboarding, training readiness, and clinical
-          availability. Safe fields only — no payroll or sensitive HR data is shown or exported.
+          Operational view of payroll links, FI role assignment, HR onboarding, training readiness,
+          and clinical availability. Safe fields only — no payroll or sensitive HR data is shown or
+          exported.
         </p>
         <p className="text-sm text-[#94A3B8]">
           <Link href={`${base}/staff`} className="text-[#22C1FF] hover:underline">
@@ -142,7 +145,12 @@ export function HrStaffReadinessClient({
                 Run HR sync
               </Button>
             ) : null}
-            <Button type="button" variant="outline" disabled={visibleRows.length === 0} onClick={exportCsv}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={visibleRows.length === 0}
+              onClick={exportCsv}
+            >
               <Download className="mr-2 h-4 w-4" aria-hidden />
               Export CSV
             </Button>
@@ -199,9 +207,7 @@ export function HrStaffReadinessClient({
                     <td className="px-2 py-2">
                       <span
                         className={
-                          row.payrollLinkStatus === "linked"
-                            ? "text-emerald-300"
-                            : "text-[#64748B]"
+                          row.payrollLinkStatus === "linked" ? "text-emerald-300" : "text-[#64748B]"
                         }
                       >
                         {row.payrollLinkStatus === "linked" ? "Linked" : "Not linked"}
@@ -242,7 +248,9 @@ export function HrStaffReadinessClient({
                         {row.clinicalAvailabilityStatus === "available" ? "Available" : "Blocked"}
                       </span>
                     </td>
-                    <td className="px-2 py-2 text-xs text-[#94A3B8]">{formatIso(row.lastHrSyncAt)}</td>
+                    <td className="px-2 py-2 text-xs text-[#94A3B8]">
+                      {formatIso(row.lastHrSyncAt)}
+                    </td>
                     <td className="px-2 py-2">
                       <span
                         className={`inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${readinessBadgeClass(row.readinessState)}`}
@@ -300,8 +308,9 @@ export function HrStaffReadinessClient({
             Admin note
           </h2>
           <p className="mt-2 text-sm text-[#94A3B8]">
-            Run HR sync to refresh IIOHR metadata. Clinical availability requires an assigned role, working hours, fresh
-            HR sync (when linked), and cleared HR/training policy for clinical provider roles.
+            Run HR sync to refresh IIOHR metadata. Clinical availability requires an assigned role,
+            working hours, fresh HR sync (when linked), and cleared HR/training policy for clinical
+            provider roles.
           </p>
         </DashboardCard>
       ) : null}

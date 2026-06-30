@@ -6,7 +6,11 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { isPostgresUniqueViolation } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceKind } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+  openCollectionStatusFilter,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type FiPaymentRemindersCronResult = {
   examined: number;
@@ -109,7 +113,10 @@ export async function runFiPaymentRemindersCronOnce(opts: {
       if (!opts.dryRun) {
         await supabase
           .from("fi_invoices")
-          .update({ last_reminder_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .update({
+            last_reminder_sent_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
           .eq("tenant_id", inv.tenant_id)
           .eq("id", inv.id);
       }
@@ -206,7 +213,10 @@ export async function runFiPaymentRemindersCronOnceForTenant(
       if (!opts.dryRun) {
         await supabase
           .from("fi_invoices")
-          .update({ last_reminder_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .update({
+            last_reminder_sent_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
           .eq("tenant_id", inv.tenant_id)
           .eq("id", inv.id);
       }

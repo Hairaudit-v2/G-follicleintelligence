@@ -59,8 +59,12 @@ function mapCostModelRow(raw: Record<string, unknown>): FiSurgeryCostModel {
   return {
     id: raw.id != null ? String(raw.id) : undefined,
     tenant_id: String(raw.tenant_id),
-    procedure_type: String(raw.procedure_type ?? "").trim().toLowerCase(),
-    surgeon_cost_type: String(raw.surgeon_cost_type ?? "fixed") as FiSurgeryCostModel["surgeon_cost_type"],
+    procedure_type: String(raw.procedure_type ?? "")
+      .trim()
+      .toLowerCase(),
+    surgeon_cost_type: String(
+      raw.surgeon_cost_type ?? "fixed"
+    ) as FiSurgeryCostModel["surgeon_cost_type"],
     surgeon_cost_value_cents: Number(raw.surgeon_cost_value_cents ?? 0),
     rn_hourly_rate_cents: Number(raw.rn_hourly_rate_cents ?? 0),
     technician_hourly_rate_cents: Number(raw.technician_hourly_rate_cents ?? 0),
@@ -76,7 +80,8 @@ function mapCostModelRow(raw: Record<string, unknown>): FiSurgeryCostModel {
     created_at: raw.created_at != null ? String(raw.created_at) : undefined,
     updated_at: raw.updated_at != null ? String(raw.updated_at) : undefined,
     archived_at: raw.archived_at != null ? String(raw.archived_at) : null,
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
   };
 }
 
@@ -105,7 +110,9 @@ export async function loadActiveSurgeryCostModel(
 }
 
 export function surgeryInvoicesFromReadiness(readiness: CasePaymentReadiness): FiInvoiceRow[] {
-  return readiness.invoices.filter((inv) => inv.invoice_kind === "surgery_deposit" || inv.invoice_kind === "surgery_balance");
+  return readiness.invoices.filter(
+    (inv) => inv.invoice_kind === "surgery_deposit" || inv.invoice_kind === "surgery_balance"
+  );
 }
 
 export function aggregateSurgeryInvoiceRevenue(invoices: FiInvoiceRow[]): {
@@ -171,14 +178,20 @@ export function resolveGraftAndHairCounts(args: {
   if (implanted != null && implanted > 0) {
     return {
       graft_count: Math.floor(implanted),
-      hair_count: args.procedureDay?.hairs_implanted != null ? Math.floor(args.procedureDay.hairs_implanted) : null,
+      hair_count:
+        args.procedureDay?.hairs_implanted != null
+          ? Math.floor(args.procedureDay.hairs_implanted)
+          : null,
     };
   }
   const extracted = args.procedureDay?.grafts_extracted;
   if (extracted != null && extracted > 0) {
     return {
       graft_count: Math.floor(extracted),
-      hair_count: args.procedureDay?.hairs_implanted != null ? Math.floor(args.procedureDay.hairs_implanted) : null,
+      hair_count:
+        args.procedureDay?.hairs_implanted != null
+          ? Math.floor(args.procedureDay.hairs_implanted)
+          : null,
     };
   }
   const min = args.surgeryPlan?.estimated_grafts_min;
@@ -228,7 +241,9 @@ export function resolveStaffCounts(procedureDay: CaseProcedureRow | null): {
   };
 }
 
-export function resolveTreatmentAddonsFromChecklist(checklist: Record<string, unknown> | null | undefined): SurgeryEconomicsTreatmentAddons {
+export function resolveTreatmentAddonsFromChecklist(
+  checklist: Record<string, unknown> | null | undefined
+): SurgeryEconomicsTreatmentAddons {
   const c = checklist ?? {};
   return {
     prp: Boolean(c.prp_prepared),
@@ -455,7 +470,9 @@ export async function loadCaseSurgeryEconomicsSummary(args: {
       };
     }
 
-    const costModel = (await loadActiveSurgeryCostModel(tid, procedureType)) ?? defaultCostModelForProcedure(tid, procedureType);
+    const costModel =
+      (await loadActiveSurgeryCostModel(tid, procedureType)) ??
+      defaultCostModelForProcedure(tid, procedureType);
     const calcInput = buildSurgeryEconomicsCalculationInput({
       tenantId: tid,
       procedureType,
@@ -503,7 +520,10 @@ export async function loadCaseSurgeryEconomicsSummary(args: {
   }
 }
 
-async function loadPatientLabelsForSnapshots(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
+async function loadPatientLabelsForSnapshots(
+  tenantId: string,
+  patientIds: string[]
+): Promise<Map<string, string>> {
   const ids = [...new Set(patientIds.filter(Boolean))];
   if (!ids.length) return new Map();
   const supabase = supabaseAdmin();
@@ -514,15 +534,23 @@ async function loadPatientLabelsForSnapshots(tenantId: string, patientIds: strin
     .in("id", ids);
   if (error) throw new Error(error.message);
 
-  const personIds = [...new Set((data ?? []).map((r) => String((r as { person_id: string }).person_id)))];
+  const personIds = [
+    ...new Set((data ?? []).map((r) => String((r as { person_id: string }).person_id))),
+  ];
   const personMeta = new Map<string, Record<string, unknown>>();
   if (personIds.length) {
-    const { data: persons, error: pe } = await supabase.from("fi_persons").select("id, metadata").in("id", personIds);
+    const { data: persons, error: pe } = await supabase
+      .from("fi_persons")
+      .select("id, metadata")
+      .in("id", personIds);
     if (pe) throw new Error(pe.message);
     for (const row of persons ?? []) {
       const id = String((row as { id: string }).id);
       const m = (row as { metadata: unknown }).metadata;
-      personMeta.set(id, m && typeof m === "object" && !Array.isArray(m) ? (m as Record<string, unknown>) : {});
+      personMeta.set(
+        id,
+        m && typeof m === "object" && !Array.isArray(m) ? (m as Record<string, unknown>) : {}
+      );
     }
   }
 
@@ -560,14 +588,20 @@ export async function loadSurgeryEconomicsDashboardPayload(
     query = query.gt("outstanding_cents", 0);
   }
 
-  const { data: snapshotRaw, error } = await query.order("calculated_at", { ascending: false }).limit(200);
+  const { data: snapshotRaw, error } = await query
+    .order("calculated_at", { ascending: false })
+    .limit(200);
   if (error) throw new Error(error.message);
 
-  let snapshots = (snapshotRaw ?? []).map((r) => mapProfitabilitySnapshotRow(r as Record<string, unknown>));
+  let snapshots = (snapshotRaw ?? []).map((r) =>
+    mapProfitabilitySnapshotRow(r as Record<string, unknown>)
+  );
 
   if (filters?.surgeonUserId?.trim()) {
     const surgeonId = filters.surgeonUserId.trim();
-    snapshots = snapshots.filter((s) => String(s.source_metadata.surgeon_user_id ?? "") === surgeonId);
+    snapshots = snapshots.filter(
+      (s) => String(s.source_metadata.surgeon_user_id ?? "") === surgeonId
+    );
   }
   if (filters?.clinicId?.trim()) {
     const clinicId = filters.clinicId.trim();
@@ -581,7 +615,9 @@ export async function loadSurgeryEconomicsDashboardPayload(
 
   let currency = "AUD";
   if (snapshots.length) {
-    const caseIds = [...new Set(snapshots.map((s) => s.case_id).filter((id): id is string => Boolean(id)))];
+    const caseIds = [
+      ...new Set(snapshots.map((s) => s.case_id).filter((id): id is string => Boolean(id))),
+    ];
     if (caseIds.length) {
       const { data: invs } = await supabase
         .from("fi_invoices")
@@ -596,7 +632,7 @@ export async function loadSurgeryEconomicsDashboardPayload(
 
   const recentSnapshots = snapshots.slice(0, limit).map((s) => ({
     ...s,
-    patient_label: s.patient_id ? patientLabelById.get(s.patient_id) ?? null : null,
+    patient_label: s.patient_id ? (patientLabelById.get(s.patient_id) ?? null) : null,
   }));
 
   return { metrics, recentSnapshots, currency };
@@ -630,9 +666,14 @@ export async function loadSurgeryEconomicsFilterOptions(tenantId: string): Promi
     if (clinic) clinicIds.add(clinic);
   }
 
-  const { data: costModels } = await supabase.from("fi_surgery_cost_models").select("procedure_type").eq("tenant_id", tid);
+  const { data: costModels } = await supabase
+    .from("fi_surgery_cost_models")
+    .select("procedure_type")
+    .eq("tenant_id", tid);
   for (const row of costModels ?? []) {
-    const p = String((row as { procedure_type?: string }).procedure_type ?? "").trim().toLowerCase();
+    const p = String((row as { procedure_type?: string }).procedure_type ?? "")
+      .trim()
+      .toLowerCase();
     if (p) procedureTypes.add(p);
   }
 
@@ -650,7 +691,10 @@ export async function loadSurgeryEconomicsFilterOptions(tenantId: string): Promi
   }
 
   const clinicLabels = new Map<string, string>();
-  const { data: clinics } = await supabase.from("fi_clinics").select("id, name").eq("tenant_id", tid);
+  const { data: clinics } = await supabase
+    .from("fi_clinics")
+    .select("id, name")
+    .eq("tenant_id", tid);
   for (const c of clinics ?? []) {
     const r = c as { id: string; name?: string };
     clinicLabels.set(String(r.id), r.name?.trim() || String(r.id));
@@ -658,12 +702,17 @@ export async function loadSurgeryEconomicsFilterOptions(tenantId: string): Promi
 
   return {
     procedureTypes: [...procedureTypes].sort(),
-    surgeonOptions: [...surgeonIds].map((id) => ({ value: id, label: surgeonLabels.get(id) ?? id })),
-    clinicOptions: [...clinicIds].map((id) => ({ value: id, label: clinicLabels.get(id) ?? id })).concat(
-      [...clinicLabels.entries()]
-        .filter(([id]) => !clinicIds.has(id))
-        .map(([value, label]) => ({ value, label }))
-    ),
+    surgeonOptions: [...surgeonIds].map((id) => ({
+      value: id,
+      label: surgeonLabels.get(id) ?? id,
+    })),
+    clinicOptions: [...clinicIds]
+      .map((id) => ({ value: id, label: clinicLabels.get(id) ?? id }))
+      .concat(
+        [...clinicLabels.entries()]
+          .filter(([id]) => !clinicIds.has(id))
+          .map(([value, label]) => ({ value, label }))
+      ),
   };
 }
 
@@ -691,7 +740,9 @@ export async function loadLiveSurgeryForCase(
   if (!data) return null;
   const row = data as Record<string, unknown>;
   const checklist =
-    row.readiness_checklist && typeof row.readiness_checklist === "object" && !Array.isArray(row.readiness_checklist)
+    row.readiness_checklist &&
+    typeof row.readiness_checklist === "object" &&
+    !Array.isArray(row.readiness_checklist)
       ? (row.readiness_checklist as Record<string, unknown>)
       : {};
   return {

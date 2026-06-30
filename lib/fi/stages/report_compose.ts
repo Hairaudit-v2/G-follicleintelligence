@@ -131,19 +131,17 @@ export function runReportCompose(
     })),
   };
 
-  const sections: ReportJsonContentSection[] = FI_SCORECARD_SECTIONS.map(
-    (id, idx) => ({
-      id,
-      title: FI_SCORECARD_SECTION_LABELS[id],
-      content:
-        input.scorecard.sections[id]?.interpretation ??
-        CLAIM_SAFE_BLOCKS.section_interpretation(
-          FI_SCORECARD_SECTION_LABELS[id],
-          input.scorecard.sections[id]?.score ?? 0
-        ),
-      order: idx,
-    })
-  );
+  const sections: ReportJsonContentSection[] = FI_SCORECARD_SECTIONS.map((id, idx) => ({
+    id,
+    title: FI_SCORECARD_SECTION_LABELS[id],
+    content:
+      input.scorecard.sections[id]?.interpretation ??
+      CLAIM_SAFE_BLOCKS.section_interpretation(
+        FI_SCORECARD_SECTION_LABELS[id],
+        input.scorecard.sections[id]?.score ?? 0
+      ),
+    order: idx,
+  }));
 
   const charts: ReportJsonChartDef[] = [
     {
@@ -215,10 +213,7 @@ export function runReportCompose(
     version: FI_REPORT_JSON_VERSION,
     metadata,
     branding,
-    disclaimers: [
-      CLAIM_SAFE_BLOCKS.disclaimer,
-      CLAIM_SAFE_BLOCKS.general_caveat,
-    ],
+    disclaimers: [CLAIM_SAFE_BLOCKS.disclaimer, CLAIM_SAFE_BLOCKS.general_caveat],
     score_summary: scoreSummary,
     sections,
     charts,

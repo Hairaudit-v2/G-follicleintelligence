@@ -23,7 +23,9 @@ export function PatientImageArchiveButton({
   return (
     <div className="mt-3 rounded border border-amber-400/20 bg-amber-400/10 p-3">
       <p className="text-xs font-medium text-amber-200">Archive image</p>
-      <p className="mt-1 text-xs text-amber-200">Archived images stay in the record but are hidden from the active grid by default.</p>
+      <p className="mt-1 text-xs text-amber-200">
+        Archived images stay in the record but are hidden from the active grid by default.
+      </p>
       <label className="mt-2 block text-xs text-slate-200">
         Reason (optional)
         <input

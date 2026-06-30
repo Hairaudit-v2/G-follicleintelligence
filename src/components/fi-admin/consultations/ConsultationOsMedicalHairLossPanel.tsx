@@ -12,7 +12,11 @@ const FIELDS = [
   { key: "follow_up_plan", label: "Follow-up plan" },
 ] as const;
 
-export function ConsultationOsMedicalHairLossPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsMedicalHairLossPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Hair loss (medical)" headingId="consultation-os-med-hair-loss-heading">
       <div className="space-y-4">
@@ -27,16 +31,16 @@ export function ConsultationOsMedicalHairLossPanel({ values, onFieldChange, disa
           disabled={disabled}
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {FIELDS.map((f) => (
-          <LabeledTextInput
-            key={f.key}
-            id={`cos-mhl-${f.key}`}
-            label={f.label}
-            value={values[f.key] ?? ""}
-            onChange={(v) => onFieldChange(f.key, v)}
-            disabled={disabled}
-          />
-        ))}
+          {FIELDS.map((f) => (
+            <LabeledTextInput
+              key={f.key}
+              id={`cos-mhl-${f.key}`}
+              label={f.label}
+              value={values[f.key] ?? ""}
+              onChange={(v) => onFieldChange(f.key, v)}
+              disabled={disabled}
+            />
+          ))}
         </div>
       </div>
     </FiSection>

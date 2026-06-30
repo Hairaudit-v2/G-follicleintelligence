@@ -1,8 +1,23 @@
-import type { CaseAdminDetail, CaseBookingListItem, CaseImageListItem, CaseIndexRow } from "@/src/lib/cases/caseLoaders";
+import type {
+  CaseAdminDetail,
+  CaseBookingListItem,
+  CaseImageListItem,
+  CaseIndexRow,
+} from "@/src/lib/cases/caseLoaders";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import type { CasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders";
-import type { CaseReadinessHealth, CaseReadinessReport, CaseReadinessSectionKey } from "@/src/lib/cases/caseReadinessTypes";
-import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery, CasesIndexPageSize, CasesWorklistReadinessBucket } from "./casesIndexTypes";
+import type {
+  CaseReadinessHealth,
+  CaseReadinessReport,
+  CaseReadinessSectionKey,
+} from "@/src/lib/cases/caseReadinessTypes";
+import type {
+  CaseWorklistRow,
+  CasesIndexFilterOptions,
+  CasesIndexQuery,
+  CasesIndexPageSize,
+  CasesWorklistReadinessBucket,
+} from "./casesIndexTypes";
 import { CASES_INDEX_NONE_VALUE } from "./casesIndexTypes";
 
 function stubBookings(n: number): CaseBookingListItem[] {
@@ -77,7 +92,10 @@ function readinessBucketFromReport(r: CaseReadinessReport): CasesWorklistReadine
   return "in_progress";
 }
 
-function readinessSectionHealth(report: CaseReadinessReport, key: CaseReadinessSectionKey): CaseReadinessHealth {
+function readinessSectionHealth(
+  report: CaseReadinessReport,
+  key: CaseReadinessSectionKey
+): CaseReadinessHealth {
   return report.sections.find((s) => s.key === key)?.health ?? "not_started";
 }
 
@@ -160,11 +178,15 @@ function matchesSearch(row: CaseWorklistRow, q: string): boolean {
 /**
  * Applies URL query filters in-memory (no extra DB round-trips).
  */
-export function applyCasesWorklistFilters(rows: CaseWorklistRow[], query: CasesIndexQuery): CaseWorklistRow[] {
+export function applyCasesWorklistFilters(
+  rows: CaseWorklistRow[],
+  query: CasesIndexQuery
+): CaseWorklistRow[] {
   return rows.filter((row) => {
     if (!matchesSearch(row, query.q)) return false;
     if (query.status && norm(row.status) !== norm(query.status)) return false;
-    if (query.treatment_type && norm(row.treatment_type) !== norm(query.treatment_type)) return false;
+    if (query.treatment_type && norm(row.treatment_type) !== norm(query.treatment_type))
+      return false;
     if (query.case_type && norm(row.case_type) !== norm(query.case_type)) return false;
 
     if (query.planning_status) {
@@ -182,7 +204,10 @@ export function applyCasesWorklistFilters(rows: CaseWorklistRow[], query: CasesI
       const has = !!row.procedureDay;
       if (wantNone) {
         if (has) return false;
-      } else if (!has || norm(row.procedureDay?.procedure_status) !== norm(query.procedure_status)) {
+      } else if (
+        !has ||
+        norm(row.procedureDay?.procedure_status) !== norm(query.procedure_status)
+      ) {
         return false;
       }
     }
@@ -212,7 +237,10 @@ function parseIsoMs(iso: string | null | undefined): number {
 /**
  * Sorts the worklist per query (stable for equal keys).
  */
-export function sortCaseWorklistRows(rows: CaseWorklistRow[], sort: CasesIndexQuery["sort"]): CaseWorklistRow[] {
+export function sortCaseWorklistRows(
+  rows: CaseWorklistRow[],
+  sort: CasesIndexQuery["sort"]
+): CaseWorklistRow[] {
   const copy = [...rows];
   const updatedDesc = (a: CaseWorklistRow, b: CaseWorklistRow) =>
     parseIsoMs(b.updated_at) - parseIsoMs(a.updated_at) || a.id.localeCompare(b.id);
@@ -288,7 +316,11 @@ export type CasesWorklistPageResult<T> = {
 /**
  * Slices sorted+filtered rows for the current page (1-based). Clamps page to valid range.
  */
-export function paginateCaseWorklistRows<T>(rows: T[], page: number, pageSize: CasesIndexPageSize): CasesWorklistPageResult<T> {
+export function paginateCaseWorklistRows<T>(
+  rows: T[],
+  page: number,
+  pageSize: CasesIndexPageSize
+): CasesWorklistPageResult<T> {
   const total = rows.length;
   const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize);
   const safePage = Math.min(Math.max(1, page), totalPages);

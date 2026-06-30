@@ -19,7 +19,9 @@ export type AllowedStaffPinMutationDecision =
   | { allowed: true; via: "no_pin_session" }
   | { allowed: true; via: "staff_pin_floor"; staffId: string };
 
-export type StaffPinMutationDecision = AllowedStaffPinMutationDecision | { blocked: true; message: string };
+export type StaffPinMutationDecision =
+  | AllowedStaffPinMutationDecision
+  | { blocked: true; message: string };
 
 /**
  * Pure evaluator for PIN session mutation policy (testable without cookies/DB).

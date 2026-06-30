@@ -33,11 +33,15 @@ export function normalizeHieHairLossSourceSystem(v: unknown): HieHairLossSourceS
   return isHieHairLossSourceSystem(v) ? v : "fi_os";
 }
 
-export function isHieHairLossClassificationSystem(v: unknown): v is HieHairLossClassificationSystem {
+export function isHieHairLossClassificationSystem(
+  v: unknown
+): v is HieHairLossClassificationSystem {
   return typeof v === "string" && SYS.has(v);
 }
 
-export function normalizeHieHairLossClassificationSystem(v: unknown): HieHairLossClassificationSystem {
+export function normalizeHieHairLossClassificationSystem(
+  v: unknown
+): HieHairLossClassificationSystem {
   return isHieHairLossClassificationSystem(v) ? v : "custom";
 }
 
@@ -82,7 +86,8 @@ function normaliseGradeString(raw: string): string {
   const t = raw.trim();
   if (!t) return "unknown";
   const tl = t.toLowerCase();
-  if (tl === "iii vertex" || tl === "iiiv" || tl === "iii-v" || tl === "iiivertex") return "III Vertex";
+  if (tl === "iii vertex" || tl === "iiiv" || tl === "iii-v" || tl === "iiivertex")
+    return "III Vertex";
   return t;
 }
 

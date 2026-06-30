@@ -25,7 +25,7 @@ describe("receptionCommunicationComposer", () => {
   it("selects templates from alert and revenue kinds", () => {
     assert.equal(
       suggestReceptionCommunicationTemplateKey({ sourceKind: "deposit", alertKind: null }),
-      "deposit_reminder",
+      "deposit_reminder"
     );
     assert.equal(
       suggestTemplateFromActionAlert({
@@ -36,11 +36,20 @@ describe("receptionCommunicationComposer", () => {
         severity: "critical",
         href: null,
       }),
-      "deposit_reminder",
+      "deposit_reminder"
     );
-    assert.equal(suggestTemplateFromRevenueAlertKind("patient_gone_cold"), "cold_lead_reactivation");
-    assert.equal(suggestTemplateFromRevenueAlertKind("missing_finance_payment_link"), "payment_link_follow_up");
-    assert.equal(suggestTemplateFromRevenueAlertKind("quote_followup_sla_breach"), "quote_follow_up");
+    assert.equal(
+      suggestTemplateFromRevenueAlertKind("patient_gone_cold"),
+      "cold_lead_reactivation"
+    );
+    assert.equal(
+      suggestTemplateFromRevenueAlertKind("missing_finance_payment_link"),
+      "payment_link_follow_up"
+    );
+    assert.equal(
+      suggestTemplateFromRevenueAlertKind("quote_followup_sla_breach"),
+      "quote_follow_up"
+    );
   });
 
   it("builds variable map for rendering", () => {

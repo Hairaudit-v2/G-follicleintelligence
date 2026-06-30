@@ -46,7 +46,9 @@ export type FiFinancialTransactionRow = {
   created_at: string;
 };
 
-export function mapFinancialTransactionRow(raw: Record<string, unknown>): FiFinancialTransactionRow {
+export function mapFinancialTransactionRow(
+  raw: Record<string, unknown>
+): FiFinancialTransactionRow {
   const metadata =
     raw.metadata && typeof raw.metadata === "object" && !Array.isArray(raw.metadata)
       ? (raw.metadata as Record<string, unknown>)
@@ -71,7 +73,8 @@ export function mapFinancialTransactionRow(raw: Record<string, unknown>): FiFina
     description: raw.description != null ? String(raw.description) : null,
     idempotency_key: raw.idempotency_key != null ? String(raw.idempotency_key) : null,
     metadata,
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
     created_at: String(raw.created_at ?? ""),
   };
 }

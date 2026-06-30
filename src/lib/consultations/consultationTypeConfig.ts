@@ -112,12 +112,7 @@ export const CONSULTATION_TYPE_DEFINITIONS: readonly ConsultationTypeDefinition[
     id: "mesotherapy",
     label: "Mesotherapy",
     sections: ["regenerative_assessment", "medical", "recommendations", "quote"],
-    promptFocus: [
-      "Treatment area",
-      "Product/protocol",
-      "Session plan",
-      "Maintenance plan",
-    ],
+    promptFocus: ["Treatment area", "Product/protocol", "Session plan", "Maintenance plan"],
   },
   {
     id: "medical_hair_loss",

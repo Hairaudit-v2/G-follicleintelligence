@@ -102,8 +102,7 @@ export async function loadOrCreateSurgeryDayVieSession(input: {
   }
 
   const procedureDayId =
-    input.procedureDayId?.trim() ||
-    (caseId ? await loadProcedureDayId(tid, caseId, client) : null);
+    input.procedureDayId?.trim() || (caseId ? await loadProcedureDayId(tid, caseId, client) : null);
 
   const now = new Date().toISOString();
   const progress: Record<string, unknown> = {
@@ -199,11 +198,14 @@ export async function loadSurgeryOsVieCaptureSummaries(
       .map(async (surgery) => {
         const session = sessionByPatient.get(surgery.patientId);
         const progress = session?.progress ?? {};
-        const procedureDayId = surgery.caseId ? procedureDayByCase.get(surgery.caseId) ?? null : null;
+        const procedureDayId = surgery.caseId
+          ? (procedureDayByCase.get(surgery.caseId) ?? null)
+          : null;
 
         let comparisonPairs: Awaited<ReturnType<typeof generateVieComparisonPairs>> = [];
         let alignmentResults: Awaited<ReturnType<typeof loadVieAlignmentResultsForPatient>> = [];
-        let outcomeSummary: Awaited<ReturnType<typeof computeVieOutcomeSummaryForPatient>> | null = null;
+        let outcomeSummary: Awaited<ReturnType<typeof computeVieOutcomeSummaryForPatient>> | null =
+          null;
         try {
           const policy = await loadVieCapturePolicyForTenant(tid, supabase);
           const records = await loadVieComparisonCaptureRecords(
@@ -212,8 +214,15 @@ export async function loadSurgeryOsVieCaptureSummaries(
             surgery.caseId,
             supabase
           );
-          comparisonPairs = generateVieComparisonPairs(records, policy.minimum_capture_quality_score);
-          alignmentResults = await loadVieAlignmentResultsForPatient(tid, surgery.patientId, supabase);
+          comparisonPairs = generateVieComparisonPairs(
+            records,
+            policy.minimum_capture_quality_score
+          );
+          alignmentResults = await loadVieAlignmentResultsForPatient(
+            tid,
+            surgery.patientId,
+            supabase
+          );
           outcomeSummary = await computeVieOutcomeSummaryForPatient(tid, surgery.patientId, {
             caseId: surgery.caseId,
             client: supabase,

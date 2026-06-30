@@ -49,13 +49,17 @@ async function appendReconciliationAuditEvent(args: {
 /**
  * Upsert provider reconciliation row keyed by tenant + provider + provider_transaction_id.
  */
-export async function recordPaymentReconciliation(args: RecordPaymentReconciliationArgs): Promise<FiPaymentReconciliationRow> {
+export async function recordPaymentReconciliation(
+  args: RecordPaymentReconciliationArgs
+): Promise<FiPaymentReconciliationRow> {
   const tid = args.tenantId.trim();
   const provider = args.provider.trim().toLowerCase();
   const providerTxId = args.providerTransactionId?.trim() || null;
   const supabase = supabaseAdmin();
-  const expected = args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : null;
-  const received = args.receivedAmountCents != null ? Math.max(0, Math.floor(args.receivedAmountCents)) : null;
+  const expected =
+    args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : null;
+  const received =
+    args.receivedAmountCents != null ? Math.max(0, Math.floor(args.receivedAmountCents)) : null;
 
   if (providerTxId) {
     const { data: existing } = await supabase
@@ -69,15 +73,28 @@ export async function recordPaymentReconciliation(args: RecordPaymentReconciliat
       const { data: upd, error } = await supabase
         .from("fi_payment_reconciliation")
         .update({
-          payment_id: args.paymentId?.trim() || ((existing as { payment_id?: string | null }).payment_id ?? null),
-          invoice_id: args.invoiceId?.trim() || ((existing as { invoice_id?: string | null }).invoice_id ?? null),
+          payment_id:
+            args.paymentId?.trim() ||
+            ((existing as { payment_id?: string | null }).payment_id ?? null),
+          invoice_id:
+            args.invoiceId?.trim() ||
+            ((existing as { invoice_id?: string | null }).invoice_id ?? null),
           reconciliation_status: args.reconciliationStatus,
           failure_reason: args.failureReason?.trim() || null,
           amount_cents: Math.max(0, Math.floor(args.amountCents)),
-          expected_amount_cents: expected ?? (existing as { expected_amount_cents?: number | null }).expected_amount_cents ?? null,
-          received_amount_cents: received ?? (existing as { received_amount_cents?: number | null }).received_amount_cents ?? null,
+          expected_amount_cents:
+            expected ??
+            (existing as { expected_amount_cents?: number | null }).expected_amount_cents ??
+            null,
+          received_amount_cents:
+            received ??
+            (existing as { received_amount_cents?: number | null }).received_amount_cents ??
+            null,
           currency: (args.currency ?? "AUD").trim().toUpperCase(),
-          metadata: { ...((existing as { metadata?: Record<string, unknown> }).metadata ?? {}), ...(args.metadata ?? {}) },
+          metadata: {
+            ...((existing as { metadata?: Record<string, unknown> }).metadata ?? {}),
+            ...(args.metadata ?? {}),
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("tenant_id", tid)

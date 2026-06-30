@@ -36,9 +36,10 @@ function asOrgRow(row: Record<string, unknown>): FiOrganisationRow {
     name: String(row.name),
     slug: row.slug == null ? null : String(row.slug),
     organisation_type: row.organisation_type as FiOrganisationRow["organisation_type"],
-    metadata: (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
-      ? (row.metadata as Record<string, unknown>)
-      : {}) ?? {},
+    metadata:
+      (row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {}) ?? {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -76,8 +77,13 @@ export async function resolveOrCreateOrganisation(
         .eq("id", mapped.data.organisation_id)
         .eq("tenant_id", tenantId)
         .single();
-      if (org.error || !org.data) throw new Error(org.error?.message ?? "Organisation not found for mapping.");
-      return { organisation: asOrgRow(org.data as Record<string, unknown>), created: false, mapping_created: false };
+      if (org.error || !org.data)
+        throw new Error(org.error?.message ?? "Organisation not found for mapping.");
+      return {
+        organisation: asOrgRow(org.data as Record<string, unknown>),
+        created: false,
+        mapping_created: false,
+      };
     }
   }
 
@@ -92,7 +98,13 @@ export async function resolveOrCreateOrganisation(
     const matches = rows.filter((r) => normalizeWhitespaceName(String(r.name)) === normName);
     if (matches.length === 1) {
       const org = asOrgRow(matches[0]);
-      const mappingCreated = await ensureOrganisationSourceMapping(supabase, tenantId, org.id, sourceSystem, sourceOrgId);
+      const mappingCreated = await ensureOrganisationSourceMapping(
+        supabase,
+        tenantId,
+        org.id,
+        sourceSystem,
+        sourceOrgId
+      );
       return { organisation: org, created: false, mapping_created: mappingCreated };
     }
   }
@@ -140,7 +152,11 @@ export async function resolveOrCreateOrganisation(
       if (mapIns.error && mapIns.error.code !== "23505") throw new Error(mapIns.error.message);
       mappingCreated = !mapIns.error;
     }
-    return { organisation: asOrgRow(inserted.data as Record<string, unknown>), created: true, mapping_created: mappingCreated };
+    return {
+      organisation: asOrgRow(inserted.data as Record<string, unknown>),
+      created: true,
+      mapping_created: mappingCreated,
+    };
   }
 
   if (inserted.error?.code === "23505" && sourceOrgId) {
@@ -159,7 +175,11 @@ export async function resolveOrCreateOrganisation(
         .eq("tenant_id", tenantId)
         .single();
       if (org.data) {
-        return { organisation: asOrgRow(org.data as Record<string, unknown>), created: false, mapping_created: false };
+        return {
+          organisation: asOrgRow(org.data as Record<string, unknown>),
+          created: false,
+          mapping_created: false,
+        };
       }
     }
   }

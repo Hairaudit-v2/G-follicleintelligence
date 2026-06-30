@@ -102,11 +102,11 @@ describe("FinancialOS ledger invariants", () => {
   it("assertLedgerRowsTenantScoped detects cross-tenant leakage", () => {
     assert.equal(
       assertLedgerRowsTenantScoped([{ tenant_id: TENANT_A }, { tenant_id: TENANT_A }], TENANT_A),
-      true,
+      true
     );
     assert.equal(
       assertLedgerRowsTenantScoped([{ tenant_id: TENANT_A }, { tenant_id: TENANT_B }], TENANT_A),
-      false,
+      false
     );
   });
 });

@@ -9,7 +9,9 @@ function mapUnknownArray(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
 }
 
-export function mapPathologyAiInterpretationRow(row: Record<string, unknown>): PathologyAiInterpretationRow {
+export function mapPathologyAiInterpretationRow(
+  row: Record<string, unknown>
+): PathologyAiInterpretationRow {
   const parsed = pathologyAiInterpretationJsonSchema.parse(row.interpretation_json);
   return {
     id: String(row.id),
@@ -20,7 +22,8 @@ export function mapPathologyAiInterpretationRow(row: Record<string, unknown>): P
     model_name: row.model_name != null ? String(row.model_name) : null,
     interpretation_json: parsed,
     doctor_summary: row.doctor_summary != null ? String(row.doctor_summary) : null,
-    patient_friendly_summary: row.patient_friendly_summary != null ? String(row.patient_friendly_summary) : null,
+    patient_friendly_summary:
+      row.patient_friendly_summary != null ? String(row.patient_friendly_summary) : null,
     clinical_flags: mapUnknownArray(row.clinical_flags),
     treatment_recommendations: mapUnknownArray(row.treatment_recommendations),
     surgical_readiness_score:
@@ -28,7 +31,8 @@ export function mapPathologyAiInterpretationRow(row: Record<string, unknown>): P
         ? Number(row.surgical_readiness_score)
         : null,
     hair_loss_relevance_score:
-      row.hair_loss_relevance_score != null && Number.isFinite(Number(row.hair_loss_relevance_score))
+      row.hair_loss_relevance_score != null &&
+      Number.isFinite(Number(row.hair_loss_relevance_score))
         ? Number(row.hair_loss_relevance_score)
         : null,
     reviewed_by_user_id: row.reviewed_by_user_id != null ? String(row.reviewed_by_user_id) : null,

@@ -30,7 +30,9 @@ export function CrmKanbanColumn({
     >
       <header className="sticky top-0 z-[1] flex items-center justify-between gap-2 border-b border-white/[0.08] bg-white/[0.03] px-3 py-2 backdrop-blur-sm">
         <h2 className="truncate text-sm font-semibold text-slate-100">{title}</h2>
-        <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-xs font-medium text-slate-200">{count}</span>
+        <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-xs font-medium text-slate-200">
+          {count}
+        </span>
       </header>
       <div className="flex flex-1 flex-col gap-2 p-2">{children}</div>
     </section>

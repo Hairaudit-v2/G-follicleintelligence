@@ -7,7 +7,10 @@ import { cancelBookingAction, completeBookingAction } from "@/lib/actions/fi-boo
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatBookingWindowInTimezone,
+  normalizeCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { BookingStatusBadge } from "./BookingStatusBadge";
@@ -26,7 +29,11 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
   const parts: ReactNode[] = [];
   if (row.lead_id) {
     parts.push(
-      <Link key="lead" className="text-blue-300 hover:underline" href={`/fi-admin/${tenantId}/crm/leads/${row.lead_id}`}>
+      <Link
+        key="lead"
+        className="text-blue-300 hover:underline"
+        href={`/fi-admin/${tenantId}/crm/leads/${row.lead_id}`}
+      >
         Lead
       </Link>
     );
@@ -34,7 +41,8 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
   if (row.person_id) {
     parts.push(
       <span key="person" className="text-slate-300">
-        Person <code className="rounded bg-white/[0.06] px-0.5 text-xs">{row.person_id.slice(0, 8)}…</code>
+        Person{" "}
+        <code className="rounded bg-white/[0.06] px-0.5 text-xs">{row.person_id.slice(0, 8)}…</code>
       </span>
     );
   }
@@ -51,7 +59,11 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
   }
   if (row.case_id) {
     parts.push(
-      <Link key="case" className="text-blue-300 hover:underline" href={`/fi-admin/${tenantId}/cases/${row.case_id}`}>
+      <Link
+        key="case"
+        className="text-blue-300 hover:underline"
+        href={`/fi-admin/${tenantId}/cases/${row.case_id}`}
+      >
         Case
       </Link>
     );
@@ -91,7 +103,9 @@ export function BookingOperatorRow({
   }
 
   const tz = normalizeCalendarTimezone(booking.timezone);
-  const range = formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, { endPart: "timeOnly" });
+  const range = formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, {
+    endPart: "timeOnly",
+  });
 
   async function onComplete() {
     setBusy(true);
@@ -141,7 +155,9 @@ export function BookingOperatorRow({
       <td className="max-w-[14rem] px-3 py-2 align-top text-slate-300">
         <span className="block text-xs leading-snug">{assignment.summaryLine}</span>
       </td>
-      <td className="max-w-[10rem] px-3 py-2 align-top text-slate-300">{clinicOrLocation(clinics, booking)}</td>
+      <td className="max-w-[10rem] px-3 py-2 align-top text-slate-300">
+        {clinicOrLocation(clinics, booking)}
+      </td>
       <td className="whitespace-nowrap px-3 py-2 align-top">
         <div className="flex flex-wrap gap-1">
           {!cancelled && !completed ? (

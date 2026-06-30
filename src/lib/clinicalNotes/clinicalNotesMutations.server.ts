@@ -24,7 +24,11 @@ export type FiClinicalNoteRow = {
   updated_at: string;
 };
 
-async function assertPatientInTenant(supabase: SupabaseClient, tenantId: string, patientId: string): Promise<void> {
+async function assertPatientInTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<void> {
   const { data, error } = await supabase
     .from("fi_patients")
     .select("id")
@@ -73,8 +77,10 @@ function mapClinicalNoteRow(raw: Record<string, unknown>): FiClinicalNoteRow {
     transcript_raw: String(raw.transcript_raw ?? ""),
     sections: parseClinicalNoteSections(raw.sections),
     ai_model: raw.ai_model != null ? String(raw.ai_model) : null,
-    created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
-    approved_by_fi_user_id: raw.approved_by_fi_user_id != null ? String(raw.approved_by_fi_user_id) : null,
+    created_by_fi_user_id:
+      raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
+    approved_by_fi_user_id:
+      raw.approved_by_fi_user_id != null ? String(raw.approved_by_fi_user_id) : null,
     approved_at: raw.approved_at != null ? String(raw.approved_at) : null,
     created_at: String(raw.created_at),
     updated_at: String(raw.updated_at),
@@ -209,7 +215,10 @@ export async function approveClinicalVoiceNote(params: {
   return mapClinicalNoteRow(refreshed as Record<string, unknown>);
 }
 
-export async function loadClinicalNoteById(tenantId: string, clinicalNoteId: string): Promise<FiClinicalNoteRow | null> {
+export async function loadClinicalNoteById(
+  tenantId: string,
+  clinicalNoteId: string
+): Promise<FiClinicalNoteRow | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_clinical_notes")

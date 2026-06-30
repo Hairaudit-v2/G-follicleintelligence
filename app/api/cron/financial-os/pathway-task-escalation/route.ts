@@ -36,7 +36,12 @@ async function handle(req: NextRequest) {
   }
 
   try {
-    const result = await runPaymentPathwayTaskEscalationCron({ todayYmd: runDateYmd, dryRun, limit, tenantId });
+    const result = await runPaymentPathwayTaskEscalationCron({
+      todayYmd: runDateYmd,
+      dryRun,
+      limit,
+      tenantId,
+    });
     return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     const message = e instanceof Error ? e.message : "unknown_error";

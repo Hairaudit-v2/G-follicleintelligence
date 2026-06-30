@@ -1,4 +1,8 @@
-import type { ConsultationFormField, ConsultationFormOption, ConsultationFormSchema } from "../consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormOption,
+  ConsultationFormSchema,
+} from "../consultationFormTypes";
 
 function fld(field: ConsultationFormField): ConsultationFormField {
   return field;
@@ -90,7 +94,8 @@ export const hairTransplantRepairConsultationSchemaV1: ConsultationFormSchema = 
         }),
         fld({
           id: "medicolegal_counselling_documented",
-          label: "Limitations, expectations, and prior outcome context discussed (medico-legal / counselling emphasis)",
+          label:
+            "Limitations, expectations, and prior outcome context discussed (medico-legal / counselling emphasis)",
           type: "boolean",
           required: true,
         }),
@@ -239,8 +244,13 @@ export const hairTransplantRepairConsultationSchemaV1: ConsultationFormSchema = 
           id: "corrective_planning_notes",
           label: "Corrective planning notes (clinical — not a quote)",
           type: "textarea",
-          placeholder: "Only when documenting detailed planning (zones, principles, staging). No pricing.",
-          showWhen: { fieldId: "corrective_surgical_planning_selected", operator: "equals", value: true },
+          placeholder:
+            "Only when documenting detailed planning (zones, principles, staging). No pricing.",
+          showWhen: {
+            fieldId: "corrective_surgical_planning_selected",
+            operator: "equals",
+            value: true,
+          },
           required: true,
         }),
         fld({

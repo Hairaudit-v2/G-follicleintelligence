@@ -26,7 +26,10 @@ export function canonicalHairTransplantNorwoodKey(values: Record<string, unknown
 
 /** Risk / medical flags: one checklist in v2; legacy forms may also store `risk_flags_confirmed`. */
 export function canonicalHairTransplantRiskFlagValues(values: Record<string, unknown>): string[] {
-  return mergeUniqueStrings(readStringArray(values.medical_flags), readStringArray(values.risk_flags_confirmed));
+  return mergeUniqueStrings(
+    readStringArray(values.medical_flags),
+    readStringArray(values.risk_flags_confirmed)
+  );
 }
 
 /** Structured treatment selections: recommendations win; else legacy interest list. */
@@ -52,7 +55,9 @@ function readTreatmentRecommendationPlain(values: Record<string, unknown>): stri
  * Canonical “recommended procedure / plan” line for completion summaries.
  * Prefers explicit plan text, then v2 AI placeholder field, then legacy treatment block text.
  */
-export function canonicalHairTransplantRecommendedPlanText(values: Record<string, unknown>): string {
+export function canonicalHairTransplantRecommendedPlanText(
+  values: Record<string, unknown>
+): string {
   const a = readString(values.recommended_plan_summary).trim();
   if (a) return a;
   const b = readString(values.ai_recommended_plan_summary).trim();
@@ -94,7 +99,9 @@ export function canonicalHairTransplantGraftBounds(values: Record<string, unknow
  * Shallow-normalized value map for debugging / future adapters.
  * Does not mutate the input object.
  */
-export function normalizeHairTransplantConsultationValues(values: Record<string, unknown>): Record<string, unknown> {
+export function normalizeHairTransplantConsultationValues(
+  values: Record<string, unknown>
+): Record<string, unknown> {
   const { min, max } = canonicalHairTransplantGraftBounds(values);
   return {
     ...values,

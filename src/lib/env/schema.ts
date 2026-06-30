@@ -184,7 +184,11 @@ function minSecretIssue(name: string, raw: string | undefined, min: number): Env
 export function isGoogleCalendarOAuthEnvConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
   const clientId = (env.GOOGLE_CALENDAR_CLIENT_ID ?? env.GOOGLE_CLIENT_ID ?? "").trim();
   const clientSecret = (env.GOOGLE_CALENDAR_CLIENT_SECRET ?? env.GOOGLE_CLIENT_SECRET ?? "").trim();
-  const redirectUri = (env.GOOGLE_CALENDAR_REDIRECT_URI ?? env.GOOGLE_OAUTH_REDIRECT_URI ?? "").trim();
+  const redirectUri = (
+    env.GOOGLE_CALENDAR_REDIRECT_URI ??
+    env.GOOGLE_OAUTH_REDIRECT_URI ??
+    ""
+  ).trim();
   return Boolean(clientId && clientSecret && redirectUri);
 }
 
@@ -192,9 +196,7 @@ export function isGoogleCalendarOAuthEnvConfigured(env: NodeJS.ProcessEnv = proc
  * Cross-cutting production and safety rules (shared by client + server validation).
  * Returns descriptive issues — never includes secret values.
  */
-export function collectCrossEnvValidationIssues(
-  env: NodeJS.ProcessEnv = process.env
-): EnvIssue[] {
+export function collectCrossEnvValidationIssues(env: NodeJS.ProcessEnv = process.env): EnvIssue[] {
   const issues: EnvIssue[] = [];
   const g = (k: string) => env[k];
   const isProd = isProductionEnv(env);
@@ -332,7 +334,11 @@ export function collectCrossEnvValidationIssues(
     minSecretIssue("IIOHR_HR_SYNC_SECRET", g("IIOHR_HR_SYNC_SECRET"), 16),
     minSecretIssue("IIOHR_FI_COMPETENCY_EXPORT_SECRET", g("IIOHR_FI_COMPETENCY_EXPORT_SECRET"), 16),
     minSecretIssue("FI_EXTERNAL_CONNECTOR_MASTER_KEY", g("FI_EXTERNAL_CONNECTOR_MASTER_KEY"), 16),
-    minSecretIssue("GOOGLE_CALENDAR_OAUTH_STATE_SECRET", g("GOOGLE_CALENDAR_OAUTH_STATE_SECRET"), 16),
+    minSecretIssue(
+      "GOOGLE_CALENDAR_OAUTH_STATE_SECRET",
+      g("GOOGLE_CALENDAR_OAUTH_STATE_SECRET"),
+      16
+    ),
   ]) {
     if (issue) issues.push(issue);
   }
@@ -360,7 +366,9 @@ export function zodIssuesToEnvIssues(error: z.ZodError): EnvIssue[] {
   }));
 }
 
-export function pickClientEnvInput(env: NodeJS.ProcessEnv): Record<ClientEnvKey, string | undefined> {
+export function pickClientEnvInput(
+  env: NodeJS.ProcessEnv
+): Record<ClientEnvKey, string | undefined> {
   return {
     NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -369,7 +377,9 @@ export function pickClientEnvInput(env: NodeJS.ProcessEnv): Record<ClientEnvKey,
   };
 }
 
-export function pickServerEnvInput(env: NodeJS.ProcessEnv): Record<keyof ServerEnv, string | undefined> {
+export function pickServerEnvInput(
+  env: NodeJS.ProcessEnv
+): Record<keyof ServerEnv, string | undefined> {
   const shape = serverEnvSchema.shape;
   const out = {} as Record<keyof ServerEnv, string | undefined>;
   for (const key of Object.keys(shape) as (keyof ServerEnv)[]) {
@@ -425,7 +435,8 @@ export function validateFullEnv(
   issues.push(...collectCrossEnvValidationIssues(runtimeEnv));
 
   const deduped = issues.filter(
-    (issue, index, all) => all.findIndex((x) => x.variable === issue.variable && x.message === issue.message) === index
+    (issue, index, all) =>
+      all.findIndex((x) => x.variable === issue.variable && x.message === issue.message) === index
   );
 
   if (deduped.length > 0) {
@@ -434,8 +445,12 @@ export function validateFullEnv(
 
   return {
     ok: true,
-    client: clientResult.success ? clientResult.data : (pickClientEnvInput(runtimeEnv) as ClientEnv),
-    server: serverResult.success ? serverResult.data : (pickServerEnvInput(runtimeEnv) as ServerEnv),
+    client: clientResult.success
+      ? clientResult.data
+      : (pickClientEnvInput(runtimeEnv) as ClientEnv),
+    server: serverResult.success
+      ? serverResult.data
+      : (pickServerEnvInput(runtimeEnv) as ServerEnv),
   };
 }
 

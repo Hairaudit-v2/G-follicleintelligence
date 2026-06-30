@@ -189,7 +189,8 @@ export function buildAttentionPriorities(input: {
       count: actionCentre.financialClearanceAttention,
       priorityScore: 100,
       severity: "critical",
-      label: (n) => plural(n, "surgery", "surgeries") + " need payment clearance before procedure day",
+      label: (n) =>
+        plural(n, "surgery", "surgeries") + " need payment clearance before procedure day",
       detail: "Confirm financial clearance before upcoming procedures.",
       href: `${base}/financial/dashboard`,
     },
@@ -198,7 +199,8 @@ export function buildAttentionPriorities(input: {
       count: actionCentre.surgeryReadinessAlerts,
       priorityScore: 95,
       severity: "critical",
-      label: (n) => plural(n, "surgery", "surgeries") + " blocked by missing preparation requirements",
+      label: (n) =>
+        plural(n, "surgery", "surgeries") + " blocked by missing preparation requirements",
       detail: "Link cases and complete preparation before procedure day.",
       href: `${base}/cases`,
     },
@@ -225,7 +227,8 @@ export function buildAttentionPriorities(input: {
       count: actionCentre.followUpsDue,
       priorityScore: 65,
       severity: "warning",
-      label: (n) => plural(n, "follow-up visit", "follow-up visits") + " require scheduling attention",
+      label: (n) =>
+        plural(n, "follow-up visit", "follow-up visits") + " require scheduling attention",
       detail: "Review visits due within the next two weeks.",
       href: `${base}/calendar`,
     },
@@ -280,7 +283,9 @@ const BUCKET_TIMELINE_LABEL: Record<AgendaBucket, string> = {
 };
 
 function timelineLabelForBooking(bucket: AgendaBucket, row: DashboardBookingItem): string {
-  const status = String(row.booking_status ?? "").trim().toLowerCase();
+  const status = String(row.booking_status ?? "")
+    .trim()
+    .toLowerCase();
   if (status === "arrived") return "Patient arrival confirmed";
   if (bucket === "surgery") return "Surgery begins";
   if (bucket === "consult") return "Consultation scheduled";
@@ -298,7 +303,9 @@ export function buildTodayTimeline(input: {
   const { base, operationalDay, agendaByBucket, paymentCommercialKpis, maxItems = 12 } = input;
   const { localStartIso, localEndIso, calendarTimezone } = operationalDay;
 
-  const appointmentEntries: TimelineEntry[] = (["consult", "surgery", "follow_up", "other"] as AgendaBucket[])
+  const appointmentEntries: TimelineEntry[] = (
+    ["consult", "surgery", "follow_up", "other"] as AgendaBucket[]
+  )
     .flatMap((bucket) =>
       agendaByBucket[bucket]
         .filter((row) => isInOperationalDay(row.start_at, localStartIso, localEndIso))
@@ -315,14 +322,18 @@ export function buildTodayTimeline(input: {
               : row.lead_id
                 ? `${base}/crm/leads/${row.lead_id}`
                 : `${base}/calendar`,
-        })),
+        }))
     )
     .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 
   const entries = [...appointmentEntries];
 
-  if (paymentCommercialKpis.depositsDueCount > 0 || paymentCommercialKpis.overduePaymentsCount > 0) {
-    const paymentCount = paymentCommercialKpis.depositsDueCount + paymentCommercialKpis.overduePaymentsCount;
+  if (
+    paymentCommercialKpis.depositsDueCount > 0 ||
+    paymentCommercialKpis.overduePaymentsCount > 0
+  ) {
+    const paymentCount =
+      paymentCommercialKpis.depositsDueCount + paymentCommercialKpis.overduePaymentsCount;
     entries.push({
       id: "payment-due",
       timeLabel: "Today",
@@ -348,7 +359,7 @@ export function buildPerformanceKpis(input: {
   const conversion = formatConversion(
     quickStats.conversionRateLast30d,
     quickStats.conversionWonLast30d,
-    quickStats.conversionClosedLast30d,
+    quickStats.conversionClosedLast30d
   );
 
   const surgeriesThisWeek = launchControl.surgeriesThisWeek;
@@ -402,7 +413,7 @@ export function buildTomorrowPreview(input: {
   const window = computeTomorrowOperationalWindow(now, operationalDay.calendarTimezone);
 
   const tomorrowSurgeries = agendaByBucket.surgery.filter((row) =>
-    isInOperationalDay(row.start_at, window.localStartIso, window.localEndIso),
+    isInOperationalDay(row.start_at, window.localStartIso, window.localEndIso)
   );
   const missingPrep = tomorrowSurgeries.filter((row) => !row.case_id?.trim()).length;
   const awaitingPayment = paymentCommercialKpis.depositsDueCount;
@@ -410,7 +421,8 @@ export function buildTomorrowPreview(input: {
   const lines: TomorrowPreviewLine[] = [
     {
       id: "surgeries",
-      text: plural(tomorrowSurgeries.length, "surgery scheduled", "surgeries scheduled") + " tomorrow",
+      text:
+        plural(tomorrowSurgeries.length, "surgery scheduled", "surgeries scheduled") + " tomorrow",
     },
   ];
 
@@ -424,7 +436,11 @@ export function buildTomorrowPreview(input: {
   if (awaitingPayment > 0) {
     lines.push({
       id: "payment",
-      text: plural(awaitingPayment, "patient awaiting payment confirmation", "patients awaiting payment confirmation"),
+      text: plural(
+        awaitingPayment,
+        "patient awaiting payment confirmation",
+        "patients awaiting payment confirmation"
+      ),
     });
   }
 

@@ -12,7 +12,12 @@ const TZ = "UTC";
 const YMD = "2026-06-10";
 
 function agendaFromBookings(
-  rows: Array<{ start_at: string; lead_id: string | null; timezone: string | null; booking_type: string }>
+  rows: Array<{
+    start_at: string;
+    lead_id: string | null;
+    timezone: string | null;
+    booking_type: string;
+  }>
 ): TenantOperationalDashboard["agendaByBucket"] {
   const empty: TenantOperationalDashboard["agendaByBucket"] = {
     consult: [],
@@ -23,7 +28,13 @@ function agendaFromBookings(
   for (const r of rows) {
     const t = r.booking_type.trim();
     const bucket =
-      t === "consultation" ? "consult" : t === "surgery" ? "surgery" : t === "follow_up" || t === "review" ? "follow_up" : "other";
+      t === "consultation"
+        ? "consult"
+        : t === "surgery"
+          ? "surgery"
+          : t === "follow_up" || t === "review"
+            ? "follow_up"
+            : "other";
     empty[bucket].push({
       id: "f0000000-0000-4000-8000-000000000001",
       start_at: r.start_at,
@@ -44,17 +55,42 @@ test("countDistinctLeadBookingsOnOperationalDay: only counts lead-linked booking
   const leadA = "a1000000-0000-4000-8000-000000000001";
   const leadB = "b1000000-0000-4000-8000-000000000002";
   const agenda = agendaFromBookings([
-    { start_at: "2026-06-09T14:00:00.000Z", lead_id: leadA, timezone: TZ, booking_type: "consultation" },
-    { start_at: "2026-06-10T14:00:00.000Z", lead_id: leadA, timezone: TZ, booking_type: "consultation" },
-    { start_at: "2026-06-10T14:00:00.000Z", lead_id: leadB, timezone: TZ, booking_type: "consultation" },
-    { start_at: "2026-06-10T14:00:00.000Z", lead_id: null, timezone: TZ, booking_type: "consultation" },
+    {
+      start_at: "2026-06-09T14:00:00.000Z",
+      lead_id: leadA,
+      timezone: TZ,
+      booking_type: "consultation",
+    },
+    {
+      start_at: "2026-06-10T14:00:00.000Z",
+      lead_id: leadA,
+      timezone: TZ,
+      booking_type: "consultation",
+    },
+    {
+      start_at: "2026-06-10T14:00:00.000Z",
+      lead_id: leadB,
+      timezone: TZ,
+      booking_type: "consultation",
+    },
+    {
+      start_at: "2026-06-10T14:00:00.000Z",
+      lead_id: null,
+      timezone: TZ,
+      booking_type: "consultation",
+    },
   ]);
   assert.equal(countDistinctLeadBookingsOnOperationalDay(agenda, YMD, TZ), 2);
 });
 
 test("countAgendaBookingsOnOperationalDayByBucket: derived from agenda rows only", () => {
   const agenda = agendaFromBookings([
-    { start_at: "2026-06-10T14:00:00.000Z", lead_id: null, timezone: TZ, booking_type: "consultation" },
+    {
+      start_at: "2026-06-10T14:00:00.000Z",
+      lead_id: null,
+      timezone: TZ,
+      booking_type: "consultation",
+    },
     { start_at: "2026-06-10T15:00:00.000Z", lead_id: null, timezone: TZ, booking_type: "surgery" },
   ]);
   const c = countAgendaBookingsOnOperationalDayByBucket(agenda, YMD, TZ);

@@ -124,7 +124,9 @@ export function computeCompareIntelligenceLogsToFiEventsSummary(
     event_names_only_in_intelligence: capSample([...event_names_only_in_intelligence].sort()),
     event_types_only_in_fi_events: capSample([...event_types_only_in_fi_events].sort()),
     correlation_ids_seen_in_intelligence_sample: capSample([...correlations].sort()),
-    intelligence_source_event_ids_without_fi_events_row_sample: capSample([...new Set(missingFiForSourceEventId)].sort()),
+    intelligence_source_event_ids_without_fi_events_row_sample: capSample(
+      [...new Set(missingFiForSourceEventId)].sort()
+    ),
     counts_by_event_name_intel,
     counts_by_event_type_fi,
     counts_by_source_intel,
@@ -142,7 +144,8 @@ export async function compareIntelligenceEventLogsToFiEvents(
   options: CompareIntelligenceEventLogsToFiEventsOptions
 ): Promise<CompareIntelligenceEventLogsToFiEventsResult> {
   if (!options.omitPlatformAdminAssertForOperatorCli) {
-    const { assertFiPlatformAdminSystemAccess } = await import("@/src/lib/fiOs/fiOsPlatformSystemGate.server");
+    const { assertFiPlatformAdminSystemAccess } =
+      await import("@/src/lib/fiOs/fiOsPlatformSystemGate.server");
     await assertFiPlatformAdminSystemAccess();
   }
 

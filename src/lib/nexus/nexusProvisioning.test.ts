@@ -60,7 +60,8 @@ describe("nexusIiohrApi gate and auth", () => {
       {
         headers: {
           get(name: string) {
-            if (name === "x-iiohr-fi-webhook-timestamp") return String(Math.floor(Date.now() / 1000));
+            if (name === "x-iiohr-fi-webhook-timestamp")
+              return String(Math.floor(Date.now() / 1000));
             if (name === "x-iiohr-fi-webhook-signature") return "00".repeat(32);
             return null;
           },

@@ -18,7 +18,11 @@ export function CaseDetailSection({
   className?: string;
 }) {
   return (
-    <section id={id} aria-labelledby={caseDetailSectionHeadingId(id)} className={`scroll-mt-28 ${className}`}>
+    <section
+      id={id}
+      aria-labelledby={caseDetailSectionHeadingId(id)}
+      className={`scroll-mt-28 ${className}`}
+    >
       {children}
     </section>
   );

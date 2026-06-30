@@ -40,7 +40,9 @@ export function FiPatientCard({
       <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:text-sm">
         {phone ? <span>{phone}</span> : null}
         {email ? <span>{email}</span> : null}
-        {!phone && !email ? <span className="text-slate-400">No phone or email on file</span> : null}
+        {!phone && !email ? (
+          <span className="text-slate-400">No phone or email on file</span>
+        ) : null}
         {meta}
       </span>
     </div>
@@ -70,7 +72,12 @@ export function FiPatientCard({
   }
 
   return (
-    <div className={cn(shell, "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md")}>
+    <div
+      className={cn(
+        shell,
+        "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md"
+      )}
+    >
       {main}
       {tail}
     </div>

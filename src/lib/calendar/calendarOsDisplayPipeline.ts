@@ -42,7 +42,9 @@ export type CalendarOsDisplayPipelineTrace = {
 function dayKeysForBooking(booking: FiBookingRow, lanes: CalendarDayLane[]): string[] {
   const startMs = Date.parse(booking.start_at);
   if (!Number.isFinite(startMs)) return [];
-  return lanes.filter((lane) => startMs >= lane.startMs && startMs < lane.endMs).map((lane) => lane.dayKey);
+  return lanes
+    .filter((lane) => startMs >= lane.startMs && startMs < lane.endMs)
+    .map((lane) => lane.dayKey);
 }
 
 /** Build per-event trace for dev logging through loader → merge → bucket → column placement. */
@@ -74,11 +76,14 @@ export function buildCalendarOsDisplayPipelineTrace(input: {
       ? resourceColumnIdForBooking(booking, { staffIdByUserId: input.staffIdByUserId })
       : "unassigned";
     const displayColumnId = booking
-      ? resolveDisplayResourceColumnId(booking, columnIdSet, { staffIdByUserId: input.staffIdByUserId })
+      ? resolveDisplayResourceColumnId(booking, columnIdSet, {
+          staffIdByUserId: input.staffIdByUserId,
+        })
       : "unassigned";
     const dayKeys = booking ? dayKeysForBooking(booking, input.lanes) : [];
     const inDayBucket =
-      booking != null && dayKeys.some((dayKey) => (input.buckets[dayKey] ?? []).some((b) => b.id === booking.id));
+      booking != null &&
+      dayKeys.some((dayKey) => (input.buckets[dayKey] ?? []).some((b) => b.id === booking.id));
 
     events.push({
       eventId: raw.id,
@@ -98,7 +103,9 @@ export function buildCalendarOsDisplayPipelineTrace(input: {
 
   for (const mapped of input.mappedBookings) {
     if (rawIds.has(mapped.id)) continue;
-    const resourceColumnId = resourceColumnIdForBooking(mapped, { staffIdByUserId: input.staffIdByUserId });
+    const resourceColumnId = resourceColumnIdForBooking(mapped, {
+      staffIdByUserId: input.staffIdByUserId,
+    });
     const displayColumnId = resolveDisplayResourceColumnId(mapped, columnIdSet, {
       staffIdByUserId: input.staffIdByUserId,
     });

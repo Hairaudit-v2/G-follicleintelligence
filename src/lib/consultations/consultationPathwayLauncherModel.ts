@@ -53,7 +53,8 @@ const TREATMENT_FORWARD_CONSULTATION_TYPES: readonly ConsultationTypeId[] = [
 ] as const;
 
 /** Word-boundary tokens that weakly suggest a surgical / transplant pathway. */
-const SURGERY_SIGNAL = /\b(fue|fut|transplant|transplantation|surgery|surgical|hairline|grafts?|strip\s+harvest)\b/i;
+const SURGERY_SIGNAL =
+  /\b(fue|fut|transplant|transplantation|surgery|surgical|hairline|grafts?|strip\s+harvest)\b/i;
 
 /**
  * Prior-transplant repair / revision context (used before default HT routing).
@@ -95,8 +96,15 @@ const FEMALE_SIGNAL =
   /\b(female\s+hair\s+loss|women'?s\s+hair\s+loss|womens\s+hair\s+loss|female\s+pattern|diffuse\s+female|female\s+thinning|postpartum|menopause|perimenopause|hormone|hormonal|\bpcos\b|polycystic|part\s+widening|\bludwig\b|\bsinclair\b|traction(\s+alopecia)?)\b/i;
 
 function buildFemaleSignalHaystack(row: ConsultationRow): string {
-  const typeLabel = getConsultationTypeDefinition(row.consultation_type as ConsultationTypeId).label;
-  return [typeLabel, row.live_notes ?? "", row.recommendation_notes ?? "", JSON.stringify(row.structured_data ?? {})]
+  const typeLabel = getConsultationTypeDefinition(
+    row.consultation_type as ConsultationTypeId
+  ).label;
+  return [
+    typeLabel,
+    row.live_notes ?? "",
+    row.recommendation_notes ?? "",
+    JSON.stringify(row.structured_data ?? {}),
+  ]
     .join("\n")
     .toLowerCase();
 }
@@ -108,12 +116,18 @@ const TREATMENT_SIGNAL =
   /\b(shedding|diffuse\s+thinning|diffuse\s+loss|thinning|medical\s+hair\s+loss|medication|minoxidil|finasteride|dutasteride|laboratory|lab\s+work|blood\s+test|investigation|dermatolog|telogen\s+effluvium|alopecia\s+areata)\b/i;
 
 function buildUserSignalText(row: ConsultationRow): string {
-  const chunks = [row.live_notes ?? "", row.recommendation_notes ?? "", JSON.stringify(row.structured_data ?? {})];
+  const chunks = [
+    row.live_notes ?? "",
+    row.recommendation_notes ?? "",
+    JSON.stringify(row.structured_data ?? {}),
+  ];
   return chunks.join("\n").toLowerCase();
 }
 
 function buildConsultationSignalText(row: ConsultationRow): string {
-  const typeLabel = getConsultationTypeDefinition(row.consultation_type as ConsultationTypeId).label;
+  const typeLabel = getConsultationTypeDefinition(
+    row.consultation_type as ConsultationTypeId
+  ).label;
   return [typeLabel, buildUserSignalText(row)].join("\n").toLowerCase();
 }
 
@@ -121,7 +135,9 @@ function buildConsultationSignalText(row: ConsultationRow): string {
  * Lightweight, non-clinical hint only. Consultation type is the anchor; free-text can
  * gently override when it clearly points the other way. Returns null when signals conflict.
  */
-export function recommendConsultationPathwayKey(row: ConsultationRow): ConsultationPathwayLauncherPathKey | null {
+export function recommendConsultationPathwayKey(
+  row: ConsultationRow
+): ConsultationPathwayLauncherPathKey | null {
   const ct = row.consultation_type as ConsultationTypeId;
   const userHay = buildUserSignalText(row);
   const femaleHay = buildFemaleSignalHaystack(row);
@@ -136,7 +152,8 @@ export function recommendConsultationPathwayKey(row: ConsultationRow): Consultat
 
   const repairSignal = REPAIR_SIGNAL.test(userHay);
   const surgicalContextForRepair =
-    SURGERY_SIGNAL.test(userHay) || (TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct);
+    SURGERY_SIGNAL.test(userHay) ||
+    (TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct);
   if (repairSignal && surgicalContextForRepair && !ambiguousText) {
     return "repair";
   }
@@ -179,7 +196,9 @@ export function pickLatestInRoomInstanceForTemplateSlug(
   return matches[0] ?? null;
 }
 
-function progressForInstance(inst: ConsultationFormInstanceWithTemplate | null): ConsultationPathwayProgressLabel {
+function progressForInstance(
+  inst: ConsultationFormInstanceWithTemplate | null
+): ConsultationPathwayProgressLabel {
   if (!inst) return "not_started";
   if (inst.status === "draft") return "in_progress";
   return "submitted";
@@ -266,8 +285,10 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     {
       pathKey: "hair_transplant",
       title: "Hair Transplant Consultation",
-      purpose: "Structured surgical candidacy, donor / recipient planning, and consent-ready documentation.",
-      whenToUse: "Primary visit for FUE/FUT, hairline design, graft planning, or transplant candidacy.",
+      purpose:
+        "Structured surgical candidacy, donor / recipient planning, and consent-ready documentation.",
+      whenToUse:
+        "Primary visit for FUE/FUT, hairline design, graft planning, or transplant candidacy.",
       availability: "active",
       href: `${base}${PATHWAY_FORM_RELATIVE_HREF.hair_transplant}`,
       templateSlug: HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
@@ -278,8 +299,10 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     {
       pathKey: "hair_loss_hli",
       title: "Hair Loss Treatment / HLI",
-      purpose: "Medical hair-loss workup, lifestyle and treatment pathways, and longevity-oriented planning.",
-      whenToUse: "Shedding, diffuse thinning, stabilisation, medications, labs, or non-surgical treatment planning.",
+      purpose:
+        "Medical hair-loss workup, lifestyle and treatment pathways, and longevity-oriented planning.",
+      whenToUse:
+        "Shedding, diffuse thinning, stabilisation, medications, labs, or non-surgical treatment planning.",
       availability: "active",
       href: `${base}${PATHWAY_FORM_RELATIVE_HREF.hair_loss_hli}`,
       templateSlug: HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
@@ -306,7 +329,8 @@ export function buildConsultationPathwayLauncherViewModel(input: {
       title: "Repair Consultation",
       purpose:
         "Dedicated prior-surgery audit: donor damage, hairline design, scarring, growth failure, and realistic corrective options — aligned with HairAudit + SurgeryOS (no quote builder).",
-      whenToUse: "Revision after poor outcome, scar issues, unnatural hairline, suspected overharvesting, or corrective planning.",
+      whenToUse:
+        "Revision after poor outcome, scar issues, unnatural hairline, suspected overharvesting, or corrective planning.",
       availability: "active",
       href: `${base}${PATHWAY_FORM_RELATIVE_HREF.repair}`,
       templateSlug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
@@ -319,7 +343,8 @@ export function buildConsultationPathwayLauncherViewModel(input: {
       title: "Follow-up / Review",
       purpose:
         "Longitudinal capture for Patient Twin, HairAudit progression, HLI treatment response, and AnalyticsOS — interval reviews, not primary intake (no quote or surgical planning fields).",
-      whenToUse: "Scheduled review, post-treatment or post-surgery check-in, PRP/exosome review, medication review, or annual progress visit.",
+      whenToUse:
+        "Scheduled review, post-treatment or post-surgery check-in, PRP/exosome review, medication review, or annual progress visit.",
       availability: "active",
       href: `${base}${PATHWAY_FORM_RELATIVE_HREF.follow_up_review}`,
       templateSlug: FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,

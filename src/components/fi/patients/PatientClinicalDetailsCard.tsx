@@ -44,14 +44,28 @@ function buildFormFromRow(data: PatientProfileFoundationData) {
     contraindications: textFromRow(row?.contraindications),
     scalp_conditions: textFromRow(row?.scalp_conditions),
     previous_hair_treatments: textFromRow(row?.previous_hair_treatments),
-    clinical_flags: JSON.stringify(row?.clinical_flags && typeof row.clinical_flags === "object" ? row.clinical_flags : {}, null, 2),
-    metadata: JSON.stringify(row?.metadata && typeof row.metadata === "object" ? row.metadata : {}, null, 2),
+    clinical_flags: JSON.stringify(
+      row?.clinical_flags && typeof row.clinical_flags === "object" ? row.clinical_flags : {},
+      null,
+      2
+    ),
+    metadata: JSON.stringify(
+      row?.metadata && typeof row.metadata === "object" ? row.metadata : {},
+      null,
+      2
+    ),
   };
 }
 
 type FormState = ReturnType<typeof buildFormFromRow>;
 
-export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
+export function PatientClinicalDetailsCard({
+  tenantId,
+  data,
+}: {
+  tenantId: string;
+  data: PatientProfileFoundationData;
+}) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(() => buildFormFromRow(data));
   const [showJson, setShowJson] = useState(false);
@@ -87,12 +101,14 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
     <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <h2 className="text-sm font-semibold text-slate-100">Clinical details</h2>
       <p className="mt-1 text-xs text-gray-500">
-        These details are a structured clinical summary only. Full diagnostics, blood analysis, images, HLI assessments
-        and treatment planning will be added in later stages.
+        These details are a structured clinical summary only. Full diagnostics, blood analysis,
+        images, HLI assessments and treatment planning will be added in later stages.
       </p>
       {scalesSummary ? (
         <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-500/10 px-3 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-300">Pattern summary</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-300">
+            Pattern summary
+          </p>
           <p className="mt-1 text-sm font-medium text-indigo-200">{scalesSummary}</p>
         </div>
       ) : null}
@@ -101,14 +117,13 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
           Last updated:{" "}
           <time dateTime={row.updated_at}>{row.updated_at.slice(0, 16).replace("T", " ")}</time>
           {data.clinicalDetails.updatedByLabel ? (
-            <>
-              {" "}
-              · {data.clinicalDetails.updatedByLabel}
-            </>
+            <> · {data.clinicalDetails.updatedByLabel}</>
           ) : null}
         </p>
       ) : (
-        <p className="mt-2 text-xs text-slate-400">No clinical summary row yet — save to create one.</p>
+        <p className="mt-2 text-xs text-slate-400">
+          No clinical summary row yet — save to create one.
+        </p>
       )}
 
       <div className="mt-4 space-y-3">
@@ -262,24 +277,28 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
                 const clinical_flags = parseJsonObjectField(form.clinical_flags, "Clinical flags");
                 const metadata = parseJsonObjectField(form.metadata, "Metadata");
                 const nz = (s: string) => (s.trim() ? s : null);
-                const res = await updatePatientClinicalDetailsAction(tenantId, data.foundationPatientId, {
-                  norwood_scale: nz(form.norwood_scale),
-                  ludwig_scale: nz(form.ludwig_scale),
-                  hairline_pattern: nz(form.hairline_pattern),
-                  primary_concern: nz(form.primary_concern),
-                  primary_hair_concern: nz(form.primary_hair_concern),
-                  treatment_interest: nz(form.treatment_interest),
-                  hair_loss_duration: nz(form.hair_loss_duration),
-                  family_history: nz(form.family_history),
-                  relevant_medical_history: nz(form.relevant_medical_history),
-                  current_medications: nz(form.current_medications),
-                  allergies: nz(form.allergies),
-                  contraindications: nz(form.contraindications),
-                  scalp_conditions: nz(form.scalp_conditions),
-                  previous_hair_treatments: nz(form.previous_hair_treatments),
-                  clinical_flags,
-                  metadata,
-                });
+                const res = await updatePatientClinicalDetailsAction(
+                  tenantId,
+                  data.foundationPatientId,
+                  {
+                    norwood_scale: nz(form.norwood_scale),
+                    ludwig_scale: nz(form.ludwig_scale),
+                    hairline_pattern: nz(form.hairline_pattern),
+                    primary_concern: nz(form.primary_concern),
+                    primary_hair_concern: nz(form.primary_hair_concern),
+                    treatment_interest: nz(form.treatment_interest),
+                    hair_loss_duration: nz(form.hair_loss_duration),
+                    family_history: nz(form.family_history),
+                    relevant_medical_history: nz(form.relevant_medical_history),
+                    current_medications: nz(form.current_medications),
+                    allergies: nz(form.allergies),
+                    contraindications: nz(form.contraindications),
+                    scalp_conditions: nz(form.scalp_conditions),
+                    previous_hair_treatments: nz(form.previous_hair_treatments),
+                    clinical_flags,
+                    metadata,
+                  }
+                );
                 if (!res.ok) {
                   setMsg(res.error);
                   return;

@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  resolveAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { parseEvolvedPayrollExportXlsxBuffer } from "@/src/lib/staffImport/evolvedPayrollStaffImportParse";
 import type { EvolvedPayrollStaffImportRow } from "@/src/lib/staffImport/evolvedPayrollStaffImportTypes";
 import {
@@ -51,9 +55,7 @@ function revalidatePayrollStaffImportSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}`);
 }
 
-export async function parseEvolvedPayrollXlsxAction(
-  body: unknown
-): Promise<
+export async function parseEvolvedPayrollXlsxAction(body: unknown): Promise<
   | {
       ok: true;
       rows: EvolvedPayrollStaffImportRow[];
@@ -79,7 +81,10 @@ export async function parseEvolvedPayrollXlsxAction(
     const buffer = Buffer.from(parsed.fileBase64, "base64");
     const result = parseEvolvedPayrollExportXlsxBuffer(buffer);
     if (!result.isPayrollExport && result.rows.length === 0) {
-      return { ok: false, error: "File does not look like an Evolved payroll EmployeeData export." };
+      return {
+        ok: false,
+        error: "File does not look like an Evolved payroll EmployeeData export.",
+      };
     }
     return {
       ok: true,
@@ -93,9 +98,7 @@ export async function parseEvolvedPayrollXlsxAction(
   }
 }
 
-export async function previewEvolvedPayrollStaffImportAction(
-  body: unknown
-): Promise<
+export async function previewEvolvedPayrollStaffImportAction(body: unknown): Promise<
   | {
       ok: true;
       result: EvolvedPayrollStaffImportRunResult;
@@ -118,7 +121,8 @@ export async function previewEvolvedPayrollStaffImportAction(
       rows: parsed.rows ?? [],
       packedRows: parsed.packedRows as EvolvedPayrollStaffImportRow[] | undefined,
       sourceRowIndices: parsed.sourceRowIndices,
-      skippedSensitiveFields: parsed.skippedSensitiveFields as EvolvedPayrollStaffImportRunResult["skippedSensitiveFields"],
+      skippedSensitiveFields:
+        parsed.skippedSensitiveFields as EvolvedPayrollStaffImportRunResult["skippedSensitiveFields"],
       commit: false,
       adminKey: parsed.adminKey,
       authUserId,
@@ -138,7 +142,9 @@ export async function previewEvolvedPayrollStaffImportAction(
 
 export async function commitEvolvedPayrollStaffImportAction(
   body: unknown
-): Promise<{ ok: true; result: EvolvedPayrollStaffImportRunResult } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; result: EvolvedPayrollStaffImportRunResult } | { ok: false; error: string }
+> {
   try {
     const parsed = commitBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({
@@ -152,7 +158,8 @@ export async function commitEvolvedPayrollStaffImportAction(
       rows: [],
       packedRows: parsed.packedRows as EvolvedPayrollStaffImportRow[],
       sourceRowIndices: parsed.sourceRowIndices,
-      skippedSensitiveFields: parsed.skippedSensitiveFields as EvolvedPayrollStaffImportRunResult["skippedSensitiveFields"],
+      skippedSensitiveFields:
+        parsed.skippedSensitiveFields as EvolvedPayrollStaffImportRunResult["skippedSensitiveFields"],
       commit: true,
       confirm: true,
       adminKey: parsed.adminKey,

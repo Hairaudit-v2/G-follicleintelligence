@@ -9,9 +9,7 @@ import {
   type EnterpriseDemoSurgerySpec,
   type EnterpriseDemoSurgeryStatus,
 } from "./enterpriseDemoSurgeriesGenerator";
-import {
-  ENTERPRISE_DEMO_CLINICS,
-} from "./enterpriseDemoConstants";
+import { ENTERPRISE_DEMO_CLINICS } from "./enterpriseDemoConstants";
 import {
   ENTERPRISE_DEMO_DEFAULT_VOLUME,
   type EnterpriseDemoVolumeOptions,
@@ -32,7 +30,8 @@ export const ENTERPRISE_DEMO_IMAGING_PROTOCOL_SLOTS = [
   "12_month",
 ] as const;
 
-export type EnterpriseDemoImagingProtocolSlot = (typeof ENTERPRISE_DEMO_IMAGING_PROTOCOL_SLOTS)[number];
+export type EnterpriseDemoImagingProtocolSlot =
+  (typeof ENTERPRISE_DEMO_IMAGING_PROTOCOL_SLOTS)[number];
 
 export const ENTERPRISE_DEMO_IMAGING_PROTOCOL_TEMPLATE_SLUG = "titan_surgery_outcome";
 
@@ -157,7 +156,11 @@ const SURGERY_DAY_SLOTS: readonly EnterpriseDemoImagingProtocolSlot[] = [
   "graft_tray",
 ];
 
-const FOLLOW_UP_SLOTS: readonly EnterpriseDemoImagingProtocolSlot[] = ["3_month", "6_month", "12_month"];
+const FOLLOW_UP_SLOTS: readonly EnterpriseDemoImagingProtocolSlot[] = [
+  "3_month",
+  "6_month",
+  "12_month",
+];
 
 function stableHash(input: string): number {
   let h = 2166136261;
@@ -420,7 +423,9 @@ function outcomeWarningsForProfile(
     warnings.push("Outcome audit flagged for clinical review.");
   }
   if (performanceProfile === "graft_count_vs_quote") {
-    warnings.push("Extracted graft count exceeded quoted estimate; tray imaging variance detected.");
+    warnings.push(
+      "Extracted graft count exceeded quoted estimate; tray imaging variance detected."
+    );
   }
   if (imagingProfile === "missing_follow_up") {
     warnings.push("Follow-up imaging incomplete; audit cannot be closed.");
@@ -451,8 +456,14 @@ function buildOutcomeAuditsForSurgery(
     measurementDate.setUTCMonth(measurementDate.getUTCMonth() + monthOffset);
 
     const slotPrefix =
-      checkpointKey === "month_3" ? "3_month" : checkpointKey === "month_6" ? "6_month" : "12_month";
-    const linkedImages = imageKeys.filter((img) => img.slot === slotPrefix).map((img) => img.demoImageKey);
+      checkpointKey === "month_3"
+        ? "3_month"
+        : checkpointKey === "month_6"
+          ? "6_month"
+          : "12_month";
+    const linkedImages = imageKeys
+      .filter((img) => img.slot === slotPrefix)
+      .map((img) => img.demoImageKey);
 
     return {
       demoAuditKey: `${surgery.demoSurgeryKey}-outcome-${checkpointKey}`,
@@ -469,10 +480,13 @@ function buildOutcomeAuditsForSurgery(
       metricValues: {
         ...metrics,
         audit_score_available:
-          imagingProfile === "missing_follow_up" && checkpointKey === "month_3" ? 0 : metrics.audit_score_available,
+          imagingProfile === "missing_follow_up" && checkpointKey === "month_3"
+            ? 0
+            : metrics.audit_score_available,
       },
       confidenceLevel:
-        imagingProfile === "missing_follow_up" || surgery.performanceProfile === "missing_reconciliation"
+        imagingProfile === "missing_follow_up" ||
+        surgery.performanceProfile === "missing_reconciliation"
           ? "low"
           : surgery.performanceProfile === "benchmark"
             ? "high"
@@ -534,7 +548,8 @@ export function buildEnterpriseDemoImagingAuditBundles(
 
     const hasGraftTrayMismatch = qualityFlaggedSlots.includes("graft_tray");
     const hasQualityFlags = qualityFlaggedSlots.some((slot) => slot !== "graft_tray");
-    const missingFollowUp = imagingProfile === "missing_follow_up" && surgery.surgeryStatus === "completed";
+    const missingFollowUp =
+      imagingProfile === "missing_follow_up" && surgery.surgeryStatus === "completed";
 
     const protocolSession: EnterpriseDemoProtocolSessionSpec | null =
       images.length > 0
@@ -558,9 +573,9 @@ export function buildEnterpriseDemoImagingAuditBundles(
             slotsFilled: images.length,
             missingSlots,
             qualityFlaggedSlots,
-            slotImageKeys: Object.fromEntries(images.map((img) => [img.slot, img.demoImageKey])) as Partial<
-              Record<EnterpriseDemoImagingProtocolSlot, string>
-            >,
+            slotImageKeys: Object.fromEntries(
+              images.map((img) => [img.slot, img.demoImageKey])
+            ) as Partial<Record<EnterpriseDemoImagingProtocolSlot, string>>,
           }
         : null;
 
@@ -581,7 +596,10 @@ export function validateEnterpriseDemoImagingAuditBundles(
 ): { ok: true } | { ok: false; reason: string } {
   const expectedTotal = ENTERPRISE_DEMO_CLINICS.length * volume.surgeriesPerClinic;
   if (bundles.length !== expectedTotal) {
-    return { ok: false, reason: `Expected ${expectedTotal} imaging/audit bundles, got ${bundles.length}.` };
+    return {
+      ok: false,
+      reason: `Expected ${expectedTotal} imaging/audit bundles, got ${bundles.length}.`,
+    };
   }
 
   const imageKeys = new Set<string>();
@@ -590,7 +608,10 @@ export function validateEnterpriseDemoImagingAuditBundles(
   for (const bundle of bundles) {
     for (const image of bundle.images) {
       if (imageKeys.has(image.demoImageKey)) {
-        return { ok: false, reason: `Duplicate ${ENTERPRISE_DEMO_IMAGE_KEY_METADATA}: ${image.demoImageKey}` };
+        return {
+          ok: false,
+          reason: `Duplicate ${ENTERPRISE_DEMO_IMAGE_KEY_METADATA}: ${image.demoImageKey}`,
+        };
       }
       imageKeys.add(image.demoImageKey);
       if (!image.storagePath.includes("titan-demo/synthetic/")) {
@@ -600,7 +621,10 @@ export function validateEnterpriseDemoImagingAuditBundles(
 
     for (const audit of bundle.outcomeAudits) {
       if (auditKeys.has(audit.demoAuditKey)) {
-        return { ok: false, reason: `Duplicate ${ENTERPRISE_DEMO_AUDIT_KEY_METADATA}: ${audit.demoAuditKey}` };
+        return {
+          ok: false,
+          reason: `Duplicate ${ENTERPRISE_DEMO_AUDIT_KEY_METADATA}: ${audit.demoAuditKey}`,
+        };
       }
       auditKeys.add(audit.demoAuditKey);
     }
@@ -621,7 +645,10 @@ export function validateEnterpriseDemoImagingAuditBundles(
       b.surgery.clinicSlug === "sydney-hair-institute" && b.surgery.surgeryStatus === "completed"
   );
   if (!sydneyCompleted.every((b) => b.protocolSession?.protocolCompletionStatus === "excellent")) {
-    return { ok: false, reason: "Sydney completed surgeries should have excellent protocol completion." };
+    return {
+      ok: false,
+      reason: "Sydney completed surgeries should have excellent protocol completion.",
+    };
   }
 
   const londonCompleted = bundles.filter(
@@ -629,21 +656,34 @@ export function validateEnterpriseDemoImagingAuditBundles(
       b.surgery.clinicSlug === "london-central-institute" && b.surgery.surgeryStatus === "completed"
   );
   if (!londonCompleted.some((b) => (b.protocolSession?.qualityFlaggedSlots.length ?? 0) > 0)) {
-    return { ok: false, reason: "London completed surgeries should include quality-flagged slots." };
+    return {
+      ok: false,
+      reason: "London completed surgeries should include quality-flagged slots.",
+    };
   }
 
   const bangkokCompleted = bundles.filter(
     (b) =>
-      b.surgery.clinicSlug === "bangkok-restoration-centre" && b.surgery.surgeryStatus === "completed"
+      b.surgery.clinicSlug === "bangkok-restoration-centre" &&
+      b.surgery.surgeryStatus === "completed"
   );
-  if (!bangkokCompleted.every((b) => b.protocolSession?.protocolCompletionStatus === "missing_follow_up")) {
+  if (
+    !bangkokCompleted.every(
+      (b) => b.protocolSession?.protocolCompletionStatus === "missing_follow_up"
+    )
+  ) {
     return { ok: false, reason: "Bangkok completed surgeries should miss follow-up imaging." };
   }
 
   const dubaiCompleted = bundles.filter(
-    (b) => b.surgery.clinicSlug === "dubai-hair-institute" && b.surgery.surgeryStatus === "completed"
+    (b) =>
+      b.surgery.clinicSlug === "dubai-hair-institute" && b.surgery.surgeryStatus === "completed"
   );
-  if (!dubaiCompleted.some((b) => b.protocolSession?.protocolCompletionStatus === "graft_tray_mismatch")) {
+  if (
+    !dubaiCompleted.some(
+      (b) => b.protocolSession?.protocolCompletionStatus === "graft_tray_mismatch"
+    )
+  ) {
     return { ok: false, reason: "Dubai completed surgeries should flag graft-tray mismatch." };
   }
 

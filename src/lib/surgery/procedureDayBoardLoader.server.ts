@@ -15,10 +15,17 @@ import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
-import { buildFinancialClearanceMapFromPipeline, type FinancialClearanceResult } from "@/src/lib/financialOs/financialClearance.server";
+import {
+  buildFinancialClearanceMapFromPipeline,
+  type FinancialClearanceResult,
+} from "@/src/lib/financialOs/financialClearance.server";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
-import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
+import {
+  paymentRecordNeedsCollection,
+  surgeryDepositBoardLabel,
+  SURGERY_DEPOSIT_BOARD_COPY,
+} from "@/src/lib/payments/paymentRecordModel";
 import {
   buildProcedureDayActionItems,
   buildPreOpChecklistFlags,
@@ -42,7 +49,11 @@ import {
   loadStaffAndUserLabels,
   resolvePatientIdForCaseRow,
 } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
-import { hasHighRiskSeverity, isActiveSurgeryBookingStatus, hasConsultationConsentSignal } from "@/src/lib/surgery/surgeryReadinessBoardModel";
+import {
+  hasHighRiskSeverity,
+  isActiveSurgeryBookingStatus,
+  hasConsultationConsentSignal,
+} from "@/src/lib/surgery/surgeryReadinessBoardModel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { loadClinicalStaffingSummariesForBookings } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 
@@ -78,7 +89,11 @@ async function loadRoomDisplayNamesById(
   const ids = uniqueStrings(roomIds);
   const out = new Map<string, string>();
   if (!ids.length) return out;
-  const { data, error } = await supabase.from("fi_clinic_rooms").select("id, display_name").eq("tenant_id", tid).in("id", ids);
+  const { data, error } = await supabase
+    .from("fi_clinic_rooms")
+    .select("id, display_name")
+    .eq("tenant_id", tid)
+    .in("id", ids);
   if (error) throw new Error(error.message);
   for (const raw of data ?? []) {
     const r = raw as { id: string; display_name: string | null };
@@ -97,7 +112,11 @@ async function loadFiUserEmailsById(
   const ids = uniqueStrings(userIds);
   const out = new Map<string, string>();
   if (!ids.length) return out;
-  const { data, error } = await supabase.from("fi_users").select("id, email").eq("tenant_id", tid).in("id", ids);
+  const { data, error } = await supabase
+    .from("fi_users")
+    .select("id, email")
+    .eq("tenant_id", tid)
+    .in("id", ids);
   if (error) throw new Error(error.message);
   for (const raw of data ?? []) {
     const r = raw as { id: string; email: string | null };
@@ -185,7 +204,10 @@ export type ProcedureDayBoardPayload = {
   actions: ProcedureDayActionItem[];
 };
 
-export async function loadProcedureDayBoardPayload(tenantId: string, now: Date = new Date()): Promise<ProcedureDayBoardPayload> {
+export async function loadProcedureDayBoardPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<ProcedureDayBoardPayload> {
   const tid = tenantId.trim();
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const window = computeProcedureDayBoardWindow(now, calendarTimezone);
@@ -301,9 +323,12 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
 
   for (const b of surgeryBookings) {
     const caseId = b.case_id?.trim() || null;
-    const work = caseId ? worklistById.get(caseId) ?? null : null;
+    const work = caseId ? (worklistById.get(caseId) ?? null) : null;
 
-    const patientLabelFromCase = work?.person_label?.trim() && work.person_label.trim() !== "—" ? work.person_label.trim() : null;
+    const patientLabelFromCase =
+      work?.person_label?.trim() && work.person_label.trim() !== "—"
+        ? work.person_label.trim()
+        : null;
     const patientLabel =
       patientLabelFromCase ||
       (b.patient_id?.trim() ? bookingLabels.get(`patient:${b.patient_id.trim()}`) : null) ||
@@ -322,8 +347,8 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
     const proc = work?.procedureDay ?? null;
     const surgeonUserId = proc?.surgeon_user_id?.trim() || null;
     const nurseUserId = proc?.nurse_user_id?.trim() || null;
-    const procedureSurgeonLabel = surgeonUserId ? fiUserLabels.get(surgeonUserId) ?? null : null;
-    const procedureNurseLabel = nurseUserId ? fiUserLabels.get(nurseUserId) ?? null : null;
+    const procedureSurgeonLabel = surgeonUserId ? (fiUserLabels.get(surgeonUserId) ?? null) : null;
+    const procedureNurseLabel = nurseUserId ? (fiUserLabels.get(nurseUserId) ?? null) : null;
     const procedureTechnicianLabels = (proc?.technician_user_ids ?? [])
       .map((id) => fiUserLabels.get(id.trim()))
       .filter((x): x is string => Boolean(x?.trim()));
@@ -332,16 +357,21 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       .filter((x): x is string => Boolean(x?.trim()));
 
     const rid = b.room_id?.trim();
-    const roomLabel = rid ? roomNames.get(rid) ?? null : null;
+    const roomLabel = rid ? (roomNames.get(rid) ?? null) : null;
 
-    const patientIdForPathology = b.patient_id?.trim() || (work ? resolvePatientIdForCaseRow(work) : null);
-    const hasPathology = patientIdForPathology ? pathologySets.withResult.has(patientIdForPathology) : false;
-    const consultRows = caseId ? consultationsByCase.get(caseId) ?? [] : [];
+    const patientIdForPathology =
+      b.patient_id?.trim() || (work ? resolvePatientIdForCaseRow(work) : null);
+    const hasPathology = patientIdForPathology
+      ? pathologySets.withResult.has(patientIdForPathology)
+      : false;
+    const consultRows = caseId ? (consultationsByCase.get(caseId) ?? []) : [];
     const hasConsent = hasConsultationConsentSignal(consultRows);
-    const abnormalN = patientIdForPathology ? pathologySets.abnormalTotalByPatient.get(patientIdForPathology) ?? 0 : 0;
+    const abnormalN = patientIdForPathology
+      ? (pathologySets.abnormalTotalByPatient.get(patientIdForPathology) ?? 0)
+      : 0;
 
     const payByBooking = surgeryPayments.byBookingId.get(b.id) ?? null;
-    const payByCase = caseId ? surgeryPayments.byCaseId.get(caseId) ?? null : null;
+    const payByCase = caseId ? (surgeryPayments.byCaseId.get(caseId) ?? null) : null;
     const surgeryPaymentRow: PaymentRecordRow | null = payByBooking ?? payByCase;
 
     const issues = buildTodayProcedureReadinessIssues({
@@ -390,7 +420,11 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       missingRoom: roomRequired && !hasRoom,
     });
 
-    accumulateProcedureProgressCounts(procedureProgressCounts, proc?.procedure_status ?? null, Boolean(proc));
+    accumulateProcedureProgressCounts(
+      procedureProgressCounts,
+      proc?.procedure_status ?? null,
+      Boolean(proc)
+    );
 
     let surgeryDepositBadge: string | null = null;
     if (surgeryPaymentRow) {
@@ -479,7 +513,9 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
     );
   }
 
-  cards.sort((a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel));
+  cards.sort(
+    (a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel)
+  );
 
   const groupMap = new Map<string, ProcedureDayScheduleCard[]>();
   for (const c of cards) {
@@ -499,7 +535,9 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
 
   const summary = summarizeProcedureDayBoard(phases, flagRows);
 
-  actions.sort((a, b) => a.patientLabel.localeCompare(b.patientLabel) || a.kind.localeCompare(b.kind));
+  actions.sort(
+    (a, b) => a.patientLabel.localeCompare(b.patientLabel) || a.kind.localeCompare(b.kind)
+  );
 
   return {
     tenantId: tid,

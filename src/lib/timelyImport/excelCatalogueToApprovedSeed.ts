@@ -1,6 +1,11 @@
 import { isAllowedBookingType } from "@/src/lib/bookings/bookingPolicy";
 import { validateApprovedRowForSchema } from "./approvedFiServicesImportPlan";
-import type { FiServiceApprovedImportRow, FiServiceApprovedPayload, FiServiceInactiveDeferredRow, FiServiceRemovedNonBookable } from "./buildApprovedFiSeed";
+import type {
+  FiServiceApprovedImportRow,
+  FiServiceApprovedPayload,
+  FiServiceInactiveDeferredRow,
+  FiServiceRemovedNonBookable,
+} from "./buildApprovedFiSeed";
 import { FI_SERVICE_CATEGORIES, type FiServiceCategory } from "./serviceSalesTypes";
 
 const HEX = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
@@ -80,7 +85,11 @@ function normaliseBookingTypeToken(raw: string): { value: string | null; aliasNo
 export function parseExcelCatalogueRow(
   excel_row_number: number,
   raw: ExcelCatalogueRawRow
-): { kind: "skip_empty" } | { kind: "not_yes"; importToken: string } | { kind: "parsed"; staged: StagedCatalogueRow } | { kind: "rejected"; rejected: ExcelCatalogueRejectedRow } {
+):
+  | { kind: "skip_empty" }
+  | { kind: "not_yes"; importToken: string }
+  | { kind: "parsed"; staged: StagedCatalogueRow }
+  | { kind: "rejected"; rejected: ExcelCatalogueRejectedRow } {
   const importToken = str(raw["Import?"]);
   const name = str(raw["Service Name"]);
 
@@ -214,7 +223,8 @@ export function resolveDuplicateBookingTypesInCatalogue(staged: StagedCatalogueR
     const group = byBt.get(bt) ?? [];
     const win = group.find((g) => g.excel_row_number === winNum)!;
     const flags = [...(s.row.review_flags ?? [])];
-    if (!flags.includes("duplicate_booking_type_cleared")) flags.push("duplicate_booking_type_cleared");
+    if (!flags.includes("duplicate_booking_type_cleared"))
+      flags.push("duplicate_booking_type_cleared");
     const note = `booking_type cleared: duplicate "${bt}" in Excel catalogue — canonical row is "${win.row.name}" (Excel row ${win.excel_row_number}).`;
     warnings.push(
       `Duplicate booking_type "${bt}": keeping "${win.row.name}" (Excel row ${win.excel_row_number}); cleared on "${s.row.name}" (Excel row ${s.excel_row_number}).`
@@ -230,7 +240,10 @@ export function resolveDuplicateBookingTypesInCatalogue(staged: StagedCatalogueR
   return { rows, warnings };
 }
 
-export function finalSchemaCheck(rows: FiServiceApprovedImportRow[]): { ok: FiServiceApprovedImportRow[]; rejected: ExcelCatalogueRejectedRow[] } {
+export function finalSchemaCheck(rows: FiServiceApprovedImportRow[]): {
+  ok: FiServiceApprovedImportRow[];
+  rejected: ExcelCatalogueRejectedRow[];
+} {
   const ok: FiServiceApprovedImportRow[] = [];
   const rejected: ExcelCatalogueRejectedRow[] = [];
   for (const r of rows) {
@@ -251,11 +264,21 @@ export function buildApprovedPayloadFromExcelCatalogue(
   payload: FiServiceApprovedPayload;
   warnings: string[];
   rejected: ExcelCatalogueRejectedRow[];
-  not_imported_review: { excel_row_number: number; import_token: string; name: string; reason: string }[];
+  not_imported_review: {
+    excel_row_number: number;
+    import_token: string;
+    name: string;
+    reason: string;
+  }[];
 } {
   const warnings: string[] = [];
   const rejected: ExcelCatalogueRejectedRow[] = [];
-  const not_imported_review: { excel_row_number: number; import_token: string; name: string; reason: string }[] = [];
+  const not_imported_review: {
+    excel_row_number: number;
+    import_token: string;
+    name: string;
+    reason: string;
+  }[] = [];
   const removed_non_bookable: FiServiceRemovedNonBookable[] = [];
 
   const staged: StagedCatalogueRow[] = [];
@@ -276,7 +299,11 @@ export function buildApprovedPayloadFromExcelCatalogue(
     const importToken = parsed.importToken;
     const name = str(raw["Service Name"]);
     const internal = str(raw["Internal Notes"]).toLowerCase();
-    if (/\bretail\b/.test(internal) || /\bdeposit\b/.test(name.toLowerCase()) || /\bretail\b/.test(name.toLowerCase())) {
+    if (
+      /\bretail\b/.test(internal) ||
+      /\bdeposit\b/.test(name.toLowerCase()) ||
+      /\bretail\b/.test(name.toLowerCase())
+    ) {
       removed_non_bookable.push({
         name: name || "(unnamed)",
         category: (parseCategory(str(raw["FI Category"])) ?? "Other") as FiServiceCategory,
@@ -324,7 +351,12 @@ export function buildStage7a4MarkdownReport(args: {
   payload: FiServiceApprovedPayload;
   warnings: string[];
   rejected: ExcelCatalogueRejectedRow[];
-  not_imported_review: { excel_row_number: number; import_token: string; name: string; reason: string }[];
+  not_imported_review: {
+    excel_row_number: number;
+    import_token: string;
+    name: string;
+    reason: string;
+  }[];
 }): string {
   const { payload, warnings, rejected, not_imported_review } = args;
   const lines: string[] = [];
@@ -337,13 +369,19 @@ export function buildStage7a4MarkdownReport(args: {
   lines.push("");
   lines.push(`| Metric | Count |`);
   lines.push(`|--------|------:|`);
-  lines.push(`| **Approved rows** (\`approved_for_import\`) | ${payload.approved_for_import.length} |`);
+  lines.push(
+    `| **Approved rows** (\`approved_for_import\`) | ${payload.approved_for_import.length} |`
+  );
   lines.push(`| **Active** (\`is_active: true\`) | ${payload.summary.approved_active_count} |`);
-  lines.push(`| **Inactive in approved list** | ${payload.approved_for_import.filter((r) => !r.is_active).length} |`);
+  lines.push(
+    `| **Inactive in approved list** | ${payload.approved_for_import.filter((r) => !r.is_active).length} |`
+  );
   lines.push(`| **Removed (non-bookable)** | ${payload.removed_non_bookable.length} |`);
   lines.push(`| **Rejected (validation)** | ${rejected.length} |`);
   const missingNames = rejected.filter((r) => r.reasons.some((x) => x === "missing_name")).length;
-  const missingDurations = rejected.filter((r) => r.reasons.some((x) => x === "missing_or_invalid_duration_minutes")).length;
+  const missingDurations = rejected.filter((r) =>
+    r.reasons.some((x) => x === "missing_or_invalid_duration_minutes")
+  ).length;
   lines.push(`| **Rejected — missing name** | ${missingNames} |`);
   lines.push(`| **Rejected — missing / invalid duration** | ${missingDurations} |`);
   lines.push(`| **Not imported (not Yes)** | ${not_imported_review.length} |`);
@@ -395,6 +433,8 @@ export function buildStage7a4MarkdownReport(args: {
   }
   lines.push("");
   lines.push("## Next step");
-  lines.push("Run `npm run import:approved-services` with `--tenant-id` (dry-run) against `docs/timely-import/output/fi-services-seed-approved.json` — **no DB writes in Stage 7A.4.**");
+  lines.push(
+    "Run `npm run import:approved-services` with `--tenant-id` (dry-run) against `docs/timely-import/output/fi-services-seed-approved.json` — **no DB writes in Stage 7A.4.**"
+  );
   return lines.join("\n");
 }

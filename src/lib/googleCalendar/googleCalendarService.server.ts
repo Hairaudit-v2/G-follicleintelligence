@@ -434,7 +434,10 @@ export async function createGoogleCalendarEvent(
     startTime: input.startTime,
   };
   if (isDuplicateFiCalendarEvent(duplicateCandidate, existing)) {
-    return { ok: false, error: "Duplicate calendar event — matching title and start time already exists." };
+    return {
+      ok: false,
+      error: "Duplicate calendar event — matching title and start time already exists.",
+    };
   }
 
   const googleBody = buildGoogleEventBody({
@@ -652,9 +655,7 @@ export async function getGoogleCalendarEvents(
 
   let events = ((data ?? []) as EventRow[]).map(mapEventRow);
   if (!opts.includeDeleted) {
-    events = events.filter(
-      (e) => !e.metadata.deleted_from_provider && !e.metadata.deleted_locally
-    );
+    events = events.filter((e) => !e.metadata.deleted_from_provider && !e.metadata.deleted_locally);
   }
 
   return { ok: true, data: { events } };
@@ -698,7 +699,11 @@ async function syncGoogleCalendarEventsForCalendar(
   ctx: SyncCalendarContext,
   opts: ServerOpts
 ): Promise<
-  | { ok: true; result: GoogleCalendarSyncPerCalendarResult; skipBreakdown: GoogleCalendarSyncSkipBreakdown }
+  | {
+      ok: true;
+      result: GoogleCalendarSyncPerCalendarResult;
+      skipBreakdown: GoogleCalendarSyncSkipBreakdown;
+    }
   | { ok: false; error: string }
 > {
   const {
@@ -1074,7 +1079,10 @@ async function syncGoogleCalendarEventsForCalendar(
     calendarResult.eventsUpdated += 1;
   }
 
-  const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds, { timeMin, timeMax });
+  const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds, {
+    timeMin,
+    timeMax,
+  });
   const deletedExternalIds: string[] = [];
   for (const localId of deletedLocalIds) {
     const local = localRows.find((r) => r.id === localId);

@@ -1,4 +1,7 @@
-import type { ReceptionOsSeverity, ReceptionOsWidgetKey } from "@/src/lib/receptionOs/receptionOsBoardModel";
+import type {
+  ReceptionOsSeverity,
+  ReceptionOsWidgetKey,
+} from "@/src/lib/receptionOs/receptionOsBoardModel";
 
 export type ReceptionOsTodaysPatient = {
   id: string;
@@ -104,7 +107,10 @@ import type {
   ReceptionOsRevenueRiskAlert,
   ReceptionOsRevenueSummary,
 } from "@/src/lib/receptionOs/receptionOsRevenueModel";
-import type { ReceptionTaskSourceType, ReceptionTaskStatus } from "@/src/lib/receptionOs/receptionTaskPolicy";
+import type {
+  ReceptionTaskSourceType,
+  ReceptionTaskStatus,
+} from "@/src/lib/receptionOs/receptionTaskPolicy";
 
 export type ReceptionOsTaskItem = {
   id: string;
@@ -151,7 +157,10 @@ export type ReceptionOsBoardPayload = {
       import("@/src/lib/receptionOs/receptionOsBoardModel").ReceptionOsPipelineColumnId,
       ReceptionOsPipelineCard[]
     >;
-    counts: Record<import("@/src/lib/receptionOs/receptionOsBoardModel").ReceptionOsPipelineColumnId, number>;
+    counts: Record<
+      import("@/src/lib/receptionOs/receptionOsBoardModel").ReceptionOsPipelineColumnId,
+      number
+    >;
   };
   outstandingDeposits: ReceptionOsDepositItem[];
   upcomingSurgeries: ReceptionOsSurgeryItem[];

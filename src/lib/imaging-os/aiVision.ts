@@ -4,7 +4,11 @@
  */
 
 import type { CanonicalHairImageCategory } from "./categories";
-import type { ImagingOsComparisonDomain, ImagingOsComparisonImage, ImagingOsComparisonReadinessResult } from "./comparison";
+import type {
+  ImagingOsComparisonDomain,
+  ImagingOsComparisonImage,
+  ImagingOsComparisonReadinessResult,
+} from "./comparison";
 import type { ImagingOsNormalizedImageIntake } from "./intake";
 import type { ImagingOsMeasurementDomain, ImagingOsVisualMeasurementResult } from "./measurement";
 import type { ImagingOsOutcomeEvidence, ImagingOsOutcomeMeasurementResult } from "./outcomes";
@@ -78,13 +82,7 @@ export const IMAGING_AI_VISION_TASK_REQUIREMENTS: Record<
   },
   image_quality_assessment: {
     risk_level: "low",
-    required_quality_statuses: [
-      "excellent",
-      "acceptable",
-      "borderline",
-      "not_evaluated",
-      "poor",
-    ],
+    required_quality_statuses: ["excellent", "acceptable", "borderline", "not_evaluated", "poor"],
     requires_clinically_usable_images: false,
     allowed_measurement_domains: [],
     allowed_comparison_domains: [],
@@ -201,8 +199,7 @@ export const IMAGING_AI_VISION_TASK_REQUIREMENTS: Record<
     allowed_measurement_domains: [],
     allowed_comparison_domains: [],
     requires_human_review: true,
-    description:
-      "Generate Digital Twin imaging summary narrative from case-level readiness scores",
+    description: "Generate Digital Twin imaging summary narrative from case-level readiness scores",
   },
 };
 
@@ -285,11 +282,7 @@ export type ImagingOsAiVisionRequestContract = {
 // Model output contract
 // ---------------------------------------------------------------------------
 
-export type ImagingOsAiVisionModelOutputStatus =
-  | "completed"
-  | "partial"
-  | "failed"
-  | "rejected";
+export type ImagingOsAiVisionModelOutputStatus = "completed" | "partial" | "failed" | "rejected";
 
 export type ImagingOsAiVisionFindingSeverity = "low" | "medium" | "high" | "review_required";
 
@@ -373,10 +366,7 @@ export type RecommendAiVisionTasksInput = {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const CLINICAL_QUALITY_STATUSES = new Set<ImagingOsImageQualityStatus>([
-  "excellent",
-  "acceptable",
-]);
+const CLINICAL_QUALITY_STATUSES = new Set<ImagingOsImageQualityStatus>(["excellent", "acceptable"]);
 
 function hashAiVisionSeed(seed: string): string {
   let hash = 0;
@@ -586,11 +576,7 @@ export function evaluateAiVisionReadiness(
     warnings.push(`Task ${input.task_type} is classified as ${requirements.risk_level} risk.`);
   }
 
-  const readinessStatus = resolveReadinessStatus(
-    blockers,
-    warnings,
-    false
-  );
+  const readinessStatus = resolveReadinessStatus(blockers, warnings, false);
 
   return {
     request_id: "",
@@ -728,8 +714,7 @@ export function buildAiVisionAuditLogContract(
   input: BuildAiVisionAuditLogContractInput | ImagingOsAiVisionRequestContract
 ): ImagingOsAiVisionAuditLogContract {
   const request = "request" in input ? input.request : input;
-  const createdAt =
-    ("created_at" in input && input.created_at) || new Date(0).toISOString();
+  const createdAt = ("created_at" in input && input.created_at) || new Date(0).toISOString();
   const modelName = "model_name" in input ? input.model_name : undefined;
   const modelVersion = "model_version" in input ? input.model_version : undefined;
   const metadata = "metadata" in input ? input.metadata : undefined;
@@ -778,9 +763,7 @@ export function validateAiVisionModelOutputContract(
   }
 
   if (output.output_contract_version !== IMAGING_AI_OUTPUT_CONTRACT_VERSION) {
-    blockers.push(
-      `Unsupported output contract version: ${output.output_contract_version}.`
-    );
+    blockers.push(`Unsupported output contract version: ${output.output_contract_version}.`);
   }
 
   const allowedDomains = new Set(request.allowed_measurement_domains);
@@ -811,10 +794,7 @@ export function validateAiVisionModelOutputContract(
     }
   }
 
-  if (
-    request.risk_level === "high" &&
-    (output.measurements?.length ?? 0) > 0
-  ) {
+  if (request.risk_level === "high" && (output.measurements?.length ?? 0) > 0) {
     requiresHumanReview = true;
     if (!output.requires_human_review) {
       warnings.push("High-risk task with measurements requires human review.");
@@ -855,8 +835,7 @@ export function recommendAiVisionTasksForSummary(
     tasks.add("surgical_outcome_review");
   }
 
-  const insufficient =
-    summaryScore < 80 || !comparisonReady || !outcomeMeasurable;
+  const insufficient = summaryScore < 80 || !comparisonReady || !outcomeMeasurable;
   if (insufficient) {
     tasks.add("protocol_gap_detection");
   }

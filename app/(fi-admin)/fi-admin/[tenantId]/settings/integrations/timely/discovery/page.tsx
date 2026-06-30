@@ -17,7 +17,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function TimelyDiscoverySettingsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function TimelyDiscoverySettingsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
@@ -27,7 +31,10 @@ export default async function TimelyDiscoverySettingsPage({ params }: { params: 
     notFound();
   }
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>
@@ -36,7 +43,11 @@ export default async function TimelyDiscoverySettingsPage({ params }: { params: 
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const [appOrigin, events] = await Promise.all([
@@ -50,11 +61,17 @@ export default async function TimelyDiscoverySettingsPage({ params }: { params: 
     <div className="space-y-4">
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
-          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-[#22C1FF] hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/configuration`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Settings
           </Link>{" "}
           /{" "}
-          <Link href={`/fi-admin/${tenantId}/settings/integrations/timely`} className="text-[#22C1FF] hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/settings/integrations/timely`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Integrations · Timely
           </Link>{" "}
           / <span className="text-[#CBD5E1]">Discovery</span>
@@ -63,16 +80,16 @@ export default async function TimelyDiscoverySettingsPage({ params }: { params: 
           Timely · Zapier discovery
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Temporary inbox for raw Timely trigger payloads. Does not create patients or bookings. Remove or harden before
-          production traffic at scale.
+          Temporary inbox for raw Timely trigger payloads. Does not create patients or bookings.
+          Remove or harden before production traffic at scale.
         </p>
       </div>
 
       {!process.env.FI_TIMELY_WEBHOOK_SECRET?.trim() ? (
         <InfoNotice variant="warning" title="Webhook secret not set">
           <p className="text-sm">
-            Set <code className="text-[#22C1FF]">FI_TIMELY_WEBHOOK_SECRET</code> in the deployment environment. Zapier
-            requests will fail until it is configured (required in production).
+            Set <code className="text-[#22C1FF]">FI_TIMELY_WEBHOOK_SECRET</code> in the deployment
+            environment. Zapier requests will fail until it is configured (required in production).
           </p>
         </InfoNotice>
       ) : null}

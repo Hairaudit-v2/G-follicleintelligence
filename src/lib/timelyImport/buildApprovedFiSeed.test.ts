@@ -7,7 +7,9 @@ import {
 } from "./buildApprovedFiSeed";
 import type { FiServiceSeedReviewRow } from "./serviceSalesTypes";
 
-function row(p: Partial<FiServiceSeedReviewRow> & Pick<FiServiceSeedReviewRow, "name" | "category">): FiServiceSeedReviewRow {
+function row(
+  p: Partial<FiServiceSeedReviewRow> & Pick<FiServiceSeedReviewRow, "name" | "category">
+): FiServiceSeedReviewRow {
   return {
     name: p.name,
     category: p.category,

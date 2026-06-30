@@ -20,7 +20,10 @@ test("intelligence signals: every declared key has a definition and matches reco
     assert.ok(def.description.length > 0);
     assert.ok(def.attention_min >= 0);
     if (def.critical_min != null) {
-      assert.ok(def.critical_min >= def.attention_min, `${k}: critical_min should be >= attention_min`);
+      assert.ok(
+        def.critical_min >= def.attention_min,
+        `${k}: critical_min should be >= attention_min`
+      );
     }
     for (const wp of def.related_workspace_profiles) {
       assert.ok(workspaceKeys.has(wp), `${k}: unknown workspace profile ${wp}`);

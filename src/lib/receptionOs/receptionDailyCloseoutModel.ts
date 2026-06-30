@@ -74,7 +74,8 @@ function buildTaskItems(tasks: readonly ReceptionOsTaskItem[]): ReceptionCloseou
     if (!OPEN_RECEPTION_TASK_STATUSES.includes(task.status)) continue;
     if (task.severity !== "critical" && task.severity !== "blocked") continue;
     items.push({
-      itemKind: task.severity === "blocked" ? "unresolved_blocked_task" : "unresolved_critical_task",
+      itemKind:
+        task.severity === "blocked" ? "unresolved_blocked_task" : "unresolved_critical_task",
       severity: task.severity,
       status: task.status,
       title: task.title,
@@ -89,7 +90,7 @@ function buildTaskItems(tasks: readonly ReceptionOsTaskItem[]): ReceptionCloseou
 
 function buildDepositItems(
   deposits: readonly ReceptionOsDepositItem[],
-  todayYmd: string,
+  todayYmd: string
 ): ReceptionCloseoutChecklistItem[] {
   return deposits
     .filter((d) => depositDueToday(d, todayYmd))
@@ -105,25 +106,27 @@ function buildDepositItems(
     }));
 }
 
-function buildSurgeryItems(surgeries: readonly ReceptionOsSurgeryItem[]): ReceptionCloseoutChecklistItem[] {
-  return surgeries
-    .filter(surgeryIncomplete)
-    .map((s) => ({
-      itemKind: "incomplete_surgery_readiness" as const,
-      severity: s.severity,
-      status: s.readinessStatus,
-      title: `Surgery readiness — ${s.patientLabel}`,
-      detail: `${s.surgeryDate} · ${s.readinessPercent ?? 0}% ready`,
-      sourceRefId: s.bookingId,
-      href: s.hrefs.case ?? s.hrefs.patient ?? s.hrefs.calendar,
-      metadata: {
-        payment_complete: s.paymentComplete,
-        consent_complete: s.consentComplete,
-      },
-    }));
+function buildSurgeryItems(
+  surgeries: readonly ReceptionOsSurgeryItem[]
+): ReceptionCloseoutChecklistItem[] {
+  return surgeries.filter(surgeryIncomplete).map((s) => ({
+    itemKind: "incomplete_surgery_readiness" as const,
+    severity: s.severity,
+    status: s.readinessStatus,
+    title: `Surgery readiness — ${s.patientLabel}`,
+    detail: `${s.surgeryDate} · ${s.readinessPercent ?? 0}% ready`,
+    sourceRefId: s.bookingId,
+    href: s.hrefs.case ?? s.hrefs.patient ?? s.hrefs.calendar,
+    metadata: {
+      payment_complete: s.paymentComplete,
+      consent_complete: s.consentComplete,
+    },
+  }));
 }
 
-function buildConsultationFollowUpItems(alerts: readonly ReceptionOsActionAlert[]): ReceptionCloseoutChecklistItem[] {
+function buildConsultationFollowUpItems(
+  alerts: readonly ReceptionOsActionAlert[]
+): ReceptionCloseoutChecklistItem[] {
   return alerts
     .filter((a) => a.kind === "no_follow_up_after_consultation")
     .map((a) => ({
@@ -139,7 +142,7 @@ function buildConsultationFollowUpItems(alerts: readonly ReceptionOsActionAlert[
 
 function buildFailedCommunicationItems(
   failed: readonly ReceptionCommunicationDeliverySummary[],
-  base: string,
+  base: string
 ): ReceptionCloseoutChecklistItem[] {
   return failed.map((f) => ({
     itemKind: "communication_failed" as const,
@@ -148,7 +151,11 @@ function buildFailedCommunicationItems(
     title: `Failed ${f.channel} — ${f.templateKey ?? "message"}`,
     detail: f.errorMessage ?? "Delivery failed",
     sourceRefId: f.id,
-    href: f.leadId ? `${base}/crm/leads/${f.leadId}` : f.patientId ? `${base}/patients/${f.patientId}` : null,
+    href: f.leadId
+      ? `${base}/crm/leads/${f.leadId}`
+      : f.patientId
+        ? `${base}/patients/${f.patientId}`
+        : null,
     metadata: {
       provider: f.provider,
       to_address: f.toAddress,
@@ -158,7 +165,7 @@ function buildFailedCommunicationItems(
 }
 
 function buildTomorrowPatientItem(
-  tomorrow: TomorrowFirstPatientReadiness | null,
+  tomorrow: TomorrowFirstPatientReadiness | null
 ): ReceptionCloseoutChecklistItem[] {
   if (!tomorrow) return [];
   return [
@@ -174,11 +181,17 @@ function buildTomorrowPatientItem(
   ];
 }
 
-function countSeverities(items: readonly ReceptionCloseoutChecklistItem[]): Record<
-  ReceptionOsSeverity | "total" | "failed_communications",
-  number
-> {
-  const out = { info: 0, warning: 0, critical: 0, blocked: 0, total: items.length, failed_communications: 0 };
+function countSeverities(
+  items: readonly ReceptionCloseoutChecklistItem[]
+): Record<ReceptionOsSeverity | "total" | "failed_communications", number> {
+  const out = {
+    info: 0,
+    warning: 0,
+    critical: 0,
+    blocked: 0,
+    total: items.length,
+    failed_communications: 0,
+  };
   for (const item of items) {
     if (item.itemKind === "communication_failed") out.failed_communications += 1;
     if (item.severity && item.severity in out) out[item.severity] += 1;

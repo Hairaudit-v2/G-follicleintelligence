@@ -15,7 +15,8 @@ import {
   sortCrmLeadCommunicationsForDisplay,
 } from "@/src/lib/crm";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 const OUTCOME_OPTIONS: (string | "")[] = ["", ...CRM_LEAD_COMMUNICATION_OUTCOME_VALUES];
 
@@ -68,11 +69,18 @@ export function CrmLeadCommunicationsWorkflow({
   const [editNextFollowUp, setEditNextFollowUp] = useState("");
   const [editMetadataJson, setEditMetadataJson] = useState("");
 
-  const active = useMemo(() => leadCommunications.filter((c) => !c.archived_at), [leadCommunications]);
-  const archived = useMemo(() => leadCommunications.filter((c) => !!c.archived_at), [leadCommunications]);
+  const active = useMemo(
+    () => leadCommunications.filter((c) => !c.archived_at),
+    [leadCommunications]
+  );
+  const archived = useMemo(
+    () => leadCommunications.filter((c) => !!c.archived_at),
+    [leadCommunications]
+  );
 
   const filteredActive = useMemo(() => {
-    const base = typeFilter === "all" ? active : active.filter((c) => c.communication_type === typeFilter);
+    const base =
+      typeFilter === "all" ? active : active.filter((c) => c.communication_type === typeFilter);
     return sortCrmLeadCommunicationsForDisplay(base);
   }, [active, typeFilter]);
 
@@ -92,7 +100,9 @@ export function CrmLeadCommunicationsWorkflow({
     setEditPreview(c.preview ?? "");
     setEditContactAt(c.contact_at);
     setEditNextFollowUp(c.next_follow_up_at ?? "");
-    setEditMetadataJson(c.metadata && Object.keys(c.metadata).length ? JSON.stringify(c.metadata, null, 0) : "");
+    setEditMetadataJson(
+      c.metadata && Object.keys(c.metadata).length ? JSON.stringify(c.metadata, null, 0) : ""
+    );
     setFeedback(null);
   }
 
@@ -183,7 +193,12 @@ export function CrmLeadCommunicationsWorkflow({
     setFeedback(null);
     setBusy(true);
     try {
-      const r = await archiveCrmLeadCommunicationAction(tenantId, leadId, communicationId, withAdmin({}));
+      const r = await archiveCrmLeadCommunicationAction(
+        tenantId,
+        leadId,
+        communicationId,
+        withAdmin({})
+      );
       setFeedback(r.ok ? "Entry archived." : r.error);
       if (r.ok) {
         setEditingId(null);
@@ -227,12 +242,19 @@ export function CrmLeadCommunicationsWorkflow({
         </select>
       </div>
 
-      <form onSubmit={onCreate} className="mb-6 space-y-2 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-sm">
+      <form
+        onSubmit={onCreate}
+        className="mb-6 space-y-2 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-sm"
+      >
         <h3 className="font-medium text-slate-100">New entry</h3>
         <div className="flex flex-wrap gap-3">
           <label className="text-xs text-slate-400">
             Type
-            <select value={createType} onChange={(e) => setCreateType(e.target.value)} className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs">
+            <select
+              value={createType}
+              onChange={(e) => setCreateType(e.target.value)}
+              className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs"
+            >
               {CRM_LEAD_COMMUNICATION_TYPE_VALUES.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -242,7 +264,11 @@ export function CrmLeadCommunicationsWorkflow({
           </label>
           <label className="text-xs text-slate-400">
             Direction
-            <select value={createDir} onChange={(e) => setCreateDir(e.target.value)} className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs">
+            <select
+              value={createDir}
+              onChange={(e) => setCreateDir(e.target.value)}
+              className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs"
+            >
               {CRM_LEAD_COMMUNICATION_DIRECTION_VALUES.map((d) => (
                 <option key={d} value={d}>
                   {d}
@@ -252,7 +278,11 @@ export function CrmLeadCommunicationsWorkflow({
           </label>
           <label className="text-xs text-slate-400">
             Outcome
-            <select value={createOutcome} onChange={(e) => setCreateOutcome(e.target.value)} className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs">
+            <select
+              value={createOutcome}
+              onChange={(e) => setCreateOutcome(e.target.value)}
+              className="ml-1 rounded border border-slate-700 px-2 py-1 text-xs"
+            >
               {OUTCOME_OPTIONS.map((o) => (
                 <option key={o || "none"} value={o}>
                   {o || "(none)"}
@@ -318,12 +348,18 @@ export function CrmLeadCommunicationsWorkflow({
             placeholder="{}"
           />
         </label>
-        <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+        >
           Add to contact log
         </button>
       </form>
 
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Active entries</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Active entries
+      </h3>
       {filteredActive.length === 0 ? (
         <p className="mb-4 text-sm text-slate-400">No contact log entries match this filter.</p>
       ) : (
@@ -333,21 +369,33 @@ export function CrmLeadCommunicationsWorkflow({
               {editingId === c.id ? (
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-3">
-                    <select value={editType} onChange={(e) => setEditType(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
+                    <select
+                      value={editType}
+                      onChange={(e) => setEditType(e.target.value)}
+                      className="rounded border border-slate-700 px-2 py-1 text-xs"
+                    >
                       {CRM_LEAD_COMMUNICATION_TYPE_VALUES.map((t) => (
                         <option key={t} value={t}>
                           {t}
                         </option>
                       ))}
                     </select>
-                    <select value={editDir} onChange={(e) => setEditDir(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
+                    <select
+                      value={editDir}
+                      onChange={(e) => setEditDir(e.target.value)}
+                      className="rounded border border-slate-700 px-2 py-1 text-xs"
+                    >
                       {CRM_LEAD_COMMUNICATION_DIRECTION_VALUES.map((d) => (
                         <option key={d} value={d}>
                           {d}
                         </option>
                       ))}
                     </select>
-                    <select value={editOutcome} onChange={(e) => setEditOutcome(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
+                    <select
+                      value={editOutcome}
+                      onChange={(e) => setEditOutcome(e.target.value)}
+                      className="rounded border border-slate-700 px-2 py-1 text-xs"
+                    >
                       {OUTCOME_OPTIONS.map((o) => (
                         <option key={o || "none"} value={o}>
                           {o || "(none)"}
@@ -355,8 +403,17 @@ export function CrmLeadCommunicationsWorkflow({
                       ))}
                     </select>
                   </div>
-                  <input value={editSubject} onChange={(e) => setEditSubject(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1 text-sm" />
-                  <textarea value={editPreview} onChange={(e) => setEditPreview(e.target.value)} rows={2} className="w-full rounded border border-slate-700 px-2 py-1 text-sm" />
+                  <input
+                    value={editSubject}
+                    onChange={(e) => setEditSubject(e.target.value)}
+                    className="w-full rounded border border-slate-700 px-2 py-1 text-sm"
+                  />
+                  <textarea
+                    value={editPreview}
+                    onChange={(e) => setEditPreview(e.target.value)}
+                    rows={2}
+                    className="w-full rounded border border-slate-700 px-2 py-1 text-sm"
+                  />
                   <input
                     value={editContactAt}
                     onChange={(e) => setEditContactAt(e.target.value)}
@@ -368,12 +425,27 @@ export function CrmLeadCommunicationsWorkflow({
                     className="w-full rounded border border-slate-700 px-2 py-1 font-mono text-xs"
                     placeholder="Next follow-up (ISO or empty)"
                   />
-                  <textarea value={editMetadataJson} onChange={(e) => setEditMetadataJson(e.target.value)} rows={2} className="w-full font-mono text-xs" />
+                  <textarea
+                    value={editMetadataJson}
+                    onChange={(e) => setEditMetadataJson(e.target.value)}
+                    rows={2}
+                    className="w-full font-mono text-xs"
+                  />
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" disabled={busy} onClick={() => onSaveEdit(c.id)} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onSaveEdit(c.id)}
+                      className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50"
+                    >
                       Save
                     </button>
-                    <button type="button" disabled={busy} onClick={cancelEdit} className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-50">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={cancelEdit}
+                      className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-50"
+                    >
                       Cancel
                     </button>
                   </div>
@@ -384,17 +456,28 @@ export function CrmLeadCommunicationsWorkflow({
                     <div className="flex flex-wrap gap-2 text-xs text-slate-400">
                       <span className="font-medium text-slate-200">{c.communication_type}</span>
                       <span>{c.direction}</span>
-                      {c.outcome ? <span className="rounded bg-white/[0.06] px-1.5 py-0.5">{c.outcome}</span> : null}
+                      {c.outcome ? (
+                        <span className="rounded bg-white/[0.06] px-1.5 py-0.5">{c.outcome}</span>
+                      ) : null}
                     </div>
-                    {c.subject ? <p className="mt-1 font-medium text-slate-100">{c.subject}</p> : null}
+                    {c.subject ? (
+                      <p className="mt-1 font-medium text-slate-100">{c.subject}</p>
+                    ) : null}
                     {c.preview ? <p className="mt-1 text-slate-300">{c.preview}</p> : null}
                     <p className="mt-1 text-xs text-gray-500">Contact: {c.contact_at}</p>
                     {c.next_follow_up_at ? (
-                      <p className="mt-1 text-xs font-semibold text-amber-300">Next follow-up: {c.next_follow_up_at}</p>
+                      <p className="mt-1 text-xs font-semibold text-amber-300">
+                        Next follow-up: {c.next_follow_up_at}
+                      </p>
                     ) : null}
                   </div>
                   <div className="flex shrink-0 flex-col gap-1">
-                    <button type="button" disabled={busy} onClick={() => startEdit(c)} className="rounded border border-slate-700 px-2 py-0.5 text-xs disabled:opacity-50">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => startEdit(c)}
+                      className="rounded border border-slate-700 px-2 py-0.5 text-xs disabled:opacity-50"
+                    >
                       Edit
                     </button>
                     <button
@@ -414,13 +497,21 @@ export function CrmLeadCommunicationsWorkflow({
       )}
 
       <div className="border-t border-white/[0.06] pt-3">
-        <button type="button" className="text-xs font-medium text-blue-300 hover:underline" onClick={() => setShowArchived((v) => !v)}>
-          {showArchived ? "Hide" : "Show"} archived entries{archived.length ? ` (${archived.length})` : ""}
+        <button
+          type="button"
+          className="text-xs font-medium text-blue-300 hover:underline"
+          onClick={() => setShowArchived((v) => !v)}
+        >
+          {showArchived ? "Hide" : "Show"} archived entries
+          {archived.length ? ` (${archived.length})` : ""}
         </button>
         {showArchived && sortedArchived.length > 0 ? (
           <ul className="mt-2 space-y-2 text-sm text-slate-400">
             {sortedArchived.map((c) => (
-              <li key={c.id} className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] p-2">
+              <li
+                key={c.id}
+                className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] p-2"
+              >
                 <p className="text-xs text-gray-500">Archived {c.archived_at}</p>
                 <p className="text-xs">
                   {c.communication_type} · {c.direction}
@@ -431,7 +522,9 @@ export function CrmLeadCommunicationsWorkflow({
             ))}
           </ul>
         ) : null}
-        {showArchived && sortedArchived.length === 0 ? <p className="mt-2 text-xs text-gray-500">No archived entries.</p> : null}
+        {showArchived && sortedArchived.length === 0 ? (
+          <p className="mt-2 text-xs text-gray-500">No archived entries.</p>
+        ) : null}
       </div>
 
       {feedback ? <p className="mt-3 text-sm text-slate-200">{feedback}</p> : null}

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import type { PatientClinicalIntelligenceView } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
-import type { OutcomeMeasurementRow, OutcomeProtocolRow } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import type {
+  OutcomeMeasurementRow,
+  OutcomeProtocolRow,
+} from "@/src/lib/fi-os/outcomeIntelligence.server";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 import { PatientTwinAuditCard } from "./PatientTwinAuditCard";
@@ -37,7 +40,14 @@ export type PatientTwinDashboardProps = {
 /**
  * Patient Twin dashboard: imaging + Smart Photography Protocol support client actions on the protocol card; other sections remain read-oriented unless otherwise noted.
  */
-export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel, outcomeMeasurements, outcomeProtocols }: PatientTwinDashboardProps) {
+export function PatientTwinDashboard({
+  tenantId,
+  patientId,
+  twin,
+  clinicalIntel,
+  outcomeMeasurements,
+  outcomeProtocols,
+}: PatientTwinDashboardProps) {
   return (
     <div className="scroll-mt-4 space-y-5">
       <PatientTwinHeader tenantId={tenantId} patientId={patientId} twin={twin} />
@@ -62,19 +72,46 @@ export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel,
 
       <PatientTwinCasesCard tenantId={tenantId} twin={twin} />
 
-      <PatientTwinClinicalIntelligenceCard tenantId={tenantId} patientId={patientId} view={clinicalIntel} />
+      <PatientTwinClinicalIntelligenceCard
+        tenantId={tenantId}
+        patientId={patientId}
+        view={clinicalIntel}
+      />
 
-      <PatientHairLossClassificationCard key={`${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
+      <PatientHairLossClassificationCard
+        key={`${tenantId}-${patientId}`}
+        tenantId={tenantId}
+        patientId={patientId}
+        twin={twin}
+      />
 
       <PatientTwinHairProgressionCard twin={twin} />
 
-      <PatientDonorIntelligenceCard key={`donor-${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
+      <PatientDonorIntelligenceCard
+        key={`donor-${tenantId}-${patientId}`}
+        tenantId={tenantId}
+        patientId={patientId}
+        twin={twin}
+      />
 
-      <PatientRecipientCandidacyCard key={`recipient-${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
+      <PatientRecipientCandidacyCard
+        key={`recipient-${tenantId}-${patientId}`}
+        tenantId={tenantId}
+        patientId={patientId}
+        twin={twin}
+      />
 
-      <PatientConsultationChecklistCard key={`checklist-${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
+      <PatientConsultationChecklistCard
+        key={`checklist-${tenantId}-${patientId}`}
+        tenantId={tenantId}
+        patientId={patientId}
+        twin={twin}
+      />
 
-      <PatientTwinOutcomeJourneyCard measurements={outcomeMeasurements} protocols={outcomeProtocols} />
+      <PatientTwinOutcomeJourneyCard
+        measurements={outcomeMeasurements}
+        protocols={outcomeProtocols}
+      />
 
       <PatientTwinPathologyCard tenantId={tenantId} patientId={patientId} twin={twin} />
 

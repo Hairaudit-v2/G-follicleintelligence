@@ -57,10 +57,7 @@ function buildWatermarkSvg(args: {
     anchor = "end";
   }
 
-  const y =
-    args.position === "top_right"
-      ? yStart
-      : args.height - blockHeight + fontSize;
+  const y = args.position === "top_right" ? yStart : args.height - blockHeight + fontSize;
 
   const textNodes = args.lines
     .map((line, i) => {
@@ -76,7 +73,9 @@ function buildWatermarkSvg(args: {
   return Buffer.from(svg);
 }
 
-export async function applyFiImageWatermarkOverlay(input: FiImageWatermarkOverlayInput): Promise<Buffer> {
+export async function applyFiImageWatermarkOverlay(
+  input: FiImageWatermarkOverlayInput
+): Promise<Buffer> {
   const base = sharp(input.imageBuffer, { failOn: "none" }).rotate();
   const meta = await base.metadata();
   const width = meta.width ?? 1200;
@@ -110,7 +109,10 @@ export async function applyFiImageWatermarkOverlay(input: FiImageWatermarkOverla
 
   if (input.logoBuffer && input.logoBuffer.length > 0) {
     const logoSize = Math.max(48, Math.round(Math.min(width, height) * 0.08));
-    const logo = await sharp(input.logoBuffer).resize(logoSize, logoSize, { fit: "inside" }).png().toBuffer();
+    const logo = await sharp(input.logoBuffer)
+      .resize(logoSize, logoSize, { fit: "inside" })
+      .png()
+      .toBuffer();
     composites.unshift({
       input: logo,
       gravity: input.position === "top_right" ? "northeast" : "southeast",
@@ -141,7 +143,9 @@ export async function fetchLogoBuffer(logoUrl: string | null | undefined): Promi
   }
 }
 
-export async function probeImageDimensions(buffer: Buffer): Promise<{ width: number | null; height: number | null }> {
+export async function probeImageDimensions(
+  buffer: Buffer
+): Promise<{ width: number | null; height: number | null }> {
   try {
     const meta = await sharp(buffer, { failOn: "none" }).metadata();
     return {

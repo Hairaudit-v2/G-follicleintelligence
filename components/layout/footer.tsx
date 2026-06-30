@@ -71,8 +71,9 @@ export function Footer() {
             />
           </Link>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Follicle Intelligence is the operating system for the future of hair restoration—commercial, clinical,
-            surgical, training, audit, and longitudinal intelligence in one connected substrate.
+            Follicle Intelligence is the operating system for the future of hair
+            restoration—commercial, clinical, surgical, training, audit, and longitudinal
+            intelligence in one connected substrate.
           </p>
         </div>
 
@@ -86,7 +87,9 @@ export function Footer() {
             <FooterLinkList items={FOOTER_MODULES} />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground/80">Ecosystem</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground/80">
+              Ecosystem
+            </p>
             <FooterLinkList items={FOOTER_INTELLIGENCE_LAYERS} tone="supporting" />
           </div>
           <div>

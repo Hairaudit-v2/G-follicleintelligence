@@ -20,7 +20,10 @@ export default function FiAdminShellError({
         surface="fi_admin_shell"
       />
       <p className="mt-6 text-center text-sm text-slate-400">
-        <Link href="/follicle-intelligence/login" className="text-cyan-400 hover:text-cyan-300 hover:underline">
+        <Link
+          href="/follicle-intelligence/login"
+          className="text-cyan-400 hover:text-cyan-300 hover:underline"
+        >
           Return to sign in
         </Link>
       </p>

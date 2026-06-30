@@ -14,7 +14,10 @@ import {
 import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { bookingsOverlappingDayKey, computeFiOsTodayStripCounts } from "@/src/lib/calendar/fiOsCalendarTodayStrip";
+import {
+  bookingsOverlappingDayKey,
+  computeFiOsTodayStripCounts,
+} from "@/src/lib/calendar/fiOsCalendarTodayStrip";
 import { useBookingsStableByFingerprint } from "@/src/lib/calendar/useBookingsStableByFingerprint";
 
 function chipClass(active: boolean): string {
@@ -51,9 +54,13 @@ export function FiOsCalendarTodayCommandStrip({
   );
   const counts = useMemo(() => computeFiOsTodayStripCounts(dayRows), [dayRows]);
 
-  const noStaffFilter = !query.staffId?.trim() && !query.staffRoleBucket && !query.assignedUserId?.trim();
+  const noStaffFilter =
+    !query.staffId?.trim() && !query.staffRoleBucket && !query.assignedUserId?.trim();
   const noTypeStatusWaitUn =
-    !query.bookingType?.trim() && !query.status?.trim() && !query.waitingOnly && !query.unassignedOnly;
+    !query.bookingType?.trim() &&
+    !query.status?.trim() &&
+    !query.waitingOnly &&
+    !query.unassignedOnly;
   const todayOverviewActive =
     query.view === "day" &&
     query.dateAnchor.trim() === todayYmd &&
@@ -61,7 +68,11 @@ export function FiOsCalendarTodayCommandStrip({
     noStaffFilter;
 
   function typeHref(t: string, active: boolean): string {
-    return buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { type: active ? null : t }), hrefOpts);
+    return buildCalendarHref(
+      tenantId,
+      mergeCalendarHrefQuery(query, { type: active ? null : t }),
+      hrefOpts
+    );
   }
 
   function statusHref(s: string, active: boolean): string {
@@ -130,15 +141,27 @@ export function FiOsCalendarTodayCommandStrip({
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Appointments today</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.all}</span>
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={typeHref("consultation", cConsult)} className={chipClass(cConsult)} title="Toggle consultation filter">
+      <CalendarTransitionLink
+        href={typeHref("consultation", cConsult)}
+        className={chipClass(cConsult)}
+        title="Toggle consultation filter"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Consultations</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.consultation}</span>
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={typeHref("prp", cPrp)} className={chipClass(cPrp)} title="Toggle PRP filter">
+      <CalendarTransitionLink
+        href={typeHref("prp", cPrp)}
+        className={chipClass(cPrp)}
+        title="Toggle PRP filter"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">PRP</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.prp}</span>
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={typeHref("surgery", cSurg)} className={chipClass(cSurg)} title="Toggle surgery filter">
+      <CalendarTransitionLink
+        href={typeHref("surgery", cSurg)}
+        className={chipClass(cSurg)}
+        title="Toggle surgery filter"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Surgeries</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.surgery}</span>
       </CalendarTransitionLink>
@@ -151,19 +174,35 @@ export function FiOsCalendarTodayCommandStrip({
           <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Readiness</span>
         </CalendarTransitionLink>
       ) : null}
-      <CalendarTransitionLink href={statusHref("arrived", cArrived)} className={chipClass(cArrived)} title="Toggle arrived status">
+      <CalendarTransitionLink
+        href={statusHref("arrived", cArrived)}
+        className={chipClass(cArrived)}
+        title="Toggle arrived status"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Arrived</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.arrived}</span>
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={waitingHref(cWaiting)} className={chipClass(cWaiting)} title="Scheduled or confirmed (waiting)">
+      <CalendarTransitionLink
+        href={waitingHref(cWaiting)}
+        className={chipClass(cWaiting)}
+        title="Scheduled or confirmed (waiting)"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Waiting</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.waiting}</span>
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={statusHref("completed", cCompleted)} className={chipClass(cCompleted)} title="Toggle completed status">
+      <CalendarTransitionLink
+        href={statusHref("completed", cCompleted)}
+        className={chipClass(cCompleted)}
+        title="Toggle completed status"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Completed</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.completed}</span>
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={unassignedHref(cUnassigned)} className={chipClass(cUnassigned)} title="No staff or user assignee">
+      <CalendarTransitionLink
+        href={unassignedHref(cUnassigned)}
+        className={chipClass(cUnassigned)}
+        title="No staff or user assignee"
+      >
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Unassigned</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.unassigned}</span>
       </CalendarTransitionLink>
@@ -185,10 +224,17 @@ export function FiOsCalendarTodayCommandStrip({
           onClick={() => setMobileOpen((v) => !v)}
           aria-expanded={mobileOpen}
         >
-          <span className="font-medium text-[var(--fi-cal-ws-text,#f1f5f9)]">Today · {counts.all} appointments</span>
-          <ChevronDown className={cn("h-4 w-4 shrink-0 text-slate-500 transition", mobileOpen && "rotate-180")} aria-hidden />
+          <span className="font-medium text-[var(--fi-cal-ws-text,#f1f5f9)]">
+            Today · {counts.all} appointments
+          </span>
+          <ChevronDown
+            className={cn("h-4 w-4 shrink-0 text-slate-500 transition", mobileOpen && "rotate-180")}
+            aria-hidden
+          />
         </button>
-        {mobileOpen ? <div className="border-t border-white/[0.05] px-3 pb-2 pt-1">{chipRow}</div> : null}
+        {mobileOpen ? (
+          <div className="border-t border-white/[0.05] px-3 pb-2 pt-1">{chipRow}</div>
+        ) : null}
       </div>
       <div className="hidden min-h-[2.25rem] px-3 py-1.5 md:block">{chipRow}</div>
     </div>

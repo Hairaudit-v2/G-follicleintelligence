@@ -29,7 +29,9 @@ export type BuildReceptionPilotExportInput = {
   managerScores: ReceptionPilotManagerScores | null;
 };
 
-export function buildReceptionPilotExportBundle(input: BuildReceptionPilotExportInput): ReceptionPilotExportBundle {
+export function buildReceptionPilotExportBundle(
+  input: BuildReceptionPilotExportInput
+): ReceptionPilotExportBundle {
   const bundle: ReceptionPilotExportBundle = {
     exportedAt: input.exportedAt ?? new Date().toISOString(),
     tenantId: input.tenantId,
@@ -81,7 +83,11 @@ export function serializeReceptionPilotExportCsv(bundle: ReceptionPilotExportBun
   return [header, ...rows.map(([k, v]) => `${csvEscape(k)},${csvEscape(v)}`)].join("\n");
 }
 
-export function parseReceptionPilotExportFormat(raw: string | null | undefined): ReceptionPilotExportFormat {
-  const v = String(raw ?? "json").trim().toLowerCase();
+export function parseReceptionPilotExportFormat(
+  raw: string | null | undefined
+): ReceptionPilotExportFormat {
+  const v = String(raw ?? "json")
+    .trim()
+    .toLowerCase();
   return v === "csv" ? "csv" : "json";
 }

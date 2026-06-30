@@ -29,7 +29,9 @@ function parseViewMode(sp: Record<string, string | string[] | undefined>): "work
   return v?.trim().toLowerCase() === "list" ? "list" : "workspace";
 }
 
-function directoryQueryHasListFilters(query: ReturnType<typeof parsePatientDirectoryQuery>): boolean {
+function directoryQueryHasListFilters(
+  query: ReturnType<typeof parsePatientDirectoryQuery>
+): boolean {
   return (
     Boolean(query.search.trim()) ||
     query.patientStatus != null ||

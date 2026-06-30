@@ -3,7 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
-import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatBookingWindowInTimezone,
+  normalizeCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import type { ReminderMergeContext } from "./remindersCore";
 

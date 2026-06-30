@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { ZodError, z } from "zod";
 
-import { PaymentRecordAccessError, assertPaymentRecordWriteAllowed } from "@/src/lib/payments/paymentRecordAccess.server";
+import {
+  PaymentRecordAccessError,
+  assertPaymentRecordWriteAllowed,
+} from "@/src/lib/payments/paymentRecordAccess.server";
 import { resolveFiOsPublicOrigin } from "@/src/lib/fiOs/fiOsPublicOrigin.server";
 import {
   cancelInvoice,
@@ -23,7 +26,11 @@ const createFromQuoteSchema = optionalAdminKey.extend({
   consultation_id: z.string().uuid(),
   amount_cents: z.number().int().positive().optional(),
   tax_cents: z.number().int().nonnegative().optional(),
-  due_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  due_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
 });
 
 const depositCaseSchema = optionalAdminKey.extend({
@@ -31,14 +38,22 @@ const depositCaseSchema = optionalAdminKey.extend({
   deposit_amount_cents: z.number().int().nonnegative().optional().nullable(),
   procedure_fee_estimate_cents: z.number().int().positive().optional().nullable(),
   tax_cents: z.number().int().nonnegative().optional(),
-  due_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  due_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
 });
 
 const balanceCaseSchema = optionalAdminKey.extend({
   case_id: z.string().uuid(),
   balance_amount_cents: z.number().int().positive(),
   tax_cents: z.number().int().nonnegative().optional(),
-  due_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  due_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
 });
 
 const paymentRequestSchema = optionalAdminKey.extend({
@@ -52,7 +67,10 @@ const paymentRequestSchema = optionalAdminKey.extend({
 
 const updateInvoiceDueDateSchema = optionalAdminKey.extend({
   invoice_id: z.string().uuid(),
-  due_date_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+  due_date_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable(),
 });
 
 const resendPaymentRequestSchema = optionalAdminKey.extend({
@@ -62,7 +80,10 @@ const resendPaymentRequestSchema = optionalAdminKey.extend({
 const invoiceIdSchema = optionalAdminKey.extend({
   invoice_id: z.string().uuid(),
   notes: z.string().optional().nullable(),
-  today_ymd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  today_ymd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 const cancelSchema = optionalAdminKey.extend({
@@ -78,15 +99,22 @@ function errMsg(e: unknown): string {
   return "Request failed.";
 }
 
-function revalidateRevenuePaths(tenantId: string, hints?: { patientId?: string | null; caseId?: string | null; consultationId?: string | null }) {
+function revalidateRevenuePaths(
+  tenantId: string,
+  hints?: { patientId?: string | null; caseId?: string | null; consultationId?: string | null }
+) {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}`);
   revalidatePath(`/fi-admin/${tid}/settings/payments`);
   revalidatePath(`/fi-admin/${tid}/payments`);
-  if (hints?.patientId?.trim()) revalidatePath(`/fi-admin/${tid}/patients/${encodeURIComponent(hints.patientId.trim())}`);
-  if (hints?.caseId?.trim()) revalidatePath(`/fi-admin/${tid}/cases/${encodeURIComponent(hints.caseId.trim())}`);
+  if (hints?.patientId?.trim())
+    revalidatePath(`/fi-admin/${tid}/patients/${encodeURIComponent(hints.patientId.trim())}`);
+  if (hints?.caseId?.trim())
+    revalidatePath(`/fi-admin/${tid}/cases/${encodeURIComponent(hints.caseId.trim())}`);
   if (hints?.consultationId?.trim()) {
-    revalidatePath(`/fi-admin/${tid}/consultations/${encodeURIComponent(hints.consultationId.trim())}`);
+    revalidatePath(
+      `/fi-admin/${tid}/consultations/${encodeURIComponent(hints.consultationId.trim())}`
+    );
   }
 }
 
@@ -166,7 +194,13 @@ export async function createPaymentRequestAction(
   tenantId: string,
   body: unknown
 ): Promise<
-  | { ok: true; payment_request_id: string; checkout_url: string | null; public_token: string; pay_page_url: string }
+  | {
+      ok: true;
+      payment_request_id: string;
+      checkout_url: string | null;
+      public_token: string;
+      pay_page_url: string;
+    }
   | { ok: false; error: string }
 > {
   try {
@@ -219,7 +253,13 @@ export async function resendPaymentRequestAction(
   tenantId: string,
   body: unknown
 ): Promise<
-  | { ok: true; payment_request_id: string; checkout_url: string | null; public_token: string; pay_page_url: string }
+  | {
+      ok: true;
+      payment_request_id: string;
+      checkout_url: string | null;
+      public_token: string;
+      pay_page_url: string;
+    }
   | { ok: false; error: string }
 > {
   try {
@@ -258,7 +298,11 @@ export async function markInvoiceManuallyPaidAction(
       notes: parsed.notes,
       todayYmd: parsed.today_ymd ?? null,
     });
-    revalidateRevenuePaths(tenantId, { patientId: inv.patient_id, caseId: inv.case_id, consultationId: inv.consultation_id });
+    revalidateRevenuePaths(tenantId, {
+      patientId: inv.patient_id,
+      caseId: inv.case_id,
+      consultationId: inv.consultation_id,
+    });
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
@@ -277,7 +321,11 @@ export async function cancelInvoiceAction(
       invoiceId: parsed.invoice_id,
       reason: parsed.reason,
     });
-    revalidateRevenuePaths(tenantId, { patientId: inv.patient_id, caseId: inv.case_id, consultationId: inv.consultation_id });
+    revalidateRevenuePaths(tenantId, {
+      patientId: inv.patient_id,
+      caseId: inv.case_id,
+      consultationId: inv.consultation_id,
+    });
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

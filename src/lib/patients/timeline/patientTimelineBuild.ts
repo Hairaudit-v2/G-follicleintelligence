@@ -97,7 +97,11 @@ function safeActivityMetadataSummary(kind: string, detail: Record<string, unknow
     const tpl = readString(detail, "template_used");
     return tpl ? `Template: ${tpl.replace(/_/g, " ")}` : "Request voided";
   }
-  if (k === "pathology.blood_result.uploaded" || k === "pathology.blood_result.reviewed" || k === "pathology.blood_result.archived") {
+  if (
+    k === "pathology.blood_result.uploaded" ||
+    k === "pathology.blood_result.reviewed" ||
+    k === "pathology.blood_result.archived"
+  ) {
     const rd = readString(detail, "result_date");
     const prov = readString(detail, "provider_name");
     const n = detail.marker_count;
@@ -115,8 +119,10 @@ function safeActivityMetadataSummary(kind: string, detail: Record<string, unknow
     const surgery = detail.surgical_readiness_score;
     const flags = detail.major_risk_flags_count;
     const parts: string[] = [];
-    if (typeof hair === "number" && Number.isFinite(hair)) parts.push(`Hair relevance: ${hair}/100`);
-    if (typeof surgery === "number" && Number.isFinite(surgery)) parts.push(`Surgery readiness: ${surgery}/100`);
+    if (typeof hair === "number" && Number.isFinite(hair))
+      parts.push(`Hair relevance: ${hair}/100`);
+    if (typeof surgery === "number" && Number.isFinite(surgery))
+      parts.push(`Surgery readiness: ${surgery}/100`);
     if (typeof flags === "number" && Number.isFinite(flags)) parts.push(`${flags} risk flag(s)`);
     return parts.length ? parts.join(" · ") : "AI interpretation";
   }
@@ -169,7 +175,8 @@ export function buildPatientTimeline(
   for (const ev of bundle.activity) {
     if (EXCLUDED_DUPLICATE_ACTIVITY_KINDS.has(ev.activity_kind.trim())) continue;
     const sens = isSensitiveActivityKind(ev.activity_kind);
-    const meta = ev.detail && typeof ev.detail === "object" && !Array.isArray(ev.detail) ? ev.detail : {};
+    const meta =
+      ev.detail && typeof ev.detail === "object" && !Array.isArray(ev.detail) ? ev.detail : {};
     const summary = safeActivityMetadataSummary(ev.activity_kind, meta as Record<string, unknown>);
     let href: string | null = null;
     if (ev.case_id) href = hrefForCase(ctx, ev.case_id);
@@ -182,7 +189,11 @@ export function buildPatientTimeline(
       const resid = readString(meta as Record<string, unknown>, "pathology_result_id");
       if (prid && kind.startsWith("pathology.blood_request.")) {
         href = `/fi-admin/${tid}/patients/${pid}/blood-request/${prid}`;
-      } else if (resid && (kind.startsWith("pathology.blood_result.") || kind.startsWith("pathology.ai_interpretation."))) {
+      } else if (
+        resid &&
+        (kind.startsWith("pathology.blood_result.") ||
+          kind.startsWith("pathology.ai_interpretation."))
+      ) {
         href = `/fi-admin/${tid}/patients/${pid}/blood-results/${resid}`;
       } else {
         href = `/fi-admin/${tid}/patients/${pid}`;
@@ -384,7 +395,9 @@ export function buildPatientTimeline(
 }
 
 /** Map raw Supabase activity row including JSON detail. */
-export function mapActivityRowForTimeline(row: Record<string, unknown>): PatientTimelineActivityInput {
+export function mapActivityRowForTimeline(
+  row: Record<string, unknown>
+): PatientTimelineActivityInput {
   const detailRaw = row.detail;
   const detail =
     detailRaw && typeof detailRaw === "object" && !Array.isArray(detailRaw)

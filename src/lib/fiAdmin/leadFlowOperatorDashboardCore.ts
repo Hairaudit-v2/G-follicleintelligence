@@ -22,7 +22,11 @@ export const LEADFLOW_OPERATOR_PIPELINE_STAGES = [
   { id: "new", label: "New", stage: "new" },
   { id: "contacted", label: "Contacted", stage: "contacted" },
   { id: "consultation_booked", label: "Consultation Scheduled", stage: "consultation_booked" },
-  { id: "consultation_completed", label: "Consultation Completed", stage: "consultation_completed" },
+  {
+    id: "consultation_completed",
+    label: "Consultation Completed",
+    stage: "consultation_completed",
+  },
   { id: "proposal_sent", label: "Quote Sent", stage: "proposal_sent" },
   { id: "won", label: "Procedure Booked", stage: "won" },
   { id: "lost", label: "Lost", stage: "lost" },
@@ -30,13 +34,17 @@ export const LEADFLOW_OPERATOR_PIPELINE_STAGES = [
 
 const HIGH_PRIORITY_BANDS = new Set<string>(["high", "urgent"]);
 
-export function formatLeadFlowOperatorName(lead: Pick<FiLeadRow, "first_name" | "last_name">): string {
+export function formatLeadFlowOperatorName(
+  lead: Pick<FiLeadRow, "first_name" | "last_name">
+): string {
   const parts = [lead.first_name?.trim(), lead.last_name?.trim()].filter(Boolean);
   if (parts.length === 0) return "Unnamed lead";
   return parts.join(" ");
 }
 
-export function formatLeadFlowOperatorContact(lead: Pick<FiLeadRow, "email" | "phone">): string | null {
+export function formatLeadFlowOperatorContact(
+  lead: Pick<FiLeadRow, "email" | "phone">
+): string | null {
   const email = lead.email?.trim();
   if (email) return email;
   const phone = lead.phone?.trim();
@@ -88,7 +96,9 @@ export function labelLeadFlowOperatorActivityType(activityType: string): string 
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function sanitizeLeadFlowOperatorErrorMessage(message: string | null | undefined): string | null {
+export function sanitizeLeadFlowOperatorErrorMessage(
+  message: string | null | undefined
+): string | null {
   if (!message?.trim()) return null;
   return message
     .replace(/Bearer\s+[A-Za-z0-9\-._~+/]+=*/gi, "Bearer [redacted]")
@@ -118,8 +128,10 @@ export function summarizeLeadFlowOperatorActivityMetadata(
 ): string {
   const type = activityType.trim().toLowerCase();
   if (type === "stage_changed") {
-    const from = metadata.from_stage != null ? labelLeadFlowOperatorStage(String(metadata.from_stage)) : "—";
-    const to = metadata.to_stage != null ? labelLeadFlowOperatorStage(String(metadata.to_stage)) : "—";
+    const from =
+      metadata.from_stage != null ? labelLeadFlowOperatorStage(String(metadata.from_stage)) : "—";
+    const to =
+      metadata.to_stage != null ? labelLeadFlowOperatorStage(String(metadata.to_stage)) : "—";
     return `Moved from ${from} to ${to}`;
   }
   if (type === "score_updated") {
@@ -129,13 +141,21 @@ export function summarizeLeadFlowOperatorActivityMetadata(
     return "Lead score updated";
   }
   if (type === "priority_band_changed") {
-    const from = metadata.from_band != null ? labelLeadFlowOperatorPriority(String(metadata.from_band)) : "—";
-    const to = metadata.to_band != null ? labelLeadFlowOperatorPriority(String(metadata.to_band)) : "—";
+    const from =
+      metadata.from_band != null ? labelLeadFlowOperatorPriority(String(metadata.from_band)) : "—";
+    const to =
+      metadata.to_band != null ? labelLeadFlowOperatorPriority(String(metadata.to_band)) : "—";
     return `Priority changed from ${from} to ${to}`;
   }
   if (type === "predicted_procedure_changed") {
-    const from = metadata.from_procedure != null ? labelLeadFlowOperatorPredictedProcedure(String(metadata.from_procedure)) : "—";
-    const to = metadata.to_procedure != null ? labelLeadFlowOperatorPredictedProcedure(String(metadata.to_procedure)) : "—";
+    const from =
+      metadata.from_procedure != null
+        ? labelLeadFlowOperatorPredictedProcedure(String(metadata.from_procedure))
+        : "—";
+    const to =
+      metadata.to_procedure != null
+        ? labelLeadFlowOperatorPredictedProcedure(String(metadata.to_procedure))
+        : "—";
     return `Predicted procedure changed from ${from} to ${to}`;
   }
   if (type === "lead_created") return "New lead captured";
@@ -177,8 +197,12 @@ export function buildLeadFlowOperatorSummaryMetrics(
   let procedureBooked = 0;
 
   for (const lead of leads) {
-    const stage = String(lead.current_stage ?? "").trim().toLowerCase();
-    const band = String(lead.priority_band ?? "").trim().toLowerCase();
+    const stage = String(lead.current_stage ?? "")
+      .trim()
+      .toLowerCase();
+    const band = String(lead.priority_band ?? "")
+      .trim()
+      .toLowerCase();
     if (stage === "new") newLeads += 1;
     if (HIGH_PRIORITY_BANDS.has(band)) highUrgentPriorityLeads += 1;
     if (stage === "consultation_booked") consultationBooked += 1;
@@ -197,14 +221,18 @@ export function buildLeadFlowOperatorSummaryMetrics(
   };
 }
 
-export function buildLeadFlowOperatorPipelineColumns(leads: FiLeadRow[]): LeadFlowOperatorPipelineColumn[] {
+export function buildLeadFlowOperatorPipelineColumns(
+  leads: FiLeadRow[]
+): LeadFlowOperatorPipelineColumn[] {
   const byStage = new Map<string, FiLeadRow[]>();
   for (const col of LEADFLOW_OPERATOR_PIPELINE_STAGES) {
     byStage.set(col.stage, []);
   }
 
   for (const lead of leads) {
-    const stage = String(lead.current_stage ?? "").trim().toLowerCase();
+    const stage = String(lead.current_stage ?? "")
+      .trim()
+      .toLowerCase();
     const bucket = byStage.get(stage);
     if (bucket) bucket.push(lead);
   }
@@ -221,14 +249,18 @@ export function buildLeadFlowOperatorPipelineColumns(leads: FiLeadRow[]): LeadFl
   });
 }
 
-export function buildLeadFlowOperatorPriorityCounts(leads: FiLeadRow[]): Record<LeadPriorityBand, number> {
+export function buildLeadFlowOperatorPriorityCounts(
+  leads: FiLeadRow[]
+): Record<LeadPriorityBand, number> {
   const counts = Object.fromEntries(LEAD_PRIORITY_BANDS.map((band) => [band, 0])) as Record<
     LeadPriorityBand,
     number
   >;
 
   for (const lead of leads) {
-    const band = String(lead.priority_band ?? "").trim().toLowerCase();
+    const band = String(lead.priority_band ?? "")
+      .trim()
+      .toLowerCase();
     if ((LEAD_PRIORITY_BANDS as readonly string[]).includes(band)) {
       counts[band as LeadPriorityBand] += 1;
     } else {
@@ -248,7 +280,9 @@ export function buildLeadFlowOperatorPredictedProcedureCounts(
   >;
 
   for (const lead of leads) {
-    const proc = String(lead.predicted_procedure ?? "").trim().toLowerCase();
+    const proc = String(lead.predicted_procedure ?? "")
+      .trim()
+      .toLowerCase();
     if ((PREDICTED_PROCEDURES as readonly string[]).includes(proc)) {
       counts[proc as PredictedProcedure] += 1;
     } else {
@@ -264,7 +298,13 @@ export function selectLeadFlowOperatorHighPriorityLeads(
   limit = 25
 ): LeadFlowOperatorHighPriorityLead[] {
   return [...leads]
-    .filter((lead) => HIGH_PRIORITY_BANDS.has(String(lead.priority_band ?? "").trim().toLowerCase()))
+    .filter((lead) =>
+      HIGH_PRIORITY_BANDS.has(
+        String(lead.priority_band ?? "")
+          .trim()
+          .toLowerCase()
+      )
+    )
     .sort((a, b) => {
       const scoreDiff = (b.lead_score ?? 0) - (a.lead_score ?? 0);
       if (scoreDiff !== 0) return scoreDiff;

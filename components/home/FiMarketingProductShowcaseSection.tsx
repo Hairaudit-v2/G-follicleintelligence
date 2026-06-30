@@ -23,21 +23,30 @@ function SectionHeading({
     <header className="max-w-4xl">
       {eyebrow ? (
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">{eyebrow}</p>
-          <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">
+            {eyebrow}
+          </p>
+          <div
+            className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+            aria-hidden
+          />
         </div>
       ) : null}
       <h2
         id={id}
         className={cn(
           "max-w-[52rem] font-display font-semibold tracking-tight text-foreground text-balance",
-          eyebrow ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]" : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
+          eyebrow
+            ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
+            : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
         )}
       >
         {title}
       </h2>
       {description ? (
-        <p className="mt-5 max-w-3xl text-base leading-[1.65] text-muted-foreground sm:text-lg md:leading-relaxed">{description}</p>
+        <p className="mt-5 max-w-3xl text-base leading-[1.65] text-muted-foreground sm:text-lg md:leading-relaxed">
+          {description}
+        </p>
       ) : null}
     </header>
   );
@@ -62,7 +71,13 @@ function DeviceShowcaseBezel({ children }: { children: ReactNode }) {
   );
 }
 
-function BrowserProductFrame({ card, urlSlug }: { card: HomeProductShowcaseCard; urlSlug: string }) {
+function BrowserProductFrame({
+  card,
+  urlSlug,
+}: {
+  card: HomeProductShowcaseCard;
+  urlSlug: string;
+}) {
   const hasShot = Boolean(card.screenshotSrc);
 
   return (
@@ -111,7 +126,11 @@ function BrowserProductFrame({ card, urlSlug }: { card: HomeProductShowcaseCard;
   );
 }
 
-export function FiMarketingProductShowcaseSection({ section }: { section: HomePageContent["productShowcase"] }) {
+export function FiMarketingProductShowcaseSection({
+  section,
+}: {
+  section: HomePageContent["productShowcase"];
+}) {
   return (
     <Section
       id={section.id}
@@ -151,8 +170,12 @@ export function FiMarketingProductShowcaseSection({ section }: { section: HomePa
                   <div className="relative">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-display text-lg font-semibold tracking-tight text-foreground sm:text-xl">{card.name}</h3>
-                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">{card.description}</p>
+                        <h3 className="font-display text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+                          {card.name}
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">
+                          {card.description}
+                        </p>
                       </div>
                       <span className="shrink-0 rounded-full border border-amber-400/15 bg-amber-400/[0.06] px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.18em] text-amber-200/65 sm:text-[9px]">
                         Live

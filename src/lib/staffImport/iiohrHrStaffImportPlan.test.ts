@@ -16,7 +16,9 @@ import type {
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 
-function row(p: Partial<IiohrHrStaffImportRow> & Pick<IiohrHrStaffImportRow, "external_staff_id" | "full_name">): IiohrHrStaffImportRow {
+function row(
+  p: Partial<IiohrHrStaffImportRow> & Pick<IiohrHrStaffImportRow, "external_staff_id" | "full_name">
+): IiohrHrStaffImportRow {
   return {
     staff_role: "consultant",
     employment_status: "active",
@@ -114,7 +116,9 @@ test("planner preview: existing staff email match", () => {
   ];
   const r = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [row({ external_staff_id: "X-1", email: "  mixedcase@example.com  ", full_name: "Case" })],
+    rows: [
+      row({ external_staff_id: "X-1", email: "  mixedcase@example.com  ", full_name: "Case" }),
+    ],
     existingUsers: [],
     existingStaff: staff,
     existingStaffSourceIds: [],
@@ -123,7 +127,10 @@ test("planner preview: existing staff email match", () => {
   assert.equal(r.perRow[0]?.matchedStaffId, "staff-2");
   const createSrc = r.perRow[0]?.actions.filter((a) => a.type === "create_staff_source_id");
   assert.equal(createSrc.length, 1);
-  assert.equal(createSrc[0]?.type === "create_staff_source_id" && createSrc[0].payload.staffId, "staff-2");
+  assert.equal(
+    createSrc[0]?.type === "create_staff_source_id" && createSrc[0].payload.staffId,
+    "staff-2"
+  );
 });
 
 test("match by fi_users.email — create fi_staff + source id", () => {
@@ -197,7 +204,14 @@ test("terminated status deactivates staff", () => {
   ];
   const r = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [row({ external_staff_id: "T-1", email: "t@x.com", full_name: "T", employment_status: "terminated" })],
+    rows: [
+      row({
+        external_staff_id: "T-1",
+        email: "t@x.com",
+        full_name: "T",
+        employment_status: "terminated",
+      }),
+    ],
     existingUsers: [],
     existingStaff: staff,
     existingStaffSourceIds: [],
@@ -254,7 +268,14 @@ test("external id: staff matched by email gets create_staff_source_id when no HR
   ];
   const r = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [row({ external_staff_id: "HR-NEW-42", email: "ns@x.com", full_name: "No Source Yet", iiohr_user_id: "u-9" })],
+    rows: [
+      row({
+        external_staff_id: "HR-NEW-42",
+        email: "ns@x.com",
+        full_name: "No Source Yet",
+        iiohr_user_id: "u-9",
+      }),
+    ],
     existingUsers: [],
     existingStaff: staff,
     existingStaffSourceIds: [],
@@ -292,7 +313,10 @@ test("new row without email creates staff only (no fi_user)", () => {
     existingStaff: [],
     existingStaffSourceIds: [],
   });
-  assert.equal(r.actions.some((a) => a.type === "create_fi_user"), false);
+  assert.equal(
+    r.actions.some((a) => a.type === "create_fi_user"),
+    false
+  );
   assert.ok(r.actions.some((a) => a.type === "create_fi_staff"));
   const cs = r.actions.find((a) => a.type === "create_fi_staff");
   assert.ok(cs && cs.type === "create_fi_staff");
@@ -395,7 +419,9 @@ test("missing external_staff_id skips row", () => {
 test("missing full_name skips row", () => {
   const r = planIiohrHrStaffImport({
     tenantId: TENANT,
-    rows: [{ external_staff_id: "A-1", full_name: "  ", email: "a@x.com" } as IiohrHrStaffImportRow],
+    rows: [
+      { external_staff_id: "A-1", full_name: "  ", email: "a@x.com" } as IiohrHrStaffImportRow,
+    ],
     existingUsers: [],
     existingStaff: [],
     existingStaffSourceIds: [],

@@ -3,7 +3,12 @@
  */
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
 import { crmUpdateLeadCommunicationBodySchema } from "@/src/lib/crm/crmApiSchemas";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { updateCrmLeadCommunication } from "@/src/lib/crm/server";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +33,9 @@ export async function PATCH(
       tenantId,
       leadId,
       communicationId,
-      ...(parsed.communicationType !== undefined ? { communicationType: parsed.communicationType } : {}),
+      ...(parsed.communicationType !== undefined
+        ? { communicationType: parsed.communicationType }
+        : {}),
       ...(parsed.direction !== undefined ? { direction: parsed.direction } : {}),
       ...(parsed.outcome !== undefined ? { outcome: parsed.outcome } : {}),
       ...(parsed.subject !== undefined ? { subject: parsed.subject } : {}),

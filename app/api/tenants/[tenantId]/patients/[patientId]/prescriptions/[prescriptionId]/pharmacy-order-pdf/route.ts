@@ -30,9 +30,7 @@ function parseSnapshotV1(raw: unknown): PharmacyOrderPayloadSnapshotV1 | null {
 
 export async function GET(
   req: Request,
-  {
-    params,
-  }: { params: Promise<{ tenantId: string; patientId: string; prescriptionId: string }> }
+  { params }: { params: Promise<{ tenantId: string; patientId: string; prescriptionId: string }> }
 ) {
   try {
     const { tenantId, patientId, prescriptionId } = await params;
@@ -50,7 +48,8 @@ export async function GET(
 
     const bundle = await loadPrescriptionDetail(tid, rid);
     if (!bundle) return crmJsonError(404, "Prescription not found.");
-    if (bundle.prescription.patient_id !== pid) return crmJsonError(400, "Patient does not match prescription.");
+    if (bundle.prescription.patient_id !== pid)
+      return crmJsonError(400, "Patient does not match prescription.");
 
     const url = new URL(req.url);
     const transmissionId = url.searchParams.get("transmissionId")?.trim() || "";

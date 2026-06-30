@@ -2,10 +2,7 @@
  * TITAN Phase 1I — Global Command Centre demo-readiness validation (pure).
  */
 
-import {
-  ENTERPRISE_DEMO_CLINICS,
-  ENTERPRISE_DEMO_TENANT_SLUG,
-} from "./enterpriseDemoConstants";
+import { ENTERPRISE_DEMO_CLINICS, ENTERPRISE_DEMO_TENANT_SLUG } from "./enterpriseDemoConstants";
 import { ENTERPRISE_DEMO_CONSULTATION_QUOTE_INVOICES } from "./enterpriseDemoFinancialGenerator";
 import { ENTERPRISE_DEMO_TOTAL_SURGERIES } from "./enterpriseDemoSurgeriesGenerator";
 import type { GlobalCommandCentrePayload } from "./enterpriseDemoGlobalCommandCentreLoader.server";
@@ -166,12 +163,14 @@ export function validateGlobalCommandCentrePayloadForDemo(
       id: "network_alerts",
       label: "Network alert feed",
       severity: "warn",
-      detail: "No alerts — confirm Dubai, Bangkok, London, Athens, and Sydney clinic slugs are seeded.",
+      detail:
+        "No alerts — confirm Dubai, Bangkok, London, Athens, and Sydney clinic slugs are seeded.",
     });
   }
 
   const hasSurgicalTotals =
-    payload.surgicalSnapshot.totalGraftsExtracted > 0 && payload.surgicalSnapshot.totalGraftsImplanted > 0;
+    payload.surgicalSnapshot.totalGraftsExtracted > 0 &&
+    payload.surgicalSnapshot.totalGraftsImplanted > 0;
   appendGlobalCommandCentreValidationCheck(checks, {
     id: "surgical_snapshot",
     label: "Surgical intelligence snapshot",
@@ -214,7 +213,9 @@ export function validateGlobalCommandCentrePayloadForDemo(
     id: "read_only_mode",
     label: "Read-only simulation",
     severity: payload.readOnly ? "pass" : "fail",
-    detail: payload.readOnly ? "Payload marked read-only." : "Expected readOnly=true for demo safety.",
+    detail: payload.readOnly
+      ? "Payload marked read-only."
+      : "Expected readOnly=true for demo safety.",
   });
 }
 

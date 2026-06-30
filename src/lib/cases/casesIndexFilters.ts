@@ -3,7 +3,12 @@ import { caseReadinessHealthLabel } from "./caseReadinessLabels";
 import type { CasesIndexPageSize, CasesIndexQuery, CasesWorklistSort } from "./casesIndexTypes";
 import { CASES_INDEX_DEFAULT_PAGE_SIZE, CASES_INDEX_PAGE_SIZE_OPTIONS } from "./casesIndexTypes";
 
-const SORT_VALUES: CasesWorklistSort[] = ["updated_desc", "created_desc", "procedure_date_desc", "readiness_attention_desc"];
+const SORT_VALUES: CasesWorklistSort[] = [
+  "updated_desc",
+  "created_desc",
+  "procedure_date_desc",
+  "readiness_attention_desc",
+];
 
 function firstString(v: string | string[] | undefined): string {
   if (v == null) return "";
@@ -24,14 +29,19 @@ function parsePage(sp: Record<string, string | string[] | undefined> | undefined
   return Math.floor(raw);
 }
 
-function parsePageSize(sp: Record<string, string | string[] | undefined> | undefined): CasesIndexPageSize {
+function parsePageSize(
+  sp: Record<string, string | string[] | undefined> | undefined
+): CasesIndexPageSize {
   const raw = parseInt(firstString(sp?.pageSize), 10);
-  if (CASES_INDEX_PAGE_SIZE_OPTIONS.includes(raw as CasesIndexPageSize)) return raw as CasesIndexPageSize;
+  if (CASES_INDEX_PAGE_SIZE_OPTIONS.includes(raw as CasesIndexPageSize))
+    return raw as CasesIndexPageSize;
   return CASES_INDEX_DEFAULT_PAGE_SIZE;
 }
 
 /** Maps worklist readiness bucket to a section health label (ready → complete). */
-export function casesWorklistReadinessFilterLabel(bucket: Exclude<CasesIndexQuery["readiness"], "all">): string {
+export function casesWorklistReadinessFilterLabel(
+  bucket: Exclude<CasesIndexQuery["readiness"], "all">
+): string {
   const health: CaseReadinessHealth =
     bucket === "ready" ? "complete" : bucket === "in_progress" ? "in_progress" : "needs_attention";
   return caseReadinessHealthLabel(health);
@@ -56,7 +66,11 @@ export function buildCasesWorklistQueryString(q: CasesIndexQuery): string {
   return p.toString();
 }
 
-export function casesWorklistHref(tenantId: string, q: CasesIndexQuery, patch: Partial<CasesIndexQuery> = {}): string {
+export function casesWorklistHref(
+  tenantId: string,
+  q: CasesIndexQuery,
+  patch: Partial<CasesIndexQuery> = {}
+): string {
   const merged: CasesIndexQuery = { ...q, ...patch };
   const qs = buildCasesWorklistQueryString(merged);
   const base = `/fi-admin/${tenantId.trim()}/cases`;
@@ -66,7 +80,9 @@ export function casesWorklistHref(tenantId: string, q: CasesIndexQuery, patch: P
 /**
  * Parses cases index URL search params into a normalized query (tenant-agnostic).
  */
-export function parseCasesIndexQuery(sp: Record<string, string | string[] | undefined> | undefined): CasesIndexQuery {
+export function parseCasesIndexQuery(
+  sp: Record<string, string | string[] | undefined> | undefined
+): CasesIndexQuery {
   const q = firstString(sp?.q);
   const sortRaw = firstString(sp?.sort);
   const readinessRaw = firstString(sp?.readiness).toLowerCase();

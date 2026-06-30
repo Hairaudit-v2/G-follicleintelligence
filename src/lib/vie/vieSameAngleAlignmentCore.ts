@@ -123,16 +123,25 @@ export function selectBestReferenceImage(
   return sorted[0] ?? null;
 }
 
-function scoreFramingMatch(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreFramingMatch(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   return capture.framing === reference.framing ? 20 : 0;
 }
 
-function scoreOrientationMatch(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreOrientationMatch(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   if (capture.orientation === "unknown" || reference.orientation === "unknown") return 8;
   return capture.orientation === reference.orientation ? 15 : 0;
 }
 
-function scoreDistanceConsistency(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreDistanceConsistency(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   const a = normalizeDistanceHint(capture.capture_distance_hint);
   const b = normalizeDistanceHint(reference.capture_distance_hint);
   if (!a || !b) return 8;
@@ -141,16 +150,25 @@ function scoreDistanceConsistency(capture: VieAlignmentCaptureInput, reference: 
   return 0;
 }
 
-function scoreProtocolSlotMatch(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreProtocolSlotMatch(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   return capture.protocol_slot_slug === reference.protocol_slot_slug ? 15 : 5;
 }
 
-function scoreVisitTypeConsistency(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreVisitTypeConsistency(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   if (!capture.visit_type || !reference.visit_type) return 5;
   return capture.visit_type === reference.visit_type ? 10 : 0;
 }
 
-function scoreDimensionSimilarity(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreDimensionSimilarity(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   const cw = capture.image_width;
   const ch = capture.image_height;
   const rw = reference.image_width;
@@ -170,7 +188,10 @@ function scoreDimensionSimilarity(capture: VieAlignmentCaptureInput, reference: 
   return Math.round(ratioScore + areaScore);
 }
 
-function scoreQualityConsistency(capture: VieAlignmentCaptureInput, reference: VieAlignmentReferenceCandidate): number {
+function scoreQualityConsistency(
+  capture: VieAlignmentCaptureInput,
+  reference: VieAlignmentReferenceCandidate
+): number {
   const delta = Math.abs(capture.quality_score - reference.quality_score);
   if (delta <= 5) return 10;
   if (delta <= 15) return 7;
@@ -178,17 +199,16 @@ function scoreQualityConsistency(capture: VieAlignmentCaptureInput, reference: V
   return 0;
 }
 
-function deriveAlignmentStatus(score: number): Exclude<VieAlignmentStatus, "no_reference_available"> {
+function deriveAlignmentStatus(
+  score: number
+): Exclude<VieAlignmentStatus, "no_reference_available"> {
   if (score >= 85) return "excellent";
   if (score >= 70) return "acceptable";
   if (score >= 50) return "poor";
   return "retake_recommended";
 }
 
-function deriveConfidenceBand(
-  score: number,
-  warnings: string[]
-): VieComparisonConfidenceBand {
+function deriveConfidenceBand(score: number, warnings: string[]): VieComparisonConfidenceBand {
   let adjusted = score;
   adjusted -= warnings.length * 8;
   if (adjusted >= 75) return "high";
@@ -306,7 +326,8 @@ export function buildCaptureStandardizationMetadata(
     framing: capture.framing,
     capture_distance_hint: capture.capture_distance_hint,
     orientation: capture.orientation,
-    alignment_score: alignment.alignment_status === "no_reference_available" ? null : alignment.alignment_score,
+    alignment_score:
+      alignment.alignment_status === "no_reference_available" ? null : alignment.alignment_score,
     reference_image_id: alignment.reference_image_id,
   };
 }
@@ -342,7 +363,10 @@ export function buildCaptureReferenceGuidance(
 
 const POOR_ALIGNMENT_STATUSES = new Set<VieAlignmentStatus>(["poor", "retake_recommended"]);
 
-export function isStandardizedEvidence(alignmentStatus: VieAlignmentStatus | null, alignmentScore: number | null): boolean {
+export function isStandardizedEvidence(
+  alignmentStatus: VieAlignmentStatus | null,
+  alignmentScore: number | null
+): boolean {
   if (!alignmentStatus || alignmentStatus === "no_reference_available") return false;
   if (POOR_ALIGNMENT_STATUSES.has(alignmentStatus)) return false;
   return (alignmentScore ?? 0) >= 70;
@@ -371,7 +395,9 @@ export function buildPatientTwinAlignmentSummary(
     }
   }
 
-  const standardizedCount = scored.filter((r) => isStandardizedEvidence(r.alignment_status, r.alignment_score)).length;
+  const standardizedCount = scored.filter((r) =>
+    isStandardizedEvidence(r.alignment_status, r.alignment_score)
+  ).length;
   const standardized_evidence_coverage_percent =
     scored.length > 0 ? Math.round((standardizedCount / scored.length) * 100) : 0;
 

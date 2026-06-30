@@ -15,8 +15,13 @@ function InfrastructureColumn({
   variant: "problem" | "default";
 }) {
   return (
-    <GlassCard variant={variant === "problem" ? "problem" : "default"} className="h-full border-white/[0.07]">
-      <h3 className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl">{headline}</h3>
+    <GlassCard
+      variant={variant === "problem" ? "problem" : "default"}
+      className="h-full border-white/[0.07]"
+    >
+      <h3 className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+        {headline}
+      </h3>
       <ul className="mt-6 space-y-2.5">
         {items.map((item) => (
           <li
@@ -52,7 +57,11 @@ export function FiMarketingIndustrySoftwareGapSection() {
             items={c.currentProblems.items}
             variant="problem"
           />
-          <InfrastructureColumn headline={c.modernNeeds.headline} items={c.modernNeeds.items} variant="default" />
+          <InfrastructureColumn
+            headline={c.modernNeeds.headline}
+            items={c.modernNeeds.items}
+            variant="default"
+          />
         </div>
 
         <div className="mx-auto mt-14 max-w-4xl text-center sm:mt-16 md:mt-20">

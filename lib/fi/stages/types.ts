@@ -11,6 +11,4 @@ export type StageContext = {
   updateStage: (stage: string) => Promise<void>;
 };
 
-export type StageResult<T> =
-  | { ok: true; data: T; warning?: string }
-  | { ok: false; error: string };
+export type StageResult<T> = { ok: true; data: T; warning?: string } | { ok: false; error: string };

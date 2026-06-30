@@ -3,11 +3,24 @@
  * Deterministic HubSpot → FI mapping only — no AI, no write-back.
  */
 
-import { mapLeadStatusToKey, mapStageOfJourneyToPipelineSlug } from "@/src/lib/crm/hubspotImport/hubspotImportMappings";
+import {
+  mapLeadStatusToKey,
+  mapStageOfJourneyToPipelineSlug,
+} from "@/src/lib/crm/hubspotImport/hubspotImportMappings";
 import { normalizeEmail, normalizeWhitespaceName } from "@/src/lib/fi/foundation/normalize";
-import type { HubspotLeadType, HubspotStagingContact, HubspotStagingDeal } from "./hubspotConnectorTypes";
+import type {
+  HubspotLeadType,
+  HubspotStagingContact,
+  HubspotStagingDeal,
+} from "./hubspotConnectorTypes";
 
-export const EXTERNAL_SOURCE_PROVIDERS = ["hubspot", "cliniko", "pabau", "salesforce", "google_calendar"] as const;
+export const EXTERNAL_SOURCE_PROVIDERS = [
+  "hubspot",
+  "cliniko",
+  "pabau",
+  "salesforce",
+  "google_calendar",
+] as const;
 export type ExternalSourceProvider = (typeof EXTERNAL_SOURCE_PROVIDERS)[number];
 
 export type FiLeadImportClassification = "patient" | "lead_only" | "mixed_patient_lead";
@@ -59,7 +72,10 @@ function lc(s: string | null | undefined): string {
   return (s ?? "").trim().toLowerCase();
 }
 
-function extractProperty(props: Record<string, string | null | undefined> | undefined, ...keys: string[]): string | null {
+function extractProperty(
+  props: Record<string, string | null | undefined> | undefined,
+  ...keys: string[]
+): string | null {
   if (!props) return null;
   for (const key of keys) {
     const val = props[key];
@@ -74,7 +90,9 @@ function hubspotLifecycleIsLeadPipeline(lifecycleStage: string | null | undefine
   if (/\bcustomer\b/.test(t)) return false;
   if (/\bevangelist\b/.test(t)) return false;
   if (/\bpatient\b/.test(t) && !/\blead\b/.test(t)) return false;
-  return /\blead\b|subscriber|\b(sql|mql)\b|marketing qualified|sales qualified|opportunity\b/.test(t);
+  return /\blead\b|subscriber|\b(sql|mql)\b|marketing qualified|sales qualified|opportunity\b/.test(
+    t
+  );
 }
 
 function journeyIndicatesPatient(stageOfJourney: string | null | undefined): boolean {
@@ -119,7 +137,12 @@ function classifyHubspotContactForImport(props: {
   return "lead_only";
 }
 
-function buildContactSummary(firstName: string | null, lastName: string | null, email: string | null, recordId: string): string {
+function buildContactSummary(
+  firstName: string | null,
+  lastName: string | null,
+  email: string | null,
+  recordId: string
+): string {
   const display = [firstName, lastName].filter(Boolean).join(" ").trim();
   if (display) return display.slice(0, 500);
   if (email) return email.slice(0, 500);
@@ -127,7 +150,9 @@ function buildContactSummary(firstName: string | null, lastName: string | null, 
 }
 
 /** Build FI lead import preview from an approved HubSpot contact staging row. */
-export function buildHubspotContactImportPreview(staging: HubspotStagingContact): FiLeadImportPreview {
+export function buildHubspotContactImportPreview(
+  staging: HubspotStagingContact
+): FiLeadImportPreview {
   const raw = staging.rawPayload as { properties?: Record<string, string | null | undefined> };
   const props = raw?.properties ?? {};
   const firstName = extractProperty(props, "firstname");
@@ -221,7 +246,9 @@ export function buildHubspotContactImportPreview(staging: HubspotStagingContact)
 }
 
 /** Build FI opportunity (CRM lead) import preview from an approved HubSpot deal staging row. */
-export function buildHubspotDealImportPreview(staging: HubspotStagingDeal): FiOpportunityImportPreview {
+export function buildHubspotDealImportPreview(
+  staging: HubspotStagingDeal
+): FiOpportunityImportPreview {
   const raw = staging.rawPayload as { properties?: Record<string, string | null | undefined> };
   const props = raw?.properties ?? {};
   const dealName = extractProperty(props, "dealname");
@@ -278,7 +305,9 @@ export function mapHubspotContactToFiLead(staging: HubspotStagingContact): {
   const preview = buildHubspotContactImportPreview(staging);
   return {
     preview,
-    proposedFiAction: preview.createPatient ? "create_person_patient_and_lead" : "create_person_and_lead",
+    proposedFiAction: preview.createPatient
+      ? "create_person_patient_and_lead"
+      : "create_person_and_lead",
   };
 }
 
@@ -290,6 +319,8 @@ export function mapHubspotDealToFiOpportunity(staging: HubspotStagingDeal): {
   const preview = buildHubspotDealImportPreview(staging);
   return {
     preview,
-    proposedFiAction: preview.linkToContactId ? "link_opportunity_to_contact" : "create_opportunity_lead",
+    proposedFiAction: preview.linkToContactId
+      ? "link_opportunity_to_contact"
+      : "create_opportunity_lead",
   };
 }

@@ -45,7 +45,9 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
   });
 
   it("admin note length", () => {
-    assert.doesNotThrow(() => assertAdminNoteWithinBounds("x".repeat(PATIENT_ADMIN_NOTE_MAX_LENGTH)));
+    assert.doesNotThrow(() =>
+      assertAdminNoteWithinBounds("x".repeat(PATIENT_ADMIN_NOTE_MAX_LENGTH))
+    );
     assert.throws(() => assertAdminNoteWithinBounds("x".repeat(PATIENT_ADMIN_NOTE_MAX_LENGTH + 1)));
   });
 
@@ -103,7 +105,10 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
         { start_at: "2026-06-09T10:00:00.000Z", booking_status: "scheduled" },
         { start_at: "2026-06-08T10:00:00.000Z", booking_status: "completed" },
       ],
-      activityEvents: [{ occurred_at: "2026-06-01T08:00:00.000Z" }, { occurred_at: "2026-06-02T08:00:00.000Z" }],
+      activityEvents: [
+        { occurred_at: "2026-06-01T08:00:00.000Z" },
+        { occurred_at: "2026-06-02T08:00:00.000Z" },
+      ],
       nowIso,
     });
     assert.equal(metrics.totalLeads, 2);
@@ -163,20 +168,39 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
     assert.equal(pickLastVisitAt(bookings, nowIso), "2026-06-08T10:00:00.000Z");
     assert.equal(parseTreatmentValueGbp({ treatment_value_gbp: 8500 }), 8500);
     assert.equal(parseTreatmentValueGbp({ treatment_value: "£12,500" }), 12500);
-    assert.equal(sumPatientLifetimeValueGbp([{ treatment_value: 5000 }, { estimated_value: 2000 }]), 7000);
+    assert.equal(
+      sumPatientLifetimeValueGbp([{ treatment_value: 5000 }, { estimated_value: 2000 }]),
+      7000
+    );
     assert.equal(formatPatientLifetimeValueGbp(7000), "£7,000");
   });
 
   it("activity sorting newest first", () => {
     const sorted = sortActivityEventsNewestFirst([
-      { id: "a", occurred_at: "2026-01-01T00:00:00.000Z", activity_kind: "x", title: "1", lead_id: "l1" },
-      { id: "b", occurred_at: "2026-06-01T00:00:00.000Z", activity_kind: "y", title: "2", lead_id: "l2" },
+      {
+        id: "a",
+        occurred_at: "2026-01-01T00:00:00.000Z",
+        activity_kind: "x",
+        title: "1",
+        lead_id: "l1",
+      },
+      {
+        id: "b",
+        occurred_at: "2026-06-01T00:00:00.000Z",
+        activity_kind: "y",
+        title: "2",
+        lead_id: "l2",
+      },
     ]);
     assert.equal(sorted[0]?.id, "b");
   });
 
   it("person lead history timeline and primary lead pick", () => {
-    const mkLead = (id: string, patientId: string | null, updated: string): PatientPersonLeadHistoryItem => ({
+    const mkLead = (
+      id: string,
+      patientId: string | null,
+      updated: string
+    ): PatientPersonLeadHistoryItem => ({
       lead: {
         id,
         tenant_id: "t1",
@@ -203,7 +227,10 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
       linkedToThisPatient: patientId === "pat1",
     });
 
-    const items = [mkLead("l-old", null, "2026-02-01T00:00:00.000Z"), mkLead("l-new", "pat1", "2026-06-01T00:00:00.000Z")];
+    const items = [
+      mkLead("l-old", null, "2026-02-01T00:00:00.000Z"),
+      mkLead("l-new", "pat1", "2026-06-01T00:00:00.000Z"),
+    ];
     assert.equal(pickPrimaryLeadForPatient(items)?.id, "l-new");
 
     const timeline = buildPatientLeadHistoryTimeline(items, [
@@ -254,7 +281,10 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
       },
     ] as const;
 
-    const rec = deriveRecommendedBookingTypeForPatient({ bookings: [...bookings], primaryLead: null });
+    const rec = deriveRecommendedBookingTypeForPatient({
+      bookings: [...bookings],
+      primaryLead: null,
+    });
     assert.equal(rec.bookingType, "surgery");
 
     const prefill = buildAppointmentCreatePrefillFromPatient({

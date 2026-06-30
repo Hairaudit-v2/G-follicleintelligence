@@ -3,10 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  resolveAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { syncIiohrHrStaffForTenant } from "@/src/lib/staffImport/iiohrHrStaffSync.server";
 import { parseIiohrHrStaffSyncRows } from "@/src/lib/staffImport/iiohrHrStaffSyncRowsParse";
-import type { IiohrHrStaffSyncPayload, IiohrHrStaffSyncSummary } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
+import type {
+  IiohrHrStaffSyncPayload,
+  IiohrHrStaffSyncSummary,
+} from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
 
 const syncActionBodySchema = z.object({
   tenantId: z.string().uuid("tenantId must be a UUID."),
@@ -55,7 +62,9 @@ export type SyncIiohrHrStaffPayloadActionResult =
  * Manual IIOHR HR → FI staff sync (preview or commit). Same access gate as HR staff import.
  * Accepts pasted JSON: an array of rows, or `{ "rows": [ ... ] }`.
  */
-export async function syncIiohrHrStaffPayloadAction(body: unknown): Promise<SyncIiohrHrStaffPayloadActionResult> {
+export async function syncIiohrHrStaffPayloadAction(
+  body: unknown
+): Promise<SyncIiohrHrStaffPayloadActionResult> {
   try {
     const parsed = syncActionBodySchema.parse(body);
     const rawRows = parsed.rows ?? parsed.payload?.rows;

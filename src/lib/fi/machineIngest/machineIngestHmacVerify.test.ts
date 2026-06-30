@@ -149,7 +149,11 @@ describe("machineIngestHmacVerify (partners)", () => {
 
   it("invalid signature fails", async () => {
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: TENANT, name: "X", reference_code: "ref_bad_sig" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: TENANT,
+      name: "X",
+      reference_code: "ref_bad_sig",
+    });
     const ts = Date.now();
     const req = makeRequest({
       url: `https://example.com${pathname}`,
@@ -210,7 +214,11 @@ describe("machineIngestHmacVerify (partners)", () => {
   it("reused nonce fails on second identical request", async () => {
     const mock = createMockSupabase({ encrypted });
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: TENANT, name: "X", reference_code: "ref_replay_twice" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: TENANT,
+      name: "X",
+      reference_code: "ref_replay_twice",
+    });
     const ts = Date.now();
     const nonce = "nonce-replay-twice";
     const sig = signBody({
@@ -251,7 +259,11 @@ describe("machineIngestHmacVerify (partners)", () => {
 
   it("tenant body mismatch vs path fails", async () => {
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: OTHER, name: "X", reference_code: "ref_mismatch" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: OTHER,
+      name: "X",
+      reference_code: "ref_mismatch",
+    });
     const ts = Date.now();
     const nonce = "nonce-mismatch";
     const sig = signBody({
@@ -307,7 +319,11 @@ describe("machineIngestHmacVerify (partners)", () => {
 
   it("missing signing headers is rejected", async () => {
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: TENANT, name: "X", reference_code: "ref_miss_hdr" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: TENANT,
+      name: "X",
+      reference_code: "ref_miss_hdr",
+    });
     const ts = Date.now();
     const req = makeRequest({
       url: `https://example.com${pathname}`,
@@ -330,7 +346,11 @@ describe("machineIngestHmacVerify (partners)", () => {
 
   it("unknown kid (no key row) is rejected before MAC", async () => {
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: TENANT, name: "X", reference_code: "ref_unk_kid" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: TENANT,
+      name: "X",
+      reference_code: "ref_unk_kid",
+    });
     const ts = Date.now();
     const req = makeRequest({
       url: `https://example.com${pathname}`,
@@ -354,7 +374,11 @@ describe("machineIngestHmacVerify (partners)", () => {
 
   it("no active key row (e.g. revoked) returns unknown_kid", async () => {
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: TENANT, name: "X", reference_code: "ref_revoked" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: TENANT,
+      name: "X",
+      reference_code: "ref_revoked",
+    });
     const ts = Date.now();
     const req = makeRequest({
       url: `https://example.com${pathname}`,
@@ -424,7 +448,8 @@ describe("machineIngestHmacVerify production master key length", () => {
     else testEnv.NODE_ENV = saved.NODE_ENV;
     if (saved.VERCEL_ENV === undefined) delete testEnv.VERCEL_ENV;
     else testEnv.VERCEL_ENV = saved.VERCEL_ENV;
-    if (saved.FI_MACHINE_INGEST_MASTER_KEY === undefined) delete testEnv.FI_MACHINE_INGEST_MASTER_KEY;
+    if (saved.FI_MACHINE_INGEST_MASTER_KEY === undefined)
+      delete testEnv.FI_MACHINE_INGEST_MASTER_KEY;
     else testEnv.FI_MACHINE_INGEST_MASTER_KEY = saved.FI_MACHINE_INGEST_MASTER_KEY;
   });
 
@@ -434,7 +459,11 @@ describe("machineIngestHmacVerify production master key length", () => {
     testEnv.FI_MACHINE_INGEST_MASTER_KEY = "x".repeat(31);
 
     const pathname = `/api/ingest/${TENANT}/partners`;
-    const bodyUtf8 = JSON.stringify({ tenant_id: TENANT, name: "X", reference_code: "ref_weak_mk" });
+    const bodyUtf8 = JSON.stringify({
+      tenant_id: TENANT,
+      name: "X",
+      reference_code: "ref_weak_mk",
+    });
     const ts = Date.now();
     const req = makeRequest({
       url: `https://example.com${pathname}`,

@@ -11,14 +11,19 @@ import {
   pickLatestSuccessfulSyncRun,
   summarizeSyncRunRow,
 } from "./hrStaffSyncHealthDashboard";
-import { buildStaffHrNotificationSummary, STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/staff/staffHrNotificationSummary";
+import {
+  buildStaffHrNotificationSummary,
+  STAFF_HR_SYNC_STALE_DAYS,
+} from "@/src/lib/staff/staffHrNotificationSummary";
 import type { FiStaffSyncRunRow } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
 import { buildRelinkSyncRowsByEmail, buildRelinkSyncRowsBySourceStaffId } from "./hrStaffRelink";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 const TENANT = "00000000-0000-4000-8000-000000000001";
 
-function runRow(p: Partial<FiStaffSyncRunRow> & Pick<FiStaffSyncRunRow, "status" | "started_at">): FiStaffSyncRunRow {
+function runRow(
+  p: Partial<FiStaffSyncRunRow> & Pick<FiStaffSyncRunRow, "status" | "started_at">
+): FiStaffSyncRunRow {
   return {
     id: "run-1",
     tenant_id: TENANT,
@@ -74,14 +79,21 @@ test("healthy sync state when latest run succeeded and staff metadata is fresh",
     [{ id: "s1", full_name: "Alex", email: "a@x.com", is_active: true }],
     { s1: hr }
   );
-  const overview = buildHrSyncHealthOverview({ runs, staffIssueRows: staffIssues, envChecklist: checklist, now: NOW });
+  const overview = buildHrSyncHealthOverview({
+    runs,
+    staffIssueRows: staffIssues,
+    envChecklist: checklist,
+    now: NOW,
+  });
   assert.equal(overview.variant, "healthy");
   assert.equal(overview.staffWithIssuesCount, 0);
   assert.equal(overview.staffMetadataStale, false);
 });
 
 test("stale sync detected for staff metadata older than 14 days", () => {
-  const staleAt = new Date(NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000).toISOString();
+  const staleAt = new Date(
+    NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000
+  ).toISOString();
   const hr = buildStaffHrNotificationSummary(
     {
       source_system: "iiohr_hr",
@@ -136,15 +148,27 @@ test("export excludes sensitive fields", () => {
 
 test("non-admin cannot run sync admin actions", () => {
   assert.equal(
-    canPerformHrSyncHealthAdminAction({ userRole: "member", isPlatformAdmin: false, hasValidAdminKey: false }),
+    canPerformHrSyncHealthAdminAction({
+      userRole: "member",
+      isPlatformAdmin: false,
+      hasValidAdminKey: false,
+    }),
     false
   );
   assert.equal(
-    canPerformHrSyncHealthAdminAction({ userRole: "crm_operator", isPlatformAdmin: false, hasValidAdminKey: false }),
+    canPerformHrSyncHealthAdminAction({
+      userRole: "crm_operator",
+      isPlatformAdmin: false,
+      hasValidAdminKey: false,
+    }),
     true
   );
   assert.equal(
-    canPerformHrSyncHealthAdminAction({ userRole: "member", isPlatformAdmin: true, hasValidAdminKey: false }),
+    canPerformHrSyncHealthAdminAction({
+      userRole: "member",
+      isPlatformAdmin: true,
+      hasValidAdminKey: false,
+    }),
     true
   );
 });
@@ -182,7 +206,12 @@ test("relink by source_staff_id matches HR source ids only", () => {
 
 test("summarize latest run and pick latest success", () => {
   const runs = [
-    runRow({ id: "r2", status: "failed", started_at: "2026-06-09T11:00:00.000Z", error_message: "boom" }),
+    runRow({
+      id: "r2",
+      status: "failed",
+      started_at: "2026-06-09T11:00:00.000Z",
+      error_message: "boom",
+    }),
     runRow({ id: "r1", status: "success", started_at: "2026-06-08T11:00:00.000Z" }),
   ];
   const latest = summarizeSyncRunRow(runs[0]!);

@@ -5,11 +5,7 @@ import { assertFiPlatformAdminSystemAccess } from "@/src/lib/fiOs/fiOsPlatformSy
 
 export const dynamic = "force-dynamic";
 
-export default async function SystemAdminLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default async function SystemAdminLayout({ children }: { children: ReactNode }) {
   await assertFiPlatformAdminSystemAccess();
 
   return (

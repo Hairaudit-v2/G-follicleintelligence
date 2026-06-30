@@ -25,7 +25,9 @@ function isMissingTableError(msg: string): boolean {
   return m.includes("does not exist") || m.includes("42p01") || m.includes("not find");
 }
 
-export async function recordOutcomeMeasurement(raw: RecordOutcomeMeasurementInput): Promise<{ id: string }> {
+export async function recordOutcomeMeasurement(
+  raw: RecordOutcomeMeasurementInput
+): Promise<{ id: string }> {
   const input = recordOutcomeMeasurementInputSchema.parse(raw);
   const conf =
     input.confidenceLevel ??
@@ -52,7 +54,11 @@ export async function recordOutcomeMeasurement(raw: RecordOutcomeMeasurementInpu
     metadata: input.metadata,
   };
 
-  const { data, error } = await supabase.from("fi_patient_outcome_measurements").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_patient_outcome_measurements")
+    .insert(row)
+    .select("id")
+    .single();
   if (error) {
     if (isMissingTableError(error.message ?? "")) {
       throw new Error("Outcome measurements table is not available (migration not applied).");
@@ -62,7 +68,9 @@ export async function recordOutcomeMeasurement(raw: RecordOutcomeMeasurementInpu
   return { id: String((data as { id: string }).id) };
 }
 
-export async function recordOutcomeProtocol(raw: RecordOutcomeProtocolInput): Promise<{ id: string }> {
+export async function recordOutcomeProtocol(
+  raw: RecordOutcomeProtocolInput
+): Promise<{ id: string }> {
   const input = recordOutcomeProtocolInputSchema.parse(raw);
   const supabase = supabaseAdmin();
   const row = {
@@ -80,7 +88,11 @@ export async function recordOutcomeProtocol(raw: RecordOutcomeProtocolInput): Pr
     metadata: input.metadata,
   };
 
-  const { data, error } = await supabase.from("fi_outcome_protocols").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_outcome_protocols")
+    .insert(row)
+    .select("id")
+    .single();
   if (error) {
     if (isMissingTableError(error.message ?? "")) {
       throw new Error("Outcome protocols table is not available (migration not applied).");

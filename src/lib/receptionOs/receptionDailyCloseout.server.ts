@@ -45,12 +45,18 @@ async function loadTomorrowFirstPatientReadiness(
   tenantId: string,
   calendarTimezone: string,
   now: Date,
-  base: string,
+  base: string
 ): Promise<TomorrowFirstPatientReadiness | null> {
   const window = computeTomorrowOperationalWindow(now, calendarTimezone);
-  const bookings = await loadBookingsForTenantRange(tenantId, window.localStartIso, window.localEndIso);
+  const bookings = await loadBookingsForTenantRange(
+    tenantId,
+    window.localStartIso,
+    window.localEndIso
+  );
   const sorted = bookings
-    .filter((b) => ["scheduled", "confirmed"].includes(String(b.booking_status ?? "").toLowerCase()))
+    .filter((b) =>
+      ["scheduled", "confirmed"].includes(String(b.booking_status ?? "").toLowerCase())
+    )
     .sort((a, b) => String(a.start_at).localeCompare(String(b.start_at)));
   const first = sorted[0];
   if (!first) return null;
@@ -74,7 +80,7 @@ async function loadTomorrowFirstPatientReadiness(
 async function loadExistingCloseout(
   tenantId: string,
   operatingDate: string,
-  clinicId: string | null,
+  clinicId: string | null
 ): Promise<{ id: string; notes: string | null; closedAt: string } | null> {
   const supabase = supabaseAdmin();
   let query = supabase
@@ -101,10 +107,12 @@ async function loadExistingCloseout(
 
 export async function loadReceptionCloseoutSnapshotForCommandCentre(
   payload: ReceptionCloseoutCommandCentreInput,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): Promise<ReceptionCloseoutSnapshot> {
   const tenantId = payload.tenantId;
-  let failedCommunications: Awaited<ReturnType<typeof loadFailedReceptionCommunicationsForOperationalDay>> = [];
+  let failedCommunications: Awaited<
+    ReturnType<typeof loadFailedReceptionCommunicationsForOperationalDay>
+  > = [];
   let clinicId: string | null = null;
   let tomorrowFirstPatient: Awaited<ReturnType<typeof loadTomorrowFirstPatientReadiness>> = null;
   let existingCloseout: Awaited<ReturnType<typeof loadExistingCloseout>> = null;
@@ -123,7 +131,7 @@ export async function loadReceptionCloseoutSnapshotForCommandCentre(
       tenantId,
       payload.operationalDay.calendarTimezone,
       now,
-      `/fi-admin/${tenantId}`,
+      `/fi-admin/${tenantId}`
     );
   } catch (error) {
     console.error("[loadReceptionCloseoutSnapshotForCommandCentre:tomorrow]", error);
@@ -133,7 +141,7 @@ export async function loadReceptionCloseoutSnapshotForCommandCentre(
     existingCloseout = await loadExistingCloseout(
       tenantId,
       payload.operationalDay.todayYmd,
-      clinicId,
+      clinicId
     );
   } catch (error) {
     console.error("[loadReceptionCloseoutSnapshotForCommandCentre:existing]", error);
@@ -158,7 +166,7 @@ export type CreateReceptionDailyCloseoutParams = {
 };
 
 export async function createReceptionDailyCloseout(
-  params: CreateReceptionDailyCloseoutParams,
+  params: CreateReceptionDailyCloseoutParams
 ): Promise<{ closeoutId: string }> {
   const tenantId = assertNonEmptyUuid(params.tenantId, "tenantId").trim();
   const clinicId = await resolveTenantDefaultClinicId(tenantId);
@@ -203,7 +211,9 @@ export async function createReceptionDailyCloseout(
   }));
 
   if (itemRows.length) {
-    const { error: itemsError } = await supabase.from("fi_reception_daily_closeout_items").insert(itemRows);
+    const { error: itemsError } = await supabase
+      .from("fi_reception_daily_closeout_items")
+      .insert(itemRows);
     if (itemsError) throw new Error(itemsError.message);
   }
 

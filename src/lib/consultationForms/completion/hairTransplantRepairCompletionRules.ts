@@ -112,7 +112,9 @@ function buildPriorHistoryLine(values: Record<string, unknown>): string {
   const parts = [
     cnt ? `Prior procedures: ${optionLabel(PRIOR_COUNT_OPTS, cnt)}` : "",
     yr ? `Era: ${optionLabel(YEAR_OPTS, yr)}` : "",
-    known ? `Clinic known: ${labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.yes_no_unsure, known) ?? known}` : "",
+    known
+      ? `Clinic known: ${labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.yes_no_unsure, known) ?? known}`
+      : "",
     clinic ? `Named prior provider/clinic: ${clinic}` : "",
   ];
   return parts.filter(Boolean).join(" · ");
@@ -141,12 +143,15 @@ function buildDiagnosisImpression(values: Record<string, unknown>): string {
   );
   const hl = readString(values.hairline_design_issue).trim();
   if (hl) {
-    lines.push(`Hairline design flag: ${labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.yes_no_unsure, hl) ?? hl}.`);
+    lines.push(
+      `Hairline design flag: ${labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.yes_no_unsure, hl) ?? hl}.`
+    );
   }
   const flags: string[] = [];
   if (readBoolean(values.growth_failure_suspected)) flags.push("growth yield concern");
   if (readBoolean(values.pluggy_or_unnatural_grafts)) flags.push("pluggy / unnatural grafts");
-  if (readBoolean(values.transection_or_overharvesting_concern)) flags.push("transection / overharvesting concern");
+  if (readBoolean(values.transection_or_overharvesting_concern))
+    flags.push("transection / overharvesting concern");
   if (flags.length) lines.push(`Clinical flags: ${flags.join(", ")}.`);
   return lines.join("\n").trim();
 }
@@ -155,7 +160,8 @@ function buildRiskFlagValues(values: Record<string, unknown>): string[] {
   const out: string[] = [];
   if (readBoolean(values.growth_failure_suspected)) out.push("growth_failure_suspected");
   if (readBoolean(values.pluggy_or_unnatural_grafts)) out.push("pluggy_or_unnatural_grafts");
-  if (readBoolean(values.transection_or_overharvesting_concern)) out.push("transection_or_overharvesting_concern");
+  if (readBoolean(values.transection_or_overharvesting_concern))
+    out.push("transection_or_overharvesting_concern");
   const dd = readString(values.donor_depletion_level).trim();
   if (dd === "moderate" || dd === "severe") out.push("donor_depletion_elevated");
   const ds = readString(values.donor_scarring_level).trim();
@@ -172,7 +178,9 @@ function correctiveOptionLabels(keys: string[]): string[] {
 /**
  * Rules-based completion summary for {@link HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG}.
  */
-export function buildHairTransplantRepairCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildHairTransplantRepairCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   const v = input.values ?? {};
   const base = emptyRepairBase(input);
 
@@ -183,7 +191,10 @@ export function buildHairTransplantRepairCompletionSummary(input: ConsultationCo
   const outcomeType = parseOutcome(v.repair_completion_outcome);
 
   const primaryFocus = readString(v.priority_focus);
-  const primaryConcern = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.consultation_priority, primaryFocus);
+  const primaryConcern = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.consultation_priority,
+    primaryFocus
+  );
 
   const concernKey = readString(v.primary_repair_concern).trim();
   const mainRepairConcernLabel = optionLabel(PRIMARY_CONCERN_OPTS, concernKey) || concernKey;
@@ -199,7 +210,10 @@ export function buildHairTransplantRepairCompletionSummary(input: ConsultationCo
   const surgeryosPlanningRecommended = readBoolean(v.surgeryos_planning_recommended);
 
   const ai = readString(v.ai_recommended_plan_summary).trim();
-  const planNarrative = [correctiveOptionsLabels.join("; "), ai].filter(Boolean).join("\n\n").trim();
+  const planNarrative = [correctiveOptionsLabels.join("; "), ai]
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
   const recommendedProcedure = planNarrative || "Repair options discussed — see structured note.";
 
   const urgency = readString(v.follow_up_urgency);
@@ -213,9 +227,12 @@ export function buildHairTransplantRepairCompletionSummary(input: ConsultationCo
   }
 
   const pathologyRecommended = outcomeType === "needs_blood_tests";
-  const pathologyReason = pathologyRecommended ? "Investigations / labs indicated before committing to a surgical plan." : "";
+  const pathologyReason = pathologyRecommended
+    ? "Investigations / labs indicated before committing to a surgical plan."
+    : "";
 
-  const followUpUrgencyLabel = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.urgency, urgency) || urgency;
+  const followUpUrgencyLabel =
+    labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.urgency, urgency) || urgency;
 
   const riskFlags = buildRiskFlagValues(v);
 
@@ -227,7 +244,8 @@ export function buildHairTransplantRepairCompletionSummary(input: ConsultationCo
     primaryConcern,
     diagnosisImpression,
     recommendedProcedure,
-    surgicalSuitability: outcomeType === "proceed_surgery" ? "suitable_with_caution" : "not_assessed",
+    surgicalSuitability:
+      outcomeType === "proceed_surgery" ? "suitable_with_caution" : "not_assessed",
     medicalSuitability: outcomeType === "medical_management" ? "suitable" : "not_assessed",
     pathologyRecommended,
     pathologyReason,

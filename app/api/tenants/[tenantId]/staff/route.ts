@@ -4,7 +4,10 @@
  */
 import { NextResponse } from "next/server";
 
-import { assertCrmTenantReadAllowed, assertCrmTenantStaffManageAllowed } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantReadAllowed,
+  assertCrmTenantStaffManageAllowed,
+} from "@/src/lib/crm/crmGate";
 import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 import { staffCreateBodySchema } from "@/src/lib/staff/staffApiSchemas";
 import { insertFiStaff, loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
@@ -32,7 +35,8 @@ function serializeStaff(row: Awaited<ReturnType<typeof loadAllStaffForTenant>>[n
 export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
-    if (!tenantId?.trim()) return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
+    if (!tenantId?.trim())
+      return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
 
     const adminKey = extractAdminKeyFromRequest(req);
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
@@ -47,7 +51,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
 export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
-    if (!tenantId?.trim()) return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
+    if (!tenantId?.trim())
+      return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
 
     const body = await req.json().catch(() => ({}));
     const adminKey = extractAdminKeyFromRequest(req, body);
@@ -64,7 +69,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       is_active: parsed.is_active,
       calendar_color: parsed.calendar_color?.trim() || null,
       fi_user_id:
-        parsed.fi_user_id === "" || parsed.fi_user_id == null ? null : String(parsed.fi_user_id).trim() || null,
+        parsed.fi_user_id === "" || parsed.fi_user_id == null
+          ? null
+          : String(parsed.fi_user_id).trim() || null,
     });
 
     return NextResponse.json({ ok: true, staff: serializeStaff(row) }, { status: 201 });

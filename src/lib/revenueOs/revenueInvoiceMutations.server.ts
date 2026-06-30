@@ -5,13 +5,24 @@ import { randomBytes } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
-import { readFiPaymentsEnabled, readFiPaymentProviderId } from "@/src/lib/payments/fiPaymentEnv.server";
+import {
+  readFiPaymentsEnabled,
+  readFiPaymentProviderId,
+} from "@/src/lib/payments/fiPaymentEnv.server";
 import { isFiStripeGatewayPaymentIntentDuplicateInsert } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { resolvePaymentProvider } from "@/src/lib/payments/providers/registry.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import { computeNextInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceMath";
-import type { FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import type {
+  FiInvoiceKind,
+  FiInvoiceRow,
+  FiInvoiceStatus,
+  FiPaymentRequestRow,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { resolveConsultationQuoteInvoiceSource } from "@/src/lib/revenueOs/consultationInvoiceAmountResolve";
 import { syncFinancialOsAfterInvoiceSettlement } from "@/src/lib/financialOs/financialOsPaymentSync.server";
 import { syncAccountsReceivableOnInvoiceChange } from "@/src/lib/financialOs/financialAccountsReceivable.server";
@@ -41,7 +52,11 @@ function assertUuid(id: string, label: string): string {
   return v;
 }
 
-async function syncArAfterInvoiceChangeBestEffort(tenantId: string, invoice: FiInvoiceRow, todayYmd?: string | null): Promise<void> {
+async function syncArAfterInvoiceChangeBestEffort(
+  tenantId: string,
+  invoice: FiInvoiceRow,
+  todayYmd?: string | null
+): Promise<void> {
   try {
     await syncAccountsReceivableOnInvoiceChange({
       tenantId,
@@ -53,7 +68,10 @@ async function syncArAfterInvoiceChangeBestEffort(tenantId: string, invoice: FiI
   }
 }
 
-async function loadInvoiceForTenant(tenantId: string, invoiceId: string): Promise<FiInvoiceRow | null> {
+async function loadInvoiceForTenant(
+  tenantId: string,
+  invoiceId: string
+): Promise<FiInvoiceRow | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_invoices")
@@ -77,7 +95,10 @@ async function patchInvoiceAfterPayment(
   if (!row) throw new Error("Invoice not found.");
   const ymd = todayYmd ?? new Date().toISOString().slice(0, 10);
   const baseStatus: FiInvoiceStatus = row.status === "draft" ? "awaiting_payment" : row.status;
-  const nextStatus = computeNextInvoiceStatus({ ...row, amount_paid_cents: nextPaid, status: baseStatus }, ymd);
+  const nextStatus = computeNextInvoiceStatus(
+    { ...row, amount_paid_cents: nextPaid, status: baseStatus },
+    ymd
+  );
   assertInvoiceTransitionAllowed(row.status, nextStatus, { paymentSettlement: true });
   const lifecyclePatch = buildInvoiceLifecyclePatch(
     { ...row, amount_paid_cents: nextPaid, status: baseStatus },
@@ -92,7 +113,13 @@ async function patchInvoiceAfterPayment(
     patch.issued_at = new Date().toISOString();
   }
   patch.sent_at = resolveInvoiceSentAtPatch(row.sent_at, nextStatus, row.issued_at);
-  const { data, error } = await supabase.from("fi_invoices").update(patch).eq("tenant_id", tenantId).eq("id", invoiceId).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_invoices")
+    .update(patch)
+    .eq("tenant_id", tenantId)
+    .eq("id", invoiceId)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapInvoiceRow(data as Record<string, unknown>);
 }
@@ -131,7 +158,10 @@ export async function createInvoiceFromConsultationQuote(args: {
     quoteSource.crmQuoteId?.trim() ||
     (() => {
       const raw = quoteRows?.[0]?.id;
-      return typeof raw === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw.trim())
+      return typeof raw === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          raw.trim()
+        )
         ? raw.trim()
         : null;
     })();
@@ -175,20 +205,26 @@ export async function createInvoiceFromConsultationQuote(args: {
       source: "consultation_quote",
       consultation_id: consultation.id,
       quote_snapshot: consultation.quote_data,
-      ...(crmQuoteId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(crmQuoteId)
+      ...(crmQuoteId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(crmQuoteId)
         ? { crm_quote_id: crmQuoteId }
         : {}),
     },
     created_by_fi_user_id: args.createdByFiUserId?.trim() || null,
   };
 
-  const { data: inv, error: ie } = await supabase.from("fi_invoices").insert(insert).select("*").single();
+  const { data: inv, error: ie } = await supabase
+    .from("fi_invoices")
+    .insert(insert)
+    .select("*")
+    .single();
   if (ie) throw new Error(ie.message);
 
   const invoice = mapInvoiceRow(inv as Record<string, unknown>);
 
   const lineDesc =
-    typeof consultation.quote_data?.session_size === "string" && consultation.quote_data.session_size.trim()
+    typeof consultation.quote_data?.session_size === "string" &&
+    consultation.quote_data.session_size.trim()
       ? `Quoted session: ${consultation.quote_data.session_size}`
       : "Consultation quote";
   const { error: li } = await supabase.from("fi_invoice_items").insert({
@@ -204,7 +240,10 @@ export async function createInvoiceFromConsultationQuote(args: {
   });
   if (li) throw new Error(li.message);
 
-  await appendInvoiceCreatedLedgerEntry({ invoice, createdByFiUserId: args.createdByFiUserId?.trim() || null });
+  await appendInvoiceCreatedLedgerEntry({
+    invoice,
+    createdByFiUserId: args.createdByFiUserId?.trim() || null,
+  });
 
   return invoice;
 }
@@ -232,7 +271,9 @@ async function loadActiveDepositRule(
     return !ruleProc || (proc != null && ruleProc.toLowerCase() === proc.toLowerCase());
   };
 
-  const clinicSpecific = rows.filter((r) => r.clinic_id && clinic && String(r.clinic_id) === clinic && matchesProcedure(r));
+  const clinicSpecific = rows.filter(
+    (r) => r.clinic_id && clinic && String(r.clinic_id) === clinic && matchesProcedure(r)
+  );
   const tenantWide = rows.filter((r) => !r.clinic_id && matchesProcedure(r));
   return clinicSpecific[0] ?? tenantWide[0] ?? rows.find(matchesProcedure) ?? null;
 }
@@ -248,7 +289,8 @@ function resolveDepositCentsFromRule(
   const kind = String(rule.rule_kind ?? "manual_only");
   if (kind === "fixed_cents") {
     const v = Number(rule.fixed_amount_cents ?? 0);
-    if (!Number.isFinite(v) || v <= 0) throw new Error("Deposit rule fixed_amount_cents is not set.");
+    if (!Number.isFinite(v) || v <= 0)
+      throw new Error("Deposit rule fixed_amount_cents is not set.");
     return Math.floor(v);
   }
   if (kind === "percent_of_procedure_fee") {
@@ -256,7 +298,8 @@ function resolveDepositCentsFromRule(
     if (base == null || !Number.isFinite(base) || base <= 0) {
       throw new Error("procedure_fee_estimate_cents is required for percent deposit rules.");
     }
-    const minPct = rule.minimum_deposit_percentage != null ? Number(rule.minimum_deposit_percentage) : null;
+    const minPct =
+      rule.minimum_deposit_percentage != null ? Number(rule.minimum_deposit_percentage) : null;
     const bp =
       minPct != null && Number.isFinite(minPct)
         ? Math.min(10_000, Math.max(0, Math.floor(minPct * 100)))
@@ -306,7 +349,11 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
       ? String((planRow as { planned_procedure_type: string }).planned_procedure_type)
       : null;
 
-  const rule = await loadActiveDepositRule(tid, args.clinicId?.trim() || row.clinic_id, procedureType);
+  const rule = await loadActiveDepositRule(
+    tid,
+    args.clinicId?.trim() || row.clinic_id,
+    procedureType
+  );
   const amount = resolveDepositCentsFromRule(rule, {
     explicitDepositCents: args.depositAmountCents ?? null,
     procedureFeeEstimateCents: args.procedureFeeEstimateCents ?? null,
@@ -326,7 +373,13 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
     deposit_due_reminder_days: [14, 7, 3],
     overdue_reminder_enabled: true,
   };
-  if (rule && Boolean((rule as { blocks_surgery_readiness_when_unpaid?: boolean }).blocks_surgery_readiness_when_unpaid)) {
+  if (
+    rule &&
+    Boolean(
+      (rule as { blocks_surgery_readiness_when_unpaid?: boolean })
+        .blocks_surgery_readiness_when_unpaid
+    )
+  ) {
     hints.blocks_surgery_readiness_when_unpaid = true;
   }
 
@@ -379,7 +432,10 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
   });
   if (li) throw new Error(li.message);
 
-  await appendInvoiceCreatedLedgerEntry({ invoice, createdByFiUserId: args.createdByFiUserId?.trim() || null });
+  await appendInvoiceCreatedLedgerEntry({
+    invoice,
+    createdByFiUserId: args.createdByFiUserId?.trim() || null,
+  });
 
   return invoice;
 }
@@ -396,7 +452,8 @@ export async function createBalanceInvoiceFromSurgeryCase(args: {
   const tid = assertUuid(args.tenantId, "tenantId");
   const caseId = assertUuid(args.caseId, "caseId");
   const amount = Math.max(0, Math.floor(args.balanceAmountCents));
-  if (!Number.isFinite(amount) || amount <= 0) throw new Error("balance_amount_cents must be a positive integer.");
+  if (!Number.isFinite(amount) || amount <= 0)
+    throw new Error("balance_amount_cents must be a positive integer.");
 
   const supabase = supabaseAdmin();
   const { data: c, error } = await supabase
@@ -462,7 +519,10 @@ export async function createBalanceInvoiceFromSurgeryCase(args: {
   });
   if (li) throw new Error(li.message);
 
-  await appendInvoiceCreatedLedgerEntry({ invoice, createdByFiUserId: args.createdByFiUserId?.trim() || null });
+  await appendInvoiceCreatedLedgerEntry({
+    invoice,
+    createdByFiUserId: args.createdByFiUserId?.trim() || null,
+  });
 
   return invoice;
 }
@@ -481,7 +541,8 @@ export async function createPaymentRequestForInvoice(args: {
   const iid = assertUuid(args.invoiceId, "invoiceId");
   const inv = await loadInvoiceForTenant(tid, iid);
   if (!inv) throw new Error("Invoice not found.");
-  if (!isInvoiceOpenForCollection(inv.status)) throw new Error("Invoice is not open for payment requests.");
+  if (!isInvoiceOpenForCollection(inv.status))
+    throw new Error("Invoice is not open for payment requests.");
   const amt = Math.max(0, Math.floor(args.amountCents));
   if (!amt) throw new Error("amount_cents must be positive.");
   const bal = invoiceBalanceDueCents(inv);
@@ -603,7 +664,10 @@ export async function createPaymentRequestForInvoice(args: {
   return out;
 }
 
-async function markInvoiceSentWhenPaymentRequestDispatched(tenantId: string, inv: FiInvoiceRow): Promise<void> {
+async function markInvoiceSentWhenPaymentRequestDispatched(
+  tenantId: string,
+  inv: FiInvoiceRow
+): Promise<void> {
   const supabase = supabaseAdmin();
   const now = new Date().toISOString();
   const ymd = now.slice(0, 10);
@@ -659,7 +723,12 @@ export async function updateInvoiceDueDateForTenant(args: {
       ...buildInvoiceLifecyclePatch(
         { ...inv, due_date: due },
         computeNextInvoiceStatus(
-          { status: inv.status, total_cents: inv.total_cents, amount_paid_cents: inv.amount_paid_cents, due_date: due },
+          {
+            status: inv.status,
+            total_cents: inv.total_cents,
+            amount_paid_cents: inv.amount_paid_cents,
+            due_date: due,
+          },
           todayYmd
         ),
         todayYmd
@@ -673,19 +742,29 @@ export async function updateInvoiceDueDateForTenant(args: {
   return mapInvoiceRow(data as Record<string, unknown>);
 }
 
-export async function resendOpenPaymentRequest(args: { tenantId: string; paymentRequestId: string }): Promise<FiPaymentRequestRow> {
+export async function resendOpenPaymentRequest(args: {
+  tenantId: string;
+  paymentRequestId: string;
+}): Promise<FiPaymentRequestRow> {
   const tid = assertUuid(args.tenantId, "tenantId");
   const pid = assertUuid(args.paymentRequestId, "paymentRequestId");
   const supabase = supabaseAdmin();
-  const { data: prRaw, error } = await supabase.from("fi_payment_requests").select("*").eq("tenant_id", tid).eq("id", pid).maybeSingle();
+  const { data: prRaw, error } = await supabase
+    .from("fi_payment_requests")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", pid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!prRaw) throw new Error("Payment request not found.");
   let pr = mapPaymentRequestRow(prRaw as Record<string, unknown>);
   const inv = await loadInvoiceForTenant(tid, pr.invoice_id);
   if (!inv) throw new Error("Invoice not found.");
-  if (!isInvoiceOpenForCollection(inv.status)) throw new Error("Invoice is closed — cancel outstanding links instead.");
+  if (!isInvoiceOpenForCollection(inv.status))
+    throw new Error("Invoice is closed — cancel outstanding links instead.");
   if (invoiceBalanceDueCents(inv) <= 0) throw new Error("Invoice is already settled.");
-  if (!["draft", "sent", "viewed"].includes(pr.status)) throw new Error("Only open payment requests can be resent.");
+  if (!["draft", "sent", "viewed"].includes(pr.status))
+    throw new Error("Only open payment requests can be resent.");
 
   const stripeActive = readFiPaymentsEnabled() && readFiPaymentProviderId() === "stripe";
   const nowIso = new Date().toISOString();
@@ -760,7 +839,8 @@ export async function markInvoiceManuallyPaid(args: {
   const iid = assertUuid(args.invoiceId, "invoiceId");
   const inv = await loadInvoiceForTenant(tid, iid);
   if (!inv) throw new Error("Invoice not found.");
-  if (inv.status === "cancelled" || inv.status === "refunded") throw new Error("Invoice cannot be marked paid.");
+  if (inv.status === "cancelled" || inv.status === "refunded")
+    throw new Error("Invoice cannot be marked paid.");
   const bal = invoiceBalanceDueCents(inv);
   if (bal <= 0) return inv;
 
@@ -871,7 +951,8 @@ export async function cancelInvoice(args: {
   const supabase = supabaseAdmin();
   const inv = await loadInvoiceForTenant(tid, iid);
   if (!inv) throw new Error("Invoice not found.");
-  if (inv.status === "paid" || inv.status === "refunded") throw new Error("Cannot cancel a paid or refunded invoice.");
+  if (inv.status === "paid" || inv.status === "refunded")
+    throw new Error("Cannot cancel a paid or refunded invoice.");
   assertInvoiceTransitionAllowed(inv.status, "cancelled");
   const { data, error } = await supabase
     .from("fi_invoices")
@@ -926,7 +1007,10 @@ export async function recordGatewayPaymentSuccess(args: {
       try {
         await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
         await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
-        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
+          tenantId: tid,
+          invoice: current,
+        });
         await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
       } catch {
         /* FinancialOS best-effort */
@@ -935,7 +1019,8 @@ export async function recordGatewayPaymentSuccess(args: {
     }
   }
 
-  let expectedAmount = args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : payAmt;
+  let expectedAmount =
+    args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : payAmt;
   const prId = args.paymentRequestId?.trim() || null;
   if (prId) {
     const { data: prRow } = await supabase
@@ -947,7 +1032,11 @@ export async function recordGatewayPaymentSuccess(args: {
     if (prRow) {
       const prAmt = Math.max(
         0,
-        Number((prRow as { total_cents?: unknown }).total_cents ?? (prRow as { amount_cents?: unknown }).amount_cents ?? 0)
+        Number(
+          (prRow as { total_cents?: unknown }).total_cents ??
+            (prRow as { amount_cents?: unknown }).amount_cents ??
+            0
+        )
       );
       if (prAmt > 0) expectedAmount = prAmt;
     }
@@ -1006,7 +1095,10 @@ export async function recordGatewayPaymentSuccess(args: {
       try {
         await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
         await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
-        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
+          tenantId: tid,
+          invoice: current,
+        });
         await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
       } catch {
         /* FinancialOS best-effort */
@@ -1076,7 +1168,10 @@ export async function recordGatewayPaymentSuccess(args: {
   try {
     await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
     await syncArAfterInvoiceChangeBestEffort(tid, updated, args.todayYmd ?? null);
-    await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
+    await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
+      tenantId: tid,
+      invoice: updated,
+    });
     await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: updated });
   } catch {
     /* FinancialOS best-effort */

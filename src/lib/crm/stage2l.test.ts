@@ -45,7 +45,8 @@ function leadBase(p: Partial<FiCrmLeadRow> & Pick<FiCrmLeadRow, "id">): FiCrmLea
 describe("Stage 2L — converted guard (pure)", () => {
   it("blocks when converted_at is set", () => {
     assert.throws(
-      () => assertLeadNotYetConverted(leadBase({ id: LID, converted_at: "2026-02-01T00:00:00.000Z" })),
+      () =>
+        assertLeadNotYetConverted(leadBase({ id: LID, converted_at: "2026-02-01T00:00:00.000Z" })),
       /already been converted/
     );
   });
@@ -74,7 +75,8 @@ describe("Stage 2L — conversion note (pure)", () => {
 describe("Stage 2L — identity collision (pure)", () => {
   it("throws when multiple distinct persons in union", () => {
     assert.throws(
-      () => assertIdentityMatchesLeadPersonOnly(PID, [PID, "dddddddd-dddd-4ddd-8ddd-dddddddddddd"], []),
+      () =>
+        assertIdentityMatchesLeadPersonOnly(PID, [PID, "dddddddd-dddd-4ddd-8ddd-dddddddddddd"], []),
       /Multiple person records/
     );
   });
@@ -136,7 +138,12 @@ describe("Stage 2L — activity detail shape (ids only)", () => {
       case_id: "ffffffff-ffff-4fff-8fff-ffffffffffff",
       conversion_mode: "patient_linked",
     };
-    assert.deepEqual(Object.keys(detail).sort(), ["case_id", "conversion_mode", "patient_id", "person_id"]);
+    assert.deepEqual(Object.keys(detail).sort(), [
+      "case_id",
+      "conversion_mode",
+      "patient_id",
+      "person_id",
+    ]);
   });
 });
 
@@ -146,7 +153,11 @@ describe("Stage 2L — Zod convert body", () => {
   });
 
   it("accepts seedCase with case fields", () => {
-    const v = crmConvertLeadBodySchema.parse({ seedCase: true, caseType: "consult", treatmentInterest: " fue " });
+    const v = crmConvertLeadBodySchema.parse({
+      seedCase: true,
+      caseType: "consult",
+      treatmentInterest: " fue ",
+    });
     assert.equal(v.seedCase, true);
     assert.equal(v.caseType, "consult");
   });

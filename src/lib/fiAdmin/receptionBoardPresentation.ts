@@ -81,7 +81,9 @@ function plural(count: number, singular: string, pluralForm?: string): string {
 }
 
 function bookingStatusNorm(status: string): string {
-  return String(status ?? "").trim().toLowerCase();
+  return String(status ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function isActiveColumn(col: ReceptionBoardCard["receptionColumn"]): boolean {
@@ -114,7 +116,11 @@ function missingItemsForCard(card: ReceptionBoardCard, nowMs: number): string[] 
   if (card.receptionColumn === "expected" && isOverdueExpected(card, nowMs)) {
     items.push("Check in overdue");
   }
-  if (card.bookingType.toLowerCase().includes("surgery") && !card.metadata?.case_id && !card.metadata?.fi_case_id) {
+  if (
+    card.bookingType.toLowerCase().includes("surgery") &&
+    !card.metadata?.case_id &&
+    !card.metadata?.fi_case_id
+  ) {
     items.push("Procedure preparation incomplete");
   }
 
@@ -151,7 +157,10 @@ export const RECEPTION_FLOW_LANES: readonly ReceptionFlowLane[] = [
   { id: "completed", label: "Completed" },
 ] as const;
 
-export function receptionFlowLaneForCard(card: ReceptionBoardCard, nowMs: number): ReceptionFlowLaneId | null {
+export function receptionFlowLaneForCard(
+  card: ReceptionBoardCard,
+  nowMs: number
+): ReceptionFlowLaneId | null {
   switch (card.receptionColumn) {
     case "expected":
       return isOverdueExpected(card, nowMs) ? "waiting" : "arriving_soon";
@@ -173,18 +182,24 @@ export function buildReceptionSnapshotCards(
   base: string,
   cards: readonly ReceptionBoardCard[],
   paymentCommercialKpis: TenantPaymentCommercialKpis,
-  nowMs = Date.now(),
+  nowMs = Date.now()
 ): ReceptionSnapshotCard[] {
   const expected = cards.filter((c) => c.receptionColumn === "expected").length;
   const checkedIn = cards.filter(
-    (c) => c.receptionColumn === "arrived" || c.receptionColumn === "in_consultation" || c.receptionColumn === "in_treatment",
+    (c) =>
+      c.receptionColumn === "arrived" ||
+      c.receptionColumn === "in_consultation" ||
+      c.receptionColumn === "in_treatment"
   ).length;
   const waiting = cards.filter((c) => c.receptionColumn === "arrived").length;
   const inClinical = cards.filter(
-    (c) => c.receptionColumn === "in_consultation" || c.receptionColumn === "in_treatment",
+    (c) => c.receptionColumn === "in_consultation" || c.receptionColumn === "in_treatment"
   ).length;
-  const paymentsDue = paymentCommercialKpis.depositsDueCount + paymentCommercialKpis.overduePaymentsCount;
-  const formsMissing = cards.filter((c) => missingItemsForCard(c, nowMs).some((m) => m.includes("preparation") || m.includes("profile"))).length;
+  const paymentsDue =
+    paymentCommercialKpis.depositsDueCount + paymentCommercialKpis.overduePaymentsCount;
+  const formsMissing = cards.filter((c) =>
+    missingItemsForCard(c, nowMs).some((m) => m.includes("preparation") || m.includes("profile"))
+  ).length;
 
   return [
     {
@@ -243,16 +258,22 @@ export function buildReceptionPriorities(
   paymentCommercialKpis: TenantPaymentCommercialKpis,
   actionCentre: TenantActionCentre,
   maxItems = 5,
-  nowMs = Date.now(),
+  nowMs = Date.now()
 ): ReceptionPriorityItem[] {
-  const overdueCheckIn = cards.filter((c) => c.receptionColumn === "expected" && isOverdueExpected(c, nowMs)).length;
+  const overdueCheckIn = cards.filter(
+    (c) => c.receptionColumn === "expected" && isOverdueExpected(c, nowMs)
+  ).length;
   const waitingToCheckIn = cards.filter(
-    (c) => c.receptionColumn === "expected" && !isOverdueExpected(c, nowMs),
+    (c) => c.receptionColumn === "expected" && !isOverdueExpected(c, nowMs)
   ).length;
   const formsBlockers = cards.filter((c) =>
-    missingItemsForCard(c, nowMs).some((m) => m.includes("preparation") || m.includes("profile") || m.includes("confirmed")),
+    missingItemsForCard(c, nowMs).some(
+      (m) => m.includes("preparation") || m.includes("profile") || m.includes("confirmed")
+    )
   ).length;
-  const roomNeeded = cards.filter((c) => isActiveColumn(c.receptionColumn) && !c.roomLabel?.trim()).length;
+  const roomNeeded = cards.filter(
+    (c) => isActiveColumn(c.receptionColumn) && !c.roomLabel?.trim()
+  ).length;
   const handoffRequired = cards.filter((c) => c.receptionColumn === "in_consultation").length;
   const paymentsBeforeTreatment =
     paymentCommercialKpis.depositsDueCount +
@@ -283,7 +304,8 @@ export function buildReceptionPriorities(
       count: formsBlockers,
       priorityScore: 88,
       severity: "warning",
-      headline: (n) => plural(n, "patient", "patients") + " have missing forms or details before treatment",
+      headline: (n) =>
+        plural(n, "patient", "patients") + " have missing forms or details before treatment",
       detail: "Complete intake, consents, or patient profile links before clinical handoff.",
     },
     {
@@ -291,7 +313,8 @@ export function buildReceptionPriorities(
       count: roomNeeded,
       priorityScore: 82,
       severity: "warning",
-      headline: (n) => plural(n, "room assignment", "room assignments") + " needed for on-site patients",
+      headline: (n) =>
+        plural(n, "room assignment", "room assignments") + " needed for on-site patients",
       detail: "Assign rooms before moving patients to consultation or treatment.",
       href: `${base}/calendar`,
     },
@@ -300,7 +323,8 @@ export function buildReceptionPriorities(
       count: handoffRequired,
       priorityScore: 75,
       severity: "info",
-      headline: (n) => plural(n, "patient handoff", "patient handoffs") + " required after consultation",
+      headline: (n) =>
+        plural(n, "patient handoff", "patient handoffs") + " required after consultation",
       detail: "Move patients to treatment or mark complete when consultation finishes.",
     },
     {
@@ -331,7 +355,9 @@ export function hasUrgentReceptionPriorities(items: readonly ReceptionPriorityIt
   return items.some((i) => i.severity === "critical" || i.severity === "warning");
 }
 
-export function receptionAttentionSeverityClass(severity: ReceptionPriorityItem["severity"]): string {
+export function receptionAttentionSeverityClass(
+  severity: ReceptionPriorityItem["severity"]
+): string {
   switch (severity) {
     case "critical":
       return "border-rose-500/25 bg-rose-500/[0.06]";
@@ -344,7 +370,7 @@ export function receptionAttentionSeverityClass(severity: ReceptionPriorityItem[
 
 export function buildReceptionFlowBoardItems(
   cards: readonly ReceptionBoardCard[],
-  nowMs = Date.now(),
+  nowMs = Date.now()
 ): Record<ReceptionFlowLaneId, ReceptionFlowBoardItem[]> {
   const lanes: Record<ReceptionFlowLaneId, ReceptionFlowBoardItem[]> = {
     arriving_soon: [],
@@ -378,14 +404,17 @@ export function buildReceptionReadinessBlockers(
   base: string,
   cards: readonly ReceptionBoardCard[],
   paymentCommercialKpis: TenantPaymentCommercialKpis,
-  nowMs = Date.now(),
+  nowMs = Date.now()
 ): ReceptionReadinessBlocker[] {
   const intakeIncomplete = cards.filter((c) =>
-    missingItemsForCard(c, nowMs).some((m) => m.includes("profile") || m.includes("preparation")),
+    missingItemsForCard(c, nowMs).some((m) => m.includes("profile") || m.includes("preparation"))
   ).length;
-  const arrivalUnconfirmed = cards.filter((c) => bookingStatusNorm(c.bookingStatus) === "scheduled").length;
+  const arrivalUnconfirmed = cards.filter(
+    (c) => bookingStatusNorm(c.bookingStatus) === "scheduled"
+  ).length;
   const contactMissing = cards.filter((c) => !c.patientId && c.leadId).length;
-  const paymentsDue = paymentCommercialKpis.depositsDueCount + paymentCommercialKpis.overduePaymentsCount;
+  const paymentsDue =
+    paymentCommercialKpis.depositsDueCount + paymentCommercialKpis.overduePaymentsCount;
 
   const items: ReceptionReadinessBlocker[] = [
     {
@@ -423,10 +452,16 @@ export function buildReceptionReadinessBlockers(
   return items.filter((i) => i.count > 0).slice(0, 5);
 }
 
-export function buildReceptionHandoffSummary(cards: readonly ReceptionBoardCard[]): ReceptionHandoffSummary {
-  const active = cards.filter((c) => isActiveColumn(c.receptionColumn) || c.receptionColumn === "expected");
+export function buildReceptionHandoffSummary(
+  cards: readonly ReceptionBoardCard[]
+): ReceptionHandoffSummary {
+  const active = cards.filter(
+    (c) => isActiveColumn(c.receptionColumn) || c.receptionColumn === "expected"
+  );
   const roomAssigned = active.filter((c) => c.roomLabel?.trim()).length;
-  const roomMissing = active.filter((c) => !c.roomLabel?.trim() && isActiveColumn(c.receptionColumn)).length;
+  const roomMissing = active.filter(
+    (c) => !c.roomLabel?.trim() && isActiveColumn(c.receptionColumn)
+  ).length;
   const readyForClinical = cards.filter((c) => c.receptionColumn === "arrived").length;
   const waitingForHandoff = cards.filter((c) => c.receptionColumn === "in_consultation").length;
   const completedReadyToLeave = cards.filter((c) => c.receptionColumn === "complete").length;
@@ -444,7 +479,7 @@ export function buildReceptionAppointmentList(
   base: string,
   cards: readonly ReceptionBoardCard[],
   tz: string,
-  maxItems = 12,
+  maxItems = 12
 ): ReceptionAppointmentListItem[] {
   return cards
     .filter((c) => c.receptionColumn !== "cancelled" && c.receptionColumn !== "no_show")
@@ -461,12 +496,16 @@ export function buildReceptionAppointmentList(
     .slice(0, maxItems);
 }
 
-export function receptionFlowBoardHasPatients(lanes: Record<ReceptionFlowLaneId, ReceptionFlowBoardItem[]>): boolean {
+export function receptionFlowBoardHasPatients(
+  lanes: Record<ReceptionFlowLaneId, ReceptionFlowBoardItem[]>
+): boolean {
   return RECEPTION_FLOW_LANES.some((lane) => lanes[lane.id].length > 0);
 }
 
 /** Column counts for diagnostics — raw booking reception columns. */
-export function receptionColumnCounts(cards: readonly ReceptionBoardCard[]): Record<string, number> {
+export function receptionColumnCounts(
+  cards: readonly ReceptionBoardCard[]
+): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const c of cards) {
     counts[c.receptionColumn] = (counts[c.receptionColumn] ?? 0) + 1;
@@ -476,5 +515,10 @@ export function receptionColumnCounts(cards: readonly ReceptionBoardCard[]): Rec
 
 export type ReceptionBoardPresentationInput = Pick<
   TenantOperationalDashboard,
-  "receptionBoard" | "paymentCommercialKpis" | "actionCentre" | "operationalDay" | "tenantId" | "tenantName"
+  | "receptionBoard"
+  | "paymentCommercialKpis"
+  | "actionCentre"
+  | "operationalDay"
+  | "tenantId"
+  | "tenantName"
 >;

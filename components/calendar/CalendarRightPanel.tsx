@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Search } from "lucide-react";
+import {
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  PanelRightClose,
+  PanelRightOpen,
+  Search,
+} from "lucide-react";
 
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
 import { calendarSidebarsCollapsedByDefault } from "@/lib/calendar/calendarResponsive";
@@ -52,7 +59,11 @@ export function computeCalendarDailyStats(
     if (startMs == null) continue;
     const key = calendarDateStringFromInstant(new Date(startMs), tz);
     if (key !== dayKey) continue;
-    if (b.booking_status === "cancelled" || b.booking_status === "completed" || b.booking_status === "no_show") {
+    if (
+      b.booking_status === "cancelled" ||
+      b.booking_status === "completed" ||
+      b.booking_status === "no_show"
+    ) {
       continue;
     }
 
@@ -188,7 +199,10 @@ export function CalendarRightPanel({
 
   return (
     <aside
-      className={cn("flex w-[17rem] shrink-0 flex-col border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md", className)}
+      className={cn(
+        "flex w-[17rem] shrink-0 flex-col border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md",
+        className
+      )}
       aria-label="Calendar insights panel"
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
@@ -198,7 +212,9 @@ export function CalendarRightPanel({
             onClick={() => setTab("search")}
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-              tab === "search" ? "bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg shadow-black/40" : "text-slate-500 hover:text-slate-200"
+              tab === "search"
+                ? "bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg shadow-black/40"
+                : "text-slate-500 hover:text-slate-200"
             )}
           >
             Search
@@ -208,7 +224,9 @@ export function CalendarRightPanel({
             onClick={() => setTab("stats")}
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-              tab === "stats" ? "bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg shadow-black/40" : "text-slate-500 hover:text-slate-200"
+              tab === "stats"
+                ? "bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg shadow-black/40"
+                : "text-slate-500 hover:text-slate-200"
             )}
           >
             Stats
@@ -264,7 +282,9 @@ export function CalendarRightPanel({
 
             {quickMatches.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Matches</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  Matches
+                </p>
                 <ul className="space-y-1.5">
                   {quickMatches.map((b) => (
                     <li
@@ -286,8 +306,12 @@ export function CalendarRightPanel({
         ) : (
           <div className="space-y-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Today</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-100">{stats.total}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                Today
+              </p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-100">
+                {stats.total}
+              </p>
               <p className="text-xs text-slate-500">appointments scheduled</p>
             </div>
 
@@ -304,8 +328,12 @@ export function CalendarRightPanel({
                   key={item.label}
                   className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5"
                 >
-                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</dt>
-                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-slate-100">{item.value}</dd>
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                    {item.label}
+                  </dt>
+                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-slate-100">
+                    {item.value}
+                  </dd>
                 </div>
               ))}
             </dl>

@@ -5,7 +5,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import type { InternalIntelligenceQueuedEnvelopeSummary } from "./internalBusQueue";
-import { isFiIntelligenceEventLogPersistEnabled, type PersistentEventLogEnvOptions } from "./persistentEventLogEnv";
+import {
+  isFiIntelligenceEventLogPersistEnabled,
+  type PersistentEventLogEnvOptions,
+} from "./persistentEventLogEnv";
 import {
   sanitizeIntelligenceEventForPersistence,
   sanitizeIntelligencePayloadKeysForPersistence,
@@ -47,7 +50,10 @@ function normalizeWarnings(w?: string[]): string[] {
   return w.map((x) => (x.length > 500 ? x.slice(0, 500) : x));
 }
 
-function mergePayloadSummary(base: Record<string, unknown>, extra?: Record<string, unknown>): Record<string, unknown> {
+function mergePayloadSummary(
+  base: Record<string, unknown>,
+  extra?: Record<string, unknown>
+): Record<string, unknown> {
   if (!extra) return base;
   return { ...base, ...extra };
 }

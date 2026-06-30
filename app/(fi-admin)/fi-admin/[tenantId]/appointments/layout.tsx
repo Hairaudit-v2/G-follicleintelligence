@@ -9,7 +9,10 @@ type AppointmentsShellLayoutProps = {
 };
 
 /** Auth gate; slide-over provider is mounted on the page with booking context. */
-export default async function AppointmentsShellLayout({ children, params }: AppointmentsShellLayoutProps) {
+export default async function AppointmentsShellLayout({
+  children,
+  params,
+}: AppointmentsShellLayoutProps) {
   const { tenantId } = await params;
   await getClinicFloorPageSession(tenantId);
   return children;

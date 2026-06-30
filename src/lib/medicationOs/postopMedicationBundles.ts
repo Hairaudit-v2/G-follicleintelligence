@@ -3,11 +3,21 @@
  * Canonical codes align with `fi_medication_os_canonical` seed in `20260719120001_fi_medication_os_v1.sql`.
  */
 import { normaliseTherapyPlanItems } from "./medicationOsMutationPolicy";
-import type { DraftTherapyPlanItemInput, PlanItemRole, PlanSource, PlanType } from "./medicationOsTypes";
+import type {
+  DraftTherapyPlanItemInput,
+  PlanItemRole,
+  PlanSource,
+  PlanType,
+} from "./medicationOsTypes";
 
 /** Seeded tenant canonical codes for post-op categories (not `postop.*` design aliases). */
-export const SURGERY_POSTOP_BUNDLE_V1_CANONICAL_CODES = ["antibiotics", "prednisolone", "pain_medication"] as const;
-export type SurgeryPostopBundleV1CanonicalCode = (typeof SURGERY_POSTOP_BUNDLE_V1_CANONICAL_CODES)[number];
+export const SURGERY_POSTOP_BUNDLE_V1_CANONICAL_CODES = [
+  "antibiotics",
+  "prednisolone",
+  "pain_medication",
+] as const;
+export type SurgeryPostopBundleV1CanonicalCode =
+  (typeof SURGERY_POSTOP_BUNDLE_V1_CANONICAL_CODES)[number];
 
 export const SURGERY_POSTOP_BUNDLE_PLAN_TITLE = "Post-operative medication plan";
 
@@ -31,38 +41,39 @@ export type PostopMedicationBundleTemplateLine = {
  * Default v1 lines: class-level placeholders only — no named controlled drugs.
  * Dosing is intentionally non-specific; agents and doses are chosen in DoctorOS / clinic protocol.
  */
-export const DEFAULT_SURGERY_POSTOP_MEDICATION_BUNDLE_V1: readonly PostopMedicationBundleTemplateLine[] = [
-  {
-    category: "antibiotics",
-    canonical_code: "antibiotics",
-    role: "course",
-    day_offset_start: 0,
-    day_offset_end: 7,
-    dosing_summary:
-      "Antimicrobial prophylaxis per local protocol; specific agent, dose, and duration to be confirmed by the prescriber.",
-    metadata: { generic_class: "antibiotic", agent_specificity: "class_level" },
-  },
-  {
-    category: "prednisolone",
-    canonical_code: "prednisolone",
-    role: "taper",
-    day_offset_start: 0,
-    day_offset_end: 5,
-    dosing_summary:
-      "Oral corticosteroid taper per local post-operative protocol; starting dose and schedule to be set by the prescriber.",
-    metadata: { agent_specificity: "class_level" },
-  },
-  {
-    category: "pain_medication",
-    canonical_code: "pain_medication",
-    role: "prn",
-    day_offset_start: 0,
-    day_offset_end: 14,
-    dosing_summary:
-      "Analgesia as required per local protocol; specific agents and maximum daily limits per prescriber and jurisdiction.",
-    metadata: { generic_class: "analgesic", agent_specificity: "class_level" },
-  },
-] as const;
+export const DEFAULT_SURGERY_POSTOP_MEDICATION_BUNDLE_V1: readonly PostopMedicationBundleTemplateLine[] =
+  [
+    {
+      category: "antibiotics",
+      canonical_code: "antibiotics",
+      role: "course",
+      day_offset_start: 0,
+      day_offset_end: 7,
+      dosing_summary:
+        "Antimicrobial prophylaxis per local protocol; specific agent, dose, and duration to be confirmed by the prescriber.",
+      metadata: { generic_class: "antibiotic", agent_specificity: "class_level" },
+    },
+    {
+      category: "prednisolone",
+      canonical_code: "prednisolone",
+      role: "taper",
+      day_offset_start: 0,
+      day_offset_end: 5,
+      dosing_summary:
+        "Oral corticosteroid taper per local post-operative protocol; starting dose and schedule to be set by the prescriber.",
+      metadata: { agent_specificity: "class_level" },
+    },
+    {
+      category: "pain_medication",
+      canonical_code: "pain_medication",
+      role: "prn",
+      day_offset_start: 0,
+      day_offset_end: 14,
+      dosing_summary:
+        "Analgesia as required per local protocol; specific agents and maximum daily limits per prescriber and jurisdiction.",
+      metadata: { generic_class: "analgesic", agent_specificity: "class_level" },
+    },
+  ] as const;
 
 export function postopBundleTemplateLinesToDraftItems(
   lines: readonly PostopMedicationBundleTemplateLine[] = DEFAULT_SURGERY_POSTOP_MEDICATION_BUNDLE_V1
@@ -79,7 +90,9 @@ export function postopBundleTemplateLinesToDraftItems(
 }
 
 /** All human-readable strings in the bundle (for safety tests: no named CD agents). */
-export function collectPostopBundleTemplateText(lines: readonly PostopMedicationBundleTemplateLine[]): string[] {
+export function collectPostopBundleTemplateText(
+  lines: readonly PostopMedicationBundleTemplateLine[]
+): string[] {
   const out: string[] = [];
   for (const line of lines) {
     out.push(line.dosing_summary);

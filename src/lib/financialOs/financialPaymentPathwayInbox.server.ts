@@ -64,7 +64,10 @@ function mapTaskRow(raw: Record<string, unknown>): FinancialPaymentPathwayTaskRe
   };
 }
 
-async function loadPatientLabels(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
+async function loadPatientLabels(
+  tenantId: string,
+  patientIds: string[]
+): Promise<Map<string, string>> {
   const ids = [...new Set(patientIds.filter(Boolean))];
   if (!ids.length) return new Map();
   const supabase = supabaseAdmin();
@@ -75,15 +78,23 @@ async function loadPatientLabels(tenantId: string, patientIds: string[]): Promis
     .in("id", ids);
   if (error) throw new Error(error.message);
 
-  const personIds = [...new Set((data ?? []).map((r) => String((r as { person_id: string }).person_id)))];
+  const personIds = [
+    ...new Set((data ?? []).map((r) => String((r as { person_id: string }).person_id))),
+  ];
   const personMeta = new Map<string, Record<string, unknown>>();
   if (personIds.length) {
-    const { data: persons, error: pe } = await supabase.from("fi_persons").select("id, metadata").in("id", personIds);
+    const { data: persons, error: pe } = await supabase
+      .from("fi_persons")
+      .select("id, metadata")
+      .in("id", personIds);
     if (pe) throw new Error(pe.message);
     for (const row of persons ?? []) {
       const id = String((row as { id: string }).id);
       const m = (row as { metadata: unknown }).metadata;
-      personMeta.set(id, m && typeof m === "object" && !Array.isArray(m) ? (m as Record<string, unknown>) : {});
+      personMeta.set(
+        id,
+        m && typeof m === "object" && !Array.isArray(m) ? (m as Record<string, unknown>) : {}
+      );
     }
   }
 
@@ -154,11 +165,26 @@ async function loadPathwayTypesForTasks(
   return out;
 }
 
-async function enrichInboxRows(tenantId: string, tasks: FinancialPaymentPathwayTaskRecord[]): Promise<PaymentPathwayInboxRow[]> {
-  const pathwayMeta = await loadPathwayTypesForTasks(tenantId, tasks.map((t) => t.payment_pathway_id));
-  const patientLabels = await loadPatientLabels(tenantId, tasks.map((t) => t.patient_id ?? ""));
-  const caseLabels = await loadCaseLabels(tenantId, tasks.map((t) => t.case_id ?? ""));
-  const userEmails = await loadUserEmails(tenantId, tasks.map((t) => t.assigned_to ?? ""));
+async function enrichInboxRows(
+  tenantId: string,
+  tasks: FinancialPaymentPathwayTaskRecord[]
+): Promise<PaymentPathwayInboxRow[]> {
+  const pathwayMeta = await loadPathwayTypesForTasks(
+    tenantId,
+    tasks.map((t) => t.payment_pathway_id)
+  );
+  const patientLabels = await loadPatientLabels(
+    tenantId,
+    tasks.map((t) => t.patient_id ?? "")
+  );
+  const caseLabels = await loadCaseLabels(
+    tenantId,
+    tasks.map((t) => t.case_id ?? "")
+  );
+  const userEmails = await loadUserEmails(
+    tenantId,
+    tasks.map((t) => t.assigned_to ?? "")
+  );
 
   return tasks.map((task) => {
     const pathway = pathwayMeta.get(task.payment_pathway_id);
@@ -166,9 +192,11 @@ async function enrichInboxRows(tenantId: string, tasks: FinancialPaymentPathwayT
       ...task,
       pathway_type: pathway?.pathway_type ?? "manual",
       pathway_status: pathway?.status ?? "selected",
-      patient_label: task.patient_id ? patientLabels.get(task.patient_id) ?? task.patient_id.slice(0, 8) : null,
-      case_label: task.case_id ? caseLabels.get(task.case_id) ?? task.case_id.slice(0, 8) : null,
-      assigned_to_email: task.assigned_to ? userEmails.get(task.assigned_to) ?? null : null,
+      patient_label: task.patient_id
+        ? (patientLabels.get(task.patient_id) ?? task.patient_id.slice(0, 8))
+        : null,
+      case_label: task.case_id ? (caseLabels.get(task.case_id) ?? task.case_id.slice(0, 8)) : null,
+      assigned_to_email: task.assigned_to ? (userEmails.get(task.assigned_to) ?? null) : null,
     };
   });
 }
@@ -183,7 +211,12 @@ export async function loadPaymentPathwayInbox(
 ): Promise<PaymentPathwayInboxRow[]> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
-  let q = supabase.from("fi_payment_pathway_tasks").select(SELECT_COLUMNS).eq("tenant_id", tid).order("created_at", { ascending: false }).limit(limit);
+  let q = supabase
+    .from("fi_payment_pathway_tasks")
+    .select(SELECT_COLUMNS)
+    .eq("tenant_id", tid)
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (filters.status && filters.status !== "all") {
     q = q.eq("status", filters.status);
@@ -211,7 +244,9 @@ export async function loadPaymentPathwayInbox(
 /**
  * Auto-creates inbox task when a non-standard payment pathway is created.
  */
-export async function createPaymentPathwayTaskForPathway(pathway: FinancialPaymentPathwayRecord): Promise<FinancialPaymentPathwayTaskRecord | null> {
+export async function createPaymentPathwayTaskForPathway(
+  pathway: FinancialPaymentPathwayRecord
+): Promise<FinancialPaymentPathwayTaskRecord | null> {
   const taskType = mapPathwayTypeToTaskType(pathway.pathway_type);
   if (!taskType) return null;
 
@@ -278,7 +313,8 @@ export async function addPaymentPathwayTaskNote(args: {
     .eq("id", args.taskId.trim())
     .maybeSingle();
   if (fetchErr) throw new Error(fetchErr.message);
-  const currentMeta = ((existing as { metadata?: Record<string, unknown> } | null)?.metadata ?? {}) as Record<string, unknown>;
+  const currentMeta = ((existing as { metadata?: Record<string, unknown> } | null)?.metadata ??
+    {}) as Record<string, unknown>;
 
   const { data, error } = await supabase
     .from("fi_payment_pathway_tasks")
@@ -315,7 +351,8 @@ export async function updatePaymentPathwayTaskStatus(args: {
       .eq("id", args.taskId.trim())
       .maybeSingle();
     if (fetchErr) throw new Error(fetchErr.message);
-    const currentMeta = ((existing as { metadata?: Record<string, unknown> } | null)?.metadata ?? {}) as Record<string, unknown>;
+    const currentMeta = ((existing as { metadata?: Record<string, unknown> } | null)?.metadata ??
+      {}) as Record<string, unknown>;
     update.metadata = { ...currentMeta, ...args.metadataPatch };
   }
 
@@ -353,7 +390,10 @@ export async function assignPaymentPathwayTask(args: {
 /**
  * Marks unresolved open tasks for a booking as completed when pathway workflow is cleared.
  */
-export async function resolveOpenPaymentPathwayTasksForBooking(tenantId: string, bookingId: string): Promise<number> {
+export async function resolveOpenPaymentPathwayTasksForBooking(
+  tenantId: string,
+  bookingId: string
+): Promise<number> {
   const tid = tenantId.trim();
   const bid = bookingId.trim();
   const supabase = supabaseAdmin();
@@ -388,7 +428,9 @@ export async function loadPaymentPathwayAttentionCount(tenantId: string): Promis
   return count ?? 0;
 }
 
-export async function loadPaymentPathwayInboxDashboardCounts(tenantId: string): Promise<PathwayInboxDashboardCounts> {
+export async function loadPaymentPathwayInboxDashboardCounts(
+  tenantId: string
+): Promise<PathwayInboxDashboardCounts> {
   const tid = tenantId.trim();
   const todayYmd = new Date().toISOString().slice(0, 10);
   const supabase = supabaseAdmin();
@@ -427,7 +469,9 @@ export async function loadUnresolvedPathwayTasksForBookings(
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_payment_pathway_tasks")
-    .select("id, booking_id, task_type, status, priority, assigned_to, due_date, created_at, updated_at")
+    .select(
+      "id, booking_id, task_type, status, priority, assigned_to, due_date, created_at, updated_at"
+    )
     .eq("tenant_id", tenantId.trim())
     .in("booking_id", ids)
     .in("status", [...OPEN_PATHWAY_TASK_STATUSES]);
@@ -520,7 +564,7 @@ export async function runPaymentPathwayTaskEscalationForTenant(
   let escalated = 0;
   for (const task of tasks) {
     const expectedSettlement = pathwaySettlement.get(task.payment_pathway_id) ?? null;
-    const surgeryDate = task.booking_id ? surgeryDates.get(task.booking_id) ?? null : null;
+    const surgeryDate = task.booking_id ? (surgeryDates.get(task.booking_id) ?? null) : null;
     const targetPriority = computeTaskEscalationPriority({
       todayYmd,
       task,
@@ -529,7 +573,12 @@ export async function runPaymentPathwayTaskEscalationForTenant(
     });
     if (!targetPriority) continue;
 
-    const priorityRank: Record<FiPaymentPathwayTaskPriority, number> = { low: 0, normal: 1, high: 2, urgent: 3 };
+    const priorityRank: Record<FiPaymentPathwayTaskPriority, number> = {
+      low: 0,
+      normal: 1,
+      high: 2,
+      urgent: 3,
+    };
     if (priorityRank[targetPriority] <= priorityRank[task.priority]) continue;
 
     escalated += 1;

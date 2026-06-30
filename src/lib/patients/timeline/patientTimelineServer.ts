@@ -89,10 +89,16 @@ export async function loadPatientTimelineSources(
   if (le) throw new Error(le.message);
 
   const leadsMapped = (leadRows ?? []).map((r) => mapFiCrmLeadRow(r as Record<string, unknown>));
-  const stageIds = Array.from(new Set(leadsMapped.map((l) => l.current_stage_id).filter(Boolean) as string[]));
+  const stageIds = Array.from(
+    new Set(leadsMapped.map((l) => l.current_stage_id).filter(Boolean) as string[])
+  );
   const stageLabelById = new Map<string, string>();
   if (stageIds.length) {
-    const { data: stages, error: se } = await supabase.from("fi_crm_pipeline_stages").select("id, label").eq("tenant_id", tid).in("id", stageIds);
+    const { data: stages, error: se } = await supabase
+      .from("fi_crm_pipeline_stages")
+      .select("id, label")
+      .eq("tenant_id", tid)
+      .in("id", stageIds);
     if (se) throw new Error(se.message);
     for (const s of stages ?? []) {
       stageLabelById.set(String((s as { id: string }).id), String((s as { label: string }).label));
@@ -107,7 +113,7 @@ export async function loadPatientTimelineSources(
     converted_at: lead.converted_at,
     converted_case_id: lead.converted_case_id,
     current_stage_id: lead.current_stage_id,
-    stageLabel: lead.current_stage_id ? stageLabelById.get(lead.current_stage_id) ?? null : null,
+    stageLabel: lead.current_stage_id ? (stageLabelById.get(lead.current_stage_id) ?? null) : null,
   }));
 
   const { data: caseRows, error: ce } = await supabase
@@ -128,13 +134,20 @@ export async function loadPatientTimelineSources(
       .eq("tenant_id", tid)
       .in("case_id", caseIds);
     if (lce) throw new Error(lce.message);
-    leadForCases = (lrows ?? []) as { id: string; summary: string | null; case_id: string | null }[];
+    leadForCases = (lrows ?? []) as {
+      id: string;
+      summary: string | null;
+      case_id: string | null;
+    }[];
   }
   const leadByCaseId = new Map<string, { id: string; summary: string | null }>();
   for (const row of leadForCases) {
     const cid = row.case_id;
     if (!cid) continue;
-    leadByCaseId.set(String(cid), { id: String(row.id), summary: row.summary != null ? String(row.summary) : null });
+    leadByCaseId.set(String(cid), {
+      id: String(row.id),
+      summary: row.summary != null ? String(row.summary) : null,
+    });
   }
 
   const cases = (caseRows ?? []).map((raw) => {
@@ -157,7 +170,9 @@ export async function loadPatientTimelineSources(
 
   const { data: bookingRows, error: be } = await supabase
     .from("fi_bookings")
-    .select("id, start_at, end_at, booking_status, booking_type, title, lead_id, case_id, created_at, updated_at, cancelled_at")
+    .select(
+      "id, start_at, end_at, booking_status, booking_type, title, lead_id, case_id, created_at, updated_at, cancelled_at"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", pid)
     .order("start_at", { ascending: false });
@@ -167,13 +182,25 @@ export async function loadPatientTimelineSources(
     id: String((b as { id: string }).id),
     booking_type: String((b as { booking_type: string }).booking_type),
     booking_status: String((b as { booking_status: string }).booking_status),
-    title: (b as { title: string | null }).title != null ? String((b as { title: string | null }).title) : null,
+    title:
+      (b as { title: string | null }).title != null
+        ? String((b as { title: string | null }).title)
+        : null,
     start_at: String((b as { start_at: string }).start_at),
-    lead_id: (b as { lead_id: string | null }).lead_id != null ? String((b as { lead_id: string | null }).lead_id) : null,
-    case_id: (b as { case_id: string | null }).case_id != null ? String((b as { case_id: string | null }).case_id) : null,
+    lead_id:
+      (b as { lead_id: string | null }).lead_id != null
+        ? String((b as { lead_id: string | null }).lead_id)
+        : null,
+    case_id:
+      (b as { case_id: string | null }).case_id != null
+        ? String((b as { case_id: string | null }).case_id)
+        : null,
     created_at: String((b as { created_at: string }).created_at),
     updated_at: String((b as { updated_at: string }).updated_at),
-    cancelled_at: (b as { cancelled_at: string | null }).cancelled_at != null ? String((b as { cancelled_at: string | null }).cancelled_at) : null,
+    cancelled_at:
+      (b as { cancelled_at: string | null }).cancelled_at != null
+        ? String((b as { cancelled_at: string | null }).cancelled_at)
+        : null,
   }));
 
   const leadIds = leadsMapped.map((l) => l.id);
@@ -190,25 +217,31 @@ export async function loadPatientTimelineSources(
     .limit(actLimit);
 
   if (ae) throw new Error(ae.message);
-  const activity = (actRows ?? []).map((a) => mapActivityRowForTimeline(a as Record<string, unknown>));
+  const activity = (actRows ?? []).map((a) =>
+    mapActivityRowForTimeline(a as Record<string, unknown>)
+  );
 
   const clinical = clinicalRow
     ? {
         patient_id: String((clinicalRow as { patient_id: string }).patient_id),
         created_at: String((clinicalRow as { created_at: string }).created_at),
         updated_at: String((clinicalRow as { updated_at: string }).updated_at),
-        norwood_scale: (clinicalRow as { norwood_scale?: string | null }).norwood_scale != null
-          ? String((clinicalRow as { norwood_scale: string | null }).norwood_scale)
-          : null,
-        ludwig_scale: (clinicalRow as { ludwig_scale?: string | null }).ludwig_scale != null
-          ? String((clinicalRow as { ludwig_scale: string | null }).ludwig_scale)
-          : null,
-        hairline_pattern: (clinicalRow as { hairline_pattern?: string | null }).hairline_pattern != null
-          ? String((clinicalRow as { hairline_pattern: string | null }).hairline_pattern)
-          : null,
-        primary_concern: (clinicalRow as { primary_concern?: string | null }).primary_concern != null
-          ? String((clinicalRow as { primary_concern: string | null }).primary_concern)
-          : null,
+        norwood_scale:
+          (clinicalRow as { norwood_scale?: string | null }).norwood_scale != null
+            ? String((clinicalRow as { norwood_scale: string | null }).norwood_scale)
+            : null,
+        ludwig_scale:
+          (clinicalRow as { ludwig_scale?: string | null }).ludwig_scale != null
+            ? String((clinicalRow as { ludwig_scale: string | null }).ludwig_scale)
+            : null,
+        hairline_pattern:
+          (clinicalRow as { hairline_pattern?: string | null }).hairline_pattern != null
+            ? String((clinicalRow as { hairline_pattern: string | null }).hairline_pattern)
+            : null,
+        primary_concern:
+          (clinicalRow as { primary_concern?: string | null }).primary_concern != null
+            ? String((clinicalRow as { primary_concern: string | null }).primary_concern)
+            : null,
       }
     : null;
 
@@ -228,7 +261,9 @@ export async function loadPatientTimelineSources(
 export async function loadPatientTimeline(
   tenantId: string,
   foundationPatientId: string,
-  buildOptions?: Omit<PatientTimelineBuildOptions, "hrefContext"> & { hrefContext?: PatientTimelineBuildOptions["hrefContext"] },
+  buildOptions?: Omit<PatientTimelineBuildOptions, "hrefContext"> & {
+    hrefContext?: PatientTimelineBuildOptions["hrefContext"];
+  },
   opts?: LoadPatientTimelineSourcesOptions
 ): Promise<PatientTimelineBuildResult> {
   const bundle = await loadPatientTimelineSources(tenantId, foundationPatientId, opts);

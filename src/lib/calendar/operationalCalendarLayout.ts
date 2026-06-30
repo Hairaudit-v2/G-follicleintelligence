@@ -41,10 +41,12 @@ export const DEFAULT_BUSINESS_GRID: BusinessGridConfig = {
  * `datetime-local` string for FI OS month empty-day quick create: clinic business open hour
  * (`dayStartHourUtc`, clinic-local wall time), or 09:00 when the configured hour is invalid.
  */
-export function monthEmptyDayQuickCreateLocalStart(dayKey: string, cfg: BusinessGridConfig): string {
+export function monthEmptyDayQuickCreateLocalStart(
+  dayKey: string,
+  cfg: BusinessGridConfig
+): string {
   const raw = cfg.dayStartHourUtc;
-  const hour =
-    Number.isFinite(raw) && raw >= 0 && raw <= 23 ? Math.floor(raw) : 9;
+  const hour = Number.isFinite(raw) && raw >= 0 && raw <= 23 ? Math.floor(raw) : 9;
   const hh = String(hour).padStart(2, "0");
   return `${dayKey.trim()}T${hh}:00`;
 }
@@ -109,7 +111,11 @@ export function utcBusinessSlotIsoRange(
   return localBusinessSlotIsoRange(dayKey, slotIndex, cfg, cfg.timeZone);
 }
 
-export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, dayKey: string): string | null {
+export function snapIsoToBusinessSlotUtc(
+  iso: string,
+  cfg: BusinessGridConfig,
+  dayKey: string
+): string | null {
   const parsed = parseCalendarDateString(dayKey, cfg.timeZone);
   if (!parsed) return null;
   const mid = zonedMidnightUtcMs(parsed, cfg.timeZone);
@@ -127,7 +133,10 @@ export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, d
 }
 
 export function bookingConflictsForOperationalCalendar(
-  candidate: Pick<FiBookingRow, "id" | "start_at" | "end_at" | "assigned_staff_id" | "assigned_user_id" | "clinic_id">,
+  candidate: Pick<
+    FiBookingRow,
+    "id" | "start_at" | "end_at" | "assigned_staff_id" | "assigned_user_id" | "clinic_id"
+  >,
   others: FiBookingRow[],
   opts?: {
     ignoreBookingId?: string;
@@ -142,7 +151,10 @@ export function bookingConflictsForOperationalCalendar(
   const e = Date.parse(candidate.end_at);
   if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return [];
 
-  const bufferMs = Math.max(0, (opts?.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES) * 60_000);
+  const bufferMs = Math.max(
+    0,
+    (opts?.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES) * 60_000
+  );
   const staffMap = opts?.staffIdToUserId ?? new Map<string, string | null>();
 
   const candCol = resourceColumnIdForBooking(candidate as FiBookingRow);
@@ -157,7 +169,10 @@ export function bookingConflictsForOperationalCalendar(
     if (!Number.isFinite(os) || !Number.isFinite(oe)) continue;
     if (!(s < oe + bufferMs && e + bufferMs > os)) continue;
 
-    const sameAssignee = bookingAssigneeIdentitiesMatch(candIdentity, bookingAssigneeIdentity(o, staffMap));
+    const sameAssignee = bookingAssigneeIdentitiesMatch(
+      candIdentity,
+      bookingAssigneeIdentity(o, staffMap)
+    );
     const sameClinic =
       candidate.clinic_id?.trim() &&
       o.clinic_id?.trim() &&
@@ -168,7 +183,9 @@ export function bookingConflictsForOperationalCalendar(
       candCol !== "unassigned";
 
     const unassignedOverlap =
-      Boolean(opts?.sameResourceColumnOverlapConflicts) && candCol === "unassigned" && resourceColumnIdForBooking(o) === "unassigned";
+      Boolean(opts?.sameResourceColumnOverlapConflicts) &&
+      candCol === "unassigned" &&
+      resourceColumnIdForBooking(o) === "unassigned";
 
     if (sameAssignee || sameClinic || sameResourceColumn || unassignedOverlap) out.push(o);
   }

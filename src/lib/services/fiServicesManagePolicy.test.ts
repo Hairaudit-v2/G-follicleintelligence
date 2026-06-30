@@ -3,7 +3,9 @@ import { test } from "node:test";
 
 import { evaluateFiServicesCatalogManageAllowed } from "./fiServicesManagePolicy";
 
-function snap(p: Partial<{ adminKeyValid: boolean; osRole: string | null; tenantUserRole: string | null }>) {
+function snap(
+  p: Partial<{ adminKeyValid: boolean; osRole: string | null; tenantUserRole: string | null }>
+) {
   return evaluateFiServicesCatalogManageAllowed({
     adminKeyValid: p.adminKeyValid ?? false,
     osRole: p.osRole ?? null,

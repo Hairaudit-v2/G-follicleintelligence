@@ -2,5 +2,9 @@
 node_modules
 out
 *.min.js
-tools/*.json
-tools/dangerous-rows.raw.json
+tools/
+docs/production/evidence/attachments/
+agent-tools/
+terminals/
+mcps/
+ihrg-seed-error.log

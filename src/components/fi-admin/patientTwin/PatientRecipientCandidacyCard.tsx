@@ -19,7 +19,9 @@ import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 const RECIPIENT_TAG_SET = new Set<string>(HIE_RECIPIENT_AREA_IMAGE_CATEGORIES);
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>
+  );
 }
 
 export function PatientRecipientCandidacyCard({
@@ -33,10 +35,16 @@ export function PatientRecipientCandidacyCard({
 }) {
   const { recipient_candidacy: rc } = twin.intelligence;
   const recipientPreferredIds = useMemo(
-    () => twin.imaging.gallery.items.filter((i) => i.ai_image_category && RECIPIENT_TAG_SET.has(i.ai_image_category)).map((i) => i.id),
+    () =>
+      twin.imaging.gallery.items
+        .filter((i) => i.ai_image_category && RECIPIENT_TAG_SET.has(i.ai_image_category))
+        .map((i) => i.id),
     [twin.imaging.gallery.items]
   );
-  const allGalleryIds = useMemo(() => twin.imaging.gallery.items.map((i) => i.id), [twin.imaging.gallery.items]);
+  const allGalleryIds = useMemo(
+    () => twin.imaging.gallery.items.map((i) => i.id),
+    [twin.imaging.gallery.items]
+  );
   const selectableIds = recipientPreferredIds.length > 0 ? recipientPreferredIds : allGalleryIds;
 
   const [selectedImageId, setSelectedImageId] = useState(() => selectableIds[0] ?? "");
@@ -110,8 +118,9 @@ export function PatientRecipientCandidacyCard({
       description="Stage 9D review signals from recipient-area photographs plus hair loss, progression, donor, therapy, and pathology presence. Stored in hair_intelligence_recipient_candidacy_reviews."
     >
       <p className="mb-3 rounded-md border border-rose-500/35 bg-rose-500/10 px-3 py-2 text-xs text-rose-100/95">
-        Recipient intelligence provides clinician review support only and does not replace surgical judgement. It does not create surgical plans,
-        recommend graft numbers, design hairlines, or predict outcomes.
+        Recipient intelligence provides clinician review support only and does not replace surgical
+        judgement. It does not create surgical plans, recommend graft numbers, design hairlines, or
+        predict outcomes.
       </p>
 
       {message ? <p className="mb-2 text-xs text-amber-200/90">{message}</p> : null}
@@ -137,15 +146,21 @@ export function PatientRecipientCandidacyCard({
         </div>
         <div>
           <FieldLabel>Surgical timing risk</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest?.surgical_timing_risk?.replace(/_/g, " ") ?? "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest?.surgical_timing_risk?.replace(/_/g, " ") ?? "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Medication stabilisation needed</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest != null ? (latest.medication_stabilisation_needed ? "Yes" : "No") : "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest != null ? (latest.medication_stabilisation_needed ? "Yes" : "No") : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Pathology review recommended</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest != null ? (latest.pathology_review_recommended ? "Yes" : "No") : "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest != null ? (latest.pathology_review_recommended ? "Yes" : "No") : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Expectation risk</FieldLabel>
@@ -154,7 +169,9 @@ export function PatientRecipientCandidacyCard({
         <div>
           <FieldLabel>Confidence</FieldLabel>
           <p className="mt-0.5 text-sm text-slate-200">
-            {latest != null && latest.confidence_score != null ? latest.confidence_score.toFixed(2) : "—"}
+            {latest != null && latest.confidence_score != null
+              ? latest.confidence_score.toFixed(2)
+              : "—"}
           </p>
         </div>
         <div>
@@ -188,13 +205,18 @@ export function PatientRecipientCandidacyCard({
         </div>
       ) : null}
 
-      {!latest ? <p className="mt-3 text-sm text-[#94A3B8]">No recipient candidacy reviews yet for this patient.</p> : null}
+      {!latest ? (
+        <p className="mt-3 text-sm text-[#94A3B8]">
+          No recipient candidacy reviews yet for this patient.
+        </p>
+      ) : null}
 
       <div className="mt-5 border-t border-white/10 pt-4">
         <FieldLabel>Select recipient-area image</FieldLabel>
         {recipientPreferredIds.length === 0 && allGalleryIds.length > 0 ? (
           <p className="mt-1 text-xs text-amber-200/80">
-            No images are AI-tagged as front/crown/top yet; you can still run on any gallery image that shows the recipient area.
+            No images are AI-tagged as front/crown/top yet; you can still run on any gallery image
+            that shows the recipient area.
           </p>
         ) : null}
         <select
@@ -219,7 +241,12 @@ export function PatientRecipientCandidacyCard({
           onClick={() => {
             setMessage(null);
             start(async () => {
-              const res = await assessPatientRecipientCandidacyAction(tenantId, patientId, selectedImageId, {});
+              const res = await assessPatientRecipientCandidacyAction(
+                tenantId,
+                patientId,
+                selectedImageId,
+                {}
+              );
               if (!res.ok) setMessage(res.error);
             });
           }}
@@ -347,15 +374,27 @@ export function PatientRecipientCandidacyCard({
               </div>
               <div className="flex items-center gap-2 sm:col-span-2">
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={medStab} onChange={(e) => setMedStab(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={medStab}
+                    onChange={(e) => setMedStab(e.target.checked)}
+                  />
                   Medication stabilisation needed
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={pathRev} onChange={(e) => setPathRev(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={pathRev}
+                    onChange={(e) => setPathRev(e.target.checked)}
+                  />
                   Pathology review recommended
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={docGap} onChange={(e) => setDocGap(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={docGap}
+                    onChange={(e) => setDocGap(e.target.checked)}
+                  />
                   Documentation gap
                 </label>
               </div>
@@ -411,22 +450,31 @@ export function PatientRecipientCandidacyCard({
                     .map((s) => s.trim())
                     .filter(Boolean)
                     .slice(0, 40);
-                  const res = await updateRecipientAssessmentReviewAction(tenantId, patientId, editId, {
-                    review_status: review as (typeof HIE_RECIPIENT_REVIEW_STATUSES)[number],
-                    recipient_quality_rating: quality as (typeof HIE_RECIPIENT_QUALITY_RATINGS)[number],
-                    confidence_score: Number.isFinite(c) ? c : 0,
-                    diffuse_thinning_risk: diffuse as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
-                    shock_loss_risk: shock as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
-                    density_expectation_risk: density as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
-                    surgical_timing_risk: timing as (typeof HIE_RECIPIENT_SURGICAL_TIMING_RISKS)[number],
-                    patient_expectation_risk: expect as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
-                    medication_stabilisation_needed: medStab,
-                    pathology_review_recommended: pathRev,
-                    documentation_gap_detected: docGap,
-                    candidacy_summary: summary || null,
-                    ai_notes: aiNotes || null,
-                    review_topics: topics,
-                  });
+                  const res = await updateRecipientAssessmentReviewAction(
+                    tenantId,
+                    patientId,
+                    editId,
+                    {
+                      review_status: review as (typeof HIE_RECIPIENT_REVIEW_STATUSES)[number],
+                      recipient_quality_rating:
+                        quality as (typeof HIE_RECIPIENT_QUALITY_RATINGS)[number],
+                      confidence_score: Number.isFinite(c) ? c : 0,
+                      diffuse_thinning_risk: diffuse as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
+                      shock_loss_risk: shock as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
+                      density_expectation_risk:
+                        density as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
+                      surgical_timing_risk:
+                        timing as (typeof HIE_RECIPIENT_SURGICAL_TIMING_RISKS)[number],
+                      patient_expectation_risk:
+                        expect as (typeof HIE_RECIPIENT_RISK_LEVELS)[number],
+                      medication_stabilisation_needed: medStab,
+                      pathology_review_recommended: pathRev,
+                      documentation_gap_detected: docGap,
+                      candidacy_summary: summary || null,
+                      ai_notes: aiNotes || null,
+                      review_topics: topics,
+                    }
+                  );
                   if (!res.ok) setMessage(res.error);
                 });
               }}

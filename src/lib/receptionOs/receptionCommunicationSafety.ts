@@ -19,7 +19,7 @@ export type ReceptionCommunicationSafetyInput = {
 export type ReceptionCommunicationSafetyResult = { ok: true } | { ok: false; reason: string };
 
 export function validateReceptionCommunicationSafety(
-  input: ReceptionCommunicationSafetyInput,
+  input: ReceptionCommunicationSafetyInput
 ): ReceptionCommunicationSafetyResult {
   const templateKey = input.templateKey?.trim() ?? "";
   if (!templateKey) return { ok: false, reason: "Template key is required." };

@@ -35,7 +35,9 @@ function sliceText(s: string, max: number): string {
   return t.slice(0, max);
 }
 
-export function parseDonorAssessmentModelJson(parsed: unknown): DonorModelJsonParseSuccess | DonorModelJsonParseFailure {
+export function parseDonorAssessmentModelJson(
+  parsed: unknown
+): DonorModelJsonParseSuccess | DonorModelJsonParseFailure {
   const zod = rawSchema.safeParse(parsed);
   if (!zod.success) {
     return { ok: false, error: zod.error.issues[0]?.message ?? "invalid json" };
@@ -50,9 +52,16 @@ export function parseDonorAssessmentModelJson(parsed: unknown): DonorModelJsonPa
     retrograde_risk: normalizeHieDonorRiskLevel(d.retrograde_risk ?? null),
     overharvesting_risk: normalizeHieDonorRiskLevel(d.overharvesting_risk ?? null),
     safe_donor_capacity_band: normalizeHieSafeDonorCapacityBand(d.safe_donor_capacity_band ?? null),
-    lifetime_graft_budget_band: normalizeHieLifetimeGraftBudgetBand(d.lifetime_graft_budget_band ?? null),
-    extraction_caution_level: normalizeHieExtractionCautionLevel(d.extraction_caution_level ?? null),
-    clinical_observations: sliceText(typeof d.clinical_observations === "string" ? d.clinical_observations : "", 8000),
+    lifetime_graft_budget_band: normalizeHieLifetimeGraftBudgetBand(
+      d.lifetime_graft_budget_band ?? null
+    ),
+    extraction_caution_level: normalizeHieExtractionCautionLevel(
+      d.extraction_caution_level ?? null
+    ),
+    clinical_observations: sliceText(
+      typeof d.clinical_observations === "string" ? d.clinical_observations : "",
+      8000
+    ),
     ai_notes: sliceText(typeof d.ai_notes === "string" ? d.ai_notes : "", 8000),
   };
   return { ok: true, data: out };

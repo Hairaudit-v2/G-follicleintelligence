@@ -27,9 +27,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -38,7 +42,9 @@ function SectionIntro({
 function DiagramPlaceholder({ label }: { label: string }) {
   return (
     <div className="mt-8 flex min-h-[96px] flex-col items-center justify-center rounded-xl border border-dashed border-primary/20 bg-primary/5 px-4 py-5 text-center">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/75">Suggested diagram</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/75">
+        Suggested diagram
+      </p>
       <p className="mt-2 max-w-xl text-xs text-muted-foreground">{label}</p>
     </div>
   );
@@ -162,12 +168,16 @@ export default function MethodologyPage() {
 
       <Section>
         <FadeIn>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">Structured workflows</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">
+            Structured workflows
+          </p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             Repeatability, traceability, institutional credibility.
           </h2>
           <p className="mt-4 max-w-3xl text-muted-foreground leading-relaxed">
-            The pipeline below is stable across deployments: capture through closed-loop quality. What follows deepens each stage—how weighting, confidence, benchmarks, and review layers behave in practice.
+            The pipeline below is stable across deployments: capture through closed-loop quality.
+            What follows deepens each stage—how weighting, confidence, benchmarks, and review layers
+            behave in practice.
           </p>
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -319,7 +329,10 @@ export default function MethodologyPage() {
         <FadeIn delay={0.06} className="mt-8">
           <ul className="max-w-3xl space-y-4">
             {IIOHR_ALIGNMENT.map((p) => (
-              <li key={p} className="flex gap-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+              <li
+                key={p}
+                className="flex gap-3 text-sm leading-relaxed text-muted-foreground md:text-base"
+              >
                 <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary/60" aria-hidden />
                 {p}
               </li>
@@ -348,8 +361,8 @@ export default function MethodologyPage() {
               >
                 Hair Longevity Institute
               </Link>{" "}
-              longitudinal pathways—so surgery, biology, and professional standards reinforce one another in
-              one architecture.
+              longitudinal pathways—so surgery, biology, and professional standards reinforce one
+              another in one architecture.
             </p>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
               For extended discussion of evaluation in hair restoration, see our{" "}

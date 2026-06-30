@@ -29,7 +29,10 @@ export function CrmLeadIdJump({ tenantId }: { tenantId: string }) {
           className="w-72 max-w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-sm"
         />
       </div>
-      <button type="submit" className="rounded bg-gray-800 px-3 py-1.5 text-sm text-white hover:bg-gray-900">
+      <button
+        type="submit"
+        className="rounded bg-gray-800 px-3 py-1.5 text-sm text-white hover:bg-gray-900"
+      >
         Open lead
       </button>
     </form>

@@ -3,7 +3,11 @@
 import { useState, useTransition } from "react";
 
 import { createInstallmentPlanAction } from "@/lib/actions/financial-os-actions";
-import { financialOsClasses, FinancialOsFeedbackText, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 
 export function FinancialOsInstallmentForm(props: { tenantId: string; canMutate: boolean }) {
   const [invoiceId, setInvoiceId] = useState("");
@@ -14,7 +18,11 @@ export function FinancialOsInstallmentForm(props: { tenantId: string; canMutate:
   const [pending, start] = useTransition();
 
   if (!props.canMutate) {
-    return <p className={financialOsClasses.mutedMeta}>Finance or manager role required to create installment plans.</p>;
+    return (
+      <p className={financialOsClasses.mutedMeta}>
+        Finance or manager role required to create installment plans.
+      </p>
+    );
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -39,20 +47,31 @@ export function FinancialOsInstallmentForm(props: { tenantId: string; canMutate:
       setFeedback(
         res.ok
           ? { message: `Plan created (${res.plan_id.slice(0, 8)}…).`, tone: "success" }
-          : { message: res.error, tone: "error" },
+          : { message: res.error, tone: "error" }
       );
     });
   }
 
   return (
-    <form onSubmit={onSubmit} className={`max-w-md space-y-3 text-xs ${financialOsClasses.formPanel}`}>
+    <form
+      onSubmit={onSubmit}
+      className={`max-w-md space-y-3 text-xs ${financialOsClasses.formPanel}`}
+    >
       <label className={financialOsClasses.formLabel}>
         Invoice id
-        <input className={`${financialOsClasses.input} font-mono text-[11px]`} value={invoiceId} onChange={(e) => setInvoiceId(e.target.value)} />
+        <input
+          className={`${financialOsClasses.input} font-mono text-[11px]`}
+          value={invoiceId}
+          onChange={(e) => setInvoiceId(e.target.value)}
+        />
       </label>
       <label className={financialOsClasses.formLabel}>
         Frequency
-        <select className={financialOsClasses.select} value={frequency} onChange={(e) => setFrequency(e.target.value as typeof frequency)}>
+        <select
+          className={financialOsClasses.select}
+          value={frequency}
+          onChange={(e) => setFrequency(e.target.value as typeof frequency)}
+        >
           <option value="weekly">weekly</option>
           <option value="biweekly">biweekly</option>
           <option value="monthly">monthly</option>
@@ -60,16 +79,29 @@ export function FinancialOsInstallmentForm(props: { tenantId: string; canMutate:
       </label>
       <label className={financialOsClasses.formLabel}>
         Installment (cents)
-        <input className={financialOsClasses.input} value={installmentCents} onChange={(e) => setInstallmentCents(e.target.value)} />
+        <input
+          className={financialOsClasses.input}
+          value={installmentCents}
+          onChange={(e) => setInstallmentCents(e.target.value)}
+        />
       </label>
       <label className={financialOsClasses.formLabel}>
         Next payment date (YYYY-MM-DD, optional)
-        <input className={financialOsClasses.input} value={nextDate} onChange={(e) => setNextDate(e.target.value)} placeholder="2026-07-01" />
+        <input
+          className={financialOsClasses.input}
+          value={nextDate}
+          onChange={(e) => setNextDate(e.target.value)}
+          placeholder="2026-07-01"
+        />
       </label>
       <button type="submit" disabled={pending} className={financialOsClasses.primaryButton}>
         {pending ? "Saving…" : "Create plan"}
       </button>
-      <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} className="mt-2" />
+      <FinancialOsFeedbackText
+        message={feedback?.message ?? null}
+        tone={feedback?.tone}
+        className="mt-2"
+      />
     </form>
   );
 }

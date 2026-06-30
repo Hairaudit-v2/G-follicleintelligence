@@ -59,7 +59,9 @@ export function StaffPinLoginClient({ data }: { data: StaffPinLoginPageData }) {
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-10">
       <div className="rounded-xl border border-slate-700/60 bg-slate-900/80 p-6 shadow-xl backdrop-blur sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/90">Clinic floor access</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/90">
+          Clinic floor access
+        </p>
         <h1 className="mt-2 text-2xl font-semibold text-white">Staff PIN sign-in</h1>
         <p className="mt-2 text-sm text-slate-300">
           {data.clinicName ? `${data.clinicName} — ` : ""}
@@ -115,7 +117,10 @@ export function StaffPinLoginClient({ data }: { data: StaffPinLoginPageData }) {
             ) : null}
 
             {error ? (
-              <div className="rounded border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-100" role="alert">
+              <div
+                className="rounded border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-100"
+                role="alert"
+              >
                 {error}
               </div>
             ) : null}

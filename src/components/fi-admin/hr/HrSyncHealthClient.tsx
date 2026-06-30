@@ -53,15 +53,24 @@ function issueLabel(kind: HrStaffSyncIssueKind): string {
   return HR_STAFF_SYNC_ISSUE_LABELS[kind];
 }
 
-export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; pageModel: HrSyncHealthPageModel }) {
+export function HrSyncHealthClient({
+  tenantId,
+  pageModel,
+}: {
+  tenantId: string;
+  pageModel: HrSyncHealthPageModel;
+}) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}`;
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [feedPreview, setFeedPreview] = useState<Awaited<ReturnType<typeof previewHrStaffFeedAction>> | null>(null);
+  const [feedPreview, setFeedPreview] = useState<Awaited<
+    ReturnType<typeof previewHrStaffFeedAction>
+  > | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const { overview, latestRun, latestSuccessfulRun, envChecklist, staffIssues, identityOverview } = pageModel;
+  const { overview, latestRun, latestSuccessfulRun, envChecklist, staffIssues, identityOverview } =
+    pageModel;
 
   const exportCsv = useCallback(() => {
     const csv = buildHrSyncIssuesCsvExport(staffIssues);
@@ -78,7 +87,9 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
   }, [staffIssues]);
 
   const runAction = useCallback(
-    (fn: () => Promise<{ ok: boolean; error?: string; message?: string; summaryMessage?: string }>) => {
+    (
+      fn: () => Promise<{ ok: boolean; error?: string; message?: string; summaryMessage?: string }>
+    ) => {
       setError(null);
       setActionMessage(null);
       startTransition(async () => {
@@ -103,10 +114,12 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">HR</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">HR sync health</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
+          HR sync health
+        </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Monitor IIOHR HR staff sync runs, staff-level HR link issues, and environment readiness. Operational metadata
-          only — no payroll or sensitive HR fields are shown or exported.
+          Monitor IIOHR HR staff sync runs, staff-level HR link issues, and environment readiness.
+          Operational metadata only — no payroll or sensitive HR fields are shown or exported.
         </p>
         <p className="text-sm text-[#94A3B8]">
           <Link href={`${base}/hr/staff-import`} className="text-[#22C1FF] hover:underline">
@@ -141,12 +154,15 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
       <DashboardCard className="p-5 border-white/10">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">Workforce identity coverage</h2>
         <p className="mt-1 text-sm text-[#94A3B8]">
-          Active staff identity links across IIOHR HR, Academy, and Nexus (operational projection — not source of record).
+          Active staff identity links across IIOHR HR, Academy, and Nexus (operational projection —
+          not source of record).
         </p>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <dt className="text-xs uppercase tracking-wide text-[#64748B]">Active staff</dt>
-            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{identityOverview.activeStaffCount}</dd>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {identityOverview.activeStaffCount}
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[#64748B]">HR linked</dt>
@@ -168,11 +184,17 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[#64748B]">Stale identity sync</dt>
-            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{identityOverview.staleIdentityCount}</dd>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {identityOverview.staleIdentityCount}
+            </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Fully linked (3 systems)</dt>
-            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{identityOverview.fullyLinkedCount}</dd>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+              Fully linked (3 systems)
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {identityOverview.fullyLinkedCount}
+            </dd>
           </div>
         </dl>
       </DashboardCard>
@@ -186,19 +208,33 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
             <p className="mt-1 text-sm text-[#94A3B8]">{overview.message}</p>
             <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <dt className="text-xs uppercase tracking-wide text-[#64748B]">Last successful sync</dt>
-                <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{formatIso(overview.lastSuccessfulSyncAt)}</dd>
+                <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+                  Last successful sync
+                </dt>
+                <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+                  {formatIso(overview.lastSuccessfulSyncAt)}
+                </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-[#64748B]">Last attempted sync</dt>
-                <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{formatIso(overview.lastAttemptedSyncAt)}</dd>
+                <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+                  Last attempted sync
+                </dt>
+                <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+                  {formatIso(overview.lastAttemptedSyncAt)}
+                </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-[#64748B]">Staff with issues</dt>
-                <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{overview.staffWithIssuesCount}</dd>
+                <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+                  Staff with issues
+                </dt>
+                <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+                  {overview.staffWithIssuesCount}
+                </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-[#64748B]">Stale staff metadata (&gt;14d)</dt>
+                <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+                  Stale staff metadata (&gt;14d)
+                </dt>
                 <dd
                   className={`mt-0.5 text-sm font-medium ${overview.staffMetadataStale ? "text-amber-300" : "text-emerald-300"}`}
                 >
@@ -247,7 +283,8 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
           ) : null}
           {latestSuccessfulRun.runId && latestSuccessfulRun.runId !== latestRun.runId ? (
             <p className="mt-3 text-xs text-[#64748B]">
-              Last success: {formatIso(latestSuccessfulRun.finishedAt ?? latestSuccessfulRun.startedAt)} (
+              Last success:{" "}
+              {formatIso(latestSuccessfulRun.finishedAt ?? latestSuccessfulRun.startedAt)} (
               {latestSuccessfulRun.updatedCount} updated)
             </p>
           ) : null}
@@ -259,8 +296,8 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
             Admin actions
           </h2>
           <p className="mt-2 text-xs text-[#64748B]">
-            Tenant admins and platform operators only. Stale warnings clear automatically after a successful sync
-            refreshes staff metadata.
+            Tenant admins and platform operators only. Stale warnings clear automatically after a
+            successful sync refreshes staff metadata.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
@@ -290,7 +327,12 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
             >
               Preview latest HR feed
             </Button>
-            <Button type="button" variant="outline" disabled={pending || staffIssues.length === 0} onClick={exportCsv}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending || staffIssues.length === 0}
+              onClick={exportCsv}
+            >
               <Download className="mr-2 h-4 w-4" aria-hidden />
               Export issue CSV
             </Button>
@@ -318,14 +360,18 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
           {feedPreview?.ok ? (
             <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
               <p className="text-xs font-medium text-[#94A3B8]">
-                Feed preview — {feedPreview.feedRowCount} row{feedPreview.feedRowCount === 1 ? "" : "s"} (sample below)
+                Feed preview — {feedPreview.feedRowCount} row
+                {feedPreview.feedRowCount === 1 ? "" : "s"} (sample below)
               </p>
-              <pre className="mt-2 max-h-48 overflow-auto text-[11px] text-[#CBD5E1]">{feedSampleJson}</pre>
+              <pre className="mt-2 max-h-48 overflow-auto text-[11px] text-[#CBD5E1]">
+                {feedSampleJson}
+              </pre>
             </div>
           ) : null}
           {pageModel.isEvolvedPerthCronTenant ? (
             <p className="mt-3 text-xs text-[#64748B]">
-              Scheduled cron: <span className="font-mono text-[#94A3B8]">{pageModel.automationCronPath}</span>
+              Scheduled cron:{" "}
+              <span className="font-mono text-[#94A3B8]">{pageModel.automationCronPath}</span>
             </p>
           ) : null}
         </DashboardCard>
@@ -334,7 +380,8 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
       <DashboardCard className="p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Staff issues</h2>
         <p className="mt-1 text-sm text-[#94A3B8]">
-          Active staff with HR link, onboarding, URL, or readiness metadata gaps. Amber rows need attention.
+          Active staff with HR link, onboarding, URL, or readiness metadata gaps. Amber rows need
+          attention.
         </p>
         {staffIssues.length === 0 ? (
           <p className="mt-4 text-sm text-emerald-300">No staff HR sync issues detected.</p>
@@ -352,7 +399,9 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
                 {staffIssues.map((row) => (
                   <tr key={row.staffId} className="border-b border-white/5 text-[#E2E8F0]">
                     <td className="px-2 py-2">{row.fullName}</td>
-                    <td className="px-2 py-2 font-mono text-xs text-[#94A3B8]">{row.email ?? "—"}</td>
+                    <td className="px-2 py-2 font-mono text-xs text-[#94A3B8]">
+                      {row.email ?? "—"}
+                    </td>
                     <td className="px-2 py-2">
                       <ul className="flex flex-wrap gap-1">
                         {row.issues.map((issue) => (
@@ -375,13 +424,20 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
 
       <DashboardCard className="p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Environment checklist</h2>
-        <p className="mt-1 text-sm text-[#94A3B8]">Present/missing only — secret values are never displayed.</p>
+        <p className="mt-1 text-sm text-[#94A3B8]">
+          Present/missing only — secret values are never displayed.
+        </p>
         <ul className="mt-4 space-y-2">
           {envChecklist.map((item) => (
-            <li key={item.key} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/5 px-3 py-2">
+            <li
+              key={item.key}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/5 px-3 py-2"
+            >
               <span className="text-sm text-[#E2E8F0]">
                 <span className="font-mono text-xs text-[#94A3B8]">{item.key}</span>
-                {item.optional ? <span className="ml-2 text-xs text-[#64748B]">(optional)</span> : null}
+                {item.optional ? (
+                  <span className="ml-2 text-xs text-[#64748B]">(optional)</span>
+                ) : null}
               </span>
               <span
                 className={`text-xs font-semibold uppercase tracking-wide ${item.present ? "text-emerald-400" : item.optional ? "text-[#64748B]" : "text-amber-400"}`}

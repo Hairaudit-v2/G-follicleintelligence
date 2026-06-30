@@ -13,7 +13,8 @@ const SHOWCASE = [
   {
     file: "Consultation Conversion Board.jpeg",
     label: "LeadFlow",
-    caption: "Patient acquisition, consultations, conversion intelligence, and surgical pipeline management.",
+    caption:
+      "Patient acquisition, consultations, conversion intelligence, and surgical pipeline management.",
   },
   {
     file: "Doctor Workspace.jpeg",
@@ -28,17 +29,20 @@ const SHOWCASE = [
   {
     file: "Reception Board.jpeg",
     label: "OperationsOS",
-    caption: "Live reception rhythm, team handoffs, and same-day operational visibility across the clinic.",
+    caption:
+      "Live reception rhythm, team handoffs, and same-day operational visibility across the clinic.",
   },
   {
     file: "Operations centre.jpeg",
     label: "OperationsOS",
-    caption: "Operations centre view for coordinated scheduling, block readiness, and real-time clinic command.",
+    caption:
+      "Operations centre view for coordinated scheduling, block readiness, and real-time clinic command.",
   },
   {
     file: "Analyticsos.jpeg",
     label: "AnalyticsOS",
-    caption: "Analytics layer for pipeline health, performance signals, and decision-ready intelligence across FI OS.",
+    caption:
+      "Analytics layer for pipeline health, performance signals, and decision-ready intelligence across FI OS.",
   },
   {
     file: "Patient Twin.jpeg",
@@ -63,8 +67,13 @@ export function VisionShowcaseSection() {
     >
       <FadeIn>
         <header className="mx-auto max-w-4xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/70">Product depth</p>
-          <div className="mx-auto mt-3 h-px w-14 bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" aria-hidden />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/70">
+            Product depth
+          </p>
+          <div
+            className="mx-auto mt-3 h-px w-14 bg-gradient-to-r from-transparent via-amber-400/35 to-transparent"
+            aria-hidden
+          />
           <h2
             id="vision-product-proof-heading"
             className="mt-6 font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] md:leading-[1.1]"
@@ -72,7 +81,8 @@ export function VisionShowcaseSection() {
             This Is Not a Concept
           </h2>
           <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg md:leading-relaxed">
-            We are actively building the world&apos;s first connected operating system for hair restoration medicine.
+            We are actively building the world&apos;s first connected operating system for hair
+            restoration medicine.
           </p>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg md:leading-relaxed">
             Designed to unify every layer of modern clinical practice.

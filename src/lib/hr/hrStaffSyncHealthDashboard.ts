@@ -89,7 +89,9 @@ function truncate(s: string, max: number): string {
   return `${t.slice(0, max - 1)}…`;
 }
 
-export function buildHrSyncEnvironmentChecklist(getEnv: (key: string) => string | undefined): HrSyncEnvChecklistItem[] {
+export function buildHrSyncEnvironmentChecklist(
+  getEnv: (key: string) => string | undefined
+): HrSyncEnvChecklistItem[] {
   return ENV_ITEMS.map(({ key, label, optional }) => ({
     key,
     label,
@@ -204,13 +206,15 @@ export function buildHrSyncHealthOverview(input: {
 }): HrSyncHealthOverview {
   const latest = input.runs[0] ?? null;
   const latestSuccess = pickLatestSuccessfulSyncRun(input.runs);
-  const staleStaffCount = input.staffIssueRows.filter((r) => r.issues.includes("stale_hr_sync")).length;
+  const staleStaffCount = input.staffIssueRows.filter((r) =>
+    r.issues.includes("stale_hr_sync")
+  ).length;
   const staffWithIssuesCount = input.staffIssueRows.length;
   const envOk = allRequiredHrSyncEnvPresent(input.envChecklist);
 
   const lastAttemptedSyncAt = latest?.started_at?.trim() || null;
   const lastSuccessfulSyncAt = latestSuccess
-    ? (latestSuccess.finished_at?.trim() || latestSuccess.started_at?.trim() || null)
+    ? latestSuccess.finished_at?.trim() || latestSuccess.started_at?.trim() || null
     : null;
 
   let variant: HrSyncHealthVariant = "healthy";
@@ -294,7 +298,15 @@ export function buildHrSyncIssuesCsvExport(rows: HrStaffSyncIssueRow[]): string 
 /** Ensures CSV export never includes sensitive key names (defence in depth). */
 export function hrSyncIssuesCsvIsSafe(csv: string): boolean {
   const lower = csv.toLowerCase();
-  const blocked = ["bank", "tfn", "super", "pay_rate", "tax_details", "date_of_birth", "home_address"];
+  const blocked = [
+    "bank",
+    "tfn",
+    "super",
+    "pay_rate",
+    "tax_details",
+    "date_of_birth",
+    "home_address",
+  ];
   return !blocked.some((k) => lower.includes(k));
 }
 

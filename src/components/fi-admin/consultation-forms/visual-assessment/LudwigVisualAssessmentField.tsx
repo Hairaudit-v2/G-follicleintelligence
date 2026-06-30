@@ -35,10 +35,9 @@ export function LudwigVisualAssessmentField({
     </label>
   );
 
-  const desc =
-    description?.trim() ? (
-      <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
-    ) : null;
+  const desc = description?.trim() ? (
+    <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
+  ) : null;
 
   return (
     <div className="space-y-3">
@@ -51,7 +50,9 @@ export function LudwigVisualAssessmentField({
         <div className="border-b border-white/[0.06] bg-white/[0.03] px-3 py-2">
           <p className={cn("text-xs", fiOsLightFormSurfaceClassNames.helper)}>
             Tap the Ludwig stage that best matches central density loss. Replace the diagram in{" "}
-            <code className="rounded bg-white/[0.08] px-1 py-0.5 text-[10px]">public/consultation-os/visual-assessment/</code>{" "}
+            <code className="rounded bg-white/[0.08] px-1 py-0.5 text-[10px]">
+              public/consultation-os/visual-assessment/
+            </code>{" "}
             with your clinic asset when ready.
           </p>
         </div>
@@ -104,7 +105,9 @@ export function LudwigVisualAssessmentField({
       </div>
 
       <div className="space-y-1">
-        <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>Fallback (dropdown)</span>
+        <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>
+          Fallback (dropdown)
+        </span>
         <select
           className={cn(fiOsLightFormSurfaceClassNames.controlInset, "max-w-lg")}
           value={str}
@@ -112,11 +115,7 @@ export function LudwigVisualAssessmentField({
           onChange={(e) => onChange(normalizePatternClassificationString(e.target.value))}
         >
           <option value="">— Select —</option>
-          {hasLegacyUnknown ? (
-            <option value={str}>
-              (Legacy) {str}
-            </option>
-          ) : null}
+          {hasLegacyUnknown ? <option value={str}>(Legacy) {str}</option> : null}
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

@@ -28,9 +28,12 @@ export function mapFiConsultationRow(raw: Record<string, unknown>): Consultation
       ? (raw.structured_data as Record<string, unknown>)
       : {}) as Record<string, unknown>,
     live_notes: raw.live_notes == null ? null : String(raw.live_notes),
-    recommendation_notes: raw.recommendation_notes == null ? null : String(raw.recommendation_notes),
+    recommendation_notes:
+      raw.recommendation_notes == null ? null : String(raw.recommendation_notes),
     quote_data:
-      raw.quote_data && typeof raw.quote_data === "object" ? (raw.quote_data as Record<string, unknown>) : {},
+      raw.quote_data && typeof raw.quote_data === "object"
+        ? (raw.quote_data as Record<string, unknown>)
+        : {},
     created_by: raw.created_by == null ? null : String(raw.created_by),
     updated_by: raw.updated_by == null ? null : String(raw.updated_by),
     created_at: String(raw.created_at),
@@ -327,14 +330,14 @@ function mapConsultationIndexRow(
   consultantStaffNameById: Map<string, string>
 ): ConsultationIndexRow {
   const patient_display_name = r.patient_id?.trim()
-    ? patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`
+    ? (patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`)
     : null;
   const lead_display_name = r.lead_id?.trim()
-    ? leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`
+    ? (leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`)
     : null;
   const link_headline = patient_display_name ?? lead_display_name ?? "Unlinked";
   const linkedStaffName = r.consultant_staff_id?.trim()
-    ? consultantStaffNameById.get(r.consultant_staff_id.trim()) ?? null
+    ? (consultantStaffNameById.get(r.consultant_staff_id.trim()) ?? null)
     : null;
   return {
     ...r,
@@ -379,7 +382,13 @@ export async function loadConsultationsForPatient(
   const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
   const consultantStaffNameById = await resolveConsultantStaffNameById(tid, rows);
   return rows.map((r) =>
-    mapConsultationIndexRow(r, subjectById, patientLabelById, leadTitleById, consultantStaffNameById)
+    mapConsultationIndexRow(
+      r,
+      subjectById,
+      patientLabelById,
+      leadTitleById,
+      consultantStaffNameById
+    )
   );
 }
 
@@ -394,7 +403,11 @@ export async function listConsultationsForTenant(
   const offset = Math.max(options.offset ?? 0, 0);
 
   const supabase = supabaseAdmin();
-  let q = supabase.from("fi_consultations").select("*").eq("tenant_id", tid).order("updated_at", { ascending: false });
+  let q = supabase
+    .from("fi_consultations")
+    .select("*")
+    .eq("tenant_id", tid)
+    .order("updated_at", { ascending: false });
 
   if (options.statusIn?.length) {
     q = q.in("status", options.statusIn);
@@ -410,6 +423,12 @@ export async function listConsultationsForTenant(
   const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
   const consultantStaffNameById = await resolveConsultantStaffNameById(tid, rows);
   return rows.map((r) =>
-    mapConsultationIndexRow(r, subjectById, patientLabelById, leadTitleById, consultantStaffNameById)
+    mapConsultationIndexRow(
+      r,
+      subjectById,
+      patientLabelById,
+      leadTitleById,
+      consultantStaffNameById
+    )
   );
 }

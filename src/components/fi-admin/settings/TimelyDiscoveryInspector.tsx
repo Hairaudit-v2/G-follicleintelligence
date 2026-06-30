@@ -56,8 +56,8 @@ export function TimelyDiscoveryInspector({
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/80 p-4 sm:p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Zapier webhook</h2>
         <p className="mt-1 text-sm text-[#94A3B8]">
-          POST JSON from Webhooks by Zapier. Same bearer secret as production Timely routes. Payloads are stored for
-          inspection only.
+          POST JSON from Webhooks by Zapier. Same bearer secret as production Timely routes.
+          Payloads are stored for inspection only.
         </p>
         <div className="mt-4 space-y-3">
           <CopyLine label="Webhook URL" text={webhookUrl} />
@@ -68,11 +68,16 @@ export function TimelyDiscoveryInspector({
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/80 p-4 sm:p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Last 20 Timely webhook events</h2>
         <p className="mt-1 text-sm text-[#94A3B8]">
-          Rows from <code className="rounded bg-[#141C33] px-1 py-0.5 font-mono text-xs text-[#22C1FF]">fi_integration_webhook_events</code>{" "}
+          Rows from{" "}
+          <code className="rounded bg-[#141C33] px-1 py-0.5 font-mono text-xs text-[#22C1FF]">
+            fi_integration_webhook_events
+          </code>{" "}
           with provider timely.
         </p>
         {events.length === 0 ? (
-          <p className="mt-4 text-sm text-[#64748B]">No events recorded yet. Fire a test Zap pointing at the URL above.</p>
+          <p className="mt-4 text-sm text-[#64748B]">
+            No events recorded yet. Fire a test Zap pointing at the URL above.
+          </p>
         ) : (
           <ul className="mt-4 space-y-6">
             {events.map((ev) => (
@@ -99,7 +104,9 @@ export function TimelyDiscoveryInspector({
                   {ev.payload_hash ? ` · sha256 ${ev.payload_hash}` : null}
                 </p>
                 <div className="mt-3">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">payload</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
+                    payload
+                  </p>
                   <MonoBlock>{JSON.stringify(ev.payload, null, 2)}</MonoBlock>
                 </div>
               </li>

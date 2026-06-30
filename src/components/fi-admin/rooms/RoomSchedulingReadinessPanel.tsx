@@ -67,17 +67,32 @@ export function RoomSchedulingReadinessPanel({
     <section
       className={cn(
         "rounded-xl border p-4 sm:p-5",
-        isDark ? cn("border-white/10 bg-slate-950/50", meta.cardClass) : cn("border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40", meta.cardClass),
+        isDark
+          ? cn("border-white/10 bg-slate-950/50", meta.cardClass)
+          : cn(
+              "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40",
+              meta.cardClass
+            ),
         className
       )}
       aria-label="Room and service scheduling readiness"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-gray-500")}>
+          <p
+            className={cn(
+              "text-xs font-semibold uppercase tracking-wider",
+              isDark ? "text-slate-500" : "text-gray-500"
+            )}
+          >
             Scheduling readiness
           </p>
-          <h2 className={cn("mt-1 text-lg font-semibold", isDark ? "text-slate-100" : "text-slate-100")}>
+          <h2
+            className={cn(
+              "mt-1 text-lg font-semibold",
+              isDark ? "text-slate-100" : "text-slate-100"
+            )}
+          >
             Room &amp; service checklist
           </h2>
           {readiness.clinicName ? (
@@ -105,7 +120,11 @@ export function RoomSchedulingReadinessPanel({
 
       {showBookingSetupTest && readiness.clinicId ? (
         <div className="mt-4">
-          <ClinicBookingSetupTestPanel tenantId={tenantId} clinicId={readiness.clinicId} variant={variant} />
+          <ClinicBookingSetupTestPanel
+            tenantId={tenantId}
+            clinicId={readiness.clinicId}
+            variant={variant}
+          />
         </div>
       ) : null}
 
@@ -126,8 +145,15 @@ function ReadinessRow({ check, isDark }: { check: RoomSchedulingReadinessCheck; 
       <div className="flex min-w-0 gap-2.5">
         <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", CHECK_COLOR[check.status])} aria-hidden />
         <div className="min-w-0">
-          <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>{check.label}</p>
-          <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
+          <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>
+            {check.label}
+          </p>
+          <p
+            className={cn(
+              "mt-0.5 text-xs leading-relaxed",
+              isDark ? "text-slate-400" : "text-slate-400"
+            )}
+          >
             {check.message}
           </p>
         </div>
@@ -153,10 +179,14 @@ function PerthDefaultSetupInfoBox({ isDark, tenantId }: { isDark: boolean; tenan
     <div
       className={cn(
         "mt-4 rounded-lg border px-3 py-3 text-xs leading-relaxed",
-        isDark ? "border-cyan-500/20 bg-cyan-950/15 text-slate-300" : "border-cyan-500/20 bg-cyan-500/10 text-slate-300"
+        isDark
+          ? "border-cyan-500/20 bg-cyan-950/15 text-slate-300"
+          : "border-cyan-500/20 bg-cyan-500/10 text-slate-300"
       )}
     >
-      <p className={cn("font-semibold", isDark ? "text-cyan-100" : "text-cyan-200")}>Perth default setup</p>
+      <p className={cn("font-semibold", isDark ? "text-cyan-100" : "text-cyan-200")}>
+        Perth default setup
+      </p>
       <ul className="mt-2 list-inside list-disc space-y-0.5">
         <li>Consult Room 1</li>
         <li>Consult Room 2 / Patient Room 2 — shared physical room</li>
@@ -168,16 +198,29 @@ function PerthDefaultSetupInfoBox({ isDark, tenantId }: { isDark: boolean; tenan
       </ul>
       <p className="mt-3">
         Seed default service mappings:{" "}
-        <code className={cn("rounded px-1 py-0.5 font-mono text-[11px]", isDark ? "bg-black/30" : "bg-[#0F1629]/80 backdrop-blur-md")}>
+        <code
+          className={cn(
+            "rounded px-1 py-0.5 font-mono text-[11px]",
+            isDark ? "bg-black/30" : "bg-[#0F1629]/80 backdrop-blur-md"
+          )}
+        >
           npm run seed -- --dry-run
         </code>{" "}
         then{" "}
-        <code className={cn("rounded px-1 py-0.5 font-mono text-[11px]", isDark ? "bg-black/30" : "bg-[#0F1629]/80 backdrop-blur-md")}>
+        <code
+          className={cn(
+            "rounded px-1 py-0.5 font-mono text-[11px]",
+            isDark ? "bg-black/30" : "bg-[#0F1629]/80 backdrop-blur-md"
+          )}
+        >
           npm run seed
         </code>
       </p>
       <p className="mt-2">
-        <Link href={calendarHref} className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-cyan-300")}>
+        <Link
+          href={calendarHref}
+          className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-cyan-300")}
+        >
           View calendar by room
         </Link>
         {" · "}
@@ -199,11 +242,20 @@ function PerthDefaultSetupInfoBox({ isDark, tenantId }: { isDark: boolean; tenan
   );
 }
 
-export function RoomSchedulingReadinessCompactBadge({ status }: { status: OverallReadinessStatus }) {
+export function RoomSchedulingReadinessCompactBadge({
+  status,
+}: {
+  status: OverallReadinessStatus;
+}) {
   const meta = OVERALL_META[status];
   const Icon = meta.Icon;
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset", meta.badgeClass)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset",
+        meta.badgeClass
+      )}
+    >
       <Icon className="h-3 w-3" aria-hidden />
       {meta.label}
     </span>

@@ -81,7 +81,8 @@ export default async function StaffTwinPage({
     source_staff_id: row.source_staff_id,
     metadata: row.metadata,
   }));
-  const academyCompetencySignals = buildAcademyCompetencySignalsFromProjections(competencyProjections);
+  const academyCompetencySignals =
+    buildAcademyCompetencySignalsFromProjections(competencyProjections);
   const workforceReadiness = calculateWorkforceReadinessScore({
     is_active: staff.is_active,
     staff_role: staff.staff_role,
@@ -95,11 +96,15 @@ export default async function StaffTwinPage({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">Staff Twin</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">{staff.full_name}</h1>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
+          Staff Twin
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
+          {staff.full_name}
+        </h1>
         <p className="mt-2 text-sm text-[#94A3B8]">
-          Read-only foundation view. Scheduling and identity links are shown here; deeper HR and clinical modules will
-          connect in later phases.
+          Read-only foundation view. Scheduling and identity links are shown here; deeper HR and
+          clinical modules will connect in later phases.
         </p>
       </div>
 
@@ -107,11 +112,16 @@ export default async function StaffTwinPage({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-[#F8FAFC]">Profile</h2>
-            <p className="mt-1 text-sm text-[#94A3B8]">From <span className="font-mono text-xs text-[#64748B]">fi_staff</span></p>
+            <p className="mt-1 text-sm text-[#94A3B8]">
+              From <span className="font-mono text-xs text-[#64748B]">fi_staff</span>
+            </p>
             <p className="mt-2 text-sm">
-            <Link href={`${base}/staff/role-review`} className="text-[#22C1FF] underline-offset-2 hover:underline">
-              Assign roles workflow
-            </Link>
+              <Link
+                href={`${base}/staff/role-review`}
+                className="text-[#22C1FF] underline-offset-2 hover:underline"
+              >
+                Assign roles workflow
+              </Link>
             </p>
           </div>
           <span
@@ -123,7 +133,11 @@ export default async function StaffTwinPage({
                 : "rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-100"
             }
           >
-            {!staff.is_active ? "Inactive" : isStaffRoleNeedsReview(staff.staff_role) ? "Needs review" : "Active"}
+            {!staff.is_active
+              ? "Inactive"
+              : isStaffRoleNeedsReview(staff.staff_role)
+                ? "Needs review"
+                : "Active"}
           </span>
         </div>
         <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
@@ -160,7 +174,10 @@ export default async function StaffTwinPage({
         {isStaffRoleNeedsReview(staff.staff_role) ? (
           <p className="mt-4 text-sm text-amber-100/90">
             This profile cannot be used as a clinical booking assignee until a proper role is set in{" "}
-            <Link href={`${base}/staff?staff_role=needs_review`} className="underline-offset-2 hover:underline">
+            <Link
+              href={`${base}/staff?staff_role=needs_review`}
+              className="underline-offset-2 hover:underline"
+            >
               Staff directory
             </Link>
             .
@@ -176,7 +193,10 @@ export default async function StaffTwinPage({
 
       <DashboardCard className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">FI login</h2>
-        <p className="mt-1 text-sm text-[#94A3B8]">Linked row in <span className="font-mono text-xs text-[#64748B]">fi_users</span> (tenant-scoped)</p>
+        <p className="mt-1 text-sm text-[#94A3B8]">
+          Linked row in <span className="font-mono text-xs text-[#64748B]">fi_users</span>{" "}
+          (tenant-scoped)
+        </p>
         {linkedUser ? (
           <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
             <div className="sm:col-span-2">
@@ -219,7 +239,10 @@ export default async function StaffTwinPage({
 
       <DashboardCard className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">External systems</h2>
-        <p className="mt-1 text-sm text-[#94A3B8]">Identifiers from <span className="font-mono text-xs text-[#64748B]">fi_staff_source_ids</span></p>
+        <p className="mt-1 text-sm text-[#94A3B8]">
+          Identifiers from{" "}
+          <span className="font-mono text-xs text-[#64748B]">fi_staff_source_ids</span>
+        </p>
         {sourceIds.length === 0 ? (
           <p className="mt-4 text-sm text-[#94A3B8]">No external source ids recorded.</p>
         ) : (
@@ -260,7 +283,9 @@ export default async function StaffTwinPage({
           </div>
           <div>
             <dt className="text-[#64748B]">Weekly hours</dt>
-            <dd className="mt-1 text-[#E2E8F0]">{workingHoursSummary || "No weekly pattern configured."}</dd>
+            <dd className="mt-1 text-[#E2E8F0]">
+              {workingHoursSummary || "No weekly pattern configured."}
+            </dd>
           </div>
         </dl>
       </DashboardCard>
@@ -286,25 +311,45 @@ export default async function StaffTwinPage({
 
       <div className="grid gap-4 sm:grid-cols-2">
         {[
-          { title: "HR employment record", body: "Payroll dates, contracts, and position history will appear when HR integrations are enabled." },
-          { title: "Surgical participation", body: "Theatre lists, procedures assisted, and case attribution will be summarised here." },
-          { title: "Patient outcomes", body: "Aggregated outcome metrics tied to this clinician will display with appropriate governance." },
-          { title: "Audit performance", body: "Quality audits and corrective actions will roll up into this panel." },
+          {
+            title: "HR employment record",
+            body: "Payroll dates, contracts, and position history will appear when HR integrations are enabled.",
+          },
+          {
+            title: "Surgical participation",
+            body: "Theatre lists, procedures assisted, and case attribution will be summarised here.",
+          },
+          {
+            title: "Patient outcomes",
+            body: "Aggregated outcome metrics tied to this clinician will display with appropriate governance.",
+          },
+          {
+            title: "Audit performance",
+            body: "Quality audits and corrective actions will roll up into this panel.",
+          },
         ].map((panel) => (
           <DashboardCard key={panel.title} className="p-5">
             <h3 className="text-sm font-semibold text-[#F8FAFC]">{panel.title}</h3>
             <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{panel.body}</p>
-            <p className="mt-3 text-[10px] font-semibold uppercase tracking-wider text-[#475569]">Placeholder</p>
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-wider text-[#475569]">
+              Placeholder
+            </p>
           </DashboardCard>
         ))}
       </div>
 
       <p className="text-center text-sm text-[#64748B]">
-        <Link href={`${base}/staff`} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+        <Link
+          href={`${base}/staff`}
+          className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline"
+        >
           Back to staff directory
         </Link>
         {" · "}
-        <Link href={base} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+        <Link
+          href={base}
+          className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline"
+        >
           Tenant home
         </Link>
       </p>

@@ -20,7 +20,10 @@ import {
 import type { ExternalConnectorProvider } from "./externalConnectorTypes";
 import { isExternalConnectorProvider } from "./externalConnectorTypes";
 
-const PROVIDER_AUTH_METHODS: Record<ExternalConnectorProvider, readonly ExternalConnectorAuthMethod[]> = {
+const PROVIDER_AUTH_METHODS: Record<
+  ExternalConnectorProvider,
+  readonly ExternalConnectorAuthMethod[]
+> = {
   pabau: ["api_key", "manual_placeholder"],
   cliniko: ["api_key", "manual_placeholder"],
   hubspot: ["oauth2", "api_key", "manual_placeholder"],
@@ -183,7 +186,11 @@ export function resolveConnectorAuthStatus(opts: {
     return "insufficient_permissions";
   }
 
-  if (opts.permissionCoveragePercent >= 100 && opts.verificationAttempted && opts.credentialPresent) {
+  if (
+    opts.permissionCoveragePercent >= 100 &&
+    opts.verificationAttempted &&
+    opts.credentialPresent
+  ) {
     return "verified";
   }
 
@@ -191,7 +198,9 @@ export function resolveConnectorAuthStatus(opts: {
     return "failed";
   }
 
-  const current = isExternalConnectorAuthStatus(opts.currentStatus) ? opts.currentStatus : "pending";
+  const current = isExternalConnectorAuthStatus(opts.currentStatus)
+    ? opts.currentStatus
+    : "pending";
   return current;
 }
 
@@ -258,12 +267,11 @@ export function buildConnectorVerificationResult(opts: {
     };
   }
 
-  const grantedKeys =
-    opts.input.grantedScopes?.length
-      ? opts.input.grantedScopes
-      : testMode
-        ? requiredScopes.map((s) => s.scopeKey)
-        : [];
+  const grantedKeys = opts.input.grantedScopes?.length
+    ? opts.input.grantedScopes
+    : testMode
+      ? requiredScopes.map((s) => s.scopeKey)
+      : [];
 
   const grantedScopes = mergeGrantedScopes(requiredScopes, grantedKeys);
   const coverage = calculatePermissionCoverage(grantedScopes);
@@ -361,7 +369,8 @@ export function buildConnectorAuthHealthSummary(opts: {
     warnings.push("Verification required before live sync.");
   }
 
-  const readyForLiveSync = authStatus === "verified" && coverage >= 100 && !tokenExpiryWarning?.includes("expired");
+  const readyForLiveSync =
+    authStatus === "verified" && coverage >= 100 && !tokenExpiryWarning?.includes("expired");
 
   const summary =
     authStatus === "verified"
@@ -386,7 +395,9 @@ export function buildConnectorAuthHealthSummary(opts: {
 }
 
 /** Default auth method for a provider (first supported non-placeholder). */
-export function defaultAuthMethodForProvider(provider: ExternalConnectorProvider): ExternalConnectorAuthMethod {
+export function defaultAuthMethodForProvider(
+  provider: ExternalConnectorProvider
+): ExternalConnectorAuthMethod {
   const methods = resolveSupportedAuthMethods(provider);
   return methods.find((m) => m !== "manual_placeholder") ?? methods[0] ?? "manual_placeholder";
 }

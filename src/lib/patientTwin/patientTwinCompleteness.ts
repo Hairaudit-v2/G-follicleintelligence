@@ -33,7 +33,11 @@ function pushMissing(
   out.push({ area, label, severity });
 }
 
-function pushStrength(out: PatientTwinCompletenessSection["strengths"], area: string, label: string) {
+function pushStrength(
+  out: PatientTwinCompletenessSection["strengths"],
+  area: string,
+  label: string
+) {
   out.push({ area, label });
 }
 
@@ -50,7 +54,9 @@ function pushAction(
  * Derives completeness score, band, gaps, strengths, and suggested next steps from an assembled
  * twin (excluding the `completeness` field). Uses only fields already on the DTO — no I/O.
  */
-export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleteness): PatientTwinCompletenessSection {
+export function calculatePatientTwinCompleteness(
+  twin: PatientTwinV1ForCompleteness
+): PatientTwinCompletenessSection {
   const missing: PatientTwinCompletenessSection["missing"] = [];
   const strengths: PatientTwinCompletenessSection["strengths"] = [];
   const recommended_actions: PatientTwinCompletenessSection["recommended_actions"] = [];
@@ -64,7 +70,12 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
     idPts += 5;
     pushStrength(strengths, "identity", "Display name is present.");
   } else {
-    pushMissing(missing, "identity", "Add a display name on the person or patient record.", "warning");
+    pushMissing(
+      missing,
+      "identity",
+      "Add a display name on the person or patient record.",
+      "warning"
+    );
     pushAction(
       recommended_actions,
       "Set patient display name",
@@ -95,7 +106,12 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
     idPts += 5;
     pushStrength(strengths, "identity", "Source identifiers or resolution labels are mapped.");
   } else {
-    pushMissing(missing, "identity", "Map external source IDs (fi_patient_source_ids) where possible.", "info");
+    pushMissing(
+      missing,
+      "identity",
+      "Map external source IDs (fi_patient_source_ids) where possible.",
+      "info"
+    );
     pushAction(
       recommended_actions,
       "Link source system IDs",
@@ -105,7 +121,12 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
   }
 
   if (twin.identity_resolution.duplicate_risk) {
-    pushMissing(missing, "identity", "Possible duplicate or ambiguous resolution — review mappings.", "warning");
+    pushMissing(
+      missing,
+      "identity",
+      "Possible duplicate or ambiguous resolution — review mappings.",
+      "warning"
+    );
   }
 
   score += idPts;
@@ -120,7 +141,12 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
     score += 10;
     pushStrength(strengths, "crm", "CRM activity, leads, or tasks are linked.");
   } else {
-    pushMissing(missing, "crm", "No linked CRM leads, tasks, or recent activity for this patient.", "info");
+    pushMissing(
+      missing,
+      "crm",
+      "No linked CRM leads, tasks, or recent activity for this patient.",
+      "info"
+    );
     pushAction(
       recommended_actions,
       "Connect a CRM lead or log activity",
@@ -147,8 +173,18 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
   }
   if (hasCaseMilestone || hasTimeline) {
     score += 5;
-    if (hasCaseMilestone) pushStrength(strengths, "case", "Recent case milestones are visible from the foundation timeline.");
-    else if (hasTimeline) pushStrength(strengths, "timeline", "Foundation timeline events provide longitudinal context.");
+    if (hasCaseMilestone)
+      pushStrength(
+        strengths,
+        "case",
+        "Recent case milestones are visible from the foundation timeline."
+      );
+    else if (hasTimeline)
+      pushStrength(
+        strengths,
+        "timeline",
+        "Foundation timeline events provide longitudinal context."
+      );
   } else if (hasCases) {
     pushMissing(missing, "case", "Cases exist but no foundation timeline milestones yet.", "info");
     pushAction(
@@ -163,12 +199,19 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
 
   // --- Audit (15): pipeline 10, released report 5 ---
   const auditSignal =
-    twin.audits.reports_total > 0 || twin.audits.audits_total > 0 || twin.audits.scorecards_total > 0;
+    twin.audits.reports_total > 0 ||
+    twin.audits.audits_total > 0 ||
+    twin.audits.scorecards_total > 0;
   if (auditSignal) {
     score += 10;
     pushStrength(strengths, "audit", "Reports, audits, or scorecards exist on linked cases.");
   } else {
-    pushMissing(missing, "audit", "No reports, audits, or scorecards on linked cases yet.", "warning");
+    pushMissing(
+      missing,
+      "audit",
+      "No reports, audits, or scorecards on linked cases yet.",
+      "warning"
+    );
     pushAction(
       recommended_actions,
       "Run or attach audit pipeline outputs",
@@ -219,7 +262,9 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
     } else {
       pushMissing(missing, "clinical", "Norwood / Ludwig / hairline pattern not set.", "info");
     }
-    const hasConcernOrInterest = Boolean(sp.primary_concern?.trim() || sp.treatment_interest?.trim());
+    const hasConcernOrInterest = Boolean(
+      sp.primary_concern?.trim() || sp.treatment_interest?.trim()
+    );
     if (hasConcernOrInterest) {
       clinPts += 4;
       pushStrength(strengths, "clinical", "Primary concern or treatment interest is captured.");
@@ -227,7 +272,12 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
       pushMissing(missing, "clinical", "Primary concern and treatment interest are empty.", "info");
     }
   } else {
-    pushMissing(missing, "clinical", "No fi_patient_clinical_details row (bounded fields).", "warning");
+    pushMissing(
+      missing,
+      "clinical",
+      "No fi_patient_clinical_details row (bounded fields).",
+      "warning"
+    );
     pushAction(
       recommended_actions,
       "Complete structured clinical fields",
@@ -238,7 +288,11 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
   score += Math.min(15, clinPts);
 
   if (twin.pathology.requests.length > 0 || twin.pathology.results.length > 0) {
-    pushStrength(strengths, "pathology", "Blood pathology requests or results exist for this patient.");
+    pushStrength(
+      strengths,
+      "pathology",
+      "Blood pathology requests or results exist for this patient."
+    );
   }
 
   // --- Timeline (10) ---
@@ -258,12 +312,22 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
   }
 
   // --- Outcome (5): placeholder — reward structured pipeline readiness only ---
-  const outcomeReady = twin.audits.scorecards_total > 0 || twin.audits.latest_released_report != null;
+  const outcomeReady =
+    twin.audits.scorecards_total > 0 || twin.audits.latest_released_report != null;
   if (outcomeReady) {
     score += 5;
-    pushStrength(strengths, "outcome", "Scorecard or released report indicates outcome-ready pipeline data.");
+    pushStrength(
+      strengths,
+      "outcome",
+      "Scorecard or released report indicates outcome-ready pipeline data."
+    );
   } else {
-    pushMissing(missing, "outcome", "Outcome indicators are not populated yet (V1 placeholder).", "info");
+    pushMissing(
+      missing,
+      "outcome",
+      "Outcome indicators are not populated yet (V1 placeholder).",
+      "info"
+    );
     pushAction(
       recommended_actions,
       "Plan outcome capture",

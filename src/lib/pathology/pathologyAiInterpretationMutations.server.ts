@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
-import { pathologyAiInterpretationJsonSchema, type PathologyAiInterpretationJson } from "./pathologyAiInterpretationSchema";
+import {
+  pathologyAiInterpretationJsonSchema,
+  type PathologyAiInterpretationJson,
+} from "./pathologyAiInterpretationSchema";
 import { mapPathologyAiInterpretationRow } from "./pathologyAiInterpretationLoad.server";
 import type { PathologyAiInterpretationRow } from "./pathologyAiInterpretationTypes";
 
@@ -36,7 +39,11 @@ function requireOpenAiKey(): string {
 }
 
 function modelName(): string {
-  return process.env.OPENAI_PATHOLOGY_INTERPRETATION_MODEL?.trim() || process.env.OPENAI_CLINICAL_NOTE_MODEL?.trim() || "gpt-4o-mini";
+  return (
+    process.env.OPENAI_PATHOLOGY_INTERPRETATION_MODEL?.trim() ||
+    process.env.OPENAI_CLINICAL_NOTE_MODEL?.trim() ||
+    "gpt-4o-mini"
+  );
 }
 
 function maybeNumber(v: unknown): number | null {
@@ -82,7 +89,9 @@ function shapePrompt(): string {
           suggested_next_step: "string",
         },
       ],
-      risk_flags: [{ label: "string", rationale: "string", urgency: "routine | review_soon | urgent" }],
+      risk_flags: [
+        { label: "string", rationale: "string", urgency: "routine | review_soon | urgent" },
+      ],
       treatment_considerations: [{ label: "string", rationale: "string" }],
       supplement_considerations: [{ label: "string", rationale: "string" }],
       medication_considerations: [{ label: "string", rationale: "string" }],
@@ -95,7 +104,9 @@ function shapePrompt(): string {
         inflammation_status_score: 0,
         hormone_status_score: 0,
       },
-      repeat_testing_recommendations: [{ marker_or_panel: "string", rationale: "string", suggested_timing: "string or null" }],
+      repeat_testing_recommendations: [
+        { marker_or_panel: "string", rationale: "string", suggested_timing: "string or null" },
+      ],
       patient_friendly_summary: "string",
       clinician_summary: "string",
       hair_loss_relevance_score: 0,
@@ -109,7 +120,11 @@ function buildPrompt(params: {
   patientDisplayName: string | null;
   result: ResultHeader;
   markers: ResultMarker[];
-  linkedRequest: { request_date: string; template_used: string; clinical_notes: string | null } | null;
+  linkedRequest: {
+    request_date: string;
+    template_used: string;
+    clinical_notes: string | null;
+  } | null;
 }): string {
   const markers = params.markers.map((m) => ({
     test_code: m.test_code,
@@ -148,10 +163,17 @@ function buildPrompt(params: {
   ].join("\n");
 }
 
-async function loadGenerationContext(supabase: SupabaseClient, tenantId: string, patientId: string, resultId: string) {
+async function loadGenerationContext(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string,
+  resultId: string
+) {
   const { data: resultRow, error: re } = await supabase
     .from("fi_pathology_results")
-    .select("id, tenant_id, patient_id, pathology_request_id, result_date, provider_name, clinical_summary")
+    .select(
+      "id, tenant_id, patient_id, pathology_request_id, result_date, provider_name, clinical_summary"
+    )
     .eq("tenant_id", tenantId)
     .eq("patient_id", patientId)
     .eq("id", resultId)
@@ -185,22 +207,39 @@ async function loadGenerationContext(supabase: SupabaseClient, tenantId: string,
     reference_range: x.reference_range != null ? String(x.reference_range) : null,
     flag: String(x.flag ?? "unknown"),
   }));
-  if (markers.length === 0) throw new Error("No structured result markers are available for AI interpretation.");
+  if (markers.length === 0)
+    throw new Error("No structured result markers are available for AI interpretation.");
 
   let patientDisplayName: string | null = null;
-  const { data: patRow, error: pe } = await supabase.from("fi_patients").select("person_id").eq("tenant_id", tenantId).eq("id", patientId).maybeSingle();
+  const { data: patRow, error: pe } = await supabase
+    .from("fi_patients")
+    .select("person_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", patientId)
+    .maybeSingle();
   if (pe) throw new Error(pe.message);
   const personId = patRow ? String((patRow as { person_id: string }).person_id) : "";
   if (personId) {
-    const { data: personRow } = await supabase.from("fi_persons").select("metadata").eq("tenant_id", tenantId).eq("id", personId).maybeSingle();
+    const { data: personRow } = await supabase
+      .from("fi_persons")
+      .select("metadata")
+      .eq("tenant_id", tenantId)
+      .eq("id", personId)
+      .maybeSingle();
     const meta =
-      personRow && typeof (personRow as { metadata: unknown }).metadata === "object" && !Array.isArray((personRow as { metadata: unknown }).metadata)
+      personRow &&
+      typeof (personRow as { metadata: unknown }).metadata === "object" &&
+      !Array.isArray((personRow as { metadata: unknown }).metadata)
         ? ((personRow as { metadata: Record<string, unknown> }).metadata ?? {})
         : {};
     patientDisplayName = displayFromPersonMetadata(meta).name;
   }
 
-  let linkedRequest: { request_date: string; template_used: string; clinical_notes: string | null } | null = null;
+  let linkedRequest: {
+    request_date: string;
+    template_used: string;
+    clinical_notes: string | null;
+  } | null = null;
   if (result.pathology_request_id) {
     const { data: rq } = await supabase
       .from("fi_pathology_requests")
@@ -222,7 +261,9 @@ async function loadGenerationContext(supabase: SupabaseClient, tenantId: string,
   return { result, markers, patientDisplayName, linkedRequest };
 }
 
-async function callOpenAiForInterpretation(prompt: string): Promise<{ interpretation: PathologyAiInterpretationJson; model: string }> {
+async function callOpenAiForInterpretation(
+  prompt: string
+): Promise<{ interpretation: PathologyAiInterpretationJson; model: string }> {
   const key = requireOpenAiKey();
   const model = modelName();
   const res = await fetch(CHAT_URL, {
@@ -267,7 +308,9 @@ async function callOpenAiForInterpretation(prompt: string): Promise<{ interpreta
 
   const parsed = pathologyAiInterpretationJsonSchema.safeParse(parsedJson);
   if (!parsed.success) {
-    throw new Error(`OpenAI pathology interpretation failed schema validation: ${parsed.error.issues[0]?.message ?? "invalid JSON"}`);
+    throw new Error(
+      `OpenAI pathology interpretation failed schema validation: ${parsed.error.issues[0]?.message ?? "invalid JSON"}`
+    );
   }
   return { interpretation: parsed.data, model };
 }
@@ -378,18 +421,31 @@ export async function updatePathologyAiInterpretationSummaries(
   tenantId: string,
   patientId: string,
   resultId: string,
-  patch: { interpretationId?: string | null; doctorSummary: string | null; patientFriendlySummary: string | null },
+  patch: {
+    interpretationId?: string | null;
+    doctorSummary: string | null;
+    patientFriendlySummary: string | null;
+  },
   client?: SupabaseClient
 ): Promise<PathologyAiInterpretationRow> {
   const supabase = client ?? supabaseAdmin();
-  const current = await resolveInterpretation(supabase, tenantId.trim(), patientId.trim(), resultId.trim(), patch.interpretationId);
-  if (current.status === "archived") throw new Error("Archived AI interpretations cannot be edited.");
+  const current = await resolveInterpretation(
+    supabase,
+    tenantId.trim(),
+    patientId.trim(),
+    resultId.trim(),
+    patch.interpretationId
+  );
+  if (current.status === "archived")
+    throw new Error("Archived AI interpretations cannot be edited.");
 
   const { data, error } = await supabase
     .from("fi_pathology_ai_interpretations")
     .update({
       doctor_summary: patch.doctorSummary?.trim() ? patch.doctorSummary.trim() : null,
-      patient_friendly_summary: patch.patientFriendlySummary?.trim() ? patch.patientFriendlySummary.trim() : null,
+      patient_friendly_summary: patch.patientFriendlySummary?.trim()
+        ? patch.patientFriendlySummary.trim()
+        : null,
     })
     .eq("tenant_id", tenantId.trim())
     .eq("id", current.id)
@@ -410,11 +466,22 @@ export async function markPathologyAiInterpretationReviewed(
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
   const pid = patientId.trim();
-  const current = await resolveInterpretation(supabase, tid, pid, resultId.trim(), interpretationId);
-  if (current.status === "archived") throw new Error("Archived AI interpretations cannot be marked reviewed.");
+  const current = await resolveInterpretation(
+    supabase,
+    tid,
+    pid,
+    resultId.trim(),
+    interpretationId
+  );
+  if (current.status === "archived")
+    throw new Error("Archived AI interpretations cannot be marked reviewed.");
   const { data, error } = await supabase
     .from("fi_pathology_ai_interpretations")
-    .update({ status: "doctor_reviewed", reviewed_at: new Date().toISOString(), reviewed_by_user_id: actingUserId })
+    .update({
+      status: "doctor_reviewed",
+      reviewed_at: new Date().toISOString(),
+      reviewed_by_user_id: actingUserId,
+    })
     .eq("tenant_id", tid)
     .eq("id", current.id)
     .select("*")
@@ -435,7 +502,13 @@ export async function archivePathologyAiInterpretation(
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
   const pid = patientId.trim();
-  const current = await resolveInterpretation(supabase, tid, pid, resultId.trim(), interpretationId);
+  const current = await resolveInterpretation(
+    supabase,
+    tid,
+    pid,
+    resultId.trim(),
+    interpretationId
+  );
   if (current.status === "archived") return current;
   const { data, error } = await supabase
     .from("fi_pathology_ai_interpretations")

@@ -72,7 +72,12 @@ function makeFailedEvent(overrides: Partial<FiExternalEventRow> = {}): FiExterna
 type MockStore = {
   leads: FiLeadRow[];
   externalEvents: FiExternalEventRow[];
-  integrations: Array<{ tenant_id: string; provider: string; status: string; config: Record<string, unknown> }>;
+  integrations: Array<{
+    tenant_id: string;
+    provider: string;
+    status: string;
+    config: Record<string, unknown>;
+  }>;
   activities: Array<{
     id: string;
     lead_id: string;
@@ -211,14 +216,25 @@ function makeOperatorDashboardSupabase(store: MockStore, tenantFilter?: string):
           return chain;
         },
         maybeSingle: async () => {
-          const rows = filterExternalEvents(store.externalEvents, filters, gteCol, notNullCol, orderCol, orderAsc);
+          const rows = filterExternalEvents(
+            store.externalEvents,
+            filters,
+            gteCol,
+            notNullCol,
+            orderCol,
+            orderAsc
+          );
           return { data: rows[0] ?? null, error: null };
         },
         then: (onF: (v: unknown) => unknown, onR?: (e: unknown) => unknown) => {
-          const rows = filterExternalEvents(store.externalEvents, filters, gteCol, notNullCol, orderCol, orderAsc).slice(
-            0,
-            limit
-          );
+          const rows = filterExternalEvents(
+            store.externalEvents,
+            filters,
+            gteCol,
+            notNullCol,
+            orderCol,
+            orderAsc
+          ).slice(0, limit);
           if (head) {
             return Promise.resolve({ count: rows.length, error: null }).then(onF, onR);
           }
@@ -253,12 +269,16 @@ function filterExternalEvents(
       if (key.startsWith("__in_")) {
         const col = key.slice(5);
         const allowed = value as string[];
-        if (!allowed.includes(String((row as unknown as Record<string, unknown>)[col]))) return false;
+        if (!allowed.includes(String((row as unknown as Record<string, unknown>)[col])))
+          return false;
         continue;
       }
       if (String((row as unknown as Record<string, unknown>)[key]) !== String(value)) return false;
     }
-    if (gteCol && String((row as unknown as Record<string, unknown>)[gteCol.col] ?? "") < gteCol.val) {
+    if (
+      gteCol &&
+      String((row as unknown as Record<string, unknown>)[gteCol.col] ?? "") < gteCol.val
+    ) {
       return false;
     }
     if (notNullCol && (row as unknown as Record<string, unknown>)[notNullCol] == null) return false;
@@ -312,15 +332,38 @@ describe("LeadFlow operator dashboard core", () => {
     assert.equal(pipeline.find((col) => col.stage === "proposal_sent")?.count, 1);
     assert.equal(pipeline.find((col) => col.stage === "won")?.count, 1);
     assert.equal(pipeline.find((col) => col.stage === "lost")?.count, 1);
-    assert.equal(pipeline.find((col) => col.stage === "qualified"), undefined);
+    assert.equal(
+      pipeline.find((col) => col.stage === "qualified"),
+      undefined
+    );
   });
 
   it("orders high-priority leads by score then updated_at", () => {
     const leads = [
-      makeLead({ id: "a", priority_band: "high", lead_score: 70, updated_at: "2026-06-24T10:00:00.000Z" }),
-      makeLead({ id: "b", priority_band: "urgent", lead_score: 90, updated_at: "2026-06-23T10:00:00.000Z" }),
-      makeLead({ id: "c", priority_band: "urgent", lead_score: 90, updated_at: "2026-06-25T10:00:00.000Z" }),
-      makeLead({ id: "d", priority_band: "low", lead_score: 99, updated_at: "2026-06-25T12:00:00.000Z" }),
+      makeLead({
+        id: "a",
+        priority_band: "high",
+        lead_score: 70,
+        updated_at: "2026-06-24T10:00:00.000Z",
+      }),
+      makeLead({
+        id: "b",
+        priority_band: "urgent",
+        lead_score: 90,
+        updated_at: "2026-06-23T10:00:00.000Z",
+      }),
+      makeLead({
+        id: "c",
+        priority_band: "urgent",
+        lead_score: 90,
+        updated_at: "2026-06-25T10:00:00.000Z",
+      }),
+      makeLead({
+        id: "d",
+        priority_band: "low",
+        lead_score: 99,
+        updated_at: "2026-06-25T12:00:00.000Z",
+      }),
     ];
 
     const selected = selectLeadFlowOperatorHighPriorityLeads(leads);
@@ -353,7 +396,10 @@ describe("LeadFlow operator dashboard core", () => {
   it("handles empty lead sets without crashing", () => {
     const summary = buildLeadFlowOperatorSummaryMetrics([], 0);
     assert.equal(summary.totalLeads, 0);
-    assert.deepEqual(buildLeadFlowOperatorPipelineColumns([]).map((col) => col.count), [0, 0, 0, 0, 0, 0, 0]);
+    assert.deepEqual(
+      buildLeadFlowOperatorPipelineColumns([]).map((col) => col.count),
+      [0, 0, 0, 0, 0, 0, 0]
+    );
     assert.equal(selectLeadFlowOperatorHighPriorityLeads([]).length, 0);
     const predicted = buildLeadFlowOperatorPredictedProcedureCounts([]);
     assert.equal(predicted.unknown, 0);
@@ -374,12 +420,27 @@ describe("LeadFlow operator dashboard compose", () => {
     const tenantLeads = [leadA];
     const supabase = makeOperatorDashboardSupabase(
       {
-        leads: [leadA, makeLead({ id: "lead-b", tenant_id: TENANT_B, current_stage: "won", priority_band: "high" })],
+        leads: [
+          leadA,
+          makeLead({
+            id: "lead-b",
+            tenant_id: TENANT_B,
+            current_stage: "won",
+            priority_band: "high",
+          }),
+        ],
         externalEvents: [
           makeFailedEvent({ tenant_id: TENANT_A }),
           makeFailedEvent({ tenant_id: TENANT_B, external_id: "other" }),
         ],
-        integrations: [{ tenant_id: TENANT_A, provider: "hubspot", status: "active", config: { label: "Clinic HubSpot" } }],
+        integrations: [
+          {
+            tenant_id: TENANT_A,
+            provider: "hubspot",
+            status: "active",
+            config: { label: "Clinic HubSpot" },
+          },
+        ],
         activities: [
           {
             id: "act-1",

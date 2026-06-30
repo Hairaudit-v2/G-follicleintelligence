@@ -113,7 +113,9 @@ export async function markGoLiveChecklistItemReviewedAction(
   }
 }
 
-export async function markOwnerReviewCompleteAction(sessionId: string): Promise<GoLiveReadinessActionResult> {
+export async function markOwnerReviewCompleteAction(
+  sessionId: string
+): Promise<GoLiveReadinessActionResult> {
   try {
     const sid = sessionIdSchema.parse(sessionId);
     const authId = await resolveActorAuthId();
@@ -141,7 +143,9 @@ export async function markOwnerReviewCompleteAction(sessionId: string): Promise<
   }
 }
 
-export async function markPlatformReviewCompleteAction(sessionId: string): Promise<GoLiveReadinessActionResult> {
+export async function markPlatformReviewCompleteAction(
+  sessionId: string
+): Promise<GoLiveReadinessActionResult> {
   try {
     const sid = sessionIdSchema.parse(sessionId);
     const authId = await resolveActorAuthId();
@@ -170,7 +174,9 @@ export async function markPlatformReviewCompleteAction(sessionId: string): Promi
   }
 }
 
-export async function approveTenantGoLiveAction(sessionId: string): Promise<GoLiveReadinessActionResult> {
+export async function approveTenantGoLiveAction(
+  sessionId: string
+): Promise<GoLiveReadinessActionResult> {
   try {
     const sid = sessionIdSchema.parse(sessionId);
     const authId = await resolveActorAuthId();

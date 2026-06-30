@@ -21,7 +21,11 @@ type ModuleNavItem = {
   disabled?: boolean;
 };
 
-export function DashboardModuleNavigation(props: { base: string; showCrmNav: boolean; showBookingsBoard: boolean }) {
+export function DashboardModuleNavigation(props: {
+  base: string;
+  showCrmNav: boolean;
+  showBookingsBoard: boolean;
+}) {
   const { base, showCrmNav, showBookingsBoard } = props;
 
   const modules: ModuleNavItem[] = [
@@ -89,7 +93,9 @@ export function DashboardModuleNavigation(props: { base: string; showCrmNav: boo
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-semibold text-slate-100">{mod.label}</span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{mod.description}</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+                  {mod.description}
+                </span>
               </span>
             </>
           );
@@ -99,7 +105,7 @@ export function DashboardModuleNavigation(props: { base: string; showCrmNav: boo
               <div
                 key={mod.id}
                 className={cn(
-                  "flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-3 opacity-50",
+                  "flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-3 opacity-50"
                 )}
                 aria-disabled="true"
               >
@@ -114,7 +120,7 @@ export function DashboardModuleNavigation(props: { base: string; showCrmNav: boo
               href={mod.href}
               className={cn(
                 "flex items-start gap-3 rounded-xl border border-white/[0.07] bg-[#0c1426]/60 px-3 py-3 transition",
-                "hover:border-cyan-500/25 hover:bg-[#141c33]/75",
+                "hover:border-cyan-500/25 hover:bg-[#141c33]/75"
               )}
             >
               {content}

@@ -29,9 +29,17 @@ export type FiFinanceApplicationDocumentType =
   | "consent_form"
   | "custom";
 
-export type FiFinanceApplicationDocumentStatus = "pending" | "requested" | "received" | "verified" | "rejected";
+export type FiFinanceApplicationDocumentStatus =
+  | "pending"
+  | "requested"
+  | "received"
+  | "verified"
+  | "rejected";
 
-export const RESOLVED_FINANCE_APPLICATION_STATUSES: readonly FiFinanceApplicationStatus[] = ["settled", "cancelled"];
+export const RESOLVED_FINANCE_APPLICATION_STATUSES: readonly FiFinanceApplicationStatus[] = [
+  "settled",
+  "cancelled",
+];
 
 export const FINANCE_DOCUMENTS_PENDING_LABEL = "Finance Documents Pending" as const;
 export const FINANCE_APPROVAL_PENDING_LABEL = "Finance Approval Pending" as const;
@@ -81,7 +89,9 @@ export function isResolvedFinanceApplicationStatus(status: FiFinanceApplicationS
   return RESOLVED_FINANCE_APPLICATION_STATUSES.includes(status);
 }
 
-export function isUnresolvedFinanceApplication(application: FiFinanceApplicationRow | null | undefined): boolean {
+export function isUnresolvedFinanceApplication(
+  application: FiFinanceApplicationRow | null | undefined
+): boolean {
   if (!application) return false;
   return !isResolvedFinanceApplicationStatus(application.application_status);
 }
@@ -111,7 +121,8 @@ export function requiresEscalatedFinanceApplicationAttention(
   input: BuildFinanceApplicationAttentionInput
 ): boolean {
   const { todayYmd, application, surgeryDateYmd = null } = input;
-  if (!application || isResolvedFinanceApplicationStatus(application.application_status)) return false;
+  if (!application || isResolvedFinanceApplicationStatus(application.application_status))
+    return false;
 
   const status = application.application_status;
   const surgery = ymd(surgeryDateYmd);
@@ -158,7 +169,12 @@ export function buildFinanceApplicationAttentionLabels(
     labels.push(FINANCE_DOCUMENTS_PENDING_LABEL);
   }
 
-  if (status === "submitted" || status === "under_review" || status === "rejected" || status === "approved") {
+  if (
+    status === "submitted" ||
+    status === "under_review" ||
+    status === "rejected" ||
+    status === "approved"
+  ) {
     if (status !== "approved") labels.push(FINANCE_APPROVAL_PENDING_LABEL);
   }
 
@@ -199,7 +215,9 @@ export function buildFinanceApplicationAttentionSummary(
   const labels = buildFinanceApplicationAttentionLabels(input);
   return {
     finance_attention_required: true,
-    finance_attention_reason: labels.length ? labels.join("; ") : "Financing application in progress",
+    finance_attention_reason: labels.length
+      ? labels.join("; ")
+      : "Financing application in progress",
     finance_attention_labels: labels,
   };
 }
@@ -235,7 +253,11 @@ export type FinanceApplicationsDashboardCounts = {
   settlementPendingCount: number;
   attentionCount: number;
   averageApprovalDays: number | null;
-  providerConversionRates: Array<{ providerId: string; providerName: string; conversionRate: number | null }>;
+  providerConversionRates: Array<{
+    providerId: string;
+    providerName: string;
+    conversionRate: number | null;
+  }>;
   mostUsedProvider: { providerId: string; providerName: string; count: number } | null;
 };
 
@@ -260,7 +282,14 @@ export function aggregateFinanceProviderAnalytics(
   const out: FinanceProviderAnalytics[] = [];
   for (const [providerId, rows] of byProvider) {
     const submitted = rows.filter((r) =>
-      ["submitted", "under_review", "approved", "rejected", "settlement_pending", "settled"].includes(r.application_status)
+      [
+        "submitted",
+        "under_review",
+        "approved",
+        "rejected",
+        "settlement_pending",
+        "settled",
+      ].includes(r.application_status)
     );
     const approved = rows.filter((r) =>
       ["approved", "settlement_pending", "settled"].includes(r.application_status)
@@ -289,9 +318,13 @@ export function aggregateFinanceProviderAnalytics(
       approvalRate: decided > 0 ? approved.length / decided : null,
       rejectionRate: decided > 0 ? rejected.length / decided : null,
       averageApprovalDays:
-        approvalDays.length > 0 ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length) : null,
+        approvalDays.length > 0
+          ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length)
+          : null,
       averageSettlementDays:
-        settlementDays.length > 0 ? Math.round(settlementDays.reduce((a, b) => a + b, 0) / settlementDays.length) : null,
+        settlementDays.length > 0
+          ? Math.round(settlementDays.reduce((a, b) => a + b, 0) / settlementDays.length)
+          : null,
     });
   }
 
@@ -312,7 +345,16 @@ export function aggregateFinanceApplicationsDashboardCounts(
   const approvalDays: number[] = [];
 
   for (const app of applications) {
-    if (["submitted", "under_review", "approved", "rejected", "settlement_pending", "settled"].includes(app.application_status)) {
+    if (
+      [
+        "submitted",
+        "under_review",
+        "approved",
+        "rejected",
+        "settlement_pending",
+        "settled",
+      ].includes(app.application_status)
+    ) {
       submittedCount += 1;
     }
     if (["approved", "settlement_pending", "settled"].includes(app.application_status)) {
@@ -321,7 +363,9 @@ export function aggregateFinanceApplicationsDashboardCounts(
     if (app.application_status === "documents_pending") pendingDocsCount += 1;
     if (app.application_status === "settlement_pending") settlementPendingCount += 1;
 
-    const surgeryYmd = app.booking_id ? surgeryDatesByBookingId.get(app.booking_id) ?? null : null;
+    const surgeryYmd = app.booking_id
+      ? (surgeryDatesByBookingId.get(app.booking_id) ?? null)
+      : null;
     if (
       resolveFinanceApplicationAttention({
         todayYmd,
@@ -344,7 +388,9 @@ export function aggregateFinanceApplicationsDashboardCounts(
   }));
 
   const mostUsed = providerAnalytics.length
-    ? providerAnalytics.reduce((best, cur) => (cur.totalApplications > best.totalApplications ? cur : best))
+    ? providerAnalytics.reduce((best, cur) =>
+        cur.totalApplications > best.totalApplications ? cur : best
+      )
     : null;
 
   return {
@@ -354,10 +400,16 @@ export function aggregateFinanceApplicationsDashboardCounts(
     settlementPendingCount,
     attentionCount,
     averageApprovalDays:
-      approvalDays.length > 0 ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length) : null,
+      approvalDays.length > 0
+        ? Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length)
+        : null,
     providerConversionRates,
     mostUsedProvider: mostUsed
-      ? { providerId: mostUsed.providerId, providerName: mostUsed.providerName, count: mostUsed.totalApplications }
+      ? {
+          providerId: mostUsed.providerId,
+          providerName: mostUsed.providerName,
+          count: mostUsed.totalApplications,
+        }
       : null,
   };
 }

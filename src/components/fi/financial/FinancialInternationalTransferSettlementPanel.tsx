@@ -7,7 +7,12 @@ import {
   updateInternationalTransferSettlementAction,
   updateInternationalTransferStatusAction,
 } from "@/lib/actions/financial-os-international-transfer-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  financialOsActionFeedback,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialInternationalTransferStatusBadge } from "@/src/components/fi/financial/FinancialInternationalTransferStatusBadge";
 import type { InternationalTransferApplicationRecord } from "@/src/lib/financialOs/financialInternationalTransfer.server";
 
@@ -85,7 +90,9 @@ export function FinancialInternationalTransferSettlementPanel(props: {
       const res = await resolveInternationalTransferAttentionAction(props.tenantId, {
         application_id: application.id,
       });
-      setFeedback(financialOsActionFeedback(res, "Marked as settled — financial clearance granted."));
+      setFeedback(
+        financialOsActionFeedback(res, "Marked as settled — financial clearance granted.")
+      );
     });
   }
 
@@ -95,7 +102,8 @@ export function FinancialInternationalTransferSettlementPanel(props: {
         <div>
           <p className={financialOsClasses.formTitle}>Settlement &amp; FX</p>
           <p className={financialOsClasses.bodyTextXs}>
-            {application.source_country_code ?? "—"} · {application.source_currency_code ?? "—"} → {currency}
+            {application.source_country_code ?? "—"} · {application.source_currency_code ?? "—"} →{" "}
+            {currency}
             {application.payment_reference ? ` · Ref ${application.payment_reference}` : null}
           </p>
         </div>
@@ -105,15 +113,21 @@ export function FinancialInternationalTransferSettlementPanel(props: {
       <dl className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className={financialOsClasses.mutedMeta}>Expected settlement</dt>
-          <dd className="font-mono text-slate-100">{fmtMoney(application.expected_settlement_amount_cents, currency)}</dd>
+          <dd className="font-mono text-slate-100">
+            {fmtMoney(application.expected_settlement_amount_cents, currency)}
+          </dd>
         </div>
         <div>
           <dt className={financialOsClasses.mutedMeta}>Received</dt>
-          <dd className="font-mono text-slate-100">{fmtMoney(application.received_amount_cents, currency)}</dd>
+          <dd className="font-mono text-slate-100">
+            {fmtMoney(application.received_amount_cents, currency)}
+          </dd>
         </div>
         <div>
           <dt className={financialOsClasses.mutedMeta}>Variance</dt>
-          <dd className="font-mono text-slate-100">{fmtMoney(application.settlement_variance_cents, currency)}</dd>
+          <dd className="font-mono text-slate-100">
+            {fmtMoney(application.settlement_variance_cents, currency)}
+          </dd>
         </div>
         <div>
           <dt className={financialOsClasses.mutedMeta}>FX rates</dt>
@@ -126,7 +140,9 @@ export function FinancialInternationalTransferSettlementPanel(props: {
       {application.transfer_instructions ? (
         <div className={`text-xs ${financialOsClasses.subPanel}`}>
           <p className="font-semibold text-slate-100">Transfer instructions</p>
-          <p className="mt-1 whitespace-pre-wrap text-slate-300">{application.transfer_instructions}</p>
+          <p className="mt-1 whitespace-pre-wrap text-slate-300">
+            {application.transfer_instructions}
+          </p>
         </div>
       ) : null}
 

@@ -57,10 +57,15 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
         />
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS · SurgeryOS</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">{data.tenantName}</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+              FI OS · SurgeryOS
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+              {data.tenantName}
+            </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-              Detailed surgical execution and graft intelligence — live theatre operations for today&apos;s procedures.
+              Detailed surgical execution and graft intelligence — live theatre operations for
+              today&apos;s procedures.
             </p>
             <p className="mt-2 text-sm text-[#64748B]">
               {dateLine} · Auto-refresh · {formatRefreshTime(lastRefreshedAt)}
@@ -72,7 +77,10 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
                 disabled={isRefreshing}
                 className={cn(surgeryLinkButtonClass, "disabled:opacity-60")}
               >
-                <RefreshCw className={cn("mr-1.5 inline h-4 w-4", isRefreshing && "animate-spin")} aria-hidden />
+                <RefreshCw
+                  className={cn("mr-1.5 inline h-4 w-4", isRefreshing && "animate-spin")}
+                  aria-hidden
+                />
                 Refresh
               </button>
               <Link href={`${base}/procedure-day`} className={surgeryLinkButtonClass}>
@@ -140,7 +148,9 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                   <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                 </Link>

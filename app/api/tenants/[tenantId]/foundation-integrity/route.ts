@@ -25,9 +25,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
 
     const supabase = supabaseAdmin();
-    const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+    const { data: tenant, error: te } = await supabase
+      .from("fi_tenants")
+      .select("id")
+      .eq("id", tenantId)
+      .maybeSingle();
     if (te) return NextResponse.json({ ok: false, error: te.message }, { status: 500 });
-    if (!tenant) return NextResponse.json({ ok: false, error: "Tenant not found." }, { status: 404 });
+    if (!tenant)
+      return NextResponse.json({ ok: false, error: "Tenant not found." }, { status: 404 });
 
     const dashboard = await loadFoundationOsDashboard(tenantId);
     const { integrity, ...foundation_os } = dashboard;

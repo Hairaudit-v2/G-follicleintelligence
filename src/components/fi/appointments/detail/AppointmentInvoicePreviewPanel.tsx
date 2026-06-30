@@ -17,11 +17,15 @@ export function AppointmentInvoicePreviewPanel({
         <div>
           <h2 className="text-sm font-semibold text-slate-100">Invoice preview</h2>
           <p className="mt-1 text-xs text-slate-400">
-            Draft preview from appointment metadata until a dedicated billing module is connected. Not a tax invoice.
+            Draft preview from appointment metadata until a dedicated billing module is connected.
+            Not a tax invoice.
           </p>
         </div>
         {patientId ? (
-          <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/patients/${patientId}`}
+            className="text-xs text-blue-300 hover:underline"
+          >
             Patient billing context →
           </Link>
         ) : null}
@@ -62,7 +66,9 @@ export function AppointmentInvoicePreviewPanel({
           </tbody>
         </table>
       ) : (
-        <p className="mt-4 text-sm text-slate-400">No line items yet. Add `metadata.invoice` on the booking when billing is wired.</p>
+        <p className="mt-4 text-sm text-slate-400">
+          No line items yet. Add `metadata.invoice` on the booking when billing is wired.
+        </p>
       )}
       {invoice.notes ? <p className="mt-3 text-xs text-slate-400">{invoice.notes}</p> : null}
     </section>

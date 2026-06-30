@@ -27,12 +27,18 @@ import {
   type ConsultationConversionKpis,
 } from "@/src/lib/consultations/consultationConversionBoardModel";
 import { mapFiConsultationRow } from "@/src/lib/consultations/consultationLoaders.server";
-import type { ConsultationRow, ConsultationTypeId } from "@/src/lib/consultations/consultationTypes";
+import type {
+  ConsultationRow,
+  ConsultationTypeId,
+} from "@/src/lib/consultations/consultationTypes";
 import { CONSULTATION_TYPE_DEFINITIONS } from "@/src/lib/consultations/consultationTypeConfig";
 import { resolveConsultationConsultantDisplayName } from "@/src/lib/consultations/consultationConsultantDisplay";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { loadPaymentRecordsForConsultations } from "@/src/lib/payments/paymentRecordLoaders.server";
-import { CONSULTATION_DEPOSIT_BOARD_COPY, consultationDepositBoardLabel } from "@/src/lib/payments/paymentRecordModel";
+import {
+  CONSULTATION_DEPOSIT_BOARD_COPY,
+  consultationDepositBoardLabel,
+} from "@/src/lib/payments/paymentRecordModel";
 
 const BOARD_BOOKING_LIMIT = 500;
 const CONSULTATION_FETCH_LIMIT = 800;
@@ -93,7 +99,8 @@ function consultationInDateWindow(
     const b = bookingById.get(bid);
     if (b) {
       const bymd = calendarYmdFromIsoInstant(b.start_at, tz);
-      if (bymd && calendarYmdInInclusiveRange(bymd, window.ymdPast90, window.ymdFuture30)) return true;
+      if (bymd && calendarYmdInInclusiveRange(bymd, window.ymdPast90, window.ymdFuture30))
+        return true;
     }
   }
 
@@ -147,7 +154,11 @@ async function loadPatientLabels(
   const out = new Map<string, string>();
   const ids = uniqueIds(patientIds);
   for (const part of chunk(ids, IN_CHUNK)) {
-    const { data, error } = await supabase.from("fi_patients").select("id, metadata").eq("tenant_id", tid).in("id", part);
+    const { data, error } = await supabase
+      .from("fi_patients")
+      .select("id, metadata")
+      .eq("tenant_id", tid)
+      .in("id", part);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; metadata: unknown };
@@ -158,17 +169,27 @@ async function loadPatientLabels(
   return out;
 }
 
-async function loadPersonLabels(supabase: SupabaseClient, tenantId: string, personIds: string[]): Promise<Map<string, string>> {
+async function loadPersonLabels(
+  supabase: SupabaseClient,
+  tenantId: string,
+  personIds: string[]
+): Promise<Map<string, string>> {
   const tid = tenantId.trim();
   const out = new Map<string, string>();
   const ids = uniqueIds(personIds);
   for (const part of chunk(ids, IN_CHUNK)) {
-    const { data, error } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid).in("id", part);
+    const { data, error } = await supabase
+      .from("fi_persons")
+      .select("id, metadata")
+      .eq("tenant_id", tid)
+      .in("id", part);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; metadata: unknown };
       const meta =
-        r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
+        r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : {};
       const { name } = displayFromPersonMetadata(meta);
       if (name && name !== "—") out.set(String(r.id), name);
     }
@@ -176,7 +197,11 @@ async function loadPersonLabels(supabase: SupabaseClient, tenantId: string, pers
   return out;
 }
 
-async function loadStaffDisplayNames(supabase: SupabaseClient, tenantId: string, staffIds: string[]): Promise<Map<string, string>> {
+async function loadStaffDisplayNames(
+  supabase: SupabaseClient,
+  tenantId: string,
+  staffIds: string[]
+): Promise<Map<string, string>> {
   const tid = tenantId.trim();
   const out = new Map<string, string>();
   const ids = uniqueIds(staffIds);
@@ -196,12 +221,20 @@ async function loadStaffDisplayNames(supabase: SupabaseClient, tenantId: string,
   return out;
 }
 
-async function loadUserEmails(supabase: SupabaseClient, tenantId: string, userIds: string[]): Promise<Map<string, string>> {
+async function loadUserEmails(
+  supabase: SupabaseClient,
+  tenantId: string,
+  userIds: string[]
+): Promise<Map<string, string>> {
   const tid = tenantId.trim();
   const out = new Map<string, string>();
   const ids = uniqueIds(userIds);
   for (const part of chunk(ids, IN_CHUNK)) {
-    const { data, error } = await supabase.from("fi_users").select("id, email").eq("tenant_id", tid).in("id", part);
+    const { data, error } = await supabase
+      .from("fi_users")
+      .select("id, email")
+      .eq("tenant_id", tid)
+      .in("id", part);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; email: string | null };
@@ -268,11 +301,18 @@ async function loadStageMeta(
   const out = new Map<string, { label: string; isLost: boolean }>();
   const ids = uniqueIds(stageIds);
   for (const part of chunk(ids, IN_CHUNK)) {
-    const { data, error } = await supabase.from("fi_crm_pipeline_stages").select("id, label, is_lost").eq("tenant_id", tid).in("id", part);
+    const { data, error } = await supabase
+      .from("fi_crm_pipeline_stages")
+      .select("id, label, is_lost")
+      .eq("tenant_id", tid)
+      .in("id", part);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
       const r = raw as { id: string; label: string | null; is_lost: boolean | null };
-      out.set(String(r.id), { label: String(r.label ?? "").trim() || "Stage", isLost: Boolean(r.is_lost) });
+      out.set(String(r.id), {
+        label: String(r.label ?? "").trim() || "Stage",
+        isLost: Boolean(r.is_lost),
+      });
     }
   }
   return out;
@@ -298,36 +338,40 @@ async function loadSurgeryBookingsForAnchors(
     const meta = row.metadata;
     assertMetadataJsonObject(meta);
     return {
-    id: String(row.id),
-    tenant_id: String(row.tenant_id),
-    lead_id: row.lead_id != null ? String(row.lead_id) : null,
-    person_id: row.person_id != null ? String(row.person_id) : null,
-    patient_id: row.patient_id != null ? String(row.patient_id) : null,
-    case_id: row.case_id != null ? String(row.case_id) : null,
-    clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
-    room_id: row.room_id != null ? String(row.room_id) : null,
-    room_required: row.room_required == null ? true : Boolean(row.room_required),
-    assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
-    assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
-    booking_type: String(row.booking_type),
-    booking_status: String(row.booking_status),
-    title: row.title != null ? String(row.title) : null,
-    description: row.description != null ? String(row.description) : null,
-    start_at: String(row.start_at),
-    end_at: String(row.end_at),
-    timezone: row.timezone != null ? String(row.timezone) : null,
-    location: row.location != null ? String(row.location) : null,
-    metadata: meta,
-    cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
-    cancelled_by_user_id: row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
-    cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
-    created_by_user_id: row.created_by_user_id != null ? String(row.created_by_user_id) : null,
-    created_at: String(row.created_at ?? row.start_at),
-    updated_at: String(row.updated_at ?? row.start_at),
-  };
+      id: String(row.id),
+      tenant_id: String(row.tenant_id),
+      lead_id: row.lead_id != null ? String(row.lead_id) : null,
+      person_id: row.person_id != null ? String(row.person_id) : null,
+      patient_id: row.patient_id != null ? String(row.patient_id) : null,
+      case_id: row.case_id != null ? String(row.case_id) : null,
+      clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+      room_id: row.room_id != null ? String(row.room_id) : null,
+      room_required: row.room_required == null ? true : Boolean(row.room_required),
+      assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
+      assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
+      booking_type: String(row.booking_type),
+      booking_status: String(row.booking_status),
+      title: row.title != null ? String(row.title) : null,
+      description: row.description != null ? String(row.description) : null,
+      start_at: String(row.start_at),
+      end_at: String(row.end_at),
+      timezone: row.timezone != null ? String(row.timezone) : null,
+      location: row.location != null ? String(row.location) : null,
+      metadata: meta,
+      cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
+      cancelled_by_user_id:
+        row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
+      cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
+      created_by_user_id: row.created_by_user_id != null ? String(row.created_by_user_id) : null,
+      created_at: String(row.created_at ?? row.start_at),
+      updated_at: String(row.updated_at ?? row.start_at),
+    };
   };
 
-  const runOr = async (col: "lead_id" | "patient_id" | "case_id" | "person_id", values: string[]) => {
+  const runOr = async (
+    col: "lead_id" | "patient_id" | "case_id" | "person_id",
+    values: string[]
+  ) => {
     for (const part of chunk(values, 40)) {
       const q = supabase
         .from("fi_bookings")
@@ -378,7 +422,12 @@ function buildSurgeryPresenceSets(surgeryBookings: FiBookingRow[]): {
 }
 
 function resolveSurgeryLinked(
-  surgerySets: { byLead: Set<string>; byPatient: Set<string>; byCase: Set<string>; byPerson: Set<string> },
+  surgerySets: {
+    byLead: Set<string>;
+    byPatient: Set<string>;
+    byCase: Set<string>;
+    byPerson: Set<string>;
+  },
   input: {
     leadId: string | null;
     patientId: string | null;
@@ -400,15 +449,22 @@ function resolveSurgeryLinked(
   return false;
 }
 
-function formatGraftLine(quoteData: Record<string, unknown>, consultationType: ConsultationTypeId): string | null {
+function formatGraftLine(
+  quoteData: Record<string, unknown>,
+  consultationType: ConsultationTypeId
+): string | null {
   const graft = quoteData.graft_estimate;
-  const graftStr = typeof graft === "string" ? graft.trim() : typeof graft === "number" ? String(graft) : "";
+  const graftStr =
+    typeof graft === "string" ? graft.trim() : typeof graft === "number" ? String(graft) : "";
   const typeLabel = consultationTypeLabel(consultationType);
   if (graftStr) return `${graftStr} grafts · ${typeLabel}`;
   return typeLabel;
 }
 
-export async function loadConsultationConversionBoardPayload(tenantId: string, now: Date = new Date()): Promise<ConsultationConversionBoardPayload> {
+export async function loadConsultationConversionBoardPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<ConsultationConversionBoardPayload> {
   const tid = tenantId.trim();
   const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
   const window = computeConsultationConversionBoardWindow(now, calendarTimezone);
@@ -426,7 +482,9 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
     .limit(CONSULTATION_FETCH_LIMIT);
   if (ce) throw new Error(ce.message);
 
-  const consultationRows = (consultRaw ?? []).map((row) => mapFiConsultationRow(row as Record<string, unknown>));
+  const consultationRows = (consultRaw ?? []).map((row) =>
+    mapFiConsultationRow(row as Record<string, unknown>)
+  );
 
   const consultationBookings = await loadBookingsForOperatorView({
     tenantId: tid,
@@ -442,10 +500,14 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
     bookingById.set(b.id, b);
   }
 
-  const filteredConsultations = consultationRows.filter((r) => consultationInDateWindow(r, bookingById, window, nowMs));
+  const filteredConsultations = consultationRows.filter((r) =>
+    consultationInDateWindow(r, bookingById, window, nowMs)
+  );
 
   const consultBookingIds = uniqueIds(filteredConsultations.map((r) => r.booking_id));
-  const orphanConsultationBookings = consultationBookings.filter((b) => isConsultationBooking(b) && !consultBookingIds.includes(b.id));
+  const orphanConsultationBookings = consultationBookings.filter(
+    (b) => isConsultationBooking(b) && !consultBookingIds.includes(b.id)
+  );
 
   const leadIds = uniqueIds([
     ...filteredConsultations.map((r) => r.lead_id),
@@ -455,7 +517,10 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
     ...filteredConsultations.map((r) => r.patient_id),
     ...orphanConsultationBookings.map((b) => b.patient_id),
   ]);
-  const personIds = uniqueIds([...filteredConsultations.map((r) => r.person_id), ...orphanConsultationBookings.map((b) => b.person_id)]);
+  const personIds = uniqueIds([
+    ...filteredConsultations.map((r) => r.person_id),
+    ...orphanConsultationBookings.map((b) => b.person_id),
+  ]);
 
   const caseIds = uniqueIds(filteredConsultations.map((r) => r.case_id));
 
@@ -474,20 +539,37 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
   ]);
   const staffIdsFromConsult = uniqueIds(filteredConsultations.map((r) => r.consultant_staff_id));
 
-  const staffIdsFromBookings = uniqueIds(orphanConsultationBookings.flatMap((b) => [b.assigned_staff_id]));
-  const userIdsFromBookings = uniqueIds(orphanConsultationBookings.flatMap((b) => [b.assigned_user_id]));
+  const staffIdsFromBookings = uniqueIds(
+    orphanConsultationBookings.flatMap((b) => [b.assigned_staff_id])
+  );
+  const userIdsFromBookings = uniqueIds(
+    orphanConsultationBookings.flatMap((b) => [b.assigned_user_id])
+  );
 
   const stageIds = uniqueIds(Array.from(leadBundles.values()).map((v) => v.currentStageId));
-  const [stageMeta, staffNames, userEmails, surgeryBookings, payByConsultation] = await Promise.all([
-    loadStageMeta(supabase, tid, stageIds),
-    loadStaffDisplayNames(supabase, tid, uniqueIds([...staffIdsFromConsult, ...staffIdsFromBookings])),
-    loadUserEmails(supabase, tid, userIdsFromBookings),
-    loadSurgeryBookingsForAnchors(supabase, tid, leadIds, uniqueIds(patientIds), caseIds, personIds),
-    loadPaymentRecordsForConsultations(
-      tid,
-      filteredConsultations.map((r) => r.id)
-    ),
-  ]);
+  const [stageMeta, staffNames, userEmails, surgeryBookings, payByConsultation] = await Promise.all(
+    [
+      loadStageMeta(supabase, tid, stageIds),
+      loadStaffDisplayNames(
+        supabase,
+        tid,
+        uniqueIds([...staffIdsFromConsult, ...staffIdsFromBookings])
+      ),
+      loadUserEmails(supabase, tid, userIdsFromBookings),
+      loadSurgeryBookingsForAnchors(
+        supabase,
+        tid,
+        leadIds,
+        uniqueIds(patientIds),
+        caseIds,
+        personIds
+      ),
+      loadPaymentRecordsForConsultations(
+        tid,
+        filteredConsultations.map((r) => r.id)
+      ),
+    ]
+  );
 
   const surgerySets = buildSurgeryPresenceSets(surgeryBookings);
 
@@ -495,7 +577,11 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
 
   const cards: ConsultationConversionBoardCard[] = [];
 
-  const pushCard = (partial: Omit<ConsultationConversionBoardCard, "primaryColumn" | "nextAction"> & { primaryColumn: ConsultationConversionBoardColumnId }) => {
+  const pushCard = (
+    partial: Omit<ConsultationConversionBoardCard, "primaryColumn" | "nextAction"> & {
+      primaryColumn: ConsultationConversionBoardColumnId;
+    }
+  ) => {
     cards.push({
       ...partial,
       nextAction: nextRecommendedAction(partial.primaryColumn),
@@ -504,9 +590,9 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
 
   for (const row of filteredConsultations) {
     const leadId = row.lead_id?.trim() || null;
-    const bundle = leadId ? leadBundles.get(leadId) ?? null : null;
+    const bundle = leadId ? (leadBundles.get(leadId) ?? null) : null;
     const stageId = bundle?.currentStageId?.trim() || null;
-    const stMeta = stageId ? stageMeta.get(stageId) ?? null : null;
+    const stMeta = stageId ? (stageMeta.get(stageId) ?? null) : null;
     const stageIsLost = Boolean(stMeta?.isLost);
     const leadStatusLost = bundle?.leadStatus?.trim().toLowerCase() === "lost";
     const crmLost = isCrmLostSignal({ stageIsLost, leadStatusLost });
@@ -532,9 +618,12 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
       consultationStatus: row.status,
     });
 
-    const bookingRow = row.booking_id?.trim() ? bookingById.get(row.booking_id.trim()) ?? null : null;
+    const bookingRow = row.booking_id?.trim()
+      ? (bookingById.get(row.booking_id.trim()) ?? null)
+      : null;
     const bookingCompletedOrPast = bookingRow
-      ? bookingRow.booking_status.trim().toLowerCase() === "completed" || Date.parse(bookingRow.start_at) < nowMs
+      ? bookingRow.booking_status.trim().toLowerCase() === "completed" ||
+        Date.parse(bookingRow.start_at) < nowMs
       : false;
 
     const primaryColumn = pickConsultationConversionColumn({
@@ -550,12 +639,14 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
 
     const pid = row.patient_id?.trim();
     const perId = row.person_id?.trim();
-    const patientName = pid ? patientLabels.get(pid) ?? null : null;
-    const personName = perId ? personLabels.get(perId) ?? null : null;
+    const patientName = pid ? (patientLabels.get(pid) ?? null) : null;
+    const personName = perId ? (personLabels.get(perId) ?? null) : null;
     const leadName = leadId ? leadTitleFromRow(bundle?.leadSummary ?? null, leadId) : null;
     const patientOrLeadLabel = patientName ?? personName ?? leadName ?? "Unlinked";
 
-    const staffName = row.consultant_staff_id?.trim() ? staffNames.get(row.consultant_staff_id.trim()) ?? null : null;
+    const staffName = row.consultant_staff_id?.trim()
+      ? (staffNames.get(row.consultant_staff_id.trim()) ?? null)
+      : null;
     const consultantLabel = resolveConsultationConsultantDisplayName({
       consultant_staff_id: row.consultant_staff_id,
       consultant_name: row.consultant_name,
@@ -607,16 +698,18 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
         lead: leadId ? `${base}/crm/leads/${encodeURIComponent(leadId)}` : null,
         patient: pid ? `${base}/patients/${encodeURIComponent(pid)}` : null,
         case: effectiveCaseId ? `${base}/cases/${encodeURIComponent(effectiveCaseId)}` : null,
-        appointment: row.booking_id?.trim() ? `${base}/appointments/${encodeURIComponent(row.booking_id.trim())}` : null,
+        appointment: row.booking_id?.trim()
+          ? `${base}/appointments/${encodeURIComponent(row.booking_id.trim())}`
+          : null,
       },
     });
   }
 
   for (const b of orphanConsultationBookings) {
     const leadId = b.lead_id?.trim() || null;
-    const bundle = leadId ? leadBundles.get(leadId) ?? null : null;
+    const bundle = leadId ? (leadBundles.get(leadId) ?? null) : null;
     const stageId = bundle?.currentStageId?.trim() || null;
-    const stMeta = stageId ? stageMeta.get(stageId) ?? null : null;
+    const stMeta = stageId ? (stageMeta.get(stageId) ?? null) : null;
     const stageIsLost = Boolean(stMeta?.isLost);
     const leadStatusLost = bundle?.leadStatus?.trim().toLowerCase() === "lost";
     const crmLost = isCrmLostSignal({ stageIsLost, leadStatusLost });
@@ -651,15 +744,17 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
 
     const pid = b.patient_id?.trim();
     const perId = b.person_id?.trim();
-    const patientName = pid ? patientLabels.get(pid) ?? null : null;
-    const personName = perId ? personLabels.get(perId) ?? null : null;
+    const patientName = pid ? (patientLabels.get(pid) ?? null) : null;
+    const personName = perId ? (personLabels.get(perId) ?? null) : null;
     const leadName = leadId ? leadTitleFromRow(bundle?.leadSummary ?? null, leadId) : null;
     const title = b.title?.trim();
-    const patientOrLeadLabel = patientName ?? personName ?? leadName ?? title ?? "Consultation booking";
+    const patientOrLeadLabel =
+      patientName ?? personName ?? leadName ?? title ?? "Consultation booking";
 
     let assignee: string | null = null;
     if (b.assigned_staff_id?.trim()) assignee = staffNames.get(b.assigned_staff_id.trim()) ?? null;
-    if (!assignee && b.assigned_user_id?.trim()) assignee = userEmails.get(b.assigned_user_id.trim()) ?? null;
+    if (!assignee && b.assigned_user_id?.trim())
+      assignee = userEmails.get(b.assigned_user_id.trim()) ?? null;
 
     const consultationDateYmd = calendarYmdFromIsoInstant(b.start_at, window.calendarTimezone);
     const consultationDateLabel = consultationDateYmd ?? "—";
@@ -726,9 +821,9 @@ export async function loadConsultationConversionBoardPayload(tenantId: string, n
     lost: columns.lost.length,
   };
 
-  const consultationBookingYmdsNextRange = consultationBookings.map((bk) =>
-    calendarYmdFromIsoInstant(bk.start_at, window.calendarTimezone)
-  ).filter((x): x is string => Boolean(x));
+  const consultationBookingYmdsNextRange = consultationBookings
+    .map((bk) => calendarYmdFromIsoInstant(bk.start_at, window.calendarTimezone))
+    .filter((x): x is string => Boolean(x));
 
   const kpis = aggregateConsultationConversionKpis({
     calendarTimezone: window.calendarTimezone,

@@ -6,7 +6,10 @@
  * Explicit `"UTC"` remains valid for UTC-native grids and fast paths.
  */
 
-import { parseUtcCalendarDateString, utcCalendarDateStringFromDate } from "@/src/lib/bookings/calendarQuery";
+import {
+  parseUtcCalendarDateString,
+  utcCalendarDateStringFromDate,
+} from "@/src/lib/bookings/calendarQuery";
 
 /** Explicit UTC calendar mode (lane math + ISO without IANA offset lookup). */
 export const DEFAULT_CALENDAR_TIMEZONE = "UTC";
@@ -65,10 +68,15 @@ export function getCalendarTimeZone(source?: CalendarTimeZoneSource | null): str
 }
 
 /** Tenant column `default_timezone`, then `metadata.timezone`, else {@link FALLBACK_CALENDAR_TIMEZONE}. */
-export function resolveTenantCalendarTimezone(input: {
-  default_timezone?: string | null;
-  metadata?: Record<string, unknown> | null;
-} | null | undefined): string {
+export function resolveTenantCalendarTimezone(
+  input:
+    | {
+        default_timezone?: string | null;
+        metadata?: Record<string, unknown> | null;
+      }
+    | null
+    | undefined
+): string {
   if (!input) return normalizeCalendarTimezone(null);
   const meta =
     input.metadata && typeof input.metadata === "object" && !Array.isArray(input.metadata)
@@ -92,7 +100,10 @@ function getZonedParts(ms: number, timeZone: string): ZonedParts {
     weekday: "short",
   });
   const parts = Object.fromEntries(
-    dtf.formatToParts(new Date(ms)).filter((p) => p.type !== "literal").map((p) => [p.type, p.value])
+    dtf
+      .formatToParts(new Date(ms))
+      .filter((p) => p.type !== "literal")
+      .map((p) => [p.type, p.value])
   );
   return {
     year: Number(parts.year),
@@ -218,7 +229,11 @@ export function addDaysToCalendarDate(ymd: string, days: number, timeZone: strin
   return calendarDateStringFromInstant(new Date(start + days * 86_400_000), tz);
 }
 
-export function addMonthsToCalendarDate(ymd: string, deltaMonths: number, timeZone: string): string {
+export function addMonthsToCalendarDate(
+  ymd: string,
+  deltaMonths: number,
+  timeZone: string
+): string {
   const tz = normalizeCalendarTimezone(timeZone);
   const parsed = parseCalendarDateString(ymd, tz) ?? ymd.trim();
   const [y, mo] = parsed.split("-").map(Number);
@@ -254,7 +269,11 @@ export function formatWeekdayShort(ms: number, timeZone: string): string {
 }
 
 /** ISO instant from local calendar day + minutes-from-midnight. */
-export function isoFromLocalDayMinutes(dayKey: string, minutesLocal: number, timeZone: string): string | null {
+export function isoFromLocalDayMinutes(
+  dayKey: string,
+  minutesLocal: number,
+  timeZone: string
+): string | null {
   const dayStart = zonedMidnightUtcMs(dayKey, timeZone);
   if (dayStart == null) return null;
   const [y, mo, da] = dayKey.split("-").map(Number);
@@ -473,7 +492,9 @@ export function formatBookingWindowInTimezone(
   const start = formatIsoDateTimeInTimezone(startIso, tz);
   const endPart = opts?.endPart ?? "mediumShort";
   const end =
-    endPart === "timeOnly" ? formatIsoTimeNumericInTimezone(endIso, tz) : formatIsoDateTimeInTimezone(endIso, tz);
+    endPart === "timeOnly"
+      ? formatIsoTimeNumericInTimezone(endIso, tz)
+      : formatIsoDateTimeInTimezone(endIso, tz);
   return `${start} → ${end}`;
 }
 

@@ -50,7 +50,10 @@ async function loadPinRow(tenantId: string, staffId: string): Promise<PinRow | n
   return data as PinRow;
 }
 
-async function assertActiveStaffMember(tenantId: string, staffId: string): Promise<{ full_name: string; staff_role: string }> {
+async function assertActiveStaffMember(
+  tenantId: string,
+  staffId: string
+): Promise<{ full_name: string; staff_role: string }> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
@@ -65,7 +68,10 @@ async function assertActiveStaffMember(tenantId: string, staffId: string): Promi
   return { full_name: String(row.full_name), staff_role: String(row.staff_role) };
 }
 
-export async function loadStaffPinMetadataForStaff(tenantId: string, staffId: string): Promise<StaffPinMetadata> {
+export async function loadStaffPinMetadataForStaff(
+  tenantId: string,
+  staffId: string
+): Promise<StaffPinMetadata> {
   const row = await loadPinRow(tenantId, staffId);
   const status = resolveStaffPinPublicStatus({
     hasPinRow: Boolean(row),
@@ -83,7 +89,10 @@ export async function loadStaffPinMetadataForStaff(tenantId: string, staffId: st
   };
 }
 
-export async function loadStaffPinMetadataMap(tenantId: string, staffIds: string[]): Promise<Map<string, StaffPinMetadata>> {
+export async function loadStaffPinMetadataMap(
+  tenantId: string,
+  staffIds: string[]
+): Promise<Map<string, StaffPinMetadata>> {
   const map = new Map<string, StaffPinMetadata>();
   const ids = staffIds.map((id) => id.trim()).filter(Boolean);
   if (ids.length === 0) return map;
@@ -97,14 +106,16 @@ export async function loadStaffPinMetadataMap(tenantId: string, staffIds: string
   if (error) throw new Error(error.message);
 
   const byStaff = new Map(
-    ((data ?? []) as {
-      staff_id: string;
-      is_active: boolean;
-      failed_attempt_count: number;
-      locked_until: string | null;
-      last_used_at: string | null;
-      updated_at: string | null;
-    }[]).map((r) => [String(r.staff_id), r])
+    (
+      (data ?? []) as {
+        staff_id: string;
+        is_active: boolean;
+        failed_attempt_count: number;
+        locked_until: string | null;
+        last_used_at: string | null;
+        updated_at: string | null;
+      }[]
+    ).map((r) => [String(r.staff_id), r])
   );
 
   for (const staffId of ids) {

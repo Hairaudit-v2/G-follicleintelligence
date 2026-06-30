@@ -77,7 +77,11 @@ export function isEventStartInSyncWindow(
 }
 
 export function isGoogleEventCancelled(event: GoogleCalendarApiEvent): boolean {
-  return String(event.status ?? "").trim().toLowerCase() === "cancelled";
+  return (
+    String(event.status ?? "")
+      .trim()
+      .toLowerCase() === "cancelled"
+  );
 }
 
 export function buildGoogleCalendarOAuthScopes(): string {
@@ -128,9 +132,7 @@ export function parseGoogleDateTime(
 }
 
 /** Extract Google Meet URL from a Google Calendar API event payload. */
-export function extractGoogleMeetUrl(
-  event: GoogleCalendarApiEventWithConference
-): string | null {
+export function extractGoogleMeetUrl(event: GoogleCalendarApiEventWithConference): string | null {
   const hangout = event.hangoutLink?.trim();
   if (hangout) return hangout;
 
@@ -142,7 +144,9 @@ export function extractGoogleMeetUrl(
   return null;
 }
 
-export function buildGoogleMeetConferenceRequest(requestId: string): GoogleCalendarApiEventWithConference["conferenceData"] {
+export function buildGoogleMeetConferenceRequest(
+  requestId: string
+): GoogleCalendarApiEventWithConference["conferenceData"] {
   return {
     createRequest: {
       requestId,
@@ -156,7 +160,15 @@ export function mapGoogleApiEventToFiFields(
   calendarId: string
 ): Pick<
   FiCalendarEvent,
-  "externalEventId" | "calendarId" | "title" | "description" | "location" | "startTime" | "endTime" | "eventType" | "googleMeetUrl"
+  | "externalEventId"
+  | "calendarId"
+  | "title"
+  | "description"
+  | "location"
+  | "startTime"
+  | "endTime"
+  | "eventType"
+  | "googleMeetUrl"
 > {
   const title = (event.summary ?? "").trim() || "(Untitled event)";
   const eventType = classifyExternalCalendarEventType(title, event.description);

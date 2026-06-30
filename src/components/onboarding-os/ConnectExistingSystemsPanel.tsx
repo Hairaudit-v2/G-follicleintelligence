@@ -71,7 +71,12 @@ function ScopeList({
   scopes,
 }: {
   label: string;
-  scopes: readonly { scopeKey: string; scopeLabel: string; granted?: boolean; required?: boolean }[];
+  scopes: readonly {
+    scopeKey: string;
+    scopeLabel: string;
+    granted?: boolean;
+    required?: boolean;
+  }[];
 }) {
   if (scopes.length === 0) return null;
   return (
@@ -116,7 +121,8 @@ function ConnectorCard({
   const band = health?.healthBand ?? "unknown";
   const authStatus = authSummary?.authSession?.authStatus ?? "not_started";
   const authBadge = EXTERNAL_CONNECTOR_AUTH_STATUS_BADGES[authStatus];
-  const authMethod = authSummary?.authSession?.authMethod ?? defaultAuthMethodForProvider(integration.provider);
+  const authMethod =
+    authSummary?.authSession?.authMethod ?? defaultAuthMethodForProvider(integration.provider);
   const grantedScopes = authSummary?.grantedScopes.filter((s) => s.granted) ?? [];
   const requiredScopes = authSummary?.requiredScopes ?? [];
   const coverage = authSummary?.permissionCoveragePercent ?? 0;
@@ -146,7 +152,9 @@ function ConnectorCard({
           </span>
         </p>
         <p>Auth method: {authMethod.replace(/_/g, " ")}</p>
-        <p>Credentials: {integration.credentialConfigured ? "Stored (encrypted)" : "Not configured"}</p>
+        <p>
+          Credentials: {integration.credentialConfigured ? "Stored (encrypted)" : "Not configured"}
+        </p>
         <p>Permission coverage: {coverage}%</p>
         {authSummary?.tokenExpiryWarning ? (
           <p className="text-amber-400">{authSummary.tokenExpiryWarning}</p>
@@ -166,7 +174,7 @@ function ConnectorCard({
         <p className="text-[11px] text-slate-500">
           Latest verification: {authSummary.latestVerificationEvent.outcome} ·{" "}
           {new Date(authSummary.latestVerificationEvent.occurredAt).toLocaleString()} ·{" "}
-          {authSummary.latestVerificationEvent.detail.summary as string | undefined ??
+          {(authSummary.latestVerificationEvent.detail.summary as string | undefined) ??
             authSummary.latestVerificationEvent.authStatus}
         </p>
       ) : null}
@@ -357,7 +365,11 @@ export function ConnectExistingSystemsPanel({
   function revokeAuth(integration: ExternalConnectorIntegrationRow) {
     setMessage(null);
     startTransition(async () => {
-      const res = await revokeConnectorAuthSessionAction(snapshot.tenantId, integration.id, sessionId);
+      const res = await revokeConnectorAuthSessionAction(
+        snapshot.tenantId,
+        integration.id,
+        sessionId
+      );
       if (!res.ok) {
         setMessage({ kind: "err", text: res.error });
         return;
@@ -374,13 +386,16 @@ export function ConnectExistingSystemsPanel({
         <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F1–F3</p>
         <h2 className="text-lg font-semibold text-slate-50">Connect Existing Systems</h2>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
-          Register legacy CRM, calendar, finance, and marketing systems for coexistence during onboarding.
-          Authenticate and verify credentials before live sync. Google Calendar supports read-only staging sync (Phase F3).
+          Register legacy CRM, calendar, finance, and marketing systems for coexistence during
+          onboarding. Authenticate and verify credentials before live sync. Google Calendar supports
+          read-only staging sync (Phase F3).
         </p>
       </div>
 
       {message ? (
-        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>{message.text}</p>
+        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>
+          {message.text}
+        </p>
       ) : null}
 
       {snapshot.integrations.length > 0 ? (
@@ -419,7 +434,9 @@ export function ConnectExistingSystemsPanel({
         <h3 className="text-sm font-medium text-slate-300">Available connectors</h3>
         {Object.entries(grouped).map(([categoryLabel, entries]) => (
           <div key={categoryLabel} className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{categoryLabel}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {categoryLabel}
+            </p>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {entries.map((entry) => (
                 <CatalogProviderButton
@@ -445,8 +462,8 @@ export function ConnectExistingSystemsPanel({
             {resolveSupportedAuthMethods(selectedProvider)
               .map((m) => m.replace(/_/g, " "))
               .join(", ")}
-            . Enter placeholder credential material for architecture testing. Credentials are encrypted at rest; no
-            external API calls are made.
+            . Enter placeholder credential material for architecture testing. Credentials are
+            encrypted at rest; no external API calls are made.
           </p>
           <input
             type="password"

@@ -11,17 +11,21 @@ export function CaseOutcomeIntelligencePanel(props: { view: CaseOutcomeIntellige
         Outcome Intelligence
       </h2>
       <p className="mt-1 text-xs text-slate-400">
-        Structured checkpoints, references, and protocol signals available in FI OS. No predictions or automated treatment
-        advice.
+        Structured checkpoints, references, and protocol signals available in FI OS. No predictions
+        or automated treatment advice.
       </p>
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div>
           <dt className="font-medium text-slate-300">Checkpoints captured</dt>
-          <dd className="mt-1 text-slate-400">{v.checkpointsCaptured.length ? v.checkpointsCaptured.join(", ") : "—"}</dd>
+          <dd className="mt-1 text-slate-400">
+            {v.checkpointsCaptured.length ? v.checkpointsCaptured.join(", ") : "—"}
+          </dd>
         </div>
         <div>
           <dt className="font-medium text-slate-300">Missing checkpoints</dt>
-          <dd className="mt-1 text-slate-400">{v.checkpointsMissing.length ? v.checkpointsMissing.join(", ") : "—"}</dd>
+          <dd className="mt-1 text-slate-400">
+            {v.checkpointsMissing.length ? v.checkpointsMissing.join(", ") : "—"}
+          </dd>
         </div>
         <div>
           <dt className="font-medium text-slate-300">12-month window</dt>
@@ -33,12 +37,15 @@ export function CaseOutcomeIntelligencePanel(props: { view: CaseOutcomeIntellige
         <div>
           <dt className="font-medium text-slate-300">Imaging / audit refs</dt>
           <dd className="mt-1 text-slate-400">
-            Imaging refs (approx.): {v.imagingRefsApprox}. Audit refs (approx.): {v.auditRefsApprox}.
+            Imaging refs (approx.): {v.imagingRefsApprox}. Audit refs (approx.): {v.auditRefsApprox}
+            .
           </dd>
         </div>
         <div className="sm:col-span-2">
           <dt className="font-medium text-slate-300">Protocol summary</dt>
-          <dd className="mt-1 text-slate-400">{v.protocolKeys.length ? v.protocolKeys.join(", ") : "No protocol rows captured yet."}</dd>
+          <dd className="mt-1 text-slate-400">
+            {v.protocolKeys.length ? v.protocolKeys.join(", ") : "No protocol rows captured yet."}
+          </dd>
         </div>
         <div className="sm:col-span-2">
           <dt className="font-medium text-slate-300">Future benchmark eligibility</dt>

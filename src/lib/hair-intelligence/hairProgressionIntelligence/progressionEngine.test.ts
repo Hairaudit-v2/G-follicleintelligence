@@ -99,8 +99,14 @@ test("clinician accepted review increases weighting stats", () => {
       },
     ],
   });
-  assert.ok(accepted.clinician_review_weighting.average_review_multiplier > pending.clinician_review_weighting.average_review_multiplier);
-  assert.ok(accepted.clinician_review_weighting.verified_point_fraction > pending.clinician_review_weighting.verified_point_fraction);
+  assert.ok(
+    accepted.clinician_review_weighting.average_review_multiplier >
+      pending.clinician_review_weighting.average_review_multiplier
+  );
+  assert.ok(
+    accepted.clinician_review_weighting.verified_point_fraction >
+      pending.clinician_review_weighting.verified_point_fraction
+  );
 });
 
 test("finasteride exposure splits before / after velocity when enough points", () => {
@@ -157,7 +163,9 @@ test("finasteride exposure splits before / after velocity when enough points", (
   const fin = out.treatment_response.find((x) => x.canonical_code === "finasteride");
   assert.ok(fin);
   assert.ok(fin!.first_exposure_at);
-  assert.ok(fin!.velocity_before_grades_per_year != null || fin!.velocity_after_grades_per_year != null);
+  assert.ok(
+    fin!.velocity_before_grades_per_year != null || fin!.velocity_after_grades_per_year != null
+  );
 });
 
 test("Norwood forecast toward V when velocity is high enough", () => {

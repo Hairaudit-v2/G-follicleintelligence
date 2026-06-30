@@ -67,8 +67,11 @@ export function PhotoProtocolAlertEventsTable({
           disabled={pending}
           className={cn(
             dark
-              ? cn(fiOsChromeClasses.toolbarControlSurface, "px-3 py-1.5 text-xs font-semibold text-cyan-100/95 disabled:opacity-40")
-              : "rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-40",
+              ? cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "px-3 py-1.5 text-xs font-semibold text-cyan-100/95 disabled:opacity-40"
+                )
+              : "rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-40"
           )}
           onClick={() => {
             setMsg(null);
@@ -85,8 +88,11 @@ export function PhotoProtocolAlertEventsTable({
           href={foundationHref}
           className={cn(
             dark
-              ? cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-200")
-              : "inline-flex items-center rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/[0.03]",
+              ? cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-200"
+                )
+              : "inline-flex items-center rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/[0.03]"
           )}
         >
           Analytics anchor
@@ -97,7 +103,9 @@ export function PhotoProtocolAlertEventsTable({
 
   const table = (
     <>
-      {msg ? <p className={`mt-3 text-xs ${dark ? "text-rose-300" : "text-rose-300"}`}>{msg}</p> : null}
+      {msg ? (
+        <p className={`mt-3 text-xs ${dark ? "text-rose-300" : "text-rose-300"}`}>{msg}</p>
+      ) : null}
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full border-collapse text-left text-sm">
           <thead>
@@ -122,17 +130,34 @@ export function PhotoProtocolAlertEventsTable({
           <tbody>
             {events.length === 0 ? (
               <tr>
-                <td colSpan={9} className={`py-6 text-center ${dark ? "text-slate-500" : "text-slate-500"}`}>
-                  No persisted alerts yet — run <span className="font-medium">Refresh alerts</span> to materialise computed findings.
+                <td
+                  colSpan={9}
+                  className={`py-6 text-center ${dark ? "text-slate-500" : "text-slate-500"}`}
+                >
+                  No persisted alerts yet — run <span className="font-medium">Refresh alerts</span>{" "}
+                  to materialise computed findings.
                 </td>
               </tr>
             ) : (
               events.map((ev) => (
-                <tr key={ev.id} className={`align-top ${dark ? "border-b border-white/[0.06]" : "border-b border-white/[0.06]"}`}>
-                  <td className={`py-2 pr-3 text-xs font-semibold uppercase ${severityClass(ev.severity, dark)}`}>{ev.severity}</td>
-                  <td className={`py-2 pr-3 text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}>{ev.alert_type.replace(/_/g, " ")}</td>
-                  <td className={`py-2 pr-3 ${dark ? "text-slate-200" : "text-slate-200"}`}>{ev.message}</td>
-                  <td className={`py-2 pr-3 text-xs ${dark ? "text-slate-500" : "text-slate-500"}`}>{ev.recommended_action ?? "—"}</td>
+                <tr
+                  key={ev.id}
+                  className={`align-top ${dark ? "border-b border-white/[0.06]" : "border-b border-white/[0.06]"}`}
+                >
+                  <td
+                    className={`py-2 pr-3 text-xs font-semibold uppercase ${severityClass(ev.severity, dark)}`}
+                  >
+                    {ev.severity}
+                  </td>
+                  <td className={`py-2 pr-3 text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}>
+                    {ev.alert_type.replace(/_/g, " ")}
+                  </td>
+                  <td className={`py-2 pr-3 ${dark ? "text-slate-200" : "text-slate-200"}`}>
+                    {ev.message}
+                  </td>
+                  <td className={`py-2 pr-3 text-xs ${dark ? "text-slate-500" : "text-slate-500"}`}>
+                    {ev.recommended_action ?? "—"}
+                  </td>
                   <td className="py-2 pr-3">
                     {ev.patient_id ? (
                       <Link
@@ -142,7 +167,9 @@ export function PhotoProtocolAlertEventsTable({
                         Open Twin
                       </Link>
                     ) : (
-                      <span className={`text-xs ${dark ? "text-slate-400" : "text-slate-400"}`}>—</span>
+                      <span className={`text-xs ${dark ? "text-slate-400" : "text-slate-400"}`}>
+                        —
+                      </span>
                     )}
                   </td>
                   <td className="py-2 pr-3">
@@ -167,7 +194,10 @@ export function PhotoProtocolAlertEventsTable({
                         onClick={() => {
                           setMsg(null);
                           start(async () => {
-                            const res = await acknowledgePhotoProtocolAlertAction({ tenantId: tid, alertEventId: ev.id });
+                            const res = await acknowledgePhotoProtocolAlertAction({
+                              tenantId: tid,
+                              alertEventId: ev.id,
+                            });
                             if (!res.ok) setMsg(res.error);
                             else router.refresh();
                           });
@@ -182,7 +212,10 @@ export function PhotoProtocolAlertEventsTable({
                         onClick={() => {
                           setMsg(null);
                           start(async () => {
-                            const res = await resolvePhotoProtocolAlertAction({ tenantId: tid, alertEventId: ev.id });
+                            const res = await resolvePhotoProtocolAlertAction({
+                              tenantId: tid,
+                              alertEventId: ev.id,
+                            });
                             if (!res.ok) setMsg(res.error);
                             else router.refresh();
                           });
@@ -197,7 +230,10 @@ export function PhotoProtocolAlertEventsTable({
                         onClick={() => {
                           setMsg(null);
                           start(async () => {
-                            const res = await dismissPhotoProtocolAlertAction({ tenantId: tid, alertEventId: ev.id });
+                            const res = await dismissPhotoProtocolAlertAction({
+                              tenantId: tid,
+                              alertEventId: ev.id,
+                            });
                             if (!res.ok) setMsg(res.error);
                             else router.refresh();
                           });

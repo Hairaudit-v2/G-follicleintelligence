@@ -71,7 +71,7 @@ function previewBounded(text: string | null | undefined, max = 512): string | nu
 
 async function enrichPaymentLink(
   tenantId: string,
-  context: ReceptionCommunicationContextInput,
+  context: ReceptionCommunicationContextInput
 ): Promise<string | null> {
   if (context.paymentLink?.trim()) return context.paymentLink.trim();
   if (context.sourceKind === "deposit" && context.sourceId) {
@@ -81,7 +81,7 @@ async function enrichPaymentLink(
 }
 
 export async function executeReceptionCommunicationAction(
-  params: ExecuteReceptionCommunicationParams,
+  params: ExecuteReceptionCommunicationParams
 ): Promise<ExecuteReceptionCommunicationResult> {
   const tenantId = assertNonEmptyUuid(params.tenantId, "tenantId");
   const { role, channel, templateKey, context, actorFiUserId } = params;
@@ -133,9 +133,15 @@ export async function executeReceptionCommunicationAction(
         ? (params.smsBody ?? rendered.smsBody ?? "").trim()
         : (params.emailBody ?? rendered.emailBody ?? "").trim();
     subject =
-      channel === "email" ? previewBounded(params.emailSubject ?? rendered.emailSubject ?? null, 512) : null;
+      channel === "email"
+        ? previewBounded(params.emailSubject ?? rendered.emailSubject ?? null, 512)
+        : null;
 
-    const toAddress = resolveReceptionCommunicationToAddress(channel, params.toAddress, contactSubject);
+    const toAddress = resolveReceptionCommunicationToAddress(
+      channel,
+      params.toAddress,
+      contactSubject
+    );
     const safety = validateReceptionCommunicationSafety({
       channel,
       templateKey,
@@ -153,7 +159,11 @@ export async function executeReceptionCommunicationAction(
       toAddress,
       subject,
       body,
-      metadata: { template_key: templateKey, source_kind: context.sourceKind, source_id: context.sourceId },
+      metadata: {
+        template_key: templateKey,
+        source_kind: context.sourceKind,
+        source_id: context.sourceId,
+      },
     });
 
     preview = previewBounded(body);
@@ -257,7 +267,8 @@ export async function executeReceptionCommunicationAction(
         source_kind: context.sourceKind,
         source_id: context.sourceId,
         provider: providerName,
-        payment_reminder: templateKey === "deposit_reminder" || templateKey === "payment_link_follow_up",
+        payment_reminder:
+          templateKey === "deposit_reminder" || templateKey === "payment_link_follow_up",
       },
     });
 
@@ -295,12 +306,17 @@ export async function executeReceptionCommunicationAction(
 
 /** Payment reminder workflow — send deposit reminder, log, keep alert open (no resolve). */
 export async function executePaymentReminderWorkflow(
-  params: Omit<ExecuteReceptionCommunicationParams, "templateKey" | "channel" | "updateTaskStatus"> & {
+  params: Omit<
+    ExecuteReceptionCommunicationParams,
+    "templateKey" | "channel" | "updateTaskStatus"
+  > & {
     channel?: "sms" | "email";
-  },
+  }
 ): Promise<ExecuteReceptionCommunicationResult> {
   const link = await enrichPaymentLink(params.tenantId, params.context);
-  const templateKey: ReceptionCommunicationTemplateKey = link ? "payment_link_follow_up" : "deposit_reminder";
+  const templateKey: ReceptionCommunicationTemplateKey = link
+    ? "payment_link_follow_up"
+    : "deposit_reminder";
   return executeReceptionCommunicationAction({
     ...params,
     channel: params.channel ?? "sms",

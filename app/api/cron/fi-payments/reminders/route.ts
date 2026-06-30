@@ -7,7 +7,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { validateCronAuth } from "@/src/lib/security/validateCronAuth";
 import { logStructured } from "@/src/lib/server/structuredLog";
-import { runFiPaymentRemindersCronOnce, runFiPaymentRemindersCronOnceForTenant } from "@/src/lib/revenueOs/fiPaymentRemindersCron.server";
+import {
+  runFiPaymentRemindersCronOnce,
+  runFiPaymentRemindersCronOnceForTenant,
+} from "@/src/lib/revenueOs/fiPaymentRemindersCron.server";
 
 export const dynamic = "force-dynamic";
 

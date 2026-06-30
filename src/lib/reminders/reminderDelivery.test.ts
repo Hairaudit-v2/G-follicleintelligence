@@ -13,7 +13,10 @@ import {
   scheduledAtForImmediateTrigger,
   toBookingScheduleTrigger,
 } from "./remindersCore";
-import { patientHasContactForTemplateType, type PatientReminderContact } from "./reminderDeliveryConfig";
+import {
+  patientHasContactForTemplateType,
+  type PatientReminderContact,
+} from "./reminderDeliveryConfig";
 
 const sampleCfg = (overrides?: Partial<ReminderDeliveryConfig>): ReminderDeliveryConfig => ({
   resend: {
@@ -50,7 +53,10 @@ describe("reminderDeliveryConfig", () => {
       buildResendFromAddress({ apiKey: "k", fromEmail: "a@b.com", fromName: "Evolved" }),
       "Evolved <a@b.com>"
     );
-    assert.equal(buildResendFromAddress({ apiKey: "k", fromEmail: "a@b.com", fromName: null }), "a@b.com");
+    assert.equal(
+      buildResendFromAddress({ apiKey: "k", fromEmail: "a@b.com", fromName: null }),
+      "a@b.com"
+    );
   });
 });
 

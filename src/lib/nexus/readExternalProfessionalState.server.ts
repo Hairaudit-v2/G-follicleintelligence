@@ -35,15 +35,24 @@ export function buildReconciliationWarnings(state: {
   const warnings: string[] = [];
   const globalId = state.professional?.global_professional_id;
 
-  if (!state.professional && (state.memberships.length > 0 || state.staffProfiles.length > 0 || state.activeRoles.length > 0)) {
+  if (
+    !state.professional &&
+    (state.memberships.length > 0 || state.staffProfiles.length > 0 || state.activeRoles.length > 0)
+  ) {
     warnings.push("membership_or_staff_exists_without_external_professional_record");
   }
 
   for (const membership of state.memberships) {
-    if (membership.membership_status === "revoked" && state.activeRoles.some((r) => r.tenant_id === membership.tenant_id)) {
+    if (
+      membership.membership_status === "revoked" &&
+      state.activeRoles.some((r) => r.tenant_id === membership.tenant_id)
+    ) {
       warnings.push(`active_roles_present_for_revoked_membership:${membership.tenant_id}`);
     }
-    if (membership.membership_status === "pending" && state.activeRoles.some((r) => r.tenant_id === membership.tenant_id)) {
+    if (
+      membership.membership_status === "pending" &&
+      state.activeRoles.some((r) => r.tenant_id === membership.tenant_id)
+    ) {
       warnings.push(`active_roles_present_for_pending_membership:${membership.tenant_id}`);
     }
   }
@@ -124,9 +133,15 @@ export async function readExternalProfessionalState(
     return { ok: false, error: auditErr.message, httpStatus: 500 };
   }
 
-  const professional = professionalData ? asProfessionalRow(professionalData as Record<string, unknown>) : null;
-  const memberships = (membershipsData ?? []).map((r) => asMembershipRow(r as Record<string, unknown>));
-  const staffProfiles = (staffData ?? []).map((r) => asStaffProfileRow(r as Record<string, unknown>));
+  const professional = professionalData
+    ? asProfessionalRow(professionalData as Record<string, unknown>)
+    : null;
+  const memberships = (membershipsData ?? []).map((r) =>
+    asMembershipRow(r as Record<string, unknown>)
+  );
+  const staffProfiles = (staffData ?? []).map((r) =>
+    asStaffProfileRow(r as Record<string, unknown>)
+  );
   const activeRoles = (rolesData ?? []).map((r) => asRoleRow(r as Record<string, unknown>));
 
   const state: ExternalProfessionalState = {

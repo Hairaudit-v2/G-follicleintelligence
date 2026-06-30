@@ -3,7 +3,10 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { CalendarTestingPanel } from "@/src/components/fi-admin/calendar/CalendarTestingPanel";
 import { loadCalendarTestingPageData } from "@/src/lib/calendar/calendarTestingReadiness.server";
-import { assertBookingsOperatorPageAccess, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import {
+  assertBookingsOperatorPageAccess,
+  getCrmShellNavAllowed,
+} from "@/src/lib/crm/crmShellAccess";
 
 export const metadata = {
   title: "Calendar UAT",
@@ -13,7 +16,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function CalendarTestingRoutePage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function CalendarTestingRoutePage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();

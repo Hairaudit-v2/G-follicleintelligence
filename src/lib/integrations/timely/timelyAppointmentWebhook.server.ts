@@ -38,7 +38,11 @@ const ENTITY_BOOKING = "booking";
 export type TimelyAppointmentPayload = z.infer<typeof timelyAppointmentWebhookSchema>;
 
 async function assertTenantExists(supabase: SupabaseClient, tenantId: string): Promise<void> {
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId.trim()).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new TimelyWebhookHttpError(404, "Tenant not found.");
 }
@@ -105,7 +109,11 @@ async function resolveServiceBookingType(
     .eq("tenant_id", tenantId.trim())
     .eq("is_active", true);
   if (error) throw new Error(error.message);
-  const rows = (data ?? []) as { booking_type: string | null; name: string; category: string | null }[];
+  const rows = (data ?? []) as {
+    booking_type: string | null;
+    name: string;
+    category: string | null;
+  }[];
   const lower = name.toLowerCase();
   const match = rows.find((r) => r.name.trim().toLowerCase() === lower);
   if (!match) {
@@ -284,7 +292,8 @@ function buildTimelyBookingMetadata(
   };
   if (payload.service_name?.trim()) patch.service_name = payload.service_name.trim();
   if (payload.staff_name?.trim()) patch.staff_name = payload.staff_name.trim();
-  if (payload.notes != null && String(payload.notes).trim()) patch.notes = String(payload.notes).trim();
+  if (payload.notes != null && String(payload.notes).trim())
+    patch.notes = String(payload.notes).trim();
   if (payload.status?.trim()) patch.original_status = payload.status.trim();
 
   return shallowMergeMetadata(base, patch);
@@ -393,7 +402,11 @@ export type TimelyAppointmentWebhookPorts = {
     params: import("@/src/lib/bookings/bookings").UpdateBookingParams,
     client?: SupabaseClient
   ) => Promise<FiBookingRow>;
-  loadBooking: (tenantId: string, bookingId: string, client?: SupabaseClient) => Promise<FiBookingRow | null>;
+  loadBooking: (
+    tenantId: string,
+    bookingId: string,
+    client?: SupabaseClient
+  ) => Promise<FiBookingRow | null>;
   loadActiveStaffForTenant: (
     tenantId: string,
     client?: SupabaseClient
@@ -430,17 +443,18 @@ function getDefaultAppointmentPorts(): TimelyAppointmentWebhookPorts {
       return loadActiveStaffForTenant(tenantId, client);
     },
     syncBookingReminders: async (booking, client) => {
-      const { syncBookingReminderJobs } = await import("@/src/lib/reminders/reminderEnqueue.server");
+      const { syncBookingReminderJobs } =
+        await import("@/src/lib/reminders/reminderEnqueue.server");
       await syncBookingReminderJobs(booking, client);
     },
     createConsultationFromBooking: async (tenantId, bookingId) => {
-      const { createConsultationFromBooking } = await import("@/src/lib/consultations/consultationMutations.server");
+      const { createConsultationFromBooking } =
+        await import("@/src/lib/consultations/consultationMutations.server");
       return createConsultationFromBooking(tenantId, bookingId);
     },
     advanceCrmLeadOnTimelyConsultationBooking: async (input, client) => {
-      const { advanceCrmLeadOnTimelyConsultationBooking } = await import(
-        "./advanceCrmLeadOnTimelyConsultationBooking.server"
-      );
+      const { advanceCrmLeadOnTimelyConsultationBooking } =
+        await import("./advanceCrmLeadOnTimelyConsultationBooking.server");
       return advanceCrmLeadOnTimelyConsultationBooking(input, client);
     },
   };
@@ -525,7 +539,12 @@ async function finalizeTimelyAppointmentWebhookResult(
     result,
     ports
   );
-  return attachCrmStageAdvanceToTimelyAppointmentResult(supabase, tenantId, withConsultation, ports);
+  return attachCrmStageAdvanceToTimelyAppointmentResult(
+    supabase,
+    tenantId,
+    withConsultation,
+    ports
+  );
 }
 
 async function patchTimelyBookingMetadataOnly(
@@ -657,7 +676,9 @@ async function syncExistingTimelyBooking(
   payload: TimelyAppointmentPayload,
   externalAppointmentId: string,
   ports: TimelyAppointmentWebhookPorts
-): Promise<{ ok: false; status: number; message: string } | ProcessTimelyAppointmentWebhookCoreSuccess> {
+): Promise<
+  { ok: false; status: number; message: string } | ProcessTimelyAppointmentWebhookCoreSuccess
+> {
   const existing = await ports.loadBooking(tenantId, bookingId, supabase);
   if (!existing) {
     return { ok: false, status: 404, message: "Mapped booking not found." };
@@ -690,10 +711,14 @@ async function syncExistingTimelyBooking(
   const responseLeadId = resolvedLeadIdForResponse(existing.lead_id, leadAttach);
   const targetStatus = resolveTargetBookingStatus(lifecycleEvent, payload, existing);
   const nextAssignedStaffId =
-    payload.staff_name !== undefined ? staffPick.staffId : (existing.assigned_staff_id?.trim() || null);
+    payload.staff_name !== undefined
+      ? staffPick.staffId
+      : existing.assigned_staff_id?.trim() || null;
 
   const cancelledAt =
-    targetStatus === "cancelled" ? existing.cancelled_at?.trim() || new Date().toISOString() : existing.cancelled_at;
+    targetStatus === "cancelled"
+      ? existing.cancelled_at?.trim() || new Date().toISOString()
+      : existing.cancelled_at;
 
   const nextSnapshot = {
     start_at: startAt,
@@ -705,9 +730,8 @@ async function syncExistingTimelyBooking(
   };
 
   const shouldAttachLead = !existing.lead_id?.trim() && Boolean(leadAttach.lead_id);
-  const existingResolution = (existing.metadata as Record<string, unknown>).timely_lead_resolution as
-    | { status?: string }
-    | undefined;
+  const existingResolution = (existing.metadata as Record<string, unknown>)
+    .timely_lead_resolution as { status?: string } | undefined;
   const nextResolution = metadata.timely_lead_resolution as { status?: string } | undefined;
   const shouldPatchLeadResolutionMeta =
     leadAttach.lead_resolution !== "skipped" &&
@@ -734,12 +758,19 @@ async function syncExistingTimelyBooking(
     };
   }
 
-  const isCancelled = existing.booking_status === "cancelled" || Boolean(existing.cancelled_at?.trim());
+  const isCancelled =
+    existing.booking_status === "cancelled" || Boolean(existing.cancelled_at?.trim());
 
   if (lifecycleEvent === "appointment_cancelled" || targetStatus === "cancelled") {
     await applyTimelyCancellation(supabase, tenantId, bookingId, existing, metadata, ports);
     if (shouldAttachLead) {
-      await patchTimelyBookingLeadAndMetadata(supabase, tenantId, bookingId, leadAttach.lead_id, metadata);
+      await patchTimelyBookingLeadAndMetadata(
+        supabase,
+        tenantId,
+        bookingId,
+        leadAttach.lead_id,
+        metadata
+      );
     }
     return {
       ok: true,
@@ -873,7 +904,11 @@ export async function processTimelyAppointmentWebhook(
       };
     }
 
-    const patient = await loadPatientForTimelyExternalId(supabase, tid, payload.external_patient_id.trim());
+    const patient = await loadPatientForTimelyExternalId(
+      supabase,
+      tid,
+      payload.external_patient_id.trim()
+    );
     if (!patient) {
       return {
         ok: false,
@@ -993,8 +1028,19 @@ export async function processTimelyAppointmentWebhook(
 
     await setBookingMappingInternalId(supabase, tid, mappingId, booking.id);
 
-    if (initialStatus === "cancelled" || initialStatus === "completed" || initialStatus === "no_show") {
-      const synced = await syncExistingTimelyBooking(supabase, tid, booking.id, payload, extAppt, mergedPorts);
+    if (
+      initialStatus === "cancelled" ||
+      initialStatus === "completed" ||
+      initialStatus === "no_show"
+    ) {
+      const synced = await syncExistingTimelyBooking(
+        supabase,
+        tid,
+        booking.id,
+        payload,
+        extAppt,
+        mergedPorts
+      );
       if (!synced.ok) return synced;
       return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
     }

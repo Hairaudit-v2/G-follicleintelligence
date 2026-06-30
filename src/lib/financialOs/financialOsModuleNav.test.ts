@@ -14,8 +14,14 @@ describe("financialOsModuleNav", () => {
   });
 
   it("resolves active module from pathname", () => {
-    assert.equal(resolveFinancialOsActiveModule(`${base}/super-release`, base)?.id, "super-release");
-    assert.equal(resolveFinancialOsActiveModule(`${base}/pathway-inbox`, base)?.id, "pathway-inbox");
+    assert.equal(
+      resolveFinancialOsActiveModule(`${base}/super-release`, base)?.id,
+      "super-release"
+    );
+    assert.equal(
+      resolveFinancialOsActiveModule(`${base}/pathway-inbox`, base)?.id,
+      "pathway-inbox"
+    );
     assert.equal(resolveFinancialOsActiveModule(base, base)?.id, "dashboard");
   });
 });

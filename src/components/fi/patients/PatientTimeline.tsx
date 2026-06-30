@@ -52,8 +52,12 @@ export function PatientTimeline({ rows }: { rows: PatientTimelineRow[] }) {
                 {formatTimestamp(row.event_timestamp)}
               </time>
             </div>
-            {row.title ? <p className="mt-2 text-sm font-medium text-slate-100">{row.title}</p> : null}
-            {row.description ? <p className="mt-1 text-sm text-slate-400">{row.description}</p> : null}
+            {row.title ? (
+              <p className="mt-2 text-sm font-medium text-slate-100">{row.title}</p>
+            ) : null}
+            {row.description ? (
+              <p className="mt-1 text-sm text-slate-400">{row.description}</p>
+            ) : null}
           </div>
         </li>
       ))}

@@ -4,7 +4,11 @@ import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { normalizeHubSpotContactToLead } from "@/src/lib/leadFlow/hubspotLeadFlowCore";
-import type { FiExternalEventRow, FiLeadActivityRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
+import type {
+  FiExternalEventRow,
+  FiLeadActivityRow,
+  FiLeadRow,
+} from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 import {
   claimHubSpotExternalEventForProcessing,
   loadPendingExternalEvents,
@@ -53,7 +57,10 @@ function makeLead(overrides: Partial<FiLeadRow> = {}): FiLeadRow {
   };
 }
 
-function makeExternalEvent(payload: Record<string, unknown>, overrides: Partial<FiExternalEventRow> = {}): FiExternalEventRow {
+function makeExternalEvent(
+  payload: Record<string, unknown>,
+  overrides: Partial<FiExternalEventRow> = {}
+): FiExternalEventRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT,
@@ -74,7 +81,10 @@ function makeExternalEvent(payload: Record<string, unknown>, overrides: Partial<
 
 const TENANT_B = "22222222-2222-4222-8222-222222222222";
 
-function matchesFilters(row: Record<string, unknown>, filters: Record<string, string | string[]>): boolean {
+function matchesFilters(
+  row: Record<string, unknown>,
+  filters: Record<string, string | string[]>
+): boolean {
   for (const [key, value] of Object.entries(filters)) {
     if (key === "__or" || key.startsWith("__in:")) continue;
     if (Array.isArray(value)) {
@@ -111,16 +121,22 @@ function makeStoreSupabase(store: Store): SupabaseClient {
         return chain;
       },
       maybeSingle: async () => {
-        const rows = getTable(table).filter((row) => matchesFilters(row as Record<string, unknown>, filters));
+        const rows = getTable(table).filter((row) =>
+          matchesFilters(row as Record<string, unknown>, filters)
+        );
         return { data: rows[0] ?? null, error: null };
       },
       single: async () => {
-        const rows = getTable(table).filter((row) => matchesFilters(row as Record<string, unknown>, filters));
+        const rows = getTable(table).filter((row) =>
+          matchesFilters(row as Record<string, unknown>, filters)
+        );
         if (!rows[0]) return { data: null, error: { message: "not found" } };
         return { data: rows[0], error: null };
       },
       then: (onF: (v: unknown) => unknown, onR?: (e: unknown) => unknown) => {
-        let rows = getTable(table).filter((row) => matchesFilters(row as Record<string, unknown>, filters));
+        let rows = getTable(table).filter((row) =>
+          matchesFilters(row as Record<string, unknown>, filters)
+        );
         rows = rows.slice(0, limit);
         return Promise.resolve({ data: rows, error: null }).then(onF, onR);
       },
@@ -138,7 +154,11 @@ function makeStoreSupabase(store: Store): SupabaseClient {
   const from = (table: string) => ({
     select: () => buildSelect(table),
     insert: (row: Record<string, unknown>) => {
-      const insertedRow = { id: randomUUID(), created_at: new Date().toISOString(), ...row } as Record<string, unknown>;
+      const insertedRow = {
+        id: randomUUID(),
+        created_at: new Date().toISOString(),
+        ...row,
+      } as Record<string, unknown>;
       const applyInsert = () => {
         if (table === "fi_external_events") {
           const duplicate = store.externalEvents.some(
@@ -232,7 +252,9 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
   it("updates lead from later event and records stage change activity", async () => {
     const store: Store = {
       externalEvents: [],
-      leads: [makeLead({ hubspot_contact_id: "501", email: "jane@example.com", current_stage: "new" })],
+      leads: [
+        makeLead({ hubspot_contact_id: "501", email: "jane@example.com", current_stage: "new" }),
+      ],
       activity: [],
     };
     const supabase = makeStoreSupabase(store);
@@ -271,9 +293,15 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
   it("allows repeated external events for same HubSpot contact id", async () => {
     const store: Store = { externalEvents: [], leads: [], activity: [] };
     const supabase = makeStoreSupabase(store);
-    const payload = { eventId: "evt-1", hubspot_contact_id: "501", properties: { email: "a@b.com" } };
+    const payload = {
+      eventId: "evt-1",
+      hubspot_contact_id: "501",
+      properties: { email: "a@b.com" },
+    };
 
-    store.externalEvents.push(makeExternalEvent(payload, { provider_event_id: "evt-1", external_id: "501" }));
+    store.externalEvents.push(
+      makeExternalEvent(payload, { provider_event_id: "evt-1", external_id: "501" })
+    );
     store.externalEvents.push(
       makeExternalEvent(
         { ...payload, eventId: "evt-2", properties: { email: "a@b.com", lifecyclestage: "lead" } },
@@ -300,7 +328,12 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
 
     const result = await processHubSpotContactEvent(claimed!, supabase);
     assert.equal(result.ok, false);
-    const marked = await markExternalEventFailed(TENANT, event.id, result.ok ? undefined : result.message, supabase);
+    const marked = await markExternalEventFailed(
+      TENANT,
+      event.id,
+      result.ok ? undefined : result.message,
+      supabase
+    );
     assert.equal(marked.ok, true);
     if (!marked.ok) return;
     assert.equal(marked.outcome, "retried");
@@ -327,7 +360,9 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
     assert.equal(results[0]?.outcome, "processed");
     assert.equal(store.leads.length, 1);
     assert.equal(store.externalEvents[0]?.status, "processed");
-    const meta = (store.externalEvents[0]?.payload_json as Record<string, unknown>)?.[LEADFLOW_EVENT_META_KEY] as {
+    const meta = (store.externalEvents[0]?.payload_json as Record<string, unknown>)?.[
+      LEADFLOW_EVENT_META_KEY
+    ] as {
       processing_started_at?: string;
     };
     assert.ok(meta?.processing_started_at);
@@ -394,7 +429,10 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
   it("stops retrying after 3 failed attempts", async () => {
     const store: Store = {
       externalEvents: [
-        makeExternalEvent({ properties: {} }, { external_id: null, retry_count: 2, status: "retrying" }),
+        makeExternalEvent(
+          { properties: {} },
+          { external_id: null, retry_count: 2, status: "retrying" }
+        ),
       ],
       leads: [],
       activity: [],
@@ -412,7 +450,11 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
       externalEvents: [
         makeExternalEvent(
           { hubspot_contact_id: "501", properties: { email: "done@example.com" } },
-          { provider_event_id: "evt-done", status: "processed", processed_at: new Date().toISOString() }
+          {
+            provider_event_id: "evt-done",
+            status: "processed",
+            processed_at: new Date().toISOString(),
+          }
         ),
       ],
       leads: [makeLead({ hubspot_contact_id: "501", email: "done@example.com" })],

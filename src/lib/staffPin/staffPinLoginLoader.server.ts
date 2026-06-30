@@ -17,7 +17,9 @@ export type StaffPinLoginPageData = {
   }>;
 };
 
-export async function loadStaffPinLoginPage(tenantId: string): Promise<StaffPinLoginPageData | null> {
+export async function loadStaffPinLoginPage(
+  tenantId: string
+): Promise<StaffPinLoginPageData | null> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = supabaseAdmin();
 

@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
 import {
   autosaveConsultationFormInstance,
@@ -42,7 +46,9 @@ export async function autosaveConsultationFormInstanceAction(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
 
     const values = readRecord(
-      body && typeof body === "object" && body !== null && "values" in body ? (body as { values: unknown }).values : {}
+      body && typeof body === "object" && body !== null && "values" in body
+        ? (body as { values: unknown }).values
+        : {}
     );
     const computedRaw =
       body && typeof body === "object" && body !== null && "computed" in body
@@ -81,7 +87,9 @@ export async function submitConsultationFormInstanceAction(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
 
     const values = readRecord(
-      body && typeof body === "object" && body !== null && "values" in body ? (body as { values: unknown }).values : {}
+      body && typeof body === "object" && body !== null && "values" in body
+        ? (body as { values: unknown }).values
+        : {}
     );
     const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
 
@@ -119,7 +127,9 @@ export async function upsertConsultationFormClinicalNoteAction(
     const formFieldId = String(b.formFieldId ?? "").trim();
     const transcriptRaw = typeof b.transcriptRaw === "string" ? b.transcriptRaw : "";
     const clinicalNoteId =
-      typeof b.clinicalNoteId === "string" && b.clinicalNoteId.trim() ? b.clinicalNoteId.trim() : null;
+      typeof b.clinicalNoteId === "string" && b.clinicalNoteId.trim()
+        ? b.clinicalNoteId.trim()
+        : null;
     const sectionsRaw = b.sections;
     const sections =
       sectionsRaw && typeof sectionsRaw === "object" && !Array.isArray(sectionsRaw)

@@ -9,12 +9,18 @@ export type FiAdminTenantRow = { id: string; name: string; slug: string };
 
 /** Opt-in local dev only: never `true` in production builds (`NODE_ENV === 'production'` blocks use). */
 export function isFiDevTenantListFallbackEnabled(): boolean {
-  return process.env.NODE_ENV !== "production" && String(process.env.FI_ENABLE_DEV_ADMIN_ACCESS ?? "").trim() === "true";
+  return (
+    process.env.NODE_ENV !== "production" &&
+    String(process.env.FI_ENABLE_DEV_ADMIN_ACCESS ?? "").trim() === "true"
+  );
 }
 
 async function loadTenantsForAuthUser(authUserId: string): Promise<FiAdminTenantRow[]> {
   const supabase = supabaseAdmin();
-  const { data: memberships, error: e1 } = await supabase.from("fi_users").select("tenant_id").eq("auth_user_id", authUserId);
+  const { data: memberships, error: e1 } = await supabase
+    .from("fi_users")
+    .select("tenant_id")
+    .eq("auth_user_id", authUserId);
   if (e1) throw new Error(e1.message);
   const ids = Array.from(
     new Set(
@@ -48,7 +54,9 @@ async function loadAllTenants(): Promise<FiAdminTenantRow[]> {
  * - **Production, unauthenticated:** error (401).
  * - **Non-production, unauthenticated:** if `FI_ENABLE_DEV_ADMIN_ACCESS=true`, all `fi_tenants` (dev fallback); else 401.
  */
-export async function resolveFiAdminTenantDirectory(request: Request): Promise<
+export async function resolveFiAdminTenantDirectory(
+  request: Request
+): Promise<
   | { kind: "ok"; tenants: FiAdminTenantRow[]; devTenantListFallback: boolean }
   | { kind: "error"; status: number; message: string; code: string }
 > {

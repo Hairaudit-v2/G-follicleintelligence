@@ -2,9 +2,16 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
-import type { OutcomeMeasurementRow, OutcomeProtocolRow } from "@/src/lib/fi-os/outcomeIntelligenceCaseView";
+import type {
+  OutcomeMeasurementRow,
+  OutcomeProtocolRow,
+} from "@/src/lib/fi-os/outcomeIntelligenceCaseView";
 
-export type { CaseOutcomeIntelligenceView, OutcomeMeasurementRow, OutcomeProtocolRow } from "@/src/lib/fi-os/outcomeIntelligenceCaseView";
+export type {
+  CaseOutcomeIntelligenceView,
+  OutcomeMeasurementRow,
+  OutcomeProtocolRow,
+} from "@/src/lib/fi-os/outcomeIntelligenceCaseView";
 export { buildCaseOutcomeIntelligenceView } from "@/src/lib/fi-os/outcomeIntelligenceCaseView";
 
 export type TenantOutcomeAggregateRow = {
@@ -56,11 +63,16 @@ export const EMPTY_TENANT_OUTCOME_INTELLIGENCE_SUMMARY: TenantOutcomeIntelligenc
   notes: [],
 };
 
-export async function loadCaseOutcomeMeasurements(tenantId: string, caseId: string): Promise<OutcomeMeasurementRow[]> {
+export async function loadCaseOutcomeMeasurements(
+  tenantId: string,
+  caseId: string
+): Promise<OutcomeMeasurementRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_patient_outcome_measurements")
-    .select("id, checkpoint_key, measurement_date, metric_values, imaging_refs, audit_refs, case_id")
+    .select(
+      "id, checkpoint_key, measurement_date, metric_values, imaging_refs, audit_refs, case_id"
+    )
     .eq("tenant_id", tenantId.trim())
     .eq("case_id", caseId.trim())
     .order("measurement_date", { ascending: true, nullsFirst: false })
@@ -72,11 +84,16 @@ export async function loadCaseOutcomeMeasurements(tenantId: string, caseId: stri
   return (data ?? []) as OutcomeMeasurementRow[];
 }
 
-export async function loadPatientOutcomeMeasurements(tenantId: string, patientId: string): Promise<OutcomeMeasurementRow[]> {
+export async function loadPatientOutcomeMeasurements(
+  tenantId: string,
+  patientId: string
+): Promise<OutcomeMeasurementRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_patient_outcome_measurements")
-    .select("id, checkpoint_key, measurement_date, metric_values, imaging_refs, audit_refs, case_id")
+    .select(
+      "id, checkpoint_key, measurement_date, metric_values, imaging_refs, audit_refs, case_id"
+    )
     .eq("tenant_id", tenantId.trim())
     .eq("patient_id", patientId.trim())
     .order("measurement_date", { ascending: true, nullsFirst: false })
@@ -88,11 +105,16 @@ export async function loadPatientOutcomeMeasurements(tenantId: string, patientId
   return (data ?? []) as OutcomeMeasurementRow[];
 }
 
-export async function loadPatientOutcomeProtocols(tenantId: string, patientId: string): Promise<OutcomeProtocolRow[]> {
+export async function loadPatientOutcomeProtocols(
+  tenantId: string,
+  patientId: string
+): Promise<OutcomeProtocolRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_outcome_protocols")
-    .select("id, protocol_type, protocol_key, protocol_label, protocol_details, case_id, patient_id, started_at, completed_at")
+    .select(
+      "id, protocol_type, protocol_key, protocol_label, protocol_details, case_id, patient_id, started_at, completed_at"
+    )
     .eq("tenant_id", tenantId.trim())
     .eq("patient_id", patientId.trim())
     .order("created_at", { ascending: true })
@@ -104,11 +126,16 @@ export async function loadPatientOutcomeProtocols(tenantId: string, patientId: s
   return (data ?? []) as OutcomeProtocolRow[];
 }
 
-export async function loadCaseOutcomeProtocols(tenantId: string, caseId: string): Promise<OutcomeProtocolRow[]> {
+export async function loadCaseOutcomeProtocols(
+  tenantId: string,
+  caseId: string
+): Promise<OutcomeProtocolRow[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_outcome_protocols")
-    .select("id, protocol_type, protocol_key, protocol_label, protocol_details, case_id, patient_id, started_at, completed_at")
+    .select(
+      "id, protocol_type, protocol_key, protocol_label, protocol_details, case_id, patient_id, started_at, completed_at"
+    )
     .eq("tenant_id", tenantId.trim())
     .eq("case_id", caseId.trim())
     .order("created_at", { ascending: true })
@@ -141,7 +168,9 @@ export async function loadTenantOutcomeAggregateSummary(
   return (data ?? []) as TenantOutcomeAggregateRow[];
 }
 
-export async function loadGlobalOutcomeAggregateSummary(opts?: { limit?: number }): Promise<GlobalOutcomeAggregateRow[]> {
+export async function loadGlobalOutcomeAggregateSummary(opts?: {
+  limit?: number;
+}): Promise<GlobalOutcomeAggregateRow[]> {
   const supabase = supabaseAdmin();
   const lim = Math.min(Math.max(opts?.limit ?? 12, 1), 50);
   const { data, error } = await supabase
@@ -159,15 +188,28 @@ export async function loadGlobalOutcomeAggregateSummary(opts?: { limit?: number 
   return (data ?? []) as GlobalOutcomeAggregateRow[];
 }
 
-const TWELVE_MONTH_CHECKPOINTS = new Set(["baseline", "day_1", "day_7", "month_1", "month_3", "month_6", "month_12"]);
+const TWELVE_MONTH_CHECKPOINTS = new Set([
+  "baseline",
+  "day_1",
+  "day_7",
+  "month_1",
+  "month_3",
+  "month_6",
+  "month_12",
+]);
 
-export async function loadTenantOutcomeIntelligenceSummary(tenantId: string): Promise<TenantOutcomeIntelligenceSummary> {
+export async function loadTenantOutcomeIntelligenceSummary(
+  tenantId: string
+): Promise<TenantOutcomeIntelligenceSummary> {
   const tid = tenantId.trim();
   const notes: string[] = [];
   const supabase = supabaseAdmin();
 
   const [mRes, pRes, gRes] = await Promise.all([
-    supabase.from("fi_patient_outcome_measurements").select("id", { count: "exact", head: true }).eq("tenant_id", tid),
+    supabase
+      .from("fi_patient_outcome_measurements")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid),
     supabase
       .from("fi_patient_outcome_measurements")
       .select("checkpoint_key")
@@ -179,13 +221,18 @@ export async function loadTenantOutcomeIntelligenceSummary(tenantId: string): Pr
       .eq("anonymisation_threshold_met", true),
   ]);
 
-  if (mRes.error && !isSupabaseMissingRelationError(mRes.error)) notes.push(`measurements_count:${mRes.error.message}`);
-  if (pRes.error && !isSupabaseMissingRelationError(pRes.error)) notes.push(`measurements_rows:${pRes.error.message}`);
-  if (gRes.error && !isSupabaseMissingRelationError(gRes.error)) notes.push(`global:${gRes.error.message}`);
+  if (mRes.error && !isSupabaseMissingRelationError(mRes.error))
+    notes.push(`measurements_count:${mRes.error.message}`);
+  if (pRes.error && !isSupabaseMissingRelationError(pRes.error))
+    notes.push(`measurements_rows:${pRes.error.message}`);
+  if (gRes.error && !isSupabaseMissingRelationError(gRes.error))
+    notes.push(`global:${gRes.error.message}`);
 
-  const outcomesCapturedApprox = mRes.error ? 0 : mRes.count ?? 0;
+  const outcomesCapturedApprox = mRes.error ? 0 : (mRes.count ?? 0);
   const ckRows = (pRes.data ?? []) as { checkpoint_key: string }[];
-  const capturedSet = new Set(ckRows.map((r) => String(r.checkpoint_key ?? "").trim()).filter(Boolean));
+  const capturedSet = new Set(
+    ckRows.map((r) => String(r.checkpoint_key ?? "").trim()).filter(Boolean)
+  );
   let twelveMonthCheckpointsCaptured = 0;
   for (const k of TWELVE_MONTH_CHECKPOINTS) {
     if (capturedSet.has(k)) twelveMonthCheckpointsCaptured += 1;
@@ -204,11 +251,12 @@ export async function loadTenantOutcomeIntelligenceSummary(tenantId: string): Pr
     for (const row of (detailRes.data ?? []) as { metric_values: Record<string, unknown> }[]) {
       const mv = row.metric_values ?? {};
       if (mv.imaging_available === true || mv.imaging_available === 1) imagingSignalsApprox += 1;
-      if (mv.audit_score_available === true || mv.audit_score_available === 1) auditScoreSignalsApprox += 1;
+      if (mv.audit_score_available === true || mv.audit_score_available === 1)
+        auditScoreSignalsApprox += 1;
     }
   }
 
-  const globalBenchmarkRowsVisible = gRes.error ? 0 : gRes.count ?? 0;
+  const globalBenchmarkRowsVisible = gRes.error ? 0 : (gRes.count ?? 0);
 
   return {
     outcomesCapturedApprox,
@@ -220,4 +268,3 @@ export async function loadTenantOutcomeIntelligenceSummary(tenantId: string): Pr
     notes,
   };
 }
-

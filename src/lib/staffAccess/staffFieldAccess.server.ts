@@ -2,10 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-import {
-  getStaffEffectiveAccess,
-  type StaffAccessPrincipal,
-} from "./staffAccess.server";
+import { getStaffEffectiveAccess, type StaffAccessPrincipal } from "./staffAccess.server";
 import {
   normalizeStaffRoleKey,
   STAFF_ACCESS_MODULE_KEYS,
@@ -610,7 +607,9 @@ export async function revokeStaffFieldAccessGrant(input: {
   const supabase = supabaseAdmin();
   const { data: existing, error: findErr } = await supabase
     .from("fi_staff_field_access_grants")
-    .select("id, clinic_id, staff_member_id, module_key, field_key, permission_level, scope, revoked_at")
+    .select(
+      "id, clinic_id, staff_member_id, module_key, field_key, permission_level, scope, revoked_at"
+    )
     .eq("id", input.grantId)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -650,6 +649,4 @@ export async function revokeStaffFieldAccessGrant(input: {
   return { ok: true };
 }
 
-export {
-  loadStaffFieldAccessAuditHistory,
-} from "./staffFieldAccessAudit.server";
+export { loadStaffFieldAccessAuditHistory } from "./staffFieldAccessAudit.server";

@@ -95,7 +95,11 @@ export async function loadCrmLeadNoteForLead(
   return mapLeadNoteRow(data as Record<string, unknown>);
 }
 
-async function assertAuthorBelongsToTenant(supabase: SupabaseClient, tenantId: string, fiUserId: string): Promise<void> {
+async function assertAuthorBelongsToTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  fiUserId: string
+): Promise<void> {
   const { data, error } = await supabase
     .from("fi_users")
     .select("id")
@@ -106,7 +110,10 @@ async function assertAuthorBelongsToTenant(supabase: SupabaseClient, tenantId: s
   if (!data) throw new Error("author_user_id is not a user in this tenant.");
 }
 
-export async function createCrmLeadNote(params: CreateCrmLeadNoteParams, client?: SupabaseClient): Promise<FiCrmLeadNoteRow> {
+export async function createCrmLeadNote(
+  params: CreateCrmLeadNoteParams,
+  client?: SupabaseClient
+): Promise<FiCrmLeadNoteRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tenantId = assertNonEmptyUuid(params.tenantId, "tenantId");
   const leadId = assertNonEmptyUuid(params.leadId, "leadId");
@@ -161,7 +168,10 @@ export async function createCrmLeadNote(params: CreateCrmLeadNoteParams, client?
   return note;
 }
 
-export async function updateCrmLeadNote(params: UpdateCrmLeadNoteParams, client?: SupabaseClient): Promise<FiCrmLeadNoteRow> {
+export async function updateCrmLeadNote(
+  params: UpdateCrmLeadNoteParams,
+  client?: SupabaseClient
+): Promise<FiCrmLeadNoteRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const row = await loadCrmLeadNoteForLead(params.tenantId, params.leadId, params.noteId, supabase);
   if (!row) throw new Error("Lead note not found for this lead.");
@@ -169,7 +179,9 @@ export async function updateCrmLeadNote(params: UpdateCrmLeadNoteParams, client?
   assertLeadNoteNotArchived(row);
 
   const hasPatch =
-    params.noteBody !== undefined || params.noteVisibility !== undefined || params.isPinned !== undefined;
+    params.noteBody !== undefined ||
+    params.noteVisibility !== undefined ||
+    params.isPinned !== undefined;
   if (!hasPatch) throw new Error("No lead note fields to update.");
 
   let nextBody = row.note_body;

@@ -33,20 +33,30 @@ export type ConsultationLinkSearchPayload = {
 };
 
 function uuidLike(s: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s.trim());
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    s.trim()
+  );
 }
 
 /**
  * Read-only patient + CRM lead search for ConsultationOS linking modals (max {@link MAX} each).
  */
-export async function loadConsultationLinkSearchResults(tenantId: string, queryRaw: string): Promise<ConsultationLinkSearchPayload> {
+export async function loadConsultationLinkSearchResults(
+  tenantId: string,
+  queryRaw: string
+): Promise<ConsultationLinkSearchPayload> {
   const tid = tenantId.trim();
   const query = queryRaw.trim().slice(0, 120);
   if (!tid || !query) {
     return { patients: [], leads: [] };
   }
 
-  const block = await searchFoundationRecords({ tenantId: tid, query, type: "patients", limit: MAX });
+  const block = await searchFoundationRecords({
+    tenantId: tid,
+    query,
+    type: "patients",
+    limit: MAX,
+  });
   const candidateIds: string[] = [];
   for (const h of block.patients) {
     if (h.warning?.includes("No foundation")) continue;

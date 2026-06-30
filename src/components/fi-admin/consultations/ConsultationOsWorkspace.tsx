@@ -25,11 +25,18 @@ import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import { parsePathwayCompletionFromConsultationStructured } from "@/src/lib/consultations/consultationCompletionSummaryParse";
-import { buildConsultationHubLayoutPlan, type ConsultationHubSectionId } from "@/src/lib/consultations/consultationHubLayoutPlan";
+import {
+  buildConsultationHubLayoutPlan,
+  type ConsultationHubSectionId,
+} from "@/src/lib/consultations/consultationHubLayoutPlan";
 import type { ConsultationPathwayLauncherViewModel } from "@/src/lib/consultations/consultationPathwayLauncherModel";
 import type { ConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import { getConsultationTypeDefinition } from "@/src/lib/consultations/consultationTypeConfig";
-import { CONSULTATION_EDITABLE_STATUSES, type ConsultationRow, type ConsultationStatus } from "@/src/lib/consultations/consultationTypes";
+import {
+  CONSULTATION_EDITABLE_STATUSES,
+  type ConsultationRow,
+  type ConsultationStatus,
+} from "@/src/lib/consultations/consultationTypes";
 
 const PATHWAY_HERO_CARD_CLASS =
   "border-cyan-500/20 bg-gradient-to-b from-sky-50/95 via-white to-white shadow-md ring-2 ring-sky-300/40 dark:border-sky-800/60 dark:from-sky-950/45 dark:via-slate-950/50 dark:to-slate-950/40 dark:ring-sky-800/50";
@@ -87,17 +94,29 @@ export function ConsultationOsWorkspace({
 
   const [status, setStatus] = useState<ConsultationStatus>(initialRow.status);
   const [consultantName, setConsultantName] = useState(initialRow.consultant_name ?? "");
-  const [consultantStaffId, setConsultantStaffId] = useState(initialRow.consultant_staff_id?.trim() ?? "");
+  const [consultantStaffId, setConsultantStaffId] = useState(
+    initialRow.consultant_staff_id?.trim() ?? ""
+  );
   const [consultationDate, setConsultationDate] = useState(initialRow.consultation_date ?? "");
 
-  const [linkedPatientId, setLinkedPatientId] = useState<string | null>(() => initialRow.patient_id?.trim() ?? null);
-  const [linkedPersonId, setLinkedPersonId] = useState<string | null>(() => initialRow.person_id?.trim() ?? null);
-  const [linkedLeadId, setLinkedLeadId] = useState<string | null>(() => initialRow.lead_id?.trim() ?? null);
+  const [linkedPatientId, setLinkedPatientId] = useState<string | null>(
+    () => initialRow.patient_id?.trim() ?? null
+  );
+  const [linkedPersonId, setLinkedPersonId] = useState<string | null>(
+    () => initialRow.person_id?.trim() ?? null
+  );
+  const [linkedLeadId, setLinkedLeadId] = useState<string | null>(
+    () => initialRow.lead_id?.trim() ?? null
+  );
   const [linkedPatientLabel, setLinkedPatientLabel] = useState<string | null>(
     () => initialWorkspaceDisplay?.patientName ?? null
   );
-  const [linkedLeadLabel, setLinkedLeadLabel] = useState<string | null>(() => initialWorkspaceDisplay?.leadName ?? null);
-  const [linkedLeadStage, setLinkedLeadStage] = useState<string | null>(() => initialWorkspaceDisplay?.leadStage ?? null);
+  const [linkedLeadLabel, setLinkedLeadLabel] = useState<string | null>(
+    () => initialWorkspaceDisplay?.leadName ?? null
+  );
+  const [linkedLeadStage, setLinkedLeadStage] = useState<string | null>(
+    () => initialWorkspaceDisplay?.leadStage ?? null
+  );
 
   const [busySave, setBusySave] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +129,9 @@ export function ConsultationOsWorkspace({
 
   const pathwayCompletionSummary = useMemo(() => {
     const sd =
-      initialRow.structured_data && typeof initialRow.structured_data === "object" && !Array.isArray(initialRow.structured_data)
+      initialRow.structured_data &&
+      typeof initialRow.structured_data === "object" &&
+      !Array.isArray(initialRow.structured_data)
         ? (initialRow.structured_data as Record<string, unknown>)
         : {};
     return parsePathwayCompletionFromConsultationStructured(sd);
@@ -160,9 +181,20 @@ export function ConsultationOsWorkspace({
       person_id: linkedPersonId,
       lead_id: linkedLeadId,
     };
-  }, [status, consultantName, consultantStaffId, consultationDate, linkedPatientId, linkedPersonId, linkedLeadId]);
+  }, [
+    status,
+    consultantName,
+    consultantStaffId,
+    consultationDate,
+    linkedPatientId,
+    linkedPersonId,
+    linkedLeadId,
+  ]);
 
-  const payloadWatch = useMemo(() => stableConsultationPayloadSignature(buildPayload()), [buildPayload]);
+  const payloadWatch = useMemo(
+    () => stableConsultationPayloadSignature(buildPayload()),
+    [buildPayload]
+  );
 
   const autosaveEnabled = Boolean(cid) && canEdit;
 
@@ -224,14 +256,18 @@ export function ConsultationOsWorkspace({
   })();
 
   const linkedBookingId = initialRow.booking_id?.trim() ? initialRow.booking_id.trim() : null;
-  const appointmentHref = linkedBookingId ? `${base}/appointments/${encodeURIComponent(linkedBookingId)}` : null;
+  const appointmentHref = linkedBookingId
+    ? `${base}/appointments/${encodeURIComponent(linkedBookingId)}`
+    : null;
 
   const pathwayLauncherEl = (
     <ConsultationPathwayLauncher
       key="pathway-launcher"
       model={pathwayLauncher}
       sectionTitle={hubPlan.hasPathwayCompletionSummary ? "Pathways" : undefined}
-      sectionDescription={hubPlan.hasPathwayCompletionSummary ? "Review or start another pathway." : undefined}
+      sectionDescription={
+        hubPlan.hasPathwayCompletionSummary ? "Review or start another pathway." : undefined
+      }
       cardClassName={hubPlan.hasPathwayCompletionSummary ? "" : PATHWAY_HERO_CARD_CLASS}
     />
   );
@@ -241,13 +277,20 @@ export function ConsultationOsWorkspace({
       case "intelligence_summary":
         if (!pathwayCompletionSummary) return null;
         return (
-          <section key="intelligence_summary" className="space-y-3" aria-labelledby="consultation-intel-summary-heading">
-            <h2 id="consultation-intel-summary-heading" className="text-base font-semibold tracking-tight text-slate-100 dark:text-slate-50">
+          <section
+            key="intelligence_summary"
+            className="space-y-3"
+            aria-labelledby="consultation-intel-summary-heading"
+          >
+            <h2
+              id="consultation-intel-summary-heading"
+              className="text-base font-semibold tracking-tight text-slate-100 dark:text-slate-50"
+            >
               Consultation intelligence summary
             </h2>
             <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">
-              Rules-based snapshot from the completed guided pathway — stored on this consultation for Twin, audit, and
-              revenue hand-offs.
+              Rules-based snapshot from the completed guided pathway — stored on this consultation
+              for Twin, audit, and revenue hand-offs.
             </p>
             <ConsultationCompletionSummaryCard summary={pathwayCompletionSummary} />
           </section>
@@ -271,146 +314,163 @@ export function ConsultationOsWorkspace({
         return (
           <div key="intake" id="consultation-hub-intake">
             <FiCard className="border-white/[0.08] bg-white/[0.03] p-4 sm:p-5 dark:border-slate-700/80 dark:bg-slate-950/30">
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.08] pb-3 dark:border-slate-700/80">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Visit context</p>
-                <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-400">
-                  {consultationTypeLabel}
-                  <span className="text-slate-400"> · </span>
-                  {canEdit ? (
-                    <label htmlFor="consultation-os-status" className="sr-only">
-                      Status
-                    </label>
-                  ) : null}
-                  {canEdit ? (
-                    <select
-                      id="consultation-os-status"
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value as ConsultationStatus)}
-                      className="ml-1 max-w-[11rem] rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-1.5 py-0.5 text-xs font-medium text-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="in_progress">In progress</option>
-                    </select>
-                  ) : (
-                    <FiStatusBadge tone={statusTone(status)} appearance="pill">
-                      {formatStatusLabel(status)}
-                    </FiStatusBadge>
-                  )}
-                </p>
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.08] pb-3 dark:border-slate-700/80">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Visit context
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-400">
+                    {consultationTypeLabel}
+                    <span className="text-slate-400"> · </span>
+                    {canEdit ? (
+                      <label htmlFor="consultation-os-status" className="sr-only">
+                        Status
+                      </label>
+                    ) : null}
+                    {canEdit ? (
+                      <select
+                        id="consultation-os-status"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as ConsultationStatus)}
+                        className="ml-1 max-w-[11rem] rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-1.5 py-0.5 text-xs font-medium text-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="in_progress">In progress</option>
+                      </select>
+                    ) : (
+                      <FiStatusBadge tone={statusTone(status)} appearance="pill">
+                        {formatStatusLabel(status)}
+                      </FiStatusBadge>
+                    )}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div onBlurCapture={handleEditorBlurCapture} className="mt-4 space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <ConsultationPatientLinkField
-                  tenantId={tenantId}
-                  disabled={!canEdit}
-                  patientId={linkedPatientId}
-                  patientLabel={linkedPatientLabel}
-                  onLinkPatient={onLinkPatientHit}
-                  onClearPatient={onClearPatient}
-                />
-                {showCrmNav ? (
-                  <ConsultationLeadLinkField
+              <div onBlurCapture={handleEditorBlurCapture} className="mt-4 space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <ConsultationPatientLinkField
                     tenantId={tenantId}
                     disabled={!canEdit}
-                    leadId={linkedLeadId}
-                    leadLabel={linkedLeadLabel}
-                    leadStage={linkedLeadStage}
-                    onLinkLead={onLinkLeadHit}
-                    onClearLead={onClearLead}
+                    patientId={linkedPatientId}
+                    patientLabel={linkedPatientLabel}
+                    onLinkPatient={onLinkPatientHit}
+                    onClearPatient={onClearPatient}
                   />
-                ) : (
-                  <div className="rounded-lg border border-dashed border-white/[0.08] p-3 text-xs text-slate-400 dark:border-slate-600 dark:text-slate-400">
-                    Lead linking requires CRM access.
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="cos-hub-date" className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">
-                    Date
-                  </label>
-                  <input
-                    id="cos-hub-date"
-                    type="date"
-                    value={consultationDate}
-                    onChange={(e) => setConsultationDate(e.target.value)}
-                    disabled={!canEdit}
-                    className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                </div>
-                {clinicalStaffOptions.length > 0 ? (
-                  <div>
-                    <label htmlFor="cos-hub-consultant-staff" className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">
-                      Consultant
-                    </label>
-                    <StaffClinicalSelect
-                      id="cos-hub-consultant-staff"
+                  {showCrmNav ? (
+                    <ConsultationLeadLinkField
                       tenantId={tenantId}
-                      options={clinicalStaffOptions}
-                      value={consultantStaffId}
-                      allowEmpty
-                      emptyLabel="Select…"
-                      className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                       disabled={!canEdit}
-                      onChange={(staffId) => {
-                        setConsultantStaffId(staffId);
-                        const picked = clinicalStaffOptions.find((s) => s.id === staffId);
-                        if (picked) setConsultantName(picked.full_name?.trim() || picked.email?.trim() || "");
-                        else if (!staffId) setConsultantName("");
-                      }}
+                      leadId={linkedLeadId}
+                      leadLabel={linkedLeadLabel}
+                      leadStage={linkedLeadStage}
+                      onLinkLead={onLinkLeadHit}
+                      onClearLead={onClearLead}
                     />
-                  </div>
-                ) : (
-                  <div>
-                    <label htmlFor="cos-hub-consultant-name" className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">
-                      Consultant
-                    </label>
-                    <input
-                      id="cos-hub-consultant-name"
-                      type="text"
-                      value={consultantName}
-                      onChange={(e) => setConsultantName(e.target.value)}
-                      disabled={!canEdit}
-                      className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-3 dark:border-slate-700/80">
-                <div className="min-w-0">
-                  {canEdit ? (
-                    <>
-                      <p className="text-xs font-medium text-slate-500" aria-live="polite">
-                        {subtleSaveLabel}
-                      </p>
-                      {autosaveWarning?.trim() && !error?.trim() ? (
-                        <p className="mt-1 max-w-md text-xs text-amber-300 dark:text-amber-200/90" role="status">
-                          Autosave: {autosaveWarning}
-                        </p>
-                      ) : null}
-                    </>
                   ) : (
-                    <p className="text-xs text-slate-500">Intake is read-only for this status.</p>
+                    <div className="rounded-lg border border-dashed border-white/[0.08] p-3 text-xs text-slate-400 dark:border-slate-600 dark:text-slate-400">
+                      Lead linking requires CRM access.
+                    </div>
                   )}
                 </div>
-                {canEdit ? (
-                  <button
-                    type="button"
-                    onClick={() => void onSaveDraft()}
-                    disabled={busySave}
-                    className="inline-flex shrink-0 items-center justify-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {busySave ? "Saving…" : "Save intake"}
-                  </button>
-                ) : null}
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="cos-hub-date"
+                      className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500"
+                    >
+                      Date
+                    </label>
+                    <input
+                      id="cos-hub-date"
+                      type="date"
+                      value={consultationDate}
+                      onChange={(e) => setConsultationDate(e.target.value)}
+                      disabled={!canEdit}
+                      className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  {clinicalStaffOptions.length > 0 ? (
+                    <div>
+                      <label
+                        htmlFor="cos-hub-consultant-staff"
+                        className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500"
+                      >
+                        Consultant
+                      </label>
+                      <StaffClinicalSelect
+                        id="cos-hub-consultant-staff"
+                        tenantId={tenantId}
+                        options={clinicalStaffOptions}
+                        value={consultantStaffId}
+                        allowEmpty
+                        emptyLabel="Select…"
+                        className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                        disabled={!canEdit}
+                        onChange={(staffId) => {
+                          setConsultantStaffId(staffId);
+                          const picked = clinicalStaffOptions.find((s) => s.id === staffId);
+                          if (picked)
+                            setConsultantName(
+                              picked.full_name?.trim() || picked.email?.trim() || ""
+                            );
+                          else if (!staffId) setConsultantName("");
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label
+                        htmlFor="cos-hub-consultant-name"
+                        className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500"
+                      >
+                        Consultant
+                      </label>
+                      <input
+                        id="cos-hub-consultant-name"
+                        type="text"
+                        value={consultantName}
+                        onChange={(e) => setConsultantName(e.target.value)}
+                        disabled={!canEdit}
+                        className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-3 dark:border-slate-700/80">
+                  <div className="min-w-0">
+                    {canEdit ? (
+                      <>
+                        <p className="text-xs font-medium text-slate-500" aria-live="polite">
+                          {subtleSaveLabel}
+                        </p>
+                        {autosaveWarning?.trim() && !error?.trim() ? (
+                          <p
+                            className="mt-1 max-w-md text-xs text-amber-300 dark:text-amber-200/90"
+                            role="status"
+                          >
+                            Autosave: {autosaveWarning}
+                          </p>
+                        ) : null}
+                      </>
+                    ) : (
+                      <p className="text-xs text-slate-500">Intake is read-only for this status.</p>
+                    )}
+                  </div>
+                  {canEdit ? (
+                    <button
+                      type="button"
+                      onClick={() => void onSaveDraft()}
+                      disabled={busySave}
+                      className="inline-flex shrink-0 items-center justify-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {busySave ? "Saving…" : "Save intake"}
+                    </button>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          </FiCard>
+            </FiCard>
           </div>
         );
       case "checklist":
@@ -463,19 +523,27 @@ export function ConsultationOsWorkspace({
       {!hubPlan.hasPathwayCompletionSummary ? pathwayLauncherEl : null}
 
       {error ? (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300" role="alert">
+        <div
+          className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
 
       {saveOk ? (
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200" role="status">
+        <div
+          className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"
+          role="status"
+        >
           Intake saved successfully.
         </div>
       ) : null}
 
       <FiCard className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Optional break-glass access
+        </p>
         <label htmlFor="cos-admin-key" className="block text-xs text-slate-400">
           FI Admin API key (only if your account does not have CRM write access)
         </label>

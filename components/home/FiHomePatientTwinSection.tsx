@@ -199,7 +199,9 @@ function PatientTwinTimeline() {
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-[10px] font-semibold text-primary">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="text-left text-sm font-semibold leading-snug tracking-tight text-foreground">{m.title}</h3>
+                <h3 className="text-left text-sm font-semibold leading-snug tracking-tight text-foreground">
+                  {m.title}
+                </h3>
               </div>
               <DataSpine active={active} />
               {i < TIMELINE.length - 1 ? (
@@ -245,11 +247,16 @@ function GrowthCascade() {
           <span className="py-1 text-center text-lg text-primary/50 sm:hidden" aria-hidden>
             ↓
           </span>
-          <span className="hidden shrink-0 text-center text-lg text-primary/50 sm:block" aria-hidden>
+          <span
+            className="hidden shrink-0 text-center text-lg text-primary/50 sm:block"
+            aria-hidden
+          >
             →
           </span>
           <div className="flex flex-1 flex-col items-center rounded-xl border border-white/[0.08] bg-[rgb(10_15_24_/0.55)] px-4 py-4 text-center sm:py-5">
-            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">10</span>
+            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
+              10
+            </span>
             <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Data sources
             </span>
@@ -257,11 +264,16 @@ function GrowthCascade() {
           <span className="py-1 text-center text-lg text-primary/50 sm:hidden" aria-hidden>
             ↓
           </span>
-          <span className="hidden shrink-0 text-center text-lg text-primary/50 sm:block" aria-hidden>
+          <span
+            className="hidden shrink-0 text-center text-lg text-primary/50 sm:block"
+            aria-hidden
+          >
             →
           </span>
           <div className="flex flex-1 flex-col items-center rounded-xl border border-white/[0.08] bg-[rgb(10_15_24_/0.55)] px-4 py-4 text-center sm:py-5">
-            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">1,000</span>
+            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
+              1,000
+            </span>
             <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Structured data points
             </span>
@@ -283,7 +295,9 @@ function GrowthCascade() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,hsl(var(--primary)/0.08),transparent_50%)]" />
         <div className="relative flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center sm:gap-2">
           <div className="flex flex-1 flex-col items-center rounded-xl border border-white/[0.08] bg-[rgb(10_15_24_/0.55)] px-4 py-4 text-center sm:py-5">
-            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">100,000</span>
+            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
+              100,000
+            </span>
             <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Patient Twins
             </span>
@@ -291,11 +305,16 @@ function GrowthCascade() {
           <span className="py-1 text-center text-lg text-primary/50 sm:hidden" aria-hidden>
             ↓
           </span>
-          <span className="hidden shrink-0 text-center text-lg text-primary/50 sm:block" aria-hidden>
+          <span
+            className="hidden shrink-0 text-center text-lg text-primary/50 sm:block"
+            aria-hidden
+          >
             →
           </span>
           <div className="flex flex-[1.4] flex-col items-center rounded-xl border border-white/[0.08] bg-[rgb(10_15_24_/0.55)] px-4 py-4 text-center sm:py-5">
-            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">100+</span>
+            <span className="font-display text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
+              100+
+            </span>
             <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Million structured data points
             </span>
@@ -318,8 +337,9 @@ function GrowthCascade() {
             Global clinical intelligence at patient scale
           </p>
           <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Scale compounds: enough structured twins make cohort effects visible—patterns that no single clinic could
-            surface alone, yet each deployment stays permissioned and governable under tenant policy.
+            Scale compounds: enough structured twins make cohort effects visible—patterns that no
+            single clinic could surface alone, yet each deployment stays permissioned and governable
+            under tenant policy.
           </p>
         </div>
       </motion.div>
@@ -341,7 +361,9 @@ export function FiHomePatientTwinSection() {
 
       <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-24">
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/88">The Patient Twin™</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/88">
+            The Patient Twin™
+          </p>
           <h2
             id="fi-patient-twin-heading"
             className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl md:leading-[1.12]"
@@ -376,7 +398,9 @@ export function FiHomePatientTwinSection() {
                 <div className="rounded-lg border border-white/[0.08] bg-primary/8 p-2 text-primary w-fit">
                   <Icon className="h-4 w-4" aria-hidden />
                 </div>
-                <h3 className="mt-4 font-display text-sm font-semibold tracking-tight text-foreground">{card.title}</h3>
+                <h3 className="mt-4 font-display text-sm font-semibold tracking-tight text-foreground">
+                  {card.title}
+                </h3>
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-[13px] sm:leading-relaxed">
                   {card.body}
                 </p>

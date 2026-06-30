@@ -45,14 +45,24 @@ export async function generatePatientConsultationChecklistAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const adminKey = body && typeof body === "object" ? body.adminKey : undefined;
-    const consultationId = body && typeof body === "object" ? body.consultationId?.trim() : undefined;
+    const consultationId =
+      body && typeof body === "object" ? body.consultationId?.trim() : undefined;
     const caseId = body && typeof body === "object" ? body.caseId?.trim() : undefined;
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: adminKey ?? undefined,
+      request: undefined,
+    });
     const tid = tenantId.trim();
     const pid = patientId.trim();
 
     const supabase = supabaseAdmin();
-    const { data: row, error } = await supabase.from("fi_patients").select("id").eq("tenant_id", tid).eq("id", pid).maybeSingle();
+    const { data: row, error } = await supabase
+      .from("fi_patients")
+      .select("id")
+      .eq("tenant_id", tid)
+      .eq("id", pid)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Patient not found for this tenant.");
 
@@ -109,7 +119,9 @@ export async function updateConsultationChecklistReviewAction(
 
     const merged = {
       priority_level:
-        parsed.priority_level !== undefined ? normalizeHieConsultationPriorityLevel(parsed.priority_level) : normalizeHieConsultationPriorityLevel(x.priority_level),
+        parsed.priority_level !== undefined
+          ? normalizeHieConsultationPriorityLevel(parsed.priority_level)
+          : normalizeHieConsultationPriorityLevel(x.priority_level),
       confidence_score:
         parsed.confidence_score !== undefined
           ? clampConsultationChecklistConfidence(parsed.confidence_score)
@@ -135,16 +147,29 @@ export async function updateConsultationChecklistReviewAction(
           ? normalizeHieConsultationConsentComplexity(parsed.consent_complexity_level)
           : normalizeHieConsultationConsentComplexity(x.consent_complexity_level),
       documentation_required:
-        parsed.documentation_required !== undefined ? parsed.documentation_required : Boolean(x.documentation_required),
-      follow_up_required: parsed.follow_up_required !== undefined ? parsed.follow_up_required : Boolean(x.follow_up_required),
-      delay_recommended: parsed.delay_recommended !== undefined ? parsed.delay_recommended : Boolean(x.delay_recommended),
+        parsed.documentation_required !== undefined
+          ? parsed.documentation_required
+          : Boolean(x.documentation_required),
+      follow_up_required:
+        parsed.follow_up_required !== undefined
+          ? parsed.follow_up_required
+          : Boolean(x.follow_up_required),
+      delay_recommended:
+        parsed.delay_recommended !== undefined
+          ? parsed.delay_recommended
+          : Boolean(x.delay_recommended),
       consultation_summary:
-        parsed.consultation_summary !== undefined ? parsed.consultation_summary : (x.consultation_summary as string | null),
-      checklist_items: parsed.checklist_items !== undefined ? parsed.checklist_items : existingItems,
+        parsed.consultation_summary !== undefined
+          ? parsed.consultation_summary
+          : (x.consultation_summary as string | null),
+      checklist_items:
+        parsed.checklist_items !== undefined ? parsed.checklist_items : existingItems,
       risk_flags: parsed.risk_flags !== undefined ? parsed.risk_flags : existingFlags,
       ai_notes: parsed.ai_notes !== undefined ? parsed.ai_notes : (x.ai_notes as string | null),
       checklist_status:
-        parsed.checklist_status !== undefined ? normalizeHieConsultationChecklistStatus(parsed.checklist_status) : normalizeHieConsultationChecklistStatus(x.checklist_status),
+        parsed.checklist_status !== undefined
+          ? normalizeHieConsultationChecklistStatus(parsed.checklist_status)
+          : normalizeHieConsultationChecklistStatus(x.checklist_status),
       review_status: parsed.review_status,
       reviewed_by_user_id: fiUserId,
       reviewed_at: now,

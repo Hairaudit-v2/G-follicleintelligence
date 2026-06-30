@@ -1,5 +1,8 @@
 import Link from "next/link";
-import type { CaseWorklistRow, CasesWorklistReadinessBucket } from "@/src/lib/cases/casesIndexTypes";
+import type {
+  CaseWorklistRow,
+  CasesWorklistReadinessBucket,
+} from "@/src/lib/cases/casesIndexTypes";
 import { caseDetailPageHref } from "@/src/lib/cases/caseDetailFromCasesParam";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
@@ -27,7 +30,10 @@ export function CasesWorklistTable({
   return (
     <div className="hidden overflow-x-auto rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40 md:block">
       <table className="min-w-full text-sm" aria-labelledby="cases-worklist-table-heading">
-        <caption id="cases-worklist-table-heading" className="px-3 py-2 text-left text-sm font-semibold text-slate-100">
+        <caption
+          id="cases-worklist-table-heading"
+          className="px-3 py-2 text-left text-sm font-semibold text-slate-100"
+        >
           Surgery case worklist
         </caption>
         <thead className="bg-white/[0.03] text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -46,14 +52,20 @@ export function CasesWorklistTable({
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-white/[0.06] hover:bg-white/[0.03]">
               <td className="px-3 py-2">
-                <Link href={caseDetailPageHref(tenantId, r.id, worklistQueryString)} className="font-medium text-blue-300 hover:underline">
+                <Link
+                  href={caseDetailPageHref(tenantId, r.id, worklistQueryString)}
+                  className="font-medium text-blue-300 hover:underline"
+                >
                   {r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}
                 </Link>
                 <div className="text-xs text-slate-300">{r.person_label}</div>
                 {r.lead ? (
                   <div className="mt-0.5 text-[11px] text-gray-500">
                     Lead:{" "}
-                    <Link href={`/fi-admin/${tenantId}/crm/leads/${r.lead.id}`} className="text-blue-300 hover:underline">
+                    <Link
+                      href={`/fi-admin/${tenantId}/crm/leads/${r.lead.id}`}
+                      className="text-blue-300 hover:underline"
+                    >
                       {r.lead.title}
                     </Link>
                   </div>
@@ -64,7 +76,10 @@ export function CasesWorklistTable({
               </td>
               <td className="px-3 py-2 whitespace-nowrap">
                 <div className="flex flex-col items-start gap-1">
-                  <CaseSectionHealthBadge health={readinessToBadgeHealth(r.readinessBucket)} compact />
+                  <CaseSectionHealthBadge
+                    health={readinessToBadgeHealth(r.readinessBucket)}
+                    compact
+                  />
                   <span className="text-[11px] text-slate-400">{r.readinessPercent}%</span>
                 </div>
               </td>
@@ -72,7 +87,9 @@ export function CasesWorklistTable({
                 {r.surgeryPlan ? (
                   <>
                     <div>{surgeryPlanningStatusLabel(r.surgeryPlan.planning_status)}</div>
-                    <div className="text-[11px] text-gray-500">{r.surgeryPlan.planned_procedure_type ?? "—"}</div>
+                    <div className="text-[11px] text-gray-500">
+                      {r.surgeryPlan.planned_procedure_type ?? "—"}
+                    </div>
                   </>
                 ) : (
                   <span className="text-gray-400">—</span>
@@ -89,11 +106,17 @@ export function CasesWorklistTable({
                 )}
               </td>
               <td className="px-3 py-2 text-xs text-slate-300">
-                {r.postOpTracking ? postOpStatusLabel(r.postOpTracking.post_op_status) : <span className="text-gray-400">—</span>}
+                {r.postOpTracking ? (
+                  postOpStatusLabel(r.postOpTracking.post_op_status)
+                ) : (
+                  <span className="text-gray-400">—</span>
+                )}
               </td>
               <td className="px-3 py-2 text-xs tabular-nums text-slate-300">{r.imageCount}</td>
               <td className="px-3 py-2 text-xs tabular-nums text-slate-300">{r.bookingCount}</td>
-              <td className="px-3 py-2 whitespace-nowrap text-xs text-slate-400">{r.updated_at ? r.updated_at.slice(0, 10) : "—"}</td>
+              <td className="px-3 py-2 whitespace-nowrap text-xs text-slate-400">
+                {r.updated_at ? r.updated_at.slice(0, 10) : "—"}
+              </td>
             </tr>
           ))}
         </tbody>

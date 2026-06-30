@@ -16,7 +16,15 @@ export function CrmLeadSlideOverProvider({
   const close = useCallback(() => setLeadId(null), []);
 
   const value = useMemo(
-    () => ({ tenantId, operatorFiUserId, userRole, canUseClinicFeatures, activeLeadId: leadId, openLead, close }),
+    () => ({
+      tenantId,
+      operatorFiUserId,
+      userRole,
+      canUseClinicFeatures,
+      activeLeadId: leadId,
+      openLead,
+      close,
+    }),
     [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, leadId, openLead, close]
   );
 

@@ -48,7 +48,11 @@ export function PrescriptionPatientPickerClient({
     try {
       const url = `/api/tenants/${encodeURIComponent(tid)}/consultations/search-links?q=${encodeURIComponent(debounced)}`;
       const res = await fetch(url, { credentials: "same-origin" });
-      const json = (await res.json()) as { ok?: boolean; error?: string; patients?: ConsultationLinkSearchPatientHit[] };
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        patients?: ConsultationLinkSearchPatientHit[];
+      };
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Search failed.");
       }

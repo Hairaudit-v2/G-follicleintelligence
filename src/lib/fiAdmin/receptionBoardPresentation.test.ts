@@ -9,7 +9,9 @@ import {
   receptionFlowLaneForCard,
 } from "@/src/lib/fiAdmin/receptionBoardPresentation";
 
-function card(partial: Partial<ReceptionBoardCard> & Pick<ReceptionBoardCard, "id" | "receptionColumn">): ReceptionBoardCard {
+function card(
+  partial: Partial<ReceptionBoardCard> & Pick<ReceptionBoardCard, "id" | "receptionColumn">
+): ReceptionBoardCard {
   return {
     startAt: "2026-06-23T09:00:00.000Z",
     endAt: "2026-06-23T10:00:00.000Z",
@@ -34,7 +36,7 @@ test("receptionFlowLaneForCard: expected future → arriving_soon", () => {
   const now = Date.parse("2026-06-23T08:00:00.000Z");
   const lane = receptionFlowLaneForCard(
     card({ id: "a", receptionColumn: "expected", startAt: "2026-06-23T10:00:00.000Z" }),
-    now,
+    now
   );
   assert.equal(lane, "arriving_soon");
 });
@@ -43,7 +45,7 @@ test("receptionFlowLaneForCard: overdue expected → waiting", () => {
   const now = Date.parse("2026-06-23T10:30:00.000Z");
   const lane = receptionFlowLaneForCard(
     card({ id: "b", receptionColumn: "expected", startAt: "2026-06-23T09:00:00.000Z" }),
-    now,
+    now
   );
   assert.equal(lane, "waiting");
 });
@@ -66,7 +68,9 @@ test("buildReceptionSnapshotCards returns six cards", () => {
 
 test("buildReceptionPriorities ranks overdue check-in highest", () => {
   const now = Date.parse("2026-06-23T11:00:00.000Z");
-  const cards = [card({ id: "1", receptionColumn: "expected", startAt: "2026-06-23T09:00:00.000Z" })];
+  const cards = [
+    card({ id: "1", receptionColumn: "expected", startAt: "2026-06-23T09:00:00.000Z" }),
+  ];
   const items = buildReceptionPriorities(
     "/fi-admin/t",
     cards,
@@ -84,7 +88,7 @@ test("buildReceptionPriorities ranks overdue check-in highest", () => {
       financialClearanceAttention: 0,
     },
     5,
-    now,
+    now
   );
   assert.ok(items.length > 0);
   assert.equal(items[0].id, "check_in_overdue");

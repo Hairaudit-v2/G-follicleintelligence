@@ -9,15 +9,27 @@ import {
 
 test("computeInvoiceDaysOverdue", () => {
   assert.equal(
-    computeInvoiceDaysOverdue({ due_date: "2026-06-01", remaining_balance_cents: 1000, todayYmd: "2026-06-10" }),
+    computeInvoiceDaysOverdue({
+      due_date: "2026-06-01",
+      remaining_balance_cents: 1000,
+      todayYmd: "2026-06-10",
+    }),
     9
   );
   assert.equal(
-    computeInvoiceDaysOverdue({ due_date: "2026-06-20", remaining_balance_cents: 1000, todayYmd: "2026-06-10" }),
+    computeInvoiceDaysOverdue({
+      due_date: "2026-06-20",
+      remaining_balance_cents: 1000,
+      todayYmd: "2026-06-10",
+    }),
     0
   );
   assert.equal(
-    computeInvoiceDaysOverdue({ due_date: "2026-06-01", remaining_balance_cents: 0, todayYmd: "2026-06-10" }),
+    computeInvoiceDaysOverdue({
+      due_date: "2026-06-01",
+      remaining_balance_cents: 0,
+      todayYmd: "2026-06-10",
+    }),
     0
   );
 });

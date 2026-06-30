@@ -17,7 +17,7 @@ export function DashboardEmptyState(props: {
     <div
       className={cn(
         "flex flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.1] bg-white/[0.02] px-5 py-8 text-center backdrop-blur-sm sm:px-8 sm:py-10",
-        className,
+        className
       )}
     >
       {icon ? (

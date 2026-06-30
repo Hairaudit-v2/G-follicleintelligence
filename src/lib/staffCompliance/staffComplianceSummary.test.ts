@@ -38,7 +38,10 @@ test("infer: due_soon — expires_at within 30 days", () => {
 });
 
 test("infer: missing — no completed_at", () => {
-  assert.equal(inferStaffComplianceStatus({ id: "x", expires_at: "2027-06-01T00:00:00.000Z" }, FIXED), "missing");
+  assert.equal(
+    inferStaffComplianceStatus({ id: "x", expires_at: "2027-06-01T00:00:00.000Z" }, FIXED),
+    "missing"
+  );
   assert.equal(inferStaffComplianceStatus({ id: "x" }, FIXED), "missing");
 });
 
@@ -87,9 +90,21 @@ test("build: overallStatus priority expired over current", () => {
       {
         source_system: "iiohr",
         metadata: {
-          training: [{ id: "ok", label: "Ok", completed_at: "2026-06-01T00:00:00.000Z", expires_at: "2027-06-01T00:00:00.000Z" }],
+          training: [
+            {
+              id: "ok",
+              label: "Ok",
+              completed_at: "2026-06-01T00:00:00.000Z",
+              expires_at: "2027-06-01T00:00:00.000Z",
+            },
+          ],
           compliance: [
-            { id: "bad", label: "Bad", completed_at: "2024-01-01T00:00:00.000Z", expires_at: "2026-01-01T00:00:00.000Z" },
+            {
+              id: "bad",
+              label: "Bad",
+              completed_at: "2024-01-01T00:00:00.000Z",
+              expires_at: "2026-01-01T00:00:00.000Z",
+            },
           ],
         },
       },
@@ -102,8 +117,16 @@ test("build: overallStatus priority expired over current", () => {
 });
 
 test("build: empty metadata / no rows", () => {
-  assert.equal(buildStaffComplianceSummaryFromSourceRows([], { now: FIXED }).overallStatus, "unknown");
-  assert.equal(buildStaffComplianceSummaryFromSourceRows([{ source_system: "x", metadata: {} }], { now: FIXED }).items.length, 0);
+  assert.equal(
+    buildStaffComplianceSummaryFromSourceRows([], { now: FIXED }).overallStatus,
+    "unknown"
+  );
+  assert.equal(
+    buildStaffComplianceSummaryFromSourceRows([{ source_system: "x", metadata: {} }], {
+      now: FIXED,
+    }).items.length,
+    0
+  );
 });
 
 test("build: lastSyncedAt picks latest parseable", () => {

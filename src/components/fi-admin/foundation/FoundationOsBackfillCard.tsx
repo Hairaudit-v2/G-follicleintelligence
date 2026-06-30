@@ -32,7 +32,7 @@ export function FoundationOsBackfillCard({
     setBackfillBusy(false);
     if (res.ok) {
       setBackfillMsg(
-        `Backfill: scanned ${res.scanned}, attempted ${res.attempted}, succeeded ${res.succeeded}, skipped ${res.skipped}, failed ${res.failed}.`,
+        `Backfill: scanned ${res.scanned}, attempted ${res.attempted}, succeeded ${res.succeeded}, skipped ${res.skipped}, failed ${res.failed}.`
       );
       if (res.errors.length) setBackfillMsg((m) => `${m} Errors: ${res.errors.join("; ")}`);
     } else {
@@ -43,19 +43,26 @@ export function FoundationOsBackfillCard({
   const body = (
     <>
       <p className={`mt-2 text-sm leading-relaxed ${dark ? "text-slate-400" : "text-slate-400"}`}>
-        Replays dual-write for up to 50 recent <strong className={dark ? "text-slate-200" : "text-slate-200"}>processed</strong> events
+        Replays dual-write for up to 50 recent{" "}
+        <strong className={dark ? "text-slate-200" : "text-slate-200"}>processed</strong> events
         that have no timeline row with matching{" "}
-        <code className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-[#0F1629]/80 backdrop-blur-md text-cyan-200 ring-1 ring-white/[0.08]"}`}>
+        <code
+          className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-[#0F1629]/80 backdrop-blur-md text-cyan-200 ring-1 ring-white/[0.08]"}`}
+        >
           fi_event_id
         </code>
         . Requires server{" "}
-        <code className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-[#0F1629]/80 backdrop-blur-md text-cyan-200 ring-1 ring-white/[0.08]"}`}>
+        <code
+          className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-[#0F1629]/80 backdrop-blur-md text-cyan-200 ring-1 ring-white/[0.08]"}`}
+        >
           FI_ADMIN_API_KEY
         </code>
         . Does not run automatically and does not merge identities.
       </p>
       <form onSubmit={runBackfill} className="mt-4 flex flex-wrap items-end gap-3">
-        <label className={`flex min-w-[12rem] flex-1 flex-col text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}>
+        <label
+          className={`flex min-w-[12rem] flex-1 flex-col text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}
+        >
           Admin key
           <input
             type="password"
@@ -75,14 +82,21 @@ export function FoundationOsBackfillCard({
           disabled={backfillBusy || !adminKey.trim()}
           className={cn(
             dark
-              ? cn(fiOsChromeClasses.toolbarControlSurface, "px-4 py-2.5 text-sm font-semibold text-violet-100/95 disabled:opacity-45")
-              : "rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 disabled:opacity-45",
+              ? cn(
+                  fiOsChromeClasses.toolbarControlSurface,
+                  "px-4 py-2.5 text-sm font-semibold text-violet-100/95 disabled:opacity-45"
+                )
+              : "rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 disabled:opacity-45"
           )}
         >
           {backfillBusy ? "Running…" : "Run batch backfill (max 50)"}
         </button>
       </form>
-      {backfillMsg ? <p className={`mt-3 text-sm ${dark ? "text-slate-300" : "text-slate-300"}`}>{backfillMsg}</p> : null}
+      {backfillMsg ? (
+        <p className={`mt-3 text-sm ${dark ? "text-slate-300" : "text-slate-300"}`}>
+          {backfillMsg}
+        </p>
+      ) : null}
     </>
   );
 
@@ -101,7 +115,9 @@ export function FoundationOsBackfillCard({
 
   return (
     <FiCard className="border-violet-500/20 bg-violet-500/10">
-      <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-violet-300">Deployment operators</p>
+      <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-violet-300">
+        Deployment operators
+      </p>
       <h2 className="mt-1 text-base font-semibold text-slate-100">Manual foundation backfill</h2>
       {body}
     </FiCard>

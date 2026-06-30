@@ -8,7 +8,9 @@ import { assertCronAuthorized, CronEnvError, getRequiredEnv } from "@/src/lib/se
 const SECRET = "0123456789abcdef"; // 16 chars
 
 test("assertCronAuthorized returns 401 when no bearer or alternate header", () => {
-  const res = assertCronAuthorized(new NextRequest("https://x.test/api/cron", { method: "GET" }), [SECRET]);
+  const res = assertCronAuthorized(new NextRequest("https://x.test/api/cron", { method: "GET" }), [
+    SECRET,
+  ]);
   assert.ok(res);
   assert.equal(res.status, 401);
 });
@@ -73,7 +75,10 @@ test("assertCronAuthorized accepts any of multiple secrets", () => {
 test("getRequiredEnv throws CronEnvError when missing", () => {
   const prev = process.env.CRON_AUTH_TEST_VAR___;
   delete process.env.CRON_AUTH_TEST_VAR___;
-  assert.throws(() => getRequiredEnv("CRON_AUTH_TEST_VAR___"), (e: unknown) => e instanceof CronEnvError);
+  assert.throws(
+    () => getRequiredEnv("CRON_AUTH_TEST_VAR___"),
+    (e: unknown) => e instanceof CronEnvError
+  );
   if (prev !== undefined) process.env.CRON_AUTH_TEST_VAR___ = prev;
 });
 

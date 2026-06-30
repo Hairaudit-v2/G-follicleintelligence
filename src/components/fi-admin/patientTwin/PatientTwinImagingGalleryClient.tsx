@@ -13,10 +13,15 @@ import {
   FI_AI_SHAVE_STATES,
   FI_AI_SURGERY_STAGES,
 } from "@/src/lib/imaging/aiImageClassificationTypes";
-import type { PatientTwinImagingGalleryItem, PatientTwinImagingGalleryUiSection } from "@/src/lib/patientTwin/patientTwinTypes";
+import type {
+  PatientTwinImagingGalleryItem,
+  PatientTwinImagingGalleryUiSection,
+} from "@/src/lib/patientTwin/patientTwinTypes";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>
+  );
 }
 
 function SelectRow(props: {
@@ -51,13 +56,18 @@ export function PatientTwinImagingGalleryClient(props: {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  const sections = useMemo(() => props.uiSections.filter((s) => s.items.length > 0), [props.uiSections]);
+  const sections = useMemo(
+    () => props.uiSections.filter((s) => s.items.length > 0),
+    [props.uiSections]
+  );
 
   return (
     <div className="mt-4 space-y-6">
       {message ? <p className="text-xs text-amber-200/90">{message}</p> : null}
       {sections.length === 0 ? (
-        <p className="text-sm text-[#94A3B8]">No gallery groups yet — upload clinical images, then run AI analysis.</p>
+        <p className="text-sm text-[#94A3B8]">
+          No gallery groups yet — upload clinical images, then run AI analysis.
+        </p>
       ) : (
         sections.map((section) => (
           <div key={section.key}>
@@ -100,16 +110,25 @@ function TwinImagingImageCard(props: {
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={img.thumbnail_url} alt="" className="aspect-square w-full rounded-md object-cover" loading="lazy" />
+      <img
+        src={img.thumbnail_url}
+        alt=""
+        className="aspect-square w-full rounded-md object-cover"
+        loading="lazy"
+      />
       <div className="grid grid-cols-2 gap-2 text-xs text-slate-200">
         <div>
           <FieldLabel>AI category</FieldLabel>
-          <p className="mt-0.5 font-medium text-white">{(img.ai_image_category ?? "—").replace(/_/g, " ")}</p>
+          <p className="mt-0.5 font-medium text-white">
+            {(img.ai_image_category ?? "—").replace(/_/g, " ")}
+          </p>
         </div>
         <div>
           <FieldLabel>Confidence</FieldLabel>
           <p className="mt-0.5 font-medium text-white">
-            {img.ai_image_category_confidence != null ? img.ai_image_category_confidence.toFixed(2) : "—"}
+            {img.ai_image_category_confidence != null
+              ? img.ai_image_category_confidence.toFixed(2)
+              : "—"}
           </p>
         </div>
         <div>
@@ -148,11 +167,36 @@ function TwinImagingImageCard(props: {
       <div className="border-t border-white/10 pt-3">
         <p className="text-xs font-medium text-slate-300">Correct category</p>
         <div className="mt-2 grid grid-cols-1 gap-2">
-          <SelectRow label="Category" value={cat} onChange={setCat} options={FI_AI_IMAGE_CATEGORIES} />
-          <SelectRow label="Hair state" value={hair} onChange={setHair} options={FI_AI_HAIR_STATES} />
-          <SelectRow label="Shave state" value={shave} onChange={setShave} options={FI_AI_SHAVE_STATES} />
-          <SelectRow label="Surgery stage" value={surg} onChange={setSurg} options={FI_AI_SURGERY_STAGES} />
-          <SelectRow label="Review status" value={review} onChange={setReview} options={FI_AI_IMAGE_REVIEW_STATUSES} />
+          <SelectRow
+            label="Category"
+            value={cat}
+            onChange={setCat}
+            options={FI_AI_IMAGE_CATEGORIES}
+          />
+          <SelectRow
+            label="Hair state"
+            value={hair}
+            onChange={setHair}
+            options={FI_AI_HAIR_STATES}
+          />
+          <SelectRow
+            label="Shave state"
+            value={shave}
+            onChange={setShave}
+            options={FI_AI_SHAVE_STATES}
+          />
+          <SelectRow
+            label="Surgery stage"
+            value={surg}
+            onChange={setSurg}
+            options={FI_AI_SURGERY_STAGES}
+          />
+          <SelectRow
+            label="Review status"
+            value={review}
+            onChange={setReview}
+            options={FI_AI_IMAGE_REVIEW_STATUSES}
+          />
         </div>
         <button
           type="button"
@@ -161,13 +205,18 @@ function TwinImagingImageCard(props: {
           onClick={() => {
             setMessage(null);
             start(async () => {
-              const res = await updatePatientImageClassificationReviewAction(tenantId, patientId, img.id, {
-                ai_image_category: cat as (typeof FI_AI_IMAGE_CATEGORIES)[number],
-                ai_hair_state: hair as (typeof FI_AI_HAIR_STATES)[number],
-                ai_shave_state: shave as (typeof FI_AI_SHAVE_STATES)[number],
-                ai_surgery_stage: surg as (typeof FI_AI_SURGERY_STAGES)[number],
-                ai_image_review_status: review as (typeof FI_AI_IMAGE_REVIEW_STATUSES)[number],
-              });
+              const res = await updatePatientImageClassificationReviewAction(
+                tenantId,
+                patientId,
+                img.id,
+                {
+                  ai_image_category: cat as (typeof FI_AI_IMAGE_CATEGORIES)[number],
+                  ai_hair_state: hair as (typeof FI_AI_HAIR_STATES)[number],
+                  ai_shave_state: shave as (typeof FI_AI_SHAVE_STATES)[number],
+                  ai_surgery_stage: surg as (typeof FI_AI_SURGERY_STAGES)[number],
+                  ai_image_review_status: review as (typeof FI_AI_IMAGE_REVIEW_STATUSES)[number],
+                }
+              );
               if (!res.ok) setMessage(res.error);
             });
           }}

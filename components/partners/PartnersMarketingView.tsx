@@ -9,7 +9,10 @@ import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPri
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { PARTNERS_PAGE_CONTENT } from "@/lib/marketing/partnersPageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react";
 
@@ -43,10 +46,23 @@ function EcosystemNetworkViz({ nodes }: { nodes: readonly string[] }) {
       aria-label="Global intelligence network connecting clinics, surgeons, educators, researchers, patients, and industry partners."
     >
       <div className="relative aspect-square min-h-[300px] w-full overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-[radial-gradient(ellipse_at_50%_40%,rgb(212_175_55_/0.14),transparent_55%),linear-gradient(180deg,rgb(255_255_255_/0.04),transparent)] shadow-[0_24px_80px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.05)] sm:min-h-[340px]">
-        <svg className="absolute inset-0 h-full w-full text-amber-400" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
+        <svg
+          className="absolute inset-0 h-full w-full text-amber-400"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="xMidYMid meet"
+          aria-hidden
+        >
           {layout.map((n) => (
             <g key={n.label}>
-              <line x1="50" y1="50" x2={n.x} y2={n.y} stroke="rgb(212 175 55 / 0.12)" strokeWidth="0.45" vectorEffect="non-scaling-stroke" />
+              <line
+                x1="50"
+                y1="50"
+                x2={n.x}
+                y2={n.y}
+                stroke="rgb(212 175 55 / 0.12)"
+                strokeWidth="0.45"
+                vectorEffect="non-scaling-stroke"
+              />
               <line
                 x1="50"
                 y1="50"
@@ -57,7 +73,11 @@ function EcosystemNetworkViz({ nodes }: { nodes: readonly string[] }) {
                 strokeDasharray="0.8 2"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-                className={reduceMotion ? "text-amber-400/30" : "fi-hero-network-line-out text-amber-400/45 [animation-duration:3.2s]"}
+                className={
+                  reduceMotion
+                    ? "text-amber-400/30"
+                    : "fi-hero-network-line-out text-amber-400/45 [animation-duration:3.2s]"
+                }
               />
             </g>
           ))}
@@ -65,8 +85,12 @@ function EcosystemNetworkViz({ nodes }: { nodes: readonly string[] }) {
 
         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
           <div className="rounded-full border border-amber-400/30 bg-[rgb(8_12_20_/0.92)] px-4 py-2.5 text-center shadow-[0_0_32px_rgb(212_175_55_/0.18),inset_0_1px_0_rgb(255_255_255_/0.08)] sm:px-5 sm:py-3">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-200/70 sm:text-[10px]">Central</p>
-            <p className="mt-0.5 font-display text-[0.7rem] font-semibold leading-tight text-foreground sm:text-sm">Intelligence Network</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-200/70 sm:text-[10px]">
+              Central
+            </p>
+            <p className="mt-0.5 font-display text-[0.7rem] font-semibold leading-tight text-foreground sm:text-sm">
+              Intelligence Network
+            </p>
           </div>
         </div>
 
@@ -81,7 +105,9 @@ function EcosystemNetworkViz({ nodes }: { nodes: readonly string[] }) {
             transition={{ delay: n.delay, duration: 0.45, ease: "easeOut" }}
           >
             <div className="rounded-lg border border-white/[0.08] bg-[rgb(10_14_22_/0.88)] px-2.5 py-1.5 text-center shadow-[0_8px_24px_rgb(0_0_0_/0.35)] backdrop-blur-sm sm:px-3 sm:py-2">
-              <p className="whitespace-nowrap text-[0.65rem] font-medium text-foreground/90 sm:text-xs">{n.label}</p>
+              <p className="whitespace-nowrap text-[0.65rem] font-medium text-foreground/90 sm:text-xs">
+                {n.label}
+              </p>
             </div>
           </motion.div>
         ))}
@@ -104,11 +130,16 @@ function TrainingPathwayViz({ steps }: { steps: readonly string[] }) {
       <div className="relative mt-10 space-y-8">
         {steps.map((step, index) => (
           <div key={step} className="relative flex flex-col items-center">
-            <GlassCard variant="default" className="w-full max-w-md border-amber-400/10 !p-4 text-center sm:!p-5">
+            <GlassCard
+              variant="default"
+              className="w-full max-w-md border-amber-400/10 !p-4 text-center sm:!p-5"
+            >
               <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/55">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 text-sm font-medium leading-snug text-foreground sm:text-[0.9375rem]">{step}</p>
+              <p className="mt-2 text-sm font-medium leading-snug text-foreground sm:text-[0.9375rem]">
+                {step}
+              </p>
             </GlassCard>
             {index < steps.length - 1 ? (
               <ChevronDown className="mt-4 h-4 w-4 text-amber-400/45" strokeWidth={2} aria-hidden />
@@ -123,8 +154,12 @@ function TrainingPathwayViz({ steps }: { steps: readonly string[] }) {
 function BenefitCard({ title, body }: { title: string; body: string }) {
   return (
     <GlassCard variant="default" className="flex h-full flex-col border-amber-400/10">
-      <h3 className="font-display text-base font-semibold leading-snug tracking-tight text-foreground md:text-lg">{title}</h3>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">{body}</p>
+      <h3 className="font-display text-base font-semibold leading-snug tracking-tight text-foreground md:text-lg">
+        {title}
+      </h3>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">
+        {body}
+      </p>
     </GlassCard>
   );
 }
@@ -145,8 +180,13 @@ export function PartnersMarketingView() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 md:py-24">
           <FadeIn>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">{c.hero.eyebrow}</p>
-            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">
+              {c.hero.eyebrow}
+            </p>
+            <div
+              className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+              aria-hidden
+            />
             <h1
               id={`${c.hero.id}-heading`}
               className="mt-5 max-w-4xl font-display text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance drop-shadow-[0_2px_36px_rgb(0_0_0_/0.45)] sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
@@ -175,7 +215,12 @@ export function PartnersMarketingView() {
                   <ChevronRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.secondaryCta.href}>
                   {c.hero.secondaryCta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -209,7 +254,9 @@ export function PartnersMarketingView() {
             ))}
           </ul>
           <GlassCard className="mx-auto mt-12 max-w-3xl border-amber-400/14">
-            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">{c.whyPartnerships.closingStatement}</p>
+            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">
+              {c.whyPartnerships.closingStatement}
+            </p>
           </GlassCard>
         </FadeIn>
       </Section>
@@ -234,7 +281,9 @@ export function PartnersMarketingView() {
                     variant="default"
                     className="flex h-full min-h-[5rem] items-center justify-center border-amber-400/10 !p-4 text-center sm:!p-5"
                   >
-                    <p className="text-sm font-medium leading-snug text-foreground sm:text-[0.9375rem]">{category}</p>
+                    <p className="text-sm font-medium leading-snug text-foreground sm:text-[0.9375rem]">
+                      {category}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -307,7 +356,9 @@ export function PartnersMarketingView() {
             ))}
           </ul>
           <GlassCard className="mx-auto mt-12 max-w-3xl border-amber-400/14">
-            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">{c.researchPartnerships.closingStatement}</p>
+            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">
+              {c.researchPartnerships.closingStatement}
+            </p>
           </GlassCard>
         </FadeIn>
       </Section>
@@ -359,7 +410,9 @@ export function PartnersMarketingView() {
             ))}
           </ul>
           <GlassCard className="mx-auto mt-12 max-w-3xl border-amber-400/14">
-            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">{c.globalStandardisation.closingStatement}</p>
+            <p className="text-center text-base leading-relaxed text-foreground sm:text-lg">
+              {c.globalStandardisation.closingStatement}
+            </p>
           </GlassCard>
         </FadeIn>
       </Section>
@@ -380,7 +433,9 @@ export function PartnersMarketingView() {
           <div className="mt-12 flex flex-col items-center gap-10 lg:gap-12">
             <EcosystemNetworkViz nodes={c.longTermVision.participants} />
             <GlassCard className="max-w-3xl border-amber-400/14 text-center">
-              <p className="text-base leading-relaxed text-foreground sm:text-lg">{c.longTermVision.closingStatement}</p>
+              <p className="text-base leading-relaxed text-foreground sm:text-lg">
+                {c.longTermVision.closingStatement}
+              </p>
             </GlassCard>
           </div>
         </FadeIn>
@@ -396,8 +451,13 @@ export function PartnersMarketingView() {
             <div className="rounded-[1.75rem] border border-amber-400/18 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.48),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">{c.finalCta.eyebrow}</p>
-                  <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">
+                    {c.finalCta.eyebrow}
+                  </p>
+                  <div
+                    className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+                    aria-hidden
+                  />
                   <h2
                     id={`${c.finalCta.id}-heading`}
                     className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-4xl lg:text-5xl"
@@ -417,7 +477,12 @@ export function PartnersMarketingView() {
                       <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className={MARKETING_CTA_SECONDARY_CLASS}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={MARKETING_CTA_SECONDARY_CLASS}
+                  >
                     <Link href={c.finalCta.secondaryCta.href}>
                       {c.finalCta.secondaryCta.label}
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />

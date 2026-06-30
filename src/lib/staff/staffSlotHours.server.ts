@@ -27,7 +27,10 @@ const LONG_DAY: Record<StaffWeekdayKey, string> = {
   sun: "Sunday",
 };
 
-function dayHoursLineForKey(weekly: ReturnType<typeof parseStaffWeeklyHours>, key: StaffWeekdayKey): string | null {
+function dayHoursLineForKey(
+  weekly: ReturnType<typeof parseStaffWeeklyHours>,
+  key: StaffWeekdayKey
+): string | null {
   const d = weekly[key];
   if (!d || d.enabled === false) return null;
   const a = d.start?.trim();
@@ -68,7 +71,9 @@ export async function assertStaffAppointmentWithinWorkingHours(
     );
   }
 
-  const staffTz = normalizeCalendarTimezone(staff.default_timezone?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ);
+  const staffTz = normalizeCalendarTimezone(
+    staff.default_timezone?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ
+  );
   const tzShort = timeZoneShortLabel(staffTz, startMs);
   const weekly = parseStaffWeeklyHours(staff.working_hours);
   const summary = formatStaffWeeklyHoursSummary(weekly).trim();

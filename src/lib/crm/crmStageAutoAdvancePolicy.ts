@@ -14,12 +14,16 @@ export const CRM_TERMINAL_LEAD_STATUSES = ["archived", "lost", "converted"] as c
 export const CONSULTATION_CRM_COMPLETE_STATUSES = ["completed", "submitted", "locked"] as const;
 
 export function isTerminalCrmLeadStatus(status: string | null | undefined): boolean {
-  const s = String(status ?? "").trim().toLowerCase();
+  const s = String(status ?? "")
+    .trim()
+    .toLowerCase();
   return (CRM_TERMINAL_LEAD_STATUSES as readonly string[]).includes(s);
 }
 
 export function isConsultationCrmCompleteStatus(status: string | null | undefined): boolean {
-  const s = String(status ?? "").trim().toLowerCase();
+  const s = String(status ?? "")
+    .trim()
+    .toLowerCase();
   return (CONSULTATION_CRM_COMPLETE_STATUSES as readonly string[]).includes(s);
 }
 
@@ -61,9 +65,10 @@ export function timelyConsultationBookingEligibleForCrmAdvance(
   return true;
 }
 
-export function consultationEligibleForCrmCompleteAdvance(
-  consultation: { lead_id: string | null | undefined; status: string }
-): boolean {
+export function consultationEligibleForCrmCompleteAdvance(consultation: {
+  lead_id: string | null | undefined;
+  status: string;
+}): boolean {
   if (!consultation.lead_id?.trim()) return false;
   return isConsultationCrmCompleteStatus(consultation.status);
 }

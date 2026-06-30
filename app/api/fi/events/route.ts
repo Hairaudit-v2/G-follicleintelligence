@@ -38,7 +38,9 @@ export async function POST(req: Request) {
     }
 
     const result = await ingestFiEvent(body);
-    return NextResponse.json(result, { status: result.ok ? 200 : getFailureStatus(result.message) });
+    return NextResponse.json(result, {
+      status: result.ok ? 200 : getFailureStatus(result.message),
+    });
   } catch (e: unknown) {
     return NextResponse.json(
       {

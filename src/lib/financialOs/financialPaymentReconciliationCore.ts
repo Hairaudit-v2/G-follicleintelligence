@@ -49,7 +49,9 @@ export function compareReconciliationAmounts(
   };
 }
 
-export function mapPaymentReconciliationRow(raw: Record<string, unknown>): FiPaymentReconciliationRow {
+export function mapPaymentReconciliationRow(
+  raw: Record<string, unknown>
+): FiPaymentReconciliationRow {
   const metadata =
     raw.metadata && typeof raw.metadata === "object" && !Array.isArray(raw.metadata)
       ? (raw.metadata as Record<string, unknown>)
@@ -61,12 +63,17 @@ export function mapPaymentReconciliationRow(raw: Record<string, unknown>): FiPay
     payment_id: raw.payment_id != null ? String(raw.payment_id) : null,
     invoice_id: raw.invoice_id != null ? String(raw.invoice_id) : null,
     provider: String(raw.provider ?? ""),
-    provider_transaction_id: raw.provider_transaction_id != null ? String(raw.provider_transaction_id) : null,
-    reconciliation_status: String(raw.reconciliation_status ?? "pending") as FiPaymentReconciliationStatus,
+    provider_transaction_id:
+      raw.provider_transaction_id != null ? String(raw.provider_transaction_id) : null,
+    reconciliation_status: String(
+      raw.reconciliation_status ?? "pending"
+    ) as FiPaymentReconciliationStatus,
     failure_reason: raw.failure_reason != null ? String(raw.failure_reason) : null,
     amount_cents: Number(raw.amount_cents ?? 0),
-    expected_amount_cents: raw.expected_amount_cents != null ? Number(raw.expected_amount_cents) : null,
-    received_amount_cents: raw.received_amount_cents != null ? Number(raw.received_amount_cents) : null,
+    expected_amount_cents:
+      raw.expected_amount_cents != null ? Number(raw.expected_amount_cents) : null,
+    received_amount_cents:
+      raw.received_amount_cents != null ? Number(raw.received_amount_cents) : null,
     currency: String(raw.currency ?? "AUD").toUpperCase(),
     metadata,
     created_at: String(raw.created_at ?? ""),

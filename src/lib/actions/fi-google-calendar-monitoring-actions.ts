@@ -21,12 +21,7 @@ import {
 import { createGoogleCalendarSyncAlertIfNeeded } from "@/src/lib/googleCalendar/googleCalendarSyncAlerts.server";
 
 const frequencySchema = z.object({
-  frequencyMinutes: z.union([
-    z.literal(5),
-    z.literal(15),
-    z.literal(30),
-    z.literal(60),
-  ]),
+  frequencyMinutes: z.union([z.literal(5), z.literal(15), z.literal(30), z.literal(60)]),
 });
 
 const enabledSchema = z.object({ enabled: z.boolean() });
@@ -92,7 +87,9 @@ export async function pauseGoogleCalendarScheduledSyncAction(
     const result = await pauseGoogleCalendarScheduledSync({ tenantId: tenantId.trim() });
     if (!result.ok) return result;
 
-    const integration = await loadGoogleCalendarMonitoringPage(tenantId.trim(), { canManage: true });
+    const integration = await loadGoogleCalendarMonitoringPage(tenantId.trim(), {
+      canManage: true,
+    });
     if (integration.integrationId) {
       await createGoogleCalendarSyncAlertIfNeeded({
         tenantId: tenantId.trim(),

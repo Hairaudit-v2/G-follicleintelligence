@@ -45,13 +45,13 @@ type CheckDefinition = {
   label: string;
   description: string;
   severity: GoLiveReadinessCheck["severity"];
-  evaluate: (signals: GoLiveReadinessInputSignals) => { state: GoLiveReadinessCheck["state"]; detail: string | null };
+  evaluate: (signals: GoLiveReadinessInputSignals) => {
+    state: GoLiveReadinessCheck["state"];
+    detail: string | null;
+  };
 };
 
-function stepCompleted(
-  signals: GoLiveReadinessInputSignals,
-  code: ProvisioningStepCode
-): boolean {
+function stepCompleted(signals: GoLiveReadinessInputSignals, code: ProvisioningStepCode): boolean {
   return signals.stepStatuses[code] === "completed";
 }
 
@@ -89,9 +89,7 @@ const CHECK_DEFINITIONS: readonly CheckDefinition[] = [
       const ok = s.enabledModuleCount >= expected && stepCompleted(s, "apply_module_entitlements");
       return {
         state: ok ? "pass" : "fail",
-        detail: ok
-          ? null
-          : `Enabled ${s.enabledModuleCount} of ${expected} expected modules.`,
+        detail: ok ? null : `Enabled ${s.enabledModuleCount} of ${expected} expected modules.`,
       };
     },
   },
@@ -157,7 +155,10 @@ const CHECK_DEFINITIONS: readonly CheckDefinition[] = [
     severity: "required",
     evaluate: (s) => ({
       state: s.staffUserCount > 1 ? "pass" : "fail",
-      detail: s.staffUserCount > 1 ? null : "Only the initial admin user exists — invite staff before go-live.",
+      detail:
+        s.staffUserCount > 1
+          ? null
+          : "Only the initial admin user exists — invite staff before go-live.",
     }),
   },
   {
@@ -236,7 +237,9 @@ function isCheckPassing(check: GoLiveReadinessCheck): boolean {
 }
 
 /** Build all deterministic readiness checks from input signals. */
-export function buildGoLiveReadinessChecks(signals: GoLiveReadinessInputSignals): GoLiveReadinessCheck[] {
+export function buildGoLiveReadinessChecks(
+  signals: GoLiveReadinessInputSignals
+): GoLiveReadinessCheck[] {
   const reviewedSet = new Set(signals.checklistReviewedCodes);
   return CHECK_DEFINITIONS.map((def) => {
     const result = def.evaluate(signals);
@@ -254,7 +257,9 @@ export function buildGoLiveReadinessChecks(signals: GoLiveReadinessInputSignals)
 }
 
 /** Calculate weighted readiness score from checks. */
-export function calculateGoLiveReadinessScore(checks: readonly GoLiveReadinessCheck[]): GoLiveReadinessScore {
+export function calculateGoLiveReadinessScore(
+  checks: readonly GoLiveReadinessCheck[]
+): GoLiveReadinessScore {
   const applicable = checks.filter((c) => c.state !== "skipped");
   const required = applicable.filter((c) => c.severity === "required");
   const optional = applicable.filter((c) => c.severity === "optional");
@@ -295,7 +300,9 @@ export function resolveGoLiveReadinessStatus(
 }
 
 /** Build a full readiness snapshot. */
-export function buildGoLiveReadinessSnapshot(signals: GoLiveReadinessInputSignals): GoLiveReadinessSnapshot {
+export function buildGoLiveReadinessSnapshot(
+  signals: GoLiveReadinessInputSignals
+): GoLiveReadinessSnapshot {
   const checks = buildGoLiveReadinessChecks(signals);
   const score = calculateGoLiveReadinessScore(checks);
   const status = resolveGoLiveReadinessStatus(checks, signals.reviews);
@@ -349,7 +356,8 @@ export function generateGoLiveRecommendations(
       code: "complete_platform_review",
       severity: "blocker",
       title: "Complete platform review",
-      message: "FI platform administrator must review provisioning before production go-live approval.",
+      message:
+        "FI platform administrator must review provisioning before production go-live approval.",
       relatedCheckCode: "platform_review_complete",
     });
   }
@@ -377,16 +385,25 @@ export function canPlatformAdminApproveGoLive(opts: {
   snapshot: GoLiveReadinessSnapshot;
 }): { allowed: boolean; reason: string | null } {
   if (!opts.isPlatformAdmin) {
-    return { allowed: false, reason: "Platform administrator access is required to approve go-live." };
+    return {
+      allowed: false,
+      reason: "Platform administrator access is required to approve go-live.",
+    };
   }
   if (opts.snapshot.reviews.goLiveApproved) {
     return { allowed: false, reason: "Go-live has already been approved for this tenant." };
   }
   if (opts.snapshot.status === "blocked") {
-    return { allowed: false, reason: "Critical readiness checks are failing — resolve blockers first." };
+    return {
+      allowed: false,
+      reason: "Critical readiness checks are failing — resolve blockers first.",
+    };
   }
   if (!opts.snapshot.reviews.ownerReviewComplete) {
-    return { allowed: false, reason: "Tenant owner review must be complete before go-live approval." };
+    return {
+      allowed: false,
+      reason: "Tenant owner review must be complete before go-live approval.",
+    };
   }
   if (!opts.snapshot.reviews.platformReviewComplete) {
     return { allowed: false, reason: "Platform review must be complete before go-live approval." };
@@ -395,7 +412,9 @@ export function canPlatformAdminApproveGoLive(opts: {
 }
 
 /** Shape for persisted platform go-live approval events. */
-export function buildGoLiveApprovalEventDetail(snapshot: GoLiveReadinessSnapshot): Record<string, unknown> {
+export function buildGoLiveApprovalEventDetail(
+  snapshot: GoLiveReadinessSnapshot
+): Record<string, unknown> {
   return {
     session_id: snapshot.sessionId,
     tenant_id: snapshot.tenantId,

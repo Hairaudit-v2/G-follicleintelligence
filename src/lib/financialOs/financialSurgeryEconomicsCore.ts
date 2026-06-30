@@ -105,9 +105,7 @@ export type SurgeryEconomicsProfitabilityResult = SurgeryEconomicsCostBreakdown 
   procedure_type: string;
 };
 
-export type SurgeryEconomicsValidationResult =
-  | { ok: true }
-  | { ok: false; message: string };
+export type SurgeryEconomicsValidationResult = { ok: true } | { ok: false; message: string };
 
 type FiniteNonNegativeIntResult = { ok: false; message: string } | { ok: true; value: number };
 
@@ -181,7 +179,8 @@ export function calculateSurgeonCost(args: {
       return Math.round((revenue * value) / 10_000);
     }
     case "per_graft": {
-      const grafts = args.graft_count != null && args.graft_count > 0 ? Math.floor(args.graft_count) : 0;
+      const grafts =
+        args.graft_count != null && args.graft_count > 0 ? Math.floor(args.graft_count) : 0;
       return value * grafts;
     }
     case "per_hour":
@@ -198,7 +197,9 @@ export function calculateStaffCost(args: {
   duration_minutes: number;
   staff_counts: SurgeryEconomicsStaffCounts;
 }): number {
-  const rn = calculateHourlyCostCents(args.rn_hourly_rate_cents, args.duration_minutes) * Math.max(0, Math.floor(args.staff_counts.rn_count));
+  const rn =
+    calculateHourlyCostCents(args.rn_hourly_rate_cents, args.duration_minutes) *
+    Math.max(0, Math.floor(args.staff_counts.rn_count));
   const tech =
     calculateHourlyCostCents(args.technician_hourly_rate_cents, args.duration_minutes) *
     Math.max(0, Math.floor(args.staff_counts.technician_count));
@@ -208,7 +209,10 @@ export function calculateStaffCost(args: {
   return rn + tech + assistant;
 }
 
-export function calculateRoomCost(args: { room_hourly_cost_cents: number; duration_minutes: number }): number {
+export function calculateRoomCost(args: {
+  room_hourly_cost_cents: number;
+  duration_minutes: number;
+}): number {
   return calculateHourlyCostCents(args.room_hourly_cost_cents, args.duration_minutes);
 }
 
@@ -221,7 +225,8 @@ export function calculateConsumablesCost(args: {
   const base = Math.max(0, Math.floor(args.consumables_base_cost_cents));
   const perGraft = Math.max(0, Math.floor(args.graft_consumable_cost_cents));
   const medication = Math.max(0, Math.floor(args.medication_cost_cents));
-  const grafts = args.graft_count != null && args.graft_count > 0 ? Math.floor(args.graft_count) : 0;
+  const grafts =
+    args.graft_count != null && args.graft_count > 0 ? Math.floor(args.graft_count) : 0;
   return base + perGraft * grafts + medication;
 }
 
@@ -236,7 +241,10 @@ export function calculateTreatmentAddonCost(args: {
   return total;
 }
 
-export function calculateGrossMarginPercentage(revenueCents: number, grossProfitCents: number): number {
+export function calculateGrossMarginPercentage(
+  revenueCents: number,
+  grossProfitCents: number
+): number {
   const revenue = Math.max(0, Math.floor(revenueCents));
   if (revenue <= 0) return 0;
   const profit = Math.floor(grossProfitCents);
@@ -248,7 +256,8 @@ export function calculatePerGraftMetrics(args: {
   revenue_cents: number;
   total_cost_cents: number;
 }): { revenue_per_graft_cents: number | null; cost_per_graft_cents: number | null } {
-  const grafts = args.graft_count != null && args.graft_count > 0 ? Math.floor(args.graft_count) : null;
+  const grafts =
+    args.graft_count != null && args.graft_count > 0 ? Math.floor(args.graft_count) : null;
   if (grafts == null || grafts <= 0) {
     return { revenue_per_graft_cents: null, cost_per_graft_cents: null };
   }
@@ -260,7 +269,9 @@ export function calculatePerGraftMetrics(args: {
   };
 }
 
-export function validateSurgeryEconomicsInputs(input: SurgeryEconomicsCalculationInput): SurgeryEconomicsValidationResult {
+export function validateSurgeryEconomicsInputs(
+  input: SurgeryEconomicsCalculationInput
+): SurgeryEconomicsValidationResult {
   const tid = input.tenant_id?.trim();
   if (!tid) return { ok: false, message: "tenant_id is required." };
   if (tid !== input.cost_model.tenant_id.trim()) {
@@ -284,7 +295,8 @@ export function validateSurgeryEconomicsInputs(input: SurgeryEconomicsCalculatio
 
   const duration = finiteNonNegativeInt(input.duration_minutes, "duration_minutes");
   if (!duration.ok) return duration;
-  if (duration.value <= 0) return { ok: false, message: "duration_minutes must be greater than zero." };
+  if (duration.value <= 0)
+    return { ok: false, message: "duration_minutes must be greater than zero." };
 
   if (input.graft_count != null) {
     const grafts = finiteNonNegativeInt(input.graft_count, "graft_count");
@@ -308,7 +320,9 @@ export function validateSurgeryEconomicsInputs(input: SurgeryEconomicsCalculatio
   return { ok: true };
 }
 
-export function calculateSurgeryProfitability(input: SurgeryEconomicsCalculationInput): SurgeryEconomicsProfitabilityResult {
+export function calculateSurgeryProfitability(
+  input: SurgeryEconomicsCalculationInput
+): SurgeryEconomicsProfitabilityResult {
   const validation = validateSurgeryEconomicsInputs(input);
   if (!validation.ok) throw new Error(validation.message);
 
@@ -355,7 +369,11 @@ export function calculateSurgeryProfitability(input: SurgeryEconomicsCalculation
   });
 
   const total_cost_cents =
-    surgeon_cost_cents + staff_cost_cents + room_cost_cents + consumables_cost_cents + treatment_addon_cost_cents;
+    surgeon_cost_cents +
+    staff_cost_cents +
+    room_cost_cents +
+    consumables_cost_cents +
+    treatment_addon_cost_cents;
   const gross_profit_cents = revenueCents - total_cost_cents;
   const gross_margin_percentage = calculateGrossMarginPercentage(revenueCents, gross_profit_cents);
   const perGraft = calculatePerGraftMetrics({
@@ -421,9 +439,13 @@ export function buildProfitabilitySnapshotInsertRow(args: {
   };
 }
 
-export function mapProfitabilitySnapshotRow(raw: Record<string, unknown>): FiSurgeryProfitabilitySnapshotRow {
+export function mapProfitabilitySnapshotRow(
+  raw: Record<string, unknown>
+): FiSurgeryProfitabilitySnapshotRow {
   const metadata =
-    raw.source_metadata && typeof raw.source_metadata === "object" && !Array.isArray(raw.source_metadata)
+    raw.source_metadata &&
+    typeof raw.source_metadata === "object" &&
+    !Array.isArray(raw.source_metadata)
       ? (raw.source_metadata as Record<string, unknown>)
       : {};
   return {
@@ -447,8 +469,10 @@ export function mapProfitabilitySnapshotRow(raw: Record<string, unknown>): FiSur
     gross_margin_percentage: Number(raw.gross_margin_percentage ?? 0),
     graft_count: raw.graft_count != null ? Number(raw.graft_count) : null,
     hair_count: raw.hair_count != null ? Number(raw.hair_count) : null,
-    revenue_per_graft_cents: raw.revenue_per_graft_cents != null ? Number(raw.revenue_per_graft_cents) : null,
-    cost_per_graft_cents: raw.cost_per_graft_cents != null ? Number(raw.cost_per_graft_cents) : null,
+    revenue_per_graft_cents:
+      raw.revenue_per_graft_cents != null ? Number(raw.revenue_per_graft_cents) : null,
+    cost_per_graft_cents:
+      raw.cost_per_graft_cents != null ? Number(raw.cost_per_graft_cents) : null,
     source_metadata: metadata,
     calculated_at: String(raw.calculated_at ?? ""),
   };
@@ -522,8 +546,10 @@ export function aggregateSurgeryEconomicsDashboardMetrics(
 
   return {
     average_margin_percentage: Math.round((marginSum / snapshots.length) * 100) / 100,
-    average_revenue_per_graft_cents: revenuePerGraftCount > 0 ? Math.round(revenuePerGraftSum / revenuePerGraftCount) : null,
-    average_cost_per_graft_cents: costPerGraftCount > 0 ? Math.round(costPerGraftSum / costPerGraftCount) : null,
+    average_revenue_per_graft_cents:
+      revenuePerGraftCount > 0 ? Math.round(revenuePerGraftSum / revenuePerGraftCount) : null,
+    average_cost_per_graft_cents:
+      costPerGraftCount > 0 ? Math.round(costPerGraftSum / costPerGraftCount) : null,
     outstanding_surgery_balances_cents: outstanding,
     most_profitable_procedure_type: mostProfitable,
   };
@@ -571,12 +597,18 @@ export function assessSurgeryProfitabilitySnapshotReadiness(
   };
 }
 
-export function assertCostModelsTenantScoped(rows: Array<{ tenant_id: string }>, expectedTenantId: string): boolean {
+export function assertCostModelsTenantScoped(
+  rows: Array<{ tenant_id: string }>,
+  expectedTenantId: string
+): boolean {
   const tid = expectedTenantId.trim();
   return rows.every((r) => String(r.tenant_id) === tid);
 }
 
-export function defaultCostModelForProcedure(tenantId: string, procedureType: string): FiSurgeryCostModel {
+export function defaultCostModelForProcedure(
+  tenantId: string,
+  procedureType: string
+): FiSurgeryCostModel {
   return {
     tenant_id: tenantId.trim(),
     procedure_type: procedureType.trim().toLowerCase(),

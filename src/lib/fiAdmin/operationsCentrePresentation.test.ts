@@ -85,7 +85,11 @@ const baseData: Pick<
     ],
   },
   clinicToday: { consultations: 2, prp: 0, followUps: 0, surgeries: 1 },
-  paymentCommercialKpis: { depositsDueCount: 2, depositsPaidTodayCount: 1, overduePaymentsCount: 1 },
+  paymentCommercialKpis: {
+    depositsDueCount: 2,
+    depositsPaidTodayCount: 1,
+    overduePaymentsCount: 1,
+  },
   receptionBoard: { cards: [] },
   actionCentre: {
     leadsAwaitingContact: 0,
@@ -138,7 +142,11 @@ test("buildMovementBoardItems groups today visits by operational lane", () => {
 test("hasUrgentCoordination is false when no priorities", () => {
   const calm = {
     ...baseData,
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
     agendaByBucket: { consult: [], surgery: [], follow_up: [], other: [] },
     actionCentre: { ...baseData.actionCentre, surgeryReadinessAlerts: 0 },
   };

@@ -29,10 +29,7 @@ const PRESETS = {
     title: "Waitlist is empty",
     description: "Patients awaiting a slot will show up here.",
   },
-} as const satisfies Record<
-  string,
-  { icon: LucideIcon; title: string; description: string }
->;
+} as const satisfies Record<string, { icon: LucideIcon; title: string; description: string }>;
 
 export type CalendarEmptyPreset = keyof typeof PRESETS;
 
@@ -76,11 +73,21 @@ export function CalendarEmptyState({
       >
         <Icon className={cn(compact ? "h-5 w-5" : "h-6 w-6")} strokeWidth={1.75} aria-hidden />
       </span>
-      <p className={cn("font-semibold tracking-tight text-slate-200", compact ? "text-xs" : "text-sm")}>
+      <p
+        className={cn(
+          "font-semibold tracking-tight text-slate-200",
+          compact ? "text-xs" : "text-sm"
+        )}
+      >
         {heading}
       </p>
       {body ? (
-        <p className={cn("mt-1 max-w-[16rem] text-slate-500", compact ? "text-[10px] leading-relaxed" : "text-xs leading-relaxed")}>
+        <p
+          className={cn(
+            "mt-1 max-w-[16rem] text-slate-500",
+            compact ? "text-[10px] leading-relaxed" : "text-xs leading-relaxed"
+          )}
+        >
           {body}
         </p>
       ) : null}

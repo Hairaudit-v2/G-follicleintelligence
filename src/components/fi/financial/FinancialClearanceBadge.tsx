@@ -34,7 +34,13 @@ export function FinancialClearanceBadge(props: {
   showSafeIndicator?: boolean;
   financiallySafeToProceed?: boolean;
 }) {
-  const { state, variant = "light", className, showSafeIndicator = false, financiallySafeToProceed = false } = props;
+  const {
+    state,
+    variant = "light",
+    className,
+    showSafeIndicator = false,
+    financiallySafeToProceed = false,
+  } = props;
   const label = props.label ?? FINANCIAL_CLEARANCE_STATE_LABELS[state];
   const tone = variant === "dark" ? STATUS_TONE_DARK[state] : STATUS_TONE[state];
 

@@ -1,4 +1,7 @@
-import type { FiAiImageCategory, FiAiSurgeryStage } from "@/src/lib/imaging/aiImageClassificationTypes";
+import type {
+  FiAiImageCategory,
+  FiAiSurgeryStage,
+} from "@/src/lib/imaging/aiImageClassificationTypes";
 import {
   normalizeFiAiImageCategory,
   normalizeFiAiImageReviewStatus,
@@ -22,7 +25,9 @@ export type PatientJourneyGalleryImageInput = {
   ai_image_classified_at: string | null;
 };
 
-export type PatientJourneyGalleryBuckets<T extends { id: string } = PatientJourneyGalleryImageInput> = {
+export type PatientJourneyGalleryBuckets<
+  T extends { id: string } = PatientJourneyGalleryImageInput,
+> = {
   /** Newest captures first (small hero list; may overlap other buckets). */
   mostRecent: T[];
   preOp: T[];
@@ -70,7 +75,9 @@ function needsUnknownReviewBucket(img: PatientJourneyGalleryImageInput): boolean
   return false;
 }
 
-function primaryBucketForImage(img: PatientJourneyGalleryImageInput): keyof Omit<PatientJourneyGalleryBuckets, "mostRecent"> {
+function primaryBucketForImage(
+  img: PatientJourneyGalleryImageInput
+): keyof Omit<PatientJourneyGalleryBuckets, "mostRecent"> {
   if (needsUnknownReviewBucket(img)) return "unknownNeedsReview";
 
   const cat = normalizeFiAiImageCategory(img.ai_image_category) as FiAiImageCategory;
@@ -79,7 +86,8 @@ function primaryBucketForImage(img: PatientJourneyGalleryImageInput): keyof Omit
   if (cat === "microscopic") return "microscope";
   if (cat === "donor" || cat === "graft_tray") return "donor";
   if (cat === "crown") return "crown";
-  if (cat === "front" || cat === "left_profile" || cat === "right_profile" || cat === "top") return "hairline";
+  if (cat === "front" || cat === "left_profile" || cat === "right_profile" || cat === "top")
+    return "hairline";
 
   const d = daysBetweenCaptureAndProcedure(img);
   if (d != null) {
@@ -136,7 +144,9 @@ export function buildPatientJourneyGallery<T extends PatientJourneyGalleryImageI
 }
 
 /** UI-facing merge for Twin "Follow-up" rail (timed windows + general follow-up). */
-export function flattenFollowUpGroup<T extends { id: string }>(b: PatientJourneyGalleryBuckets<T>): T[] {
+export function flattenFollowUpGroup<T extends { id: string }>(
+  b: PatientJourneyGalleryBuckets<T>
+): T[] {
   const seen = new Set<string>();
   const out: T[] = [];
   for (const x of [...b.sixMonth, ...b.twelveMonth, ...b.followUpGeneral]) {
@@ -166,7 +176,9 @@ export type TwinImagingUiSection<T extends { id: string }> = {
 /**
  * Maps journey buckets to the Patient Twin gallery sections.
  */
-export function buildTwinImagingUiSections<T extends { id: string }>(b: PatientJourneyGalleryBuckets<T>): TwinImagingUiSection<T>[] {
+export function buildTwinImagingUiSections<T extends { id: string }>(
+  b: PatientJourneyGalleryBuckets<T>
+): TwinImagingUiSection<T>[] {
   const follow = flattenFollowUpGroup(b);
   return [
     { key: "unknown_needs_review", title: "Unknown / needs review", items: b.unknownNeedsReview },

@@ -35,7 +35,13 @@ export function isFollowUpCheckpoint(s: string | null | undefined): s is FollowU
   return !!s && (FOLLOW_UP_CHECKPOINT_VALUES as readonly string[]).includes(s.trim());
 }
 
-export const FOLLOW_UP_STATUS_VALUES = ["pending", "scheduled", "completed", "skipped", "cancelled"] as const;
+export const FOLLOW_UP_STATUS_VALUES = [
+  "pending",
+  "scheduled",
+  "completed",
+  "skipped",
+  "cancelled",
+] as const;
 
 export type FollowUpStatusValue = (typeof FOLLOW_UP_STATUS_VALUES)[number];
 
@@ -75,7 +81,10 @@ export const followUpUpsertBodySchema = z
   })
   .superRefine((b, ctx) => {
     if (!b.id && !b.checkpoint) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "checkpoint is required when id is omitted." });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "checkpoint is required when id is omitted.",
+      });
     }
   });
 

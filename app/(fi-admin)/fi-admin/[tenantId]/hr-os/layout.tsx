@@ -21,7 +21,11 @@ export default async function HrOsLayout({
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) {
     return (
-      <FiModuleAccessDenied tenantId={tenantId.trim()} moduleLabel="HR OS" reason={access.access.reason} />
+      <FiModuleAccessDenied
+        tenantId={tenantId.trim()}
+        moduleLabel="HR OS"
+        reason={access.access.reason}
+      />
     );
   }
 

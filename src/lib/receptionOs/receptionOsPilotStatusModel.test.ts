@@ -39,7 +39,7 @@ describe("receptionOsPilotStatusModel", () => {
         resendConfigured: true,
         twilioConfigured: true,
       }),
-      "dry_run",
+      "dry_run"
     );
   });
 
@@ -75,12 +75,15 @@ describe("receptionOsPilotStatusModel", () => {
   });
 
   it("flags live_blocked when channel flags on but providers missing", () => {
-    assert.equal(isReceptionOsPilotModeActive({
-      dryRunEnabled: false,
-      emailSendEnabled: true,
-      smsSendEnabled: false,
-      providerMode: "live_blocked",
-    }), true);
+    assert.equal(
+      isReceptionOsPilotModeActive({
+        dryRunEnabled: false,
+        emailSendEnabled: true,
+        smsSendEnabled: false,
+        providerMode: "live_blocked",
+      }),
+      true
+    );
     const banner = buildReceptionOsPilotBanner({
       pilotModeActive: true,
       dryRunEnabled: false,

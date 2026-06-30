@@ -9,7 +9,12 @@ import {
   parseCrmLeadAdminMetadataMergeJson,
   parseCrmLeadMetadataJsonInput,
 } from "@/src/lib/crm/crmLeadDetailsPolicy";
-import type { CrmShellClinicOption, CrmShellOrgOption, CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
+import type {
+  CrmShellClinicOption,
+  CrmShellOrgOption,
+  CrmShellUserPickerOption,
+  FiCrmLeadRow,
+} from "@/src/lib/crm/types";
 
 function statusSelectOptions(current: string): string[] {
   const s = new Set<string>(CRM_LEAD_DETAIL_STATUS_VALUES);
@@ -47,7 +52,9 @@ export function CrmLeadEditPanel({
   const [ownerId, setOwnerId] = useState(lead.primary_owner_user_id ?? "");
   const [organisationId, setOrganisationId] = useState(lead.organisation_id ?? "");
   const [clinicId, setClinicId] = useState(lead.clinic_id ?? "");
-  const [metadataRaw, setMetadataRaw] = useState(() => JSON.stringify(lead.metadata ?? {}, null, 2));
+  const [metadataRaw, setMetadataRaw] = useState(() =>
+    JSON.stringify(lead.metadata ?? {}, null, 2)
+  );
   const [adminMergeRaw, setAdminMergeRaw] = useState("");
   const [adminKey, setAdminKey] = useState("");
   const [busy, setBusy] = useState(false);
@@ -90,14 +97,22 @@ export function CrmLeadEditPanel({
     const nextErr: Partial<Record<FieldKey, string>> = {};
     if (!summary.trim()) nextErr.summary = "Lead title / summary is required.";
 
-    if (!CRM_LEAD_DETAIL_STATUS_VALUES.includes(status as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number])) {
-      nextErr.status = "Pick a standard status from the list (legacy values cannot be saved until changed).";
+    if (
+      !CRM_LEAD_DETAIL_STATUS_VALUES.includes(
+        status as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number]
+      )
+    ) {
+      nextErr.status =
+        "Pick a standard status from the list (legacy values cannot be saved until changed).";
     }
     if (
       priority.trim() !== "" &&
-      !CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(priority as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number])
+      !CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(
+        priority as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number]
+      )
     ) {
-      nextErr.priority = "Pick a standard priority or None (legacy values cannot be saved until changed).";
+      nextErr.priority =
+        "Pick a standard priority or None (legacy values cannot be saved until changed).";
     }
 
     let metadata: Record<string, unknown> = {};
@@ -168,7 +183,9 @@ export function CrmLeadEditPanel({
             rows={2}
             className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
           />
-          {fieldErrors.summary ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.summary}</p> : null}
+          {fieldErrors.summary ? (
+            <p className="mt-1 text-xs text-rose-300">{fieldErrors.summary}</p>
+          ) : null}
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -185,13 +202,17 @@ export function CrmLeadEditPanel({
               {statusOpts.map((s) => (
                 <option key={s} value={s}>
                   {s}
-                  {!CRM_LEAD_DETAIL_STATUS_VALUES.includes(s as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number])
+                  {!CRM_LEAD_DETAIL_STATUS_VALUES.includes(
+                    s as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number]
+                  )
                     ? " (legacy)"
                     : ""}
                 </option>
               ))}
             </select>
-            {fieldErrors.status ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.status}</p> : null}
+            {fieldErrors.status ? (
+              <p className="mt-1 text-xs text-rose-300">{fieldErrors.status}</p>
+            ) : null}
           </label>
           <label className="block">
             <span className="text-xs font-medium text-slate-300">Priority</span>
@@ -207,13 +228,17 @@ export function CrmLeadEditPanel({
               {priorityOpts.map((p) => (
                 <option key={p} value={p}>
                   {p}
-                  {!CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(p as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number])
+                  {!CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(
+                    p as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number]
+                  )
                     ? " (legacy)"
                     : ""}
                 </option>
               ))}
             </select>
-            {fieldErrors.priority ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.priority}</p> : null}
+            {fieldErrors.priority ? (
+              <p className="mt-1 text-xs text-rose-300">{fieldErrors.priority}</p>
+            ) : null}
           </label>
         </div>
 
@@ -226,9 +251,7 @@ export function CrmLeadEditPanel({
           >
             <option value="">Unassigned</option>
             {ownerId && !owners.some((o) => o.id === ownerId) ? (
-              <option value={ownerId}>
-                Unknown user ({ownerId.slice(0, 8)}…)
-              </option>
+              <option value={ownerId}>Unknown user ({ownerId.slice(0, 8)}…)</option>
             ) : null}
             {owners.map((o) => (
               <option key={o.id} value={o.id}>
@@ -238,7 +261,10 @@ export function CrmLeadEditPanel({
           </select>
         </label>
 
-        {(organisations.length > 0 || clinics.length > 0 || organisationId !== "" || clinicId !== "") && (
+        {(organisations.length > 0 ||
+          clinics.length > 0 ||
+          organisationId !== "" ||
+          clinicId !== "") && (
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="text-xs font-medium text-slate-300">Organisation</span>
@@ -249,7 +275,8 @@ export function CrmLeadEditPanel({
                   setClinicId((cur) => {
                     const c = clinics.find((x) => x.id === cur);
                     if (!c) return "";
-                    if (e.target.value && c.organisation_id && c.organisation_id !== e.target.value) return "";
+                    if (e.target.value && c.organisation_id && c.organisation_id !== e.target.value)
+                      return "";
                     return cur;
                   });
                 }}
@@ -257,7 +284,9 @@ export function CrmLeadEditPanel({
               >
                 <option value="">Tenant default</option>
                 {organisationId && !organisations.some((o) => o.id === organisationId) ? (
-                  <option value={organisationId}>Unknown organisation ({organisationId.slice(0, 8)}…)</option>
+                  <option value={organisationId}>
+                    Unknown organisation ({organisationId.slice(0, 8)}…)
+                  </option>
                 ) : null}
                 {organisations.map((o) => (
                   <option key={o.id} value={o.id}>
@@ -299,13 +328,18 @@ export function CrmLeadEditPanel({
             spellCheck={false}
             className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
           />
-          {fieldErrors.metadata ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.metadata}</p> : null}
+          {fieldErrors.metadata ? (
+            <p className="mt-1 text-xs text-rose-300">{fieldErrors.metadata}</p>
+          ) : null}
         </label>
 
         <div className="rounded border border-dashed border-slate-700 bg-white/[0.03] p-3">
-          <p className="mb-2 text-xs font-medium text-slate-200">FI admin — optional metadata merge</p>
+          <p className="mb-2 text-xs font-medium text-slate-200">
+            FI admin — optional metadata merge
+          </p>
           <p className="mb-2 text-xs text-slate-400">
-            Shallow-merged onto metadata when the FI admin key below matches <code className="rounded bg-white/[0.06] px-0.5">FI_ADMIN_API_KEY</code>.
+            Shallow-merged onto metadata when the FI admin key below matches{" "}
+            <code className="rounded bg-white/[0.06] px-0.5">FI_ADMIN_API_KEY</code>.
           </p>
           <textarea
             value={adminMergeRaw}
@@ -318,7 +352,9 @@ export function CrmLeadEditPanel({
             placeholder='{"internal_flag": true}'
             className="w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
           />
-          {fieldErrors.adminMerge ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.adminMerge}</p> : null}
+          {fieldErrors.adminMerge ? (
+            <p className="mt-1 text-xs text-rose-300">{fieldErrors.adminMerge}</p>
+          ) : null}
         </div>
 
         <label className="block">
@@ -333,7 +369,10 @@ export function CrmLeadEditPanel({
         </label>
 
         {formError ? (
-          <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+          <div
+            className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+            role="alert"
+          >
             {formError}
           </div>
         ) : null}

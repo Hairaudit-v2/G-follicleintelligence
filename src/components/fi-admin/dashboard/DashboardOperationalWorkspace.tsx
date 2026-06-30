@@ -66,7 +66,10 @@ type StaffShiftRow = {
 
 function staffRowsFromReceptionCards(cards: readonly ReceptionBoardCard[]): StaffShiftRow[] {
   /** Case-insensitive key so the same clinician is not listed twice when labels differ only by casing. */
-  const byCanonical = new Map<string, { displayLabel: string; earliest: string; tz: string | null }>();
+  const byCanonical = new Map<
+    string,
+    { displayLabel: string; earliest: string; tz: string | null }
+  >();
   for (const c of cards) {
     const label = c.providerLabel.trim();
     if (!label || label.toLowerCase() === "unassigned") continue;
@@ -89,7 +92,8 @@ function staffRowsFromReceptionCards(cards: readonly ReceptionBoardCard[]): Staf
     .sort((a, b) => a.earliestStartIso.localeCompare(b.earliestStartIso));
 }
 
-const panelShell = "flex min-h-[11rem] flex-col rounded-xl border border-white/[0.07] bg-white/[0.02] p-3 sm:min-h-[12rem] sm:p-4";
+const panelShell =
+  "flex min-h-[11rem] flex-col rounded-xl border border-white/[0.07] bg-white/[0.02] p-3 sm:min-h-[12rem] sm:p-4";
 
 export function DashboardOperationalWorkspace(props: {
   tenantId: string;
@@ -104,7 +108,11 @@ export function DashboardOperationalWorkspace(props: {
   const staffRows = staffRowsFromReceptionCards(receptionCards);
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-operational-workspace-heading">
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby="dash-operational-workspace-heading"
+    >
       <SectionHeader
         id="dash-operational-workspace-heading"
         kicker="Operations"
@@ -113,12 +121,18 @@ export function DashboardOperationalWorkspace(props: {
       />
       <div className="mt-4 grid min-h-[10rem] grid-cols-1 gap-3 md:min-h-[11rem] md:grid-cols-2 md:gap-4">
         <div className={panelShell}>
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Today’s appointments</p>
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Today’s appointments
+          </p>
           {appts.length === 0 ? (
             <div className="mt-3 flex flex-1 flex-col justify-center rounded-lg border border-dashed border-white/[0.08] bg-black/15 px-3 py-4 text-center">
               <Calendar className="mx-auto h-5 w-5 text-slate-600" aria-hidden />
-              <p className="mt-2 text-sm font-medium text-slate-300">No visits in this clinic day window</p>
-              <p className="mt-1 text-xs text-slate-500">Book from the calendar or reception board to populate the day.</p>
+              <p className="mt-2 text-sm font-medium text-slate-300">
+                No visits in this clinic day window
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Book from the calendar or reception board to populate the day.
+              </p>
               <Link
                 href={`${base}/calendar`}
                 className="mx-auto mt-3 text-xs font-semibold text-cyan-400/90 underline-offset-2 hover:underline"
@@ -138,7 +152,9 @@ export function DashboardOperationalWorkspace(props: {
                       {formatSlot(row.start_at, row.timezone)}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-slate-100">{row.title?.trim() || "Booking"}</span>
+                      <span className="block truncate text-sm font-medium text-slate-100">
+                        {row.title?.trim() || "Booking"}
+                      </span>
                       <span className="mt-0.5 block text-[0.7rem] text-slate-500">
                         {BUCKET_LABEL[bucket]} · {bookingTypeLabel(row.booking_type)}
                       </span>
@@ -151,13 +167,18 @@ export function DashboardOperationalWorkspace(props: {
         </div>
 
         <div className={panelShell}>
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Staff on shift today</p>
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Staff on shift today
+          </p>
           {staffRows.length === 0 ? (
             <div className="mt-3 flex flex-1 flex-col justify-center rounded-lg border border-dashed border-white/[0.08] bg-black/15 px-3 py-4 text-center">
               <Users className="mx-auto h-5 w-5 text-slate-600" aria-hidden />
-              <p className="mt-2 text-sm font-medium text-slate-300">No assigned providers on today’s board</p>
+              <p className="mt-2 text-sm font-medium text-slate-300">
+                No assigned providers on today’s board
+              </p>
               <p className="mt-1 text-xs text-slate-500">
-                Assign clinical staff on bookings to see coverage here. Role labels follow when HR exposes them.
+                Assign clinical staff on bookings to see coverage here. Role labels follow when HR
+                exposes them.
               </p>
               <Link
                 href={`${base}/reception`}
@@ -174,7 +195,9 @@ export function DashboardOperationalWorkspace(props: {
                   className="flex items-start justify-between gap-2 rounded-lg border border-white/[0.06] bg-black/20 px-2.5 py-2"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-slate-100">{s.providerLabel}</span>
+                    <span className="block truncate text-sm font-medium text-slate-100">
+                      {s.providerLabel}
+                    </span>
                     <span className="mt-0.5 block text-[0.7rem] text-slate-500">{s.roleLabel}</span>
                   </span>
                   <span className="shrink-0 font-mono text-xs font-semibold tabular-nums text-cyan-200/90">

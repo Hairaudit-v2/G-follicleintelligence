@@ -33,7 +33,10 @@ test("assertBookingStartInOperationalWindow: accepts inside window", () => {
 });
 
 test("applyPhaseIntentToMetadataForAction: mark arrived clears phase and preserves keys", () => {
-  const base = { foo: "bar", [FI_RECEPTION_FLOW_PHASE_KEY]: "consultation" } as Record<string, unknown>;
+  const base = { foo: "bar", [FI_RECEPTION_FLOW_PHASE_KEY]: "consultation" } as Record<
+    string,
+    unknown
+  >;
   const out = applyPhaseIntentToMetadataForAction("mark_arrived", base);
   assert.equal(out.foo, "bar");
   assert.equal(Object.prototype.hasOwnProperty.call(out, FI_RECEPTION_FLOW_PHASE_KEY), false);

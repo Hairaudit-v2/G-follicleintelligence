@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 
 import { hairTransplantRepairConsultationSchemaV1 } from "./hairTransplantRepairConsultationTemplate";
 
-function allFieldIds(schema: { sections: { fields: { id: string; type: string }[] }[] }): { id: string; type: string }[] {
+function allFieldIds(schema: {
+  sections: { fields: { id: string; type: string }[] }[];
+}): { id: string; type: string }[] {
   return schema.sections.flatMap((s) => s.fields.map((f) => ({ id: f.id, type: f.type })));
 }
 

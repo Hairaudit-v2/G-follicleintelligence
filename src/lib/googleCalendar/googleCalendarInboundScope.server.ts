@@ -6,9 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logStructured } from "@/src/lib/server/structuredLog";
 
 import { resolveGoogleCalendarAccessToken } from "./googleCalendarAuth.server";
-import {
-  seedGoogleInboundCalendarScopesFromCalendarList,
-} from "./googleCalendarInboundSyncData.server";
+import { seedGoogleInboundCalendarScopesFromCalendarList } from "./googleCalendarInboundSyncData.server";
 import {
   buildInboundScopePageStats,
   inboundSyncCalendarRowToClient,
@@ -101,23 +99,28 @@ export async function loadGoogleCalendarInboundScopePage(
 ): Promise<GoogleCalendarInboundScopePageModel> {
   const tid = tenantId.trim();
   const integration = await loadActiveIntegrationRow(tid, opts);
-  const connected = Boolean(integration?.access_token_encrypted?.trim() && integration.status !== "disconnected");
+  const connected = Boolean(
+    integration?.access_token_encrypted?.trim() && integration.status !== "disconnected"
+  );
 
   let calendars: InboundSyncCalendarClientRow[] = [];
   if (integration && connected) {
     calendars = await loadInboundSyncCalendars(tid, integration.id, opts);
   }
 
-  const stats = buildInboundScopePageStats(calendars, integration
-    ? {
-        lastSyncedAt: integration.last_synced_at,
-        lastSyncStatus: (integration.last_sync_status ?? "never_synced") as FiCalendarSyncStatus,
-        lastSyncErrorSummary:
-          integration.last_sync_status === "failed"
-            ? summarizeSyncError(integration.last_sync_error)
-            : null,
-      }
-    : null);
+  const stats = buildInboundScopePageStats(
+    calendars,
+    integration
+      ? {
+          lastSyncedAt: integration.last_synced_at,
+          lastSyncStatus: (integration.last_sync_status ?? "never_synced") as FiCalendarSyncStatus,
+          lastSyncErrorSummary:
+            integration.last_sync_status === "failed"
+              ? summarizeSyncError(integration.last_sync_error)
+              : null,
+        }
+      : null
+  );
 
   return {
     tenantId: tid,
@@ -188,7 +191,13 @@ export async function refreshGoogleInboundCalendarScopes(
   tenantId: string,
   opts: ServerOpts = {}
 ): Promise<
-  | { ok: true; calendarsDiscovered: number; inserted: number; updated: number; preservedEnabledState: number }
+  | {
+      ok: true;
+      calendarsDiscovered: number;
+      inserted: number;
+      updated: number;
+      preservedEnabledState: number;
+    }
   | { ok: false; error: string }
 > {
   const tid = tenantId.trim();
@@ -227,7 +236,9 @@ export async function refreshGoogleInboundCalendarScopes(
   };
 }
 
-function mapSyncResultToAdminSummary(result: GoogleCalendarSyncResult): GoogleCalendarInboundSyncNowSummary {
+function mapSyncResultToAdminSummary(
+  result: GoogleCalendarSyncResult
+): GoogleCalendarInboundSyncNowSummary {
   const perCalendar = (result.perCalendar ?? []).map((row) => ({
     calendarId: row.calendarId,
     calendarSummary: row.calendarSummary,
@@ -261,7 +272,12 @@ export async function runGoogleCalendarInboundSyncNow(
   opts: ServerOpts = {}
 ): Promise<
   | { ok: true; outcome: "synced"; summary: GoogleCalendarInboundSyncNowSummary }
-  | { ok: false; outcome: "failed" | "skipped"; error: string; summary?: GoogleCalendarInboundSyncNowSummary }
+  | {
+      ok: false;
+      outcome: "failed" | "skipped";
+      error: string;
+      summary?: GoogleCalendarInboundSyncNowSummary;
+    }
 > {
   const tid = tenantId.trim();
   const syncSummary = await syncGoogleCalendarForTenant({ tenantId: tid, source: "manual" }, opts);

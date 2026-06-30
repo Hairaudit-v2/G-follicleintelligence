@@ -15,8 +15,8 @@ export function PartnersInvestorsStrip() {
           For Partners &amp; Institutional Collaborators
         </p>
         <p className="mx-auto mt-3 max-w-xl text-xs leading-relaxed text-muted-foreground/90 sm:text-sm">
-          We are building foundational infrastructure designed to improve standards and outcomes across global hair
-          restoration medicine.
+          We are building foundational infrastructure designed to improve standards and outcomes
+          across global hair restoration medicine.
         </p>
         <p className="mx-auto mt-4 max-w-lg text-[11px] leading-relaxed text-muted-foreground/75 sm:text-xs">
           For strategic partnerships, institutional collaboration, or private discussions:
@@ -28,7 +28,9 @@ export function PartnersInvestorsStrip() {
           >
             Contact our team
           </Link>
-          <span className="text-[10px] tracking-wide text-muted-foreground/55">Private access only.</span>
+          <span className="text-[10px] tracking-wide text-muted-foreground/55">
+            Private access only.
+          </span>
         </div>
       </div>
     </aside>

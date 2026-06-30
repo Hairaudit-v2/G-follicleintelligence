@@ -56,7 +56,11 @@ export function ConsultationLeadLinkField({
     try {
       const url = `/api/tenants/${encodeURIComponent(tid)}/consultations/search-links?q=${encodeURIComponent(debounced)}`;
       const res = await fetch(url, { credentials: "same-origin" });
-      const json = (await res.json()) as { ok?: boolean; error?: string; leads?: ConsultationLinkSearchLeadHit[] };
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        leads?: ConsultationLinkSearchLeadHit[];
+      };
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Search failed.");
       }
@@ -91,7 +95,9 @@ export function ConsultationLeadLinkField({
           <>
             {leadLabel.trim()}
             {leadStage?.trim() ? (
-              <span className="mt-0.5 block text-xs font-normal text-slate-500">{leadStage.trim()}</span>
+              <span className="mt-0.5 block text-xs font-normal text-slate-500">
+                {leadStage.trim()}
+              </span>
             ) : null}
           </>
         ) : (
@@ -147,7 +153,11 @@ export function ConsultationLeadLinkField({
               </button>
             </div>
             <div className="space-y-3 p-4">
-              <label htmlFor={searchInputId} id={searchLabelId} className="block text-sm font-medium text-slate-200">
+              <label
+                htmlFor={searchInputId}
+                id={searchLabelId}
+                className="block text-sm font-medium text-slate-200"
+              >
                 Lead search
               </label>
               <p id={searchHintId} className="text-xs text-slate-500">
@@ -179,7 +189,9 @@ export function ConsultationLeadLinkField({
                       <span className="font-medium text-slate-100">{h.name}</span>
                       <span className="text-xs text-slate-500">
                         {h.stageLabel}
-                        {h.phone || h.email ? ` · ${[h.phone, h.email].filter(Boolean).join(" · ")}` : ""}
+                        {h.phone || h.email
+                          ? ` · ${[h.phone, h.email].filter(Boolean).join(" · ")}`
+                          : ""}
                       </span>
                     </button>
                   </li>

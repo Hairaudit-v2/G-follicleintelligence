@@ -16,7 +16,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function MyHrPortalPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function MyHrPortalPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
@@ -29,9 +33,12 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">Staff</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">My HR Portal</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
+          My HR Portal
+        </h1>
         <p className="mt-2 text-sm text-[#94A3B8]">
-          Read-only access to your employer HR workspace. HR data is not edited in Follicle Intelligence.
+          Read-only access to your employer HR workspace. HR data is not edited in Follicle
+          Intelligence.
         </p>
       </div>
 
@@ -52,8 +59,8 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
       {state.kind === "no_tenant_membership" ? (
         <InfoNotice variant="info" title="Tenant access">
           <p>
-            Your account is not a member of this tenant in Follicle Intelligence, so personal HR self-service is not
-            available here.
+            Your account is not a member of this tenant in Follicle Intelligence, so personal HR
+            self-service is not available here.
           </p>
         </InfoNotice>
       ) : null}
@@ -64,7 +71,11 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
             Your FI login is not linked to a staff profile yet.
           </p>
           <p className="mt-6 text-center">
-            <Button variant="outline" asChild className="border-white/15 bg-white/[0.04] text-[#E2E8F0] hover:bg-white/[0.08]">
+            <Button
+              variant="outline"
+              asChild
+              className="border-white/15 bg-white/[0.04] text-[#E2E8F0] hover:bg-white/[0.08]"
+            >
               <Link href={base}>Back to dashboard</Link>
             </Button>
           </p>
@@ -97,7 +108,11 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
           </div>
           <MyHrTrainingComplianceCompactCard summary={state.complianceSummary} />
           <p className="mt-6 text-center">
-            <Button variant="outline" asChild className="border-white/15 bg-white/[0.04] text-[#E2E8F0] hover:bg-white/[0.08]">
+            <Button
+              variant="outline"
+              asChild
+              className="border-white/15 bg-white/[0.04] text-[#E2E8F0] hover:bg-white/[0.08]"
+            >
               <Link href={base}>Back to dashboard</Link>
             </Button>
           </p>
@@ -133,7 +148,9 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
               <ExternalLink className="h-4 w-4 opacity-90" aria-hidden />
             </a>
           </div>
-          <p className="mt-4 text-xs text-[#64748B]">Opens in a new tab on your organisation&apos;s HR system (not embedded).</p>
+          <p className="mt-4 text-xs text-[#64748B]">
+            Opens in a new tab on your organisation&apos;s HR system (not embedded).
+          </p>
           <div className="mt-6 border-t border-white/[0.08] pt-6">
             <StaffHrNotificationDetailCard summary={state.hrNotification} variant="dark" />
           </div>
@@ -142,7 +159,10 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
       ) : null}
 
       <p className="text-center text-sm text-[#64748B]">
-        <Link href={base} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+        <Link
+          href={base}
+          className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline"
+        >
           Back to tenant home
         </Link>
       </p>

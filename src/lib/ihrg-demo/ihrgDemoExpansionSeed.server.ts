@@ -131,7 +131,11 @@ function predictedProcedureForJourney(
   if (journey === "poor_donor_candidate" || journey === "medical_therapy_monitoring") {
     return "consultation_only";
   }
-  if (journey === "excellent_candidate" || journey.startsWith("surgery") || journey.startsWith("follow_up")) {
+  if (
+    journey === "excellent_candidate" ||
+    journey.startsWith("surgery") ||
+    journey.startsWith("follow_up")
+  ) {
     return "fue_transplant";
   }
   return "unknown";
@@ -162,7 +166,14 @@ function buildCrmTaskDemoKey(leadKey: string): string {
 }
 
 const ANALYTICS_EVENT_SPECS: ReadonlyArray<{
-  module_name: "leadflow" | "consultation_os" | "surgery_os" | "patient_os" | "imaging_os" | "financial_os" | "clinic_os";
+  module_name:
+    | "leadflow"
+    | "consultation_os"
+    | "surgery_os"
+    | "patient_os"
+    | "imaging_os"
+    | "financial_os"
+    | "clinic_os";
   event_type: string;
 }> = [
   { module_name: "leadflow", event_type: "lead_created" },
@@ -185,7 +196,10 @@ const COMPETENCY_KEYS = [
 ] as const;
 
 async function loadClinics(supabase: SupabaseClient, tenantId: string): Promise<ClinicRow[]> {
-  const { data, error } = await supabase.from("fi_clinics").select("id, metadata").eq("tenant_id", tenantId);
+  const { data, error } = await supabase
+    .from("fi_clinics")
+    .select("id, metadata")
+    .eq("tenant_id", tenantId);
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => {
     const raw = row as { id: string; metadata: unknown };
@@ -198,7 +212,10 @@ async function loadClinics(supabase: SupabaseClient, tenantId: string): Promise<
 }
 
 async function loadPersons(supabase: SupabaseClient, tenantId: string): Promise<PersonRow[]> {
-  const { data, error } = await supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tenantId);
+  const { data, error } = await supabase
+    .from("fi_persons")
+    .select("id, metadata")
+    .eq("tenant_id", tenantId);
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => {
     const raw = row as { id: string; metadata: unknown };
@@ -235,7 +252,9 @@ async function loadStaff(supabase: SupabaseClient, tenantId: string): Promise<St
   return (data ?? []).map((row) => {
     const raw = row as { id: string; staff_metadata: unknown };
     const staff_metadata =
-      raw.staff_metadata && typeof raw.staff_metadata === "object" && !Array.isArray(raw.staff_metadata)
+      raw.staff_metadata &&
+      typeof raw.staff_metadata === "object" &&
+      !Array.isArray(raw.staff_metadata)
         ? (raw.staff_metadata as Record<string, unknown>)
         : null;
     return { id: String(raw.id), staff_metadata };
@@ -324,7 +343,10 @@ export async function seedIhrgDemoExpansion(
 
   let crmTasksCreatedBudget = profile.crmTasksPerClinic * ENTERPRISE_DEMO_CLINICS.length;
 
-  for (const spec of patientSpecs.slice(0, profile.crmLeadsPerClinic * ENTERPRISE_DEMO_CLINICS.length)) {
+  for (const spec of patientSpecs.slice(
+    0,
+    profile.crmLeadsPerClinic * ENTERPRISE_DEMO_CLINICS.length
+  )) {
     const clinicId = clinicIdBySlug.get(spec.clinicSlug);
     const personId = personIdByPatientKey.get(spec.demoPatientKey);
     const patientId = patientIdByKey.get(spec.demoPatientKey);
@@ -447,8 +469,8 @@ export async function seedIhrgDemoExpansion(
         country: clinic.country,
         budget_range: i % 3 === 0 ? "15k_25k" : "8k_15k",
         current_stage: leadflowStageForJourney(journey),
-        lead_score: 35 + (i * 7) % 55,
-        conversion_probability: 20 + (i * 11) % 60,
+        lead_score: 35 + ((i * 7) % 55),
+        conversion_probability: 20 + ((i * 11) % 60),
         priority_band: i % 4 === 0 ? "high" : "medium",
         predicted_procedure: predictedProcedureForJourney(journey),
         scoring_reasons: ["demo_profile_seed", `clinic:${clinic.slug}`],
@@ -589,7 +611,10 @@ export async function seedIhrgDemoExpansion(
       .filter((ref): ref is string => Boolean(ref))
   );
 
-  const receptionSpecs = patientSpecs.slice(0, profile.receptionTasksPerClinic * ENTERPRISE_DEMO_CLINICS.length);
+  const receptionSpecs = patientSpecs.slice(
+    0,
+    profile.receptionTasksPerClinic * ENTERPRISE_DEMO_CLINICS.length
+  );
   for (const spec of receptionSpecs) {
     const sourceRef = buildReceptionTaskDemoKey(spec);
     if (receptionRefSet.has(sourceRef)) {

@@ -44,7 +44,9 @@ export default async function FiAdminGlobalCommandCentrePresentationPage({
     return (
       <div className="p-4 sm:p-6">
         <InfoNotice variant="danger" title="Server misconfigured">
-          <p className="text-sm">Supabase environment variables are missing. Check deployment configuration.</p>
+          <p className="text-sm">
+            Supabase environment variables are missing. Check deployment configuration.
+          </p>
         </InfoNotice>
       </div>
     );
@@ -55,8 +57,8 @@ export default async function FiAdminGlobalCommandCentrePresentationPage({
       <div className="p-4 sm:p-6">
         <InfoNotice variant="danger" title="Presentation mode could not load">
           <p className="text-sm">
-            The TITAN presentation view failed to load. Ensure the enterprise demo tenant is seeded and Supabase
-            migrations are applied.
+            The TITAN presentation view failed to load. Ensure the enterprise demo tenant is seeded
+            and Supabase migrations are applied.
           </p>
           {result.message ? <p className="mt-2 text-xs text-slate-500">{result.message}</p> : null}
         </InfoNotice>

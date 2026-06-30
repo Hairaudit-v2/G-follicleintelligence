@@ -4,7 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
-import { ensureDefaultPipelineStages, getEntryPipelineStage, loadPipelineStages } from "@/src/lib/crm/pipeline";
+import {
+  ensureDefaultPipelineStages,
+  getEntryPipelineStage,
+  loadPipelineStages,
+} from "@/src/lib/crm/pipeline";
 import { appendCrmLeadStageHistory } from "@/src/lib/crm/stageHistory";
 import { mapFiCrmLeadRow } from "@/src/lib/crm/leadRow";
 import type { CrmPipelineScope } from "@/src/lib/crm/types";
@@ -146,10 +150,9 @@ function mapDealStagingRow(row: DealStagingRow): HubspotStagingDeal {
   };
 }
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
@@ -216,7 +219,12 @@ async function resolveWriteAuth(
 > {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) {
-    return { ok: true, actorAuthUserId: platform.actorAuthUserId, fiUserId: null, actorLabel: "Platform admin" };
+    return {
+      ok: true,
+      actorAuthUserId: platform.actorAuthUserId,
+      fiUserId: null,
+      actorLabel: "Platform admin",
+    };
   }
   const tenant = await resolveTenantAdminAuth(tenantId, opts);
   if (!tenant.ok) return tenant;
@@ -228,7 +236,10 @@ async function resolveWriteAuth(
   };
 }
 
-async function resolveReadAuth(tenantId: string, opts: ServerOpts): Promise<{ ok: true } | { ok: false; error: string }> {
+async function resolveReadAuth(
+  tenantId: string,
+  opts: ServerOpts
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) return { ok: true };
 
@@ -257,22 +268,23 @@ async function loadDuplicateCheckIndex(
 ): Promise<DuplicateCheckCandidateIndex> {
   const tid = tenantId.trim();
 
-  const [personsRes, leadsRes, patientsRes, casesRes, mappingsRes, personSourceRes] = await Promise.all([
-    supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid),
-    supabase.from("fi_crm_leads").select("id, person_id, summary, metadata").eq("tenant_id", tid),
-    supabase.from("fi_patients").select("id, person_id, metadata").eq("tenant_id", tid),
-    supabase.from("fi_cases").select("id, email, full_name").eq("tenant_id", tid),
-    supabase
-      .from("fi_external_record_mappings")
-      .select("external_id, source_entity_type, fi_entity_type, fi_entity_id")
-      .eq("tenant_id", tid)
-      .eq("integration_id", integrationId),
-    supabase
-      .from("fi_person_source_ids")
-      .select("source_person_id, person_id")
-      .eq("tenant_id", tid)
-      .eq("source_system", HUBSPOT_PERSON_SOURCE),
-  ]);
+  const [personsRes, leadsRes, patientsRes, casesRes, mappingsRes, personSourceRes] =
+    await Promise.all([
+      supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid),
+      supabase.from("fi_crm_leads").select("id, person_id, summary, metadata").eq("tenant_id", tid),
+      supabase.from("fi_patients").select("id, person_id, metadata").eq("tenant_id", tid),
+      supabase.from("fi_cases").select("id, email, full_name").eq("tenant_id", tid),
+      supabase
+        .from("fi_external_record_mappings")
+        .select("external_id, source_entity_type, fi_entity_type, fi_entity_id")
+        .eq("tenant_id", tid)
+        .eq("integration_id", integrationId),
+      supabase
+        .from("fi_person_source_ids")
+        .select("source_person_id, person_id")
+        .eq("tenant_id", tid)
+        .eq("source_system", HUBSPOT_PERSON_SOURCE),
+    ]);
 
   if (personsRes.error) throw new Error(personsRes.error.message);
   if (leadsRes.error) throw new Error(leadsRes.error.message);
@@ -543,7 +555,9 @@ export async function createFiLeadFromHubspotContact(
   integrationId: string,
   tenantId: string,
   opts?: ServerOpts & { mergePersonId?: string | null }
-): Promise<HubspotImportActionResult<{ personId: string; leadId: string; patientId: string | null }>> {
+): Promise<
+  HubspotImportActionResult<{ personId: string; leadId: string; patientId: string | null }>
+> {
   const auth = await resolveWriteAuth(tenantId, opts ?? {});
   if (!auth.ok) return auth;
 
@@ -823,7 +837,10 @@ export async function createFiOpportunityFromHubspotDeal(
 
   if (!personId && staging.hubspotContactId) {
     const contactMapping = index.externalMappings.find(
-      (m) => m.externalId === staging.hubspotContactId && m.sourceEntityType === "contact" && m.fiEntityType === "person"
+      (m) =>
+        m.externalId === staging.hubspotContactId &&
+        m.sourceEntityType === "contact" &&
+        m.fiEntityType === "person"
     );
     if (contactMapping) personId = contactMapping.fiEntityId;
 
@@ -840,7 +857,11 @@ export async function createFiOpportunityFromHubspotDeal(
   }
 
   if (!personId) {
-    return { ok: false, error: "Cannot create opportunity without a linked FI person — import the contact first or provide personId." };
+    return {
+      ok: false,
+      error:
+        "Cannot create opportunity without a linked FI person — import the contact first or provide personId.",
+    };
   }
 
   const stageId = await resolvePipelineStageId(tid, preview.mappedPipelineSlug, supabase);

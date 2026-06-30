@@ -85,19 +85,17 @@ export function RosterAssignmentEditor({
             }}
             className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
           >
-            {missingRoles.length ? (
-              missingRoles.map((row) => (
-                <option key={row.role} value={row.role}>
-                  {row.role} ({row.assigned}/{row.required})
-                </option>
-              ))
-            ) : (
-              Object.keys(candidatesByRole).map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))
-            )}
+            {missingRoles.length
+              ? missingRoles.map((row) => (
+                  <option key={row.role} value={row.role}>
+                    {row.role} ({row.assigned}/{row.required})
+                  </option>
+                ))
+              : Object.keys(candidatesByRole).map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
           </select>
         </label>
       </div>

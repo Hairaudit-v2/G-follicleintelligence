@@ -13,9 +13,8 @@ const ENQUEUE_SHADOW_CANDIDATE_NAMES = [
 ] as const;
 
 /** Strict allow-list for `enqueue_shadow` governed replay (subset of intelligence-core names). */
-export const GOVERNED_ENQUEUE_SHADOW_EVENT_ALLOWLIST: readonly string[] = ENQUEUE_SHADOW_CANDIDATE_NAMES.filter((n) =>
-  CORE_NAMES.has(n)
-);
+export const GOVERNED_ENQUEUE_SHADOW_EVENT_ALLOWLIST: readonly string[] =
+  ENQUEUE_SHADOW_CANDIDATE_NAMES.filter((n) => CORE_NAMES.has(n));
 
 /** Reserved for Stage 16+ real dispatch — intentionally empty in Stage 15. */
 export const GOVERNED_DISPATCH_FUTURE_ALLOWLIST: readonly string[] = [];
@@ -28,7 +27,9 @@ export function isEnqueueShadowEventNameAllowlisted(eventName: string | null | u
 }
 
 /** Blocks high-sensitivity clinical tier for shadow enqueue paths. */
-export function isGovernedPrivacyFilterSafeForShadowEnqueue(privacyLevel: string | null | undefined): boolean {
+export function isGovernedPrivacyFilterSafeForShadowEnqueue(
+  privacyLevel: string | null | undefined
+): boolean {
   if (!privacyLevel || !privacyLevel.trim()) return true;
   return privacyLevel.trim() !== "operational_clinical";
 }

@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 /** Persisted only for FI OS scheduling workspace — does not affect global app theme. */
 export const FI_OS_CALENDAR_DISPLAY_THEME_STORAGE_KEY = "fi-os-calendar-display-theme";
@@ -39,7 +47,9 @@ export function FiCalendarWorkspaceDisplayThemeProvider({ children }: { children
   const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
 
   return (
-    <FiCalendarWorkspaceDisplayThemeContext.Provider value={value}>{children}</FiCalendarWorkspaceDisplayThemeContext.Provider>
+    <FiCalendarWorkspaceDisplayThemeContext.Provider value={value}>
+      {children}
+    </FiCalendarWorkspaceDisplayThemeContext.Provider>
   );
 }
 

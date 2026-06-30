@@ -41,7 +41,9 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
         <div className="min-w-0 space-y-1">
           <h3 className="text-sm font-semibold text-slate-100 dark:text-slate-50">{card.title}</h3>
           {card.recommended ? (
-            <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300 dark:text-sky-300">Recommended pathway</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300 dark:text-sky-300">
+              Recommended pathway
+            </p>
           ) : null}
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
@@ -63,11 +65,9 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
       </p>
       {!isSoon && card.templateSlug ? (
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          {card.instanceId ? (
-            "A saved ConsultationOS pathway instance exists for this visit."
-          ) : (
-            "No pathway instance yet - starting opens the guided form for this template."
-          )}
+          {card.instanceId
+            ? "A saved ConsultationOS pathway instance exists for this visit."
+            : "No pathway instance yet - starting opens the guided form for this template."}
         </p>
       ) : null}
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -108,15 +108,37 @@ export function ConsultationPathwayLauncher({
   return (
     <div id="consultation-pathway-launcher">
       <FiCard className={`space-y-4 ${cardClassName ?? ""}`.trim()}>
-        <FiSection title={sectionTitle} description={sectionDescription} headingId="consultation-pathway-launcher-heading">
+        <FiSection
+          title={sectionTitle}
+          description={sectionDescription}
+          headingId="consultation-pathway-launcher-heading"
+        >
           <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">
             Direct links:{" "}
-            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms</code>,{" "}
-            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/hair-loss-treatment</code>,{" "}
-            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/female-hair-loss</code>,{" "}
-            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/repair</code>,{" "}
-            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/follow-up</code>,{" "}
-            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/pathology</code>.
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">
+              /forms
+            </code>
+            ,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">
+              /forms/hair-loss-treatment
+            </code>
+            ,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">
+              /forms/female-hair-loss
+            </code>
+            ,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">
+              /forms/repair
+            </code>
+            ,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">
+              /forms/follow-up
+            </code>
+            ,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">
+              /forms/pathology
+            </code>
+            .
           </p>
           {model.recommendedHint?.trim() ? (
             <div

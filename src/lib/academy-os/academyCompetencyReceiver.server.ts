@@ -1,6 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { FiCompetencyExportItemV1, FiCompetencyExportPayload } from "@follicle/intelligence-core/contracts";
+import type {
+  FiCompetencyExportItemV1,
+  FiCompetencyExportPayload,
+} from "@follicle/intelligence-core/contracts";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
@@ -10,7 +13,10 @@ import {
   linkAcademyProfileToFiStaff,
   upsertStaffIdentityLink,
 } from "@/src/lib/workforce-os/workforceIdentityLinks.server";
-import { mergeWorkforceIdentityMetadata, sanitizeWorkforceIdentityMetadata } from "@/src/lib/workforce-os/workforceIdentityMetadata";
+import {
+  mergeWorkforceIdentityMetadata,
+  sanitizeWorkforceIdentityMetadata,
+} from "@/src/lib/workforce-os/workforceIdentityMetadata";
 
 import { publishAcademyCompetencyAnalytics } from "./academyAnalyticsPublisher.server";
 import type {
@@ -26,17 +32,23 @@ function mapProjectionRow(raw: Record<string, unknown>): FiStaffCompetencyProjec
     tenantId: String(raw.tenant_id),
     staffId: String(raw.staff_id),
     sourceSystem: String(raw.source_system),
-    globalProfessionalId: raw.global_professional_id != null ? String(raw.global_professional_id) : null,
+    globalProfessionalId:
+      raw.global_professional_id != null ? String(raw.global_professional_id) : null,
     iiohrUserId: raw.iiohr_user_id != null ? String(raw.iiohr_user_id) : null,
     academyProfileId: raw.academy_profile_id != null ? String(raw.academy_profile_id) : null,
     competencyKey: String(raw.competency_key),
-    competencyStatus: String(raw.competency_status) as FiStaffCompetencyProjectionRow["competencyStatus"],
+    competencyStatus: String(
+      raw.competency_status
+    ) as FiStaffCompetencyProjectionRow["competencyStatus"],
     readinessBand:
-      raw.readiness_band != null ? (String(raw.readiness_band) as FiStaffCompetencyProjectionRow["readinessBand"]) : null,
+      raw.readiness_band != null
+        ? (String(raw.readiness_band) as FiStaffCompetencyProjectionRow["readinessBand"])
+        : null,
     certificationLevel: raw.certification_level != null ? String(raw.certification_level) : null,
     evidenceCount: Number(raw.evidence_count ?? 0),
     latestCertificate: raw.latest_certificate != null ? String(raw.latest_certificate) : null,
-    sourceExportEventId: raw.source_export_event_id != null ? String(raw.source_export_event_id) : null,
+    sourceExportEventId:
+      raw.source_export_event_id != null ? String(raw.source_export_event_id) : null,
     metadata:
       raw.metadata && typeof raw.metadata === "object" && !Array.isArray(raw.metadata)
         ? (raw.metadata as Record<string, unknown>)
@@ -191,7 +203,11 @@ export async function resolveStaffForCompetencyExport(
   const tid = payload.tenantId;
 
   if (payload.globalProfessionalId?.trim()) {
-    const staffId = await resolveStaffByGlobalProfessionalId(tid, payload.globalProfessionalId, client);
+    const staffId = await resolveStaffByGlobalProfessionalId(
+      tid,
+      payload.globalProfessionalId,
+      client
+    );
     if (staffId) return { ok: true, staffId, method: "global_professional_id" };
   }
 
@@ -237,7 +253,9 @@ async function syncAcademyIdentityMetadata(
   const metadataPatch = sanitizeWorkforceIdentityMetadata({
     competency_source: "iiohr_academy",
     sync_status: "active",
-    ...(payload.globalProfessionalId?.trim() ? { global_professional_id: payload.globalProfessionalId.trim() } : {}),
+    ...(payload.globalProfessionalId?.trim()
+      ? { global_professional_id: payload.globalProfessionalId.trim() }
+      : {}),
     ...(payload.iiohrUserId?.trim() ? { iiohr_user_id: payload.iiohrUserId.trim() } : {}),
   });
 

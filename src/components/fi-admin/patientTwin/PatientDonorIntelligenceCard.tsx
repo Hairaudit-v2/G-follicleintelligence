@@ -20,7 +20,9 @@ import {
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{children}</p>
+  );
 }
 
 export function PatientDonorIntelligenceCard({
@@ -34,10 +36,14 @@ export function PatientDonorIntelligenceCard({
 }) {
   const { donor } = twin.intelligence;
   const donorPreferredIds = useMemo(
-    () => twin.imaging.gallery.items.filter((i) => i.ai_image_category === "donor").map((i) => i.id),
+    () =>
+      twin.imaging.gallery.items.filter((i) => i.ai_image_category === "donor").map((i) => i.id),
     [twin.imaging.gallery.items]
   );
-  const allGalleryIds = useMemo(() => twin.imaging.gallery.items.map((i) => i.id), [twin.imaging.gallery.items]);
+  const allGalleryIds = useMemo(
+    () => twin.imaging.gallery.items.map((i) => i.id),
+    [twin.imaging.gallery.items]
+  );
   const selectableIds = donorPreferredIds.length > 0 ? donorPreferredIds : allGalleryIds;
 
   const [selectedImageId, setSelectedImageId] = useState(() => selectableIds[0] ?? "");
@@ -121,7 +127,8 @@ export function PatientDonorIntelligenceCard({
       description="Stage 9C shared donor-zone bands from clinical donor photographs. Stored in hair_intelligence_donor_assessments."
     >
       <p className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100/95">
-        Donor intelligence is image-based decision support and does not replace clinical density measurement or surgical judgement.
+        Donor intelligence is image-based decision support and does not replace clinical density
+        measurement or surgical judgement.
       </p>
 
       {message ? <p className="mb-2 text-xs text-amber-200/90">{message}</p> : null}
@@ -129,21 +136,29 @@ export function PatientDonorIntelligenceCard({
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <FieldLabel>Donor quality</FieldLabel>
-          <p className="mt-0.5 text-sm font-medium text-white">{latest ? latest.donor_quality_rating.replace(/_/g, " ") : "—"}</p>
+          <p className="mt-0.5 text-sm font-medium text-white">
+            {latest ? latest.donor_quality_rating.replace(/_/g, " ") : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Donor region</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest ? latest.donor_region.replace(/_/g, " ") : "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest ? latest.donor_region.replace(/_/g, " ") : "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Confidence</FieldLabel>
           <p className="mt-0.5 text-sm text-slate-200">
-            {latest != null && latest.confidence_score != null ? latest.confidence_score.toFixed(2) : "—"}
+            {latest != null && latest.confidence_score != null
+              ? latest.confidence_score.toFixed(2)
+              : "—"}
           </p>
         </div>
         <div>
           <FieldLabel>Density band</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest?.estimated_density_band?.replace(/_/g, " ") ?? "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest?.estimated_density_band?.replace(/_/g, " ") ?? "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Miniaturisation risk</FieldLabel>
@@ -159,11 +174,15 @@ export function PatientDonorIntelligenceCard({
         </div>
         <div>
           <FieldLabel>Safe donor capacity band</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest?.safe_donor_capacity_band?.replace(/_/g, " ") ?? "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest?.safe_donor_capacity_band?.replace(/_/g, " ") ?? "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Lifetime graft budget band</FieldLabel>
-          <p className="mt-0.5 text-sm text-slate-200">{latest?.lifetime_graft_budget_band?.replace(/_/g, " ") ?? "—"}</p>
+          <p className="mt-0.5 text-sm text-slate-200">
+            {latest?.lifetime_graft_budget_band?.replace(/_/g, " ") ?? "—"}
+          </p>
         </div>
         <div>
           <FieldLabel>Extraction caution</FieldLabel>
@@ -196,7 +215,8 @@ export function PatientDonorIntelligenceCard({
         <FieldLabel>Select donor image</FieldLabel>
         {donorPreferredIds.length === 0 && allGalleryIds.length > 0 ? (
           <p className="mt-1 text-xs text-amber-200/80">
-            No images are AI-tagged as donor yet; you can still run an assessment on any gallery image if it shows the donor area.
+            No images are AI-tagged as donor yet; you can still run an assessment on any gallery
+            image if it shows the donor area.
           </p>
         ) : null}
         <select
@@ -221,7 +241,12 @@ export function PatientDonorIntelligenceCard({
           onClick={() => {
             setMessage(null);
             start(async () => {
-              const res = await assessPatientDonorImageAction(tenantId, patientId, selectedImageId, {});
+              const res = await assessPatientDonorImageAction(
+                tenantId,
+                patientId,
+                selectedImageId,
+                {}
+              );
               if (!res.ok) setMessage(res.error);
             });
           }}
@@ -438,8 +463,10 @@ export function PatientDonorIntelligenceCard({
                     retrograde_risk: retro as (typeof HIE_DONOR_RISK_LEVELS)[number],
                     overharvesting_risk: over as (typeof HIE_DONOR_RISK_LEVELS)[number],
                     safe_donor_capacity_band: cap as (typeof HIE_SAFE_DONOR_CAPACITY_BANDS)[number],
-                    lifetime_graft_budget_band: budget as (typeof HIE_LIFETIME_GRAFT_BUDGET_BANDS)[number],
-                    extraction_caution_level: extract as (typeof HIE_EXTRACTION_CAUTION_LEVELS)[number],
+                    lifetime_graft_budget_band:
+                      budget as (typeof HIE_LIFETIME_GRAFT_BUDGET_BANDS)[number],
+                    extraction_caution_level:
+                      extract as (typeof HIE_EXTRACTION_CAUTION_LEVELS)[number],
                     clinical_observations: clinical || null,
                     ai_notes: aiNotes || null,
                   });

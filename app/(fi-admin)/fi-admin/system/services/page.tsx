@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default async function SystemServicesPage() {
   const supabase = supabaseAdmin();
-  const { data: tenants, error: e1 } = await supabase.from("fi_tenants").select("id, name").order("name");
+  const { data: tenants, error: e1 } = await supabase
+    .from("fi_tenants")
+    .select("id, name")
+    .order("name");
   if (e1) return <p className="text-sm text-red-400">Could not load tenants: {e1.message}</p>;
   const trows = (tenants ?? []) as { id: string; name: string }[];
   const counts = new Map<string, number>();
@@ -31,7 +34,10 @@ export default async function SystemServicesPage() {
               <p className="font-medium text-slate-100">{t.name}</p>
               <p className="text-xs text-slate-500">{counts.get(t.id) ?? 0} services</p>
             </div>
-            <Link href={`/fi-admin/${t.id}/services`} className="text-sm font-medium text-cyan-400 hover:text-cyan-300">
+            <Link
+              href={`/fi-admin/${t.id}/services`}
+              className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+            >
               Manage services →
             </Link>
           </li>

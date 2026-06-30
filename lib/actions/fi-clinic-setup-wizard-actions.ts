@@ -9,7 +9,10 @@ import {
   buildClinicSetupWizardPreview,
   loadClinicSetupWizardBootstrap,
 } from "@/src/lib/clinicSetup/clinicSetupWizard.server";
-import type { ClinicSetupRoomCounts, ClinicSetupStaffInput } from "@/src/lib/clinicSetup/clinicSetupWizardCore";
+import type {
+  ClinicSetupRoomCounts,
+  ClinicSetupStaffInput,
+} from "@/src/lib/clinicSetup/clinicSetupWizardCore";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
@@ -73,7 +76,10 @@ export async function loadClinicSetupWizardBootstrapAction(
 export async function previewClinicSetupWizardAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; preview: Awaited<ReturnType<typeof buildClinicSetupWizardPreview>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; preview: Awaited<ReturnType<typeof buildClinicSetupWizardPreview>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = previewBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
@@ -92,7 +98,10 @@ export async function previewClinicSetupWizardAction(
 export async function applyClinicSetupWizardAction(
   tenantId: string,
   body: unknown
-): Promise<{ ok: true; result: Awaited<ReturnType<typeof applyClinicSetupWizard>> } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; result: Awaited<ReturnType<typeof applyClinicSetupWizard>> }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = applyBodySchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });

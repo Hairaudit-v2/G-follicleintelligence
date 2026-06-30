@@ -6,7 +6,11 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+  openCollectionStatusFilter,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { readCrmQuoteIdFromObjectMetadata } from "@/src/lib/revenueOs/paymentsInboxQuoteMetadata";
 
 export type PaymentsInboxFilters = {
@@ -67,7 +71,9 @@ function startOfWeekMondayUtcYmd(todayYmd: string): string {
   return dt.toISOString().slice(0, 10);
 }
 
-function patientLabelFromRow(p: { first_name?: string | null; last_name?: string | null } | null): string | null {
+function patientLabelFromRow(
+  p: { first_name?: string | null; last_name?: string | null } | null
+): string | null {
   if (!p) return null;
   const a = String(p.first_name ?? "").trim();
   const b = String(p.last_name ?? "").trim();
@@ -129,7 +135,12 @@ export async function loadPaymentsInboxSnapshot(
   const weekStartYmd = startOfWeekMondayUtcYmd(todayYmd);
 
   const [{ data: clinicRows, error: ce }, { data: invs, error: ie }] = await Promise.all([
-    supabase.from("fi_clinics").select("id, name").eq("tenant_id", tid).order("name", { ascending: true }).limit(200),
+    supabase
+      .from("fi_clinics")
+      .select("id, name")
+      .eq("tenant_id", tid)
+      .order("name", { ascending: true })
+      .limit(200),
     supabase
       .from("fi_invoices")
       .select("*")
@@ -157,7 +168,9 @@ export async function loadPaymentsInboxSnapshot(
     } satisfies PaymentsInboxInvoiceRow;
   });
 
-  const patientIds = [...new Set(mapped.map((i) => i.patient_id).filter((x): x is string => Boolean(x?.trim())))];
+  const patientIds = [
+    ...new Set(mapped.map((i) => i.patient_id).filter((x): x is string => Boolean(x?.trim()))),
+  ];
   const patientLabels = new Map<string, string>();
   if (patientIds.length > 0) {
     const { data: prows, error: pe } = await supabase
@@ -168,7 +181,10 @@ export async function loadPaymentsInboxSnapshot(
     if (pe) throw new Error(pe.message);
     for (const raw of prows ?? []) {
       const id = String((raw as { id: string }).id);
-      patientLabels.set(id, patientLabelFromRow(raw as { first_name?: string | null; last_name?: string | null }) ?? "");
+      patientLabels.set(
+        id,
+        patientLabelFromRow(raw as { first_name?: string | null; last_name?: string | null }) ?? ""
+      );
     }
   }
 
@@ -182,7 +198,11 @@ export async function loadPaymentsInboxSnapshot(
     .limit(400);
   if (paye) throw new Error(paye.message);
 
-  const payInvoiceIds = [...new Set((payRows ?? []).map((r) => String((r as { invoice_id: string }).invoice_id)).filter(Boolean))];
+  const payInvoiceIds = [
+    ...new Set(
+      (payRows ?? []).map((r) => String((r as { invoice_id: string }).invoice_id)).filter(Boolean)
+    ),
+  ];
   const payInvoiceQuoteId = new Map<string, string>();
   if (payInvoiceIds.length > 0) {
     const { data: invPay, error: ipe } = await supabase
@@ -241,7 +261,7 @@ export async function loadPaymentsInboxSnapshot(
       ...inv,
       patient_label: inv.patient_id ? patientLabels.get(inv.patient_id) || null : null,
       crm_quote_id: qid,
-      crm_quote_title: qid ? quoteTitles.get(qid) ?? "Quote" : null,
+      crm_quote_title: qid ? (quoteTitles.get(qid) ?? "Quote") : null,
     };
   });
 
@@ -270,7 +290,10 @@ export async function loadPaymentsInboxSnapshot(
 
     if (
       inv.status === "overdue" ||
-      (pastDue && (inv.status === "awaiting_payment" || inv.status === "sent" || inv.status === "partially_paid"))
+      (pastDue &&
+        (inv.status === "awaiting_payment" ||
+          inv.status === "sent" ||
+          inv.status === "partially_paid"))
     ) {
       overdue.push(inv);
     } else if (inv.status === "awaiting_payment" || inv.status === "sent") {
@@ -303,7 +326,7 @@ export async function loadPaymentsInboxSnapshot(
       patient_id: row.patient_id != null ? String(row.patient_id) : null,
       case_id: row.case_id != null ? String(row.case_id) : null,
       crm_quote_id: qid,
-      crm_quote_title: qid ? quoteTitles.get(qid) ?? "Quote" : null,
+      crm_quote_title: qid ? (quoteTitles.get(qid) ?? "Quote") : null,
     };
     paymentsThisWeek.push(p);
     if (p.created_at >= dayStart) paymentsToday.push(p);

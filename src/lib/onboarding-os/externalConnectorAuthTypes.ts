@@ -23,11 +23,18 @@ export const EXTERNAL_CONNECTOR_AUTH_STATUSES = [
 ] as const;
 export type ExternalConnectorAuthStatus = (typeof EXTERNAL_CONNECTOR_AUTH_STATUSES)[number];
 
-export const EXTERNAL_CONNECTOR_VERIFICATION_OUTCOMES = ["success", "warning", "error", "info"] as const;
-export type ExternalConnectorVerificationOutcome = (typeof EXTERNAL_CONNECTOR_VERIFICATION_OUTCOMES)[number];
+export const EXTERNAL_CONNECTOR_VERIFICATION_OUTCOMES = [
+  "success",
+  "warning",
+  "error",
+  "info",
+] as const;
+export type ExternalConnectorVerificationOutcome =
+  (typeof EXTERNAL_CONNECTOR_VERIFICATION_OUTCOMES)[number];
 
 export const EXTERNAL_CONNECTOR_TOKEN_REFRESH_OUTCOMES = ["success", "failed", "skipped"] as const;
-export type ExternalConnectorTokenRefreshOutcome = (typeof EXTERNAL_CONNECTOR_TOKEN_REFRESH_OUTCOMES)[number];
+export type ExternalConnectorTokenRefreshOutcome =
+  (typeof EXTERNAL_CONNECTOR_TOKEN_REFRESH_OUTCOMES)[number];
 
 export type ExternalConnectorAuthSession = {
   id: string;

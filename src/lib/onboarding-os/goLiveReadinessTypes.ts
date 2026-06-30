@@ -108,7 +108,11 @@ export const GO_LIVE_READINESS_STATUS_BADGES: Record<
   approved: { label: "Go-live approved", tone: "info" },
 };
 
-export type GoLiveReadinessApprovalEventKind = "owner_review" | "platform_review" | "checklist_item" | "go_live_approved";
+export type GoLiveReadinessApprovalEventKind =
+  | "owner_review"
+  | "platform_review"
+  | "checklist_item"
+  | "go_live_approved";
 
 export type GoLiveReadinessApprovalEvent = {
   id: string;

@@ -19,7 +19,9 @@ export type InternalBusShadowEnvOptions = {
  * Rules: `FI_INTELLIGENCE_INTERNAL_BUS_SHADOW_ENABLED === "1"` and `NODE_ENV !== "production"`.
  * Defaults to `false` everywhere else (including production even if the flag is set).
  */
-export function isInternalIntelligenceBusShadowEnabled(options?: InternalBusShadowEnvOptions): boolean {
+export function isInternalIntelligenceBusShadowEnabled(
+  options?: InternalBusShadowEnvOptions
+): boolean {
   const env = options?.env ?? (process.env as Record<string, string | undefined>);
   const nodeEnv = options?.nodeEnv ?? env.NODE_ENV ?? "";
   if (nodeEnv === "production") return false;

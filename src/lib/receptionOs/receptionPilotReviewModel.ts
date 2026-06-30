@@ -83,7 +83,9 @@ export function isDepositChaseTemplateKey(templateKey: string | null | undefined
   return DEPOSIT_CHASE_TEMPLATE_KEYS.has(String(templateKey).trim());
 }
 
-export function buildReceptionPilotReviewReport(input: BuildReceptionPilotReviewReportInput): ReceptionPilotReviewReport {
+export function buildReceptionPilotReviewReport(
+  input: BuildReceptionPilotReviewReportInput
+): ReceptionPilotReviewReport {
   const activeProfiles = new Set<string>();
   const widgetCounts = new Map<string, number>();
   const feedbackCounts = new Map<ReceptionPilotFeedbackKind, number>();

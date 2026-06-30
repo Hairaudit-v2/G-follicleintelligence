@@ -58,7 +58,9 @@ export function AppointmentDetailPageView({
   const lead = payload.leadAnchor?.lead ?? null;
   const cancelled = isBookingCancelled(booking);
   const leadHref = lead ? `/fi-admin/${tenantId}/crm/leads/${lead.id}` : null;
-  const patientHref = booking.patient_id ? `/fi-admin/${tenantId}/patients/${booking.patient_id}` : null;
+  const patientHref = booking.patient_id
+    ? `/fi-admin/${tenantId}/patients/${booking.patient_id}`
+    : null;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
@@ -94,22 +96,38 @@ export function AppointmentDetailPageView({
             </Link>
           ) : null}
           {booking.case_id ? (
-            <Link href={`/fi-admin/${tenantId}/cases/${booking.case_id}`} className="text-blue-300 hover:underline">
+            <Link
+              href={`/fi-admin/${tenantId}/cases/${booking.case_id}`}
+              className="text-blue-300 hover:underline"
+            >
               Case →
             </Link>
           ) : null}
-          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/appointments`}
+            className="text-blue-300 hover:underline"
+          >
             All appointments
           </Link>
           {booking.booking_type.trim().toLowerCase() === "surgery" ? (
-            <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-300 hover:underline">
+            <Link
+              href={`/fi-admin/${tenantId}/surgery-readiness`}
+              className="text-blue-300 hover:underline"
+            >
               Surgery readiness board
             </Link>
           ) : null}
         </div>
       </header>
 
-      <Suspense fallback={<div className="h-16 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="h-16 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
+            aria-hidden
+          />
+        }
+      >
         <AppointmentDetailPreviewBridge
           tenantId={tenantId}
           currentAppointmentId={booking.id}
@@ -118,8 +136,19 @@ export function AppointmentDetailPageView({
         />
       </Suspense>
 
-      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
-        <AppointmentDetailTabNav tenantId={tenantId} appointmentId={appointmentId} activeTab={activeTab} />
+      <Suspense
+        fallback={
+          <div
+            className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
+            aria-hidden
+          />
+        }
+      >
+        <AppointmentDetailTabNav
+          tenantId={tenantId}
+          appointmentId={appointmentId}
+          activeTab={activeTab}
+        />
       </Suspense>
 
       {activeTab === "overview" ? (
@@ -201,7 +230,11 @@ export function AppointmentDetailPageView({
             onLinkPatient={() => void state.onLinkPatient()}
             onConvert={state.onConvert}
           />
-          {lead && state.completionLeadOpts && payload.pipelineStages.length > 0 && !cancelled && booking.booking_status !== "completed" ? (
+          {lead &&
+          state.completionLeadOpts &&
+          payload.pipelineStages.length > 0 &&
+          !cancelled &&
+          booking.booking_status !== "completed" ? (
             <AppointmentCompletionLeadWorkflow
               lead={lead}
               pipelineStages={payload.pipelineStages}

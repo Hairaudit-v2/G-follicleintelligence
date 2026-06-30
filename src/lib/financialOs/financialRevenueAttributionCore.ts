@@ -133,9 +133,18 @@ function readNestedMetaString(meta: Record<string, unknown>, path: string[]): st
 }
 
 function normaliseSourceToken(raw: string): FiRevenueAttributionSource | null {
-  const s = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const s = raw
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
   if (!s) return null;
-  if (s.includes("google") || s.includes("gclid") || s === "google_ads" || s === "adwords" || s === "ppc") {
+  if (
+    s.includes("google") ||
+    s.includes("gclid") ||
+    s === "google_ads" ||
+    s === "adwords" ||
+    s === "ppc"
+  ) {
     return "google_ads";
   }
   if (
@@ -157,13 +166,18 @@ function normaliseSourceToken(raw: string): FiRevenueAttributionSource | null {
   ) {
     return "existing_patient";
   }
-  if (s.includes("organic") || s.includes("seo") || s.includes("website") || s === "search") return "organic";
-  if (s.includes("direct") || s.includes("walk_in") || s.includes("walkin") || s === "in_clinic") return "direct";
-  if ((FI_REVENUE_ATTRIBUTION_SOURCES as readonly string[]).includes(s)) return s as FiRevenueAttributionSource;
+  if (s.includes("organic") || s.includes("seo") || s.includes("website") || s === "search")
+    return "organic";
+  if (s.includes("direct") || s.includes("walk_in") || s.includes("walkin") || s === "in_clinic")
+    return "direct";
+  if ((FI_REVENUE_ATTRIBUTION_SOURCES as readonly string[]).includes(s))
+    return s as FiRevenueAttributionSource;
   return null;
 }
 
-function extractRawSourceSignals(ctx: LeadSourceContext): Array<{ value: string; channel: string }> {
+function extractRawSourceSignals(
+  ctx: LeadSourceContext
+): Array<{ value: string; channel: string }> {
   const signals: Array<{ value: string; channel: string }> = [];
   const override = ctx.manual_override?.attribution_source;
   if (override) signals.push({ value: override, channel: "manual_override" });
@@ -189,14 +203,22 @@ function extractRawSourceSignals(ctx: LeadSourceContext): Array<{ value: string;
     if (sys.trim()) signals.push({ value: sys, channel: "patient_source_system" });
   }
 
-  const patientSource = readMetaString(ctx.patient_metadata, ["source", "lead_source", "patient_source"]);
+  const patientSource = readMetaString(ctx.patient_metadata, [
+    "source",
+    "lead_source",
+    "patient_source",
+  ]);
   if (patientSource) signals.push({ value: patientSource, channel: "patient_metadata" });
 
   if (ctx.consultation_source?.trim()) {
     signals.push({ value: ctx.consultation_source.trim(), channel: "consultation_source" });
   }
 
-  const consultSource = readMetaString(ctx.consultation_metadata, ["source", "lead_source", "referral_source"]);
+  const consultSource = readMetaString(ctx.consultation_metadata, [
+    "source",
+    "lead_source",
+    "referral_source",
+  ]);
   if (consultSource) signals.push({ value: consultSource, channel: "consultation_metadata" });
 
   return signals;
@@ -217,8 +239,11 @@ export function resolveLeadSourceAttribution(ctx: LeadSourceContext): LeadSource
     if (mapped && mapped !== "unknown") {
       const referralContactId =
         mapped === "referral"
-          ? readMetaString(ctx.lead_metadata, ["referral_contact_id", "referrer_person_id"]) ??
-            readMetaString(ctx.consultation_metadata, ["referral_contact_id", "referrer_person_id"])
+          ? (readMetaString(ctx.lead_metadata, ["referral_contact_id", "referrer_person_id"]) ??
+            readMetaString(ctx.consultation_metadata, [
+              "referral_contact_id",
+              "referrer_person_id",
+            ]))
           : null;
       return {
         attribution_source: mapped,
@@ -252,7 +277,9 @@ export type ConsultantAttributionResult = {
 };
 
 /** Consultant fallback: manual → lead owner → consultation owner → quote creator → case owner. */
-export function resolveConsultantAttribution(ctx: ConsultantAttributionContext): ConsultantAttributionResult {
+export function resolveConsultantAttribution(
+  ctx: ConsultantAttributionContext
+): ConsultantAttributionResult {
   const order: Array<{ key: string; value: string | null }> = [
     { key: "manual_override", value: ctx.manual_consultant_fi_user_id },
     { key: "lead_primary_owner", value: ctx.lead_primary_owner_user_id },
@@ -297,7 +324,9 @@ export type CampaignAttributionResult = {
 };
 
 /** Campaign fields from lead/consultation metadata or manual override. */
-export function resolveCampaignAttribution(ctx: CampaignAttributionContext): CampaignAttributionResult {
+export function resolveCampaignAttribution(
+  ctx: CampaignAttributionContext
+): CampaignAttributionResult {
   if (ctx.manual_campaign_name?.trim() || ctx.manual_campaign_id?.trim()) {
     return {
       campaign_name: ctx.manual_campaign_name?.trim() || null,
@@ -377,10 +406,16 @@ export type AttributionConfidenceInput = {
 };
 
 /** Confidence: manual override → direct; lead source system → direct; else inferred; unknown fallback → inferred. */
-export function calculateAttributionConfidence(input: AttributionConfidenceInput): FiRevenueAttributionConfidence {
+export function calculateAttributionConfidence(
+  input: AttributionConfidenceInput
+): FiRevenueAttributionConfidence {
   if (input.has_manual_override) return "manual";
-  if (input.has_direct_lead_source || input.lead_resolution_channel === "lead_source_system") return "direct";
-  if (input.lead_resolution_channel === "hubspot_lead_source" || input.lead_resolution_channel === "manual_override") {
+  if (input.has_direct_lead_source || input.lead_resolution_channel === "lead_source_system")
+    return "direct";
+  if (
+    input.lead_resolution_channel === "hubspot_lead_source" ||
+    input.lead_resolution_channel === "manual_override"
+  ) {
     return "direct";
   }
   if (input.trigger_source === "manual_recalculation") return "manual";
@@ -388,7 +423,9 @@ export function calculateAttributionConfidence(input: AttributionConfidenceInput
 }
 
 /** Compose a fully-resolved attribution event draft (caller persists append-only). */
-export function buildRevenueAttributionEvent(input: BuildRevenueAttributionEventInput): RevenueAttributionEventDraft {
+export function buildRevenueAttributionEvent(
+  input: BuildRevenueAttributionEventInput
+): RevenueAttributionEventDraft {
   const leadResult = resolveLeadSourceAttribution(input.lead_context);
   const consultantResult = resolveConsultantAttribution(input.consultant_context);
   const clinicResult = resolveClinicAttribution(input.clinic_context);
@@ -406,9 +443,9 @@ export function buildRevenueAttributionEvent(input: BuildRevenueAttributionEvent
 
   const hasManualOverride = Boolean(
     input.lead_context.manual_override?.attribution_source ||
-      input.lead_context.manual_override?.campaign_name ||
-      input.lead_context.manual_override?.campaign_id ||
-      input.lead_context.manual_override?.consultant_fi_user_id
+    input.lead_context.manual_override?.campaign_name ||
+    input.lead_context.manual_override?.campaign_id ||
+    input.lead_context.manual_override?.consultant_fi_user_id
   );
 
   const confidence = calculateAttributionConfidence({
@@ -419,7 +456,8 @@ export function buildRevenueAttributionEvent(input: BuildRevenueAttributionEvent
     trigger_source: input.trigger_source,
   });
 
-  const source = input.lead_context.manual_override?.attribution_source ?? leadResult.attribution_source;
+  const source =
+    input.lead_context.manual_override?.attribution_source ?? leadResult.attribution_source;
 
   return {
     tenant_id: input.tenant_id.trim(),
@@ -496,9 +534,10 @@ function marginPct(revenue: number, profit: number): number | null {
 }
 
 /** Aggregate dashboard metrics from event summaries (tenant-scoped rows only). */
-export function aggregateRevenueAttributionDashboard(
-  events: RevenueAttributionEventSummary[]
-): { metrics: RevenueAttributionDashboardMetrics; rows: RevenueAttributionDashboardRow[] } {
+export function aggregateRevenueAttributionDashboard(events: RevenueAttributionEventSummary[]): {
+  metrics: RevenueAttributionDashboardMetrics;
+  rows: RevenueAttributionDashboardRow[];
+} {
   const byKey = new Map<
     string,
     {
@@ -549,10 +588,16 @@ export function aggregateRevenueAttributionDashboard(
   const consultsBySource = new Map<FiRevenueAttributionSource, number>();
 
   for (const bucket of byKey.values()) {
-    revenueBySource.set(bucket.source, (revenueBySource.get(bucket.source) ?? 0) + bucket.collected);
+    revenueBySource.set(
+      bucket.source,
+      (revenueBySource.get(bucket.source) ?? 0) + bucket.collected
+    );
     profitBySource.set(bucket.source, (profitBySource.get(bucket.source) ?? 0) + bucket.profit);
     leadsBySource.set(bucket.source, (leadsBySource.get(bucket.source) ?? 0) + bucket.leadIds.size);
-    consultsBySource.set(bucket.source, (consultsBySource.get(bucket.source) ?? 0) + bucket.consultIds.size);
+    consultsBySource.set(
+      bucket.source,
+      (consultsBySource.get(bucket.source) ?? 0) + bucket.consultIds.size
+    );
   }
 
   let bestConverting: { source: FiRevenueAttributionSource; conversion_rate: number } | null = null;
@@ -566,7 +611,8 @@ export function aggregateRevenueAttributionDashboard(
     }
   }
 
-  let highestMargin: { source: FiRevenueAttributionSource; margin_percentage: number } | null = null;
+  let highestMargin: { source: FiRevenueAttributionSource; margin_percentage: number } | null =
+    null;
   for (const source of FI_REVENUE_ATTRIBUTION_SOURCES) {
     const rev = revenueBySource.get(source) ?? 0;
     const profit = profitBySource.get(source) ?? 0;
@@ -579,8 +625,9 @@ export function aggregateRevenueAttributionDashboard(
 
   const rows: RevenueAttributionDashboardRow[] = Array.from(byKey.values())
     .map((bucket) => {
-      const dominantConfidence = (Object.entries(bucket.confidenceCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-        "inferred") as FiRevenueAttributionConfidence;
+      const dominantConfidence = (Object.entries(bucket.confidenceCounts).sort(
+        (a, b) => b[1] - a[1]
+      )[0]?.[0] ?? "inferred") as FiRevenueAttributionConfidence;
       return {
         source: bucket.source,
         campaign: bucket.campaign,
@@ -615,7 +662,10 @@ export function aggregateRevenueAttributionDashboard(
 }
 
 /** Tenant isolation guard for attribution event batches. */
-export function assertRevenueAttributionEventsTenantScoped(tenantId: string, events: Array<{ tenant_id: string }>): void {
+export function assertRevenueAttributionEventsTenantScoped(
+  tenantId: string,
+  events: Array<{ tenant_id: string }>
+): void {
   const tid = tenantId.trim();
   for (const ev of events) {
     if (ev.tenant_id.trim() !== tid) {

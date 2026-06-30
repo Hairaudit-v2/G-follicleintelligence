@@ -17,7 +17,10 @@ export async function PATCH(
   try {
     const { tenantId, staffId } = await params;
     if (!tenantId?.trim() || !staffId?.trim()) {
-      return NextResponse.json({ ok: false, error: "Missing tenantId or staffId." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Missing tenantId or staffId." },
+        { status: 400 }
+      );
     }
 
     const body = await req.json().catch(() => ({}));
@@ -30,13 +33,17 @@ export async function PATCH(
     if (parsed.staff_role !== undefined) patch.staff_role = parsed.staff_role;
     if (parsed.email !== undefined) patch.email = parsed.email?.trim() || null;
     if (parsed.mobile !== undefined) patch.mobile = parsed.mobile?.trim() || null;
-    if (parsed.default_timezone !== undefined) patch.default_timezone = parsed.default_timezone?.trim() || null;
+    if (parsed.default_timezone !== undefined)
+      patch.default_timezone = parsed.default_timezone?.trim() || null;
     if (parsed.working_hours !== undefined) patch.working_hours = parsed.working_hours ?? {};
     if (parsed.is_active !== undefined) patch.is_active = parsed.is_active;
-    if (parsed.calendar_color !== undefined) patch.calendar_color = parsed.calendar_color?.trim() || null;
+    if (parsed.calendar_color !== undefined)
+      patch.calendar_color = parsed.calendar_color?.trim() || null;
     if (parsed.fi_user_id !== undefined) {
       patch.fi_user_id =
-        parsed.fi_user_id === "" || parsed.fi_user_id == null ? null : String(parsed.fi_user_id).trim() || null;
+        parsed.fi_user_id === "" || parsed.fi_user_id == null
+          ? null
+          : String(parsed.fi_user_id).trim() || null;
     }
 
     const row = await updateFiStaff(tenantId.trim(), staffId.trim(), patch);

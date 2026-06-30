@@ -62,10 +62,9 @@ export async function loadOverlappingBookingsForRange(
   );
 }
 
-export function filterRoomEligibilityForClinic<T extends { clinic_id: string | null; is_active: boolean }>(
-  rows: T[],
-  clinicId: string
-): T[] {
+export function filterRoomEligibilityForClinic<
+  T extends { clinic_id: string | null; is_active: boolean },
+>(rows: T[], clinicId: string): T[] {
   const cid = clinicId.trim();
   return rows.filter((r) => r.is_active && (!r.clinic_id || r.clinic_id.trim() === cid));
 }
@@ -289,7 +288,9 @@ export async function assertBookingResourceAvailability(args: {
       excludeBookingId: args.bookingId,
     });
     if (staffConflict) {
-      throw new RoomAvailabilityError("This staff member is already booked for an overlapping appointment.");
+      throw new RoomAvailabilityError(
+        "This staff member is already booked for an overlapping appointment."
+      );
     }
   }
 

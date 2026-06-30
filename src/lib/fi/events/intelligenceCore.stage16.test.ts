@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { GOVERNED_DISPATCH_FUTURE_ALLOWLIST, GOVERNED_ENQUEUE_SHADOW_EVENT_ALLOWLIST } from "./governedReplayAllowlist";
+import {
+  GOVERNED_DISPATCH_FUTURE_ALLOWLIST,
+  GOVERNED_ENQUEUE_SHADOW_EVENT_ALLOWLIST,
+} from "./governedReplayAllowlist";
 import {
   canExecuteGovernedReplayRun,
   isDispatchFutureExecutionPolicyAllowed,

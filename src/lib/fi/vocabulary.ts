@@ -67,10 +67,7 @@ export type FiSignalId = (typeof FI_SIGNAL_IDS)[number];
 
 export type FiSignalType = "risk" | "pattern";
 
-export const FI_SIGNAL_META: Record<
-  FiSignalId,
-  { type: FiSignalType; description: string }
-> = {
+export const FI_SIGNAL_META: Record<FiSignalId, { type: FiSignalType; description: string }> = {
   iron_risk: { type: "risk", description: "Iron status / deficiency risk" },
   thyroid_risk: { type: "risk", description: "Thyroid dysfunction risk" },
   androgen_pattern: {
@@ -125,6 +122,7 @@ export const FI_VOCABULARY_OUTSIDE_INTELLIGENCE_CORE = {
   "hli.blood_request.generated": "Roadmap / design vocabulary; no shared envelope yet.",
   "hli.scalp_imaging.captured": "Roadmap / design vocabulary; no shared envelope yet.",
   "hli.treatment.recorded": "Roadmap / design vocabulary; no shared envelope yet.",
-  "hairaudit.report.released": "Design alias; intelligence-core uses hairaudit.report.generated for graph/export drafts.",
+  "hairaudit.report.released":
+    "Design alias; intelligence-core uses hairaudit.report.generated for graph/export drafts.",
   "hairaudit.verification.completed": "Roadmap / design vocabulary; no shared envelope yet.",
 } as const satisfies Partial<Record<FiEventType, string>>;

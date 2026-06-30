@@ -39,7 +39,9 @@ const MASTER_KEY = "gc6-test-master-key-16";
 type LinkRow = Record<string, unknown>;
 type StaffRow = Record<string, unknown>;
 
-function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiCalendarEventOverlapRow {
+function sampleEventRow(
+  overrides: Partial<FiCalendarEventOverlapRow> = {}
+): FiCalendarEventOverlapRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT_A,
@@ -62,7 +64,9 @@ function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiC
   };
 }
 
-function sampleLink(overrides: Partial<StaffCalendarLinkLookupRow> = {}): StaffCalendarLinkLookupRow {
+function sampleLink(
+  overrides: Partial<StaffCalendarLinkLookupRow> = {}
+): StaffCalendarLinkLookupRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT_A,
@@ -91,9 +95,7 @@ function createMockSupabase() {
             const calendarId = String(row.calendar_id);
             const idx = links.findIndex(
               (r) =>
-                r.tenant_id === tenantId &&
-                r.provider === provider &&
-                r.calendar_id === calendarId
+                r.tenant_id === tenantId && r.provider === provider && r.calendar_id === calendarId
             );
             const id = idx >= 0 ? links[idx]!.id : randomUUID();
             const full = {

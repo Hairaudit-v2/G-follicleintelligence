@@ -4,9 +4,17 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createPatientImageSignedUrls } from "@/src/lib/patientImages/patientImagesServer";
 import { donorAssessmentNotConfiguredResult } from "./assessDonorFallback";
-import { HIE_DONOR_ASSESSOR_VERSION, assessDonorWithOpenAi, isDonorAssessorOpenAiConfigured } from "./openAiDonorAssessor.server";
+import {
+  HIE_DONOR_ASSESSOR_VERSION,
+  assessDonorWithOpenAi,
+  isDonorAssessorOpenAiConfigured,
+} from "./openAiDonorAssessor.server";
 import { insertHairIntelligenceDonorAssessmentRow } from "./persistDonorAssessment.server";
-import type { DonorAssessmentModelResult, HairIntelligenceDonorAssessmentInsert, HieDonorSourceSystem } from "./types";
+import type {
+  DonorAssessmentModelResult,
+  HairIntelligenceDonorAssessmentInsert,
+  HieDonorSourceSystem,
+} from "./types";
 
 export type AssessDonorParams = {
   source_system: HieDonorSourceSystem;
@@ -41,7 +49,10 @@ async function resolveImageUrlForModel(params: AssessDonorParams): Promise<strin
   const bucket = String(mapped.storage_bucket ?? "patient-images");
   const path = String(mapped.storage_path ?? "");
   if (!path) return null;
-  const signedMap = await createPatientImageSignedUrls([{ id: iid, storage_bucket: bucket, storage_path: path }], supabase);
+  const signedMap = await createPatientImageSignedUrls(
+    [{ id: iid, storage_bucket: bucket, storage_path: path }],
+    supabase
+  );
   const signed = signedMap.get(iid);
   return signed?.url ?? null;
 }
@@ -94,7 +105,9 @@ export async function assessDonor(params: AssessDonorParams): Promise<AssessDono
     safe_donor_capacity_band: result.safe_donor_capacity_band,
     lifetime_graft_budget_band: result.lifetime_graft_budget_band,
     extraction_caution_level: result.extraction_caution_level,
-    clinical_observations: result.clinical_observations.trim() ? result.clinical_observations : null,
+    clinical_observations: result.clinical_observations.trim()
+      ? result.clinical_observations
+      : null,
     ai_notes: result.ai_notes.trim() ? result.ai_notes : null,
     review_status: "pending",
     reviewed_by_user_id: null,

@@ -8,7 +8,8 @@ import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import type { CrmShellRelatedLeadItem } from "@/src/lib/crm/crmShellLoaders";
 import { useCrmLeadSlideOver } from "./LeadSlideOver";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";
 
 type Props = {
   tenantId: string;
@@ -22,7 +23,12 @@ type Props = {
  * Deep-link `?preview=<leadId>` support on the full lead page and a related-leads peek strip.
  * Slide-over payload loads via {@link LeadSlideOverPanel} / `crmLoadLeadSlideOverBundleAction`.
  */
-export function CrmLeadDetailPreviewBridge({ tenantId, currentLeadId, previewLeadId, relatedLeads }: Props) {
+export function CrmLeadDetailPreviewBridge({
+  tenantId,
+  currentLeadId,
+  previewLeadId,
+  relatedLeads,
+}: Props) {
   const { openLead, close, activeLeadId } = useCrmLeadSlideOver();
   const router = useRouter();
   const pathname = usePathname();
@@ -95,12 +101,18 @@ export function CrmLeadDetailPreviewBridge({ tenantId, currentLeadId, previewLea
         <section className={card} aria-label="Related leads">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Related leads</h2>
-              <p className="mt-1 text-xs text-slate-400">Same person — peek in the slide-over without leaving this page.</p>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Related leads
+              </h2>
+              <p className="mt-1 text-xs text-slate-400">
+                Same person — peek in the slide-over without leaving this page.
+              </p>
             </div>
             <p className="text-xs text-gray-500">
               Tip: share{" "}
-              <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">?preview=&lt;lead-id&gt;</code>
+              <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">
+                ?preview=&lt;lead-id&gt;
+              </code>
             </p>
           </div>
           <ul className="mt-3 flex flex-col gap-2">
@@ -111,7 +123,9 @@ export function CrmLeadDetailPreviewBridge({ tenantId, currentLeadId, previewLea
                 <li
                   key={r.id}
                   className={`flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-sm ${
-                    isActive ? "border-blue-300 bg-blue-500/10" : "border-white/[0.06] bg-white/[0.03]"
+                    isActive
+                      ? "border-blue-300 bg-blue-500/10"
+                      : "border-white/[0.06] bg-white/[0.03]"
                   }`}
                 >
                   <div className="min-w-0">
@@ -120,7 +134,9 @@ export function CrmLeadDetailPreviewBridge({ tenantId, currentLeadId, previewLea
                       {r.status}
                       {r.stage_label ? ` · ${r.stage_label}` : ""}
                       {" · "}
-                      <span className="text-gray-500">updated {new Date(r.updated_at).toLocaleDateString()}</span>
+                      <span className="text-gray-500">
+                        updated {new Date(r.updated_at).toLocaleDateString()}
+                      </span>
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">

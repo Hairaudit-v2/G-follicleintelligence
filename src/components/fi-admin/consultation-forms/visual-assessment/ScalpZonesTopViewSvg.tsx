@@ -1,27 +1,38 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { ConsultationRepairAnnotationTag, ConsultationScalpZoneId } from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
-/** Draw order: back / broad regions first so lateral zones stay clickable. */
+import type {
+  ConsultationRepairAnnotationTag,
+  ConsultationScalpZoneId,
+} from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
+
+/** Egg-shaped head silhouette, top-down. Narrow at the front (forehead/nose), wider over the crown/occiput. */
+const HEAD_PATH =
+  "M200 62 C268 64 330 122 336 236 C341 330 284 410 200 414 C116 410 59 330 64 236 C70 122 132 64 200 62 Z";
+
+/** Draw order: back / broad regions first so the lateral + crown zones stay clickable on top. */
 const ZONE_DRAW_ORDER: ConsultationScalpZoneId[] = [
   "donor_safe_zone",
   "occipital",
+  "temporal_left",
+  "temporal_right",
   "mid_scalp",
   "crown",
   "frontal",
-  "temporal_left",
-  "temporal_right",
 ];
 
-/** SVG path-ish regions (top-down schematic). */
+/**
+ * Zone regions (top-down, FRONT = top where the nose is). Every region is clipped to the head
+ * silhouette (`#scalpHead`), so simple polygons read as anatomical zones that follow the scalp edge.
+ */
 const ZONE_PATHS: Record<ConsultationScalpZoneId, string> = {
-  occipital: "M 120 52 L 280 52 L 300 120 L 200 155 L 100 120 Z",
-  mid_scalp: "M 130 115 L 270 115 L 255 195 L 145 195 Z",
-  crown: "M 165 125 L 235 125 L 228 178 L 172 178 Z",
-  frontal: "M 140 200 L 260 200 L 248 268 L 152 268 Z",
-  temporal_left: "M 60 130 L 145 125 L 155 230 L 85 255 Z",
-  temporal_right: "M 340 130 L 255 125 L 245 230 L 315 255 Z",
-  donor_safe_zone: "M 70 300 L 330 300 L 340 380 L 60 380 Z",
+  frontal: "M132 70 L268 70 L272 150 L128 150 Z",
+  temporal_left: "M58 108 L128 150 L138 268 L58 268 Z",
+  temporal_right: "M342 108 L272 150 L262 268 L342 268 Z",
+  mid_scalp: "M130 152 L270 152 L260 246 L140 246 Z",
+  crown: "M150 248 L250 248 L262 312 L138 312 Z",
+  occipital: "M104 314 L296 314 L280 374 L120 374 Z",
+  donor_safe_zone: "M120 376 L280 376 L246 414 L154 414 Z",
 };
 
 const ZONE_LABELS: Record<ConsultationScalpZoneId, string> = {
@@ -32,6 +43,17 @@ const ZONE_LABELS: Record<ConsultationScalpZoneId, string> = {
   mid_scalp: "Mid",
   occipital: "Occipital",
   donor_safe_zone: "Donor",
+};
+
+/** Label anchor per zone (centre of the region). */
+const ZONE_LABEL_POS: Record<ConsultationScalpZoneId, { x: number; y: number }> = {
+  frontal: { x: 200, y: 116 },
+  temporal_left: { x: 97, y: 200 },
+  temporal_right: { x: 303, y: 200 },
+  mid_scalp: { x: 200, y: 202 },
+  crown: { x: 200, y: 284 },
+  occipital: { x: 200, y: 348 },
+  donor_safe_zone: { x: 200, y: 398 },
 };
 
 type ScalpZonesMode = "multi" | "repair";
@@ -53,60 +75,114 @@ export function ScalpZonesTopViewSvg({
 }) {
   const selectedSet = new Set(selectedZones);
 
+  function zoneActive(zone: ConsultationScalpZoneId): boolean {
+    return mode === "multi" ? selectedSet.has(zone) : Boolean(repairAnnotations[zone]?.length);
+  }
+
   function zoneFill(zone: ConsultationScalpZoneId): string {
     if (mode === "multi") {
-      return selectedSet.has(zone) ? "rgba(14,165,233,0.35)" : "rgba(148,163,184,0.12)";
+      return selectedSet.has(zone) ? "rgba(14,165,233,0.38)" : "rgba(148,163,184,0.10)";
     }
     const tags = repairAnnotations[zone];
     const has = tags && tags.length > 0;
-    return has ? "rgba(244,63,94,0.28)" : "rgba(148,163,184,0.1)";
+    return has ? "rgba(244,63,94,0.30)" : "rgba(148,163,184,0.10)";
   }
 
   function zoneStroke(zone: ConsultationScalpZoneId): string {
     if (mode === "multi") return selectedSet.has(zone) ? "rgb(2,132,199)" : "rgb(100,116,139)";
     const tags = repairAnnotations[zone];
     if (activeRepairTag && tags?.includes(activeRepairTag)) return "rgb(225,29,72)";
-    return tags?.length ? "rgb(244,63,94)" : "rgb(148,163,184)";
+    return tags?.length ? "rgb(244,63,94)" : "rgb(100,116,139)";
   }
 
   return (
     <svg
-      viewBox="0 0 400 420"
+      viewBox="0 0 400 470"
       className="h-auto w-full max-w-md touch-manipulation select-none"
       role="img"
-      aria-label="Scalp zones — top-down schematic"
+      aria-label="Scalp zones — top-down view, front of head at the top"
     >
-      <title>Scalp zones</title>
-      <ellipse cx="200" cy="210" rx="150" ry="185" fill="#f8fafc" stroke="#94a3b8" strokeWidth="2" />
-      {ZONE_DRAW_ORDER.map((zone) => (
-        <path
-          key={zone}
-          d={ZONE_PATHS[zone]}
-          fill={zoneFill(zone)}
-          stroke={zoneStroke(zone)}
-          strokeWidth={2}
-          className={cn(
-            "transition-colors",
-            disabled ? "pointer-events-none opacity-60" : "cursor-pointer hover:opacity-90 focus:outline-none"
-          )}
-          tabIndex={disabled ? -1 : 0}
-          role="button"
-          aria-pressed={mode === "multi" ? selectedSet.has(zone) : Boolean(repairAnnotations[zone]?.length)}
-          aria-label={ZONE_LABELS[zone]}
-          onClick={() => {
-            if (!disabled) onToggleZone(zone);
-          }}
-          onKeyDown={(e) => {
-            if (disabled) return;
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onToggleZone(zone);
-            }
-          }}
-        />
-      ))}
-      <text x="200" y="32" textAnchor="middle" className="fill-slate-600 text-[11px] font-semibold">
-        Top view (schematic)
+      <title>Scalp zones (top-down)</title>
+      <defs>
+        <clipPath id="scalpHead">
+          <path d={HEAD_PATH} />
+        </clipPath>
+      </defs>
+
+      {/* orientation */}
+      <text x="200" y="26" textAnchor="middle" className="fill-slate-500 text-[12px] font-semibold">
+        Front
+      </text>
+      {/* nose marker = front of head */}
+      <path d="M188 54 L212 54 L200 36 Z" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+
+      {/* scalp silhouette */}
+      <path d={HEAD_PATH} fill="#eef2f7" stroke="#94a3b8" strokeWidth="2" />
+
+      {/* clickable zones (clipped to the scalp edge) */}
+      <g clipPath="url(#scalpHead)">
+        {ZONE_DRAW_ORDER.map((zone) => (
+          <path
+            key={zone}
+            d={ZONE_PATHS[zone]}
+            fill={zoneFill(zone)}
+            stroke={zoneStroke(zone)}
+            strokeWidth={1.5}
+            className={cn(
+              "transition-colors",
+              disabled
+                ? "pointer-events-none opacity-60"
+                : "cursor-pointer hover:opacity-90 focus:outline-none"
+            )}
+            tabIndex={disabled ? -1 : 0}
+            role="button"
+            aria-pressed={zoneActive(zone)}
+            aria-label={ZONE_LABELS[zone]}
+            onClick={() => {
+              if (!disabled) onToggleZone(zone);
+            }}
+            onKeyDown={(e) => {
+              if (disabled) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onToggleZone(zone);
+              }
+            }}
+          />
+        ))}
+      </g>
+
+      {/* head outline on top for a crisp silhouette */}
+      <path d={HEAD_PATH} fill="none" stroke="#64748b" strokeWidth="2" />
+
+      {/* zone labels (non-interactive) */}
+      <g className="pointer-events-none">
+        {ZONE_DRAW_ORDER.map((zone) => {
+          const p = ZONE_LABEL_POS[zone];
+          return (
+            <text
+              key={zone}
+              x={p.x}
+              y={p.y}
+              textAnchor="middle"
+              className={cn(
+                "text-[11px] font-medium",
+                zoneActive(zone) ? "fill-slate-900" : "fill-slate-500"
+              )}
+            >
+              {ZONE_LABELS[zone]}
+            </text>
+          );
+        })}
+      </g>
+
+      <text
+        x="200"
+        y="450"
+        textAnchor="middle"
+        className="fill-slate-500 text-[12px] font-semibold"
+      >
+        Back / nape
       </text>
     </svg>
   );

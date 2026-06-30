@@ -14,7 +14,10 @@ type ReceptionOsPilotManagerWidgetProps = {
   scores: ReceptionPilotManagerScores;
 };
 
-export function ReceptionOsPilotManagerWidget({ summary, scores }: ReceptionOsPilotManagerWidgetProps) {
+export function ReceptionOsPilotManagerWidget({
+  summary,
+  scores,
+}: ReceptionOsPilotManagerWidgetProps) {
   return (
     <DashboardCard className="overflow-hidden border-violet-500/20">
       <div className="border-b border-white/[0.06] px-4 py-3">
@@ -26,7 +29,11 @@ export function ReceptionOsPilotManagerWidget({ summary, scores }: ReceptionOsPi
 
       <div className="grid gap-3 px-4 py-4 sm:grid-cols-2 xl:grid-cols-4">
         <ScoreTile icon={Users} label="Adoption score" value={scores.adoptionScore} />
-        <ScoreTile icon={Gauge} label="Workflow completion" value={scores.workflowCompletionScore} />
+        <ScoreTile
+          icon={Gauge}
+          label="Workflow completion"
+          value={scores.workflowCompletionScore}
+        />
         <ScoreTile icon={Target} label="Risk closure" value={scores.riskClosureScore} />
         <ScoreTile icon={BarChart3} label="Feedback count" value={scores.feedbackCount} isCount />
       </div>
@@ -46,7 +53,10 @@ export function ReceptionOsPilotManagerWidget({ summary, scores }: ReceptionOsPi
                   : "—",
             },
             { label: "Unresolved critical risks", value: String(summary.unresolvedCriticalRisks) },
-            { label: "Comms drafted / sent / dry-run", value: `${summary.communicationsDrafted} / ${summary.communicationsSent} / ${summary.communicationsDryRun}` },
+            {
+              label: "Comms drafted / sent / dry-run",
+              value: `${summary.communicationsDrafted} / ${summary.communicationsSent} / ${summary.communicationsDryRun}`,
+            },
             { label: "Closeouts completed", value: String(summary.closeoutsCompleted) },
           ]}
         />
@@ -92,19 +102,34 @@ function ScoreTile({
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4 text-violet-400/80" aria-hidden />
-        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          {label}
+        </p>
       </div>
-      <p className={cn("mt-1 font-semibold tabular-nums text-slate-50", isCount ? "text-2xl" : "text-2xl")}>
+      <p
+        className={cn(
+          "mt-1 font-semibold tabular-nums text-slate-50",
+          isCount ? "text-2xl" : "text-2xl"
+        )}
+      >
         {isCount ? value : `${value}%`}
       </p>
     </div>
   );
 }
 
-function MetricsList({ title, items }: { title: string; items: Array<{ label: string; value: string }> }) {
+function MetricsList({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ label: string; value: string }>;
+}) {
   return (
     <div>
-      <p className="mb-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</p>
+      <p className="mb-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {title}
+      </p>
       <ul className="space-y-1.5">
         {items.map((item) => (
           <li key={item.label} className="flex items-center justify-between gap-3 text-sm">

@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { VieAlignmentCaptureInput, VieAlignmentReferenceCandidate, VieAlignmentStatus } from "./vieAlignmentTypes";
+import type {
+  VieAlignmentCaptureInput,
+  VieAlignmentReferenceCandidate,
+  VieAlignmentStatus,
+} from "./vieAlignmentTypes";
 import {
   buildPatientTwinAlignmentSummary,
   evaluateSameAngleAlignment,
@@ -35,7 +39,8 @@ function captureInput(overrides: Partial<VieAlignmentCaptureInput> = {}): VieAli
 }
 
 function referenceCandidate(
-  overrides: Partial<VieAlignmentReferenceCandidate> & Pick<VieAlignmentReferenceCandidate, "image_id" | "captured_at">
+  overrides: Partial<VieAlignmentReferenceCandidate> &
+    Pick<VieAlignmentReferenceCandidate, "image_id" | "captured_at">
 ): VieAlignmentReferenceCandidate {
   return {
     patient_id: patientId,
@@ -104,7 +109,10 @@ describe("VIE same angle alignment core", () => {
       framing: "overview",
     });
     const matched = evaluateSameAngleAlignment(captureInput({ framing: "overview" }), ref);
-    const mismatchedVsOverviewRef = evaluateSameAngleAlignment(captureInput({ framing: "close_up" }), ref);
+    const mismatchedVsOverviewRef = evaluateSameAngleAlignment(
+      captureInput({ framing: "close_up" }),
+      ref
+    );
 
     assert.ok(matched.alignment_score > mismatchedVsOverviewRef.alignment_score);
     assert.ok(mismatchedVsOverviewRef.warnings.some((w) => w.includes("framing")));
@@ -120,7 +128,10 @@ describe("VIE same angle alignment core", () => {
       captureInput({ capture_distance_hint: "very close macro" }),
       ref
     );
-    const matched = evaluateSameAngleAlignment(captureInput({ capture_distance_hint: "arm's length" }), ref);
+    const matched = evaluateSameAngleAlignment(
+      captureInput({ capture_distance_hint: "arm's length" }),
+      ref
+    );
     assert.ok(matched.alignment_score > close.alignment_score);
     assert.ok(close.warnings.some((w) => w.includes("closer") || w.includes("distance")));
   });
@@ -205,9 +216,21 @@ describe("VIE compare tab alignment filters", () => {
       alignment_status: VieAlignmentStatus;
       is_standardized_evidence: boolean;
     }> = [
-      { alignment_score: 85, alignment_status: "excellent" as const, is_standardized_evidence: true },
-      { alignment_score: 45, alignment_status: "retake_recommended" as const, is_standardized_evidence: false },
-      { alignment_score: 72, alignment_status: "acceptable" as const, is_standardized_evidence: true },
+      {
+        alignment_score: 85,
+        alignment_status: "excellent" as const,
+        is_standardized_evidence: true,
+      },
+      {
+        alignment_score: 45,
+        alignment_status: "retake_recommended" as const,
+        is_standardized_evidence: false,
+      },
+      {
+        alignment_score: 72,
+        alignment_status: "acceptable" as const,
+        is_standardized_evidence: true,
+      },
     ];
 
     const high = pairs.filter((p) => p.alignment_score != null && p.alignment_score >= 70);

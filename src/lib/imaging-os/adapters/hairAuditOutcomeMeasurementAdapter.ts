@@ -11,10 +11,7 @@ import {
 } from "../outcomes";
 import type { ImagingOsImageQualityStatus } from "../quality";
 import { normalizeImagingOsTimepoint, type ImagingOsTimepoint } from "../progression";
-import {
-  normalizeSurgicalImageEventType,
-  type ImagingOsSurgicalImageEventType,
-} from "../surgical";
+import { normalizeSurgicalImageEventType, type ImagingOsSurgicalImageEventType } from "../surgical";
 
 export type HairAuditOutcomeMeasurementImageInput = {
   category: string;
@@ -24,9 +21,7 @@ export type HairAuditOutcomeMeasurementImageInput = {
   surgical_event?: string;
 };
 
-function resolveQualityStatus(
-  qualityStatus?: string
-): ImagingOsImageQualityStatus | undefined {
+function resolveQualityStatus(qualityStatus?: string): ImagingOsImageQualityStatus | undefined {
   if (qualityStatus == null || qualityStatus.trim().length === 0) {
     return undefined;
   }
@@ -59,7 +54,10 @@ function mapHairAuditSurgicalEvent(
     return normalized === "unknown" ? undefined : normalized;
   }
 
-  const timepointKey = timepoint?.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const timepointKey = timepoint
+    ?.trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
   if (timepointKey === "baseline" || timepointKey === "pre_op" || timepointKey === "preop") {
     return "pre_op";
   }

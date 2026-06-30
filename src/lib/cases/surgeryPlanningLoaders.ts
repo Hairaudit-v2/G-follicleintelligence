@@ -64,13 +64,15 @@ export async function loadSurgeryPlanForCase(
     tenant_id: String(r.tenant_id),
     case_id: String(r.case_id),
     planning_status: String(r.planning_status ?? "draft"),
-    planned_procedure_type: r.planned_procedure_type != null ? String(r.planned_procedure_type) : null,
+    planned_procedure_type:
+      r.planned_procedure_type != null ? String(r.planned_procedure_type) : null,
     planned_session_type: r.planned_session_type != null ? String(r.planned_session_type) : null,
     planned_zones: parsePlannedZones(r.planned_zones),
     estimated_grafts_min: r.estimated_grafts_min != null ? Number(r.estimated_grafts_min) : null,
     estimated_grafts_max: r.estimated_grafts_max != null ? Number(r.estimated_grafts_max) : null,
     donor_strategy_notes: r.donor_strategy_notes != null ? String(r.donor_strategy_notes) : null,
-    recipient_strategy_notes: r.recipient_strategy_notes != null ? String(r.recipient_strategy_notes) : null,
+    recipient_strategy_notes:
+      r.recipient_strategy_notes != null ? String(r.recipient_strategy_notes) : null,
     medication_prep_notes: r.medication_prep_notes != null ? String(r.medication_prep_notes) : null,
     planning_notes: r.planning_notes != null ? String(r.planning_notes) : null,
     surgical_plan_summary: r.surgical_plan_summary != null ? String(r.surgical_plan_summary) : null,

@@ -31,7 +31,10 @@ function countGovernedActions(args: string[]): number {
   return c;
 }
 
-function readRunIdAfterFlag(args: string[], flag: string): { ok: true; runId: string } | { ok: false; message: string } {
+function readRunIdAfterFlag(
+  args: string[],
+  flag: string
+): { ok: true; runId: string } | { ok: false; message: string } {
   const i = args.indexOf(flag);
   if (i < 0) return { ok: false, message: `internal: missing ${flag}` };
   const id = args[i + 1];
@@ -46,11 +49,17 @@ function readRunIdAfterFlag(args: string[], flag: string): { ok: true; runId: st
  */
 export function parseReplayIntelligenceEventLogsScriptArgs(
   argv: string[]
-): { ok: true; value: ReplayIntelligenceEventLogsScriptParsed } | { ok: false; exitCode: number; message: string } {
+):
+  | { ok: true; value: ReplayIntelligenceEventLogsScriptParsed }
+  | { ok: false; exitCode: number; message: string } {
   const tail = argv.slice(2);
   const governedCount = countGovernedActions(tail);
   if (governedCount > 1) {
-    return { ok: false, exitCode: 2, message: "Only one governed action flag is allowed per invocation." };
+    return {
+      ok: false,
+      exitCode: 2,
+      message: "Only one governed action flag is allowed per invocation.",
+    };
   }
 
   const printJson = tail.includes("--json");

@@ -44,7 +44,8 @@ type SubscriberRetryRow = {
 const DELIVERY_SELECT =
   "id, tenant_id, event_id, subscriber_id, subscriber_key, target_module, handler_key, status, attempt_count, next_attempt_at";
 
-const EVENT_SELECT = "id, tenant_id, event_name, source_module, payload, metadata, processing_status";
+const EVENT_SELECT =
+  "id, tenant_id, event_name, source_module, payload, metadata, processing_status";
 
 function resolveClient(opts: ServerOpts): SupabaseClient {
   return opts.supabaseClientForTests ?? supabaseAdmin();
@@ -250,7 +251,9 @@ async function loadPendingDeliveries(
 }
 
 /** Mark pending platform events as processing when they have outstanding deliveries. */
-export async function processPendingFiEvents(opts: ServerOpts = {}): Promise<{ processed: number }> {
+export async function processPendingFiEvents(
+  opts: ServerOpts = {}
+): Promise<{ processed: number }> {
   const supabase = resolveClient(opts);
   const limit = opts.limit ?? 50;
 
@@ -284,7 +287,9 @@ export async function processPendingFiEvents(opts: ServerOpts = {}): Promise<{ p
 }
 
 /** Process pending event deliveries and update parent event status. */
-export async function processFiEventDeliveries(opts: ServerOpts = {}): Promise<{ delivered: number; failed: number }> {
+export async function processFiEventDeliveries(
+  opts: ServerOpts = {}
+): Promise<{ delivered: number; failed: number }> {
   const supabase = resolveClient(opts);
   const limit = opts.limit ?? 50;
   const nowMs = opts.nowMs ?? Date.now();

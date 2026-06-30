@@ -3,7 +3,11 @@ import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/pos
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
-import type { CaseReadinessHealth, CaseReadinessReport, CaseReadinessSection } from "./caseReadinessTypes";
+import type {
+  CaseReadinessHealth,
+  CaseReadinessReport,
+  CaseReadinessSection,
+} from "./caseReadinessTypes";
 import { caseReadinessSectionTitle } from "./caseReadinessLabels";
 import type { FollowUpCheckpointValue } from "@/src/lib/cases/postOpTypes";
 
@@ -33,7 +37,10 @@ function treatmentOrCaseType(d: CaseAdminDetail): boolean {
   return !!(d.treatment_type?.trim() || d.case_type?.trim());
 }
 
-function followUpRow(cp: FollowUpCheckpointValue, rows: CaseFollowUpRow[]): CaseFollowUpRow | undefined {
+function followUpRow(
+  cp: FollowUpCheckpointValue,
+  rows: CaseFollowUpRow[]
+): CaseFollowUpRow | undefined {
   return rows.find((r) => r.checkpoint === cp);
 }
 
@@ -67,11 +74,16 @@ function isPlanningActiveStatus(status: string | null | undefined): boolean {
   return ["in_progress", "ready_for_review", "approved", "on_hold"].includes(s);
 }
 
-function missingLabels(checks: { id: string; label: string; ok: boolean; optional?: boolean }[]): string[] {
+function missingLabels(
+  checks: { id: string; label: string; ok: boolean; optional?: boolean }[]
+): string[] {
   return checks.filter((c) => !c.optional && !c.ok).map((c) => c.label);
 }
 
-function requiredProgressFrom(checks: { ok: boolean; optional?: boolean }[]): { ok: number; total: number } {
+function requiredProgressFrom(checks: { ok: boolean; optional?: boolean }[]): {
+  ok: number;
+  total: number;
+} {
   const req = checks.filter((c) => !c.optional);
   return { ok: req.filter((c) => c.ok).length, total: req.length };
 }
@@ -100,14 +112,33 @@ export type BuildCaseReadinessOptions = {
 /**
  * Computes SurgeryOS-style readiness from data already loaded on the case detail route (read-only).
  */
-export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: BuildCaseReadinessOptions): CaseReadinessReport {
-  const { detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineItems, revenueReadiness } = input;
+export function buildCaseReadiness(
+  input: CaseReadinessBuildInput,
+  options?: BuildCaseReadinessOptions
+): CaseReadinessReport {
+  const {
+    detail,
+    surgeryPlan,
+    procedureDay,
+    postOpTracking,
+    followUps,
+    timelineItems,
+    revenueReadiness,
+  } = input;
   const worklistMode = options?.worklistMode === true;
 
   const fu1 = followUpRow("day_1", followUps);
   const fu7 = followUpRow("day_7", followUps);
-  const laterCps: FollowUpCheckpointValue[] = ["day_14", "month_1", "month_3", "month_6", "month_12"];
-  const laterPending = laterCps.filter((cp) => !followUpScheduledOrDone(followUpRow(cp, followUps)));
+  const laterCps: FollowUpCheckpointValue[] = [
+    "day_14",
+    "month_1",
+    "month_3",
+    "month_6",
+    "month_12",
+  ];
+  const laterPending = laterCps.filter(
+    (cp) => !followUpScheduledOrDone(followUpRow(cp, followUps))
+  );
 
   const profileChecks = [
     { id: "status", label: "Patient status set", ok: !!detail.status?.trim() },
@@ -118,8 +149,9 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     key: "case_profile",
     title: caseReadinessSectionTitle("case_profile"),
     health: sectionHealth(profileChecks),
-    summary:
-      profileChecks.every((c) => c.ok) ? "Profile identifiers are in good shape." : "Complete core patient profile fields.",
+    summary: profileChecks.every((c) => c.ok)
+      ? "Profile identifiers are in good shape."
+      : "Complete core patient profile fields.",
     checks: profileChecks,
   });
 
@@ -130,8 +162,16 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
           label: "Planning status in progress or approved",
           ok: isPlanningActiveStatus(surgeryPlan.planning_status),
         },
-        { id: "proc_type", label: "Planned procedure type", ok: !!surgeryPlan.planned_procedure_type?.trim() },
-        { id: "zones", label: "At least one planned zone", ok: surgeryPlan.planned_zones.length > 0 },
+        {
+          id: "proc_type",
+          label: "Planned procedure type",
+          ok: !!surgeryPlan.planned_procedure_type?.trim(),
+        },
+        {
+          id: "zones",
+          label: "At least one planned zone",
+          ok: surgeryPlan.planned_zones.length > 0,
+        },
         {
           id: "graft_range",
           label: "Estimated graft range (min & max)",
@@ -143,10 +183,20 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
       ]
     : [
         { id: "plan", label: "Surgery plan record exists", ok: false },
-        { id: "status", label: "Planning status in progress or approved", ok: false, optional: true },
+        {
+          id: "status",
+          label: "Planning status in progress or approved",
+          ok: false,
+          optional: true,
+        },
         { id: "proc_type", label: "Planned procedure type", ok: false, optional: true },
         { id: "zones", label: "At least one planned zone", ok: false, optional: true },
-        { id: "graft_range", label: "Estimated graft range (min & max)", ok: false, optional: true },
+        {
+          id: "graft_range",
+          label: "Estimated graft range (min & max)",
+          ok: false,
+          optional: true,
+        },
       ];
 
   const surgerySection = finalizeSection({
@@ -162,15 +212,20 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
   });
 
   const procComplete = procedureDay?.procedure_status === "completed";
-  const procedureChecks: { id: string; label: string; ok: boolean; optional?: boolean }[] = procedureDay
-    ? [
-        { id: "date", label: "Procedure date", ok: !!procedureDay.procedure_date?.trim() },
-        { id: "status", label: "Procedure status", ok: !!procedureDay.procedure_status?.trim() },
-        { id: "surgeon", label: "Surgeon assigned", ok: !!procedureDay.surgeon_user_id?.trim() },
-        { id: "ext", label: "Extraction method", ok: !!procedureDay.extraction_method?.trim() },
-        { id: "imp", label: "Implantation method", ok: !!procedureDay.implantation_method?.trim() },
-      ]
-    : [{ id: "row", label: "Procedure day record exists", ok: false }];
+  const procedureChecks: { id: string; label: string; ok: boolean; optional?: boolean }[] =
+    procedureDay
+      ? [
+          { id: "date", label: "Procedure date", ok: !!procedureDay.procedure_date?.trim() },
+          { id: "status", label: "Procedure status", ok: !!procedureDay.procedure_status?.trim() },
+          { id: "surgeon", label: "Surgeon assigned", ok: !!procedureDay.surgeon_user_id?.trim() },
+          { id: "ext", label: "Extraction method", ok: !!procedureDay.extraction_method?.trim() },
+          {
+            id: "imp",
+            label: "Implantation method",
+            ok: !!procedureDay.implantation_method?.trim(),
+          },
+        ]
+      : [{ id: "row", label: "Procedure day record exists", ok: false }];
 
   if (procedureDay && procComplete) {
     procedureChecks.push(
@@ -196,9 +251,15 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
         {
           id: "status",
           label: "Post-op status beyond “not started”",
-          ok: !!postOpTracking.post_op_status?.trim() && postOpTracking.post_op_status !== "not_started",
+          ok:
+            !!postOpTracking.post_op_status?.trim() &&
+            postOpTracking.post_op_status !== "not_started",
         },
-        { id: "instr", label: "Post-op instructions given", ok: postOpTracking.instructions_given === true },
+        {
+          id: "instr",
+          label: "Post-op instructions given",
+          ok: postOpTracking.instructions_given === true,
+        },
         {
           id: "notes",
           label: "Donor or recipient recovery notes",
@@ -213,7 +274,9 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     key: "post_op",
     title: caseReadinessSectionTitle("post_op"),
     health: postOpTracking ? deriveHealthWithContext(postOpChecks, true) : "not_started",
-    summary: postOpTracking ? "Post-op row present — capture recovery instructions and notes." : "Start post-op tracking after the procedure.",
+    summary: postOpTracking
+      ? "Post-op row present — capture recovery instructions and notes."
+      : "Start post-op tracking after the procedure.",
     checks: postOpChecks,
   });
 
@@ -249,7 +312,9 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     checks: fuChecks,
   });
 
-  const imageChecks = [{ id: "count", label: "At least one patient-linked image", ok: detail.images.length >= 1 }];
+  const imageChecks = [
+    { id: "count", label: "At least one patient-linked image", ok: detail.images.length >= 1 },
+  ];
   const imageSection = finalizeSection({
     key: "images",
     title: caseReadinessSectionTitle("images"),
@@ -285,14 +350,19 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
   });
 
   const timelineRich =
-    timelineItems.some((i) => i.kind !== "case_lifecycle") || timelineItems.filter((i) => i.kind === "case_lifecycle").length >= 2;
+    timelineItems.some((i) => i.kind !== "case_lifecycle") ||
+    timelineItems.filter((i) => i.kind === "case_lifecycle").length >= 2;
 
-  const timelineChecks = [{ id: "activity", label: "Timeline shows activity beyond patient creation", ok: timelineRich }];
+  const timelineChecks = [
+    { id: "activity", label: "Timeline shows activity beyond patient creation", ok: timelineRich },
+  ];
   const timelineSection = finalizeSection({
     key: "timeline",
     title: caseReadinessSectionTitle("timeline"),
     health: sectionHealth(timelineChecks),
-    summary: timelineRich ? "Timeline shows linked clinical or operational activity." : "Add bookings, images, CRM, or clinical rows to populate the timeline.",
+    summary: timelineRich
+      ? "Timeline shows linked clinical or operational activity."
+      : "Add bookings, images, CRM, or clinical rows to populate the timeline.",
     checks: timelineChecks,
   });
 
@@ -311,7 +381,8 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
   const requiredChecks = allChecks.filter((c) => !c.optional);
   const requiredTotal = requiredChecks.length;
   const requiredSatisfied = requiredChecks.filter((c) => c.ok).length;
-  const overallPercent = requiredTotal === 0 ? 0 : Math.round((100 * requiredSatisfied) / requiredTotal);
+  const overallPercent =
+    requiredTotal === 0 ? 0 : Math.round((100 * requiredSatisfied) / requiredTotal);
 
   const warnings = sections.flatMap((s) => s.missing.map((m) => `${s.title}: ${m}`));
 

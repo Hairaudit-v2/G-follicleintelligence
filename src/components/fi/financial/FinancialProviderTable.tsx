@@ -11,7 +11,10 @@ import {
   financialOsClasses,
   type FinancialOsFeedback,
 } from "@/src/components/fi-admin/financial-os/financialOsUi";
-import { financialOsStatusBadgeBase, financialOsStatusBadgeTones } from "@/src/components/fi-admin/financial-os/financialOsStatusBadgeStyles";
+import {
+  financialOsStatusBadgeBase,
+  financialOsStatusBadgeTones,
+} from "@/src/components/fi-admin/financial-os/financialOsStatusBadgeStyles";
 import type { FinanceProviderRecord } from "@/src/lib/financialOs/financialFinanceProviders.server";
 
 export function FinancialProviderTable(props: {
@@ -36,7 +39,11 @@ export function FinancialProviderTable(props: {
 
   return (
     <div>
-      <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} className="mb-2" />
+      <FinancialOsFeedbackText
+        message={feedback?.message ?? null}
+        tone={feedback?.tone}
+        className="mb-2"
+      />
       <FinancialOsTable
         isEmpty={props.rows.length === 0}
         emptyMessage="No providers configured."
@@ -55,7 +62,9 @@ export function FinancialProviderTable(props: {
           <tr key={row.id} className={financialOsClasses.tableRow}>
             <td className={financialOsClasses.tableCellStrong}>{row.name}</td>
             <td className={financialOsClasses.tableCell}>{row.provider_type}</td>
-            <td className={financialOsClasses.tableCell}>{row.tenant_id ? "Tenant" : "Global catalog"}</td>
+            <td className={financialOsClasses.tableCell}>
+              {row.tenant_id ? "Tenant" : "Global catalog"}
+            </td>
             <td className={financialOsClasses.tableCellMono}>{row.country_code ?? "—"}</td>
             <td className={financialOsClasses.tableCell}>
               <span

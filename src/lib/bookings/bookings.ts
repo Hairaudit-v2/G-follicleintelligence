@@ -27,8 +27,14 @@ import {
 } from "@/src/lib/staff/staff.server";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
-import { publishConsultationEvent, publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
-import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
+import {
+  publishConsultationEvent,
+  publishLeadFlowEvent,
+} from "@/src/lib/analytics-os/analyticsModulePublishers";
+import {
+  checkAppointmentAvailability,
+  DEFAULT_APPOINTMENT_BUFFER_MINUTES,
+} from "./appointmentAvailability";
 import { AppointmentConflictError } from "./bookingErrors";
 import {
   assertBookingResourceAvailability,
@@ -44,7 +50,10 @@ import {
   replaceBookingResourceAssignments,
   type ResourceAssignmentInput,
 } from "@/src/lib/calendar/bookingResourceRequirements.server";
-import { loadClinicRoomForTenant, resolveServiceIdForBookingType } from "@/src/lib/rooms/fiClinicRooms.server";
+import {
+  loadClinicRoomForTenant,
+  resolveServiceIdForBookingType,
+} from "@/src/lib/rooms/fiClinicRooms.server";
 import { parseUtcCalendarDateString } from "./calendarQuery";
 import { assertSurgeryBookingConfirmationFinancialClearance } from "@/src/lib/bookings/bookingSurgeryFinancialClearanceGuard.server";
 import { sortBookingsByStartAt } from "./bookingTime";
@@ -55,7 +64,10 @@ import {
 } from "./operatorBookingConstants";
 import type { FiBookingRow } from "./types";
 
-export { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
+export {
+  DEFAULT_OPERATOR_BOOKINGS_LIMIT,
+  MAX_OPERATOR_BOOKINGS_LIMIT,
+} from "./operatorBookingConstants";
 
 function mapBookingRow(row: Record<string, unknown>): FiBookingRow {
   const meta = row.metadata;
@@ -83,7 +95,8 @@ function mapBookingRow(row: Record<string, unknown>): FiBookingRow {
     location: row.location != null ? String(row.location) : null,
     metadata: meta,
     cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
-    cancelled_by_user_id: row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
+    cancelled_by_user_id:
+      row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
     cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
     created_by_user_id: row.created_by_user_id != null ? String(row.created_by_user_id) : null,
     created_at: String(row.created_at),
@@ -119,7 +132,10 @@ async function assertClinicBelongsToTenant(
     .eq("id", clinicId.trim())
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Clinic is missing or does not belong to this tenant. Choose a clinic from your tenant list.");
+  if (!data)
+    throw new Error(
+      "Clinic is missing or does not belong to this tenant. Choose a clinic from your tenant list."
+    );
 }
 
 async function loadRoomDisplayName(
@@ -337,7 +353,9 @@ export async function loadBookingsForOperatorView(
     if (!staff) throw new Error("assignedStaffId not found for tenant.");
     const linkedUser = staff.fi_user_id?.trim() || null;
     if (linkedUser) {
-      q = q.or(`assigned_staff_id.eq.${staffFilter},and(assigned_staff_id.is.null,assigned_user_id.eq.${linkedUser})`);
+      q = q.or(
+        `assigned_staff_id.eq.${staffFilter},and(assigned_staff_id.is.null,assigned_user_id.eq.${linkedUser})`
+      );
     } else {
       q = q.eq("assigned_staff_id", staffFilter);
     }
@@ -387,7 +405,8 @@ function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
     location: row.location != null ? String(row.location) : null,
     metadata: meta,
     cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
-    cancelled_by_user_id: row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
+    cancelled_by_user_id:
+      row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
     cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
     created_by_user_id: null,
     created_at: startAt,
@@ -395,7 +414,10 @@ function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
   };
 }
 
-export type LoadBookingsForCalendarOverlapParams = Omit<LoadBookingsForOperatorViewParams, "limit"> & {
+export type LoadBookingsForCalendarOverlapParams = Omit<
+  LoadBookingsForOperatorViewParams,
+  "limit"
+> & {
   limit?: number;
 };
 
@@ -454,7 +476,9 @@ export async function loadBookingsForCalendarOverlap(
   const { data, error } = await q.order("start_at", { ascending: true }).limit(limit);
 
   if (error) throw new Error(error.message);
-  return sortBookingsByStartAt(((data ?? []) as Record<string, unknown>[]).map(mapCalendarBookingRow));
+  return sortBookingsByStartAt(
+    ((data ?? []) as Record<string, unknown>[]).map(mapCalendarBookingRow)
+  );
 }
 
 export async function loadBookingsForLead(
@@ -579,7 +603,10 @@ export type CreateBookingParams = BookingAnchorInput & {
   resourceAssignments?: ResourceAssignmentInput[];
 };
 
-export async function createBooking(params: CreateBookingParams, client?: SupabaseClient): Promise<FiBookingRow> {
+export async function createBooking(
+  params: CreateBookingParams,
+  client?: SupabaseClient
+): Promise<FiBookingRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
 
@@ -663,9 +690,17 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
 
   const extras = params.resourceAssignments ?? [];
   if (clinicId) {
-    const serviceIdResolved = await resolveServiceIdForBookingType(tid, params.bookingType.trim(), supabase);
+    const serviceIdResolved = await resolveServiceIdForBookingType(
+      tid,
+      params.bookingType.trim(),
+      supabase
+    );
     const reqs = serviceIdResolved
-      ? await loadServiceResourceRequirements({ tenantId: tid, serviceId: serviceIdResolved, client: supabase })
+      ? await loadServiceResourceRequirements({
+          tenantId: tid,
+          serviceId: serviceIdResolved,
+          client: supabase,
+        })
       : [];
     if (extras.length > 0) {
       await assertBookingResourceAssignmentsAvailable({
@@ -703,7 +738,9 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
     }
   }
 
-  const assignedRoom = resolvedRoomId ? await loadRoomDisplayName(supabase, tid, resolvedRoomId) : null;
+  const assignedRoom = resolvedRoomId
+    ? await loadRoomDisplayName(supabase, tid, resolvedRoomId)
+    : null;
 
   const insertRow = {
     tenant_id: tid,
@@ -807,7 +844,10 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
   return row;
 }
 
-function utcCalendarDayRangeIsoFromStartIso(startAtIso: string): { rangeStartIso: string; rangeEndIso: string } {
+function utcCalendarDayRangeIsoFromStartIso(startAtIso: string): {
+  rangeStartIso: string;
+  rangeEndIso: string;
+} {
   const ymd = parseUtcCalendarDateString(startAtIso.slice(0, 10)) ?? startAtIso.slice(0, 10);
   const normalized = parseUtcCalendarDateString(ymd);
   if (!normalized) throw new Error("Invalid booking start date.");
@@ -816,10 +856,16 @@ function utcCalendarDayRangeIsoFromStartIso(startAtIso: string): { rangeStartIso
   const d = Number(normalized.slice(8, 10));
   const startMs = Date.UTC(y, mo, d, 0, 0, 0, 0);
   const endMs = startMs + 86_400_000;
-  return { rangeStartIso: new Date(startMs).toISOString(), rangeEndIso: new Date(endMs).toISOString() };
+  return {
+    rangeStartIso: new Date(startMs).toISOString(),
+    rangeEndIso: new Date(endMs).toISOString(),
+  };
 }
 
-function collectStaffIdsForOverlapGuard(rows: FiBookingRow[], candidateStaffId: string | null): string[] {
+function collectStaffIdsForOverlapGuard(
+  rows: FiBookingRow[],
+  candidateStaffId: string | null
+): string[] {
   const s = new Set<string>();
   if (candidateStaffId?.trim()) s.add(candidateStaffId.trim());
   for (const b of rows) {
@@ -893,7 +939,10 @@ export type UpdateBookingParams = BookingAnchorInput & {
   resourceAssignments?: ResourceAssignmentInput[] | null;
 };
 
-export async function updateBooking(params: UpdateBookingParams, client?: SupabaseClient): Promise<FiBookingRow> {
+export async function updateBooking(
+  params: UpdateBookingParams,
+  client?: SupabaseClient
+): Promise<FiBookingRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const bid = assertNonEmptyUuid(params.bookingId, "bookingId");
@@ -920,25 +969,32 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
 
   let next: FiBookingRow = {
     ...existing,
-    lead_id: params.leadId !== undefined ? (params.leadId?.trim() || null) : existing.lead_id,
-    person_id: params.personId !== undefined ? (params.personId?.trim() || null) : existing.person_id,
-    patient_id: params.patientId !== undefined ? (params.patientId?.trim() || null) : existing.patient_id,
-    case_id: params.caseId !== undefined ? (params.caseId?.trim() || null) : existing.case_id,
+    lead_id: params.leadId !== undefined ? params.leadId?.trim() || null : existing.lead_id,
+    person_id: params.personId !== undefined ? params.personId?.trim() || null : existing.person_id,
+    patient_id:
+      params.patientId !== undefined ? params.patientId?.trim() || null : existing.patient_id,
+    case_id: params.caseId !== undefined ? params.caseId?.trim() || null : existing.case_id,
     booking_type:
-      params.bookingType !== undefined ? (params.bookingType?.trim() || existing.booking_type) : existing.booking_type,
+      params.bookingType !== undefined
+        ? params.bookingType?.trim() || existing.booking_type
+        : existing.booking_type,
     booking_status:
       params.bookingStatus !== undefined
-        ? (params.bookingStatus?.trim() || existing.booking_status)
+        ? params.bookingStatus?.trim() || existing.booking_status
         : existing.booking_status,
-    title: params.title !== undefined ? (params.title?.trim() || null) : existing.title,
-    description: params.description !== undefined ? (params.description?.trim() || null) : existing.description,
-    start_at: params.startAt !== undefined ? (params.startAt?.trim() || existing.start_at) : existing.start_at,
-    end_at: params.endAt !== undefined ? (params.endAt?.trim() || existing.end_at) : existing.end_at,
-    timezone: params.timezone !== undefined ? (params.timezone?.trim() || null) : existing.timezone,
-    location: params.location !== undefined ? (params.location?.trim() || null) : existing.location,
-    metadata: params.metadata !== undefined ? params.metadata ?? {} : existing.metadata,
-    clinic_id: params.clinicId !== undefined ? (params.clinicId?.trim() || null) : existing.clinic_id,
-    room_id: params.roomId !== undefined ? (params.roomId?.trim() || null) : existing.room_id,
+    title: params.title !== undefined ? params.title?.trim() || null : existing.title,
+    description:
+      params.description !== undefined ? params.description?.trim() || null : existing.description,
+    start_at:
+      params.startAt !== undefined
+        ? params.startAt?.trim() || existing.start_at
+        : existing.start_at,
+    end_at: params.endAt !== undefined ? params.endAt?.trim() || existing.end_at : existing.end_at,
+    timezone: params.timezone !== undefined ? params.timezone?.trim() || null : existing.timezone,
+    location: params.location !== undefined ? params.location?.trim() || null : existing.location,
+    metadata: params.metadata !== undefined ? (params.metadata ?? {}) : existing.metadata,
+    clinic_id: params.clinicId !== undefined ? params.clinicId?.trim() || null : existing.clinic_id,
+    room_id: params.roomId !== undefined ? params.roomId?.trim() || null : existing.room_id,
     room_required:
       params.roomRequired !== undefined && params.roomRequired !== null
         ? Boolean(params.roomRequired)
@@ -981,7 +1037,8 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
   );
 
   if (next.clinic_id?.trim()) await assertClinicBelongsToTenant(supabase, tid, next.clinic_id);
-  if (next.assigned_user_id?.trim()) await assertFiUserBelongsToTenant(supabase, tid, next.assigned_user_id);
+  if (next.assigned_user_id?.trim())
+    await assertFiUserBelongsToTenant(supabase, tid, next.assigned_user_id);
 
   const scheduleTouched =
     params.startAt !== undefined ||
@@ -995,14 +1052,24 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
   const resourceAssignmentsTouched = params.resourceAssignments !== undefined;
   const scheduleOrResources = scheduleTouched || resourceAssignmentsTouched;
 
-  const serviceIdForNext = await resolveServiceIdForBookingType(tid, next.booking_type.trim(), supabase);
+  const serviceIdForNext = await resolveServiceIdForBookingType(
+    tid,
+    next.booking_type.trim(),
+    supabase
+  );
   const extrasEffective: ResourceAssignmentInput[] = resourceAssignmentsTouched
     ? (params.resourceAssignments ?? [])
-    : assignmentRowsToInput(await loadBookingResourceAssignments({ tenantId: tid, bookingId: bid, client: supabase }));
+    : assignmentRowsToInput(
+        await loadBookingResourceAssignments({ tenantId: tid, bookingId: bid, client: supabase })
+      );
   const clinicForMulti = next.clinic_id?.trim() || null;
   const reqs =
     serviceIdForNext && clinicForMulti
-      ? await loadServiceResourceRequirements({ tenantId: tid, serviceId: serviceIdForNext, client: supabase })
+      ? await loadServiceResourceRequirements({
+          tenantId: tid,
+          serviceId: serviceIdForNext,
+          client: supabase,
+        })
       : [];
   const needsMultiGate = Boolean(clinicForMulti && (extrasEffective.length > 0 || reqs.length > 0));
 
@@ -1175,7 +1242,10 @@ export type CancelBookingParams = {
   cancelledByUserId?: string | null;
 };
 
-export async function cancelBooking(params: CancelBookingParams, client?: SupabaseClient): Promise<FiBookingRow> {
+export async function cancelBooking(
+  params: CancelBookingParams,
+  client?: SupabaseClient
+): Promise<FiBookingRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const bid = assertNonEmptyUuid(params.bookingId, "bookingId");
@@ -1232,7 +1302,10 @@ export type CompleteBookingParams = {
   bookingId: string;
 };
 
-export async function completeBooking(params: CompleteBookingParams, client?: SupabaseClient): Promise<FiBookingRow> {
+export async function completeBooking(
+  params: CompleteBookingParams,
+  client?: SupabaseClient
+): Promise<FiBookingRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const bid = assertNonEmptyUuid(params.bookingId, "bookingId");

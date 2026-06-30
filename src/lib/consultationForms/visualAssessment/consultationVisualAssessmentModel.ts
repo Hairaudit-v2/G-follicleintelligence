@@ -30,7 +30,9 @@ export const CONSULTATION_REPAIR_ANNOTATION_TAGS = [
 export type ConsultationRepairAnnotationTag = (typeof CONSULTATION_REPAIR_ANNOTATION_TAGS)[number];
 
 /** Stored under `repair_visual_annotations` — zone id → list of tags. */
-export type ConsultationRepairVisualAnnotationsV1 = Partial<Record<ConsultationScalpZoneId, ConsultationRepairAnnotationTag[]>>;
+export type ConsultationRepairVisualAnnotationsV1 = Partial<
+  Record<ConsultationScalpZoneId, ConsultationRepairAnnotationTag[]>
+>;
 
 export function isConsultationScalpZoneId(v: string): v is ConsultationScalpZoneId {
   return (CONSULTATION_SCALP_ZONE_IDS as readonly string[]).includes(v);
@@ -92,7 +94,9 @@ export function parseSelectedZones(value: unknown): ConsultationScalpZoneId[] {
   return out;
 }
 
-export function parseRepairVisualAnnotations(value: unknown): ConsultationRepairVisualAnnotationsV1 {
+export function parseRepairVisualAnnotations(
+  value: unknown
+): ConsultationRepairVisualAnnotationsV1 {
   let raw: Record<string, unknown> | null = null;
   if (value == null) return {};
   if (typeof value === "string") {

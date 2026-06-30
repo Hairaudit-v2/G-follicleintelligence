@@ -4,7 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
-import { FI_CASE_PROCEDURE_SELECT_COLUMNS, mapCaseProcedureRowFromRecord, type CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
+import {
+  FI_CASE_PROCEDURE_SELECT_COLUMNS,
+  mapCaseProcedureRowFromRecord,
+  type CaseProcedureRow,
+} from "@/src/lib/cases/procedureDayLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { plannedZoneRowSchema, type PlannedZoneRow } from "@/src/lib/cases/surgeryPlanningTypes";
 import type { FollowUpCheckpointValue } from "@/src/lib/cases/postOpTypes";
@@ -45,13 +49,15 @@ function mapSurgeryPlan(r: Record<string, unknown>): CaseSurgeryPlanRow {
     tenant_id: String(r.tenant_id),
     case_id: String(r.case_id),
     planning_status: String(r.planning_status ?? "draft"),
-    planned_procedure_type: r.planned_procedure_type != null ? String(r.planned_procedure_type) : null,
+    planned_procedure_type:
+      r.planned_procedure_type != null ? String(r.planned_procedure_type) : null,
     planned_session_type: r.planned_session_type != null ? String(r.planned_session_type) : null,
     planned_zones: parsePlannedZones(r.planned_zones),
     estimated_grafts_min: r.estimated_grafts_min != null ? Number(r.estimated_grafts_min) : null,
     estimated_grafts_max: r.estimated_grafts_max != null ? Number(r.estimated_grafts_max) : null,
     donor_strategy_notes: r.donor_strategy_notes != null ? String(r.donor_strategy_notes) : null,
-    recipient_strategy_notes: r.recipient_strategy_notes != null ? String(r.recipient_strategy_notes) : null,
+    recipient_strategy_notes:
+      r.recipient_strategy_notes != null ? String(r.recipient_strategy_notes) : null,
     medication_prep_notes: r.medication_prep_notes != null ? String(r.medication_prep_notes) : null,
     planning_notes: r.planning_notes != null ? String(r.planning_notes) : null,
     surgical_plan_summary: r.surgical_plan_summary != null ? String(r.surgical_plan_summary) : null,
@@ -69,9 +75,11 @@ function mapPostOp(r: Record<string, unknown>): CasePostOpTrackingRow {
     instructions_given: Boolean(r.instructions_given),
     aftercare_notes: r.aftercare_notes != null ? String(r.aftercare_notes) : null,
     donor_recovery_notes: r.donor_recovery_notes != null ? String(r.donor_recovery_notes) : null,
-    recipient_recovery_notes: r.recipient_recovery_notes != null ? String(r.recipient_recovery_notes) : null,
+    recipient_recovery_notes:
+      r.recipient_recovery_notes != null ? String(r.recipient_recovery_notes) : null,
     complication_notes: r.complication_notes != null ? String(r.complication_notes) : null,
-    patient_satisfaction_score: r.patient_satisfaction_score != null ? Number(r.patient_satisfaction_score) : null,
+    patient_satisfaction_score:
+      r.patient_satisfaction_score != null ? Number(r.patient_satisfaction_score) : null,
     outcome_notes: r.outcome_notes != null ? String(r.outcome_notes) : null,
     created_at: String(r.created_at ?? ""),
     updated_at: String(r.updated_at ?? ""),
@@ -132,7 +140,11 @@ export async function loadCasesIndexExtensionBundle(
       )
       .eq("tenant_id", tid)
       .in("case_id", ids),
-    supabase.from("fi_case_procedures").select(FI_CASE_PROCEDURE_SELECT_COLUMNS).eq("tenant_id", tid).in("case_id", ids),
+    supabase
+      .from("fi_case_procedures")
+      .select(FI_CASE_PROCEDURE_SELECT_COLUMNS)
+      .eq("tenant_id", tid)
+      .in("case_id", ids),
     supabase
       .from("fi_case_post_op_tracking")
       .select(

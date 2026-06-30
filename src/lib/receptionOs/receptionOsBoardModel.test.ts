@@ -24,7 +24,7 @@ describe("receptionOsBoardModel", () => {
         depositNeedsCollection: false,
         surgeryBooked: false,
       }),
-      "consultation_booked",
+      "consultation_booked"
     );
     assert.equal(
       mapConversionColumnToReceptionPipeline({
@@ -32,27 +32,51 @@ describe("receptionOsBoardModel", () => {
         depositNeedsCollection: true,
         surgeryBooked: false,
       }),
-      "deposit_pending",
+      "deposit_pending"
     );
   });
 
   it("detects overdue deposits by calendar day", () => {
-    assert.equal(depositIsOverdue({ status: "pending", due_date: "2026-01-01" }, "2026-06-19"), true);
+    assert.equal(
+      depositIsOverdue({ status: "pending", due_date: "2026-01-01" }, "2026-06-19"),
+      true
+    );
     assert.equal(depositIsOverdue({ status: "paid", due_date: "2026-01-01" }, "2026-06-19"), false);
-    assert.equal(depositSeverity({ isOverdue: true, dueDate: "2026-01-01", todayYmd: "2026-06-19" }), "critical");
-    assert.equal(depositSeverity({ isOverdue: false, dueDate: "2026-06-19", todayYmd: "2026-06-19" }), "warning");
+    assert.equal(
+      depositSeverity({ isOverdue: true, dueDate: "2026-01-01", todayYmd: "2026-06-19" }),
+      "critical"
+    );
+    assert.equal(
+      depositSeverity({ isOverdue: false, dueDate: "2026-06-19", todayYmd: "2026-06-19" }),
+      "warning"
+    );
   });
 
   it("scopes tenant rows strictly", () => {
     assert.doesNotThrow(() => assertReceptionOsTenantRowScope("aaa", "aaa", "fi_bookings"));
-    assert.throws(() => assertReceptionOsTenantRowScope("aaa", "bbb", "fi_bookings"), /tenant scope violation/);
+    assert.throws(
+      () => assertReceptionOsTenantRowScope("aaa", "bbb", "fi_bookings"),
+      /tenant scope violation/
+    );
   });
 
   it("assigns persona-specific widget defaults", () => {
-    assert.deepEqual(visibleWidgetsForReceptionOsRole("receptionist"), RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.receptionist);
-    assert.deepEqual(visibleWidgetsForReceptionOsRole("consultant"), RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.consultant);
-    assert.deepEqual(visibleWidgetsForReceptionOsRole("clinic_manager"), RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.clinic_manager);
-    assert.deepEqual(visibleWidgetsForReceptionOsRole("admin"), RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.admin);
+    assert.deepEqual(
+      visibleWidgetsForReceptionOsRole("receptionist"),
+      RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.receptionist
+    );
+    assert.deepEqual(
+      visibleWidgetsForReceptionOsRole("consultant"),
+      RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.consultant
+    );
+    assert.deepEqual(
+      visibleWidgetsForReceptionOsRole("clinic_manager"),
+      RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.clinic_manager
+    );
+    assert.deepEqual(
+      visibleWidgetsForReceptionOsRole("admin"),
+      RECEPTION_OS_PERSONA_WIDGET_DEFAULTS.admin
+    );
 
     assert.ok(!visibleWidgetsForReceptionOsRole("receptionist").includes("consultation_pipeline"));
     assert.ok(!visibleWidgetsForReceptionOsRole("receptionist").includes("outstanding_deposits"));
@@ -76,7 +100,7 @@ describe("receptionOsBoardModel", () => {
         consentComplete: false,
         daysUntil: 2,
       }),
-      "blocked",
+      "blocked"
     );
     assert.equal(
       surgeryReadinessSeverity({
@@ -85,26 +109,44 @@ describe("receptionOsBoardModel", () => {
         consentComplete: true,
         daysUntil: 5,
       }),
-      "warning",
+      "warning"
     );
-    assert.equal(surgeryItemNeedsRiskAlert({
-      readinessStatus: "Ready",
-      paymentComplete: true,
-      consentComplete: true,
-      daysUntil: 10,
-    }), false);
-    assert.equal(surgeryItemNeedsRiskAlert({
-      readinessStatus: "Needs attention",
-      paymentComplete: false,
-      consentComplete: true,
-      daysUntil: 5,
-    }), true);
+    assert.equal(
+      surgeryItemNeedsRiskAlert({
+        readinessStatus: "Ready",
+        paymentComplete: true,
+        consentComplete: true,
+        daysUntil: 10,
+      }),
+      false
+    );
+    assert.equal(
+      surgeryItemNeedsRiskAlert({
+        readinessStatus: "Needs attention",
+        paymentComplete: false,
+        consentComplete: true,
+        daysUntil: 5,
+      }),
+      true
+    );
   });
 
   it("maps alert kinds to severities", () => {
-    assert.equal(alertSeverityForContext({ kind: "missing_deposit", isOverdueDeposit: true }), "critical");
-    assert.equal(alertSeverityForContext({ kind: "surgery_risk", surgeryReadinessStatus: "High risk" }), "blocked");
-    assert.equal(alertSeverityForContext({ kind: "no_follow_up_after_consultation", daysSinceConsultation: 8 }), "critical");
+    assert.equal(
+      alertSeverityForContext({ kind: "missing_deposit", isOverdueDeposit: true }),
+      "critical"
+    );
+    assert.equal(
+      alertSeverityForContext({ kind: "surgery_risk", surgeryReadinessStatus: "High risk" }),
+      "blocked"
+    );
+    assert.equal(
+      alertSeverityForContext({
+        kind: "no_follow_up_after_consultation",
+        daysSinceConsultation: 8,
+      }),
+      "critical"
+    );
   });
 
   it("ranks severities and alert kinds", () => {

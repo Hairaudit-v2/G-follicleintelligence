@@ -20,11 +20,17 @@ export default function FollicleIntelligenceUpdatePasswordPage() {
       />
       <div className="relative z-10 mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-16 sm:px-8">
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400/90">Follicle Intelligence OS</p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Choose a new password</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400/90">
+            Follicle Intelligence OS
+          </p>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+            Choose a new password
+          </h1>
         </div>
         <div className="rounded-2xl border border-cyan-500/15 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-md">
-          <Suspense fallback={<p className="text-center text-sm text-slate-400">Verifying reset link…</p>}>
+          <Suspense
+            fallback={<p className="text-center text-sm text-slate-400">Verifying reset link…</p>}
+          >
             <FiOsUpdatePasswordForm />
           </Suspense>
         </div>

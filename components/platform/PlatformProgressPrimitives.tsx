@@ -10,17 +10,20 @@ export const PLATFORM_PROGRESS_STATUS_STYLES: Record<
   { badge: string; dot: string; bar: string }
 > = {
   Live: {
-    badge: "border-emerald-400/35 bg-emerald-950/40 text-emerald-200/95 shadow-[0_0_20px_rgb(52_211_153_/0.12)]",
+    badge:
+      "border-emerald-400/35 bg-emerald-950/40 text-emerald-200/95 shadow-[0_0_20px_rgb(52_211_153_/0.12)]",
     dot: "bg-emerald-400 shadow-[0_0_10px_rgb(52_211_153_/0.55)]",
     bar: "from-emerald-400/90 via-emerald-300/70 to-cyan-400/60",
   },
   Production: {
-    badge: "border-amber-400/35 bg-amber-950/35 text-amber-100/95 shadow-[0_0_20px_rgb(212_175_55_/0.1)]",
+    badge:
+      "border-amber-400/35 bg-amber-950/35 text-amber-100/95 shadow-[0_0_20px_rgb(212_175_55_/0.1)]",
     dot: "bg-amber-300 shadow-[0_0_10px_rgb(212_175_55_/0.5)]",
     bar: "from-amber-400/95 via-amber-300/75 to-amber-200/55",
   },
   "Pilot Ready": {
-    badge: "border-violet-400/30 bg-violet-950/35 text-violet-100/95 shadow-[0_0_20px_rgb(167_139_250_/0.1)]",
+    badge:
+      "border-violet-400/30 bg-violet-950/35 text-violet-100/95 shadow-[0_0_20px_rgb(167_139_250_/0.1)]",
     dot: "bg-violet-400 shadow-[0_0_10px_rgb(167_139_250_/0.45)]",
     bar: "from-violet-400/85 via-fuchsia-400/55 to-violet-300/60",
   },
@@ -30,7 +33,8 @@ export const PLATFORM_PROGRESS_STATUS_STYLES: Record<
     bar: "from-sky-400/85 via-cyan-400/55 to-sky-300/60",
   },
   "Active Development": {
-    badge: "border-cyan-400/30 bg-cyan-950/30 text-cyan-100/95 shadow-[0_0_20px_rgb(34_211_238_/0.08)]",
+    badge:
+      "border-cyan-400/30 bg-cyan-950/30 text-cyan-100/95 shadow-[0_0_20px_rgb(34_211_238_/0.08)]",
     dot: "bg-cyan-400 shadow-[0_0_10px_rgb(34_211_238_/0.45)]",
     bar: "from-cyan-400/85 via-[hsl(var(--primary)/0.85)] to-cyan-300/55",
   },
@@ -88,7 +92,11 @@ export function PlatformProgressAnimatedBar({
         initial={{ width: reduceMotion ? `${percent}%` : "0%" }}
         whileInView={{ width: `${percent}%` }}
         viewport={{ once: true }}
-        transition={{ duration: reduceMotion ? 0 : 1.1, delay: reduceMotion ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
+        transition={{
+          duration: reduceMotion ? 0 : 1.1,
+          delay: reduceMotion ? 0 : delay,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         role="progressbar"
         aria-valuenow={percent}
         aria-valuemin={0}

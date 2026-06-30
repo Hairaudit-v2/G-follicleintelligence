@@ -4,9 +4,16 @@
  */
 import type { NextRequest } from "next/server";
 
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
+import {
+  CRON_OR_WEBHOOK_SECRET_MIN_LENGTH,
+  timingSafeUtf8Equal,
+} from "@/src/lib/security/timingSafeSecret";
 
-const FI_OS_CRON_SECRET_ENV_KEYS = ["CRON_SECRET", "FINANCIAL_OS_CRON_SECRET", "FI_PAYMENTS_CRON_SECRET"] as const;
+const FI_OS_CRON_SECRET_ENV_KEYS = [
+  "CRON_SECRET",
+  "FINANCIAL_OS_CRON_SECRET",
+  "FI_PAYMENTS_CRON_SECRET",
+] as const;
 
 function extractBearerToken(authorization: string | null): string | null {
   const m = authorization?.match(/^Bearer\s+(.+)$/i);

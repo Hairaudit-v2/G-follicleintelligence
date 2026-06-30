@@ -29,7 +29,9 @@ export function FiMarketingEngineeringCredibilitySection() {
               <div className="flex items-start gap-3">
                 <Server className="mt-0.5 h-4 w-4 shrink-0 text-amber-300/70" aria-hidden />
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{metric.label}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    {metric.label}
+                  </p>
                   <p className="mt-2 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
                     {metric.value}
                   </p>
@@ -43,7 +45,9 @@ export function FiMarketingEngineeringCredibilitySection() {
           <div className="flex items-start gap-3">
             <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300/80" aria-hidden />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200/75">Security model</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200/75">
+                Security model
+              </p>
               <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
                 {c.securityModel.map((item) => (
                   <li

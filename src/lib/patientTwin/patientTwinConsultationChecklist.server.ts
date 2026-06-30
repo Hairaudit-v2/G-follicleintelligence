@@ -2,11 +2,17 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { PatientTwinConsultationChecklistRow, PatientTwinConsultationChecklistSection } from "./patientTwinTypes";
+import type {
+  PatientTwinConsultationChecklistRow,
+  PatientTwinConsultationChecklistSection,
+} from "./patientTwinTypes";
 
 function parseStringArray(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean);
+  return raw
+    .filter((x): x is string => typeof x === "string")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function mapRow(x: Record<string, unknown>): PatientTwinConsultationChecklistRow {
@@ -15,12 +21,14 @@ function mapRow(x: Record<string, unknown>): PatientTwinConsultationChecklistRow
     source_record_id: x.source_record_id != null ? String(x.source_record_id) : null,
     priority_level: String(x.priority_level ?? "low"),
     checklist_status: String(x.checklist_status ?? "generated"),
-    confidence_score: typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
+    confidence_score:
+      typeof x.confidence_score === "number" ? x.confidence_score : Number(x.confidence_score ?? 0),
     medication_discussion_required: Boolean(x.medication_discussion_required),
     stabilisation_discussion_required: Boolean(x.stabilisation_discussion_required),
     donor_preservation_discussion_required: Boolean(x.donor_preservation_discussion_required),
     expectation_management_required: Boolean(x.expectation_management_required),
-    consent_complexity_level: x.consent_complexity_level != null ? String(x.consent_complexity_level) : null,
+    consent_complexity_level:
+      x.consent_complexity_level != null ? String(x.consent_complexity_level) : null,
     documentation_required: Boolean(x.documentation_required),
     follow_up_required: Boolean(x.follow_up_required),
     delay_recommended: Boolean(x.delay_recommended),

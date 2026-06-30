@@ -12,7 +12,10 @@ import {
 import { isCrmShellNavRole } from "./crmGatePolicy";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
-import { tenantAdminRoleAllowsBookingsBoardNav, tenantAdminRoleAllowsCrmShellNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import {
+  tenantAdminRoleAllowsBookingsBoardNav,
+  tenantAdminRoleAllowsCrmShellNav,
+} from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 export type CrmShellSession = {
   authUserId: string;
@@ -37,7 +40,10 @@ async function shellSession(
   };
 }
 
-async function loadFiUserRow(tenantId: string, authUserId: string): Promise<{ id: string; role: string } | null> {
+async function loadFiUserRow(
+  tenantId: string,
+  authUserId: string
+): Promise<{ id: string; role: string } | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
@@ -47,7 +53,10 @@ async function loadFiUserRow(tenantId: string, authUserId: string): Promise<{ id
     .maybeSingle();
   if (error) return null;
   if (!data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 async function hasActiveFiStaffForFiUser(tenantId: string, fiUserId: string): Promise<boolean> {
@@ -74,7 +83,13 @@ async function resolveBookingsOperatorEligibleFiUserRow(
   const row = await loadFiUserRow(tid, authUserId);
   if (!row) return null;
   if (isCrmShellNavRole(row.role)) return row;
-  if (String(row.role ?? "").trim().toLowerCase() === "member" && (await hasActiveFiStaffForFiUser(tid, row.id))) return row;
+  if (
+    String(row.role ?? "")
+      .trim()
+      .toLowerCase() === "member" &&
+    (await hasActiveFiStaffForFiUser(tid, row.id))
+  )
+    return row;
   return null;
 }
 
@@ -145,7 +160,9 @@ export async function assertCrmShellPageAccess(tenantId: string): Promise<CrmShe
  * Same membership check as {@link assertCrmShellPageAccess} without redirect — for server actions
  * and other callers that need an explicit null when unauthorised.
  */
-export async function getCrmShellSessionIfAllowed(tenantId: string): Promise<CrmShellSession | null> {
+export async function getCrmShellSessionIfAllowed(
+  tenantId: string
+): Promise<CrmShellSession | null> {
   const tid = tenantId.trim();
   if (!tid) return null;
   const authId = await resolveAuthUserId(null);
@@ -186,39 +203,43 @@ export async function getBookingsBoardNavAllowed(tenantId: string): Promise<bool
   return tenantAdminRoleAllowsBookingsBoardNav(prof?.adminRole ?? null);
 }
 
-export const getBookingsOperatorPageSession = cache(async (tenantId: string): Promise<CrmShellSession> => {
-  const tid = tenantId.trim();
-  if (!tid) redirect("/fi-admin");
+export const getBookingsOperatorPageSession = cache(
+  async (tenantId: string): Promise<CrmShellSession> => {
+    const tid = tenantId.trim();
+    if (!tid) redirect("/fi-admin");
 
-  const authId = await resolveAuthUserId(null);
-  if (!authId) redirect("/fi-admin");
+    const authId = await resolveAuthUserId(null);
+    if (!authId) redirect("/fi-admin");
 
-  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
-    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
-    if (!proxy) redirect(`/fi-admin/${tid}/cases`);
-    return shellSession(tid, authId, proxy.id, "fi_admin");
+    if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+      const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
+      if (!proxy) redirect(`/fi-admin/${tid}/cases`);
+      return shellSession(tid, authId, proxy.id, "fi_admin");
+    }
+
+    const navAuth = await resolveShellNavAuthUserId(authId);
+    const bookingRow = await resolveBookingsOperatorEligibleFiUserRow(tid, navAuth);
+    if (bookingRow) {
+      return shellSession(tid, authId, bookingRow.id, bookingRow.role);
+    }
+    const baseRow = await loadFiUserRow(tid, navAuth);
+    if (!baseRow) redirect(`/fi-admin/${tid}/cases`);
+    const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
+    if (!prof || !tenantAdminRoleAllowsBookingsBoardNav(prof.adminRole)) {
+      redirect(`/fi-admin/${tid}/cases`);
+    }
+
+    return shellSession(tid, authId, baseRow.id, baseRow.role);
   }
-
-  const navAuth = await resolveShellNavAuthUserId(authId);
-  const bookingRow = await resolveBookingsOperatorEligibleFiUserRow(tid, navAuth);
-  if (bookingRow) {
-    return shellSession(tid, authId, bookingRow.id, bookingRow.role);
-  }
-  const baseRow = await loadFiUserRow(tid, navAuth);
-  if (!baseRow) redirect(`/fi-admin/${tid}/cases`);
-  const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
-  if (!prof || !tenantAdminRoleAllowsBookingsBoardNav(prof.adminRole)) {
-    redirect(`/fi-admin/${tid}/cases`);
-  }
-
-  return shellSession(tid, authId, baseRow.id, baseRow.role);
-});
+);
 
 export async function assertBookingsOperatorPageAccess(tenantId: string): Promise<CrmShellSession> {
   return getBookingsOperatorPageSession(tenantId);
 }
 
-export async function getBookingsOperatorSessionIfAllowed(tenantId: string): Promise<CrmShellSession | null> {
+export async function getBookingsOperatorSessionIfAllowed(
+  tenantId: string
+): Promise<CrmShellSession | null> {
   const tid = tenantId.trim();
   if (!tid) return null;
   const authId = await resolveAuthUserId(null);
@@ -243,7 +264,9 @@ export async function getBookingsOperatorSessionIfAllowed(tenantId: string): Pro
 /**
  * Any tenant `fi_users` row (for modules that are not restricted to CRM/bookings-operator roles).
  */
-export async function getFiTenantMemberSessionIfAllowed(tenantId: string): Promise<CrmShellSession | null> {
+export async function getFiTenantMemberSessionIfAllowed(
+  tenantId: string
+): Promise<CrmShellSession | null> {
   const tid = tenantId.trim();
   if (!tid) return null;
   const authId = await resolveAuthUserId(null);

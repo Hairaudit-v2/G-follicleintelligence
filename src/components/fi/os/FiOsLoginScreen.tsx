@@ -53,14 +53,21 @@ export function FiOsLoginScreen({
       />
       <div className="relative z-10 mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-16 sm:px-8">
         <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400/90">Follicle Intelligence</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Operating System</h1>
-          <p className="mt-2 text-sm text-slate-400 sm:text-base">Hair Restoration Operating System</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400/90">
+            Follicle Intelligence
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Operating System
+          </h1>
+          <p className="mt-2 text-sm text-slate-400 sm:text-base">
+            Hair Restoration Operating System
+          </p>
         </div>
 
         <div className="rounded-2xl border border-cyan-500/15 bg-slate-900/70 p-8 shadow-2xl shadow-cyan-950/40 backdrop-blur-md">
           <p className="mb-6 text-center text-sm text-slate-400">
-            Clinical staff and platform operators: sign in with your Follicle Intelligence OS credentials.
+            Clinical staff and platform operators: sign in with your Follicle Intelligence OS
+            credentials.
           </p>
 
           {err ? (
@@ -84,11 +91,15 @@ export function FiOsLoginScreen({
           <FiOsLoginForm safeNextPath={safeNextPath} />
 
           <div className="mt-6 flex flex-col gap-3 border-t border-slate-700/60 pt-6 text-center text-sm text-slate-400">
-            <Link href="/follicle-intelligence/forgot-password" className="text-cyan-400/90 hover:text-cyan-300 hover:underline">
+            <Link
+              href="/follicle-intelligence/forgot-password"
+              className="text-cyan-400/90 hover:text-cyan-300 hover:underline"
+            >
               Forgot password?
             </Link>
             <p className="text-xs text-slate-500">
-              Patient portals and marketing pages use separate sign-in flows. This page is for FI OS staff only.
+              Patient portals and marketing pages use separate sign-in flows. This page is for FI OS
+              staff only.
             </p>
           </div>
         </div>

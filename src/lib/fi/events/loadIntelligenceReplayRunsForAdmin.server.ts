@@ -13,7 +13,9 @@ export type LoadIntelligenceReplayRunsForAdminResult = {
 /**
  * Recent governed replay runs for FI platform system UI (service role + platform admin gate).
  */
-export async function loadIntelligenceReplayRunsForAdmin(opts?: { limit?: number }): Promise<LoadIntelligenceReplayRunsForAdminResult> {
+export async function loadIntelligenceReplayRunsForAdmin(opts?: {
+  limit?: number;
+}): Promise<LoadIntelligenceReplayRunsForAdminResult> {
   await assertFiPlatformAdminSystemAccess();
   const limit = Math.min(Math.max(opts?.limit ?? 40, 1), 100);
 

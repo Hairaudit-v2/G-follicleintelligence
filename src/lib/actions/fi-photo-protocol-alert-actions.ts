@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import {
   acknowledgePhotoProtocolAlertEvent,
   dismissPhotoProtocolAlertEvent,
@@ -40,7 +44,11 @@ export async function refreshPhotoProtocolAlertsAction(
 ): Promise<{ ok: true; upserted: number; computed_count: number } | { ok: false; error: string }> {
   try {
     const parsed = tenantBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId: parsed.tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId: parsed.tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const r = await upsertPhotoProtocolAlertEventsForTenant(parsed.tenantId.trim(), {});
     revalidatePhotoProtocolFoundation(parsed.tenantId.trim());
     return { ok: true, upserted: r.upserted, computed_count: r.computed_count };
@@ -62,9 +70,17 @@ export async function acknowledgePhotoProtocolAlertAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = alertIdBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId: parsed.tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId: parsed.tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const fiUserId = await tryResolveFiUserIdForTenant(parsed.tenantId.trim(), undefined);
-    const row = await acknowledgePhotoProtocolAlertEvent(parsed.tenantId.trim(), parsed.alertEventId, fiUserId);
+    const row = await acknowledgePhotoProtocolAlertEvent(
+      parsed.tenantId.trim(),
+      parsed.alertEventId,
+      fiUserId
+    );
     revalidatePhotoProtocolFoundation(parsed.tenantId.trim(), row.patient_id);
     return { ok: true };
   } catch (e) {
@@ -77,9 +93,17 @@ export async function resolvePhotoProtocolAlertAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = alertIdBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId: parsed.tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId: parsed.tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const fiUserId = await tryResolveFiUserIdForTenant(parsed.tenantId.trim(), undefined);
-    const row = await resolvePhotoProtocolAlertEvent(parsed.tenantId.trim(), parsed.alertEventId, fiUserId);
+    const row = await resolvePhotoProtocolAlertEvent(
+      parsed.tenantId.trim(),
+      parsed.alertEventId,
+      fiUserId
+    );
     revalidatePhotoProtocolFoundation(parsed.tenantId.trim(), row.patient_id);
     return { ok: true };
   } catch (e) {
@@ -92,9 +116,17 @@ export async function dismissPhotoProtocolAlertAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = alertIdBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId: parsed.tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId: parsed.tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+    });
     const fiUserId = await tryResolveFiUserIdForTenant(parsed.tenantId.trim(), undefined);
-    const row = await dismissPhotoProtocolAlertEvent(parsed.tenantId.trim(), parsed.alertEventId, fiUserId);
+    const row = await dismissPhotoProtocolAlertEvent(
+      parsed.tenantId.trim(),
+      parsed.alertEventId,
+      fiUserId
+    );
     revalidatePhotoProtocolFoundation(parsed.tenantId.trim(), row.patient_id);
     return { ok: true };
   } catch (e) {

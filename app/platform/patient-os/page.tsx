@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 
 export const metadata = buildPageMetadata({
-  title: "PatientOS: Lifelong Patient Intelligence & Clinical Journey Engine | Follicle Intelligence",
+  title:
+    "PatientOS: Lifelong Patient Intelligence & Clinical Journey Engine | Follicle Intelligence",
   description:
     "PatientOS is the intelligence engine powering the complete patient journey—connecting consultations, imaging, pathology, medications, surgery, treatments, follow-ups, and long-term outcomes in one lifelong Patient Twin™ record for every patient.",
   path: "/platform/patient-os",
@@ -36,9 +37,13 @@ function SectionIntro({
   return (
     <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -94,8 +99,9 @@ export default function PatientOsPage() {
               The intelligence engine powering the complete patient journey.
             </p>
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
-              Every patient becomes a lifelong clinical intelligence record — connecting consultations, imaging,
-              pathology, medications, surgery, treatments, follow-ups, and long-term outcomes.
+              Every patient becomes a lifelong clinical intelligence record — connecting
+              consultations, imaging, pathology, medications, surgery, treatments, follow-ups, and
+              long-term outcomes.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">

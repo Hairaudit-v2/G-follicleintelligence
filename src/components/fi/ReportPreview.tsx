@@ -25,12 +25,12 @@ export function ReportPreview({ report, className = "" }: ReportPreviewProps) {
   return (
     <div className={`space-y-6 rounded-lg border border-gray-200 bg-white p-6 ${className}`}>
       <header>
-        <h1 className="text-xl font-semibold text-gray-900">Follicle Intelligence™ Report Preview</h1>
+        <h1 className="text-xl font-semibold text-gray-900">
+          Follicle Intelligence™ Report Preview
+        </h1>
         <p className="mt-1 text-sm text-gray-500">
           Case {metadata.case_id} · {metadata.generated_at.slice(0, 10)}
-          {metadata.partner_reference_code && (
-            <> · Partner: {metadata.partner_reference_code}</>
-          )}
+          {metadata.partner_reference_code && <> · Partner: {metadata.partner_reference_code}</>}
         </p>
       </header>
 
@@ -39,7 +39,8 @@ export function ReportPreview({ report, className = "" }: ReportPreviewProps) {
           Score summary
         </h2>
         <p className="mt-2 text-gray-700">
-          Overall: {(score_summary.overall_score * 10).toFixed(1)}/10 · Tier: {score_summary.risk_tier}
+          Overall: {(score_summary.overall_score * 10).toFixed(1)}/10 · Tier:{" "}
+          {score_summary.risk_tier}
         </p>
         <p className="mt-1 text-sm text-gray-600">{score_summary.risk_tier_summary}</p>
         <ul className="mt-3 space-y-1">
@@ -66,16 +67,16 @@ export function ReportPreview({ report, className = "" }: ReportPreviewProps) {
       )}
 
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">
-          Findings
-        </h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">Findings</h2>
         <div className="mt-3 space-y-4">
-          {[...sections].sort((a, b) => a.order - b.order).map((s) => (
-            <div key={s.id}>
-              <h3 className="font-medium text-gray-900">{s.title}</h3>
-              <p className="mt-1 text-sm text-gray-600">{s.content}</p>
-            </div>
-          ))}
+          {[...sections]
+            .sort((a, b) => a.order - b.order)
+            .map((s) => (
+              <div key={s.id}>
+                <h3 className="font-medium text-gray-900">{s.title}</h3>
+                <p className="mt-1 text-sm text-gray-600">{s.content}</p>
+              </div>
+            ))}
         </div>
       </section>
 
@@ -84,7 +85,9 @@ export function ReportPreview({ report, className = "" }: ReportPreviewProps) {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">
             Chart definitions
           </h2>
-          <p className="mt-2 text-xs text-gray-500">Charts are defined below (not rendered in preview).</p>
+          <p className="mt-2 text-xs text-gray-500">
+            Charts are defined below (not rendered in preview).
+          </p>
           <pre className="mt-2 overflow-x-auto rounded bg-gray-100 p-3 text-xs">
             {JSON.stringify(charts, null, 2)}
           </pre>
@@ -110,7 +113,11 @@ export function ReportPreview({ report, className = "" }: ReportPreviewProps) {
               {appendix.blood_markers.map((m, i) => (
                 <tr key={i} className="border-b border-gray-100">
                   <td className="py-2 pr-4">{m.name}</td>
-                  <td className="py-2 pr-4">{m.value ?? "—"}{m.unit ? ` ${m.unit}` : ""}{m.flag ? ` [${m.flag}]` : ""}</td>
+                  <td className="py-2 pr-4">
+                    {m.value ?? "—"}
+                    {m.unit ? ` ${m.unit}` : ""}
+                    {m.flag ? ` [${m.flag}]` : ""}
+                  </td>
                   <td className="py-2">{m.referenceRange ?? "—"}</td>
                 </tr>
               ))}

@@ -27,7 +27,10 @@ export async function loadHrNotificationByStaffId(
     .in("source_system", hrSystems);
   if (error) throw new Error(error.message);
 
-  const byStaff = new Map<string, { source_system: string; source_url: string | null; metadata: Record<string, unknown> | null }[]>();
+  const byStaff = new Map<
+    string,
+    { source_system: string; source_url: string | null; metadata: Record<string, unknown> | null }[]
+  >();
   for (const raw of data ?? []) {
     const r = raw as {
       staff_id: string;

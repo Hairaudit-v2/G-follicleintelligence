@@ -44,7 +44,11 @@ export function LeadBookNextAppointmentCard({
       slide.openCreateAppointment(prefill);
       return;
     }
-    window.location.href = buildBookAppointmentFromLeadHref(tenantId, lead.id, recommended.bookingType);
+    window.location.href = buildBookAppointmentFromLeadHref(
+      tenantId,
+      lead.id,
+      recommended.bookingType
+    );
   }
 
   return (
@@ -67,12 +71,18 @@ export function LeadBookNextAppointmentCard({
 
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Recommended type</dt>
-          <dd className="font-medium text-slate-100">{bookingTypeLabel(recommended.bookingType)}</dd>
+          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Recommended type
+          </dt>
+          <dd className="font-medium text-slate-100">
+            {bookingTypeLabel(recommended.bookingType)}
+          </dd>
           <dd className="text-xs text-gray-500">{recommended.reason}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Next scheduled</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Next scheduled
+          </dt>
           <dd className="text-slate-100">
             {nextUpcoming ? formatUpcomingBookingLabel(nextUpcoming) : "No upcoming visits"}
           </dd>

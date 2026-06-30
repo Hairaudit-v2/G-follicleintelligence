@@ -11,7 +11,10 @@ import {
   type ExistingAlertEventRow,
   type PhotoProtocolAlertUpsertCandidate,
 } from "./protocolAlertEventsPure";
-import { loadPhotoProtocolDatasetForTenant, type PhotoProtocolAnalyticsFilters } from "./photoProtocolAnalyticsLoader.server";
+import {
+  loadPhotoProtocolDatasetForTenant,
+  type PhotoProtocolAnalyticsFilters,
+} from "./photoProtocolAnalyticsLoader.server";
 import type { HliPhotoProtocolAlertEvent, HliPhotoProtocolAlertEventStatus } from "./types";
 
 const UPSERT_CHUNK = 80;
@@ -41,12 +44,16 @@ function mapAlertEventRow(r: Record<string, unknown>): HliPhotoProtocolAlertEven
     status: String(r.status) as HliPhotoProtocolAlertEvent["status"],
     message: String(r.message),
     recommended_action: r.recommended_action != null ? String(r.recommended_action) : null,
-    payload: r.payload && typeof r.payload === "object" && !Array.isArray(r.payload) ? (r.payload as Record<string, unknown>) : {},
+    payload:
+      r.payload && typeof r.payload === "object" && !Array.isArray(r.payload)
+        ? (r.payload as Record<string, unknown>)
+        : {},
     idempotency_key: String(r.idempotency_key),
     first_detected_at: String(r.first_detected_at),
     last_detected_at: String(r.last_detected_at),
     acknowledged_at: r.acknowledged_at != null ? String(r.acknowledged_at) : null,
-    acknowledged_by_user_id: r.acknowledged_by_user_id != null ? String(r.acknowledged_by_user_id) : null,
+    acknowledged_by_user_id:
+      r.acknowledged_by_user_id != null ? String(r.acknowledged_by_user_id) : null,
     resolved_at: r.resolved_at != null ? String(r.resolved_at) : null,
     resolved_by_user_id: r.resolved_by_user_id != null ? String(r.resolved_by_user_id) : null,
     created_at: String(r.created_at),
@@ -54,14 +61,17 @@ function mapAlertEventRow(r: Record<string, unknown>): HliPhotoProtocolAlertEven
   };
 }
 
-function mapExistingForMerge(r: Record<string, unknown>): ExistingAlertEventRow & { idempotency_key: string } {
+function mapExistingForMerge(
+  r: Record<string, unknown>
+): ExistingAlertEventRow & { idempotency_key: string } {
   return {
     idempotency_key: String(r.idempotency_key),
     status: String(r.status) as HliPhotoProtocolAlertEventStatus,
     first_detected_at: String(r.first_detected_at),
     last_detected_at: String(r.last_detected_at),
     acknowledged_at: r.acknowledged_at != null ? String(r.acknowledged_at) : null,
-    acknowledged_by_user_id: r.acknowledged_by_user_id != null ? String(r.acknowledged_by_user_id) : null,
+    acknowledged_by_user_id:
+      r.acknowledged_by_user_id != null ? String(r.acknowledged_by_user_id) : null,
     resolved_at: r.resolved_at != null ? String(r.resolved_at) : null,
     resolved_by_user_id: r.resolved_by_user_id != null ? String(r.resolved_by_user_id) : null,
   };
@@ -103,7 +113,9 @@ export async function upsertPhotoProtocolAlertEventsForTenant(
   for (const a of alerts) {
     const session = sessionById.get(a.session_id);
     if (!session) continue;
-    const clinicId = session.patient_id ? ds.patientPrimaryClinicByPatientId.get(session.patient_id) ?? null : null;
+    const clinicId = session.patient_id
+      ? (ds.patientPrimaryClinicByPatientId.get(session.patient_id) ?? null)
+      : null;
     const base = mapComputedAlertToUpsertCandidate(a, session, clinicId, runIso);
     candidates.push(base);
   }
@@ -186,11 +198,21 @@ export async function loadPhotoProtocolAlertEventsForTenant(
 
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  return { tenant_id: tid, events: (data ?? []).map((row) => mapAlertEventRow(row as Record<string, unknown>)) };
+  return {
+    tenant_id: tid,
+    events: (data ?? []).map((row) => mapAlertEventRow(row as Record<string, unknown>)),
+  };
 }
 
-async function loadAlertEventRow(alertEventId: string, client: SupabaseClient): Promise<HliPhotoProtocolAlertEvent | null> {
-  const { data, error } = await client.from("hli_photo_protocol_alert_events").select("*").eq("id", alertEventId.trim()).maybeSingle();
+async function loadAlertEventRow(
+  alertEventId: string,
+  client: SupabaseClient
+): Promise<HliPhotoProtocolAlertEvent | null> {
+  const { data, error } = await client
+    .from("hli_photo_protocol_alert_events")
+    .select("*")
+    .eq("id", alertEventId.trim())
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   return mapAlertEventRow(data as Record<string, unknown>);
@@ -246,7 +268,13 @@ export async function resolvePhotoProtocolAlertEvent(
     patch.acknowledged_at = now;
     patch.acknowledged_by_user_id = actorFiUserId;
   }
-  const { data, error } = await supabase.from("hli_photo_protocol_alert_events").update(patch).eq("id", row.id).eq("tenant_id", tid).select("*").single();
+  const { data, error } = await supabase
+    .from("hli_photo_protocol_alert_events")
+    .update(patch)
+    .eq("id", row.id)
+    .eq("tenant_id", tid)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   return mapAlertEventRow(data as Record<string, unknown>);
 }

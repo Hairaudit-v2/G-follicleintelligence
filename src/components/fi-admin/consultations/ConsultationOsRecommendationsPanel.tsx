@@ -11,7 +11,11 @@ const FIELDS = [
   { key: "possible_complications", label: "Possible complications" },
 ] as const;
 
-export function ConsultationOsRecommendationsPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsRecommendationsPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Recommendations" headingId="consultation-os-recs-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

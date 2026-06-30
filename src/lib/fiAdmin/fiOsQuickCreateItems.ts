@@ -58,7 +58,8 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
   {
     id: "patient_photos",
     label: "Upload patient photos",
-    description: "FoundationOS media health — then use PatientOS / appointments for uploads where enabled.",
+    description:
+      "FoundationOS media health — then use PatientOS / appointments for uploads where enabled.",
     keywords: ["media", "gallery", "images", "foundation"],
     path: "foundation-integrity",
     hash: "fi-os-foundation-media",

@@ -17,7 +17,10 @@ import {
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { BrandLogoImage } from "@/src/components/brand/BrandLogoImage";
 import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
-import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
+import {
+  FI_ADMIN_NEUTRAL_ACCENT,
+  safeBrandingColourHex,
+} from "@/src/lib/fi/foundation/brandingCss";
 import {
   getClinicOsShellActiveNavId,
   isClinicOsShellCalendarContextRoute,
@@ -38,7 +41,9 @@ function ComingSoonMenuRow({ label, title }: { label: string; title?: string }) 
       className="pointer-events-none flex cursor-not-allowed items-center justify-between gap-3 rounded-md opacity-100 data-[disabled]:opacity-100"
     >
       <span className="text-slate-500">{label}</span>
-      <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-slate-400">Coming soon</span>
+      <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+        Coming soon
+      </span>
     </DropdownMenuItem>
   );
 }
@@ -91,7 +96,12 @@ export function ClinicOsShell({
     window.addEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
     return () => window.removeEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
   }, []);
-  const navModules = resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard, showManageAdminUsersNav);
+  const navModules = resolveClinicOsShellNavModules(
+    base,
+    showCrmNav,
+    showBookingsBoard,
+    showManageAdminUsersNav
+  );
   const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav, showBookingsBoard);
   const activeNavId = getClinicOsShellActiveNavId(pathname, base);
   const showCalendarBar = isClinicOsShellCalendarContextRoute();
@@ -118,7 +128,9 @@ export function ClinicOsShell({
                 FI
               </div>
               <div className="min-w-0 text-left">
-                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">FI OS</p>
+                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                  FI OS
+                </p>
                 <p className="truncate text-sm font-semibold text-slate-100">{brandName}</p>
               </div>
             </Link>
@@ -145,7 +157,9 @@ export function ClinicOsShell({
                 aria-label="Open workspace search"
               >
                 <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
-                <span className="min-w-0 flex-1 truncate text-slate-400">Search patients, leads, bookings and cases</span>
+                <span className="min-w-0 flex-1 truncate text-slate-400">
+                  Search patients, leads, bookings and cases
+                </span>
                 <kbd className="hidden shrink-0 select-none rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-sans text-[10px] font-medium text-slate-500 sm:inline-block">
                   {kbdHint}
                 </kbd>
@@ -165,14 +179,19 @@ export function ClinicOsShell({
                     <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[12.5rem] rounded-lg border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-1 shadow-md">
+                <DropdownMenuContent
+                  align="end"
+                  className="min-w-[12.5rem] rounded-lg border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-1 shadow-md"
+                >
                   <DropdownMenuLabel className="text-slate-500">New</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-white/[0.08]" />
                   {quickActions.map((action, index) => {
                     const showSepBeforeTask = action.id === "task" && index > 0;
                     return (
                       <div key={action.id}>
-                        {showSepBeforeTask ? <DropdownMenuSeparator className="bg-white/[0.08]" /> : null}
+                        {showSepBeforeTask ? (
+                          <DropdownMenuSeparator className="bg-white/[0.08]" />
+                        ) : null}
                         {action.disabled ? (
                           <ComingSoonMenuRow label={action.label} title={action.description} />
                         ) : (
@@ -213,8 +232,8 @@ export function ClinicOsShell({
                     const common =
                       "shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 sm:px-3";
                     const linkTitle = mod.showModuleLabel
-                      ? item.description ?? mod.description
-                      : mod.description ?? item.description;
+                      ? (item.description ?? mod.description)
+                      : (mod.description ?? item.description);
 
                     if (item.disabled) {
                       return (

@@ -49,16 +49,30 @@ function fmtWhen(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function filterArRows(rows: AccountsReceivableWorkQueueRow[], filters: ArWorkQueueFilterState): AccountsReceivableWorkQueueRow[] {
+function filterArRows(
+  rows: AccountsReceivableWorkQueueRow[],
+  filters: ArWorkQueueFilterState
+): AccountsReceivableWorkQueueRow[] {
   return rows.filter((row) => {
     if (filters.risk !== "all" && row.risk_level !== filters.risk) return false;
     if (filters.status !== "all" && row.status !== filters.status) return false;
-    if (filters.receivable_type !== "all" && row.receivable_type !== filters.receivable_type) return false;
+    if (filters.receivable_type !== "all" && row.receivable_type !== filters.receivable_type)
+      return false;
     if (filters.assigned_fi_user_id === "unassigned" && row.assigned_fi_user_id) return false;
-    if (filters.assigned_fi_user_id !== "all" && filters.assigned_fi_user_id !== "unassigned" && row.assigned_fi_user_id !== filters.assigned_fi_user_id) return false;
+    if (
+      filters.assigned_fi_user_id !== "all" &&
+      filters.assigned_fi_user_id !== "unassigned" &&
+      row.assigned_fi_user_id !== filters.assigned_fi_user_id
+    )
+      return false;
     if (filters.clinic_id !== "all" && row.clinic_id !== filters.clinic_id) return false;
     return true;
   });
@@ -75,7 +89,11 @@ function ArWorkQueueFilters(props: {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
       <label className={financialOsClasses.formLabel}>
         Risk
-        <select className={financialOsClasses.select} value={filters.risk} onChange={(e) => onChange({ ...filters, risk: e.target.value })}>
+        <select
+          className={financialOsClasses.select}
+          value={filters.risk}
+          onChange={(e) => onChange({ ...filters, risk: e.target.value })}
+        >
           <option value="all">All</option>
           {FI_AR_RISK_LEVELS.map((r) => (
             <option key={r} value={r} className={financialOsClasses.selectOption}>
@@ -86,7 +104,11 @@ function ArWorkQueueFilters(props: {
       </label>
       <label className={financialOsClasses.formLabel}>
         Status
-        <select className={financialOsClasses.select} value={filters.status} onChange={(e) => onChange({ ...filters, status: e.target.value })}>
+        <select
+          className={financialOsClasses.select}
+          value={filters.status}
+          onChange={(e) => onChange({ ...filters, status: e.target.value })}
+        >
           <option value="all">All</option>
           {FI_AR_CASE_STATUSES.map((s) => (
             <option key={s} value={s} className={financialOsClasses.selectOption}>
@@ -128,7 +150,11 @@ function ArWorkQueueFilters(props: {
       </label>
       <label className={financialOsClasses.formLabel}>
         Clinic
-        <select className={financialOsClasses.select} value={filters.clinic_id} onChange={(e) => onChange({ ...filters, clinic_id: e.target.value })}>
+        <select
+          className={financialOsClasses.select}
+          value={filters.clinic_id}
+          onChange={(e) => onChange({ ...filters, clinic_id: e.target.value })}
+        >
           <option value="all">All</option>
           {clinicOptions.map((c) => (
             <option key={c.value} value={c.value} className={financialOsClasses.selectOption}>
@@ -153,17 +179,23 @@ function ArCaseDrawer(props: {
   const [pending, start] = useTransition();
   const [nextActionLocal, setNextActionLocal] = useState("");
   const [callNotes, setCallNotes] = useState("");
-  const [reminderChannel, setReminderChannel] = useState<(typeof FI_AR_REMINDER_CHANNELS)[number]>("email");
+  const [reminderChannel, setReminderChannel] =
+    useState<(typeof FI_AR_REMINDER_CHANNELS)[number]>("email");
   const [draftPreview, setDraftPreview] = useState<string | null>(null);
 
   if (!row) return null;
 
-  function run(action: () => Promise<{ ok: boolean; error?: string; draft_preview?: string }>, success: string) {
+  function run(
+    action: () => Promise<{ ok: boolean; error?: string; draft_preview?: string }>,
+    success: string
+  ) {
     onFeedback(null);
     start(async () => {
       const res = await action();
       if ("draft_preview" in res && res.draft_preview) setDraftPreview(res.draft_preview);
-      onFeedback(financialOsActionFeedback(res as { ok: true } | { ok: false; error: string }, success));
+      onFeedback(
+        financialOsActionFeedback(res as { ok: true } | { ok: false; error: string }, success)
+      );
     });
   }
 
@@ -172,8 +204,12 @@ function ArCaseDrawer(props: {
       <div className={financialOsClasses.drawerPanel}>
         <div className={financialOsClasses.drawerHeader}>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">AR case</p>
-            <h3 className="text-sm font-semibold text-slate-50">{row.patient_label ?? "Patient"}</h3>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              AR case
+            </p>
+            <h3 className="text-sm font-semibold text-slate-50">
+              {row.patient_label ?? "Patient"}
+            </h3>
           </div>
           <button type="button" className={financialOsClasses.secondaryButton} onClick={onClose}>
             Close
@@ -196,13 +232,19 @@ function ArCaseDrawer(props: {
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Risk</dt>
               <dd>
-                <FinancialOsRecordStatusBadge status={row.risk_level} label={FI_AR_RISK_LABELS[row.risk_level]} />
+                <FinancialOsRecordStatusBadge
+                  status={row.risk_level}
+                  label={FI_AR_RISK_LABELS[row.risk_level]}
+                />
               </dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Status</dt>
               <dd>
-                <FinancialOsRecordStatusBadge status={row.status} label={FI_AR_STATUS_LABELS[row.status]} />
+                <FinancialOsRecordStatusBadge
+                  status={row.status}
+                  label={FI_AR_STATUS_LABELS[row.status]}
+                />
               </dd>
             </div>
             <div className="flex justify-between gap-2">
@@ -213,7 +255,10 @@ function ArCaseDrawer(props: {
               <div className="flex justify-between gap-2">
                 <dt className="text-slate-500">Case</dt>
                 <dd>
-                  <Link href={`/fi-admin/${tenantId}/cases/${row.case_id}`} className={financialOsClasses.link}>
+                  <Link
+                    href={`/fi-admin/${tenantId}/cases/${row.case_id}`}
+                    className={financialOsClasses.link}
+                  >
                     View case
                   </Link>
                 </dd>
@@ -232,8 +277,12 @@ function ArCaseDrawer(props: {
                     disabled={pending}
                     onChange={(e) =>
                       run(
-                        () => assignArCaseOwnerAction(tenantId, { ar_case_id: row.id, assigned_fi_user_id: e.target.value || null }),
-                        "Owner updated.",
+                        () =>
+                          assignArCaseOwnerAction(tenantId, {
+                            ar_case_id: row.id,
+                            assigned_fi_user_id: e.target.value || null,
+                          }),
+                        "Owner updated."
                       )
                     }
                   >
@@ -270,7 +319,7 @@ function ArCaseDrawer(props: {
                           ar_case_id: row.id,
                           next_action_at: new Date(nextActionLocal).toISOString(),
                         }),
-                      "Next action scheduled.",
+                      "Next action scheduled."
                     )
                   }
                 >
@@ -281,14 +330,22 @@ function ArCaseDrawer(props: {
               <div>
                 <label className={financialOsClasses.formLabel}>
                   Log call
-                  <textarea className={financialOsClasses.input} rows={2} value={callNotes} onChange={(e) => setCallNotes(e.target.value)} />
+                  <textarea
+                    className={financialOsClasses.input}
+                    rows={2}
+                    value={callNotes}
+                    onChange={(e) => setCallNotes(e.target.value)}
+                  />
                 </label>
                 <button
                   type="button"
                   className={`${financialOsClasses.primaryButton} mt-2`}
                   disabled={pending}
                   onClick={() =>
-                    run(() => logArCallAction(tenantId, { ar_case_id: row.id, notes: callNotes }), "Call logged.")
+                    run(
+                      () => logArCallAction(tenantId, { ar_case_id: row.id, notes: callNotes }),
+                      "Call logged."
+                    )
                   }
                 >
                   Log call
@@ -301,7 +358,9 @@ function ArCaseDrawer(props: {
                   <select
                     className={financialOsClasses.select}
                     value={reminderChannel}
-                    onChange={(e) => setReminderChannel(e.target.value as (typeof FI_AR_REMINDER_CHANNELS)[number])}
+                    onChange={(e) =>
+                      setReminderChannel(e.target.value as (typeof FI_AR_REMINDER_CHANNELS)[number])
+                    }
                   >
                     {FI_AR_REMINDER_CHANNELS.map((c) => (
                       <option key={c} value={c} className={financialOsClasses.selectOption}>
@@ -316,8 +375,12 @@ function ArCaseDrawer(props: {
                   disabled={pending}
                   onClick={() =>
                     run(
-                      () => markArReminderSentAction(tenantId, { ar_case_id: row.id, channel: reminderChannel }),
-                      "Reminder draft queued — no live message sent.",
+                      () =>
+                        markArReminderSentAction(tenantId, {
+                          ar_case_id: row.id,
+                          channel: reminderChannel,
+                        }),
+                      "Reminder draft queued — no live message sent."
                     )
                   }
                 >
@@ -335,7 +398,12 @@ function ArCaseDrawer(props: {
                   type="button"
                   className={financialOsClasses.secondaryButton}
                   disabled={pending}
-                  onClick={() => run(() => resolveArCaseAction(tenantId, { ar_case_id: row.id }), "Case resolved.")}
+                  onClick={() =>
+                    run(
+                      () => resolveArCaseAction(tenantId, { ar_case_id: row.id }),
+                      "Case resolved."
+                    )
+                  }
                 >
                   Mark resolved
                 </button>
@@ -345,8 +413,12 @@ function ArCaseDrawer(props: {
                   disabled={pending}
                   onClick={() =>
                     run(
-                      () => writeOffArCaseAction(tenantId, { ar_case_id: row.id, reason: "Staff write-off" }),
-                      "Case written off.",
+                      () =>
+                        writeOffArCaseAction(tenantId, {
+                          ar_case_id: row.id,
+                          reason: "Staff write-off",
+                        }),
+                      "Case written off."
                     )
                   }
                 >
@@ -355,7 +427,9 @@ function ArCaseDrawer(props: {
               </div>
             </div>
           ) : (
-            <p className={financialOsClasses.mutedMeta}>You do not have permission to mutate AR cases.</p>
+            <p className={financialOsClasses.mutedMeta}>
+              You do not have permission to mutate AR cases.
+            </p>
           )}
         </div>
       </div>
@@ -387,8 +461,17 @@ export function FinancialOsAccountsReceivableWorkQueue(props: {
 
   return (
     <div className="space-y-4">
-      <ArWorkQueueFilters filters={filters} users={users} clinicOptions={clinicOptions} onChange={setFilters} />
-      <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} className="mt-1" />
+      <ArWorkQueueFilters
+        filters={filters}
+        users={users}
+        clinicOptions={clinicOptions}
+        onChange={setFilters}
+      />
+      <FinancialOsFeedbackText
+        message={feedback?.message ?? null}
+        tone={feedback?.tone}
+        className="mt-1"
+      />
       {pending ? <p className={financialOsClasses.mutedMeta}>Saving…</p> : null}
 
       <FinancialOsTable
@@ -396,7 +479,7 @@ export function FinancialOsAccountsReceivableWorkQueue(props: {
         emptyMessage={financialOsFilteredEmptyMessage(
           rows.length > 0,
           "No accounts receivable cases yet.",
-          "No AR cases match these filters.",
+          "No AR cases match these filters."
         )}
         head={
           <>
@@ -416,20 +499,36 @@ export function FinancialOsAccountsReceivableWorkQueue(props: {
         {filtered.map((row) => (
           <tr key={row.id} className={financialOsClasses.tableRow}>
             <td className={financialOsClasses.tableCellStrong}>{row.patient_label ?? "—"}</td>
-            <td className={financialOsClasses.tableCell}>{FI_AR_RECEIVABLE_TYPE_LABELS[row.receivable_type]}</td>
-            <td className={financialOsClasses.tableCell}>{row.invoice_label ?? "—"}</td>
-            <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.outstanding_amount_cents)}</td>
-            <td className={financialOsClasses.tableCellMono}>{row.days_overdue > 0 ? row.days_overdue : "—"}</td>
             <td className={financialOsClasses.tableCell}>
-              <FinancialOsRecordStatusBadge status={row.risk_level} label={FI_AR_RISK_LABELS[row.risk_level]} />
+              {FI_AR_RECEIVABLE_TYPE_LABELS[row.receivable_type]}
+            </td>
+            <td className={financialOsClasses.tableCell}>{row.invoice_label ?? "—"}</td>
+            <td className={financialOsClasses.tableCellMono}>
+              {fmtMoney(row.outstanding_amount_cents)}
+            </td>
+            <td className={financialOsClasses.tableCellMono}>
+              {row.days_overdue > 0 ? row.days_overdue : "—"}
             </td>
             <td className={financialOsClasses.tableCell}>
-              <FinancialOsRecordStatusBadge status={row.status} label={FI_AR_STATUS_LABELS[row.status]} />
+              <FinancialOsRecordStatusBadge
+                status={row.risk_level}
+                label={FI_AR_RISK_LABELS[row.risk_level]}
+              />
+            </td>
+            <td className={financialOsClasses.tableCell}>
+              <FinancialOsRecordStatusBadge
+                status={row.status}
+                label={FI_AR_STATUS_LABELS[row.status]}
+              />
             </td>
             <td className={financialOsClasses.tableCell}>{fmtWhen(row.next_action_at)}</td>
             <td className={financialOsClasses.tableCell}>{row.owner_label ?? "Unassigned"}</td>
             <td className={financialOsClasses.tableCell}>
-              <button type="button" className={financialOsClasses.textButton} onClick={() => setSelectedId(row.id)}>
+              <button
+                type="button"
+                className={financialOsClasses.textButton}
+                onClick={() => setSelectedId(row.id)}
+              >
                 Open
               </button>
             </td>

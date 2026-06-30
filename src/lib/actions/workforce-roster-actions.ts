@@ -178,7 +178,9 @@ export async function removeStaffFromRosterEventAction(
   }
 }
 
-export async function createRosterShiftAction(body: unknown): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
+export async function createRosterShiftAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
   try {
     const parsed = createShiftSchema.parse(body);
     const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
@@ -250,7 +252,9 @@ export async function createAvailabilityBlockAction(
   }
 }
 
-export async function cancelRosterShiftAction(body: unknown): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
+export async function cancelRosterShiftAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
   try {
     const parsed = cancelShiftSchema.parse(body);
     const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);

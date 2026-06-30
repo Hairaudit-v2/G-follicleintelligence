@@ -24,9 +24,17 @@ export const WORKFORCE_IDENTITY_METADATA_KEYS = [
 
 export type WorkforceIdentityMetadataKey = (typeof WORKFORCE_IDENTITY_METADATA_KEYS)[number];
 
-export const WORKFORCE_IDENTITY_SAFE_METADATA_KEYS = new Set<string>(WORKFORCE_IDENTITY_METADATA_KEYS);
+export const WORKFORCE_IDENTITY_SAFE_METADATA_KEYS = new Set<string>(
+  WORKFORCE_IDENTITY_METADATA_KEYS
+);
 
-export const WORKFORCE_IDENTITY_SYNC_STATUSES = ["active", "pending", "stale", "revoked", "error"] as const;
+export const WORKFORCE_IDENTITY_SYNC_STATUSES = [
+  "active",
+  "pending",
+  "stale",
+  "revoked",
+  "error",
+] as const;
 
 export type WorkforceIdentitySyncStatus = (typeof WORKFORCE_IDENTITY_SYNC_STATUSES)[number];
 
@@ -42,7 +50,9 @@ function trimSourceLabel(v: unknown): string | undefined {
   return s.length <= 64 ? s : s.slice(0, 63) + "…";
 }
 
-export function parseWorkforceIdentitySyncStatus(v: unknown): WorkforceIdentitySyncStatus | undefined {
+export function parseWorkforceIdentitySyncStatus(
+  v: unknown
+): WorkforceIdentitySyncStatus | undefined {
   const s = trimId(v)?.toLowerCase();
   if (!s) return undefined;
   return (WORKFORCE_IDENTITY_SYNC_STATUSES as readonly string[]).includes(s)

@@ -14,7 +14,10 @@ function alignmentStatusTone(status: VieSameAngleAlignmentResult["alignment_stat
   return "border-white/[0.08] bg-white/[0.03] text-slate-300";
 }
 
-function statusTone(status: string): { className: string; icon: "pass" | "warn" | "fail" | "pending" } {
+function statusTone(status: string): {
+  className: string;
+  icon: "pass" | "warn" | "fail" | "pending";
+} {
   if (status === "heuristic_pass" || status === "stub_pass" || status === "stub_match") {
     return { className: "text-emerald-300", icon: "pass" };
   }
@@ -65,9 +68,12 @@ export function VieIntelligenceResultPanel({
   return (
     <div className="space-y-3 rounded-lg border border-cyan-200 bg-cyan-50/40 p-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-cyan-800">Capture intelligence</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-cyan-800">
+          Capture intelligence
+        </p>
         <p className="mt-1 text-sm text-slate-200">
-          Detected view: <span className="font-medium">{review.protocol_slot_slug.replace(/_/g, " ")}</span>
+          Detected view:{" "}
+          <span className="font-medium">{review.protocol_slot_slug.replace(/_/g, " ")}</span>
           {" · "}
           Region: {review.classification.expected_region.replace(/_/g, " ")}
         </p>
@@ -75,8 +81,12 @@ export function VieIntelligenceResultPanel({
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="rounded-md bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 ring-1 ring-gray-200">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-gray-500">Quality score</p>
-          <p className="text-lg font-semibold tabular-nums text-slate-100">{review.quality_score}/100</p>
+          <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-gray-500">
+            Quality score
+          </p>
+          <p className="text-lg font-semibold tabular-nums text-slate-100">
+            {review.quality_score}/100
+          </p>
           <p className="text-xs text-slate-400">{review.quality_band.replace(/_/g, " ")}</p>
         </div>
         <div className={`flex-1 rounded-md border px-3 py-2 ${usabilityTone}`}>
@@ -89,9 +99,21 @@ export function VieIntelligenceResultPanel({
       </div>
 
       <ul className="space-y-1">
-        <CheckRow label="Classification" status={review.classification.status} message={review.classification.message} />
-        <CheckRow label="Angle" status={review.angle_verification.status} message={review.angle_verification.message} />
-        <CheckRow label="Focus" status={review.focus_verification.status} message={review.focus_verification.message} />
+        <CheckRow
+          label="Classification"
+          status={review.classification.status}
+          message={review.classification.message}
+        />
+        <CheckRow
+          label="Angle"
+          status={review.angle_verification.status}
+          message={review.angle_verification.message}
+        />
+        <CheckRow
+          label="Focus"
+          status={review.focus_verification.status}
+          message={review.focus_verification.message}
+        />
         <CheckRow
           label="Lighting"
           status={review.lighting_verification.status}
@@ -100,8 +122,12 @@ export function VieIntelligenceResultPanel({
       </ul>
 
       {review.alignment_preview && review.alignment_preview.reference_image_id ? (
-        <div className={`rounded-md border px-3 py-2 ${alignmentStatusTone(review.alignment_preview.alignment_status)}`}>
-          <p className="text-xs font-semibold uppercase tracking-wide">Reference comparison available</p>
+        <div
+          className={`rounded-md border px-3 py-2 ${alignmentStatusTone(review.alignment_preview.alignment_status)}`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wide">
+            Reference comparison available
+          </p>
           <p className="mt-1 text-sm">
             {formatReferenceComparisonLabel(
               review.alignment_preview.reference_slot_label,
@@ -109,7 +135,10 @@ export function VieIntelligenceResultPanel({
             )}
           </p>
           <p className="mt-1 text-sm">
-            Alignment score: <span className="font-semibold tabular-nums">{review.alignment_preview.alignment_score}%</span>
+            Alignment score:{" "}
+            <span className="font-semibold tabular-nums">
+              {review.alignment_preview.alignment_score}%
+            </span>
           </p>
           <p className="text-sm capitalize">
             Status: {review.alignment_preview.alignment_status.replace(/_/g, " ")}
@@ -165,7 +194,9 @@ export function VieIntelligenceResultPanel({
         </button>
       </div>
 
-      {review.review.requires_override && review.policy.allow_quality_override && onOverrideAccept ? (
+      {review.review.requires_override &&
+      review.policy.allow_quality_override &&
+      onOverrideAccept ? (
         <button
           type="button"
           disabled={pending}

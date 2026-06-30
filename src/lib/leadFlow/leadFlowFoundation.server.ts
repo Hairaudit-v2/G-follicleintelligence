@@ -7,7 +7,11 @@ import type {
   FiLeadActivityType,
   FiLeadExternalEventStatus,
 } from "@/src/lib/leadFlow/leadFlowFoundationCore";
-import type { FiExternalEventRow, FiLeadActivityRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
+import type {
+  FiExternalEventRow,
+  FiLeadActivityRow,
+  FiLeadRow,
+} from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 
 export async function insertFiExternalEvent(input: {
   tenantId: string;

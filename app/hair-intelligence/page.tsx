@@ -41,9 +41,13 @@ function SectionIntro({
   return (
     <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -236,8 +240,8 @@ export default function HairIntelligencePage() {
         </div>
         <FadeIn delay={0.12} className="mt-8">
           <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Positioning:</span> HairAudit = surgical evidence and audit
-            surface. Follicle Intelligence = central intelligence layer.{" "}
+            <span className="font-medium text-foreground">Positioning:</span> HairAudit = surgical
+            evidence and audit surface. Follicle Intelligence = central intelligence layer.{" "}
             <Link
               href="https://hairlongevityinstitute.com"
               target="_blank"
@@ -255,8 +259,8 @@ export default function HairIntelligencePage() {
             >
               IIOHR
             </Link>{" "}
-            are the surfaces that connect biology and standards into the same operating system—without replacing
-            your operational tools of record.
+            are the surfaces that connect biology and standards into the same operating
+            system—without replacing your operational tools of record.
           </p>
         </FadeIn>
       </Section>
@@ -290,11 +294,17 @@ export default function HairIntelligencePage() {
             <h2 className="text-xl font-semibold text-foreground md:text-2xl">Next steps</h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               See the command layer in the{" "}
-              <Link href="/dashboard-demo" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+              <Link
+                href="/dashboard-demo"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
                 dashboard walkthrough
               </Link>
               , or read the{" "}
-              <Link href="/ai-hair-transplant-analysis" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+              <Link
+                href="/ai-hair-transplant-analysis"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
                 clinical evaluation pillar
               </Link>{" "}
               for a longer treatment of audit and evidence in hair transplant care.

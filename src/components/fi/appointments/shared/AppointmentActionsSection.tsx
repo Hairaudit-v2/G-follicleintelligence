@@ -40,7 +40,9 @@ export function AppointmentActionsSection({
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</h3>
 
       {!canMutate ? (
-        <p className="text-xs text-amber-200">Your role can view appointments but not change them here.</p>
+        <p className="text-xs text-amber-200">
+          Your role can view appointments but not change them here.
+        </p>
       ) : null}
 
       {canMutate && !cancelled && !completed ? (
@@ -91,7 +93,8 @@ export function AppointmentActionsSection({
       {actionErr ? <p className="mt-2 text-xs text-rose-300">{actionErr}</p> : null}
       {instructionsErr ? <p className="mt-2 text-xs text-rose-300">{instructionsErr}</p> : null}
       <p className="mt-2 text-xs text-gray-500">
-        Instruction sends log CRM activity and timestamp; delivery uses your reminder templates when configured.
+        Instruction sends log CRM activity and timestamp; delivery uses your reminder templates when
+        configured.
       </p>
     </section>
   );

@@ -28,7 +28,9 @@ export function readNexusHttpEnv(): NexusHttpEnv {
   };
 }
 
-export function evaluateNexusGate(env: NexusHttpEnv = readNexusHttpEnv()): NexusHttpResponse | null {
+export function evaluateNexusGate(
+  env: NexusHttpEnv = readNexusHttpEnv()
+): NexusHttpResponse | null {
   if (!env.enabled) {
     return { httpStatus: 403, body: { ok: false, error: "Nexus provisioning is disabled." } };
   }

@@ -53,7 +53,9 @@ export function BookingCalendarDayView({
       <div className="min-w-0 flex-1">
         <div className="border-b border-white/[0.08] bg-white/[0.03] px-2 py-2 text-sm font-medium text-slate-100">
           {calendarDayHeading(lane)}
-          <span className="ml-2 text-xs font-normal text-gray-500">{displayCalendarTimezoneSubtitle(lane.timeZone)}</span>
+          <span className="ml-2 text-xs font-normal text-gray-500">
+            {displayCalendarTimezoneSubtitle(lane.timeZone)}
+          </span>
         </div>
         <div className="relative" style={{ height: CALENDAR_DAY_COLUMN_HEIGHT_PX }}>
           {HOURS.map((h) => (

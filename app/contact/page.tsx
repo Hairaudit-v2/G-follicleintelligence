@@ -31,9 +31,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -97,28 +101,32 @@ const INTENT_PATHS = [
   {
     icon: Building2,
     title: "Enterprise demo",
-    value: "See how benchmarks, governance queues, and tenant configuration behave at a scale that matches your organization—not a scripted walkthrough.",
+    value:
+      "See how benchmarks, governance queues, and tenant configuration behave at a scale that matches your organization—not a scripted walkthrough.",
     copy: "Walk through the platform: benchmarks, governance queues, and deployment options for your scale.",
     email: "sales@follicleintelligence.ai?subject=Enterprise%20Demo%20Request",
   },
   {
     icon: ShieldCheck,
     title: "White-label program",
-    value: "Understand how FI sits behind your brand, what you own in UX, and how integration and support align before you commit build time.",
+    value:
+      "Understand how FI sits behind your brand, what you own in UX, and how integration and support align before you commit build time.",
     copy: "Scope branded audit and benchmark infrastructure for groups, institutions, or platforms.",
     email: "sales@follicleintelligence.ai?subject=White-Label%20Consultation",
   },
   {
     icon: Handshake,
     title: "Strategic partnership",
-    value: "Explore long-term alignment—category expansion, co-development, and how the intelligence layer fits your roadmap beyond a single integration.",
+    value:
+      "Explore long-term alignment—category expansion, co-development, and how the intelligence layer fits your roadmap beyond a single integration.",
     copy: "Discuss cohort depth, specialty expansion, and long-term infrastructure alignment.",
     email: "sales@follicleintelligence.ai?subject=Strategic%20Partnership",
   },
   {
     icon: MessageSquare,
     title: "Institutional and standards",
-    value: "Connect standards programs, advisory, and quality initiatives when the question is institutional credibility and scale, not only a software seat.",
+    value:
+      "Connect standards programs, advisory, and quality initiatives when the question is institutional credibility and scale, not only a software seat.",
     copy: "IIOHR-aligned standards, advisory engagement, and quality programs at association scale.",
     email: "hello@follicleintelligence.ai?subject=Institutional%20Interest",
   },
@@ -204,7 +212,11 @@ export default function ContactPage() {
                     <span className="font-medium text-foreground/90">What you get: </span>
                     {item.value}
                   </p>
-                  <Button asChild variant="ghost" className="mt-4 h-auto px-0 py-2 text-primary hover:text-primary">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="mt-4 h-auto px-0 py-2 text-primary hover:text-primary"
+                  >
                     <a href={`mailto:${item.email}`}>Open email — subject prefilled for routing</a>
                   </Button>
                 </CardContent>
@@ -253,7 +265,8 @@ export default function ContactPage() {
             >
               security overview
             </Link>
-            , then request detailed materials through your vendor process—we respond in line with your review cycle.
+            , then request detailed materials through your vendor process—we respond in line with
+            your review cycle.
           </p>
         </FadeIn>
         <EcosystemMention className="mt-10 border-t border-border/50 pt-6" />

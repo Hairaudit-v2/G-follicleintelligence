@@ -1,12 +1,5 @@
 import Link from "next/link";
-import {
-  Banknote,
-  Calendar,
-  Scissors,
-  Stethoscope,
-  UserCircle,
-  Users,
-} from "lucide-react";
+import { Banknote, Calendar, Scissors, Stethoscope, UserCircle, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
@@ -74,7 +67,7 @@ function moduleVisible(
   item: ModuleNavItem,
   featureAccess: ReadonlyMap<FiFeatureKey, boolean> | null,
   showCrmNav: boolean,
-  showBookingsBoard: boolean,
+  showBookingsBoard: boolean
 ): boolean {
   if (item.key === "crm" && !showCrmNav) return false;
   if (item.key === "patients" && !showBookingsBoard) return false;
@@ -89,7 +82,9 @@ export function DashboardModuleNavigation(props: {
   featureAccess?: ReadonlyMap<FiFeatureKey, boolean> | null;
 }) {
   const { base, showCrmNav, showBookingsBoard, featureAccess = null } = props;
-  const items = MODULES.filter((item) => moduleVisible(item, featureAccess, showCrmNav, showBookingsBoard));
+  const items = MODULES.filter((item) =>
+    moduleVisible(item, featureAccess, showCrmNav, showBookingsBoard)
+  );
 
   return (
     <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-module-nav-heading">
@@ -106,15 +101,20 @@ export function DashboardModuleNavigation(props: {
             href={`${base}/${item.href}`}
             className={cn(
               "group flex items-start gap-3 rounded-xl border border-white/[0.07] bg-[#0c1426]/60 px-4 py-4 transition",
-              "hover:border-cyan-500/25 hover:bg-[#141c33]/75",
+              "hover:border-cyan-500/25 hover:bg-[#141c33]/75"
             )}
           >
-            <span className="mt-0.5 shrink-0 text-cyan-400/85 transition group-hover:text-cyan-300" aria-hidden>
+            <span
+              className="mt-0.5 shrink-0 text-cyan-400/85 transition group-hover:text-cyan-300"
+              aria-hidden
+            >
               {item.icon}
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-semibold text-slate-100">{item.label}</span>
-              <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{item.description}</span>
+              <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+                {item.description}
+              </span>
             </span>
           </Link>
         ))}

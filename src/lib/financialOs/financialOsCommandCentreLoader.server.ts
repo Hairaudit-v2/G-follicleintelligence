@@ -1,7 +1,10 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { mapFinancialTransactionRow, type FiFinancialTransactionRow } from "@/src/lib/financialOs/financialTransactionCore";
+import {
+  mapFinancialTransactionRow,
+  type FiFinancialTransactionRow,
+} from "@/src/lib/financialOs/financialTransactionCore";
 import type { FinancialOsCommandCentreAlertStrip } from "@/src/lib/financialOs/financialOsCommandCentreAlertsCore";
 import { buildFinancialOsCommandCentreAlerts } from "@/src/lib/financialOs/financialOsCommandCentreAlertsCore";
 import {
@@ -16,7 +19,11 @@ import {
 } from "@/src/lib/financialOs/financialRevenueAttribution.server";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+  openCollectionStatusFilter,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
   loadAccountsReceivableDashboardMetrics,
   loadAccountsReceivableWorkQueue,
@@ -51,7 +58,18 @@ export type FinancialOsCommandCentrePayload = {
   };
   recentTransactions: FiFinancialTransactionRow[];
   recentOpenInvoices: Array<
-    Pick<FiInvoiceRow, "id" | "title" | "status" | "invoice_kind" | "total_cents" | "remaining_balance_cents" | "due_date" | "days_overdue" | "currency">
+    Pick<
+      FiInvoiceRow,
+      | "id"
+      | "title"
+      | "status"
+      | "invoice_kind"
+      | "total_cents"
+      | "remaining_balance_cents"
+      | "due_date"
+      | "days_overdue"
+      | "currency"
+    >
   >;
   alerts: FinancialOsCommandCentreAlertStrip;
   surgeryEconomics: SurgeryEconomicsDashboardPayload;
@@ -64,7 +82,10 @@ export type FinancialOsCommandCentrePayload = {
 };
 
 function sumRemainingBalances(rows: FiInvoiceRow[]): number {
-  return rows.reduce((acc, r) => acc + Math.max(0, r.remaining_balance_cents ?? invoiceBalanceDueCents(r)), 0);
+  return rows.reduce(
+    (acc, r) => acc + Math.max(0, r.remaining_balance_cents ?? invoiceBalanceDueCents(r)),
+    0
+  );
 }
 
 function ymdAddDays(ymd: string, days: number): string {
@@ -119,7 +140,9 @@ export async function loadFinancialOsCommandCentrePayload(
   if (openErr) throw new Error(openErr.message);
 
   const openInvoices = (openInvRaw ?? []).map((x) => mapInvoiceRow(x as Record<string, unknown>));
-  const withBalance = openInvoices.filter((r) => (r.remaining_balance_cents ?? invoiceBalanceDueCents(r)) > 0);
+  const withBalance = openInvoices.filter(
+    (r) => (r.remaining_balance_cents ?? invoiceBalanceDueCents(r)) > 0
+  );
 
   const depositAwaiting = withBalance.filter((r) => r.invoice_kind === "surgery_deposit");
   const overdue = withBalance.filter((r) => r.status === "overdue" || r.days_overdue > 0);
@@ -132,11 +155,15 @@ export async function loadFinancialOsCommandCentrePayload(
     .limit(12);
   if (recentErr) throw new Error(recentErr.message);
 
-  const recentTransactions = (recentTxRaw ?? []).map((x) => mapFinancialTransactionRow(x as Record<string, unknown>));
+  const recentTransactions = (recentTxRaw ?? []).map((x) =>
+    mapFinancialTransactionRow(x as Record<string, unknown>)
+  );
 
   const { data: unmatchedRaw } = await supabase
     .from("fi_payment_reconciliation")
-    .select("id, provider, failure_reason, expected_amount_cents, received_amount_cents, invoice_id, created_at")
+    .select(
+      "id, provider, failure_reason, expected_amount_cents, received_amount_cents, invoice_id, created_at"
+    )
     .eq("tenant_id", tid)
     .eq("reconciliation_status", "unmatched")
     .order("created_at", { ascending: false })
@@ -198,7 +225,10 @@ export async function loadFinancialOsCommandCentrePayload(
     recentEvents: [],
   };
   try {
-    revenueAttribution = await loadRevenueAttributionDashboardPayload(tid, revenueAttributionFilters);
+    revenueAttribution = await loadRevenueAttributionDashboardPayload(
+      tid,
+      revenueAttributionFilters
+    );
     if (!revenueAttribution.currency) revenueAttribution.currency = currency;
   } catch {
     // Attribution table may not exist until migration is applied.
@@ -280,7 +310,12 @@ export async function loadFinancialOsCommandCentrePayload(
       ar_risk_delta: 0,
       forecast_delta_cents: 0,
       best_revenue_source_shift: { previous: null, current: null, changed: false },
-      badges: { collected_vs_previous: "flat", margin: "flat", outstanding: "flat", source_shift: false },
+      badges: {
+        collected_vs_previous: "flat",
+        margin: "flat",
+        outstanding: "flat",
+        source_shift: false,
+      },
     },
     insights: [],
   };

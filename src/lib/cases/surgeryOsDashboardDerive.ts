@@ -3,7 +3,10 @@ import { caseReadinessSectionTitle } from "@/src/lib/cases/caseReadinessLabels";
 import { postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { surgeryPlanningStatusLabel } from "@/src/lib/cases/surgeryPlanningLabels";
-import type { CaseWorklistRow, CasesWorklistReadinessBucket } from "@/src/lib/cases/casesIndexTypes";
+import type {
+  CaseWorklistRow,
+  CasesWorklistReadinessBucket,
+} from "@/src/lib/cases/casesIndexTypes";
 
 const TERMINAL_PROCEDURE = new Set(["cancelled", "aborted"]);
 
@@ -60,7 +63,11 @@ export function isTodaySurgeryRow(row: CaseWorklistRow, todayYmd: string): boole
 }
 
 /** Tomorrow through `endYmd` (inclusive), excluding completed/cancelled/aborted procedures. */
-export function isUpcomingSurgeryWindowRow(row: CaseWorklistRow, todayYmd: string, endYmd: string): boolean {
+export function isUpcomingSurgeryWindowRow(
+  row: CaseWorklistRow,
+  todayYmd: string,
+  endYmd: string
+): boolean {
   if (!row.procedureDate) return false;
   const d = row.procedureDate;
   const tomorrow = addCalendarDaysToYmd(todayYmd, 1);
@@ -98,21 +105,31 @@ function rowToRef(row: CaseWorklistRow): SurgeryOsDashboardRef {
     personLabel: row.person_label,
     caseStatusLabel: fiCaseStatusLabel(row.status),
     procedureDate: row.procedureDate,
-    procedureStatusLabel: row.procedureDay ? procedureStatusLabel(row.procedureDay.procedure_status) : null,
-    planningStatusLabel: row.surgeryPlan ? surgeryPlanningStatusLabel(row.surgeryPlan.planning_status) : null,
+    procedureStatusLabel: row.procedureDay
+      ? procedureStatusLabel(row.procedureDay.procedure_status)
+      : null,
+    planningStatusLabel: row.surgeryPlan
+      ? surgeryPlanningStatusLabel(row.surgeryPlan.planning_status)
+      : null,
     zonesLabel: plannedZonesShortLabel(row),
     readinessBucket: row.readinessBucket,
-    postOpStatusLabel: row.postOpTracking ? postOpStatusLabel(row.postOpTracking.post_op_status) : null,
+    postOpStatusLabel: row.postOpTracking
+      ? postOpStatusLabel(row.postOpTracking.post_op_status)
+      : null,
   };
 }
 
 function gapSummaryForReadiness(row: CaseWorklistRow): string {
   const parts: string[] = [];
-  if (row.readinessCaseProfileHealth !== "complete") parts.push(caseReadinessSectionTitle("case_profile"));
-  if (row.readinessSurgeryPlanningHealth !== "complete") parts.push(caseReadinessSectionTitle("surgery_planning"));
-  if (row.readinessProcedureDayHealth !== "complete") parts.push(caseReadinessSectionTitle("procedure_day"));
+  if (row.readinessCaseProfileHealth !== "complete")
+    parts.push(caseReadinessSectionTitle("case_profile"));
+  if (row.readinessSurgeryPlanningHealth !== "complete")
+    parts.push(caseReadinessSectionTitle("surgery_planning"));
+  if (row.readinessProcedureDayHealth !== "complete")
+    parts.push(caseReadinessSectionTitle("procedure_day"));
   if (row.readinessPostOpHealth !== "complete") parts.push(caseReadinessSectionTitle("post_op"));
-  if (row.readinessFollowUpsHealth !== "complete") parts.push(caseReadinessSectionTitle("follow_ups"));
+  if (row.readinessFollowUpsHealth !== "complete")
+    parts.push(caseReadinessSectionTitle("follow_ups"));
   return parts.slice(0, 4).join(" · ") || "Open the case to review readiness";
 }
 
@@ -152,18 +169,26 @@ const LIST_CAP = 10;
 /**
  * Read-only aggregates for the SurgeryOS dashboard from enriched worklist rows (same cap as index loader).
  */
-export function deriveSurgeryOsDashboardModel(rows: CaseWorklistRow[], now = new Date()): SurgeryOsDashboardModel {
+export function deriveSurgeryOsDashboardModel(
+  rows: CaseWorklistRow[],
+  now = new Date()
+): SurgeryOsDashboardModel {
   const todayYmd = dashboardTodayYmd(now);
   const endUpcoming = addCalendarDaysToYmd(todayYmd, 30);
 
   const active = rows.filter(isDashboardActiveCase);
 
   const todayRows = active.filter((r) => isTodaySurgeryRow(r, todayYmd)).sort(SORT_PROC_DATE_ASC);
-  const upcomingRows = active.filter((r) => isUpcomingSurgeryWindowRow(r, todayYmd, endUpcoming)).sort(SORT_PROC_DATE_ASC);
+  const upcomingRows = active
+    .filter((r) => isUpcomingSurgeryWindowRow(r, todayYmd, endUpcoming))
+    .sort(SORT_PROC_DATE_ASC);
 
   const readinessRows = active
     .filter((r) => r.readinessBucket === "needs_attention")
-    .sort((a, b) => a.readinessPercent - b.readinessPercent || a.person_label.localeCompare(b.person_label));
+    .sort(
+      (a, b) =>
+        a.readinessPercent - b.readinessPercent || a.person_label.localeCompare(b.person_label)
+    );
 
   const followRows = active.filter((r) => hasDueFollowUp(r, todayYmd)).sort(SORT_PROC_DATE_ASC);
 
@@ -172,7 +197,9 @@ export function deriveSurgeryOsDashboardModel(rows: CaseWorklistRow[], now = new
     .sort(SORT_PROC_DATE_DESC)
     .slice(0, LIST_CAP);
 
-  const planningRows = active.filter((r) => isSurgeryPlanningQueueCase(r)).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+  const planningRows = active
+    .filter((r) => isSurgeryPlanningQueueCase(r))
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
 
   const metrics = {
     totalActiveCases: active.length,

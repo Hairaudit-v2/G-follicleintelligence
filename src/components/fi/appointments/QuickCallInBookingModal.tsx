@@ -7,7 +7,11 @@ import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import { quickCallInConsultationAction } from "@/lib/actions/fi-quick-call-in-actions";
 import { fromDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
-import { activeBookableServices, formatPriceAud, serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
+import {
+  activeBookableServices,
+  formatPriceAud,
+  serviceForBookingType,
+} from "@/src/lib/bookings/servicesCatalog";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
@@ -16,8 +20,14 @@ import {
   type ClinicalStaffPickerOption,
 } from "@/src/lib/staff/clinicalStaffPicker";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
-import { QUICK_CALL_IN_DEFAULT_TIMEZONE, dispatchCrmKanbanRefresh } from "@/src/lib/calendar/quickCallInConstants";
-import { localNowForDatetimePicker, nextQuarterHourLocalString } from "@/src/lib/calendar/quickCallInDatetime";
+import {
+  QUICK_CALL_IN_DEFAULT_TIMEZONE,
+  dispatchCrmKanbanRefresh,
+} from "@/src/lib/calendar/quickCallInConstants";
+import {
+  localNowForDatetimePicker,
+  nextQuarterHourLocalString,
+} from "@/src/lib/calendar/quickCallInDatetime";
 
 function procedureLabel(t: string): string {
   const s = t.trim();
@@ -93,12 +103,20 @@ export function QuickCallInBookingModal({
     const staffPrefill =
       initialAssignedStaffId?.trim() ||
       (initialAssignedUserId?.trim()
-        ? clinicalStaffOptions.find((s) => s.fi_user_id?.trim() === initialAssignedUserId.trim())?.id
+        ? clinicalStaffOptions.find((s) => s.fi_user_id?.trim() === initialAssignedUserId.trim())
+            ?.id
         : "") ||
       "";
     setAssignedStaffId(staffPrefill);
     setError(null);
-  }, [clinicalStaffOptions, initialAssignedStaffId, initialAssignedUserId, initialClinicId, initialLocalStart, tz]);
+  }, [
+    clinicalStaffOptions,
+    initialAssignedStaffId,
+    initialAssignedUserId,
+    initialClinicId,
+    initialLocalStart,
+    tz,
+  ]);
 
   useEffect(() => {
     if (!open) return;
@@ -108,7 +126,10 @@ export function QuickCallInBookingModal({
   const startIso = useMemo(() => fromDatetimeLocalValue(localStart, tz), [localStart, tz]);
 
   const bookable = useMemo(() => activeBookableServices(services), [services]);
-  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+  const selectedCatalog = useMemo(
+    () => serviceForBookingType(services, bookingType),
+    [services, bookingType]
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -129,7 +150,9 @@ export function QuickCallInBookingModal({
     if (staffId) {
       const staff = clinicalStaffOptions.find((s) => s.id === staffId);
       if (staff && !canSelectStaffForClinicalPicker(staff)) {
-        setError(staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available.");
+        setError(
+          staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available."
+        );
         return;
       }
     }
@@ -182,7 +205,10 @@ export function QuickCallInBookingModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end justify-center sm:items-center" role="presentation">
+    <div
+      className="fixed inset-0 z-[120] flex items-end justify-center sm:items-center"
+      role="presentation"
+    >
       <button
         type="button"
         className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"
@@ -204,8 +230,8 @@ export function QuickCallInBookingModal({
               New call-in booking
             </h2>
             <p className="text-xs text-slate-400">
-              Creates a CRM lead (source Phone), patient shell, and consultation appointment. Times use{" "}
-              <span className="font-medium">{tz}</span>.
+              Creates a CRM lead (source Phone), patient shell, and consultation appointment. Times
+              use <span className="font-medium">{tz}</span>.
             </p>
           </div>
           <button
@@ -295,7 +321,9 @@ export function QuickCallInBookingModal({
                     ))}
               </select>
               {selectedCatalog && selectedCatalog.base_price > 0 ? (
-                <p className="mt-1 text-xs text-slate-400">Suggested price: {formatPriceAud(selectedCatalog.base_price)}</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Suggested price: {formatPriceAud(selectedCatalog.base_price)}
+                </p>
               ) : null}
             </label>
 

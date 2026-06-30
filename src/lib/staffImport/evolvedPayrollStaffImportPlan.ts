@@ -29,7 +29,9 @@ import type {
   IiohrHrStaffImportValidationIssue,
 } from "./iiohrHrStaffImportTypes";
 
-export const EVOLVED_PAYROLL_SOURCE_SYSTEM_NORMALIZED = normalizeFiStaffSourceSystem(EVOLVED_PAYROLL_SOURCE_SYSTEM);
+export const EVOLVED_PAYROLL_SOURCE_SYSTEM_NORMALIZED = normalizeFiStaffSourceSystem(
+  EVOLVED_PAYROLL_SOURCE_SYSTEM
+);
 
 function emailKey(email: string | null | undefined): string | null {
   if (email == null) return null;
@@ -42,10 +44,14 @@ function jsonForCompare(v: unknown): string {
   return JSON.stringify(v === undefined ? null : v);
 }
 
-function resolveSourceRowIndex(input: EvolvedPayrollStaffImportPlanInput, packedIndex: number): number {
+function resolveSourceRowIndex(
+  input: EvolvedPayrollStaffImportPlanInput,
+  packedIndex: number
+): number {
   const map = input.sourceRowIndices;
   if (map) {
-    if (map.length !== input.rows.length) throw new Error("sourceRowIndices length must match rows length.");
+    if (map.length !== input.rows.length)
+      throw new Error("sourceRowIndices length must match rows length.");
     return map[packedIndex]!;
   }
   return packedIndex;
@@ -72,10 +78,15 @@ function sourceIdNeedsUpdate(
   existing: IiohrHrImportExistingSourceId,
   nextMeta: Record<string, unknown>
 ): boolean {
-  return jsonForCompare(normalizeFiStaffSourceMetadata(existing.metadata)) !== jsonForCompare(nextMeta);
+  return (
+    jsonForCompare(normalizeFiStaffSourceMetadata(existing.metadata)) !== jsonForCompare(nextMeta)
+  );
 }
 
-type UpdateFiStaffPayload = Extract<IiohrHrStaffImportAction, { type: "update_fi_staff" }>["payload"];
+type UpdateFiStaffPayload = Extract<
+  IiohrHrStaffImportAction,
+  { type: "update_fi_staff" }
+>["payload"];
 
 function buildStaffUpdatePayload(
   staff: EvolvedPayrollImportExistingStaff,
@@ -83,7 +94,8 @@ function buildStaffUpdatePayload(
 ): UpdateFiStaffPayload | null {
   const patch: UpdateFiStaffPayload = { staffId: staff.id };
 
-  if (row.full_name.trim() && row.full_name.trim() !== staff.full_name) patch.full_name = row.full_name.trim();
+  if (row.full_name.trim() && row.full_name.trim() !== staff.full_name)
+    patch.full_name = row.full_name.trim();
 
   /** Never overwrite an assigned role from payroll — only fill when still `needs_review`. */
   if (staff.staff_role === PAYROLL_DEFAULT_STAFF_ROLE && staff.staff_role !== row.staff_role) {
@@ -188,7 +200,9 @@ function createStaffAndSourceActions(
 /**
  * Matching (first hit wins): `fi_staff_source_ids` (`evolved_payroll` + EmployeeId) → `fi_staff.email` → new staff.
  */
-export function planEvolvedPayrollStaffImport(input: EvolvedPayrollStaffImportPlanInput): EvolvedPayrollStaffImportPlanResult {
+export function planEvolvedPayrollStaffImport(
+  input: EvolvedPayrollStaffImportPlanInput
+): EvolvedPayrollStaffImportPlanResult {
   const warnings: string[] = [];
   const validationIssues: IiohrHrStaffImportValidationIssue[] = [];
   const tid = input.tenantId.trim();
@@ -304,7 +318,9 @@ export function planEvolvedPayrollStaffImport(input: EvolvedPayrollStaffImportPl
     const emailK = emailKey(row.email);
     let staffFromSource = externalIdToStaffId.get(extNorm);
     if (staffFromSource && !staffById.has(staffFromSource)) {
-      warnings.push(`Row ${rowIndex}: payroll EmployeeId maps to unknown staff_id ${staffFromSource}; ignoring.`);
+      warnings.push(
+        `Row ${rowIndex}: payroll EmployeeId maps to unknown staff_id ${staffFromSource}; ignoring.`
+      );
       staffFromSource = undefined;
     }
 
@@ -337,7 +353,9 @@ export function planEvolvedPayrollStaffImport(input: EvolvedPayrollStaffImportPl
     }
 
     if (!matchedStaffId && emailK && consumedNewEmails.has(emailK)) {
-      warnings.push(`Row ${rowIndex}: duplicate email ${emailK} in this import file; skipping to avoid duplicate staff.`);
+      warnings.push(
+        `Row ${rowIndex}: duplicate email ${emailK} in this import file; skipping to avoid duplicate staff.`
+      );
       perRow.push({
         rowIndex,
         row,
@@ -427,7 +445,15 @@ export function planEvolvedPayrollStaffImport(input: EvolvedPayrollStaffImportPl
       });
     } else {
       const matchedUserRef = { value: matchedUserId };
-      createStaffAndSourceActions(actions, rowIndex, row, emailK, emailToUser, matchedUserRef, nextMeta);
+      createStaffAndSourceActions(
+        actions,
+        rowIndex,
+        row,
+        emailK,
+        emailToUser,
+        matchedUserRef,
+        nextMeta
+      );
       matchedUserId = matchedUserRef.value;
     }
 

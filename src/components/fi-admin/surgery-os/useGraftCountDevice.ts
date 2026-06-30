@@ -23,8 +23,11 @@ export function useGraftCountDevice() {
 
   const runGuarded = useCallback(
     async (
-      action: (ctx: { deviceId: string; clientSubmissionId: string }) => Promise<{ ok: boolean; error?: string }>,
-      onSuccess?: () => void,
+      action: (ctx: {
+        deviceId: string;
+        clientSubmissionId: string;
+      }) => Promise<{ ok: boolean; error?: string }>,
+      onSuccess?: () => void
     ) => {
       if (inFlightRef.current) return { ok: false as const, error: "Save already in progress." };
       inFlightRef.current = true;
@@ -44,7 +47,7 @@ export function useGraftCountDevice() {
         inFlightRef.current = false;
       }
     },
-    [deviceId],
+    [deviceId]
   );
 
   return { deviceId, saveState, runGuarded, isSubmitting: saveState === "saving" };

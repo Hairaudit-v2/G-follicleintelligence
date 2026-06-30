@@ -22,12 +22,15 @@ test("computeReadinessPercent counts completed checklist items", () => {
       staff_assigned: true,
       consumables_ready: true,
     }),
-    100,
+    100
   );
 });
 
 test("computeReadinessRiskLevel blocks when consent or deposit missing", () => {
-  assert.equal(computeReadinessRiskLevel({ consent_signed: false, deposit_paid: true }, 80), "blocked");
+  assert.equal(
+    computeReadinessRiskLevel({ consent_signed: false, deposit_paid: true }, 80),
+    "blocked"
+  );
   assert.equal(computeReadinessRiskLevel({ consent_signed: true, deposit_paid: true }, 95), "low");
 });
 

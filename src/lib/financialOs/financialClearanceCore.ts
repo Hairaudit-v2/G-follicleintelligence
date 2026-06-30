@@ -182,7 +182,10 @@ function collectAttentionFactors(input: BuildFinancialClearanceInput): {
     blocking.push(
       input.financeRejected ? "Finance application rejected" : "Finance application SLA breach"
     );
-  } else if (input.financeApplicationAttention.finance_attention_required && input.financeSlaBreach) {
+  } else if (
+    input.financeApplicationAttention.finance_attention_required &&
+    input.financeSlaBreach
+  ) {
     blocking.push("Finance application SLA breach");
   }
   if (input.superReleaseApplicationAttention.sla_breach) {
@@ -206,10 +209,14 @@ function collectAttentionFactors(input: BuildFinancialClearanceInput): {
   ) {
     blocking.push("Surgery within clearance window with unresolved funds");
   }
-  if (input.paymentPathway.pathway_attention_required && input.paymentPathway.pathway_attention_reason) {
+  if (
+    input.paymentPathway.pathway_attention_required &&
+    input.paymentPathway.pathway_attention_reason
+  ) {
     warnings.push(input.paymentPathway.pathway_attention_reason);
   }
-  if (input.deposit_pending_for_confirmed_surgery) warnings.push("Deposit pending for confirmed surgery");
+  if (input.deposit_pending_for_confirmed_surgery)
+    warnings.push("Deposit pending for confirmed surgery");
 
   return { blocking, warnings };
 }
@@ -232,7 +239,10 @@ function isFinanceRejected(input: BuildFinancialClearanceInput): boolean {
 function isInternationalTransferRejectedOrVariance(input: BuildFinancialClearanceInput): boolean {
   const intl = input.internationalTransferApplicationAttention;
   if (intl.sla_breach) return true;
-  if (intl.financial_clearance_state === "blocked" || intl.financial_clearance_state === "partial_settlement") {
+  if (
+    intl.financial_clearance_state === "blocked" ||
+    intl.financial_clearance_state === "partial_settlement"
+  ) {
     return true;
   }
   return intl.international_transfer_attention_labels.some((l) => {
@@ -241,7 +251,9 @@ function isInternationalTransferRejectedOrVariance(input: BuildFinancialClearanc
   });
 }
 
-function buildSourceBreakdown(input: BuildFinancialClearanceInput): FinancialClearanceSourceBreakdown {
+function buildSourceBreakdown(
+  input: BuildFinancialClearanceInput
+): FinancialClearanceSourceBreakdown {
   return {
     financial_os_status: input.financial_os_status?.trim() || null,
     deposit_invoice_state: input.depositInvoiceState,
@@ -251,7 +263,8 @@ function buildSourceBreakdown(input: BuildFinancialClearanceInput): FinancialCle
     pathway_type: input.paymentPathway.pathway_type,
     unresolved_pathway_tasks: input.pathwayTaskAttention.unresolved_open_task_count,
     finance_attention: input.financeApplicationAttention.finance_attention_required,
-    super_release_attention: input.superReleaseApplicationAttention.super_release_attention_required,
+    super_release_attention:
+      input.superReleaseApplicationAttention.super_release_attention_required,
     international_transfer_attention:
       input.internationalTransferApplicationAttention.international_transfer_attention_required,
     balance_overdue: input.balance_overdue,
@@ -295,7 +308,9 @@ function resolveNextRequiredAction(
 /**
  * Derives the authoritative financial clearance snapshot for a surgery booking or case context.
  */
-export function buildFinancialClearance(input: BuildFinancialClearanceInput): FinancialClearanceResult {
+export function buildFinancialClearance(
+  input: BuildFinancialClearanceInput
+): FinancialClearanceResult {
   const source_breakdown = buildSourceBreakdown(input);
   const amount_paid_cents = Math.max(0, input.amount_paid_cents);
   const balance_due_cents = Math.max(0, input.balance_due_cents);
@@ -304,7 +319,8 @@ export function buildFinancialClearance(input: BuildFinancialClearanceInput): Fi
     return {
       clearance_state: "unavailable",
       clearance_label: FINANCIAL_CLEARANCE_STATE_LABELS.unavailable,
-      clearance_reason: "Financial data could not be loaded or no FinancialOS signals exist for this context.",
+      clearance_reason:
+        "Financial data could not be loaded or no FinancialOS signals exist for this context.",
       blocking_factors: [],
       warning_factors: [],
       amount_paid_cents,
@@ -319,7 +335,11 @@ export function buildFinancialClearance(input: BuildFinancialClearanceInput): Fi
 
   const financeSlaBreach = Boolean(input.financeSlaBreach);
   const financeRejected = isFinanceRejected({ ...input, financeSlaBreach });
-  const attentionInput: BuildFinancialClearanceInput = { ...input, financeSlaBreach, financeRejected };
+  const attentionInput: BuildFinancialClearanceInput = {
+    ...input,
+    financeSlaBreach,
+    financeRejected,
+  };
 
   const { blocking, warnings } = collectAttentionFactors({
     ...attentionInput,
@@ -327,10 +347,16 @@ export function buildFinancialClearance(input: BuildFinancialClearanceInput): Fi
 
   // Recompute blocking with explicit rejection checks
   const blocking_factors = [...blocking];
-  if (financeRejected && !blocking_factors.some((b) => b.includes("Finance application rejected"))) {
+  if (
+    financeRejected &&
+    !blocking_factors.some((b) => b.includes("Finance application rejected"))
+  ) {
     blocking_factors.unshift("Finance application rejected");
   }
-  if (input.superReleaseApplicationAttention.sla_breach && !blocking_factors.some((b) => b.includes("Super release"))) {
+  if (
+    input.superReleaseApplicationAttention.sla_breach &&
+    !blocking_factors.some((b) => b.includes("Super release"))
+  ) {
     blocking_factors.push("Super release SLA breach");
   }
   if (
@@ -350,7 +376,9 @@ export function buildFinancialClearance(input: BuildFinancialClearanceInput): Fi
     financeSlaBreach ||
     input.superReleaseApplicationAttention.sla_breach ||
     isInternationalTransferRejectedOrVariance(input) ||
-    (surgeryWithinClearanceWindow(input) && balance_due_cents > 0 && !pathwayFundsReleasedOrSettled(input));
+    (surgeryWithinClearanceWindow(input) &&
+      balance_due_cents > 0 &&
+      !pathwayFundsReleasedOrSettled(input));
 
   const paidInFullCandidate =
     balance_due_cents <= 0 &&
@@ -404,12 +432,14 @@ export function buildFinancialClearance(input: BuildFinancialClearanceInput): Fi
     return {
       clearance_state: "financially_cleared",
       clearance_label: FINANCIAL_CLEARANCE_STATE_LABELS.financially_cleared,
-      clearance_reason: "Payment pathway settled or funds released with no urgent workflow blockers.",
+      clearance_reason:
+        "Payment pathway settled or funds released with no urgent workflow blockers.",
       blocking_factors: [],
       warning_factors: warnings,
       amount_paid_cents,
       balance_due_cents,
-      next_required_action: balance_due_cents > 0 ? "Collect remaining balance before surgery window" : null,
+      next_required_action:
+        balance_due_cents > 0 ? "Collect remaining balance before surgery window" : null,
       financially_safe_to_proceed: true,
       paid_in_full: false,
       requires_staff_attention: false,
@@ -450,7 +480,8 @@ export function buildFinancialClearance(input: BuildFinancialClearanceInput): Fi
       warning_factors: warnings,
       amount_paid_cents,
       balance_due_cents,
-      next_required_action: balance_due_cents > 0 ? "Collect remaining balance before surgery window" : null,
+      next_required_action:
+        balance_due_cents > 0 ? "Collect remaining balance before surgery window" : null,
       financially_safe_to_proceed: true,
       paid_in_full: false,
       requires_staff_attention: false,
@@ -633,13 +664,18 @@ export function buildFinancialClearanceFromPipelineStatus(args: {
       pathwayTaskAttention: args.pipeline.pathwayTaskAttention,
       financeApplicationAttention: args.pipeline.financeApplicationAttention,
       superReleaseApplicationAttention: args.pipeline.superReleaseApplicationAttention,
-      internationalTransferApplicationAttention: args.pipeline.internationalTransferApplicationAttention,
+      internationalTransferApplicationAttention:
+        args.pipeline.internationalTransferApplicationAttention,
       financeSlaBreach: args.financeSlaBreach,
       financeRejected: args.financeRejected,
     })
   );
 }
 
-export function computeClearanceHorizonEndYmd(todayYmd: string, calendarTimezone: string, horizonDays = 14): string {
+export function computeClearanceHorizonEndYmd(
+  todayYmd: string,
+  calendarTimezone: string,
+  horizonDays = 14
+): string {
   return addDaysToCalendarDate(todayYmd, horizonDays, calendarTimezone);
 }

@@ -81,7 +81,10 @@ function statusFromMessages(messages: BookingConflictMessage[]): BookingConflict
   return "available";
 }
 
-function localMinutesOfDay(iso: string, timeZone: string): { dayKey: string; minutes: number } | null {
+function localMinutesOfDay(
+  iso: string,
+  timeZone: string
+): { dayKey: string; minutes: number } | null {
   const local = toDatetimeLocalValueInTimezone(iso, timeZone);
   if (!local) return null;
   const hour = Number(local.slice(11, 13));
@@ -134,7 +137,9 @@ export async function previewBookingConflicts(
   } else if (!timesValid) {
     return {
       status: "blocked",
-      messages: [{ type: "hours", severity: "error", message: "End time must be after the start time." }],
+      messages: [
+        { type: "hours", severity: "error", message: "End time must be after the start time." },
+      ],
     };
   }
 
@@ -150,9 +155,7 @@ export async function previewBookingConflicts(
 
   const [rooms, roomEligibility, staff, calendarSettings] = await Promise.all([
     clinicId ? loadClinicRoomsForTenant(tid, { clinicId }, client) : Promise.resolve([]),
-    serviceId
-      ? loadServiceRoomEligibilityForService(tid, serviceId, client)
-      : Promise.resolve([]),
+    serviceId ? loadServiceRoomEligibilityForService(tid, serviceId, client) : Promise.resolve([]),
     staffId ? loadStaffMemberForTenant(tid, staffId, client) : Promise.resolve(null),
     loadTenantOperationalCalendarSettings(tid).catch(() => null),
   ]);
@@ -222,7 +225,11 @@ export async function previewBookingConflicts(
     const room =
       rooms.find((r) => r.id === roomId) ?? (await loadClinicRoomForTenant(tid, roomId, client));
     if (!room) {
-      messages.push({ type: "room", severity: "error", message: "Selected room could not be found for this clinic." });
+      messages.push({
+        type: "room",
+        severity: "error",
+        message: "Selected room could not be found for this clinic.",
+      });
     } else if (clinicId && room.clinic_id !== clinicId) {
       messages.push({
         type: "room",
@@ -308,7 +315,8 @@ export async function previewBookingConflicts(
       messages.push({
         type: "room",
         severity: "error",
-        message: "A room must be assigned before saving. Select a clinic so a room can be allocated.",
+        message:
+          "A room must be assigned before saving. Select a clinic so a room can be allocated.",
       });
     }
   }
@@ -378,9 +386,14 @@ export async function previewBookingConflicts(
         if (!rid || seenRooms.has(rid)) continue;
         seenRooms.add(rid);
         const rrow =
-          rooms.find((r) => r.id === rid) ?? (clinicId ? await loadClinicRoomForTenant(tid, rid, client) : null);
+          rooms.find((r) => r.id === rid) ??
+          (clinicId ? await loadClinicRoomForTenant(tid, rid, client) : null);
         if (!rrow) {
-          messages.push({ type: "room", severity: "error", message: "A selected extra room could not be found." });
+          messages.push({
+            type: "room",
+            severity: "error",
+            message: "A selected extra room could not be found.",
+          });
           continue;
         }
         if (clinicId && rrow.clinic_id !== clinicId) {

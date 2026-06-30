@@ -11,7 +11,11 @@ export type ClinicalStaffingStatusBadgeProps = {
   className?: string;
 };
 
-export function ClinicalStaffingStatusBadge({ status, compact, className }: ClinicalStaffingStatusBadgeProps) {
+export function ClinicalStaffingStatusBadge({
+  status,
+  compact,
+  className,
+}: ClinicalStaffingStatusBadgeProps) {
   const tone = clinicalStaffingDisplayStatusTone(status);
   const label = clinicalStaffingDisplayStatusLabel(status);
 

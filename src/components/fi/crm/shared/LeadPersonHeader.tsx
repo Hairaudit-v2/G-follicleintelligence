@@ -32,7 +32,10 @@ export function LeadPersonHeader({
             <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-300 hover:underline">
               Patient directory
             </Link>
-            <Link href={`/fi-admin/${tenantId}/patients/${pid}`} className="text-blue-300 hover:underline">
+            <Link
+              href={`/fi-admin/${tenantId}/patients/${pid}`}
+              className="text-blue-300 hover:underline"
+            >
               Profile →
             </Link>
           </p>

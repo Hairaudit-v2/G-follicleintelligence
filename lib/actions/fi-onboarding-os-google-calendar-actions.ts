@@ -69,7 +69,10 @@ export async function loadGoogleCalendarConnectorSnapshotAction(
     return { ok: true, snapshot: result.snapshot };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid input." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load calendar connector." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load calendar connector.",
+    };
   }
 }
 

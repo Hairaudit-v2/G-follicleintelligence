@@ -40,13 +40,15 @@ export type ResolvedFeatureRow = SystemFeatureEntry & { status: FeatureRolloutSt
  * - **Partial:** schema or shell exists but prerequisites missing or usage not yet proven.
  * - **Planned:** not yet shipped in this codebase / placeholder row.
  */
-export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): ResolvedFeatureRow[] {
-  const crmTablesOk =
-    payload.crm.tables.every((t) => t.exists) && payload.crm.traffic !== "red";
+export function resolveFeatureInventoryStatuses(
+  payload: SystemStatusPayload
+): ResolvedFeatureRow[] {
+  const crmTablesOk = payload.crm.tables.every((t) => t.exists) && payload.crm.traffic !== "red";
   const leadsOk = payload.crm.tables.find((t) => t.name === "fi_crm_leads")?.exists ?? false;
   const tasksOk = payload.crm.tables.find((t) => t.name === "fi_crm_tasks")?.exists ?? false;
   const notesOk = payload.crm.tables.find((t) => t.name === "fi_crm_lead_notes")?.exists ?? false;
-  const commsOk = payload.crm.tables.find((t) => t.name === "fi_crm_lead_communications")?.exists ?? false;
+  const commsOk =
+    payload.crm.tables.find((t) => t.name === "fi_crm_lead_communications")?.exists ?? false;
 
   const hasLeads = (payload.crm.counts.leads ?? 0) > 0;
   const hasTasks = (payload.crm.counts.tasks ?? 0) > 0;

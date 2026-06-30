@@ -74,14 +74,20 @@ export default async function TenantConfigurationPage({
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const sp = await searchParams;
   const activeTab = parseConfigurationTab(sp.tab);
 
   const organisationId =
-    typeof sp.organisationId === "string" && sp.organisationId.trim() ? sp.organisationId.trim() : null;
+    typeof sp.organisationId === "string" && sp.organisationId.trim()
+      ? sp.organisationId.trim()
+      : null;
   const clinicId =
     typeof sp.clinicId === "string" && sp.clinicId.trim() ? sp.clinicId.trim() : null;
 
@@ -115,15 +121,21 @@ export default async function TenantConfigurationPage({
         <FiTenantBrandFrame effective={effective} variant="page-preview" />
       ) : null}
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Configuration</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          Configuration
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
           {activeTab === "calendar"
             ? "Configure operational calendar display — visible hours, slot size, default view, and booking visibility."
             : "Tenant-scoped branding and operational defaults. Everyone can review values; saves use the deployment "}
           {activeTab === "branding" ? (
             <>
-              <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#22C1FF]">FI_ADMIN_API_KEY</code> in the operator
-              panel below. See design doc 15 (<span className="font-mono text-[#CBD5E1]">15-configuration-admin-editing.md</span>) for fields and access control.
+              <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#22C1FF]">
+                FI_ADMIN_API_KEY
+              </code>{" "}
+              in the operator panel below. See design doc 15 (
+              <span className="font-mono text-[#CBD5E1]">15-configuration-admin-editing.md</span>)
+              for fields and access control.
             </>
           ) : null}
         </p>
@@ -146,9 +158,13 @@ export default async function TenantConfigurationPage({
         />
       ) : (
         <>
-          {showDeploymentIntelligence ? <TenantDeploymentIntelligencePanel tenantId={tenantId} /> : null}
+          {showDeploymentIntelligence ? (
+            <TenantDeploymentIntelligencePanel tenantId={tenantId} />
+          ) : null}
           {showGoLiveReadiness ? <TenantGoLiveReadinessPanel tenantId={tenantId} /> : null}
-          {showExternalConnectors ? <TenantConnectExistingSystemsPanel tenantId={tenantId} /> : null}
+          {showExternalConnectors ? (
+            <TenantConnectExistingSystemsPanel tenantId={tenantId} />
+          ) : null}
           {showGuidedAssistUsage ? <GuidedAssistUsagePanel tenantId={tenantId} /> : null}
           <TenantConfigurationPanel
             tenantId={tenantId}

@@ -52,9 +52,12 @@ export function AppointmentCompletionLeadWorkflow({
 
   return (
     <section className={`${appointmentCardClass} border-emerald-100 bg-emerald-500/10`}>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-emerald-300">On completion — update lead</h3>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
+        On completion — update lead
+      </h3>
       <p className="mt-1 text-xs text-slate-400">
-        Optional CRM updates when you mark this appointment complete. Current stage: {opportunity.stageLabel}.
+        Optional CRM updates when you mark this appointment complete. Current stage:{" "}
+        {opportunity.stageLabel}.
       </p>
 
       <label className="mt-3 flex items-center gap-2 text-sm text-slate-200">

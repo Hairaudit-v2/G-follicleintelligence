@@ -37,19 +37,27 @@ function mapOverrideRow(raw: Record<string, unknown>): FiRevenueAttributionManua
     case_id: String(raw.case_id),
     attribution_source:
       raw.attribution_source != null
-        ? (String(raw.attribution_source) as FiRevenueAttributionManualOverrideRow["attribution_source"])
+        ? (String(
+            raw.attribution_source
+          ) as FiRevenueAttributionManualOverrideRow["attribution_source"])
         : null,
     campaign_name: raw.campaign_name != null ? String(raw.campaign_name) : null,
     campaign_id: raw.campaign_id != null ? String(raw.campaign_id) : null,
-    consultant_fi_user_id: raw.consultant_fi_user_id != null ? String(raw.consultant_fi_user_id) : null,
-    updated_by_fi_user_id: raw.updated_by_fi_user_id != null ? String(raw.updated_by_fi_user_id) : null,
+    consultant_fi_user_id:
+      raw.consultant_fi_user_id != null ? String(raw.consultant_fi_user_id) : null,
+    updated_by_fi_user_id:
+      raw.updated_by_fi_user_id != null ? String(raw.updated_by_fi_user_id) : null,
     updated_at: String(raw.updated_at ?? ""),
   };
 }
 
-export function mapRevenueAttributionEventRow(raw: Record<string, unknown>): FiRevenueAttributionEventRow {
+export function mapRevenueAttributionEventRow(
+  raw: Record<string, unknown>
+): FiRevenueAttributionEventRow {
   const sourceMetadata =
-    raw.source_metadata && typeof raw.source_metadata === "object" && !Array.isArray(raw.source_metadata)
+    raw.source_metadata &&
+    typeof raw.source_metadata === "object" &&
+    !Array.isArray(raw.source_metadata)
       ? (raw.source_metadata as Record<string, unknown>)
       : {};
   return {
@@ -63,18 +71,23 @@ export function mapRevenueAttributionEventRow(raw: Record<string, unknown>): FiR
     invoice_id: raw.invoice_id != null ? String(raw.invoice_id) : null,
     payment_id: raw.payment_id != null ? String(raw.payment_id) : null,
     transaction_id: raw.transaction_id != null ? String(raw.transaction_id) : null,
-    attribution_source: String(raw.attribution_source ?? "unknown") as FiRevenueAttributionEventRow["attribution_source"],
+    attribution_source: String(
+      raw.attribution_source ?? "unknown"
+    ) as FiRevenueAttributionEventRow["attribution_source"],
     campaign_name: raw.campaign_name != null ? String(raw.campaign_name) : null,
     campaign_id: raw.campaign_id != null ? String(raw.campaign_id) : null,
     ad_group: raw.ad_group != null ? String(raw.ad_group) : null,
     keyword: raw.keyword != null ? String(raw.keyword) : null,
     referral_contact_id: raw.referral_contact_id != null ? String(raw.referral_contact_id) : null,
-    consultant_fi_user_id: raw.consultant_fi_user_id != null ? String(raw.consultant_fi_user_id) : null,
+    consultant_fi_user_id:
+      raw.consultant_fi_user_id != null ? String(raw.consultant_fi_user_id) : null,
     clinic_id: raw.clinic_id != null ? String(raw.clinic_id) : null,
     attributed_revenue_cents: Number(raw.attributed_revenue_cents ?? 0),
     attributed_collected_cents: Number(raw.attributed_collected_cents ?? 0),
     gross_profit_cents: raw.gross_profit_cents != null ? Number(raw.gross_profit_cents) : null,
-    attribution_confidence: String(raw.attribution_confidence ?? "inferred") as FiRevenueAttributionEventRow["attribution_confidence"],
+    attribution_confidence: String(
+      raw.attribution_confidence ?? "inferred"
+    ) as FiRevenueAttributionEventRow["attribution_confidence"],
     source_metadata: sourceMetadata,
     idempotency_key: raw.idempotency_key != null ? String(raw.idempotency_key) : null,
     occurred_at: String(raw.occurred_at ?? ""),
@@ -171,7 +184,11 @@ async function loadAttributionContextForAnchors(args: {
         .eq("tenant_id", tid)
         .eq("id", leadId)
         .maybeSingle(),
-      supabase.from("fi_crm_lead_source_ids").select("source_system").eq("tenant_id", tid).eq("lead_id", leadId),
+      supabase
+        .from("fi_crm_lead_source_ids")
+        .select("source_system")
+        .eq("tenant_id", tid)
+        .eq("lead_id", leadId),
     ]);
     if (leadRow) {
       const l = leadRow as Record<string, unknown>;
@@ -180,7 +197,8 @@ async function loadAttributionContextForAnchors(args: {
           ? (l.metadata as Record<string, unknown>)
           : {};
       leadClinicId = l.clinic_id != null ? String(l.clinic_id) : null;
-      leadPrimaryOwnerUserId = l.primary_owner_user_id != null ? String(l.primary_owner_user_id) : null;
+      leadPrimaryOwnerUserId =
+        l.primary_owner_user_id != null ? String(l.primary_owner_user_id) : null;
       patientId = patientId ?? (l.patient_id != null ? String(l.patient_id) : null);
     }
     leadSourceSystems = (sourceRows ?? [])
@@ -223,7 +241,9 @@ async function loadAttributionContextForAnchors(args: {
       const c = consult as Record<string, unknown>;
       leadId = leadId ?? (c.lead_id != null ? String(c.lead_id) : null);
       const structured =
-        c.structured_data && typeof c.structured_data === "object" && !Array.isArray(c.structured_data)
+        c.structured_data &&
+        typeof c.structured_data === "object" &&
+        !Array.isArray(c.structured_data)
           ? (c.structured_data as Record<string, unknown>)
           : {};
       const quote =
@@ -266,17 +286,30 @@ async function loadAttributionContextForAnchors(args: {
         (quoteRow as { metadata?: unknown }).metadata &&
         typeof (quoteRow as { metadata?: unknown }).metadata === "object" &&
         !Array.isArray((quoteRow as { metadata?: unknown }).metadata)
-          ? ((quoteRow as { metadata: Record<string, unknown> }).metadata as Record<string, unknown>)
+          ? ((quoteRow as { metadata: Record<string, unknown> }).metadata as Record<
+              string,
+              unknown
+            >)
           : {};
-      const creator = meta.created_by_fi_user_id ?? meta.quote_creator_fi_user_id ?? meta.owner_fi_user_id;
+      const creator =
+        meta.created_by_fi_user_id ?? meta.quote_creator_fi_user_id ?? meta.owner_fi_user_id;
       if (typeof creator === "string" && creator.trim()) quoteCreatorFiUserId = creator.trim();
     }
   }
 
   if (patientId) {
     const [{ data: patientRow }, { data: patientSources }] = await Promise.all([
-      supabase.from("fi_patients").select("metadata").eq("tenant_id", tid).eq("id", patientId).maybeSingle(),
-      supabase.from("fi_patient_source_ids").select("source_system").eq("tenant_id", tid).eq("patient_id", patientId),
+      supabase
+        .from("fi_patients")
+        .select("metadata")
+        .eq("tenant_id", tid)
+        .eq("id", patientId)
+        .maybeSingle(),
+      supabase
+        .from("fi_patient_source_ids")
+        .select("source_system")
+        .eq("tenant_id", tid)
+        .eq("patient_id", patientId),
     ]);
     if (patientRow) {
       const p = patientRow as Record<string, unknown>;
@@ -435,7 +468,11 @@ async function persistRevenueAttributionEvent(
     occurred_at: draft.occurred_at,
   };
 
-  const { data, error } = await supabase.from("fi_revenue_attribution_events").insert(insert).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_revenue_attribution_events")
+    .insert(insert)
+    .select("*")
+    .single();
   if (error) {
     if (draft.idempotency_key && error.code === "23505") {
       const { data: dup } = await supabase
@@ -690,7 +727,9 @@ export async function loadRevenueAttributionOverrideForCase(
 
 function eventToSummary(row: FiRevenueAttributionEventRow): RevenueAttributionEventSummary {
   const procedureType =
-    typeof row.source_metadata.procedure_type === "string" ? row.source_metadata.procedure_type : null;
+    typeof row.source_metadata.procedure_type === "string"
+      ? row.source_metadata.procedure_type
+      : null;
   return {
     id: row.id,
     attribution_source: row.attribution_source,
@@ -719,11 +758,13 @@ export async function loadRevenueAttributionDashboardPayload(
     .order("occurred_at", { ascending: false })
     .limit(2000);
 
-  if (filters?.dateFrom?.trim()) q = q.gte("occurred_at", `${filters.dateFrom.trim()}T00:00:00.000Z`);
+  if (filters?.dateFrom?.trim())
+    q = q.gte("occurred_at", `${filters.dateFrom.trim()}T00:00:00.000Z`);
   if (filters?.dateTo?.trim()) q = q.lte("occurred_at", `${filters.dateTo.trim()}T23:59:59.999Z`);
   if (filters?.source?.trim()) q = q.eq("attribution_source", filters.source.trim());
   if (filters?.campaign?.trim()) q = q.ilike("campaign_name", `%${filters.campaign.trim()}%`);
-  if (filters?.consultantFiUserId?.trim()) q = q.eq("consultant_fi_user_id", filters.consultantFiUserId.trim());
+  if (filters?.consultantFiUserId?.trim())
+    q = q.eq("consultant_fi_user_id", filters.consultantFiUserId.trim());
   if (filters?.clinicId?.trim()) q = q.eq("clinic_id", filters.clinicId.trim());
 
   const { data, error } = await q;
@@ -786,7 +827,9 @@ export async function loadRevenueAttributionFilterOptions(tenantId: string): Pro
     const cn = r.campaign_name != null ? String(r.campaign_name).trim() : "";
     if (cn) campaignSet.add(cn);
     const meta =
-      r.source_metadata && typeof r.source_metadata === "object" && !Array.isArray(r.source_metadata)
+      r.source_metadata &&
+      typeof r.source_metadata === "object" &&
+      !Array.isArray(r.source_metadata)
         ? (r.source_metadata as Record<string, unknown>)
         : {};
     const pt = meta.procedure_type;
@@ -806,7 +849,10 @@ export async function loadRevenueAttributionFilterOptions(tenantId: string): Pro
       .in("id", Array.from(consultantIds));
     for (const u of users ?? []) {
       const row = u as { id: string; email?: string; display_name?: string };
-      consultantLabels.set(row.id, row.display_name?.trim() || row.email?.trim() || row.id.slice(0, 8));
+      consultantLabels.set(
+        row.id,
+        row.display_name?.trim() || row.email?.trim() || row.id.slice(0, 8)
+      );
     }
   }
 

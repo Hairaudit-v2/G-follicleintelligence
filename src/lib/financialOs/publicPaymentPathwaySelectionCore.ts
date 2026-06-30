@@ -9,8 +9,15 @@ import {
   type FiPaymentPathwayStatus,
   type FiPaymentPathwayType,
 } from "@/src/lib/financialOs/financialPaymentPathwayCore";
-import { invoiceBalanceDueCents, type FiInvoiceRow, type FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { derivePublicPaymentPageState, isPaymentPublicTokenFormat } from "@/src/lib/revenueOs/publicPaymentRequestModel";
+import {
+  invoiceBalanceDueCents,
+  type FiInvoiceRow,
+  type FiPaymentRequestRow,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  derivePublicPaymentPageState,
+  isPaymentPublicTokenFormat,
+} from "@/src/lib/revenueOs/publicPaymentRequestModel";
 
 export type FiPaymentPathwaySource = "staff" | "patient_public_token" | "system";
 
@@ -75,7 +82,9 @@ export type PublicPathwaySelectionRejectReason =
   | "cancelled"
   | "expired";
 
-export function mapPatientPathwayTypeToStatus(pathwayType: FiPaymentPathwayType): FiPaymentPathwayStatus {
+export function mapPatientPathwayTypeToStatus(
+  pathwayType: FiPaymentPathwayType
+): FiPaymentPathwayStatus {
   switch (pathwayType) {
     case "pay_in_full":
     case "deposit_balance":
@@ -93,7 +102,9 @@ export function mapPatientPathwayTypeToStatus(pathwayType: FiPaymentPathwayType)
   }
 }
 
-export function getPatientPathwayConfirmationMessage(pathwayType: FiPaymentPathwayType): string | null {
+export function getPatientPathwayConfirmationMessage(
+  pathwayType: FiPaymentPathwayType
+): string | null {
   switch (pathwayType) {
     case "pay_in_full":
     case "deposit_balance":
@@ -185,7 +196,11 @@ export type PatientPathwayUpsertTarget = {
  */
 export function resolvePatientPathwayUpsertTarget(input: {
   existingPathways: Array<
-    FiPaymentPathwayRow & { id: string; source?: FiPaymentPathwaySource | null; source_payment_request_id?: string | null }
+    FiPaymentPathwayRow & {
+      id: string;
+      source?: FiPaymentPathwaySource | null;
+      source_payment_request_id?: string | null;
+    }
   >;
   paymentRequestId: string;
   invoiceId: string;

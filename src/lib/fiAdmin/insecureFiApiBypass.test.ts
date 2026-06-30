@@ -50,6 +50,9 @@ describe("isInsecureFiApiBypassAllowed", () => {
   });
 
   it("treats non-production node env with flag as bypass (e.g. test)", () => {
-    assert.equal(isInsecureFiApiBypassAllowed({ NODE_ENV: "test", FI_ALLOW_INSECURE_API: "yes" }), true);
+    assert.equal(
+      isInsecureFiApiBypassAllowed({ NODE_ENV: "test", FI_ALLOW_INSECURE_API: "yes" }),
+      true
+    );
   });
 });

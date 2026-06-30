@@ -2,8 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { upsertImagingAnnotationSet, upsertImagingScalpMap } from "@/src/lib/imagingOs/imagingOsMutations.server";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
+import {
+  upsertImagingAnnotationSet,
+  upsertImagingScalpMap,
+} from "@/src/lib/imagingOs/imagingOsMutations.server";
 import {
   finishProtocolSessionManually,
   skipOptionalProtocolSlot,
@@ -93,7 +100,12 @@ const aiJobBodySchema = z
   .object({
     adminKey: z.string().optional(),
     patientImageId: z.string().uuid(),
-    analysisKind: z.enum(["density_estimate", "norwood_grade", "donor_assessment", "outcome_score"]),
+    analysisKind: z.enum([
+      "density_estimate",
+      "norwood_grade",
+      "donor_assessment",
+      "outcome_score",
+    ]),
   })
   .strict();
 
@@ -362,9 +374,8 @@ export async function recordPatientPhotoQuickActionCompletedAction(
   try {
     const parsed = patientPhotoQuickActionCompletedSchema.parse(body);
     await assertCrmTenantWriteAllowed({ tenantId: parsed.tenantId, request: undefined });
-    const { publishPatientPhotoQuickActionCompletedEvent } = await import(
-      "@/src/lib/patientImages/patientPhotoQuickActionAnalytics.server"
-    );
+    const { publishPatientPhotoQuickActionCompletedEvent } =
+      await import("@/src/lib/patientImages/patientPhotoQuickActionAnalytics.server");
     await publishPatientPhotoQuickActionCompletedEvent(parsed);
     return { ok: true };
   } catch (e) {

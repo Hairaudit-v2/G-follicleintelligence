@@ -8,7 +8,10 @@ import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPri
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { ENTERPRISE_PAGE_CONTENT } from "@/lib/marketing/enterprisePageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
@@ -62,15 +65,23 @@ function ExpansionStoryTimeline({ steps }: { steps: readonly string[] }) {
             {steps.map((step, index) => (
               <Fragment key={step}>
                 <li className="flex w-[7.35rem] shrink-0 flex-col xl:w-[7.75rem]">
-                  <GlassCard variant="default" className="h-full border-amber-400/10 !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)] sm:!p-4">
+                  <GlassCard
+                    variant="default"
+                    className="h-full border-amber-400/10 !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)] sm:!p-4"
+                  >
                     <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/55">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <p className="mt-2 text-[0.75rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">{step}</p>
+                    <p className="mt-2 text-[0.75rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">
+                      {step}
+                    </p>
                   </GlassCard>
                 </li>
                 {index < steps.length - 1 ? (
-                  <li className="flex w-6 shrink-0 items-center justify-center self-center pt-6 xl:w-7" aria-hidden>
+                  <li
+                    className="flex w-6 shrink-0 items-center justify-center self-center pt-6 xl:w-7"
+                    aria-hidden
+                  >
                     <ChevronRight className="h-3.5 w-3.5 text-amber-400/45" strokeWidth={2} />
                   </li>
                 ) : null}
@@ -87,11 +98,16 @@ function ExpansionStoryTimeline({ steps }: { steps: readonly string[] }) {
               aria-hidden
               className="absolute -left-[19px] top-2 flex h-3 w-3 items-center justify-center rounded-full border border-amber-300/45 bg-gradient-to-br from-amber-200/55 to-amber-800/30 shadow-[0_0_16px_rgb(212_175_55_/0.35)] sm:-left-[21px]"
             />
-            <GlassCard variant="default" className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]">
+            <GlassCard
+              variant="default"
+              className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]"
+            >
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
                 Stage {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">{step}</p>
+              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">
+                {step}
+              </p>
             </GlassCard>
           </li>
         ))}
@@ -116,8 +132,13 @@ export function EnterpriseMarketingView() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 md:py-24">
           <FadeIn>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">{c.hero.eyebrow}</p>
-            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">
+              {c.hero.eyebrow}
+            </p>
+            <div
+              className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+              aria-hidden
+            />
             <h1
               id={`${c.hero.id}-heading`}
               className="mt-5 max-w-4xl font-display text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance drop-shadow-[0_2px_36px_rgb(0_0_0_/0.45)] sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
@@ -141,7 +162,12 @@ export function EnterpriseMarketingView() {
                   <ChevronRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.secondaryCta.href}>
                   {c.hero.secondaryCta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -171,7 +197,9 @@ export function EnterpriseMarketingView() {
                     <h3 className="font-display text-base font-semibold leading-snug tracking-tight text-foreground md:text-lg">
                       {card.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">{card.body}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -186,7 +214,11 @@ export function EnterpriseMarketingView() {
         aria-labelledby={`${c.governance.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.governance.id}-heading`} eyebrow={c.governance.eyebrow} title={c.governance.headline} />
+          <SectionHeading
+            id={`${c.governance.id}-heading`}
+            eyebrow={c.governance.eyebrow}
+            title={c.governance.headline}
+          />
           <EnterpriseGovernanceBands />
           <div className="mt-14 max-w-3xl">
             <GlassCard className="border-amber-400/14">
@@ -209,14 +241,22 @@ export function EnterpriseMarketingView() {
         aria-labelledby={`${c.useCases.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.useCases.id}-heading`} eyebrow={c.useCases.eyebrow} title={c.useCases.headline} />
+          <SectionHeading
+            id={`${c.useCases.id}-heading`}
+            eyebrow={c.useCases.eyebrow}
+            title={c.useCases.headline}
+          />
           <ul className="mt-12 grid list-none gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {c.useCases.cards.map((card, i) => (
               <li key={card.title}>
                 <FadeIn delay={0.05 * (i % 3)}>
                   <GlassCard className="group flex h-full flex-col border-white/[0.07] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amber-400/22">
-                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">{card.title}</h3>
-                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground md:text-base">{card.body}</p>
+                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
+                      {card.title}
+                    </h3>
+                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground md:text-base">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -231,20 +271,34 @@ export function EnterpriseMarketingView() {
         aria-labelledby={`${c.capabilities.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.capabilities.id}-heading`} eyebrow={c.capabilities.eyebrow} title={c.capabilities.headline} />
+          <SectionHeading
+            id={`${c.capabilities.id}-heading`}
+            eyebrow={c.capabilities.eyebrow}
+            title={c.capabilities.headline}
+          />
           <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2 xl:grid-cols-5">
             {c.capabilities.cards.map((card, i) => (
               <li key={card.title}>
                 <FadeIn delay={0.03 * (i % 5)}>
-                  <GlassCard variant="os" className="flex h-full min-h-[10.5rem] flex-col border-white/[0.06] sm:min-h-[11rem]">
+                  <GlassCard
+                    variant="os"
+                    className="flex h-full min-h-[10.5rem] flex-col border-white/[0.06] sm:min-h-[11rem]"
+                  >
                     <div className="flex items-center border-b border-white/[0.07] pb-3">
                       <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.2em] text-amber-200/50">
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="ml-auto h-px w-10 bg-gradient-to-r from-amber-400/40 to-transparent" aria-hidden />
+                      <span
+                        className="ml-auto h-px w-10 bg-gradient-to-r from-amber-400/40 to-transparent"
+                        aria-hidden
+                      />
                     </div>
-                    <p className="mt-4 text-sm font-semibold uppercase tracking-[0.1em] text-amber-100/95">{card.title}</p>
-                    <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{card.body}</p>
+                    <p className="mt-4 text-sm font-semibold uppercase tracking-[0.1em] text-amber-100/95">
+                      {card.title}
+                    </p>
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                      {card.body}
+                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -259,7 +313,11 @@ export function EnterpriseMarketingView() {
         aria-labelledby={`${c.expansion.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.expansion.id}-heading`} eyebrow={c.expansion.eyebrow} title={c.expansion.headline} />
+          <SectionHeading
+            id={`${c.expansion.id}-heading`}
+            eyebrow={c.expansion.eyebrow}
+            title={c.expansion.headline}
+          />
           <ExpansionStoryTimeline steps={c.expansion.steps} />
         </FadeIn>
       </Section>
@@ -270,7 +328,11 @@ export function EnterpriseMarketingView() {
         aria-labelledby={`${c.whyItMatters.id}-heading`}
       >
         <FadeIn>
-          <SectionHeading id={`${c.whyItMatters.id}-heading`} eyebrow={c.whyItMatters.eyebrow} title={c.whyItMatters.headline} />
+          <SectionHeading
+            id={`${c.whyItMatters.id}-heading`}
+            eyebrow={c.whyItMatters.eyebrow}
+            title={c.whyItMatters.headline}
+          />
           <GlassCard className="mt-10 max-w-3xl border-amber-400/12">
             <div className="space-y-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
               {c.whyItMatters.paragraphs.map((p, idx) => (
@@ -291,8 +353,13 @@ export function EnterpriseMarketingView() {
             <div className="rounded-[1.75rem] border border-amber-400/18 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.48),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">{c.finalCta.eyebrow}</p>
-                  <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">
+                    {c.finalCta.eyebrow}
+                  </p>
+                  <div
+                    className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+                    aria-hidden
+                  />
                   <h2
                     id={`${c.finalCta.id}-heading`}
                     className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-4xl lg:text-5xl"
@@ -307,7 +374,12 @@ export function EnterpriseMarketingView() {
                       <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className={MARKETING_CTA_SECONDARY_CLASS}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={MARKETING_CTA_SECONDARY_CLASS}
+                  >
                     <Link href={c.finalCta.secondaryCta.href}>
                       {c.finalCta.secondaryCta.label}
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />

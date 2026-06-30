@@ -24,8 +24,15 @@ function eventColumns() {
   return "id, tenant_id, event_type, source_system, source_event_id, occurred_at, payload_json, status, error_text, created_at, updated_at";
 }
 
-async function loadFiEventRow(supabase: SupabaseClient, eventId: string): Promise<FiEventRow | null> {
-  const { data, error } = await supabase.from("fi_events").select(eventColumns()).eq("id", eventId).maybeSingle();
+async function loadFiEventRow(
+  supabase: SupabaseClient,
+  eventId: string
+): Promise<FiEventRow | null> {
+  const { data, error } = await supabase
+    .from("fi_events")
+    .select(eventColumns())
+    .eq("id", eventId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return (data as FiEventRow | null) ?? null;
 }
@@ -36,7 +43,14 @@ async function loadFiEventRow(supabase: SupabaseClient, eventId: string): Promis
 export async function reconstructFiEventEnvelopeForDualWrite(
   supabase: SupabaseClient,
   eventId: string
-): Promise<{ envelope: FiEventEnvelope; resolution: { fiCaseId: string | null; globalPatientId: string | null; globalCaseId: string | null } } | null> {
+): Promise<{
+  envelope: FiEventEnvelope;
+  resolution: {
+    fiCaseId: string | null;
+    globalPatientId: string | null;
+    globalCaseId: string | null;
+  };
+} | null> {
   const row = await loadFiEventRow(supabase, eventId);
   if (!row || row.status !== "processed") return null;
 
@@ -61,7 +75,8 @@ export async function reconstructFiEventEnvelopeForDualWrite(
       .eq("id", link.fi_case_id)
       .maybeSingle();
     const meta = c?.metadata as Record<string, unknown> | undefined;
-    const metaCase = meta && typeof meta.source_case_id === "string" ? meta.source_case_id : undefined;
+    const metaCase =
+      meta && typeof meta.source_case_id === "string" ? meta.source_case_id : undefined;
     if (metaCase) source_case_id = metaCase;
     else if (c?.external_id && typeof c.external_id === "string") {
       const ext = c.external_id;
@@ -110,7 +125,10 @@ export async function reconstructFiEventEnvelopeForDualWrite(
   };
 }
 
-async function eventIdsWithTimeline(supabase: SupabaseClient, tenantId: string): Promise<Set<string>> {
+async function eventIdsWithTimeline(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<Set<string>> {
   const ids = new Set<string>();
   let from = 0;
   const page = 1000;

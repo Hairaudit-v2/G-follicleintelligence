@@ -12,7 +12,9 @@ import {
   isUpcomingSurgeryWindowRow,
 } from "@/src/lib/cases/surgeryOsDashboardDerive";
 
-function stubRow(partial: Partial<CaseWorklistRow> & Pick<CaseWorklistRow, "id" | "person_label">): CaseWorklistRow {
+function stubRow(
+  partial: Partial<CaseWorklistRow> & Pick<CaseWorklistRow, "id" | "person_label">
+): CaseWorklistRow {
   const now = "2026-06-01T12:00:00.000Z";
   return {
     id: partial.id,
@@ -98,7 +100,9 @@ test("isTodaySurgeryRow respects procedure date and terminal statuses", () => {
     ...ok,
     id: "b",
     person_label: "B",
-    procedureDay: ok.procedureDay ? { ...ok.procedureDay, id: "p2", case_id: "b", procedure_status: "cancelled" } : null,
+    procedureDay: ok.procedureDay
+      ? { ...ok.procedureDay, id: "p2", case_id: "b", procedure_status: "cancelled" }
+      : null,
   });
   assert.equal(isTodaySurgeryRow(cancelled, today), false);
 });

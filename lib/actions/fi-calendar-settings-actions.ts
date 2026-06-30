@@ -22,7 +22,9 @@ const saveSchema = z.object({
 
 export type CalendarSettingsSaveResult = { ok: true } | { ok: false; error: string };
 
-export async function saveCalendarSettingsAction(body: unknown): Promise<CalendarSettingsSaveResult> {
+export async function saveCalendarSettingsAction(
+  body: unknown
+): Promise<CalendarSettingsSaveResult> {
   try {
     const parsed = saveSchema.parse(body);
     const tid = parsed.tenantId.trim();
@@ -50,7 +52,8 @@ export async function saveCalendarSettingsAction(body: unknown): Promise<Calenda
     revalidatePath(`/fi-admin/${tid}/calendar`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }

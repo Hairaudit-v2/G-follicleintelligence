@@ -20,16 +20,22 @@ export function PatientTwinClinicalIntelligenceCard(props: {
         Clinical intelligence
       </h2>
       <p className="mt-1 text-xs text-slate-400">
-        Neutral signals from linked records — review in context; does not replace clinician judgement.
+        Neutral signals from linked records — review in context; does not replace clinician
+        judgement.
       </p>
       {view.signals.length === 0 ? (
-        <p className="mt-3 text-sm text-slate-400">No open signals from the current Patient Twin projection.</p>
+        <p className="mt-3 text-sm text-slate-400">
+          No open signals from the current Patient Twin projection.
+        </p>
       ) : (
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-200">
           {view.signals.map((s) => (
             <li key={`${s.signalKey}-${s.title}`}>
               <span className="font-medium text-slate-100">{s.title}</span>
-              <span className="text-slate-400"> — {recommendedNextStepForClinicalSignal(s.signalKey)}</span>
+              <span className="text-slate-400">
+                {" "}
+                — {recommendedNextStepForClinicalSignal(s.signalKey)}
+              </span>
             </li>
           ))}
         </ul>
@@ -47,7 +53,10 @@ export function PatientTwinClinicalIntelligenceCard(props: {
         <Link href={`/fi-admin/${encodeURIComponent(tenantId)}/cases`} className="hover:underline">
           SurgeryOS cases
         </Link>
-        <Link href={`/fi-admin/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}`} className="hover:underline">
+        <Link
+          href={`/fi-admin/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}`}
+          className="hover:underline"
+        >
           Patient profile
         </Link>
       </div>

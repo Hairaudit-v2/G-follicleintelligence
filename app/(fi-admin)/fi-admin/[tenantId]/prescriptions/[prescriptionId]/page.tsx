@@ -9,7 +9,10 @@ import {
   loadActiveCompoundPharmaciesForTenant,
   loadPharmacyTransmissionsForPrescription,
 } from "@/src/lib/prescribing/fiPharmacyLoaders.server";
-import { loadMedicationCatalogueForTenant, loadPrescriptionDetail } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
+import {
+  loadMedicationCatalogueForTenant,
+  loadPrescriptionDetail,
+} from "@/src/lib/prescribing/fiPrescribingLoaders.server";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +36,10 @@ export default async function PrescriptionEditorRoutePage({
   const { tenantId, prescriptionId } = await params;
   if (!tenantId?.trim() || !prescriptionId?.trim()) notFound();
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
@@ -110,7 +116,9 @@ export default async function PrescriptionEditorRoutePage({
       initialReorderValidFrom={p.reorder_valid_from ?? ""}
       initialReorderValidUntil={p.reorder_valid_until ?? ""}
       initialReorderReviewRequired={p.reorder_review_required}
-      initialPatientReorderFeePence={p.patient_reorder_fee_pence != null ? String(p.patient_reorder_fee_pence) : ""}
+      initialPatientReorderFeePence={
+        p.patient_reorder_fee_pence != null ? String(p.patient_reorder_fee_pence) : ""
+      }
       initialReorderFeePaymentRequired={p.reorder_fee_payment_required}
     />
   );

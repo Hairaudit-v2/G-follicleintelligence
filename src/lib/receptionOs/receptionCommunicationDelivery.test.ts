@@ -15,7 +15,7 @@ describe("receptionCommunicationDelivery", () => {
         },
         dryRun: true,
       }),
-      "dry_run",
+      "dry_run"
     );
   });
 
@@ -30,7 +30,7 @@ describe("receptionCommunicationDelivery", () => {
         },
         dryRun: false,
       }),
-      "sent",
+      "sent"
     );
   });
 
@@ -45,7 +45,7 @@ describe("receptionCommunicationDelivery", () => {
         },
         dryRun: false,
       }),
-      "failed",
+      "failed"
     );
   });
 
@@ -61,7 +61,7 @@ describe("receptionCommunicationDelivery", () => {
         dryRun: false,
         blocked: true,
       }),
-      "failed",
+      "failed"
     );
   });
 });

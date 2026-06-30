@@ -14,7 +14,9 @@ export function warnIfSlowCalendarSync(label: string, durationMs: number): void 
   if (!calendarInteractionPerfEnabled()) return;
   if (durationMs <= SLOW_MS) return;
   // eslint-disable-next-line no-console -- intentional dev instrumentation
-  console.warn(`[fi-calendar/inp] slow sync: ${label} took ${durationMs.toFixed(1)}ms (>${SLOW_MS}ms)`);
+  console.warn(
+    `[fi-calendar/inp] slow sync: ${label} took ${durationMs.toFixed(1)}ms (>${SLOW_MS}ms)`
+  );
 }
 
 /** Measure a synchronous block; warns when over threshold. */

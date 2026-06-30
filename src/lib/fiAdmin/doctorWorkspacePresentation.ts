@@ -96,7 +96,10 @@ function formatShortDate(iso: string): string {
 
 const ACTIVE_PRESCRIPTION_STATUSES = new Set(["signed", "sent_to_pharmacy", "dispensed", "posted"]);
 
-export function buildDoctorSnapshotCards(base: string, bundle: DoctorWorkspaceBundle): DoctorSnapshotCard[] {
+export function buildDoctorSnapshotCards(
+  base: string,
+  bundle: DoctorWorkspaceBundle
+): DoctorSnapshotCard[] {
   const patientsAwaitingReview =
     bundle.pendingConsultations.length +
     bundle.voiceNotesPendingApproval.length +
@@ -166,10 +169,16 @@ type PriorityCandidate = {
   href?: string;
 };
 
-export function buildDoctorPriorities(base: string, bundle: DoctorWorkspaceBundle, maxItems = 5): DoctorPriorityItem[] {
+export function buildDoctorPriorities(
+  base: string,
+  bundle: DoctorWorkspaceBundle,
+  maxItems = 5
+): DoctorPriorityItem[] {
   const failedPharmacy = bundle.pharmacyQueue.filter((r) => r.status === "failed").length;
   const pendingPharmacy = bundle.pharmacyQueue.filter((r) => r.status === "pending").length;
-  const reorderReview = bundle.medicationReorders.filter((r) => r.status === "doctor_review_required").length;
+  const reorderReview = bundle.medicationReorders.filter(
+    (r) => r.status === "doctor_review_required"
+  ).length;
 
   const candidates: PriorityCandidate[] = [
     {
@@ -186,7 +195,8 @@ export function buildDoctorPriorities(base: string, bundle: DoctorWorkspaceBundl
       count: failedPharmacy,
       priorityScore: 95,
       severity: "critical",
-      headline: (n) => plural(n, "pharmacy transmission", "pharmacy transmissions") + " failed and need review",
+      headline: (n) =>
+        plural(n, "pharmacy transmission", "pharmacy transmissions") + " failed and need review",
       detail: "Open the prescription to retry or export for manual send.",
       href: `${base}/prescriptions`,
     },
@@ -212,7 +222,8 @@ export function buildDoctorPriorities(base: string, bundle: DoctorWorkspaceBundl
       count: reorderReview || bundle.medicationReorders.length,
       priorityScore: 85,
       severity: "warning",
-      headline: (n) => plural(n, "medication reorder", "medication reorders") + " require clinical review",
+      headline: (n) =>
+        plural(n, "medication reorder", "medication reorders") + " require clinical review",
       detail: "Review patient medication renewal requests.",
       href: `${base}/medication-reorders`,
     },
@@ -283,7 +294,11 @@ export function doctorAttentionSeverityClass(severity: DoctorPriorityItem["sever
   }
 }
 
-export function buildDoctorPatientReviewQueue(base: string, bundle: DoctorWorkspaceBundle, maxItems = 12): DoctorPatientReviewItem[] {
+export function buildDoctorPatientReviewQueue(
+  base: string,
+  bundle: DoctorWorkspaceBundle,
+  maxItems = 12
+): DoctorPatientReviewItem[] {
   const items: DoctorPatientReviewItem[] = [];
 
   for (const r of bundle.prescriptionsAwaitingSignature) {
@@ -329,7 +344,9 @@ export function buildDoctorPatientReviewQueue(base: string, bundle: DoctorWorksp
       treatmentPlanStatus: "Consultation documentation in progress",
       followUpDue: null,
       nextAction: "Complete consultation report",
-      patientHref: c.patient_id ? `${base}/patients/${encodeURIComponent(c.patient_id)}` : `${base}/consultations/${encodeURIComponent(c.id)}`,
+      patientHref: c.patient_id
+        ? `${base}/patients/${encodeURIComponent(c.patient_id)}`
+        : `${base}/consultations/${encodeURIComponent(c.id)}`,
       consultationHref: `${base}/consultations/${encodeURIComponent(c.id)}`,
       prescriptionHref: null,
       procedureHref: null,
@@ -358,7 +375,9 @@ export function buildDoctorPatientReviewQueue(base: string, bundle: DoctorWorksp
     items.push({
       id: `today-${p.patientId}`,
       patientName: p.patientLabel,
-      visitType: [p.bookingType.replace(/_/g, " "), p.bookingTitle].filter(Boolean).join(" · ") || "Appointment",
+      visitType:
+        [p.bookingType.replace(/_/g, " "), p.bookingTitle].filter(Boolean).join(" · ") ||
+        "Appointment",
       clinicalStatus: "Scheduled today",
       treatmentPlanStatus: "Review before consultation",
       followUpDue: formatLocalTime(p.nextStartAt),
@@ -404,29 +423,33 @@ export function buildDoctorPrescriptionWorkspace(
   base: string,
   bundle: DoctorWorkspaceBundle,
   recentPrescriptions: readonly FiPatientPrescriptionRow[],
-  patientLabels: ReadonlyMap<string, string>,
+  patientLabels: ReadonlyMap<string, string>
 ): DoctorPrescriptionWorkspaceModel {
   const labelFor = (patientId: string) => patientLabels.get(patientId) ?? "Patient";
 
-  const awaitingApproval: DoctorPrescriptionItem[] = bundle.prescriptionsAwaitingSignature.map((r) => ({
-    id: r.id,
-    patientLabel: r.patientLabel,
-    statusLabel: "Pending approval",
-    detail: "Draft complete — sign to authorise",
-    href: `${base}/prescriptions/${encodeURIComponent(r.id)}`,
-    tone: "urgent",
-    updatedAt: r.updatedAt,
-  }));
+  const awaitingApproval: DoctorPrescriptionItem[] = bundle.prescriptionsAwaitingSignature.map(
+    (r) => ({
+      id: r.id,
+      patientLabel: r.patientLabel,
+      statusLabel: "Pending approval",
+      detail: "Draft complete — sign to authorise",
+      href: `${base}/prescriptions/${encodeURIComponent(r.id)}`,
+      tone: "urgent",
+      updatedAt: r.updatedAt,
+    })
+  );
 
-  const inProgressDrafts: DoctorPrescriptionItem[] = bundle.draftPrescriptionsInProgress.map((r) => ({
-    id: r.id,
-    patientLabel: r.patientLabel,
-    statusLabel: "Draft in progress",
-    detail: "Add lines or confirm repeat rules",
-    href: `${base}/prescriptions/${encodeURIComponent(r.id)}`,
-    tone: "warn",
-    updatedAt: r.updatedAt,
-  }));
+  const inProgressDrafts: DoctorPrescriptionItem[] = bundle.draftPrescriptionsInProgress.map(
+    (r) => ({
+      id: r.id,
+      patientLabel: r.patientLabel,
+      statusLabel: "Draft in progress",
+      detail: "Add lines or confirm repeat rules",
+      href: `${base}/prescriptions/${encodeURIComponent(r.id)}`,
+      tone: "warn",
+      updatedAt: r.updatedAt,
+    })
+  );
 
   const medicationAlerts: DoctorPrescriptionItem[] = [
     ...bundle.pharmacyQueue
@@ -510,7 +533,10 @@ export function buildDoctorPrescriptionWorkspace(
   };
 }
 
-export function buildDoctorTreatmentApprovals(base: string, bundle: DoctorWorkspaceBundle): DoctorTreatmentApprovalItem[] {
+export function buildDoctorTreatmentApprovals(
+  base: string,
+  bundle: DoctorWorkspaceBundle
+): DoctorTreatmentApprovalItem[] {
   const failedPharmacy = bundle.pharmacyQueue.filter((r) => r.status === "failed").length;
 
   const items: DoctorTreatmentApprovalItem[] = [
@@ -554,7 +580,7 @@ export function buildDoctorClinicalTimeline(
   bundle: DoctorWorkspaceBundle,
   recentPrescriptions: readonly FiPatientPrescriptionRow[],
   patientLabels: ReadonlyMap<string, string>,
-  maxItems = 8,
+  maxItems = 8
 ): DoctorTimelineItem[] {
   const events: DoctorTimelineItem[] = [];
 
@@ -568,7 +594,9 @@ export function buildDoctorClinicalTimeline(
     });
   }
 
-  for (const r of recentPrescriptions.filter((rx) => rx.status === "signed" || rx.status === "sent_to_pharmacy").slice(0, 5)) {
+  for (const r of recentPrescriptions
+    .filter((rx) => rx.status === "signed" || rx.status === "sent_to_pharmacy")
+    .slice(0, 5)) {
     events.push({
       id: `tl-rx-${r.id}`,
       timeLabel: formatLocalTime(r.signed_at ?? r.updated_at),
@@ -619,7 +647,9 @@ export function buildDoctorClinicalTimeline(
 }
 
 /** Raw counts for system diagnostics — operator view only. */
-export function doctorWorkspaceDiagnosticCounts(bundle: DoctorWorkspaceBundle): Record<string, number> {
+export function doctorWorkspaceDiagnosticCounts(
+  bundle: DoctorWorkspaceBundle
+): Record<string, number> {
   return {
     todayPatients: bundle.todayPatients.length,
     pendingConsultations: bundle.pendingConsultations.length,

@@ -33,7 +33,7 @@ export function ReceptionOsSystemStatusPanel({
     <DashboardCard
       className={cn(
         "overflow-hidden",
-        status.pilotModeActive ? "border-amber-500/25" : "border-emerald-500/25",
+        status.pilotModeActive ? "border-amber-500/25" : "border-emerald-500/25"
       )}
     >
       <div className="border-b border-white/[0.06] px-4 py-3">
@@ -97,14 +97,16 @@ export function ReceptionOsSystemStatusPanel({
         />
       </div>
       <div className="border-t border-white/[0.06] px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Environment checklist</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Environment checklist
+        </p>
         <ul className="mt-2 grid gap-1 sm:grid-cols-2">
           {status.envChecklist.map((item) => (
             <li key={item.key} className="flex items-center gap-2 text-sm text-slate-400">
               <span
                 className={cn(
                   "inline-block h-2 w-2 rounded-full",
-                  item.present ? "bg-emerald-400" : "bg-slate-600",
+                  item.present ? "bg-emerald-400" : "bg-slate-600"
                 )}
                 aria-hidden
               />

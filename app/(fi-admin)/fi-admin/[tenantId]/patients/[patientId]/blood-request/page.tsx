@@ -15,7 +15,9 @@ export async function generateMetadata({
   const { tenantId, patientId } = await params;
   const loaded = await loadPatientProfile(tenantId, patientId);
   const name =
-    loaded.ok && loaded.mode === "foundation" ? displayFromPersonMetadata(loaded.data.person.metadata).name : null;
+    loaded.ok && loaded.mode === "foundation"
+      ? displayFromPersonMetadata(loaded.data.person.metadata).name
+      : null;
   return {
     title: `${name?.trim() ? name.trim() : "Patient"} · Blood request`,
     robots: { index: false, follow: false },
@@ -42,15 +44,18 @@ export default async function PatientBloodRequestPage({
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`}
+          className="text-blue-300 hover:underline"
+        >
           ← Patient profile
         </Link>
       </p>
       <header className="space-y-1">
         <h1 className="text-lg font-semibold text-slate-100">Request blood tests</h1>
         <p className="text-sm text-slate-400">
-          DoctorOS pathology request (Stage 1). Panels are stored with this patient; external lab / eOrder integrations
-          are not enabled yet.
+          DoctorOS pathology request (Stage 1). Panels are stored with this patient; external lab /
+          eOrder integrations are not enabled yet.
         </p>
       </header>
       <BloodPathologyRequestClient

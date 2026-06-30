@@ -106,7 +106,13 @@ export function PatientIntelligenceSummary({
     : null;
 
   const latestConsultation = consultations[0] ?? null;
-  const completedConsultations = consultations.filter((c) => c.status === "completed" || c.status === "quoted" || c.status === "accepted" || c.status === "converted_to_case");
+  const completedConsultations = consultations.filter(
+    (c) =>
+      c.status === "completed" ||
+      c.status === "quoted" ||
+      c.status === "accepted" ||
+      c.status === "converted_to_case"
+  );
 
   const medicationsValue = clinical?.current_medications?.trim() || null;
   const treatmentInterestValue = clinical?.treatment_interest?.trim() || null;
@@ -126,7 +132,9 @@ export function PatientIntelligenceSummary({
       </div>
 
       {/* Journey status */}
-      <div className={`mt-3 flex items-start gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.03] p-3`}>
+      <div
+        className={`mt-3 flex items-start gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.03] p-3`}
+      >
         <div className="min-w-0 flex-1">
           <p className={pwsLabel}>Patient journey</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -183,11 +191,12 @@ export function PatientIntelligenceSummary({
                 {latestConsultation.consultation_type_label}
               </Link>
               <span className="text-xs text-slate-500">· {latestConsultation.status}</span>
-              {completedConsultations.length > 0 && completedConsultations.length !== consultations.length && (
-                <span className="text-xs text-slate-400">
-                  · {completedConsultations.length} of {consultations.length} completed
-                </span>
-              )}
+              {completedConsultations.length > 0 &&
+                completedConsultations.length !== consultations.length && (
+                  <span className="text-xs text-slate-400">
+                    · {completedConsultations.length} of {consultations.length} completed
+                  </span>
+                )}
             </div>
           ) : (
             <div>

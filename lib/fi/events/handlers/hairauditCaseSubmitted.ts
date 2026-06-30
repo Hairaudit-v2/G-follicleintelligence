@@ -225,9 +225,7 @@ async function handleHairAuditCaseSubmittedImpl(
       fiCaseId: fiCase.id,
       globalCaseId: linkedGlobalCase.id,
       globalPatientId: globalPatient?.id ?? null,
-      actionTaken: submitDecision.submitted
-        ? "mapped_case_and_submitted"
-        : "mapped_case_only",
+      actionTaken: submitDecision.submitted ? "mapped_case_and_submitted" : "mapped_case_only",
       submitDecision,
       message: submitDecision.submitted
         ? "HairAudit case ingested and FI case submitted."
@@ -254,8 +252,7 @@ export async function handleHairAuditCaseSubmitted(
   inputOrSupabase: HandlerInput | SupabaseClient,
   legacyEnvelope?: FiEventEnvelope
 ): Promise<HairAuditCaseSubmittedResult> {
-  const envelope =
-    "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
+  const envelope = "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
 
   if (!envelope) {
     throw new Error("Missing envelope for handleHairAuditCaseSubmitted.");

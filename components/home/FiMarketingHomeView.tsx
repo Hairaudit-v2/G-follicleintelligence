@@ -7,7 +7,10 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { HOME_V5_CONTENT } from "@/lib/marketing/homePageContent";
-import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import {
+  MARKETING_CTA_PRIMARY_CLASS,
+  MARKETING_CTA_SECONDARY_CLASS,
+} from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
@@ -70,7 +73,9 @@ function FragmentationCard({
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-200/55">
           {String(index + 1).padStart(2, "0")}
         </p>
-        <h3 className="mt-3 font-display text-lg font-semibold tracking-tight text-foreground">{card.category}</h3>
+        <h3 className="mt-3 font-display text-lg font-semibold tracking-tight text-foreground">
+          {card.category}
+        </h3>
         <ul className="mt-5 space-y-2">
           {card.items.map((item) => (
             <li
@@ -113,7 +118,9 @@ function PlatformSystemCard({
       <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl">
         {system.name}
       </h3>
-      <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">{system.description}</p>
+      <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">
+        {system.description}
+      </p>
     </GlassCard>
   );
 
@@ -159,7 +166,9 @@ function ComparisonColumn({
       >
         {variant === "fi" ? "Clinical intelligence platform" : "Horizontal software"}
       </p>
-      <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{title}</h3>
+      <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+        {title}
+      </h3>
       <ul className="mt-6 space-y-2.5">
         {items.map((item) => (
           <li
@@ -194,7 +203,9 @@ function CapabilityCard({ label, index }: { label: string; index: number }) {
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           {String(index + 1).padStart(2, "0")}
         </p>
-        <p className="mt-3 font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">{label}</p>
+        <p className="mt-3 font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
+          {label}
+        </p>
       </div>
     </FadeIn>
   );
@@ -272,8 +283,12 @@ function CredibilityCard({
         <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/45">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground">{card.title}</h3>
-        <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">{card.description}</p>
+        <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground">
+          {card.title}
+        </h3>
+        <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">
+          {card.description}
+        </p>
       </GlassCard>
     </FadeIn>
   );
@@ -294,8 +309,13 @@ export function FiMarketingHomeView() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-28 md:py-36">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-amber-200/80">{c.hero.eyebrow}</p>
-            <div className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/60 via-amber-400/20 to-transparent" aria-hidden />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-amber-200/80">
+              {c.hero.eyebrow}
+            </p>
+            <div
+              className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/60 via-amber-400/20 to-transparent"
+              aria-hidden
+            />
             <h1
               id="hero-heading"
               className="mt-8 max-w-5xl font-display text-[2.25rem] font-semibold leading-[1.06] tracking-tight text-foreground text-balance sm:text-5xl md:text-[3.25rem] md:leading-[1.05]"
@@ -313,13 +333,22 @@ export function FiMarketingHomeView() {
             </p>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-              <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                size="lg"
+                className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.primaryCta.href}>
                   {c.hero.primaryCta.label}
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+              >
                 <Link href={c.hero.secondaryCta.href}>
                   {c.hero.secondaryCta.label}
                   <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
@@ -349,7 +378,9 @@ export function FiMarketingHomeView() {
               <FragmentationCard key={card.category} card={card} index={index} />
             ))}
           </div>
-          <SectionClosingStatement centered>{c.fragmentation.closingStatement}</SectionClosingStatement>
+          <SectionClosingStatement centered>
+            {c.fragmentation.closingStatement}
+          </SectionClosingStatement>
           <SectionClosingSubtext centered>{c.fragmentation.closingSubtext}</SectionClosingSubtext>
         </FadeIn>
       </Section>
@@ -363,8 +394,13 @@ export function FiMarketingHomeView() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.1),transparent_50%)]" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-amber-200/70">{c.hiddenCost.eyebrow}</p>
-            <div className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/50 to-transparent" aria-hidden />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-amber-200/70">
+              {c.hiddenCost.eyebrow}
+            </p>
+            <div
+              className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/50 to-transparent"
+              aria-hidden
+            />
             <h2
               id={`${c.hiddenCost.id}-heading`}
               className="mt-8 max-w-4xl font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl md:text-5xl md:leading-[1.1]"
@@ -372,7 +408,9 @@ export function FiMarketingHomeView() {
               {c.hiddenCost.headline}
             </h2>
             <HiddenCostCascade />
-            <SectionClosingStatement centered>{c.hiddenCost.closingStatement}</SectionClosingStatement>
+            <SectionClosingStatement centered>
+              {c.hiddenCost.closingStatement}
+            </SectionClosingStatement>
           </FadeIn>
         </div>
       </section>
@@ -452,7 +490,10 @@ export function FiMarketingHomeView() {
           </p>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
             {c.surgeryIntelligence.supportingPoints.map((point) => (
-              <p key={point} className="font-display text-base font-semibold tracking-tight text-cyan-100/90 sm:text-lg">
+              <p
+                key={point}
+                className="font-display text-base font-semibold tracking-tight text-cyan-100/90 sm:text-lg"
+              >
                 {point}
               </p>
             ))}
@@ -464,8 +505,12 @@ export function FiMarketingHomeView() {
             <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {c.surgeryIntelligence.metrics.map((metric, index) => (
                 <div key={metric} className="bg-[#040810] px-6 py-6 sm:px-8 sm:py-7">
-                  <p className="font-mono text-[10px] tabular-nums text-cyan-200/50">{String(index + 1).padStart(2, "0")}</p>
-                  <p className="mt-2.5 text-sm font-medium leading-snug text-foreground/92 sm:text-base">{metric}</p>
+                  <p className="font-mono text-[10px] tabular-nums text-cyan-200/50">
+                    {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <p className="mt-2.5 text-sm font-medium leading-snug text-foreground/92 sm:text-base">
+                    {metric}
+                  </p>
                 </div>
               ))}
             </div>
@@ -497,7 +542,9 @@ export function FiMarketingHomeView() {
               <CapabilityCard key={capability} label={capability} index={index} />
             ))}
           </div>
-          <SectionClosingStatement>{c.outcomeIntelligence.closingStatement}</SectionClosingStatement>
+          <SectionClosingStatement>
+            {c.outcomeIntelligence.closingStatement}
+          </SectionClosingStatement>
         </FadeIn>
       </Section>
 
@@ -542,7 +589,9 @@ export function FiMarketingHomeView() {
               <CredibilityCard key={card.title} card={card} index={index} />
             ))}
           </div>
-          <SectionClosingStatement centered>{c.credibility.closingStatement}</SectionClosingStatement>
+          <SectionClosingStatement centered>
+            {c.credibility.closingStatement}
+          </SectionClosingStatement>
         </FadeIn>
       </Section>
 
@@ -556,8 +605,13 @@ export function FiMarketingHomeView() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,rgb(167_139_250_/0.06),transparent_40%)]" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <FadeIn>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-amber-200/70">{c.futureVision.eyebrow}</p>
-            <div className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/50 to-transparent" aria-hidden />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-amber-200/70">
+              {c.futureVision.eyebrow}
+            </p>
+            <div
+              className="mt-4 h-px w-16 bg-gradient-to-r from-amber-300/50 to-transparent"
+              aria-hidden
+            />
             <h2
               id={`${c.futureVision.id}-heading`}
               className="mt-8 max-w-4xl font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl md:text-5xl md:leading-[1.1]"
@@ -566,7 +620,10 @@ export function FiMarketingHomeView() {
             </h2>
             <div className="mt-10 max-w-3xl space-y-4">
               {c.futureVision.bodyParagraphs.map((paragraph) => (
-                <p key={paragraph} className="text-lg leading-[1.75] text-foreground/82 sm:text-xl sm:leading-[1.8]">
+                <p
+                  key={paragraph}
+                  className="text-lg leading-[1.75] text-foreground/82 sm:text-xl sm:leading-[1.8]"
+                >
                   {paragraph}
                 </p>
               ))}

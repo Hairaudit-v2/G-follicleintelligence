@@ -51,7 +51,9 @@ export function FinancialPaymentPathwayBadge(props: {
       <span
         className={cn(
           "inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-[0.62rem] font-medium uppercase tracking-wide",
-          variant === "dark" ? "border-white/[0.08] bg-white/[0.03] text-slate-500" : "border-white/[0.08] bg-white/[0.03] text-gray-500",
+          variant === "dark"
+            ? "border-white/[0.08] bg-white/[0.03] text-slate-500"
+            : "border-white/[0.08] bg-white/[0.03] text-gray-500"
         )}
       >
         No pathway selected
@@ -76,7 +78,7 @@ export function FinancialPaymentPathwayBadge(props: {
       title={summary.pathway_attention_reason ?? undefined}
       className={cn(
         "inline-flex w-fit items-center gap-1 rounded-md border px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide",
-        variant === "dark" ? toneDark : toneLight,
+        variant === "dark" ? toneDark : toneLight
       )}
     >
       {pathwayTypeLabel(summary.pathway_type)} · {pathwayStatusLabel(summary.pathway_status)}

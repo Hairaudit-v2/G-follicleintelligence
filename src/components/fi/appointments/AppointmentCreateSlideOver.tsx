@@ -9,7 +9,11 @@ import {
   checkAppointmentAvailability,
   DEFAULT_APPOINTMENT_BUFFER_MINUTES,
 } from "@/src/lib/bookings/appointmentAvailability";
-import { defaultProcedureDurationMinutes, formatPriceAud, serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
+import {
+  defaultProcedureDurationMinutes,
+  formatPriceAud,
+  serviceForBookingType,
+} from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
@@ -55,8 +59,12 @@ export function AppointmentCreateSlideOver({
 
   const [bookingType, setBookingType] = useState(prefill.bookingType || "consultation");
   const [title, setTitle] = useState(prefill.title ?? "");
-  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(prefill.startIso, tenantCalendarTimezone));
-  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(prefill.endIso, tenantCalendarTimezone));
+  const [startLocal, setStartLocal] = useState(
+    toDatetimeLocalValue(prefill.startIso, tenantCalendarTimezone)
+  );
+  const [endLocal, setEndLocal] = useState(
+    toDatetimeLocalValue(prefill.endIso, tenantCalendarTimezone)
+  );
   const staffIdToUserId = useMemo(() => staffPickerUserMap(assignees), [assignees]);
 
   const [assignee, setAssignee] = useState(prefill.assignedStaffId ?? prefill.assignedUserId ?? "");
@@ -103,11 +111,19 @@ export function AppointmentCreateSlideOver({
     return Array.from(u);
   }, [bookingType]);
 
-  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+  const selectedCatalog = useMemo(
+    () => serviceForBookingType(services, bookingType),
+    [services, bookingType]
+  );
 
   function onProcedureTypeChange(nextType: string) {
     setBookingType(nextType);
-    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, tenantCalendarTimezone, services);
+    const nextEnd = endLocalFromStartLocalAndProcedure(
+      startLocal,
+      nextType,
+      tenantCalendarTimezone,
+      services
+    );
     if (nextEnd) setEndLocal(nextEnd);
     setAvailabilityHint(null);
   }
@@ -168,7 +184,9 @@ export function AppointmentCreateSlideOver({
       caseId: prefill.caseId,
     };
     const baseMeta =
-      prefill.initialMetadata && typeof prefill.initialMetadata === "object" && !Array.isArray(prefill.initialMetadata)
+      prefill.initialMetadata &&
+      typeof prefill.initialMetadata === "object" &&
+      !Array.isArray(prefill.initialMetadata)
         ? { ...prefill.initialMetadata }
         : {};
     if (!anchors.leadId && !anchors.personId && !anchors.patientId && !anchors.caseId) {
@@ -206,11 +224,13 @@ export function AppointmentCreateSlideOver({
   return (
     <div className="space-y-4">
       <section className={appointmentCardClass}>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">New appointment</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          New appointment
+        </h3>
         <p className="mt-1 text-xs text-slate-400">
-          Pre-filled from your current context. Start/end use the clinic timezone ({tenantCalendarTimezone}).
-          Availability uses a {DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer around existing bookings for the
-          selected staff member.
+          Pre-filled from your current context. Start/end use the clinic timezone (
+          {tenantCalendarTimezone}). Availability uses a {DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute
+          buffer around existing bookings for the selected staff member.
         </p>
       </section>
 
@@ -283,8 +303,9 @@ export function AppointmentCreateSlideOver({
             }}
           />
           <p className="mt-1 text-[11px] text-gray-500">
-            Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min (end
-            updates when you change type).
+            Default slot for this procedure type:{" "}
+            {defaultProcedureDurationMinutes(bookingType, services)} min (end updates when you
+            change type).
             {selectedCatalog && selectedCatalog.base_price > 0 ? (
               <> Suggested price: {formatPriceAud(selectedCatalog.base_price)}.</>
             ) : null}
@@ -337,7 +358,9 @@ export function AppointmentCreateSlideOver({
           </button>
         </div>
         {availabilityHint ? (
-          <p className={`text-xs ${availabilityHint.startsWith("Slot is") ? "text-emerald-300" : "text-amber-200"}`}>
+          <p
+            className={`text-xs ${availabilityHint.startsWith("Slot is") ? "text-emerald-300" : "text-amber-200"}`}
+          >
             {availabilityHint}
           </p>
         ) : null}
@@ -351,7 +374,11 @@ export function AppointmentCreateSlideOver({
           >
             {busy ? "Creating…" : "Create appointment"}
           </button>
-          <button type="button" className="text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+          <button
+            type="button"
+            className="text-sm text-slate-400 hover:text-slate-100"
+            onClick={onClose}
+          >
             Cancel
           </button>
         </div>

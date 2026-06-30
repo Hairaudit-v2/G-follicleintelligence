@@ -31,7 +31,8 @@ export function ClinicOsPatientsHome({
   return (
     <div className="space-y-6" aria-describedby="clinic-os-patients-preview-note">
       <p id="clinic-os-patients-preview-note" className="sr-only">
-        Work queue figures and recent patient names are preview placeholders only. They are not live operational data.
+        Work queue figures and recent patient names are preview placeholders only. They are not live
+        operational data.
       </p>
 
       <FiPageHeader
@@ -115,8 +116,14 @@ export function ClinicOsPatientsHome({
                 description="Clinical patients and worklists for this tenant."
                 href={`${base}/cases`}
               />
-              <FiQuickActionCard title="Follow-ups" description="Due tasks and recall lists (preview)." />
-              <FiQuickActionCard title="Send message" description="Team and patient messaging (preview)." />
+              <FiQuickActionCard
+                title="Follow-ups"
+                description="Due tasks and recall lists (preview)."
+              />
+              <FiQuickActionCard
+                title="Send message"
+                description="Team and patient messaging (preview)."
+              />
             </div>
           </div>
         </div>
@@ -125,12 +132,42 @@ export function ClinicOsPatientsHome({
           <h2 className="text-sm font-semibold text-slate-100">Patient work queues</h2>
           <p className="text-xs text-slate-500">Preview · not connected to live metrics</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <FiKpiTile label="New enquiries" value="—" description="Preview · Coming soon" tone="info" />
-            <FiKpiTile label="Consultations due" value="—" description="Preview · Coming soon" tone="info" />
-            <FiKpiTile label="Follow-ups due" value="—" description="Preview · Coming soon" tone="info" />
-            <FiKpiTile label="Treatment patients" value="—" description="Preview · Coming soon" tone="info" />
-            <FiKpiTile label="Hair transplant patients" value="—" description="Preview · Coming soon" tone="info" />
-            <FiKpiTile label="Records needing attention" value="—" description="Preview · Coming soon" tone="info" />
+            <FiKpiTile
+              label="New enquiries"
+              value="—"
+              description="Preview · Coming soon"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Consultations due"
+              value="—"
+              description="Preview · Coming soon"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Follow-ups due"
+              value="—"
+              description="Preview · Coming soon"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Treatment patients"
+              value="—"
+              description="Preview · Coming soon"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Hair transplant patients"
+              value="—"
+              description="Preview · Coming soon"
+              tone="info"
+            />
+            <FiKpiTile
+              label="Records needing attention"
+              value="—"
+              description="Preview · Coming soon"
+              tone="info"
+            />
           </div>
         </aside>
       </div>
@@ -141,7 +178,10 @@ export function ClinicOsPatientsHome({
           title="No recent activity to show"
           description="Preview only — recent patients will appear here once connected to live data. Use search to open a patient record."
         />
-        <ul className="mt-3 space-y-2 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.03] p-3 text-sm text-slate-400" aria-hidden>
+        <ul
+          className="mt-3 space-y-2 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.03] p-3 text-sm text-slate-400"
+          aria-hidden
+        >
           <li className="flex justify-between gap-2 border-b border-white/[0.06] pb-2 last:border-b-0 last:pb-0">
             <span className="font-medium text-slate-200">A. Preview</span>
             <span className="text-xs text-slate-400">Sample row</span>

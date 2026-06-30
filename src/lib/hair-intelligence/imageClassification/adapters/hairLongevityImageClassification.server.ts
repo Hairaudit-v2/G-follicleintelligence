@@ -1,6 +1,10 @@
 import "server-only";
 
-import type { FiAiImageClassificationResult, HliClinicalUseContext, HliSourceSystem } from "../types";
+import type {
+  FiAiImageClassificationResult,
+  HliClinicalUseContext,
+  HliSourceSystem,
+} from "../types";
 import { classifyClinicalHairImageFromModelUrl } from "../classifyClinicalHairImage.server";
 import {
   classificationResultToHliInsert,
@@ -19,7 +23,9 @@ export type HairLongevityImageClassificationInput = {
 /**
  * Hair Longevity adapter: shared classifier + HLI ledger row for intake/progress photography.
  */
-export async function classifyHairLongevityImageAndPersist(input: HairLongevityImageClassificationInput): Promise<{
+export async function classifyHairLongevityImageAndPersist(
+  input: HairLongevityImageClassificationInput
+): Promise<{
   result: FiAiImageClassificationResult;
   classifierVersion: string;
   usedOpenAi: boolean;

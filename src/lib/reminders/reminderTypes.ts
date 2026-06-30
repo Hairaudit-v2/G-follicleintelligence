@@ -1,4 +1,8 @@
-import type { ReminderJobStatus, ReminderTemplateType, ReminderTriggerEvent } from "./reminderConstants";
+import type {
+  ReminderJobStatus,
+  ReminderTemplateType,
+  ReminderTriggerEvent,
+} from "./reminderConstants";
 
 export type FiReminderTemplateRow = {
   id: string;

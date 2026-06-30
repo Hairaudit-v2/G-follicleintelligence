@@ -12,12 +12,16 @@ import type {
   FiProcedurePrivilegeRequirementRow,
   FiStaffProcedurePrivilegeRow,
 } from "@/src/lib/academy-os/procedurePrivilegeTypes";
-import { comparePrivilegeLevels, doesPrivilegeLevelSatisfy } from "@/src/lib/academy-os/procedurePrivilegeTypes";
+import {
+  comparePrivilegeLevels,
+  doesPrivilegeLevelSatisfy,
+} from "@/src/lib/academy-os/procedurePrivilegeTypes";
 
 const NOW = new Date("2026-06-22T12:00:00.000Z");
 
 function privilege(
-  overrides: Partial<FiStaffProcedurePrivilegeRow> & Pick<FiStaffProcedurePrivilegeRow, "procedureKey">
+  overrides: Partial<FiStaffProcedurePrivilegeRow> &
+    Pick<FiStaffProcedurePrivilegeRow, "procedureKey">
 ): FiStaffProcedurePrivilegeRow {
   return {
     id: overrides.id ?? "priv-1",
@@ -86,7 +90,11 @@ test("isPrivilegeActiveAtDate accepts active and pending_review", () => {
 });
 
 test("findMatchingProcedurePrivilege prefers clinic-specific privilege", () => {
-  const tenantWide = privilege({ procedureKey: "graft_sorting", clinicId: null, privilegeLevel: "assist" });
+  const tenantWide = privilege({
+    procedureKey: "graft_sorting",
+    clinicId: null,
+    privilegeLevel: "assist",
+  });
   const clinicSpecific = privilege({
     id: "priv-clinic",
     procedureKey: "graft_sorting",
@@ -107,7 +115,11 @@ test("findMatchingProcedurePrivilege prefers clinic-specific privilege", () => {
 });
 
 test("findMatchingProcedurePrivilege falls back to tenant-wide privilege", () => {
-  const tenantWide = privilege({ procedureKey: "fue_extraction", clinicId: null, privilegeLevel: "perform_independent" });
+  const tenantWide = privilege({
+    procedureKey: "fue_extraction",
+    clinicId: null,
+    privilegeLevel: "perform_independent",
+  });
 
   const match = findMatchingProcedurePrivilege({
     privileges: [tenantWide],
@@ -165,10 +177,21 @@ test("insufficient privilege level blocks eligibility", () => {
 
 test("evaluateRoleProcedureRequirements uses OR across multiple procedure keys", () => {
   const result = evaluateRoleProcedureRequirements({
-    privileges: [privilege({ procedureKey: "donor_assessment", privilegeLevel: "perform_independent" })],
+    privileges: [
+      privilege({ procedureKey: "donor_assessment", privilegeLevel: "perform_independent" }),
+    ],
     requirements: [
-      requirement({ assignedRole: "surgeon", requiredProcedureKey: "hairline_design", minimumPrivilegeLevel: "perform_independent" }),
-      requirement({ id: "req-2", assignedRole: "surgeon", requiredProcedureKey: "donor_assessment", minimumPrivilegeLevel: "perform_independent" }),
+      requirement({
+        assignedRole: "surgeon",
+        requiredProcedureKey: "hairline_design",
+        minimumPrivilegeLevel: "perform_independent",
+      }),
+      requirement({
+        id: "req-2",
+        assignedRole: "surgeon",
+        requiredProcedureKey: "donor_assessment",
+        minimumPrivilegeLevel: "perform_independent",
+      }),
     ],
     assignedRole: "surgeon",
     at: NOW,

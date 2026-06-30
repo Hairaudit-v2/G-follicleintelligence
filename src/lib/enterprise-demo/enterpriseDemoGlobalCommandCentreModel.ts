@@ -120,7 +120,9 @@ export type GlobalCommandCentreRawOutcomeRow = {
   warnings: string[];
 };
 
-const CLINIC_NAME_BY_SLUG = new Map<string, string>(ENTERPRISE_DEMO_CLINICS.map((c) => [c.slug, c.name]));
+const CLINIC_NAME_BY_SLUG = new Map<string, string>(
+  ENTERPRISE_DEMO_CLINICS.map((c) => [c.slug, c.name])
+);
 
 function clinicLabel(slug: string): string {
   return CLINIC_NAME_BY_SLUG.get(slug) ?? slug.replace(/-/g, " ");
@@ -261,10 +263,14 @@ export function aggregateClinicRows(
     if (row.satisfactionScore != null) agg.satisfactionScores.push(row.satisfactionScore);
   }
 
-  return [...bySlug.values()].sort((a, b) => b.maxRiskScore - a.maxRiskScore || a.clinicName.localeCompare(b.clinicName));
+  return [...bySlug.values()].sort(
+    (a, b) => b.maxRiskScore - a.maxRiskScore || a.clinicName.localeCompare(b.clinicName)
+  );
 }
 
-export function buildClinicRiskTable(aggregates: readonly GlobalCommandCentreClinicAggregate[]): GlobalCommandCentreClinicRiskRow[] {
+export function buildClinicRiskTable(
+  aggregates: readonly GlobalCommandCentreClinicAggregate[]
+): GlobalCommandCentreClinicRiskRow[] {
   return aggregates.map((aggregate) => ({
     clinicId: aggregate.clinicId,
     clinicName: aggregate.clinicName,
@@ -353,7 +359,8 @@ export function aggregateSurgicalSnapshot(graftTotals: {
     totalGraftsExtracted: graftTotals.extracted,
     totalGraftsImplanted: graftTotals.implanted,
     totalHairs: graftTotals.totalHairs,
-    averageTransectionRatePct: transectionRates.length > 0 ? round1(average(transectionRates)) : null,
+    averageTransectionRatePct:
+      transectionRates.length > 0 ? round1(average(transectionRates)) : null,
     reconciliationCompleted: graftTotals.reconciliationCompleted,
     reconciliationPending: graftTotals.reconciliationPending,
     reconciliationMismatch: graftTotals.reconciliationMismatch,
@@ -363,9 +370,13 @@ export function aggregateSurgicalSnapshot(graftTotals: {
 export function aggregateOutcomeSnapshot(
   outcomeRows: readonly GlobalCommandCentreRawOutcomeRow[]
 ): GlobalCommandCentreOutcomeSnapshot {
-  const survival = outcomeRows.map((r) => r.graftSurvivalEstimate).filter((v): v is number => v != null);
+  const survival = outcomeRows
+    .map((r) => r.graftSurvivalEstimate)
+    .filter((v): v is number => v != null);
   const donor = outcomeRows.map((r) => r.donorRecoveryScore).filter((v): v is number => v != null);
-  const satisfaction = outcomeRows.map((r) => r.satisfactionScore).filter((v): v is number => v != null);
+  const satisfaction = outcomeRows
+    .map((r) => r.satisfactionScore)
+    .filter((v): v is number => v != null);
 
   let auditsApproved = 0;
   let auditsWithWarnings = 0;
@@ -373,7 +384,8 @@ export function aggregateOutcomeSnapshot(
 
   for (const row of outcomeRows) {
     if (row.auditStatus === "approved") auditsApproved += 1;
-    if (row.warnings.length > 0 || row.auditStatus === "graft_variance_warning") auditsWithWarnings += 1;
+    if (row.warnings.length > 0 || row.auditStatus === "graft_variance_warning")
+      auditsWithWarnings += 1;
     if (row.auditStatus === "incomplete_follow_up") incompleteFollowUp += 1;
   }
 
@@ -392,7 +404,8 @@ export function buildEnterpriseDemoGlobalCommandCentreAlerts(
   referenceDate: Date,
   clinicRiskRows: readonly GlobalCommandCentreClinicRiskRow[]
 ): GlobalCommandCentreAlert[] {
-  const iso = (hoursAgo: number) => new Date(referenceDate.getTime() - hoursAgo * 60 * 60 * 1000).toISOString();
+  const iso = (hoursAgo: number) =>
+    new Date(referenceDate.getTime() - hoursAgo * 60 * 60 * 1000).toISOString();
 
   const alerts: GlobalCommandCentreAlert[] = [
     {

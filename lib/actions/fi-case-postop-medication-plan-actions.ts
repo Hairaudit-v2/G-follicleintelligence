@@ -9,7 +9,11 @@ import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
 import { pickPrimaryLinkedSurgeryBookingYmd } from "@/src/lib/cases/caseProcedureDayLinkedBooking";
 import { loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantWriteAllowed,
+  CrmAccessError,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import { instantiateSurgeryPostopMedicationBundle } from "@/src/lib/medicationOs/surgeryPostopMedicationBundle.server";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 
@@ -61,7 +65,11 @@ export async function createCasePostopMedicationPlanAction(
 ): Promise<CreateCasePostopMedicationPlanActionResult> {
   try {
     const parsed = postopMedicationPlanActionBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey ?? null, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: parsed.adminKey ?? null,
+      request: undefined,
+    });
 
     const tid = tenantId.trim();
     const cid = caseId.trim();
@@ -74,7 +82,10 @@ export async function createCasePostopMedicationPlanAction(
     const foundationPatientId =
       detail.foundation_patient_id?.trim() || detail.patient?.foundation_patient_id?.trim() || null;
     if (!foundationPatientId) {
-      return { ok: false, error: "Link a foundation patient to this case before creating a medication plan." };
+      return {
+        ok: false,
+        error: "Link a foundation patient to this case before creating a medication plan.",
+      };
     }
 
     const surgeryAnchorDate = await resolveSurgeryAnchorDateYmd(tid, cid, foundationPatientId);

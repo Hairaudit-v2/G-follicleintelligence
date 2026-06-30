@@ -10,10 +10,5 @@ interface JsonLdProps {
 export function JsonLd({ data }: JsonLdProps) {
   const payload = Array.isArray(data) ? data : [data];
   const __html = JSON.stringify(payload.length === 1 ? payload[0] : payload);
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html }} />;
 }

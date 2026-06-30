@@ -9,7 +9,11 @@ import {
   loadVieComparisonTimelineForPatient,
   updateVieComparisonReviewStatus,
 } from "@/src/lib/vie/vieLongitudinalComparison.server";
-import type { VieComparisonPairRow, VieComparisonReviewStatus, VieProgressionTimeline } from "@/src/lib/vie/vieComparisonTypes";
+import type {
+  VieComparisonPairRow,
+  VieComparisonReviewStatus,
+  VieProgressionTimeline,
+} from "@/src/lib/vie/vieComparisonTypes";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";

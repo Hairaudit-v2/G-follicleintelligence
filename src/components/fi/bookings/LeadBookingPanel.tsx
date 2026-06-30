@@ -11,7 +11,8 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCreatePanel } from "./BookingCreatePanel";
 import { BookingSummaryCard } from "./BookingSummaryCard";
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function LeadBookingPanel({
   tenantId,
@@ -74,7 +75,8 @@ export function LeadBookingPanel({
           <Link href={`${base}/appointments`} className="text-blue-300 hover:underline">
             Appointments
           </Link>{" "}
-          for the full operational view. Optional FI Admin key for writes when your session role cannot mutate CRM data.
+          for the full operational view. Optional FI Admin key for writes when your session role
+          cannot mutate CRM data.
         </p>
         <label className="mt-2 block text-xs text-slate-400">
           FI Admin key (optional)
@@ -125,7 +127,9 @@ export function LeadBookingPanel({
 
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Upcoming</h3>
-        {upcoming.length === 0 ? <p className="text-sm text-gray-500">No upcoming appointments.</p> : null}
+        {upcoming.length === 0 ? (
+          <p className="text-sm text-gray-500">No upcoming appointments.</p>
+        ) : null}
         <div className="space-y-2">
           {upcoming.map((b) => (
             <BookingSummaryCard
@@ -142,9 +146,13 @@ export function LeadBookingPanel({
       </section>
 
       <section className="space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Past & cancelled</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Past & cancelled
+        </h3>
         <details className="rounded border border-white/[0.06] bg-white/[0.03] p-2">
-          <summary className="cursor-pointer text-sm text-slate-300">Past & cancelled ({past.length})</summary>
+          <summary className="cursor-pointer text-sm text-slate-300">
+            Past & cancelled ({past.length})
+          </summary>
           <div className="mt-2 space-y-2">
             {past.map((b) => (
               <BookingSummaryCard

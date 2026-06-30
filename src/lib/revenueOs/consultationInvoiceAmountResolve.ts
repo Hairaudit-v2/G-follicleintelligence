@@ -42,7 +42,8 @@ function parseNumericMoney(v: unknown): number | null {
 function quoteRowUuid(q: FiCrmQuoteRowLike): string | null {
   const raw = q.id;
   const s = typeof raw === "string" ? raw.trim() : "";
-  if (!s || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s)) return null;
+  if (!s || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s))
+    return null;
   return s;
 }
 
@@ -59,11 +60,16 @@ export function resolveConsultationQuoteInvoiceSource(
   consultation: Pick<ConsultationRow, "quote_data">,
   crmQuotes?: FiCrmQuoteRowLike[] | null
 ): ConsultationQuoteInvoiceSource {
-  const qd = consultation.quote_data && typeof consultation.quote_data === "object" ? consultation.quote_data : {};
+  const qd =
+    consultation.quote_data && typeof consultation.quote_data === "object"
+      ? consultation.quote_data
+      : {};
   const quotes = crmQuotes ?? [];
   const primaryQuoteId = quotes.length ? quoteRowUuid(quotes[0]!) : null;
 
-  const fromPanel = parseMoneyStringToCentsAud(String((qd as { price_quoted?: unknown }).price_quoted ?? ""));
+  const fromPanel = parseMoneyStringToCentsAud(
+    String((qd as { price_quoted?: unknown }).price_quoted ?? "")
+  );
   if (fromPanel != null && fromPanel > 0) {
     return { amountCents: fromPanel, crmQuoteId: primaryQuoteId };
   }

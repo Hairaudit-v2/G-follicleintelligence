@@ -35,12 +35,13 @@ const HAIRAUDIT_TIMEPOINT_TO_SURGICAL_EVENT: Record<string, ImagingOsSurgicalIma
 };
 
 function normalizeTimepointKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
-function mapHairAuditTimepointToSurgicalEvent(
-  timepoint?: string
-): ImagingOsSurgicalImageEventType {
+function mapHairAuditTimepointToSurgicalEvent(timepoint?: string): ImagingOsSurgicalImageEventType {
   if (timepoint == null || timepoint.trim().length === 0) {
     return "unknown";
   }

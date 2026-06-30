@@ -9,7 +9,11 @@ const FIELDS = [
   { key: "donor_quality_notes", label: "Donor quality notes", wide: true },
 ] as const;
 
-export function ConsultationOsDonorPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
+export function ConsultationOsDonorPanel({
+  values,
+  onFieldChange,
+  disabled,
+}: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Donor" headingId="consultation-os-donor-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

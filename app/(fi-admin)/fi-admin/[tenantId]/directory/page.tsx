@@ -40,7 +40,11 @@ export default async function FoundationDirectoryPage({
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: te } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (te || !tenant) notFound();
 
   const q = typeof searchParams.q === "string" ? searchParams.q : "";
@@ -51,8 +55,15 @@ export default async function FoundationDirectoryPage({
       type: parseFilter(searchParams.type),
       limit: parseLimit(searchParams.limit),
     }),
-    supabase.from("fi_organisations").select("id, name").eq("tenant_id", tenantId).order("name", { ascending: true }),
-    supabase.from("fi_clinics").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabase
+      .from("fi_organisations")
+      .select("id, name")
+      .eq("tenant_id", tenantId)
+      .order("name", { ascending: true }),
+    supabase
+      .from("fi_clinics")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId),
   ]);
 
   if (orgListRes.error) {
@@ -81,12 +92,18 @@ export default async function FoundationDirectoryPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Directory</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          Directory
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Search foundation patients, cases, clinics, and organisations for this tenant. FI admins can create
-          organisations and clinics in <strong className="text-[#E2E8F0]">Foundation records</strong> (service role +{" "}
-          <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#22C1FF]">FI_ADMIN_API_KEY</code>); patient and
-          case rows stay read-only here. Results link to records where applicable; clinics and organisations use in-page anchors.
+          Search foundation patients, cases, clinics, and organisations for this tenant. FI admins
+          can create organisations and clinics in{" "}
+          <strong className="text-[#E2E8F0]">Foundation records</strong> (service role +{" "}
+          <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-xs text-[#22C1FF]">
+            FI_ADMIN_API_KEY
+          </code>
+          ); patient and case rows stay read-only here. Results link to records where applicable;
+          clinics and organisations use in-page anchors.
         </p>
       </div>
       <FoundationDirectoryTools

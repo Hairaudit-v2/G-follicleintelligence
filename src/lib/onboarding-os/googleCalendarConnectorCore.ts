@@ -17,22 +17,32 @@ import type {
 import { isExternalCalendarEventType } from "./googleCalendarConnectorTypes";
 
 /** Keyword rules ordered by specificity (first match wins). */
-const CLASSIFICATION_RULES: readonly { type: ExternalCalendarEventType; keywords: readonly string[] }[] = [
+const CLASSIFICATION_RULES: readonly {
+  type: ExternalCalendarEventType;
+  keywords: readonly string[];
+}[] = [
   { type: "exosomes", keywords: ["exosome", "exosomes"] },
   { type: "prp", keywords: ["prp", "platelet rich plasma", "platelet-rich"] },
-  { type: "surgery", keywords: ["surgery", "transplant", "fue", "dhi", "hair transplant", "procedure day"] },
-  { type: "follow_up", keywords: ["follow up", "follow-up", "followup", "post op", "post-op", "postoperative"] },
-  { type: "consultation", keywords: ["consultation", "consult", "initial consult", "hair consult", "discovery call"] },
-  { type: "review", keywords: ["review", "check-in", "check in", "progress review", "6 month", "12 month"] },
+  {
+    type: "surgery",
+    keywords: ["surgery", "transplant", "fue", "dhi", "hair transplant", "procedure day"],
+  },
+  {
+    type: "follow_up",
+    keywords: ["follow up", "follow-up", "followup", "post op", "post-op", "postoperative"],
+  },
+  {
+    type: "consultation",
+    keywords: ["consultation", "consult", "initial consult", "hair consult", "discovery call"],
+  },
+  {
+    type: "review",
+    keywords: ["review", "check-in", "check in", "progress review", "6 month", "12 month"],
+  },
 ];
 
 function normalizeSearchText(...parts: (string | null | undefined)[]): string {
-  return parts
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return parts.filter(Boolean).join(" ").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 function parseGoogleDateTime(
@@ -223,16 +233,15 @@ export function calculateCalendarSyncHealth(opts: {
   else if (healthScore >= 45) healthBand = "degraded";
   else healthBand = "unhealthy";
 
-  const summary =
-    !opts.authVerified
-      ? "Verify Google Calendar credentials before syncing."
-      : lastRun?.status === "failed"
-        ? "Last sync failed — review connector auth and calendar configuration."
-        : stagedPendingReview > 0
-          ? `${stagedPendingReview} staged event(s) pending human review — no automatic import.`
-          : lastRun?.status === "completed"
-            ? "Calendar sync healthy — events staged for review only."
-            : "Run a manual sync to discover external calendar events.";
+  const summary = !opts.authVerified
+    ? "Verify Google Calendar credentials before syncing."
+    : lastRun?.status === "failed"
+      ? "Last sync failed — review connector auth and calendar configuration."
+      : stagedPendingReview > 0
+        ? `${stagedPendingReview} staged event(s) pending human review — no automatic import.`
+        : lastRun?.status === "completed"
+          ? "Calendar sync healthy — events staged for review only."
+          : "Run a manual sync to discover external calendar events.";
 
   return {
     healthScore,

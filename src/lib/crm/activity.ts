@@ -68,7 +68,8 @@ function mapActivityRow(row: Record<string, unknown>): FiCrmActivityEventRow {
         : {},
     occurred_at: String(row.occurred_at),
     created_at: String(row.created_at),
-    fi_timeline_event_id: row.fi_timeline_event_id != null ? String(row.fi_timeline_event_id) : null,
+    fi_timeline_event_id:
+      row.fi_timeline_event_id != null ? String(row.fi_timeline_event_id) : null,
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
   };

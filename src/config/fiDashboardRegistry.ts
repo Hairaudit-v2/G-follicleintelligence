@@ -105,11 +105,13 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   },
   staff_intelligence_summary: {
     title: "Staff intelligence",
-    description: "Operational support signals for clinic leadership (no automated permission changes).",
+    description:
+      "Operational support signals for clinic leadership (no automated permission changes).",
   },
   clinical_intelligence_summary: {
     title: "Clinical Intelligence",
-    description: "Neutral patient journey and outcome support signals for clinical leadership (no automated medical advice).",
+    description:
+      "Neutral patient journey and outcome support signals for clinical leadership (no automated medical advice).",
   },
   outcome_intelligence_summary: {
     title: "Outcome Intelligence",
@@ -118,7 +120,8 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   },
   platform_development_progress: {
     title: "Platform Development Progress",
-    description: "Live FI OS module completion percentages and delivery status across the ecosystem.",
+    description:
+      "Live FI OS module completion percentages and delivery status across the ecosystem.",
   },
   recent_platform_releases: {
     title: "Recent Platform Releases",

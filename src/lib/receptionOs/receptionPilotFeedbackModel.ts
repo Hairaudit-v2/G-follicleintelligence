@@ -2,7 +2,10 @@
  * ReceptionOS Phase 7 — pilot feedback kinds and validation (pure).
  */
 
-import { RECEPTION_OS_OPERATING_MODES, type ReceptionOsOperatingMode } from "@/src/lib/receptionOs/receptionOperatingMode";
+import {
+  RECEPTION_OS_OPERATING_MODES,
+  type ReceptionOsOperatingMode,
+} from "@/src/lib/receptionOs/receptionOperatingMode";
 import { sanitizeOperationalMetadata } from "@/src/lib/receptionOs/receptionUsageEventModel";
 
 export const RECEPTION_PILOT_FEEDBACK_KINDS = [
@@ -54,16 +57,24 @@ export function isReceptionPilotFeedbackKind(v: unknown): v is ReceptionPilotFee
 }
 
 export function sanitizeReceptionPilotFeedbackContext(
-  ctx: ReceptionPilotFeedbackContext | undefined,
-): Required<Pick<ReceptionPilotFeedbackContext, "operatingMode" | "widgetKey" | "taskId" | "alertKind" | "sourceRefId" | "note">> & {
+  ctx: ReceptionPilotFeedbackContext | undefined
+): Required<
+  Pick<
+    ReceptionPilotFeedbackContext,
+    "operatingMode" | "widgetKey" | "taskId" | "alertKind" | "sourceRefId" | "note"
+  >
+> & {
   metadata: Record<string, unknown>;
 } {
   const operatingMode =
     ctx?.operatingMode && OPERATING_MODE_SET.has(ctx.operatingMode) ? ctx.operatingMode : null;
-  const widgetKey = typeof ctx?.widgetKey === "string" ? ctx.widgetKey.trim().slice(0, 64) || null : null;
+  const widgetKey =
+    typeof ctx?.widgetKey === "string" ? ctx.widgetKey.trim().slice(0, 64) || null : null;
   const taskId = typeof ctx?.taskId === "string" ? ctx.taskId.trim() || null : null;
-  const alertKind = typeof ctx?.alertKind === "string" ? ctx.alertKind.trim().slice(0, 64) || null : null;
-  const sourceRefId = typeof ctx?.sourceRefId === "string" ? ctx.sourceRefId.trim().slice(0, 128) || null : null;
+  const alertKind =
+    typeof ctx?.alertKind === "string" ? ctx.alertKind.trim().slice(0, 64) || null : null;
+  const sourceRefId =
+    typeof ctx?.sourceRefId === "string" ? ctx.sourceRefId.trim().slice(0, 128) || null : null;
   const note = typeof ctx?.note === "string" ? ctx.note.trim().slice(0, 500) || null : null;
   const metadata =
     ctx?.metadata && typeof ctx.metadata === "object" && !Array.isArray(ctx.metadata)
@@ -72,7 +83,10 @@ export function sanitizeReceptionPilotFeedbackContext(
   return { operatingMode, widgetKey, taskId, alertKind, sourceRefId, note, metadata };
 }
 
-export function assertReceptionPilotFeedbackTenantScope(expectedTenantId: string, rowTenantId: string): void {
+export function assertReceptionPilotFeedbackTenantScope(
+  expectedTenantId: string,
+  rowTenantId: string
+): void {
   if (expectedTenantId.trim() !== rowTenantId.trim()) {
     throw new Error("ReceptionOS pilot feedback tenant scope violation.");
   }

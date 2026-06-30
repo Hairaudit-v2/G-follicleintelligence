@@ -33,9 +33,13 @@ function SectionIntro({
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">{eyebrow}</p>
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground md:text-4xl">
+        {title}
+      </h2>
       {description ? (
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">{description}</p>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -60,8 +64,8 @@ export default function TechnologyPage() {
       <Section className="border-b border-border/50 pb-12 pt-2 md:pb-14">
         <FadeIn>
           <p className="max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            Follicle Intelligence connects every operational and clinical system into one structured platform designed
-            specifically for hair restoration.
+            Follicle Intelligence connects every operational and clinical system into one structured
+            platform designed specifically for hair restoration.
           </p>
         </FadeIn>
       </Section>
@@ -92,9 +96,9 @@ export default function TechnologyPage() {
             <div className="fi-panel rounded-[1.35rem] p-6 md:p-7">
               <Layers3 className="h-6 w-6 text-primary/85" aria-hidden />
               <p className="mt-5 text-sm leading-relaxed text-muted-foreground md:text-base">
-                The platform is designed so signals compound: operational discipline and clinical evidence reinforce
-                each other in one longitudinal record, instead of fragmenting across tools that never share a common
-                model of the patient or the case.
+                The platform is designed so signals compound: operational discipline and clinical
+                evidence reinforce each other in one longitudinal record, instead of fragmenting
+                across tools that never share a common model of the patient or the case.
               </p>
             </div>
           </FadeIn>
@@ -114,9 +118,10 @@ export default function TechnologyPage() {
             <div className="fi-panel-muted rounded-[1.35rem] p-6 md:p-7">
               <GitMerge className="h-6 w-6 text-primary/85" aria-hidden />
               <p className="mt-5 text-sm leading-relaxed text-muted-foreground md:text-base">
-                Adoption can follow your risk and change-management posture: connect critical workflows first, prove
-                value with structured reporting and governance, then consolidate schedules, records, and analytics on
-                the same spine when leadership and clinical teams are ready.
+                Adoption can follow your risk and change-management posture: connect critical
+                workflows first, prove value with structured reporting and governance, then
+                consolidate schedules, records, and analytics on the same spine when leadership and
+                clinical teams are ready.
               </p>
               <Button asChild variant="outline" className="mt-6 rounded-xl">
                 <Link href="/integration">Integration overview</Link>
@@ -138,7 +143,10 @@ export default function TechnologyPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             <ul className="space-y-4">
               {GOVERNANCE_POINTS.map((line) => (
-                <li key={line} className="flex gap-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+                <li
+                  key={line}
+                  className="flex gap-3 text-sm leading-relaxed text-muted-foreground md:text-base"
+                >
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary/85" aria-hidden />
                   <span>{line}</span>
                 </li>
@@ -148,8 +156,9 @@ export default function TechnologyPage() {
               <div className="flex items-start gap-3">
                 <Shield className="h-6 w-6 shrink-0 text-primary/85" aria-hidden />
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Deeper security artefacts, data-flow detail, and procurement materials are shared through your
-                  normal vendor process—this page states design intent, not a substitute for diligence.
+                  Deeper security artefacts, data-flow detail, and procurement materials are shared
+                  through your normal vendor process—this page states design intent, not a
+                  substitute for diligence.
                 </p>
               </div>
               <Button asChild variant="outline" className="w-fit rounded-xl">
@@ -165,17 +174,23 @@ export default function TechnologyPage() {
           <div className="fi-panel rounded-[2rem] p-8 md:p-10">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">Next step</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">
+                  Next step
+                </p>
                 <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl">
                   Build your clinic on connected infrastructure.
                 </h2>
                 <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                  See how layers map to your acquisition funnel, operating model, and clinical pathways—and how
-                  governance stays explicit as you scale.
+                  See how layers map to your acquisition funnel, operating model, and clinical
+                  pathways—and how governance stays explicit as you scale.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-col lg:items-stretch">
-                <Button asChild size="lg" className="h-11 rounded-xl px-6 shadow-[0_10px_36px_hsl(var(--primary)/0.2)]">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-11 rounded-xl px-6 shadow-[0_10px_36px_hsl(var(--primary)/0.2)]"
+                >
                   <Link href="/contact?intent=demo">Book Demo</Link>
                 </Button>
                 <Button

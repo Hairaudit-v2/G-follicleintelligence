@@ -30,7 +30,10 @@ function slotTierFor(slug: string, templateSlug: string): VieSlotTier {
   return def?.required === false ? "optional" : "primary";
 }
 
-function slotStatus(slot: ProtocolSlotDef, progress: Record<string, unknown>): VieSlotCompletionStatus {
+function slotStatus(
+  slot: ProtocolSlotDef,
+  progress: Record<string, unknown>
+): VieSlotCompletionStatus {
   const ids = getSlotImageIds(progress, slot.slug);
   if (ids.length > 0) return "captured";
   if (slot.required === false) {
@@ -165,11 +168,15 @@ export async function loadViePatientImagingCompleteness(
   for (const session of sessions) {
     const tpl = await loadTemplateSlots(tenantId, session.template_slug, supabase);
     if (!tpl.slots.length) continue;
-    protocols.push(buildProtocolCompleteness(session.template_slug, tpl.name, tpl.slots, session.progress));
+    protocols.push(
+      buildProtocolCompleteness(session.template_slug, tpl.name, tpl.slots, session.progress)
+    );
   }
 
   const activeSession =
-    sessions.find((s) => s.template_slug === "baseline_consultation" && !isSessionMarkedComplete(s.progress)) ??
+    sessions.find(
+      (s) => s.template_slug === "baseline_consultation" && !isSessionMarkedComplete(s.progress)
+    ) ??
     sessions.find((s) => s.template_slug === "baseline_consultation") ??
     sessions.find((s) => !isSessionMarkedComplete(s.progress)) ??
     sessions[0] ??
@@ -178,7 +185,12 @@ export async function loadViePatientImagingCompleteness(
   let headline: VieProtocolCompleteness;
   if (activeSession) {
     const tpl = await loadTemplateSlots(tenantId, activeSession.template_slug, supabase);
-    headline = buildProtocolCompleteness(activeSession.template_slug, tpl.name, tpl.slots, activeSession.progress);
+    headline = buildProtocolCompleteness(
+      activeSession.template_slug,
+      tpl.name,
+      tpl.slots,
+      activeSession.progress
+    );
   } else {
     const baseline = getVieProtocol("baseline_consultation")!;
     const emptyProgress: Record<string, unknown> = {};

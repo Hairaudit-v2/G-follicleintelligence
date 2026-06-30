@@ -46,8 +46,12 @@ export function CaseSurgeryPlanningForm({
   const [procedureType, setProcedureType] = useState(initial?.planned_procedure_type ?? "");
   const [sessionType, setSessionType] = useState(initial?.planned_session_type ?? "");
   const [zones, setZones] = useState<PlannedZoneRow[]>(initial?.planned_zones ?? []);
-  const [graftsMin, setGraftsMin] = useState(initial?.estimated_grafts_min != null ? String(initial.estimated_grafts_min) : "");
-  const [graftsMax, setGraftsMax] = useState(initial?.estimated_grafts_max != null ? String(initial.estimated_grafts_max) : "");
+  const [graftsMin, setGraftsMin] = useState(
+    initial?.estimated_grafts_min != null ? String(initial.estimated_grafts_min) : ""
+  );
+  const [graftsMax, setGraftsMax] = useState(
+    initial?.estimated_grafts_max != null ? String(initial.estimated_grafts_max) : ""
+  );
   const [donorNotes, setDonorNotes] = useState(initial?.donor_strategy_notes ?? "");
   const [recipientNotes, setRecipientNotes] = useState(initial?.recipient_strategy_notes ?? "");
   const [medNotes, setMedNotes] = useState(initial?.medication_prep_notes ?? "");
@@ -106,7 +110,10 @@ export function CaseSurgeryPlanningForm({
 
   return (
     <div className="space-y-4">
-      <label htmlFor={SURGERY_PLAN_FIELDS.planningStatus.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={SURGERY_PLAN_FIELDS.planningStatus.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Planning status
         <select
           {...SURGERY_PLAN_FIELDS.planningStatus}
@@ -114,7 +121,9 @@ export function CaseSurgeryPlanningForm({
           onChange={(e) => setPlanningStatus(e.target.value)}
           className="mt-1 block w-full max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         >
-          {!isSurgeryPlanningStatus(planningStatus) ? <option value={planningStatus}>{planningStatus} (legacy)</option> : null}
+          {!isSurgeryPlanningStatus(planningStatus) ? (
+            <option value={planningStatus}>{planningStatus} (legacy)</option>
+          ) : null}
           {SURGERY_PLANNING_STATUS_VALUES.map((s) => (
             <option key={s} value={s}>
               {s}
@@ -123,7 +132,10 @@ export function CaseSurgeryPlanningForm({
         </select>
       </label>
 
-      <label htmlFor={SURGERY_PLAN_FIELDS.summary.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={SURGERY_PLAN_FIELDS.summary.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Surgical plan summary
         <textarea
           {...SURGERY_PLAN_FIELDS.summary}
@@ -136,7 +148,10 @@ export function CaseSurgeryPlanningForm({
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={SURGERY_PLAN_FIELDS.procedureType.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SURGERY_PLAN_FIELDS.procedureType.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Planned procedure type
           <input
             {...SURGERY_PLAN_FIELDS.procedureType}
@@ -146,7 +161,10 @@ export function CaseSurgeryPlanningForm({
             placeholder="e.g. FUE, FUT"
           />
         </label>
-        <label htmlFor={SURGERY_PLAN_FIELDS.sessionType.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SURGERY_PLAN_FIELDS.sessionType.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Planned session type
           <input
             {...SURGERY_PLAN_FIELDS.sessionType}
@@ -159,7 +177,10 @@ export function CaseSurgeryPlanningForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMin.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SURGERY_PLAN_FIELDS.graftsMin.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Estimated grafts (min)
           <input
             {...SURGERY_PLAN_FIELDS.graftsMin}
@@ -170,7 +191,10 @@ export function CaseSurgeryPlanningForm({
             placeholder="Optional"
           />
         </label>
-        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMax.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={SURGERY_PLAN_FIELDS.graftsMax.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Estimated grafts (max)
           <input
             {...SURGERY_PLAN_FIELDS.graftsMax}
@@ -185,7 +209,10 @@ export function CaseSurgeryPlanningForm({
 
       <CasePlannedZonesPanel zones={zones} onChange={setZones} />
 
-      <label htmlFor={SURGERY_PLAN_FIELDS.donorNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={SURGERY_PLAN_FIELDS.donorNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Donor strategy notes
         <textarea
           {...SURGERY_PLAN_FIELDS.donorNotes}
@@ -195,7 +222,10 @@ export function CaseSurgeryPlanningForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={SURGERY_PLAN_FIELDS.recipientNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={SURGERY_PLAN_FIELDS.recipientNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Recipient strategy notes
         <textarea
           {...SURGERY_PLAN_FIELDS.recipientNotes}
@@ -205,7 +235,10 @@ export function CaseSurgeryPlanningForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={SURGERY_PLAN_FIELDS.medNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={SURGERY_PLAN_FIELDS.medNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Medication / prep notes
         <textarea
           {...SURGERY_PLAN_FIELDS.medNotes}
@@ -215,7 +248,10 @@ export function CaseSurgeryPlanningForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={SURGERY_PLAN_FIELDS.planningNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={SURGERY_PLAN_FIELDS.planningNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Detailed planning notes (surgery plan)
         <textarea
           {...SURGERY_PLAN_FIELDS.planningNotes}

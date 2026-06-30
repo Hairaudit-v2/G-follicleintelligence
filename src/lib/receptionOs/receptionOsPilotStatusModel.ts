@@ -76,13 +76,25 @@ export function isReceptionOsPilotModeActive(input: {
 }): boolean {
   if (input.dryRunEnabled) return true;
   if (!input.emailSendEnabled && !input.smsSendEnabled) return true;
-  return input.providerMode === "dry_run" || input.providerMode === "stub" || input.providerMode === "live_blocked";
+  return (
+    input.providerMode === "dry_run" ||
+    input.providerMode === "stub" ||
+    input.providerMode === "live_blocked"
+  );
 }
 
-export function buildReceptionOsPilotBanner(status: Pick<
-  ReceptionOsSystemStatus,
-  "pilotModeActive" | "dryRunEnabled" | "emailSendEnabled" | "smsSendEnabled" | "providerMode" | "resendConfigured" | "twilioConfigured"
->): ReceptionOsPilotBanner | null {
+export function buildReceptionOsPilotBanner(
+  status: Pick<
+    ReceptionOsSystemStatus,
+    | "pilotModeActive"
+    | "dryRunEnabled"
+    | "emailSendEnabled"
+    | "smsSendEnabled"
+    | "providerMode"
+    | "resendConfigured"
+    | "twilioConfigured"
+  >
+): ReceptionOsPilotBanner | null {
   if (!status.pilotModeActive) return null;
 
   if (status.providerMode === "live_blocked") {
@@ -108,7 +120,9 @@ export function buildReceptionOsPilotBanner(status: Pick<
   };
 }
 
-export function buildReceptionOsSystemStatus(input: BuildReceptionOsSystemStatusInput): ReceptionOsSystemStatus {
+export function buildReceptionOsSystemStatus(
+  input: BuildReceptionOsSystemStatusInput
+): ReceptionOsSystemStatus {
   const providerMode = deriveReceptionOsProviderMode(input);
   const pilotModeActive = isReceptionOsPilotModeActive({
     dryRunEnabled: input.dryRunEnabled,

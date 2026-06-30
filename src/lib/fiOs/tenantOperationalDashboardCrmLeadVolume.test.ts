@@ -30,6 +30,9 @@ test("aggregateActiveLeadVolumeByPipelineStage: ignores terminal statuses and bu
 
 test("aggregateActiveLeadVolumeByPipelineStage: does not read stale lead rows", () => {
   const pipelineIds = new Set([STAGE_A]);
-  const vol = aggregateActiveLeadVolumeByPipelineStage([{ current_stage_id: STAGE_A, status: "open" }], pipelineIds);
+  const vol = aggregateActiveLeadVolumeByPipelineStage(
+    [{ current_stage_id: STAGE_A, status: "open" }],
+    pipelineIds
+  );
   assert.equal(vol.activeByStageId[STAGE_A], 1);
 });

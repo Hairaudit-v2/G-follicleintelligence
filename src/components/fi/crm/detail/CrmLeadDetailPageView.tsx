@@ -4,7 +4,12 @@ import { Suspense } from "react";
 import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import type { CrmLeadDetailTabId } from "@/src/lib/crm/crmLeadDetailTabs";
 import type { CrmLeadShellDetailPagePayload } from "@/src/lib/crm/crmShellLoaders";
-import { CrmActivityPanel, CrmMessagesPanel, CrmNotesPanel, CrmPipelinePanel } from "../CrmDataPanels";
+import {
+  CrmActivityPanel,
+  CrmMessagesPanel,
+  CrmNotesPanel,
+  CrmPipelinePanel,
+} from "../CrmDataPanels";
 import { CrmLeadDetailPreviewBridge } from "../CrmLeadDetailPreviewBridge";
 import { CrmLeadConversionPanel } from "../CrmLeadConversionPanel";
 import { CrmLeadCommunicationsWorkflow } from "../CrmLeadCommunicationsWorkflow";
@@ -62,7 +67,9 @@ export function CrmLeadDetailPageView({
       <header className="space-y-1">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <h1 className="text-xl font-semibold text-slate-100">{leadTitle}</h1>
-          {lead.patient_id ? <PatientTwinNavLink tenantId={tenantId} patientId={lead.patient_id} /> : null}
+          {lead.patient_id ? (
+            <PatientTwinNavLink tenantId={tenantId} patientId={lead.patient_id} />
+          ) : null}
         </div>
         <p className="text-sm text-slate-400">
           CRM lead · <span className="font-mono text-xs">{lead.id}</span>
@@ -75,7 +82,14 @@ export function CrmLeadDetailPageView({
         </p>
       </header>
 
-      <Suspense fallback={<div className="h-16 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="h-16 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
+            aria-hidden
+          />
+        }
+      >
         <CrmLeadDetailPreviewBridge
           tenantId={tenantId}
           currentLeadId={lead.id}
@@ -84,7 +98,14 @@ export function CrmLeadDetailPageView({
         />
       </Suspense>
 
-      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
+            aria-hidden
+          />
+        }
+      >
         <CrmLeadDetailTabNav tenantId={tenantId} leadId={leadId} activeTab={activeTab} />
       </Suspense>
 
@@ -147,7 +168,11 @@ export function CrmLeadDetailPageView({
             clinicalDetails={payload.clinicalDetails}
             clinicalScalesSummary={payload.clinicalScalesSummary}
           />
-          <LeadPhotoGalleryPanel tenantId={tenantId} patientId={lead.patient_id} bundle={payload.patientImages} />
+          <LeadPhotoGalleryPanel
+            tenantId={tenantId}
+            patientId={lead.patient_id}
+            bundle={payload.patientImages}
+          />
         </div>
       ) : null}
 
@@ -210,7 +235,11 @@ export function CrmLeadDetailPageView({
             onAddGeneralNote={state.onAddGeneralNote}
             onAddLeadNote={state.onAddLeadNote}
           />
-          <CrmLeadNotesWorkflow tenantId={tenantId} leadId={lead.id} leadNotes={payload.detail.leadNotes} />
+          <CrmLeadNotesWorkflow
+            tenantId={tenantId}
+            leadId={lead.id}
+            leadNotes={payload.detail.leadNotes}
+          />
           <CrmLeadCommunicationsWorkflow
             tenantId={tenantId}
             leadId={lead.id}

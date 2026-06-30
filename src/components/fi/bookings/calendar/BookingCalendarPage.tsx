@@ -25,7 +25,17 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
     router.refresh();
   }, [router]);
 
-  const { tenantId, query, lanes, buckets, assignees, clinicalStaffOptions, clinics, listTruncated, rangeTitle } = data;
+  const {
+    tenantId,
+    query,
+    lanes,
+    buckets,
+    assignees,
+    clinicalStaffOptions,
+    clinics,
+    listTruncated,
+    rangeTitle,
+  } = data;
 
   function scrollToCreate() {
     createRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -36,10 +46,12 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       <header className="space-y-2">
         <h1 className="text-lg font-semibold text-slate-100">Calendar</h1>
         <p className="text-sm text-slate-400">
-          Scheduling for the selected clinic-local range. Use the operator list for bulk filters and wide exports.
+          Scheduling for the selected clinic-local range. Use the operator list for bulk filters and
+          wide exports.
         </p>
         <label className="block max-w-md text-xs text-slate-400">
-          FI Admin key (optional — paste when your session role cannot write via service actions alone)
+          FI Admin key (optional — paste when your session role cannot write via service actions
+          alone)
           <input
             type="password"
             className="mt-1 w-full rounded border border-slate-700 px-2 py-1 font-mono text-sm"
@@ -52,8 +64,8 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
 
       {listTruncated ? (
         <p className="text-xs text-amber-300">
-          The calendar hit the row cap for this range. Narrow filters or use the Bookings operator page for a wider
-          window.
+          The calendar hit the row cap for this range. Narrow filters or use the Bookings operator
+          page for a wider window.
         </p>
       ) : null}
 
@@ -127,7 +139,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       <BookingEditDrawer
         tenantId={tenantId}
         booking={editing}
-        reminderJobs={editing ? data.reminderJobsByBookingId[editing.id] ?? [] : []}
+        reminderJobs={editing ? (data.reminderJobsByBookingId[editing.id] ?? []) : []}
         clinicalStaffOptions={clinicalStaffOptions}
         clinics={clinics}
         adminKey={adminKey}

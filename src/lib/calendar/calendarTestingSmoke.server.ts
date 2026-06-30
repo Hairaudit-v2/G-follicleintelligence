@@ -4,10 +4,19 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createCalendarAppointment } from "@/src/lib/bookings/appointmentsApi";
 import { cancelBooking } from "@/src/lib/bookings/server";
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { isoFromLocalDayMinutes, normalizeCalendarTimezone, zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import {
+  isoFromLocalDayMinutes,
+  normalizeCalendarTimezone,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import { nextStaffWorkingLocalDayYmd } from "@/src/lib/calendar/calendarTestingSlotHelpers";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { formatStaffWeeklyHoursSummary, minutesFromHm, parseStaffWeeklyHours, staffWeekdayKeyFromUtcMs } from "@/src/lib/staff/staffWeeklyHours";
+import {
+  formatStaffWeeklyHoursSummary,
+  minutesFromHm,
+  parseStaffWeeklyHours,
+  staffWeekdayKeyFromUtcMs,
+} from "@/src/lib/staff/staffWeeklyHours";
 
 function hasWeeklyHoursSummary(staff: { working_hours: Record<string, unknown> }): boolean {
   return Boolean(formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(staff.working_hours)).trim());
@@ -26,7 +35,11 @@ export async function runCalendarConsultationSmokeTest(
   adminKey?: string | null
 ): Promise<CalendarSmokeTestResult> {
   const tid = tenantId.trim();
-  await assertCrmTenantWriteAllowed({ tenantId: tid, adminKey: adminKey ?? undefined, request: undefined });
+  await assertCrmTenantWriteAllowed({
+    tenantId: tid,
+    adminKey: adminKey ?? undefined,
+    request: undefined,
+  });
 
   const supabase = supabaseAdmin();
   const { data: lead, error: le } = await supabase
@@ -38,7 +51,10 @@ export async function runCalendarConsultationSmokeTest(
     .maybeSingle();
   if (le) return { ok: false, error: le.message };
   if (!lead) {
-    return { ok: false, error: "No CRM lead with person_id found — create a lead first, then retry." };
+    return {
+      ok: false,
+      error: "No CRM lead with person_id found — create a lead first, then retry.",
+    };
   }
 
   const staffList = await loadAllStaffForTenant(tid);
@@ -70,7 +86,10 @@ export async function runCalendarConsultationSmokeTest(
     slotEnd = slotStart + 30;
   }
   if (slotEnd <= slotStart) {
-    return { ok: false, error: "Working window too narrow for a smoke booking — widen staff hours." };
+    return {
+      ok: false,
+      error: "Working window too narrow for a smoke booking — widen staff hours.",
+    };
   }
   const startIso = isoFromLocalDayMinutes(ymd, slotStart, staffTz);
   const endIso = isoFromLocalDayMinutes(ymd, slotEnd, staffTz);

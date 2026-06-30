@@ -11,7 +11,8 @@ export type FiStaffIntelligenceRecommendation = {
   href?: string | null;
 };
 
-const PUNITIVE_SUBSTRINGS = /\b(poor|worst|rank|ranking|failure|failed|bad\s+performer|underperform|lazy|inadequate)\b/i;
+const PUNITIVE_SUBSTRINGS =
+  /\b(poor|worst|rank|ranking|failure|failed|bad\s+performer|underperform|lazy|inadequate)\b/i;
 
 export function assertRecommendationCopyIsNonPunitive(text: string): void {
   if (PUNITIVE_SUBSTRINGS.test(text)) {
@@ -19,7 +20,12 @@ export function assertRecommendationCopyIsNonPunitive(text: string): void {
   }
 }
 
-function rec(id: string, title: string, body: string, href?: string | null): FiStaffIntelligenceRecommendation {
+function rec(
+  id: string,
+  title: string,
+  body: string,
+  href?: string | null
+): FiStaffIntelligenceRecommendation {
   assertRecommendationCopyIsNonPunitive(`${title} ${body}`);
   return { id, title, body, href: href ?? null };
 }
@@ -37,9 +43,14 @@ export function buildStaffIntelligenceRecommendations(opts: {
   const p = workspaceProfileHint;
   const code = (positionTypeCode ?? "").trim().toUpperCase();
 
-  const sev = (k: FiOrganisationalIntelligenceSignalKey) => severityForSignalCount(k, counts[k] ?? 0);
+  const sev = (k: FiOrganisationalIntelligenceSignalKey) =>
+    severityForSignalCount(k, counts[k] ?? 0);
 
-  if ((counts.leads_stale ?? 0) > 0 && sev("leads_stale") !== "info" && (p === "consultant" || code === "CONSULTANT")) {
+  if (
+    (counts.leads_stale ?? 0) > 0 &&
+    sev("leads_stale") !== "info" &&
+    (p === "consultant" || code === "CONSULTANT")
+  ) {
     out.push(
       rec(
         "stale_leads",
@@ -49,7 +60,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.consultations_assigned ?? 0) >= 1 && sev("consultations_assigned") !== "info" && (p === "consultant" || p === "doctor")) {
+  if (
+    (counts.consultations_assigned ?? 0) >= 1 &&
+    sev("consultations_assigned") !== "info" &&
+    (p === "consultant" || p === "doctor")
+  ) {
     out.push(
       rec(
         "consult_summaries",
@@ -59,7 +74,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.follow_ups_due ?? 0) > 0 && sev("follow_ups_due") !== "info" && (p === "nurse" || code === "RN")) {
+  if (
+    (counts.follow_ups_due ?? 0) > 0 &&
+    sev("follow_ups_due") !== "info" &&
+    (p === "nurse" || code === "RN")
+  ) {
     out.push(
       rec(
         "follow_up_queue",
@@ -69,7 +88,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.imaging_uploads_pending ?? 0) > 0 && sev("imaging_uploads_pending") !== "info" && (p === "nurse" || p === "doctor")) {
+  if (
+    (counts.imaging_uploads_pending ?? 0) > 0 &&
+    sev("imaging_uploads_pending") !== "info" &&
+    (p === "nurse" || p === "doctor")
+  ) {
     out.push(
       rec(
         "imaging_queue",
@@ -79,7 +102,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.surgery_readiness_alerts ?? 0) > 0 && sev("surgery_readiness_alerts") !== "info" && (p === "surgeon" || code === "SURGEON")) {
+  if (
+    (counts.surgery_readiness_alerts ?? 0) > 0 &&
+    sev("surgery_readiness_alerts") !== "info" &&
+    (p === "surgeon" || code === "SURGEON")
+  ) {
     out.push(
       rec(
         "readiness_blockers",
@@ -89,7 +116,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.audit_reviews_pending ?? 0) > 0 && sev("audit_reviews_pending") !== "info" && (p === "auditor" || p === "director")) {
+  if (
+    (counts.audit_reviews_pending ?? 0) > 0 &&
+    sev("audit_reviews_pending") !== "info" &&
+    (p === "auditor" || p === "director")
+  ) {
     out.push(
       rec(
         "audit_queue",
@@ -99,7 +130,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.training_due ?? 0) > 0 && sev("training_due") !== "info" && (p === "academy_trainer" || code === "ACADEMY_TRAINER")) {
+  if (
+    (counts.training_due ?? 0) > 0 &&
+    sev("training_due") !== "info" &&
+    (p === "academy_trainer" || code === "ACADEMY_TRAINER")
+  ) {
     out.push(
       rec(
         "learner_progress",
@@ -109,7 +144,11 @@ export function buildStaffIntelligenceRecommendations(opts: {
     );
   }
 
-  if ((counts.productivity_attention ?? 0) > 0 && sev("productivity_attention") !== "info" && (p === "clinic_manager" || p === "director")) {
+  if (
+    (counts.productivity_attention ?? 0) > 0 &&
+    sev("productivity_attention") !== "info" &&
+    (p === "clinic_manager" || p === "director")
+  ) {
     out.push(
       rec(
         "workload_support",

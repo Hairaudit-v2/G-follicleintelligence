@@ -38,7 +38,13 @@ function formatDateTime(iso: string): string {
   });
 }
 
-export function RosterShiftPanel({ tenantId, shifts, staffOptions, clinics, onChanged }: RosterShiftPanelProps) {
+export function RosterShiftPanel({
+  tenantId,
+  shifts,
+  staffOptions,
+  clinics,
+  onChanged,
+}: RosterShiftPanelProps) {
   const [staffId, setStaffId] = useState(staffOptions[0]?.id ?? "");
   const [clinicId, setClinicId] = useState("");
   const [shiftType, setShiftType] = useState<(typeof SHIFT_TYPES)[number]>("clinic_day");
@@ -175,7 +181,9 @@ export function RosterShiftPanel({ tenantId, shifts, staffOptions, clinics, onCh
       {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
 
       <div className="mt-5">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Upcoming shifts</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Upcoming shifts
+        </h4>
         {shifts.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">No shifts in this window.</p>
         ) : (
@@ -186,7 +194,9 @@ export function RosterShiftPanel({ tenantId, shifts, staffOptions, clinics, onCh
                 className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-xs"
               >
                 <div>
-                  <p className="font-medium capitalize text-slate-200">{shift.shift_type.replace(/_/g, " ")}</p>
+                  <p className="font-medium capitalize text-slate-200">
+                    {shift.shift_type.replace(/_/g, " ")}
+                  </p>
                   <p className="text-slate-400">
                     {formatDateTime(shift.starts_at)} → {formatDateTime(shift.ends_at)}
                   </p>

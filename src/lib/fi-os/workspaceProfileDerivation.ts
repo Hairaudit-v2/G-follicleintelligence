@@ -39,8 +39,12 @@ export function parseExplicitWorkspaceProfile(raw: unknown): FiWorkspaceProfileK
  * **Fallback (Stage 3.5):** superseded by `position_type` / feature-template defaults when present.
  * TODO(Stage 4): replace with normalized staff_type / HR job code when available in schema.
  */
-export function deriveWorkspaceProfileFromStaffRole(staffRole: string | null | undefined): FiWorkspaceProfileKey | null {
-  const t = String(staffRole ?? "").trim().toLowerCase();
+export function deriveWorkspaceProfileFromStaffRole(
+  staffRole: string | null | undefined
+): FiWorkspaceProfileKey | null {
+  const t = String(staffRole ?? "")
+    .trim()
+    .toLowerCase();
   if (!t) return null;
   if (t.includes("surgeon")) return "surgeon";
   if (t.includes("nurse")) return "nurse";
@@ -65,7 +69,9 @@ export function deriveWorkspaceProfileFromTenantAdminRole(
   return null;
 }
 
-export function deriveWorkspaceProfileFromFiOsRole(osRole: string | null | undefined): FiWorkspaceProfileKey | null {
+export function deriveWorkspaceProfileFromFiOsRole(
+  osRole: string | null | undefined
+): FiWorkspaceProfileKey | null {
   const r = normalizeFiOsRole(osRole);
   if (isFiOsPlatformAdminRole(r)) return "platform_admin";
   if (r === "fi_auditor") return "auditor";
@@ -77,7 +83,9 @@ export function deriveWorkspaceProfileFromFiOsRole(osRole: string | null | undef
  * Deterministic workspace profile resolution for the signed-in viewer.
  * Order: explicit metadata → position type default → feature template default → staff role heuristic (fallback) → tenant admin → OS role → default.
  */
-export function resolveWorkspaceProfileKeyFromSignals(input: WorkspaceProfileDerivationInput): FiWorkspaceProfileKey {
+export function resolveWorkspaceProfileKeyFromSignals(
+  input: WorkspaceProfileDerivationInput
+): FiWorkspaceProfileKey {
   const explicit = parseExplicitWorkspaceProfile(input.explicitWorkspaceProfile);
   if (explicit) return explicit;
 

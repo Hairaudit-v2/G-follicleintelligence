@@ -63,7 +63,10 @@ export function AppointmentHeader({
           <span className="text-gray-500">No patient linked yet</span>
         ) : null}
         {booking.case_id ? (
-          <Link href={`/fi-admin/${tenantId}/cases/${booking.case_id}`} className="text-blue-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/cases/${booking.case_id}`}
+            className="text-blue-300 hover:underline"
+          >
             Case →
           </Link>
         ) : null}

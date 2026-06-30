@@ -35,7 +35,8 @@ export function buildProcedureDayMismatchWarnings(input: {
   if (!proc && book) {
     out.push({
       severity: "warning",
-      message: "Linked surgery booking exists but procedure date is not set on the procedure-day record.",
+      message:
+        "Linked surgery booking exists but procedure date is not set on the procedure-day record.",
     });
   }
 

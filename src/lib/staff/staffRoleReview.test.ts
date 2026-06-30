@@ -50,8 +50,14 @@ test("saving role requires non-needs_review value", () => {
 
 test("bulk clinic assignment updates selected rows only", () => {
   const rows = [
-    buildStaffRoleReviewEditableRow(staff({ id: "1", full_name: "A" }), null, { position_title: null, primary_clinic_id: null }),
-    buildStaffRoleReviewEditableRow(staff({ id: "2", full_name: "B" }), null, { position_title: null, primary_clinic_id: null }),
+    buildStaffRoleReviewEditableRow(staff({ id: "1", full_name: "A" }), null, {
+      position_title: null,
+      primary_clinic_id: null,
+    }),
+    buildStaffRoleReviewEditableRow(staff({ id: "2", full_name: "B" }), null, {
+      position_title: null,
+      primary_clinic_id: null,
+    }),
   ];
   const next = applyBulkPrimaryClinic(rows, new Set(["1"]), "clinic-perth");
   assert.equal(next[0]?.primary_clinic_id, "clinic-perth");
@@ -64,7 +70,10 @@ test("cannot save all while any row still needs_review", () => {
       position_title: null,
       primary_clinic_id: null,
     }),
-    buildStaffRoleReviewEditableRow(staff({ id: "2", full_name: "B" }), null, { position_title: null, primary_clinic_id: null }),
+    buildStaffRoleReviewEditableRow(staff({ id: "2", full_name: "B" }), null, {
+      position_title: null,
+      primary_clinic_id: null,
+    }),
   ];
   assert.ok(validateStaffRoleReviewSaveAll(rows));
   rows[1]!.staff_role = "technician";
@@ -77,7 +86,10 @@ test("progress tracks assigned roles", () => {
       position_title: null,
       primary_clinic_id: null,
     }),
-    buildStaffRoleReviewEditableRow(staff({ id: "2", full_name: "B" }), null, { position_title: null, primary_clinic_id: null }),
+    buildStaffRoleReviewEditableRow(staff({ id: "2", full_name: "B" }), null, {
+      position_title: null,
+      primary_clinic_id: null,
+    }),
   ];
   const p = computeStaffRoleReviewProgress(rows);
   assert.equal(p.assigned, 1);
@@ -87,7 +99,10 @@ test("progress tracks assigned roles", () => {
 
 test("bulk admin clears needs_review on selected rows locally", () => {
   const rows = [
-    buildStaffRoleReviewEditableRow(staff({ id: "1", full_name: "A" }), null, { position_title: null, primary_clinic_id: null }),
+    buildStaffRoleReviewEditableRow(staff({ id: "1", full_name: "A" }), null, {
+      position_title: null,
+      primary_clinic_id: null,
+    }),
   ];
   const next = applyBulkNonClinicalAdminRole(rows, new Set(["1"]));
   assert.equal(next[0]?.staff_role, "admin");

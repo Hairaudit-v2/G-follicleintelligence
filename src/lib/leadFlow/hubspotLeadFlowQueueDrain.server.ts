@@ -43,7 +43,10 @@ export type HubSpotLeadFlowDrainResult = LeadFlowDrainSummary & {
 };
 
 function normalizeBatchLimit(limit?: number): number {
-  return Math.min(Math.max(limit ?? LEADFLOW_HUBSPOT_DRAIN_DEFAULT_BATCH, 1), LEADFLOW_HUBSPOT_DRAIN_MAX_BATCH);
+  return Math.min(
+    Math.max(limit ?? LEADFLOW_HUBSPOT_DRAIN_DEFAULT_BATCH, 1),
+    LEADFLOW_HUBSPOT_DRAIN_MAX_BATCH
+  );
 }
 
 export function summarizeLeadFlowDrainResults(

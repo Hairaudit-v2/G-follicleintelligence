@@ -37,8 +37,8 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
         <div className="space-y-1">
           <h1 className="text-lg font-semibold text-slate-100">Appointments</h1>
           <p className="text-sm text-slate-400">
-            Calendar, list, and today views for Evolved Hair Clinics scheduling. Click a row or drag on the calendar;
-            use New appointment for lead-aware booking.
+            Calendar, list, and today views for Evolved Hair Clinics scheduling. Click a row or drag
+            on the calendar; use New appointment for lead-aware booking.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -79,9 +79,7 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
         <p className="text-xs text-amber-300">List capped — narrow your date range or filters.</p>
       ) : null}
 
-      {query.tab === "calendar" && calendar ? (
-        <AppointmentCalendar data={calendar} />
-      ) : null}
+      {query.tab === "calendar" && calendar ? <AppointmentCalendar data={calendar} /> : null}
 
       {query.tab === "list" ? (
         <AppointmentListTable

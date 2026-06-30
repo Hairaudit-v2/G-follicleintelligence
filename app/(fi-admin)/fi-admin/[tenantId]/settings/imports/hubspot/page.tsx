@@ -36,7 +36,10 @@ export default async function HubspotCrmImportPage({
 
   await assertCrmTenantReadAllowed({ tenantId, request: undefined });
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  ) {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing.</p>
@@ -45,30 +48,49 @@ export default async function HubspotCrmImportPage({
   }
 
   const supabase = supabaseAdmin();
-  const { data: tenant, error } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (error || !tenant) notFound();
 
   const batchId =
-    typeof searchParams.batchId === "string" && searchParams.batchId.trim() ? searchParams.batchId.trim() : null;
-  const batchData = batchId ? await loadHubspotImportBatch(tenantId, batchId) : { batch: null, stagingPreview: [], stagingTotal: 0 };
+    typeof searchParams.batchId === "string" && searchParams.batchId.trim()
+      ? searchParams.batchId.trim()
+      : null;
+  const batchData = batchId
+    ? await loadHubspotImportBatch(tenantId, batchId)
+    : { batch: null, stagingPreview: [], stagingTotal: 0 };
 
   return (
     <div className="space-y-4">
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
-          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-[#22C1FF] hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/configuration`}
+            className="text-[#22C1FF] hover:underline"
+          >
             Settings
           </Link>{" "}
-          / <span className="text-[#94A3B8]">Imports</span> / <span className="text-[#CBD5E1]">HubSpot</span>
+          / <span className="text-[#94A3B8]">Imports</span> /{" "}
+          <span className="text-[#CBD5E1]">HubSpot</span>
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">HubSpot CRM import (Stage 1)</h1>
+        <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+          HubSpot CRM import (Stage 1)
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Upload a HubSpot contacts export, run a dry-run validation, then import up to 100 eligible rows into{" "}
-          <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">fi_persons</code>, optional{" "}
+          Upload a HubSpot contacts export, run a dry-run validation, then import up to 100 eligible
+          rows into{" "}
+          <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">fi_persons</code>,
+          optional{" "}
           <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">fi_patients</code>,{" "}
-          <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">fi_crm_leads</code>, and{" "}
-          <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">fi_crm_lead_source_ids</code>. All writes use the
-          Supabase service role on the server after access checks.
+          <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">fi_crm_leads</code>,
+          and{" "}
+          <code className="rounded bg-[#141C33] px-1 text-xs text-[#22C1FF]">
+            fi_crm_lead_source_ids
+          </code>
+          . All writes use the Supabase service role on the server after access checks.
         </p>
       </div>
 
@@ -79,7 +101,11 @@ export default async function HubspotCrmImportPage({
       ) : null}
 
       <Suspense fallback={<p className="text-sm text-slate-400">Loading…</p>}>
-        <HubspotCrmImportCentre tenantId={tenantId} initialBatch={batchData.batch} stagingPreview={batchData.stagingPreview} />
+        <HubspotCrmImportCentre
+          tenantId={tenantId}
+          initialBatch={batchData.batch}
+          stagingPreview={batchData.stagingPreview}
+        />
       </Suspense>
     </div>
   );

@@ -52,7 +52,8 @@ export function LeadNotesSection({
         <ul className="mb-3 max-h-40 space-y-2 overflow-y-auto text-xs">
           {notesPreview.map((n) => (
             <li key={`${n.kind}-${n.id}`} className="rounded bg-white/[0.03] p-2">
-              <span className="text-gray-500">{n.at}</span> <span className="text-gray-500">({n.kind})</span>
+              <span className="text-gray-500">{n.at}</span>{" "}
+              <span className="text-gray-500">({n.kind})</span>
               <p className="whitespace-pre-wrap text-slate-200">{n.text}</p>
             </li>
           ))}
@@ -96,7 +97,9 @@ export function LeadNotesSection({
           </form>
         </div>
       ) : null}
-      {noteErr || leadNoteErr ? <p className="mt-1 text-xs text-rose-300">{noteErr ?? leadNoteErr}</p> : null}
+      {noteErr || leadNoteErr ? (
+        <p className="mt-1 text-xs text-rose-300">{noteErr ?? leadNoteErr}</p>
+      ) : null}
     </section>
   );
 }

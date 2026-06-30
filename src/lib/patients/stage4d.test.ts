@@ -10,7 +10,9 @@ import type { PatientTimelineSourceBundle } from "./timeline/patientTimelineType
 
 const href = { tenantId: "tid-1" };
 
-function minimalBundle(over: Partial<PatientTimelineSourceBundle> = {}): PatientTimelineSourceBundle {
+function minimalBundle(
+  over: Partial<PatientTimelineSourceBundle> = {}
+): PatientTimelineSourceBundle {
   const base: PatientTimelineSourceBundle = {
     tenantId: "tid-1",
     foundationPatientId: "patient-1",
@@ -63,7 +65,9 @@ describe("Stage 4D — patient treatment timeline (pure)", () => {
     const newest = buildPatientTimeline(bundle, { hrefContext: href, sort: "newest_first" });
     assert.ok(newest.items.length >= 2);
     for (let i = 1; i < newest.items.length; i++) {
-      assert.ok(Date.parse(newest.items[i - 1]!.occurred_at) >= Date.parse(newest.items[i]!.occurred_at));
+      assert.ok(
+        Date.parse(newest.items[i - 1]!.occurred_at) >= Date.parse(newest.items[i]!.occurred_at)
+      );
     }
     assert.ok(newest.items.some((i) => i.id === "lead_created:lead-a"));
     assert.ok(newest.items.some((i) => i.id === "booking_scheduled:book-1"));
@@ -183,9 +187,15 @@ describe("Stage 4D — patient treatment timeline (pure)", () => {
       ],
     });
     const { items } = buildPatientTimeline(bundle, { hrefContext: href, limit: 500 });
-    const onlyCases = filterPatientTimelineItems(items, { itemTypes: ["case_created"], sourceTypes: null });
+    const onlyCases = filterPatientTimelineItems(items, {
+      itemTypes: ["case_created"],
+      sourceTypes: null,
+    });
     assert.ok(onlyCases.every((i) => i.item_type === "case_created"));
-    const onlyLeadSource = filterPatientTimelineItems(items, { itemTypes: null, sourceTypes: ["lead"] });
+    const onlyLeadSource = filterPatientTimelineItems(items, {
+      itemTypes: null,
+      sourceTypes: ["lead"],
+    });
     assert.ok(onlyLeadSource.every((i) => i.source_type === "lead"));
   });
 

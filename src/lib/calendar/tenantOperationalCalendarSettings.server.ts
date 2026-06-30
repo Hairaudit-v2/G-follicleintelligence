@@ -13,7 +13,10 @@ import {
   type BusinessGridConfig,
 } from "@/src/lib/calendar/operationalCalendarLayout";
 
-function parseGridFromTenantMetadata(metadata: unknown, timeZone: string): BusinessGridConfig | null {
+function parseGridFromTenantMetadata(
+  metadata: unknown,
+  timeZone: string
+): BusinessGridConfig | null {
   if (!metadata || typeof metadata !== "object") return null;
   const root = metadata as Record<string, unknown>;
   const raw = root.operational_calendar ?? root.calendar;
@@ -22,7 +25,8 @@ function parseGridFromTenantMetadata(metadata: unknown, timeZone: string): Busin
   let dayStart = Number(c.dayStartHourUtc);
   let dayEnd = Number(c.dayEndHourUtc);
   let sm = Number(c.slotMinutes);
-  if (!Number.isFinite(dayStart) || dayStart < 0 || dayStart > 23) dayStart = DEFAULT_BUSINESS_GRID.dayStartHourUtc;
+  if (!Number.isFinite(dayStart) || dayStart < 0 || dayStart > 23)
+    dayStart = DEFAULT_BUSINESS_GRID.dayStartHourUtc;
   if (!Number.isFinite(dayEnd) || dayEnd <= dayStart || dayEnd > 24) {
     dayEnd = Math.max(dayStart + 1, DEFAULT_BUSINESS_GRID.dayEndHourUtc);
   }
@@ -67,7 +71,14 @@ export async function loadTenantOperationalCalendarSettings(
   if (error) throw new Error(error.message);
   const row = data as { default_timezone?: string | null; metadata?: unknown } | null;
   const calendarTimezone = getCalendarTimeZone(
-    row ? { tenant: { default_timezone: row.default_timezone, metadata: row.metadata as Record<string, unknown> } } : null
+    row
+      ? {
+          tenant: {
+            default_timezone: row.default_timezone,
+            metadata: row.metadata as Record<string, unknown>,
+          },
+        }
+      : null
   );
 
   const stored = await resolveCalendarSettingsForScope(tenantId, clinicId);
@@ -81,7 +92,9 @@ export async function loadTenantOperationalCalendarSettings(
   }
 
   const legacyGrid = parseGridFromTenantMetadata(row?.metadata, calendarTimezone);
-  const settings = legacyGrid ? settingsFromLegacyGrid(legacyGrid) : { ...DEFAULT_CALENDAR_SETTINGS };
+  const settings = legacyGrid
+    ? settingsFromLegacyGrid(legacyGrid)
+    : { ...DEFAULT_CALENDAR_SETTINGS };
   const gridConfig = legacyGrid ?? calendarSettingsToGridConfig(settings, calendarTimezone);
 
   return {

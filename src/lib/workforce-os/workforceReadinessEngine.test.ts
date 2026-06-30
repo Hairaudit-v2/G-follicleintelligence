@@ -47,13 +47,15 @@ function freshHr(overrides: Record<string, unknown> = {}) {
   );
 }
 
-function identityRows(overrides: {
-  hr?: boolean;
-  academy?: boolean;
-  nexus?: boolean;
-  hrMeta?: Record<string, unknown>;
-  academyMeta?: Record<string, unknown>;
-} = {}) {
+function identityRows(
+  overrides: {
+    hr?: boolean;
+    academy?: boolean;
+    nexus?: boolean;
+    hrMeta?: Record<string, unknown>;
+    academyMeta?: Record<string, unknown>;
+  } = {}
+) {
   const rows = [];
   if (overrides.hr !== false) {
     rows.push({
@@ -95,7 +97,9 @@ function identityRows(overrides: {
   return rows;
 }
 
-function perfectInput(overrides: Partial<WorkforceReadinessScoreInput> = {}): WorkforceReadinessScoreInput {
+function perfectInput(
+  overrides: Partial<WorkforceReadinessScoreInput> = {}
+): WorkforceReadinessScoreInput {
   return {
     is_active: true,
     staff_role: "consultant",
@@ -210,9 +214,7 @@ test("mandatory SOP missing blocks", () => {
 });
 
 test("working hours missing reduces score and emits warning", () => {
-  const result = calculateWorkforceReadinessScore(
-    perfectInput({ working_hours: {} })
-  );
+  const result = calculateWorkforceReadinessScore(perfectInput({ working_hours: {} }));
   assert.ok(result.warnings.includes("working_hours_incomplete"));
   const hoursFactor = result.factors.find((f) => f.key === "working_hours");
   assert.equal(hoursFactor?.score, 0);
@@ -231,7 +233,10 @@ test("stale HR sync reduces score and emits warning", () => {
     })
   );
   assert.ok(result.warnings.includes("hr_sync_stale"));
-  assert.ok(result.factors.find((f) => f.key === "hr_sync")!.score < WORKFORCE_READINESS_FACTOR_WEIGHTS.hr_sync);
+  assert.ok(
+    result.factors.find((f) => f.key === "hr_sync")!.score <
+      WORKFORCE_READINESS_FACTOR_WEIGHTS.hr_sync
+  );
 });
 
 test("academy sync stale emits warning", () => {

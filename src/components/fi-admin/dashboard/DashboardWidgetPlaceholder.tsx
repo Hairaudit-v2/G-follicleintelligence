@@ -19,7 +19,11 @@ export function DashboardWidgetPlaceholder(props: Props) {
   const href = relatedHref?.trim() || null;
 
   return (
-    <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby={`dash-ph-${widgetKey}-heading`}>
+    <DashboardCard
+      className="p-4 sm:p-5"
+      role="region"
+      aria-labelledby={`dash-ph-${widgetKey}-heading`}
+    >
       <SectionHeader
         id={`dash-ph-${widgetKey}-heading`}
         kicker="Coming into focus"
@@ -27,12 +31,15 @@ export function DashboardWidgetPlaceholder(props: Props) {
         description={meta.description}
       />
       <p className="mt-3 text-xs text-slate-500">
-        Data will appear as this workflow becomes active in your clinic. The module stays read-only until live signals are
-        wired — nothing here changes permissions or routing.
+        Data will appear as this workflow becomes active in your clinic. The module stays read-only
+        until live signals are wired — nothing here changes permissions or routing.
       </p>
       {href ? (
         <p className="mt-3">
-          <Link href={href} className="text-sm font-semibold text-cyan-400/90 underline-offset-2 hover:underline">
+          <Link
+            href={href}
+            className="text-sm font-semibold text-cyan-400/90 underline-offset-2 hover:underline"
+          >
             Open related area
           </Link>
         </p>

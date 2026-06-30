@@ -2,7 +2,12 @@
  * POST /api/tenants/[tenantId]/patients/[patientId]/images/[imageId]/archive
  */
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { patientImageArchiveBodySchema } from "@/src/lib/patientImages/patientImageApiSchemas";
 import { archivePatientImage } from "@/src/lib/patientImages/patientImagesServer";
 

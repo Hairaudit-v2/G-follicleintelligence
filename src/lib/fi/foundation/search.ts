@@ -60,14 +60,20 @@ export function escapeIlikePattern(fragment: string): string {
 }
 
 function uuidLike(s: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s.trim());
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    s.trim()
+  );
 }
 
 function adminBase(tenantId: string): string {
   return `/fi-admin/${tenantId}`;
 }
 
-function patientHref(tenantId: string, foundationPatientId: string | null, globalPatientId: string | null): string {
+function patientHref(
+  tenantId: string,
+  foundationPatientId: string | null,
+  globalPatientId: string | null
+): string {
   const slug = foundationPatientId ?? globalPatientId;
   return `${adminBase(tenantId)}/patients/${slug ?? ""}`;
 }
@@ -102,7 +108,12 @@ export async function searchFoundationRecords(
   };
 
   if (want("patients")) {
-    let q = supabase.from("v_fi_patient_resolution").select("*").eq("tenant_id", tid).order("created_at", { ascending: false }).limit(limit);
+    let q = supabase
+      .from("v_fi_patient_resolution")
+      .select("*")
+      .eq("tenant_id", tid)
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
     if (query) {
       const p = `%${escapeIlikePattern(query)}%`;
@@ -138,7 +149,9 @@ export async function searchFoundationRecords(
       const slug = r.foundation_patient_id ?? r.global_patient_id;
       if (!slug) continue;
       const title = r.display_name?.trim() || "Patient (unnamed)";
-      const subtitle = [r.email, r.phone].filter(Boolean).join(" · ") || `${r.source_system}:${r.source_patient_id}`;
+      const subtitle =
+        [r.email, r.phone].filter(Boolean).join(" · ") ||
+        `${r.source_system}:${r.source_patient_id}`;
       let warning: string | null = null;
       if (r.global_patient_id && !r.foundation_patient_id) {
         warning = "No foundation patient linked for this global stub.";
@@ -146,7 +159,9 @@ export async function searchFoundationRecords(
       if (!r.person_id && r.foundation_patient_id) {
         warning = warning ? `${warning} No person_id on record.` : "No person_id resolved.";
       }
-      const dedupeKey = r.foundation_patient_id ? `fp:${r.foundation_patient_id}` : `gp:${r.global_patient_id}`;
+      const dedupeKey = r.foundation_patient_id
+        ? `fp:${r.foundation_patient_id}`
+        : `gp:${r.global_patient_id}`;
       pushPatient(
         {
           id: slug,
@@ -184,7 +199,12 @@ export async function searchFoundationRecords(
       for (const c of clMatch ?? []) clinicIdsForCaseBoost.add(String((c as { id: string }).id));
     }
 
-    let q = supabase.from("v_fi_case_foundation").select("*").eq("tenant_id", tid).order("updated_at", { ascending: false }).limit(limit);
+    let q = supabase
+      .from("v_fi_case_foundation")
+      .select("*")
+      .eq("tenant_id", tid)
+      .order("updated_at", { ascending: false })
+      .limit(limit);
 
     if (query) {
       const p = `%${escapeIlikePattern(query)}%`;
@@ -216,13 +236,19 @@ export async function searchFoundationRecords(
 
     const { data: rawCases, error: cErr } = await q;
     if (cErr) throw new Error(cErr.message);
-    const enriched = await enrichCasesWithExternalAndNames(supabase, tid, (rawCases ?? []) as Record<string, unknown>[]);
+    const enriched = await enrichCasesWithExternalAndNames(
+      supabase,
+      tid,
+      (rawCases ?? []) as Record<string, unknown>[]
+    );
 
     for (const c of enriched) {
       if (seenCase.has(c.case_id)) continue;
       seenCase.add(c.case_id);
       const title = c.case_type?.trim() || `Case ${c.case_id.slice(0, 8)}…`;
-      const subtitle = [c.status, c.source_system, c.source_case_id, c.external_id].filter(Boolean).join(" · ");
+      const subtitle = [c.status, c.source_system, c.source_case_id, c.external_id]
+        .filter(Boolean)
+        .join(" · ");
       let warning: string | null = null;
       if (!c.foundation_patient_id) warning = "No foundation_patient_id on case.";
       cases.push({
@@ -258,9 +284,18 @@ export async function searchFoundationRecords(
       if (seenClinic.has(id)) continue;
       seenClinic.add(id);
       const meta = ((row as { metadata: unknown }).metadata as Record<string, unknown>) ?? {};
-      const city = typeof meta.city === "string" ? meta.city : typeof meta.locality === "string" ? meta.locality : null;
+      const city =
+        typeof meta.city === "string"
+          ? meta.city
+          : typeof meta.locality === "string"
+            ? meta.locality
+            : null;
       const country =
-        typeof meta.country === "string" ? meta.country : typeof meta.country_code === "string" ? meta.country_code : null;
+        typeof meta.country === "string"
+          ? meta.country
+          : typeof meta.country_code === "string"
+            ? meta.country_code
+            : null;
       const loc = [city, country].filter(Boolean).join(", ");
       clinics.push({
         id,

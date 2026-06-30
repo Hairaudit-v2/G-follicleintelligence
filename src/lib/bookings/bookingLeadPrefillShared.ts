@@ -18,7 +18,9 @@ export function buildAppointmentCreatePrefillFromLead(opts: {
   const recommended = deriveRecommendedBookingTypeForLead({ lead: opts.lead, bookings });
   const bookingType = (opts.bookingType?.trim() || recommended.bookingType).trim();
   const summary = opts.lead.summary?.trim();
-  const title = summary ? `${bookingTypeLabel(bookingType)} — ${summary}` : bookingTypeLabel(bookingType);
+  const title = summary
+    ? `${bookingTypeLabel(bookingType)} — ${summary}`
+    : bookingTypeLabel(bookingType);
 
   return {
     leadId: opts.lead.id,

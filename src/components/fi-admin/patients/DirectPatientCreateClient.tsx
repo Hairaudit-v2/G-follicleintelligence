@@ -76,7 +76,9 @@ export function DirectPatientCreateClient({ tenantId }: { tenantId: string }) {
             disabled={busy}
           />
           <label className="block text-sm">
-            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Email</span>
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+              Email
+            </span>
             <input
               id="direct-patient-email"
               type="email"
@@ -101,7 +103,10 @@ export function DirectPatientCreateClient({ tenantId }: { tenantId: string }) {
           </label>
 
           {error ? (
-            <p className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
+            <p
+              className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+              role="alert"
+            >
               {error}
             </p>
           ) : null}

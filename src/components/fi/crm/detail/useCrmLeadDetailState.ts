@@ -114,13 +114,19 @@ export function useCrmLeadDetailState(
         setDetailErr("Lead title / summary is required.");
         return;
       }
-      if (!CRM_LEAD_DETAIL_STATUS_VALUES.includes(status as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number])) {
+      if (
+        !CRM_LEAD_DETAIL_STATUS_VALUES.includes(
+          status as (typeof CRM_LEAD_DETAIL_STATUS_VALUES)[number]
+        )
+      ) {
         setDetailErr("Pick a standard status from the list.");
         return;
       }
       if (
         priority.trim() !== "" &&
-        !CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(priority as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number])
+        !CRM_LEAD_DETAIL_PRIORITY_VALUES.includes(
+          priority as (typeof CRM_LEAD_DETAIL_PRIORITY_VALUES)[number]
+        )
       ) {
         setDetailErr("Pick a standard priority or None.");
         return;
@@ -194,7 +200,11 @@ export function useCrmLeadDetailState(
           source: MUTATION_SOURCE,
         });
         if (!r.ok) {
-          setPayload((p) => ({ ...p, detail: { ...p.detail, lead: snapLead }, stageHistory: snapHist }));
+          setPayload((p) => ({
+            ...p,
+            detail: { ...p.detail, lead: snapLead },
+            stageHistory: snapHist,
+          }));
           setStageErr(r.error);
           return;
         }
@@ -240,7 +250,9 @@ export function useCrmLeadDetailState(
       if (!canMutate) return;
       const snap = payload.detail.tasks;
       const optimistic = snap.map((t) =>
-        t.id === taskId ? { ...t, status: "done" as const, completed_at: new Date().toISOString() } : t
+        t.id === taskId
+          ? { ...t, status: "done" as const, completed_at: new Date().toISOString() }
+          : t
       );
       setPayload((p) => ({ ...p, detail: { ...p.detail, tasks: optimistic } }));
       const r = await completeCrmTaskAction(tenantId, lead.id, taskId, {});
@@ -300,7 +312,10 @@ export function useCrmLeadDetailState(
           return;
         }
         setLeadNoteBody("");
-        setPayload((p) => ({ ...p, detail: { ...p.detail, leadNotes: [r.note, ...p.detail.leadNotes] } }));
+        setPayload((p) => ({
+          ...p,
+          detail: { ...p.detail, leadNotes: [r.note, ...p.detail.leadNotes] },
+        }));
         router.refresh();
       } finally {
         setLeadNoteBusy(false);

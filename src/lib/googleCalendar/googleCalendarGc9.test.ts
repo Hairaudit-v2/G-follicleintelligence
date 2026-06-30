@@ -20,7 +20,10 @@ import {
   stopGoogleCalendarWebhookSubscription,
 } from "./googleCalendarWebhookSubscriptions.server";
 import { reconcileGoogleCalendarEventChange } from "./googleCalendarReconciliation.server";
-import { shouldProcessEventVersion, upsertCalendarEventVersion } from "./googleCalendarEventVersions.server";
+import {
+  shouldProcessEventVersion,
+  upsertCalendarEventVersion,
+} from "./googleCalendarEventVersions.server";
 import { loadGoogleCalendarMonitoringPage } from "./googleCalendarMonitoring.server";
 import { runScheduledGoogleCalendarSync } from "./googleCalendarSyncScheduler.server";
 import type { FiCalendarEvent } from "./googleCalendarTypes";
@@ -49,7 +52,9 @@ function mockGoogleFetch(watchOk = true, listSyncTokenInvalid = false): typeof f
     const url = String(input);
     if (url.includes("/events/watch") && init?.method === "POST") {
       if (!watchOk) {
-        return new Response(JSON.stringify({ error: { message: "watch failed" } }), { status: 400 });
+        return new Response(JSON.stringify({ error: { message: "watch failed" } }), {
+          status: 400,
+        });
       }
       return new Response(
         JSON.stringify({
@@ -65,7 +70,9 @@ function mockGoogleFetch(watchOk = true, listSyncTokenInvalid = false): typeof f
     }
     if (url.includes("/events?") && init?.method === "GET") {
       if (listSyncTokenInvalid || url.includes("syncToken=bad")) {
-        return new Response(JSON.stringify({ error: { message: "Sync token invalid" } }), { status: 410 });
+        return new Response(JSON.stringify({ error: { message: "Sync token invalid" } }), {
+          status: 410,
+        });
       }
       if (url.includes("syncToken=")) {
         return new Response(
@@ -86,13 +93,14 @@ function mockGoogleFetch(watchOk = true, listSyncTokenInvalid = false): typeof f
           { status: 200 }
         );
       }
-      return new Response(
-        JSON.stringify({ items: [], nextSyncToken: "initial-sync-token" }),
-        { status: 200 }
-      );
+      return new Response(JSON.stringify({ items: [], nextSyncToken: "initial-sync-token" }), {
+        status: 200,
+      });
     }
     if (url.includes("oauth2.googleapis.com/token")) {
-      return new Response(JSON.stringify({ access_token: "fresh-token", expires_in: 3600 }), { status: 200 });
+      return new Response(JSON.stringify({ access_token: "fresh-token", expires_in: 3600 }), {
+        status: 200,
+      });
     }
     return new Response(JSON.stringify({ items: [] }), { status: 200 });
   };
@@ -203,7 +211,9 @@ describe("GC-9 — webhook notifications", () => {
     return async (input) => {
       const url = String(input);
       if (url.includes("oauth2.googleapis.com/token")) {
-        return new Response(JSON.stringify({ access_token: "refreshed", expires_in: 3600 }), { status: 200 });
+        return new Response(JSON.stringify({ access_token: "refreshed", expires_in: 3600 }), {
+          status: 200,
+        });
       }
       if (url.includes("/events/watch") && (input as Request).method === "POST") {
         return new Response(
@@ -212,7 +222,9 @@ describe("GC-9 — webhook notifications", () => {
         );
       }
       if (url.includes("/calendars/") && url.includes("/events")) {
-        return new Response(JSON.stringify({ items: [], nextSyncToken: "initial-sync-token" }), { status: 200 });
+        return new Response(JSON.stringify({ items: [], nextSyncToken: "initial-sync-token" }), {
+          status: 200,
+        });
       }
       if (url.includes("/calendars/") && !url.includes("/events")) {
         return new Response(JSON.stringify({ summary: "Primary" }), { status: 200 });
@@ -459,7 +471,10 @@ describe("GC-9 — reconciliation", () => {
     assert.equal(version.external_event_id, "evt-v");
     assert.equal(gc9.eventVersions.length, 1);
 
-    assert.equal(shouldProcessEventVersion(version, '"etag-1"', version.external_updated_at), false);
+    assert.equal(
+      shouldProcessEventVersion(version, '"etag-1"', version.external_updated_at),
+      false
+    );
     assert.equal(shouldProcessEventVersion(version, '"etag-2"', new Date().toISOString()), true);
   });
 });

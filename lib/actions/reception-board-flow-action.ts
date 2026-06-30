@@ -26,7 +26,10 @@ const receptionBoardFlowBodySchema = z
   .object({
     adminKey: z.string().optional(),
     action: z.enum(
-      RECEPTION_BOARD_FLOW_ACTIONS as unknown as [ReceptionBoardFlowActionKind, ...ReceptionBoardFlowActionKind[]]
+      RECEPTION_BOARD_FLOW_ACTIONS as unknown as [
+        ReceptionBoardFlowActionKind,
+        ...ReceptionBoardFlowActionKind[],
+      ]
     ),
     reason: z.string().max(4000).optional().nullable(),
   })
@@ -139,7 +142,11 @@ export async function receptionBoardFlowAction(
         staffPinFloorAction: "reception.board_flow",
       });
     } else {
-      await assertCrmTenantWriteAllowed({ tenantId: tid, adminKey: parsed.adminKey, request: undefined });
+      await assertCrmTenantWriteAllowed({
+        tenantId: tid,
+        adminKey: parsed.adminKey,
+        request: undefined,
+      });
     }
 
     const rowMeta = metadataRecordFromRow(booking);

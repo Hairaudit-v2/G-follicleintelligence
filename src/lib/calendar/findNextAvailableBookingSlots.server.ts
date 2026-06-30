@@ -78,9 +78,15 @@ function localClockKey(iso: string, timeZone: string): string {
   return toDatetimeLocalValueInTimezone(iso, timeZone).slice(0, 16);
 }
 
-function fitsSameLocalCalendarDayForStaff(startMs: number, endMs: number, staffTz: string): boolean {
+function fitsSameLocalCalendarDayForStaff(
+  startMs: number,
+  endMs: number,
+  staffTz: string
+): boolean {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return false;
-  return staffWeekdayKeyFromUtcMs(startMs, staffTz) === staffWeekdayKeyFromUtcMs(endMs - 1, staffTz);
+  return (
+    staffWeekdayKeyFromUtcMs(startMs, staffTz) === staffWeekdayKeyFromUtcMs(endMs - 1, staffTz)
+  );
 }
 
 function fitsClinicBusinessDay(
@@ -177,12 +183,18 @@ export async function findNextAvailableBookingSlots(
       return { slots: [] };
     }
     staffWeekly = parseStaffWeeklyHours(staff.working_hours);
-    staffTz = normalizeCalendarTimezone(staff.default_timezone?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ);
+    staffTz = normalizeCalendarTimezone(
+      staff.default_timezone?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ
+    );
     if (serviceId) {
       staffRules = await loadServiceStaffEligibilityForService(tid, serviceId, client);
     }
     const activeRules = staffRules.filter((r) => r.is_active);
-    if (serviceId && activeRules.length > 0 && !isStaffEligibleForServiceRules(staffId, staff.staff_role, activeRules)) {
+    if (
+      serviceId &&
+      activeRules.length > 0 &&
+      !isStaffEligibleForServiceRules(staffId, staff.staff_role, activeRules)
+    ) {
       return { slots: [] };
     }
   }
@@ -220,7 +232,12 @@ export async function findNextAvailableBookingSlots(
     new Date(preferredMs + maxDays * 86_400_000).toISOString(),
     durationMinutes + 120
   );
-  const existing = await loadOverlappingBookingsForRange(tid, preferredStartAt, horizonEndIso, client);
+  const existing = await loadOverlappingBookingsForRange(
+    tid,
+    preferredStartAt,
+    horizonEndIso,
+    client
+  );
   const assignmentByBooking = await loadBookingResourceAssignmentsOverlapByBooking(
     tid,
     existing.map((b) => b.id),
@@ -246,7 +263,12 @@ export async function findNextAvailableBookingSlots(
       const endIso = addUtcMinutesToIso(startIso, durationMinutes);
       const startMs = parseIsoUtcMs(startIso);
       const endMs = parseIsoUtcMs(endIso);
-      if (startMs == null || endMs == null || startMs < preferredMs || !fitsClinicBusinessDay(startIso, endIso, dayKey, cfg)) {
+      if (
+        startMs == null ||
+        endMs == null ||
+        startMs < preferredMs ||
+        !fitsClinicBusinessDay(startIso, endIso, dayKey, cfg)
+      ) {
         continue;
       }
 

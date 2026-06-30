@@ -42,7 +42,9 @@ export function stubConfidenceFromSeed(seed: string): number {
 /**
  * Stub classification — maps external labels to canonical categories without AI.
  */
-export function classifyImageCategoryStub(input: ClassifyImageCategoryStubInput): ImageClassificationResult {
+export function classifyImageCategoryStub(
+  input: ClassifyImageCategoryStubInput
+): ImageClassificationResult {
   const mapping = mapExternalCategoryToCanonical(input.external_category, input.legacy_upload_type);
   const seed = input.idempotency_key?.trim() || input.external_category;
   const confidence = stubConfidenceFromSeed(seed);

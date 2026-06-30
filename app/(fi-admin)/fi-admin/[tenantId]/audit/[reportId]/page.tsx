@@ -45,7 +45,9 @@ export default function AuditReviewPage() {
     setLoading(true);
     setLoadError(null);
 
-    fetch(`/api/fi/report?tenant_id=${encodeURIComponent(tenantId)}&report_id=${encodeURIComponent(reportId)}`)
+    fetch(
+      `/api/fi/report?tenant_id=${encodeURIComponent(tenantId)}&report_id=${encodeURIComponent(reportId)}`
+    )
       .then((r) => parseJsonResponse<ReportData>(r))
       .then((d) => {
         if (cancelled) return;
@@ -119,7 +121,10 @@ export default function AuditReviewPage() {
   if (loadError) {
     return (
       <div className="space-y-3">
-        <Link href={`/fi-admin/${tenantId}/audit`} className="text-sm text-slate-400 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/audit`}
+          className="text-sm text-slate-400 hover:underline"
+        >
           ← Audit queue
         </Link>
         <p className="text-sm text-rose-300" role="alert">
@@ -132,7 +137,10 @@ export default function AuditReviewPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href={`/fi-admin/${tenantId}/audit`} className="text-sm text-slate-400 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/audit`}
+          className="text-sm text-slate-400 hover:underline"
+        >
           ← Audit queue
         </Link>
         <h2 className="text-base font-medium">
@@ -148,7 +156,9 @@ export default function AuditReviewPage() {
 
       {report?.report_json ? (
         <>
-          <ReportPreview report={report.report_json as Parameters<typeof ReportPreview>[0]["report"]} />
+          <ReportPreview
+            report={report.report_json as Parameters<typeof ReportPreview>[0]["report"]}
+          />
 
           <div className="flex gap-4 items-start border-t border-white/[0.08] pt-4">
             <button

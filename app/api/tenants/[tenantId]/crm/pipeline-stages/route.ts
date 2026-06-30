@@ -3,7 +3,12 @@
  * Lazy-seeds default stages when none exist for the scope (first read).
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
-import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonOk,
+  crmJsonError,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import { crmPipelineStagesQuerySchema } from "@/src/lib/crm/crmApiSchemas";
 import { ensureDefaultPipelineStages } from "@/src/lib/crm/server";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
@@ -31,7 +36,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
       clinicId: parsed.clinicId ?? undefined,
     });
 
-    const pipelineKey = (parsed.pipelineKey?.trim() || DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
+    const pipelineKey =
+      (parsed.pipelineKey?.trim() || DEFAULT_CRM_PIPELINE_KEY).trim() || DEFAULT_CRM_PIPELINE_KEY;
 
     const { stages } = await ensureDefaultPipelineStages({
       tenantId,

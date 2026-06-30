@@ -23,7 +23,9 @@ export function StaffLinkUsersClient({
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}`;
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(pageModel.rows.map((r) => r.staffId)));
+  const [selected, setSelected] = useState<Set<string>>(
+    () => new Set(pageModel.rows.map((r) => r.staffId))
+  );
   const [adminKey, setAdminKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
@@ -80,17 +82,26 @@ export function StaffLinkUsersClient({
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Settings · Staff</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Settings · Staff
+        </p>
         <h1 className="text-xl font-semibold text-slate-100">Link staff to login users</h1>
         <p className="max-w-2xl text-sm text-slate-400">
-          Repair staff profiles that have an email but no linked fi_user. Matches existing tenant users by email or
-          creates a safe member login row when none exists — never duplicates users for the same email.
+          Repair staff profiles that have an email but no linked fi_user. Matches existing tenant
+          users by email or creates a safe member login row when none exists — never duplicates
+          users for the same email.
         </p>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href={`${base}/staff`} className="font-medium text-cyan-300 underline hover:text-cyan-200">
+          <Link
+            href={`${base}/staff`}
+            className="font-medium text-cyan-300 underline hover:text-cyan-200"
+          >
             Staff directory
           </Link>
-          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-cyan-300 underline hover:text-cyan-200">
+          <Link
+            href={`${base}/hr/staff-readiness`}
+            className="font-medium text-cyan-300 underline hover:text-cyan-200"
+          >
             Staff readiness
           </Link>
         </div>
@@ -110,7 +121,9 @@ export function StaffLinkUsersClient({
         </div>
         <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-slate-500">After last run</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-100">{result ? result.unlinkedAfter : "—"}</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">
+            {result ? result.unlinkedAfter : "—"}
+          </p>
         </div>
       </div>
 
@@ -128,7 +141,10 @@ export function StaffLinkUsersClient({
       ) : null}
 
       {error ? (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300" role="alert">
+        <div
+          className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -155,7 +171,12 @@ export function StaffLinkUsersClient({
               <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase text-slate-500">
                 <tr>
                   <th className="px-3 py-2">
-                    <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Select all" />
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all"
+                    />
                   </th>
                   <th className="px-3 py-2">Staff</th>
                   <th className="px-3 py-2">Email</th>
@@ -173,7 +194,9 @@ export function StaffLinkUsersClient({
                         aria-label={`Select ${row.fullName}`}
                       />
                     </td>
-                    <td className="px-3 py-2 align-top font-medium text-slate-100">{row.fullName}</td>
+                    <td className="px-3 py-2 align-top font-medium text-slate-100">
+                      {row.fullName}
+                    </td>
                     <td className="px-3 py-2 align-top text-slate-300">{row.email}</td>
                     <td className="px-3 py-2 align-top text-slate-400">
                       <span className="inline-flex items-center gap-1.5">

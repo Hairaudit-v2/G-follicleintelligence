@@ -15,7 +15,10 @@ import {
   type ClinicSetupWizardPreviewPayload,
   type WizardServiceCategory,
 } from "@/src/lib/clinicSetup/clinicSetupWizardCore";
-import { isCalendarVisibleClinicalStaff, isNonCalendarSupportRole } from "@/src/lib/staff/calendarVisibleStaff";
+import {
+  isCalendarVisibleClinicalStaff,
+  isNonCalendarSupportRole,
+} from "@/src/lib/staff/calendarVisibleStaff";
 
 const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";
@@ -42,16 +45,22 @@ function defaultStaffRowState(s: {
   staff_role: string | null;
   calendar_visible: boolean | null;
 }): StaffRowState {
-  const role = String(s.staff_role ?? "").trim().toLowerCase();
+  const role = String(s.staff_role ?? "")
+    .trim()
+    .toLowerCase();
   const performsConsultations =
     /\b(doctor|physician|consult|trich|surgeon|gp|dermatologist)\b/.test(role) ||
     role.includes("consultant") ||
     role.includes("trichologist");
   const performsPrp =
-    /\b(nurse|technician|doctor|physician)\b/.test(role) || role.includes("technician") || role.includes("nurse");
+    /\b(nurse|technician|doctor|physician)\b/.test(role) ||
+    role.includes("technician") ||
+    role.includes("nurse");
   const performsSurgery = role.includes("surgeon") || role.includes("doctor");
   const assistsSurgery =
-    /\b(nurse|technician|assistant)\b/.test(role) || role.includes("clinical_assistant") || role.includes("assistant");
+    /\b(nurse|technician|assistant)\b/.test(role) ||
+    role.includes("clinical_assistant") ||
+    role.includes("assistant");
   const showOnCalendar =
     s.calendar_visible === true
       ? true
@@ -111,9 +120,7 @@ export function ClinicSetupWizard({
   const [useStandardSecondRoomAliases, setUseStandardSecondRoomAliases] = useState(false);
   const [staffRows, setStaffRows] = useState<StaffRowState[]>([]);
   const [preview, setPreview] = useState<
-    | { ok: true; preview: ClinicSetupWizardPreviewPayload }
-    | { ok: false; error: string }
-    | null
+    { ok: true; preview: ClinicSetupWizardPreviewPayload } | { ok: false; error: string } | null
   >(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -214,8 +221,8 @@ export function ClinicSetupWizard({
       <div>
         <h1 className="text-xl font-semibold text-slate-50">Clinic setup</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Answer a few operational questions to configure rooms, who appears on the calendar, and which rooms each
-          service may use. Technical eligibility is applied automatically.
+          Answer a few operational questions to configure rooms, who appears on the calendar, and
+          which rooms each service may use. Technical eligibility is applied automatically.
         </p>
       </div>
 
@@ -287,8 +294,8 @@ export function ClinicSetupWizard({
             </button>
           </div>
           <p className="text-xs text-slate-400">
-            We create labelled rooms such as “Consult Room 1”. Physical overlap between two labels is handled
-            automatically when you use the standard pairing option below.
+            We create labelled rooms such as “Consult Room 1”. Physical overlap between two labels
+            is handled automatically when you use the standard pairing option below.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             {(
@@ -325,7 +332,8 @@ export function ClinicSetupWizard({
             <span>
               <span className="font-medium">Standard second-room pairing</span>
               <span className="mt-0.5 block text-xs font-normal text-slate-400">
-                Recommended for two-storey consult/patient pairs and a shared PRP/surgery theatre on room “2”.
+                Recommended for two-storey consult/patient pairs and a shared PRP/surgery theatre on
+                room “2”.
               </span>
             </span>
           </label>
@@ -346,16 +354,21 @@ export function ClinicSetupWizard({
         <div className={`${sectionClass} space-y-4`}>
           <h2 className="text-base font-semibold text-slate-50">Staff roles & calendar</h2>
           <p className="text-xs text-slate-400">
-            Tick what each person does day-to-day. Reception and admin staff stay off the calendar unless you
-            explicitly show them.
+            Tick what each person does day-to-day. Reception and admin staff stay off the calendar
+            unless you explicitly show them.
           </p>
           <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
             {staffRows.map((row, idx) => (
-              <div key={row.staffId} className="rounded-lg border border-white/[0.06] bg-[#0a1222]/80 p-3">
+              <div
+                key={row.staffId}
+                className="rounded-lg border border-white/[0.06] bg-[#0a1222]/80 p-3"
+              >
                 <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
                   <div>
                     <div className="text-sm font-medium text-slate-100">{row.fullName}</div>
-                    <div className="text-[11px] text-slate-500">{row.staffRole || "Role not set"}</div>
+                    <div className="text-[11px] text-slate-500">
+                      {row.staffRole || "Role not set"}
+                    </div>
                   </div>
                 </div>
                 <div className="grid gap-2 text-xs text-slate-200 sm:grid-cols-2">
@@ -409,9 +422,9 @@ export function ClinicSetupWizard({
         <div className={`${sectionClass} space-y-3`}>
           <h2 className="text-base font-semibold text-slate-50">Services</h2>
           <p className="text-xs text-slate-400">
-            Services are matched from your catalogue (names and booking types). Consultation and trichology map to
-            consultation rooms only; follow-up and review also allow patient recovery rooms; PRP family uses PRP rooms;
-            surgery uses surgery rooms.
+            Services are matched from your catalogue (names and booking types). Consultation and
+            trichology map to consultation rooms only; follow-up and review also allow patient
+            recovery rooms; PRP family uses PRP rooms; surgery uses surgery rooms.
           </p>
           <ul className="list-inside list-disc space-y-1 text-xs text-slate-300">
             <li>Consultation → consultation rooms</li>
@@ -443,8 +456,9 @@ export function ClinicSetupWizard({
         <div className={`${sectionClass} space-y-4`}>
           <h2 className="text-base font-semibold text-slate-50">Review &amp; apply</h2>
           <p className="text-xs text-slate-400">
-            Preview refreshes the summary from your current database and the numbers above. Applying is idempotent:
-            existing rooms are updated only when safe; wizard-tagged eligibility rows are replaced.
+            Preview refreshes the summary from your current database and the numbers above. Applying
+            is idempotent: existing rooms are updated only when safe; wizard-tagged eligibility rows
+            are replaced.
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -481,7 +495,9 @@ export function ClinicSetupWizard({
           {previewBody ? (
             <div className="space-y-4 text-sm text-slate-200">
               <div>
-                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Rooms</h3>
+                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Rooms
+                </h3>
                 <ul className="list-inside list-disc text-xs text-slate-300">
                   {previewBody.plannedRooms.map((r) => (
                     <li key={r.room_code}>
@@ -491,36 +507,48 @@ export function ClinicSetupWizard({
                 </ul>
               </div>
               <div>
-                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Service → rooms</h3>
+                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Service → rooms
+                </h3>
                 <ul className="space-y-1 text-xs text-slate-300">
                   {previewBody.servicePlans.map((p) => (
                     <li key={p.serviceId}>
-                      <span className="font-medium text-slate-200">{p.serviceName}</span> — {categoryLabel(p.category)}
-                      : {p.roomCodes.join(", ") || "—"}
+                      <span className="font-medium text-slate-200">{p.serviceName}</span> —{" "}
+                      {categoryLabel(p.category)}: {p.roomCodes.join(", ") || "—"}
                       {p.alreadyConfigured ? (
-                        <span className="ml-1 text-amber-200/90">(already has {p.existingActiveRoomLinks} room link(s))</span>
+                        <span className="ml-1 text-amber-200/90">
+                          (already has {p.existingActiveRoomLinks} room link(s))
+                        </span>
                       ) : null}
                       {p.hasNonWizardRoomLinks ? (
-                        <span className="ml-1 text-cyan-200/90">(includes non-wizard / advanced mappings)</span>
+                        <span className="ml-1 text-cyan-200/90">
+                          (includes non-wizard / advanced mappings)
+                        </span>
                       ) : null}
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Staff calendar</h3>
+                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Staff calendar
+                </h3>
                 <ul className="text-xs text-slate-300">
                   {staffRows.map((s) => (
                     <li key={s.staffId}>
                       {s.fullName}: calendar {s.showOnCalendar ? "visible" : "hidden"}
-                      {isNonCalendarSupportRole(s.staffRole) && !s.showOnCalendar ? " (reception/admin default)" : ""}
+                      {isNonCalendarSupportRole(s.staffRole) && !s.showOnCalendar
+                        ? " (reception/admin default)"
+                        : ""}
                     </li>
                   ))}
                 </ul>
               </div>
               {previewBody.warnings.length ? (
                 <div>
-                  <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-400">Warnings</h3>
+                  <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-400">
+                    Warnings
+                  </h3>
                   <ul className="list-inside list-disc text-xs text-amber-100">
                     {previewBody.warnings.map((w, i) => (
                       <li key={i}>{w}</li>
@@ -530,11 +558,18 @@ export function ClinicSetupWizard({
               ) : null}
             </div>
           ) : (
-            <p className="text-xs text-slate-500">Run “Preview setup” to load a summary before applying.</p>
+            <p className="text-xs text-slate-500">
+              Run “Preview setup” to load a summary before applying.
+            </p>
           )}
 
           {clinicId.trim() ? (
-            <ClinicBookingSetupTestPanel tenantId={tid} clinicId={clinicId.trim()} variant="dark" className="mt-2" />
+            <ClinicBookingSetupTestPanel
+              tenantId={tid}
+              clinicId={clinicId.trim()}
+              variant="dark"
+              className="mt-2"
+            />
           ) : null}
 
           <div className="flex justify-between">

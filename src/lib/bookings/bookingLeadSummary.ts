@@ -13,7 +13,10 @@ function isTerminalBooking(row: FiBookingRow): boolean {
 }
 
 /** Non-cancelled, non-completed bookings with `start_at` on or after `now`. */
-export function filterUpcomingLeadBookings(bookings: FiBookingRow[], now: Date = new Date()): FiBookingRow[] {
+export function filterUpcomingLeadBookings(
+  bookings: FiBookingRow[],
+  now: Date = new Date()
+): FiBookingRow[] {
   return sortBookingsByStartAt(bookings).filter((b) => {
     if (isTerminalBooking(b)) return false;
     return isBookingUpcoming(b, now);
@@ -73,7 +76,10 @@ export function deriveRecommendedBookingTypeForLead(opts: {
   }
 
   if (!completedTypes.has("surgery") && lastCompleted?.booking_type.trim() === "consultation") {
-    return { bookingType: "surgery", reason: "Consultation completed — typical next step is procedure day." };
+    return {
+      bookingType: "surgery",
+      reason: "Consultation completed — typical next step is procedure day.",
+    };
   }
 
   if (completedTypes.has("surgery")) {

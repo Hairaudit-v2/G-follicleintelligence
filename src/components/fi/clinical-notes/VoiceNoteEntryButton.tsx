@@ -4,7 +4,10 @@ import { useCallback, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { approveClinicalVoiceNoteAction } from "@/lib/actions/fi-clinical-voice-note-actions";
-import { CLINICAL_NOTE_SECTION_KEYS, CLINICAL_NOTE_SECTION_LABELS } from "@/src/lib/clinicalNotes/clinicalNoteConstants";
+import {
+  CLINICAL_NOTE_SECTION_KEYS,
+  CLINICAL_NOTE_SECTION_LABELS,
+} from "@/src/lib/clinicalNotes/clinicalNoteConstants";
 import type { ClinicalNoteSections } from "@/src/lib/clinicalNotes/clinicalNoteSchemas";
 
 type ProcessOk = {
@@ -169,7 +172,10 @@ export function VoiceNoteEntryButton({
           setDraft(null);
           resetCapture();
         }}
-        className={className ?? "rounded border border-violet-300 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-200 hover:bg-violet-500/15"}
+        className={
+          className ??
+          "rounded border border-violet-300 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-200 hover:bg-violet-500/15"
+        }
       >
         {label}
       </button>
@@ -188,12 +194,17 @@ export function VoiceNoteEntryButton({
                   Voice-to-note (consultation)
                 </h2>
                 <p className="mt-1 text-xs text-slate-400">
-                  Audio is transcribed and structured by AI. The result is saved as an <strong>AI draft</strong> — review
-                  and approve before it becomes part of the official record. The original transcript is stored separately
-                  from the approved structured note.
+                  Audio is transcribed and structured by AI. The result is saved as an{" "}
+                  <strong>AI draft</strong> — review and approve before it becomes part of the
+                  official record. The original transcript is stored separately from the approved
+                  structured note.
                 </p>
               </div>
-              <button type="button" onClick={close} className="text-sm text-gray-500 hover:text-slate-200">
+              <button
+                type="button"
+                onClick={close}
+                className="text-sm text-gray-500 hover:text-slate-200"
+              >
                 Close
               </button>
             </div>
@@ -240,7 +251,9 @@ export function VoiceNoteEntryButton({
                     )}
                   </div>
                   {recordedBlob && !file ? (
-                    <p className="mt-2 text-xs text-emerald-300">Recording ready ({Math.round(recordedBlob.size / 1024)} KB).</p>
+                    <p className="mt-2 text-xs text-emerald-300">
+                      Recording ready ({Math.round(recordedBlob.size / 1024)} KB).
+                    </p>
                   ) : null}
                 </div>
 
@@ -256,13 +269,16 @@ export function VoiceNoteEntryButton({
             ) : (
               <div className="mt-4 space-y-4">
                 <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-                  Status: <strong>{draft.record_status}</strong> — this note is not official until you approve below.
+                  Status: <strong>{draft.record_status}</strong> — this note is not official until
+                  you approve below.
                 </p>
 
                 <div className="space-y-3">
                   {CLINICAL_NOTE_SECTION_KEYS.map((key) => (
                     <div key={key}>
-                      <h3 className="text-xs font-semibold text-slate-200">{CLINICAL_NOTE_SECTION_LABELS[key]}</h3>
+                      <h3 className="text-xs font-semibold text-slate-200">
+                        {CLINICAL_NOTE_SECTION_LABELS[key]}
+                      </h3>
                       <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">
                         {draft.sections[key]?.trim() || "—"}
                       </p>
@@ -275,7 +291,8 @@ export function VoiceNoteEntryButton({
                   onClick={() => setShowTranscript((v) => !v)}
                   className="text-xs font-medium text-violet-300 hover:underline"
                 >
-                  {showTranscript ? "Hide" : "Show"} original transcript (separate from approved record)
+                  {showTranscript ? "Hide" : "Show"} original transcript (separate from approved
+                  record)
                 </button>
                 {showTranscript ? (
                   <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-white/[0.08] bg-white/[0.03] p-2 text-xs text-slate-200">

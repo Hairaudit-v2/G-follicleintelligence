@@ -26,8 +26,12 @@ export const VIE_PLATFORM_PROGRESS = {
   status: "Pilot Ready" as const,
   statusLabel: "Visual Intelligence Layer" as const,
   progressPercent: 86,
-  completedPhases: VIE_PLATFORM_PHASES.filter((p) => p.status === "completed").map((p) => `${p.id} ${p.label}`),
-  pendingPhases: VIE_PLATFORM_PHASES.filter((p) => p.status === "pending").map((p) => `${p.id} ${p.label}`),
+  completedPhases: VIE_PLATFORM_PHASES.filter((p) => p.status === "completed").map(
+    (p) => `${p.id} ${p.label}`
+  ),
+  pendingPhases: VIE_PLATFORM_PHASES.filter((p) => p.status === "pending").map(
+    (p) => `${p.id} ${p.label}`
+  ),
   platformStage: "VIE-7 · outcome intelligence engine",
   platformDescription:
     "Protocol-driven clinical photography intelligence — guided capture, quality accept/retake loop, longitudinal comparison, same-angle alignment, outcome readiness signals, and surgical progress visualization. Audit evidence packs, AI clinical interpretation, and global benchmarking remain.",

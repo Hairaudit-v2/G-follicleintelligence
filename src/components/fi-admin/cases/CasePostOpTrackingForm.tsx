@@ -43,7 +43,9 @@ export function CasePostOpTrackingForm({
   const [instructionsGiven, setInstructionsGiven] = useState(initial?.instructions_given ?? false);
   const [aftercareNotes, setAftercareNotes] = useState(initial?.aftercare_notes ?? "");
   const [donorRecovery, setDonorRecovery] = useState(initial?.donor_recovery_notes ?? "");
-  const [recipientRecovery, setRecipientRecovery] = useState(initial?.recipient_recovery_notes ?? "");
+  const [recipientRecovery, setRecipientRecovery] = useState(
+    initial?.recipient_recovery_notes ?? ""
+  );
   const [complicationNotes, setComplicationNotes] = useState(initial?.complication_notes ?? "");
   const [outcomeNotes, setOutcomeNotes] = useState(initial?.outcome_notes ?? "");
   const [satisfaction, setSatisfaction] = useState(
@@ -60,7 +62,9 @@ export function CasePostOpTrackingForm({
     setRecipientRecovery(initial?.recipient_recovery_notes ?? "");
     setComplicationNotes(initial?.complication_notes ?? "");
     setOutcomeNotes(initial?.outcome_notes ?? "");
-    setSatisfaction(initial?.patient_satisfaction_score != null ? String(initial.patient_satisfaction_score) : "");
+    setSatisfaction(
+      initial?.patient_satisfaction_score != null ? String(initial.patient_satisfaction_score) : ""
+    );
   }, [initial]);
 
   const dirty = useMemo(() => {
@@ -95,7 +99,10 @@ export function CasePostOpTrackingForm({
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={POST_OP_FIELDS.postOpStatus.id} className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor={POST_OP_FIELDS.postOpStatus.id}
+          className="block text-xs font-medium text-slate-300"
+        >
           Post-op status
           <select
             {...POST_OP_FIELDS.postOpStatus}
@@ -103,7 +110,9 @@ export function CasePostOpTrackingForm({
             onChange={(e) => setPostOpStatus(e.target.value)}
             className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
-            {!isPostOpStatus(postOpStatus) ? <option value={postOpStatus}>{postOpStatus} (legacy)</option> : null}
+            {!isPostOpStatus(postOpStatus) ? (
+              <option value={postOpStatus}>{postOpStatus} (legacy)</option>
+            ) : null}
             {POST_OP_STATUS_VALUES.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -111,7 +120,10 @@ export function CasePostOpTrackingForm({
             ))}
           </select>
         </label>
-        <label htmlFor={POST_OP_FIELDS.instructionsGiven.id} className="flex items-end gap-2 text-xs font-medium text-slate-300">
+        <label
+          htmlFor={POST_OP_FIELDS.instructionsGiven.id}
+          className="flex items-end gap-2 text-xs font-medium text-slate-300"
+        >
           <input
             {...POST_OP_FIELDS.instructionsGiven}
             type="checkbox"
@@ -123,7 +135,10 @@ export function CasePostOpTrackingForm({
         </label>
       </div>
 
-      <label htmlFor={POST_OP_FIELDS.aftercareNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={POST_OP_FIELDS.aftercareNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Medication / aftercare notes
         <textarea
           {...POST_OP_FIELDS.aftercareNotes}
@@ -133,7 +148,10 @@ export function CasePostOpTrackingForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.donorRecovery.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={POST_OP_FIELDS.donorRecovery.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Donor recovery notes
         <textarea
           {...POST_OP_FIELDS.donorRecovery}
@@ -143,7 +161,10 @@ export function CasePostOpTrackingForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.recipientRecovery.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={POST_OP_FIELDS.recipientRecovery.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Recipient recovery notes
         <textarea
           {...POST_OP_FIELDS.recipientRecovery}
@@ -153,7 +174,10 @@ export function CasePostOpTrackingForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.complicationNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={POST_OP_FIELDS.complicationNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Complication notes
         <textarea
           {...POST_OP_FIELDS.complicationNotes}
@@ -163,7 +187,10 @@ export function CasePostOpTrackingForm({
           className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.outcomeNotes.id} className="block text-xs font-medium text-slate-300">
+      <label
+        htmlFor={POST_OP_FIELDS.outcomeNotes.id}
+        className="block text-xs font-medium text-slate-300"
+      >
         Outcome notes (early / qualitative)
         <textarea
           {...POST_OP_FIELDS.outcomeNotes}
@@ -174,7 +201,10 @@ export function CasePostOpTrackingForm({
         />
       </label>
 
-      <label htmlFor={POST_OP_FIELDS.satisfaction.id} className="block max-w-xs text-xs font-medium text-slate-300">
+      <label
+        htmlFor={POST_OP_FIELDS.satisfaction.id}
+        className="block max-w-xs text-xs font-medium text-slate-300"
+      >
         Patient satisfaction (1–10, optional)
         <input
           {...POST_OP_FIELDS.satisfaction}
@@ -186,7 +216,9 @@ export function CasePostOpTrackingForm({
         />
       </label>
       {!satOk ? <p className="text-xs text-amber-300">Use 1–10 or leave blank.</p> : null}
-      {!canSaveStatus ? <p className="text-xs text-amber-300">Pick a standard post-op status before saving.</p> : null}
+      {!canSaveStatus ? (
+        <p className="text-xs text-amber-300">Pick a standard post-op status before saving.</p>
+      ) : null}
       {msg ? <p className="text-xs text-slate-300">{msg}</p> : null}
 
       <button

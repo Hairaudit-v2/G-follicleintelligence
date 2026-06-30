@@ -200,7 +200,9 @@ export async function loadGuidedAssistSessionPayload(
   tenantId: string,
   pathname: string,
   serverOpts: ServerOpts = {}
-): Promise<{ ok: true; payload: GuidedAssistSessionPayload | null } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; payload: GuidedAssistSessionPayload | null } | { ok: false; error: string }
+> {
   try {
     const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
     if (!auth.ok) return auth;
@@ -282,7 +284,10 @@ export async function setGuidedAssistEnabledForUser(
 
     return { ok: true, assistEnabled: enabled };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to update assist preference." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update assist preference.",
+    };
   }
 }
 
@@ -297,7 +302,10 @@ export async function setGuidedAssistTenantDefaults(
 
     const adminProf = await loadActiveTenantAdminProfileForSession(tenantId, auth.actorAuthUserId);
     if (adminProf?.adminRole !== "clinic_admin" && adminProf?.adminRole !== "operations_admin") {
-      return { ok: false, error: "Clinic admin access is required to change tenant assist defaults." };
+      return {
+        ok: false,
+        error: "Clinic admin access is required to change tenant assist defaults.",
+      };
     }
 
     const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
@@ -313,11 +321,17 @@ export async function setGuidedAssistTenantDefaults(
 
     if (Object.keys(patch).length === 0) return { ok: true };
 
-    const { error } = await supabase.from("fi_guided_assist_preferences").update(patch).eq("id", row.id);
+    const { error } = await supabase
+      .from("fi_guided_assist_preferences")
+      .update(patch)
+      .eq("id", row.id);
     if (error) return { ok: false, error: error.message };
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to update tenant defaults." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update tenant defaults.",
+    };
   }
 }
 

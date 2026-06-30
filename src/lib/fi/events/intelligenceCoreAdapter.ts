@@ -159,9 +159,9 @@ export function fromIntelligenceEventEnvelope(
   const source_system = mapIntelligenceSourceToFiSourceSystem(envelope.source, warnings);
 
   const event_type_raw = envelope.event_name;
-  const event_type = (
-    isFiEventTypeString(event_type_raw) ? event_type_raw : (event_type_raw as FiEventType)
-  );
+  const event_type = isFiEventTypeString(event_type_raw)
+    ? event_type_raw
+    : (event_type_raw as FiEventType);
 
   const fiCompatible: FiEventEnvelope = {
     tenant_id,

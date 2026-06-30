@@ -10,7 +10,11 @@ export type FiIntelligenceReplayRunApprovalStatus =
   | "failed";
 
 /** Stored on replay run rows; includes reserved `dispatch_future` (not executable in Stage 15). */
-export type FiIntelligenceReplayRunMode = "dry_run" | "validate_only" | "enqueue_shadow" | "dispatch_future";
+export type FiIntelligenceReplayRunMode =
+  | "dry_run"
+  | "validate_only"
+  | "enqueue_shadow"
+  | "dispatch_future";
 
 export type FiIntelligenceReplayRunRow = {
   id: string;
@@ -37,7 +41,9 @@ export type FiIntelligenceReplayRunRow = {
   completed_at: string | null;
 };
 
-export function filtersFromReplayRunRow(row: FiIntelligenceReplayRunRow): IntelligenceEventLogReplayFilters {
+export function filtersFromReplayRunRow(
+  row: FiIntelligenceReplayRunRow
+): IntelligenceEventLogReplayFilters {
   return {
     ...(row.event_name ? { event_name: row.event_name } : {}),
     ...(row.source ? { source: row.source } : {}),

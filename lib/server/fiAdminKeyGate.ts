@@ -20,10 +20,16 @@ export function requireFiAdminKey(adminKey: string): { ok: true } | { ok: false;
   return { ok: true };
 }
 
-export async function assertFiTenantExists(tenantId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function assertFiTenantExists(
+  tenantId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id")
+    .eq("id", tid)
+    .maybeSingle();
   if (error) return { ok: false, error: "Could not verify tenant." };
   if (!data) return { ok: false, error: "Tenant not found." };
   return { ok: true };

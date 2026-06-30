@@ -23,8 +23,7 @@ const HDR_SIG = "x-fi-signature";
 
 const KID_RE = /^[a-zA-Z0-9_-]{1,64}$/;
 const NONCE_RE = /^[a-zA-Z0-9._-]{8,128}$/;
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export type MachineIngestRejectReason =
   | "malformed_headers"
@@ -160,12 +159,19 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       ok: false,
       httpStatus: 400,
       reason: "malformed_headers",
-      publicMessage: "Missing signing headers (x-fi-timestamp, x-fi-nonce, x-fi-key-id, x-fi-signature).",
+      publicMessage:
+        "Missing signing headers (x-fi-timestamp, x-fi-nonce, x-fi-key-id, x-fi-signature).",
       tenantId: tidPath,
       kid: kid || null,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid: fail.kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid: fail.kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid: fail.kid,
@@ -188,7 +194,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -212,7 +224,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -236,7 +254,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -260,7 +284,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -273,7 +303,10 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
     return fail;
   }
 
-  if (isMachineIngestProductionDeploy() && masterRaw.length < MACHINE_INGEST_MASTER_KEY_MIN_PRODUCTION_LENGTH) {
+  if (
+    isMachineIngestProductionDeploy() &&
+    masterRaw.length < MACHINE_INGEST_MASTER_KEY_MIN_PRODUCTION_LENGTH
+  ) {
     logStructured("error", "machine_ingest_master_key_production_length_invalid", {
       route,
       min_length: MACHINE_INGEST_MASTER_KEY_MIN_PRODUCTION_LENGTH,
@@ -288,7 +321,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -312,7 +351,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -343,7 +388,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -369,7 +420,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -400,7 +457,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -430,7 +493,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -454,7 +523,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -485,7 +560,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,
@@ -508,7 +589,13 @@ export async function verifySignedMachineIngestPartnersRequest(input: {
       kid,
       bodySha256Hex,
     };
-    logRejection({ reason: fail.reason, route, tenant_id: tidPath, kid, http_status: fail.httpStatus });
+    logRejection({
+      reason: fail.reason,
+      route,
+      tenant_id: tidPath,
+      kid,
+      http_status: fail.httpStatus,
+    });
     await insertMachineIngestAudit(input.supabase, {
       tenant_id: tidPath,
       kid,

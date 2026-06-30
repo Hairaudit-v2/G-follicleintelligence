@@ -11,20 +11,27 @@ function formatGenerated(iso: string): string {
   }
 }
 
-function warningTone(code: PatientTwinV1["warnings"][number]["code"]): keyof typeof fiBadgeIntentClassNames {
+function warningTone(
+  code: PatientTwinV1["warnings"][number]["code"]
+): keyof typeof fiBadgeIntentClassNames {
   if (code === "missing_case_linkage" || code === "missing_audit_linkage") return "info";
   if (code === "duplicate_media_risk" || code === "resolution_anomaly") return "warning";
-  if (code === "missing_foundation_patient" || code === "unresolved_global_patient") return "warning";
+  if (code === "missing_foundation_patient" || code === "unresolved_global_patient")
+    return "warning";
   return "neutral";
 }
 
-function severityTone(sev: PatientTwinV1["completeness"]["missing"][number]["severity"]): keyof typeof fiBadgeIntentClassNames {
+function severityTone(
+  sev: PatientTwinV1["completeness"]["missing"][number]["severity"]
+): keyof typeof fiBadgeIntentClassNames {
   if (sev === "important") return "danger";
   if (sev === "warning") return "warning";
   return "info";
 }
 
-function priorityTone(p: PatientTwinV1["completeness"]["recommended_actions"][number]["priority"]): string {
+function priorityTone(
+  p: PatientTwinV1["completeness"]["recommended_actions"][number]["priority"]
+): string {
   if (p === "high") return "border-rose-500/25 bg-rose-500/10 text-rose-50";
   if (p === "medium") return "border-amber-500/25 bg-amber-500/10 text-amber-50";
   return "border-slate-600/50 bg-white/[0.04] text-slate-200";
@@ -74,16 +81,22 @@ export function PatientTwinWarningsCard({ twin }: { twin: PatientTwinV1 }) {
         className="mt-8 border-t border-white/[0.08] pt-8"
         aria-labelledby="patient-twin-completeness-subheading"
       >
-        <h3 id="patient-twin-completeness-subheading" className="text-sm font-semibold text-[#F8FAFC]">
+        <h3
+          id="patient-twin-completeness-subheading"
+          className="text-sm font-semibold text-[#F8FAFC]"
+        >
           Record completeness
         </h3>
         <p className="mt-1 text-xs text-[#64748B]">
-          Coverage and AI-readiness (no inference). Bands: 0–39 poor · 40–64 partial · 65–84 good · 85–100 excellent.
+          Coverage and AI-readiness (no inference). Bands: 0–39 poor · 40–64 partial · 65–84 good ·
+          85–100 excellent.
         </p>
 
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-4xl font-semibold tabular-nums tracking-tight text-white">{c.score}</p>
+            <p className="text-4xl font-semibold tabular-nums tracking-tight text-white">
+              {c.score}
+            </p>
             <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">of 100</p>
           </div>
           <p
@@ -139,9 +152,13 @@ export function PatientTwinWarningsCard({ twin }: { twin: PatientTwinV1 }) {
             )}
           </div>
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Strengths</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+              Strengths
+            </h4>
             {c.strengths.length === 0 ? (
-              <p className="mt-2 text-sm text-[#94A3B8]">No strengths listed — enrich linked data to raise the score.</p>
+              <p className="mt-2 text-sm text-[#94A3B8]">
+                No strengths listed — enrich linked data to raise the score.
+              </p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {c.strengths.map((s, i) => (
@@ -159,13 +176,18 @@ export function PatientTwinWarningsCard({ twin }: { twin: PatientTwinV1 }) {
         </div>
 
         <div className="mt-6">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Recommended actions</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+            Recommended actions
+          </h4>
           {c.recommended_actions.length === 0 ? (
             <p className="mt-2 text-sm text-[#94A3B8]">No automated recommendations.</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {c.recommended_actions.map((a, i) => (
-                <li key={`${a.label}-${i}`} className={cn("rounded-xl border px-3 py-2.5", priorityTone(a.priority))}>
+                <li
+                  key={`${a.label}-${i}`}
+                  className={cn("rounded-xl border px-3 py-2.5", priorityTone(a.priority))}
+                >
                   <p className="text-sm font-semibold text-white">{a.label}</p>
                   <p className="mt-1 text-xs text-[#E2E8F0]/85">{a.reason}</p>
                   <p className="mt-1 text-[0.65rem] font-medium uppercase tracking-wide text-[#94A3B8]">
@@ -209,7 +231,8 @@ export function PatientTwinWarningsCard({ twin }: { twin: PatientTwinV1 }) {
           </div>
         </dl>
         <p className="mt-3 text-[0.65rem] leading-relaxed text-[#64748B]">
-          Twin V1 does not run AI inference. Intelligence fields on the payload are placeholders only.
+          Twin V1 does not run AI inference. Intelligence fields on the payload are placeholders
+          only.
         </p>
       </div>
     </FiSection>

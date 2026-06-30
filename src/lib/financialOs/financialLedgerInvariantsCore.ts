@@ -1,4 +1,7 @@
-import type { FiFinancialTransactionDirection, FiFinancialTransactionKind } from "@/src/lib/financialOs/financialTransactionCore";
+import type {
+  FiFinancialTransactionDirection,
+  FiFinancialTransactionKind,
+} from "@/src/lib/financialOs/financialTransactionCore";
 
 export type LedgerInvariantViolationCode =
   | "tenant_id_required"
@@ -28,21 +31,31 @@ export const FI_FINANCIAL_LEDGER_APPEND_ONLY = true as const;
 
 const DEBIT_ALLOWED_KINDS: ReadonlySet<FiFinancialTransactionKind> = new Set(["refund_processed"]);
 
-export function validateLedgerAppendInput(input: LedgerAppendValidationInput): LedgerAppendValidationResult {
+export function validateLedgerAppendInput(
+  input: LedgerAppendValidationInput
+): LedgerAppendValidationResult {
   const tid = input.tenantId?.trim();
   if (!tid) {
     return { ok: false, code: "tenant_id_required", message: "tenantId is required." };
   }
 
   if (!Number.isFinite(input.amountCents)) {
-    return { ok: false, code: "amount_not_finite", message: "amountCents must be a finite number." };
+    return {
+      ok: false,
+      code: "amount_not_finite",
+      message: "amountCents must be a finite number.",
+    };
   }
 
   const direction: FiFinancialTransactionDirection = input.direction ?? "credit";
   const rawAmount = Math.floor(input.amountCents);
 
   if (rawAmount < 0) {
-    return { ok: false, code: "negative_amount_not_allowed", message: "Negative amount_cents is not allowed on the ledger." };
+    return {
+      ok: false,
+      code: "negative_amount_not_allowed",
+      message: "Negative amount_cents is not allowed on the ledger.",
+    };
   }
 
   if (direction === "debit" && !DEBIT_ALLOWED_KINDS.has(input.transactionKind)) {
@@ -64,7 +77,11 @@ export function validateLedgerAppendInput(input: LedgerAppendValidationInput): L
 
   const idempotencyKey = input.idempotencyKey?.trim() || null;
   if (idempotencyKey !== null && idempotencyKey.length === 0) {
-    return { ok: false, code: "idempotency_key_empty", message: "idempotencyKey cannot be empty when provided." };
+    return {
+      ok: false,
+      code: "idempotency_key_empty",
+      message: "idempotencyKey cannot be empty when provided.",
+    };
   }
 
   if (idempotencyKey?.includes(":")) {
@@ -81,7 +98,10 @@ export function validateLedgerAppendInput(input: LedgerAppendValidationInput): L
   return { ok: true, normalizedAmountCents: Math.max(0, rawAmount), direction };
 }
 
-export function assertLedgerRowsTenantScoped(rows: Array<{ tenant_id: string }>, expectedTenantId: string): boolean {
+export function assertLedgerRowsTenantScoped(
+  rows: Array<{ tenant_id: string }>,
+  expectedTenantId: string
+): boolean {
   const tid = expectedTenantId.trim();
   return rows.every((r) => String(r.tenant_id) === tid);
 }

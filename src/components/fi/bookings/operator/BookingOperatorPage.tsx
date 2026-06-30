@@ -20,7 +20,20 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
     router.refresh();
   }
 
-  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinicalStaffOptions, clinics, summaryCounts, summaryTruncated, listTruncated, calendarTimezone, services } = data;
+  const {
+    tenantId,
+    query,
+    bookings,
+    reminderJobsByBookingId,
+    assignees,
+    clinicalStaffOptions,
+    clinics,
+    summaryCounts,
+    summaryTruncated,
+    listTruncated,
+    calendarTimezone,
+    services,
+  } = data;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
@@ -28,17 +41,22 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         <h1 className="text-lg font-semibold text-slate-100">Bookings</h1>
         <p className="text-sm text-slate-400">
           Use the{" "}
-          <Link className="text-blue-300 underline hover:text-blue-300" href={`/fi-admin/${tenantId}/calendar`}>
+          <Link
+            className="text-blue-300 underline hover:text-blue-300"
+            href={`/fi-admin/${tenantId}/calendar`}
+          >
             Calendar
           </Link>{" "}
-          for week/day scheduling. This page is the operational booking list — filter, create, and complete work in a
-          dense table.
+          for week/day scheduling. This page is the operational booking list — filter, create, and
+          complete work in a dense table.
         </p>
         <p className="text-sm text-slate-400">
-          Cancelled bookings are locked except for cancellation details (server policy); use the list to review reasons.
+          Cancelled bookings are locked except for cancellation details (server policy); use the
+          list to review reasons.
         </p>
         <label className="block max-w-md text-xs text-slate-400">
-          FI Admin key (optional — paste when your session role cannot write via service actions alone)
+          FI Admin key (optional — paste when your session role cannot write via service actions
+          alone)
           <input
             type="password"
             className="mt-1 w-full rounded border border-slate-700 px-2 py-1 font-mono text-sm"
@@ -63,18 +81,23 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
           <p className="mt-1 text-2xl font-semibold text-amber-200">{summaryCounts.overdue}</p>
         </div>
         <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
-          <p className="text-xs font-medium uppercase text-gray-500">Cancelled (in summary window)</p>
+          <p className="text-xs font-medium uppercase text-gray-500">
+            Cancelled (in summary window)
+          </p>
           <p className="mt-1 text-2xl font-semibold text-slate-300">{summaryCounts.cancelled}</p>
         </div>
         <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
-          <p className="text-xs font-medium uppercase text-gray-500">Completed (in summary window)</p>
+          <p className="text-xs font-medium uppercase text-gray-500">
+            Completed (in summary window)
+          </p>
           <p className="mt-1 text-2xl font-semibold text-emerald-300">{summaryCounts.completed}</p>
         </div>
       </section>
       {summaryTruncated ? (
         <p className="text-xs text-amber-300">
-          Summary counts may be capped: more than the configured maximum bookings overlap the internal summary window.
-          Narrow your list filters or extend the range in a follow-up if needed.
+          Summary counts may be capped: more than the configured maximum bookings overlap the
+          internal summary window. Narrow your list filters or extend the range in a follow-up if
+          needed.
         </p>
       ) : null}
 
@@ -118,7 +141,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
       <BookingEditDrawer
         tenantId={tenantId}
         booking={editing}
-        reminderJobs={editing ? reminderJobsByBookingId[editing.id] ?? [] : []}
+        reminderJobs={editing ? (reminderJobsByBookingId[editing.id] ?? []) : []}
         clinicalStaffOptions={clinicalStaffOptions}
         clinics={clinics}
         adminKey={adminKey}

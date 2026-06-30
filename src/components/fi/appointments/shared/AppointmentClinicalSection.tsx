@@ -14,7 +14,9 @@ export function AppointmentClinicalSection({
 }) {
   return (
     <section className={appointmentCardClass}>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Clinical context</h3>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Clinical context
+      </h3>
       {clinicalScalesSummary ? (
         <p className="text-sm text-slate-100">{clinicalScalesSummary}</p>
       ) : (
@@ -32,7 +34,8 @@ export function AppointmentClinicalSection({
               Grafts (plan):{" "}
               {surgeryPlan.estimated_grafts_min != null && surgeryPlan.estimated_grafts_max != null
                 ? `${surgeryPlan.estimated_grafts_min.toLocaleString()}–${surgeryPlan.estimated_grafts_max.toLocaleString()}`
-                : surgeryPlan.estimated_grafts_min?.toLocaleString() ?? surgeryPlan.estimated_grafts_max?.toLocaleString()}
+                : (surgeryPlan.estimated_grafts_min?.toLocaleString() ??
+                  surgeryPlan.estimated_grafts_max?.toLocaleString())}
             </p>
           ) : null}
           {surgeryPlan.surgical_plan_summary?.trim() ? (

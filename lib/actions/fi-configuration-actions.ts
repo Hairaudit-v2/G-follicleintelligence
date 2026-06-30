@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { assertFiTenantExists, isFiAdminUuid, requireFiAdminKey } from "@/lib/server/fiAdminKeyGate";
+import {
+  assertFiTenantExists,
+  isFiAdminUuid,
+  requireFiAdminKey,
+} from "@/lib/server/fiAdminKeyGate";
 import {
   clinicBelongsToTenant,
   organisationBelongsToTenant,
@@ -19,10 +23,15 @@ function trimToNull(v: unknown): string | null {
   return s === "" ? null : s;
 }
 
-function optionalBoundedText(v: unknown, max: number, label: string): { ok: true; value: string | null } | { ok: false; error: string } {
+function optionalBoundedText(
+  v: unknown,
+  max: number,
+  label: string
+): { ok: true; value: string | null } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: true, value: null };
-  if (raw.length > max) return { ok: false, error: `${label} is too long (max ${max} characters).` };
+  if (raw.length > max)
+    return { ok: false, error: `${label} is too long (max ${max} characters).` };
   if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(raw)) {
     return { ok: false, error: `${label} contains invalid characters.` };
   }
@@ -37,14 +46,18 @@ function optionalMultilineBoundedText(
 ): { ok: true; value: string | null } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: true, value: null };
-  if (raw.length > max) return { ok: false, error: `${label} is too long (max ${max} characters).` };
+  if (raw.length > max)
+    return { ok: false, error: `${label} is too long (max ${max} characters).` };
   if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(raw)) {
     return { ok: false, error: `${label} contains invalid characters.` };
   }
   return { ok: true, value: raw };
 }
 
-function optionalHttpUrl(v: unknown, label: string): { ok: true; value: string | null } | { ok: false; error: string } {
+function optionalHttpUrl(
+  v: unknown,
+  label: string
+): { ok: true; value: string | null } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: true, value: null };
   const lower = raw.toLowerCase();
@@ -55,16 +68,23 @@ function optionalHttpUrl(v: unknown, label: string): { ok: true; value: string |
   return { ok: true, value: raw };
 }
 
-function optionalEmail(v: unknown, label: string): { ok: true; value: string | null } | { ok: false; error: string } {
+function optionalEmail(
+  v: unknown,
+  label: string
+): { ok: true; value: string | null } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: true, value: null };
   if (raw.length > 254) return { ok: false, error: `${label} is too long.` };
   const simple = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!simple.test(raw)) return { ok: false, error: `${label} does not look like a valid email address.` };
+  if (!simple.test(raw))
+    return { ok: false, error: `${label} does not look like a valid email address.` };
   return { ok: true, value: raw };
 }
 
-function optionalColour(v: unknown, label: string): { ok: true; value: string | null } | { ok: false; error: string } {
+function optionalColour(
+  v: unknown,
+  label: string
+): { ok: true; value: string | null } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: true, value: null };
   if (raw.length > 32) return { ok: false, error: `${label} is too long.` };
@@ -74,7 +94,10 @@ function optionalColour(v: unknown, label: string): { ok: true; value: string | 
   return { ok: true, value: raw };
 }
 
-function optionalTimezone(v: unknown, label: string): { ok: true; value: string | null } | { ok: false; error: string } {
+function optionalTimezone(
+  v: unknown,
+  label: string
+): { ok: true; value: string | null } | { ok: false; error: string } {
   const raw = trimToNull(v);
   if (raw === null) return { ok: true, value: null };
   if (raw.length > 64) return { ok: false, error: `${label} is too long.` };
@@ -156,7 +179,8 @@ export async function upsertOrganisationSettingsAction(input: {
   const tenantId = trimToNull(input.tenantId);
   const organisationId = trimToNull(input.organisationId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
-  if (!organisationId || !isFiAdminUuid(organisationId)) return { ok: false, error: "Invalid organisation id." };
+  if (!organisationId || !isFiAdminUuid(organisationId))
+    return { ok: false, error: "Invalid organisation id." };
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;

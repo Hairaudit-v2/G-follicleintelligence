@@ -1,6 +1,8 @@
 import type { DonorAssessmentModelResult } from "./types";
 
-export function donorAssessmentNotConfiguredResult(reason: "no_api_key" | "no_image"): DonorAssessmentModelResult {
+export function donorAssessmentNotConfiguredResult(
+  reason: "no_api_key" | "no_image"
+): DonorAssessmentModelResult {
   const note =
     reason === "no_api_key"
       ? "Donor assessor unavailable (OPENAI_API_KEY missing). Bands and risks default to unknown pending clinical review."

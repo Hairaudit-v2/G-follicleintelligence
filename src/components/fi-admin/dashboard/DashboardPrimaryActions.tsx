@@ -63,8 +63,12 @@ export function DashboardPrimaryActions(props: {
                 title={action.disabledReason}
                 className="flex min-h-[8.5rem] cursor-not-allowed flex-col rounded-2xl border border-dashed border-white/[0.08] bg-black/20 p-5 opacity-55"
               >
-                <div className="text-sm font-semibold tracking-tight text-slate-300 sm:text-base">{action.title}</div>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{action.description}</p>
+                <div className="text-sm font-semibold tracking-tight text-slate-300 sm:text-base">
+                  {action.title}
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+                  {action.description}
+                </p>
               </div>
             );
           }
@@ -86,7 +90,9 @@ export function DashboardPrimaryActions(props: {
               <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-slate-500">
                 {(action as { icon?: ReactNode }).icon}
               </span>
-              <div className="text-sm font-semibold tracking-tight text-slate-300 sm:text-base">{action.title}</div>
+              <div className="text-sm font-semibold tracking-tight text-slate-300 sm:text-base">
+                {action.title}
+              </div>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{action.description}</p>
             </div>
           );

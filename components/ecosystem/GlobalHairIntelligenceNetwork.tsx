@@ -219,9 +219,7 @@ export function GlobalHairIntelligenceNetwork({
           </filter>
         </defs>
 
-        {showBackground && (
-          <rect width={VIEW_SIZE} height={VIEW_SIZE} fill={colors.bg} />
-        )}
+        {showBackground && <rect width={VIEW_SIZE} height={VIEW_SIZE} fill={colors.bg} />}
 
         <circle
           cx={CX}
@@ -347,14 +345,10 @@ function CenterNode({
         strokeWidth={isHighlight ? 2.5 : 1.5}
         initial={false}
         animate={
-          animate
-            ? { scale: [1, 1.03, 1], opacity: [0.95, 1, 0.95] }
-            : { scale: 1, opacity: 1 }
+          animate ? { scale: [1, 1.03, 1], opacity: [0.95, 1, 0.95] } : { scale: 1, opacity: 1 }
         }
         transition={
-          animate
-            ? { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
-            : { duration: 0 }
+          animate ? { duration: 3, repeat: Infinity, ease: "easeInOut" as const } : { duration: 0 }
         }
         style={{
           filter: animate ? `drop-shadow(0 0 12px ${colors.centerGlow})` : undefined,
@@ -437,14 +431,7 @@ function ConnectorLine({
 
   return (
     <g>
-      <line
-        x1={start.x}
-        y1={start.y}
-        x2={end.x}
-        y2={end.y}
-        stroke={lineStroke}
-        strokeWidth={1.2}
-      />
+      <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke={lineStroke} strokeWidth={1.2} />
       {animate && (
         <motion.line
           x1={start.x}
@@ -518,7 +505,8 @@ function OuterNodeGroup({
   const stroke = isHighlight ? colors.outerHighlightStroke : colors.outerStroke;
   const strokeWidth = isHighlight ? 2.5 : 1.5;
 
-  const fontSizeTitle = size === "compact" ? (node.id === "hli" ? 12 : 14) : node.id === "hli" ? 14 : 16;
+  const fontSizeTitle =
+    size === "compact" ? (node.id === "hli" ? 12 : 14) : node.id === "hli" ? 14 : 16;
   const fontSizeSub = size === "compact" ? 10 : 11;
   const fontSizeDetail = size === "compact" ? 8 : 9;
 
@@ -549,8 +537,12 @@ function OuterNodeGroup({
       >
         {node.id === "hli" ? (
           <>
-            <tspan x={0} dy={0}>Hair Longevity</tspan>
-            <tspan x={0} dy={17}>Institute™</tspan>
+            <tspan x={0} dy={0}>
+              Hair Longevity
+            </tspan>
+            <tspan x={0} dy={17}>
+              Institute™
+            </tspan>
           </>
         ) : (
           node.title

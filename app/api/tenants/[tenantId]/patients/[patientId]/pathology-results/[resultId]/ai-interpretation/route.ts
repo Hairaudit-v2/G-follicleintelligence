@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import {
+  crmJsonError,
+  crmJsonOk,
+  extractAdminKeyFromRequest,
+  mapCrmRouteError,
+} from "@/src/lib/crm/crmHttp";
 import {
   archivePathologyAiInterpretation,
   generatePathologyAiInterpretation,
@@ -28,7 +33,10 @@ const patchBodySchema = z.discriminatedUnion("action", [
 ]);
 
 function mapAiRouteError(e: unknown) {
-  if (e instanceof Error && (e.message.includes("OpenAI") || e.message.includes("schema validation"))) {
+  if (
+    e instanceof Error &&
+    (e.message.includes("OpenAI") || e.message.includes("schema validation"))
+  ) {
     return crmJsonError(502, e.message);
   }
   return mapCrmRouteError(e);
@@ -52,7 +60,12 @@ export async function POST(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
     const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), req);
 
-    const interpretation = await generatePathologyAiInterpretation(tenantId.trim(), patientId.trim(), resultId.trim(), actingUserId);
+    const interpretation = await generatePathologyAiInterpretation(
+      tenantId.trim(),
+      patientId.trim(),
+      resultId.trim(),
+      actingUserId
+    );
     return crmJsonOk({ interpretation });
   } catch (e) {
     return mapAiRouteError(e);
@@ -77,16 +90,24 @@ export async function PATCH(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
     const parsed = patchBodySchema.safeParse(body);
     if (!parsed.success) {
-      return crmJsonError(400, parsed.error.issues.map((i) => i.message).join(" ") || "Invalid body.");
+      return crmJsonError(
+        400,
+        parsed.error.issues.map((i) => i.message).join(" ") || "Invalid body."
+      );
     }
 
     const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), req);
     if (parsed.data.action === "update_summaries") {
-      const interpretation = await updatePathologyAiInterpretationSummaries(tenantId.trim(), patientId.trim(), resultId.trim(), {
-        interpretationId: parsed.data.interpretation_id ?? null,
-        doctorSummary: parsed.data.doctor_summary ?? null,
-        patientFriendlySummary: parsed.data.patient_friendly_summary ?? null,
-      });
+      const interpretation = await updatePathologyAiInterpretationSummaries(
+        tenantId.trim(),
+        patientId.trim(),
+        resultId.trim(),
+        {
+          interpretationId: parsed.data.interpretation_id ?? null,
+          doctorSummary: parsed.data.doctor_summary ?? null,
+          patientFriendlySummary: parsed.data.patient_friendly_summary ?? null,
+        }
+      );
       return crmJsonOk({ interpretation });
     }
 

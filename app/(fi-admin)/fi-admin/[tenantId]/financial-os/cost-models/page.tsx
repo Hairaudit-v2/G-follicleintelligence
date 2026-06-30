@@ -6,7 +6,10 @@ import {
   FinancialSurgeryCostModelForm,
   FinancialSurgeryCostModelHistory,
 } from "@/src/components/fi-admin/financial-os/FinancialSurgeryCostModelsPanel";
-import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  FinancialOsSubPageHeader,
+  financialOsClasses,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import {
   loadCostModelCreatorLabels,
@@ -21,7 +24,11 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function FinancialOsCostModelsPage({ params }: { params: Promise<{ tenantId: string }> }) {
+export default async function FinancialOsCostModelsPage({
+  params,
+}: {
+  params: Promise<{ tenantId: string }>;
+}) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) notFound();
@@ -32,8 +39,11 @@ export default async function FinancialOsCostModelsPage({ params }: { params: Pr
     getPaymentRecordMutationCapability(tid),
   ]);
 
-  const creatorIds = groups.flatMap((g) =>
-    [g.active?.created_by_fi_user_id, ...g.history.map((h) => h.created_by_fi_user_id)].filter(Boolean) as string[]
+  const creatorIds = groups.flatMap(
+    (g) =>
+      [g.active?.created_by_fi_user_id, ...g.history.map((h) => h.created_by_fi_user_id)].filter(
+        Boolean
+      ) as string[]
   );
   const creatorLabelMap = await loadCostModelCreatorLabels(tid, creatorIds);
   const creatorLabels = Object.fromEntries(creatorLabelMap.entries());

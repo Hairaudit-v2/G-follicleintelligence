@@ -130,7 +130,10 @@ function typeSections(typeId: ConsultationTypeId): readonly ConsultationSectionI
   return CONSULTATION_TYPE_DEFINITIONS.find((d) => d.id === typeId)?.sections ?? [];
 }
 
-function sectionObject(structured: Record<string, unknown>, key: string): Record<string, unknown> | null {
+function sectionObject(
+  structured: Record<string, unknown>,
+  key: string
+): Record<string, unknown> | null {
   const raw = structured[key];
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   return raw as Record<string, unknown>;
@@ -153,7 +156,11 @@ function isActiveConsultation(row: ConsultationIndexRow): boolean {
   return row.status !== "archived";
 }
 
-function isTodayOrUpcoming(ymd: string | null | undefined, todayYmd: string, horizonDays = 7): boolean {
+function isTodayOrUpcoming(
+  ymd: string | null | undefined,
+  todayYmd: string,
+  horizonDays = 7
+): boolean {
   const d = ymd?.trim();
   if (!d) return false;
   const end = addCalendarDays(todayYmd, horizonDays);
@@ -175,9 +182,10 @@ function daysSinceYmd(ymd: string | null | undefined, todayYmd: string): number 
   return Math.floor((b - a) / MS_DAY);
 }
 
-function readQuoteStatus(row: ConsultationIndexRow): ReturnType<typeof normalizeQuoteStatusFromSignals> {
-  const raw =
-    typeof row.quote_data?.quote_status === "string" ? row.quote_data.quote_status : null;
+function readQuoteStatus(
+  row: ConsultationIndexRow
+): ReturnType<typeof normalizeQuoteStatusFromSignals> {
+  const raw = typeof row.quote_data?.quote_status === "string" ? row.quote_data.quote_status : null;
   return normalizeQuoteStatusFromSignals({ consultationStatus: row.status, quoteStatusRaw: raw });
 }
 
@@ -200,7 +208,8 @@ function readTreatmentInterest(row: ConsultationIndexRow): string | null {
 
 function nextActionForStatus(row: ConsultationIndexRow): string {
   if (row.status === "draft") return "Continue the consultation draft and capture assessment.";
-  if (row.status === "in_progress") return "Complete clinical assessment and treatment recommendation.";
+  if (row.status === "in_progress")
+    return "Complete clinical assessment and treatment recommendation.";
   if (row.status === "completed") return "Draft and send the treatment quote.";
   if (row.status === "quoted") return "Follow up on the quote and capture patient decision.";
   if (row.status === "accepted") return "Move toward surgery planning and case creation.";
@@ -208,7 +217,10 @@ function nextActionForStatus(row: ConsultationIndexRow): string {
   return "Review consultation status and plan next step.";
 }
 
-export function deriveConsultationFlowState(row: ConsultationIndexRow, todayYmd: string): ConsultationFlowState | null {
+export function deriveConsultationFlowState(
+  row: ConsultationIndexRow,
+  todayYmd: string
+): ConsultationFlowState | null {
   const date = row.consultation_date?.trim();
   const isToday = date === todayYmd;
   const st = row.status;
@@ -265,7 +277,9 @@ export function buildConsultationHealthCards(
   const treatmentPlansPending = active.filter(
     (r) =>
       r.status === "in_progress" ||
-      (r.status === "completed" && readQuoteStatus(r) === "neutral" && !hasQuoteDraftSignals(r.quote_data))
+      (r.status === "completed" &&
+        readQuoteStatus(r) === "neutral" &&
+        !hasQuoteDraftSignals(r.quote_data))
   ).length;
   const quotesFollowUpsDue =
     columnCounts.quote_sent +
@@ -300,7 +314,8 @@ export function buildConsultationHealthCards(
       id: "drafts",
       label: "Draft consultations",
       value: String(draftCount),
-      detail: draftCount > 0 ? "Consultation drafts awaiting completion" : "No open consultation drafts",
+      detail:
+        draftCount > 0 ? "Consultation drafts awaiting completion" : "No open consultation drafts",
       href: `${base}/consultations?view=list&status=draft`,
     },
     {
@@ -380,7 +395,8 @@ export function buildConsultationAttentionPriorities(
       count: needingPreparation,
       priorityScore: 96,
       severity: "critical",
-      headline: (n) => plural(n, "consultation", "consultations") + " need preparation before the patient arrives",
+      headline: (n) =>
+        plural(n, "consultation", "consultations") + " need preparation before the patient arrives",
       detail: "Open the consultation workspace and complete pre-visit assessment.",
       href: `${base}/consultations?view=list&status=draft`,
     },
@@ -398,7 +414,8 @@ export function buildConsultationAttentionPriorities(
       count: inProgress,
       priorityScore: 84,
       severity: "warning",
-      headline: (n) => plural(n, "consultation", "consultations") + " are in progress and need completion",
+      headline: (n) =>
+        plural(n, "consultation", "consultations") + " are in progress and need completion",
       detail: "Finish clinical assessment and mark the consultation complete.",
       href: `${base}/consultations?view=list&status=in_progress`,
     },
@@ -407,7 +424,8 @@ export function buildConsultationAttentionPriorities(
       count: completedNoQuote,
       priorityScore: 82,
       severity: "warning",
-      headline: (n) => plural(n, "completed consultation", "completed consultations") + " need a treatment quote",
+      headline: (n) =>
+        plural(n, "completed consultation", "completed consultations") + " need a treatment quote",
       detail: "Draft pricing and send the quote to the patient.",
       href: `${base}/consultation-conversion`,
     },
@@ -425,7 +443,8 @@ export function buildConsultationAttentionPriorities(
       count: surgeryReady,
       priorityScore: 76,
       severity: "info",
-      headline: (n) => plural(n, "consultation", "consultations") + " are ready to convert to surgery planning",
+      headline: (n) =>
+        plural(n, "consultation", "consultations") + " are ready to convert to surgery planning",
       detail: "Create or link the case and schedule the procedure.",
       href: `${base}/consultation-conversion`,
     },
@@ -449,7 +468,9 @@ export function hasUrgentConsultationAttention(items: ConsultationAttentionItem[
   return items.some((i) => i.severity === "critical" || i.severity === "warning");
 }
 
-export function consultationAttentionSeverityClass(severity: ConsultationAttentionItem["severity"]): string {
+export function consultationAttentionSeverityClass(
+  severity: ConsultationAttentionItem["severity"]
+): string {
   if (severity === "critical") return "border-rose-500/25 bg-rose-500/[0.06]";
   if (severity === "warning") return "border-amber-500/20 bg-amber-500/[0.04]";
   return "border-white/[0.08] bg-[#0c1220]/60";
@@ -503,7 +524,10 @@ export function buildTodayConsultationFlowItems(
     items.push({
       id: row.id,
       patientOrLeadName: row.link_headline,
-      timeLabel: row.consultation_date?.trim() === todayYmd ? "Today" : formatConsultationDate(row.consultation_date),
+      timeLabel:
+        row.consultation_date?.trim() === todayYmd
+          ? "Today"
+          : formatConsultationDate(row.consultation_date),
       consultationType: row.consultation_type_label,
       clinicalStatus: consultationStatusLabel(row.status),
       commercialStatus: commercialStatusForRow(row),
@@ -527,19 +551,28 @@ export function buildTodayConsultationFlowItems(
   };
 
   return items
-    .sort((a, b) => stateOrder[a.flowState] - stateOrder[b.flowState] || a.sortKey.localeCompare(b.sortKey))
+    .sort(
+      (a, b) =>
+        stateOrder[a.flowState] - stateOrder[b.flowState] || a.sortKey.localeCompare(b.sortKey)
+    )
     .slice(0, maxItems);
 }
 
-function deriveClinicalPlanningLabel(row: ConsultationIndexRow): { label: string; action: string; score: number } | null {
+function deriveClinicalPlanningLabel(
+  row: ConsultationIndexRow
+): { label: string; action: string; score: number } | null {
   if (!isActiveConsultation(row)) return null;
-  if (row.status === "quoted" || row.status === "accepted" || row.status === "converted_to_case") return null;
+  if (row.status === "quoted" || row.status === "accepted" || row.status === "converted_to_case")
+    return null;
 
   const structured = row.structured_data ?? {};
   const sections = typeSections(row.consultation_type);
   const typeId = row.consultation_type;
 
-  if (sections.includes("assessment") && !sectionHasContent(sectionObject(structured, "assessment"))) {
+  if (
+    sections.includes("assessment") &&
+    !sectionHasContent(sectionObject(structured, "assessment"))
+  ) {
     return {
       label: "Hair loss classification incomplete",
       action: "Complete visual assessment and pattern classification.",
@@ -563,7 +596,10 @@ function deriveClinicalPlanningLabel(row: ConsultationIndexRow): { label: string
     };
   }
 
-  if (sections.includes("recommendations") && !sectionHasContent(sectionObject(structured, "recommendations"))) {
+  if (
+    sections.includes("recommendations") &&
+    !sectionHasContent(sectionObject(structured, "recommendations"))
+  ) {
     return {
       label: "Treatment recommendation pending",
       action: "Document the recommended treatment plan.",
@@ -644,7 +680,11 @@ function conversionCardToFollowUp(
     consultationHref: card.hrefs.consultation,
     leadHref: card.hrefs.lead,
     priorityScore:
-      col === "quote_sent" ? 88 + Math.min(10, card.daysSinceConsultation ?? 0) : col === "quote_accepted" ? 85 : 75,
+      col === "quote_sent"
+        ? 88 + Math.min(10, card.daysSinceConsultation ?? 0)
+        : col === "quote_accepted"
+          ? 85
+          : 75,
   };
 }
 
@@ -700,7 +740,9 @@ export function formatConsultationDate(iso: string | null | undefined): string {
 export function formatConsultationDateTime(iso: string): string {
   const d = Date.parse(iso);
   if (!Number.isFinite(d)) return iso;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(d));
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
+    new Date(d)
+  );
 }
 
 export function consultationDiagnosticCounts(payload: ConsultationDashboardPayload): {

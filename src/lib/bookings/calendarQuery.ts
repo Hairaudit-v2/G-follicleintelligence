@@ -71,8 +71,7 @@ export type ParsedCalendarQuery = {
   unassignedOnly: boolean;
 };
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(v: string): boolean {
   return UUID_RE.test(v.trim());
@@ -98,7 +97,8 @@ export function parseUtcCalendarDateString(ymd: string): string | null {
   const ms = Date.UTC(y, mo, day);
   if (!Number.isFinite(ms)) return null;
   const chk = new Date(ms);
-  if (chk.getUTCFullYear() !== y || chk.getUTCMonth() !== mo || chk.getUTCDate() !== day) return null;
+  if (chk.getUTCFullYear() !== y || chk.getUTCMonth() !== mo || chk.getUTCDate() !== day)
+    return null;
   return utcCalendarDateStringFromDate(chk);
 }
 
@@ -217,7 +217,8 @@ export function buildCalendarHref(
   opts?: { route?: CalendarRoute }
 ): string {
   const route = opts?.route ?? "fi-admin";
-  const base = route === "dashboard" ? "/dashboard/calendar" : `/fi-admin/${tenantId.trim()}/calendar`;
+  const base =
+    route === "dashboard" ? "/dashboard/calendar" : `/fi-admin/${tenantId.trim()}/calendar`;
   const sp = new URLSearchParams();
   if (route === "dashboard") sp.set("tenantId", tenantId.trim());
   if (q.view && q.view !== "week") sp.set("view", q.view);
@@ -240,7 +241,10 @@ export function buildCalendarHref(
 }
 
 /** Merge current calendar URL state with partial overrides (pure). */
-export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: CalendarHrefQuery): CalendarHrefQuery {
+export function mergeCalendarHrefQuery(
+  current: ParsedCalendarQuery,
+  patch: CalendarHrefQuery
+): CalendarHrefQuery {
   const cleared = (v: string | null | undefined | ""): v is null | "" => v === null || v === "";
 
   let staffId: string | undefined =
@@ -248,7 +252,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
       ? cleared(patch.staffId)
         ? undefined
         : String(patch.staffId).trim() || undefined
-      : current.staffId ?? undefined;
+      : (current.staffId ?? undefined);
 
   let role: CalendarStaffRoleBucket | undefined =
     patch.role !== undefined
@@ -256,8 +260,8 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
         ? undefined
         : patch.role === "doctor" || patch.role === "nurse"
           ? patch.role
-          : current.staffRoleBucket ?? undefined
-      : current.staffRoleBucket ?? undefined;
+          : (current.staffRoleBucket ?? undefined)
+      : (current.staffRoleBucket ?? undefined);
 
   if (patch.role === "doctor" || patch.role === "nurse") staffId = undefined;
   if (patch.staffId !== undefined && staffId) role = undefined;
@@ -267,14 +271,14 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
       ? cleared(patch.clinicId)
         ? undefined
         : String(patch.clinicId).trim() || undefined
-      : current.clinicId ?? undefined;
+      : (current.clinicId ?? undefined);
 
   const roomId: string | undefined =
     patch.roomId !== undefined
       ? cleared(patch.roomId)
         ? undefined
         : String(patch.roomId).trim() || undefined
-      : current.roomId ?? undefined;
+      : (current.roomId ?? undefined);
 
   const resourceView: CalendarResourceView | undefined =
     patch.resourceView !== undefined
@@ -285,8 +289,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
           : "staff"
       : current.resourceView;
 
-  let waitingOnly =
-    patch.waiting !== undefined ? Boolean(patch.waiting) : current.waitingOnly;
+  let waitingOnly = patch.waiting !== undefined ? Boolean(patch.waiting) : current.waitingOnly;
   let unassignedOnly =
     patch.unassigned !== undefined ? Boolean(patch.unassigned) : current.unassignedOnly;
 
@@ -295,7 +298,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
       ? cleared(patch.status)
         ? undefined
         : String(patch.status).trim() || undefined
-      : current.status ?? undefined;
+      : (current.status ?? undefined);
 
   if (waitingOnly) statusOut = undefined;
   if (statusOut) waitingOnly = false;
@@ -305,7 +308,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
       ? cleared(patch.assignedUserId)
         ? undefined
         : String(patch.assignedUserId).trim() || undefined
-      : current.assignedUserId ?? undefined;
+      : (current.assignedUserId ?? undefined);
 
   if (staffId || assignedUserIdOut || role) unassignedOnly = false;
   if (unassignedOnly) {
@@ -323,15 +326,16 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
         ? cleared(patch.type)
           ? undefined
           : patch.type
-        : current.bookingType ?? undefined,
+        : (current.bookingType ?? undefined),
     assignedUserId: assignedUserIdOut,
     staffId,
     clinicId,
     roomId,
     resourceView,
     role,
-    includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
-    q: patch.q !== undefined ? patch.q : current.search ?? undefined,
+    includeCancelled:
+      patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
+    q: patch.q !== undefined ? patch.q : (current.search ?? undefined),
     sample: patch.sample !== undefined ? patch.sample : current.sampleMode ? true : undefined,
     waiting: waitingOnly ? true : undefined,
     unassigned: unassignedOnly ? true : undefined,
@@ -339,7 +343,10 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
 }
 
 /** `start` / `end` ISO for booking overlap query covering the visible calendar range. */
-export function calendarRangeIsoForQuery(q: ParsedCalendarQuery): { rangeStartIso: string; rangeEndIso: string } {
+export function calendarRangeIsoForQuery(q: ParsedCalendarQuery): {
+  rangeStartIso: string;
+  rangeEndIso: string;
+} {
   const { rangeStartMs, rangeEndMs } = calendarVisibleUtcRangeMs(q);
   return {
     rangeStartIso: new Date(rangeStartMs).toISOString(),
@@ -347,7 +354,10 @@ export function calendarRangeIsoForQuery(q: ParsedCalendarQuery): { rangeStartIs
   };
 }
 
-export function calendarVisibleUtcRangeMs(q: ParsedCalendarQuery): { rangeStartMs: number; rangeEndMs: number } {
+export function calendarVisibleUtcRangeMs(q: ParsedCalendarQuery): {
+  rangeStartMs: number;
+  rangeEndMs: number;
+} {
   const tz = normalizeCalendarTimezone(q.calendarTimezone);
   const anchor = parseCalendarDateString(q.dateAnchor, tz);
   const ymd = anchor ?? calendarDateStringFromInstant(new Date(), tz);
@@ -372,7 +382,11 @@ export function calendarVisibleUtcRangeMs(q: ParsedCalendarQuery): { rangeStartM
 }
 
 /** Local range for the six-week month grid containing `dateAnchor`. */
-export function monthGridRangeMs(dateAnchor: string, timeZone: string, now: Date = new Date()): {
+export function monthGridRangeMs(
+  dateAnchor: string,
+  timeZone: string,
+  now: Date = new Date()
+): {
   rangeStartMs: number;
   rangeEndMs: number;
 } {
@@ -401,7 +415,10 @@ export function monthGridRangeMs(dateAnchor: string, timeZone: string, now: Date
 }
 
 /** @deprecated Use {@link monthGridRangeMs} — kept for existing imports. */
-export function monthGridUtcRangeMs(dateAnchor: string, now: Date = new Date()): {
+export function monthGridUtcRangeMs(
+  dateAnchor: string,
+  now: Date = new Date()
+): {
   rangeStartMs: number;
   rangeEndMs: number;
 } {

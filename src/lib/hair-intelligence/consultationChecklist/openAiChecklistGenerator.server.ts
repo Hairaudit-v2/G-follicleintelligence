@@ -7,7 +7,8 @@ import type { ConsultationChecklistModelResult } from "./types";
 
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
-export const HIE_CONSULTATION_CHECKLIST_GENERATOR_VERSION = "hie-consultation-checklist-generator@1.0.0" as const;
+export const HIE_CONSULTATION_CHECKLIST_GENERATOR_VERSION =
+  "hie-consultation-checklist-generator@1.0.0" as const;
 
 function textModel(): string {
   return (

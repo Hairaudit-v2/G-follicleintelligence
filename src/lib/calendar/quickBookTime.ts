@@ -65,7 +65,11 @@ export function buildQuickBookTimeSummary(opts: {
   locale?: string | null;
   timeZone?: string | null;
 }): string {
-  if (!opts.label?.trim() || opts.durationMinutes == null || !Number.isFinite(opts.durationMinutes)) {
+  if (
+    !opts.label?.trim() ||
+    opts.durationMinutes == null ||
+    !Number.isFinite(opts.durationMinutes)
+  ) {
     return "Select an appointment type to calculate finish time.";
   }
   const s = normalizeQuickBookDatetimeLocal(opts.startLocal);

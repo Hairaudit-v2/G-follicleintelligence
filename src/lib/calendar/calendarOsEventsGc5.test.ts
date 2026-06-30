@@ -19,7 +19,9 @@ import {
 const TENANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TENANT_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiCalendarEventOverlapRow {
+function sampleEventRow(
+  overrides: Partial<FiCalendarEventOverlapRow> = {}
+): FiCalendarEventOverlapRow {
   return {
     id: randomUUID(),
     tenant_id: TENANT_A,
@@ -60,7 +62,9 @@ describe("CalendarOS GC-5 — calendar event mapping", () => {
   });
 
   it("labels Google-synced vs FI-created source correctly", () => {
-    const google = calendarOsClientFieldsFromEvent(sampleEventRow({ metadata: { source: "google_sync" } }));
+    const google = calendarOsClientFieldsFromEvent(
+      sampleEventRow({ metadata: { source: "google_sync" } })
+    );
     assert.equal(google.calendarOsProvider, "google");
     assert.equal(google.calendarOsSourceLabel, "Google Calendar");
 
@@ -106,7 +110,10 @@ describe("CalendarOS GC-5 — calendar event mapping", () => {
     assert.ok(booking);
     assert.equal(calendarOsBookingRowExposesSecrets(booking!), false);
     assert.equal(sanitizeCalendarOsMetadataForClient(booking!.metadata).access_token, undefined);
-    assert.equal(sanitizeCalendarOsMetadataForClient(booking!.metadata).raw_google_event, undefined);
+    assert.equal(
+      sanitizeCalendarOsMetadataForClient(booking!.metadata).raw_google_event,
+      undefined
+    );
   });
 
   it("skips deleted mirror rows and invalid datetimes", () => {
@@ -165,7 +172,10 @@ describe("CalendarOS GC-5 — calendar event mapping", () => {
     assert.ok(combined.some((b) => b.id === existingBooking.id));
     assert.ok(combined.some((b) => isCalendarOsEventRow(b)));
     const calendarOsId = mapped.bookings[0]!.id;
-    assert.equal(mapped.bookingDisplay[calendarOsId]?.googleMeetUrl?.includes("meet.google.com"), true);
+    assert.equal(
+      mapped.bookingDisplay[calendarOsId]?.googleMeetUrl?.includes("meet.google.com"),
+      true
+    );
   });
 
   it("mapFiCalendarEventsToOperationalCalendar ignores cross-tenant rows", () => {

@@ -1,9 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { type MissingRequirement } from "@/src/lib/fi/requirements";
-import {
-  getCaseSubmissionState,
-  submitCaseIfReady,
-} from "@/lib/fi/services/caseSubmission";
+import { getCaseSubmissionState, submitCaseIfReady } from "@/lib/fi/services/caseSubmission";
 import { runPipeline } from "../pipeline";
 
 export type FiSubmitDecision = {
@@ -12,11 +9,7 @@ export type FiSubmitDecision = {
   fiCaseId: string;
   statusBefore?: string;
   statusAfter?: string;
-  reason:
-    | "submitted"
-    | "case_not_found"
-    | "requirements_not_met"
-    | "already_submitted_or_beyond";
+  reason: "submitted" | "case_not_found" | "requirements_not_met" | "already_submitted_or_beyond";
   missing?: MissingRequirement[];
 };
 

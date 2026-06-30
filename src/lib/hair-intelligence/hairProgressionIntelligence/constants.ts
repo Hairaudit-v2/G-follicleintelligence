@@ -11,8 +11,11 @@ export const HAIR_PROGRESSION_TRACKED_THERAPY_CODES = [
   "exosomes",
 ] as const;
 
-export type HairProgressionTrackedTherapyCode = (typeof HAIR_PROGRESSION_TRACKED_THERAPY_CODES)[number];
+export type HairProgressionTrackedTherapyCode =
+  (typeof HAIR_PROGRESSION_TRACKED_THERAPY_CODES)[number];
 
-export function isHairProgressionTrackedTherapyCode(v: string): v is HairProgressionTrackedTherapyCode {
+export function isHairProgressionTrackedTherapyCode(
+  v: string
+): v is HairProgressionTrackedTherapyCode {
   return (HAIR_PROGRESSION_TRACKED_THERAPY_CODES as readonly string[]).includes(v);
 }

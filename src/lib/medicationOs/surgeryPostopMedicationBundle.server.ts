@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { createDraftTherapyPlan, validateTherapyCanonicalCodes } from "./medicationOsMutations.server";
+import {
+  createDraftTherapyPlan,
+  validateTherapyCanonicalCodes,
+} from "./medicationOsMutations.server";
 import type { TherapyTimelineMirrorOutcome } from "./medicationOsTimeline.server";
 import { toPatientTherapyEventRow, toPatientTherapyPlanRow } from "./medicationOsMappers";
 import { loadTherapyPlanById } from "./medicationOsLoaders.server";
@@ -13,7 +16,11 @@ import {
   buildSurgeryPostopMedicationDryRunModel,
   postopBundleTemplateLinesToDraftItems,
 } from "./postopMedicationBundles";
-import type { PatientTherapyEventRow, PatientTherapyPlanItemRow, PatientTherapyPlanRow } from "./medicationOsTypes";
+import type {
+  PatientTherapyEventRow,
+  PatientTherapyPlanItemRow,
+  PatientTherapyPlanRow,
+} from "./medicationOsTypes";
 import { PATIENT_THERAPY_EVENT_SELECT, PATIENT_THERAPY_PLAN_SELECT } from "./medicationOsTypes";
 
 export type InstantiateSurgeryPostopMedicationBundleOptions = {
@@ -137,7 +144,9 @@ export async function instantiateSurgeryPostopMedicationBundle(
     surgeryPlanId: surgeryPlanKey,
   });
   if (existingHeader) {
-    const bundle = await loadTherapyPlanById(options.supabase, tid, existingHeader.id, { includeItems: true });
+    const bundle = await loadTherapyPlanById(options.supabase, tid, existingHeader.id, {
+      includeItems: true,
+    });
     if (!bundle) throw new Error("Existing post-op bundle plan not found after header match.");
     return {
       status: "existing",

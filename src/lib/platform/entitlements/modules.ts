@@ -67,18 +67,28 @@ export function defaultAllowedRolesForModule(moduleCode: string): readonly strin
   return [];
 }
 
-export function isTenantVerificationAllowed(status: FiTenantVerificationStatus | null | undefined): boolean {
-  const s = String(status ?? "").trim().toLowerCase();
+export function isTenantVerificationAllowed(
+  status: FiTenantVerificationStatus | null | undefined
+): boolean {
+  const s = String(status ?? "")
+    .trim()
+    .toLowerCase();
   return s === "verified" || s === "enterprise_verified";
 }
 
-export function isSubscriptionStatusEntitled(status: FiSubscriptionStatus | null | undefined): boolean {
-  const s = String(status ?? "").trim().toLowerCase();
+export function isSubscriptionStatusEntitled(
+  status: FiSubscriptionStatus | null | undefined
+): boolean {
+  const s = String(status ?? "")
+    .trim()
+    .toLowerCase();
   return s === "active" || s === "trialing";
 }
 
 function normalizeRole(role: string | null | undefined): string {
-  return String(role ?? "").trim().toLowerCase();
+  return String(role ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function normalizeRoleList(roles: readonly string[]): string[] {
@@ -141,7 +151,13 @@ export function evaluateModuleAccess(
   if (!ctx.userExists || !ctx.userRole) {
     return { ok: false, reason: "user_not_found", message: DENIAL_MESSAGES.user_not_found };
   }
-  if (!isUserRoleAllowedForModule({ userRole: ctx.userRole, allowedRoles: ctx.allowedRoles, requiredRoles: opts?.requiredRoles })) {
+  if (
+    !isUserRoleAllowedForModule({
+      userRole: ctx.userRole,
+      allowedRoles: ctx.allowedRoles,
+      requiredRoles: opts?.requiredRoles,
+    })
+  ) {
     return { ok: false, reason: "role_not_allowed", message: DENIAL_MESSAGES.role_not_allowed };
   }
 
@@ -165,7 +181,11 @@ export function canShowModuleNav(
   return Boolean(entitlements.modules[code]?.showInNav);
 }
 
-export function resolveEffectiveAllowedRoles(moduleCode: string, tenantAllowedRoles: string[] | null | undefined, moduleDefaultRoles: string[] | null | undefined): string[] {
+export function resolveEffectiveAllowedRoles(
+  moduleCode: string,
+  tenantAllowedRoles: string[] | null | undefined,
+  moduleDefaultRoles: string[] | null | undefined
+): string[] {
   const tenantRoles = tenantAllowedRoles?.filter((r) => String(r).trim()) ?? [];
   if (tenantRoles.length) return tenantRoles;
   const moduleRoles = moduleDefaultRoles?.filter((r) => String(r).trim()) ?? [];

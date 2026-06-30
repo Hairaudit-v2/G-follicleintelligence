@@ -130,13 +130,19 @@ export function buildAuditHealthCards(snapshot: AuditDashboardSnapshot): AuditHe
       id: "awaiting_review",
       label: "Cases awaiting review",
       value: String(kpis.pending_reviews),
-      detail: kpis.pending_reviews > 0 ? "Draft and returned reports needing clinical sign-off" : "No cases waiting for review",
+      detail:
+        kpis.pending_reviews > 0
+          ? "Draft and returned reports needing clinical sign-off"
+          : "No cases waiting for review",
     },
     {
       id: "ready_for_release",
       label: "Reports ready for release",
       value: String(kpis.draft_reports),
-      detail: kpis.draft_reports > 0 ? "Awaiting final auditor review before release" : "No reports awaiting release",
+      detail:
+        kpis.draft_reports > 0
+          ? "Awaiting final auditor review before release"
+          : "No reports awaiting release",
     },
     {
       id: "photo_evidence",
@@ -154,7 +160,10 @@ export function buildAuditHealthCards(snapshot: AuditDashboardSnapshot): AuditHe
       id: "surgery_linked",
       label: "Surgery cases linked",
       value: String(total),
-      detail: total > 0 ? "Cases with audit reports connected to SurgeryOS" : "Link surgery cases to begin outcome review",
+      detail:
+        total > 0
+          ? "Cases with audit reports connected to SurgeryOS"
+          : "Link surgery cases to begin outcome review",
     },
     {
       id: "audit_confidence",
@@ -196,7 +205,9 @@ export function buildAuditAttentionPriorities(
     });
   }
 
-  const returnedReleased = recent_audit_activity.filter((row) => row.status === "changes_required").length;
+  const returnedReleased = recent_audit_activity.filter(
+    (row) => row.status === "changes_required"
+  ).length;
   if (returnedReleased > 0) {
     items.push({
       id: "outcome_concerns",
@@ -235,7 +246,8 @@ export function buildAuditAttentionPriorities(
     items.push({
       id: "bootstrap",
       headline: "More follow-up evidence is needed before outcome trends are reliable.",
-      detail: "Link surgery cases and capture consistent photo sets to strengthen audit intelligence.",
+      detail:
+        "Link surgery cases and capture consistent photo sets to strengthen audit intelligence.",
       href: `${base}/cases`,
       severity: "info",
       priorityScore: 30,
@@ -318,7 +330,8 @@ export function buildOutcomeSnapshotAreas(snapshot: AuditDashboardSnapshot): Out
     {
       id: "follow_up_coverage",
       label: "Follow-up evidence coverage",
-      status: kpis.released_reports > 0 ? "strong" : kpis.pending_reviews > 0 ? "building" : "limited",
+      status:
+        kpis.released_reports > 0 ? "strong" : kpis.pending_reviews > 0 ? "building" : "limited",
       summary:
         total > 0
           ? `${formatPct(kpis.released_reports, total)} of cases have complete follow-up evidence for outcomes.`

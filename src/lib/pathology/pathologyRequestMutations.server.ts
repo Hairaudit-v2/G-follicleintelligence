@@ -22,7 +22,8 @@ function mapRequest(row: Record<string, unknown>): PathologyRequestRow {
     template_used: String(row.template_used) as PathologyTemplateId,
     status: String(row.status) as PathologyRequestStatus,
     clinical_notes: row.clinical_notes != null ? String(row.clinical_notes) : null,
-    emailed_to_patient_at: row.emailed_to_patient_at != null ? String(row.emailed_to_patient_at) : null,
+    emailed_to_patient_at:
+      row.emailed_to_patient_at != null ? String(row.emailed_to_patient_at) : null,
     cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
     pdf_storage_bucket: row.pdf_storage_bucket != null ? String(row.pdf_storage_bucket) : null,
     pdf_storage_path: row.pdf_storage_path != null ? String(row.pdf_storage_path) : null,
@@ -98,7 +99,9 @@ export async function createPathologyRequest(
       consultation_id: input.consultationId?.trim() || null,
       form_instance_id: input.formInstanceId?.trim() || null,
       metadata: {
-        ...(input.requestMetadata && typeof input.requestMetadata === "object" && !Array.isArray(input.requestMetadata)
+        ...(input.requestMetadata &&
+        typeof input.requestMetadata === "object" &&
+        !Array.isArray(input.requestMetadata)
           ? input.requestMetadata
           : {}),
       },
@@ -117,7 +120,10 @@ export async function createPathologyRequest(
     test_label: t.label.trim(),
   }));
 
-  const { data: itemRows, error: ie } = await supabase.from("fi_pathology_request_items").insert(itemPayloads).select("*");
+  const { data: itemRows, error: ie } = await supabase
+    .from("fi_pathology_request_items")
+    .insert(itemPayloads)
+    .select("*");
   if (ie) throw new Error(ie.message);
 
   const items = ((itemRows ?? []) as Record<string, unknown>[]).map(mapItem);
@@ -149,7 +155,12 @@ export async function updatePathologyRequestClinicalNotes(
 
   const { data, error } = await supabase
     .from("fi_pathology_requests")
-    .update({ clinical_notes: params.clinicalNotes == null || !String(params.clinicalNotes).trim() ? null : String(params.clinicalNotes).trim() })
+    .update({
+      clinical_notes:
+        params.clinicalNotes == null || !String(params.clinicalNotes).trim()
+          ? null
+          : String(params.clinicalNotes).trim(),
+    })
     .eq("tenant_id", tid)
     .eq("patient_id", pid)
     .eq("id", rid)

@@ -20,13 +20,17 @@ export function recipientCandidacyQualityDistribution(rows: RecipientCandidacyAn
     .map(([recipient_quality_rating, count]) => ({ recipient_quality_rating, count }));
 }
 
-export function recipientMedicationStabilisationRecommendationRate(rows: RecipientCandidacyAnalyticsInput): number {
+export function recipientMedicationStabilisationRecommendationRate(
+  rows: RecipientCandidacyAnalyticsInput
+): number {
   if (rows.length === 0) return 0;
   const n = rows.filter((r) => r.medication_stabilisation_needed).length;
   return n / rows.length;
 }
 
-export function recipientPathologyReviewRecommendationRate(rows: RecipientCandidacyAnalyticsInput): number {
+export function recipientPathologyReviewRecommendationRate(
+  rows: RecipientCandidacyAnalyticsInput
+): number {
   if (rows.length === 0) return 0;
   const n = rows.filter((r) => r.pathology_review_recommended).length;
   return n / rows.length;

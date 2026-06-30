@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildPhotoProtocolAlertDeliveryPayload, shouldDeliverPhotoProtocolAlert } from "./protocolAlertDelivery";
+import {
+  buildPhotoProtocolAlertDeliveryPayload,
+  shouldDeliverPhotoProtocolAlert,
+} from "./protocolAlertDelivery";
 import type { PhotoProtocolAlert } from "./protocolAlerts";
 import {
   assertPhotoProtocolAlertStatusTransition,
@@ -85,7 +88,12 @@ describe("Stage 8D photo protocol alert events", () => {
       created_at: "2026-06-01T00:00:00Z",
       updated_at: "2026-06-01T00:00:00Z",
     };
-    const c = mapComputedAlertToUpsertCandidate(alert, session, "clinic-1", "2026-06-02T00:00:00.000Z");
+    const c = mapComputedAlertToUpsertCandidate(
+      alert,
+      session,
+      "clinic-1",
+      "2026-06-02T00:00:00.000Z"
+    );
     assert.equal(c.protocol_session_id, "s1");
     assert.equal(c.alert_type, "needs_retake");
     assert.equal(c.clinic_id, "clinic-1");
@@ -139,7 +147,11 @@ describe("Stage 8D photo protocol alert events", () => {
       resolved_by_user_id: null,
     };
 
-    const merged = mergePhotoProtocolAlertUpsertCandidate(candidate, existing, "2026-06-01T13:00:00.000Z");
+    const merged = mergePhotoProtocolAlertUpsertCandidate(
+      candidate,
+      existing,
+      "2026-06-01T13:00:00.000Z"
+    );
     assert.equal(merged.status, "acknowledged");
     assert.equal(merged.first_detected_at, "2026-06-01T10:00:00.000Z");
     assert.equal(merged.last_detected_at, "2026-06-01T13:00:00.000Z");
@@ -162,7 +174,11 @@ describe("Stage 8D photo protocol alert events", () => {
     assert.equal(twin, "/fi-admin/tenant-uuid/patients/patient-uuid/twin#smart-photo-protocol");
     const fo = fiOsFoundationPhotoProtocolAnalyticsHref("tenant-uuid");
     assert.equal(fo, "/fi-admin/tenant-uuid/foundation-integrity#fi-os-photo-protocol-analytics");
-    assert.ok(hairAuditCasePhotoProtocolHrefPlaceholder("case-1").includes("/hairaudit/cases/case-1/photo-protocol"));
+    assert.ok(
+      hairAuditCasePhotoProtocolHrefPlaceholder("case-1").includes(
+        "/hairaudit/cases/case-1/photo-protocol"
+      )
+    );
   });
 
   it("buildPhotoProtocolAlertDeliveryPayload and shouldDeliver stub", () => {

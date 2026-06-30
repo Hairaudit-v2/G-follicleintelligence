@@ -9,7 +9,10 @@ import {
 
 describe("developmentClinicAccess (pure)", () => {
   it("denies unauthenticated users", () => {
-    assert.equal(canUseDevelopmentClinicFeatures({ isAuthenticated: false, fiUserRole: "fi_admin" }), false);
+    assert.equal(
+      canUseDevelopmentClinicFeatures({ isAuthenticated: false, fiUserRole: "fi_admin" }),
+      false
+    );
   });
 
   it("allows CRM mutation roles and owner during development", () => {

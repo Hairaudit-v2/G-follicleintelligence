@@ -3,7 +3,11 @@
 import { useState, useTransition } from "react";
 
 import { startConsultationQuoteDepositPaymentRequestAction } from "@/lib/actions/financial-os-actions";
-import { financialOsClasses, FinancialOsFeedbackText, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 
 export function FinancialOsDashboardDepositForm(props: { tenantId: string; canMutate: boolean }) {
   const [invoiceId, setInvoiceId] = useState("");
@@ -13,7 +17,11 @@ export function FinancialOsDashboardDepositForm(props: { tenantId: string; canMu
   const [pending, start] = useTransition();
 
   if (!props.canMutate) {
-    return <p className={financialOsClasses.mutedMeta}>Finance or manager role required for deposit workflow actions.</p>;
+    return (
+      <p className={financialOsClasses.mutedMeta}>
+        Finance or manager role required for deposit workflow actions.
+      </p>
+    );
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -25,7 +33,10 @@ export function FinancialOsDashboardDepositForm(props: { tenantId: string; canMu
       return;
     }
     if (!Number.isFinite(cents) || cents <= 0) {
-      setFeedback({ message: "Deposit amount (cents) must be a positive number.", tone: "warning" });
+      setFeedback({
+        message: "Deposit amount (cents) must be a positive number.",
+        tone: "warning",
+      });
       return;
     }
     start(async () => {
@@ -36,14 +47,20 @@ export function FinancialOsDashboardDepositForm(props: { tenantId: string; canMu
       });
       setFeedback(
         res.ok
-          ? { message: `Created payment request ${res.payment_request_id.slice(0, 8)}…`, tone: "success" }
-          : { message: res.error, tone: "error" },
+          ? {
+              message: `Created payment request ${res.payment_request_id.slice(0, 8)}…`,
+              tone: "success",
+            }
+          : { message: res.error, tone: "error" }
       );
     });
   }
 
   return (
-    <form onSubmit={onSubmit} className={`max-w-md space-y-3 text-xs ${financialOsClasses.formPanel}`}>
+    <form
+      onSubmit={onSubmit}
+      className={`max-w-md space-y-3 text-xs ${financialOsClasses.formPanel}`}
+    >
       <label className={financialOsClasses.formLabel}>
         Consultation quote invoice id (UUID)
         <input
@@ -55,16 +72,29 @@ export function FinancialOsDashboardDepositForm(props: { tenantId: string; canMu
       </label>
       <label className={financialOsClasses.formLabel}>
         Deposit amount (cents)
-        <input className={financialOsClasses.input} value={depositCents} onChange={(e) => setDepositCents(e.target.value)} inputMode="numeric" />
+        <input
+          className={financialOsClasses.input}
+          value={depositCents}
+          onChange={(e) => setDepositCents(e.target.value)}
+          inputMode="numeric"
+        />
       </label>
       <label className={financialOsClasses.checkboxLabel}>
-        <input type="checkbox" checked={sendCheckout} onChange={(e) => setSendCheckout(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={sendCheckout}
+          onChange={(e) => setSendCheckout(e.target.checked)}
+        />
         <span>Send Stripe checkout (when payments module enabled)</span>
       </label>
       <button type="submit" disabled={pending} className={financialOsClasses.primaryButton}>
         {pending ? "Working…" : "Create deposit payment request"}
       </button>
-      <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} className="mt-2" />
+      <FinancialOsFeedbackText
+        message={feedback?.message ?? null}
+        tone={feedback?.tone}
+        className="mt-2"
+      />
     </form>
   );
 }

@@ -12,7 +12,9 @@ import {
 } from "@/src/lib/workforce-os/workforceClinicalEventMapping";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
-function booking(partial: Partial<FiBookingRow> & Pick<FiBookingRow, "booking_type">): FiBookingRow {
+function booking(
+  partial: Partial<FiBookingRow> & Pick<FiBookingRow, "booking_type">
+): FiBookingRow {
   const { booking_type, ...rest } = partial;
   return {
     id: "b1",
@@ -46,17 +48,32 @@ function booking(partial: Partial<FiBookingRow> & Pick<FiBookingRow, "booking_ty
 }
 
 test("resolveWorkforceEventTypeFromBooking maps known booking types", () => {
-  assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "surgery" })), "surgery");
-  assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "consultation" })), "consultation");
+  assert.equal(
+    resolveWorkforceEventTypeFromBooking(booking({ booking_type: "surgery" })),
+    "surgery"
+  );
+  assert.equal(
+    resolveWorkforceEventTypeFromBooking(booking({ booking_type: "consultation" })),
+    "consultation"
+  );
   assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "prp" })), "prp");
-  assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "exosomes" })), "exosomes");
+  assert.equal(
+    resolveWorkforceEventTypeFromBooking(booking({ booking_type: "exosomes" })),
+    "exosomes"
+  );
   assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "review" })), "review");
   assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "prf" })), "prp");
-  assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "follow_up" })), "review");
+  assert.equal(
+    resolveWorkforceEventTypeFromBooking(booking({ booking_type: "follow_up" })),
+    "review"
+  );
 });
 
 test("resolveWorkforceEventTypeFromBooking falls back safely for unknown types", () => {
-  assert.equal(resolveWorkforceEventTypeFromBooking(booking({ booking_type: "mystery_type" })), "consultation");
+  assert.equal(
+    resolveWorkforceEventTypeFromBooking(booking({ booking_type: "mystery_type" })),
+    "consultation"
+  );
 });
 
 test("resolveWorkforceEventTypeFromBooking maps procedure day metadata", () => {
@@ -76,7 +93,10 @@ test("resolveWorkforceEventTypeFromBooking maps procedure day metadata", () => {
 
 test("resolveWorkforceEventTypeFromSurgery defaults to surgery", () => {
   assert.equal(resolveWorkforceEventTypeFromSurgery({ procedure_phase: "extraction" }), "surgery");
-  assert.equal(resolveWorkforceEventTypeFromSurgery({ procedure_phase: "theatre_day" }), "theatre_day");
+  assert.equal(
+    resolveWorkforceEventTypeFromSurgery({ procedure_phase: "theatre_day" }),
+    "theatre_day"
+  );
 });
 
 test("resolveWorkforceEventSource is deterministic", () => {
@@ -94,8 +114,14 @@ test("getWorkforceEventWindow returns booking window", () => {
 
 test("resolveWorkforceAssignedRole prefers role label and aliases", () => {
   assert.equal(resolveWorkforceAssignedRole({ roleLabel: "Nurse" }), "nurse");
-  assert.equal(resolveWorkforceAssignedRole({ staffRole: "tech", bookingType: "surgery" }), "technician");
-  assert.equal(resolveWorkforceAssignedRole({ staffRole: "consultant", bookingType: "consultation" }), "consultant");
+  assert.equal(
+    resolveWorkforceAssignedRole({ staffRole: "tech", bookingType: "surgery" }),
+    "technician"
+  );
+  assert.equal(
+    resolveWorkforceAssignedRole({ staffRole: "consultant", bookingType: "consultation" }),
+    "consultant"
+  );
 });
 
 test("buildWorkforceCandidateAssignments deduplicates primary, resource, and existing rows", () => {
@@ -112,9 +138,18 @@ test("buildWorkforceCandidateAssignments deduplicates primary, resource, and exi
 });
 
 test("isBookingActiveForStaffing ignores cancelled bookings", () => {
-  assert.equal(isBookingActiveForStaffing(booking({ booking_type: "surgery", booking_status: "scheduled" })), true);
   assert.equal(
-    isBookingActiveForStaffing(booking({ booking_type: "surgery", booking_status: "cancelled", cancelled_at: "2026-06-01T00:00:00.000Z" })),
+    isBookingActiveForStaffing(booking({ booking_type: "surgery", booking_status: "scheduled" })),
+    true
+  );
+  assert.equal(
+    isBookingActiveForStaffing(
+      booking({
+        booking_type: "surgery",
+        booking_status: "cancelled",
+        cancelled_at: "2026-06-01T00:00:00.000Z",
+      })
+    ),
     false
   );
 });

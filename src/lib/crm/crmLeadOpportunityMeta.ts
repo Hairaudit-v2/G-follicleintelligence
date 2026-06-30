@@ -44,7 +44,11 @@ export function parseCrmLeadOpportunitySnapshot(
       : `£${treatmentRaw}`
     : null;
 
-  const probRaw = metaString(metadata, ["conversion_probability", "win_probability", "close_probability"]);
+  const probRaw = metaString(metadata, [
+    "conversion_probability",
+    "win_probability",
+    "close_probability",
+  ]);
   const conversionProbabilityLabel = probRaw
     ? probRaw.endsWith("%")
       ? probRaw
@@ -54,7 +58,11 @@ export function parseCrmLeadOpportunitySnapshot(
   return {
     treatmentValueLabel,
     conversionProbabilityLabel,
-    opportunityNotes: metaString(metadata, ["opportunity_notes", "opportunity_summary", "deal_notes"]),
+    opportunityNotes: metaString(metadata, [
+      "opportunity_notes",
+      "opportunity_summary",
+      "deal_notes",
+    ]),
     sourceSystem: metaString(metadata, ["source_system", "crm_source_system"]),
     sourceLeadId: metaString(metadata, ["source_lead_id", "external_lead_id"]),
     stageLabel: stageLabel(lead.current_stage_id, stages),

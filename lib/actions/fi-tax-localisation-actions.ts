@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { isFiOsPlatformAdminFullSessionBypass, loadProxyFiUserRowForPlatformAdminTenant, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  isFiOsPlatformAdminFullSessionBypass,
+  loadProxyFiUserRowForPlatformAdminTenant,
+  resolveAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { insertFiTaxLocalisationAuditEvent } from "@/src/lib/taxLocalisation/taxLocalisationAudit.server";
@@ -14,7 +18,10 @@ import {
   upsertTaxLocalisationDocument,
 } from "@/src/lib/taxLocalisation/taxLocalisationSettings.server";
 import type { FiTaxLocalisationDocument } from "@/src/lib/taxLocalisation/taxLocalisationTypes";
-import { FI_TAX_COUNTRY_REGIONS, FI_TAX_CURRENCIES } from "@/src/lib/taxLocalisation/taxLocalisationTypes";
+import {
+  FI_TAX_COUNTRY_REGIONS,
+  FI_TAX_CURRENCIES,
+} from "@/src/lib/taxLocalisation/taxLocalisationTypes";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 function errMsg(e: unknown): string {
@@ -51,7 +58,8 @@ function parseDocument(raw: unknown): FiTaxLocalisationDocument {
   if (!(FI_TAX_CURRENCIES as readonly string[]).includes(currency)) {
     throw new Error("Invalid currency.");
   }
-  const effectiveFrom = typeof o.effectiveFrom === "string" ? o.effectiveFrom : new Date().toISOString();
+  const effectiveFrom =
+    typeof o.effectiveFrom === "string" ? o.effectiveFrom : new Date().toISOString();
   return mergeTaxLocalisationFromStorage({
     countryRegion: country,
     currency,
@@ -64,7 +72,9 @@ function parseDocument(raw: unknown): FiTaxLocalisationDocument {
 
 export type TaxLocalisationSaveResult = { ok: true } | { ok: false; error: string };
 
-export async function saveTaxLocalisationSettingsAction(body: unknown): Promise<TaxLocalisationSaveResult> {
+export async function saveTaxLocalisationSettingsAction(
+  body: unknown
+): Promise<TaxLocalisationSaveResult> {
   try {
     const parsed = saveSchema.parse(body);
     const tid = parsed.tenantId.trim();
@@ -77,7 +87,10 @@ export async function saveTaxLocalisationSettingsAction(body: unknown): Promise<
       return { ok: false, error: "Not allowed to view tax settings for this tenant." };
     }
     if (!access.canEdit) {
-      return { ok: false, error: "You do not have permission to edit tax & localisation settings." };
+      return {
+        ok: false,
+        error: "You do not have permission to edit tax & localisation settings.",
+      };
     }
 
     const authId = await resolveAuthUserId(null);
@@ -152,7 +165,8 @@ export async function saveTaxLocalisationSettingsAction(body: unknown): Promise<
     revalidatePath(`/fi-admin/${tid}/settings/tax-localisation`);
     return { ok: true };
   } catch (e) {
-    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    if (e instanceof z.ZodError)
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
     return { ok: false, error: errMsg(e) };
   }
 }

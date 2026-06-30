@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { BloodPathologyResultDetailClient } from "@/src/components/fi/patients/pathology/BloodPathologyResultDetailClient";
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
 import { loadLatestPathologyAiInterpretation } from "@/src/lib/pathology/pathologyAiInterpretationLoad.server";
-import { loadPathologyRequestOptionsForPatient, loadPathologyResultDetail } from "@/src/lib/pathology/pathologyResultLoad.server";
+import {
+  loadPathologyRequestOptionsForPatient,
+  loadPathologyResultDetail,
+} from "@/src/lib/pathology/pathologyResultLoad.server";
 
 export const dynamic = "force-dynamic";
 
@@ -35,16 +38,30 @@ export default async function PatientBloodResultDetailPage({
 
   await assertCrmTenantReadAllowed({ tenantId: tenantId.trim() });
 
-  const bundle = await loadPathologyResultDetail(tenantId.trim(), patientId.trim(), resultId.trim());
+  const bundle = await loadPathologyResultDetail(
+    tenantId.trim(),
+    patientId.trim(),
+    resultId.trim()
+  );
   if (!bundle) notFound();
 
-  const requestOptions = await loadPathologyRequestOptionsForPatient(tenantId.trim(), patientId.trim());
-  const aiInterpretation = await loadLatestPathologyAiInterpretation(tenantId.trim(), patientId.trim(), resultId.trim());
+  const requestOptions = await loadPathologyRequestOptionsForPatient(
+    tenantId.trim(),
+    patientId.trim()
+  );
+  const aiInterpretation = await loadLatestPathologyAiInterpretation(
+    tenantId.trim(),
+    patientId.trim(),
+    resultId.trim()
+  );
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-300 hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`}
+          className="text-blue-300 hover:underline"
+        >
           ← Patient profile
         </Link>
         <span className="mx-2 text-gray-300">·</span>

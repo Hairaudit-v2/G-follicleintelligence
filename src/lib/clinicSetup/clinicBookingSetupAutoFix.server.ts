@@ -24,7 +24,10 @@ import { filterRoomEligibilityForClinic } from "@/src/lib/rooms/roomAvailability
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
-import { isCalendarVisibleClinicalStaff, isNonCalendarSupportRole } from "@/src/lib/staff/calendarVisibleStaff";
+import {
+  isCalendarVisibleClinicalStaff,
+  isNonCalendarSupportRole,
+} from "@/src/lib/staff/calendarVisibleStaff";
 import { isSupportStaffRole } from "@/src/lib/staff/clinicalStaffPicker";
 
 import type {
@@ -43,7 +46,10 @@ export type {
 
 export const CLINIC_BOOKING_SETUP_AUTOFIX_SOURCE = "clinic_booking_setup_autofix";
 
-const MANAGED_ELIGIBILITY_SOURCES = new Set([CLINIC_SETUP_WIZARD_SOURCE, CLINIC_BOOKING_SETUP_AUTOFIX_SOURCE]);
+const MANAGED_ELIGIBILITY_SOURCES = new Set([
+  CLINIC_SETUP_WIZARD_SOURCE,
+  CLINIC_BOOKING_SETUP_AUTOFIX_SOURCE,
+]);
 
 export function roomEligibilityFixKey(profile: ClinicBookingSetupTestProfile): string {
   return `room_eligibility:${profile}`;
@@ -64,7 +70,10 @@ export const AUTOFIX_KEY_PERTH_PHYSICAL_ALIASES = "perth_physical_aliases";
 function isManualRoom(room: FiClinicRoomRow): boolean {
   const m = room.metadata;
   return Boolean(
-    m && typeof m === "object" && !Array.isArray(m) && (m as { manual_room_override?: boolean }).manual_room_override
+    m &&
+    typeof m === "object" &&
+    !Array.isArray(m) &&
+    (m as { manual_room_override?: boolean }).manual_room_override
   );
 }
 
@@ -89,16 +98,22 @@ function inferStaffInputFromRow(s: {
   staff_role: string | null;
   calendar_visible: boolean | null;
 }): ClinicSetupStaffInput {
-  const role = String(s.staff_role ?? "").trim().toLowerCase();
+  const role = String(s.staff_role ?? "")
+    .trim()
+    .toLowerCase();
   const performsConsultations =
     /\b(doctor|physician|consult|trich|surgeon|gp|dermatologist)\b/.test(role) ||
     role.includes("consultant") ||
     role.includes("trichologist");
   const performsPrp =
-    /\b(nurse|technician|doctor|physician)\b/.test(role) || role.includes("technician") || role.includes("nurse");
+    /\b(nurse|technician|doctor|physician)\b/.test(role) ||
+    role.includes("technician") ||
+    role.includes("nurse");
   const performsSurgery = role.includes("surgeon") || role.includes("doctor");
   const assistsSurgery =
-    /\b(nurse|technician|assistant)\b/.test(role) || role.includes("clinical_assistant") || role.includes("assistant");
+    /\b(nurse|technician|assistant)\b/.test(role) ||
+    role.includes("clinical_assistant") ||
+    role.includes("assistant");
   const showOnCalendar =
     s.calendar_visible === true
       ? true
@@ -155,7 +170,9 @@ function pickRegenerativeService(services: FiServiceRow[]): FiServiceRow | null 
   const bt = new Set(["prp", "exosomes", "mesotherapy", "prf"]);
   const byBt = services.filter((s) => s.is_active && s.booking_type && bt.has(s.booking_type));
   if (byBt.length) return pickFirstByName(byBt);
-  const byCat = services.filter((s) => s.is_active && categorizeServiceForWizard(s) === "regenerative");
+  const byCat = services.filter(
+    (s) => s.is_active && categorizeServiceForWizard(s) === "regenerative"
+  );
   return pickFirstByName(byCat);
 }
 
@@ -171,11 +188,16 @@ function pickFollowUpService(services: FiServiceRow[]): FiServiceRow | null {
     (s) => s.is_active && (s.booking_type === "follow_up" || s.booking_type === "review")
   );
   if (byBt.length) return pickFirstByName(byBt);
-  const byCat = services.filter((s) => s.is_active && categorizeServiceForWizard(s) === "consult_loose");
+  const byCat = services.filter(
+    (s) => s.is_active && categorizeServiceForWizard(s) === "consult_loose"
+  );
   return pickFirstByName(byCat);
 }
 
-function pickServiceForProfile(services: FiServiceRow[], profile: ClinicBookingSetupTestProfile): FiServiceRow | null {
+function pickServiceForProfile(
+  services: FiServiceRow[],
+  profile: ClinicBookingSetupTestProfile
+): FiServiceRow | null {
   switch (profile) {
     case "consult":
       return pickConsultService(services);
@@ -190,7 +212,9 @@ function pickServiceForProfile(services: FiServiceRow[], profile: ClinicBookingS
   }
 }
 
-function planCategoryForStaff(p: ServiceRoomPlanRow): "consult" | "regenerative" | "surgery" | null {
+function planCategoryForStaff(
+  p: ServiceRoomPlanRow
+): "consult" | "regenerative" | "surgery" | null {
   if (p.category === "consult_strict" || p.category === "consult_loose") return "consult";
   if (p.category === "regenerative") return "regenerative";
   if (p.category === "surgery") return "surgery";
@@ -217,10 +241,13 @@ async function applyRoomEligibilityProfile(args: {
     counts,
     useStandardSecondRoomAliases: useAlias,
   });
-  const roomIdByCode = new Map(rooms.filter((r) => r.clinic_id === cid).map((r) => [r.room_code.trim(), r.id]));
+  const roomIdByCode = new Map(
+    rooms.filter((r) => r.clinic_id === cid).map((r) => [r.room_code.trim(), r.id])
+  );
   const plans = buildServiceRoomPlans({ services, plannedRooms: planned });
   const p = plans.find((x) => x.serviceId === service.id);
-  if (!p || p.roomCodes.length === 0) return { skipped: "No planned room mapping for this service.", applied: "" };
+  if (!p || p.roomCodes.length === 0)
+    return { skipped: "No planned room mapping for this service.", applied: "" };
 
   const existing = await loadServiceRoomEligibilityForService(tid, service.id, supabase);
   const insertedRoomIds = new Set<string>();
@@ -256,7 +283,8 @@ async function applyRoomEligibilityProfile(args: {
     insertedRoomIds.add(roomId);
   }
 
-  if (inserted === 0) return { skipped: "Room eligibility already present or blocked by manual rows.", applied: "" };
+  if (inserted === 0)
+    return { skipped: "Room eligibility already present or blocked by manual rows.", applied: "" };
   return { applied: `Added ${inserted} room eligibility link(s) for “${service.name.trim()}”.` };
 }
 
@@ -276,11 +304,16 @@ async function applyStaffEligibilityProfile(args: {
   const counts = inferRoomCounts(rooms, cid);
   const useAlias =
     counts.consult >= 2 && counts.patient >= 2 && counts.prp >= 2 && counts.surgery >= 2;
-  const planned = buildPlannedRoomsFromCounts({ clinicId: cid, counts, useStandardSecondRoomAliases: useAlias });
+  const planned = buildPlannedRoomsFromCounts({
+    clinicId: cid,
+    counts,
+    useStandardSecondRoomAliases: useAlias,
+  });
   const plans = buildServiceRoomPlans({ services, plannedRooms: planned });
   const p = plans.find((x) => x.serviceId === service.id);
   const cat = p ? planCategoryForStaff(p) : null;
-  if (!cat || p?.category === "block") return { skipped: "Service category does not use staff mapping.", applied: "" };
+  if (!cat || p?.category === "block")
+    return { skipped: "Service category does not use staff mapping.", applied: "" };
 
   const existing = await loadServiceStaffEligibilityForService(tid, service.id, supabase);
   const hasStaffRow = (staffId: string) =>
@@ -308,7 +341,11 @@ async function applyStaffEligibilityProfile(args: {
     inserted += 1;
   }
 
-  if (inserted === 0) return { skipped: "Staff eligibility already present or no matching staff inferred.", applied: "" };
+  if (inserted === 0)
+    return {
+      skipped: "Staff eligibility already present or no matching staff inferred.",
+      applied: "",
+    };
   return { applied: `Added ${inserted} staff eligibility row(s) for “${service.name.trim()}”.` };
 }
 
@@ -327,21 +364,29 @@ async function applyPreferredRoomProfile(args: {
   const counts = inferRoomCounts(rooms, cid);
   const useAlias =
     counts.consult >= 2 && counts.patient >= 2 && counts.prp >= 2 && counts.surgery >= 2;
-  const planned = buildPlannedRoomsFromCounts({ clinicId: cid, counts, useStandardSecondRoomAliases: useAlias });
-  const roomIdByCode = new Map(rooms.filter((r) => r.clinic_id === cid).map((r) => [r.room_code.trim(), r.id]));
+  const planned = buildPlannedRoomsFromCounts({
+    clinicId: cid,
+    counts,
+    useStandardSecondRoomAliases: useAlias,
+  });
+  const roomIdByCode = new Map(
+    rooms.filter((r) => r.clinic_id === cid).map((r) => [r.room_code.trim(), r.id])
+  );
   const plans = buildServiceRoomPlans({ services, plannedRooms: planned });
   const p = plans.find((x) => x.serviceId === service.id);
   const prefCode = p?.preferredRoomCode?.trim() ?? "";
   const prefRoomId = prefCode ? roomIdByCode.get(prefCode) : undefined;
-  if (!prefRoomId) return { skipped: "Preferred room code not available for this clinic.", applied: "" };
+  if (!prefRoomId)
+    return { skipped: "Preferred room code not available for this clinic.", applied: "" };
 
   const prefRoom = rooms.find((r) => r.id === prefRoomId);
   if (!prefRoom?.is_active) return { skipped: "Preferred room is inactive.", applied: "" };
 
   const roomById = new Map(rooms.map((r) => [r.id, r]));
-  const elig = filterRoomEligibilityForClinic(await loadServiceRoomEligibilityForService(tid, service.id, supabase), cid).filter(
-    (e) => e.is_active
-  );
+  const elig = filterRoomEligibilityForClinic(
+    await loadServiceRoomEligibilityForService(tid, service.id, supabase),
+    cid
+  ).filter((e) => e.is_active);
 
   const hasActivePreferred = elig.some((e) => {
     if (!e.is_preferred) return false;
@@ -415,7 +460,11 @@ async function applySupportCalendarFalse(args: {
     return vis !== false;
   });
 
-  if (targets.length === 0) return { skipped: "No reception/admin/coordinator staff needed calendar visibility updates.", applied: "" };
+  if (targets.length === 0)
+    return {
+      skipped: "No reception/admin/coordinator staff needed calendar visibility updates.",
+      applied: "",
+    };
 
   const now = new Date().toISOString();
   let n = 0;
@@ -432,7 +481,10 @@ async function applySupportCalendarFalse(args: {
   return { applied: `Hid ${n} support staff member(s) from the calendar.` };
 }
 
-async function applyClinicalCalendarRestore(args: { supabase: SupabaseClient; tenantId: string }): Promise<{
+async function applyClinicalCalendarRestore(args: {
+  supabase: SupabaseClient;
+  tenantId: string;
+}): Promise<{
   applied: string;
   skipped?: string;
 }> {
@@ -493,7 +545,11 @@ async function applyPerthPhysicalAliases(args: {
 
   const layoutOk = Boolean(cons2 && patient2 && prp2 && surg2);
   if (!layoutOk && !confirmPerthAliases) {
-    return { skipped: "Evolved Perth second-room set (cons_2, patient_room_2, prp_2, surgery_2) not detected; pass confirmPerthAliases to apply anyway.", applied: "" };
+    return {
+      skipped:
+        "Evolved Perth second-room set (cons_2, patient_room_2, prp_2, surgery_2) not detected; pass confirmPerthAliases to apply anyway.",
+      applied: "",
+    };
   }
   if (!layoutOk && confirmPerthAliases) {
     return { skipped: "Required room codes are missing for alias repair.", applied: "" };
@@ -512,8 +568,7 @@ async function applyPerthPhysicalAliases(args: {
     updates.push({ room: patient2, nextKey: consKey });
   }
 
-  const pairTarget =
-    prpKey && surgKey ? (prpKey === surgKey ? prpKey : prpKey) : prpKey || surgKey;
+  const pairTarget = prpKey && surgKey ? (prpKey === surgKey ? prpKey : prpKey) : prpKey || surgKey;
 
   if (pairTarget) {
     if (prp2.physical_room_key.trim() !== pairTarget && !isManualRoom(prp2)) {
@@ -541,7 +596,9 @@ async function applyPerthPhysicalAliases(args: {
   for (const { room, nextKey } of normalized) {
     if (isManualRoom(room)) continue;
     const meta = {
-      ...(room.metadata && typeof room.metadata === "object" && !Array.isArray(room.metadata) ? room.metadata : {}),
+      ...(room.metadata && typeof room.metadata === "object" && !Array.isArray(room.metadata)
+        ? room.metadata
+        : {}),
       source: CLINIC_BOOKING_SETUP_AUTOFIX_SOURCE,
     };
     await updateClinicRoom(
@@ -566,7 +623,8 @@ async function applyPerthPhysicalAliases(args: {
 function parseProfileFixKey(prefix: string, key: string): ClinicBookingSetupTestProfile | null {
   if (!key.startsWith(`${prefix}:`)) return null;
   const rest = key.slice(prefix.length + 1).trim();
-  if (rest === "consult" || rest === "regenerative" || rest === "surgery" || rest === "follow_up") return rest;
+  if (rest === "consult" || rest === "regenerative" || rest === "surgery" || rest === "follow_up")
+    return rest;
   return null;
 }
 

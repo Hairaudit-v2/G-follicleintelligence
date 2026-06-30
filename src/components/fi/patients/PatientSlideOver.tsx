@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { loadPatientSlideOverBundleAction } from "@/lib/actions/fi-patient-actions";
 import type { PatientSlideOverPayload } from "@/src/lib/patients/patientSlideOverLoader";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
@@ -69,7 +77,16 @@ export function PatientSlideOverProvider({
       openPatient,
       close,
     }),
-    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, canCapturePatientPhotos, patientId, openPatient, close]
+    [
+      tenantId,
+      operatorFiUserId,
+      userRole,
+      canUseClinicFeatures,
+      canCapturePatientPhotos,
+      patientId,
+      openPatient,
+      close,
+    ]
   );
 
   return (
@@ -161,12 +178,20 @@ export function PatientSlideOverPanel({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Patient preview</h2>
             {payload ? (
-              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
+              <Link
+                href={href}
+                className="text-xs text-blue-300 hover:underline"
+                onClick={() => onClose()}
+              >
                 Open full profile →
               </Link>
             ) : null}
           </div>
-          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
+          <button
+            type="button"
+            className="shrink-0 text-sm text-slate-400 hover:text-slate-100"
+            onClick={onClose}
+          >
             Close
           </button>
         </div>
@@ -174,7 +199,10 @@ export function PatientSlideOverPanel({
         <div className="min-h-0 flex-1 overflow-y-auto p-4 text-sm">
           {loading ? <p className="text-slate-400">Loading…</p> : null}
           {loadError ? (
-            <div className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300" role="alert">
+            <div
+              className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300"
+              role="alert"
+            >
               {loadError}
             </div>
           ) : null}
@@ -184,7 +212,9 @@ export function PatientSlideOverPanel({
               <section className={crmLeadCardClass}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Patient</h3>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Patient
+                    </h3>
                     <p className="mt-1 font-medium text-slate-100">{payload.displayName}</p>
                     <p className="mt-1 text-xs text-slate-400">
                       {payload.email ?? "—"} · {payload.phone ?? "—"}
@@ -202,19 +232,25 @@ export function PatientSlideOverPanel({
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Since {payload.createdAt.slice(0, 10)} · ID{" "}
-                  <code className="rounded bg-white/[0.06] px-1">{payload.patientId.slice(0, 8)}…</code>
+                  <code className="rounded bg-white/[0.06] px-1">
+                    {payload.patientId.slice(0, 8)}…
+                  </code>
                 </p>
               </section>
 
               <section className={crmLeadCardClass}>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Clinical summary</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Clinical summary
+                </h3>
                 <p className="mt-2 text-sm text-slate-200">
                   {payload.clinicalScalesSummary ?? "No Norwood / clinical summary on file yet."}
                 </p>
               </section>
 
               <section className={crmLeadCardClass}>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hair clinic ops</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Hair clinic ops
+                </h3>
                 <dl className="mt-2 grid gap-2 text-sm text-slate-200 sm:grid-cols-2">
                   <div>
                     <dt className="text-xs text-gray-500">Next appointment</dt>
@@ -238,7 +274,9 @@ export function PatientSlideOverPanel({
                   </div>
                   <div>
                     <dt className="text-xs text-gray-500">Last visit</dt>
-                    <dd className="font-medium">{payload.lastVisitAt?.slice(0, 16).replace("T", " ") ?? "—"}</dd>
+                    <dd className="font-medium">
+                      {payload.lastVisitAt?.slice(0, 16).replace("T", " ") ?? "—"}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-xs text-gray-500">Completed procedures</dt>
@@ -262,7 +300,11 @@ export function PatientSlideOverPanel({
                 compact
               />
 
-              <PatientConsultationsCard tenantId={tenantId} consultations={payload.consultations} compact />
+              <PatientConsultationsCard
+                tenantId={tenantId}
+                consultations={payload.consultations}
+                compact
+              />
 
               <PatientPersonLeadHistoryCard
                 tenantId={tenantId}
@@ -273,13 +315,17 @@ export function PatientSlideOverPanel({
               />
 
               <section className={crmLeadCardClass}>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Linked records</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Linked records
+                </h3>
                 <ul className="mt-2 space-y-1 text-sm text-slate-200">
                   <li>
-                    <strong>{payload.linkedLeadCount}</strong> CRM lead{payload.linkedLeadCount === 1 ? "" : "s"}
+                    <strong>{payload.linkedLeadCount}</strong> CRM lead
+                    {payload.linkedLeadCount === 1 ? "" : "s"}
                   </li>
                   <li>
-                    <strong>{payload.activeCaseCount}</strong> active case{payload.activeCaseCount === 1 ? "" : "s"}
+                    <strong>{payload.activeCaseCount}</strong> active case
+                    {payload.activeCaseCount === 1 ? "" : "s"}
                   </li>
                   <li>
                     <strong>{payload.upcomingBookingCount}</strong> upcoming booking

@@ -85,7 +85,9 @@ export function GoogleCalendarSyncReviewCard({
           </div>
 
           {pageModel.items.length === 0 ? (
-            <p className="mt-4 text-sm text-[#64748B]">No open review items — inbound sync is clear.</p>
+            <p className="mt-4 text-sm text-[#64748B]">
+              No open review items — inbound sync is clear.
+            </p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[920px] text-left text-xs">
@@ -129,7 +131,9 @@ export function GoogleCalendarSyncReviewCard({
                           <div>{formatIso(item.eventStartAt)}</div>
                           <div className="text-[#64748B]">{formatIso(item.eventEndAt)}</div>
                         </td>
-                        <td className="max-w-[200px] px-2 py-2 text-[#94A3B8]">{item.conflictReason}</td>
+                        <td className="max-w-[200px] px-2 py-2 text-[#94A3B8]">
+                          {item.conflictReason}
+                        </td>
                         <td className="px-2 py-2">
                           {item.matchedLocalEventId ? (
                             <span className="font-mono text-[10px] text-[#22C1FF]">

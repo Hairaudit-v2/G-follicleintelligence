@@ -49,7 +49,10 @@ export function normalizeOutcomeMetricValues(
   return out;
 }
 
-export function mergeCheckpointKeys(a: readonly string[], b: readonly string[]): FiOutcomeCheckpointKey[] {
+export function mergeCheckpointKeys(
+  a: readonly string[],
+  b: readonly string[]
+): FiOutcomeCheckpointKey[] {
   const set = new Set<string>();
   for (const x of a) {
     const t = String(x ?? "").trim();
@@ -59,7 +62,9 @@ export function mergeCheckpointKeys(a: readonly string[], b: readonly string[]):
     const t = String(x ?? "").trim();
     if (isFiOutcomeCheckpointKey(t)) set.add(t);
   }
-  return Array.from(set).sort((x, y) => fiOutcomeCheckpointOrderIndex(x) - fiOutcomeCheckpointOrderIndex(y)) as FiOutcomeCheckpointKey[];
+  return Array.from(set).sort(
+    (x, y) => fiOutcomeCheckpointOrderIndex(x) - fiOutcomeCheckpointOrderIndex(y)
+  ) as FiOutcomeCheckpointKey[];
 }
 
 export function missingOutcomeCheckpoints(captured: readonly string[]): FiOutcomeCheckpointKey[] {
@@ -67,7 +72,11 @@ export function missingOutcomeCheckpoints(captured: readonly string[]): FiOutcom
   return FI_OUTCOME_CHECKPOINT_KEYS.filter((k) => !cap.has(k));
 }
 
-export function checkpointCompletenessRatio(captured: readonly string[]): { captured: number; total: number; ratio: number } {
+export function checkpointCompletenessRatio(captured: readonly string[]): {
+  captured: number;
+  total: number;
+  ratio: number;
+} {
   const cap = new Set(captured.map((c) => String(c).trim()).filter(isFiOutcomeCheckpointKey));
   const total: number = FI_OUTCOME_CHECKPOINT_KEYS.length;
   return { captured: cap.size, total, ratio: total === 0 ? 0 : cap.size / total };
@@ -81,8 +90,12 @@ export function deriveOutcomeConfidenceLevel(input: {
   sourceId: string | null | undefined;
   metricValues: Record<string, unknown>;
 }): FiOutcomeConfidenceLevel {
-  const hasSource = Boolean(String(input.sourceTable ?? "").trim() && String(input.sourceId ?? "").trim());
-  const keys = Object.keys(input.metricValues ?? {}).filter((k) => input.metricValues[k] !== null && input.metricValues[k] !== undefined);
+  const hasSource = Boolean(
+    String(input.sourceTable ?? "").trim() && String(input.sourceId ?? "").trim()
+  );
+  const keys = Object.keys(input.metricValues ?? {}).filter(
+    (k) => input.metricValues[k] !== null && input.metricValues[k] !== undefined
+  );
   const nonEmpty = keys.filter((k) => {
     const v = input.metricValues[k];
     if (typeof v === "string") return v.trim().length > 0;

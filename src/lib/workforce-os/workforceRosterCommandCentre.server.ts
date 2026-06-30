@@ -10,7 +10,10 @@ import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { HR_OS_ROUTE_REQUIRED_ROLES, resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import {
+  HR_OS_ROUTE_REQUIRED_ROLES,
+  resolveHrOsRouteAccess,
+} from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
@@ -188,7 +191,9 @@ function mapAvailabilityBlockRow(row: Record<string, unknown>): FiStaffAvailabil
 
 function mapAssignmentRow(row: Record<string, unknown>): FiStaffEventAssignmentRow {
   const snapshot =
-    row.eligibility_snapshot && typeof row.eligibility_snapshot === "object" && !Array.isArray(row.eligibility_snapshot)
+    row.eligibility_snapshot &&
+    typeof row.eligibility_snapshot === "object" &&
+    !Array.isArray(row.eligibility_snapshot)
       ? (row.eligibility_snapshot as Record<string, unknown>)
       : {};
   return {
@@ -383,7 +388,7 @@ async function buildBookingEvents(input: {
       startsAt: window.startsAt,
       endsAt: window.endsAt,
       clinicId,
-      clinicName: clinicId ? input.clinicNameById.get(clinicId) ?? null : null,
+      clinicName: clinicId ? (input.clinicNameById.get(clinicId) ?? null) : null,
       bookingTypeLabel: bookingTypeLabel(booking.booking_type),
       staffing: input.staffingByBooking.get(booking.id) ?? {
         displayStatus: "not_configured",
@@ -396,14 +401,19 @@ async function buildBookingEvents(input: {
         blockedAssignments: [],
         warnings: [],
       },
-      assignments: buildAssignmentRows(input.assignmentsByBooking.get(booking.id) ?? [], input.staffNameById),
+      assignments: buildAssignmentRows(
+        input.assignmentsByBooking.get(booking.id) ?? [],
+        input.staffNameById
+      ),
     });
   }
   return events;
 }
 
 /** HR OS roster mutations — owner, admin, or hr_manager with module access. */
-export async function assertHrOsRosterManageAllowed(tenantId: string): Promise<{ fiUserId: string }> {
+export async function assertHrOsRosterManageAllowed(
+  tenantId: string
+): Promise<{ fiUserId: string }> {
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) {
     throw new CrmAccessError(403, access.access.message);
@@ -411,13 +421,18 @@ export async function assertHrOsRosterManageAllowed(tenantId: string): Promise<{
   if (!access.platformAdminPreview) {
     const role = access.userRole.trim().toLowerCase();
     if (!HR_OS_ROUTE_REQUIRED_ROLES.some((allowed) => allowed === role)) {
-      throw new CrmAccessError(403, "Owner, admin, or HR manager role required for roster management.");
+      throw new CrmAccessError(
+        403,
+        "Owner, admin, or HR manager role required for roster management."
+      );
     }
   }
   return { fiUserId: access.fiUserId };
 }
 
-export async function loadRosterCommandCentre(input: LoadRosterCommandCentreInput): Promise<RosterCommandCentrePayload> {
+export async function loadRosterCommandCentre(
+  input: LoadRosterCommandCentreInput
+): Promise<RosterCommandCentrePayload> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const dateRange = input.dateRange ?? defaultRosterCommandCentreDateRange();
   const clinicFilter = input.clinicId?.trim() || null;
@@ -483,7 +498,9 @@ export async function loadRosterCommandCentre(input: LoadRosterCommandCentreInpu
     events = events.filter((event) => event.eventType === eventTypeFilter);
   }
   if (statusFilter) {
-    events = events.filter((event) => rosterDisplayStatusMatchesFilter(event.staffing.displayStatus, statusFilter));
+    events = events.filter((event) =>
+      rosterDisplayStatusMatchesFilter(event.staffing.displayStatus, statusFilter)
+    );
   }
 
   events.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
@@ -502,20 +519,29 @@ export async function loadRosterCommandCentre(input: LoadRosterCommandCentreInpu
     })),
     events,
     shifts: (shiftsRes.data ?? []).map((row) => mapShiftRow(row as Record<string, unknown>)),
-    availabilityBlocks: (blocksRes.data ?? []).map((row) => mapAvailabilityBlockRow(row as Record<string, unknown>)),
+    availabilityBlocks: (blocksRes.data ?? []).map((row) =>
+      mapAvailabilityBlockRow(row as Record<string, unknown>)
+    ),
     summary,
     preselectedEventKey: input.preselectedEventKey?.trim() || null,
   };
 }
 
-export async function loadRosterEventDetail(input: LoadRosterEventDetailInput): Promise<RosterEventDetailPayload> {
+export async function loadRosterEventDetail(
+  input: LoadRosterEventDetailInput
+): Promise<RosterEventDetailPayload> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const eventId = assertNonEmptyUuid(input.eventId, "eventId");
   const eventSource = input.eventSource;
 
   if (eventSource === "booking") {
     const supabase = supabaseAdmin();
-    const { data, error } = await supabase.from("fi_bookings").select("*").eq("tenant_id", tid).eq("id", eventId).maybeSingle();
+    const { data, error } = await supabase
+      .from("fi_bookings")
+      .select("*")
+      .eq("tenant_id", tid)
+      .eq("id", eventId)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) return { event: null, candidatesByRole: {} };
 
@@ -590,7 +616,11 @@ export async function loadRosterAssignableStaff(
   const existingAssignments = (assignmentRows ?? [])
     .map((row) => mapAssignmentRow(row as Record<string, unknown>))
     .filter((row) => row.assignment_status !== "cancelled")
-    .map((row) => ({ staffId: row.staff_id, assignedRole: row.assigned_role, assignmentStatus: row.assignment_status }));
+    .map((row) => ({
+      staffId: row.staff_id,
+      assignedRole: row.assigned_role,
+      assignmentStatus: row.assignment_status,
+    }));
 
   const allPrivilegeRequirements = await loadAllProcedurePrivilegeRequirementsForTenant(tid);
 
@@ -599,7 +629,8 @@ export async function loadRosterAssignableStaff(
     import("@/src/lib/workforce-os/workforceRosteringEngine").StaffAvailabilityRangeInput
   >();
   const conflictsByStaff = new Map<string, ReturnType<typeof detectStaffSchedulingConflicts>>();
-  const staffList: import("@/src/lib/workforce-os/workforceRosterCandidates").RosterCandidateStaffInput[] = [];
+  const staffList: import("@/src/lib/workforce-os/workforceRosterCandidates").RosterCandidateStaffInput[] =
+    [];
 
   for (const staff of staffRows) {
     const [blocksRes, shiftsRes, staffAssignmentsRes] = await Promise.all([
@@ -626,16 +657,21 @@ export async function loadRosterAssignableStaff(
     if (shiftsRes.error) throw new Error(shiftsRes.error.message);
     if (staffAssignmentsRes.error) throw new Error(staffAssignmentsRes.error.message);
 
-    const blocks = (blocksRes.data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>));
+    const blocks = (blocksRes.data ?? []).map((r) =>
+      mapAvailabilityBlock(r as Record<string, unknown>)
+    );
     const shifts = (shiftsRes.data ?? []).map((r) => mapShift(r as Record<string, unknown>));
     const assignments = (staffAssignmentsRes.data ?? []).map((r) => ({
       id: String((r as Record<string, unknown>).id),
       staff_id: String((r as Record<string, unknown>).staff_id),
       assigned_role: String((r as Record<string, unknown>).assigned_role),
-      assignment_status: (r as Record<string, unknown>).assignment_status as FiStaffEventAssignmentRow["assignment_status"],
+      assignment_status: (r as Record<string, unknown>)
+        .assignment_status as FiStaffEventAssignmentRow["assignment_status"],
       event_source: String((r as Record<string, unknown>).event_source),
       event_id:
-        (r as Record<string, unknown>).event_id != null ? String((r as Record<string, unknown>).event_id) : null,
+        (r as Record<string, unknown>).event_id != null
+          ? String((r as Record<string, unknown>).event_id)
+          : null,
     }));
 
     availabilityByStaff.set(staff.id, {
@@ -695,11 +731,19 @@ export async function loadRosterAssignableStaff(
   });
 }
 
-export async function loadBookingForRosterEvent(tenantId: string, bookingId: string): Promise<FiBookingRow | null> {
+export async function loadBookingForRosterEvent(
+  tenantId: string,
+  bookingId: string
+): Promise<FiBookingRow | null> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const bid = assertNonEmptyUuid(bookingId, "bookingId");
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_bookings").select("*").eq("tenant_id", tid).eq("id", bid).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_bookings")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", bid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data ? (data as FiBookingRow) : null;
 }

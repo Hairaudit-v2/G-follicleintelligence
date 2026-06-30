@@ -29,15 +29,21 @@ export function leadCommunicationDetailSnapshotFromRowLike(
   return {
     communication_type: String(row.communication_type).trim(),
     direction: String(row.direction).trim(),
-    outcome: row.outcome != null && String(row.outcome).trim() !== "" ? String(row.outcome).trim() : null,
-    subject: row.subject != null && String(row.subject).trim() !== "" ? String(row.subject).trim() : null,
-    preview: row.preview != null && String(row.preview).trim() !== "" ? String(row.preview).trim() : null,
+    outcome:
+      row.outcome != null && String(row.outcome).trim() !== "" ? String(row.outcome).trim() : null,
+    subject:
+      row.subject != null && String(row.subject).trim() !== "" ? String(row.subject).trim() : null,
+    preview:
+      row.preview != null && String(row.preview).trim() !== "" ? String(row.preview).trim() : null,
     contact_at: String(row.contact_at).trim(),
     next_follow_up_at:
       row.next_follow_up_at != null && String(row.next_follow_up_at).trim() !== ""
         ? String(row.next_follow_up_at).trim()
         : null,
-    metadata: row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata) ? row.metadata : {},
+    metadata:
+      row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? row.metadata
+        : {},
   };
 }
 
@@ -54,7 +60,9 @@ export function collectChangedLeadCommunicationDetailKeys(
   if ((before.subject ?? null) !== (after.subject ?? null)) keys.push("subject");
   if ((before.preview ?? null) !== (after.preview ?? null)) keys.push("preview");
   if (before.contact_at !== after.contact_at) keys.push("contact_at");
-  if ((before.next_follow_up_at ?? null) !== (after.next_follow_up_at ?? null)) keys.push("next_follow_up_at");
-  if (stableMetadataFingerprint(before.metadata) !== stableMetadataFingerprint(after.metadata)) keys.push("metadata");
+  if ((before.next_follow_up_at ?? null) !== (after.next_follow_up_at ?? null))
+    keys.push("next_follow_up_at");
+  if (stableMetadataFingerprint(before.metadata) !== stableMetadataFingerprint(after.metadata))
+    keys.push("metadata");
   return keys;
 }

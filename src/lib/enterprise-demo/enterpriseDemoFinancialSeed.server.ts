@@ -103,7 +103,9 @@ function isEnterpriseDemoPaymentMetadata(metadata: unknown): boolean {
 
 function isEnterpriseDemoPaymentRequestMetadata(metadata: unknown): boolean {
   if (metadata == null || typeof metadata !== "object" || Array.isArray(metadata)) return false;
-  return (metadata as Record<string, unknown>)[ENTERPRISE_DEMO_PAYMENT_REQUEST_METADATA_FLAG] === true;
+  return (
+    (metadata as Record<string, unknown>)[ENTERPRISE_DEMO_PAYMENT_REQUEST_METADATA_FLAG] === true
+  );
 }
 
 function clinicMetadataSlug(row: ClinicRow): string | null {
@@ -160,7 +162,9 @@ async function loadConsultationRows(
   return (data ?? []).map((row) => {
     const raw = row as { id: string; structured_data: unknown; case_id: string | null };
     const structured_data =
-      raw.structured_data && typeof raw.structured_data === "object" && !Array.isArray(raw.structured_data)
+      raw.structured_data &&
+      typeof raw.structured_data === "object" &&
+      !Array.isArray(raw.structured_data)
         ? (raw.structured_data as Record<string, unknown>)
         : null;
     return {
@@ -272,8 +276,13 @@ function findPatientByDemoKey(rows: PatientRow[], key: string): PatientRow | und
   return rows.find((row) => metadataKey(row.metadata, "demo_patient_key") === key);
 }
 
-function findConsultationByDemoKey(rows: ConsultationRow[], key: string): ConsultationRow | undefined {
-  return rows.find((row) => metadataKey(row.structured_data, ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA) === key);
+function findConsultationByDemoKey(
+  rows: ConsultationRow[],
+  key: string
+): ConsultationRow | undefined {
+  return rows.find(
+    (row) => metadataKey(row.structured_data, ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA) === key
+  );
 }
 
 function findCaseByDemoKey(rows: CaseRow[], key: string): CaseRow | undefined {
@@ -281,18 +290,27 @@ function findCaseByDemoKey(rows: CaseRow[], key: string): CaseRow | undefined {
 }
 
 function findBookingByDemoKey(rows: BookingRow[], key: string): BookingRow | undefined {
-  return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_BOOKING_KEY_METADATA) === key);
+  return rows.find(
+    (row) => metadataKey(row.metadata, ENTERPRISE_DEMO_BOOKING_KEY_METADATA) === key
+  );
 }
 
 function findInvoiceByDemoKey(rows: InvoiceRow[], key: string): InvoiceRow | undefined {
-  return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_INVOICE_KEY_METADATA) === key);
+  return rows.find(
+    (row) => metadataKey(row.metadata, ENTERPRISE_DEMO_INVOICE_KEY_METADATA) === key
+  );
 }
 
 function findPaymentByDemoKey(rows: PaymentRow[], key: string): PaymentRow | undefined {
-  return rows.find((row) => metadataKey(row.metadata, ENTERPRISE_DEMO_PAYMENT_KEY_METADATA) === key);
+  return rows.find(
+    (row) => metadataKey(row.metadata, ENTERPRISE_DEMO_PAYMENT_KEY_METADATA) === key
+  );
 }
 
-function findPaymentRequestByDemoKey(rows: PaymentRequestRow[], key: string): PaymentRequestRow | undefined {
+function findPaymentRequestByDemoKey(
+  rows: PaymentRequestRow[],
+  key: string
+): PaymentRequestRow | undefined {
   return rows.find((row) => metadataKey(row.metadata, "demo_payment_request_key") === key);
 }
 
@@ -327,7 +345,9 @@ function buildPaymentMetadata(payment: EnterpriseDemoPaymentSpec): Record<string
   };
 }
 
-function buildPaymentRequestMetadata(request: EnterpriseDemoPaymentRequestSpec): Record<string, unknown> {
+function buildPaymentRequestMetadata(
+  request: EnterpriseDemoPaymentRequestSpec
+): Record<string, unknown> {
   return {
     [ENTERPRISE_DEMO_PAYMENT_REQUEST_METADATA_FLAG]: true,
     enterprise_demo: true,
@@ -340,7 +360,9 @@ function buildPaymentRequestMetadata(request: EnterpriseDemoPaymentRequestSpec):
   };
 }
 
-function buildFranchiseRiskMetadata(risk: EnterpriseDemoFranchiseRiskSpec): Record<string, unknown> {
+function buildFranchiseRiskMetadata(
+  risk: EnterpriseDemoFranchiseRiskSpec
+): Record<string, unknown> {
   return {
     [ENTERPRISE_DEMO_FINANCIAL_RISK_METADATA_FLAG]: true,
     enterprise_demo: true,
@@ -426,7 +448,11 @@ async function seedInvoice(
     .select("id")
     .single();
   if (error) {
-    if (/uq_fi_invoices_tenant_number|duplicate key value violates unique constraint/i.test(error.message)) {
+    if (
+      /uq_fi_invoices_tenant_number|duplicate key value violates unique constraint/i.test(
+        error.message
+      )
+    ) {
       const { data: existingByNumber, error: findErr } = await supabase
         .from("fi_invoices")
         .select("id, metadata")
@@ -438,7 +464,10 @@ async function seedInvoice(
         const invoiceId = String((existingByNumber as { id: string }).id);
         context.existingInvoices.push({
           id: invoiceId,
-          metadata: (existingByNumber as { metadata: unknown }).metadata as Record<string, unknown> | null,
+          metadata: (existingByNumber as { metadata: unknown }).metadata as Record<
+            string,
+            unknown
+          > | null,
         });
         return { created: false, invoiceId, itemCreated: false };
       }
@@ -484,7 +513,10 @@ async function seedPaymentRequest(
     now: string;
   }
 ): Promise<{ created: boolean; paymentRequestId: string | null }> {
-  const existing = findPaymentRequestByDemoKey(context.existingPaymentRequests, request.demoPaymentRequestKey);
+  const existing = findPaymentRequestByDemoKey(
+    context.existingPaymentRequests,
+    request.demoPaymentRequestKey
+  );
   if (existing) {
     if (!isEnterpriseDemoPaymentRequestMetadata(existing.metadata)) {
       return { created: false, paymentRequestId: null };
@@ -627,7 +659,10 @@ async function seedConsultationBundle(
   }
 ): Promise<void> {
   const patient = findPatientByDemoKey(context.patients, bundle.consultation.demoPatientKey);
-  const consultation = findConsultationByDemoKey(context.consultations, bundle.consultation.demoConsultationKey);
+  const consultation = findConsultationByDemoKey(
+    context.consultations,
+    bundle.consultation.demoConsultationKey
+  );
   if (!patient || !consultation) {
     context.warnings.push(
       `Missing patient/consultation for financial bundle ${bundle.quoteInvoice.demoInvoiceKey}; skipped.`
@@ -651,7 +686,9 @@ async function seedConsultationBundle(
   } else if (invoiceResult.invoiceId) {
     context.counters.existingInvoices += 1;
   } else {
-    context.warnings.push(`Invoice key collision for ${bundle.quoteInvoice.demoInvoiceKey}; skipped.`);
+    context.warnings.push(
+      `Invoice key collision for ${bundle.quoteInvoice.demoInvoiceKey}; skipped.`
+    );
     return;
   }
 
@@ -719,7 +756,10 @@ async function seedSurgeryBundle(
   }
 ): Promise<void> {
   const patient = findPatientByDemoKey(context.patients, bundle.surgery.demoPatientKey);
-  const consultation = findConsultationByDemoKey(context.consultations, bundle.surgery.demoConsultationKey);
+  const consultation = findConsultationByDemoKey(
+    context.consultations,
+    bundle.surgery.demoConsultationKey
+  );
   const caseRow = findCaseByDemoKey(context.cases, bundle.surgery.demoCaseKey);
   const booking = findBookingByDemoKey(context.bookings, bundle.surgery.demoBookingKey);
 
@@ -865,7 +905,13 @@ async function seedSurgeryBundle(
     else context.counters.existingPayments += 1;
   }
 
-  const riskResult = await upsertCaseFranchiseRisk(supabase, tenantId, caseRow, bundle.franchiseRisk, context.now);
+  const riskResult = await upsertCaseFranchiseRisk(
+    supabase,
+    tenantId,
+    caseRow,
+    bundle.franchiseRisk,
+    context.now
+  );
   if (riskResult.updated) context.counters.updatedCaseFranchiseRisk += 1;
   else if (riskResult.existing) context.counters.existingCaseFranchiseRisk += 1;
 

@@ -1,8 +1,15 @@
 import type { HieHairLossClassificationSystem } from "../hairLossClassification/types";
 import { isHieHairLossClassificationSystem } from "../hairLossClassification/enumValidation";
 import { HAIR_PROGRESSION_TRACKED_THERAPY_CODES } from "./constants";
-import { buildHairProgressionCohortSignature, dateOfBirthToAgeBand, type HairProgressionAgeBand } from "./cohortSignature";
-import { classificationGradeToProgressionOrdinal, norwoodOrdinalToGradeLabel } from "./gradeOrdinal";
+import {
+  buildHairProgressionCohortSignature,
+  dateOfBirthToAgeBand,
+  type HairProgressionAgeBand,
+} from "./cohortSignature";
+import {
+  classificationGradeToProgressionOrdinal,
+  norwoodOrdinalToGradeLabel,
+} from "./gradeOrdinal";
 import {
   describeReviewWeighting,
   hairLossReviewStatusToConfidenceMultiplier,
@@ -118,7 +125,9 @@ export type BuildHairProgressionParams = {
   } | null;
 };
 
-function dominantSystem(rows: HairProgressionTimepointInput[]): HieHairLossClassificationSystem | null {
+function dominantSystem(
+  rows: HairProgressionTimepointInput[]
+): HieHairLossClassificationSystem | null {
   const counts = new Map<string, number>();
   for (const r of rows) {
     const sys = String(r.classification_system ?? "").trim();
@@ -148,9 +157,10 @@ function parseMs(iso: string): number | null {
   return Number.isFinite(t) ? t : null;
 }
 
-function weightedRegressionSlopePerYear(
-  pts: Array<{ tMs: number; ordinal: number; w: number }>
-): { slope: number | null; t0Ms: number } {
+function weightedRegressionSlopePerYear(pts: Array<{ tMs: number; ordinal: number; w: number }>): {
+  slope: number | null;
+  t0Ms: number;
+} {
   if (pts.length < 2) return { slope: null, t0Ms: pts[0]?.tMs ?? 0 };
   const t0Ms = Math.min(...pts.map((p) => p.tMs));
   const mapped = pts
@@ -238,7 +248,9 @@ function slopeForSubset(
   return weightedRegressionSlopePerYear(sub).slope;
 }
 
-export function buildHairProgressionIntelligence(params: BuildHairProgressionParams): HairProgressionIntelligence {
+export function buildHairProgressionIntelligence(
+  params: BuildHairProgressionParams
+): HairProgressionIntelligence {
   const cap = Math.max(1, params.timelineCap);
   const sortedRaw = [...params.timepointsRaw]
     .filter((r) => r.id && r.created_at)
@@ -251,7 +263,9 @@ export function buildHairProgressionIntelligence(params: BuildHairProgressionPar
     const sys = String(r.classification_system ?? "").trim();
     const cs = isHieHairLossClassificationSystem(sys) ? sys : "custom";
     const ord =
-      systemUsed && cs === systemUsed ? classificationGradeToProgressionOrdinal(systemUsed, r.classification_grade) : null;
+      systemUsed && cs === systemUsed
+        ? classificationGradeToProgressionOrdinal(systemUsed, r.classification_grade)
+        : null;
     const rm = hairLossReviewStatusToConfidenceMultiplier(r.review_status);
     return {
       id: r.id,
@@ -298,8 +312,12 @@ export function buildHairProgressionIntelligence(params: BuildHairProgressionPar
   const seg = segmentSlopesPerYear(regressionPts.map((p) => ({ tMs: p.tMs, ordinal: p.ordinal })));
   const segStd = std(seg);
 
-  const lastPattern = sortedRaw.length ? String(sortedRaw[sortedRaw.length - 1].pattern_type ?? "") : "";
-  const lastDiffuseScore = sortedRaw.length ? sortedRaw[sortedRaw.length - 1].diffuse_thinning_score : null;
+  const lastPattern = sortedRaw.length
+    ? String(sortedRaw[sortedRaw.length - 1].pattern_type ?? "")
+    : "";
+  const lastDiffuseScore = sortedRaw.length
+    ? sortedRaw[sortedRaw.length - 1].diffuse_thinning_score
+    : null;
   const diffusePattern =
     lastPattern === "diffuse_male_pattern" ||
     lastPattern === "diffuse_female_thinning" ||
@@ -345,7 +363,9 @@ export function buildHairProgressionIntelligence(params: BuildHairProgressionPar
       }
       if (nAfter < 2) {
         after = null;
-        notes = notes ? `${notes} Insufficient post-exposure grade points.` : "Insufficient post-exposure grade points.";
+        notes = notes
+          ? `${notes} Insufficient post-exposure grade points.`
+          : "Insufficient post-exposure grade points.";
       }
     } else if (!firstAt) {
       notes = "No therapy exposure events recorded for this code.";
@@ -353,7 +373,9 @@ export function buildHairProgressionIntelligence(params: BuildHairProgressionPar
       notes = "Insufficient graded timeline for before/after comparison.";
     }
     const delta =
-      before != null && after != null && Number.isFinite(before) && Number.isFinite(after) ? after - before : null;
+      before != null && after != null && Number.isFinite(before) && Number.isFinite(after)
+        ? after - before
+        : null;
     return {
       canonical_code: code,
       display_label: therapyDisplayLabel(code),
@@ -407,7 +429,9 @@ export function buildHairProgressionIntelligence(params: BuildHairProgressionPar
     }
   }
 
-  const reviewStats = describeReviewWeighting(sortedRaw.map((r) => ({ review_status: r.review_status })));
+  const reviewStats = describeReviewWeighting(
+    sortedRaw.map((r) => ({ review_status: r.review_status }))
+  );
 
   const nb = params.networkBucket;
   const population_mean = nb?.mean_velocity ?? null;

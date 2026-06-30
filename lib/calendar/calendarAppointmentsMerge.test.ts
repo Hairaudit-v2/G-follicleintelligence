@@ -42,10 +42,7 @@ function row(id: string, start: string): FiBookingRow {
 describe("mergeCalendarBookingsOnHydrate", () => {
   it("keeps client-only bookings missing from server payload", () => {
     const server = [row("a", "2026-06-10T01:00:00.000Z")];
-    const client = [
-      row("a", "2026-06-10T01:00:00.000Z"),
-      row("b", "2026-06-10T03:00:00.000Z"),
-    ];
+    const client = [row("a", "2026-06-10T01:00:00.000Z"), row("b", "2026-06-10T03:00:00.000Z")];
     const merged = mergeCalendarBookingsOnHydrate(server, client);
     assert.equal(merged.length, 2);
     assert.deepEqual(

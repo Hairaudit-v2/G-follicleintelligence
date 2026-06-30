@@ -1,4 +1,8 @@
-import type { ConsultationFormField, ConsultationFormOption, ConsultationFormSchema } from "../consultationFormTypes";
+import type {
+  ConsultationFormField,
+  ConsultationFormOption,
+  ConsultationFormSchema,
+} from "../consultationFormTypes";
 
 function fld(field: ConsultationFormField): ConsultationFormField {
   return field;
@@ -38,7 +42,8 @@ export const femaleHairLossConsultationSchemaV1: ConsultationFormSchema = {
     {
       id: "rapid_intake",
       title: "Rapid Intake",
-      description: "Priorities and context — target under five minutes for a focused female hair-loss visit.",
+      description:
+        "Priorities and context — target under five minutes for a focused female hair-loss visit.",
       fields: [
         fld({
           id: "priority_focus",

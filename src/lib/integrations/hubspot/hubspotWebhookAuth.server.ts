@@ -66,7 +66,10 @@ function resolveHubspotClientSecret(): string {
 }
 
 function decodeHubspotUriEncodedChars(value: string): string {
-  return value.replace(/%[0-9A-Fa-f]{2}/g, (match) => HUBSPOT_URI_DECODE_MAP[match.toUpperCase()] ?? match);
+  return value.replace(
+    /%[0-9A-Fa-f]{2}/g,
+    (match) => HUBSPOT_URI_DECODE_MAP[match.toUpperCase()] ?? match
+  );
 }
 
 /** Full request URI as HubSpot signs it (origin + decoded path/query). */

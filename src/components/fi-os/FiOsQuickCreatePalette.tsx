@@ -16,7 +16,10 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { resolveFiOsQuickCreateItems, type ResolvedFiOsQuickCreateItem } from "@/src/lib/fiAdmin/fiOsQuickCreateItems";
+import {
+  resolveFiOsQuickCreateItems,
+  type ResolvedFiOsQuickCreateItem,
+} from "@/src/lib/fiAdmin/fiOsQuickCreateItems";
 
 const ICONS: Record<string, typeof Stethoscope> = {
   consultation: Stethoscope,
@@ -170,7 +173,11 @@ export function FiOsQuickCreatePalette({
           Quick create
         </p>
 
-        <ul className="max-h-[min(60vh,22rem)] overflow-y-auto py-1" role="listbox" aria-label="Quick create actions">
+        <ul
+          className="max-h-[min(60vh,22rem)] overflow-y-auto py-1"
+          role="listbox"
+          aria-label="Quick create actions"
+        >
           {filtered.length === 0 ? (
             <li className="px-4 py-8 text-center text-sm text-slate-500">No matches.</li>
           ) : (
@@ -197,9 +204,13 @@ export function FiOsQuickCreatePalette({
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-semibold">{it.label}</span>
-                      <span className="mt-0.5 block text-xs leading-snug text-slate-400">{it.description}</span>
+                      <span className="mt-0.5 block text-xs leading-snug text-slate-400">
+                        {it.description}
+                      </span>
                       {!it.enabled && it.disabledReason ? (
-                        <span className="mt-1 block text-[11px] font-medium text-amber-200/90">{it.disabledReason}</span>
+                        <span className="mt-1 block text-[11px] font-medium text-amber-200/90">
+                          {it.disabledReason}
+                        </span>
                       ) : null}
                     </span>
                   </button>
@@ -211,9 +222,12 @@ export function FiOsQuickCreatePalette({
 
         <div className="border-t border-white/[0.06] px-3 py-2 text-[10px] text-slate-500 sm:px-4">
           <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">↑</kbd>{" "}
-          <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">↓</kbd> move ·{" "}
-          <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">Enter</kbd> open ·{" "}
-          <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">Esc</kbd> close
+          <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">↓</kbd> move
+          ·{" "}
+          <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">Enter</kbd>{" "}
+          open ·{" "}
+          <kbd className="rounded border border-white/[0.1] bg-black/25 px-1 font-mono">Esc</kbd>{" "}
+          close
         </div>
       </div>
     </div>

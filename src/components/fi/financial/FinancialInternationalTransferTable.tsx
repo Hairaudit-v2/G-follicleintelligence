@@ -53,7 +53,8 @@ export function FinancialInternationalTransferTable(props: {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pathwayId, setPathwayId] = useState("");
-  const [transferMethod, setTransferMethod] = useState<(typeof TRANSFER_METHODS)[number]>("bank_transfer");
+  const [transferMethod, setTransferMethod] =
+    useState<(typeof TRANSFER_METHODS)[number]>("bank_transfer");
   const [sourceCountry, setSourceCountry] = useState("");
   const [sourceCurrency, setSourceCurrency] = useState("");
   const [expectedCents, setExpectedCents] = useState("");
@@ -74,7 +75,10 @@ export function FinancialInternationalTransferTable(props: {
     e.preventDefault();
     setFeedback(null);
     if (!pathwayId) {
-      setFeedback({ message: "Select an international_transfer payment pathway.", tone: "warning" });
+      setFeedback({
+        message: "Select an international_transfer payment pathway.",
+        tone: "warning",
+      });
       return;
     }
     const cents = expectedCents.trim() ? Number(expectedCents) : null;
@@ -99,8 +103,8 @@ export function FinancialInternationalTransferTable(props: {
       {props.canMutate ? (
         <FinancialOsFormPanel title="New international transfer application">
           <p className={financialOsClasses.formHint}>
-            Linked to an <code className={financialOsClasses.code}>international_transfer</code> payment pathway.
-            Provider-neutral workflow — no live Wise/bank/SWIFT APIs.
+            Linked to an <code className={financialOsClasses.code}>international_transfer</code>{" "}
+            payment pathway. Provider-neutral workflow — no live Wise/bank/SWIFT APIs.
           </p>
           <form onSubmit={createApplication}>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -124,7 +128,9 @@ export function FinancialInternationalTransferTable(props: {
                 Transfer method
                 <select
                   value={transferMethod}
-                  onChange={(e) => setTransferMethod(e.target.value as (typeof TRANSFER_METHODS)[number])}
+                  onChange={(e) =>
+                    setTransferMethod(e.target.value as (typeof TRANSFER_METHODS)[number])
+                  }
                   className={financialOsClasses.select}
                 >
                   {TRANSFER_METHODS.map((m) => (
@@ -162,10 +168,20 @@ export function FinancialInternationalTransferTable(props: {
                 />
               </label>
             </div>
-            <button type="submit" disabled={pending} className={`mt-3 ${financialOsClasses.primaryButton}`}>
+            <button
+              type="submit"
+              disabled={pending}
+              className={`mt-3 ${financialOsClasses.primaryButton}`}
+            >
               {pending ? "Creating…" : "Create application"}
             </button>
-            {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} className="mt-2" /> : null}
+            {feedback ? (
+              <FinancialOsFeedbackText
+                message={feedback.message}
+                tone={feedback.tone}
+                className="mt-2"
+              />
+            ) : null}
           </form>
         </FinancialOsFormPanel>
       ) : null}
@@ -183,10 +199,12 @@ export function FinancialInternationalTransferTable(props: {
         emptyMessage={financialOsFilteredEmptyMessage(
           props.rows.length > 0,
           "No international transfer applications yet.",
-          "No international transfer applications match this status filter.",
+          "No international transfer applications match this status filter."
         )}
         emptyHint={
-          props.rows.length > 0 && filtered.length === 0 ? "Try clearing the status filter to see all applications." : undefined
+          props.rows.length > 0 && filtered.length === 0
+            ? "Try clearing the status filter to see all applications."
+            : undefined
         }
         head={
           <>
@@ -204,9 +222,12 @@ export function FinancialInternationalTransferTable(props: {
         {filtered.map((row) => (
           <Fragment key={row.id}>
             <tr className={financialOsClasses.tableRow}>
-              <td className={financialOsClasses.tableCellStrong}>{row.transfer_method.replace(/_/g, " ")}</td>
+              <td className={financialOsClasses.tableCellStrong}>
+                {row.transfer_method.replace(/_/g, " ")}
+              </td>
               <td className={financialOsClasses.tableCell}>
-                {row.source_country_code ?? "—"} / {row.source_currency_code ?? "—"} → {row.settlement_currency_code}
+                {row.source_country_code ?? "—"} / {row.source_currency_code ?? "—"} →{" "}
+                {row.settlement_currency_code}
               </td>
               <td className={financialOsClasses.tableCell}>
                 <FinancialInternationalTransferStatusBadge status={row.transfer_status} />
@@ -217,7 +238,9 @@ export function FinancialInternationalTransferTable(props: {
               <td className={financialOsClasses.tableCellMono}>
                 {fmtMoney(row.received_amount_cents, row.settlement_currency_code)}
               </td>
-              <td className={financialOsClasses.tableCellMono}>{row.expected_settlement_date ?? "—"}</td>
+              <td className={financialOsClasses.tableCellMono}>
+                {row.expected_settlement_date ?? "—"}
+              </td>
               <td className={financialOsClasses.tableCell}>{row.updated_at.slice(0, 10)}</td>
               <td className={financialOsClasses.tableCell}>
                 <button

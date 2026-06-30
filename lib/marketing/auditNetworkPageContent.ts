@@ -4,7 +4,8 @@
  */
 
 export const AUDIT_NETWORK_PAGE_METADATA = {
-  title: "AuditOS & HairAudit — Independent Outcome Verification For Hair Restoration | Follicle Intelligence",
+  title:
+    "AuditOS & HairAudit — Independent Outcome Verification For Hair Restoration | Follicle Intelligence",
   description:
     "AuditOS connects clinical evidence, surgical records, patient images, outcome review, quality scoring, and benchmarking into one accountability layer—powered by HairAudit independent review for clinics, surgeons, and enterprise quality teams.",
 } as const;

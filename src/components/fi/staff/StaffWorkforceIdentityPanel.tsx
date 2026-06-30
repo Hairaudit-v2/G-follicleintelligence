@@ -66,7 +66,9 @@ function LinkRow({
             <dd className="mt-0.5">{formatIso(status.lastSyncedAt)}</dd>
           </div>
           {status.isSyncStale ? (
-            <div className="sm:col-span-2 text-amber-200/90">Sync metadata is stale — refresh from source system.</div>
+            <div className="sm:col-span-2 text-amber-200/90">
+              Sync metadata is stale — refresh from source system.
+            </div>
           ) : null}
         </dl>
       ) : null}
@@ -91,8 +93,8 @@ export function StaffWorkforceIdentityPanel({
         <h2 className={`text-lg font-semibold ${heading}`}>Workforce identity</h2>
       </div>
       <p className={`mt-1 text-sm ${sub}`}>
-        Operational links to IIOHR HR, Academy, and Nexus. FI OS projects readiness metadata only — source systems
-        remain authoritative for HR, training, and certification records.
+        Operational links to IIOHR HR, Academy, and Nexus. FI OS projects readiness metadata only —
+        source systems remain authoritative for HR, training, and certification records.
       </p>
       <div className="mt-4 space-y-3">
         <LinkRow label="HR identity" status={summary.hr} variant={variant} />

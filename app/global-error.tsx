@@ -19,12 +19,16 @@ export default function GlobalError({
     <html lang="en">
       <body className="min-h-screen bg-[#020617] font-sans text-slate-200 antialiased">
         <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/90">Follicle Intelligence</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/90">
+            Follicle Intelligence
+          </p>
           <h1 className="mt-4 text-2xl font-semibold text-white">Application error</h1>
           <p className="mt-3 max-w-md text-sm text-slate-400">
             A critical error prevented this page from loading. Try again or refresh the browser.
           </p>
-          {error.digest ? <p className="mt-2 font-mono text-xs text-slate-500">Reference: {error.digest}</p> : null}
+          {error.digest ? (
+            <p className="mt-2 font-mono text-xs text-slate-500">Reference: {error.digest}</p>
+          ) : null}
           <button
             type="button"
             onClick={() => reset()}

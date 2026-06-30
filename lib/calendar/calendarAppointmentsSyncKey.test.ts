@@ -19,7 +19,9 @@ function baseData(overrides: Partial<Parameters<typeof calendarAppointmentsSyncK
 describe("calendarAppointmentsSyncKey", () => {
   it("differs when URL sample mode toggles so demo rows cannot reuse real-booking store slices", () => {
     const real = calendarAppointmentsSyncKey(baseData());
-    const demo = calendarAppointmentsSyncKey(baseData({ query: { view: "week", dateAnchor: "2026-06-02", sampleMode: true } }));
+    const demo = calendarAppointmentsSyncKey(
+      baseData({ query: { view: "week", dateAnchor: "2026-06-02", sampleMode: true } })
+    );
     assert.notEqual(real, demo);
   });
 
@@ -34,7 +36,9 @@ describe("calendarAppointmentsSyncKey", () => {
   it("matches useCalendarAppointments clientSample suffix — client-only augment cannot alias real mode", () => {
     const data = baseData();
     const hookKey = (clientSample: boolean) =>
-      [calendarAppointmentsSyncKey(data), clientSample ? "clientSample:1" : "clientSample:0"].join("|");
+      [calendarAppointmentsSyncKey(data), clientSample ? "clientSample:1" : "clientSample:0"].join(
+        "|"
+      );
     assert.notEqual(hookKey(true), hookKey(false));
   });
 });

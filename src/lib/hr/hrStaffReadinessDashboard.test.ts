@@ -19,13 +19,15 @@ import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 
-function staffBase(p: Partial<{
-  id: string;
-  full_name: string;
-  staff_role: string;
-  working_hours: Record<string, unknown>;
-  is_active: boolean;
-}> = {}) {
+function staffBase(
+  p: Partial<{
+    id: string;
+    full_name: string;
+    staff_role: string;
+    working_hours: Record<string, unknown>;
+    is_active: boolean;
+  }> = {}
+) {
   return {
     id: "s1",
     full_name: "Alex Clinician",
@@ -86,7 +88,9 @@ test("needs_review blocks clinical availability", () => {
 });
 
 test("stale HR sync affects readiness state and clinical availability", () => {
-  const staleAt = new Date(NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000).toISOString();
+  const staleAt = new Date(
+    NOW.getTime() - (STAFF_HR_SYNC_STALE_DAYS + 1) * 86_400_000
+  ).toISOString();
   const hr = freshHr({ last_synced_at: staleAt });
 
   assert.equal(

@@ -3,7 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createPatientImageSignedUrls } from "@/src/lib/patientImages/patientImagesServer";
-import { loadActiveTherapyPlanSummary, loadPatientTherapyEventsForPatient } from "@/src/lib/medicationOs/medicationOsLoaders.server";
+import {
+  loadActiveTherapyPlanSummary,
+  loadPatientTherapyEventsForPatient,
+} from "@/src/lib/medicationOs/medicationOsLoaders.server";
 import type { PatientTherapyEventRow } from "@/src/lib/medicationOs/medicationOsTypes";
 import { loadPatientTwinHairProgressionSection } from "@/src/lib/patientTwin/patientTwinHairProgression.server";
 import { recipientAssessmentNotConfiguredResult } from "./assessRecipientFallback";
@@ -14,7 +17,11 @@ import {
 } from "./openAiRecipientAssessment.server";
 import { insertHairIntelligenceRecipientCandidacyReviewRow } from "./persistRecipientAssessment.server";
 import { HIE_RECIPIENT_AREA_IMAGE_CATEGORIES } from "./types";
-import type { HairIntelligenceRecipientCandidacyReviewInsert, HieRecipientSourceSystem, RecipientAssessmentModelResult } from "./types";
+import type {
+  HairIntelligenceRecipientCandidacyReviewInsert,
+  HieRecipientSourceSystem,
+  RecipientAssessmentModelResult,
+} from "./types";
 
 const RECIPIENT_CATEGORIES_SQL = [...HIE_RECIPIENT_AREA_IMAGE_CATEGORIES] as string[];
 
@@ -75,7 +82,18 @@ function buildTherapyContext(
   let activePlanTracked = false;
   for (const c of activeCanonicalCodes) {
     const hits = modalityHits(c, c);
-    if (hits.some((h) => ["finasteride", "dutasteride", "oral_minoxidil", "topical_minoxidil", "prp", "exosomes"].includes(h))) {
+    if (
+      hits.some((h) =>
+        [
+          "finasteride",
+          "dutasteride",
+          "oral_minoxidil",
+          "topical_minoxidil",
+          "prp",
+          "exosomes",
+        ].includes(h)
+      )
+    ) {
       activePlanTracked = true;
       break;
     }
@@ -108,7 +126,10 @@ async function resolveImageUrlForModel(params: AssessRecipientParams): Promise<s
   const bucket = String(mapped.storage_bucket ?? "patient-images");
   const path = String(mapped.storage_path ?? "");
   if (!path) return null;
-  const signedMap = await createPatientImageSignedUrls([{ id: iid, storage_bucket: bucket, storage_path: path }], supabase);
+  const signedMap = await createPatientImageSignedUrls(
+    [{ id: iid, storage_bucket: bucket, storage_path: path }],
+    supabase
+  );
   const signed = signedMap.get(iid);
   return signed?.url ?? null;
 }
@@ -143,7 +164,9 @@ async function resolveDefaultRecipientPatientImageId(
     .limit(40);
   if (e2) return null;
   for (const p of preferred) {
-    const hit = (img ?? []).find((r) => String((r as Record<string, unknown>).ai_image_category ?? "") === p);
+    const hit = (img ?? []).find(
+      (r) => String((r as Record<string, unknown>).ai_image_category ?? "") === p
+    );
     if (hit) return String((hit as { id: string }).id);
   }
   const first = (img ?? [])[0] as { id?: string } | undefined;
@@ -207,7 +230,9 @@ async function latestDonorAssessmentSummary(
 ): Promise<{ id: string; summary: Record<string, unknown> } | null> {
   const { data, error } = await supabase
     .from("hair_intelligence_donor_assessments")
-    .select("id, donor_quality_rating, miniaturisation_risk, retrograde_risk, safe_donor_capacity_band")
+    .select(
+      "id, donor_quality_rating, miniaturisation_risk, retrograde_risk, safe_donor_capacity_band"
+    )
     .eq("tenant_id", tenantId)
     .eq("patient_id", patientId)
     .order("created_at", { ascending: false })
@@ -226,7 +251,11 @@ async function latestDonorAssessmentSummary(
   };
 }
 
-async function pathologyRecordsPresent(supabase: SupabaseClient, tenantId: string, patientId: string): Promise<boolean> {
+async function pathologyRecordsPresent(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<boolean> {
   const [{ count: c1 }, { count: c2 }] = await Promise.all([
     supabase
       .from("fi_pathology_requests")
@@ -241,13 +270,15 @@ async function pathologyRecordsPresent(supabase: SupabaseClient, tenantId: strin
       .eq("patient_id", patientId)
       .limit(1),
   ]);
-  return ((c1 ?? 0) > 0 || (c2 ?? 0) > 0);
+  return (c1 ?? 0) > 0 || (c2 ?? 0) > 0;
 }
 
 /**
  * Resolve image URL, assemble longitudinal + therapy context, run recipient vision assessor (or fallback), persist ledger row.
  */
-export async function assessRecipient(params: AssessRecipientParams): Promise<AssessRecipientOutcome> {
+export async function assessRecipient(
+  params: AssessRecipientParams
+): Promise<AssessRecipientOutcome> {
   const supabase = params.client ?? supabaseAdmin();
   let patientId = params.patient_id?.trim() ?? null;
   let caseId = params.case_id?.trim() ?? null;
@@ -289,23 +320,31 @@ export async function assessRecipient(params: AssessRecipientParams): Promise<As
   const context: Record<string, unknown> = {};
 
   if (tenantId && patientId) {
-    const [hairLoss, donorBundle, progression, therapyEvents, activeSummary, pathologyPresent] = await Promise.all([
-      latestHairLossClassificationBundle(supabase, tenantId, patientId),
-      latestDonorAssessmentSummary(supabase, tenantId, patientId),
-      loadPatientTwinHairProgressionSection(tenantId, patientId, {}, supabase).catch(() => null),
-      loadPatientTherapyEventsForPatient(supabase, tenantId, patientId, { limit: 200 }).catch(() => [] as PatientTherapyEventRow[]),
-      loadActiveTherapyPlanSummary(supabase, tenantId, patientId).catch(() => null),
-      pathologyRecordsPresent(supabase, tenantId, patientId),
-    ]);
+    const [hairLoss, donorBundle, progression, therapyEvents, activeSummary, pathologyPresent] =
+      await Promise.all([
+        latestHairLossClassificationBundle(supabase, tenantId, patientId),
+        latestDonorAssessmentSummary(supabase, tenantId, patientId),
+        loadPatientTwinHairProgressionSection(tenantId, patientId, {}, supabase).catch(() => null),
+        loadPatientTherapyEventsForPatient(supabase, tenantId, patientId, { limit: 200 }).catch(
+          () => [] as PatientTherapyEventRow[]
+        ),
+        loadActiveTherapyPlanSummary(supabase, tenantId, patientId).catch(() => null),
+        pathologyRecordsPresent(supabase, tenantId, patientId),
+      ]);
 
     hairLossClassificationId = hairLoss.id;
     donorAssessmentId = donorBundle?.id ?? null;
 
     if (patientImageId) {
-      recipientImageClassificationId = await latestRecipientHliClassificationIdForPatientImage(supabase, patientImageId);
+      recipientImageClassificationId = await latestRecipientHliClassificationIdForPatientImage(
+        supabase,
+        patientImageId
+      );
     }
 
-    const activeCodes = (activeSummary?.plans ?? []).flatMap((p) => p.items.map((i) => i.canonical_code));
+    const activeCodes = (activeSummary?.plans ?? []).flatMap((p) =>
+      p.items.map((i) => i.canonical_code)
+    );
     const therapyCtx = buildTherapyContext(therapyEvents, activeCodes);
 
     if (progression) {
@@ -317,13 +356,16 @@ export async function assessRecipient(params: AssessRecipientParams): Promise<As
 
     Object.assign(context, {
       hair_loss_classification: hairLoss.summary,
-      donor_assessment: donorBundle ? { donor_assessment_id: donorBundle.id, ...donorBundle.summary } : null,
+      donor_assessment: donorBundle
+        ? { donor_assessment_id: donorBundle.id, ...donorBundle.summary }
+        : null,
       hair_progression: progression
         ? {
             stability_label: progression.stability.label,
             stability_rationale: progression.stability.rationale,
             progression_velocity_grades_per_year: progression.progression_velocity.grades_per_year,
-            progression_velocity_weighted_grades_per_year: progression.progression_velocity.confidence_weighted_grades_per_year,
+            progression_velocity_weighted_grades_per_year:
+              progression.progression_velocity.confidence_weighted_grades_per_year,
             analysis_basis: progression.analysis_basis,
           }
         : null,

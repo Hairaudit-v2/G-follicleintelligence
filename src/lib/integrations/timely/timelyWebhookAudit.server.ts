@@ -43,7 +43,10 @@ export function computeTimelyWebhookPayloadHash(payload: unknown): string {
   return sha256HexUtf8(stableStringifyForWebhookHash(payload));
 }
 
-export function resolveTimelyWebhookEventType(payload: unknown, fallback = "timely_webhook"): string {
+export function resolveTimelyWebhookEventType(
+  payload: unknown,
+  fallback = "timely_webhook"
+): string {
   if (payload && typeof payload === "object" && !Array.isArray(payload)) {
     const explicit = extractTimelyDiscoveryEventType(payload);
     if (explicit !== "zapier_discovery") return explicit;
@@ -59,7 +62,10 @@ export async function insertTimelyWebhookEvent(
   const payload_hash = computeTimelyWebhookPayloadHash(params.payload);
   const event_type =
     params.eventType?.trim() ||
-    resolveTimelyWebhookEventType(params.payload, params.route.includes("appointment") ? "timely.appointment" : "timely.webhook");
+    resolveTimelyWebhookEventType(
+      params.payload,
+      params.route.includes("appointment") ? "timely.appointment" : "timely.webhook"
+    );
 
   const row = {
     tenant_id: params.tenantId,
@@ -72,7 +78,11 @@ export async function insertTimelyWebhookEvent(
     error_message: params.errorMessage?.trim() || null,
   };
 
-  const { data, error } = await supabase.from("fi_integration_webhook_events").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_integration_webhook_events")
+    .insert(row)
+    .select("id")
+    .single();
 
   if (error || !data?.id) {
     return { ok: false, message: error?.message ?? "Failed to store webhook event.", status: 500 };
@@ -145,7 +155,13 @@ async function loadWebhookEventByHash(
 
 export type ClaimTimelyWebhookEventResult =
   | { ok: true; outcome: "claimed"; id: string; payload_hash: string }
-  | { ok: true; outcome: "duplicate"; id: string; payload_hash: string; status: TimelyWebhookEventStatus }
+  | {
+      ok: true;
+      outcome: "duplicate";
+      id: string;
+      payload_hash: string;
+      status: TimelyWebhookEventStatus;
+    }
   | { ok: false; message: string; status: number };
 
 /**
@@ -177,7 +193,11 @@ export async function claimTimelyWebhookEvent(
     error_message: params.errorMessage?.trim() || null,
   };
 
-  const { data, error } = await supabase.from("fi_integration_webhook_events").insert(row).select("id").single();
+  const { data, error } = await supabase
+    .from("fi_integration_webhook_events")
+    .insert(row)
+    .select("id")
+    .single();
 
   if (!error && data?.id) {
     return { ok: true, outcome: "claimed", id: String(data.id), payload_hash };
@@ -185,9 +205,20 @@ export async function claimTimelyWebhookEvent(
 
   // Unique idempotency violation → a row for this (tenant, route, payload_hash) already exists.
   if (error?.code === "23505") {
-    const existing = await loadWebhookEventByHash(supabase, params.tenantId, params.route, payload_hash);
+    const existing = await loadWebhookEventByHash(
+      supabase,
+      params.tenantId,
+      params.route,
+      payload_hash
+    );
     if (existing) {
-      return { ok: true, outcome: "duplicate", id: existing.id, payload_hash, status: existing.status };
+      return {
+        ok: true,
+        outcome: "duplicate",
+        id: existing.id,
+        payload_hash,
+        status: existing.status,
+      };
     }
   }
 
@@ -234,7 +265,10 @@ export async function withTimelyWebhookAudit<T>(params: {
 
   // Duplicate that already succeeded or is still in-flight: short-circuit so Zapier does not retry
   // into a duplicate booking/consultation/CRM write.
-  if (claim.outcome === "duplicate" && (claim.status === "processed" || claim.status === "received")) {
+  if (
+    claim.outcome === "duplicate" &&
+    (claim.status === "processed" || claim.status === "received")
+  ) {
     return { ok: true, duplicate: true, event_id: claim.id, duplicate_status: claim.status };
   }
 

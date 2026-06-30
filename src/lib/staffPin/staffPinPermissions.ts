@@ -72,7 +72,9 @@ export function isStaffPinRestrictedRoute(pathname: string, tenantBase: string):
   if (!path.startsWith(tenantBase)) return true;
   const suffix = path.slice(tenantBase.length) || "/";
   if (suffix === "/" || suffix === "") return false;
-  return PIN_RESTRICTED_ROUTE_PREFIXES.some((prefix) => suffix === prefix || suffix.startsWith(`${prefix}/`));
+  return PIN_RESTRICTED_ROUTE_PREFIXES.some(
+    (prefix) => suffix === prefix || suffix.startsWith(`${prefix}/`)
+  );
 }
 
 export function staffPinSessionIsExpired(session: StaffPinClinicSession): boolean {

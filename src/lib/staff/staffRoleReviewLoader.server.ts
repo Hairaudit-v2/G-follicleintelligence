@@ -57,7 +57,12 @@ async function loadPayrollByStaffId(
   if (error) throw new Error(error.message);
 
   for (const raw of data ?? []) {
-    const r = raw as { staff_id: string; source_system: string; source_staff_id: string; metadata: unknown };
+    const r = raw as {
+      staff_id: string;
+      source_system: string;
+      source_staff_id: string;
+      metadata: unknown;
+    };
     const md =
       r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
         ? (r.metadata as Record<string, unknown>)
@@ -75,7 +80,10 @@ export async function loadStaffRoleReviewPage(tenantId: string): Promise<StaffRo
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   await assertCrmTenantStaffManageAllowed({ tenantId: tid, request: undefined });
 
-  const [allStaff, clinics] = await Promise.all([loadAllStaffForTenant(tid), loadClinicsForTenant(tid)]);
+  const [allStaff, clinics] = await Promise.all([
+    loadAllStaffForTenant(tid),
+    loadClinicsForTenant(tid),
+  ]);
   const needsReview = filterActiveNeedsReviewStaff(allStaff);
   const staffIds = needsReview.map((s) => s.id);
   const [payrollByStaffId, hrNotificationByStaffId] = await Promise.all([

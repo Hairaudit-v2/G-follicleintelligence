@@ -7,7 +7,11 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import type { FiReminderJobRow, FiReminderJobWithTemplate } from "./reminderTypes";
 import { REMINDER_JOB_STATUSES } from "./reminderConstants";
-import type { ReminderJobStatus, ReminderTemplateType, ReminderTriggerEvent } from "./reminderConstants";
+import type {
+  ReminderJobStatus,
+  ReminderTemplateType,
+  ReminderTriggerEvent,
+} from "./reminderConstants";
 import { REMINDER_TEMPLATE_TYPES, REMINDER_TRIGGER_EVENTS } from "./reminderConstants";
 
 function assertMetadataObject(v: unknown): Record<string, unknown> {
@@ -33,11 +37,7 @@ function mapJobRow(row: Record<string, unknown>): FiReminderJobRow {
     last_attempt_at: row.last_attempt_at != null ? String(row.last_attempt_at) : null,
     delivered_at: row.delivered_at != null ? String(row.delivered_at) : null,
     error_log:
-      row.error_log != null
-        ? String(row.error_log)
-        : row.error != null
-          ? String(row.error)
-          : null,
+      row.error_log != null ? String(row.error_log) : row.error != null ? String(row.error) : null,
     metadata: assertMetadataObject(row.metadata),
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
@@ -48,8 +48,13 @@ async function loadTemplatesByIds(
   supabase: SupabaseClient,
   tenantId: string,
   templateIds: string[]
-): Promise<Map<string, { name: string; type: ReminderTemplateType; trigger_event: ReminderTriggerEvent }>> {
-  const out = new Map<string, { name: string; type: ReminderTemplateType; trigger_event: ReminderTriggerEvent }>();
+): Promise<
+  Map<string, { name: string; type: ReminderTemplateType; trigger_event: ReminderTriggerEvent }>
+> {
+  const out = new Map<
+    string,
+    { name: string; type: ReminderTemplateType; trigger_event: ReminderTriggerEvent }
+  >();
   if (!templateIds.length) return out;
   const { data, error } = await supabase
     .from("fi_reminder_templates")
@@ -218,7 +223,11 @@ export async function loadUpcomingReminderJobsForTenantRange(
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as Record<string, unknown>[];
   const bookingIds = Array.from(
-    new Set(rows.map((r) => (r.booking_id != null ? String(r.booking_id) : null)).filter((x): x is string => Boolean(x)))
+    new Set(
+      rows
+        .map((r) => (r.booking_id != null ? String(r.booking_id) : null))
+        .filter((x): x is string => Boolean(x))
+    )
   );
   const templateIds = Array.from(new Set(rows.map((r) => String(r.template_id))));
 
@@ -302,11 +311,14 @@ function anchorLabelForBooking(
   return row.title?.trim() || humanizeBookingType(row.booking_type);
 }
 
-function detailPathForBookingAnchors(tenantId: string, row: {
-  case_id: string | null;
-  patient_id: string | null;
-  lead_id: string | null;
-}): string {
+function detailPathForBookingAnchors(
+  tenantId: string,
+  row: {
+    case_id: string | null;
+    patient_id: string | null;
+    lead_id: string | null;
+  }
+): string {
   const base = `/fi-admin/${tenantId.trim()}`;
   if (row.case_id?.trim()) return `${base}/cases/${row.case_id.trim()}`;
   if (row.patient_id?.trim()) return `${base}/patients/${row.patient_id.trim()}`;
@@ -374,10 +386,18 @@ export async function loadOperationalDashboardReminderJobs(
 
   const templateIds = Array.from(new Set(rows.map((r) => String(r.template_id))));
   const bookingIds = Array.from(
-    new Set(rows.map((r) => (r.booking_id != null ? String(r.booking_id) : null)).filter((x): x is string => Boolean(x)))
+    new Set(
+      rows
+        .map((r) => (r.booking_id != null ? String(r.booking_id) : null))
+        .filter((x): x is string => Boolean(x))
+    )
   );
   const leadIdsDirect = Array.from(
-    new Set(rows.map((r) => (r.lead_id != null ? String(r.lead_id) : null)).filter((x): x is string => Boolean(x)))
+    new Set(
+      rows
+        .map((r) => (r.lead_id != null ? String(r.lead_id) : null))
+        .filter((x): x is string => Boolean(x))
+    )
   );
 
   const tplMap = await loadTemplatesByIds(supabase, tid, templateIds);
@@ -454,7 +474,8 @@ export async function loadOperationalDashboardReminderJobs(
         id: lid,
         summary: row.summary != null ? String(row.summary) : null,
         person_id: pid,
-        primary_owner_user_id: row.primary_owner_user_id != null ? String(row.primary_owner_user_id) : null,
+        primary_owner_user_id:
+          row.primary_owner_user_id != null ? String(row.primary_owner_user_id) : null,
         patient_id: row.patient_id != null ? String(row.patient_id) : null,
       });
       if (pid) personIdsNeeded.add(pid);
@@ -477,7 +498,10 @@ export async function loadOperationalDashboardReminderJobs(
   const patientIdsForLabels = new Set<string>();
   const patientIdsForClinical = new Set<string>();
   for (const r of rows) {
-    const meta = r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : null;
+    const meta =
+      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+        ? (r.metadata as Record<string, unknown>)
+        : null;
     const mp = meta?.patient_id;
     if (typeof mp === "string" && mp.trim()) {
       patientIdsForLabels.add(mp.trim());
@@ -516,7 +540,9 @@ export async function loadOperationalDashboardReminderJobs(
   if (patientIdsForClinical.size) {
     const { data: cd, error: ce } = await supabase
       .from("fi_patient_clinical_details")
-      .select("patient_id, norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern")
+      .select(
+        "patient_id, norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern"
+      )
       .eq("tenant_id", tid)
       .in("patient_id", Array.from(patientIdsForClinical));
     if (ce) throw new Error(ce.message);
@@ -527,7 +553,8 @@ export async function loadOperationalDashboardReminderJobs(
         ludwig_scale: row.ludwig_scale != null ? String(row.ludwig_scale) : null,
         hairline_pattern: row.hairline_pattern != null ? String(row.hairline_pattern) : null,
         primary_concern: row.primary_concern != null ? String(row.primary_concern) : null,
-        primary_hair_concern: row.primary_hair_concern != null ? String(row.primary_hair_concern) : null,
+        primary_hair_concern:
+          row.primary_hair_concern != null ? String(row.primary_hair_concern) : null,
       });
     }
   }
@@ -536,10 +563,15 @@ export async function loadOperationalDashboardReminderJobs(
   for (const [lid, lead] of Array.from(leadById.entries())) {
     const meta = personMetaById.get(lead.person_id);
     const metaObj =
-      meta && typeof meta === "object" && !Array.isArray(meta) ? (meta as Record<string, unknown>) : null;
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? (meta as Record<string, unknown>)
+        : null;
     const personLabel = personMetadataDisplayLabel(metaObj);
     const summaryTitle = leadTitleFromRow(lead.summary, lead.id);
-    leadDisplayById.set(lid, personLabel !== "—" ? `${summaryTitle} · ${personLabel}` : summaryTitle);
+    leadDisplayById.set(
+      lid,
+      personLabel !== "—" ? `${summaryTitle} · ${personLabel}` : summaryTitle
+    );
   }
 
   const out: OperationalDashboardReminderItem[] = [];
@@ -556,9 +588,12 @@ export async function loadOperationalDashboardReminderJobs(
     const tpl = tplMap.get(String(r.template_id));
 
     const meta =
-      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : null;
+      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+        ? (r.metadata as Record<string, unknown>)
+        : null;
     const metaPatient = meta?.patient_id;
-    const metaPatientId = typeof metaPatient === "string" && metaPatient.trim() ? metaPatient.trim() : null;
+    const metaPatientId =
+      typeof metaPatient === "string" && metaPatient.trim() ? metaPatient.trim() : null;
 
     const booking = bookingId ? bookingById.get(bookingId) : undefined;
     const lead = leadId ? leadById.get(leadId) : undefined;
@@ -586,7 +621,9 @@ export async function loadOperationalDashboardReminderJobs(
     } else if (personId) {
       const metaP = personMetaById.get(personId);
       const metaObj =
-        metaP && typeof metaP === "object" && !Array.isArray(metaP) ? (metaP as Record<string, unknown>) : null;
+        metaP && typeof metaP === "object" && !Array.isArray(metaP)
+          ? (metaP as Record<string, unknown>)
+          : null;
       const personLabel = personMetadataDisplayLabel(metaObj);
       recipientLabel = personLabel !== "—" ? personLabel : `Person ${personId.slice(0, 8)}…`;
       detailHref = `/fi-admin/${tid}/directory`;

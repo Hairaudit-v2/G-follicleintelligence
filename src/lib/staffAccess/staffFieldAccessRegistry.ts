@@ -82,21 +82,15 @@ export const SENSITIVITY_DEFAULT_HIDDEN: ReadonlySet<StaffFieldSensitivityLevel>
 export const EXPORT_FORBIDDEN_MODULES: ReadonlySet<StaffAccessModuleKey> = new Set([]);
 
 export function isStaffFieldPermissionLevel(v: unknown): v is StaffFieldPermissionLevel {
-  return (
-    typeof v === "string" && (STAFF_FIELD_PERMISSION_LEVELS as readonly string[]).includes(v)
-  );
+  return typeof v === "string" && (STAFF_FIELD_PERMISSION_LEVELS as readonly string[]).includes(v);
 }
 
 export function isStaffFieldSensitivityLevel(v: unknown): v is StaffFieldSensitivityLevel {
-  return (
-    typeof v === "string" && (STAFF_FIELD_SENSITIVITY_LEVELS as readonly string[]).includes(v)
-  );
+  return typeof v === "string" && (STAFF_FIELD_SENSITIVITY_LEVELS as readonly string[]).includes(v);
 }
 
 export function isStaffFieldMaskingStrategy(v: unknown): v is StaffFieldMaskingStrategy {
-  return (
-    typeof v === "string" && (STAFF_FIELD_MASKING_STRATEGIES as readonly string[]).includes(v)
-  );
+  return typeof v === "string" && (STAFF_FIELD_MASKING_STRATEGIES as readonly string[]).includes(v);
 }
 
 export type StaffFieldDefinition = {

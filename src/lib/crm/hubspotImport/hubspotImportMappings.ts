@@ -46,7 +46,10 @@ export function mapStageOfJourneyToPipelineSlug(raw: string | null | undefined):
   return { slug: null, unmapped: true };
 }
 
-export function mapLeadStatusToKey(raw: string | null | undefined): { key: string | null; unmapped: boolean } {
+export function mapLeadStatusToKey(raw: string | null | undefined): {
+  key: string | null;
+  unmapped: boolean;
+} {
   const t = raw?.trim();
   if (!t) return { key: null, unmapped: false };
   for (const { re, key } of LEAD_STATUS_KEYS) {

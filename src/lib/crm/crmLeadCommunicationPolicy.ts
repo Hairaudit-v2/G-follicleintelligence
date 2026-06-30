@@ -21,7 +21,8 @@ export function isCrmLeadCommunicationType(v: string): v is CrmLeadCommunication
 
 export const CRM_LEAD_COMMUNICATION_DIRECTION_VALUES = ["inbound", "outbound", "internal"] as const;
 
-export type CrmLeadCommunicationDirection = (typeof CRM_LEAD_COMMUNICATION_DIRECTION_VALUES)[number];
+export type CrmLeadCommunicationDirection =
+  (typeof CRM_LEAD_COMMUNICATION_DIRECTION_VALUES)[number];
 
 const DIR_SET = new Set<string>(CRM_LEAD_COMMUNICATION_DIRECTION_VALUES);
 
@@ -67,28 +68,38 @@ export function assertCrmLeadCommunicationTypeAllowed(communicationType: string)
 export function assertCrmLeadCommunicationDirectionAllowed(direction: string): string {
   const d = direction.trim();
   if (!isCrmLeadCommunicationDirection(d)) {
-    throw new Error(`Invalid direction "${direction}". Allowed: ${CRM_LEAD_COMMUNICATION_DIRECTION_VALUES.join(", ")}.`);
+    throw new Error(
+      `Invalid direction "${direction}". Allowed: ${CRM_LEAD_COMMUNICATION_DIRECTION_VALUES.join(", ")}.`
+    );
   }
   return d;
 }
 
 /** When `outcome` is non-null after trim, it must be allow-listed. */
-export function normaliseCrmLeadCommunicationOutcome(outcome: string | null | undefined): string | null {
+export function normaliseCrmLeadCommunicationOutcome(
+  outcome: string | null | undefined
+): string | null {
   if (outcome === undefined || outcome === null) return null;
   const t = String(outcome).trim();
   return t.length === 0 ? null : t;
 }
 
-export function assertCrmLeadCommunicationOutcomeAllowed(outcome: string | null | undefined): string | null {
+export function assertCrmLeadCommunicationOutcomeAllowed(
+  outcome: string | null | undefined
+): string | null {
   const o = normaliseCrmLeadCommunicationOutcome(outcome);
   if (o === null) return null;
   if (!isCrmLeadCommunicationOutcome(o)) {
-    throw new Error(`Invalid outcome "${outcome}". Allowed: ${CRM_LEAD_COMMUNICATION_OUTCOME_VALUES.join(", ")}, or omit.`);
+    throw new Error(
+      `Invalid outcome "${outcome}". Allowed: ${CRM_LEAD_COMMUNICATION_OUTCOME_VALUES.join(", ")}, or omit.`
+    );
   }
   return o;
 }
 
-export function assertCrmLeadCommunicationSubjectBounded(subject: string | null | undefined): string | null {
+export function assertCrmLeadCommunicationSubjectBounded(
+  subject: string | null | undefined
+): string | null {
   if (subject === undefined || subject === null) return null;
   const t = String(subject).trim();
   if (t.length > CRM_LEAD_COMMUNICATION_MAX_SUBJECT) {
@@ -97,7 +108,9 @@ export function assertCrmLeadCommunicationSubjectBounded(subject: string | null 
   return t.length === 0 ? null : t;
 }
 
-export function assertCrmLeadCommunicationPreviewBounded(preview: string | null | undefined): string | null {
+export function assertCrmLeadCommunicationPreviewBounded(
+  preview: string | null | undefined
+): string | null {
   if (preview === undefined || preview === null) return null;
   const t = String(preview).trim();
   if (t.length > CRM_LEAD_COMMUNICATION_MAX_PREVIEW) {
@@ -106,7 +119,9 @@ export function assertCrmLeadCommunicationPreviewBounded(preview: string | null 
   return t.length === 0 ? null : t;
 }
 
-export function assertCrmLeadCommunicationMetadataObject(metadata: unknown): Record<string, unknown> {
+export function assertCrmLeadCommunicationMetadataObject(
+  metadata: unknown
+): Record<string, unknown> {
   if (metadata === undefined || metadata === null) return {};
   if (typeof metadata !== "object" || Array.isArray(metadata)) {
     throw new Error("metadata must be a JSON object.");
@@ -114,14 +129,18 @@ export function assertCrmLeadCommunicationMetadataObject(metadata: unknown): Rec
   return metadata as Record<string, unknown>;
 }
 
-export function assertLeadCommunicationNotArchived(row: Pick<FiCrmLeadCommunicationRow, "archived_at">): void {
+export function assertLeadCommunicationNotArchived(
+  row: Pick<FiCrmLeadCommunicationRow, "archived_at">
+): void {
   if (row.archived_at != null && String(row.archived_at).trim() !== "") {
     throw new Error("Archived contact log entries cannot be edited.");
   }
 }
 
 /** Newest `contact_at` first (contact log default). */
-export function sortCrmLeadCommunicationsForDisplay(rows: FiCrmLeadCommunicationRow[]): FiCrmLeadCommunicationRow[] {
+export function sortCrmLeadCommunicationsForDisplay(
+  rows: FiCrmLeadCommunicationRow[]
+): FiCrmLeadCommunicationRow[] {
   return [...rows].sort((a, b) => {
     const tb = new Date(b.contact_at).getTime();
     const ta = new Date(a.contact_at).getTime();

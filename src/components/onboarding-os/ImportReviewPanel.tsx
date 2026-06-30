@@ -13,7 +13,10 @@ import {
 } from "@/lib/actions/fi-onboarding-os-import-actions";
 import type { ImportReviewItem } from "@/src/lib/onboarding-os/hubspotImport.server";
 import { HUBSPOT_LEAD_TYPE_LABELS } from "@/src/lib/onboarding-os/hubspotConnectorTypes";
-import type { FiLeadImportPreview, FiOpportunityImportPreview } from "@/src/lib/onboarding-os/importPreviewEngine";
+import type {
+  FiLeadImportPreview,
+  FiOpportunityImportPreview,
+} from "@/src/lib/onboarding-os/importPreviewEngine";
 
 type Props = {
   tenantId: string;
@@ -22,7 +25,11 @@ type Props = {
 };
 
 function ConfidenceBadge({ score, blocking }: { score: number; blocking: boolean }) {
-  const tone = blocking ? "bg-red-500/15 text-red-300" : score >= 70 ? "bg-amber-500/15 text-amber-300" : "bg-emerald-500/15 text-emerald-300";
+  const tone = blocking
+    ? "bg-red-500/15 text-red-300"
+    : score >= 70
+      ? "bg-amber-500/15 text-amber-300"
+      : "bg-emerald-500/15 text-emerald-300";
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${tone}`}>
       {blocking ? "Blocking" : "Confidence"} {score}%
@@ -30,26 +37,59 @@ function ConfidenceBadge({ score, blocking }: { score: number; blocking: boolean
   );
 }
 
-function PreviewBlock({ preview, kind }: { preview: FiLeadImportPreview | FiOpportunityImportPreview; kind: "contact" | "deal" }) {
+function PreviewBlock({
+  preview,
+  kind,
+}: {
+  preview: FiLeadImportPreview | FiOpportunityImportPreview;
+  kind: "contact" | "deal";
+}) {
   if (kind === "contact") {
     const p = preview as FiLeadImportPreview;
     return (
       <dl className="grid gap-1 text-xs text-slate-300">
-        <div><dt className="text-slate-500">Summary</dt><dd>{p.summary}</dd></div>
-        <div><dt className="text-slate-500">Classification</dt><dd>{p.classification}</dd></div>
-        <div><dt className="text-slate-500">Lead type</dt><dd>{HUBSPOT_LEAD_TYPE_LABELS[p.normalizedLeadType]}</dd></div>
-        <div><dt className="text-slate-500">Pipeline slug</dt><dd>{p.mappedPipelineSlug ?? "—"}</dd></div>
-        <div><dt className="text-slate-500">Create patient</dt><dd>{p.createPatient ? "Yes" : "No"}</dd></div>
+        <div>
+          <dt className="text-slate-500">Summary</dt>
+          <dd>{p.summary}</dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">Classification</dt>
+          <dd>{p.classification}</dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">Lead type</dt>
+          <dd>{HUBSPOT_LEAD_TYPE_LABELS[p.normalizedLeadType]}</dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">Pipeline slug</dt>
+          <dd>{p.mappedPipelineSlug ?? "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">Create patient</dt>
+          <dd>{p.createPatient ? "Yes" : "No"}</dd>
+        </div>
       </dl>
     );
   }
   const d = preview as FiOpportunityImportPreview;
   return (
     <dl className="grid gap-1 text-xs text-slate-300">
-      <div><dt className="text-slate-500">Deal</dt><dd>{d.dealName ?? d.summary}</dd></div>
-      <div><dt className="text-slate-500">Stage</dt><dd>{d.dealStage ?? "—"}</dd></div>
-      <div><dt className="text-slate-500">Pipeline</dt><dd>{d.pipelineName ?? "—"}</dd></div>
-      <div><dt className="text-slate-500">Linked contact</dt><dd>{d.linkToContactId ?? "—"}</dd></div>
+      <div>
+        <dt className="text-slate-500">Deal</dt>
+        <dd>{d.dealName ?? d.summary}</dd>
+      </div>
+      <div>
+        <dt className="text-slate-500">Stage</dt>
+        <dd>{d.dealStage ?? "—"}</dd>
+      </div>
+      <div>
+        <dt className="text-slate-500">Pipeline</dt>
+        <dd>{d.pipelineName ?? "—"}</dd>
+      </div>
+      <div>
+        <dt className="text-slate-500">Linked contact</dt>
+        <dd>{d.linkToContactId ?? "—"}</dd>
+      </div>
     </dl>
   );
 }
@@ -98,10 +138,12 @@ function ReviewCard({
       alert("No mergeable person match found.");
       return;
     }
-    void mergeHubspotContactAction(tenantId, integrationId, stagingId, topMatch.entityId).then((r) => {
-      if (!r.ok) alert(r.error);
-      else onDone();
-    });
+    void mergeHubspotContactAction(tenantId, integrationId, stagingId, topMatch.entityId).then(
+      (r) => {
+        if (!r.ok) alert(r.error);
+        else onDone();
+      }
+    );
   };
 
   return (
@@ -115,24 +157,33 @@ function ReviewCard({
             {item.preview.email ?? "No email"} · {item.preview.phone ?? "No phone"}
           </p>
         </div>
-        <ConfidenceBadge score={item.duplicateCheck.confidenceScore} blocking={item.duplicateCheck.hasBlockingMatch} />
+        <ConfidenceBadge
+          score={item.duplicateCheck.confidenceScore}
+          blocking={item.duplicateCheck.hasBlockingMatch}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">Staged record</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">
+            Staged record
+          </p>
           <pre className="max-h-32 overflow-auto rounded bg-slate-950/60 p-2 text-xs text-slate-400">
             {JSON.stringify(staging.rawPayload, null, 2).slice(0, 800)}
           </pre>
         </div>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">FI import preview</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">
+            FI import preview
+          </p>
           <PreviewBlock preview={item.preview} kind={item.kind} />
         </div>
       </div>
 
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">Duplicate check</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">
+          Duplicate check
+        </p>
         <p className="text-sm text-slate-300">{item.duplicateCheck.summary}</p>
         {item.duplicateCheck.matches.length > 0 && (
           <ul className="mt-2 space-y-1 text-xs text-slate-400">
@@ -148,7 +199,9 @@ function ReviewCard({
       <div className="rounded border border-slate-700/40 bg-slate-950/30 px-3 py-2">
         <p className="text-xs text-slate-500">Proposed FI action</p>
         <p className="text-sm font-medium text-cyan-300">{item.proposedAction}</p>
-        <p className="mt-1 text-xs text-slate-500">Read-only HubSpot — FI is destination. No overwrite of existing records.</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Read-only HubSpot — FI is destination. No overwrite of existing records.
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -183,7 +236,11 @@ function ReviewCard({
   );
 }
 
-export function ImportReviewPanel({ tenantId, integrationId: initialIntegrationId, integrationLabel: initialLabel }: Props) {
+export function ImportReviewPanel({
+  tenantId,
+  integrationId: initialIntegrationId,
+  integrationLabel: initialLabel,
+}: Props) {
   const router = useRouter();
   const [items, setItems] = useState<ImportReviewItem[]>([]);
   const [integrationId, setIntegrationId] = useState(initialIntegrationId ?? "");
@@ -220,7 +277,8 @@ export function ImportReviewPanel({ tenantId, integrationId: initialIntegrationI
         <div>
           <h2 className="text-lg font-semibold text-slate-100">Staged import review</h2>
           <p className="text-sm text-slate-400">
-            Approved {integrationLabel} records awaiting explicit import into FI. HubSpot remains read-only.
+            Approved {integrationLabel} records awaiting explicit import into FI. HubSpot remains
+            read-only.
           </p>
         </div>
         <Link
@@ -233,7 +291,9 @@ export function ImportReviewPanel({ tenantId, integrationId: initialIntegrationI
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {pending && items.length === 0 && <p className="text-sm text-slate-400">Loading approved records…</p>}
+      {pending && items.length === 0 && (
+        <p className="text-sm text-slate-400">Loading approved records…</p>
+      )}
 
       {!pending && items.length === 0 && !error && (
         <p className="text-sm text-slate-400">No approved staging records ready for import.</p>

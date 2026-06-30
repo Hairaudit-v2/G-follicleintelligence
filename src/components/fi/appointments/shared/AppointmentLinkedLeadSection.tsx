@@ -28,9 +28,15 @@ export function AppointmentLinkedLeadSection({
     <section className={appointmentCardClass}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Linked CRM lead</h3>
-          <p className="mt-1 text-sm font-medium text-slate-100">{leadTitleFromRow(lead.summary, lead.id)}</p>
-          {personName && personName !== "—" ? <p className="text-sm text-slate-300">{personName}</p> : null}
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Linked CRM lead
+          </h3>
+          <p className="mt-1 text-sm font-medium text-slate-100">
+            {leadTitleFromRow(lead.summary, lead.id)}
+          </p>
+          {personName && personName !== "—" ? (
+            <p className="text-sm text-slate-300">{personName}</p>
+          ) : null}
         </div>
         {bookingType ? <BookingTypeBadge type={bookingType} /> : null}
       </div>

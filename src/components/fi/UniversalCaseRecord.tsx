@@ -37,8 +37,7 @@ export function UniversalCaseRecord({
   const lp = record.linked_patient;
   const p = lp?.patient;
   const person = lp?.person;
-  const displayName =
-    p?.display_name ?? readPersonDisplayName(person?.metadata ?? {}) ?? "—";
+  const displayName = p?.display_name ?? readPersonDisplayName(person?.metadata ?? {}) ?? "—";
   const email = p?.email ?? readPersonEmail(person?.metadata ?? {}) ?? "—";
   const phone = p?.phone ?? readPersonPhone(person?.metadata ?? {}) ?? "—";
 
@@ -55,7 +54,10 @@ export function UniversalCaseRecord({
           ← Patients
         </Link>
         <span className="text-gray-300">|</span>
-        <Link href={`${base}/foundation-integrity`} className="hover:text-slate-100 hover:underline">
+        <Link
+          href={`${base}/foundation-integrity`}
+          className="hover:text-slate-100 hover:underline"
+        >
           Foundation integrity
         </Link>
       </div>
@@ -123,7 +125,9 @@ export function UniversalCaseRecord({
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Foundation patient id</dt>
-                <dd className="font-mono text-xs">{p?.foundation_patient_id ?? c.foundation_patient_id ?? "—"}</dd>
+                <dd className="font-mono text-xs">
+                  {p?.foundation_patient_id ?? c.foundation_patient_id ?? "—"}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Person id</dt>
@@ -134,7 +138,7 @@ export function UniversalCaseRecord({
                 <dd className="font-mono text-xs break-all">
                   {[
                     ...(c.global_patient_id ? [c.global_patient_id] : []),
-                    ...(lp.global_patient_ids.filter((id) => id !== c.global_patient_id)),
+                    ...lp.global_patient_ids.filter((id) => id !== c.global_patient_id),
                   ].length
                     ? Array.from(
                         new Set([
@@ -162,11 +166,21 @@ export function UniversalCaseRecord({
         <dl className="grid gap-2 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-gray-500">Organisation</dt>
-            <dd>{record.organisation?.name ?? record.case.organisation_name ?? record.case.organisation_id ?? "—"}</dd>
+            <dd>
+              {record.organisation?.name ??
+                record.case.organisation_name ??
+                record.case.organisation_id ??
+                "—"}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-gray-500">Clinic</dt>
-            <dd>{record.clinic?.display_name ?? record.case.clinic_display_name ?? record.case.clinic_id ?? "—"}</dd>
+            <dd>
+              {record.clinic?.display_name ??
+                record.case.clinic_display_name ??
+                record.case.clinic_id ??
+                "—"}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-gray-500">City</dt>
@@ -181,7 +195,9 @@ export function UniversalCaseRecord({
 
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
         <h2 className="mb-3 text-base font-medium text-slate-100">Timeline</h2>
-        <p className="mb-2 text-xs text-gray-500">fi_timeline_events for this case, newest first (capped server-side).</p>
+        <p className="mb-2 text-xs text-gray-500">
+          fi_timeline_events for this case, newest first (capped server-side).
+        </p>
         {record.timeline_events.length === 0 ? (
           <p className="text-gray-500">No timeline events.</p>
         ) : (
@@ -229,10 +245,16 @@ export function UniversalCaseRecord({
               </thead>
               <tbody>
                 {record.media_unified.map((m, idx) => (
-                  <tr key={`${m.media_asset_id ?? ""}-${m.legacy_upload_id ?? ""}-${idx}`} className="border-b border-white/[0.06]">
+                  <tr
+                    key={`${m.media_asset_id ?? ""}-${m.legacy_upload_id ?? ""}-${idx}`}
+                    className="border-b border-white/[0.06]"
+                  >
                     <td className="py-2 pr-3 font-mono">{m.asset_type ?? "—"}</td>
                     <td className="py-2 pr-3">{m.file_name ?? "—"}</td>
-                    <td className="py-2 pr-3 max-w-xs truncate font-mono" title={m.storage_path ?? ""}>
+                    <td
+                      className="py-2 pr-3 max-w-xs truncate font-mono"
+                      title={m.storage_path ?? ""}
+                    >
                       {m.storage_path ?? "—"}
                     </td>
                     <td className="py-2 pr-3">{m.source_system ?? "—"}</td>
@@ -260,7 +282,8 @@ export function UniversalCaseRecord({
       <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
         <h2 className="mb-3 text-base font-medium text-slate-100">Media (fi_media_assets)</h2>
         <p className="mb-2 text-xs text-gray-500">
-          All rows for this case; supplemental rows are those not matched in the unified view by media asset id.
+          All rows for this case; supplemental rows are those not matched in the unified view by
+          media asset id.
         </p>
         {record.media_assets_direct.length === 0 ? (
           <p className="text-gray-500">No fi_media_assets for this case.</p>
@@ -288,7 +311,10 @@ export function UniversalCaseRecord({
                     <td className="py-2 pr-3">{m.source_system ?? "—"}</td>
                     <td className="py-2 pr-3 font-mono text-xs">
                       {m.patient_id ? (
-                        <Link href={`${base}/patients/${m.patient_id}`} className="text-blue-300 hover:underline">
+                        <Link
+                          href={`${base}/patients/${m.patient_id}`}
+                          className="text-blue-300 hover:underline"
+                        >
                           {m.patient_id.slice(0, 8)}…
                         </Link>
                       ) : (
@@ -304,7 +330,9 @@ export function UniversalCaseRecord({
         )}
         {record.media_assets_supplemental.length > 0 && (
           <div className="mt-4">
-            <h3 className="mb-2 text-sm font-medium text-slate-200">Supplemental (not in unified by asset id)</h3>
+            <h3 className="mb-2 text-sm font-medium text-slate-200">
+              Supplemental (not in unified by asset id)
+            </h3>
             <ul className="space-y-1 font-mono text-xs text-slate-300">
               {record.media_assets_supplemental.map((m) => (
                 <li key={m.id}>
@@ -321,7 +349,10 @@ export function UniversalCaseRecord({
           <h2 className="mb-2 text-base font-medium text-slate-100">Patient source identifiers</h2>
           <ul className="space-y-1 text-xs">
             {record.case_source_identifiers.map((s, i) => (
-              <li key={`${s.provenance}-${s.source_system}-${s.source_case_id}-${i}`} className="font-mono">
+              <li
+                key={`${s.provenance}-${s.source_system}-${s.source_case_id}-${i}`}
+                className="font-mono"
+              >
                 {s.source_system}:{s.source_case_id}
                 <span className="ml-2 text-gray-500">
                   ({s.provenance}

@@ -176,7 +176,11 @@ export function createNexusTestStore(tenantId: string, siteId?: string): NexusTe
     return { data: null, error: null };
   }
 
-  function resolveMany(table: string, filters: [string, unknown][], selectOpts?: { count?: string; head?: boolean }) {
+  function resolveMany(
+    table: string,
+    filters: [string, unknown][],
+    selectOpts?: { count?: string; head?: boolean }
+  ) {
     if (table === "fi_nexus_provisioning_audit" && selectOpts?.head) {
       const gid = filters.find(([c]) => c === "global_professional_id")?.[1] as string;
       const count = store.audits.filter((a) => a.global_professional_id === gid).length;
@@ -191,7 +195,9 @@ export function createNexusTestStore(tenantId: string, siteId?: string): NexusTe
       return { data: rows, error: null };
     }
     if (table === "fi_nexus_staff_profiles" && gid) {
-      const rows = [...store.staffProfiles.values()].filter((r) => r.global_professional_id === gid);
+      const rows = [...store.staffProfiles.values()].filter(
+        (r) => r.global_professional_id === gid
+      );
       return { data: rows, error: null };
     }
     if (table === "fi_nexus_role_assignments" && gid) {

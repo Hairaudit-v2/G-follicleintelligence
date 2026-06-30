@@ -71,7 +71,9 @@ function drawWrapped(
 /**
  * Builds a doctor-facing pathology request PDF (pdf-lib; no external services).
  */
-export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInput): Promise<Uint8Array> {
+export async function renderPathologyBloodRequestPdfBytes(
+  input: PathologyPdfInput
+): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
@@ -81,7 +83,13 @@ export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInp
   let y = PAGE_H - MARGIN;
 
   const drawHeader = () => {
-    page.drawRectangle({ x: 0, y: PAGE_H - 52, width: PAGE_W, height: 52, color: rgb(0.06, 0.1, 0.16) });
+    page.drawRectangle({
+      x: 0,
+      y: PAGE_H - 52,
+      width: PAGE_W,
+      height: 52,
+      color: rgb(0.06, 0.1, 0.16),
+    });
     page.drawText(input.branding.clinicName.slice(0, 80), {
       x: MARGIN,
       y: PAGE_H - 32,
@@ -92,7 +100,13 @@ export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInp
     let yy = PAGE_H - 46;
     for (const ln of input.branding.clinicLines.slice(0, 3)) {
       if (!ln.trim()) continue;
-      page.drawText(ln.slice(0, 96), { x: MARGIN, y: yy, size: 8, font, color: rgb(0.85, 0.88, 0.92) });
+      page.drawText(ln.slice(0, 96), {
+        x: MARGIN,
+        y: yy,
+        size: 8,
+        font,
+        color: rgb(0.85, 0.88, 0.92),
+      });
       yy -= 9;
     }
     y = PAGE_H - 64;
@@ -100,13 +114,25 @@ export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInp
 
   drawHeader();
 
-  page.drawText("PATHOLOGY / BLOOD TEST REQUEST", { x: MARGIN, y, size: 16, font: fontBold, color: rgb(0.05, 0.06, 0.08) });
+  page.drawText("PATHOLOGY / BLOOD TEST REQUEST", {
+    x: MARGIN,
+    y,
+    size: 16,
+    font: fontBold,
+    color: rgb(0.05, 0.06, 0.08),
+  });
   y -= 28;
 
   const row = (label: string, value: string | null) => {
     const v = value?.trim() || "—";
     page.drawText(label, { x: MARGIN, y, size: 9, font: fontBold, color: rgb(0.35, 0.37, 0.42) });
-    page.drawText(v.slice(0, 120), { x: MARGIN + 130, y, size: 9, font, color: rgb(0.05, 0.06, 0.08) });
+    page.drawText(v.slice(0, 120), {
+      x: MARGIN + 130,
+      y,
+      size: 9,
+      font,
+      color: rgb(0.05, 0.06, 0.08),
+    });
     y -= LINE_H + 2;
   };
 
@@ -121,14 +147,26 @@ export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInp
   row("Laboratory / provider", "[ To be completed by patient or clinic ]");
 
   y -= 6;
-  page.drawText("Clinical notes / indication", { x: MARGIN, y, size: 10, font: fontBold, color: rgb(0.05, 0.06, 0.08) });
+  page.drawText("Clinical notes / indication", {
+    x: MARGIN,
+    y,
+    size: 10,
+    font: fontBold,
+    color: rgb(0.05, 0.06, 0.08),
+  });
   y -= 14;
   const notes = input.clinicalNotes?.trim() || "—";
   const yRef = { y };
   drawWrapped(page, yRef, notes, 9, font);
   y = yRef.y - 8;
 
-  page.drawText("Requested tests", { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.05, 0.06, 0.08) });
+  page.drawText("Requested tests", {
+    x: MARGIN,
+    y,
+    size: 11,
+    font: fontBold,
+    color: rgb(0.05, 0.06, 0.08),
+  });
   y -= 16;
 
   for (const t of input.tests) {
@@ -142,7 +180,14 @@ export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInp
         page.drawText("(continued)", { x: MARGIN, y, size: 9, font, color: rgb(0.4, 0.4, 0.45) });
         y -= 18;
       }
-      page.drawText(`• ${ln}`, { x: MARGIN + 8, y, size: 9, font, color: rgb(0.05, 0.06, 0.08), maxWidth: CONTENT_W - 8 });
+      page.drawText(`• ${ln}`, {
+        x: MARGIN + 8,
+        y,
+        size: 9,
+        font,
+        color: rgb(0.05, 0.06, 0.08),
+        maxWidth: CONTENT_W - 8,
+      });
       y -= LINE_H;
     }
   }
@@ -152,11 +197,29 @@ export async function renderPathologyBloodRequestPdfBytes(input: PathologyPdfInp
     page = doc.addPage([PAGE_W, PAGE_H]);
     y = PAGE_H - MARGIN;
   }
-  page.drawText("Authorised by", { x: MARGIN, y, size: 10, font: fontBold, color: rgb(0.05, 0.06, 0.08) });
+  page.drawText("Authorised by", {
+    x: MARGIN,
+    y,
+    size: 10,
+    font: fontBold,
+    color: rgb(0.05, 0.06, 0.08),
+  });
   y -= 18;
-  page.drawText("_______________________________________________", { x: MARGIN, y, size: 9, font, color: rgb(0.2, 0.2, 0.24) });
+  page.drawText("_______________________________________________", {
+    x: MARGIN,
+    y,
+    size: 9,
+    font,
+    color: rgb(0.2, 0.2, 0.24),
+  });
   y -= 14;
-  page.drawText("Treating clinician signature", { x: MARGIN, y, size: 8, font, color: rgb(0.45, 0.45, 0.5) });
+  page.drawText("Treating clinician signature", {
+    x: MARGIN,
+    y,
+    size: 8,
+    font,
+    color: rgb(0.45, 0.45, 0.5),
+  });
   y -= 28;
 
   const footY = MARGIN + 36;

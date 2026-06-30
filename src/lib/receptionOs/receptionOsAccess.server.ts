@@ -37,7 +37,10 @@ function mapToReceptionOsRole(input: {
   return "receptionist";
 }
 
-async function loadStaffSignalsForAuthUser(tenantId: string, authUserId: string): Promise<{
+async function loadStaffSignalsForAuthUser(
+  tenantId: string,
+  authUserId: string
+): Promise<{
   staffRole: string | null;
   explicitWorkspaceProfile: unknown;
 }> {
@@ -62,7 +65,9 @@ async function loadStaffSignalsForAuthUser(tenantId: string, authUserId: string)
   if (!staff) return { staffRole: null, explicitWorkspaceProfile: null };
   const row = staff as { staff_role: string | null; staff_metadata: unknown };
   const meta =
-    row.staff_metadata && typeof row.staff_metadata === "object" && !Array.isArray(row.staff_metadata)
+    row.staff_metadata &&
+    typeof row.staff_metadata === "object" &&
+    !Array.isArray(row.staff_metadata)
       ? (row.staff_metadata as Record<string, unknown>)
       : {};
   return {
@@ -75,7 +80,9 @@ async function loadStaffSignalsForAuthUser(tenantId: string, authUserId: string)
  * Resolve ReceptionOS viewer context for widget visibility and route access.
  * Front-desk operators, CRM shell roles, active staff, and tenant backend admins may access.
  */
-export async function resolveReceptionOsViewerContext(tenantId: string): Promise<ReceptionOsViewerContext> {
+export async function resolveReceptionOsViewerContext(
+  tenantId: string
+): Promise<ReceptionOsViewerContext> {
   const tid = tenantId.trim();
   const authUserId = await resolveAuthUserId(null);
   const platformAdmin = authUserId ? await isFiOsPlatformAdminFullSessionBypass(authUserId) : false;

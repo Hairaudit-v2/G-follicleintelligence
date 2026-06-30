@@ -27,7 +27,7 @@ export function FinancialOsExecutiveFilters(props: {
       else params.delete(fullKey);
       router.push(`/fi-admin/${props.tenantId}/financial-os/executive?${params.toString()}`);
     },
-    [router, searchParams, props.tenantId],
+    [router, searchParams, props.tenantId]
   );
 
   return (

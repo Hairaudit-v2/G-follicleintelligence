@@ -37,7 +37,10 @@ function parseSuitability(raw: unknown): ConsultationSuitabilityStatus {
   return (CONSULTATION_SUITABILITY_STATUSES as readonly string[]).includes(s) ? s : "not_assessed";
 }
 
-function emptySummaryBase(input: ConsultationCompletionInput): Omit<ConsultationCompletionSummary, "outcomeType"> & {
+function emptySummaryBase(input: ConsultationCompletionInput): Omit<
+  ConsultationCompletionSummary,
+  "outcomeType"
+> & {
   outcomeType: ConsultationOutcomeType;
 } {
   return {
@@ -88,7 +91,9 @@ function buildDiagnosisImpressionText(values: Record<string, unknown>): string {
  * Rules-based completion summary for the Hair Transplant Consultation template (`hair-transplant-consultation`).
  * Dual-reads legacy 16-section instances and ConsultationOS v2 adaptive pathway values.
  */
-export function buildHairTransplantCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
+export function buildHairTransplantCompletionSummary(
+  input: ConsultationCompletionInput
+): ConsultationCompletionSummary {
   const v = input.values ?? {};
   const base = emptySummaryBase(input);
 
@@ -99,7 +104,10 @@ export function buildHairTransplantCompletionSummary(input: ConsultationCompleti
   const outcomeType = parseOutcome(v.consultation_outcome_type);
 
   const primaryFocus = readString(v.priority_focus);
-  const primaryConcern = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.consultation_priority, primaryFocus);
+  const primaryConcern = labelForOptionValue(
+    CONSULTATION_FORM_OPTION_SETS.consultation_priority,
+    primaryFocus
+  );
 
   const diagnosisImpression = buildDiagnosisImpressionText(v);
 
@@ -108,9 +116,12 @@ export function buildHairTransplantCompletionSummary(input: ConsultationCompleti
 
   const recommendedProcedure = canonicalHairTransplantRecommendedPlanText(v);
 
-  const { min: estimatedGraftsMin, max: estimatedGraftsMax } = canonicalHairTransplantGraftBounds(v);
+  const { min: estimatedGraftsMin, max: estimatedGraftsMax } =
+    canonicalHairTransplantGraftBounds(v);
 
-  const zones = Array.isArray(v.recommended_zones) ? (v.recommended_zones as unknown[]).map((x) => String(x).trim()).filter(Boolean) : [];
+  const zones = Array.isArray(v.recommended_zones)
+    ? (v.recommended_zones as unknown[]).map((x) => String(x).trim()).filter(Boolean)
+    : [];
 
   const treatments = canonicalHairTransplantTreatmentValues(v);
 

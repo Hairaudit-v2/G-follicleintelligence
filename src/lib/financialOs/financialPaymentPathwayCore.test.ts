@@ -6,7 +6,9 @@ import {
   type FiPaymentPathwayRow,
 } from "@/src/lib/financialOs/financialPaymentPathwayCore";
 
-function basePathway(p: Partial<FiPaymentPathwayRow> & Pick<FiPaymentPathwayRow, "pathway_type" | "status">): FiPaymentPathwayRow {
+function basePathway(
+  p: Partial<FiPaymentPathwayRow> & Pick<FiPaymentPathwayRow, "pathway_type" | "status">
+): FiPaymentPathwayRow {
   return {
     id: "11111111-1111-4111-8111-111111111111",
     provider: null,
@@ -89,7 +91,10 @@ describe("financialPaymentPathwayCore", () => {
     const s = buildPaymentPathwayAttentionSummary({
       todayYmd: "2026-06-16",
       surgeryDateYmd: "2026-06-20",
-      pathway: basePathway({ pathway_type: "international_transfer", status: "settlement_pending" }),
+      pathway: basePathway({
+        pathway_type: "international_transfer",
+        status: "settlement_pending",
+      }),
     });
     assert.equal(s.pathway_attention_required, true);
     assert.match(s.pathway_attention_reason ?? "", /international transfer/i);
@@ -99,7 +104,10 @@ describe("financialPaymentPathwayCore", () => {
     const s = buildPaymentPathwayAttentionSummary({
       todayYmd: "2026-06-16",
       surgeryDateYmd: "2026-06-30",
-      pathway: basePathway({ pathway_type: "international_transfer", status: "settlement_pending" }),
+      pathway: basePathway({
+        pathway_type: "international_transfer",
+        status: "settlement_pending",
+      }),
     });
     assert.equal(s.pathway_attention_required, false);
   });

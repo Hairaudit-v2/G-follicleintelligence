@@ -57,9 +57,20 @@ export function ClinicOsOperationsCentre(props: {
   const movementLanes = buildMovementBoardItems(base, data, 4);
   const roomOverview = buildRoomOverview(data.receptionBoard.cards);
   const visitsToday =
-    data.clinicToday.consultations + data.clinicToday.surgeries + data.clinicToday.followUps + data.clinicToday.prp;
-  const staffSummary = buildStaffCoordinationSummary(data.quickStats, data.actionCentre, visitsToday);
-  const financialBlockers = buildFinancialBlockers(base, data.paymentCommercialKpis, data.actionCentre);
+    data.clinicToday.consultations +
+    data.clinicToday.surgeries +
+    data.clinicToday.followUps +
+    data.clinicToday.prp;
+  const staffSummary = buildStaffCoordinationSummary(
+    data.quickStats,
+    data.actionCentre,
+    visitsToday
+  );
+  const financialBlockers = buildFinancialBlockers(
+    base,
+    data.paymentCommercialKpis,
+    data.actionCentre
+  );
   const movementHasItems = MOVEMENT_LANES.some((lane) => movementLanes[lane.id].length > 0);
 
   return (
@@ -71,10 +82,15 @@ export function ClinicOsOperationsCentre(props: {
         />
         <div className="relative flex flex-col gap-4">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Operations Centre</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
+              FI OS
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+              Operations Centre
+            </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-              Live clinic coordination across arrivals, consultations, procedures, rooms, payments, and patient movement.
+              Live clinic coordination across arrivals, consultations, procedures, rooms, payments,
+              and patient movement.
             </p>
             <p className="mt-2 text-sm text-[#64748B]">
               {data.tenantName} · {dateLine}
@@ -100,7 +116,9 @@ export function ClinicOsOperationsCentre(props: {
               className="group flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4 transition hover:border-[#22C1FF]/25"
             >
               <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                {card.value}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#22C1FF]/80 opacity-0 transition group-hover:opacity-100">
                 Open <ArrowRight className="h-3 w-3" aria-hidden />
@@ -110,7 +128,11 @@ export function ClinicOsOperationsCentre(props: {
         </div>
       </DashboardCard>
 
-      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="ops-coordination-heading">
+      <DashboardCard
+        className="p-5 sm:p-6"
+        role="region"
+        aria-labelledby="ops-coordination-heading"
+      >
         <SectionHeader
           id="ops-coordination-heading"
           kicker="Priorities"
@@ -136,14 +158,20 @@ export function ClinicOsOperationsCentre(props: {
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                      {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                      {item.detail ? (
+                        <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                      ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
                   </Link>
                 ) : (
-                  <div className={`rounded-xl border px-4 py-4 ${attentionSeverityClass(item.severity)}`}>
+                  <div
+                    className={`rounded-xl border px-4 py-4 ${attentionSeverityClass(item.severity)}`}
+                  >
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                 )}
               </li>
@@ -162,7 +190,8 @@ export function ClinicOsOperationsCentre(props: {
         />
         {!movementHasItems ? (
           <p className="text-sm text-[#94A3B8]">
-            Today&apos;s visits will appear here as appointments are scheduled. Open the calendar to add bookings.
+            Today&apos;s visits will appear here as appointments are scheduled. Open the calendar to
+            add bookings.
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
@@ -173,7 +202,9 @@ export function ClinicOsOperationsCentre(props: {
                   key={lane.id}
                   className="rounded-xl border border-white/[0.08] bg-[#0c1220]/50 p-3 sm:p-4"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#64748B]">{lane.label}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#64748B]">
+                    {lane.label}
+                  </p>
                   {items.length === 0 ? (
                     <p className="mt-3 text-xs text-[#64748B]">No patients in this state.</p>
                   ) : (
@@ -192,17 +223,28 @@ export function ClinicOsOperationsCentre(props: {
                           <p className="mt-1 text-xs text-[#94A3B8]">
                             {item.serviceLabel} · {item.stateLabel}
                           </p>
-                          <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{item.nextAction}</p>
+                          <p className="mt-2 text-xs leading-relaxed text-[#64748B]">
+                            {item.nextAction}
+                          </p>
                           <div className="mt-3 flex flex-wrap gap-1.5">
                             {item.patientHref ? (
-                              <Link href={item.patientHref} className={operationsCentreLinkButtonClass}>
+                              <Link
+                                href={item.patientHref}
+                                className={operationsCentreLinkButtonClass}
+                              >
                                 Open patient
                               </Link>
                             ) : null}
-                            <Link href={item.bookingHref} className={operationsCentreLinkButtonClass}>
+                            <Link
+                              href={item.bookingHref}
+                              className={operationsCentreLinkButtonClass}
+                            >
                               Open booking
                             </Link>
-                            <Link href={item.receptionHref} className={operationsCentreLinkButtonClass}>
+                            <Link
+                              href={item.receptionHref}
+                              className={operationsCentreLinkButtonClass}
+                            >
                               Reception Board
                             </Link>
                           </div>
@@ -230,7 +272,9 @@ export function ClinicOsOperationsCentre(props: {
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-xl border border-white/[0.08] bg-[#0c1220]/60 px-4 py-3">
                 <dt className="text-xs text-[#64748B]">Rooms active</dt>
-                <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{roomOverview.roomsActive}</dd>
+                <dd className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {roomOverview.roomsActive}
+                </dd>
               </div>
               <div className="rounded-xl border border-white/[0.08] bg-[#0c1220]/60 px-4 py-3">
                 <dt className="text-xs text-[#64748B]">Procedure rooms in use</dt>
@@ -276,7 +320,8 @@ export function ClinicOsOperationsCentre(props: {
               {staffSummary.procedureTeamBlockers > 0 ? (
                 <p className="rounded-xl border border-rose-500/20 bg-rose-500/[0.04] px-4 py-3 text-[#CBD5E1]">
                   {staffSummary.procedureTeamBlockers} procedure preparation{" "}
-                  {staffSummary.procedureTeamBlockers === 1 ? "item needs" : "items need"} attention before surgery day.
+                  {staffSummary.procedureTeamBlockers === 1 ? "item needs" : "items need"} attention
+                  before surgery day.
                 </p>
               ) : null}
             </div>
@@ -297,7 +342,9 @@ export function ClinicOsOperationsCentre(props: {
           className="mb-4"
         />
         {financialBlockers.length === 0 ? (
-          <p className="text-sm text-[#94A3B8]">No payment blockers flagged for today&apos;s clinic flow.</p>
+          <p className="text-sm text-[#94A3B8]">
+            No payment blockers flagged for today&apos;s clinic flow.
+          </p>
         ) : (
           <ul className="space-y-2">
             {financialBlockers.map((item) => (
@@ -316,7 +363,10 @@ export function ClinicOsOperationsCentre(props: {
           </ul>
         )}
         <p className="mt-4">
-          <Link href={`${base}/financial/dashboard`} className="text-sm font-semibold text-[#22C1FF] hover:underline">
+          <Link
+            href={`${base}/financial/dashboard`}
+            className="text-sm font-semibold text-[#22C1FF] hover:underline"
+          >
             Open FinancialOS →
           </Link>
         </p>

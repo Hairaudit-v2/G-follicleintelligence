@@ -1,5 +1,8 @@
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
-import { normalizeFiAdminTenantPathSuffix, resolveRequiredFiFeatureForTenantSuffix } from "@/src/config/fiRouteFeatureMap";
+import {
+  normalizeFiAdminTenantPathSuffix,
+  resolveRequiredFiFeatureForTenantSuffix,
+} from "@/src/config/fiRouteFeatureMap";
 
 export type FiFeatureRouteDecision =
   | { kind: "allow" }

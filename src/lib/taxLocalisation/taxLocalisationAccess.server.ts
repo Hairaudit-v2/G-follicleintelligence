@@ -1,6 +1,10 @@
 import "server-only";
 
-import { isFiOsPlatformAdminFullSessionBypass, loadProxyFiUserRowForPlatformAdminTenant, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  isFiOsPlatformAdminFullSessionBypass,
+  loadProxyFiUserRowForPlatformAdminTenant,
+  resolveAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
@@ -27,7 +31,10 @@ async function loadFiUserRow(
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   if (error || !data) return null;
-  return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 /**

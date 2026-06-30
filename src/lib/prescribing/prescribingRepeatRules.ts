@@ -10,7 +10,10 @@ export function prescriptionItemHasRepeatText(it: {
 /** Returns error message or null when OK. */
 export function validateRepeatRulesPrescriberConfirmed(
   items: Array<
-    Pick<FiPrescriptionItemRow, "repeats_instructions" | "reorder_rule" | "repeat_rules_prescriber_confirmed">
+    Pick<
+      FiPrescriptionItemRow,
+      "repeats_instructions" | "reorder_rule" | "repeat_rules_prescriber_confirmed"
+    >
   >
 ): string | null {
   for (const it of items) {

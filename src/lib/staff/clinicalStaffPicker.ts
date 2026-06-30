@@ -15,7 +15,10 @@ import {
   buildStaffHrNotificationNoLinkSummary,
   type StaffHrNotificationSummary,
 } from "@/src/lib/staff/staffHrNotificationSummary";
-import { isStaffBookableForClinicalWorkflow, isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
+import {
+  isStaffBookableForClinicalWorkflow,
+  isStaffRoleNeedsReview,
+} from "@/src/lib/staff/staffRolePolicy";
 import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 
 export const SUPPORT_STAFF_ROLES = ["admin", "reception", "coordinator"] as const;
@@ -42,14 +45,17 @@ export type ProcedureTeamPickerOption = {
   allowed_slots: ProcedureTeamSlotKind[];
 };
 
-export const CLINICAL_ASSIGNMENT_ERROR_PREFIX = "This staff member is not clinically available yet: ";
+export const CLINICAL_ASSIGNMENT_ERROR_PREFIX =
+  "This staff member is not clinically available yet: ";
 
 export function staffReadinessDashboardPath(tenantId: string): string {
   return `/fi-admin/${tenantId.trim()}/hr/staff-readiness`;
 }
 
 export function isSupportStaffRole(staffRole: string | null | undefined): boolean {
-  const role = String(staffRole ?? "").trim().toLowerCase();
+  const role = String(staffRole ?? "")
+    .trim()
+    .toLowerCase();
   return (SUPPORT_STAFF_ROLES as readonly string[]).includes(role);
 }
 
@@ -158,10 +164,12 @@ export function buildProcedureTeamPickerOption(input: {
     if (readiness.clinically_available) allowed_slots.push("clinical");
   }
   if (staffAllowedInProcedureSlot(input.staff.staff_role, "support")) {
-    if (isStaffBookableForClinicalWorkflow({
-      is_active: input.staff.is_active,
-      staff_role: input.staff.staff_role,
-    })) {
+    if (
+      isStaffBookableForClinicalWorkflow({
+        is_active: input.staff.is_active,
+        staff_role: input.staff.staff_role,
+      })
+    ) {
       allowed_slots.push("support");
     }
   }

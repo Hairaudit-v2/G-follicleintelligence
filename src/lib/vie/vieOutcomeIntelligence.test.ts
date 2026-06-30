@@ -13,7 +13,9 @@ import { regenerateVieOutcomeSummaryBestEffort } from "./vieOutcomeIntelligence.
 
 const patientId = "00000000-0000-4000-8000-000000000001";
 
-function pair(overrides: Partial<VieOutcomeComparisonInput> & Pick<VieOutcomeComparisonInput, "pair_id">): VieOutcomeComparisonInput {
+function pair(
+  overrides: Partial<VieOutcomeComparisonInput> & Pick<VieOutcomeComparisonInput, "pair_id">
+): VieOutcomeComparisonInput {
   return {
     comparison_category: "baseline_vs_follow_up",
     anatomical_region: "hairline",
@@ -118,7 +120,10 @@ describe("VIE outcome intelligence core", () => {
       alignmentConsistencyScore: 35,
     });
 
-    assert.ok(highAlign.confidence_band !== "low" || highAlign.overall_outcome_readiness_score > lowAlign.overall_outcome_readiness_score);
+    assert.ok(
+      highAlign.confidence_band !== "low" ||
+        highAlign.overall_outcome_readiness_score > lowAlign.overall_outcome_readiness_score
+    );
     assert.equal(lowAlign.confidence_band, "low");
   });
 

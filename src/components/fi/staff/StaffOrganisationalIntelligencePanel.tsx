@@ -11,13 +11,15 @@ function severityStyles(sev: string): string {
 
 export function StaffOrganisationalIntelligencePanel(props: { intel: StaffIntelligenceViewModel }) {
   const { intel } = props;
-  const profileLabel = FI_WORKSPACE_PROFILES[intel.workspaceProfileHint]?.label ?? intel.workspaceProfileHint;
+  const profileLabel =
+    FI_WORKSPACE_PROFILES[intel.workspaceProfileHint]?.label ?? intel.workspaceProfileHint;
 
   return (
     <div className="mt-6 border-t border-white/[0.08] pt-4">
       <h3 className="text-sm font-semibold text-slate-100">Organisational intelligence</h3>
       <p className="mt-1 text-xs text-slate-400">
-        Support-oriented signals for managers. This view does not change permissions, workspace layout, or feature access.
+        Support-oriented signals for managers. This view does not change permissions, workspace
+        layout, or feature access.
       </p>
 
       <dl className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
@@ -28,7 +30,9 @@ export function StaffOrganisationalIntelligencePanel(props: { intel: StaffIntell
         <div>
           <dt className="font-medium text-gray-500">Position type</dt>
           <dd className="text-slate-100">
-            {intel.positionTypeTitle ? `${intel.positionTypeTitle} (${intel.positionTypeCode ?? "—"})` : "—"}
+            {intel.positionTypeTitle
+              ? `${intel.positionTypeTitle} (${intel.positionTypeCode ?? "—"})`
+              : "—"}
           </dd>
         </div>
         <div>
@@ -45,7 +49,9 @@ export function StaffOrganisationalIntelligencePanel(props: { intel: StaffIntell
         </div>
       </dl>
 
-      <h4 className="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-500">Signal cards</h4>
+      <h4 className="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Signal cards
+      </h4>
       <ul className="mt-2 space-y-2">
         {intel.signalCards.map((s) => (
           <li
@@ -63,13 +69,20 @@ export function StaffOrganisationalIntelligencePanel(props: { intel: StaffIntell
         ))}
       </ul>
 
-      <h4 className="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-500">Recommended next steps</h4>
+      <h4 className="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Recommended next steps
+      </h4>
       {intel.recommendations.length === 0 ? (
-        <p className="mt-2 text-xs text-gray-500">No additional recommendations from current signals.</p>
+        <p className="mt-2 text-xs text-gray-500">
+          No additional recommendations from current signals.
+        </p>
       ) : (
         <ul className="mt-2 space-y-2">
           {intel.recommendations.map((r) => (
-            <li key={r.id} className="rounded border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-200">
+            <li
+              key={r.id}
+              className="rounded border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-200"
+            >
               <p className="font-semibold text-slate-100">{r.title}</p>
               <p className="mt-1 text-slate-300">{r.body}</p>
             </li>

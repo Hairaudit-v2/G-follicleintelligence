@@ -58,16 +58,23 @@ export default async function PatientProfileRoutePage({
   if (!loaded.ok) notFound();
 
   if (loaded.mode === "legacy_global") {
-    const record = await loadUniversalPatientRecord({ tenantId, globalPatientId: loaded.data.globalPatientId });
+    const record = await loadUniversalPatientRecord({
+      tenantId,
+      globalPatientId: loaded.data.globalPatientId,
+    });
     if (!record.ok) notFound();
     return (
       <div className="mx-auto max-w-6xl space-y-4 py-6">
         <p className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">
           This URL resolves to a <strong>legacy global patient</strong> without a linked foundation{" "}
-          <code className="rounded bg-amber-400/15 px-1">fi_patients</code> row. Showing the universal read-only aggregate
-          until ingest maps a foundation patient.
+          <code className="rounded bg-amber-400/15 px-1">fi_patients</code> row. Showing the
+          universal read-only aggregate until ingest maps a foundation patient.
         </p>
-        <UniversalPatientRecord tenantId={tenantId} patientSlug={loaded.data.globalPatientId} record={record} />
+        <UniversalPatientRecord
+          tenantId={tenantId}
+          patientSlug={loaded.data.globalPatientId}
+          record={record}
+        />
       </div>
     );
   }
@@ -75,8 +82,15 @@ export default async function PatientProfileRoutePage({
   const payload = await loadPatientDetailPayload(tenantId, patientId);
   if (!payload) notFound();
 
-  const [services, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap, patientInvoiceSummary, imagingCaptureCap] =
-    await Promise.all([
+  const [
+    services,
+    clinicalStaffOptions,
+    calendarSettings,
+    initialPaymentRecords,
+    payCap,
+    patientInvoiceSummary,
+    imagingCaptureCap,
+  ] = await Promise.all([
     loadFiServicesForTenant(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
     loadTenantOperationalCalendarSettings(tenantId.trim()),
@@ -85,7 +99,10 @@ export default async function PatientProfileRoutePage({
     loadPatientInvoiceSummary(tenantId.trim(), patientId.trim()),
     getPatientImagingCaptureCapability(tenantId.trim()),
   ]);
-  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
+  const operationalTodayYmd = calendarDateStringFromInstant(
+    new Date(),
+    calendarSettings.calendarTimezone
+  );
 
   return (
     <AppointmentSlideOverProvider
@@ -99,7 +116,15 @@ export default async function PatientProfileRoutePage({
       calendarTimezone={payload.calendarTimezone}
       services={services}
     >
-      <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div
+            className="mx-auto max-w-6xl animate-pulse space-y-4 py-6"
+            aria-busy="true"
+            aria-hidden
+          />
+        }
+      >
         <PatientDetailPageView
           tenantId={tenantId}
           patientId={patientId.trim()}
@@ -115,7 +140,10 @@ export default async function PatientProfileRoutePage({
             activeTab === "prescriptions" ? (
               <Suspense
                 fallback={
-                  <div className="mx-auto max-w-6xl animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md py-12" aria-hidden />
+                  <div
+                    className="mx-auto max-w-6xl animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md py-12"
+                    aria-hidden
+                  />
                 }
               >
                 <PatientPrescriptionsTab tenantId={tenantId} patientId={patientId.trim()} />

@@ -96,9 +96,7 @@ async function applyFiAdminAuthGuard(
       setAll(cookiesToSet: CookieToSet[]) {
         // Propagate refreshed cookies to both the mutated request and response
         // so the refreshed session token reaches the server component tree.
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value)
-        );
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         supabaseResponse = NextResponse.next({ request });
         supabaseResponse.headers.set("x-pathname", pathname);
         cookiesToSet.forEach(({ name, value, options }) =>

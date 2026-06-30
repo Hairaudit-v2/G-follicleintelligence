@@ -225,9 +225,7 @@ async function handleHliIntakeSubmittedImpl(
       fiCaseId: fiCase.id,
       globalCaseId: linkedGlobalCase.id,
       globalPatientId: globalPatient?.id ?? null,
-      actionTaken: submitDecision.submitted
-        ? "mapped_intake_and_submitted"
-        : "mapped_intake_only",
+      actionTaken: submitDecision.submitted ? "mapped_intake_and_submitted" : "mapped_intake_only",
       submitDecision,
       message: submitDecision.submitted
         ? "HLI intake ingested and FI case submitted."
@@ -243,7 +241,9 @@ async function handleHliIntakeSubmittedImpl(
   }
 }
 
-export async function handleHliIntakeSubmitted(input: HandlerInput): Promise<HliIntakeSubmittedResult>;
+export async function handleHliIntakeSubmitted(
+  input: HandlerInput
+): Promise<HliIntakeSubmittedResult>;
 export async function handleHliIntakeSubmitted(
   _supabase: SupabaseClient,
   envelope: FiEventEnvelope
@@ -252,8 +252,7 @@ export async function handleHliIntakeSubmitted(
   inputOrSupabase: HandlerInput | SupabaseClient,
   legacyEnvelope?: FiEventEnvelope
 ): Promise<HliIntakeSubmittedResult> {
-  const envelope =
-    "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
+  const envelope = "envelope" in inputOrSupabase ? inputOrSupabase.envelope : legacyEnvelope;
 
   if (!envelope) {
     throw new Error("Missing envelope for handleHliIntakeSubmitted.");

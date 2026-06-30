@@ -32,7 +32,10 @@ import {
 } from "@/src/lib/financialOs/financialAccountsReceivableCore";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  invoiceBalanceDueCents,
+  isInvoiceOpenForCollection,
+} from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type {
   FiAccountsReceivableCaseRow,
@@ -90,7 +93,11 @@ export async function insertAccountsReceivableEvent(opts: {
   });
 
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_accounts_receivable_events").insert(payload).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_accounts_receivable_events")
+    .insert(payload)
+    .select("*")
+    .single();
   if (error) throw new Error(error.message);
   const row = mapEventRow(data as Record<string, unknown>);
   assertTenantScope(tid, row.tenant_id, "fi_accounts_receivable_events");
@@ -100,7 +107,7 @@ export async function insertAccountsReceivableEvent(opts: {
 async function getOpenArCaseByInvoice(
   tenantId: string,
   invoiceId: string,
-  receivableType: FiArReceivableType,
+  receivableType: FiArReceivableType
 ): Promise<FiAccountsReceivableCaseRow | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -118,11 +125,19 @@ async function getOpenArCaseByInvoice(
   return data ? mapRow(data as Record<string, unknown>) : null;
 }
 
-export async function getAccountsReceivableCaseById(tenantId: string, caseId: string): Promise<FiAccountsReceivableCaseRow | null> {
+export async function getAccountsReceivableCaseById(
+  tenantId: string,
+  caseId: string
+): Promise<FiAccountsReceivableCaseRow | null> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(caseId, "caseId").trim();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_accounts_receivable_cases").select("*").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("fi_accounts_receivable_cases")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", id)
+    .maybeSingle();
   if (error) {
     if (isMissingDatabaseRelationError(error)) return null;
     throw new Error(error.message);
@@ -136,7 +151,7 @@ export async function getAccountsReceivableCaseById(tenantId: string, caseId: st
 export async function loadAccountsReceivableEventsForCase(
   tenantId: string,
   arCaseId: string,
-  limit = 50,
+  limit = 50
 ): Promise<FiAccountsReceivableEventRow[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -171,7 +186,9 @@ export type UpsertArCaseFromInvoiceOpts = {
  * Opens or refreshes an AR case from an invoice signal. Duplicate open cases are prevented
  * by DB unique index on (tenant_id, invoice_id, receivable_type).
  */
-export async function upsertArCaseFromInvoice(opts: UpsertArCaseFromInvoiceOpts): Promise<FiAccountsReceivableCaseRow | null> {
+export async function upsertArCaseFromInvoice(
+  opts: UpsertArCaseFromInvoiceOpts
+): Promise<FiAccountsReceivableCaseRow | null> {
   const tid = assertNonEmptyUuid(opts.tenantId, "tenantId").trim();
   const derived = deriveArCaseFromInvoice({
     tenant_id: tid,
@@ -185,7 +202,8 @@ export async function upsertArCaseFromInvoice(opts: UpsertArCaseFromInvoiceOpts)
       invoice_kind: opts.invoice.invoice_kind,
       total_cents: opts.invoice.total_cents,
       amount_paid_cents: opts.invoice.amount_paid_cents,
-      remaining_balance_cents: opts.invoice.remaining_balance_cents ?? invoiceBalanceDueCents(opts.invoice),
+      remaining_balance_cents:
+        opts.invoice.remaining_balance_cents ?? invoiceBalanceDueCents(opts.invoice),
       due_date: opts.invoice.due_date,
       metadata: opts.invoice.metadata,
       title: opts.invoice.title,
@@ -217,7 +235,11 @@ export async function upsertArCaseFromInvoice(opts: UpsertArCaseFromInvoiceOpts)
     return mapRow(data as Record<string, unknown>);
   }
 
-  const { data, error } = await supabase.from("fi_accounts_receivable_cases").insert(derived).select("*").single();
+  const { data, error } = await supabase
+    .from("fi_accounts_receivable_cases")
+    .insert(derived)
+    .select("*")
+    .single();
   if (error) {
     if (isPostgresUniqueViolation(error)) {
       const dup = await getOpenArCaseByInvoice(tid, opts.invoice.id, derived.receivable_type);
@@ -251,7 +273,12 @@ export async function syncAccountsReceivableOnInvoiceChange(opts: {
   const outstanding = opts.invoice.remaining_balance_cents ?? invoiceBalanceDueCents(opts.invoice);
 
   if (outstanding <= 0 || !isInvoiceOpenForCollection(opts.invoice.status)) {
-    await resolveArCasesForInvoice(tid, opts.invoice.id, opts.actorFiUserId, "Payment received — balance cleared.");
+    await resolveArCasesForInvoice(
+      tid,
+      opts.invoice.id,
+      opts.actorFiUserId,
+      "Payment received — balance cleared."
+    );
     return;
   }
 
@@ -273,7 +300,9 @@ export async function syncAccountsReceivableOnInvoiceChange(opts: {
         days_overdue: opts.invoice.days_overdue,
       });
       if (applied.resolved) {
-        await resolveArCase(tid, existing.id, opts.actorFiUserId, { note: "Auto-resolved after payment." });
+        await resolveArCase(tid, existing.id, opts.actorFiUserId, {
+          note: "Auto-resolved after payment.",
+        });
         return;
       }
       const supabase = supabaseAdmin();
@@ -311,7 +340,7 @@ async function resolveArCasesForInvoice(
   tenantId: string,
   invoiceId: string,
   actorFiUserId?: string | null,
-  note?: string,
+  note?: string
 ): Promise<void> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -333,7 +362,7 @@ export async function resolveArCase(
   tenantId: string,
   arCaseId: string,
   actorFiUserId?: string | null,
-  detail?: Record<string, unknown>,
+  detail?: Record<string, unknown>
 ): Promise<FiAccountsReceivableCaseRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -369,7 +398,7 @@ export async function writeOffArCase(
   tenantId: string,
   arCaseId: string,
   actorFiUserId?: string | null,
-  detail?: Record<string, unknown>,
+  detail?: Record<string, unknown>
 ): Promise<FiAccountsReceivableCaseRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -409,7 +438,12 @@ export async function createManualArCase(opts: {
   const tid = assertNonEmptyUuid(opts.tenantId, "tenantId").trim();
   const iid = assertNonEmptyUuid(opts.invoiceId, "invoiceId").trim();
   const supabase = supabaseAdmin();
-  const { data: invRaw, error: invErr } = await supabase.from("fi_invoices").select("*").eq("tenant_id", tid).eq("id", iid).maybeSingle();
+  const { data: invRaw, error: invErr } = await supabase
+    .from("fi_invoices")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", iid)
+    .maybeSingle();
   if (invErr) throw new Error(invErr.message);
   if (!invRaw) throw new Error("Invoice not found.");
   const invoice = mapInvoiceRow(invRaw as Record<string, unknown>);
@@ -431,7 +465,7 @@ export async function assignArCaseOwner(
   tenantId: string,
   arCaseId: string,
   assignedFiUserId: string | null,
-  _actorFiUserId?: string | null,
+  _actorFiUserId?: string | null
 ): Promise<FiAccountsReceivableCaseRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -454,7 +488,7 @@ export async function setArCaseNextAction(
   tenantId: string,
   arCaseId: string,
   nextActionAt: string | null,
-  _actorFiUserId?: string | null,
+  _actorFiUserId?: string | null
 ): Promise<FiAccountsReceivableCaseRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -477,7 +511,7 @@ export async function logArCall(
   tenantId: string,
   arCaseId: string,
   actorFiUserId?: string | null,
-  notes?: string,
+  notes?: string
 ): Promise<FiAccountsReceivableEventRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -501,8 +535,12 @@ export async function markArReminderSent(
   tenantId: string,
   arCaseId: string,
   channel: FiArReminderChannel,
-  actorFiUserId?: string | null,
-): Promise<{ case: FiAccountsReceivableCaseRow; event: FiAccountsReceivableEventRow; draft: ReturnType<typeof buildReminderDraft> }> {
+  actorFiUserId?: string | null
+): Promise<{
+  case: FiAccountsReceivableCaseRow;
+  event: FiAccountsReceivableEventRow;
+  draft: ReturnType<typeof buildReminderDraft>;
+}> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
   const existing = await getAccountsReceivableCaseById(tid, id);
@@ -513,7 +551,10 @@ export async function markArReminderSent(
     channel,
     outstanding_amount_cents: existing.outstanding_amount_cents,
     days_overdue: existing.days_overdue,
-    invoice_title: typeof existing.source_metadata.invoice_title === "string" ? existing.source_metadata.invoice_title : null,
+    invoice_title:
+      typeof existing.source_metadata.invoice_title === "string"
+        ? existing.source_metadata.invoice_title
+        : null,
   });
 
   const now = new Date().toISOString();
@@ -557,7 +598,12 @@ export async function syncArFromReconciliationMismatch(opts: {
   const tid = assertNonEmptyUuid(opts.tenantId, "tenantId").trim();
   const iid = assertNonEmptyUuid(opts.invoiceId, "invoiceId").trim();
   const supabase = supabaseAdmin();
-  const { data: invRaw, error } = await supabase.from("fi_invoices").select("*").eq("tenant_id", tid).eq("id", iid).maybeSingle();
+  const { data: invRaw, error } = await supabase
+    .from("fi_invoices")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", iid)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!invRaw) return null;
   const invoice = mapInvoiceRow(invRaw as Record<string, unknown>);
@@ -587,19 +633,26 @@ export type AccountsReceivableWorkQueueFilters = {
 export async function loadAccountsReceivableWorkQueue(
   tenantId: string,
   filters: AccountsReceivableWorkQueueFilters = {},
-  limit = 200,
+  limit = 200
 ): Promise<AccountsReceivableWorkQueueRow[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
-  let q = supabase.from("fi_accounts_receivable_cases").select("*").eq("tenant_id", tid).order("next_action_at", { ascending: true, nullsFirst: false }).limit(limit);
+  let q = supabase
+    .from("fi_accounts_receivable_cases")
+    .select("*")
+    .eq("tenant_id", tid)
+    .order("next_action_at", { ascending: true, nullsFirst: false })
+    .limit(limit);
   if (filters.risk?.trim() && filters.risk !== "all") q = q.eq("risk_level", filters.risk.trim());
   if (filters.status?.trim() && filters.status !== "all") q = q.eq("status", filters.status.trim());
-  if (filters.receivable_type?.trim() && filters.receivable_type !== "all") q = q.eq("receivable_type", filters.receivable_type.trim());
+  if (filters.receivable_type?.trim() && filters.receivable_type !== "all")
+    q = q.eq("receivable_type", filters.receivable_type.trim());
   if (filters.assigned_fi_user_id?.trim() && filters.assigned_fi_user_id !== "all") {
     if (filters.assigned_fi_user_id === "unassigned") q = q.is("assigned_fi_user_id", null);
     else q = q.eq("assigned_fi_user_id", filters.assigned_fi_user_id.trim());
   }
-  if (filters.clinic_id?.trim() && filters.clinic_id !== "all") q = q.eq("clinic_id", filters.clinic_id.trim());
+  if (filters.clinic_id?.trim() && filters.clinic_id !== "all")
+    q = q.eq("clinic_id", filters.clinic_id.trim());
 
   const { data, error } = await q;
   if (error) {
@@ -614,25 +667,43 @@ export async function loadAccountsReceivableWorkQueue(
 
   const patientLabels = new Map<string, string>();
   if (patientIds.length) {
-    const { data: patients } = await supabase.from("fi_patients").select("id, first_name, last_name").eq("tenant_id", tid).in("id", patientIds);
+    const { data: patients } = await supabase
+      .from("fi_patients")
+      .select("id, first_name, last_name")
+      .eq("tenant_id", tid)
+      .in("id", patientIds);
     for (const p of patients ?? []) {
       const raw = p as { id: string; first_name?: string | null; last_name?: string | null };
-      patientLabels.set(raw.id, [raw.first_name, raw.last_name].filter(Boolean).join(" ").trim() || raw.id.slice(0, 8));
+      patientLabels.set(
+        raw.id,
+        [raw.first_name, raw.last_name].filter(Boolean).join(" ").trim() || raw.id.slice(0, 8)
+      );
     }
   }
 
   const invoiceLabels = new Map<string, string>();
   if (invoiceIds.length) {
-    const { data: invoices } = await supabase.from("fi_invoices").select("id, title, invoice_number").eq("tenant_id", tid).in("id", invoiceIds);
+    const { data: invoices } = await supabase
+      .from("fi_invoices")
+      .select("id, title, invoice_number")
+      .eq("tenant_id", tid)
+      .in("id", invoiceIds);
     for (const inv of invoices ?? []) {
       const raw = inv as { id: string; title?: string | null; invoice_number?: string | null };
-      invoiceLabels.set(raw.id, raw.title?.trim() || raw.invoice_number?.trim() || raw.id.slice(0, 8));
+      invoiceLabels.set(
+        raw.id,
+        raw.title?.trim() || raw.invoice_number?.trim() || raw.id.slice(0, 8)
+      );
     }
   }
 
   const userLabels = new Map<string, string>();
   if (userIds.length) {
-    const { data: users } = await supabase.from("fi_users").select("id, display_name, email").eq("tenant_id", tid).in("id", userIds);
+    const { data: users } = await supabase
+      .from("fi_users")
+      .select("id, display_name, email")
+      .eq("tenant_id", tid)
+      .in("id", userIds);
     for (const u of users ?? []) {
       const raw = u as { id: string; display_name?: string | null; email?: string | null };
       userLabels.set(raw.id, raw.display_name?.trim() || raw.email?.trim() || raw.id.slice(0, 8));
@@ -647,7 +718,9 @@ export async function loadAccountsReceivableWorkQueue(
   }));
 }
 
-export async function loadAccountsReceivableDashboardMetrics(tenantId: string): Promise<AccountsReceivableDashboardMetrics> {
+export async function loadAccountsReceivableDashboardMetrics(
+  tenantId: string
+): Promise<AccountsReceivableDashboardMetrics> {
   const rows = await loadAccountsReceivableWorkQueue(tenantId, {}, 500);
   return aggregateAccountsReceivableMetrics(rows);
 }
@@ -659,7 +732,10 @@ export type CaseAccountsReceivableSummary = {
   total_outstanding_cents: number;
 };
 
-export async function loadCaseAccountsReceivableSummary(tenantId: string, caseId: string): Promise<CaseAccountsReceivableSummary> {
+export async function loadCaseAccountsReceivableSummary(
+  tenantId: string,
+  caseId: string
+): Promise<CaseAccountsReceivableSummary> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const cid = assertNonEmptyUuid(caseId, "caseId").trim();
   const supabase = supabaseAdmin();
@@ -672,12 +748,19 @@ export async function loadCaseAccountsReceivableSummary(tenantId: string, caseId
     .limit(20);
   if (error) {
     if (isMissingDatabaseRelationError(error)) {
-      return { display_status: "no_ar_issue", display_label: "No AR issue", open_cases: [], total_outstanding_cents: 0 };
+      return {
+        display_status: "no_ar_issue",
+        display_label: "No AR issue",
+        open_cases: [],
+        total_outstanding_cents: 0,
+      };
     }
     throw new Error(error.message);
   }
   const cases = (data ?? []).map((r) => mapRow(r as Record<string, unknown>));
-  const open_cases = cases.filter((c) => isOpenArCaseStatus(c.status) && c.outstanding_amount_cents > 0);
+  const open_cases = cases.filter(
+    (c) => isOpenArCaseStatus(c.status) && c.outstanding_amount_cents > 0
+  );
   const display_status = buildCaseArDisplayStatus(cases);
   return {
     display_status,
@@ -716,13 +799,17 @@ export async function runAccountsReceivableOverdueSyncJob(opts: {
     examined += 1;
     const invoice = mapInvoiceRow(raw as Record<string, unknown>);
     if (invoiceBalanceDueCents(invoice) <= 0) continue;
-    const receivableType = classifyReceivableType({ invoice_kind: invoice.invoice_kind, metadata: invoice.metadata });
+    const receivableType = classifyReceivableType({
+      invoice_kind: invoice.invoice_kind,
+      metadata: invoice.metadata,
+    });
     const existing = await getOpenArCaseByInvoice(invoice.tenant_id, invoice.id, receivableType);
     const result = await upsertArCaseFromInvoice({
       tenantId: invoice.tenant_id,
       invoice,
       todayYmd: opts.runDateYmd,
-      trigger: invoice.invoice_kind === "surgery_deposit" ? "deposit_deadline_missed" : "invoice_overdue",
+      trigger:
+        invoice.invoice_kind === "surgery_deposit" ? "deposit_deadline_missed" : "invoice_overdue",
     });
     if (!result) continue;
     if (existing) updated += 1;

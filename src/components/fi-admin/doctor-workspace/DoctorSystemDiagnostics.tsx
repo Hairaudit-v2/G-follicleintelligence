@@ -26,11 +26,13 @@ export function DoctorSystemDiagnostics({
       <summary className="cursor-pointer list-none px-5 py-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Operators</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+              Operators
+            </p>
             <h2 className="mt-1 text-lg font-semibold text-[#F8FAFC]">System diagnostics</h2>
             <p className="mt-1 max-w-3xl text-sm text-[#94A3B8]">
-              For platform operators only. These checks support medical workflow integrity and do not affect day-to-day
-              physician workflow.
+              For platform operators only. These checks support medical workflow integrity and do
+              not affect day-to-day physician workflow.
             </p>
           </div>
           <span className="shrink-0 text-xs font-medium text-emerald-400/80">
@@ -49,7 +51,11 @@ export function DoctorSystemDiagnostics({
           />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {Object.entries(counts).map(([key, count]) => (
-              <StatCard key={key} label={key.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={count} />
+              <StatCard
+                key={key}
+                label={key.replace(/([A-Z])/g, " $1").replace(/_/g, " ")}
+                value={count}
+              />
             ))}
           </div>
         </DashboardCard>
@@ -70,8 +76,9 @@ export function DoctorSystemDiagnostics({
                   key={r.id}
                   className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 font-mono text-[#94A3B8]"
                 >
-                  <span className="text-[#64748B]">{r.id.slice(0, 8)}…</span> · patient {r.patient_id.slice(0, 8)}… ·{" "}
-                  {PRESCRIPTION_STATUS_LABELS[r.status]} · doctor {r.doctor_id.slice(0, 8)}…
+                  <span className="text-[#64748B]">{r.id.slice(0, 8)}…</span> · patient{" "}
+                  {r.patient_id.slice(0, 8)}… · {PRESCRIPTION_STATUS_LABELS[r.status]} · doctor{" "}
+                  {r.doctor_id.slice(0, 8)}…
                 </li>
               ))}
             </ul>
@@ -86,7 +93,10 @@ export function DoctorSystemDiagnostics({
             className="mb-4"
           />
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard label="Drafts in progress" value={bundle.draftPrescriptionsInProgress.length} />
+            <StatCard
+              label="Drafts in progress"
+              value={bundle.draftPrescriptionsInProgress.length}
+            />
             <StatCard label="Ready to sign" value={bundle.prescriptionsAwaitingSignature.length} />
             <StatCard label="Pharmacy queue" value={bundle.pharmacyQueue.length} />
           </dl>

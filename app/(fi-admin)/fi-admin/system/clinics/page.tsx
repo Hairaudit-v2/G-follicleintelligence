@@ -19,7 +19,10 @@ export default async function SystemClinicsPage() {
   const tenantIds = Array.from(new Set(rows.map((r) => r.tenant_id).filter(Boolean)));
   const tenantNameById = new Map<string, string>();
   if (tenantIds.length > 0) {
-    const { data: tenants, error: e2 } = await supabase.from("fi_tenants").select("id, name").in("id", tenantIds);
+    const { data: tenants, error: e2 } = await supabase
+      .from("fi_tenants")
+      .select("id, name")
+      .in("id", tenantIds);
     if (!e2 && tenants) {
       for (const t of tenants as { id: string; name: string }[]) {
         tenantNameById.set(String(t.id), String(t.name ?? ""));
@@ -31,7 +34,9 @@ export default async function SystemClinicsPage() {
       <div>
         <p className={fiOsChromeClasses.sectionEyebrow}>Directory</p>
         <h1 className="mt-1 text-xl font-semibold text-slate-50">Clinics</h1>
-        <p className="mt-1 text-sm text-slate-500">Clinic rows across tenants (first 500 by display name).</p>
+        <p className="mt-1 text-sm text-slate-500">
+          Clinic rows across tenants (first 500 by display name).
+        </p>
       </div>
       <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#060d18]/80">
         {rows.map((c) => (
@@ -39,10 +44,14 @@ export default async function SystemClinicsPage() {
             <div>
               <p className="font-medium text-slate-100">{c.display_name?.trim() || "Clinic"}</p>
               <p className="text-xs text-slate-500">
-                {tenantNameById.get(c.tenant_id) || "Tenant"} · <span className="font-mono">{c.tenant_id.slice(0, 8)}…</span>
+                {tenantNameById.get(c.tenant_id) || "Tenant"} ·{" "}
+                <span className="font-mono">{c.tenant_id.slice(0, 8)}…</span>
               </p>
             </div>
-            <Link href={`/fi-admin/${c.tenant_id}`} className="text-sm font-medium text-cyan-400 hover:text-cyan-300">
+            <Link
+              href={`/fi-admin/${c.tenant_id}`}
+              className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+            >
               Tenant home →
             </Link>
           </li>

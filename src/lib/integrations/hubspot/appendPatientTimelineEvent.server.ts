@@ -32,7 +32,9 @@ export async function appendPatientTimelineEvent(
   input: AppendPatientTimelineEventInput
 ): Promise<AppendPatientTimelineEventResult> {
   if (!input.patientId && !input.personId && !input.crmLeadId) {
-    throw new Error("appendPatientTimelineEvent requires at least one anchor (patient/person/lead).");
+    throw new Error(
+      "appendPatientTimelineEvent requires at least one anchor (patient/person/lead)."
+    );
   }
 
   const metadata = {

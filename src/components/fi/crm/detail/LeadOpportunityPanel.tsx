@@ -58,7 +58,8 @@ export function LeadOpportunityPanel({
       <p className="mt-3 text-xs text-gray-500">
         Set <code className="rounded bg-white/[0.06] px-1">treatment_value</code>,{" "}
         <code className="rounded bg-white/[0.06] px-1">conversion_probability</code>, or{" "}
-        <code className="rounded bg-white/[0.06] px-1">opportunity_notes</code> on lead metadata to populate commercial fields.
+        <code className="rounded bg-white/[0.06] px-1">opportunity_notes</code> on lead metadata to
+        populate commercial fields.
       </p>
     </section>
   );

@@ -3,7 +3,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeFiAiImageReviewStatus } from "./enumValidation";
-import type { FiAiImageClassificationResult, HliImageClassificationInsert, HliSourceSystem } from "./types";
+import type {
+  FiAiImageClassificationResult,
+  HliImageClassificationInsert,
+  HliSourceSystem,
+} from "./types";
 
 export async function insertHliImageClassificationRow(
   row: HliImageClassificationInsert,

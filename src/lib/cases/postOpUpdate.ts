@@ -48,13 +48,22 @@ export type UpsertPostOpTrackingParams = {
  * Creates or updates `fi_case_post_op_tracking`. Verifies `fi_cases` belongs to the tenant.
  * Service-role Supabase only.
  */
-export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingParams, client?: SupabaseClient): Promise<void> {
+export async function upsertPostOpTrackingForCase(
+  params: UpsertPostOpTrackingParams,
+  client?: SupabaseClient
+): Promise<void> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const cid = assertNonEmptyUuid(params.caseId, "caseId");
   const p = params.patch;
 
-  const { data: c, error: ce } = await supabase.from("fi_cases").select("id").eq("tenant_id", tid).eq("id", cid).is("deleted_at", null).maybeSingle();
+  const { data: c, error: ce } = await supabase
+    .from("fi_cases")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .is("deleted_at", null)
+    .maybeSingle();
   if (ce) throw new Error(ce.message);
   if (!c) throw new Error("Case not found for tenant.");
 
@@ -75,13 +84,19 @@ export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingPa
     updatePayload.aftercare_notes = p.aftercare_notes?.trim() ? p.aftercare_notes.trim() : null;
   }
   if (p.donor_recovery_notes !== undefined) {
-    updatePayload.donor_recovery_notes = p.donor_recovery_notes?.trim() ? p.donor_recovery_notes.trim() : null;
+    updatePayload.donor_recovery_notes = p.donor_recovery_notes?.trim()
+      ? p.donor_recovery_notes.trim()
+      : null;
   }
   if (p.recipient_recovery_notes !== undefined) {
-    updatePayload.recipient_recovery_notes = p.recipient_recovery_notes?.trim() ? p.recipient_recovery_notes.trim() : null;
+    updatePayload.recipient_recovery_notes = p.recipient_recovery_notes?.trim()
+      ? p.recipient_recovery_notes.trim()
+      : null;
   }
   if (p.complication_notes !== undefined) {
-    updatePayload.complication_notes = p.complication_notes?.trim() ? p.complication_notes.trim() : null;
+    updatePayload.complication_notes = p.complication_notes?.trim()
+      ? p.complication_notes.trim()
+      : null;
   }
   if (p.patient_satisfaction_score !== undefined) {
     updatePayload.patient_satisfaction_score = p.patient_satisfaction_score;
@@ -108,10 +123,14 @@ export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingPa
     post_op_status: p.post_op_status ?? "not_started",
     instructions_given: p.instructions_given ?? false,
     aftercare_notes: p.aftercare_notes !== undefined ? trimOrNull(p.aftercare_notes) : null,
-    donor_recovery_notes: p.donor_recovery_notes !== undefined ? trimOrNull(p.donor_recovery_notes) : null,
-    recipient_recovery_notes: p.recipient_recovery_notes !== undefined ? trimOrNull(p.recipient_recovery_notes) : null,
-    complication_notes: p.complication_notes !== undefined ? trimOrNull(p.complication_notes) : null,
-    patient_satisfaction_score: p.patient_satisfaction_score !== undefined ? p.patient_satisfaction_score : null,
+    donor_recovery_notes:
+      p.donor_recovery_notes !== undefined ? trimOrNull(p.donor_recovery_notes) : null,
+    recipient_recovery_notes:
+      p.recipient_recovery_notes !== undefined ? trimOrNull(p.recipient_recovery_notes) : null,
+    complication_notes:
+      p.complication_notes !== undefined ? trimOrNull(p.complication_notes) : null,
+    patient_satisfaction_score:
+      p.patient_satisfaction_score !== undefined ? p.patient_satisfaction_score : null,
     outcome_notes: p.outcome_notes !== undefined ? trimOrNull(p.outcome_notes) : null,
     created_at: now,
     updated_at: now,
@@ -131,13 +150,22 @@ export type UpsertFollowUpParams = {
  * Creates or updates `fi_case_follow_ups` for a case. Validates linked image IDs against `fi_patient_images` for the same case.
  * Service-role Supabase only.
  */
-export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client?: SupabaseClient): Promise<void> {
+export async function upsertFollowUpForCase(
+  params: UpsertFollowUpParams,
+  client?: SupabaseClient
+): Promise<void> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const cid = assertNonEmptyUuid(params.caseId, "caseId");
   const p = params.patch;
 
-  const { data: c, error: ce } = await supabase.from("fi_cases").select("id").eq("tenant_id", tid).eq("id", cid).is("deleted_at", null).maybeSingle();
+  const { data: c, error: ce } = await supabase
+    .from("fi_cases")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .is("deleted_at", null)
+    .maybeSingle();
   if (ce) throw new Error(ce.message);
   if (!c) throw new Error("Case not found for tenant.");
 
@@ -176,7 +204,12 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
     if (p.follow_up_status !== undefined) updatePayload.follow_up_status = p.follow_up_status;
     if (p.notes !== undefined) updatePayload.notes = p.notes?.trim() ? p.notes.trim() : null;
 
-    const { error: ue } = await supabase.from("fi_case_follow_ups").update(updatePayload).eq("tenant_id", tid).eq("case_id", cid).eq("id", p.id);
+    const { error: ue } = await supabase
+      .from("fi_case_follow_ups")
+      .update(updatePayload)
+      .eq("tenant_id", tid)
+      .eq("case_id", cid)
+      .eq("id", p.id);
     if (ue) throwPostOpDbError(ue);
 
     if (p.follow_up_status === "completed" && priorStatus !== "completed") {
@@ -277,12 +310,20 @@ export type DeleteFollowUpParams = {
   followUpId: string;
 };
 
-export async function deleteFollowUpForCase(params: DeleteFollowUpParams, client?: SupabaseClient): Promise<void> {
+export async function deleteFollowUpForCase(
+  params: DeleteFollowUpParams,
+  client?: SupabaseClient
+): Promise<void> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const cid = assertNonEmptyUuid(params.caseId, "caseId");
   const fid = assertNonEmptyUuid(params.followUpId, "followUpId");
 
-  const { error } = await supabase.from("fi_case_follow_ups").delete().eq("tenant_id", tid).eq("case_id", cid).eq("id", fid);
+  const { error } = await supabase
+    .from("fi_case_follow_ups")
+    .delete()
+    .eq("tenant_id", tid)
+    .eq("case_id", cid)
+    .eq("id", fid);
   if (error) throwPostOpDbError(error);
 }

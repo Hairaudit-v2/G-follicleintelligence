@@ -3,9 +3,17 @@
 import { useState, useTransition } from "react";
 
 import { addPaymentPathwayTaskNoteAction } from "@/lib/actions/financial-os-payment-pathway-inbox-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import {
+  financialOsClasses,
+  FinancialOsFeedbackText,
+  financialOsActionFeedback,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { pathwayTypeLabel } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
-import { FinancialPaymentPathwayTaskBadge, pathwayTaskTypeLabel } from "@/src/components/fi/financial/FinancialPaymentPathwayTaskBadge";
+import {
+  FinancialPaymentPathwayTaskBadge,
+  pathwayTaskTypeLabel,
+} from "@/src/components/fi/financial/FinancialPaymentPathwayTaskBadge";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { PaymentPathwayInboxRow } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 
@@ -27,7 +35,10 @@ export function FinancialPaymentPathwayTaskDrawer(props: {
     if (!note.trim()) return;
     setFeedback(null);
     start(async () => {
-      const res = await addPaymentPathwayTaskNoteAction(tenantId, { task_id: row.id, notes: note.trim() });
+      const res = await addPaymentPathwayTaskNoteAction(tenantId, {
+        task_id: row.id,
+        notes: note.trim(),
+      });
       setFeedback(financialOsActionFeedback(res, "Note saved."));
       if (res.ok) setNote("");
     });
@@ -44,7 +55,11 @@ export function FinancialPaymentPathwayTaskDrawer(props: {
         </div>
         <div className={financialOsClasses.drawerBody}>
           <div>
-            <FinancialPaymentPathwayTaskBadge status={row.status} priority={row.priority} variant="dark" />
+            <FinancialPaymentPathwayTaskBadge
+              status={row.status}
+              priority={row.priority}
+              variant="dark"
+            />
           </div>
           <dl className="space-y-2 text-xs">
             <div>
@@ -93,19 +108,39 @@ export function FinancialPaymentPathwayTaskDrawer(props: {
                 </select>
               </label>
               <div className="flex flex-wrap gap-2">
-                <button type="button" className={financialOsClasses.secondaryButton} onClick={() => onStatus(row.id, "in_progress")}>
+                <button
+                  type="button"
+                  className={financialOsClasses.secondaryButton}
+                  onClick={() => onStatus(row.id, "in_progress")}
+                >
                   Mark in progress
                 </button>
-                <button type="button" className={financialOsClasses.secondaryButton} onClick={() => onStatus(row.id, "waiting_patient")}>
+                <button
+                  type="button"
+                  className={financialOsClasses.secondaryButton}
+                  onClick={() => onStatus(row.id, "waiting_patient")}
+                >
                   Waiting patient
                 </button>
-                <button type="button" className={financialOsClasses.secondaryButton} onClick={() => onStatus(row.id, "waiting_provider")}>
+                <button
+                  type="button"
+                  className={financialOsClasses.secondaryButton}
+                  onClick={() => onStatus(row.id, "waiting_provider")}
+                >
                   Waiting provider
                 </button>
-                <button type="button" className={financialOsClasses.secondaryButton} onClick={() => onStatus(row.id, "completed")}>
+                <button
+                  type="button"
+                  className={financialOsClasses.secondaryButton}
+                  onClick={() => onStatus(row.id, "completed")}
+                >
                   Complete
                 </button>
-                <button type="button" className={financialOsClasses.secondaryButton} onClick={() => onStatus(row.id, "cancelled")}>
+                <button
+                  type="button"
+                  className={financialOsClasses.secondaryButton}
+                  onClick={() => onStatus(row.id, "cancelled")}
+                >
                   Cancel
                 </button>
               </div>

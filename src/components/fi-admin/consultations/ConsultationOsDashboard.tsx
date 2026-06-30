@@ -71,10 +71,15 @@ export function ConsultationOsDashboard({
           aria-hidden
         />
         <div className="relative border-l-4 border-violet-400/80 pl-5 sm:pl-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300/95">FI OS</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Consultations</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300/95">
+            FI OS
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            Consultations
+          </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Clinical assessment, treatment planning, quote readiness, and patient follow-up across every consultation.
+            Clinical assessment, treatment planning, quote readiness, and patient follow-up across
+            every consultation.
           </p>
           <ConsultationOsPrimaryActions base={base} />
         </div>
@@ -95,7 +100,9 @@ export function ConsultationOsDashboard({
               className="group flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4 transition hover:border-violet-400/25"
             >
               <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
-              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">
+                {card.value}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-violet-300/80 opacity-0 transition group-hover:opacity-100">
                 View <ArrowRight className="h-3 w-3" aria-hidden />
@@ -130,14 +137,20 @@ export function ConsultationOsDashboard({
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                      {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                      {item.detail ? (
+                        <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                      ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-violet-300/70" aria-hidden />
                   </Link>
                 ) : (
-                  <div className={`rounded-xl border px-4 py-4 ${consultationAttentionSeverityClass(item.severity)}`}>
+                  <div
+                    className={`rounded-xl border px-4 py-4 ${consultationAttentionSeverityClass(item.severity)}`}
+                  >
                     <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
-                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                    {item.detail ? (
+                      <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p>
+                    ) : null}
                   </div>
                 )}
               </li>
@@ -149,8 +162,8 @@ export function ConsultationOsDashboard({
       <DashboardCard className="p-5 sm:p-6">
         <SectionHeader
           kicker="Today"
-          title="Today&apos;s consultation flow"
-          description="Lightweight view of today&apos;s consultations — open Calendar for full scheduling."
+          title="Today's consultation flow"
+          description="Lightweight view of today's consultations — open Calendar for full scheduling."
           className="mb-4"
         />
         {todayFlow.length === 0 ? (
@@ -176,7 +189,9 @@ export function ConsultationOsDashboard({
                       <span>{item.timeLabel}</span>
                       <span>{item.consultationType}</span>
                       <span>Clinical: {item.clinicalStatus}</span>
-                      {item.commercialStatus ? <span>Commercial: {item.commercialStatus}</span> : null}
+                      {item.commercialStatus ? (
+                        <span>Commercial: {item.commercialStatus}</span>
+                      ) : null}
                     </div>
                     <p className="text-sm text-[#CBD5E1]">{item.nextAction}</p>
                   </div>
@@ -307,7 +322,10 @@ export function ConsultationOsDashboard({
                     </div>
                     <p className="mt-1 text-sm text-[#94A3B8]">{record.nextAction}</p>
                   </div>
-                  <ArrowRight className="hidden h-4 w-4 shrink-0 text-violet-300/70 sm:block" aria-hidden />
+                  <ArrowRight
+                    className="hidden h-4 w-4 shrink-0 text-violet-300/70 sm:block"
+                    aria-hidden
+                  />
                 </Link>
               </li>
             ))}

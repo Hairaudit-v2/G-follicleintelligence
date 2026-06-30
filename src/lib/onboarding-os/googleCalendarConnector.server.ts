@@ -45,7 +45,10 @@ type ServerOpts = {
   skipAuthCheck?: boolean;
   allowTenantMemberRead?: boolean;
   /** Test hook — inject events instead of calling Google API. */
-  fetchEventsOverride?: (calendarId: string, accessToken: string) => Promise<GoogleCalendarApiEvent[]>;
+  fetchEventsOverride?: (
+    calendarId: string,
+    accessToken: string
+  ) => Promise<GoogleCalendarApiEvent[]>;
 };
 
 type StagingRow = {
@@ -110,10 +113,9 @@ function resolveMasterKey(): Buffer | null {
   return deriveExternalConnectorMasterKey(process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY);
 }
 
-async function resolvePlatformAdminAuth(opts: ServerOpts): Promise<
-  | { ok: true; actorAuthUserId: string }
-  | { ok: false; error: string }
-> {
+async function resolvePlatformAdminAuth(
+  opts: ServerOpts
+): Promise<{ ok: true; actorAuthUserId: string } | { ok: false; error: string }> {
   const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
   if (!authId) return { ok: false, error: "Authentication required." };
   if (opts.skipAuthCheck && opts.actorAuthUserId) {
@@ -180,7 +182,12 @@ async function resolveWriteAuth(
 > {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) {
-    return { ok: true, actorAuthUserId: platform.actorAuthUserId, fiUserId: null, actorLabel: "Platform admin" };
+    return {
+      ok: true,
+      actorAuthUserId: platform.actorAuthUserId,
+      fiUserId: null,
+      actorLabel: "Platform admin",
+    };
   }
   const tenant = await resolveTenantAdminAuth(tenantId, opts);
   if (!tenant.ok) return tenant;
@@ -192,7 +199,10 @@ async function resolveWriteAuth(
   };
 }
 
-async function resolveReadAuth(tenantId: string, opts: ServerOpts): Promise<{ ok: true } | { ok: false; error: string }> {
+async function resolveReadAuth(
+  tenantId: string,
+  opts: ServerOpts
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) return { ok: true };
 
@@ -217,7 +227,9 @@ async function resolveReadAuth(tenantId: string, opts: ServerOpts): Promise<{ ok
 function mapStagingRow(row: StagingRow): ExternalCalendarStagingEvent {
   const attendeeRaw = row.attendee_emails;
   const attendeeEmails = Array.isArray(attendeeRaw) ? attendeeRaw.map(String) : [];
-  const importStatus = isExternalCalendarImportStatus(row.import_status) ? row.import_status : "staged";
+  const importStatus = isExternalCalendarImportStatus(row.import_status)
+    ? row.import_status
+    : "staged";
 
   return {
     id: row.id,
@@ -240,7 +252,9 @@ function mapStagingRow(row: StagingRow): ExternalCalendarStagingEvent {
 }
 
 function mapSyncRunRow(row: SyncRunRow): ExternalCalendarSyncRun {
-  const status = isExternalCalendarSyncRunStatus(row.status) ? row.status : coerceSyncRunStatus(row.status);
+  const status = isExternalCalendarSyncRunStatus(row.status)
+    ? row.status
+    : coerceSyncRunStatus(row.status);
   return {
     id: row.id,
     integrationId: row.integration_id,
@@ -300,10 +314,7 @@ async function loadGoogleCalendarAccessToken(
   return null;
 }
 
-async function loadAuthVerified(
-  supabase: SupabaseClient,
-  integrationId: string
-): Promise<boolean> {
+async function loadAuthVerified(supabase: SupabaseClient, integrationId: string): Promise<boolean> {
   const { data } = await supabase
     .from("fi_external_connector_auth_sessions")
     .select("auth_status")
@@ -405,7 +416,9 @@ async function loadExistingStagingForDedup(
 ): Promise<ExternalCalendarStagingEvent[]> {
   const { data } = await supabase
     .from("fi_external_calendar_event_staging")
-    .select("id, integration_id, tenant_id, sync_run_id, google_event_id, calendar_id, event_title, start_at, end_at, attendee_emails, raw_payload, normalized_event_type, import_status, imported_at, created_at, updated_at")
+    .select(
+      "id, integration_id, tenant_id, sync_run_id, google_event_id, calendar_id, event_title, start_at, end_at, attendee_emails, raw_payload, normalized_event_type, import_status, imported_at, created_at, updated_at"
+    )
     .eq("integration_id", integrationId);
 
   return ((data ?? []) as StagingRow[]).map(mapStagingRow);
@@ -439,7 +452,10 @@ export async function runGoogleCalendarSync(
 
   const accessToken = await loadGoogleCalendarAccessToken(supabase, integrationId);
   if (!accessToken && !opts.fetchEventsOverride) {
-    return { ok: false, error: "OAuth access token not available — store connector credentials first." };
+    return {
+      ok: false,
+      error: "OAuth access token not available — store connector credentials first.",
+    };
   }
 
   const now = new Date().toISOString();
@@ -607,7 +623,11 @@ export async function runGoogleCalendarSync(
       });
     }
 
-    if (eventsStaged === 0 && discoveredEvents.length > 0 && eventsSkipped >= discoveredEvents.length) {
+    if (
+      eventsStaged === 0 &&
+      discoveredEvents.length > 0 &&
+      eventsSkipped >= discoveredEvents.length
+    ) {
       syncStatus = "partial";
     }
   } catch (e) {
@@ -730,10 +750,7 @@ export async function loadExternalCalendarStagingEvents(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts & { importStatus?: string | null } = {}
-): Promise<
-  | { ok: true; events: ExternalCalendarStagingEvent[] }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; events: ExternalCalendarStagingEvent[] } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, opts);
   if (!read.ok) return read;
 
@@ -761,10 +778,7 @@ async function reviewStagingEvent(
   tenantId: string,
   action: "approve" | "reject",
   opts: ServerOpts
-): Promise<
-  | { ok: true; event: ExternalCalendarStagingEvent }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; event: ExternalCalendarStagingEvent } | { ok: false; error: string }> {
   const auth = await resolveWriteAuth(tenantId, opts);
   if (!auth.ok) return auth;
 
@@ -782,7 +796,10 @@ async function reviewStagingEvent(
   const row = existing as StagingRow;
   const nextStatus = resolveCalendarImportStatus(row.import_status, action);
   if (!nextStatus) {
-    return { ok: false, error: "Event is not eligible for review — only staged events can be approved or rejected." };
+    return {
+      ok: false,
+      error: "Event is not eligible for review — only staged events can be approved or rejected.",
+    };
   }
 
   const now = new Date().toISOString();
@@ -835,10 +852,7 @@ export async function approveExternalCalendarEvent(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; event: ExternalCalendarStagingEvent }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; event: ExternalCalendarStagingEvent } | { ok: false; error: string }> {
   return reviewStagingEvent(stagingEventId, integrationId, tenantId, "approve", opts);
 }
 
@@ -848,10 +862,7 @@ export async function rejectExternalCalendarEvent(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; event: ExternalCalendarStagingEvent }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; event: ExternalCalendarStagingEvent } | { ok: false; error: string }> {
   return reviewStagingEvent(stagingEventId, integrationId, tenantId, "reject", opts);
 }
 
@@ -860,10 +871,7 @@ export async function loadCalendarSyncRuns(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts & { limit?: number } = {}
-): Promise<
-  | { ok: true; runs: ExternalCalendarSyncRun[] }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; runs: ExternalCalendarSyncRun[] } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, opts);
   if (!read.ok) return read;
 
@@ -933,10 +941,7 @@ export async function loadGoogleCalendarConnectorSnapshot(
   integrationId: string,
   tenantId: string,
   opts: ServerOpts = {}
-): Promise<
-  | { ok: true; snapshot: GoogleCalendarConnectorSnapshot }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; snapshot: GoogleCalendarConnectorSnapshot } | { ok: false; error: string }> {
   const read = await resolveReadAuth(tenantId, { ...opts, allowTenantMemberRead: true });
   if (!read.ok) return read;
 

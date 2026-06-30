@@ -12,7 +12,10 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
-import { canSelectStaffForClinicalPicker, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import {
+  canSelectStaffForClinicalPicker,
+  type ClinicalStaffPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
 import {
   defaultRangeIso,
   endLocalFromStartLocalAndProcedure,
@@ -21,14 +24,14 @@ import {
 } from "@/src/components/fi/bookings/bookingFormUtils";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(v: string): boolean {
   return UUID_RE.test(v.trim());
 }
 
-const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
+const card =
+  "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function BookingQuickCreatePanel({
   tenantId,
@@ -81,7 +84,10 @@ export function BookingQuickCreatePanel({
     return Array.from(u);
   }, [bookingType]);
 
-  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+  const selectedCatalog = useMemo(
+    () => serviceForBookingType(services, bookingType),
+    [services, bookingType]
+  );
 
   const selectedStaff = useMemo(
     () => clinicalStaffOptions.find((o) => o.id === assignedStaffId.trim()) ?? null,
@@ -112,7 +118,10 @@ export function BookingQuickCreatePanel({
       }
       const sid = assignedStaffId.trim();
       if (sid && selectedStaff && !canSelectStaffForClinicalPicker(selectedStaff)) {
-        setFeedback(selectedStaff.clinical_readiness.block_reason ?? "Selected staff is not clinically available.");
+        setFeedback(
+          selectedStaff.clinical_readiness.block_reason ??
+            "Selected staff is not clinically available."
+        );
         return;
       }
 
@@ -160,8 +169,8 @@ export function BookingQuickCreatePanel({
     <div className={card}>
       <h2 className="text-sm font-semibold text-slate-100">Quick create</h2>
       <p className="mt-1 text-xs text-slate-400">
-        Paste an existing UUID for a lead, person, patient, or case anchor (no search yet). Consultation-only rules apply
-        when the anchor is a non-converted lead.
+        Paste an existing UUID for a lead, person, patient, or case anchor (no search yet).
+        Consultation-only rules apply when the anchor is a non-converted lead.
       </p>
       <form onSubmit={(e) => void onSubmit(e)} className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block text-xs font-medium text-slate-300 sm:col-span-2">
@@ -225,8 +234,9 @@ export function BookingQuickCreatePanel({
             className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
           />
           <p className="mt-1 text-[11px] text-gray-500">
-            Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min (end
-            updates when you change type).
+            Default slot for this procedure type:{" "}
+            {defaultProcedureDurationMinutes(bookingType, services)} min (end updates when you
+            change type).
             {selectedCatalog && selectedCatalog.base_price > 0 ? (
               <> Suggested price: {formatPriceAud(selectedCatalog.base_price)}.</>
             ) : null}

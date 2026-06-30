@@ -50,7 +50,9 @@ export type ResolveTimelyApiConfigResult =
   | { ok: false; missing: string[] };
 
 /** Resolve client config from the environment without throwing or exposing the key. */
-export function resolveTimelyApiConfig(env: NodeJS.ProcessEnv = process.env): ResolveTimelyApiConfigResult {
+export function resolveTimelyApiConfig(
+  env: NodeJS.ProcessEnv = process.env
+): ResolveTimelyApiConfigResult {
   const apiKey = env[TIMELY_API_ENV.apiKey]?.trim();
   const baseUrl = env[TIMELY_API_ENV.baseUrl]?.trim();
 
@@ -159,7 +161,12 @@ export async function timelyApiGet<T = unknown>(
     );
   }
   if (!res.ok) {
-    throw new TimelyApiError(`Timely API request failed (${res.status}).`, endpoint, res.status, "http");
+    throw new TimelyApiError(
+      `Timely API request failed (${res.status}).`,
+      endpoint,
+      res.status,
+      "http"
+    );
   }
 
   const text = await res.text();

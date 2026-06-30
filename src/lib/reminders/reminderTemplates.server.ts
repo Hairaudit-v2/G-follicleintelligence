@@ -95,7 +95,7 @@ export async function createReminderTemplate(
       name: params.name.trim(),
       type: params.type,
       trigger_event: params.trigger_event,
-      subject: params.type === "email" ? (params.subject?.trim() || null) : null,
+      subject: params.type === "email" ? params.subject?.trim() || null : null,
       body: params.body.trim(),
       is_active: params.is_active ?? true,
       metadata: {},
@@ -124,7 +124,11 @@ export async function updateReminderTemplate(
   client?: SupabaseClient
 ): Promise<FiReminderTemplateRow> {
   const supabase = client ?? supabaseAdmin();
-  const existing = await loadReminderTemplateForTenant(params.tenantId, params.templateId, supabase);
+  const existing = await loadReminderTemplateForTenant(
+    params.tenantId,
+    params.templateId,
+    supabase
+  );
   if (!existing) throw new Error("Template not found.");
 
   const nextType = params.type ?? existing.type;
@@ -165,6 +169,10 @@ export async function deleteReminderTemplate(
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const id = assertNonEmptyUuid(templateId, "templateId");
-  const { error } = await supabase.from("fi_reminder_templates").delete().eq("tenant_id", tid).eq("id", id);
+  const { error } = await supabase
+    .from("fi_reminder_templates")
+    .delete()
+    .eq("tenant_id", tid)
+    .eq("id", id);
   if (error) throw new Error(error.message);
 }

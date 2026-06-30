@@ -52,7 +52,9 @@ export function resolveModuleCoverageStatus(eventCount: number): AnalyticsModule
   return "waiting";
 }
 
-function countEventsByModule(events: FiAnalyticsEventRow[]): Map<AnalyticsModuleName, { count: number; lastAt: string | null }> {
+function countEventsByModule(
+  events: FiAnalyticsEventRow[]
+): Map<AnalyticsModuleName, { count: number; lastAt: string | null }> {
   const byModule = new Map<AnalyticsModuleName, { count: number; lastAt: string | null }>();
 
   for (const event of events) {
@@ -92,7 +94,9 @@ export function deriveActiveModules(events: FiAnalyticsEventRow[]): AnalyticsMod
   );
 }
 
-export function deriveAnalyticsConfidence(coverage: AnalyticsModuleCoverageRow[]): AnalyticsConfidenceLevel {
+export function deriveAnalyticsConfidence(
+  coverage: AnalyticsModuleCoverageRow[]
+): AnalyticsConfidenceLevel {
   const activeCount = coverage.filter((row) => row.status === "active").length;
   const publishingCount = coverage.filter((row) => row.status !== "waiting").length;
 

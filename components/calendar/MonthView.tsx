@@ -57,10 +57,18 @@ import {
   parseIsoUtcMs,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
-import { buildCalendarHref, mergeCalendarHrefQuery, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import {
+  buildCalendarHref,
+  mergeCalendarHrefQuery,
+  type CalendarRoute,
+  type ParsedCalendarQuery,
+} from "@/src/lib/bookings/calendarQuery";
 import { buildCalendarMonth } from "@/src/lib/bookings/calendarView";
 import { filterMonthCellsForWeekends } from "@/src/lib/calendar/calendarSettingsCore";
-import { resolveDisplayResourceColumnId, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import {
+  resolveDisplayResourceColumnId,
+  type BusinessGridConfig,
+} from "@/src/lib/calendar/operationalCalendarLayout";
 import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
@@ -165,12 +173,20 @@ export function parseMonthDayDropId(id: string, timeZone?: string): string | nul
 }
 
 /** Six-week Monday-start grid covering the month containing `monthAnchor`. */
-export function buildMonthGridCells(monthAnchor: string, timeZone: string, now: Date = new Date()): MonthGridCell[] {
+export function buildMonthGridCells(
+  monthAnchor: string,
+  timeZone: string,
+  now: Date = new Date()
+): MonthGridCell[] {
   const tz = normalizeCalendarTimezone(timeZone);
   const todayKey = calendarDateStringFromInstant(now, tz);
   const anchor = parseCalendarDateString(monthAnchor, tz) ?? calendarDateStringFromInstant(now, tz);
   const anchorMs = zonedMidnightUtcMs(anchor, tz) ?? Date.now();
-  const monthParts = new Intl.DateTimeFormat("en-US", { timeZone: tz, month: "numeric", year: "numeric" })
+  const monthParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    month: "numeric",
+    year: "numeric",
+  })
     .formatToParts(new Date(anchorMs))
     .reduce<Record<string, string>>((acc, p) => {
       if (p.type !== "literal") acc[p.type] = p.value;
@@ -248,7 +264,10 @@ export function bucketBookingsForMonthCells(
   return map;
 }
 
-export function formatMonthTitle(monthAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): string {
+export function formatMonthTitle(
+  monthAnchor: string,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): string {
   const tz = normalizeCalendarTimezone(timeZone);
   const anchor = parseCalendarDateString(monthAnchor, tz) ?? monthAnchor;
   const ms = zonedMidnightUtcMs(anchor, tz) ?? parseIsoUtcMs(`${anchor}T12:00:00.000Z`);
@@ -283,9 +302,13 @@ function summarizeProvidersForDay(
   const counts = new Map<string, number>();
 
   for (const booking of dayBookings) {
-    const colId = resolveDisplayResourceColumnId(booking, resourceColumns.map((c) => c.id), {
-      staffIdByUserId,
-    });
+    const colId = resolveDisplayResourceColumnId(
+      booking,
+      resourceColumns.map((c) => c.id),
+      {
+        staffIdByUserId,
+      }
+    );
     counts.set(colId, (counts.get(colId) ?? 0) + 1);
   }
 
@@ -351,12 +374,16 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
       ref={setNodeRef}
       type="button"
       aria-busy={isPendingSave || undefined}
-      {...(draggable && !isPendingSave && !readOnlyCalendarOs ? { ...listeners, ...attributes } : {})}
+      {...(draggable && !isPendingSave && !readOnlyCalendarOs
+        ? { ...listeners, ...attributes }
+        : {})}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
       }}
-      style={transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined}
+      style={
+        transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined
+      }
       className={cn(
         "group/pill relative flex w-full min-w-0 items-center gap-1.5 rounded-lg border px-1.5 py-1 text-left transition",
         "border-[#1e2937]/80 bg-[#0f172a]/90 shadow-sm",
@@ -369,13 +396,30 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
       )}
     >
       {isPendingSave ? (
-        <Loader2 className="absolute right-1 top-1 h-3 w-3 shrink-0 animate-spin text-amber-200" aria-hidden />
+        <Loader2
+          className="absolute right-1 top-1 h-3 w-3 shrink-0 animate-spin text-amber-200"
+          aria-hidden
+        />
       ) : null}
-      <span aria-hidden className={cn("h-4 w-0.5 shrink-0 rounded-full", appointmentStyle.accentClass)} />
-      <Icon className={cn("h-3 w-3 shrink-0 opacity-80", appointmentStyle.textColor)} strokeWidth={2} aria-hidden />
+      <span
+        aria-hidden
+        className={cn("h-4 w-0.5 shrink-0 rounded-full", appointmentStyle.accentClass)}
+      />
+      <Icon
+        className={cn("h-3 w-3 shrink-0 opacity-80", appointmentStyle.textColor)}
+        strokeWidth={2}
+        aria-hidden
+      />
       <span className="min-w-0 flex-1 truncate">
-        <span className={cn("text-[10px] font-bold tabular-nums", appointmentStyle.textColor)}>{time}</span>
-        <span className={cn("ml-1 text-[10px] font-semibold text-slate-200", appointmentStyle.textColor)}>
+        <span className={cn("text-[10px] font-bold tabular-nums", appointmentStyle.textColor)}>
+          {time}
+        </span>
+        <span
+          className={cn(
+            "ml-1 text-[10px] font-semibold text-slate-200",
+            appointmentStyle.textColor
+          )}
+        >
           {label}
         </span>
         {readOnlyCalendarOs && meta.calendar_os_source_label ? (
@@ -434,7 +478,8 @@ const MonthDayCell = memo(function MonthDayCell({
   const visibleProviders = providerSummary.slice(0, 4);
   const overflowProviders = providerSummary.length - visibleProviders.length;
   const isQuietDay = cell.inCurrentMonth && dayBookings.length === 0;
-  const openEmptyDayQuickCreate = isQuietDay && onEmptyDayQuickCreate ? onEmptyDayQuickCreate : null;
+  const openEmptyDayQuickCreate =
+    isQuietDay && onEmptyDayQuickCreate ? onEmptyDayQuickCreate : null;
 
   return (
     <div
@@ -450,10 +495,14 @@ const MonthDayCell = memo(function MonthDayCell({
     >
       <button
         type="button"
-        onClick={() => (openEmptyDayQuickCreate ? openEmptyDayQuickCreate(cell.dayKey) : onDayClick(cell.dayKey))}
+        onClick={() =>
+          openEmptyDayQuickCreate ? openEmptyDayQuickCreate(cell.dayKey) : onDayClick(cell.dayKey)
+        }
         className="mb-1.5 flex w-full items-start justify-between gap-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
         aria-label={
-          openEmptyDayQuickCreate ? `Quick book appointment on ${cell.dayKey}` : `Open day view for ${cell.dayKey}`
+          openEmptyDayQuickCreate
+            ? `Quick book appointment on ${cell.dayKey}`
+            : `Open day view for ${cell.dayKey}`
         }
       >
         <span
@@ -479,7 +528,9 @@ const MonthDayCell = memo(function MonthDayCell({
               />
             ))}
             {overflowProviders > 0 ? (
-              <span className="text-[9px] font-semibold tabular-nums text-slate-500">+{overflowProviders}</span>
+              <span className="text-[9px] font-semibold tabular-nums text-slate-500">
+                +{overflowProviders}
+              </span>
             ) : null}
           </span>
         ) : null}
@@ -514,7 +565,9 @@ const MonthDayCell = memo(function MonthDayCell({
           <button
             type="button"
             onClick={() =>
-              openEmptyDayQuickCreate ? openEmptyDayQuickCreate(cell.dayKey) : onDayClick(cell.dayKey)
+              openEmptyDayQuickCreate
+                ? openEmptyDayQuickCreate(cell.dayKey)
+                : onDayClick(cell.dayKey)
             }
             className="mt-auto w-full rounded-md border border-dashed border-[#1e2937]/80 px-1.5 py-1 text-[10px] font-medium text-slate-400 opacity-0 transition group-hover/cell:opacity-100 hover:border-slate-600 hover:bg-slate-900/50 hover:text-slate-300"
           >
@@ -566,7 +619,8 @@ function MonthViewInner({
     const all = buildMonthGridCells(monthAnchor, gridConfig.timeZone);
     return filterMonthCellsForWeekends(all, showWeekends);
   }, [monthAnchor, gridConfig.timeZone, showWeekends]);
-  const { rows: bookingsForBuckets, fingerprint: monthBookingsKey } = useBookingsStableByFingerprint(bookings);
+  const { rows: bookingsForBuckets, fingerprint: monthBookingsKey } =
+    useBookingsStableByFingerprint(bookings);
   const bucketGroupingPerfRef = useRef<{ groupingMs: number; bookingCount: number } | null>(null);
   const buckets = useMemo(() => {
     const t0 = typeof performance !== "undefined" ? performance.now() : 0;
@@ -710,7 +764,9 @@ function MonthViewInner({
       const endIso = isoFromLocalDayMinutes(dayKey, startMin + durationMin, gridConfig.timeZone);
       if (!startIso || !endIso) return;
 
-      const meta: MonthViewRescheduleMeta | undefined = waitlistBookingId ? { clearWaitlist: true } : undefined;
+      const meta: MonthViewRescheduleMeta | undefined = waitlistBookingId
+        ? { clearWaitlist: true }
+        : undefined;
       const result = await onRescheduleBooking(booking, startIso, endIso, meta);
 
       if (result.ok) {
@@ -741,7 +797,9 @@ function MonthViewInner({
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="flex items-center justify-between gap-3 border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)] px-4 py-3">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold tracking-tight text-[var(--fi-cal-ws-text,#f8fafc)]">{monthTitle}</h2>
+          <h2 className="truncate text-lg font-semibold tracking-tight text-[var(--fi-cal-ws-text,#f8fafc)]">
+            {monthTitle}
+          </h2>
           <p className="text-xs text-[var(--fi-cal-ws-muted,#94a3b8)]">
             {monthStats.total > 0 ? (
               <>
@@ -838,7 +896,9 @@ function MonthViewInner({
         className={cn(
           "fi-calendar-shell flex overflow-hidden rounded-xl border shadow-sm ring-1",
           "border-[color:var(--fi-cal-ws-shell-border,#1e2937)] bg-[var(--fi-cal-ws-shell-bg,#0f172a)] shadow-black/30 ring-[color:var(--fi-cal-ws-shell-ring,rgba(255,255,255,0.04))] md:rounded-2xl",
-          shellIsFiOs ? "relative min-h-0 flex-1 flex-col" : "min-h-[min(36rem,78dvh)] flex-col md:min-h-[36rem] lg:min-h-[calc(100dvh-13rem)]"
+          shellIsFiOs
+            ? "relative min-h-0 flex-1 flex-col"
+            : "min-h-[min(36rem,78dvh)] flex-col md:min-h-[36rem] lg:min-h-[calc(100dvh-13rem)]"
         )}
       >
         {shellIsFiOs ? (

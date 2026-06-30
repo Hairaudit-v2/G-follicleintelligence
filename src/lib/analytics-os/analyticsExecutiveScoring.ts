@@ -80,7 +80,9 @@ export function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
-export function buildExecutiveScoringEventSummary(events: FiAnalyticsEventRow[]): ExecutiveScoringEventSummary {
+export function buildExecutiveScoringEventSummary(
+  events: FiAnalyticsEventRow[]
+): ExecutiveScoringEventSummary {
   const byEventType = new Map<string, { count: number; valueSum: number }>();
   const byModule = new Map<string, { count: number; valueSum: number }>();
   const distinctEntityIds = new Set<string>();
@@ -175,7 +177,9 @@ function activityBaseScore(count: number, thresholds: [number, number, number]):
   return 30;
 }
 
-export function calculateRevenueEfficiencyScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
+export function calculateRevenueEfficiencyScore(
+  input: ExecutiveScoringInput
+): AnalyticsExecutiveScore {
   const paymentCount = getTypeCount(input.current, "payment_received");
   const paymentValue = getTypeValue(input.current, "payment_received");
   const invoiceCount = getTypeCount(input.current, "invoice_created");
@@ -211,19 +215,20 @@ export function calculateRevenueEfficiencyScore(input: ExecutiveScoringInput): A
     });
   }
 
-  const explanation =
-    limitedSignal
-      ? "Limited revenue signal — no FinancialOS events in this period. Score uses fallback activity thresholds."
-      : paymentCount === 0
-        ? "No payment activity recorded this period."
-        : prevPaymentCount != null && paymentCount > prevPaymentCount
-          ? "Payment activity increased compared with the previous period."
-          : "Revenue efficiency reflects payment volume and invoice activity in the period.";
+  const explanation = limitedSignal
+    ? "Limited revenue signal — no FinancialOS events in this period. Score uses fallback activity thresholds."
+    : paymentCount === 0
+      ? "No payment activity recorded this period."
+      : prevPaymentCount != null && paymentCount > prevPaymentCount
+        ? "Payment activity increased compared with the previous period."
+        : "Revenue efficiency reflects payment volume and invoice activity in the period.";
 
   return buildScore(score, "Revenue efficiency", explanation, signals, limitedSignal);
 }
 
-export function calculateWorkforceReadinessScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
+export function calculateWorkforceReadinessScore(
+  input: ExecutiveScoringInput
+): AnalyticsExecutiveScore {
   const ctx = input.workforceReadiness;
   const staffAssigned = getTypeCount(input.current, "staff_assigned");
   const shiftCreated = getTypeCount(input.current, "shift_created");
@@ -239,9 +244,17 @@ export function calculateWorkforceReadinessScore(input: ExecutiveScoringInput): 
     score = clampScore(score - Math.min(25, riskPenalty));
 
     signals.push(
-      { key: "average_readiness", label: "Average readiness score", value: ctx.averageReadinessScore },
+      {
+        key: "average_readiness",
+        label: "Average readiness score",
+        value: ctx.averageReadinessScore,
+      },
       { key: "blocked_staff", label: "Blocked staff", value: ctx.blockedCount },
-      { key: "operational_warnings", label: "Operational warnings", value: ctx.operationalWarningCount }
+      {
+        key: "operational_warnings",
+        label: "Operational warnings",
+        value: ctx.operationalWarningCount,
+      }
     );
 
     const explanation =
@@ -270,7 +283,9 @@ export function calculateWorkforceReadinessScore(input: ExecutiveScoringInput): 
   return buildScore(score, "Workforce readiness", explanation, signals, limitedSignal);
 }
 
-export function calculateConversionPerformanceScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
+export function calculateConversionPerformanceScore(
+  input: ExecutiveScoringInput
+): AnalyticsExecutiveScore {
   const leadCreated = getTypeCount(input.current, "lead_created");
   const leadScored = getTypeCount(input.current, "lead_scored");
   const leadQualified = getTypeCount(input.current, "lead_qualified");
@@ -279,7 +294,8 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
   const quoteSent = getTypeCount(input.current, "quote_sent");
   const leadConverted = getTypeCount(input.current, "lead_converted");
 
-  const quoteToConsultRatio = consultationBooked > 0 ? quoteSent / consultationBooked : quoteSent > 0 ? 0.5 : 0;
+  const quoteToConsultRatio =
+    consultationBooked > 0 ? quoteSent / consultationBooked : quoteSent > 0 ? 0.5 : 0;
   const conversionRate = leadCreated > 0 ? leadConverted / leadCreated : leadConverted > 0 ? 1 : 0;
 
   let score = 40;
@@ -298,9 +314,9 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
   }
 
   const hasLeadFlow = input.current.byModule.has("leadflow");
-  const hasConversionModule =
-    input.current.byModule.has("consultation_os") || hasLeadFlow;
-  const limitedSignal = !hasConversionModule && quoteSent === 0 && consultationBooked === 0 && leadCreated === 0;
+  const hasConversionModule = input.current.byModule.has("consultation_os") || hasLeadFlow;
+  const limitedSignal =
+    !hasConversionModule && quoteSent === 0 && consultationBooked === 0 && leadCreated === 0;
 
   const signals: AnalyticsExecutiveContributingSignal[] = [
     { key: "lead_created", label: "Leads created", value: leadCreated },
@@ -310,24 +326,29 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
     { key: "consultation_booked", label: "Consultations booked", value: consultationBooked },
     { key: "quote_sent", label: "Quotes sent", value: quoteSent },
     { key: "lead_converted", label: "Leads converted", value: leadConverted },
-    { key: "quote_to_consult_ratio", label: "Quote-to-consult ratio", value: Math.round(quoteToConsultRatio * 100) },
+    {
+      key: "quote_to_consult_ratio",
+      label: "Quote-to-consult ratio",
+      value: Math.round(quoteToConsultRatio * 100),
+    },
   ];
 
-  const explanation =
-    limitedSignal
-      ? "Limited conversion signal — no ConsultationOS or LeadFlow events in this period."
-      : consultationBooked > 0 && quoteSent < consultationBooked * 0.5
-        ? "Quote activity is low relative to consultation activity."
-        : hasLeadFlow && leadScored > 0
-          ? "Conversion performance reflects LeadFlow scoring, stage progression, and funnel events."
-          : quoteSent > 0
-            ? "Conversion performance reflects quote, consultation, and lead progression events."
-            : "Conversion funnel activity is minimal this period.";
+  const explanation = limitedSignal
+    ? "Limited conversion signal — no ConsultationOS or LeadFlow events in this period."
+    : consultationBooked > 0 && quoteSent < consultationBooked * 0.5
+      ? "Quote activity is low relative to consultation activity."
+      : hasLeadFlow && leadScored > 0
+        ? "Conversion performance reflects LeadFlow scoring, stage progression, and funnel events."
+        : quoteSent > 0
+          ? "Conversion performance reflects quote, consultation, and lead progression events."
+          : "Conversion funnel activity is minimal this period.";
 
   return buildScore(score, "Conversion performance", explanation, signals, limitedSignal);
 }
 
-export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
+export function calculateSurgicalEfficiencyScore(
+  input: ExecutiveScoringInput
+): AnalyticsExecutiveScore {
   const surgeryCompleted = getTypeCount(input.current, "surgery_completed");
   const surgeryStarted = getTypeCount(input.current, "surgery_started");
   const graftRecorded = getTypeCount(input.current, "graft_count_recorded");
@@ -357,8 +378,16 @@ export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): 
     { key: "surgery_completed", label: "Surgeries completed", value: surgeryCompleted },
     { key: "surgery_started", label: "Surgeries started", value: surgeryStarted },
     { key: "graft_count_recorded", label: "Graft counts recorded", value: graftRecorded },
-    { key: "imaging_protocol_completed", label: "Imaging protocols completed", value: imagingProtocolCompleted },
-    { key: "audit_report_generated", label: "Audit reports generated", value: auditReportGenerated },
+    {
+      key: "imaging_protocol_completed",
+      label: "Imaging protocols completed",
+      value: imagingProtocolCompleted,
+    },
+    {
+      key: "audit_report_generated",
+      label: "Audit reports generated",
+      value: auditReportGenerated,
+    },
     { key: "graft_integrity_scored", label: "Graft integrity scores", value: graftIntegrityScored },
   ];
   if (prevCompleted != null) {
@@ -369,28 +398,40 @@ export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): 
     });
   }
 
-  const explanation =
-    limitedSignal
-      ? "Limited surgical signal — no SurgeryOS, ImagingOS, or AuditOS support events in this period."
-      : prevCompleted != null && surgeryCompleted === prevCompleted
-        ? "Surgery completion activity is stable compared with the previous period."
-        : prevCompleted != null && surgeryCompleted > prevCompleted
-          ? "Surgery throughput increased compared with the previous period."
-          : "Surgical efficiency reflects completion volume and procedure consistency.";
+  const explanation = limitedSignal
+    ? "Limited surgical signal — no SurgeryOS, ImagingOS, or AuditOS support events in this period."
+    : prevCompleted != null && surgeryCompleted === prevCompleted
+      ? "Surgery completion activity is stable compared with the previous period."
+      : prevCompleted != null && surgeryCompleted > prevCompleted
+        ? "Surgery throughput increased compared with the previous period."
+        : "Surgical efficiency reflects completion volume and procedure consistency.";
 
   return buildScore(score, "Surgical efficiency", explanation, signals, limitedSignal);
 }
 
-export function calculatePatientJourneyScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
+export function calculatePatientJourneyScore(
+  input: ExecutiveScoringInput
+): AnalyticsExecutiveScore {
   const onboardingStarted = getTypeCount(input.current, "patient_onboarding_started");
   const documentUploaded = getTypeCount(input.current, "patient_document_uploaded");
-  const imagesUploaded = getTypeCounts(input.current, ["patient_images_uploaded", "patient_uploaded_images"]);
+  const imagesUploaded = getTypeCounts(input.current, [
+    "patient_images_uploaded",
+    "patient_uploaded_images",
+  ]);
   const reportGenerated = getTypeCount(input.current, "patient_report_generated");
-  const followupCompleted = getTypeCounts(input.current, ["patient_followup_completed", "followup_completed"]);
+  const followupCompleted = getTypeCounts(input.current, [
+    "patient_followup_completed",
+    "followup_completed",
+  ]);
   const journeyCompleted = getTypeCount(input.current, "patient_journey_completed");
 
   const journeyEvents =
-    onboardingStarted + documentUploaded + imagesUploaded + reportGenerated + followupCompleted + journeyCompleted;
+    onboardingStarted +
+    documentUploaded +
+    imagesUploaded +
+    reportGenerated +
+    followupCompleted +
+    journeyCompleted;
   let score = activityBaseScore(journeyEvents, [1, 3, 8]);
   score += Math.min(6, onboardingStarted * 3);
   score += Math.min(6, documentUploaded * 2);
@@ -420,7 +461,9 @@ export function calculatePatientJourneyScore(input: ExecutiveScoringInput): Anal
   return buildScore(score, "Patient journey", explanation, signals, limitedSignal);
 }
 
-export function calculateDataCompletenessScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
+export function calculateDataCompletenessScore(
+  input: ExecutiveScoringInput
+): AnalyticsExecutiveScore {
   const coverage = input.moduleCoverage ?? [];
   const activeCount = coverage.filter((row) => row.status === "active").length;
   const limitedCount = coverage.filter((row) => row.status === "limited").length;
@@ -432,11 +475,27 @@ export function calculateDataCompletenessScore(input: ExecutiveScoringInput): An
   score += Math.round((limitedCount / expected) * 20);
   score += Math.min(
     10,
-    input.current.eventCount >= 50 ? 10 : input.current.eventCount >= 20 ? 7 : input.current.eventCount >= 10 ? 4 : input.current.eventCount > 0 ? 2 : 0
+    input.current.eventCount >= 50
+      ? 10
+      : input.current.eventCount >= 20
+        ? 7
+        : input.current.eventCount >= 10
+          ? 4
+          : input.current.eventCount > 0
+            ? 2
+            : 0
   );
   score += Math.min(
     10,
-    entityCoverage >= 20 ? 10 : entityCoverage >= 10 ? 6 : entityCoverage >= 5 ? 3 : entityCoverage > 0 ? 1 : 0
+    entityCoverage >= 20
+      ? 10
+      : entityCoverage >= 10
+        ? 6
+        : entityCoverage >= 5
+          ? 3
+          : entityCoverage > 0
+            ? 1
+            : 0
   );
   if (activeCount >= 6) score += 8;
   if (activeCount >= 8) score += 5;
@@ -473,7 +532,9 @@ export type OverallHealthScoreInput = {
   dataCompletenessScore: AnalyticsExecutiveScore;
 };
 
-export function calculateOverallClinicHealthScore(input: OverallHealthScoreInput): AnalyticsExecutiveScore {
+export function calculateOverallClinicHealthScore(
+  input: OverallHealthScoreInput
+): AnalyticsExecutiveScore {
   const weighted =
     input.revenueEfficiencyScore.score * OVERALL_HEALTH_WEIGHTS.revenueEfficiency +
     input.workforceReadinessScore.score * OVERALL_HEALTH_WEIGHTS.workforceReadiness +
@@ -541,7 +602,9 @@ export function calculateOverallClinicHealthScore(input: OverallHealthScoreInput
   );
 }
 
-export function buildExecutiveMetrics(input: ExecutiveScoringInput): import("./analyticsExecutiveTypes").AnalyticsExecutiveMetric[] {
+export function buildExecutiveMetrics(
+  input: ExecutiveScoringInput
+): import("./analyticsExecutiveTypes").AnalyticsExecutiveMetric[] {
   const paymentCount = getTypeCount(input.current, "payment_received");
   const paymentValue = getTypeValue(input.current, "payment_received");
   const prevPaymentCount =
@@ -560,7 +623,13 @@ export function buildExecutiveMetrics(input: ExecutiveScoringInput): import("./a
     buildMetric("payment_value", "Payment volume", paymentValue, "currency", prevPaymentValue),
     buildMetric("quote_sent", "Quotes sent", quoteSent, "count"),
     buildMetric("consultations_booked", "Consultations booked", consultationBooked, "count"),
-    buildMetric("surgeries_completed", "Surgeries completed", surgeryCompleted, "count", prevSurgeryCompleted),
+    buildMetric(
+      "surgeries_completed",
+      "Surgeries completed",
+      surgeryCompleted,
+      "count",
+      prevSurgeryCompleted
+    ),
     buildMetric("active_modules", "Active modules", input.activeModuleNames.length, "modules"),
     buildMetric("total_events", "Analytics events", input.current.eventCount, "events"),
   ];
@@ -574,7 +643,7 @@ function buildMetric(
   previousValue?: number
 ): import("./analyticsExecutiveTypes").AnalyticsExecutiveMetric {
   const changePercent =
-    previousValue != null ? pctChange(value, previousValue) ?? undefined : undefined;
+    previousValue != null ? (pctChange(value, previousValue) ?? undefined) : undefined;
   let direction: import("./analyticsExecutiveTypes").AnalyticsExecutiveMetricDirection = "unknown";
   if (changePercent != null) {
     if (changePercent > 2) direction = "up";

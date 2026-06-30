@@ -45,7 +45,9 @@ export function PatientTwinCasesCard({ tenantId, twin }: PatientTwinCasesCardPro
                       className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-200/95 hover:text-cyan-100"
                     >
                       Case
-                      <span className="font-mono text-xs text-[#94A3B8]">{c.case_id.slice(0, 8)}…</span>
+                      <span className="font-mono text-xs text-[#94A3B8]">
+                        {c.case_id.slice(0, 8)}…
+                      </span>
                       <ExternalLink className="h-3.5 w-3.5 opacity-60" aria-hidden />
                     </Link>
                     <p className="mt-1 text-xs text-[#94A3B8]">
@@ -57,7 +59,9 @@ export function PatientTwinCasesCard({ tenantId, twin }: PatientTwinCasesCardPro
                   <div className="text-right text-xs text-[#64748B]">
                     <div>Created {shortWhen(c.created_at)}</div>
                     {c.global_case_id ? (
-                      <div className="mt-0.5 font-mono text-[10px] text-[#475569]">Global {c.global_case_id.slice(0, 8)}…</div>
+                      <div className="mt-0.5 font-mono text-[10px] text-[#475569]">
+                        Global {c.global_case_id.slice(0, 8)}…
+                      </div>
                     ) : null}
                   </div>
                 </div>
@@ -65,10 +69,15 @@ export function PatientTwinCasesCard({ tenantId, twin }: PatientTwinCasesCardPro
                   <p className="mt-2 border-t border-white/[0.06] pt-2 text-xs text-[#94A3B8]">
                     <span className="text-[#64748B]">Latest milestone </span>
                     {c.latest_milestone.title ?? c.latest_milestone.event_kind}
-                    <span className="text-[#64748B]"> · {shortWhen(c.latest_milestone.occurred_at)}</span>
+                    <span className="text-[#64748B]">
+                      {" "}
+                      · {shortWhen(c.latest_milestone.occurred_at)}
+                    </span>
                   </p>
                 ) : (
-                  <p className="mt-2 border-t border-white/[0.06] pt-2 text-xs text-[#64748B]">No timeline milestone on file.</p>
+                  <p className="mt-2 border-t border-white/[0.06] pt-2 text-xs text-[#64748B]">
+                    No timeline milestone on file.
+                  </p>
                 )}
               </li>
             );

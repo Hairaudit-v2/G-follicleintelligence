@@ -66,7 +66,9 @@ function emptyBoard(overrides: Partial<ReceptionOsBoardPayload> = {}): Reception
   } as ReceptionOsBoardPayload;
 }
 
-function subject(partial: Partial<ReceptionOsRevenueSubjectSignals>): ReceptionOsRevenueSubjectSignals {
+function subject(
+  partial: Partial<ReceptionOsRevenueSubjectSignals>
+): ReceptionOsRevenueSubjectSignals {
   return {
     subjectId: "sub-1",
     label: "Alex Patient",
@@ -97,7 +99,9 @@ function subject(partial: Partial<ReceptionOsRevenueSubjectSignals>): ReceptionO
 
 describe("receptionOsRevenueModel", () => {
   it("scores probability with confidence and weighted revenue", () => {
-    const score = scoreReceptionOsRevenueSubject(subject({ pipelineColumn: "deposit_pending", depositRequested: true }));
+    const score = scoreReceptionOsRevenueSubject(
+      subject({ pipelineColumn: "deposit_pending", depositRequested: true })
+    );
     assert.ok(score.probabilityPercent >= 70);
     assert.ok(["low", "medium", "high"].includes(score.confidenceLevel));
     assert.equal(score.weightedRevenue, Math.round((12_000 * score.probabilityPercent) / 100));
@@ -105,9 +109,11 @@ describe("receptionOsRevenueModel", () => {
   });
 
   it("reduces probability for overdue deposits and inactive leads", () => {
-    const healthy = scoreReceptionOsRevenueSubject(subject({ depositOverdue: false, daysSinceLastCommunication: 1 }));
+    const healthy = scoreReceptionOsRevenueSubject(
+      subject({ depositOverdue: false, daysSinceLastCommunication: 1 })
+    );
     const risky = scoreReceptionOsRevenueSubject(
-      subject({ depositOverdue: true, daysSinceLastCommunication: 10 }),
+      subject({ depositOverdue: true, daysSinceLastCommunication: 10 })
     );
     assert.ok(risky.probabilityPercent < healthy.probabilityPercent);
     assert.ok(risky.riskFlags.includes("deposit_overdue"));
@@ -116,7 +122,11 @@ describe("receptionOsRevenueModel", () => {
 
   it("detects follow-up SLA breaches", () => {
     const breaches = detectReceptionOsFollowUpSlaBreaches([
-      subject({ consultationCompleted: true, quoteSent: false, pipelineColumn: "consultation_completed" }),
+      subject({
+        consultationCompleted: true,
+        quoteSent: false,
+        pipelineColumn: "consultation_completed",
+      }),
       subject({ quoteSent: true, daysSinceLastCommunication: 3, pipelineColumn: "quote_sent" }),
       subject({ depositRequested: true, depositOverdue: true, pipelineColumn: "deposit_pending" }),
       subject({
@@ -152,7 +162,11 @@ describe("receptionOsRevenueModel", () => {
       }),
     ];
     const scores = subjects.map(scoreReceptionOsRevenueSubject);
-    const alerts = buildReceptionOsLostRevenueAlerts({ subjects, scores, highValueQuoteThreshold: 10_000 });
+    const alerts = buildReceptionOsLostRevenueAlerts({
+      subjects,
+      scores,
+      highValueQuoteThreshold: 10_000,
+    });
     assert.ok(alerts.some((a) => a.kind === "high_value_quote_no_followup"));
     assert.ok(alerts.some((a) => a.kind === "missing_finance_payment_link"));
   });
@@ -178,7 +192,10 @@ describe("receptionOsRevenueModel", () => {
         },
       },
     });
-    const subjects = [subject({ estimatedQuoteValue: 10_000 }), subject({ subjectId: "sub-2", estimatedQuoteValue: 8_000 })];
+    const subjects = [
+      subject({ estimatedQuoteValue: 10_000 }),
+      subject({ subjectId: "sub-2", estimatedQuoteValue: 8_000 }),
+    ];
     const scores = subjects.map(scoreReceptionOsRevenueSubject);
     const revenueRiskAlerts = buildReceptionOsLostRevenueAlerts({ subjects, scores });
     const scoreboard = buildReceptionOsConversionScoreboard({
@@ -267,7 +284,10 @@ describe("receptionOsRevenueModel", () => {
     assert.equal(conversionScoreboardVisibleForRole("consultant"), true);
     assert.equal(conversionScoreboardVisibleForRole("receptionist"), false);
 
-    assert.deepEqual(phase3WidgetsForRole("admin"), ["revenue_intelligence", "conversion_scoreboard"]);
+    assert.deepEqual(phase3WidgetsForRole("admin"), [
+      "revenue_intelligence",
+      "conversion_scoreboard",
+    ]);
     assert.deepEqual(phase3WidgetsForRole("consultant"), ["conversion_scoreboard"]);
     assert.deepEqual(phase3WidgetsForRole("receptionist"), []);
   });

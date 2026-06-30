@@ -43,7 +43,11 @@ export type ConsultationOsListViewProps = {
   activeStatus: ConsultationStatus | null;
 };
 
-export function ConsultationOsListView({ tenantId, rows, activeStatus }: ConsultationOsListViewProps) {
+export function ConsultationOsListView({
+  tenantId,
+  rows,
+  activeStatus,
+}: ConsultationOsListViewProps) {
   const base = `/fi-admin/${tenantId}`;
 
   return (
@@ -99,7 +103,10 @@ export function ConsultationOsListView({ tenantId, rows, activeStatus }: Consult
               ? `No consultations with status “${consultationStatusLabel(activeStatus)}”.`
               : "Start by creating a new consultation."}
           </p>
-          <Link href={`${base}/consultations/new`} className={`mt-4 ${consultationOsLinkButtonClass}`}>
+          <Link
+            href={`${base}/consultations/new`}
+            className={`mt-4 ${consultationOsLinkButtonClass}`}
+          >
             New consultation
           </Link>
         </DashboardCard>
@@ -111,7 +118,9 @@ export function ConsultationOsListView({ tenantId, rows, activeStatus }: Consult
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-[#F8FAFC]">{row.consultation_type_label}</p>
+                      <p className="text-sm font-semibold text-[#F8FAFC]">
+                        {row.consultation_type_label}
+                      </p>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusToneClass(row.status)}`}
                       >
@@ -121,11 +130,16 @@ export function ConsultationOsListView({ tenantId, rows, activeStatus }: Consult
                     <p className="text-sm font-medium text-[#CBD5E1]">{row.link_headline}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#64748B]">
                       <span>Date: {formatConsultationDate(row.consultation_date)}</span>
-                      {row.consultant_display_name ? <span>Clinician: {row.consultant_display_name}</span> : null}
+                      {row.consultant_display_name ? (
+                        <span>Clinician: {row.consultant_display_name}</span>
+                      ) : null}
                       <span>Updated: {formatConsultationDateTime(row.updated_at)}</span>
                     </div>
                   </div>
-                  <Link href={`${base}/consultations/${row.id}`} className={consultationOsLinkButtonClass}>
+                  <Link
+                    href={`${base}/consultations/${row.id}`}
+                    className={consultationOsLinkButtonClass}
+                  >
                     Open consultation
                   </Link>
                 </div>

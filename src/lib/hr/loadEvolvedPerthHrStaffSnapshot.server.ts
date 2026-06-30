@@ -16,7 +16,9 @@ function optionalCount(value: unknown): number | null {
  *
  * Optional `IIOHR_HR_PERTH_STAFF_FEED_KEY` sets `Authorization: Bearer <key>`.
  */
-export async function loadEvolvedPerthHrStaffRecordsForFiPush(): Promise<IiohrHrPortalStaffRecord[]> {
+export async function loadEvolvedPerthHrStaffRecordsForFiPush(): Promise<
+  IiohrHrPortalStaffRecord[]
+> {
   const url = process.env.IIOHR_HR_PERTH_STAFF_FEED_URL?.trim();
   if (!url) {
     throw new Error(

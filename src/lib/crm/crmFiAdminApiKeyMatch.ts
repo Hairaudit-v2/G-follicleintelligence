@@ -6,7 +6,7 @@ import { safeTimingEqualAdminKey } from "@/src/lib/crm/fiAdminKeyTransport";
 /** Compare submitted admin key to configured `FI_ADMIN_API_KEY` (trimmed; timing-safe). */
 export function isFiAdminApiKeyMatch(
   adminKey: string | undefined | null,
-  configuredKey: string | undefined | null,
+  configuredKey: string | undefined | null
 ): boolean {
   const expected = configuredKey?.trim();
   if (!expected) return false;

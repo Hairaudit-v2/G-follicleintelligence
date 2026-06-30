@@ -21,28 +21,68 @@ export const NORWOOD_SCALE_VALUES = [
 
 export type NorwoodScaleValue = (typeof NORWOOD_SCALE_VALUES)[number];
 
-export const NORWOOD_OPTIONS: readonly { value: NorwoodScaleValue; label: string; description: string }[] = [
+export const NORWOOD_OPTIONS: readonly {
+  value: NorwoodScaleValue;
+  label: string;
+  description: string;
+}[] = [
   { value: "I", label: "Stage I", description: "Minimal recession; full hairline." },
   { value: "II", label: "Stage II", description: "Triangular recession at temples." },
   { value: "IIa", label: "Stage IIa", description: "Recession across entire frontal hairline." },
-  { value: "III", label: "Stage III", description: "Deep temporal recession; vertex often spared." },
+  {
+    value: "III",
+    label: "Stage III",
+    description: "Deep temporal recession; vertex often spared.",
+  },
   { value: "IIIa", label: "Stage IIIa", description: "III with continued frontal recession." },
-  { value: "IIIvertex", label: "Stage III vertex", description: "Primarily vertex / crown thinning." },
+  {
+    value: "IIIvertex",
+    label: "Stage III vertex",
+    description: "Primarily vertex / crown thinning.",
+  },
   { value: "IV", label: "Stage IV", description: "Further recession; enlarged vertex thinning." },
-  { value: "IVa", label: "Stage IVa", description: "Advanced recession with sparse mid-scalp band." },
+  {
+    value: "IVa",
+    label: "Stage IVa",
+    description: "Advanced recession with sparse mid-scalp band.",
+  },
   { value: "V", label: "Stage V", description: "Vertex and frontal areas merging." },
   { value: "Va", label: "Stage Va", description: "More extensive than V; narrower bridge." },
-  { value: "VI", label: "Stage VI", description: "Bridge of hair between frontal and vertex lost." },
-  { value: "VII", label: "Stage VII", description: "Most extensive; narrow band or horseshoe pattern." },
-  { value: "unknown", label: "Not classified", description: "Stage not assessed or not applicable." },
+  {
+    value: "VI",
+    label: "Stage VI",
+    description: "Bridge of hair between frontal and vertex lost.",
+  },
+  {
+    value: "VII",
+    label: "Stage VII",
+    description: "Most extensive; narrow band or horseshoe pattern.",
+  },
+  {
+    value: "unknown",
+    label: "Not classified",
+    description: "Stage not assessed or not applicable.",
+  },
 ] as const;
 
 export const LUDWIG_SCALE_VALUES = ["I", "II", "III"] as const;
 export type LudwigScaleValue = (typeof LUDWIG_SCALE_VALUES)[number];
 
-export const LUDWIG_OPTIONS: readonly { value: LudwigScaleValue; label: string; description: string }[] = [
-  { value: "I", label: "Ludwig I", description: "Mild thinning on crown; frontal hairline preserved." },
-  { value: "II", label: "Ludwig II", description: "Noticeable central widening; moderate crown loss." },
+export const LUDWIG_OPTIONS: readonly {
+  value: LudwigScaleValue;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "I",
+    label: "Ludwig I",
+    description: "Mild thinning on crown; frontal hairline preserved.",
+  },
+  {
+    value: "II",
+    label: "Ludwig II",
+    description: "Noticeable central widening; moderate crown loss.",
+  },
   { value: "III", label: "Ludwig III", description: "Diffuse thinning with see-through crown." },
 ] as const;
 
@@ -58,19 +98,45 @@ export const HAIRLINE_PATTERN_VALUES = [
 
 export type HairlinePatternValue = (typeof HAIRLINE_PATTERN_VALUES)[number];
 
-export const HAIRLINE_PATTERN_OPTIONS: readonly { value: HairlinePatternValue; label: string; description: string }[] = [
+export const HAIRLINE_PATTERN_OPTIONS: readonly {
+  value: HairlinePatternValue;
+  label: string;
+  description: string;
+}[] = [
   { value: "receding", label: "Receding", description: "Classic frontal / temple pullback." },
-  { value: "diffuse", label: "Diffuse", description: "Generalised thinning without sharp hairline step." },
-  { value: "mature", label: "Mature hairline", description: "Physiological adult shift, not necessarily pathological loss." },
-  { value: "stable", label: "Stable", description: "Pattern unchanged over clinically relevant period." },
-  { value: "temporal_recession", label: "Temporal recession", description: "Predominant loss at temples." },
-  { value: "vertex_thinning", label: "Vertex / crown thinning", description: "Predominant thinning at crown." },
+  {
+    value: "diffuse",
+    label: "Diffuse",
+    description: "Generalised thinning without sharp hairline step.",
+  },
+  {
+    value: "mature",
+    label: "Mature hairline",
+    description: "Physiological adult shift, not necessarily pathological loss.",
+  },
+  {
+    value: "stable",
+    label: "Stable",
+    description: "Pattern unchanged over clinically relevant period.",
+  },
+  {
+    value: "temporal_recession",
+    label: "Temporal recession",
+    description: "Predominant loss at temples.",
+  },
+  {
+    value: "vertex_thinning",
+    label: "Vertex / crown thinning",
+    description: "Predominant thinning at crown.",
+  },
   { value: "unknown", label: "Not specified", description: "Pattern not recorded." },
 ] as const;
 
 const NORWOOD_LABEL_BY_VALUE = new Map(NORWOOD_OPTIONS.map((o) => [o.value, o.label] as const));
 const LUDWIG_LABEL_BY_VALUE = new Map(LUDWIG_OPTIONS.map((o) => [o.value, o.label] as const));
-const HAIRLINE_LABEL_BY_VALUE = new Map(HAIRLINE_PATTERN_OPTIONS.map((o) => [o.value, o.label] as const));
+const HAIRLINE_LABEL_BY_VALUE = new Map(
+  HAIRLINE_PATTERN_OPTIONS.map((o) => [o.value, o.label] as const)
+);
 
 /** Display label for a stored Norwood code (falls back to raw value). */
 export function getNorwoodLabel(scale: string | null | undefined): string {

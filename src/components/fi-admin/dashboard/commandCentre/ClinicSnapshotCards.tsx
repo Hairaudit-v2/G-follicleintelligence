@@ -22,11 +22,15 @@ export function ClinicSnapshotCards(props: { cards: readonly ClinicSnapshotCard[
             href={card.href}
             className={cn(
               "flex min-h-[7.5rem] flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0c1426]/70 px-4 py-4 shadow-inner shadow-black/20 backdrop-blur-sm transition",
-              "hover:border-cyan-500/25 hover:bg-[#141c33]/80",
+              "hover:border-cyan-500/25 hover:bg-[#141c33]/80"
             )}
           >
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">{card.label}</p>
-            <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-slate-50">{card.value}</p>
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              {card.label}
+            </p>
+            <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-slate-50">
+              {card.value}
+            </p>
             <p className="mt-2 text-xs leading-relaxed text-slate-500">{card.detail}</p>
           </Link>
         ))}
