@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { PrescriptionEditorClient } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
+import { PrescriptionPatientPickerClient } from "@/src/components/fi-admin/prescribing/PrescriptionPatientPickerClient";
 import { getFiTenantMemberSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { formatClinicalPickerOptionLabel } from "@/src/lib/staff/clinicalStaffPicker";
@@ -20,16 +21,20 @@ export default async function NewPrescriptionPage({
 }) {
   const { tenantId } = await params;
   const sp = (await searchParams) ?? {};
-  const patientIdRaw = sp.patientId;
-  const patientId = Array.isArray(patientIdRaw) ? patientIdRaw[0] : patientIdRaw;
-  if (!tenantId?.trim() || !patientId?.trim()) notFound();
+  if (!tenantId?.trim()) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
+  const patientIdRaw = sp.patientId;
+  const patientId = (Array.isArray(patientIdRaw) ? patientIdRaw[0] : patientIdRaw)?.trim() || null;
   const caseIdRaw = sp.caseId;
   const caseId = (Array.isArray(caseIdRaw) ? caseIdRaw[0] : caseIdRaw)?.trim() || null;
+
+  if (!patientId) {
+    return <PrescriptionPatientPickerClient tenantId={tenantId.trim()} caseId={caseId} />;
+  }
 
   const session = await getFiTenantMemberSessionIfAllowed(tenantId.trim());
   const defaultDoctorStaffId =
