@@ -84,7 +84,7 @@ export function RepairWireframeVisualAssessmentField({
         {desc}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
         <p className={cn("mb-2 text-xs", fiOsLightFormSurfaceClassNames.helper)}>
           1) Choose an issue tag. 2) Tap scalp zones on the wireframe to add/remove that tag for the zone. Optional
           reference:
@@ -102,8 +102,8 @@ export function RepairWireframeVisualAssessmentField({
                   className={cn(
                     "min-h-[44px] shrink-0 rounded-full border px-3 py-2 text-xs font-medium",
                     on
-                      ? "border-rose-600 bg-rose-50 text-rose-950"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white",
+                      ? "border-rose-600 bg-rose-500/10 text-rose-200"
+                      : "border-white/[0.08] bg-white/[0.03] text-slate-300 hover:bg-[#0F1629]/80 backdrop-blur-md",
                     disabled && "cursor-not-allowed opacity-60"
                   )}
                 >
@@ -120,7 +120,7 @@ export function RepairWireframeVisualAssessmentField({
             <img
               src={`${CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE}/head-wireframe.svg`}
               alt="Head wireframe reference"
-              className="mx-auto mb-2 max-h-32 w-full max-w-xs rounded border border-slate-100 object-contain md:max-h-36"
+              className="mx-auto mb-2 max-h-32 w-full max-w-xs rounded border border-white/[0.06] object-contain md:max-h-36"
             />
             <ScalpZonesTopViewSvg
               mode="repair"
@@ -132,8 +132,8 @@ export function RepairWireframeVisualAssessmentField({
             />
           </div>
 
-          <div className="space-y-2 text-xs text-slate-700">
-            <p className="font-semibold text-slate-600">Zone summary</p>
+          <div className="space-y-2 text-xs text-slate-300">
+            <p className="font-semibold text-slate-400">Zone summary</p>
             <ul className="space-y-2">
               {Object.keys(annotations).length === 0 ? (
                 <li className="text-slate-500">No annotations yet.</li>
@@ -141,20 +141,20 @@ export function RepairWireframeVisualAssessmentField({
                 (Object.keys(annotations) as ConsultationScalpZoneId[]).map((z) => (
                   <li
                     key={z}
-                    className="rounded border border-slate-100 bg-slate-50/80 px-2 py-2 text-[11px] leading-snug text-slate-700"
+                    className="rounded border border-white/[0.06] bg-white/[0.03] px-2 py-2 text-[11px] leading-snug text-slate-300"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold capitalize text-slate-800">{z.replaceAll("_", " ")}</span>
+                      <span className="font-semibold capitalize text-slate-200">{z.replaceAll("_", " ")}</span>
                       <button
                         type="button"
-                        className="shrink-0 text-[11px] font-medium text-rose-700 underline"
+                        className="shrink-0 text-[11px] font-medium text-rose-300 underline"
                         disabled={disabled}
                         onClick={() => clearZone(z)}
                       >
                         Clear
                       </button>
                     </div>
-                    <p className="mt-1 text-slate-600">{(annotations[z] ?? []).map((t) => repairTagLabel(t)).join(", ")}</p>
+                    <p className="mt-1 text-slate-400">{(annotations[z] ?? []).map((t) => repairTagLabel(t)).join(", ")}</p>
                   </li>
                 ))
               )}
@@ -162,9 +162,9 @@ export function RepairWireframeVisualAssessmentField({
           </div>
         </div>
 
-        <div className="space-y-1 border-t border-slate-100 pt-3">
+        <div className="space-y-1 border-t border-white/[0.06] pt-3">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Raw JSON (read-only)</span>
-          <pre className="max-h-28 overflow-auto rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-800">
+          <pre className="max-h-28 overflow-auto rounded border border-white/[0.08] bg-white/[0.03] p-2 text-[11px] text-slate-200">
             {JSON.stringify(annotations, null, 2)}
           </pre>
         </div>

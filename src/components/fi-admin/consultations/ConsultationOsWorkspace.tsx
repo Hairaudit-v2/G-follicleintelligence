@@ -32,7 +32,7 @@ import { getConsultationTypeDefinition } from "@/src/lib/consultations/consultat
 import { CONSULTATION_EDITABLE_STATUSES, type ConsultationRow, type ConsultationStatus } from "@/src/lib/consultations/consultationTypes";
 
 const PATHWAY_HERO_CARD_CLASS =
-  "border-sky-200/90 bg-gradient-to-b from-sky-50/95 via-white to-white shadow-md ring-2 ring-sky-300/40 dark:border-sky-800/60 dark:from-sky-950/45 dark:via-slate-950/50 dark:to-slate-950/40 dark:ring-sky-800/50";
+  "border-cyan-500/20 bg-gradient-to-b from-sky-50/95 via-white to-white shadow-md ring-2 ring-sky-300/40 dark:border-sky-800/60 dark:from-sky-950/45 dark:via-slate-950/50 dark:to-slate-950/40 dark:ring-sky-800/50";
 
 function formatStatusLabel(s: ConsultationStatus): string {
   return s
@@ -242,10 +242,10 @@ export function ConsultationOsWorkspace({
         if (!pathwayCompletionSummary) return null;
         return (
           <section key="intelligence_summary" className="space-y-3" aria-labelledby="consultation-intel-summary-heading">
-            <h2 id="consultation-intel-summary-heading" className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+            <h2 id="consultation-intel-summary-heading" className="text-base font-semibold tracking-tight text-slate-100 dark:text-slate-50">
               Consultation intelligence summary
             </h2>
-            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">
               Rules-based snapshot from the completed guided pathway — stored on this consultation for Twin, audit, and
               revenue hand-offs.
             </p>
@@ -270,11 +270,11 @@ export function ConsultationOsWorkspace({
       case "intake":
         return (
           <div key="intake" id="consultation-hub-intake">
-            <FiCard className="border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 dark:border-slate-700/80 dark:bg-slate-950/30">
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200/80 pb-3 dark:border-slate-700/80">
+            <FiCard className="border-white/[0.08] bg-white/[0.03] p-4 sm:p-5 dark:border-slate-700/80 dark:bg-slate-950/30">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.08] pb-3 dark:border-slate-700/80">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Visit context</p>
-                <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-400">
                   {consultationTypeLabel}
                   <span className="text-slate-400"> · </span>
                   {canEdit ? (
@@ -287,7 +287,7 @@ export function ConsultationOsWorkspace({
                       id="consultation-os-status"
                       value={status}
                       onChange={(e) => setStatus(e.target.value as ConsultationStatus)}
-                      className="ml-1 max-w-[11rem] rounded border border-slate-200 bg-white px-1.5 py-0.5 text-xs font-medium text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      className="ml-1 max-w-[11rem] rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-1.5 py-0.5 text-xs font-medium text-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                     >
                       <option value="draft">Draft</option>
                       <option value="in_progress">In progress</option>
@@ -322,7 +322,7 @@ export function ConsultationOsWorkspace({
                     onClearLead={onClearLead}
                   />
                 ) : (
-                  <div className="rounded-lg border border-dashed border-slate-200/90 p-3 text-xs text-slate-600 dark:border-slate-600 dark:text-slate-400">
+                  <div className="rounded-lg border border-dashed border-white/[0.08] p-3 text-xs text-slate-400 dark:border-slate-600 dark:text-slate-400">
                     Lead linking requires CRM access.
                   </div>
                 )}
@@ -339,7 +339,7 @@ export function ConsultationOsWorkspace({
                     value={consultationDate}
                     onChange={(e) => setConsultationDate(e.target.value)}
                     disabled={!canEdit}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                    className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                   />
                 </div>
                 {clinicalStaffOptions.length > 0 ? (
@@ -354,7 +354,7 @@ export function ConsultationOsWorkspace({
                       value={consultantStaffId}
                       allowEmpty
                       emptyLabel="Select…"
-                      className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                       disabled={!canEdit}
                       onChange={(staffId) => {
                         setConsultantStaffId(staffId);
@@ -375,13 +375,13 @@ export function ConsultationOsWorkspace({
                       value={consultantName}
                       onChange={(e) => setConsultantName(e.target.value)}
                       disabled={!canEdit}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      className="w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-white/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-3 dark:border-slate-700/80">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-3 dark:border-slate-700/80">
                 <div className="min-w-0">
                   {canEdit ? (
                     <>
@@ -389,7 +389,7 @@ export function ConsultationOsWorkspace({
                         {subtleSaveLabel}
                       </p>
                       {autosaveWarning?.trim() && !error?.trim() ? (
-                        <p className="mt-1 max-w-md text-xs text-amber-800 dark:text-amber-200/90" role="status">
+                        <p className="mt-1 max-w-md text-xs text-amber-300 dark:text-amber-200/90" role="status">
                           Autosave: {autosaveWarning}
                         </p>
                       ) : null}
@@ -435,14 +435,14 @@ export function ConsultationOsWorkspace({
               {appointmentHref ? (
                 <Link
                   href={appointmentHref}
-                  className="inline-flex items-center justify-center rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-900 shadow-sm transition hover:border-sky-300 hover:bg-sky-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+                  className="inline-flex items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-200 shadow-sm transition hover:border-sky-300 hover:bg-cyan-500/15 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
                 >
                   Open appointment
                 </Link>
               ) : null}
               <Link
                 href={patientsHref}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
               >
                 Back to patients
               </Link>
@@ -452,8 +452,8 @@ export function ConsultationOsWorkspace({
       </FiCard>
 
       <FiCard className="border-sky-100 bg-gradient-to-r from-sky-50/80 to-white dark:border-sky-900/40 dark:from-sky-950/30 dark:to-slate-950/40">
-        <p className="text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200">
-          <span className="font-semibold text-sky-900 dark:text-sky-200">How this hub works.</span>{" "}
+        <p className="text-sm font-medium leading-relaxed text-slate-200 dark:text-slate-200">
+          <span className="font-semibold text-cyan-200 dark:text-sky-200">How this hub works.</span>{" "}
           {!hubPlan.hasPathwayCompletionSummary
             ? "Choose a pathway below to open the guided form. When you complete and approve that form, this page will surface the intelligence summary and downstream routing."
             : "Your pathway is complete — review the intelligence summary and routing first, then open another pathway if this visit needs an additional structured capture."}
@@ -463,20 +463,20 @@ export function ConsultationOsWorkspace({
       {!hubPlan.hasPathwayCompletionSummary ? pathwayLauncherEl : null}
 
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300" role="alert">
           {error}
         </div>
       ) : null}
 
       {saveOk ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950" role="status">
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200" role="status">
           Intake saved successfully.
         </div>
       ) : null}
 
       <FiCard className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
-        <label htmlFor="cos-admin-key" className="block text-xs text-slate-600">
+        <label htmlFor="cos-admin-key" className="block text-xs text-slate-400">
           FI Admin API key (only if your account does not have CRM write access)
         </label>
         <input
@@ -485,7 +485,7 @@ export function ConsultationOsWorkspace({
           autoComplete="off"
           value={adminKey}
           onChange={(e) => setAdminKey(e.target.value)}
-          className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
+          className="mt-1 w-full max-w-md rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 shadow-lg shadow-black/40 outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
         />
       </FiCard>
 

@@ -49,7 +49,7 @@ function ConsultationWorkflowStepper({ phase }: { phase: WorkflowPhase }) {
   ];
   const activeIdx = phase === "editing" ? 0 : phase === "review" ? 1 : 2;
   return (
-    <nav aria-label="Consultation workflow" className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+    <nav aria-label="Consultation workflow" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
       <ol className="flex flex-wrap items-stretch gap-2 sm:gap-3">
         {steps.map((s, i) => {
           const active = i === activeIdx;
@@ -59,15 +59,15 @@ function ConsultationWorkflowStepper({ phase }: { phase: WorkflowPhase }) {
               key={s.id}
               className={cn(
                 "flex min-h-[44px] min-w-[140px] flex-1 flex-col justify-center rounded-lg border px-3 py-2 text-left text-xs sm:text-sm",
-                active && "border-sky-500 bg-sky-50 font-semibold text-sky-950 shadow-sm",
-                done && !active && "border-emerald-200 bg-emerald-50/50 text-emerald-950",
-                !active && !done && "border-slate-200 bg-white text-slate-600"
+                active && "border-sky-500 bg-cyan-500/10 font-semibold text-cyan-200 shadow-sm",
+                done && !active && "border-emerald-500/20 bg-emerald-500/10 text-emerald-200",
+                !active && !done && "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-400"
               )}
             >
               <span className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Step {s.n}</span>
               <span className="mt-0.5 leading-snug">{s.title}</span>
-              {done ? <span className="mt-1 text-[0.65rem] font-medium text-emerald-800">Done</span> : null}
-              {active ? <span className="mt-1 text-[0.65rem] font-medium text-sky-800">Current</span> : null}
+              {done ? <span className="mt-1 text-[0.65rem] font-medium text-emerald-300">Done</span> : null}
+              {active ? <span className="mt-1 text-[0.65rem] font-medium text-cyan-200">Current</span> : null}
             </li>
           );
         })}
@@ -320,7 +320,7 @@ export function ConsultationFormRunner({
 
   const areaMapReadOnlyBlock =
     !canEdit && bodyAreaMapFields.length > 0 ? (
-      <div className="space-y-3 border-t border-slate-200 pt-4">
+      <div className="space-y-3 border-t border-white/[0.08] pt-4">
         <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Area map summary</h3>
         {bodyAreaMapFields.map((f) => (
           <BodyAreaMapAnnotationsSummary
@@ -384,7 +384,7 @@ export function ConsultationFormRunner({
           secondaryAction={
             <Link
               href={base}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
             >
               Back to consultation hub
             </Link>
@@ -407,12 +407,12 @@ export function ConsultationFormRunner({
           {autosaveError?.trim() ? ` — ${autosaveError.trim()}` : null}
         </p>
         {submitError?.trim() ? (
-          <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900" role="alert">
+          <p className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
             {submitError.trim()}
           </p>
         ) : null}
         {completeError?.trim() ? (
-          <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900" role="alert">
+          <p className="mt-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
             {completeError.trim()}
           </p>
         ) : null}
@@ -451,7 +451,7 @@ export function ConsultationFormRunner({
             <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Pathway complete</h3>
             <p className={`text-sm ${fiOsLightFormSurfaceClassNames.body}`}>
               The consultation intelligence summary and routing tiles are on the{" "}
-              <Link href={base} className="font-semibold text-sky-700 underline">
+              <Link href={base} className="font-semibold text-cyan-300 underline">
                 consultation hub
               </Link>
               .
@@ -471,8 +471,8 @@ export function ConsultationFormRunner({
               />
             </div>
           ) : null}
-          <details className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-            <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900">
+          <details className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
+            <summary className="cursor-pointer select-none text-sm font-semibold text-slate-100">
               Chart snapshot and guided form record
             </summary>
             <div className="mt-4 space-y-6">
@@ -486,10 +486,10 @@ export function ConsultationFormRunner({
 
       {workflowPhase === "review" ? (
         <details
-          className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+          className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40"
           open
         >
-          <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900">
+          <summary className="cursor-pointer select-none text-sm font-semibold text-slate-100">
             Guided form answers (read-only)
           </summary>
           <div className="mt-4 space-y-6">

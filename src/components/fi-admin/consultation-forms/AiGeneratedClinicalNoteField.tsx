@@ -50,7 +50,7 @@ export function AiGeneratedClinicalNoteField({
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+    <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
       <div>
         <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
@@ -59,7 +59,7 @@ export function AiGeneratedClinicalNoteField({
         {description?.trim() ? (
           <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
         ) : null}
-        <p className={cn("mt-2 rounded-lg border border-violet-200 bg-violet-50/90 px-3 py-2 text-xs text-violet-950")}>
+        <p className={cn("mt-2 rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-2 text-xs text-violet-200")}>
           Draft note is assembled from structured answers in this consultation (deterministic — not a live cloud model).
           Approve to copy into the chart note, or edit freely.
         </p>
@@ -71,7 +71,7 @@ export function AiGeneratedClinicalNoteField({
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Suggested chart note</p>
             <div
               className={cn(
-                "mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-white bg-white px-3 py-2 text-sm text-slate-800 shadow-sm",
+                "mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-white bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-200 shadow-lg shadow-black/40",
                 fiOsLightFormSurfaceClassNames.body
               )}
             >
@@ -90,7 +90,7 @@ export function AiGeneratedClinicalNoteField({
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 py-2 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-white/[0.03]"
             >
               Edit note
             </button>
@@ -101,7 +101,7 @@ export function AiGeneratedClinicalNoteField({
               {normalized.note.trim() === draft.trim() ? "Matches current suggestion." : "Differs from current suggestion — approve again to overwrite."}
             </p>
           ) : required ? (
-            <p className={cn("text-xs font-medium text-amber-900", fiOsLightFormSurfaceClassNames.meta)}>
+            <p className={cn("text-xs font-medium text-amber-200", fiOsLightFormSurfaceClassNames.meta)}>
               Approve or edit a canonical note before submitting — this field is required.
             </p>
           ) : null}
@@ -119,7 +119,7 @@ export function AiGeneratedClinicalNoteField({
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="text-sm font-semibold text-sky-700 underline hover:text-sky-900"
+            className="text-sm font-semibold text-cyan-300 underline hover:text-cyan-200"
           >
             Back to suggestion preview
           </button>

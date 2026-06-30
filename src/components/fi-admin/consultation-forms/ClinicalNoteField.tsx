@@ -76,7 +76,7 @@ export function ClinicalNoteField({
               key={t}
               type="button"
               onClick={() => appendSnippet(t)}
-              className="min-h-[40px] touch-manipulation rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50/50"
+              className="min-h-[40px] touch-manipulation rounded-full border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-slate-200 shadow-lg shadow-black/40 transition hover:border-cyan-300 hover:bg-cyan-50/50"
             >
               {t}
             </button>
@@ -101,9 +101,9 @@ export function ClinicalNoteField({
 export function ClinicalNoteReadOnlySummary({ label, value }: { label: string; value: unknown }) {
   const { note } = normalizeClinicalNoteValue(value);
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-800">
-      <p className="font-semibold text-slate-900">{label}</p>
-      <p className="mt-2 whitespace-pre-wrap text-slate-700">{note.trim() || "—"}</p>
+    <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-3 text-sm text-slate-200">
+      <p className="font-semibold text-slate-100">{label}</p>
+      <p className="mt-2 whitespace-pre-wrap text-slate-300">{note.trim() || "—"}</p>
     </div>
   );
 }

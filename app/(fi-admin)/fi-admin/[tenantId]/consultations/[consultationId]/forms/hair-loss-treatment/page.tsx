@@ -36,9 +36,9 @@ export default async function HairLossTreatmentGuidedFormPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <p className="mb-4 text-sm text-slate-600">
+      <p className="mb-4 text-sm text-slate-400">
         Non-surgical Hair Longevity / Patient Twin pathway. For transplant planning, use the{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms`} className="font-semibold text-emerald-800 underline">
+        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms`} className="font-semibold text-emerald-300 underline">
           hair transplant guided form
         </Link>
         .

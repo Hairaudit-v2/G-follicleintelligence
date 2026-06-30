@@ -47,11 +47,11 @@ export function LudwigVisualAssessmentField({
         {desc}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-2">
+      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
+        <div className="border-b border-white/[0.06] bg-white/[0.03] px-3 py-2">
           <p className={cn("text-xs", fiOsLightFormSurfaceClassNames.helper)}>
             Tap the Ludwig stage that best matches central density loss. Replace the diagram in{" "}
-            <code className="rounded bg-slate-200 px-1 py-0.5 text-[10px]">public/consultation-os/visual-assessment/</code>{" "}
+            <code className="rounded bg-white/[0.08] px-1 py-0.5 text-[10px]">public/consultation-os/visual-assessment/</code>{" "}
             with your clinic asset when ready.
           </p>
         </div>
@@ -60,7 +60,7 @@ export function LudwigVisualAssessmentField({
           <img
             src={`${CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE}/ludwig-scale.svg`}
             alt="Ludwig pattern reference diagram"
-            className="mx-auto max-h-[min(36vh,280px)] w-full max-w-xl rounded-md border border-slate-100 bg-white object-contain"
+            className="mx-auto max-h-[min(36vh,280px)] w-full max-w-xl rounded-md border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md object-contain"
           />
           <div className="-mx-1 mt-3 overflow-x-auto px-1 pb-1">
             <div className="flex min-w-min flex-wrap justify-center gap-2">
@@ -70,7 +70,7 @@ export function LudwigVisualAssessmentField({
                   disabled={disabled}
                   onClick={() => onChange(str)}
                   className={cn(
-                    "min-h-[44px] shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950",
+                    "min-h-[44px] shrink-0 rounded-lg border border-amber-300 bg-amber-400/10 px-3 py-2 text-sm font-medium text-amber-200",
                     disabled && "cursor-not-allowed opacity-60"
                   )}
                   title="Value from an older form version; tap to keep or pick a standard stage below."
@@ -89,8 +89,8 @@ export function LudwigVisualAssessmentField({
                     className={cn(
                       "min-h-[44px] min-w-[44px] shrink-0 rounded-lg border px-3 py-2 text-sm font-medium transition-colors sm:min-w-[120px]",
                       active
-                        ? "border-violet-600 bg-violet-50 text-violet-950 ring-1 ring-violet-500/30"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                        ? "border-violet-600 bg-violet-500/10 text-violet-200 ring-1 ring-violet-500/30"
+                        : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300 hover:border-slate-700 hover:bg-white/[0.03]",
                       disabled && "cursor-not-allowed opacity-60"
                     )}
                   >

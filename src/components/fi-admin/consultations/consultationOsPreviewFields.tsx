@@ -9,10 +9,10 @@ export type ConsultationOsSectionBinder = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-90";
+  "w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300 placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-90";
 
 const editableInputClass =
-  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2";
+  "w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 shadow-lg shadow-black/40 outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2";
 
 const labelClass = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500";
 
@@ -77,7 +77,7 @@ export function LabeledTextInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={cn(editableInputClass, disabled && "cursor-not-allowed bg-slate-50 opacity-80")}
+        className={cn(editableInputClass, disabled && "cursor-not-allowed bg-white/[0.03] opacity-80")}
       />
     </div>
   );
@@ -117,7 +117,7 @@ export function LabeledTextarea({
         rows={rows}
         placeholder={placeholder}
         disabled={disabled}
-        className={cn(editableInputClass, "min-h-[10rem] resize-y", disabled && "cursor-not-allowed bg-slate-50 opacity-80")}
+        className={cn(editableInputClass, "min-h-[10rem] resize-y", disabled && "cursor-not-allowed bg-white/[0.03] opacity-80")}
       />
       {hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
     </div>

@@ -31,17 +31,17 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
 
   return (
     <div
-      className={`flex flex-col rounded-xl border p-4 shadow-sm ${
+      className={`flex flex-col rounded-xl border p-4 shadow-lg shadow-black/40 ${
         card.recommended
-          ? "border-sky-300/80 bg-sky-50/80 ring-1 ring-sky-200/60 dark:border-sky-600/40 dark:bg-sky-950/30 dark:ring-sky-800/50"
-          : "border-slate-200/90 bg-white dark:border-slate-700/80 dark:bg-slate-950/40"
+          ? "border-sky-300/80 bg-cyan-500/10 ring-1 ring-sky-200/60 dark:border-sky-600/40 dark:bg-sky-950/30 dark:ring-sky-800/50"
+          : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-950/40"
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 space-y-1">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{card.title}</h3>
+          <h3 className="text-sm font-semibold text-slate-100 dark:text-slate-50">{card.title}</h3>
           {card.recommended ? (
-            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Recommended pathway</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300 dark:text-sky-300">Recommended pathway</p>
           ) : null}
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
@@ -56,9 +56,9 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
           )}
         </div>
       </div>
-      <p className="mt-3 text-sm leading-snug text-slate-700 dark:text-slate-300">{card.purpose}</p>
-      <p className="mt-2 text-xs leading-snug text-slate-600 dark:text-slate-400">
-        <span className="font-semibold text-slate-700 dark:text-slate-300">When to use: </span>
+      <p className="mt-3 text-sm leading-snug text-slate-300 dark:text-slate-300">{card.purpose}</p>
+      <p className="mt-2 text-xs leading-snug text-slate-400 dark:text-slate-400">
+        <span className="font-semibold text-slate-300 dark:text-slate-300">When to use: </span>
         {card.whenToUse}
       </p>
       {!isSoon && card.templateSlug ? (
@@ -74,12 +74,12 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
         {!isSoon && href ? (
           <Link
             href={href}
-            className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+            className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-lg shadow-black/40 transition hover:bg-slate-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 dark:bg-white/[0.06] dark:text-slate-100 dark:hover:bg-[#0F1629]/80 backdrop-blur-md"
           >
             {cta}
           </Link>
         ) : (
-          <span className="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-500">
+          <span className="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-sm font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-500">
             Unavailable
           </span>
         )}
@@ -109,18 +109,18 @@ export function ConsultationPathwayLauncher({
     <div id="consultation-pathway-launcher">
       <FiCard className={`space-y-4 ${cardClassName ?? ""}`.trim()}>
         <FiSection title={sectionTitle} description={sectionDescription} headingId="consultation-pathway-launcher-heading">
-          <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">
             Direct links:{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms</code>,{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/hair-loss-treatment</code>,{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/female-hair-loss</code>,{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/repair</code>,{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/follow-up</code>,{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/pathology</code>.
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms</code>,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/hair-loss-treatment</code>,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/female-hair-loss</code>,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/repair</code>,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/follow-up</code>,{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/pathology</code>.
           </p>
           {model.recommendedHint?.trim() ? (
             <div
-              className="rounded-lg border border-sky-200/80 bg-sky-50/90 px-3 py-2.5 text-sm text-sky-950 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-50"
+              className="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-2.5 text-sm text-cyan-200 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-50"
               role="status"
             >
               <strong className="font-semibold">Hint: </strong>

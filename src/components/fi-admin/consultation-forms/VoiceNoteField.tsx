@@ -222,19 +222,19 @@ export function VoiceNoteField({
               stopDictation();
               commitTranscript("");
             }}
-            className="min-h-[44px] touch-manipulation rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50/50"
+            className="min-h-[44px] touch-manipulation rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-cyan-300 hover:bg-cyan-50/50"
           >
             Clear transcript
           </button>
         </div>
       ) : null}
       {listening ? (
-        <FiCard className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950">
+        <FiCard className="border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm font-medium text-amber-200">
           Dictation active — speak clearly. Tap “Stop dictation” when finished.
         </FiCard>
       ) : null}
       {speechError?.trim() ? (
-        <p className="text-xs text-red-800" role="alert">
+        <p className="text-xs text-rose-300" role="alert">
           {speechError}
         </p>
       ) : null}
@@ -265,12 +265,12 @@ export function VoiceNoteField({
         </div>
       ) : null}
       {saveStatus === "saved" && saveMessage?.trim() ? (
-        <p className="text-xs font-medium text-emerald-800" role="status">
+        <p className="text-xs font-medium text-emerald-300" role="status">
           {saveMessage}
         </p>
       ) : null}
       {saveStatus === "error" && saveMessage?.trim() ? (
-        <p className="text-xs font-medium text-red-800" role="alert">
+        <p className="text-xs font-medium text-rose-300" role="alert">
           {saveMessage}
         </p>
       ) : null}
@@ -281,9 +281,9 @@ export function VoiceNoteField({
 export function VoiceNoteReadOnlySummary({ label, value }: { label: string; value: unknown }) {
   const { transcript, clinicalNoteId } = normalizeVoiceNoteValue(value);
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-800">
-      <p className="font-semibold text-slate-900">{label}</p>
-      <p className="mt-2 whitespace-pre-wrap text-slate-700">{transcript.trim() || "—"}</p>
+    <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-3 text-sm text-slate-200">
+      <p className="font-semibold text-slate-100">{label}</p>
+      <p className="mt-2 whitespace-pre-wrap text-slate-300">{transcript.trim() || "—"}</p>
       {clinicalNoteId?.trim() ? (
         <p className={cn("mt-2", fiOsLightFormSurfaceClassNames.meta)}>Clinical note: {clinicalNoteId}</p>
       ) : null}

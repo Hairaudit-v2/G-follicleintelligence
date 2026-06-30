@@ -56,7 +56,7 @@ export function ScalpZonesVisualAssessmentField({
       </div>
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
-        <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="space-y-2 rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className={cn("text-xs", fiOsLightFormSurfaceClassNames.helper)}>
             Tap regions on the schematic to toggle involvement (44px+ touch targets). Optional reference:
           </p>
@@ -64,7 +64,7 @@ export function ScalpZonesVisualAssessmentField({
           <img
             src={`${CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE}/scalp-zones-top.svg`}
             alt="Scalp zone reference (replaceable asset)"
-            className="mx-auto max-h-36 w-full max-w-xs rounded border border-slate-100 object-contain"
+            className="mx-auto max-h-36 w-full max-w-xs rounded border border-white/[0.06] object-contain"
           />
           <div className="mx-auto w-full max-w-md">
             <ScalpZonesTopViewSvg
@@ -80,7 +80,7 @@ export function ScalpZonesVisualAssessmentField({
 
         <div className="space-y-2">
           <span className={cn("text-xs font-semibold uppercase tracking-wide text-slate-500")}>Selected</span>
-          <ul className="min-h-[2rem] list-inside list-disc text-sm text-slate-700">
+          <ul className="min-h-[2rem] list-inside list-disc text-sm text-slate-300">
             {selected.length === 0 ? <li className="list-none text-slate-500">None</li> : null}
             {selected.map((z) => (
               <li key={z}>{optByValue.get(z)?.label ?? z}</li>

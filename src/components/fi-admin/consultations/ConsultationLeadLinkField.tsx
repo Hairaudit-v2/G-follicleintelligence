@@ -86,7 +86,7 @@ export function ConsultationLeadLinkField({
   return (
     <div className="space-y-2">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lead</p>
-      <p className="text-sm font-medium text-slate-900">
+      <p className="text-sm font-medium text-slate-100">
         {leadLabel?.trim() ? (
           <>
             {leadLabel.trim()}
@@ -103,7 +103,7 @@ export function ConsultationLeadLinkField({
           type="button"
           disabled={disabled}
           onClick={() => setOpen(true)}
-          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-1.5 text-xs font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:bg-white/[0.03] disabled:cursor-not-allowed disabled:opacity-60"
         >
           Link lead
         </button>
@@ -111,7 +111,7 @@ export function ConsultationLeadLinkField({
           <button
             type="button"
             onClick={onClearLead}
-            className="text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-800"
+            className="text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-200"
           >
             Remove link
           </button>
@@ -130,16 +130,16 @@ export function ConsultationLeadLinkField({
             role="dialog"
             aria-modal="true"
             aria-labelledby={dialogTitleId}
-            className="max-h-[min(80vh,560px)] w-full max-w-lg overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+            className="max-h-[min(80vh,560px)] w-full max-w-lg overflow-hidden rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-xl"
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <h2 id={dialogTitleId} className="text-sm font-semibold text-slate-900">
+            <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
+              <h2 id={dialogTitleId} className="text-sm font-semibold text-slate-100">
                 Search leads
               </h2>
               <button
                 type="button"
-                className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200"
                 onClick={() => setOpen(false)}
                 aria-label="Close"
               >
@@ -147,7 +147,7 @@ export function ConsultationLeadLinkField({
               </button>
             </div>
             <div className="space-y-3 p-4">
-              <label htmlFor={searchInputId} id={searchLabelId} className="block text-sm font-medium text-slate-800">
+              <label htmlFor={searchInputId} id={searchLabelId} className="block text-sm font-medium text-slate-200">
                 Lead search
               </label>
               <p id={searchHintId} className="text-xs text-slate-500">
@@ -161,22 +161,22 @@ export function ConsultationLeadLinkField({
                 onChange={(e) => setQuery(e.target.value)}
                 aria-describedby={searchHintId}
                 placeholder="Search…"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-sky-400/20 focus:border-sky-300 focus:ring-2"
+                className="w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm outline-none ring-sky-400/20 focus:border-sky-300 focus:ring-2"
               />
               {loading ? <p className="text-xs text-slate-500">Searching…</p> : null}
-              {error ? <p className="text-xs text-red-600">{error}</p> : null}
+              {error ? <p className="text-xs text-rose-300">{error}</p> : null}
               <ul className="max-h-72 space-y-1 overflow-y-auto">
                 {hits.map((h) => (
                   <li key={h.id}>
                     <button
                       type="button"
-                      className="flex w-full flex-col rounded-lg border border-transparent px-2 py-2 text-left text-sm hover:border-slate-200 hover:bg-slate-50"
+                      className="flex w-full flex-col rounded-lg border border-transparent px-2 py-2 text-left text-sm hover:border-white/[0.08] hover:bg-white/[0.03]"
                       onClick={() => {
                         onLinkLead(h);
                         setOpen(false);
                       }}
                     >
-                      <span className="font-medium text-slate-900">{h.name}</span>
+                      <span className="font-medium text-slate-100">{h.name}</span>
                       <span className="text-xs text-slate-500">
                         {h.stageLabel}
                         {h.phone || h.email ? ` · ${[h.phone, h.email].filter(Boolean).join(" · ")}` : ""}

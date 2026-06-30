@@ -256,8 +256,8 @@ export function BodyAreaMapField({
               className={cn(
                 "min-h-[44px] min-w-[44px] touch-manipulation rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
                 active
-                  ? "border-sky-500 bg-sky-50 text-sky-950"
-                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300"
+                  ? "border-sky-500 bg-cyan-500/10 text-cyan-200"
+                  : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-200 hover:border-slate-700"
               )}
             >
               <span className="block leading-tight">{BODY_AREA_MAP_VIEW_LABELS[v]}</span>
@@ -269,12 +269,12 @@ export function BodyAreaMapField({
         })}
       </div>
 
-      <FiCard className="overflow-hidden border border-slate-200 bg-slate-50/60 p-3">
+      <FiCard className="overflow-hidden border border-white/[0.08] bg-white/[0.03] p-3">
         <svg
           ref={svgRef}
           viewBox="0 0 100 100"
           className={cn(
-            "aspect-square w-full max-w-md select-none rounded-lg bg-white",
+            "aspect-square w-full max-w-md select-none rounded-lg bg-[#0F1629]/80 backdrop-blur-md",
             disabled ? "cursor-not-allowed opacity-70" : "cursor-crosshair"
           )}
           onPointerDown={onSvgPointerDown}
@@ -316,13 +316,13 @@ export function BodyAreaMapField({
       </FiCard>
 
       {selected && !disabled ? (
-        <FiCard className="space-y-3 border border-slate-200 p-4">
+        <FiCard className="space-y-3 border border-white/[0.08] p-4">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold text-slate-900">Edit marker</h4>
+            <h4 className="text-sm font-semibold text-slate-100">Edit marker</h4>
             <button
               type="button"
               onClick={() => setSelectedId(null)}
-              className="min-h-[44px] rounded-lg px-3 text-sm text-slate-600 hover:bg-slate-100"
+              className="min-h-[44px] rounded-lg px-3 text-sm text-slate-400 hover:bg-white/[0.06]"
             >
               Close
             </button>
@@ -365,7 +365,7 @@ export function BodyAreaMapField({
                     key={o.value}
                     className={cn(
                       fiOsLightFormSurfaceClassNames.choiceRow,
-                      "min-h-[44px] rounded-lg border border-slate-200 px-2 py-1"
+                      "min-h-[44px] rounded-lg border border-white/[0.08] px-2 py-1"
                     )}
                   >
                     <input
@@ -396,7 +396,7 @@ export function BodyAreaMapField({
           <button
             type="button"
             onClick={deleteSelected}
-            className="min-h-[44px] w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900 hover:bg-red-100"
+            className="min-h-[44px] w-full rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-500/15"
           >
             Delete marker
           </button>
@@ -421,10 +421,10 @@ export function BodyAreaMapAnnotationsSummary({
   const byRegion = useMemo(() => aggregateBodyAreaMapByRegionLabel(annotations), [annotations]);
   if (annotations.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-2 text-sm text-slate-700">
+      <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
         {fieldLabel.trim() ? (
           <>
-            <span className="font-medium text-slate-800">{fieldLabel}:</span>{" "}
+            <span className="font-medium text-slate-200">{fieldLabel}:</span>{" "}
           </>
         ) : null}
         No markers recorded.
@@ -432,28 +432,28 @@ export function BodyAreaMapAnnotationsSummary({
     );
   }
   return (
-    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/90 p-3">
+    <div className="space-y-2 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
       {fieldLabel.trim() ? (
-        <p className="text-sm font-semibold text-slate-900">{fieldLabel}</p>
+        <p className="text-sm font-semibold text-slate-100">{fieldLabel}</p>
       ) : null}
       <ul className="space-y-2">
         {byRegion.map((row) => (
           <li
             key={row.labelValue}
-            className="rounded-md border border-slate-200/90 bg-white px-3 py-2 text-sm text-slate-800"
+            className="rounded-md border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-200"
           >
-            <div className="font-medium text-slate-900">{row.labelDisplay}</div>
-            <div className="mt-0.5 text-xs text-slate-600">
+            <div className="font-medium text-slate-100">{row.labelDisplay}</div>
+            <div className="mt-0.5 text-xs text-slate-400">
               {row.views.map((v) => viewDisplayForBodyAreaMap(v)).join(" · ")}
               {row.markerCount > 1 ? (
                 <span className="text-slate-500"> · {row.markerCount} markers merged</span>
               ) : null}
             </div>
-            <div className="mt-0.5 text-xs text-slate-600">
+            <div className="mt-0.5 text-xs text-slate-400">
               Severity: <span className="font-medium capitalize">{row.severity.replace(/_/g, " ")}</span>
             </div>
             {row.combinedNotes.trim() ? (
-              <div className="mt-1 text-xs text-slate-700">Notes: {row.combinedNotes.trim()}</div>
+              <div className="mt-1 text-xs text-slate-300">Notes: {row.combinedNotes.trim()}</div>
             ) : null}
           </li>
         ))}

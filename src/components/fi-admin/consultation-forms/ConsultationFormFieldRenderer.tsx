@@ -28,7 +28,7 @@ function readStringArray(v: unknown): string[] {
 
 function PlaceholderCard({ title, body }: { title: string; body: string }) {
   return (
-    <FiCard className="border border-dashed border-slate-300 bg-slate-50/90 p-4">
+    <FiCard className="border border-dashed border-slate-700 bg-white/[0.03] p-4">
       <p className={cn("text-sm font-semibold", fiOsLightFormSurfaceClassNames.labelInline)}>{title}</p>
       <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.helper)}>{body}</p>
     </FiCard>
@@ -438,9 +438,9 @@ export function ConsultationFormFieldRenderer({
       );
     default:
       return (
-        <p className="text-xs text-amber-900">
+        <p className="text-xs text-amber-200">
           Unsupported field type:{" "}
-          <code className="rounded bg-amber-100 px-1 font-mono text-[0.8rem] text-amber-950">{field.type}</code>
+          <code className="rounded bg-amber-400/15 px-1 font-mono text-[0.8rem] text-amber-200">{field.type}</code>
         </p>
       );
   }

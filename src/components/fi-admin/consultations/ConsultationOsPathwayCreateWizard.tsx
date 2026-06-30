@@ -148,7 +148,7 @@ export function ConsultationOsPathwayCreateWizard({
           secondaryAction={
             <Link
               href={patientsHref}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
             >
               Back to patients
             </Link>
@@ -158,7 +158,7 @@ export function ConsultationOsPathwayCreateWizard({
 
       <FiCard className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
-        <label htmlFor="cos-new-admin-key" className="block text-xs text-slate-600">
+        <label htmlFor="cos-new-admin-key" className="block text-xs text-slate-400">
           FI Admin API key (only if your account does not have CRM write access)
         </label>
         <input
@@ -167,7 +167,7 @@ export function ConsultationOsPathwayCreateWizard({
           autoComplete="off"
           value={adminKey}
           onChange={(e) => setAdminKey(e.target.value)}
-          className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
+          className="mt-1 w-full max-w-md rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 shadow-lg shadow-black/40 outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
         />
       </FiCard>
 
@@ -176,7 +176,7 @@ export function ConsultationOsPathwayCreateWizard({
           type="button"
           onClick={() => setStep(1)}
           className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            step === 1 ? "bg-sky-600 text-white" : "border border-slate-200 bg-white text-slate-700"
+            step === 1 ? "bg-sky-600 text-white" : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300"
           }`}
         >
           Step 1 · Intake
@@ -185,7 +185,7 @@ export function ConsultationOsPathwayCreateWizard({
           type="button"
           onClick={() => setStep(2)}
           className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            step === 2 ? "bg-sky-600 text-white" : "border border-slate-200 bg-white text-slate-700"
+            step === 2 ? "bg-sky-600 text-white" : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300"
           }`}
         >
           Step 2 · Pathway
@@ -193,7 +193,7 @@ export function ConsultationOsPathwayCreateWizard({
       </nav>
 
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300" role="alert">
           {error}
         </div>
       ) : null}
@@ -227,12 +227,12 @@ export function ConsultationOsPathwayCreateWizard({
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lead (optional)</p>
-                  <p className="text-sm text-slate-600">CRM lead linking requires Sales (CRM) access for this user.</p>
+                  <p className="text-sm text-slate-400">CRM lead linking requires Sales (CRM) access for this user.</p>
                 </div>
               )}
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">
+            <div className="mt-6 grid grid-cols-1 gap-4 border-t border-white/[0.06] pt-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="cos-new-date" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
                   Consultation date
@@ -242,7 +242,7 @@ export function ConsultationOsPathwayCreateWizard({
                   type="date"
                   value={consultationDate}
                   onChange={(e) => setConsultationDate(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30"
+                  className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30"
                 />
               </div>
               {clinicalStaffOptions.length > 0 ? (
@@ -257,7 +257,7 @@ export function ConsultationOsPathwayCreateWizard({
                     value={consultantStaffId}
                     allowEmpty
                     emptyLabel="Select consultant…"
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30"
+                    className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30"
                     disabled={false}
                     onChange={(staffId) => {
                       setConsultantStaffId(staffId);
@@ -277,7 +277,7 @@ export function ConsultationOsPathwayCreateWizard({
                     type="text"
                     value={consultantName}
                     onChange={(e) => setConsultantName(e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30"
+                    className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 shadow-lg shadow-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30"
                     placeholder="Consultant name"
                   />
                 </div>
@@ -316,24 +316,24 @@ export function ConsultationOsPathwayCreateWizard({
                       setSelectedPathway(c.pathKey);
                       setError(null);
                     }}
-                    className={`flex flex-col rounded-xl border p-4 text-left shadow-sm transition ${
+                    className={`flex flex-col rounded-xl border p-4 text-left shadow-lg shadow-black/40 transition ${
                       active
-                        ? "border-sky-400 bg-sky-50/90 ring-2 ring-sky-300/60 dark:border-sky-600 dark:bg-sky-950/40 dark:ring-sky-800"
-                        : "border-slate-200/90 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950/40"
+                        ? "border-sky-400 bg-cyan-500/10 ring-2 ring-sky-300/60 dark:border-sky-600 dark:bg-sky-950/40 dark:ring-sky-800"
+                        : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md hover:border-slate-700 dark:border-slate-700 dark:bg-slate-950/40"
                     }`}
                   >
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">{c.title}</span>
-                    <span className="mt-2 text-xs leading-snug text-slate-600 dark:text-slate-400">{c.subtitle}</span>
+                    <span className="text-sm font-semibold text-slate-100 dark:text-slate-50">{c.title}</span>
+                    <span className="mt-2 text-xs leading-snug text-slate-400 dark:text-slate-400">{c.subtitle}</span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="text-sm font-semibold text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
+                className="text-sm font-semibold text-slate-400 underline-offset-2 hover:text-slate-100 hover:underline"
               >
                 ← Back to intake
               </button>

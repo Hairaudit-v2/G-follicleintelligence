@@ -300,7 +300,7 @@ export function ConsultationHandoffPanel({
         {cards.map((c) => (
           <FiCard key={c.key} className="flex flex-col gap-3 p-4">
             <div>
-              <h4 className="text-base font-semibold text-slate-900">{c.title}</h4>
+              <h4 className="text-base font-semibold text-slate-100">{c.title}</h4>
               <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.helper)}>{c.why}</p>
             </div>
             <div>
@@ -308,12 +308,12 @@ export function ConsultationHandoffPanel({
               {c.requirements}
             </div>
             {c.blockedDetail ? (
-              <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-950">
+              <p className="rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-1.5 text-xs text-amber-200">
                 {c.blockedDetail}
               </p>
             ) : null}
             {errors[c.key] ? (
-              <p className="rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-900" role="alert">
+              <p className="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1.5 text-xs text-rose-300" role="alert">
                 {errors[c.key]}
               </p>
             ) : null}
@@ -327,13 +327,13 @@ export function ConsultationHandoffPanel({
                 {busy === c.key ? "Working…" : c.cta}
               </button>
               {c.result ? (
-                <span className={cn(fiOsLightFormSurfaceClassNames.helper, "text-slate-700")}>
+                <span className={cn(fiOsLightFormSurfaceClassNames.helper, "text-slate-300")}>
                   {c.result.reused ? "Already exists" : "Created"}
                   {c.result.detail ? ` — ${c.result.detail}` : null}
                   {c.result.href ? (
                     <>
                       {" · "}
-                      <Link href={c.result.href} className="font-semibold text-sky-700 underline hover:text-sky-900">
+                      <Link href={c.result.href} className="font-semibold text-cyan-300 underline hover:text-cyan-200">
                         Open
                       </Link>
                     </>

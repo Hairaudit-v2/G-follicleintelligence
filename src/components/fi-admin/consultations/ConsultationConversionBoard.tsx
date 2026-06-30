@@ -45,7 +45,7 @@ function ConversionCard({ card }: { card: ConsultationConversionBoardCard }) {
             Consult {card.consultationDateLabel}
             {card.daysSinceConsultation != null ? (
               <>
-                <span className="text-slate-600"> · </span>
+                <span className="text-slate-400"> · </span>
                 {card.daysSinceConsultation === 0
                   ? "Today"
                   : card.daysSinceConsultation === 1
@@ -59,31 +59,31 @@ function ConversionCard({ card }: { card: ConsultationConversionBoardCard }) {
       <dl className="mt-2 space-y-1 text-xs text-slate-500">
         {card.consultantLabel ? (
           <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Staff</dt>
+            <dt className="shrink-0 text-slate-400">Staff</dt>
             <dd className="min-w-0 truncate text-slate-400">{card.consultantLabel}</dd>
           </div>
         ) : null}
         {card.leadStageLabel ? (
           <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">CRM stage</dt>
+            <dt className="shrink-0 text-slate-400">CRM stage</dt>
             <dd className="min-w-0 truncate text-slate-400">{card.leadStageLabel}</dd>
           </div>
         ) : null}
         {card.quoteStatusDisplay ? (
           <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Quote</dt>
+            <dt className="shrink-0 text-slate-400">Quote</dt>
             <dd className="min-w-0 truncate text-slate-400">{card.quoteStatusDisplay}</dd>
           </div>
         ) : null}
         {card.graftOrTreatmentLine ? (
           <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Plan</dt>
+            <dt className="shrink-0 text-slate-400">Plan</dt>
             <dd className="min-w-0 truncate text-slate-400">{card.graftOrTreatmentLine}</dd>
           </div>
         ) : null}
         {card.caseLabel ? (
           <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Case</dt>
+            <dt className="shrink-0 text-slate-400">Case</dt>
             <dd className="min-w-0 truncate text-slate-400">{card.caseLabel}</dd>
           </div>
         ) : null}
@@ -214,7 +214,7 @@ export function ConsultationConversionBoard({ tenantId, data }: { tenantId: stri
               </h2>
               <div className="mt-3 flex max-h-[70vh] min-h-[120px] flex-col gap-2 overflow-y-auto pr-0.5">
                 {columns[col.id].length === 0 ? (
-                  <p className="px-1 py-6 text-center text-xs leading-relaxed text-slate-600">
+                  <p className="px-1 py-6 text-center text-xs leading-relaxed text-slate-400">
                     No consultations in this stage for the current window. Adjust CRM stages, bookings, or filters elsewhere
                     if this looks wrong.
                   </p>

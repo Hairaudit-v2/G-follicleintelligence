@@ -86,20 +86,20 @@ export function ConsultationOsHubRoutingActions({
               <FiCard
                 className={cn(
                   "flex h-full flex-col gap-2 p-4 transition",
-                  enabled ? "border-slate-200 hover:border-sky-300 hover:shadow-sm" : "border-slate-100 bg-slate-50/60 opacity-80"
+                  enabled ? "border-white/[0.08] hover:border-sky-300 hover:shadow-sm" : "border-white/[0.06] bg-white/[0.03] opacity-80"
                 )}
               >
-                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{t.title}</h4>
+                <h4 className="text-sm font-semibold text-slate-100 dark:text-slate-50">{t.title}</h4>
                 <p className={cn("flex-1 text-xs", fiOsLightFormSurfaceClassNames.helper)}>{t.body}</p>
                 {enabled ? (
                   <Link
                     href={t.href!}
-                    className="mt-1 inline-flex min-h-[40px] items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-center text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                    className="mt-1 inline-flex min-h-[40px] items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-center text-xs font-semibold text-white hover:bg-slate-800 dark:bg-white/[0.06] dark:text-slate-100 dark:hover:bg-[#0F1629]/80 backdrop-blur-md"
                   >
                     {t.cta}
                   </Link>
                 ) : (
-                  <span className="mt-1 inline-flex min-h-[40px] items-center justify-center rounded-lg border border-dashed border-slate-200 px-3 py-2 text-center text-xs font-medium text-slate-500 dark:border-slate-600 dark:text-slate-400">
+                  <span className="mt-1 inline-flex min-h-[40px] items-center justify-center rounded-lg border border-dashed border-white/[0.08] px-3 py-2 text-center text-xs font-medium text-slate-500 dark:border-slate-600 dark:text-slate-400">
                     {t.cta}
                   </span>
                 )}
@@ -111,7 +111,7 @@ export function ConsultationOsHubRoutingActions({
       {lid ? (
         <p className="text-xs text-slate-500 dark:text-slate-400">
           CRM:{" "}
-          <Link href={`/fi-admin/${tid}/crm/leads/${lid}`} className="font-semibold text-sky-700 underline dark:text-sky-400">
+          <Link href={`/fi-admin/${tid}/crm/leads/${lid}`} className="font-semibold text-cyan-300 underline dark:text-sky-400">
             Open linked lead
           </Link>
         </p>

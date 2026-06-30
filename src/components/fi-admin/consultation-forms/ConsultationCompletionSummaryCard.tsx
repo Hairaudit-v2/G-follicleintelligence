@@ -30,9 +30,9 @@ function ListOrDash({ items }: { items: string[] }) {
 
 function SectionBlock({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+    <section className="border-b border-white/[0.06] pb-4 last:border-0 last:pb-0">
       <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h4>
-      <div className={cn("mt-1.5 text-sm leading-relaxed text-slate-800", fiOsLightFormSurfaceClassNames.body)}>{children}</div>
+      <div className={cn("mt-1.5 text-sm leading-relaxed text-slate-200", fiOsLightFormSurfaceClassNames.body)}>{children}</div>
     </section>
   );
 }
@@ -49,13 +49,13 @@ function FollowUpReviewCompletionBrief({
   return (
     <div className="space-y-4">
       {isPreview ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+        <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
           Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
         <header>
-          <h3 className="text-base font-semibold text-slate-900">Follow-up / review snapshot</h3>
+          <h3 className="text-base font-semibold text-slate-100">Follow-up / review snapshot</h3>
           <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
             {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
@@ -98,7 +98,7 @@ function FollowUpReviewCompletionBrief({
           </SectionBlock>
 
           <SectionBlock title="Integration (placeholder)">
-            <p className="text-xs text-slate-600">{snap?.integrationPlaceholderLine?.trim() || "—"}</p>
+            <p className="text-xs text-slate-400">{snap?.integrationPlaceholderLine?.trim() || "—"}</p>
           </SectionBlock>
 
           <SectionBlock title="Outcome (rules)">
@@ -126,13 +126,13 @@ function ScalpPathologyCompletionBrief({
   return (
     <div className="space-y-4">
       {isPreview ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+        <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
           Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
         <header>
-          <h3 className="text-base font-semibold text-slate-900">Scalp disorder / pathology snapshot</h3>
+          <h3 className="text-base font-semibold text-slate-100">Scalp disorder / pathology snapshot</h3>
           <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
             {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
@@ -154,7 +154,7 @@ function ScalpPathologyCompletionBrief({
           <SectionBlock title="Investigations recommended">
             <p>{snap?.investigationsLine?.trim() || "—"}</p>
             {summary.pathologyRecommended ? (
-              <p className="mt-2 text-xs text-slate-600">
+              <p className="mt-2 text-xs text-slate-400">
                 <span className="font-semibold">Pathology / labs context: </span>
                 {summary.pathologyReason.trim() || "—"}
               </p>
@@ -172,7 +172,7 @@ function ScalpPathologyCompletionBrief({
 
           <SectionBlock title="Urgency">
             <p className="font-medium">{snap?.followUpUrgencyLabel?.trim() || "—"}</p>
-            <p className="mt-1 text-xs text-slate-600">{snap?.urgencyContextLine?.trim() || "—"}</p>
+            <p className="mt-1 text-xs text-slate-400">{snap?.urgencyContextLine?.trim() || "—"}</p>
           </SectionBlock>
 
           <SectionBlock title="Outcome (rules)">
@@ -204,13 +204,13 @@ function HairTransplantRepairCompletionBrief({
   return (
     <div className="space-y-4">
       {isPreview ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+        <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
           Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
         <header>
-          <h3 className="text-base font-semibold text-slate-900">Repair consultation snapshot</h3>
+          <h3 className="text-base font-semibold text-slate-100">Repair consultation snapshot</h3>
           <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
             {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
@@ -299,13 +299,13 @@ function HairTransplantCompletionBrief({
   return (
     <div className="space-y-4">
       {isPreview ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+        <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
           Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
         </p>
       ) : null}
       <FiCard className="space-y-5 p-4 sm:p-5">
         <header>
-          <h3 className="text-base font-semibold text-slate-900">Clinical decision snapshot</h3>
+          <h3 className="text-base font-semibold text-slate-100">Clinical decision snapshot</h3>
           <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
             {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
@@ -324,7 +324,7 @@ function HairTransplantCompletionBrief({
             <p className="whitespace-pre-wrap font-medium">
               {summary.recommendedProcedure.trim() || "—"}
               {summary.outcomeType && summary.outcomeType !== "undecided" ? (
-                <span className="mt-1 block text-xs font-normal text-slate-600">Outcome: {fmt(summary.outcomeType)}</span>
+                <span className="mt-1 block text-xs font-normal text-slate-400">Outcome: {fmt(summary.outcomeType)}</span>
               ) : null}
             </p>
           </SectionBlock>
@@ -336,8 +336,8 @@ function HairTransplantCompletionBrief({
               Medical suitability: <span className="font-medium">{fmt(summary.medicalSuitability)}</span>
             </p>
             {graftLine ? <p className="mt-2">{graftLine}</p> : null}
-            {zonesTreats ? <p className="mt-2 text-xs text-slate-600">Zones / therapies: {zonesTreats}</p> : null}
-            {mapLine ? <p className="mt-2 text-xs text-slate-600">Concern map: {mapLine}</p> : null}
+            {zonesTreats ? <p className="mt-2 text-xs text-slate-400">Zones / therapies: {zonesTreats}</p> : null}
+            {mapLine ? <p className="mt-2 text-xs text-slate-400">Concern map: {mapLine}</p> : null}
           </SectionBlock>
 
           <SectionBlock title="Risks / considerations">
@@ -384,14 +384,14 @@ export function ConsultationCompletionSummaryCard({
   return (
     <div className="space-y-4">
       {isPreview ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+        <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200">
           Preview — rules-based summary from current form answers. Click “Complete consultation” to save to the chart
           and lock this form.
         </p>
       ) : null}
       <FiCard className="space-y-4 p-4 sm:p-5">
         <div>
-          <h3 className="text-base font-semibold text-slate-900">Consultation completion summary</h3>
+          <h3 className="text-base font-semibold text-slate-100">Consultation completion summary</h3>
           <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.meta)}>
             Source: {summary.source} · Completed {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
           </p>
@@ -440,7 +440,7 @@ export function ConsultationCompletionSummaryCard({
               </div>
               <div className="sm:col-span-2">
                 <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">HLI / Patient Twin pathway</dt>
-                <dd className={cn("mt-0.5 text-sm font-medium text-violet-900", fiOsLightFormSurfaceClassNames.body)}>
+                <dd className={cn("mt-0.5 text-sm font-medium text-violet-300", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.hliPathwayRecommendedLabel?.trim() || "—"}
                 </dd>
               </div>
