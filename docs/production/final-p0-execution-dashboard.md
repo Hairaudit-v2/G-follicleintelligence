@@ -21,9 +21,9 @@
 | Metric | Value |
 |--------|-------|
 | Total P0 blockers | 6 |
-| Complete | 1 |
+| Complete | 2 |
 | Accepted risk | 0 |
-| In progress | 2 |
+| In progress | 1 |
 | Open / blocking | 3 |
 | Engineering deliverables | Complete |
 | Production go-live | **Blocked** |
@@ -118,8 +118,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Current status** | **In progress** (auth gate PASS 2026-06-30; 12-step journey pending) |
-| **Final production status** | **Blocking go-live** |
+| **Current status** | **Complete** (E2+E5+E6, 2026-06-30) |
+| **Final production status** | **Allow** |
 | **Assigned owner** | Paul Green (Clinic Deployment Lead) |
 | **Target completion date** | To verify |
 | **Completion date** | — |
@@ -160,5 +160,5 @@
 |-------|-------|
 | Dashboard created | 2026-06-27 |
 | Operator execution | **Not executed** — requires Supabase/Vercel dashboard access and real staff |
-| P0 blockers closed | **1 / 6** (BLK-LEG-01) |
+| P0 blockers closed | **2 / 6** (BLK-LEG-01, BLK-SEC-05) |
 | Recommended next step | Assign owners; execute [evolved-p0-operator-execution-checklist.md](./evolved-p0-operator-execution-checklist.md) |

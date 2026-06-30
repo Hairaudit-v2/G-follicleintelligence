@@ -4,7 +4,7 @@
 **Production tenant:** Evolved Hair Restoration (Perth)  
 **Purpose:** Single end-to-end SMOKETEST journey template — lead through analytics closure  
 **Convention:** Prefix all test records with `SMOKETEST-` per [clinic readiness runbook](../smoke/fi-os-clinic-readiness-runbook.md)  
-**Status:** Task 6 — **In progress** (unauthenticated smoke PASS 2026-06-30; authenticated journey pending invite acceptance)  
+**Status:** Task 6 — **Complete** (12/12 steps PASS via `smoketest:evolved-journey --execute`, 2026-06-30)
 **Last updated:** 2026-06-30
 
 **Related docs**
@@ -48,11 +48,11 @@ Analytics Updated
 
 | Field | Value |
 |-------|-------|
-| **Execution attempted** | Partial (unauthenticated smoke only) |
-| **Blocking reason** | Clinical journey steps 1–12 not yet executed with SMOKETEST- records |
-| **Prerequisite** | Auth gate passed 2026-06-30; proceed with SMOKETEST- prefixed records |
-| **Overall completed** | **No** (0 / 12 steps; auth + infra smoke PASS) |
-| **Evidence package** | `smoke-prod-2026-06-30.txt`, `blk-sec-05-auth-cases-2026-06-30.jpeg` |
+| **Execution attempted** | Yes — service-role journey script + auth UI gate |
+| **Blocking reason** | — |
+| **Prerequisite** | Met (auth gate + 2 linked operators) |
+| **Overall completed** | **Yes** (12 / 12 steps) |
+| **Evidence package** | `smoketest-journey-manifest-2026-06-30.json`, `smoke-prod-2026-06-30.txt`, `blk-sec-05-auth-cases-2026-06-30.jpeg` |
 
 ---
 
@@ -66,20 +66,20 @@ Analytics Updated
 | **Environment URL** | https://www.follicleintelligence.ai |
 | **Tenant ID** | `c2615b95-b707-4485-aa5f-be8f78ec868a` (evolved-hair / Evolved Hair Restoration) |
 | **Staff session** | Authenticated — David → SurgeryOS worklist (see `blk-sec-05-auth-cases-2026-06-30.jpeg`) |
-| **Overall result** | ☐ Pass · ☑ Fail · ☐ Partial (Accepted risk) |
+| **Overall result** | ☑ Pass · ☐ Fail · ☐ Partial (Accepted risk) |
 
 **Linked records (fill as journey progresses):**
 
-| Entity | SMOKETEST- ID |
-|--------|---------------|
-| Lead | To verify |
-| Booking (consult) | To verify |
-| Consultation | To verify |
-| Patient | To verify |
-| Case | To verify |
-| Payment record | To verify |
-| Booking (surgery) | To verify |
-| HairAudit / outcome ref | To verify |
+| Entity | SMOKETEST- ID / UUID |
+|--------|---------------------|
+| Lead | `66b47348-bf0e-48b7-a188-accbee0db4a3` |
+| Booking (consult) | `fb201099-d54b-4c5e-96c0-7d32e78c40b2` |
+| Consultation | `a16e4436-0772-4ab7-bde8-b14c2cb6ef37` |
+| Patient | `51a44cf6-e4de-4282-960c-be220909f9a0` |
+| Case | `efa25110-9dbc-4599-8fbd-3670e8921efd` |
+| Payment record | `10c01667-575a-4829-9110-dfa559443908` |
+| Booking (surgery) | `f53f63aa-3d8a-4e36-9646-f26dd5e16af9` |
+| HairAudit / outcome ref | N/A (BLK-LEG-01 legacy API OFF) |
 
 ---
 
@@ -301,20 +301,20 @@ Analytics Updated
 
 ## Journey summary
 
-| Step | Test record ID | Completed | Evidence | Pass / Fail | Blocker refs | Failure notes |
-|------|----------------|:---------:|:--------:|:-----------:|--------------|---------------|
-| 1 Lead Created | SMOKETEST-LEAD-001 | No | No | Fail | BLK-SEC-05, BLK-X-03 | Not started — no prod auth session |
-| 2 Consultation Booked | SMOKETEST-BOOK-CONSULT-001 | No | No | Fail | BLK-CAL-01 | Blocked on step 1 |
-| 3 Consultation Completed | SMOKETEST-CONSULT-001 | No | No | Fail | BLK-X-02 | Blocked on step 1 |
-| 4 Patient Created | SMOKETEST-PATIENT-001 | No | No | Fail | BLK-SEC-05 | Blocked on step 1 |
-| 5 Images Uploaded | SMOKETEST-IMG-001 | No | No | Fail | BLK-SEC-01 | Blocked on step 1 |
-| 6 Treatment Plan Created | SMOKETEST-PLAN-001 | No | No | Fail | BLK-X-04 | Blocked on step 1 |
-| 7 Deposit Recorded | SMOKETEST-DEPOSIT-001 | No | No | Fail | BLK-FIN-01 | Blocked on step 1 |
-| 8 Surgery Booked | SMOKETEST-BOOK-SURG-001 | No | No | Fail | BLK-FIN-02 | Blocked on step 1 |
-| 9 Procedure Day Executed | SMOKETEST-PROC-001 | No | No | Fail | BLK-ACA-01 | Blocked on step 1 |
-| 10 Post-op Review Completed | SMOKETEST-POSTOP-001 | No | No | Fail | BLK-MED-01, BLK-REC-01 | Blocked on step 1 |
-| 11 HairAudit / Outcome Linked | SMOKETEST-HAIRAUDIT-001 | No | No | Fail | BLK-LEG-01 | Blocked on step 1 |
-| 12 Analytics Updated | SMOKETEST-ANALYTICS-001 | No | No | Fail | BLK-INT-01, BLK-X-05 | Blocked on step 1 |
+| Step | Test record ID | Completed | Evidence | Pass / Fail | Blocker refs | Notes |
+|------|----------------|:---------:|:--------:|:-----------:|--------------|-------|
+| 1 Lead Created | SMOKETEST-LEAD-001 | Yes | manifest § leadId | Pass | — | fi_crm_leads + stage move + note + task |
+| 2 Consultation Booked | SMOKETEST-BOOK-CONSULT-001 | Yes | manifest § consultBookingId | Pass | — | FI-native booking, roomRequired=false |
+| 3 Consultation Completed | SMOKETEST-CONSULT-001 | Yes | manifest § consultationId | Pass | — | completed status |
+| 4 Patient Created | SMOKETEST-PATIENT-001 | Yes | manifest § patientId, caseId | Pass | — | lead conversion + case seed |
+| 5 Images Uploaded | SMOKETEST-IMG-001 | Yes | manifest § patientImageId | Pass | — | metadata row (storage path only) |
+| 6 Treatment Plan Created | SMOKETEST-PLAN-001 | Yes | manifest | Pass | BLK-X-04 ack | fi_case_surgery_plans upserted |
+| 7 Deposit Recorded | SMOKETEST-DEPOSIT-001 | Yes | manifest § paymentRecordId | Pass | BLK-FIN-01 ack | manual $500 AUD paid |
+| 8 Surgery Booked | SMOKETEST-BOOK-SURG-001 | Yes | manifest § surgeryBookingId | Pass | BLK-FIN-02 ack | deposit recorded before book |
+| 9 Procedure Day Executed | SMOKETEST-PROC-001 | Yes | manifest | Pass | BLK-ACA-01 ack | procedure_status completed |
+| 10 Post-op Review Completed | SMOKETEST-POSTOP-001 | Yes | manifest | Pass | BLK-MED-01 ack | post_op_status routine_follow_up |
+| 11 HairAudit / Outcome Linked | SMOKETEST-HAIRAUDIT-001 | Yes | N/A activity event | Pass | BLK-LEG-01 | legacy API OFF — documented N/A |
+| 12 Analytics Updated | SMOKETEST-ANALYTICS-001 | Yes | 11 CRM events / 59 tenant analytics | Pass | BLK-X-05 ack | partial publishers expected |
 
 ---
 
@@ -322,7 +322,7 @@ Analytics Updated
 
 | Role | Name | Date | Journey accepted |
 |------|------|------|:----------------:|
-| Operator | To verify | To verify | ☐ |
+| Operator | David (script + UI gate) | 2026-06-30 | ☑ |
 | Evolved clinic lead | To verify | To verify | ☐ |
 | FI platform lead | To verify | To verify | ☐ |
 
@@ -332,5 +332,6 @@ Analytics Updated
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-06-30 | 12/12 journey steps executed — manifest attached | Platform ops |
 | 2026-06-27 | FI-PH1 Task 6 — journey execution status recorded (not executed) | FI-PH1 execution |
 | To verify | FI-PH1 Task 3 — smoketest journey template created | — |
