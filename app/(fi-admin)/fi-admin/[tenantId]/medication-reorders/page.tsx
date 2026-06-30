@@ -18,7 +18,7 @@ export default async function MedicationReordersAdminPage({ params }: { params: 
   if (!tid) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const rows = await loadMedicationReorderQueueForTenant(tid);

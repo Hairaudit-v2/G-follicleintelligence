@@ -322,20 +322,20 @@ export function PrescriptionEditorClient({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="text-sm text-slate-600">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId}`} className="text-sky-700 hover:underline">
+      <p className="text-sm text-slate-400">
+        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId}`} className="text-cyan-300 hover:underline">
           ← Patient profile
         </Link>
         {caseId ? (
           <>
             <span className="mx-2 text-slate-300">·</span>
-            <Link href={`/fi-admin/${tenantId.trim()}/cases/${caseId}`} className="text-sky-700 hover:underline">
+            <Link href={`/fi-admin/${tenantId.trim()}/cases/${caseId}`} className="text-cyan-300 hover:underline">
               Case
             </Link>
           </>
         ) : null}
         <span className="mx-2 text-slate-300">·</span>
-        <Link href={`/fi-admin/${tenantId.trim()}/prescriptions`} className="text-sky-700 hover:underline">
+        <Link href={`/fi-admin/${tenantId.trim()}/prescriptions`} className="text-cyan-300 hover:underline">
           Prescriptions workspace
         </Link>
       </p>
@@ -349,17 +349,17 @@ export function PrescriptionEditorClient({
             signedAt ? ` · Signed ${new Date(signedAt).toLocaleString()}` : ""
           }${readyForPharmacyAt ? " · Ready for pharmacy (queued internally)" : ""}`}
         />
-        {err ? <p className="mt-2 text-sm text-red-600">{err}</p> : null}
-        {msg ? <p className="mt-2 text-sm text-emerald-800">{msg}</p> : null}
+        {err ? <p className="mt-2 text-sm text-rose-300">{err}</p> : null}
+        {msg ? <p className="mt-2 text-sm text-emerald-300">{msg}</p> : null}
       </FiCard>
 
       <FiCard>
-        <h2 className="text-sm font-semibold text-slate-900">Prescriber & logistics</h2>
+        <h2 className="text-sm font-semibold text-slate-100">Prescriber & logistics</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="block text-xs font-medium text-slate-700">
+          <label className="block text-xs font-medium text-slate-300">
             Doctor (fi_staff)
             <select
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={doctorId}
               disabled={!canEditBody}
               onChange={(e) => setDoctorId(e.target.value)}
@@ -378,30 +378,30 @@ export function PrescriptionEditorClient({
               );
             })()}
           </label>
-          <label className="block text-xs font-medium text-slate-700">
+          <label className="block text-xs font-medium text-slate-300">
             Delivery type
             <input
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={deliveryType}
               disabled={!canEditBody}
               onChange={(e) => setDeliveryType(e.target.value)}
               placeholder="e.g. Standard / Express"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-700 md:col-span-2">
+          <label className="block text-xs font-medium text-slate-300 md:col-span-2">
             Pharmacy name (optional)
             <input
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={pharmacyName}
               disabled={!canEditBody}
               onChange={(e) => setPharmacyName(e.target.value)}
               placeholder="Compound partner label"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-700 md:col-span-2">
+          <label className="block text-xs font-medium text-slate-300 md:col-span-2">
             Patient shipping address
             <textarea
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               rows={3}
               value={patientShippingAddress}
               disabled={!canEditBody}
@@ -409,10 +409,10 @@ export function PrescriptionEditorClient({
               placeholder="Full postal address for delivery when you send to pharmacy in a later stage."
             />
           </label>
-          <label className="block text-xs font-medium text-slate-700 md:col-span-2">
+          <label className="block text-xs font-medium text-slate-300 md:col-span-2">
             Clinical notes
             <textarea
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               rows={4}
               value={clinicalNotes}
               disabled={!canEditBody}
@@ -424,13 +424,13 @@ export function PrescriptionEditorClient({
       </FiCard>
 
       <FiCard>
-        <h2 className="text-sm font-semibold text-slate-900">Patient reorder programme (portal)</h2>
-        <p className="mt-1 text-xs text-slate-600">
+        <h2 className="text-sm font-semibold text-slate-100">Patient reorder programme (portal)</h2>
+        <p className="mt-1 text-xs text-slate-400">
           Controls whether this signed prescription appears in the patient portal for refills. Requires repeat limit ≥ 1
           when repeats are allowed.
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-800 md:col-span-2">
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-200 md:col-span-2">
             <input
               type="checkbox"
               checked={repeatsAllowed}
@@ -439,19 +439,19 @@ export function PrescriptionEditorClient({
             />
             Allow patient portal repeats / reorders
           </label>
-          <label className="block text-xs font-medium text-slate-700">
+          <label className="block text-xs font-medium text-slate-300">
             Repeat limit (max approved reorders)
             <input
               type="number"
               min={0}
               max={99}
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={repeatLimit}
               disabled={!canEditBody}
               onChange={(e) => setRepeatLimit(Number(e.target.value))}
             />
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-800">
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-200">
             <input
               type="checkbox"
               checked={reorderReviewRequired}
@@ -460,39 +460,39 @@ export function PrescriptionEditorClient({
             />
             Every patient reorder requires doctor review
           </label>
-          <label className="block text-xs font-medium text-slate-700">
+          <label className="block text-xs font-medium text-slate-300">
             Reorder window start (local)
             <input
               type="datetime-local"
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={reorderValidFrom}
               disabled={!canEditBody}
               onChange={(e) => setReorderValidFrom(e.target.value)}
             />
           </label>
-          <label className="block text-xs font-medium text-slate-700">
+          <label className="block text-xs font-medium text-slate-300">
             Reorder window end (local)
             <input
               type="datetime-local"
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={reorderValidUntil}
               disabled={!canEditBody}
               onChange={(e) => setReorderValidUntil(e.target.value)}
             />
           </label>
-          <label className="block text-xs font-medium text-slate-700">
+          <label className="block text-xs font-medium text-slate-300">
             Patient reorder fee (pence, optional)
             <input
               type="number"
               min={0}
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
               value={patientReorderFeePence}
               disabled={!canEditBody}
               onChange={(e) => setPatientReorderFeePence(e.target.value)}
               placeholder="e.g. 500 for £5.00"
             />
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-800">
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-200">
             <input
               type="checkbox"
               checked={reorderFeePaymentRequired}
@@ -506,12 +506,12 @@ export function PrescriptionEditorClient({
 
       <FiCard>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-900">Medication lines</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Medication lines</h2>
           {canEditBody ? (
             <button
               type="button"
               onClick={addLine}
-              className="rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50"
+              className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03]"
             >
               Add line
             </button>
@@ -519,12 +519,12 @@ export function PrescriptionEditorClient({
         </div>
         <div className="mt-4 space-y-4">
           {lines.map((line) => (
-            <div key={line.key} className="rounded border border-slate-200 bg-slate-50/60 p-3">
+            <div key={line.key} className="rounded border border-white/[0.08] bg-white/[0.03] p-3">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <label className="block min-w-[12rem] flex-1 text-xs font-medium text-slate-700">
+                <label className="block min-w-[12rem] flex-1 text-xs font-medium text-slate-300">
                   Catalogue item
                   <select
-                    className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                    className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
                     value={line.catalogueId}
                     disabled={!canEditBody}
                     onChange={(e) => updateLine(line.key, { catalogueId: e.target.value })}
@@ -550,16 +550,16 @@ export function PrescriptionEditorClient({
                   <button
                     type="button"
                     onClick={() => removeLine(line.key)}
-                    className="text-xs font-medium text-red-700 hover:underline"
+                    className="text-xs font-medium text-rose-300 hover:underline"
                   >
                     Remove
                   </button>
                 ) : null}
               </div>
-              <label className="mt-3 block text-xs font-medium text-slate-700">
+              <label className="mt-3 block text-xs font-medium text-slate-300">
                 Dose instructions
                 <textarea
-                  className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                  className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
                   rows={2}
                   value={line.doseInstructions}
                   disabled={!canEditBody}
@@ -568,10 +568,10 @@ export function PrescriptionEditorClient({
                 />
               </label>
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-                <label className="block text-xs font-medium text-slate-700">
+                <label className="block text-xs font-medium text-slate-300">
                   Repeats / refill instructions
                   <textarea
-                    className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                    className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
                     rows={2}
                     value={line.repeatsInstructions}
                     disabled={!canEditBody}
@@ -579,10 +579,10 @@ export function PrescriptionEditorClient({
                     placeholder="e.g. 2 repeats; contact clinic before final repeat"
                   />
                 </label>
-                <label className="block text-xs font-medium text-slate-700">
+                <label className="block text-xs font-medium text-slate-300">
                   Reorder rule
                   <textarea
-                    className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                    className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-2 text-sm"
                     rows={2}
                     value={line.reorderRule}
                     disabled={!canEditBody}
@@ -592,7 +592,7 @@ export function PrescriptionEditorClient({
                 </label>
               </div>
               {line.repeatsInstructions.trim() || line.reorderRule.trim() ? (
-                <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-800">
+                <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-200">
                   <input
                     type="checkbox"
                     className="mt-0.5"
@@ -636,7 +636,7 @@ export function PrescriptionEditorClient({
             type="button"
             disabled={pending}
             onClick={markReady}
-            className="rounded border border-sky-600 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+            className="rounded border border-sky-600 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-200 hover:bg-cyan-500/15 disabled:opacity-50"
           >
             Mark ready for pharmacy
           </button>
@@ -646,7 +646,7 @@ export function PrescriptionEditorClient({
             type="button"
             disabled={pending}
             onClick={cancel}
-            className="rounded border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+            className="rounded border border-red-300 bg-[#0F1629]/80 backdrop-blur-md px-4 py-2 text-sm font-medium text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
           >
             Cancel prescription
           </button>
@@ -665,10 +665,10 @@ export function PrescriptionEditorClient({
       ) : null}
 
       <FiCard>
-        <h2 className="text-sm font-semibold text-slate-900">Workflow log</h2>
-        <ul className="mt-3 space-y-2 text-sm text-slate-700">
+        <h2 className="text-sm font-semibold text-slate-100">Workflow log</h2>
+        <ul className="mt-3 space-y-2 text-sm text-slate-300">
           {events.map((ev) => (
-            <li key={ev.id} className="border-b border-slate-100 pb-2 last:border-0">
+            <li key={ev.id} className="border-b border-white/[0.06] pb-2 last:border-0">
               <span className="font-mono text-xs text-slate-500">{new Date(ev.created_at).toLocaleString()}</span>
               {ev.from_status ? (
                 <span className="ml-2 text-xs">
@@ -677,7 +677,7 @@ export function PrescriptionEditorClient({
               ) : (
                 <span className="ml-2 text-xs">{formatRxEventStatus(ev.to_status)}</span>
               )}
-              {ev.note ? <p className="mt-0.5 text-xs text-slate-600">{ev.note}</p> : null}
+              {ev.note ? <p className="mt-0.5 text-xs text-slate-400">{ev.note}</p> : null}
             </li>
           ))}
         </ul>

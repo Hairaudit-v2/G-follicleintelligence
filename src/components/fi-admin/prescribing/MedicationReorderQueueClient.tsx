@@ -30,22 +30,22 @@ export function MedicationReorderQueueClient({
 
   return (
     <div className="space-y-4">
-      {err ? <p className="text-sm text-red-600">{err}</p> : null}
+      {err ? <p className="text-sm text-rose-300">{err}</p> : null}
       {rows.length === 0 ? (
-        <p className="text-sm text-slate-600">No medication reorder requests yet.</p>
+        <p className="text-sm text-slate-400">No medication reorder requests yet.</p>
       ) : (
-        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+        <ul className="divide-y divide-white/[0.08] rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md">
           {rows.map((r) => (
             <li key={r.id} className="space-y-2 px-3 py-3 text-sm">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="font-medium text-slate-900">{r.medication_name}</p>
+                  <p className="font-medium text-slate-100">{r.medication_name}</p>
                   <p className="text-xs text-slate-500">
                     Patient <span className="font-mono">{r.patient_id.slice(0, 8)}…</span> ·{" "}
                     {MEDICATION_REORDER_STATUS_LABELS[r.status]} · {new Date(r.created_at).toLocaleString()}
                   </p>
                   {r.fee_pence != null && r.fee_pence > 0 ? (
-                    <p className="text-xs text-slate-600">
+                    <p className="text-xs text-slate-400">
                       Fee £{(r.fee_pence / 100).toFixed(2)} · Payment: {r.payment_status}
                     </p>
                   ) : null}
@@ -74,7 +74,7 @@ export function MedicationReorderQueueClient({
                       <button
                         type="button"
                         disabled={pending}
-                        className="rounded border border-red-300 px-2 py-1 text-xs text-red-800 disabled:opacity-50"
+                        className="rounded border border-red-300 px-2 py-1 text-xs text-rose-300 disabled:opacity-50"
                         onClick={() => setRejectId(r.id)}
                       >
                         Reject
@@ -146,15 +146,15 @@ export function MedicationReorderQueueClient({
                   ) : null}
                 </div>
               </div>
-              <p className="text-xs text-slate-700">
+              <p className="text-xs text-slate-300">
                 <span className="font-semibold">Delivery:</span> {r.delivery_address}
               </p>
               {rejectId === r.id ? (
-                <div className="flex flex-wrap items-end gap-2 border-t border-slate-100 pt-2">
+                <div className="flex flex-wrap items-end gap-2 border-t border-white/[0.06] pt-2">
                   <label className="block flex-1 text-xs">
                     Rejection reason
                     <input
-                      className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                      className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                     />
@@ -182,7 +182,7 @@ export function MedicationReorderQueueClient({
                   >
                     Confirm reject
                   </button>
-                  <button type="button" className="text-xs text-slate-600" onClick={() => setRejectId(null)}>
+                  <button type="button" className="text-xs text-slate-400" onClick={() => setRejectId(null)}>
                     Cancel
                   </button>
                 </div>
