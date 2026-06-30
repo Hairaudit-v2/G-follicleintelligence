@@ -310,14 +310,25 @@ export async function loadPatientImageForPatient(
   return mapRow(data as Record<string, unknown>);
 }
 
+function isMissingStorageObjectError(message: string | undefined): boolean {
+  if (!message) return false;
+  const m = message.toLowerCase();
+  return (
+    m.includes("object not found") ||
+    m.includes("resource was not found") ||
+    m.includes("the specified key does not exist")
+  );
+}
+
 export async function createPatientImageSignedUrl(
   row: Pick<PatientImageRow, "id" | "storage_bucket" | "storage_path">,
   client?: SupabaseClient
-): Promise<PatientImageSignedDescriptor> {
+): Promise<PatientImageSignedDescriptor | null> {
   const supabase = client ?? supabaseAdmin();
   const bucket = row.storage_bucket?.trim() || PATIENT_IMAGES_BUCKET_DEFAULT;
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(row.storage_path, SIGNED_URL_TTL_SEC);
   if (error || !data?.signedUrl) {
+    if (isMissingStorageObjectError(error?.message)) return null;
     throw new Error(error?.message ?? "Could not create signed URL.");
   }
   const expiresAtIso = new Date(Date.now() + SIGNED_URL_TTL_SEC * 1000).toISOString();
@@ -330,7 +341,8 @@ export async function createPatientImageSignedUrls(
 ): Promise<Map<string, PatientImageSignedDescriptor>> {
   const out = new Map<string, PatientImageSignedDescriptor>();
   for (const r of rows) {
-    out.set(r.id, await createPatientImageSignedUrl(r, client));
+    const signed = await createPatientImageSignedUrl(r, client);
+    if (signed) out.set(r.id, signed);
   }
   return out;
 }
@@ -402,10 +414,10 @@ export async function loadPatientImagesProfileBundle(
     supabase
   );
 
-  const activeWithSignedUrls: PatientImageProfileTile[] = activeMapped.map((image) => {
+  const activeWithSignedUrls: PatientImageProfileTile[] = activeMapped.flatMap((image) => {
     const signed = signedMap.get(image.id);
-    if (!signed) throw new Error("Signed URL missing for image.");
-    return { image, signed };
+    if (!signed) return [];
+    return [{ image, signed }];
   });
 
   return {

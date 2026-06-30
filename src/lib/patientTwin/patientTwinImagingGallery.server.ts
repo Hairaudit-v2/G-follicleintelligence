@@ -102,31 +102,38 @@ export async function loadPatientTwinImagingGallerySection(
     supabase
   );
 
-  const items: PatientTwinImagingGallerySection["items"] = mapped.map((img) => {
+  const items: PatientTwinImagingGallerySection["items"] = mapped.flatMap((img) => {
     const s = signedMap.get(img.id);
-    if (!s) {
-      throw new Error("Signed URL missing for twin imaging gallery.");
-    }
-    return {
-      id: img.id,
-      thumbnail_url: s.url,
-      signed_expires_at: s.expiresAtIso,
-      taken_at: img.taken_at,
-      created_at: img.created_at,
-      ai_image_category: img.ai_image_category ?? null,
-      ai_image_category_confidence: img.ai_image_category_confidence ?? null,
-      ai_hair_state: img.ai_hair_state ?? null,
-      ai_shave_state: img.ai_shave_state ?? null,
-      ai_surgery_stage: img.ai_surgery_stage ?? null,
-      ai_image_review_status: img.ai_image_review_status,
-      ai_image_ai_notes: img.ai_image_ai_notes ?? null,
-      ai_image_classified_at: img.ai_image_classified_at ?? null,
-    };
+    if (!s) return [];
+    return [
+      {
+        id: img.id,
+        thumbnail_url: s.url,
+        signed_expires_at: s.expiresAtIso,
+        taken_at: img.taken_at,
+        created_at: img.created_at,
+        ai_image_category: img.ai_image_category ?? null,
+        ai_image_category_confidence: img.ai_image_category_confidence ?? null,
+        ai_hair_state: img.ai_hair_state ?? null,
+        ai_shave_state: img.ai_shave_state ?? null,
+        ai_surgery_stage: img.ai_surgery_stage ?? null,
+        ai_image_review_status: img.ai_image_review_status,
+        ai_image_ai_notes: img.ai_image_ai_notes ?? null,
+        ai_image_classified_at: img.ai_image_classified_at ?? null,
+      },
+    ];
   });
 
-  const itemsById = new Map(items.map((i) => [i.id, i]));
+  if (items.length === 0) {
+    return emptyGallerySection();
+  }
 
-  const journeyInputs: PatientJourneyGalleryImageInput[] = mapped.map((img) => ({
+  const itemsById = new Map(items.map((i) => [i.id, i]));
+  const signedIds = new Set(items.map((i) => i.id));
+
+  const journeyInputs: PatientJourneyGalleryImageInput[] = mapped
+    .filter((img) => signedIds.has(img.id))
+    .map((img) => ({
     id: img.id,
     taken_at: img.taken_at,
     created_at: img.created_at,
