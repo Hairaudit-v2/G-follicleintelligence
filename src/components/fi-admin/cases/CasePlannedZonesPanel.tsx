@@ -19,11 +19,11 @@ export function CasePlannedZonesPanel({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold text-gray-800">Planned zones</h3>
+        <h3 className="text-xs font-semibold text-slate-200">Planned zones</h3>
         <button
           type="button"
           onClick={() => onChange([...zones, { key: `zone_${zones.length + 1}`, label: "" }])}
-          className="rounded border border-gray-300 bg-white px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-0.5 text-xs text-slate-300 hover:bg-white/[0.03]"
         >
           Add zone
         </button>
@@ -37,24 +37,24 @@ export function CasePlannedZonesPanel({
             const keyField = caseFormField(`planned-zone-${i}-key`);
             const labelField = caseFormField(`planned-zone-${i}-label`);
             return (
-            <li key={i} className="flex flex-wrap items-end gap-2 rounded border border-gray-100 bg-gray-50/80 p-2">
-              <label htmlFor={keyField.id} className="text-xs text-gray-600">
+            <li key={i} className="flex flex-wrap items-end gap-2 rounded border border-white/[0.06] bg-white/[0.03] p-2">
+              <label htmlFor={keyField.id} className="text-xs text-slate-400">
                 Key
                 <input
                   {...keyField}
                   value={z.key}
                   onChange={(e) => updateAt(i, { key: e.target.value })}
-                  className="mt-0.5 block w-36 rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 block w-36 rounded border border-slate-700 px-2 py-1 text-sm"
                   placeholder="hairline"
                 />
               </label>
-              <label htmlFor={labelField.id} className="min-w-[8rem] flex-1 text-xs text-gray-600">
+              <label htmlFor={labelField.id} className="min-w-[8rem] flex-1 text-xs text-slate-400">
                 Label
                 <input
                   {...labelField}
                   value={z.label ?? ""}
                   onChange={(e) => updateAt(i, { label: e.target.value || null })}
-                  className="mt-0.5 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
                   placeholder="Optional display name"
                 />
               </label>

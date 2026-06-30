@@ -196,23 +196,23 @@ export function CaseProcedureDayForm({
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.procedureDate.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.procedureDate.id} className="block text-xs font-medium text-slate-300">
           Procedure date
           <input
             {...PROCEDURE_DAY_FIELDS.procedureDate}
             type="date"
             value={procedureDate}
             onChange={(e) => setProcedureDate(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.procedureStatus.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.procedureStatus.id} className="block text-xs font-medium text-slate-300">
           Procedure status
           <select
             {...PROCEDURE_DAY_FIELDS.procedureStatus}
             value={procedureStatus}
             onChange={(e) => setProcedureStatus(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             {!isProcedureStatus(procedureStatus) ? <option value={procedureStatus}>{procedureStatus} (legacy)</option> : null}
             {PROCEDURE_STATUS_VALUES.map((s) => (
@@ -225,7 +225,7 @@ export function CaseProcedureDayForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.surgeonId.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.surgeonId.id} className="block text-xs font-medium text-slate-300">
           Surgeon
           <ProcedureTeamSelect
             id={PROCEDURE_DAY_FIELDS.surgeonId.id}
@@ -236,7 +236,7 @@ export function CaseProcedureDayForm({
             slot="clinical"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.nurseId.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.nurseId.id} className="block text-xs font-medium text-slate-300">
           Circulating / recovery nurse
           <ProcedureTeamSelect
             id={PROCEDURE_DAY_FIELDS.nurseId.id}
@@ -249,24 +249,24 @@ export function CaseProcedureDayForm({
         </label>
       </div>
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.room.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.room.id} className="block text-xs font-medium text-slate-300">
         Procedure room
         <input
           {...PROCEDURE_DAY_FIELDS.room}
           value={room}
           onChange={(e) => setRoom(e.target.value)}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           placeholder="OR 2"
         />
       </label>
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.location.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.location.id} className="block text-xs font-medium text-slate-300">
         Procedure location / site
         <input
           {...PROCEDURE_DAY_FIELDS.location}
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           placeholder="Clinic address or site label"
         />
       </label>
@@ -287,8 +287,8 @@ export function CaseProcedureDayForm({
         onChange={setTeamIds}
       />
 
-      <div className="rounded border border-gray-200 bg-gray-50/80 p-3">
-        <h3 className="text-xs font-semibold text-gray-900">Procedure milestones</h3>
+      <div className="rounded border border-white/[0.08] bg-white/[0.03] p-3">
+        <h3 className="text-xs font-semibold text-slate-100">Procedure milestones</h3>
         <p className="mt-1 text-xs text-gray-500">
           Record when each stage happened (optional but recommended for handoffs and audits).
         </p>
@@ -296,14 +296,14 @@ export function CaseProcedureDayForm({
           {PROCEDURE_MILESTONE_KEYS.map((key) => {
             const ts = milestones[key]?.trim();
             return (
-              <li key={key} className="flex flex-wrap items-center gap-2 border-b border-gray-100 pb-2 text-xs last:border-0 last:pb-0">
-                <span className="min-w-0 flex-1 text-gray-800">{PROCEDURE_MILESTONE_LABEL[key]}</span>
+              <li key={key} className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] pb-2 text-xs last:border-0 last:pb-0">
+                <span className="min-w-0 flex-1 text-slate-200">{PROCEDURE_MILESTONE_LABEL[key]}</span>
                 <span className="text-gray-500">
                   {ts ? (Number.isNaN(Date.parse(ts)) ? ts : new Date(ts).toLocaleString()) : "—"}
                 </span>
                 <button
                   type="button"
-                  className="rounded border border-gray-300 bg-white px-2 py-0.5 text-[0.65rem] font-medium text-gray-800 hover:bg-gray-50"
+                  className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-white/[0.03]"
                   onClick={() => setMilestones((m) => ({ ...m, [key]: new Date().toISOString() }))}
                 >
                   Now
@@ -325,7 +325,7 @@ export function CaseProcedureDayForm({
             );
           })}
         </ul>
-        <p className="mt-2 text-xs text-gray-600">
+        <p className="mt-2 text-xs text-slate-400">
           Milestones logged:{" "}
           <span className="font-mono font-medium">
             {milestoneCompletionCount(milestones)} / {PROCEDURE_MILESTONE_KEYS.length}
@@ -333,20 +333,20 @@ export function CaseProcedureDayForm({
         </p>
       </div>
 
-      <div className="rounded border border-sky-100 bg-sky-50/50 p-3 text-xs text-gray-800">
-        <p className="font-semibold text-gray-900">Finishing the case</p>
-        <ol className="mt-2 list-decimal space-y-1 pl-4 text-gray-700">
-          <li className={ge != null && gi != null ? "" : "text-amber-900"}>Capture extracted and implanted graft counts.</li>
-          <li className={milestoneCompletionCount(milestones) >= 3 ? "" : "text-amber-900"}>
+      <div className="rounded border border-sky-100 bg-cyan-500/10 p-3 text-xs text-slate-200">
+        <p className="font-semibold text-slate-100">Finishing the case</p>
+        <ol className="mt-2 list-decimal space-y-1 pl-4 text-slate-300">
+          <li className={ge != null && gi != null ? "" : "text-amber-200"}>Capture extracted and implanted graft counts.</li>
+          <li className={milestoneCompletionCount(milestones) >= 3 ? "" : "text-amber-200"}>
             Log at least three procedure milestones (or explain gaps in intraoperative notes).
           </li>
-          <li className={completionSummary.trim() ? "" : "text-amber-900"}>
+          <li className={completionSummary.trim() ? "" : "text-amber-200"}>
             Add a completion summary when you set status to completed.
           </li>
         </ol>
         <button
           type="button"
-          className="mt-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-900 hover:bg-gray-50"
+          className="mt-2 rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-xs font-medium text-slate-100 hover:bg-white/[0.03]"
           onClick={() => setProcedureStatus("completed")}
         >
           Set status to completed (save to persist)
@@ -354,150 +354,150 @@ export function CaseProcedureDayForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.startLocal.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.startLocal.id} className="block text-xs font-medium text-slate-300">
           Start time
           <input
             {...PROCEDURE_DAY_FIELDS.startLocal}
             type="datetime-local"
             value={startLocal}
             onChange={(e) => setStartLocal(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.finishLocal.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.finishLocal.id} className="block text-xs font-medium text-slate-300">
           Finish time
           <input
             {...PROCEDURE_DAY_FIELDS.finishLocal}
             type="datetime-local"
             value={finishLocal}
             onChange={(e) => setFinishLocal(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.punchSize.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.punchSize.id} className="block text-xs font-medium text-slate-300">
           Punch size
           <input
             {...PROCEDURE_DAY_FIELDS.punchSize}
             value={punchSize}
             onChange={(e) => setPunchSize(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="e.g. 0.85mm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.extractionMethod.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.extractionMethod.id} className="block text-xs font-medium text-slate-300">
           Extraction method
           <input
             {...PROCEDURE_DAY_FIELDS.extractionMethod}
             value={extractionMethod}
             onChange={(e) => setExtractionMethod(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.implantationMethod.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.implantationMethod.id} className="block text-xs font-medium text-slate-300">
           Implantation method
           <input
             {...PROCEDURE_DAY_FIELDS.implantationMethod}
             value={implantationMethod}
             onChange={(e) => setImplantationMethod(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
       </div>
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.medicationNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.medicationNotes.id} className="block text-xs font-medium text-slate-300">
         Anaesthetic / medication notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.medicationNotes}
           value={medicationNotes}
           onChange={(e) => setMedicationNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={PROCEDURE_DAY_FIELDS.intraNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.intraNotes.id} className="block text-xs font-medium text-slate-300">
         Intraoperative notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.intraNotes}
           value={intraNotes}
           onChange={(e) => setIntraNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <label htmlFor={PROCEDURE_DAY_FIELDS.graftsExtracted.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.graftsExtracted.id} className="block text-xs font-medium text-slate-300">
           Grafts extracted
           <input
             {...PROCEDURE_DAY_FIELDS.graftsExtracted}
             inputMode="numeric"
             value={graftsExtracted}
             onChange={(e) => setGraftsExtracted(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.graftsImplanted.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.graftsImplanted.id} className="block text-xs font-medium text-slate-300">
           Grafts implanted
           <input
             {...PROCEDURE_DAY_FIELDS.graftsImplanted}
             inputMode="numeric"
             value={graftsImplanted}
             onChange={(e) => setGraftsImplanted(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.hairsImplanted.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={PROCEDURE_DAY_FIELDS.hairsImplanted.id} className="block text-xs font-medium text-slate-300">
           Hairs implanted
           <input
             {...PROCEDURE_DAY_FIELDS.hairsImplanted}
             inputMode="numeric"
             value={hairsImplanted}
             onChange={(e) => setHairsImplanted(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
       </div>
-      {!graftsOk ? <p className="text-xs text-amber-800">Implanted grafts cannot exceed extracted grafts.</p> : null}
-      {!timesOk ? <p className="text-xs text-amber-800">Finish time must be on or after start time.</p> : null}
+      {!graftsOk ? <p className="text-xs text-amber-300">Implanted grafts cannot exceed extracted grafts.</p> : null}
+      {!timesOk ? <p className="text-xs text-amber-300">Finish time must be on or after start time.</p> : null}
 
-      <label htmlFor={PROCEDURE_DAY_FIELDS.handlingNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.handlingNotes.id} className="block text-xs font-medium text-slate-300">
         Graft survival / handling notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.handlingNotes}
           value={handlingNotes}
           onChange={(e) => setHandlingNotes(e.target.value)}
           rows={2}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={PROCEDURE_DAY_FIELDS.complicationsNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.complicationsNotes.id} className="block text-xs font-medium text-slate-300">
         Complications / incidents notes
         <textarea
           {...PROCEDURE_DAY_FIELDS.complicationsNotes}
           value={complicationsNotes}
           onChange={(e) => setComplicationsNotes(e.target.value)}
           rows={2}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={PROCEDURE_DAY_FIELDS.completionSummary.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={PROCEDURE_DAY_FIELDS.completionSummary.id} className="block text-xs font-medium text-slate-300">
         Procedure completion summary
         <textarea
           {...PROCEDURE_DAY_FIELDS.completionSummary}
           value={completionSummary}
           onChange={(e) => setCompletionSummary(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
 
       {!canSaveStatus ? (
-        <p className="text-xs text-amber-800">Pick a standard procedure status before saving.</p>
+        <p className="text-xs text-amber-300">Pick a standard procedure status before saving.</p>
       ) : null}
-      {msg ? <p className="text-xs text-gray-700">{msg}</p> : null}
+      {msg ? <p className="text-xs text-slate-300">{msg}</p> : null}
 
       <button
         type="button"

@@ -29,12 +29,12 @@ export function CaseProcedureDayCard({
     linkedSurgeryBookingYmd,
   });
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h2
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.procedureDay)}
-            className="text-sm font-semibold text-gray-900"
+            className="text-sm font-semibold text-slate-100"
           >
             Procedure day workflow
           </h2>
@@ -49,26 +49,26 @@ export function CaseProcedureDayCard({
             relativeHref={caseProcedureDayDetailHref(tenantId, caseId)}
           />
           {procedure ? (
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-slate-400">
               Status:{" "}
-              <span className="font-medium text-gray-900">{procedureStatusLabel(procedure.procedure_status)}</span>
+              <span className="font-medium text-slate-100">{procedureStatusLabel(procedure.procedure_status)}</span>
               <span className="ml-2 text-gray-400">· updated {procedure.updated_at ? procedure.updated_at.slice(0, 10) : "—"}</span>
             </p>
           ) : (
-            <p className="text-xs text-amber-800">No procedure-day row yet — save to create one.</p>
+            <p className="text-xs text-amber-300">No procedure-day row yet — save to create one.</p>
           )}
         </div>
       </div>
 
       {mismatch.length ? (
-        <ul className="mt-3 space-y-1 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+        <ul className="mt-3 space-y-1 rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
           {mismatch.map((w, i) => (
             <li key={i}>{w.message}</li>
           ))}
         </ul>
       ) : null}
 
-      <div className="mt-4 border-t border-gray-100 pt-4">
+      <div className="mt-4 border-t border-white/[0.06] pt-4">
         <CaseProcedureDayForm tenantId={tenantId} caseId={caseId} initial={procedure} teamUserOptions={teamUserOptions} />
       </div>
     </div>

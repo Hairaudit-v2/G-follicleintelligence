@@ -76,7 +76,7 @@ export function SurgeryOsCaptureEvidenceButton({
           aria-modal="true"
           aria-labelledby="surgery-os-vie-capture-title"
         >
-          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#334155] bg-white p-4 shadow-2xl">
+          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#334155] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-2xl">
             <VieCaptureWizard
               tenantId={tenantId}
               patientId={capture.patientId}

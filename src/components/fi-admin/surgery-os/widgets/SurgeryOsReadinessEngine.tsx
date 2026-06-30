@@ -22,7 +22,7 @@ export function SurgeryOsReadinessEngineWidget({ snapshots }: { snapshots: Surge
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {snapshots.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-            <ClipboardCheck className="mb-2 h-8 w-8 text-slate-600" aria-hidden />
+            <ClipboardCheck className="mb-2 h-8 w-8 text-slate-400" aria-hidden />
             <p className="text-sm text-slate-400">No surgeries to assess readiness for today.</p>
           </div>
         ) : (
@@ -56,7 +56,7 @@ export function SurgeryOsReadinessEngineWidget({ snapshots }: { snapshots: Surge
                         {item.complete ? (
                           <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-hidden />
                         ) : (
-                          <Circle className="h-3.5 w-3.5 shrink-0 text-slate-600" aria-hidden />
+                          <Circle className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
                         )}
                         <span className={item.complete ? "text-slate-300" : undefined}>{item.label}</span>
                       </li>

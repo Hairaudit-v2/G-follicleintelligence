@@ -8,12 +8,12 @@ export function CasesIndexTable({ tenantId, rows }: { tenantId: string; rows: Ca
   }
 
   return (
-    <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
       <table className="min-w-full text-sm" aria-labelledby="cases-index-table-heading">
-        <caption id="cases-index-table-heading" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
+        <caption id="cases-index-table-heading" className="px-3 py-2 text-left text-sm font-semibold text-slate-100">
           Tenant patients
         </caption>
-        <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+        <thead className="bg-white/[0.03] text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
           <tr>
             <th className="px-3 py-2">Patient</th>
             <th className="px-3 py-2">Person</th>
@@ -27,13 +27,13 @@ export function CasesIndexTable({ tenantId, rows }: { tenantId: string; rows: Ca
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-gray-100 hover:bg-gray-50/80">
+            <tr key={r.id} className="border-t border-white/[0.06] hover:bg-white/[0.03]">
               <td className="px-3 py-2">
                 <Link href={`/fi-admin/${tenantId}/cases/${r.id}`} className="font-medium text-blue-700 hover:underline">
                   {r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}
                 </Link>
               </td>
-              <td className="px-3 py-2 text-gray-800">
+              <td className="px-3 py-2 text-slate-200">
                 <div>{r.person_label}</div>
                 {r.person_email ? <div className="text-xs text-gray-500">{r.person_email}</div> : null}
               </td>
@@ -46,11 +46,11 @@ export function CasesIndexTable({ tenantId, rows }: { tenantId: string; rows: Ca
                   <span className="text-gray-400">—</span>
                 )}
               </td>
-              <td className="px-3 py-2 text-gray-700">{r.treatment_type ?? "—"}</td>
-              <td className="px-3 py-2 text-gray-700">{r.case_type ?? "—"}</td>
-              <td className="px-3 py-2 text-gray-800">{fiCaseStatusLabel(r.status)}</td>
-              <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-600">{r.updated_at ? r.updated_at.slice(0, 10) : "—"}</td>
-              <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-600">{r.created_at ? r.created_at.slice(0, 10) : "—"}</td>
+              <td className="px-3 py-2 text-slate-300">{r.treatment_type ?? "—"}</td>
+              <td className="px-3 py-2 text-slate-300">{r.case_type ?? "—"}</td>
+              <td className="px-3 py-2 text-slate-200">{fiCaseStatusLabel(r.status)}</td>
+              <td className="px-3 py-2 whitespace-nowrap text-xs text-slate-400">{r.updated_at ? r.updated_at.slice(0, 10) : "—"}</td>
+              <td className="px-3 py-2 whitespace-nowrap text-xs text-slate-400">{r.created_at ? r.created_at.slice(0, 10) : "—"}</td>
             </tr>
           ))}
         </tbody>

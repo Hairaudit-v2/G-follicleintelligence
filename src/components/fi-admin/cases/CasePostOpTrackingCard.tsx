@@ -19,12 +19,12 @@ export function CasePostOpTrackingCard({
   imageOptions: CaseImageListItem[];
 }) {
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.postOp)}
-            className="text-sm font-semibold text-gray-900"
+            className="text-sm font-semibold text-slate-100"
           >
             Post-op / outcome tracking
           </h2>
@@ -35,17 +35,17 @@ export function CasePostOpTrackingCard({
           </p>
         </div>
         {tracking ? (
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-slate-400">
             Status:{" "}
-            <span className="font-medium text-gray-900">{postOpStatusLabel(tracking.post_op_status)}</span>
+            <span className="font-medium text-slate-100">{postOpStatusLabel(tracking.post_op_status)}</span>
             <span className="ml-2 text-gray-400">· updated {tracking.updated_at ? tracking.updated_at.slice(0, 10) : "—"}</span>
           </p>
         ) : (
-          <p className="text-xs text-amber-800">No post-op tracking row yet — save the form below to create one.</p>
+          <p className="text-xs text-amber-300">No post-op tracking row yet — save the form below to create one.</p>
         )}
       </div>
 
-      <div className="mt-4 border-t border-gray-100 pt-4">
+      <div className="mt-4 border-t border-white/[0.06] pt-4">
         <CasePostOpTrackingForm tenantId={tenantId} caseId={caseId} initial={tracking} />
         <CaseFollowUpsPanel tenantId={tenantId} caseId={caseId} followUps={followUps} imageOptions={imageOptions} />
       </div>

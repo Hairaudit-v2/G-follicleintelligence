@@ -94,13 +94,13 @@ export function CaseCrmQuotesPipelineCard(props: {
   if (!props.quotes.length) {
     return (
       <FiCard className="space-y-2 p-4">
-        <h2 className="text-sm font-semibold text-slate-900">Quotes &amp; booking handoff</h2>
+        <h2 className="text-sm font-semibold text-slate-100">Quotes &amp; booking handoff</h2>
         <p className={`text-xs ${fiOsLightFormSurfaceClassNames.helper}`}>
           No CRM quotes are linked to this case yet. Complete a guided consultation, then use{" "}
           <strong>Create quote draft</strong> on the consultation form hand-offs (requires a linked lead or this case).
         </p>
         <p className={`text-xs ${fiOsLightFormSurfaceClassNames.helper}`}>
-          <Link href={`/fi-admin/${tid}/consultations`} className="font-semibold text-sky-700 underline">
+          <Link href={`/fi-admin/${tid}/consultations`} className="font-semibold text-cyan-300 underline">
             Open consultations
           </Link>
         </p>
@@ -111,11 +111,11 @@ export function CaseCrmQuotesPipelineCard(props: {
   return (
     <FiCard className="space-y-3 p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900">Quotes &amp; booking handoff</h2>
-        <label className="text-xs text-slate-600">
+        <h2 className="text-sm font-semibold text-slate-100">Quotes &amp; booking handoff</h2>
+        <label className="text-xs text-slate-400">
           Staff key{" "}
           <input
-            className="ml-1 rounded border border-slate-300 px-2 py-0.5 font-mono text-[11px]"
+            className="ml-1 rounded border border-slate-700 px-2 py-0.5 font-mono text-[11px]"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
             autoComplete="off"
@@ -128,11 +128,11 @@ export function CaseCrmQuotesPipelineCard(props: {
         invoices and payment links live in <strong>Payments &amp; invoices</strong> below.
       </p>
       {msg ? (
-        <p className="rounded border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-800" role="status">
+        <p className="rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200" role="status">
           {msg}
         </p>
       ) : null}
-      <ul className="divide-y divide-slate-100 rounded border border-slate-200">
+      <ul className="divide-y divide-white/[0.06] rounded border border-white/[0.08]">
         {props.quotes.map((q) => {
           const consHref = q.consultation_id
             ? `/fi-admin/${tid}/consultations/${encodeURIComponent(q.consultation_id)}`
@@ -142,14 +142,14 @@ export function CaseCrmQuotesPipelineCard(props: {
             <li key={q.id} className="space-y-2 px-3 py-3 text-xs">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="font-semibold text-slate-900">{quoteTitle(q)}</p>
-                  <p className="mt-0.5 text-slate-600">
+                  <p className="font-semibold text-slate-100">{quoteTitle(q)}</p>
+                  <p className="mt-0.5 text-slate-400">
                     Status: <span className="font-mono">{q.status}</span>
                     {q.valid_until ? ` · valid until ${q.valid_until.slice(0, 10)}` : null}
                   </p>
                   {consHref ? (
                     <p className="mt-1">
-                      <Link href={consHref} className="font-semibold text-sky-700 underline">
+                      <Link href={consHref} className="font-semibold text-cyan-300 underline">
                         Open consultation
                       </Link>
                     </p>
@@ -169,7 +169,7 @@ export function CaseCrmQuotesPipelineCard(props: {
                     disabled={!slide || !accepted}
                     onClick={() => openSurgeryFromQuote(q)}
                     title={!slide ? "Sign in with booking permissions to schedule from this page." : undefined}
-                    className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-900 disabled:opacity-50"
+                    className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2.5 py-1.5 text-[11px] font-semibold text-slate-100 disabled:opacity-50"
                   >
                     Schedule surgery
                   </button>

@@ -32,8 +32,8 @@ export function CasePlanningNotesPanel({
   const dirty = useMemo(() => notes !== (initialPlanningNotes ?? ""), [notes, initialPlanningNotes]);
 
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.notes)} className="text-sm font-semibold text-gray-900">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.notes)} className="text-sm font-semibold text-slate-100">
         Planning notes
       </h2>
       <p className="mt-1 text-xs text-gray-500">
@@ -47,10 +47,10 @@ export function CasePlanningNotesPanel({
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         rows={8}
-        className="mt-3 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+        className="mt-3 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         placeholder="Consult goals, timeline, contraindications to review, etc."
       />
-      {msg ? <p className="mt-2 text-xs text-gray-700">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-xs text-slate-300">{msg}</p> : null}
       <button
         type="button"
         disabled={pending || !dirty}

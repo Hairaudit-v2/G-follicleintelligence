@@ -15,7 +15,7 @@ export default async function FirstCaseWizardPage({ params }: { params: Promise<
   if (!tenantId?.trim()) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const supabase = supabaseAdmin();
@@ -31,7 +31,7 @@ export default async function FirstCaseWizardPage({ params }: { params: Promise<
   if (ce) {
     return (
       <div className="mx-auto max-w-2xl py-6">
-        <p className="text-sm text-red-600">Could not load clinics for this tenant.</p>
+        <p className="text-sm text-rose-300">Could not load clinics for this tenant.</p>
         <Link href={`/fi-admin/${tenantId}/cases`} className="mt-2 inline-block text-sm text-blue-600 hover:underline">
           Back to patients
         </Link>

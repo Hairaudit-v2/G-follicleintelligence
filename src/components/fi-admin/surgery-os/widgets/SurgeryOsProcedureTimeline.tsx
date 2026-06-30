@@ -27,7 +27,7 @@ export function SurgeryOsProcedureTimelineWidget({ events }: { events: SurgeryOs
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-            <Clock className="mb-2 h-8 w-8 text-slate-600" aria-hidden />
+            <Clock className="mb-2 h-8 w-8 text-slate-400" aria-hidden />
             <p className="text-sm text-slate-400">No procedure events recorded yet.</p>
           </div>
         ) : (
@@ -45,7 +45,7 @@ export function SurgeryOsProcedureTimelineWidget({ events }: { events: SurgeryOs
                   </div>
                   <p className="text-xs text-slate-500">{ev.patientLabel}</p>
                   {ev.recordedByLabel ? (
-                    <p className="text-xs text-slate-600">Recorded by {ev.recordedByLabel}</p>
+                    <p className="text-xs text-slate-400">Recorded by {ev.recordedByLabel}</p>
                   ) : null}
                 </div>
               </li>

@@ -8,7 +8,7 @@ import { createFirstPatientCaseWizardAction } from "@/lib/actions/fi-first-case-
 export type FirstCaseWizardClinicOption = { id: string; display_name: string };
 
 const fieldClass =
-  "mt-0.5 w-full max-w-md rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
+  "mt-0.5 w-full max-w-md rounded border border-slate-700 px-2 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
 
 const WIZARD_STEP_HEADING_IDS = {
   1: "first-case-wizard-step-1-heading",
@@ -135,7 +135,7 @@ export function FirstCaseWizardClient({
 
   if (clinics.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl space-y-4 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+      <div className="mx-auto max-w-2xl space-y-4 rounded border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-200">
         <p className="font-medium">No clinics in this tenant yet</p>
         <p>
           Create an organisation and clinic under{" "}
@@ -159,12 +159,12 @@ export function FirstCaseWizardClient({
     <div className="mx-auto max-w-2xl space-y-6 py-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">First patient</h1>
-          <p className="mt-1 max-w-xl text-sm text-gray-600">
+          <h1 className="text-lg font-semibold text-slate-100">First patient</h1>
+          <p className="mt-1 max-w-xl text-sm text-slate-400">
             Guided setup: one person, one patient record, and one clinical patient. If you are signed in with a role that can edit
-            patients (for example <code className="rounded bg-gray-100 px-1 text-xs">fi_admin</code>,{" "}
-            <code className="rounded bg-gray-100 px-1 text-xs">admin</code>, or{" "}
-            <code className="rounded bg-gray-100 px-1 text-xs">crm_operator</code>), you can create the patient without an
+            patients (for example <code className="rounded bg-white/[0.06] px-1 text-xs">fi_admin</code>,{" "}
+            <code className="rounded bg-white/[0.06] px-1 text-xs">admin</code>, or{" "}
+            <code className="rounded bg-white/[0.06] px-1 text-xs">crm_operator</code>), you can create the patient without an
             API key. Optional: use an admin key override below for break-glass or automation.
           </p>
         </div>
@@ -173,16 +173,16 @@ export function FirstCaseWizardClient({
         </Link>
       </div>
 
-      <ol className="flex flex-wrap gap-2 text-xs text-gray-600">
-        <li className={step >= 1 ? "font-semibold text-gray-900" : ""}>1. Clinic</li>
+      <ol className="flex flex-wrap gap-2 text-xs text-slate-400">
+        <li className={step >= 1 ? "font-semibold text-slate-100" : ""}>1. Clinic</li>
         <li aria-hidden="true">
           ·
         </li>
-        <li className={step >= 2 ? "font-semibold text-gray-900" : ""}>2. Person / patient</li>
+        <li className={step >= 2 ? "font-semibold text-slate-100" : ""}>2. Person / patient</li>
         <li aria-hidden="true">
           ·
         </li>
-        <li className={step >= 3 ? "font-semibold text-gray-900" : ""}>3. Patient</li>
+        <li className={step >= 3 ? "font-semibold text-slate-100" : ""}>3. Patient</li>
         <li aria-hidden="true">
           ·
         </li>
@@ -190,20 +190,20 @@ export function FirstCaseWizardClient({
       </ol>
 
       {error ? (
-        <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+        <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
           {error}
         </div>
       ) : null}
 
       {step === 1 ? (
         <section
-          className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
+          className="space-y-3 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
           aria-labelledby={WIZARD_STEP_HEADING_IDS[1]}
         >
-          <h2 id={WIZARD_STEP_HEADING_IDS[1]} className="text-sm font-medium text-gray-900">
+          <h2 id={WIZARD_STEP_HEADING_IDS[1]} className="text-sm font-medium text-slate-100">
             Step 1 — Select clinic
           </h2>
-          <label id={WIZARD_FIELDS.clinic.labelId} htmlFor={WIZARD_FIELDS.clinic.inputId} className="block text-sm text-gray-700">
+          <label id={WIZARD_FIELDS.clinic.labelId} htmlFor={WIZARD_FIELDS.clinic.inputId} className="block text-sm text-slate-300">
             Clinic
             <select
               id={WIZARD_FIELDS.clinic.inputId}
@@ -231,10 +231,10 @@ export function FirstCaseWizardClient({
 
       {step === 2 ? (
         <section
-          className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
+          className="space-y-3 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
           aria-labelledby={WIZARD_STEP_HEADING_IDS[2]}
         >
-          <h2 id={WIZARD_STEP_HEADING_IDS[2]} className="text-sm font-medium text-gray-900">
+          <h2 id={WIZARD_STEP_HEADING_IDS[2]} className="text-sm font-medium text-slate-100">
             Step 2 — Person / patient
           </h2>
           <p className="text-xs text-gray-500">
@@ -245,7 +245,7 @@ export function FirstCaseWizardClient({
             <label
               id={WIZARD_FIELDS.firstName.labelId}
               htmlFor={WIZARD_FIELDS.firstName.inputId}
-              className="block text-sm text-gray-700"
+              className="block text-sm text-slate-300"
             >
               First name
               <input
@@ -260,7 +260,7 @@ export function FirstCaseWizardClient({
             <label
               id={WIZARD_FIELDS.lastName.labelId}
               htmlFor={WIZARD_FIELDS.lastName.inputId}
-              className="block text-sm text-gray-700"
+              className="block text-sm text-slate-300"
             >
               Last name
               <input
@@ -273,7 +273,7 @@ export function FirstCaseWizardClient({
               />
             </label>
           </div>
-          <label id={WIZARD_FIELDS.email.labelId} htmlFor={WIZARD_FIELDS.email.inputId} className="block text-sm text-gray-700">
+          <label id={WIZARD_FIELDS.email.labelId} htmlFor={WIZARD_FIELDS.email.inputId} className="block text-sm text-slate-300">
             Email
             <input
               id={WIZARD_FIELDS.email.inputId}
@@ -285,7 +285,7 @@ export function FirstCaseWizardClient({
               autoComplete="email"
             />
           </label>
-          <label id={WIZARD_FIELDS.phone.labelId} htmlFor={WIZARD_FIELDS.phone.inputId} className="block text-sm text-gray-700">
+          <label id={WIZARD_FIELDS.phone.labelId} htmlFor={WIZARD_FIELDS.phone.inputId} className="block text-sm text-slate-300">
             Phone
             <input
               id={WIZARD_FIELDS.phone.inputId}
@@ -300,7 +300,7 @@ export function FirstCaseWizardClient({
           <label
             id={WIZARD_FIELDS.dateOfBirth.labelId}
             htmlFor={WIZARD_FIELDS.dateOfBirth.inputId}
-            className="block text-sm text-gray-700"
+            className="block text-sm text-slate-300"
           >
             Date of birth <span className="text-gray-400">(optional)</span>
             <input
@@ -313,7 +313,7 @@ export function FirstCaseWizardClient({
             />
           </label>
           <div className="flex justify-between gap-2 pt-2">
-            <button type="button" className="text-sm text-gray-700 underline" onClick={goBack}>
+            <button type="button" className="text-sm text-slate-300 underline" onClick={goBack}>
               Back
             </button>
             <button type="button" className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-800" onClick={goNext}>
@@ -325,16 +325,16 @@ export function FirstCaseWizardClient({
 
       {step === 3 ? (
         <section
-          className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
+          className="space-y-3 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
           aria-labelledby={WIZARD_STEP_HEADING_IDS[3]}
         >
-          <h2 id={WIZARD_STEP_HEADING_IDS[3]} className="text-sm font-medium text-gray-900">
+          <h2 id={WIZARD_STEP_HEADING_IDS[3]} className="text-sm font-medium text-slate-100">
             Step 3 — Patient
           </h2>
           <label
             id={WIZARD_FIELDS.caseType.labelId}
             htmlFor={WIZARD_FIELDS.caseType.inputId}
-            className="block text-sm text-gray-700"
+            className="block text-sm text-slate-300"
           >
             Patient type
             <input
@@ -349,7 +349,7 @@ export function FirstCaseWizardClient({
           <label
             id={WIZARD_FIELDS.treatmentType.labelId}
             htmlFor={WIZARD_FIELDS.treatmentType.inputId}
-            className="block text-sm text-gray-700"
+            className="block text-sm text-slate-300"
           >
             Treatment type
             <input
@@ -361,25 +361,25 @@ export function FirstCaseWizardClient({
               placeholder="e.g. hair_transplant, fue"
             />
           </label>
-          <div className="rounded border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-gray-600">
+          <div className="rounded border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
             <div>
-              <span className="font-medium text-gray-800">Patient status:</span> consultation (default)
+              <span className="font-medium text-slate-200">Patient status:</span> consultation (default)
             </div>
             <div>
-              <span className="font-medium text-gray-800">Source:</span> manual_admin_test (default)
+              <span className="font-medium text-slate-200">Source:</span> manual_admin_test (default)
             </div>
           </div>
-          <details className="rounded border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-700">
-            <summary className="cursor-pointer font-medium text-gray-800">Advanced — admin key override (optional)</summary>
-            <p className="mt-2 text-xs text-gray-600">
-              Paste <code className="rounded bg-gray-100 px-0.5 text-[11px]">FI_ADMIN_API_KEY</code> only if you are
+          <details className="rounded border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
+            <summary className="cursor-pointer font-medium text-slate-200">Advanced — admin key override (optional)</summary>
+            <p className="mt-2 text-xs text-slate-400">
+              Paste <code className="rounded bg-white/[0.06] px-0.5 text-[11px]">FI_ADMIN_API_KEY</code> only if you are
               not using a signed-in CRM/clinical role, or for scripted break-glass access. Leave blank for normal staff
               creation.
             </p>
             <label
               id={WIZARD_FIELDS.adminKey.labelId}
               htmlFor={WIZARD_FIELDS.adminKey.inputId}
-              className="mt-2 block text-sm text-gray-700"
+              className="mt-2 block text-sm text-slate-300"
             >
               FI admin API key
               <input
@@ -395,7 +395,7 @@ export function FirstCaseWizardClient({
             </label>
           </details>
           <div className="flex justify-between gap-2 pt-2">
-            <button type="button" className="text-sm text-gray-700 underline" onClick={goBack}>
+            <button type="button" className="text-sm text-slate-300 underline" onClick={goBack}>
               Back
             </button>
             <button

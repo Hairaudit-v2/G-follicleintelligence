@@ -67,10 +67,10 @@ export function CasesWorklistFilters({
     <form
       method="get"
       action={basePath}
-      className="rounded border border-gray-200 bg-gray-50/80 p-4"
+      className="rounded border border-white/[0.08] bg-white/[0.03] p-4"
       aria-labelledby={FILTER_HEADING_ID}
     >
-      <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-gray-900">
+      <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-slate-100">
         Filter and search cases
       </h2>
       <input type="hidden" id="cases-worklist-filter-page-size" name="pageSize" value={String(query.pageSize)} />
@@ -78,7 +78,7 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.q.labelId}
           htmlFor={FILTER_FIELDS.q.inputId}
-          className="block text-xs font-medium text-gray-700 sm:col-span-2"
+          className="block text-xs font-medium text-slate-300 sm:col-span-2"
         >
           {FILTER_FIELDS.q.label}
           <input
@@ -87,20 +87,20 @@ export function CasesWorklistFilters({
             type="search"
             defaultValue={query.q}
             placeholder="Person, patient id, lead, treatment…"
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
         <label
           id={FILTER_FIELDS.status.labelId}
           htmlFor={FILTER_FIELDS.status.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.status.label}
           <select
             id={FILTER_FIELDS.status.inputId}
             name="status"
             defaultValue={query.status}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
             {filterOptions.statuses.map((s) => (
@@ -113,14 +113,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.treatment_type.labelId}
           htmlFor={FILTER_FIELDS.treatment_type.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.treatment_type.label}
           <select
             id={FILTER_FIELDS.treatment_type.inputId}
             name="treatment_type"
             defaultValue={query.treatment_type}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
             {filterOptions.treatment_types.map((s) => (
@@ -133,14 +133,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.case_type.labelId}
           htmlFor={FILTER_FIELDS.case_type.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.case_type.label}
           <select
             id={FILTER_FIELDS.case_type.inputId}
             name="case_type"
             defaultValue={query.case_type}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
             {filterOptions.case_types.map((s) => (
@@ -153,14 +153,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.planning_status.labelId}
           htmlFor={FILTER_FIELDS.planning_status.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.planning_status.label}
           <select
             id={FILTER_FIELDS.planning_status.inputId}
             name="planning_status"
             defaultValue={query.planning_status}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
             <option value={CASES_INDEX_NONE_VALUE}>No surgery plan</option>
@@ -174,14 +174,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.procedure_status.labelId}
           htmlFor={FILTER_FIELDS.procedure_status.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.procedure_status.label}
           <select
             id={FILTER_FIELDS.procedure_status.inputId}
             name="procedure_status"
             defaultValue={query.procedure_status}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
             <option value={CASES_INDEX_NONE_VALUE}>No procedure day</option>
@@ -195,14 +195,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.post_op_status.labelId}
           htmlFor={FILTER_FIELDS.post_op_status.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.post_op_status.label}
           <select
             id={FILTER_FIELDS.post_op_status.inputId}
             name="post_op_status"
             defaultValue={query.post_op_status}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
             <option value={CASES_INDEX_NONE_VALUE}>No post-op row</option>
@@ -216,14 +216,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.readiness.labelId}
           htmlFor={FILTER_FIELDS.readiness.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.readiness.label}
           <select
             id={FILTER_FIELDS.readiness.inputId}
             name="readiness"
             defaultValue={query.readiness}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="all">All</option>
             <option value="ready">{casesWorklistReadinessFilterLabel("ready")}</option>
@@ -234,14 +234,14 @@ export function CasesWorklistFilters({
         <label
           id={FILTER_FIELDS.sort.labelId}
           htmlFor={FILTER_FIELDS.sort.inputId}
-          className="block text-xs font-medium text-gray-700"
+          className="block text-xs font-medium text-slate-300"
         >
           {FILTER_FIELDS.sort.label}
           <select
             id={FILTER_FIELDS.sort.inputId}
             name="sort"
             defaultValue={query.sort}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="updated_desc">Newest updated</option>
             <option value="created_desc">Newest created</option>
@@ -254,7 +254,7 @@ export function CasesWorklistFilters({
         <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800">
           Apply filters
         </button>
-        <Link href={basePath} className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50">
+        <Link href={basePath} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03]">
           Clear
         </Link>
       </div>

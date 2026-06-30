@@ -49,9 +49,9 @@ function CaseDashRow({
 }) {
   const href = caseDetailPageHref(tenantId, entry.caseId, worklistQueryString);
   return (
-    <li className="flex flex-col gap-1 border-b border-slate-100 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-1 border-b border-white/[0.06] py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <Link href={href} className="font-medium text-sky-700 hover:underline">
+        <Link href={href} className="font-medium text-cyan-300 hover:underline">
           {entry.personLabel}
         </Link>
         <p className="text-xs text-slate-500">
@@ -59,16 +59,16 @@ function CaseDashRow({
           {entry.procedureDate ? ` · ${entry.procedureDate}` : ""}
           {entry.procedureStatusLabel ? ` · ${entry.procedureStatusLabel}` : ""}
         </p>
-        {entry.zonesLabel ? <p className="mt-0.5 text-xs text-slate-600">Zones: {entry.zonesLabel}</p> : null}
+        {entry.zonesLabel ? <p className="mt-0.5 text-xs text-slate-400">Zones: {entry.zonesLabel}</p> : null}
         {extra}
       </div>
       <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-end sm:gap-1.5">
         <CaseSectionHealthBadge health={bucketToHealth(entry.readinessBucket)} compact />
         <div className="flex flex-wrap gap-2 text-xs font-medium">
-          <Link href={href} className="text-sky-700 hover:underline">
+          <Link href={href} className="text-cyan-300 hover:underline">
             Case
           </Link>
-          <Link href={caseSummaryDocumentPageHref(tenantId, entry.caseId, worklistQueryString)} className="text-slate-600 hover:underline">
+          <Link href={caseSummaryDocumentPageHref(tenantId, entry.caseId, worklistQueryString)} className="text-slate-400 hover:underline">
             Summary
           </Link>
         </div>
@@ -80,8 +80,8 @@ function CaseDashRow({
 function SectionCard({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
     <FiCard>
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-      {description ? <p className="mt-1 text-sm text-slate-600">{description}</p> : null}
+      <h2 className="text-sm font-semibold text-slate-100">{title}</h2>
+      {description ? <p className="mt-1 text-sm text-slate-400">{description}</p> : null}
       <div className="mt-3">{children}</div>
     </FiCard>
   );
@@ -119,7 +119,7 @@ export function SurgeryOsDashboard({
           <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
             <Link
               href={`${base}/patients`}
-              className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-center text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:w-auto"
             >
               View PatientOS
             </Link>
@@ -167,7 +167,7 @@ export function SurgeryOsDashboard({
             {model.todaySurgeries.length === 0 ? (
               <FiEmptyState title="Nothing on the board today" description="When procedures are dated for today, they will appear here." />
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-white/[0.06]">
                 {model.todaySurgeries.map((r) => (
                   <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
                 ))}
@@ -185,7 +185,7 @@ export function SurgeryOsDashboard({
                 description="Add or update procedure dates on cases to populate this list."
               />
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-white/[0.06]">
                 {model.upcomingSurgeries.map((r) => (
                   <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
                 ))}
@@ -203,20 +203,20 @@ export function SurgeryOsDashboard({
                 description="Uses the same readiness rules as the worklist. When a section needs attention, the case appears here."
               />
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-white/[0.06]">
                 {model.readinessAlerts.map((r: SurgeryOsReadinessAlertRef) => (
                   <CaseDashRow
                     key={r.caseId}
                     tenantId={tid}
                     worklistQueryString={worklistQueryString}
                     entry={r}
-                    extra={<p className="mt-1 text-xs text-amber-800">{r.gapSummary}</p>}
+                    extra={<p className="mt-1 text-xs text-amber-300">{r.gapSummary}</p>}
                   />
                 ))}
               </ul>
             )}
             <p className="mt-3 text-xs text-slate-500">
-              <Link href={readinessHref} className="font-medium text-sky-700 hover:underline">
+              <Link href={readinessHref} className="font-medium text-cyan-300 hover:underline">
                 Open filtered worklist (needs attention)
               </Link>
             </p>
@@ -231,12 +231,12 @@ export function SurgeryOsDashboard({
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Follow-ups due</h3>
                 {model.followUpQueue.length === 0 ? (
                   <FiEmptyState
-                    className="mt-2 border-slate-100 bg-white py-6"
+                    className="mt-2 border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md py-6"
                     title="No follow-ups due"
                     description="Follow-ups need a scheduled date on or before today and must not already be completed or skipped."
                   />
                 ) : (
-                  <ul className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-100">
+                  <ul className="mt-2 divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                     {model.followUpQueue.map((r) => (
                       <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
                     ))}
@@ -247,21 +247,21 @@ export function SurgeryOsDashboard({
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recently completed</h3>
                 {model.recentCompleted.length === 0 ? (
                   <FiEmptyState
-                    className="mt-2 border-slate-100 bg-white py-6"
+                    className="mt-2 border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md py-6"
                     title="No recent completions"
                     description="Completed procedures from the last two weeks appear here."
                   />
                 ) : (
-                  <ul className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-100">
+                  <ul className="mt-2 divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                     {model.recentCompleted.map((r) => (
                       <li
                         key={r.caseId}
-                        className="flex flex-col gap-1 border-b border-slate-100 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-1 border-b border-white/[0.06] py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="min-w-0">
                           <Link
                             href={caseDetailPageHref(tid, r.caseId, worklistQueryString)}
-                            className="font-medium text-sky-700 hover:underline"
+                            className="font-medium text-cyan-300 hover:underline"
                           >
                             {r.personLabel}
                           </Link>
@@ -272,7 +272,7 @@ export function SurgeryOsDashboard({
                         </div>
                         <Link
                           href={caseSummaryDocumentPageHref(tid, r.caseId, worklistQueryString)}
-                          className="shrink-0 text-xs font-medium text-slate-600 hover:underline"
+                          className="shrink-0 text-xs font-medium text-slate-400 hover:underline"
                         >
                           Summary
                         </Link>
@@ -291,20 +291,20 @@ export function SurgeryOsDashboard({
             {model.planningQueue.length === 0 ? (
               <FiEmptyState title="Planning looks clear" description="No active cases are missing core planning completion." />
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-white/[0.06]">
                 {model.planningQueue.map((r) => (
                   <CaseDashRow key={r.caseId} tenantId={tid} worklistQueryString={worklistQueryString} entry={r} />
                 ))}
               </ul>
             )}
             <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
-              <Link href={planningHref} className="font-medium text-sky-700 hover:underline">
+              <Link href={planningHref} className="font-medium text-cyan-300 hover:underline">
                 Filter: no surgery plan row
               </Link>
               <span className="hidden sm:inline" aria-hidden>
                 ·
               </span>
-              <Link href={casesWorklistHref(tid, dq, { sort: "readiness_attention_desc" })} className="font-medium text-sky-700 hover:underline">
+              <Link href={casesWorklistHref(tid, dq, { sort: "readiness_attention_desc" })} className="font-medium text-cyan-300 hover:underline">
                 Full worklist (readiness sort)
               </Link>
             </p>
@@ -313,8 +313,8 @@ export function SurgeryOsDashboard({
 
         <div className="space-y-4 lg:col-span-4">
           <FiCard>
-            <h2 className="text-sm font-semibold text-slate-900">Quick actions</h2>
-            <p className="mt-1 text-sm text-slate-600">Shortcuts use existing FI OS routes only.</p>
+            <h2 className="text-sm font-semibold text-slate-100">Quick actions</h2>
+            <p className="mt-1 text-sm text-slate-400">Shortcuts use existing FI OS routes only.</p>
             <div className="mt-4 grid grid-cols-1 gap-3">
               <FiQuickActionCard
                 title="Start surgery case"

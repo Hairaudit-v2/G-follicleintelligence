@@ -5,7 +5,7 @@ import { CASE_DETAIL_NAV_SECTIONS } from "@/src/lib/cases/caseDetailNavConstants
 
 const NAV_LINK_CLASS =
   "shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium transition-colors";
-const NAV_LINK_IDLE = `${NAV_LINK_CLASS} border-transparent bg-transparent text-gray-700 hover:bg-gray-100 hover:text-gray-900`;
+const NAV_LINK_IDLE = `${NAV_LINK_CLASS} border-transparent bg-transparent text-slate-300 hover:bg-white/[0.06] hover:text-slate-100`;
 const NAV_LINK_ACTIVE = `${NAV_LINK_CLASS} border-gray-900 bg-gray-900 text-white`;
 
 /**
@@ -68,7 +68,7 @@ export function CaseDetailSectionNav() {
   return (
     <nav
       aria-label="Patient sections"
-      className="sticky top-0 z-30 -mx-1 border-b border-gray-200 bg-white/95 px-1 py-2 shadow-sm backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 md:py-2.5"
+      className="sticky top-0 z-30 -mx-1 border-b border-white/[0.08] bg-white/95 px-1 py-2 shadow-sm backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 md:py-2.5"
     >
       <div className="flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {CASE_DETAIL_NAV_SECTIONS.map(({ id, label }) => (

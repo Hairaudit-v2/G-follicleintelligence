@@ -84,12 +84,12 @@ export function CaseFollowUpRowEditor({
   const notesField = followUpField("notes");
 
   return (
-    <div className="rounded border border-gray-100 bg-gray-50/80 p-3">
+    <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h3 className="text-xs font-semibold text-gray-900">{followUpCheckpointLabel(checkpoint)}</h3>
+        <h3 className="text-xs font-semibold text-slate-100">{followUpCheckpointLabel(checkpoint)}</h3>
         {row ? (
           <p className="text-xs text-gray-500">
-            Status: <span className="font-medium text-gray-800">{followUpStatusLabel(row.follow_up_status)}</span>
+            Status: <span className="font-medium text-slate-200">{followUpStatusLabel(row.follow_up_status)}</span>
           </p>
         ) : (
           <p className="text-xs text-gray-500">No row yet — save to record this checkpoint.</p>
@@ -97,35 +97,35 @@ export function CaseFollowUpRowEditor({
       </div>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <label htmlFor={scheduledDateField.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={scheduledDateField.id} className="block text-xs font-medium text-slate-300">
           Scheduled date
           <input
             {...scheduledDateField}
             type="date"
             value={scheduledDate}
             onChange={(e) => setScheduledDate(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label htmlFor={completedDateField.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={completedDateField.id} className="block text-xs font-medium text-slate-300">
           Completed date
           <input
             {...completedDateField}
             type="date"
             value={completedDate}
             onChange={(e) => setCompletedDate(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
       </div>
 
-      <label htmlFor={followUpStatusField.id} className="mt-2 block text-xs font-medium text-gray-700">
+      <label htmlFor={followUpStatusField.id} className="mt-2 block text-xs font-medium text-slate-300">
         Follow-up status
         <select
           {...followUpStatusField}
           value={followUpStatus}
           onChange={(e) => setFollowUpStatus(e.target.value)}
-          className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         >
           {FOLLOW_UP_STATUS_VALUES.map((s) => (
             <option key={s} value={s}>
@@ -135,19 +135,19 @@ export function CaseFollowUpRowEditor({
         </select>
       </label>
 
-      <label htmlFor={notesField.id} className="mt-2 block text-xs font-medium text-gray-700">
+      <label htmlFor={notesField.id} className="mt-2 block text-xs font-medium text-slate-300">
         Notes
         <textarea
           {...notesField}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
 
       <fieldset className="mt-2">
-        <legend className="text-xs font-medium text-gray-700">Linked patient images (by ID)</legend>
+        <legend className="text-xs font-medium text-slate-300">Linked patient images (by ID)</legend>
         {imageOptions.length === 0 ? (
           <p className="mt-1 text-xs text-gray-500">No patient images on file — upload via patient images first.</p>
         ) : (
@@ -161,9 +161,9 @@ export function CaseFollowUpRowEditor({
                   type="checkbox"
                   checked={linkedIds.includes(img.id)}
                   onChange={() => toggleImage(img.id)}
-                  className="mt-0.5 rounded border-gray-300"
+                  className="mt-0.5 rounded border-slate-700"
                 />
-                <span className="text-gray-800">
+                <span className="text-slate-200">
                   <span className="font-mono text-[10px] text-gray-500">{img.id.slice(0, 8)}…</span>{" "}
                   {img.image_category}
                   {img.caption ? ` — ${img.caption.slice(0, 60)}${img.caption.length > 60 ? "…" : ""}` : null}
@@ -175,7 +175,7 @@ export function CaseFollowUpRowEditor({
         )}
       </fieldset>
 
-      {msg ? <p className="mt-2 text-xs text-gray-700">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-xs text-slate-300">{msg}</p> : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
@@ -250,7 +250,7 @@ export function CaseFollowUpRowEditor({
               router.refresh();
             });
           }}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-800 hover:bg-gray-50"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-xs font-medium text-slate-200 hover:bg-white/[0.03]"
         >
           {pending ? "Saving…" : "Mark complete (today)"}
         </button>
@@ -270,7 +270,7 @@ export function CaseFollowUpRowEditor({
                 router.refresh();
               });
             }}
-            className="rounded border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-800 hover:bg-red-50"
+            className="rounded border border-rose-500/20 bg-[#0F1629]/80 backdrop-blur-md px-2 py-1 text-xs font-medium text-rose-300 hover:bg-rose-500/10"
           >
             Remove row
           </button>

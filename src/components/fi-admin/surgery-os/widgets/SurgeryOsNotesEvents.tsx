@@ -25,7 +25,7 @@ export function SurgeryOsNotesEventsWidget({ notes }: { notes: SurgeryOsOperatio
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {notes.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-            <FileText className="mb-2 h-8 w-8 text-slate-600" aria-hidden />
+            <FileText className="mb-2 h-8 w-8 text-slate-400" aria-hidden />
             <p className="text-sm text-slate-400">No intra-operative notes recorded yet.</p>
           </div>
         ) : (
@@ -42,7 +42,7 @@ export function SurgeryOsNotesEventsWidget({ notes }: { notes: SurgeryOsOperatio
                       {n.noteKindLabel}
                     </p>
                     <SurgeryOsSeverityBadge severity={n.severity} />
-                    <span className="text-xs tabular-nums text-slate-600">{formatTimestamp(n.recordedAt)}</span>
+                    <span className="text-xs tabular-nums text-slate-400">{formatTimestamp(n.recordedAt)}</span>
                   </div>
                   <p className="mt-1 text-sm text-slate-200">{n.body}</p>
                   <p className="mt-1 text-xs text-slate-500">

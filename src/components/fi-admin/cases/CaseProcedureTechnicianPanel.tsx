@@ -51,7 +51,7 @@ export function CaseProcedureTechnicianPanel({
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold text-gray-800">Technicians / assistants</h3>
+      <h3 className="text-xs font-semibold text-slate-200">Technicians / assistants</h3>
       <p className="text-xs text-gray-500">
         Structured technician roster for procedure day (separate from the circulating nurse and surgeon).
       </p>
@@ -61,7 +61,7 @@ export function CaseProcedureTechnicianPanel({
         </label>
         <select
           {...TECH_ADD_SELECT}
-          className="max-w-md rounded border border-gray-300 bg-white px-2 py-1 text-sm"
+          className="max-w-md rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm"
           defaultValue=""
           onChange={(e) => {
             const v = e.target.value;
@@ -95,7 +95,7 @@ export function CaseProcedureTechnicianPanel({
           {technicianIds.map((id) => (
             <li
               key={id}
-              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-800"
+              className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-xs text-slate-200"
             >
               <span>{labelFor(id)}</span>
               <button

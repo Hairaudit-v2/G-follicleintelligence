@@ -43,7 +43,7 @@ export function SurgeryOsGraftIntelligenceWidget({ graftSummary }: { graftSummar
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {graftSummary.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-            <Layers className="mb-2 h-8 w-8 text-slate-600" aria-hidden />
+            <Layers className="mb-2 h-8 w-8 text-slate-400" aria-hidden />
             <p className="text-sm text-slate-400">No graft sessions for today&apos;s surgeries.</p>
           </div>
         ) : (

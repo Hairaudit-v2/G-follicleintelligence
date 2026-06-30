@@ -67,7 +67,7 @@ function BookingLine({
           {bookingTypeLabel(b.booking_type)} · {b.booking_status}
         </span>
       </div>
-      <div className="whitespace-nowrap text-xs text-gray-600">{fmt(b.start_at)}</div>
+      <div className="whitespace-nowrap text-xs text-slate-400">{fmt(b.start_at)}</div>
     </li>
   );
 }
@@ -88,8 +88,8 @@ function Section({
   if (rows.length === 0) return <p className="mt-2 text-sm text-gray-500">{empty}</p>;
   return (
     <div className="mt-3">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-600">{title}</h3>
-      <ul className="mt-1 divide-y divide-gray-100 text-sm">{rows.map((b) => <BookingLine key={b.id} tenantId={tenantId} b={b} slide={slide} />)}</ul>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</h3>
+      <ul className="mt-1 divide-y divide-white/[0.06] text-sm">{rows.map((b) => <BookingLine key={b.id} tenantId={tenantId} b={b} slide={slide} />)}</ul>
     </div>
   );
 }
@@ -144,7 +144,7 @@ export function CaseAppointmentsCard({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h2
           id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.bookings)}
-          className="text-sm font-semibold text-gray-900"
+          className="text-sm font-semibold text-slate-100"
         >
           Case appointments
         </h2>
@@ -160,7 +160,7 @@ export function CaseAppointmentsCard({
       </div>
 
       <p className="mt-1 text-xs text-gray-500">
-        Anchored on <code className="rounded bg-gray-100 px-1 font-mono text-[10px]">fi_bookings.case_id</code> for this case
+        Anchored on <code className="rounded bg-white/[0.06] px-1 font-mono text-[10px]">fi_bookings.case_id</code> for this case
         {prefillPatientId ? "; patient bookings are merged for scheduling overlap checks." : "."}
       </p>
 
@@ -184,20 +184,20 @@ export function CaseAppointmentsCard({
           </button>
         </div>
       ) : (
-        <p className="mt-2 text-xs text-amber-800">
+        <p className="mt-2 text-xs text-amber-300">
           Sign in with booking permissions to create or edit appointments from this page.
         </p>
       )}
 
       {next ? (
-        <div className="mt-4 rounded-md border border-sky-200 bg-sky-50/60 p-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-sky-900">Next appointment</h3>
+        <div className="mt-4 rounded-md border border-cyan-500/20 bg-cyan-500/10 p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Next appointment</h3>
           <ul className="mt-1 text-sm">
             <BookingLine tenantId={tenantId} b={next} slide={slide} />
           </ul>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-gray-600">
+        <p className="mt-3 text-sm text-slate-400">
           No upcoming appointments for this case. Use &quot;New appointment for this case&quot; when you have booking access, or open{" "}
           <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-600 hover:underline">
             Calendar
@@ -214,7 +214,7 @@ export function CaseAppointmentsCard({
       <div className="mt-4">
         <button
           type="button"
-          className="flex w-full items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-semibold text-gray-800 hover:bg-gray-100"
+          className="flex w-full items-center justify-between rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-left text-xs font-semibold text-slate-200 hover:bg-white/[0.06]"
           aria-expanded={cancelledOpen}
           onClick={() => setCancelledOpen((o) => !o)}
         >
@@ -225,7 +225,7 @@ export function CaseAppointmentsCard({
           cancelled.length === 0 ? (
             <p className="mt-2 text-sm text-gray-500">No cancelled appointments.</p>
           ) : (
-            <ul className="mt-2 divide-y divide-gray-100 text-sm">
+            <ul className="mt-2 divide-y divide-white/[0.06] text-sm">
               {cancelled.map((b) => (
                 <BookingLine key={b.id} tenantId={tenantId} b={b} slide={slide} />
               ))}

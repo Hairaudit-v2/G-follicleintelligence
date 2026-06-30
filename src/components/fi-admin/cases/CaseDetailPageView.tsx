@@ -130,7 +130,7 @@ export function CaseDetailPageView({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-400">
         <CaseDetailBackLink tenantId={tenantId} casesListReturnQuery={casesListReturnQuery} />
         {detail.leads.length ? (
           <>
@@ -152,7 +152,7 @@ export function CaseDetailPageView({
 
       <div>
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 id="case-detail-page-heading" className="text-lg font-semibold text-gray-900">
+          <h1 id="case-detail-page-heading" className="text-lg font-semibold text-slate-100">
             Treatment patient
           </h1>
           <div className="flex flex-shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
@@ -174,7 +174,7 @@ export function CaseDetailPageView({
             ) : null}
           </div>
         </div>
-        <p className="mt-1 max-w-3xl text-sm text-gray-600">
+        <p className="mt-1 max-w-3xl text-sm text-slate-400">
           Tenant-scoped patient profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
           day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, Stage 5G–5I
           worklist navigation polish, patient-level planning notes, and Stage 5J read-only summary / print. HairAudit
@@ -216,7 +216,7 @@ export function CaseDetailPageView({
               quotes={caseCrmQuotes}
             />
           </div>
-          <div className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="mt-6 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
             <PaymentRecordPanel
               tenantId={tenantId}
               todayYmd={operationalTodayYmd}
@@ -229,9 +229,9 @@ export function CaseDetailPageView({
               noManualPaymentRecordsCopy="No manual payment records linked to this case yet."
             />
           </div>
-          <div className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-900">FinancialOS · Surgery pipeline</h3>
-            <p className="mt-1 text-xs text-gray-600">
+          <div className="mt-6 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+            <h3 className="text-sm font-semibold text-slate-100">FinancialOS · Surgery pipeline</h3>
+            <p className="mt-1 text-xs text-slate-400">
               Revenue invoices and booking financial overlay — additive to manual payment records above.
             </p>
             <div className="mt-3">
@@ -400,9 +400,9 @@ export function CaseDetailPageView({
               Hide foundation view
             </Link>
           </p>
-          <details className="rounded border border-gray-200 bg-gray-50/50 p-3 text-sm">
-            <summary className="cursor-pointer font-medium text-gray-800">Advanced: universal patient record (read-only)</summary>
-            <p className="mt-2 text-xs text-gray-600">
+          <details className="rounded border border-white/[0.08] bg-white/[0.03] p-3 text-sm">
+            <summary className="cursor-pointer font-medium text-slate-200">Advanced: universal patient record (read-only)</summary>
+            <p className="mt-2 text-xs text-slate-400">
               Full foundation aggregate (timeline, unified media, identifiers) for operators who need ingest-level
               context.
             </p>

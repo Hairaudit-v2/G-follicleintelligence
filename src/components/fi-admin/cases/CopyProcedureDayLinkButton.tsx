@@ -61,8 +61,8 @@ export function CopyProcedureDayLinkButton({
         "shrink-0 rounded border px-2 py-0.5 text-[0.65rem] font-medium transition-colors",
         variant === "light"
           ? copied
-            ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            ? "border-emerald-300 bg-emerald-500/10 text-emerald-300"
+            : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300 hover:bg-white/[0.03]"
           : copied
             ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-200"
             : "border-white/[0.12] bg-black/25 text-cyan-200/90 hover:border-cyan-500/30 hover:bg-black/40",

@@ -95,13 +95,13 @@ export function CasePostOpTrackingForm({
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={POST_OP_FIELDS.postOpStatus.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={POST_OP_FIELDS.postOpStatus.id} className="block text-xs font-medium text-slate-300">
           Post-op status
           <select
             {...POST_OP_FIELDS.postOpStatus}
             value={postOpStatus}
             onChange={(e) => setPostOpStatus(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             {!isPostOpStatus(postOpStatus) ? <option value={postOpStatus}>{postOpStatus} (legacy)</option> : null}
             {POST_OP_STATUS_VALUES.map((s) => (
@@ -111,70 +111,70 @@ export function CasePostOpTrackingForm({
             ))}
           </select>
         </label>
-        <label htmlFor={POST_OP_FIELDS.instructionsGiven.id} className="flex items-end gap-2 text-xs font-medium text-gray-700">
+        <label htmlFor={POST_OP_FIELDS.instructionsGiven.id} className="flex items-end gap-2 text-xs font-medium text-slate-300">
           <input
             {...POST_OP_FIELDS.instructionsGiven}
             type="checkbox"
             checked={instructionsGiven}
             onChange={(e) => setInstructionsGiven(e.target.checked)}
-            className="rounded border-gray-300"
+            className="rounded border-slate-700"
           />
           <span>Post-op instructions given</span>
         </label>
       </div>
 
-      <label htmlFor={POST_OP_FIELDS.aftercareNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.aftercareNotes.id} className="block text-xs font-medium text-slate-300">
         Medication / aftercare notes
         <textarea
           {...POST_OP_FIELDS.aftercareNotes}
           value={aftercareNotes}
           onChange={(e) => setAftercareNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.donorRecovery.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.donorRecovery.id} className="block text-xs font-medium text-slate-300">
         Donor recovery notes
         <textarea
           {...POST_OP_FIELDS.donorRecovery}
           value={donorRecovery}
           onChange={(e) => setDonorRecovery(e.target.value)}
           rows={2}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.recipientRecovery.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.recipientRecovery.id} className="block text-xs font-medium text-slate-300">
         Recipient recovery notes
         <textarea
           {...POST_OP_FIELDS.recipientRecovery}
           value={recipientRecovery}
           onChange={(e) => setRecipientRecovery(e.target.value)}
           rows={2}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.complicationNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.complicationNotes.id} className="block text-xs font-medium text-slate-300">
         Complication notes
         <textarea
           {...POST_OP_FIELDS.complicationNotes}
           value={complicationNotes}
           onChange={(e) => setComplicationNotes(e.target.value)}
           rows={2}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={POST_OP_FIELDS.outcomeNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.outcomeNotes.id} className="block text-xs font-medium text-slate-300">
         Outcome notes (early / qualitative)
         <textarea
           {...POST_OP_FIELDS.outcomeNotes}
           value={outcomeNotes}
           onChange={(e) => setOutcomeNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
 
-      <label htmlFor={POST_OP_FIELDS.satisfaction.id} className="block max-w-xs text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.satisfaction.id} className="block max-w-xs text-xs font-medium text-slate-300">
         Patient satisfaction (1–10, optional)
         <input
           {...POST_OP_FIELDS.satisfaction}
@@ -182,12 +182,12 @@ export function CasePostOpTrackingForm({
           value={satisfaction}
           onChange={(e) => setSatisfaction(e.target.value)}
           placeholder="—"
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      {!satOk ? <p className="text-xs text-amber-800">Use 1–10 or leave blank.</p> : null}
-      {!canSaveStatus ? <p className="text-xs text-amber-800">Pick a standard post-op status before saving.</p> : null}
-      {msg ? <p className="text-xs text-gray-700">{msg}</p> : null}
+      {!satOk ? <p className="text-xs text-amber-300">Use 1–10 or leave blank.</p> : null}
+      {!canSaveStatus ? <p className="text-xs text-amber-300">Pick a standard post-op status before saving.</p> : null}
+      {msg ? <p className="text-xs text-slate-300">{msg}</p> : null}
 
       <button
         type="button"

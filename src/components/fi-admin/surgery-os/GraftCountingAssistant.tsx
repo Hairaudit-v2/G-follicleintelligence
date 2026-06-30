@@ -1376,7 +1376,7 @@ function EventLog({ events }: { events: SurgeryOsGraftCountEvent[] }) {
           <li key={e.id} className="rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-2 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-medium text-slate-200">{e.eventTypeLabel}</span>
-              <span className="text-xs text-slate-600">{new Date(e.createdAt).toLocaleTimeString()}</span>
+              <span className="text-xs text-slate-400">{new Date(e.createdAt).toLocaleTimeString()}</span>
             </div>
             <p className="mt-0.5 text-xs text-slate-500">
               {e.deltaExtracted > 0 ? `+${e.deltaExtracted} extracted · ` : ""}

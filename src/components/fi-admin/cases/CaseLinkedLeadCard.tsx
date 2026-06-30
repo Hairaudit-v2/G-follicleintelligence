@@ -4,8 +4,8 @@ import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/c
 
 export function CaseLinkedLeadCard({ tenantId, leads }: { tenantId: string; leads: CaseLeadLink[] }) {
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.lead)} className="text-sm font-semibold text-gray-900">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.lead)} className="text-sm font-semibold text-slate-100">
         Linked CRM leads
       </h2>
       {leads.length === 0 ? (

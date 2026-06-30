@@ -24,16 +24,16 @@ export function CaseTimelineItemList({ items }: { items: CaseTimelineItem[] }) {
   return (
     <ol className="space-y-3">
       {items.map((it) => (
-        <li key={it.id} className="relative rounded border border-gray-100 bg-gray-50/60 p-3">
+        <li key={it.id} className="relative rounded border border-white/[0.06] bg-white/[0.03] p-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-semibold text-gray-900">{it.title}</p>
+                <p className="text-xs font-semibold text-slate-100">{it.title}</p>
                 <p className="mt-0.5 text-[11px] text-gray-500">
                   {caseTimelineKindLabel(it.kind)}
                   <span className="text-gray-300"> · </span>
                   <span className="font-mono text-[10px]">{it.source}</span>
                   {it.is_sensitive ? (
-                    <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-[10px] font-medium text-amber-900">
+                    <span className="ml-2 rounded bg-amber-400/15 px-1 py-0.5 text-[10px] font-medium text-amber-200">
                       Sensitive
                     </span>
                   ) : null}
@@ -43,11 +43,11 @@ export function CaseTimelineItemList({ items }: { items: CaseTimelineItem[] }) {
                 {formatWhen(it.occurred_at)}
               </time>
             </div>
-            {it.description ? <p className="mt-2 text-xs text-gray-700">{it.description}</p> : null}
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-600">
+            {it.description ? <p className="mt-2 text-xs text-slate-300">{it.description}</p> : null}
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-400">
               {it.status ? (
                 <span>
-                  Status: <span className="font-medium text-gray-800">{it.status}</span>
+                  Status: <span className="font-medium text-slate-200">{it.status}</span>
                 </span>
               ) : null}
               {it.metadata_summary ? <span className="max-w-md truncate">{it.metadata_summary}</span> : null}

@@ -52,8 +52,8 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
   }, [status, treatmentType, caseType, initial.status, initial.treatment_type, initial.case_type]);
 
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.summary)} className="text-sm font-semibold text-gray-900">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.summary)} className="text-sm font-semibold text-slate-100">
         Patient summary
       </h2>
       <p className="mt-1 text-xs text-gray-500">
@@ -63,48 +63,48 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-xs font-medium text-gray-500">Patient id</dt>
-          <dd className="font-mono text-xs text-gray-800">{initial.id}</dd>
+          <dd className="font-mono text-xs text-slate-200">{initial.id}</dd>
         </div>
         <div>
           <dt className="text-xs font-medium text-gray-500">External id</dt>
-          <dd className="text-gray-800">{initial.external_id?.trim() ? initial.external_id : "—"}</dd>
+          <dd className="text-slate-200">{initial.external_id?.trim() ? initial.external_id : "—"}</dd>
         </div>
         <div>
           <dt className="text-xs font-medium text-gray-500">Created</dt>
-          <dd className="text-gray-800">{initial.created_at ? new Date(initial.created_at).toLocaleString() : "—"}</dd>
+          <dd className="text-slate-200">{initial.created_at ? new Date(initial.created_at).toLocaleString() : "—"}</dd>
         </div>
         <div>
           <dt className="text-xs font-medium text-gray-500">Updated</dt>
-          <dd className="text-gray-800">{initial.updated_at ? new Date(initial.updated_at).toLocaleString() : "—"}</dd>
+          <dd className="text-slate-200">{initial.updated_at ? new Date(initial.updated_at).toLocaleString() : "—"}</dd>
         </div>
         {initial.clinic_id ? (
           <div>
             <dt className="text-xs font-medium text-gray-500">Clinic id</dt>
-            <dd className="font-mono text-xs text-gray-700">{initial.clinic_id}</dd>
+            <dd className="font-mono text-xs text-slate-300">{initial.clinic_id}</dd>
           </div>
         ) : null}
         {initial.organisation_id ? (
           <div>
             <dt className="text-xs font-medium text-gray-500">Organisation id</dt>
-            <dd className="font-mono text-xs text-gray-700">{initial.organisation_id}</dd>
+            <dd className="font-mono text-xs text-slate-300">{initial.organisation_id}</dd>
           </div>
         ) : null}
         {initial.partner_id ? (
           <div>
             <dt className="text-xs font-medium text-gray-500">Partner id</dt>
-            <dd className="font-mono text-xs text-gray-700">{initial.partner_id}</dd>
+            <dd className="font-mono text-xs text-slate-300">{initial.partner_id}</dd>
           </div>
         ) : null}
       </dl>
 
-      <div className="mt-6 space-y-3 border-t border-gray-100 pt-4">
-        <label htmlFor={SUMMARY_FIELDS.status.id} className="block text-xs font-medium text-gray-700">
+      <div className="mt-6 space-y-3 border-t border-white/[0.06] pt-4">
+        <label htmlFor={SUMMARY_FIELDS.status.id} className="block text-xs font-medium text-slate-300">
           Patient status
           <select
             {...SUMMARY_FIELDS.status}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             {!isFiCaseStatus(status) ? (
               <option value={status}>
@@ -118,31 +118,31 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
             ))}
           </select>
         </label>
-        <label htmlFor={SUMMARY_FIELDS.treatmentType.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SUMMARY_FIELDS.treatmentType.id} className="block text-xs font-medium text-slate-300">
           Treatment type
           <input
             {...SUMMARY_FIELDS.treatmentType}
             value={treatmentType}
             onChange={(e) => setTreatmentType(e.target.value)}
-            className="mt-1 block w-full max-w-md rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full max-w-md rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="e.g. FUE, consultation pathway…"
           />
         </label>
-        <label htmlFor={SUMMARY_FIELDS.caseType.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SUMMARY_FIELDS.caseType.id} className="block text-xs font-medium text-slate-300">
           Patient type
           <input
             {...SUMMARY_FIELDS.caseType}
             value={caseType}
             onChange={(e) => setCaseType(e.target.value)}
-            className="mt-1 block w-full max-w-md rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full max-w-md rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="Stored in patient metadata (producer / bridge label)."
           />
         </label>
       </div>
 
-      {msg ? <p className="mt-3 text-xs text-gray-700">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-xs text-slate-300">{msg}</p> : null}
       {!isFiCaseStatus(status) ? (
-        <p className="mt-2 text-xs text-amber-800">
+        <p className="mt-2 text-xs text-amber-300">
           This case&apos;s status is not in the standard set. Choose a standard status before saving profile fields.
         </p>
       ) : null}

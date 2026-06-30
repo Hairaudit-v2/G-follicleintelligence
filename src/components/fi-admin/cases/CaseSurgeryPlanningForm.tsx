@@ -106,13 +106,13 @@ export function CaseSurgeryPlanningForm({
 
   return (
     <div className="space-y-4">
-      <label htmlFor={SURGERY_PLAN_FIELDS.planningStatus.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.planningStatus.id} className="block text-xs font-medium text-slate-300">
         Planning status
         <select
           {...SURGERY_PLAN_FIELDS.planningStatus}
           value={planningStatus}
           onChange={(e) => setPlanningStatus(e.target.value)}
-          className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         >
           {!isSurgeryPlanningStatus(planningStatus) ? <option value={planningStatus}>{planningStatus} (legacy)</option> : null}
           {SURGERY_PLANNING_STATUS_VALUES.map((s) => (
@@ -123,61 +123,61 @@ export function CaseSurgeryPlanningForm({
         </select>
       </label>
 
-      <label htmlFor={SURGERY_PLAN_FIELDS.summary.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.summary.id} className="block text-xs font-medium text-slate-300">
         Surgical plan summary
         <textarea
           {...SURGERY_PLAN_FIELDS.summary}
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           placeholder="One-paragraph overview of the intended procedure and goals."
         />
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={SURGERY_PLAN_FIELDS.procedureType.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.procedureType.id} className="block text-xs font-medium text-slate-300">
           Planned procedure type
           <input
             {...SURGERY_PLAN_FIELDS.procedureType}
             value={procedureType}
             onChange={(e) => setProcedureType(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="e.g. FUE, FUT"
           />
         </label>
-        <label htmlFor={SURGERY_PLAN_FIELDS.sessionType.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.sessionType.id} className="block text-xs font-medium text-slate-300">
           Planned session type
           <input
             {...SURGERY_PLAN_FIELDS.sessionType}
             value={sessionType}
             onChange={(e) => setSessionType(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="e.g. mega-session, two-day"
           />
         </label>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMin.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMin.id} className="block text-xs font-medium text-slate-300">
           Estimated grafts (min)
           <input
             {...SURGERY_PLAN_FIELDS.graftsMin}
             inputMode="numeric"
             value={graftsMin}
             onChange={(e) => setGraftsMin(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="Optional"
           />
         </label>
-        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMax.id} className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMax.id} className="block text-xs font-medium text-slate-300">
           Estimated grafts (max)
           <input
             {...SURGERY_PLAN_FIELDS.graftsMax}
             inputMode="numeric"
             value={graftsMax}
             onChange={(e) => setGraftsMax(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             placeholder="Optional"
           />
         </label>
@@ -185,52 +185,52 @@ export function CaseSurgeryPlanningForm({
 
       <CasePlannedZonesPanel zones={zones} onChange={setZones} />
 
-      <label htmlFor={SURGERY_PLAN_FIELDS.donorNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.donorNotes.id} className="block text-xs font-medium text-slate-300">
         Donor strategy notes
         <textarea
           {...SURGERY_PLAN_FIELDS.donorNotes}
           value={donorNotes}
           onChange={(e) => setDonorNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={SURGERY_PLAN_FIELDS.recipientNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.recipientNotes.id} className="block text-xs font-medium text-slate-300">
         Recipient strategy notes
         <textarea
           {...SURGERY_PLAN_FIELDS.recipientNotes}
           value={recipientNotes}
           onChange={(e) => setRecipientNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={SURGERY_PLAN_FIELDS.medNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.medNotes.id} className="block text-xs font-medium text-slate-300">
         Medication / prep notes
         <textarea
           {...SURGERY_PLAN_FIELDS.medNotes}
           value={medNotes}
           onChange={(e) => setMedNotes(e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
         />
       </label>
-      <label htmlFor={SURGERY_PLAN_FIELDS.planningNotes.id} className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.planningNotes.id} className="block text-xs font-medium text-slate-300">
         Detailed planning notes (surgery plan)
         <textarea
           {...SURGERY_PLAN_FIELDS.planningNotes}
           value={planningNotes}
           onChange={(e) => setPlanningNotes(e.target.value)}
           rows={4}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           placeholder="Longer narrative — still not procedure-day counts or audit scoring."
         />
       </label>
 
       {!canSaveStatus ? (
-        <p className="text-xs text-amber-800">Pick a standard planning status before saving.</p>
+        <p className="text-xs text-amber-300">Pick a standard planning status before saving.</p>
       ) : null}
-      {msg ? <p className="text-xs text-gray-700">{msg}</p> : null}
+      {msg ? <p className="text-xs text-slate-300">{msg}</p> : null}
 
       <button
         type="button"

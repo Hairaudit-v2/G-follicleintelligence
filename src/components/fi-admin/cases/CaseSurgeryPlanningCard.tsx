@@ -27,12 +27,12 @@ export function CaseSurgeryPlanningCard({
     return null;
   })();
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.surgeryPlanning)}
-            className="text-sm font-semibold text-gray-900"
+            className="text-sm font-semibold text-slate-100"
           >
             Surgery planning foundation
           </h2>
@@ -42,16 +42,16 @@ export function CaseSurgeryPlanningCard({
           </p>
         </div>
         {plan ? (
-          <p className="text-xs text-gray-600">
-            Status: <span className="font-medium text-gray-900">{surgeryPlanningStatusLabel(plan.planning_status)}</span>
+          <p className="text-xs text-slate-400">
+            Status: <span className="font-medium text-slate-100">{surgeryPlanningStatusLabel(plan.planning_status)}</span>
             <span className="ml-2 text-gray-400">· updated {plan.updated_at ? plan.updated_at.slice(0, 10) : "—"}</span>
           </p>
         ) : (
-          <p className="text-xs text-amber-800">No surgery plan row yet — save to create one.</p>
+          <p className="text-xs text-amber-300">No surgery plan row yet — save to create one.</p>
         )}
       </div>
 
-      <div className="mt-4 border-t border-gray-100 pt-4">
+      <div className="mt-4 border-t border-white/[0.06] pt-4">
         <CaseSurgeryPlanningForm tenantId={tenantId} caseId={caseId} initial={plan} />
         <CasePostopMedicationPlanButton
           tenantId={tenantId}

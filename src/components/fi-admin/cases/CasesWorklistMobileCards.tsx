@@ -30,23 +30,23 @@ export function CasesWorklistMobileCards({
         <Link
           key={r.id}
           href={caseDetailPageHref(tenantId, r.id, worklistQueryString)}
-          className="block rounded border border-gray-200 bg-white p-3 shadow-sm hover:border-gray-300"
+          className="block rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40 hover:border-slate-700"
         >
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="font-medium text-blue-700">{r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}</p>
-              <p className="text-xs text-gray-800">{r.person_label}</p>
+              <p className="text-xs text-slate-200">{r.person_label}</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               <CaseSectionHealthBadge health={readinessToBadgeHealth(r.readinessBucket)} compact />
-              <span className="text-[11px] text-gray-600">{r.readinessPercent}%</span>
+              <span className="text-[11px] text-slate-400">{r.readinessPercent}%</span>
             </div>
           </div>
-          <p className="mt-2 text-[11px] text-gray-600">
+          <p className="mt-2 text-[11px] text-slate-400">
             {fiCaseStatusLabel(r.status)}
             {r.treatment_type ? ` · ${r.treatment_type}` : ""}
           </p>
-          <dl className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-gray-700">
+          <dl className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-300">
             <dt className="text-gray-500">Planning</dt>
             <dd>{r.surgeryPlan ? surgeryPlanningStatusLabel(r.surgeryPlan.planning_status) : "—"}</dd>
             <dt className="text-gray-500">Procedure</dt>

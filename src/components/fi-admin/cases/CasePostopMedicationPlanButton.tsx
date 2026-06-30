@@ -26,22 +26,22 @@ export function CasePostopMedicationPlanButton({
   const disabled = pending || !foundationPatientId?.trim();
 
   return (
-    <div className="mt-4 rounded border border-dashed border-gray-200 bg-gray-50/80 p-3">
-      <p className="text-xs font-medium text-gray-800">Post-operative medication (MedicationOS)</p>
-      <p className="mt-1 text-xs text-gray-600">
+    <div className="mt-4 rounded border border-dashed border-white/[0.08] bg-white/[0.03] p-3">
+      <p className="text-xs font-medium text-slate-200">Post-operative medication (MedicationOS)</p>
+      <p className="mt-1 text-xs text-slate-400">
         Creates a <strong>draft</strong> therapy plan from the standard post-op bundle. Does not prescribe or send
         pharmacy orders.
         {anchorHint ? (
           <>
             {" "}
-            Day offsets anchor to: <span className="font-medium text-gray-800">{anchorHint}</span>.
+            Day offsets anchor to: <span className="font-medium text-slate-200">{anchorHint}</span>.
           </>
         ) : (
           <> A procedure day date or surgery booking is required to anchor the plan.</>
         )}
       </p>
       {!foundationPatientId ? (
-        <p className="mt-2 text-xs text-amber-800">Link a foundation patient on this case to enable this action.</p>
+        <p className="mt-2 text-xs text-amber-300">Link a foundation patient on this case to enable this action.</p>
       ) : null}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
@@ -75,10 +75,10 @@ export function CasePostopMedicationPlanButton({
         <p
           className={
             tone === "err"
-              ? "mt-2 text-xs text-red-700"
+              ? "mt-2 text-xs text-rose-300"
               : tone === "ok"
                 ? "mt-2 text-xs text-green-800"
-                : "mt-2 text-xs text-gray-700"
+                : "mt-2 text-xs text-slate-300"
           }
         >
           {msg}

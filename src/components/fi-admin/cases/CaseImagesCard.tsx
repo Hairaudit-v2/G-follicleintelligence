@@ -12,11 +12,11 @@ export function CaseImagesCard({
   images: CaseImageListItem[];
 }) {
   return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2
           id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.images)}
-          className="text-sm font-semibold text-gray-900"
+          className="text-sm font-semibold text-slate-100"
         >
           Linked patient images
         </h2>
@@ -31,12 +31,12 @@ export function CaseImagesCard({
       ) : (
         <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto text-sm">
           {images.map((im) => (
-            <li key={im.id} className="rounded border border-gray-100 bg-gray-50/80 px-2 py-1.5">
-              <div className="font-medium text-gray-900">
+            <li key={im.id} className="rounded border border-white/[0.06] bg-white/[0.03] px-2 py-1.5">
+              <div className="font-medium text-slate-100">
                 {im.image_category}
                 <span className="ml-2 text-xs font-normal text-gray-500">{im.image_status}</span>
               </div>
-              {im.caption ? <div className="text-xs text-gray-600">{im.caption}</div> : null}
+              {im.caption ? <div className="text-xs text-slate-400">{im.caption}</div> : null}
               <div className="mt-0.5 font-mono text-[10px] text-gray-400">{im.storage_path.slice(-64)}</div>
             </li>
           ))}
