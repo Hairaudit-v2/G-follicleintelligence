@@ -3,9 +3,6 @@ import Link from "next/link";
 
 import { FiOsForgotPasswordForm } from "@/src/components/fi/os/FiOsForgotPasswordForm";
 
-/** Forensic debug: avoid static prerender so deploy markers and server actions stay in sync. */
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Forgot password | Follicle Intelligence OS",
   robots: { index: false, follow: false },
@@ -25,8 +22,7 @@ export default function FollicleIntelligenceForgotPasswordPage() {
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400/90">Follicle Intelligence OS</p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Reset password</h1>
-          <p className="mt-2 text-sm text-slate-400">We will email you a secure link via Supabase Auth.</p>
-          <p className="mt-3 font-mono text-xs text-amber-300/90">AUTH DEBUG BUILD 4be26ac</p>
+          <p className="mt-2 text-sm text-slate-400">We will email you a secure link to choose a new password.</p>
         </div>
         <div className="rounded-2xl border border-cyan-500/15 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-md">
           <FiOsForgotPasswordForm />

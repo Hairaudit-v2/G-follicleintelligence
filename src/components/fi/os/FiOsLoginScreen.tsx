@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { fiOsPasswordSignInAction } from "@/lib/actions/fi-os-auth-actions";
+import { FiOsLoginForm } from "@/src/components/fi/os/FiOsLoginForm";
 
 function loginErrorMessage(code: string | undefined): string | null {
   if (!code) return null;
@@ -81,43 +81,7 @@ export function FiOsLoginScreen({
             </div>
           ) : null}
 
-          <form action={fiOsPasswordSignInAction} className="space-y-5">
-            {safeNextPath ? <input type="hidden" name="next" value={safeNextPath} /> : null}
-            <div>
-              <label htmlFor="fi-os-email" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
-                Work email
-              </label>
-              <input
-                id="fi-os-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="w-full rounded-lg border border-slate-600/80 bg-slate-950/80 px-3 py-2.5 text-slate-100 outline-none ring-cyan-500/40 placeholder:text-slate-600 focus:border-cyan-500/50 focus:ring-2"
-                placeholder="you@clinic.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="fi-os-password" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400">
-                Password
-              </label>
-              <input
-                id="fi-os-password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="w-full rounded-lg border border-slate-600/80 bg-slate-950/80 px-3 py-2.5 text-slate-100 outline-none ring-cyan-500/40 placeholder:text-slate-600 focus:border-cyan-500/50 focus:ring-2"
-                placeholder="••••••••"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-sky-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
-            >
-              Sign in to OS
-            </button>
-          </form>
+          <FiOsLoginForm safeNextPath={safeNextPath} />
 
           <div className="mt-6 flex flex-col gap-3 border-t border-slate-700/60 pt-6 text-center text-sm text-slate-400">
             <Link href="/follicle-intelligence/forgot-password" className="text-cyan-400/90 hover:text-cyan-300 hover:underline">

@@ -1,31 +1,16 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 
 import { loadFiOsIdentity, loadFirstTenantIdForAuthUser } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { resolveFiOsPublicOrigin } from "@/src/lib/fiOs/fiOsPublicOrigin.server";
 import { resolveFiOsPostLoginRedirect } from "@/src/lib/fiOs/fiOsRedirect.server";
 /** Temporary diagnostic logging — env presence only; never log secrets or tokens. */
 function logFiOsSignIn(stage: string, details: Record<string, unknown>): void {
   console.info("[fi-os-auth]", stage, JSON.stringify(details));
-}
-
-function firstForwardedValue(raw: string | null): string | null {
-  if (!raw) return null;
-  const first = raw.split(",")[0]?.trim();
-  return first && first.length > 0 ? first : null;
-}
-
-function _getRequestOrigin(): string {
-  const h = headers();
-  const host = firstForwardedValue(h.get("x-forwarded-host")) ?? h.get("host")?.trim() ?? null;
-  const protoRaw = firstForwardedValue(h.get("x-forwarded-proto")) ?? "http";
-  const proto = protoRaw.split("/")[0]?.trim() || "http";
-  if (host) return `${proto}://${host}`;
-  const fallback = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  return fallback && fallback.length > 0 ? fallback : "http://localhost:3000";
 }
 
 function readNextPath(raw: FormDataEntryValue | null | undefined): string | null {
@@ -34,13 +19,20 @@ function readNextPath(raw: FormDataEntryValue | null | undefined): string | null
   return s;
 }
 
+function signInErrorRedirect(formData: FormData, error: string): string {
+  const errorReturn = readNextPath(formData.get("errorReturn"));
+  const base = errorReturn ?? "/follicle-intelligence/login";
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}error=${error}`;
+}
+
 export async function fiOsPasswordSignInAction(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "").trim();
   const next = readNextPath(formData.get("next"));
 
   if (!email || !password) {
-    redirect("/follicle-intelligence/login?error=missing_credentials");
+    redirect(signInErrorRedirect(formData, "missing_credentials"));
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -54,7 +46,7 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
       reason: "server_misconfigured",
       target: "/follicle-intelligence/login?error=server_misconfigured",
     });
-    redirect("/follicle-intelligence/login?error=server_misconfigured");
+    redirect(signInErrorRedirect(formData, "server_misconfigured"));
   }
 
   const cookieStore = cookies();
@@ -85,7 +77,7 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
       reason: "invalid_credentials",
       target: "/follicle-intelligence/login?error=invalid_credentials",
     });
-    redirect("/follicle-intelligence/login?error=invalid_credentials");
+    redirect(signInErrorRedirect(formData, "invalid_credentials"));
   }
 
   const dest = next ?? (await resolveFiOsPostLoginRedirect(data.user.id));
@@ -107,7 +99,6 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
 }
 
 export async function fiOsRequestPasswordResetAction(formData: FormData): Promise<{ ok: true } | { ok: false; error: string }> {
-  console.info("[fi-os-auth] SERVER FORGOT PASSWORD ACTION ENTERED");
   const email = String(formData.get("email") ?? "").trim();
   if (!email) {
     return { ok: false, error: "Enter the email address for your OS account." };
@@ -123,21 +114,19 @@ export async function fiOsRequestPasswordResetAction(formData: FormData): Promis
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const redirectUrl = "https://follicleintelligence.ai/follicle-intelligence/update-password";
-
-  console.log("PASSWORD RESET DEBUG");
-  console.log("EMAIL:", email);
-  console.log("REDIRECT URL:", redirectUrl);
-  console.log("Sending redirectTo:", redirectUrl);
+  const origin = (await resolveFiOsPublicOrigin()).replace(/\/+$/, "");
+  const redirectUrl = `${origin}/follicle-intelligence/update-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: redirectUrl,
   });
 
   if (error) {
+    logFiOsSignIn("password_reset_error", { code: error.code ?? "unknown" });
     return { ok: false, error: "Could not start password recovery. Try again or contact support." };
   }
 
+  logFiOsSignIn("password_reset_requested", { redirectHost: new URL(redirectUrl).host });
   return { ok: true };
 }
 

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { PatientPortalAccessNotice } from "@/src/components/patient-portal/PatientPortalAccessNotice";
 import { PatientMedicationsPortalClient } from "@/src/components/patient-portal/PatientMedicationsPortalClient";
-import { loadPatientPortalPatientRow } from "@/src/lib/patientPortal/patientPortalAccess.server";
+import { resolvePatientPortalAccess } from "@/src/lib/patientPortal/patientPortalAccess.server";
 import {
   loadMedicationPortalLines,
   loadMedicationReorderRequestsForPatient,
@@ -18,23 +19,14 @@ export default async function PatientMedicationsPage({ params }: { params: Promi
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
-  const portal = await loadPatientPortalPatientRow(tid);
-  if (!portal) {
-    return (
-      <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.06] p-4 text-sm text-amber-200">
-        <p className="font-semibold text-amber-100">Portal not linked</p>
-        <p className="mt-2">
-          Sign in with Supabase Auth, then ask your clinic to set <code className="rounded bg-white/[0.06] px-1 text-amber-100">portal_auth_user_id</code>{" "}
-          on your <code className="rounded bg-white/[0.06] px-1 text-amber-100">fi_patients</code> row to your auth user id for tenant{" "}
-          <span className="font-mono">{tid}</span>.
-        </p>
-      </div>
-    );
+  const access = await resolvePatientPortalAccess(tid);
+  if (access.status !== "linked") {
+    return <PatientPortalAccessNotice tenantId={tid} access={access} />;
   }
 
   const [lines, requests] = await Promise.all([
-    loadMedicationPortalLines(tid, portal.patientId),
-    loadMedicationReorderRequestsForPatient(tid, portal.patientId),
+    loadMedicationPortalLines(tid, access.patientId),
+    loadMedicationReorderRequestsForPatient(tid, access.patientId),
   ]);
 
   return (

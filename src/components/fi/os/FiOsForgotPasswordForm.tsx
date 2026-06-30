@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 
 import { fiOsRequestPasswordResetAction } from "@/lib/actions/fi-os-auth-actions";
@@ -10,32 +10,24 @@ export function FiOsForgotPasswordForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log("CLIENT FORGOT PASSWORD FORM MOUNTED (AUTH DEBUG BUILD 4be26ac)");
-  }, []);
-
   return (
     <form
       className="space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
-        console.log("CLIENT FORGOT PASSWORD SUBMIT");
         const fd = new FormData(e.currentTarget);
         setMessage(null);
         setError(null);
         startTransition(() => {
           void (async () => {
             try {
-              console.log("CLIENT FORGOT PASSWORD calling fiOsRequestPasswordResetAction");
               const r = await fiOsRequestPasswordResetAction(fd);
-              console.log("CLIENT FORGOT PASSWORD action result", r);
               if (r.ok) {
                 setMessage("If an account exists for that email, we sent a reset link. Check your inbox and spam folder.");
               } else {
                 setError(r.error);
               }
-            } catch (err) {
-              console.error("CLIENT FORGOT PASSWORD action threw", err);
+            } catch {
               setError("Could not start password recovery. Try again or contact support.");
             }
           })();
@@ -52,7 +44,8 @@ export function FiOsForgotPasswordForm() {
           type="email"
           autoComplete="email"
           required
-          className="w-full rounded-lg border border-slate-600/80 bg-slate-950/80 px-3 py-2.5 text-slate-100 outline-none ring-cyan-500/40 focus:border-cyan-500/50 focus:ring-2"
+          disabled={pending}
+          className="w-full rounded-lg border border-slate-600/80 bg-slate-950/80 px-3 py-2.5 text-slate-100 outline-none ring-cyan-500/40 focus:border-cyan-500/50 focus:ring-2 disabled:opacity-70"
           placeholder="you@clinic.com"
         />
       </div>
@@ -72,7 +65,8 @@ export function FiOsForgotPasswordForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-sky-500 disabled:opacity-60"
+        aria-busy={pending}
+        className="w-full rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Sending…" : "Send reset link"}
       </button>
