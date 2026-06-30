@@ -37,9 +37,9 @@ const STATUS_COLOR: Record<ClinicBookingSetupTestRowStatus, string> = {
 };
 
 function overallBadgeClass(status: ClinicBookingSetupTestRowStatus, isDark: boolean): string {
-  if (status === "pass") return isDark ? "bg-emerald-500/15 text-emerald-200 ring-emerald-500/30" : "bg-emerald-50 text-emerald-900 ring-emerald-200";
-  if (status === "warning") return isDark ? "bg-amber-500/15 text-amber-100 ring-amber-500/30" : "bg-amber-50 text-amber-950 ring-amber-200";
-  return isDark ? "bg-rose-500/15 text-rose-100 ring-rose-500/35" : "bg-rose-50 text-rose-950 ring-rose-200";
+  if (status === "pass") return isDark ? "bg-emerald-500/15 text-emerald-200 ring-emerald-500/30" : "bg-emerald-500/10 text-emerald-300 ring-emerald-200";
+  if (status === "warning") return isDark ? "bg-amber-500/15 text-amber-100 ring-amber-500/30" : "bg-amber-400/10 text-amber-200 ring-amber-200";
+  return isDark ? "bg-rose-500/15 text-rose-100 ring-rose-500/35" : "bg-rose-500/10 text-rose-200 ring-rose-200";
 }
 
 function collectAutoFixKeys(
@@ -154,7 +154,7 @@ export function ClinicBookingSetupTestPanel({
     <div
       className={cn(
         "rounded-lg border px-3 py-3 sm:px-4",
-        isDark ? "border-white/[0.08] bg-black/25" : "border-gray-200 bg-gray-50/90",
+        isDark ? "border-white/[0.08] bg-black/25" : "border-white/[0.08] bg-white/[0.03]",
         className
       )}
     >
@@ -163,7 +163,7 @@ export function ClinicBookingSetupTestPanel({
           <p className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-gray-500")}>
             Booking setup test
           </p>
-          <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-gray-900")}>
+          <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>
             Safe diagnostic — no bookings created
           </p>
         </div>
@@ -202,7 +202,7 @@ export function ClinicBookingSetupTestPanel({
         </div>
       </div>
 
-      <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-gray-600")}>
+      <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
         Checks consultation, PRP / exosomes, surgery, and follow-up paths: catalogue service, room links, preferred room,
         staff rules, calendar-visible clinical assignees (reception excluded), and the same next-slot search used in the
         calendar — read-only.
@@ -212,7 +212,7 @@ export function ClinicBookingSetupTestPanel({
         <p className="mt-2 text-xs text-rose-300">{error}</p>
       ) : null}
       {autofixSummary ? (
-        <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-300" : "text-gray-700")}>{autofixSummary}</p>
+        <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-300" : "text-slate-300")}>{autofixSummary}</p>
       ) : null}
 
       {result ? (
@@ -233,7 +233,7 @@ export function ClinicBookingSetupTestPanel({
                 key={t.profile}
                 className={cn(
                   "flex flex-col gap-1 rounded-md border px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between",
-                  isDark ? "border-white/[0.06] bg-slate-950/40" : "border-gray-100 bg-white"
+                  isDark ? "border-white/[0.06] bg-slate-950/40" : "border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md"
                 )}
               >
                 <div className="flex min-w-0 gap-2">
@@ -242,14 +242,14 @@ export function ClinicBookingSetupTestPanel({
                     return <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[t.status])} aria-hidden />;
                   })()}
                   <div className="min-w-0">
-                    <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-gray-900")}>
+                    <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>
                       {t.label}: <span className="font-semibold">{rowHeadline(t.status)}</span>
                     </p>
-                    <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-gray-600")}>
+                    <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
                       {t.message}
                     </p>
                     {t.suggestedAction ? (
-                      <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-900/90")}>{t.suggestedAction}</p>
+                      <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-200")}>{t.suggestedAction}</p>
                     ) : null}
                     {t.status !== "pass" && t.fixKeys?.length ? (
                       <div className="mt-2">
@@ -274,7 +274,7 @@ export function ClinicBookingSetupTestPanel({
                     href={t.href}
                     className={cn(
                       "shrink-0 text-xs font-medium hover:underline sm:pt-0.5",
-                      isDark ? "text-cyan-400" : "text-sky-700"
+                      isDark ? "text-cyan-400" : "text-cyan-300"
                     )}
                   >
                     Open
@@ -295,7 +295,7 @@ export function ClinicBookingSetupTestPanel({
                     key={h.id}
                     className={cn(
                       "flex flex-col gap-1 rounded-md border px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between",
-                      isDark ? "border-white/[0.06] bg-slate-950/40" : "border-gray-100 bg-white"
+                      isDark ? "border-white/[0.06] bg-slate-950/40" : "border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md"
                     )}
                   >
                     <div className="flex min-w-0 gap-2">
@@ -304,12 +304,12 @@ export function ClinicBookingSetupTestPanel({
                         return <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[h.status])} aria-hidden />;
                       })()}
                       <div className="min-w-0">
-                        <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-gray-900")}>{h.label}</p>
-                        <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-gray-600")}>
+                        <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>{h.label}</p>
+                        <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
                           {h.message}
                         </p>
                         {h.suggestedAction ? (
-                          <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-900/90")}>{h.suggestedAction}</p>
+                          <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-200")}>{h.suggestedAction}</p>
                         ) : null}
                         {h.status !== "pass" && h.fixKeys?.length ? (
                           <div className="mt-2 space-y-2">
@@ -318,7 +318,7 @@ export function ClinicBookingSetupTestPanel({
                                 <label
                                   className={cn(
                                     "flex cursor-pointer items-start gap-2 text-xs leading-snug",
-                                    isDark ? "text-slate-200" : "text-gray-800"
+                                    isDark ? "text-slate-200" : "text-slate-200"
                                   )}
                                 >
                                   <input
@@ -327,7 +327,7 @@ export function ClinicBookingSetupTestPanel({
                                       "mt-0.5 h-3.5 w-3.5 shrink-0 rounded border",
                                       isDark
                                         ? "border-slate-500 bg-slate-900 accent-violet-400"
-                                        : "border-gray-400 bg-white accent-violet-600"
+                                        : "border-slate-600 bg-[#0F1629]/80 backdrop-blur-md accent-violet-600"
                                     )}
                                     checked={perthPhysicalAliasConfirmed}
                                     onChange={(e) => setPerthPhysicalAliasConfirmed(e.target.checked)}
@@ -340,7 +340,7 @@ export function ClinicBookingSetupTestPanel({
                                 <p
                                   className={cn(
                                     "text-[11px] leading-relaxed pl-5 sm:pl-6",
-                                    isDark ? "text-slate-500" : "text-gray-600"
+                                    isDark ? "text-slate-500" : "text-slate-400"
                                   )}
                                 >
                                   This prevents FI OS from double-booking the same physical room under two different
@@ -382,7 +382,7 @@ export function ClinicBookingSetupTestPanel({
                         href={h.href}
                         className={cn(
                           "shrink-0 text-xs font-medium hover:underline sm:pt-0.5",
-                          isDark ? "text-cyan-400" : "text-sky-700"
+                          isDark ? "text-cyan-400" : "text-cyan-300"
                         )}
                       >
                         Open

@@ -194,28 +194,28 @@ export function ServicesCatalogClient({
     <div className="mx-auto max-w-[88rem] space-y-6 py-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold text-gray-900">Services</h1>
-          <p className="max-w-3xl text-sm text-gray-600">
+          <h1 className="text-lg font-semibold text-slate-100">Services</h1>
+          <p className="max-w-3xl text-sm text-slate-400">
             Procedure catalog: default duration, price suggestion, and calendar colour per booking type. When{" "}
             <span className="font-medium">Procedure type</span> is set, that row defines the catalog for that type (one
             per tenant).
           </p>
-          <p className="text-sm text-gray-600">
-            <Link href={base} className="text-blue-600 hover:underline">
+          <p className="text-sm text-slate-400">
+            <Link href={base} className="text-blue-300 hover:underline">
               ← Dashboard
             </Link>
             <span className="mx-2 text-gray-300">·</span>
-            <Link href={`${base}/calendar`} className="text-blue-600 hover:underline">
+            <Link href={`${base}/calendar`} className="text-blue-300 hover:underline">
               Calendar
             </Link>
             <span className="mx-2 text-gray-300">·</span>
-            <Link href={`${base}/staff`} className="text-blue-600 hover:underline">
+            <Link href={`${base}/staff`} className="text-blue-300 hover:underline">
               Staff
             </Link>
             {showCrmNav ? (
               <>
                 <span className="mx-2 text-gray-300">·</span>
-                <Link href={`${base}/crm`} className="text-blue-600 hover:underline">
+                <Link href={`${base}/crm`} className="text-blue-300 hover:underline">
                   CRM
                 </Link>
               </>
@@ -240,11 +240,11 @@ export function ServicesCatalogClient({
 
       {showEmptyCatalogBanner ? (
         <div
-          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200"
           role="status"
         >
           <p className="font-medium">No active services in your catalog</p>
-          <p className="mt-1 text-amber-900/90">
+          <p className="mt-1 text-amber-200">
             Calendar and bookings still work with built-in fallbacks, but procedure colours, durations, and price hints
             work best with a service library. Load the {DEFAULT_CLINIC_SERVICE_LIBRARY.length} Evolved defaults or add
             your own rows.
@@ -258,82 +258,82 @@ export function ServicesCatalogClient({
       ) : null}
 
       {seedMessage ? (
-        <div className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900" role="status">
+        <div className="rounded border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300" role="status">
           {seedMessage}
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+        <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
           {error}
         </div>
       ) : null}
 
       {(mode === "create" || mode === "edit") && canManage ? (
         <section
-          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
           aria-label={mode === "create" ? "Add service" : "Edit service"}
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-gray-900">{mode === "create" ? "New service" : "Edit service"}</h2>
-            <button type="button" onClick={closePanel} className="text-xs text-gray-600 hover:text-gray-900">
+            <h2 className="text-sm font-semibold text-slate-100">{mode === "create" ? "New service" : "Edit service"}</h2>
+            <button type="button" onClick={closePanel} className="text-xs text-slate-400 hover:text-slate-100">
               Close
             </button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-gray-700 sm:col-span-2">
+            <label className="block text-xs font-medium text-slate-300 sm:col-span-2">
               Name
               <input
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                 value={form.name}
                 onChange={(e) => onField("name", e.target.value)}
                 required
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Duration (minutes)
               <input
                 type="number"
                 min={1}
                 max={1440}
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                 value={form.duration_minutes}
                 onChange={(e) => onField("duration_minutes", e.target.value)}
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Base price (AUD)
               <input
                 type="number"
                 min={0}
                 step="0.01"
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                 value={form.base_price}
                 onChange={(e) => onField("base_price", e.target.value)}
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Colour (hex)
               <input
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm font-mono"
+                className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm font-mono"
                 value={form.color}
                 onChange={(e) => onField("color", e.target.value)}
                 placeholder="#0ea5e9"
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Category
               <input
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                 value={form.category}
                 onChange={(e) => onField("category", e.target.value)}
                 placeholder="Optional"
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700 sm:col-span-2">
+            <label className="block text-xs font-medium text-slate-300 sm:col-span-2">
               Procedure type (optional — links to booking type)
               <select
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                 value={form.booking_type}
                 onChange={(e) => onField("booking_type", e.target.value)}
               >
@@ -345,18 +345,18 @@ export function ServicesCatalogClient({
                 ))}
               </select>
             </label>
-            <label className="flex items-center gap-2 text-xs font-medium text-gray-700 sm:col-span-2">
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-300 sm:col-span-2">
               <input type="checkbox" checked={form.is_active === "on"} onChange={(e) => onField("is_active", e.target.checked ? "on" : "")} />
               Active
             </label>
           </div>
           {mode === "edit" ? (
-            <div className="mt-4 space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Scheduling eligibility</p>
+            <div className="mt-4 space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Scheduling eligibility</p>
               {data.rooms.length === 0 ? (
                 <p className="text-xs text-gray-500">
                   No rooms configured. Add rooms in{" "}
-                  <Link href={`${base}/rooms`} className="text-sky-700 underline">
+                  <Link href={`${base}/rooms`} className="text-cyan-300 underline">
                     Settings → Rooms
                   </Link>
                   .
@@ -364,7 +364,7 @@ export function ServicesCatalogClient({
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2">
                   {data.rooms.map((room) => (
-                    <label key={room.id} className="flex items-center gap-2 text-xs text-gray-700">
+                    <label key={room.id} className="flex items-center gap-2 text-xs text-slate-300">
                       <input
                         type="checkbox"
                         checked={eligibleRoomIds.includes(room.id)}
@@ -381,10 +381,10 @@ export function ServicesCatalogClient({
                 </div>
               )}
               {eligibleRoomIds.length > 0 ? (
-                <label className="block text-xs font-medium text-gray-700">
+                <label className="block text-xs font-medium text-slate-300">
                   Preferred room
                   <select
-                    className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                    className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                     value={preferredRoomId}
                     onChange={(e) => setPreferredRoomId(e.target.value)}
                   >
@@ -400,10 +400,10 @@ export function ServicesCatalogClient({
                   </select>
                 </label>
               ) : null}
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Eligible staff roles (comma-separated)
                 <input
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   value={staffRoles}
                   onChange={(e) => setStaffRoles(e.target.value)}
                   placeholder="consultant, nurse, doctor, technician"
@@ -422,9 +422,9 @@ export function ServicesCatalogClient({
         </section>
       ) : null}
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-600">
+      <div className="overflow-x-auto rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
+        <table className="min-w-full divide-y divide-white/[0.08] text-sm">
+          <thead className="bg-white/[0.03] text-left text-xs font-medium uppercase tracking-wide text-slate-400">
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Type</th>
@@ -436,14 +436,14 @@ export function ServicesCatalogClient({
               <th className="px-3 py-2" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-white/[0.06]">
             {data.services.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-gray-600">
+                <td colSpan={8} className="px-3 py-8 text-center text-slate-400">
                   <p>No services in the catalog yet.</p>
                   <p className="mt-2 text-sm text-gray-500">
                     {canManage ? "Add the first row to drive booking durations and colours, or use " : "See "}
-                    <Link href={`${base}/calendar/testing`} className="text-blue-600 hover:underline">
+                    <Link href={`${base}/calendar/testing`} className="text-blue-300 hover:underline">
                       Calendar UAT
                     </Link>
                     {canManage ? " for optional demo services (dev / staging)." : " for setup guidance."}
@@ -452,9 +452,9 @@ export function ServicesCatalogClient({
               </tr>
             ) : (
               data.services.map((row) => (
-                <tr key={row.id} className={cn(!row.is_active && "bg-gray-50 text-gray-500")}>
-                  <td className="px-3 py-2 font-medium text-gray-900">{row.name}</td>
-                  <td className="px-3 py-2 text-gray-700">
+                <tr key={row.id} className={cn(!row.is_active && "bg-white/[0.03] text-gray-500")}>
+                  <td className="px-3 py-2 font-medium text-slate-100">{row.name}</td>
+                  <td className="px-3 py-2 text-slate-300">
                     {row.booking_type ? bookingTypeLabel(row.booking_type) : "—"}
                   </td>
                   <td className="px-3 py-2">{row.duration_minutes} min</td>
@@ -462,7 +462,7 @@ export function ServicesCatalogClient({
                   <td className="px-3 py-2">
                     {row.color ? (
                       <span className="inline-flex items-center gap-1">
-                        <span className="inline-block h-4 w-4 rounded border border-gray-300" style={{ backgroundColor: row.color }} title={row.color} />
+                        <span className="inline-block h-4 w-4 rounded border border-slate-700" style={{ backgroundColor: row.color }} title={row.color} />
                         <span className="font-mono text-xs">{row.color}</span>
                       </span>
                     ) : (
@@ -476,7 +476,7 @@ export function ServicesCatalogClient({
                       <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
                         <button
                           type="button"
-                          className="text-blue-600 hover:underline disabled:opacity-50"
+                          className="text-blue-300 hover:underline disabled:opacity-50"
                           disabled={pending}
                           onClick={() => openEdit(row)}
                         >
@@ -485,7 +485,7 @@ export function ServicesCatalogClient({
                         {row.is_active ? (
                           <button
                             type="button"
-                            className="text-amber-700 hover:underline disabled:opacity-50"
+                            className="text-amber-300 hover:underline disabled:opacity-50"
                             disabled={pending}
                             onClick={() => deactivateRow(row)}
                           >
@@ -494,7 +494,7 @@ export function ServicesCatalogClient({
                         ) : (
                           <button
                             type="button"
-                            className="text-blue-600 hover:underline disabled:opacity-50"
+                            className="text-blue-300 hover:underline disabled:opacity-50"
                             disabled={pending}
                             onClick={() => activateRow(row)}
                           >

@@ -240,11 +240,11 @@ export function FoundationOsDashboard({
                     meta={
                       <>
                         {journey ? <>Case: {journey.caseStatusLabel}</> : "No active case"}
-                        <span className="text-slate-600"> · </span>
+                        <span className="text-slate-400"> · </span>
                         Updated {formatTwinWhen(p.lastActivityAt)}
                         {booking ? (
                           <>
-                            <span className="text-slate-600"> · </span>
+                            <span className="text-slate-400"> · </span>
                             Next booking {formatTwinWhen(booking.startAt)}
                           </>
                         ) : null}
@@ -287,9 +287,9 @@ export function FoundationOsDashboard({
                   meta={
                     <>
                       {j.caseStatusLabel}
-                      <span className="text-slate-600"> · </span>
+                      <span className="text-slate-400"> · </span>
                       Updated {formatTwinWhen(j.updatedAt)}
-                      <span className="text-slate-600"> · </span>
+                      <span className="text-slate-400"> · </span>
                       Next: review case progress in SurgeryOS
                     </>
                   }
@@ -328,13 +328,13 @@ export function FoundationOsDashboard({
                     {h.eventKind.replace(/_/g, " ")}
                     {h.patientId ? (
                       <>
-                        <span className="text-slate-600"> · </span>
+                        <span className="text-slate-400"> · </span>
                         <Link href={`${base}/patients/${h.patientId}`} className="text-cyan-300/90 hover:text-cyan-200 hover:underline">
                           {h.patientDisplayName ?? "Patient"}
                         </Link>
                       </>
                     ) : null}
-                    <span className="text-slate-600"> · </span>
+                    <span className="text-slate-400"> · </span>
                     {formatTwinWhen(h.occurredAt)}
                   </>
                 }
@@ -539,7 +539,7 @@ export function FoundationOsDashboard({
                     m.previews.unresolved_global_patients.map((r) => (
                       <li key={r.global_patient_id} className="px-3 py-2 text-slate-400">
                         <MonoLink href={`${base}/patients/${r.global_patient_id}`}>{r.global_patient_id}</MonoLink>
-                        <span className="text-slate-600">
+                        <span className="text-slate-400">
                           {" "}
                           — {r.source_system}:{r.source_patient_id}
                         </span>
@@ -557,7 +557,7 @@ export function FoundationOsDashboard({
                     m.previews.unresolved_cases.map((r) => (
                       <li key={r.case_id} className="px-3 py-2 text-slate-400">
                         <span className="font-mono text-xs text-slate-500">{r.case_id}</span>
-                        <span className="text-slate-600"> — {r.status}</span>
+                        <span className="text-slate-400"> — {r.status}</span>
                         <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs">
                           <MonoLink href={`${base}/cases/${r.case_id}`}>Open case</MonoLink>
                           {r.global_patient_id ? <MonoLink href={`${base}/patients/${r.global_patient_id}`}>Open patient</MonoLink> : null}
@@ -585,7 +585,7 @@ export function FoundationOsDashboard({
                 )}
               </ul>
             </div>
-            <p className="mt-3 text-xs text-slate-600">
+            <p className="mt-3 text-xs text-slate-400">
               v_fi_case_foundation rows missing foundation patient: {m.risks.unresolved_cases_no_foundation_patient}. Media without case
               (unified view): {m.unified_media_without_case_id}.
             </p>

@@ -103,28 +103,28 @@ export function ClinicOsShell({
     effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "This clinic";
 
   return (
-    <div className="min-h-[min(100dvh,100vh)] bg-slate-50">
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
+    <div className="min-h-[min(100dvh,100vh)] bg-white/[0.03]">
+      <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6">
           <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
             <Link
               href={base}
-              className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-lg pr-2 outline-none ring-sky-500/30 transition hover:bg-slate-50 focus-visible:ring-2"
+              className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-lg pr-2 outline-none ring-sky-500/30 transition hover:bg-white/[0.03] focus-visible:ring-2"
             >
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-bold tracking-tight text-slate-800"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-sm font-bold tracking-tight text-slate-200"
                 aria-hidden
               >
                 FI
               </div>
               <div className="min-w-0 text-left">
-                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">FI OS</p>
-                <p className="truncate text-sm font-semibold text-slate-900">{brandName}</p>
+                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">FI OS</p>
+                <p className="truncate text-sm font-semibold text-slate-100">{brandName}</p>
               </div>
             </Link>
 
             {logoSrc ? (
-              <div className="hidden shrink-0 border-l border-slate-200 pl-3 sm:block">
+              <div className="hidden shrink-0 border-l border-white/[0.08] pl-3 sm:block">
                 <BrandLogoImage
                   logoUrl={effective.logo_url}
                   alt={brandName}
@@ -139,14 +139,14 @@ export function ClinicOsShell({
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="flex h-9 w-full min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-left text-sm text-slate-800 outline-none ring-sky-400/20 transition hover:border-slate-300 hover:bg-slate-50/80 focus-visible:border-sky-400/50 focus-visible:ring-2"
+                className="flex h-9 w-full min-w-0 items-center gap-2 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 text-left text-sm text-slate-200 outline-none ring-sky-400/20 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:border-sky-400/50 focus-visible:ring-2"
                 aria-haspopup="dialog"
                 aria-expanded={searchOpen}
                 aria-label="Open workspace search"
               >
                 <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                 <span className="min-w-0 flex-1 truncate text-slate-400">Search patients, leads, bookings and cases</span>
-                <kbd className="hidden shrink-0 select-none rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-sans text-[10px] font-medium text-slate-500 sm:inline-block">
+                <kbd className="hidden shrink-0 select-none rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-sans text-[10px] font-medium text-slate-500 sm:inline-block">
                   {kbdHint}
                 </kbd>
               </button>
@@ -157,22 +157,22 @@ export function ClinicOsShell({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 outline-none transition hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-sky-400/30"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 text-sm font-medium text-slate-200 outline-none transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-sky-400/30"
                     style={{ boxShadow: `inset 0 -1px 0 0 ${accent}18` }}
                   >
-                    <Plus className="h-4 w-4 text-sky-600" aria-hidden />
+                    <Plus className="h-4 w-4 text-cyan-300" aria-hidden />
                     New
                     <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[12.5rem] rounded-lg border-slate-200 bg-white p-1 shadow-md">
+                <DropdownMenuContent align="end" className="min-w-[12.5rem] rounded-lg border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-1 shadow-md">
                   <DropdownMenuLabel className="text-slate-500">New</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-200" />
+                  <DropdownMenuSeparator className="bg-white/[0.08]" />
                   {quickActions.map((action, index) => {
                     const showSepBeforeTask = action.id === "task" && index > 0;
                     return (
                       <div key={action.id}>
-                        {showSepBeforeTask ? <DropdownMenuSeparator className="bg-slate-200" /> : null}
+                        {showSepBeforeTask ? <DropdownMenuSeparator className="bg-white/[0.08]" /> : null}
                         {action.disabled ? (
                           <ComingSoonMenuRow label={action.label} title={action.description} />
                         ) : (
@@ -197,7 +197,7 @@ export function ClinicOsShell({
             {navModules.map((mod) => (
               <div
                 key={mod.id}
-                className="flex min-w-0 shrink-0 items-center gap-2 border-r border-slate-200/90 pr-2 last:border-r-0 last:pr-0"
+                className="flex min-w-0 shrink-0 items-center gap-2 border-r border-white/[0.08] pr-2 last:border-r-0 last:pr-0"
               >
                 {mod.showModuleLabel ? (
                   <span
@@ -237,8 +237,8 @@ export function ClinicOsShell({
                         className={cn(
                           common,
                           active
-                            ? "bg-sky-50 text-sky-900 ring-1 ring-sky-200/90"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            ? "bg-cyan-500/10 text-cyan-200 ring-1 ring-sky-200/90"
+                            : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
                         )}
                         aria-current={active ? "page" : undefined}
                       >

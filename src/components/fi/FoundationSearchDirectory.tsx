@@ -25,23 +25,23 @@ function buildDirectoryHref(tenantId: string, q: string, filter: FoundationSearc
 function HitRow({ hit }: { hit: FoundationSearchHit }) {
   const isCard = hit.type === "clinic" || hit.type === "organisation";
   const inner = (
-    <div className="rounded border border-gray-200 bg-white p-3 text-sm hover:border-gray-300">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 text-sm hover:border-slate-700">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <div className="font-medium text-gray-900">{hit.title}</div>
-          <div className="mt-0.5 text-xs text-gray-600">{hit.subtitle}</div>
+          <div className="font-medium text-slate-100">{hit.title}</div>
+          <div className="mt-0.5 text-xs text-slate-400">{hit.subtitle}</div>
           {hit.source_system && (
             <div className="mt-1 text-xs text-gray-500">
               Source: <span className="font-mono">{hit.source_system}</span>
             </div>
           )}
         </div>
-        <span className="rounded bg-gray-100 px-2 py-0.5 text-xs capitalize text-gray-700">{hit.type}</span>
+        <span className="rounded bg-white/[0.06] px-2 py-0.5 text-xs capitalize text-slate-300">{hit.type}</span>
       </div>
-      {hit.warning && <p className="mt-2 text-xs text-amber-800">{hit.warning}</p>}
+      {hit.warning && <p className="mt-2 text-xs text-amber-300">{hit.warning}</p>}
       {!isCard && (
         <p className="mt-2">
-          <Link href={hit.href} className="text-xs font-medium text-blue-700 hover:underline">
+          <Link href={hit.href} className="text-xs font-medium text-blue-300 hover:underline">
             Open record →
           </Link>
         </p>
@@ -122,23 +122,23 @@ export function FoundationSearchDirectory({
   return (
     <div className="space-y-8 text-sm">
       <form action={`/fi-admin/${tenantId}/directory`} method="get" className="flex flex-wrap items-end gap-3">
-        <label className="flex min-w-[200px] flex-1 flex-col text-xs text-gray-600">
+        <label className="flex min-w-[200px] flex-1 flex-col text-xs text-slate-400">
           Search
           <input
             type="search"
             name="q"
             defaultValue={result.query ?? ""}
             placeholder="Name, email, id, source id…"
-            className="mt-1 rounded border border-gray-300 px-2 py-1.5 text-sm text-gray-900"
+            className="mt-1 rounded border border-slate-700 px-2 py-1.5 text-sm text-slate-100"
             autoComplete="off"
           />
         </label>
-        <label className="flex flex-col text-xs text-gray-600">
+        <label className="flex flex-col text-xs text-slate-400">
           Scope
           <select
             name="type"
             defaultValue={result.filter}
-            className="mt-1 rounded border border-gray-300 px-2 py-1.5 text-sm text-gray-900"
+            className="mt-1 rounded border border-slate-700 px-2 py-1.5 text-sm text-slate-100"
           >
             {FILTERS.map((f) => (
               <option key={f.value} value={f.value}>
@@ -161,7 +161,7 @@ export function FoundationSearchDirectory({
             key={f.value}
             href={buildDirectoryHref(tenantId, qFromUrl, f.value)}
             className={`rounded border px-2 py-1 no-underline ${
-              result.filter === f.value ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-700 hover:bg-gray-50"
+              result.filter === f.value ? "border-gray-900 bg-gray-900 text-white" : "border-white/[0.08] text-slate-300 hover:bg-white/[0.03]"
             }`}
           >
             {f.label}

@@ -55,7 +55,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
             crmHref ? (
               <Link
                 href={crmHref}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
               >
                 New enquiry
               </Link>
@@ -63,7 +63,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
               <button
                 type="button"
                 disabled
-                className="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-dashed border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-400"
+                className="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-dashed border-white/[0.08] px-4 py-2.5 text-sm font-semibold text-slate-400"
                 title="Requires CRM workspace access"
               >
                 New enquiry
@@ -86,12 +86,12 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
               <FiCalendarBlock title="Hair transplant patients" timeLabel="PM" tone="surgery" placeholder />
               <FiCalendarBlock title="Follow-ups" timeLabel="PM" tone="followup" placeholder />
             </div>
-            <div className="mt-4 border-t border-slate-100 pt-4">
+            <div className="mt-4 border-t border-white/[0.06] pt-4">
               <Link
                 href={calendarHref}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 py-2.5 text-sm font-medium text-slate-800 transition hover:border-sky-200 hover:bg-sky-50/60 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] py-2.5 text-sm font-medium text-slate-200 transition hover:border-cyan-500/20 hover:bg-cyan-500/10 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40"
               >
-                <Calendar className="h-4 w-4 text-sky-600" aria-hidden />
+                <Calendar className="h-4 w-4 text-cyan-300" aria-hidden />
                 Open Calendar
               </Link>
             </div>

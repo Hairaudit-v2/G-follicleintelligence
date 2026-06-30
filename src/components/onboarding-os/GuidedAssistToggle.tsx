@@ -58,7 +58,7 @@ export function GuidedAssistToggle({
       >
         <span
           className={cn(
-            "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+            "absolute top-0.5 h-5 w-5 rounded-full bg-[#0F1629]/80 backdrop-blur-md shadow transition-transform",
             assistEnabled ? "translate-x-5" : "translate-x-0.5"
           )}
         />

@@ -30,7 +30,7 @@ export function FiSection({
   className,
   contentClassName,
   headingId,
-  surfaceVariant = "clinicLight",
+  surfaceVariant = "darkGlass",
 }: FiSectionProps) {
   const surface = fiSurfaceVariantClassNames[surfaceVariant];
   const padWhenNeeded =

@@ -119,10 +119,10 @@ export default function AuditReviewPage() {
   if (loadError) {
     return (
       <div className="space-y-3">
-        <Link href={`/fi-admin/${tenantId}/audit`} className="text-sm text-gray-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/audit`} className="text-sm text-slate-400 hover:underline">
           ← Audit queue
         </Link>
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-sm text-rose-300" role="alert">
           {loadError}
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function AuditReviewPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href={`/fi-admin/${tenantId}/audit`} className="text-sm text-gray-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/audit`} className="text-sm text-slate-400 hover:underline">
           ← Audit queue
         </Link>
         <h2 className="text-base font-medium">
@@ -141,7 +141,7 @@ export default function AuditReviewPage() {
       </div>
 
       {actionError ? (
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-sm text-rose-300" role="alert">
           {actionError}
         </p>
       ) : null}
@@ -150,7 +150,7 @@ export default function AuditReviewPage() {
         <>
           <ReportPreview report={report.report_json as Parameters<typeof ReportPreview>[0]["report"]} />
 
-          <div className="flex gap-4 items-start border-t border-gray-200 pt-4">
+          <div className="flex gap-4 items-start border-t border-white/[0.08] pt-4">
             <button
               onClick={approve}
               disabled={approving || report.status === "released"}

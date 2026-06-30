@@ -23,9 +23,9 @@ function formatDurationMs(ms: number | null): string {
 }
 
 function severityClass(s: PhotoProtocolAlert["severity"], dark = false): string {
-  if (s === "high") return dark ? "text-rose-300" : "text-rose-800";
-  if (s === "medium") return dark ? "text-amber-300" : "text-amber-900";
-  return dark ? "text-slate-400" : "text-slate-700";
+  if (s === "high") return dark ? "text-rose-300" : "text-rose-300";
+  if (s === "medium") return dark ? "text-amber-300" : "text-amber-200";
+  return dark ? "text-slate-400" : "text-slate-300";
 }
 
 function ProtocolMetricsGrid({
@@ -137,7 +137,7 @@ export function PhotoProtocolAnalyticsCard({
             {topAlerts.map((a, i) => (
               <li key={`${a.session_id}-${a.type}-${i}`} className="px-3 py-2 text-slate-400">
                 <span className={`text-xs font-semibold uppercase ${severityClass(a.severity, true)}`}>{a.severity}</span>
-                <span className="text-xs text-slate-600"> · {a.type.replace(/_/g, " ")}</span>
+                <span className="text-xs text-slate-400"> · {a.type.replace(/_/g, " ")}</span>
                 <p className="mt-0.5 text-slate-200">{a.message}</p>
                 <p className="mt-1 text-xs text-slate-500">{a.recommended_action}</p>
                 {a.patient_id ? (
@@ -158,20 +158,20 @@ export function PhotoProtocolAnalyticsCard({
     <FiCard>
       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">Clinical photography protocol</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-sm font-semibold text-slate-100">Clinical photography protocol</h2>
+          <p className="mt-1 text-sm text-slate-400">
             Stage 8C analytics for Smart Clinical Photography — completion, gaps, and operational alerts.
           </p>
         </div>
         <Link
           href={`/fi-admin/${encodeURIComponent(tid)}/patients`}
-          className="shrink-0 text-sm font-medium text-sky-700 hover:underline"
+          className="shrink-0 text-sm font-medium text-cyan-300 hover:underline"
         >
           PatientOS
         </Link>
       </div>
       {scanNote ? (
-        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50/80 p-2 text-xs text-amber-950">{scanNote}</p>
+        <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 p-2 text-xs text-amber-200">{scanNote}</p>
       ) : null}
       <ProtocolMetricsGrid summary={summary} dark={false} />
       <div className="mt-6">
@@ -179,17 +179,17 @@ export function PhotoProtocolAnalyticsCard({
         {topAlerts.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">No computed alerts in this window.</p>
         ) : (
-          <ul className="mt-2 max-h-56 divide-y divide-slate-100 overflow-auto rounded-lg border border-slate-100 text-sm">
+          <ul className="mt-2 max-h-56 divide-y divide-white/[0.06] overflow-auto rounded-lg border border-white/[0.06] text-sm">
             {topAlerts.map((a, i) => (
-              <li key={`${a.session_id}-${a.type}-${i}`} className="px-3 py-2 text-slate-700">
+              <li key={`${a.session_id}-${a.type}-${i}`} className="px-3 py-2 text-slate-300">
                 <span className={`text-xs font-semibold uppercase ${severityClass(a.severity)}`}>{a.severity}</span>
                 <span className="text-xs text-slate-500"> · {a.type.replace(/_/g, " ")}</span>
-                <p className="mt-0.5 text-slate-800">{a.message}</p>
+                <p className="mt-0.5 text-slate-200">{a.message}</p>
                 <p className="mt-1 text-xs text-slate-500">{a.recommended_action}</p>
                 {a.patient_id ? (
                   <Link
                     href={fiOsPatientTwinPhotoProtocolHref(tid, a.patient_id)}
-                    className="mt-1 inline-block text-xs font-medium text-sky-700 hover:underline"
+                    className="mt-1 inline-block text-xs font-medium text-cyan-300 hover:underline"
                   >
                     Open Patient Twin (protocol)
                   </Link>

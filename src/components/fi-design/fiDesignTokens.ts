@@ -28,16 +28,16 @@ export type FiSurfaceVariant = keyof typeof fiSurfaceVariantClassNames;
  * At call site, add layout: e.g. `inline-flex items-center rounded-full font-medium` plus a density padding class.
  */
 export const fiBadgeIntentClassNames = {
-  success: "bg-emerald-100 text-emerald-900 ring-1 ring-inset ring-emerald-600/20",
-  warning: "bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-600/20",
-  danger: "bg-rose-100 text-rose-900 ring-1 ring-inset ring-rose-600/20",
-  neutral: "bg-slate-100 text-slate-800 ring-1 ring-inset ring-slate-500/20",
-  info: "bg-sky-100 text-sky-900 ring-1 ring-inset ring-sky-600/20",
-  draft: "bg-zinc-100 text-zinc-800 ring-1 ring-inset ring-zinc-500/20",
+  success: "bg-emerald-500/15 text-emerald-300 ring-1 ring-inset ring-emerald-500/30",
+  warning: "bg-amber-400/15 text-amber-200 ring-1 ring-inset ring-amber-400/30",
+  danger: "bg-rose-500/15 text-rose-300 ring-1 ring-inset ring-rose-500/30",
+  neutral: "bg-white/[0.06] text-slate-200 ring-1 ring-inset ring-white/[0.12]",
+  info: "bg-cyan-500/15 text-cyan-200 ring-1 ring-inset ring-cyan-500/30",
+  draft: "bg-zinc-500/15 text-zinc-300 ring-1 ring-inset ring-zinc-500/30",
   /** In-flight / waiting (distinct from `warning` operational caution). */
-  pending: "bg-blue-50 text-blue-900 ring-1 ring-inset ring-blue-500/25",
+  pending: "bg-blue-500/15 text-blue-300 ring-1 ring-inset ring-blue-500/30",
   /** Terminal positive (e.g. checklist done) — slightly softer than `success`. */
-  complete: "bg-emerald-50 text-emerald-900 ring-1 ring-inset ring-emerald-500/30",
+  complete: "bg-emerald-500/10 text-emerald-300 ring-1 ring-inset ring-emerald-500/25",
 } as const;
 
 export type FiBadgeIntent = keyof typeof fiBadgeIntentClassNames;
@@ -46,11 +46,11 @@ export type FiBadgeIntent = keyof typeof fiBadgeIntentClassNames;
  * `FiStatusBadge` default “chip” shape — bordered `rounded-md` (distinct from ring-based `fiBadgeIntentClassNames` pills).
  */
 export const fiStatusBadgeChipToneClassNames = {
-  neutral: "border-slate-200 bg-slate-100 text-slate-700",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  warning: "border-amber-200 bg-amber-50 text-amber-950",
-  danger: "border-red-200 bg-red-50 text-red-900",
-  info: "border-sky-200 bg-sky-50 text-sky-900",
+  neutral: "border-white/[0.12] bg-white/[0.06] text-slate-300",
+  success: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+  warning: "border-amber-400/20 bg-amber-400/10 text-amber-200",
+  danger: "border-rose-500/20 bg-rose-500/10 text-rose-300",
+  info: "border-cyan-500/20 bg-cyan-500/10 text-cyan-200",
 } as const;
 
 export type FiStatusBadgeChipTone = keyof typeof fiStatusBadgeChipToneClassNames;
@@ -68,12 +68,12 @@ export const fiPageHeaderVariantClassNames = {
     description: "max-w-2xl text-[11px] leading-relaxed text-[#94A3B8] sm:text-xs",
     meta: "text-[11px] text-[#64748B]",
   },
-  /** Clinic OS light welcome / `FiPageHeader`-style titles on white + slate. */
+  /** Clinic OS welcome / `FiPageHeader`-style titles on dark glass. */
   clinicLight: {
     root: "min-w-0 space-y-1",
-    eyebrow: "text-xs font-semibold uppercase tracking-wide text-sky-700",
-    title: "text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl",
-    description: "max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base",
+    eyebrow: "text-xs font-semibold uppercase tracking-wide text-cyan-300",
+    title: "text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl",
+    description: "max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base",
     meta: "text-xs text-slate-500",
   },
   /** Portal entry (OS login, HairAudit hub hero). */
@@ -84,15 +84,15 @@ export const fiPageHeaderVariantClassNames = {
     description: "text-sm text-slate-400 sm:text-base",
     meta: "text-xs text-slate-500",
   },
-  /** CRM / cases / patients document pages (`gray-900` headings, blue links). */
+  /** CRM / cases / patients document pages on dark glass. */
   document: {
     root: "space-y-1",
-    eyebrow: "text-xs font-semibold uppercase tracking-wide text-gray-500",
-    title: "text-lg font-semibold text-gray-900",
-    description: "max-w-3xl text-sm text-gray-600",
+    eyebrow: "text-xs font-semibold uppercase tracking-wide text-slate-400",
+    title: "text-lg font-semibold text-slate-100",
+    description: "max-w-3xl text-sm text-slate-400",
     /** Inline nav / “back to” links on document pages. */
-    link: "text-sm text-blue-600 hover:underline",
-    meta: "text-xs text-gray-500",
+    link: "text-sm text-cyan-300 hover:underline",
+    meta: "text-xs text-slate-500",
   },
 } as const;
 
@@ -115,20 +115,20 @@ export type FiPageHeaderVariant = keyof typeof fiPageHeaderVariantClassNames;
  * and placeholders stay AA-friendly on the light card without relying on `dark:`.
  */
 export const fiOsLightFormSurfaceClassNames = {
-  sectionTitle: "text-lg font-semibold text-slate-900",
-  panelCaption: "text-sm font-semibold uppercase tracking-wide text-slate-600",
-  label: "block text-sm font-medium text-slate-800",
-  labelInline: "text-sm font-medium text-slate-800",
-  compactLabel: "text-xs font-medium text-slate-700",
-  legend: "text-sm font-medium text-slate-800",
-  legendCompact: "text-xs font-medium text-slate-700",
-  helper: "text-xs leading-relaxed text-slate-600",
+  sectionTitle: "text-lg font-semibold text-slate-100",
+  panelCaption: "text-sm font-semibold uppercase tracking-wide text-slate-300",
+  label: "block text-sm font-medium text-slate-200",
+  labelInline: "text-sm font-medium text-slate-200",
+  compactLabel: "text-xs font-medium text-slate-300",
+  legend: "text-sm font-medium text-slate-200",
+  legendCompact: "text-xs font-medium text-slate-300",
+  helper: "text-xs leading-relaxed text-slate-400",
   meta: "text-xs text-slate-500",
-  body: "text-sm text-slate-800",
-  bodyMuted: "text-sm text-slate-600",
-  choiceRow: "flex items-center gap-2 text-sm text-slate-800",
-  requiredMark: "text-red-600",
-  /** Text-like inputs, selects, textareas — dark control on light card */
+  body: "text-sm text-slate-200",
+  bodyMuted: "text-sm text-slate-400",
+  choiceRow: "flex items-center gap-2 text-sm text-slate-200",
+  requiredMark: "text-rose-400",
+  /** Text-like inputs, selects, textareas — dark inset control */
   controlInset:
     "w-full rounded-lg border border-slate-700 bg-[#020617] px-3 py-2 text-sm text-white shadow-sm placeholder:text-slate-400 selection:bg-cyan-500/25 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60",
   controlInsetDate:
@@ -136,9 +136,9 @@ export const fiOsLightFormSurfaceClassNames = {
   /** Boolean / checkbox-group / radio — on white card */
   choiceCheckbox:
     "h-4 w-4 shrink-0 rounded border-slate-500 text-cyan-600 focus:ring-2 focus:ring-cyan-400/35 disabled:opacity-60",
-  /** Small bordered chips (quick inserts, secondary buttons) on the light form */
+  /** Small bordered chips (quick inserts, secondary buttons) on the dark form */
   chipNeutral:
-    "min-h-[40px] touch-manipulation rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50/50",
+    "min-h-[40px] touch-manipulation rounded-lg border border-white/[0.1] bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-slate-200 shadow-sm transition hover:border-cyan-400/40 hover:bg-white/[0.1]",
 } as const;
 
 /** Full-width interactive button / link affordances (primary actions). */
@@ -151,10 +151,10 @@ export const fiButtonVariantClassNames = {
     "inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2",
   /** Neutral filled / secondary (`PatientDirectoryFilters` Apply-adjacent). */
   neutral:
-    "inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2",
+    "inline-flex items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-sm transition hover:border-cyan-400/40 hover:bg-white/[0.1] focus-visible:outline focus-visible:ring-2 focus-visible:ring-cyan-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1424]",
   /** Text / low-emphasis control (footer links, tertiary). */
   ghost:
-    "inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/30",
+    "inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-white/[0.06] hover:text-slate-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-cyan-400/30",
   /** Destructive confirmation (aligns with shadcn destructive tone). */
   danger:
     "inline-flex items-center justify-center rounded-lg border border-rose-500/40 bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-rose-400/60 focus-visible:ring-offset-2",

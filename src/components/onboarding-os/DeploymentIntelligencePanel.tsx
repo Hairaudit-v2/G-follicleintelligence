@@ -63,7 +63,7 @@ export function DeploymentIntelligencePanel({ snapshot, mode }: Props) {
             style={{ width: `${snapshot.deploymentScore}%` }}
           />
         </div>
-        <p className="mt-1 text-xs text-slate-600">
+        <p className="mt-1 text-xs text-slate-400">
           Provisioning {snapshot.provisioningProgressPercent}%
           {snapshot.countryLabel !== "—" ? ` · ${snapshot.countryLabel}` : ""}
         </p>
@@ -125,7 +125,7 @@ export function DeploymentIntelligencePanel({ snapshot, mode }: Props) {
       ) : null}
 
       {!isReadOnly && mode === "platform" ? (
-        <p className="mt-4 text-xs text-slate-600">
+        <p className="mt-4 text-xs text-slate-400">
           Use the{" "}
           <Link href={`/fi-admin/platform/onboarding/${snapshot.sessionId}`} className="text-cyan-400 hover:text-cyan-300">
             Go-Live Readiness panel

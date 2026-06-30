@@ -101,7 +101,7 @@ export function GoLiveReadinessPanel({ snapshot: initialSnapshot, mode }: Props)
             style={{ width: `${snapshot.score.percent}%` }}
           />
         </div>
-        <p className="mt-1 text-xs text-slate-600">
+        <p className="mt-1 text-xs text-slate-400">
           Required {snapshot.score.requiredPassed}/{snapshot.score.requiredTotal} · Optional{" "}
           {snapshot.score.optionalPassed}/{snapshot.score.optionalTotal}
         </p>
@@ -228,7 +228,7 @@ function ReviewMetric({
       </dd>
       {reviewer ? <dd className="mt-0.5 text-slate-500">{reviewer}</dd> : null}
       {reviewedAt ? (
-        <dd className="mt-0.5 text-slate-600">{new Date(reviewedAt).toLocaleString()}</dd>
+        <dd className="mt-0.5 text-slate-400">{new Date(reviewedAt).toLocaleString()}</dd>
       ) : null}
     </div>
   );
@@ -263,7 +263,7 @@ function ChecklistGroup({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-slate-200">{check.label}</p>
-                <span className="text-[10px] uppercase tracking-wide text-slate-600">
+                <span className="text-[10px] uppercase tracking-wide text-slate-400">
                   {GO_LIVE_READINESS_AREA_LABELS[check.area]}
                 </span>
                 <span className={`text-xs font-medium ${CHECK_STATE_CLASSES[check.state] ?? "text-slate-400"}`}>
@@ -288,7 +288,7 @@ function ChecklistGroup({
               </button>
             ) : null}
             {check.reviewed ? (
-              <span className="shrink-0 text-xs text-slate-600">Reviewed</span>
+              <span className="shrink-0 text-xs text-slate-400">Reviewed</span>
             ) : null}
           </li>
         ))}

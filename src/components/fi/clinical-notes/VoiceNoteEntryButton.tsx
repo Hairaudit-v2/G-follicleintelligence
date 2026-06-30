@@ -169,7 +169,7 @@ export function VoiceNoteEntryButton({
           setDraft(null);
           resetCapture();
         }}
-        className={className ?? "rounded border border-violet-300 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-950 hover:bg-violet-100"}
+        className={className ?? "rounded border border-violet-300 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-200 hover:bg-violet-500/15"}
       >
         {label}
       </button>
@@ -181,29 +181,29 @@ export function VoiceNoteEntryButton({
           aria-modal="true"
           aria-labelledby="voice-note-dialog-title"
         >
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-xl">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h2 id="voice-note-dialog-title" className="text-base font-semibold text-gray-900">
+                <h2 id="voice-note-dialog-title" className="text-base font-semibold text-slate-100">
                   Voice-to-note (consultation)
                 </h2>
-                <p className="mt-1 text-xs text-gray-600">
+                <p className="mt-1 text-xs text-slate-400">
                   Audio is transcribed and structured by AI. The result is saved as an <strong>AI draft</strong> — review
                   and approve before it becomes part of the official record. The original transcript is stored separately
                   from the approved structured note.
                 </p>
               </div>
-              <button type="button" onClick={close} className="text-sm text-gray-500 hover:text-gray-800">
+              <button type="button" onClick={close} className="text-sm text-gray-500 hover:text-slate-200">
                 Close
               </button>
             </div>
 
-            {err ? <p className="mt-3 text-sm text-red-600">{err}</p> : null}
+            {err ? <p className="mt-3 text-sm text-rose-300">{err}</p> : null}
 
             {!draft ? (
               <div className="mt-4 space-y-4">
-                <div className="rounded border border-gray-100 bg-gray-50 p-3">
-                  <p className="text-xs font-medium text-gray-700">Upload audio</p>
+                <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
+                  <p className="text-xs font-medium text-slate-300">Upload audio</p>
                   <input
                     type="file"
                     accept="audio/*,.webm,.m4a,.mp3,.wav,.ogg"
@@ -217,8 +217,8 @@ export function VoiceNoteEntryButton({
                   />
                 </div>
 
-                <div className="rounded border border-gray-100 bg-gray-50 p-3">
-                  <p className="text-xs font-medium text-gray-700">Or record in browser</p>
+                <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
+                  <p className="text-xs font-medium text-slate-300">Or record in browser</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {!recording ? (
                       <button
@@ -240,7 +240,7 @@ export function VoiceNoteEntryButton({
                     )}
                   </div>
                   {recordedBlob && !file ? (
-                    <p className="mt-2 text-xs text-emerald-800">Recording ready ({Math.round(recordedBlob.size / 1024)} KB).</p>
+                    <p className="mt-2 text-xs text-emerald-300">Recording ready ({Math.round(recordedBlob.size / 1024)} KB).</p>
                   ) : null}
                 </div>
 
@@ -255,15 +255,15 @@ export function VoiceNoteEntryButton({
               </div>
             ) : (
               <div className="mt-4 space-y-4">
-                <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+                <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
                   Status: <strong>{draft.record_status}</strong> — this note is not official until you approve below.
                 </p>
 
                 <div className="space-y-3">
                   {CLINICAL_NOTE_SECTION_KEYS.map((key) => (
                     <div key={key}>
-                      <h3 className="text-xs font-semibold text-gray-800">{CLINICAL_NOTE_SECTION_LABELS[key]}</h3>
-                      <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">
+                      <h3 className="text-xs font-semibold text-slate-200">{CLINICAL_NOTE_SECTION_LABELS[key]}</h3>
+                      <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">
                         {draft.sections[key]?.trim() || "—"}
                       </p>
                     </div>
@@ -273,17 +273,17 @@ export function VoiceNoteEntryButton({
                 <button
                   type="button"
                   onClick={() => setShowTranscript((v) => !v)}
-                  className="text-xs font-medium text-violet-800 hover:underline"
+                  className="text-xs font-medium text-violet-300 hover:underline"
                 >
                   {showTranscript ? "Hide" : "Show"} original transcript (separate from approved record)
                 </button>
                 {showTranscript ? (
-                  <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-gray-200 bg-gray-50 p-2 text-xs text-gray-800">
+                  <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-white/[0.08] bg-white/[0.03] p-2 text-xs text-slate-200">
                     {draft.transcript_raw}
                   </pre>
                 ) : null}
 
-                <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-3">
+                <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
                   <button
                     type="button"
                     disabled={pending}
@@ -299,7 +299,7 @@ export function VoiceNoteEntryButton({
                       setDraft(null);
                       resetCapture();
                     }}
-                    className="rounded border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                    className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 py-2 text-sm text-slate-200 hover:bg-white/[0.03]"
                   >
                     New capture
                   </button>

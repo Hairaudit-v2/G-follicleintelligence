@@ -42,20 +42,20 @@ export function FoundationOsBackfillCard({
 
   const body = (
     <>
-      <p className={`mt-2 text-sm leading-relaxed ${dark ? "text-slate-400" : "text-slate-600"}`}>
-        Replays dual-write for up to 50 recent <strong className={dark ? "text-slate-200" : "text-slate-800"}>processed</strong> events
+      <p className={`mt-2 text-sm leading-relaxed ${dark ? "text-slate-400" : "text-slate-400"}`}>
+        Replays dual-write for up to 50 recent <strong className={dark ? "text-slate-200" : "text-slate-200"}>processed</strong> events
         that have no timeline row with matching{" "}
-        <code className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-white text-sky-800 ring-1 ring-slate-200"}`}>
+        <code className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-[#0F1629]/80 backdrop-blur-md text-cyan-200 ring-1 ring-white/[0.08]"}`}>
           fi_event_id
         </code>
         . Requires server{" "}
-        <code className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-white text-sky-800 ring-1 ring-slate-200"}`}>
+        <code className={`rounded px-1.5 py-0.5 text-xs ${dark ? "bg-white/[0.06] text-cyan-200 ring-1 ring-white/[0.08]" : "bg-[#0F1629]/80 backdrop-blur-md text-cyan-200 ring-1 ring-white/[0.08]"}`}>
           FI_ADMIN_API_KEY
         </code>
         . Does not run automatically and does not merge identities.
       </p>
       <form onSubmit={runBackfill} className="mt-4 flex flex-wrap items-end gap-3">
-        <label className={`flex min-w-[12rem] flex-1 flex-col text-xs ${dark ? "text-slate-500" : "text-slate-600"}`}>
+        <label className={`flex min-w-[12rem] flex-1 flex-col text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}>
           Admin key
           <input
             type="password"
@@ -65,7 +65,7 @@ export function FoundationOsBackfillCard({
             className={
               dark
                 ? "mt-1 w-full max-w-xs rounded-lg border border-white/[0.1] bg-[#0a101f]/80 px-3 py-2 text-sm text-slate-100 outline-none focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20"
-                : "mt-1 w-full max-w-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
+                : "mt-1 w-full max-w-xs rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
             }
             placeholder="FI_ADMIN_API_KEY value"
           />
@@ -82,7 +82,7 @@ export function FoundationOsBackfillCard({
           {backfillBusy ? "Running…" : "Run batch backfill (max 50)"}
         </button>
       </form>
-      {backfillMsg ? <p className={`mt-3 text-sm ${dark ? "text-slate-300" : "text-slate-700"}`}>{backfillMsg}</p> : null}
+      {backfillMsg ? <p className={`mt-3 text-sm ${dark ? "text-slate-300" : "text-slate-300"}`}>{backfillMsg}</p> : null}
     </>
   );
 
@@ -100,9 +100,9 @@ export function FoundationOsBackfillCard({
   }
 
   return (
-    <FiCard className="border-violet-200 bg-violet-50/40">
-      <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-violet-800/90">Deployment operators</p>
-      <h2 className="mt-1 text-base font-semibold text-slate-900">Manual foundation backfill</h2>
+    <FiCard className="border-violet-500/20 bg-violet-500/10">
+      <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-violet-300">Deployment operators</p>
+      <h2 className="mt-1 text-base font-semibold text-slate-100">Manual foundation backfill</h2>
       {body}
     </FiCard>
   );

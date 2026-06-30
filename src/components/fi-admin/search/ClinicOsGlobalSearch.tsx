@@ -248,13 +248,13 @@ export function ClinicOsGlobalSearch({
         role="dialog"
         aria-modal="true"
         aria-labelledby={CLINIC_OS_SEARCH_DIALOG_TITLE_ID}
-        className="flex max-h-[min(88vh,820px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_24px_80px_-12px_rgba(15,23,42,0.35)]"
+        className="flex max-h-[min(88vh,820px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-[0_24px_80px_-12px_rgba(15,23,42,0.35)]"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <header className="shrink-0 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+        <header className="shrink-0 border-b border-white/[0.06] px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <h2 id={CLINIC_OS_SEARCH_DIALOG_TITLE_ID} className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+              <h2 id={CLINIC_OS_SEARCH_DIALOG_TITLE_ID} className="text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">
                 Search patients, leads, bookings and cases
               </h2>
               <p className="text-xs text-slate-500 sm:text-sm">Read-only search · no changes are made from this panel.</p>
@@ -262,7 +262,7 @@ export function ClinicOsGlobalSearch({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-transparent text-slate-500 outline-none transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-sky-400/40"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-transparent text-slate-500 outline-none transition hover:border-white/[0.08] hover:bg-white/[0.03] hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-sky-400/40"
               aria-label="Close search"
             >
               <X className="h-4 w-4" aria-hidden />
@@ -297,7 +297,7 @@ export function ClinicOsGlobalSearch({
               autoComplete="off"
               enterKeyHint="search"
               placeholder="Name, phone, email or patient number"
-              className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 text-base text-slate-900 outline-none ring-sky-500/20 transition placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:ring-4 sm:h-14 sm:text-lg"
+              className="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-11 pr-4 text-base text-slate-100 outline-none ring-sky-500/20 transition placeholder:text-slate-400 focus:border-sky-300 focus:bg-[#0F1629]/80 backdrop-blur-md focus:ring-4 sm:h-14 sm:text-lg"
             />
           </div>
         </header>
@@ -316,11 +316,11 @@ export function ClinicOsGlobalSearch({
               />
             ) : loading ? (
               <div className="flex flex-col items-center justify-center gap-2 py-16 text-slate-500">
-                <Loader2 className="h-8 w-8 animate-spin text-sky-600" aria-hidden />
+                <Loader2 className="h-8 w-8 animate-spin text-cyan-300" aria-hidden />
                 <span className="text-sm">Searching…</span>
               </div>
             ) : error ? (
-              <p className="rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-900">{error}</p>
+              <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p>
             ) : !hasResults ? (
               <FiEmptyState
                 title="No matches"
@@ -399,14 +399,14 @@ export function ClinicOsGlobalSearch({
             )}
           </div>
 
-          <aside className="shrink-0 border-t border-slate-100 bg-slate-50/40 px-4 py-4 sm:px-5 lg:w-56 lg:border-l lg:border-t-0 lg:py-5">
+          <aside className="shrink-0 border-t border-white/[0.06] bg-white/[0.03] px-4 py-4 sm:px-5 lg:w-56 lg:border-l lg:border-t-0 lg:py-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick actions</p>
             <ul className="mt-3 space-y-1">
               <li>
                 <Link
                   href={newPatientHref}
                   onClick={() => onOpenChange(false)}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
+                  className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-200 outline-none transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                 >
                   New Patient
                   <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
@@ -417,7 +417,7 @@ export function ClinicOsGlobalSearch({
                   <Link
                     href={newBookingHref}
                     onClick={() => onOpenChange(false)}
-                    className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
+                    className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-200 outline-none transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                   >
                     New Booking
                     <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
@@ -436,7 +436,7 @@ export function ClinicOsGlobalSearch({
                   <Link
                     href={newLeadHref}
                     onClick={() => onOpenChange(false)}
-                    className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
+                    className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-200 outline-none transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                   >
                     New enquiry
                     <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
@@ -454,7 +454,7 @@ export function ClinicOsGlobalSearch({
                 <Link
                   href={newCaseHref}
                   onClick={() => onOpenChange(false)}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
+                  className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-200 outline-none transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                 >
                   New case
                   <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
@@ -464,16 +464,16 @@ export function ClinicOsGlobalSearch({
           </aside>
         </div>
 
-        <footer className="shrink-0 border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:px-6">
+        <footer className="shrink-0 border-t border-white/[0.06] bg-white/[0.03] px-4 py-3 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recent patients</p>
           <p className="mt-0.5 text-[10px] text-slate-400">Preview · not connected to live data</p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {RECENT_PLACEHOLDERS.map((row) => (
               <li
                 key={row.name}
-                className="rounded-lg border border-slate-200/80 bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm"
+                className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-1.5 text-xs text-slate-400 shadow-lg shadow-black/40"
               >
-                <span className="font-medium text-slate-800">{row.name}</span>
+                <span className="font-medium text-slate-200">{row.name}</span>
                 <span className="ml-2 text-slate-400">{row.meta}</span>
               </li>
             ))}

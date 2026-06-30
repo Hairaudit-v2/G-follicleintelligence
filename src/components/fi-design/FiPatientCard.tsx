@@ -30,13 +30,13 @@ export function FiPatientCard({
   onNavigate,
 }: FiPatientCardProps) {
   const shell = cn(
-    "group flex flex-col rounded-xl border border-slate-100 bg-white px-3 py-2.5 outline-none transition hover:border-sky-200/80 hover:bg-sky-50/50 focus-visible:ring-2 focus-visible:ring-sky-400/40 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
+    "group flex flex-col rounded-xl border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2.5 outline-none transition hover:border-cyan-400/30 hover:bg-cyan-500/10 focus-visible:ring-2 focus-visible:ring-sky-400/40 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
     className
   );
 
   const main = (
     <div className="min-w-0 flex-1">
-      <span className="font-medium text-slate-900">{name}</span>
+      <span className="font-medium text-slate-100">{name}</span>
       <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:text-sm">
         {phone ? <span>{phone}</span> : null}
         {email ? <span>{email}</span> : null}
@@ -54,7 +54,7 @@ export function FiPatientCard({
         </FiStatusBadge>
       ) : null}
       <ArrowRight
-        className="ml-auto mt-2 hidden h-4 w-4 shrink-0 text-sky-600 opacity-0 transition group-hover:opacity-100 sm:mt-0 sm:block"
+        className="ml-auto mt-2 hidden h-4 w-4 shrink-0 text-cyan-300 opacity-0 transition group-hover:opacity-100 sm:mt-0 sm:block"
         aria-hidden
       />
     </>
@@ -70,7 +70,7 @@ export function FiPatientCard({
   }
 
   return (
-    <div className={cn(shell, "cursor-default hover:border-slate-100 hover:bg-white")}>
+    <div className={cn(shell, "cursor-default hover:border-white/[0.06] hover:bg-[#0F1629]/80 backdrop-blur-md")}>
       {main}
       {tail}
     </div>

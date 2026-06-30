@@ -67,7 +67,7 @@ export function RoomSchedulingReadinessPanel({
     <section
       className={cn(
         "rounded-xl border p-4 sm:p-5",
-        isDark ? cn("border-white/10 bg-slate-950/50", meta.cardClass) : cn("border-gray-200 bg-white shadow-sm", meta.cardClass),
+        isDark ? cn("border-white/10 bg-slate-950/50", meta.cardClass) : cn("border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40", meta.cardClass),
         className
       )}
       aria-label="Room and service scheduling readiness"
@@ -77,11 +77,11 @@ export function RoomSchedulingReadinessPanel({
           <p className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-gray-500")}>
             Scheduling readiness
           </p>
-          <h2 className={cn("mt-1 text-lg font-semibold", isDark ? "text-slate-100" : "text-gray-900")}>
+          <h2 className={cn("mt-1 text-lg font-semibold", isDark ? "text-slate-100" : "text-slate-100")}>
             Room &amp; service checklist
           </h2>
           {readiness.clinicName ? (
-            <p className={cn("mt-1 text-sm", isDark ? "text-slate-400" : "text-gray-600")}>
+            <p className={cn("mt-1 text-sm", isDark ? "text-slate-400" : "text-slate-400")}>
               Clinic: {readiness.clinicName}
             </p>
           ) : null}
@@ -120,14 +120,14 @@ function ReadinessRow({ check, isDark }: { check: RoomSchedulingReadinessCheck; 
     <li
       className={cn(
         "flex flex-col gap-2 rounded-lg border px-3 py-2.5 sm:flex-row sm:items-start sm:justify-between",
-        isDark ? "border-white/[0.08] bg-black/20" : "border-gray-100 bg-gray-50/80"
+        isDark ? "border-white/[0.08] bg-black/20" : "border-white/[0.06] bg-white/[0.03]"
       )}
     >
       <div className="flex min-w-0 gap-2.5">
         <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", CHECK_COLOR[check.status])} aria-hidden />
         <div className="min-w-0">
-          <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-gray-900")}>{check.label}</p>
-          <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-gray-600")}>
+          <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-slate-100")}>{check.label}</p>
+          <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-400")}>
             {check.message}
           </p>
         </div>
@@ -137,7 +137,7 @@ function ReadinessRow({ check, isDark }: { check: RoomSchedulingReadinessCheck; 
           href={check.href}
           className={cn(
             "shrink-0 text-xs font-medium hover:underline sm:pt-0.5",
-            isDark ? "text-cyan-400" : "text-sky-700"
+            isDark ? "text-cyan-400" : "text-cyan-300"
           )}
         >
           {check.actionLabel ?? "Open"}
@@ -153,10 +153,10 @@ function PerthDefaultSetupInfoBox({ isDark, tenantId }: { isDark: boolean; tenan
     <div
       className={cn(
         "mt-4 rounded-lg border px-3 py-3 text-xs leading-relaxed",
-        isDark ? "border-cyan-500/20 bg-cyan-950/15 text-slate-300" : "border-sky-200 bg-sky-50 text-gray-700"
+        isDark ? "border-cyan-500/20 bg-cyan-950/15 text-slate-300" : "border-cyan-500/20 bg-cyan-500/10 text-slate-300"
       )}
     >
-      <p className={cn("font-semibold", isDark ? "text-cyan-100" : "text-sky-900")}>Perth default setup</p>
+      <p className={cn("font-semibold", isDark ? "text-cyan-100" : "text-cyan-200")}>Perth default setup</p>
       <ul className="mt-2 list-inside list-disc space-y-0.5">
         <li>Consult Room 1</li>
         <li>Consult Room 2 / Patient Room 2 — shared physical room</li>
@@ -168,29 +168,29 @@ function PerthDefaultSetupInfoBox({ isDark, tenantId }: { isDark: boolean; tenan
       </ul>
       <p className="mt-3">
         Seed default service mappings:{" "}
-        <code className={cn("rounded px-1 py-0.5 font-mono text-[11px]", isDark ? "bg-black/30" : "bg-white")}>
+        <code className={cn("rounded px-1 py-0.5 font-mono text-[11px]", isDark ? "bg-black/30" : "bg-[#0F1629]/80 backdrop-blur-md")}>
           npm run seed -- --dry-run
         </code>{" "}
         then{" "}
-        <code className={cn("rounded px-1 py-0.5 font-mono text-[11px]", isDark ? "bg-black/30" : "bg-white")}>
+        <code className={cn("rounded px-1 py-0.5 font-mono text-[11px]", isDark ? "bg-black/30" : "bg-[#0F1629]/80 backdrop-blur-md")}>
           npm run seed
         </code>
       </p>
       <p className="mt-2">
-        <Link href={calendarHref} className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-sky-700")}>
+        <Link href={calendarHref} className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-cyan-300")}>
           View calendar by room
         </Link>
         {" · "}
         <Link
           href={`/fi-admin/${tenantId.trim()}/rooms`}
-          className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-sky-700")}
+          className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-cyan-300")}
         >
           Manage rooms
         </Link>
         {" · "}
         <Link
           href={`/fi-admin/${tenantId.trim()}/services`}
-          className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-sky-700")}
+          className={cn("font-medium hover:underline", isDark ? "text-cyan-400" : "text-cyan-300")}
         >
           Edit services
         </Link>

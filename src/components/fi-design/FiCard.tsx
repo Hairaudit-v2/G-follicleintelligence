@@ -18,13 +18,13 @@ const SURFACE_WITH_BUILTIN_PADDING = new Set<FiSurfaceVariant>(["clinicLight", "
 /**
  * Base surface card — white panel, slate border, Clinic OS rhythm.
  */
-export function FiCard({ children, className, interactive, surfaceVariant = "clinicLight" }: FiCardProps) {
+export function FiCard({ children, className, interactive, surfaceVariant = "darkGlass" }: FiCardProps) {
   const surface = fiSurfaceVariantClassNames[surfaceVariant];
   const padWhenNeeded =
     !SURFACE_WITH_BUILTIN_PADDING.has(surfaceVariant) ? "p-4 sm:p-5" : undefined;
   const interactiveClasses =
     interactive && (surfaceVariant === "clinicLight" || surfaceVariant === "crmLight")
-      ? "transition hover:border-sky-200/80 hover:shadow-md"
+      ? "transition hover:border-cyan-400/30 hover:shadow-md"
       : interactive && surfaceVariant === "darkGlass"
         ? "transition hover:border-white/[0.12] hover:bg-[#141C33]/85"
         : undefined;

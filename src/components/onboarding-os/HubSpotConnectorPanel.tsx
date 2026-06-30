@@ -418,7 +418,7 @@ export function HubSpotConnectorPanel({
             >
               Deals ({health?.dealsPendingReview ?? 0})
             </button>
-            <span className="text-slate-600">|</span>
+            <span className="text-slate-400">|</span>
             <button
               type="button"
               onClick={() => setQueueFilter("staged")}

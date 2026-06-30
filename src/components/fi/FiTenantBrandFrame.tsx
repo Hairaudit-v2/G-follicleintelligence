@@ -28,7 +28,7 @@ function BrandingBlock({
   const box =
     density === "layout"
       ? "relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#0F1629]/80 px-4 py-4 shadow-xl shadow-black/50 backdrop-blur-md sm:px-5 sm:py-4"
-      : "rounded border border-amber-200 bg-amber-50/80 px-3 py-2 shadow-sm";
+      : "rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 shadow-sm";
 
   return (
     <div className={box}>
@@ -55,18 +55,18 @@ function BrandingBlock({
           </div>
         ) : null}
         <div className="min-w-0 flex-1 space-y-1">
-          <p className={`text-base font-semibold tracking-tight ${density === "layout" ? "text-[#F8FAFC]" : "text-gray-900"}`}>
+          <p className={`text-base font-semibold tracking-tight ${density === "layout" ? "text-[#F8FAFC]" : "text-slate-100"}`}>
             {headline}
           </p>
           {clinicLine ? (
-            <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-gray-600"}`}>
-              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-gray-700"}`}>Clinic:</span>{" "}
+            <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-slate-400"}`}>
+              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-slate-300"}`}>Clinic:</span>{" "}
               {clinicLine}
             </p>
           ) : null}
           {support ? (
-            <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-gray-600"}`}>
-              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-gray-700"}`}>Support:</span>{" "}
+            <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-slate-400"}`}>
+              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-slate-300"}`}>Support:</span>{" "}
               <a
                 href={`mailto:${encodeURIComponent(support)}`}
                 className="underline decoration-dotted underline-offset-2 hover:opacity-90"
@@ -103,7 +103,7 @@ export function FiTenantBrandFrame({
   if (variant === "page-preview") {
     return (
       <div className="space-y-1" style={buildBrandingCssVariables(effective)}>
-        <p className="text-xs font-medium uppercase tracking-wide text-amber-900">Cascade preview</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-amber-200">Cascade preview</p>
         <BrandingBlock effective={effective} density="preview" />
       </div>
     );

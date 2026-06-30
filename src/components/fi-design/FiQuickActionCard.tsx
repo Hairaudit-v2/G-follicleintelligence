@@ -66,7 +66,7 @@ function CardBody({
       </div>
       <span className={cn("mt-2 flex-1 text-sm leading-relaxed", descClass)}>{description}</span>
       {badge ? (
-        <span className="mt-3 inline-flex w-fit rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+        <span className="mt-3 inline-flex w-fit rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
           {badge}
         </span>
       ) : null}
@@ -74,7 +74,7 @@ function CardBody({
         <span className="mt-3 text-[11px] font-medium leading-snug text-slate-500">{disabledReason}</span>
       ) : null}
       {showComingSoon ? (
-        <span className="mt-3 inline-flex w-fit rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+        <span className="mt-3 inline-flex w-fit rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
           Coming soon
         </span>
       ) : null}
@@ -102,7 +102,7 @@ export function FiQuickActionCard({
   className,
   showOpenAffordance,
   openAffordanceLabel = "Open",
-  surfaceVariant = "clinicLight",
+  surfaceVariant = "darkGlass",
 }: FiQuickActionCardProps) {
   const isLink = Boolean(href?.trim()) && !disabled;
   const showComingSoon = !isLink && !disabledReason && !badge;
@@ -166,7 +166,7 @@ export function FiQuickActionCard({
     <div
       className={cn(
         "flex flex-col rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35 sm:p-5",
-        "min-h-[200px] cursor-not-allowed border-dashed border-slate-200 bg-slate-50/80 text-slate-500 shadow-none sm:min-h-[220px]",
+        "min-h-[200px] cursor-not-allowed border-dashed border-white/[0.08] bg-white/[0.02] text-slate-400 shadow-none sm:min-h-[220px]",
         className
       )}
       aria-disabled="true"
@@ -179,9 +179,9 @@ export function FiQuickActionCard({
         badge={badge}
         disabledReason={disabledReason}
         showComingSoon={showComingSoon}
-        titleClass="text-slate-800"
-        descClass="text-slate-600"
-        iconClass="text-slate-400"
+        titleClass="text-slate-200"
+        descClass="text-slate-400"
+        iconClass="text-slate-500"
         showOpenAffordance={false}
         isLink={false}
         openAffordanceLabel={openAffordanceLabel}
