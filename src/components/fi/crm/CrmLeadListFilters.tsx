@@ -134,7 +134,7 @@ export function CrmLeadListFilters({
         <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">
           Apply filters
         </button>
-        <a href={clearHref} className="text-sm text-blue-600 hover:underline">
+        <a href={clearHref} className="text-sm text-blue-300 hover:underline">
           Clear filters
         </a>
       </div>

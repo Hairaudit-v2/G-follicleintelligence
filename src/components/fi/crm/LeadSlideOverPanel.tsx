@@ -371,7 +371,7 @@ export function LeadSlideOverPanel({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Lead preview</h2>
             {lead ? (
-              <Link href={href} className="text-xs text-blue-600 hover:underline" onClick={() => onClose()}>
+              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
                 Open full page →
               </Link>
             ) : null}

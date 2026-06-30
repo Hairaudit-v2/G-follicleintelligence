@@ -157,9 +157,9 @@ export function CrmLeadKanbanCard({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 {onOpenPreview ? (
-                  <span className="block font-medium text-blue-700">{name}</span>
+                  <span className="block font-medium text-blue-300">{name}</span>
                 ) : (
-                  <Link href={href} className="block font-medium text-blue-700 hover:underline">
+                  <Link href={href} className="block font-medium text-blue-300 hover:underline">
                     {name}
                   </Link>
                 )}

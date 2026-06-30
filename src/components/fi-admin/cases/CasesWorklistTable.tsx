@@ -46,14 +46,14 @@ export function CasesWorklistTable({
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-white/[0.06] hover:bg-white/[0.03]">
               <td className="px-3 py-2">
-                <Link href={caseDetailPageHref(tenantId, r.id, worklistQueryString)} className="font-medium text-blue-700 hover:underline">
+                <Link href={caseDetailPageHref(tenantId, r.id, worklistQueryString)} className="font-medium text-blue-300 hover:underline">
                   {r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}
                 </Link>
                 <div className="text-xs text-slate-300">{r.person_label}</div>
                 {r.lead ? (
                   <div className="mt-0.5 text-[11px] text-gray-500">
                     Lead:{" "}
-                    <Link href={`/fi-admin/${tenantId}/crm/leads/${r.lead.id}`} className="text-blue-600 hover:underline">
+                    <Link href={`/fi-admin/${tenantId}/crm/leads/${r.lead.id}`} className="text-blue-300 hover:underline">
                       {r.lead.title}
                     </Link>
                   </div>

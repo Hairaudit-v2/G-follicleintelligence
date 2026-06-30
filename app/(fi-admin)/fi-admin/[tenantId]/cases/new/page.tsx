@@ -32,7 +32,7 @@ export default async function FirstCaseWizardPage({ params }: { params: Promise<
     return (
       <div className="mx-auto max-w-2xl py-6">
         <p className="text-sm text-rose-300">Could not load clinics for this tenant.</p>
-        <Link href={`/fi-admin/${tenantId}/cases`} className="mt-2 inline-block text-sm text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/cases`} className="mt-2 inline-block text-sm text-blue-300 hover:underline">
           Back to patients
         </Link>
       </div>

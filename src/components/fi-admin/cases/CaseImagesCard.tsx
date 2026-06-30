@@ -21,7 +21,7 @@ export function CaseImagesCard({
           Linked patient images
         </h2>
         {patientId ? (
-          <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-300 hover:underline">
             Patient images
           </Link>
         ) : null}

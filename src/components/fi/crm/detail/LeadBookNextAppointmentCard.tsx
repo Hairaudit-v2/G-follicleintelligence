@@ -83,7 +83,7 @@ export function LeadBookNextAppointmentCard({
         <p className="mt-2 text-xs text-gray-500">
           <Link
             href={buildBookAppointmentFromLeadHref(tenantId, lead.id, recommended.bookingType)}
-            className="text-blue-600 hover:underline"
+            className="text-blue-300 hover:underline"
           >
             Open in full calendar
           </Link>{" "}

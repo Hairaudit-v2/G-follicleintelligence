@@ -54,12 +54,12 @@ export function PatientDetailPreviewBridge({ tenantId, currentPatientId, related
               <div className="flex shrink-0 gap-2 text-xs">
                 <button
                   type="button"
-                  className="text-blue-700 hover:underline"
+                  className="text-blue-300 hover:underline"
                   onClick={() => onOpenPreview(r.patientId)}
                 >
                   Preview
                 </button>
-                <Link href={`/fi-admin/${tenantId}/patients/${r.patientId}`} className="text-blue-700 hover:underline">
+                <Link href={`/fi-admin/${tenantId}/patients/${r.patientId}`} className="text-blue-300 hover:underline">
                   Open →
                 </Link>
               </div>

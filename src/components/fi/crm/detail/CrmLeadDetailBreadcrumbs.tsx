@@ -11,7 +11,7 @@ export function CrmLeadDetailBreadcrumbs({
     <nav aria-label="Breadcrumb" className="text-sm text-slate-400">
       <ol className="flex flex-wrap items-center gap-1.5">
         <li>
-          <Link href={`/fi-admin/${tenantId}`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}`} className="text-blue-300 hover:underline">
             Tenant
           </Link>
         </li>
@@ -19,7 +19,7 @@ export function CrmLeadDetailBreadcrumbs({
           /
         </li>
         <li>
-          <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-300 hover:underline">
             CRM leads
           </Link>
         </li>

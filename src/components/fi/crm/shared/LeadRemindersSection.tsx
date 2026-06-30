@@ -87,13 +87,13 @@ export function LeadRemindersSection({
 
       {recentFailed.length > 0 ? (
         <>
-          <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-rose-600">Failed</h4>
+          <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-rose-300">Failed</h4>
           <ul className="mb-4 space-y-2 text-xs">
             {recentFailed.map((j) => (
               <li key={j.id} className="flex flex-col rounded border border-rose-100 bg-rose-500/10 p-2">
                 <span className="font-medium text-slate-100">{j.template_name || "Reminder"}</span>
                 <span className="text-slate-400">{j.scheduled_at}</span>
-                {j.error_log ? <span className="mt-1 font-mono text-[10px] text-rose-800">{j.error_log}</span> : null}
+                {j.error_log ? <span className="mt-1 font-mono text-[10px] text-rose-300">{j.error_log}</span> : null}
               </li>
             ))}
           </ul>

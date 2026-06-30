@@ -31,14 +31,14 @@ export function PatientDirectoryPagination({
       </p>
       <div className="flex gap-3">
         {prevHref ? (
-          <Link href={prevHref} className="text-blue-600 hover:underline">
+          <Link href={prevHref} className="text-blue-300 hover:underline">
             Previous
           </Link>
         ) : (
           <span className="text-gray-400">Previous</span>
         )}
         {nextHref ? (
-          <Link href={nextHref} className="text-blue-600 hover:underline">
+          <Link href={nextHref} className="text-blue-300 hover:underline">
             Next
           </Link>
         ) : (

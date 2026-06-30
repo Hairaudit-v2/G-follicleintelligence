@@ -5,7 +5,7 @@ export function PatientDetailBreadcrumbs({ tenantId, patientName }: { tenantId: 
     <nav aria-label="Breadcrumb" className="text-sm text-slate-400">
       <ol className="flex flex-wrap items-center gap-1.5">
         <li>
-          <Link href={`/fi-admin/${tenantId}`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}`} className="text-blue-300 hover:underline">
             Tenant
           </Link>
         </li>
@@ -13,7 +13,7 @@ export function PatientDetailBreadcrumbs({ tenantId, patientName }: { tenantId: 
           /
         </li>
         <li>
-          <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-300 hover:underline">
             Patients
           </Link>
         </li>

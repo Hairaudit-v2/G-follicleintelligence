@@ -30,7 +30,7 @@ export function CaseLinkedPatientCard({ tenantId, patient }: { tenantId: string;
             <dd>
               <Link
                 href={`/fi-admin/${tenantId}/patients/${patient.foundation_patient_id}`}
-                className="text-blue-600 hover:underline"
+                className="text-blue-300 hover:underline"
               >
                 Open patient profile
               </Link>

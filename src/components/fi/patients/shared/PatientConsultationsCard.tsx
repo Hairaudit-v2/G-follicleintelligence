@@ -22,7 +22,7 @@ export function PatientConsultationsCard({
             ConsultationOS workspaces linked to this patient. Norwood / Ludwig scales sync to clinical details on save.
           </p>
         </div>
-        <Link href={`/fi-admin/${tenantId}/consultations/new`} className="text-xs text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/consultations/new`} className="text-xs text-blue-300 hover:underline">
           New consultation →
         </Link>
       </div>
@@ -37,7 +37,7 @@ export function PatientConsultationsCard({
                 <div>
                   <Link
                     href={`/fi-admin/${tenantId}/consultations/${c.id}`}
-                    className="text-sm font-medium text-blue-700 hover:underline"
+                    className="text-sm font-medium text-blue-300 hover:underline"
                   >
                     {c.consultation_type_label}
                   </Link>
@@ -48,7 +48,7 @@ export function PatientConsultationsCard({
                   </p>
                 </div>
                 {c.scalesSyncedToPatient ? (
-                  <span className="rounded bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-800">
+                  <span className="rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-300">
                     Scales synced
                   </span>
                 ) : c.consultation_type === "medical_hair_loss" ? (

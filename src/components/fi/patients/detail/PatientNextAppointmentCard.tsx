@@ -61,7 +61,7 @@ export function PatientNextAppointmentCard({
                 slide ? (
                   <button
                     type="button"
-                    className="text-left text-blue-700 hover:underline"
+                    className="text-left text-blue-300 hover:underline"
                     onClick={() => slide.openAppointment(nextAppointment.id)}
                   >
                     {bookingTypeLabel(nextAppointment.bookingType)} · {fmtWhen(nextAppointment.startAt)}
@@ -69,7 +69,7 @@ export function PatientNextAppointmentCard({
                 ) : (
                   <Link
                     href={`/fi-admin/${tenantId}/appointments/${nextAppointment.id}`}
-                    className="text-blue-700 hover:underline"
+                    className="text-blue-300 hover:underline"
                   >
                     {bookingTypeLabel(nextAppointment.bookingType)} · {fmtWhen(nextAppointment.startAt)}
                   </Link>

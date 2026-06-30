@@ -139,16 +139,16 @@ export function FirstCaseWizardClient({
         <p className="font-medium">No clinics in this tenant yet</p>
         <p>
           Create an organisation and clinic under{" "}
-          <Link href={`/fi-admin/${tenantId}/directory`} className="text-blue-700 underline">
+          <Link href={`/fi-admin/${tenantId}/directory`} className="text-blue-300 underline">
             Directory
           </Link>{" "}
           or{" "}
-          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-blue-700 underline">
+          <Link href={`/fi-admin/${tenantId}/configuration`} className="text-blue-300 underline">
             Configuration
           </Link>{" "}
           before adding a patient.
         </p>
-        <Link href={`/fi-admin/${tenantId}/cases`} className="inline-block text-blue-700 underline">
+        <Link href={`/fi-admin/${tenantId}/cases`} className="inline-block text-blue-300 underline">
           Back to patients
         </Link>
       </div>
@@ -168,7 +168,7 @@ export function FirstCaseWizardClient({
             API key. Optional: use an admin key override below for break-glass or automation.
           </p>
         </div>
-        <Link href={`/fi-admin/${tenantId}/cases`} className="text-sm text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/cases`} className="text-sm text-blue-300 hover:underline">
           Back to patients
         </Link>
       </div>

@@ -12,7 +12,7 @@ export function PatientLinkedLeadsCard({ tenantId, data }: { tenantId: string; d
         <ul className="mt-3 divide-y divide-white/[0.06]">
           {data.leads.map(({ lead, stageLabel, ownerLabel }) => (
             <li key={lead.id} className="py-2">
-              <Link href={`/fi-admin/${tenantId}/crm/leads/${lead.id}`} className="text-sm font-medium text-blue-700 hover:underline">
+              <Link href={`/fi-admin/${tenantId}/crm/leads/${lead.id}`} className="text-sm font-medium text-blue-300 hover:underline">
                 {leadTitleFromRow(lead.summary, lead.id)}
               </Link>
               <p className="text-xs text-slate-400">

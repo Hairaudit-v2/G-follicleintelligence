@@ -55,11 +55,11 @@ function BookingLine({
     <li className="flex flex-wrap items-center justify-between gap-2 py-2">
       <div className="min-w-0">
         {slide ? (
-          <button type="button" className="font-medium text-blue-700 hover:underline" onClick={() => slide.openAppointment(b.id)}>
+          <button type="button" className="font-medium text-blue-300 hover:underline" onClick={() => slide.openAppointment(b.id)}>
             {title}
           </button>
         ) : (
-          <Link href={href} className="font-medium text-blue-700 hover:underline">
+          <Link href={href} className="font-medium text-blue-300 hover:underline">
             {title}
           </Link>
         )}
@@ -149,11 +149,11 @@ export function CaseAppointmentsCard({
           Case appointments
         </h2>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
             Appointments
           </Link>
           <span className="text-gray-300">·</span>
-          <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-300 hover:underline">
             Calendar
           </Link>
         </div>
@@ -199,7 +199,7 @@ export function CaseAppointmentsCard({
       ) : (
         <p className="mt-3 text-sm text-slate-400">
           No upcoming appointments for this case. Use &quot;New appointment for this case&quot; when you have booking access, or open{" "}
-          <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-300 hover:underline">
             Calendar
           </Link>
           .

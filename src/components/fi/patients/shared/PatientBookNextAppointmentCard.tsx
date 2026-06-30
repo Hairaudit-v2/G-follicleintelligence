@@ -112,7 +112,7 @@ export function PatientBookNextAppointmentCard({
               recommended.bookingType,
               primaryLead?.id ?? null
             )}
-            className="text-blue-600 hover:underline"
+            className="text-blue-300 hover:underline"
           >
             Open in full calendar
           </Link>{" "}

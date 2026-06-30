@@ -294,7 +294,7 @@ export function BloodPathologyRequestDetailClient({
       </section>
 
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-300 hover:underline">
           ← Back to patient profile
         </Link>
       </p>

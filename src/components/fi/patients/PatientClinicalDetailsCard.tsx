@@ -91,9 +91,9 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
         and treatment planning will be added in later stages.
       </p>
       {scalesSummary ? (
-        <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-50/90 px-3 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-800">Pattern summary</p>
-          <p className="mt-1 text-sm font-medium text-indigo-950">{scalesSummary}</p>
+        <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-500/10 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-300">Pattern summary</p>
+          <p className="mt-1 text-sm font-medium text-indigo-200">{scalesSummary}</p>
         </div>
       ) : null}
       {row?.updated_at ? (
@@ -217,7 +217,7 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
 
         <button
           type="button"
-          className="text-xs font-medium text-blue-700 hover:underline"
+          className="text-xs font-medium text-blue-300 hover:underline"
           onClick={() => setShowJson((s) => !s)}
         >
           {showJson ? "Hide" : "Show"} JSON fields ({CLINICAL_DETAIL_FIELD_LABELS.clinical_flags},{" "}

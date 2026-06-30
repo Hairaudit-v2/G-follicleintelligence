@@ -29,10 +29,10 @@ export function LeadPersonHeader({
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Person</h3>
         {tenantId && pid ? (
           <p className="flex flex-wrap gap-x-3 text-xs">
-            <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-300 hover:underline">
               Patient directory
             </Link>
-            <Link href={`/fi-admin/${tenantId}/patients/${pid}`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/patients/${pid}`} className="text-blue-300 hover:underline">
               Profile →
             </Link>
           </p>

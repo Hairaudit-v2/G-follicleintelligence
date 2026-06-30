@@ -59,10 +59,10 @@ export function LeadClinicalDetailsPanel({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-100">Clinical scales</h2>
           <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-            <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-300 hover:underline">
               Patient directory
             </Link>
-            <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-300 hover:underline">
               Open profile →
             </Link>
           </p>

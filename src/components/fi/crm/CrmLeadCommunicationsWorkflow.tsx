@@ -414,7 +414,7 @@ export function CrmLeadCommunicationsWorkflow({
       )}
 
       <div className="border-t border-white/[0.06] pt-3">
-        <button type="button" className="text-xs font-medium text-blue-700 hover:underline" onClick={() => setShowArchived((v) => !v)}>
+        <button type="button" className="text-xs font-medium text-blue-300 hover:underline" onClick={() => setShowArchived((v) => !v)}>
           {showArchived ? "Hide" : "Show"} archived entries{archived.length ? ` (${archived.length})` : ""}
         </button>
         {showArchived && sortedArchived.length > 0 ? (

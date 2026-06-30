@@ -135,17 +135,17 @@ export function CaseDetailPageView({
         {detail.leads.length ? (
           <>
             <span className="text-gray-300">·</span>
-            <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-300 hover:underline">
               CRM
             </Link>
           </>
         ) : null}
         <span className="text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-300 hover:underline">
           Surgery readiness
         </Link>
         <span className="text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/procedure-day`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/procedure-day`} className="text-blue-300 hover:underline">
           Procedure day board
         </Link>
       </p>
@@ -161,7 +161,7 @@ export function CaseDetailPageView({
             ) : null}
             <Link
               href={caseSummaryDocumentPageHref(tenantId, detail.id, casesListReturnQuery)}
-              className="shrink-0 self-start text-sm font-medium text-blue-600 hover:underline sm:self-center"
+              className="shrink-0 self-start text-sm font-medium text-blue-300 hover:underline sm:self-center"
             >
               Print / Export summary
             </Link>
@@ -386,7 +386,7 @@ export function CaseDetailPageView({
 
       {!foundationRecord ? (
         <p className="text-xs text-gray-500">
-          <Link className="text-blue-600 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery, { foundation: "1" })}`}>
+          <Link className="text-blue-300 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery, { foundation: "1" })}`}>
             Load universal patient record
           </Link>{" "}
           (read-only timeline, media, identifiers).
@@ -396,7 +396,7 @@ export function CaseDetailPageView({
       {foundationRecord ? (
         <div className="space-y-2">
           <p className="text-right text-xs">
-            <Link className="text-blue-600 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery)}`}>
+            <Link className="text-blue-300 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery)}`}>
               Hide foundation view
             </Link>
           </p>

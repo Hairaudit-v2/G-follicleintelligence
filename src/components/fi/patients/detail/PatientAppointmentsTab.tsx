@@ -34,7 +34,7 @@ export function PatientAppointmentsTab({
           <h2 className="text-sm font-semibold text-slate-100">Appointments & bookings</h2>
           <Link
             href={`/fi-admin/${tenantId}/appointments`}
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs text-blue-300 hover:underline"
           >
             Calendar →
           </Link>
@@ -63,13 +63,13 @@ export function PatientAppointmentsTab({
                         {slide ? (
                           <button
                             type="button"
-                            className="font-medium text-blue-700 hover:underline"
+                            className="font-medium text-blue-300 hover:underline"
                             onClick={() => slide.openAppointment(b.id)}
                           >
                             {title}
                           </button>
                         ) : (
-                          <Link href={href} className="font-medium text-blue-700 hover:underline">
+                          <Link href={href} className="font-medium text-blue-300 hover:underline">
                             {title}
                           </Link>
                         )}
@@ -86,7 +86,7 @@ export function PatientAppointmentsTab({
       </section>
 
       <p className="text-xs text-gray-500">
-        <Link href={`/fi-admin/${tenantId}/bookings/new?patientId=${encodeURIComponent(patientId)}`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/bookings/new?patientId=${encodeURIComponent(patientId)}`} className="text-blue-300 hover:underline">
           Book a new appointment
         </Link>
         {" · "}

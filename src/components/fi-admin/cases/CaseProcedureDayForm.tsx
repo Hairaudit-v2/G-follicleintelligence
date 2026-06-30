@@ -310,7 +310,7 @@ export function CaseProcedureDayForm({
                 </button>
                 <button
                   type="button"
-                  className="rounded border border-transparent px-2 py-0.5 text-[0.65rem] text-rose-700 hover:underline"
+                  className="rounded border border-transparent px-2 py-0.5 text-[0.65rem] text-rose-300 hover:underline"
                   onClick={() =>
                     setMilestones((m) => {
                       const next = { ...m };

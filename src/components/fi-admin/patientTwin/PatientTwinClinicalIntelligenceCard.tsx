@@ -40,7 +40,7 @@ export function PatientTwinClinicalIntelligenceCard(props: {
           {view.recommendedNextStep}
         </p>
       ) : null}
-      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-blue-700">
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-blue-300">
         <Link href={imagingHref} className="hover:underline">
           Imaging workspace
         </Link>

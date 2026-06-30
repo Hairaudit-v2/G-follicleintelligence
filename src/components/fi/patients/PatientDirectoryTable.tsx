@@ -58,11 +58,11 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
             const contact = [row.email, row.phone].filter(Boolean).join(" · ") || "—";
             const norwoodLine = truncateClinicalSummary(row.clinicalScalesSummary);
             const nameCell = slide ? (
-              <PatientSlideOverTrigger patientId={row.patientId} className="text-left font-medium text-blue-700 hover:underline">
+              <PatientSlideOverTrigger patientId={row.patientId} className="text-left font-medium text-blue-300 hover:underline">
                 {row.displayName}
               </PatientSlideOverTrigger>
             ) : (
-              <Link href={profileHref} className="font-medium text-blue-700 hover:underline">
+              <Link href={profileHref} className="font-medium text-blue-300 hover:underline">
                 {row.displayName}
               </Link>
             );
@@ -91,7 +91,7 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
                 </td>
                 <td className="hidden px-3 py-2 lg:table-cell">
                   {apptHref ? (
-                    <Link href={apptHref} className="text-xs text-blue-700 hover:underline" title={row.nextAppointmentTitle ?? undefined}>
+                    <Link href={apptHref} className="text-xs text-blue-300 hover:underline" title={row.nextAppointmentTitle ?? undefined}>
                       {fmtTs(row.nextAppointmentAt)}
                     </Link>
                   ) : (

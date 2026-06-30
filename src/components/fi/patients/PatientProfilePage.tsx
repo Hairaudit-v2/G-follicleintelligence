@@ -18,11 +18,11 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-300 hover:underline">
           ← Patients
         </Link>
         <span className="mx-2 text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-300 hover:underline">
           CRM
         </Link>
       </p>

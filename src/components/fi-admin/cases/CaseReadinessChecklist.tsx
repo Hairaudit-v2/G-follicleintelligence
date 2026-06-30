@@ -23,7 +23,7 @@ export function CaseReadinessChecklist({ sections }: { sections: CaseReadinessSe
           <ul className="mt-3 space-y-1 border-t border-gray-50 pt-2">
             {s.checks.map((c) => (
               <li key={c.id} className="flex items-start gap-2 text-[11px] text-slate-300">
-                <span className={c.ok ? "text-emerald-600" : c.optional ? "text-gray-400" : "text-rose-600"}>
+                <span className={c.ok ? "text-emerald-300" : c.optional ? "text-gray-400" : "text-rose-300"}>
                   {c.ok ? "✓" : c.optional ? "○" : "✗"}
                 </span>
                 <span className={c.optional ? "text-slate-400" : ""}>

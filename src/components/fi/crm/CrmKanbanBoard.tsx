@@ -141,7 +141,7 @@ export function CrmKanbanBoard({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-400">
           Showing <strong>{cards.length}</strong> of <strong>{total}</strong> matching leads
-          {truncated ? <span className="text-amber-700"> (board cap reached — narrow filters)</span> : null}.
+          {truncated ? <span className="text-amber-300"> (board cap reached — narrow filters)</span> : null}.
         </p>
         <div className="flex items-center gap-2">
           {canMutate ? (

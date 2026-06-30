@@ -48,13 +48,13 @@ export default async function BloodPathologyRequestDetailPage({
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
-        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-300 hover:underline">
           ← Patient profile
         </Link>
         <span className="mx-2 text-gray-300">·</span>
         <Link
           href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}/blood-request`}
-          className="text-blue-600 hover:underline"
+          className="text-blue-300 hover:underline"
         >
           New request
         </Link>

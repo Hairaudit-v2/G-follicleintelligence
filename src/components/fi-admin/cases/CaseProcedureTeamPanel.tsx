@@ -99,7 +99,7 @@ export function CaseProcedureTeamPanel({
               className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-xs text-slate-200"
             >
               <span>{labelFor(id)}</span>
-              <button type="button" className="text-rose-600 hover:underline" onClick={() => onChange(teamIds.filter((x) => x !== id))}>
+              <button type="button" className="text-rose-300 hover:underline" onClick={() => onChange(teamIds.filter((x) => x !== id))}>
                 ×
               </button>
             </li>

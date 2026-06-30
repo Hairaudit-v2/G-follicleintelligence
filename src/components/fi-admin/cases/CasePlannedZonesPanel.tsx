@@ -61,7 +61,7 @@ export function CasePlannedZonesPanel({
               <button
                 type="button"
                 onClick={() => onChange(zones.filter((_, j) => j !== i))}
-                className="text-xs text-rose-600 hover:underline"
+                className="text-xs text-rose-300 hover:underline"
               >
                 Remove
               </button>

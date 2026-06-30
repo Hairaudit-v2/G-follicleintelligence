@@ -20,25 +20,25 @@ export function CaseClinicalIntelligencePanel(props: {
   const base = `/fi-admin/${encodeURIComponent(tenantId)}/cases/${encodeURIComponent(caseId)}`;
 
   return (
-    <div className="rounded border border-indigo-100 bg-indigo-50/40 p-4 shadow-sm">
-      <h3 className="text-sm font-semibold text-indigo-950">Case intelligence</h3>
-      <p className="mt-1 text-xs text-indigo-900/80">
+    <div className="rounded border border-indigo-100 bg-indigo-500/10 p-4 shadow-sm">
+      <h3 className="text-sm font-semibold text-indigo-200">Case intelligence</h3>
+      <p className="mt-1 text-xs text-indigo-300">
         Support signals from existing readiness data only — not a substitute for clinical judgement.
       </p>
       {signals.length === 0 ? (
-        <p className="mt-3 text-sm text-indigo-900/75">No open journey signals detected from current case data.</p>
+        <p className="mt-3 text-sm text-indigo-300">No open journey signals detected from current case data.</p>
       ) : (
-        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-indigo-950">
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-indigo-200">
           {signals.map((s) => (
             <li key={`${s.signalKey}-${s.title}`}>
               <span className="font-medium">{s.title}</span>
-              <span className="text-indigo-800/80"> — {recommendedNextStepForClinicalSignal(s.signalKey)}</span>
+              <span className="text-indigo-300"> — {recommendedNextStepForClinicalSignal(s.signalKey)}</span>
             </li>
           ))}
         </ul>
       )}
-      <p className="mt-3 text-xs text-indigo-900/75">{readiness.nextRecommendedStep}</p>
-      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-indigo-800">
+      <p className="mt-3 text-xs text-indigo-300">{readiness.nextRecommendedStep}</p>
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-indigo-300">
         <Link href={`${base}#${CASE_DETAIL_SECTION_IDS.readiness}`} className="hover:underline">
           Readiness
         </Link>

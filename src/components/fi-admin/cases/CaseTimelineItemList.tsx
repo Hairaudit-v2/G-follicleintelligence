@@ -54,7 +54,7 @@ export function CaseTimelineItemList({ items }: { items: CaseTimelineItem[] }) {
             </div>
             {it.href ? (
               <p className="mt-2 text-right text-[11px]">
-                <Link href={it.href} className="text-blue-600 hover:underline">
+                <Link href={it.href} className="text-blue-300 hover:underline">
                   Open in CRM
                 </Link>
               </p>

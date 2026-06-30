@@ -12,7 +12,7 @@ export function PatientCasesCard({ tenantId, data }: { tenantId: string; data: P
         <ul className="mt-3 divide-y divide-white/[0.06]">
           {data.cases.map((c) => (
             <li key={c.id} className="py-2">
-              <Link href={`/fi-admin/${tenantId}/cases/${c.id}`} className="text-sm font-medium text-blue-700 hover:underline">
+              <Link href={`/fi-admin/${tenantId}/cases/${c.id}`} className="text-sm font-medium text-blue-300 hover:underline">
                 Patient {c.id.slice(0, 8)}…
               </Link>
               <p className="text-xs text-slate-400">
@@ -28,7 +28,7 @@ export function PatientCasesCard({ tenantId, data }: { tenantId: string; data: P
               {c.sourceLeadId ? (
                 <p className="mt-1 text-xs">
                   Source lead:{" "}
-                  <Link href={`/fi-admin/${tenantId}/crm/leads/${c.sourceLeadId}`} className="text-blue-600 hover:underline">
+                  <Link href={`/fi-admin/${tenantId}/crm/leads/${c.sourceLeadId}`} className="text-blue-300 hover:underline">
                     {leadTitleFromRow(c.sourceLeadSummary, c.sourceLeadId)}
                   </Link>
                 </p>

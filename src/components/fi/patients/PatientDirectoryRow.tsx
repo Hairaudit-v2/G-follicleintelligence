@@ -7,7 +7,7 @@ export function PatientDirectoryRow({ tenantId, row }: { tenantId: string; row: 
   return (
     <tr className="border-t border-white/[0.06] hover:bg-white/[0.03]">
       <td className="px-3 py-2 text-sm">
-        <Link href={href} className="font-medium text-blue-700 hover:underline">
+        <Link href={href} className="font-medium text-blue-300 hover:underline">
           {row.displayName}
         </Link>
       </td>

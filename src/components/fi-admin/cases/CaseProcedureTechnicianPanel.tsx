@@ -100,7 +100,7 @@ export function CaseProcedureTechnicianPanel({
               <span>{labelFor(id)}</span>
               <button
                 type="button"
-                className="text-rose-600 hover:underline"
+                className="text-rose-300 hover:underline"
                 onClick={() => onChange(technicianIds.filter((x) => x !== id))}
               >
                 ×

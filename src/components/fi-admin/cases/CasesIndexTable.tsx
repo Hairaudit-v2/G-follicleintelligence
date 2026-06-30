@@ -29,7 +29,7 @@ export function CasesIndexTable({ tenantId, rows }: { tenantId: string; rows: Ca
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-white/[0.06] hover:bg-white/[0.03]">
               <td className="px-3 py-2">
-                <Link href={`/fi-admin/${tenantId}/cases/${r.id}`} className="font-medium text-blue-700 hover:underline">
+                <Link href={`/fi-admin/${tenantId}/cases/${r.id}`} className="font-medium text-blue-300 hover:underline">
                   {r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}
                 </Link>
               </td>
@@ -39,7 +39,7 @@ export function CasesIndexTable({ tenantId, rows }: { tenantId: string; rows: Ca
               </td>
               <td className="px-3 py-2">
                 {r.lead ? (
-                  <Link href={`/fi-admin/${tenantId}/crm/leads/${r.lead.id}`} className="text-blue-600 hover:underline">
+                  <Link href={`/fi-admin/${tenantId}/crm/leads/${r.lead.id}`} className="text-blue-300 hover:underline">
                     {r.lead.title}
                   </Link>
                 ) : (

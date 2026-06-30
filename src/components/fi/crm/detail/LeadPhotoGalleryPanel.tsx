@@ -55,7 +55,7 @@ export function LeadPhotoGalleryPanel({
               Images are tagged by category on the patient record. Upload and edit on the patient profile.
             </p>
           </div>
-          <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-300 hover:underline">
             Manage on patient →
           </Link>
         </div>

@@ -47,7 +47,7 @@ export function PatientPhotoAddedFeedback() {
       role="status"
       aria-live="polite"
     >
-      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" aria-hidden />
       <p className="min-w-0 flex-1 text-sm font-medium leading-snug">{PATIENT_PHOTO_ADDED_TOAST_MESSAGE}</p>
       <button
         type="button"

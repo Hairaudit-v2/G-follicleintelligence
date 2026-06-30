@@ -199,7 +199,7 @@ export function CrmLeadNotesWorkflow({
                 <>
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      {n.is_pinned ? <span className="mr-2 text-xs font-medium text-amber-700">Pinned</span> : null}
+                      {n.is_pinned ? <span className="mr-2 text-xs font-medium text-amber-300">Pinned</span> : null}
                       <span className="text-xs text-gray-500">{n.note_visibility}</span>
                       <p className="mt-1 whitespace-pre-wrap text-slate-200">{n.note_body}</p>
                       <p className="mt-1 text-xs text-gray-400">{n.created_at}</p>
@@ -223,7 +223,7 @@ export function CrmLeadNotesWorkflow({
       <div className="border-t border-white/[0.06] pt-3">
         <button
           type="button"
-          className="text-xs font-medium text-blue-700 hover:underline"
+          className="text-xs font-medium text-blue-300 hover:underline"
           onClick={() => setShowArchived((v) => !v)}
         >
           {showArchived ? "Hide" : "Show"} archived notes{archivedNotes.length ? ` (${archivedNotes.length})` : ""}

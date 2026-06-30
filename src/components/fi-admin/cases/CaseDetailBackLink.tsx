@@ -13,7 +13,7 @@ export function CaseDetailBackLink({
   const label = casesListReturnQuery ? "← Back to patients (same filters)" : "← Patients";
 
   return (
-    <Link href={href} className="text-sm text-blue-600 hover:underline">
+    <Link href={href} className="text-sm text-blue-300 hover:underline">
       {label}
     </Link>
   );

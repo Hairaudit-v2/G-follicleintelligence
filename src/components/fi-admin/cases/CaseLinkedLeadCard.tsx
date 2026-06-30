@@ -14,7 +14,7 @@ export function CaseLinkedLeadCard({ tenantId, leads }: { tenantId: string; lead
         <ul className="mt-3 list-inside list-disc space-y-2 text-sm">
           {leads.map((l) => (
             <li key={l.id}>
-              <Link href={`/fi-admin/${tenantId}/crm/leads/${l.id}`} className="font-medium text-blue-700 hover:underline">
+              <Link href={`/fi-admin/${tenantId}/crm/leads/${l.id}`} className="font-medium text-blue-300 hover:underline">
                 {l.title}
               </Link>
               <span className="ml-2 text-xs text-gray-500">

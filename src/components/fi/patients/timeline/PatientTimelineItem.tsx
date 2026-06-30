@@ -44,7 +44,7 @@ export function PatientTimelineItem({
         {item.metadata_summary ? <p className="text-xs text-gray-500">{item.metadata_summary}</p> : null}
         <div className="flex flex-wrap gap-2 text-xs">
           {item.href ? (
-            <Link href={item.href} className="font-medium text-blue-600 hover:underline">
+            <Link href={item.href} className="font-medium text-blue-300 hover:underline">
               Open linked record
             </Link>
           ) : null}

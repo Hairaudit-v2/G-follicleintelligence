@@ -27,7 +27,7 @@ export function PatientImagesCard({ tenantId, data }: { tenantId: string; data: 
       <p className="mt-2 text-xs text-slate-400">
         {bundle.counts.total} total · {bundle.counts.active} active · {bundle.counts.archived} archived
         {bundle.counts.active > bundle.activeWithSignedUrls.length ? (
-          <span className="text-amber-700"> · showing latest {bundle.activeWithSignedUrls.length} active thumbnails</span>
+          <span className="text-amber-300"> · showing latest {bundle.activeWithSignedUrls.length} active thumbnails</span>
         ) : null}
       </p>
 

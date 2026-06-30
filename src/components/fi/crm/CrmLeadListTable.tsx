@@ -47,7 +47,7 @@ export function CrmLeadListTable({
                   {slide ? (
                     <button
                       type="button"
-                      className="text-left font-medium text-blue-700 hover:underline"
+                      className="text-left font-medium text-blue-300 hover:underline"
                       onClick={(e) => {
                         if (e.ctrlKey || e.metaKey) {
                           window.open(href, "_blank", "noopener,noreferrer");
@@ -59,7 +59,7 @@ export function CrmLeadListTable({
                       {title}
                     </button>
                   ) : (
-                    <Link href={href} className="font-medium text-blue-700 hover:underline">
+                    <Link href={href} className="font-medium text-blue-300 hover:underline">
                       {title}
                     </Link>
                   )}

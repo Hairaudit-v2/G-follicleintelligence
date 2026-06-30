@@ -20,11 +20,11 @@ function BookingLine({ tenantId, b }: { tenantId: string; b: PatientProfileBooki
       </div>
       <p className="text-xs text-slate-400">{fmt(b.start_at)}</p>
       <p className="mt-1 text-xs">
-        <Link href={cal} className="text-blue-600 hover:underline">
+        <Link href={cal} className="text-blue-300 hover:underline">
           Open calendar
         </Link>
         <span className="mx-1 text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
           Appointments
         </Link>
       </p>
@@ -42,11 +42,11 @@ export function PatientBookingsCard({ tenantId, data }: { tenantId: string; data
           <p>No appointments for this patient yet.</p>
           <p className="text-xs text-gray-500">
             Open{" "}
-            <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
               Appointments
             </Link>{" "}
             or the{" "}
-            <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-300 hover:underline">
               calendar
             </Link>{" "}
             to schedule when you have booking access.

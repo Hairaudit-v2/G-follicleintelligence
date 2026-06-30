@@ -41,7 +41,7 @@ export function PatientPersonLeadHistoryCard({
             prior enquiries ({personOnly.length}).
           </p>
         </div>
-        <Link href={`/fi-admin/${tenantId}/crm`} className="text-xs text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/crm`} className="text-xs text-blue-300 hover:underline">
           CRM →
         </Link>
       </div>
@@ -57,7 +57,7 @@ export function PatientPersonLeadHistoryCard({
               <li key={lead.id} className="py-2.5">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <Link href={href} className="text-sm font-medium text-blue-700 hover:underline">
+                    <Link href={href} className="text-sm font-medium text-blue-300 hover:underline">
                       {title}
                     </Link>
                     <p className="mt-0.5 text-xs text-slate-400">
@@ -101,7 +101,7 @@ export function PatientPersonLeadHistoryCard({
                           {" · "}
                           <Link
                             href={`/fi-admin/${tenantId}/crm/leads/${a.lead_id}`}
-                            className="text-blue-600 hover:underline"
+                            className="text-blue-300 hover:underline"
                           >
                             {a.leadTitle?.trim() || `Lead ${a.lead_id.slice(0, 8)}…`}
                           </Link>
@@ -111,7 +111,7 @@ export function PatientPersonLeadHistoryCard({
                           {" · "}
                           <Link
                             href={`/fi-admin/${tenantId}/patients/${currentPatientId}`}
-                            className="text-blue-600 hover:underline"
+                            className="text-blue-300 hover:underline"
                           >
                             Patient record
                           </Link>

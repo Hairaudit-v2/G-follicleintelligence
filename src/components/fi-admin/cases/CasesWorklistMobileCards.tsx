@@ -34,7 +34,7 @@ export function CasesWorklistMobileCards({
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="font-medium text-blue-700">{r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}</p>
+              <p className="font-medium text-blue-300">{r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}</p>
               <p className="text-xs text-slate-200">{r.person_label}</p>
             </div>
             <div className="flex flex-col items-end gap-1">

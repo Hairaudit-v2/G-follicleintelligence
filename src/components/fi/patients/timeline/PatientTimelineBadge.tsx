@@ -7,7 +7,7 @@ const SOURCE_STYLES: Record<PatientTimelineSourceType, string> = {
   lead: "bg-cyan-500/15 text-cyan-200",
   crm_activity: "bg-amber-400/15 text-amber-200",
   booking: "bg-emerald-500/15 text-emerald-300",
-  case: "bg-indigo-100 text-indigo-900",
+  case: "bg-indigo-500/15 text-indigo-300",
   clinical: "bg-rose-500/15 text-rose-300",
   image: "bg-teal-100 text-teal-900",
   system: "bg-white/[0.06] text-slate-200",

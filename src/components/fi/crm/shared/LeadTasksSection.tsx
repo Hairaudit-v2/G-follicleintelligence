@@ -46,7 +46,7 @@ export function LeadTasksSection({
               {canMutate ? (
                 <button
                   type="button"
-                  className="shrink-0 text-blue-700 hover:underline"
+                  className="shrink-0 text-blue-300 hover:underline"
                   onClick={() => void onCompleteTask(t.id)}
                 >
                   Done

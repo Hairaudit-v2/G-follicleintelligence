@@ -77,7 +77,7 @@ export function CasePostopMedicationPlanButton({
             tone === "err"
               ? "mt-2 text-xs text-rose-300"
               : tone === "ok"
-                ? "mt-2 text-xs text-green-800"
+                ? "mt-2 text-xs text-emerald-300"
                 : "mt-2 text-xs text-slate-300"
           }
         >

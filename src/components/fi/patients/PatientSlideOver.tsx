@@ -161,7 +161,7 @@ export function PatientSlideOverPanel({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Patient preview</h2>
             {payload ? (
-              <Link href={href} className="text-xs text-blue-600 hover:underline" onClick={() => onClose()}>
+              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
                 Open full profile →
               </Link>
             ) : null}
@@ -223,7 +223,7 @@ export function PatientSlideOverPanel({
                         payload.nextAppointmentId ? (
                           <Link
                             href={`/fi-admin/${tenantId}/appointments/${payload.nextAppointmentId}`}
-                            className="text-blue-700 hover:underline"
+                            className="text-blue-300 hover:underline"
                             onClick={() => onClose()}
                           >
                             {payload.nextAppointmentAt.slice(0, 16).replace("T", " ")}

@@ -133,7 +133,7 @@ export function CrmLeadDetailPreviewBridge({ tenantId, currentLeadId, previewLea
                     </button>
                     <Link
                       href={`/fi-admin/${tenantId}/crm/leads/${r.id}`}
-                      className="rounded px-2 py-1 text-xs text-blue-600 hover:underline"
+                      className="rounded px-2 py-1 text-xs text-blue-300 hover:underline"
                     >
                       Open full page →
                     </Link>
