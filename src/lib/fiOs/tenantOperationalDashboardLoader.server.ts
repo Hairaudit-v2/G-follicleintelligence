@@ -60,10 +60,6 @@ const agendaBookingStatusSet = new Set<string>(AGENDA_BOOKING_STATUSES);
 
 export const terminalLeadStatuses = new Set(["archived", "lost", "converted"]);
 
-function utcDayStart(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
-}
-
 function addHours(d: Date, hours: number): Date {
   return new Date(d.getTime() + hours * 3_600_000);
 }

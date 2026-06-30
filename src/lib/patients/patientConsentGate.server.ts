@@ -17,10 +17,9 @@ export class PatientTrialConsentRequiredError extends Error {
 
 export async function isTrialConsentGateEnabledForTenant(
   tenantId: string,
-  client?: SupabaseClient
+  _client?: SupabaseClient
 ): Promise<boolean> {
   if (isGlobalTrialConsentGateEnabled()) return true;
-  const supabase = client ?? supabaseAdmin();
   const config = await getTenantConfigResolvedById(tenantId);
   return config.feature_flags?.trial_require_consent_before_capture === true;
 }
