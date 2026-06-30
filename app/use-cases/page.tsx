@@ -49,7 +49,7 @@ export default function UseCasesPage() {
         <div className="grid gap-8 md:grid-cols-2">
           {USE_CASES.map((item, i) => (
             <FadeIn key={item.title} delay={i * 0.1}>
-              <Card className="border-border/50 bg-card/50">
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-fi-panel">
                 <CardHeader>
                   <item.icon className="h-10 w-10 text-primary/80" />
                   <CardTitle className="text-xl">{item.title}</CardTitle>

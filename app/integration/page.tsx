@@ -113,7 +113,7 @@ export default function IntegrationPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {SURFACE_CAPABILITIES.map((item, i) => (
             <FadeIn key={item.title} delay={i * 0.06}>
-              <Card className="h-full border-border/70 bg-card/55">
+              <Card className="h-full border-border/70 bg-card/55 backdrop-blur-xl shadow-fi-panel">
                 <CardHeader>
                   <item.icon className="h-9 w-9 text-primary/85" />
                   <CardTitle className="text-xl">{item.title}</CardTitle>
@@ -138,7 +138,7 @@ export default function IntegrationPage() {
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           {IMPLEMENTATION_PATTERNS.map((item, i) => (
             <FadeIn key={item.title} delay={0.05 * i}>
-              <div className="rounded-[1.25rem] border border-border/70 bg-card/45 p-6">
+              <div className="rounded-[1.25rem] border border-border/70 bg-card/45 p-6 backdrop-blur-xl shadow-fi-panel">
                 <div className="flex items-center gap-2 text-primary/90">
                   <RefreshCw className="h-4 w-4 shrink-0" aria-hidden />
                   <h3 className="text-base font-semibold text-foreground">{item.title}</h3>

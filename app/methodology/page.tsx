@@ -173,7 +173,7 @@ export default function MethodologyPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {METHOD_STEPS.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <Card className="h-full border-border/70 bg-card/60">
+              <Card className="h-full border-border/70 bg-card/60 backdrop-blur-xl shadow-fi-panel">
                 <CardHeader>
                   <item.icon className="h-6 w-6 text-primary/85" />
                   <CardTitle className="text-lg">{item.title}</CardTitle>
@@ -199,7 +199,7 @@ export default function MethodologyPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {EVIDENCE_WEIGHTING.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7">
+              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7 backdrop-blur-xl shadow-fi-panel">
                 <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
               </div>
@@ -219,7 +219,7 @@ export default function MethodologyPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {CONFIDENCE_INTEGRITY.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7">
+              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7 backdrop-blur-xl shadow-fi-panel">
                 <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
               </div>
@@ -239,7 +239,7 @@ export default function MethodologyPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {BENCHMARK_CONTEXT.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7">
+              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7 backdrop-blur-xl shadow-fi-panel">
                 <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
               </div>
@@ -260,7 +260,7 @@ export default function MethodologyPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {REVIEW_ADJUDICATION.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7">
+              <div className="h-full rounded-[1.35rem] border border-border/70 bg-card/45 p-6 md:p-7 backdrop-blur-xl shadow-fi-panel">
                 <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
               </div>
@@ -299,7 +299,7 @@ export default function MethodologyPage() {
         <div className="mt-10 space-y-5">
           {CONFIDENCE_INTERPRETATION.map((row, i) => (
             <FadeIn key={row.label} delay={0.05 * i}>
-              <div className="rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-5 md:px-6 md:py-6">
+              <div className="rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-5 md:px-6 md:py-6 backdrop-blur-xl shadow-fi-panel">
                 <p className="text-sm font-semibold text-foreground">{row.label}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{row.text}</p>
               </div>
@@ -327,7 +327,7 @@ export default function MethodologyPage() {
           </ul>
         </FadeIn>
         <FadeIn delay={0.1}>
-          <div className="mt-10 rounded-2xl border border-border/60 bg-card/60 p-8 md:p-10">
+          <div className="mt-10 rounded-2xl border border-border/60 bg-card/60 p-8 md:p-10 backdrop-blur-xl shadow-fi-panel">
             <p className="fi-trust text-xs uppercase tracking-[0.22em]">Platform</p>
             <p className="mt-4 max-w-4xl leading-relaxed text-muted-foreground">
               The same framework underpins{" "}

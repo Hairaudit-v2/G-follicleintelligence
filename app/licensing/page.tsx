@@ -146,7 +146,7 @@ export default function LicensingPage() {
         <div className="mt-10 space-y-8">
           {CHOOSE_STEPS.map((block, i) => (
             <FadeIn key={block.prompt} delay={0.06 * i}>
-              <div className="rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-6 md:px-7 md:py-7">
+              <div className="rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-6 md:px-7 md:py-7 backdrop-blur-xl shadow-fi-panel">
                 <div className="flex items-start gap-3">
                   <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary/85" aria-hidden />
                   <div>
@@ -200,7 +200,7 @@ export default function LicensingPage() {
         <div className="mt-10 grid gap-8 md:grid-cols-3">
           {TIERS.map((tier, i) => (
             <FadeIn key={tier.title} delay={i * 0.08}>
-              <Card className="flex h-full flex-col border-border/50 bg-card/50">
+              <Card className="flex h-full flex-col border-border/50 bg-card/50 backdrop-blur-xl shadow-fi-panel">
                 <CardHeader>
                   <CardTitle className="text-xl">{tier.title}</CardTitle>
                 </CardHeader>

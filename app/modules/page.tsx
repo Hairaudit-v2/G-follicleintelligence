@@ -18,7 +18,7 @@ const ArchitectureDiagramDynamic = dynamic(
     ssr: false,
     loading: () => (
       <div
-        className="min-h-[320px] w-full rounded-xl border border-border/50 bg-card/40"
+        className="min-h-[320px] w-full rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-fi-panel"
         aria-hidden
       />
     ),
@@ -179,7 +179,7 @@ export default function ModulesPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {FEEDS.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <div className="h-full rounded-[1.25rem] border border-border/70 bg-card/45 p-6 md:p-7">
+              <div className="h-full rounded-[1.25rem] border border-border/70 bg-card/45 p-6 md:p-7 backdrop-blur-xl shadow-fi-panel">
                 <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
                 <p className="mt-4">
@@ -248,7 +248,7 @@ export default function ModulesPage() {
           {MODULES.map((module, i) => (
             <div key={module.title}>
               <FadeIn delay={i * 0.08}>
-                <div className="rounded-xl border border-border/50 bg-card/50 p-8 md:p-10">
+                <div className="rounded-xl border border-border/50 bg-card/50 p-8 md:p-10 backdrop-blur-xl shadow-fi-panel">
                   <h2 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                     {module.title}
                   </h2>

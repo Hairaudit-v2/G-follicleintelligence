@@ -91,7 +91,7 @@ export default function VisionPage() {
               <li key={item.name}>
                 <article
                   className={cn(
-                    "flex h-full flex-col rounded-[1.35rem] border border-border/60 bg-card/35 p-7 sm:p-8",
+                    "flex h-full flex-col rounded-[1.35rem] border border-border/60 bg-card/35 p-7 sm:p-8 backdrop-blur-xl shadow-fi-panel",
                     "shadow-[0_20px_56px_rgb(0_0_0_/0.35),inset_0_1px_0_rgb(255_255_255_/0.04)]",
                     "transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:border-amber-400/18 hover:shadow-[0_28px_72px_rgb(0_0_0_/0.42)]"
                   )}

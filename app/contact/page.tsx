@@ -145,7 +145,7 @@ export default function ContactPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {WHO_SHOULD.map((item, i) => (
             <FadeIn key={item.title} delay={0.06 * i}>
-              <div className="h-full rounded-[1.25rem] border border-border/70 bg-card/40 p-6">
+              <div className="h-full rounded-[1.25rem] border border-border/70 bg-card/40 p-6 backdrop-blur-xl shadow-fi-panel">
                 <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
               </div>
@@ -165,7 +165,7 @@ export default function ContactPage() {
         <div className="mt-10 grid gap-8 md:grid-cols-2">
           {PRIMARY_PATHS.map((path, i) => (
             <FadeIn key={path.title} delay={i * 0.08}>
-              <Card className="border-border/50 bg-card/50">
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-fi-panel">
                 <CardContent className="pt-6">
                   <path.icon className="h-10 w-10 text-primary/80" />
                   <h3 className="mt-4 text-lg font-semibold text-foreground">{path.title}</h3>
@@ -195,7 +195,7 @@ export default function ContactPage() {
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {INTENT_PATHS.map((item, i) => (
             <FadeIn key={item.title} delay={0.05 * i}>
-              <Card className="border-border/50 bg-card/50">
+              <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-fi-panel">
                 <CardContent className="pt-6">
                   <item.icon className="h-5 w-5 text-primary/85" />
                   <h3 className="mt-3 text-base font-semibold text-foreground">{item.title}</h3>

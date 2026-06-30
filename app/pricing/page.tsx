@@ -96,7 +96,7 @@ export default function PricingPage() {
         <div className="grid gap-8 md:grid-cols-3">
           {PLAN_CARDS.map((plan, i) => (
             <FadeIn key={plan.title} delay={i * 0.08}>
-              <Card className="flex h-full flex-col border-border/50 bg-card/50">
+              <Card className="flex h-full flex-col border-border/50 bg-card/50 backdrop-blur-xl shadow-fi-panel">
                 <CardHeader>
                   <plan.icon className="h-9 w-9 text-primary/85" aria-hidden />
                   <CardTitle className="mt-4 text-xl">{plan.title}</CardTitle>
@@ -119,7 +119,7 @@ export default function PricingPage() {
         <FadeIn>
           <SectionIntro eyebrow="Factors" title="What affects pricing." />
         </FadeIn>
-        <div className="mt-10 rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-6 md:px-7 md:py-7">
+        <div className="mt-10 rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-6 md:px-7 md:py-7 backdrop-blur-xl shadow-fi-panel">
           <ul className="space-y-3">
             {PRICING_FACTORS.map((item, i) => (
               <FadeIn key={item} delay={0.04 * i}>
@@ -145,7 +145,7 @@ export default function PricingPage() {
 
       <Section className="border-t border-border/50 pb-2">
         <FadeIn>
-          <div className="rounded-[1.35rem] border border-border/60 bg-card/35 px-6 py-10 md:px-10 md:py-12">
+          <div className="rounded-[1.35rem] border border-border/60 bg-card/35 px-6 py-10 md:px-10 md:py-12 backdrop-blur-xl shadow-fi-panel">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
               Let&apos;s design the right deployment pathway.
             </h2>
