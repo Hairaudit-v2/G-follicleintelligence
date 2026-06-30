@@ -17,7 +17,6 @@ jobs:
     timeout-minutes: 30
 
     env:
-      NODE_ENV: production
       SKIP_ENV_VALIDATION: "1"
       FI_E2E_BASE_URL: http://127.0.0.1:3000
       FI_E2E_BROWSERS: chromium
@@ -43,6 +42,10 @@ jobs:
 
       - name: Production build
         run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: E2E security (build + start + Playwright)
         run: node scripts/run-e2e-security-production.mjs --skip-build --port=3000
+        env:
+          NODE_ENV: production

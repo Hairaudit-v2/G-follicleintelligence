@@ -17,7 +17,6 @@ jobs:
     timeout-minutes: 45
 
     env:
-      NODE_ENV: production
       SKIP_ENV_VALIDATION: "1"
       FI_E2E_BASE_URL: http://127.0.0.1:3000
       NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
@@ -42,9 +41,13 @@ jobs:
 
       - name: Production build
         run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: E2E smoke (build + start + Playwright)
         run: node scripts/run-e2e-smoke-production.mjs --skip-build --port=3000
+        env:
+          NODE_ENV: production
 
   authenticated-smoke:
     name: Authenticated journeys (staging credentials)
@@ -53,7 +56,6 @@ jobs:
     if: ${{ secrets.FI_E2E_DEMO_ADMIN_EMAIL != '' && secrets.FI_E2E_DEMO_ADMIN_PASSWORD != '' && secrets.FI_E2E_TENANT_ID != '' }}
 
     env:
-      NODE_ENV: production
       SKIP_ENV_VALIDATION: "1"
       FI_E2E_BASE_URL: ${{ vars.FI_E2E_STAGING_URL || 'http://127.0.0.1:3000' }}
       FI_E2E_TENANT_ID: ${{ secrets.FI_E2E_TENANT_ID }}

@@ -16,7 +16,6 @@ jobs:
     timeout-minutes: 30
 
     env:
-      NODE_ENV: production
       SKIP_ENV_VALIDATION: "1"
       NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-placeholder-anon
@@ -55,6 +54,10 @@ jobs:
 
       - name: Production env rules (fixture)
         run: npm run check:env:production-rules
+        env:
+          NODE_ENV: production
 
       - name: Production build
         run: npm run build
+        env:
+          NODE_ENV: production

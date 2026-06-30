@@ -1,12 +1,25 @@
-import bundleAnalyzer from "@next/bundle-analyzer";
+import { createRequire } from "node:module";
 
-/** @type {import('next').NextConfig} */
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-  // Non-interactive: write HTML reports instead of opening a dev server (build exits).
-  openAnalyzer: false,
-  analyzerMode: "static",
-});
+const require = createRequire(import.meta.url);
+
+/** @param {import('next').NextConfig} config */
+function passthrough(config) {
+  return config;
+}
+
+/** @type {(config: import('next').NextConfig) => import('next').NextConfig} */
+let withBundleAnalyzer = passthrough;
+try {
+  const bundleAnalyzer = require("@next/bundle-analyzer");
+  withBundleAnalyzer = bundleAnalyzer({
+    enabled: process.env.ANALYZE === "true",
+    // Non-interactive: write HTML reports instead of opening a dev server (build exits).
+    openAnalyzer: false,
+    analyzerMode: "static",
+  });
+} catch {
+  // Optional devDependency — skip bundle analysis when not installed (e.g. production npm ci).
+}
 
 // ---------------------------------------------------------------------------
 // CORS: only public branding/static assets that legitimately need cross-origin
