@@ -16,15 +16,7 @@ import {
 import type { SurgeryEconomicsCaseSummary } from "@/src/lib/financialOs/financialSurgeryEconomics.server";
 import type { SurgeryProfitabilitySnapshotReadiness } from "@/src/lib/financialOs/financialSurgeryEconomicsCore";
 import type { FiSurgeryProfitabilitySnapshotRow } from "@/src/lib/financialOs/financialSurgeryEconomicsCore";
-
-function formatMoney(cents: number, currency = "AUD"): string {
-  const n = cents / 100;
-  try {
-    return new Intl.NumberFormat("en-AU", { style: "currency", currency }).format(n);
-  } catch {
-    return `${currency} ${n.toFixed(2)}`;
-  }
-}
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 
 function formatPct(n: number): string {
   return `${n.toFixed(1)}%`;
@@ -235,28 +227,34 @@ export function FinancialSurgeryEconomicsCard(props: {
           <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <dt className={labelCls}>Invoice total</dt>
-              <dd className={valueCls}>{formatMoney(summary.invoice_total_cents, currency)}</dd>
+              <dd className={valueCls}>
+                {formatMoneyFromCents(summary.invoice_total_cents, currency)}
+              </dd>
             </div>
             <div>
               <dt className={labelCls}>Collected</dt>
-              <dd className={valueCls}>{formatMoney(summary.collected_cents, currency)}</dd>
+              <dd className={valueCls}>
+                {formatMoneyFromCents(summary.collected_cents, currency)}
+              </dd>
             </div>
             <div>
               <dt className={labelCls}>Outstanding</dt>
-              <dd className={valueCls}>{formatMoney(summary.outstanding_cents, currency)}</dd>
+              <dd className={valueCls}>
+                {formatMoneyFromCents(summary.outstanding_cents, currency)}
+              </dd>
             </div>
             <div>
               <dt className={labelCls}>
                 {summary.snapshot_status === "snapshot" ? "Recorded cost" : "Estimated cost"}
               </dt>
-              <dd className={valueCls}>{formatMoney(displayCost, currency)}</dd>
+              <dd className={valueCls}>{formatMoneyFromCents(displayCost, currency)}</dd>
             </div>
             <div>
               <dt className={labelCls}>
                 {summary.snapshot_status === "snapshot" ? "Recorded profit" : "Estimated margin"}
               </dt>
               <dd className={valueCls}>
-                {formatMoney(displayProfit, currency)}
+                {formatMoneyFromCents(displayProfit, currency)}
                 <span className={cn("ml-1 font-normal", metaCls)}>
                   ({formatPct(displayMargin)})
                 </span>
@@ -302,7 +300,7 @@ export function FinancialSurgeryEconomicsCard(props: {
                   <span className="font-medium">{new Date(s.calculated_at).toLocaleString()}</span>
                   <span className={metaCls}>
                     {" "}
-                    · profit {formatMoney(s.gross_profit_cents, currency)} (
+                    · profit {formatMoneyFromCents(s.gross_profit_cents, currency)} (
                     {formatPct(s.gross_margin_percentage)}) · grafts {s.graft_count ?? "—"}
                   </span>
                 </li>

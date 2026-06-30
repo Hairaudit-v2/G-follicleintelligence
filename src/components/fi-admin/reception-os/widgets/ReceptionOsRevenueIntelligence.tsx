@@ -6,10 +6,7 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 import { ReceptionOsCommunicationActionBar } from "@/src/components/fi-admin/reception-os/ReceptionOsCommunicationActionBar";
 import { buildContextFromRevenueAlert } from "@/src/components/fi-admin/reception-os/receptionOsCommunicationContext";
 import type { ReceptionOsConversionScoreboard } from "@/src/lib/receptionOs/receptionOsRevenueModel";
-
-function formatMoney(amount: number, currency: string): string {
-  return `${currency} ${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-}
+import { formatMoneyMajor } from "@/src/lib/format/money";
 
 export function ReceptionOsConversionScoreboardWidget({
   scoreboard,
@@ -33,12 +30,12 @@ export function ReceptionOsConversionScoreboardWidget({
         <ScoreStat label="Surgery bookings" value={scoreboard.surgeryBookingsCreatedToday} />
         <ScoreStat
           label="Projected weighted revenue"
-          value={formatMoney(scoreboard.projectedWeightedRevenue, scoreboard.currency)}
+          value={formatMoneyMajor(scoreboard.projectedWeightedRevenue, scoreboard.currency)}
           highlight
         />
         <ScoreStat
           label="At-risk revenue"
-          value={formatMoney(scoreboard.atRiskRevenue, scoreboard.currency)}
+          value={formatMoneyMajor(scoreboard.atRiskRevenue, scoreboard.currency)}
           warn={scoreboard.atRiskRevenue > 0}
         />
       </div>

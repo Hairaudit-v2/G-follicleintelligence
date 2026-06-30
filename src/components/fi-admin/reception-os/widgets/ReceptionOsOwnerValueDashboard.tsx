@@ -5,6 +5,7 @@ import { DollarSign, Gauge, ShieldCheck, Sparkles, Timer, TrendingUp, Users } fr
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { cn } from "@/lib/utils";
 import type { ReceptionOwnerValueDashboard } from "@/src/lib/receptionOs/receptionOwnerValueModel";
+import { formatMoneyMajor } from "@/src/lib/format/money";
 
 type ReceptionOsOwnerValueDashboardProps = {
   dashboard: ReceptionOwnerValueDashboard;
@@ -30,7 +31,7 @@ export function ReceptionOsOwnerValueDashboardWidget({
         <ValueTile
           icon={DollarSign}
           label="Estimated revenue protected"
-          value={formatMoney(dashboard.estimatedRevenueProtected, currency)}
+          value={formatMoneyMajor(dashboard.estimatedRevenueProtected, currency)}
         />
         <ValueTile
           icon={ShieldCheck}
@@ -86,16 +87,4 @@ function ValueTile({
       <p className={cn("mt-1 text-xl font-semibold tabular-nums text-slate-50")}>{value}</p>
     </div>
   );
-}
-
-function formatMoney(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toLocaleString()}`;
-  }
 }

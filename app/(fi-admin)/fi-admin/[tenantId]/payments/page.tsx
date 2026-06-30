@@ -10,6 +10,7 @@ import {
   loadPaymentsInboxSnapshot,
   type PaymentsInboxFilters,
 } from "@/src/lib/revenueOs/paymentsInboxLoader.server";
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 
 export const metadata: Metadata = {
   title: "Payments inbox",
@@ -17,11 +18,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-function formatMoney(cents: number, currency: string): string {
-  const v = cents / 100;
-  return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 function parseFilters(sp: Record<string, string | string[] | undefined>): PaymentsInboxFilters {
   const g = (k: string) => {
@@ -144,7 +140,7 @@ export default async function TenantPaymentsInboxPage({
               </p>
             </div>
             <div className="text-right font-semibold text-slate-100">
-              {formatMoney(r.balance_due_cents, r.currency)}
+              {formatMoneyFromCents(r.balance_due_cents, r.currency)}
             </div>
           </li>
         ))}
@@ -285,7 +281,7 @@ export default async function TenantPaymentsInboxPage({
                   <li key={p.id} className="px-2 py-2">
                     <p className="font-medium text-slate-100">{p.invoice_title ?? "Invoice"}</p>
                     <p className="text-slate-400">
-                      {p.status} · {formatMoney(p.total_cents, p.currency)}
+                      {p.status} · {formatMoneyFromCents(p.total_cents, p.currency)}
                     </p>
                     {p.crm_quote_id ? (
                       <p className="mt-0.5 text-[11px] text-slate-400">
@@ -316,7 +312,7 @@ export default async function TenantPaymentsInboxPage({
                     <div className="flex justify-between gap-2">
                       <span className="text-slate-400">{p.created_at.slice(0, 19)}</span>
                       <span className="font-semibold">
-                        {formatMoney(p.total_cents, p.currency)}
+                        {formatMoneyFromCents(p.total_cents, p.currency)}
                       </span>
                     </div>
                     <p className="flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-cyan-200">
@@ -363,7 +359,7 @@ export default async function TenantPaymentsInboxPage({
                     <div className="flex justify-between gap-2">
                       <span className="text-slate-400">{p.created_at.slice(0, 19)}</span>
                       <span className="font-semibold">
-                        {formatMoney(p.total_cents, p.currency)}
+                        {formatMoneyFromCents(p.total_cents, p.currency)}
                       </span>
                     </div>
                     <p className="flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-cyan-200">

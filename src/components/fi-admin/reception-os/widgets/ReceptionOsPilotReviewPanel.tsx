@@ -6,6 +6,7 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { ReceptionPilotReviewReport } from "@/src/lib/receptionOs/receptionPilotReviewModel";
+import { formatMoneyMajor } from "@/src/lib/format/money";
 
 type ReceptionOsPilotReviewPanelProps = {
   tenantId: string;
@@ -41,7 +42,7 @@ export function ReceptionOsPilotReviewPanel({
             { label: "Risks closed", value: String(report.risksClosed) },
             {
               label: "Revenue at risk identified",
-              value: formatMoney(report.revenueAtRiskIdentified, report.currency),
+              value: formatMoneyMajor(report.revenueAtRiskIdentified, report.currency),
             },
             { label: "Deposits chased", value: String(report.depositsChased) },
           ]}
@@ -137,16 +138,4 @@ function MetricsList({
       </ul>
     </div>
   );
-}
-
-function formatMoney(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toLocaleString()}`;
-  }
 }

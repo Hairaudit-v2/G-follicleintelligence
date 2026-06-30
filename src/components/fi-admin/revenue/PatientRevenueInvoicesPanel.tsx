@@ -6,11 +6,7 @@ import {
   invoiceBalanceDueCents,
   isInvoiceOpenForCollection,
 } from "@/src/lib/revenueOs/revenueInvoiceModel";
-
-function formatMoney(cents: number, currency: string): string {
-  const v = cents / 100;
-  return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 
 export function PatientRevenueInvoicesPanel(props: {
   tenantId: string;
@@ -37,7 +33,8 @@ export function PatientRevenueInvoicesPanel(props: {
             Overdue (by due date): <strong>{summary.overdueCount}</strong>
           </span>
           <span>
-            Outstanding (AUD): <strong>{formatMoney(summary.outstandingCentsAud, "AUD")}</strong>
+            Outstanding (AUD):{" "}
+            <strong>{formatMoneyFromCents(summary.outstandingCentsAud, "AUD")}</strong>
           </span>
         </div>
         {summary.invoices.length === 0 ? (
@@ -56,8 +53,8 @@ export function PatientRevenueInvoicesPanel(props: {
                     <span className="font-semibold">{inv.status}</span>
                   </p>
                   <p className="text-xs text-slate-400">
-                    Paid {formatMoney(inv.amount_paid_cents, inv.currency)} /{" "}
-                    {formatMoney(inv.total_cents, inv.currency)}
+                    Paid {formatMoneyFromCents(inv.amount_paid_cents, inv.currency)} /{" "}
+                    {formatMoneyFromCents(inv.total_cents, inv.currency)}
                     {inv.due_date ? <span> · due {inv.due_date}</span> : null}
                   </p>
                 </div>

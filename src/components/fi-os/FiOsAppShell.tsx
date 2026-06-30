@@ -31,6 +31,7 @@ import { FiOsClinicSettingsNav } from "@/src/components/fi-os/FiOsClinicSettings
 import { NewEnquiryDialog } from "@/src/components/fi-admin/leadflow/NewEnquiryDialog";
 import { FiOsQuickCreatePalette } from "@/src/components/fi-os/FiOsQuickCreatePalette";
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
+import { FiOsSkipLink } from "@/src/components/fi-os/FiOsSkipLink";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
@@ -219,6 +220,7 @@ export function FiOsAppShell({
 
   return (
     <div className={fiOsChromeClasses.shellRoot}>
+      <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
         <FiOsSidebar
           variant="rail"
@@ -249,11 +251,13 @@ export function FiOsAppShell({
             staffPinLogoutTenantId={staffPinLogoutTenantId}
           />
           <main
+            id="fi-os-main-content"
+            tabIndex={-1}
             className={cn(
               isCalendarMainLocked
                 ? fiOsChromeClasses.mainScrollCalendarLock
                 : fiOsChromeClasses.mainScroll,
-              "flex min-h-0 flex-col"
+              "flex min-h-0 flex-col outline-none"
             )}
           >
             <FiOsClinicSettingsNav

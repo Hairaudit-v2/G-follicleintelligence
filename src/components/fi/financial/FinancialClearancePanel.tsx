@@ -5,15 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { FinancialClearanceBadge } from "@/src/components/fi/financial/FinancialClearanceBadge";
 import type { FinancialClearanceResult } from "@/src/lib/financialOs/financialClearanceCore";
-
-function formatMoney(cents: number, currency = "AUD"): string {
-  const n = cents / 100;
-  try {
-    return new Intl.NumberFormat("en-AU", { style: "currency", currency }).format(n);
-  } catch {
-    return `${currency} ${n.toFixed(2)}`;
-  }
-}
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 
 /** Financial clearance summary for case detail and surgery/clinic boards. Use `variant="dark"` on FI OS dark surfaces; `variant="light"` only on light case-detail panels. FinancialOS command-centre pages do not render this component. */
 export function FinancialClearancePanel(props: {
@@ -122,7 +114,7 @@ export function FinancialClearancePanel(props: {
                   variant === "dark" ? "text-slate-100" : "text-slate-100"
                 )}
               >
-                {formatMoney(clearance.amount_paid_cents, currency)}
+                {formatMoneyFromCents(clearance.amount_paid_cents, currency)}
               </dd>
             </div>
             <div>
@@ -135,7 +127,7 @@ export function FinancialClearancePanel(props: {
                   variant === "dark" ? "text-slate-100" : "text-slate-100"
                 )}
               >
-                {formatMoney(clearance.balance_due_cents, currency)}
+                {formatMoneyFromCents(clearance.balance_due_cents, currency)}
               </dd>
             </div>
           </dl>

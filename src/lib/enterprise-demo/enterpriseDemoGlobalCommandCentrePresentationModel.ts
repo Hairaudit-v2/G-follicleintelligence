@@ -1,8 +1,9 @@
+import { formatMoneyFromCents } from "@/src/lib/format/money";
+
 import type { GlobalCommandCentrePayload } from "./enterpriseDemoGlobalCommandCentreLoader.server";
 
-function formatMoney(cents: number, currency: string): string {
-  return `${currency} ${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-}
+const formatCommandCentreMoney = (cents: number, currency: string): string =>
+  formatMoneyFromCents(cents, currency, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
 function formatPct(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return "—";
@@ -200,7 +201,7 @@ export function buildPresentationStorySections(
         { label: "Graft survival", value: formatPct(networkKpis.averageGraftSurvivalPct) },
         {
           label: "Collected",
-          value: formatMoney(networkKpis.revenueCollectedCents, networkKpis.currency),
+          value: formatCommandCentreMoney(networkKpis.revenueCollectedCents, networkKpis.currency),
         },
       ],
     },
@@ -261,11 +262,14 @@ export function buildPresentationStorySections(
       highlights: [
         {
           label: "Outstanding",
-          value: formatMoney(networkKpis.revenueOutstandingCents, networkKpis.currency),
+          value: formatCommandCentreMoney(
+            networkKpis.revenueOutstandingCents,
+            networkKpis.currency
+          ),
         },
         {
           label: "Collected",
-          value: formatMoney(networkKpis.revenueCollectedCents, networkKpis.currency),
+          value: formatCommandCentreMoney(networkKpis.revenueCollectedCents, networkKpis.currency),
         },
         { label: "Financial alerts", value: String(financialAlerts) },
         { label: "Open risk signals", value: String(networkKpis.openFinancialRiskAlerts) },

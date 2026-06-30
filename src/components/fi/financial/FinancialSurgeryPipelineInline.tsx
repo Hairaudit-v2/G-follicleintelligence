@@ -8,18 +8,7 @@ import {
   AWAITING_FINANCIAL_WORKFLOW_COPY,
   type FinancialSurgeryPipelineStatus,
 } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
-
-function formatMoney(cents: number, currency: string): string {
-  const n = cents / 100;
-  try {
-    return new Intl.NumberFormat("en-AU", {
-      style: "currency",
-      currency: currency || "AUD",
-    }).format(n);
-  } catch {
-    return `${currency} ${n.toFixed(2)}`;
-  }
-}
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 
 export function FinancialSurgeryPipelineInline(props: {
   tenantId: string;
@@ -171,13 +160,13 @@ export function FinancialSurgeryPipelineInline(props: {
           <div>
             <dt className="text-gray-500">Paid</dt>
             <dd className="font-mono text-slate-100">
-              {formatMoney(status.amount_paid_cents, status.currency)}
+              {formatMoneyFromCents(status.amount_paid_cents, status.currency)}
             </dd>
           </div>
           <div>
             <dt className="text-gray-500">Balance due</dt>
             <dd className="font-mono text-slate-100">
-              {formatMoney(status.balance_due_cents, status.currency)}
+              {formatMoneyFromCents(status.balance_due_cents, status.currency)}
             </dd>
           </div>
           <div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { fiOsSignOutAction } from "@/lib/actions/fi-os-auth-actions";
 import { fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboard-ui";
+import { FiOsSkipLink } from "@/src/components/fi-os/FiOsSkipLink";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
 import {
@@ -52,6 +53,7 @@ export function FiOsWorkspaceEntryShell({
         aria-hidden
       />
       <div className="relative z-10 flex min-h-screen min-h-dvh w-full flex-col">
+        {showChrome ? <FiOsSkipLink /> : null}
         {showChrome ? (
           <header
             className={cn(
@@ -144,8 +146,11 @@ export function FiOsWorkspaceEntryShell({
         ) : null}
 
         <div
+          id={showChrome ? "fi-os-main-content" : undefined}
+          tabIndex={showChrome ? -1 : undefined}
           className={cn(
             "flex min-h-0 w-full flex-1 flex-col",
+            showChrome ? "outline-none" : "",
             isWorkspacePickerOnly
               ? "mx-auto max-w-3xl px-3 py-6 sm:px-4 sm:py-8 lg:max-w-4xl"
               : showChrome

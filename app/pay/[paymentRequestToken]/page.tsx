@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { PublicPaymentPathwaySelector } from "@/src/components/fi/public-payments/PublicPaymentPathwaySelector";
 import { loadPublicPaymentPathwaySelectionByToken } from "@/src/lib/financialOs/publicPaymentPathwaySelection.server";
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 import { loadPublicPaymentRequestView } from "@/src/lib/revenueOs/publicPaymentRequestLoaders.server";
 
 export const metadata: Metadata = {
@@ -11,11 +12,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-function formatMoney(cents: number, currency: string): string {
-  const v = cents / 100;
-  return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export default async function PublicPayPage({
   params,
@@ -68,7 +64,7 @@ export default async function PublicPayPage({
         <h2 className="text-sm font-semibold text-slate-100">Invoice summary</h2>
         <p className="text-sm text-slate-300">{invoiceTitle ?? invoiceKind.replace(/_/g, " ")}</p>
         <p className="text-lg font-semibold text-slate-100">
-          Amount due: {formatMoney(amountDueCents, currency)}
+          Amount due: {formatMoneyFromCents(amountDueCents, currency)}
         </p>
         {state === "paid" ? (
           <p className="rounded bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">

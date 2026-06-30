@@ -15,11 +15,7 @@ import {
   invoiceBalanceDueCents,
   isInvoiceOpenForCollection,
 } from "@/src/lib/revenueOs/revenueInvoiceModel";
-
-function formatMoney(cents: number, currency: string): string {
-  const v = cents / 100;
-  return `${currency} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+import { formatMoneyFromCents } from "@/src/lib/format/money";
 
 function audToCents(aud: string): number | null {
   const n = Number(String(aud).replace(/,/g, "").trim());
@@ -301,8 +297,8 @@ function InvoicePaymentRow(props: {
             {inv.invoice_kind} · <span className="font-semibold">{inv.status}</span>
           </p>
           <p className="text-xs text-slate-400">
-            Balance {formatMoney(bal, inv.currency)} of {formatMoney(inv.total_cents, inv.currency)}{" "}
-            total
+            Balance {formatMoneyFromCents(bal, inv.currency)} of{" "}
+            {formatMoneyFromCents(inv.total_cents, inv.currency)} total
           </p>
         </div>
       </div>
