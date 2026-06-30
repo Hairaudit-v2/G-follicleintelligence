@@ -20,17 +20,17 @@ const STATUS_TONE_DARK: Record<FiInternationalTransferStatus, string> = {
 };
 
 const STATUS_TONE_LIGHT: Record<FiInternationalTransferStatus, string> = {
-  instructions_required: "bg-violet-50 text-violet-900",
-  instructions_sent: "bg-sky-50 text-sky-900",
-  awaiting_transfer: "bg-amber-50 text-amber-900",
-  proof_received: "bg-indigo-50 text-indigo-900",
-  under_reconciliation: "bg-purple-50 text-purple-900",
-  settlement_pending: "bg-orange-50 text-orange-900",
+  instructions_required: "bg-violet-500/10 text-violet-300",
+  instructions_sent: "bg-cyan-500/10 text-cyan-200",
+  awaiting_transfer: "bg-amber-400/10 text-amber-200",
+  proof_received: "bg-indigo-500/10 text-indigo-300",
+  under_reconciliation: "bg-violet-500/10 text-violet-300",
+  settlement_pending: "bg-orange-500/10 text-orange-300",
   partially_settled: "bg-yellow-50 text-yellow-900",
-  settled: "bg-emerald-100 text-emerald-950",
-  variance_review: "bg-rose-50 text-rose-900",
-  rejected: "bg-rose-100 text-rose-950",
-  cancelled: "bg-slate-200 text-slate-700",
+  settled: "bg-emerald-500/15 text-emerald-200",
+  variance_review: "bg-rose-500/10 text-rose-300",
+  rejected: "bg-rose-500/15 text-rose-200",
+  cancelled: "bg-white/[0.08] text-slate-300",
 };
 
 export function FinancialInternationalTransferStatusBadge(props: {

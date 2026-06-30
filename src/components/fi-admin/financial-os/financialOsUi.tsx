@@ -30,7 +30,7 @@ export const financialOsClasses = {
   formLabel: "block text-xs text-slate-400",
   formHint: "mt-1 text-xs text-slate-500",
   input:
-    "mt-1 w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-2 py-1.5 text-sm text-slate-100 shadow-sm shadow-black/30 backdrop-blur-md transition placeholder:text-slate-600 focus-visible:border-cyan-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/30",
+    "mt-1 w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-2 py-1.5 text-sm text-slate-100 shadow-sm shadow-black/30 backdrop-blur-md transition placeholder:text-slate-400 focus-visible:border-cyan-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/30",
   select:
     "mt-1 w-full rounded-xl border border-white/[0.1] bg-[#0a101f] px-2 py-1.5 text-sm text-slate-100 shadow-sm shadow-black/30 backdrop-blur-md transition [color-scheme:dark] focus-visible:border-cyan-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/30",
   inlineSelect:
@@ -147,7 +147,7 @@ export function FinancialOsEmptyState(props: {
 }) {
   return (
     <div className={cn(financialOsClasses.emptyStatePanel, props.className)}>
-      {props.icon ?? <Inbox className="mb-2 h-8 w-8 text-slate-600" aria-hidden />}
+      {props.icon ?? <Inbox className="mb-2 h-8 w-8 text-slate-400" aria-hidden />}
       <p className="text-sm text-slate-300">{props.message}</p>
       {props.hint ? <p className="mt-1 max-w-sm text-xs text-slate-500">{props.hint}</p> : null}
     </div>

@@ -21,18 +21,18 @@ const STATUS_TONE_DARK: Record<FiSuperReleaseApplicationStatus, string> = {
 };
 
 const STATUS_TONE_LIGHT: Record<FiSuperReleaseApplicationStatus, string> = {
-  draft: "bg-slate-100 text-slate-700",
-  eligibility_review: "bg-violet-50 text-violet-900",
-  documents_pending: "bg-amber-50 text-amber-900",
-  clinical_letter_required: "bg-purple-50 text-purple-900",
-  ready_for_submission: "bg-sky-50 text-sky-900",
-  submitted: "bg-sky-50 text-sky-900",
-  under_review: "bg-indigo-50 text-indigo-900",
-  approved: "bg-emerald-50 text-emerald-900",
-  rejected: "bg-rose-50 text-rose-900",
-  release_pending: "bg-orange-50 text-orange-900",
-  funds_released: "bg-emerald-100 text-emerald-950",
-  cancelled: "bg-slate-200 text-slate-700",
+  draft: "bg-white/[0.06] text-slate-300",
+  eligibility_review: "bg-violet-500/10 text-violet-300",
+  documents_pending: "bg-amber-400/10 text-amber-200",
+  clinical_letter_required: "bg-violet-500/10 text-violet-300",
+  ready_for_submission: "bg-cyan-500/10 text-cyan-200",
+  submitted: "bg-cyan-500/10 text-cyan-200",
+  under_review: "bg-indigo-500/10 text-indigo-300",
+  approved: "bg-emerald-500/10 text-emerald-300",
+  rejected: "bg-rose-500/10 text-rose-300",
+  release_pending: "bg-orange-500/10 text-orange-300",
+  funds_released: "bg-emerald-500/15 text-emerald-200",
+  cancelled: "bg-white/[0.08] text-slate-300",
 };
 
 export function FinancialSuperReleaseStatusBadge(props: {

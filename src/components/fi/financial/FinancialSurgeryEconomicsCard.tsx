@@ -58,10 +58,10 @@ export function FinancialSurgeryEconomicsCard(props: {
   const panelCls =
     variant === "dark"
       ? "rounded-lg border border-white/[0.08] bg-white/[0.02] p-3"
-      : "rounded border border-gray-200 bg-gray-50 p-3";
+      : "rounded border border-white/[0.08] bg-white/[0.03] p-3";
   const labelCls = variant === "dark" ? "text-[0.62rem] uppercase tracking-wide text-slate-500" : "text-[0.62rem] uppercase tracking-wide text-gray-500";
-  const valueCls = variant === "dark" ? "text-sm font-semibold text-slate-100" : "text-sm font-semibold text-gray-900";
-  const metaCls = variant === "dark" ? "text-xs text-slate-400" : "text-xs text-gray-600";
+  const valueCls = variant === "dark" ? "text-sm font-semibold text-slate-100" : "text-sm font-semibold text-slate-100";
+  const metaCls = variant === "dark" ? "text-xs text-slate-400" : "text-xs text-slate-400";
 
   const displayCost = summary.latest_snapshot?.total_cost_cents ?? summary.estimated_total_cost_cents;
   const displayProfit = summary.latest_snapshot?.gross_profit_cents ?? summary.estimated_gross_profit_cents;
@@ -106,7 +106,7 @@ export function FinancialSurgeryEconomicsCard(props: {
   return (
     <div className={cn(panelCls, className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h4 className={variant === "dark" ? "text-sm font-semibold text-slate-50" : "text-sm font-semibold text-gray-900"}>
+        <h4 className={variant === "dark" ? "text-sm font-semibold text-slate-50" : "text-sm font-semibold text-slate-100"}>
           FinancialOS · Surgery economics
         </h4>
         <span
@@ -115,14 +115,14 @@ export function FinancialSurgeryEconomicsCard(props: {
             summary.snapshot_status === "snapshot"
               ? variant === "dark"
                 ? "bg-emerald-500/15 text-emerald-300"
-                : "bg-emerald-50 text-emerald-800"
+                : "bg-emerald-500/10 text-emerald-300"
               : summary.snapshot_status === "estimate"
                 ? variant === "dark"
                   ? "bg-amber-500/15 text-amber-300"
-                  : "bg-amber-50 text-amber-800"
+                  : "bg-amber-400/10 text-amber-300"
                 : variant === "dark"
                   ? "bg-slate-500/15 text-slate-400"
-                  : "bg-gray-100 text-gray-600"
+                  : "bg-white/[0.06] text-slate-400"
           )}
         >
           {snapshotStatusLabel(summary.snapshot_status)}
@@ -133,7 +133,7 @@ export function FinancialSurgeryEconomicsCard(props: {
         <div
           className={cn(
             "mt-2 rounded border px-3 py-2 text-xs",
-            variant === "dark" ? "border-amber-500/30 bg-amber-500/10 text-amber-200" : "border-amber-200 bg-amber-50 text-amber-900"
+            variant === "dark" ? "border-amber-500/30 bg-amber-500/10 text-amber-200" : "border-amber-400/20 bg-amber-400/10 text-amber-200"
           )}
         >
           <p className="font-semibold">Needs configuration</p>
@@ -151,7 +151,7 @@ export function FinancialSurgeryEconomicsCard(props: {
             type="button"
             disabled={pending || !readiness.ready}
             onClick={() => runSnapshot("create")}
-            className={variant === "dark" ? financialOsClasses.secondaryButton : "rounded border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-800 disabled:opacity-50"}
+            className={variant === "dark" ? financialOsClasses.secondaryButton : "rounded border border-slate-700 px-2 py-1 text-xs font-semibold text-slate-200 disabled:opacity-50"}
           >
             Create snapshot
           </button>
@@ -159,7 +159,7 @@ export function FinancialSurgeryEconomicsCard(props: {
             type="button"
             disabled={pending || !readiness.ready}
             onClick={() => runSnapshot("recalculate")}
-            className={variant === "dark" ? financialOsClasses.secondaryButton : "rounded border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-800 disabled:opacity-50"}
+            className={variant === "dark" ? financialOsClasses.secondaryButton : "rounded border border-slate-700 px-2 py-1 text-xs font-semibold text-slate-200 disabled:opacity-50"}
           >
             Recalculate snapshot
           </button>
@@ -224,7 +224,7 @@ export function FinancialSurgeryEconomicsCard(props: {
       )}
 
       {historyOpen ? (
-        <div className={cn("mt-3 rounded border p-3", variant === "dark" ? "border-white/10" : "border-gray-200")}>
+        <div className={cn("mt-3 rounded border p-3", variant === "dark" ? "border-white/10" : "border-white/[0.08]")}>
           <div className="flex items-center justify-between gap-2">
             <p className={labelCls}>Snapshot history (immutable versions)</p>
             <button type="button" onClick={() => setHistoryOpen(false)} className={metaCls}>Close</button>
@@ -234,7 +234,7 @@ export function FinancialSurgeryEconomicsCard(props: {
           ) : (
             <ul className="mt-2 space-y-2 text-xs">
               {history.map((s, idx) => (
-                <li key={s.id ?? idx} className={cn("rounded px-2 py-1.5", variant === "dark" ? "bg-white/[0.03]" : "bg-white")}>
+                <li key={s.id ?? idx} className={cn("rounded px-2 py-1.5", variant === "dark" ? "bg-white/[0.03]" : "bg-[#0F1629]/80 backdrop-blur-md")}>
                   <span className="font-medium">{new Date(s.calculated_at).toLocaleString()}</span>
                   <span className={metaCls}>
                     {" "}

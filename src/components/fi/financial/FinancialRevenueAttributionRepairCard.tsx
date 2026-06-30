@@ -34,7 +34,7 @@ export function FinancialRevenueAttributionRepairCard(props: {
   const panelCls =
     variant === "dark"
       ? "rounded-lg border border-white/[0.08] bg-white/[0.02] p-3"
-      : "rounded-lg border border-slate-200 bg-slate-50/80 p-3";
+      : "rounded-lg border border-white/[0.08] bg-white/[0.03] p-3";
 
   function runSave() {
     if (!canMutate) return;

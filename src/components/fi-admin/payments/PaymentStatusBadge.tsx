@@ -5,15 +5,15 @@ import type { EffectivePaymentStatus, PaymentStatus } from "@/src/lib/payments/p
 import { computeEffectivePaymentStatus } from "@/src/lib/payments/paymentRecordModel";
 
 const STATUS_TONE: Record<EffectivePaymentStatus | "neutral", string> = {
-  not_required: "border-slate-200 bg-slate-50 text-slate-700",
-  pending: "border-amber-200 bg-amber-50 text-amber-900",
-  partially_paid: "border-amber-300 bg-amber-50 text-amber-950",
-  paid: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  waived: "border-slate-200 bg-slate-100 text-slate-700",
-  refunded: "border-violet-200 bg-violet-50 text-violet-900",
-  overdue: "border-rose-300 bg-rose-50 text-rose-950",
-  overdue_derived: "border-rose-300 bg-rose-50 text-rose-950",
-  neutral: "border-slate-200 bg-white text-slate-700",
+  not_required: "border-white/[0.08] bg-white/[0.03] text-slate-300",
+  pending: "border-amber-400/20 bg-amber-400/10 text-amber-200",
+  partially_paid: "border-amber-300 bg-amber-400/10 text-amber-200",
+  paid: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+  waived: "border-white/[0.08] bg-white/[0.06] text-slate-300",
+  refunded: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+  overdue: "border-rose-300 bg-rose-500/10 text-rose-200",
+  overdue_derived: "border-rose-300 bg-rose-500/10 text-rose-200",
+  neutral: "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-300",
 };
 
 function labelFor(status: EffectivePaymentStatus | PaymentStatus): string {

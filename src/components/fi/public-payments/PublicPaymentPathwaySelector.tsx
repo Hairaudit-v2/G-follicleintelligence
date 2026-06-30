@@ -47,10 +47,10 @@ export function PublicPaymentPathwaySelector(props: {
   }
 
   return (
-    <section className="mt-6 space-y-4 rounded-lg border border-slate-200 bg-slate-50/80 p-5">
+    <section className="mt-6 space-y-4 rounded-lg border border-white/[0.08] bg-white/[0.03] p-5">
       <div>
-        <h2 className="text-sm font-semibold text-slate-900">Choose your payment option</h2>
-        <p className="mt-1 text-xs text-slate-600">
+        <h2 className="text-sm font-semibold text-slate-100">Choose your payment option</h2>
+        <p className="mt-1 text-xs text-slate-400">
           Select how you would like to proceed. Your clinic will see your choice and follow up where needed.
         </p>
       </div>
@@ -67,14 +67,14 @@ export function PublicPaymentPathwaySelector(props: {
                 onClick={() => onSelect(opt.pathwayType)}
                 className={`w-full rounded-lg border px-4 py-3 text-left transition-colors disabled:opacity-60 ${
                   isSelected
-                    ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                    ? "border-blue-600 bg-blue-500/10 ring-1 ring-blue-600"
+                    : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md hover:border-slate-700 hover:bg-white/[0.03]"
                 }`}
               >
-                <span className="block text-sm font-semibold text-slate-900">{opt.title}</span>
-                <span className="mt-0.5 block text-xs text-slate-600">{opt.description}</span>
+                <span className="block text-sm font-semibold text-slate-100">{opt.title}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{opt.description}</span>
                 {isSelected ? (
-                  <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-blue-700">Selected</span>
+                  <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-blue-300">Selected</span>
                 ) : null}
                 {isBusy ? <span className="mt-1 block text-[11px] text-slate-500">Saving…</span> : null}
               </button>
@@ -83,10 +83,10 @@ export function PublicPaymentPathwaySelector(props: {
         })}
       </ul>
 
-      {error ? <p className="rounded bg-rose-50 px-3 py-2 text-sm text-rose-900">{error}</p> : null}
+      {error ? <p className="rounded bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{error}</p> : null}
 
       {confirmationMessage ? (
-        <p className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{confirmationMessage}</p>
+        <p className="rounded bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">{confirmationMessage}</p>
       ) : null}
 
       {showCheckout && checkoutUrl ? (

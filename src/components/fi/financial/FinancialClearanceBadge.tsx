@@ -7,13 +7,13 @@ import {
 } from "@/src/lib/financialOs/financialClearanceCore";
 
 const STATUS_TONE: Record<FinancialClearanceState, string> = {
-  unavailable: "bg-slate-200 text-slate-700",
-  not_ready: "bg-slate-100 text-slate-800",
-  deposit_ready: "bg-sky-50 text-sky-900",
-  pathway_pending: "bg-indigo-50 text-indigo-900",
-  attention_required: "bg-rose-100 text-rose-950",
-  financially_cleared: "bg-emerald-100 text-emerald-950",
-  paid_in_full: "bg-emerald-200 text-emerald-950",
+  unavailable: "bg-white/[0.08] text-slate-300",
+  not_ready: "bg-white/[0.06] text-slate-200",
+  deposit_ready: "bg-cyan-500/10 text-cyan-200",
+  pathway_pending: "bg-indigo-500/10 text-indigo-300",
+  attention_required: "bg-rose-500/15 text-rose-200",
+  financially_cleared: "bg-emerald-500/15 text-emerald-200",
+  paid_in_full: "bg-emerald-200 text-emerald-200",
 };
 
 const STATUS_TONE_DARK: Record<FinancialClearanceState, string> = {
@@ -57,10 +57,10 @@ export function FinancialClearanceBadge(props: {
             financiallySafeToProceed
               ? variant === "dark"
                 ? "text-emerald-300"
-                : "text-emerald-800"
+                : "text-emerald-300"
               : variant === "dark"
                 ? "text-amber-300"
-                : "text-amber-800"
+                : "text-amber-300"
           )}
         >
           {financiallySafeToProceed ? "Safe to proceed" : "Review before day"}

@@ -51,10 +51,10 @@ export function FinancialPaymentPathwayTaskBadge(props: {
       : financialOsStatusBadgeTones[statusTone];
 
   const toneLight = isUrgent
-    ? "border-rose-200 bg-rose-50 text-rose-900"
+    ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
     : isHigh
-      ? "border-amber-200 bg-amber-50 text-amber-900"
-      : "border-slate-200 bg-slate-50 text-slate-700";
+      ? "border-amber-400/20 bg-amber-400/10 text-amber-200"
+      : "border-white/[0.08] bg-white/[0.03] text-slate-300";
 
   const tone = variant === "dark" ? toneDark : toneLight;
   const base = variant === "dark" ? financialOsStatusBadgeBase : "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide";

@@ -28,7 +28,7 @@ export function FinancialClearancePanel(props: {
   const base = `/fi-admin/${tenantId}/financial`;
   const muted = clearance.clearance_state === "unavailable";
   const linkCls =
-    variant === "dark" ? "text-cyan-400/95 hover:text-cyan-300" : "text-blue-700 hover:text-blue-900 hover:underline";
+    variant === "dark" ? "text-cyan-400/95 hover:text-cyan-300" : "text-blue-300 hover:text-blue-300 hover:underline";
 
   if (compact) {
     return (
@@ -41,7 +41,7 @@ export function FinancialClearancePanel(props: {
           financiallySafeToProceed={clearance.financially_safe_to_proceed}
         />
         {!muted ? (
-          <p className={cn("text-[0.62rem]", variant === "dark" ? "text-slate-400" : "text-slate-600")}>
+          <p className={cn("text-[0.62rem]", variant === "dark" ? "text-slate-400" : "text-slate-400")}>
             {clearance.clearance_reason}
           </p>
         ) : null}
@@ -53,7 +53,7 @@ export function FinancialClearancePanel(props: {
     <div
       className={cn(
         "rounded-lg border p-3 text-sm",
-        variant === "dark" ? "border-white/[0.08] bg-white/[0.03]" : "border-gray-200 bg-gray-50/80",
+        variant === "dark" ? "border-white/[0.08] bg-white/[0.03]" : "border-white/[0.08] bg-white/[0.03]",
         className
       )}
     >
@@ -82,34 +82,34 @@ export function FinancialClearancePanel(props: {
 
       {!muted ? (
         <>
-          <p className={cn("mt-2 text-xs", variant === "dark" ? "text-slate-300" : "text-gray-700")}>
+          <p className={cn("mt-2 text-xs", variant === "dark" ? "text-slate-300" : "text-slate-300")}>
             {clearance.clearance_reason}
           </p>
           {clearance.next_required_action ? (
-            <p className={cn("mt-1 text-xs font-medium", variant === "dark" ? "text-amber-200" : "text-amber-900")}>
+            <p className={cn("mt-1 text-xs font-medium", variant === "dark" ? "text-amber-200" : "text-amber-200")}>
               Next: {clearance.next_required_action}
             </p>
           ) : null}
           <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-xs sm:grid-cols-4">
             <div>
               <dt className={variant === "dark" ? "text-slate-500" : "text-gray-500"}>Paid</dt>
-              <dd className={cn("font-mono", variant === "dark" ? "text-slate-100" : "text-gray-900")}>
+              <dd className={cn("font-mono", variant === "dark" ? "text-slate-100" : "text-slate-100")}>
                 {formatMoney(clearance.amount_paid_cents, currency)}
               </dd>
             </div>
             <div>
               <dt className={variant === "dark" ? "text-slate-500" : "text-gray-500"}>Balance due</dt>
-              <dd className={cn("font-mono", variant === "dark" ? "text-slate-100" : "text-gray-900")}>
+              <dd className={cn("font-mono", variant === "dark" ? "text-slate-100" : "text-slate-100")}>
                 {formatMoney(clearance.balance_due_cents, currency)}
               </dd>
             </div>
           </dl>
           {clearance.blocking_factors.length ? (
             <div className="mt-3">
-              <p className={cn("text-[0.65rem] font-semibold uppercase tracking-wide", variant === "dark" ? "text-rose-200" : "text-rose-800")}>
+              <p className={cn("text-[0.65rem] font-semibold uppercase tracking-wide", variant === "dark" ? "text-rose-200" : "text-rose-300")}>
                 Blockers
               </p>
-              <ul className={cn("mt-1 list-inside list-disc text-xs", variant === "dark" ? "text-rose-100" : "text-rose-900")}>
+              <ul className={cn("mt-1 list-inside list-disc text-xs", variant === "dark" ? "text-rose-100" : "text-rose-300")}>
                 {clearance.blocking_factors.map((f) => (
                   <li key={f}>{f}</li>
                 ))}
@@ -118,10 +118,10 @@ export function FinancialClearancePanel(props: {
           ) : null}
           {clearance.warning_factors.length ? (
             <div className="mt-2">
-              <p className={cn("text-[0.65rem] font-semibold uppercase tracking-wide", variant === "dark" ? "text-amber-200" : "text-amber-800")}>
+              <p className={cn("text-[0.65rem] font-semibold uppercase tracking-wide", variant === "dark" ? "text-amber-200" : "text-amber-300")}>
                 Warnings
               </p>
-              <ul className={cn("mt-1 list-inside list-disc text-xs", variant === "dark" ? "text-amber-100" : "text-amber-900")}>
+              <ul className={cn("mt-1 list-inside list-disc text-xs", variant === "dark" ? "text-amber-100" : "text-amber-200")}>
                 {clearance.warning_factors.map((f) => (
                   <li key={f}>{f}</li>
                 ))}

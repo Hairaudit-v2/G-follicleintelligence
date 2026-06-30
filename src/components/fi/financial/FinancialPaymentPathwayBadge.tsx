@@ -51,7 +51,7 @@ export function FinancialPaymentPathwayBadge(props: {
       <span
         className={cn(
           "inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-[0.62rem] font-medium uppercase tracking-wide",
-          variant === "dark" ? "border-white/[0.08] bg-white/[0.03] text-slate-500" : "border-gray-200 bg-gray-50 text-gray-500",
+          variant === "dark" ? "border-white/[0.08] bg-white/[0.03] text-slate-500" : "border-white/[0.08] bg-white/[0.03] text-gray-500",
         )}
       >
         No pathway selected
@@ -66,10 +66,10 @@ export function FinancialPaymentPathwayBadge(props: {
       : "border-cyan-500/25 bg-cyan-500/[0.06] text-cyan-100";
 
   const toneLight = summary.pathway_attention_required
-    ? "border-rose-200 bg-rose-50 text-rose-900"
+    ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
     : summary.pathway_status === "settled"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : "border-sky-200 bg-sky-50 text-sky-900";
+      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+      : "border-cyan-500/20 bg-cyan-500/10 text-cyan-200";
 
   return (
     <span

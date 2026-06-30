@@ -27,9 +27,9 @@ export function FinancialCaseAccountsReceivableCard(props: {
 }) {
   const { tenantId, caseId, summary, currency = "AUD", variant = "light" } = props;
   const isLight = variant === "light";
-  const shell = isLight ? "rounded border border-gray-200 bg-gray-50 p-3" : "rounded-lg border border-white/[0.06] bg-white/[0.02] p-3";
-  const titleCls = isLight ? "text-xs font-semibold text-gray-900" : "text-xs font-semibold text-slate-100";
-  const metaCls = isLight ? "text-[11px] text-gray-600" : "text-[11px] text-slate-400";
+  const shell = isLight ? "rounded border border-white/[0.08] bg-white/[0.03] p-3" : "rounded-lg border border-white/[0.06] bg-white/[0.02] p-3";
+  const titleCls = isLight ? "text-xs font-semibold text-slate-100" : "text-xs font-semibold text-slate-100";
+  const metaCls = isLight ? "text-[11px] text-slate-400" : "text-[11px] text-slate-400";
   const queueHref = `/fi-admin/${tenantId}/financial-os/accounts-receivable`;
 
   if (summary.display_status === "no_ar_issue") {
@@ -68,7 +68,7 @@ export function FinancialCaseAccountsReceivableCard(props: {
       <div className="mt-2">
         <Link
           href={queueHref}
-          className={isLight ? "text-xs font-medium text-blue-700 hover:underline" : "text-xs font-medium text-cyan-400/95 hover:text-cyan-300"}
+          className={isLight ? "text-xs font-medium text-blue-300 hover:underline" : "text-xs font-medium text-cyan-400/95 hover:text-cyan-300"}
         >
           Open AR work queue →
         </Link>

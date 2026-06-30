@@ -18,15 +18,15 @@ const STATUS_TONE_DARK: Record<FiFinanceApplicationStatus, string> = {
 };
 
 const STATUS_TONE_LIGHT: Record<FiFinanceApplicationStatus, string> = {
-  draft: "bg-slate-100 text-slate-700",
-  documents_pending: "bg-amber-50 text-amber-900",
-  submitted: "bg-sky-50 text-sky-900",
-  under_review: "bg-indigo-50 text-indigo-900",
-  approved: "bg-emerald-50 text-emerald-900",
-  rejected: "bg-rose-50 text-rose-900",
-  settlement_pending: "bg-orange-50 text-orange-900",
-  settled: "bg-emerald-100 text-emerald-950",
-  cancelled: "bg-slate-200 text-slate-700",
+  draft: "bg-white/[0.06] text-slate-300",
+  documents_pending: "bg-amber-400/10 text-amber-200",
+  submitted: "bg-cyan-500/10 text-cyan-200",
+  under_review: "bg-indigo-500/10 text-indigo-300",
+  approved: "bg-emerald-500/10 text-emerald-300",
+  rejected: "bg-rose-500/10 text-rose-300",
+  settlement_pending: "bg-orange-500/10 text-orange-300",
+  settled: "bg-emerald-500/15 text-emerald-200",
+  cancelled: "bg-white/[0.08] text-slate-300",
 };
 
 export function FinancialFinanceApplicationStatusBadge(props: {

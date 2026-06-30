@@ -43,18 +43,18 @@ export function PaymentRecordPanel(props: {
       description="Manual payment tracking for this workspace — not integrated billing, POS, or accounting."
       headingId="fi-payment-record-panel-heading"
     >
-      <div className="space-y-3 text-sm text-slate-700">
+      <div className="space-y-3 text-sm text-slate-300">
         {props.initialRows.length === 0 ? (
-          <p className="rounded border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">{emptyCopy}</p>
+          <p className="rounded border border-dashed border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-400">{emptyCopy}</p>
         ) : (
-          <ul className="divide-y divide-slate-100 rounded border border-slate-200">
+          <ul className="divide-y divide-white/[0.06] rounded border border-white/[0.08]">
             {props.initialRows.map((r) => (
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
                 <div className="min-w-0">
                   <p className="font-mono text-xs text-slate-500">{r.id}</p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-1 text-xs text-slate-400">
                     {r.currency}{" "}
-                    <span className="font-semibold text-slate-900">{r.amount_paid}</span> paid of{" "}
+                    <span className="font-semibold text-slate-100">{r.amount_paid}</span> paid of{" "}
                     <span className="font-semibold">{r.amount_expected}</span> expected
                     {r.due_date ? <span className="text-slate-500"> · due {r.due_date}</span> : null}
                   </p>
@@ -81,7 +81,7 @@ export function PaymentRecordPanel(props: {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100"
+              className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-sm font-semibold text-cyan-200 hover:bg-cyan-500/15"
             >
               Record payment…
             </button>

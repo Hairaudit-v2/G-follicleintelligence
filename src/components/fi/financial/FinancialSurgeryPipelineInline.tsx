@@ -40,16 +40,16 @@ export function FinancialSurgeryPipelineInline(props: {
         : "border-cyan-500/25 bg-cyan-500/[0.06] text-cyan-100";
 
   const toneLight = status.payment_attention_required
-    ? "border-rose-200 bg-rose-50 text-rose-900"
+    ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
     : muted
-      ? "border-gray-200 bg-gray-50 text-gray-600"
+      ? "border-white/[0.08] bg-white/[0.03] text-slate-400"
       : status.summary_label === "Paid in full"
-        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-        : "border-sky-200 bg-sky-50 text-sky-900";
+        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+        : "border-cyan-500/20 bg-cyan-500/10 text-cyan-200";
 
   const tone = variant === "dark" ? toneDark : toneLight;
   const linkCls =
-    variant === "dark" ? "text-cyan-400/95 hover:text-cyan-300" : "text-blue-700 hover:text-blue-900 hover:underline";
+    variant === "dark" ? "text-cyan-400/95 hover:text-cyan-300" : "text-blue-300 hover:text-blue-300 hover:underline";
 
   const label = muted ? FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY : status.summary_label;
 
@@ -67,20 +67,20 @@ export function FinancialSurgeryPipelineInline(props: {
         {!muted ? (
           <span className="flex flex-wrap gap-x-3 text-[0.62rem] font-medium">
             {status.task_attention_required ? (
-              <span className={variant === "dark" ? "text-amber-300" : "text-amber-800"}>{AWAITING_FINANCIAL_WORKFLOW_COPY}</span>
+              <span className={variant === "dark" ? "text-amber-300" : "text-amber-300"}>{AWAITING_FINANCIAL_WORKFLOW_COPY}</span>
             ) : null}
             {status.financeApplicationAttention.finance_attention_labels.map((label) => (
-              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-800"}>
+              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-300"}>
                 {label}
               </span>
             ))}
             {status.superReleaseApplicationAttention.super_release_attention_labels.map((label) => (
-              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-800"}>
+              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-300"}>
                 {label}
               </span>
             ))}
             {status.internationalTransferApplicationAttention.international_transfer_attention_labels.map((label) => (
-              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-800"}>
+              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-300"}>
                 {label}
               </span>
             ))}
@@ -117,7 +117,7 @@ export function FinancialSurgeryPipelineInline(props: {
     <div
       className={cn(
         "rounded-lg border p-3 text-sm",
-        variant === "dark" ? "border-white/[0.08] bg-white/[0.03]" : "border-gray-200 bg-gray-50/80",
+        variant === "dark" ? "border-white/[0.08] bg-white/[0.03]" : "border-white/[0.08] bg-white/[0.03]",
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -139,22 +139,22 @@ export function FinancialSurgeryPipelineInline(props: {
         ) : null}
       </div>
       {!muted ? (
-        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600 sm:grid-cols-4">
+        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-400 sm:grid-cols-4">
           <div>
             <dt className="text-gray-500">Paid</dt>
-            <dd className="font-mono text-gray-900">{formatMoney(status.amount_paid_cents, status.currency)}</dd>
+            <dd className="font-mono text-slate-100">{formatMoney(status.amount_paid_cents, status.currency)}</dd>
           </div>
           <div>
             <dt className="text-gray-500">Balance due</dt>
-            <dd className="font-mono text-gray-900">{formatMoney(status.balance_due_cents, status.currency)}</dd>
+            <dd className="font-mono text-slate-100">{formatMoney(status.balance_due_cents, status.currency)}</dd>
           </div>
           <div>
             <dt className="text-gray-500">Next due</dt>
-            <dd className="font-mono text-gray-900">{status.next_payment_due_date ?? "—"}</dd>
+            <dd className="font-mono text-slate-100">{status.next_payment_due_date ?? "—"}</dd>
           </div>
           <div>
             <dt className="text-gray-500">Latest pay link</dt>
-            <dd className="truncate text-gray-900">{status.latest_payment_request_status ?? "—"}</dd>
+            <dd className="truncate text-slate-100">{status.latest_payment_request_status ?? "—"}</dd>
           </div>
         </dl>
       ) : null}

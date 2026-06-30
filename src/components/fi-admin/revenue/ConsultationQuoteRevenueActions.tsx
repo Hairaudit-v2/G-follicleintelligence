@@ -74,7 +74,7 @@ export function ConsultationQuoteRevenueActions(props: {
           type="button"
           disabled={busy !== null}
           onClick={() => void onDepositInvoice()}
-          className="rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/[0.03] disabled:opacity-50"
         >
           {busy === "deposit" ? "Working…" : "Create deposit invoice (case)"}
         </button>
@@ -82,7 +82,7 @@ export function ConsultationQuoteRevenueActions(props: {
       <p className="mt-2 text-xs text-slate-500">
         Deposit amounts follow active deposit rules or explicit amounts passed from the case workspace. Nothing here auto-charges a card.
       </p>
-      {msg ? <p className="mt-2 text-sm text-slate-700">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-sm text-slate-300">{msg}</p> : null}
     </FiSection>
   );
 }
