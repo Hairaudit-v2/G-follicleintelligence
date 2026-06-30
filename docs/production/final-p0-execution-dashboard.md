@@ -118,7 +118,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Current status** | **In progress** (2/2 linked; invite + journey pending) |
+| **Current status** | **In progress** (auth gate PASS 2026-06-30; 12-step journey pending) |
 | **Final production status** | **Blocking go-live** |
 | **Assigned owner** | Paul Green (Clinic Deployment Lead) |
 | **Target completion date** | To verify |

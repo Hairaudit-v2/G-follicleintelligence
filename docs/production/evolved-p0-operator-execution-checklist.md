@@ -118,7 +118,7 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 8.1 | Login as real Evolved admin → `/fi-admin/[tenantId]/cases` | Pending invite acceptance (crm_operator) | ☐ |
+| 8.1 | Login as real Evolved admin → `/fi-admin/[tenantId]/cases` | `attachments/blk-sec-05-auth-cases-2026-06-30.jpeg` (David → SurgeryOS worklist, 3 cases) | ☑ |
 | 8.2 | Cross-tenant denial: non-member auth user cannot access Evolved tenant | `smoke-prod-2026-06-30.txt` check J PASS | ☑ |
 | 8.3 | Complete [smoketest journey](./evolved-smoketest-journey.md) authenticated sections | Unauthenticated smoke PASS; journey 0/12 | ☐ |
 
@@ -154,6 +154,6 @@
 | BLK-LEG-01 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [legacy decision](./evidence/legacy-api-decision.md) | |
 | BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
 | BLK-FIN-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
-| BLK-SEC-05 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | Identity 2/2 linked; auth journey pending | 2026-06-30 |
+| BLK-SEC-05 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | Auth gate PASS; 12-step journey pending | 2026-06-30 |
 
 **Verifier (name + date):** ___________________________

@@ -49,10 +49,10 @@ Analytics Updated
 | Field | Value |
 |-------|-------|
 | **Execution attempted** | Partial (unauthenticated smoke only) |
-| **Blocking reason** | Authenticated UI journey — crm_operator invite pending acceptance |
-| **Prerequisite** | Operator accepts Supabase invite; login → `/fi-admin/c2615b95…/cases` |
-| **Overall completed** | **No** (0 / 12 steps; infra smoke PASS) |
-| **Evidence package** | `evidence/attachments/smoke-prod-2026-06-30.txt` |
+| **Blocking reason** | Clinical journey steps 1–12 not yet executed with SMOKETEST- records |
+| **Prerequisite** | Auth gate passed 2026-06-30; proceed with SMOKETEST- prefixed records |
+| **Overall completed** | **No** (0 / 12 steps; auth + infra smoke PASS) |
+| **Evidence package** | `smoke-prod-2026-06-30.txt`, `blk-sec-05-auth-cases-2026-06-30.jpeg` |
 
 ---
 
@@ -61,11 +61,11 @@ Analytics Updated
 | Field | Value |
 |-------|-------|
 | **Journey ID** | SMOKETEST-JOURNEY-001 |
-| **Operator** | To verify |
-| **Date** | To verify |
+| **Operator** | David (Audit @hairaudit.co) |
+| **Date** | 2026-06-30 |
 | **Environment URL** | https://www.follicleintelligence.ai |
 | **Tenant ID** | `c2615b95-b707-4485-aa5f-be8f78ec868a` (evolved-hair / Evolved Hair Restoration) |
-| **Staff session** | 2 linked operators (tenant_backend + crm_operator); invite pending |
+| **Staff session** | Authenticated — David → SurgeryOS worklist (see `blk-sec-05-auth-cases-2026-06-30.jpeg`) |
 | **Overall result** | ☐ Pass · ☑ Fail · ☐ Partial (Accepted risk) |
 
 **Linked records (fill as journey progresses):**
@@ -97,7 +97,7 @@ Analytics Updated
 | **Pass / Fail** | Fail (not executed) |
 | **Completed** | **No** |
 | **Evidence captured** | **No** |
-| **Failure notes** | Journey not started — requires authenticated production session (BLK-SEC-05). BLK-X-03: confirm which lead model is SoR for Evolved before execution. |
+| **Failure notes** | Auth gate passed 2026-06-30 (David → SurgeryOS). Step not executed — create SMOKETEST-LEAD-001. BLK-X-03: confirm which lead model is SoR for Evolved. |
 
 ---
 
