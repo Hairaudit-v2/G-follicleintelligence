@@ -426,7 +426,7 @@ export function resolveFiOsPrimarySidebarItems(
             id: "hr-os",
             label: "WorkforceOS",
             shortLabel: "Workforce",
-            href: hrefFor(b, "hr-os"),
+            href: hrefFor(b, "workforce-os"),
             disabled: false,
             hint: "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
           } satisfies FiOsPrimarySidebarItem,

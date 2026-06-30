@@ -82,9 +82,9 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 85,
+    completionPercent: 88,
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and active staffing orchestration.",
+      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, employment lifecycle, and active staffing orchestration.",
   },
   {
     id: "hairaudit",
@@ -505,13 +505,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 76,
-    stage: "Phase 2F · workforce command centre",
+    completionPercent: 81,
+    stage: "Phase 1C · staff lifecycle management",
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and staffing orchestration.",
+      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, employment lifecycle, and HR reconciliation.",
     status: "Active Development",
     statusLabel: "Operational Beta",
-    latestMilestone: "Workforce Command Centre v1",
+    latestMilestone: "Staff lifecycle management and HR reconciliation",
   },
   {
     id: "onboarding-os",
@@ -975,6 +975,15 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     summary:
       "OnboardingOS Phase A–B foundations added: tenant provisioning sessions, deployment templates, module bundle activation planning, role packs, service workflow templates, and sandbox seed planning.",
     modules: ["OnboardingOS"],
+  },
+  {
+    id: "2026-07-01-workforce-os-staff-lifecycle",
+    date: "2026-07-01",
+    tag: "workforce-os",
+    title: "WorkforceOS staff lifecycle management added",
+    summary:
+      "WorkforceOS staff lifecycle management added, introducing employment lifecycle controls, external HR identity management, reconciliation workflows, archival controls, and audit-backed workforce identity governance.",
+    modules: ["WorkforceOS"],
   },
   {
     id: "2026-06-26-workforce-command-centre-v1",

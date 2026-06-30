@@ -19,6 +19,8 @@ import {
 } from "@/src/lib/workforce-os/workforceIdentityReadinessSignals";
 import type { WorkforceIdentitySourceRowInput } from "@/src/lib/workforce-os/workforceIdentitySummary";
 import type { AcademyCompetencySignals } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
+import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { isOperationallyIneligible } from "@/src/lib/workforce-os/staffLifecycleCore";
 import {
   clampWorkforceReadinessScore,
   resolveWorkforceReadinessBand,
@@ -60,10 +62,14 @@ export type WorkforceReadinessWarning =
   | "academy_sync_stale"
   | "hr_sync_stale"
   | "working_hours_incomplete"
-  | "competency_review_due_soon";
+  | "competency_review_due_soon"
+  | "employment_on_leave"
+  | "employment_suspended";
 
 export type WorkforceReadinessScoreInput = {
   is_active: boolean;
+  /** WorkforceOS employment lifecycle — overrides is_active when set. */
+  employment_status?: StaffEmploymentStatus | null;
   staff_role: string | null | undefined;
   working_hours: Record<string, unknown> | null | undefined;
   hr: StaffHrNotificationSummary;
@@ -85,6 +91,8 @@ export type WorkforceReadinessScoreResult = {
   blocking_issues: WorkforceReadinessBlockingIssue[];
   warnings: WorkforceReadinessWarning[];
   identitySignals: WorkforceIdentityReadinessSignals;
+  /** True when employment status removes staff from operational workforce. */
+  operationally_ineligible: boolean;
 };
 
 export const WORKFORCE_READINESS_FACTOR_WEIGHTS: Record<WorkforceReadinessFactorKey, number> = {
@@ -374,8 +382,12 @@ function collectWarnings(input: {
   competencyItems: StaffComplianceItem[];
   competencyReviewDueAt: string | null;
   now: Date;
+  employment_status?: StaffEmploymentStatus | null;
 }): WorkforceReadinessWarning[] {
   const warnings: WorkforceReadinessWarning[] = [];
+
+  if (input.employment_status === "on_leave") warnings.push("employment_on_leave");
+  if (input.employment_status === "suspended") warnings.push("employment_suspended");
 
   if (input.signals.isAcademySyncStale) warnings.push("academy_sync_stale");
   if (input.signals.isHrSyncStale || input.hr.isSyncStale) warnings.push("hr_sync_stale");
@@ -444,6 +456,30 @@ export function calculateWorkforceReadinessScore(
   input: WorkforceReadinessScoreInput
 ): WorkforceReadinessScoreResult {
   const now = input.now ?? new Date();
+  const employmentStatus = input.employment_status ?? null;
+  const terminatedLike =
+    employmentStatus != null && isOperationallyIneligible(employmentStatus);
+
+  if (terminatedLike) {
+    const signals = buildWorkforceIdentityReadinessSignals(
+      input.identityRows,
+      now,
+      input.academyCompetencySignals ?? null
+    );
+    const bandDetail = resolveWorkforceReadinessBand(0);
+    return {
+      score: 0,
+      band: bandDetail.id,
+      bandLabel: bandDetail.label,
+      bandDetail,
+      factors: [],
+      blocking_issues: ["inactive"],
+      warnings: [],
+      identitySignals: signals,
+      operationally_ineligible: true,
+    };
+  }
+
   const signals = buildWorkforceIdentityReadinessSignals(
     input.identityRows,
     now,
@@ -538,6 +574,7 @@ export function calculateWorkforceReadinessScore(
     competencyItems,
     competencyReviewDueAt,
     now,
+    employment_status: employmentStatus,
   });
 
   return {
@@ -549,6 +586,9 @@ export function calculateWorkforceReadinessScore(
     blocking_issues,
     warnings,
     identitySignals: signals,
+    operationally_ineligible:
+      (employmentStatus != null && isOperationallyIneligible(employmentStatus)) ||
+      employmentStatus === "suspended",
   };
 }
 
@@ -571,4 +611,6 @@ export const WORKFORCE_READINESS_WARNING_LABELS: Record<WorkforceReadinessWarnin
   hr_sync_stale: "HR sync is older than 14 days",
   working_hours_incomplete: "Working hours not fully configured",
   competency_review_due_soon: "Competency review due soon",
+  employment_on_leave: "On leave — excluded from scheduling pools",
+  employment_suspended: "Suspended — procedure participation blocked",
 };
