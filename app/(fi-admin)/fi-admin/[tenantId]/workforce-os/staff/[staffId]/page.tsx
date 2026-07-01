@@ -24,7 +24,7 @@ export default async function WorkforceOsStaffProfilePage({
   if (!data) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-4xl pb-8">
       <WorkforceOsStaffProfileClient
         tenantId={tenantId.trim()}
         lifecycle={data.lifecycle}

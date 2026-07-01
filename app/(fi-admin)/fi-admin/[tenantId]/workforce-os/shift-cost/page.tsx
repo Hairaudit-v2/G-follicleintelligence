@@ -27,7 +27,7 @@ export default async function WorkforceOsShiftCostPage({
   if (!data) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl pb-8">
       <WorkforceOsShiftCostClient
         tenantId={tenantId.trim()}
         intelligence={data.intelligence}

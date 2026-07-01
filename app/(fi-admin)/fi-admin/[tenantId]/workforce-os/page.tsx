@@ -1,17 +1,17 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
-import { WorkforceOsDirectoryClient } from "@/src/components/fi/workforce/WorkforceOsDirectoryClient";
-import { loadWorkforceOsDirectoryPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { WorkforceCommandCentreClient } from "@/src/components/fi-admin/workforce/WorkforceCommandCentreClient";
+import { loadWorkforceCommandCentrePage } from "@/src/lib/workforce/workforceCommandCentrePage.server";
 
 export const metadata = {
-  title: "WorkforceOS",
+  title: "Workforce Command Centre · WorkforceOS",
   robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function WorkforceOsDirectoryPage({
+export default async function WorkforceOsCommandCentrePage({
   params,
 }: {
   params: Promise<{ tenantId: string }>;
@@ -20,16 +20,12 @@ export default async function WorkforceOsDirectoryPage({
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const data = await loadWorkforceOsDirectoryPage(tenantId.trim());
+  const data = await loadWorkforceCommandCentrePage(tenantId.trim());
   if (!data) notFound();
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <WorkforceOsDirectoryClient
-        tenantId={tenantId.trim()}
-        rows={data.rows}
-        canManage={data.canManage}
-      />
+    <div className="pb-8">
+      <WorkforceCommandCentreClient tenantId={tenantId.trim()} data={data} />
     </div>
   );
 }

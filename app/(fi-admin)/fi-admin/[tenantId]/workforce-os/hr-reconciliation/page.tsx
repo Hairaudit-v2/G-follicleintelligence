@@ -24,7 +24,7 @@ export default async function WorkforceOsHrReconciliationPage({
   if (!data) notFound();
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl pb-8">
       <HrReconciliationClient tenantId={tenantId.trim()} initialSuggestions={data.suggestions} />
     </div>
   );

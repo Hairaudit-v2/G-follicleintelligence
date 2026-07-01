@@ -72,51 +72,11 @@ export function WorkforceOsDirectoryClient({
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
             WorkforceOS
           </p>
-          <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Staff directory</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Workforce members</h1>
           <p className="mt-2 text-sm text-[#94A3B8]">
             Employment lifecycle, identity source, and HR link governance.
           </p>
         </div>
-        {canManage ? (
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={`${base}/planning`}
-              className="rounded-lg border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-4 py-2 text-sm font-medium text-[#22C1FF] hover:bg-[#22C1FF]/15"
-            >
-              Workforce planning
-            </Link>
-            <Link
-              href={`${base}/recruitment`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
-            >
-              Recruitment pipeline
-            </Link>
-            <Link
-              href={`${base}/payroll`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
-            >
-              Payroll & wages
-            </Link>
-            <Link
-              href={`${base}/shift-cost`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
-            >
-              Shift cost intelligence
-            </Link>
-            <Link
-              href={`${base}/procedure-staffing`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
-            >
-              Procedure staffing
-            </Link>
-            <Link
-              href={`${base}/hr-reconciliation`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
-            >
-              HR reconciliation
-            </Link>
-          </div>
-        ) : null}
       </header>
 
       <div className="flex flex-wrap items-center gap-2">

@@ -13,7 +13,7 @@ import { StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHr
 import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffWeeklyHoursEditor } from "@/src/components/fi/staff/StaffWeeklyHoursEditor";
-import { WorkforceCommandCentreView } from "@/src/components/fi/staff/WorkforceCommandCentreView";
+import { StaffDirectorySecondaryView } from "@/src/components/fi/staff/StaffDirectorySecondaryView";
 import { detectStaffHrSyncIssues } from "@/src/lib/hr/hrStaffSyncHealthDashboard";
 import type { StaffDirectoryPageResult } from "@/src/lib/staff/staffDirectoryLoader.server";
 import {
@@ -30,7 +30,7 @@ import {
   NEEDS_REVIEW_STAFF_ROLE,
 } from "@/src/lib/staff/staffRolePolicy";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
-import type { WorkforceRoleSegmentId } from "@/src/lib/staff/workforceCommandCentre";
+
 import { parseExplicitWorkspaceProfile } from "@/src/lib/fi-os/workspaceProfileDerivation";
 import {
   parseStaffWeeklyHours,
@@ -88,7 +88,6 @@ export function StaffDirectoryClient({
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}`;
-  const [roleSegment, setRoleSegment] = useState<WorkforceRoleSegmentId>("all");
   const [mode, setMode] = useState<Mode>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Record<string, string>>(emptyForm());
@@ -216,8 +215,9 @@ export function StaffDirectoryClient({
 
   return (
     <div className="mx-auto max-w-[88rem] space-y-6 py-6">
-      <WorkforceCommandCentreView
+      <StaffDirectorySecondaryView
         base={base}
+        workforceOsBase={`${base}/workforce-os`}
         canManage={canManage}
         showTwinLinks={showTwinLinks}
         viewerStaffId={viewerStaffId}
@@ -225,8 +225,6 @@ export function StaffDirectoryClient({
         directoryRows={visibleRows}
         intelligenceByStaffId={intelligenceByStaffId}
         operationalMetrics={data.workforceOperationalMetrics}
-        roleSegment={roleSegment}
-        onRoleSegmentChange={setRoleSegment}
         onAddStaff={openCreate}
         onEditStaff={openEdit}
       />
