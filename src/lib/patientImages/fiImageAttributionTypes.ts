@@ -12,6 +12,10 @@ export const FI_IMAGE_CAPTURE_SOURCES = [
   "profile_upload_form",
   "appointment_procedure",
   "appointment_procedure_admin_fallback",
+  "consultation_os",
+  "patient_portal",
+  "iiohr_academy",
+  "follow_up_outcome",
   "unknown",
 ] as const;
 export type FiImageCaptureSource = (typeof FI_IMAGE_CAPTURE_SOURCES)[number];

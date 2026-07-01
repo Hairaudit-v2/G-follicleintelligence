@@ -273,5 +273,10 @@ describe("dualWriteHliDocumentToPatientLibrary", () => {
     });
     assert.ok(insertedMetadata);
     assert.ok(insertedMetadata.imaging_quality);
+    assert.ok(insertedMetadata.imaging_os_ingest);
+    assert.equal(
+      (insertedMetadata.imaging_os_ingest as { source_system?: string }).source_system,
+      "hli"
+    );
   });
 });

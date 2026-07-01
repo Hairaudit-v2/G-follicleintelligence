@@ -33,6 +33,7 @@ import type {
   FiImageMetadata,
   PatientImagePostCaptureResult,
 } from "./fiImageAttributionTypes";
+import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
 import { buildPatientImageDerivativeStoragePath } from "./patientImagePaths";
 import { PATIENT_IMAGES_BUCKET_DEFAULT } from "./patientImagePolicy";
 import type { CreatePatientImageUploadInput } from "./patientImageTypes";
@@ -209,6 +210,27 @@ export async function runPatientImagePostCapturePipeline(
       ? (existingRow.metadata as Record<string, unknown>)
       : {};
 
+  const unifiedIngestPatch = buildUnifiedIngestMetadataPatch({
+    tenant_id: tid,
+    patient_id: pid,
+    image_id: existingRow.id,
+    case_id: existingRow.case_id,
+    consultation_id: existingRow.consultation_id,
+    storage_bucket: existingRow.storage_bucket,
+    storage_path: existingRow.storage_path,
+    content_type: input.contentType,
+    size_bytes: input.file.size,
+    capture_source: captureSource,
+    image_category: existingRow.image_category,
+    protocol_template_slug: existingRow.imaging_protocol_template_slug,
+    protocol_slot_slug: existingRow.imaging_protocol_slot_slug,
+    follow_up_interval: existingRow.follow_up_interval,
+    visit_type: existingRow.visit_type,
+    anatomical_region: existingRow.anatomical_region,
+    captured_by_staff_id: existingRow.captured_by_staff_id,
+    metadata: rowMetadata,
+  });
+
   const imagingQualityRun = await runImagingQualityEvaluation({
     tenantId: tid,
     patientId: pid,
@@ -242,7 +264,10 @@ export async function runPatientImagePostCapturePipeline(
   if (imagingQualityRun.evaluation.shouldBlockUpload) {
     return {
       updatedRow: existingRow as unknown as Record<string, unknown>,
-      metadata_patch: { imaging_quality: imagingQualityRun.metadata_record },
+      metadata_patch: {
+        ...unifiedIngestPatch,
+        imaging_quality: imagingQualityRun.metadata_record,
+      },
       quality: {
         ...quality,
         alert_message:
@@ -480,6 +505,7 @@ export async function runPatientImagePostCapturePipeline(
   }
 
   const metadataPatch: Record<string, unknown> = {
+    ...unifiedIngestPatch,
     fi_image_metadata: fiImageMetadata,
     fi_image_quality: quality,
     imaging_quality: imagingQualityRun.metadata_record,

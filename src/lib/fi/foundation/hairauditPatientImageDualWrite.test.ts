@@ -151,6 +151,8 @@ describe("hairaudit patient image dual-write core", () => {
     });
     assert.ok(insertedMetadata);
     assert.ok(insertedMetadata.imaging_quality);
+    assert.ok(insertedMetadata.imaging_os_ingest);
+    assert.ok(insertedMetadata.imaging_session);
   });
 
   it("buildHairAuditPatientImageMetadata includes audit relationships", () => {

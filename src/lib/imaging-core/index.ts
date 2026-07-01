@@ -3,3 +3,4 @@
  */
 
 export * from "./vocabulary";
+export * from "./ingest";

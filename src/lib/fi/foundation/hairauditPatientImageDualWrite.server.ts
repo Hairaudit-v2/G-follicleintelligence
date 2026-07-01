@@ -10,6 +10,7 @@ import { buildImagingQualityMetadataRecord } from "@/src/lib/imaging-os/imageQua
 import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQualityPolicy";
 import { loadImagingQualityPolicyForTenant } from "@/src/lib/imaging-os/imageQualityPolicy.server";
 import type { ImagingQualityTenantPolicy } from "@/src/lib/imaging-os/imageQualityPolicy";
+import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
 import {
   planHairAuditPatientImageInsert,
   type HairAuditPatientImageInsertPlan,
@@ -198,8 +199,26 @@ export async function dualWriteHairAuditImagesToPatientLibrary(
         },
         policy: qualityPolicy,
       });
+      const unifiedIngestPatch = buildUnifiedIngestMetadataPatch({
+        tenant_id: tenantId,
+        patient_id: patientCtx.patientId,
+        image_id: uploadIdsByStoragePath?.[storagePath] ?? fiEventId,
+        case_id: fiCaseId,
+        storage_bucket: plan.storage_bucket,
+        storage_path: plan.storage_path,
+        content_type: image.mime_type ?? null,
+        size_bytes: image.size_bytes ?? null,
+        upload_source: "hairaudit",
+        capture_source: "hairaudit",
+        hairaudit_image_type: image.type,
+        fi_event_id: fiEventId,
+        fi_upload_id: uploadIdsByStoragePath?.[storagePath] ?? null,
+        external_category: image.type,
+        metadata: plan.metadata,
+      });
       plan.metadata = {
         ...plan.metadata,
+        ...unifiedIngestPatch,
         imaging_quality: buildImagingQualityMetadataRecord({
           evaluation: qualityEvaluation,
           blur_status: "unknown",

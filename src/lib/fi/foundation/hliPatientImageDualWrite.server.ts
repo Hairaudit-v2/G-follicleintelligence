@@ -10,6 +10,7 @@ import { buildImagingQualityMetadataRecord } from "@/src/lib/imaging-os/imageQua
 import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQualityPolicy";
 import { loadImagingQualityPolicyForTenant } from "@/src/lib/imaging-os/imageQualityPolicy.server";
 import type { ImagingQualityTenantPolicy } from "@/src/lib/imaging-os/imageQualityPolicy";
+import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
 import {
   planHliPatientImageInsert,
   type HliPatientImageInsertPlan,
@@ -201,8 +202,26 @@ export async function dualWriteHliDocumentToPatientLibrary(
       },
       policy: qualityPolicy,
     });
+    const unifiedIngestPatch = buildUnifiedIngestMetadataPatch({
+      tenant_id: tenantId,
+      patient_id: patientCtx.patientId,
+      image_id: fiUploadId ?? fiEventId,
+      case_id: fiCaseId,
+      storage_bucket: plan.storage_bucket,
+      storage_path: plan.storage_path,
+      content_type: document.mime_type ?? null,
+      size_bytes: document.size_bytes ?? null,
+      upload_source: "hair_longevity",
+      capture_source: "hli",
+      hli_document_kind: document.kind,
+      fi_event_id: fiEventId,
+      fi_upload_id: fiUploadId ?? null,
+      external_category: document.kind,
+      metadata: plan.metadata,
+    });
     plan.metadata = {
       ...plan.metadata,
+      ...unifiedIngestPatch,
       imaging_quality: buildImagingQualityMetadataRecord({
         evaluation: qualityEvaluation,
         blur_status: "unknown",
