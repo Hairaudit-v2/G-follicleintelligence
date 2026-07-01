@@ -1,16 +1,19 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 import {
   approvePatientVisualSummaryReportAction,
   loadPatientVisualSummaryReportAction,
+  loadPatientVisualSummaryStaffRecordAction,
   regeneratePatientVisualSummaryReportAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { PatientVisualSummaryReportView } from "./PatientVisualSummaryReport";
+import { PatientVisualSummaryZoneEditor } from "./PatientVisualSummaryZoneEditor";
 import type {
   PatientVisualSummaryReport,
   PatientVisualSummaryReportType,
+  PatientVisualSummaryStaffRecord,
 } from "@/src/lib/imaging-os/patientVisualSummaryReportTypes";
 
 export function PatientVisualSummaryReportPanel({
@@ -20,6 +23,7 @@ export function PatientVisualSummaryReportPanel({
   surgeryId,
   reportType,
   adminKey,
+  surgeryGraftTotal,
   compact = false,
 }: {
   tenantId: string;
@@ -28,12 +32,29 @@ export function PatientVisualSummaryReportPanel({
   surgeryId?: string | null;
   reportType: PatientVisualSummaryReportType;
   adminKey?: string;
+  surgeryGraftTotal?: number | null;
   compact?: boolean;
 }) {
   const [report, setReport] = useState<PatientVisualSummaryReport | null>(null);
+  const [staffRecord, setStaffRecord] = useState<PatientVisualSummaryStaffRecord | null>(null);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
+
+  const loadStaffRecord = useCallback(() => {
+    if (!caseId) return;
+    start(async () => {
+      const res = await loadPatientVisualSummaryStaffRecordAction(tenantId, {
+        adminKey,
+        caseId,
+      });
+      if (res.ok) setStaffRecord(res.record);
+    });
+  }, [tenantId, caseId, adminKey]);
+
+  useEffect(() => {
+    loadStaffRecord();
+  }, [loadStaffRecord]);
 
   const loadReport = useCallback(() => {
     start(async () => {
@@ -137,6 +158,23 @@ export function PatientVisualSummaryReportPanel({
       </div>
 
       {message ? <p className="text-xs text-amber-200/90">{message}</p> : null}
+
+      {caseId && !compact ? (
+        <PatientVisualSummaryZoneEditor
+          tenantId={tenantId}
+          caseId={caseId}
+          surgeryId={surgeryId}
+          surgeryGraftTotal={surgeryGraftTotal}
+          initialRecord={staffRecord}
+          adminKey={adminKey}
+          onSaved={() => {
+            loadStaffRecord();
+            if (open) loadReport();
+          }}
+        />
+      ) : !compact && !caseId ? (
+        <p className="text-xs text-slate-500">Link a case to record recipient zone data.</p>
+      ) : null}
 
       {open && report ? (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 sm:p-8">

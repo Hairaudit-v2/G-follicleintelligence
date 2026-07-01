@@ -932,3 +932,134 @@ export async function regeneratePatientVisualSummaryReportAction(
     return { ok: false, error: errMsg(e) };
   }
 }
+
+const zoneDraftSchema = z
+  .object({
+    zone_id: z.enum(["zone_1", "zone_2", "zone_3", "zone_4"]),
+    graft_count: z.string().optional(),
+    density_range: z.string().optional(),
+    grafts_per_cm2: z.string().optional(),
+    singles: z.string().optional(),
+    doubles: z.string().optional(),
+    triples: z.string().optional(),
+    multi_hair: z.string().optional(),
+    five_hair: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .strict();
+
+const visualSummaryZoneSaveSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    caseId: z.string().uuid(),
+    surgeryId: z.string().uuid().nullable().optional(),
+    surgeryGraftTotal: z.number().int().nonnegative().nullable().optional(),
+    zones: z.array(zoneDraftSchema),
+    followUpPlan: z.string().nullable().optional(),
+  })
+  .strict();
+
+export async function savePatientVisualSummaryZoneRecordAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; warnings: string[] } | { ok: false; error: string }> {
+  try {
+    const parsed = visualSummaryZoneSaveSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+
+    const { draftsToZoneInputs, validateAndBuildStaffRecord } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryRecordCore");
+    const { savePatientVisualSummaryStaffRecord } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryReportMutations.server");
+
+    let surgeryGraftTotal = parsed.surgeryGraftTotal ?? null;
+    if (surgeryGraftTotal == null && parsed.surgeryId?.trim()) {
+      const { loadGraftSessionsForSurgeries } =
+        await import("@/src/lib/surgeryOs/surgeryGraftMutations.server");
+      const sessions = await loadGraftSessionsForSurgeries(tenantId.trim(), [parsed.surgeryId.trim()]);
+      const session = sessions.get(parsed.surgeryId.trim());
+      if (session) {
+        surgeryGraftTotal =
+          session.implanted_grafts > 0
+            ? session.implanted_grafts
+            : session.extracted_grafts > 0
+              ? session.extracted_grafts
+              : null;
+      }
+    }
+
+    const zoneDrafts = parsed.zones.map((z) => ({
+      zone_id: z.zone_id,
+      graft_count: z.graft_count ?? "",
+      density_range: z.density_range ?? "",
+      grafts_per_cm2: z.grafts_per_cm2 ?? "",
+      singles: z.singles ?? "",
+      doubles: z.doubles ?? "",
+      triples: z.triples ?? "",
+      multi_hair: z.multi_hair ?? "",
+      five_hair: z.five_hair ?? "",
+      notes: z.notes ?? "",
+    }));
+
+    const validation = validateAndBuildStaffRecord({
+      zones: draftsToZoneInputs(zoneDrafts),
+      followUpPlan: parsed.followUpPlan ?? null,
+      surgeryGraftTotal,
+    });
+    if (!validation.ok) {
+      return { ok: false, error: validation.errors.join(" ") };
+    }
+
+    await savePatientVisualSummaryStaffRecord({
+      tenantId,
+      caseId: parsed.caseId,
+      record: validation.record,
+    });
+
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/cases/${parsed.caseId}`);
+    return { ok: true, warnings: validation.warnings };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const visualSummaryStaffRecordLoadSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    caseId: z.string().uuid(),
+  })
+  .strict();
+
+export async function loadPatientVisualSummaryStaffRecordAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; record: import("@/src/lib/imaging-os/patientVisualSummaryReportTypes").PatientVisualSummaryStaffRecord | null }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = visualSummaryStaffRecordLoadSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
+    const { readPatientVisualSummaryStaffRecord } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryReportCore");
+    const supabase = supabaseAdmin();
+    const { data, error } = await supabase
+      .from("fi_cases")
+      .select("metadata, tenant_id")
+      .eq("id", parsed.caseId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data || String(data.tenant_id) !== tenantId.trim()) {
+      return { ok: false, error: "Case not found." };
+    }
+    const meta =
+      data.metadata && typeof data.metadata === "object" && !Array.isArray(data.metadata)
+        ? (data.metadata as Record<string, unknown>)
+        : {};
+    return { ok: true, record: readPatientVisualSummaryStaffRecord(meta) };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}

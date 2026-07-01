@@ -56,6 +56,7 @@ export type PatientVisualSummaryGraftTypeMix = {
   doubles?: number;
   triples?: number;
   multiHair?: number;
+  fiveHair?: number;
 };
 
 export type PatientVisualSummaryRecipientZone = {
@@ -118,6 +119,7 @@ export type PatientVisualSummaryReport = {
   healingTimeline: PatientVisualSummaryTimelineMilestone[];
   timelineVariationNote: string;
   monitoringItems: string[];
+  followUpPlan: string | null;
   auditSummary: PatientVisualSummaryAuditSummary | null;
   approval: PatientVisualSummaryApprovalRecord;
   patientAccessAllowed: boolean;
@@ -141,4 +143,5 @@ export type PatientVisualSummaryStaffRecord = {
   hairline_principles?: string[];
   five_hair_grafts?: number;
   patient_safe_audit_summary?: string;
+  follow_up_plan?: string;
 };

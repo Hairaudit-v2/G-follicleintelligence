@@ -10,9 +10,11 @@ import {
   mergePatientVisualSummaryApprovalMetadata,
   readPatientVisualSummaryApproval,
 } from "./patientVisualSummaryApprovalCore";
+import { mergeStaffRecordIntoCaseMetadata } from "./patientVisualSummaryRecordCore";
 import type {
   PatientVisualSummaryApprovalRecord,
   PatientVisualSummaryReportType,
+  PatientVisualSummaryStaffRecord,
 } from "./patientVisualSummaryReportTypes";
 
 async function loadCaseMetadata(caseId: string, tenantId: string): Promise<Record<string, unknown>> {
@@ -82,6 +84,19 @@ export async function markPatientVisualSummaryExported(input: {
   const record = buildExportedPatientVisualSummaryRecord(existing);
   await saveCaseMetadata(caseId, tid, mergePatientVisualSummaryApprovalMetadata(metadata, record));
   return record;
+}
+
+export async function savePatientVisualSummaryStaffRecord(input: {
+  tenantId: string;
+  caseId: string;
+  record: PatientVisualSummaryStaffRecord;
+}): Promise<PatientVisualSummaryStaffRecord> {
+  const caseId = assertNonEmptyUuid(input.caseId, "caseId");
+  const tid = input.tenantId.trim();
+  const metadata = await loadCaseMetadata(caseId, tid);
+  const merged = mergeStaffRecordIntoCaseMetadata(metadata, input.record);
+  await saveCaseMetadata(caseId, tid, merged);
+  return input.record;
 }
 
 export async function regeneratePatientVisualSummaryDraft(input: {

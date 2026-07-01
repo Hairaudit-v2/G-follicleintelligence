@@ -106,12 +106,24 @@ export function PatientVisualSummaryReportView({ report }: { report: PatientVisu
               <p className="font-medium text-slate-200">{zone.label}</p>
               <p className="text-xs text-slate-500">{zone.description}</p>
               <div className="mt-2 grid gap-1 text-xs sm:grid-cols-2">
-                <p>
-                  Grafts: {formatZoneDisplayValue(zone.graftCount)}
-                </p>
+                <p>Grafts: {formatZoneDisplayValue(zone.graftCount)}</p>
                 <p>
                   Density: {zone.densityRange?.trim() || PATIENT_VISUAL_SUMMARY_NOT_RECORDED}
                 </p>
+                {zone.graftTypeMix && Object.keys(zone.graftTypeMix).length > 0 ? (
+                  <p className="sm:col-span-2 text-slate-400">
+                    Mix:{" "}
+                    {[
+                      zone.graftTypeMix.singles != null ? `S ${zone.graftTypeMix.singles}` : null,
+                      zone.graftTypeMix.doubles != null ? `D ${zone.graftTypeMix.doubles}` : null,
+                      zone.graftTypeMix.triples != null ? `T ${zone.graftTypeMix.triples}` : null,
+                      zone.graftTypeMix.multiHair != null ? `4+ ${zone.graftTypeMix.multiHair}` : null,
+                      zone.graftTypeMix.fiveHair != null ? `5 ${zone.graftTypeMix.fiveHair}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || PATIENT_VISUAL_SUMMARY_NOT_RECORDED}
+                  </p>
+                ) : null}
               </div>
             </div>
           ))}
@@ -170,6 +182,13 @@ export function PatientVisualSummaryReportView({ report }: { report: PatientVisu
         </ul>
         <p className="text-xs text-slate-500">{report.timelineVariationNote}</p>
       </section>
+
+      {report.followUpPlan ? (
+        <section className="space-y-2">
+          <SectionTitle>Follow-up plan</SectionTitle>
+          <p className="text-sm text-slate-300">{report.followUpPlan}</p>
+        </section>
+      ) : null}
 
       <section className="space-y-2">
         <SectionTitle>What we will monitor</SectionTitle>

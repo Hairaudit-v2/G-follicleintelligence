@@ -547,6 +547,11 @@ export function buildPatientVisualSummaryReport(
     healingTimeline: HEALING_TIMELINE_MILESTONES,
     timelineVariationNote: "Timelines vary between patients.",
     monitoringItems: [...MONITORING_ITEMS],
+    followUpPlan:
+      staffRecord?.follow_up_plan?.trim() &&
+      patientSafeReportTextIsAllowed(staffRecord.follow_up_plan)
+        ? staffRecord.follow_up_plan.trim()
+        : null,
     auditSummary:
       input.reportType === "hairaudit_visual_summary"
         ? buildHairAuditAuditSummary({

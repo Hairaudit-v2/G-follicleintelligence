@@ -36,6 +36,12 @@ export default async function PatientPortalLayout({
             >
               Photography
             </Link>
+            <Link
+              href={`${base}/visual-summary`}
+              className="text-sm font-medium text-slate-300 transition hover:text-cyan-300"
+            >
+              Visual summaries
+            </Link>
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-400">
             {access.status === "unauthenticated" ? (

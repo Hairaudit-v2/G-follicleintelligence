@@ -38,6 +38,8 @@ export * from "./patientSafeImagingExportMapperCore";
 export * from "./patientVisualSummaryReportTypes";
 export * from "./patientVisualSummaryApprovalCore";
 export * from "./patientVisualSummaryReportCore";
+export * from "./patientVisualSummaryRecordCore";
+export * from "./patientVisualSummaryPortalCore";
 export * from "./imageDuplicateDetectionCore";
 export * from "./summary";
 export * from "./aiVision";
