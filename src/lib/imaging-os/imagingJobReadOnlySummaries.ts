@@ -23,7 +23,13 @@ export type ReadOnlyJobSummary = {
 export type ImagingJobSummariesMetadata = {
   density_estimate?: ReadOnlyJobSummary;
   norwood_grade?: ReadOnlyJobSummary;
+  outcome_score?: ReadOnlyJobSummary;
 };
+
+const OUTCOME_SCORE_STAFF_LIMITATIONS = [
+  "Not a predictive simulation",
+  "For staff review only",
+] as const;
 
 export function buildUnavailableJobSummary(input: {
   limitations: string[];
@@ -195,4 +201,64 @@ export function buildNorwoodGradeSummary(input: {
       "Do not present to patients as a diagnosis.",
     ],
   });
+}
+
+/**
+ * Conservative staff outcome summary — not predictive surgery simulation.
+ * Returns unavailable when live outcome scoring is not supported.
+ */
+export function buildOutcomeScoreSummary(input: {
+  metadata: Record<string, unknown>;
+  providerSupported?: boolean;
+  aiImageCategoryConfidence?: number | null;
+}): ReadOnlyJobSummary {
+  if (input.providerSupported === false) {
+    return buildUnavailableJobSummary({
+      limitations: [...OUTCOME_SCORE_STAFF_LIMITATIONS, "Outcome scoring provider is not enabled."],
+      observations: ["Automated outcome scoring is not available for this image."],
+    });
+  }
+
+  const clinical = readImagingClinicalAiMetadata(input.metadata);
+  const jobSummaries = readImagingJobSummaries(input.metadata);
+  const hasPriorOutcome = Boolean(jobSummaries.outcome_score);
+  const confidence = clinical?.confidence ?? input.aiImageCategoryConfidence ?? 0;
+
+  if (!clinical && !hasPriorOutcome) {
+    return buildUnavailableJobSummary({
+      limitations: [...OUTCOME_SCORE_STAFF_LIMITATIONS],
+      observations: [
+        "Clinical image analysis is required before an outcome staff summary can be prepared.",
+      ],
+    });
+  }
+
+  const observations: string[] = [];
+  if (clinical?.donor_assessment?.observations?.length) {
+    observations.push(...clinical.donor_assessment.observations.slice(0, 2));
+  }
+  if (clinical?.recipient_assessment?.observations?.length) {
+    observations.push(...clinical.recipient_assessment.observations.slice(0, 2));
+  }
+  if (observations.length === 0) {
+    observations.push("Staff may compare this capture with prior longitudinal images.");
+  }
+
+  const summary_status =
+    confidence >= CLINICAL_REVIEW_CONFIDENCE_THRESHOLD ? "complete" : "needs_review";
+
+  return buildReadOnlyJobSummary({
+    summary_status,
+    confidence,
+    observations,
+    limitations: [...OUTCOME_SCORE_STAFF_LIMITATIONS],
+  });
+}
+
+/** Ensures outcome summaries never use patient-facing diagnostic wording. */
+/** Patient-facing diagnostic wording must not appear in staff observations. */
+export function outcomeScoreSummaryIsStaffSafe(summary: ReadOnlyJobSummary): boolean {
+  const forbidden = [/\bdiagnosis\b/i, /\bpredictive surgery\b/i, /patient-facing/i];
+  const obsText = summary.observations.join(" ");
+  return !forbidden.some((re) => re.test(obsText));
 }

@@ -117,7 +117,9 @@ export function ImagingClinicalIntelligencePanel({ view }: Props) {
         <AssessmentCard title="Recipient assessment" assessment={view.recipientAssessment} />
       </div>
 
-      {view.jobSummaries.density_estimate || view.jobSummaries.norwood_grade ? (
+      {view.jobSummaries.density_estimate ||
+      view.jobSummaries.norwood_grade ||
+      view.jobSummaries.outcome_score ? (
         <div className="grid gap-2 md:grid-cols-2">
           {view.jobSummaries.density_estimate ? (
             <div className="rounded border border-white/[0.06] p-2 text-xs text-slate-400">
@@ -137,6 +139,29 @@ export function ImagingClinicalIntelligencePanel({ view }: Props) {
               ) : null}
             </div>
           ) : null}
+          {view.jobSummaries.outcome_score ? (
+            <div className="rounded border border-white/[0.06] p-2 text-xs text-slate-400">
+              <p className="font-medium text-slate-300">Outcome summary (staff)</p>
+              <p className="capitalize">{view.jobSummaries.outcome_score.summary_status}</p>
+              {view.jobSummaries.outcome_score.limitations[0] ? (
+                <p className="mt-1 text-[11px]">{view.jobSummaries.outcome_score.limitations[0]}</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {view.deepLinks.length > 0 ? (
+        <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
+          {view.deepLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-[11px] text-sky-400 hover:text-sky-300"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
       ) : null}
     </div>

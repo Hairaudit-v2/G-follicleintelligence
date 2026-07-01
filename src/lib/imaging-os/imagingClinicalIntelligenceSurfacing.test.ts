@@ -22,6 +22,7 @@ describe("imagingClinicalIntelligenceSurfacing", () => {
     };
     const view = buildImagingClinicalIntelligenceView({
       tenantId: "tenant-1",
+      patientId: "patient-1",
       imageId: "img-1",
       metadata: { imaging_clinical_ai: clinical },
       aiImageCategoryConfidence: 0.9,
@@ -42,6 +43,7 @@ describe("imagingClinicalIntelligenceSurfacing", () => {
     );
     const view = buildImagingClinicalIntelligenceView({
       tenantId: "tenant-1",
+      patientId: "patient-1",
       imageId: "img-1",
       metadata: {
         imaging_clinical_ai: clinical,
@@ -76,6 +78,7 @@ describe("imagingClinicalIntelligenceSurfacing", () => {
     );
     const view = buildImagingClinicalIntelligenceView({
       tenantId: "tenant-1",
+      patientId: "patient-1",
       imageId: "img-1",
       metadata,
       aiImageCategoryConfidence: 0.4,

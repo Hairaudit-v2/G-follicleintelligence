@@ -150,12 +150,15 @@ export function ImagingOsWorkspace({
         : {};
     return buildImagingClinicalIntelligenceView({
       tenantId,
+      patientId,
       imageId: selectedTile.image.id,
       metadata: meta,
       aiImageCategory: selectedTile.image.ai_image_category ?? null,
       aiImageCategoryConfidence: selectedTile.image.ai_image_category_confidence ?? null,
+      caseId: selectedTile.image.case_id ?? null,
+      consultationId: selectedTile.image.consultation_id ?? null,
     });
-  }, [selectedTile, tenantId]);
+  }, [selectedTile, tenantId, patientId]);
 
   const onSaveScalp = useCallback(() => {
     setMsg(null);

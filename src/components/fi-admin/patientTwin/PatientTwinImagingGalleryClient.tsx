@@ -13,6 +13,7 @@ import {
   FI_AI_SHAVE_STATES,
   FI_AI_SURGERY_STAGES,
 } from "@/src/lib/imaging/aiImageClassificationTypes";
+import { PatientTwinLongitudinalIntelligenceSummary } from "@/src/components/fi-admin/patientTwin/PatientTwinLongitudinalIntelligenceCard";
 import type {
   PatientTwinImagingGalleryItem,
   PatientTwinImagingGalleryUiSection,
@@ -164,6 +165,8 @@ function TwinImagingImageCard(props: {
           Analyse image
         </button>
       </div>
+      <PatientTwinLongitudinalIntelligenceSummary img={img} />
+
       <div className="border-t border-white/10 pt-3">
         <p className="text-xs font-medium text-slate-300">Correct category</p>
         <div className="mt-2 grid grid-cols-1 gap-2">

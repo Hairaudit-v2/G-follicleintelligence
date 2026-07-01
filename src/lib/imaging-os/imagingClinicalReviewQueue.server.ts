@@ -13,6 +13,7 @@ import {
   staffReviewClearsQueue,
 } from "./imagingStaffReviewCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
+import { buildImagingDeepLinks, listAvailableImagingDeepLinks, type ImagingDeepLink } from "./imagingDeepLinksCore";
 
 export type ImagingClinicalReviewQueueItem = {
   imageId: string;
@@ -30,6 +31,7 @@ export type ImagingClinicalReviewQueueItem = {
   previewSignedUrl: string | null;
   staffReviewedAt: string | null;
   staffReviewStatus: string | null;
+  deepLinks: ImagingDeepLink[];
 };
 
 function readQualityRecord(metadata: Record<string, unknown>): ImagingQualityMetadataRecord | null {
@@ -203,10 +205,28 @@ export async function loadImagingClinicalReviewQueue(
     const imageId = String(row.id);
     const signedEntry = signed.get(imageId);
 
+    const patientId = String(row.patient_id);
+    const protocolSessionId =
+      typeof metadata.protocol_session_id === "string" ? metadata.protocol_session_id : null;
+    const deepLinks = listAvailableImagingDeepLinks(
+      buildImagingDeepLinks({
+        tenantId: tid,
+        patientId,
+        imageId,
+        caseId: row.case_id != null ? String(row.case_id) : null,
+        protocolSessionId,
+        protocolTemplateSlug:
+          typeof metadata.protocol_template_slug === "string"
+            ? metadata.protocol_template_slug
+            : null,
+        reviewRequired: true,
+      })
+    );
+
     return {
       imageId,
-      patientId: String(row.patient_id),
-      patientLabel: patientLabelById.get(String(row.patient_id)) ?? null,
+      patientId,
+      patientLabel: patientLabelById.get(patientId) ?? null,
       caseId: row.case_id != null ? String(row.case_id) : null,
       viewType:
         clinicalAi?.view_type ??
@@ -221,11 +241,11 @@ export async function loadImagingClinicalReviewQueue(
           : (clinicalAi?.confidence ?? null),
       reviewReasons: reasons,
       createdAt: String(row.created_at),
-      protocolSessionId:
-        typeof metadata.protocol_session_id === "string" ? metadata.protocol_session_id : null,
+      protocolSessionId,
       previewSignedUrl: signedEntry?.url ?? null,
       staffReviewedAt: readImagingStaffReviewRecord(metadata)?.reviewed_at ?? null,
       staffReviewStatus: readImagingStaffReviewRecord(metadata)?.status ?? null,
+      deepLinks,
     };
   });
 }

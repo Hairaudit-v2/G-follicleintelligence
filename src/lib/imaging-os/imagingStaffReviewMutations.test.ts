@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  bulkFlagImagingReviewItemsRetakeRequired,
+  bulkMarkImagingReviewItemsReviewed,
   flagImagingImageRetakeRequired,
   markImagingImageReviewed,
   reassignImagingImageViewType,
@@ -148,6 +150,46 @@ describe("imagingStaffReviewMutations", () => {
         }),
       /Invalid view type/
     );
+  });
+
+  it("bulk mark reviewed returns partial success", async () => {
+    const store1 = createImageStore({
+      id: "img-1",
+      tenant_id: "tenant-1",
+      patient_id: "patient-1",
+      image_status: "active",
+      metadata: { imaging_clinical_ai: aiMeta },
+    });
+    const result = await bulkMarkImagingReviewItemsReviewed({
+      tenantId: "tenant-1",
+      items: [
+        { patientId: "patient-1", patientImageId: "img-1" },
+        { patientId: "patient-1", patientImageId: "img-missing" },
+      ],
+      reviewedByUserId: "user-1",
+      client: store1.client,
+    });
+    assert.equal(result.succeeded.length, 1);
+    assert.equal(result.failed.length, 1);
+  });
+
+  it("bulk actions enforce tenant isolation per image", async () => {
+    const { client } = createImageStore({
+      id: "img-1",
+      tenant_id: "other-tenant",
+      patient_id: "patient-1",
+      image_status: "active",
+      metadata: {},
+    });
+    const result = await bulkFlagImagingReviewItemsRetakeRequired({
+      tenantId: "tenant-1",
+      items: [{ patientId: "patient-1", patientImageId: "img-1" }],
+      reviewedByUserId: "user-1",
+      client,
+    });
+    assert.equal(result.succeeded.length, 0);
+    assert.equal(result.failed.length, 1);
+    assert.match(result.failed[0]?.error ?? "", /not found/i);
   });
 
   it("enforces tenant isolation on missing image", async () => {

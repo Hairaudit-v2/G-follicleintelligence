@@ -13,6 +13,11 @@ import {
   type PatientJourneyGalleryImageInput,
   type TwinImagingUiSection,
 } from "@/src/lib/patientTwin/patientJourneyGallery";
+import {
+  buildPatientTwinImagingDeepLinks,
+  journeyPhaseLabelForSection,
+  mapPatientTwinImagingIntelligence,
+} from "@/src/lib/patientTwin/patientTwinImagingIntelligenceCore";
 
 async function loadProcedureYmdByCaseId(
   supabase: SupabaseClient,
@@ -61,7 +66,10 @@ function mapUiSectionsToGalleryItems(
     items: sec.items.map((j) => {
       const full = itemsById.get(j.id);
       if (!full) throw new Error(`Twin gallery item missing for id ${j.id}`);
-      return full;
+      return {
+        ...full,
+        journey_phase: journeyPhaseLabelForSection(sec.key),
+      };
     }),
   }));
 }
@@ -114,6 +122,26 @@ export async function loadPatientTwinImagingGallerySection(
   const items: PatientTwinImagingGallerySection["items"] = mapped.flatMap((img) => {
     const s = signedMap.get(img.id);
     if (!s) return [];
+    const metadata =
+      img.metadata && typeof img.metadata === "object" && !Array.isArray(img.metadata)
+        ? (img.metadata as Record<string, unknown>)
+        : {};
+    const intelligence = mapPatientTwinImagingIntelligence({
+      metadata,
+      aiImageCategory: img.ai_image_category ?? null,
+      aiImageCategoryConfidence: img.ai_image_category_confidence ?? null,
+      aiImageReviewStatus: img.ai_image_review_status,
+    });
+    const deepLinks = buildPatientTwinImagingDeepLinks({
+      tenantId: tid,
+      patientId: pid,
+      metadata,
+      caseId: img.case_id ?? null,
+      consultationId: img.consultation_id ?? null,
+      imageId: img.id,
+      reviewRequired: intelligence.review_required,
+    });
+    const sessionDate = img.taken_at ?? img.created_at;
     return [
       {
         id: img.id,
@@ -121,6 +149,7 @@ export async function loadPatientTwinImagingGallerySection(
         signed_expires_at: s.expiresAtIso,
         taken_at: img.taken_at,
         created_at: img.created_at,
+        session_date: sessionDate,
         ai_image_category: img.ai_image_category ?? null,
         ai_image_category_confidence: img.ai_image_category_confidence ?? null,
         ai_hair_state: img.ai_hair_state ?? null,
@@ -129,6 +158,17 @@ export async function loadPatientTwinImagingGallerySection(
         ai_image_review_status: img.ai_image_review_status,
         ai_image_ai_notes: img.ai_image_ai_notes ?? null,
         ai_image_classified_at: img.ai_image_classified_at ?? null,
+        view_type: intelligence.view_type,
+        capture_source: intelligence.capture_source,
+        protocol_session_id:
+          typeof metadata.protocol_session_id === "string" ? metadata.protocol_session_id : null,
+        protocol_template_slug:
+          typeof metadata.protocol_template_slug === "string"
+            ? metadata.protocol_template_slug
+            : null,
+        journey_phase: null,
+        intelligence,
+        deep_links: deepLinks,
       },
     ];
   });

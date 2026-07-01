@@ -12,6 +12,10 @@ import type {
   HliPhotoProtocolComplianceSummary,
 } from "@/src/lib/hair-intelligence/photoProtocols/types";
 import type { HairProgressionIntelligence } from "@/src/lib/hair-intelligence/hairProgressionIntelligence";
+import type {
+  PatientTwinImagingDeepLinks,
+  PatientTwinImagingIntelligenceSummary,
+} from "./patientTwinImagingIntelligenceCore";
 
 export const PATIENT_TWIN_VERSION = "patient-twin.v1" as const;
 
@@ -138,6 +142,7 @@ export type PatientTwinImagingGalleryItem = {
   signed_expires_at: string;
   taken_at: string | null;
   created_at: string;
+  session_date: string | null;
   ai_image_category: string | null;
   ai_image_category_confidence: number | null;
   ai_hair_state: string | null;
@@ -146,6 +151,14 @@ export type PatientTwinImagingGalleryItem = {
   ai_image_review_status: string;
   ai_image_ai_notes: string | null;
   ai_image_classified_at: string | null;
+  /** ImagingOS Phase 5 — staff-facing intelligence projection. */
+  view_type: string | null;
+  capture_source: string | null;
+  protocol_session_id: string | null;
+  protocol_template_slug: string | null;
+  journey_phase: string | null;
+  intelligence: PatientTwinImagingIntelligenceSummary | null;
+  deep_links: PatientTwinImagingDeepLinks;
 };
 
 export type PatientTwinImagingGalleryUiSection = {

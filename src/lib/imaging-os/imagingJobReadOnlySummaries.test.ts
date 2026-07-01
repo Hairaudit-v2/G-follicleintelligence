@@ -6,7 +6,9 @@ import { buildClinicalImageAnalysisFromHli } from "./clinicalImageAnalysisCore";
 import {
   buildDensityEstimateSummary,
   buildNorwoodGradeSummary,
+  buildOutcomeScoreSummary,
   mergeImagingJobSummariesMetadata,
+  outcomeScoreSummaryIsStaffSafe,
 } from "./imagingJobReadOnlySummaries";
 
 describe("imagingJobReadOnlySummaries", () => {
@@ -52,6 +54,44 @@ describe("imagingJobReadOnlySummaries", () => {
     });
     assert.equal(summary.summary_status, "complete");
     assert.ok(summary.observations.some((o) => o.includes("III")));
+  });
+
+  it("outcome_score unavailable when provider unsupported", () => {
+    const summary = buildOutcomeScoreSummary({
+      metadata: {},
+      providerSupported: false,
+    });
+    assert.equal(summary.summary_status, "unavailable");
+    assert.equal(summary.review_required, true);
+    assert.ok(outcomeScoreSummaryIsStaffSafe(summary));
+    assert.ok(summary.limitations.some((l) => /not a predictive simulation/i.test(l)));
+  });
+
+  it("outcome_score needs review when confidence low", () => {
+    const clinical = clinicalAnalysisResultToMetadataRecord(
+      buildClinicalImageAnalysisFromHli({
+        hliCategory: "front",
+        categoryConfidence: 0.3,
+        notes: "low",
+      })
+    );
+    const summary = buildOutcomeScoreSummary({
+      metadata: { imaging_clinical_ai: clinical },
+      providerSupported: true,
+      aiImageCategoryConfidence: 0.3,
+    });
+    assert.equal(summary.summary_status, "needs_review");
+    assert.equal(summary.review_required, true);
+  });
+
+  it("outcome_score metadata write-back preserves clinical AI", () => {
+    const summary = buildOutcomeScoreSummary({ metadata: {}, providerSupported: false });
+    const merged = mergeImagingJobSummariesMetadata(
+      { imaging_clinical_ai: { provider: "stub", status: "complete" } },
+      { outcome_score: summary }
+    );
+    assert.deepEqual(merged.imaging_clinical_ai, { provider: "stub", status: "complete" });
+    assert.ok((merged.imaging_job_summaries as { outcome_score?: unknown }).outcome_score);
   });
 
   it("merges job summaries without overwriting clinical AI", () => {

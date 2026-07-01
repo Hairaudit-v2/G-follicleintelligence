@@ -19,6 +19,7 @@ import { assessFiOsPatientRecipientAndPersist } from "@/src/lib/hair-intelligenc
 import {
   buildDensityEstimateSummary,
   buildNorwoodGradeSummary,
+  buildOutcomeScoreSummary,
   mergeImagingJobSummariesMetadata,
   type ReadOnlyJobSummary,
 } from "./imagingJobReadOnlySummaries";
@@ -64,7 +65,7 @@ async function persistJobSummaryMetadata(
   supabase: SupabaseClient,
   tenantId: string,
   imageId: string,
-  kind: "density_estimate" | "norwood_grade",
+  kind: "density_estimate" | "norwood_grade" | "outcome_score",
   summary: ReadOnlyJobSummary
 ): Promise<Record<string, unknown>> {
   const ctx = await loadPatientImageContext(supabase, tenantId, imageId);
@@ -184,6 +185,23 @@ export async function processImagingAiAnalysisJob(
         aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
       });
       await persistJobSummaryMetadata(supabase, tid, imageId, "norwood_grade", summary);
+      await completeImagingAiAnalysisJob({
+        tenantId: tid,
+        jobId: job.id,
+        resultPayload: { summary },
+        client: supabase,
+      });
+      return { jobId: job.id, status: "completed", analysisKind: job.analysis_kind };
+    }
+
+    if (job.analysis_kind === "outcome_score") {
+      const ctx = await loadPatientImageContext(supabase, tid, imageId);
+      const summary = buildOutcomeScoreSummary({
+        metadata: ctx.metadata,
+        providerSupported: true,
+        aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
+      });
+      await persistJobSummaryMetadata(supabase, tid, imageId, "outcome_score", summary);
       await completeImagingAiAnalysisJob({
         tenantId: tid,
         jobId: job.id,

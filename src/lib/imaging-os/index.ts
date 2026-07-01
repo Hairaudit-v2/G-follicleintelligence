@@ -25,6 +25,8 @@ export * from "./scalpRegionEnforcement";
 export * from "./imagingStaffReviewCore";
 export * from "./imagingJobReadOnlySummaries";
 export * from "./imagingClinicalIntelligenceSurfacing";
+export * from "./protocolCatalogResolverCore";
+export * from "./imagingDeepLinksCore";
 export * from "./imageDuplicateDetectionCore";
 export * from "./summary";
 export * from "./aiVision";

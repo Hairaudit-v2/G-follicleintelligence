@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
 import {
+  bulkAssignImagingQueueStaffNoteAction,
+  bulkFlagImagingQueueRetakeAction,
+  bulkMarkImagingQueueReviewedAction,
   flagImagingReviewRetakeAction,
   markImagingReviewReviewedAction,
   reassignImagingReviewViewTypeAction,
@@ -43,6 +46,8 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
   const [msg, setMsg] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [reassignView, setReassignView] = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [bulkNote, setBulkNote] = useState("");
 
   const withAdmin = useCallback(
     <T extends Record<string, unknown>>(body: T): T & { adminKey?: string } => {
@@ -94,10 +99,111 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
       {msg ? <p className="text-sm text-slate-300">{msg}</p> : null}
       {pending ? <p className="text-xs text-gray-500">Saving…</p> : null}
 
+      <div className="flex flex-wrap items-end gap-2 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+        <input
+          type="text"
+          placeholder="Bulk staff note (optional)"
+          value={bulkNote}
+          onChange={(e) => setBulkNote(e.target.value)}
+          className="min-w-[200px] flex-1 rounded border border-slate-700 bg-[#020617] px-2 py-1 text-xs"
+        />
+        <button
+          type="button"
+          disabled={pending || Object.values(selected).every((v) => !v)}
+          className="rounded bg-emerald-900/40 px-3 py-1 text-xs text-emerald-200 disabled:opacity-40"
+          onClick={() => {
+            const bulkItems = items
+              .filter((i) => selected[i.imageId])
+              .map((i) => ({ patientId: i.patientId, patientImageId: i.imageId }));
+            if (!bulkItems.length) return;
+            setMsg(null);
+            startTransition(async () => {
+              const res = await bulkMarkImagingQueueReviewedAction(
+                tenantId,
+                withAdmin({ items: bulkItems, staffNote: bulkNote || undefined })
+              );
+              if (!res.ok) {
+                setMsg(res.error);
+                return;
+              }
+              setMsg(`Marked ${res.succeeded} reviewed${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              router.refresh();
+            });
+          }}
+        >
+          Bulk mark reviewed
+        </button>
+        <button
+          type="button"
+          disabled={pending || Object.values(selected).every((v) => !v)}
+          className="rounded bg-amber-900/40 px-3 py-1 text-xs text-amber-200 disabled:opacity-40"
+          onClick={() => {
+            const bulkItems = items
+              .filter((i) => selected[i.imageId])
+              .map((i) => ({ patientId: i.patientId, patientImageId: i.imageId }));
+            if (!bulkItems.length) return;
+            setMsg(null);
+            startTransition(async () => {
+              const res = await bulkFlagImagingQueueRetakeAction(
+                tenantId,
+                withAdmin({ items: bulkItems, staffNote: bulkNote || undefined })
+              );
+              if (!res.ok) {
+                setMsg(res.error);
+                return;
+              }
+              setMsg(`Flagged ${res.succeeded} retake${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              router.refresh();
+            });
+          }}
+        >
+          Bulk flag retake
+        </button>
+        <button
+          type="button"
+          disabled={pending || Object.values(selected).every((v) => !v) || !bulkNote.trim()}
+          className="rounded bg-sky-900/40 px-3 py-1 text-xs text-sky-200 disabled:opacity-40"
+          onClick={() => {
+            const bulkItems = items
+              .filter((i) => selected[i.imageId])
+              .map((i) => ({ patientId: i.patientId, patientImageId: i.imageId }));
+            if (!bulkItems.length) return;
+            setMsg(null);
+            startTransition(async () => {
+              const res = await bulkAssignImagingQueueStaffNoteAction(
+                tenantId,
+                withAdmin({ items: bulkItems, staffNote: bulkNote })
+              );
+              if (!res.ok) {
+                setMsg(res.error);
+                return;
+              }
+              setMsg(`Assigned note to ${res.succeeded}${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              router.refresh();
+            });
+          }}
+        >
+          Bulk assign note
+        </button>
+      </div>
+
       <div className="overflow-hidden rounded-lg border border-white/[0.08] bg-[#0F1629]/60">
         <table className="min-w-full divide-y divide-white/[0.06] text-sm">
           <thead className="bg-white/[0.03] text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             <tr>
+              <th className="px-4 py-3">
+                <input
+                  type="checkbox"
+                  aria-label="Select all"
+                  checked={items.length > 0 && items.every((i) => selected[i.imageId])}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    const next: Record<string, boolean> = {};
+                    for (const i of items) next[i.imageId] = on;
+                    setSelected(next);
+                  }}
+                />
+              </th>
               <th className="px-4 py-3">Preview</th>
               <th className="px-4 py-3">Patient</th>
               <th className="px-4 py-3">View</th>
@@ -112,6 +218,16 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
               const imagingHref = `/fi-admin/${tenantId}/patients/${item.patientId}/imaging`;
               return (
                 <tr key={item.imageId} className="align-top hover:bg-white/[0.02]">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(selected[item.imageId])}
+                      onChange={(e) =>
+                        setSelected((prev) => ({ ...prev, [item.imageId]: e.target.checked }))
+                      }
+                      aria-label={`Select image ${item.imageId.slice(0, 8)}`}
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     {item.previewSignedUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -128,9 +244,20 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium">{item.patientLabel ?? "Patient"}</div>
-                    <Link href={imagingHref} className="text-xs text-sky-400 hover:text-sky-300">
-                      Imaging workspace
-                    </Link>
+                    <div className="flex flex-col gap-0.5">
+                      <Link href={imagingHref} className="text-xs text-sky-400 hover:text-sky-300">
+                        Imaging workspace
+                      </Link>
+                      {item.deepLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="text-[11px] text-slate-400 hover:text-slate-300"
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div>{item.viewType ?? "—"}</div>

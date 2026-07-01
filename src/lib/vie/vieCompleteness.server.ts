@@ -6,11 +6,11 @@ import {
   getSlotImageIds,
   isSessionMarkedComplete,
   parseProgressMeta,
-  parseProtocolSlots,
   protocolRequiredCompletionPercent,
   slotIsSatisfied,
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
+import { loadResolvedProtocolSlots } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
 import { enrichPatientImagingCompleteness } from "./vieCompleteness";
 import { getVieProtocol, isVieProtocolSlug } from "./vieProtocolCatalog";
 import type {
@@ -117,40 +117,8 @@ async function loadTemplateSlots(
   templateSlug: string,
   client: SupabaseClient
 ): Promise<{ name: string; slots: ProtocolSlotDef[] }> {
-  const catalog = getVieProtocol(templateSlug);
-
-  // TypeScript catalog is canonical for VIE protocols (Phase 3 expanded catalog).
-  if (catalog) {
-    return {
-      name: catalog.name,
-      slots: catalog.slots.map((s) => ({
-        slug: s.slug,
-        label: s.label,
-        required: s.required,
-        suggested_region: s.suggested_region,
-        instruction: s.instruction,
-      })),
-    };
-  }
-
-  const { data, error } = await client
-    .from("fi_imaging_protocol_templates")
-    .select("name, slots")
-    .or(`tenant_id.eq.${tenantId.trim()},tenant_id.is.null`)
-    .eq("slug", templateSlug.trim())
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-
-  if (data) {
-    const r = data as Record<string, unknown>;
-    return {
-      name: String(r.name ?? templateSlug),
-      slots: parseProtocolSlots(r.slots),
-    };
-  }
-
-  return { name: templateSlug, slots: [] };
+  const resolved = await loadResolvedProtocolSlots(tenantId, templateSlug, client);
+  return { name: resolved.name, slots: resolved.slots };
 }
 
 /**

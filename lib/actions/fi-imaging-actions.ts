@@ -20,6 +20,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { loadOrCreateSurgeryDayVieSession } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import {
+  bulkAssignImagingReviewItemsStaffNote,
+  bulkAssignImagingStaffNote,
+  bulkFlagImagingImagesRetakeRequired,
+  bulkFlagImagingReviewItemsRetakeRequired,
+  bulkMarkImagingImagesReviewed,
+  bulkMarkImagingReviewItemsReviewed,
   flagImagingImageRetakeRequired,
   markImagingImageReviewed,
   reassignImagingImageViewType,
@@ -465,6 +471,211 @@ const patientPhotoQuickActionCompletedSchema = z
     source: z.enum(["patient_profile", "patient_slide_over"]),
   })
   .strict();
+
+const bulkReviewBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    patientImageIds: z.array(z.string().uuid()).min(1).max(50),
+    staffNote: z.string().max(2000).optional(),
+  })
+  .strict();
+
+export async function bulkMarkImagingReviewReviewedAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkReviewBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkMarkImagingImagesReviewed({
+      tenantId,
+      patientId,
+      patientImageIds: parsed.patientImageIds,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function bulkFlagImagingReviewRetakeAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkReviewBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkFlagImagingImagesRetakeRequired({
+      tenantId,
+      patientId,
+      patientImageIds: parsed.patientImageIds,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const bulkStaffNoteSchema = bulkReviewBodySchema.extend({
+  staffNote: z.string().min(1).max(2000),
+});
+
+export async function bulkAssignImagingStaffNoteAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkStaffNoteSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkAssignImagingStaffNote({
+      tenantId,
+      patientId,
+      patientImageIds: parsed.patientImageIds,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const bulkQueueReviewBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    items: z
+      .array(
+        z
+          .object({
+            patientId: z.string().uuid(),
+            patientImageId: z.string().uuid(),
+          })
+          .strict()
+      )
+      .min(1)
+      .max(50),
+    staffNote: z.string().max(2000).optional(),
+  })
+  .strict();
+
+export async function bulkMarkImagingQueueReviewedAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkQueueReviewBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkMarkImagingReviewItemsReviewed({
+      tenantId,
+      items: parsed.items,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    for (const pid of new Set(parsed.items.map((i) => i.patientId))) {
+      revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+      revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    }
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function bulkFlagImagingQueueRetakeAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkQueueReviewBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkFlagImagingReviewItemsRetakeRequired({
+      tenantId,
+      items: parsed.items,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    for (const pid of new Set(parsed.items.map((i) => i.patientId))) {
+      revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    }
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const bulkQueueStaffNoteSchema = bulkQueueReviewBodySchema.extend({
+  staffNote: z.string().min(1).max(2000),
+});
+
+export async function bulkAssignImagingQueueStaffNoteAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkQueueStaffNoteSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkAssignImagingReviewItemsStaffNote({
+      tenantId,
+      items: parsed.items,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
 
 export async function recordPatientPhotoQuickActionCompletedAction(
   body: unknown

@@ -5,6 +5,7 @@
 import { collectImagingReviewReasons, readImagingClinicalAiMetadata } from "./clinicalImageAnalysisCore";
 import type { DonorRecipientAssessmentSummary } from "./clinicalImageAnalysisCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
+import { buildImagingDeepLinks, listAvailableImagingDeepLinks, type ImagingDeepLink } from "./imagingDeepLinksCore";
 import { readImagingJobSummaries, type ReadOnlyJobSummary } from "./imagingJobReadOnlySummaries";
 import {
   readImagingStaffReviewRecord,
@@ -27,8 +28,10 @@ export type ImagingClinicalIntelligenceView = {
   jobSummaries: {
     density_estimate?: ReadOnlyJobSummary;
     norwood_grade?: ReadOnlyJobSummary;
+    outcome_score?: ReadOnlyJobSummary;
   };
   reviewQueueHref: string;
+  deepLinks: ImagingDeepLink[];
 };
 
 function readQuality(metadata: Record<string, unknown>): ImagingQualityMetadataRecord | null {
@@ -54,10 +57,13 @@ function readQuality(metadata: Record<string, unknown>): ImagingQualityMetadataR
 
 export function buildImagingClinicalIntelligenceView(input: {
   tenantId: string;
+  patientId: string;
   imageId: string;
   metadata: Record<string, unknown>;
   aiImageCategory?: string | null;
   aiImageCategoryConfidence?: number | null;
+  caseId?: string | null;
+  consultationId?: string | null;
 }): ImagingClinicalIntelligenceView {
   const clinical = readImagingClinicalAiMetadata(input.metadata);
   const quality = readQuality(input.metadata);
@@ -94,7 +100,26 @@ export function buildImagingClinicalIntelligenceView(input: {
     jobSummaries: {
       ...(jobSummaries.density_estimate ? { density_estimate: jobSummaries.density_estimate } : {}),
       ...(jobSummaries.norwood_grade ? { norwood_grade: jobSummaries.norwood_grade } : {}),
+      ...(jobSummaries.outcome_score ? { outcome_score: jobSummaries.outcome_score } : {}),
     },
     reviewQueueHref: `/fi-admin/${input.tenantId.trim()}/imaging/review`,
+    deepLinks: listAvailableImagingDeepLinks(
+      buildImagingDeepLinks({
+        tenantId: input.tenantId,
+        patientId: input.patientId,
+        imageId: input.imageId,
+        caseId: input.caseId ?? null,
+        consultationId: input.consultationId ?? null,
+        protocolSessionId:
+          typeof input.metadata.protocol_session_id === "string"
+            ? input.metadata.protocol_session_id
+            : null,
+        protocolTemplateSlug:
+          typeof input.metadata.protocol_template_slug === "string"
+            ? input.metadata.protocol_template_slug
+            : null,
+        reviewRequired,
+      })
+    ),
   };
 }

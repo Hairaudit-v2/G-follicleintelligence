@@ -16,6 +16,16 @@ export type ImagingStaffReviewMutationResult = {
   metadata: Record<string, unknown>;
 };
 
+export type BulkImagingStaffReviewResult = {
+  succeeded: ImagingStaffReviewMutationResult[];
+  failed: Array<{ imageId: string; error: string }>;
+};
+
+export type BulkImagingReviewItem = {
+  patientId: string;
+  patientImageId: string;
+};
+
 async function loadTenantPatientImage(
   supabase: SupabaseClient,
   tenantId: string,
@@ -194,4 +204,175 @@ export async function reassignImagingImageViewType(input: {
   });
 
   return { imageId: iid, staffReviewStatus: record.status, metadata: merged };
+}
+
+async function runBulkStaffReview<T>(
+  imageIds: string[],
+  runOne: (imageId: string) => Promise<T>
+): Promise<{ succeeded: T[]; failed: Array<{ imageId: string; error: string }> }> {
+  const succeeded: T[] = [];
+  const failed: Array<{ imageId: string; error: string }> = [];
+  const uniqueIds = [...new Set(imageIds.map((id) => id.trim()).filter(Boolean))];
+
+  for (const imageId of uniqueIds) {
+    try {
+      succeeded.push(await runOne(imageId));
+    } catch (e: unknown) {
+      failed.push({
+        imageId,
+        error: e instanceof Error ? e.message : "Request failed.",
+      });
+    }
+  }
+
+  return { succeeded, failed };
+}
+
+async function runBulkReviewItems<T>(
+  items: BulkImagingReviewItem[],
+  runOne: (item: BulkImagingReviewItem) => Promise<T>
+): Promise<{ succeeded: T[]; failed: Array<{ imageId: string; error: string }> }> {
+  const succeeded: T[] = [];
+  const failed: Array<{ imageId: string; error: string }> = [];
+  const seen = new Set<string>();
+
+  for (const item of items) {
+    const imageId = item.patientImageId.trim();
+    const patientId = item.patientId.trim();
+    if (!imageId || !patientId) continue;
+    const key = `${patientId}:${imageId}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    try {
+      succeeded.push(await runOne({ patientId, patientImageId: imageId }));
+    } catch (e: unknown) {
+      failed.push({
+        imageId,
+        error: e instanceof Error ? e.message : "Request failed.",
+      });
+    }
+  }
+
+  return { succeeded, failed };
+}
+
+export async function bulkMarkImagingImagesReviewed(input: {
+  tenantId: string;
+  patientId: string;
+  patientImageIds: string[];
+  reviewedByUserId: string | null;
+  staffNote?: string | null;
+  client?: SupabaseClient;
+}): Promise<BulkImagingStaffReviewResult> {
+  return runBulkStaffReview(input.patientImageIds, (imageId) =>
+    markImagingImageReviewed({
+      tenantId: input.tenantId,
+      patientId: input.patientId,
+      patientImageId: imageId,
+      reviewedByUserId: input.reviewedByUserId,
+      staffNote: input.staffNote,
+      client: input.client,
+    })
+  );
+}
+
+export async function bulkFlagImagingImagesRetakeRequired(input: {
+  tenantId: string;
+  patientId: string;
+  patientImageIds: string[];
+  reviewedByUserId: string | null;
+  staffNote?: string | null;
+  client?: SupabaseClient;
+}): Promise<BulkImagingStaffReviewResult> {
+  return runBulkStaffReview(input.patientImageIds, (imageId) =>
+    flagImagingImageRetakeRequired({
+      tenantId: input.tenantId,
+      patientId: input.patientId,
+      patientImageId: imageId,
+      reviewedByUserId: input.reviewedByUserId,
+      staffNote: input.staffNote,
+      client: input.client,
+    })
+  );
+}
+
+export async function bulkAssignImagingStaffNote(input: {
+  tenantId: string;
+  patientId: string;
+  patientImageIds: string[];
+  reviewedByUserId: string | null;
+  staffNote: string;
+  client?: SupabaseClient;
+}): Promise<BulkImagingStaffReviewResult> {
+  const note = input.staffNote.trim();
+  if (!note) throw new Error("Staff note is required for bulk assign.");
+  return runBulkStaffReview(input.patientImageIds, (imageId) =>
+    markImagingImageReviewed({
+      tenantId: input.tenantId,
+      patientId: input.patientId,
+      patientImageId: imageId,
+      reviewedByUserId: input.reviewedByUserId,
+      staffNote: note,
+      client: input.client,
+    })
+  );
+}
+
+export async function bulkMarkImagingReviewItemsReviewed(input: {
+  tenantId: string;
+  items: BulkImagingReviewItem[];
+  reviewedByUserId: string | null;
+  staffNote?: string | null;
+  client?: SupabaseClient;
+}): Promise<BulkImagingStaffReviewResult> {
+  return runBulkReviewItems(input.items, (item) =>
+    markImagingImageReviewed({
+      tenantId: input.tenantId,
+      patientId: item.patientId,
+      patientImageId: item.patientImageId,
+      reviewedByUserId: input.reviewedByUserId,
+      staffNote: input.staffNote,
+      client: input.client,
+    })
+  );
+}
+
+export async function bulkFlagImagingReviewItemsRetakeRequired(input: {
+  tenantId: string;
+  items: BulkImagingReviewItem[];
+  reviewedByUserId: string | null;
+  staffNote?: string | null;
+  client?: SupabaseClient;
+}): Promise<BulkImagingStaffReviewResult> {
+  return runBulkReviewItems(input.items, (item) =>
+    flagImagingImageRetakeRequired({
+      tenantId: input.tenantId,
+      patientId: item.patientId,
+      patientImageId: item.patientImageId,
+      reviewedByUserId: input.reviewedByUserId,
+      staffNote: input.staffNote,
+      client: input.client,
+    })
+  );
+}
+
+export async function bulkAssignImagingReviewItemsStaffNote(input: {
+  tenantId: string;
+  items: BulkImagingReviewItem[];
+  reviewedByUserId: string | null;
+  staffNote: string;
+  client?: SupabaseClient;
+}): Promise<BulkImagingStaffReviewResult> {
+  const note = input.staffNote.trim();
+  if (!note) throw new Error("Staff note is required for bulk assign.");
+  return runBulkReviewItems(input.items, (item) =>
+    markImagingImageReviewed({
+      tenantId: input.tenantId,
+      patientId: item.patientId,
+      patientImageId: item.patientImageId,
+      reviewedByUserId: input.reviewedByUserId,
+      staffNote: note,
+      client: input.client,
+    })
+  );
 }
