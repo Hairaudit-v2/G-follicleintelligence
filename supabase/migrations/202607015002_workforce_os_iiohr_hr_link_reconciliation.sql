@@ -38,18 +38,25 @@ create unique index if not exists idx_fi_staff_members_tenant_iiohr_staff_record
 
 alter table public.fi_staff_members enable row level security;
 
-drop policy if exists fi_staff_members_select_tenant_member on public.fi_staff_members;
-create policy fi_staff_members_select_tenant_member
-  on public.fi_staff_members for select to authenticated
-  using (
-    exists (
-      select 1 from public.fi_users u
-      where u.auth_user_id = auth.uid()
-        and u.tenant_id = fi_staff_members.tenant_id
-    )
-  );
+-- Tenant-member read policy only when platform users table is present (foundation migration).
+do $$
+begin
+  if to_regclass('public.fi_users') is not null then
+    drop policy if exists fi_staff_members_select_tenant_member on public.fi_staff_members;
+    create policy fi_staff_members_select_tenant_member
+      on public.fi_staff_members for select to authenticated
+      using (
+        exists (
+          select 1 from public.fi_users u
+          where u.auth_user_id = auth.uid()
+            and u.tenant_id = fi_staff_members.tenant_id
+        )
+      );
+    grant select on public.fi_staff_members to authenticated;
+  end if;
+end $$;
 
-grant select on public.fi_staff_members to authenticated, service_role;
+grant select on public.fi_staff_members to service_role;
 grant insert, update, delete on public.fi_staff_members to service_role;
 
 create table if not exists public.fi_staff_member_audit_events (
