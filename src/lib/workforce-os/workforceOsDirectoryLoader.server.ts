@@ -77,6 +77,7 @@ export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Pro
   metrics: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationMetrics;
   suggestions: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationSuggestion[];
   archivedHistorical: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationArchivedRecord[];
+  diagnostics: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationDiagnostics;
 } | null> {
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) return null;
@@ -92,13 +93,7 @@ export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Pro
     "@/src/lib/workforce-os/hrReconciliation.server"
   );
 
-  // Empty feed until IIOHR API wired — UI still renders active unlinked staff.
-  const pageData = await loadHrReconciliationPageData({
-    tenantId,
-    evolvedStaffRecords: [],
-  });
-
-  return pageData;
+  return loadHrReconciliationPageData({ tenantId });
 }
 
 export async function assertWorkforceOsReadAccess(tenantId: string): Promise<boolean> {

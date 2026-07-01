@@ -88,10 +88,14 @@ test("command centre payload requires graftSummary array", () => {
     graftSummary: [],
     graftEvents: [],
     vieCapture: [],
+    liveTimeline: [],
+    graftIntelligence: [],
   });
   assert.ok(Array.isArray(payload.graftSummary));
   assert.ok(Array.isArray(payload.graftEvents));
   assert.ok(Array.isArray(payload.vieCapture));
+  assert.ok(Array.isArray(payload.liveTimeline));
+  assert.ok(Array.isArray(payload.graftIntelligence));
   assert.equal(
     surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, graftSummary: undefined }).success,
     false
@@ -102,6 +106,15 @@ test("command centre payload requires graftSummary array", () => {
   );
   assert.equal(
     surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, vieCapture: undefined }).success,
+    false
+  );
+  assert.equal(
+    surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, liveTimeline: undefined }).success,
+    false
+  );
+  assert.equal(
+    surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, graftIntelligence: undefined })
+      .success,
     false
   );
 });

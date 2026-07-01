@@ -22,12 +22,15 @@ import {
   SURGERY_OS_GRAFT_RECONCILIATION_STATUSES,
   SURGERY_OS_GRAFT_SESSION_PHASES,
 } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import { LIVE_PROCEDURE_TIMELINE_STAGES } from "@/src/lib/surgeryOs/liveProcedureTimelineCore";
 import { VIE_SURGERY_PHASE_GROUPS } from "@/src/lib/vie/vieProtocolTypes";
 import type { SurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 
 export type {
   SurgeryOsAlert,
   SurgeryOsCommandCentrePayload,
+  GraftIntelligenceSnapshot,
+  LiveProcedureTimelineSnapshot,
   SurgeryOsGraftSummary,
   SurgeryOsLiveSurgery,
   SurgeryOsOperationalNote,
@@ -312,6 +315,76 @@ const vieCaptureSummarySchema = z.object({
   outcomeReadiness: vieOutcomeReadinessSchema,
 });
 
+const liveProcedureTimelineItemSchema = z.object({
+  stage: z.enum(LIVE_PROCEDURE_TIMELINE_STAGES),
+  stageLabel: z.string(),
+  eventLabel: z.string(),
+  occurredAt: z.string(),
+});
+
+const liveProcedureStageDurationSchema = z.object({
+  stage: z.enum(LIVE_PROCEDURE_TIMELINE_STAGES),
+  stageLabel: z.string(),
+  durationMinutes: z.number().int().min(0),
+});
+
+const liveProcedureDelaySignalSchema = z.object({
+  kind: z.enum(["stage_overrun", "behind_schedule", "long_break"]),
+  stage: z.enum(LIVE_PROCEDURE_TIMELINE_STAGES).nullable(),
+  stageLabel: z.string().nullable(),
+  message: z.string(),
+  severity: z.enum(["info", "warning", "critical"]),
+  elapsedMinutes: z.number().int().min(0),
+  thresholdMinutes: z.number().int().min(0),
+});
+
+const liveProcedureTimelineSnapshotSchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientLabel: z.string(),
+  currentStage: z.enum(LIVE_PROCEDURE_TIMELINE_STAGES).nullable(),
+  currentStageLabel: z.string().nullable(),
+  status: z.enum(["not_started", "in_progress", "paused", "completed", "cancelled"]),
+  elapsedMinutes: z.number().int().min(0).nullable(),
+  expectedCompletionTime: z.string().nullable(),
+  timelineItems: z.array(liveProcedureTimelineItemSchema),
+  stageDurations: z.array(liveProcedureStageDurationSchema),
+  delaySignals: z.array(liveProcedureDelaySignalSchema),
+  summary: z.string(),
+});
+
+const graftIntelligenceWarningSchema = z.object({
+  kind: z.enum([
+    "no_data",
+    "composition_mismatch",
+    "remaining_unaccounted",
+    "over_implantation",
+    "pending_tray_review",
+    "reconciliation_incomplete",
+    "low_confidence",
+  ]),
+  message: z.string(),
+  severity: z.enum(["info", "warning", "critical"]),
+});
+
+const graftIntelligenceSnapshotSchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientLabel: z.string(),
+  totalGrafts: z.number().int().min(0),
+  totalHairs: z.number().int().min(0),
+  averageHairsPerGraft: z.number().nullable(),
+  singles: z.number().int().min(0),
+  doubles: z.number().int().min(0),
+  triples: z.number().int().min(0),
+  multiples: z.number().int().min(0),
+  multiHairGrafts: z.number().int().min(0),
+  graftCountConfidence: z.number().int().min(0).max(100),
+  reconciliationStatus: z.enum(SURGERY_OS_GRAFT_RECONCILIATION_STATUSES),
+  extractionProgressPercent: z.number().int().min(0).max(100).nullable(),
+  implantationProgressPercent: z.number().int().min(0).max(100).nullable(),
+  summary: z.string(),
+  warnings: z.array(graftIntelligenceWarningSchema),
+});
+
 const intelligenceSchema = z.object({
   policy: z.object({
     canExportCompetencyData: z.boolean(),
@@ -353,6 +426,8 @@ export const surgeryOsCommandCentrePayloadSchema = z.object({
   graftSummary: z.array(graftSummarySchema),
   graftEvents: z.array(graftCountEventSchema),
   vieCapture: z.array(vieCaptureSummarySchema),
+  liveTimeline: z.array(liveProcedureTimelineSnapshotSchema),
+  graftIntelligence: z.array(graftIntelligenceSnapshotSchema),
   intelligence: intelligenceSchema,
 });
 

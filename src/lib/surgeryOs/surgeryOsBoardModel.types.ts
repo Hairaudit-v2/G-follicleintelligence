@@ -20,6 +20,29 @@ import type {
   SurgeryOsGraftSessionPhase,
   SurgeryOsGraftTotals,
 } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import type {
+  GraftIntelligenceSnapshot,
+  GraftIntelligenceWarning,
+} from "@/src/lib/surgeryOs/graftIntelligenceCore";
+import type {
+  LiveProcedureDelaySignal,
+  LiveProcedureStageDuration,
+  LiveProcedureTimelineItem,
+  LiveProcedureTimelineSnapshot,
+  LiveProcedureTimelineStage,
+  LiveProcedureTimelineStatus,
+} from "@/src/lib/surgeryOs/liveProcedureTimelineCore";
+
+export type {
+  GraftIntelligenceSnapshot,
+  GraftIntelligenceWarning,
+  LiveProcedureDelaySignal,
+  LiveProcedureStageDuration,
+  LiveProcedureTimelineItem,
+  LiveProcedureTimelineSnapshot,
+  LiveProcedureTimelineStage,
+  LiveProcedureTimelineStatus,
+};
 
 export type SurgeryOsReadinessItem = {
   key: SurgeryOsReadinessChecklistKey;
@@ -190,6 +213,8 @@ export type SurgeryOsCommandCentrePayload = {
   graftSummary: SurgeryOsGraftSummary[];
   graftEvents: SurgeryOsGraftCountEvent[];
   vieCapture: SurgeryOsVieCaptureSummary[];
+  liveTimeline: LiveProcedureTimelineSnapshot[];
+  graftIntelligence: GraftIntelligenceSnapshot[];
   intelligence: {
     policy: {
       canExportCompetencyData: boolean;

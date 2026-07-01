@@ -8,26 +8,49 @@ import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { approveStaffHrLinkAction } from "@/lib/actions/workforce-os-staff-lifecycle-actions";
 import type {
   HrReconciliationArchivedRecord,
+  HrReconciliationDiagnostics,
   HrReconciliationMetrics,
   HrReconciliationSuggestion,
 } from "@/src/lib/workforce-os/staffLifecycleTypes";
+
+function formatTimestamp(value: string | null): string {
+  if (!value) return "Never";
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return value;
+  return new Date(parsed).toLocaleString();
+}
+
+function EnvFlag({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-xs">
+      <span className="text-[#94A3B8]">{label}</span>
+      <span className={ok ? "text-emerald-300" : "text-amber-300"}>{ok ? "OK" : "Missing"}</span>
+    </div>
+  );
+}
 
 export function HrReconciliationClient({
   tenantId,
   initialMetrics,
   initialSuggestions,
   initialArchivedHistorical,
+  initialDiagnostics,
 }: {
   tenantId: string;
   initialMetrics: HrReconciliationMetrics;
   initialSuggestions: HrReconciliationSuggestion[];
   initialArchivedHistorical: HrReconciliationArchivedRecord[];
+  initialDiagnostics: HrReconciliationDiagnostics;
 }) {
   const [metrics] = useState(initialMetrics);
+  const [diagnostics] = useState(initialDiagnostics);
   const [suggestions, setSuggestions] = useState(initialSuggestions);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(true);
+
+  const feedBlocked = diagnostics.feedStatus !== "ok";
 
   const actionableCount = useMemo(
     () =>
@@ -40,6 +63,14 @@ export function HrReconciliationClient({
   const noMatchCount = useMemo(
     () => suggestions.filter((s) => s.matchType === "none").length,
     [suggestions]
+  );
+
+  const sourceSystemSummary = useMemo(
+    () =>
+      Object.entries(diagnostics.fiStaffSourceSystemCounts)
+        .map(([key, count]) => `${key}: ${count}`)
+        .join(" · ") || "—",
+    [diagnostics.fiStaffSourceSystemCounts]
   );
 
   function onApprove(row: HrReconciliationSuggestion) {
@@ -74,6 +105,31 @@ export function HrReconciliationClient({
         </p>
       </header>
 
+      {feedBlocked && diagnostics.feedBlockedMessage ? (
+        <DashboardCard className="border-amber-500/40 bg-amber-500/10 p-4">
+          <h2 className="text-sm font-semibold text-amber-100">IIOHR feed unavailable</h2>
+          <p className="mt-2 text-sm text-amber-50/90">{diagnostics.feedBlockedMessage}</p>
+          <p className="mt-3 text-xs text-amber-100/80">
+            Reconciliation actions are hidden until IIOHR candidate rows are available — this prevents
+            false &quot;No match&quot; results when the feed is empty or misconfigured.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`/fi-admin/${tenantId}/hr/sync-health`}
+              className="text-xs text-amber-100 underline-offset-2 hover:underline"
+            >
+              Open HR sync health
+            </Link>
+            <Link
+              href={`/fi-admin/${tenantId}/hr/staff-import`}
+              className="text-xs text-amber-100 underline-offset-2 hover:underline"
+            >
+              Run staff import / sync
+            </Link>
+          </div>
+        </DashboardCard>
+      ) : null}
+
       <DashboardCard className="p-4">
         <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -95,6 +151,77 @@ export function HrReconciliationClient({
             <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">{metrics.archivedExcluded}</dd>
           </div>
         </dl>
+      </DashboardCard>
+
+      <DashboardCard className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-[#F8FAFC]">Runtime diagnostics</h2>
+          <Button size="sm" variant="outline" onClick={() => setShowDiagnostics((prev) => !prev)}>
+            {showDiagnostics ? "Hide" : "Show"}
+          </Button>
+        </div>
+        {showDiagnostics ? (
+          <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <dt className="text-[#64748B]">FI staff rows</dt>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">{diagnostics.fiStaffCount}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">IIOHR feed rows (raw)</dt>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">{diagnostics.iiohrRawFeedRowCount}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">IIOHR candidates (UUID)</dt>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">{diagnostics.iiohrCandidateCount}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Exact email pairs</dt>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">
+                {diagnostics.exactNormalizedEmailMatchCount}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Staff identity links</dt>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">
+                {diagnostics.staffIdentityLinksCount}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Last IIOHR sync success</dt>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">
+                {formatTimestamp(diagnostics.lastSuccessfulIiohrSyncAt)}
+              </dd>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <dt className="text-[#64748B]">FI source_system counts</dt>
+              <dd className="mt-1 text-[#CBD5E1]">{sourceSystemSummary}</dd>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <dt className="text-[#64748B]">Feed status</dt>
+              <dd className="mt-1 capitalize text-[#CBD5E1]">
+                {diagnostics.feedStatus.replace(/_/g, " ")}
+                {diagnostics.feedUrlSource ? ` · env ${diagnostics.feedUrlSource}` : ""}
+                {diagnostics.iiohrCandidatesSkippedNonUuid > 0
+                  ? ` · ${diagnostics.iiohrCandidatesSkippedNonUuid} feed rows skipped (non-UUID id)`
+                  : ""}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+        {showDiagnostics ? (
+          <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Env checks</p>
+            <EnvFlag label="IIOHR feed URL" ok={diagnostics.feedUrlConfigured} />
+            <EnvFlag label="IIOHR feed key (optional)" ok={diagnostics.feedKeyConfigured} />
+            <EnvFlag label="CRON_SECRET" ok={diagnostics.cronSecretConfigured} />
+            <EnvFlag label="EVOLVED_PERTH_TENANT_ID" ok={diagnostics.evolvedPerthTenantIdConfigured} />
+            {diagnostics.legacyFeedUrlConfigured ? (
+              <p className="text-xs text-amber-200/90">
+                Legacy IIOHR_HR_STAFF_FEED_URL is set — prefer IIOHR_HR_PERTH_STAFF_FEED_URL in production.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </DashboardCard>
 
       <DashboardCard className="p-4">
@@ -135,7 +262,13 @@ export function HrReconciliationClient({
             </tr>
           </thead>
           <tbody>
-            {suggestions.length === 0 ? (
+            {feedBlocked ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-[#94A3B8]">
+                  Action queue hidden — load the IIOHR staff feed before reconciling.
+                </td>
+              </tr>
+            ) : suggestions.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-[#94A3B8]">
                   No reconciliation actions — all active staff are linked or excluded.

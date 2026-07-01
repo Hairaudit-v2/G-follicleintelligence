@@ -12,10 +12,16 @@ import {
   IIOHR_HR_STAFF_RECONCILIATION_SOURCE,
 } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
 import {
+  buildHrReconciliationDiagnostics,
   buildHrReconciliationPageData,
   needsHrReconciliation,
   type HrReconciliationPageData,
 } from "@/src/lib/workforce-os/hrReconciliationFilterCore";
+import {
+  loadHrReconciliationDbDiagnostics,
+  loadHrReconciliationEnvDiagnostics,
+  loadIiohrReconciliationFeedRecords,
+} from "@/src/lib/workforce-os/hrReconciliationCandidateLoader.server";
 import {
   composeFullName,
   parseStaffEmploymentStatus,
@@ -241,19 +247,66 @@ export async function findMatchingIiohrHrRecords(
 
 export async function loadHrReconciliationPageData(input: {
   tenantId: string;
-  evolvedStaffRecords: EvolvedStaffRecord[];
+  evolvedStaffRecords?: EvolvedStaffRecord[];
   client?: SupabaseClient;
+  skipFeedLoad?: boolean;
 }): Promise<HrReconciliationPageData> {
   const staffMembers = await loadAllTenantStaffMembers(input.tenantId, input.client);
+  const envDiagnostics = loadHrReconciliationEnvDiagnostics();
+  const dbDiagnostics = await loadHrReconciliationDbDiagnostics(input.tenantId, input.client);
+
+  let evolvedStaffRecords = input.evolvedStaffRecords ?? [];
+  let rawFeedRowCount = 0;
+  let skippedNonUuidCount = 0;
+  let feedLoadError: string | null = null;
+
+  if (!input.skipFeedLoad && input.evolvedStaffRecords === undefined) {
+    const feed = await loadIiohrReconciliationFeedRecords();
+    evolvedStaffRecords = feed.evolvedStaffRecords;
+    rawFeedRowCount = feed.rawFeedRowCount;
+    skippedNonUuidCount = feed.skippedNonUuidCount;
+    feedLoadError = feed.feedLoadError;
+  } else if (input.evolvedStaffRecords !== undefined) {
+    rawFeedRowCount = input.evolvedStaffRecords.length;
+  }
+
+  const diagnostics = buildHrReconciliationDiagnostics({
+    staffMembers,
+    evolvedStaffRecords,
+    rawFeedRowCount,
+    skippedNonUuidCount,
+    staffIdentityLinksCount: dbDiagnostics.staffIdentityLinksCount,
+    lastSuccessfulIiohrSyncAt: dbDiagnostics.lastSuccessfulIiohrSyncAt,
+    feedUrlConfigured: envDiagnostics.feedUrlConfigured,
+    feedUrlSource: envDiagnostics.feedUrlSource,
+    feedKeyConfigured: envDiagnostics.feedKeyConfigured,
+    cronSecretConfigured: envDiagnostics.cronSecretConfigured,
+    evolvedPerthTenantIdConfigured: envDiagnostics.evolvedPerthTenantIdConfigured,
+    legacyFeedUrlConfigured: envDiagnostics.legacyFeedUrlConfigured,
+    feedLoadError,
+  });
+
+  console.info("[hr_reconciliation] page diagnostics", {
+    tenantId: input.tenantId,
+    fiStaffCount: diagnostics.fiStaffCount,
+    iiohrCandidateCount: diagnostics.iiohrCandidateCount,
+    exactNormalizedEmailMatchCount: diagnostics.exactNormalizedEmailMatchCount,
+    feedStatus: diagnostics.feedStatus,
+    alreadyLinked: diagnostics.fiStaffSourceSystemCounts,
+    staffIdentityLinksCount: diagnostics.staffIdentityLinksCount,
+    lastSuccessfulIiohrSyncAt: diagnostics.lastSuccessfulIiohrSyncAt,
+  });
+
   return buildHrReconciliationPageData({
     staffMembers,
-    evolvedStaffRecords: input.evolvedStaffRecords,
+    evolvedStaffRecords,
+    diagnostics,
   });
 }
 
 export async function buildReconciliationSuggestionsForTenant(input: {
   tenantId: string;
-  evolvedStaffRecords: EvolvedStaffRecord[];
+  evolvedStaffRecords?: EvolvedStaffRecord[];
   client?: SupabaseClient;
 }): Promise<HrReconciliationSuggestion[]> {
   const pageData = await loadHrReconciliationPageData(input);

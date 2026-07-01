@@ -130,3 +130,25 @@ export type HrReconciliationArchivedRecord = {
   fiOsStaffName: string;
   fiOsEmail: string | null;
 };
+
+export type HrReconciliationFeedStatus = "ok" | "empty" | "not_configured" | "error";
+
+export type HrReconciliationDiagnostics = {
+  fiStaffCount: number;
+  iiohrRawFeedRowCount: number;
+  iiohrCandidateCount: number;
+  iiohrCandidatesSkippedNonUuid: number;
+  exactNormalizedEmailMatchCount: number;
+  staffIdentityLinksCount: number;
+  lastSuccessfulIiohrSyncAt: string | null;
+  fiStaffSourceSystemCounts: Record<string, number>;
+  feedStatus: HrReconciliationFeedStatus;
+  feedLoadError: string | null;
+  feedBlockedMessage: string | null;
+  feedUrlConfigured: boolean;
+  feedUrlSource: string | null;
+  feedKeyConfigured: boolean;
+  cronSecretConfigured: boolean;
+  evolvedPerthTenantIdConfigured: boolean;
+  legacyFeedUrlConfigured: boolean;
+};

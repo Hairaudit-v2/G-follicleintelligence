@@ -1,5 +1,9 @@
 import "server-only";
 
+import {
+  readIiohrHrStaffFeedKey,
+  readIiohrHrStaffFeedUrl,
+} from "@/src/lib/hr/iiohrHrStaffFeedEnv";
 import type { IiohrHrPortalStaffRecord } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
 
 function optionalCount(value: unknown): number | null {
@@ -14,19 +18,22 @@ function optionalCount(value: unknown): number | null {
  * Configure `IIOHR_HR_PERTH_STAFF_FEED_URL` (GET) to return JSON:
  * `{ "staff": [ ... ] }`, `{ "rows": [ ... ] }`, or a bare array of `IiohrHrPortalStaffRecord`-shaped objects.
  *
+ * Falls back to legacy `IIOHR_HR_STAFF_FEED_URL` when Perth URL is unset.
+ *
  * Optional `IIOHR_HR_PERTH_STAFF_FEED_KEY` sets `Authorization: Bearer <key>`.
  */
 export async function loadEvolvedPerthHrStaffRecordsForFiPush(): Promise<
   IiohrHrPortalStaffRecord[]
 > {
-  const url = process.env.IIOHR_HR_PERTH_STAFF_FEED_URL?.trim();
-  if (!url) {
+  const feed = readIiohrHrStaffFeedUrl();
+  if (!feed?.url) {
     throw new Error(
-      "Evolved Perth HR staff feed is not configured. Set IIOHR_HR_PERTH_STAFF_FEED_URL to the IIOHR HR JSON export endpoint for Perth staff."
+      "Evolved Perth HR staff feed is not configured. Set IIOHR_HR_PERTH_STAFF_FEED_URL (or legacy IIOHR_HR_STAFF_FEED_URL) to the IIOHR HR JSON export endpoint for Perth staff."
     );
   }
 
-  const key = process.env.IIOHR_HR_PERTH_STAFF_FEED_KEY?.trim();
+  const url = feed.url;
+  const key = readIiohrHrStaffFeedKey();
   const headers: Record<string, string> = { accept: "application/json" };
   if (key) headers.authorization = `Bearer ${key}`;
 

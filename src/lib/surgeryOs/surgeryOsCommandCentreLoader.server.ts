@@ -62,13 +62,18 @@ import {
   loadGraftCountEventsForSurgeries,
   loadGraftSessionsForSurgeries,
 } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
-import { surgeryOsCommandCentrePayloadSchema } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
 import { loadSurgeryOsVieCaptureSummaries } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
+import { buildGraftIntelligence } from "@/src/lib/surgeryOs/graftIntelligenceCore";
+import {
+  buildLiveProcedureTimeline,
+  type LiveProcedureTimelineInputEvent,
+} from "@/src/lib/surgeryOs/liveProcedureTimelineCore";
 import {
   emptySurgeryOsIntelligence,
   isMissingDatabaseRelationError,
   normalizeLoaderErrorMessage,
 } from "@/src/lib/surgeryOs/surgeryOsLoaderResilience";
+import { surgeryOsCommandCentrePayloadSchema } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
 
 type SurgeryRow = {
   id: string;
@@ -83,6 +88,9 @@ type SurgeryRow = {
   target_grafts: number | null;
   scheduled_date: string;
   scheduled_start_at: string | null;
+  scheduled_end_at: string | null;
+  actual_start_at: string | null;
+  actual_end_at: string | null;
   readiness_percent: number;
   readiness_risk_level: string;
   readiness_checklist: unknown;
@@ -250,7 +258,7 @@ export async function loadSurgeryOsCommandCentrePayload(
     const { data, error } = await supabase
       .from("fi_surgeries")
       .select(
-        "id, tenant_id, patient_id, case_id, booking_id, surgeon_fi_user_id, status, live_status, procedure_phase, target_grafts, scheduled_date, scheduled_start_at, readiness_percent, readiness_risk_level, readiness_checklist"
+        "id, tenant_id, patient_id, case_id, booking_id, surgeon_fi_user_id, status, live_status, procedure_phase, target_grafts, scheduled_date, scheduled_start_at, scheduled_end_at, actual_start_at, actual_end_at, readiness_percent, readiness_risk_level, readiness_checklist"
       )
       .eq("tenant_id", tid)
       .eq("scheduled_date", window.todayYmd)
@@ -355,7 +363,18 @@ export async function loadSurgeryOsCommandCentrePayload(
   const liveSurgeries: SurgeryOsLiveSurgery[] = [];
   const readinessSnapshots: SurgeryOsReadinessSnapshot[] = [];
   const graftSummary: SurgeryOsGraftSummary[] = [];
+  const liveTimeline: SurgeryOsCommandCentrePayload["liveTimeline"] = [];
+  const graftIntelligence: SurgeryOsCommandCentrePayload["graftIntelligence"] = [];
   const allAlerts: SurgeryOsAlert[] = [];
+  const eventsBySurgery = new Map<string, LiveProcedureTimelineInputEvent[]>();
+  for (const event of events) {
+    const list = eventsBySurgery.get(event.surgery_id) ?? [];
+    list.push({
+      eventKind: event.event_kind as SurgeryOsProcedureEventKind,
+      occurredAt: event.occurred_at,
+    });
+    eventsBySurgery.set(event.surgery_id, list);
+  }
 
   for (const row of surgeries) {
     const patientLabel = row.patient_id
@@ -593,6 +612,43 @@ export async function loadSurgeryOsCommandCentrePayload(
         href: a.href,
       }))
     );
+
+    liveTimeline.push(
+      buildLiveProcedureTimeline({
+        surgery: {
+          surgeryId: row.id,
+          patientLabel,
+          status: row.status,
+          procedurePhase: phase,
+          scheduledStartAt: row.scheduled_start_at,
+          scheduledEndAt: row.scheduled_end_at,
+          actualStartAt: row.actual_start_at,
+          actualEndAt: row.actual_end_at,
+        },
+        events: eventsBySurgery.get(row.id) ?? [],
+        now,
+      })
+    );
+
+    graftIntelligence.push(
+      buildGraftIntelligence({
+        surgeryId: row.id,
+        patientLabel,
+        targetGrafts: totals.targetGrafts,
+        extractedGrafts: totals.extractedGrafts,
+        implantedGrafts: totals.implantedGrafts,
+        discardedGrafts: totals.discardedGrafts,
+        remainingGrafts: totals.remainingGrafts,
+        singles: totals.composition.singles,
+        doubles: totals.composition.doubles,
+        triples: totals.composition.triples,
+        multiples: totals.composition.multiples,
+        totalHairs: totals.totalHairs,
+        averageHairsPerGraft: totals.averageHairsPerGraft,
+        reconciliationStatus,
+        pendingTrayCount: trayBuckets.pending,
+      })
+    );
   }
 
   allAlerts.sort((a, b) => compareSurgeryOsSeverity(a.severity, b.severity));
@@ -731,6 +787,8 @@ export async function loadSurgeryOsCommandCentrePayload(
     graftSummary,
     graftEvents,
     vieCapture,
+    liveTimeline,
+    graftIntelligence,
     intelligence: emptySurgeryOsIntelligence(),
   };
 

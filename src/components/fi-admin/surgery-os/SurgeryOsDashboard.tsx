@@ -171,7 +171,10 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
 
         {show("live_graft_intelligence") ? (
           <div className="xl:col-span-2">
-            <SurgeryOsGraftIntelligenceWidget graftSummary={data.graftSummary} />
+            <SurgeryOsGraftIntelligenceWidget
+              graftSummary={data.graftSummary}
+              graftIntelligence={data.graftIntelligence}
+            />
           </div>
         ) : null}
 
@@ -182,7 +185,10 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
         ) : null}
 
         {show("live_procedure_timeline") ? (
-          <SurgeryOsProcedureTimelineWidget events={data.procedureTimeline} />
+          <SurgeryOsProcedureTimelineWidget
+            events={data.procedureTimeline}
+            liveTimeline={data.liveTimeline}
+          />
         ) : null}
 
         {show("team_assignment_board") ? (

@@ -221,7 +221,7 @@ export async function loadStaffLifecyclePageAction(
 
 export async function loadHrReconciliationPageAction(
   tenantId: string,
-  evolvedStaffRecords: EvolvedStaffRecord[]
+  evolvedStaffRecords?: EvolvedStaffRecord[]
 ): Promise<
   | { ok: true; pageData: Awaited<ReturnType<typeof loadHrReconciliationPageData>> }
   | { ok: false; error: string }
@@ -231,7 +231,7 @@ export async function loadHrReconciliationPageAction(
     await syncAllStaffProjectionsForTenant(tenantId);
     const pageData = await loadHrReconciliationPageData({
       tenantId,
-      evolvedStaffRecords,
+      ...(evolvedStaffRecords !== undefined ? { evolvedStaffRecords } : {}),
     });
     return { ok: true, pageData };
   } catch (e) {

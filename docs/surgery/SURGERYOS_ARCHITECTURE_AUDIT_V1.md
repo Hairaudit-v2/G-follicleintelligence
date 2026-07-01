@@ -833,8 +833,79 @@ CalendarOS (`fi_bookings`) remains scheduling SoR. Live theatre writes flow back
 - Post-op tracking (`fi_case_post_op_tracking`) not auto-seeded on completion.
 - `fi_surgery_team_assignments` (`fi_users`) still not bidirectionally synced with WorkforceOS roster.
 - Analytics: only `surgery_completed` published; graft/phase events still unpublished.
-- SurgeryOS intelligence slot still placeholder (`emptySurgeryOsIntelligence()`).
 - Consultation → booking automation still manual.
+
+---
+
+## SurgeryOS Sprint 1 Implementation Notes (2026-07-01)
+
+First intelligence sprint: live procedural state + graft intelligence on the existing unified live theatre data layer. No duplicate procedure models, no CalendarOS changes, P0 sync preserved.
+
+### Files added
+
+| Area | Files |
+|------|-------|
+| Live procedure timeline engine | `src/lib/surgeryOs/liveProcedureTimelineCore.ts`, `src/lib/surgeryOs/liveProcedureTimelineCore.test.ts` |
+| Graft intelligence engine | `src/lib/surgeryOs/graftIntelligenceCore.ts`, `src/lib/surgeryOs/graftIntelligenceCore.test.ts` |
+
+### Files changed
+
+| Area | Files |
+|------|-------|
+| Command centre payload | `src/lib/surgeryOs/surgeryOsBoardModel.types.ts`, `surgeryOsBoardPayloadSchema.ts`, `surgeryOsCommandCentreLoader.server.ts`, `surgeryOsLoaderResilience.ts` |
+| UI | `src/components/fi-admin/surgery-os/SurgeryOsDashboard.tsx`, `widgets/SurgeryOsProcedureTimeline.tsx`, `widgets/SurgeryOsGraftIntelligence.tsx` |
+| Tests | `src/lib/surgeryOs/surgeryOsBoardPayloadSchema.test.ts` |
+
+### Engines created
+
+**Live Procedure Timeline Engine** (`buildLiveProcedureTimeline`)
+
+- Input: `fi_surgeries` timing fields + `fi_surgery_procedure_events`
+- Output per surgery: `currentStage`, `status`, `elapsedMinutes`, `expectedCompletionTime`, `timelineItems`, `stageDurations`, `delaySignals`, `summary`
+- Maps existing event kinds (e.g. `patient_arrived` → `patient_checked_in`, `graft_reconciliation_completed` → `graft_count_reconciled`)
+- Configurable delay thresholds via `DEFAULT_LIVE_PROCEDURE_TIMELINE_THRESHOLDS`
+
+**Graft Intelligence Engine** (`buildGraftIntelligence`)
+
+- Input: graft session totals from `fi_surgery_graft_sessions` + tray review buckets
+- Output per surgery: graft/hair totals, composition, confidence score, progress percentages, reconciliation status, warnings
+- Preserves existing reconciliation gate semantics from `surgeryOsGraftModel.ts`
+
+### API / payload integration
+
+`GET /api/tenants/{tenantId}/surgery-os` and SSR loader now include:
+
+- `liveTimeline: LiveProcedureTimelineSnapshot[]`
+- `graftIntelligence: GraftIntelligenceSnapshot[]`
+
+Existing payload fields unchanged (`procedureTimeline`, `graftSummary`, etc.).
+
+### Data sources
+
+| Engine | Primary tables |
+|--------|----------------|
+| Live timeline | `fi_surgeries`, `fi_surgery_procedure_events` |
+| Graft intelligence | `fi_surgery_graft_sessions`, `fi_surgery_graft_count_events` (via existing loader helpers) |
+
+### Empty-state rules
+
+| Engine | Condition | Summary |
+|--------|-----------|---------|
+| Live timeline | No mappable procedure events | `"No live theatre events recorded yet."` |
+| Graft intelligence | No extracted/implanted/composition data | `"No graft intelligence available yet."` |
+
+Both engines clamp percentages 0–100, avoid division by zero, and never emit NaN.
+
+### Case timeline compatibility
+
+No new `fi_surgery_procedure_events` kinds added. Sprint 1 maps existing kinds to operational stage labels only inside the intelligence engines. Case timeline ingestion (`caseTimelineBuild`, `SURGERY_OS_PROCEDURE_EVENT_LABELS`) unchanged.
+
+### Remaining gaps (post-Sprint 1)
+
+- Tenant-configurable delay thresholds and expected-duration models.
+- `intelligence.hints` slot still placeholder (`emptySurgeryOsIntelligence()`).
+- Anaesthetic start / implantation complete stages depend on future explicit event kinds or phase metadata.
+- Post-op auto-seed and analytics event bus still outstanding from P0 gap list.
 
 ---
 

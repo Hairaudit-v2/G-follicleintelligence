@@ -30,6 +30,7 @@ export default async function WorkforceOsHrReconciliationPage({
         initialMetrics={data.metrics}
         initialSuggestions={data.suggestions}
         initialArchivedHistorical={data.archivedHistorical}
+        initialDiagnostics={data.diagnostics}
       />
     </div>
   );
