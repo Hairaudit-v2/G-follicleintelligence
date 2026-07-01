@@ -261,7 +261,11 @@ export async function reconcileInboundStaffIdentityApply(input: {
 /** Enriches fi_staff import snapshots with workforce identity link mappings. */
 export async function enrichImportSnapshotsWithIdentityLinks(
   tenantId: string,
-  inboundRows: { external_staff_id: string; email: string | null; full_name: string }[],
+  inboundRows: {
+    external_staff_id: string;
+    email?: string | null;
+    full_name: string;
+  }[],
   sourceSystem: string,
   snapshots: {
     existingStaffSourceIds: {
@@ -298,7 +302,7 @@ export async function enrichImportSnapshotsWithIdentityLinks(
       inbound: {
         sourceSystem,
         externalId: row.external_staff_id,
-        email: row.email,
+        email: row.email ?? null,
         fullName: row.full_name,
       },
       staffMembers,

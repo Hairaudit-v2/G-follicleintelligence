@@ -505,13 +505,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 81,
-    stage: "Phase 1C · staff lifecycle management",
+    completionPercent: 73,
+    stage: "Phase 1C Sprint 1 · identity reconciliation audit",
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, employment lifecycle, and HR reconciliation.",
+      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, employment lifecycle, IIOHR HR identity reconciliation, duplicate detection, and HR sync audit centre.",
     status: "Active Development",
     statusLabel: "Operational Beta",
-    latestMilestone: "Staff lifecycle management and HR reconciliation",
+    latestMilestone: "HR identity reconciliation audit layer and sync health dashboard",
   },
   {
     id: "onboarding-os",
@@ -975,6 +975,15 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     summary:
       "OnboardingOS Phase A–B foundations added: tenant provisioning sessions, deployment templates, module bundle activation planning, role packs, service workflow templates, and sandbox seed planning.",
     modules: ["OnboardingOS"],
+  },
+  {
+    id: "2026-07-01-workforce-os-phase-1c-sprint-1",
+    date: "2026-07-01",
+    tag: "workforce-os",
+    title: "WorkforceOS Phase 1C Sprint 1 — HR identity reconciliation audit layer",
+    summary:
+      "Staff Identity Reconciliation Engine, Duplicate Detection Engine, and HR Sync Audit Centre shipped — auditable IIOHR ↔ FI OS identity links, fi_hr_sync_runs audit trail, duplicate candidate detection, and HR sync health dashboard foundation.",
+    modules: ["WorkforceOS"],
   },
   {
     id: "2026-07-01-workforce-os-staff-lifecycle",
