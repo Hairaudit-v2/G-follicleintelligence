@@ -12,6 +12,8 @@ import {
 } from "@/src/lib/hr/hrStaffSyncHealthDashboard";
 import { buildHrStaffAutomationStatus } from "@/src/lib/hr/hrStaffAutomationStatus";
 import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
+import type { WorkforceHrSyncAuditPageModel } from "@/src/lib/workforce/hrSyncAuditPage.server";
+import { loadWorkforceHrSyncAuditPageModel } from "@/src/lib/workforce/hrSyncAuditPage.server";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
 import {
@@ -29,6 +31,7 @@ export type HrSyncHealthPageModel = {
   automationCronPath: string;
   isEvolvedPerthCronTenant: boolean;
   identityOverview: Awaited<ReturnType<typeof buildTenantWorkforceIdentityOverview>>;
+  workforceAudit: WorkforceHrSyncAuditPageModel;
 };
 
 function mapRunRefs(rows: FiStaffSyncRunRow[]) {
@@ -76,7 +79,10 @@ export async function loadHrSyncHealthPageModel(tenantId: string): Promise<HrSyn
     getEnv: (k) => process.env[k],
   });
 
-  const identityOverview = await buildTenantWorkforceIdentityOverview(tid, staff);
+  const [identityOverview, workforceAudit] = await Promise.all([
+    buildTenantWorkforceIdentityOverview(tid, staff),
+    loadWorkforceHrSyncAuditPageModel(tid),
+  ]);
 
   return {
     overview,
@@ -88,5 +94,6 @@ export async function loadHrSyncHealthPageModel(tenantId: string): Promise<HrSyn
     automationCronPath: automation.cronPath,
     isEvolvedPerthCronTenant: automation.evolvedPerthTenantMatchesPageTenant,
     identityOverview,
+    workforceAudit,
   };
 }

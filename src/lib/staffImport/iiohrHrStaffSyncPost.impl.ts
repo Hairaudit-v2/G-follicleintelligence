@@ -54,11 +54,25 @@ function timingSafeSecretEqual(expected: string, received: string | null): boole
   return timingSafeUtf8Equal(expected, received);
 }
 
-function rollupImportCounts(c: IiohrHrStaffImportCounts): {
+function rollupImportCounts(
+  c: IiohrHrStaffImportCounts,
+  workforce?: {
+    recordsLinked: number;
+    recordsCreated: number;
+    recordsUpdated: number;
+  }
+): {
   createdCount: number;
   updatedCount: number;
   linkedCount: number;
 } {
+  if (workforce) {
+    return {
+      createdCount: workforce.recordsCreated,
+      updatedCount: workforce.recordsUpdated,
+      linkedCount: workforce.recordsLinked,
+    };
+  }
   return {
     createdCount: c.createdUsers + c.createdStaff + c.createdSourceIds,
     updatedCount: c.updatedUsers + c.updatedStaff + c.updatedSourceIds + c.deactivatedStaff,
@@ -74,7 +88,7 @@ function pickCounts(summary: IiohrHrStaffSyncSummary): IiohrHrStaffImportCounts 
 function summarizeResult(summary: IiohrHrStaffSyncSummary): Record<string, unknown> {
   const r: IiohrHrStaffImportRunResult = summary.result;
   const c = pickCounts(summary);
-  const roll = rollupImportCounts(c);
+  const roll = rollupImportCounts(c, r.workforceReconciliation);
   return {
     ok: r.ok,
     mode: summary.mode,
@@ -84,8 +98,11 @@ function summarizeResult(summary: IiohrHrStaffSyncSummary): Record<string, unkno
     validationErrors: r.validationErrors,
     warnings: r.warnings,
     error: r.error ?? null,
+    hrSyncRunId: r.hrSyncRunId ?? null,
+    workforceReconciliation: r.workforceReconciliation ?? null,
     counts: {
       ...roll,
+      duplicatesDetected: r.workforceReconciliation?.duplicatesDetected ?? 0,
       raw: c,
     },
   };
@@ -217,7 +234,7 @@ export async function processIiohrHrStaffSyncPost(
   }
 
   const c = pickCounts(summary);
-  const roll = rollupImportCounts(c);
+  const roll = rollupImportCounts(c, summary.result.workforceReconciliation);
   const errMsg =
     summary.result.error ??
     (summary.result.validationErrors.length

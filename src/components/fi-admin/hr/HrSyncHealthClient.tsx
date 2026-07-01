@@ -69,8 +69,17 @@ export function HrSyncHealthClient({
   > | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const { overview, latestRun, latestSuccessfulRun, envChecklist, staffIssues, identityOverview } =
-    pageModel;
+  const {
+    overview,
+    latestRun,
+    latestSuccessfulRun,
+    envChecklist,
+    staffIssues,
+    identityOverview,
+    workforceAudit,
+  } = pageModel;
+  const { healthSummary, recentRuns: workforceRuns, openDuplicates, unlinkedActiveStaff } =
+    workforceAudit;
 
   const exportCsv = useCallback(() => {
     const csv = buildHrSyncIssuesCsvExport(staffIssues);
@@ -149,6 +158,151 @@ export function HrSyncHealthClient({
         <InfoNotice variant="success" title="Success">
           {actionMessage}
         </InfoNotice>
+      ) : null}
+
+      <DashboardCard className="p-5 border-[#22C1FF]/25">
+        <h2 className="text-lg font-semibold text-[#F8FAFC]">WorkforceOS HR sync audit</h2>
+        <p className="mt-1 text-sm text-[#94A3B8]">
+          Identity reconciliation layer — links inbound IIOHR HR records to existing FI OS staff
+          members and surfaces duplicate candidates for manual review.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="Last sync" value={formatIso(healthSummary.lastSyncTime)} />
+          <StatCard label="Status" value={healthSummary.lastStatus ?? "—"} />
+          <StatCard label="Received" value={healthSummary.recordsReceived} />
+          <StatCard label="Linked" value={healthSummary.linked} />
+          <StatCard label="Created" value={healthSummary.created} />
+          <StatCard label="Updated" value={healthSummary.updated} />
+          <StatCard label="Skipped" value={healthSummary.skipped} />
+          <StatCard label="Duplicates detected" value={healthSummary.duplicatesDetected} />
+        </div>
+        <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Warnings</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {healthSummary.warningCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Errors</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {healthSummary.errorCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+              Unlinked active staff
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium text-amber-200">
+              {healthSummary.unlinkedActiveStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">
+              Open duplicate candidates
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium text-amber-200">
+              {healthSummary.openDuplicateCandidatesCount}
+            </dd>
+          </div>
+        </dl>
+      </DashboardCard>
+
+      {openDuplicates.length > 0 ? (
+        <DashboardCard className="p-5 border-amber-500/25">
+          <h2 className="text-lg font-semibold text-[#F8FAFC]">Open duplicate candidates</h2>
+          <p className="mt-1 text-sm text-[#94A3B8]">
+            Pairs scoring ≥80 — Sprint 1 does not auto-merge. Review in WorkforceOS HR
+            reconciliation.
+          </p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="text-xs uppercase tracking-wide text-[#64748B]">
+                <tr>
+                  <th className="pb-2 pr-4">Staff A</th>
+                  <th className="pb-2 pr-4">Staff B</th>
+                  <th className="pb-2 pr-4">Score</th>
+                  <th className="pb-2 pr-4">Signals</th>
+                  <th className="pb-2">Detected</th>
+                </tr>
+              </thead>
+              <tbody className="text-[#E2E8F0]">
+                {openDuplicates.map((d) => (
+                  <tr key={d.id} className="border-t border-white/5">
+                    <td className="py-2 pr-4">{d.staffAName}</td>
+                    <td className="py-2 pr-4">{d.staffBName}</td>
+                    <td className="py-2 pr-4">{d.similarityScore}</td>
+                    <td className="py-2 pr-4 text-xs text-[#94A3B8]">
+                      {[
+                        d.matchEmail ? "email" : null,
+                        d.matchName ? "name" : null,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "—"}
+                    </td>
+                    <td className="py-2">{formatIso(d.detectedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </DashboardCard>
+      ) : null}
+
+      {unlinkedActiveStaff.length > 0 ? (
+        <DashboardCard className="p-5">
+          <h2 className="text-lg font-semibold text-[#F8FAFC]">Unlinked active staff</h2>
+          <p className="mt-1 text-sm text-[#94A3B8]">
+            Active WorkforceOS members without an IIOHR HR identity link.
+          </p>
+          <ul className="mt-4 space-y-2 text-sm text-[#E2E8F0]">
+            {unlinkedActiveStaff.slice(0, 15).map((s) => (
+              <li key={s.id} className="flex flex-wrap justify-between gap-2 border-t border-white/5 pt-2">
+                <span>{s.fullName}</span>
+                <span className="text-[#94A3B8]">{s.email ?? "no email"}</span>
+              </li>
+            ))}
+          </ul>
+          {unlinkedActiveStaff.length > 15 ? (
+            <p className="mt-2 text-xs text-[#64748B]">
+              +{unlinkedActiveStaff.length - 15} more unlinked staff
+            </p>
+          ) : null}
+        </DashboardCard>
+      ) : null}
+
+      {workforceRuns.length > 0 ? (
+        <DashboardCard className="p-5">
+          <h2 className="text-lg font-semibold text-[#F8FAFC]">Recent WorkforceOS sync runs</h2>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="text-xs uppercase tracking-wide text-[#64748B]">
+                <tr>
+                  <th className="pb-2 pr-4">Started</th>
+                  <th className="pb-2 pr-4">Status</th>
+                  <th className="pb-2 pr-4">Received</th>
+                  <th className="pb-2 pr-4">Linked</th>
+                  <th className="pb-2 pr-4">Created</th>
+                  <th className="pb-2 pr-4">Updated</th>
+                  <th className="pb-2">Duplicates</th>
+                </tr>
+              </thead>
+              <tbody className="text-[#E2E8F0]">
+                {workforceRuns.slice(0, 10).map((r) => (
+                  <tr key={r.id} className="border-t border-white/5">
+                    <td className="py-2 pr-4">{formatIso(r.startedAt)}</td>
+                    <td className="py-2 pr-4">{r.status}</td>
+                    <td className="py-2 pr-4">{r.recordsReceived}</td>
+                    <td className="py-2 pr-4">{r.recordsLinked}</td>
+                    <td className="py-2 pr-4">{r.recordsCreated}</td>
+                    <td className="py-2 pr-4">{r.recordsUpdated}</td>
+                    <td className="py-2">{r.duplicatesDetected}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </DashboardCard>
       ) : null}
 
       <DashboardCard className="p-5 border-white/10">

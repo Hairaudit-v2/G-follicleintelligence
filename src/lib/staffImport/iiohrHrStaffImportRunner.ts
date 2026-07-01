@@ -130,6 +130,14 @@ export type IiohrHrStaffImportCounts = {
   updatedSourceIds: number;
 };
 
+export type WorkforceReconciliationCounts = {
+  recordsLinked: number;
+  recordsCreated: number;
+  recordsUpdated: number;
+  duplicatesDetected: number;
+  recordsSkipped: number;
+};
+
 export type IiohrHrStaffImportRunResult = {
   ok: boolean;
   commit: boolean;
@@ -139,6 +147,8 @@ export type IiohrHrStaffImportRunResult = {
   plan: IiohrHrStaffImportPlanResult;
   dryRunCounts: IiohrHrStaffImportCounts;
   appliedCounts?: IiohrHrStaffImportCounts;
+  workforceReconciliation?: WorkforceReconciliationCounts;
+  hrSyncRunId?: string | null;
   error?: string;
   /** Rows accepted after per-row schema validation (same order as planner input). Omitted when tenant parse fails before validation. */
   validatedPackedRows?: IiohrHrStaffImportRow[];
@@ -727,8 +737,29 @@ export async function runIiohrHrStaffImport(
     };
   }
 
-  const { existingUsers, existingStaff, existingStaffSourceIds } =
-    await loadSnapshotsForPlan(tenantId);
+  const snapshots = await loadSnapshotsForPlan(tenantId);
+  const { existingUsers, existingStaff } = snapshots;
+  let { existingStaffSourceIds } = snapshots;
+
+  let workforceInjectedSourceIds = 0;
+  if (rows.length > 0) {
+    const { syncAllStaffProjectionsForTenant } = await import(
+      "@/src/lib/workforce-os/hrReconciliation.server"
+    );
+    await syncAllStaffProjectionsForTenant(tenantId);
+
+    const { enrichImportSnapshotsWithIdentityLinks } = await import(
+      "@/src/lib/workforce/identityReconciliation.server"
+    );
+    const enrichment = await enrichImportSnapshotsWithIdentityLinks(
+      tenantId,
+      rows,
+      IIOHR_HR_SOURCE_SYSTEM,
+      { existingStaffSourceIds }
+    );
+    existingStaffSourceIds = snapshots.existingStaffSourceIds;
+    workforceInjectedSourceIds = enrichment.injectedSourceIds;
+  }
 
   const plan =
     rows.length === 0
@@ -741,6 +772,12 @@ export async function runIiohrHrStaffImport(
           existingStaff,
           existingStaffSourceIds,
         });
+
+  if (workforceInjectedSourceIds > 0) {
+    plan.warnings.push(
+      `Workforce identity reconciliation injected ${workforceInjectedSourceIds} source-id mapping(s) to prevent duplicate staff creation.`
+    );
+  }
 
   if (rows.length > 0) {
     const { clinicId } = await resolveEvolvedHrPerthClinicForTenant(tenantId);
