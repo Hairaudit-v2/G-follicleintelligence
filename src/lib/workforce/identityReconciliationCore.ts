@@ -11,6 +11,8 @@ export type StaffMemberSnapshot = {
   roleCode: string | null;
   fiStaffId: string | null;
   sourceExternalId: string | null;
+  iiohrStaffRecordId?: string | null;
+  sourceSystem?: string | null;
   mergedInto: string | null;
   archivedAt: string | null;
 };

@@ -4,28 +4,38 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { IIOHR_EVOLVED_HR_SOURCE_SYSTEM } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
-import type { StaffMemberSnapshot } from "@/src/lib/workforce/identityReconciliationCore";
+import { loadEvolvedPerthHrStaffRecordsForFiPush } from "@/src/lib/hr/loadEvolvedPerthHrStaffSnapshot.server";
+import { IIOHR_HR_SOURCE_SYSTEM } from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
+import { isHrStaffSourceSystem } from "@/src/lib/staff/hrStaffReadinessMetadata";
 import {
-  calculateStaffIdentityMatchScore,
   findExistingStaffMatch,
   loadIdentityLinksForTenant,
   loadStaffMembersForReconciliation,
   normalizeEmail,
   upsertStaffIdentityLink,
 } from "@/src/lib/workforce/identityReconciliation.server";
+import {
+  buildDuplicateStaffContexts,
+  buildLinkedExternalKeySet,
+  buildLinkedMemberIdSet,
+  buildReconciliationDiagnostics,
+  extractEmailFromSourceMetadata,
+  extractNameFromSourceMetadata,
+  findBestExternalMatch,
+  isActiveUnlinkedStaff,
+  mergeExternalIdentities,
+  scoreExternalMatch,
+  type ExternalStaffIdentityOption,
+  type ReconciliationMemberContext,
+  type ReconciliationPipelineDiagnostics,
+} from "@/src/lib/workforce/staffReconciliationDataCore";
 import { loadHrSyncHealthSummary } from "@/src/lib/workforce/hrSyncAudit.server";
 import {
   WORKFORCE_PHASE_1C_AUDIT_EVENTS,
   WORKFORCE_PHASE_1C_AUDIT_SOURCE,
 } from "@/src/lib/workforce/workforcePhase1cAudit";
 
-export type ExternalStaffIdentityOption = {
-  sourceSystem: string;
-  externalId: string;
-  externalEmail: string | null;
-  externalName: string | null;
-};
+export type { ExternalStaffIdentityOption, ReconciliationPipelineDiagnostics };
 
 export type UnlinkedActiveStaffRow = {
   id: string;
@@ -46,15 +56,10 @@ export type UnlinkedActiveStaffRow = {
 export type StaffReconciliationPageModel = {
   unlinkedStaff: UnlinkedActiveStaffRow[];
   availableExternalIdentities: ExternalStaffIdentityOption[];
+  diagnostics: ReconciliationPipelineDiagnostics;
 };
 
 export type { StaffReconciliationDecisionCard } from "@/src/lib/workforce/staffReconciliationRecommendation.server";
-
-const ACTIVE_EMPLOYMENT_STATUSES = new Set([
-  "active",
-  "pending_onboarding",
-  "on_leave",
-]);
 
 async function insertWorkforceAudit(
   supabase: SupabaseClient,
@@ -75,14 +80,44 @@ async function insertWorkforceAudit(
   if (error) throw new Error(error.message);
 }
 
-function isActiveUnlinkedMember(
-  member: StaffMemberSnapshot & { employmentStatus?: string | null },
-  linkedMemberIds: Set<string>
-): boolean {
-  if (member.archivedAt || member.mergedInto) return false;
-  if (linkedMemberIds.has(member.id)) return false;
-  const status = (member.employmentStatus ?? "active").toLowerCase();
-  return ACTIVE_EMPLOYMENT_STATUSES.has(status);
+async function loadIiohrHrFeedExternalIdentities(): Promise<ExternalStaffIdentityOption[]> {
+  try {
+    const feedRows = await loadEvolvedPerthHrStaffRecordsForFiPush();
+    return feedRows.map((row) => ({
+      sourceSystem: IIOHR_HR_SOURCE_SYSTEM,
+      externalId: row.external_staff_id,
+      externalEmail: normalizeEmail(row.email),
+      externalName: row.full_name,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function mapSourceIdRowsToExternalIdentities(
+  rows: Record<string, unknown>[],
+  linkedExternalKeys: Set<string>
+): ExternalStaffIdentityOption[] {
+  const identities: ExternalStaffIdentityOption[] = [];
+  for (const raw of rows) {
+    const sys = String(raw.source_system ?? "").trim();
+    const extId = String(raw.source_staff_id ?? "").trim();
+    if (!sys || !extId || !isHrStaffSourceSystem(sys)) continue;
+    const key = `${sys}:${extId}`;
+    if (linkedExternalKeys.has(key)) continue;
+    const md = raw.metadata;
+    const meta =
+      md && typeof md === "object" && !Array.isArray(md)
+        ? (md as Record<string, unknown>)
+        : {};
+    identities.push({
+      sourceSystem: sys,
+      externalId: extId,
+      externalEmail: extractEmailFromSourceMetadata(meta),
+      externalName: extractNameFromSourceMetadata(meta),
+    });
+  }
+  return identities;
 }
 
 export async function loadUnlinkedActiveStaff(
@@ -108,21 +143,23 @@ export async function loadStaffReconciliationQueue(
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = client ?? supabaseAdmin();
 
-  const [members, identityLinks, memberStatusRes, sourceIdRes] = await Promise.all([
-    loadStaffMembersForReconciliation(tid, supabase),
-    loadIdentityLinksForTenant(tid, supabase),
-    supabase
-      .from("fi_staff_members")
-      .select("id, employment_status")
-      .eq("tenant_id", tid),
-    supabase
-      .from("fi_staff_source_ids")
-      .select("source_system, source_staff_id, metadata")
-      .eq("tenant_id", tid)
-      .limit(500),
-  ]);
+  const [members, identityLinks, memberStatusRes, sourceIdRes, feedIdentities] =
+    await Promise.all([
+      loadStaffMembersForReconciliation(tid, supabase),
+      loadIdentityLinksForTenant(tid, supabase),
+      supabase
+        .from("fi_staff_members")
+        .select("id, employment_status")
+        .eq("tenant_id", tid),
+      supabase
+        .from("fi_staff_source_ids")
+        .select("source_system, source_staff_id, metadata")
+        .eq("tenant_id", tid),
+      loadIiohrHrFeedExternalIdentities(),
+    ]);
 
   if (memberStatusRes.error) throw new Error(memberStatusRes.error.message);
+  if (sourceIdRes.error) throw new Error(sourceIdRes.error.message);
 
   const statusById = new Map(
     ((memberStatusRes.data ?? []) as { id: string; employment_status: string }[]).map((r) => [
@@ -131,83 +168,40 @@ export async function loadStaffReconciliationQueue(
     ])
   );
 
-  const linkedExternalKeys = new Set(
-    identityLinks.map((l) => `${l.sourceSystem}:${l.externalId}`)
-  );
-  const linkedMemberIds = new Set(identityLinks.map((l) => l.staffMemberId));
+  const linkedExternalKeys = buildLinkedExternalKeySet(identityLinks);
+  const linkedMemberIds = buildLinkedMemberIdSet(identityLinks);
 
-  const externalByKey = new Map<string, ExternalStaffIdentityOption>();
+  const availableExternalIdentities = mergeExternalIdentities([
+    ...feedIdentities,
+    ...mapSourceIdRowsToExternalIdentities(
+      (sourceIdRes.data ?? []) as Record<string, unknown>[],
+      linkedExternalKeys
+    ),
+  ]);
 
-  for (const m of members) {
-    if (!m.sourceExternalId) continue;
-    const sys = IIOHR_EVOLVED_HR_SOURCE_SYSTEM;
-    const key = `${sys}:${m.sourceExternalId}`;
-    if (linkedExternalKeys.has(key)) continue;
-    externalByKey.set(key, {
-      sourceSystem: sys,
-      externalId: m.sourceExternalId,
-      externalEmail: normalizeEmail(m.email),
-      externalName: m.fullName || null,
-    });
-  }
-
-  if (!sourceIdRes.error && sourceIdRes.data) {
-    for (const raw of sourceIdRes.data as Record<string, unknown>[]) {
-      const sys = String(raw.source_system ?? "").trim();
-      const extId = String(raw.source_staff_id ?? "").trim();
-      if (!sys || !extId) continue;
-      if (!sys.includes("iiohr") && !sys.includes("hr")) continue;
-      const key = `${sys}:${extId}`;
-      if (linkedExternalKeys.has(key)) continue;
-      const md = raw.metadata;
-      const meta =
-        md && typeof md === "object" && !Array.isArray(md)
-          ? (md as Record<string, unknown>)
-          : {};
-      externalByKey.set(key, {
-        sourceSystem: sys,
-        externalId: extId,
-        externalEmail: normalizeEmail(
-          meta.email != null ? String(meta.email) : null
-        ),
-        externalName:
-          meta.full_name != null
-            ? String(meta.full_name)
-            : meta.name != null
-              ? String(meta.name)
-              : null,
-      });
-    }
-  }
-
-  const availableExternalIdentities = [...externalByKey.values()].sort((a, b) =>
-    (a.externalName ?? a.externalId).localeCompare(b.externalName ?? b.externalId)
-  );
-
-  const enrichedMembers = members.map((m) => ({
+  const enrichedMembers: ReconciliationMemberContext[] = members.map((m) => ({
     ...m,
     employmentStatus: statusById.get(m.id) ?? "active",
+    iiohrStaffRecordId: m.iiohrStaffRecordId ?? null,
   }));
 
+  const duplicateContexts = buildDuplicateStaffContexts(enrichedMembers);
+
   const unlinkedStaff: UnlinkedActiveStaffRow[] = enrichedMembers
-    .filter((m) => isActiveUnlinkedMember(m, linkedMemberIds))
+    .filter((m) => isActiveUnlinkedStaff({ member: m, linkedMemberIds }))
     .map((m) => {
       const suggestions = availableExternalIdentities
-        .map((ext) => ({
-          externalId: ext.externalId,
-          externalName: ext.externalName,
-          externalEmail: ext.externalEmail,
-          sourceSystem: ext.sourceSystem,
-          score: calculateStaffIdentityMatchScore(m, {
-            sourceSystem: ext.sourceSystem,
-            externalId: ext.externalId,
-            email: ext.externalEmail,
-            fullName: ext.externalName ?? "",
-          }),
-        }))
+        .map((ext) => scoreExternalMatch(m, ext))
         .filter((s) => s.score >= 60)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+        .slice(0, 3)
+        .map((s) => ({
+          externalId: s.externalId,
+          externalName: s.externalName,
+          externalEmail: s.externalEmail,
+          sourceSystem: s.sourceSystem,
+          score: s.score,
+        }));
 
       return {
         id: m.id,
@@ -221,7 +215,17 @@ export async function loadStaffReconciliationQueue(
     })
     .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
-  return { unlinkedStaff, availableExternalIdentities };
+  const diagnostics = buildReconciliationDiagnostics({
+    members: enrichedMembers,
+    externals: availableExternalIdentities,
+    linkedMemberIds,
+    unlinkedMembers: enrichedMembers.filter((m) =>
+      isActiveUnlinkedStaff({ member: m, linkedMemberIds })
+    ),
+    duplicateContexts,
+  });
+
+  return { unlinkedStaff, availableExternalIdentities, diagnostics };
 }
 
 export async function loadStaffReconciliationDecisionQueue(
@@ -229,47 +233,85 @@ export async function loadStaffReconciliationDecisionQueue(
   client?: SupabaseClient
 ): Promise<{
   decisionCards: import("@/src/lib/workforce/staffReconciliationRecommendation.server").StaffReconciliationDecisionCard[];
+  diagnostics: ReconciliationPipelineDiagnostics;
 }> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = client ?? supabaseAdmin();
   const queue = await loadStaffReconciliationQueue(tid, supabase);
 
-  const { buildReconciliationDecisionCard } =
+  const { buildReconciliationDecisionCard, formatRecommendationLabel } =
     await import("@/src/lib/workforce/staffReconciliationRecommendation.server");
+  const { loadStaffOperationalHistory } =
+    await import("@/src/lib/workforce/staffOperationalHistory.server");
+  const { generateStaffReconciliationRecommendation } =
+    await import("@/src/lib/workforce/staffReconciliationRecommendationCore");
 
   const decisionCards = [];
-
   const members = await loadStaffMembersForReconciliation(tid, supabase);
   const memberById = new Map(members.map((m) => [m.id, m]));
+  const duplicateContexts = buildDuplicateStaffContexts(
+    members.map((m) => ({
+      ...m,
+      employmentStatus: queue.unlinkedStaff.find((row) => row.id === m.id)?.employmentStatus ?? "active",
+      iiohrStaffRecordId: m.iiohrStaffRecordId ?? null,
+    }))
+  );
 
   for (const row of queue.unlinkedStaff) {
     const member = memberById.get(row.id);
-    const scoredExternals = queue.availableExternalIdentities
-      .map((ext) => ({
-        externalId: ext.externalId,
-        externalName: ext.externalName,
-        externalEmail: ext.externalEmail,
-        sourceSystem: ext.sourceSystem,
-        score: member
-          ? calculateStaffIdentityMatchScore(member, {
-              sourceSystem: ext.sourceSystem,
-              externalId: ext.externalId,
-              email: ext.externalEmail,
-              fullName: ext.externalName ?? "",
-            })
-          : 0,
-      }))
-      .sort((a, b) => b.score - a.score);
+    const duplicateContext = duplicateContexts.get(row.id);
 
-    const best = scoredExternals[0] ?? row.matchSuggestions[0];
-    if (!best || best.score < 1) {
-      const { loadStaffOperationalHistory } =
-        await import("@/src/lib/workforce/staffOperationalHistory.server");
-      const { generateStaffReconciliationRecommendation } =
-        await import("@/src/lib/workforce/staffReconciliationRecommendationCore");
-      const { formatRecommendationLabel } =
-        await import("@/src/lib/workforce/staffReconciliationRecommendation.server");
+    if (duplicateContext && duplicateContext.canonicalStaffMemberId !== row.id) {
+      const fiRecord = await loadStaffOperationalHistory(tid, row.id, supabase);
+      const canonicalRecord = await loadStaffOperationalHistory(
+        tid,
+        duplicateContext.canonicalStaffMemberId,
+        supabase
+      );
+      const duplicateRecommendation = {
+        recommendation: "MERGE_INTO_EXISTING" as const,
+        confidence: 90,
+        reasoning: [
+          "Duplicate FI staff record shares email with another active member",
+          `Canonical survivor: ${canonicalRecord.fullName}`,
+          "Resolve duplicate before or alongside IIOHR identity linking",
+        ],
+        suggestedExternalId: null,
+        suggestedTargetStaffMemberId: duplicateContext.canonicalStaffMemberId,
+        suggestedSourceStaffMemberId: row.id,
+      };
 
+      decisionCards.push({
+        staffMemberId: row.id,
+        fiRecord,
+        iiohrRecord: null,
+        recommendation: duplicateRecommendation,
+        recommendationLabel: formatRecommendationLabel(duplicateRecommendation.recommendation),
+      });
+      continue;
+    }
+
+    const best = member
+      ? findBestExternalMatch(member, queue.availableExternalIdentities)
+      : null;
+    const fallback = row.matchSuggestions[0];
+    const matchCandidate =
+      best && (best.score >= (fallback?.score ?? 0) || best.emailExactMatch)
+        ? best
+        : fallback
+          ? {
+              externalId: fallback.externalId,
+              externalName: fallback.externalName,
+              externalEmail: fallback.externalEmail,
+              sourceSystem: fallback.sourceSystem,
+              score: fallback.score,
+              emailExactMatch:
+                normalizeEmail(member?.email) === normalizeEmail(fallback.externalEmail),
+              nameMatch: fallback.score >= 75,
+            }
+          : null;
+
+    if (!matchCandidate || matchCandidate.score < 1) {
       const fiRecord = await loadStaffOperationalHistory(tid, row.id, supabase);
       const recommendation = generateStaffReconciliationRecommendation({
         fiRecord,
@@ -289,19 +331,24 @@ export async function loadStaffReconciliationDecisionQueue(
     const card = await buildReconciliationDecisionCard({
       tenantId: tid,
       staffMemberId: row.id,
-      externalId: best.externalId,
-      sourceSystem: best.sourceSystem,
-      externalEmail: best.externalEmail,
-      externalName: best.externalName,
-      matchScore: best.score,
-      emailMatch: best.score >= 90,
-      nameMatch: best.score >= 70,
+      externalId: matchCandidate.externalId,
+      sourceSystem: matchCandidate.sourceSystem,
+      externalEmail: matchCandidate.externalEmail,
+      externalName: matchCandidate.externalName,
+      matchScore: matchCandidate.score,
+      emailMatch:
+        ("emailExactMatch" in matchCandidate && matchCandidate.emailExactMatch) ||
+        normalizeEmail(member?.email) === normalizeEmail(matchCandidate.externalEmail),
+      nameMatch:
+        ("nameMatch" in matchCandidate && matchCandidate.nameMatch) ||
+        (matchCandidate.score >= 75 &&
+          normalizeEmail(member?.email) !== normalizeEmail(matchCandidate.externalEmail)),
       client: supabase,
     });
     decisionCards.push(card);
   }
 
-  return { decisionCards };
+  return { decisionCards, diagnostics: queue.diagnostics };
 }
 
 export async function manuallyLinkStaffIdentity(input: {
