@@ -86,6 +86,12 @@ export function WorkforceOsDirectoryClient({
               Recruitment pipeline
             </Link>
             <Link
+              href={`${base}/payroll`}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
+            >
+              Payroll & wages
+            </Link>
+            <Link
               href={`${base}/hr-reconciliation`}
               className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
             >
