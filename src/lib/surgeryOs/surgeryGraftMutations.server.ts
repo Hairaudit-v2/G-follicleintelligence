@@ -3,6 +3,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { maybeTriggerSurgeryProfitabilitySnapshot } from "@/src/lib/financialOs/financialSurgeryEconomicsSnapshotOrchestrator.server";
+import { syncLiveTheatreToCaseProcedure } from "@/src/lib/surgeryOs/liveTheatreCaseSync.server";
 import {
   assertSurgeryOsTenantRowScope,
   type SurgeryOsProcedureEventKind,
@@ -1165,6 +1166,13 @@ export async function reconcileGrafts(input: {
       /* best-effort */
     }
   }
+
+  void syncLiveTheatreToCaseProcedure({
+    tenantId: input.tenantId,
+    surgeryId: input.surgeryId,
+    trigger: "graft_reconciliation_completed",
+    actorFiUserId: input.actorFiUserId,
+  });
 
   return result;
 }

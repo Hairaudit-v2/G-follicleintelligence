@@ -25,6 +25,10 @@ import {
 } from "@/src/lib/surgeryOs/surgeryOsPolicy";
 import { assertGraftReconciliationForPhaseTransition } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
 import { isMissingDatabaseRelationError } from "@/src/lib/surgeryOs/surgeryOsLoaderResilience";
+import { syncLiveTheatreToCaseProcedure } from "@/src/lib/surgeryOs/liveTheatreCaseSync.server";
+import { FI_BOOKINGS_CALENDAR_OVERLAP_SELECT } from "@/src/lib/bookings/calendarBookingOverlapSelect";
+import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { ensureSurgeryStaffingFromBooking } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 
 export type SurgeryMutationRow = {
   id: string;
@@ -209,6 +213,68 @@ async function applySurgeryStatePatch(
   return { surgery: updated, event };
 }
 
+function mapBookingRowForStaffingBridge(row: Record<string, unknown>): FiBookingRow {
+  const meta =
+    row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+      ? (row.metadata as Record<string, unknown>)
+      : {};
+  return {
+    id: String(row.id),
+    tenant_id: String(row.tenant_id),
+    lead_id: row.lead_id != null ? String(row.lead_id) : null,
+    person_id: row.person_id != null ? String(row.person_id) : null,
+    patient_id: row.patient_id != null ? String(row.patient_id) : null,
+    case_id: row.case_id != null ? String(row.case_id) : null,
+    clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    room_id: row.room_id != null ? String(row.room_id) : null,
+    room_required: row.room_required == null ? true : Boolean(row.room_required),
+    assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
+    assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
+    booking_type: String(row.booking_type ?? "surgery"),
+    booking_status: String(row.booking_status ?? ""),
+    title: row.title != null ? String(row.title) : null,
+    description: row.description != null ? String(row.description) : null,
+    start_at: String(row.start_at),
+    end_at: String(row.end_at),
+    timezone: row.timezone != null ? String(row.timezone) : null,
+    location: row.location != null ? String(row.location) : null,
+    metadata: meta,
+    cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
+    cancelled_by_user_id:
+      row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
+    cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
+    created_by_user_id: row.created_by_user_id != null ? String(row.created_by_user_id) : null,
+    created_at: row.created_at != null ? String(row.created_at) : new Date().toISOString(),
+    updated_at: row.updated_at != null ? String(row.updated_at) : new Date().toISOString(),
+  };
+}
+
+async function maybeWireSurgeryStaffingFromBooking(input: {
+  tenantId: string;
+  surgeryId: string;
+  bookingId: string;
+  actorFiUserId: string | null;
+}): Promise<void> {
+  try {
+    const supabase = supabaseAdmin();
+    const { data, error } = await supabase
+      .from("fi_bookings")
+      .select(`${FI_BOOKINGS_CALENDAR_OVERLAP_SELECT}, created_at, updated_at, created_by_user_id`)
+      .eq("tenant_id", input.tenantId.trim())
+      .eq("id", input.bookingId.trim())
+      .maybeSingle();
+    if (error || !data) return;
+    await ensureSurgeryStaffingFromBooking({
+      tenantId: input.tenantId,
+      surgeryId: input.surgeryId,
+      booking: mapBookingRowForStaffingBridge(data as Record<string, unknown>),
+      assignedBy: input.actorFiUserId,
+    });
+  } catch {
+    /* staffing bridge must not block surgery creation */
+  }
+}
+
 export async function createSurgeryFromBooking(input: {
   tenantId: string;
   bookingId: string;
@@ -228,6 +294,12 @@ export async function createSurgeryFromBooking(input: {
   if (existing) {
     const row = mapSurgeryRow(existing as Record<string, unknown>);
     assertSurgeryOsTenantRowScope(tid, row.tenant_id, "fi_surgeries");
+    await maybeWireSurgeryStaffingFromBooking({
+      tenantId: tid,
+      surgeryId: row.id,
+      bookingId,
+      actorFiUserId: input.actorFiUserId,
+    });
     return { surgery: row, created: false };
   }
 
@@ -300,8 +372,16 @@ export async function createSurgeryFromBooking(input: {
         .eq("tenant_id", tid)
         .eq("booking_id", bookingId)
         .maybeSingle();
-      if (raced)
-        return { surgery: mapSurgeryRow(raced as Record<string, unknown>), created: false };
+      if (raced) {
+        const surgery = mapSurgeryRow(raced as Record<string, unknown>);
+        await maybeWireSurgeryStaffingFromBooking({
+          tenantId: tid,
+          surgeryId: surgery.id,
+          bookingId,
+          actorFiUserId: input.actorFiUserId,
+        });
+        return { surgery, created: false };
+      }
     }
     throw new Error(insertErr.message);
   }
@@ -322,6 +402,13 @@ export async function createSurgeryFromBooking(input: {
       newLiveStatus: surgery.live_status,
       extra: { booking_id: bookingId },
     }),
+  });
+
+  await maybeWireSurgeryStaffingFromBooking({
+    tenantId: tid,
+    surgeryId: surgery.id,
+    bookingId,
+    actorFiUserId: input.actorFiUserId,
   });
 
   return { surgery, created: true };
@@ -428,6 +515,12 @@ export async function logSurgeryProcedureEvent(input: {
           actor_fi_user_id: input.actorFiUserId,
         },
         occurredAt: input.occurredAt ?? result.event.occurred_at,
+      });
+      void syncLiveTheatreToCaseProcedure({
+        tenantId: input.tenantId,
+        surgeryId: input.surgeryId,
+        trigger: "procedure_completed",
+        actorFiUserId: input.actorFiUserId,
       });
     }
     return result;

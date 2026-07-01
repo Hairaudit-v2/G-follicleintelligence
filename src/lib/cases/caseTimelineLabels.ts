@@ -7,6 +7,7 @@ const KIND_LABELS: Record<CaseTimelineItemKind, string> = {
   image: "Image",
   surgery_plan: "Surgery plan",
   procedure_day: "Procedure day",
+  live_theatre: "SurgeryOS / Live theatre",
   post_op: "Post-op",
   follow_up: "Follow-up",
   crm_activity: "CRM activity",
@@ -26,7 +27,7 @@ export const CASE_TIMELINE_FILTER_PRESETS: {
   {
     id: "clinical",
     label: "Clinical & ops",
-    hint: "Patient, planning, procedure, post-op, follow-ups, bookings, images, foundation milestones.",
+    hint: "Patient, planning, procedure, live theatre, post-op, follow-ups, bookings, images, foundation milestones.",
   },
   { id: "crm", label: "CRM", hint: "Leads and CRM activity rows anchored on this patient." },
 ];

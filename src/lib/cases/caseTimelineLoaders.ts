@@ -8,7 +8,13 @@ import type {
   CaseTimelineExtraSources,
   CaseTimelineFoundationEventRow,
   CaseTimelineLinkedLeadRow,
+  CaseTimelineLiveTheatreEventRow,
 } from "./caseTimelineTypes";
+import {
+  SURGERY_OS_PROCEDURE_EVENT_LABELS,
+  type SurgeryOsProcedureEventKind,
+} from "@/src/lib/surgeryOs/surgeryOsBoardModel";
+import { isMissingDatabaseRelationError } from "@/src/lib/surgeryOs/surgeryOsLoaderResilience";
 
 function asObj(v: unknown): Record<string, unknown> {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
@@ -16,6 +22,73 @@ function asObj(v: unknown): Record<string, unknown> {
 
 const TIMELINE_EVENTS_LIMIT = 200;
 const CRM_ACTIVITY_LIMIT = 150;
+const LIVE_THEATRE_EVENTS_LIMIT = 300;
+
+function liveTheatreEventTitle(eventKind: string, metadata: Record<string, unknown>): string {
+  const kind = eventKind as SurgeryOsProcedureEventKind;
+  if (kind in SURGERY_OS_PROCEDURE_EVENT_LABELS) {
+    return SURGERY_OS_PROCEDURE_EVENT_LABELS[kind];
+  }
+  const custom = metadata.custom_label;
+  if (typeof custom === "string" && custom.trim()) return custom.trim();
+  return eventKind.replace(/_/g, " ");
+}
+
+function liveTheatreEventDescription(metadata: Record<string, unknown>): string | null {
+  const customBody = metadata.custom_body;
+  if (typeof customBody === "string" && customBody.trim()) return customBody.trim().slice(0, 280);
+  const sourceAction = metadata.source_action;
+  if (typeof sourceAction === "string" && sourceAction.trim()) {
+    return `Source action: ${sourceAction.replace(/_/g, " ")}`;
+  }
+  return null;
+}
+
+async function loadLiveTheatreEventsForCase(
+  tenantId: string,
+  caseId: string,
+  client: SupabaseClient
+): Promise<CaseTimelineLiveTheatreEventRow[]> {
+  const { data: surgeries, error: surgeryErr } = await client
+    .from("fi_surgeries")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("case_id", caseId);
+  if (surgeryErr) {
+    if (isMissingDatabaseRelationError(surgeryErr)) return [];
+    throw new Error(surgeryErr.message);
+  }
+
+  const surgeryIds = (surgeries ?? []).map((r) => String((r as { id: string }).id)).filter(Boolean);
+  if (!surgeryIds.length) return [];
+
+  const { data: events, error: eventsErr } = await client
+    .from("fi_surgery_procedure_events")
+    .select("id, event_kind, occurred_at, metadata")
+    .eq("tenant_id", tenantId)
+    .in("surgery_id", surgeryIds)
+    .order("occurred_at", { ascending: false })
+    .limit(LIVE_THEATRE_EVENTS_LIMIT);
+  if (eventsErr) {
+    if (isMissingDatabaseRelationError(eventsErr)) return [];
+    throw new Error(eventsErr.message);
+  }
+
+  return (events ?? []).map((r) => {
+    const x = r as Record<string, unknown>;
+    const metadata = asObj(x.metadata);
+    const eventKind = String(x.event_kind ?? "");
+    const newStatus = metadata.new_status;
+    return {
+      id: String(x.id),
+      event_kind: eventKind,
+      occurred_at: String(x.occurred_at ?? ""),
+      title: liveTheatreEventTitle(eventKind, metadata),
+      description: liveTheatreEventDescription(metadata),
+      status: typeof newStatus === "string" && newStatus.trim() ? newStatus.trim() : eventKind,
+    };
+  });
+}
 
 /**
  * Loads additional tenant-scoped rows for the case clinical timeline (beyond 5A case detail payload).
@@ -34,6 +107,7 @@ export async function loadCaseTimelineExtraSources(
     { data: tlRows, error: tle },
     { data: actRows, error: ae },
     { data: leadRows, error: le },
+    liveTheatreEvents,
   ] = await Promise.all([
     supabase
       .from("fi_timeline_events")
@@ -56,6 +130,7 @@ export async function loadCaseTimelineExtraSources(
       )
       .eq("tenant_id", tid)
       .or(`case_id.eq.${cid},converted_case_id.eq.${cid}`),
+    loadLiveTheatreEventsForCase(tid, cid, supabase),
   ]);
 
   if (tle) throw new Error(tle.message);
@@ -100,5 +175,5 @@ export async function loadCaseTimelineExtraSources(
     };
   });
 
-  return { foundationTimelineEvents, crmActivityEvents, linkedLeads };
+  return { foundationTimelineEvents, crmActivityEvents, linkedLeads, liveTheatreEvents };
 }

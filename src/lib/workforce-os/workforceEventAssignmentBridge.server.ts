@@ -662,6 +662,100 @@ export async function ensureBookingStaffingAssignment(
   });
 }
 
+export type EnsureSurgeryStaffingFromBookingInput = {
+  tenantId: string;
+  surgeryId: string;
+  booking: FiBookingRow;
+  allowBlockedDraft?: boolean;
+  assignedBy?: string | null;
+};
+
+/**
+ * Mirrors booking roster staff into `fi_staff_event_assignments` for a live surgery event.
+ * Idempotent — existing surgery assignments are preserved; missing staff records are skipped safely.
+ */
+export async function ensureSurgeryStaffingFromBooking(
+  input: EnsureSurgeryStaffingFromBookingInput
+): Promise<{ created: number; skipped: number }> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const surgeryId = assertNonEmptyUuid(input.surgeryId, "surgeryId");
+  const booking = input.booking;
+  const window = getWorkforceEventWindow(booking);
+
+  const resourceAssignments =
+    (
+      await loadBookingResourceAssignmentsForBookings({ tenantId: tid, bookingIds: [booking.id] })
+    ).get(booking.id) ?? [];
+
+  const existing = await loadExistingAssignmentsForEvent(tid, "surgery", surgeryId);
+  const activeExisting = existing.filter((row) => row.assignment_status !== "cancelled");
+
+  const staffRoleById = new Map<string, string>();
+  const staffIds = new Set<string>();
+  if (booking.assigned_staff_id?.trim()) staffIds.add(booking.assigned_staff_id.trim());
+  for (const ra of resourceAssignments) {
+    if (ra.resource_type === "staff" && ra.resource_id.trim()) staffIds.add(ra.resource_id.trim());
+  }
+  const staffMembers = await loadStaffMembersByIdForTenant(tid, Array.from(staffIds));
+  for (const staffId of staffIds) {
+    const staff = staffMembers.get(staffId);
+    if (staff) staffRoleById.set(staffId, staff.staff_role);
+  }
+
+  const resourceStaff = resourceAssignments
+    .filter((ra) => ra.resource_type === "staff")
+    .map((ra) => ({
+      staffId: ra.resource_id,
+      roleLabel: ra.role_label,
+      staffRole: staffRoleById.get(ra.resource_id) ?? null,
+    }));
+
+  const candidates = buildWorkforceCandidateAssignments({
+    primaryStaffId: booking.assigned_staff_id,
+    primaryStaffRole: booking.assigned_staff_id
+      ? (staffRoleById.get(booking.assigned_staff_id.trim()) ?? null)
+      : null,
+    bookingType: booking.booking_type,
+    resourceStaff,
+    existingAssignments: activeExisting.map((row) => ({
+      staffId: row.staff_id,
+      assignedRole: row.assigned_role,
+    })),
+  });
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const candidate of candidates) {
+    const key = assignmentDedupKey(candidate.staffId, candidate.assignedRole);
+    const hasActive = activeExisting.some(
+      (row) =>
+        assignmentDedupKey(row.staff_id, row.assigned_role) === key &&
+        row.assignment_status !== "cancelled"
+    );
+    if (hasActive) {
+      skipped += 1;
+      continue;
+    }
+
+    const result = await ensureSurgeryStaffingAssignment({
+      tenantId: tid,
+      surgeryId,
+      clinicId: booking.clinic_id,
+      startsAt: window.startsAt,
+      endsAt: window.endsAt,
+      staffId: candidate.staffId,
+      assignedRole: candidate.assignedRole,
+      allowBlockedDraft: input.allowBlockedDraft ?? true,
+      assignedBy: input.assignedBy,
+    });
+    if (result) created += 1;
+    else skipped += 1;
+  }
+
+  return { created, skipped };
+}
+
 export async function ensureSurgeryStaffingAssignment(
   input: EnsureSurgeryStaffingAssignmentInput
 ): Promise<ClinicalStaffingSummaryDto | null> {

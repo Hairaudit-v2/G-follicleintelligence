@@ -9,6 +9,7 @@ export type CaseTimelineItemKind =
   | "image"
   | "surgery_plan"
   | "procedure_day"
+  | "live_theatre"
   | "post_op"
   | "follow_up"
   | "crm_activity"
@@ -61,8 +62,18 @@ export type CaseTimelineLinkedLeadRow = {
   converted_at: string | null;
 };
 
+export type CaseTimelineLiveTheatreEventRow = {
+  id: string;
+  event_kind: string;
+  occurred_at: string;
+  title: string;
+  description: string | null;
+  status: string | null;
+};
+
 export type CaseTimelineExtraSources = {
   foundationTimelineEvents: CaseTimelineFoundationEventRow[];
   crmActivityEvents: CaseTimelineCrmActivityRow[];
   linkedLeads: CaseTimelineLinkedLeadRow[];
+  liveTheatreEvents: CaseTimelineLiveTheatreEventRow[];
 };

@@ -305,6 +305,20 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
     });
   }
 
+  for (const liveEv of extra.liveTheatreEvents) {
+    push(out, {
+      id: `live-theatre-${liveEv.id}`,
+      kind: "live_theatre",
+      source: "SurgeryOS / Live theatre",
+      title: liveEv.title,
+      description: liveEv.description,
+      occurred_at: liveEv.occurred_at,
+      status: liveEv.status,
+      href: null,
+      metadata_summary: liveEv.event_kind.replace(/_/g, " "),
+    });
+  }
+
   for (const act of extra.crmActivityEvents) {
     const href =
       act.lead_id != null

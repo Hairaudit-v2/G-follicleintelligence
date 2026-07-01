@@ -22,6 +22,7 @@ export const SURGERY_OS_ACTIONS = [
   "correct_graft_count",
   "reconcile_grafts",
   "confirm_tray_count",
+  "live_theatre_case_sync",
 ] as const;
 export type SurgeryOsAction = (typeof SURGERY_OS_ACTIONS)[number];
 
