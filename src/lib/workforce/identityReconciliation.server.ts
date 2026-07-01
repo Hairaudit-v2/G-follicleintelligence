@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import type { IiohrHrStaffImportRow } from "@/src/lib/staffImport/iiohrHrStaffImportTypes";
 import {
   normalizeEmail,
   reconcileInboundStaffIdentity,
@@ -261,11 +262,7 @@ export async function reconcileInboundStaffIdentityApply(input: {
 /** Enriches fi_staff import snapshots with workforce identity link mappings. */
 export async function enrichImportSnapshotsWithIdentityLinks(
   tenantId: string,
-  inboundRows: {
-    external_staff_id: string;
-    email?: string | null;
-    full_name: string;
-  }[],
+  inboundRows: IiohrHrStaffImportRow[],
   sourceSystem: string,
   snapshots: {
     existingStaffSourceIds: {
