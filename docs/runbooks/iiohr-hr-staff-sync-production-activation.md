@@ -12,7 +12,7 @@ Set these on the **Follicle Intelligence** deployment that runs outbound sync an
 |----------|----------|--------|
 | `FI_BASE_URL` | Yes | Absolute base URL of the FI app used by the outbound client to POST staff-sync (often the same deployment). |
 | `IIOHR_HR_SYNC_SECRET` | Yes | Must match the value expected by `POST /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync` (header `x-iiohr-sync-secret`). |
-| `IIOHR_HR_PERTH_STAFF_FEED_URL` | Yes | GET URL returning Perth HR JSON (`staff`, `rows`, or a top-level array). |
+| `IIOHR_HR_PERTH_STAFF_FEED_URL` | Yes | GET URL returning Perth HR JSON (`staff`, `rows`, or a top-level array). Production: `https://www.iiohr.com/api/hr/evolved-perth/staff-feed` (not bare `iiohr.com` — redirect strips Bearer). |
 | `IIOHR_HR_PERTH_STAFF_FEED_KEY` | If needed | If the feed requires auth, set this; it is sent as `Authorization: Bearer …` on the feed GET. |
 | `EVOLVED_PERTH_TENANT_ID` | Yes | UUID of the Evolved Perth FI tenant that receives sync rows. |
 | `CRON_SECRET` | Yes for cron | Minimum **16** characters; used as `Authorization: Bearer` for the cron route. |

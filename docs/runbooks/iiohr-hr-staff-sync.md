@@ -13,7 +13,7 @@ Operational guide for the Evolved Perth HR feed → FI staff pipeline (manual ou
 | Variable | Used by |
 |----------|---------|
 | `EVOLVED_PERTH_TENANT_ID` | Cron, health endpoint, outbound push target, admin automation hints. |
-| `IIOHR_HR_PERTH_STAFF_FEED_URL` | Outbound mapper feed (GET JSON). Optional `IIOHR_HR_PERTH_STAFF_FEED_KEY` (Bearer). |
+| `IIOHR_HR_PERTH_STAFF_FEED_URL` | Outbound mapper feed (GET JSON). Use `https://www.iiohr.com/api/hr/evolved-perth/staff-feed` (not bare `iiohr.com` — redirect drops Bearer). Optional `IIOHR_HR_PERTH_STAFF_FEED_KEY` (Bearer). |
 | `FI_BASE_URL` | Outbound POST base for the FI deployment. |
 | `IIOHR_HR_SYNC_SECRET` | Authenticates `POST /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync` (`x-iiohr-sync-secret`). |
 | `CRON_SECRET` | Bearer auth for `POST /api/cron/iiohr-hr-perth-staff-sync` (min 16 chars). |

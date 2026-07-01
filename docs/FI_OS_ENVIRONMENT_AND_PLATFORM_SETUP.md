@@ -64,7 +64,7 @@ Complete configuration reference for deploying **Follicle Intelligence OS** (CRM
 | `EVOLVED_PERTH_TENANT_ID` | Optional* | HR cron target tenant | UUID | `src/lib/hr/runScheduledIiohrHrStaffSync.server.ts` | HR cron fails | *Required for Evolved Perth automation |
 | `FI_BASE_URL` | Optional* | Outbound HR sync client POST to self | `https://fi.example.com` | `src/lib/hr/iiohrFiStaffSyncPush.ts`, `scripts/verify-fi-event-ingestion.ts` | Scheduled HR sync cannot POST staff-sync API | Must match deployed FI origin |
 | `IIOHR_HR_SYNC_SECRET` | Optional* | Staff sync API auth | Shared secret | `src/lib/staffImport/iiohrHrStaffSyncPost.server.ts`, HR cron | Staff sync POST rejected | Must match header `x-iiohr-sync-secret` |
-| `IIOHR_HR_PERTH_STAFF_FEED_URL` | Optional* | HR feed GET | HTTPS URL | `src/lib/hr/loadEvolvedPerthHrStaffSnapshot.server.ts` | HR cron/import cannot load rows | — |
+| `IIOHR_HR_PERTH_STAFF_FEED_URL` | Optional* | HR feed GET | HTTPS URL | `src/lib/hr/loadEvolvedPerthHrStaffSnapshot.server.ts` | HR cron/import cannot load rows | Use `https://www.iiohr.com/api/hr/evolved-perth/staff-feed`; bare `iiohr.com` 307 redirect drops Bearer |
 | `IIOHR_HR_PERTH_STAFF_FEED_KEY` | Optional | HR feed Bearer auth | Secret | Same | Feed fetch fails if feed requires auth | Set when feed is protected |
 | `ALLOW_EMPTY_HR_SYNC` | Optional | Allow empty HR feed on cron | `true` | `src/lib/hr/runScheduledIiohrHrStaffSync.server.ts` | Empty feed returns error on cron | Staging safety |
 | `STAFF_SYNC_STALE_WARNING_HOURS` | Optional | HR health staleness | Hours, default **48** | `src/lib/hr/iiohrHrStaffSyncHealth.ts` | Default 48h used | — |
