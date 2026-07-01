@@ -74,7 +74,7 @@ export type FiEcosystemPlatformCompletion = {
 /** Manual ecosystem-wide completion rollup — edit as delivery advances. */
 export const FI_ECOSYSTEM_COMPLETION_SUMMARY = {
   overallEcosystemPercent: 78,
-  fiOsCorePlatformPercent: 81,
+  fiOsCorePlatformPercent: 77,
 } as const;
 
 /** Satellite and workforce platforms in the broader FI ecosystem. */
@@ -82,9 +82,9 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 88,
+    completionPercent: 85,
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, employment lifecycle, and active staffing orchestration.",
+      "Enterprise workforce intelligence for staffing readiness, payroll intelligence, compliance monitoring, recruitment, surgical workforce allocation, and predictive workforce decision systems.",
   },
   {
     id: "hairaudit",
@@ -121,7 +121,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "Building the Intelligence Infrastructure for Hair Restoration Medicine",
     subtext:
       "Follicle Intelligence is engineering the world's first vertically integrated operating system connecting patient acquisition, clinical diagnostics, surgical execution, long-term outcome intelligence, practitioner certification, and global treatment intelligence into one unified platform.",
-    lastUpdated: "2026-06-26",
+    lastUpdated: "2026-07-01",
   },
 
   intelligenceSystems: {
@@ -505,13 +505,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 73,
-    stage: "Phase 1C Sprint 1 · identity reconciliation audit",
+    completionPercent: 85,
+    stage: "Phase 2 · predictive workforce intelligence",
     description:
       "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, employment lifecycle, IIOHR HR identity reconciliation, duplicate detection, and HR sync audit centre.",
     status: "Active Development",
     statusLabel: "Operational Beta",
-    latestMilestone: "HR identity reconciliation audit layer and sync health dashboard",
+    latestMilestone: "Predictive workforce intelligence and workforce planning engine",
   },
   {
     id: "onboarding-os",
@@ -662,7 +662,7 @@ export const PLATFORM_INFRASTRUCTURE_DEPLOYMENT_STATUS: Record<
 
 export const PLATFORM_PROGRESS_METRICS: PlatformProgressMetric[] = [
   { label: "Integrated Systems", value: "20" },
-  { label: "Ecosystem Completion", value: "81%" },
+  { label: "Ecosystem Completion", value: "77%" },
   { label: "Clinical Data Fields", value: "250+" },
   { label: "Procedure Variables Captured", value: "1000+" },
   { label: "Outcome Tracking Horizon", value: "12 Months" },
@@ -812,6 +812,15 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-07-01-workforce-os-predictive-intelligence",
+    date: "2026-07-01",
+    tag: "workforce-os",
+    title: "WorkforceOS predictive workforce intelligence shipped",
+    summary:
+      "WorkforceOS now includes predictive workforce intelligence, allowing clinics to forecast staffing risks, monitor workforce readiness, and proactively manage operational workforce performance.",
+    modules: ["WorkforceOS"],
+  },
   {
     id: "2026-06-26-ihrg-demo-1",
     date: "2026-06-26",

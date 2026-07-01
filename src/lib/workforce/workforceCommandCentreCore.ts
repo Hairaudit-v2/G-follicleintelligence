@@ -636,3 +636,11 @@ export function buildEmptyPlanningFallbackMessage(): string {
 
 export { composeWorkforceIntelligence } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
 export type { WorkforceIntelligencePanel } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
+export {
+  composeSurgicalWorkforceIntelligence,
+  resolveSurgicalIntelligenceDates,
+} from "@/src/lib/workforce/surgicalWorkforceIntelligenceCore";
+export type {
+  SurgicalWorkforceIntelligenceInput,
+  SurgicalWorkforceIntelligencePanel,
+} from "@/src/lib/workforce/surgicalWorkforceIntelligenceCore";

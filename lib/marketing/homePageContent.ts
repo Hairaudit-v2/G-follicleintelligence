@@ -575,8 +575,8 @@ export const HOME_PAGE_CONTENT = {
     subtext:
       "Every module inside Follicle Intelligence is being developed as enterprise-grade healthcare infrastructure designed for global multi-clinic deployment.",
     metrics: [
-      { label: "Overall FI ecosystem completion", value: "~74%" },
-      { label: "FI OS core platform", value: "~86%" },
+      { label: "Overall FI ecosystem completion", value: "~77%" },
+      { label: "FI OS core platform", value: "~77%" },
       { label: "Production infrastructure modules", value: "8" },
       { label: "Multi-tenant systems active", value: "11" },
       { label: "Operational workflows deployed", value: "40+" },
@@ -646,7 +646,7 @@ export const HOME_PAGE_CONTENT = {
           {
             name: "WorkforceOS",
             description:
-              "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and active staffing orchestration.",
+              "The workforce intelligence layer powering surgical staffing readiness, credential management, payroll intelligence, recruitment pipelines, operational workforce forecasting, and predictive workforce decision systems.",
           },
           {
             name: "AcademyOS",

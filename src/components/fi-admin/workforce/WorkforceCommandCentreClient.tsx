@@ -17,10 +17,12 @@ import {
   type WorkforceAttentionQueueItem,
   type WorkforceAttentionSeverity,
   type WorkforceHealthMetric,
+  type SurgicalWorkforceIntelligencePanel,
   type WorkforceIntelligencePanel,
   type WorkforceModuleTile,
 } from "@/src/lib/workforce/workforceCommandCentreCore";
 import type { WorkforceIntelligenceStatus } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
+import type { SurgicalReadinessStatus } from "@/src/lib/workforce/surgicalWorkforceIntelligenceCore";
 import { cn } from "@/lib/utils";
 
 const UTILITY_MODULE_IDS = new Set([
@@ -113,6 +115,28 @@ function intelligenceStatusBadgeClass(status: WorkforceIntelligenceStatus): stri
       return "bg-amber-500/15 text-amber-200 ring-amber-500/25";
     default:
       return "bg-rose-500/15 text-rose-300 ring-rose-500/25";
+  }
+}
+
+function surgicalStatusBadgeClass(status: SurgicalReadinessStatus): string {
+  switch (status) {
+    case "optimal":
+      return "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25";
+    case "watch":
+      return "bg-amber-500/15 text-amber-200 ring-amber-500/25";
+    default:
+      return "bg-rose-500/15 text-rose-300 ring-rose-500/25";
+  }
+}
+
+function surgicalStatusLabel(status: SurgicalReadinessStatus): string {
+  switch (status) {
+    case "optimal":
+      return "Optimal";
+    case "watch":
+      return "Watch";
+    default:
+      return "Risk";
   }
 }
 
@@ -471,6 +495,186 @@ function WorkforceIntelligenceEngineSection({
   );
 }
 
+function SurgicalWorkforceIntelligenceSection({
+  surgicalIntelligence,
+}: {
+  surgicalIntelligence: SurgicalWorkforceIntelligencePanel;
+}) {
+  const { tomorrowReadiness, staffingQuality, clinicalCapacity, staffingRisks, recommendations } =
+    surgicalIntelligence;
+  const topRisks = staffingRisks.detectedRisks.slice(0, 3);
+  const topRecommendations = recommendations.slice(0, 3);
+
+  return (
+    <section aria-label="Surgical workforce intelligence" className="space-y-5">
+      <SectionHeading
+        kicker="SurgeryOS"
+        title="Surgical Workforce Intelligence"
+        description="Clinical procedure staffing intelligence — assignment safety, surgical capacity, and operational risk across upcoming procedures."
+      />
+      <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_100%_0%,rgba(34,193,255,0.06),transparent_60%)]"
+          aria-hidden
+        />
+        <div className="relative space-y-6">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Tomorrow Clinical Readiness
+                </p>
+                <Badge className={surgicalStatusBadgeClass(tomorrowReadiness.status)}>
+                  {surgicalStatusLabel(tomorrowReadiness.status)}
+                </Badge>
+              </div>
+              <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
+                {tomorrowReadiness.readinessScore}%
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{tomorrowReadiness.summary}</p>
+              {tomorrowReadiness.surgeriesScheduled > 0 ? (
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Scheduled</dt>
+                    <dd className="mt-1 font-semibold tabular-nums text-[#F8FAFC]">
+                      {tomorrowReadiness.surgeriesScheduled}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">At risk</dt>
+                    <dd className="mt-1 font-semibold tabular-nums text-amber-200">{tomorrowReadiness.atRisk}</dd>
+                  </div>
+                </dl>
+              ) : null}
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                Procedure Staffing Quality
+              </p>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-[#64748B]">Assignment Quality</p>
+              <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
+                {staffingQuality.staffingQualityScore}%
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{staffingQuality.summary}</p>
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Accuracy</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-[#CBD5E1]">
+                    {staffingQuality.assignmentAccuracy}%
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Unsafe</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-rose-300">
+                    {staffingQuality.unsafeAssignments}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                Weekly Clinical Capacity
+              </p>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-[#64748B]">Capacity Utilization</p>
+              <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
+                {clinicalCapacity.weeklyCapacityPercent}%
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{clinicalCapacity.summary}</p>
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Unused hours</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-[#22C1FF]">
+                    {Math.round(clinicalCapacity.unusedHours)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Overload risk</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-amber-200">{clinicalCapacity.overloadRisk}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="border-t border-white/[0.06] pt-6 lg:border-t-0 lg:pt-0">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[#64748B]">
+                Surgical Staffing Risks
+              </h3>
+              {topRisks.length > 0 ? (
+                <ul className="mt-4 space-y-3">
+                  {topRisks.map((risk) => (
+                    <li
+                      key={risk.id}
+                      className={cn(
+                        "rounded-2xl border border-white/[0.08] border-l-4 bg-[#0B1220]/60 p-4",
+                        risk.severity === "critical" ? "border-l-rose-500" : "border-l-amber-400"
+                      )}
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                          className={
+                            risk.severity === "critical"
+                              ? "bg-rose-500/15 text-rose-300 ring-rose-500/25"
+                              : "bg-amber-500/15 text-amber-200 ring-amber-500/25"
+                          }
+                        >
+                          {risk.severity}
+                        </Badge>
+                        <p className="text-sm font-semibold text-[#F8FAFC]">{risk.title}</p>
+                      </div>
+                      <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">{risk.recommendation}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-4 rounded-2xl border border-white/[0.08] bg-[#0B1220]/50 px-5 py-4 text-sm text-[#94A3B8]">
+                  No surgical staffing risks detected in the current planning horizon.
+                </p>
+              )}
+            </div>
+
+            <div className="border-t border-white/[0.06] pt-6 lg:border-t-0 lg:pt-0">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[#64748B]">
+                Procedure Recommendations
+              </h3>
+              {topRecommendations.length > 0 ? (
+                <ol className="mt-4 space-y-3">
+                  {topRecommendations.map((rec, idx) => (
+                    <li
+                      key={rec.id}
+                      className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-[#0B1220]/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-bold tabular-nums text-[#64748B]">#{idx + 1}</span>
+                          <Badge className={severityBadgeClass(rec.severity)}>{rec.severity}</Badge>
+                        </div>
+                        <p className="mt-2 text-sm font-semibold text-[#F8FAFC]">{rec.title}</p>
+                      </div>
+                      <Link
+                        href={rec.route}
+                        className="shrink-0 rounded-xl border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3.5 py-2 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/50 hover:bg-[#22C1FF]/18"
+                      >
+                        {rec.ctaLabel} →
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="mt-4 rounded-2xl border border-white/[0.08] bg-[#0B1220]/50 px-5 py-4 text-sm text-[#94A3B8]">
+                  No procedure staffing recommendations at this time.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </DashboardCard>
+    </section>
+  );
+}
+
 export function WorkforceCommandCentreClient({
   tenantId,
   data,
@@ -492,6 +696,7 @@ export function WorkforceCommandCentreClient({
     procedureForecast,
     financialIntelligence,
     intelligence,
+    surgicalIntelligence,
     canManage,
   } = data;
 
@@ -573,6 +778,8 @@ export function WorkforceCommandCentreClient({
         error={error}
         onRefreshPlanning={onRefreshPlanning}
       />
+
+      <SurgicalWorkforceIntelligenceSection surgicalIntelligence={surgicalIntelligence} />
 
       <section aria-label="Workforce priority queue" className="space-y-5">
         <SectionHeading

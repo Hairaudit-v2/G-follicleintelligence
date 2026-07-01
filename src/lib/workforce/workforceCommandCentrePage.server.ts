@@ -17,8 +17,11 @@ import {
   buildModuleTiles,
   buildProcedureStaffingForecast,
   buildWorkforceHealthRadar,
+  composeSurgicalWorkforceIntelligence,
   composeWorkforceIntelligence,
+  resolveSurgicalIntelligenceDates,
   type ProcedureStaffingForecastPanel,
+  type SurgicalWorkforceIntelligencePanel,
   type WorkforceIntelligencePanel,
   type WorkforceAttentionQueueItem,
   type WorkforceCommandCentreKpis,
@@ -31,6 +34,8 @@ import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceO
 import { loadWorkforcePlanningEngine } from "@/src/lib/workforce/workforcePlanningEngine.server";
 import type { WorkforcePlanningSnapshot } from "@/src/lib/workforce/workforcePlanningEngineCore";
 import { loadWorkforceOsDirectoryPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { loadProcedureStaffingOptimizer } from "@/src/lib/workforce/procedureStaffingOptimizer.server";
+import type { ProcedureStaffingOptimizerSnapshot } from "@/src/lib/workforce/procedureStaffingOptimizerCore";
 
 export type WorkforceCommandCentrePageData = {
   canManage: boolean;
@@ -43,6 +48,7 @@ export type WorkforceCommandCentrePageData = {
   planning: WorkforcePlanningSnapshot | null;
   planningAvailable: boolean;
   intelligence: WorkforceIntelligencePanel;
+  surgicalIntelligence: SurgicalWorkforceIntelligencePanel;
 };
 
 async function safeLoadPlanning(tenantId: string): Promise<WorkforcePlanningSnapshot | null> {
@@ -69,6 +75,48 @@ async function safeLoadOperationalMetrics(
   } catch {
     return null;
   }
+}
+
+async function safeLoadProcedureOptimizer(
+  tenantId: string,
+  workDate: string
+): Promise<ProcedureStaffingOptimizerSnapshot | null> {
+  try {
+    return await loadProcedureStaffingOptimizer(tenantId, workDate);
+  } catch {
+    return null;
+  }
+}
+
+async function loadSurgicalIntelligenceSignals(
+  tenantId: string,
+  planning: WorkforcePlanningSnapshot | null,
+  activeClinicalStaffCount: number
+): Promise<SurgicalWorkforceIntelligencePanel> {
+  const { tomorrowDate, weekDates } = resolveSurgicalIntelligenceDates(planning);
+  const optimizerDates = Array.from(new Set([tomorrowDate, ...weekDates]));
+
+  const snapshots = await Promise.all(
+    optimizerDates.map(async (date) => ({
+      date,
+      snapshot: await safeLoadProcedureOptimizer(tenantId, date),
+    }))
+  );
+
+  const snapshotByDate = new Map(
+    snapshots.filter((entry) => entry.snapshot != null).map((entry) => [entry.date, entry.snapshot!])
+  );
+
+  return composeSurgicalWorkforceIntelligence({
+    tenantId,
+    tomorrowDate,
+    tomorrowOptimizer: snapshotByDate.get(tomorrowDate) ?? null,
+    weekOptimizers: weekDates
+      .map((date) => snapshotByDate.get(date))
+      .filter((snapshot): snapshot is ProcedureStaffingOptimizerSnapshot => snapshot != null),
+    planning,
+    activeClinicalStaffCount,
+  });
 }
 
 export async function loadWorkforceCommandCentrePage(
@@ -122,6 +170,9 @@ export async function loadWorkforceCommandCentrePage(
     wageProfileCoveragePercent,
   };
 
+  const clinicallyEligible = operationalMetrics?.clinicallyEligibleStaff ?? totalStaff;
+  const surgicalIntelligence = await loadSurgicalIntelligenceSignals(tid, planning, clinicallyEligible);
+
   return {
     canManage,
     kpis: buildCommandCentreKpis(composeInput),
@@ -133,5 +184,6 @@ export async function loadWorkforceCommandCentrePage(
     planning,
     planningAvailable: planning != null,
     intelligence: composeWorkforceIntelligence(composeInput),
+    surgicalIntelligence,
   };
 }
