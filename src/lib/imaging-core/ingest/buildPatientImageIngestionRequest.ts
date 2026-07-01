@@ -155,7 +155,8 @@ export function buildPatientImageIngestionRequest(
 
   if (
     captureSource === "follow_up_outcome" ||
-    (captureSource === "vie_capture_wizard" && isFollowUpTemplate(input.protocol_template_slug))
+    ((captureSource === "vie_capture_wizard" || captureSource === "imaging_os_wizard") &&
+      isFollowUpTemplate(input.protocol_template_slug))
   ) {
     return buildFollowUpOutcomeImageIngestionRequest({
       tenant_id: input.tenant_id ?? "",

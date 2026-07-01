@@ -70,6 +70,36 @@ describe("imaging-core unified ingest routing", () => {
     assert.equal(request.metadata?.protocol_template_slug, "follow_up_review");
   });
 
+  it("routes imaging_os_wizard + follow_up_review template to follow-up adapter", () => {
+    const request = buildPatientImageIngestionRequest({
+      tenant_id: TENANT,
+      patient_id: PATIENT,
+      image_id: IMAGE,
+      storage_bucket: "patient-images",
+      storage_path: STORAGE_PATH,
+      capture_source: "imaging_os_wizard",
+      protocol_template_slug: "follow_up_review",
+      protocol_slot_slug: "fu_front",
+    });
+    assert.equal(request.upload_surface, "fi_guided_protocol");
+    assert.equal(request.metadata?.capture_source, "follow_up_outcome");
+  });
+
+  it("routes baseline imaging_os_wizard to FI OS adapter unchanged", () => {
+    const request = buildPatientImageIngestionRequest({
+      tenant_id: TENANT,
+      patient_id: PATIENT,
+      image_id: IMAGE,
+      storage_bucket: "patient-images",
+      storage_path: STORAGE_PATH,
+      capture_source: "imaging_os_wizard",
+      protocol_template_slug: "hair_loss_consultation",
+      protocol_slot_slug: "bc_front",
+    });
+    assert.equal(request.source_system, "fi_os");
+    assert.equal(request.upload_surface, "fi_guided_protocol");
+  });
+
   it("routes consultation_id to consultation adapter", () => {
     const request = buildPatientImageIngestionRequest({
       tenant_id: TENANT,
@@ -191,6 +221,19 @@ describe("imaging-core session taxonomy", () => {
     });
     assert.equal(taxonomy.session_type, "follow_up");
     assert.equal(taxonomy.interval, "12_month");
+    assert.equal(taxonomy.view, "fu_front");
+    assert.equal(taxonomy.protocol_version, "follow_up_review");
+  });
+
+  it("classifies surgery_day sessions with slot view", () => {
+    const taxonomy = buildImagingSessionTaxonomy({
+      capture_source: "surgery_os",
+      protocol_template_slug: "surgery_day",
+      protocol_slot_slug: "graft_tray_overview",
+    });
+    assert.equal(taxonomy.session_type, "surgery_day");
+    assert.equal(taxonomy.view, "graft_tray_overview");
+    assert.equal(taxonomy.protocol_version, "surgery_day");
   });
 
   it("classifies hairaudit dual-write sessions", () => {

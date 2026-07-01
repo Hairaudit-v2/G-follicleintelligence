@@ -100,18 +100,25 @@ export function formatFiImageCaptureDate(iso: string, locale = "en-AU"): string 
 }
 
 export function inferFiImageProcedureStage(args: {
+  capture_source?: string | null;
   visit_type?: string | null;
   imaging_protocol_template_slug?: string | null;
   image_category?: string | null;
   follow_up_interval?: string | null;
   imaging_library_axis?: string | null;
 }): FiImageProcedureStage {
+  const capture = String(args.capture_source ?? "")
+    .trim()
+    .toLowerCase();
   const visit = String(args.visit_type ?? "")
     .trim()
     .toLowerCase();
   const template = String(args.imaging_protocol_template_slug ?? "")
     .trim()
     .toLowerCase();
+
+  if (capture === "surgery_os") return "surgery_day";
+  if (capture === "follow_up_outcome") return "follow_up";
   const category = String(args.image_category ?? "")
     .trim()
     .toLowerCase();

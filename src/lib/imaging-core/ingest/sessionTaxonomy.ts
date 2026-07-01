@@ -52,16 +52,28 @@ function inferSessionType(input: BuildImagingSessionTaxonomyInput): string {
   return "general_clinical";
 }
 
+function resolveProtocolVersion(
+  input: BuildImagingSessionTaxonomyInput,
+  sessionType: string
+): string | null {
+  const template = input.protocol_template_slug?.trim() || null;
+  if (sessionType === "follow_up") {
+    return template ?? "follow_up_review";
+  }
+  return template;
+}
+
 /** Build normalized session taxonomy block for fi_patient_images.metadata.imaging_session. */
 export function buildImagingSessionTaxonomy(
   input: BuildImagingSessionTaxonomyInput
 ): ImagingSessionTaxonomy {
   const captureSource = normalizeKey(input.capture_source) || normalizeKey(input.upload_source) || "unknown";
+  const sessionType = inferSessionType(input);
   return {
-    session_type: inferSessionType(input),
+    session_type: sessionType,
     view: input.protocol_slot_slug?.trim() || input.image_category?.trim() || null,
-    interval: input.follow_up_interval?.trim() || input.visit_type?.trim() || null,
-    protocol_version: input.protocol_template_slug?.trim() || null,
+    interval: input.follow_up_interval?.trim() || null,
+    protocol_version: resolveProtocolVersion(input, sessionType),
     capture_source: captureSource,
   };
 }

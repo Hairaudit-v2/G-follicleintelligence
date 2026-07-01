@@ -23,6 +23,7 @@ import type {
   VieSlotTier,
 } from "@/src/lib/vie/vieProtocolTypes";
 import type { VieCaptureReferenceGuidance } from "@/src/lib/vie/vieAlignmentTypes";
+import { resolveGuidedCaptureSource } from "@/src/lib/imaging-core/ingest/resolveGuidedCaptureSource";
 import type { FiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionTypes";
 import { VieCaptureGuideOverlay } from "./VieCaptureGuideOverlay";
 import { VieIntelligenceResultPanel } from "./VieIntelligenceResultPanel";
@@ -187,6 +188,15 @@ export function VieCaptureWizard({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const resolvedCaptureSource = useMemo(
+    () =>
+      resolveGuidedCaptureSource({
+        protocolTemplateSlug: templateSlug,
+        explicitCaptureSource: captureSource,
+        guidedSurface: "vie",
+      }),
+    [captureSource, templateSlug]
+  );
   const [progress, setProgress] = useState<SlotProgress>(initialProgress);
   const [slotOverride, setSlotOverride] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -406,7 +416,7 @@ export function VieCaptureWizard({
           if (fields.anatomical_region) fd.set("anatomical_region", fields.anatomical_region);
           fd.set("device_type", fields.device_type);
           fd.set("capture_type", "camera");
-          fd.set("capture_source", captureSource);
+          fd.set("capture_source", resolvedCaptureSource);
           if (surgeryContext?.caseId) fd.set("case_id", surgeryContext.caseId);
           if (surgeryContext?.bookingId) fd.set("booking_id", surgeryContext.bookingId);
           if (surgeryContext?.procedureDayId)
@@ -477,7 +487,7 @@ export function VieCaptureWizard({
     },
     [
       awaitingReview,
-      captureSource,
+      resolvedCaptureSource,
       currentSlot,
       currentSlug,
       patientId,

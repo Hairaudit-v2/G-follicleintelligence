@@ -17,6 +17,8 @@ describe("FI image attribution core", () => {
     assert.equal(normalizeFiImageCaptureType("camera"), "camera");
     assert.equal(normalizeFiImageCaptureType("bogus"), "upload");
     assert.equal(normalizeFiImageCaptureSource("patient_profile"), "patient_profile");
+    assert.equal(normalizeFiImageCaptureSource("surgery_os"), "surgery_os");
+    assert.equal(normalizeFiImageCaptureSource("follow_up_outcome"), "follow_up_outcome");
     assert.equal(normalizeFiImageCaptureSource(""), "unknown");
   });
 
@@ -41,6 +43,30 @@ describe("FI image attribution core", () => {
         follow_up_interval: "month_6",
       }),
       "follow_up"
+    );
+  });
+
+  it("infers procedure stage from normalized capture_source", () => {
+    assert.equal(
+      inferFiImageProcedureStage({
+        capture_source: "surgery_os",
+        imaging_protocol_template_slug: "surgery_day",
+      }),
+      "surgery_day"
+    );
+    assert.equal(
+      inferFiImageProcedureStage({
+        capture_source: "follow_up_outcome",
+        imaging_protocol_template_slug: "follow_up_review",
+      }),
+      "follow_up"
+    );
+    assert.equal(
+      inferFiImageProcedureStage({
+        capture_source: "imaging_os_wizard",
+        imaging_protocol_template_slug: "hair_loss_consultation",
+      }),
+      "baseline"
     );
   });
 

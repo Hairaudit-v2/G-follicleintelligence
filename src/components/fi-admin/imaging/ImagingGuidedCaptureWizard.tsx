@@ -28,6 +28,7 @@ import {
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
 import { PatientTrialConsentBanner } from "@/src/components/fi/patients/PatientTrialConsentBanner";
+import { resolveGuidedCaptureSource } from "@/src/lib/imaging-core/ingest/resolveGuidedCaptureSource";
 import {
   buildPatientProfilePhotoAddedHref,
   type PatientImagingCaptureIntent,
@@ -141,6 +142,17 @@ export function ImagingGuidedCaptureWizard({
     [initial.protocolSessions, sessionId]
   );
 
+  const resolvedCaptureSource = useMemo(() => {
+    if (!currentSession?.template_slug) {
+      return captureSource ?? "imaging_os_wizard";
+    }
+    return resolveGuidedCaptureSource({
+      protocolTemplateSlug: currentSession.template_slug,
+      explicitCaptureSource: captureSource,
+      guidedSurface: "imaging_os",
+    });
+  }, [captureSource, currentSession?.template_slug]);
+
   const template = useMemo(
     () => initial.protocolTemplates.find((t) => t.slug === currentSession?.template_slug) ?? null,
     [initial.protocolTemplates, currentSession?.template_slug]
@@ -218,7 +230,7 @@ export function ImagingGuidedCaptureWizard({
             fd.set("captured_by_staff_id", fields.captured_by_staff_id);
           if (replaceNext) fd.set("guided_replace", "1");
           fd.set("capture_type", captureIntent === "camera" ? "camera" : "upload");
-          fd.set("capture_source", captureSource ?? "imaging_os_wizard");
+          fd.set("capture_source", resolvedCaptureSource);
           if (dims.width) fd.set("image_width", String(dims.width));
           if (dims.height) fd.set("image_height", String(dims.height));
           const k = adminKey.trim();
@@ -305,6 +317,7 @@ export function ImagingGuidedCaptureWizard({
       lastPreviewUrl,
       captureIntent,
       captureSource,
+      resolvedCaptureSource,
       patientId,
       pending,
       replaceNext,

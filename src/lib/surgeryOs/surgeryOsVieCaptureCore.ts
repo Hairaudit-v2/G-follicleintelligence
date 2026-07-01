@@ -363,7 +363,12 @@ export function buildVieSurgeryImageMetadata(input: {
 }
 
 export function isVieCaptureSource(source: string): boolean {
-  return source === "vie_capture_wizard" || source === "surgery_os";
+  const normalized = source.trim().toLowerCase();
+  return (
+    normalized === "vie_capture_wizard" ||
+    normalized === "surgery_os" ||
+    normalized === "follow_up_outcome"
+  );
 }
 
 export { protocolRequiredCompletionPercent, slotIsSatisfied, slotPending, slotAccepted };

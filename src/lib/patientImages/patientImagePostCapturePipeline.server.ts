@@ -186,6 +186,7 @@ export async function runPatientImagePostCapturePipeline(
   );
 
   const procedureStage = inferFiImageProcedureStage({
+    capture_source: captureSource,
     visit_type: existingRow.visit_type,
     imaging_protocol_template_slug: existingRow.imaging_protocol_template_slug,
     image_category: existingRow.image_category,
