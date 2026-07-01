@@ -33,6 +33,7 @@ export default async function WorkforceOsPayrollPage({
         wageProfiles={data.wageProfiles}
         awardLoadings={data.awardLoadings}
         timesheetEntries={data.timesheetEntries}
+        timePunches={data.timePunches}
         staffOptions={data.staffOptions}
         surgeryDayCost={data.surgeryDayCost}
         rateTypeCounts={data.rateTypeCounts}

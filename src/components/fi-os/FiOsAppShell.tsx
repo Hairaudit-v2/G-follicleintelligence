@@ -62,6 +62,7 @@ export function FiOsAppShell({
   showFiPlatformSystemLink = false,
   staffPinSessionLabel = null,
   staffPinLogoutTenantId = null,
+  staffPinOnBreak = false,
   children,
 }: {
   tenantId: string;
@@ -97,6 +98,7 @@ export function FiOsAppShell({
   /** Limited clinic-floor PIN session label in the top bar. */
   staffPinSessionLabel?: string | null;
   staffPinLogoutTenantId?: string | null;
+  staffPinOnBreak?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -249,6 +251,7 @@ export function FiOsAppShell({
             showFiPlatformSystemLink={showFiPlatformSystemLink}
             staffPinSessionLabel={staffPinSessionLabel}
             staffPinLogoutTenantId={staffPinLogoutTenantId}
+            staffPinOnBreak={staffPinOnBreak}
           />
           <main
             id="fi-os-main-content"

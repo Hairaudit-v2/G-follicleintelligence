@@ -7,9 +7,14 @@ import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import {
+  managerAddBreakToPunchAction,
+  managerCloseForgottenPunchAction,
+} from "@/src/lib/actions/staff-time-clock-actions";
+import {
   createTimesheetEntryAction,
   upsertWorkforceWageProfileAction,
 } from "@/src/lib/actions/workforce-phase-2-sprint-2-actions";
+import type { WorkforceTimePunch } from "@/src/lib/workforce/staffTimeClockCore";
 import {
   DEFAULT_AWARD_LOADING_SEEDS,
   formatCentsAsCurrency,
@@ -22,11 +27,19 @@ import {
   type WorkforceWageProfile,
 } from "@/src/lib/workforce/wageProfileCore";
 
+function formatPunchTime(iso: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return "—";
+  return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+}
+
 export function WorkforceOsPayrollClient({
   tenantId,
   wageProfiles,
   awardLoadings,
   timesheetEntries,
+  timePunches,
   staffOptions,
   surgeryDayCost,
   rateTypeCounts,
@@ -37,6 +50,7 @@ export function WorkforceOsPayrollClient({
   wageProfiles: WorkforceWageProfile[];
   awardLoadings: AwardLoadingPlaceholder[];
   timesheetEntries: TimesheetEntry[];
+  timePunches: WorkforceTimePunch[];
   staffOptions: {
     id: string;
     fullName: string;
@@ -75,6 +89,18 @@ export function WorkforceOsPayrollClient({
     notes: "",
   });
 
+  const [correctingPunchId, setCorrectingPunchId] = useState<string | null>(null);
+  const [correctionForm, setCorrectionForm] = useState({
+    clockOutAt: "",
+    notes: "",
+  });
+  const [addingBreakPunchId, setAddingBreakPunchId] = useState<string | null>(null);
+  const [breakForm, setBreakForm] = useState({
+    breakStartAt: "",
+    breakEndAt: "",
+    notes: "",
+  });
+
   const staffWithoutProfile = useMemo(
     () => staffOptions.filter((s) => !s.hasWageProfile),
     [staffOptions]
@@ -110,6 +136,53 @@ export function WorkforceOsPayrollClient({
       }
       setMessage("Wage profile saved.");
       setShowWageForm(false);
+      router.refresh();
+    });
+  }
+
+  function onCloseForgottenPunch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!correctingPunchId) return;
+    resetFeedback();
+    startTransition(async () => {
+      const res = await managerCloseForgottenPunchAction(tenantId, {
+        punchId: correctingPunchId,
+        clockOutAt: new Date(correctionForm.clockOutAt).toISOString(),
+        notes: correctionForm.notes,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setMessage(
+        res.timesheetEntryId
+          ? "Punch closed and draft timesheet created."
+          : "Punch closed. Timesheet pending — check wage profile."
+      );
+      setCorrectingPunchId(null);
+      setCorrectionForm({ clockOutAt: "", notes: "" });
+      router.refresh();
+    });
+  }
+
+  function onAddManagerBreak(e: React.FormEvent) {
+    e.preventDefault();
+    if (!addingBreakPunchId) return;
+    resetFeedback();
+    startTransition(async () => {
+      const res = await managerAddBreakToPunchAction(tenantId, {
+        punchId: addingBreakPunchId,
+        breakStartAt: new Date(breakForm.breakStartAt).toISOString(),
+        breakEndAt: new Date(breakForm.breakEndAt).toISOString(),
+        notes: breakForm.notes,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setMessage("Break recorded on punch.");
+      setAddingBreakPunchId(null);
+      setBreakForm({ breakStartAt: "", breakEndAt: "", notes: "" });
       router.refresh();
     });
   }
@@ -528,6 +601,192 @@ export function WorkforceOsPayrollClient({
                       <Button size="sm" variant="outline" onClick={() => startEditProfile(profile)}>
                         Edit
                       </Button>
+                    </td>
+                  ) : null}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </DashboardCard>
+
+      <DashboardCard className="overflow-x-auto p-0">
+        <h2 className="border-b border-white/10 px-4 py-3 text-sm font-semibold text-[#F8FAFC]">
+          PIN time clock
+        </h2>
+        <p className="border-b border-white/[0.06] px-4 py-2 text-xs text-[#94A3B8]">
+          Staff clock in on PIN sign-in and clock out on sign-out. Breaks (PIN or manager-added) are
+          deducted from gross minutes. HR can close forgotten open punches below.
+        </p>
+        {canManage && correctingPunchId ? (
+          <form
+            onSubmit={onCloseForgottenPunch}
+            className="space-y-3 border-b border-white/[0.06] px-4 py-4"
+          >
+            <p className="text-xs font-semibold text-[#F8FAFC]">Close forgotten punch</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block text-xs text-[#94A3B8]">
+                Clock-out time
+                <input
+                  type="datetime-local"
+                  required
+                  className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
+                  value={correctionForm.clockOutAt}
+                  onChange={(e) =>
+                    setCorrectionForm((f) => ({ ...f, clockOutAt: e.target.value }))
+                  }
+                />
+              </label>
+              <label className="block text-xs text-[#94A3B8] sm:col-span-2">
+                Correction note
+                <input
+                  required
+                  className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
+                  value={correctionForm.notes}
+                  onChange={(e) => setCorrectionForm((f) => ({ ...f, notes: e.target.value }))}
+                  placeholder="e.g. Staff forgot to clock out — left at 5:30pm"
+                />
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={pending}>
+                Save correction
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setCorrectingPunchId(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : null}
+        {canManage && addingBreakPunchId ? (
+          <form
+            onSubmit={onAddManagerBreak}
+            className="space-y-3 border-b border-white/[0.06] px-4 py-4"
+          >
+            <p className="text-xs font-semibold text-[#F8FAFC]">Add break to punch</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block text-xs text-[#94A3B8]">
+                Break start
+                <input
+                  type="datetime-local"
+                  required
+                  className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
+                  value={breakForm.breakStartAt}
+                  onChange={(e) =>
+                    setBreakForm((f) => ({ ...f, breakStartAt: e.target.value }))
+                  }
+                />
+              </label>
+              <label className="block text-xs text-[#94A3B8]">
+                Break end
+                <input
+                  type="datetime-local"
+                  required
+                  className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
+                  value={breakForm.breakEndAt}
+                  onChange={(e) =>
+                    setBreakForm((f) => ({ ...f, breakEndAt: e.target.value }))
+                  }
+                />
+              </label>
+              <label className="block text-xs text-[#94A3B8] sm:col-span-2">
+                Note
+                <input
+                  required
+                  className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
+                  value={breakForm.notes}
+                  onChange={(e) => setBreakForm((f) => ({ ...f, notes: e.target.value }))}
+                />
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={pending}>
+                Add break
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setAddingBreakPunchId(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : null}
+        <table className="min-w-full text-left text-sm">
+          <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wide text-[#64748B]">
+            <tr>
+              <th className="px-4 py-3">Staff</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Clock in</th>
+              <th className="px-4 py-3">Clock out</th>
+              <th className="px-4 py-3">Breaks</th>
+              <th className="px-4 py-3">Net min</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Timesheet</th>
+              {canManage ? <th className="px-4 py-3">Actions</th> : null}
+            </tr>
+          </thead>
+          <tbody>
+            {timePunches.length === 0 ? (
+              <tr>
+                <td colSpan={canManage ? 9 : 8} className="px-4 py-8 text-center text-[#94A3B8]">
+                  No PIN clock punches yet.
+                </td>
+              </tr>
+            ) : (
+              timePunches.map((punch) => (
+                <tr key={punch.id} className="border-b border-white/[0.06]">
+                  <td className="px-4 py-3 text-[#F8FAFC]">{punch.staffFullName ?? "—"}</td>
+                  <td className="px-4 py-3 text-[#CBD5E1]">{punch.workDate}</td>
+                  <td className="px-4 py-3 text-[#CBD5E1]">{formatPunchTime(punch.clockInAt)}</td>
+                  <td className="px-4 py-3 text-[#CBD5E1]">{formatPunchTime(punch.clockOutAt)}</td>
+                  <td className="px-4 py-3 text-[#CBD5E1]">
+                    {punch.breakMinutes > 0
+                      ? `${punch.breakMinutes} min`
+                      : punch.hasOpenBreak
+                        ? "On break"
+                        : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-[#CBD5E1]">
+                    {punch.minutesWorked ?? (punch.status === "open" ? "In progress" : "—")}
+                  </td>
+                  <td className="px-4 py-3 capitalize text-[#94A3B8]">{punch.status}</td>
+                  <td className="px-4 py-3 text-[#94A3B8]">
+                    {punch.timesheetEntryId ? "Draft created" : punch.status === "open" ? "—" : "Pending"}
+                  </td>
+                  {canManage ? (
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        {punch.status === "open" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setAddingBreakPunchId(null);
+                              setCorrectingPunchId(punch.id);
+                            }}
+                          >
+                            Close punch
+                          </Button>
+                        ) : null}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setCorrectingPunchId(null);
+                            setAddingBreakPunchId(punch.id);
+                          }}
+                        >
+                          Add break
+                        </Button>
+                      </div>
                     </td>
                   ) : null}
                 </tr>

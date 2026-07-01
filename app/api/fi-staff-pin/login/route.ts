@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createStaffPinClinicSession } from "@/src/lib/staffPin/staffPinSession.server";
 import { verifyStaffPinLogin } from "@/src/lib/staffPin/staffPin.server";
+import { clockInFromPinLogin } from "@/src/lib/workforce/staffTimeClock.server";
 
 export const dynamic = "force-dynamic";
 
@@ -42,11 +43,26 @@ export async function POST(req: Request) {
       userAgent: req.headers.get("user-agent"),
     });
 
+    const clockIn = await clockInFromPinLogin({
+      tenantId,
+      fiStaffId: verified.staffId,
+      pinSessionToken: session.sessionToken,
+      clientIp: clientIp(req),
+      userAgent: req.headers.get("user-agent"),
+    });
+
     return NextResponse.json({
       ok: true,
       redirectTo: `/fi-admin/${tenantId}/calendar`,
       staffName: session.staffName,
       expiresAt: session.expiresAt,
+      clockIn: clockIn
+        ? {
+            workDate: clockIn.punch.workDate,
+            clockInAt: clockIn.punch.clockInAt,
+            resumed: clockIn.resumed,
+          }
+        : null,
     });
   } catch (e: unknown) {
     return NextResponse.json(

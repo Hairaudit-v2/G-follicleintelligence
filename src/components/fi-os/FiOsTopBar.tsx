@@ -7,6 +7,10 @@ import { Bell, ChevronDown, Menu, Plus, Search } from "lucide-react";
 import { fiOsSignOutAction } from "@/lib/actions/fi-os-auth-actions";
 import { staffPinLogoutAction } from "@/lib/actions/fi-staff-pin-actions";
 import {
+  staffPinEndBreakAction,
+  staffPinStartBreakAction,
+} from "@/src/lib/actions/staff-time-clock-actions";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -38,6 +42,7 @@ export function FiOsTopBar({
   showFiPlatformSystemLink = false,
   staffPinSessionLabel = null,
   staffPinLogoutTenantId = null,
+  staffPinOnBreak = false,
 }: {
   tenantId: string;
   clinicLabel: string;
@@ -59,6 +64,8 @@ export function FiOsTopBar({
   showFiPlatformSystemLink?: boolean;
   staffPinSessionLabel?: string | null;
   staffPinLogoutTenantId?: string | null;
+  /** True when staff has started a break on their open punch. */
+  staffPinOnBreak?: boolean;
 }) {
   const router = useRouter();
   return (
@@ -73,18 +80,45 @@ export function FiOsTopBar({
             <strong className="font-semibold text-cyan-100">{staffPinSessionLabel}</strong>
           </span>
           {staffPinLogoutTenantId ? (
-            <button
-              type="button"
-              className="shrink-0 rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"
-              onClick={() => {
-                void staffPinLogoutAction(staffPinLogoutTenantId).then((r) => {
-                  if (r.ok) router.push(r.redirectTo);
-                  router.refresh();
-                });
-              }}
-            >
-              End PIN session
-            </button>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {staffPinOnBreak ? (
+                <button
+                  type="button"
+                  className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-50 transition hover:bg-amber-500/30"
+                  onClick={() => {
+                    void staffPinEndBreakAction(staffPinLogoutTenantId).then(() =>
+                      router.refresh()
+                    );
+                  }}
+                >
+                  End break
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"
+                  onClick={() => {
+                    void staffPinStartBreakAction(staffPinLogoutTenantId).then(() =>
+                      router.refresh()
+                    );
+                  }}
+                >
+                  Start break
+                </button>
+              )}
+              <button
+                type="button"
+                className="rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"
+                onClick={() => {
+                  void staffPinLogoutAction(staffPinLogoutTenantId).then((r) => {
+                    if (r.ok) router.push(r.redirectTo);
+                    router.refresh();
+                  });
+                }}
+              >
+                Clock out
+              </button>
+            </div>
           ) : null}
         </div>
       ) : null}

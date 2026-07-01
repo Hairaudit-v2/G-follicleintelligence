@@ -2,6 +2,7 @@ import "server-only";
 
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
+import { listWorkforceTimePunches } from "@/src/lib/workforce/staffTimeClock.server";
 import {
   computeSurgeryDayStaffingCostForDate,
   ensureDefaultAwardLoadingPlaceholders,
@@ -23,11 +24,12 @@ export async function loadWorkforceOsPayrollPage(tenantId: string, workDate?: st
     workDate?.trim() ||
     new Date().toISOString().slice(0, 10);
 
-  const [wageProfiles, awardLoadings, timesheetEntries, staffOptions, surgeryDayCost] =
+  const [wageProfiles, awardLoadings, timesheetEntries, timePunches, staffOptions, surgeryDayCost] =
     await Promise.all([
       listWorkforceWageProfiles(tid),
       listAwardLoadingPlaceholders(tid),
       listTimesheetEntries(tid, { limit: 50 }),
+      listWorkforceTimePunches(tid, { limit: 50 }),
       listActiveStaffForWageProfiles(tid),
       computeSurgeryDayStaffingCostForDate(tid, date),
     ]);
@@ -41,6 +43,7 @@ export async function loadWorkforceOsPayrollPage(tenantId: string, workDate?: st
     wageProfiles,
     awardLoadings,
     timesheetEntries,
+    timePunches,
     staffOptions,
     surgeryDayCost,
     rateTypeCounts: countWageProfilesByRateType(wageProfiles),

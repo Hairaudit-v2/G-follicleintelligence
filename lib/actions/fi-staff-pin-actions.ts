@@ -157,12 +157,26 @@ export async function staffPinLogoutAction(
 ): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
   try {
     const member = await getFiTenantMemberSessionIfAllowed(tenantId);
-    const { clearStaffPinClinicSessionCookie } =
+    const { getStaffPinClinicSessionIfValid, endStaffPinClinicSession } =
       await import("@/src/lib/staffPin/staffPinSession.server");
-    await clearStaffPinClinicSessionCookie();
+    const { clockOutFromPinLogout } =
+      await import("@/src/lib/workforce/staffTimeClock.server");
+    const session = await getStaffPinClinicSessionIfValid(tenantId.trim());
+    if (session) {
+      await clockOutFromPinLogout({
+        tenantId: session.tenantId,
+        fiStaffId: session.staffId,
+      });
+      await endStaffPinClinicSession(
+        session.sessionToken,
+        session.tenantId,
+        session.staffId
+      );
+    }
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}`);
     revalidatePath(`/fi-admin/${tid}/calendar`);
+    revalidatePath(`/fi-admin/${tid}/workforce-os/payroll`);
     return {
       ok: true,
       redirectTo: member ? `/fi-admin/${tid}/calendar` : `/fi-admin/${tid}/staff-pin-login`,

@@ -24,6 +24,7 @@ import {
 } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermissions";
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
+import { loadPinBreakSessionState } from "@/src/lib/workforce/staffTimeClock.server";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import { getStaffAccessNavFeatureOverrides } from "@/src/lib/staffAccess/staffAccess.server";
@@ -115,6 +116,9 @@ export default async function TenantAdminLayout({
     }
   }
   const pinFloorMode = Boolean(pinSession);
+  const pinBreakState = pinSession
+    ? await loadPinBreakSessionState(tenantId, pinSession.staffId)
+    : null;
   const [
     showCrmNav,
     showBookingsBoard,
@@ -241,6 +245,7 @@ export default async function TenantAdminLayout({
         showFiPlatformSystemLink={pinFloorMode ? false : showFiPlatformSystemLink}
         staffPinSessionLabel={pinFloorMode ? `${pinSession!.staffName} · PIN session` : null}
         staffPinLogoutTenantId={pinFloorMode ? tenantId : null}
+        staffPinOnBreak={pinBreakState?.onBreak ?? false}
       >
         {mainSurface}
         {!pinFloorMode && !isCommandCentrePresentation ? (
