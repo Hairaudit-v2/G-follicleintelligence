@@ -15,6 +15,16 @@ function pickString(v: string | string[] | undefined): string | undefined {
   return undefined;
 }
 
+function resolvePatientPortalReturnPath(tenantId: string, next: string | undefined): string {
+  const fallback = `/patient/${tenantId}/medications`;
+  const raw = next?.trim();
+  if (!raw) return fallback;
+  if (!raw.startsWith("/")) return fallback;
+  const prefix = `/patient/${tenantId}`;
+  if (raw === prefix || raw.startsWith(`${prefix}/`)) return raw;
+  return fallback;
+}
+
 export default async function PatientPortalSignInPage({
   params,
   searchParams,
@@ -27,7 +37,7 @@ export default async function PatientPortalSignInPage({
   if (!tid) redirect("/");
 
   const access = await resolvePatientPortalAccess(tid);
-  const returnPath = `/patient/${tid}/medications`;
+  const returnPath = resolvePatientPortalReturnPath(tid, pickString(searchParams.next));
   const errorCode = pickString(searchParams.error);
 
   if (access.status === "linked") {

@@ -11,9 +11,11 @@ import {
 import {
   patientImageArchiveBodySchema,
   patientImagePatchBodySchema,
+  patientImagePortalReleaseBodySchema,
 } from "@/src/lib/patientImages/patientImageApiSchemas";
 import {
   archivePatientImage,
+  setPatientImagePortalReleaseStatus,
   updatePatientImageDetails,
 } from "@/src/lib/patientImages/patientImagesServer";
 import { patientClinicalDetailsPatchBodySchema } from "@/src/lib/patients/clinicalDetailsApiSchemas";
@@ -111,6 +113,38 @@ export async function updatePatientImageDetailsAction(
 
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients`);
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`);
+    return { ok: true, changed_keys: result.changed_keys };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/**
+ * Releases or holds a patient image from the patient portal imaging view.
+ */
+export async function setPatientImagePortalReleaseAction(
+  tenantId: string,
+  patientId: string,
+  imageId: string,
+  body: unknown
+): Promise<{ ok: true; changed_keys: string[] } | { ok: false; error: string }> {
+  try {
+    const parsed = patientImagePortalReleaseBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+
+    const result = await setPatientImagePortalReleaseStatus({
+      tenantId,
+      patientId,
+      imageId,
+      releaseStatus: parsed.release_status,
+      request: undefined,
+    });
+
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/patients`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
+    revalidatePath(`/patient/${tid}/imaging`);
     return { ok: true, changed_keys: result.changed_keys };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

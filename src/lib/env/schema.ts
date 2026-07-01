@@ -96,6 +96,8 @@ export const serverEnvSchema = z.object({
   FI_LEADFLOW_CRON_SECRET: optionalString,
   FI_GOOGLE_CALENDAR_CRON_SECRET: optionalString,
   FI_ADMIN_API_KEY: optionalString,
+  FI_ADMIN_API_KEY_TENANT_ALLOWLIST: optionalString,
+  FI_PORTAL_IMAGING_ENABLED: optionalString,
   FI_IMPORT_ADMIN_KEY: optionalString,
   FI_MACHINE_INGEST_MASTER_KEY: optionalString,
   FI_TIMELY_WEBHOOK_SECRET: optionalString,
@@ -239,6 +241,13 @@ export function collectCrossEnvValidationIssues(env: NodeJS.ProcessEnv = process
       issues.push({
         variable: "CRON_SECRET",
         message: "Must be at least 16 characters in production",
+      });
+    }
+    if (isPresent(g("FI_ADMIN_API_KEY")) && !isPresent(g("FI_ADMIN_API_KEY_TENANT_ALLOWLIST"))) {
+      issues.push({
+        variable: "FI_ADMIN_API_KEY_TENANT_ALLOWLIST",
+        message:
+          "Required in production when FI_ADMIN_API_KEY is set (comma-separated tenant UUID allowlist)",
       });
     }
     if (isAffirmative(g("FI_PAYMENTS_ENABLED"))) {

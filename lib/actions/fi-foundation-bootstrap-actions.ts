@@ -75,11 +75,11 @@ export async function createFiOrganisationAction(input: {
   slug: string;
   organisation_type: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return gate;
-
   const tenantId = trimToNull(input.tenantId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+
+  const gate = requireFiAdminKey(input.adminKey, tenantId);
+  if (!gate.ok) return gate;
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
@@ -118,11 +118,11 @@ export async function createFiClinicAction(input: {
   display_name: string;
   organisation_id?: string | null;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return gate;
-
   const tenantId = trimToNull(input.tenantId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+
+  const gate = requireFiAdminKey(input.adminKey, tenantId);
+  if (!gate.ok) return gate;
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;

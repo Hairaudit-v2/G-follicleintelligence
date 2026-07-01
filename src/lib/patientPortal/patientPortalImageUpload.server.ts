@@ -6,6 +6,7 @@ import { assertPatientTrialConsentRecorded } from "@/src/lib/patients/patientCon
 import { createPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
 import { loadPatientPortalPatientRow } from "./patientPortalAccess.server";
 import { buildPatientPortalImageUploadFields } from "./patientPortalImageUploadCore";
+import { isPatientPortalImagingEnabled } from "./patientPortalImagingEnabled";
 
 export type PatientPortalImageUploadInput = {
   tenantId: string;
@@ -18,6 +19,9 @@ export type PatientPortalImageUploadInput = {
 export async function uploadPatientPortalImage(input: PatientPortalImageUploadInput) {
   const tid = input.tenantId.trim();
   if (!tid) throw new Error("tenantId is required.");
+  if (!isPatientPortalImagingEnabled()) {
+    throw new Error("Patient portal imaging is not enabled.");
+  }
 
   const portal = await loadPatientPortalPatientRow(tid);
   if (!portal) {

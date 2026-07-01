@@ -15,6 +15,10 @@ import {
   resolveStaffPinFloorMutation,
 } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 
+import {
+  FI_ADMIN_KEY_TENANT_DENIED_MESSAGE,
+  isFiAdminKeyTenantScopeAllowed,
+} from "./fiAdminKeyTenantScope";
 import { isCrmStaffManageRole } from "./crmGatePolicy";
 import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 
@@ -35,6 +39,15 @@ export class CrmAccessError extends Error {
 function requireFiAdminKey(adminKey: string | undefined | null): boolean {
   return isFiAdminApiKeyMatch(adminKey, process.env.FI_ADMIN_API_KEY);
 }
+
+function assertFiAdminKeyTenantScope(tenantId: string): void {
+  if (!isFiAdminKeyTenantScopeAllowed(tenantId)) {
+    throw new CrmAccessError(403, FI_ADMIN_KEY_TENANT_DENIED_MESSAGE);
+  }
+}
+
+const PLATFORM_ADMIN_WRITE_REQUIRES_IMPERSONATION =
+  "Platform administrators must impersonate a tenant member before mutating tenant data.";
 
 async function assertTenantRowExists(tenantId: string): Promise<void> {
   const supabase = supabaseAdmin();
@@ -196,6 +209,7 @@ export async function assertCrmTenantReadAllowed(opts: {
   if (!tenantId) throw new CrmAccessError(400, "tenantId is required.");
 
   if (requireFiAdminKey(opts.adminKey ?? undefined)) {
+    assertFiAdminKeyTenantScope(tenantId);
     await assertTenantRowExists(tenantId);
     return;
   }
@@ -232,6 +246,7 @@ export async function assertCrmTenantWriteAllowed(opts: {
   if (!tenantId) throw new CrmAccessError(400, "tenantId is required.");
 
   if (requireFiAdminKey(opts.adminKey ?? undefined)) {
+    assertFiAdminKeyTenantScope(tenantId);
     await assertTenantRowExists(tenantId);
     return;
   }
@@ -248,8 +263,7 @@ export async function assertCrmTenantWriteAllowed(opts: {
   }
 
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
-    await assertTenantRowExists(tenantId);
-    return;
+    throw new CrmAccessError(403, PLATFORM_ADMIN_WRITE_REQUIRES_IMPERSONATION);
   }
 
   const principal = await resolveTenantMembershipAuthUserId(authUserId);
@@ -299,6 +313,7 @@ export async function assertCrmTenantStaffManageAllowed(opts: {
   if (!tenantId) throw new CrmAccessError(400, "tenantId is required.");
 
   if (requireFiAdminKey(opts.adminKey ?? undefined)) {
+    assertFiAdminKeyTenantScope(tenantId);
     await assertTenantRowExists(tenantId);
     return;
   }
@@ -311,8 +326,7 @@ export async function assertCrmTenantStaffManageAllowed(opts: {
   }
 
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
-    await assertTenantRowExists(tenantId);
-    return;
+    throw new CrmAccessError(403, PLATFORM_ADMIN_WRITE_REQUIRES_IMPERSONATION);
   }
 
   const principal = await resolveTenantMembershipAuthUserId(authUserId);

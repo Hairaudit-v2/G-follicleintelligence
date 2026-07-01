@@ -100,3 +100,12 @@ export const patientImageArchiveBodySchema = z
   .strict();
 
 export type PatientImageArchiveBody = z.infer<typeof patientImageArchiveBodySchema>;
+
+export const patientImagePortalReleaseBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    release_status: z.enum(["held", "released"]),
+  })
+  .strict();
+
+export type PatientImagePortalReleaseBody = z.infer<typeof patientImagePortalReleaseBodySchema>;

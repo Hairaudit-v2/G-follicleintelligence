@@ -4,6 +4,7 @@ import { PatientPortalAccessNotice } from "@/src/components/patient-portal/Patie
 import { PatientImagingPortalClient } from "@/src/components/patient-portal/PatientImagingPortalClient";
 import { loadPatientSafeImagingExportCardsForPatient } from "@/src/lib/imaging-os/patientSafeImagingExportLoad.server";
 import { resolvePatientPortalAccess } from "@/src/lib/patientPortal/patientPortalAccess.server";
+import { isPatientPortalImagingEnabled } from "@/src/lib/patientPortal/patientPortalImagingEnabled";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,18 @@ export default async function PatientImagingPortalPage({
   const access = await resolvePatientPortalAccess(tid);
   if (access.status !== "linked") {
     return <PatientPortalAccessNotice tenantId={tid} access={access} />;
+  }
+
+  if (!isPatientPortalImagingEnabled()) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-xl font-semibold text-slate-100">Clinical photography</h1>
+        <p className="text-sm text-slate-400">
+          Patient portal imaging is not enabled for this environment. Contact the clinic if you
+          expected to view or upload photos here.
+        </p>
+      </div>
+    );
   }
 
   const bundle = await loadPatientSafeImagingExportCardsForPatient({

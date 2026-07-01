@@ -2,13 +2,20 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isPatientPortalReleased } from "@/src/lib/patientImages/patientPortalReleaseStatus";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImageRow } from "@/src/lib/patientImages/patientImageTypes";
+import { isPatientPortalImagingEnabled } from "@/src/lib/patientPortal/patientPortalImagingEnabled";
 import {
   mapPatientImagesToSafeExportCards,
   type PatientSafeImagingExportCardWithPreview,
 } from "./patientSafeImagingExportMapperCore";
 import type { PatientSafeImagingExportCard } from "./patientSafeImagingExportCore";
+
+/** Exported for unit tests — portal loader only surfaces explicitly released images. */
+export function selectPatientPortalReleasedImages(images: PatientImageRow[]): PatientImageRow[] {
+  return images.filter((img) => isPatientPortalReleased(img.patient_portal_release_status));
+}
 
 export type PatientSafeImagingExportBundle = {
   cards: PatientSafeImagingExportCardWithPreview[];
@@ -24,12 +31,19 @@ export async function loadPatientSafeImagingExportCardsForPatient(input: {
   includeSignedPreviews?: boolean;
   client?: SupabaseClient;
 }): Promise<PatientSafeImagingExportBundle> {
-  const supabase = input.client ?? supabaseAdmin();
   const tid = input.tenantId.trim();
   const pid = input.patientId.trim();
+
+  if (!isPatientPortalImagingEnabled()) {
+    return { cards: [], patientId: pid, tenantId: tid };
+  }
+
+  const supabase = input.client ?? supabaseAdmin();
   const bundle = await loadPatientImagesProfileBundle(tid, pid, supabase);
 
-  let images: PatientImageRow[] = bundle.activeWithSignedUrls.map((t) => t.image);
+  let images: PatientImageRow[] = selectPatientPortalReleasedImages(
+    bundle.activeWithSignedUrls.map((t) => t.image)
+  );
   if (input.caseId?.trim()) {
     const cid = input.caseId.trim();
     images = images.filter((img) => img.case_id === cid);

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import { PatientImageArchiveButton } from "./PatientImageArchiveButton";
+import { PatientImagePortalReleaseControls } from "./PatientImagePortalReleaseControls";
 import { PatientImageEditPanel } from "./PatientImageEditPanel";
 import { PatientImageGrid } from "./PatientImageGrid";
 import { PatientImageUploadForm } from "./PatientImageUploadForm";
@@ -61,6 +62,12 @@ export function PatientImagesCard({
 
       {selectedTile ? (
         <div className="mt-4 space-y-2">
+          <PatientImagePortalReleaseControls
+            tenantId={tenantId}
+            patientId={patientId}
+            imageId={selectedTile.image.id}
+            releaseStatus={selectedTile.image.patient_portal_release_status}
+          />
           <PatientImageEditPanel
             tenantId={tenantId}
             patientId={patientId}

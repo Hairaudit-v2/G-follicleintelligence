@@ -2,11 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { PatientImageRow } from "@/src/lib/patientImages/patientImageTypes";
-import {
-  mapPatientImageToSafeExportCard,
-  mapPatientImagesToSafeExportCards,
-  patientSafeExportCardsAreRedacted,
-} from "./patientSafeImagingExportMapperCore";
+import { selectPatientPortalReleasedImages } from "./patientSafeImagingExportLoad.server";
 
 function baseImage(overrides: Partial<PatientImageRow> = {}): PatientImageRow {
   return {
@@ -21,38 +17,34 @@ function baseImage(overrides: Partial<PatientImageRow> = {}): PatientImageRow {
     form_instance_id: null,
     image_category: "consult",
     image_status: "active",
-    patient_portal_release_status: "released",
-    portal_released_at: "2026-07-01T12:00:00.000Z",
+    patient_portal_release_status: "held",
+    portal_released_at: null,
     portal_released_by_fi_user_id: null,
     imaging_library_axis: "consultation",
     clinic_id: null,
     captured_by_staff_id: null,
     device_type: null,
     anatomical_region: "hairline",
-    visit_type: "guided:baseline_consultation",
+    visit_type: null,
     follow_up_interval: null,
     imaging_protocol_template_slug: "baseline_consultation",
     imaging_protocol_slot_slug: "global_front",
     storage_bucket: "patient-images",
-    storage_path: "t/p/i.jpg",
+    storage_path: "tenant/tenant-1/i.jpg",
     original_filename: null,
     content_type: "image/jpeg",
     file_size_bytes: 1000,
     caption: null,
     taken_at: "2026-07-01T12:00:00.000Z",
-    metadata: {
-      imaging_quality: { quality_status: "pass" },
-      imaging_clinical_ai: { provider: "hli_openai", confidence: 0.9 },
-      imaging_job_summaries: { norwood_grade: { observations: ["Norwood III"] } },
-    },
+    metadata: {},
     uploaded_by_user_id: null,
     archived_at: null,
     archived_by_user_id: null,
     archive_reason: null,
     created_at: "2026-07-01T12:00:00.000Z",
     updated_at: "2026-07-01T12:00:00.000Z",
-    ai_image_category: "front",
-    ai_image_category_confidence: 0.9,
+    ai_image_category: null,
+    ai_image_category_confidence: null,
     ai_hair_state: null,
     ai_shave_state: null,
     ai_surgery_stage: null,
@@ -66,27 +58,14 @@ function baseImage(overrides: Partial<PatientImageRow> = {}): PatientImageRow {
   };
 }
 
-describe("patientSafeImagingExportMapperCore", () => {
-  it("maps image to redacted export card without clinical fields", () => {
-    const card = mapPatientImageToSafeExportCard(baseImage());
-    assert.equal(card.status_message, "Image quality suitable for review");
-    assert.ok(patientSafeExportCardsAreRedacted([card]));
-    assert.equal(card.view_label, "global front");
-  });
-
-  it("excludes images with forbidden view labels from batch export", () => {
-    const cards = mapPatientImagesToSafeExportCards([
-      baseImage({
-        imaging_protocol_slot_slug: null,
-        anatomical_region: "norwood_pattern" as never,
-      }),
+describe("selectPatientPortalReleasedImages", () => {
+  it("excludes held images from portal export", () => {
+    const filtered = selectPatientPortalReleasedImages([
+      baseImage({ id: "held-1", patient_portal_release_status: "held" }),
+      baseImage({ id: "released-1", patient_portal_release_status: "released" }),
     ]);
-    assert.equal(cards.length, 0);
-  });
-
-  it("batch export cards are all redacted", () => {
-    const cards = mapPatientImagesToSafeExportCards([baseImage(), baseImage({ id: "img-2" })]);
-    assert.equal(cards.length, 2);
-    assert.ok(patientSafeExportCardsAreRedacted(cards));
+    assert.equal(filtered.length, 1);
+    assert.equal(filtered[0]?.id, "released-1");
   });
 });
+

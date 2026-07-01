@@ -15,7 +15,7 @@ const TENANT = "11111111-1111-4111-8111-111111111111";
 const CASE = "22222222-2222-4222-8222-222222222222";
 const PATIENT = "33333333-3333-4333-8333-333333333333";
 const EVENT = "44444444-4444-4444-8444-444444444444";
-const STORAGE_PATH = `cases/${CASE}/patient/front/1.jpg`;
+const STORAGE_PATH = `tenant/${TENANT}/cases/${CASE}/patient/front/1.jpg`;
 
 function buildEnvelope(): FiEventEnvelope {
   return {
@@ -103,6 +103,16 @@ function createMockSupabase(input: {
       };
 
       return chain;
+    },
+    storage: {
+      from() {
+        return {
+          createSignedUrl: async (path: string) => ({
+            data: { signedUrl: `https://signed.example/${path}` },
+            error: null,
+          }),
+        };
+      },
     },
   } as unknown as SupabaseClient;
 }
@@ -234,5 +244,32 @@ describe("dualWriteHairAuditImagesToPatientLibrary", () => {
     assert.equal(result.ok, false);
     assert.equal(result.inserted, 0);
     assert.ok(result.errors.length > 0);
+  });
+
+  it("rejects cross-tenant storage paths before insert", async () => {
+    const client = createMockSupabase({ foundationPatientId: PATIENT });
+    const envelope = buildEnvelope();
+    const badPath = `tenant/other-tenant/cases/${CASE}/patient/front/1.jpg`;
+    envelope.payload = {
+      images: [
+        {
+          type: "frontal",
+          filename: "1.jpg",
+          storage_path: badPath,
+          mime_type: "image/jpeg",
+          size_bytes: 2048,
+        },
+      ],
+    };
+    const result = await dualWriteHairAuditImagesToPatientLibrary({
+      tenantId: TENANT,
+      fiEventId: EVENT,
+      fiCaseId: CASE,
+      envelope,
+      supabase: client,
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.inserted, 0);
+    assert.ok(result.errors.some((e) => e.includes("tenant isolation")));
   });
 });

@@ -56,6 +56,18 @@ function isBypassedApiRoute(pathname: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Patient portal: public sign-in only at the middleware layer (production).
+// ---------------------------------------------------------------------------
+function isPatientPortalPublicSubpath(pathname: string): boolean {
+  return /\/patient\/[^/]+\/sign-in\/?$/.test(pathname);
+}
+
+function extractPatientPortalTenantId(pathname: string): string | null {
+  const m = /^\/patient\/([^/]+)/.exec(pathname);
+  return m?.[1]?.trim() || null;
+}
+
+// ---------------------------------------------------------------------------
 // Auth guard for /fi-admin/* routes (production only).
 // This is a safety net — individual layouts call assertFiTenantPortalAccess()
 // which performs full membership/role checks. The middleware guard ensures
@@ -121,6 +133,56 @@ async function applyFiAdminAuthGuard(
 }
 
 // ---------------------------------------------------------------------------
+// Auth guard for /patient/* routes (production only).
+// ---------------------------------------------------------------------------
+async function applyPatientPortalAuthGuard(
+  request: NextRequest,
+  pathname: string
+): Promise<NextResponse | null> {
+  if (process.env.NODE_ENV !== "production") return null;
+  if (!pathname.startsWith("/patient")) return null;
+  if (isPatientPortalPublicSubpath(pathname)) return null;
+
+  const tenantId = extractPatientPortalTenantId(pathname);
+  if (!tenantId) return null;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+
+  let supabaseResponse = NextResponse.next({ request });
+  supabaseResponse.headers.set("x-pathname", pathname);
+
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet: CookieToSet[]) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        supabaseResponse = NextResponse.next({ request });
+        supabaseResponse.headers.set("x-pathname", pathname);
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    const loginUrl = new URL(`/patient/${tenantId}/sign-in`, request.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return supabaseResponse;
+}
+
+// ---------------------------------------------------------------------------
 // Middleware entry point
 // ---------------------------------------------------------------------------
 export async function middleware(request: NextRequest) {
@@ -141,10 +203,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. /fi-admin/* auth safety net.
-  const guardResult = await applyFiAdminAuthGuard(request, pathname);
-  if (guardResult) return guardResult;
+  const adminGuardResult = await applyFiAdminAuthGuard(request, pathname);
+  if (adminGuardResult) return adminGuardResult;
 
-  // 4. Default: forward with x-pathname header set.
+  // 4. /patient/* auth safety net.
+  const patientGuardResult = await applyPatientPortalAuthGuard(request, pathname);
+  if (patientGuardResult) return patientGuardResult;
+
+  // 5. Default: forward with x-pathname header set.
   const response = NextResponse.next();
   response.headers.set("x-pathname", pathname);
   return response;

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { approveClinicalVoiceNote } from "@/src/lib/clinicalNotes/clinicalNotesMutations.server";
-import { requireFiPrescribingActor } from "@/src/lib/prescribing/fiPrescribingAccess.server";
+import { requireClinicalNoteApproverActor } from "@/src/lib/clinicalNotes/clinicalNoteApproverAccess.server";
 
 const approveBodySchema = z.object({
   tenantId: z.string().uuid(),
@@ -16,7 +16,7 @@ export async function approveClinicalVoiceNoteAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const parsed = approveBodySchema.parse(raw);
-    const actor = await requireFiPrescribingActor(parsed.tenantId);
+    const actor = await requireClinicalNoteApproverActor(parsed.tenantId);
     const updated = await approveClinicalVoiceNote({
       tenantId: parsed.tenantId,
       clinicalNoteId: parsed.clinicalNoteId,

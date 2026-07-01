@@ -22,11 +22,11 @@ export async function saveTenantFiOsOperatingModeAction(input: {
   tenantId: string;
   modeKey: string;
 }): Promise<{ ok: true; auditWarning?: string } | { ok: false; error: string }> {
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return gate;
-
   const tenantId = input.tenantId?.trim();
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+
+  const gate = requireFiAdminKey(input.adminKey, tenantId);
+  if (!gate.ok) return gate;
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;

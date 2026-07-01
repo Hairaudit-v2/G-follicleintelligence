@@ -64,6 +64,24 @@ describe("validateFiServerEnv", () => {
     if (!r.ok) assert.ok(r.errors.includes("FI_ADMIN_API_KEY"));
   });
 
+  it("production FI_ADMIN_API_KEY without tenant allowlist fails", () => {
+    const r = validateFiServerEnv({
+      ...validProdBase(),
+      FI_ADMIN_API_KEY: "twenty_characters_min__",
+    });
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.ok(r.errors.includes("FI_ADMIN_API_KEY_TENANT_ALLOWLIST"));
+  });
+
+  it("production FI_ADMIN_API_KEY with tenant allowlist passes", () => {
+    const r = validateFiServerEnv({
+      ...validProdBase(),
+      FI_ADMIN_API_KEY: "twenty_characters_min__",
+      FI_ADMIN_API_KEY_TENANT_ALLOWLIST: "a0000000-0000-4000-8000-000000000001",
+    });
+    assert.equal(r.ok, true);
+  });
+
   it("cron secret too short fails", () => {
     const r = validateFiServerEnv({
       ...validProdBase(),

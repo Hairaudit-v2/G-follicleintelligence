@@ -118,11 +118,11 @@ export async function upsertTenantSettingsAction(input: {
   support_email?: string;
   default_timezone?: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return gate;
-
   const tenantId = trimToNull(input.tenantId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+
+  const gate = requireFiAdminKey(input.adminKey, tenantId);
+  if (!gate.ok) return gate;
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
@@ -173,12 +173,12 @@ export async function upsertOrganisationSettingsAction(input: {
   website_url?: string;
   support_email?: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return gate;
-
   const tenantId = trimToNull(input.tenantId);
   const organisationId = trimToNull(input.organisationId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+
+  const gate = requireFiAdminKey(input.adminKey, tenantId);
+  if (!gate.ok) return gate;
   if (!organisationId || !isFiAdminUuid(organisationId))
     return { ok: false, error: "Invalid organisation id." };
 
@@ -240,12 +240,12 @@ export async function upsertClinicSettingsAction(input: {
   address?: string;
   timezone?: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return gate;
-
   const tenantId = trimToNull(input.tenantId);
   const clinicId = trimToNull(input.clinicId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+
+  const gate = requireFiAdminKey(input.adminKey, tenantId);
+  if (!gate.ok) return gate;
   if (!clinicId || !isFiAdminUuid(clinicId)) return { ok: false, error: "Invalid clinic id." };
 
   const t = await assertFiTenantExists(tenantId);

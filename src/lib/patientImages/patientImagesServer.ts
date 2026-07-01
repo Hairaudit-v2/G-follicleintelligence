@@ -29,6 +29,10 @@ import {
   PATIENT_IMAGES_BUCKET_DEFAULT,
 } from "./patientImagePolicy";
 import { buildPatientImageStoragePath, buildSafePatientImageFilename } from "./patientImagePaths";
+import {
+  normalizePatientPortalReleaseStatus,
+  type PatientPortalReleaseStatus,
+} from "./patientPortalReleaseStatus";
 import type {
   PatientImageProfileTile,
   PatientImageRow,
@@ -59,6 +63,14 @@ export function mapRow(data: Record<string, unknown>): PatientImageRow {
     form_instance_id: data.form_instance_id != null ? String(data.form_instance_id) : null,
     image_category: normalizePatientImageCategory(data.image_category),
     image_status: (data.image_status === "archived" ? "archived" : "active") as PatientImageStatus,
+    patient_portal_release_status: normalizePatientPortalReleaseStatus(
+      data.patient_portal_release_status
+    ),
+    portal_released_at: data.portal_released_at != null ? String(data.portal_released_at) : null,
+    portal_released_by_fi_user_id:
+      data.portal_released_by_fi_user_id != null
+        ? String(data.portal_released_by_fi_user_id)
+        : null,
     imaging_library_axis: normalizeImagingLibraryAxis(data.imaging_library_axis),
     clinic_id: data.clinic_id != null ? String(data.clinic_id) : null,
     captured_by_staff_id:
@@ -609,6 +621,9 @@ export async function createPatientImageRecord(
     form_instance_id: formInstanceId,
     image_category: imageCategory,
     image_status: "active" as const,
+    patient_portal_release_status: "held" as const,
+    portal_released_at: null,
+    portal_released_by_fi_user_id: null,
     imaging_library_axis: imagingLibraryAxis,
     clinic_id: clinicId,
     captured_by_staff_id: capturedByStaffId,
@@ -852,6 +867,52 @@ export async function updatePatientImageDetails(
     .single();
   if (error) throw new Error(error.message);
   return { row: mapRow(data as Record<string, unknown>), changed_keys };
+}
+
+export async function setPatientImagePortalReleaseStatus(params: {
+  tenantId: string;
+  patientId: string;
+  imageId: string;
+  releaseStatus: PatientPortalReleaseStatus;
+  request?: Request | null;
+}): Promise<{ row: PatientImageRow; changed_keys: string[] }> {
+  const supabase = supabaseAdmin();
+  const tid = params.tenantId.trim();
+  const pid = params.patientId.trim();
+  const iid = params.imageId.trim();
+
+  const existing = await loadPatientImageForPatient(tid, pid, iid, supabase);
+  if (!existing) throw new Error("Image not found.");
+  if (existing.image_status !== "active") {
+    throw new Error("Only active images can be released to or held from the patient portal.");
+  }
+
+  const actingUserId = await tryResolveFiUserIdForTenant(tid, params.request ?? null);
+  const now = new Date().toISOString();
+  const releasing = params.releaseStatus === "released";
+
+  const upd = {
+    patient_portal_release_status: params.releaseStatus,
+    portal_released_at: releasing ? now : null,
+    portal_released_by_fi_user_id: releasing ? actingUserId : null,
+    updated_at: now,
+  };
+
+  const { data, error } = await supabase
+    .from("fi_patient_images")
+    .update(upd)
+    .eq("tenant_id", tid)
+    .eq("patient_id", pid)
+    .eq("id", iid)
+    .eq("image_status", "active")
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  return {
+    row: mapRow(data as Record<string, unknown>),
+    changed_keys: ["patient_portal_release_status"],
+  };
 }
 
 export async function archivePatientImage(

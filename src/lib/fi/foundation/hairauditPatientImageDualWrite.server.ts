@@ -11,6 +11,7 @@ import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQuali
 import { loadImagingQualityPolicyForTenant } from "@/src/lib/imaging-os/imageQualityPolicy.server";
 import type { ImagingQualityTenantPolicy } from "@/src/lib/imaging-os/imageQualityPolicy";
 import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
+import { assertDualWriteStorageGuard } from "./dualWriteStorageGuard.server";
 import {
   planHairAuditPatientImageInsert,
   type HairAuditPatientImageInsertPlan,
@@ -185,6 +186,19 @@ export async function dualWriteHairAuditImagesToPatientLibrary(
         occurredAt: envelope.occurred_at,
       });
       if (!plan) continue;
+
+      const storageGuard = await assertDualWriteStorageGuard({
+        tenantId,
+        storageBucket: plan.storage_bucket,
+        storagePath: plan.storage_path,
+        supabase,
+      });
+      if (!storageGuard.ok) {
+        errors.push(`${storagePath}: ${storageGuard.error}`);
+        continue;
+      }
+      plan.storage_path = storageGuard.storage_path;
+      plan.storage_bucket = storageGuard.storage_bucket;
 
       const qualityEvaluation = evaluateImagingQuality({
         image_metadata: {

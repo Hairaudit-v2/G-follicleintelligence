@@ -19,6 +19,8 @@ export type PatientImageCategory =
 
 export type PatientImageStatus = "active" | "archived";
 
+export type PatientPortalReleaseStatus = "held" | "released";
+
 export type PatientImageRow = {
   id: string;
   tenant_id: string;
@@ -31,6 +33,9 @@ export type PatientImageRow = {
   form_instance_id: string | null;
   image_category: PatientImageCategory;
   image_status: PatientImageStatus;
+  patient_portal_release_status: PatientPortalReleaseStatus;
+  portal_released_at: string | null;
+  portal_released_by_fi_user_id: string | null;
   imaging_library_axis: ImagingLibraryAxis;
   clinic_id: string | null;
   captured_by_staff_id: string | null;

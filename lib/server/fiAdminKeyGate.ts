@@ -1,5 +1,9 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
+import {
+  FI_ADMIN_KEY_TENANT_DENIED_MESSAGE,
+  isFiAdminKeyTenantScopeAllowed,
+} from "@/src/lib/crm/fiAdminKeyTenantScope";
 
 /** UUID v4-style validation (aligned with FI configuration actions). */
 export const FI_ADMIN_UUID_RE =
@@ -9,13 +13,19 @@ export function isFiAdminUuid(v: string): boolean {
   return FI_ADMIN_UUID_RE.test(v.trim());
 }
 
-export function requireFiAdminKey(adminKey: string): { ok: true } | { ok: false; error: string } {
+export function requireFiAdminKey(
+  adminKey: string,
+  tenantId?: string | null
+): { ok: true } | { ok: false; error: string } {
   const expected = process.env.FI_ADMIN_API_KEY?.trim();
   if (!expected) {
     return { ok: false, error: "FI_ADMIN_API_KEY is not configured on the server." };
   }
   if (!isFiAdminApiKeyMatch(adminKey, expected)) {
     return { ok: false, error: "Invalid or missing admin key." };
+  }
+  if (tenantId?.trim() && !isFiAdminKeyTenantScopeAllowed(tenantId)) {
+    return { ok: false, error: FI_ADMIN_KEY_TENANT_DENIED_MESSAGE };
   }
   return { ok: true };
 }

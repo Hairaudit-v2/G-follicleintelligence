@@ -6,6 +6,23 @@ import { canUseDevelopmentClinicFeaturesFromFiUserRole } from "@/src/lib/fiOs/de
 
 export const CRM_MUTATION_ROLES_LOWER = new Set(["fi_admin", "admin", "crm_operator", "owner"]);
 
+/** Roles that may read PHI clinical notes via authenticated Supabase client (RLS-aligned). */
+export const CLINICAL_PHI_READ_ROLES_LOWER = new Set([
+  ...CRM_MUTATION_ROLES_LOWER,
+  "doctor",
+  "nurse",
+  "consultant",
+  "surgeon",
+]);
+
+export function isClinicalPhiReadRole(role: string | null | undefined): boolean {
+  return CLINICAL_PHI_READ_ROLES_LOWER.has(
+    String(role ?? "")
+      .trim()
+      .toLowerCase()
+  );
+}
+
 /** Staff directory CRUD: `fi_admin` / `admin` only (not `crm_operator`). */
 export const CRM_STAFF_MANAGE_ROLES_LOWER = new Set(["fi_admin", "admin"]);
 

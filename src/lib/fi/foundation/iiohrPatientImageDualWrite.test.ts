@@ -21,7 +21,7 @@ const CASE = "22222222-2222-4222-8222-222222222222";
 const PATIENT = "33333333-3333-4333-8333-333333333333";
 const EVENT = "44444444-4444-4444-8444-444444444444";
 const ACADEMY_CASE = "academy-case-42";
-const STORAGE_PATH = `academy/${ACADEMY_CASE}/donor/rear.jpg`;
+const STORAGE_PATH = `tenant/${TENANT}/academy/${ACADEMY_CASE}/donor/rear.jpg`;
 
 function buildEnvelope(overrides?: Partial<FiEventEnvelope["payload"]>): FiEventEnvelope {
   return {
@@ -105,6 +105,16 @@ function createMockSupabase(input: {
       };
 
       return chain;
+    },
+    storage: {
+      from() {
+        return {
+          createSignedUrl: async (path: string) => ({
+            data: { signedUrl: `https://signed.example/${path}` },
+            error: null,
+          }),
+        };
+      },
     },
   } as unknown as SupabaseClient;
 }

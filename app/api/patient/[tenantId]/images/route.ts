@@ -3,6 +3,7 @@
  * Patient-portal multipart upload — capture_source=patient_portal, unified ingest pipeline.
  */
 import { mapCrmRouteError, crmJsonError, crmJsonOk } from "@/src/lib/crm/crmHttp";
+import { isPatientPortalImagingEnabled } from "@/src/lib/patientPortal/patientPortalImagingEnabled";
 import { uploadPatientPortalImage } from "@/src/lib/patientPortal/patientPortalImageUpload.server";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,9 @@ export async function POST(
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return crmJsonError(500, "Server misconfigured.");
+    }
+    if (!isPatientPortalImagingEnabled()) {
+      return crmJsonError(403, "Patient portal imaging is not enabled.");
     }
 
     const form = await req.formData();

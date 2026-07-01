@@ -11,6 +11,7 @@ import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQuali
 import { loadImagingQualityPolicyForTenant } from "@/src/lib/imaging-os/imageQualityPolicy.server";
 import type { ImagingQualityTenantPolicy } from "@/src/lib/imaging-os/imageQualityPolicy";
 import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
+import { assertDualWriteStorageGuard } from "./dualWriteStorageGuard.server";
 import {
   planHliPatientImageInsert,
   type HliPatientImageInsertPlan,
@@ -188,6 +189,24 @@ export async function dualWriteHliDocumentToPatientLibrary(
     if (!plan) {
       return { ok: true, skipped_reason: "ineligible_document", inserted, reused, errors };
     }
+
+    const storageGuard = await assertDualWriteStorageGuard({
+      tenantId,
+      storageBucket: plan.storage_bucket,
+      storagePath: plan.storage_path,
+      supabase,
+    });
+    if (!storageGuard.ok) {
+      return {
+        ok: false,
+        skipped_reason: "invalid_storage_path",
+        inserted,
+        reused,
+        errors: [`${plan.storage_path}: ${storageGuard.error}`],
+      };
+    }
+    plan.storage_path = storageGuard.storage_path;
+    plan.storage_bucket = storageGuard.storage_bucket;
 
     const qualityEvaluation = evaluateImagingQuality({
       image_metadata: {
