@@ -50,9 +50,9 @@ export async function runWorkforceReconciliationForInboundRows(input: {
         inbound: {
           sourceSystem,
           externalId: row.external_staff_id,
-          email: row.email,
+          email: row.email ?? null,
           fullName: row.full_name,
-          roleCode: row.staff_role,
+          roleCode: row.staff_role ?? null,
         },
         syncedAt,
         client: input.client,
