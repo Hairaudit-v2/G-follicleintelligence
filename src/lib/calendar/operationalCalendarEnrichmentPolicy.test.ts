@@ -4,10 +4,10 @@ import { describe, it } from "node:test";
 import { operationalCalendarSkipsHeavyEnrichment } from "./operationalCalendarEnrichmentPolicy";
 
 describe("operationalCalendarSkipsHeavyEnrichment", () => {
-  it("skips clinical + resource-assignment enrichment only for month view", () => {
+  it("skips heavy patient/profile enrichment for all views (operational feed path)", () => {
     assert.equal(operationalCalendarSkipsHeavyEnrichment("month"), true);
-    assert.equal(operationalCalendarSkipsHeavyEnrichment("week"), false);
-    assert.equal(operationalCalendarSkipsHeavyEnrichment("day"), false);
-    assert.equal(operationalCalendarSkipsHeavyEnrichment("3day"), false);
+    assert.equal(operationalCalendarSkipsHeavyEnrichment("week"), true);
+    assert.equal(operationalCalendarSkipsHeavyEnrichment("day"), true);
+    assert.equal(operationalCalendarSkipsHeavyEnrichment("3day"), true);
   });
 });

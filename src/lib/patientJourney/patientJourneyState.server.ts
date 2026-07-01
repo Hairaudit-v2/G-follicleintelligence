@@ -68,7 +68,7 @@ export async function loadPatientJourneySignals(
   const tz = calendarSettings.calendarTimezone;
   const todayYmd = calendarDateStringFromInstant(new Date(), tz);
 
-  const [leadsRes, consultsRes, bookingsRes, paymentsRes, imagesRes, casesRes] = await Promise.all([
+  const [leadsRes, consultsRes, bookingsRes, paymentsRes, imagesRes, _casesRes] = await Promise.all([
     supabase
       .from("fi_crm_leads")
       .select("id, status")

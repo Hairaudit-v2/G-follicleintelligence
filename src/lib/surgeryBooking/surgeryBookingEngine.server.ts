@@ -238,6 +238,7 @@ export async function confirmSurgeryBooking(
     }).catch(() => undefined);
   }
 
+  revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}/appointments`);
   revalidatePath(`/fi-admin/${tid}/surgery-readiness`);
   revalidatePath(`/fi-admin/${tid}/reception-os`);

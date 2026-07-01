@@ -9,7 +9,12 @@ import {
   loadSurgeryBookingWizardContextAction,
   type SurgeryBookingWizardContext,
 } from "@/lib/actions/fi-surgery-booking-actions";
-import { fromDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import { findNextAvailableSurgerySlotsAction } from "@/lib/actions/fi-next-available-surgery-slots-actions";
+import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
+import {
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/src/components/fi/bookings/bookingFormUtils";
 import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
 import {
   listSurgeryBookingMissingRequirements,
@@ -62,6 +67,8 @@ export function SurgeryBookingWizard({
   const [roomId, setRoomId] = useState("");
   const [createDepositRequest, setCreateDepositRequest] = useState(true);
   const [confirmBooking, setConfirmBooking] = useState(false);
+  const [surgerySlots, setSurgerySlots] = useState<NextAvailableBookingSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const timezone = DEFAULT_CALENDAR_TIMEZONE;
 
@@ -340,6 +347,57 @@ export function SurgeryBookingWizard({
 
         {step === 3 ? (
           <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={!clinicId || slotsLoading}
+                className="rounded border border-cyan-600/50 bg-cyan-950/40 px-2.5 py-1 text-xs font-medium text-cyan-100 hover:bg-cyan-900/50 disabled:opacity-40"
+                onClick={async () => {
+                  if (!clinicId) return;
+                  setSlotsLoading(true);
+                  setError(null);
+                  const preferred = startLocal
+                    ? fromDatetimeLocalValue(startLocal, timezone)
+                    : new Date().toISOString();
+                  const r = await findNextAvailableSurgerySlotsAction(tid, {
+                    clinicId,
+                    staffId: surgeonStaffId || null,
+                    preferredStartAt: preferred ?? new Date().toISOString(),
+                    durationMinutes: 480,
+                    limit: 6,
+                  });
+                  setSlotsLoading(false);
+                  if (!r.ok) {
+                    setError(r.error);
+                    return;
+                  }
+                  setSurgerySlots(r.slots);
+                }}
+              >
+                {slotsLoading ? "Searching…" : "Find next available surgery slots"}
+              </button>
+            </div>
+            {surgerySlots.length > 0 ? (
+              <ul className="space-y-1 rounded border border-white/10 bg-slate-950/40 p-2 text-xs">
+                {surgerySlots.map((slot) => (
+                  <li key={`${slot.startAt}-${slot.roomId}`}>
+                    <button
+                      type="button"
+                      className="w-full rounded px-2 py-1 text-left text-slate-200 hover:bg-white/[0.06]"
+                      onClick={() => {
+                        const local = toDatetimeLocalValue(slot.startAt, timezone);
+                        if (local) setStartLocal(local);
+                        setRoomId(slot.roomId);
+                        if (slot.staffId) setSurgeonStaffId(slot.staffId);
+                      }}
+                    >
+                      {slot.reason} · {slot.roomLabel}
+                      {slot.staffLabel ? ` · ${slot.staffLabel}` : ""}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             <label className="block text-sm text-slate-300">
               Start date & time
               <input

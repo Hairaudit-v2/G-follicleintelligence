@@ -14,6 +14,7 @@ import {
 import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import {
   bookingsOverlappingDayKey,
   computeFiOsTodayStripCounts,
@@ -33,12 +34,14 @@ export function FiOsCalendarTodayCommandStrip({
   tenantId,
   query,
   bookings,
+  bookingDisplay,
   lanes,
   route = "fi-admin",
 }: {
   tenantId: string;
   query: ParsedCalendarQuery;
   bookings: FiBookingRow[];
+  bookingDisplay?: Record<string, OperationalCalendarBookingDisplay>;
   lanes: CalendarDayLane[];
   route?: CalendarRoute;
 }) {
@@ -52,7 +55,19 @@ export function FiOsCalendarTodayCommandStrip({
     () => bookingsOverlappingDayKey(bookingsForStrip, lanes, query.dateAnchor),
     [bookingsForStrip, lanes, query.dateAnchor]
   );
-  const counts = useMemo(() => computeFiOsTodayStripCounts(dayRows), [dayRows]);
+  const intelligenceByBookingId = useMemo(() => {
+    const out: Record<string, NonNullable<OperationalCalendarBookingDisplay["operational"]>> = {};
+    if (!bookingDisplay) return out;
+    for (const [id, d] of Object.entries(bookingDisplay)) {
+      if (d?.operational) out[id] = d.operational;
+    }
+    return out;
+  }, [bookingDisplay]);
+
+  const counts = useMemo(
+    () => computeFiOsTodayStripCounts(dayRows, intelligenceByBookingId),
+    [dayRows, intelligenceByBookingId]
+  );
 
   const noStaffFilter =
     !query.staffId?.trim() && !query.staffRoleBucket && !query.assignedUserId?.trim();
@@ -165,6 +180,15 @@ export function FiOsCalendarTodayCommandStrip({
         <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Surgeries</span>
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.surgery}</span>
       </CalendarTransitionLink>
+      {counts.withBlockers > 0 ? (
+        <span
+          className={chipClass(false)}
+          title="Appointments with operational blockers today"
+        >
+          <span className="text-rose-300/90">Blockers</span>
+          <span className="text-rose-100">{counts.withBlockers}</span>
+        </span>
+      ) : null}
       {route === "fi-admin" ? (
         <CalendarTransitionLink
           href={`/fi-admin/${tenantId}/surgery-readiness`}

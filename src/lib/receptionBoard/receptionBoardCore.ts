@@ -32,6 +32,46 @@ import {
 
 export { RECEPTION_BOARD_QUEUE_COLUMN_LABELS };
 
+/** CalendarOS v2 — surface scheduling blockers on reception action alerts. */
+export function buildCalendarSchedulingConflictAlerts(
+  cards: ReceptionBoardCard[],
+  base: string
+): ReceptionBoardActionAlert[] {
+  const alerts: ReceptionBoardActionAlert[] = [];
+  for (const card of cards) {
+    const isSurgery = card.bookingType.trim().toLowerCase() === "surgery";
+    const st = bookingStatusNorm(card.bookingStatus);
+    if (st === "cancelled" || st === "completed") continue;
+
+    const missingRoom = !card.roomLabel?.trim();
+    const missingStaff = !card.providerLabel?.trim() || card.providerLabel.trim() === "—";
+
+    if (isSurgery && missingStaff) {
+      alerts.push({
+        id: `cal-conflict-staff-${card.id}`,
+        kind: "unconfirmed_surgery",
+        title: "Surgery missing assigned staff",
+        detail: `${card.displayName} · ${card.typeLabel}`,
+        severity: "critical",
+        href: `${base}/calendar?booking=${card.id}`,
+        priorityScore: 94,
+      });
+    }
+    if ((isSurgery || missingRoom) && missingRoom) {
+      alerts.push({
+        id: `cal-conflict-room-${card.id}`,
+        kind: "surgery_readiness_incomplete",
+        title: "Appointment missing room assignment",
+        detail: `${card.displayName} · open calendar to assign room`,
+        severity: isSurgery ? "critical" : "warning",
+        href: `${base}/calendar?booking=${card.id}`,
+        priorityScore: isSurgery ? 90 : 72,
+      });
+    }
+  }
+  return alerts;
+}
+
 function bookingStatusNorm(status: string): string {
   return String(status ?? "")
     .trim()

@@ -11,6 +11,7 @@ import { loadPatientJourneySnapshotsForPatients } from "@/src/lib/patientJourney
 import { PATIENT_JOURNEY_STATE_LABELS } from "@/src/lib/patientJourney/patientJourneyStateCore";
 import {
   buildAppointmentCard,
+  buildCalendarSchedulingConflictAlerts,
   buildExtendedAlertsFromSurgeryCards,
   buildIntelligenceMetrics,
   buildLiveActivityFeed,
@@ -170,10 +171,13 @@ export async function loadReceptionBoardCommandCenterPayload(
     base,
     tomorrowWindow.tomorrowYmd
   );
-  const actionAlerts = sortActionAlerts([...osAlerts, ...surgeryAlerts, ...journeyBlockerAlerts]).slice(
-    0,
-    40
-  );
+  const calendarConflictAlerts = buildCalendarSchedulingConflictAlerts(cards, base);
+  const actionAlerts = sortActionAlerts([
+    ...osAlerts,
+    ...surgeryAlerts,
+    ...journeyBlockerAlerts,
+    ...calendarConflictAlerts,
+  ]).slice(0, 40);
 
   const tomorrowSurgeries = surgeryCards
     .map((c) => mapTomorrowSurgeryCard(c, tomorrowWindow.tomorrowYmd))

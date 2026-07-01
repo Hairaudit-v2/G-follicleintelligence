@@ -43,6 +43,7 @@ import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
+import { CalendarOperationalDiagnosticsPanel } from "@/src/components/fi-admin/calendar/CalendarOperationalDiagnosticsPanel";
 import {
   FiCalendarWorkspaceDisplayThemeProvider,
   useFiCalendarWorkspaceDisplayTheme,
@@ -409,6 +410,7 @@ function CalendarPageImpl({
           tenantId={data.tenantId}
           query={data.query}
           bookings={bookings}
+          bookingDisplay={bookingDisplay}
           lanes={data.lanes}
           route={route}
         />
@@ -748,6 +750,9 @@ function CalendarPageImpl({
         calendarOsStatus={
           drawer ? (data.bookingDisplay[drawer.id]?.calendarOsStatus ?? null) : null
         }
+        operationalIntelligence={
+          drawer ? (data.bookingDisplay[drawer.id]?.operational ?? null) : null
+        }
         onBookingUpdated={(b) => {
           upsertBooking(b);
           setDrawer(b);
@@ -828,6 +833,20 @@ function CalendarPageImpl({
             onOpenBooking={(id) => slide?.openAppointment(id)}
           />
         </>
+      ) : null}
+
+      {isFiOsWorkspace ? (
+        <CalendarOperationalDiagnosticsPanel
+          diagnostics={{
+            bookingCount: bookings.length,
+            renderCount: renderCountRef.current,
+            view: data.query.view,
+            dateAnchor: data.query.dateAnchor,
+            payloadApproxBytes: new TextEncoder().encode(
+              JSON.stringify({ bookings: bookings.length, display: Object.keys(bookingDisplay).length })
+            ).length,
+          }}
+        />
       ) : null}
     </div>
   );

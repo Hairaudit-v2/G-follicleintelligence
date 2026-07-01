@@ -57,6 +57,15 @@ export type AppointmentCardData = {
   calendarOsProvider?: "google" | "fi" | null;
   googleMeetUrl?: string | null;
   calendarOsEventTypeLabel?: string | null;
+  /** CalendarOS v2 operational overlays */
+  isSurgery?: boolean;
+  riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
+  readinessPercent?: number | null;
+  blockerCount?: number;
+  journeyStateLabel?: string | null;
+  topBlockerLabel?: string | null;
+  graftEstimate?: string | null;
+  paymentDue?: boolean;
 };
 
 export type AppointmentCardLayout = {
@@ -168,6 +177,16 @@ export function appointmentCardDataFromBooking(
     calendarOsProvider?: "google" | "fi" | null;
     googleMeetUrl?: string | null;
     calendarOsEventTypeLabel?: string | null;
+    operational?: {
+      isSurgery?: boolean;
+      riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
+      readinessPercent?: number | null;
+      blockerCount?: number;
+      journeyStateLabel?: string | null;
+      blockers?: Array<{ label: string }>;
+      paymentFlag?: string;
+      graftEstimate?: string | null;
+    } | null;
   }
 ): AppointmentCardData {
   const invoice = parseAppointmentInvoicePreview(booking);
@@ -205,6 +224,14 @@ export function appointmentCardDataFromBooking(
       (typeof meta.google_meet_url === "string" ? meta.google_meet_url.trim() : null) ||
       null,
     calendarOsEventTypeLabel: display?.calendarOsEventTypeLabel ?? null,
+    isSurgery: display?.operational?.isSurgery ?? booking.booking_type.trim() === "surgery",
+    riskStatus: display?.operational?.riskStatus,
+    readinessPercent: display?.operational?.readinessPercent ?? null,
+    blockerCount: display?.operational?.blockerCount ?? 0,
+    journeyStateLabel: display?.operational?.journeyStateLabel ?? null,
+    topBlockerLabel: display?.operational?.blockers?.[0]?.label ?? null,
+    graftEstimate: display?.operational?.graftEstimate ?? null,
+    paymentDue: display?.operational?.paymentFlag === "due",
   };
 }
 
@@ -486,7 +513,8 @@ function AppointmentCardInner({
             catalog.chipStyle
               ? catalog.toneClasses
               : cn(style.borderColor, style.backgroundTint, style.textColor),
-            style.statusRing
+            style.statusRing,
+            appointment.isSurgery && "ring-1 ring-rose-400/25"
           ),
         layout &&
           !isDragPreview &&
@@ -652,6 +680,48 @@ function AppointmentCardInner({
             ) : null}
           </div>
 
+          {showMeta && appointment.isSurgery ? (
+            <div className={cn("mt-1 flex flex-wrap items-center gap-1", textSize)}>
+              {appointment.readinessPercent != null ? (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "border font-medium tabular-nums",
+                    appointment.readinessPercent >= 85
+                      ? "border-emerald-500/35 bg-emerald-950/40 text-emerald-100"
+                      : appointment.readinessPercent >= 60
+                        ? "border-amber-500/35 bg-amber-950/40 text-amber-100"
+                        : "border-rose-500/35 bg-rose-950/40 text-rose-100"
+                  )}
+                >
+                  {appointment.readinessPercent}% ready
+                </Badge>
+              ) : null}
+              {(appointment.blockerCount ?? 0) > 0 ? (
+                <Badge
+                  variant="outline"
+                  className="border-rose-500/35 bg-rose-950/40 font-medium text-rose-100"
+                >
+                  {appointment.blockerCount} blocker{(appointment.blockerCount ?? 0) === 1 ? "" : "s"}
+                </Badge>
+              ) : null}
+              {appointment.paymentDue ? (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500/35 bg-amber-950/40 font-medium text-amber-100"
+                >
+                  Deposit due
+                </Badge>
+              ) : null}
+            </div>
+          ) : null}
+
+          {showMeta && appointment.topBlockerLabel ? (
+            <p className={cn("mt-0.5 truncate text-rose-300/90", textSize)}>
+              {appointment.topBlockerLabel}
+            </p>
+          ) : null}
+
           {/* Room + provider */}
           {showMeta && (room || provider) ? (
             <div
@@ -761,6 +831,16 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
     calendarOsProvider?: "google" | "fi" | null;
     googleMeetUrl?: string | null;
     calendarOsEventTypeLabel?: string | null;
+    operational?: {
+      isSurgery?: boolean;
+      riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
+      readinessPercent?: number | null;
+      blockerCount?: number;
+      journeyStateLabel?: string | null;
+      blockers?: Array<{ label: string }>;
+      paymentFlag?: string;
+      graftEstimate?: string | null;
+    } | null;
   };
   layout?: AppointmentCardLayout;
   draggable?: boolean;

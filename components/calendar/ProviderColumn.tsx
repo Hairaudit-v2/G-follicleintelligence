@@ -561,6 +561,13 @@ export function ProviderColumn({
                   calendarOsProvider: d?.calendarOsProvider,
                   googleMeetUrl: d?.googleMeetUrl,
                   calendarOsEventTypeLabel: d?.calendarOsEventTypeLabel,
+                  operational: d?.operational
+                    ? {
+                        ...d.operational,
+                        graftEstimate:
+                          (booking.metadata?.graft_count_estimate as string | undefined) ?? null,
+                      }
+                    : null,
                 }}
                 layout={layout}
                 draggable={draggable}

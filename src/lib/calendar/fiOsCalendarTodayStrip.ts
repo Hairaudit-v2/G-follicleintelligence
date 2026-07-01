@@ -1,6 +1,7 @@
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import { isBookingCancelled } from "@/src/lib/bookings/bookingPolicy";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
 
 /** Bookings whose interval overlaps the clinic-local lane for `dayKey`. */
 export function bookingsOverlappingDayKey(
@@ -26,10 +27,16 @@ export type FiOsTodayStripCounts = {
   waiting: number;
   completed: number;
   unassigned: number;
+  /** Bookings with operational blockers (CalendarOS v2). */
+  withBlockers: number;
+  atRisk: number;
 };
 
 /** Counts for the selected anchor day (cancelled excluded, completed included). */
-export function computeFiOsTodayStripCounts(dayRows: FiBookingRow[]): FiOsTodayStripCounts {
+export function computeFiOsTodayStripCounts(
+  dayRows: FiBookingRow[],
+  intelligenceByBookingId?: Record<string, CalendarBookingIntelligence | null | undefined>
+): FiOsTodayStripCounts {
   const rows = dayRows.filter((b) => !isBookingCancelled(b));
   const all = rows.length;
   const consultation = rows.filter((b) => b.booking_type.trim() === "consultation").length;
@@ -44,5 +51,15 @@ export function computeFiOsTodayStripCounts(dayRows: FiBookingRow[]): FiOsTodayS
   const unassigned = rows.filter(
     (b) => !b.assigned_staff_id?.trim() && !b.assigned_user_id?.trim()
   ).length;
-  return { all, consultation, prp, surgery, arrived, waiting, completed, unassigned };
+  let withBlockers = 0;
+  let atRisk = 0;
+  if (intelligenceByBookingId) {
+    for (const b of rows) {
+      const intel = intelligenceByBookingId[b.id];
+      if (!intel) continue;
+      if (intel.blockerCount > 0) withBlockers += 1;
+      if (intel.riskStatus === "at_risk" || intel.riskStatus === "blocked") atRisk += 1;
+    }
+  }
+  return { all, consultation, prp, surgery, arrived, waiting, completed, unassigned, withBlockers, atRisk };
 }

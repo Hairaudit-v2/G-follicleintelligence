@@ -13,6 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { loadOperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarLoader.server";
+import { loadCalendarOperationalFeed } from "@/src/lib/calendar/calendarOperationalFeed.server";
 
 function loadDotEnvLocalSync(): void {
   const p = path.join(process.cwd(), ".env.local");
@@ -62,6 +63,12 @@ async function run(): Promise<void> {
   for (const s of scenarios) {
     console.info("\n>>> scenario:", s.label);
     await loadOperationalCalendarPageData(tenantId, s.searchParams, { route: "fi-admin" });
+    await loadCalendarOperationalFeed(
+      tenantId,
+      s.searchParams,
+      { staffNameById: {}, roomLabelById: {}, staffIdByUserId: new Map() },
+      { route: "fi-admin" }
+    );
   }
 
   console.info(

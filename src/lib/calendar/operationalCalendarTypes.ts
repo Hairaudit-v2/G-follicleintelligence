@@ -9,6 +9,7 @@ import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarL
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
 
 export type OperationalCalendarBookingDisplay = {
   anchorLabel: string;
@@ -31,6 +32,8 @@ export type OperationalCalendarBookingDisplay = {
   resourceTeamLine?: string | null;
   /** WorkforceOS Phase 2D — staffing readiness badge data. */
   clinicalStaffing?: ClinicalStaffingSummaryDto | null;
+  /** CalendarOS v2 — operational intelligence overlay (lightweight feed). */
+  operational?: CalendarBookingIntelligence | null;
   /** CalendarOS GC-5 — mirrored `fi_calendar_events` source label. */
   calendarOsSourceLabel?: string | null;
   calendarOsProvider?: "google" | "fi" | null;

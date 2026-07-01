@@ -20,6 +20,7 @@ import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
 
 function clinicName(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
   if (row.clinic_id) {
@@ -147,6 +148,7 @@ export function BookingCalendarDrawer({
   calendarOsEventTypeLabel,
   calendarOsExternalEventId,
   calendarOsStatus,
+  operationalIntelligence,
 }: {
   tenantId: string;
   booking: FiBookingRow | null;
@@ -177,6 +179,8 @@ export function BookingCalendarDrawer({
   calendarOsEventTypeLabel?: string | null;
   calendarOsExternalEventId?: string | null;
   calendarOsStatus?: string | null;
+  /** CalendarOS v2 — readiness, journey, blockers, next action. */
+  operationalIntelligence?: CalendarBookingIntelligence | null;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -590,6 +594,82 @@ export function BookingCalendarDrawer({
                   </div>
                 ) : null}
               </dl>
+              {operationalIntelligence && !calendarOsEvent ? (
+                <div className="mt-4 space-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                    Operational readiness
+                  </p>
+                  {operationalIntelligence.journeyStateLabel ? (
+                    <p className="text-slate-300">
+                      Journey:{" "}
+                      <span className="font-medium text-slate-100">
+                        {operationalIntelligence.journeyStateLabel}
+                      </span>
+                    </p>
+                  ) : null}
+                  {operationalIntelligence.readinessPercent != null ? (
+                    <p className="text-slate-300">
+                      Readiness:{" "}
+                      <span className="font-medium tabular-nums text-slate-100">
+                        {operationalIntelligence.readinessPercent}%
+                      </span>
+                    </p>
+                  ) : null}
+                  <p className="text-slate-300">
+                    Payment:{" "}
+                    <span className="font-medium capitalize text-slate-100">
+                      {operationalIntelligence.paymentFlag.replace(/_/g, " ")}
+                    </span>
+                    {" · "}
+                    Consent:{" "}
+                    <span className="font-medium capitalize text-slate-100">
+                      {operationalIntelligence.consentFlag}
+                    </span>
+                  </p>
+                  {operationalIntelligence.blockers.length ? (
+                    <ul className="space-y-1">
+                      {operationalIntelligence.blockers.map((b) => (
+                        <li key={b.kind} className="flex items-start gap-2 text-slate-300">
+                          <span
+                            className={
+                              b.severity === "critical" ? "text-rose-300" : "text-amber-300"
+                            }
+                          >
+                            •
+                          </span>
+                          {b.href ? (
+                            <Link href={b.href} className="hover:text-cyan-300 hover:underline">
+                              {b.label}
+                            </Link>
+                          ) : (
+                            <span>{b.label}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-emerald-300/90">No operational blockers detected.</p>
+                  )}
+                  {operationalIntelligence.nextAction ? (
+                    <p className="border-t border-white/[0.06] pt-2 text-slate-400">
+                      Next:{" "}
+                      {operationalIntelligence.nextAction.href ? (
+                        <Link
+                          href={operationalIntelligence.nextAction.href}
+                          className="font-medium text-cyan-300 hover:underline"
+                        >
+                          {operationalIntelligence.nextAction.label}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-slate-200">
+                          {operationalIntelligence.nextAction.label}
+                        </span>
+                      )}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+
               {clinicalStaffing && !calendarOsEvent ? (
                 <div className="mt-4">
                   <ClinicalStaffingStatusCard

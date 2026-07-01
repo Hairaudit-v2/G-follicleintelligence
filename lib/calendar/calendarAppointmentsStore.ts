@@ -32,6 +32,11 @@ export type CalendarReschedulePatch = {
   metadata?: FiBookingRow["metadata"];
 };
 
+/** Expire stale optimistic pending ids so server hydrates are not blocked forever. */
+export const CALENDAR_PENDING_IDS_EXPIRE_MS = 30_000;
+
+type PendingEntry = { markedAt: number };
+
 type CalendarAppointmentsState = {
   tenantId: string | null;
   syncKey: string | null;
@@ -40,6 +45,7 @@ type CalendarAppointmentsState = {
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   /** Booking ids currently awaiting server confirmation after optimistic move. */
   pendingIds: Set<string>;
+  pendingMeta: Map<string, PendingEntry>;
 
   hydrate: (input: CalendarAppointmentsHydrateInput) => void;
   patchBooking: (id: string, patch: CalendarReschedulePatch) => void;
@@ -57,9 +63,21 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
   bookings: [],
   bookingDisplay: {},
   pendingIds: new Set(),
+  pendingMeta: new Map(),
 
   hydrate: ({ tenantId, syncKey, calendarTimezone, bookings, bookingDisplay }) => {
     const current = get();
+    const now = Date.now();
+    const activePending = new Set<string>();
+    const activeMeta = new Map<string, PendingEntry>();
+    for (const id of current.pendingIds) {
+      const meta = current.pendingMeta.get(id);
+      if (meta && now - meta.markedAt < CALENDAR_PENDING_IDS_EXPIRE_MS) {
+        activePending.add(id);
+        activeMeta.set(id, meta);
+      }
+    }
+
     const navigatedAway = current.syncKey != null && current.syncKey !== syncKey;
     if (navigatedAway) {
       set({
@@ -69,18 +87,47 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
         bookings,
         bookingDisplay,
         pendingIds: new Set(),
+        pendingMeta: new Map(),
       });
       return;
     }
-    if (current.pendingIds.size > 0) {
-      return;
-    }
+
     const mergedBookings = mergeCalendarBookingsOnHydrate(bookings, current.bookings);
     const mergedDisplay = mergeCalendarBookingDisplayOnHydrate(
       bookingDisplay,
       current.bookingDisplay,
       mergedBookings
     );
+
+    if (activePending.size > 0) {
+      for (const id of activePending) {
+        const serverRow = bookings.find((b) => b.id === id);
+        const clientRow = current.bookings.find((b) => b.id === id);
+        if (serverRow && clientRow && serverRow.updated_at !== clientRow.updated_at) {
+          activePending.delete(id);
+          activeMeta.delete(id);
+        }
+      }
+    }
+
+    if (activePending.size > 0) {
+      const pendingBookings = mergedBookings.map((b) => {
+        if (!activePending.has(b.id)) return b;
+        const local = current.bookings.find((x) => x.id === b.id);
+        return local ?? b;
+      });
+      set({
+        tenantId,
+        syncKey,
+        calendarTimezone,
+        bookings: pendingBookings,
+        bookingDisplay: mergedDisplay,
+        pendingIds: activePending,
+        pendingMeta: activeMeta,
+      });
+      return;
+    }
+
     set({
       tenantId,
       syncKey,
@@ -88,6 +135,7 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
       bookings: mergedBookings,
       bookingDisplay: mergedDisplay,
       pendingIds: new Set(),
+      pendingMeta: new Map(),
     });
   },
 
@@ -148,9 +196,15 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
   markPending: (id, pending) => {
     set((state) => {
       const next = new Set(state.pendingIds);
-      if (pending) next.add(id);
-      else next.delete(id);
-      return { pendingIds: next };
+      const nextMeta = new Map(state.pendingMeta);
+      if (pending) {
+        next.add(id);
+        nextMeta.set(id, { markedAt: Date.now() });
+      } else {
+        next.delete(id);
+        nextMeta.delete(id);
+      }
+      return { pendingIds: next, pendingMeta: nextMeta };
     });
   },
 

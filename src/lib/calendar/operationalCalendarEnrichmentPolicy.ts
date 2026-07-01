@@ -1,12 +1,9 @@
 import type { CalendarViewMode } from "@/src/lib/bookings/calendarQuery";
 
 /**
- * Month grid renders lightweight pills only — skip patient/lead/person lookups, clinical scales,
- * and multi-resource assignment rows. Anchor labels use booking title/type via
- * {@link optimisticBookingAnchorLabel} (see {@link loadOperationalCalendarGridData}).
- *
- * Day / week / 3-day still run full enrichment in {@link loadOperationalCalendarPageData}.
+ * CalendarOS v2 — all views use the lightweight operational feed instead of full patient/profile joins.
+ * Month grid still uses abbreviated anchor labels; day/week get operational intelligence overlays.
  */
-export function operationalCalendarSkipsHeavyEnrichment(view: CalendarViewMode): boolean {
-  return view === "month";
+export function operationalCalendarSkipsHeavyEnrichment(_view: CalendarViewMode): boolean {
+  return true;
 }

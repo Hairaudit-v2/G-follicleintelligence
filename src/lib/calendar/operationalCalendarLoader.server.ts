@@ -69,7 +69,6 @@ import {
   patientContactForBookingRow,
   type BookingDisplayContextMaps,
 } from "@/src/lib/bookings/bookingDisplayContext";
-import { optimisticBookingAnchorLabel } from "@/src/lib/bookings/bookingDisplayName";
 import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
 import {
   buildBookingResourceSummaryLines,
@@ -85,6 +84,7 @@ import {
 import { calendarOsOverlapRowsForDisplayContext } from "@/src/lib/calendar/calendarOsEventsCore";
 import { buildCalendarOsDisplayPipelineTrace } from "@/src/lib/calendar/calendarOsDisplayPipeline";
 import { loadActiveStaffCalendarLinkIndex } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
+import { buildOperationalFeedForGridBookings } from "@/src/lib/calendar/calendarOperationalFeed.server";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -891,6 +891,16 @@ export async function loadOperationalCalendarGridData(
     staffNameById[s.id] = s.full_name?.trim() || s.email?.trim() || s.id.slice(0, 8);
   }
 
+  const tFeedStart = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const operationalFeed = monthSummaryMode
+    ? await buildOperationalFeedForGridBookings(tid, structuredBookings, {
+        staffNameById,
+        roomDisplayById: resources.roomDisplayById,
+        staffIdByUserId: resources.staffIdByUserId,
+      }, calendarSettings)
+    : null;
+  const tFeedEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
+
   const bookingDisplay: Record<string, OperationalCalendarBookingDisplay> = {};
   for (const row of structuredCalendarOs) {
     const d = calendarOsMapped.bookingDisplay[row.id];
@@ -904,6 +914,28 @@ export async function loadOperationalCalendarGridData(
         ? Math.max(1, Math.round((endMs - startMs) / 60000))
         : 30;
 
+    const feedItem = operationalFeed?.items.find((i) => i.id === row.id);
+    const intelligence = operationalFeed?.intelligenceByBookingId[row.id];
+    const cat = serviceForBookingType(services, row.booking_type);
+
+    if (monthSummaryMode && feedItem) {
+      bookingDisplay[row.id] = {
+        anchorLabel: feedItem.patientDisplayName,
+        scalesSummary: null,
+        durationMin,
+        reminderHint: null,
+        procedureCatalogName: cat?.name ?? null,
+        procedureCatalogHex: cat?.color ?? null,
+        suggestedPrice: cat != null ? cat.base_price : null,
+        roomLabel: feedItem.room,
+        resourceRoomLine: feedItem.room,
+        resourceTeamLine: feedItem.clinicianSummary,
+        clinicalStaffing: null,
+        operational: intelligence ?? null,
+      };
+      continue;
+    }
+
     const clin = row.patient_id?.trim() ? clinicalMap.get(row.patient_id.trim()) : undefined;
     const scalesSummary = clin
       ? formatClinicalScalesSummary({
@@ -914,20 +946,15 @@ export async function loadOperationalCalendarGridData(
         })
       : null;
 
-    const cat = serviceForBookingType(services, row.booking_type);
-    const contact = monthSummaryMode ? null : patientContactForBookingRow(row, displayMaps);
-    const resourceLines = monthSummaryMode
-      ? { roomLine: null, teamLine: null }
-      : buildBookingResourceSummaryLines({
-          booking: row,
-          assignments: assignmentMap.get(row.id) ?? [],
-          roomLabelById: resources.roomDisplayById,
-          staffNameById,
-        });
+    const contact = patientContactForBookingRow(row, displayMaps);
+    const resourceLines = buildBookingResourceSummaryLines({
+      booking: row,
+      assignments: assignmentMap.get(row.id) ?? [],
+      roomLabelById: resources.roomDisplayById,
+      staffNameById,
+    });
     bookingDisplay[row.id] = {
-      anchorLabel: monthSummaryMode
-        ? optimisticBookingAnchorLabel(row)
-        : anchorLabelForBookingRow(row, displayMaps),
+      anchorLabel: anchorLabelForBookingRow(row, displayMaps),
       scalesSummary,
       durationMin,
       reminderHint: null,
@@ -936,15 +963,23 @@ export async function loadOperationalCalendarGridData(
       suggestedPrice: cat != null ? cat.base_price : null,
       patientEmail: contact?.email ?? null,
       patientPhone: contact?.phone ?? null,
-      roomLabel: monthSummaryMode
-        ? null
-        : ((row.room_id?.trim() ? resources.roomDisplayById[row.room_id.trim()] : null) ??
-          row.location?.trim() ??
-          null),
+      roomLabel:
+        (row.room_id?.trim() ? resources.roomDisplayById[row.room_id.trim()] : null) ??
+        row.location?.trim() ??
+        null,
       resourceRoomLine: resourceLines.roomLine,
       resourceTeamLine: resourceLines.teamLine,
       clinicalStaffing: clinicalStaffingByBooking.get(row.id) ?? null,
+      operational: intelligence ?? null,
     };
+  }
+
+  if (monthSummaryMode && process.env.NODE_ENV === "development") {
+    logOperationalCalendarServerTiming({
+      phase: "loadOperationalCalendarGridData.operationalFeed",
+      durationMs: Math.round(tFeedEnd - tFeedStart),
+      feedItemCount: operationalFeed?.items.length ?? 0,
+    });
   }
 
   const searchNeedle = query.search?.trim().toLowerCase() ?? "";
