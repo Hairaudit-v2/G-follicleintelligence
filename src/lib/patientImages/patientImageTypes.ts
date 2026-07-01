@@ -104,6 +104,8 @@ export type CreatePatientImageUploadInput = {
   bookingId?: string | null;
   leadId?: string | null;
   consultationId?: string | null;
+  formInstanceId?: string | null;
+  formFieldId?: string | null;
   imagingLibraryAxis?: unknown;
   clinicId?: string | null;
   capturedByStaffId?: string | null;

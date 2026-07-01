@@ -11,6 +11,10 @@ import {
   ClinicalNoteReadOnlySummary,
 } from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
 import {
+  ConsultationImageUploadField,
+  ConsultationImageUploadReadOnlySummary,
+} from "@/src/components/fi-admin/consultation-forms/ConsultationImageUploadField";
+import {
   VoiceNoteField,
   VoiceNoteReadOnlySummary,
 } from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
@@ -404,15 +408,25 @@ export function ConsultationFormFieldRenderer({
         />
       );
     case "image_upload":
+      if (disabled) {
+        return (
+          <div className="space-y-2">
+            {description}
+            <ConsultationImageUploadReadOnlySummary label={field.label} value={value} />
+          </div>
+        );
+      }
       return (
-        <div className="space-y-2">
-          {commonLabel}
-          {description}
-          <PlaceholderCard
-            title="Image upload (Stage 2+)"
-            body="Uploads will create fi_patient_images rows linked to this consultation / form instance."
-          />
-        </div>
+        <ConsultationImageUploadField
+          fieldId={field.id}
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          disabled={disabled}
+          persistence={persistence}
+          onChange={(next) => onChange(next)}
+        />
       );
     case "clinical_note":
       if (disabled) {

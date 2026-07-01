@@ -39,6 +39,7 @@ import {
 } from "@/src/lib/surgeryOs/surgeryOsVieCaptureCore";
 import { loadResolvedProtocol } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
 import { buildProtocolCatalogCaptureMetadata } from "@/src/lib/imaging-os/protocolCaptureMetadataCore";
+import { resolvePatientImageUploadCaptureSource } from "@/src/lib/imaging-core/ingest/resolvePatientImageUploadCaptureSource";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +75,8 @@ export async function POST(
     const bookingId = form.get("booking_id");
     const leadId = form.get("lead_id");
     const consultationId = form.get("consultation_id");
+    const formInstanceId = form.get("form_instance_id");
+    const formFieldId = form.get("form_field_id");
     const imagingLibraryAxis = form.get("imaging_library_axis");
     const clinicId = form.get("clinic_id");
     const capturedByStaffId = form.get("captured_by_staff_id");
@@ -93,7 +96,11 @@ export async function POST(
 
     const protocolSessionId =
       protocolSessionIdRaw != null ? String(protocolSessionIdRaw).trim() : "";
-    const captureSourceStr = captureSource == null ? null : String(captureSource);
+    const consultationIdStr = consultationId == null ? "" : String(consultationId).trim();
+    const captureSourceStr = resolvePatientImageUploadCaptureSource({
+      captureSource: captureSource == null ? null : String(captureSource),
+      consultationId: consultationIdStr || null,
+    });
     const templateSlugStr =
       imagingProtocolTemplateSlug != null ? String(imagingProtocolTemplateSlug).trim() : null;
     const slotSlugStr =
@@ -204,7 +211,9 @@ export async function POST(
       caseId: caseId == null ? null : String(caseId),
       bookingId: bookingId == null ? null : String(bookingId),
       leadId: leadId == null ? null : String(leadId),
-      consultationId: consultationId == null ? null : String(consultationId),
+      consultationId: consultationIdStr || null,
+      formInstanceId: formInstanceId == null ? null : String(formInstanceId),
+      formFieldId: formFieldId == null ? null : String(formFieldId),
       imagingLibraryAxis,
       clinicId: clinicId == null ? null : String(clinicId),
       capturedByStaffId: capturedByStaffId == null ? null : String(capturedByStaffId),
@@ -218,7 +227,7 @@ export async function POST(
         imagingProtocolSlotSlug == null ? null : String(imagingProtocolSlotSlug),
       actingUserId,
       captureType: captureType == null ? null : String(captureType),
-      captureSource: captureSource == null ? null : String(captureSource),
+      captureSource: captureSourceStr,
       imageWidth: parseDim(imageWidthRaw),
       imageHeight: parseDim(imageHeightRaw),
       protocolSessionId: protocolSessionId || null,

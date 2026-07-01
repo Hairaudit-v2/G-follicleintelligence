@@ -243,6 +243,29 @@ async function assertOptionalConsultationForPatient(
   }
 }
 
+async function assertOptionalFormInstanceForConsultation(
+  supabase: SupabaseClient,
+  tenantId: string,
+  consultationId: string | null,
+  formInstanceId: string | null
+): Promise<void> {
+  if (!formInstanceId) return;
+  const { data, error } = await supabase
+    .from("fi_consultation_form_instances")
+    .select("id, consultation_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", formInstanceId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (
+    !data ||
+    (consultationId != null &&
+      String((data as { consultation_id: string }).consultation_id) !== consultationId)
+  ) {
+    throw new Error("Form instance does not belong to this consultation.");
+  }
+}
+
 async function assertOptionalClinicForTenant(
   supabase: SupabaseClient,
   tenantId: string,
@@ -505,6 +528,8 @@ export async function createPatientImageRecord(
   const bookingId = parseUuidOpt(input.bookingId);
   const leadId = parseUuidOpt(input.leadId);
   const consultationId = parseUuidOpt(input.consultationId);
+  const formInstanceId = parseUuidOpt(input.formInstanceId);
+  const formFieldId = normalizeBoundedOptText(input.formFieldId ?? null, 128, "form_field_id");
   const clinicId = parseUuidOpt(input.clinicId);
   const capturedByStaffId = parseUuidOpt(input.capturedByStaffId);
 
@@ -512,6 +537,7 @@ export async function createPatientImageRecord(
   await assertOptionalBookingForPatient(supabase, tid, pid, bookingId);
   await assertOptionalLeadForPatient(supabase, tid, pid, leadId);
   await assertOptionalConsultationForPatient(supabase, tid, pid, consultationId);
+  await assertOptionalFormInstanceForConsultation(supabase, tid, consultationId, formInstanceId);
   await assertOptionalClinicForTenant(supabase, tid, clinicId);
   await assertOptionalStaffForTenant(supabase, tid, capturedByStaffId);
 
@@ -537,7 +563,20 @@ export async function createPatientImageRecord(
   );
   const caption = assertCaptionLength(input.caption ?? null);
   const takenAt = normalizeTakenAt(input.takenAt ?? null);
-  const metadata = assertPatientImageMetadataObject("metadata", input.metadata ?? {});
+  const baseMetadata =
+    input.metadata && typeof input.metadata === "object" && !Array.isArray(input.metadata)
+      ? (input.metadata as Record<string, unknown>)
+      : {};
+  const consultationMetadata: Record<string, unknown> = {};
+  if (consultationId || formInstanceId || formFieldId) {
+    consultationMetadata.consultation_os = true;
+    if (formInstanceId) consultationMetadata.form_instance_id = formInstanceId;
+    if (formFieldId) consultationMetadata.form_field_id = formFieldId;
+  }
+  const metadata = assertPatientImageMetadataObject("metadata", {
+    ...consultationMetadata,
+    ...baseMetadata,
+  });
 
   const imageId = randomUUID();
   const safeName = buildSafePatientImageFilename(input.file.name);
@@ -567,6 +606,7 @@ export async function createPatientImageRecord(
     booking_id: bookingId,
     lead_id: leadId,
     consultation_id: consultationId,
+    form_instance_id: formInstanceId,
     image_category: imageCategory,
     image_status: "active" as const,
     imaging_library_axis: imagingLibraryAxis,

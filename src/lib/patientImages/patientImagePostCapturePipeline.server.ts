@@ -217,6 +217,7 @@ export async function runPatientImagePostCapturePipeline(
     image_id: existingRow.id,
     case_id: existingRow.case_id,
     consultation_id: existingRow.consultation_id,
+    form_instance_id: existingRow.form_instance_id ?? input.formInstanceId ?? null,
     storage_bucket: existingRow.storage_bucket,
     storage_path: existingRow.storage_path,
     content_type: input.contentType,
