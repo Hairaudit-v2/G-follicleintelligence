@@ -188,7 +188,7 @@ export function buildSurgeonPerformanceScores(
     buildSurgeonPerformanceScore({ ...input, allSurgeonScores: undefined })
   );
   const allScores = preliminary.map((s) => s.score);
-  return inputs.map((input, index) =>
+  return inputs.map((input) =>
     buildSurgeonPerformanceScore({ ...input, allSurgeonScores: allScores })
   );
 }

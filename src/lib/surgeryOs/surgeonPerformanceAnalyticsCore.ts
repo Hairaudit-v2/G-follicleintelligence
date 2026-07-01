@@ -38,11 +38,6 @@ export type SurgeonPerformanceSnapshot = {
 export const SURGEON_PERFORMANCE_MIN_SAMPLE = 3;
 export const SURGEON_PERFORMANCE_TREND_STABLE_PERCENT = 5;
 
-function clampScore(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  return Math.min(100, Math.max(0, Math.round(value)));
-}
-
 function safeAverage(values: (number | null | undefined)[]): number | null {
   const nums = values.filter((v): v is number => v != null && Number.isFinite(v));
   if (!nums.length) return null;
