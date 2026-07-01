@@ -48,7 +48,7 @@ function matchesFilter(row: StaffMemberLifecycleRow, filter: WorkforceDirectoryF
 export function WorkforceOsDirectoryClient({
   tenantId,
   rows,
-  canManage,
+  canManage: _canManage,
 }: {
   tenantId: string;
   rows: StaffMemberLifecycleRow[];
