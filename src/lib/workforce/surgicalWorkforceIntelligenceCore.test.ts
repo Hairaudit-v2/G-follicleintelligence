@@ -7,10 +7,13 @@ import type {
   ProcedureStaffingRecommendation,
 } from "@/src/lib/workforce/procedureStaffingOptimizerCore";
 import {
+  buildActionableSurgicalProcedures,
   buildClinicalCapacityIntel,
   buildProcedureStaffingQualityIntel,
+  buildSurgicalProcedureActions,
   buildSurgicalWorkforceRecommendations,
   buildTomorrowSurgeryReadinessIntel,
+  canApplyRecommendedTeam,
   clampSurgicalScore,
   composeSurgicalWorkforceIntelligence,
   detectSurgicalStaffingRisks,
@@ -343,5 +346,89 @@ describe("surgicalWorkforceIntelligenceCore", () => {
     assert.ok(Number.isFinite(panel.clinicalCapacity.weeklyCapacityPercent));
     assert.ok(panel.tomorrowReadiness.readinessScore >= 0 && panel.tomorrowReadiness.readinessScore <= 100);
     assert.ok(panel.recommendations.length <= 6);
+    assert.equal(panel.tomorrowDate, "2026-07-02");
+  });
+
+  it("buildSurgicalProcedureActions includes apply, staffing review, and SurgeryOS case links", () => {
+    const rec = recommendation({
+      surgeryId: "s1",
+      scheduledDate: "2026-07-12",
+      staffingComplete: false,
+      recommendedTeam: [
+        {
+          ...candidate({ staffId: "n1", name: "Nurse" }),
+          assignedRole: "nurse",
+          grossCostCents: 0,
+          optimizerScore: 80,
+          autoBlocked: false,
+        },
+      ],
+    });
+    assert.equal(canApplyRecommendedTeam(rec), true);
+
+    const actions = buildSurgicalProcedureActions({
+      tenantId: "tenant-1",
+      surgeryId: "s1",
+      procedureDate: "2026-07-12",
+      procedureLabel: "FUE",
+      staffingComplete: false,
+      canApply: true,
+      caseId: "case-1",
+    });
+
+    assert.ok(actions.some((a) => a.type === "apply_recommended_team"));
+    assert.ok(actions.some((a) => a.type === "open_procedure_staffing"));
+    assert.ok(actions.some((a) => a.type === "open_surgery_case" && a.route.includes("case-1")));
+  });
+
+  it("detectSurgicalStaffingRisks attaches one-click actions to missing RN risks", () => {
+    const risks = detectSurgicalStaffingRisks({
+      ...baseInput,
+      surgeryCaseById: { s1: "case-1" },
+      weekOptimizers: [
+        snapshot("2026-07-12", [
+          recommendation({
+            surgeryId: "s1",
+            scheduledDate: "2026-07-12",
+            staffingComplete: false,
+            missingRoles: [{ role: "nurse", required: 1, assigned: 0 }],
+            recommendedTeam: [
+              {
+                ...candidate({ staffId: "s1", name: "Surgeon" }),
+                assignedRole: "surgeon",
+                grossCostCents: 0,
+                optimizerScore: 80,
+                autoBlocked: false,
+              },
+            ],
+          }),
+        ]),
+      ],
+    });
+
+    const rnRisk = risks.detectedRisks.find((r) => r.title.includes("RN missing"));
+    assert.ok(rnRisk);
+    assert.equal(rnRisk?.surgeryId, "s1");
+    assert.ok(rnRisk?.actions.some((a) => a.type === "apply_recommended_team"));
+    assert.ok(rnRisk?.actions.some((a) => a.type === "open_surgery_case"));
+  });
+
+  it("buildActionableSurgicalProcedures lists only understaffed procedures", () => {
+    const procedures = buildActionableSurgicalProcedures({
+      ...baseInput,
+      weekOptimizers: [
+        snapshot("2026-07-12", [
+          recommendation({ surgeryId: "s1", scheduledDate: "2026-07-12", staffingComplete: true }),
+          recommendation({
+            surgeryId: "s2",
+            scheduledDate: "2026-07-12",
+            staffingComplete: false,
+            missingRoles: [{ role: "nurse", required: 1, assigned: 0 }],
+          }),
+        ]),
+      ],
+    });
+    assert.equal(procedures.length, 1);
+    assert.equal(procedures[0]?.surgeryId, "s2");
   });
 });

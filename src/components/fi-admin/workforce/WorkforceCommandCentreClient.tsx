@@ -6,6 +6,7 @@ import { useState, useTransition, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
+import { applyRecommendedProcedureTeamAction } from "@/src/lib/actions/workforce-phase-2-sprint-4-actions";
 import { refreshWorkforcePlanningAction } from "@/src/lib/actions/workforce-phase-2-sprint-5-actions";
 import { formatCentsAsCurrency } from "@/src/lib/workforce/wageProfileCore";
 import type { WorkforceCommandCentrePageData } from "@/src/lib/workforce/workforceCommandCentrePage.server";
@@ -22,7 +23,10 @@ import {
   type WorkforceModuleTile,
 } from "@/src/lib/workforce/workforceCommandCentreCore";
 import type { WorkforceIntelligenceStatus } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
-import type { SurgicalReadinessStatus } from "@/src/lib/workforce/surgicalWorkforceIntelligenceCore";
+import type {
+  SurgicalIntelligenceAction,
+  SurgicalReadinessStatus,
+} from "@/src/lib/workforce/surgicalWorkforceIntelligenceCore";
 import { cn } from "@/lib/utils";
 
 const UTILITY_MODULE_IDS = new Set([
@@ -495,15 +499,119 @@ function WorkforceIntelligenceEngineSection({
   );
 }
 
-function SurgicalWorkforceIntelligenceSection({
-  surgicalIntelligence,
+const surgicalActionButtonClass =
+  "inline-flex items-center rounded-xl border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3.5 py-2 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/50 hover:bg-[#22C1FF]/18 disabled:cursor-not-allowed disabled:opacity-50";
+
+const surgicalSecondaryButtonClass =
+  "inline-flex items-center rounded-xl border border-white/12 bg-white/[0.03] px-3.5 py-2 text-sm font-medium text-[#CBD5E1] transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06] hover:text-[#F8FAFC]";
+
+function SurgicalIntelligenceActionButtons({
+  actions,
+  canManage,
+  applyingSurgeryId,
+  onApplyRecommendedTeam,
 }: {
-  surgicalIntelligence: SurgicalWorkforceIntelligencePanel;
+  actions: SurgicalIntelligenceAction[];
+  canManage: boolean;
+  applyingSurgeryId: string | null;
+  onApplyRecommendedTeam: (surgeryId: string) => void;
 }) {
-  const { tomorrowReadiness, staffingQuality, clinicalCapacity, staffingRisks, recommendations } =
-    surgicalIntelligence;
+  if (actions.length === 0) return null;
+
+  const primary = actions[0];
+  const secondary = actions.slice(1, 3);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {primary?.type === "apply_recommended_team" && primary.surgeryId && canManage ? (
+        <Button
+          type="button"
+          size="sm"
+          className="h-9 px-4 text-sm font-semibold"
+          disabled={applyingSurgeryId != null}
+          onClick={() => onApplyRecommendedTeam(primary.surgeryId!)}
+        >
+          {applyingSurgeryId === primary.surgeryId ? "Applying…" : primary.label}
+        </Button>
+      ) : (
+        <Link href={primary.route} className={surgicalActionButtonClass}>
+          {primary.label} →
+        </Link>
+      )}
+      {secondary.map((action) =>
+        action.type === "apply_recommended_team" && action.surgeryId && canManage ? (
+          <Button
+            key={`${action.type}-${action.surgeryId}`}
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-9 border-white/12 bg-transparent px-3.5 text-sm text-[#CBD5E1] hover:bg-white/[0.06]"
+            disabled={applyingSurgeryId != null}
+            onClick={() => onApplyRecommendedTeam(action.surgeryId!)}
+          >
+            {applyingSurgeryId === action.surgeryId ? "Applying…" : action.label}
+          </Button>
+        ) : (
+          <Link
+            key={`${action.type}-${action.route}`}
+            href={action.route}
+            className={surgicalSecondaryButtonClass}
+          >
+            {action.label} →
+          </Link>
+        )
+      )}
+    </div>
+  );
+}
+
+function SurgicalWorkforceIntelligenceSection({
+  tenantId,
+  surgicalIntelligence,
+  canManage,
+}: {
+  tenantId: string;
+  surgicalIntelligence: SurgicalWorkforceIntelligencePanel;
+  canManage: boolean;
+}) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+  const [applyingSurgeryId, setApplyingSurgeryId] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const {
+    tomorrowDate,
+    tomorrowReadiness,
+    staffingQuality,
+    clinicalCapacity,
+    staffingRisks,
+    recommendations,
+    actionableProcedures,
+  } = surgicalIntelligence;
   const topRisks = staffingRisks.detectedRisks.slice(0, 3);
   const topRecommendations = recommendations.slice(0, 3);
+  const tomorrowAtRisk = actionableProcedures
+    .filter((proc) => proc.procedureDate === tomorrowDate)
+    .slice(0, 2);
+
+  function onApplyRecommendedTeam(surgeryId: string) {
+    setMessage(null);
+    setError(null);
+    setApplyingSurgeryId(surgeryId);
+    startTransition(async () => {
+      const res = await applyRecommendedProcedureTeamAction(tenantId, surgeryId);
+      setApplyingSurgeryId(null);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setMessage(
+        `Applied ${res.assignedCount} assignment(s) for procedure team. Skipped ${res.skippedCount}.`
+      );
+      router.refresh();
+    });
+  }
 
   return (
     <section aria-label="Surgical workforce intelligence" className="space-y-5">
@@ -545,6 +653,21 @@ function SurgicalWorkforceIntelligenceSection({
                     <dd className="mt-1 font-semibold tabular-nums text-amber-200">{tomorrowReadiness.atRisk}</dd>
                   </div>
                 </dl>
+              ) : null}
+              {tomorrowAtRisk.length > 0 ? (
+                <ul className="mt-4 space-y-3 border-t border-white/[0.06] pt-4">
+                  {tomorrowAtRisk.map((proc) => (
+                    <li key={proc.surgeryId} className="space-y-2">
+                      <p className="text-sm font-medium text-[#F8FAFC]">{proc.procedureLabel}</p>
+                      <SurgicalIntelligenceActionButtons
+                        actions={proc.actions}
+                        canManage={canManage}
+                        applyingSurgeryId={applyingSurgeryId}
+                        onApplyRecommendedTeam={onApplyRecommendedTeam}
+                      />
+                    </li>
+                  ))}
+                </ul>
               ) : null}
             </div>
 
@@ -625,6 +748,14 @@ function SurgicalWorkforceIntelligenceSection({
                         <p className="text-sm font-semibold text-[#F8FAFC]">{risk.title}</p>
                       </div>
                       <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">{risk.recommendation}</p>
+                      <div className="mt-3">
+                        <SurgicalIntelligenceActionButtons
+                          actions={risk.actions}
+                          canManage={canManage}
+                          applyingSurgeryId={applyingSurgeryId}
+                          onApplyRecommendedTeam={onApplyRecommendedTeam}
+                        />
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -653,12 +784,12 @@ function SurgicalWorkforceIntelligenceSection({
                         </div>
                         <p className="mt-2 text-sm font-semibold text-[#F8FAFC]">{rec.title}</p>
                       </div>
-                      <Link
-                        href={rec.route}
-                        className="shrink-0 rounded-xl border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3.5 py-2 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/50 hover:bg-[#22C1FF]/18"
-                      >
-                        {rec.ctaLabel} →
-                      </Link>
+                      <SurgicalIntelligenceActionButtons
+                        actions={rec.actions}
+                        canManage={canManage}
+                        applyingSurgeryId={applyingSurgeryId}
+                        onApplyRecommendedTeam={onApplyRecommendedTeam}
+                      />
                     </li>
                   ))}
                 </ol>
@@ -669,6 +800,9 @@ function SurgicalWorkforceIntelligenceSection({
               )}
             </div>
           </div>
+
+          {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
+          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
         </div>
       </DashboardCard>
     </section>
@@ -779,7 +913,11 @@ export function WorkforceCommandCentreClient({
         onRefreshPlanning={onRefreshPlanning}
       />
 
-      <SurgicalWorkforceIntelligenceSection surgicalIntelligence={surgicalIntelligence} />
+      <SurgicalWorkforceIntelligenceSection
+        tenantId={tenantId}
+        surgicalIntelligence={surgicalIntelligence}
+        canManage={canManage}
+      />
 
       <section aria-label="Workforce priority queue" className="space-y-5">
         <SectionHeading

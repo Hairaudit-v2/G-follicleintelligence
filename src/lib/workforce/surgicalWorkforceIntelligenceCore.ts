@@ -2,6 +2,7 @@
  * WorkforceOS — Surgical Workforce Intelligence (pure composition, SurgeryOS bridge).
  */
 
+import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { addDaysIso } from "@/src/lib/workforce/shiftCostIntelligenceCore";
 import type {
   ProcedureStaffingOptimizerSnapshot,
@@ -45,6 +46,28 @@ export type ClinicalCapacityIntel = {
   summary: string;
 };
 
+export type SurgicalIntelligenceActionType =
+  | "apply_recommended_team"
+  | "open_procedure_staffing"
+  | "open_surgery_case"
+  | "open_credentials";
+
+export type SurgicalIntelligenceAction = {
+  type: SurgicalIntelligenceActionType;
+  label: string;
+  route: string;
+  surgeryId?: string;
+};
+
+export type ActionableSurgicalProcedure = {
+  surgeryId: string;
+  procedureLabel: string;
+  procedureDate: string;
+  staffingComplete: boolean;
+  canApplyRecommendedTeam: boolean;
+  actions: SurgicalIntelligenceAction[];
+};
+
 export type SurgicalStaffingRisk = {
   id: string;
   title: string;
@@ -52,6 +75,9 @@ export type SurgicalStaffingRisk = {
   procedureDate: string;
   recommendation: string;
   score: number;
+  surgeryId: string | null;
+  procedureLabel: string | null;
+  actions: SurgicalIntelligenceAction[];
 };
 
 export type SurgicalStaffingRiskIntel = {
@@ -69,14 +95,19 @@ export type SurgicalWorkforceRecommendation = {
   route: string;
   ctaLabel: string;
   score: number;
+  surgeryId: string | null;
+  procedureDate: string | null;
+  actions: SurgicalIntelligenceAction[];
 };
 
 export type SurgicalWorkforceIntelligencePanel = {
+  tomorrowDate: string;
   tomorrowReadiness: TomorrowSurgeryReadinessIntel;
   staffingQuality: ProcedureStaffingQualityIntel;
   clinicalCapacity: ClinicalCapacityIntel;
   staffingRisks: SurgicalStaffingRiskIntel;
   recommendations: SurgicalWorkforceRecommendation[];
+  actionableProcedures: ActionableSurgicalProcedure[];
 };
 
 export type SurgicalWorkforceIntelligenceInput = {
@@ -86,6 +117,7 @@ export type SurgicalWorkforceIntelligenceInput = {
   weekOptimizers: ProcedureStaffingOptimizerSnapshot[];
   planning: WorkforcePlanningSnapshot | null;
   activeClinicalStaffCount: number;
+  surgeryCaseById?: Record<string, string | null>;
 };
 
 const TOMORROW_EMPTY_SUMMARY = "No surgeries scheduled tomorrow.";
@@ -390,16 +422,119 @@ function formatProcedureDateLabel(date: string): string {
   return parsed.toLocaleDateString("en-AU", { month: "long", day: "numeric", timeZone: "UTC" });
 }
 
+function procedureStaffingRoute(tenantId: string, procedureDate: string, surgeryId?: string): string {
+  const base = `/fi-admin/${tenantId}/workforce-os/procedure-staffing?date=${encodeURIComponent(procedureDate)}`;
+  return surgeryId ? `${base}&surgeryId=${encodeURIComponent(surgeryId)}` : base;
+}
+
+function credentialsRoute(tenantId: string): string {
+  return `/fi-admin/${tenantId}/hr-os/credentials`;
+}
+
+export function canApplyRecommendedTeam(rec: ProcedureStaffingRecommendation): boolean {
+  return rec.recommendedTeam.some((member) => !member.autoBlocked);
+}
+
+export function buildSurgicalProcedureActions(input: {
+  tenantId: string;
+  surgeryId: string;
+  procedureDate: string;
+  procedureLabel: string;
+  staffingComplete: boolean;
+  canApply: boolean;
+  caseId?: string | null;
+  preferCredentials?: boolean;
+}): SurgicalIntelligenceAction[] {
+  const actions: SurgicalIntelligenceAction[] = [];
+  const wos = `/fi-admin/${input.tenantId}/workforce-os`;
+
+  if (input.preferCredentials) {
+    actions.push({
+      type: "open_credentials",
+      label: "Review credentials",
+      route: credentialsRoute(input.tenantId),
+    });
+  } else if (!input.staffingComplete && input.canApply) {
+    actions.push({
+      type: "apply_recommended_team",
+      label: "Apply recommended team",
+      route: `${wos}/procedure-staffing`,
+      surgeryId: input.surgeryId,
+    });
+  }
+
+  actions.push({
+    type: "open_procedure_staffing",
+    label: input.staffingComplete ? "View staffing" : "Review staffing",
+    route: procedureStaffingRoute(input.tenantId, input.procedureDate, input.surgeryId),
+    surgeryId: input.surgeryId,
+  });
+
+  if (input.caseId) {
+    actions.push({
+      type: "open_surgery_case",
+      label: "Open SurgeryOS case",
+      route: caseProcedureDayDetailHref(input.tenantId, input.caseId),
+      surgeryId: input.surgeryId,
+    });
+  }
+
+  return actions;
+}
+
+export function buildActionableSurgicalProcedures(
+  input: SurgicalWorkforceIntelligenceInput
+): ActionableSurgicalProcedure[] {
+  const caseBySurgery = input.surgeryCaseById ?? {};
+  const procedures: ActionableSurgicalProcedure[] = [];
+
+  for (const rec of collectWeekRecommendations(input.weekOptimizers)) {
+    if (rec.staffingComplete) continue;
+    const canApply = canApplyRecommendedTeam(rec);
+    procedures.push({
+      surgeryId: rec.surgeryId,
+      procedureLabel: rec.procedureLabel,
+      procedureDate: rec.scheduledDate.slice(0, 10),
+      staffingComplete: rec.staffingComplete,
+      canApplyRecommendedTeam: canApply,
+      actions: buildSurgicalProcedureActions({
+        tenantId: input.tenantId,
+        surgeryId: rec.surgeryId,
+        procedureDate: rec.scheduledDate.slice(0, 10),
+        procedureLabel: rec.procedureLabel,
+        staffingComplete: rec.staffingComplete,
+        canApply,
+        caseId: caseBySurgery[rec.surgeryId] ?? null,
+      }),
+    });
+  }
+
+  return procedures.sort((a, b) => a.procedureDate.localeCompare(b.procedureDate));
+}
+
 export function detectSurgicalStaffingRisks(
   input: SurgicalWorkforceIntelligenceInput
 ): SurgicalStaffingRiskIntel {
   const recommendations = collectWeekRecommendations(input.weekOptimizers);
   const credentialRisks = input.planning?.credentialRisks ?? [];
+  const caseBySurgery = input.surgeryCaseById ?? {};
   const risks: SurgicalStaffingRisk[] = [];
 
   for (const rec of recommendations) {
     const date = rec.scheduledDate.slice(0, 10);
     const dateLabel = formatProcedureDateLabel(date);
+    const caseId = caseBySurgery[rec.surgeryId] ?? null;
+    const canApply = canApplyRecommendedTeam(rec);
+
+    const staffingActions = buildSurgicalProcedureActions({
+      tenantId: input.tenantId,
+      surgeryId: rec.surgeryId,
+      procedureDate: date,
+      procedureLabel: rec.procedureLabel,
+      staffingComplete: rec.staffingComplete,
+      canApply,
+      caseId,
+    });
 
     for (const missing of rec.missingRoles) {
       if (isSurgeonRole(missing.role)) {
@@ -410,6 +545,9 @@ export function detectSurgicalStaffingRisks(
           procedureDate: date,
           recommendation: `Assign surgeon to ${rec.procedureLabel} on ${dateLabel}.`,
           score: 980,
+          surgeryId: rec.surgeryId,
+          procedureLabel: rec.procedureLabel,
+          actions: staffingActions,
         });
       }
       if (isRnRole(missing.role)) {
@@ -420,6 +558,9 @@ export function detectSurgicalStaffingRisks(
           procedureDate: date,
           recommendation: `Assign RN to ${rec.procedureLabel} on ${dateLabel}.`,
           score: 900,
+          surgeryId: rec.surgeryId,
+          procedureLabel: rec.procedureLabel,
+          actions: staffingActions,
         });
       }
       if (isTechnicianRole(missing.role)) {
@@ -430,6 +571,9 @@ export function detectSurgicalStaffingRisks(
           procedureDate: date,
           recommendation: `Assign technician to ${rec.procedureLabel} on ${dateLabel}.`,
           score: 700,
+          surgeryId: rec.surgeryId,
+          procedureLabel: rec.procedureLabel,
+          actions: staffingActions,
         });
       }
     }
@@ -446,6 +590,9 @@ export function detectSurgicalStaffingRisks(
           procedureDate: date,
           recommendation: `Reallocate ${member.name} to resolve scheduling conflict on ${dateLabel}.`,
           score: 950,
+          surgeryId: rec.surgeryId,
+          procedureLabel: rec.procedureLabel,
+          actions: staffingActions,
         });
       }
     }
@@ -459,6 +606,9 @@ export function detectSurgicalStaffingRisks(
         procedureDate: date,
         recommendation: `Review ${member.name}'s eligibility for ${rec.procedureLabel}.`,
         score: 650,
+        surgeryId: rec.surgeryId,
+        procedureLabel: rec.procedureLabel,
+        actions: staffingActions,
       });
     }
 
@@ -473,6 +623,18 @@ export function detectSurgicalStaffingRisks(
         procedureDate: date,
         recommendation: `Renew ${risk.displayName} for ${risk.staffName} before ${dateLabel}.`,
         score: risk.blocksClinicalWork ? 960 : 720,
+        surgeryId: rec.surgeryId,
+        procedureLabel: rec.procedureLabel,
+        actions: buildSurgicalProcedureActions({
+          tenantId: input.tenantId,
+          surgeryId: rec.surgeryId,
+          procedureDate: date,
+          procedureLabel: rec.procedureLabel,
+          staffingComplete: rec.staffingComplete,
+          canApply,
+          caseId,
+          preferCredentials: true,
+        }),
       });
     }
   }
@@ -508,27 +670,53 @@ export function buildSurgicalWorkforceRecommendations(
   for (const risk of risks.detectedRisks) {
     const severity: WorkforceAttentionSeverity =
       risk.severity === "critical" ? "critical" : "high";
+    const primaryAction = risk.actions[0];
     recommendations.push({
       id: `rec-${risk.id}`,
       title: risk.title,
       severity,
       impact: risk.severity === "critical" ? "high" : "medium",
-      route: `${base}/procedure-staffing?date=${encodeURIComponent(risk.procedureDate)}`,
-      ctaLabel: "Open procedure staffing",
+      route: primaryAction?.route ?? `${base}/procedure-staffing?date=${encodeURIComponent(risk.procedureDate)}`,
+      ctaLabel: primaryAction?.label ?? "Open procedure staffing",
       score: risk.score,
+      surgeryId: risk.surgeryId,
+      procedureDate: risk.procedureDate,
+      actions: risk.actions,
     });
   }
 
   const tomorrow = input.tomorrowOptimizer;
   if (tomorrow && tomorrow.completeCount < tomorrow.procedureCount) {
+    const firstAtRisk = tomorrow.recommendations.find((rec) => !rec.staffingComplete);
+    const tomorrowActions = firstAtRisk
+      ? buildSurgicalProcedureActions({
+          tenantId: input.tenantId,
+          surgeryId: firstAtRisk.surgeryId,
+          procedureDate: input.tomorrowDate,
+          procedureLabel: firstAtRisk.procedureLabel,
+          staffingComplete: firstAtRisk.staffingComplete,
+          canApply: canApplyRecommendedTeam(firstAtRisk),
+          caseId: input.surgeryCaseById?.[firstAtRisk.surgeryId] ?? null,
+        })
+      : [
+          {
+            type: "open_procedure_staffing" as const,
+            label: "Staff tomorrow",
+            route: `${base}/procedure-staffing?date=${encodeURIComponent(input.tomorrowDate)}`,
+          },
+        ];
+    const primary = tomorrowActions[0];
     recommendations.push({
       id: "rec-tomorrow-staffing",
       title: `Assign staff to ${tomorrow.procedureCount - tomorrow.completeCount} tomorrow procedure(s)`,
       severity: "high",
       impact: "high",
-      route: `${base}/procedure-staffing?date=${encodeURIComponent(input.tomorrowDate)}`,
-      ctaLabel: "Staff tomorrow",
+      route: primary?.route ?? `${base}/procedure-staffing?date=${encodeURIComponent(input.tomorrowDate)}`,
+      ctaLabel: primary?.label ?? "Staff tomorrow",
       score: 880,
+      surgeryId: firstAtRisk?.surgeryId ?? null,
+      procedureDate: input.tomorrowDate,
+      actions: tomorrowActions,
     });
   }
 
@@ -541,6 +729,15 @@ export function buildSurgicalWorkforceRecommendations(
       route: `${base}/procedure-staffing`,
       ctaLabel: "Review capacity",
       score: 600,
+      surgeryId: null,
+      procedureDate: null,
+      actions: [
+        {
+          type: "open_procedure_staffing",
+          label: "Review capacity",
+          route: `${base}/procedure-staffing`,
+        },
+      ],
     });
   }
 
@@ -578,12 +775,15 @@ export function composeSurgicalWorkforceIntelligence(
   const clinicalCapacity = buildClinicalCapacityIntel(input);
   const staffingRisks = detectSurgicalStaffingRisks(input);
   const recommendations = buildSurgicalWorkforceRecommendations(input, staffingRisks);
+  const actionableProcedures = buildActionableSurgicalProcedures(input);
 
   return {
+    tomorrowDate: input.tomorrowDate,
     tomorrowReadiness,
     staffingQuality,
     clinicalCapacity,
     staffingRisks,
     recommendations,
+    actionableProcedures,
   };
 }

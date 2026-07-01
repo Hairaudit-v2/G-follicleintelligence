@@ -36,6 +36,7 @@ import type { WorkforcePlanningSnapshot } from "@/src/lib/workforce/workforcePla
 import { loadWorkforceOsDirectoryPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
 import { loadProcedureStaffingOptimizer } from "@/src/lib/workforce/procedureStaffingOptimizer.server";
 import type { ProcedureStaffingOptimizerSnapshot } from "@/src/lib/workforce/procedureStaffingOptimizerCore";
+import { loadSurgeryCaseLinks } from "@/src/lib/workforce/surgicalWorkforceIntelligence.server";
 
 export type WorkforceCommandCentrePageData = {
   canManage: boolean;
@@ -106,16 +107,23 @@ async function loadSurgicalIntelligenceSignals(
   const snapshotByDate = new Map(
     snapshots.filter((entry) => entry.snapshot != null).map((entry) => [entry.date, entry.snapshot!])
   );
+  const weekOptimizers = weekDates
+    .map((date) => snapshotByDate.get(date))
+    .filter((snapshot): snapshot is ProcedureStaffingOptimizerSnapshot => snapshot != null);
+
+  const surgeryIds = weekOptimizers.flatMap((optimizer) =>
+    optimizer.recommendations.map((rec) => rec.surgeryId)
+  );
+  const surgeryCaseById = await loadSurgeryCaseLinks(tenantId, surgeryIds).catch(() => ({}));
 
   return composeSurgicalWorkforceIntelligence({
     tenantId,
     tomorrowDate,
     tomorrowOptimizer: snapshotByDate.get(tomorrowDate) ?? null,
-    weekOptimizers: weekDates
-      .map((date) => snapshotByDate.get(date))
-      .filter((snapshot): snapshot is ProcedureStaffingOptimizerSnapshot => snapshot != null),
+    weekOptimizers,
     planning,
     activeClinicalStaffCount,
+    surgeryCaseById,
   });
 }
 
