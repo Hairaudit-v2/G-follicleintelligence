@@ -633,6 +633,7 @@ export async function createPatientImageRecord(
         imageId,
         safeFilename: safeName,
         contentType,
+        protocolSessionId: input.protocolSessionId ?? null,
       },
       mappedRow,
       supabase

@@ -6,6 +6,7 @@ import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings
 import { classifyFiPatientImageAndPersist } from "@/src/lib/hair-intelligence/imageClassification/adapters/fiOsPatientImageClassification.server";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import { runImagingQualityEvaluation } from "@/src/lib/imaging-os/imageQualityEvaluation.server";
 import { loadFiImageAttributionSettings } from "./fiImageAttributionSettings.server";
 import {
   buildFiImageAiDatasetFields,
@@ -42,6 +43,7 @@ export type RunPatientImagePostCapturePipelineInput = CreatePatientImageUploadIn
   captureType?: unknown;
   imageWidth?: number | null;
   imageHeight?: number | null;
+  protocolSessionId?: string | null;
 };
 
 export type PatientImagePostCapturePipelineOutcome = PatientImagePostCaptureResult & {
@@ -193,17 +195,67 @@ export async function runPatientImagePostCapturePipeline(
       ? { width: input.imageWidth, height: input.imageHeight }
       : await probeImageDimensions(imageBuffer);
 
+  const rowMetadata =
+    existingRow.metadata && typeof existingRow.metadata === "object"
+      ? (existingRow.metadata as Record<string, unknown>)
+      : {};
+
+  const imagingQualityRun = await runImagingQualityEvaluation({
+    tenantId: tid,
+    patientId: pid,
+    imageBuffer,
+    width: probed.width,
+    height: probed.height,
+    size_bytes: input.file.size,
+    content_type: input.contentType,
+    metadata: rowMetadata,
+    capture_source: captureSource,
+    protocol_session_id:
+      input.protocolSessionId ??
+      (typeof rowMetadata.protocol_session_id === "string"
+        ? rowMetadata.protocol_session_id
+        : null),
+    protocol_template_slug: existingRow.imaging_protocol_template_slug,
+    protocol_slot_slug: existingRow.imaging_protocol_slot_slug,
+    storage_path: existingRow.storage_path,
+    client: supabase,
+  });
+
   const { snapshot: quality } = evaluateFiImageQuality({
     width: probed.width,
     height: probed.height,
     size_bytes: input.file.size,
     content_type: input.contentType,
     image_type: imageType,
-    metadata_hints:
-      existingRow.metadata && typeof existingRow.metadata === "object"
-        ? (existingRow.metadata as Record<string, unknown>)
-        : {},
+    metadata_hints: rowMetadata,
   });
+
+  if (imagingQualityRun.evaluation.shouldBlockUpload) {
+    return {
+      updatedRow: existingRow as unknown as Record<string, unknown>,
+      metadata_patch: { imaging_quality: imagingQualityRun.metadata_record },
+      quality: {
+        ...quality,
+        alert_message:
+          imagingQualityRun.evaluation.retakePrompt ??
+          "Image quality too low. Please retake photo.",
+        is_clinically_usable: false,
+      },
+      derivatives: [],
+      classification: null,
+      timeline_entry: buildFiImageTimelineEntry({
+        image_id: existingRow.id,
+        capture_timestamp: captureTimestamp,
+        procedure_stage: procedureStage,
+        visit_type: existingRow.visit_type,
+        follow_up_interval: existingRow.follow_up_interval,
+        image_type: imageType,
+      }),
+      watermark_applied: false,
+      marketing_version_created: false,
+      quality_blocked: true,
+    };
+  }
 
   if (settings.block_upload_on_poor_quality && !quality.is_clinically_usable) {
     return {
@@ -360,6 +412,7 @@ export async function runPatientImagePostCapturePipeline(
   const metadataPatch: Record<string, unknown> = {
     fi_image_metadata: fiImageMetadata,
     fi_image_quality: quality,
+    imaging_quality: imagingQualityRun.metadata_record,
     fi_image_derivatives: derivatives,
     fi_image_timeline: timelineEntry,
     fi_ai_dataset_fields: datasetFields,

@@ -29,6 +29,7 @@ import {
   stageVieProtocolCapture,
 } from "@/src/lib/vie/vieGuidedCapture.server";
 import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
+import { toClientImagingQualitySummary } from "@/src/lib/imaging-os/imageQualityMetadata";
 import { runVieInstantIntelligence } from "@/src/lib/vie/vieInstantIntelligence.server";
 import { previewVieSameAngleAlignment } from "@/src/lib/vie/vieSameAngleAlignment.server";
 import {
@@ -143,6 +144,12 @@ export async function POST(
         return crmJsonError(400, "metadata must be valid JSON.");
       }
     }
+    if (protocolSessionId) {
+      metadata =
+        metadata && typeof metadata === "object" && !Array.isArray(metadata)
+          ? { ...(metadata as Record<string, unknown>), protocol_session_id: protocolSessionId }
+          : { protocol_session_id: protocolSessionId };
+    }
 
     const procedureDayIdRaw = form.get("procedure_day_id");
     if (captureSourceNormalized === "surgery_os" && slotSlugStr) {
@@ -194,12 +201,25 @@ export async function POST(
       captureSource: captureSource == null ? null : String(captureSource),
       imageWidth: parseDim(imageWidthRaw),
       imageHeight: parseDim(imageHeightRaw),
+      protocolSessionId: protocolSessionId || null,
     });
 
     const qualityAlert = result.attribution?.quality?.alert_message;
     if (qualityAlert) {
       return crmJsonError(400, qualityAlert);
     }
+
+    const imagingQualityRaw =
+      result.attribution?.metadata_patch &&
+      typeof result.attribution.metadata_patch === "object" &&
+      !Array.isArray(result.attribution.metadata_patch) &&
+      (result.attribution.metadata_patch as Record<string, unknown>).imaging_quality;
+    const imaging_quality =
+      imagingQualityRaw && typeof imagingQualityRaw === "object" && !Array.isArray(imagingQualityRaw)
+        ? toClientImagingQualitySummary(
+            imagingQualityRaw as Parameters<typeof toClientImagingQualitySummary>[0]
+          )
+        : undefined;
 
     let guided_session:
       | {
@@ -283,6 +303,7 @@ export async function POST(
                 },
               }
             : {}),
+          ...(imaging_quality ? { imaging_quality } : {}),
           guided_session,
           vie_capture_review,
         });
@@ -367,6 +388,7 @@ export async function POST(
             },
           }
         : {}),
+      ...(imaging_quality ? { imaging_quality } : {}),
       ...(guided_session ? { guided_session } : {}),
       ...(vie_intelligence ? { vie_intelligence } : {}),
     });

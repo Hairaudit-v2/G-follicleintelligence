@@ -5,6 +5,11 @@ import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { parseFiEventPayload } from "@/lib/fi/events/schema";
 import type { FiEventEnvelope } from "@/src/types/fi-events";
+import { evaluateImagingQuality } from "@/src/lib/imaging-os/imageQualityCore";
+import { buildImagingQualityMetadataRecord } from "@/src/lib/imaging-os/imageQualityMetadata";
+import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQualityPolicy";
+import { loadImagingQualityPolicyForTenant } from "@/src/lib/imaging-os/imageQualityPolicy.server";
+import type { ImagingQualityTenantPolicy } from "@/src/lib/imaging-os/imageQualityPolicy";
 import {
   planHairAuditPatientImageInsert,
   type HairAuditPatientImageInsertPlan,
@@ -20,6 +25,7 @@ export type DualWriteHairAuditPatientImagesParams = {
   envelope: FiEventEnvelope;
   globalCaseId?: string | null;
   uploadIdsByStoragePath?: Record<string, string>;
+  imagingQualityPolicy?: ImagingQualityTenantPolicy;
   supabase?: FoundationSupabase;
 };
 
@@ -157,6 +163,11 @@ export async function dualWriteHairAuditImagesToPatientLibrary(
 
     const sourceCaseId = envelope.identifiers?.source_case_id?.trim() || null;
     const sourcePatientId = envelope.identifiers?.source_patient_id?.trim() || null;
+    const qualityPolicy =
+      params.imagingQualityPolicy ??
+      (await loadImagingQualityPolicyForTenant(tenantId, supabase).catch(
+        () => IMAGING_QUALITY_POLICY_DEFAULTS
+      ));
 
     for (const image of payloadResult.data.images) {
       const storagePath = image.storage_path?.trim();
@@ -173,6 +184,33 @@ export async function dualWriteHairAuditImagesToPatientLibrary(
         occurredAt: envelope.occurred_at,
       });
       if (!plan) continue;
+
+      const qualityEvaluation = evaluateImagingQuality({
+        image_metadata: {
+          size_bytes: image.size_bytes ?? null,
+          content_type: image.mime_type ?? null,
+          missing_required_fields: ["dimensions"],
+        },
+        protocol_context: {
+          capture_source: "hairaudit",
+          is_audit_context: true,
+          slot_required: true,
+        },
+        policy: qualityPolicy,
+      });
+      plan.metadata = {
+        ...plan.metadata,
+        imaging_quality: buildImagingQualityMetadataRecord({
+          evaluation: qualityEvaluation,
+          blur_status: "unknown",
+          exposure_status: "unknown",
+          duplicate_status: "unique",
+        }),
+        classifier_status:
+          typeof plan.metadata.classifier_status === "string"
+            ? plan.metadata.classifier_status
+            : qualityEvaluation.status,
+      };
 
       try {
         const outcome = await insertPatientImageRow(supabase, {

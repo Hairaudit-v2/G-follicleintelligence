@@ -414,6 +414,16 @@ export function VieCaptureWizard({
           if (dims.width) fd.set("image_width", String(dims.width));
           if (dims.height) fd.set("image_height", String(dims.height));
           if (hasAccepted || hasPending) fd.set("guided_replace", "1");
+          fd.set(
+            "metadata",
+            JSON.stringify({
+              protocol_session_id: sessionId,
+              capture_hints: {
+                framing_score:
+                  dims.width && dims.height && Math.min(dims.width, dims.height) >= 720 ? 85 : 55,
+              },
+            })
+          );
 
           const res = await fetch(
             `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`,
@@ -424,6 +434,7 @@ export function VieCaptureWizard({
             error?: string;
             vie_capture_review?: VieCaptureReviewPayload;
             attribution?: { quality?: { alert_message?: string | null } };
+            imaging_quality?: { retake_prompt?: string; quality_status?: string };
           };
           if (!res.ok || !j.ok) {
             setErr(j.error ?? `Capture failed (${res.status}).`);
@@ -433,6 +444,10 @@ export function VieCaptureWizard({
           const qualityAlert = j.attribution?.quality?.alert_message;
           if (qualityAlert) {
             setErr(qualityAlert);
+            return;
+          }
+          if (j.imaging_quality?.quality_status === "fail" && j.imaging_quality.retake_prompt) {
+            setErr(j.imaging_quality.retake_prompt);
             return;
           }
 

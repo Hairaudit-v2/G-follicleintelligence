@@ -65,6 +65,9 @@ export async function buildVieInstantIntelligenceStub(
     (s) => s.status === "fail" && (s.name === "file_size" || s.name === "aspect_ratio")
   );
 
+  const imagingQualityRetake =
+    qualityEval.blockers.find((b) => /blur|light|framing|duplicate/i.test(b)) ?? null;
+
   const partial = {
     quality_score: qualityScore,
     quality_band: qualityBand,
@@ -72,13 +75,15 @@ export async function buildVieInstantIntelligenceStub(
       status: focusFail ? ("heuristic_fail" as const) : ("heuristic_pass" as const),
       blur_score: null,
       message: focusFail
-        ? "Image may be blurry or low resolution — consider retaking."
+        ? "Image may be blurred. Retake with the camera held steady."
         : "Focus check passed basic heuristics.",
     },
     lighting_verification: {
       status: lightingFail ? ("heuristic_fail" as const) : ("heuristic_pass" as const),
       exposure_score: null,
-      message: qualityEval.warnings[0] ?? "Lighting check passed basic heuristics.",
+      message: lightingFail
+        ? "Image may be too dark or overexposed. Retake in brighter, even lighting."
+        : (qualityEval.warnings[0] ?? "Lighting check passed basic heuristics."),
     },
     classification: {
       status: "pending_ai" as const,
@@ -94,7 +99,15 @@ export async function buildVieInstantIntelligenceStub(
     },
   };
 
-  const clinical_usability = deriveClinicalUsability(partial, capturePolicy);
+  let clinical_usability = deriveClinicalUsability(partial, capturePolicy);
+  if (imagingQualityRetake && clinical_usability.status === "usable") {
+    clinical_usability = {
+      ...clinical_usability,
+      status: "warning",
+      warnings: [...clinical_usability.warnings, imagingQualityRetake],
+      retake_recommendation: imagingQualityRetake,
+    };
+  }
 
   return {
     engine_version: VIE_ENGINE_VERSION,

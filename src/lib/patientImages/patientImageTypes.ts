@@ -118,4 +118,5 @@ export type CreatePatientImageUploadInput = {
   captureSource?: unknown;
   imageWidth?: number | null;
   imageHeight?: number | null;
+  protocolSessionId?: string | null;
 };

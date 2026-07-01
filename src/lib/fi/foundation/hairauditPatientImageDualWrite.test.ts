@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQualityPolicy";
 import {
   buildHairAuditPatientImageMetadata,
   HAIRAUDIT_DEFAULT_STORAGE_BUCKET,
@@ -45,6 +46,7 @@ function createMockSupabase(input: {
   foundationPatientId?: string | null;
   existingPaths?: Set<string>;
   insertShouldFail?: boolean;
+  onInsert?: (row: Record<string, unknown>) => void;
 }): SupabaseClient {
   const insertedPaths: string[] = [];
   const existingPaths = input.existingPaths ?? new Set<string>();
@@ -86,13 +88,15 @@ function createMockSupabase(input: {
           }
           return { data: null, error: null };
         },
-        insert: async (row: { storage_path?: string }) => {
+        insert: async (row: Record<string, unknown>) => {
           if (input.insertShouldFail) {
             return { error: { message: "dual-write insert failed", code: "XX000" } };
           }
-          if (row.storage_path) {
-            insertedPaths.push(row.storage_path);
-            existingPaths.add(row.storage_path);
+          input.onInsert?.(row);
+          const storagePath = typeof row.storage_path === "string" ? row.storage_path : "";
+          if (storagePath) {
+            insertedPaths.push(storagePath);
+            existingPaths.add(storagePath);
           }
           return { error: null };
         },
@@ -125,6 +129,28 @@ describe("hairaudit patient image dual-write core", () => {
     assert.equal(plan.metadata.upload_source, "hairaudit");
     assert.equal(plan.metadata.fi_upload_id, "upload-1");
     assert.equal(plan.metadata.canonical_view, "front");
+  });
+
+  it("dual-write enriches metadata with imaging_quality for HairAudit images", async () => {
+    let insertedMetadata: Record<string, unknown> | undefined;
+    const client = createMockSupabase({
+      foundationPatientId: PATIENT,
+      onInsert: (row) => {
+        if (row.metadata && typeof row.metadata === "object") {
+          insertedMetadata = row.metadata as Record<string, unknown>;
+        }
+      },
+    });
+    await dualWriteHairAuditImagesToPatientLibrary({
+      tenantId: TENANT,
+      fiEventId: EVENT,
+      fiCaseId: CASE,
+      envelope: buildEnvelope(),
+      imagingQualityPolicy: IMAGING_QUALITY_POLICY_DEFAULTS,
+      supabase: client,
+    });
+    assert.ok(insertedMetadata);
+    assert.ok(insertedMetadata.imaging_quality);
   });
 
   it("buildHairAuditPatientImageMetadata includes audit relationships", () => {
