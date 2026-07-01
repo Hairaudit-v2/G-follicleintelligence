@@ -1096,6 +1096,12 @@ All engines clamp scores 0–100, use safe division, and never emit NaN.
 - Cross-clinic benchmarking (currently tenant-scoped clinic averages only).
 - Automated IIOHR / competency graph export wiring.
 
+### Sprint 3 Verification
+
+- Sprint 3 unit tests: 19/19 pass
+- `pnpm check:migrations`: pass
+- `pnpm test:unit`: blocked by pre-existing server-only patch issue
+
 ---
 
 *End of SurgeryOS Architecture Audit V1*
