@@ -55,7 +55,7 @@ export function WorkforceOsPayrollClient({
   timePunches,
   staffOptions,
   surgeryDayCost,
-  rateTypeCounts,
+  rateTypeCounts: _rateTypeCounts,
   workDate,
   canManage,
   breaksEnabled,
