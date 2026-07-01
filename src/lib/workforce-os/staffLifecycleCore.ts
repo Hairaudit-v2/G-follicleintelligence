@@ -1,5 +1,9 @@
 import type { EvolvedStaffRecord } from "./iiohrStaffHrLinkReconciliationTypes";
 import { normaliseStaffEmail } from "./iiohrStaffHrLinkReconciliationCore";
+import {
+  isStaffArchived,
+  isStaffHrLinkedForReconciliation,
+} from "./hrReconciliationEligibleCore";
 import type {
   HrReconciliationSuggestion,
   StaffEmploymentStatus,
@@ -168,8 +172,8 @@ export function buildReconciliationSuggestions(
   const claimedIiohrIds = new Set<string>();
 
   for (const row of input.staffMembers) {
-    if (row.archived_at) continue;
-    if (row.iiohr_staff_record_id?.trim()) continue;
+    if (isStaffArchived(row)) continue;
+    if (isStaffHrLinkedForReconciliation(row)) continue;
     const emailKey = normaliseStaffEmail(row.email);
     if (!emailKey) {
       suggestions.push({

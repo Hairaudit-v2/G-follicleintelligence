@@ -9,7 +9,7 @@ import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOs
 import type { EvolvedStaffRecord } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
 import {
   approveStaffHrLink,
-  buildReconciliationSuggestionsForTenant,
+  loadHrReconciliationPageData,
   manuallyLinkStaffHrIdentity,
   removeStaffHrLink,
   syncAllStaffProjectionsForTenant,
@@ -223,17 +223,17 @@ export async function loadHrReconciliationPageAction(
   tenantId: string,
   evolvedStaffRecords: EvolvedStaffRecord[]
 ): Promise<
-  | { ok: true; suggestions: Awaited<ReturnType<typeof buildReconciliationSuggestionsForTenant>> }
+  | { ok: true; pageData: Awaited<ReturnType<typeof loadHrReconciliationPageData>> }
   | { ok: false; error: string }
 > {
   try {
     await assertHrLifecycleManageAllowed(tenantId);
     await syncAllStaffProjectionsForTenant(tenantId);
-    const suggestions = await buildReconciliationSuggestionsForTenant({
+    const pageData = await loadHrReconciliationPageData({
       tenantId,
       evolvedStaffRecords,
     });
-    return { ok: true, suggestions };
+    return { ok: true, pageData };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

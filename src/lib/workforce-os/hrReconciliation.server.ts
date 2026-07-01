@@ -12,7 +12,11 @@ import {
   IIOHR_HR_STAFF_RECONCILIATION_SOURCE,
 } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
 import {
-  buildReconciliationSuggestions,
+  buildHrReconciliationPageData,
+  needsHrReconciliation,
+  type HrReconciliationPageData,
+} from "@/src/lib/workforce-os/hrReconciliationFilterCore";
+import {
   composeFullName,
   parseStaffEmploymentStatus,
   parseStaffIdentitySource,
@@ -187,6 +191,21 @@ export async function loadStaffMemberLifecycleByFiStaffId(
   return mapLifecycleRow(data as Record<string, unknown>);
 }
 
+export async function loadAllTenantStaffMembers(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<StaffMemberLifecycleRow[]> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const supabase = client ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff_members")
+    .select("*")
+    .eq("tenant_id", tid)
+    .order("full_name", { ascending: true });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as Record<string, unknown>[]).map(mapLifecycleRow);
+}
+
 export async function findUnlinkedWorkforceStaff(
   tenantId: string,
   client?: SupabaseClient
@@ -201,7 +220,9 @@ export async function findUnlinkedWorkforceStaff(
     .is("iiohr_staff_record_id", null)
     .order("full_name", { ascending: true });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as Record<string, unknown>[]).map(mapLifecycleRow);
+  return ((data ?? []) as Record<string, unknown>[])
+    .map(mapLifecycleRow)
+    .filter((row) => needsHrReconciliation(row));
 }
 
 export async function findMatchingIiohrHrRecords(
@@ -218,16 +239,25 @@ export async function findMatchingIiohrHrRecords(
   return out;
 }
 
+export async function loadHrReconciliationPageData(input: {
+  tenantId: string;
+  evolvedStaffRecords: EvolvedStaffRecord[];
+  client?: SupabaseClient;
+}): Promise<HrReconciliationPageData> {
+  const staffMembers = await loadAllTenantStaffMembers(input.tenantId, input.client);
+  return buildHrReconciliationPageData({
+    staffMembers,
+    evolvedStaffRecords: input.evolvedStaffRecords,
+  });
+}
+
 export async function buildReconciliationSuggestionsForTenant(input: {
   tenantId: string;
   evolvedStaffRecords: EvolvedStaffRecord[];
   client?: SupabaseClient;
 }): Promise<HrReconciliationSuggestion[]> {
-  const unlinked = await findUnlinkedWorkforceStaff(input.tenantId, input.client);
-  return buildReconciliationSuggestions({
-    staffMembers: unlinked,
-    evolvedStaffRecords: input.evolvedStaffRecords,
-  });
+  const pageData = await loadHrReconciliationPageData(input);
+  return pageData.suggestions;
 }
 
 export async function approveStaffHrLink(input: {

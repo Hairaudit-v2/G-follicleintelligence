@@ -74,7 +74,9 @@ export async function loadWorkforceOsStaffProfilePage(
 }
 
 export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Promise<{
+  metrics: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationMetrics;
   suggestions: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationSuggestion[];
+  archivedHistorical: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationArchivedRecord[];
 } | null> {
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) return null;
@@ -86,17 +88,17 @@ export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Pro
   if (!canManage) return null;
 
   await syncAllStaffProjectionsForTenant(tenantId);
-  const { buildReconciliationSuggestionsForTenant } = await import(
+  const { loadHrReconciliationPageData } = await import(
     "@/src/lib/workforce-os/hrReconciliation.server"
   );
 
-  // Empty feed until IIOHR API wired — UI still renders unlinked staff.
-  const suggestions = await buildReconciliationSuggestionsForTenant({
+  // Empty feed until IIOHR API wired — UI still renders active unlinked staff.
+  const pageData = await loadHrReconciliationPageData({
     tenantId,
     evolvedStaffRecords: [],
   });
 
-  return { suggestions };
+  return pageData;
 }
 
 export async function assertWorkforceOsReadAccess(tenantId: string): Promise<boolean> {

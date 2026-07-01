@@ -25,7 +25,12 @@ export default async function WorkforceOsHrReconciliationPage({
 
   return (
     <div className="mx-auto max-w-5xl pb-8">
-      <HrReconciliationClient tenantId={tenantId.trim()} initialSuggestions={data.suggestions} />
+      <HrReconciliationClient
+        tenantId={tenantId.trim()}
+        initialMetrics={data.metrics}
+        initialSuggestions={data.suggestions}
+        initialArchivedHistorical={data.archivedHistorical}
+      />
     </div>
   );
 }

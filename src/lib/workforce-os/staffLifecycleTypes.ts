@@ -117,3 +117,16 @@ export type HrReconciliationSuggestion = {
   matchType: "exact_email" | "name_suggestion" | "none";
   canAutoApprove: boolean;
 };
+
+export type HrReconciliationMetrics = {
+  activeStaff: number;
+  alreadyLinked: number;
+  needsReconciliation: number;
+  archivedExcluded: number;
+};
+
+export type HrReconciliationArchivedRecord = {
+  staffMemberId: string;
+  fiOsStaffName: string;
+  fiOsEmail: string | null;
+};
