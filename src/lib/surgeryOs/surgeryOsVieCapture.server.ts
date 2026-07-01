@@ -13,6 +13,7 @@ import { loadVieComparisonCaptureRecords } from "@/src/lib/vie/vieLongitudinalCo
 import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
 import { loadVieAlignmentResultsForPatient } from "@/src/lib/vie/vieSameAngleAlignment.server";
 import { computeVieOutcomeSummaryForPatient } from "@/src/lib/vie/vieOutcomeIntelligence.server";
+import { loadResolvedProtocolSlots } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
 
 type SessionRow = {
   id: string;
@@ -173,6 +174,8 @@ export async function loadSurgeryOsVieCaptureSummaries(
     .order("updated_at", { ascending: false });
   if (sessionErr) throw new Error(sessionErr.message);
 
+  const resolvedSurgeryProtocol = await loadResolvedProtocolSlots(tid, "surgery_day", supabase);
+
   const sessionByPatient = new Map<string, SessionRow>();
   for (const row of sessionRows ?? []) {
     const r = row as Record<string, unknown>;
@@ -243,6 +246,9 @@ export async function loadSurgeryOsVieCaptureSummaries(
           comparisonPairs,
           alignmentResults,
           outcomeSummary,
+          protocolSlots: resolvedSurgeryProtocol.slots,
+          protocolCatalogSource: resolvedSurgeryProtocol.protocol.metadata.source,
+          protocolCatalogVersion: resolvedSurgeryProtocol.protocol.metadata.version,
         });
       })
   );

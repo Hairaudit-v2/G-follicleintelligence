@@ -14,6 +14,11 @@ import {
 } from "./imagingStaffReviewCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
 import { buildImagingDeepLinks, listAvailableImagingDeepLinks, type ImagingDeepLink } from "./imagingDeepLinksCore";
+import {
+  matchesImagingReviewQueueFilters,
+  type ImagingClinicalReviewQueueFilters,
+} from "./imagingClinicalReviewQueueFilters";
+import { readImagingReviewAssignmentRecord } from "./imagingReviewAssignmentCore";
 
 export type ImagingClinicalReviewQueueItem = {
   imageId: string;
@@ -32,6 +37,8 @@ export type ImagingClinicalReviewQueueItem = {
   staffReviewedAt: string | null;
   staffReviewStatus: string | null;
   deepLinks: ImagingDeepLink[];
+  assignedToUserId: string | null;
+  assignmentStatus: string | null;
 };
 
 function readQualityRecord(metadata: Record<string, unknown>): ImagingQualityMetadataRecord | null {
@@ -108,7 +115,8 @@ export function imageNeedsClinicalReview(input: {
 export async function loadImagingClinicalReviewQueue(
   tenantId: string,
   client?: SupabaseClient,
-  limit = 100
+  limit = 100,
+  filters: ImagingClinicalReviewQueueFilters = {}
 ): Promise<ImagingClinicalReviewQueueItem[]> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
@@ -144,9 +152,27 @@ export async function loadImagingClinicalReviewQueue(
       aiImageReviewStatus:
         mapped.ai_image_review_status != null ? String(mapped.ai_image_review_status) : null,
     });
-    if (review.needsReview) {
-      pending.push({ row: mapped, reasons: review.reasons });
-    }
+    if (!review.needsReview) continue;
+
+    const filterRow = {
+      imageId: String(mapped.id),
+      patientId: String(mapped.patient_id),
+      caseId: mapped.case_id != null ? String(mapped.case_id) : null,
+      metadata,
+      aiImageCategory:
+        mapped.ai_image_category != null ? String(mapped.ai_image_category) : null,
+      aiImageCategoryConfidence:
+        mapped.ai_image_category_confidence != null
+          ? Number(mapped.ai_image_category_confidence)
+          : null,
+      aiImageReviewStatus:
+        mapped.ai_image_review_status != null ? String(mapped.ai_image_review_status) : null,
+      createdAt: String(mapped.created_at),
+      reviewReasons: review.reasons,
+    };
+    if (!matchesImagingReviewQueueFilters(filterRow, filters)) continue;
+
+    pending.push({ row: mapped, reasons: review.reasons });
   }
 
   const slice = pending.slice(0, limit);
@@ -246,6 +272,9 @@ export async function loadImagingClinicalReviewQueue(
       staffReviewedAt: readImagingStaffReviewRecord(metadata)?.reviewed_at ?? null,
       staffReviewStatus: readImagingStaffReviewRecord(metadata)?.status ?? null,
       deepLinks,
+      assignedToUserId: readImagingReviewAssignmentRecord(metadata)?.assigned_to ?? null,
+      assignmentStatus:
+        readImagingReviewAssignmentRecord(metadata)?.assignment_status ?? null,
     };
   });
 }

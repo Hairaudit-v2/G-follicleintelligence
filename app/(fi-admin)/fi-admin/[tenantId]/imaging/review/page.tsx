@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 import { ImagingClinicalReviewQueue } from "@/src/components/fi-admin/imaging/ImagingClinicalReviewQueue";
+import { ImagingClinicalReviewQueueFilters } from "@/src/components/fi-admin/imaging/ImagingClinicalReviewQueueFilters";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { parseImagingReviewQueueFiltersFromSearchParams } from "@/src/lib/imaging-os/imagingClinicalReviewQueueFilters";
 import { loadImagingClinicalReviewQueue } from "@/src/lib/imaging-os/imagingClinicalReviewQueue.server";
 
 export const dynamic = "force-dynamic";
@@ -23,10 +25,19 @@ export async function generateMetadata({
 
 export default async function ImagingClinicalReviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId } = await params;
+  const sp = await searchParams;
+  const urlParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (typeof value === "string") urlParams.set(key, value);
+    else if (Array.isArray(value) && value[0]) urlParams.set(key, value[0]);
+  }
+  const filters = parseImagingReviewQueueFiltersFromSearchParams(urlParams);
   const tid = tenantId?.trim();
   if (!tid) notFound();
 
@@ -39,7 +50,7 @@ export default async function ImagingClinicalReviewPage({
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
-  const items = await loadImagingClinicalReviewQueue(tid);
+  const items = await loadImagingClinicalReviewQueue(tid, undefined, 100, filters);
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 py-6">
@@ -65,6 +76,7 @@ export default async function ImagingClinicalReviewPage({
         </p>
       </header>
 
+      <ImagingClinicalReviewQueueFilters tenantId={tid} />
       <ImagingClinicalReviewQueue tenantId={tid} items={items} />
     </div>
   );

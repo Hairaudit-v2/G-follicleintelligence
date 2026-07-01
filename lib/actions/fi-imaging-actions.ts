@@ -30,6 +30,10 @@ import {
   markImagingImageReviewed,
   reassignImagingImageViewType,
 } from "@/src/lib/imaging-os/imagingStaffReviewMutations.server";
+import {
+  assignImagingReviewToStaff,
+  unassignImagingReview,
+} from "@/src/lib/imaging-os/imagingReviewAssignmentMutations.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -672,6 +676,68 @@ export async function bulkAssignImagingQueueStaffNoteAction(
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}/imaging/review`);
     return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const assignReviewSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    patientImageId: z.string().uuid(),
+    assignedToUserId: z.string().uuid(),
+  })
+  .strict();
+
+export async function assignImagingReviewAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = assignReviewSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    await assignImagingReviewToStaff({
+      tenantId,
+      patientId,
+      patientImageId: parsed.patientImageId,
+      assignedToUserId: parsed.assignedToUserId,
+      assignedByUserId: actingUserId,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const unassignReviewSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    patientImageId: z.string().uuid(),
+  })
+  .strict();
+
+export async function unassignImagingReviewAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = unassignReviewSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    await unassignImagingReview({
+      tenantId,
+      patientId,
+      patientImageId: parsed.patientImageId,
+      assignedByUserId: actingUserId,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

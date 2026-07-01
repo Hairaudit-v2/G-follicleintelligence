@@ -36,6 +36,8 @@ import {
   buildVieSurgeryImageMetadata,
   isVieCaptureSource,
 } from "@/src/lib/surgeryOs/surgeryOsVieCaptureCore";
+import { loadResolvedProtocol } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
+import { buildProtocolCatalogCaptureMetadata } from "@/src/lib/imaging-os/protocolCaptureMetadataCore";
 
 export const dynamic = "force-dynamic";
 
@@ -149,6 +151,20 @@ export async function POST(
         metadata && typeof metadata === "object" && !Array.isArray(metadata)
           ? { ...(metadata as Record<string, unknown>), protocol_session_id: protocolSessionId }
           : { protocol_session_id: protocolSessionId };
+    }
+
+    if (templateSlugStr) {
+      try {
+        const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
+        const resolved = await loadResolvedProtocol(tid, templateSlugStr, supabaseAdmin());
+        const catalogMeta = buildProtocolCatalogCaptureMetadata(resolved);
+        metadata =
+          metadata && typeof metadata === "object" && !Array.isArray(metadata)
+            ? { ...(metadata as Record<string, unknown>), ...catalogMeta }
+            : catalogMeta;
+      } catch {
+        // best-effort — capture proceeds with session metadata only
+      }
     }
 
     const procedureDayIdRaw = form.get("procedure_day_id");

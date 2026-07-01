@@ -30,7 +30,9 @@ export type SurgeryOsVieCaptureWarningKind =
   | "missing_immediate_post_op"
   | "pending_low_quality"
   | "donor_alignment_inconsistent"
-  | "immediate_post_op_alignment_inconsistent";
+  | "immediate_post_op_alignment_inconsistent"
+  | "missing_protocol_session"
+  | "protocol_legacy_fallback";
 
 export type SurgeryOsVieCaptureWarning = {
   kind: SurgeryOsVieCaptureWarningKind;

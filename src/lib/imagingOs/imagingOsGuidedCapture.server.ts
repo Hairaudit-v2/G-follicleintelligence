@@ -10,12 +10,12 @@ import {
   missingRequiredSlotSlugs,
   nextRecommendedSlotSlug,
   parseProgressMeta,
-  parseProtocolSlots,
   PROGRESS_META_KEY,
   protocolRequiredCompletionPercent,
   type ProgressMeta,
   type ProtocolSlotDef,
 } from "./imagingOsProtocol";
+import { loadResolvedProtocolSlots } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 function publishImagingProtocolCompleted(params: {
@@ -83,21 +83,21 @@ export async function loadProtocolTemplateBySlug(
   tenantId: string,
   templateSlug: string,
   client?: SupabaseClient
-): Promise<{ slug: string; slots: ProtocolSlotDef[] } | null> {
+): Promise<{
+  slug: string;
+  slots: ProtocolSlotDef[];
+  protocol_catalog_source?: string;
+  protocol_catalog_version?: string;
+} | null> {
   const supabase = client ?? supabaseAdmin();
-  const tid = tenantId.trim();
-  const slug = templateSlug.trim();
-  const { data, error } = await supabase
-    .from("fi_imaging_protocol_templates")
-    .select("slug, slots")
-    .or(`tenant_id.eq.${tid},tenant_id.is.null`)
-    .eq("slug", slug)
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) return null;
-  const r = data as Record<string, unknown>;
-  return { slug: String(r.slug ?? slug), slots: parseProtocolSlots(r.slots) };
+  const resolved = await loadResolvedProtocolSlots(tenantId, templateSlug, supabase);
+  if (!resolved.slots.length) return null;
+  return {
+    slug: resolved.protocol.slug,
+    slots: resolved.slots,
+    protocol_catalog_source: resolved.protocol.metadata.source,
+    protocol_catalog_version: resolved.protocol.metadata.version,
+  };
 }
 
 /**

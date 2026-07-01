@@ -17,12 +17,17 @@ import { clinicalAnalysisResultToMetadataRecord } from "./clinicalImageAnalysisC
 import { assessFiOsPatientDonorAndPersist } from "@/src/lib/hair-intelligence/donorIntelligence/adapters/fiOsDonorAssessment.server";
 import { assessFiOsPatientRecipientAndPersist } from "@/src/lib/hair-intelligence/recipientCandidacy/adapters/fiOsRecipientAssessment.server";
 import {
-  buildDensityEstimateSummary,
   buildNorwoodGradeSummary,
-  buildOutcomeScoreSummary,
   mergeImagingJobSummariesMetadata,
   type ReadOnlyJobSummary,
 } from "./imagingJobReadOnlySummaries";
+import {
+  buildLiveDensitySignalSummary,
+  buildLiveOutcomeScoreSignalSummary,
+  parseImagingLiveProviderFlags,
+  type OutcomeSignalSummary,
+} from "./imagingOutcomeSignalsCore";
+import { resolveLiveImagingSignalProvider } from "./liveImagingSignalProviders.server";
 
 export type ProcessImagingAiJobResult = {
   jobId: string;
@@ -66,7 +71,7 @@ async function persistJobSummaryMetadata(
   tenantId: string,
   imageId: string,
   kind: "density_estimate" | "norwood_grade" | "outcome_score",
-  summary: ReadOnlyJobSummary
+  summary: ReadOnlyJobSummary | OutcomeSignalSummary
 ): Promise<Record<string, unknown>> {
   const ctx = await loadPatientImageContext(supabase, tenantId, imageId);
   const merged = mergeImagingJobSummariesMetadata(ctx.metadata, { [kind]: summary });
@@ -158,10 +163,15 @@ export async function processImagingAiAnalysisJob(
 
     if (job.analysis_kind === "density_estimate") {
       const ctx = await loadPatientImageContext(supabase, tid, imageId);
-      const summary = buildDensityEstimateSummary({
+      const flags = parseImagingLiveProviderFlags(process.env);
+      const providerCtx = resolveLiveImagingSignalProvider(process.env);
+      const summary = buildLiveDensitySignalSummary({
         metadata: ctx.metadata,
         aiImageCategory: ctx.aiImageCategory,
         aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
+        liveEnabled: flags.liveDensityEnabled,
+        providerAvailable: providerCtx.providerAvailable,
+        providerName: providerCtx.providerName,
       });
       await persistJobSummaryMetadata(supabase, tid, imageId, "density_estimate", summary);
       await completeImagingAiAnalysisJob({
@@ -196,10 +206,14 @@ export async function processImagingAiAnalysisJob(
 
     if (job.analysis_kind === "outcome_score") {
       const ctx = await loadPatientImageContext(supabase, tid, imageId);
-      const summary = buildOutcomeScoreSummary({
+      const flags = parseImagingLiveProviderFlags(process.env);
+      const providerCtx = resolveLiveImagingSignalProvider(process.env);
+      const summary = buildLiveOutcomeScoreSignalSummary({
         metadata: ctx.metadata,
-        providerSupported: true,
         aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
+        liveEnabled: flags.liveOutcomeEnabled,
+        providerAvailable: providerCtx.providerAvailable,
+        providerName: providerCtx.providerName,
       });
       await persistJobSummaryMetadata(supabase, tid, imageId, "outcome_score", summary);
       await completeImagingAiAnalysisJob({

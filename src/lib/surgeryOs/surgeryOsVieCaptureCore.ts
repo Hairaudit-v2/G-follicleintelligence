@@ -268,19 +268,44 @@ export function buildSurgeryOsVieCaptureSummary(input: {
   comparisonPairs?: VieComparisonPair[];
   alignmentResults?: VieAlignmentResultRow[];
   outcomeSummary?: VieOutcomeSummary | null;
+  /** Phase 6 — resolved protocol slots (tenant override / canonical fallback). */
+  protocolSlots?: ProtocolSlotDef[];
+  protocolCatalogSource?: string | null;
+  protocolCatalogVersion?: string | null;
 }): SurgeryOsVieCaptureSummary {
   const sessions = [{ template_slug: "surgery_day", progress: input.progress }];
   const surgical = computeSurgicalDocumentationCompleteness(sessions);
   const donor = computeDonorDocumentationCompleteness(sessions);
   const protocol = getVieProtocol("surgery_day");
-  const protocolSlots = protocol?.slots.map(toProtocolSlotDef) ?? [];
+  const protocolSlots =
+    input.protocolSlots?.length
+      ? input.protocolSlots
+      : (protocol?.slots.map(toProtocolSlotDef) ?? []);
   const globalNextSlug = protocolSlots.length
     ? nextRecommendedSlotSlug(protocolSlots, input.progress)
     : null;
   const globalNextLabel =
     globalNextSlug != null
-      ? (protocol?.slots.find((s) => s.slug === globalNextSlug)?.label ?? globalNextSlug)
+      ? (protocolSlots.find((s) => s.slug === globalNextSlug)?.label ??
+        protocol?.slots.find((s) => s.slug === globalNextSlug)?.label ??
+        globalNextSlug)
       : null;
+
+  const warnings = deriveSurgeryOsVieWarnings(input.progress, input.alignmentResults ?? []);
+  if (!input.sessionId) {
+    warnings.push({
+      kind: "missing_protocol_session",
+      label: "Start a surgery-day protocol session before operative capture.",
+      severity: "warning",
+    });
+  }
+  if (input.protocolCatalogSource === "vie_legacy") {
+    warnings.push({
+      kind: "protocol_legacy_fallback",
+      label: "Protocol resolved from legacy catalog — verify slot guidance with staff.",
+      severity: "info",
+    });
+  }
 
   return {
     surgeryId: input.surgeryId,
@@ -296,7 +321,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
     graftTrayStatus: evidenceGroupStatus(GRAFT_TRAY_SLOTS, input.progress),
     immediatePostOpStatus: evidenceGroupStatus(IMMEDIATE_POST_OP_REQUIRED_SLOTS, input.progress),
     phases: buildSurgeryOsViePhaseStatuses(input.progress),
-    warnings: deriveSurgeryOsVieWarnings(input.progress, input.alignmentResults ?? []),
+    warnings,
     nextRecommendedSlot: globalNextSlug,
     nextRecommendedSlotLabel: globalNextLabel,
     comparisonStatus: deriveSurgeryComparisonStatus(input.comparisonPairs ?? []),
@@ -316,8 +341,15 @@ export function buildVieSurgeryImageMetadata(input: {
   procedureDayId: string | null;
   slotSlug: string;
   protocolSlug?: string;
+  protocolCatalogSource?: string | null;
+  protocolCatalogVersion?: string | null;
+  protocolSessionId?: string | null;
 }): Record<string, unknown> {
   return {
+    protocol_template_slug: input.protocolSlug ?? "surgery_day",
+    protocol_catalog_source: input.protocolCatalogSource ?? null,
+    protocol_catalog_version: input.protocolCatalogVersion ?? null,
+    protocol_session_id: input.protocolSessionId ?? null,
     vie_surgery_context: {
       case_id: input.caseId,
       booking_id: input.bookingId,

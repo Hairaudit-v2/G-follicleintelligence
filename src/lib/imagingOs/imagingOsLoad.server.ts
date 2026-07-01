@@ -5,11 +5,21 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
 import {
-  parseProtocolSlots,
   protocolRequiredCompletionPercent,
   type ProtocolSlotDef,
 } from "./imagingOsProtocol";
+import { loadResolvedProtocol } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
+import type { ProtocolCatalogSource } from "@/src/lib/imaging-os/protocolCatalogResolverCore";
 import type { VieComparisonPairRow } from "@/src/lib/vie/vieComparisonTypes";
+
+export const GUIDED_CAPTURE_TEMPLATE_SLUGS = [
+  "hair_loss_consultation",
+  "baseline_consultation",
+  "hair_transplant_planning",
+  "surgery_day",
+  "follow_up_review",
+  "trichoscopy_review",
+] as const;
 
 export type ImagingProtocolTemplateRow = {
   id: string;
@@ -18,6 +28,8 @@ export type ImagingProtocolTemplateRow = {
   name: string;
   description: string | null;
   slots: ProtocolSlotDef[];
+  protocol_catalog_source?: ProtocolCatalogSource;
+  protocol_catalog_version?: string;
 };
 
 export type ImagingProtocolSessionRow = {
@@ -61,15 +73,22 @@ export type ImagingOsPatientPayload = {
   comparisonPairs: VieComparisonPairRow[];
 };
 
-function mapTemplate(r: Record<string, unknown>): ImagingProtocolTemplateRow {
-  const slotsRaw = r.slots;
+async function resolveProtocolTemplateRow(
+  tenantId: string,
+  slug: string,
+  dbId: string | null,
+  client: SupabaseClient
+): Promise<ImagingProtocolTemplateRow> {
+  const protocol = await loadResolvedProtocol(tenantId, slug, client);
   return {
-    id: String(r.id),
-    tenant_id: r.tenant_id != null ? String(r.tenant_id) : null,
-    slug: String(r.slug ?? ""),
-    name: String(r.name ?? ""),
-    description: r.description != null ? String(r.description) : null,
-    slots: parseProtocolSlots(slotsRaw),
+    id: dbId ?? `resolved:${protocol.slug}`,
+    tenant_id: null,
+    slug: protocol.slug,
+    name: protocol.name,
+    description: protocol.description ?? null,
+    slots: protocol.slots,
+    protocol_catalog_source: protocol.metadata.source,
+    protocol_catalog_version: protocol.metadata.version,
   };
 }
 
@@ -114,14 +133,37 @@ export async function loadImagingOsPatientPayload(
       .limit(20),
   ]);
 
-  const protocolTemplates: ImagingProtocolTemplateRow[] = [];
+  const slugSet = new Set<string>(GUIDED_CAPTURE_TEMPLATE_SLUGS);
+  const dbIdBySlug = new Map<string, string>();
   if (!tplErr && tplRows) {
-    for (const r of tplRows) protocolTemplates.push(mapTemplate(r as Record<string, unknown>));
+    for (const r of tplRows) {
+      const row = r as Record<string, unknown>;
+      const slug = String(row.slug ?? "").trim();
+      if (slug) {
+        slugSet.add(slug);
+        dbIdBySlug.set(slug, String(row.id));
+      }
+    }
+  }
+
+  const protocolSessions: ImagingProtocolSessionRow[] = [];
+  if (!sessErr && sessRows) {
+    for (const raw of sessRows) {
+      const r = raw as Record<string, unknown>;
+      const sessionSlug = String(r.template_slug ?? "").trim();
+      if (sessionSlug) slugSet.add(sessionSlug);
+    }
+  }
+
+  const protocolTemplates: ImagingProtocolTemplateRow[] = [];
+  for (const slug of slugSet) {
+    protocolTemplates.push(
+      await resolveProtocolTemplateRow(tid, slug, dbIdBySlug.get(slug) ?? null, supabase)
+    );
   }
 
   const templateBySlug = new Map(protocolTemplates.map((t) => [t.slug, t]));
 
-  const protocolSessions: ImagingProtocolSessionRow[] = [];
   if (!sessErr && sessRows) {
     for (const raw of sessRows) {
       const r = raw as Record<string, unknown>;

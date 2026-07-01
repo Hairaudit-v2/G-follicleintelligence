@@ -12,7 +12,7 @@ import {
 import type { ImagingQualityMetadataRecord } from "@/src/lib/imaging-os/imageQualityMetadata";
 import {
   readImagingJobSummaries,
-  type ReadOnlyJobSummary,
+  type ImagingJobSummariesMetadata,
 } from "@/src/lib/imaging-os/imagingJobReadOnlySummaries";
 import {
   readImagingStaffReviewRecord,
@@ -32,11 +32,7 @@ export type PatientTwinImagingIntelligenceSummary = {
   clinical_status: string | null;
   observations: string[];
   limitations: string[];
-  job_summaries: {
-    density_estimate?: ReadOnlyJobSummary;
-    norwood_grade?: ReadOnlyJobSummary;
-    outcome_score?: ReadOnlyJobSummary;
-  };
+  job_summaries: ImagingJobSummariesMetadata;
 };
 
 export type PatientTwinImagingDeepLinks = {

@@ -480,7 +480,13 @@ export function ImagingGuidedCaptureWizard({
                 onClick={() => onStartTemplate(t.slug)}
                 className="min-h-[48px] rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 py-3 text-left text-sm font-medium text-slate-100 shadow-sm hover:bg-white/[0.03] active:bg-white/[0.06] disabled:opacity-50"
               >
-                {t.name}
+                <span className="block">{t.name}</span>
+                {t.protocol_catalog_source ? (
+                  <span className="mt-0.5 block text-[10px] font-normal text-slate-500">
+                    {t.protocol_catalog_source}
+                    {t.protocol_catalog_version ? ` · ${t.protocol_catalog_version}` : ""}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>

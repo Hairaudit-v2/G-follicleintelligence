@@ -162,7 +162,15 @@ describe("SurgeryOS VIE capture completeness", () => {
       bookingId,
       procedureDayId,
       slotSlug: "graft_tray_overview",
-    }) as { vie_surgery_context: Record<string, unknown> };
+      protocolCatalogSource: "imagingos_canonical",
+      protocolCatalogVersion: "imagingos_protocol_v1",
+      protocolSessionId: "00000000-0000-4000-8000-000000000106",
+    }) as {
+      vie_surgery_context: Record<string, unknown>;
+      protocol_catalog_source: string;
+      protocol_catalog_version: string;
+      protocol_session_id: string;
+    };
 
     assert.equal(meta.vie_surgery_context.case_id, caseId);
     assert.equal(meta.vie_surgery_context.booking_id, bookingId);
@@ -171,6 +179,25 @@ describe("SurgeryOS VIE capture completeness", () => {
     assert.equal(meta.vie_surgery_context.slot_slug, "graft_tray_overview");
     assert.equal(meta.vie_surgery_context.capture_surface, "surgery_os");
     assert.equal(meta.vie_surgery_context.surgery_phase, "graft_handling");
+    assert.equal(meta.protocol_catalog_source, "imagingos_canonical");
+    assert.equal(meta.protocol_catalog_version, "imagingos_protocol_v1");
+    assert.equal(meta.protocol_session_id, "00000000-0000-4000-8000-000000000106");
+  });
+
+  it("surfaces missing protocol session and legacy fallback warnings", () => {
+    const summary = buildSurgeryOsVieCaptureSummary({
+      surgeryId,
+      patientId,
+      patientLabel: "Test Patient",
+      caseId,
+      bookingId,
+      procedureDayId,
+      sessionId: null,
+      progress: {},
+      protocolCatalogSource: "vie_legacy",
+    });
+    assert.ok(summary.warnings.some((w) => w.kind === "missing_protocol_session"));
+    assert.ok(summary.warnings.some((w) => w.kind === "protocol_legacy_fallback"));
   });
 
   it("surfaces pending low-quality capture warnings", () => {

@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
 import {
+  assignImagingReviewAction,
   bulkAssignImagingQueueStaffNoteAction,
   bulkFlagImagingQueueRetakeAction,
   bulkMarkImagingQueueReviewedAction,
   flagImagingReviewRetakeAction,
   markImagingReviewReviewedAction,
   reassignImagingReviewViewTypeAction,
+  unassignImagingReviewAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { ALLOWED_STAFF_REASSIGN_VIEW_TYPES } from "@/src/lib/imaging-os/imagingStaffReviewCore";
 import type { ImagingClinicalReviewQueueItem } from "@/src/lib/imaging-os/imagingClinicalReviewQueue.server";
@@ -48,6 +50,7 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
   const [reassignView, setReassignView] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [bulkNote, setBulkNote] = useState("");
+  const [assignee, setAssignee] = useState<Record<string, string>>({});
 
   const withAdmin = useCallback(
     <T extends Record<string, unknown>>(body: T): T & { adminKey?: string } => {
@@ -210,6 +213,7 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
               <th className="px-4 py-3">Quality</th>
               <th className="px-4 py-3">Confidence</th>
               <th className="px-4 py-3">Review reasons</th>
+              <th className="px-4 py-3">Assigned</th>
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
@@ -275,6 +279,65 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
                         <li key={r}>{formatReason(r)}</li>
                       ))}
                     </ul>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex min-w-[160px] flex-col gap-1 text-xs">
+                      {item.assignedToUserId ? (
+                        <span className="font-mono text-sky-200/90">
+                          {item.assignedToUserId.slice(0, 8)}…
+                        </span>
+                      ) : (
+                        <span className="text-slate-500">Unassigned</span>
+                      )}
+                      <input
+                        type="text"
+                        placeholder="Reviewer user ID"
+                        value={assignee[item.imageId] ?? item.assignedToUserId ?? ""}
+                        onChange={(e) =>
+                          setAssignee((prev) => ({ ...prev, [item.imageId]: e.target.value }))
+                        }
+                        className="rounded border border-slate-700 bg-[#020617] px-2 py-1 font-mono text-[10px]"
+                      />
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          type="button"
+                          disabled={pending || !assignee[item.imageId]?.trim()}
+                          className="rounded bg-violet-900/40 px-2 py-0.5 text-[10px] text-violet-200 disabled:opacity-40"
+                          onClick={() =>
+                            runAction(item.patientId, item.imageId, () =>
+                              assignImagingReviewAction(
+                                tenantId,
+                                item.patientId,
+                                withAdmin({
+                                  patientImageId: item.imageId,
+                                  assignedToUserId: assignee[item.imageId]!.trim(),
+                                })
+                              )
+                            )
+                          }
+                        >
+                          Assign
+                        </button>
+                        {item.assignedToUserId ? (
+                          <button
+                            type="button"
+                            disabled={pending}
+                            className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300"
+                            onClick={() =>
+                              runAction(item.patientId, item.imageId, () =>
+                                unassignImagingReviewAction(
+                                  tenantId,
+                                  item.patientId,
+                                  withAdmin({ patientImageId: item.imageId })
+                                )
+                              )
+                            }
+                          >
+                            Unassign
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex min-w-[200px] flex-col gap-2">

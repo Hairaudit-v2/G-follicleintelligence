@@ -6,7 +6,10 @@ import { collectImagingReviewReasons, readImagingClinicalAiMetadata } from "./cl
 import type { DonorRecipientAssessmentSummary } from "./clinicalImageAnalysisCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
 import { buildImagingDeepLinks, listAvailableImagingDeepLinks, type ImagingDeepLink } from "./imagingDeepLinksCore";
-import { readImagingJobSummaries, type ReadOnlyJobSummary } from "./imagingJobReadOnlySummaries";
+import {
+  readImagingJobSummaries,
+  type ImagingJobSummariesMetadata,
+} from "./imagingJobReadOnlySummaries";
 import {
   readImagingStaffReviewRecord,
   staffReviewClearsQueue,
@@ -25,11 +28,7 @@ export type ImagingClinicalIntelligenceView = {
   staffReviewStatus: string | null;
   retakeRequired: boolean;
   missingScalpRegion: boolean;
-  jobSummaries: {
-    density_estimate?: ReadOnlyJobSummary;
-    norwood_grade?: ReadOnlyJobSummary;
-    outcome_score?: ReadOnlyJobSummary;
-  };
+  jobSummaries: ImagingJobSummariesMetadata;
   reviewQueueHref: string;
   deepLinks: ImagingDeepLink[];
 };

@@ -140,6 +140,8 @@ export const serverEnvSchema = z.object({
   FI_REMINDER_TEST_EMAIL: optionalString,
   FI_REMINDERS_TEST_SEND: optionalString,
   FI_INTELLIGENCE_POLICY_DEV: optionalString,
+  FI_IMAGING_ENABLE_LIVE_DENSITY_PROVIDER: optionalString,
+  FI_IMAGING_ENABLE_LIVE_OUTCOME_PROVIDER: optionalString,
   GOOGLE_SITE_VERIFICATION: optionalString,
   FI_EXTERNAL_CONNECTOR_MASTER_KEY: optionalString,
   GOOGLE_CALENDAR_CLIENT_ID: optionalString,
