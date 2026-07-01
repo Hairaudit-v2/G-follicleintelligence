@@ -5,8 +5,6 @@
  * Delegates to existing FI OS workflow engines; no duplicate business logic.
  */
 
-export { receptionBoardFlowAction } from "@/lib/actions/reception-board-flow-action";
-
 import { receptionBoardFlowAction } from "@/lib/actions/reception-board-flow-action";
 import type { ReceptionBoardFlowActionKind } from "@/src/lib/fiOs/receptionBoardFlowPolicy";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
