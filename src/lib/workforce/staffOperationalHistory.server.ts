@@ -22,14 +22,15 @@ const INACTIVE_STATUSES = new Set([
   "inactive",
 ]);
 
+type HeadCountQuery = ReturnType<ReturnType<SupabaseClient["from"]>["select"]>;
+
 async function safeCount(
   supabase: SupabaseClient,
   table: string,
-  filters: (q: ReturnType<SupabaseClient["from"]>) => ReturnType<SupabaseClient["from"]>
+  filters: (q: HeadCountQuery) => HeadCountQuery
 ): Promise<number> {
   try {
-    let q = supabase.from(table).select("id", { count: "exact", head: true });
-    q = filters(q) as ReturnType<SupabaseClient["from"]>;
+    const q = filters(supabase.from(table).select("id", { count: "exact", head: true }));
     const { count, error } = await q;
     if (error) return 0;
     return count ?? 0;
