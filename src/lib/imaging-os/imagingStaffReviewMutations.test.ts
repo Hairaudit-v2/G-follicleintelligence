@@ -19,7 +19,6 @@ function createImageStore(initial: Row) {
     const filters: Array<{ col: string; val: unknown }> = [];
     let mode: "select" | "update" = "select";
     let patch: Partial<Row> | null = null;
-    let terminal: "single" | "maybeSingle" = "maybeSingle";
 
     const exec = () => {
       const match = filters.every((f) => row[f.col] === f.val);
@@ -40,10 +39,7 @@ function createImageStore(initial: Row) {
         return api;
       },
       maybeSingle: () => api,
-      single: () => {
-        terminal = "single";
-        return api;
-      },
+      single: () => api,
       then: (resolve: (v: unknown) => void) => Promise.resolve(exec()).then(resolve),
     };
     return api;
