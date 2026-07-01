@@ -177,9 +177,14 @@ export async function staffPinLogoutAction(
     revalidatePath(`/fi-admin/${tid}`);
     revalidatePath(`/fi-admin/${tid}/calendar`);
     revalidatePath(`/fi-admin/${tid}/workforce-os/payroll`);
+    revalidatePath(`/fi-admin/${tid}/staff-time-clock`);
     return {
       ok: true,
-      redirectTo: member ? `/fi-admin/${tid}/calendar` : `/fi-admin/${tid}/staff-pin-login`,
+      redirectTo: member
+        ? `/fi-admin/${tid}/calendar`
+        : session
+          ? `/fi-admin/${tid}/staff-time-clock`
+          : `/fi-admin/${tid}/staff-pin-login`,
     };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

@@ -10,7 +10,9 @@ import {
   managerCloseForgottenPunch,
   startBreakFromPinSession,
 } from "@/src/lib/workforce/staffTimeClock.server";
-import { setWorkforceTimeClockBreaksEnabled } from "@/src/lib/workforce/staffTimeClockPolicy.server";
+import { isPayPeriodFrequency } from "@/src/lib/workforce/payPeriodCore";
+import { saveWorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicy.server";
+import type { WorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicyCore";
 import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 function errMsg(e: unknown): string {
@@ -36,9 +38,36 @@ export async function updateWorkforceTimeClockBreaksEnabledAction(
     await assertWorkforceHrManageAllowed(tenantId);
     const b = body && typeof body === "object" && body !== null ? body : {};
     const breaksEnabled = Boolean((b as { breaksEnabled?: boolean }).breaksEnabled);
-    const policy = await setWorkforceTimeClockBreaksEnabled(tenantId, breaksEnabled);
+    const policy = await saveWorkforceTimeClockPolicy(tenantId, { breaksEnabled });
     revalidateTimeClockSurfaces(tenantId);
     return { ok: true, breaksEnabled: policy.breaksEnabled };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function updateWorkforceTimeClockPolicyAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await assertWorkforceHrManageAllowed(tenantId);
+    const b = body && typeof body === "object" && body !== null ? body : {};
+    const patch: Record<string, unknown> = {};
+    if ("breaksEnabled" in b) patch.breaksEnabled = Boolean((b as { breaksEnabled?: boolean }).breaksEnabled);
+    if ("autoCloseEnabled" in b) {
+      patch.autoCloseEnabled = Boolean((b as { autoCloseEnabled?: boolean }).autoCloseEnabled);
+    }
+    const freq = String((b as { payPeriodFrequency?: string }).payPeriodFrequency ?? "").trim();
+    if (freq && isPayPeriodFrequency(freq)) patch.payPeriodFrequency = freq;
+    const anchor = String((b as { payPeriodAnchor?: string }).payPeriodAnchor ?? "").trim();
+    if (anchor) patch.payPeriodAnchor = anchor;
+    const hour = Number((b as { autoCloseLocalHour?: number }).autoCloseLocalHour);
+    if (Number.isFinite(hour)) patch.autoCloseLocalHour = hour;
+
+    await saveWorkforceTimeClockPolicy(tenantId, patch as Partial<WorkforceTimeClockPolicy>);
+    revalidateTimeClockSurfaces(tenantId);
+    return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

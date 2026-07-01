@@ -71,7 +71,8 @@ export default async function TenantAdminLayout({
   const { tenantId } = await params;
   const base = `/fi-admin/${tenantId}`;
   const pathname = headers().get("x-pathname") ?? "";
-  const isStaffPinLogin = pathname.includes("/staff-pin-login");
+  const isStaffPinLogin =
+    pathname.includes("/staff-pin-login") || pathname.includes("/staff-time-clock");
   const isCommandCentrePresentation = isGlobalCommandCentrePresentationPath(pathname);
   const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
 

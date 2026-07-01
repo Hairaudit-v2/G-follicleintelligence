@@ -5,11 +5,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   calendarDateStringFromInstant,
+  isoFromLocalDayMinutes,
   resolveTenantCalendarTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { insertFiStaffPinAuditEvent } from "@/src/lib/staffPin/staffPinAudit.server";
-import { createTimesheetEntry } from "@/src/lib/workforce/wageProfile.server";
+
 import { resolveStaffMemberContext } from "@/src/lib/workforce/workforceStaffMemberResolve.server";
 
 import {
@@ -26,6 +27,7 @@ import {
   assertBreaksEnabledForTenant,
   loadWorkforceTimeClockPolicy,
 } from "./staffTimeClockPolicy.server";
+import { syncTimesheetEntryFromPunch } from "./timesheetPunchSync.server";
 
 type PunchRow = Record<string, unknown>;
 type BreakRow = Record<string, unknown>;
@@ -235,38 +237,17 @@ async function closeTimePunch(opts: ClosePunchOpts): Promise<ClockOutResult> {
   const netMinutes =
     grossMinutes != null ? Math.max(0, grossMinutes - breakMinutes) : null;
 
-  let timesheetEntryId: string | null = null;
-  let timesheetPendingReason: string | null = null;
-
   const staffMemberId =
     opts.punchRow.staff_member_id != null
       ? String(opts.punchRow.staff_member_id)
       : (await resolveStaffMemberContext(tid, fiStaffId, supabase))?.staffMemberId ?? null;
 
-  if (staffMemberId && netMinutes != null && netMinutes > 0) {
-    try {
-      const entry = await createTimesheetEntry({
-        tenantId: tid,
-        staffMemberId,
-        workDate: String(opts.punchRow.work_date).slice(0, 10),
-        entryType: "regular",
-        minutesWorked: netMinutes,
-        shiftId:
-          opts.punchRow.shift_id != null ? String(opts.punchRow.shift_id) : null,
-        notes:
-          breakMinutes > 0
-            ? `Auto-generated from PIN clock-out (${breakMinutes} min breaks deducted).`
-            : "Auto-generated from PIN clock-out.",
-        client: supabase,
-      });
-      timesheetEntryId = entry.id;
-    } catch (e) {
-      timesheetPendingReason =
-        e instanceof Error ? e.message : "Could not generate timesheet entry.";
-    }
-  } else if (!staffMemberId) {
+  let timesheetEntryId: string | null =
+    opts.punchRow.timesheet_entry_id != null ? String(opts.punchRow.timesheet_entry_id) : null;
+  let timesheetPendingReason: string | null = null;
+  if (!staffMemberId) {
     timesheetPendingReason = "Staff member not linked in WorkforceOS.";
-  } else {
+  } else if (netMinutes == null || netMinutes <= 0) {
     timesheetPendingReason = "Zero or invalid worked minutes.";
   }
 
@@ -298,16 +279,45 @@ async function closeTimePunch(opts: ClosePunchOpts): Promise<ClockOutResult> {
 
   const closedBreaks = (await loadBreaksForPunchIds(tid, [punchId], supabase)).get(punchId) ?? [];
 
+  const syncResult = await syncTimesheetEntryFromPunch({
+    tenantId: tid,
+    punchId,
+    client: supabase,
+  }).catch(() => ({ entry: null, updated: false, reason: "Sync failed." }));
+  if (syncResult.entry) {
+    timesheetEntryId = syncResult.entry.id;
+    timesheetPendingReason = null;
+  } else if (!timesheetPendingReason) {
+    timesheetPendingReason = syncResult.reason;
+  }
+
+  const refreshed = await supabase
+    .from("fi_workforce_time_punches")
+    .select("timesheet_entry_id")
+    .eq("tenant_id", tid)
+    .eq("id", punchId)
+    .maybeSingle();
+  const linkedId = refreshed.data
+    ? (refreshed.data as { timesheet_entry_id: string | null }).timesheet_entry_id
+    : timesheetEntryId;
+
   return {
     punch: mapTimePunch(data as PunchRow, closedBreaks, staffName),
-    timesheetEntryId,
+    timesheetEntryId: linkedId != null ? String(linkedId) : timesheetEntryId,
     timesheetPendingReason,
   };
 }
 
 export async function listWorkforceTimePunches(
   tenantId: string,
-  options?: { limit?: number; workDate?: string | null; openOnly?: boolean },
+  options?: {
+    limit?: number;
+    workDate?: string | null;
+    periodStart?: string | null;
+    periodEnd?: string | null;
+    openOnly?: boolean;
+    source?: WorkforceTimePunch["source"] | null;
+  },
   client?: SupabaseClient
 ): Promise<WorkforceTimePunch[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
@@ -320,7 +330,10 @@ export async function listWorkforceTimePunches(
     .order("work_date", { ascending: false })
     .order("clock_in_at", { ascending: false });
   if (options?.workDate?.trim()) q = q.eq("work_date", options.workDate.trim());
+  if (options?.periodStart?.trim()) q = q.gte("work_date", options.periodStart.trim());
+  if (options?.periodEnd?.trim()) q = q.lte("work_date", options.periodEnd.trim());
   if (options?.openOnly) q = q.eq("status", "open");
+  if (options?.source) q = q.eq("source", options.source);
   if (options?.limit) q = q.limit(options.limit);
   const { data, error } = await q;
   if (error) {
@@ -705,5 +718,48 @@ export async function managerAddBreakToPunch(opts: {
     .single();
   if (error) throw new Error(error.message);
 
+  if (row.status === "closed") {
+    await syncTimesheetEntryFromPunch({ tenantId: tid, punchId, client: supabase }).catch(
+      () => null
+    );
+  }
+
   return mapBreak(data as BreakRow);
 }
+
+export async function autoCloseOpenPunchesForTenant(opts: {
+  tenantId: string;
+  beforeWorkDate: string;
+  autoCloseLocalHour: number;
+  timeZone: string;
+  client?: SupabaseClient;
+}): Promise<{ closed: number }> {
+  const tid = assertNonEmptyUuid(opts.tenantId, "tenantId");
+  const supabase = opts.client ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_workforce_time_punches")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("status", "open")
+    .lt("work_date", opts.beforeWorkDate.trim());
+  if (error) throw new Error(error.message);
+
+  let closed = 0;
+  for (const row of (data ?? []) as PunchRow[]) {
+    const workDate = String(row.work_date).slice(0, 10);
+    const clockOutAt =
+      isoFromLocalDayMinutes(workDate, opts.autoCloseLocalHour * 60, opts.timeZone) ??
+      new Date().toISOString();
+    await closeTimePunch({
+      tenantId: tid,
+      punchRow: row,
+      clockOutAt,
+      source: "auto_close",
+      notes: `Auto-closed at ${opts.autoCloseLocalHour}:00 clinic time.`,
+      client: supabase,
+    });
+    closed += 1;
+  }
+  return { closed };
+}
+

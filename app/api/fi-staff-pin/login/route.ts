@@ -24,6 +24,7 @@ export async function POST(req: Request) {
     const tenantId = typeof body.tenantId === "string" ? body.tenantId.trim() : "";
     const staffId = typeof body.staffId === "string" ? body.staffId.trim() : "";
     const pin = typeof body.pin === "string" ? body.pin : "";
+    const mode = typeof body.mode === "string" ? body.mode.trim() : "";
 
     if (!isUuid(tenantId) || !isUuid(staffId)) {
       return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
@@ -53,7 +54,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      redirectTo: `/fi-admin/${tenantId}/calendar`,
+      redirectTo:
+        mode === "kiosk"
+          ? `/fi-admin/${tenantId}/staff-time-clock`
+          : `/fi-admin/${tenantId}/calendar`,
       staffName: session.staffName,
       expiresAt: session.expiresAt,
       clockIn: clockIn

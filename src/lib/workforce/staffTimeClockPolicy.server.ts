@@ -16,6 +16,37 @@ function asMetadataRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+async function upsertTenantSettingsMetadata(
+  tenantId: string,
+  metadata: Record<string, unknown>,
+  client: SupabaseClient
+): Promise<void> {
+  const tid = tenantId.trim();
+  const now = new Date().toISOString();
+  const { data: existing, error: loadErr } = await client
+    .from("fi_tenant_settings")
+    .select("id")
+    .eq("tenant_id", tid)
+    .maybeSingle();
+  if (loadErr) throw new Error(loadErr.message);
+
+  if (existing) {
+    const { error } = await client
+      .from("fi_tenant_settings")
+      .update({ metadata, updated_at: now })
+      .eq("tenant_id", tid);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await client.from("fi_tenant_settings").insert({
+      tenant_id: tid,
+      metadata,
+      created_at: now,
+      updated_at: now,
+    });
+    if (error) throw new Error(error.message);
+  }
+}
+
 export async function loadWorkforceTimeClockPolicy(
   tenantId: string,
   client?: SupabaseClient
@@ -32,45 +63,34 @@ export async function loadWorkforceTimeClockPolicy(
   return parseWorkforceTimeClockPolicy(asMetadataRecord(row?.metadata));
 }
 
+export async function saveWorkforceTimeClockPolicy(
+  tenantId: string,
+  patch: Partial<WorkforceTimeClockPolicy>,
+  client?: SupabaseClient
+): Promise<WorkforceTimeClockPolicy> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const supabase = client ?? supabaseAdmin();
+  const { data: existing, error: loadErr } = await supabase
+    .from("fi_tenant_settings")
+    .select("metadata")
+    .eq("tenant_id", tid)
+    .maybeSingle();
+  if (loadErr) throw new Error(loadErr.message);
+
+  const metadata = mergeWorkforceTimeClockPolicyIntoMetadata(
+    asMetadataRecord((existing as { metadata?: unknown } | null)?.metadata),
+    patch
+  );
+  await upsertTenantSettingsMetadata(tid, metadata, supabase);
+  return parseWorkforceTimeClockPolicy(metadata);
+}
+
 export async function setWorkforceTimeClockBreaksEnabled(
   tenantId: string,
   breaksEnabled: boolean,
   client?: SupabaseClient
 ): Promise<WorkforceTimeClockPolicy> {
-  const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = client ?? supabaseAdmin();
-  const policy: WorkforceTimeClockPolicy = { breaksEnabled: Boolean(breaksEnabled) };
-
-  const { data: existing, error: loadErr } = await supabase
-    .from("fi_tenant_settings")
-    .select("id, metadata")
-    .eq("tenant_id", tid)
-    .maybeSingle();
-  if (loadErr) throw new Error(loadErr.message);
-
-  const now = new Date().toISOString();
-  const metadata = mergeWorkforceTimeClockPolicyIntoMetadata(
-    asMetadataRecord((existing as { metadata?: unknown } | null)?.metadata),
-    policy
-  );
-
-  if (existing) {
-    const { error } = await supabase
-      .from("fi_tenant_settings")
-      .update({ metadata, updated_at: now })
-      .eq("tenant_id", tid);
-    if (error) throw new Error(error.message);
-  } else {
-    const { error } = await supabase.from("fi_tenant_settings").insert({
-      tenant_id: tid,
-      metadata,
-      created_at: now,
-      updated_at: now,
-    });
-    if (error) throw new Error(error.message);
-  }
-
-  return policy;
+  return saveWorkforceTimeClockPolicy(tenantId, { breaksEnabled }, client);
 }
 
 export async function assertBreaksEnabledForTenant(

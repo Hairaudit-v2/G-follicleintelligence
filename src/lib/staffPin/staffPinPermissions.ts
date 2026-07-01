@@ -67,11 +67,16 @@ export function canUseStaffPinClinicSession(
   return PIN_ALLOWED_ACTIONS.has(action);
 }
 
+const PIN_ALLOWED_ROUTE_SUFFIXES = ["/staff-time-clock", "/staff-pin-login"] as const;
+
 export function isStaffPinRestrictedRoute(pathname: string, tenantBase: string): boolean {
   const path = pathname.trim();
   if (!path.startsWith(tenantBase)) return true;
   const suffix = path.slice(tenantBase.length) || "/";
   if (suffix === "/" || suffix === "") return false;
+  if (PIN_ALLOWED_ROUTE_SUFFIXES.some((allowed) => suffix === allowed || suffix.startsWith(`${allowed}/`))) {
+    return false;
+  }
   return PIN_RESTRICTED_ROUTE_PREFIXES.some(
     (prefix) => suffix === prefix || suffix.startsWith(`${prefix}/`)
   );

@@ -316,7 +316,12 @@ export async function upsertWorkforceWageProfile(input: {
 
 export async function listTimesheetEntries(
   tenantId: string,
-  options?: { limit?: number; workDate?: string | null },
+  options?: {
+    limit?: number;
+    workDate?: string | null;
+    periodStart?: string | null;
+    periodEnd?: string | null;
+  },
   client?: SupabaseClient
 ): Promise<TimesheetEntry[]> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
@@ -329,6 +334,8 @@ export async function listTimesheetEntries(
     .order("work_date", { ascending: false })
     .order("updated_at", { ascending: false });
   if (options?.workDate?.trim()) q = q.eq("work_date", options.workDate.trim());
+  if (options?.periodStart?.trim()) q = q.gte("work_date", options.periodStart.trim());
+  if (options?.periodEnd?.trim()) q = q.lte("work_date", options.periodEnd.trim());
   if (options?.limit) q = q.limit(options.limit);
   const { data, error } = await q;
   if (error) {
@@ -406,6 +413,67 @@ export async function createTimesheetEntry(input: {
     .single();
   if (error) throw new Error(error.message);
   return mapTimesheetEntry(data as Record<string, unknown>, ctx.fullName);
+}
+
+export async function updateTimesheetEntryLabour(input: {
+  tenantId: string;
+  entryId: string;
+  staffMemberId: string;
+  minutesWorked: number;
+  notes?: string | null;
+  metadataPatch?: Record<string, unknown>;
+  client?: SupabaseClient;
+}): Promise<TimesheetEntry> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const entryId = assertNonEmptyUuid(input.entryId, "entryId");
+  const supabase = input.client ?? supabaseAdmin();
+
+  const { row, staffName } = await loadTimesheetEntryById(tid, entryId, supabase);
+  const status = String(row.status) as TimesheetStatus;
+  if (status !== "draft" && status !== "submitted") {
+    throw new Error(`Cannot recalculate a ${status} timesheet entry.`);
+  }
+
+  const profiles = await listWorkforceWageProfiles(tid, supabase);
+  const profile = profiles.find((p) => p.staffMemberId === input.staffMemberId.trim()) ?? null;
+  if (!profile) throw new Error("No active wage profile for staff member.");
+
+  const placeholders = await listAwardLoadingPlaceholders(tid, supabase);
+  const awardLoadings = resolveAwardLoadingsForProfile({
+    awardCode: profile.awardCode,
+    awardLoadingCodes: profile.awardLoadingCodes,
+    placeholders,
+  });
+  const minutesWorked = Math.max(0, Math.floor(input.minutesWorked));
+  const grossCostCents = computeGrossLabourCostCents({
+    rateType: profile.rateType,
+    baseRateCents: profile.baseRateCents,
+    minutesWorked,
+    awardLoadings,
+  });
+
+  const now = new Date().toISOString();
+  const metadata = {
+    ...asMetadataObject(row.metadata),
+    ...(input.metadataPatch ?? {}),
+    punch_recalculated_at: now,
+  };
+
+  const { data, error } = await supabase
+    .from("fi_workforce_timesheet_entries")
+    .update({
+      minutes_worked: minutesWorked,
+      gross_cost_cents: grossCostCents,
+      notes: input.notes?.trim() || (row.notes != null ? String(row.notes) : null),
+      metadata,
+      updated_at: now,
+    })
+    .eq("tenant_id", tid)
+    .eq("id", entryId)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return mapTimesheetEntry(data as Record<string, unknown>, staffName);
 }
 
 function asMetadataObject(value: unknown): Record<string, unknown> {

@@ -10,7 +10,12 @@ import {
   managerAddBreakToPunchAction,
   managerCloseForgottenPunchAction,
   updateWorkforceTimeClockBreaksEnabledAction,
+  updateWorkforceTimeClockPolicyAction,
 } from "@/src/lib/actions/staff-time-clock-actions";
+import type { PayPeriodRange, PayPeriodStaffTotal } from "@/src/lib/workforce/payPeriodCore";
+import { PAY_PERIOD_FREQUENCIES } from "@/src/lib/workforce/payPeriodCore";
+import type { RosterActualVarianceRow } from "@/src/lib/workforce/rosterActualVarianceCore";
+import type { WorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicyCore";
 import {
   bulkTransitionTimesheetEntriesAction,
   createTimesheetEntryAction,
@@ -54,6 +59,12 @@ export function WorkforceOsPayrollClient({
   workDate,
   canManage,
   breaksEnabled,
+  timeClockPolicy,
+  payPeriod,
+  payPeriodStaffTotals,
+  rosterVariance,
+  autoClosedPunches,
+  openPunches,
 }: {
   tenantId: string;
   wageProfiles: WorkforceWageProfile[];
@@ -71,9 +82,16 @@ export function WorkforceOsPayrollClient({
   workDate: string;
   canManage: boolean;
   breaksEnabled: boolean;
+  timeClockPolicy: WorkforceTimeClockPolicy;
+  payPeriod: PayPeriodRange;
+  payPeriodStaffTotals: PayPeriodStaffTotal[];
+  rosterVariance: RosterActualVarianceRow[];
+  autoClosedPunches: WorkforceTimePunch[];
+  openPunches: WorkforceTimePunch[];
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}/workforce-os`;
+  const kioskUrl = `/fi-admin/${tenantId}/staff-time-clock`;
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -387,6 +405,165 @@ export function WorkforceOsPayrollClient({
 
       {message ? <p className="text-sm text-emerald-200">{message}</p> : null}
       {error ? <p className="text-sm text-red-300">{error}</p> : null}
+
+      <DashboardCard className="p-4">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold text-[#F8FAFC]">Pay period</h2>
+            <p className="mt-1 text-xs text-[#94A3B8]">
+              {payPeriod.label} ({payPeriod.start} → {payPeriod.end}) · {payPeriod.frequency}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            <Link
+              href={kioskUrl}
+              className="rounded-lg border border-white/10 px-3 py-2 text-xs text-cyan-200 hover:bg-white/5"
+            >
+              Open time clock kiosk
+            </Link>
+            <label className="text-xs text-[#94A3B8]">
+              Period anchor
+              <input
+                type="date"
+                className="ml-2 rounded border border-white/10 bg-white/5 px-2 py-1 text-sm text-[#F8FAFC]"
+                defaultValue={payPeriod.end}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    router.push(`${base}/payroll?period=${encodeURIComponent(e.target.value)}`);
+                  }
+                }}
+              />
+            </label>
+          </div>
+        </div>
+        {canManage ? (
+          <div className="mt-4 flex flex-wrap gap-4 border-t border-white/[0.06] pt-4 text-xs text-[#CBD5E1]">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={timeClockPolicy.autoCloseEnabled}
+                disabled={pending}
+                onChange={(e) => {
+                  startTransition(async () => {
+                    const res = await updateWorkforceTimeClockPolicyAction(tenantId, {
+                      autoCloseEnabled: e.target.checked,
+                    });
+                    if (res.ok) router.refresh();
+                  });
+                }}
+              />
+              Auto-close forgotten punches (nightly)
+            </label>
+            <label>
+              Pay frequency
+              <select
+                className="ml-2 rounded border border-white/10 bg-white/5 px-2 py-1"
+                value={timeClockPolicy.payPeriodFrequency}
+                disabled={pending}
+                onChange={(e) => {
+                  startTransition(async () => {
+                    await updateWorkforceTimeClockPolicyAction(tenantId, {
+                      payPeriodFrequency: e.target.value,
+                    });
+                    router.refresh();
+                  });
+                }}
+              >
+                {PAY_PERIOD_FREQUENCIES.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ) : null}
+        <table className="mt-4 min-w-full text-left text-sm">
+          <thead className="text-xs uppercase tracking-wide text-[#64748B]">
+            <tr>
+              <th className="py-2 pr-4">Staff</th>
+              <th className="py-2 pr-4">Minutes</th>
+              <th className="py-2 pr-4">Gross</th>
+              <th className="py-2">Approved entries</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payPeriodStaffTotals.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-[#94A3B8]">
+                  No timesheet entries in this pay period.
+                </td>
+              </tr>
+            ) : (
+              payPeriodStaffTotals.map((row) => (
+                <tr key={row.staffMemberId} className="border-t border-white/[0.06]">
+                  <td className="py-2 pr-4 text-[#F8FAFC]">{row.staffFullName ?? "—"}</td>
+                  <td className="py-2 pr-4 text-[#CBD5E1]">{row.minutesWorked}</td>
+                  <td className="py-2 pr-4 text-[#CBD5E1]">
+                    {formatCentsAsCurrency(row.grossCostCents)}
+                  </td>
+                  <td className="py-2 text-[#94A3B8]">
+                    {row.approvedCount} / {row.entryCount}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </DashboardCard>
+
+      {(openPunches.length > 0 || autoClosedPunches.length > 0) && canManage ? (
+        <DashboardCard className="p-4">
+          <h2 className="text-sm font-semibold text-[#F8FAFC]">HR review queue</h2>
+          <p className="mt-1 text-xs text-[#94A3B8]">
+            Open punches need attention; auto-closed punches should be verified.
+          </p>
+          {openPunches.length > 0 ? (
+            <p className="mt-3 text-sm text-amber-200">
+              {openPunches.length} open punch{openPunches.length === 1 ? "" : "es"} still running.
+            </p>
+          ) : null}
+          {autoClosedPunches.length > 0 ? (
+            <ul className="mt-2 space-y-1 text-sm text-[#CBD5E1]">
+              {autoClosedPunches.slice(0, 5).map((p) => (
+                <li key={p.id}>
+                  {p.staffFullName ?? "Staff"} · {p.workDate} · auto-closed
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </DashboardCard>
+      ) : null}
+
+      {rosterVariance.length > 0 ? (
+        <DashboardCard className="overflow-x-auto p-0">
+          <h2 className="border-b border-white/10 px-4 py-3 text-sm font-semibold text-[#F8FAFC]">
+            Roster vs actual
+          </h2>
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wide text-[#64748B]">
+              <tr>
+                <th className="px-4 py-3">Staff</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Variance</th>
+                <th className="px-4 py-3">Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rosterVariance.slice(0, 30).map((row, i) => (
+                <tr key={`${row.punchId ?? row.shiftId ?? i}`} className="border-b border-white/[0.06]">
+                  <td className="px-4 py-3 text-[#F8FAFC]">{row.staffFullName ?? "—"}</td>
+                  <td className="px-4 py-3 text-[#CBD5E1]">{row.workDate}</td>
+                  <td className="px-4 py-3 capitalize text-amber-200">
+                    {row.kind.replace(/_/g, " ")}
+                  </td>
+                  <td className="px-4 py-3 text-[#94A3B8]">{row.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DashboardCard>
+      ) : null}
 
       <DashboardCard className="p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">

@@ -16,14 +16,14 @@ export default async function WorkforceOsPayrollPage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; period?: string }>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const { date } = await searchParams;
+  const { date, period } = await searchParams;
   if (!tenantId?.trim()) notFound();
 
-  const data = await loadWorkforceOsPayrollPage(tenantId.trim(), date);
+  const data = await loadWorkforceOsPayrollPage(tenantId.trim(), date, period);
   if (!data) notFound();
 
   return (
@@ -40,6 +40,12 @@ export default async function WorkforceOsPayrollPage({
         workDate={data.workDate}
         canManage={data.canManage}
         breaksEnabled={data.timeClockPolicy.breaksEnabled}
+        timeClockPolicy={data.timeClockPolicy}
+        payPeriod={data.payPeriod}
+        payPeriodStaffTotals={data.payPeriodStaffTotals}
+        rosterVariance={data.rosterVariance}
+        autoClosedPunches={data.autoClosedPunches}
+        openPunches={data.openPunches}
       />
     </div>
   );

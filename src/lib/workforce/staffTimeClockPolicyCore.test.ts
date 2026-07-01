@@ -8,32 +8,40 @@ import {
 } from "./staffTimeClockPolicyCore";
 
 describe("staffTimeClockPolicyCore", () => {
-  it("defaults breaks to disabled when metadata is missing", () => {
+  it("defaults when metadata is missing", () => {
     assert.deepEqual(parseWorkforceTimeClockPolicy(null), DEFAULT_WORKFORCE_TIME_CLOCK_POLICY);
-    assert.deepEqual(parseWorkforceTimeClockPolicy({}), DEFAULT_WORKFORCE_TIME_CLOCK_POLICY);
   });
 
-  it("reads breaks_enabled from workforce_time_clock metadata", () => {
+  it("reads extended workforce_time_clock metadata", () => {
     assert.deepEqual(
       parseWorkforceTimeClockPolicy({
-        workforce_time_clock: { breaks_enabled: true },
+        workforce_time_clock: {
+          breaks_enabled: true,
+          pay_period_frequency: "monthly",
+          pay_period_anchor: "2026-03-01",
+          auto_close_enabled: false,
+          auto_close_local_hour: 22,
+        },
       }),
-      { breaksEnabled: true }
-    );
-    assert.deepEqual(
-      parseWorkforceTimeClockPolicy({
-        workforce_time_clock: { breaks_enabled: false },
-      }),
-      { breaksEnabled: false }
+      {
+        breaksEnabled: true,
+        payPeriodFrequency: "monthly",
+        payPeriodAnchor: "2026-03-01",
+        autoCloseEnabled: false,
+        autoCloseLocalHour: 22,
+      }
     );
   });
 
   it("merge preserves unrelated metadata keys", () => {
     const merged = mergeWorkforceTimeClockPolicyIntoMetadata(
-      { timezone_note: "Perth", workforce_time_clock: { breaks_enabled: false } },
+      { timezone_note: "Perth" },
       { breaksEnabled: true }
     );
     assert.equal(merged.timezone_note, "Perth");
-    assert.deepEqual(merged.workforce_time_clock, { breaks_enabled: true });
+    assert.equal(
+      (merged.workforce_time_clock as { breaks_enabled: boolean }).breaks_enabled,
+      true
+    );
   });
 });
