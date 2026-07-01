@@ -78,7 +78,7 @@ function buildFallbackHliResult(input: {
  */
 export async function classifyWithLiveHieStack(
   request: UnifiedImageClassifyRequest,
-  env: NodeJS.ProcessEnv = process.env
+  _env: NodeJS.ProcessEnv = process.env
 ): Promise<LiveHieClassifierOutcome> {
   const warnings: string[] = [];
 
@@ -180,7 +180,7 @@ export function classifyWithImagingOsStub(
 }
 
 export function notConfiguredFallbackResult(
-  request: UnifiedImageClassifyRequest
+  _request: UnifiedImageClassifyRequest
 ): LiveHieClassifierOutcome {
   return {
     hliResult: hairImageClassificationNotConfiguredResult(),
