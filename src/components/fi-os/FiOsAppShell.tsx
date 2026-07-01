@@ -63,6 +63,7 @@ export function FiOsAppShell({
   staffPinSessionLabel = null,
   staffPinLogoutTenantId = null,
   staffPinOnBreak = false,
+  staffPinBreaksEnabled = false,
   children,
 }: {
   tenantId: string;
@@ -99,6 +100,7 @@ export function FiOsAppShell({
   staffPinSessionLabel?: string | null;
   staffPinLogoutTenantId?: string | null;
   staffPinOnBreak?: boolean;
+  staffPinBreaksEnabled?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -252,6 +254,7 @@ export function FiOsAppShell({
             staffPinSessionLabel={staffPinSessionLabel}
             staffPinLogoutTenantId={staffPinLogoutTenantId}
             staffPinOnBreak={staffPinOnBreak}
+            staffPinBreaksEnabled={staffPinBreaksEnabled}
           />
           <main
             id="fi-os-main-content"

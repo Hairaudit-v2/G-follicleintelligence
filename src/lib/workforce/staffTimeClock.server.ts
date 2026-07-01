@@ -22,6 +22,10 @@ import {
   type TimePunchBreak,
   type WorkforceTimePunch,
 } from "./staffTimeClockCore";
+import {
+  assertBreaksEnabledForTenant,
+  loadWorkforceTimeClockPolicy,
+} from "./staffTimeClockPolicy.server";
 
 type PunchRow = Record<string, unknown>;
 type BreakRow = Record<string, unknown>;
@@ -212,12 +216,17 @@ async function closeTimePunch(opts: ClosePunchOpts): Promise<ClockOutResult> {
   const fiStaffId = String(opts.punchRow.fi_staff_id);
   const clockOutAt = opts.clockOutAt;
   const staffName = await loadStaffNameByFiStaffId(tid, fiStaffId, supabase);
+  const timeClockPolicy = await loadWorkforceTimeClockPolicy(tid, supabase);
 
-  await closeOpenBreaksForPunch(tid, punchId, clockOutAt, supabase);
+  if (timeClockPolicy.breaksEnabled) {
+    await closeOpenBreaksForPunch(tid, punchId, clockOutAt, supabase);
+  }
 
   const breaksMap = await loadBreaksForPunchIds(tid, [punchId], supabase);
   const breaks = breaksMap.get(punchId) ?? [];
-  const breakMinutes = sumBreakMinutes(breaks.filter((b) => b.status === "closed"));
+  const breakMinutes = timeClockPolicy.breaksEnabled
+    ? sumBreakMinutes(breaks.filter((b) => b.status === "closed"))
+    : 0;
   const grossMinutes = deriveGrossMinutesWorked(
     "closed",
     String(opts.punchRow.clock_in_at),
@@ -535,6 +544,7 @@ export async function startBreakFromPinSession(opts: {
   const tid = assertNonEmptyUuid(opts.tenantId, "tenantId");
   const fiStaffId = assertNonEmptyUuid(opts.fiStaffId, "fiStaffId");
   const supabase = opts.client ?? supabaseAdmin();
+  await assertBreaksEnabledForTenant(tid, supabase);
 
   const openRow = await findOpenPunchRow(tid, fiStaffId, supabase);
   if (!openRow) throw new Error("No open clock punch. Sign in with your PIN first.");
@@ -584,6 +594,7 @@ export async function endBreakFromPinSession(opts: {
   const tid = assertNonEmptyUuid(opts.tenantId, "tenantId");
   const fiStaffId = assertNonEmptyUuid(opts.fiStaffId, "fiStaffId");
   const supabase = opts.client ?? supabaseAdmin();
+  await assertBreaksEnabledForTenant(tid, supabase);
 
   const openRow = await findOpenPunchRow(tid, fiStaffId, supabase);
   if (!openRow) throw new Error("No open clock punch.");
@@ -640,6 +651,7 @@ export async function managerAddBreakToPunch(opts: {
   const tid = assertNonEmptyUuid(opts.tenantId, "tenantId");
   const punchId = assertNonEmptyUuid(opts.punchId, "punchId");
   const supabase = opts.client ?? supabaseAdmin();
+  await assertBreaksEnabledForTenant(tid, supabase);
   const breakStartAt = opts.breakStartAt.trim();
   const breakEndAt = opts.breakEndAt.trim();
   const notes = opts.notes.trim();

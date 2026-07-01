@@ -3,6 +3,7 @@ import "server-only";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
 import { listWorkforceTimePunches } from "@/src/lib/workforce/staffTimeClock.server";
+import { loadWorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicy.server";
 import {
   computeSurgeryDayStaffingCostForDate,
   ensureDefaultAwardLoadingPlaceholders,
@@ -24,15 +25,23 @@ export async function loadWorkforceOsPayrollPage(tenantId: string, workDate?: st
     workDate?.trim() ||
     new Date().toISOString().slice(0, 10);
 
-  const [wageProfiles, awardLoadings, timesheetEntries, timePunches, staffOptions, surgeryDayCost] =
-    await Promise.all([
-      listWorkforceWageProfiles(tid),
-      listAwardLoadingPlaceholders(tid),
-      listTimesheetEntries(tid, { limit: 50 }),
-      listWorkforceTimePunches(tid, { limit: 50 }),
-      listActiveStaffForWageProfiles(tid),
-      computeSurgeryDayStaffingCostForDate(tid, date),
-    ]);
+  const [
+    wageProfiles,
+    awardLoadings,
+    timesheetEntries,
+    timePunches,
+    staffOptions,
+    surgeryDayCost,
+    timeClockPolicy,
+  ] = await Promise.all([
+    listWorkforceWageProfiles(tid),
+    listAwardLoadingPlaceholders(tid),
+    listTimesheetEntries(tid, { limit: 50 }),
+    listWorkforceTimePunches(tid, { limit: 50 }),
+    listActiveStaffForWageProfiles(tid),
+    computeSurgeryDayStaffingCostForDate(tid, date),
+    loadWorkforceTimeClockPolicy(tid),
+  ]);
 
   const role = access.userRole.trim().toLowerCase();
   const canManage =
@@ -49,5 +58,6 @@ export async function loadWorkforceOsPayrollPage(tenantId: string, workDate?: st
     rateTypeCounts: countWageProfilesByRateType(wageProfiles),
     workDate: date,
     canManage,
+    timeClockPolicy,
   };
 }

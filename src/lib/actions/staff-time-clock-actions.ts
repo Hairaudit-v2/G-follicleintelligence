@@ -10,6 +10,7 @@ import {
   managerCloseForgottenPunch,
   startBreakFromPinSession,
 } from "@/src/lib/workforce/staffTimeClock.server";
+import { setWorkforceTimeClockBreaksEnabled } from "@/src/lib/workforce/staffTimeClockPolicy.server";
 import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 function errMsg(e: unknown): string {
@@ -20,9 +21,27 @@ function errMsg(e: unknown): string {
 
 function revalidateTimeClockSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
+  revalidatePath(`/fi-admin/${tid}`);
   revalidatePath(`/fi-admin/${tid}/workforce-os/payroll`);
   revalidatePath(`/fi-admin/${tid}/workforce-os`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
+  revalidatePath(`/fi-admin/${tid}/staff-pin-login`);
+}
+
+export async function updateWorkforceTimeClockBreaksEnabledAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; breaksEnabled: boolean } | { ok: false; error: string }> {
+  try {
+    await assertWorkforceHrManageAllowed(tenantId);
+    const b = body && typeof body === "object" && body !== null ? body : {};
+    const breaksEnabled = Boolean((b as { breaksEnabled?: boolean }).breaksEnabled);
+    const policy = await setWorkforceTimeClockBreaksEnabled(tenantId, breaksEnabled);
+    revalidateTimeClockSurfaces(tenantId);
+    return { ok: true, breaksEnabled: policy.breaksEnabled };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
 }
 
 export async function staffPinStartBreakAction(

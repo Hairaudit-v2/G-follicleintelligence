@@ -39,6 +39,7 @@ export default async function WorkforceOsPayrollPage({
         rateTypeCounts={data.rateTypeCounts}
         workDate={data.workDate}
         canManage={data.canManage}
+        breaksEnabled={data.timeClockPolicy.breaksEnabled}
       />
     </div>
   );

@@ -43,6 +43,7 @@ export function FiOsTopBar({
   staffPinSessionLabel = null,
   staffPinLogoutTenantId = null,
   staffPinOnBreak = false,
+  staffPinBreaksEnabled = false,
 }: {
   tenantId: string;
   clinicLabel: string;
@@ -66,6 +67,7 @@ export function FiOsTopBar({
   staffPinLogoutTenantId?: string | null;
   /** True when staff has started a break on their open punch. */
   staffPinOnBreak?: boolean;
+  staffPinBreaksEnabled?: boolean;
 }) {
   const router = useRouter();
   return (
@@ -81,31 +83,33 @@ export function FiOsTopBar({
           </span>
           {staffPinLogoutTenantId ? (
             <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {staffPinOnBreak ? (
-                <button
-                  type="button"
-                  className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-50 transition hover:bg-amber-500/30"
-                  onClick={() => {
-                    void staffPinEndBreakAction(staffPinLogoutTenantId).then(() =>
-                      router.refresh()
-                    );
-                  }}
-                >
-                  End break
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"
-                  onClick={() => {
-                    void staffPinStartBreakAction(staffPinLogoutTenantId).then(() =>
-                      router.refresh()
-                    );
-                  }}
-                >
-                  Start break
-                </button>
-              )}
+              {staffPinBreaksEnabled ? (
+                staffPinOnBreak ? (
+                  <button
+                    type="button"
+                    className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-50 transition hover:bg-amber-500/30"
+                    onClick={() => {
+                      void staffPinEndBreakAction(staffPinLogoutTenantId).then(() =>
+                        router.refresh()
+                      );
+                    }}
+                  >
+                    End break
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"
+                    onClick={() => {
+                      void staffPinStartBreakAction(staffPinLogoutTenantId).then(() =>
+                        router.refresh()
+                      );
+                    }}
+                  >
+                    Start break
+                  </button>
+                )
+              ) : null}
               <button
                 type="button"
                 className="rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"

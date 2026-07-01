@@ -9,6 +9,7 @@ import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import {
   managerAddBreakToPunchAction,
   managerCloseForgottenPunchAction,
+  updateWorkforceTimeClockBreaksEnabledAction,
 } from "@/src/lib/actions/staff-time-clock-actions";
 import {
   createTimesheetEntryAction,
@@ -45,6 +46,7 @@ export function WorkforceOsPayrollClient({
   rateTypeCounts,
   workDate,
   canManage,
+  breaksEnabled,
 }: {
   tenantId: string;
   wageProfiles: WorkforceWageProfile[];
@@ -61,6 +63,7 @@ export function WorkforceOsPayrollClient({
   rateTypeCounts: Record<WageRateType, number>;
   workDate: string;
   canManage: boolean;
+  breaksEnabled: boolean;
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}/workforce-os`;
@@ -224,6 +227,26 @@ export function WorkforceOsPayrollClient({
   function onCostDateChange(next: string) {
     setCostDate(next);
     router.push(`${base}/payroll?date=${encodeURIComponent(next)}`);
+  }
+
+  function onToggleBreaksEnabled(next: boolean) {
+    resetFeedback();
+    startTransition(async () => {
+      const res = await updateWorkforceTimeClockBreaksEnabledAction(tenantId, {
+        breaksEnabled: next,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setMessage(
+        res.breaksEnabled
+          ? "Break tracking enabled for this clinic."
+          : "Break tracking disabled for this clinic."
+      );
+      setAddingBreakPunchId(null);
+      router.refresh();
+    });
   }
 
   return (
@@ -614,10 +637,27 @@ export function WorkforceOsPayrollClient({
         <h2 className="border-b border-white/10 px-4 py-3 text-sm font-semibold text-[#F8FAFC]">
           PIN time clock
         </h2>
-        <p className="border-b border-white/[0.06] px-4 py-2 text-xs text-[#94A3B8]">
-          Staff clock in on PIN sign-in and clock out on sign-out. Breaks (PIN or manager-added) are
-          deducted from gross minutes. HR can close forgotten open punches below.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
+          <p className="text-xs text-[#94A3B8]">
+            Staff clock in on PIN sign-in and clock out on sign-out.
+            {breaksEnabled
+              ? " Breaks are deducted from gross minutes for paid time."
+              : " Break tracking is off — paid time uses full clock-in to clock-out span."}{" "}
+            HR can close forgotten open punches below.
+          </p>
+          {canManage ? (
+            <label className="flex shrink-0 items-center gap-2 text-xs text-[#CBD5E1]">
+              <input
+                type="checkbox"
+                className="rounded border-white/20 bg-white/5"
+                checked={breaksEnabled}
+                disabled={pending}
+                onChange={(e) => onToggleBreaksEnabled(e.target.checked)}
+              />
+              Enable break tracking
+            </label>
+          ) : null}
+        </div>
         {canManage && correctingPunchId ? (
           <form
             onSubmit={onCloseForgottenPunch}
@@ -663,7 +703,7 @@ export function WorkforceOsPayrollClient({
             </div>
           </form>
         ) : null}
-        {canManage && addingBreakPunchId ? (
+        {canManage && breaksEnabled && addingBreakPunchId ? (
           <form
             onSubmit={onAddManagerBreak}
             className="space-y-3 border-b border-white/[0.06] px-4 py-4"
@@ -726,8 +766,8 @@ export function WorkforceOsPayrollClient({
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Clock in</th>
               <th className="px-4 py-3">Clock out</th>
-              <th className="px-4 py-3">Breaks</th>
-              <th className="px-4 py-3">Net min</th>
+              {breaksEnabled ? <th className="px-4 py-3">Breaks</th> : null}
+              <th className="px-4 py-3">{breaksEnabled ? "Net min" : "Minutes"}</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Timesheet</th>
               {canManage ? <th className="px-4 py-3">Actions</th> : null}
@@ -736,7 +776,10 @@ export function WorkforceOsPayrollClient({
           <tbody>
             {timePunches.length === 0 ? (
               <tr>
-                <td colSpan={canManage ? 9 : 8} className="px-4 py-8 text-center text-[#94A3B8]">
+                <td
+                  colSpan={(canManage ? 9 : 8) - (breaksEnabled ? 0 : 1)}
+                  className="px-4 py-8 text-center text-[#94A3B8]"
+                >
                   No PIN clock punches yet.
                 </td>
               </tr>
@@ -747,13 +790,15 @@ export function WorkforceOsPayrollClient({
                   <td className="px-4 py-3 text-[#CBD5E1]">{punch.workDate}</td>
                   <td className="px-4 py-3 text-[#CBD5E1]">{formatPunchTime(punch.clockInAt)}</td>
                   <td className="px-4 py-3 text-[#CBD5E1]">{formatPunchTime(punch.clockOutAt)}</td>
-                  <td className="px-4 py-3 text-[#CBD5E1]">
-                    {punch.breakMinutes > 0
-                      ? `${punch.breakMinutes} min`
-                      : punch.hasOpenBreak
-                        ? "On break"
-                        : "—"}
-                  </td>
+                  {breaksEnabled ? (
+                    <td className="px-4 py-3 text-[#CBD5E1]">
+                      {punch.breakMinutes > 0
+                        ? `${punch.breakMinutes} min`
+                        : punch.hasOpenBreak
+                          ? "On break"
+                          : "—"}
+                    </td>
+                  ) : null}
                   <td className="px-4 py-3 text-[#CBD5E1]">
                     {punch.minutesWorked ?? (punch.status === "open" ? "In progress" : "—")}
                   </td>
@@ -776,16 +821,18 @@ export function WorkforceOsPayrollClient({
                             Close punch
                           </Button>
                         ) : null}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setCorrectingPunchId(null);
-                            setAddingBreakPunchId(punch.id);
-                          }}
-                        >
-                          Add break
-                        </Button>
+                        {breaksEnabled ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setCorrectingPunchId(null);
+                              setAddingBreakPunchId(punch.id);
+                            }}
+                          >
+                            Add break
+                          </Button>
+                        ) : null}
                       </div>
                     </td>
                   ) : null}

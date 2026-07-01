@@ -25,6 +25,7 @@ import {
 import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermissions";
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
 import { loadPinBreakSessionState } from "@/src/lib/workforce/staffTimeClock.server";
+import { loadWorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicy.server";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import { getStaffAccessNavFeatureOverrides } from "@/src/lib/staffAccess/staffAccess.server";
@@ -116,9 +117,13 @@ export default async function TenantAdminLayout({
     }
   }
   const pinFloorMode = Boolean(pinSession);
-  const pinBreakState = pinSession
-    ? await loadPinBreakSessionState(tenantId, pinSession.staffId)
+  const timeClockPolicy = pinSession
+    ? await loadWorkforceTimeClockPolicy(tenantId)
     : null;
+  const pinBreakState =
+    pinSession && timeClockPolicy?.breaksEnabled
+      ? await loadPinBreakSessionState(tenantId, pinSession.staffId)
+      : null;
   const [
     showCrmNav,
     showBookingsBoard,
@@ -246,6 +251,7 @@ export default async function TenantAdminLayout({
         staffPinSessionLabel={pinFloorMode ? `${pinSession!.staffName} · PIN session` : null}
         staffPinLogoutTenantId={pinFloorMode ? tenantId : null}
         staffPinOnBreak={pinBreakState?.onBreak ?? false}
+        staffPinBreaksEnabled={timeClockPolicy?.breaksEnabled ?? false}
       >
         {mainSurface}
         {!pinFloorMode && !isCommandCentrePresentation ? (
