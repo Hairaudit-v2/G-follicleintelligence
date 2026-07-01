@@ -11,6 +11,7 @@ import { CaseCrmQuotesPipelineCard } from "./CaseCrmQuotesPipelineCard";
 import { CaseDetailBackLink } from "./CaseDetailBackLink";
 import { CaseDetailSection } from "./CaseDetailSection";
 import { CaseDetailSectionNav } from "./CaseDetailSectionNav";
+import { PatientVisualSummaryReportPanel } from "@/src/components/fi-admin/imaging/PatientVisualSummaryReportPanel";
 import { CaseImagesCard } from "./CaseImagesCard";
 import { CaseLinkedLeadCard } from "./CaseLinkedLeadCard";
 import { CaseLinkedPatientCard } from "./CaseLinkedPatientCard";
@@ -379,6 +380,22 @@ export function CaseDetailPageView({
           </CaseDetailSection>
           <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.images} className="min-w-0">
             <CaseImagesCard tenantId={tenantId} patientId={patientId} images={detail.images} />
+            {patientId ? (
+              <div className="mt-4 space-y-3">
+                <PatientVisualSummaryReportPanel
+                  tenantId={tenantId}
+                  patientId={patientId}
+                  caseId={detail.id}
+                  reportType="hairaudit_visual_summary"
+                />
+                <PatientVisualSummaryReportPanel
+                  tenantId={tenantId}
+                  patientId={patientId}
+                  caseId={detail.id}
+                  reportType="surgery_post_op_summary"
+                />
+              </div>
+            ) : null}
           </CaseDetailSection>
         </div>
 

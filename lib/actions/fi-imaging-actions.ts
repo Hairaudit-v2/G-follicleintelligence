@@ -839,3 +839,96 @@ export async function recordPatientPhotoQuickActionCompletedAction(
     return { ok: false, error: errMsg(e) };
   }
 }
+
+const visualSummaryLoadSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    reportType: z.enum(["surgery_post_op_summary", "hairaudit_visual_summary"]),
+    caseId: z.string().uuid().nullable().optional(),
+    surgeryId: z.string().uuid().nullable().optional(),
+    useInitials: z.boolean().optional(),
+  })
+  .strict();
+
+export async function loadPatientVisualSummaryReportAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | { ok: true; report: import("@/src/lib/imaging-os/patientVisualSummaryReportTypes").PatientVisualSummaryReport }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = visualSummaryLoadSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const { loadPatientVisualSummaryReport } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryReportLoad.server");
+    const report = await loadPatientVisualSummaryReport({
+      tenantId,
+      patientId,
+      reportType: parsed.reportType,
+      caseId: parsed.caseId ?? null,
+      surgeryId: parsed.surgeryId ?? null,
+      useInitials: parsed.useInitials,
+    });
+    return { ok: true, report };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const visualSummaryCaseMutationSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    caseId: z.string().uuid(),
+    reportType: z.enum(["surgery_post_op_summary", "hairaudit_visual_summary"]),
+    surgeryId: z.string().uuid().nullable().optional(),
+  })
+  .strict();
+
+export async function approvePatientVisualSummaryReportAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = visualSummaryCaseMutationSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    if (!actingUserId) return { ok: false, error: "Could not resolve staff user for approval." };
+    const { approvePatientVisualSummaryReport } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryReportMutations.server");
+    await approvePatientVisualSummaryReport({
+      tenantId,
+      caseId: parsed.caseId,
+      reportType: parsed.reportType,
+      approvedByUserId: actingUserId,
+      surgeryId: parsed.surgeryId ?? null,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/cases/${parsed.caseId}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function regeneratePatientVisualSummaryReportAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = visualSummaryCaseMutationSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const { regeneratePatientVisualSummaryDraft } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryReportMutations.server");
+    await regeneratePatientVisualSummaryDraft({
+      tenantId,
+      caseId: parsed.caseId,
+      reportType: parsed.reportType,
+      surgeryId: parsed.surgeryId ?? null,
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}

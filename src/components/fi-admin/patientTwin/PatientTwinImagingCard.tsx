@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { FiSection } from "@/src/components/fi-design/FiSection";
+import { PatientVisualSummaryReportPanel } from "@/src/components/fi-admin/imaging/PatientVisualSummaryReportPanel";
 import { PatientTwinImagingGalleryClient } from "@/src/components/fi-admin/patientTwin/PatientTwinImagingGalleryClient";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
@@ -83,6 +84,14 @@ export function PatientTwinImagingCard({
           </ul>
         </div>
       ) : null}
+
+      <div className="mt-6 border-t border-white/10 pt-5">
+        <PatientVisualSummaryReportPanel
+          tenantId={tenantId}
+          patientId={patientId}
+          reportType="surgery_post_op_summary"
+        />
+      </div>
 
       <PatientTwinImagingGalleryClient
         tenantId={tenantId}

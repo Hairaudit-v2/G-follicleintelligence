@@ -9,6 +9,7 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 import { surgeryLinkButtonClass } from "@/src/lib/fiAdmin/surgeryPresentation";
 import type { SurgeryOsLiveSurgery } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
 import type { SurgeryOsVieCaptureSummary } from "@/src/lib/surgeryOs/surgeryOsVieCapture.types";
+import { PatientVisualSummaryReportPanel } from "@/src/components/fi-admin/imaging/PatientVisualSummaryReportPanel";
 import { SurgeryOsCaptureEvidenceButton } from "./SurgeryOsCaptureEvidenceButton";
 
 function statusLabel(status: SurgeryOsVieCaptureSummary["graftTrayStatus"]): string {
@@ -343,6 +344,14 @@ export function SurgeryOsVieCapturePanel({
               </p>
             ) : null}
           </div>
+
+          <PatientVisualSummaryReportPanel
+            tenantId={tenantId}
+            patientId={capture.patientId}
+            caseId={capture.caseId}
+            surgeryId={capture.surgeryId}
+            reportType="surgery_post_op_summary"
+          />
         </div>
       )}
     </DashboardCard>

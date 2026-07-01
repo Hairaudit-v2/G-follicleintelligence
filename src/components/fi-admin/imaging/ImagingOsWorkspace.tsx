@@ -11,6 +11,7 @@ import {
   saveImagingScalpMapAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { ImagingClinicalIntelligencePanel } from "@/src/components/fi-admin/imaging/ImagingClinicalIntelligencePanel";
+import { PatientVisualSummaryReportPanel } from "@/src/components/fi-admin/imaging/PatientVisualSummaryReportPanel";
 import { ImagingGuidedCaptureWizard } from "@/src/components/fi-admin/imaging/ImagingGuidedCaptureWizard";
 import { VieComparisonSuggestionsPanel } from "@/src/components/fi-admin/imaging/VieComparisonSuggestionsPanel";
 import { buildImagingClinicalIntelligenceView } from "@/src/lib/imaging-os/imagingClinicalIntelligenceSurfacing";
@@ -295,6 +296,13 @@ export function ImagingOsWorkspace({
 
       {msg ? <p className="text-sm text-slate-300">{msg}</p> : null}
       {pending ? <p className="text-xs text-gray-500">Working…</p> : null}
+
+      <PatientVisualSummaryReportPanel
+        tenantId={tenantId}
+        patientId={patientId}
+        reportType="surgery_post_op_summary"
+        adminKey={adminKey.trim() || undefined}
+      />
 
       {tab === "gallery" ? (
         <section className="space-y-3">
