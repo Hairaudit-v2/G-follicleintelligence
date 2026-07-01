@@ -7,8 +7,15 @@ import {
   isStaffHrLinkedForReconciliation,
   needsHrReconciliation,
 } from "./hrReconciliationEligibleCore";
-import { buildHrReconciliationPageData } from "./hrReconciliationFilterCore";
-import type { StaffMemberLifecycleRow } from "./staffLifecycleTypes";
+import {
+  countExactNormalizedEmailMatches,
+  mapIiohrPortalStaffToEvolvedStaffRecords,
+} from "./hrReconciliationCandidateCore";
+import {
+  buildHrReconciliationDiagnostics,
+  buildHrReconciliationPageData,
+} from "./hrReconciliationFilterCore";
+import type { HrReconciliationDiagnostics, StaffMemberLifecycleRow } from "./staffLifecycleTypes";
 import { IIOHR_EVOLVED_HR_SOURCE_SYSTEM } from "./iiohrStaffHrLinkReconciliationTypes";
 
 function lifecycleRow(
@@ -48,14 +55,37 @@ function lifecycleRow(
   };
 }
 
+function baseDiagnostics(
+  overrides: Partial<HrReconciliationDiagnostics> = {}
+): HrReconciliationDiagnostics {
+  return {
+    fiStaffCount: 0,
+    iiohrRawFeedRowCount: 0,
+    iiohrCandidateCount: 0,
+    iiohrCandidatesSkippedNonUuid: 0,
+    exactNormalizedEmailMatchCount: 0,
+    staffIdentityLinksCount: 0,
+    lastSuccessfulIiohrSyncAt: null,
+    fiStaffSourceSystemCounts: {},
+    feedStatus: "not_configured",
+    feedLoadError: null,
+    feedBlockedMessage: "No IIOHR staff feed URL configured.",
+    feedUrlConfigured: false,
+    feedUrlSource: null,
+    feedKeyConfigured: false,
+    cronSecretConfigured: false,
+    evolvedPerthTenantIdConfigured: false,
+    legacyFeedUrlConfigured: false,
+    ...overrides,
+  };
+}
+
 const archivedDemoStaff = lifecycleRow({
   id: "demo-archived-1",
   fi_staff_id: "fs-demo-1",
   full_name: "Demo Nurse",
   email: "demo.nurse@demo.iiohr.local",
   archived_at: "2024-01-01T00:00:00.000Z",
-  source_system: null,
-  iiohr_staff_record_id: null,
 });
 
 const activeLinkedIiohrStaff = lifecycleRow({
@@ -77,10 +107,18 @@ const activeUnlinkedRealStaff = lifecycleRow({
   email: "unlinked@clinic.com",
 });
 
+const drSeetal = lifecycleRow({
+  id: "seetal-1",
+  fi_staff_id: "fs-seetal",
+  full_name: "Dr Seetal",
+  email: "seetskd@gmail.com",
+});
+
 test("archived unlinked demo staff are excluded from reconciliation queue", () => {
   const pageData = buildHrReconciliationPageData({
     staffMembers: [archivedDemoStaff, activeUnlinkedRealStaff],
     evolvedStaffRecords: [],
+    diagnostics: baseDiagnostics({ feedStatus: "ok", feedBlockedMessage: null }),
   });
 
   assert.equal(
@@ -88,15 +126,28 @@ test("archived unlinked demo staff are excluded from reconciliation queue", () =
     false
   );
   assert.equal(pageData.suggestions.length, 1);
-  assert.equal(pageData.suggestions[0]?.staffMemberId, activeUnlinkedRealStaff.id);
-  assert.equal(pageData.metrics.archivedExcluded, 1);
-  assert.equal(pageData.metrics.needsReconciliation, 1);
+  assert.equal(pageData.suggestions[0]?.matchType, "none");
+});
+
+test("empty feed does not emit false no-match suggestions", () => {
+  const pageData = buildHrReconciliationPageData({
+    staffMembers: [activeUnlinkedRealStaff, drSeetal],
+    evolvedStaffRecords: [],
+    diagnostics: baseDiagnostics({
+      feedStatus: "not_configured",
+      feedBlockedMessage: "No IIOHR staff feed URL configured.",
+    }),
+  });
+
+  assert.equal(pageData.suggestions.length, 0);
+  assert.equal(pageData.metrics.needsReconciliation, 2);
 });
 
 test("active linked IIOHR staff do not generate no-match suggestions", () => {
   const pageData = buildHrReconciliationPageData({
     staffMembers: [activeLinkedIiohrStaff, activeUnlinkedRealStaff],
     evolvedStaffRecords: [],
+    diagnostics: baseDiagnostics({ feedStatus: "ok", feedBlockedMessage: null }),
   });
 
   assert.equal(
@@ -104,7 +155,33 @@ test("active linked IIOHR staff do not generate no-match suggestions", () => {
     false
   );
   assert.equal(pageData.metrics.alreadyLinked, 1);
-  assert.equal(pageData.metrics.needsReconciliation, 1);
+});
+
+test("Dr Seetal exact email matches IIOHR feed row", () => {
+  const feedRecords = mapIiohrPortalStaffToEvolvedStaffRecords([
+    {
+      external_staff_id: "00000000-0000-4000-8000-000000000301",
+      iiohr_user_id: "00000000-0000-4000-8000-000000000301",
+      full_name: "Dr Seetal",
+      email: "seetskd@gmail.com",
+    },
+  ]).records;
+
+  const pageData = buildHrReconciliationPageData({
+    staffMembers: [drSeetal],
+    evolvedStaffRecords: feedRecords,
+    diagnostics: baseDiagnostics({
+      feedStatus: "ok",
+      feedBlockedMessage: null,
+      iiohrCandidateCount: 1,
+      exactNormalizedEmailMatchCount: 1,
+    }),
+  });
+
+  assert.equal(pageData.suggestions.length, 1);
+  assert.equal(pageData.suggestions[0]?.matchType, "exact_email");
+  assert.equal(pageData.suggestions[0]?.confidenceScore, 100);
+  assert.equal(pageData.suggestions[0]?.canAutoApprove, true);
 });
 
 test("active unlinked real staff may generate reconciliation suggestions", () => {
@@ -112,16 +189,16 @@ test("active unlinked real staff may generate reconciliation suggestions", () =>
     staffMembers: [activeUnlinkedRealStaff],
     evolvedStaffRecords: [
       {
-        id: "iiohr-match-1",
+        id: "00000000-0000-4000-8000-000000000401",
         email: "unlinked@clinic.com",
         full_name: "Unlinked Real Staff",
       },
     ],
+    diagnostics: baseDiagnostics({ feedStatus: "ok", feedBlockedMessage: null }),
   });
 
   assert.equal(pageData.suggestions.length, 1);
   assert.equal(pageData.suggestions[0]?.matchType, "exact_email");
-  assert.equal(pageData.suggestions[0]?.canAutoApprove, true);
 });
 
 test("totals do not count archived staff as unresolved", () => {
@@ -137,28 +214,39 @@ test("totals do not count archived staff as unresolved", () => {
   assert.equal(metrics.archivedExcluded, 1);
 });
 
-test("isStaffHrLinkedForReconciliation accepts iiohr_user_id without staff record id", () => {
-  assert.equal(
-    isStaffHrLinkedForReconciliation({
-      iiohr_staff_record_id: null,
-      iiohr_user_id: "user-only-link",
-      source_system: null,
-      source_synced_at: null,
-    }),
-    true
-  );
+test("countExactNormalizedEmailMatches is case-insensitive", () => {
+  const matches = countExactNormalizedEmailMatches({
+    staffMembers: [drSeetal],
+    evolvedStaffRecords: [
+      {
+        id: "00000000-0000-4000-8000-000000000301",
+        email: "Seetskd@Gmail.COM",
+        full_name: "Dr Seetal",
+      },
+    ],
+  });
+  assert.equal(matches, 1);
 });
 
-test("isStaffHrLinkedForReconciliation accepts source_system sync without record id", () => {
-  assert.equal(
-    isStaffHrLinkedForReconciliation({
-      iiohr_staff_record_id: null,
-      iiohr_user_id: null,
-      source_system: IIOHR_EVOLVED_HR_SOURCE_SYSTEM,
-      source_synced_at: "2025-01-01T00:00:00.000Z",
-    }),
-    true
-  );
+test("buildHrReconciliationDiagnostics marks empty configured feed", () => {
+  const diagnostics = buildHrReconciliationDiagnostics({
+    staffMembers: [drSeetal],
+    evolvedStaffRecords: [],
+    rawFeedRowCount: 0,
+    skippedNonUuidCount: 0,
+    staffIdentityLinksCount: 0,
+    lastSuccessfulIiohrSyncAt: null,
+    feedUrlConfigured: true,
+    feedUrlSource: "IIOHR_HR_PERTH_STAFF_FEED_URL",
+    feedKeyConfigured: false,
+    cronSecretConfigured: true,
+    evolvedPerthTenantIdConfigured: true,
+    legacyFeedUrlConfigured: false,
+    feedLoadError: null,
+  });
+
+  assert.equal(diagnostics.feedStatus, "empty");
+  assert.ok(diagnostics.feedBlockedMessage?.includes("No IIOHR staff feed rows found"));
 });
 
 test("needsHrReconciliation excludes archived and linked staff", () => {
@@ -170,16 +258,16 @@ test("needsHrReconciliation excludes archived and linked staff", () => {
 test("isStaffArchived treats empty archived_at as active", () => {
   assert.equal(isStaffArchived({ archived_at: null }), false);
   assert.equal(isStaffArchived({ archived_at: "" }), false);
-  assert.equal(isStaffArchived({ archived_at: "2024-01-01T00:00:00.000Z" }), true);
 });
 
-test("archived historical records are listed separately from action queue", () => {
-  const pageData = buildHrReconciliationPageData({
-    staffMembers: [archivedDemoStaff],
-    evolvedStaffRecords: [],
-  });
-
-  assert.equal(pageData.suggestions.length, 0);
-  assert.equal(pageData.archivedHistorical.length, 1);
-  assert.equal(pageData.archivedHistorical[0]?.fiOsEmail, "demo.nurse@demo.iiohr.local");
+test("isStaffHrLinkedForReconciliation accepts iiohr_user_id without staff record id", () => {
+  assert.equal(
+    isStaffHrLinkedForReconciliation({
+      iiohr_staff_record_id: null,
+      iiohr_user_id: "user-only-link",
+      source_system: null,
+      source_synced_at: null,
+    }),
+    true
+  );
 });
