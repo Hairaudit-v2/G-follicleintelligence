@@ -6,7 +6,6 @@ import { useState, useTransition, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
-import { StatCard } from "@/src/components/fi-admin/dashboard-ui/StatCard";
 import { refreshWorkforcePlanningAction } from "@/src/lib/actions/workforce-phase-2-sprint-5-actions";
 import { formatCentsAsCurrency } from "@/src/lib/workforce/wageProfileCore";
 import type { WorkforceCommandCentrePageData } from "@/src/lib/workforce/workforceCommandCentrePage.server";
@@ -16,10 +15,20 @@ import {
   healthStatusLabel,
   severityBadgeClass,
   type WorkforceAttentionQueueItem,
+  type WorkforceAttentionSeverity,
   type WorkforceHealthMetric,
   type WorkforceModuleTile,
 } from "@/src/lib/workforce/workforceCommandCentreCore";
 import { cn } from "@/lib/utils";
+
+const UTILITY_MODULE_IDS = new Set([
+  "recruitment",
+  "compliance",
+  "credentials",
+  "payroll",
+  "staff-directory",
+  "hr-reconciliation",
+]);
 
 function Badge({
   children,
@@ -31,12 +40,51 @@ function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset",
         className
       )}
     >
       {children}
     </span>
+  );
+}
+
+function SectionHeading({
+  kicker,
+  title,
+  description,
+  className,
+}: {
+  kicker?: string;
+  title: string;
+  description?: string;
+  className?: string;
+}) {
+  return (
+    <header className={cn("space-y-2", className)}>
+      {kicker ? (
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#22C1FF]/90">
+          {kicker}
+        </p>
+      ) : null}
+      <h2 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">{title}</h2>
+      {description ? (
+        <p className="max-w-3xl text-sm leading-relaxed text-[#64748B] sm:text-[15px]">{description}</p>
+      ) : null}
+    </header>
+  );
+}
+
+function ExecutiveKpiCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="group flex min-h-[8.5rem] flex-col justify-center rounded-2xl border border-white/[0.1] bg-[#0c1426]/90 px-6 py-8 shadow-xl shadow-black/50 backdrop-blur-sm transition-all duration-200 hover:border-[#22C1FF]/30 hover:bg-[#0c1426] hover:shadow-2xl hover:shadow-[#22C1FF]/5">
+      <div className="text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl xl:text-[3.25rem]">
+        {value}
+      </div>
+      <div className="mt-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#64748B] transition-colors group-hover:text-[#94A3B8]">
+        {label}
+      </div>
+    </div>
   );
 }
 
@@ -53,30 +101,59 @@ function tileBadgeClass(variant: WorkforceModuleTile["statusBadge"]["variant"]):
   }
 }
 
+function severityAccentClass(severity: WorkforceAttentionSeverity): string {
+  switch (severity) {
+    case "critical":
+      return "border-l-rose-500 bg-rose-500/[0.05] shadow-rose-500/10";
+    case "high":
+      return "border-l-amber-400 bg-amber-500/[0.05] shadow-amber-500/10";
+    case "medium":
+      return "border-l-[#22C1FF] bg-[#22C1FF]/[0.04] shadow-[#22C1FF]/10";
+    default:
+      return "border-l-slate-500 bg-white/[0.02] shadow-black/20";
+  }
+}
+
+function extractQueueCount(item: WorkforceAttentionQueueItem): number | null {
+  const explanationMatch = item.explanation.match(/^(\d+)/);
+  if (explanationMatch) return Number.parseInt(explanationMatch[1], 10);
+  const titleMatch = item.title.match(/^(\d+)/);
+  if (titleMatch) return Number.parseInt(titleMatch[1], 10);
+  return null;
+}
+
+function formatQueueHeadline(item: WorkforceAttentionQueueItem): string {
+  const count = extractQueueCount(item);
+  if (count != null) {
+    return `${count} ${item.title}`;
+  }
+  return item.title;
+}
+
 function HealthBar({ metric }: { metric: WorkforceHealthMetric }) {
   const pct = metric.scorePercent ?? 0;
   return (
     <Link
       href={metric.href}
-      className="group block rounded-xl border border-white/[0.07] bg-[#0c1426]/70 p-4 transition-colors hover:border-[#22C1FF]/25 hover:bg-[#0c1426]"
+      className="group block rounded-2xl border border-white/[0.09] bg-[#0c1426]/80 p-5 shadow-lg shadow-black/35 transition-all duration-200 hover:border-[#22C1FF]/30 hover:bg-[#0c1426] hover:shadow-xl hover:shadow-[#22C1FF]/5 sm:p-6"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#F8FAFC]">{metric.label}</p>
-          <p className="mt-1 text-xs text-[#64748B]">{metric.explanation}</p>
+          <p className="text-base font-semibold text-[#F8FAFC]">{metric.label}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-[#64748B]">{metric.explanation}</p>
         </div>
         <Badge className={healthStatusBadgeClass(metric.status)}>
           {healthStatusLabel(metric.status)}
         </Badge>
       </div>
-      <div className="mt-4">
-        <div className="flex items-center justify-between text-xs text-[#94A3B8]">
+      <div className="mt-5">
+        <div className="flex items-center justify-between text-xs font-medium text-[#94A3B8]">
           <span>Score</span>
-          <span className="tabular-nums text-[#CBD5E1]">
+          <span className="tabular-nums text-sm text-[#CBD5E1]">
             {metric.scorePercent != null ? `${metric.scorePercent}%` : "—"}
           </span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+        <div className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
           <div
             className={cn(
               "h-full rounded-full transition-all",
@@ -96,19 +173,22 @@ function HealthBar({ metric }: { metric: WorkforceHealthMetric }) {
   );
 }
 
-function ModuleCard({ tile }: { tile: WorkforceModuleTile }) {
+function UtilityModuleCard({ tile }: { tile: WorkforceModuleTile }) {
   return (
-    <DashboardCard className="flex h-full flex-col p-5 transition-colors hover:border-[#22C1FF]/20" elevated>
+    <DashboardCard
+      className="flex h-full flex-col p-4 transition-all duration-200 hover:border-[#22C1FF]/25 hover:shadow-lg hover:shadow-[#22C1FF]/5 sm:p-5"
+      elevated
+    >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-base font-semibold text-[#F8FAFC]">{tile.name}</h3>
+        <h3 className="text-sm font-semibold text-[#F8FAFC]">{tile.name}</h3>
         <Badge className={tileBadgeClass(tile.statusBadge.variant)}>{tile.statusBadge.label}</Badge>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{tile.valueProposition}</p>
-      <p className="mt-4 text-sm font-medium text-[#CBD5E1]">{tile.keyMetric}</p>
-      <div className="mt-auto pt-5">
+      <p className="mt-2 text-xs leading-relaxed text-[#64748B] line-clamp-2">{tile.valueProposition}</p>
+      <p className="mt-3 text-xs font-medium text-[#94A3B8]">{tile.keyMetric}</p>
+      <div className="mt-auto pt-4">
         <Link
           href={tile.href}
-          className="inline-flex items-center rounded-lg border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3 py-2 text-sm font-medium text-[#22C1FF] transition-colors hover:bg-[#22C1FF]/15"
+          className="inline-flex items-center rounded-lg border border-[#22C1FF]/25 bg-[#22C1FF]/10 px-3 py-2 text-xs font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/45 hover:bg-[#22C1FF]/18 hover:shadow-md hover:shadow-[#22C1FF]/10"
         >
           {tile.ctaLabel} →
         </Link>
@@ -118,26 +198,51 @@ function ModuleCard({ tile }: { tile: WorkforceModuleTile }) {
 }
 
 function AttentionItem({ item }: { item: WorkforceAttentionQueueItem }) {
+  const count = extractQueueCount(item);
+  const headline = formatQueueHeadline(item);
+
   return (
     <li>
-      <DashboardCard className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className={severityBadgeClass(item.severity)}>{item.severity}</Badge>
-            <p className="font-medium text-[#F8FAFC]">{item.title}</p>
+      <div
+        className={cn(
+          "flex flex-col gap-5 rounded-2xl border border-white/[0.09] border-l-4 p-5 shadow-lg transition-all duration-200 hover:border-white/[0.14] hover:shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-6",
+          severityAccentClass(item.severity)
+        )}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-4 sm:gap-5">
+            {count != null ? (
+              <span className="shrink-0 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
+                {count}
+              </span>
+            ) : null}
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Badge className={severityBadgeClass(item.severity)}>{item.severity}</Badge>
+                <p className="text-base font-semibold text-[#F8FAFC] sm:text-lg">
+                  {count != null ? item.title : headline}
+                </p>
+              </div>
+              <p className="text-sm leading-relaxed text-[#94A3B8]">{item.explanation}</p>
+            </div>
           </div>
-          <p className="text-sm text-[#94A3B8]">{item.explanation}</p>
         </div>
         <Link
           href={item.href}
-          className="shrink-0 rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-[#22C1FF] hover:bg-white/5"
+          className="shrink-0 rounded-xl border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-4 py-2.5 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/50 hover:bg-[#22C1FF]/18 hover:shadow-md hover:shadow-[#22C1FF]/10"
         >
           {item.recommendedAction}
         </Link>
-      </DashboardCard>
+      </div>
     </li>
   );
 }
+
+const heroPrimaryButtonClass =
+  "rounded-xl border border-[#22C1FF]/45 bg-[#22C1FF]/15 px-5 py-3 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/65 hover:bg-[#22C1FF]/22 hover:shadow-lg hover:shadow-[#22C1FF]/15";
+
+const heroSecondaryButtonClass =
+  "rounded-xl border border-white/12 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#CBD5E1] transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06] hover:text-[#F8FAFC] hover:shadow-md hover:shadow-black/30";
 
 export function WorkforceCommandCentreClient({
   tenantId,
@@ -155,6 +260,8 @@ export function WorkforceCommandCentreClient({
   const { kpis, healthRadar, attentionQueue, moduleTiles, procedureForecast, financialIntelligence, planning, canManage } =
     data;
 
+  const utilityTiles = moduleTiles.filter((tile) => UTILITY_MODULE_IDS.has(tile.id));
+
   function onRefreshPlanning() {
     setMessage(null);
     setError(null);
@@ -170,292 +277,309 @@ export function WorkforceCommandCentreClient({
   }
 
   return (
-    <div className="space-y-8">
-      <header className="relative overflow-hidden rounded-2xl border border-[#22C1FF]/20 bg-gradient-to-br from-[#0c1426] via-[#0f1a30] to-[#0a1020] p-6 sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#22C1FF]/10 blur-3xl" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/90">
-              WorkforceOS · Command Centre
-            </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-              Workforce Command Centre
-            </h1>
-            <p className="text-sm leading-relaxed text-[#94A3B8] sm:text-base">
-              Clinical workforce readiness, staffing, cost, recruitment, and compliance intelligence.
-            </p>
-          </div>
-          {canManage ? (
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href={`${base}/planning`}
-                className="rounded-lg border border-[#22C1FF]/40 bg-[#22C1FF]/15 px-4 py-2.5 text-sm font-semibold text-[#22C1FF] hover:bg-[#22C1FF]/20"
-              >
-                Open Workforce Planning
-              </Link>
-              <Link
-                href={`${base}/procedure-staffing`}
-                className="rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-[#CBD5E1] hover:bg-white/5"
-              >
-                Procedure Staffing
-              </Link>
-              <Link
-                href={`${base}/payroll`}
-                className="rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-[#CBD5E1] hover:bg-white/5"
-              >
-                Payroll & Wages
-              </Link>
-              <Link
-                href={`${base}/hr-reconciliation`}
-                className="rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-[#CBD5E1] hover:bg-white/5"
-              >
-                HR Reconciliation
-              </Link>
+    <div className="space-y-10 pb-10 sm:space-y-12 sm:pb-14">
+      <header className="relative overflow-hidden rounded-2xl border border-[#22C1FF]/25 bg-gradient-to-br from-[#0c1426] via-[#0f1a30] to-[#0a1020] p-8 shadow-2xl shadow-black/50 sm:p-10">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_320px_at_0%_0%,rgba(34,193,255,0.14),transparent_55%),radial-gradient(480px_240px_at_100%_100%,rgba(124,58,237,0.08),transparent_50%)]"
+          aria-hidden
+        />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#22C1FF]/10 blur-3xl" />
+        <div className="relative border-l-4 border-[#22C1FF]/80 pl-6 sm:pl-8">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#22C1FF]/90 sm:text-sm">
+                WorkforceOS · Intelligence Centre
+              </p>
+              <h1 className="text-4xl font-semibold tracking-tight text-[#F8FAFC] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+                Workforce Intelligence Centre
+              </h1>
+              <p className="text-base leading-relaxed text-[#94A3B8] sm:text-lg sm:leading-8">
+                Real-time workforce intelligence across staffing readiness, surgical workforce allocation,
+                compliance monitoring, payroll exposure, and operational workforce performance.
+              </p>
             </div>
-          ) : null}
+            {canManage ? (
+              <div className="flex flex-wrap gap-3">
+                <Link href={`${base}/planning`} className={heroPrimaryButtonClass}>
+                  Open Workforce Planning
+                </Link>
+                <Link href={`${base}/procedure-staffing`} className={heroSecondaryButtonClass}>
+                  Procedure Staffing
+                </Link>
+                <Link href={`${base}/payroll`} className={heroSecondaryButtonClass}>
+                  Payroll & Wages
+                </Link>
+                <Link href={`${base}/hr-reconciliation`} className={heroSecondaryButtonClass}>
+                  HR Reconciliation
+                </Link>
+              </div>
+            ) : null}
+          </div>
         </div>
       </header>
 
-      <section aria-label="Executive KPIs" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        <StatCard label="Total Staff" value={kpis.totalStaff} />
-        <StatCard label="Clinically Eligible" value={kpis.clinicallyEligible} />
-        <StatCard label="Credential Risks" value={kpis.credentialRisks} />
-        <StatCard label="Open Recruitment" value={kpis.openRecruitment} />
-        <StatCard label="Procedure Gaps" value={kpis.upcomingProcedureGaps} />
-        <StatCard
+      <section aria-label="Executive KPIs" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <ExecutiveKpiCard label="Total Staff" value={kpis.totalStaff} />
+        <ExecutiveKpiCard label="Clinically Eligible" value={kpis.clinicallyEligible} />
+        <ExecutiveKpiCard label="Credential Risks" value={kpis.credentialRisks} />
+        <ExecutiveKpiCard label="Open Recruitment" value={kpis.openRecruitment} />
+        <ExecutiveKpiCard label="Procedure Gaps" value={kpis.upcomingProcedureGaps} />
+        <ExecutiveKpiCard
           label="Weekly Wage Exposure"
           value={formatCentsAsCurrency(kpis.weeklyWageExposureCents)}
         />
       </section>
 
-      <section aria-label="Workforce health radar">
-        <div className="mb-4 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-[#F8FAFC]">Workforce Health Radar</h2>
-            <p className="mt-1 text-sm text-[#64748B]">
-              Operational readiness across compliance, staffing, recruitment, and payroll.
-            </p>
-          </div>
-        </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {healthRadar.map((metric) => (
-            <HealthBar key={metric.id} metric={metric} />
-          ))}
-        </div>
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-5">
-        <section aria-label="Needs attention" className="xl:col-span-3">
-          <h2 className="text-lg font-semibold text-[#F8FAFC]">Needs Attention</h2>
-          <p className="mt-1 text-sm text-[#64748B]">
-            Highest-priority workforce issues ranked by severity and planning signals.
-          </p>
+      <section aria-label="Workforce priority queue" className="space-y-5">
+        <SectionHeading
+          kicker="Operations"
+          title="Workforce Priority Queue"
+          description="Highest-priority workforce issues ranked by severity and planning signals — your operational command surface."
+        />
+        <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_0%_0%,rgba(34,193,255,0.08),transparent_60%)]"
+            aria-hidden
+          />
           {attentionQueue.length === 0 ? (
-            <DashboardCard className="mt-4 p-8 text-center">
-              <p className="text-sm text-[#94A3B8]">
+            <div className="relative rounded-2xl border border-white/[0.08] bg-[#0B1220]/60 px-8 py-12 text-center">
+              <p className="text-base text-[#94A3B8]">
                 No urgent workforce issues detected. Monitor planning signals for changes.
               </p>
-            </DashboardCard>
+            </div>
           ) : (
-            <ul className="mt-4 space-y-2">
+            <ul className="relative space-y-3 sm:space-y-4">
               {attentionQueue.map((item) => (
                 <AttentionItem key={item.id} item={item} />
               ))}
             </ul>
           )}
-        </section>
+        </DashboardCard>
+      </section>
 
-        <section aria-label="FI Workforce Intelligence" className="xl:col-span-2">
-          <DashboardCard className="h-full p-5" elevated>
-            <h2 className="text-lg font-semibold text-[#F8FAFC]">FI Workforce Intelligence</h2>
-            <p className="mt-1 text-sm text-[#64748B]">
-              Ranked recommendations from the workforce planning engine.
+      <section aria-label="Workforce intelligence engine" className="space-y-5">
+        <SectionHeading
+          kicker="Intelligence"
+          title="Workforce Intelligence Engine"
+          description="Ranked recommendations from the workforce planning engine."
+        />
+        <DashboardCard elevated className="p-6 shadow-2xl shadow-black/55 sm:p-8">
+          {planning && planning.nextBestActions.length > 0 ? (
+            <ol className="space-y-4">
+              {planning.nextBestActions.slice(0, 5).map((action, idx) => (
+                <li
+                  key={action.id}
+                  className="rounded-2xl border border-white/[0.08] bg-[#0B1220]/60 p-5 transition-all duration-200 hover:border-[#22C1FF]/20 hover:bg-[#0B1220]/80 sm:p-6"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold tabular-nums text-[#64748B]">#{idx + 1}</span>
+                    <Badge className={severityBadgeClass(action.priority)}>{action.priority}</Badge>
+                  </div>
+                  <p className="mt-3 text-base font-semibold text-[#F8FAFC] sm:text-lg">{action.title}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{action.description}</p>
+                  {action.href ? (
+                    <Link
+                      href={action.href}
+                      className="mt-3 inline-flex items-center rounded-lg border border-[#22C1FF]/25 bg-[#22C1FF]/10 px-3.5 py-2 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/45 hover:bg-[#22C1FF]/18"
+                    >
+                      Take action →
+                    </Link>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="rounded-2xl border border-white/[0.08] bg-[#0B1220]/50 px-6 py-5 text-sm leading-relaxed text-[#94A3B8]">
+              {buildEmptyPlanningFallbackMessage()}
             </p>
-            {planning && planning.nextBestActions.length > 0 ? (
-              <ol className="mt-4 space-y-3">
-                {planning.nextBestActions.slice(0, 5).map((action, idx) => (
-                  <li key={action.id} className="rounded-lg border border-white/[0.06] bg-[#0B1220]/50 p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-[#64748B]">#{idx + 1}</span>
-                      <Badge className={severityBadgeClass(action.priority)}>{action.priority}</Badge>
-                    </div>
-                    <p className="mt-2 text-sm font-medium text-[#F8FAFC]">{action.title}</p>
-                    <p className="mt-1 text-xs text-[#94A3B8]">{action.description}</p>
-                    {action.href ? (
-                      <Link href={action.href} className="mt-2 inline-block text-xs font-medium text-[#22C1FF] hover:underline">
-                        Take action →
-                      </Link>
-                    ) : null}
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="mt-4 rounded-lg border border-white/[0.06] bg-[#0B1220]/40 px-4 py-3 text-sm text-[#94A3B8]">
-                {buildEmptyPlanningFallbackMessage()}
-              </p>
-            )}
-            {canManage ? (
-              <Button
-                type="button"
-                className="mt-4 w-full"
-                disabled={pending}
-                onClick={onRefreshPlanning}
-              >
-                {pending ? "Refreshing…" : "Refresh Planning Signals"}
-              </Button>
-            ) : null}
-            {message ? <p className="mt-2 text-xs text-emerald-300">{message}</p> : null}
-            {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
-          </DashboardCard>
-        </section>
-      </div>
+          )}
+          {canManage ? (
+            <Button
+              type="button"
+              className="mt-6 h-11 w-full text-sm font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-[#22C1FF]/10 sm:w-auto sm:px-8"
+              disabled={pending}
+              onClick={onRefreshPlanning}
+            >
+              {pending ? "Refreshing…" : "Refresh Planning Signals"}
+            </Button>
+          ) : null}
+          {message ? <p className="mt-3 text-sm text-emerald-300">{message}</p> : null}
+          {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
+        </DashboardCard>
+      </section>
 
-      <section aria-label="Intelligence modules">
-        <h2 className="text-lg font-semibold text-[#F8FAFC]">Workforce Intelligence Modules</h2>
-        <p className="mt-1 text-sm text-[#64748B]">
-          Deep-dive modules for recruitment, payroll, staffing, compliance, and directory management.
-        </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {moduleTiles.map((tile) => (
-            <ModuleCard key={tile.id} tile={tile} />
+      <section aria-label="Workforce health radar" className="space-y-5">
+        <SectionHeading
+          kicker="Health"
+          title="Workforce Health Radar"
+          description="Operational readiness across compliance, staffing, recruitment, and payroll."
+        />
+        <DashboardCard className="p-6 shadow-xl shadow-black/45 sm:p-7">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {healthRadar.map((metric) => (
+              <HealthBar key={metric.id} metric={metric} />
+            ))}
+          </div>
+        </DashboardCard>
+      </section>
+
+      <section aria-label="Procedure staffing forecast" className="space-y-5">
+        <SectionHeading
+          kicker="Forecast"
+          title="Procedure Staffing Forecast"
+          description={
+            procedureForecast.available
+              ? `Planning horizon ${procedureForecast.horizonStart} → ${procedureForecast.horizonEnd}`
+              : "Planning horizon unavailable"
+          }
+        />
+        <DashboardCard elevated className="p-6 shadow-xl shadow-black/45 sm:p-8">
+          {procedureForecast.available ? (
+            <>
+              <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Scheduled</dt>
+                  <dd className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">
+                    {procedureForecast.scheduledProcedures}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Fully staffed</dt>
+                  <dd className="mt-2 text-3xl font-bold tabular-nums text-emerald-300">
+                    {procedureForecast.fullyStaffedProcedures}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Understaffed</dt>
+                  <dd className="mt-2 text-3xl font-bold tabular-nums text-amber-200">
+                    {procedureForecast.understaffedProcedures}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                    Credential warnings
+                  </dt>
+                  <dd className="mt-2 text-3xl font-bold tabular-nums text-rose-300">
+                    {procedureForecast.credentialWarnings}
+                  </dd>
+                </div>
+              </dl>
+              {procedureForecast.missingRoles.length > 0 ? (
+                <div className="mt-6 border-t border-white/[0.06] pt-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Missing roles</p>
+                  <ul className="mt-3 flex flex-wrap gap-2.5">
+                    {procedureForecast.missingRoles.map((r) => (
+                      <li
+                        key={r.role}
+                        className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100"
+                      >
+                        {r.role} · {r.gap}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <p className="text-sm leading-relaxed text-[#94A3B8]">{buildEmptyPlanningFallbackMessage()}</p>
+          )}
+          <Link
+            href={`${base}/procedure-staffing`}
+            className="mt-6 inline-flex items-center rounded-xl border border-[#22C1FF]/25 bg-[#22C1FF]/10 px-4 py-2.5 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/45 hover:bg-[#22C1FF]/18 hover:shadow-md hover:shadow-[#22C1FF]/10"
+          >
+            Open procedure staffing →
+          </Link>
+        </DashboardCard>
+      </section>
+
+      <section aria-label="Intelligence modules" className="space-y-5">
+        <SectionHeading
+          kicker="Modules"
+          title="Workforce Operations"
+          description="Quick access to recruitment, compliance, credentials, payroll, directory, and HR reconciliation."
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {utilityTiles.map((tile) => (
+            <UtilityModuleCard key={tile.id} tile={tile} />
           ))}
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section aria-label="Procedure staffing forecast">
-          <DashboardCard className="p-5" elevated>
-            <h2 className="text-lg font-semibold text-[#F8FAFC]">Procedure Staffing Forecast</h2>
-            <p className="mt-1 text-sm text-[#64748B]">
-              {procedureForecast.available
-                ? `Horizon ${procedureForecast.horizonStart} → ${procedureForecast.horizonEnd}`
-                : "Planning horizon unavailable"}
+      <section aria-label="Financial intelligence" className="space-y-5">
+        <SectionHeading
+          kicker="Finance"
+          title="Workforce Financial Intelligence"
+          description="Commercial labour cost visibility across roster, procedures, and weekly exposure."
+        />
+        <DashboardCard elevated className="p-6 shadow-xl shadow-black/45 sm:p-8">
+          {financialIntelligence.available ? (
+            <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Weekly exposure</dt>
+                <dd className="mt-2 text-2xl font-bold tabular-nums text-[#22C1FF] sm:text-3xl">
+                  {formatCentsAsCurrency(financialIntelligence.weeklyWageExposureCents)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Daily roster cost</dt>
+                <dd className="mt-2 text-2xl font-bold tabular-nums text-[#F8FAFC] sm:text-3xl">
+                  {formatCentsAsCurrency(financialIntelligence.dailyRosterCostCents)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Procedure labour</dt>
+                <dd className="mt-2 text-2xl font-bold tabular-nums text-[#F8FAFC] sm:text-3xl">
+                  {formatCentsAsCurrency(financialIntelligence.procedureLabourCostCents)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Avg / procedure</dt>
+                <dd className="mt-2 text-2xl font-bold tabular-nums text-[#F8FAFC] sm:text-3xl">
+                  {financialIntelligence.averageCostPerProcedureCents != null
+                    ? formatCentsAsCurrency(financialIntelligence.averageCostPerProcedureCents)
+                    : "—"}
+                </dd>
+              </div>
+              <div className="sm:col-span-2 lg:col-span-2">
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Missing wage profiles
+                </dt>
+                <dd className="mt-2 text-2xl font-bold tabular-nums text-amber-200 sm:text-3xl">
+                  {financialIntelligence.missingWageProfileCount}
+                </dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="text-sm leading-relaxed text-[#94A3B8]">
+              Financial intelligence unavailable — configure wage profiles and roster shifts.
             </p>
-            {procedureForecast.available ? (
-              <>
-                <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-[#64748B]">Scheduled</dt>
-                    <dd className="mt-1 text-2xl font-semibold text-[#F8FAFC]">
-                      {procedureForecast.scheduledProcedures}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-[#64748B]">Fully staffed</dt>
-                    <dd className="mt-1 text-2xl font-semibold text-emerald-300">
-                      {procedureForecast.fullyStaffedProcedures}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-[#64748B]">Understaffed</dt>
-                    <dd className="mt-1 text-2xl font-semibold text-amber-200">
-                      {procedureForecast.understaffedProcedures}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-[#64748B]">Credential warnings</dt>
-                    <dd className="mt-1 text-2xl font-semibold text-rose-300">
-                      {procedureForecast.credentialWarnings}
-                    </dd>
-                  </div>
-                </dl>
-                {procedureForecast.missingRoles.length > 0 ? (
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
-                      Missing roles
-                    </p>
-                    <ul className="mt-2 flex flex-wrap gap-2">
-                      {procedureForecast.missingRoles.map((r) => (
-                        <li
-                          key={r.role}
-                          className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-100"
-                        >
-                          {r.role} · {r.gap}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <p className="mt-4 text-sm text-[#94A3B8]">{buildEmptyPlanningFallbackMessage()}</p>
-            )}
+          )}
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href={`${base}/procedure-staffing`}
-              className="mt-4 inline-block text-sm font-medium text-[#22C1FF] hover:underline"
+              href={`${base}/payroll`}
+              className="inline-flex items-center rounded-xl border border-[#22C1FF]/25 bg-[#22C1FF]/10 px-4 py-2.5 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/45 hover:bg-[#22C1FF]/18"
             >
-              Open procedure staffing →
+              Payroll & wages →
             </Link>
-          </DashboardCard>
-        </section>
+            <Link
+              href={`${base}/shift-cost`}
+              className="inline-flex items-center rounded-xl border border-[#22C1FF]/25 bg-[#22C1FF]/10 px-4 py-2.5 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/45 hover:bg-[#22C1FF]/18"
+            >
+              Shift cost intelligence →
+            </Link>
+          </div>
+        </DashboardCard>
+      </section>
 
-        <section aria-label="Financial intelligence">
-          <DashboardCard className="p-5" elevated>
-            <h2 className="text-lg font-semibold text-[#F8FAFC]">Workforce Financial Intelligence</h2>
-            <p className="mt-1 text-sm text-[#64748B]">
-              Commercial labour cost visibility across roster, procedures, and weekly exposure.
-            </p>
-            {financialIntelligence.available ? (
-              <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-[#64748B]">Weekly exposure</dt>
-                  <dd className="mt-1 text-xl font-semibold text-[#22C1FF]">
-                    {formatCentsAsCurrency(financialIntelligence.weeklyWageExposureCents)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-[#64748B]">Daily roster cost</dt>
-                  <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">
-                    {formatCentsAsCurrency(financialIntelligence.dailyRosterCostCents)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-[#64748B]">Procedure labour</dt>
-                  <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">
-                    {formatCentsAsCurrency(financialIntelligence.procedureLabourCostCents)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-[#64748B]">Avg / procedure</dt>
-                  <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">
-                    {financialIntelligence.averageCostPerProcedureCents != null
-                      ? formatCentsAsCurrency(financialIntelligence.averageCostPerProcedureCents)
-                      : "—"}
-                  </dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs uppercase tracking-wide text-[#64748B]">Missing wage profiles</dt>
-                  <dd className="mt-1 text-lg font-semibold text-amber-200">
-                    {financialIntelligence.missingWageProfileCount}
-                  </dd>
-                </div>
-              </dl>
-            ) : (
-              <p className="mt-4 text-sm text-[#94A3B8]">
-                Financial intelligence unavailable — configure wage profiles and roster shifts.
-              </p>
-            )}
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link href={`${base}/payroll`} className="text-sm font-medium text-[#22C1FF] hover:underline">
-                Payroll & wages →
-              </Link>
-              <Link href={`${base}/shift-cost`} className="text-sm font-medium text-[#22C1FF] hover:underline">
-                Shift cost intelligence →
-              </Link>
-            </div>
-          </DashboardCard>
-        </section>
-      </div>
-
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-6 text-sm text-[#64748B]">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08] pt-8 text-sm text-[#64748B]">
         <p>
           Workforce members lifecycle view available at{" "}
-          <Link href={`${base}/directory`} className="text-[#22C1FF] hover:underline">
+          <Link href={`${base}/directory`} className="font-medium text-[#22C1FF] hover:underline">
             workforce directory
           </Link>
           .
         </p>
-        <Link href={`/fi-admin/${tenantId}/staff`} className="text-[#22C1FF] hover:underline">
+        <Link href={`/fi-admin/${tenantId}/staff`} className="font-medium text-[#22C1FF] hover:underline">
           FI staff directory →
         </Link>
       </footer>

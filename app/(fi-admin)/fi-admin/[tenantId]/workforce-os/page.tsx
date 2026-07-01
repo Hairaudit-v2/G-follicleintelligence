@@ -5,7 +5,7 @@ import { WorkforceCommandCentreClient } from "@/src/components/fi-admin/workforc
 import { loadWorkforceCommandCentrePage } from "@/src/lib/workforce/workforceCommandCentrePage.server";
 
 export const metadata = {
-  title: "Workforce Command Centre · WorkforceOS",
+  title: "Workforce Intelligence Centre · WorkforceOS",
   robots: { index: false, follow: false },
 };
 
