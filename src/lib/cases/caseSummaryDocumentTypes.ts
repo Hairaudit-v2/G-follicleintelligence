@@ -72,6 +72,13 @@ export type CaseSummaryDocument = {
   };
   followUpCheckpoints: CaseSummaryFollowUpLine[];
   linkedImageCount: number;
+  patientSafeImagingExports: Array<{
+    photoDate: string;
+    viewLabel: string;
+    sessionType: string;
+    progressLabel: string;
+    statusMessage: string;
+  }>;
   timeline: {
     eventCount: number;
     preview: CaseSummaryTimelinePreviewLine[];

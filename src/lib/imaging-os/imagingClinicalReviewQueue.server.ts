@@ -38,7 +38,9 @@ export type ImagingClinicalReviewQueueItem = {
   staffReviewStatus: string | null;
   deepLinks: ImagingDeepLink[];
   assignedToUserId: string | null;
+  assignedReviewerLabel: string | null;
   assignmentStatus: string | null;
+  retakeRequired: boolean;
 };
 
 function readQualityRecord(metadata: Record<string, unknown>): ImagingQualityMetadataRecord | null {
@@ -273,8 +275,22 @@ export async function loadImagingClinicalReviewQueue(
       staffReviewStatus: readImagingStaffReviewRecord(metadata)?.status ?? null,
       deepLinks,
       assignedToUserId: readImagingReviewAssignmentRecord(metadata)?.assigned_to ?? null,
+      assignedReviewerLabel: null,
       assignmentStatus:
         readImagingReviewAssignmentRecord(metadata)?.assignment_status ?? null,
+      retakeRequired: readImagingStaffReviewRecord(metadata)?.status === "retake_required",
     };
   });
+}
+
+export function attachReviewerLabelsToQueueItems(
+  items: ImagingClinicalReviewQueueItem[],
+  labelByUserId: Map<string, string>
+): ImagingClinicalReviewQueueItem[] {
+  return items.map((item) => ({
+    ...item,
+    assignedReviewerLabel: item.assignedToUserId
+      ? (labelByUserId.get(item.assignedToUserId) ?? null)
+      : null,
+  }));
 }

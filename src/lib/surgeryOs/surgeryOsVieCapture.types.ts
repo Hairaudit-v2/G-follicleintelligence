@@ -1,6 +1,7 @@
 import type { VieSurgeryPhase } from "@/src/lib/vie/vieProtocolTypes";
 import type { VieSurgeryComparisonStatus } from "@/src/lib/vie/vieComparisonTypes";
 import type { VieOutcomeStatus } from "@/src/lib/vie/vieOutcomeTypes";
+import type { SurgeryOsLongitudinalSurfacing } from "./surgeryOsLongitudinalIntelligenceCore";
 
 export type SurgeryOsVieOutcomeReadiness = {
   overall_score: number;
@@ -73,6 +74,7 @@ export type SurgeryOsVieCaptureSummary = {
   nextRecommendedSlotLabel: string | null;
   comparisonStatus: VieSurgeryComparisonStatus;
   outcomeReadiness: SurgeryOsVieOutcomeReadiness | null;
+  longitudinalSurfacing?: SurgeryOsLongitudinalSurfacing | null;
 };
 
 export type VieSurgeryCaptureContext = {

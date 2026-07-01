@@ -10,6 +10,7 @@ import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
 import { loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
 import { buildCaseSummaryDocument } from "@/src/lib/cases/caseSummaryDocumentBuild";
+import { loadPatientSafeImagingExportCardsForPatient } from "@/src/lib/imaging-os/patientSafeImagingExportLoad.server";
 import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
 import { loadCaseTimelineExtraSources } from "@/src/lib/cases/caseTimelineLoaders";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
@@ -79,6 +80,29 @@ export default async function CaseSummaryDocumentRoutePage({
     timelineItems,
   });
 
+  const patientId =
+    detail.patient?.foundation_patient_id?.trim() ??
+    detail.foundation_patient_id?.trim() ??
+    null;
+  let patientSafeImagingCards: Awaited<
+    ReturnType<typeof loadPatientSafeImagingExportCardsForPatient>
+  >["cards"] = [];
+  if (patientId) {
+    try {
+      const bundle = await loadPatientSafeImagingExportCardsForPatient({
+        tenantId,
+        patientId,
+        caseId,
+        includeSignedPreviews: false,
+        limit: 12,
+        client: supabase,
+      });
+      patientSafeImagingCards = bundle.cards;
+    } catch {
+      // best-effort — imaging export optional for case handout
+    }
+  }
+
   const document = buildCaseSummaryDocument({
     tenantId,
     detail,
@@ -88,6 +112,7 @@ export default async function CaseSummaryDocumentRoutePage({
     followUps,
     timelineItems,
     readiness,
+    patientSafeImagingCards,
   });
 
   const casesListReturnQuery = sanitizeFromCasesSearchParam(sp.fromCases);

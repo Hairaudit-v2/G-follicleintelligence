@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, Circle } from "lucide-react";
 
@@ -274,6 +275,59 @@ export function SurgeryOsVieCapturePanel({
               </div>
             ))}
           </div>
+
+          {capture.longitudinalSurfacing ? (
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+                Longitudinal intelligence
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs">
+                <Link
+                  href={capture.longitudinalSurfacing.review_queue_href}
+                  className="rounded-lg border border-cyan-500/30 px-3 py-1.5 text-cyan-200 hover:bg-cyan-500/10"
+                >
+                  Review queue
+                  {capture.longitudinalSurfacing.pending_review_count > 0
+                    ? ` (${capture.longitudinalSurfacing.pending_review_count})`
+                    : ""}
+                </Link>
+                <Link
+                  href={capture.longitudinalSurfacing.patient_twin_href}
+                  className="rounded-lg border border-[#334155] px-3 py-1.5 text-[#CBD5E1] hover:bg-white/5"
+                >
+                  Patient Twin
+                </Link>
+                <Link
+                  href={capture.longitudinalSurfacing.imaging_gallery_href}
+                  className="rounded-lg border border-[#334155] px-3 py-1.5 text-[#CBD5E1] hover:bg-white/5"
+                >
+                  Imaging gallery
+                </Link>
+                <Link
+                  href={capture.longitudinalSurfacing.vie_compare_href}
+                  className="rounded-lg border border-[#334155] px-3 py-1.5 text-[#CBD5E1] hover:bg-white/5"
+                >
+                  VIE compare
+                </Link>
+              </div>
+              {capture.longitudinalSurfacing.retake_required_count > 0 ? (
+                <p className="text-xs text-rose-300">
+                  {capture.longitudinalSurfacing.retake_required_count} phase
+                  {capture.longitudinalSurfacing.retake_required_count === 1 ? "" : "s"} may need
+                  retake — staff review recommended.
+                </p>
+              ) : null}
+              <ul className="grid gap-1 sm:grid-cols-2 text-xs text-[#94A3B8]">
+                {capture.longitudinalSurfacing.slots.map((slot) => (
+                  <li key={slot.phase} className="rounded border border-[#334155] px-2 py-1">
+                    <span className="text-[#CBD5E1]">{slot.label}</span>
+                    {": "}
+                    <span className="capitalize">{slot.status.replace(/_/g, " ")}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="flex flex-wrap items-center gap-3">
             <SurgeryOsCaptureEvidenceButton

@@ -20,6 +20,7 @@ import type {
   CaseSummaryLeadLine,
   CaseSummaryTimelinePreviewLine,
 } from "@/src/lib/cases/caseSummaryDocumentTypes";
+import type { PatientSafeImagingExportCard } from "@/src/lib/imaging-os/patientSafeImagingExportCore";
 
 export type BuildCaseSummaryDocumentInput = {
   tenantId: string;
@@ -30,6 +31,7 @@ export type BuildCaseSummaryDocumentInput = {
   followUps: CaseFollowUpRow[];
   timelineItems: CaseTimelineItem[];
   readiness: CaseReadinessReport;
+  patientSafeImagingCards?: PatientSafeImagingExportCard[];
 };
 
 function row(label: string, value: string | null | undefined): CaseSummaryKeyValue {
@@ -248,6 +250,13 @@ export function buildCaseSummaryDocument(
     },
     followUpCheckpoints,
     linkedImageCount: detail.images.length,
+    patientSafeImagingExports: (input.patientSafeImagingCards ?? []).map((card) => ({
+      photoDate: card.photo_date ? formatDateYmd(card.photo_date) : "—",
+      viewLabel: card.view_label ?? "—",
+      sessionType: card.session_type ?? "—",
+      progressLabel: card.progress_label ?? "—",
+      statusMessage: card.status_message,
+    })),
     timeline: {
       eventCount: timelineItems.length,
       preview,

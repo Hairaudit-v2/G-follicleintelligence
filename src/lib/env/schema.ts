@@ -142,6 +142,7 @@ export const serverEnvSchema = z.object({
   FI_INTELLIGENCE_POLICY_DEV: optionalString,
   FI_IMAGING_ENABLE_LIVE_DENSITY_PROVIDER: optionalString,
   FI_IMAGING_ENABLE_LIVE_OUTCOME_PROVIDER: optionalString,
+  FI_IMAGING_ENABLE_LIVE_NORWOOD_PROVIDER: optionalString,
   GOOGLE_SITE_VERIFICATION: optionalString,
   FI_EXTERNAL_CONNECTOR_MASTER_KEY: optionalString,
   GOOGLE_CALENDAR_CLIENT_ID: optionalString,

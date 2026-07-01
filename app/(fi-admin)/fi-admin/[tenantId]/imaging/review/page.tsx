@@ -7,7 +7,11 @@ import { ImagingClinicalReviewQueue } from "@/src/components/fi-admin/imaging/Im
 import { ImagingClinicalReviewQueueFilters } from "@/src/components/fi-admin/imaging/ImagingClinicalReviewQueueFilters";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { parseImagingReviewQueueFiltersFromSearchParams } from "@/src/lib/imaging-os/imagingClinicalReviewQueueFilters";
-import { loadImagingClinicalReviewQueue } from "@/src/lib/imaging-os/imagingClinicalReviewQueue.server";
+import {
+  attachReviewerLabelsToQueueItems,
+  loadImagingClinicalReviewQueue,
+} from "@/src/lib/imaging-os/imagingClinicalReviewQueue.server";
+import { loadImagingReviewerDirectoryForTenant } from "@/src/lib/imaging-os/imagingReviewerDirectoryLoader.server";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +54,12 @@ export default async function ImagingClinicalReviewPage({
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
-  const items = await loadImagingClinicalReviewQueue(tid, undefined, 100, filters);
+  const [rawItems, reviewers] = await Promise.all([
+    loadImagingClinicalReviewQueue(tid, undefined, 100, filters),
+    loadImagingReviewerDirectoryForTenant(tid).catch(() => []),
+  ]);
+  const labelByUserId = new Map(reviewers.map((r) => [r.fi_user_id, r.display_name]));
+  const items = attachReviewerLabelsToQueueItems(rawItems, labelByUserId);
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 py-6">
@@ -76,8 +85,8 @@ export default async function ImagingClinicalReviewPage({
         </p>
       </header>
 
-      <ImagingClinicalReviewQueueFilters tenantId={tid} />
-      <ImagingClinicalReviewQueue tenantId={tid} items={items} />
+      <ImagingClinicalReviewQueueFilters tenantId={tid} reviewers={reviewers} />
+      <ImagingClinicalReviewQueue tenantId={tid} items={items} reviewers={reviewers} />
     </div>
   );
 }

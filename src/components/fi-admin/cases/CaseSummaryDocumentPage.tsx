@@ -246,6 +246,27 @@ export function CaseSummaryDocumentPage({
             {doc.linkedImageCount === 1 ? "" : "s"} (loaded for this summary; list capped in source
             query).
           </p>
+          {doc.patientSafeImagingExports.length > 0 ? (
+            <div className="mt-4 space-y-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Patient-safe imaging status (redacted)
+              </p>
+              {doc.patientSafeImagingExports.map((row, i) => (
+                <div
+                  key={`${row.photoDate}-${row.viewLabel}-${i}`}
+                  className="rounded border border-gray-200 p-3 text-sm print:border-gray-400"
+                >
+                  <p>
+                    <span className="font-medium text-gray-900">{row.statusMessage}</span>
+                  </p>
+                  <p className="mt-1 text-gray-600">
+                    {row.photoDate} · {row.viewLabel} · {row.sessionType}
+                    {row.progressLabel !== "—" ? ` · ${row.progressLabel}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </CaseSummaryDocumentSection>
 
         <CaseSummaryDocumentSection title="Timeline summary">

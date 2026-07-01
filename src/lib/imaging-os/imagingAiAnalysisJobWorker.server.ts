@@ -17,10 +17,11 @@ import { clinicalAnalysisResultToMetadataRecord } from "./clinicalImageAnalysisC
 import { assessFiOsPatientDonorAndPersist } from "@/src/lib/hair-intelligence/donorIntelligence/adapters/fiOsDonorAssessment.server";
 import { assessFiOsPatientRecipientAndPersist } from "@/src/lib/hair-intelligence/recipientCandidacy/adapters/fiOsRecipientAssessment.server";
 import {
-  buildNorwoodGradeSummary,
   mergeImagingJobSummariesMetadata,
   type ReadOnlyJobSummary,
 } from "./imagingJobReadOnlySummaries";
+import { buildLiveNorwoodSignalSummary, parseImagingNorwoodProviderFlag } from "./imagingNorwoodSignalCore";
+import type { NorwoodSignalSummary } from "./imagingNorwoodSignalCore";
 import {
   buildLiveDensitySignalSummary,
   buildLiveOutcomeScoreSignalSummary,
@@ -71,7 +72,7 @@ async function persistJobSummaryMetadata(
   tenantId: string,
   imageId: string,
   kind: "density_estimate" | "norwood_grade" | "outcome_score",
-  summary: ReadOnlyJobSummary | OutcomeSignalSummary
+  summary: ReadOnlyJobSummary | OutcomeSignalSummary | NorwoodSignalSummary
 ): Promise<Record<string, unknown>> {
   const ctx = await loadPatientImageContext(supabase, tenantId, imageId);
   const merged = mergeImagingJobSummariesMetadata(ctx.metadata, { [kind]: summary });
@@ -185,14 +186,14 @@ export async function processImagingAiAnalysisJob(
 
     if (job.analysis_kind === "norwood_grade") {
       const ctx = await loadPatientImageContext(supabase, tid, imageId);
-      const norwood =
-        ctx.patientId != null
-          ? await loadPatientNorwoodScale(supabase, tid, ctx.patientId)
-          : null;
-      const summary = buildNorwoodGradeSummary({
+      const providerCtx = resolveLiveImagingSignalProvider(process.env);
+      const summary = buildLiveNorwoodSignalSummary({
         metadata: ctx.metadata,
-        patientNorwoodScale: norwood,
+        aiImageCategory: ctx.aiImageCategory,
         aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
+        liveEnabled: parseImagingNorwoodProviderFlag(process.env),
+        providerAvailable: providerCtx.providerAvailable,
+        providerName: providerCtx.providerName,
       });
       await persistJobSummaryMetadata(supabase, tid, imageId, "norwood_grade", summary);
       await completeImagingAiAnalysisJob({

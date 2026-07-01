@@ -3,7 +3,15 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
 
-export function ImagingClinicalReviewQueueFilters({ tenantId }: { tenantId: string }) {
+import type { ImagingReviewerPickerOption } from "@/src/lib/imaging-os/imagingReviewerDirectoryLoader.server";
+
+export function ImagingClinicalReviewQueueFilters({
+  tenantId,
+  reviewers = [],
+}: {
+  tenantId: string;
+  reviewers?: ImagingReviewerPickerOption[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -93,11 +101,26 @@ export function ImagingClinicalReviewQueueFilters({ tenantId }: { tenantId: stri
       </label>
       <label className="text-xs text-slate-400">
         Assigned reviewer
-        <input
-          name="assigned"
-          defaultValue={searchParams.get("assigned") ?? ""}
-          className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] px-2 py-1 text-xs font-mono"
-        />
+        {reviewers.length > 0 ? (
+          <select
+            name="assigned"
+            defaultValue={searchParams.get("assigned") ?? ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] px-2 py-1 text-xs"
+          >
+            <option value="">Any</option>
+            {reviewers.map((r) => (
+              <option key={r.fi_user_id} value={r.fi_user_id}>
+                {r.display_name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            name="assigned"
+            defaultValue={searchParams.get("assigned") ?? ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] px-2 py-1 text-xs font-mono"
+          />
+        )}
       </label>
       <label className="text-xs text-slate-400">
         Retake required

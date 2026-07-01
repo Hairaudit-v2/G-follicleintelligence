@@ -6,9 +6,11 @@ import { useCallback, useState, useTransition } from "react";
 
 import {
   assignImagingReviewAction,
+  bulkAssignImagingQueueReviewerAction,
   bulkAssignImagingQueueStaffNoteAction,
   bulkFlagImagingQueueRetakeAction,
   bulkMarkImagingQueueReviewedAction,
+  bulkUnassignImagingQueueReviewerAction,
   flagImagingReviewRetakeAction,
   markImagingReviewReviewedAction,
   reassignImagingReviewViewTypeAction,
@@ -16,6 +18,7 @@ import {
 } from "@/lib/actions/fi-imaging-actions";
 import { ALLOWED_STAFF_REASSIGN_VIEW_TYPES } from "@/src/lib/imaging-os/imagingStaffReviewCore";
 import type { ImagingClinicalReviewQueueItem } from "@/src/lib/imaging-os/imagingClinicalReviewQueue.server";
+import type { ImagingReviewerPickerOption } from "@/src/lib/imaging-os/imagingReviewerDirectoryLoader.server";
 
 const REASON_LABELS: Record<string, string> = {
   low_classification_confidence: "Low classification confidence",
@@ -39,9 +42,10 @@ function formatReason(reason: string): string {
 type Props = {
   tenantId: string;
   items: ImagingClinicalReviewQueueItem[];
+  reviewers?: ImagingReviewerPickerOption[];
 };
 
-export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
+export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [adminKey, setAdminKey] = useState("");
@@ -51,6 +55,16 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [bulkNote, setBulkNote] = useState("");
   const [assignee, setAssignee] = useState<Record<string, string>>({});
+  const [bulkReviewerId, setBulkReviewerId] = useState("");
+  const [reviewerSearch, setReviewerSearch] = useState("");
+  const filteredReviewers = reviewers.filter((r) => {
+    const q = reviewerSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      r.display_name.toLowerCase().includes(q) ||
+      (r.email?.toLowerCase().includes(q) ?? false)
+    );
+  });
 
   const withAdmin = useCallback(
     <T extends Record<string, unknown>>(body: T): T & { adminKey?: string } => {
@@ -162,6 +176,70 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
         >
           Bulk flag retake
         </button>
+        <select
+          value={bulkReviewerId}
+          onChange={(e) => setBulkReviewerId(e.target.value)}
+          className="min-w-[180px] rounded border border-slate-700 bg-[#020617] px-2 py-1 text-xs"
+        >
+          <option value="">Bulk assign reviewer…</option>
+          {reviewers.map((r) => (
+            <option key={r.fi_user_id} value={r.fi_user_id}>
+              {r.display_name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          disabled={pending || Object.values(selected).every((v) => !v) || !bulkReviewerId}
+          className="rounded bg-violet-900/40 px-3 py-1 text-xs text-violet-200 disabled:opacity-40"
+          onClick={() => {
+            const bulkItems = items
+              .filter((i) => selected[i.imageId])
+              .map((i) => ({ patientId: i.patientId, patientImageId: i.imageId }));
+            if (!bulkItems.length || !bulkReviewerId) return;
+            setMsg(null);
+            startTransition(async () => {
+              const res = await bulkAssignImagingQueueReviewerAction(
+                tenantId,
+                withAdmin({ items: bulkItems, assignedToUserId: bulkReviewerId })
+              );
+              if (!res.ok) {
+                setMsg(res.error);
+                return;
+              }
+              setMsg(`Assigned ${res.succeeded} reviewer${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              router.refresh();
+            });
+          }}
+        >
+          Bulk assign reviewer
+        </button>
+        <button
+          type="button"
+          disabled={pending || Object.values(selected).every((v) => !v)}
+          className="rounded bg-slate-800 px-3 py-1 text-xs text-slate-300 disabled:opacity-40"
+          onClick={() => {
+            const bulkItems = items
+              .filter((i) => selected[i.imageId])
+              .map((i) => ({ patientId: i.patientId, patientImageId: i.imageId }));
+            if (!bulkItems.length) return;
+            setMsg(null);
+            startTransition(async () => {
+              const res = await bulkUnassignImagingQueueReviewerAction(
+                tenantId,
+                withAdmin({ items: bulkItems })
+              );
+              if (!res.ok) {
+                setMsg(res.error);
+                return;
+              }
+              setMsg(`Unassigned ${res.succeeded}${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              router.refresh();
+            });
+          }}
+        >
+          Bulk unassign
+        </button>
         <button
           type="button"
           disabled={pending || Object.values(selected).every((v) => !v) || !bulkNote.trim()}
@@ -212,6 +290,7 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
               <th className="px-4 py-3">View</th>
               <th className="px-4 py-3">Quality</th>
               <th className="px-4 py-3">Confidence</th>
+              <th className="px-4 py-3">Retake</th>
               <th className="px-4 py-3">Review reasons</th>
               <th className="px-4 py-3">Assigned</th>
               <th className="px-4 py-3">Actions</th>
@@ -274,6 +353,15 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
                       : "—"}
                   </td>
                   <td className="px-4 py-3">
+                    {item.retakeRequired ? (
+                      <span className="rounded bg-rose-900/40 px-2 py-0.5 text-[10px] font-medium text-rose-200">
+                        Retake required
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-500">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     <ul className="space-y-0.5 text-xs text-amber-200/90">
                       {item.reviewReasons.map((r) => (
                         <li key={r}>{formatReason(r)}</li>
@@ -281,40 +369,77 @@ export function ImagingClinicalReviewQueue({ tenantId, items }: Props) {
                     </ul>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex min-w-[160px] flex-col gap-1 text-xs">
-                      {item.assignedToUserId ? (
+                    <div className="flex min-w-[180px] flex-col gap-1 text-xs">
+                      {item.assignedReviewerLabel ? (
+                        <span className="text-sky-200/90">{item.assignedReviewerLabel}</span>
+                      ) : item.assignedToUserId ? (
                         <span className="font-mono text-sky-200/90">
                           {item.assignedToUserId.slice(0, 8)}…
                         </span>
                       ) : (
                         <span className="text-slate-500">Unassigned</span>
                       )}
-                      <input
-                        type="text"
-                        placeholder="Reviewer user ID"
-                        value={assignee[item.imageId] ?? item.assignedToUserId ?? ""}
-                        onChange={(e) =>
-                          setAssignee((prev) => ({ ...prev, [item.imageId]: e.target.value }))
-                        }
-                        className="rounded border border-slate-700 bg-[#020617] px-2 py-1 font-mono text-[10px]"
-                      />
+                      {reviewers.length > 0 ? (
+                        <>
+                          <input
+                            type="search"
+                            placeholder="Search reviewers"
+                            value={reviewerSearch}
+                            onChange={(e) => setReviewerSearch(e.target.value)}
+                            className="rounded border border-slate-700 bg-[#020617] px-2 py-1 text-[10px]"
+                          />
+                          <select
+                            value={assignee[item.imageId] ?? item.assignedToUserId ?? ""}
+                            onChange={(e) =>
+                              setAssignee((prev) => ({ ...prev, [item.imageId]: e.target.value }))
+                            }
+                            className="rounded border border-slate-700 bg-[#020617] px-2 py-1 text-[10px]"
+                          >
+                            <option value="">Select reviewer…</option>
+                            {filteredReviewers.map((r) => (
+                              <option key={r.fi_user_id} value={r.fi_user_id}>
+                                {r.display_name}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder="Reviewer user ID (fallback)"
+                          value={assignee[item.imageId] ?? item.assignedToUserId ?? ""}
+                          onChange={(e) =>
+                            setAssignee((prev) => ({ ...prev, [item.imageId]: e.target.value }))
+                          }
+                          className="rounded border border-slate-700 bg-[#020617] px-2 py-1 font-mono text-[10px]"
+                        />
+                      )}
                       <div className="flex flex-wrap gap-1">
                         <button
                           type="button"
-                          disabled={pending || !assignee[item.imageId]?.trim()}
+                          disabled={
+                            pending ||
+                            !(assignee[item.imageId] ?? item.assignedToUserId)?.trim()
+                          }
                           className="rounded bg-violet-900/40 px-2 py-0.5 text-[10px] text-violet-200 disabled:opacity-40"
-                          onClick={() =>
+                          onClick={() => {
+                            const uid = (
+                              assignee[item.imageId] ??
+                              item.assignedToUserId ??
+                              ""
+                            ).trim();
+                            if (!uid) return;
                             runAction(item.patientId, item.imageId, () =>
                               assignImagingReviewAction(
                                 tenantId,
                                 item.patientId,
                                 withAdmin({
                                   patientImageId: item.imageId,
-                                  assignedToUserId: assignee[item.imageId]!.trim(),
+                                  assignedToUserId: uid,
                                 })
                               )
-                            )
-                          }
+                            );
+                          }}
                         >
                           Assign
                         </button>

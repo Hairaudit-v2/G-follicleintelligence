@@ -108,3 +108,71 @@ export async function unassignImagingReview(input: {
   await persistAssignmentUpdate({ supabase, tenantId: tid, patientImageId: iid, metadata: merged });
   return { imageId: iid, assignment: record, metadata: merged };
 }
+
+export type BulkImagingReviewAssignmentItem = {
+  patientId: string;
+  patientImageId: string;
+};
+
+export type BulkImagingReviewAssignmentResult = {
+  succeeded: string[];
+  failed: Array<{ imageId: string; error: string }>;
+};
+
+async function runBulkAssignment(
+  items: BulkImagingReviewAssignmentItem[],
+  run: (item: BulkImagingReviewAssignmentItem) => Promise<void>
+): Promise<BulkImagingReviewAssignmentResult> {
+  const succeeded: string[] = [];
+  const failed: Array<{ imageId: string; error: string }> = [];
+  for (const item of items) {
+    try {
+      await run(item);
+      succeeded.push(item.patientImageId);
+    } catch (e) {
+      failed.push({
+        imageId: item.patientImageId,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+  return { succeeded, failed };
+}
+
+export async function bulkAssignImagingReviewItems(input: {
+  tenantId: string;
+  items: BulkImagingReviewAssignmentItem[];
+  assignedToUserId: string;
+  assignedByUserId: string | null;
+  client?: SupabaseClient;
+}): Promise<BulkImagingReviewAssignmentResult> {
+  const assignee = input.assignedToUserId.trim();
+  if (!assignee) throw new Error("assigned_to user id is required.");
+  return runBulkAssignment(input.items, (item) =>
+    assignImagingReviewToStaff({
+      tenantId: input.tenantId,
+      patientId: item.patientId,
+      patientImageId: item.patientImageId,
+      assignedToUserId: assignee,
+      assignedByUserId: input.assignedByUserId,
+      client: input.client,
+    }).then(() => undefined)
+  );
+}
+
+export async function bulkUnassignImagingReviewItems(input: {
+  tenantId: string;
+  items: BulkImagingReviewAssignmentItem[];
+  assignedByUserId: string | null;
+  client?: SupabaseClient;
+}): Promise<BulkImagingReviewAssignmentResult> {
+  return runBulkAssignment(input.items, (item) =>
+    unassignImagingReview({
+      tenantId: input.tenantId,
+      patientId: item.patientId,
+      patientImageId: item.patientImageId,
+      assignedByUserId: input.assignedByUserId,
+      client: input.client,
+    }).then(() => undefined)
+  );
+}

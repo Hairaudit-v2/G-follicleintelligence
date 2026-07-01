@@ -5,6 +5,8 @@ import { clinicalAnalysisResultToMetadataRecord } from "./clinicalImageAnalysisC
 import { buildStubClinicalImageAnalysis } from "./clinicalImageAnalysisCore";
 import {
   assignImagingReviewToStaff,
+  bulkAssignImagingReviewItems,
+  bulkUnassignImagingReviewItems,
   unassignImagingReview,
 } from "./imagingReviewAssignmentMutations.server";
 import { readImagingReviewAssignmentRecord } from "./imagingReviewAssignmentCore";
@@ -106,6 +108,55 @@ describe("imagingReviewAssignmentMutations", () => {
     const meta = row.metadata as Record<string, unknown>;
     assert.equal(readImagingReviewAssignmentRecord(meta)?.assignment_status, "unassigned");
     assert.equal(readImagingReviewAssignmentRecord(meta)?.assigned_to, null);
+  });
+
+  it("bulk assign applies reviewer to multiple items", async () => {
+    const { client, row } = createImageStore({
+      id: "img-1",
+      tenant_id: "tenant-1",
+      patient_id: "patient-1",
+      image_status: "active",
+      metadata: { imaging_clinical_ai: aiMeta },
+    });
+    const result = await bulkAssignImagingReviewItems({
+      tenantId: "tenant-1",
+      items: [{ patientId: "patient-1", patientImageId: "img-1" }],
+      assignedToUserId: "reviewer-bulk",
+      assignedByUserId: "admin-1",
+      client,
+    });
+    assert.deepEqual(result.succeeded, ["img-1"]);
+    assert.equal(readImagingReviewAssignmentRecord(row.metadata as Record<string, unknown>)?.assigned_to, "reviewer-bulk");
+  });
+
+  it("bulk unassign clears assignments", async () => {
+    const { client, row } = createImageStore({
+      id: "img-1",
+      tenant_id: "tenant-1",
+      patient_id: "patient-1",
+      image_status: "active",
+      metadata: {
+        imaging_clinical_ai: aiMeta,
+        imaging_review_assignment: {
+          assigned_to: "reviewer-1",
+          assigned_by: "admin-1",
+          assigned_at: "2026-01-01T00:00:00.000Z",
+          assignment_status: "assigned",
+          assignment_version: "imagingos_review_assignment_v1",
+        },
+      },
+    });
+    const result = await bulkUnassignImagingReviewItems({
+      tenantId: "tenant-1",
+      items: [{ patientId: "patient-1", patientImageId: "img-1" }],
+      assignedByUserId: "admin-1",
+      client,
+    });
+    assert.deepEqual(result.succeeded, ["img-1"]);
+    assert.equal(
+      readImagingReviewAssignmentRecord(row.metadata as Record<string, unknown>)?.assignment_status,
+      "unassigned"
+    );
   });
 
   it("tenant isolation — wrong tenant does not update", async () => {

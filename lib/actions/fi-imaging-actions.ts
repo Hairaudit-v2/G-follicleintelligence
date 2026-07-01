@@ -32,6 +32,8 @@ import {
 } from "@/src/lib/imaging-os/imagingStaffReviewMutations.server";
 import {
   assignImagingReviewToStaff,
+  bulkAssignImagingReviewItems,
+  bulkUnassignImagingReviewItems,
   unassignImagingReview,
 } from "@/src/lib/imaging-os/imagingReviewAssignmentMutations.server";
 
@@ -719,6 +721,86 @@ const unassignReviewSchema = z
     patientImageId: z.string().uuid(),
   })
   .strict();
+
+const bulkAssignReviewerSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    assignedToUserId: z.string().uuid(),
+    items: z
+      .array(
+        z.object({
+          patientId: z.string().uuid(),
+          patientImageId: z.string().uuid(),
+        })
+      )
+      .min(1)
+      .max(100),
+  })
+  .strict();
+
+export async function bulkAssignImagingQueueReviewerAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkAssignReviewerSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkAssignImagingReviewItems({
+      tenantId,
+      items: parsed.items,
+      assignedToUserId: parsed.assignedToUserId,
+      assignedByUserId: actingUserId,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const bulkUnassignReviewerSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    items: z
+      .array(
+        z.object({
+          patientId: z.string().uuid(),
+          patientImageId: z.string().uuid(),
+        })
+      )
+      .min(1)
+      .max(100),
+  })
+  .strict();
+
+export async function bulkUnassignImagingQueueReviewerAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; succeeded: number; failed: Array<{ imageId: string; error: string }> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = bulkUnassignReviewerSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await bulkUnassignImagingReviewItems({
+      tenantId,
+      items: parsed.items,
+      assignedByUserId: actingUserId,
+    });
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    return { ok: true, succeeded: result.succeeded.length, failed: result.failed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
 
 export async function unassignImagingReviewAction(
   tenantId: string,

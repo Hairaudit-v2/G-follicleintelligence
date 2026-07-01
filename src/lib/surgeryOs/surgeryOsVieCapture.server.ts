@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { PROGRESS_META_KEY } from "@/src/lib/imagingOs/imagingOsProtocol";
 import { parseProgressMeta } from "@/src/lib/imagingOs/imagingOsProtocol";
 
+import { buildSurgeryOsLongitudinalSurfacing } from "./surgeryOsLongitudinalIntelligenceCore";
 import { buildSurgeryOsVieCaptureSummary } from "./surgeryOsVieCaptureCore";
 import type { SurgeryOsVieCaptureSummary } from "./surgeryOsVieCapture.types";
 import { generateVieComparisonPairs } from "@/src/lib/vie/vieLongitudinalComparisonCore";
@@ -234,7 +235,7 @@ export async function loadSurgeryOsVieCaptureSummaries(
           // best-effort
         }
 
-        return buildSurgeryOsVieCaptureSummary({
+        const summary = buildSurgeryOsVieCaptureSummary({
           surgeryId: surgery.surgeryId,
           patientId: surgery.patientId,
           patientLabel: surgery.patientLabel,
@@ -250,6 +251,10 @@ export async function loadSurgeryOsVieCaptureSummaries(
           protocolCatalogSource: resolvedSurgeryProtocol.protocol.metadata.source,
           protocolCatalogVersion: resolvedSurgeryProtocol.protocol.metadata.version,
         });
+        return {
+          ...summary,
+          longitudinalSurfacing: buildSurgeryOsLongitudinalSurfacing({ tenantId: tid, capture: summary }),
+        };
       })
   );
 }

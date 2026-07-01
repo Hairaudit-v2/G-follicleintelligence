@@ -5,6 +5,7 @@
 
 import { CLINICAL_REVIEW_CONFIDENCE_THRESHOLD } from "./clinicalImageAnalysisCore";
 import { readImagingClinicalAiMetadata } from "./clinicalImageAnalysisCore";
+import type { NorwoodSignalSummary } from "./imagingNorwoodSignalCore";
 import type { OutcomeSignalSummary } from "./imagingOutcomeSignalsCore";
 
 export const IMAGINGOS_JOB_SUMMARY_VERSION = "imagingos_job_summary_v1" as const;
@@ -23,7 +24,7 @@ export type ReadOnlyJobSummary = {
 
 export type ImagingJobSummariesMetadata = {
   density_estimate?: ReadOnlyJobSummary | OutcomeSignalSummary;
-  norwood_grade?: ReadOnlyJobSummary;
+  norwood_grade?: ReadOnlyJobSummary | NorwoodSignalSummary;
   outcome_score?: ReadOnlyJobSummary | OutcomeSignalSummary;
 };
 
