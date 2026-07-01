@@ -10,8 +10,8 @@ import { loadWorkforceTimeClockPolicy } from "./staffTimeClockPolicy.server";
 import {
   createTimesheetEntry,
   updateTimesheetEntryLabour,
-  type TimesheetEntry,
 } from "./wageProfile.server";
+import type { TimesheetEntry } from "./wageProfileCore";
 
 export async function syncTimesheetEntryFromPunch(opts: {
   tenantId: string;
