@@ -8,6 +8,7 @@ import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patient
 import {
   APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
   APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE,
+  isAppointmentAdminFallbackEnabled,
 } from "@/src/lib/vie/appointmentProcedureCapture";
 import { appointmentCardClass } from "../shared";
 
@@ -31,6 +32,7 @@ export function AppointmentProcedurePhotosPanel({
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
   const [showAdminFallback, setShowAdminFallback] = useState(false);
+  const adminFallbackEnabled = isAppointmentAdminFallbackEnabled();
 
   const onAdminFallbackSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
@@ -105,6 +107,7 @@ export function AppointmentProcedurePhotosPanel({
                 caseId,
               }}
             />
+            {adminFallbackEnabled ? (
             <details
               className="rounded border border-white/[0.06] bg-white/[0.02] p-3"
               open={showAdminFallback}
@@ -174,6 +177,7 @@ export function AppointmentProcedurePhotosPanel({
                 </button>
               </form>
             </details>
+            ) : null}
             {msg ? <p className="text-xs text-slate-300">{msg}</p> : null}
           </div>
         )}

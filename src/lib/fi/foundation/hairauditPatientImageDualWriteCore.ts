@@ -3,7 +3,10 @@
  * Server ingest calls these; tests import without server-only constraints.
  */
 
-import { mapExternalCategoryToCanonical } from "@/src/lib/imaging-os/categories";
+import {
+  mapCanonicalToPatientImageCategory,
+  mapExternalCategoryToCanonical,
+} from "@/src/lib/imaging-core/vocabulary";
 import { mapTemplateSlugToImagingLibraryAxis } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { PatientImageCategory } from "@/src/lib/patientImages/patientImageTypes";
 import type { HairAuditImagesUploadedPayload } from "@/src/types/fi-events";
@@ -23,20 +26,6 @@ export type HairAuditPatientImageInsertPlan = {
   file_size_bytes: number | null;
   metadata: Record<string, unknown>;
 };
-
-function mapCanonicalToPatientImageCategory(
-  canonical: string
-): PatientImageCategory {
-  const c = canonical.trim().toLowerCase();
-  if (c === "donor" || c === "recipient") return "donor";
-  if (c === "immediate_post_op" || c === "graft_tray") return "post_op";
-  if (c === "follow_up" || c === "after") return "progress";
-  if (c === "microscopic" || c === "trichoscopy") return "trichoscopy";
-  if (c === "hairline" || c === "front" || c === "left" || c === "right") return "scalp";
-  if (c === "top" || c === "crown" || c === "vertex") return "scalp";
-  if (c === "before" || c === "preop") return "before";
-  return "other";
-}
 
 export function buildHairAuditPatientImageMetadata(input: {
   fiEventId: string;

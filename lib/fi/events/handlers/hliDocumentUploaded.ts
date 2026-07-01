@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeFiUploadType } from "@/lib/fi/uploadTypes";
 import { dualWriteFoundationFromFiEvent } from "@/src/lib/fi/foundation/dualWriteEvent";
+import { dualWriteHliDocumentToPatientLibrary } from "@/src/lib/fi/foundation/hliPatientImageDualWrite.server";
 import type { FiEventEnvelope, HliDocumentUploadedPayload } from "@/src/types/fi-events";
 import {
   attachFiEventError,
@@ -83,6 +84,35 @@ function mapHliDocumentKindToFiUploadType(kind: HliDocumentUploadedPayload["docu
   return normalizeFiUploadType(kind);
 }
 
+async function maybeDualWriteHliPatientImage(input: {
+  tenantId: string;
+  fiEventId: string;
+  fiCaseId: string;
+  envelope: FiEventEnvelope;
+  globalCaseId?: string | null;
+  storagePath?: string | null;
+  fiUploadId?: string | null;
+}): Promise<void> {
+  try {
+    await dualWriteHliDocumentToPatientLibrary({
+      tenantId: input.tenantId,
+      fiEventId: input.fiEventId,
+      fiCaseId: input.fiCaseId,
+      envelope: input.envelope,
+      globalCaseId: input.globalCaseId,
+      fiUploadId: input.fiUploadId,
+    });
+  } catch (e: unknown) {
+    console.error("[hli-document-uploaded] patient image dual-write failed", {
+      tenantId: input.tenantId,
+      fiEventId: input.fiEventId,
+      fiCaseId: input.fiCaseId,
+      storagePath: input.storagePath,
+      message: e instanceof Error ? e.message : String(e),
+    });
+  }
+}
+
 async function handleHliDocumentUploadedImpl(
   envelope: FiEventEnvelope
 ): Promise<HliDocumentUploadedResult> {
@@ -128,6 +158,17 @@ async function handleHliDocumentUploadedImpl(
         globalCaseId: linked.globalCaseId,
       },
     });
+    if (linked.fiCaseId) {
+      await maybeDualWriteHliPatientImage({
+        tenantId: envelope.tenant_id,
+        fiEventId: eventLog.row.id,
+        fiCaseId: linked.fiCaseId,
+        envelope,
+        globalCaseId: linked.globalCaseId,
+        storagePath: document.storage_path,
+        fiUploadId: uploadId,
+      });
+    }
     return {
       ok: true,
       eventId: eventLog.row.id,
@@ -232,6 +273,16 @@ async function handleHliDocumentUploadedImpl(
       },
     });
 
+    await maybeDualWriteHliPatientImage({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      fiCaseId: fiCase.id,
+      envelope,
+      globalCaseId: linkedGlobalCase.id,
+      storagePath: document.storage_path,
+      fiUploadId: upload.id,
+    });
+
     const submitDecision = await maybeSubmitCaseFromEvent({
       tenantId: envelope.tenant_id,
       fiCaseId: fiCase.id,
@@ -333,6 +384,18 @@ export async function handleHliDocumentUploaded(
         globalCaseId: linked.globalCaseId,
       },
     });
+
+    if (linked.fiCaseId && payloadResult.ok && "document" in payloadResult.data) {
+      await maybeDualWriteHliPatientImage({
+        tenantId: envelope.tenant_id,
+        fiEventId: existing.id,
+        fiCaseId: linked.fiCaseId,
+        envelope,
+        globalCaseId: linked.globalCaseId,
+        storagePath: payloadResult.data.document.storage_path,
+        fiUploadId: uploadId,
+      });
+    }
 
     return {
       ok: true,

@@ -8,6 +8,7 @@ import {
   APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
   APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE,
   appointmentProcedureUploadBlockedReason,
+  isAppointmentAdminFallbackEnabled,
 } from "./appointmentProcedureCapture";
 import { assertVieProtocolCapturePolicy } from "./vieCapturePolicy.server";
 
@@ -46,7 +47,28 @@ describe("appointment procedure capture policy", () => {
     );
   });
 
+  it("admin fallback is disabled unless env gate is set", () => {
+    const prev = process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK;
+    delete process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK;
+    delete process.env.NEXT_PUBLIC_FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK;
+    assert.equal(isAppointmentAdminFallbackEnabled(), false);
+    assert.match(
+      appointmentProcedureUploadBlockedReason({
+        captureSource: APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
+        protocolSessionId: null,
+        hasAdminFallbackKey: true,
+      }) ?? "",
+      /disabled/i
+    );
+    process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK = "1";
+    assert.equal(isAppointmentAdminFallbackEnabled(), true);
+    if (prev === undefined) delete process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK;
+    else process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK = prev;
+  });
+
   it("admin fallback requires admin key", () => {
+    const prev = process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK;
+    process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK = "1";
     assert.match(
       appointmentProcedureUploadBlockedReason({
         captureSource: APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
@@ -63,6 +85,8 @@ describe("appointment procedure capture policy", () => {
       }),
       null
     );
+    if (prev === undefined) delete process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK;
+    else process.env.FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK = prev;
   });
 
   it("AppointmentProcedurePhotosPanel surfaces protocol guidance and gallery", () => {

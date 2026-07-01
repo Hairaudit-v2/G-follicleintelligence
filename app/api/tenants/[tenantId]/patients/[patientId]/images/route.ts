@@ -18,6 +18,7 @@ import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
 import {
   APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
   APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE,
+  isAppointmentAdminFallbackEnabled,
 } from "@/src/lib/vie/appointmentProcedureCapture";
 import {
   assertVieProtocolCapturePolicy,
@@ -106,6 +107,9 @@ export async function POST(
     }
 
     if (captureSourceNormalized === APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE) {
+      if (!isAppointmentAdminFallbackEnabled()) {
+        return crmJsonError(403, "Admin fallback uploads are disabled for this environment.");
+      }
       if (!isFiAdminApiKeyMatch(adminKey, process.env.FI_ADMIN_API_KEY)) {
         return crmJsonError(403, "Admin fallback upload requires a valid admin key.");
       }

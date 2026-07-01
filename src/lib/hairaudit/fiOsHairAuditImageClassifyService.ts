@@ -14,11 +14,8 @@ import {
 import { buildDegradedHairAuditClassification } from "./hairAuditClassifierResponseMap";
 import { isValidHairauditImageContentType } from "./hairauditImageClassifyContract";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
-import {
-  runImagingOsIngestionPipeline,
-  stubConfidenceFromSeed,
-  type ImagingOsImageIngestionRequest,
-} from "@/src/lib/imaging-os";
+import { classifyImageCategoryStub, stubConfidenceFromSeed } from "@/src/lib/imaging-os/classification";
+import type { ImagingOsImageIngestionRequest } from "@/src/lib/imaging-os/intake";
 
 export const HAIRAUDIT_CLASSIFIER_SOURCE_SYSTEM = "hairaudit" as const;
 
@@ -113,14 +110,18 @@ export function buildStubClassificationResponse(
   input: HairAuditImageClassifyRequest
 ): HairAuditImageClassifyResponse {
   const externalCategory = input.canonical_photo_category;
-  const pipeline = runImagingOsIngestionPipeline(buildHairAuditIngestionRequest(input));
+  const classification = classifyImageCategoryStub({
+    external_category: externalCategory,
+    legacy_upload_type: input.legacy_upload_type ?? null,
+    idempotency_key: input.idempotency_key,
+  });
 
   return {
     category: externalCategory,
-    canonical_photo_category: pipeline.classification.canonical_photo_category,
-    confidence: pipeline.classification.confidence,
+    canonical_photo_category: classification.canonical_photo_category,
+    confidence: classification.confidence,
     quality_status: "not_evaluated",
-    protocol_status: pipeline.protocol.protocol_status,
+    protocol_status: "not_evaluated",
     classifier_version: STUB_CLASSIFIER_VERSION,
     notes: "Stub classification only",
   };
