@@ -29,11 +29,25 @@ export function PatientVisualSummaryPortalClient({
           Approved post-surgery and audit summaries for your records. Not a guarantee of outcome.
         </p>
       </header>
-      {items.map((item) => (
-        <div key={`${item.caseId}-${item.reportType}`} className="space-y-2">
-          <PatientVisualSummaryReportView report={item.report} />
-        </div>
-      ))}
+      {items.map((item) => {
+        const pdfParams = new URLSearchParams({
+          caseId: item.caseId,
+          reportType: item.reportType,
+        });
+        return (
+          <div key={`${item.caseId}-${item.reportType}`} className="space-y-2">
+            <div className="flex justify-end">
+              <a
+                href={`visual-summary/pdf?${pdfParams}`}
+                className="rounded-lg border border-cyan-500/30 px-3 py-1.5 text-xs text-cyan-200 hover:bg-cyan-500/10"
+              >
+                Download PDF
+              </a>
+            </div>
+            <PatientVisualSummaryReportView report={item.report} />
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -1174,6 +1174,19 @@ export async function reconcileGrafts(input: {
     actorFiUserId: input.actorFiUserId,
   });
 
+  if (caseId) {
+    void import("@/src/lib/imaging-os/patientVisualSummaryAutoRegen.server").then(
+      ({ triggerPatientVisualSummaryAutoRegen }) =>
+        triggerPatientVisualSummaryAutoRegen({
+          tenantId: input.tenantId,
+          caseId,
+          surgeryId: input.surgeryId,
+          trigger: "graft_reconciled",
+          source: "surgeryos",
+        })
+    );
+  }
+
   return result;
 }
 

@@ -939,6 +939,7 @@ const zoneDraftSchema = z
     graft_count: z.string().optional(),
     density_range: z.string().optional(),
     grafts_per_cm2: z.string().optional(),
+    qualitative_density: z.string().optional(),
     singles: z.string().optional(),
     doubles: z.string().optional(),
     triples: z.string().optional(),
@@ -993,6 +994,7 @@ export async function savePatientVisualSummaryZoneRecordAction(
       graft_count: z.graft_count ?? "",
       density_range: z.density_range ?? "",
       grafts_per_cm2: z.grafts_per_cm2 ?? "",
+      qualitative_density: z.qualitative_density ?? "",
       singles: z.singles ?? "",
       doubles: z.doubles ?? "",
       triples: z.triples ?? "",
@@ -1003,6 +1005,7 @@ export async function savePatientVisualSummaryZoneRecordAction(
 
     const validation = validateAndBuildStaffRecord({
       zones: draftsToZoneInputs(zoneDrafts),
+      zoneDrafts,
       followUpPlan: parsed.followUpPlan ?? null,
       surgeryGraftTotal,
     });

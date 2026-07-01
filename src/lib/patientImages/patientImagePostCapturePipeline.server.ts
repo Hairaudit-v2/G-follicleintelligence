@@ -531,6 +531,32 @@ export async function runPatientImagePostCapturePipeline(
     },
   });
 
+  const caseId =
+    existingRow.case_id != null ? String(existingRow.case_id).trim() : "";
+  if (caseId) {
+    const { isPatientVisualSummaryEligibleCaptureImage } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryCaptureEligibilityCore");
+    if (
+      isPatientVisualSummaryEligibleCaptureImage({
+        ai_image_category: existingRow.ai_image_category ?? null,
+        anatomical_region: existingRow.anatomical_region ?? null,
+        image_category: existingRow.image_category ?? null,
+        imaging_protocol_slot_slug: existingRow.imaging_protocol_slot_slug ?? null,
+        follow_up_interval: existingRow.follow_up_interval ?? null,
+      })
+    ) {
+      void import("@/src/lib/imaging-os/patientVisualSummaryAutoRegen.server").then(
+        ({ triggerPatientVisualSummaryAutoRegen }) =>
+          triggerPatientVisualSummaryAutoRegen({
+            tenantId: tid,
+            caseId,
+            trigger: "post_op_capture",
+            source: "imagingos",
+          })
+      );
+    }
+  }
+
   return {
     updatedRow: updated as Record<string, unknown>,
     metadata_patch: metadataPatch,

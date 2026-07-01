@@ -6,6 +6,7 @@ import { savePatientVisualSummaryZoneRecordAction } from "@/lib/actions/fi-imagi
 import {
   emptyRecipientZoneDraft,
   recipientZoneDraftFromRecord,
+  QUALITATIVE_DENSITY_OPTIONS,
   RECIPIENT_ZONE_IDS,
   RECIPIENT_ZONE_LABELS,
   type RecipientZoneDraft,
@@ -120,7 +121,23 @@ export function PatientVisualSummaryZoneEditor({
                 />
               </label>
               <label className="text-[10px] text-slate-500">
-                Grafts/cm²
+                Qualitative density
+                <select
+                  className={inputClass}
+                  value={draft.qualitative_density}
+                  onChange={(e) =>
+                    updateDraft(draft.zone_id, { qualitative_density: e.target.value })
+                  }
+                >
+                  {QUALITATIVE_DENSITY_OPTIONS.map((opt) => (
+                    <option key={opt.value || "not_recorded"} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-[10px] text-slate-500">
+                Grafts/cm² (optional)
                 <input
                   type="number"
                   min={0}

@@ -19,11 +19,36 @@ export const RECIPIENT_ZONE_LABELS: Record<RecipientZoneId, string> = {
   zone_4: "Zone 4 — Posterior frontal / transition",
 };
 
+export const QUALITATIVE_DENSITY_VALUES = [
+  "",
+  "higher",
+  "medium",
+  "lower_blending",
+  "transition",
+] as const;
+
+export type QualitativeDensityValue = (typeof QUALITATIVE_DENSITY_VALUES)[number];
+
+export const QUALITATIVE_DENSITY_OPTIONS: Array<{ value: QualitativeDensityValue; label: string }> =
+  [
+    { value: "", label: "Not recorded" },
+    { value: "higher", label: "Higher density zone" },
+    { value: "medium", label: "Medium density zone" },
+    { value: "lower_blending", label: "Lower density blending zone" },
+    { value: "transition", label: "Transition zone" },
+  ];
+
+export function qualitativeDensityPatientLabel(value: string): string | null {
+  const option = QUALITATIVE_DENSITY_OPTIONS.find((o) => o.value === value);
+  return option && option.value ? option.label : null;
+}
+
 export type RecipientZoneDraft = {
   zone_id: RecipientZoneId;
   graft_count: string;
   density_range: string;
   grafts_per_cm2: string;
+  qualitative_density: QualitativeDensityValue | string;
   singles: string;
   doubles: string;
   triples: string;
@@ -77,6 +102,7 @@ export function emptyRecipientZoneDraft(zoneId: RecipientZoneId): RecipientZoneD
     graft_count: "",
     density_range: "",
     grafts_per_cm2: "",
+    qualitative_density: "",
     singles: "",
     doubles: "",
     triples: "",
@@ -84,6 +110,31 @@ export function emptyRecipientZoneDraft(zoneId: RecipientZoneId): RecipientZoneD
     five_hair: "",
     notes: "",
   };
+}
+
+function qualitativeValueFromLabel(label: string | undefined): QualitativeDensityValue | "" {
+  if (!label?.trim()) return "";
+  const match = QUALITATIVE_DENSITY_OPTIONS.find((o) => o.label === label.trim());
+  return match?.value ?? "";
+}
+
+export function buildDensityZonesFromZoneDrafts(
+  drafts: RecipientZoneDraft[]
+): NonNullable<PatientVisualSummaryStaffRecord["density_zones"]> {
+  const out: NonNullable<PatientVisualSummaryStaffRecord["density_zones"]> = [];
+  for (const draft of drafts) {
+    const qualitative = draft.qualitative_density?.trim() as QualitativeDensityValue | "";
+    if (!qualitative) continue;
+    const qualitativeLabel = qualitativeDensityPatientLabel(qualitative);
+    if (!qualitativeLabel) continue;
+    const graftsPerCm2 = parseOptionalCount(draft.grafts_per_cm2);
+    out.push({
+      label: RECIPIENT_ZONE_LABELS[draft.zone_id],
+      qualitative_label: qualitativeLabel,
+      ...(graftsPerCm2 != null ? { grafts_per_cm2: graftsPerCm2 } : {}),
+    });
+  }
+  return out;
 }
 
 export function recipientZoneDraftFromRecord(
@@ -94,14 +145,23 @@ export function recipientZoneDraftFromRecord(
     const id = z.zone_id?.trim();
     if (id) byId.set(id, z);
   }
+  const densityByLabel = new Map<string, NonNullable<PatientVisualSummaryStaffRecord["density_zones"]>[number]>();
+  for (const dz of record?.density_zones ?? []) {
+    const label = dz.label?.trim();
+    if (label) densityByLabel.set(label, dz);
+  }
   return RECIPIENT_ZONE_IDS.map((zoneId) => {
     const z = byId.get(zoneId);
     const mix = z?.graft_type_mix;
+    const zoneLabel = RECIPIENT_ZONE_LABELS[zoneId];
+    const densityRow = densityByLabel.get(zoneLabel);
     return {
       zone_id: zoneId,
       graft_count: z?.graft_count != null ? String(z.graft_count) : "",
       density_range: z?.density_range ?? "",
-      grafts_per_cm2: "",
+      grafts_per_cm2:
+        densityRow?.grafts_per_cm2 != null ? String(densityRow.grafts_per_cm2) : "",
+      qualitative_density: qualitativeValueFromLabel(densityRow?.qualitative_label),
       singles: mix?.singles != null ? String(mix.singles) : "",
       doubles: mix?.doubles != null ? String(mix.doubles) : "",
       triples: mix?.triples != null ? String(mix.triples) : "",
@@ -218,6 +278,7 @@ export function normalizeRecipientZoneInput(
 
 export function validateAndBuildStaffRecord(input: {
   zones: RecipientZoneRecordInput[];
+  zoneDrafts?: RecipientZoneDraft[];
   densityZones?: PatientVisualSummaryStaffRecord["density_zones"];
   hairlinePrinciples?: string[];
   fiveHairGrafts?: number | null;
@@ -252,10 +313,16 @@ export function validateAndBuildStaffRecord(input: {
   });
   if (mismatch) warnings.push(mismatch);
 
+  const densityZones = input.densityZones?.length
+    ? input.densityZones
+    : input.zoneDrafts?.length
+      ? buildDensityZonesFromZoneDrafts(input.zoneDrafts)
+      : undefined;
+
   const record: PatientVisualSummaryStaffRecord = {
     version: PATIENT_VISUAL_SUMMARY_VERSION,
     ...(recipientZones.length > 0 ? { recipient_zones: recipientZones } : {}),
-    ...(input.densityZones?.length ? { density_zones: input.densityZones } : {}),
+    ...(densityZones?.length ? { density_zones: densityZones } : {}),
     ...(input.hairlinePrinciples?.length ? { hairline_principles: input.hairlinePrinciples } : {}),
     ...(input.fiveHairGrafts != null && input.fiveHairGrafts >= 0
       ? { five_hair_grafts: Math.floor(input.fiveHairGrafts) }

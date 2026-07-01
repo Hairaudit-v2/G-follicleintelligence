@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  buildDensityZonesFromZoneDrafts,
   buildGraftTotalMismatchWarning,
   draftsToZoneInputs,
   emptyRecipientZoneDraft,
@@ -87,5 +88,31 @@ describe("patientVisualSummaryRecordCore", () => {
     const d = emptyRecipientZoneDraft("zone_2");
     assert.equal(d.zone_id, "zone_2");
     assert.equal(d.graft_count, "");
+  });
+
+  it("saves qualitative density without inventing numeric density", () => {
+    const drafts = [
+      {
+        ...emptyRecipientZoneDraft("zone_1"),
+        qualitative_density: "higher",
+      },
+      emptyRecipientZoneDraft("zone_2"),
+    ];
+    const zones = buildDensityZonesFromZoneDrafts(drafts);
+    assert.equal(zones.length, 1);
+    assert.equal(zones[0].qualitative_label, "Higher density zone");
+    assert.equal(zones[0].grafts_per_cm2, undefined);
+  });
+
+  it("includes staff-recorded numeric density only when provided", () => {
+    const drafts = [
+      {
+        ...emptyRecipientZoneDraft("zone_3"),
+        qualitative_density: "medium",
+        grafts_per_cm2: "42",
+      },
+    ];
+    const zones = buildDensityZonesFromZoneDrafts(drafts);
+    assert.equal(zones[0].grafts_per_cm2, 42);
   });
 });
