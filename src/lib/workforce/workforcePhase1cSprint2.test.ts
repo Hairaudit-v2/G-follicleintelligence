@@ -312,7 +312,7 @@ test("dismiss duplicate updates status", async () => {
   const state = baseState();
   const client = makeMockClient(state);
 
-  await dismissDuplicateCandidate(CANDIDATE, "actor-1", client);
+  await dismissDuplicateCandidate(TENANT, CANDIDATE, "actor-1", client);
   assert.equal(state.fi_staff_duplicate_candidates?.[0]?.status, "dismissed");
 });
 
@@ -320,7 +320,7 @@ test("approve merge candidate sets approved_for_merge", async () => {
   const state = baseState();
   const client = makeMockClient(state);
 
-  const pair = await approveDuplicateCandidateForMerge(CANDIDATE, "actor-1", client);
+  const pair = await approveDuplicateCandidateForMerge(TENANT, CANDIDATE, "actor-1", client);
   assert.equal(pair.staffAId, STAFF_A);
   assert.equal(pair.staffBId, STAFF_B);
   assert.equal(state.fi_staff_duplicate_candidates?.[0]?.status, "approved_for_merge");

@@ -372,6 +372,7 @@ export async function runStaffComplianceAudit(
         alerts_generated: alertsGenerated,
         status: "completed",
       })
+      .eq("tenant_id", tid)
       .eq("id", runId);
 
     const firstMember = (members ?? [])[0] as { id: string } | undefined;
@@ -401,6 +402,7 @@ export async function runStaffComplianceAudit(
     await supabase
       .from("fi_workforce_compliance_runs")
       .update({ status: "failed", completed_at: new Date().toISOString() })
+      .eq("tenant_id", tid)
       .eq("id", runId);
     throw e;
   }

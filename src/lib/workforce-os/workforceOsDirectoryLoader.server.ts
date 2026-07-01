@@ -1,6 +1,5 @@
 import "server-only";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
@@ -14,6 +13,7 @@ import {
   loadStaffLifecycleForFiStaff,
   loadStaffMemberAuditTimeline,
 } from "@/src/lib/workforce-os/staffLifecycle.server";
+import { workforceTenantClient } from "@/src/lib/workforce-os/security/tenantScopedQuery.server";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 
 export async function loadWorkforceOsDirectoryPage(tenantId: string): Promise<{
@@ -24,11 +24,9 @@ export async function loadWorkforceOsDirectoryPage(tenantId: string): Promise<{
   if (!access.ok) return null;
 
   await syncAllStaffProjectionsForTenant(tenantId);
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_staff_members")
-    .select("*")
-    .eq("tenant_id", tenantId.trim())
+  // Tenant-scoped via the WorkforceOS guard helper (see security/tenantScopedQuery.server.ts).
+  const { data, error } = await workforceTenantClient(tenantId)
+    .list("fi_staff_members")
     .order("full_name", { ascending: true });
   if (error) throw new Error(error.message);
 
@@ -38,7 +36,7 @@ export async function loadWorkforceOsDirectoryPage(tenantId: string): Promise<{
     (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
   return {
-    rows: ((data ?? []) as Record<string, unknown>[]).map(mapLifecycleRow),
+    rows: ((data ?? []) as unknown as Record<string, unknown>[]).map(mapLifecycleRow),
     canManage,
   };
 }

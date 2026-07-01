@@ -16,6 +16,7 @@ export type WorkforceComplianceCronResult = {
 
 export async function runWorkforceComplianceAuditCron(): Promise<WorkforceComplianceCronResult> {
   const supabase = supabaseAdmin();
+  // tenant-guard-allow: cron enumerates all active tenants; fi_tenants is the tenant registry (no tenant_id column). Per-tenant work below is scoped.
   const { data, error } = await supabase.from("fi_tenants").select("id").eq("is_active", true);
   if (error) throw new Error(error.message);
 

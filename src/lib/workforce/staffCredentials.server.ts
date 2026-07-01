@@ -264,6 +264,7 @@ export async function checkExpiringCredentials(
       const { error: upErr } = await supabase
         .from("fi_staff_credentials")
         .update({ status: preserved, updated_at: now })
+        .eq("tenant_id", tid)
         .eq("id", String(raw.id));
       if (upErr) throw new Error(upErr.message);
       updated += 1;
@@ -308,6 +309,7 @@ export async function syncStaffCredentialStatusesForMember(
       const { error: upErr } = await supabase
         .from("fi_staff_credentials")
         .update({ status: nextStatus, updated_at: now })
+        .eq("tenant_id", tid)
         .eq("id", String(raw.id));
       if (upErr) throw new Error(upErr.message);
       updated += 1;
