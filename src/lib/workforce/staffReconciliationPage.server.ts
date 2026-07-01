@@ -48,6 +48,8 @@ export type StaffReconciliationPageModel = {
   availableExternalIdentities: ExternalStaffIdentityOption[];
 };
 
+export type { StaffReconciliationDecisionCard } from "@/src/lib/workforce/staffReconciliationRecommendation.server";
+
 const ACTIVE_EMPLOYMENT_STATUSES = new Set([
   "active",
   "pending_onboarding",
@@ -220,6 +222,86 @@ export async function loadStaffReconciliationQueue(
     .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
   return { unlinkedStaff, availableExternalIdentities };
+}
+
+export async function loadStaffReconciliationDecisionQueue(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<{
+  decisionCards: import("@/src/lib/workforce/staffReconciliationRecommendation.server").StaffReconciliationDecisionCard[];
+}> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const supabase = client ?? supabaseAdmin();
+  const queue = await loadStaffReconciliationQueue(tid, supabase);
+
+  const { buildReconciliationDecisionCard } =
+    await import("@/src/lib/workforce/staffReconciliationRecommendation.server");
+
+  const decisionCards = [];
+
+  const members = await loadStaffMembersForReconciliation(tid, supabase);
+  const memberById = new Map(members.map((m) => [m.id, m]));
+
+  for (const row of queue.unlinkedStaff) {
+    const member = memberById.get(row.id);
+    const scoredExternals = queue.availableExternalIdentities
+      .map((ext) => ({
+        externalId: ext.externalId,
+        externalName: ext.externalName,
+        externalEmail: ext.externalEmail,
+        sourceSystem: ext.sourceSystem,
+        score: member
+          ? calculateStaffIdentityMatchScore(member, {
+              sourceSystem: ext.sourceSystem,
+              externalId: ext.externalId,
+              email: ext.externalEmail,
+              fullName: ext.externalName ?? "",
+            })
+          : 0,
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    const best = scoredExternals[0] ?? row.matchSuggestions[0];
+    if (!best || best.score < 1) {
+      const { loadStaffOperationalHistory } =
+        await import("@/src/lib/workforce/staffOperationalHistory.server");
+      const { generateStaffReconciliationRecommendation } =
+        await import("@/src/lib/workforce/staffReconciliationRecommendationCore");
+      const { formatRecommendationLabel } =
+        await import("@/src/lib/workforce/staffReconciliationRecommendation.server");
+
+      const fiRecord = await loadStaffOperationalHistory(tid, row.id, supabase);
+      const recommendation = generateStaffReconciliationRecommendation({
+        fiRecord,
+        iiohrMatch: null,
+        match: { emailExactMatch: false, nameMatch: false, matchScore: 0, hasConflicts: false },
+      });
+      decisionCards.push({
+        staffMemberId: row.id,
+        fiRecord,
+        iiohrRecord: null,
+        recommendation,
+        recommendationLabel: formatRecommendationLabel(recommendation.recommendation),
+      });
+      continue;
+    }
+
+    const card = await buildReconciliationDecisionCard({
+      tenantId: tid,
+      staffMemberId: row.id,
+      externalId: best.externalId,
+      sourceSystem: best.sourceSystem,
+      externalEmail: best.externalEmail,
+      externalName: best.externalName,
+      matchScore: best.score,
+      emailMatch: best.score >= 90,
+      nameMatch: best.score >= 70,
+      client: supabase,
+    });
+    decisionCards.push(card);
+  }
+
+  return { decisionCards };
 }
 
 export async function manuallyLinkStaffIdentity(input: {

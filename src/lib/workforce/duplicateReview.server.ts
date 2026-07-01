@@ -54,6 +54,33 @@ async function insertWorkforceAudit(
   if (error) throw new Error(error.message);
 }
 
+export type { DuplicateDecisionCard } from "@/src/lib/workforce/duplicateMergeRecommendation.server";
+
+export async function loadDuplicateDecisionCards(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<import("@/src/lib/workforce/duplicateMergeRecommendation.server").DuplicateDecisionCard[]> {
+  const candidates = await loadDuplicateCandidates(tenantId, client);
+  const { buildDuplicateDecisionCard } =
+    await import("@/src/lib/workforce/duplicateMergeRecommendation.server");
+  const cards = [];
+  for (const c of candidates) {
+    cards.push(
+      await buildDuplicateDecisionCard({
+        tenantId,
+        candidateId: c.id,
+        staffAId: c.staffAId,
+        staffBId: c.staffBId,
+        matchEmail: c.matchEmail,
+        matchName: c.matchName,
+        similarityScore: c.similarityScore,
+        client,
+      })
+    );
+  }
+  return cards;
+}
+
 export async function loadDuplicateCandidates(
   tenantId: string,
   client?: SupabaseClient
