@@ -8,6 +8,10 @@ import {
   readImagingClinicalAiMetadata,
   CLINICAL_REVIEW_CONFIDENCE_THRESHOLD,
 } from "./clinicalImageAnalysisCore";
+import {
+  readImagingStaffReviewRecord,
+  staffReviewClearsQueue,
+} from "./imagingStaffReviewCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
 
 export type ImagingClinicalReviewQueueItem = {
@@ -25,6 +29,7 @@ export type ImagingClinicalReviewQueueItem = {
   protocolSessionId: string | null;
   previewSignedUrl: string | null;
   staffReviewedAt: string | null;
+  staffReviewStatus: string | null;
 };
 
 function readQualityRecord(metadata: Record<string, unknown>): ImagingQualityMetadataRecord | null {
@@ -87,16 +92,12 @@ export function imageNeedsClinicalReview(input: {
     }
   }
 
-  const reviewMarker = metadata.imaging_clinical_review;
-  const staffReviewedAt =
-    reviewMarker &&
-    typeof reviewMarker === "object" &&
-    !Array.isArray(reviewMarker) &&
-    typeof (reviewMarker as { reviewed_at?: string }).reviewed_at === "string"
-      ? (reviewMarker as { reviewed_at: string }).reviewed_at
-      : null;
-  if (staffReviewedAt) {
+  const staffReview = readImagingStaffReviewRecord(metadata);
+  if (staffReviewClearsQueue(staffReview)) {
     return { needsReview: false, reasons: [] };
+  }
+  if (staffReview?.status === "retake_required") {
+    if (!reasons.includes("retake_required")) reasons.push("retake_required");
   }
 
   return { needsReview: reasons.length > 0, reasons };
@@ -223,18 +224,8 @@ export async function loadImagingClinicalReviewQueue(
       protocolSessionId:
         typeof metadata.protocol_session_id === "string" ? metadata.protocol_session_id : null,
       previewSignedUrl: signedEntry?.url ?? null,
-      staffReviewedAt: (() => {
-        const marker = metadata.imaging_clinical_review;
-        if (
-          marker &&
-          typeof marker === "object" &&
-          !Array.isArray(marker) &&
-          typeof (marker as { reviewed_at?: string }).reviewed_at === "string"
-        ) {
-          return (marker as { reviewed_at: string }).reviewed_at;
-        }
-        return null;
-      })(),
+      staffReviewedAt: readImagingStaffReviewRecord(metadata)?.reviewed_at ?? null,
+      staffReviewStatus: readImagingStaffReviewRecord(metadata)?.status ?? null,
     };
   });
 }

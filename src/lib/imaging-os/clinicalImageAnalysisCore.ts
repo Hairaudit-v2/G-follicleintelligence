@@ -452,6 +452,33 @@ export function readImagingClinicalAiMetadata(
         : {},
     analysis_version: IMAGINGOS_CLINICAL_ANALYSIS_VERSION,
     analysed_at: typeof m.analysed_at === "string" ? m.analysed_at : new Date().toISOString(),
+    ...(parseDonorRecipientAssessmentSummary(m.donor_assessment)
+      ? { donor_assessment: parseDonorRecipientAssessmentSummary(m.donor_assessment)! }
+      : {}),
+    ...(parseDonorRecipientAssessmentSummary(m.recipient_assessment)
+      ? { recipient_assessment: parseDonorRecipientAssessmentSummary(m.recipient_assessment)! }
+      : {}),
+  };
+}
+
+function parseDonorRecipientAssessmentSummary(
+  raw: unknown
+): DonorRecipientAssessmentSummary | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const m = raw as Record<string, unknown>;
+  const status = m.status;
+  if (
+    status !== "complete" &&
+    status !== "needs_review" &&
+    status !== "unavailable"
+  ) {
+    return null;
+  }
+  return {
+    status,
+    confidence: typeof m.confidence === "number" ? m.confidence : 0,
+    observations: Array.isArray(m.observations) ? m.observations.map(String) : [],
+    review_required: m.review_required === true,
   };
 }
 

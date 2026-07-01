@@ -28,7 +28,12 @@ describe("imagingClinicalReviewQueue", () => {
   it("respects staff reviewed marker", () => {
     const review = imageNeedsClinicalReview({
       metadata: {
-        imaging_clinical_review: { reviewed_at: "2026-01-01T00:00:00.000Z" },
+        imaging_staff_review: {
+          status: "reviewed",
+          reviewed_at: "2026-01-01T00:00:00.000Z",
+          reviewed_by: "user-1",
+          review_version: "imagingos_staff_review_v1",
+        },
         imaging_clinical_ai: {
           provider: "stub",
           status: "needs_review",

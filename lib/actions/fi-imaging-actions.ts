@@ -19,6 +19,11 @@ import { PROGRESS_META_KEY } from "@/src/lib/imagingOs/imagingOsProtocol";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { loadOrCreateSurgeryDayVieSession } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
+import {
+  flagImagingImageRetakeRequired,
+  markImagingImageReviewed,
+  reassignImagingImageViewType,
+} from "@/src/lib/imaging-os/imagingStaffReviewMutations.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -355,6 +360,97 @@ export async function finishGuidedProtocolSessionAction(
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const imagingReviewActionSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    patientImageId: z.string().uuid(),
+    staffNote: z.string().max(2000).optional(),
+  })
+  .strict();
+
+export async function markImagingReviewReviewedAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = imagingReviewActionSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    await markImagingImageReviewed({
+      tenantId,
+      patientId,
+      patientImageId: parsed.patientImageId,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function flagImagingReviewRetakeAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = imagingReviewActionSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    await flagImagingImageRetakeRequired({
+      tenantId,
+      patientId,
+      patientImageId: parsed.patientImageId,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const reassignViewTypeSchema = imagingReviewActionSchema.extend({
+  assignedViewType: z.string().min(1).max(64),
+});
+
+export async function reassignImagingReviewViewTypeAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = reassignViewTypeSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    await reassignImagingImageViewType({
+      tenantId,
+      patientId,
+      patientImageId: parsed.patientImageId,
+      assignedViewType: parsed.assignedViewType,
+      reviewedByUserId: actingUserId,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

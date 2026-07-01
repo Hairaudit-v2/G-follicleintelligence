@@ -2,14 +2,20 @@
  * POST or GET /api/cron/fi-imaging-ai-analysis
  *
  * Processes queued `fi_imaging_ai_analysis_jobs` per tenant (service role only).
- * Authorisation: Bearer `FI_IMAGING_AI_ANALYSIS_CRON_SECRET` or `CRON_SECRET`.
+ * Vercel cron: every 15 minutes — see vercel.json.
+ *
+ * Authorisation: Bearer `FI_IMAGING_AI_ANALYSIS_CRON_SECRET` or `CRON_SECRET`,
+ * or header `x-fi-imaging-ai-analysis-secret`.
+ *
+ * Query params:
+ * - tenantId (optional UUID) — process a single tenant
+ * - limit (optional, 1–20) — max jobs per tenant in single-tenant mode (default 5)
  */
 import { NextRequest, NextResponse } from "next/server";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
 import { logStructured } from "@/src/lib/server/structuredLog";
-import { processPendingImagingAiJobsForTenant } from "@/src/lib/imaging-os/imagingAiAnalysisJobWorker.server";
+import { runImagingAiAnalysisCron } from "@/src/lib/imaging-os/imagingAiAnalysisCron.server";
 
 export const dynamic = "force-dynamic";
 
@@ -34,38 +40,16 @@ async function handle(req: NextRequest) {
   const limit = Math.max(1, Math.min(Number(url.searchParams.get("limit") ?? "5"), 20));
 
   try {
-    if (singleTenant) {
-      const results = await processPendingImagingAiJobsForTenant({
-        tenantId: singleTenant,
-        limit,
-      });
-      return NextResponse.json({
-        ok: true,
-        mode: "single_tenant",
-        tenantId: singleTenant,
-        processed: results.length,
-        results,
-      });
-    }
-
-    const supabase = supabaseAdmin();
-    const { data: tenants, error } = await supabase
-      .from("fi_tenants")
-      .select("id")
-      .order("name")
-      .limit(500);
-    if (error) throw new Error(error.message);
-
-    const summaries: Array<{ tenantId: string; processed: number }> = [];
-    for (const tenant of tenants ?? []) {
-      const tenantId = String((tenant as { id: string }).id);
-      const results = await processPendingImagingAiJobsForTenant({ tenantId, limit: 3 });
-      if (results.length > 0) {
-        summaries.push({ tenantId, processed: results.length });
-      }
-    }
-
-    return NextResponse.json({ ok: true, mode: "all_tenants", tenants: summaries });
+    const summary = await runImagingAiAnalysisCron({
+      tenantId: singleTenant,
+      limit,
+    });
+    logStructured("info", "fi_imaging_ai_analysis_cron_completed", {
+      mode: summary.mode,
+      jobsProcessed: summary.jobsProcessed,
+      durationMs: summary.durationMs,
+    });
+    return NextResponse.json(summary);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "cron failed";
     logStructured("error", "fi_imaging_ai_analysis_cron_failed", { message });

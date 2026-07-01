@@ -10,8 +10,10 @@ import {
   saveImagingAnnotationSetAction,
   saveImagingScalpMapAction,
 } from "@/lib/actions/fi-imaging-actions";
+import { ImagingClinicalIntelligencePanel } from "@/src/components/fi-admin/imaging/ImagingClinicalIntelligencePanel";
 import { ImagingGuidedCaptureWizard } from "@/src/components/fi-admin/imaging/ImagingGuidedCaptureWizard";
 import { VieComparisonSuggestionsPanel } from "@/src/components/fi-admin/imaging/VieComparisonSuggestionsPanel";
+import { buildImagingClinicalIntelligenceView } from "@/src/lib/imaging-os/imagingClinicalIntelligenceSurfacing";
 import {
   IMAGING_AI_ANALYSIS_KINDS,
   IMAGING_COMPARE_PRESETS,
@@ -54,6 +56,7 @@ export function ImagingOsWorkspace({
     urlTab === "capture" ? "capture" : urlTab === "compare" ? "compare" : "gallery"
   );
   const [axisFilter, setAxisFilter] = useState<string>("");
+  const [selectedImageId, setSelectedImageId] = useState<string>("");
   const [adminKey, setAdminKey] = useState("");
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -136,6 +139,23 @@ export function ImagingOsWorkspace({
     () => new Map(initial.bundle.activeWithSignedUrls.map((t) => [t.image.id, t])),
     [initial.bundle.activeWithSignedUrls]
   );
+
+  const selectedTile = tiles.find((t) => t.image.id === selectedImageId) ?? tiles[0] ?? null;
+
+  const selectedIntelligence = useMemo(() => {
+    if (!selectedTile) return null;
+    const meta =
+      selectedTile.image.metadata && typeof selectedTile.image.metadata === "object"
+        ? (selectedTile.image.metadata as Record<string, unknown>)
+        : {};
+    return buildImagingClinicalIntelligenceView({
+      tenantId,
+      imageId: selectedTile.image.id,
+      metadata: meta,
+      aiImageCategory: selectedTile.image.ai_image_category ?? null,
+      aiImageCategoryConfidence: selectedTile.image.ai_image_category_confidence ?? null,
+    });
+  }, [selectedTile, tenantId]);
 
   const onSaveScalp = useCallback(() => {
     setMsg(null);
@@ -275,6 +295,9 @@ export function ImagingOsWorkspace({
 
       {tab === "gallery" ? (
         <section className="space-y-3">
+          {selectedIntelligence ? (
+            <ImagingClinicalIntelligencePanel view={selectedIntelligence} />
+          ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-slate-300">Library axis</span>
             <select
@@ -294,7 +317,17 @@ export function ImagingOsWorkspace({
             {tiles.map((t) => (
               <figure
                 key={t.image.id}
-                className="overflow-hidden rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40"
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedImageId(t.image.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setSelectedImageId(t.image.id);
+                }}
+                className={`cursor-pointer overflow-hidden rounded border bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40 ${
+                  selectedTile?.image.id === t.image.id
+                    ? "border-sky-500/50 ring-1 ring-sky-500/30"
+                    : "border-white/[0.08]"
+                }`}
               >
                 <div className="relative aspect-square bg-white/[0.06]">
                   <Image

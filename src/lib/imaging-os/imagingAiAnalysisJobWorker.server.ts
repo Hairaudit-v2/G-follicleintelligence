@@ -16,12 +16,93 @@ import {
 import { clinicalAnalysisResultToMetadataRecord } from "./clinicalImageAnalysisCore";
 import { assessFiOsPatientDonorAndPersist } from "@/src/lib/hair-intelligence/donorIntelligence/adapters/fiOsDonorAssessment.server";
 import { assessFiOsPatientRecipientAndPersist } from "@/src/lib/hair-intelligence/recipientCandidacy/adapters/fiOsRecipientAssessment.server";
+import {
+  buildDensityEstimateSummary,
+  buildNorwoodGradeSummary,
+  mergeImagingJobSummariesMetadata,
+  type ReadOnlyJobSummary,
+} from "./imagingJobReadOnlySummaries";
 
 export type ProcessImagingAiJobResult = {
   jobId: string;
   status: "completed" | "failed" | "requeued";
   analysisKind: string;
 };
+
+async function loadPatientImageContext(
+  supabase: SupabaseClient,
+  tenantId: string,
+  imageId: string
+): Promise<{
+  metadata: Record<string, unknown>;
+  aiImageCategory: string | null;
+  aiImageCategoryConfidence: number | null;
+  patientId: string | null;
+}> {
+  const { data, error } = await supabase
+    .from("fi_patient_images")
+    .select("metadata, ai_image_category, ai_image_category_confidence, patient_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", imageId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Patient image not found.");
+  const row = data as Record<string, unknown>;
+  return {
+    metadata:
+      row.metadata && typeof row.metadata === "object"
+        ? (row.metadata as Record<string, unknown>)
+        : {},
+    aiImageCategory: row.ai_image_category != null ? String(row.ai_image_category) : null,
+    aiImageCategoryConfidence:
+      row.ai_image_category_confidence != null ? Number(row.ai_image_category_confidence) : null,
+    patientId: row.patient_id != null ? String(row.patient_id) : null,
+  };
+}
+
+async function persistJobSummaryMetadata(
+  supabase: SupabaseClient,
+  tenantId: string,
+  imageId: string,
+  kind: "density_estimate" | "norwood_grade",
+  summary: ReadOnlyJobSummary
+): Promise<Record<string, unknown>> {
+  const ctx = await loadPatientImageContext(supabase, tenantId, imageId);
+  const merged = mergeImagingJobSummariesMetadata(ctx.metadata, { [kind]: summary });
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("fi_patient_images")
+    .update({ metadata: merged, updated_at: now })
+    .eq("tenant_id", tenantId)
+    .eq("id", imageId);
+  if (error) throw new Error(error.message);
+  return merged;
+}
+
+async function loadPatientNorwoodScale(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("fi_patients")
+    .select("metadata")
+    .eq("tenant_id", tenantId)
+    .eq("id", patientId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const meta = (data as { metadata?: Record<string, unknown> }).metadata ?? {};
+  const scale =
+    typeof meta.norwood_scale === "string"
+      ? meta.norwood_scale
+      : typeof meta.clinical_details === "object" &&
+          meta.clinical_details &&
+          !Array.isArray(meta.clinical_details) &&
+          typeof (meta.clinical_details as { norwood_scale?: string }).norwood_scale === "string"
+        ? (meta.clinical_details as { norwood_scale: string }).norwood_scale
+        : null;
+  return scale?.trim() || null;
+}
 
 export async function processImagingAiAnalysisJob(
   job: ImagingAiAnalysisJobRow,
@@ -69,6 +150,44 @@ export async function processImagingAiAnalysisJob(
           confidence_score: recipient.result.confidence_score,
           recipient_quality_rating: recipient.result.recipient_quality_rating,
         },
+        client: supabase,
+      });
+      return { jobId: job.id, status: "completed", analysisKind: job.analysis_kind };
+    }
+
+    if (job.analysis_kind === "density_estimate") {
+      const ctx = await loadPatientImageContext(supabase, tid, imageId);
+      const summary = buildDensityEstimateSummary({
+        metadata: ctx.metadata,
+        aiImageCategory: ctx.aiImageCategory,
+        aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
+      });
+      await persistJobSummaryMetadata(supabase, tid, imageId, "density_estimate", summary);
+      await completeImagingAiAnalysisJob({
+        tenantId: tid,
+        jobId: job.id,
+        resultPayload: { summary },
+        client: supabase,
+      });
+      return { jobId: job.id, status: "completed", analysisKind: job.analysis_kind };
+    }
+
+    if (job.analysis_kind === "norwood_grade") {
+      const ctx = await loadPatientImageContext(supabase, tid, imageId);
+      const norwood =
+        ctx.patientId != null
+          ? await loadPatientNorwoodScale(supabase, tid, ctx.patientId)
+          : null;
+      const summary = buildNorwoodGradeSummary({
+        metadata: ctx.metadata,
+        patientNorwoodScale: norwood,
+        aiImageCategoryConfidence: ctx.aiImageCategoryConfidence,
+      });
+      await persistJobSummaryMetadata(supabase, tid, imageId, "norwood_grade", summary);
+      await completeImagingAiAnalysisJob({
+        tenantId: tid,
+        jobId: job.id,
+        resultPayload: { summary },
         client: supabase,
       });
       return { jobId: job.id, status: "completed", analysisKind: job.analysis_kind };
