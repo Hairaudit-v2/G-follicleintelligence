@@ -73,6 +73,7 @@ export default async function TenantAdminLayout({
   const pathname = headers().get("x-pathname") ?? "";
   const isStaffPinLogin =
     pathname.includes("/staff-pin-login") || pathname.includes("/staff-time-clock");
+  const isOnboardingInvite = pathname.includes("/onboarding/invite/");
   const isCommandCentrePresentation = isGlobalCommandCentrePresentationPath(pathname);
   const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
 
@@ -85,7 +86,7 @@ export default async function TenantAdminLayout({
     return <div className="min-h-[100dvh] bg-[#03060d]">{children}</div>;
   }
 
-  if (isStaffPinLogin) {
+  if (isStaffPinLogin || isOnboardingInvite) {
     await assertFiTenantExists(tenantId);
     return <>{children}</>;
   }

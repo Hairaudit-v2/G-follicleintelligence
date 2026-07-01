@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { FiOsWorkspaceEntryShell } from "@/src/components/fi-os/FiOsWorkspaceEntryShell";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
@@ -13,7 +14,15 @@ export const metadata: Metadata = {
 };
 
 export default async function FiAdminLayout({ children }: { children: React.ReactNode }) {
-  await assertFiAdminShellAccess();
+  const pathname = headers().get("x-pathname") ?? "";
+  const isPublicFiAdminEntry =
+    pathname.includes("/staff-pin-login") ||
+    pathname.includes("/staff-time-clock") ||
+    pathname.includes("/onboarding/invite/");
+
+  if (!isPublicFiAdminEntry) {
+    await assertFiAdminShellAccess();
+  }
   const userEmail = await resolveFiOsAuthUserEmail();
   let showSystemAdminEntry = false;
   const authId = await resolveAuthUserId(null);

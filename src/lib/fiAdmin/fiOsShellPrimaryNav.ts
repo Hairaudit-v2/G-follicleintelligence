@@ -423,6 +423,14 @@ export function resolveFiOsPrimarySidebarItems(
     ...(showHrOsNav
       ? [
           {
+            id: "onboarding-centre",
+            label: "Onboarding Centre",
+            shortLabel: "Onboard",
+            href: hrefFor(b, "hr-os/onboarding"),
+            disabled: false,
+            hint: "Create staff, send invites, and track onboarding checklist progress.",
+          } satisfies FiOsPrimarySidebarItem,
+          {
             id: "hr-os",
             label: "WorkforceOS",
             shortLabel: "Workforce",
@@ -515,7 +523,11 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "financial-os") return "financial-os";
     if (firstEarly === "financial") return "financial-os";
     if (firstEarly === "staff") return "staff";
-    if (firstEarly === "hr-os") return "hr-os";
+    if (firstEarly === "hr-os") {
+      const secondEarly = restEarly.split("/")[1] ?? "";
+      if (secondEarly === "onboarding") return "onboarding-centre";
+      return "hr-os";
+    }
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
@@ -551,7 +563,11 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (first === "financial") return "financial-os";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";
-    if (first === "hr-os") return "hr-os";
+    if (first === "hr-os") {
+      const second = rest.split("/")[1] ?? "";
+      if (second === "onboarding") return "onboarding-centre";
+      return "hr-os";
+    }
   }
 
   return null;

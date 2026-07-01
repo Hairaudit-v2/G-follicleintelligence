@@ -47,6 +47,7 @@ export const FI_OS_SIDEBAR_ITEM_DEFAULT_GROUP: Record<string, FiOsWorkflowGroupI
   analytics: "INTELLIGENCE",
   academyos: "TEAM",
   staff: "TEAM",
+  "onboarding-centre": "TEAM",
   "hr-os": "TEAM",
   settings: "SYSTEM",
 };
@@ -67,7 +68,7 @@ const GROUP_MEMBER_ORDER: Record<FiOsWorkflowGroupId, readonly string[]> = {
   PATIENT_JOURNEY: ["crm", "follow-up-queue", "consultations", "patients", "cases"],
   CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav", "patient-twin"],
   INTELLIGENCE: ["patient-twin", "auditos", "payments-inbox", "financial-os", "analytics"],
-  TEAM: ["academyos", "staff", "hr-os"],
+  TEAM: ["academyos", "staff", "onboarding-centre", "hr-os"],
   SYSTEM: ["settings"],
 };
 

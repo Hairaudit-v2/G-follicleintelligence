@@ -22,6 +22,7 @@ export function buildHrOsNavItems(tenantId: string): HrOsNavItem[] {
       segment: "staff-reconciliation",
     },
     { label: "Duplicate Review", href: `${base}/duplicates`, segment: "duplicates" },
+    { label: "Onboarding Centre", href: `${base}/onboarding`, segment: "onboarding" },
     { label: "Offboarding Centre", href: `${base}/offboarding`, segment: "offboarding" },
     { label: "Credentials", href: `${base}/credentials`, segment: "credentials" },
     { label: "Certifications", href: `${base}/certifications`, segment: "certifications" },

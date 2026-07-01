@@ -24,6 +24,7 @@ function revalidateWorkforceHrSurfaces(tenantId: string): void {
     `/fi-admin/${tid}/hr-os/staff-reconciliation`,
     `/fi-admin/${tid}/hr-os/duplicates`,
     `/fi-admin/${tid}/hr-os/offboarding`,
+    `/fi-admin/${tid}/hr-os/onboarding`,
     `/fi-admin/${tid}/hr/sync-health`,
     `/fi-admin/${tid}/workforce-os`,
     `/fi-admin/${tid}/workforce-os/hr-reconciliation`,
