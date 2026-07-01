@@ -22,6 +22,7 @@ import { SurgeryOsTeamAssignmentBoardWidget } from "@/src/components/fi-admin/su
 import { SurgeryOsAlertsWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsAlerts";
 import { SurgeryOsNotesEventsWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsNotesEvents";
 import { SurgeryOsGraftIntelligenceWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsGraftIntelligence";
+import { SurgeryOsProceduralPerformanceWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsProceduralPerformance";
 import { SurgeryOsLiveActions } from "@/src/components/fi-admin/surgery-os/SurgeryOsLiveActions";
 import { SurgeryOsGraftActions } from "@/src/components/fi-admin/surgery-os/SurgeryOsGraftActions";
 import { SurgeryOsVieCapturePanel } from "@/src/components/fi-admin/surgery-os/SurgeryOsVieCapturePanel";
@@ -176,6 +177,15 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
               graftIntelligence={data.graftIntelligence}
             />
           </div>
+        ) : null}
+
+        {show("live_graft_intelligence") ? (
+          <SurgeryOsProceduralPerformanceWidget
+            extractionVelocity={data.extractionVelocity}
+            transectionMonitoring={data.transectionMonitoring}
+            implantationSpeed={data.implantationSpeed}
+            surgicalRisks={data.surgicalRisks}
+          />
         ) : null}
 
         {show("surgical_readiness_engine") ? (
