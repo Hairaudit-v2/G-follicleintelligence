@@ -7,15 +7,11 @@
  * See: docs/hairaudit-phase-3f-fi-classifier-endpoint.md
  */
 
-import {
-  classifyClinicalHairImageFromModelUrl,
-  isClinicalHairImageClassifierAvailable,
-} from "./classifyClinicalHairImageFromModelUrl";
-import { buildDegradedHairAuditClassification } from "./hairAuditClassifierResponseMap";
 import { isValidHairauditImageContentType } from "./hairauditImageClassifyContract";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
 import { classifyImageCategoryStub, stubConfidenceFromSeed } from "@/src/lib/imaging-os/classification";
 import type { ImagingOsImageIngestionRequest } from "@/src/lib/imaging-os/intake";
+import type { UnifiedImageClassifyRequest } from "@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyRequest";
 
 export const HAIRAUDIT_CLASSIFIER_SOURCE_SYSTEM = "hairaudit" as const;
 
@@ -53,8 +49,6 @@ export type ParseHairAuditImageClassifyResult =
 export type ClassifyHairAuditImageOutcome =
   | { ok: true; result: HairAuditImageClassifyResponse }
   | { ok: false; code: "provider_not_ready"; status: 503 };
-
-const LIVE_DEGRADED_CLASSIFIER_VERSION = "hli-openai-hairaudit-live-v1" as const;
 
 const RESPONSE_FIELD_KEYS = [
   "category",
@@ -248,34 +242,32 @@ export async function classifyHairAuditImageRequest(
     return { ok: true, result: buildStubClassificationResponse(input) };
   }
 
-  if (isClinicalHairImageClassifierAvailable(env)) {
-    const realResult = await classifyClinicalHairImageFromModelUrl(
-      {
-        canonical_photo_category: input.canonical_photo_category,
-        legacy_upload_type: input.legacy_upload_type,
-        storage_bucket: input.storage_bucket,
-        storage_path: input.storage_path,
-        image_content_type: input.image_content_type,
-        image_size_bytes: input.image_size_bytes,
-        source_upload_id: input.source_upload_id,
-      },
-      env
-    );
+  const unifiedRequest: UnifiedImageClassifyRequest = {
+    source_system: "hairaudit",
+    source_image_id: input.source_upload_id,
+    case_id: input.source_case_id,
+    canonical_photo_category: input.canonical_photo_category,
+    ...(input.legacy_upload_type ? { legacy_upload_type: input.legacy_upload_type } : {}),
+    ...(input.storage_bucket ? { storage_bucket: input.storage_bucket } : {}),
+    ...(input.storage_path ? { storage_path: input.storage_path } : {}),
+    ...(input.image_content_type ? { image_content_type: input.image_content_type } : {}),
+    ...(input.image_size_bytes != null ? { image_size_bytes: input.image_size_bytes } : {}),
+    capture_source: "forensic_audit",
+    upload_source: "hairaudit",
+    ...(input.idempotency_key ? { metadata: { idempotency_key: input.idempotency_key } } : {}),
+  };
 
-    if (realResult) {
-      return { ok: true, result: realResult };
-    }
+  const { classifyUnifiedImageRequest, mapUnifiedResultToHairAuditResponse } = await import(
+    "@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyService.server"
+  );
+
+  const outcome = await classifyUnifiedImageRequest(unifiedRequest, env);
+  if (!outcome.ok) {
+    return { ok: false, code: "provider_not_ready", status: 503 };
   }
 
   return {
     ok: true,
-    result: buildDegradedHairAuditClassification({
-      canonical_photo_category: input.canonical_photo_category,
-      legacy_upload_type: input.legacy_upload_type,
-      classifier_version: LIVE_DEGRADED_CLASSIFIER_VERSION,
-      reason: isClinicalHairImageClassifierAvailable(env)
-        ? "live classifier unavailable in this runtime"
-        : "live classifier prerequisites not met",
-    }),
+    result: mapUnifiedResultToHairAuditResponse(outcome.result, unifiedRequest),
   };
 }

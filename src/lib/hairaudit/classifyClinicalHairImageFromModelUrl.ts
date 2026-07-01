@@ -37,18 +37,28 @@ export function isClinicalHairImageClassifierAvailable(
 
 /**
  * Classify a clinical hair image using FI OS / HLI model infrastructure.
- * Live implementation is server-only; returns null in non-server test contexts without dynamic import.
+ * In live mode always returns a structured result (including degraded fallback).
+ * Returns null only when not in live mode (caller uses stub path).
  */
 export async function classifyClinicalHairImageFromModelUrl(
   input: ClinicalHairImageClassifierInput,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<ClinicalHairImageClassifierResult | null> {
-  if (!isClinicalHairImageClassifierAvailable(env)) return null;
+  if (resolveHairauditClassifierMode(env) !== "live") return null;
 
   try {
     const mod = await import("./classifyClinicalHairImageFromModelUrl.server");
     return mod.classifyClinicalHairImageFromModelUrlLive(input, env);
-  } catch {
-    return null;
+  } catch (e: unknown) {
+    const { buildDegradedHairAuditClassification } = await import("./hairAuditClassifierResponseMap");
+    return buildDegradedHairAuditClassification({
+      canonical_photo_category: input.canonical_photo_category,
+      legacy_upload_type: input.legacy_upload_type,
+      classifier_version: "hli-openai-hairaudit-live-v1",
+      reason:
+        e instanceof Error
+          ? `live classifier runtime unavailable: ${e.message}`
+          : "live classifier runtime unavailable",
+    });
   }
 }
