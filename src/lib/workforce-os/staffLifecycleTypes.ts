@@ -7,7 +7,9 @@ export const STAFF_EMPLOYMENT_STATUSES = [
   "terminated",
   "resigned",
   "contract_ended",
+  "contract_expired",
   "suspended",
+  "merged",
 ] as const;
 
 export type StaffEmploymentStatus = (typeof STAFF_EMPLOYMENT_STATUSES)[number];

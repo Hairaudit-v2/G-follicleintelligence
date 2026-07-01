@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { StatCard } from "@/src/components/fi-admin/dashboard-ui/StatCard";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
 import type { StaffDirectoryRowView } from "@/src/lib/staff/staffDirectoryFilters";
+import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
 import {
   WORKFORCE_ROLE_SEGMENTS,
   buildWorkforceAttentionQueue,
@@ -33,11 +34,32 @@ export type WorkforceCommandCentreViewProps = {
   /** Rows after URL/search filters — role segment is applied on top for the directory. */
   directoryRows: StaffDirectoryRowView[];
   intelligenceByStaffId: Record<string, StaffWorkforceIntelligence | undefined>;
+  operationalMetrics?: WorkforceOperationalMetrics | null;
   roleSegment: WorkforceRoleSegmentId;
   onRoleSegmentChange: (segment: WorkforceRoleSegmentId) => void;
   onAddStaff: () => void;
   onEditStaff: (row: StaffDirectoryRowView) => void;
 };
+
+function OperationalCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string | number;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-xl border border-white/[0.08] bg-[#0c1426]/70 p-4 transition-colors hover:border-[#22C1FF]/30 hover:bg-[#0c1426]"
+    >
+      <p className="text-xs uppercase tracking-wide text-[#64748B]">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{value}</p>
+    </Link>
+  );
+}
 
 function StatusPill({ children, className }: { children: ReactNode; className: string }) {
   return (
@@ -177,6 +199,7 @@ export function WorkforceCommandCentreView({
   allRows,
   directoryRows,
   intelligenceByStaffId,
+  operationalMetrics,
   roleSegment,
   onRoleSegmentChange,
   onAddStaff,
@@ -272,6 +295,38 @@ export function WorkforceCommandCentreView({
           value={displayAverageReadiness != null ? `${displayAverageReadiness}%` : "—"}
         />
       </section>
+
+      {operationalMetrics ? (
+        <section
+          aria-label="HR operational control"
+          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+        >
+          <OperationalCard
+            label="Sync Health"
+            value={
+              operationalMetrics.syncHealthPercent != null
+                ? `${operationalMetrics.syncHealthPercent}%`
+                : "—"
+            }
+            href={`${base}/hr-os/sync-health`}
+          />
+          <OperationalCard
+            label="Duplicate Conflicts"
+            value={operationalMetrics.openDuplicateCount}
+            href={`${base}/hr-os/duplicates`}
+          />
+          <OperationalCard
+            label="Unlinked Staff"
+            value={operationalMetrics.unlinkedStaffCount}
+            href={`${base}/hr-os/staff-reconciliation`}
+          />
+          <OperationalCard
+            label="Inactive Staff"
+            value={operationalMetrics.inactiveStaffCount}
+            href={`${base}/hr-os/offboarding`}
+          />
+        </section>
+      ) : null}
 
       <DashboardCard className="p-5 sm:p-6" elevated>
         <h2 className="text-sm font-semibold text-[#F8FAFC]">Workforce intelligence</h2>

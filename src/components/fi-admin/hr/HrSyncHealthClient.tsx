@@ -7,6 +7,7 @@ import { Activity, AlertTriangle, CheckCircle2, Download, RefreshCw, Wrench } fr
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice, StatCard } from "@/src/components/fi-admin/dashboard-ui";
+import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import {
   previewHrStaffFeedAction,
   relinkHrStaffByEmailAction,
@@ -121,6 +122,7 @@ export function HrSyncHealthClient({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
+      <HrOsSubNav tenantId={tenantId} />
       <header className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">HR</p>
         <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">

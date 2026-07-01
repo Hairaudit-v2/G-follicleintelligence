@@ -196,7 +196,7 @@ export function resolveEffectiveAllowedRoles(
 export const HR_OS_MODULE_CODE = "hr_os" as const;
 
 /** Tighter HR OS route gate on top of module allow-list. */
-export const HR_OS_ROUTE_REQUIRED_ROLES = ["owner", "admin", "hr_manager"] as const;
+export const HR_OS_ROUTE_REQUIRED_ROLES = ["owner", "fi_admin", "admin", "hr_manager"] as const;
 
 /** Pure HR OS entitlement check — used by route gate and unit tests. */
 export function evaluateHrOsModuleEntitlement(ctx: EntitlementAccessContext): ModuleAccessResult {

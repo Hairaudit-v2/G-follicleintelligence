@@ -31,6 +31,10 @@ import {
   loadWorkforceCommandCentreIntelligence,
   type WorkforceCommandCentreIntelligence,
 } from "@/src/lib/staff/workforceCommandCentre.server";
+import {
+  loadWorkforceOperationalMetrics,
+  type WorkforceOperationalMetrics,
+} from "@/src/lib/workforce/workforceOperationalMetrics.server";
 
 export type StaffDirectoryClinicOption = {
   id: string;
@@ -60,6 +64,8 @@ export type StaffDirectoryPageResult = {
   clinics: StaffDirectoryClinicOption[];
   /** Workforce Command Centre v1 — derived readiness, compliance, and shift intelligence. */
   workforceIntelligence: WorkforceCommandCentreIntelligence;
+  /** WorkforceOS Phase 1C Sprint 2 — HR operational metrics for command centre cards. */
+  workforceOperationalMetrics: WorkforceOperationalMetrics | null;
 };
 
 async function loadFiUserRow(
@@ -255,6 +261,15 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     workforceIntelligence = { perStaff: {}, tenantOverview: null };
   }
 
+  let workforceOperationalMetrics: WorkforceOperationalMetrics | null = null;
+  if (canManageStaff) {
+    try {
+      workforceOperationalMetrics = await loadWorkforceOperationalMetrics(tid);
+    } catch {
+      workforceOperationalMetrics = null;
+    }
+  }
+
   return {
     staff: staffRes,
     canManageStaff,
@@ -271,5 +286,6 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     hrNotificationByStaffId,
     clinics,
     workforceIntelligence,
+    workforceOperationalMetrics,
   };
 }

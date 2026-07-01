@@ -224,6 +224,7 @@ export function StaffDirectoryClient({
         allRows={enrichedRows}
         directoryRows={visibleRows}
         intelligenceByStaffId={intelligenceByStaffId}
+        operationalMetrics={data.workforceOperationalMetrics}
         roleSegment={roleSegment}
         onRoleSegmentChange={setRoleSegment}
         onAddStaff={openCreate}

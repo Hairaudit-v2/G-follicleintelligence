@@ -2,6 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { HrOsClinicalRosteringSection } from "@/src/components/fi/hr-os/HrOsClinicalRosteringSection";
+import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
@@ -50,7 +51,9 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
         </InfoNotice>
       ) : null}
 
-      <header className="mt-6">
+      <HrOsSubNav tenantId={tid} />
+
+      <header className="mt-2">
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
           Paid add-on module
         </p>
@@ -165,27 +168,31 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
         </p>
         <ul className="mt-4 space-y-2 text-sm text-slate-300">
           <li>
+            <a className="text-cyan-400 hover:text-cyan-300" href={`${base}/sync-health`}>
+              Sync Health
+            </a>
+          </li>
+          <li>
             <a
               className="text-cyan-400 hover:text-cyan-300"
-              href={`/fi-admin/${tenantId.trim()}/hr-os/roster`}
+              href={`${base}/staff-reconciliation`}
             >
+              Staff Reconciliation
+            </a>
+          </li>
+          <li>
+            <a className="text-cyan-400 hover:text-cyan-300" href={`${base}/duplicates`}>
+              Duplicate Review
+            </a>
+          </li>
+          <li>
+            <a className="text-cyan-400 hover:text-cyan-300" href={`${base}/offboarding`}>
+              Offboarding Centre
+            </a>
+          </li>
+          <li>
+            <a className="text-cyan-400 hover:text-cyan-300" href={`${base}/roster`}>
               Roster Command Centre
-            </a>
-          </li>
-          <li>
-            <a
-              className="text-cyan-400 hover:text-cyan-300"
-              href={`/fi-admin/${tenantId.trim()}/hr/staff-readiness`}
-            >
-              Staff readiness
-            </a>
-          </li>
-          <li>
-            <a
-              className="text-cyan-400 hover:text-cyan-300"
-              href={`/fi-admin/${tenantId.trim()}/hr/sync-health`}
-            >
-              HR sync health
             </a>
           </li>
           <li>
@@ -193,7 +200,7 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
               className="text-cyan-400 hover:text-cyan-300"
               href={`/fi-admin/${tenantId.trim()}/staff`}
             >
-              Staff directory
+              Workforce Command Centre
             </a>
           </li>
         </ul>
