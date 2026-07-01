@@ -7,6 +7,15 @@ import { classifyFiPatientImageAndPersist } from "@/src/lib/hair-intelligence/im
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { runImagingQualityEvaluation } from "@/src/lib/imaging-os/imageQualityEvaluation.server";
+import { runClinicalImageAnalysis } from "@/src/lib/imaging-os/clinicalImageAnalysisProvider.server";
+import {
+  enqueueImagingAiAnalysisJob,
+  loadRegionLinkExists,
+} from "@/src/lib/imaging-os/imagingAiAnalysisJobs.server";
+import {
+  shouldRunDonorAssessment,
+  shouldRunRecipientAssessment,
+} from "@/src/lib/imaging-os/clinicalImageAnalysisCore";
 import { loadFiImageAttributionSettings } from "./fiImageAttributionSettings.server";
 import {
   buildFiImageAiDatasetFields,
@@ -279,6 +288,7 @@ export async function runPatientImagePostCapturePipeline(
   }
 
   let classificationConfidence: number | null = null;
+  let classifiedCategory: string | null = null;
   if (settings.auto_classify_on_capture) {
     try {
       const classified = await classifyFiPatientImageAndPersist({
@@ -288,6 +298,7 @@ export async function runPatientImagePostCapturePipeline(
         client: supabase,
       });
       classificationConfidence = classified.result.categoryConfidence;
+      classifiedCategory = classified.result.category;
       imageType = mapToFiImageAttributionType({
         ai_category: classified.result.category,
         anatomical_region: existingRow.anatomical_region,
@@ -297,6 +308,65 @@ export async function runPatientImagePostCapturePipeline(
     } catch {
       // Classification is best-effort; original upload must succeed.
     }
+  }
+
+  let clinicalAiMetadata: Record<string, unknown> | undefined;
+  try {
+    const hasRegionLink = await loadRegionLinkExists(supabase, tid, existingRow.id);
+    const clinical = await runClinicalImageAnalysis({
+      tenantId: tid,
+      patientImageId: existingRow.id,
+      protocolSlotSlug: existingRow.imaging_protocol_slot_slug,
+      anatomicalRegion: existingRow.anatomical_region,
+      captureSource,
+      protocolSessionId:
+        input.protocolSessionId ??
+        (typeof rowMetadata.protocol_session_id === "string"
+          ? rowMetadata.protocol_session_id
+          : null),
+      hasRegionLink,
+      isAdminFallback: captureSource === "appointment_procedure_admin_fallback",
+      externalCategory: classifiedCategory ?? existingRow.image_category,
+      client: supabase,
+    });
+    clinicalAiMetadata = clinical.mergedMetadata;
+
+    void enqueueImagingAiAnalysisJob({
+      tenantId: tid,
+      patientImageId: existingRow.id,
+      analysisKind: "clinical_image_analysis",
+      requestPayload: { trigger: "post_capture" },
+      client: supabase,
+    }).catch(() => {
+      // Async job enqueue is best-effort.
+    });
+
+    const assessmentInput = {
+      viewType: clinical.result.viewType,
+      protocolSlotSlug: existingRow.imaging_protocol_slot_slug,
+      anatomicalRegion: existingRow.anatomical_region,
+      hliCategory: null,
+    };
+    if (shouldRunDonorAssessment(assessmentInput)) {
+      void enqueueImagingAiAnalysisJob({
+        tenantId: tid,
+        patientImageId: existingRow.id,
+        analysisKind: "donor_assessment",
+        requestPayload: { trigger: "post_capture" },
+        client: supabase,
+      }).catch(() => {});
+    }
+    if (shouldRunRecipientAssessment(assessmentInput)) {
+      void enqueueImagingAiAnalysisJob({
+        tenantId: tid,
+        patientImageId: existingRow.id,
+        analysisKind: "recipient_assessment",
+        requestPayload: { trigger: "post_capture" },
+        client: supabase,
+      }).catch(() => {});
+    }
+  } catch {
+    // Clinical intelligence is best-effort; upload must succeed.
   }
 
   const fiImageMetadata: FiImageMetadata = buildFiImageMetadata({
@@ -417,6 +487,9 @@ export async function runPatientImagePostCapturePipeline(
     fi_image_timeline: timelineEntry,
     fi_ai_dataset_fields: datasetFields,
     fi_image_attribution_engine_version: fiImageMetadata.attribution_engine_version,
+    ...(clinicalAiMetadata?.imaging_clinical_ai
+      ? { imaging_clinical_ai: clinicalAiMetadata.imaging_clinical_ai }
+      : {}),
   };
 
   const mergedMetadata = {

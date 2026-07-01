@@ -104,6 +104,8 @@ const aiJobBodySchema = z
       "density_estimate",
       "norwood_grade",
       "donor_assessment",
+      "recipient_assessment",
+      "clinical_image_analysis",
       "outcome_score",
     ]),
   })

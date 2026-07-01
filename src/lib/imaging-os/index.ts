@@ -20,6 +20,8 @@ export * from "./qualityRules";
 export * from "./imageQualityCore";
 export * from "./imageQualityPolicy";
 export * from "./imageQualityMetadata";
+export * from "./clinicalImageAnalysisCore";
+export * from "./scalpRegionEnforcement";
 export * from "./imageDuplicateDetectionCore";
 export * from "./summary";
 export * from "./aiVision";
