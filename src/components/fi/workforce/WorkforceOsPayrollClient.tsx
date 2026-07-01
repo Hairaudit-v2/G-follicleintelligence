@@ -92,6 +92,10 @@ export function WorkforceOsPayrollClient({
   const router = useRouter();
   const base = `/fi-admin/${tenantId}/workforce-os`;
   const kioskUrl = `/fi-admin/${tenantId}/staff-time-clock`;
+  const exportBase = `/api/tenants/${tenantId}/workforce-os/payroll-export`;
+  const exportPeriod = payPeriod.end;
+  const exportSummaryUrl = `${exportBase}?period=${encodeURIComponent(exportPeriod)}&view=summary&scope=approved`;
+  const exportDetailUrl = `${exportBase}?period=${encodeURIComponent(exportPeriod)}&view=detail&scope=approved`;
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -415,6 +419,22 @@ export function WorkforceOsPayrollClient({
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">
+            {canManage ? (
+              <>
+                <a
+                  href={exportSummaryUrl}
+                  className="rounded-lg border border-emerald-400/25 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100 hover:bg-emerald-500/20"
+                >
+                  Export payroll CSV
+                </a>
+                <a
+                  href={exportDetailUrl}
+                  className="rounded-lg border border-white/10 px-3 py-2 text-xs text-[#CBD5E1] hover:bg-white/5"
+                >
+                  Export line detail
+                </a>
+              </>
+            ) : null}
             <Link
               href={kioskUrl}
               className="rounded-lg border border-white/10 px-3 py-2 text-xs text-cyan-200 hover:bg-white/5"
