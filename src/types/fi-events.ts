@@ -3,13 +3,14 @@
  * Shared type-only contracts for producers, validators, and handlers.
  */
 
-export type FiSourceSystem = "hli" | "hairaudit" | "clinic";
+export type FiSourceSystem = "hli" | "hairaudit" | "iiohr" | "clinic";
 
 export type FiEventType =
   | "hli.intake.submitted"
   | "hli.document.uploaded"
   | "hairaudit.case.submitted"
   | "hairaudit.images.uploaded"
+  | "iiohr.images.uploaded"
   | "clinic.ai.usage";
 
 export type FiEventEnvelope = {
@@ -71,4 +72,26 @@ export type HairAuditImagesUploadedPayload = {
     mime_type?: string;
     size_bytes?: number;
   }>;
+};
+
+/** IIOHR academy case image upload (Phase 1 imaging consolidation). */
+export type IiohrImagesUploadedPayload = {
+  /** Academy case id (also accepted via identifiers.source_case_id). */
+  academy_case_id: string;
+  /** Foundation patient id when already resolved in FI OS. */
+  patient_id?: string;
+  /** External patient reference for global identity mapping. */
+  patient_external_id?: string;
+  professional_id?: string;
+  global_professional_id?: string;
+  /** Storage path preferred; image_url retained for producer compatibility. */
+  storage_path?: string;
+  image_url?: string;
+  mime_type?: string;
+  original_filename: string;
+  canonical_view?: string;
+  external_view?: string;
+  uploaded_at?: string;
+  size_bytes?: number;
+  metadata?: Record<string, unknown>;
 };

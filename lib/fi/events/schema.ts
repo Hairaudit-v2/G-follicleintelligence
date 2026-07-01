@@ -12,6 +12,7 @@ import type {
   HliDocumentUploadedPayload,
   HairAuditCaseSubmittedPayload,
   HairAuditImagesUploadedPayload,
+  IiohrImagesUploadedPayload,
 } from "@/src/types/fi-events";
 
 /**
@@ -29,6 +30,7 @@ export const fiEventTypeSchema = [
   "hli.document.uploaded",
   "hairaudit.case.submitted",
   "hairaudit.images.uploaded",
+  "iiohr.images.uploaded",
   "clinic.ai.usage",
 ] as const;
 
@@ -43,7 +45,7 @@ export const FI_INGEST_CROSS_SYSTEM_EVENT_TYPES = fiEventTypeSchema.filter(
     !(FI_INGEST_LOCAL_ONLY_EVENT_TYPES as readonly string[]).includes(t)
 );
 
-const fiSourceSystemSchema = ["hli", "hairaudit", "clinic"] as const;
+const fiSourceSystemSchema = ["hli", "hairaudit", "iiohr", "clinic"] as const;
 const hliDocumentKinds = ["blood_pdf", "blood_csv", "supporting_docs"] as const;
 
 export type HliIntakePayload = HliIntakeSubmittedPayload;
@@ -87,6 +89,8 @@ function isCompatibleSourceSystem(eventType: FiEventType, sourceSystem: FiSource
     case "hairaudit.case.submitted":
     case "hairaudit.images.uploaded":
       return sourceSystem === "hairaudit";
+    case "iiohr.images.uploaded":
+      return sourceSystem === "iiohr";
     case "clinic.ai.usage":
       return sourceSystem === "clinic";
   }
@@ -236,6 +240,55 @@ function parseHairAuditImagesPayload(
   return { ok: true, data: { images: parsedImages } };
 }
 
+function parseIiohrImagesPayload(input: unknown): ValidationResult<IiohrImagesUploadedPayload> {
+  const payload = isRecord(input) ? input : {};
+  const academy_case_id = asTrimmedString(payload.academy_case_id);
+  const original_filename = asTrimmedString(payload.original_filename);
+  const storage_path = asOptionalTrimmedString(payload.storage_path);
+  const image_url = asOptionalTrimmedString(payload.image_url);
+
+  if (!academy_case_id) {
+    return { ok: false, error: "payload.academy_case_id is required." };
+  }
+  if (!original_filename) {
+    return { ok: false, error: "payload.original_filename is required." };
+  }
+  if (!storage_path && !image_url) {
+    return {
+      ok: false,
+      error: "payload.storage_path or payload.image_url is required.",
+    };
+  }
+
+  const metadataRaw = payload.metadata;
+  const metadata =
+    metadataRaw && isRecord(metadataRaw) ? (metadataRaw as Record<string, unknown>) : undefined;
+  const uploaded_at = asOptionalTrimmedString(payload.uploaded_at);
+  if (uploaded_at && !isIsoDateString(uploaded_at)) {
+    return { ok: false, error: "payload.uploaded_at must be ISO datetime." };
+  }
+
+  return {
+    ok: true,
+    data: {
+      academy_case_id,
+      patient_id: asOptionalTrimmedString(payload.patient_id),
+      patient_external_id: asOptionalTrimmedString(payload.patient_external_id),
+      professional_id: asOptionalTrimmedString(payload.professional_id),
+      global_professional_id: asOptionalTrimmedString(payload.global_professional_id),
+      storage_path,
+      image_url,
+      mime_type: asOptionalTrimmedString(payload.mime_type),
+      original_filename,
+      canonical_view: asOptionalTrimmedString(payload.canonical_view),
+      external_view: asOptionalTrimmedString(payload.external_view),
+      uploaded_at,
+      size_bytes: typeof payload.size_bytes === "number" ? payload.size_bytes : undefined,
+      metadata,
+    },
+  };
+}
+
 function parseClinicAiUsagePayload(input: unknown): ValidationResult<ClinicAiUsagePayload> {
   const payload = isRecord(input) ? input : {};
   const usage = isRecord(payload.usage) ? payload.usage : null;
@@ -248,6 +301,7 @@ export const fiEventPayloadSchemaMap = {
   "hli.document.uploaded": parseHliDocumentPayload,
   "hairaudit.case.submitted": parseHairAuditCasePayload,
   "hairaudit.images.uploaded": parseHairAuditImagesPayload,
+  "iiohr.images.uploaded": parseIiohrImagesPayload,
   "clinic.ai.usage": parseClinicAiUsagePayload,
 } as const;
 
@@ -265,6 +319,7 @@ export function parseFiEventPayload(
   | HliDocumentUploadedPayload
   | HairAuditCaseSubmittedPayload
   | HairAuditImagesUploadedPayload
+  | IiohrImagesUploadedPayload
   | ClinicAiUsagePayload
 > {
   return fiEventPayloadSchemaMap[eventType](payload);

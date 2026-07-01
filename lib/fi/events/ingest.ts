@@ -4,6 +4,7 @@ import { handleHairAuditCaseSubmitted } from "./handlers/hairauditCaseSubmitted"
 import { handleHairAuditImagesUploaded } from "./handlers/hairauditImagesUploaded";
 import { handleHliDocumentUploaded } from "./handlers/hliDocumentUploaded";
 import { handleHliIntakeSubmitted } from "./handlers/hliIntakeSubmitted";
+import { handleIiohrImagesUploaded } from "./handlers/iiohrImagesUploaded";
 import { parseFiEventEnvelope } from "./schema";
 import { maybeEmitShadowHairAuditAuditCompletedFromImagesIngest } from "@/src/lib/fi/events/shadowHairAuditAuditCompletedBus";
 
@@ -84,6 +85,17 @@ async function dispatchValidatedFiEvent(envelope: FiEventEnvelope): Promise<FiEv
       if (result.ok) {
         await maybeEmitShadowHairAuditAuditCompletedFromImagesIngest(envelope);
       }
+      return {
+        ok: result.ok,
+        eventType: envelope.event_type,
+        sourceSystem: envelope.source_system,
+        fiCaseId: result.fiCaseId,
+        actionTaken: result.actionTaken,
+        message: result.message,
+      };
+    }
+    case "iiohr.images.uploaded": {
+      const result = await handleIiohrImagesUploaded({ envelope });
       return {
         ok: result.ok,
         eventType: envelope.event_type,

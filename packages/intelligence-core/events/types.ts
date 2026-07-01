@@ -16,6 +16,7 @@ export const INTELLIGENCE_EVENT_NAMES = [
   "hairaudit.case.created",
   "hairaudit.case.submitted",
   "hairaudit.images.uploaded",
+  "iiohr.images.uploaded",
   "hairaudit.audit.completed",
   "hairaudit.report.generated",
   "fi_os.clinic.readiness.updated",

@@ -72,6 +72,8 @@ export function getFoundationCaseTypeForEvent(eventType: FiEventType): Foundatio
       return "media";
     case "hairaudit.images.uploaded":
       return "general_case_event";
+    case "iiohr.images.uploaded":
+      return "media";
     case "clinic.ai.usage":
       return "general_case_event";
     default:
@@ -93,6 +95,8 @@ export function getFoundationTimelineSpec(eventType: FiEventType): FoundationTim
       return { event_kind: "audit_case_submitted", title: "HairAudit case submitted" };
     case "hairaudit.images.uploaded":
       return { event_kind: "hairaudit_media_uploaded", title: "HairAudit images uploaded" };
+    case "iiohr.images.uploaded":
+      return { event_kind: "iiohr_academy_image_uploaded", title: "IIOHR academy image uploaded" };
     case "clinic.ai.usage":
       return null;
     default:

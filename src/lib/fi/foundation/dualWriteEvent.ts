@@ -20,6 +20,7 @@ import { resolveOrCreateClinic } from "./resolveClinic";
 import { resolveOrCreateOrganisation } from "./resolveOrganisation";
 import { resolveOrCreatePatient } from "./resolvePatient";
 import { resolveOrCreatePerson } from "./resolvePerson";
+import { resolveIiohrImageStoragePath } from "./iiohrPatientImageDualWriteCore";
 import type { FoundationSupabase } from "./types";
 
 const LOG_PREFIX = "[fi-foundation-dual-write]";
@@ -316,6 +317,40 @@ export async function dualWriteFoundationFromFiEvent(
               mime_type: image.mime_type ?? null,
               size_bytes: image.size_bytes ?? null,
               metadata: { hairaudit_image_type: image.type, fi_event_id: fiEventId },
+            },
+            client
+          );
+          if (ma.created) media_assets_upserted += 1;
+        }
+      }
+    }
+
+    if (envelope.event_type === "iiohr.images.uploaded") {
+      const iiohrPr = parseFiEventPayload(envelope.event_type, envelope.payload);
+      if (iiohrPr.ok && "academy_case_id" in iiohrPr.data) {
+        const storagePath = resolveIiohrImageStoragePath(iiohrPr.data);
+        if (storagePath) {
+          const ma = await createMediaAsset(
+            {
+              tenant_id: tenantId,
+              case_id: fiCaseId,
+              foundation_patient_id: patientRes.patient.id,
+              person_id: personRes.person.id,
+              clinic_id: clinicId,
+              organisation_id: organisationId,
+              source_system: sourceSystem,
+              source_asset_id: `${fiEventId}:${storagePath}`,
+              asset_type: "media",
+              storage_path: storagePath,
+              file_name: iiohrPr.data.original_filename,
+              mime_type: iiohrPr.data.mime_type ?? null,
+              size_bytes: iiohrPr.data.size_bytes ?? null,
+              metadata: {
+                academy_case_id: iiohrPr.data.academy_case_id,
+                external_view:
+                  iiohrPr.data.external_view ?? iiohrPr.data.canonical_view ?? undefined,
+                fi_event_id: fiEventId,
+              },
             },
             client
           );
