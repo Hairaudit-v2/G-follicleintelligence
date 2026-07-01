@@ -12,9 +12,16 @@ import {
   updateWorkforceTimeClockBreaksEnabledAction,
 } from "@/src/lib/actions/staff-time-clock-actions";
 import {
+  bulkTransitionTimesheetEntriesAction,
   createTimesheetEntryAction,
+  transitionTimesheetEntryAction,
   upsertWorkforceWageProfileAction,
 } from "@/src/lib/actions/workforce-phase-2-sprint-2-actions";
+import {
+  countTimesheetEntriesByStatus,
+  isTimesheetLocked,
+  TIMESHEET_STATUS_LABELS,
+} from "@/src/lib/workforce/timesheetApprovalCore";
 import type { WorkforceTimePunch } from "@/src/lib/workforce/staffTimeClockCore";
 import {
   DEFAULT_AWARD_LOADING_SEEDS,
@@ -107,6 +114,11 @@ export function WorkforceOsPayrollClient({
   const staffWithoutProfile = useMemo(
     () => staffOptions.filter((s) => !s.hasWageProfile),
     [staffOptions]
+  );
+
+  const timesheetStatusCounts = useMemo(
+    () => countTimesheetEntriesByStatus(timesheetEntries),
+    [timesheetEntries]
   );
 
   const loadingCodes = useMemo(() => {
@@ -229,6 +241,54 @@ export function WorkforceOsPayrollClient({
     router.push(`${base}/payroll?date=${encodeURIComponent(next)}`);
   }
 
+  function runTimesheetTransition(
+    entryId: string,
+    action: "submit" | "approve" | "void" | "revert_to_draft"
+  ) {
+    resetFeedback();
+    let voidReason: string | undefined;
+    if (action === "void") {
+      const reason = window.prompt("Reason for voiding this timesheet entry:");
+      if (!reason?.trim()) return;
+      voidReason = reason.trim();
+    }
+    startTransition(async () => {
+      const res = await transitionTimesheetEntryAction(tenantId, {
+        entryId,
+        action,
+        voidReason,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setMessage(`Timesheet marked as ${TIMESHEET_STATUS_LABELS[res.status]}.`);
+      router.refresh();
+    });
+  }
+
+  function runBulkTimesheetTransition(
+    action: "submit" | "approve",
+    fromStatus: "draft" | "submitted"
+  ) {
+    resetFeedback();
+    startTransition(async () => {
+      const res = await bulkTransitionTimesheetEntriesAction(tenantId, {
+        action,
+        fromStatus,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setMessage(
+        `${res.updated} timesheet${res.updated === 1 ? "" : "s"} updated` +
+          (res.skipped > 0 ? ` (${res.skipped} skipped).` : ".")
+      );
+      router.refresh();
+    });
+  }
+
   function onToggleBreaksEnabled(next: boolean) {
     resetFeedback();
     startTransition(async () => {
@@ -283,16 +343,10 @@ export function WorkforceOsPayrollClient({
       </header>
 
       <DashboardCard className="p-4">
-        <dl className="grid gap-4 text-sm sm:grid-cols-4">
+        <dl className="grid gap-4 text-sm sm:grid-cols-3 lg:grid-cols-6">
           <div>
             <dt className="text-[#64748B]">Active wage profiles</dt>
             <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">{wageProfiles.length}</dd>
-          </div>
-          <div>
-            <dt className="text-[#64748B]">Hourly / daily / contractor</dt>
-            <dd className="mt-1 text-sm text-[#E2E8F0]">
-              {rateTypeCounts.hourly} / {rateTypeCounts.daily} / {rateTypeCounts.contractor}
-            </dd>
           </div>
           <div>
             <dt className="text-[#64748B]">Staff without profile</dt>
@@ -301,9 +355,31 @@ export function WorkforceOsPayrollClient({
             </dd>
           </div>
           <div>
-            <dt className="text-[#64748B]">Draft timesheet entries</dt>
-            <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">
-              {timesheetEntries.filter((t) => t.status === "draft").length}
+            <dt className="text-[#64748B]">Draft</dt>
+            <dd className="mt-1 text-xl font-semibold text-[#94A3B8]">
+              {timesheetStatusCounts.draft}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#64748B]">Submitted</dt>
+            <dd className="mt-1 text-xl font-semibold text-amber-100">
+              {timesheetStatusCounts.submitted}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#64748B]">Approved</dt>
+            <dd className="mt-1 text-xl font-semibold text-emerald-200">
+              {timesheetStatusCounts.approved}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#64748B]">Ready for pay</dt>
+            <dd className="mt-1 text-sm text-[#E2E8F0]">
+              {formatCentsAsCurrency(
+                timesheetEntries
+                  .filter((t) => t.status === "approved")
+                  .reduce((sum, t) => sum + t.grossCostCents, 0)
+              )}
             </dd>
           </div>
         </dl>
@@ -804,7 +880,14 @@ export function WorkforceOsPayrollClient({
                   </td>
                   <td className="px-4 py-3 capitalize text-[#94A3B8]">{punch.status}</td>
                   <td className="px-4 py-3 text-[#94A3B8]">
-                    {punch.timesheetEntryId ? "Draft created" : punch.status === "open" ? "—" : "Pending"}
+                    {punch.timesheetEntryId
+                      ? TIMESHEET_STATUS_LABELS[
+                          timesheetEntries.find((t) => t.id === punch.timesheetEntryId)?.status ??
+                            "draft"
+                        ]
+                      : punch.status === "open"
+                        ? "—"
+                        : "Pending"}
                   </td>
                   {canManage ? (
                     <td className="px-4 py-3">
@@ -844,9 +927,37 @@ export function WorkforceOsPayrollClient({
       </DashboardCard>
 
       <DashboardCard className="overflow-x-auto p-0">
-        <h2 className="border-b border-white/10 px-4 py-3 text-sm font-semibold text-[#F8FAFC]">
-          Recent timesheet entries
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+          <div>
+            <h2 className="text-sm font-semibold text-[#F8FAFC]">Timesheet approval</h2>
+            <p className="mt-1 text-xs text-[#94A3B8]">
+              Draft → submit for review → approve to lock for pay. Approved entries cannot be edited.
+            </p>
+          </div>
+          {canManage ? (
+            <div className="flex flex-wrap gap-2">
+              {timesheetStatusCounts.draft > 0 ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => runBulkTimesheetTransition("submit", "draft")}
+                >
+                  Submit all drafts ({timesheetStatusCounts.draft})
+                </Button>
+              ) : null}
+              {timesheetStatusCounts.submitted > 0 ? (
+                <Button
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => runBulkTimesheetTransition("approve", "submitted")}
+                >
+                  Approve all submitted ({timesheetStatusCounts.submitted})
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wide text-[#64748B]">
             <tr>
@@ -856,12 +967,13 @@ export function WorkforceOsPayrollClient({
               <th className="px-4 py-3">Minutes</th>
               <th className="px-4 py-3">Gross cost</th>
               <th className="px-4 py-3">Status</th>
+              {canManage ? <th className="px-4 py-3">Actions</th> : null}
             </tr>
           </thead>
           <tbody>
             {timesheetEntries.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[#94A3B8]">
+                <td colSpan={canManage ? 7 : 6} className="px-4 py-8 text-center text-[#94A3B8]">
                   No timesheet entries yet.
                 </td>
               </tr>
@@ -877,7 +989,82 @@ export function WorkforceOsPayrollClient({
                   <td className="px-4 py-3 text-[#CBD5E1]">
                     {formatCentsAsCurrency(entry.grossCostCents)}
                   </td>
-                  <td className="px-4 py-3 capitalize text-[#94A3B8]">{entry.status}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        entry.status === "approved"
+                          ? "text-emerald-300"
+                          : entry.status === "submitted"
+                            ? "text-amber-200"
+                            : entry.status === "void"
+                              ? "text-red-300/80"
+                              : "text-[#94A3B8]"
+                      }
+                    >
+                      {TIMESHEET_STATUS_LABELS[entry.status]}
+                      {isTimesheetLocked(entry.status) && entry.status === "approved"
+                        ? " · locked"
+                        : ""}
+                    </span>
+                  </td>
+                  {canManage ? (
+                    <td className="px-4 py-3">
+                      {!isTimesheetLocked(entry.status) ? (
+                        <div className="flex flex-wrap gap-1">
+                          {entry.status === "draft" ? (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => runTimesheetTransition(entry.id, "submit")}
+                              >
+                                Submit
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={pending}
+                                onClick={() => runTimesheetTransition(entry.id, "approve")}
+                              >
+                                Approve
+                              </Button>
+                            </>
+                          ) : null}
+                          {entry.status === "submitted" ? (
+                            <>
+                              <Button
+                                size="sm"
+                                disabled={pending}
+                                onClick={() => runTimesheetTransition(entry.id, "approve")}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() =>
+                                  runTimesheetTransition(entry.id, "revert_to_draft")
+                                }
+                              >
+                                Revert
+                              </Button>
+                            </>
+                          ) : null}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={pending}
+                            onClick={() => runTimesheetTransition(entry.id, "void")}
+                          >
+                            Void
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-[#64748B]">—</span>
+                      )}
+                    </td>
+                  ) : null}
                 </tr>
               ))
             )}

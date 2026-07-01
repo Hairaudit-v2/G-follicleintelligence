@@ -7,6 +7,10 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveStaffMemberContext } from "@/src/lib/workforce/workforceStaffMemberResolve.server";
 
 import {
+  resolveTimesheetTransition,
+  type TimesheetApprovalAction,
+} from "./timesheetApprovalCore";
+import {
   computeGrossLabourCostCents,
   computeSurgeryDayStaffingCost,
   DEFAULT_AWARD_LOADING_SEEDS,
@@ -402,6 +406,161 @@ export async function createTimesheetEntry(input: {
     .single();
   if (error) throw new Error(error.message);
   return mapTimesheetEntry(data as Record<string, unknown>, ctx.fullName);
+}
+
+function asMetadataObject(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return value as Record<string, unknown>;
+}
+
+function mergeApprovalMetadata(
+  metadata: Record<string, unknown>,
+  action: TimesheetApprovalAction,
+  actorFiUserId: string,
+  voidReason?: string | null
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+  const next = { ...metadata };
+  if (action === "submit") {
+    next.submitted_at = now;
+    next.submitted_by_fi_user_id = actorFiUserId;
+  }
+  if (action === "approve") {
+    next.approved_at = now;
+    next.approved_by_fi_user_id = actorFiUserId;
+  }
+  if (action === "void") {
+    next.voided_at = now;
+    next.voided_by_fi_user_id = actorFiUserId;
+    if (voidReason?.trim()) next.void_reason = voidReason.trim();
+  }
+  if (action === "revert_to_draft") {
+    next.reverted_to_draft_at = now;
+    next.reverted_to_draft_by_fi_user_id = actorFiUserId;
+  }
+  return next;
+}
+
+async function loadTimesheetEntryById(
+  tenantId: string,
+  entryId: string,
+  client: SupabaseClient
+): Promise<{ row: Record<string, unknown>; staffName: string | null }> {
+  const { data, error } = await client
+    .from("fi_workforce_timesheet_entries")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("id", entryId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Timesheet entry not found.");
+  const row = data as Record<string, unknown>;
+  const nameMap = await loadStaffNameMap(tenantId, [String(row.staff_member_id)], client);
+  return {
+    row,
+    staffName: nameMap.get(String(row.staff_member_id)) ?? null,
+  };
+}
+
+export async function transitionTimesheetEntry(input: {
+  tenantId: string;
+  entryId: string;
+  action: TimesheetApprovalAction;
+  actorFiUserId: string;
+  voidReason?: string | null;
+  client?: SupabaseClient;
+}): Promise<TimesheetEntry> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const entryId = assertNonEmptyUuid(input.entryId, "entryId");
+  const supabase = input.client ?? supabaseAdmin();
+
+  const { row, staffName } = await loadTimesheetEntryById(tid, entryId, supabase);
+  const current = String(row.status) as TimesheetStatus;
+  const nextStatus = resolveTimesheetTransition(current, input.action);
+  if (!nextStatus) {
+    throw new Error(`Cannot ${input.action.replace(/_/g, " ")} a ${current} timesheet entry.`);
+  }
+  if (input.action === "void" && !input.voidReason?.trim()) {
+    throw new Error("A reason is required to void a timesheet entry.");
+  }
+
+  const now = new Date().toISOString();
+  const metadata = mergeApprovalMetadata(
+    asMetadataObject(row.metadata),
+    input.action,
+    input.actorFiUserId.trim(),
+    input.voidReason
+  );
+
+  const { data, error } = await supabase
+    .from("fi_workforce_timesheet_entries")
+    .update({
+      status: nextStatus,
+      metadata,
+      updated_at: now,
+    })
+    .eq("tenant_id", tid)
+    .eq("id", entryId)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return mapTimesheetEntry(data as Record<string, unknown>, staffName);
+}
+
+export async function bulkTransitionTimesheetEntries(input: {
+  tenantId: string;
+  entryIds: string[];
+  action: TimesheetApprovalAction;
+  actorFiUserId: string;
+  voidReason?: string | null;
+  client?: SupabaseClient;
+}): Promise<{ updated: number; skipped: number }> {
+  const ids = input.entryIds.map((id) => id.trim()).filter(Boolean);
+  let updated = 0;
+  let skipped = 0;
+  for (const entryId of ids) {
+    try {
+      await transitionTimesheetEntry({
+        tenantId: input.tenantId,
+        entryId,
+        action: input.action,
+        actorFiUserId: input.actorFiUserId,
+        voidReason: input.voidReason,
+        client: input.client,
+      });
+      updated += 1;
+    } catch {
+      skipped += 1;
+    }
+  }
+  return { updated, skipped };
+}
+
+export async function bulkTransitionTimesheetsByStatus(input: {
+  tenantId: string;
+  fromStatus: TimesheetStatus;
+  action: TimesheetApprovalAction;
+  actorFiUserId: string;
+  voidReason?: string | null;
+  client?: SupabaseClient;
+}): Promise<{ updated: number; skipped: number }> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const supabase = input.client ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_workforce_timesheet_entries")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("status", input.fromStatus);
+  if (error) throw new Error(error.message);
+  const entryIds = ((data ?? []) as { id: string }[]).map((r) => String(r.id));
+  return bulkTransitionTimesheetEntries({
+    tenantId: tid,
+    entryIds,
+    action: input.action,
+    actorFiUserId: input.actorFiUserId,
+    voidReason: input.voidReason,
+    client: supabase,
+  });
 }
 
 function shiftMinutes(startsAt: string, endsAt: string): number {

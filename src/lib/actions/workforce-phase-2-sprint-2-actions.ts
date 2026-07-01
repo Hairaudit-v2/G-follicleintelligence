@@ -3,15 +3,21 @@
 import { revalidatePath } from "next/cache";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
+import { isTimesheetApprovalAction } from "@/src/lib/workforce/timesheetApprovalCore";
 import {
+  bulkTransitionTimesheetEntries,
+  bulkTransitionTimesheetsByStatus,
   createTimesheetEntry,
+  transitionTimesheetEntry,
   upsertAwardLoadingPlaceholder,
   upsertWorkforceWageProfile,
 } from "@/src/lib/workforce/wageProfile.server";
 import {
   dollarsToCents,
   isTimesheetEntryType,
+  isTimesheetStatus,
   isWageRateType,
+  type TimesheetStatus,
 } from "@/src/lib/workforce/wageProfileCore";
 import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
 
@@ -133,6 +139,73 @@ export async function createTimesheetEntryAction(
     });
     revalidatePayroll(tenantId);
     return { ok: true, entryId: row.id };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function transitionTimesheetEntryAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; status: TimesheetStatus } | { ok: false; error: string }> {
+  try {
+    const actor = await assertWorkforceHrManageAllowed(tenantId);
+    const b = body && typeof body === "object" && body !== null ? body : {};
+    const entryId = String((b as { entryId?: string }).entryId ?? "").trim();
+    const actionRaw = String((b as { action?: string }).action ?? "").trim();
+    if (!entryId) throw new Error("entryId is required.");
+    if (!isTimesheetApprovalAction(actionRaw)) throw new Error("Invalid timesheet action.");
+
+    const row = await transitionTimesheetEntry({
+      tenantId,
+      entryId,
+      action: actionRaw,
+      actorFiUserId: actor.fiUserId,
+      voidReason: String((b as { voidReason?: string }).voidReason ?? "").trim() || null,
+    });
+    revalidatePayroll(tenantId);
+    return { ok: true, status: row.status };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function bulkTransitionTimesheetEntriesAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; updated: number; skipped: number } | { ok: false; error: string }> {
+  try {
+    const actor = await assertWorkforceHrManageAllowed(tenantId);
+    const b = body && typeof body === "object" && body !== null ? body : {};
+    const actionRaw = String((b as { action?: string }).action ?? "").trim();
+    if (!isTimesheetApprovalAction(actionRaw)) throw new Error("Invalid timesheet action.");
+
+    const entryIdsRaw = (b as { entryIds?: string[] }).entryIds;
+    const fromStatusRaw = String((b as { fromStatus?: string }).fromStatus ?? "").trim();
+
+    let result: { updated: number; skipped: number };
+    if (Array.isArray(entryIdsRaw) && entryIdsRaw.length > 0) {
+      result = await bulkTransitionTimesheetEntries({
+        tenantId,
+        entryIds: entryIdsRaw.map((id) => String(id).trim()).filter(Boolean),
+        action: actionRaw,
+        actorFiUserId: actor.fiUserId,
+        voidReason: String((b as { voidReason?: string }).voidReason ?? "").trim() || null,
+      });
+    } else if (fromStatusRaw && isTimesheetStatus(fromStatusRaw)) {
+      result = await bulkTransitionTimesheetsByStatus({
+        tenantId,
+        fromStatus: fromStatusRaw,
+        action: actionRaw,
+        actorFiUserId: actor.fiUserId,
+        voidReason: String((b as { voidReason?: string }).voidReason ?? "").trim() || null,
+      });
+    } else {
+      throw new Error("entryIds or fromStatus is required.");
+    }
+
+    revalidatePayroll(tenantId);
+    return { ok: true, updated: result.updated, skipped: result.skipped };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
