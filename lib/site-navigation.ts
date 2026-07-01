@@ -1,9 +1,13 @@
-/** Top-level marketing header — Vision through Contact (Products handled separately in `Header`). */
+import {
+  ECOSYSTEM_ARCHITECTURE_PAGE_LABEL,
+} from "@/lib/marketing/ecosystemArchitecturePageContent";
+
+/** Public marketing header — Vision through Contact (Products handled separately in `Header`). */
 export type HeaderNavItem = { label: string; href: string };
 
 export const HEADER_PRIMARY_LINKS: HeaderNavItem[] = [
   { href: "/vision", label: "Vision" },
-  { href: "/#ecosystem", label: "Ecosystem" },
+  { href: "/platform/ecosystem", label: ECOSYSTEM_ARCHITECTURE_PAGE_LABEL },
   { href: "/technology", label: "Technology" },
   { href: "/academy", label: "Institute" },
   { href: "/contact", label: "Contact" },
@@ -28,7 +32,7 @@ export type FooterNavLink = { label: string; href: string };
 /** Public footer — primary OS story routes */
 export const FOOTER_PLATFORM: FooterNavLink[] = [
   { label: "Platform", href: "/platform" },
-  { label: "Ecosystem architecture", href: "/platform/ecosystem" },
+  { label: ECOSYSTEM_ARCHITECTURE_PAGE_LABEL, href: "/platform/ecosystem" },
   { label: "Platform progress", href: "/platform/progress" },
   { label: "Surgeons", href: "/surgeons" },
   { label: "Clinic owners", href: "/clinic-owners" },

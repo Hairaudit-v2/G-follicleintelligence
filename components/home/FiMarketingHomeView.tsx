@@ -12,7 +12,7 @@ import {
   MARKETING_CTA_SECONDARY_CLASS,
 } from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight, Layers3 } from "lucide-react";
 
 const c = HOME_V5_CONTENT;
 
@@ -355,6 +355,15 @@ export function FiMarketingHomeView() {
                 </Link>
               </Button>
             </div>
+            <p className="mt-5 text-sm text-muted-foreground">
+              <Link
+                href={c.hero.tertiaryCta.href}
+                className="inline-flex items-center gap-1.5 font-semibold text-amber-200/85 transition-colors hover:text-amber-50"
+              >
+                {c.hero.tertiaryCta.label}
+                <ArrowRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
+              </Link>
+            </p>
 
             <HeroMetricsRow />
           </FadeIn>
@@ -426,11 +435,87 @@ export function FiMarketingHomeView() {
             id={`${c.platformSystems.id}-heading`}
             eyebrow={c.platformSystems.eyebrow}
             title={c.platformSystems.headline}
+            description={c.platformSystems.subtext}
           />
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {c.platformSystems.systems.map((system, index) => (
               <PlatformSystemCard key={system.name} system={system} index={index} />
             ))}
+          </div>
+          <div className="mt-10 flex justify-center sm:mt-12">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
+            >
+              <Link href={c.platformSystems.architectureCta.href}>
+                {c.platformSystems.architectureCta.label}
+                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+          </div>
+        </FadeIn>
+      </Section>
+
+      {/* Section 4b — Ecosystem architecture bridge */}
+      <Section
+        id={c.ecosystemArchitecture.id}
+        className="scroll-mt-24 border-b border-border/40 bg-gradient-to-b from-[#040810] via-[#040810]/95 to-background py-24 sm:py-28 md:py-32"
+        aria-labelledby={`${c.ecosystemArchitecture.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.ecosystemArchitecture.id}-heading`}
+            eyebrow={c.ecosystemArchitecture.eyebrow}
+            title={c.ecosystemArchitecture.headline}
+            description={c.ecosystemArchitecture.description}
+          />
+
+          <div className="relative mt-12 overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.14),transparent_55%),linear-gradient(180deg,rgb(255_255_255_/0.045),transparent)] p-5 shadow-[0_24px_80px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.05)] sm:mt-14 sm:rounded-[2rem] sm:p-8 md:p-10">
+            <div className="relative flex flex-col items-center gap-3 text-center">
+              <Layers3 className="h-6 w-6 text-amber-300/70" aria-hidden />
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200/70">
+                Follicle Intelligence Ecosystem Architecture
+              </p>
+            </div>
+            <ul className="relative mt-8 grid list-none gap-2.5 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-3">
+              {c.ecosystemArchitecture.layerPreview.map((layer, index) => (
+                <li
+                  key={layer}
+                  className="rounded-xl border border-white/[0.07] bg-black/25 px-4 py-3 text-sm font-medium text-foreground/92 transition-colors hover:border-amber-400/20 hover:bg-amber-950/15"
+                >
+                  <span className="font-mono text-[10px] tabular-nums text-amber-200/50">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="mt-1 block leading-snug">{layer}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            <Button
+              asChild
+              size="lg"
+              className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[14rem]")}
+            >
+              <Link href={c.ecosystemArchitecture.primaryCta.href}>
+                {c.ecosystemArchitecture.primaryCta.label}
+                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
+            >
+              <Link href={c.ecosystemArchitecture.secondaryCta.href}>
+                {c.ecosystemArchitecture.secondaryCta.label}
+                <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              </Link>
+            </Button>
           </div>
         </FadeIn>
       </Section>
@@ -468,6 +553,19 @@ export function FiMarketingHomeView() {
                 {line}
               </p>
             ))}
+          </div>
+          <div className="mt-10 flex justify-start">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
+            >
+              <Link href={c.differentiation.architectureCta.href}>
+                {c.differentiation.architectureCta.label}
+                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
           </div>
         </FadeIn>
       </Section>
@@ -631,6 +729,83 @@ export function FiMarketingHomeView() {
             <p className="mt-16 border-t border-white/[0.08] pt-12 font-display text-base font-medium tracking-tight text-muted-foreground sm:text-lg">
               {c.futureVision.footerLine}
             </p>
+            <div className="mt-10">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
+              >
+                <Link href={c.futureVision.architectureCta.href}>
+                  {c.futureVision.architectureCta.label}
+                  <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                </Link>
+              </Button>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Section 11 — Final CTA */}
+      <section
+        id={c.finalCta.id}
+        className="relative scroll-mt-24 overflow-hidden border-t border-border/40 bg-gradient-to-b from-background via-muted/[0.06] to-background py-24 sm:py-28 md:py-32"
+        aria-labelledby={`${c.finalCta.id}-heading`}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_15%_0%,rgb(212_175_55_/0.12),transparent_45%)]" />
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          <FadeIn>
+            <div className="rounded-[1.75rem] border border-amber-400/18 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.48),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
+              <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">
+                    {c.finalCta.eyebrow}
+                  </p>
+                  <div
+                    className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent"
+                    aria-hidden
+                  />
+                  <h2
+                    id={`${c.finalCta.id}-heading`}
+                    className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl lg:text-5xl"
+                  >
+                    {c.finalCta.headline}
+                  </h2>
+                  <p className="mt-4 font-display text-xl font-semibold tracking-tight text-amber-100/90 sm:text-2xl">
+                    {c.finalCta.subheadline}
+                  </p>
+                  <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                    {c.finalCta.body}
+                  </p>
+                </div>
+                <div className="flex w-full max-w-md flex-col gap-3 lg:max-w-none lg:justify-self-end">
+                  <Button asChild size="lg" className={MARKETING_CTA_PRIMARY_CLASS}>
+                    <Link href={c.finalCta.primaryCta.href}>
+                      {c.finalCta.primaryCta.label}
+                      <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className={MARKETING_CTA_SECONDARY_CLASS}
+                  >
+                    <Link href={c.finalCta.secondaryCta.href}>
+                      {c.finalCta.secondaryCta.label}
+                      <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                    </Link>
+                  </Button>
+                  <Link
+                    href={c.finalCta.tertiaryCta.href}
+                    className="inline-flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-amber-200/85 transition-colors hover:text-amber-50"
+                  >
+                    {c.finalCta.tertiaryCta.label}
+                    <ArrowRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
+                  </Link>
+                </div>
+              </div>
+            </div>
           </FadeIn>
         </div>
       </section>

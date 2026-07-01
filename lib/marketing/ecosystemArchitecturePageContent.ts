@@ -1,7 +1,16 @@
 /**
- * Copy and structure for `/platform/ecosystem` — Follicle Intelligence Ecosystem Architecture.
+ * Copy and structure for `/platform/ecosystem` — What Makes Follicle Intelligence Different.
  * Edit here to update marketing content without touching layout code.
  */
+
+export const ECOSYSTEM_ARCHITECTURE_PAGE_LABEL =
+  "What Makes Follicle Intelligence Different" as const;
+
+export const ECOSYSTEM_ARCHITECTURE_SEO_TITLE =
+  `${ECOSYSTEM_ARCHITECTURE_PAGE_LABEL} | Follicle Intelligence` as const;
+
+export const ECOSYSTEM_ARCHITECTURE_SEO_DESCRIPTION =
+  "Why Follicle Intelligence is more than CRM software — a vertical intelligence operating system for hair restoration clinics connecting acquisition, clinical decision support, surgery, workforce, outcomes, and analytics." as const;
 
 export type EcosystemArchitectureLayer = {
   readonly layer: number;
@@ -15,7 +24,7 @@ export type EcosystemArchitectureLayer = {
 export const ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT = {
   hero: {
     id: "ecosystem-hero",
-    eyebrow: "Strategic architecture",
+    eyebrow: ECOSYSTEM_ARCHITECTURE_PAGE_LABEL,
     headline: "The Operating System Built For Hair Restoration Medicine",
     subheadline: "Not software.",
     subheadlineAccent: "Infrastructure for the future of hair restoration clinics.",

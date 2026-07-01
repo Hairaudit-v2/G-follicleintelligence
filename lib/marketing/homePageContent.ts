@@ -1249,8 +1249,9 @@ export const HOME_V5_CONTENT = {
       { value: "8+", label: "Replacing Disconnected Clinic Tools" },
       { label: "Built Exclusively For Hair Restoration Medicine" },
     ] satisfies readonly HomeV5MetricCard[],
-    primaryCta: { label: "Explore The Platform", href: "/#platform-systems" as const },
-    secondaryCta: { label: "See How Clinics Operate On FI", href: "/#hidden-cost" as const },
+    primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
+    secondaryCta: { label: "See Connected Platform Systems", href: "/#platform-systems" as const },
+    tertiaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
   },
 
   fragmentation: {
@@ -1324,6 +1325,12 @@ export const HOME_V5_CONTENT = {
     id: "platform-systems",
     eyebrow: "Connected infrastructure",
     headline: "One Connected Platform Managing The Entire Clinic",
+    subtext:
+      "Eight core systems shown here — part of a twelve-layer intelligence architecture built for hair restoration medicine.",
+    architectureCta: {
+      label: "View all 12 intelligence layers",
+      href: "/platform/ecosystem" as const,
+    },
     systems: [
       { name: "LeadFlow", description: "Never lose another enquiry." },
       { name: "PatientOS", description: "Complete patient intelligence tracking." },
@@ -1368,6 +1375,34 @@ export const HOME_V5_CONTENT = {
       "Generic Software Helps Run Clinics",
       "Follicle Intelligence Helps Clinics Perform Better",
     ] as const,
+    architectureCta: {
+      label: "See why this is bigger than CRM software",
+      href: "/platform/ecosystem#bigger-than-crm" as const,
+    },
+  },
+
+  ecosystemArchitecture: {
+    id: "ecosystem-architecture",
+    eyebrow: "Strategic architecture",
+    headline: "Twelve Intelligence Layers. One Operating System.",
+    description:
+      "This is not clinic software. Follicle Intelligence is infrastructure for the future of hair restoration medicine — acquisition, consultation, clinical intelligence, imaging, surgery, workforce, operations, finance, outcomes, education, deployment, and executive analytics in one connected ecosystem.",
+    layerPreview: [
+      "Acquisition Intelligence",
+      "Consultation Intelligence",
+      "Clinical Intelligence",
+      "Imaging Intelligence",
+      "Surgical Intelligence",
+      "Workforce Intelligence",
+      "Operational Intelligence",
+      "Financial Intelligence",
+      "Outcome Intelligence",
+      "Learning Intelligence",
+      "Deployment Intelligence",
+      "Executive Intelligence",
+    ] as const,
+    primaryCta: { label: "Explore The Full Architecture", href: "/platform/ecosystem" as const },
+    secondaryCta: { label: "View Live Platform Progress", href: "/platform/progress" as const },
   },
 
   surgeryIntelligence: {
@@ -1477,6 +1512,21 @@ export const HOME_V5_CONTENT = {
       "And they will continuously learn from every patient interaction.",
     ] as const,
     footerLine: "Better systems create better clinics. Better clinics create better outcomes.",
+    architectureCta: {
+      label: "Explore the global intelligence network",
+      href: "/platform/ecosystem#global-intelligence-network" as const,
+    },
+  },
+
+  finalCta: {
+    id: "final-cta",
+    eyebrow: "Enterprise infrastructure",
+    headline: "This Is Not Clinic Software",
+    subheadline: "This is infrastructure for an entire medical industry.",
+    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine.",
+    primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
+    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    tertiaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
   },
 } as const;
 
