@@ -23,6 +23,7 @@ export const SURGERY_OS_WIDGET_KEYS = [
   "surgical_alerts",
   "surgical_notes_events",
   "live_graft_intelligence",
+  "surgeon_performance_intelligence",
 ] as const;
 export type SurgeryOsWidgetKey = (typeof SURGERY_OS_WIDGET_KEYS)[number];
 

@@ -23,6 +23,7 @@ import { SurgeryOsAlertsWidget } from "@/src/components/fi-admin/surgery-os/widg
 import { SurgeryOsNotesEventsWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsNotesEvents";
 import { SurgeryOsGraftIntelligenceWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsGraftIntelligence";
 import { SurgeryOsProceduralPerformanceWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsProceduralPerformance";
+import { SurgeryOsSurgeonPerformanceWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsSurgeonPerformance";
 import { SurgeryOsLiveActions } from "@/src/components/fi-admin/surgery-os/SurgeryOsLiveActions";
 import { SurgeryOsGraftActions } from "@/src/components/fi-admin/surgery-os/SurgeryOsGraftActions";
 import { SurgeryOsVieCapturePanel } from "@/src/components/fi-admin/surgery-os/SurgeryOsVieCapturePanel";
@@ -185,6 +186,15 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
             transectionMonitoring={data.transectionMonitoring}
             implantationSpeed={data.implantationSpeed}
             surgicalRisks={data.surgicalRisks}
+          />
+        ) : null}
+
+        {show("surgeon_performance_intelligence") ? (
+          <SurgeryOsSurgeonPerformanceWidget
+            surgeonPerformance={data.surgeonPerformance}
+            surgeryBenchmarks={data.surgeryBenchmarks}
+            surgeonConsistency={data.surgeonConsistency}
+            surgeonRiskPatterns={data.surgeonRiskPatterns}
           />
         ) : null}
 

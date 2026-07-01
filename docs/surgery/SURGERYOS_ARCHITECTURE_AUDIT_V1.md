@@ -996,4 +996,106 @@ All engines clamp percentages 0–100, avoid division by zero, and never emit Na
 
 ---
 
+## SurgeryOS Sprint 3 Implementation Notes (2026-07-01)
+
+Surgeon Performance Intelligence: longitudinal surgeon-level analytics across completed procedures. Extends Sprint 1 and Sprint 2 engines without duplicate models, CalendarOS changes, or UI redesign.
+
+### Files added
+
+| Area | Files |
+|------|-------|
+| Surgeon performance analytics | `src/lib/surgeryOs/surgeonPerformanceAnalyticsCore.ts`, `surgeonPerformanceAnalyticsCore.test.ts` |
+| Procedure benchmark engine | `src/lib/surgeryOs/surgeryBenchmarkCore.ts`, `surgeryBenchmarkCore.test.ts` |
+| Surgeon consistency engine | `src/lib/surgeryOs/surgeonConsistencyCore.ts`, `surgeonConsistencyCore.test.ts` |
+| Surgeon risk pattern detection | `src/lib/surgeryOs/surgeonRiskPatternCore.ts`, `surgeonRiskPatternCore.test.ts` |
+| Performance score engine | `src/lib/surgeryOs/surgeonPerformanceScoreCore.ts`, `surgeonPerformanceScoreCore.test.ts` |
+| Shared record type + orchestrator | `surgeonPerformanceRecord.types.ts`, `surgeonPerformanceIntelligenceCore.ts` |
+| UI widget | `src/components/fi-admin/surgery-os/widgets/SurgeryOsSurgeonPerformance.tsx` |
+
+### Files changed
+
+| Area | Files |
+|------|-------|
+| Command centre payload | `surgeryOsBoardModel.types.ts`, `surgeryOsBoardPayloadSchema.ts`, `surgeryOsCommandCentreLoader.server.ts`, `surgeryOsLoaderResilience.ts` |
+| Widget registry | `surgeryOsBoardModel.ts` (`surgeon_performance_intelligence` widget key) |
+| UI | `SurgeryOsDashboard.tsx` |
+
+### Engines created
+
+**Surgeon Performance Analytics Engine** (`buildSurgeonPerformanceAnalytics`)
+
+- Input: historical `SurgeonProcedurePerformanceRecord[]` built from completed `fi_surgeries` via Sprint 2 engines
+- Output per surgeon: `proceduresCompleted`, average duration/velocity/transection/hairs-per-graft, `consistencyScore`, `performanceScore`, `performanceGrade`, `trendDirection`, `summary`
+- Minimum sample: `SURGEON_PERFORMANCE_MIN_SAMPLE` = 3 completed procedures per surgeon
+- Trend: first-half vs second-half composite comparison; ±5% band = stable
+
+**Procedure Benchmark Engine** (`buildSurgeryBenchmark`, `buildSurgeryBenchmarks`)
+
+- Compares each surgeon against clinic-wide averages from all historical records
+- Output: `surgeonBenchmarkRank`, clinic averages, `deviationPercentages`, `benchmarkStatus` (`above_average` | `average` | `below_average`), `summary`
+- Status band: ±5% composite deviation from clinic average
+
+**Surgeon Consistency Engine** (`buildSurgeonConsistency`)
+
+- Window: last 10–20 procedures (`SURGEON_CONSISTENCY_WINDOW`)
+- Tracks coefficient-of-variation for extraction speed, transection rate, duration, graft quality
+- Output: `consistencyScore`, variance metrics, `status` (`elite` | `stable` | `inconsistent` | `concerning`), `summary`
+
+**Surgeon Risk Pattern Detection** (`buildSurgeonRiskPatterns`)
+
+- Detects over last 8 procedures (min 4): rising transection, slowing extraction, increasing duration, declining implantation, abnormal inconsistency
+- Output: `totalRisks`, `detectedPatterns[]`, `summary`
+- Empty state: `"No surgeon performance risks detected."`
+
+**Performance Score Engine** (`buildSurgeonPerformanceScore`)
+
+- Weighted composite (`SURGEON_PERFORMANCE_SCORE_WEIGHTS`):
+  - Extraction efficiency 25%
+  - Implantation efficiency 20%
+  - Transection quality 25%
+  - Consistency 15%
+  - Procedure duration 10%
+  - Graft quality 5%
+- Grades: elite ≥90, excellent ≥80, strong ≥70, watch ≥50, poor &lt;50
+- Output: `score`, `grade`, `percentile`, `summary`
+
+### API / payload integration
+
+`GET /api/tenants/{tenantId}/surgery-os` and SSR loader now include (Sprint 1 & 2 fields unchanged):
+
+- `surgeonPerformance: SurgeonPerformanceSnapshot[]`
+- `surgeryBenchmarks: SurgeryBenchmarkSnapshot[]`
+- `surgeonConsistency: SurgeonConsistencySnapshot[]`
+- `surgeonRiskPatterns: SurgeonRiskPatternSnapshot[]`
+- `surgeonPerformanceScores: SurgeonPerformanceScoreSnapshot[]`
+
+### Historical aggregation
+
+| Setting | Value |
+|---------|-------|
+| Source status | `fi_surgeries.status = completed` |
+| Lookback | 180 days from operational day |
+| Limit | 150 most recent completed surgeries |
+| Surgeon filter | `surgeon_fi_user_id IS NOT NULL` |
+| Metric derivation | Reuses `buildExtractionVelocity`, `buildImplantationSpeed`, `buildTransectionMonitoring` per case |
+
+### Empty-state rules
+
+| Engine | Summary |
+|--------|---------|
+| Surgeon performance analytics | `"No surgeon performance data available."` (UI + insufficient sample) |
+| Surgeon consistency | `"No surgeon consistency data available."` |
+| Surgeon risk patterns | `"No surgeon performance risks detected."` |
+
+All engines clamp scores 0–100, use safe division, and never emit NaN.
+
+### Remaining gaps (post-Sprint 3)
+
+- Tenant-configurable lookback window and minimum sample thresholds.
+- Explicit surgeon consent / export policy for competency analytics (`intelligence.hints` still placeholder).
+- Cross-clinic benchmarking (currently tenant-scoped clinic averages only).
+- Automated IIOHR / competency graph export wiring.
+
+---
+
 *End of SurgeryOS Architecture Audit V1*

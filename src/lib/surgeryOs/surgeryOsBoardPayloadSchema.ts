@@ -35,6 +35,11 @@ export type {
   TransectionMonitoringSnapshot,
   ImplantationSpeedSnapshot,
   SurgicalRiskDetectionSnapshot,
+  SurgeonPerformanceSnapshot,
+  SurgeryBenchmarkSnapshot,
+  SurgeonConsistencySnapshot,
+  SurgeonRiskPatternSnapshot,
+  SurgeonPerformanceScoreSnapshot,
   SurgeryOsGraftSummary,
   SurgeryOsLiveSurgery,
   SurgeryOsOperationalNote,
@@ -455,6 +460,79 @@ const surgicalRiskDetectionSnapshotSchema = z.object({
   summary: z.string(),
 });
 
+const surgeonPerformanceSnapshotSchema = z.object({
+  surgeonId: z.string().uuid(),
+  surgeonName: z.string(),
+  proceduresCompleted: z.number().int().min(0),
+  averageProcedureDuration: z.number().nullable(),
+  averageExtractionVelocity: z.number().nullable(),
+  averageImplantationSpeed: z.number().nullable(),
+  averageTransectionRate: z.number().nullable(),
+  averageHairsPerGraft: z.number().nullable(),
+  consistencyScore: z.number().int().min(0).max(100),
+  performanceScore: z.number().int().min(0).max(100),
+  performanceGrade: z.enum(["elite", "excellent", "strong", "watch", "poor"]),
+  trendDirection: z.enum(["improving", "stable", "declining"]),
+  summary: z.string(),
+});
+
+const surgeryBenchmarkDeviationSchema = z.object({
+  extractionVelocity: z.number().nullable(),
+  implantationSpeed: z.number().nullable(),
+  transectionRate: z.number().nullable(),
+  procedureDuration: z.number().nullable(),
+  graftComposition: z.number().nullable(),
+});
+
+const surgeryBenchmarkSnapshotSchema = z.object({
+  surgeonId: z.string().uuid(),
+  surgeonName: z.string(),
+  surgeonBenchmarkRank: z.number().int().min(1).nullable(),
+  clinicAverageExtractionVelocity: z.number().nullable(),
+  clinicAverageTransectionRate: z.number().nullable(),
+  clinicAverageImplantationSpeed: z.number().nullable(),
+  clinicAverageDurationMinutes: z.number().nullable(),
+  clinicAverageHairsPerGraft: z.number().nullable(),
+  deviationPercentages: surgeryBenchmarkDeviationSchema,
+  benchmarkStatus: z.enum(["above_average", "average", "below_average"]),
+  summary: z.string(),
+});
+
+const surgeonConsistencySnapshotSchema = z.object({
+  surgeonId: z.string().uuid(),
+  surgeonName: z.string(),
+  consistencyScore: z.number().int().min(0).max(100),
+  extractionVariance: z.number().nullable(),
+  transectionVariance: z.number().nullable(),
+  durationVariance: z.number().nullable(),
+  graftVariance: z.number().nullable(),
+  status: z.enum(["elite", "stable", "inconsistent", "concerning"]),
+  summary: z.string(),
+});
+
+const surgeonDetectedRiskPatternSchema = z.object({
+  title: z.string(),
+  severity: z.enum(["warning", "critical"]),
+  recommendation: z.string(),
+});
+
+const surgeonRiskPatternSnapshotSchema = z.object({
+  surgeonId: z.string().uuid(),
+  surgeonName: z.string(),
+  totalRisks: z.number().int().min(0),
+  detectedPatterns: z.array(surgeonDetectedRiskPatternSchema),
+  summary: z.string(),
+});
+
+const surgeonPerformanceScoreSnapshotSchema = z.object({
+  surgeonId: z.string().uuid(),
+  surgeonName: z.string(),
+  score: z.number().int().min(0).max(100),
+  grade: z.enum(["elite", "excellent", "strong", "watch", "poor"]),
+  percentile: z.number().int().min(0).max(100).nullable(),
+  summary: z.string(),
+});
+
 const intelligenceSchema = z.object({
   policy: z.object({
     canExportCompetencyData: z.boolean(),
@@ -502,6 +580,11 @@ export const surgeryOsCommandCentrePayloadSchema = z.object({
   transectionMonitoring: z.array(transectionMonitoringSnapshotSchema),
   implantationSpeed: z.array(implantationSpeedSnapshotSchema),
   surgicalRisks: z.array(surgicalRiskDetectionSnapshotSchema),
+  surgeonPerformance: z.array(surgeonPerformanceSnapshotSchema),
+  surgeryBenchmarks: z.array(surgeryBenchmarkSnapshotSchema),
+  surgeonConsistency: z.array(surgeonConsistencySnapshotSchema),
+  surgeonRiskPatterns: z.array(surgeonRiskPatternSnapshotSchema),
+  surgeonPerformanceScores: z.array(surgeonPerformanceScoreSnapshotSchema),
   intelligence: intelligenceSchema,
 });
 

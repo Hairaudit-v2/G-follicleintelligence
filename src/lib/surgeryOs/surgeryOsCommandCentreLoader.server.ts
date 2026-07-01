@@ -69,6 +69,10 @@ import { buildImplantationSpeed } from "@/src/lib/surgeryOs/implantationSpeedCor
 import { buildSurgicalRiskDetection } from "@/src/lib/surgeryOs/surgicalRiskDetectionCore";
 import { buildTransectionMonitoring } from "@/src/lib/surgeryOs/transectionMonitoringCore";
 import {
+  buildSurgeonProcedurePerformanceRecord,
+} from "@/src/lib/surgeryOs/surgeonPerformanceAnalyticsCore";
+import { buildSurgeonPerformanceIntelligence } from "@/src/lib/surgeryOs/surgeonPerformanceIntelligenceCore";
+import {
   buildLiveProcedureTimeline,
   type LiveProcedureTimelineInputEvent,
 } from "@/src/lib/surgeryOs/liveProcedureTimelineCore";
@@ -130,6 +134,8 @@ type OperationalNoteRow = {
 };
 
 const ACTIVE_SURGERY_STATUSES = ["scheduled", "pre_op", "in_progress", "paused"] as const;
+const SURGEON_PERFORMANCE_HISTORY_LIMIT = 150;
+const SURGEON_PERFORMANCE_LOOKBACK_DAYS = 180;
 
 function uniqueStrings(ids: (string | null | undefined)[]): string[] {
   const s = new Set<string>();
@@ -230,6 +236,195 @@ function buildHrefs(
     surgery: `${base}/surgery-os?surgery=${row.id}`,
     calendar: row.booking_id ? `${base}/calendar?booking=${row.booking_id}` : `${base}/calendar`,
   };
+}
+
+function subtractDaysYmd(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const date = new Date(Date.UTC(y!, m! - 1, d!));
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
+async function loadHistoricalSurgeonPerformanceRecords(
+  supabase: SupabaseClient,
+  tenantId: string,
+  todayYmd: string,
+  userLabels: Map<string, string>
+) {
+  const tid = tenantId.trim();
+  const lookbackYmd = subtractDaysYmd(todayYmd, SURGEON_PERFORMANCE_LOOKBACK_DAYS);
+
+  let historicalSurgeries: SurgeryRow[] = [];
+  try {
+    const { data, error } = await supabase
+      .from("fi_surgeries")
+      .select(
+        "id, tenant_id, patient_id, case_id, booking_id, surgeon_fi_user_id, status, live_status, procedure_phase, target_grafts, scheduled_date, scheduled_start_at, scheduled_end_at, actual_start_at, actual_end_at, readiness_percent, readiness_risk_level, readiness_checklist"
+      )
+      .eq("tenant_id", tid)
+      .eq("status", "completed")
+      .not("surgeon_fi_user_id", "is", null)
+      .gte("scheduled_date", lookbackYmd)
+      .order("actual_end_at", { ascending: false, nullsFirst: false })
+      .limit(SURGEON_PERFORMANCE_HISTORY_LIMIT);
+
+    if (error) {
+      if (isMissingDatabaseRelationError(error)) {
+        historicalSurgeries = [];
+      } else {
+        throw new Error(error.message);
+      }
+    } else {
+      historicalSurgeries = (data ?? []) as SurgeryRow[];
+    }
+  } catch (e) {
+    if (isMissingDatabaseRelationError(e)) {
+      historicalSurgeries = [];
+    } else {
+      throw e;
+    }
+  }
+
+  for (const row of historicalSurgeries) {
+    assertSurgeryOsTenantRowScope(tid, row.tenant_id, "fi_surgeries");
+  }
+
+  const historicalSurgeryIds = historicalSurgeries.map((s) => s.id);
+  if (!historicalSurgeryIds.length) {
+    return buildSurgeonPerformanceIntelligence([]);
+  }
+
+  const missingSurgeonIds = uniqueStrings(
+    historicalSurgeries
+      .map((s) => s.surgeon_fi_user_id)
+      .filter((id) => id && !userLabels.has(id)) as string[]
+  );
+  if (missingSurgeonIds.length) {
+    const extraLabels = await loadFiUserLabelsById(supabase, tid, missingSurgeonIds);
+    for (const [id, label] of extraLabels) userLabels.set(id, label);
+  }
+
+  const historicalPatientIds = historicalSurgeries
+    .map((s) => s.patient_id)
+    .filter(Boolean) as string[];
+  const patientLabels = await loadPatientLabels(supabase, tid, historicalPatientIds);
+
+  const [historicalEventsRes, historicalGraftSessions, historicalGraftEvents] = await Promise.all([
+    supabase
+      .from("fi_surgery_procedure_events")
+      .select("id, tenant_id, surgery_id, event_kind, occurred_at, recorded_by_fi_user_id")
+      .eq("tenant_id", tid)
+      .in("surgery_id", historicalSurgeryIds)
+      .order("occurred_at", { ascending: true }),
+    loadGraftSessionsForSurgeries(tid, historicalSurgeryIds),
+    loadGraftCountEventsForSurgeries(tid, historicalSurgeryIds),
+  ]);
+
+  if (historicalEventsRes.error && !isMissingDatabaseRelationError(historicalEventsRes.error)) {
+    throw new Error(historicalEventsRes.error.message);
+  }
+
+  const historicalEvents = (historicalEventsRes.data ?? []) as ProcedureEventRow[];
+  const eventsByHistoricalSurgery = new Map<string, ProcedureEventRow[]>();
+  for (const event of historicalEvents) {
+    const list = eventsByHistoricalSurgery.get(event.surgery_id) ?? [];
+    list.push(event);
+    eventsByHistoricalSurgery.set(event.surgery_id, list);
+  }
+
+  const records = [];
+  for (const row of historicalSurgeries) {
+    const surgeonId = row.surgeon_fi_user_id?.trim();
+    if (!surgeonId) continue;
+
+    const patientLabel = row.patient_id
+      ? (patientLabels.get(row.patient_id) ?? "Patient")
+      : "Patient";
+    const graftSession = historicalGraftSessions.get(row.id);
+    const rawGraftEvents = historicalGraftEvents.get(row.id) ?? [];
+    const reviewStatuses = deriveTrayReviewStatuses(
+      rawGraftEvents.map((e) => ({
+        id: e.id,
+        eventType: e.event_type,
+        note: e.note,
+        createdAt: e.created_at,
+      }))
+    );
+    const totals = graftSession
+      ? graftSessionToTotals(graftSession)
+      : graftSessionToTotals({
+          id: "",
+          tenant_id: tid,
+          surgery_id: row.id,
+          phase: "extraction",
+          target_grafts: row.target_grafts,
+          extracted_grafts: 0,
+          implanted_grafts: 0,
+          discarded_grafts: 0,
+          remaining_grafts: 0,
+          singles: 0,
+          doubles: 0,
+          triples: 0,
+          multiples: 0,
+          total_hairs: 0,
+          average_hairs_per_graft: null,
+          reconciliation_status: "pending",
+          created_by_fi_user_id: null,
+          extraction_lock_device_id: null,
+          extraction_lock_held_at: null,
+          extraction_lock_held_by_fi_user_id: null,
+          implantation_lock_device_id: null,
+          implantation_lock_held_at: null,
+          implantation_lock_held_by_fi_user_id: null,
+          reconciled_by_fi_user_id: null,
+          reconciled_at: null,
+        });
+
+    const surgeryProcedureEvents = (eventsByHistoricalSurgery.get(row.id) ?? []).map((e) => ({
+      eventKind: e.event_kind as SurgeryOsProcedureEventKind,
+      occurredAt: e.occurred_at,
+    }));
+
+    records.push(
+      buildSurgeonProcedurePerformanceRecord({
+        surgeryId: row.id,
+        surgeonId,
+        surgeonName: userLabels.get(surgeonId) ?? "Surgeon",
+        patientLabel,
+        actualStartAt: row.actual_start_at,
+        actualEndAt: row.actual_end_at,
+        extractedGrafts: totals.extractedGrafts,
+        implantedGrafts: totals.implantedGrafts,
+        averageHairsPerGraft: totals.averageHairsPerGraft,
+        events: surgeryProcedureEvents,
+        graftEvents: rawGraftEvents.map((e) => ({
+          occurredAt: e.created_at,
+          deltaExtracted: e.delta_extracted,
+          deltaImplanted: e.delta_implanted,
+        })),
+        trayEvents: rawGraftEvents.map((e) => ({
+          eventType: e.event_type,
+          reviewStatus:
+            e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+          singles: e.singles,
+          doubles: e.doubles,
+          triples: e.triples,
+          multiples: e.multiples,
+          deltaDiscarded: e.delta_discarded,
+          note: e.note,
+        })),
+        pendingTrayCount: countTrayReviewBuckets(
+          rawGraftEvents.map((e) => ({
+            eventType: e.event_type,
+            reviewStatus:
+              e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+          }))
+        ).pending,
+      })
+    );
+  }
+
+  return buildSurgeonPerformanceIntelligence(records);
 }
 
 export async function loadSurgeryOsCommandCentrePayload(
@@ -837,6 +1032,13 @@ export async function loadSurgeryOsCommandCentrePayload(
     if (!isMissingDatabaseRelationError(e)) throw e;
   }
 
+  const surgeonIntelligence = await loadHistoricalSurgeonPerformanceRecords(
+    supabase,
+    tid,
+    window.todayYmd,
+    userLabels
+  );
+
   const payload: SurgeryOsCommandCentrePayload = {
     tenantId: tid,
     tenantName,
@@ -867,6 +1069,11 @@ export async function loadSurgeryOsCommandCentrePayload(
     transectionMonitoring,
     implantationSpeed,
     surgicalRisks,
+    surgeonPerformance: surgeonIntelligence.surgeonPerformance,
+    surgeryBenchmarks: surgeonIntelligence.surgeryBenchmarks,
+    surgeonConsistency: surgeonIntelligence.surgeonConsistency,
+    surgeonRiskPatterns: surgeonIntelligence.surgeonRiskPatterns,
+    surgeonPerformanceScores: surgeonIntelligence.surgeonPerformanceScores,
     intelligence: emptySurgeryOsIntelligence(),
   };
 

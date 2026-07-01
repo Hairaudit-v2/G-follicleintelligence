@@ -82,6 +82,11 @@ export function emptySurgeryOsCommandCentrePayload(input: {
     transectionMonitoring: [],
     implantationSpeed: [],
     surgicalRisks: [],
+    surgeonPerformance: [],
+    surgeryBenchmarks: [],
+    surgeonConsistency: [],
+    surgeonRiskPatterns: [],
+    surgeonPerformanceScores: [],
     intelligence: emptySurgeryOsIntelligence(),
   };
 }

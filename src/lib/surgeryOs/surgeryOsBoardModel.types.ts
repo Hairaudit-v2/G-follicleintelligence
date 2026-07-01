@@ -36,6 +36,11 @@ import type { ExtractionVelocitySnapshot } from "@/src/lib/surgeryOs/extractionV
 import type { ImplantationSpeedSnapshot } from "@/src/lib/surgeryOs/implantationSpeedCore";
 import type { SurgicalRiskDetectionSnapshot } from "@/src/lib/surgeryOs/surgicalRiskDetectionCore";
 import type { TransectionMonitoringSnapshot } from "@/src/lib/surgeryOs/transectionMonitoringCore";
+import type { SurgeonPerformanceSnapshot } from "@/src/lib/surgeryOs/surgeonPerformanceAnalyticsCore";
+import type { SurgeryBenchmarkSnapshot } from "@/src/lib/surgeryOs/surgeryBenchmarkCore";
+import type { SurgeonConsistencySnapshot } from "@/src/lib/surgeryOs/surgeonConsistencyCore";
+import type { SurgeonRiskPatternSnapshot } from "@/src/lib/surgeryOs/surgeonRiskPatternCore";
+import type { SurgeonPerformanceScoreSnapshot } from "@/src/lib/surgeryOs/surgeonPerformanceScoreCore";
 
 export type {
   GraftIntelligenceSnapshot,
@@ -50,6 +55,11 @@ export type {
   TransectionMonitoringSnapshot,
   ImplantationSpeedSnapshot,
   SurgicalRiskDetectionSnapshot,
+  SurgeonPerformanceSnapshot,
+  SurgeryBenchmarkSnapshot,
+  SurgeonConsistencySnapshot,
+  SurgeonRiskPatternSnapshot,
+  SurgeonPerformanceScoreSnapshot,
 };
 
 export type SurgeryOsReadinessItem = {
@@ -227,6 +237,11 @@ export type SurgeryOsCommandCentrePayload = {
   transectionMonitoring: TransectionMonitoringSnapshot[];
   implantationSpeed: ImplantationSpeedSnapshot[];
   surgicalRisks: SurgicalRiskDetectionSnapshot[];
+  surgeonPerformance: SurgeonPerformanceSnapshot[];
+  surgeryBenchmarks: SurgeryBenchmarkSnapshot[];
+  surgeonConsistency: SurgeonConsistencySnapshot[];
+  surgeonRiskPatterns: SurgeonRiskPatternSnapshot[];
+  surgeonPerformanceScores: SurgeonPerformanceScoreSnapshot[];
   intelligence: {
     policy: {
       canExportCompetencyData: boolean;
