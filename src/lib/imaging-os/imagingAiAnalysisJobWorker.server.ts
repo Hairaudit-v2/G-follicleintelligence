@@ -86,31 +86,6 @@ async function persistJobSummaryMetadata(
   return merged;
 }
 
-async function loadPatientNorwoodScale(
-  supabase: SupabaseClient,
-  tenantId: string,
-  patientId: string
-): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("fi_patients")
-    .select("metadata")
-    .eq("tenant_id", tenantId)
-    .eq("id", patientId)
-    .maybeSingle();
-  if (error || !data) return null;
-  const meta = (data as { metadata?: Record<string, unknown> }).metadata ?? {};
-  const scale =
-    typeof meta.norwood_scale === "string"
-      ? meta.norwood_scale
-      : typeof meta.clinical_details === "object" &&
-          meta.clinical_details &&
-          !Array.isArray(meta.clinical_details) &&
-          typeof (meta.clinical_details as { norwood_scale?: string }).norwood_scale === "string"
-        ? (meta.clinical_details as { norwood_scale: string }).norwood_scale
-        : null;
-  return scale?.trim() || null;
-}
-
 export async function processImagingAiAnalysisJob(
   job: ImagingAiAnalysisJobRow,
   client?: SupabaseClient
