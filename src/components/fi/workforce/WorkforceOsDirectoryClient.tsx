@@ -78,12 +78,20 @@ export function WorkforceOsDirectoryClient({
           </p>
         </div>
         {canManage ? (
-          <Link
-            href={`${base}/hr-reconciliation`}
-            className="rounded-lg border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-4 py-2 text-sm font-medium text-[#22C1FF] hover:bg-[#22C1FF]/15"
-          >
-            HR reconciliation
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`${base}/recruitment`}
+              className="rounded-lg border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-4 py-2 text-sm font-medium text-[#22C1FF] hover:bg-[#22C1FF]/15"
+            >
+              Recruitment pipeline
+            </Link>
+            <Link
+              href={`${base}/hr-reconciliation`}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
+            >
+              HR reconciliation
+            </Link>
+          </div>
         ) : null}
       </header>
 
