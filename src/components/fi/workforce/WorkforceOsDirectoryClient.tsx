@@ -80,8 +80,14 @@ export function WorkforceOsDirectoryClient({
         {canManage ? (
           <div className="flex flex-wrap gap-2">
             <Link
-              href={`${base}/recruitment`}
+              href={`${base}/planning`}
               className="rounded-lg border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-4 py-2 text-sm font-medium text-[#22C1FF] hover:bg-[#22C1FF]/15"
+            >
+              Workforce planning
+            </Link>
+            <Link
+              href={`${base}/recruitment`}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-[#94A3B8] hover:bg-white/5"
             >
               Recruitment pipeline
             </Link>
