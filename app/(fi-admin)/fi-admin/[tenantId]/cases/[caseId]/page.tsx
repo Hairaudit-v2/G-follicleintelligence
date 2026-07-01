@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
+import { SurgeryBookingWizardProvider } from "@/src/components/fi/surgery-booking/SurgeryBookingWizardProvider";
 import { CaseDetailPageView } from "@/src/components/fi-admin/cases/CaseDetailPageView";
 import { loadCaseAppointmentBookingsForShell } from "@/src/lib/cases/caseAppointmentShellLoader.server";
 import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
@@ -269,18 +270,20 @@ export default async function CaseDetailRoutePage({
   if (!bookingSession) return pageView;
 
   return (
-    <AppointmentSlideOverProvider
-      tenantId={tenantId}
-      operatorFiUserId={bookingSession.fiUserId}
-      userRole={bookingSession.role}
-      canUseClinicFeatures={bookingSession.canUseClinicFeatures}
-      assignees={assignees}
-      clinics={scope.clinics}
-      existingBookings={caseAppointmentBookings}
-      calendarTimezone={calendarSettings.calendarTimezone}
-      services={services}
-    >
-      {pageView}
-    </AppointmentSlideOverProvider>
+    <SurgeryBookingWizardProvider tenantId={tenantId}>
+      <AppointmentSlideOverProvider
+        tenantId={tenantId}
+        operatorFiUserId={bookingSession.fiUserId}
+        userRole={bookingSession.role}
+        canUseClinicFeatures={bookingSession.canUseClinicFeatures}
+        assignees={assignees}
+        clinics={scope.clinics}
+        existingBookings={caseAppointmentBookings}
+        calendarTimezone={calendarSettings.calendarTimezone}
+        services={services}
+      >
+        {pageView}
+      </AppointmentSlideOverProvider>
+    </SurgeryBookingWizardProvider>
   );
 }

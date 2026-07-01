@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 
 import { markCrmQuoteAcceptedAction } from "@/lib/actions/fi-crm-quote-actions";
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
+import { useSurgeryBookingWizardOptional } from "@/src/components/fi/surgery-booking/SurgeryBookingWizardProvider";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { buildSurgeryAppointmentPrefillFromAcceptedQuote } from "@/src/lib/crm/acceptedCrmQuoteSurgeryPrefill";
@@ -29,6 +30,7 @@ export function CaseCrmQuotesPipelineCard(props: {
   const cid = props.caseId.trim();
   const router = useRouter();
   const slide = useAppointmentSlideOverOptional();
+  const surgeryWizard = useSurgeryBookingWizardOptional();
   const [adminKey, setAdminKey] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -61,6 +63,44 @@ export function CaseCrmQuotesPipelineCard(props: {
       router.refresh();
     },
     [router, tid, withKey]
+  );
+
+  const openGuidedSurgeryFromQuote = useCallback(
+    (q: CaseCrmQuoteRow) => {
+      if (!surgeryWizard || !props.patientFoundationId) return;
+      const { initialMetadata } = buildSurgeryAppointmentPrefillFromAcceptedQuote({
+        id: q.id,
+        consultation_id: q.consultation_id,
+        subtotal_amount: q.subtotal_amount,
+        total_amount: q.total_amount,
+        metadata: q.metadata,
+        line_items_snapshot: q.line_items_snapshot,
+      });
+      surgeryWizard.openSurgeryBooking({
+        patientId: props.patientFoundationId,
+        personId: props.personId,
+        caseId: cid,
+        leadId: props.leadId,
+        clinicId: props.clinicId,
+        consultationId: q.consultation_id,
+        crmQuoteId: q.id,
+        procedureType: quoteTitle(q),
+        graftEstimate:
+          typeof initialMetadata.graft_count_estimate === "string"
+            ? initialMetadata.graft_count_estimate
+            : null,
+        clinicalNotes: null,
+        entrySource: "case_quote",
+      });
+    },
+    [
+      cid,
+      props.clinicId,
+      props.leadId,
+      props.personId,
+      props.patientFoundationId,
+      surgeryWizard,
+    ]
   );
 
   const openSurgeryFromQuote = useCallback(
@@ -178,6 +218,14 @@ export function CaseCrmQuotesPipelineCard(props: {
                   </button>
                   <button
                     type="button"
+                    disabled={!surgeryWizard || !accepted || !props.patientFoundationId}
+                    onClick={() => openGuidedSurgeryFromQuote(q)}
+                    className="rounded bg-emerald-800 px-2.5 py-1.5 text-[11px] font-semibold text-white disabled:opacity-50"
+                  >
+                    Book surgery (guided)
+                  </button>
+                  <button
+                    type="button"
                     disabled={!slide || !accepted}
                     onClick={() => openSurgeryFromQuote(q)}
                     title={
@@ -185,9 +233,9 @@ export function CaseCrmQuotesPipelineCard(props: {
                         ? "Sign in with booking permissions to schedule from this page."
                         : undefined
                     }
-                    className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2.5 py-1.5 text-[11px] font-semibold text-slate-100 disabled:opacity-50"
+                    className="rounded border border-slate-700 bg-[#020617] px-2.5 py-1.5 text-[11px] font-semibold text-slate-100 disabled:opacity-50"
                   >
-                    Schedule surgery
+                    Quick schedule
                   </button>
                 </div>
               </div>

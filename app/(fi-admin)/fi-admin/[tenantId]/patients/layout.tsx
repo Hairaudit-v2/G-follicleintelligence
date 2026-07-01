@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
+import { SurgeryBookingWizardProvider } from "@/src/components/fi/surgery-booking/SurgeryBookingWizardProvider";
 import { PatientSlideOverProvider } from "@/src/components/fi/patients/PatientSlideOver";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
@@ -37,19 +38,21 @@ export default async function PatientsShellLayout({ children, params }: Patients
       canUseClinicFeatures={session.canUseClinicFeatures}
       canCapturePatientPhotos={imagingCaptureCap.canCapture}
     >
-      <AppointmentSlideOverProvider
-        tenantId={tenantId}
-        operatorFiUserId={session.fiUserId}
-        userRole={session.role}
-        canUseClinicFeatures={session.canUseClinicFeatures}
-        assignees={assignees}
-        clinics={scope.clinics}
-        existingBookings={[]}
-        calendarTimezone={calendarSettings.calendarTimezone}
-        services={services}
-      >
-        {children}
-      </AppointmentSlideOverProvider>
+      <SurgeryBookingWizardProvider tenantId={tenantId}>
+        <AppointmentSlideOverProvider
+          tenantId={tenantId}
+          operatorFiUserId={session.fiUserId}
+          userRole={session.role}
+          canUseClinicFeatures={session.canUseClinicFeatures}
+          assignees={assignees}
+          clinics={scope.clinics}
+          existingBookings={[]}
+          calendarTimezone={calendarSettings.calendarTimezone}
+          services={services}
+        >
+          {children}
+        </AppointmentSlideOverProvider>
+      </SurgeryBookingWizardProvider>
     </PatientSlideOverProvider>
   );
 }

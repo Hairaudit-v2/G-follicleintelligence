@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
+import { useSurgeryBookingWizardOptional } from "@/src/components/fi/surgery-booking/SurgeryBookingWizardProvider";
 import { buildAppointmentCreatePrefillFromPatient } from "@/src/lib/bookings/bookingPatientPrefillShared";
 import {
   deriveRecommendedBookingTypeForPatient,
@@ -24,6 +25,7 @@ export function PatientBookNextAppointmentCard({
   bookings,
   groupingNowIso,
   compact,
+  caseId,
 }: {
   tenantId: string;
   patientId: string;
@@ -33,8 +35,10 @@ export function PatientBookNextAppointmentCard({
   bookings: FiBookingRow[];
   groupingNowIso: string;
   compact?: boolean;
+  caseId?: string | null;
 }) {
   const slide = useAppointmentSlideOverOptional();
+  const surgeryWizard = useSurgeryBookingWizardOptional();
   const now = useMemo(() => new Date(groupingNowIso), [groupingNowIso]);
   const nextUpcoming = useMemo(
     () => pickNextUpcomingPatientBooking(bookings, now),
@@ -83,15 +87,38 @@ export function PatientBookNextAppointmentCard({
             </p>
           ) : null}
         </div>
-        <button
-          type="button"
-          className={`shrink-0 rounded bg-gray-900 font-medium text-white hover:bg-gray-800 ${
-            compact ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
-          }`}
-          onClick={openCreate}
-        >
-          Book appointment
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {recommended.bookingType === "surgery" && surgeryWizard ? (
+            <button
+              type="button"
+              className={`shrink-0 rounded bg-emerald-800 font-medium text-white hover:bg-emerald-700 ${
+                compact ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
+              }`}
+              onClick={() =>
+                surgeryWizard.openSurgeryBooking({
+                  patientId,
+                  personId,
+                  leadId: primaryLead?.id ?? null,
+                  caseId: caseId ?? null,
+                  clinicId: primaryLead?.clinic_id ?? null,
+                  patientDisplayName: displayName ?? null,
+                  entrySource: "patient_profile",
+                })
+              }
+            >
+              Book surgery
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className={`shrink-0 rounded bg-gray-900 font-medium text-white hover:bg-gray-800 ${
+              compact ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
+            }`}
+            onClick={openCreate}
+          >
+            Book appointment
+          </button>
+        </div>
       </div>
 
       <dl
