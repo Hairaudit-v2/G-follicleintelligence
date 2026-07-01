@@ -46,7 +46,7 @@ export function resolveFiOsUploadSurface(captureSource?: string | null): Imaging
   return FI_OS_CAPTURE_SOURCE_UPLOAD_SURFACE[key] ?? "case_gallery";
 }
 
-export function resolveFiOsSourceSystem(captureSource?: string | null): ImagingOsSourceSystem {
+export function resolveFiOsSourceSystem(_captureSource?: string | null): ImagingOsSourceSystem {
   return "fi_os";
 }
 
