@@ -17,7 +17,9 @@ import {
   buildModuleTiles,
   buildProcedureStaffingForecast,
   buildWorkforceHealthRadar,
+  composeWorkforceIntelligence,
   type ProcedureStaffingForecastPanel,
+  type WorkforceIntelligencePanel,
   type WorkforceAttentionQueueItem,
   type WorkforceCommandCentreKpis,
   type WorkforceFinancialIntelligencePanel,
@@ -40,6 +42,7 @@ export type WorkforceCommandCentrePageData = {
   financialIntelligence: WorkforceFinancialIntelligencePanel;
   planning: WorkforcePlanningSnapshot | null;
   planningAvailable: boolean;
+  intelligence: WorkforceIntelligencePanel;
 };
 
 async function safeLoadPlanning(tenantId: string): Promise<WorkforcePlanningSnapshot | null> {
@@ -129,5 +132,6 @@ export async function loadWorkforceCommandCentrePage(
     financialIntelligence: buildFinancialIntelligencePanel(planning, shiftCost),
     planning,
     planningAvailable: planning != null,
+    intelligence: composeWorkforceIntelligence(composeInput),
   };
 }

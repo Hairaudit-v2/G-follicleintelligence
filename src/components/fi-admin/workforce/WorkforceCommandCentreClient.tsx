@@ -17,8 +17,10 @@ import {
   type WorkforceAttentionQueueItem,
   type WorkforceAttentionSeverity,
   type WorkforceHealthMetric,
+  type WorkforceIntelligencePanel,
   type WorkforceModuleTile,
 } from "@/src/lib/workforce/workforceCommandCentreCore";
+import type { WorkforceIntelligenceStatus } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
 import { cn } from "@/lib/utils";
 
 const UTILITY_MODULE_IDS = new Set([
@@ -98,6 +100,32 @@ function tileBadgeClass(variant: WorkforceModuleTile["statusBadge"]["variant"]):
       return "bg-rose-500/15 text-rose-300 ring-rose-500/25";
     default:
       return "bg-slate-500/15 text-slate-400 ring-slate-500/20";
+  }
+}
+
+function intelligenceStatusBadgeClass(status: WorkforceIntelligenceStatus): string {
+  switch (status) {
+    case "excellent":
+      return "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25";
+    case "stable":
+      return "bg-cyan-500/15 text-cyan-300 ring-cyan-500/25";
+    case "watch":
+      return "bg-amber-500/15 text-amber-200 ring-amber-500/25";
+    default:
+      return "bg-rose-500/15 text-rose-300 ring-rose-500/25";
+  }
+}
+
+function intelligenceStatusLabel(status: WorkforceIntelligenceStatus): string {
+  switch (status) {
+    case "excellent":
+      return "Excellent";
+    case "stable":
+      return "Stable";
+    case "watch":
+      return "Watch";
+    default:
+      return "Critical";
   }
 }
 
@@ -244,6 +272,205 @@ const heroPrimaryButtonClass =
 const heroSecondaryButtonClass =
   "rounded-xl border border-white/12 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#CBD5E1] transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06] hover:text-[#F8FAFC] hover:shadow-md hover:shadow-black/30";
 
+function IntelligenceScoreRing({
+  score,
+  label,
+  status,
+}: {
+  score: number;
+  label: string;
+  status: WorkforceIntelligenceStatus;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">{label}</p>
+        <Badge className={intelligenceStatusBadgeClass(status)}>{intelligenceStatusLabel(status)}</Badge>
+      </div>
+      <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">{score}</p>
+      <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
+        <div
+          className={cn(
+            "h-full rounded-full transition-all",
+            status === "excellent" || status === "stable"
+              ? "bg-gradient-to-r from-[#22C1FF] to-emerald-400"
+              : status === "watch"
+                ? "bg-amber-400"
+                : "bg-rose-500"
+          )}
+          style={{ width: `${Math.min(100, Math.max(score, 4))}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function WorkforceIntelligenceEngineSection({
+  intelligence,
+  canManage,
+  pending,
+  message,
+  error,
+  onRefreshPlanning,
+}: {
+  intelligence: WorkforceIntelligencePanel;
+  canManage: boolean;
+  pending: boolean;
+  message: string | null;
+  error: string | null;
+  onRefreshPlanning: () => void;
+}) {
+  const { overallHealth, tomorrowReadiness, forecast, executiveRecommendations } = intelligence;
+  const topRecommendations = executiveRecommendations.slice(0, 3);
+
+  return (
+    <section aria-label="Workforce intelligence engine" className="space-y-5">
+      <SectionHeading
+        kicker="Intelligence"
+        title="Workforce Intelligence Engine"
+        description="Predictive workforce risk, readiness, and ranked executive actions — FI interprets what matters next."
+      />
+      <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_100%_0%,rgba(34,193,255,0.08),transparent_60%)]"
+          aria-hidden
+        />
+        <div className="relative space-y-6">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-1">
+              <IntelligenceScoreRing
+                score={overallHealth.score}
+                label="Overall Workforce Health"
+                status={overallHealth.status}
+              />
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{overallHealth.summary}</p>
+              {overallHealth.contributingFactors.length > 0 ? (
+                <ul className="mt-3 space-y-2">
+                  {overallHealth.contributingFactors.slice(0, 3).map((factor) => (
+                    <li
+                      key={factor.label}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-[#0B1220]/50 px-3 py-2 text-xs"
+                    >
+                      <span className="text-[#CBD5E1]">{factor.label}</span>
+                      <span className="font-semibold tabular-nums text-rose-300">{factor.impact}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6 lg:col-span-1">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Tomorrow Surgery Readiness
+                </p>
+                <Badge className={intelligenceStatusBadgeClass(tomorrowReadiness.status)}>
+                  {intelligenceStatusLabel(tomorrowReadiness.status)}
+                </Badge>
+              </div>
+              <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">
+                {tomorrowReadiness.readinessScore}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{tomorrowReadiness.summary}</p>
+              {tomorrowReadiness.available && tomorrowReadiness.understaffed + tomorrowReadiness.credentialWarnings > 0 ? (
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Staffing gaps</dt>
+                    <dd className="mt-1 font-semibold tabular-nums text-amber-200">
+                      {tomorrowReadiness.understaffed}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Credential warnings</dt>
+                    <dd className="mt-1 font-semibold tabular-nums text-rose-300">
+                      {tomorrowReadiness.credentialWarnings}
+                    </dd>
+                  </div>
+                </dl>
+              ) : null}
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6 lg:col-span-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                Predictive Staffing Forecast
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748B]">7-day score</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-[#F8FAFC]">{forecast.sevenDayScore}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748B]">14-day score</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-[#F8FAFC]">{forecast.fourteenDayScore}</p>
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-[#94A3B8]">{forecast.summary}</p>
+              {forecast.staffingGapSignals.length > 0 ? (
+                <ul className="mt-3 space-y-1.5 text-xs text-[#94A3B8]">
+                  {forecast.staffingGapSignals.slice(0, 2).map((signal) => (
+                    <li key={signal} className="rounded-md border border-white/[0.05] bg-[#0B1220]/40 px-2.5 py-1.5">
+                      {signal}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="border-t border-white/[0.06] pt-6">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[#64748B]">
+              Executive Recommendations
+            </h3>
+            {topRecommendations.length > 0 ? (
+              <ol className="mt-4 space-y-3">
+                {topRecommendations.map((rec, idx) => (
+                  <li
+                    key={rec.id}
+                    className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-[#0B1220]/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="text-xs font-bold tabular-nums text-[#64748B]">#{idx + 1}</span>
+                        <Badge className={severityBadgeClass(rec.severity)}>{rec.severity}</Badge>
+                        <Badge className="bg-white/[0.04] text-[#94A3B8] ring-white/10">{rec.impact} impact</Badge>
+                      </div>
+                      <p className="mt-2 text-base font-semibold text-[#F8FAFC]">{rec.title}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-[#94A3B8]">{rec.description}</p>
+                    </div>
+                    <Link
+                      href={rec.route}
+                      className="shrink-0 rounded-xl border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-4 py-2.5 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/50 hover:bg-[#22C1FF]/18"
+                    >
+                      {rec.ctaLabel} →
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-4 rounded-2xl border border-white/[0.08] bg-[#0B1220]/50 px-6 py-5 text-sm leading-relaxed text-[#94A3B8]">
+                {buildEmptyPlanningFallbackMessage()}
+              </p>
+            )}
+          </div>
+
+          {canManage ? (
+            <Button
+              type="button"
+              className="h-11 w-full text-sm font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-[#22C1FF]/10 sm:w-auto sm:px-8"
+              disabled={pending}
+              onClick={onRefreshPlanning}
+            >
+              {pending ? "Refreshing…" : "Refresh Planning Signals"}
+            </Button>
+          ) : null}
+          {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
+          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+        </div>
+      </DashboardCard>
+    </section>
+  );
+}
+
 export function WorkforceCommandCentreClient({
   tenantId,
   data,
@@ -257,8 +484,16 @@ export function WorkforceCommandCentreClient({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { kpis, healthRadar, attentionQueue, moduleTiles, procedureForecast, financialIntelligence, planning, canManage } =
-    data;
+  const {
+    kpis,
+    healthRadar,
+    attentionQueue,
+    moduleTiles,
+    procedureForecast,
+    financialIntelligence,
+    intelligence,
+    canManage,
+  } = data;
 
   const utilityTiles = moduleTiles.filter((tile) => UTILITY_MODULE_IDS.has(tile.id));
 
@@ -330,6 +565,15 @@ export function WorkforceCommandCentreClient({
         />
       </section>
 
+      <WorkforceIntelligenceEngineSection
+        intelligence={intelligence}
+        canManage={canManage}
+        pending={pending}
+        message={message}
+        error={error}
+        onRefreshPlanning={onRefreshPlanning}
+      />
+
       <section aria-label="Workforce priority queue" className="space-y-5">
         <SectionHeading
           kicker="Operations"
@@ -354,57 +598,6 @@ export function WorkforceCommandCentreClient({
               ))}
             </ul>
           )}
-        </DashboardCard>
-      </section>
-
-      <section aria-label="Workforce intelligence engine" className="space-y-5">
-        <SectionHeading
-          kicker="Intelligence"
-          title="Workforce Intelligence Engine"
-          description="Ranked recommendations from the workforce planning engine."
-        />
-        <DashboardCard elevated className="p-6 shadow-2xl shadow-black/55 sm:p-8">
-          {planning && planning.nextBestActions.length > 0 ? (
-            <ol className="space-y-4">
-              {planning.nextBestActions.slice(0, 5).map((action, idx) => (
-                <li
-                  key={action.id}
-                  className="rounded-2xl border border-white/[0.08] bg-[#0B1220]/60 p-5 transition-all duration-200 hover:border-[#22C1FF]/20 hover:bg-[#0B1220]/80 sm:p-6"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold tabular-nums text-[#64748B]">#{idx + 1}</span>
-                    <Badge className={severityBadgeClass(action.priority)}>{action.priority}</Badge>
-                  </div>
-                  <p className="mt-3 text-base font-semibold text-[#F8FAFC] sm:text-lg">{action.title}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{action.description}</p>
-                  {action.href ? (
-                    <Link
-                      href={action.href}
-                      className="mt-3 inline-flex items-center rounded-lg border border-[#22C1FF]/25 bg-[#22C1FF]/10 px-3.5 py-2 text-sm font-semibold text-[#22C1FF] transition-all duration-200 hover:border-[#22C1FF]/45 hover:bg-[#22C1FF]/18"
-                    >
-                      Take action →
-                    </Link>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="rounded-2xl border border-white/[0.08] bg-[#0B1220]/50 px-6 py-5 text-sm leading-relaxed text-[#94A3B8]">
-              {buildEmptyPlanningFallbackMessage()}
-            </p>
-          )}
-          {canManage ? (
-            <Button
-              type="button"
-              className="mt-6 h-11 w-full text-sm font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-[#22C1FF]/10 sm:w-auto sm:px-8"
-              disabled={pending}
-              onClick={onRefreshPlanning}
-            >
-              {pending ? "Refreshing…" : "Refresh Planning Signals"}
-            </Button>
-          ) : null}
-          {message ? <p className="mt-3 text-sm text-emerald-300">{message}</p> : null}
-          {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
         </DashboardCard>
       </section>
 

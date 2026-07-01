@@ -633,3 +633,6 @@ export function buildModuleTiles(input: WorkforceCommandCentreComposeInput): Wor
 export function buildEmptyPlanningFallbackMessage(): string {
   return "Planning signals unavailable — use Refresh Planning Signals to generate workforce intelligence.";
 }
+
+export { composeWorkforceIntelligence } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
+export type { WorkforceIntelligencePanel } from "@/src/lib/workforce/workforceIntelligenceEngineCore";
