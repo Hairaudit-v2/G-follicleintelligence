@@ -171,7 +171,7 @@ export async function loadPatientVisualSummaryReport(
     bundle.activeWithSignedUrls.map((t) => [t.image.id, t.signed.url] as const)
   );
 
-  let images = filterImagesForContext(
+  const images = filterImagesForContext(
     bundle.activeWithSignedUrls.map((t) => t.image),
     { caseId, surgeryId, reportType: input.reportType }
   );

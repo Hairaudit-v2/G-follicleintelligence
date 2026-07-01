@@ -78,7 +78,7 @@ export async function renderPatientVisualSummaryPdfBytes(
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
 
-  let page = pdf.addPage([PAGE_W, PAGE_H]);
+  const page = pdf.addPage([PAGE_W, PAGE_H]);
   const pageRef = { page };
   const y = { y: PAGE_H - MARGIN };
 

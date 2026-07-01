@@ -408,18 +408,12 @@ function deriveAuditImageQualityStatus(images: PatientImageRow[]): string {
 function deriveClinicalReviewStatus(images: PatientImageRow[]): string {
   let reviewed = 0;
   let retake = 0;
-  let pending = 0;
   for (const img of images) {
     const staff = img.metadata?.imaging_staff_review;
     if (staff && typeof staff === "object" && !Array.isArray(staff)) {
       const status = (staff as { status?: string }).status;
       if (status === "retake_required") retake += 1;
       else if (status === "reviewed" || status === "view_reassigned") reviewed += 1;
-      else pending += 1;
-    } else if (img.ai_image_review_status === "pending") {
-      pending += 1;
-    } else {
-      pending += 1;
     }
   }
   if (images.length === 0) return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
