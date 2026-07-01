@@ -129,6 +129,7 @@ export async function loadDuplicateCandidates(
 }
 
 async function loadDuplicateCandidateById(
+  tenantId: string,
   candidateId: string,
   client: SupabaseClient
 ): Promise<{
@@ -138,10 +139,13 @@ async function loadDuplicateCandidateById(
   staff_b_id: string;
   status: string;
 }> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const id = assertNonEmptyUuid(candidateId, "candidateId");
+  // Scope by tenant so a caller from tenant A cannot resolve (and then mutate) tenant B's candidate.
   const { data, error } = await client
     .from("fi_staff_duplicate_candidates")
     .select("id, tenant_id, staff_a_id, staff_b_id, status")
+    .eq("tenant_id", tid)
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -156,12 +160,13 @@ async function loadDuplicateCandidateById(
 }
 
 export async function dismissDuplicateCandidate(
+  tenantId: string,
   candidateId: string,
   dismissedBy?: string | null,
   client?: SupabaseClient
 ): Promise<void> {
   const supabase = client ?? supabaseAdmin();
-  const row = await loadDuplicateCandidateById(candidateId, supabase);
+  const row = await loadDuplicateCandidateById(tenantId, candidateId, supabase);
   if (row.status !== "open") return;
 
   const now = new Date().toISOString();
@@ -173,6 +178,7 @@ export async function dismissDuplicateCandidate(
       resolved_by: dismissedBy ?? null,
       updated_at: now,
     })
+    .eq("tenant_id", row.tenant_id)
     .eq("id", row.id);
   if (error) throw new Error(error.message);
 
@@ -190,20 +196,22 @@ export async function dismissDuplicateCandidate(
 
 /** Keep separate — same as dismiss for Sprint 2 (no merge, no link). */
 export async function keepDuplicateCandidatesSeparate(
+  tenantId: string,
   candidateId: string,
   resolvedBy?: string | null,
   client?: SupabaseClient
 ): Promise<void> {
-  await dismissDuplicateCandidate(candidateId, resolvedBy, client);
+  await dismissDuplicateCandidate(tenantId, candidateId, resolvedBy, client);
 }
 
 export async function approveDuplicateCandidateForMerge(
+  tenantId: string,
   candidateId: string,
   approvedBy?: string | null,
   client?: SupabaseClient
 ): Promise<{ staffAId: string; staffBId: string }> {
   const supabase = client ?? supabaseAdmin();
-  const row = await loadDuplicateCandidateById(candidateId, supabase);
+  const row = await loadDuplicateCandidateById(tenantId, candidateId, supabase);
   if (row.status !== "open") {
     throw new Error("Only open duplicate candidates can be approved for merge.");
   }
@@ -216,6 +224,7 @@ export async function approveDuplicateCandidateForMerge(
       resolved_by: approvedBy ?? null,
       updated_at: now,
     })
+    .eq("tenant_id", row.tenant_id)
     .eq("id", row.id);
   if (error) throw new Error(error.message);
 
@@ -234,12 +243,13 @@ export async function approveDuplicateCandidateForMerge(
 }
 
 export async function markDuplicateCandidateResolved(
+  tenantId: string,
   candidateId: string,
   resolvedBy?: string | null,
   client?: SupabaseClient
 ): Promise<void> {
   const supabase = client ?? supabaseAdmin();
-  const row = await loadDuplicateCandidateById(candidateId, supabase);
+  const row = await loadDuplicateCandidateById(tenantId, candidateId, supabase);
   const now = new Date().toISOString();
   const { error } = await supabase
     .from("fi_staff_duplicate_candidates")
@@ -249,6 +259,7 @@ export async function markDuplicateCandidateResolved(
       resolved_by: resolvedBy ?? null,
       updated_at: now,
     })
+    .eq("tenant_id", row.tenant_id)
     .eq("id", row.id);
   if (error) throw new Error(error.message);
 }

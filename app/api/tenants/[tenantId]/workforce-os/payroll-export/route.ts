@@ -9,6 +9,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 
+import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { buildPayPeriodPayrollExport } from "@/src/lib/workforce/payPeriodExport.server";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,17 @@ export async function GET(
   const { tenantId } = await params;
   if (!tenantId?.trim()) {
     return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
+  }
+
+  // Thin defence-in-depth gate at the route boundary. `buildPayPeriodPayrollExport` also enforces
+  // the HR-manager role internally; this guard ensures the endpoint stays protected even if that
+  // internal check is ever refactored, and blocks unauthenticated/cross-tenant callers early.
+  const access = await resolveHrOsRouteAccess(tenantId.trim());
+  if (!access.ok) {
+    return NextResponse.json(
+      { ok: false, error: "WorkforceOS access denied." },
+      { status: 403 }
+    );
   }
 
   const url = new URL(req.url);

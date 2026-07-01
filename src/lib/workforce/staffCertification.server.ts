@@ -230,6 +230,7 @@ export async function syncStaffCertificationStatusesForMember(
       const { error: upErr } = await supabase
         .from("fi_staff_certifications")
         .update({ status: nextStatus, updated_at: now })
+        .eq("tenant_id", tid)
         .eq("id", String(raw.id));
       if (upErr) throw new Error(upErr.message);
       updated += 1;

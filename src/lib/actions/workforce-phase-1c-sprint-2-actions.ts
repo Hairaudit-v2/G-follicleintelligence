@@ -59,7 +59,7 @@ export async function dismissDuplicateCandidateAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
-    await dismissDuplicateCandidate(candidateId, fiUserId);
+    await dismissDuplicateCandidate(tenantId, candidateId, fiUserId);
     revalidateWorkforceHrSurfaces(tenantId);
     return { ok: true };
   } catch (e) {
@@ -73,7 +73,7 @@ export async function keepDuplicateSeparateAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
-    await keepDuplicateCandidatesSeparate(candidateId, fiUserId);
+    await keepDuplicateCandidatesSeparate(tenantId, candidateId, fiUserId);
     revalidateWorkforceHrSurfaces(tenantId);
     return { ok: true };
   } catch (e) {
@@ -89,7 +89,7 @@ export async function approveDuplicateMergeAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
-    await approveDuplicateCandidateForMerge(candidateId, fiUserId);
+    await approveDuplicateCandidateForMerge(tenantId, candidateId, fiUserId);
     await mergeStaffRecords({
       tenantId,
       sourceStaffId,

@@ -14,6 +14,7 @@ export async function runWorkforceTimeClockAutoCloseCron(): Promise<{
   punchesClosed: number;
 }> {
   const supabase = supabaseAdmin();
+  // tenant-guard-allow: cron enumerates all tenants; fi_tenants is the tenant registry (no tenant_id column). Per-tenant auto-close below is scoped.
   const { data: tenants, error } = await supabase.from("fi_tenants").select("id");
   if (error) throw new Error(error.message);
 

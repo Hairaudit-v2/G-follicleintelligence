@@ -95,6 +95,7 @@ export async function completeHrSyncRun(input: {
     completedAt: now,
   });
 
+  // tenant-guard-allow: keyed on the server-generated unique run_id (created by createHrSyncRun within the tenant's sync flow); runId is never client-supplied.
   const { error } = await supabase.from("fi_hr_sync_runs").update(patch).eq("run_id", runId);
   if (error) throw new Error(error.message);
 }

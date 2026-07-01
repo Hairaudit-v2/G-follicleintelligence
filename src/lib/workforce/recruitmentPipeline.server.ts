@@ -97,6 +97,7 @@ export async function listOnboardingTemplateOptions(
   client?: SupabaseClient
 ): Promise<OnboardingTemplateOption[]> {
   const supabase = client ?? supabaseAdmin();
+  // tenant-guard-allow: fi_tenant_provisioning_templates is a platform-global reference catalogue (no tenant_id column); read-only lookup of active templates.
   const { data, error } = await supabase
     .from("fi_tenant_provisioning_templates")
     .select("code, display_name, description")
