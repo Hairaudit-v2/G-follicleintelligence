@@ -222,9 +222,26 @@ export async function confirmSurgeryBooking(
     });
   }
 
+  if (booking.patient_id) {
+    const { advancePatientJourneyOnEvent } = await import(
+      "@/src/lib/patientJourney/patientJourneyState.server"
+    );
+    await advancePatientJourneyOnEvent({
+      tenantId: tid,
+      patientId: booking.patient_id,
+      event: "surgery_booked",
+      reason: "surgery_booked",
+      leadId: booking.lead_id,
+      caseId: booking.case_id,
+      actorFiUserId: input.createdByFiUserId,
+      client: supabase,
+    }).catch(() => undefined);
+  }
+
   revalidatePath(`/fi-admin/${tid}/appointments`);
   revalidatePath(`/fi-admin/${tid}/surgery-readiness`);
   revalidatePath(`/fi-admin/${tid}/reception-os`);
+  revalidatePath(`/fi-admin/${tid}/reception-board`);
   revalidatePath(`/fi-admin/${tid}/surgery-os`);
   if (booking.case_id) revalidatePath(`/fi-admin/${tid}/cases/${booking.case_id}`);
   if (booking.patient_id) revalidatePath(`/fi-admin/${tid}/patients/${booking.patient_id}`);

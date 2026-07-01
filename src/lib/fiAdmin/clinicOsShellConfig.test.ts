@@ -33,7 +33,7 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.dashboard?.href, base);
   assert.equal(byId.dashboard?.disabled, false);
   assert.equal(byId["operations-centre"]?.href, `${base}/operations`);
-  assert.equal(byId["reception-board"]?.href, `${base}/reception`);
+  assert.equal(byId["reception-board"]?.href, `${base}/reception-board`);
   const tomorrow = items.find((i) => i.id === "tomorrow-board");
   assert.ok(tomorrow);
   assert.equal(tomorrow!.href, `${base}/tomorrow`);
@@ -117,6 +117,7 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/`, base), "dashboard");
   assert.equal(getClinicOsShellActiveNavId(`${base}/operations`, base), "operations-centre");
   assert.equal(getClinicOsShellActiveNavId(`${base}/operations/extra`, base), "operations-centre");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/reception-board`, base), "reception-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/reception`, base), "reception-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/reception/extra`, base), "reception-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/tomorrow`, base), "tomorrow-board");

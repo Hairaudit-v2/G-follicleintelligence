@@ -408,5 +408,21 @@ export async function completeConsultationDraft(
   const { advanceCrmLeadOnConsultationComplete } =
     await import("./advanceCrmLeadOnConsultationComplete.server");
   await advanceCrmLeadOnConsultationComplete(tid, loaded, supabase);
+  if (loaded.patient_id?.trim()) {
+    const { advancePatientJourneyOnEvent } = await import(
+      "@/src/lib/patientJourney/patientJourneyState.server"
+    );
+    const hasRecommendation = Boolean(loaded.recommendation_notes?.trim());
+    await advancePatientJourneyOnEvent({
+      tenantId: tid,
+      patientId: loaded.patient_id.trim(),
+      event: hasRecommendation ? "treatment_recommended" : "consultation_completed",
+      reason: hasRecommendation ? "treatment_recommended" : "consultation_completed",
+      leadId: loaded.lead_id,
+      caseId: loaded.case_id,
+      actorFiUserId: opts?.updatedByFiUserId ?? null,
+      client: supabase,
+    }).catch(() => undefined);
+  }
   return loaded;
 }

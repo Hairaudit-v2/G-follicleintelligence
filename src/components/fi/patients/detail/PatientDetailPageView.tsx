@@ -27,6 +27,9 @@ import type { PatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLo
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { PatientOverviewTab } from "@/src/components/fi-admin/patients/PatientOverviewTab";
 import { derivePatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
+import { legacyJourneyLabelFromCanonical } from "@/src/lib/patientJourney/patientJourneyStateCore";
+import type { PatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
+import { PatientJourneyRibbon } from "@/src/components/fi-admin/patients/PatientJourneyRibbon";
 
 export function PatientDetailPageView({
   tenantId,
@@ -41,6 +44,7 @@ export function PatientDetailPageView({
   /** Server-rendered async tab; passed from the route so this client module never imports prescribing loaders. */
   prescriptionsTab,
   canCapturePatientPhotos = false,
+  patientJourney = null,
 }: {
   tenantId: string;
   patientId: string;
@@ -53,10 +57,11 @@ export function PatientDetailPageView({
   patientInvoiceSummary: PatientInvoiceSummary;
   prescriptionsTab?: ReactNode;
   canCapturePatientPhotos?: boolean;
+  patientJourney?: PatientJourneySnapshot | null;
 }) {
   const { profile } = initialPayload;
 
-  const journeyStatus = derivePatientJourneyStatus({
+  const legacyJourney = derivePatientJourneyStatus({
     totalLeads: profile.summary.totalLeads,
     consultations: initialPayload.consultations,
     nextAppointment: initialPayload.nextAppointment,
@@ -66,9 +71,28 @@ export function PatientDetailPageView({
     completedBookings: profile.summary.completedBookings,
   });
 
+  const journeyStatus = patientJourney
+    ? {
+        label: legacyJourneyLabelFromCanonical(patientJourney.state),
+        tone:
+          patientJourney.presentation.tone === "critical"
+            ? ("warning" as const)
+            : patientJourney.presentation.tone === "success"
+              ? ("success" as const)
+              : patientJourney.presentation.tone === "warning"
+                ? ("warning" as const)
+                : patientJourney.presentation.tone === "info"
+                  ? ("info" as const)
+                  : ("neutral" as const),
+        description: patientJourney.presentation.description,
+      }
+    : legacyJourney;
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6 pb-24 md:pb-6">
       <PatientDetailBreadcrumbs tenantId={tenantId} patientName={initialPayload.displayName} />
+
+      {patientJourney ? <PatientJourneyRibbon journey={patientJourney} /> : null}
 
       <PatientCommandHero
         tenantId={tenantId}

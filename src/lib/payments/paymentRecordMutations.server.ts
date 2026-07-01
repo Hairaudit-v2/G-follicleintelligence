@@ -233,5 +233,19 @@ export async function recordManualPayment(
     .single();
 
   if (error) throw new Error(error.message);
-  return mapRow(data as Record<string, unknown>);
+  const mapped = mapRow(data as Record<string, unknown>);
+  if (mapped.status === "paid" && mapped.patient_id?.trim()) {
+    const { advancePatientJourneyOnEvent } = await import(
+      "@/src/lib/patientJourney/patientJourneyState.server"
+    );
+    await advancePatientJourneyOnEvent({
+      tenantId: tid,
+      patientId: mapped.patient_id.trim(),
+      event: "payment_received",
+      reason: "deposit_received",
+      caseId: mapped.case_id,
+      leadId: mapped.lead_id,
+    }).catch(() => undefined);
+  }
+  return mapped;
 }

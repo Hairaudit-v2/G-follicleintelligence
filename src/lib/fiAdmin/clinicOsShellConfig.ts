@@ -111,10 +111,11 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
       },
       {
         id: "reception-board",
-        label: "Reception",
-        path: "reception",
+        label: "Reception Board",
+        path: "reception-board",
         permissionHint: {},
-        description: "Front-desk board for today’s patients and booking status.",
+        description:
+          "Front-desk command center — today’s clinic, arrival queue, alerts, and surgery prep.",
       },
       {
         id: "tomorrow-board",
@@ -474,6 +475,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
 
   if (first === "operations") return "operations-centre";
   if (first === "reception-os") return "reception-os";
+  if (first === "reception-board") return "reception-board";
   if (first === "reception") return "reception-board";
   if (first === "tomorrow") return "tomorrow-board";
 

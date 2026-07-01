@@ -19,6 +19,7 @@ import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRe
 import { loadPaymentRecordsForPatientId } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { loadPatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import { getPatientImagingCaptureCapability } from "@/src/lib/patientImages/patientImagingCaptureAccess.server";
+import { loadPatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -90,6 +91,7 @@ export default async function PatientProfileRoutePage({
     payCap,
     patientInvoiceSummary,
     imagingCaptureCap,
+    patientJourney,
   ] = await Promise.all([
     loadFiServicesForTenant(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
@@ -98,6 +100,7 @@ export default async function PatientProfileRoutePage({
     getPaymentRecordMutationCapability(tenantId.trim()),
     loadPatientInvoiceSummary(tenantId.trim(), patientId.trim()),
     getPatientImagingCaptureCapability(tenantId.trim()),
+    loadPatientJourneySnapshot(tenantId.trim(), patientId.trim()).catch(() => null),
   ]);
   const operationalTodayYmd = calendarDateStringFromInstant(
     new Date(),
@@ -136,6 +139,7 @@ export default async function PatientProfileRoutePage({
           canMutatePaymentRecords={payCap.canMutate}
           patientInvoiceSummary={patientInvoiceSummary}
           canCapturePatientPhotos={imagingCaptureCap.canCapture}
+          patientJourney={patientJourney}
           prescriptionsTab={
             activeTab === "prescriptions" ? (
               <Suspense
