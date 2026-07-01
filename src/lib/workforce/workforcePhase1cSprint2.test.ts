@@ -181,7 +181,12 @@ function makeMockClient(state: TableState): SupabaseClient {
               }
             }
             resolve({
-              data: { ok: true, moved_identity_links: 1, archived_source_fi_staff: true },
+              data: {
+                ok: true,
+                moved_identity_links: 1,
+                archived_source_fi_staff: true,
+                dependency_counts: { identity_links: 1, credentials: 0 },
+              },
               error: null,
             });
           });

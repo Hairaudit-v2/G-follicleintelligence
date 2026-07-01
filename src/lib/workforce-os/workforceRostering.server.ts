@@ -17,6 +17,7 @@ import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNo
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
+import { assertStaffMeetsClinicalEligibilityForAssignment } from "@/src/lib/workforce/clinicalEligibilityGate.server";
 import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
 import {
   assignStaffToClinicalEvent,
@@ -745,6 +746,10 @@ export async function assignStaffToClinicalEventAction(input: {
         assignedRole: input.assignedRole,
       })
     : undefined;
+
+  if (!input.allowBlockedDraft) {
+    await assertStaffMeetsClinicalEligibilityForAssignment(tid, sid, supabase);
+  }
 
   const result = assignStaffToClinicalEvent({
     tenantId: tid,

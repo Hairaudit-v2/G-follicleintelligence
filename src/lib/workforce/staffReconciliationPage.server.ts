@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { IIOHR_EVOLVED_HR_SOURCE_SYSTEM } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
+import type { StaffMemberSnapshot } from "@/src/lib/workforce/identityReconciliationCore";
 import {
   calculateStaffIdentityMatchScore,
   findExistingStaffMatch,
@@ -12,7 +13,6 @@ import {
   loadStaffMembersForReconciliation,
   normalizeEmail,
   upsertStaffIdentityLink,
-  type StaffMemberSnapshot,
 } from "@/src/lib/workforce/identityReconciliation.server";
 import { loadHrSyncHealthSummary } from "@/src/lib/workforce/hrSyncAudit.server";
 import {

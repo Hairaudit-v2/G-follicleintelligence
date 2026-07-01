@@ -13,6 +13,7 @@ export type MergeStaffRecordsResult = {
   ok: boolean;
   movedIdentityLinks: number;
   archivedSourceFiStaff: boolean;
+  dependencyCounts: Record<string, number>;
 };
 
 async function insertWorkforceAudit(
@@ -93,9 +94,22 @@ export async function mergeStaffRecords(input: {
     },
   });
 
+  const dependencyCountsRaw = payload.dependency_counts;
+  const dependencyCounts: Record<string, number> = {};
+  if (
+    dependencyCountsRaw &&
+    typeof dependencyCountsRaw === "object" &&
+    !Array.isArray(dependencyCountsRaw)
+  ) {
+    for (const [key, value] of Object.entries(dependencyCountsRaw as Record<string, unknown>)) {
+      dependencyCounts[key] = Number(value ?? 0);
+    }
+  }
+
   return {
     ok: Boolean(payload.ok ?? true),
     movedIdentityLinks: Number(payload.moved_identity_links ?? 0),
     archivedSourceFiStaff: Boolean(payload.archived_source_fi_staff ?? false),
+    dependencyCounts,
   };
 }

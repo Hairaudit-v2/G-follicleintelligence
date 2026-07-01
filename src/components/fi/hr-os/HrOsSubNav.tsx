@@ -23,6 +23,9 @@ export function buildHrOsNavItems(tenantId: string): HrOsNavItem[] {
     },
     { label: "Duplicate Review", href: `${base}/duplicates`, segment: "duplicates" },
     { label: "Offboarding Centre", href: `${base}/offboarding`, segment: "offboarding" },
+    { label: "Credentials", href: `${base}/credentials`, segment: "credentials" },
+    { label: "Certifications", href: `${base}/certifications`, segment: "certifications" },
+    { label: "Compliance", href: `${base}/compliance`, segment: "compliance" },
   ];
 }
 

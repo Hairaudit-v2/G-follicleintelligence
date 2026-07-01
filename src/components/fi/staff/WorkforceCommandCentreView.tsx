@@ -297,35 +297,62 @@ export function WorkforceCommandCentreView({
       </section>
 
       {operationalMetrics ? (
-        <section
-          aria-label="HR operational control"
-          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
-        >
-          <OperationalCard
-            label="Sync Health"
-            value={
-              operationalMetrics.syncHealthPercent != null
-                ? `${operationalMetrics.syncHealthPercent}%`
-                : "—"
-            }
-            href={`${base}/hr-os/sync-health`}
-          />
-          <OperationalCard
-            label="Duplicate Conflicts"
-            value={operationalMetrics.openDuplicateCount}
-            href={`${base}/hr-os/duplicates`}
-          />
-          <OperationalCard
-            label="Unlinked Staff"
-            value={operationalMetrics.unlinkedStaffCount}
-            href={`${base}/hr-os/staff-reconciliation`}
-          />
-          <OperationalCard
-            label="Inactive Staff"
-            value={operationalMetrics.inactiveStaffCount}
-            href={`${base}/hr-os/offboarding`}
-          />
-        </section>
+        <>
+          <section
+            aria-label="HR operational control"
+            className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <OperationalCard
+              label="Sync Health"
+              value={
+                operationalMetrics.syncHealthPercent != null
+                  ? `${operationalMetrics.syncHealthPercent}%`
+                  : "—"
+              }
+              href={`${base}/hr-os/sync-health`}
+            />
+            <OperationalCard
+              label="Duplicate Conflicts"
+              value={operationalMetrics.openDuplicateCount}
+              href={`${base}/hr-os/duplicates`}
+            />
+            <OperationalCard
+              label="Unlinked Staff"
+              value={operationalMetrics.unlinkedStaffCount}
+              href={`${base}/hr-os/staff-reconciliation`}
+            />
+            <OperationalCard
+              label="Inactive Staff"
+              value={operationalMetrics.inactiveStaffCount}
+              href={`${base}/hr-os/offboarding`}
+            />
+          </section>
+          <section
+            aria-label="Clinical workforce intelligence"
+            className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <OperationalCard
+              label="Clinically Eligible Staff"
+              value={operationalMetrics.clinicallyEligibleStaff}
+              href={`${base}/hr-os/compliance`}
+            />
+            <OperationalCard
+              label="Expiring Credentials"
+              value={operationalMetrics.expiringCredentials}
+              href={`${base}/hr-os/credentials`}
+            />
+            <OperationalCard
+              label="Compliance Alerts"
+              value={operationalMetrics.complianceAlerts}
+              href={`${base}/hr-os/compliance`}
+            />
+            <OperationalCard
+              label="Expired Certifications"
+              value={operationalMetrics.expiredCertifications}
+              href={`${base}/hr-os/certifications`}
+            />
+          </section>
+        </>
       ) : null}
 
       <DashboardCard className="p-5 sm:p-6" elevated>

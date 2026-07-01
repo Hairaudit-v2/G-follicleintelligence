@@ -19,6 +19,10 @@ import {
   assertFiStaffBelongsToTenant,
   loadStaffMemberForTenant,
 } from "@/src/lib/staff/staff.server";
+import {
+  assertStaffMeetsClinicalEligibilityForAssignment,
+  StaffClinicalEligibilityError,
+} from "@/src/lib/workforce/clinicalEligibilityGate.server";
 
 export class StaffClinicalAvailabilityError extends Error {
   constructor(message: string) {
@@ -73,6 +77,15 @@ export async function assertStaffClinicallyAvailableForAssignment(
     throw new StaffClinicalAvailabilityError(
       clinicalAssignmentErrorMessage(readiness.block_reason)
     );
+  }
+
+  try {
+    await assertStaffMeetsClinicalEligibilityForAssignment(tenantId, staff.id, supabase);
+  } catch (e) {
+    if (e instanceof StaffClinicalEligibilityError) {
+      throw new StaffClinicalAvailabilityError(e.message);
+    }
+    throw e;
   }
 }
 

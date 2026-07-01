@@ -5,9 +5,12 @@ export const WORKFORCE_PHASE_1C_AUDIT_EVENTS = {
   DUPLICATE_APPROVED_FOR_MERGE: "workforce_duplicate_approved_for_merge",
   STAFF_MERGED: "workforce_staff_merged",
   STAFF_OFFBOARDED: "workforce_staff_offboarded",
+  CREDENTIAL_UPSERTED: "workforce_credential_upserted",
+  CERTIFICATION_UPSERTED: "workforce_certification_upserted",
+  COMPLIANCE_AUTOMATION_RUN: "workforce_compliance_automation_run",
 } as const;
 
 export type WorkforcePhase1cAuditEventType =
   (typeof WORKFORCE_PHASE_1C_AUDIT_EVENTS)[keyof typeof WORKFORCE_PHASE_1C_AUDIT_EVENTS];
 
-export const WORKFORCE_PHASE_1C_AUDIT_SOURCE = "workforceos_phase_1c_sprint_2" as const;
+export const WORKFORCE_PHASE_1C_AUDIT_SOURCE = "workforceos_phase_1c_sprint_3" as const;
