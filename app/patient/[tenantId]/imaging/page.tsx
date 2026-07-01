@@ -35,5 +35,11 @@ export default async function PatientImagingPortalPage({
     limit: 30,
   });
 
-  return <PatientImagingPortalClient cards={bundle.cards} />;
+  return (
+    <PatientImagingPortalClient
+      tenantId={tid}
+      cards={bundle.cards}
+      canUpload={access.status === "linked"}
+    />
+  );
 }
