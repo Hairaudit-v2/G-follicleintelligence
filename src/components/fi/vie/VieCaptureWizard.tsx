@@ -175,7 +175,10 @@ export function VieCaptureWizard({
   templateSlug: VieProtocolSlug;
   initialProgress?: SlotProgress;
   onClose: () => void;
-  captureSource?: Extract<FiImageCaptureSource, "vie_capture_wizard" | "surgery_os">;
+  captureSource?: Extract<
+    FiImageCaptureSource,
+    "vie_capture_wizard" | "surgery_os" | "appointment_procedure"
+  >;
   surgeryContext?: {
     caseId: string | null;
     bookingId: string | null;

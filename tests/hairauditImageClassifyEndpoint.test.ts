@@ -195,18 +195,18 @@ describe("hairaudit image classify service", () => {
     restoreEnv();
   });
 
-  it("returns provider_not_ready when live mode and classifier unavailable", async () => {
+  it("returns degraded live response when classifier prerequisites are missing", async () => {
     delete process.env.HAIRAUDIT_IMAGE_CLASSIFIER_MODE;
+    delete process.env.OPENAI_API_KEY;
     const parsed = parseHairAuditImageClassifyRequest(buildValidPayload());
     assert.strictEqual(parsed.ok, true);
     if (!parsed.ok) return;
 
     const outcome = await classifyHairAuditImageRequest(parsed.data);
-    assert.strictEqual(outcome.ok, false);
-    if (!outcome.ok) {
-      assert.strictEqual(outcome.code, "provider_not_ready");
-      assert.strictEqual(outcome.status, 503);
-    }
+    assert.strictEqual(outcome.ok, true);
+    if (!outcome.ok) return;
+    assert.ok(outcome.result.confidence > 0);
+    assert.match(outcome.result.notes, /Degraded classification/i);
   });
 
   it("returns normalized stub response in stub mode", async () => {
@@ -308,14 +308,16 @@ describe("hairaudit image classify route", () => {
     assert.strictEqual(res.status, 400);
   });
 
-  it("provider not ready → 503", async () => {
+  it("live mode without OpenAI key → degraded 200 response", async () => {
     delete process.env.HAIRAUDIT_IMAGE_CLASSIFIER_MODE;
+    delete process.env.OPENAI_API_KEY;
     const res = await POST(
       mockRequest(buildValidPayload(), { authorization: `Bearer ${VALID_TOKEN}` })
     );
-    assert.strictEqual(res.status, 503);
-    const json = (await res.json()) as { code?: string };
-    assert.strictEqual(json.code, "provider_not_ready");
+    assert.strictEqual(res.status, 200);
+    const json = (await res.json()) as Record<string, unknown>;
+    assert.strictEqual(isSafeClassificationResponseBody(json), true);
+    assert.match(String(json.notes ?? ""), /Degraded classification/i);
   });
 
   it("stub mode success → normalized response", async () => {

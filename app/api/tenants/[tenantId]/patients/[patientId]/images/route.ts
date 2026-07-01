@@ -14,6 +14,11 @@ import { assertGuidedSessionUploadPreconditions } from "@/src/lib/imagingOs/imag
 import { applyGuidedCaptureToSession } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
 import { assertPatientTrialConsentRecorded } from "@/src/lib/patients/patientConsentGate.server";
 import { createPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
+import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
+import {
+  APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
+  APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE,
+} from "@/src/lib/vie/appointmentProcedureCapture";
 import {
   assertVieProtocolCapturePolicy,
   normalizeCaptureSource,
@@ -90,16 +95,29 @@ export async function POST(
     const slotSlugStr =
       imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : null;
 
-    try {
-      assertVieProtocolCapturePolicy({
-        captureSource: captureSourceStr,
-        protocolSessionId: protocolSessionId || null,
-        protocolTemplateSlug: templateSlugStr,
-        protocolSlotSlug: slotSlugStr,
-      });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Protocol capture required.";
-      return crmJsonError(400, msg);
+    const captureSourceNormalized = normalizeCaptureSource(captureSourceStr);
+    const bookingIdStr = bookingId == null ? "" : String(bookingId).trim();
+
+    if (bookingIdStr && !captureSourceNormalized) {
+      return crmJsonError(400, APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE);
+    }
+
+    if (captureSourceNormalized === APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE) {
+      if (!isFiAdminApiKeyMatch(adminKey, process.env.FI_ADMIN_API_KEY)) {
+        return crmJsonError(403, "Admin fallback upload requires a valid admin key.");
+      }
+    } else {
+      try {
+        assertVieProtocolCapturePolicy({
+          captureSource: captureSourceStr,
+          protocolSessionId: protocolSessionId || null,
+          protocolTemplateSlug: templateSlugStr,
+          protocolSlotSlug: slotSlugStr,
+        });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Protocol capture required.";
+        return crmJsonError(400, msg);
+      }
     }
 
     if (protocolSessionId) {
@@ -126,7 +144,6 @@ export async function POST(
       }
     }
 
-    const captureSourceNormalized = normalizeCaptureSource(captureSourceStr);
     const procedureDayIdRaw = form.get("procedure_day_id");
     if (captureSourceNormalized === "surgery_os" && slotSlugStr) {
       const surgeryMeta = buildVieSurgeryImageMetadata({

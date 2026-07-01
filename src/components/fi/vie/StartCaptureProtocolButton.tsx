@@ -15,6 +15,7 @@ import {
   PATIENT_TRIAL_CONSENT_REQUIRED_TOOLTIP,
 } from "@/src/lib/patients/patientTrialConsentShared";
 
+import { APPOINTMENT_PROCEDURE_CAPTURE_SOURCE } from "@/src/lib/vie/appointmentProcedureCapture";
 import { VieCaptureWizard } from "./VieCaptureWizard";
 
 function protocolSlotSummary(slug: VieProtocolSlug): string {
@@ -36,6 +37,7 @@ export function StartCaptureProtocolButton({
   trialConsentGate,
   className,
   label = "Start Capture Protocol",
+  appointmentContext,
 }: {
   tenantId: string;
   patientId: string;
@@ -43,6 +45,11 @@ export function StartCaptureProtocolButton({
   trialConsentGate?: PatientTrialConsentGateView | null;
   className?: string;
   label?: string;
+  appointmentContext?: {
+    bookingId: string;
+    leadId: string | null;
+    caseId: string | null;
+  };
 }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"pick" | "capture">("pick");
@@ -206,6 +213,18 @@ export function StartCaptureProtocolButton({
                 sessionId={activeSession.sessionId}
                 templateSlug={activeSession.templateSlug}
                 onClose={close}
+                captureSource={
+                  appointmentContext ? APPOINTMENT_PROCEDURE_CAPTURE_SOURCE : "vie_capture_wizard"
+                }
+                surgeryContext={
+                  appointmentContext
+                    ? {
+                        bookingId: appointmentContext.bookingId,
+                        caseId: appointmentContext.caseId,
+                        procedureDayId: null,
+                      }
+                    : undefined
+                }
               />
             ) : null}
           </div>

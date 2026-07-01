@@ -1,11 +1,11 @@
 /**
- * FI OS clinical hair image classifier hook — Phase 3F placeholder.
- *
- * Future phases wire this to the FI photo-protocol / ImagingOS pipeline.
- * The HairAudit internal endpoint calls this when available and safe.
+ * FI OS receiving-side HairAudit image classifier hook — Phase 3F + ImagingOS Phase 1 live wiring.
  *
  * See: docs/hairaudit-phase-3f-fi-classifier-endpoint.md
  */
+
+import { isOpenAiApiKeyConfigured } from "@/src/lib/hair-intelligence/imageClassification/classifyClinicalHairImageFallback";
+import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
 
 export type ClinicalHairImageClassifierInput = {
   canonical_photo_category: string;
@@ -14,6 +14,8 @@ export type ClinicalHairImageClassifierInput = {
   storage_path?: string;
   image_content_type?: string | null;
   image_size_bytes?: number | null;
+  source_upload_id?: string;
+  tenant_id?: string | null;
 };
 
 export type ClinicalHairImageClassifierResult = {
@@ -28,18 +30,25 @@ export type ClinicalHairImageClassifierResult = {
 
 /** Whether the FI OS clinical image classifier is wired and safe to invoke. */
 export function isClinicalHairImageClassifierAvailable(
-  _env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv = process.env
 ): boolean {
-  return false;
+  return resolveHairauditClassifierMode(env) === "live" && isOpenAiApiKeyConfigured();
 }
 
 /**
- * Classify a clinical hair image using FI OS model infrastructure.
- * Returns null when the classifier is not available (Phase 3F default).
+ * Classify a clinical hair image using FI OS / HLI model infrastructure.
+ * Live implementation is server-only; returns null in non-server test contexts without dynamic import.
  */
 export async function classifyClinicalHairImageFromModelUrl(
-  _input: ClinicalHairImageClassifierInput,
-  _env: NodeJS.ProcessEnv = process.env
+  input: ClinicalHairImageClassifierInput,
+  env: NodeJS.ProcessEnv = process.env
 ): Promise<ClinicalHairImageClassifierResult | null> {
-  return null;
+  if (!isClinicalHairImageClassifierAvailable(env)) return null;
+
+  try {
+    const mod = await import("./classifyClinicalHairImageFromModelUrl.server");
+    return mod.classifyClinicalHairImageFromModelUrlLive(input, env);
+  } catch {
+    return null;
+  }
 }

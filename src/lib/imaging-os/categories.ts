@@ -79,6 +79,8 @@ const EXTERNAL_CATEGORY_ALIASES: Record<string, CanonicalHairImageCategory> = {
   patient_current_recipient: "recipient",
   patient_current_hairline: "hairline",
   preop_front: "front",
+  frontal: "front",
+  front_view: "front",
   preop_top: "top",
   preop_crown: "crown",
   preop_left: "left",

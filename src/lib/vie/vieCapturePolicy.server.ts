@@ -16,6 +16,7 @@ export const VIE_PROTOCOL_REQUIRED_CAPTURE_SOURCES = [
   "profile_upload_form",
   "vie_capture_wizard",
   "surgery_os",
+  "appointment_procedure",
 ] as const;
 
 export type VieProtocolRequiredCaptureSource =

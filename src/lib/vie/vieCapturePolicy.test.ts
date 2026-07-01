@@ -51,4 +51,17 @@ describe("assertVieProtocolCapturePolicy", () => {
       })
     );
   });
+
+  it("blocks appointment_procedure upload without protocol session", () => {
+    assert.throws(
+      () =>
+        assertVieProtocolCapturePolicy({
+          captureSource: "appointment_procedure",
+          protocolSessionId: null,
+          protocolTemplateSlug: "surgery_day",
+          protocolSlotSlug: "graft_tray_overview",
+        }),
+      /active capture protocol/i
+    );
+  });
 });

@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeFiUploadType, type FiUploadType } from "@/lib/fi/uploadTypes";
 import { dualWriteFoundationFromFiEvent } from "@/src/lib/fi/foundation/dualWriteEvent";
+import { dualWriteHairAuditImagesToPatientLibrary } from "@/src/lib/fi/foundation/hairauditPatientImageDualWrite.server";
 import type { FiEventEnvelope, HairAuditImagesUploadedPayload } from "@/src/types/fi-events";
 import {
   attachFiEventError,
@@ -76,6 +77,56 @@ async function loadLinkedUploadIds(fiCaseId: string, storagePaths: string[]): Pr
     .in("storage_path", storagePaths);
 
   return (data ?? []).map((row) => row.id);
+}
+
+async function loadLinkedUploadIdsByPath(
+  fiCaseId: string,
+  storagePaths: string[]
+): Promise<Record<string, string>> {
+  if (storagePaths.length === 0) return {};
+
+  const { data } = await supabaseAdmin()
+    .from("fi_uploads")
+    .select("id, storage_path")
+    .eq("case_id", fiCaseId)
+    .in("storage_path", storagePaths);
+
+  const out: Record<string, string> = {};
+  for (const row of data ?? []) {
+    const path = row.storage_path?.trim();
+    if (path) out[path] = String(row.id);
+  }
+  return out;
+}
+
+async function maybeDualWriteHairAuditPatientImages(input: {
+  tenantId: string;
+  fiEventId: string;
+  fiCaseId: string;
+  envelope: FiEventEnvelope;
+  globalCaseId?: string | null;
+  storagePaths?: string[];
+}): Promise<void> {
+  try {
+    const uploadIdsByStoragePath = input.storagePaths?.length
+      ? await loadLinkedUploadIdsByPath(input.fiCaseId, input.storagePaths)
+      : {};
+    await dualWriteHairAuditImagesToPatientLibrary({
+      tenantId: input.tenantId,
+      fiEventId: input.fiEventId,
+      fiCaseId: input.fiCaseId,
+      envelope: input.envelope,
+      globalCaseId: input.globalCaseId,
+      uploadIdsByStoragePath,
+    });
+  } catch (e: unknown) {
+    console.error("[hairaudit-images-uploaded] patient image dual-write failed", {
+      tenantId: input.tenantId,
+      fiEventId: input.fiEventId,
+      fiCaseId: input.fiCaseId,
+      message: e instanceof Error ? e.message : String(e),
+    });
+  }
 }
 
 function mapHairAuditImageTypeToFiUploadType(type: string): FiUploadType {
@@ -155,6 +206,16 @@ async function handleHairAuditImagesUploadedImpl(
         globalCaseId: linked.globalCaseId,
       },
     });
+    if (linked.fiCaseId) {
+      await maybeDualWriteHairAuditPatientImages({
+        tenantId: envelope.tenant_id,
+        fiEventId: eventLog.row.id,
+        fiCaseId: linked.fiCaseId,
+        envelope,
+        globalCaseId: linked.globalCaseId,
+        storagePaths,
+      });
+    }
     return {
       ok: true,
       eventId: eventLog.row.id,
@@ -260,6 +321,15 @@ async function handleHairAuditImagesUploadedImpl(
         globalPatientId: globalPatient?.id ?? null,
         globalCaseId: linkedGlobalCase.id,
       },
+    });
+
+    await maybeDualWriteHairAuditPatientImages({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      fiCaseId: fiCase.id,
+      envelope,
+      globalCaseId: linkedGlobalCase.id,
+      storagePaths,
     });
 
     const submitDecision = await maybeSubmitCaseFromEvent({
@@ -382,6 +452,17 @@ export async function handleHairAuditImagesUploaded(
         globalCaseId: linked.globalCaseId,
       },
     });
+
+    if (linked.fiCaseId && payloadResult.ok && "images" in payloadResult.data) {
+      await maybeDualWriteHairAuditPatientImages({
+        tenantId: envelope.tenant_id,
+        fiEventId: existing.id,
+        fiCaseId: linked.fiCaseId,
+        envelope,
+        globalCaseId: linked.globalCaseId,
+        storagePaths: payloadResult.data.images.map((image) => image.storage_path),
+      });
+    }
 
     return {
       ok: true,

@@ -11,6 +11,7 @@ import {
   classifyClinicalHairImageFromModelUrl,
   isClinicalHairImageClassifierAvailable,
 } from "./classifyClinicalHairImageFromModelUrl";
+import { buildDegradedHairAuditClassification } from "./hairAuditClassifierResponseMap";
 import { isValidHairauditImageContentType } from "./hairauditImageClassifyContract";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
 import {
@@ -55,6 +56,8 @@ export type ParseHairAuditImageClassifyResult =
 export type ClassifyHairAuditImageOutcome =
   | { ok: true; result: HairAuditImageClassifyResponse }
   | { ok: false; code: "provider_not_ready"; status: 503 };
+
+const LIVE_DEGRADED_CLASSIFIER_VERSION = "hli-openai-hairaudit-live-v1" as const;
 
 const RESPONSE_FIELD_KEYS = [
   "category",
@@ -240,6 +243,10 @@ export async function classifyHairAuditImageRequest(
   input: HairAuditImageClassifyRequest,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<ClassifyHairAuditImageOutcome> {
+  if (resolveHairauditClassifierMode(env) === "stub") {
+    return { ok: true, result: buildStubClassificationResponse(input) };
+  }
+
   if (isClinicalHairImageClassifierAvailable(env)) {
     const realResult = await classifyClinicalHairImageFromModelUrl(
       {
@@ -249,6 +256,7 @@ export async function classifyHairAuditImageRequest(
         storage_path: input.storage_path,
         image_content_type: input.image_content_type,
         image_size_bytes: input.image_size_bytes,
+        source_upload_id: input.source_upload_id,
       },
       env
     );
@@ -258,9 +266,15 @@ export async function classifyHairAuditImageRequest(
     }
   }
 
-  if (resolveHairauditClassifierMode(env) === "stub") {
-    return { ok: true, result: buildStubClassificationResponse(input) };
-  }
-
-  return { ok: false, code: "provider_not_ready", status: 503 };
+  return {
+    ok: true,
+    result: buildDegradedHairAuditClassification({
+      canonical_photo_category: input.canonical_photo_category,
+      legacy_upload_type: input.legacy_upload_type,
+      classifier_version: LIVE_DEGRADED_CLASSIFIER_VERSION,
+      reason: isClinicalHairImageClassifierAvailable(env)
+        ? "live classifier unavailable in this runtime"
+        : "live classifier prerequisites not met",
+    }),
+  };
 }
