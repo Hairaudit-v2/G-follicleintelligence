@@ -71,7 +71,29 @@ export type ImagingOsPatientPayload = {
   scalpMaps: ImagingScalpMapRow[];
   annotationsByImageId: Record<string, ImagingAnnotationRow>;
   comparisonPairs: VieComparisonPairRow[];
+  primaryCaseId: string | null;
 };
+
+export async function loadPrimaryCaseIdForPatient(
+  tenantId: string,
+  patientId: string,
+  client?: SupabaseClient
+): Promise<string | null> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = tenantId.trim();
+  const pid = patientId.trim();
+  const { data, error } = await supabase
+    .from("fi_cases")
+    .select("id")
+    .eq("tenant_id", tid)
+    .or(`patient_id.eq.${pid},foundation_patient_id.eq.${pid}`)
+    .is("deleted_at", null)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? String((data as { id: string }).id) : null;
+}
 
 async function resolveProtocolTemplateRow(
   tenantId: string,
@@ -244,6 +266,8 @@ export async function loadImagingOsPatientPayload(
     // best-effort — table may be unavailable during migration rollout
   }
 
+  const primaryCaseId = await loadPrimaryCaseIdForPatient(tid, pid, supabase);
+
   return {
     bundle,
     protocolTemplates,
@@ -251,5 +275,6 @@ export async function loadImagingOsPatientPayload(
     scalpMaps,
     annotationsByImageId,
     comparisonPairs,
+    primaryCaseId,
   };
 }

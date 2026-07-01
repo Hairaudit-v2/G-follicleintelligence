@@ -1034,6 +1034,59 @@ const visualSummaryStaffRecordLoadSchema = z
   })
   .strict();
 
+const visualSummaryShareSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    caseId: z.string().uuid(),
+    reportType: z.enum(["surgery_post_op_summary", "hairaudit_visual_summary"]),
+    sendEmail: z.boolean().optional(),
+    personalNote: z.string().max(2000).nullable().optional(),
+  })
+  .strict();
+
+export async function sharePatientVisualSummaryWithPatientAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | { ok: true; shareUrl: string; expiresAt?: string; emailedTo?: string }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = visualSummaryShareSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const { resolveFiOsPublicOrigin } = await import("@/src/lib/fiOs/fiOsPublicOrigin.server");
+    const origin = await resolveFiOsPublicOrigin();
+
+    if (parsed.sendEmail) {
+      const { sendPatientVisualSummaryShareEmail } =
+        await import("@/src/lib/imaging-os/patientVisualSummaryShare.server");
+      const result = await sendPatientVisualSummaryShareEmail({
+        tenantId,
+        patientId,
+        caseId: parsed.caseId,
+        reportType: parsed.reportType,
+        origin,
+        personalNote: parsed.personalNote,
+      });
+      return { ok: true, shareUrl: result.shareUrl, emailedTo: result.to };
+    }
+
+    const { generatePatientVisualSummaryShareLink } =
+      await import("@/src/lib/imaging-os/patientVisualSummaryShare.server");
+    const link = await generatePatientVisualSummaryShareLink({
+      tenantId,
+      patientId,
+      caseId: parsed.caseId,
+      reportType: parsed.reportType,
+      origin,
+    });
+    return { ok: true, shareUrl: link.shareUrl, expiresAt: link.expiresAt };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
 export async function loadPatientVisualSummaryStaffRecordAction(
   tenantId: string,
   body: unknown

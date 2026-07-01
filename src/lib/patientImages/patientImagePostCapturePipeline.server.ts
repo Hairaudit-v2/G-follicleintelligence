@@ -534,25 +534,31 @@ export async function runPatientImagePostCapturePipeline(
   const caseId =
     existingRow.case_id != null ? String(existingRow.case_id).trim() : "";
   if (caseId) {
-    const { isPatientVisualSummaryEligibleCaptureImage } =
+    const { resolveReportTypesForEligibleCapture } =
       await import("@/src/lib/imaging-os/patientVisualSummaryCaptureEligibilityCore");
-    if (
-      isPatientVisualSummaryEligibleCaptureImage({
+    const reportTypes = resolveReportTypesForEligibleCapture({
+      image: {
         ai_image_category: existingRow.ai_image_category ?? null,
         anatomical_region: existingRow.anatomical_region ?? null,
         image_category: existingRow.image_category ?? null,
         imaging_protocol_slot_slug: existingRow.imaging_protocol_slot_slug ?? null,
         follow_up_interval: existingRow.follow_up_interval ?? null,
-      })
-    ) {
+      },
+      metadata: mergedMetadata,
+    });
+    if (reportTypes.length > 0) {
       void import("@/src/lib/imaging-os/patientVisualSummaryAutoRegen.server").then(
-        ({ triggerPatientVisualSummaryAutoRegen }) =>
-          triggerPatientVisualSummaryAutoRegen({
-            tenantId: tid,
-            caseId,
-            trigger: "post_op_capture",
-            source: "imagingos",
-          })
+        ({ triggerPatientVisualSummaryAutoRegen }) => {
+          for (const reportType of reportTypes) {
+            void triggerPatientVisualSummaryAutoRegen({
+              tenantId: tid,
+              caseId,
+              reportType,
+              trigger: "post_op_capture",
+              source: "imagingos",
+            });
+          }
+        }
       );
     }
   }

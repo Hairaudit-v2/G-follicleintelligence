@@ -1,10 +1,13 @@
 /**
- * ImagingOS Phase 7C — detect images eligible for visual summary auto-regeneration.
+ * ImagingOS Phase 7C/7D — detect images eligible for visual summary auto-regeneration.
  */
 
 import { mapToFiImageAttributionType } from "@/src/lib/patientImages/fiImageAttributionCore";
 import type { PatientImageRow } from "@/src/lib/patientImages/patientImageTypes";
-import type { PatientVisualSummaryPhotoSlot } from "./patientVisualSummaryReportTypes";
+import type {
+  PatientVisualSummaryPhotoSlot,
+  PatientVisualSummaryReportType,
+} from "./patientVisualSummaryReportTypes";
 
 const SUMMARY_SLOTS: PatientVisualSummaryPhotoSlot[] = [
   "immediate_post_op",
@@ -72,4 +75,30 @@ export function isPatientVisualSummaryEligibleCaptureImage(
   >
 ): boolean {
   return SUMMARY_SLOTS.some((slot) => imageMatchesVisualSummaryPhotoSlot(image, slot));
+}
+
+export function isHairAuditVisualSummaryCapture(
+  metadata: Record<string, unknown> | null | undefined
+): boolean {
+  return String(metadata?.upload_source ?? "").trim() === "hairaudit";
+}
+
+/** Report types to auto-regenerate after an eligible post-capture image. */
+export function resolveReportTypesForEligibleCapture(input: {
+  image: Pick<
+    PatientImageRow,
+    | "ai_image_category"
+    | "anatomical_region"
+    | "image_category"
+    | "imaging_protocol_slot_slug"
+    | "follow_up_interval"
+  >;
+  metadata?: Record<string, unknown> | null;
+}): PatientVisualSummaryReportType[] {
+  if (!isPatientVisualSummaryEligibleCaptureImage(input.image)) return [];
+  const types: PatientVisualSummaryReportType[] = ["surgery_post_op_summary"];
+  if (isHairAuditVisualSummaryCapture(input.metadata)) {
+    types.push("hairaudit_visual_summary");
+  }
+  return types;
 }

@@ -46,7 +46,7 @@ export async function loadPatientPortalVisualSummaryPdf(input: {
   const supabase = supabaseAdmin();
   const { data: caseRow, error } = await supabase
     .from("fi_cases")
-    .select("patient_id, metadata, tenant_id")
+    .select("patient_id, foundation_patient_id, metadata, tenant_id")
     .eq("id", caseId)
     .eq("tenant_id", tid)
     .is("deleted_at", null)
@@ -54,8 +54,13 @@ export async function loadPatientPortalVisualSummaryPdf(input: {
   if (error) return { ok: false, status: 500, error: error.message };
   if (!caseRow) return { ok: false, status: 404, error: "Case not found." };
 
-  const casePatientId =
-    caseRow.patient_id != null ? String(caseRow.patient_id) : null;
+  const legacyPatient =
+    caseRow.patient_id != null ? String(caseRow.patient_id).trim() : "";
+  const foundationPatient =
+    (caseRow as { foundation_patient_id?: string | null }).foundation_patient_id != null
+      ? String((caseRow as { foundation_patient_id: string }).foundation_patient_id).trim()
+      : "";
+  const casePatientId = legacyPatient || foundationPatient || null;
   const metadata =
     caseRow.metadata && typeof caseRow.metadata === "object" && !Array.isArray(caseRow.metadata)
       ? (caseRow.metadata as Record<string, unknown>)

@@ -7,6 +7,7 @@ import {
   loadPatientVisualSummaryReportAction,
   loadPatientVisualSummaryStaffRecordAction,
   regeneratePatientVisualSummaryReportAction,
+  sharePatientVisualSummaryWithPatientAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { PatientVisualSummaryReportView } from "./PatientVisualSummaryReport";
 import { PatientVisualSummaryZoneEditor } from "./PatientVisualSummaryZoneEditor";
@@ -116,6 +117,35 @@ export function PatientVisualSummaryReportPanel({
     });
   };
 
+  const shareWithPatient = (sendEmail: boolean) => {
+    if (!caseId) {
+      setMessage("Link a case before sharing with the patient.");
+      return;
+    }
+    start(async () => {
+      const res = await sharePatientVisualSummaryWithPatientAction(tenantId, patientId, {
+        adminKey,
+        caseId,
+        reportType,
+        sendEmail,
+      });
+      if (!res.ok) {
+        setMessage(res.error);
+        return;
+      }
+      if (res.emailedTo) {
+        setMessage(`Share link emailed to ${res.emailedTo}.`);
+      } else {
+        setMessage(`Patient share link copied to clipboard. Expires ${res.expiresAt ?? "soon"}.`);
+        try {
+          await navigator.clipboard.writeText(res.shareUrl);
+        } catch {
+          setMessage(`Share link: ${res.shareUrl}`);
+        }
+      }
+    });
+  };
+
   const exportPdfUrl = () => {
     const params = new URLSearchParams();
     params.set("reportType", reportType);
@@ -154,6 +184,22 @@ export function PatientVisualSummaryReportPanel({
         </button>
         <button type="button" className={btnClass} disabled={pending} onClick={regenerate}>
           Regenerate from latest images/data
+        </button>
+        <button
+          type="button"
+          className={btnClass}
+          disabled={pending || !caseId}
+          onClick={() => shareWithPatient(false)}
+        >
+          Copy patient share link
+        </button>
+        <button
+          type="button"
+          className={btnClass}
+          disabled={pending || !caseId}
+          onClick={() => shareWithPatient(true)}
+        >
+          Email share link
         </button>
       </div>
 

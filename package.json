@@ -74,6 +74,7 @@
     "supabase:push:post-op-tracking": "node scripts/apply-fi-case-post-op-tracking-remote.mjs",
     "dev:provision:evolved": "tsx scripts/provision-evolved-tenant.ts",
     "seed:enterprise-demo": "node scripts/run-with-system-ca.mjs tsx scripts/seedEnterpriseDemoTenant.ts",
+    "seed:visual-summary-e2e": "node scripts/run-with-system-ca.mjs tsx scripts/seed-visual-summary-e2e-fixture.ts",
     "seed:ihrg-demo": "node scripts/run-with-system-ca.mjs tsx scripts/seed-ihrg-demo-data.ts --tenant ihrg-demo --profile alive",
     "validate:titan-global-command-centre": "node scripts/run-with-system-ca.mjs tsx scripts/validateEnterpriseDemoGlobalCommandCentre.ts",
     "seed": "tsx scripts/seed-evolved-perth-service-room-eligibility.ts",

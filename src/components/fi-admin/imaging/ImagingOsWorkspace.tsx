@@ -300,6 +300,7 @@ export function ImagingOsWorkspace({
       <PatientVisualSummaryReportPanel
         tenantId={tenantId}
         patientId={patientId}
+        caseId={initial.primaryCaseId}
         reportType="surgery_post_op_summary"
         adminKey={adminKey.trim() || undefined}
       />

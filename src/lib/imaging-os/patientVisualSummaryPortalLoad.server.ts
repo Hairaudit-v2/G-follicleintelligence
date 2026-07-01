@@ -39,7 +39,7 @@ export async function loadApprovedPatientVisualSummariesForPortal(input: {
     .from("fi_cases")
     .select("id, metadata")
     .eq("tenant_id", tid)
-    .eq("patient_id", pid)
+    .or(`patient_id.eq.${pid},foundation_patient_id.eq.${pid}`)
     .is("deleted_at", null)
     .order("updated_at", { ascending: false })
     .limit(20);
