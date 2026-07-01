@@ -32,6 +32,10 @@ import type {
   LiveProcedureTimelineStage,
   LiveProcedureTimelineStatus,
 } from "@/src/lib/surgeryOs/liveProcedureTimelineCore";
+import type { ExtractionVelocitySnapshot } from "@/src/lib/surgeryOs/extractionVelocityCore";
+import type { ImplantationSpeedSnapshot } from "@/src/lib/surgeryOs/implantationSpeedCore";
+import type { SurgicalRiskDetectionSnapshot } from "@/src/lib/surgeryOs/surgicalRiskDetectionCore";
+import type { TransectionMonitoringSnapshot } from "@/src/lib/surgeryOs/transectionMonitoringCore";
 
 export type {
   GraftIntelligenceSnapshot,
@@ -42,6 +46,10 @@ export type {
   LiveProcedureTimelineSnapshot,
   LiveProcedureTimelineStage,
   LiveProcedureTimelineStatus,
+  ExtractionVelocitySnapshot,
+  TransectionMonitoringSnapshot,
+  ImplantationSpeedSnapshot,
+  SurgicalRiskDetectionSnapshot,
 };
 
 export type SurgeryOsReadinessItem = {
@@ -215,6 +223,10 @@ export type SurgeryOsCommandCentrePayload = {
   vieCapture: SurgeryOsVieCaptureSummary[];
   liveTimeline: LiveProcedureTimelineSnapshot[];
   graftIntelligence: GraftIntelligenceSnapshot[];
+  extractionVelocity: ExtractionVelocitySnapshot[];
+  transectionMonitoring: TransectionMonitoringSnapshot[];
+  implantationSpeed: ImplantationSpeedSnapshot[];
+  surgicalRisks: SurgicalRiskDetectionSnapshot[];
   intelligence: {
     policy: {
       canExportCompetencyData: boolean;

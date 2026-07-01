@@ -31,6 +31,10 @@ export type {
   SurgeryOsCommandCentrePayload,
   GraftIntelligenceSnapshot,
   LiveProcedureTimelineSnapshot,
+  ExtractionVelocitySnapshot,
+  TransectionMonitoringSnapshot,
+  ImplantationSpeedSnapshot,
+  SurgicalRiskDetectionSnapshot,
   SurgeryOsGraftSummary,
   SurgeryOsLiveSurgery,
   SurgeryOsOperationalNote,
@@ -385,6 +389,72 @@ const graftIntelligenceSnapshotSchema = z.object({
   warnings: z.array(graftIntelligenceWarningSchema),
 });
 
+const extractionVelocityHourlyBucketSchema = z.object({
+  hourIndex: z.number().int().min(0),
+  label: z.string(),
+  graftsExtracted: z.number().int().min(0),
+  ratePerHour: z.number().int().min(0),
+});
+
+const extractionVelocitySnapshotSchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientLabel: z.string(),
+  graftsExtracted: z.number().int().min(0),
+  extractionRatePerHour: z.number().int().min(0).nullable(),
+  hourlyBreakdown: z.array(extractionVelocityHourlyBucketSchema),
+  peakEfficiencyWindow: z.string().nullable(),
+  efficiencyDeclinePercent: z.number().int().min(0).max(100).nullable(),
+  fatigueSignal: z.boolean(),
+  trendDirection: z.enum(["up", "down", "stable"]),
+  summary: z.string(),
+});
+
+const transectionMonitoringWarningSchema = z.object({
+  kind: z.enum(["no_data", "unclassified_damage", "pending_tray_review", "elevated_rate"]),
+  message: z.string(),
+  severity: z.enum(["info", "warning", "critical"]),
+});
+
+const transectionMonitoringSnapshotSchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientLabel: z.string(),
+  totalGraftsReviewed: z.number().int().min(0),
+  partialTransections: z.number().int().min(0),
+  fullTransections: z.number().int().min(0),
+  transectionRate: z.number().nullable(),
+  qualityScore: z.number().int().min(0).max(100),
+  status: z.enum(["excellent", "acceptable", "watch", "critical"]),
+  warnings: z.array(transectionMonitoringWarningSchema),
+  summary: z.string(),
+});
+
+const implantationSpeedSnapshotSchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientLabel: z.string(),
+  implantedGrafts: z.number().int().min(0),
+  implantationRatePerHour: z.number().int().min(0).nullable(),
+  implantationDurationMinutes: z.number().int().min(0).nullable(),
+  efficiencyScore: z.number().int().min(0).max(100),
+  trendDirection: z.enum(["up", "down", "stable"]),
+  summary: z.string(),
+});
+
+const surgicalDetectedRiskSchema = z.object({
+  title: z.string(),
+  severity: z.enum(["warning", "critical"]),
+  recommendation: z.string(),
+});
+
+const surgicalRiskDetectionSnapshotSchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientLabel: z.string(),
+  totalRisks: z.number().int().min(0),
+  criticalRisks: z.number().int().min(0),
+  warningRisks: z.number().int().min(0),
+  detectedRisks: z.array(surgicalDetectedRiskSchema),
+  summary: z.string(),
+});
+
 const intelligenceSchema = z.object({
   policy: z.object({
     canExportCompetencyData: z.boolean(),
@@ -428,6 +498,10 @@ export const surgeryOsCommandCentrePayloadSchema = z.object({
   vieCapture: z.array(vieCaptureSummarySchema),
   liveTimeline: z.array(liveProcedureTimelineSnapshotSchema),
   graftIntelligence: z.array(graftIntelligenceSnapshotSchema),
+  extractionVelocity: z.array(extractionVelocitySnapshotSchema),
+  transectionMonitoring: z.array(transectionMonitoringSnapshotSchema),
+  implantationSpeed: z.array(implantationSpeedSnapshotSchema),
+  surgicalRisks: z.array(surgicalRiskDetectionSnapshotSchema),
   intelligence: intelligenceSchema,
 });
 

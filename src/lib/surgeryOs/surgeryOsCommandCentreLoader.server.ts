@@ -64,6 +64,10 @@ import {
 } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
 import { loadSurgeryOsVieCaptureSummaries } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import { buildGraftIntelligence } from "@/src/lib/surgeryOs/graftIntelligenceCore";
+import { buildExtractionVelocity } from "@/src/lib/surgeryOs/extractionVelocityCore";
+import { buildImplantationSpeed } from "@/src/lib/surgeryOs/implantationSpeedCore";
+import { buildSurgicalRiskDetection } from "@/src/lib/surgeryOs/surgicalRiskDetectionCore";
+import { buildTransectionMonitoring } from "@/src/lib/surgeryOs/transectionMonitoringCore";
 import {
   buildLiveProcedureTimeline,
   type LiveProcedureTimelineInputEvent,
@@ -365,6 +369,10 @@ export async function loadSurgeryOsCommandCentrePayload(
   const graftSummary: SurgeryOsGraftSummary[] = [];
   const liveTimeline: SurgeryOsCommandCentrePayload["liveTimeline"] = [];
   const graftIntelligence: SurgeryOsCommandCentrePayload["graftIntelligence"] = [];
+  const extractionVelocity: SurgeryOsCommandCentrePayload["extractionVelocity"] = [];
+  const transectionMonitoring: SurgeryOsCommandCentrePayload["transectionMonitoring"] = [];
+  const implantationSpeed: SurgeryOsCommandCentrePayload["implantationSpeed"] = [];
+  const surgicalRisks: SurgeryOsCommandCentrePayload["surgicalRisks"] = [];
   const allAlerts: SurgeryOsAlert[] = [];
   const eventsBySurgery = new Map<string, LiveProcedureTimelineInputEvent[]>();
   for (const event of events) {
@@ -649,6 +657,72 @@ export async function loadSurgeryOsCommandCentrePayload(
         pendingTrayCount: trayBuckets.pending,
       })
     );
+
+    const surgeryProcedureEvents = eventsBySurgery.get(row.id) ?? [];
+    const surgeryGraftVelocityEvents = rawGraftEvents.map((e) => ({
+      occurredAt: e.created_at,
+      deltaExtracted: e.delta_extracted,
+      deltaImplanted: e.delta_implanted,
+    }));
+    const surgeryTrayEvents = rawGraftEvents.map((e) => ({
+      eventType: e.event_type,
+      reviewStatus:
+        e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+      singles: e.singles,
+      doubles: e.doubles,
+      triples: e.triples,
+      multiples: e.multiples,
+      deltaDiscarded: e.delta_discarded,
+      note: e.note,
+    }));
+
+    const timelineSnapshot = liveTimeline[liveTimeline.length - 1]!;
+    const graftIntelSnapshot = graftIntelligence[graftIntelligence.length - 1]!;
+
+    const extractionVelocitySnapshot = buildExtractionVelocity({
+      surgeryId: row.id,
+      patientLabel,
+      extractedGrafts: totals.extractedGrafts,
+      events: surgeryProcedureEvents,
+      graftEvents: surgeryGraftVelocityEvents
+        .filter((e) => e.deltaExtracted > 0)
+        .map((e) => ({ occurredAt: e.occurredAt, deltaExtracted: e.deltaExtracted })),
+      now,
+    });
+    extractionVelocity.push(extractionVelocitySnapshot);
+
+    const transectionMonitoringSnapshot = buildTransectionMonitoring({
+      surgeryId: row.id,
+      patientLabel,
+      trayEvents: surgeryTrayEvents,
+      pendingTrayCount: trayBuckets.pending,
+    });
+    transectionMonitoring.push(transectionMonitoringSnapshot);
+
+    const implantationSpeedSnapshot = buildImplantationSpeed({
+      surgeryId: row.id,
+      patientLabel,
+      implantedGrafts: totals.implantedGrafts,
+      events: surgeryProcedureEvents,
+      graftEvents: surgeryGraftVelocityEvents
+        .filter((e) => e.deltaImplanted > 0)
+        .map((e) => ({ occurredAt: e.occurredAt, deltaImplanted: e.deltaImplanted })),
+      now,
+    });
+    implantationSpeed.push(implantationSpeedSnapshot);
+
+    surgicalRisks.push(
+      buildSurgicalRiskDetection({
+        surgeryId: row.id,
+        patientLabel,
+        extractionVelocity: extractionVelocitySnapshot,
+        transectionMonitoring: transectionMonitoringSnapshot,
+        implantationSpeed: implantationSpeedSnapshot,
+        liveTimeline: timelineSnapshot,
+        graftIntelligence: graftIntelSnapshot,
+        now,
+      })
+    );
   }
 
   allAlerts.sort((a, b) => compareSurgeryOsSeverity(a.severity, b.severity));
@@ -789,6 +863,10 @@ export async function loadSurgeryOsCommandCentrePayload(
     vieCapture,
     liveTimeline,
     graftIntelligence,
+    extractionVelocity,
+    transectionMonitoring,
+    implantationSpeed,
+    surgicalRisks,
     intelligence: emptySurgeryOsIntelligence(),
   };
 

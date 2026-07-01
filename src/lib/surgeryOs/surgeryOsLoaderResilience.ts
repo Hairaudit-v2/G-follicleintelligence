@@ -78,6 +78,10 @@ export function emptySurgeryOsCommandCentrePayload(input: {
     vieCapture: [],
     liveTimeline: [],
     graftIntelligence: [],
+    extractionVelocity: [],
+    transectionMonitoring: [],
+    implantationSpeed: [],
+    surgicalRisks: [],
     intelligence: emptySurgeryOsIntelligence(),
   };
 }

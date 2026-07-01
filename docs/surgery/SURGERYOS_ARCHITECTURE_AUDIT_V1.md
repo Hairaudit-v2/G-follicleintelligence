@@ -909,4 +909,91 @@ No new `fi_surgery_procedure_events` kinds added. Sprint 1 maps existing kinds t
 
 ---
 
+## SurgeryOS Sprint 2 Implementation Notes (2026-07-01)
+
+Procedural Performance Intelligence: real-time surgical efficiency, graft quality, and live risk detection on the existing unified live theatre layer. No duplicate models, no CalendarOS changes, Sprint 1 and P0 sync preserved.
+
+### Files added
+
+| Area | Files |
+|------|-------|
+| Extraction velocity engine | `src/lib/surgeryOs/extractionVelocityCore.ts`, `extractionVelocityCore.test.ts` |
+| Transection monitoring engine | `src/lib/surgeryOs/transectionMonitoringCore.ts`, `transectionMonitoringCore.test.ts` |
+| Implantation speed engine | `src/lib/surgeryOs/implantationSpeedCore.ts`, `implantationSpeedCore.test.ts` |
+| Surgical risk detection engine | `src/lib/surgeryOs/surgicalRiskDetectionCore.ts`, `surgicalRiskDetectionCore.test.ts` |
+| UI widget | `src/components/fi-admin/surgery-os/widgets/SurgeryOsProceduralPerformance.tsx` |
+
+### Files changed
+
+| Area | Files |
+|------|-------|
+| Command centre payload | `surgeryOsBoardModel.types.ts`, `surgeryOsBoardPayloadSchema.ts`, `surgeryOsCommandCentreLoader.server.ts`, `surgeryOsLoaderResilience.ts` |
+| UI | `SurgeryOsDashboard.tsx` |
+| Tests | `surgeryOsBoardPayloadSchema.test.ts` |
+
+### Engines created
+
+**Extraction Velocity Engine** (`buildExtractionVelocity`)
+
+- Input: graft session extracted totals, `fi_surgery_procedure_events` (extraction start/pause/resume/end), graft count event deltas
+- Output: `graftsExtracted`, `extractionRatePerHour`, `hourlyBreakdown`, `peakEfficiencyWindow`, `efficiencyDeclinePercent`, `fatigueSignal`, `trendDirection`, `summary`
+- Thresholds: `DEFAULT_EXTRACTION_VELOCITY_THRESHOLDS` — fatigue at ≥15% first/second-half decline
+
+**Transection Monitoring Engine** (`buildTransectionMonitoring`)
+
+- Input: confirmed/pending `tray_count` events from graft count stream (`deltaDiscarded` = damaged units, note-based partial/full classification)
+- Output: `totalGraftsReviewed`, `partialTransections`, `fullTransections`, `transectionRate`, `qualityScore`, `status`, `warnings`, `summary`
+- Status thresholds (`DEFAULT_TRANSECTION_MONITORING_THRESHOLDS`): excellent &lt;2%, acceptable &lt;5%, watch &lt;10%, critical ≥10%
+
+**Implantation Speed Engine** (`buildImplantationSpeed`)
+
+- Input: graft session implanted totals, `implantation_started` / `procedure_completed` events, implant count deltas
+- Output: `implantedGrafts`, `implantationRatePerHour`, `implantationDurationMinutes`, `efficiencyScore`, `trendDirection`, `summary`
+- Benchmark: `DEFAULT_IMPLANTATION_SPEED_THRESHOLDS.optimalRatePerHour` = 600 grafts/hour
+
+**Surgical Risk Detection Engine** (`buildSurgicalRiskDetection`)
+
+- Input: composes Sprint 2 engines + Sprint 1 `liveTimeline` + `graftIntelligence`
+- Detects: extraction slowing, high transection, behind schedule, graft inconsistency, implantation delay, operator fatigue, low implantation velocity
+- Output: `totalRisks`, `criticalRisks`, `warningRisks`, `detectedRisks[]`, `summary`
+
+### API / payload integration
+
+`GET /api/tenants/{tenantId}/surgery-os` and SSR loader now include (Sprint 1 fields unchanged):
+
+- `extractionVelocity: ExtractionVelocitySnapshot[]`
+- `transectionMonitoring: TransectionMonitoringSnapshot[]`
+- `implantationSpeed: ImplantationSpeedSnapshot[]`
+- `surgicalRisks: SurgicalRiskDetectionSnapshot[]`
+
+### Data sources
+
+| Engine | Primary tables / streams |
+|--------|--------------------------|
+| Extraction velocity | `fi_surgery_graft_sessions`, `fi_surgery_graft_count_events`, `fi_surgery_procedure_events` |
+| Transection monitoring | `fi_surgery_graft_count_events` (confirmed tray review + damaged/discarded units) |
+| Implantation speed | `fi_surgery_graft_sessions`, `fi_surgery_graft_count_events`, `fi_surgery_procedure_events` |
+| Surgical risk | Composed snapshots (no new tables) |
+
+### Empty-state rules
+
+| Engine | Summary |
+|--------|---------|
+| Extraction velocity | `"No extraction velocity data available."` |
+| Transection monitoring | `"No transection monitoring data available."` |
+| Implantation speed | `"No implantation speed data available."` |
+| Surgical risk | `"No active procedural risks detected."` |
+
+All engines clamp percentages 0–100, avoid division by zero, and never emit NaN.
+
+### Remaining gaps (post-Sprint 2)
+
+- Explicit partial/full transection capture in graft counting UI (currently note-keyword + damaged-unit inference).
+- Tenant-configurable performance thresholds.
+- Historical benchmarking across procedures / surgeon cohorts.
+- Analytics bus publication for performance/risk signals.
+- `intelligence.hints` slot still placeholder.
+
+---
+
 *End of SurgeryOS Architecture Audit V1*
