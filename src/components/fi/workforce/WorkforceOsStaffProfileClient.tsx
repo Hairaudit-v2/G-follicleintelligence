@@ -11,11 +11,13 @@ import {
   ManageEmploymentModal,
   StaffEditModal,
 } from "@/src/components/fi/workforce/StaffLifecycleModals";
+import { StaffLifecyclePanel } from "@/src/components/fi/workforce/StaffLifecyclePanel";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 import {
   isExternallyManagedStaff,
   resolveIdentitySourceBadge,
 } from "@/src/lib/workforce-os/staffLifecycleCore";
+import { resolveStaffLifecycleOperationalPresentation } from "@/src/lib/workforce-os/staffLifecyclePresentation";
 
 export function WorkforceOsStaffProfileClient({
   tenantId,
@@ -46,6 +48,7 @@ export function WorkforceOsStaffProfileClient({
   const identityBadge = resolveIdentitySourceBadge(lifecycle.identity_source);
   const external = isExternallyManagedStaff(lifecycle);
   const hrLinked = Boolean(lifecycle.iiohr_staff_record_id);
+  const lifecycleState = resolveStaffLifecycleOperationalPresentation(lifecycle);
 
   return (
     <div className="space-y-6">
@@ -89,8 +92,8 @@ export function WorkforceOsStaffProfileClient({
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#E2E8F0]">
             {identityBadge.label}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold capitalize text-[#E2E8F0]">
-            {lifecycle.employment_status.replace(/_/g, " ")}
+          <span className="rounded-full border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3 py-1 text-xs font-semibold text-[#7DD3FC]">
+            {lifecycleState.label}
           </span>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#E2E8F0]">
             {hrLinked ? "HR Linked" : "No HR Link"}
@@ -139,6 +142,8 @@ export function WorkforceOsStaffProfileClient({
           </div>
         </dl>
       </DashboardCard>
+
+      <StaffLifecyclePanel lifecycle={lifecycle} />
 
       {auditOpen ? (
         <DashboardCard className="p-6">

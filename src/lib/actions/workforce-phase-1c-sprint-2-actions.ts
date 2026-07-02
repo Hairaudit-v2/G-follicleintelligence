@@ -127,7 +127,8 @@ export async function mergeStaffRecordsAction(
 export async function offboardStaffMemberAction(
   tenantId: string,
   staffMemberId: string,
-  exitReason: string
+  exitReason: string,
+  employmentStatus?: "terminated" | "resigned" | "contract_ended"
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
@@ -135,6 +136,7 @@ export async function offboardStaffMemberAction(
       tenantId,
       staffId: staffMemberId,
       exitReason,
+      employmentStatus,
       terminatedBy: fiUserId,
     });
     revalidateWorkforceHrSurfaces(tenantId);

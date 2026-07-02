@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { X } from "lucide-react";
+import { CircleHelp, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,10 +14,11 @@ import {
   updateStaffProfileAction,
 } from "@/lib/actions/workforce-os-staff-lifecycle-actions";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { STAFF_EMPLOYMENT_STATUSES } from "@/src/lib/workforce-os/staffLifecycleTypes";
 import {
-  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
-  STAFF_EMPLOYMENT_STATUSES,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+  MANAGE_EMPLOYMENT_STATUS_LABELS,
+  MANAGE_EMPLOYMENT_VISIBLE_STATUSES,
+} from "@/src/lib/workforce-os/staffLifecyclePresentation";
 import {
   isExternallyManagedStaff,
   resolveEditableProfileFields,
@@ -90,7 +91,6 @@ export function StaffEditModal({
     phone: row.phone ?? "",
     role_code: row.role_code ?? "",
     employment_type: row.employment_type ?? "",
-    employment_status: row.employment_status,
     timezone: row.timezone ?? "",
     notes: row.notes ?? "",
   });
@@ -179,26 +179,6 @@ export function StaffEditModal({
           />
         </label>
         <label className={labelClassName}>
-          Employment status
-          <select
-            className={inputClassName}
-            value={form.employment_status}
-            disabled={fieldLocked("employment_status")}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                employment_status: e.target.value as typeof form.employment_status,
-              }))
-            }
-          >
-            {STAFF_EMPLOYMENT_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={labelClassName}>
           Timezone
           <input
             className={inputClassName}
@@ -228,10 +208,6 @@ export function StaffEditModal({
     </ModalShell>
   );
 }
-
-const MANAGE_EMPLOYMENT_STATUSES = STAFF_EMPLOYMENT_STATUSES.filter(
-  (s) => !OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES.has(s)
-);
 
 export function ManageEmploymentModal({
   tenantId,
@@ -293,9 +269,9 @@ export function ManageEmploymentModal({
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            {MANAGE_EMPLOYMENT_STATUSES.map((s) => (
+            {MANAGE_EMPLOYMENT_VISIBLE_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s.replace(/_/g, " ")}
+                {MANAGE_EMPLOYMENT_STATUS_LABELS[s]}
               </option>
             ))}
           </select>
@@ -320,9 +296,23 @@ export function ManageEmploymentModal({
             onChange={(e) => setEffectiveDate(e.target.value)}
           />
         </label>
-        <label className="flex items-center gap-2 text-sm text-[#CBD5E1]">
-          <input type="checkbox" checked={archive} onChange={(e) => setArchive(e.target.checked)} />
-          Archive from active workforce
+        <label className="flex items-start gap-2 text-sm text-[#CBD5E1]">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={archive}
+            onChange={(e) => setArchive(e.target.checked)}
+          />
+          <span className="flex items-center gap-1.5">
+            Deactivate operational access
+            <span
+              className="inline-flex text-[#64748B] hover:text-[#94A3B8]"
+              title="Temporarily removes this staff member from scheduling and operational systems. This does not terminate employment."
+              aria-label="Temporarily removes this staff member from scheduling and operational systems. This does not terminate employment."
+            >
+              <CircleHelp className="h-3.5 w-3.5" />
+            </span>
+          </span>
         </label>
         {error ? <p className="text-sm text-red-300">{error}</p> : null}
         <div className="flex justify-end gap-2 pt-2">
