@@ -117,6 +117,8 @@ create policy fi_pathology_inbound_documents_select_tenant_member
   );
 
 drop policy if exists fi_pathology_inbound_document_events_select_tenant_member
+  on fi_pathology_inbound_document_events;
+create policy fi_pathology_inbound_document_events_select_tenant_member
   on fi_pathology_inbound_document_events for select to authenticated
   using (
     exists (
