@@ -1,12 +1,18 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { buildAttentionPriorities } from "@/src/lib/fiAdmin/dashboardCommandCentreDerive";
 import {
-  compareTodayFeedItems,
   coveredAggregateKeys,
   entityAttentionItems,
   type TodayEntityAttentionCategory,
   type TodayEntityAttentionSignal,
 } from "@/src/lib/fiOs/todayFeedEntityAttention";
+import { bookingHasPendingArrivalIntent } from "@/src/lib/fiOs/todaySignal/bookingArrivalIntentCore";
+import {
+  applyTodaySignalPriority,
+  comparePrioritisedTodaySignals,
+  type TodayPriorityBand,
+  type TodayPriorityDimensions,
+} from "@/src/lib/fiOs/todaySignal/todaySignalPriority";
 import type {
   DashboardReminderItem,
   ReceptionBoardCard,
@@ -45,6 +51,12 @@ export type TodayFeedItem = {
   groupKey?: string;
   /** Expanded members when this row represents a collapsed group. */
   groupMembers?: TodayFeedItem[];
+  /** D6B — derived priority band (internal / subtle presentation). */
+  priorityBand?: TodayPriorityBand;
+  /** D6B — human-readable priority reasons (internal / subtle). */
+  priorityReasons?: string[];
+  /** D6B — per-dimension scores for tuning and diagnostics. */
+  priorityDimensions?: TodayPriorityDimensions;
 };
 
 export type TodayFeed = {
@@ -127,6 +139,19 @@ function receptionCopy(
   bucket: TodayFeedBucket,
   nowMs: number
 ): Pick<TodayFeedItem, "actionLabel" | "detailLine" | "actionHint" | "groupKey"> {
+  if (
+    bookingHasPendingArrivalIntent({
+      booking_status: card.bookingStatus,
+      metadata: card.metadata,
+    })
+  ) {
+    return {
+      actionLabel: `${firstName(card.displayName)} says they're here`,
+      detailLine: "Awaiting reception confirmation — not fully checked in",
+      actionHint: "Confirm check-in",
+      groupKey: "reception:arrival_intent",
+    };
+  }
   if (card.receptionColumn === "arrived") {
     return {
       actionLabel: `${firstName(card.displayName)} is waiting`,
@@ -193,7 +218,16 @@ function receptionItems(
       let severity: TodayFeedSeverity;
       let priorityScore: number;
 
-      if (c.receptionColumn === "arrived") {
+      const arrivalIntent = bookingHasPendingArrivalIntent({
+        booking_status: c.bookingStatus,
+        metadata: c.metadata,
+      });
+
+      if (arrivalIntent) {
+        bucket = "right_now";
+        severity = "critical";
+        priorityScore = 98;
+      } else if (c.receptionColumn === "arrived") {
         bucket = "right_now";
         severity = "warning";
         priorityScore = 92;
@@ -426,10 +460,6 @@ function entityAttentionFeedItems(
   });
 }
 
-function byPriorityDesc(a: TodayFeedItem, b: TodayFeedItem): number {
-  return compareTodayFeedItems(a, b);
-}
-
 export function buildTodayFeed(input: {
   base: string;
   dashboard: TenantOperationalDashboard;
@@ -445,7 +475,7 @@ export function buildTodayFeed(input: {
   const parsedTodayEnd = parseMs(dashboard.operationalDay.localEndIso);
   const todayEndMs = parsedTodayEnd ?? nowMs + 24 * 60 * 60_000;
 
-  const all: TodayFeedItem[] = [
+  const rawItems: TodayFeedItem[] = [
     ...receptionItems(dashboard.receptionBoard.cards, { base, nowMs, todayEndMs, profileKey }),
     ...staleLeadItems(dashboard.staleLeads, {
       base,
@@ -464,10 +494,13 @@ export function buildTodayFeed(input: {
     }),
   ];
 
+  const all = applyTodaySignalPriority(rawItems, { profileKey, nowMs });
+  const priorityContext = { profileKey, nowMs };
+
   const byBucket = (bucket: TodayFeedBucket): TodayFeedItem[] =>
     all
       .filter((i) => i.bucket === bucket)
-      .sort(byPriorityDesc)
+      .sort((a, b) => comparePrioritisedTodaySignals(a, b, priorityContext))
       .slice(0, maxPerBucket);
 
   return {

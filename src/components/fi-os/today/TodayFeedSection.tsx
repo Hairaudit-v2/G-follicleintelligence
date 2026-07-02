@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { TodayFeedRow } from "@/src/components/fi-os/today/TodayFeedRow";
+import { TodayFeedLiveList } from "@/src/components/fi-os/today/TodayFeedLiveList";
 import type { TodayFeedItem } from "@/src/lib/fiOs/todayFeedDerive";
 
 /** P0C — section wrapper for the living operational feed (no dashboard card chrome). */
@@ -30,11 +30,7 @@ export function TodayFeedSection(props: {
         items.length === 0 ? (
           <p className="py-6 text-sm text-slate-500">{emptyText}</p>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
-            {items.map((item) => (
-              <TodayFeedRow key={item.id} item={item} />
-            ))}
-          </ul>
+          <TodayFeedLiveList items={items} />
         )
       )}
       {footer}

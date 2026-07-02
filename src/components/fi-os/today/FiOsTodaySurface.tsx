@@ -25,8 +25,19 @@ export function FiOsTodaySurface(props: {
   showCrmNav: boolean;
   workspaceProfile?: FiWorkspaceProfileKey;
   viewerDisplayName?: string | null;
+  /** FI-UX-REBUILD D6 — Supabase Realtime refresh (tenant opt-in). */
+  todayRealtimeEnabled?: boolean;
+  /** FI-UX-REBUILD D6 — revision fingerprint polling. */
+  todayRevisionPollEnabled?: boolean;
 }) {
-  const { data, showCrmNav, workspaceProfile, viewerDisplayName } = props;
+  const {
+    data,
+    showCrmNav,
+    workspaceProfile,
+    viewerDisplayName,
+    todayRealtimeEnabled = false,
+    todayRevisionPollEnabled = false,
+  } = props;
 
   const now = new Date();
   const dateLine = new Intl.DateTimeFormat(undefined, {
@@ -60,7 +71,11 @@ export function FiOsTodaySurface(props: {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 pb-8 sm:space-y-10">
-      <TodayFeedRefreshMount />
+      <TodayFeedRefreshMount
+        tenantId={data.tenantId}
+        realtimeEnabled={todayRealtimeEnabled}
+        revisionPollEnabled={todayRevisionPollEnabled}
+      />
       <TodayHeader
         tenantName={data.tenantName}
         dateLine={dateLine}

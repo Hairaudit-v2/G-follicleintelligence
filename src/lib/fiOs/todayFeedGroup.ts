@@ -46,6 +46,9 @@ function groupLabelForKey(groupKey: string, count: number): string {
   if (groupKey === "reception:arriving_soon") {
     return `${count} patients arriving within the next 30 minutes`;
   }
+  if (groupKey === "reception:arrival_intent") {
+    return `${count} patients say they're here`;
+  }
   if (groupKey === "reception:waiting") {
     return `${count} patients waiting to be seen`;
   }

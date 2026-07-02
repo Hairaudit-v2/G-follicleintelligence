@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 
+import { TodayFeedLiveList } from "@/src/components/fi-os/today/TodayFeedLiveList";
 import type { TodayFeedItem } from "@/src/lib/fiOs/todayFeedDerive";
-
-import { TodayFeedRow } from "@/src/components/fi-os/today/TodayFeedRow";
 
 /** P0C — Right now queue: show top priority items, collapse the rest. */
 export function TodayFeedQueue(props: {
@@ -26,11 +25,7 @@ export function TodayFeedQueue(props: {
 
   return (
     <div>
-      <ul className="divide-y divide-white/[0.06]">
-        {visible.map((item) => (
-          <TodayFeedRow key={item.id} item={item} />
-        ))}
-      </ul>
+      <TodayFeedLiveList items={visible} />
       {!expanded && hiddenCount > 0 ? (
         <button
           type="button"

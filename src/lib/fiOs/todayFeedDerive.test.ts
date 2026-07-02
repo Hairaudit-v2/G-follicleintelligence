@@ -386,3 +386,39 @@ test("buildTodayFeed: named entity items rank above aggregate summaries", () => 
   const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
   assert.equal(feed.upNext[0]?.personLabel, "Emma Walsh");
 });
+
+test("buildTodayFeed: QR arrival intent surfaces as right now with confirm copy", () => {
+  const dashboard = baseDashboard({
+    receptionBoard: {
+      cards: [
+        {
+          id: "55555555-0000-0000-0000-000000000001",
+          startAt: "2026-06-10T12:05:00.000Z",
+          endAt: "2026-06-10T12:35:00.000Z",
+          title: null,
+          bookingType: "consult",
+          bookingStatus: "confirmed",
+          timezone: "UTC",
+          leadId: null,
+          patientId: "22222222-0000-0000-0000-000000000001",
+          displayName: "James Morrison",
+          statusLabel: "Confirmed",
+          typeLabel: "Consultation",
+          providerLabel: "",
+          clinicLabel: null,
+          roomLabel: null,
+          receptionColumn: "expected",
+          metadata: {
+            fi_arrival_intent_at: "2026-06-10T12:00:00.000Z",
+            fi_arrival_intent_source: "qr",
+          },
+        },
+      ],
+    },
+  });
+
+  const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
+  assert.equal(feed.rightNow.length, 1);
+  assert.match(feed.rightNow[0]?.actionLabel ?? "", /James says they're here/i);
+  assert.equal(feed.rightNow[0]?.actionHint, "Confirm check-in");
+});

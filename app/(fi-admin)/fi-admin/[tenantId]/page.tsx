@@ -9,6 +9,10 @@ import { FiOsTodaySurface } from "@/src/components/fi-os/today/FiOsTodaySurface"
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 
 import { isTodaySurfaceEnabledForTenant } from "@/src/lib/fiOs/todaySurfaceRollout.server";
+import {
+  isTodayRealtimeEnabledForTenant,
+  isTodaySignalRevisionPollEnabled,
+} from "@/src/lib/fiOs/todaySignal/todayRealtimePlan";
 
 import { runTodayFeedShadowValidation } from "@/src/lib/fiOs/todayFeedShadowDiff";
 
@@ -133,6 +137,8 @@ export default async function FiAdminTenantHomePage({
           showCrmNav={showCrmNav}
           workspaceProfile={workspaceProfile}
           viewerDisplayName={viewerDisplayName}
+          todayRealtimeEnabled={isTodayRealtimeEnabledForTenant(tenantId)}
+          todayRevisionPollEnabled={isTodaySignalRevisionPollEnabled()}
         />
       </CalendarToastProvider>
     );

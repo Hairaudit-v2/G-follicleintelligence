@@ -21,6 +21,7 @@ import {
   staffPinMayRunReceptionFlowAction,
   receptionFlowAuditPhaseLabel,
 } from "@/src/lib/fiOs/receptionBoardFlowPolicy";
+import { withoutArrivalIntentMetadata } from "@/src/lib/fiOs/todaySignal/bookingArrivalIntentCore";
 
 const receptionBoardFlowBodySchema = z
   .object({
@@ -155,7 +156,10 @@ export async function receptionBoardFlowAction(
     const a = parsed.action;
     if (a === "mark_arrived") {
       nextStatus = "arrived";
-      nextMeta = applyPhaseIntentToMetadataForAction("mark_arrived", rowMeta);
+      nextMeta = applyPhaseIntentToMetadataForAction(
+        "mark_arrived",
+        withoutArrivalIntentMetadata(rowMeta)
+      );
     } else if (a === "start_consultation") {
       nextStatus = "arrived";
       nextMeta = applyPhaseIntentToMetadataForAction("start_consultation", rowMeta);
