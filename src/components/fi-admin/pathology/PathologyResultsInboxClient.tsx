@@ -11,6 +11,7 @@ import type {
   PathologyInboundDocumentListItem,
   PathologyInboundExtractionStatus,
   PathologyInboundMatchStatus,
+  PathologyInboundSourceChannel,
 } from "@/src/lib/pathology/pathologyInboxTypes";
 
 const STATUS_LABELS: Record<PathologyInboundMatchStatus, string> = {
@@ -27,6 +28,12 @@ const EXTRACTION_STATUS_LABELS: Record<PathologyInboundExtractionStatus, string>
   succeeded: "Succeeded",
   failed: "Failed",
   needs_review: "Needs review",
+};
+
+const SOURCE_CHANNEL_LABELS: Record<PathologyInboundSourceChannel, string> = {
+  manual_upload: "Manual upload",
+  email: "Email",
+  api: "API",
 };
 
 function formatWhen(iso: string): string {
@@ -75,11 +82,14 @@ export function PathologyResultsInboxClient(props: {
   initialDocuments: PathologyInboundDocumentListItem[];
   canMutate: boolean;
   extractionEnabled: boolean;
+  emailIngestionEnabled?: boolean;
 }) {
-  const { tenantId, initialDocuments, canMutate, extractionEnabled } = props;
+  const { tenantId, initialDocuments, canMutate, extractionEnabled, emailIngestionEnabled = false } =
+    props;
   const router = useRouter();
   const [documents, setDocuments] = useState(initialDocuments);
   const [statusFilter, setStatusFilter] = useState<PathologyInboundMatchStatus | "all">("pending");
+  const [sourceFilter, setSourceFilter] = useState<PathologyInboundSourceChannel | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(
     initialDocuments.find((d) => d.match_status === "pending")?.id ?? null
   );
@@ -91,9 +101,12 @@ export function PathologyResultsInboxClient(props: {
   const [pending, start] = useTransition();
 
   const filtered = useMemo(() => {
-    if (statusFilter === "all") return documents;
-    return documents.filter((d) => d.match_status === statusFilter);
-  }, [documents, statusFilter]);
+    return documents.filter((d) => {
+      if (statusFilter !== "all" && d.match_status !== statusFilter) return false;
+      if (sourceFilter !== "all" && d.source_channel !== sourceFilter) return false;
+      return true;
+    });
+  }, [documents, statusFilter, sourceFilter]);
 
   const selected = filtered.find((d) => d.id === selectedId) ?? filtered[0] ?? null;
   const selectedMarkers = selected ? previewMarkersFromJob(selected) : [];
@@ -371,7 +384,9 @@ export function PathologyResultsInboxClient(props: {
           <h2 className="text-sm font-semibold text-slate-100">Upload inbound PDF</h2>
           <p className="mt-1 text-xs text-slate-500">
             {extractionEnabled
-              ? "Upload triggers automatic marker extraction when PATHOLOGY_EXTRACTION_ENABLED is on. eFax/email ingestion is not enabled."
+              ? emailIngestionEnabled
+                ? "Manual upload and inbound email both enqueue extraction when PATHOLOGY_EXTRACTION_ENABLED is on."
+                : "Upload triggers automatic marker extraction when PATHOLOGY_EXTRACTION_ENABLED is on."
               : "Manual upload for lab PDFs awaiting patient match. OCR extraction is disabled (PATHOLOGY_EXTRACTION_ENABLED=false)."}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -446,6 +461,21 @@ export function PathologyResultsInboxClient(props: {
               <option value="promoted">Promoted</option>
             </select>
           </label>
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            Source
+            <select
+              className="rounded border border-slate-700 bg-[#0a101f] px-2 py-1 text-sm text-slate-100"
+              value={sourceFilter}
+              onChange={(e) =>
+                setSourceFilter(e.target.value as PathologyInboundSourceChannel | "all")
+              }
+            >
+              <option value="all">All</option>
+              <option value="manual_upload">Manual upload</option>
+              <option value="email">Email</option>
+              <option value="api">API</option>
+            </select>
+          </label>
         </div>
 
         {filtered.length === 0 ? (
@@ -460,6 +490,7 @@ export function PathologyResultsInboxClient(props: {
                 <thead className="border-b border-white/[0.06] text-left text-[0.62rem] uppercase tracking-[0.12em] text-slate-500">
                   <tr>
                     <th className="px-3 py-2">Received</th>
+                    <th className="px-3 py-2">Source</th>
                     <th className="px-3 py-2">File</th>
                     <th className="px-3 py-2">Match</th>
                     <th className="px-3 py-2">Extraction</th>
@@ -478,6 +509,11 @@ export function PathologyResultsInboxClient(props: {
                       onClick={() => setSelectedId(doc.id)}
                     >
                       <td className="px-3 py-2 whitespace-nowrap">{formatWhen(doc.created_at)}</td>
+                      <td className="px-3 py-2">
+                        <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[0.62rem] uppercase tracking-wide text-slate-300">
+                          {SOURCE_CHANNEL_LABELS[doc.source_channel]}
+                        </span>
+                      </td>
                       <td className="px-3 py-2 font-medium text-slate-100">
                         {doc.original_filename ?? "inbound.pdf"}
                       </td>
@@ -503,10 +539,29 @@ export function PathologyResultsInboxClient(props: {
                     {selected.original_filename ?? "inbound.pdf"}
                   </h3>
                   <p className="mt-1 text-xs text-slate-500">
+                    {SOURCE_CHANNEL_LABELS[selected.source_channel]}
+                    {selected.email_source_label ? ` · ${selected.email_source_label}` : ""} ·{" "}
                     {STATUS_LABELS[selected.match_status]} · Extraction:{" "}
                     {EXTRACTION_STATUS_LABELS[selected.extraction_status]}
                   </p>
                 </div>
+
+                {(selected.email_from || selected.email_subject) && (
+                  <dl className="space-y-2 text-xs border-b border-white/[0.06] pb-4">
+                    {selected.email_from ? (
+                      <div>
+                        <dt className="text-slate-500">Email from</dt>
+                        <dd className="text-slate-200">{selected.email_from}</dd>
+                      </div>
+                    ) : null}
+                    {selected.email_subject ? (
+                      <div>
+                        <dt className="text-slate-500">Email subject</dt>
+                        <dd className="text-slate-200">{selected.email_subject}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                )}
 
                 <dl className="space-y-2 text-xs">
                   <div>

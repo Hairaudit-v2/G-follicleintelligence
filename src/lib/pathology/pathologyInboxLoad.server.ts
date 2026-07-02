@@ -38,6 +38,13 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
     extraction_job_id: row.extraction_job_id != null ? String(row.extraction_job_id) : null,
     draft_result_id: row.draft_result_id != null ? String(row.draft_result_id) : null,
     ready_for_review_at: row.ready_for_review_at != null ? String(row.ready_for_review_at) : null,
+    inbound_email_message_id:
+      row.inbound_email_message_id != null ? String(row.inbound_email_message_id) : null,
+    email_from: row.email_from != null ? String(row.email_from) : null,
+    email_subject: row.email_subject != null ? String(row.email_subject) : null,
+    email_source_label: row.email_source_label != null ? String(row.email_source_label) : null,
+    email_attachment_dedup_hash:
+      row.email_attachment_dedup_hash != null ? String(row.email_attachment_dedup_hash) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -163,6 +170,7 @@ function enrichListItem(
 
 export type PathologyInboxListFilters = {
   matchStatus?: PathologyInboundMatchStatus | "all";
+  sourceChannel?: PathologyInboundDocumentRow["source_channel"] | "all";
 };
 
 export async function loadPathologyInboxDocuments(
@@ -182,6 +190,11 @@ export async function loadPathologyInboxDocuments(
   const status = filters.matchStatus ?? "all";
   if (status !== "all") {
     query = query.eq("match_status", status);
+  }
+
+  const sourceChannel = filters.sourceChannel ?? "all";
+  if (sourceChannel !== "all") {
+    query = query.eq("source_channel", sourceChannel);
   }
 
   const { data, error } = await query;

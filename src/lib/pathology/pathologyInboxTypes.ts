@@ -33,6 +33,11 @@ export type PathologyInboundDocumentRow = {
   extraction_job_id: string | null;
   draft_result_id: string | null;
   ready_for_review_at: string | null;
+  inbound_email_message_id: string | null;
+  email_from: string | null;
+  email_subject: string | null;
+  email_source_label: string | null;
+  email_attachment_dedup_hash: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -48,7 +53,11 @@ export type PathologyInboundDocumentEventType =
   | "extraction_succeeded"
   | "extraction_failed"
   | "draft_result_created"
-  | "ready_for_review";
+  | "ready_for_review"
+  | "email_received"
+  | "email_attachment_accepted"
+  | "email_attachment_rejected"
+  | "email_duplicate_detected";
 
 export type PathologyExtractionJobStatus =
   | "queued"

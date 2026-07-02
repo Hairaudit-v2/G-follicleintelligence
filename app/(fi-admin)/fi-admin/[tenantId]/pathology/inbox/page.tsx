@@ -5,8 +5,8 @@ import { PathologyResultsInboxClient } from "@/src/components/fi-admin/pathology
 import { SectionHeader } from "@/src/components/fi-admin/dashboard-ui/SectionHeader";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadPathologyInboxDocuments } from "@/src/lib/pathology/pathologyInboxLoad.server";
+import { readPathologyEmailIngestionEnabled } from "@/src/lib/pathology/email/pathologyEmailIngestionEnv.server";
 import { readPathologyExtractionEnabled } from "@/src/lib/pathology/pathologyExtractionEnv.server";
-import { isPathologyEmailIngestionEnabledFromEnv } from "@/src/lib/pathology/email/pathologyEmailIngestionEnv";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default async function PathologyResultsInboxPage({
     getPaymentRecordMutationCapability(tid),
   ]);
   const extractionEnabled = readPathologyExtractionEnabled();
-  const emailIngestionEnabled = isPathologyEmailIngestionEnabledFromEnv();
+  const emailIngestionEnabled = readPathologyEmailIngestionEnabled();
 
   return (
     <div className="space-y-6">

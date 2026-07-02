@@ -54,6 +54,13 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
     extraction_job_id: row.extraction_job_id != null ? String(row.extraction_job_id) : null,
     draft_result_id: row.draft_result_id != null ? String(row.draft_result_id) : null,
     ready_for_review_at: row.ready_for_review_at != null ? String(row.ready_for_review_at) : null,
+    inbound_email_message_id:
+      row.inbound_email_message_id != null ? String(row.inbound_email_message_id) : null,
+    email_from: row.email_from != null ? String(row.email_from) : null,
+    email_subject: row.email_subject != null ? String(row.email_subject) : null,
+    email_source_label: row.email_source_label != null ? String(row.email_source_label) : null,
+    email_attachment_dedup_hash:
+      row.email_attachment_dedup_hash != null ? String(row.email_attachment_dedup_hash) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -90,7 +97,7 @@ async function loadInboundDocumentRow(
   return mapInboundDocument(data as Record<string, unknown>);
 }
 
-async function appendInboundDocumentEvent(
+export async function appendInboundDocumentEvent(
   supabase: SupabaseClient,
   params: {
     tenantId: string;
@@ -173,7 +180,7 @@ async function applyMatchSuggestion(
   return mapInboundDocument(data as Record<string, unknown>);
 }
 
-export type UploadInboundPathologyDocumentInput = {
+export type CreateInboundDocumentFromBufferInput = {
   tenantId: string;
   pdfBytes: Uint8Array;
   originalFilename: string;
@@ -183,10 +190,17 @@ export type UploadInboundPathologyDocumentInput = {
   extractedDob?: string | null;
   extractedMrn?: string | null;
   actingUserId: string | null;
+  inboundEmailMessageId?: string | null;
+  emailFrom?: string | null;
+  emailSubject?: string | null;
+  emailSourceLabel?: string | null;
+  emailAttachmentDedupHash?: string | null;
 };
 
-export async function uploadInboundPathologyDocument(
-  input: UploadInboundPathologyDocumentInput,
+export type UploadInboundPathologyDocumentInput = CreateInboundDocumentFromBufferInput;
+
+export async function createInboundDocumentFromBuffer(
+  input: CreateInboundDocumentFromBufferInput,
   client?: SupabaseClient
 ): Promise<PathologyInboundDocumentListItem> {
   const supabase = client ?? supabaseAdmin();
@@ -203,6 +217,11 @@ export async function uploadInboundPathologyDocument(
       extracted_patient_name: input.extractedPatientName?.trim() || null,
       extracted_dob: input.extractedDob?.trim() || null,
       extracted_mrn: input.extractedMrn?.trim() || null,
+      inbound_email_message_id: input.inboundEmailMessageId?.trim() || null,
+      email_from: input.emailFrom?.trim() || null,
+      email_subject: input.emailSubject?.trim() || null,
+      email_source_label: input.emailSourceLabel?.trim() || null,
+      email_attachment_dedup_hash: input.emailAttachmentDedupHash?.trim() || null,
     })
     .select("*")
     .single();
@@ -253,6 +272,13 @@ export async function uploadInboundPathologyDocument(
   const loaded = await loadPathologyInboxDocument(tid, doc.id, supabase);
   if (!loaded) throw new Error("Failed to load inbound document after upload.");
   return loaded;
+}
+
+export async function uploadInboundPathologyDocument(
+  input: UploadInboundPathologyDocumentInput,
+  client?: SupabaseClient
+): Promise<PathologyInboundDocumentListItem> {
+  return createInboundDocumentFromBuffer(input, client);
 }
 
 export type ConfirmInboundDocumentMatchInput = {
