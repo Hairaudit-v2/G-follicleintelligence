@@ -50,9 +50,19 @@ export const TODAY_PRIORITY_WEIGHTS: Readonly<Record<TodayPriorityDimension, num
   escalation: 1,
 };
 
+/** D6E — optional presence escalation hints (no PHI). */
+export type TodayPresencePriorityContext = {
+  receptionUnknown?: boolean;
+  doctorUnknown?: boolean;
+  surgeryTeamIncomplete?: boolean;
+  clinicUnattendedCandidate?: boolean;
+};
+
 export type TodaySignalPriorityContext = {
   profileKey?: FiWorkspaceProfileKey;
   nowMs?: number;
+  /** D6E — presence-aware escalation when responsible role is not confirmed. */
+  presenceContext?: TodayPresencePriorityContext;
 };
 
 export type TodaySignalPriorityResult = {
@@ -257,6 +267,44 @@ function roleRelevanceForSignal(
   return table[profile] ?? table.default ?? 50;
 }
 
+function applyPresenceEscalation(
+  kind: TodaySignalKind,
+  dimensions: TodayPriorityDimensions,
+  reasons: string[],
+  context: TodaySignalPriorityContext
+): void {
+  const presence = context.presenceContext;
+  if (!presence) return;
+
+  if (kind === "arrival_intent" && presence.receptionUnknown) {
+    dimensions.urgency = clampScore(dimensions.urgency + 8);
+    dimensions.workflowBlocking = clampScore(dimensions.workflowBlocking + 12);
+    dimensions.escalation = clampScore(Math.max(dimensions.escalation, 75));
+    reasons.push("Reception not confirmed");
+  }
+
+  if (kind === "consultation" && presence.doctorUnknown) {
+    dimensions.urgency = clampScore(dimensions.urgency + 10);
+    dimensions.workflowBlocking = clampScore(dimensions.workflowBlocking + 8);
+    reasons.push("Doctor coverage needs confirmation");
+  }
+
+  if (
+    (kind === "surgery_readiness" || kind === "staff_compliance") &&
+    presence.surgeryTeamIncomplete
+  ) {
+    dimensions.clinicalRisk = clampScore(dimensions.clinicalRisk + 12);
+    dimensions.workflowBlocking = clampScore(dimensions.workflowBlocking + 15);
+    dimensions.escalation = clampScore(Math.max(dimensions.escalation, 85));
+    reasons.push("Team readiness needs confirmation");
+  }
+
+  if (kind === "arrival_intent" && presence.clinicUnattendedCandidate) {
+    dimensions.escalation = clampScore(Math.max(dimensions.escalation, 70));
+    reasons.push("Unattended arrival support may be needed");
+  }
+}
+
 function baseDimensionsForSignal(
   kind: TodaySignalKind,
   item: TodayFeedItem,
@@ -273,6 +321,7 @@ function baseDimensionsForSignal(
       dimensions.patientImpact = 55;
       dimensions.clinicalRisk = 15;
       dimensions.freshness = 85;
+      dimensions.workflowBlocking = 40;
       reasons.push("Patient is here now");
       break;
 
@@ -408,6 +457,8 @@ function baseDimensionsForSignal(
   if (item.severity === "critical" && dimensions.escalation < 70) {
     dimensions.escalation = 70;
   }
+
+  applyPresenceEscalation(kind, dimensions, reasons, context);
 
   return { dimensions, reasons };
 }

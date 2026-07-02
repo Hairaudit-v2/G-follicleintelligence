@@ -13,7 +13,11 @@ export type TodayMagicMomentKey =
   | "payment_blocker_cleared"
   | "pathology_result_arrived"
   | "surgery_readiness_changed"
-  | "lead_stale";
+  | "lead_stale"
+  | "reception_not_confirmed"
+  | "consultation_ready_for_doctor"
+  | "surgery_team_readiness_watch"
+  | "clinic_unattended_candidate";
 
 export type TodayMagicMomentSpec = {
   key: TodayMagicMomentKey;
@@ -57,6 +61,30 @@ export const TODAY_MAGIC_MOMENTS: Record<TodayMagicMomentKey, TodayMagicMomentSp
     key: "lead_stale",
     label: "Lead becomes stale without follow-up",
     autoResolves: true,
+    refreshTrigger: "dashboard_reload",
+  },
+  reception_not_confirmed: {
+    key: "reception_not_confirmed",
+    label: "Patient arrival intent without confirmed reception",
+    autoResolves: true,
+    refreshTrigger: "dashboard_reload",
+  },
+  consultation_ready_for_doctor: {
+    key: "consultation_ready_for_doctor",
+    label: "Patient checked in — consultation may be ready",
+    autoResolves: true,
+    refreshTrigger: "dashboard_reload",
+  },
+  surgery_team_readiness_watch: {
+    key: "surgery_team_readiness_watch",
+    label: "Surgery team readiness needs confirmation",
+    autoResolves: true,
+    refreshTrigger: "dashboard_reload",
+  },
+  clinic_unattended_candidate: {
+    key: "clinic_unattended_candidate",
+    label: "Unattended arrival support may be needed",
+    autoResolves: false,
     refreshTrigger: "dashboard_reload",
   },
 };

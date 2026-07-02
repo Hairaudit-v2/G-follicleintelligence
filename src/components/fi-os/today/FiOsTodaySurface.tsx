@@ -6,7 +6,7 @@ import { TodayFeedRefreshMount } from "@/src/components/fi-os/today/TodayFeedRef
 import { TodayHeader } from "@/src/components/fi-os/today/TodayHeader";
 import { UpNextSection } from "@/src/components/fi-os/today/UpNextSection";
 import {
-  buildTodayFeed,
+  buildTodayFeedWithPresence,
   countOverdueTasks,
   countPatientsBookedToday,
   firstNameFromDisplayName,
@@ -58,7 +58,7 @@ export function FiOsTodaySurface(props: {
     }).format(now)
   );
 
-  const feed = buildTodayFeed({
+  const { feed, presence } = buildTodayFeedWithPresence({
     base: `/fi-admin/${data.tenantId}`,
     dashboard: data,
     showCrmNav,
@@ -94,6 +94,7 @@ export function FiOsTodaySurface(props: {
         tasksOverdue={countOverdueTasks(data.tasksDue, now.getTime())}
         workspaceBadge={showWorkspaceBadge ? getWorkspaceProfileLabel(workspaceProfile!) : null}
         hourOfDay={hourOfDay}
+        presenceStatus={presence.operationalStatus}
       />
       <RightNowSection items={rightNow} />
       <UpNextSection items={upNext} />

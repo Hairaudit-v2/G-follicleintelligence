@@ -234,3 +234,43 @@ test("applyTodaySignalPriority enriches items with priority metadata", () => {
   assert.ok(enriched?.priorityDimensions);
   assert.equal(typeof enriched?.priorityScore, "number");
 });
+
+test("presence context escalates arrival intent when reception unknown", () => {
+  const arrival = feedItem({
+    id: "reception-presence-1",
+    personLabel: "Patient",
+    actionLabel: "Patient says they're here",
+    groupKey: "reception:arrival_intent",
+    severity: "critical",
+    bucket: "right_now",
+  });
+
+  const withoutPresence = scoreTodaySignalPriority(arrival, { profileKey: "reception" });
+  const withPresence = scoreTodaySignalPriority(arrival, {
+    profileKey: "reception",
+    presenceContext: { receptionUnknown: true },
+  });
+
+  assert.ok(withPresence.priorityScore > withoutPresence.priorityScore);
+  assert.ok(withPresence.priorityReasons.some((r) => /reception not confirmed/i.test(r)));
+});
+
+test("presence context escalates surgery readiness when team incomplete", () => {
+  const surgery = feedItem({
+    id: "entity-surgery-presence-1",
+    actionLabel: "Surgery preparation incomplete",
+    detailLine: "Procedure tomorrow — checklist incomplete",
+    groupKey: "entity:surgery_readiness",
+    severity: "warning",
+    bucket: "right_now",
+  });
+
+  const withoutPresence = scoreTodaySignalPriority(surgery, { profileKey: "surgeon" });
+  const withPresence = scoreTodaySignalPriority(surgery, {
+    profileKey: "surgeon",
+    presenceContext: { surgeryTeamIncomplete: true },
+  });
+
+  assert.ok(withPresence.priorityScore > withoutPresence.priorityScore);
+  assert.ok(withPresence.priorityReasons.some((r) => /team readiness/i.test(r)));
+});

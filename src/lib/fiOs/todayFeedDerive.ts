@@ -12,7 +12,13 @@ import {
   comparePrioritisedTodaySignals,
   type TodayPriorityBand,
   type TodayPriorityDimensions,
+  type TodayPresencePriorityContext,
 } from "@/src/lib/fiOs/todaySignal/todaySignalPriority";
+import {
+  applyPresenceToTodayItems,
+  derivePresenceFromDashboardInput,
+} from "@/src/lib/fiOs/presence/presenceEngine";
+import type { PresenceSummary } from "@/src/lib/fiOs/presence/presenceTypes";
 import type {
   DashboardReminderItem,
   ReceptionBoardCard,
@@ -467,9 +473,18 @@ export function buildTodayFeed(input: {
   profileKey?: FiWorkspaceProfileKey;
   now?: Date;
   maxPerBucket?: number;
+  /** D6E — when true (default), apply presence-aware ranking and copy hints. */
+  applyPresence?: boolean;
 }): TodayFeed {
-  const { base, dashboard, showCrmNav, profileKey, now = new Date(), maxPerBucket = DEFAULT_MAX_PER_BUCKET } =
-    input;
+  const {
+    base,
+    dashboard,
+    showCrmNav,
+    profileKey,
+    now = new Date(),
+    maxPerBucket = DEFAULT_MAX_PER_BUCKET,
+    applyPresence = true,
+  } = input;
 
   const nowMs = now.getTime();
   const parsedTodayEnd = parseMs(dashboard.operationalDay.localEndIso);
@@ -494,8 +509,28 @@ export function buildTodayFeed(input: {
     }),
   ];
 
-  const all = applyTodaySignalPriority(rawItems, { profileKey, nowMs });
-  const priorityContext = { profileKey, nowMs };
+  let presenceSummary: PresenceSummary | null = null;
+  let presenceContext: TodayPresencePriorityContext | undefined;
+
+  if (applyPresence) {
+    presenceSummary = derivePresenceFromDashboardInput({
+      dashboard,
+      todayItems: rawItems,
+      profileKey,
+      now,
+    });
+    presenceContext = presenceContextFromSummary(presenceSummary);
+  }
+
+  const prioritised = applyTodaySignalPriority(rawItems, {
+    profileKey,
+    nowMs,
+    presenceContext,
+  });
+  const all = presenceSummary
+    ? applyPresenceToTodayItems(prioritised, presenceSummary)
+    : prioritised;
+  const priorityContext = { profileKey, nowMs, presenceContext };
 
   const byBucket = (bucket: TodayFeedBucket): TodayFeedItem[] =>
     all
@@ -508,6 +543,79 @@ export function buildTodayFeed(input: {
     upNext: byBucket("up_next"),
     comingUp: byBucket("coming_up"),
   };
+}
+
+function presenceContextFromSummary(
+  summary: PresenceSummary
+): TodayPresencePriorityContext {
+  const hints = new Set(summary.escalationHints);
+  return {
+    receptionUnknown: hints.has("reception_unknown_escalates_arrival"),
+    doctorUnknown: hints.has("doctor_unknown_escalates_consultation"),
+    surgeryTeamIncomplete: hints.has("surgery_team_incomplete_escalates_readiness"),
+    clinicUnattendedCandidate: hints.has("clinic_unattended_suggest_support"),
+  };
+}
+
+/** D6E — derive presence summary alongside feed (for header chips / admin). */
+export function buildTodayFeedWithPresence(input: {
+  base: string;
+  dashboard: TenantOperationalDashboard;
+  showCrmNav: boolean;
+  profileKey?: FiWorkspaceProfileKey;
+  now?: Date;
+  maxPerBucket?: number;
+}): { feed: TodayFeed; presence: PresenceSummary } {
+  const now = input.now ?? new Date();
+  const rawItems: TodayFeedItem[] = [
+    ...receptionItems(input.dashboard.receptionBoard.cards, {
+      base: input.base,
+      nowMs: now.getTime(),
+      todayEndMs:
+        parseMs(input.dashboard.operationalDay.localEndIso) ??
+        now.getTime() + 24 * 60 * 60_000,
+      profileKey: input.profileKey,
+    }),
+    ...staleLeadItems(input.dashboard.staleLeads, {
+      base: input.base,
+      thresholdDays: input.dashboard.staleLeadThresholdDays,
+      profileKey: input.profileKey,
+    }),
+    ...taskDueItems(input.dashboard.tasksDue, {
+      base: input.base,
+      nowMs: now.getTime(),
+      todayEndMs:
+        parseMs(input.dashboard.operationalDay.localEndIso) ??
+        now.getTime() + 24 * 60 * 60_000,
+      profileKey: input.profileKey,
+    }),
+    ...reminderItems(input.dashboard.upcomingReminders, {
+      nowMs: now.getTime(),
+      todayEndMs:
+        parseMs(input.dashboard.operationalDay.localEndIso) ??
+        now.getTime() + 24 * 60 * 60_000,
+      profileKey: input.profileKey,
+    }),
+    ...entityAttentionFeedItems(input.dashboard.entityAttention ?? [], input.profileKey),
+    ...aggregateFallbackItems({
+      base: input.base,
+      actionCentre: input.dashboard.actionCentre,
+      showCrmNav: input.showCrmNav,
+      profileKey: input.profileKey,
+      suppressAggregateKeys: coveredAggregateKeys(input.dashboard.entityAttention ?? []),
+    }),
+  ];
+
+  const presence = derivePresenceFromDashboardInput({
+    dashboard: input.dashboard,
+    todayItems: rawItems,
+    profileKey: input.profileKey,
+    now,
+  });
+
+  const feed = buildTodayFeed({ ...input, now, applyPresence: true });
+
+  return { feed, presence };
 }
 
 /** Count overdue CRM tasks for the Today header pulse line. */
