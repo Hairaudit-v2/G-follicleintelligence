@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 import { FiOsEmptyState } from "@/src/components/fi-admin/shared/FiOsEmptyState";
-import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
   PATHOLOGY_EMAIL_WEBHOOK_SECRET_HEADER,
   type PathologyEmailRouteStatusValue,
@@ -18,6 +17,8 @@ function formatWhen(iso: string | null): string {
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
+
+const PANEL_CLASS = "rounded-xl border border-white/[0.08] bg-[#0a1424]/80 p-4 sm:p-5";
 
 function statusBadge(status: PathologyEmailRouteStatusValue): string {
   return status === "active"
@@ -155,7 +156,7 @@ export function PathologyEmailRoutesClient(props: {
 
   return (
     <div className="space-y-6">
-      <section className={`${fiOsChromeClasses.panel} p-4 sm:p-5`}>
+      <section className={PANEL_CLASS}>
         <h2 className="text-base font-semibold text-[#F8FAFC]">Webhook configuration</h2>
         <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
           Point your inbound email provider (Postmark recommended) at this endpoint. Include the
@@ -208,7 +209,7 @@ export function PathologyEmailRoutesClient(props: {
       </section>
 
       {canMutate ? (
-        <section className={`${fiOsChromeClasses.panel} p-4 sm:p-5`}>
+        <section className={PANEL_CLASS}>
           <h2 className="text-base font-semibold text-[#F8FAFC]">Add inbound address</h2>
           <p className="mt-2 text-sm text-[#94A3B8]">
             Register a dedicated inbound address (for example{" "}
@@ -254,7 +255,7 @@ export function PathologyEmailRoutesClient(props: {
         </section>
       ) : null}
 
-      <section className={`${fiOsChromeClasses.panel} p-4 sm:p-5`}>
+      <section className={PANEL_CLASS}>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-[#F8FAFC]">Inbound addresses</h2>
