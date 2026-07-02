@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { useTodayFeedRealtime } from "@/src/components/fi-os/today/useTodayFeedRealtime";

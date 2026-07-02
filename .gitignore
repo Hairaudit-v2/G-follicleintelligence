@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+node_modules/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -49,3 +50,9 @@ supabase/.branches/
 /blob-report/
 /playwright/.cache/
 .playwright/
+
+# Local agent / IDE artifacts (do not commit)
+/mcps/
+/terminals/
+/test-failures.txt
+/test-output.txt
