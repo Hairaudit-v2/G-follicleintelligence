@@ -67,6 +67,7 @@ export function resolveInviteStatus(input: {
   if (raw === "accepted") return "accepted";
   if (raw === "revoked") return "revoked";
   if (raw === "expired") return "expired";
+  if (raw === "sent") return "pending";
   const expiresAt = input.expiresAt?.trim();
   if (expiresAt) {
     const now = input.now ?? new Date();
@@ -118,11 +119,12 @@ export function pinStatusLabel(status: string | null | undefined): string {
 
 /** Resend should advance invited_at while preserving invitation identity when possible. */
 export function nextResendInvitationTimestamps(
-  now: Date = new Date()
+  now: Date = new Date(),
+  expiryDays: number = STAFF_LOGIN_INVITE_EXPIRY_DAYS
 ): { invitedAt: string; expiresAt: string; updatedAt: string } {
   const invitedAt = now.toISOString();
   const expiresAt = new Date(
-    now.getTime() + STAFF_LOGIN_INVITE_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+    now.getTime() + expiryDays * 24 * 60 * 60 * 1000
   ).toISOString();
   return { invitedAt, expiresAt, updatedAt: invitedAt };
 }

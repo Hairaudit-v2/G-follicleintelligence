@@ -1,5 +1,5 @@
 /** WorkforceOS staff onboarding invitation statuses. */
-export const ONBOARDING_INVITATION_STATUSES = ["pending", "accepted", "expired"] as const;
+export const ONBOARDING_INVITATION_STATUSES = ["pending", "sent", "accepted", "expired", "revoked"] as const;
 export type OnboardingInvitationStatus = (typeof ONBOARDING_INVITATION_STATUSES)[number];
 
 /** Isolated onboarding PIN setup token statuses. */
@@ -40,15 +40,25 @@ export type OnboardingStaffRow = {
   clinicName: string | null;
   employmentType: string | null;
   employmentStatus: string;
+  systemAccessRevoked: boolean;
   fiStaffId: string | null;
   createdAt: string;
   invitation: {
     id: string;
     status: OnboardingInvitationStatus;
     invitedAt: string;
+    sentAt: string | null;
+    resentAt: string | null;
+    resendCount: number;
     expiresAt: string;
     acceptedAt: string | null;
+    inviteUrl: string | null;
   } | null;
+  inviteStatus: "none" | "pending" | "accepted" | "expired" | "revoked";
+  inviteLabel: string;
+  canSendInvite: boolean;
+  canResendInvite: boolean;
+  canCopyInviteLink: boolean;
   checklist: OnboardingChecklistState;
 };
 

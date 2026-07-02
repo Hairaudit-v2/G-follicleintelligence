@@ -12,6 +12,11 @@ import {
   sendStaffLoginInvite,
   suspendStaffLoginAccess,
 } from "@/src/lib/workforce/staffAccessCentre.server";
+import { acceptStaffAccessInvitation } from "@/src/lib/workforce/staffAccessAccept.server";
+import {
+  completeStaffAccessPinSetup,
+  requestStaffPinResetLink,
+} from "@/src/lib/workforce/staffAccessPinLayer.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
@@ -131,3 +136,75 @@ export async function suspendStaffLoginAccessAction(
     return { ok: false, error: errMsg(e) };
   }
 }
+
+const acceptInviteSchema = z.object({
+  inviteToken: z.string().uuid(),
+  pinSetupToken: z.string().uuid().nullable().optional(),
+});
+
+/** Public — staff accept invite without admin session. */
+export async function acceptStaffAccessInviteAction(
+  tenantId: string,
+  body: unknown
+): Promise<StaffAccessActionResult> {
+  try {
+    const parsed = acceptInviteSchema.parse(body);
+    await acceptStaffAccessInvitation({
+      tenantId,
+      inviteToken: parsed.inviteToken,
+      pinSetupToken: parsed.pinSetupToken ?? null,
+    });
+    revalidateStaffAccessSurfaces(tenantId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const pinSetupSchema = z.object({
+  setupToken: z.string().uuid(),
+  pin: z.string().regex(/^\d{4}$/, "PIN must be exactly 4 digits."),
+});
+
+/** Public — staff PIN setup from invite or reset link without admin session. */
+export async function completeStaffAccessPinSetupAction(
+  tenantId: string,
+  body: unknown
+): Promise<StaffAccessActionResult> {
+  try {
+    const parsed = pinSetupSchema.parse(body);
+    await completeStaffAccessPinSetup({
+      tenantId,
+      setupToken: parsed.setupToken,
+      pin: parsed.pin,
+    });
+    revalidateStaffAccessSurfaces(tenantId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/** Admin creates a PIN reset link — admin never sees the PIN. */
+export async function requestStaffPinResetLinkAction(
+  tenantId: string,
+  body: unknown
+): Promise<StaffAccessActionResult> {
+  try {
+    const parsed = staffMemberBodySchema.parse(body);
+    const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
+    const result = await requestStaffPinResetLink({
+      tenantId,
+      staffMemberId: parsed.staffMemberId,
+      actorFiUserId: fiUserId,
+    });
+    revalidateStaffAccessSurfaces(tenantId);
+    return { ok: true, inviteUrl: result.setupUrl };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/** Alias for spec naming — delegates to sendStaffLoginInviteAction. */
+export const sendStaffAccessInviteAction = sendStaffLoginInviteAction;
+export const resendStaffAccessInviteAction = resendStaffLoginInviteAction;

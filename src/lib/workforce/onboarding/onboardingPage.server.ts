@@ -23,6 +23,14 @@ import type {
   OnboardingPageModel,
   OnboardingStaffRow,
 } from "./onboardingTypes";
+import {
+  canCopyOnboardingInviteLink,
+  canResendOnboardingInvite,
+  canSendOnboardingInvite,
+  mapOnboardingInviteDisplayStatus,
+  onboardingInviteStatusLabel,
+} from "./onboardingCentreCore";
+import { buildOnboardingInviteUrl } from "./onboardingInviteUrlCore";
 import { syncOnboardingChecklistFromState } from "./onboardingChecklist.server";
 import {
   evaluateOnboardingStaffCreation,
@@ -31,12 +39,6 @@ import {
 } from "./onboardingStaffCreateCore";
 
 const ONBOARDING_SOURCE = ONBOARDING_STAFF_SOURCE;
-
-function mapInvitationStatus(raw: unknown): OnboardingInvitationStatus {
-  const s = String(raw ?? "pending").trim().toLowerCase();
-  if (s === "accepted" || s === "expired") return s;
-  return "pending";
-}
 
 function mapChecklist(raw: Record<string, unknown> | null): OnboardingChecklistState {
   if (!raw) {
@@ -97,7 +99,7 @@ export async function loadOnboardingPageModel(
     supabase
       .from("fi_staff_members")
       .select(
-        "id, full_name, email, role_code, clinic_id, employment_type, employment_status, fi_staff_id, created_at"
+        "id, full_name, email, role_code, clinic_id, employment_type, employment_status, fi_staff_id, created_at, system_access_revoked"
       )
       .eq("tenant_id", tid)
       .is("archived_at", null)
@@ -117,7 +119,9 @@ export async function loadOnboardingPageModel(
     const [invRes, chkRes] = await Promise.all([
       supabase
         .from("fi_staff_onboarding_invitations")
-        .select("id, staff_member_id, status, invited_at, expires_at, accepted_at")
+        .select(
+          "id, staff_member_id, status, invited_at, sent_at, resent_at, resend_count, expires_at, accepted_at, invite_token"
+        )
         .eq("tenant_id", tid)
         .in("staff_member_id", memberIds)
         .order("invited_at", { ascending: false }),
@@ -147,26 +151,62 @@ export async function loadOnboardingPageModel(
       const id = String(raw.id);
       const clinicId = raw.clinic_id != null ? String(raw.clinic_id) : null;
       const inv = latestInviteByMember.get(id);
+      const email = raw.email != null ? String(raw.email) : null;
+      const employmentStatus = String(raw.employment_status ?? "pending_onboarding");
+      const systemAccessRevoked = Boolean(raw.system_access_revoked);
+
+      const inviteStatus = mapOnboardingInviteDisplayStatus({
+        rawStatus: inv ? String(inv.status) : null,
+        expiresAt: inv ? String(inv.expires_at) : null,
+        acceptedAt: inv?.accepted_at != null ? String(inv.accepted_at) : null,
+      });
+
+      const inviteToken = inv?.invite_token != null ? String(inv.invite_token).trim() : "";
+      const inviteUrl =
+        inviteToken && (inviteStatus === "pending" || inviteStatus === "expired")
+          ? buildOnboardingInviteUrl(tid, inviteToken)
+          : null;
+
+      const actionInput = {
+        email,
+        systemAccessRevoked,
+        employmentStatus,
+        inviteStatus,
+      };
+
       return {
         id,
         fullName: String(raw.full_name ?? "Staff"),
-        email: raw.email != null ? String(raw.email) : null,
+        email,
         roleCode: raw.role_code != null ? String(raw.role_code) : null,
         clinicId,
         clinicName: clinicId ? (clinicById.get(clinicId) ?? null) : null,
         employmentType: raw.employment_type != null ? String(raw.employment_type) : null,
-        employmentStatus: String(raw.employment_status ?? "pending_onboarding"),
+        employmentStatus,
+        systemAccessRevoked,
         fiStaffId: raw.fi_staff_id != null ? String(raw.fi_staff_id) : null,
         createdAt: String(raw.created_at),
         invitation: inv
           ? {
               id: String(inv.id),
-              status: mapInvitationStatus(inv.status),
+              status: String(inv.status).trim().toLowerCase() as OnboardingInvitationStatus,
               invitedAt: String(inv.invited_at),
+              sentAt: inv.sent_at != null ? String(inv.sent_at) : null,
+              resentAt: inv.resent_at != null ? String(inv.resent_at) : null,
+              resendCount: Number(inv.resend_count ?? 0),
               expiresAt: String(inv.expires_at),
               acceptedAt: inv.accepted_at != null ? String(inv.accepted_at) : null,
+              inviteUrl,
             }
           : null,
+        inviteStatus,
+        inviteLabel: onboardingInviteStatusLabel(inviteStatus),
+        canSendInvite: canSendOnboardingInvite(actionInput),
+        canResendInvite: canResendOnboardingInvite(actionInput),
+        canCopyInviteLink: canCopyOnboardingInviteLink({
+          inviteStatus,
+          hasInviteUrl: Boolean(inviteUrl),
+        }),
         checklist: mapChecklist(checklistByMember.get(id) ?? null),
       };
     }
@@ -420,7 +460,7 @@ export async function expireStaleOnboardingInvitations(
     .from("fi_staff_onboarding_invitations")
     .update({ status: "expired", updated_at: now })
     .eq("tenant_id", tid)
-    .eq("status", "pending")
+    .in("status", ["pending", "sent"])
     .lt("expires_at", now);
 }
 

@@ -25,6 +25,21 @@ import {
   type StaffAuthLoginStatus,
   type StaffInviteStatus,
 } from "@/src/lib/workforce/staffAccessCentreCore";
+import {
+  buildStaffAccessInviteEmail,
+  buildStaffAccessInviteUrl,
+  extractStaffFirstName,
+  formatInviteExpiryDate,
+  generateStaffAccessInviteToken,
+  hashStaffAccessInviteToken,
+  STAFF_ACCESS_INVITE_ERRORS,
+  STAFF_ACCESS_INVITE_EXPIRY_DAYS,
+} from "@/src/lib/workforce/staffAccessInviteCore";
+import {
+  insertStaffAccessAuditEvent,
+  STAFF_ACCESS_AUDIT_EVENTS,
+} from "@/src/lib/workforce/staffAccessInviteAudit.server";
+import { createStaffAccessPinSetupToken } from "@/src/lib/workforce/staffAccessPinLayer.server";
 
 export type StaffAccessCentreRow = {
   staffMemberId: string;
@@ -43,9 +58,12 @@ export type StaffAccessCentreRow = {
   inviteLabel: string;
   inviteUrl: string | null;
   invitedAt: string | null;
+  inviteExpiresAt: string | null;
+  resendCount: number;
   canSendInvite: boolean;
   canResendInvite: boolean;
   canCopyInviteLink: boolean;
+  canResetPin: boolean;
   canRevokeAccess: boolean;
   canSuspendAccess: boolean;
 };
@@ -102,7 +120,7 @@ async function expireStaleLoginInvitations(
     .from("fi_staff_login_invitations")
     .update({ status: "expired", updated_at: now })
     .eq("tenant_id", tenantId)
-    .eq("status", "pending")
+    .in("status", ["pending", "sent"])
     .lt("expires_at", now);
 }
 
@@ -204,12 +222,16 @@ export async function loadStaffAccessCentrePage(
       expires_at: string;
       invite_link: string | null;
       invited_at: string;
+      resend_count: number | null;
+      accepted_at: string | null;
     }
   >();
   if (memberIds.length) {
     const { data: invites, error: invErr } = await supabase
       .from("fi_staff_login_invitations")
-      .select("staff_member_id, status, expires_at, invite_link, invited_at")
+      .select(
+        "staff_member_id, status, expires_at, invite_link, invited_at, resend_count, accepted_at"
+      )
       .eq("tenant_id", tid)
       .in("staff_member_id", memberIds)
       .order("invited_at", { ascending: false });
@@ -221,6 +243,8 @@ export async function loadStaffAccessCentrePage(
         expires_at: string;
         invite_link: string | null;
         invited_at: string;
+        resend_count: number | null;
+        accepted_at: string | null;
       };
       const mid = String(r.staff_member_id);
       if (!latestInviteByMember.has(mid)) latestInviteByMember.set(mid, r);
@@ -267,9 +291,24 @@ export async function loadStaffAccessCentrePage(
       authLoginStatus,
     });
 
+    const inviteAccepted =
+      inviteStatus === "accepted" ||
+      Boolean(latestInvite?.accepted_at) ||
+      authLoginStatus === "login_active";
     const canResend =
-      canSend && (inviteStatus === "pending" || inviteStatus === "expired");
-    const canCopy = inviteStatus === "pending" && Boolean(latestInvite?.invite_link?.trim());
+      canSend &&
+      !inviteAccepted &&
+      (inviteStatus === "pending" || inviteStatus === "expired" || inviteStatus === "none");
+    const canCopy =
+      (inviteStatus === "pending" || inviteStatus === "expired") &&
+      Boolean(latestInvite?.invite_link?.trim());
+    const canResetPin =
+      Boolean(fiStaffId) &&
+      !member.archived_at &&
+      !Boolean(member.system_access_revoked) &&
+      authLoginStatus !== "suspended" &&
+      authLoginStatus !== "revoked" &&
+      (inviteAccepted || authLoginStatus === "invite_pending");
     const canRevoke =
       Boolean(fiUserId || authLoginStatus !== "no_login" || inviteStatus === "pending") &&
       !member.archived_at;
@@ -291,13 +330,18 @@ export async function loadStaffAccessCentrePage(
       authLoginLabel: authLoginStatusLabel(authLoginStatus),
       pinStatus: pinStatusLabel(fiStaffId ? pinStatusByStaffId.get(fiStaffId) : "not_set"),
       permissionTemplate: resolvePermissionTemplateLabel(member.role_code),
-      inviteStatus,
-      inviteLabel: inviteStatusLabel(inviteStatus),
+      inviteStatus: inviteAccepted && inviteStatus !== "revoked" ? "accepted" : inviteStatus,
+      inviteLabel: inviteStatusLabel(
+        inviteAccepted && inviteStatus !== "revoked" ? "accepted" : inviteStatus
+      ),
       inviteUrl: latestInvite?.invite_link?.trim() || null,
       invitedAt: latestInvite?.invited_at ?? null,
-      canSendInvite: canSend && inviteStatus !== "pending",
+      inviteExpiresAt: latestInvite?.expires_at ?? null,
+      resendCount: latestInvite?.resend_count ?? 0,
+      canSendInvite: canSend && inviteStatus === "none" && !inviteAccepted,
       canResendInvite: canResend,
       canCopyInviteLink: canCopy,
+      canResetPin,
       canRevokeAccess: canRevoke,
       canSuspendAccess: canSuspend && authLoginStatus !== "suspended",
     });
@@ -448,7 +492,13 @@ async function assertEligibleForLoginInvite(
       authLoginStatus,
     })
   ) {
-    throw new Error("This staff member is not eligible for a login invite.");
+    if (Boolean(row.system_access_revoked) || authLoginStatus === "suspended") {
+      throw new Error(STAFF_ACCESS_INVITE_ERRORS.REVOKED_REACTIVATE);
+    }
+    if (authLoginStatus === "login_active") {
+      throw new Error(STAFF_ACCESS_INVITE_ERRORS.ACCEPTED_NO_RESEND);
+    }
+    throw new Error(STAFF_ACCESS_INVITE_ERRORS.NOT_ELIGIBLE);
   }
 
   return { fiStaffId, email, fullName: String(row.full_name ?? "Staff") };
@@ -522,10 +572,36 @@ async function provisionAuthInviteLink(
   return { authUserId: linkData.user.id, inviteLink };
 }
 
-async function trySendLoginInviteEmail(input: {
+async function loadTenantDisplayName(tenantId: string, client: SupabaseClient): Promise<string> {
+  const { data, error } = await client
+    .from("fi_tenants")
+    .select("name")
+    .eq("id", tenantId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return String((data as { name: string } | null)?.name ?? "Your clinic").trim() || "Your clinic";
+}
+
+async function revokeSupersededLoginInvites(
+  tenantId: string,
+  staffMemberId: string,
+  client: SupabaseClient
+): Promise<void> {
+  const now = new Date().toISOString();
+  await client
+    .from("fi_staff_login_invitations")
+    .update({ status: "revoked", revoked_at: now, updated_at: now })
+    .eq("tenant_id", tenantId)
+    .eq("staff_member_id", staffMemberId)
+    .in("status", ["pending", "sent", "expired"]);
+}
+
+async function trySendStaffAccessInviteEmail(input: {
   to: string;
   staffName: string;
+  tenantName: string;
   inviteUrl: string;
+  expiresAt: string;
 }): Promise<boolean> {
   try {
     const { sendResendEmailHttp } = await import("@/src/lib/email/resendHttpSend.server");
@@ -539,17 +615,97 @@ async function trySendLoginInviteEmail(input: {
     if (!isEmailDeliveryConfigured(cfg)) return false;
     const fromHeader = buildResendFromAddress(cfg.resend);
     if (!fromHeader) return false;
+    const { subject, text } = buildStaffAccessInviteEmail({
+      staffFirstName: extractStaffFirstName(input.staffName),
+      clinicOrTenantName: input.tenantName,
+      inviteLink: input.inviteUrl,
+      expiryDate: formatInviteExpiryDate(input.expiresAt),
+    });
     await sendResendEmailHttp({
       apiKey: cfg.resend.apiKey!,
       from: fromHeader,
       to: [input.to],
-      subject: "Your Follicle Intelligence login invitation",
-      text: `Hi ${input.staffName},\n\nYou have been invited to sign in to your clinic workspace:\n\n${input.inviteUrl}`,
+      subject,
+      text,
     });
     return true;
   } catch {
     return false;
   }
+}
+
+async function upsertStaffLoginInvitation(input: {
+  tenantId: string;
+  staffMemberId: string;
+  fiStaffId: string;
+  fiUserId: string;
+  email: string;
+  inviteToken: string;
+  inviteUrl: string;
+  authInviteLink: string;
+  invitedBy: string | null;
+  isResend: boolean;
+  existingInvitationId?: string | null;
+  existingResendCount?: number;
+  client: SupabaseClient;
+  now: Date;
+}): Promise<string> {
+  const tokenHash = hashStaffAccessInviteToken(input.inviteToken);
+  const timestamps = nextResendInvitationTimestamps(input.now, STAFF_ACCESS_INVITE_EXPIRY_DAYS);
+  const nowIso = input.now.toISOString();
+
+  if (input.isResend && input.existingInvitationId) {
+    const { error: upErr } = await input.client
+      .from("fi_staff_login_invitations")
+      .update({
+        invite_token_hash: tokenHash,
+        invite_link: input.inviteUrl,
+        auth_invite_link: input.authInviteLink,
+        invite_email: input.email,
+        fi_staff_id: input.fiStaffId,
+        fi_user_id: input.fiUserId,
+        status: "sent",
+        invited_at: timestamps.invitedAt,
+        sent_at: timestamps.invitedAt,
+        resent_at: nowIso,
+        resend_count: (input.existingResendCount ?? 0) + 1,
+        last_sent_by_user_id: input.invitedBy,
+        expires_at: timestamps.expiresAt,
+        updated_at: timestamps.updatedAt,
+      })
+      .eq("tenant_id", input.tenantId)
+      .eq("id", input.existingInvitationId);
+    if (upErr) throw new Error(upErr.message);
+    return input.existingInvitationId;
+  }
+
+  await revokeSupersededLoginInvites(input.tenantId, input.staffMemberId, input.client);
+
+  const { data: invitation, error } = await input.client
+    .from("fi_staff_login_invitations")
+    .insert({
+      tenant_id: input.tenantId,
+      staff_member_id: input.staffMemberId,
+      fi_staff_id: input.fiStaffId,
+      fi_user_id: input.fiUserId,
+      invite_email: input.email,
+      invite_token_hash: tokenHash,
+      invite_link: input.inviteUrl,
+      auth_invite_link: input.authInviteLink,
+      status: "sent",
+      invited_by: input.invitedBy,
+      last_sent_by_user_id: input.invitedBy,
+      invited_at: timestamps.invitedAt,
+      sent_at: timestamps.invitedAt,
+      expires_at: timestamps.expiresAt,
+      resend_count: 0,
+      created_at: timestamps.invitedAt,
+      updated_at: timestamps.updatedAt,
+    })
+    .select("id")
+    .single();
+  if (error) throw new Error(error.message);
+  return String((invitation as { id: string }).id);
 }
 
 export async function sendStaffLoginInvite(input: {
@@ -565,9 +721,10 @@ export async function sendStaffLoginInvite(input: {
 
   await expireStaleLoginInvitations(tid, supabase);
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
+  const tenantName = await loadTenantDisplayName(tid, supabase);
 
   const fiUserId = await resolveOrCreateFiUser(tid, email, supabase);
-  const { authUserId, inviteLink } = await provisionAuthInviteLink(tid, email, supabase);
+  const { authUserId, inviteLink: authInviteLink } = await provisionAuthInviteLink(tid, email, supabase);
 
   await supabase
     .from("fi_users")
@@ -581,45 +738,58 @@ export async function sendStaffLoginInvite(input: {
 
   await updateFiStaff(tid, fiStaffId, { fi_user_id: fiUserId }, supabase);
 
-  const timestamps = nextResendInvitationTimestamps(now);
-  const { data: invitation, error } = await supabase
-    .from("fi_staff_login_invitations")
-    .insert({
-      tenant_id: tid,
-      staff_member_id: mid,
-      fi_staff_id: fiStaffId,
-      fi_user_id: fiUserId,
-      invite_email: email,
-      invite_link: inviteLink,
-      status: "pending",
-      invited_by: input.invitedBy?.trim() || null,
-      invited_at: timestamps.invitedAt,
-      expires_at: timestamps.expiresAt,
-      created_at: timestamps.invitedAt,
-      updated_at: timestamps.updatedAt,
-    })
-    .select("id")
-    .single();
-  if (error) throw new Error(error.message);
+  const inviteToken = generateStaffAccessInviteToken();
+  const inviteUrl = buildStaffAccessInviteUrl(tid, inviteToken);
+  const invitationId = await upsertStaffLoginInvitation({
+    tenantId: tid,
+    staffMemberId: mid,
+    fiStaffId,
+    fiUserId,
+    email,
+    inviteToken,
+    inviteUrl,
+    authInviteLink,
+    invitedBy: input.invitedBy?.trim() || null,
+    isResend: false,
+    client: supabase,
+    now,
+  });
 
-  const emailSent = await trySendLoginInviteEmail({
+  await createStaffAccessPinSetupToken({
+    tenantId: tid,
+    staffMemberId: mid,
+    fiStaffId,
+    loginInvitationId: invitationId,
+    actorFiUserId: input.invitedBy ?? null,
+    client: supabase,
+  });
+
+  const timestamps = nextResendInvitationTimestamps(now, STAFF_ACCESS_INVITE_EXPIRY_DAYS);
+  const emailSent = await trySendStaffAccessInviteEmail({
     to: email,
     staffName: fullName,
-    inviteUrl: inviteLink,
+    tenantName,
+    inviteUrl,
+    expiresAt: timestamps.expiresAt,
   });
   if (emailSent) {
     await supabase
       .from("fi_staff_login_invitations")
       .update({ email_sent_at: now.toISOString(), updated_at: now.toISOString() })
       .eq("tenant_id", tid)
-      .eq("id", String((invitation as { id: string }).id));
+      .eq("id", invitationId);
   }
 
-  return {
-    invitationId: String((invitation as { id: string }).id),
-    inviteUrl: inviteLink,
-    emailSent,
-  };
+  await insertStaffAccessAuditEvent({
+    tenantId: tid,
+    staffMemberId: mid,
+    eventType: STAFF_ACCESS_AUDIT_EVENTS.INVITE_SENT,
+    actorFiUserId: input.invitedBy ?? null,
+    metadata: { invitation_id: invitationId, email_sent: emailSent },
+    client: supabase,
+  });
+
+  return { invitationId, inviteUrl, emailSent };
 }
 
 export async function resendStaffLoginInvite(input: {
@@ -634,8 +804,30 @@ export async function resendStaffLoginInvite(input: {
   const now = new Date();
 
   await expireStaleLoginInvitations(tid, supabase);
+
+  const { data: latestInvite, error: latestErr } = await supabase
+    .from("fi_staff_login_invitations")
+    .select("id, status, accepted_at, resend_count")
+    .eq("tenant_id", tid)
+    .eq("staff_member_id", mid)
+    .order("invited_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (latestErr) throw new Error(latestErr.message);
+
+  const latest = latestInvite as {
+    id: string;
+    status: string;
+    accepted_at: string | null;
+    resend_count: number | null;
+  } | null;
+  if (latest?.status === "accepted" || latest?.accepted_at) {
+    throw new Error(STAFF_ACCESS_INVITE_ERRORS.ACCEPTED_NO_RESEND);
+  }
+
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
-  const { authUserId, inviteLink } = await provisionAuthInviteLink(tid, email, supabase);
+  const tenantName = await loadTenantDisplayName(tid, supabase);
+  const { authUserId, inviteLink: authInviteLink } = await provisionAuthInviteLink(tid, email, supabase);
 
   const fiUserId = await resolveOrCreateFiUser(tid, email, supabase);
   await supabase
@@ -649,61 +841,47 @@ export async function resendStaffLoginInvite(input: {
     .eq("id", fiUserId);
   await updateFiStaff(tid, fiStaffId, { fi_user_id: fiUserId }, supabase);
 
-  const timestamps = nextResendInvitationTimestamps(now);
+  const inviteToken = generateStaffAccessInviteToken();
+  const inviteUrl = buildStaffAccessInviteUrl(tid, inviteToken);
+  const canReuseRow =
+    latest &&
+    latest.status !== "accepted" &&
+    latest.status !== "revoked" &&
+    !latest.accepted_at;
 
-  const { data: existing, error: findErr } = await supabase
-    .from("fi_staff_login_invitations")
-    .select("id")
-    .eq("tenant_id", tid)
-    .eq("staff_member_id", mid)
-    .eq("status", "pending")
-    .order("invited_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (findErr) throw new Error(findErr.message);
+  const invitationId = await upsertStaffLoginInvitation({
+    tenantId: tid,
+    staffMemberId: mid,
+    fiStaffId,
+    fiUserId,
+    email,
+    inviteToken,
+    inviteUrl,
+    authInviteLink,
+    invitedBy: input.invitedBy?.trim() || null,
+    isResend: Boolean(canReuseRow),
+    existingInvitationId: canReuseRow ? latest!.id : null,
+    existingResendCount: latest?.resend_count ?? 0,
+    client: supabase,
+    now,
+  });
 
-  let invitationId: string;
-  if (existing) {
-    invitationId = String((existing as { id: string }).id);
-    const { error: upErr } = await supabase
-      .from("fi_staff_login_invitations")
-      .update({
-        invite_link: inviteLink,
-        invited_by: input.invitedBy?.trim() || null,
-        invited_at: timestamps.invitedAt,
-        expires_at: timestamps.expiresAt,
-        updated_at: timestamps.updatedAt,
-      })
-      .eq("tenant_id", tid)
-      .eq("id", invitationId);
-    if (upErr) throw new Error(upErr.message);
-  } else {
-    const { data: created, error: insErr } = await supabase
-      .from("fi_staff_login_invitations")
-      .insert({
-        tenant_id: tid,
-        staff_member_id: mid,
-        fi_staff_id: fiStaffId,
-        fi_user_id: fiUserId,
-        invite_email: email,
-        invite_link: inviteLink,
-        status: "pending",
-        invited_by: input.invitedBy?.trim() || null,
-        invited_at: timestamps.invitedAt,
-        expires_at: timestamps.expiresAt,
-        created_at: timestamps.invitedAt,
-        updated_at: timestamps.updatedAt,
-      })
-      .select("id")
-      .single();
-    if (insErr || !created) throw new Error(insErr?.message ?? "Could not create invitation.");
-    invitationId = String((created as { id: string }).id);
-  }
+  await createStaffAccessPinSetupToken({
+    tenantId: tid,
+    staffMemberId: mid,
+    fiStaffId,
+    loginInvitationId: invitationId,
+    actorFiUserId: input.invitedBy ?? null,
+    client: supabase,
+  });
 
-  const emailSent = await trySendLoginInviteEmail({
+  const timestamps = nextResendInvitationTimestamps(now, STAFF_ACCESS_INVITE_EXPIRY_DAYS);
+  const emailSent = await trySendStaffAccessInviteEmail({
     to: email,
     staffName: fullName,
-    inviteUrl: inviteLink,
+    tenantName,
+    inviteUrl,
+    expiresAt: timestamps.expiresAt,
   });
   if (emailSent) {
     await supabase
@@ -713,7 +891,20 @@ export async function resendStaffLoginInvite(input: {
       .eq("id", invitationId);
   }
 
-  return { invitationId, inviteUrl: inviteLink, emailSent };
+  await insertStaffAccessAuditEvent({
+    tenantId: tid,
+    staffMemberId: mid,
+    eventType: STAFF_ACCESS_AUDIT_EVENTS.INVITE_RESENT,
+    actorFiUserId: input.invitedBy ?? null,
+    metadata: {
+      invitation_id: invitationId,
+      email_sent: emailSent,
+      resend_count: (latest?.resend_count ?? 0) + 1,
+    },
+    client: supabase,
+  });
+
+  return { invitationId, inviteUrl, emailSent };
 }
 
 export async function copyStaffLoginInviteLink(input: {
@@ -727,22 +918,23 @@ export async function copyStaffLoginInviteLink(input: {
 
   const { data, error } = await supabase
     .from("fi_staff_login_invitations")
-    .select("invite_link, status, expires_at")
+    .select("invite_link, status, expires_at, accepted_at")
     .eq("tenant_id", tid)
     .eq("staff_member_id", mid)
-    .eq("status", "pending")
+    .in("status", ["pending", "sent", "expired"])
     .order("invited_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("No pending login invite found.");
 
-  const row = data as { invite_link: string | null; expires_at: string };
+  const row = data as { invite_link: string | null; expires_at: string; accepted_at: string | null };
+  if (row.accepted_at) throw new Error(STAFF_ACCESS_INVITE_ERRORS.ALREADY_ACCEPTED);
   const status = resolveInviteStatus({
     invitationStatus: "pending",
     expiresAt: row.expires_at,
   });
-  if (status !== "pending") throw new Error("Invite has expired.");
+  if (status === "expired") throw new Error(STAFF_ACCESS_INVITE_ERRORS.EXPIRED);
   const inviteUrl = row.invite_link?.trim();
   if (!inviteUrl) throw new Error("Invite link is unavailable.");
   return { inviteUrl };

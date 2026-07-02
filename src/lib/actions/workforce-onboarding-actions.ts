@@ -6,7 +6,7 @@ import { z } from "zod";
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
 import { markOnboardingTrainingComplete } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
-import { sendOnboardingInvite } from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
+import { sendOnboardingInvite, resendOnboardingInvite, copyOnboardingInviteLink } from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
 import {
   createOnboardingStaffMember,
   expireStaleOnboardingInvitations,
@@ -84,6 +84,58 @@ export async function sendOnboardingInviteAction(
     });
     revalidateOnboardingSurfaces(tenantId);
     return { ok: true, inviteUrl: result.inviteUrl, emailSent: result.emailSent };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function resendOnboardingInviteAction(
+  tenantId: string,
+  staffMemberId: string
+): Promise<
+  | { ok: true; inviteUrl: string; emailSent: boolean; wasExpired?: boolean }
+  | { ok: false; error: string }
+> {
+  try {
+    const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
+    await expireStaleOnboardingInvitations(tenantId);
+
+    const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
+    const supabase = supabaseAdmin();
+    const { data: prior } = await supabase
+      .from("fi_staff_onboarding_invitations")
+      .select("status, expires_at, accepted_at")
+      .eq("tenant_id", tenantId.trim())
+      .eq("staff_member_id", staffMemberId.trim())
+      .order("invited_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const wasExpired =
+      prior != null &&
+      !(prior as { accepted_at: string | null }).accepted_at &&
+      (String((prior as { status: string }).status) === "expired" ||
+        new Date(String((prior as { expires_at: string }).expires_at)).getTime() < Date.now());
+
+    const result = await resendOnboardingInvite({
+      tenantId,
+      staffMemberId,
+      invitedBy: fiUserId,
+    });
+    revalidateOnboardingSurfaces(tenantId);
+    return { ok: true, inviteUrl: result.inviteUrl, emailSent: result.emailSent, wasExpired };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function copyOnboardingInviteLinkAction(
+  tenantId: string,
+  staffMemberId: string
+): Promise<{ ok: true; inviteUrl: string } | { ok: false; error: string }> {
+  try {
+    await assertWorkforceHrManageAllowed(tenantId);
+    const result = await copyOnboardingInviteLink({ tenantId, staffMemberId });
+    return { ok: true, inviteUrl: result.inviteUrl };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

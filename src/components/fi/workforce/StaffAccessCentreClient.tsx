@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import {
   copyStaffLoginInviteLinkAction,
+  requestStaffPinResetLinkAction,
   resendStaffLoginInviteAction,
   revokeStaffLoginAccessAction,
   sendStaffLoginInviteAction,
@@ -102,6 +103,7 @@ export function StaffAccessCentreClient({
         | "send"
         | "resend"
         | "copy"
+        | "resetPin"
         | "revoke"
         | "suspend"
     ) => {
@@ -116,6 +118,7 @@ export function StaffAccessCentreClient({
         if (action === "send") result = await sendStaffLoginInviteAction(tenantId, body);
         else if (action === "resend") result = await resendStaffLoginInviteAction(tenantId, body);
         else if (action === "copy") result = await copyStaffLoginInviteLinkAction(tenantId, body);
+        else if (action === "resetPin") result = await requestStaffPinResetLinkAction(tenantId, body);
         else if (action === "revoke") result = await revokeStaffLoginAccessAction(tenantId, body);
         else result = await suspendStaffLoginAccessAction(tenantId, body);
 
@@ -129,6 +132,14 @@ export function StaffAccessCentreClient({
             await navigator.clipboard.writeText(result.inviteUrl);
             setCopiedStaffId(staffMemberId);
             setMessage("Invite link copied to clipboard.");
+          } catch {
+            setMessage(result.inviteUrl);
+          }
+        } else if (action === "resetPin" && result.inviteUrl) {
+          try {
+            await navigator.clipboard.writeText(result.inviteUrl);
+            setCopiedStaffId(staffMemberId);
+            setMessage("PIN reset link copied — share it with the staff member. You cannot see their PIN.");
           } catch {
             setMessage(result.inviteUrl);
           }
@@ -253,8 +264,16 @@ export function StaffAccessCentreClient({
                     {row.inviteLabel}
                     {row.invitedAt ? (
                       <p className="text-xs text-[#64748B]">
-                        {new Date(row.invitedAt).toLocaleString()}
+                        Sent {new Date(row.invitedAt).toLocaleString()}
                       </p>
+                    ) : null}
+                    {row.inviteExpiresAt ? (
+                      <p className="text-xs text-[#64748B]">
+                        Expires {new Date(row.inviteExpiresAt).toLocaleDateString()}
+                      </p>
+                    ) : null}
+                    {row.resendCount > 0 ? (
+                      <p className="text-xs text-[#64748B]">Resent {row.resendCount}×</p>
                     ) : null}
                   </td>
                   {canManage ? (
@@ -279,6 +298,13 @@ export function StaffAccessCentreClient({
                             label={copiedStaffId === row.staffMemberId ? "Copied" : "Copy link"}
                             disabled={pending}
                             onClick={() => runAction(row.staffMemberId, "copy")}
+                          />
+                        ) : null}
+                        {row.canResetPin ? (
+                          <ActionButton
+                            label="Reset PIN"
+                            disabled={pending}
+                            onClick={() => runAction(row.staffMemberId, "resetPin")}
                           />
                         ) : null}
                         {row.canSuspendAccess ? (

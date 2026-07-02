@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import {
+  copyOnboardingInviteLinkAction,
   createOnboardingStaffAction,
   markOnboardingTrainingCompleteAction,
+  resendOnboardingInviteAction,
   sendOnboardingInviteAction,
 } from "@/src/lib/actions/workforce-onboarding-actions";
 import {
@@ -19,16 +21,11 @@ import {
   type OnboardingStaffRow,
 } from "@/src/lib/workforce/onboarding/onboardingTypes";
 
-function invitationStatusLabel(status: string): string {
-  if (status === "accepted") return "Accepted";
-  if (status === "expired") return "Expired";
-  return "Pending";
-}
-
-function invitationStatusClass(status: string): string {
+function inviteStatusClass(status: string): string {
   if (status === "accepted") return "text-emerald-400";
-  if (status === "expired") return "text-rose-400";
-  return "text-amber-300";
+  if (status === "expired" || status === "revoked") return "text-rose-400";
+  if (status === "pending") return "text-amber-300";
+  return "text-slate-500";
 }
 
 function ChecklistItem({ done, label }: { done: boolean; label: string }) {
@@ -46,6 +43,33 @@ function ChecklistItem({ done, label }: { done: boolean; label: string }) {
       </span>
       <span className={done ? "text-slate-200" : "text-slate-400"}>{label}</span>
     </li>
+  );
+}
+
+function ActionButton({
+  label,
+  disabled,
+  onClick,
+  tone = "default",
+}: {
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  tone?: "default" | "warn";
+}) {
+  const cls =
+    tone === "warn"
+      ? "border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+      : "border-white/10 text-[#CBD5E1] hover:bg-white/5";
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-50 ${cls}`}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -67,6 +91,7 @@ export function OnboardingCentreClient({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [copiedStaffId, setCopiedStaffId] = useState<string | null>(null);
 
   const [form, setForm] = useState<{
     fullName: string;
@@ -101,23 +126,58 @@ export function OnboardingCentreClient({
     });
   }, [form, router, tenantId]);
 
-  const onSendInvite = useCallback(
-    (staffMemberId: string) => {
+  const runInviteAction = useCallback(
+    (staffMemberId: string, action: "send" | "resend" | "copy") => {
       setError(null);
       setMessage(null);
       setInviteUrl(null);
       startTransition(async () => {
-        const result = await sendOnboardingInviteAction(tenantId, staffMemberId);
+        let result:
+          | { ok: true; inviteUrl?: string; emailSent?: boolean; wasExpired?: boolean }
+          | { ok: false; error: string };
+
+        if (action === "send") result = await sendOnboardingInviteAction(tenantId, staffMemberId);
+        else if (action === "resend") result = await resendOnboardingInviteAction(tenantId, staffMemberId);
+        else result = await copyOnboardingInviteLinkAction(tenantId, staffMemberId);
+
         if (!result.ok) {
           setError(result.error);
           return;
         }
-        setInviteUrl(result.inviteUrl);
-        setMessage(
-          result.emailSent
-            ? "Invitation email sent."
-            : "Invitation created. Copy the link below — email delivery is not configured."
-        );
+
+        if (action === "copy" && result.inviteUrl) {
+          try {
+            await navigator.clipboard.writeText(result.inviteUrl);
+            setCopiedStaffId(staffMemberId);
+            setMessage("Invite link copied to clipboard.");
+          } catch {
+            setInviteUrl(result.inviteUrl);
+            setMessage(result.inviteUrl);
+          }
+        } else if (action === "send") {
+          setInviteUrl(result.inviteUrl ?? null);
+          setMessage(
+            result.emailSent
+              ? "Invitation email sent."
+              : "Email delivery is not configured. Copy and send the invite link manually."
+          );
+        } else if (action === "resend") {
+          setInviteUrl(result.inviteUrl ?? null);
+          if (result.wasExpired) {
+            setMessage(
+              result.emailSent
+                ? "This invite has expired. A new secure link has been generated and emailed."
+                : "This invite has expired. A new secure link has been generated — copy and send it manually."
+            );
+          } else {
+            setMessage(
+              result.emailSent
+                ? "Invite resent."
+                : "Invite resent. Email delivery is not configured. Copy and send the invite link manually."
+            );
+          }
+        }
+
         router.refresh();
       });
     },
@@ -149,10 +209,16 @@ export function OnboardingCentreClient({
           Onboarding Centre
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
-          Create staff, send onboarding invites, and track checklist progress through PIN setup
-          and permissions.
+          Create staff, send onboarding invites, resend when needed, and track checklist progress
+          through PIN setup and permissions.
         </p>
       </header>
+
+      {!canManage ? (
+        <InfoNotice variant="warning" className="mt-6">
+          You can view onboarding status but cannot send or resend invites.
+        </InfoNotice>
+      ) : null}
 
       {error ? (
         <InfoNotice variant="warning" title="Action failed" className="mt-6">
@@ -281,14 +347,29 @@ export function OnboardingCentreClient({
                     <td className="px-4 py-3 text-slate-300">{row.email ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-300">{row.roleCode ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-300">{row.clinicName ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      {row.invitation ? (
-                        <span className={invitationStatusClass(row.invitation.status)}>
-                          {invitationStatusLabel(row.invitation.status)}
-                        </span>
-                      ) : (
-                        <span className="text-slate-500">Not sent</span>
-                      )}
+                    <td className={`px-4 py-3 ${inviteStatusClass(row.inviteStatus)}`}>
+                      {row.inviteLabel}
+                      {row.invitation?.sentAt || row.invitation?.invitedAt ? (
+                        <p className="text-xs text-slate-500">
+                          Sent{" "}
+                          {new Date(
+                            row.invitation.sentAt ?? row.invitation.invitedAt
+                          ).toLocaleString()}
+                        </p>
+                      ) : null}
+                      {row.invitation?.expiresAt ? (
+                        <p className="text-xs text-slate-500">
+                          Expires {new Date(row.invitation.expiresAt).toLocaleDateString()}
+                        </p>
+                      ) : null}
+                      {row.invitation && row.invitation.resendCount > 0 ? (
+                        <p className="text-xs text-slate-500">
+                          Resent {row.invitation.resendCount}×
+                        </p>
+                      ) : null}
+                      {row.systemAccessRevoked ? (
+                        <p className="text-xs text-rose-400">Access suspended</p>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3">
                       <ul className="space-y-1">
@@ -308,24 +389,34 @@ export function OnboardingCentreClient({
                     </td>
                     {canManage ? (
                       <td className="px-4 py-3">
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={pending || !row.email}
-                            onClick={() => onSendInvite(row.id)}
-                          >
-                            Send invite
-                          </Button>
+                        <div className="flex flex-wrap gap-1.5">
+                          {row.canSendInvite ? (
+                            <ActionButton
+                              label="Send invite"
+                              disabled={pending}
+                              onClick={() => runInviteAction(row.id, "send")}
+                            />
+                          ) : null}
+                          {row.canResendInvite ? (
+                            <ActionButton
+                              label="Resend invite"
+                              disabled={pending}
+                              onClick={() => runInviteAction(row.id, "resend")}
+                            />
+                          ) : null}
+                          {row.canCopyInviteLink ? (
+                            <ActionButton
+                              label={copiedStaffId === row.id ? "Copied" : "Copy link"}
+                              disabled={pending}
+                              onClick={() => runInviteAction(row.id, "copy")}
+                            />
+                          ) : null}
                           {row.checklist.trainingPending ? (
-                            <Button
-                              size="sm"
-                              variant="ghost"
+                            <ActionButton
+                              label="Mark training done"
                               disabled={pending}
                               onClick={() => onMarkTrainingComplete(row.id)}
-                            >
-                              Mark training done
-                            </Button>
+                            />
                           ) : null}
                         </div>
                       </td>
