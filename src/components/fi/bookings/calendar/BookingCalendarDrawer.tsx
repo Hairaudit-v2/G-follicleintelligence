@@ -21,6 +21,8 @@ import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/Clinic
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
 import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
+import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { cn } from "@/lib/utils";
 
 function clinicName(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
   if (row.clinic_id) {
@@ -324,7 +326,7 @@ export function BookingCalendarDrawer({
     <div
       className={
         os
-          ? "fixed inset-0 z-[190] flex justify-end bg-black/55 backdrop-blur-[3px]"
+          ? cn(fiOsChromeClasses.rightDrawerOverlay, "z-[190] bg-black/55 backdrop-blur-[3px]")
           : "fixed inset-0 z-40 flex justify-end bg-black/30"
       }
       role="presentation"
@@ -333,7 +335,10 @@ export function BookingCalendarDrawer({
       <aside
         className={
           os
-            ? "flex h-full w-full max-w-sm flex-col overflow-hidden border-l border-white/[0.08] bg-[#070f1a]/96 text-slate-100 shadow-2xl shadow-black/60 backdrop-blur-xl"
+            ? cn(
+                fiOsChromeClasses.rightDrawerPanel,
+                "border-l border-white/[0.08] bg-[#070f1a]/96 text-slate-100 shadow-2xl shadow-black/60 backdrop-blur-xl sm:max-w-sm"
+              )
             : "h-full w-full max-w-md overflow-y-auto bg-[#0F1629]/80 backdrop-blur-md shadow-xl"
         }
         role="dialog"
@@ -343,7 +348,12 @@ export function BookingCalendarDrawer({
       >
         {os ? (
           <>
-            <header className="shrink-0 border-b border-white/[0.08] px-3 py-3">
+            <header
+              className={cn(
+                fiOsChromeClasses.rightDrawerHeader,
+                "border-b border-white/[0.08] px-3 py-3"
+              )}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <p className="truncate text-[15px] font-semibold leading-tight text-slate-50">
@@ -367,7 +377,7 @@ export function BookingCalendarDrawer({
               </div>
             </header>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+            <div className={cn(fiOsChromeClasses.rightDrawerBodyScroll, "px-3 py-3")}>
               {calendarOsEvent ? (
                 <p className="mb-3 rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-2 text-[11px] leading-snug text-cyan-100/90">
                   CalendarOS event — read-only in this phase. Edit in Google Calendar or the

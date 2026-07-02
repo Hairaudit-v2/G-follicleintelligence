@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
@@ -39,7 +39,7 @@ import { FiOsMinimalNavRail, FiOsMobileBottomNav } from "@/src/components/fi-os/
 import { FiOsMoreNavDrawer } from "@/src/components/fi-os/FiOsMoreNavDrawer";
 import { FiOsSkipLink } from "@/src/components/fi-os/FiOsSkipLink";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
-import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { fiOsChromeClasses, buildFiOsChromeViewportStyle } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
 
 /**
@@ -123,6 +123,9 @@ export function FiOsAppShell({
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
   const [createLeadOpen, setCreateLeadOpen] = useState(false);
   const quickCreateOpenRef = useRef(false);
+  const topChromeRef = useRef<HTMLDivElement>(null);
+  const bottomChromeRef = useRef<HTMLDivElement>(null);
+  const [chromeViewportStyle, setChromeViewportStyle] = useState<CSSProperties>({});
   const [mobileNav, setMobileNav] = useState(false);
   const [moreNavOpen, setMoreNavOpen] = useState(false);
   const [kbdHint, setKbdHint] = useState("Ctrl+K");
@@ -245,6 +248,24 @@ export function FiOsAppShell({
     };
   }, [mobileNav, quickCreateOpen, moreNavOpen]);
 
+  useEffect(() => {
+    function measureChromeViewport() {
+      const topPx = topChromeRef.current?.getBoundingClientRect().height ?? 0;
+      const bottomPx = bottomChromeRef.current?.getBoundingClientRect().height ?? 0;
+      setChromeViewportStyle(buildFiOsChromeViewportStyle(topPx, bottomPx));
+    }
+
+    measureChromeViewport();
+    const ro = new ResizeObserver(measureChromeViewport);
+    if (topChromeRef.current) ro.observe(topChromeRef.current);
+    if (bottomChromeRef.current) ro.observe(bottomChromeRef.current);
+    window.addEventListener("resize", measureChromeViewport);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measureChromeViewport);
+    };
+  }, [navCollapseActive, workspaceFocusLine, staffPinSessionLabel, impersonationDisplayName]);
+
   const closeMobile = () => setMobileNav(false);
   const closeMoreNav = () => setMoreNavOpen(false);
   const openSearch = () => setSearchOpen(true);
@@ -252,7 +273,7 @@ export function FiOsAppShell({
   const openMoreNav = () => setMoreNavOpen(true);
 
   return (
-    <div className={fiOsChromeClasses.shellRoot}>
+    <div className={fiOsChromeClasses.shellRoot} style={chromeViewportStyle}>
       <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
         {showLegacySidebar ? (
@@ -282,28 +303,30 @@ export function FiOsAppShell({
             navCollapseActive && fiOsChromeClasses.mainColumnMobileBottomNavPad
           )}
         >
-          <FiOsTopBar
-            tenantId={tenantId}
-            clinicLabel={clinicLabel}
-            accentHex={accent}
-            workspaceProfileKey={workspaceProfileKey}
-            workspaceFocusLine={workspaceFocusLine}
-            userEmail={userEmail}
-            searchOpen={searchOpen}
-            onSearchOpenChange={setSearchOpen}
-            kbdHint={kbdHint}
-            quickCreateKbdHint={quickCreateKbdHint}
-            onOpenMobileNav={() => setMobileNav(true)}
-            onOpenQuickCreate={openQuickCreate}
-            hideMobileNav={navCollapseActive}
-            compactCreateLabel={navCollapseActive}
-            impersonationDisplayName={impersonationDisplayName ?? null}
-            showFiPlatformSystemLink={showFiPlatformSystemLink}
-            staffPinSessionLabel={staffPinSessionLabel}
-            staffPinLogoutTenantId={staffPinLogoutTenantId}
-            staffPinOnBreak={staffPinOnBreak}
-            staffPinBreaksEnabled={staffPinBreaksEnabled}
-          />
+          <div ref={topChromeRef} className="shrink-0" data-testid="fi-os-top-chrome">
+            <FiOsTopBar
+              tenantId={tenantId}
+              clinicLabel={clinicLabel}
+              accentHex={accent}
+              workspaceProfileKey={workspaceProfileKey}
+              workspaceFocusLine={workspaceFocusLine}
+              userEmail={userEmail}
+              searchOpen={searchOpen}
+              onSearchOpenChange={setSearchOpen}
+              kbdHint={kbdHint}
+              quickCreateKbdHint={quickCreateKbdHint}
+              onOpenMobileNav={() => setMobileNav(true)}
+              onOpenQuickCreate={openQuickCreate}
+              hideMobileNav={navCollapseActive}
+              compactCreateLabel={navCollapseActive}
+              impersonationDisplayName={impersonationDisplayName ?? null}
+              showFiPlatformSystemLink={showFiPlatformSystemLink}
+              staffPinSessionLabel={staffPinSessionLabel}
+              staffPinLogoutTenantId={staffPinLogoutTenantId}
+              staffPinOnBreak={staffPinOnBreak}
+              staffPinBreaksEnabled={staffPinBreaksEnabled}
+            />
+          </div>
           <main
             id="fi-os-main-content"
             tabIndex={-1}
@@ -356,13 +379,15 @@ export function FiOsAppShell({
       ) : null}
 
       {navCollapseActive ? (
-        <FiOsMobileBottomNav
-          items={minimalNavItems}
-          activeId={activeMinimalNavId}
-          onSearch={openSearch}
-          onNew={openQuickCreate}
-          onMore={openMoreNav}
-        />
+        <div ref={bottomChromeRef} data-testid="fi-os-bottom-chrome">
+          <FiOsMobileBottomNav
+            items={minimalNavItems}
+            activeId={activeMinimalNavId}
+            onSearch={openSearch}
+            onNew={openQuickCreate}
+            onMore={openMoreNav}
+          />
+        </div>
       ) : null}
 
       <FiOsMoreNavDrawer

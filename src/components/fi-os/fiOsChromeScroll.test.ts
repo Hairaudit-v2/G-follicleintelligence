@@ -3,7 +3,10 @@ import test from "node:test";
 
 import {
   FI_OS_SIDEBAR_NAV_SCROLL,
+  FI_OS_TOP_CHROME_OFFSET_FALLBACK,
+  buildFiOsChromeViewportStyle,
   fiOsChromeClasses,
+  fiOsChromeCssVars,
 } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
   filterFiOsPrimarySidebarItemsByFeatureAccess,
@@ -49,6 +52,45 @@ test("fiOsChromeClasses: sidebar rail and drawer establish scroll boundaries", (
     "sidebarNavScroll respects mobile safe-area insets"
   );
   assert.equal(fiOsChromeClasses.sidebarNavScroll, FI_OS_SIDEBAR_NAV_SCROLL);
+});
+
+test("fiOsChromeClasses: right drawer viewport respects measured chrome offsets", () => {
+  assertIncludesAll(
+    fiOsChromeClasses.rightDrawerOverlay,
+    [
+      "fixed",
+      "inset-x-0",
+      `var(${fiOsChromeCssVars.topOffset}`,
+      FI_OS_TOP_CHROME_OFFSET_FALLBACK,
+      `var(${fiOsChromeCssVars.bottomOffset}`,
+      "safe-area-inset-bottom",
+    ],
+    "rightDrawerOverlay"
+  );
+  assertIncludesAll(
+    fiOsChromeClasses.rightDrawerPanel,
+    ["h-full", "max-h-full", "overflow-hidden", "flex-col"],
+    "rightDrawerPanel"
+  );
+  assertIncludesAll(
+    fiOsChromeClasses.rightDrawerBodyScroll,
+    ["min-h-0", "flex-1", "overflow-y-auto", "overscroll-y-contain"],
+    "rightDrawerBodyScroll"
+  );
+  assert.ok(
+    fiOsChromeClasses.rightDrawerHeader.includes("shrink-0"),
+    "rightDrawerHeader stays visible"
+  );
+  assert.ok(
+    fiOsChromeClasses.rightDrawerFooter.includes("shrink-0"),
+    "rightDrawerFooter stays reachable"
+  );
+});
+
+test("buildFiOsChromeViewportStyle: clamps negative measurements to zero px", () => {
+  const style = buildFiOsChromeViewportStyle(-4, 12.7) as Record<string, string>;
+  assert.equal(style[fiOsChromeCssVars.topOffset], "0px");
+  assert.equal(style[fiOsChromeCssVars.bottomOffset], "13px");
 });
 
 test("fiOs sidebar workflow: lower-priority modules remain in nav sections", () => {

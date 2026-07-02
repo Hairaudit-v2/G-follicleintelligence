@@ -51,6 +51,27 @@ authenticatedTest.describe("CalendarOS V2 — day click-to-create @authenticated
     await expect(page.getByTestId("calendar-quick-create-time-summary")).toContainText(/\d/);
   });
 
+  authenticatedTest("Quick book drawer sits below FI OS top chrome", async ({ page }) => {
+    const calendar = new CalendarE2ePage(page);
+    const grid = await calendar.readGridHours("v2-day");
+    const targetHour = grid.start + 1 <= grid.end - 1 ? grid.start + 1 : grid.start;
+
+    await calendar.clickEmptySlotAtHour(calendar.emptyDaySlotLayer(), targetHour, grid);
+    await calendar.expectQuickCreateBelowTopChrome();
+  });
+
+  authenticatedTest("booking drawer sits below FI OS top chrome", async ({ page }) => {
+    const calendar = new CalendarE2ePage(page);
+    const bookingCard = page.getByTestId("calendar-booking-card").first();
+    if ((await bookingCard.count()) === 0) {
+      test.skip(true, "No bookings on the visible day — seed data or pick another date");
+      return;
+    }
+
+    await bookingCard.click();
+    await calendar.expectBookingDrawerBelowTopChrome();
+  });
+
   authenticatedTest("staff lane empty slot prefills provider when staff columns exist", async ({
     page,
   }) => {

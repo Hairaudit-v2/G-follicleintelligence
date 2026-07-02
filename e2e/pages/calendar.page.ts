@@ -92,6 +92,45 @@ export class CalendarE2ePage {
     });
   }
 
+  /** Quick create drawer must sit below FI OS top command bar (not clipped behind chrome). */
+  async expectQuickCreateBelowTopChrome(): Promise<void> {
+    const topChrome = this.page.getByTestId("fi-os-top-chrome");
+    await expect(topChrome).toBeVisible({ timeout: 10_000 });
+    const drawer = this.page.getByTestId("calendar-quick-create-drawer");
+    await expect(drawer).toBeVisible({ timeout: 10_000 });
+
+    const chromeBox = await topChrome.boundingBox();
+    const drawerBox = await drawer.boundingBox();
+    expect(chromeBox, "FI OS top chrome must be measurable").toBeTruthy();
+    expect(drawerBox, "Quick create drawer must be measurable").toBeTruthy();
+
+    const chromeBottom = chromeBox!.y + chromeBox!.height;
+    expect(
+      drawerBox!.y,
+      "drawer top should start at or below the bottom of FI OS top chrome"
+    ).toBeGreaterThanOrEqual(chromeBottom - 1);
+
+    await expect(drawer.getByRole("heading", { name: /quick book/i })).toBeVisible();
+    await expect(drawer.getByRole("button", { name: /close drawer/i })).toBeVisible();
+  }
+
+  /** Booking drawer uses the same viewport-safe shell as quick create. */
+  async expectBookingDrawerBelowTopChrome(): Promise<void> {
+    const topChrome = this.page.getByTestId("fi-os-top-chrome");
+    await expect(topChrome).toBeVisible({ timeout: 10_000 });
+    const drawer = this.page.getByTestId("calendar-booking-drawer");
+    await expect(drawer).toBeVisible({ timeout: 10_000 });
+
+    const chromeBox = await topChrome.boundingBox();
+    const drawerBox = await drawer.boundingBox();
+    expect(chromeBox).toBeTruthy();
+    expect(drawerBox).toBeTruthy();
+
+    const chromeBottom = chromeBox!.y + chromeBox!.height;
+    expect(drawerBox!.y).toBeGreaterThanOrEqual(chromeBottom - 1);
+    await expect(drawer.getByRole("button", { name: /^close$/i })).toBeVisible();
+  }
+
   async expectQuickCreateClosed(): Promise<void> {
     await expect(this.page.getByTestId("calendar-quick-create-drawer")).toHaveCount(0);
   }

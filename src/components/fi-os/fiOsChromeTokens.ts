@@ -7,9 +7,31 @@ export {
   fiAdminAmbientBackgroundStyle,
 } from "@/src/components/fi-admin/dashboard-ui/dashboardTheme";
 
+import type { CSSProperties } from "react";
+
+/** CSS custom properties — measured on `FiOsAppShell` root; fallbacks used until hydration. */
+export const fiOsChromeCssVars = {
+  topOffset: "--fi-os-top-chrome-offset",
+  bottomOffset: "--fi-os-bottom-chrome-offset",
+} as const;
+
+/** ≈ compact command bar without banners (ResizeObserver replaces at runtime). */
+export const FI_OS_TOP_CHROME_OFFSET_FALLBACK = "3.75rem";
+
 /** Shared padding + flex sizing for FI OS `<main>` (vertical overflow chosen in `FiOsAppShell`). */
 const FI_OS_MAIN_PAD =
   "relative min-h-0 flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5";
+
+const FI_OS_RIGHT_DRAWER_TOP = `top-[var(${fiOsChromeCssVars.topOffset},${FI_OS_TOP_CHROME_OFFSET_FALLBACK})]`;
+const FI_OS_RIGHT_DRAWER_BOTTOM = `bottom-[calc(var(${fiOsChromeCssVars.bottomOffset},0px)+env(safe-area-inset-bottom,0px))]`;
+
+/** Inline style for measured chrome offsets (applied on `FiOsAppShell` root). */
+export function buildFiOsChromeViewportStyle(topPx: number, bottomPx: number): CSSProperties {
+  return {
+    [fiOsChromeCssVars.topOffset as string]: `${Math.max(0, Math.round(topPx))}px`,
+    [fiOsChromeCssVars.bottomOffset as string]: `${Math.max(0, Math.round(bottomPx))}px`,
+  };
+}
 
 /** Scrollable primary nav list — flex child must use min-h-0 for overflow-y-auto to engage. */
 export const FI_OS_SIDEBAR_NAV_SCROLL =
@@ -58,4 +80,16 @@ export const fiOsChromeClasses = {
     "rounded-xl border border-white/[0.1] bg-white/[0.05] text-slate-100 shadow-sm shadow-black/30 backdrop-blur-md transition hover:border-cyan-500/35 hover:bg-white/[0.08] hover:shadow-cyan-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40",
   /** Primary emphasis control (Quick create). */
   toolbarPrimaryAccent: "ring-1 ring-cyan-400/25 ring-offset-0 ring-offset-[#0a1424]",
+  /**
+   * Viewport-aware right drawer shell — sits below measured top chrome and above mobile bottom nav.
+   * Pair with `rightDrawerPanel` + `rightDrawerBodyScroll` + `rightDrawerFooter`.
+   */
+  rightDrawerOverlay: `fixed inset-x-0 ${FI_OS_RIGHT_DRAWER_TOP} ${FI_OS_RIGHT_DRAWER_BOTTOM} flex justify-end`,
+  rightDrawerBackdrop: "absolute inset-0 bg-black/55 backdrop-blur-[2px]",
+  rightDrawerPanel:
+    "relative flex h-full max-h-full w-full max-w-full flex-col overflow-hidden sm:mr-2 sm:max-w-md sm:rounded-2xl",
+  rightDrawerHeader: "shrink-0",
+  rightDrawerBodyScroll:
+    "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain [overflow-scrolling:touch]",
+  rightDrawerFooter: "shrink-0",
 } as const;
