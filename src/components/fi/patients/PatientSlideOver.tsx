@@ -20,6 +20,7 @@ import { PatientPersonLeadHistoryCard } from "./shared/PatientPersonLeadHistoryC
 import { PatientStatusBadge } from "./PatientStatusBadge";
 import { PatientPhotoCaptureActions } from "./PatientPhotoCaptureActions";
 import { useWorkspaceShellOptional } from "@/src/components/fi-os/workspace/WorkspaceShellContext";
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 
 export type PatientShellOperatorContext = {
   tenantId: string;
@@ -288,13 +289,13 @@ export function PatientSlideOverPanel({
                     <dd className="font-medium">
                       {payload.nextAppointmentAt ? (
                         payload.nextAppointmentId ? (
-                          <Link
+                          <WorkspaceFeedLink
                             href={`/fi-admin/${tenantId}/appointments/${payload.nextAppointmentId}`}
+                            push
                             className="text-blue-300 hover:underline"
-                            onClick={() => onClose()}
                           >
                             {payload.nextAppointmentAt.slice(0, 16).replace("T", " ")}
-                          </Link>
+                          </WorkspaceFeedLink>
                         ) : (
                           payload.nextAppointmentAt.slice(0, 16).replace("T", " ")
                         )

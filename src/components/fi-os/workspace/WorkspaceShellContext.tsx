@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import type { D1WorkspaceKind, WorkspaceRef } from "@/src/lib/fiOs/workspaceShell/types";
+import type { WorkspaceRef, WorkspaceShellKind } from "@/src/lib/fiOs/workspaceShell/types";
 
 export type WorkspaceShellOperatorContext = {
   tenantId: string;
@@ -25,7 +25,7 @@ export type WorkspaceShellContextValue = WorkspaceShellOperatorContext & {
   popWorkspace: () => void;
   /** Close every open workspace. */
   closeAll: () => void;
-  activeOfKind: (kind: D1WorkspaceKind) => WorkspaceRef | null;
+  activeOfKind: (kind: WorkspaceShellKind) => WorkspaceRef | null;
   /** Internal — full stack replace (URL sync). */
   setStack: (stack: WorkspaceRef[]) => void;
 };

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
+
 import {
   FinancialOsSubPageHeader,
   FinancialOsTable,
@@ -68,20 +70,20 @@ export default async function FinancialOsInvoicesPage({
             </td>
             <td className={financialOsClasses.tableCell}>
               {r.case_id ? (
-                <Link
+                <WorkspaceFeedLink
                   className={financialOsClasses.inlineLink}
                   href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}
                 >
                   Case
-                </Link>
+                </WorkspaceFeedLink>
               ) : null}{" "}
               {r.consultation_id ? (
-                <Link
+                <WorkspaceFeedLink
                   className={financialOsClasses.inlineLink}
                   href={`/fi-admin/${tid}/consultations/${encodeURIComponent(r.consultation_id)}`}
                 >
                   Consult
-                </Link>
+                </WorkspaceFeedLink>
               ) : null}
             </td>
           </tr>

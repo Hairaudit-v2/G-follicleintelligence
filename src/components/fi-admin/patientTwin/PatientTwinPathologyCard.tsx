@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 import { MedicalIntelligenceTwinSummary } from "@/src/components/clinical-intelligence/MedicalIntelligencePanel";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
@@ -92,12 +93,12 @@ export function PatientTwinPathologyCard({
                   : ""}
               </p>
             </div>
-            <Link
+            <WorkspaceFeedLink
               href={`/fi-admin/${tenantId}/patients/${patientId}/blood-results/${latest_ai_interpretation.pathology_result_id}`}
               className="text-xs font-medium text-cyan-300 hover:underline"
             >
               Open result
-            </Link>
+            </WorkspaceFeedLink>
           </div>
           <ul className="mt-2 flex flex-wrap gap-2 text-xs text-cyan-200">
             {latest_ai_interpretation.hair_loss_relevance_score != null ? (
@@ -168,13 +169,13 @@ export function PatientTwinPathologyCard({
             {results.map((r) => (
               <li key={r.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2">
                 <div>
-                  <Link
+                  <WorkspaceFeedLink
                     href={`/fi-admin/${tenantId}/patients/${patientId}/blood-results/${r.id}`}
                     className="font-medium text-cyan-300 hover:underline"
                   >
                     {r.result_date}
                     {r.provider_name ? ` · ${r.provider_name}` : ""}
-                  </Link>
+                  </WorkspaceFeedLink>
                   <p className="text-xs text-gray-500">
                     {r.status} · {r.marker_count} marker(s)
                     {r.abnormal_marker_count > 0 ? ` · ${r.abnormal_marker_count} abnormal` : ""}

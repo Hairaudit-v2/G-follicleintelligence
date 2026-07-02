@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 import type { PatientConsultationListItem } from "@/src/lib/patients/patientConsultations";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
 
@@ -41,12 +42,12 @@ export function PatientConsultationsCard({
             <li key={c.id} className="py-2.5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <Link
+                  <WorkspaceFeedLink
                     href={`/fi-admin/${tenantId}/consultations/${c.id}`}
                     className="text-sm font-medium text-blue-300 hover:underline"
                   >
                     {c.consultation_type_label}
-                  </Link>
+                  </WorkspaceFeedLink>
                   <p className="mt-0.5 text-xs text-slate-400">
                     {c.status}
                     {c.consultation_date ? ` · ${c.consultation_date}` : ""}

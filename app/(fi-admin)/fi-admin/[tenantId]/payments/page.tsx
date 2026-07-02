@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
+
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
@@ -94,13 +96,13 @@ export default async function TenantPaymentsInboxPage({
                 <p className="text-[11px] text-slate-400">
                   Source quote:{" "}
                   {r.case_id ? (
-                    <Link
+                    <WorkspaceFeedLink
                       href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}
                       className="font-semibold text-cyan-200 underline"
                       title={r.crm_quote_id}
                     >
                       {r.crm_quote_title ?? "CRM quote"}
-                    </Link>
+                    </WorkspaceFeedLink>
                   ) : (
                     <span className="font-medium text-slate-200" title={r.crm_quote_id}>
                       {r.crm_quote_title ?? r.crm_quote_id}
@@ -111,28 +113,28 @@ export default async function TenantPaymentsInboxPage({
               {r.due_date ? <p className="text-slate-500">Due {r.due_date}</p> : null}
               <p className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-cyan-200">
                 {r.case_id ? (
-                  <Link
+                  <WorkspaceFeedLink
                     href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}
                     className="underline"
                   >
                     Case
-                  </Link>
+                  </WorkspaceFeedLink>
                 ) : null}
                 {r.patient_id ? (
-                  <Link
+                  <WorkspaceFeedLink
                     href={`/fi-admin/${tid}/patients/${encodeURIComponent(r.patient_id)}`}
                     className="underline"
                   >
                     Patient
-                  </Link>
+                  </WorkspaceFeedLink>
                 ) : null}
                 {r.consultation_id ? (
-                  <Link
+                  <WorkspaceFeedLink
                     href={`/fi-admin/${tid}/consultations/${encodeURIComponent(r.consultation_id)}`}
                     className="underline"
                   >
                     Consultation
-                  </Link>
+                  </WorkspaceFeedLink>
                 ) : null}
                 <Link href={`/fi-admin/${tid}/settings/payments`} className="underline">
                   Revenue settings

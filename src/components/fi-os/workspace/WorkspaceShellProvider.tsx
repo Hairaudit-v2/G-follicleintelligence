@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type React
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { formatWorkspaceSearchParam } from "@/src/lib/fiOs/workspaceShell/workspaceQuery";
-import type { D1WorkspaceKind, WorkspaceRef } from "@/src/lib/fiOs/workspaceShell/types";
+import type { WorkspaceRef, WorkspaceShellKind } from "@/src/lib/fiOs/workspaceShell/types";
 import { workspaceRefKey } from "@/src/lib/fiOs/workspaceShell/types";
 
 import {
@@ -119,7 +119,7 @@ function WorkspaceShellProviderInner({
   const activeWorkspace = openWorkspaces[openWorkspaces.length - 1] ?? null;
 
   const activeOfKind = useCallback(
-    (kind: D1WorkspaceKind) => {
+    (kind: WorkspaceShellKind) => {
       for (let i = openWorkspaces.length - 1; i >= 0; i -= 1) {
         const ref = openWorkspaces[i]!;
         if (ref.kind === kind) return ref;

@@ -23,6 +23,17 @@ import { e2eTenantId, requireE2eBaseUrl } from "./fixtures/baseUrl";
 
 const baseTest = hasDemoCredentials() ? authenticatedTest : test;
 
+const UUID =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+function BASE(): string {
+  return `/fi-admin/${e2eTenantId()}`;
+}
+
+function TENANT(): string {
+  return e2eTenantId();
+}
+
 function validationOptedIn(): boolean {
   return process.env.FI_E2E_WORKSPACE_SHELL_VALIDATION?.trim().toLowerCase() === "true";
 }
@@ -160,6 +171,52 @@ baseTest.describe("FI-UX-REBUILD D1B Workspace shell validation @smoke @authenti
     const box = await dialog.boundingBox();
     expect(box?.width ?? 0).toBeGreaterThan(350);
   });
+
+  baseTest("deep link — D4 consultation workspace", async ({ page }) => {
+    const consultationId = process.env.FI_E2E_CONSULTATION_ID?.trim();
+    test.skip(!consultationId, "FI_E2E_CONSULTATION_ID required");
+
+    await page.goto(`${BASE()}?workspace=consultation:${consultationId}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await expect(page.getByRole("dialog", { name: /consultation preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page).toHaveURL(new RegExp(`workspace=consultation:${consultationId}`, "i"));
+  });
+
+  baseTest("deep link — D4 stacked payment then surgery case", async ({ page }) => {
+    const paymentId = process.env.FI_E2E_PAYMENT_ID?.trim();
+    const caseId = process.env.FI_E2E_CASE_ID?.trim();
+    test.skip(!paymentId || !caseId, "FI_E2E_PAYMENT_ID and FI_E2E_CASE_ID required");
+
+    await page.goto(`${BASE()}?workspace=payment:${paymentId},surgery_case:${caseId}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await expect(page.getByRole("dialog", { name: /surgery case preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page).toHaveURL(
+      new RegExp(`workspace=payment:${paymentId},surgery_case:${caseId}`, "i")
+    );
+  });
+
+  baseTest("Open full page link closes workspace panel", async ({ page }) => {
+    const patientId = process.env.FI_E2E_PATIENT_ID?.trim();
+    test.skip(!patientId, "FI_E2E_PATIENT_ID required");
+
+    await page.goto(`${BASE()}?workspace=patient:${patientId}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await expect(page.getByRole("dialog", { name: /patient preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await page.getByRole("link", { name: /open full profile/i }).click();
+    await expect(page).toHaveURL(new RegExp(`/patients/${patientId}`, "i"));
+  });
 });
 
 test.describe("FI-UX-REBUILD D1B Calendar guard @smoke", () => {
@@ -172,7 +229,7 @@ test.describe("FI-UX-REBUILD D1B Calendar guard @smoke", () => {
 
   test("Calendar route unchanged — full page, no workspace on load", async ({ page }) => {
     await page.goto(`${BASE()}/calendar`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(page.getByRole("dialog", { name: /patient preview|lead|appointment/i })).toHaveCount(
+    await expect(page.getByRole("dialog", { name: /patient preview|lead|appointment|consultation|payment|blood result|surgery case|staff/i })).toHaveCount(
       0
     );
     await expect(page.locator("body")).toBeVisible();

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 import type {
   FiMedicalIntelligenceClinicalFlag,
   FiMedicalIntelligenceDisplay,
@@ -204,12 +205,12 @@ export function MedicalIntelligenceTwinSummary({
             · Clinician review required
           </p>
         </div>
-        <Link
+        <WorkspaceFeedLink
           href={`/fi-admin/${tenantId}/patients/${patientId}/blood-results/${summary.pathology_result_id}`}
           className="text-xs font-medium text-cyan-300 hover:underline"
         >
           Open result
-        </Link>
+        </WorkspaceFeedLink>
       </div>
       {summary.clinical_flags.length > 0 ? (
         <ul className="mt-2 flex flex-wrap gap-2">

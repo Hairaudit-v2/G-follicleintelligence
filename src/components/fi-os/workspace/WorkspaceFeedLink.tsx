@@ -15,7 +15,7 @@ type WorkspaceFeedLinkProps = Omit<ComponentProps<typeof Link>, "href" | "onClic
 };
 
 /**
- * Opens a D1 workspace panel when the shell is active; otherwise navigates normally.
+ * Opens a workspace panel when the shell is active; otherwise navigates normally.
  */
 export function WorkspaceFeedLink({ href, push = false, children, ...rest }: WorkspaceFeedLinkProps) {
   const shell = useWorkspaceShellOptional();

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 import { useMemo, useState } from "react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
@@ -131,9 +132,9 @@ export function WorkforceOsDirectoryClient({
                 return (
                   <tr key={row.id} className="border-b border-white/[0.06]">
                     <td className="px-4 py-3">
-                      <Link href={staffHref} className="font-medium text-[#F8FAFC] hover:underline">
+                      <WorkspaceFeedLink href={staffHref} className="font-medium text-[#F8FAFC] hover:underline">
                         {row.full_name}
-                      </Link>
+                      </WorkspaceFeedLink>
                       <p className="text-xs text-[#64748B]">{row.email ?? "—"}</p>
                     </td>
                     <td className="px-4 py-3 text-[#CBD5E1]">{badge.label}</td>
