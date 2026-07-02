@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildFiPathologyMedicalIntelligenceDisplay } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceCore";
 import type {
   PathologyRequestOptionRow,
   PathologyResultDetailBundle,
@@ -173,5 +174,7 @@ export async function loadPathologyResultDetail(
     }
   }
 
-  return { result, items, linkedRequest, reviewerDisplayName, pdfSignedUrl };
+  const medicalIntelligence = buildFiPathologyMedicalIntelligenceDisplay({ result, items });
+
+  return { result, items, linkedRequest, reviewerDisplayName, pdfSignedUrl, medicalIntelligence };
 }

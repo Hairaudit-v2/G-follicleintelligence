@@ -45,6 +45,8 @@ export type PathologyResultDetailBundle = {
   reviewerDisplayName: string | null;
   /** Short-lived signed URL for the uploaded PDF, if any. */
   pdfSignedUrl: string | null;
+  /** Shared HLI medical intelligence (draft/reviewed results only). */
+  medicalIntelligence: import("@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes").FiMedicalIntelligenceDisplay | null;
 };
 
 export type PathologyRequestOptionRow = {
