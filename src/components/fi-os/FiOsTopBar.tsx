@@ -39,6 +39,8 @@ export function FiOsTopBar({
   onOpenMobileNav,
   onOpenQuickCreate,
   hideMobileNav = false,
+  /** D2: Rename Quick create → New in collapsed navigation shell mode. */
+  compactCreateLabel = false,
   impersonationDisplayName,
   showFiPlatformSystemLink = false,
   staffPinSessionLabel = null,
@@ -61,8 +63,9 @@ export function FiOsTopBar({
   quickCreateKbdHint: string;
   onOpenMobileNav: () => void;
   onOpenQuickCreate: () => void;
-  /** P0C: Hide hamburger when Today surface owns navigation. */
+  /** P0C / D2: Hide hamburger when minimal nav owns mobile navigation. */
   hideMobileNav?: boolean;
+  compactCreateLabel?: boolean;
   /** When set, shows impersonation banner (platform admin). */
   impersonationDisplayName?: string | null;
   showFiPlatformSystemLink?: boolean;
@@ -211,11 +214,15 @@ export function FiOsTopBar({
               "inline-flex h-10 shrink-0 items-center gap-2 px-3 text-sm font-semibold"
             )}
             style={{ boxShadow: `inset 0 -1px 0 0 ${accentHex}28` }}
-            aria-label="Open quick create"
-            title="Quick create — consultations, patients, leads, and more"
+            aria-label={compactCreateLabel ? "Open new" : "Open quick create"}
+            title={
+              compactCreateLabel
+                ? "New — consultations, patients, leads, and more"
+                : "Quick create — consultations, patients, leads, and more"
+            }
           >
             <Plus className="h-4 w-4 text-cyan-400" aria-hidden />
-            <span className="hidden sm:inline">Quick create</span>
+            <span className="hidden sm:inline">{compactCreateLabel ? "New" : "Quick create"}</span>
             <kbd className="hidden select-none rounded-md border border-white/[0.1] bg-black/25 px-1.5 py-0.5 font-sans text-[10px] font-medium text-slate-500 md:inline-block">
               {quickCreateKbdHint}
             </kbd>

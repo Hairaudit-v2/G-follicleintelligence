@@ -30,6 +30,14 @@ export const fiOsChromeClasses = {
   /** Desktop primary rail (decorative glow applied inline in `FiOsSidebar`) */
   sidebarRail:
     "relative z-20 hidden w-[260px] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",
+  /** D2 minimal nav rail — icon-first primary destinations. */
+  minimalNavRail:
+    "relative z-20 hidden w-[4.75rem] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 backdrop-blur-xl lg:flex",
+  /** D2 mobile bottom action bar (replaces hamburger drawer). */
+  mobileBottomNav:
+    "fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around gap-0.5 border-t border-white/[0.08] bg-[#060d18]/96 px-1 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden",
+  /** Extra bottom padding on `<main>` when the mobile bottom nav is mounted. */
+  mainColumnMobileBottomNavPad: "pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0",
   /** Mobile drawer panel */
   sidebarDrawer:
     "relative flex h-full w-[min(88vw,300px)] flex-col border-r border-white/[0.1] bg-[#060d18] shadow-2xl",

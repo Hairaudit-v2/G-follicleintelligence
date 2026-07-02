@@ -21,6 +21,10 @@ import {
   getFiOsShellActiveSidebarId,
   resolveFiOsPrimarySidebarItems,
 } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import {
+  getFiOsMinimalNavActiveId,
+  resolveFiOsMinimalNavItems,
+} from "@/src/lib/fiAdmin/fiOsMinimalNav";
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
 import { CLINIC_OS_OPEN_CREATE_LEAD_EVENT } from "@/src/lib/fiAdmin/clinicOsShellCreateLeadEvent";
@@ -31,6 +35,8 @@ import { FiOsClinicSettingsNav } from "@/src/components/fi-os/FiOsClinicSettings
 import { NewEnquiryDialog } from "@/src/components/fi-admin/leadflow/NewEnquiryDialog";
 import { FiOsQuickCreatePalette } from "@/src/components/fi-os/FiOsQuickCreatePalette";
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
+import { FiOsMinimalNavRail, FiOsMobileBottomNav } from "@/src/components/fi-os/FiOsMinimalNav";
+import { FiOsMoreNavDrawer } from "@/src/components/fi-os/FiOsMoreNavDrawer";
 import { FiOsSkipLink } from "@/src/components/fi-os/FiOsSkipLink";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -65,8 +71,8 @@ export function FiOsAppShell({
   staffPinLogoutTenantId = null,
   staffPinOnBreak = false,
   staffPinBreaksEnabled = false,
-  /** P0C: When true, hide legacy module sidebar so Today feels primary. */
-  todaySurfaceActive = false,
+  /** D2: Minimal nav rail + mobile bottom bar when Today + Workspace Shell are on. */
+  navCollapseActive = false,
   children,
 }: {
   tenantId: string;
@@ -106,8 +112,8 @@ export function FiOsAppShell({
   staffPinLogoutTenantId?: string | null;
   staffPinOnBreak?: boolean;
   staffPinBreaksEnabled?: boolean;
-  /** P0C: Hide legacy module sidebar on the Today surface home route. */
-  todaySurfaceActive?: boolean;
+  /** D2: Replace legacy sidebar with minimal rail / bottom bar (both rollout flags). */
+  navCollapseActive?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -118,6 +124,7 @@ export function FiOsAppShell({
   const [createLeadOpen, setCreateLeadOpen] = useState(false);
   const quickCreateOpenRef = useRef(false);
   const [mobileNav, setMobileNav] = useState(false);
+  const [moreNavOpen, setMoreNavOpen] = useState(false);
   const [kbdHint, setKbdHint] = useState("Ctrl+K");
   const [quickCreateKbdHint, setQuickCreateKbdHint] = useState("Ctrl+Shift+K");
 
@@ -174,6 +181,14 @@ export function FiOsAppShell({
     [workspaceProfileKey, featureAccessMap]
   );
   const activeSidebarId = getFiOsShellActiveSidebarId(pathname, base);
+  const minimalNavItems = useMemo(
+    () => resolveFiOsMinimalNavItems(base, sidebarItems),
+    [base, sidebarItems]
+  );
+  const activeMinimalNavId = navCollapseActive
+    ? getFiOsMinimalNavActiveId(pathname, base)
+    : null;
+  const showLegacySidebar = !navCollapseActive;
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
     const pf = typeof navigator !== "undefined" ? navigator.platform : "";
@@ -222,21 +237,25 @@ export function FiOsAppShell({
   }, []);
 
   useEffect(() => {
-    if (!mobileNav && !quickCreateOpen) return;
+    if (!mobileNav && !quickCreateOpen && !moreNavOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [mobileNav, quickCreateOpen]);
+  }, [mobileNav, quickCreateOpen, moreNavOpen]);
 
   const closeMobile = () => setMobileNav(false);
+  const closeMoreNav = () => setMoreNavOpen(false);
+  const openSearch = () => setSearchOpen(true);
+  const openQuickCreate = () => setQuickCreateOpen(true);
+  const openMoreNav = () => setMoreNavOpen(true);
 
   return (
     <div className={fiOsChromeClasses.shellRoot}>
       <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
-        {!todaySurfaceActive ? (
+        {showLegacySidebar ? (
           <FiOsSidebar
             variant="rail"
             brandName={brandName}
@@ -247,7 +266,22 @@ export function FiOsAppShell({
           />
         ) : null}
 
-        <div className={fiOsChromeClasses.mainColumn}>
+        {navCollapseActive ? (
+          <FiOsMinimalNavRail
+            items={minimalNavItems}
+            activeId={activeMinimalNavId}
+            onSearch={openSearch}
+            onNew={openQuickCreate}
+            onMore={openMoreNav}
+          />
+        ) : null}
+
+        <div
+          className={cn(
+            fiOsChromeClasses.mainColumn,
+            navCollapseActive && fiOsChromeClasses.mainColumnMobileBottomNavPad
+          )}
+        >
           <FiOsTopBar
             tenantId={tenantId}
             clinicLabel={clinicLabel}
@@ -260,8 +294,9 @@ export function FiOsAppShell({
             kbdHint={kbdHint}
             quickCreateKbdHint={quickCreateKbdHint}
             onOpenMobileNav={() => setMobileNav(true)}
-            onOpenQuickCreate={() => setQuickCreateOpen(true)}
-            hideMobileNav={todaySurfaceActive}
+            onOpenQuickCreate={openQuickCreate}
+            hideMobileNav={navCollapseActive}
+            compactCreateLabel={navCollapseActive}
             impersonationDisplayName={impersonationDisplayName ?? null}
             showFiPlatformSystemLink={showFiPlatformSystemLink}
             staffPinSessionLabel={staffPinSessionLabel}
@@ -293,7 +328,7 @@ export function FiOsAppShell({
         </div>
       </div>
 
-      {!todaySurfaceActive && mobileNav ? (
+      {showLegacySidebar && mobileNav ? (
         <div
           className="fixed inset-0 z-50 flex lg:hidden"
           role="dialog"
@@ -319,6 +354,26 @@ export function FiOsAppShell({
           />
         </div>
       ) : null}
+
+      {navCollapseActive ? (
+        <FiOsMobileBottomNav
+          items={minimalNavItems}
+          activeId={activeMinimalNavId}
+          onSearch={openSearch}
+          onNew={openQuickCreate}
+          onMore={openMoreNav}
+        />
+      ) : null}
+
+      <FiOsMoreNavDrawer
+        open={navCollapseActive && moreNavOpen}
+        brandName={brandName}
+        effective={effective}
+        navSections={sidebarSections}
+        activeNavId={activeSidebarId}
+        pathname={pathname}
+        onClose={closeMoreNav}
+      />
 
       <ClinicOsGlobalSearch
         tenantId={tenantId}
