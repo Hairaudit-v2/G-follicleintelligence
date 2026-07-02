@@ -4,6 +4,25 @@
  *
  * Used by `lib/supabaseAdmin.ts` only (Node / server contexts).
  */
+
+let undiciHeaderBudgetApplied = false;
+
+/** Raise undici max response header size (Windows local scripts often hit Headers Overflow). */
+function ensureUndiciHeaderBudget(): void {
+  if (undiciHeaderBudgetApplied) return;
+  undiciHeaderBudgetApplied = true;
+  if (typeof process === "undefined" || !process.versions?.node) return;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- Node-only; avoid Edge bundle
+    const undici = require("undici") as typeof import("undici");
+    if (typeof undici.setGlobalDispatcher === "function" && typeof undici.Agent === "function") {
+      undici.setGlobalDispatcher(new undici.Agent({ maxHeaderSize: 262144 }));
+    }
+  } catch {
+    /* undici unavailable — rely on NODE_OPTIONS=--max-http-header-size=262144 */
+  }
+}
+
 function describeUnderlyingFetchError(err: unknown): string {
   if (!(err instanceof Error)) return String(err);
   const bits: string[] = [err.name, err.message].filter(Boolean);
@@ -28,6 +47,7 @@ export async function supabaseAdminFetchWithRetry(
   input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<Response> {
+  ensureUndiciHeaderBudget();
   let last: unknown;
   for (let attempt = 1; attempt <= 6; attempt++) {
     try {

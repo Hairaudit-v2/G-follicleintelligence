@@ -8,6 +8,11 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { insertFiStaff } from "@/src/lib/staff/staff.server";
 import { STAFF_ROLE_KEYS, STAFF_ROLE_LABELS } from "@/src/lib/staffAccess/staffAccessRegistry";
+import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import {
+  loadIdentityLinksForTenant,
+  loadStaffMembersForReconciliation,
+} from "@/src/lib/workforce/identityReconciliation.server";
 import { splitFullName } from "@/src/lib/workforce-os/staffLifecycleCore";
 
 import type {
@@ -19,8 +24,13 @@ import type {
   OnboardingStaffRow,
 } from "./onboardingTypes";
 import { syncOnboardingChecklistFromState } from "./onboardingChecklist.server";
+import {
+  evaluateOnboardingStaffCreation,
+  ONBOARDING_AUDIT_SOURCE,
+  ONBOARDING_STAFF_SOURCE,
+} from "./onboardingStaffCreateCore";
 
-const ONBOARDING_SOURCE = "workforce_os_onboarding_centre";
+const ONBOARDING_SOURCE = ONBOARDING_STAFF_SOURCE;
 
 function mapInvitationStatus(raw: unknown): OnboardingInvitationStatus {
   const s = String(raw ?? "pending").trim().toLowerCase();
@@ -165,6 +175,96 @@ export async function loadOnboardingPageModel(
   return { staff, clinics, roleOptions: buildRoleOptions() };
 }
 
+async function insertOnboardingStaffAudit(
+  supabase: SupabaseClient,
+  row: {
+    tenantId: string;
+    staffMemberId: string;
+    fiStaffId: string;
+    actorFiUserId?: string | null;
+    email: string;
+    fullName: string;
+    roleCode: string;
+  }
+): Promise<void> {
+  const { error } = await supabase.from("fi_staff_member_audit_events").insert({
+    tenant_id: row.tenantId,
+    staff_member_id: row.staffMemberId,
+    event_type: STAFF_LIFECYCLE_AUDIT_EVENTS.ONBOARDING_CREATED,
+    source: ONBOARDING_AUDIT_SOURCE,
+    metadata: {
+      fi_staff_id: row.fiStaffId,
+      actor_fi_user_id: row.actorFiUserId ?? null,
+      email: row.email,
+      full_name: row.fullName,
+      role_code: row.roleCode,
+      created_via: ONBOARDING_SOURCE,
+    },
+  });
+  if (error) throw new Error(error.message);
+}
+
+async function findReusableFiStaffIdByEmail(
+  tenantId: string,
+  email: string,
+  supabase: SupabaseClient
+): Promise<string | null> {
+  const { data: staffRows, error: staffError } = await supabase
+    .from("fi_staff")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("email", email)
+    .is("archived_at", null)
+    .limit(1);
+  if (staffError) throw new Error(staffError.message);
+  const fiStaffId = staffRows?.[0]?.id != null ? String(staffRows[0].id) : null;
+  if (!fiStaffId) return null;
+
+  const { data: activeMember, error: memberError } = await supabase
+    .from("fi_staff_members")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("fi_staff_id", fiStaffId)
+    .is("archived_at", null)
+    .is("merged_into", null)
+    .maybeSingle();
+  if (memberError) throw new Error(memberError.message);
+  if (activeMember) return null;
+
+  return fiStaffId;
+}
+
+async function rollbackOnboardingStaffCreate(
+  supabase: SupabaseClient,
+  tenantId: string,
+  state: {
+    fiStaffId: string;
+    staffMemberId?: string;
+    createdFiStaff: boolean;
+  }
+): Promise<void> {
+  if (state.staffMemberId) {
+    await supabase
+      .from("fi_staff_onboarding_checklists")
+      .delete()
+      .eq("tenant_id", tenantId)
+      .eq("staff_member_id", state.staffMemberId);
+    await supabase
+      .from("fi_staff_members")
+      .delete()
+      .eq("tenant_id", tenantId)
+      .eq("id", state.staffMemberId);
+  }
+  if (state.createdFiStaff) {
+    const { error } = await supabase
+      .from("fi_staff")
+      .delete()
+      .eq("tenant_id", tenantId)
+      .eq("id", state.fiStaffId);
+    if (error) throw new Error(error.message);
+  }
+}
+
 export async function createOnboardingStaffMember(input: {
   tenantId: string;
   data: CreateOnboardingStaffInput;
@@ -180,35 +280,77 @@ export async function createOnboardingStaffMember(input: {
   if (!fullName) throw new Error("Name is required.");
   if (!email || !email.includes("@")) throw new Error("A valid email is required.");
 
+  const [staffMembers, identityLinks] = await Promise.all([
+    loadStaffMembersForReconciliation(tid, supabase),
+    loadIdentityLinksForTenant(tid, supabase),
+  ]);
+  const creationDecision = evaluateOnboardingStaffCreation({
+    tenantId: tid,
+    email,
+    fullName,
+    staffMembers,
+    identityLinks,
+  });
+  if (creationDecision.action === "reject") {
+    throw new Error(creationDecision.message);
+  }
+
   const names = splitFullName(fullName);
   const roleCode = input.data.roleCode.trim() || "consultant";
 
-  const fiStaff = await insertFiStaff(
-    tid,
-    {
-      full_name: fullName,
-      staff_role: roleCode,
-      email,
-      is_active: false,
-    },
-    supabase
-  );
+  let fiStaffId = await findReusableFiStaffIdByEmail(tid, email, supabase);
+  let createdFiStaff = false;
 
-  await supabase
-    .from("fi_staff")
-    .update({
-      employment_status: "pending_onboarding",
-      identity_source: "local",
-      updated_at: now,
-    })
-    .eq("tenant_id", tid)
-    .eq("id", fiStaff.id);
+  if (fiStaffId) {
+    const { error: updateError } = await supabase
+      .from("fi_staff")
+      .update({
+        full_name: fullName,
+        staff_role: roleCode,
+        employment_status: "pending_onboarding",
+        identity_source: "local",
+        is_active: false,
+        updated_at: now,
+      })
+      .eq("tenant_id", tid)
+      .eq("id", fiStaffId);
+    if (updateError) throw new Error(updateError.message);
+  } else {
+    const fiStaff = await insertFiStaff(
+      tid,
+      {
+        full_name: fullName,
+        staff_role: roleCode,
+        email,
+        is_active: false,
+      },
+      supabase
+    );
+    fiStaffId = fiStaff.id;
+    createdFiStaff = true;
+
+    const { error: lifecycleError } = await supabase
+      .from("fi_staff")
+      .update({
+        employment_status: "pending_onboarding",
+        identity_source: "local",
+        updated_at: now,
+      })
+      .eq("tenant_id", tid)
+      .eq("id", fiStaffId);
+    if (lifecycleError) {
+      await rollbackOnboardingStaffCreate(supabase, tid, { fiStaffId, createdFiStaff: true });
+      throw new Error(lifecycleError.message);
+    }
+  }
+
+  const rollbackState = { fiStaffId, createdFiStaff };
 
   const { data: member, error: memberError } = await supabase
     .from("fi_staff_members")
     .insert({
       tenant_id: tid,
-      fi_staff_id: fiStaff.id,
+      fi_staff_id: fiStaffId,
       full_name: fullName,
       first_name: names.first_name || null,
       last_name: names.last_name || null,
@@ -225,9 +367,13 @@ export async function createOnboardingStaffMember(input: {
     })
     .select("id")
     .single();
-  if (memberError) throw new Error(memberError.message);
+  if (memberError) {
+    await rollbackOnboardingStaffCreate(supabase, tid, rollbackState);
+    throw new Error(memberError.message);
+  }
 
   const staffMemberId = String((member as { id: string }).id);
+  const rollbackWithMember = { ...rollbackState, staffMemberId };
 
   const { error: checklistError } = await supabase.from("fi_staff_onboarding_checklists").insert({
     tenant_id: tid,
@@ -239,11 +385,28 @@ export async function createOnboardingStaffMember(input: {
     created_at: now,
     updated_at: now,
   });
-  if (checklistError) throw new Error(checklistError.message);
+  if (checklistError) {
+    await rollbackOnboardingStaffCreate(supabase, tid, rollbackWithMember);
+    throw new Error(checklistError.message);
+  }
 
-  await syncOnboardingChecklistFromState(tid, staffMemberId, supabase);
+  try {
+    await syncOnboardingChecklistFromState(tid, staffMemberId, supabase);
+    await insertOnboardingStaffAudit(supabase, {
+      tenantId: tid,
+      staffMemberId,
+      fiStaffId,
+      actorFiUserId: input.actorFiUserId,
+      email,
+      fullName,
+      roleCode,
+    });
+  } catch (e) {
+    await rollbackOnboardingStaffCreate(supabase, tid, rollbackWithMember);
+    throw e;
+  }
 
-  return { staffMemberId, fiStaffId: fiStaff.id };
+  return { staffMemberId, fiStaffId };
 }
 
 export async function expireStaleOnboardingInvitations(

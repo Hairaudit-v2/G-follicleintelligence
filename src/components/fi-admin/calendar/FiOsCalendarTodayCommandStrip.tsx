@@ -181,13 +181,27 @@ export function FiOsCalendarTodayCommandStrip({
         <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.surgery}</span>
       </CalendarTransitionLink>
       {counts.withBlockers > 0 ? (
-        <span
+        <CalendarTransitionLink
+          href={
+            route === "fi-admin"
+              ? `/fi-admin/${tenantId}/surgery-readiness`
+              : buildCalendarHref(
+                  tenantId,
+                  mergeCalendarHrefQuery(query, {
+                    type: "surgery",
+                    unassigned: true,
+                    status: null,
+                    waiting: false,
+                  }),
+                  hrefOpts
+                )
+          }
           className={chipClass(false)}
-          title="Appointments with operational blockers today"
+          title="Resolve surgery readiness blockers — staff, room, consent, deposit"
         >
           <span className="text-rose-300/90">Blockers</span>
           <span className="text-rose-100">{counts.withBlockers}</span>
-        </span>
+        </CalendarTransitionLink>
       ) : null}
       {route === "fi-admin" ? (
         <CalendarTransitionLink

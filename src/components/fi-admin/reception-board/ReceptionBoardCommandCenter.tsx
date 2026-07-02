@@ -14,8 +14,10 @@ import {
   Users,
 } from "lucide-react";
 
+import { useCalendarToast } from "@/components/calendar/CalendarToast";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { receptionBoardFlowActionLabel } from "@/src/lib/fiOs/receptionBoardFlowPolicy";
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 import {
   ReceptionPatientFlowBoard,
@@ -101,6 +103,7 @@ export function ReceptionBoardCommandCenter(props: {
 }) {
   const { mutationMode, showCrmNav = true, showBookingsBoard = true } = props;
   const router = useRouter();
+  const toast = useCalendarToast();
   const [searchOpen, setSearchOpen] = useState(false);
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
 
@@ -122,12 +125,19 @@ export function ReceptionBoardCommandCenter(props: {
     [data.queue]
   );
 
-  async function advancePatient(bookingId: string, action: NonNullable<(typeof data.queue.scheduled)[0]["nextFlowAction"]>) {
+  async function advancePatient(
+    bookingId: string,
+    action: NonNullable<(typeof data.queue.scheduled)[0]["nextFlowAction"]>
+  ) {
     if (!canMutate) return;
     setBusyBookingId(bookingId);
     try {
       const result = await receptionBoardTransitionPatient(data.tenantId, bookingId, { action });
-      if (!result.ok) return;
+      if (!result.ok) {
+        toast.error(result.error ?? "Could not update patient status.");
+        return;
+      }
+      toast.success(`${receptionBoardFlowActionLabel(action)} — saved`);
       router.refresh();
       void refresh();
     } finally {
@@ -136,7 +146,12 @@ export function ReceptionBoardCommandCenter(props: {
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-[100rem] space-y-8 pb-14">
+    <div
+      className={cn(
+        "mx-auto min-w-0 max-w-[100rem] space-y-8 pb-14 transition-opacity",
+        isRefreshing && "opacity-90"
+      )}
+    >
       <header className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0b1220] p-6 sm:p-8">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_300px_at_0%_0%,rgba(34,193,255,0.14),transparent_55%),radial-gradient(480px_240px_at_100%_100%,rgba(124,58,237,0.1),transparent_50%)]"
@@ -216,9 +231,27 @@ export function ReceptionBoardCommandCenter(props: {
             </div>
             <div className="max-h-[28rem] overflow-y-auto px-3 py-3 sm:px-4">
               {data.appointments.length === 0 ? (
-                <p className="px-2 py-8 text-center text-sm text-slate-500">
-                  No appointments scheduled for today.
-                </p>
+                <div className="px-4 py-10 text-center">
+                  <p className="text-sm font-medium text-slate-300">No appointments on today&apos;s board</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Book a consultation or open the calendar to fill the day.
+                  </p>
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    <Link
+                      href={`${base}/calendar`}
+                      className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-200 hover:bg-cyan-500/20"
+                    >
+                      <Calendar className="h-3.5 w-3.5" aria-hidden />
+                      Open calendar
+                    </Link>
+                    <Link
+                      href={`${base}/patients`}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] px-3 py-2 text-xs font-semibold text-slate-200 hover:border-cyan-500/30"
+                    >
+                      Find or add patient
+                    </Link>
+                  </div>
+                </div>
               ) : (
                 <ul className="space-y-2">
                   {data.appointments.map((appt) => (
@@ -286,7 +319,7 @@ export function ReceptionBoardCommandCenter(props: {
                                   onClick={() => void advancePatient(item.bookingId, item.nextFlowAction!)}
                                   className="mt-2 w-full rounded-lg bg-cyan-500/20 px-2 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/30 disabled:opacity-40"
                                 >
-                                  Advance →
+                                  {receptionBoardFlowActionLabel(item.nextFlowAction!)}
                                 </button>
                               ) : null}
                               <div className="mt-2 flex gap-2 text-[0.65rem] font-semibold">
@@ -402,13 +435,17 @@ export function ReceptionBoardCommandCenter(props: {
             </div>
             <ul className="flex-1 space-y-2 overflow-y-auto p-3">
               {data.actionAlerts.length === 0 ? (
-                <li className="py-6 text-center text-sm text-slate-500">No urgent alerts.</li>
+                <li className="py-6 text-center">
+                  <p className="text-sm font-medium text-emerald-300/90">All clear for today</p>
+                  <p className="mt-1 text-xs text-slate-500">No operational blockers need attention.</p>
+                </li>
               ) : (
-                data.actionAlerts.map((alert) => (
-                  <li key={alert.id}>
-                    {alert.href ? (
+                data.actionAlerts.map((alert) => {
+                  const alertHref = alert.href ?? `${base}/calendar`;
+                  return (
+                    <li key={alert.id}>
                       <Link
-                        href={alert.href}
+                        href={alertHref}
                         className={cn(
                           "flex gap-3 rounded-xl border px-3 py-3 transition hover:border-cyan-500/30",
                           alertRowClass(alert.severity)
@@ -418,25 +455,15 @@ export function ReceptionBoardCommandCenter(props: {
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-slate-100">{alert.title}</p>
                           <p className="mt-0.5 text-xs text-slate-400">{alert.detail}</p>
+                          <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cyan-400/80">
+                            Resolve in calendar →
+                          </p>
                         </div>
                         <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-500" aria-hidden />
                       </Link>
-                    ) : (
-                      <div
-                        className={cn(
-                          "flex gap-3 rounded-xl border px-3 py-3",
-                          alertRowClass(alert.severity)
-                        )}
-                      >
-                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden />
-                        <div>
-                          <p className="text-sm font-semibold text-slate-100">{alert.title}</p>
-                          <p className="mt-0.5 text-xs text-slate-400">{alert.detail}</p>
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                ))
+                    </li>
+                  );
+                })
               )}
             </ul>
           </DashboardCard>

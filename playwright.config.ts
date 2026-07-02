@@ -60,7 +60,7 @@ const authenticatedProjects: PlaywrightTestConfig["projects"] = hasDemoCredentia
       name: `${browser.name}-authenticated`,
       use: { ...browser.use },
       grep: /@authenticated|@mutation/,
-      testMatch: /journeys\/.*\.spec\.ts/,
+      testMatch: /journeys\/.*\.spec\.ts|fi-operational-day\.spec\.ts/,
     }))
   : [];
 

@@ -1,0 +1,169 @@
+{
+  "journeyTag": "SMOKETEST-OPDAY-20260702",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "otherTenantId": null,
+  "procedureDayEnabled": false,
+  "steps": [
+    {
+      "step": "cross_tenant_admin_key_denied",
+      "pass": true,
+      "detail": "skipped — no FI_SMOKE_OTHER_TENANT_ID or FI_ADMIN_API_KEY"
+    },
+    {
+      "step": "lead_patient_created",
+      "pass": true,
+      "detail": "leadId=c9a58f3d-e1e4-4187-9986-59faed41565d"
+    },
+    {
+      "step": "consultation_booked",
+      "pass": true,
+      "detail": "consultBookingId=3e91d76f-9502-40b8-9972-58302ec875ef"
+    },
+    {
+      "step": "patient_checked_in",
+      "pass": true,
+      "detail": "status=arrived"
+    },
+    {
+      "step": "consultation_completed",
+      "pass": true,
+      "detail": "consultationId=26660e8e-62ca-4de5-a93d-3d0410cfc2f6"
+    },
+    {
+      "step": "patient_record_created",
+      "pass": true,
+      "detail": "patientId=287348d5-18bd-4434-9bab-7caafacbfe86"
+    },
+    {
+      "step": "quote_accepted",
+      "pass": true,
+      "detail": "quoteId=86558737-ee05-4a89-8b97-d0a53cb7f26a"
+    },
+    {
+      "step": "deposit_recorded",
+      "pass": true,
+      "detail": "paymentRecordId=074a2e24-5dde-4fbe-8be2-ae712b8030da"
+    },
+    {
+      "step": "surgery_booked",
+      "pass": true,
+      "detail": "surgeryBookingId=4ccdcfbc-62b9-43eb-9f70-b4e2fc6593ef (2414ms)"
+    },
+    {
+      "step": "reception_board_updated",
+      "pass": true,
+      "detail": "appointments=10 queue=10"
+    },
+    {
+      "step": "calendar_blockers_resolved",
+      "pass": true,
+      "detail": "feed ok; blockers=4 (may be env-specific)"
+    },
+    {
+      "step": "procedure_day_skipped",
+      "pass": true,
+      "detail": "FI_PROCEDURE_DAY_ENABLED is off — live workflow skipped (non-interference)"
+    },
+    {
+      "step": "patient_journey_procedure_completed",
+      "pass": true,
+      "detail": "skipped — procedure day disabled"
+    },
+    {
+      "step": "cross_tenant_write_blocked",
+      "pass": true,
+      "detail": "skipped — no FI_SMOKE_OTHER_TENANT_ID"
+    }
+  ],
+  "ids": {
+    "leadId": "c9a58f3d-e1e4-4187-9986-59faed41565d",
+    "personId": "cfced1ee-8de3-49bf-95ae-e7dffd8edcd0",
+    "consultBookingId": "3e91d76f-9502-40b8-9972-58302ec875ef",
+    "consultationId": "26660e8e-62ca-4de5-a93d-3d0410cfc2f6",
+    "patientId": "287348d5-18bd-4434-9bab-7caafacbfe86",
+    "caseId": "80ae7196-c15e-4929-8e1d-7ceaad5a2a31",
+    "quoteId": "86558737-ee05-4a89-8b97-d0a53cb7f26a",
+    "paymentRecordId": "074a2e24-5dde-4fbe-8be2-ae712b8030da",
+    "surgeryBookingId": "4ccdcfbc-62b9-43eb-9f70-b4e2fc6593ef"
+  },
+  "readiness": {
+    "criteria": [
+      {
+        "id": "booking_complete",
+        "label": "Booking complete",
+        "pass": true,
+        "detail": "Consultation and surgery bookings exist."
+      },
+      {
+        "id": "consent_complete",
+        "label": "Consent complete",
+        "pass": true,
+        "detail": "Consent flag satisfied."
+      },
+      {
+        "id": "payment_complete",
+        "label": "Payment complete",
+        "pass": true,
+        "detail": "Deposit or payment recorded."
+      },
+      {
+        "id": "staff_assigned",
+        "label": "Staff assigned",
+        "pass": false,
+        "detail": "Staff not assigned."
+      },
+      {
+        "id": "room_assigned",
+        "label": "Room assigned",
+        "pass": false,
+        "detail": "Room not assigned."
+      },
+      {
+        "id": "procedure_completed",
+        "label": "Procedure completed",
+        "pass": false,
+        "detail": "Procedure not completed."
+      },
+      {
+        "id": "follow_up_created",
+        "label": "Follow-up created",
+        "pass": false,
+        "detail": "No follow-up task."
+      }
+    ],
+    "passed": 3,
+    "total": 7,
+    "percent": 43,
+    "ready": false
+  },
+  "stepTimingsMs": {
+    "cross_tenant_admin_key_denied": 0,
+    "lead_patient_created": 1693,
+    "consultation_booked": 985,
+    "patient_checked_in": 1912,
+    "consultation_completed": 6608,
+    "patient_record_created": 3700,
+    "quote_accepted": 1493,
+    "deposit_recorded": 946,
+    "surgery_booked": 2414,
+    "reception_board_updated": 18950,
+    "calendar_blockers_resolved": 2160,
+    "patient_journey_procedure_completed": 0,
+    "cross_tenant_write_blocked": 0
+  },
+  "performanceMs": {
+    "receptionBoardLoad": 18950,
+    "calendarFeedLoad": 1954,
+    "surgeryBooking": 2414,
+    "procedureDayActions": null
+  },
+  "estimatedUiClicks": {
+    "reception_check_in": 1,
+    "consultation_complete": 2,
+    "quote_accept": 2,
+    "surgery_book": 4,
+    "procedure_day_advance": 0,
+    "reception_board_refresh": 1
+  },
+  "completedAt": "2026-07-02T01:52:42.703Z"
+}

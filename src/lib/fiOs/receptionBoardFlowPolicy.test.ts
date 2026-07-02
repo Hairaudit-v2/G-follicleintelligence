@@ -6,11 +6,17 @@ import {
   applyPhaseIntentToMetadataForAction,
   assertBookingMutableForReceptionFlow,
   assertBookingStartInOperationalWindow,
+  receptionBoardFlowActionLabel,
   staffPinMayRunReceptionFlowAction,
 } from "@/src/lib/fiOs/receptionBoardFlowPolicy";
 
 const DAY_START = "2026-06-10T00:00:00.000Z";
 const DAY_END = "2026-06-11T00:00:00.000Z";
+
+test("receptionBoardFlowActionLabel returns staff-facing copy", () => {
+  assert.equal(receptionBoardFlowActionLabel("mark_arrived"), "Check in patient");
+  assert.equal(receptionBoardFlowActionLabel("complete"), "Complete visit");
+});
 
 test("PIN may run floor actions except cancel", () => {
   assert.equal(staffPinMayRunReceptionFlowAction("mark_arrived"), true);

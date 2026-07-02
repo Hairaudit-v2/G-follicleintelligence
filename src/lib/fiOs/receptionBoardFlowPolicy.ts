@@ -19,6 +19,19 @@ export const RECEPTION_BOARD_FLOW_ACTIONS = [
 
 export type ReceptionBoardFlowActionKind = (typeof RECEPTION_BOARD_FLOW_ACTIONS)[number];
 
+export const RECEPTION_BOARD_FLOW_ACTION_LABELS: Record<ReceptionBoardFlowActionKind, string> = {
+  mark_arrived: "Check in patient",
+  start_consultation: "Start consultation",
+  start_treatment: "Start treatment",
+  complete: "Complete visit",
+  mark_no_show: "Mark no-show",
+  cancel: "Cancel appointment",
+};
+
+export function receptionBoardFlowActionLabel(action: ReceptionBoardFlowActionKind): string {
+  return RECEPTION_BOARD_FLOW_ACTION_LABELS[action];
+}
+
 export function staffPinMayRunReceptionFlowAction(action: ReceptionBoardFlowActionKind): boolean {
   return action !== "cancel";
 }

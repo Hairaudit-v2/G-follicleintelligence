@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { AlertTriangle, CheckCircle2, Plus } from "lucide-react";
 
@@ -62,14 +63,17 @@ function LiveSurgeryCard({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [notes, setNotes] = useState(live.metrics.notes ?? "");
   const [postOpSummary, setPostOpSummary] = useState(live.postOpSummary ?? "");
 
-  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => {
+  const run = (fn: () => Promise<{ ok: boolean; error?: string }>, successMessage?: string) => {
     setError(null);
+    setSuccess(null);
     startTransition(async () => {
       const res = await fn();
       if (!res.ok) setError(res.error ?? "Action failed.");
+      else if (successMessage) setSuccess(successMessage);
     });
   };
 
@@ -236,7 +240,10 @@ function LiveSurgeryCard({
             disabled={pending}
             className={surgeryLinkButtonClass}
             onClick={() =>
-              run(() => startProcedureDaySessionAction(tenantId, { booking_id: card.bookingId }))
+              run(
+                () => startProcedureDaySessionAction(tenantId, { booking_id: card.bookingId }),
+                "Procedure day session started"
+              )
             }
           >
             Start session
@@ -248,15 +255,19 @@ function LiveSurgeryCard({
             disabled={pending}
             className={surgeryLinkButtonClass}
             onClick={() =>
-              run(() =>
-                advanceProcedureDayStageAction(tenantId, {
-                  booking_id: card.bookingId,
-                  to_stage: live.nextStage ?? undefined,
-                })
+              run(
+                () =>
+                  advanceProcedureDayStageAction(tenantId, {
+                    booking_id: card.bookingId,
+                    to_stage: live.nextStage ?? undefined,
+                  }),
+                live.nextStage
+                  ? `Advanced to ${PROCEDURE_DAY_STAGE_LABELS[live.nextStage]}`
+                  : "Stage updated"
               )
             }
           >
-            Advance to {live.nextStage ? PROCEDURE_DAY_STAGE_LABELS[live.nextStage] : "next"}
+            Next: {live.nextStage ? PROCEDURE_DAY_STAGE_LABELS[live.nextStage] : "Advance"}
           </button>
         ) : null}
         {live.currentStage === "post_op" || live.currentStage === "quality_check" ? (
@@ -304,6 +315,12 @@ function LiveSurgeryCard({
         ) : null}
       </div>
 
+      {success ? (
+        <p className="mt-3 flex items-center gap-2 text-sm text-emerald-300">
+          <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+          {success}
+        </p>
+      ) : null}
       {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
     </article>
   );
@@ -312,13 +329,43 @@ function LiveSurgeryCard({
 export function ProcedureDayLiveWorkflow({ data }: { data: ProcedureDayLiveBoardPayload }) {
   if (!data.liveWorkflowEnabled) return null;
 
+  const base = `/fi-admin/${data.tenantId}`;
   const cards = data.scheduleGroups.flatMap((g) => g.cards);
   const liveCards = cards.filter((c) => {
     const live = data.liveByBooking[c.bookingId];
     return live && (live.isLive || live.canStart || live.currentStage !== "scheduled");
   });
+  const startable = cards.filter((c) => data.liveByBooking[c.bookingId]?.canStart);
 
-  if (!liveCards.length) return null;
+  if (!liveCards.length) {
+    if (!cards.length) return null;
+    return (
+      <DashboardCard elevated className="p-4 sm:p-6">
+        <SectionHeader
+          title="Live surgical cockpit"
+          description="No active sessions yet — start today's first procedure when the patient is ready."
+        />
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          {startable[0] ? (
+            <p className="text-sm text-[#94A3B8]">
+              Next up: <span className="font-medium text-[#E2E8F0]">{startable[0].patientLabel}</span>{" "}
+              at {startable[0].timeLabel}
+            </p>
+          ) : (
+            <p className="text-sm text-[#94A3B8]">
+              {cards.length} surgery appointment{cards.length === 1 ? "" : "s"} scheduled today.
+            </p>
+          )}
+          <Link href={`${base}/calendar?date=${encodeURIComponent(data.window.todayYmd)}`} className={surgeryLinkButtonClass}>
+            Open calendar
+          </Link>
+          <Link href={`${base}/surgery-readiness`} className={surgeryLinkButtonClass}>
+            Resolve readiness blockers
+          </Link>
+        </div>
+      </DashboardCard>
+    );
+  }
 
   return (
     <DashboardCard elevated className="p-4 sm:p-6">

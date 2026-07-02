@@ -68,7 +68,10 @@ export function PatientJourneyRibbon({ journey }: { journey: PatientJourneySnaps
                   {b.label}
                 </Link>
               ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-2.5 py-1.5 text-xs text-slate-400">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-2.5 py-1.5 text-xs text-slate-400"
+                  title="Ask your clinic admin to configure a fix link for this blocker"
+                >
                   <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
                   {b.label}
                 </span>
