@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   buildCalendarOsResourceRows,
+  deriveCalendarOsResourceUtilisation,
   groupCalendarOsResourceRowsByRole,
   isBookingUnassignedForCalendarOs,
   mapBookingsToWeekResourceCells,
@@ -232,5 +233,21 @@ describe("unassigned bookings", () => {
     const filtered = filterBookingsForCalendarOsView(bookings, query({ bookingType: "surgery" }));
     assert.equal(filtered.length, 1);
     assert.equal(filtered[0]!.id, "1");
+  });
+});
+
+describe("resource utilisation", () => {
+  it("derives utilisation from booking durations", () => {
+    const bookings = [
+      booking({
+        id: "bk-1",
+        start_at: "2026-06-10T09:00:00.000Z",
+        end_at: "2026-06-10T11:00:00.000Z",
+      }),
+    ];
+    const util = deriveCalendarOsResourceUtilisation(["bk-1"], bookings);
+    assert.equal(util.bookingCount, 1);
+    assert.equal(util.bookedMinutes, 120);
+    assert.ok(util.percent > 0);
   });
 });

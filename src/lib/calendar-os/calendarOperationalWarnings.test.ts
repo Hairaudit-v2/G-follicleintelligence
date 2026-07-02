@@ -172,5 +172,6 @@ describe("buildCalendarOsOperationalPanelSummary", () => {
     assert.equal(summary.followUpsDue, 1);
     assert.equal(summary.paymentsRequiringAttention, 1);
     assert.equal(summary.roomsAvailable, 2);
+    assert.ok(Array.isArray(summary.staffCoverageWarnings));
   });
 });

@@ -45,6 +45,12 @@ export type CalendarOsSurgeryIntelligence = {
   attentionFlags: string[];
 };
 
+export type CalendarOsStaffCoverageWarning = {
+  id: string;
+  label: string;
+  severity: "warning" | "critical";
+};
+
 export type CalendarOsOperationalPanelSummary = {
   todaysCapacity: { booked: number; availableStaff: number };
   availableClinicians: string[];
@@ -53,6 +59,7 @@ export type CalendarOsOperationalPanelSummary = {
   roomsAvailable: number;
   followUpsDue: number;
   paymentsRequiringAttention: number;
+  staffCoverageWarnings: CalendarOsStaffCoverageWarning[];
 };
 
 function blockerToWarning(blocker: CalendarOperationalBlocker): CalendarOsBookingWarning | null {
@@ -273,6 +280,14 @@ export function buildCalendarOsOperationalPanelSummary(input: {
 
   const roomsAvailable = rooms.filter((r) => r.is_active !== false).length;
 
+  const staffCoverageWarnings = deriveCalendarOsStaffCoverageWarnings({
+    dayBookings,
+    staffDirectory,
+    unassignedBookings,
+    surgeryReadinessIssues,
+    availableStaffCount: availableClinicians.length,
+  });
+
   return {
     todaysCapacity: {
       booked: dayBookings.length,
@@ -284,5 +299,82 @@ export function buildCalendarOsOperationalPanelSummary(input: {
     roomsAvailable,
     followUpsDue,
     paymentsRequiringAttention,
+    staffCoverageWarnings,
   };
+}
+
+export function deriveCalendarOsStaffCoverageWarnings(input: {
+  dayBookings: FiBookingRow[];
+  staffDirectory: Array<{
+    id: string;
+    full_name?: string | null;
+    staff_role?: string | null;
+    is_active?: boolean;
+    clinical_readiness?: { clinically_available: boolean; warning_label?: string | null };
+  }>;
+  unassignedBookings: number;
+  surgeryReadinessIssues: number;
+  availableStaffCount: number;
+}): CalendarOsStaffCoverageWarning[] {
+  const warnings: CalendarOsStaffCoverageWarning[] = [];
+  const { dayBookings, staffDirectory, unassignedBookings, surgeryReadinessIssues, availableStaffCount } =
+    input;
+
+  const inactiveBlocked = staffDirectory.filter(
+    (s) =>
+      s.is_active !== false &&
+      s.clinical_readiness?.clinically_available === false &&
+      s.clinical_readiness?.warning_label
+  );
+  for (const s of inactiveBlocked.slice(0, 3)) {
+    warnings.push({
+      id: `readiness:${s.id}`,
+      label: `${String(s.full_name ?? "Staff").trim()} — ${s.clinical_readiness?.warning_label}`,
+      severity: "warning",
+    });
+  }
+
+  const surgeryCount = dayBookings.filter((b) => b.booking_type === "surgery").length;
+  const nursesAvailable = staffDirectory.filter(
+    (s) =>
+      s.is_active !== false &&
+      s.clinical_readiness?.clinically_available !== false &&
+      String(s.staff_role ?? "").toLowerCase().includes("nurse")
+  ).length;
+
+  if (surgeryCount > 0 && nursesAvailable === 0) {
+    warnings.push({
+      id: "no-nurses",
+      label: "Surgery day with no available nurses on roster",
+      severity: "critical",
+    });
+  }
+
+  if (unassignedBookings > 0) {
+    warnings.push({
+      id: "unassigned",
+      label: `${unassignedBookings} booking${unassignedBookings === 1 ? "" : "s"} unassigned`,
+      severity: unassignedBookings >= 3 ? "critical" : "warning",
+    });
+  }
+
+  if (surgeryReadinessIssues > 0) {
+    warnings.push({
+      id: "surgery-readiness",
+      label: `${surgeryReadinessIssues} surgery case${surgeryReadinessIssues === 1 ? "" : "s"} not ready`,
+      severity: "warning",
+    });
+  }
+
+  const bookedPerStaff =
+    availableStaffCount > 0 ? dayBookings.length / availableStaffCount : dayBookings.length;
+  if (dayBookings.length >= 8 && availableStaffCount > 0 && bookedPerStaff >= 6) {
+    warnings.push({
+      id: "high-load",
+      label: "High booking load relative to available staff",
+      severity: "warning",
+    });
+  }
+
+  return warnings.slice(0, 6);
 }

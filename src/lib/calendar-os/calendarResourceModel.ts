@@ -60,6 +60,14 @@ export type CalendarOsViewMode =
   | "nurse"
   | "clinic_room";
 
+export type CalendarOsResourceUtilisation = {
+  bookingCount: number;
+  bookedMinutes: number;
+  /** 0–100 utilisation vs a nominal 8h day. */
+  percent: number;
+  level: "low" | "moderate" | "high" | "full";
+};
+
 export type CalendarOsResourceRow = {
   id: string;
   kind: OperationalCalendarResourceColumn["kind"] | "role_group_header";
@@ -71,6 +79,7 @@ export type CalendarOsResourceRow = {
   clinicallyAvailable?: boolean;
   readinessWarning?: string | null;
   isGroupHeader?: boolean;
+  utilisation?: CalendarOsResourceUtilisation;
 };
 
 export type CalendarOsWeekCell = {
@@ -521,6 +530,57 @@ function minutesRangeToDayPlacement(
 export function calendarOsDefaultViewForQuery(query: ParsedCalendarQuery): "day" | "week" {
   if (query.view === "day" || query.view === "3day") return "day";
   return "week";
+}
+
+const NOMINAL_DAY_MINUTES = 8 * 60;
+
+export function deriveCalendarOsResourceUtilisation(
+  bookingIds: string[],
+  bookings: FiBookingRow[]
+): CalendarOsResourceUtilisation {
+  let bookedMinutes = 0;
+  for (const id of bookingIds) {
+    const b = bookings.find((x) => x.id === id);
+    if (!b) continue;
+    const start = Date.parse(b.start_at);
+    const end = Date.parse(b.end_at);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) continue;
+    bookedMinutes += Math.round((end - start) / 60_000);
+  }
+  const percent = Math.min(100, Math.round((bookedMinutes / NOMINAL_DAY_MINUTES) * 100));
+  let level: CalendarOsResourceUtilisation["level"] = "low";
+  if (percent >= 90) level = "full";
+  else if (percent >= 65) level = "high";
+  else if (percent >= 35) level = "moderate";
+  return { bookingCount: bookingIds.length, bookedMinutes, percent, level };
+}
+
+export function attachUtilisationToResourceRows(
+  rows: CalendarOsResourceRow[],
+  cells: CalendarOsWeekCell[],
+  bookings: FiBookingRow[],
+  dayKey?: string
+): CalendarOsResourceRow[] {
+  const byResource = new Map<string, string[]>();
+  for (const cell of cells) {
+    if (dayKey && cell.dayKey !== dayKey) continue;
+    const list = byResource.get(cell.resourceId) ?? [];
+    for (const id of cell.bookingIds) {
+      if (!list.includes(id)) list.push(id);
+    }
+    byResource.set(cell.resourceId, list);
+  }
+  return rows.map((row) => ({
+    ...row,
+    utilisation: deriveCalendarOsResourceUtilisation(byResource.get(row.id) ?? [], bookings),
+  }));
+}
+
+export function staffInitialsFromLabel(label: string): string {
+  const parts = label.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
 }
 
 export { STAFF_WEEKDAY_KEYS, type StaffWeekdayKey };
