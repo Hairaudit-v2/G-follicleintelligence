@@ -10,7 +10,7 @@ import type {
   PathologyInboundExtractionStatus,
 } from "@/src/lib/pathology/pathologyInboxTypes";
 import { maybeAutoCreateDraftFromExtraction } from "@/src/lib/pathology/pathologyAutoDraftResult.server";
-import { providerAuditToEventDetail } from "@/src/lib/pathology/pathologyExtractionProviderAudit";
+import { providerAuditToEventDetail } from "./pathologyExtractionProviderAudit";
 import { readPathologyExtractionEnabled } from "@/src/lib/pathology/pathologyExtractionEnv.server";
 import {
   downloadInboundDocumentPdf,

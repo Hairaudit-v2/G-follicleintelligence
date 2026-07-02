@@ -1,7 +1,13 @@
 import { isAffirmative } from "@/src/lib/env/zod-helpers";
 
 export type PathologyExtractionEnvSlice = Partial<
-  Record<"PATHOLOGY_EXTRACTION_ENABLED" | "PATHOLOGY_AUTO_DRAFT_ENABLED", string>
+  Record<
+    | "PATHOLOGY_EXTRACTION_ENABLED"
+    | "PATHOLOGY_AUTO_DRAFT_ENABLED"
+    | "PATHOLOGY_EXTRACTION_PROVIDER"
+    | "PATHOLOGY_EXTRACTION_MIN_OCR_CONFIDENCE",
+    string
+  >
 >;
 
 /** When true, pathology PDF extraction jobs invoke the provider after inbox upload. */
