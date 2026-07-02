@@ -23,7 +23,6 @@ import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import { CalendarOsBookingCard } from "@/src/components/calendar-os/CalendarOsBookingCard";
-import { cn } from "@/lib/utils";
 
 export type CalendarOsWeekResourceViewProps = {
   query: ParsedCalendarQuery;
