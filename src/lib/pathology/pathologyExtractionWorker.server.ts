@@ -1,16 +1,28 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import {
-  extractPathologyMarkersFromPdf,
-  truncateRawTextPreview,
-  type PathologyPdfExtractionOutput,
-} from "@/src/lib/pathology/pathologyPdfExtractCore";
+import { truncateRawTextPreview } from "@/src/lib/pathology/pathologyPdfExtractCore";
 import {
   normalizePathologyExtractedMarkers,
   type NormalizedPathologyMarker,
 } from "@/src/lib/pathology/pathologyMarkerNormalize";
 import { buildPathologyMedicalIntelligencePreview } from "@/src/lib/pathology/pathologyExtractionPreview.server";
+import type {
+  PathologyExtractionConfidenceSummary,
+  PathologyExtractionProviderAuditRecord,
+  PathologyExtractionSource,
+  PathologyPdfExtractionOutput,
+} from "@/src/lib/pathology/pathologyExtractionProviderTypes";
+import { buildPathologyExtractionConfidenceSummary } from "@/src/lib/pathology/pathologyExtractionProviderTypes";
+import { buildPathologyExtractionProviderAudit } from "@/src/lib/pathology/pathologyExtractionProviderAudit";
+import { buildManualReviewFallbackOutput } from "@/src/lib/pathology/pathologyExtractionProviderStub";
+import type { PathologyExtractionProviderAdapter } from "@/src/lib/pathology/pathologyExtractionProvider";
+import { readPathologyExtractionMinOcrConfidenceFromEnv } from "@/src/lib/pathology/pathologyExtractionProvider";
+import {
+  resolvePathologyExtractionProvider,
+  setPathologyExtractionProviderAdapterForTests,
+} from "@/src/lib/pathology/pathologyExtractionProviderResolve.server";
+import { resolvePathologyExtractionProviderIdFromEnv } from "@/src/lib/pathology/pathologyExtractionProvider";
 
 export type PathologyExtractionWorkerResult = {
   provider: string;
@@ -21,30 +33,105 @@ export type PathologyExtractionWorkerResult = {
   skippedMarkerCount: number;
   medicalIntelligencePreview: Record<string, unknown> | null;
   ocrConfidence: number | null;
-  source: PathologyPdfExtractionOutput["source"];
+  source: PathologyExtractionSource;
+  providerAudit: PathologyExtractionProviderAuditRecord;
+  requiresManualReview: boolean;
+  confidenceSummary: PathologyExtractionConfidenceSummary;
 };
 
-export type PathologyExtractionProvider = (pdfBytes: Uint8Array) => PathologyPdfExtractionOutput;
+/** @deprecated Use PathologyExtractionProviderAdapter via resolvePathologyExtractionProvider */
+export type PathologyExtractionProvider = PathologyExtractionProviderAdapter["extractFromPdf"];
 
-let extractionProviderOverride: PathologyExtractionProvider | null = null;
+type LegacyTestExtractionOutput = Partial<PathologyPdfExtractionOutput> & {
+  provider: PathologyPdfExtractionOutput["provider"] | string;
+  rawText: string;
+  markers: PathologyPdfExtractionOutput["markers"];
+  ocrConfidence: number | null;
+  source: PathologyExtractionSource;
+  skippedRawCount: number;
+};
 
-/** Test hook — inject deterministic extraction output. */
-export function setPathologyExtractionProviderForTests(
-  provider: PathologyExtractionProvider | null
-): void {
-  extractionProviderOverride = provider;
+function enrichLegacyTestOutput(raw: LegacyTestExtractionOutput): PathologyPdfExtractionOutput {
+  const threshold = readPathologyExtractionMinOcrConfidenceFromEnv();
+  const confidenceSummary = buildPathologyExtractionConfidenceSummary(
+    raw.markers,
+    raw.ocrConfidence,
+    threshold
+  );
+  const requiresManualReview =
+    raw.requiresManualReview ??
+    (raw.markers.length === 0 || !confidenceSummary.meets_threshold);
+
+  return {
+    provider: raw.provider as PathologyPdfExtractionOutput["provider"],
+    rawText: raw.rawText,
+    markers: raw.markers,
+    ocrConfidence: raw.ocrConfidence,
+    source: raw.source,
+    skippedRawCount: raw.skippedRawCount,
+    providerAudit:
+      raw.providerAudit ??
+      buildPathologyExtractionProviderAudit({
+        providerId: "fi-pathology-stub-v1",
+        requestedProviderId: "fi-pathology-stub-v1",
+        outcome: requiresManualReview ? "fallback_manual_review" : "extracted",
+        latencyMs: 0,
+        credentialPresent: true,
+      }),
+    requiresManualReview,
+    confidenceSummary: raw.confidenceSummary ?? confidenceSummary,
+  };
 }
 
-function defaultProvider(pdfBytes: Uint8Array): PathologyPdfExtractionOutput {
-  return extractPathologyMarkersFromPdf(pdfBytes);
+/** Test hook — inject deterministic extraction output via a custom adapter. */
+export function setPathologyExtractionProviderForTests(
+  provider: ((pdfBytes: Uint8Array) => LegacyTestExtractionOutput) | null
+): void {
+  if (!provider) {
+    setPathologyExtractionProviderAdapterForTests(null);
+    return;
+  }
+  setPathologyExtractionProviderAdapterForTests({
+    providerId: "fi-pathology-stub-v1",
+    isConfigured: () => true,
+    extractFromPdf: async (pdfBytes) => enrichLegacyTestOutput(provider(pdfBytes)),
+  });
+}
+
+export function resolvePathologyExtractionJobStatus(result: PathologyExtractionWorkerResult): {
+  jobStatus: "succeeded" | "needs_review";
+  inboundStatus: "succeeded" | "needs_review";
+} {
+  const hasMarkers = result.extractedMarkerCount > 0;
+  const needsReview =
+    result.requiresManualReview || !hasMarkers || !result.confidenceSummary.meets_threshold;
+  return needsReview
+    ? { jobStatus: "needs_review", inboundStatus: "needs_review" }
+    : { jobStatus: "succeeded", inboundStatus: "succeeded" };
 }
 
 export async function runPathologyExtractionOnPdf(
   pdfBytes: Uint8Array,
-  provider?: PathologyExtractionProvider
+  provider?: PathologyExtractionProviderAdapter
 ): Promise<PathologyExtractionWorkerResult> {
-  const extract = provider ?? extractionProviderOverride ?? defaultProvider;
-  const raw = extract(pdfBytes);
+  const adapter = provider ?? resolvePathologyExtractionProvider();
+  const requestedProviderId = resolvePathologyExtractionProviderIdFromEnv();
+  const started = Date.now();
+
+  let raw: PathologyPdfExtractionOutput;
+  try {
+    raw = await adapter.extractFromPdf(pdfBytes);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Extraction provider failed.";
+    raw = buildManualReviewFallbackOutput({
+      requestedProviderId,
+      providerId: adapter.providerId,
+      reason: message,
+      latencyMs: Date.now() - started,
+      credentialPresent: adapter.isConfigured(),
+      outcome: "provider_error",
+    });
+  }
 
   const normalized = normalizePathologyExtractedMarkers(raw.markers);
   const skippedMarkerCount = Math.max(0, raw.markers.length - normalized.length);
@@ -60,6 +147,9 @@ export async function runPathologyExtractionOnPdf(
       marker_count: raw.markers.length,
       skipped_raw_count: raw.skippedRawCount,
       markers: raw.markers,
+      provider_audit: raw.providerAudit,
+      confidence_summary: raw.confidenceSummary,
+      requires_manual_review: raw.requiresManualReview,
     },
     normalizedMarkers: normalized,
     extractedMarkerCount: normalized.length,
@@ -67,6 +157,9 @@ export async function runPathologyExtractionOnPdf(
     medicalIntelligencePreview: miPreview ? (miPreview as unknown as Record<string, unknown>) : null,
     ocrConfidence: raw.ocrConfidence,
     source: raw.source,
+    providerAudit: raw.providerAudit,
+    requiresManualReview: raw.requiresManualReview,
+    confidenceSummary: raw.confidenceSummary,
   };
 }
 
