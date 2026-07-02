@@ -30,14 +30,6 @@ import type {
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import { logOperationalCalendarServerTiming } from "@/src/lib/calendar/calendarPerfDev";
 
-function clinicIdFromSearchParams(
-  searchParams: Record<string, string | string[] | undefined>
-): string | null {
-  const raw = searchParams.clinicId;
-  const s = (Array.isArray(raw) ? String(raw[0] ?? "") : String(raw ?? "")).trim();
-  return /^[0-9a-f-]{36}$/i.test(s) ? s : null;
-}
-
 function resolveCalendarQueryFromShellSettings(
   tenantId: string,
   searchParams: Record<string, string | string[] | undefined>,
