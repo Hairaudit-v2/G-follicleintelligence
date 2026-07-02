@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { assertCrmTenantReadAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
 import { computeTodaySignalRevision } from "@/src/lib/fiOs/todaySignal/todaySignalEngine";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
-import { deriveWorkspaceSignalsFromOperationalDashboard } from "@/src/lib/fiOs/workspaceSignal/workspaceSignalRegistry";
+import { deriveWorkspaceSignalsFromOperationalDashboard } from "@/src/lib/fiOs/workspaceSignal/workspaceSignalRegistry.server";
 
 /**
  * GET /api/tenants/[tenantId]/today-signal/revision

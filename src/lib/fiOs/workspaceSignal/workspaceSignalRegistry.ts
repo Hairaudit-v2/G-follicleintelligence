@@ -1,14 +1,11 @@
-import type { TodayEntityAttentionSignal } from "@/src/lib/fiOs/todayFeedEntityAttention";
 import type { TodayFeedItem } from "@/src/lib/fiOs/todayFeedDerive";
 import { inferWorkspaceFromHref } from "@/src/lib/fiOs/workspaceShell/workspaceHref";
 import type { WorkspaceRef, WorkspaceShellKind } from "@/src/lib/fiOs/workspaceShell/types";
 import { workspaceRefKey } from "@/src/lib/fiOs/workspaceShell/types";
-import { parseArrivalIntentAt } from "@/src/lib/fiOs/todaySignal/bookingArrivalIntentCore";
 import {
   inferTodaySignalKind,
   type TodaySignalKind,
 } from "@/src/lib/fiOs/todaySignal/todaySignalPriority";
-import type { ReceptionBoardCard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 /**
  * FI-UX-REBUILD D6D — cross-workspace signal sync registry.
@@ -144,7 +141,7 @@ const ENTITY_KIND_TO_WORKSPACE: Readonly<Record<string, WorkspaceShellKind>> = {
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
-function extractEntityFromFeedItemId(
+export function extractEntityFromFeedItemId(
   id: string
 ): { entityKind?: string; entityId?: string } {
   const prefixes: Array<[string, string]> = [
@@ -188,7 +185,7 @@ function patientIdFromPathologyHref(href: string): string | null {
   return match?.[1] ?? null;
 }
 
-function buildTargetRefs(input: {
+export function buildWorkspaceSignalTargetRefs(input: {
   href?: string;
   entityKind?: string;
   entityId?: string;
@@ -298,7 +295,7 @@ export function normalizeTodayFeedItemToWorkspaceSignal(
   if (!signalType) return null;
 
   const { entityKind, entityId } = extractEntityFromFeedItemId(item.id);
-  const targetRefs = buildTargetRefs({ href: item.href, entityKind, entityId });
+  const targetRefs = buildWorkspaceSignalTargetRefs({ href: item.href, entityKind, entityId });
 
   return {
     signalType,
@@ -320,95 +317,6 @@ export function deriveWorkspaceSignalsFromTodayFeedItems(
     if (signal) out.push(signal);
   }
   return out;
-}
-
-function entityAttentionToWorkspaceSignalKind(
-  signal: TodayEntityAttentionSignal
-): WorkspaceSignalKind | null {
-  const id = signal.id;
-  if (id.startsWith("entity-pathology-")) return "pathology_review_pending";
-  if (id.startsWith("entity-payment-overdue-")) return "payment_blocker";
-  if (id.startsWith("entity-financial-clearance-")) return "payment_received";
-  if (id.startsWith("entity-surgery-readiness-")) return "surgery_readiness_blocker";
-  if (id.startsWith("entity-surgery-payment-")) return "payment_blocker";
-  if (id.startsWith("entity-staff-")) return "staff_compliance_alert";
-  if (id.startsWith("entity-consultation-")) return "consultation_completed";
-  return null;
-}
-
-function receptionCardToWorkspaceSignal(
-  card: ReceptionBoardCard,
-  signalType: WorkspaceSignalKind,
-  timestamp: string
-): WorkspaceSignalPayload {
-  const targetRefs = buildTargetRefs({
-    entityKind: "booking",
-    entityId: card.id,
-    patientId: card.patientId,
-  });
-
-  return {
-    signalType,
-    entityKind: "booking",
-    entityId: card.id,
-    targetRefs,
-    timestamp,
-    reasonLabel: getWorkspaceSignalReason(signalType, "appointment"),
-  };
-}
-
-/** Lightweight derivation from operational dashboard — no PHI in output. */
-export function deriveWorkspaceSignalsFromOperationalDashboard(input: {
-  receptionBoard: { cards: readonly ReceptionBoardCard[] };
-  staleLeads: readonly { leadId: string }[];
-  entityAttention: readonly TodayEntityAttentionSignal[];
-  timestamp?: string;
-}): WorkspaceSignalPayload[] {
-  const timestamp = input.timestamp ?? new Date().toISOString();
-  const signals: WorkspaceSignalPayload[] = [];
-
-  for (const card of input.receptionBoard.cards) {
-    if (parseArrivalIntentAt(card.metadata)) {
-      signals.push(receptionCardToWorkspaceSignal(card, "arrival_intent", timestamp));
-    }
-    if (
-      card.receptionColumn === "arrived" ||
-      card.receptionColumn === "in_consultation" ||
-      card.receptionColumn === "in_treatment"
-    ) {
-      signals.push(receptionCardToWorkspaceSignal(card, "reception_check_in", timestamp));
-    }
-  }
-
-  for (const lead of input.staleLeads) {
-    const leadId = lead.leadId.trim();
-    if (!leadId) continue;
-    signals.push({
-      signalType: "lead_stale",
-      entityKind: "lead",
-      entityId: leadId,
-      targetRefs: [{ kind: "lead", id: leadId }],
-      timestamp,
-      reasonLabel: getWorkspaceSignalReason("lead_stale", "lead"),
-    });
-  }
-
-  for (const entity of input.entityAttention) {
-    const signalType = entityAttentionToWorkspaceSignalKind(entity);
-    if (!signalType) continue;
-    const { entityKind, entityId } = extractEntityFromFeedItemId(entity.id);
-    const targetRefs = buildTargetRefs({ href: entity.href, entityKind, entityId });
-    signals.push({
-      signalType,
-      entityKind,
-      entityId,
-      targetRefs,
-      timestamp,
-      reasonLabel: getWorkspaceSignalReason(signalType, targetRefs[0]?.kind ?? "patient"),
-    });
-  }
-
-  return signals;
 }
 
 /** Ensures registry never maps to calendar or unsupported future kinds. */
