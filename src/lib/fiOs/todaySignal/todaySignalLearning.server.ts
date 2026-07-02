@@ -209,9 +209,14 @@ export function recordTodaySignalObservationSnapshotSafe(
 
 export async function loadTodaySignalLearningSummary(
   tenantId: string,
-  range: TodaySignalLearningSummaryRange
+  range: TodaySignalLearningSummaryRange,
+  opts: {
+    criticalUnresolvedThresholdSeconds?: number;
+    recurrenceExpectationCount?: number;
+    nowIso?: string;
+  } = {}
 ): Promise<TodaySignalLearningSummary> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const observations = await loadTodaySignalObservationsInRange(tid, range);
-  return summarizeSignalLearning(observations, { range });
+  return summarizeSignalLearning(observations, { range, ...opts });
 }
