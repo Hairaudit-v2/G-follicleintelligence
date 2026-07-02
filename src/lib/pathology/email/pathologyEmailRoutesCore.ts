@@ -42,8 +42,12 @@ export function buildEvolvedPathologyInboundEmail(inboundDomain: string): string
   return `${EVOLVED_PATHOLOGY_EMAIL_LOCAL_PART}@inbound.${domain}`;
 }
 
+export type PathologyEmailRoutesEnvSlice = Partial<
+  Record<"PATHOLOGY_EMAIL_INBOUND_DOMAIN", string>
+>;
+
 export function readPathologyEmailInboundDomainFromEnv(
-  env: Partial<Record<"PATHOLOGY_EMAIL_INBOUND_DOMAIN", string>> = process.env
+  env: PathologyEmailRoutesEnvSlice = process.env as PathologyEmailRoutesEnvSlice
 ): string {
   return env.PATHOLOGY_EMAIL_INBOUND_DOMAIN?.trim() ?? "";
 }

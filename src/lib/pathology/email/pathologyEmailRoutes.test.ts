@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { PathologyEmailRouteRow } from "@/src/lib/pathology/email/pathologyEmailIngestionTypes";
+import type {
+  PathologyEmailInboundMessageRow,
+  PathologyEmailRouteRow,
+} from "@/src/lib/pathology/email/pathologyEmailIngestionTypes";
 import {
   aggregatePathologyEmailRouteMessageStats,
   buildEvolvedPathologyInboundEmail,
