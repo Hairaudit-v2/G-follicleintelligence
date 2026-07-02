@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 import { loadPaymentWorkspaceBundleAction } from "@/lib/actions/fi-workspace-shell-actions";
 import type { PaymentWorkspacePayload } from "@/src/lib/fiOs/workspaceShell/workspaceShellLoaders.server";
 
+import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
+
 import {
   WorkspaceShellContextCard,
   WorkspaceShellPanelFrame,
   workspacePanelActionClass,
 } from "./WorkspaceShellPanelFrame";
 
-type PaymentWorkspacePanelProps = {
+type PaymentWorkspacePanelProps = WorkspacePanelSignalRefresh & {
   tenantId: string;
   paymentId: string | null;
   open: boolean;
@@ -24,6 +26,9 @@ export function PaymentWorkspacePanel({
   paymentId,
   open,
   onClose,
+  signalRefreshToken = 0,
+  lastSignalReason,
+  lastSignalAt,
 }: PaymentWorkspacePanelProps) {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -52,7 +57,7 @@ export function PaymentWorkspacePanel({
     return () => {
       cancelled = true;
     };
-  }, [open, paymentId, tenantId]);
+  }, [open, paymentId, tenantId, signalRefreshToken]);
 
   const actions =
     payload && !loading && !loadError ? (
@@ -105,6 +110,9 @@ export function PaymentWorkspacePanel({
       loading={loading}
       loadError={loadError}
       actions={actions}
+      lastSignalReason={lastSignalReason}
+      lastSignalAt={lastSignalAt}
+      signalRefreshToken={signalRefreshToken}
     >
       {payload ? (
         <div className="space-y-4 pb-24">

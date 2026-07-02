@@ -16,7 +16,32 @@ type WorkspaceShellPanelFrameProps = {
   loadError: string | null;
   children: ReactNode;
   actions?: ReactNode;
+  /** D6D — subtle signal-sync feedback (non-PHI). */
+  lastSignalReason?: string;
+  lastSignalAt?: string;
+  signalRefreshToken?: number;
 };
+
+export function WorkspaceSignalHeaderHint({
+  lastSignalReason,
+  lastSignalAt,
+  signalRefreshToken = 0,
+}: {
+  lastSignalReason?: string;
+  lastSignalAt?: string;
+  signalRefreshToken?: number;
+}) {
+  if (!lastSignalReason || !lastSignalAt) return null;
+  const showPulse = signalRefreshToken > 0;
+  return (
+    <p
+      className={`truncate text-[11px] text-slate-500${showPulse ? " motion-safe:animate-pulse" : ""}`}
+      title={lastSignalReason}
+    >
+      Updated just now · {lastSignalReason}
+    </p>
+  );
+}
 
 /** Shared right-hand workspace drawer chrome (D1/D4). */
 export function WorkspaceShellPanelFrame({
@@ -30,8 +55,13 @@ export function WorkspaceShellPanelFrame({
   loadError,
   children,
   actions,
+  lastSignalReason,
+  lastSignalAt,
+  signalRefreshToken = 0,
 }: WorkspaceShellPanelFrameProps) {
   if (!open) return null;
+
+  const showSignalPulse = signalRefreshToken > 0 && Boolean(lastSignalAt);
 
   return (
     <div
@@ -50,7 +80,20 @@ export function WorkspaceShellPanelFrame({
       >
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-slate-100">{title}</h2>
+            <h2
+              className={`truncate text-sm font-semibold text-slate-100${
+                showSignalPulse ? " motion-safe:animate-pulse" : ""
+              }`}
+            >
+              {title}
+            </h2>
+            {lastSignalReason && lastSignalAt ? (
+              <WorkspaceSignalHeaderHint
+                lastSignalReason={lastSignalReason}
+                lastSignalAt={lastSignalAt}
+                signalRefreshToken={signalRefreshToken}
+              />
+            ) : null}
             {fullPageHref ? (
               <Link
                 href={fullPageHref}

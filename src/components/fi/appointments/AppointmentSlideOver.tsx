@@ -60,6 +60,8 @@ import {
 } from "@/src/lib/crm/appointmentCompletionLeadClient";
 import { humanizeStaffErrorMessage } from "@/src/lib/fiOs/staffUxPresentation";
 import { useWorkspaceShellOptional } from "@/src/components/fi-os/workspace/WorkspaceShellContext";
+import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
+import { WorkspaceSignalHeaderHint } from "@/src/components/fi-os/workspace/panels/WorkspaceShellPanelFrame";
 import {
   AppointmentActionsSection,
   AppointmentAnchorFlowsSection,
@@ -388,6 +390,9 @@ export function AppointmentSlideOverPanel({
   userRole,
   canUseClinicFeatures,
   embedded = false,
+  signalRefreshToken = 0,
+  lastSignalReason,
+  lastSignalAt,
 }: {
   tenantId: string;
   appointmentId: string | null;
@@ -398,7 +403,7 @@ export function AppointmentSlideOverPanel({
   canUseClinicFeatures?: boolean;
   /** When true, only render inner content (shell provided by provider). */
   embedded?: boolean;
-}) {
+} & WorkspacePanelSignalRefresh) {
   const router = useRouter();
   const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
   const [loading, setLoading] = useState(false);
@@ -481,7 +486,7 @@ export function AppointmentSlideOverPanel({
     return () => {
       cancelled = true;
     };
-  }, [open, appointmentId, tenantId]);
+  }, [open, appointmentId, tenantId, signalRefreshToken]);
 
   useEffect(() => {
     if (!open) return;
@@ -1164,6 +1169,11 @@ export function AppointmentSlideOverPanel({
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Appointment preview</h2>
+            <WorkspaceSignalHeaderHint
+              lastSignalReason={lastSignalReason}
+              lastSignalAt={lastSignalAt}
+              signalRefreshToken={signalRefreshToken}
+            />
             {booking ? (
               <Link
                 href={href}

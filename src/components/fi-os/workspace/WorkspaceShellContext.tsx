@@ -12,11 +12,23 @@ export type WorkspaceShellOperatorContext = {
   canCapturePatientPhotos?: boolean;
 };
 
+export type WorkspaceSignalSyncMeta = {
+  revision: number;
+  lastSignalReason?: string;
+  lastSignalAt?: string;
+};
+
 export type WorkspaceShellContextValue = WorkspaceShellOperatorContext & {
   /** Full open stack — bottom (index 0) to top. */
   openWorkspaces: WorkspaceRef[];
   /** Topmost workspace, if any. */
   activeWorkspace: WorkspaceRef | null;
+  /** D6D — per-workspace soft refresh metadata keyed by kind:id. */
+  workspaceSignalByKey: Readonly<Record<string, WorkspaceSignalSyncMeta>>;
+  getWorkspaceSignalMeta: (ref: WorkspaceRef) => WorkspaceSignalSyncMeta | undefined;
+  applyWorkspaceSignalUpdates: (
+    updates: Record<string, { reason: string; at: string }>
+  ) => void;
   /** Replace the stack with a single workspace (Today feed, search result). */
   openWorkspace: (ref: WorkspaceRef) => void;
   /** Push a linked entity on top (patient → lead drill-down). */

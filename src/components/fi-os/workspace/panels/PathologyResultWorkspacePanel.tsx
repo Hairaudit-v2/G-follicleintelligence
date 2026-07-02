@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 import { loadPathologyResultWorkspaceBundleAction } from "@/lib/actions/fi-workspace-shell-actions";
 import type { PathologyResultWorkspacePayload } from "@/src/lib/fiOs/workspaceShell/workspaceShellLoaders.server";
 
+import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
+
 import {
   WorkspaceShellContextCard,
   WorkspaceShellPanelFrame,
   workspacePanelActionClass,
 } from "./WorkspaceShellPanelFrame";
 
-type PathologyResultWorkspacePanelProps = {
+type PathologyResultWorkspacePanelProps = WorkspacePanelSignalRefresh & {
   tenantId: string;
   resultId: string | null;
   open: boolean;
@@ -24,6 +26,9 @@ export function PathologyResultWorkspacePanel({
   resultId,
   open,
   onClose,
+  signalRefreshToken = 0,
+  lastSignalReason,
+  lastSignalAt,
 }: PathologyResultWorkspacePanelProps) {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -52,7 +57,7 @@ export function PathologyResultWorkspacePanel({
     return () => {
       cancelled = true;
     };
-  }, [open, resultId, tenantId]);
+  }, [open, resultId, tenantId, signalRefreshToken]);
 
   const actions =
     payload && !loading && !loadError ? (
@@ -91,6 +96,9 @@ export function PathologyResultWorkspacePanel({
       loading={loading}
       loadError={loadError}
       actions={actions}
+      lastSignalReason={lastSignalReason}
+      lastSignalAt={lastSignalAt}
+      signalRefreshToken={signalRefreshToken}
     >
       {payload ? (
         <div className="space-y-4 pb-24">

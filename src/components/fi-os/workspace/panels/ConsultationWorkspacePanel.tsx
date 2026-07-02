@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 import { loadConsultationWorkspaceBundleAction } from "@/lib/actions/fi-workspace-shell-actions";
 import type { ConsultationWorkspacePayload } from "@/src/lib/fiOs/workspaceShell/workspaceShellLoaders.server";
 
+import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
+
 import {
   WorkspaceShellContextCard,
   WorkspaceShellPanelFrame,
   workspacePanelActionClass,
 } from "./WorkspaceShellPanelFrame";
 
-type ConsultationWorkspacePanelProps = {
+type ConsultationWorkspacePanelProps = WorkspacePanelSignalRefresh & {
   tenantId: string;
   consultationId: string | null;
   open: boolean;
@@ -24,6 +26,9 @@ export function ConsultationWorkspacePanel({
   consultationId,
   open,
   onClose,
+  signalRefreshToken = 0,
+  lastSignalReason,
+  lastSignalAt,
 }: ConsultationWorkspacePanelProps) {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -52,7 +57,7 @@ export function ConsultationWorkspacePanel({
     return () => {
       cancelled = true;
     };
-  }, [open, consultationId, tenantId]);
+  }, [open, consultationId, tenantId, signalRefreshToken]);
 
   const actions =
     payload && !loading && !loadError ? (
@@ -86,6 +91,9 @@ export function ConsultationWorkspacePanel({
       loading={loading}
       loadError={loadError}
       actions={actions}
+      lastSignalReason={lastSignalReason}
+      lastSignalAt={lastSignalAt}
+      signalRefreshToken={signalRefreshToken}
     >
       {payload ? (
         <div className="space-y-4 pb-24">

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { assertCrmTenantReadAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
 import { computeTodaySignalRevision } from "@/src/lib/fiOs/todaySignal/todaySignalEngine";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import { deriveWorkspaceSignalsFromOperationalDashboard } from "@/src/lib/fiOs/workspaceSignal/workspaceSignalRegistry";
 
 /**
  * GET /api/tenants/[tenantId]/today-signal/revision
@@ -29,8 +30,13 @@ export async function GET(
 
   const dashboard = await loadTenantOperationalDashboard(tid, { includeReceptionBoard: true });
   const revision = computeTodaySignalRevision(dashboard);
+  const workspaceSignals = deriveWorkspaceSignalsFromOperationalDashboard({
+    receptionBoard: dashboard.receptionBoard,
+    staleLeads: dashboard.staleLeads,
+    entityAttention: dashboard.entityAttention,
+  });
   return NextResponse.json(
-    { revision },
+    { revision, workspaceSignals },
     { headers: { "Cache-Control": "no-store, private" } }
   );
 }

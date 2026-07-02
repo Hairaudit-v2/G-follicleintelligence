@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 import { loadStaffWorkspaceBundleAction } from "@/lib/actions/fi-workspace-shell-actions";
 import type { StaffWorkspacePayload } from "@/src/lib/fiOs/workspaceShell/workspaceShellLoaders.server";
 
+import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
+
 import {
   WorkspaceShellContextCard,
   WorkspaceShellPanelFrame,
   workspacePanelActionClass,
 } from "./WorkspaceShellPanelFrame";
 
-type StaffWorkspacePanelProps = {
+type StaffWorkspacePanelProps = WorkspacePanelSignalRefresh & {
   tenantId: string;
   staffId: string | null;
   open: boolean;
@@ -24,6 +26,9 @@ export function StaffWorkspacePanel({
   staffId,
   open,
   onClose,
+  signalRefreshToken = 0,
+  lastSignalReason,
+  lastSignalAt,
 }: StaffWorkspacePanelProps) {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -52,7 +57,7 @@ export function StaffWorkspacePanel({
     return () => {
       cancelled = true;
     };
-  }, [open, staffId, tenantId]);
+  }, [open, staffId, tenantId, signalRefreshToken]);
 
   const actions =
     payload && !loading && !loadError ? (
@@ -93,6 +98,9 @@ export function StaffWorkspacePanel({
       loading={loading}
       loadError={loadError}
       actions={actions}
+      lastSignalReason={lastSignalReason}
+      lastSignalAt={lastSignalAt}
+      signalRefreshToken={signalRefreshToken}
     >
       {payload ? (
         <div className="space-y-4 pb-24">

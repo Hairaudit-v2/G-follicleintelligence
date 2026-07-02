@@ -11,6 +11,8 @@ type WorkspaceShellMountClientProps = {
   tenantId: string;
   session: CrmShellSession | ClinicFloorSession;
   canCapturePatientPhotos?: boolean;
+  workspaceSignalSyncEnabled?: boolean;
+  workspaceRevisionPollEnabled?: boolean;
   children: ReactNode;
 };
 
@@ -19,6 +21,8 @@ export function WorkspaceShellMountClient({
   tenantId,
   session,
   canCapturePatientPhotos = false,
+  workspaceSignalSyncEnabled = true,
+  workspaceRevisionPollEnabled = true,
   children,
 }: WorkspaceShellMountClientProps) {
   return (
@@ -28,6 +32,8 @@ export function WorkspaceShellMountClient({
       userRole={session.role}
       canUseClinicFeatures={session.canUseClinicFeatures}
       canCapturePatientPhotos={canCapturePatientPhotos}
+      workspaceSignalSyncEnabled={workspaceSignalSyncEnabled}
+      workspaceRevisionPollEnabled={workspaceRevisionPollEnabled}
     >
       {children}
     </WorkspaceShellProvider>

@@ -21,6 +21,8 @@ import { PatientStatusBadge } from "./PatientStatusBadge";
 import { PatientPhotoCaptureActions } from "./PatientPhotoCaptureActions";
 import { useWorkspaceShellOptional } from "@/src/components/fi-os/workspace/WorkspaceShellContext";
 import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
+import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
+import { WorkspaceSignalHeaderHint } from "@/src/components/fi-os/workspace/panels/WorkspaceShellPanelFrame";
 
 export type PatientShellOperatorContext = {
   tenantId: string;
@@ -146,6 +148,9 @@ export function PatientSlideOverPanel({
   operatorFiUserId: _operatorFiUserId,
   userRole: _userRole,
   canCapturePatientPhotos = false,
+  signalRefreshToken = 0,
+  lastSignalReason,
+  lastSignalAt,
 }: {
   tenantId: string;
   patientId: string | null;
@@ -154,7 +159,7 @@ export function PatientSlideOverPanel({
   operatorFiUserId: string;
   userRole: string;
   canCapturePatientPhotos?: boolean;
-}) {
+} & WorkspacePanelSignalRefresh) {
   void _operatorFiUserId;
   void _userRole;
   const router = useRouter();
@@ -185,7 +190,7 @@ export function PatientSlideOverPanel({
     return () => {
       cancelled = true;
     };
-  }, [open, patientId, tenantId]);
+  }, [open, patientId, tenantId, signalRefreshToken]);
 
   const href = payload ? `/fi-admin/${tenantId}/patients/${payload.patientId}` : "#";
 
@@ -209,6 +214,11 @@ export function PatientSlideOverPanel({
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-100">Patient preview</h2>
+            <WorkspaceSignalHeaderHint
+              lastSignalReason={lastSignalReason}
+              lastSignalAt={lastSignalAt}
+              signalRefreshToken={signalRefreshToken}
+            />
             {payload ? (
               <Link
                 href={href}

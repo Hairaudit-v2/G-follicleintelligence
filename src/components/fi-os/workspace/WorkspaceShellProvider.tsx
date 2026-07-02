@@ -11,6 +11,7 @@ import {
   WorkspaceShellContext,
   type WorkspaceShellContextValue,
   type WorkspaceShellOperatorContext,
+  type WorkspaceSignalSyncMeta,
 } from "./WorkspaceShellContext";
 import { WorkspaceShellStack } from "./WorkspaceShellStack";
 import { WorkspaceShellEffects } from "./WorkspaceShellEffects";
@@ -32,6 +33,8 @@ function dedupePush(stack: WorkspaceRef[], ref: WorkspaceRef): WorkspaceRef[] {
 
 export type WorkspaceShellProviderProps = WorkspaceShellOperatorContext & {
   children: ReactNode;
+  workspaceSignalSyncEnabled?: boolean;
+  workspaceRevisionPollEnabled?: boolean;
 };
 
 function WorkspaceShellProviderInner({
@@ -41,6 +44,8 @@ function WorkspaceShellProviderInner({
   userRole,
   canUseClinicFeatures,
   canCapturePatientPhotos = false,
+  workspaceSignalSyncEnabled = true,
+  workspaceRevisionPollEnabled = true,
 }: WorkspaceShellProviderProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
@@ -48,6 +53,9 @@ function WorkspaceShellProviderInner({
   const [openWorkspaces, setOpenWorkspaces] = useState<WorkspaceRef[]>(() =>
     parseWorkspaceStackFromSearchParams(searchParams)
   );
+  const [workspaceSignalByKey, setWorkspaceSignalByKey] = useState<
+    Record<string, WorkspaceSignalSyncMeta>
+  >({});
   /** Skip one URL→stack echo after we push/replace from user actions. */
   const skipUrlSyncRef = useRef(false);
 
@@ -129,6 +137,29 @@ function WorkspaceShellProviderInner({
     [openWorkspaces]
   );
 
+  const getWorkspaceSignalMeta = useCallback(
+    (ref: WorkspaceRef) => workspaceSignalByKey[workspaceRefKey(ref)],
+    [workspaceSignalByKey]
+  );
+
+  const applyWorkspaceSignalUpdates = useCallback(
+    (updates: Record<string, { reason: string; at: string }>) => {
+      setWorkspaceSignalByKey((prev) => {
+        const next = { ...prev };
+        for (const [key, update] of Object.entries(updates)) {
+          const current = next[key];
+          next[key] = {
+            revision: (current?.revision ?? 0) + 1,
+            lastSignalReason: update.reason,
+            lastSignalAt: update.at,
+          };
+        }
+        return next;
+      });
+    },
+    []
+  );
+
   const value = useMemo<WorkspaceShellContextValue>(
     () => ({
       tenantId,
@@ -138,6 +169,9 @@ function WorkspaceShellProviderInner({
       canCapturePatientPhotos,
       openWorkspaces,
       activeWorkspace,
+      workspaceSignalByKey,
+      getWorkspaceSignalMeta,
+      applyWorkspaceSignalUpdates,
       openWorkspace,
       pushWorkspace,
       popWorkspace,
@@ -153,6 +187,9 @@ function WorkspaceShellProviderInner({
       canCapturePatientPhotos,
       openWorkspaces,
       activeWorkspace,
+      workspaceSignalByKey,
+      getWorkspaceSignalMeta,
+      applyWorkspaceSignalUpdates,
       openWorkspace,
       pushWorkspace,
       popWorkspace,
@@ -165,7 +202,10 @@ function WorkspaceShellProviderInner({
   return (
     <WorkspaceShellContext.Provider value={value}>
       {children}
-      <WorkspaceShellEffects />
+      <WorkspaceShellEffects
+        workspaceSignalSyncEnabled={workspaceSignalSyncEnabled}
+        workspaceRevisionPollEnabled={workspaceRevisionPollEnabled}
+      />
       <WorkspaceShellStack
         tenantId={tenantId}
         operatorFiUserId={operatorFiUserId}

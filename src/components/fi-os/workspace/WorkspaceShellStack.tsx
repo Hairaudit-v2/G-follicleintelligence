@@ -6,6 +6,7 @@ import { PatientSlideOverPanel } from "@/src/components/fi/patients/PatientSlide
 
 import type { WorkspaceShellOperatorContext } from "./WorkspaceShellContext";
 import { useWorkspaceShell } from "./WorkspaceShellContext";
+import { useWorkspacePanelSignalRefresh } from "./useWorkspacePanelSignalRefresh";
 import { ConsultationWorkspacePanel } from "./panels/ConsultationWorkspacePanel";
 import { PathologyResultWorkspacePanel } from "./panels/PathologyResultWorkspacePanel";
 import { PaymentWorkspacePanel } from "./panels/PaymentWorkspacePanel";
@@ -19,6 +20,7 @@ export function WorkspaceShellStack(props: WorkspaceShellStackProps) {
   const { openWorkspaces, popWorkspace, closeAll } = useWorkspaceShell();
   const active = openWorkspaces[openWorkspaces.length - 1] ?? null;
   const depth = openWorkspaces.length;
+  const signalRefresh = useWorkspacePanelSignalRefresh(active);
 
   if (!active) return null;
 
@@ -29,6 +31,7 @@ export function WorkspaceShellStack(props: WorkspaceShellStackProps) {
     onClose,
     operatorFiUserId: props.operatorFiUserId,
     userRole: props.userRole,
+    ...signalRefresh,
   };
 
   if (active.kind === "patient") {
@@ -62,7 +65,15 @@ export function WorkspaceShellStack(props: WorkspaceShellStackProps) {
   }
 
   if (active.kind === "payment") {
-    return <PaymentWorkspacePanel tenantId={props.tenantId} paymentId={active.id} open onClose={onClose} />;
+    return (
+      <PaymentWorkspacePanel
+        tenantId={props.tenantId}
+        paymentId={active.id}
+        open
+        onClose={onClose}
+        {...signalRefresh}
+      />
+    );
   }
 
   if (active.kind === "pathology_result") {
@@ -72,13 +83,20 @@ export function WorkspaceShellStack(props: WorkspaceShellStackProps) {
         resultId={active.id}
         open
         onClose={onClose}
+        {...signalRefresh}
       />
     );
   }
 
   if (active.kind === "surgery_case") {
     return (
-      <SurgeryCaseWorkspacePanel tenantId={props.tenantId} caseId={active.id} open onClose={onClose} />
+      <SurgeryCaseWorkspacePanel
+        tenantId={props.tenantId}
+        caseId={active.id}
+        open
+        onClose={onClose}
+        {...signalRefresh}
+      />
     );
   }
 
@@ -89,9 +107,18 @@ export function WorkspaceShellStack(props: WorkspaceShellStackProps) {
         consultationId={active.id}
         open
         onClose={onClose}
+        {...signalRefresh}
       />
     );
   }
 
-  return <StaffWorkspacePanel tenantId={props.tenantId} staffId={active.id} open onClose={onClose} />;
+  return (
+    <StaffWorkspacePanel
+      tenantId={props.tenantId}
+      staffId={active.id}
+      open
+      onClose={onClose}
+      {...signalRefresh}
+    />
+  );
 }
