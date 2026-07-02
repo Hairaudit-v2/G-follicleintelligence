@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { checkFiTenantPortalApiAccess } from "@/src/lib/fiAdmin/clinicOsGlobalSearchApiAccess.server";
-import { loadClinicOsGlobalSearchResults } from "@/src/lib/fiAdmin/clinicOsGlobalSearchLoader.server";
+import {
+  loadClinicOsGlobalSearchLeads,
+  loadClinicOsGlobalSearchResults,
+} from "@/src/lib/fiAdmin/clinicOsGlobalSearchLoader.server";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +32,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ tena
 
     const url = new URL(request.url);
     const q = url.searchParams.get("q") ?? "";
+    const scope = (url.searchParams.get("scope") ?? "").trim().toLowerCase();
 
-    const payload = await loadClinicOsGlobalSearchResults(tenantId, q);
+    if (scope === "leads") {
+      const leads = await loadClinicOsGlobalSearchLeads(tenantId, q);
+      return NextResponse.json({ ok: true, leads });
+    }
+
+    const includeLeads = url.searchParams.get("includeLeads") === "1";
+    const payload = await loadClinicOsGlobalSearchResults(tenantId, q, { includeLeads });
     return NextResponse.json({ ok: true, ...payload });
   } catch (e: unknown) {
     const safeMessage =

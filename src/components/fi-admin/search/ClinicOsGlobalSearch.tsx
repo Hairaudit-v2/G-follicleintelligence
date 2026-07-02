@@ -113,8 +113,10 @@ export function ClinicOsGlobalSearch({
     setLoading(true);
     setError(null);
 
-    const url = `/api/tenants/${encodeURIComponent(tid)}/clinic-os/global-search?q=${encodeURIComponent(debouncedTrim)}`;
-    fetch(url, { credentials: "same-origin" })
+    const baseUrl = `/api/tenants/${encodeURIComponent(tid)}/clinic-os/global-search`;
+    const qParam = `q=${encodeURIComponent(debouncedTrim)}`;
+
+    fetch(`${baseUrl}?${qParam}`, { credentials: "same-origin" })
       .then(async (res) => {
         const json = (await res.json()) as {
           ok?: boolean;
@@ -136,8 +138,25 @@ export function ClinicOsGlobalSearch({
         setData({
           patients: json.patients ?? [],
           cases: json.cases ?? [],
-          leads: json.leads ?? [],
+          leads: [],
         });
+        if (!showCrmNav) return;
+        fetch(`${baseUrl}?${qParam}&scope=leads`, { credentials: "same-origin" })
+          .then(async (res) => {
+            const leadJson = (await res.json()) as {
+              ok?: boolean;
+              leads?: ClinicOsGlobalSearchPayload["leads"];
+            };
+            if (!res.ok || !leadJson.ok || cancelled) return;
+            setData((prev) =>
+              prev
+                ? { ...prev, leads: leadJson.leads ?? [] }
+                : { patients: [], cases: [], leads: leadJson.leads ?? [] }
+            );
+          })
+          .catch(() => {
+            /* leads are optional enrichment — first pass already painted */
+          });
       })
       .catch((e: unknown) => {
         if (cancelled) return;

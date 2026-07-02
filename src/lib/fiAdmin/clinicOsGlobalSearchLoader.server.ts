@@ -5,6 +5,12 @@ import { attachSearchPattern, parseCrmLeadListQuery } from "@/src/lib/crm/crmLea
 import { loadCrmLeadsShellPage } from "@/src/lib/crm/leadList";
 import { escapeIlikePattern, searchFoundationRecords } from "@/src/lib/fi/foundation/search";
 import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
+import {
+  beginFiPerfCollection,
+  finishFiPerfCollection,
+  recordFiPerfPayloadBytes,
+  withFiPerfSpan,
+} from "@/src/lib/performance/fiPerfCollector.server";
 import type {
   ClinicOsGlobalSearchCase,
   ClinicOsGlobalSearchLead,
@@ -57,32 +63,29 @@ function caseFromFoundationSearchHit(hit: {
   };
 }
 
+function mapLeadItems(
+  tenantId: string,
+  items: Awaited<ReturnType<typeof loadCrmLeadsShellPage>>["items"]
+): ClinicOsGlobalSearchLead[] {
+  return items.map((item) => ({
+    id: item.lead.id,
+    name: leadTitleFromRow(item.lead.summary, item.lead.id),
+    stageLabel: item.stage?.label?.trim() || "—",
+    href: `/fi-admin/${tenantId}/crm/leads/${item.lead.id}`,
+  }));
+}
+
 /**
- * Read-only Clinic OS command palette search (patients + cases via foundation search;
- * leads via existing CRM shell RPC when CRM nav is allowed).
+ * CRM leads only — secondary fetch after first-pass patients/cases paint.
  */
-export async function loadClinicOsGlobalSearchResults(
+export async function loadClinicOsGlobalSearchLeads(
   tenantId: string,
   queryRaw: string
-): Promise<ClinicOsGlobalSearchPayload> {
+): Promise<ClinicOsGlobalSearchLead[]> {
   const tid = tenantId.trim();
   const query = queryRaw.trim().slice(0, 120);
-  if (!query) {
-    return { patients: [], cases: [], leads: [] };
-  }
-
-  const navChecks = Promise.all([getBookingsBoardNavAllowed(tid), getCrmShellNavAllowed(tid)]);
-  const casesPromise = searchFoundationRecords({
-    tenantId: tid,
-    query,
-    type: "cases",
-    limit: GLOBAL_SEARCH_RESULT_LIMIT,
-  });
-
-  const [[patientOsSearchAllowed, showCrmNav], caseBlock] = await Promise.all([
-    navChecks,
-    casesPromise,
-  ]);
+  if (!query) return [];
+  if (!(await getCrmShellNavAllowed(tid))) return [];
 
   const sp = new URLSearchParams();
   sp.set("search", query);
@@ -92,38 +95,80 @@ export async function loadClinicOsGlobalSearchResults(
   const esc = escapeIlikePattern(parsed.searchRaw.trim());
   parsed = attachSearchPattern(parsed, esc.length ? esc : null);
 
-  const [patientBlock, leadPage] = await Promise.all([
-    patientOsSearchAllowed
-      ? searchFoundationRecords({
-          tenantId: tid,
-          query,
-          type: "patients",
-          limit: GLOBAL_SEARCH_RESULT_LIMIT,
-        })
-      : Promise.resolve(null),
-    showCrmNav ? loadCrmLeadsShellPage(tid, parsed) : Promise.resolve({ items: [] }),
-  ]);
+  const leadPage = await loadCrmLeadsShellPage(tid, parsed);
+  return mapLeadItems(tid, leadPage.items);
+}
 
-  const patients: ClinicOsGlobalSearchPatient[] =
-    patientBlock?.patients.map((hit) => {
-      const { email, phone } = patientEmailPhoneFromSubtitle(hit.subtitle);
-      return {
-        id: hit.id,
-        name: hit.title,
-        email,
-        phone,
-        href: hit.href,
-      };
-    }) ?? [];
+/**
+ * Read-only Clinic OS command palette search (patients + cases via foundation search;
+ * leads optional — defer to {@link loadClinicOsGlobalSearchLeads} for first-paint budget).
+ */
+export async function loadClinicOsGlobalSearchResults(
+  tenantId: string,
+  queryRaw: string,
+  opts?: { includeLeads?: boolean }
+): Promise<ClinicOsGlobalSearchPayload> {
+  const tid = tenantId.trim();
+  const query = queryRaw.trim().slice(0, 120);
+  if (!query) {
+    return { patients: [], cases: [], leads: [] };
+  }
 
-  const cases: ClinicOsGlobalSearchCase[] = caseBlock.cases.map(caseFromFoundationSearchHit);
+  const includeLeads = opts?.includeLeads === true;
+  beginFiPerfCollection("clinic_os_global_search", tid);
 
-  const leads: ClinicOsGlobalSearchLead[] = leadPage.items.map((item) => ({
-    id: item.lead.id,
-    name: leadTitleFromRow(item.lead.summary, item.lead.id),
-    stageLabel: item.stage?.label?.trim() || "—",
-    href: `/fi-admin/${tid}/crm/leads/${item.lead.id}`,
-  }));
+  try {
+    const navChecks = withFiPerfSpan("nav.permissions", () =>
+      Promise.all([getBookingsBoardNavAllowed(tid), getCrmShellNavAllowed(tid)])
+    );
+    const casesPromise = withFiPerfSpan("search.cases", () =>
+      searchFoundationRecords({
+        tenantId: tid,
+        query,
+        type: "cases",
+        limit: GLOBAL_SEARCH_RESULT_LIMIT,
+      })
+    );
 
-  return { patients, cases, leads };
+    const [[patientOsSearchAllowed, showCrmNav], caseBlock] = await Promise.all([
+      navChecks,
+      casesPromise,
+    ]);
+
+    const patientBlock = patientOsSearchAllowed
+      ? await withFiPerfSpan("search.patients", () =>
+          searchFoundationRecords({
+            tenantId: tid,
+            query,
+            type: "patients",
+            limit: GLOBAL_SEARCH_RESULT_LIMIT,
+          })
+        )
+      : null;
+
+    let leads: ClinicOsGlobalSearchLead[] = [];
+    if (includeLeads && showCrmNav) {
+      leads = await withFiPerfSpan("search.leads", () => loadClinicOsGlobalSearchLeads(tid, query));
+    }
+
+    const patients: ClinicOsGlobalSearchPatient[] =
+      patientBlock?.patients.map((hit) => {
+        const { email, phone } = patientEmailPhoneFromSubtitle(hit.subtitle);
+        return {
+          id: hit.id,
+          name: hit.title,
+          email,
+          phone,
+          href: hit.href,
+        };
+      }) ?? [];
+
+    const cases: ClinicOsGlobalSearchCase[] = caseBlock.cases.map(caseFromFoundationSearchHit);
+
+    const payload = { patients, cases, leads };
+    recordFiPerfPayloadBytes(JSON.stringify(payload).length);
+    return payload;
+  } finally {
+    finishFiPerfCollection();
+  }
 }

@@ -19,6 +19,7 @@ type ActiveCollector = {
 };
 
 const activeStack: ActiveCollector[] = [];
+let lastFinishedSnapshot: FiPerfSnapshot | null = null;
 
 function currentCollector(): ActiveCollector | null {
   return activeStack.length > 0 ? activeStack[activeStack.length - 1]! : null;
@@ -26,6 +27,7 @@ function currentCollector(): ActiveCollector | null {
 
 export function beginFiPerfCollection(surface: string, tenantId?: string | null): void {
   if (!isFiPerfDiagnosticsEnabled()) return;
+  lastFinishedSnapshot = null;
   activeStack.push({
     surface,
     tenantId: tenantId?.trim() || null,
@@ -94,10 +96,15 @@ export function finishFiPerfCollection(): FiPerfSnapshot | null {
     payloadBytes: active.payloadBytes,
     recordedAt: new Date().toISOString(),
   };
+  lastFinishedSnapshot = snap;
   if (process.env.NODE_ENV !== "production") {
     console.info("[fi-perf]", JSON.stringify(snap));
   }
   return snap;
+}
+
+export function peekLastFiPerfSnapshot(): FiPerfSnapshot | null {
+  return lastFinishedSnapshot;
 }
 
 export function drainFiPerfSnapshot(): FiPerfSnapshot | null {

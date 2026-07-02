@@ -96,29 +96,31 @@ export async function loadOperationalCalendarShellData(
       loadCalendarShellBootstrapCached(tid)
     );
 
-    const layoutT0 = performance.now();
+    const settingsT0 = performance.now();
     const calendarSettings = resolveShellCalendarSettingsFromTenantRow({
       defaultTimezone: bootstrap.defaultTimezone,
       metadata: bootstrap.settingsMetadata,
     });
+    recordFiPerfSpan("resolve.timezone_settings", performance.now() - settingsT0);
 
+    const queryT0 = performance.now();
     const {
       query: resolvedQuery,
       lanes,
       settingsRedirectHref,
     } = resolveCalendarQueryFromShellSettings(tid, searchParams, route, calendarSettings);
     const query = resolvedQuery;
+    recordFiPerfSpan("resolve.query_lanes", performance.now() - queryT0);
+
+    const rangeT0 = performance.now();
     const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
-
     const resourceColumns = buildShellResourceColumns(query.resourceView);
-
     const buckets: Record<string, FiBookingRow[]> = {};
     for (const lane of lanes) {
       buckets[lane.dayKey] = [];
     }
-
     const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
-    recordFiPerfSpan("resolve.layout", performance.now() - layoutT0);
+    recordFiPerfSpan("resolve.date_range", performance.now() - rangeT0);
 
     const payload: OperationalCalendarPageData = {
       tenantId: tid,
@@ -152,7 +154,12 @@ export async function loadOperationalCalendarShellData(
       loadTier: "shell",
     };
 
-    recordFiPerfPayloadBytes(JSON.stringify(payload).length);
+    const serializeT0 = performance.now();
+    const serializedLen = JSON.stringify(payload).length;
+    recordFiPerfSpan("serialize.payload", performance.now() - serializeT0, {
+      payloadBytes: serializedLen,
+    });
+    recordFiPerfPayloadBytes(serializedLen);
 
     const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
     logOperationalCalendarServerTiming({

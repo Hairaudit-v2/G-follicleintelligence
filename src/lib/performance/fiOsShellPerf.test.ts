@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
 
 import type { OperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarTypes";
@@ -113,5 +115,38 @@ describe("FI OS shell performance regression", () => {
     assert.equal(fixture.loadTier, "shell");
     assert.equal(fixture.actions.length, 0);
     assertShellPayloadSize("procedureDay", JSON.stringify(fixture).length, 24);
+  });
+
+  it("calendar shell loader avoids heavy enrichment imports", () => {
+    const repo = path.resolve(__dirname, "../../../");
+    const shellSrc = fs.readFileSync(
+      path.join(repo, "src/lib/calendar/calendarShellLoader.server.ts"),
+      "utf8"
+    );
+    const forbidden = [
+      "operationalCalendarLoader.server",
+      "loadOperationalCalendarPageData",
+      "loadBookingDisplayContextMaps",
+      "loadClinicalStaffPicker",
+      "loadFiServicesForTenant",
+    ];
+    for (const needle of forbidden) {
+      assert.ok(!shellSrc.includes(needle), `calendar shell must not import ${needle}`);
+    }
+    assert.ok(shellSrc.includes('loadTier: "shell"'));
+    assert.ok(shellSrc.includes("tenant.bootstrap"));
+    assert.ok(shellSrc.includes("serialize.payload"));
+  });
+
+  it("global search first pass defers CRM leads by default", () => {
+    const repo = path.resolve(__dirname, "../../../");
+    const searchSrc = fs.readFileSync(
+      path.join(repo, "src/lib/fiAdmin/clinicOsGlobalSearchLoader.server.ts"),
+      "utf8"
+    );
+    assert.ok(searchSrc.includes("loadClinicOsGlobalSearchLeads"));
+    assert.ok(searchSrc.includes("includeLeads"));
+    assert.ok(searchSrc.includes("GLOBAL_SEARCH_RESULT_LIMIT"));
+    assert.ok(!searchSrc.includes("enrichCaseRows"));
   });
 });

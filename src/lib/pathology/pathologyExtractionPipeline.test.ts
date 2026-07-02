@@ -68,6 +68,11 @@ function inboundRow(partial: Partial<PathologyInboundDocumentRow> = {}): Patholo
     extraction_job_id: null,
     draft_result_id: null,
     ready_for_review_at: null,
+    inbound_email_message_id: null,
+    email_from: null,
+    email_subject: null,
+    email_source_label: null,
+    email_attachment_dedup_hash: null,
     created_at: "2026-07-02T10:00:00.000Z",
     updated_at: "2026-07-02T10:00:00.000Z",
     ...partial,
@@ -548,7 +553,7 @@ test("unmatched document stores extraction preview but does not create draft res
   process.env.PATHOLOGY_EXTRACTION_ENABLED = "true";
   try {
     setPathologyExtractionProviderForTests(() => ({
-      provider: "test",
+      provider: "fi-pathology-stub-v1",
       rawText: "fixture",
       markers: SAMPLE_MARKERS,
       ocrConfidence: 0.95,
@@ -733,7 +738,7 @@ test("tenant scoping enforced on extraction enqueue", async () => {
   process.env.PATHOLOGY_EXTRACTION_ENABLED = "true";
   try {
     setPathologyExtractionProviderForTests(() => ({
-      provider: "test",
+      provider: "fi-pathology-stub-v1",
       rawText: "",
       markers: SAMPLE_MARKERS,
       ocrConfidence: 0.9,
@@ -755,7 +760,12 @@ test("upload does not enqueue extraction when flag disabled", async () => {
   const prev = process.env.PATHOLOGY_EXTRACTION_ENABLED;
   process.env.PATHOLOGY_EXTRACTION_ENABLED = "false";
   try {
-    assert.equal(isPathologyExtractionEnabledFromEnv(process.env), false);
+    assert.equal(
+      isPathologyExtractionEnabledFromEnv({
+        PATHOLOGY_EXTRACTION_ENABLED: process.env.PATHOLOGY_EXTRACTION_ENABLED,
+      }),
+      false
+    );
     const out = await maybeEnqueueAndRunPathologyExtractionAfterUpload(TENANT, DOC, null);
     assert.equal(out, null);
   } finally {
@@ -781,7 +791,7 @@ test("upload enqueues extraction when flag enabled", async () => {
   process.env.PATHOLOGY_EXTRACTION_ENABLED = "true";
   try {
     setPathologyExtractionProviderForTests(() => ({
-      provider: "test",
+      provider: "fi-pathology-stub-v1",
       rawText: "fixture",
       markers: SAMPLE_MARKERS,
       ocrConfidence: 0.95,
@@ -800,7 +810,7 @@ test("upload enqueues extraction when flag enabled", async () => {
 
 test("worker maps markers through normalization pipeline", async () => {
   setPathologyExtractionProviderForTests(() => ({
-    provider: "test",
+    provider: "fi-pathology-stub-v1",
     rawText: "fixture",
     markers: [{ test_label: "Ferritin", result_value: "45", result_unit: "ug/L", flag: "normal" }],
     ocrConfidence: 0.8,
