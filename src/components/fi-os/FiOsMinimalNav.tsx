@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, LayoutGrid, MoreHorizontal, Plus, Search } from "lucide-react";
+import { Calendar, LayoutGrid, Loader2, MoreHorizontal, Plus, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -9,6 +9,10 @@ import {
   type FiOsMinimalNavItemId,
 } from "@/src/lib/fiAdmin/fiOsMinimalNav";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import {
+  FI_OS_NAV_PENDING_ATTR,
+  useFiOsNavigationPending,
+} from "@/src/components/fi-os/FiOsNavigationPendingProvider";
 
 function iconFor(id: FiOsMinimalNavItemId) {
   switch (id) {
@@ -30,11 +34,13 @@ function MinimalNavButton({
   active,
   onClick,
   className,
+  navPending,
 }: {
   item: FiOsMinimalNavItem;
   active?: boolean;
   onClick?: () => void;
   className?: string;
+  navPending?: boolean;
 }) {
   const Icon = iconFor(item.id);
   const row = cn(
@@ -61,9 +67,18 @@ function MinimalNavButton({
         className={row}
         title={item.hint}
         aria-current={active ? "page" : undefined}
+        aria-busy={navPending || undefined}
         aria-label={item.label}
+        {...{ [FI_OS_NAV_PENDING_ATTR]: item.id }}
       >
-        <Icon className={cn("h-5 w-5 shrink-0", active ? "text-cyan-300" : "text-slate-500")} aria-hidden />
+        {navPending ? (
+          <Loader2
+            className="h-5 w-5 shrink-0 text-cyan-300 motion-safe:animate-spin motion-reduce:animate-none"
+            aria-hidden
+          />
+        ) : (
+          <Icon className={cn("h-5 w-5 shrink-0", active ? "text-cyan-300" : "text-slate-500")} aria-hidden />
+        )}
         <span className="truncate">{item.label}</span>
       </Link>
     );
@@ -90,6 +105,8 @@ export function FiOsMinimalNavRail({
   onNew: () => void;
   onMore: () => void;
 }) {
+  const { pendingNavId } = useFiOsNavigationPending();
+
   function onAction(id: FiOsMinimalNavItemId) {
     if (id === "search") onSearch();
     if (id === "new") onNew();
@@ -112,6 +129,7 @@ export function FiOsMinimalNavRail({
             key={item.id}
             item={item}
             active={item.kind === "link" && activeId === item.id}
+            navPending={item.kind === "link" && pendingNavId === item.id}
             onClick={item.kind === "action" ? () => onAction(item.id) : undefined}
           />
         ))}
@@ -133,6 +151,8 @@ export function FiOsMobileBottomNav({
   onNew: () => void;
   onMore: () => void;
 }) {
+  const { pendingNavId } = useFiOsNavigationPending();
+
   function onAction(id: FiOsMinimalNavItemId) {
     if (id === "search") onSearch();
     if (id === "new") onNew();
@@ -149,6 +169,7 @@ export function FiOsMobileBottomNav({
           key={item.id}
           item={item}
           active={item.kind === "link" && activeId === item.id}
+          navPending={item.kind === "link" && pendingNavId === item.id}
           onClick={item.kind === "action" ? () => onAction(item.id) : undefined}
           className="min-w-0 flex-1 rounded-lg px-0.5 py-1.5"
         />

@@ -5,6 +5,7 @@ import { useCallback, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { FiOsPendingActionButton } from "@/src/components/fi-os/FiOsPendingActionButton";
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import {
   copyOnboardingInviteLinkAction,
@@ -46,33 +47,6 @@ function ChecklistItem({ done, label }: { done: boolean; label: string }) {
   );
 }
 
-function ActionButton({
-  label,
-  disabled,
-  onClick,
-  tone = "default",
-}: {
-  label: string;
-  disabled: boolean;
-  onClick: () => void;
-  tone?: "default" | "warn";
-}) {
-  const cls =
-    tone === "warn"
-      ? "border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
-      : "border-white/10 text-[#CBD5E1] hover:bg-white/5";
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-50 ${cls}`}
-    >
-      {label}
-    </button>
-  );
-}
-
 export function OnboardingCentreClient({
   tenantId,
   staff,
@@ -87,7 +61,9 @@ export function OnboardingCentreClient({
   canManage: boolean;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
+  const [pendingActionKey, setPendingActionKey] = useState<string | null>(null);
+  const [createPending, setCreatePending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -111,7 +87,9 @@ export function OnboardingCentreClient({
     setError(null);
     setMessage(null);
     setInviteUrl(null);
+    setCreatePending(true);
     startTransition(async () => {
+      try {
       const result = await createOnboardingStaffAction(tenantId, {
         ...form,
         clinicId: form.clinicId.trim() || null,
@@ -123,6 +101,9 @@ export function OnboardingCentreClient({
       setMessage("Staff member created. Send an onboarding invite when ready.");
       setForm((f) => ({ ...f, fullName: "", email: "" }));
       router.refresh();
+      } finally {
+        setCreatePending(false);
+      }
     });
   }, [form, router, tenantId]);
 
@@ -131,7 +112,10 @@ export function OnboardingCentreClient({
       setError(null);
       setMessage(null);
       setInviteUrl(null);
+      const actionKey = `${staffMemberId}:${action}`;
+      setPendingActionKey(actionKey);
       startTransition(async () => {
+        try {
         let result:
           | { ok: true; inviteUrl?: string; emailSent?: boolean; wasExpired?: boolean }
           | { ok: false; error: string };
@@ -179,6 +163,9 @@ export function OnboardingCentreClient({
         }
 
         router.refresh();
+        } finally {
+          setPendingActionKey(null);
+        }
       });
     },
     [router, tenantId]
@@ -187,7 +174,10 @@ export function OnboardingCentreClient({
   const onMarkTrainingComplete = useCallback(
     (staffMemberId: string) => {
       setError(null);
+      const actionKey = `${staffMemberId}:training`;
+      setPendingActionKey(actionKey);
       startTransition(async () => {
+        try {
         const result = await markOnboardingTrainingCompleteAction(tenantId, staffMemberId);
         if (!result.ok) {
           setError(result.error);
@@ -195,6 +185,9 @@ export function OnboardingCentreClient({
         }
         setMessage("Training marked complete.");
         router.refresh();
+        } finally {
+          setPendingActionKey(null);
+        }
       });
     },
     [router, tenantId]
@@ -308,8 +301,8 @@ export function OnboardingCentreClient({
                 </select>
               </label>
             </div>
-            <Button className="mt-4" disabled={pending} onClick={onCreate}>
-              {pending ? "Creating…" : "Create staff member"}
+            <Button className="mt-4" disabled={createPending || pendingActionKey !== null} onClick={onCreate}>
+              {createPending ? "Creating…" : "Create staff member"}
             </Button>
           </DashboardCard>
         </section>
@@ -391,30 +384,39 @@ export function OnboardingCentreClient({
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
                           {row.canSendInvite ? (
-                            <ActionButton
+                            <FiOsPendingActionButton
                               label="Send invite"
-                              disabled={pending}
+                              actionKey={`${row.id}:send`}
+                              activeActionKey={pendingActionKey}
+                              anyPending={pendingActionKey !== null}
                               onClick={() => runInviteAction(row.id, "send")}
                             />
                           ) : null}
                           {row.canResendInvite ? (
-                            <ActionButton
+                            <FiOsPendingActionButton
                               label="Resend invite"
-                              disabled={pending}
+                              actionKey={`${row.id}:resend`}
+                              activeActionKey={pendingActionKey}
+                              anyPending={pendingActionKey !== null}
                               onClick={() => runInviteAction(row.id, "resend")}
                             />
                           ) : null}
                           {row.canCopyInviteLink ? (
-                            <ActionButton
+                            <FiOsPendingActionButton
                               label={copiedStaffId === row.id ? "Copied" : "Copy link"}
-                              disabled={pending}
+                              actionKey={`${row.id}:copy`}
+                              activeActionKey={pendingActionKey}
+                              anyPending={pendingActionKey !== null}
                               onClick={() => runInviteAction(row.id, "copy")}
                             />
                           ) : null}
                           {row.checklist.trainingPending ? (
-                            <ActionButton
+                            <FiOsPendingActionButton
                               label="Mark training done"
-                              disabled={pending}
+                              actionKey={`${row.id}:training`}
+                              activeActionKey={pendingActionKey}
+                              anyPending={pendingActionKey !== null}
+                              pendingLabel="Saving…"
                               onClick={() => onMarkTrainingComplete(row.id)}
                             />
                           ) : null}

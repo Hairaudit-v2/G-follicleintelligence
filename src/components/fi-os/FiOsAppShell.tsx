@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
@@ -40,41 +40,28 @@ import { FiOsMoreNavDrawer } from "@/src/components/fi-os/FiOsMoreNavDrawer";
 import { FiOsSkipLink } from "@/src/components/fi-os/FiOsSkipLink";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
 import { fiOsChromeClasses, buildFiOsChromeViewportStyle } from "@/src/components/fi-os/fiOsChromeTokens";
+import {
+  FiOsNavigationPendingProvider,
+  FiOsNavigationProgressStrip,
+  useFiOsNavigationPending,
+} from "@/src/components/fi-os/FiOsNavigationPendingProvider";
 import { cn } from "@/lib/utils";
 
 /**
  * Authenticated FI OS workspace chrome: fixed primary rail, sticky command bar, scrollable main.
  * Visual language aligns with `FiOsLoginScreen` + `fiOsDesignTokens` / `fiOsChromeClasses`.
  */
-export function FiOsAppShell({
-  tenantId,
-  base,
-  showCrmNav,
-  showBookingsBoard = showCrmNav,
-  tenantBackendAdminRole = null,
-  showStaffAndServicesNav = false,
-  showAdminUsersNav = false,
-  showTaxLocalisationSettingsNav = true,
-  showRemindersSettingsNav = true,
-  showAuditOsNav = true,
-  showConfigurationHubNav = true,
-  showFiPaymentsInboxNav = false,
-  showProcedureDayNav = false,
-  showHrOsNav = false,
-  workspaceProfileKey = "default",
-  featureAccess = null,
-  effective,
-  userEmail,
-  impersonationDisplayName,
-  showFiPlatformSystemLink = false,
-  staffPinSessionLabel = null,
-  staffPinLogoutTenantId = null,
-  staffPinOnBreak = false,
-  staffPinBreaksEnabled = false,
-  /** D2: Minimal nav rail + mobile bottom bar when Today + Workspace Shell are on. */
-  navCollapseActive = false,
-  children,
-}: {
+export function FiOsAppShell(props: FiOsAppShellProps) {
+  return (
+    <Suspense fallback={<FiOsAppShellBody {...props} navigationPendingEnabled={false} />}>
+      <FiOsNavigationPendingProvider>
+        <FiOsAppShellBody {...props} navigationPendingEnabled />
+      </FiOsNavigationPendingProvider>
+    </Suspense>
+  );
+}
+
+type FiOsAppShellProps = {
   tenantId: string;
   base: string;
   showCrmNav: boolean;
@@ -115,8 +102,40 @@ export function FiOsAppShell({
   /** D2: Replace legacy sidebar with minimal rail / bottom bar (both rollout flags). */
   navCollapseActive?: boolean;
   children: ReactNode;
-}) {
+};
+
+function FiOsAppShellBody({
+  tenantId,
+  base,
+  showCrmNav,
+  showBookingsBoard = showCrmNav,
+  tenantBackendAdminRole = null,
+  showStaffAndServicesNav = false,
+  showAdminUsersNav = false,
+  showTaxLocalisationSettingsNav = true,
+  showRemindersSettingsNav = true,
+  showAuditOsNav = true,
+  showConfigurationHubNav = true,
+  showFiPaymentsInboxNav = false,
+  showProcedureDayNav = false,
+  showHrOsNav = false,
+  workspaceProfileKey = "default",
+  featureAccess = null,
+  effective,
+  userEmail,
+  impersonationDisplayName,
+  showFiPlatformSystemLink = false,
+  staffPinSessionLabel = null,
+  staffPinLogoutTenantId = null,
+  staffPinOnBreak = false,
+  staffPinBreaksEnabled = false,
+  navCollapseActive = false,
+  children,
+  navigationPendingEnabled = true,
+}: FiOsAppShellProps & { navigationPendingEnabled?: boolean }) {
   const pathname = usePathname() ?? "";
+  const { isNavigationPending, onInternalNavClick } = useFiOsNavigationPending();
+  const navigationPending = navigationPendingEnabled && isNavigationPending;
   /** Calendar owns vertical scroll inside `<main>`; FI OS primary rail must stay mounted for module navigation. */
   const isCalendarMainLocked = useMemo(() => isFiOsTenantCalendarPath(pathname), [pathname]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -273,7 +292,13 @@ export function FiOsAppShell({
   const openMoreNav = () => setMoreNavOpen(true);
 
   return (
-    <div className={fiOsChromeClasses.shellRoot} style={chromeViewportStyle}>
+    <div
+      className={cn("fi-os-shell", fiOsChromeClasses.shellRoot)}
+      style={chromeViewportStyle}
+      data-navigation-pending={navigationPending ? "true" : undefined}
+      data-testid="fi-os-shell"
+      onClickCapture={navigationPendingEnabled ? onInternalNavClick : undefined}
+    >
       <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
         {showLegacySidebar ? (
@@ -303,7 +328,8 @@ export function FiOsAppShell({
             navCollapseActive && fiOsChromeClasses.mainColumnMobileBottomNavPad
           )}
         >
-          <div ref={topChromeRef} className="shrink-0" data-testid="fi-os-top-chrome">
+          <div ref={topChromeRef} className="relative shrink-0" data-testid="fi-os-top-chrome">
+            <FiOsNavigationProgressStrip active={navigationPending} />
             <FiOsTopBar
               tenantId={tenantId}
               clinicLabel={clinicLabel}
@@ -330,6 +356,7 @@ export function FiOsAppShell({
           <main
             id="fi-os-main-content"
             tabIndex={-1}
+            aria-busy={navigationPending || undefined}
             className={cn(
               isCalendarMainLocked
                 ? fiOsChromeClasses.mainScrollCalendarLock

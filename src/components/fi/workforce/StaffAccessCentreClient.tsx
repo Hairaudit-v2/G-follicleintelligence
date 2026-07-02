@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { FiOsPendingActionButton } from "@/src/components/fi-os/FiOsPendingActionButton";
 import {
   copyStaffLoginInviteLinkAction,
   requestStaffPinResetLinkAction,
@@ -74,7 +75,8 @@ export function StaffAccessCentreClient({
   const router = useRouter();
   const [filter, setFilter] = useState<StaffAccessFilter>("all");
   const [showArchived, setShowArchived] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
+  const [pendingActionKey, setPendingActionKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [copiedStaffId, setCopiedStaffId] = useState<string | null>(null);
@@ -109,7 +111,10 @@ export function StaffAccessCentreClient({
     ) => {
       setError(null);
       setMessage(null);
+      const actionKey = `${staffMemberId}:${action}`;
+      setPendingActionKey(actionKey);
       startTransition(async () => {
+        try {
         const body = { staffMemberId };
         let result:
           | { ok: true; inviteUrl?: string; emailSent?: boolean }
@@ -156,6 +161,9 @@ export function StaffAccessCentreClient({
         }
 
         router.refresh();
+        } finally {
+          setPendingActionKey(null);
+        }
       });
     },
     [router, tenantId]
@@ -280,46 +288,58 @@ export function StaffAccessCentreClient({
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1.5">
                         {row.canSendInvite ? (
-                          <ActionButton
+                          <FiOsPendingActionButton
                             label="Send invite"
-                            disabled={pending}
+                            actionKey={`${row.staffMemberId}:send`}
+                            activeActionKey={pendingActionKey}
+                            anyPending={pendingActionKey !== null}
                             onClick={() => runAction(row.staffMemberId, "send")}
                           />
                         ) : null}
                         {row.canResendInvite ? (
-                          <ActionButton
+                          <FiOsPendingActionButton
                             label="Resend"
-                            disabled={pending}
+                            actionKey={`${row.staffMemberId}:resend`}
+                            activeActionKey={pendingActionKey}
+                            anyPending={pendingActionKey !== null}
                             onClick={() => runAction(row.staffMemberId, "resend")}
                           />
                         ) : null}
                         {row.canCopyInviteLink ? (
-                          <ActionButton
+                          <FiOsPendingActionButton
                             label={copiedStaffId === row.staffMemberId ? "Copied" : "Copy link"}
-                            disabled={pending}
+                            actionKey={`${row.staffMemberId}:copy`}
+                            activeActionKey={pendingActionKey}
+                            anyPending={pendingActionKey !== null}
                             onClick={() => runAction(row.staffMemberId, "copy")}
                           />
                         ) : null}
                         {row.canResetPin ? (
-                          <ActionButton
+                          <FiOsPendingActionButton
                             label="Reset PIN"
-                            disabled={pending}
+                            actionKey={`${row.staffMemberId}:resetPin`}
+                            activeActionKey={pendingActionKey}
+                            anyPending={pendingActionKey !== null}
                             onClick={() => runAction(row.staffMemberId, "resetPin")}
                           />
                         ) : null}
                         {row.canSuspendAccess ? (
-                          <ActionButton
+                          <FiOsPendingActionButton
                             label="Suspend"
                             tone="warn"
-                            disabled={pending}
+                            actionKey={`${row.staffMemberId}:suspend`}
+                            activeActionKey={pendingActionKey}
+                            anyPending={pendingActionKey !== null}
                             onClick={() => runAction(row.staffMemberId, "suspend")}
                           />
                         ) : null}
                         {row.canRevokeAccess ? (
-                          <ActionButton
+                          <FiOsPendingActionButton
                             label="Revoke"
                             tone="danger"
-                            disabled={pending}
+                            actionKey={`${row.staffMemberId}:revoke`}
+                            activeActionKey={pendingActionKey}
+                            anyPending={pendingActionKey !== null}
                             onClick={() => runAction(row.staffMemberId, "revoke")}
                           />
                         ) : null}
@@ -345,34 +365,5 @@ export function StaffAccessCentreClient({
         only.
       </InfoNotice>
     </div>
-  );
-}
-
-function ActionButton({
-  label,
-  disabled,
-  onClick,
-  tone = "default",
-}: {
-  label: string;
-  disabled: boolean;
-  onClick: () => void;
-  tone?: "default" | "warn" | "danger";
-}) {
-  const cls =
-    tone === "danger"
-      ? "border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
-      : tone === "warn"
-        ? "border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
-        : "border-white/10 text-[#CBD5E1] hover:bg-white/5";
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-50 ${cls}`}
-    >
-      {label}
-    </button>
   );
 }

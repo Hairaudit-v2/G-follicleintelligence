@@ -331,4 +331,34 @@ body {
     --cal-os-text: #e8edf5;
     --cal-os-muted: #7a8ba3;
   }
+
+  /** FI OS route-transition feedback — shell-scoped cursor + progress strip motion */
+  .fi-os-shell[data-navigation-pending="true"] {
+    cursor: progress;
+  }
+
+  .fi-os-shell[data-navigation-pending="true"] a,
+  .fi-os-shell[data-navigation-pending="true"] button:not([disabled]) {
+    cursor: progress;
+  }
+
+  .fi-os-shell[data-navigation-pending="true"] input,
+  .fi-os-shell[data-navigation-pending="true"] textarea,
+  .fi-os-shell[data-navigation-pending="true"] select,
+  .fi-os-shell[data-navigation-pending="true"] [contenteditable="true"] {
+    cursor: auto;
+  }
+
+  @keyframes fi-os-nav-progress {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(350%);
+    }
+  }
+
+  .animate-fi-os-nav-progress {
+    animation: fi-os-nav-progress 1.1s ease-in-out infinite;
+  }
 }

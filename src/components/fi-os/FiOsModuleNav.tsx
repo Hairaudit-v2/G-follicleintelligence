@@ -9,6 +9,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   LineChart,
+  Loader2,
   MessageSquare,
   Microscope,
   PieChart,
@@ -22,6 +23,10 @@ import { cn } from "@/lib/utils";
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import {
+  FI_OS_NAV_PENDING_ATTR,
+  useFiOsNavigationPending,
+} from "@/src/components/fi-os/FiOsNavigationPendingProvider";
 
 function iconFor(id: string) {
   switch (id) {
@@ -68,10 +73,12 @@ function RowLink(props: {
   pathname: string;
   onNavigate?: () => void;
   dense?: boolean;
+  pendingNavId: string | null;
 }) {
-  const { item, activeId, pathname, onNavigate, dense } = props;
+  const { item, activeId, pathname, onNavigate, dense, pendingNavId } = props;
   const Icon = iconFor(item.id);
   const active = !item.disabled && activeId === item.id;
+  const navPending = pendingNavId === item.id;
   const row = cn(
     "group relative flex shrink-0 items-center gap-2.5 rounded-lg border px-2.5 text-[13px] font-medium transition duration-150",
     dense ? "py-1.5" : "py-2",
@@ -92,6 +99,7 @@ function RowLink(props: {
             href={subItem.href}
             onClick={onNavigate}
             aria-current={subActive ? "page" : undefined}
+            {...{ [FI_OS_NAV_PENDING_ATTR]: subItem.id }}
             className={cn(
               "ml-6 block rounded-md border border-transparent py-1 pl-2 pr-2 text-[12px] font-medium transition",
               subActive
@@ -121,7 +129,9 @@ function RowLink(props: {
         className={row}
         title={item.hint}
         aria-current={active ? "page" : undefined}
+        aria-busy={navPending || undefined}
         onClick={onNavigate}
+        {...{ [FI_OS_NAV_PENDING_ATTR]: item.id }}
       >
         <Icon
           className={cn(
@@ -131,6 +141,12 @@ function RowLink(props: {
           aria-hidden
         />
         <span className="min-w-0 flex-1 leading-snug break-words">{item.label}</span>
+        {navPending ? (
+          <Loader2
+            className="h-3.5 w-3.5 shrink-0 text-cyan-300 motion-safe:animate-spin motion-reduce:animate-none"
+            aria-hidden
+          />
+        ) : null}
       </Link>
       {sub}
     </div>
@@ -153,6 +169,7 @@ export function FiOsModuleNav({
   className?: string;
 }) {
   const path = pathname ?? "";
+  const { pendingNavId } = useFiOsNavigationPending();
   return (
     <nav
       className={cn(fiOsChromeClasses.sidebarNavScroll, className)}
@@ -172,6 +189,7 @@ export function FiOsModuleNav({
                 pathname={path}
                 onNavigate={onNavigate}
                 dense={dense}
+                pendingNavId={pendingNavId}
               />
             ))}
           </div>

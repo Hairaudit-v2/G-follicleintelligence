@@ -1595,8 +1595,9 @@ export function CalendarQuickCreateDrawer({
               type="submit"
               className={fiButtonVariantClassNames.osPrimary}
               disabled={busy || !clinicId.trim()}
+              aria-busy={busy || undefined}
             >
-              {busy ? "Saving…" : "Save"}
+              {busy ? "Creating…" : "Create appointment"}
             </button>
           </div>
         </form>
