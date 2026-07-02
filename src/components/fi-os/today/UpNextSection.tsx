@@ -1,9 +1,9 @@
-import { TodayFeedItemList } from "@/src/components/fi-os/today/TodayFeedItemList";
+import { TodayFeedSection } from "@/src/components/fi-os/today/TodayFeedSection";
 import type { TodayFeedItem } from "@/src/lib/fiOs/todayFeedDerive";
 
 export function UpNextSection({ items }: { items: readonly TodayFeedItem[] }) {
   return (
-    <TodayFeedItemList
+    <TodayFeedSection
       id="today-up-next-heading"
       kicker="Up next"
       title="Queued for today"

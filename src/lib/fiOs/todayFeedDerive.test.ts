@@ -101,6 +101,7 @@ test("buildTodayFeed: named reception card 'arrived' goes to right now", () => {
   assert.equal(feed.rightNow.length, 1);
   assert.equal(feed.rightNow[0]?.personLabel, "Sarah Chen");
   assert.match(feed.rightNow[0]?.actionLabel ?? "", /waiting/i);
+  assert.equal(feed.rightNow[0]?.severity, "warning");
   assert.equal(feed.rightNow[0]?.href, "/fi-admin/t1/patients/22222222-0000-0000-0000-000000000001");
 });
 
@@ -153,7 +154,9 @@ test("buildTodayFeed: severely stale lead escalates to right now", () => {
   const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
   assert.equal(feed.rightNow.length, 1);
   assert.equal(feed.rightNow[0]?.personLabel, "James Morrison");
-  assert.equal(feed.rightNow[0]?.severity, "critical");
+  assert.match(feed.rightNow[0]?.actionLabel ?? "", /Call James/i);
+  assert.match(feed.rightNow[0]?.detailLine ?? "", /23 days|contacted/i);
+  assert.equal(feed.rightNow[0]?.severity, "warning");
 });
 
 test("buildTodayFeed: mildly stale lead is up next, not right now", () => {
@@ -195,8 +198,8 @@ test("buildTodayFeed: overdue CRM task is named and right now", () => {
   const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
   assert.equal(feed.rightNow.length, 1);
   assert.equal(feed.rightNow[0]?.personLabel, "Tom Williams");
-  assert.match(feed.rightNow[0]?.actionLabel ?? "", /overdue/i);
-  assert.equal(feed.rightNow[0]?.severity, "critical");
+  assert.match(feed.rightNow[0]?.actionLabel ?? "", /Follow up/i);
+  assert.equal(feed.rightNow[0]?.severity, "warning");
 });
 
 test("buildTodayFeed: aggregate fallback items carry no person label and land in expected buckets", () => {

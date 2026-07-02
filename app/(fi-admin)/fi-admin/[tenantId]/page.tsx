@@ -16,6 +16,12 @@ import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 
+import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+
+import {
+  resolveFiOsAuthUserDisplayNameById,
+} from "@/src/lib/fiOs/fiOsAuthDisplay.server";
+
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 
 import { loadTenantClinicalIntelligenceSummary } from "@/src/lib/fi-os/clinicalIntelligence.server";
@@ -111,10 +117,23 @@ export default async function FiAdminTenantHomePage({
   // P0B shadow mode: always compute + compare (never affects which surface renders below).
   runTodayFeedShadowValidation({ dashboard: data, showCrmNav, profileKey: workspaceProfile });
 
+  // `tenantId` here is always `fi_tenants.id` (a UUID) — this route never receives
+  // a slug — so FI_TODAY_SURFACE_TENANT_IDS must be populated with tenant UUIDs.
+  // See src/lib/fiOs/todaySurfaceRollout.server.ts for allowlist/slug details.
   if (isTodaySurfaceEnabledForTenant(tenantId)) {
+    const authUserId = await resolveAuthUserId(null);
+    const viewerDisplayName = authUserId
+      ? await resolveFiOsAuthUserDisplayNameById(authUserId)
+      : null;
+
     return (
       <CalendarToastProvider>
-        <FiOsTodaySurface data={data} showCrmNav={showCrmNav} workspaceProfile={workspaceProfile} />
+        <FiOsTodaySurface
+          data={data}
+          showCrmNav={showCrmNav}
+          workspaceProfile={workspaceProfile}
+          viewerDisplayName={viewerDisplayName}
+        />
       </CalendarToastProvider>
     );
   }

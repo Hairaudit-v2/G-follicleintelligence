@@ -38,6 +38,7 @@ export function FiOsTopBar({
   quickCreateKbdHint,
   onOpenMobileNav,
   onOpenQuickCreate,
+  hideMobileNav = false,
   impersonationDisplayName,
   showFiPlatformSystemLink = false,
   staffPinSessionLabel = null,
@@ -60,6 +61,8 @@ export function FiOsTopBar({
   quickCreateKbdHint: string;
   onOpenMobileNav: () => void;
   onOpenQuickCreate: () => void;
+  /** P0C: Hide hamburger when Today surface owns navigation. */
+  hideMobileNav?: boolean;
   /** When set, shows impersonation banner (platform admin). */
   impersonationDisplayName?: string | null;
   showFiPlatformSystemLink?: boolean;
@@ -150,17 +153,19 @@ export function FiOsTopBar({
       ) : null}
       <div className={fiOsChromeClasses.topBar}>
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            className={cn(
-              fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex h-10 w-10 shrink-0 items-center justify-center lg:hidden"
-            )}
-            aria-label="Open navigation"
-            onClick={onOpenMobileNav}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          {!hideMobileNav ? (
+            <button
+              type="button"
+              className={cn(
+                fiOsChromeClasses.toolbarControlSurface,
+                "inline-flex h-10 w-10 shrink-0 items-center justify-center lg:hidden"
+              )}
+              aria-label="Open navigation"
+              onClick={onOpenMobileNav}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          ) : null}
 
           <div className="min-w-0 shrink-0">
             <FiOsTenantSwitcher

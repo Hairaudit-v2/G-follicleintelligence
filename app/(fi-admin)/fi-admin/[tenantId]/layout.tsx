@@ -36,6 +36,7 @@ import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
 import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
 import { StaffUatLayoutMount } from "@/src/components/fi-admin/staff-uat/StaffUatLayoutMount";
+import { isTodaySurfaceEnabledForTenant } from "@/src/lib/fiOs/todaySurfaceRollout.server";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
 import {
   canAccessTenantReminderSettings,
@@ -78,6 +79,10 @@ export default async function TenantAdminLayout({
     pathname.includes("/staff-pin-login") || pathname.includes("/staff-time-clock");
   const isOnboardingInvite = pathname.includes("/onboarding/invite/");
   const isCommandCentrePresentation = isGlobalCommandCentrePresentationPath(pathname);
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  const normalizedBase = base.replace(/\/+$/, "") || base;
+  const isTenantHome = normalizedPath === normalizedBase;
+  const todaySurfaceActive = isTenantHome && isTodaySurfaceEnabledForTenant(tenantId);
   const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
 
   if (isCommandCentrePresentation) {
@@ -269,6 +274,7 @@ export default async function TenantAdminLayout({
         staffPinLogoutTenantId={pinFloorMode ? tenantId : null}
         staffPinOnBreak={pinBreakState?.onBreak ?? false}
         staffPinBreaksEnabled={timeClockPolicy?.breaksEnabled ?? false}
+        todaySurfaceActive={todaySurfaceActive}
       >
         {mainSurface}
         {!pinFloorMode && !isCommandCentrePresentation ? (

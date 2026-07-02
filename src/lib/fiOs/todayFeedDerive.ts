@@ -10,12 +10,10 @@ import type {
 } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 /**
- * FI-UX-REBUILD-1D — Today surface feed.
+ * FI-UX-REBUILD-1D / P0C — Today surface feed.
  *
  * Buckets named, human work items into Right now / Up next / Coming up.
- * Deliberately reuses `buildAttentionPriorities` for the handful of signal
- * categories that don't have a named source yet (see Phase 7 in the plan —
- * expanding those to named items is a later, separate change).
+ * Copy is operational language for humans — not backend terminology.
  */
 
 export type TodayFeedBucket = "right_now" | "up_next" | "coming_up";
@@ -26,12 +24,20 @@ export type TodayFeedItem = {
   /** Empty string for aggregate (non-named) fallback items. */
   personLabel: string;
   actionLabel: string;
+  /** Secondary human context shown below the primary line. */
+  detailLine?: string;
+  /** Short action affordance label (e.g. "Check in"). */
+  actionHint?: string;
   href: string;
   severity: TodayFeedSeverity;
   bucket: TodayFeedBucket;
   priorityScore: number;
   /** True when the item disappears on its own once the underlying condition clears (no manual dismiss needed). */
   autoResolves: boolean;
+  /** When set, presentation layer may collapse matching items into one group row. */
+  groupKey?: string;
+  /** Expanded members when this row represents a collapsed group. */
+  groupMembers?: TodayFeedItem[];
 };
 
 export type TodayFeed = {
@@ -42,6 +48,8 @@ export type TodayFeed = {
 
 const RIGHT_NOW_WINDOW_MS = 30 * 60_000;
 const DEFAULT_MAX_PER_BUCKET = 8;
+/** P0C: Right now shows at most this many items before the rest collapse behind a queue. */
+export const RIGHT_NOW_VISIBLE_CAP = 3;
 
 type FeedCategory =
   | "reception"
@@ -74,6 +82,18 @@ function parseMs(iso: string | null | undefined): number | null {
   return Number.isFinite(t) ? t : null;
 }
 
+function firstName(label: string): string {
+  const trimmed = label.trim();
+  if (!trimmed) return "Patient";
+  return trimmed.split(/\s+/)[0] ?? trimmed;
+}
+
+function minutesUntil(nowMs: number, iso: string | null | undefined): number | null {
+  const t = parseMs(iso);
+  if (t == null) return null;
+  return Math.max(0, Math.round((t - nowMs) / 60_000));
+}
+
 function bucketForInstant(
   iso: string | null | undefined,
   opts: { nowMs: number; todayEndMs: number }
@@ -85,11 +105,53 @@ function bucketForInstant(
   return "coming_up";
 }
 
-function receptionActionLabel(card: ReceptionBoardCard, bucket: TodayFeedBucket): string {
-  if (card.receptionColumn === "arrived") return `waiting — ${card.statusLabel.toLowerCase()}`;
-  if (card.receptionColumn === "in_treatment") return "in treatment";
-  if (card.receptionColumn === "in_consultation") return "in consultation";
-  return bucket === "right_now" ? "arriving soon" : "check-in expected";
+function receptionCopy(
+  card: ReceptionBoardCard,
+  bucket: TodayFeedBucket,
+  nowMs: number
+): Pick<TodayFeedItem, "actionLabel" | "detailLine" | "actionHint" | "groupKey"> {
+  if (card.receptionColumn === "arrived") {
+    return {
+      actionLabel: `${firstName(card.displayName)} is waiting`,
+      detailLine: card.statusLabel.trim() || "Checked in — ready to be seen",
+      actionHint: "Check in",
+      groupKey: "reception:waiting",
+    };
+  }
+  if (card.receptionColumn === "in_treatment") {
+    return {
+      actionLabel: `${firstName(card.displayName)} is in treatment`,
+      detailLine: card.typeLabel.trim() || undefined,
+      actionHint: "View",
+      groupKey: "reception:in_clinic",
+    };
+  }
+  if (card.receptionColumn === "in_consultation") {
+    return {
+      actionLabel: `${firstName(card.displayName)} is in consultation`,
+      detailLine: card.providerLabel.trim() || undefined,
+      actionHint: "View",
+      groupKey: "reception:in_clinic",
+    };
+  }
+
+  const mins = minutesUntil(nowMs, card.startAt);
+  if (bucket === "right_now" && mins != null) {
+    const arrival =
+      mins <= 1 ? "arriving now" : mins === 1 ? "arriving in 1 minute" : `arriving in ${mins} minutes`;
+    return {
+      actionLabel: `${firstName(card.displayName)} ${arrival}`,
+      detailLine: card.typeLabel.trim() || "Appointment starting soon",
+      actionHint: "Check in",
+      groupKey: "reception:arriving_soon",
+    };
+  }
+
+  return {
+    actionLabel: `${firstName(card.displayName)} has an appointment later today`,
+    detailLine: card.typeLabel.trim() || "Scheduled check-in expected",
+    actionHint: "View",
+  };
 }
 
 function receptionHref(base: string, card: ReceptionBoardCard): string {
@@ -128,10 +190,12 @@ function receptionItems(
         priorityScore = bucket === "right_now" ? 85 : 30;
       }
 
+      const copy = receptionCopy(c, bucket, nowMs);
+
       return {
         id: `reception-${c.id}`,
         personLabel: c.displayName,
-        actionLabel: receptionActionLabel(c, bucket),
+        ...copy,
         href: receptionHref(base, c),
         severity,
         bucket,
@@ -149,16 +213,25 @@ function staleLeadItems(
   const weight = categoryWeight(profileKey, "leads");
 
   return staleLeads.map((l) => {
-    const overBy = l.daysInStage - thresholdDays;
-    const severity: TodayFeedSeverity = overBy >= thresholdDays ? "critical" : "warning";
+    const name = firstName(l.title);
+    const days = l.daysInStage;
+    const dayLabel = days === 1 ? "1 day" : `${days} days`;
+
     return {
       id: `stale-lead-${l.leadId}`,
       personLabel: l.title,
-      actionLabel: `stale in ${l.stageLabel} — ${l.daysInStage}d`,
+      actionLabel: `Call ${name}`,
+      detailLine:
+        days === 1
+          ? "No follow-up yet today"
+          : days <= thresholdDays
+            ? `No follow-up for ${dayLabel}`
+            : `${name} has not been contacted for ${dayLabel}`,
+      actionHint: "Call patient",
       href: `${base}/crm/leads/${l.leadId}`,
-      severity,
-      bucket: severity === "critical" ? "right_now" : "up_next",
-      priorityScore: (55 + Math.min(l.daysInStage, 30)) * weight,
+      severity: "warning",
+      bucket: days > thresholdDays + 7 ? "right_now" : "up_next",
+      priorityScore: (55 + Math.min(days, 30)) * weight,
       autoResolves: true,
     } satisfies TodayFeedItem;
   });
@@ -174,21 +247,37 @@ function taskDueItems(
   return tasksDue.map((t) => {
     const bucket = bucketForInstant(t.dueAt, { nowMs, todayEndMs });
     const overdue = parseMs(t.dueAt) != null && (parseMs(t.dueAt) as number) < nowMs;
+    const name = firstName(t.title);
+
     return {
       id: `task-${t.id}`,
       personLabel: t.title,
-      actionLabel: overdue
-        ? "follow-up overdue"
+      actionLabel: overdue ? `Follow up with ${name}` : `Task due for ${name}`,
+      detailLine: overdue
+        ? "This follow-up is overdue"
         : t.isUnassigned
-          ? "unassigned follow-up"
-          : "follow-up due",
+          ? "Unassigned — needs an owner"
+          : "Due later today",
+      actionHint: "Follow up",
       href: `${base}/crm/leads/${t.leadId}`,
-      severity: overdue ? "critical" : "warning",
+      severity: "warning",
       bucket: overdue ? "right_now" : bucket,
       priorityScore: (overdue ? 80 : 50) * weight,
       autoResolves: true,
     } satisfies TodayFeedItem;
   });
+}
+
+function humanizeReminderAction(r: DashboardReminderItem): { actionLabel: string; detailLine?: string } {
+  const summary = r.clinicalSummaryLine?.trim();
+  if (summary) {
+    return { actionLabel: summary, detailLine: "Clinical reminder scheduled" };
+  }
+  const type = r.templateType.replace(/_/g, " ").toLowerCase();
+  return {
+    actionLabel: `Reminder for ${firstName(r.recipientLabel)}`,
+    detailLine: type.charAt(0).toUpperCase() + type.slice(1),
+  };
 }
 
 function reminderItems(
@@ -200,10 +289,13 @@ function reminderItems(
 
   return reminders.map((r) => {
     const bucket = bucketForInstant(r.scheduled_at, { nowMs, todayEndMs });
+    const copy = humanizeReminderAction(r);
     return {
       id: `reminder-${r.jobId}`,
       personLabel: r.recipientLabel,
-      actionLabel: r.clinicalSummaryLine?.trim() || `reminder — ${r.templateType}`,
+      actionLabel: copy.actionLabel,
+      detailLine: copy.detailLine,
+      actionHint: "View",
       href: r.detailHref,
       severity: "normal",
       bucket,
@@ -224,6 +316,50 @@ const AGGREGATE_CATEGORY: Record<string, FeedCategory> = {
   finance_applications: "financial",
 };
 
+/** Humanize aggregate labels from the legacy attention engine — presentation only. */
+function humanizeAggregateLabel(id: string, label: string): { actionLabel: string; detailLine?: string; actionHint?: string } {
+  switch (id) {
+    case "financial_clearance":
+      return {
+        actionLabel: label.replace(/need payment clearance before procedure day/i, "need financial clearance"),
+        detailLine: "Procedures cannot proceed until cleared",
+        actionHint: "Review clearance",
+      };
+    case "surgery_readiness":
+      return {
+        actionLabel: label.replace(/blocked by missing preparation requirements/i, "need preparation completed"),
+        detailLine: "Missing requirements before procedure day",
+        actionHint: "Review cases",
+      };
+    case "surgery_payment":
+      return {
+        actionLabel: label.replace(/need payment follow-up/i, "need payment attention"),
+        detailLine: "Deposits or balances require confirmation",
+        actionHint: "Take payment",
+      };
+    case "consultations":
+      return {
+        actionLabel: label.replace(/require completion/i, "need to be completed"),
+        detailLine: "Consultation workspaces awaiting closure",
+        actionHint: "Complete",
+      };
+    case "follow_ups":
+      return {
+        actionLabel: label.replace(/require scheduling attention/i, "need scheduling"),
+        detailLine: "Visits due within the next two weeks",
+        actionHint: "Schedule",
+      };
+    case "leads":
+      return {
+        actionLabel: label.replace(/awaiting contact/i, "waiting for first contact"),
+        detailLine: "New enquiries not yet worked",
+        actionHint: "Contact",
+      };
+    default:
+      return { actionLabel: label, actionHint: "Review" };
+  }
+}
+
 function aggregateFallbackItems(opts: {
   base: string;
   actionCentre: TenantActionCentre;
@@ -238,10 +374,13 @@ function aggregateFallbackItems(opts: {
     const weight = categoryWeight(profileKey, category);
     const bucket: TodayFeedBucket =
       p.severity === "critical" ? "right_now" : p.severity === "warning" ? "up_next" : "coming_up";
+    const human = humanizeAggregateLabel(p.id, p.label);
     return {
       id: `aggregate-${p.id}`,
       personLabel: "",
-      actionLabel: p.label,
+      actionLabel: human.actionLabel,
+      detailLine: human.detailLine,
+      actionHint: human.actionHint,
       href: p.href,
       severity: p.severity,
       bucket,
@@ -293,4 +432,31 @@ export function buildTodayFeed(input: {
     upNext: byBucket("up_next"),
     comingUp: byBucket("coming_up"),
   };
+}
+
+/** Count overdue CRM tasks for the Today header pulse line. */
+export function countOverdueTasks(
+  tasksDue: readonly TaskDueItem[],
+  nowMs: number = Date.now()
+): number {
+  return tasksDue.filter((t) => {
+    const due = parseMs(t.dueAt);
+    return due != null && due < nowMs;
+  }).length;
+}
+
+/** Patients booked today — consultations + surgeries + follow-ups + PRP. */
+export function countPatientsBookedToday(clinicToday: TenantOperationalDashboard["clinicToday"]): number {
+  return clinicToday.consultations + clinicToday.surgeries + clinicToday.followUps + clinicToday.prp;
+}
+
+export function greetingForHour(hour: number): string {
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+export function firstNameFromDisplayName(displayName: string | null | undefined): string | null {
+  if (!displayName?.trim()) return null;
+  return displayName.trim().split(/\s+/)[0] ?? null;
 }

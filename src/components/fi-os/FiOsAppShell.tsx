@@ -65,6 +65,8 @@ export function FiOsAppShell({
   staffPinLogoutTenantId = null,
   staffPinOnBreak = false,
   staffPinBreaksEnabled = false,
+  /** P0C: When true, hide legacy module sidebar so Today feels primary. */
+  todaySurfaceActive = false,
   children,
 }: {
   tenantId: string;
@@ -104,6 +106,8 @@ export function FiOsAppShell({
   staffPinLogoutTenantId?: string | null;
   staffPinOnBreak?: boolean;
   staffPinBreaksEnabled?: boolean;
+  /** P0C: Hide legacy module sidebar on the Today surface home route. */
+  todaySurfaceActive?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -232,14 +236,16 @@ export function FiOsAppShell({
     <div className={fiOsChromeClasses.shellRoot}>
       <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
-        <FiOsSidebar
-          variant="rail"
-          brandName={brandName}
-          effective={effective}
-          navSections={sidebarSections}
-          activeNavId={activeSidebarId}
-          pathname={pathname}
-        />
+        {!todaySurfaceActive ? (
+          <FiOsSidebar
+            variant="rail"
+            brandName={brandName}
+            effective={effective}
+            navSections={sidebarSections}
+            activeNavId={activeSidebarId}
+            pathname={pathname}
+          />
+        ) : null}
 
         <div className={fiOsChromeClasses.mainColumn}>
           <FiOsTopBar
@@ -255,6 +261,7 @@ export function FiOsAppShell({
             quickCreateKbdHint={quickCreateKbdHint}
             onOpenMobileNav={() => setMobileNav(true)}
             onOpenQuickCreate={() => setQuickCreateOpen(true)}
+            hideMobileNav={todaySurfaceActive}
             impersonationDisplayName={impersonationDisplayName ?? null}
             showFiPlatformSystemLink={showFiPlatformSystemLink}
             staffPinSessionLabel={staffPinSessionLabel}
@@ -286,7 +293,7 @@ export function FiOsAppShell({
         </div>
       </div>
 
-      {mobileNav ? (
+      {!todaySurfaceActive && mobileNav ? (
         <div
           className="fixed inset-0 z-50 flex lg:hidden"
           role="dialog"

@@ -40,10 +40,12 @@ test.describe("FI-UX-REBUILD-1D Today surface @smoke", () => {
     );
   });
 
-  test("home renders Today, not the legacy Clinic Command Center", async ({ page }) => {
+  test("home renders Today surface, not the legacy Clinic Command Center", async ({ page }) => {
     await page.goto(`${BASE()}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
 
-    await expect(page.getByText("Today", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/i })).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.getByText("Clinic Command Center")).toHaveCount(0);
   });
 
@@ -66,7 +68,9 @@ test.describe("FI-UX-REBUILD-1D Today surface @smoke", () => {
 
   test("no KPI cards or module tiles on the Today surface", async ({ page }) => {
     await page.goto(`${BASE()}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(page.getByText("Today", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/i })).toBeVisible({
+      timeout: 30_000,
+    });
 
     for (const legacyLabel of [
       "Patients in clinic today",
