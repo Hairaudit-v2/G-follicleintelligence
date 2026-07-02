@@ -314,9 +314,9 @@ function createInboxMockSupabase(state: InboxMockState): SupabaseClient {
           },
           update(patch: Record<string, unknown>) {
             return {
-              eq(col: string, val: string) {
+              eq(_col: string, _val: string) {
                 return {
-                  eq(col2: string, val2: string) {
+                  eq(_col2: string, _val2: string) {
                     return {
                       select(_cols?: string) {
                         return {

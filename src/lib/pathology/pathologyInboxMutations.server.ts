@@ -269,7 +269,7 @@ export async function confirmInboundDocumentMatch(
 
   await assertPatientInTenant(supabase, tid, pid);
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("fi_pathology_inbound_documents")
     .update({
       confirmed_patient_id: pid,
