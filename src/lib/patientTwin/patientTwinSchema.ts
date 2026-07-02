@@ -256,6 +256,17 @@ export const patientTwinPathologySectionSchema = z.object({
   abnormal_markers_total: z.number().int().nonnegative(),
   last_result_reviewed_at: z.string().nullable(),
   latest_ai_interpretation: patientTwinPathologyAiInterpretationSummarySchema.nullable(),
+  latest_medical_intelligence: z
+    .object({
+      pathology_result_id: z.string().uuid(),
+      result_date: z.string(),
+      status: z.string(),
+      interpreted_marker_count: z.number().int().nonnegative(),
+      clinical_flags: z.array(z.enum(["Fe", "T", "A", "⊕", "!"])),
+      active_drivers: z.array(z.string()),
+      insight_preview: z.string().nullable(),
+    })
+    .nullable(),
 });
 
 export const patientTwinTimelineItemSchema = z.object({

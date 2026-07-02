@@ -9,10 +9,14 @@ FI OS must **not** duplicate ferritin, thyroid, vitamin D, or other biomarker in
 ## Package dependency
 
 ```json
-"@hairlongevity/medical-intelligence-core": "file:../HairLongevityInstitute/packages/medical-intelligence-core"
+"@hairlongevity/medical-intelligence-core": "workspace:*"
 ```
 
-Sibling-repo `file:` link during monorepo extraction. Publish or workspace-link when the package is published internally.
+The package is **vendored in-repo** at `packages/medical-intelligence-core` and resolved via the pnpm workspace (`pnpm-workspace.yaml` → `packages/*`). This keeps Vercel and CI installs self-contained — no sibling `HairLongevityInstitute` checkout is required.
+
+HLI remains the **logical source of truth** for clinical rules. When HLI updates the shared package, copy changes into `packages/medical-intelligence-core` and run `pnpm test:medical-intelligence-core` (parity tests) before merging.
+
+`next.config.mjs` includes `@hairlongevity/medical-intelligence-core` in `transpilePackages` so Next.js compiles the workspace TypeScript sources.
 
 ---
 
@@ -86,12 +90,12 @@ Covers package import, marker interpretation, clinical insights, longevity signa
 2. **Questionnaire bridge** — map FI patient metadata + consultation forms → `LongevityQuestionnaireResponses` for eligibility without manual shaping.
 3. **Persist interpretation snapshot** — optional JSON on `fi_pathology_results.metadata` (similar to `hli_pathology_handoff`) for audit/replay.
 4. **Trend adapter** — map FI result history to `BloodResultMarkerRowInput` when multiple dated results exist per patient.
-5. **Publish package** — replace `file:` link with internal registry version once HLI extraction stabilizes.
+5. **Sync from HLI** — when upstream rules change, refresh `packages/medical-intelligence-core` from HLI and verify parity tests pass; optional future step is an internal registry publish to replace manual vendoring.
 
 ---
 
 ## Related
 
-- HLI package: `HairLongevityInstitute/packages/medical-intelligence-core`
+- Vendored package: `packages/medical-intelligence-core` (upstream: `HairLongevityInstitute/packages/medical-intelligence-core`)
 - FI HLI handoff (unchanged): `hliPathologyHandoffCore.ts`, `hliPathologyHandoff.server.ts`
 - Stage 5 clinical intelligence runbook: [fi-os-stage5-clinical-intelligence.md](./fi-os-stage5-clinical-intelligence.md)

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { MedicalIntelligencePanel } from "@/src/components/clinical-intelligence/MedicalIntelligencePanel";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { PathologyAiInterpretationRow } from "@/src/lib/pathology/pathologyAiInterpretationTypes";
+import type { FiMedicalIntelligenceDisplay } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes";
 import type {
   PathologyRequestOptionRow,
   PathologyResultDetailBundle,
@@ -134,12 +136,14 @@ export function BloodPathologyResultDetailClient({
   bundle: initialBundle,
   requestOptions,
   aiInterpretation: initialAiInterpretation,
+  medicalIntelligence: initialMedicalIntelligence,
 }: {
   tenantId: string;
   patientId: string;
   bundle: PathologyResultDetailBundle;
   requestOptions: PathologyRequestOptionRow[];
   aiInterpretation: PathologyAiInterpretationRow | null;
+  medicalIntelligence: FiMedicalIntelligenceDisplay | null;
 }) {
   const router = useRouter();
   const [bundle, setBundle] = useState(initialBundle);
@@ -154,6 +158,9 @@ export function BloodPathologyResultDetailClient({
   );
   const [aiInterpretation, setAiInterpretation] = useState<PathologyAiInterpretationRow | null>(
     initialAiInterpretation
+  );
+  const [medicalIntelligence] = useState<FiMedicalIntelligenceDisplay | null>(
+    initialMedicalIntelligence
   );
   const [doctorSummary, setDoctorSummary] = useState(initialAiInterpretation?.doctor_summary ?? "");
   const [patientFriendlySummary, setPatientFriendlySummary] = useState(
@@ -510,6 +517,8 @@ export function BloodPathologyResultDetailClient({
           </div>
         </dl>
       </section>
+
+      {medicalIntelligence ? <MedicalIntelligencePanel intelligence={medicalIntelligence} /> : null}
 
       {bundle.pdfSignedUrl ? (
         <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">

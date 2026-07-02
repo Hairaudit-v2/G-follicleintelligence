@@ -93,6 +93,7 @@ test("patient twin signal normalization: pathology drafts", () => {
       abnormal_markers_total: 0,
       last_result_reviewed_at: null,
       latest_ai_interpretation: null,
+      latest_medical_intelligence: null,
     },
     imaging: {
       active_image_total: 0,

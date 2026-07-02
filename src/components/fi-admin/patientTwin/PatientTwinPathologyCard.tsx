@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MedicalIntelligenceTwinSummary } from "@/src/components/clinical-intelligence/MedicalIntelligencePanel";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 const card =
@@ -21,6 +22,7 @@ export function PatientTwinPathologyCard({
     abnormal_markers_total,
     last_result_reviewed_at,
     latest_ai_interpretation,
+    latest_medical_intelligence,
   } = twin.pathology;
 
   if (requests.length === 0 && results.length === 0 && !latest_ai_interpretation) {
@@ -119,6 +121,14 @@ export function PatientTwinPathologyCard({
             </p>
           ) : null}
         </div>
+      ) : null}
+
+      {latest_medical_intelligence ? (
+        <MedicalIntelligenceTwinSummary
+          summary={latest_medical_intelligence}
+          tenantId={tenantId}
+          patientId={patientId}
+        />
       ) : null}
 
       {requests.length > 0 ? (

@@ -84,6 +84,7 @@ export default async function PatientBloodResultDetailPage({
         bundle={bundle}
         requestOptions={requestOptions}
         aiInterpretation={aiInterpretation}
+        medicalIntelligence={bundle.medicalIntelligence}
       />
     </div>
   );

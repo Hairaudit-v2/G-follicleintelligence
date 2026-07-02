@@ -42,6 +42,8 @@ import {
   emptyPatientTwinMedicationsSection,
   PATIENT_TWIN_MEDICATION_OS_EVENTS_READ_CAP,
 } from "./patientTwinMedicationOs";
+import { buildFiMedicalIntelligenceTwinSummary } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceCore";
+import type { PathologyResultItemRow, PathologyResultStatus } from "@/src/lib/pathology/pathologyResultTypes";
 import {
   PATIENT_TWIN_LOADER_VERSION,
   PATIENT_TWIN_VERSION,
@@ -856,6 +858,7 @@ export async function loadPatientTwinV1(
     abnormal_markers_total: 0,
     last_result_reviewed_at: null,
     latest_ai_interpretation: null,
+    latest_medical_intelligence: null,
   };
 
   const { data: pthRows, error: pthErr } = await supabase
@@ -961,6 +964,76 @@ export async function loadPatientTwinV1(
       abnormal_markers_total,
       last_result_reviewed_at,
     };
+
+    const intelligenceTarget = results.find(
+      (r) => r.status === "draft" || r.status === "reviewed"
+    );
+    if (intelligenceTarget) {
+      const { data: resMeta, error: resMetaErr } = await supabase
+        .from("fi_pathology_results")
+        .select("id, result_date, status, metadata")
+        .eq("tenant_id", tid)
+        .eq("id", intelligenceTarget.id)
+        .maybeSingle();
+      const { data: intelItems, error: intelItemsErr } = await supabase
+        .from("fi_pathology_result_items")
+        .select(
+          "id, tenant_id, result_id, test_code, test_label, result_value, result_unit, reference_range, flag, sort_order, metadata, created_at"
+        )
+        .eq("tenant_id", tid)
+        .eq("result_id", intelligenceTarget.id)
+        .order("sort_order", { ascending: true });
+      if (resMetaErr) {
+        pushWarning(
+          warnings,
+          "generic",
+          `Medical intelligence summary skipped: ${resMetaErr.message}`
+        );
+      } else if (intelItemsErr) {
+        pushWarning(
+          warnings,
+          "generic",
+          `Medical intelligence markers skipped: ${intelItemsErr.message}`
+        );
+      } else if (resMeta) {
+        const x = resMeta as Record<string, unknown>;
+        const items: PathologyResultItemRow[] = (intelItems ?? []).map((raw) => {
+          const row = raw as Record<string, unknown>;
+          return {
+            id: String(row.id),
+            tenant_id: String(row.tenant_id),
+            result_id: String(row.result_id),
+            test_code: row.test_code != null ? String(row.test_code) : null,
+            test_label: String(row.test_label),
+            result_value: String(row.result_value ?? ""),
+            result_unit: row.result_unit != null ? String(row.result_unit) : null,
+            reference_range: row.reference_range != null ? String(row.reference_range) : null,
+            flag: String(row.flag) as PathologyResultItemRow["flag"],
+            sort_order: Number(row.sort_order ?? 0),
+            metadata:
+              row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+                ? (row.metadata as Record<string, unknown>)
+                : {},
+            created_at: String(row.created_at),
+          };
+        });
+        pathology = {
+          ...pathology,
+          latest_medical_intelligence: buildFiMedicalIntelligenceTwinSummary({
+            result: {
+              id: String(x.id),
+              result_date: String(x.result_date ?? "").slice(0, 10),
+              status: String(x.status ?? "") as PathologyResultStatus,
+              metadata:
+                x.metadata && typeof x.metadata === "object" && !Array.isArray(x.metadata)
+                  ? (x.metadata as Record<string, unknown>)
+                  : {},
+            },
+            items,
+          }),
+        };
+      }
+    }
   }
 
   const { data: aiRow, error: aiErr } = await supabase
