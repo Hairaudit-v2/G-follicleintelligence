@@ -14,6 +14,7 @@ import type {
   HrSyncRunStatus,
 } from "@/src/lib/workforce/hrSyncAuditTypes";
 import { loadIdentityLinksForTenant, loadStaffMembersForReconciliation } from "@/src/lib/workforce/identityReconciliation.server";
+import { isDepartedEmploymentStatus } from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
 import { persistDuplicateCandidatesForTenant } from "@/src/lib/workforce/staffDuplicateDetection.server";
 
 export type {
@@ -138,7 +139,11 @@ export async function loadHrSyncHealthSummary(
   const latest = runs[0] ?? null;
   const linkedMemberIds = new Set(identityLinks.map((l) => l.staffMemberId));
   const unlinkedActive = members.filter(
-    (m) => !m.archivedAt && !m.mergedInto && !linkedMemberIds.has(m.id)
+    (m) =>
+      !m.archivedAt &&
+      !m.mergedInto &&
+      !linkedMemberIds.has(m.id) &&
+      !isDepartedEmploymentStatus(m.employmentStatus)
   );
 
   return {

@@ -3,8 +3,12 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { disableStaffPinForTenant } from "@/src/lib/staffPin/staffPin.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import {
+  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
+  type StaffEmploymentStatus,
+} from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { applyStaffDepartureSideEffects } from "@/src/lib/workforce/staffDepartureSideEffects.server";
 
 import {
   WORKFORCE_PHASE_1C_AUDIT_EVENTS,
@@ -15,6 +19,7 @@ export type OffboardStaffMemberResult = {
   staffMemberId: string;
   fiStaffId: string | null;
   employmentStatus: string;
+  futureBookingsUnassigned: number;
 };
 
 async function insertWorkforceAudit(
@@ -84,13 +89,22 @@ export async function offboardStaffMember(input: {
   tenantId: string;
   staffId: string;
   exitReason: string;
+  employmentStatus?: StaffEmploymentStatus;
   terminatedBy?: string | null;
+  departureSource?: "offboarding_centre" | "iiohr_hr";
   client?: SupabaseClient;
 }): Promise<OffboardStaffMemberResult> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const staffMemberId = assertNonEmptyUuid(input.staffId, "staffId");
   const exitReason = input.exitReason.trim();
   if (!exitReason) throw new Error("exitReason is required.");
+
+  const employmentStatus = input.employmentStatus ?? "terminated";
+  if (!OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES.has(employmentStatus)) {
+    throw new Error(
+      "employmentStatus must be terminated, resigned, or contract_ended for offboarding."
+    );
+  }
 
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
@@ -112,7 +126,7 @@ export async function offboardStaffMember(input: {
   const { error: updateError } = await supabase
     .from("fi_staff_members")
     .update({
-      employment_status: "terminated",
+      employment_status: employmentStatus,
       termination_date: now,
       exit_reason: exitReason,
       offboarded_by: input.terminatedBy ?? null,
@@ -134,7 +148,7 @@ export async function offboardStaffMember(input: {
     const { error: fiStaffError } = await supabase
       .from("fi_staff")
       .update({
-        employment_status: "terminated",
+        employment_status: employmentStatus,
         is_active: false,
         employment_status_reason: exitReason,
         employment_status_changed_at: now,
@@ -146,53 +160,34 @@ export async function offboardStaffMember(input: {
     if (fiStaffError) throw new Error(fiStaffError.message);
   }
 
+  let futureBookingsUnassigned = 0;
+
   if (fiStaffId) {
-    await supabase
-      .from("fi_staff_feature_access")
-      .delete()
-      .eq("tenant_id", tid)
-      .eq("staff_id", fiStaffId);
-
-    await supabase
-      .from("fi_staff_access_grants")
-      .update({ revoked_at: now, updated_at: now })
-      .eq("tenant_id", tid)
-      .eq("staff_member_id", fiStaffId)
-      .is("revoked_at", null);
-
-    await supabase
-      .from("fi_staff_field_access_grants")
-      .update({ revoked_at: now, updated_at: now })
-      .eq("tenant_id", tid)
-      .eq("staff_member_id", fiStaffId)
-      .is("revoked_at", null);
-
-    await supabase
-      .from("fi_staff_shifts")
-      .update({ status: "cancelled", updated_at: now })
-      .eq("tenant_id", tid)
-      .eq("staff_id", fiStaffId)
-      .in("status", ["scheduled", "confirmed"]);
-
-    await supabase
-      .from("fi_staff_event_assignments")
-      .update({ status: "cancelled", updated_at: now })
-      .eq("tenant_id", tid)
-      .eq("staff_id", fiStaffId)
-      .in("status", ["proposed", "confirmed", "assigned"]);
-
-    await supabase
-      .from("fi_staff_calendar_links")
-      .update({ is_active: false, updated_at: now })
-      .eq("tenant_id", tid)
-      .eq("staff_member_id", fiStaffId);
-
-    await disableStaffPinForTenant({
+    const sideEffects = await applyStaffDepartureSideEffects({
       tenantId: tid,
-      staffId: fiStaffId,
-      actorFiUserId: input.terminatedBy ?? null,
+      fiStaffId,
+      terminatedBy: input.terminatedBy ?? null,
+      now,
       client: supabase,
     });
+    futureBookingsUnassigned =
+      sideEffects.futureBookings.primaryUnassignedCount +
+      sideEffects.futureBookings.resourceAssignmentsRemoved;
+
+    if (sideEffects.futureBookings.affectedBookingIds.length > 0) {
+      await insertWorkforceAudit(supabase, {
+        tenant_id: tid,
+        staff_member_id: staffMemberId,
+        event_type: WORKFORCE_PHASE_1C_AUDIT_EVENTS.FUTURE_BOOKINGS_UNASSIGNED_ON_OFFBOARD,
+        metadata: {
+          fi_staff_id: fiStaffId,
+          primary_unassigned_count: sideEffects.futureBookings.primaryUnassignedCount,
+          resource_assignments_removed: sideEffects.futureBookings.resourceAssignmentsRemoved,
+          affected_booking_ids: sideEffects.futureBookings.affectedBookingIds,
+          departure_source: input.departureSource ?? "offboarding_centre",
+        },
+      });
+    }
 
     // TODO: SurgeryOS permission revocation table when dedicated grants ship.
     // TODO: Readiness recalculation job hook — tenant overview refresh is triggered by revalidation.
@@ -206,15 +201,19 @@ export async function offboardStaffMember(input: {
       exit_reason: exitReason,
       terminated_by: input.terminatedBy ?? null,
       fi_staff_id: fiStaffId,
+      employment_status: employmentStatus,
       system_access_revoked: true,
       academy_access_revoked: true,
       audit_history_preserved: true,
+      future_bookings_unassigned: futureBookingsUnassigned,
+      departure_source: input.departureSource ?? "offboarding_centre",
     },
   });
 
   return {
     staffMemberId,
     fiStaffId,
-    employmentStatus: "terminated",
+    employmentStatus,
+    futureBookingsUnassigned,
   };
 }

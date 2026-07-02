@@ -14,6 +14,7 @@ import {
   HR_OS_ROUTE_REQUIRED_ROLES,
   resolveHrOsRouteAccess,
 } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { parseStaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleCore";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
@@ -246,12 +247,24 @@ async function buildReadinessInputForStaff(
   staff: FiStaffRow
 ): Promise<WorkforceReadinessScoreInput> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_staff_source_ids")
-    .select("source_system, source_staff_id, source_url, metadata")
-    .eq("tenant_id", tenantId)
-    .eq("staff_id", staff.id);
-  if (error) throw new Error(error.message);
+  const [sourceRes, memberRes] = await Promise.all([
+    supabase
+      .from("fi_staff_source_ids")
+      .select("source_system, source_staff_id, source_url, metadata")
+      .eq("tenant_id", tenantId)
+      .eq("staff_id", staff.id),
+    supabase
+      .from("fi_staff_members")
+      .select("employment_status")
+      .eq("tenant_id", tenantId)
+      .eq("fi_staff_id", staff.id)
+      .is("archived_at", null)
+      .maybeSingle(),
+  ]);
+  if (sourceRes.error) throw new Error(sourceRes.error.message);
+  if (memberRes.error) throw new Error(memberRes.error.message);
+
+  const data = sourceRes.data;
 
   const srcRows = (data ?? []).map((r) => {
     const row = r as { source_system: string; source_url: string | null; metadata: unknown };
@@ -273,6 +286,9 @@ async function buildReadinessInputForStaff(
 
   return {
     is_active: staff.is_active,
+    employment_status: memberRes.data?.employment_status
+      ? parseStaffEmploymentStatus(memberRes.data.employment_status)
+      : null,
     staff_role: staff.staff_role,
     working_hours: staff.working_hours,
     hr,

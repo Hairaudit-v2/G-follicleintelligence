@@ -41,6 +41,8 @@ function mapStaffMemberRow(raw: Record<string, unknown>): StaffMemberSnapshot {
     sourceSystem: raw.source_system != null ? String(raw.source_system) : null,
     mergedInto: raw.merged_into != null ? String(raw.merged_into) : null,
     archivedAt: raw.archived_at != null ? String(raw.archived_at) : null,
+    employmentStatus:
+      raw.employment_status != null ? String(raw.employment_status) : null,
   };
 }
 
@@ -63,7 +65,7 @@ export async function loadStaffMembersForReconciliation(
   const { data, error } = await supabase
     .from("fi_staff_members")
     .select(
-      "id, tenant_id, full_name, email, phone, role_code, fi_staff_id, source_external_id, iiohr_staff_record_id, source_system, merged_into, archived_at"
+      "id, tenant_id, full_name, email, phone, role_code, fi_staff_id, source_external_id, iiohr_staff_record_id, source_system, merged_into, archived_at, employment_status"
     )
     .eq("tenant_id", tid);
   if (error) throw new Error(error.message);

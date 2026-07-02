@@ -199,6 +199,7 @@ function countFromActions(actions: IiohrHrStaffImportAction[]): IiohrHrStaffImpo
         c.linkedStaff += 1;
         break;
       case "deactivate_staff":
+      case "align_iiohr_departure":
         c.deactivatedStaff += 1;
         break;
       case "create_staff_source_id":
@@ -597,6 +598,21 @@ export async function applyIiohrHrStaffImportPlanForTests(
       case "deactivate_staff": {
         await updateFiStaffRow(supabase, tid, action.payload.staffId, { is_active: false });
         applied.deactivatedStaff += 1;
+        break;
+      }
+      case "align_iiohr_departure": {
+        const { alignIiohrStaffDeparture } = await import(
+          "@/src/lib/staffImport/iiohrStaffDepartureAlignment.server"
+        );
+        const result = await alignIiohrStaffDeparture({
+          tenantId: tid,
+          fiStaffId: action.payload.staffId,
+          hrEmploymentStatus: action.payload.hrEmploymentStatus,
+          client: supabase,
+        });
+        if (result.action === "full_offboard" || result.action === "deactivate_only") {
+          applied.deactivatedStaff += 1;
+        }
         break;
       }
       case "create_staff_source_id": {

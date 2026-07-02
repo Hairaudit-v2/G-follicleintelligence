@@ -13,6 +13,9 @@ export const WORKFORCE_PHASE_1C_AUDIT_EVENTS = {
   MANUAL_REVIEW_REQUESTED: "workforce_manual_review_requested",
   RECONCILIATION_RECOMMENDATION_APPROVED: "workforce_reconciliation_recommendation_approved",
   DUPLICATE_MERGE_RECOMMENDED: "workforce_duplicate_merge_recommended",
+  FUTURE_BOOKINGS_UNASSIGNED_ON_OFFBOARD: "workforce_future_bookings_unassigned_on_offboard",
+  IIOHR_DEPARTURE_ALIGNED: "workforce_iiohr_departure_aligned",
+  IIOHR_DEPARTURE_QUEUED: "workforce_iiohr_departure_queued",
 } as const;
 
 export type WorkforcePhase1cAuditEventType =

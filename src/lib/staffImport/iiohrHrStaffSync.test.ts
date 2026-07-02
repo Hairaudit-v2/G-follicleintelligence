@@ -33,6 +33,7 @@ const ALLOWED_IMPORT_ACTION_TYPES = new Set([
   "create_staff_source_id",
   "update_staff_source_id",
   "deactivate_staff",
+  "align_iiohr_departure",
   "skip_row",
 ]);
 

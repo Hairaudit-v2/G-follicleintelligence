@@ -174,6 +174,7 @@ export function buildReconciliationSuggestions(
   for (const row of input.staffMembers) {
     if (isStaffArchived(row)) continue;
     if (isStaffHrLinkedForReconciliation(row)) continue;
+    if (isOperationallyIneligible(row.employment_status)) continue;
     const emailKey = normaliseStaffEmail(row.email);
     if (!emailKey) {
       suggestions.push({

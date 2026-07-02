@@ -216,9 +216,16 @@ test("terminated status deactivates staff", () => {
     existingStaff: staff,
     existingStaffSourceIds: [],
   });
-  const de = r.actions.find((a) => a.type === "deactivate_staff");
+  const de = r.actions.find((a) => a.type === "align_iiohr_departure");
   assert.ok(de);
-  assert.equal(de.type === "deactivate_staff" && de.payload.staffId, "staff-t");
+  assert.equal(
+    de.type === "align_iiohr_departure" && de.payload.staffId,
+    "staff-t"
+  );
+  assert.equal(
+    de.type === "align_iiohr_departure" && de.payload.hrEmploymentStatus,
+    "terminated"
+  );
   const upd = r.actions.find((a) => a.type === "update_fi_staff");
   assert.equal(upd, undefined);
 });

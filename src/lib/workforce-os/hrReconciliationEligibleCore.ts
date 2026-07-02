@@ -4,11 +4,23 @@ import type {
   HrReconciliationMetrics,
   StaffMemberLifecycleRow,
 } from "./staffLifecycleTypes";
+import { isOperationallyIneligible, parseStaffEmploymentStatus } from "./staffLifecycleCore";
 
 export function isStaffArchived(
   member: Pick<StaffMemberLifecycleRow, "archived_at">
 ): boolean {
   return member.archived_at != null && String(member.archived_at).trim() !== "";
+}
+
+/** Departed staff must not appear in HR reconciliation queues. */
+export function isDepartedEmploymentStatus(status: string | null | undefined): boolean {
+  return isOperationallyIneligible(parseStaffEmploymentStatus(status ?? "active"));
+}
+
+export function isDepartedForHrReconciliation(
+  member: Pick<StaffMemberLifecycleRow, "employment_status">
+): boolean {
+  return isDepartedEmploymentStatus(member.employment_status);
 }
 
 /** Staff already linked to IIOHR — excluded from reconciliation action queue. */
@@ -31,7 +43,11 @@ export function isStaffHrLinkedForReconciliation(
 }
 
 export function needsHrReconciliation(member: StaffMemberLifecycleRow): boolean {
-  return !isStaffArchived(member) && !isStaffHrLinkedForReconciliation(member);
+  return (
+    !isStaffArchived(member) &&
+    !isDepartedForHrReconciliation(member) &&
+    !isStaffHrLinkedForReconciliation(member)
+  );
 }
 
 export function buildHrReconciliationMetrics(
@@ -44,6 +60,10 @@ export function buildHrReconciliationMetrics(
 
   for (const member of members) {
     if (isStaffArchived(member)) {
+      archivedExcluded += 1;
+      continue;
+    }
+    if (isDepartedForHrReconciliation(member)) {
       archivedExcluded += 1;
       continue;
     }

@@ -133,6 +133,11 @@ export type IiohrHrStaffImportAction =
       payload: { staffId: string };
     }
   | {
+      type: "align_iiohr_departure";
+      sourceRowIndex: number;
+      payload: { staffId: string; hrEmploymentStatus: string };
+    }
+  | {
       type: "skip_row";
       sourceRowIndex: number;
       payload: { reason: string };

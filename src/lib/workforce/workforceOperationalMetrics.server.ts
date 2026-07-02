@@ -51,7 +51,7 @@ export async function loadWorkforceOperationalMetrics(
       .from("fi_staff_members")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
-      .in("employment_status", ["terminated", "resigned"])
+      .in("employment_status", ["terminated", "resigned", "contract_ended", "contract_expired"])
       .is("archived_at", null),
     supabase
       .from("fi_staff_credentials")

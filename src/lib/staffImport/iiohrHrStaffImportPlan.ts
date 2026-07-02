@@ -76,7 +76,9 @@ export function resolveEmploymentIsActive(
     .toLowerCase();
   if (!s) return null;
   if (s === "active" || s === "current" || s === "employed") return true;
-  if (s === "inactive" || s === "terminated" || s === "resigned") return false;
+  if (s === "inactive" || s === "terminated" || s === "resigned" || s === "contract_ended") {
+    return false;
+  }
   return null;
 }
 
@@ -180,10 +182,17 @@ function pushStaffUpdatesForExisting(
   row: IiohrHrStaffImportRow,
   targetIsActive: boolean | null
 ): void {
-  const deactivate = targetIsActive === false && staff.is_active;
+  const shouldAlignDeparture = targetIsActive === false && staff.is_active;
 
-  if (deactivate) {
-    actions.push({ type: "deactivate_staff", sourceRowIndex, payload: { staffId: staff.id } });
+  if (shouldAlignDeparture) {
+    actions.push({
+      type: "align_iiohr_departure",
+      sourceRowIndex,
+      payload: {
+        staffId: staff.id,
+        hrEmploymentStatus: row.employment_status ?? "inactive",
+      },
+    });
   }
 
   const patch = buildStaffUpdatePayload(staff, row, targetIsActive);
@@ -193,11 +202,11 @@ function pushStaffUpdatesForExisting(
   const hasFieldUpdates = Object.keys(rest).length > 0;
   const isActiveChanged = patchIsActive !== undefined && patchIsActive !== staff.is_active;
 
-  if (!hasFieldUpdates && (!isActiveChanged || deactivate)) return;
+  if (!hasFieldUpdates && (!isActiveChanged || shouldAlignDeparture)) return;
 
   const payload: UpdateFiStaffPayload = { staffId };
   Object.assign(payload, rest);
-  if (patchIsActive !== undefined && !deactivate) {
+  if (patchIsActive !== undefined && !shouldAlignDeparture) {
     payload.is_active = patchIsActive;
   }
 

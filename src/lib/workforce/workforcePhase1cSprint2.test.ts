@@ -69,6 +69,14 @@ function makeMockClient(state: TableState): SupabaseClient {
         }
         return api;
       },
+      gte(col: string, val: unknown) {
+        filters.push((row) => String(row[col] ?? "") >= String(val));
+        return api;
+      },
+      neq(col: string, val: unknown) {
+        filters.push((row) => row[col] !== val);
+        return api;
+      },
       order() {
         return api;
       },
@@ -429,10 +437,81 @@ test("offboarding preserves audit history", async () => {
   assert.equal(state.fi_staff_member_audit_events?.[0]?.event_type, "legacy_event");
 });
 
+test("offboarding unassigns future bookings but preserves past assignments", async () => {
+  const state = baseState();
+  const futureStart = new Date(Date.now() + 7 * 86_400_000).toISOString();
+  const pastStart = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const FUTURE_BOOKING = "11111111-1111-4111-8111-111111111111";
+  const PAST_BOOKING = "22222222-2222-4222-8222-222222222222";
+  const OTHER_BOOKING = "33333333-3333-4333-8333-333333333333";
+  const RESOURCE_ASSIGNMENT = "44444444-4444-4444-8444-444444444444";
+
+  state.fi_bookings = [
+    {
+      id: FUTURE_BOOKING,
+      tenant_id: TENANT,
+      assigned_staff_id: FI_STAFF_A,
+      start_at: futureStart,
+      booking_status: "scheduled",
+    },
+    {
+      id: PAST_BOOKING,
+      tenant_id: TENANT,
+      assigned_staff_id: FI_STAFF_A,
+      start_at: pastStart,
+      booking_status: "completed",
+    },
+    {
+      id: OTHER_BOOKING,
+      tenant_id: TENANT,
+      assigned_staff_id: FI_STAFF_B,
+      start_at: futureStart,
+      booking_status: "scheduled",
+    },
+  ];
+  state.fi_booking_resource_assignments = [
+    {
+      id: RESOURCE_ASSIGNMENT,
+      tenant_id: TENANT,
+      booking_id: FUTURE_BOOKING,
+      resource_type: "staff",
+      resource_id: FI_STAFF_A,
+    },
+  ];
+
+  const client = makeMockClient(state);
+  await offboardStaffMember({
+    tenantId: TENANT,
+    staffId: STAFF_A,
+    exitReason: "Resignation",
+    client,
+  });
+
+  const future = state.fi_bookings?.find((b) => b.id === FUTURE_BOOKING);
+  const past = state.fi_bookings?.find((b) => b.id === PAST_BOOKING);
+  const other = state.fi_bookings?.find((b) => b.id === OTHER_BOOKING);
+
+  assert.equal(future?.assigned_staff_id, null);
+  assert.equal(past?.assigned_staff_id, FI_STAFF_A);
+  assert.equal(other?.assigned_staff_id, FI_STAFF_B);
+  assert.equal(state.fi_booking_resource_assignments?.length, 0);
+
+  const auditEvents = (client as unknown as { __auditEvents: Record<string, unknown>[] }).__auditEvents;
+  assert.ok(
+    auditEvents.some(
+      (e) => e.event_type === "workforce_future_bookings_unassigned_on_offboard"
+    )
+  );
+});
+
 test("audit event constants are stable", () => {
   assert.equal(
     WORKFORCE_PHASE_1C_AUDIT_EVENTS.MANUAL_IDENTITY_LINKED,
     "workforce_manual_identity_linked"
   );
   assert.equal(WORKFORCE_PHASE_1C_AUDIT_EVENTS.STAFF_OFFBOARDED, "workforce_staff_offboarded");
+  assert.equal(
+    WORKFORCE_PHASE_1C_AUDIT_EVENTS.FUTURE_BOOKINGS_UNASSIGNED_ON_OFFBOARD,
+    "workforce_future_bookings_unassigned_on_offboard"
+  );
 });

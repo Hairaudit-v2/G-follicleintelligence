@@ -15,6 +15,7 @@ export type StaffMemberSnapshot = {
   sourceSystem?: string | null;
   mergedInto: string | null;
   archivedAt: string | null;
+  employmentStatus?: string | null;
 };
 
 export type IdentityLinkSnapshot = {
