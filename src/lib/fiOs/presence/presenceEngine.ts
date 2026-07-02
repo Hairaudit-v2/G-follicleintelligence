@@ -602,11 +602,22 @@ export function summarizePresenceForToday(
   }
 
   if (snapshots.some((s) => s.signalKind === "consultation_ready")) {
-    chips.push({
-      id: "consultation_ready",
-      label: "Ready for consult",
-      tone: "neutral",
-    });
+    const patientConsultReady = snapshots.some(
+      (s) => s.signalKind === "consultation_ready" && s.source === "reception_board:in_clinic"
+    );
+    if (clinicSnapshot.state === "unknown" && !patientConsultReady) {
+      chips.push({
+        id: "consult_readiness_watch",
+        label: "Consult readiness watch",
+        tone: "watch",
+      });
+    } else {
+      chips.push({
+        id: "consultation_ready",
+        label: "Ready for consult",
+        tone: "neutral",
+      });
+    }
   }
 
   const tone: PresenceOperationalStatus["tone"] =

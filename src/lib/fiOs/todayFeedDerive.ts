@@ -284,7 +284,7 @@ function staleLeadItems(
           : days <= thresholdDays
             ? `No follow-up for ${dayLabel}`
             : `${name} has not been contacted for ${dayLabel}`,
-      actionHint: "Call patient",
+      actionHint: "Follow up",
       href: `${base}/crm/leads/${l.leadId}`,
       severity: "warning",
       bucket: days > thresholdDays + 7 ? "right_now" : "up_next",
@@ -648,7 +648,90 @@ export function greetingForHour(hour: number): string {
   return "Good evening";
 }
 
-export function firstNameFromDisplayName(displayName: string | null | undefined): string | null {
+/** True when consultation subject has no usable person name. */
+export function isGenericConsultationSubject(label: string): boolean {
+  const trimmed = label.trim();
+  return !trimmed || /^consultation$/i.test(trimmed);
+}
+
+export function consultationEntityActionLabel(
+  status: string,
+  personLabel: string
+): string {
+  const generic = isGenericConsultationSubject(personLabel);
+  const name = firstName(personLabel);
+
+  switch (status) {
+    case "draft":
+      return generic
+        ? "Draft consultation waiting to begin"
+        : `${name} — draft consultation waiting to begin`;
+    case "in_progress":
+      return generic
+        ? "Consultation in progress"
+        : `${name} — consultation in progress`;
+    default:
+      return generic
+        ? "Consultation awaiting closure"
+        : `${name} — consultation awaiting closure`;
+  }
+}
+
+export function consultationEntityDetailLine(input: {
+  status: string;
+  consultationDate?: string | null;
+  scheduledSoon?: boolean;
+}): string {
+  const { status, consultationDate, scheduledSoon } = input;
+  if (status === "draft") {
+    return "Open draft consultation when ready";
+  }
+  const statusLabel = status.replace(/_/g, " ");
+  if (scheduledSoon && consultationDate) {
+    return `Scheduled ${consultationDate} — ${statusLabel}`;
+  }
+  return `Status: ${statusLabel}`;
+}
+
+/** Safe first-name token for Today hero greeting — never exposes a raw email. */
+export function greetingNameFromDisplayName(displayName: string | null | undefined): string | null {
   if (!displayName?.trim()) return null;
-  return displayName.trim().split(/\s+/)[0] ?? null;
+  const trimmed = displayName.trim();
+
+  if (trimmed.includes("@")) {
+    const local = trimmed.split("@")[0]?.trim() ?? "";
+    const segment = local.split(/[._+-]/)[0]?.trim() ?? "";
+    if (!segment || !/^[a-zA-Z]/.test(segment)) return null;
+    if (/^[0-9a-f--]{12,}$/i.test(segment)) return null;
+    return segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase();
+  }
+
+  const first = trimmed.split(/\s+/)[0]?.trim() ?? "";
+  if (!first || first.includes("@")) return null;
+  return first;
+}
+
+/** @deprecated Prefer `greetingNameFromDisplayName` for Today hero copy. */
+export function firstNameFromDisplayName(displayName: string | null | undefined): string | null {
+  return greetingNameFromDisplayName(displayName);
+}
+
+/** Subline under clinic day stats — hides when feed already has actionable work. */
+export function todayClinicDaySubline(opts: {
+  statParts: readonly string[];
+  hasActionableFeedItems: boolean;
+  clinicDayContextReady?: boolean;
+}): string | null {
+  if (opts.statParts.length > 0) return opts.statParts.join(" · ");
+  if (opts.hasActionableFeedItems) return null;
+  if (opts.clinicDayContextReady === false) {
+    return "Clinic day is loading — check back shortly.";
+  }
+  return "Clinic activity is still warming up.";
+}
+
+export function formatTodayWorkspaceBadge(profileLabel: string): string {
+  const trimmed = profileLabel.trim();
+  if (!trimmed) return "Admin view";
+  return `${trimmed} view`;
 }

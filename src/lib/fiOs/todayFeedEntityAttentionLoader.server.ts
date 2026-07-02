@@ -23,6 +23,10 @@ import {
 } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 import type { TodayEntityAttentionSignal } from "@/src/lib/fiOs/todayFeedEntityAttention";
 import {
+  consultationEntityActionLabel,
+  consultationEntityDetailLine,
+} from "@/src/lib/fiOs/todayFeedDerive";
+import {
   consultationEntityHref,
   pathologyResultEntityHref,
   paymentEntityHref,
@@ -554,7 +558,6 @@ async function loadConsultationEntitySignals(
 
   for (const row of rows) {
     const label = consultationPersonLabel(row, labels);
-    const status = row.status.replace(/_/g, " ");
     const consultDate = row.consultation_date?.trim()?.slice(0, 10);
     const scheduledSoon =
       consultDate &&
@@ -565,15 +568,12 @@ async function loadConsultationEntitySignals(
       category: "consultation",
       aggregateKey: "consultations",
       personLabel: label,
-      actionLabel:
-        row.status === "draft"
-          ? `${firstName(label)} consultation ready to start`
-          : row.status === "in_progress"
-            ? `${firstName(label)} consultation in progress`
-            : `${firstName(label)} consultation awaiting closure`,
-      detailLine: scheduledSoon
-        ? `Scheduled ${consultDate} — ${status}`
-        : `Status: ${status}`,
+      actionLabel: consultationEntityActionLabel(row.status, label),
+      detailLine: consultationEntityDetailLine({
+        status: row.status,
+        consultationDate: consultDate,
+        scheduledSoon: Boolean(scheduledSoon),
+      }),
       actionHint: row.status === "quoted" ? "Complete" : "Open",
       href: consultationEntityHref(base, row.id),
       severity: row.status === "in_progress" ? "warning" : "normal",

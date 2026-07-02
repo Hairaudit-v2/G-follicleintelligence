@@ -9,7 +9,8 @@ import {
   buildTodayFeedWithPresence,
   countOverdueTasks,
   countPatientsBookedToday,
-  firstNameFromDisplayName,
+  formatTodayWorkspaceBadge,
+  greetingNameFromDisplayName,
 } from "@/src/lib/fiOs/todayFeedDerive";
 import { groupTodayFeedItems } from "@/src/lib/fiOs/todayFeedGroup";
 import { flattenTodayFeedItems } from "@/src/lib/fiOs/todaySignal/todaySignalLearning";
@@ -76,6 +77,8 @@ export function FiOsTodaySurface(props: {
   const upNext = groupTodayFeedItems(feed.upNext);
 
   const showWorkspaceBadge = Boolean(workspaceProfile && workspaceProfile !== "default");
+  const actionableFeedCount =
+    feed.rightNow.length + feed.upNext.length + feed.comingUp.length;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 pb-8 sm:space-y-10">
@@ -87,12 +90,16 @@ export function FiOsTodaySurface(props: {
       <TodayHeader
         tenantName={data.tenantName}
         dateLine={dateLine}
-        viewerFirstName={firstNameFromDisplayName(viewerDisplayName)}
+        viewerFirstName={greetingNameFromDisplayName(viewerDisplayName)}
         rightNowCount={rightNow.length}
         patientsBooked={countPatientsBookedToday(data.clinicToday)}
         surgeriesScheduled={data.clinicToday.surgeries}
         tasksOverdue={countOverdueTasks(data.tasksDue, now.getTime())}
-        workspaceBadge={showWorkspaceBadge ? getWorkspaceProfileLabel(workspaceProfile!) : null}
+        hasActionableFeedItems={actionableFeedCount > 0}
+        clinicDayContextReady={Boolean(data.operationalDay?.todayYmd)}
+        workspaceBadge={
+          showWorkspaceBadge ? formatTodayWorkspaceBadge(getWorkspaceProfileLabel(workspaceProfile!)) : null
+        }
         hourOfDay={hourOfDay}
         presenceStatus={presence.operationalStatus}
       />

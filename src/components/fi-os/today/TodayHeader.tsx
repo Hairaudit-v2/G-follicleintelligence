@@ -1,4 +1,4 @@
-import { greetingForHour } from "@/src/lib/fiOs/todayFeedDerive";
+import { greetingForHour, todayClinicDaySubline } from "@/src/lib/fiOs/todayFeedDerive";
 import type { PresenceOperationalStatus } from "@/src/lib/fiOs/presence/presenceTypes";
 
 export function TodayHeader(props: {
@@ -10,6 +10,10 @@ export function TodayHeader(props: {
   surgeriesScheduled: number;
   tasksOverdue: number;
   workspaceBadge?: string | null;
+  /** When false, clinic day stats are still loading from the server. */
+  clinicDayContextReady?: boolean;
+  /** Hide clinic-day subline when the feed already has actionable items. */
+  hasActionableFeedItems?: boolean;
   /** Hour in clinic timezone for greeting (0–23). */
   hourOfDay?: number;
   /** D6E — subtle operational presence status. */
@@ -24,6 +28,8 @@ export function TodayHeader(props: {
     surgeriesScheduled,
     tasksOverdue,
     workspaceBadge,
+    clinicDayContextReady = true,
+    hasActionableFeedItems = false,
     hourOfDay = new Date().getHours(),
     presenceStatus,
   } = props;
@@ -49,6 +55,12 @@ export function TodayHeader(props: {
     statParts.push(`${tasksOverdue} task${tasksOverdue === 1 ? "" : "s"} overdue`);
   }
 
+  const clinicDaySubline = todayClinicDaySubline({
+    statParts,
+    hasActionableFeedItems,
+    clinicDayContextReady,
+  });
+
   return (
     <header className="space-y-4 border-b border-white/[0.07] pb-6">
       <div className="space-y-1">
@@ -59,15 +71,13 @@ export function TodayHeader(props: {
       <div className="space-y-0.5">
         <p className="text-sm font-medium text-slate-200">Today at {tenantName}</p>
         <p className="text-sm text-slate-500">{dateLine}</p>
-        {statParts.length > 0 ? (
-          <p className="pt-1 text-sm text-slate-400">{statParts.join(" · ")}</p>
-        ) : (
-          <p className="pt-1 text-sm text-slate-500">Clinic day is loading — check back shortly.</p>
-        )}
+        {clinicDaySubline ? (
+          <p className="pt-1 text-sm text-slate-400">{clinicDaySubline}</p>
+        ) : null}
       </div>
 
       {workspaceBadge ? (
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+        <p className="text-xs font-medium text-slate-500">
           <span className="text-cyan-400/90">{workspaceBadge}</span>
         </p>
       ) : null}

@@ -256,3 +256,62 @@ test("reception profile session marks reception as covered", () => {
   );
   assert.ok(!snapshots.some((s) => s.signalKind === "clinic_unattended"));
 });
+
+test("summarizePresenceForToday: unknown clinic avoids generic Ready for consult chip", () => {
+  const items = [
+    feedItem({
+      id: "entity-consultation-draft",
+      personLabel: "Michael",
+      actionLabel: "Michael — draft consultation waiting to begin",
+      groupKey: "entity:consultation",
+      severity: "normal",
+    }),
+  ];
+
+  const snapshots = derivePresenceSnapshots({
+    context: context({ profileKey: "platform_admin", viewerSessionActive: false }),
+    todayItems: items,
+    receptionCards: [],
+  });
+  const summary = summarizePresenceForToday(snapshots, context());
+
+  assert.match(summary.operationalStatus.headline ?? "", /unknown/i);
+  assert.ok(
+    !summary.operationalStatus.chips.some((c) => c.label === "Ready for consult"),
+    "generic consult-ready chip should not appear when clinic status is unknown"
+  );
+  assert.ok(
+    summary.operationalStatus.chips.some((c) => c.label === "Consult readiness watch")
+  );
+});
+
+test("summarizePresenceForToday: patient in consultation keeps Ready for consult chip", () => {
+  const snapshots = derivePresenceSnapshots({
+    context: context(),
+    todayItems: [],
+    receptionCards: [
+      {
+        id: "55555555-0000-0000-0000-000000000001",
+        startAt: "2026-06-10T12:00:00.000Z",
+        endAt: "2026-06-10T12:30:00.000Z",
+        title: null,
+        bookingType: "consult",
+        bookingStatus: "in_progress",
+        timezone: "UTC",
+        leadId: null,
+        patientId: "22222222-0000-0000-0000-000000000001",
+        displayName: "Sarah Chen",
+        statusLabel: "In consultation",
+        typeLabel: "Consultation",
+        providerLabel: "",
+        clinicLabel: null,
+        roomLabel: null,
+        receptionColumn: "in_consultation",
+        metadata: {},
+      },
+    ],
+  });
+  const summary = summarizePresenceForToday(snapshots, context());
+
+  assert.ok(summary.operationalStatus.chips.some((c) => c.label === "Ready for consult"));
+});

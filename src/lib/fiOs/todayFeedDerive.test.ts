@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { buildTodayFeed } from "@/src/lib/fiOs/todayFeedDerive";
+import {
+  buildTodayFeed,
+  consultationEntityActionLabel,
+  formatTodayWorkspaceBadge,
+  greetingNameFromDisplayName,
+  todayClinicDaySubline,
+} from "@/src/lib/fiOs/todayFeedDerive";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 const NOW = new Date("2026-06-10T12:00:00.000Z");
@@ -156,6 +162,7 @@ test("buildTodayFeed: severely stale lead escalates to right now", () => {
   assert.equal(feed.rightNow.length, 1);
   assert.equal(feed.rightNow[0]?.personLabel, "James Morrison");
   assert.match(feed.rightNow[0]?.actionLabel ?? "", /Call James/i);
+  assert.equal(feed.rightNow[0]?.actionHint, "Follow up");
   assert.match(feed.rightNow[0]?.detailLine ?? "", /23 days|contacted/i);
   assert.equal(feed.rightNow[0]?.severity, "warning");
 });
@@ -374,7 +381,7 @@ test("buildTodayFeed: named entity items rank above aggregate summaries", () => 
         category: "consultation",
         aggregateKey: "consultations",
         personLabel: "Emma Walsh",
-        actionLabel: "Emma consultation in progress",
+        actionLabel: "Emma — consultation in progress",
         href: "/fi-admin/t1/consultations/99999999-0000-0000-0000-000000000001",
         severity: "warning",
         bucket: "up_next",
@@ -421,4 +428,46 @@ test("buildTodayFeed: QR arrival intent surfaces as right now with confirm copy"
   assert.equal(feed.rightNow.length, 1);
   assert.match(feed.rightNow[0]?.actionLabel ?? "", /James says they're here/i);
   assert.equal(feed.rightNow[0]?.actionHint, "Confirm check-in");
+});
+
+test("greetingNameFromDisplayName: does not expose raw email in greeting token", () => {
+  assert.equal(greetingNameFromDisplayName("auditor@hairaudit.com"), "Auditor");
+  assert.equal(greetingNameFromDisplayName("John Smith"), "John");
+  assert.equal(greetingNameFromDisplayName(null), null);
+  assert.doesNotMatch(greetingNameFromDisplayName("auditor@hairaudit.com") ?? "", /@/);
+});
+
+test("consultationEntityActionLabel: avoids duplicated consultation noun", () => {
+  assert.equal(
+    consultationEntityActionLabel("draft", "Consultation"),
+    "Draft consultation waiting to begin"
+  );
+  assert.doesNotMatch(
+    consultationEntityActionLabel("draft", "Consultation"),
+    /consultation consultation/i
+  );
+  assert.equal(
+    consultationEntityActionLabel("draft", "Emma Walsh"),
+    "Emma — draft consultation waiting to begin"
+  );
+  assert.equal(
+    consultationEntityActionLabel("in_progress", "Emma Walsh"),
+    "Emma — consultation in progress"
+  );
+});
+
+test("todayClinicDaySubline: hides when actionable feed items exist", () => {
+  assert.equal(todayClinicDaySubline({ statParts: [], hasActionableFeedItems: true }), null);
+  assert.equal(
+    todayClinicDaySubline({ statParts: [], hasActionableFeedItems: false, clinicDayContextReady: false }),
+    "Clinic day is loading — check back shortly."
+  );
+  assert.equal(
+    todayClinicDaySubline({ statParts: [], hasActionableFeedItems: false, clinicDayContextReady: true }),
+    "Clinic activity is still warming up."
+  );
+});
+
+test("formatTodayWorkspaceBadge: renders sentence-case workspace view label", () => {
+  assert.equal(formatTodayWorkspaceBadge("Platform admin"), "Platform admin view");
 });
