@@ -18,6 +18,13 @@ import { useCalendarToast } from "@/components/calendar/CalendarToast";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { receptionBoardFlowActionLabel } from "@/src/lib/fiOs/receptionBoardFlowPolicy";
+import {
+  deriveReceptionAppointmentNextAction,
+  deriveReceptionAppointmentPriority,
+  humanizeReceptionActionAlert,
+  STAFF_UX_PRIORITY_STYLES,
+} from "@/src/lib/fiOs/staffUxPresentation";
+import { FiOsEmptyState } from "@/src/components/fi-admin/shared/FiOsEmptyState";
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 import {
   ReceptionPatientFlowBoard,
@@ -231,27 +238,12 @@ export function ReceptionBoardCommandCenter(props: {
             </div>
             <div className="max-h-[28rem] overflow-y-auto px-3 py-3 sm:px-4">
               {data.appointments.length === 0 ? (
-                <div className="px-4 py-10 text-center">
-                  <p className="text-sm font-medium text-slate-300">No appointments on today&apos;s board</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Book a consultation or open the calendar to fill the day.
-                  </p>
-                  <div className="mt-4 flex flex-wrap justify-center gap-2">
-                    <Link
-                      href={`${base}/calendar`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-200 hover:bg-cyan-500/20"
-                    >
-                      <Calendar className="h-3.5 w-3.5" aria-hidden />
-                      Open calendar
-                    </Link>
-                    <Link
-                      href={`${base}/patients`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] px-3 py-2 text-xs font-semibold text-slate-200 hover:border-cyan-500/30"
-                    >
-                      Find or add patient
-                    </Link>
-                  </div>
-                </div>
+                <FiOsEmptyState
+                  title="No appointments scheduled today"
+                  description="Create a booking or open the calendar to plan the clinic day."
+                  action={{ label: "Create booking", href: `${base}/calendar` }}
+                  icon={<Calendar className="h-10 w-10 opacity-40" aria-hidden />}
+                />
               ) : (
                 <ul className="space-y-2">
                   {data.appointments.map((appt) => (
@@ -441,25 +433,26 @@ export function ReceptionBoardCommandCenter(props: {
                 </li>
               ) : (
                 data.actionAlerts.map((alert) => {
+                  const human = humanizeReceptionActionAlert(alert);
                   const alertHref = alert.href ?? `${base}/calendar`;
                   return (
                     <li key={alert.id}>
                       <Link
                         href={alertHref}
                         className={cn(
-                          "flex gap-3 rounded-xl border px-3 py-3 transition hover:border-cyan-500/30",
+                          "flex gap-3 rounded-xl border px-4 py-4 transition hover:border-cyan-500/30",
                           alertRowClass(alert.severity)
                         )}
                       >
-                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden />
+                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden />
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-100">{alert.title}</p>
-                          <p className="mt-0.5 text-xs text-slate-400">{alert.detail}</p>
-                          <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cyan-400/80">
-                            Resolve in calendar →
+                          <p className="text-base font-semibold leading-snug text-slate-50">{human.title}</p>
+                          <p className="mt-1 text-sm text-slate-400">{human.detail}</p>
+                          <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-cyan-400/90">
+                            {human.resolveLabel}
                           </p>
                         </div>
-                        <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-500" aria-hidden />
+                        <ArrowRight className="ml-auto h-5 w-5 shrink-0 text-slate-500" aria-hidden />
                       </Link>
                     </li>
                   );
@@ -514,11 +507,28 @@ export function ReceptionBoardCommandCenter(props: {
 }
 
 function AppointmentHeroCard({ appt }: { appt: ReceptionBoardAppointmentCard }) {
+  const priority = deriveReceptionAppointmentPriority(appt);
+  const priorityStyle = STAFF_UX_PRIORITY_STYLES[priority];
+  const nextAction = deriveReceptionAppointmentNextAction(appt);
+
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-white/[0.08] bg-[#0f1729]/75 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <article
+      className={cn(
+        "flex flex-col gap-4 rounded-2xl border border-l-4 bg-[#0f1729]/85 px-5 py-5 sm:flex-row sm:items-center sm:justify-between",
+        priorityStyle.border
+      )}
+    >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-lg font-semibold tabular-nums text-cyan-300">{appt.appointmentTime}</span>
+          <span
+            className={cn(
+              "rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide",
+              priorityStyle.badge
+            )}
+          >
+            {priorityStyle.label}
+          </span>
+          <span className="text-xl font-bold tabular-nums text-cyan-300">{appt.appointmentTime}</span>
           {appt.durationMinutes ? (
             <span className="text-xs text-slate-500">{appt.durationMinutes} min</span>
           ) : null}
@@ -531,7 +541,7 @@ function AppointmentHeroCard({ appt }: { appt: ReceptionBoardAppointmentCard }) 
             {appt.statusLabel}
           </span>
         </div>
-        <p className="mt-1 text-base font-semibold text-slate-50">{appt.patientName}</p>
+        <p className="mt-2 text-lg font-semibold text-slate-50">{appt.patientName}</p>
         <p className="mt-0.5 text-sm text-slate-400">
           {appt.appointmentType} · <Users className="mr-1 inline h-3.5 w-3.5" aria-hidden />
           {appt.clinician}
@@ -554,23 +564,39 @@ function AppointmentHeroCard({ appt }: { appt: ReceptionBoardAppointmentCard }) 
           </p>
         ) : null}
       </div>
-      <div className="flex shrink-0 flex-wrap gap-2">
-        {appt.hrefs.patient ? (
+      <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+        {nextAction ? (
           <Link
-            href={appt.hrefs.patient}
-            className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] px-3 py-2 text-xs font-semibold text-slate-200 hover:border-cyan-500/30"
+            href={nextAction.href}
+            className={cn(
+              "inline-flex min-w-[10rem] items-center justify-center gap-1 rounded-xl px-4 py-3 text-sm font-semibold transition",
+              nextAction.variant === "primary"
+                ? "border border-cyan-500/40 bg-cyan-500/20 text-cyan-100 hover:bg-cyan-500/30"
+                : "border border-white/[0.12] bg-white/[0.04] text-slate-200 hover:border-cyan-500/30"
+            )}
           >
-            <Stethoscope className="h-3.5 w-3.5" aria-hidden />
-            Patient
+            {nextAction.label}
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         ) : null}
-        <Link
-          href={appt.hrefs.calendar}
-          className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] px-3 py-2 text-xs font-semibold text-slate-200 hover:border-cyan-500/30"
-        >
-          <Calendar className="h-3.5 w-3.5" aria-hidden />
-          Calendar
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {appt.hrefs.patient ? (
+            <Link
+              href={appt.hrefs.patient}
+              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] px-3 py-2 text-xs font-semibold text-slate-200 hover:border-cyan-500/30"
+            >
+              <Stethoscope className="h-3.5 w-3.5" aria-hidden />
+              Patient
+            </Link>
+          ) : null}
+          <Link
+            href={appt.hrefs.calendar}
+            className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] px-3 py-2 text-xs font-semibold text-slate-200 hover:border-cyan-500/30"
+          >
+            <Calendar className="h-3.5 w-3.5" aria-hidden />
+            Calendar
+          </Link>
+        </div>
       </div>
     </article>
   );

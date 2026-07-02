@@ -1,5 +1,6 @@
 export { appointmentCardClass } from "./appointmentSharedStyles";
 export { AppointmentHeader } from "./AppointmentHeader";
+export { AppointmentOperationalSummary } from "./AppointmentOperationalSummary";
 export { AppointmentCoreDetailsSection } from "./AppointmentCoreDetailsSection";
 export { AppointmentClinicalSection } from "./AppointmentClinicalSection";
 export { AppointmentProcedureSection } from "./AppointmentProcedureSection";

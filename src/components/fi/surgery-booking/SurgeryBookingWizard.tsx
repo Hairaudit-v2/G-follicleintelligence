@@ -20,6 +20,10 @@ import {
   listSurgeryBookingMissingRequirements,
   SURGERY_BOOKING_WIZARD_STEPS,
 } from "@/src/lib/surgeryBooking/surgeryBookingEngineCore";
+import {
+  humanizeStaffErrorMessage,
+  humanizeSurgeryBookingRequirement,
+} from "@/src/lib/fiOs/staffUxPresentation";
 import type {
   SurgeryBookingConfirmResult,
   SurgeryBookingWizardPrefill,
@@ -168,7 +172,7 @@ export function SurgeryBookingWizard({
     });
     setBusy(false);
     if (!res.ok) {
-      setError(res.error);
+      setError(humanizeStaffErrorMessage(res.error ?? ""));
       return;
     }
     setResult(res.result);
@@ -190,21 +194,39 @@ export function SurgeryBookingWizard({
     zonesText,
   ]);
 
+  const surgeonLabel =
+    ctx?.staff.find((s) => s.id === surgeonStaffId)?.display_name ?? "Not selected";
+  const roomLabel = roomsForClinic.find((r) => r.id === roomId)?.display_name ?? "Not selected";
+  const clinicLabel = ctx?.clinics.find((c) => c.id === clinicId)?.display_name ?? "Not selected";
+
   if (result) {
     return (
-      <div className="space-y-5 p-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">Success</p>
-          <h2 className="mt-1 text-xl font-semibold text-slate-100">Surgery booked</h2>
-          <p className="mt-2 text-sm text-slate-400">
-            Calendar, surgery plan, readiness checklist, and audit trail were created automatically.
+      <div className="space-y-6 p-6 sm:p-8">
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/25 p-6">
+          <p className="text-2xl font-semibold text-emerald-100">✓ Surgery successfully booked</p>
+          <p className="mt-2 text-sm text-emerald-200/80">
+            The calendar, surgery plan, and pre-op checklist are ready for your team.
           </p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-200">Next actions</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {result.nextActions.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/20"
+              >
+                {action.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Pre-op checklist
           </p>
-          <ul className="mt-2 space-y-1 text-sm">
+          <ul className="mt-3 space-y-2 text-sm">
             {result.preOpChecklist.map((item) => (
               <li key={item.key} className={item.complete ? "text-emerald-300" : "text-amber-300"}>
                 {item.complete ? "✓" : "○"} {item.label}
@@ -212,21 +234,10 @@ export function SurgeryBookingWizard({
             ))}
           </ul>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {result.nextActions.map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="rounded bg-cyan-700/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-cyan-600"
-            >
-              {action.label}
-            </Link>
-          ))}
-        </div>
         <button
           type="button"
           onClick={onClose}
-          className="rounded border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+          className="rounded-xl border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
         >
           Close
         </button>
@@ -235,31 +246,27 @@ export function SurgeryBookingWizard({
   }
 
   return (
-    <div className="flex max-h-[85vh] flex-col">
-      <div className="border-b border-white/10 px-6 py-4">
+    <div className="flex max-h-[85vh] flex-col lg:max-h-[90vh]">
+      <div className="border-b border-white/10 px-6 py-5">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/90">
-          Surgery booking engine
+          Book surgery
         </p>
-        <h2 className="mt-1 text-lg font-semibold text-slate-100">Book surgery</h2>
-        <ol className="mt-3 flex flex-wrap gap-2 text-xs">
-          {SURGERY_BOOKING_WIZARD_STEPS.map((s) => (
-            <li
-              key={s.id}
-              className={
-                step === s.id
-                  ? "rounded-full bg-cyan-900/50 px-2 py-0.5 text-cyan-200"
-                  : step > s.id
-                    ? "rounded-full bg-emerald-900/30 px-2 py-0.5 text-emerald-200"
-                    : "rounded-full bg-slate-800/80 px-2 py-0.5 text-slate-400"
-              }
-            >
-              {s.id}. {s.label}
-            </li>
-          ))}
-        </ol>
+        <h2 className="mt-1 text-xl font-semibold text-slate-100">
+          Step {step} of {SURGERY_BOOKING_WIZARD_STEPS.length}
+        </h2>
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-800">
+          <div
+            className="h-full rounded-full bg-cyan-500 transition-all"
+            style={{ width: `${(step / SURGERY_BOOKING_WIZARD_STEPS.length) * 100}%` }}
+          />
+        </div>
+        <p className="mt-2 text-sm text-slate-400">
+          {SURGERY_BOOKING_WIZARD_STEPS.find((s) => s.id === step)?.label}
+        </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+      <div className="flex-1 overflow-y-auto px-6 py-5">
         {step === 1 ? (
           <div className="space-y-4">
             <div>
@@ -449,13 +456,56 @@ export function SurgeryBookingWizard({
         ) : null}
 
         {stepMissing.length > 0 ? (
-          <ul className="mt-4 space-y-1 text-xs text-amber-300">
+          <ul className="mt-4 space-y-2 rounded-xl border border-amber-500/25 bg-amber-950/20 p-4 text-sm text-amber-100">
             {stepMissing.map((m) => (
-              <li key={m}>• {m}</li>
+              <li key={m}>• {humanizeSurgeryBookingRequirement(m)}</li>
             ))}
           </ul>
         ) : null}
-        {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
+        {error ? (
+          <p className="mt-3 rounded-lg border border-rose-500/30 bg-rose-950/30 p-3 text-sm text-rose-200">
+            {humanizeStaffErrorMessage(error)}
+          </p>
+        ) : null}
+      </div>
+
+      <aside className="hidden w-72 shrink-0 border-l border-white/10 bg-slate-950/40 p-5 lg:block">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Booking summary</p>
+        <dl className="mt-4 space-y-3 text-sm">
+          <div>
+            <dt className="text-slate-500">Patient</dt>
+            <dd className="font-medium text-slate-100">
+              {prefill.patientDisplayName?.trim() || "Selected patient"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Procedure</dt>
+            <dd className="font-medium text-slate-100">{procedureType || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Date</dt>
+            <dd className="font-medium text-slate-100">{startLocal || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Surgeon</dt>
+            <dd className="font-medium text-slate-100">{surgeonLabel}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Room</dt>
+            <dd className="font-medium text-slate-100">{roomLabel}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Clinic</dt>
+            <dd className="font-medium text-slate-100">{clinicLabel}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Deposit</dt>
+            <dd className="font-medium text-slate-100">
+              {createDepositRequest ? "Invoice on confirm" : "Not requested"}
+            </dd>
+          </div>
+        </dl>
+      </aside>
       </div>
 
       <div className="flex items-center justify-between border-t border-white/10 px-6 py-4">

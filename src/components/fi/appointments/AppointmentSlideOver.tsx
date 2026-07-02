@@ -58,6 +58,7 @@ import {
   applyLeadUpdatesAfterAppointmentComplete,
   type AppointmentCompletionLeadOpts,
 } from "@/src/lib/crm/appointmentCompletionLeadClient";
+import { humanizeStaffErrorMessage } from "@/src/lib/fiOs/staffUxPresentation";
 import {
   AppointmentActionsSection,
   AppointmentAnchorFlowsSection,
@@ -66,6 +67,7 @@ import {
   AppointmentCoreDetailsSection,
   AppointmentGallerySection,
   AppointmentHeader,
+  AppointmentOperationalSummary,
   AppointmentLinkedLeadSection,
   AppointmentProcedureSection,
   defaultAppointmentCompletionLeadOpts,
@@ -910,12 +912,26 @@ export function AppointmentSlideOverPanel({
           className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300"
           role="alert"
         >
-          {loadError}
+          {humanizeStaffErrorMessage(loadError)}
         </div>
       ) : null}
 
       {!loading && booking && payload ? (
         <div className="space-y-4">
+          <AppointmentOperationalSummary
+            tenantId={tenantId}
+            booking={booking}
+            personName={payload.leadAnchor?.personName ?? null}
+            clinicalStaffing={payload.clinicalStaffing}
+            blockerLabel={
+              payload.clinicalStaffing?.displayStatus === "blocked"
+                ? payload.clinicalStaffing.warnings[0] ??
+                  "Clinical team assignment must be resolved before this appointment can proceed."
+                : payload.clinicalStaffing?.missingRoles.length
+                  ? `Please assign ${payload.clinicalStaffing.missingRoles.map((r) => r.role).join(", ")} before continuing.`
+                  : null
+            }
+          />
           <AppointmentHeader
             tenantId={tenantId}
             booking={booking}

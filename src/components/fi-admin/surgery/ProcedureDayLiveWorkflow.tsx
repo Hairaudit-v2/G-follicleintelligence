@@ -29,7 +29,7 @@ function StageTimeline({ currentStage }: { currentStage: ProcedureDayLiveCardSta
   const idx = PROCEDURE_DAY_WORKFLOW_STAGES.indexOf(currentStage);
   const visible = PROCEDURE_DAY_WORKFLOW_STAGES.filter((s) => s !== "completed" && s !== "discharged");
   return (
-    <ol className="flex flex-wrap gap-1.5">
+    <ol className="flex flex-wrap gap-2">
       {visible.map((stage) => {
         const stageIdx = PROCEDURE_DAY_WORKFLOW_STAGES.indexOf(stage);
         const active = stageIdx === idx;
@@ -38,8 +38,8 @@ function StageTimeline({ currentStage }: { currentStage: ProcedureDayLiveCardSta
           <li
             key={stage}
             className={cn(
-              "rounded-full border px-2 py-0.5 text-[0.62rem] font-medium",
-              active && "border-[#22C1FF]/50 bg-[#22C1FF]/15 text-[#22C1FF]",
+              "rounded-full border px-3 py-1.5 text-xs font-semibold sm:text-sm",
+              active && "border-[#22C1FF]/50 bg-[#22C1FF]/15 text-[#22C1FF] ring-2 ring-[#22C1FF]/20",
               done && !active && "border-emerald-500/25 bg-emerald-500/10 text-emerald-200/90",
               !active && !done && "border-white/[0.08] bg-black/20 text-[#64748B]"
             )}
@@ -86,11 +86,18 @@ function LiveSurgeryCard({
     [live.metrics]
   );
 
+  const graftTarget = (() => {
+    const raw = card.graftTargetLabel?.replace(/[^\d]/g, "") ?? "";
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : 2500;
+  })();
+  const graftProgress = Math.min(100, Math.round((metricValue.implanted / graftTarget) * 100));
+
   return (
-    <article className="rounded-xl border border-white/[0.1] bg-[#0c1220]/90 p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <article className="rounded-2xl border border-white/[0.12] bg-[#0c1220]/95 p-5 sm:p-7 shadow-xl shadow-black/30">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h3 className="truncate text-lg font-semibold text-[#F8FAFC]">{card.patientLabel}</h3>
+          <h3 className="truncate text-2xl font-semibold text-[#F8FAFC]">{card.patientLabel}</h3>
           <p className="mt-1 text-sm text-[#64748B]">
             {card.timeLabel} · {card.procedureType ?? card.bookingTypeLabel}
           </p>
@@ -111,12 +118,12 @@ function LiveSurgeryCard({
       </div>
 
       {live.safetyWarnings.length ? (
-        <div className="mt-4 rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-3">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-100/90">
-            <AlertTriangle className="h-3.5 w-3.5" />
-            Safety warnings
+        <div className="mt-5 rounded-xl border-2 border-rose-500/40 bg-rose-950/40 p-4 sm:p-5">
+          <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-rose-100">
+            <AlertTriangle className="h-5 w-5" />
+            Safety warning — review before continuing
           </p>
-          <ul className="mt-2 space-y-1 text-sm text-amber-50/90">
+          <ul className="mt-3 space-y-2 text-base text-rose-50/95">
             {live.safetyWarnings.map((w) => (
               <li key={w}>• {w}</li>
             ))}
@@ -124,56 +131,107 @@ function LiveSurgeryCard({
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-white/[0.08] bg-black/25 p-3">
-          <p className="text-xs text-[#64748B]">Grafts extracted</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{metricValue.extracted}</p>
-          <button
-            type="button"
-            disabled={pending}
-            className={cn(surgeryLinkButtonClass, "mt-2 w-full text-xs")}
-            onClick={() =>
-              run(() =>
-                incrementProcedureDayGraftAction(tenantId, {
-                  booking_id: card.bookingId,
-                  field: "grafts_extracted",
-                  delta: 10,
-                })
-              )
-            }
-          >
-            <Plus className="mr-1 inline h-3 w-3" />
-            +10
-          </button>
+      <div className="mt-5 rounded-xl border border-white/[0.08] bg-black/25 p-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <p className="text-sm font-semibold text-[#94A3B8]">Graft progress</p>
+          <p className="text-lg font-bold tabular-nums text-[#F8FAFC]">
+            {metricValue.implanted} / {graftTarget} grafts
+          </p>
         </div>
-        <div className="rounded-lg border border-white/[0.08] bg-black/25 p-3">
-          <p className="text-xs text-[#64748B]">Grafts implanted</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{metricValue.implanted}</p>
-          <button
-            type="button"
-            disabled={pending}
-            className={cn(surgeryLinkButtonClass, "mt-2 w-full text-xs")}
-            onClick={() =>
-              run(() =>
-                incrementProcedureDayGraftAction(tenantId, {
-                  booking_id: card.bookingId,
-                  field: "grafts_implanted",
-                  delta: 10,
-                })
-              )
-            }
-          >
-            <Plus className="mr-1 inline h-3 w-3" />
-            +10
-          </button>
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/[0.06]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all"
+            style={{ width: `${graftProgress}%` }}
+          />
         </div>
-        <div className="rounded-lg border border-white/[0.08] bg-black/25 p-3">
-          <p className="text-xs text-[#64748B]">Hairs counted</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{metricValue.hairs}</p>
+      </div>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-white/[0.08] bg-black/25 p-4">
+          <p className="text-sm font-medium text-[#64748B]">Grafts extracted</p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">{metricValue.extracted}</p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              disabled={pending}
+              className={cn(surgeryLinkButtonClass, "flex-1 py-2.5 text-sm font-semibold")}
+              onClick={() =>
+                run(() =>
+                  incrementProcedureDayGraftAction(tenantId, {
+                    booking_id: card.bookingId,
+                    field: "grafts_extracted",
+                    delta: 50,
+                  })
+                )
+              }
+            >
+              <Plus className="mr-1 inline h-4 w-4" />
+              +50
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              className={cn(surgeryLinkButtonClass, "flex-1 py-2.5 text-sm font-semibold")}
+              onClick={() =>
+                run(() =>
+                  incrementProcedureDayGraftAction(tenantId, {
+                    booking_id: card.bookingId,
+                    field: "grafts_extracted",
+                    delta: 10,
+                  })
+                )
+              }
+            >
+              +10
+            </button>
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.08] bg-black/25 p-4">
+          <p className="text-sm font-medium text-[#64748B]">Grafts implanted</p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">{metricValue.implanted}</p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              disabled={pending}
+              className={cn(surgeryLinkButtonClass, "flex-1 py-2.5 text-sm font-semibold")}
+              onClick={() =>
+                run(() =>
+                  incrementProcedureDayGraftAction(tenantId, {
+                    booking_id: card.bookingId,
+                    field: "grafts_implanted",
+                    delta: 50,
+                  })
+                )
+              }
+            >
+              <Plus className="mr-1 inline h-4 w-4" />
+              +50
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              className={cn(surgeryLinkButtonClass, "flex-1 py-2.5 text-sm font-semibold")}
+              onClick={() =>
+                run(() =>
+                  incrementProcedureDayGraftAction(tenantId, {
+                    booking_id: card.bookingId,
+                    field: "grafts_implanted",
+                    delta: 10,
+                  })
+                )
+              }
+            >
+              +10
+            </button>
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.08] bg-black/25 p-4">
+          <p className="text-sm font-medium text-[#64748B]">Hairs counted</p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">{metricValue.hairs}</p>
           <button
             type="button"
             disabled={pending}
-            className={cn(surgeryLinkButtonClass, "mt-2 w-full text-xs")}
+            className={cn(surgeryLinkButtonClass, "mt-3 w-full py-2.5 text-sm font-semibold")}
             onClick={() =>
               run(() =>
                 incrementProcedureDayGraftAction(tenantId, {
@@ -184,7 +242,7 @@ function LiveSurgeryCard({
               )
             }
           >
-            <Plus className="mr-1 inline h-3 w-3" />
+            <Plus className="mr-1 inline h-4 w-4" />
             +50
           </button>
         </div>
@@ -284,12 +342,14 @@ function LiveSurgeryCard({
               disabled={pending}
               className={surgeryLinkButtonClass}
               onClick={() =>
-                run(() =>
-                  completeProcedureDaySessionAction(tenantId, {
-                    booking_id: card.bookingId,
-                    post_op_summary: postOpSummary,
-                    create_follow_up_task: true,
-                  })
+                run(
+                  () =>
+                    completeProcedureDaySessionAction(tenantId, {
+                      booking_id: card.bookingId,
+                      post_op_summary: postOpSummary,
+                      create_follow_up_task: true,
+                    }),
+                  "Procedure completed successfully. Create follow-up from the patient record when ready."
                 )
               }
             >

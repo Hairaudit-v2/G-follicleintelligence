@@ -680,6 +680,17 @@ function AppointmentCardInner({
             ) : null}
           </div>
 
+          {appointment.isSurgery ? (
+            <p
+              className={cn(
+                "mt-1 font-bold uppercase tracking-wide text-rose-200",
+                isCompact ? "text-[0.6rem]" : "text-[0.65rem]"
+              )}
+            >
+              Surgery
+            </p>
+          ) : null}
+
           {showMeta && appointment.isSurgery ? (
             <div className={cn("mt-1 flex flex-wrap items-center gap-1", textSize)}>
               {appointment.readinessPercent != null ? (
