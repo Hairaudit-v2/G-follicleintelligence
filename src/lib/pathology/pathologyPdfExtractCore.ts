@@ -1,8 +1,10 @@
 import type { RawPathologyExtractedMarker } from "./pathologyMarkerNormalize";
+import { FI_PATHOLOGY_STUB_PROVIDER_ID } from "./pathologyExtractionProviderTypes";
 
-export const FI_PATHOLOGY_EXTRACTION_PROVIDER = "fi-pathology-stub-v1";
+/** @deprecated Use FI_PATHOLOGY_STUB_PROVIDER_ID */
+export const FI_PATHOLOGY_EXTRACTION_PROVIDER = FI_PATHOLOGY_STUB_PROVIDER_ID;
 
-export type PathologyPdfExtractionOutput = {
+export type PathologyPdfExtractCoreOutput = {
   provider: string;
   rawText: string;
   markers: RawPathologyExtractedMarker[];
@@ -63,7 +65,7 @@ function parseEmbeddedMarkersJson(text: string): RawPathologyExtractedMarker[] |
 }
 
 /** Parse tabular marker lines: Label | Value | Unit | Range | Flag */
-function parseTabularMarkerLines(text: string): RawPathologyExtractedMarker[] {
+export function parseTabularMarkerLines(text: string): RawPathologyExtractedMarker[] {
   const markers: RawPathologyExtractedMarker[] = [];
   for (const line of text.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -89,12 +91,12 @@ function parseTabularMarkerLines(text: string): RawPathologyExtractedMarker[] {
  * Deterministic pathology PDF extraction (Sprint F stub provider).
  * Supports embedded JSON test fixtures and pipe-delimited text rows.
  */
-export function extractPathologyMarkersFromPdf(pdfBytes: Uint8Array): PathologyPdfExtractionOutput {
+export function extractPathologyMarkersFromPdf(pdfBytes: Uint8Array): PathologyPdfExtractCoreOutput {
   const rawText = extractPdfAsciiText(pdfBytes);
   const embedded = parseEmbeddedMarkersJson(rawText);
   if (embedded && embedded.length > 0) {
     return {
-      provider: FI_PATHOLOGY_EXTRACTION_PROVIDER,
+      provider: FI_PATHOLOGY_STUB_PROVIDER_ID,
       rawText,
       markers: embedded,
       ocrConfidence: 0.95,
@@ -106,7 +108,7 @@ export function extractPathologyMarkersFromPdf(pdfBytes: Uint8Array): PathologyP
   const tabular = parseTabularMarkerLines(rawText);
   if (tabular.length > 0) {
     return {
-      provider: FI_PATHOLOGY_EXTRACTION_PROVIDER,
+      provider: FI_PATHOLOGY_STUB_PROVIDER_ID,
       rawText,
       markers: tabular,
       ocrConfidence: 0.72,
@@ -116,7 +118,7 @@ export function extractPathologyMarkersFromPdf(pdfBytes: Uint8Array): PathologyP
   }
 
   return {
-    provider: FI_PATHOLOGY_EXTRACTION_PROVIDER,
+    provider: FI_PATHOLOGY_STUB_PROVIDER_ID,
     rawText,
     markers: [],
     ocrConfidence: null,
