@@ -12,6 +12,8 @@ import {
   firstNameFromDisplayName,
 } from "@/src/lib/fiOs/todayFeedDerive";
 import { groupTodayFeedItems } from "@/src/lib/fiOs/todayFeedGroup";
+import { flattenTodayFeedItems } from "@/src/lib/fiOs/todaySignal/todaySignalLearning";
+import { recordTodaySignalObservationSnapshotSafe } from "@/src/lib/fiOs/todaySignal/todaySignalLearning.server";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 /**
@@ -63,6 +65,12 @@ export function FiOsTodaySurface(props: {
     profileKey: workspaceProfile,
     now,
   });
+
+  recordTodaySignalObservationSnapshotSafe(
+    data.tenantId,
+    flattenTodayFeedItems(feed),
+    { profileKey: workspaceProfile, nowIso: now.toISOString() }
+  );
 
   const rightNow = groupTodayFeedItems(feed.rightNow);
   const upNext = groupTodayFeedItems(feed.upNext);
