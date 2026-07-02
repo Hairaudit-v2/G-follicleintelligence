@@ -50,7 +50,7 @@ export default async function FiAdminReceptionBoardCommandCenterPage({
   let showBookingsBoard: boolean;
   try {
     [data, session, showCrmNav, showBookingsBoard] = await Promise.all([
-      loadReceptionBoardCommandCenterPayload(tenantId.trim()),
+      loadReceptionBoardCommandCenterPayload(tenantId.trim(), new Date(), { tier: "shell" }),
       getClinicFloorSessionIfAllowed(tenantId.trim()),
       getCrmShellNavAllowed(tenantId.trim()),
       getBookingsBoardNavAllowed(tenantId.trim()),

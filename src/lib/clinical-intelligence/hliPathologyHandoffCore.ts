@@ -2,8 +2,8 @@
  * Pure HLI pathology handoff payload builder (testable without server deps).
  */
 
-import type { PathologyResultItemRow, PathologyResultRow } from "./pathologyResultTypes";
-import type { NormalizedPathologyMarker } from "./pathologyMarkerNormalize";
+import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type { NormalizedPathologyMarker } from "@/src/lib/pathology/pathologyMarkerNormalize";
 
 export type HliPathologyMarkerPayload = {
   testCode: string | null;

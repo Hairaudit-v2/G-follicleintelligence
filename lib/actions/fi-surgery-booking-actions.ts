@@ -10,8 +10,10 @@ import {
   tryResolveFiUserIdForTenant,
 } from "@/src/lib/crm/crmGate";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
-import { loadClinicRoomsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
+import {
+  loadClinicalStaffPickerCached,
+  loadTenantRoomsCached,
+} from "@/src/lib/performance/referenceDataCache.server";
 import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { confirmSurgeryBooking } from "@/src/lib/surgeryBooking/surgeryBookingEngine.server";
 import {
@@ -54,10 +56,11 @@ export async function loadSurgeryBookingWizardContextAction(
     const tid = parsed.tenantId.trim();
     const scope = await loadCrmShellScopePickerOptions(tid);
     const clinics = scope.clinics;
-    const staffRows = await loadClinicalStaffPickerOptions(tid);
+    const staffRows = await loadClinicalStaffPickerCached(tid);
     const clinicId = parsed.clinicId?.trim() || clinics[0]?.id || null;
+    const allRooms = clinicId ? await loadTenantRoomsCached(tid) : [];
     const rooms = clinicId
-      ? await loadClinicRoomsForTenant(tid, { clinicId, activeOnly: true })
+      ? allRooms.filter((r) => r.clinic_id === clinicId && r.is_active !== false)
       : [];
 
     return {

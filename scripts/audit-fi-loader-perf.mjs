@@ -173,16 +173,22 @@ results.push(
 );
 
 results.push(
-  await timed("reception.boardCommandCenter (cold)", () =>
-    loadReceptionBoardCommandCenterPayload(tenantId, new Date())
+  await timed("reception.board.shell (cold)", () =>
+    loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "shell" })
   )
 );
 
 results.push(
-  await timed("reception.boardCommandCenter (warm)", async () => {
-    await loadReceptionBoardCommandCenterPayload(tenantId, new Date());
-    return loadReceptionBoardCommandCenterPayload(tenantId, new Date());
+  await timed("reception.board.shell (warm)", async () => {
+    await loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "shell" });
+    return loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "shell" });
   })
+);
+
+results.push(
+  await timed("reception.board.full (cold)", () =>
+    loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "full" })
+  )
 );
 
 results.push(

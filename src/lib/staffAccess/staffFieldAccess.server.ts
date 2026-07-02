@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { getStaffEffectiveAccess, type StaffAccessPrincipal } from "./staffAccess.server";
@@ -51,7 +53,7 @@ import {
  * rows override the global baseline (tenant_id NULL). Falls back to the static registry baseline
  * when the DB has no rows (fresh tenant / local dev / tests).
  */
-export async function loadRoleFieldTemplateFromDb(
+async function loadRoleFieldTemplateFromDbUncached(
   tenantId: string,
   roleKey: StaffRoleKey | null
 ): Promise<RoleFieldTemplateMap> {
@@ -82,6 +84,9 @@ export async function loadRoleFieldTemplateFromDb(
   }
   return out;
 }
+
+/** Per-request deduped SA-2 field permission matrix (role field templates). */
+export const loadRoleFieldTemplateFromDb = cache(loadRoleFieldTemplateFromDbUncached);
 
 /** Load active + revoked field grants for one staff member (core ignores revoked). */
 export async function loadStaffFieldAccessGrants(

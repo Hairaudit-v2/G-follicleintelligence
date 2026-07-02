@@ -63,29 +63,41 @@ const { appendProcedureDayQuickActionIfEnabled } = await import(
   "../src/lib/procedureDay/procedureDayReceptionCore.ts"
 );
 
-const RECEPTION_COLD_BUDGET_MS = 15_000;
-const RECEPTION_WARM_BUDGET_MS = 5_000;
+const RECEPTION_SHELL_COLD_BUDGET_MS = 2_000;
+const RECEPTION_SHELL_WARM_BUDGET_MS = 500;
+const RECEPTION_FULL_COLD_BUDGET_MS = 15_000;
 const CALENDAR_FEED_BUDGET_MS = 3_000;
 
 const t0 = performance.now();
-const reception = await loadReceptionBoardCommandCenterPayload(tenantId, new Date());
+const reception = await loadReceptionBoardCommandCenterPayload(tenantId, new Date(), {
+  tier: "shell",
+});
 const receptionColdMs = Math.round(performance.now() - t0);
 
 const tWarm = performance.now();
-await loadReceptionBoardCommandCenterPayload(tenantId, new Date());
+await loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "shell" });
 const receptionWarmMs = Math.round(performance.now() - tWarm);
+
+const tFull = performance.now();
+await loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "full" });
+const receptionFullMs = Math.round(performance.now() - tFull);
 
 if (!reception.operationalDay) throw new Error("Reception payload missing operationalDay");
 if (!Array.isArray(reception.appointments)) throw new Error("Reception payload missing appointments");
 
-if (receptionColdMs > RECEPTION_COLD_BUDGET_MS) {
+if (receptionColdMs > RECEPTION_SHELL_COLD_BUDGET_MS) {
   console.warn(
-    `WARN: reception cold load ${receptionColdMs}ms exceeds ${RECEPTION_COLD_BUDGET_MS}ms budget`
+    `WARN: reception shell cold ${receptionColdMs}ms exceeds ${RECEPTION_SHELL_COLD_BUDGET_MS}ms budget`
   );
 }
-if (receptionWarmMs > RECEPTION_WARM_BUDGET_MS) {
+if (receptionWarmMs > RECEPTION_SHELL_WARM_BUDGET_MS) {
   console.warn(
-    `WARN: reception warm load ${receptionWarmMs}ms exceeds ${RECEPTION_WARM_BUDGET_MS}ms budget`
+    `WARN: reception shell warm ${receptionWarmMs}ms exceeds ${RECEPTION_SHELL_WARM_BUDGET_MS}ms budget`
+  );
+}
+if (receptionFullMs > RECEPTION_FULL_COLD_BUDGET_MS) {
+  console.warn(
+    `WARN: reception full cold ${receptionFullMs}ms exceeds ${RECEPTION_FULL_COLD_BUDGET_MS}ms budget`
   );
 }
 
@@ -128,6 +140,7 @@ console.log(
   JSON.stringify({
     receptionColdMs,
     receptionWarmMs,
+    receptionFullMs,
     receptionMs: receptionColdMs,
     feedMs,
     feedItems: feed.items.length,
@@ -135,8 +148,9 @@ console.log(
     appointments: reception.appointments.length,
     procedureDayEnabled: readFiProcedureDayEnabled(),
     budgets: {
-      receptionColdMs: RECEPTION_COLD_BUDGET_MS,
-      receptionWarmMs: RECEPTION_WARM_BUDGET_MS,
+      receptionShellColdMs: RECEPTION_SHELL_COLD_BUDGET_MS,
+      receptionShellWarmMs: RECEPTION_SHELL_WARM_BUDGET_MS,
+      receptionFullColdMs: RECEPTION_FULL_COLD_BUDGET_MS,
       feedMs: CALENDAR_FEED_BUDGET_MS,
     },
   })

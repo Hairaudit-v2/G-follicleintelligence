@@ -359,5 +359,6 @@ export function nexusTestDeps(store: NexusTestStore) {
       const clinic = store.clinics.get(siteId);
       return Boolean(clinic && clinic.tenant_id === tenantId);
     },
+    linkNexusProfessionalToFiStaff: async () => undefined,
   };
 }

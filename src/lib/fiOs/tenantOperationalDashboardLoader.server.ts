@@ -3,7 +3,10 @@ import "server-only";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import {
+  loadTenantCalendarSettingsCached,
+  loadTenantConfigCached,
+} from "@/src/lib/performance/referenceDataCache.server";
 import { loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { CRM_TASK_ACTIVE_STATUS_VALUES } from "@/src/lib/crm/crmTaskPolicy";
@@ -566,7 +569,7 @@ export async function resolveTenantLocalDayWindow(
 ): Promise<{ localStartIso: string; localEndIso: string }> {
   const tz =
     calendarTimezone?.trim() ||
-    (await loadTenantOperationalCalendarSettings(tenantId.trim())).calendarTimezone;
+    (await loadTenantCalendarSettingsCached(tenantId.trim())).calendarTimezone;
   const { localStartIso, localEndIso } = computeOperationalLocalDayUtcWindow(now, tz);
   return { localStartIso, localEndIso };
 }
@@ -854,11 +857,32 @@ async function loadUpcomingReminders(
   return raw.map((r: unknown) => dashboardReminderItemSchema.parse(r));
 }
 
-async function loadReceptionBoardCards(
+export type LoadReceptionBoardCardsOptions = {
+  /** shell = patient labels only; skips staff/user/clinic/room enrichment for first paint */
+  enrichment?: "shell" | "full";
+};
+
+function providerLabelFromBookingMetadata(meta: Record<string, unknown>): string {
+  const candidates = [
+    meta.provider_label,
+    meta.clinician_label,
+    meta.staff_name,
+    meta.assignee_name,
+  ];
+  for (const c of candidates) {
+    const s = c != null ? String(c).trim() : "";
+    if (s) return s;
+  }
+  return "Unassigned";
+}
+
+export async function loadReceptionBoardCards(
   tenantId: string,
   localStartIso: string,
-  localEndIso: string
+  localEndIso: string,
+  options: LoadReceptionBoardCardsOptions = {}
 ): Promise<ReceptionBoardCard[]> {
+  const enrichment = options.enrichment ?? "full";
   const tid = tenantId.trim();
   const raw = await loadBookingsForTenantRange(tid, localStartIso, localEndIso);
   const todayBookings = raw.filter((b) =>
@@ -866,48 +890,59 @@ async function loadReceptionBoardCards(
   );
   if (todayBookings.length === 0) return [];
 
-  const [maps, staffOpts, userOpts] = await Promise.all([
-    loadBookingDisplayContextMaps(tid, todayBookings),
-    loadClinicalStaffPickerOptions(tid),
-    loadCrmShellUserPickerOptions(tid),
-  ]);
+  const maps = await loadBookingDisplayContextMaps(tid, todayBookings);
 
-  const clinicIds = Array.from(
-    new Set(todayBookings.map((b) => b.clinic_id?.trim()).filter((x): x is string => Boolean(x)))
-  );
-  const roomIds = Array.from(
-    new Set(todayBookings.map((b) => b.room_id?.trim()).filter((x): x is string => Boolean(x)))
-  );
-
-  const supabase = supabaseAdmin();
-  const [clinicRes, roomRes] = await Promise.all([
-    clinicIds.length
-      ? supabase
-          .from("fi_clinics")
-          .select("id, display_name")
-          .eq("tenant_id", tid)
-          .in("id", clinicIds)
-      : Promise.resolve({ data: [], error: null }),
-    roomIds.length
-      ? supabase
-          .from("fi_clinic_rooms")
-          .select("id, display_name")
-          .eq("tenant_id", tid)
-          .in("id", roomIds)
-      : Promise.resolve({ data: [], error: null }),
-  ]);
-  if (clinicRes.error) throw new Error(clinicRes.error.message);
-  if (roomRes.error) throw new Error(roomRes.error.message);
-
+  let staffOpts: Awaited<ReturnType<typeof loadClinicalStaffPickerOptions>> = [];
+  let userOpts: Awaited<ReturnType<typeof loadCrmShellUserPickerOptions>> = [];
   const clinicNameById = new Map<string, string>();
-  for (const row of clinicRes.data ?? []) {
-    const r = row as { id: string; display_name: string | null };
-    clinicNameById.set(String(r.id), String(r.display_name ?? "").trim() || String(r.id));
-  }
   const roomNameById = new Map<string, string>();
-  for (const row of roomRes.data ?? []) {
-    const r = row as { id: string; display_name: string | null };
-    roomNameById.set(String(r.id), String(r.display_name ?? "").trim() || String(r.id));
+
+  if (enrichment === "full") {
+    const { loadClinicalStaffPickerCached, loadCrmShellUsersCached } = await import(
+      "@/src/lib/performance/referenceDataCache.server"
+    );
+    const [staff, users] = await Promise.all([
+      loadClinicalStaffPickerCached(tid),
+      loadCrmShellUsersCached(tid),
+    ]);
+    staffOpts = staff;
+    userOpts = users;
+
+    const clinicIds = Array.from(
+      new Set(todayBookings.map((b) => b.clinic_id?.trim()).filter((x): x is string => Boolean(x)))
+    );
+    const roomIds = Array.from(
+      new Set(todayBookings.map((b) => b.room_id?.trim()).filter((x): x is string => Boolean(x)))
+    );
+
+    const supabase = supabaseAdmin();
+    const [clinicRes, roomRes] = await Promise.all([
+      clinicIds.length
+        ? supabase
+            .from("fi_clinics")
+            .select("id, display_name")
+            .eq("tenant_id", tid)
+            .in("id", clinicIds)
+        : Promise.resolve({ data: [], error: null }),
+      roomIds.length
+        ? supabase
+            .from("fi_clinic_rooms")
+            .select("id, display_name")
+            .eq("tenant_id", tid)
+            .in("id", roomIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (clinicRes.error) throw new Error(clinicRes.error.message);
+    if (roomRes.error) throw new Error(roomRes.error.message);
+
+    for (const row of clinicRes.data ?? []) {
+      const r = row as { id: string; display_name: string | null };
+      clinicNameById.set(String(r.id), String(r.display_name ?? "").trim() || String(r.id));
+    }
+    for (const row of roomRes.data ?? []) {
+      const r = row as { id: string; display_name: string | null };
+      roomNameById.set(String(r.id), String(r.display_name ?? "").trim() || String(r.id));
+    }
   }
 
   const cards: ReceptionBoardCard[] = [];
@@ -917,11 +952,18 @@ async function loadReceptionBoardCards(
         ? (b.metadata as Record<string, unknown>)
         : {};
     const displayName = anchorLabelForBookingRow(b, maps);
-    const assign = bookingAssignmentDisplay(staffOpts, userOpts, b);
-    const clinicLabel = b.clinic_id?.trim()
-      ? (clinicNameById.get(b.clinic_id.trim()) ?? null)
-      : null;
-    const roomLabel = b.room_id?.trim() ? (roomNameById.get(b.room_id.trim()) ?? null) : null;
+    const assign =
+      enrichment === "full"
+        ? bookingAssignmentDisplay(staffOpts, userOpts, b)
+        : { providerLabel: providerLabelFromBookingMetadata(meta), ownerLabel: null, summaryLine: "" };
+    const clinicLabel =
+      enrichment === "full" && b.clinic_id?.trim()
+        ? (clinicNameById.get(b.clinic_id.trim()) ?? null)
+        : null;
+    const roomLabel =
+      enrichment === "full" && b.room_id?.trim()
+        ? (roomNameById.get(b.room_id.trim()) ?? null)
+        : null;
     cards.push(
       receptionBoardCardSchema.parse({
         id: b.id,
@@ -988,13 +1030,9 @@ export async function loadTenantOperationalDashboard(
     if (staffRow) viewerStaffId = String((staffRow as { id: string }).id);
   }
 
-  const tenantRes = await supabase.from("fi_tenants").select("name").eq("id", tid).maybeSingle();
-  if (tenantRes.error) throw new Error(tenantRes.error.message);
-  if (!tenantRes.data) throw new Error("Tenant not found");
-  const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
-
-  const [calendarSettings, pipelineStages] = await Promise.all([
-    loadTenantOperationalCalendarSettings(tid),
+  const [tenantRow, calendarSettings, pipelineStages] = await Promise.all([
+    loadTenantConfigCached(tid),
+    loadTenantCalendarSettingsCached(tid),
     loadPipelineStages(
       {
         tenantId: tid,
@@ -1005,6 +1043,7 @@ export async function loadTenantOperationalDashboard(
       supabase
     ),
   ]);
+  const tenantName = String(tenantRow.name ?? "").trim() || tid;
   const operationalCalendarTimezone = calendarSettings.calendarTimezone;
   const operationalLocalDayFull = computeOperationalLocalDayUtcWindow(
     now,

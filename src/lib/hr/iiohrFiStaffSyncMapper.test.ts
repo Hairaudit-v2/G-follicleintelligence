@@ -8,18 +8,7 @@ import {
   mapIiohrHrStaffToFiSyncRow,
   type IiohrHrPortalStaffRecord,
 } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
-import { HR_STAFF_READINESS_METADATA_KEYS } from "@/src/lib/staff/hrStaffReadinessMetadata";
-
-const METADATA_V1_KEYS = new Set([
-  "schema_version",
-  "employment_type",
-  "clinic_name",
-  "role_label",
-  "compliance_summary",
-  "training_summary",
-  "last_hr_updated_at",
-  ...HR_STAFF_READINESS_METADATA_KEYS,
-]);
+import { IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS } from "@/src/lib/staff/hrStaffReadinessMetadata";
 
 test("mapper excludes sensitive HR fields from the FI sync row payload", () => {
   const record: IiohrHrPortalStaffRecord = {
@@ -56,15 +45,15 @@ test("metadata_snapshot is schema v1 and bounded to the allowlisted keys", () =>
   const snap = buildBoundedMetadataSnapshotV1(record);
   assert.equal(snap.schema_version, 1);
   const keys = Object.keys(snap);
-  assert.ok(keys.length <= METADATA_V1_KEYS.size);
+  assert.ok(keys.length <= IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS.size);
   for (const k of keys) {
-    assert.ok(METADATA_V1_KEYS.has(k), `unexpected metadata key: ${k}`);
+    assert.ok(IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS.has(k), `unexpected metadata key: ${k}`);
   }
   const row = mapIiohrHrStaffToFiSyncRow(record);
   const ms = row.metadata_snapshot;
   assert.ok(ms && typeof ms === "object");
   for (const k of Object.keys(ms)) {
-    assert.ok(METADATA_V1_KEYS.has(k), `row.metadata_snapshot leaked key: ${k}`);
+    assert.ok(IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS.has(k), `row.metadata_snapshot leaked key: ${k}`);
   }
 });
 

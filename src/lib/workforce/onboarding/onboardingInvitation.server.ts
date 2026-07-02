@@ -122,6 +122,7 @@ export async function sendOnboardingInvite(input: {
     await supabase
       .from("fi_staff_onboarding_invitations")
       .update({ email_sent_at: now.toISOString(), updated_at: now.toISOString() })
+      .eq("tenant_id", tid)
       .eq("id", invitationId);
   }
 
@@ -193,6 +194,7 @@ export async function loadOnboardingInviteByToken(
     await supabase
       .from("fi_staff_onboarding_invitations")
       .update({ status: "expired", updated_at: new Date().toISOString() })
+      .eq("tenant_id", tid)
       .eq("id", inv.id);
   }
 
@@ -262,6 +264,7 @@ export async function acceptOnboardingInvitation(input: {
   const { error: updateError } = await supabase
     .from("fi_staff_onboarding_invitations")
     .update({ status: "accepted", accepted_at: now, updated_at: now })
+    .eq("tenant_id", tid)
     .eq("id", inv.id);
   if (updateError) throw new Error(updateError.message);
 

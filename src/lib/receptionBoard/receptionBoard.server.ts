@@ -3,7 +3,18 @@ import "server-only";
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { computeTomorrowOperationalWindow } from "@/src/lib/clinicOs/tomorrowBoardModel";
-import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import {
+  loadReceptionBoardCards,
+  loadTenantOperationalDashboard,
+} from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import { computeOperationalLocalDayUtcWindow } from "@/src/lib/fiOs/tenantOperationalLocalDay";
+import {
+  beginFiPerfCollection,
+  finishFiPerfCollection,
+  recordFiPerfPayloadBytes,
+  withFiPerfSpan,
+} from "@/src/lib/performance/fiPerfCollector.server";
+import { loadReceptionShellBootstrapCached } from "@/src/lib/performance/referenceDataCache.server";
 import { loadReceptionOsBoardPayload } from "@/src/lib/receptionOs/receptionOsBoardLoader.server";
 import { loadSurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import type { SurgeryReadinessBoardCard } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
@@ -74,7 +85,108 @@ export type LoadReceptionBoardCommandCenterOptions = {
   enforceCrmReadGate?: boolean;
   adminKey?: string;
   request?: Request;
+  /** shell = first paint (~today's schedule only); full = enrichment for alerts, journey, surgery prep */
+  tier?: "shell" | "full";
 };
+
+function emptyIntelligenceMetrics(): ReceptionBoardCommandCenterPayload["intelligence"] {
+  return {
+    todayConsultations: 0,
+    todaySurgeries: 0,
+    revenueBookedToday: 0,
+    outstandingPayments: 0,
+    conversionRateToday: null,
+    doctorUtilizationPercent: null,
+    staffUtilizationPercent: null,
+    averageConsultationCloseRate: null,
+    upcomingFollowUps: 0,
+    unreadPatientTasks: 0,
+  };
+}
+
+/**
+ * Fast path for first usable paint — today's schedule + queue only (~10–15 queries).
+ * Client hydrates full payload via `/api/tenants/.../reception-board`.
+ */
+export async function loadReceptionBoardShellPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<ReceptionBoardCommandCenterPayload> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
+  const base = `/fi-admin/${tid}`;
+  beginFiPerfCollection("reception_board_shell", tid);
+
+  try {
+    const bootstrap = await withFiPerfSpan("tenant.bootstrap", () =>
+      loadReceptionShellBootstrapCached(tid)
+    );
+    const calendarTimezone = bootstrap.calendarTimezone;
+    const operationalDay = computeOperationalLocalDayUtcWindow(now, calendarTimezone);
+
+    const cards = await withFiPerfSpan("reception.cards", () =>
+      loadReceptionBoardCards(
+        tid,
+        operationalDay.localStartIso,
+        operationalDay.localEndIso,
+        { enrichment: "shell" }
+      )
+    );
+
+    // Case ids hydrate on full tier — avoids an extra round-trip on cold shell paint.
+    const caseByBooking = new Map<string, string>();
+
+    const appointments = sortAppointmentsChronologically(
+      cards.map((card) =>
+        buildAppointmentCard(card, {
+          base,
+          tz: calendarTimezone,
+          caseId: caseByBooking.get(card.id) ?? null,
+          paymentStatus: "unknown",
+        })
+      )
+    );
+
+    const queue = buildQueueBoard(cards, {
+      base,
+      tz: calendarTimezone,
+      caseByBooking,
+    });
+
+    const actionAlerts = sortActionAlerts(
+      buildCalendarSchedulingConflictAlerts(cards, base)
+    ).slice(0, 40);
+
+    const payload: ReceptionBoardCommandCenterPayload = {
+      tenantId: tid,
+      tenantName: bootstrap.tenantName,
+      loadedAt: now.toISOString(),
+      operationalDay: {
+        calendarTimezone,
+        todayYmd: operationalDay.todayYmd,
+        localStartIso: operationalDay.localStartIso,
+        localEndIso: operationalDay.localEndIso,
+      },
+      appointments,
+      queue,
+      actionAlerts,
+      quickActions: appendProcedureDayQuickActionIfEnabled(
+        buildQuickActions(base),
+        base,
+        readFiProcedureDayEnabled()
+      ),
+      tomorrowSurgeries: [],
+      intelligence: emptyIntelligenceMetrics(),
+      liveEvents: [],
+      receptionCards: cards,
+      loadTier: "shell",
+    };
+
+    recordFiPerfPayloadBytes(JSON.stringify(payload).length);
+    return payload;
+  } finally {
+    finishFiPerfCollection();
+  }
+}
 
 /**
  * Reception Board Command Center orchestrator — composes CalendarOS, SurgeryOS, ReceptionOS,
@@ -86,6 +198,11 @@ export async function loadReceptionBoardCommandCenterPayload(
   options: LoadReceptionBoardCommandCenterOptions = {}
 ): Promise<ReceptionBoardCommandCenterPayload> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
+  const tier = options.tier ?? "full";
+
+  if (tier === "shell") {
+    return loadReceptionBoardShellPayload(tid, now);
+  }
 
   if (options.enforceCrmReadGate) {
     await assertCrmTenantReadAllowed({
@@ -95,7 +212,11 @@ export async function loadReceptionBoardCommandCenterPayload(
     });
   }
 
+  beginFiPerfCollection("reception_board_full", tid);
+
   const base = `/fi-admin/${tid}`;
+
+  try {
 
   const [operational, surgeryPayload] = await Promise.all([
     loadTenantOperationalDashboard(tid, { includeReceptionBoard: true }),
@@ -218,7 +339,7 @@ export async function loadReceptionBoardCommandCenterPayload(
     loadedAt: now.toISOString(),
   });
 
-  return {
+  const payload: ReceptionBoardCommandCenterPayload = {
     tenantId: tid,
     tenantName: operational.tenantName,
     loadedAt: now.toISOString(),
@@ -235,5 +356,11 @@ export async function loadReceptionBoardCommandCenterPayload(
     intelligence,
     liveEvents,
     receptionCards: cards,
+    loadTier: "full",
   };
+  recordFiPerfPayloadBytes(JSON.stringify(payload).length);
+  return payload;
+  } finally {
+    finishFiPerfCollection();
+  }
 }

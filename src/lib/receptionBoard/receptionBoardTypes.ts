@@ -211,4 +211,6 @@ export type ReceptionBoardCommandCenterPayload = {
   receptionCards: ReceptionBoardCard[];
   /** Surgery readiness source rows for tomorrow panel (server only; stripped on client refresh). */
   _surgerySource?: SurgeryReadinessBoardCard[];
+  /** shell = SSR fast path; full = enriched alerts, journey, surgery prep */
+  loadTier?: "shell" | "full";
 };

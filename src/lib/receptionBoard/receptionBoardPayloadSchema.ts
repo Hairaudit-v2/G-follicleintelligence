@@ -171,6 +171,7 @@ export const receptionBoardCommandCenterPayloadSchema = z.object({
   intelligence: intelligenceSchema,
   liveEvents: z.array(liveEventSchema),
   receptionCards: z.array(receptionCardSchema),
+  loadTier: z.enum(["shell", "full"]).optional(),
 });
 
 export function parseReceptionBoardCommandCenterPayload(

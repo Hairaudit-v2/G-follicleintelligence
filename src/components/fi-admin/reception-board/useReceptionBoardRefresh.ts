@@ -20,6 +20,8 @@ type UseReceptionBoardRefreshOptions = {
   initialData: ReceptionBoardCommandCenterPayload;
   intervalMs?: number;
   enabled?: boolean;
+  /** When SSR used shell tier, fetch full payload immediately after paint. */
+  hydrateFullOnMount?: boolean;
 };
 
 /**
@@ -28,8 +30,13 @@ type UseReceptionBoardRefreshOptions = {
 export function useReceptionBoardRefresh(
   opts: UseReceptionBoardRefreshOptions
 ): ReceptionBoardRefreshState {
-  const { tenantId, initialData, intervalMs = RECEPTION_OS_DEFAULT_REFRESH_MS, enabled = true } =
-    opts;
+  const {
+    tenantId,
+    initialData,
+    intervalMs = RECEPTION_OS_DEFAULT_REFRESH_MS,
+    enabled = true,
+    hydrateFullOnMount = initialData.loadTier === "shell",
+  } = opts;
   const [data, setData] = useState(initialData);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -67,9 +74,10 @@ export function useReceptionBoardRefresh(
 
   useEffect(() => {
     if (!enabled || !tenantId.trim()) return;
+    if (hydrateFullOnMount) void refresh();
     const id = window.setInterval(() => void refresh(), intervalMs);
     return () => window.clearInterval(id);
-  }, [enabled, tenantId, intervalMs, refresh]);
+  }, [enabled, hydrateFullOnMount, tenantId, intervalMs, refresh]);
 
   return { data, lastRefreshedAt, isRefreshing, refreshError, refresh };
 }

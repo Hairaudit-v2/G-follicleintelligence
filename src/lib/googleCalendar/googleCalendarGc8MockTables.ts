@@ -179,25 +179,33 @@ export function createGc8MonitoringMockTables() {
         };
       },
       update(patch: Row) {
+        const apply = (matched: Row[]) => {
+          matched.forEach((r) =>
+            Object.assign(r, patch, { updated_at: new Date().toISOString() })
+          );
+          return {
+            select() {
+              return {
+                single: async () => ({
+                  data: matched[0] ?? null,
+                  error: matched[0] ? null : { message: "not found" },
+                }),
+              };
+            },
+            then(resolve: (v: { error: null }) => void) {
+              resolve({ error: null });
+            },
+          };
+        };
         return {
           eq(col: string, val: unknown) {
-            const matched = rows.filter((r) => r[col] === val);
-            matched.forEach((r) =>
-              Object.assign(r, patch, { updated_at: new Date().toISOString() })
-            );
-            return {
-              select() {
-                return {
-                  single: async () => ({
-                    data: matched[0] ?? null,
-                    error: matched[0] ? null : { message: "not found" },
-                  }),
-                };
+            const chain = {
+              eq(col2: string, val2: unknown) {
+                return apply(rows.filter((r) => r[col] === val && r[col2] === val2));
               },
-              then(resolve: (v: { error: null }) => void) {
-                resolve({ error: null });
-              },
+              ...apply(rows.filter((r) => r[col] === val)),
             };
+            return chain;
           },
         };
       },

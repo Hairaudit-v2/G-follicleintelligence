@@ -314,6 +314,21 @@ function successFetch(): typeof fetch {
   };
 }
 
+/** OAuth succeeds; calendar list/events return 500 (exercises sync failure + health alerts). */
+function calendarFailFetch(): typeof fetch {
+  const ok = successFetch();
+  return async (input, init) => {
+    const url = String(input);
+    if (url.includes("oauth2.googleapis.com/token")) {
+      return ok(input, init);
+    }
+    if (url.includes("/calendars/")) {
+      return new Response("fail", { status: 500 });
+    }
+    return ok(input, init);
+  };
+}
+
 describe("CalendarOS GC-8 — health core", () => {
   it("transitions to failing at 5 consecutive failures", () => {
     const health = deriveGoogleCalendarSyncHealth({
@@ -419,7 +434,7 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
 
   it("failed sync increments consecutive_failures", async () => {
     const mock = createGc8MockSupabase();
-    const failFetch: typeof fetch = async () => new Response("fail", { status: 500 });
+    const failFetch = calendarFailFetch();
 
     const summary = await syncGoogleCalendarForTenant(
       { tenantId: TENANT, source: "manual" },
@@ -430,13 +445,13 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
     assert.equal(mock.gc8.syncHealth[0].consecutive_failures, 1);
     assert.equal(mock.gc8.syncRuns[0].status, "failed");
     assert.ok(
-      mock.gc8.adminNotifications.some((n) => n.event_type === "google_calendar_sync_failed")
+      mock.eventBus.adminNotifications.some((n) => n.event_type === "google_calendar_sync_failed")
     );
   });
 
   it("5 failures pauses scheduled sync", async () => {
     const mock = createGc8MockSupabase();
-    const failFetch: typeof fetch = async () => new Response("fail", { status: 500 });
+    const failFetch = calendarFailFetch();
 
     for (let i = 0; i < GOOGLE_CALENDAR_SYNC_AUTO_PAUSE_FAILURE_THRESHOLD; i += 1) {
       await syncGoogleCalendarForTenant(
@@ -449,7 +464,7 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
     assert.equal(mock.gc8.syncHealth[0].health_status, "failing");
     assert.ok(mock.integrations[0].scheduled_sync_paused_at);
     assert.ok(
-      mock.gc8.adminNotifications.some((n) => n.event_type === "google_calendar_sync_paused")
+      mock.eventBus.adminNotifications.some((n) => n.event_type === "google_calendar_sync_paused")
     );
   });
 
@@ -574,7 +589,7 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
     );
 
     assert.ok(
-      mock.gc8.adminNotifications.some((n) => n.title === "Google Calendar review queue backlog")
+      mock.eventBus.adminNotifications.some((n) => n.title === "Google Calendar review queue backlog")
     );
   });
 });

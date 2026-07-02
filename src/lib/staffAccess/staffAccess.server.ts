@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   isFiOsPlatformAdminFullSessionBypass,
@@ -176,7 +178,7 @@ export async function resolveStaffAccessPrincipal(
  * rows override the global baseline (tenant_id NULL). Returns an empty map when none exist, so
  * the core can fall back to the static registry.
  */
-export async function loadRoleTemplateFromDb(
+async function loadRoleTemplateFromDbUncached(
   tenantId: string,
   roleKey: StaffRoleKey | null
 ): Promise<RoleTemplateMap> {
@@ -216,6 +218,9 @@ export async function loadRoleTemplateFromDb(
   }
   return out;
 }
+
+/** Per-request deduped SA-1 module permission matrix (role templates). */
+export const loadRoleTemplateFromDb = cache(loadRoleTemplateFromDbUncached);
 
 /** Load active + revoked grants for one staff member (core ignores revoked). */
 export async function loadStaffAccessGrants(

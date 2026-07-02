@@ -19,6 +19,14 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export type NexusProvisionDeps = {
   assertTenantExists: (tenantId: string) => Promise<boolean>;
   assertSiteBelongsToTenant: (siteId: string, tenantId: string) => Promise<boolean>;
+  /** Optional — tests may no-op; production links Nexus global id to fi_staff. */
+  linkNexusProfessionalToFiStaff?: (
+    payload: NexusProvisionPayload,
+    globalProfessionalId: string,
+    tenantId: string,
+    siteId: string | null,
+    client?: SupabaseClient
+  ) => Promise<unknown>;
 };
 
 const defaultDeps: NexusProvisionDeps = {
@@ -299,9 +307,25 @@ export async function provisionExternalProfessionalFromNexus(
     );
     await maybeCreateAuthUserForNexus(payload);
 
-    const { linkNexusProfessionalToFiStaff } =
-      await import("@/src/lib/workforce-os/nexusFiStaffBridge.server");
-    await linkNexusProfessionalToFiStaff(payload, globalProfessionalId, tenantId, siteId, supabase);
+    if (deps.linkNexusProfessionalToFiStaff) {
+      await deps.linkNexusProfessionalToFiStaff(
+        payload,
+        globalProfessionalId,
+        tenantId,
+        siteId,
+        supabase
+      );
+    } else {
+      const { linkNexusProfessionalToFiStaff } =
+        await import("@/src/lib/workforce-os/nexusFiStaffBridge.server");
+      await linkNexusProfessionalToFiStaff(
+        payload,
+        globalProfessionalId,
+        tenantId,
+        siteId,
+        supabase
+      );
+    }
 
     const stateResult = await readExternalProfessionalState(globalProfessionalId, supabase);
     if (!stateResult.ok) {

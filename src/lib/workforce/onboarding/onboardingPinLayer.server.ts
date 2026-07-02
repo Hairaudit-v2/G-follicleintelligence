@@ -105,6 +105,7 @@ export async function completeOnboardingPinSetup(input: {
     await supabase
       .from("fi_staff_onboarding_pin_setups")
       .update({ status: "expired", updated_at: now })
+      .eq("tenant_id", tid)
       .eq("id", setup.id);
     throw new Error("PIN setup session has expired.");
   }
@@ -134,6 +135,7 @@ export async function completeOnboardingPinSetup(input: {
   await supabase
     .from("fi_staff_onboarding_pin_setups")
     .update({ status: "completed", completed_at: now, updated_at: now })
+    .eq("tenant_id", tid)
     .eq("id", setup.id);
 
   await syncOnboardingChecklistFromState(tid, setup.staffMemberId, supabase);
