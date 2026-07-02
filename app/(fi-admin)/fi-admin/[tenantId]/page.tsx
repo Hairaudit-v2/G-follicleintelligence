@@ -4,7 +4,13 @@ import { notFound } from "next/navigation";
 
 import { FiTenantOperationalHome } from "@/src/components/fi-admin/FiTenantOperationalHome";
 
+import { FiOsTodaySurface } from "@/src/components/fi-os/today/FiOsTodaySurface";
+
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+
+import { isTodaySurfaceEnabledForTenant } from "@/src/lib/fiOs/todaySurfaceRollout.server";
+
+import { runTodayFeedShadowValidation } from "@/src/lib/fiOs/todayFeedShadowDiff";
 
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 
@@ -100,6 +106,17 @@ export default async function FiAdminTenantHomePage({
     if (msg === "Tenant not found") notFound();
 
     throw e;
+  }
+
+  // P0B shadow mode: always compute + compare (never affects which surface renders below).
+  runTodayFeedShadowValidation({ dashboard: data, showCrmNav, profileKey: workspaceProfile });
+
+  if (isTodaySurfaceEnabledForTenant(tenantId)) {
+    return (
+      <CalendarToastProvider>
+        <FiOsTodaySurface data={data} showCrmNav={showCrmNav} workspaceProfile={workspaceProfile} />
+      </CalendarToastProvider>
+    );
   }
 
   const shouldLoadClinical =

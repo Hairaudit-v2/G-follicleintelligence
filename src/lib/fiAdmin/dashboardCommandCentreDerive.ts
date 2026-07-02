@@ -51,7 +51,8 @@ export type TomorrowPreviewLine = {
   text: string;
 };
 
-const IN_CLINIC_COLUMNS = new Set(["arrived", "in_consultation", "in_treatment"]);
+/** Exported so the Today-surface shadow diff (FI-UX-REBUILD-1D) can validate against the same definition. */
+export const IN_CLINIC_COLUMNS = new Set(["arrived", "in_consultation", "in_treatment"]);
 
 function formatConversion(rate: number | null, won: number, closed: number): string {
   if (rate == null || closed === 0) return "—";
@@ -76,7 +77,7 @@ function isInOperationalDay(iso: string, localStartIso: string, localEndIso: str
   return t >= a && t < b;
 }
 
-function countPatientsInClinicToday(cards: readonly ReceptionBoardCard[]): number {
+export function countPatientsInClinicToday(cards: readonly ReceptionBoardCard[]): number {
   return cards.filter((c) => IN_CLINIC_COLUMNS.has(c.receptionColumn)).length;
 }
 
