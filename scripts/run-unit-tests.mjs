@@ -39,9 +39,17 @@ function walk(dir, acc) {
   return acc;
 }
 
-const files = roots.flatMap((d) => walk(d, [])).sort();
+let files = roots.flatMap((d) => walk(d, [])).sort();
+const cliFilters = process.argv.slice(2).map((p) => p.split("\\").join("/"));
+if (cliFilters.length > 0) {
+  files = files.filter((f) => cliFilters.some((filter) => f === filter || f.endsWith(filter)));
+}
 if (files.length === 0) {
-  console.error("run-unit-tests: no *.test.ts files found.");
+  console.error(
+    cliFilters.length > 0
+      ? `run-unit-tests: no *.test.ts files matched: ${cliFilters.join(", ")}`
+      : "run-unit-tests: no *.test.ts files found."
+  );
   process.exit(1);
 }
 
