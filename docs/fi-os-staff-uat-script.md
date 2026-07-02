@@ -24,7 +24,7 @@ Record findings in [fi-os-real-clinic-uat-checklist.md](./fi-os-real-clinic-uat-
 
 | Step | Action | Pass criteria |
 |------|--------|---------------|
-| R1 | Open `/fi-admin/{tenantId}/reception` | Board loads; UAT guide visible if mode on |
+| R1 | Open `/fi-admin/{tenantId}/reception` (sidebar **Reception board**) | H1 "Reception Board"; UAT guide if mode on. *Not* `/reception-board` (command center). |
 | R2 | Read action alerts | Red/yellow alerts show human titles + resolve link |
 | R3 | **Check in patient** on next arrival | Toast confirms; lane → **Checked in** |
 | R4 | **Start consultation** → **Complete visit** | Labels exact; no dead-end after action |

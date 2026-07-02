@@ -57,8 +57,8 @@
 |-------|---------------------|-----------|
 | `/` | Dashboard | `[tenantId]/page.tsx` |
 | `/operations` | Operations centre | `operations/page.tsx` |
-| `/reception` | **Reception board** | `reception/page.tsx` |
-| `/reception-board` | (legacy URL) | `reception-board/page.tsx` |
+| `/reception` | **Reception board** (patient flow dashboard) | `reception/page.tsx` |
+| `/reception-board` | **Command center** — different UI (`Clinic operations cockpit`) | `reception-board/page.tsx` |
 | `/reception-os` | ReceptionOS | `reception-os/page.tsx` |
 | `/tomorrow` | Tomorrow board | `tomorrow/page.tsx` |
 | `/calendar` | Calendar | `calendar/page.tsx` |

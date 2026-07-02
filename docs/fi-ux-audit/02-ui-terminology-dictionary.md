@@ -61,8 +61,8 @@
 
 | Legacy label | Canonical (FI OS sidebar) |
 |--------------|---------------------------|
-| Reception Board | **Reception board** |
-| Reception Board → `/reception-board` | **Reception board** → `/reception` |
+| Reception Board (page H1 on `/reception`) | **Reception board** (sidebar) |
+| `/reception-board` route | **Clinic operations cockpit** — not the same as `/reception` |
 | LeadFlow (module name) | **Leads** (nav) + **LeadFlow** (sub-item) |
 
 ---

@@ -51,7 +51,7 @@ Greyed items mean your role lacks CRM or bookings access.
 
 **Open:** Sidebar → **Reception board** → `/fi-admin/{tenantId}/reception`
 
-> Legacy URL `/reception-board` still works; new guides use `/reception`.
+> **Note:** `/reception-board` is a separate **Clinic operations cockpit** (command center), not this dashboard. E2e and older docs sometimes conflate the two routes.
 
 ### What you see
 

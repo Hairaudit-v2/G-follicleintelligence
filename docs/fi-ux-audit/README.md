@@ -12,6 +12,7 @@
 | 3 | [03-workflow-maps.md](./03-workflow-maps.md) | Click-path workflows (reception, calendar, surgery, CRM) |
 | 4 | [04-role-journeys.md](./04-role-journeys.md) | First-time user journeys by role/persona |
 | 5 | [05-operator-guide.md](./05-operator-guide.md) | **Canonical operator guide** — replaces scattered UAT scripts |
+| 6 | [06-live-browser-validation.md](./06-live-browser-validation.md) | Playwright pass on demo tenant (2026-07-02) |
 | — | [CONCEPTUAL_DOCS_DEPRECATED.md](./CONCEPTUAL_DOCS_DEPRECATED.md) | Retired vision/design docs (archived) |
 
 ## Single sources of truth (code)
@@ -32,7 +33,8 @@
 
 - **Login:** `/follicle-intelligence/login`
 - **Tenant home:** `/fi-admin/{tenantId}`
-- **Reception board (canonical):** `/fi-admin/{tenantId}/reception` — *not* `/reception-board` (legacy alias still works)
+- **Reception board (sidebar target):** `/fi-admin/{tenantId}/reception` — patient flow dashboard
+- **Command center (legacy route):** `/fi-admin/{tenantId}/reception-board` — different UI ("Clinic operations cockpit")
 - **Calendar:** `/fi-admin/{tenantId}/calendar`
 - **Procedure day:** `/fi-admin/{tenantId}/procedure-day`
 - **Settings:** `/fi-admin/{tenantId}/configuration`
