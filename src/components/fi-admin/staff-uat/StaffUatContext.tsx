@@ -84,19 +84,19 @@ export function StaffUatProvider({
 
   useEffect(() => {
     if (!enabled) return;
-    const module = staffUatModuleFromPath(pathname);
+    const activeModule = staffUatModuleFromPath(pathname);
     const prev = prevModuleRef.current;
-    if (prev && prev !== module && prev !== "other" && module !== "other") {
+    if (prev && prev !== activeModule && prev !== "other" && activeModule !== "other") {
       void postTelemetry(tenantId, {
         kind: "friction",
         route: pathname,
         role,
         frictionType: "navigation_module_bounce",
-        detail: `${prev} → ${module}`,
-        payload: { fromModule: prev, toModule: module },
+        detail: `${prev} → ${activeModule}`,
+        payload: { fromModule: prev, toModule: activeModule },
       });
     }
-    prevModuleRef.current = module;
+    prevModuleRef.current = activeModule;
   }, [enabled, pathname, role, tenantId]);
 
   const value = useMemo(
