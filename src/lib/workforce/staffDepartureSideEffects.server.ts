@@ -58,7 +58,7 @@ export async function unassignFutureBookingsForStaff(
   const assignmentRows = (resourceRows ?? []) as { id: string; booking_id: string }[];
   const bookingIdsFromResources = [...new Set(assignmentRows.map((r) => String(r.booking_id)))];
 
-  let futureResourceAssignmentIds: string[] = [];
+  const futureResourceAssignmentIds: string[] = [];
   const futureResourceBookingIds: string[] = [];
 
   if (bookingIdsFromResources.length > 0) {
