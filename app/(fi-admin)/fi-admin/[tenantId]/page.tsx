@@ -9,6 +9,7 @@ import { FiOsTodaySurface } from "@/src/components/fi-os/today/FiOsTodaySurface"
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 
 import { isTodaySurfaceEnabledForTenant } from "@/src/lib/fiOs/todaySurfaceRollout.server";
+import { resolveTodaySurfaceStaffBakeAccess } from "@/src/lib/fiOs/todaySurfaceStaffBakeGate.server";
 import {
   isTodayRealtimeEnabledForTenant,
   isTodaySignalRevisionPollEnabled,
@@ -124,7 +125,12 @@ export default async function FiAdminTenantHomePage({
   // `tenantId` here is always `fi_tenants.id` (a UUID) — this route never receives
   // a slug — so FI_TODAY_SURFACE_TENANT_IDS must be populated with tenant UUIDs.
   // See src/lib/fiOs/todaySurfaceRollout.server.ts for allowlist/slug details.
-  if (isTodaySurfaceEnabledForTenant(tenantId)) {
+  const todaySurfaceTenantEnabled = isTodaySurfaceEnabledForTenant(tenantId);
+  const todaySurfaceBakeAllowed = todaySurfaceTenantEnabled
+    ? await resolveTodaySurfaceStaffBakeAccess(tenantId)
+    : false;
+
+  if (todaySurfaceTenantEnabled && todaySurfaceBakeAllowed) {
     const authUserId = await resolveAuthUserId(null);
     const viewerDisplayName = authUserId
       ? await resolveFiOsAuthUserDisplayNameById(authUserId)
