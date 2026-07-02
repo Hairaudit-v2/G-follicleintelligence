@@ -28,6 +28,8 @@ import type {
   SurgicalReadinessStatus,
 } from "@/src/lib/workforce/surgicalWorkforceIntelligenceCore";
 import { cn } from "@/lib/utils";
+import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
+import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
 
 const UTILITY_MODULE_IDS = new Set([
   "recruitment",
@@ -852,6 +854,7 @@ export function WorkforceCommandCentreClient({
 
   return (
     <div className="space-y-10 pb-10 sm:space-y-12 sm:pb-14">
+      <StaffUatScreenGuide screenKey="workforce_os" />
       <header className="relative overflow-hidden rounded-2xl border border-[#22C1FF]/25 bg-gradient-to-br from-[#0c1426] via-[#0f1a30] to-[#0a1020] p-8 shadow-2xl shadow-black/50 sm:p-10">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_320px_at_0%_0%,rgba(34,193,255,0.14),transparent_55%),radial-gradient(480px_240px_at_100%_100%,rgba(124,58,237,0.08),transparent_50%)]"
@@ -1108,6 +1111,8 @@ export function WorkforceCommandCentreClient({
           </div>
         </DashboardCard>
       </section>
+
+      <StaffUatClarityFeedback screenKey="workforce_os" />
 
       <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08] pt-8 text-sm text-[#64748B]">
         <p>

@@ -30,6 +30,8 @@ import { derivePatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStat
 import { legacyJourneyLabelFromCanonical } from "@/src/lib/patientJourney/patientJourneyStateCore";
 import type { PatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
 import { PatientJourneyRibbon } from "@/src/components/fi-admin/patients/PatientJourneyRibbon";
+import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
+import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
 
 export function PatientDetailPageView({
   tenantId,
@@ -92,7 +94,14 @@ export function PatientDetailPageView({
     <div className="mx-auto max-w-6xl space-y-6 py-6 pb-24 md:pb-6">
       <PatientDetailBreadcrumbs tenantId={tenantId} patientName={initialPayload.displayName} />
 
-      {patientJourney ? <PatientJourneyRibbon journey={patientJourney} /> : null}
+      <StaffUatScreenGuide screenKey="patient_profile" />
+
+      {patientJourney ? (
+        <>
+          <PatientJourneyRibbon journey={patientJourney} />
+          <StaffUatScreenGuide screenKey="patient_journey" />
+        </>
+      ) : null}
 
       <PatientCommandHero
         tenantId={tenantId}
@@ -213,6 +222,8 @@ export function PatientDetailPageView({
       {activeTab === "documents" ? (
         <PatientDocumentsTab tenantId={tenantId} data={profile} />
       ) : null}
+
+      <StaffUatClarityFeedback screenKey="patient_profile" />
 
       <PatientPhotoCaptureActions
         tenantId={tenantId}

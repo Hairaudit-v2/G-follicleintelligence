@@ -25,6 +25,9 @@ import {
   STAFF_UX_PRIORITY_STYLES,
 } from "@/src/lib/fiOs/staffUxPresentation";
 import { FiOsEmptyState } from "@/src/components/fi-admin/shared/FiOsEmptyState";
+import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
+import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
+import { useStaffUat } from "@/src/components/fi-admin/staff-uat/StaffUatContext";
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 import {
   ReceptionPatientFlowBoard,
@@ -114,6 +117,7 @@ export function ReceptionBoardCommandCenter(props: {
   const [searchOpen, setSearchOpen] = useState(false);
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
 
+  const { logFriction } = useStaffUat();
   const { data, lastRefreshedAt, isRefreshing, refreshError, refresh } = useReceptionBoardRefresh({
     tenantId: props.initialData.tenantId,
     initialData: props.initialData,
@@ -159,6 +163,8 @@ export function ReceptionBoardCommandCenter(props: {
         isRefreshing && "opacity-90"
       )}
     >
+      <StaffUatScreenGuide screenKey="reception_board" />
+
       <header className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0b1220] p-6 sm:p-8">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_300px_at_0%_0%,rgba(34,193,255,0.14),transparent_55%),radial-gradient(480px_240px_at_100%_100%,rgba(124,58,237,0.1),transparent_50%)]"
@@ -240,8 +246,9 @@ export function ReceptionBoardCommandCenter(props: {
               {data.appointments.length === 0 ? (
                 <FiOsEmptyState
                   title="No appointments scheduled today"
-                  description="Create a booking or open the calendar to plan the clinic day."
-                  action={{ label: "Create booking", href: `${base}/calendar` }}
+                  description="Open the calendar to plan the day, or find a patient to book their next visit."
+                  action={{ label: "Open calendar", href: `${base}/calendar` }}
+                  secondaryAction={{ label: "Find or add patient", href: `${base}/patients` }}
                   icon={<Calendar className="h-10 w-10 opacity-40" aria-hidden />}
                 />
               ) : (
@@ -439,6 +446,14 @@ export function ReceptionBoardCommandCenter(props: {
                     <li key={alert.id}>
                       <Link
                         href={alertHref}
+                        onClick={() =>
+                          logFriction(
+                            "alert_opened_unresolved",
+                            human.title,
+                            { alertId: alert.id, kind: alert.kind },
+                            "reception_board"
+                          )
+                        }
                         className={cn(
                           "flex gap-3 rounded-xl border px-4 py-4 transition hover:border-cyan-500/30",
                           alertRowClass(alert.severity)
@@ -493,6 +508,8 @@ export function ReceptionBoardCommandCenter(props: {
           </DashboardCard>
         </div>
       </div>
+
+      <StaffUatClarityFeedback screenKey="reception_board" />
 
       <ClinicOsGlobalSearch
         tenantId={data.tenantId}

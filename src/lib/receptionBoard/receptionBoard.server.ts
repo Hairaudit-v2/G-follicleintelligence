@@ -97,9 +97,8 @@ export async function loadReceptionBoardCommandCenterPayload(
 
   const base = `/fi-admin/${tid}`;
 
-  const [operational, receptionOsBoard, surgeryPayload] = await Promise.all([
+  const [operational, surgeryPayload] = await Promise.all([
     loadTenantOperationalDashboard(tid, { includeReceptionBoard: true }),
-    loadReceptionOsBoardPayload(tid, now),
     loadSurgeryReadinessBoardPayload(tid, now),
   ]);
 
@@ -107,7 +106,21 @@ export async function loadReceptionBoardCommandCenterPayload(
   const tomorrowWindow = computeTomorrowOperationalWindow(now, tz);
   const cards = operational.receptionBoard.cards;
   const bookingIds = cards.map((c) => c.id);
-  const caseByBooking = await loadBookingCaseIds(tid, bookingIds);
+  const patientIds = cards.map((c) => c.patientId).filter((id): id is string => Boolean(id?.trim()));
+
+  const caseByBookingPromise = loadBookingCaseIds(tid, bookingIds);
+
+  const [caseByBooking, journeyByPatient, receptionOsBoard] = await Promise.all([
+    caseByBookingPromise,
+    loadPatientJourneySnapshotsForPatients(tid, patientIds),
+    caseByBookingPromise.then((caseMap) =>
+      loadReceptionOsBoardPayload(tid, now, {
+        operational,
+        surgeryPayload,
+        caseByBooking: caseMap,
+      })
+    ),
+  ]);
 
   const outstandingPaymentIds = new Set(
     receptionOsBoard.outstandingDeposits.map((d) => d.id)
@@ -115,9 +128,6 @@ export async function loadReceptionBoardCommandCenterPayload(
   const overdueIds = new Set(
     receptionOsBoard.outstandingDeposits.filter((d) => d.isOverdue).map((d) => d.id)
   );
-
-  const patientIds = cards.map((c) => c.patientId).filter((id): id is string => Boolean(id?.trim()));
-  const journeyByPatient = await loadPatientJourneySnapshotsForPatients(tid, patientIds);
 
   const appointments = sortAppointmentsChronologically(
     cards.map((card) => {

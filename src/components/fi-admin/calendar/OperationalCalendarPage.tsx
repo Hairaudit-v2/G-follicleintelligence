@@ -15,6 +15,8 @@ import {
   OperationalCalendarStreamProvider,
   type OperationalCalendarStreamContextValue,
 } from "@/src/components/fi-admin/calendar/operationalCalendarStreamContext";
+import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
+import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
 
 function shellFingerprint(shell: OperationalCalendarPageData): string {
   return [
@@ -93,5 +95,13 @@ export function OperationalCalendarPage({
   ) : (
     page
   );
-  return <CalendarToastProvider>{wrapped}</CalendarToastProvider>;
+  return (
+    <CalendarToastProvider>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <StaffUatScreenGuide screenKey="calendar" />
+        {wrapped}
+        <StaffUatClarityFeedback screenKey="calendar" />
+      </div>
+    </CalendarToastProvider>
+  );
 }

@@ -46,6 +46,8 @@ export const FUTURE_FI_EVENTS = {
   "surgery.completed": 1,
   "staff.readiness.updated": 1,
   "audit.completed": 1,
+  "staff.uat.feedback": 1,
+  "staff.uat.friction": 1,
 } as const;
 
 export const FI_EVENT_REGISTRY = {

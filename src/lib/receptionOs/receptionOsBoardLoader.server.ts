@@ -64,6 +64,13 @@ export type {
   ReceptionOsTodaysPatient,
 } from "@/src/lib/receptionOs/receptionOsBoardPayloadSchema";
 
+/** Optional slices already loaded by a parent orchestrator (avoids duplicate Supabase work). */
+export type LoadReceptionOsBoardPreloaded = {
+  operational?: Awaited<ReturnType<typeof loadTenantOperationalDashboard>>;
+  surgeryPayload?: Awaited<ReturnType<typeof loadSurgeryReadinessBoardPayload>>;
+  caseByBooking?: Map<string, string>;
+};
+
 const COMMUNICATION_LIMIT = 40;
 const DEPOSIT_LIMIT = 50;
 const NEW_LEAD_LIMIT = 40;
@@ -692,15 +699,19 @@ function buildActionAlerts(input: {
 
 export async function loadReceptionOsBoardPayload(
   tenantId: string,
-  now: Date = new Date()
+  now: Date = new Date(),
+  preloaded: LoadReceptionOsBoardPreloaded = {}
 ): Promise<ReceptionOsBoardPayload> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const viewerContext = await resolveReceptionOsViewerContext(tid);
   const base = `/fi-admin/${tid}`;
 
-  const operational = await loadTenantOperationalDashboard(tid, { includeReceptionBoard: true });
+  const operational =
+    preloaded.operational ??
+    (await loadTenantOperationalDashboard(tid, { includeReceptionBoard: true }));
   const todayYmd = operational.operationalDay.todayYmd;
   const tz = operational.operationalDay.calendarTimezone;
+  const surgeryFallback = emptySurgeryReadinessBoardPayload(tz, todayYmd);
 
   const [conversionPayload, surgeryPayload, communications, newLeads, deposits, missingForms] =
     await Promise.all([
@@ -709,11 +720,13 @@ export async function loadReceptionOsBoardPayload(
         () => loadConsultationConversionBoardPayload(tid, now),
         emptyConsultationConversionBoardPayload(tz, todayYmd)
       ),
-      loadBoardSectionSafe(
-        "surgery",
-        () => loadSurgeryReadinessBoardPayload(tid, now),
-        emptySurgeryReadinessBoardPayload(tz, todayYmd)
-      ),
+      preloaded.surgeryPayload
+        ? Promise.resolve(preloaded.surgeryPayload)
+        : loadBoardSectionSafe(
+            "surgery",
+            () => loadSurgeryReadinessBoardPayload(tid, now),
+            surgeryFallback
+          ),
       loadBoardSectionSafe("communications", () => loadRecentCommunications(tid, base), []),
       loadBoardSectionSafe("pipeline_leads", () => loadNewLeadPipelineCards(tid, base), []),
       loadBoardSectionSafe("deposits", () => loadOutstandingDeposits(tid, todayYmd, base), []),
@@ -721,7 +734,8 @@ export async function loadReceptionOsBoardPayload(
     ]);
 
   const bookingIds = operational.receptionBoard.cards.map((c) => c.id);
-  const caseByBooking = await loadBookingCaseIds(tid, bookingIds);
+  const caseByBooking =
+    preloaded.caseByBooking ?? (await loadBookingCaseIds(tid, bookingIds));
   const todaysPatients = operational.receptionBoard.cards
     .slice()
     .sort((a, b) => a.startAt.localeCompare(b.startAt))

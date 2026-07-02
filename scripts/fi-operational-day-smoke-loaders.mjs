@@ -63,12 +63,31 @@ const { appendProcedureDayQuickActionIfEnabled } = await import(
   "../src/lib/procedureDay/procedureDayReceptionCore.ts"
 );
 
+const RECEPTION_COLD_BUDGET_MS = 15_000;
+const RECEPTION_WARM_BUDGET_MS = 5_000;
+const CALENDAR_FEED_BUDGET_MS = 3_000;
+
 const t0 = performance.now();
 const reception = await loadReceptionBoardCommandCenterPayload(tenantId, new Date());
-const receptionMs = Math.round(performance.now() - t0);
+const receptionColdMs = Math.round(performance.now() - t0);
+
+const tWarm = performance.now();
+await loadReceptionBoardCommandCenterPayload(tenantId, new Date());
+const receptionWarmMs = Math.round(performance.now() - tWarm);
 
 if (!reception.operationalDay) throw new Error("Reception payload missing operationalDay");
 if (!Array.isArray(reception.appointments)) throw new Error("Reception payload missing appointments");
+
+if (receptionColdMs > RECEPTION_COLD_BUDGET_MS) {
+  console.warn(
+    `WARN: reception cold load ${receptionColdMs}ms exceeds ${RECEPTION_COLD_BUDGET_MS}ms budget`
+  );
+}
+if (receptionWarmMs > RECEPTION_WARM_BUDGET_MS) {
+  console.warn(
+    `WARN: reception warm load ${receptionWarmMs}ms exceeds ${RECEPTION_WARM_BUDGET_MS}ms budget`
+  );
+}
 
 const adminBase = `/fi-admin/${tenantId}`;
 const quickActions = appendProcedureDayQuickActionIfEnabled(
@@ -92,6 +111,10 @@ const feed = await loadCalendarOperationalFeed(
 );
 const feedMs = Math.round(performance.now() - t1);
 
+if (feedMs > CALENDAR_FEED_BUDGET_MS) {
+  console.warn(`WARN: calendar feed ${feedMs}ms exceeds ${CALENDAR_FEED_BUDGET_MS}ms budget`);
+}
+
 const forbidden = new Set(CALENDAR_OPERATIONAL_FEED_FORBIDDEN_KEYS);
 let feedBytes = 0;
 for (const item of feed.items) {
@@ -103,11 +126,18 @@ for (const item of feed.items) {
 
 console.log(
   JSON.stringify({
-    receptionMs,
+    receptionColdMs,
+    receptionWarmMs,
+    receptionMs: receptionColdMs,
     feedMs,
     feedItems: feed.items.length,
     feedBytes,
     appointments: reception.appointments.length,
     procedureDayEnabled: readFiProcedureDayEnabled(),
+    budgets: {
+      receptionColdMs: RECEPTION_COLD_BUDGET_MS,
+      receptionWarmMs: RECEPTION_WARM_BUDGET_MS,
+      feedMs: CALENDAR_FEED_BUDGET_MS,
+    },
   })
 );

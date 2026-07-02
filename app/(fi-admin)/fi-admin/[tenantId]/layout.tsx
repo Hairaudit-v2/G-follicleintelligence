@@ -34,6 +34,8 @@ import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfi
 import { loadHrOsNavVisibleForViewer } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
+import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
+import { StaffUatLayoutMount } from "@/src/components/fi-admin/staff-uat/StaffUatLayoutMount";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
 import {
   canAccessTenantReminderSettings,
@@ -205,6 +207,10 @@ export default async function TenantAdminLayout({
 
   const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
   const showProcedureDayNav = pinFloorMode ? false : readFiProcedureDayEnabled();
+  const staffUatModeEnabled = readFiStaffUatModeEnabled();
+  const staffUatRole = pinFloorMode
+    ? "receptionist_pin"
+    : tenantBackendAdminRole?.trim() || "clinic_staff";
 
   const mainSurface = (
     <div
@@ -225,7 +231,13 @@ export default async function TenantAdminLayout({
           "flex min-h-0 min-w-0 flex-1 flex-col"
         )}
       >
-        {children}
+        <StaffUatLayoutMount
+          tenantId={tenantId}
+          role={staffUatRole}
+          enabled={staffUatModeEnabled}
+        >
+          {children}
+        </StaffUatLayoutMount>
       </div>
     </div>
   );

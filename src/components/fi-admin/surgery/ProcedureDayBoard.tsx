@@ -21,6 +21,8 @@ import {
   type ProcedureDayFlowBoardItem,
 } from "@/src/lib/fiAdmin/surgeryPresentation";
 import { ProcedureDaySystemDiagnostics } from "@/src/components/fi-admin/surgery/ProcedureDaySystemDiagnostics";
+import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
+import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
 
 function ProcedureDayPrimaryActions({ base, todayYmd }: { base: string; todayYmd: string }) {
   return (
@@ -39,9 +41,6 @@ function ProcedureDayPrimaryActions({ base, todayYmd }: { base: string; todayYmd
       </Link>
       <Link href={`${base}/surgery-readiness`} className={surgeryLinkButtonClass}>
         Open Readiness Board
-      </Link>
-      <Link href={`${base}/calendar`} className={surgeryLinkButtonClass}>
-        Quick Create Booking
       </Link>
     </div>
   );
@@ -124,6 +123,7 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayLiveBoardPayload
 
   return (
     <div className="mx-auto min-w-0 max-w-[88rem] space-y-8 pb-10 sm:space-y-10 sm:pb-14">
+      <StaffUatScreenGuide screenKey="procedure_day" />
       <DashboardCard elevated className="relative overflow-hidden p-6 sm:p-8">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(560px_260px_at_0%_0%,rgba(34,193,255,0.11),transparent_55%),radial-gradient(420px_200px_at_100%_100%,rgba(124,58,237,0.07),transparent_50%)]"
@@ -347,6 +347,8 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayLiveBoardPayload
       ) : null}
 
       <ProcedureDaySystemDiagnostics payload={data} />
+
+      <StaffUatClarityFeedback screenKey="procedure_day" />
     </div>
   );
 }

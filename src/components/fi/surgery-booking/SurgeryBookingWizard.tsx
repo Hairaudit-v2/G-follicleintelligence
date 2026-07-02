@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   confirmSurgeryBookingAction,
@@ -28,6 +28,9 @@ import type {
   SurgeryBookingConfirmResult,
   SurgeryBookingWizardPrefill,
 } from "@/src/lib/surgeryBooking/surgeryBookingTypes";
+import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
+import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
+import { useStaffUat } from "@/src/components/fi-admin/staff-uat/StaffUatContext";
 
 const fieldClass =
   "mt-1 w-full rounded border border-slate-700 bg-slate-950/60 px-2 py-1.5 text-sm text-slate-100 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
@@ -50,8 +53,10 @@ export function SurgeryBookingWizard({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const { logFriction } = useStaffUat();
   const tid = tenantId.trim();
   const [step, setStep] = useState(1);
+  const validationFrictionKeyRef = useRef("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ctx, setCtx] = useState<SurgeryBookingWizardContext | null>(null);
@@ -123,6 +128,36 @@ export function SurgeryBookingWizard({
   ]);
 
   const canAdvance = stepMissing.length === 0;
+
+  const handleAbandon = useCallback(() => {
+    if (!result) {
+      logFriction(
+        "wizard_step_abandoned",
+        `Abandoned at step ${step}`,
+        { step },
+        "surgery_booking_wizard"
+      );
+    }
+    onClose();
+  }, [logFriction, onClose, result, step]);
+
+  useEffect(() => {
+    if (result || stepMissing.length === 0) return;
+    const key = `${step}:${stepMissing.join("|")}`;
+    if (key === validationFrictionKeyRef.current) return;
+    validationFrictionKeyRef.current = key;
+    logFriction(
+      "wizard_validation_error",
+      stepMissing.join("; "),
+      { step, missing: stepMissing },
+      "surgery_booking_wizard"
+    );
+  }, [logFriction, result, step, stepMissing]);
+
+  useEffect(() => {
+    if (!error) return;
+    logFriction("wizard_validation_error", error, { step }, "surgery_booking_wizard");
+  }, [error, logFriction, step]);
 
   const submit = useCallback(async () => {
     if (!prefill.patientId?.trim()) {
@@ -236,17 +271,19 @@ export function SurgeryBookingWizard({
         </div>
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleAbandon}
           className="rounded-xl border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
         >
           Close
         </button>
+        <StaffUatClarityFeedback screenKey="surgery_booking_wizard" />
       </div>
     );
   }
 
   return (
     <div className="flex max-h-[85vh] flex-col lg:max-h-[90vh]">
+      <StaffUatScreenGuide screenKey="surgery_booking_wizard" />
       <div className="border-b border-white/10 px-6 py-5">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/90">
           Book surgery
@@ -508,15 +545,27 @@ export function SurgeryBookingWizard({
       </aside>
       </div>
 
+      <StaffUatClarityFeedback screenKey="surgery_booking_wizard" />
+
       <div className="flex items-center justify-between border-t border-white/10 px-6 py-4">
-        <button
-          type="button"
-          disabled={step <= 1 || busy}
-          onClick={() => setStep((s) => Math.max(1, s - 1))}
-          className="rounded border border-slate-600 px-3 py-1.5 text-sm text-slate-300 disabled:opacity-40"
-        >
-          Back
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={step <= 1 || busy}
+            onClick={() => setStep((s) => Math.max(1, s - 1))}
+            className="rounded border border-slate-600 px-3 py-1.5 text-sm text-slate-300 disabled:opacity-40"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={handleAbandon}
+            className="rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-400 hover:border-rose-500/30 hover:text-rose-200 disabled:opacity-40"
+          >
+            Cancel booking
+          </button>
+        </div>
         {step < 4 ? (
           <button
             type="button"

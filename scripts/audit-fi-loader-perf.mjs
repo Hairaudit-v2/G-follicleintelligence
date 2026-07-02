@@ -79,6 +79,9 @@ const { loadFinancialOsCommandCentrePayload } = await import(
 const { loadReceptionOsCommandCentrePayload } = await import(
   "../src/lib/receptionOs/receptionOsCommandCentreLoader.server.ts"
 );
+const { loadReceptionBoardCommandCenterPayload } = await import(
+  "../src/lib/receptionBoard/receptionBoard.server.ts"
+);
 const { loadEnterpriseDemoGlobalCommandCentrePayload } = await import(
   "../src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentreLoader.server.ts"
 );
@@ -167,6 +170,19 @@ results.push(
   await timed("reception.commandCentre", () =>
     loadReceptionOsCommandCentrePayload(tenantId, new Date(), { dryRunCommunications: true })
   )
+);
+
+results.push(
+  await timed("reception.boardCommandCenter (cold)", () =>
+    loadReceptionBoardCommandCenterPayload(tenantId, new Date())
+  )
+);
+
+results.push(
+  await timed("reception.boardCommandCenter (warm)", async () => {
+    await loadReceptionBoardCommandCenterPayload(tenantId, new Date());
+    return loadReceptionBoardCommandCenterPayload(tenantId, new Date());
+  })
 );
 
 results.push(
