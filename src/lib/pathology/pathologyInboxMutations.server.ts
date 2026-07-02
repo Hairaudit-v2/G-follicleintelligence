@@ -15,6 +15,8 @@ import {
   type PathologyResultItemInput,
 } from "@/src/lib/pathology/pathologyResultMutations.server";
 import { suggestPathologyPatientMatch } from "@/src/lib/pathology/pathologyPatientMatch.server";
+import { maybeEnqueueAndRunPathologyExtractionAfterUpload } from "@/src/lib/pathology/pathologyExtractionJobRunner.server";
+import { maybeAutoCreateDraftFromExtraction } from "@/src/lib/pathology/pathologyAutoDraftResult.server";
 
 export const PATHOLOGY_INBOX_PDF_BUCKET = PATHOLOGY_PATIENT_PDF_BUCKET;
 
@@ -48,6 +50,10 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
     extracted_dob: row.extracted_dob != null ? String(row.extracted_dob).slice(0, 10) : null,
     extracted_mrn: row.extracted_mrn != null ? String(row.extracted_mrn) : null,
     promoted_result_id: row.promoted_result_id != null ? String(row.promoted_result_id) : null,
+    extraction_status: String(row.extraction_status ?? "not_started") as PathologyInboundDocumentRow["extraction_status"],
+    extraction_job_id: row.extraction_job_id != null ? String(row.extraction_job_id) : null,
+    draft_result_id: row.draft_result_id != null ? String(row.draft_result_id) : null,
+    ready_for_review_at: row.ready_for_review_at != null ? String(row.ready_for_review_at) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -242,6 +248,8 @@ export async function uploadInboundPathologyDocument(
     updated = await applyMatchSuggestion(supabase, tid, doc.id, updated, hints, input.actingUserId);
   }
 
+  await maybeEnqueueAndRunPathologyExtractionAfterUpload(tid, doc.id, input.actingUserId, supabase);
+
   const loaded = await loadPathologyInboxDocument(tid, doc.id, supabase);
   if (!loaded) throw new Error("Failed to load inbound document after upload.");
   return loaded;
@@ -288,6 +296,8 @@ export async function confirmInboundDocumentMatch(
     actorUserId: input.actingUserId,
     detail: { confirmed_patient_id: pid },
   });
+
+  await maybeAutoCreateDraftFromExtraction(tid, did, input.actingUserId, supabase);
 
   const loaded = await loadPathologyInboxDocument(tid, did, supabase);
   if (!loaded) throw new Error("Inbound document not found after confirm.");

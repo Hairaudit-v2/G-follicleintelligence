@@ -2,6 +2,16 @@ export type PathologyInboundSourceChannel = "manual_upload" | "email" | "api";
 
 export type PathologyInboundMatchStatus = "pending" | "matched" | "rejected" | "promoted";
 
+export type PathologyInboundExtractionStatus =
+  | "not_started"
+  | "queued"
+  | "running"
+  | "succeeded"
+  | "failed"
+  | "needs_review";
+
+export type PathologyExtractionReviewStatus = "pending_review" | "reviewed" | "dismissed";
+
 export type PathologyInboundDocumentRow = {
   id: string;
   tenant_id: string;
@@ -19,6 +29,10 @@ export type PathologyInboundDocumentRow = {
   extracted_dob: string | null;
   extracted_mrn: string | null;
   promoted_result_id: string | null;
+  extraction_status: PathologyInboundExtractionStatus;
+  extraction_job_id: string | null;
+  draft_result_id: string | null;
+  ready_for_review_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -29,12 +43,12 @@ export type PathologyInboundDocumentEventType =
   | "match_confirmed"
   | "match_rejected"
   | "promoted"
-  | "extraction_queued";
-
-export type PathologyInboundDocumentListItem = PathologyInboundDocumentRow & {
-  suggested_patient_name: string | null;
-  confirmed_patient_name: string | null;
-};
+  | "extraction_queued"
+  | "extraction_started"
+  | "extraction_succeeded"
+  | "extraction_failed"
+  | "draft_result_created"
+  | "ready_for_review";
 
 export type PathologyExtractionJobStatus =
   | "queued"
@@ -54,6 +68,29 @@ export type PathologyExtractionJobRow = {
   normalized_items_json: unknown[];
   error_message: string | null;
   idempotency_key: string;
+  started_at: string | null;
+  completed_at: string | null;
+  extracted_marker_count: number;
+  skipped_marker_count: number;
+  review_status: PathologyExtractionReviewStatus;
+  raw_text_preview: string | null;
+  medical_intelligence_preview_json: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+};
+
+export type PathologyExtractionPreviewMarker = {
+  test_code: string | null;
+  test_label: string;
+  result_value: string;
+  result_unit: string | null;
+  reference_range: string | null;
+  flag: string;
+  confidence: number | null;
+};
+
+export type PathologyInboundDocumentListItem = PathologyInboundDocumentRow & {
+  suggested_patient_name: string | null;
+  confirmed_patient_name: string | null;
+  extraction_job: PathologyExtractionJobRow | null;
 };

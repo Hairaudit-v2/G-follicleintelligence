@@ -7,6 +7,7 @@ import type {
   PathologyInboundDocumentListItem,
   PathologyInboundDocumentRow,
   PathologyInboundMatchStatus,
+  PathologyExtractionJobRow,
 } from "@/src/lib/pathology/pathologyInboxTypes";
 
 function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocumentRow {
@@ -33,6 +34,10 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
     extracted_dob: row.extracted_dob != null ? String(row.extracted_dob).slice(0, 10) : null,
     extracted_mrn: row.extracted_mrn != null ? String(row.extracted_mrn) : null,
     promoted_result_id: row.promoted_result_id != null ? String(row.promoted_result_id) : null,
+    extraction_status: String(row.extraction_status ?? "not_started") as PathologyInboundDocumentRow["extraction_status"],
+    extraction_job_id: row.extraction_job_id != null ? String(row.extraction_job_id) : null,
+    draft_result_id: row.draft_result_id != null ? String(row.draft_result_id) : null,
+    ready_for_review_at: row.ready_for_review_at != null ? String(row.ready_for_review_at) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -84,9 +89,65 @@ async function loadPatientNameLabels(
   return out;
 }
 
+function mapExtractionJob(row: Record<string, unknown>): PathologyExtractionJobRow {
+  return {
+    id: String(row.id),
+    tenant_id: String(row.tenant_id),
+    inbound_document_id: row.inbound_document_id != null ? String(row.inbound_document_id) : null,
+    result_id: row.result_id != null ? String(row.result_id) : null,
+    status: String(row.status) as PathologyExtractionJobRow["status"],
+    provider: row.provider != null ? String(row.provider) : null,
+    raw_extraction_json:
+      row.raw_extraction_json && typeof row.raw_extraction_json === "object" && !Array.isArray(row.raw_extraction_json)
+        ? (row.raw_extraction_json as Record<string, unknown>)
+        : {},
+    normalized_items_json: Array.isArray(row.normalized_items_json) ? row.normalized_items_json : [],
+    error_message: row.error_message != null ? String(row.error_message) : null,
+    idempotency_key: String(row.idempotency_key),
+    started_at: row.started_at != null ? String(row.started_at) : null,
+    completed_at: row.completed_at != null ? String(row.completed_at) : null,
+    extracted_marker_count:
+      row.extracted_marker_count != null ? Number(row.extracted_marker_count) : 0,
+    skipped_marker_count: row.skipped_marker_count != null ? Number(row.skipped_marker_count) : 0,
+    review_status: String(row.review_status ?? "pending_review") as PathologyExtractionJobRow["review_status"],
+    raw_text_preview: row.raw_text_preview != null ? String(row.raw_text_preview) : null,
+    medical_intelligence_preview_json:
+      row.medical_intelligence_preview_json &&
+      typeof row.medical_intelligence_preview_json === "object" &&
+      !Array.isArray(row.medical_intelligence_preview_json)
+        ? (row.medical_intelligence_preview_json as Record<string, unknown>)
+        : {},
+    created_at: String(row.created_at),
+    updated_at: String(row.updated_at),
+  };
+}
+
+async function loadExtractionJobsByIds(
+  tenantId: string,
+  jobIds: string[],
+  client?: SupabaseClient
+): Promise<Map<string, PathologyExtractionJobRow>> {
+  const ids = [...new Set(jobIds.filter(Boolean))];
+  if (!ids.length) return new Map();
+  const supabase = client ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_pathology_extraction_jobs")
+    .select("*")
+    .eq("tenant_id", tenantId.trim())
+    .in("id", ids);
+  if (error) throw new Error(error.message);
+  const out = new Map<string, PathologyExtractionJobRow>();
+  for (const row of data ?? []) {
+    const job = mapExtractionJob(row as Record<string, unknown>);
+    out.set(job.id, job);
+  }
+  return out;
+}
+
 function enrichListItem(
   doc: PathologyInboundDocumentRow,
-  labels: Map<string, string>
+  labels: Map<string, string>,
+  jobs: Map<string, PathologyExtractionJobRow>
 ): PathologyInboundDocumentListItem {
   return {
     ...doc,
@@ -96,6 +157,7 @@ function enrichListItem(
     confirmed_patient_name: doc.confirmed_patient_id
       ? (labels.get(doc.confirmed_patient_id) ?? null)
       : null,
+    extraction_job: doc.extraction_job_id ? (jobs.get(doc.extraction_job_id) ?? null) : null,
   };
 }
 
@@ -130,7 +192,9 @@ export async function loadPathologyInboxDocuments(
     [d.suggested_patient_id, d.confirmed_patient_id].filter(Boolean)
   ) as string[];
   const labels = await loadPatientNameLabels(tid, patientIds, supabase);
-  return docs.map((d) => enrichListItem(d, labels));
+  const jobIds = docs.map((d) => d.extraction_job_id).filter(Boolean) as string[];
+  const jobs = await loadExtractionJobsByIds(tid, jobIds, supabase);
+  return docs.map((d) => enrichListItem(d, labels, jobs));
 }
 
 export async function loadPathologyInboxDocument(
@@ -157,7 +221,10 @@ export async function loadPathologyInboxDocument(
     [doc.suggested_patient_id, doc.confirmed_patient_id].filter(Boolean) as string[],
     supabase
   );
-  return enrichListItem(doc, labels);
+  const jobs = doc.extraction_job_id
+    ? await loadExtractionJobsByIds(tid, [doc.extraction_job_id], supabase)
+    : new Map<string, PathologyExtractionJobRow>();
+  return enrichListItem(doc, labels, jobs);
 }
 
 export async function createInboundDocumentSignedUrl(
