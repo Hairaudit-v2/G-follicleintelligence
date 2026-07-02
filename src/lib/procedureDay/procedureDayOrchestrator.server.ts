@@ -4,7 +4,10 @@ import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { readFiProcedureDayEnabled } from "./procedureDayEnv.server";
 import { enrichProcedureDayBoardWithLiveWorkflow } from "./procedureDayLiveLoader.server";
-import { loadProcedureDayBoardPayload } from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import {
+  loadProcedureDayBoardPayload,
+  loadProcedureDayBoardShellPayload,
+} from "@/src/lib/surgery/procedureDayBoardLoader.server";
 
 import type { ProcedureDayLiveBoardPayload } from "./procedureDayTypes";
 
@@ -14,6 +17,8 @@ export type LoadProcedureDayBoardOptions = {
   adminKey?: string;
   request?: Request;
   now?: Date;
+  /** shell = first paint; full = post-hydrate enrichment */
+  tier?: "shell" | "full";
 };
 
 /**
@@ -33,8 +38,13 @@ export async function loadProcedureDayBoardForTenant(
     });
   }
 
-  const base = await loadProcedureDayBoardPayload(tid, options.now);
-  if (!readFiProcedureDayEnabled()) {
+  const tier = options.tier ?? "full";
+  const base =
+    tier === "shell"
+      ? await loadProcedureDayBoardShellPayload(tid, options.now)
+      : await loadProcedureDayBoardPayload(tid, options.now);
+
+  if (tier === "shell" || !readFiProcedureDayEnabled()) {
     return {
       ...base,
       liveWorkflowEnabled: false,

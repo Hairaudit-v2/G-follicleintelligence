@@ -7,7 +7,7 @@ import {
   loadTenantCalendarSettingsCached,
   loadTenantConfigCached,
 } from "@/src/lib/performance/referenceDataCache.server";
-import { loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
+import { loadBookingsForOperatorView, loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { CRM_TASK_ACTIVE_STATUS_VALUES } from "@/src/lib/crm/crmTaskPolicy";
 import { leadTitleFromRow, personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
@@ -876,6 +876,20 @@ function providerLabelFromBookingMetadata(meta: Record<string, unknown>): string
   return "Unassigned";
 }
 
+function shellAnchorLabelFromBooking(row: FiBookingRow): string {
+  const title = row.title?.trim();
+  if (title) return title;
+  const meta =
+    row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+      ? (row.metadata as Record<string, unknown>)
+      : {};
+  for (const key of ["patient_display_name", "patient_name", "anchor_label", "display_name"]) {
+    const s = meta[key] != null ? String(meta[key]).trim() : "";
+    if (s) return s;
+  }
+  return "Patient";
+}
+
 export async function loadReceptionBoardCards(
   tenantId: string,
   localStartIso: string,
@@ -884,13 +898,25 @@ export async function loadReceptionBoardCards(
 ): Promise<ReceptionBoardCard[]> {
   const enrichment = options.enrichment ?? "full";
   const tid = tenantId.trim();
-  const raw = await loadBookingsForTenantRange(tid, localStartIso, localEndIso);
+  const raw =
+    enrichment === "shell"
+      ? await loadBookingsForOperatorView({
+          tenantId: tid,
+          rangeStartIso: localStartIso,
+          rangeEndIso: localEndIso,
+          includeCancelled: false,
+          limit: 120,
+        })
+      : await loadBookingsForTenantRange(tid, localStartIso, localEndIso);
   const todayBookings = raw.filter((b) =>
     bookingStartFallsOnOperationalWindow(b.start_at, localStartIso, localEndIso)
   );
   if (todayBookings.length === 0) return [];
 
-  const maps = await loadBookingDisplayContextMaps(tid, todayBookings);
+  const maps =
+    enrichment === "shell"
+      ? { patients: new Map(), leads: new Map(), persons: new Map() }
+      : await loadBookingDisplayContextMaps(tid, todayBookings);
 
   let staffOpts: Awaited<ReturnType<typeof loadClinicalStaffPickerOptions>> = [];
   let userOpts: Awaited<ReturnType<typeof loadCrmShellUserPickerOptions>> = [];
@@ -951,7 +977,8 @@ export async function loadReceptionBoardCards(
       b.metadata && typeof b.metadata === "object" && !Array.isArray(b.metadata)
         ? (b.metadata as Record<string, unknown>)
         : {};
-    const displayName = anchorLabelForBookingRow(b, maps);
+    const displayName =
+      enrichment === "shell" ? shellAnchorLabelFromBooking(b) : anchorLabelForBookingRow(b, maps);
     const assign =
       enrichment === "full"
         ? bookingAssignmentDisplay(staffOpts, userOpts, b)

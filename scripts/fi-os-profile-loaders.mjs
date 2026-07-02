@@ -1,5 +1,5 @@
 /**
- * FI OS loader profile harness — measures cold/warm loads across operational surfaces.
+ * FI OS loader profile harness — Sprint 11 shell-tier budgets.
  *
  * Usage:
  *   node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/fi-os-profile-loaders.mjs <tenantUuid>
@@ -55,15 +55,12 @@ const { loadReceptionBoardShellPayload, loadReceptionBoardCommandCenterPayload }
   "../src/lib/receptionBoard/receptionBoard.server.ts"
 );
 const { loadOperationalCalendarShellData } = await import(
-  "../src/lib/calendar/operationalCalendarLoader.server.ts"
+  "../src/lib/calendar/calendarShellLoader.server.ts"
 );
-const { loadPatientDetailPayload } = await import("../src/lib/patients/patientDetailLoader.ts");
-const { loadCalendarOperationalFeed } = await import(
-  "../src/lib/calendar/calendarOperationalFeed.server.ts"
-);
-const { loadProcedureDayBoardPayload } = await import(
-  "../src/lib/surgery/procedureDayBoardLoader.server.ts"
-);
+const {
+  loadProcedureDayBoardShellPayload,
+  loadProcedureDayBoardPayload,
+} = await import("../src/lib/surgery/procedureDayBoardLoader.server.ts");
 const { loadClinicOsGlobalSearchResults } = await import(
   "../src/lib/fiAdmin/clinicOsGlobalSearchLoader.server.ts"
 );
@@ -74,6 +71,19 @@ const { loadClinicalStaffPickerCached, loadTenantRoomsCached } = await import(
 const anchor = new Date().toISOString().slice(0, 10);
 const results = [];
 
+const sprint11BeforeMs = {
+  "reception.shell": 2253,
+  "calendar.shell.cold": 6338,
+  "calendar.shell.warm": null,
+  "procedureDay.shell": 4108,
+  "search.global": 562,
+};
+
+results.push(
+  await timed("calendar.shell.cold", () =>
+    loadOperationalCalendarShellData(tenantId, { date: anchor }, { route: "fi-admin" })
+  )
+);
 results.push(
   await timed("reception.shell", () => loadReceptionBoardShellPayload(tenantId, new Date()))
 );
@@ -81,55 +91,23 @@ results.push(
   await timed("reception.shell.warm", () => loadReceptionBoardShellPayload(tenantId, new Date()))
 );
 results.push(
+  await timed("calendar.shell.warm", () =>
+    loadOperationalCalendarShellData(tenantId, { date: anchor }, { route: "fi-admin" })
+  )
+);
+results.push(
   await timed("reception.full", () =>
     loadReceptionBoardCommandCenterPayload(tenantId, new Date(), { tier: "full" })
   )
 );
 results.push(
-  await timed("calendar.shell", () =>
-    loadOperationalCalendarShellData(tenantId, { date: anchor }, { route: "fi-admin" })
+  await timed("procedureDay.shell", () =>
+    loadProcedureDayBoardShellPayload(tenantId, new Date())
   )
 );
 results.push(
-  await timed("calendar.feed", () =>
-    loadCalendarOperationalFeed(
-      tenantId,
-      { date: anchor, view: "week" },
-      { staffNameById: {}, roomLabelById: {}, staffIdByUserId: new Map() },
-      { enforceCrmReadGate: false }
-    )
-  )
+  await timed("procedureDay.full", () => loadProcedureDayBoardPayload(tenantId, new Date()))
 );
-
-const { supabaseAdmin } = await import("../lib/supabaseAdmin.ts");
-const { data: patientRow } = await supabaseAdmin()
-  .from("fi_patients")
-  .select("id")
-  .eq("tenant_id", tenantId)
-  .limit(1)
-  .maybeSingle();
-
-if (patientRow?.id) {
-  try {
-    results.push(
-      await timed("patient.profile", () =>
-        loadPatientDetailPayload(tenantId, String(patientRow.id), { tab: "overview" })
-      )
-    );
-  } catch (e) {
-    results.push({
-      label: "patient.profile",
-      ms: 0,
-      bytes: 0,
-      error: e instanceof Error ? e.message : String(e),
-    });
-  }
-}
-
-results.push(
-  await timed("procedureDay.board", () => loadProcedureDayBoardPayload(tenantId, new Date()))
-);
-
 results.push(
   await timed("surgeryBooking.wizardContext", async () => {
     const [staff, rooms] = await Promise.all([
@@ -139,17 +117,15 @@ results.push(
     return { staffCount: staff.length, roomCount: rooms.length };
   })
 );
-
 results.push(
   await timed("search.global", () => loadClinicOsGlobalSearchResults(tenantId, "smith"))
 );
 
 const budgets = {
   "reception.shell": 2000,
-  "calendar.shell": 2000,
-  "patient.profile": 2000,
-  "procedureDay.board": 2000,
-  "surgeryBooking.wizardContext": 500,
+  "calendar.shell.cold": 2000,
+  "calendar.shell.warm": 2000,
+  "procedureDay.shell": 2000,
   "search.global": 500,
 };
 
@@ -158,6 +134,23 @@ const summary = results.map((r) => ({
   kb: Math.round(r.bytes / 1024),
   budgetMs: budgets[r.label] ?? null,
   withinBudget: budgets[r.label] == null ? null : r.ms <= budgets[r.label],
+  sprint10Ms: sprint11BeforeMs[r.label] ?? null,
+  deltaMs:
+    sprint11BeforeMs[r.label] == null ? null : r.ms - sprint11BeforeMs[r.label],
 }));
 
-console.log(JSON.stringify({ tenantId, results: summary }, null, 2));
+const shellPass = summary
+  .filter((r) => r.budgetMs != null)
+  .every((r) => r.withinBudget === true);
+
+console.log(
+  JSON.stringify(
+    {
+      tenantId,
+      sprint11ShellBudgetPass: shellPass,
+      results: summary,
+    },
+    null,
+    2
+  )
+);

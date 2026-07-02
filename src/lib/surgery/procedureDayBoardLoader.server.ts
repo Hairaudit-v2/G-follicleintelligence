@@ -4,6 +4,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import {
+  beginFiPerfCollection,
+  finishFiPerfCollection,
+  recordFiPerfPayloadBytes,
+  withFiPerfSpan,
+} from "@/src/lib/performance/fiPerfCollector.server";
+import { loadReceptionShellBootstrapCached } from "@/src/lib/performance/referenceDataCache.server";
+import { buildFinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import { buildFinancialClearanceFromPipelineStatus } from "@/src/lib/financialOs/financialClearanceCore";
 import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { buildCaseWorklistRows } from "@/src/lib/cases/casesIndexBuild";
@@ -195,6 +204,8 @@ export type ProcedureDayScheduleCard = {
   clinicalStaffing: ClinicalStaffingSummaryDto | null;
 };
 
+export type ProcedureDayBoardLoadTier = "shell" | "full";
+
 export type ProcedureDayBoardPayload = {
   tenantId: string;
   window: ProcedureDayBoardWindow;
@@ -202,7 +213,314 @@ export type ProcedureDayBoardPayload = {
   procedureProgressCounts: ProcedureDayProgressCounts;
   scheduleGroups: { timeLabel: string; sortKey: string; cards: ProcedureDayScheduleCard[] }[];
   actions: ProcedureDayActionItem[];
+  /** shell = today's schedule + primary blockers only; full = enrichment post-hydrate */
+  loadTier?: ProcedureDayBoardLoadTier;
 };
+
+async function loadProcedureStatusByCaseId(
+  supabase: SupabaseClient,
+  tenantId: string,
+  caseIds: string[]
+): Promise<
+  Map<string, { procedure_status: string | null; surgeon_user_id: string | null; procedure_room: string | null }>
+> {
+  const out = new Map<
+    string,
+    { procedure_status: string | null; surgeon_user_id: string | null; procedure_room: string | null }
+  >();
+  const ids = uniqueStrings(caseIds);
+  if (!ids.length) return out;
+  const { data, error } = await supabase
+    .from("fi_case_procedures")
+    .select("case_id, procedure_status, surgeon_user_id, procedure_room")
+    .eq("tenant_id", tenantId.trim())
+    .in("case_id", ids);
+  if (error) throw new Error(error.message);
+  for (const raw of data ?? []) {
+    const r = raw as {
+      case_id: string;
+      procedure_status: string | null;
+      surgeon_user_id: string | null;
+      procedure_room: string | null;
+    };
+    out.set(String(r.case_id), {
+      procedure_status: r.procedure_status,
+      surgeon_user_id: r.surgeon_user_id,
+      procedure_room: r.procedure_room,
+    });
+  }
+  return out;
+}
+
+async function loadStaffDisplayNamesById(
+  supabase: SupabaseClient,
+  tenantId: string,
+  staffIds: string[]
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const ids = uniqueStrings(staffIds);
+  if (!ids.length) return out;
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("id, full_name, staff_role")
+    .eq("tenant_id", tenantId.trim())
+    .in("id", ids);
+  if (error) throw new Error(error.message);
+  for (const raw of data ?? []) {
+    const r = raw as { id: string; full_name: string | null; staff_role: string | null };
+    const name = String(r.full_name ?? "").trim() || String(r.staff_role ?? "").trim() || "Staff";
+    out.set(String(r.id), name);
+  }
+  return out;
+}
+
+function shellPatientLabelFromBooking(b: {
+  title: string | null;
+  metadata: unknown;
+  patient_id: string | null;
+}): string {
+  const title = b.title?.trim();
+  if (title) return title;
+  const meta =
+    b.metadata && typeof b.metadata === "object" && !Array.isArray(b.metadata)
+      ? (b.metadata as Record<string, unknown>)
+      : {};
+  for (const key of ["patient_display_name", "patient_name", "anchor_label"]) {
+    const s = meta[key] != null ? String(meta[key]).trim() : "";
+    if (s) return s;
+  }
+  return "Patient";
+}
+
+/**
+ * Fast path for Procedure Day first paint — today's surgeries, stage, room, surgeon, primary blocker.
+ */
+export async function loadProcedureDayBoardShellPayload(
+  tenantId: string,
+  now: Date = new Date()
+): Promise<ProcedureDayBoardPayload> {
+  const tid = tenantId.trim();
+  beginFiPerfCollection("procedure_day_shell", tid);
+
+  try {
+    const bootstrap = await withFiPerfSpan("tenant.bootstrap", () =>
+      loadReceptionShellBootstrapCached(tid)
+    );
+    const window = computeProcedureDayBoardWindow(now, bootstrap.calendarTimezone);
+
+    const rawBookings = await withFiPerfSpan("surgery.bookings", () =>
+      loadBookingsForOperatorView({
+        tenantId: tid,
+        rangeStartIso: window.rangeStartIso,
+        rangeEndIso: window.rangeEndIso,
+        bookingType: "surgery",
+        includeCancelled: false,
+        limit: BOARD_LIMIT,
+      })
+    );
+
+    const tz = window.calendarTimezone;
+    const todayYmd = window.todayYmd;
+    const surgeryBookings = rawBookings.filter(
+      (b) =>
+        b.booking_type.trim().toLowerCase() === "surgery" &&
+        isActiveSurgeryBookingStatus(b.booking_status) &&
+        isBookingStartOnTenantLocalDay(b.start_at, tz, todayYmd)
+    );
+
+    const supabase = supabaseAdmin();
+    const caseIds = uniqueStrings(surgeryBookings.map((b) => b.case_id));
+    const roomIds = uniqueStrings(surgeryBookings.map((b) => b.room_id));
+    const staffIds = uniqueStrings(surgeryBookings.map((b) => b.assigned_staff_id));
+    const surgeonUserIds = new Set<string>();
+
+    const [roomNames, procedureByCase, staffNames] = await Promise.all([
+      loadRoomDisplayNamesById(supabase, tid, roomIds),
+      loadProcedureStatusByCaseId(supabase, tid, caseIds),
+      loadStaffDisplayNamesById(supabase, tid, staffIds),
+    ]);
+
+    for (const proc of procedureByCase.values()) {
+      if (proc.surgeon_user_id?.trim()) surgeonUserIds.add(proc.surgeon_user_id.trim());
+    }
+    const fiUserLabels =
+      surgeonUserIds.size > 0
+        ? await loadFiUserEmailsById(supabase, tid, Array.from(surgeonUserIds))
+        : new Map<string, string>();
+
+    const base = `/fi-admin/${tid}`;
+    const phases: ReturnType<typeof deriveSurgeryDayPipelinePhase>[] = [];
+    const flagRows: { highRisk: boolean; unassignedTeam: boolean; missingRoom: boolean }[] = [];
+    const cards: ProcedureDayScheduleCard[] = [];
+    const procedureProgressCounts = emptyProcedureDayProgressCounts();
+
+    for (const b of surgeryBookings) {
+      const caseId = b.case_id?.trim() || null;
+      const proc = caseId ? (procedureByCase.get(caseId) ?? null) : null;
+      const surgeonUserId = proc?.surgeon_user_id?.trim() || null;
+      const procedureSurgeonLabel = surgeonUserId ? (fiUserLabels.get(surgeonUserId) ?? null) : null;
+      const calendarAssignee = b.assigned_staff_id?.trim()
+        ? (staffNames.get(b.assigned_staff_id.trim()) ?? null)
+        : null;
+      const rid = b.room_id?.trim();
+      const roomLabel = rid ? (roomNames.get(rid) ?? null) : null;
+      const hasBookingAssignee = Boolean(b.assigned_staff_id?.trim() || b.assigned_user_id?.trim());
+      const hasProcedureSurgeon = Boolean(surgeonUserId);
+      const hasRoom = Boolean(rid);
+      const roomRequired = Boolean(b.room_required);
+
+      const issues = buildTodayProcedureReadinessIssues({
+        caseId,
+        patientIdForPathology: null,
+        hasPathologyResult: true,
+        abnormalPathologyMarkerCount: 0,
+        hasConsentProxy: true,
+        hasSurgeryPlanRow: Boolean(caseId),
+        surgeryPlanningComplete: Boolean(caseId),
+        bookingStatus: b.booking_status,
+        surgeryPlanPlanningStatus: null,
+        surgeryPaymentRecord: null,
+        todayYmd,
+      });
+
+      const pipeline = buildFinancialSurgeryPipelineStatus({
+        todayYmd,
+        calendarTimezone: tz,
+        booking_status: b.booking_status,
+        financial_os_status: b.financial_os_status ?? null,
+        case_id: caseId,
+        patient_id: b.patient_id,
+        invoices: [],
+        paymentRequests: [],
+        payments: [],
+        installmentPlans: [],
+        surgeryDateYmd: todayYmd,
+      });
+      const financialClearance = buildFinancialClearanceFromPipelineStatus({
+        todayYmd,
+        calendarTimezone: tz,
+        booking_status: b.booking_status,
+        surgeryDateYmd: todayYmd,
+        dataLoadFailed: true,
+        pipeline,
+      });
+
+      const pipelinePhase = deriveSurgeryDayPipelinePhase({
+        bookingStatus: b.booking_status,
+        procedureStatus: proc?.procedure_status ?? null,
+        readinessBucket: null,
+      });
+
+      phases.push(pipelinePhase);
+      flagRows.push({
+        highRisk: hasHighRiskSeverity(issues),
+        unassignedTeam: !hasBookingAssignee && !hasProcedureSurgeon,
+        missingRoom: roomRequired && !hasRoom,
+      });
+      accumulateProcedureProgressCounts(
+        procedureProgressCounts,
+        proc?.procedure_status ?? null,
+        Boolean(proc)
+      );
+
+      const patientHref = b.patient_id?.trim()
+        ? `${base}/patients/${encodeURIComponent(b.patient_id.trim())}`
+        : null;
+
+      cards.push({
+        bookingId: b.id,
+        startAt: b.start_at,
+        timeLabel: formatLocalTimeFromIso(b.start_at, tz),
+        patientLabel: shellPatientLabelFromBooking(b),
+        caseId,
+        caseLabel: null,
+        procedureType: null,
+        graftTargetLabel: null,
+        calendarAssigneeLabel: calendarAssignee,
+        procedureSurgeonLabel,
+        procedureNurseLabel: null,
+        procedureTechnicianLabels: [],
+        teamMemberLabels: [],
+        roomLabel,
+        procedureRoomText: proc?.procedure_room?.trim() || null,
+        bookingStatus: b.booking_status,
+        bookingStatusLabel: bookingStatusLabel(b.booking_status),
+        bookingTypeLabel: bookingTypeLabel(b.booking_type),
+        readinessPercent: null,
+        readinessBucketLabel: null,
+        readinessBucket: null,
+        surgeryDepositBadge: null,
+        financialPipeline: pipeline,
+        financialClearance,
+        issues,
+        preOp: buildPreOpChecklistFlags({
+          caseId,
+          consultRows: [],
+          hasPathologyResult: true,
+          hasSurgeryPlanRow: Boolean(caseId),
+          surgeryPlanningComplete: Boolean(caseId),
+          surgeryPaymentRecord: null,
+          todayYmd,
+          hasBookingAssignee,
+          hasProcedureSurgeon,
+          roomRequired,
+          hasRoom,
+        }),
+        procedureProgress: {
+          rowExists: Boolean(proc),
+          statusRaw: proc?.procedure_status ?? null,
+          statusLabel: proc ? procedureStatusLabel(proc.procedure_status) : null,
+          startTime: null,
+          finishTime: null,
+          extractionImplantSummary: null,
+        },
+        pipelinePhase,
+        hrefs: {
+          appointment: `${base}/appointments/${encodeURIComponent(b.id)}`,
+          case: caseId ? caseProcedureDayDetailHref(tid, caseId) : null,
+          patient: patientHref,
+          calendar: `${base}/calendar?date=${encodeURIComponent(todayYmd)}`,
+        },
+        clinicalStaffing: null,
+      });
+    }
+
+    cards.sort(
+      (a, b) => a.startAt.localeCompare(b.startAt) || a.patientLabel.localeCompare(b.patientLabel)
+    );
+
+    const groupMap = new Map<string, ProcedureDayScheduleCard[]>();
+    for (const c of cards) {
+      const k = c.timeLabel || "—";
+      const list = groupMap.get(k) ?? [];
+      list.push(c);
+      groupMap.set(k, list);
+    }
+
+    const scheduleGroups = Array.from(groupMap.entries())
+      .map(([timeLabel, groupCards]) => ({
+        timeLabel,
+        sortKey: groupCards[0]?.startAt ?? timeLabel,
+        cards: groupCards,
+      }))
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+    const payload: ProcedureDayBoardPayload = {
+      tenantId: tid,
+      window,
+      summary: summarizeProcedureDayBoard(phases, flagRows),
+      procedureProgressCounts,
+      scheduleGroups,
+      actions: [],
+      loadTier: "shell",
+    };
+
+    recordFiPerfPayloadBytes(JSON.stringify(payload).length);
+    return payload;
+  } finally {
+    finishFiPerfCollection();
+  }
+}
 
 export async function loadProcedureDayBoardPayload(
   tenantId: string,
@@ -546,5 +864,6 @@ export async function loadProcedureDayBoardPayload(
     procedureProgressCounts,
     scheduleGroups,
     actions,
+    loadTier: "full",
   };
 }

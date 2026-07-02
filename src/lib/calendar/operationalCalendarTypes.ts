@@ -108,6 +108,8 @@ export type OperationalCalendarPageData = {
   calendarOperatorPrimaryClinicId?: string | null;
   /** When true, render CalendarOS V2 resource-first grid (feature-flagged, additive). */
   calendarV2Enabled?: boolean;
+  /** shell = toolbar + empty grid first paint; full = post-hydrate intelligence overlays */
+  loadTier?: "shell" | "full";
 };
 
 /** Bookings + derived grid fields streamed after the calendar shell. */
@@ -120,4 +122,19 @@ export type OperationalCalendarGridPatch = Pick<
   | "listTruncated"
   | "resourceColumns"
   | "rangeTitle"
+  | "assignees"
+  | "staffDirectory"
+  | "clinics"
+  | "rooms"
+  | "roomDisplayById"
+  | "services"
+  | "setupRecommendations"
+  | "tenantMetadata"
+  | "calendarOperatorPrimaryClinicId"
+  | "calendarSettings"
+  | "gridConfig"
+  | "loadTier"
+  | "canMutateBookings"
+  | "bookingMutationBlockedReason"
+  | "calendarV2Enabled"
 >;

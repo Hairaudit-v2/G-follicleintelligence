@@ -21,6 +21,13 @@ export type ReceptionShellBootstrap = {
   calendarTimezone: string;
 };
 
+export type CalendarShellBootstrap = ReceptionShellBootstrap & {
+  timezoneConfigured: boolean;
+  tenantMetadata: Record<string, unknown> | null;
+  settingsMetadata: unknown;
+  defaultTimezone: string | null;
+};
+
 async function fetchReceptionShellBootstrap(tenantId: string): Promise<ReceptionShellBootstrap> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const { data, error } = await supabaseAdmin()
@@ -82,6 +89,76 @@ async function loadReceptionShellBootstrapCrossRequest(tenantId: string): Promis
 
 /** Per-request dedup + cross-request cache for reception shell bootstrap (name + timezone in one query). */
 export const loadReceptionShellBootstrapCached = cache(loadReceptionShellBootstrapCrossRequest);
+
+async function fetchCalendarShellBootstrap(tenantId: string): Promise<CalendarShellBootstrap> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
+  const { data, error } = await supabaseAdmin()
+    .from("fi_tenants")
+    .select("id, name, config_json, fi_tenant_settings(default_timezone, metadata)")
+    .eq("id", tid)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Tenant not found");
+
+  const row = data as {
+    name?: string | null;
+    config_json?: unknown;
+    fi_tenant_settings?:
+      | { default_timezone?: string | null; metadata?: unknown }
+      | { default_timezone?: string | null; metadata?: unknown }[]
+      | null;
+  };
+  const settings = Array.isArray(row.fi_tenant_settings)
+    ? row.fi_tenant_settings[0]
+    : row.fi_tenant_settings;
+  const calendarTimezone = getCalendarTimeZone(
+    settings
+      ? {
+          tenant: {
+            default_timezone: settings.default_timezone,
+            metadata: settings.metadata as Record<string, unknown> | null,
+          },
+        }
+      : null
+  );
+  const cfg = row.config_json;
+  const tenantMetadata =
+    cfg != null && typeof cfg === "object" && !Array.isArray(cfg)
+      ? (cfg as Record<string, unknown>)
+      : null;
+
+  return {
+    tenantName: String(row.name ?? "").trim() || tid,
+    calendarTimezone,
+    timezoneConfigured: Boolean(settings?.default_timezone?.trim()),
+    tenantMetadata,
+    settingsMetadata: settings?.metadata ?? null,
+    defaultTimezone: settings?.default_timezone?.trim() || null,
+  };
+}
+
+const calendarShellBootstrapMemory = new Map<string, { at: number; value: CalendarShellBootstrap }>();
+
+async function loadCalendarShellBootstrapCrossRequest(
+  tenantId: string
+): Promise<CalendarShellBootstrap> {
+  const tid = tenantId.trim();
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => fetchCalendarShellBootstrap(tid),
+      ["fi-calendar-shell-bootstrap", tid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  const hit = calendarShellBootstrapMemory.get(tid);
+  if (hit && Date.now() - hit.at < REFERENCE_DATA_REVALIDATE_SEC * 1000) return hit.value;
+  const value = await fetchCalendarShellBootstrap(tid);
+  calendarShellBootstrapMemory.set(tid, { at: Date.now(), value });
+  return value;
+}
+
+/** Calendar shell bootstrap — tenant metadata + timezone in one query (no `fi_calendar_settings`). */
+export const loadCalendarShellBootstrapCached = cache(loadCalendarShellBootstrapCrossRequest);
 
 export const loadTenantCalendarSettingsCached = cache((tenantId: string, clinicId?: string | null) =>
   loadTenantOperationalCalendarSettings(tenantId.trim(), clinicId?.trim() || null)

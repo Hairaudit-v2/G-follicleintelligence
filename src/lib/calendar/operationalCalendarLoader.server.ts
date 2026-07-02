@@ -19,6 +19,9 @@ import {
 import { buildCalendarHref, mergeCalendarHrefQuery } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { loadOperationalCalendarShellData } from "@/src/lib/calendar/calendarShellLoader.server";
+
+export { loadOperationalCalendarShellData };
 import {
   applyCalendarSettingsToQuery,
   calendarSettingsRedirectNeeded,
@@ -558,120 +561,6 @@ async function loadCalendarOperatorPrimaryClinicId(
  * Fast path: tenant settings, directory, services, and layout metadata — no booking overlap query.
  * Used by FI OS calendar streaming so toolbar / filters can render before appointments resolve.
  */
-export async function loadOperationalCalendarShellData(
-  tenantId: string,
-  searchParams: Record<string, string | string[] | undefined>,
-  opts?: { route?: CalendarRoute }
-): Promise<OperationalCalendarPageData> {
-  const route = opts?.route ?? "fi-admin";
-  const tid = tenantId.trim();
-  const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const calendarSettings = await loadTenantCalendarSettingsCached(
-    tid,
-    clinicIdFromSearchParams(searchParams)
-  );
-  const {
-    query: resolvedQuery,
-    lanes,
-    settingsRedirectHref,
-  } = resolveCalendarQueryFromSettings(tid, searchParams, route, calendarSettings);
-  let query = resolvedQuery;
-  const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
-
-  const [resources, mutationGate, services, tenantMetaRow] = await Promise.all([
-    loadTenantStaffAndResourcesCached(tid, query.resourceView, query.clinicId?.trim() || null),
-    resolveBookingMutationGateCached(tid),
-    loadFiServicesForTenantCached(tid),
-    loadTenantConfigRowCached(tid),
-  ]);
-
-  const cfg = tenantMetaRow?.config_json;
-  const tenantMetadata =
-    cfg != null && typeof cfg === "object" && !Array.isArray(cfg)
-      ? (cfg as Record<string, unknown>)
-      : null;
-
-  const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
-  query = normalized.query;
-  const staffCanonicalHref = normalized.shouldCanonicalizeToStaffId
-    ? buildCalendarHref(tid, mergeCalendarHrefQuery(query, {}), { route })
-    : null;
-  const canonicalRedirectHref = settingsRedirectHref ?? staffCanonicalHref;
-
-  const resourceColumns =
-    query.resourceView === "staff"
-      ? appendLegacyUserColumns(resources.resourceColumns, {
-          userAssignees: resources.assignees,
-          staffIdByUserId: resources.staffIdByUserId,
-          bookings: [],
-          filterUserId: query.assignedUserId,
-        })
-      : resources.resourceColumns;
-  const { canMutateBookings, bookingMutationBlockedReason } = mutationGate;
-  const gridConfig = calendarSettings.gridConfig;
-
-  const buckets: Record<string, FiBookingRow[]> = {};
-  for (const lane of lanes) {
-    buckets[lane.dayKey] = [];
-  }
-
-  const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
-
-  const setupRecommendations = buildSetupRecommendations({
-    servicesCount: services.length,
-    staffDirectory: resources.staffDirectory,
-    timezoneConfigured: calendarSettings.timezoneConfigured,
-  });
-
-  const calendarOperatorPrimaryClinicId = await loadCalendarOperatorPrimaryClinicId(
-    tid,
-    resources.staffDirectory
-  );
-
-  const calendarV2Enabled = await resolveCalendarV2EnabledForViewer(tid, searchParams);
-
-  const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
-  logOperationalCalendarServerTiming({
-    phase: "loadOperationalCalendarShellData",
-    durationMs: Math.round(t1 - t0),
-    view: query.view,
-    dateAnchor: query.dateAnchor,
-    rangeStartIso,
-    rangeEndIso,
-  });
-
-  return {
-    tenantId: tid,
-    tenantMetadata,
-    query,
-    calendarTimezone: query.calendarTimezone,
-    rangeStartIso,
-    rangeEndIso,
-    rangeTitle,
-    lanes,
-    buckets,
-    bookings: [],
-    bookingDisplay: {},
-    assignees: resources.assignees,
-    staffDirectory: resources.staffDirectory,
-    clinics: resources.clinics,
-    rooms: resources.rooms,
-    roomDisplayById: resources.roomDisplayById,
-    resourceColumns,
-    gridConfig,
-    calendarSettings: calendarSettings.settings,
-    listTruncated: false,
-    canMutateBookings,
-    bookingMutationBlockedReason,
-    reminderJobsByBookingId: {},
-    services,
-    setupRecommendations,
-    canonicalRedirectHref,
-    calendarOperatorPrimaryClinicId,
-    calendarV2Enabled,
-  };
-}
-
 /**
  * Booking overlap + enrichment. Dedupes directory/services queries with {@link loadOperationalCalendarShellData}
  * via React `cache()` for the same navigation request.
@@ -1035,6 +924,25 @@ export async function loadOperationalCalendarGridData(
 
   const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
+  const [tenantMetaRow, calendarOperatorPrimaryClinicId, mutationGate, calendarV2Enabled] =
+    await Promise.all([
+      loadTenantConfigRowCached(tid),
+      loadCalendarOperatorPrimaryClinicId(tid, resources.staffDirectory),
+      resolveBookingMutationGateCached(tid),
+      resolveCalendarV2EnabledForViewer(tid, searchParams),
+    ]);
+  const cfg = tenantMetaRow?.config_json;
+  const tenantMetadata =
+    cfg != null && typeof cfg === "object" && !Array.isArray(cfg)
+      ? (cfg as Record<string, unknown>)
+      : null;
+
+  const setupRecommendations = buildSetupRecommendations({
+    servicesCount: services.length,
+    staffDirectory: resources.staffDirectory,
+    timezoneConfigured: calendarSettings.timezoneConfigured,
+  });
+
   const patch: OperationalCalendarGridPatch = {
     bookings,
     bookingDisplay,
@@ -1043,6 +951,21 @@ export async function loadOperationalCalendarGridData(
     listTruncated,
     resourceColumns,
     rangeTitle,
+    assignees: resources.assignees,
+    staffDirectory: resources.staffDirectory,
+    clinics: resources.clinics,
+    rooms: resources.rooms,
+    roomDisplayById: resources.roomDisplayById,
+    services,
+    setupRecommendations,
+    tenantMetadata,
+    calendarOperatorPrimaryClinicId,
+    calendarSettings: calendarSettings.settings,
+    gridConfig: calendarSettings.gridConfig,
+    canMutateBookings: mutationGate.canMutateBookings,
+    bookingMutationBlockedReason: mutationGate.bookingMutationBlockedReason,
+    calendarV2Enabled,
+    loadTier: "full",
   };
 
   const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();

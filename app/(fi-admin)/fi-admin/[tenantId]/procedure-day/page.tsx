@@ -43,7 +43,7 @@ export default async function FiAdminProcedureDayPage({
 
   let data;
   try {
-    data = await loadProcedureDayBoardForTenant(tenantId.trim());
+    data = await loadProcedureDayBoardForTenant(tenantId.trim(), { tier: "shell" });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     if (msg === "Tenant not found") notFound();

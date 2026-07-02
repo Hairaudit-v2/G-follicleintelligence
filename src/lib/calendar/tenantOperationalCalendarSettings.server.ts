@@ -48,6 +48,43 @@ function settingsFromLegacyGrid(grid: BusinessGridConfig): FiCalendarSettingsDoc
   };
 }
 
+export type TenantOperationalCalendarSettingsResult = {
+  gridConfig: BusinessGridConfig;
+  calendarTimezone: string;
+  timezoneConfigured: boolean;
+  settings: FiCalendarSettingsDocument;
+};
+
+/**
+ * Shell fast path — timezone + legacy metadata grid only (no `fi_calendar_settings` round-trip).
+ */
+export function resolveShellCalendarSettingsFromTenantRow(input: {
+  defaultTimezone?: string | null;
+  metadata?: unknown;
+} | null): TenantOperationalCalendarSettingsResult {
+  const calendarTimezone = getCalendarTimeZone(
+    input
+      ? {
+          tenant: {
+            default_timezone: input.defaultTimezone,
+            metadata: input.metadata as Record<string, unknown> | null,
+          },
+        }
+      : null
+  );
+  const legacyGrid = parseGridFromTenantMetadata(input?.metadata, calendarTimezone);
+  const settings = legacyGrid
+    ? settingsFromLegacyGrid(legacyGrid)
+    : { ...DEFAULT_CALENDAR_SETTINGS };
+  const gridConfig = legacyGrid ?? calendarSettingsToGridConfig(settings, calendarTimezone);
+  return {
+    gridConfig,
+    calendarTimezone,
+    timezoneConfigured: Boolean(input?.defaultTimezone?.trim()),
+    settings,
+  };
+}
+
 /**
  * Loads calendar display settings from `fi_calendar_settings` (with legacy metadata fallback for grid hours),
  * plus `fi_tenant_settings.default_timezone` for IANA zone resolution.
@@ -55,13 +92,7 @@ function settingsFromLegacyGrid(grid: BusinessGridConfig): FiCalendarSettingsDoc
 export async function loadTenantOperationalCalendarSettings(
   tenantId: string,
   clinicId?: string | null
-): Promise<{
-  gridConfig: BusinessGridConfig;
-  calendarTimezone: string;
-  /** True when `fi_tenant_settings.default_timezone` is set (not relying on fallback). */
-  timezoneConfigured: boolean;
-  settings: FiCalendarSettingsDocument;
-}> {
+): Promise<TenantOperationalCalendarSettingsResult> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_tenant_settings")

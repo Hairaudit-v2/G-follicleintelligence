@@ -8,6 +8,7 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
 import type { ProcedureDayLiveBoardPayload } from "@/src/lib/procedureDay/procedureDayWorkflowTypes";
+import { useProcedureDayRefresh } from "@/src/components/fi-admin/surgery/useProcedureDayRefresh";
 import { ProcedureDayLiveWorkflow } from "@/src/components/fi-admin/surgery/ProcedureDayLiveWorkflow";
 import {
   buildPostOpDischargeReadiness,
@@ -109,7 +110,11 @@ function groupByLane(cards: ProcedureDayScheduleCard[]) {
   return lanes;
 }
 
-export function ProcedureDayBoard({ data }: { data: ProcedureDayLiveBoardPayload }) {
+export function ProcedureDayBoard({ data: initialData }: { data: ProcedureDayLiveBoardPayload }) {
+  const { data, isHydrating, hydrateError } = useProcedureDayRefresh({
+    tenantId: initialData.tenantId,
+    initialData,
+  });
   const base = `/fi-admin/${data.tenantId}`;
   const tz = data.window.calendarTimezone.trim();
   const dateLine = formatCalendarLongWeekdayDate(data.window.todayYmd, tz);
@@ -141,6 +146,12 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayLiveBoardPayload
             team, and recovery.
           </p>
           <p className="mt-2 text-sm text-[#64748B]">{dateLine}</p>
+          {isHydrating ? (
+            <p className="mt-2 text-xs text-[#64748B]">Loading full procedure day details…</p>
+          ) : null}
+          {hydrateError ? (
+            <p className="mt-2 text-xs text-amber-200/90">{hydrateError}</p>
+          ) : null}
           <ProcedureDayPrimaryActions base={base} todayYmd={data.window.todayYmd} />
         </div>
       </DashboardCard>
