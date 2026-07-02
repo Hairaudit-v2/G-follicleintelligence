@@ -1,5 +1,12 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { buildAttentionPriorities } from "@/src/lib/fiAdmin/dashboardCommandCentreDerive";
+import {
+  compareTodayFeedItems,
+  coveredAggregateKeys,
+  entityAttentionItems,
+  type TodayEntityAttentionCategory,
+  type TodayEntityAttentionSignal,
+} from "@/src/lib/fiOs/todayFeedEntityAttention";
 import type {
   DashboardReminderItem,
   ReceptionBoardCard,
@@ -58,7 +65,17 @@ type FeedCategory =
   | "reminders"
   | "surgery"
   | "financial"
-  | "consultations";
+  | "consultations"
+  | "pathology"
+  | "staff";
+
+const ENTITY_CATEGORY: Record<TodayEntityAttentionCategory, FeedCategory> = {
+  financial: "financial",
+  surgery: "surgery",
+  pathology: "pathology",
+  consultation: "consultations",
+  staff: "staff",
+};
 
 /** Best-effort role weighting — reuses `FiWorkspaceProfileKey`, does not modify `fiWorkspaceProfiles.ts`. */
 const ROLE_CATEGORY_WEIGHT: Partial<Record<FiWorkspaceProfileKey, Partial<Record<FeedCategory, number>>>> = {
@@ -365,11 +382,14 @@ function aggregateFallbackItems(opts: {
   actionCentre: TenantActionCentre;
   showCrmNav: boolean;
   profileKey?: FiWorkspaceProfileKey;
+  suppressAggregateKeys?: ReadonlySet<string>;
 }): TodayFeedItem[] {
-  const { base, actionCentre, showCrmNav, profileKey } = opts;
+  const { base, actionCentre, showCrmNav, profileKey, suppressAggregateKeys } = opts;
   const priorities = buildAttentionPriorities({ base, actionCentre, showCrmNav, maxItems: 8 });
 
-  return priorities.map((p) => {
+  return priorities
+    .filter((p) => !suppressAggregateKeys?.has(p.id))
+    .map((p) => {
     const category = AGGREGATE_CATEGORY[p.id] ?? "financial";
     const weight = categoryWeight(profileKey, category);
     const bucket: TodayFeedBucket =
@@ -390,8 +410,24 @@ function aggregateFallbackItems(opts: {
   });
 }
 
+function entityCategoryWeight(
+  profileKey: FiWorkspaceProfileKey | undefined,
+  category: TodayEntityAttentionCategory
+): number {
+  return categoryWeight(profileKey, ENTITY_CATEGORY[category]);
+}
+
+function entityAttentionFeedItems(
+  signals: readonly TodayEntityAttentionSignal[],
+  profileKey?: FiWorkspaceProfileKey
+): TodayFeedItem[] {
+  return entityAttentionItems(signals, {
+    categoryWeight: (category) => entityCategoryWeight(profileKey, category),
+  });
+}
+
 function byPriorityDesc(a: TodayFeedItem, b: TodayFeedItem): number {
-  return b.priorityScore - a.priorityScore;
+  return compareTodayFeedItems(a, b);
 }
 
 export function buildTodayFeed(input: {
@@ -418,7 +454,14 @@ export function buildTodayFeed(input: {
     }),
     ...taskDueItems(dashboard.tasksDue, { base, nowMs, todayEndMs, profileKey }),
     ...reminderItems(dashboard.upcomingReminders, { nowMs, todayEndMs, profileKey }),
-    ...aggregateFallbackItems({ base, actionCentre: dashboard.actionCentre, showCrmNav, profileKey }),
+    ...entityAttentionFeedItems(dashboard.entityAttention ?? [], profileKey),
+    ...aggregateFallbackItems({
+      base,
+      actionCentre: dashboard.actionCentre,
+      showCrmNav,
+      profileKey,
+      suppressAggregateKeys: coveredAggregateKeys(dashboard.entityAttention ?? []),
+    }),
   ];
 
   const byBucket = (bucket: TodayFeedBucket): TodayFeedItem[] =>

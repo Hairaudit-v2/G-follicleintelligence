@@ -65,6 +65,7 @@ function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): Ten
     paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
     revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
     receptionBoard: { cards: [] },
+    entityAttention: [],
     ...overrides,
   };
 }

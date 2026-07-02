@@ -65,6 +65,7 @@ function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): Ten
     paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
     revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
     receptionBoard: { cards: [] },
+    entityAttention: [],
     ...overrides,
   };
 }
@@ -285,4 +286,103 @@ test("buildTodayFeed: caps each bucket at maxPerBucket", () => {
   });
 
   assert.equal(feed.rightNow.length, 5);
+});
+
+test("buildTodayFeed: entity financial item links to payment workspace href", () => {
+  const paymentId = "77777777-0000-0000-0000-000000000001";
+  const dashboard = baseDashboard({
+    entityAttention: [
+      {
+        id: `entity-payment-overdue-${paymentId}`,
+        category: "financial",
+        aggregateKey: "surgery_payment",
+        personLabel: "Sarah Chen",
+        actionLabel: "Sarah payment overdue",
+        detailLine: "Outstanding balance requires collection",
+        actionHint: "Take payment",
+        href: `/fi-admin/t1/financial/payments/${paymentId}`,
+        severity: "warning",
+        bucket: "right_now",
+        priorityScore: 88,
+        groupKey: "entity:payment_overdue",
+      },
+    ],
+  });
+
+  const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
+  assert.equal(feed.rightNow.length, 1);
+  assert.equal(feed.rightNow[0]?.personLabel, "Sarah Chen");
+  assert.equal(feed.rightNow[0]?.href, `/fi-admin/t1/financial/payments/${paymentId}`);
+});
+
+test("buildTodayFeed: entity signals suppress matching aggregate fallback rows", () => {
+  const caseId = "88888888-0000-0000-0000-000000000001";
+  const dashboard = baseDashboard({
+    actionCentre: {
+      leadsAwaitingContact: 0,
+      consultationsAwaitingCompletion: 0,
+      followUpsDue: 0,
+      surgeryReadinessAlerts: 3,
+      surgeryFinancialPaymentAttention: 0,
+      financialPathwayTasksAttention: 0,
+      financeApplicationsAttention: 0,
+      superReleaseApplicationsAttention: 0,
+      internationalTransferApplicationsAttention: 0,
+      financialClearanceAttention: 0,
+    },
+    entityAttention: [
+      {
+        id: `entity-surgery-readiness-booking-1`,
+        category: "surgery",
+        aggregateKey: "surgery_readiness",
+        personLabel: "Marcus Reid",
+        actionLabel: "Marcus surgery preparation incomplete",
+        detailLine: "Procedure tomorrow — case not linked yet",
+        actionHint: "Review case",
+        href: `/fi-admin/t1/cases/${caseId}`,
+        severity: "critical",
+        bucket: "right_now",
+        priorityScore: 96,
+        groupKey: "entity:surgery_readiness",
+      },
+    ],
+  });
+
+  const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
+  const allItems = [...feed.rightNow, ...feed.upNext, ...feed.comingUp];
+  assert.ok(allItems.some((i) => i.personLabel === "Marcus Reid"));
+  assert.ok(!allItems.some((i) => i.id === "aggregate-surgery_readiness"));
+});
+
+test("buildTodayFeed: named entity items rank above aggregate summaries", () => {
+  const dashboard = baseDashboard({
+    actionCentre: {
+      leadsAwaitingContact: 0,
+      consultationsAwaitingCompletion: 2,
+      followUpsDue: 0,
+      surgeryReadinessAlerts: 0,
+      surgeryFinancialPaymentAttention: 0,
+      financialPathwayTasksAttention: 0,
+      financeApplicationsAttention: 0,
+      superReleaseApplicationsAttention: 0,
+      internationalTransferApplicationsAttention: 0,
+      financialClearanceAttention: 0,
+    },
+    entityAttention: [
+      {
+        id: "entity-consultation-1",
+        category: "consultation",
+        aggregateKey: "consultations",
+        personLabel: "Emma Walsh",
+        actionLabel: "Emma consultation in progress",
+        href: "/fi-admin/t1/consultations/99999999-0000-0000-0000-000000000001",
+        severity: "warning",
+        bucket: "up_next",
+        priorityScore: 68,
+      },
+    ],
+  });
+
+  const feed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
+  assert.equal(feed.upNext[0]?.personLabel, "Emma Walsh");
 });

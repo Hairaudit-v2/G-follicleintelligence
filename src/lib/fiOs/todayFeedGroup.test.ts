@@ -34,6 +34,39 @@ test("groupTodayFeedItems: collapses 4 arriving-soon cards into one group row", 
   assert.equal(grouped[0]?.groupMembers?.length, 4);
 });
 
+test("groupTodayFeedItems: leaves pairs ungrouped until 3+ share a groupKey", () => {
+  const items = [
+    receptionItem("1", "SMOKETEST Patient A"),
+    receptionItem("2", "SMOKETEST Patient B"),
+  ];
+  const grouped = groupTodayFeedItems(items);
+  assert.equal(grouped.length, 2);
+  assert.ok(grouped.every((i) => !i.groupMembers));
+});
+
+test("groupTodayFeedItems: collapses 3 pathology entity rows", () => {
+  const pathologyItem = (id: string, name: string): TodayFeedItem => ({
+    id: `entity-pathology-${id}`,
+    personLabel: name,
+    actionLabel: `Review ${name.split(" ")[0]} pathology result`,
+    href: `/fi-admin/t1/patients/${id}/blood-results/${id}`,
+    severity: "warning",
+    bucket: "up_next",
+    priorityScore: 72,
+    autoResolves: true,
+    groupKey: "entity:pathology_review",
+  });
+
+  const grouped = groupTodayFeedItems([
+    pathologyItem("1", "Sarah Chen"),
+    pathologyItem("2", "Emma Walsh"),
+    pathologyItem("3", "James Morrison"),
+  ]);
+  assert.equal(grouped.length, 1);
+  assert.match(grouped[0]?.actionLabel ?? "", /3 pathology results need review/i);
+  assert.equal(grouped[0]?.groupMembers?.length, 3);
+});
+
 test("groupTodayFeedItems: leaves singleton groupKey items ungrouped", () => {
   const items = [receptionItem("1", "James Morrison")];
   const grouped = groupTodayFeedItems(items);

@@ -157,6 +157,81 @@ baseTest.describe("FI-UX-REBUILD D1B Workspace shell validation @smoke @authenti
     expect(page.url()).toContain(pathBefore.split("?")[0] ?? pathBefore);
   });
 
+  baseTest("D5 Today feed — consultation entity opens consultation workspace", async ({ page }) => {
+    await page.goto(BASE(), { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const legacyDashboard = page.getByText("Clinic Command Center");
+    test.skip(await legacyDashboard.isVisible(), "Today surface not enabled for this tenant");
+
+    const consultationHref = await firstFeedHref(
+      page,
+      new RegExp(`/fi-admin/${TENANT()}/consultations/${UUID.source}$`, "i")
+    );
+    test.skip(!consultationHref, "No consultation-linked Today feed item found");
+
+    await page.locator(`a[href="${consultationHref}"]`).first().click();
+    await expect(page.getByRole("dialog", { name: /consultation preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page).toHaveURL(/workspace=consultation:/i);
+  });
+
+  baseTest("D5 Today feed — payment entity opens payment workspace", async ({ page }) => {
+    await page.goto(BASE(), { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const legacyDashboard = page.getByText("Clinic Command Center");
+    test.skip(await legacyDashboard.isVisible(), "Today surface not enabled for this tenant");
+
+    const paymentHref = await firstFeedHref(
+      page,
+      new RegExp(
+        `/fi-admin/${TENANT()}/financial/(payments|payment-requests)/${UUID.source}$`,
+        "i"
+      )
+    );
+    test.skip(!paymentHref, "No payment-linked Today feed item found");
+
+    await page.locator(`a[href="${paymentHref}"]`).first().click();
+    await expect(page.getByRole("dialog", { name: /payment preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page).toHaveURL(/workspace=payment:/i);
+  });
+
+  baseTest("D5 Today feed — surgery case entity opens surgery_case workspace", async ({ page }) => {
+    await page.goto(BASE(), { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const legacyDashboard = page.getByText("Clinic Command Center");
+    test.skip(await legacyDashboard.isVisible(), "Today surface not enabled for this tenant");
+
+    const caseHref = await firstFeedHref(
+      page,
+      new RegExp(`/fi-admin/${TENANT()}/cases/${UUID.source}(?:/summary)?$`, "i")
+    );
+    test.skip(!caseHref, "No surgery-case-linked Today feed item found");
+
+    await page.locator(`a[href="${caseHref}"]`).first().click();
+    await expect(page.getByRole("dialog", { name: /surgery case preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page).toHaveURL(/workspace=surgery_case:/i);
+  });
+
+  baseTest("D5 Today feed — staff entity opens staff workspace", async ({ page }) => {
+    await page.goto(BASE(), { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const legacyDashboard = page.getByText("Clinic Command Center");
+    test.skip(await legacyDashboard.isVisible(), "Today surface not enabled for this tenant");
+
+    const staffHref = await firstFeedHref(
+      page,
+      new RegExp(`/fi-admin/${TENANT()}/workforce-os/staff/${UUID.source}$`, "i")
+    );
+    test.skip(!staffHref, "No staff-linked Today feed item found");
+
+    await page.locator(`a[href="${staffHref}"]`).first().click();
+    await expect(page.getByRole("dialog", { name: /staff preview/i })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page).toHaveURL(/workspace=staff:/i);
+  });
+
   baseTest("mobile viewport — workspace panel is full width", async ({ page }) => {
     const patientId = process.env.FI_E2E_PATIENT_ID?.trim();
     test.skip(!patientId, "FI_E2E_PATIENT_ID required");

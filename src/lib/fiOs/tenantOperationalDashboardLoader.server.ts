@@ -29,6 +29,10 @@ import { loadFinanceApplicationAttentionCount } from "@/src/lib/financialOs/fina
 import { loadSuperReleaseAttentionCount } from "@/src/lib/financialOs/financialSuperRelease.server";
 import { loadInternationalTransferAttentionCount } from "@/src/lib/financialOs/financialInternationalTransfer.server";
 import { loadFinancialClearanceAttentionCount } from "@/src/lib/financialOs/financialClearance.server";
+import {
+  loadTodayEntityAttentionPayload,
+  todayEntityAttentionSignalSchema,
+} from "@/src/lib/fiOs/todayFeedEntityAttentionLoader.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
   bookingAgendaBucket,
@@ -316,6 +320,8 @@ export const tenantOperationalDashboardSchema = z.object({
   revenueCollections: revenueCollectionsSchema,
   /** Reception board cards for `operationalDay` (tenant-local); empty when loader skips enrichment. */
   receptionBoard: receptionBoardPayloadSchema,
+  /** FI-UX-REBUILD D5 — named entity attention signals for Today feed (entity-first links). */
+  entityAttention: z.array(todayEntityAttentionSignalSchema),
 });
 
 export type TenantOperationalDashboard = z.infer<typeof tenantOperationalDashboardSchema>;
@@ -1108,6 +1114,7 @@ export async function loadTenantOperationalDashboard(
     paymentCommercialKpis,
     receptionBoardCards,
     revenueCollections,
+    entityAttentionPayload,
   ] = await Promise.all([
     loadAgendaBookings(tid, now),
     loadStaleLeads(tid, staleDays, now, pipelineStages),
@@ -1133,6 +1140,7 @@ export async function loadTenantOperationalDashboard(
         )
       : Promise.resolve([]),
     loadRevenueCollectionsDashboardKpis(tid, operationalTodayYmd),
+    loadTodayEntityAttentionPayload(tid, now),
   ]);
 
   return tenantOperationalDashboardSchema.parse({
@@ -1169,5 +1177,6 @@ export async function loadTenantOperationalDashboard(
     paymentCommercialKpis: paymentCommercialKpisSchema.parse(paymentCommercialKpis),
     revenueCollections: revenueCollectionsSchema.parse(revenueCollections),
     receptionBoard: receptionBoardPayloadSchema.parse({ cards: receptionBoardCards }),
+    entityAttention: entityAttentionPayload.signals,
   });
 }
