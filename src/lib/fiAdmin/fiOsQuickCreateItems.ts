@@ -37,7 +37,8 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
     label: "New enquiry",
     description: "Capture a patient enquiry (name, contact, interest).",
     keywords: ["crm", "enquiry", "pipeline", "leadflow"],
-    path: "crm",
+    path: "leadflow",
+    hash: "fi-os-crm-create-lead",
     requiresCrmShellNav: true,
   },
   {

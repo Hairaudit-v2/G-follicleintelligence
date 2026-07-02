@@ -23,5 +23,5 @@ test("resolveFiOsQuickCreateItems: patient gated by bookings board", () => {
 test("resolveFiOsQuickCreateItems: lead uses CRM anchor hash", () => {
   const items = resolveFiOsQuickCreateItems(base, true, false);
   const lead = items.find((i) => i.id === "lead");
-  assert.equal(lead?.href, `${base}/crm#fi-os-crm-create-lead`);
+  assert.equal(lead?.href, `${base}/leadflow#fi-os-crm-create-lead`);
 });
