@@ -16,10 +16,10 @@ importers:
         version: 3.2.2(react@18.3.1)
       '@follicle/intelligence-core':
         specifier: file:packages/intelligence-core
-        version: file:packages/intelligence-core
+        version: link:packages/intelligence-core
       '@hairlongevity/medical-intelligence-core':
-        specifier: file:../HairLongevityInstitute/packages/medical-intelligence-core
-        version: file:../HairLongevityInstitute/packages/medical-intelligence-core
+        specifier: workspace:*
+        version: link:packages/medical-intelligence-core
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.17(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -144,6 +144,14 @@ importers:
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
+
+  packages/intelligence-core: {}
+
+  packages/medical-intelligence-core:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
 packages:
 
@@ -379,12 +387,6 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
-
-  '@follicle/intelligence-core@file:packages/intelligence-core':
-    resolution: {directory: packages/intelligence-core, type: directory}
-
-  '@hairlongevity/medical-intelligence-core@file:../HairLongevityInstitute/packages/medical-intelligence-core':
-    resolution: {directory: ../HairLongevityInstitute/packages/medical-intelligence-core, type: directory}
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -3275,10 +3277,6 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
   '@floating-ui/utils@0.2.11': {}
-
-  '@follicle/intelligence-core@file:packages/intelligence-core': {}
-
-  '@hairlongevity/medical-intelligence-core@file:../HairLongevityInstitute/packages/medical-intelligence-core': {}
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
