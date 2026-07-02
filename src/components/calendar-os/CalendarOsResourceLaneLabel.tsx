@@ -95,7 +95,7 @@ export function CalendarOsResourceLaneLabel({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center border-r border-white/[0.08] bg-[#0a1220] px-2 py-1",
+        "flex flex-col justify-center border-r border-white/[0.032] bg-[#060d18] px-1.5 py-0.5",
         sticky && "sticky left-0 z-[2]",
         isUnassigned && "border-amber-500/35 bg-amber-950/40 ring-1 ring-inset ring-amber-500/20",
         className

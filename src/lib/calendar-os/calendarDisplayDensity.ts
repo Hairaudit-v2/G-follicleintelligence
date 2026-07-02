@@ -1,15 +1,19 @@
 /**
  * CalendarOS V2 — display density tokens (pure).
+ * Tuned for Timely-like operational density on standard laptop viewports.
  */
 
 export const CALENDAR_OS_DISPLAY_DENSITIES = ["comfortable", "compact", "command"] as const;
 
 export type CalendarOsDisplayDensity = (typeof CALENDAR_OS_DISPLAY_DENSITIES)[number];
 
+/** Legacy layout baseline — day placement math scales from this reference hour height. */
+export const CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR = 44;
+
 export type CalendarOsDensityTokens = {
   /** Week view: resource label column width (px). */
   weekResourceLabelWidth: number;
-  /** Week view: minimum day column width (px). */
+  /** Week view: minimum day column width (px). 0 = fluid `minmax(0, 1fr)`. */
   weekDayColMinWidth: number;
   /** Week view: minimum resource row height (px). */
   weekRowMinHeight: number;
@@ -17,7 +21,7 @@ export type CalendarOsDensityTokens = {
   weekGroupHeaderPy: string;
   /** Day view: time gutter width (px). */
   dayTimeGutterWidth: number;
-  /** Day view: minimum resource column width (px). */
+  /** Day view: minimum resource column width (px). 0 = fluid `minmax(0, 1fr)`. */
   dayResourceColMinWidth: number;
   /** Day view: px per hour for time grid. */
   dayPxPerHour: number;
@@ -37,29 +41,29 @@ export type CalendarOsDensityTokens = {
 
 const DENSITY_TOKENS: Record<CalendarOsDisplayDensity, CalendarOsDensityTokens> = {
   comfortable: {
-    weekResourceLabelWidth: 180,
-    weekDayColMinWidth: 140,
-    weekRowMinHeight: 48,
-    weekGroupHeaderPy: "py-1",
-    dayTimeGutterWidth: 52,
-    dayResourceColMinWidth: 160,
-    dayPxPerHour: 44,
-    dayHeaderPy: "py-2",
-    bookingUltraCompact: false,
+    weekResourceLabelWidth: 120,
+    weekDayColMinWidth: 0,
+    weekRowMinHeight: 31,
+    weekGroupHeaderPy: "py-0.5",
+    dayTimeGutterWidth: 40,
+    dayResourceColMinWidth: 0,
+    dayPxPerHour: 26,
+    dayHeaderPy: "py-1",
+    bookingUltraCompact: true,
     showHoverDetail: true,
-    panelCompact: false,
+    panelCompact: true,
     showUtilisation: true,
     showWorkingStatus: true,
   },
   compact: {
-    weekResourceLabelWidth: 152,
-    weekDayColMinWidth: 112,
-    weekRowMinHeight: 40,
+    weekResourceLabelWidth: 108,
+    weekDayColMinWidth: 0,
+    weekRowMinHeight: 26,
     weekGroupHeaderPy: "py-0.5",
-    dayTimeGutterWidth: 44,
-    dayResourceColMinWidth: 128,
-    dayPxPerHour: 40,
-    dayHeaderPy: "py-1.5",
+    dayTimeGutterWidth: 36,
+    dayResourceColMinWidth: 0,
+    dayPxPerHour: 24,
+    dayHeaderPy: "py-1",
     bookingUltraCompact: true,
     showHoverDetail: true,
     panelCompact: true,
@@ -67,19 +71,19 @@ const DENSITY_TOKENS: Record<CalendarOsDisplayDensity, CalendarOsDensityTokens> 
     showWorkingStatus: true,
   },
   command: {
-    weekResourceLabelWidth: 136,
-    weekDayColMinWidth: 96,
-    weekRowMinHeight: 34,
-    weekGroupHeaderPy: "py-0.5",
-    dayTimeGutterWidth: 40,
-    dayResourceColMinWidth: 108,
-    dayPxPerHour: 36,
-    dayHeaderPy: "py-1",
+    weekResourceLabelWidth: 96,
+    weekDayColMinWidth: 0,
+    weekRowMinHeight: 22,
+    weekGroupHeaderPy: "py-0",
+    dayTimeGutterWidth: 32,
+    dayResourceColMinWidth: 0,
+    dayPxPerHour: 22,
+    dayHeaderPy: "py-0.5",
     bookingUltraCompact: true,
-    showHoverDetail: false,
+    showHoverDetail: true,
     panelCompact: true,
     showUtilisation: true,
-    showWorkingStatus: true,
+    showWorkingStatus: false,
   },
 };
 
@@ -102,12 +106,16 @@ export function calendarOsDensityStorageKey(tenantId: string): string {
   return `fi-calendar-os-density:${tenantId.trim()}`;
 }
 
+function fluidColMin(minWidth: number): string {
+  return minWidth > 0 ? `minmax(${minWidth}px, 1fr)` : "minmax(0, 1fr)";
+}
+
 export function calendarOsWeekGridTemplate(
   density: CalendarOsDisplayDensity,
   dayCount: number
 ): string {
   const t = calendarOsDensityTokens(density);
-  return `${t.weekResourceLabelWidth}px repeat(${dayCount}, minmax(${t.weekDayColMinWidth}px, 1fr))`;
+  return `${t.weekResourceLabelWidth}px repeat(${dayCount}, ${fluidColMin(t.weekDayColMinWidth)})`;
 }
 
 export function calendarOsDayGridTemplate(
@@ -115,7 +123,7 @@ export function calendarOsDayGridTemplate(
   resourceCount: number
 ): string {
   const t = calendarOsDensityTokens(density);
-  return `${t.dayTimeGutterWidth}px repeat(${resourceCount}, minmax(${t.dayResourceColMinWidth}px, 1fr))`;
+  return `${t.dayTimeGutterWidth}px repeat(${resourceCount}, ${fluidColMin(t.dayResourceColMinWidth)})`;
 }
 
 export function calendarOsDayBodyHeightPx(density: CalendarOsDisplayDensity, gridHours: number): number {

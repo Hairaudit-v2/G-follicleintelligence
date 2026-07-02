@@ -450,9 +450,9 @@ export function validateScenarioCFrontDeskWorkflow(): ScenarioValidationResult {
 }
 
 function stressResourceColumns(staffDirectory: ClinicalStaffPickerOption[]): OperationalCalendarResourceColumn[] {
-  const cols = staffDirectory.map((s) => ({
+  const cols: OperationalCalendarResourceColumn[] = staffDirectory.map((s) => ({
     id: `s:${s.id}`,
-    kind: "fi_staff" as const,
+    kind: "fi_staff",
     label: String(s.full_name ?? "Staff").trim(),
     subtitle: String(s.staff_role ?? "").trim() || null,
     staffId: s.id,

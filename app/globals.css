@@ -320,4 +320,15 @@ body {
     background-color: var(--fi-cal-ws-select-option-bg, #0f172a);
     color: var(--fi-cal-ws-select-option-text, #f1f5f9);
   }
+
+  /** CalendarOS V2 — deeper contrast stack for dense operational grid */
+  .calendar-os-v2-root {
+    --cal-os-surface: #050a12;
+    --cal-os-elevated: #060d18;
+    --cal-os-card: #0c1426;
+    --cal-os-border: rgb(255 255 255 / 0.06);
+    --cal-os-grid-line: rgb(255 255 255 / 0.024);
+    --cal-os-text: #e8edf5;
+    --cal-os-muted: #7a8ba3;
+  }
 }

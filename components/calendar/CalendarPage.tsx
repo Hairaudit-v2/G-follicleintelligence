@@ -189,6 +189,13 @@ function CalendarPageImpl({
   /** Any user who can mutate bookings server-side can open quick-create from slots. */
   const quickCreateEnabled = data.canMutateBookings;
   const isFiOsWorkspace = workspaceVariant === "fiOs";
+  const calendarOsV2Active = Boolean(data.calendarV2Enabled && isFiOsWorkspace);
+
+  useEffect(() => {
+    if (!calendarOsV2Active) return;
+    setFiOsAgendaOpen(false);
+    setFiOsInsightsOpen(false);
+  }, [calendarOsV2Active]);
   const fiCalendarTheme = useFiCalendarWorkspaceDisplayTheme();
   const calendarWorkspaceDisplayTheme = fiCalendarTheme?.theme ?? "dark";
   const prefersReducedMotion = useReducedMotion();
@@ -362,10 +369,20 @@ function CalendarPageImpl({
     ]
   );
 
-  const sidebarForGrid = isFiOsWorkspace ? (fiOsAgendaOpen ? sidebar : null) : sidebar;
-  const rightPanelForGrid = isFiOsWorkspace ? (fiOsInsightsOpen ? rightPanel : null) : rightPanel;
-
-  const calendarOsV2Active = Boolean(data.calendarV2Enabled && isFiOsWorkspace);
+  const sidebarForGrid = calendarOsV2Active
+    ? null
+    : isFiOsWorkspace
+      ? fiOsAgendaOpen
+        ? sidebar
+        : null
+      : sidebar;
+  const rightPanelForGrid = calendarOsV2Active
+    ? null
+    : isFiOsWorkspace
+      ? fiOsInsightsOpen
+        ? rightPanel
+        : null
+      : rightPanel;
 
   const weekDayGrid = calendarOsV2Active ? (
     <CalendarOsShell
@@ -442,7 +459,7 @@ function CalendarPageImpl({
         }
       />
 
-      {isFiOsWorkspace ? (
+      {isFiOsWorkspace && !calendarOsV2Active ? (
         <FiOsCalendarQuickFilters
           tenantId={data.tenantId}
           query={data.query}

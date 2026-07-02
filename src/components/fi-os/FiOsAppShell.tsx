@@ -231,14 +231,16 @@ export function FiOsAppShell({
     <div className={fiOsChromeClasses.shellRoot}>
       <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
-        <FiOsSidebar
-          variant="rail"
-          brandName={brandName}
-          effective={effective}
-          navSections={sidebarSections}
-          activeNavId={activeSidebarId}
-          pathname={pathname}
-        />
+        {!isCalendarMainLocked ? (
+          <FiOsSidebar
+            variant="rail"
+            brandName={brandName}
+            effective={effective}
+            navSections={sidebarSections}
+            activeNavId={activeSidebarId}
+            pathname={pathname}
+          />
+        ) : null}
 
         <div className={fiOsChromeClasses.mainColumn}>
           <FiOsTopBar

@@ -14,12 +14,12 @@ const WARNING_TONE: Record<string, string> = {
 };
 
 const STATUS_TONE: Record<string, string> = {
-  scheduled: "bg-white/10 text-slate-200 border-white/15",
-  confirmed: "bg-emerald-500/15 text-emerald-200 border-emerald-500/30",
-  arrived: "bg-cyan-500/15 text-cyan-200 border-cyan-500/30",
-  completed: "bg-slate-500/20 text-slate-300 border-slate-500/30",
-  cancelled: "bg-slate-600/20 text-slate-400 border-slate-600/30 line-through",
-  no_show: "bg-rose-500/15 text-rose-200 border-rose-500/30",
+  scheduled: "bg-white/8 text-slate-300 border-white/10",
+  confirmed: "bg-emerald-500/12 text-emerald-200 border-emerald-500/25",
+  arrived: "bg-cyan-500/12 text-cyan-200 border-cyan-500/25",
+  completed: "bg-slate-500/15 text-slate-400 border-slate-500/25",
+  cancelled: "bg-slate-600/15 text-slate-500 border-slate-600/25 line-through",
+  no_show: "bg-rose-500/12 text-rose-200 border-rose-500/25",
 };
 
 export type CalendarOsBookingCardProps = {
@@ -43,7 +43,7 @@ export function CalendarOsBookingCard({
   const surface = bookingCalendarChipSurface(model.bookingType, model.catalogColor);
   const isSurgery = Boolean(model.surgery);
   const topWarning = model.warnings.find((w) => w.severity === "critical") ?? model.warnings[0];
-  const expanded = showHoverDetail && hovered && !ultraCompact;
+  const expanded = showHoverDetail && hovered;
 
   return (
     <button
@@ -53,43 +53,46 @@ export function CalendarOsBookingCard({
       onMouseLeave={() => setHovered(false)}
       className={cn(
         "group relative w-full rounded border text-left transition-all",
-        "border-white/[0.08] bg-[#0F1629]/90 hover:border-cyan-500/30 hover:bg-[#121c33]",
-        ultraCompact ? "p-1" : compact ? "p-1.5" : "p-2",
+        "border-white/[0.07] bg-[#0c1426]/95 hover:border-cyan-500/25 hover:bg-[#101c32] hover:shadow-md hover:shadow-black/30",
+        ultraCompact ? "px-1 py-0.5" : compact ? "px-1 py-0.5" : "px-1.5 py-1",
         isSurgery &&
-          "border-violet-500/30 border-l-2 border-l-violet-400 bg-gradient-to-br from-violet-950/50 to-[#0F1629]/90",
-        highlighted && "ring-1 ring-cyan-400/60",
-        model.isUnassigned && "border-amber-500/30"
+          "border-violet-500/35 border-l-[3px] border-l-violet-400 bg-gradient-to-br from-violet-950/55 to-[#0c1426]/95 shadow-sm shadow-violet-950/40",
+        highlighted && "ring-1 ring-cyan-400/50",
+        model.isUnassigned && "border-amber-500/25"
       )}
-      style={surface.chipStyle}
+      style={isSurgery ? undefined : surface.chipStyle}
     >
-      <div className="flex items-start justify-between gap-0.5">
+      <div className="flex items-center justify-between gap-0.5">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {isSurgery ? (
               <Scissors className="h-2.5 w-2.5 shrink-0 text-violet-300" aria-hidden />
             ) : null}
             <p
               className={cn(
-                "truncate font-medium text-slate-100",
-                ultraCompact ? "text-[10px]" : compact ? "text-[11px]" : "text-xs"
+                "truncate text-slate-100",
+                isSurgery && "font-semibold text-violet-50",
+                ultraCompact ? "text-[9px]" : compact ? "text-[10px]" : "text-[11px]"
               )}
             >
               {model.patientName}
             </p>
           </div>
-          <p
-            className={cn(
-              "truncate text-slate-400",
-              ultraCompact ? "text-[9px]" : compact ? "text-[10px]" : "text-[11px]"
-            )}
-          >
-            {model.bookingTypeLabel}
-          </p>
+          {expanded ? (
+            <p
+              className={cn(
+                "truncate text-slate-500",
+                ultraCompact ? "text-[8px]" : "text-[9px]"
+              )}
+            >
+              {model.bookingTypeLabel}
+            </p>
+          ) : null}
         </div>
         <span
           className={cn(
             "shrink-0 rounded border font-medium uppercase tracking-wide",
-            ultraCompact ? "px-0.5 py-0 text-[8px]" : "px-1 py-0.5 text-[9px]",
+            ultraCompact ? "px-0.5 py-0 text-[7px]" : "px-0.5 py-0 text-[8px]",
             STATUS_TONE[model.status] ?? STATUS_TONE.scheduled
           )}
         >
@@ -97,62 +100,76 @@ export function CalendarOsBookingCard({
         </span>
       </div>
 
-      <div
-        className={cn(
-          "flex flex-wrap items-center gap-x-1.5 gap-y-0 text-slate-400",
-          ultraCompact ? "mt-0.5 text-[8px]" : compact ? "mt-0.5 text-[9px]" : "mt-1 text-[10px]"
-        )}
-      >
-        <span className="inline-flex items-center gap-0.5">
-          <Clock className="h-2.5 w-2.5 shrink-0" aria-hidden />
-          {model.timeRangeLabel}
-        </span>
-        <span>{model.durationMin}m</span>
-        {isSurgery && model.surgery?.plannedGraftCount ? (
-          <span className="text-violet-300/80">{model.surgery.plannedGraftCount} grafts</span>
-        ) : null}
-      </div>
+      {expanded ? (
+        <>
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-x-1 gap-y-0 text-slate-500",
+              ultraCompact ? "mt-0 text-[8px]" : "mt-0.5 text-[9px]"
+            )}
+          >
+            <span className="inline-flex items-center gap-0.5">
+              <Clock className="h-2 w-2 shrink-0" aria-hidden />
+              {model.timeRangeLabel}
+            </span>
+            <span>{model.durationMin}m</span>
+            {isSurgery && model.surgery?.plannedGraftCount ? (
+              <span className="text-violet-300/90">{model.surgery.plannedGraftCount} grafts</span>
+            ) : null}
+          </div>
 
-      {expanded && model.assignedDoctor ? (
-        <p className="mt-1 flex items-center gap-1 truncate text-[10px] text-slate-400">
-          <UserRound className="h-2.5 w-2.5 shrink-0" aria-hidden />
-          {model.assignedDoctor}
-        </p>
-      ) : null}
-
-      {expanded && model.roomLabel ? (
-        <p className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-slate-500">
-          <DoorOpen className="h-2.5 w-2.5 shrink-0" aria-hidden />
-          {model.roomLabel}
-        </p>
-      ) : null}
-
-      {isSurgery && (expanded || !compact) ? (
-        <div className="mt-1 space-y-0.5 rounded border border-violet-500/20 bg-violet-500/5 px-1 py-0.5 text-[9px] text-violet-100/90">
-          {model.surgery?.readinessStatus ? (
-            <p>Readiness: {model.surgery.readinessStatus}</p>
+          {model.assignedDoctor ? (
+            <p className="mt-0.5 flex items-center gap-0.5 truncate text-[9px] text-slate-500">
+              <UserRound className="h-2 w-2 shrink-0" aria-hidden />
+              {model.assignedDoctor}
+            </p>
           ) : null}
-          {model.surgery?.paymentStatus ? <p>Payment: {model.surgery.paymentStatus}</p> : null}
-        </div>
+
+          {model.roomLabel ? (
+            <p className="flex items-center gap-0.5 truncate text-[9px] text-slate-600">
+              <DoorOpen className="h-2 w-2 shrink-0" aria-hidden />
+              {model.roomLabel}
+            </p>
+          ) : null}
+
+          {isSurgery ? (
+            <div className="mt-0.5 space-y-0 rounded border border-violet-500/20 bg-violet-500/5 px-1 py-0.5 text-[8px] text-violet-100/90">
+              {model.surgery?.readinessStatus ? (
+                <p>Readiness: {model.surgery.readinessStatus}</p>
+              ) : null}
+              {model.surgery?.paymentStatus ? <p>Payment: {model.surgery.paymentStatus}</p> : null}
+            </div>
+          ) : null}
+
+          {topWarning ? (
+            <div
+              className={cn(
+                "inline-flex max-w-full items-center gap-0.5 rounded border font-medium",
+                "mt-0.5 px-0.5 py-0 text-[8px]",
+                WARNING_TONE[topWarning.severity] ?? WARNING_TONE.warning
+              )}
+            >
+              <AlertTriangle className="h-2 w-2 shrink-0" aria-hidden />
+              <span className="truncate">{topWarning.label}</span>
+            </div>
+          ) : null}
+        </>
       ) : null}
 
-      {topWarning && !ultraCompact ? (
-        <div
-          className={cn(
-            "inline-flex max-w-full items-center gap-0.5 rounded border font-medium",
-            compact ? "mt-0.5 px-1 py-0 text-[8px]" : "mt-1 px-1 py-0.5 text-[9px]",
-            WARNING_TONE[topWarning.severity] ?? WARNING_TONE.warning
-          )}
-        >
-          <AlertTriangle className="h-2.5 w-2.5 shrink-0" aria-hidden />
-          <span className="truncate">{topWarning.label}</span>
-        </div>
+      {!expanded && model.isUnassigned ? (
+        <span
+          className="mt-0.5 inline-block h-1 w-1 rounded-full bg-amber-400"
+          title="Unassigned"
+          aria-label="Unassigned"
+        />
       ) : null}
 
-      {model.isUnassigned ? (
-        <span className="mt-0.5 inline-block rounded border border-amber-500/35 bg-amber-500/10 px-1 py-0 text-[8px] font-medium text-amber-200">
-          Unassigned
-        </span>
+      {!expanded && isSurgery && topWarning?.severity === "critical" ? (
+        <span
+          className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-rose-400"
+          title={topWarning.label}
+          aria-hidden
+        />
       ) : null}
     </button>
   );

@@ -24,6 +24,7 @@ import {
   type StaffWeekdayKey,
   STAFF_WEEKDAY_KEYS,
 } from "@/src/lib/staff/staffWeeklyHours";
+import { CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR } from "@/src/lib/calendar-os/calendarDisplayDensity";
 import { weekdayKeyFromDayKey } from "@/src/lib/calendar-os/calendarWorkforceBlocks";
 
 export const CALENDAR_OS_RESOURCE_ROLE_GROUPS = [
@@ -520,7 +521,7 @@ function minutesRangeToDayPlacement(
   const visStart = Math.max(startMinFromMidnight, gridStart);
   const visEnd = Math.min(startMinFromMidnight + durationMin, gridEnd);
   if (visEnd <= visStart) return null;
-  const pxPerMin = 44 / 60;
+  const pxPerMin = CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR / 60;
   return {
     topPx: (visStart - gridStart) * pxPerMin,
     heightPx: Math.max((visEnd - visStart) * pxPerMin, 12),

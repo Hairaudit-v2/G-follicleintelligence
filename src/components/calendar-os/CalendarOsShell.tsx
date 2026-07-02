@@ -92,27 +92,29 @@ export function CalendarOsShell({
   const dayLane: CalendarDayLane | undefined = data.lanes[0];
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#081020]">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/20 bg-cyan-950/20 px-3 py-1.5">
-        <span className="text-[11px] font-medium text-cyan-200/90">
-          CalendarOS V2 — resource-first operations view
-        </span>
+    <div className="calendar-os-v2-root flex min-h-0 flex-1 flex-col overflow-hidden bg-[#050a12]">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-white/[0.06] bg-[#060d18]/95 px-2 py-1">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+          <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
+          <span className="hidden h-3 w-px bg-white/[0.08] sm:block" aria-hidden />
+          <CalendarOsViewControls
+            tenantId={data.tenantId}
+            query={data.query}
+            route={route}
+            inline
+          />
+        </div>
         <CalendarOsDensityToggle density={density} onDensityChange={handleDensityChange} />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] bg-[#081020]/80 px-3 py-1.5">
-        <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} />
-      </div>
-
-      <CalendarOsViewControls tenantId={data.tenantId} query={data.query} route={route} />
       <CalendarOsOperationalPanel summary={panelSummary} density={density} />
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1">
         {sidebar ? (
-          <div className="hidden w-56 shrink-0 border-r border-white/[0.06] lg:block">{sidebar}</div>
+          <div className="hidden w-48 shrink-0 border-r border-white/[0.05] lg:block">{sidebar}</div>
         ) : null}
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {isDayLayout && dayLane ? (
             <CalendarOsDayResourceView
               query={data.query}
@@ -149,7 +151,7 @@ export function CalendarOsShell({
         </div>
 
         {rightPanel ? (
-          <div className="hidden w-72 shrink-0 border-l border-white/[0.06] xl:block">{rightPanel}</div>
+          <div className="hidden w-64 shrink-0 border-l border-white/[0.05] xl:block">{rightPanel}</div>
         ) : null}
       </div>
     </div>

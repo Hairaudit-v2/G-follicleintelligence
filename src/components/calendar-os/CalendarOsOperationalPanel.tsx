@@ -28,7 +28,7 @@ function PanelCard({ icon, label, value, tone = "default", detail, compact }: Pa
     <div
       className={cn(
         "rounded-lg border",
-        compact ? "px-2 py-1.5" : "px-3 py-2.5",
+        compact ? "px-1.5 py-1" : "px-2 py-1.5",
         tone === "warning" && "border-amber-500/25 bg-amber-500/5",
         tone === "success" && "border-emerald-500/25 bg-emerald-500/5",
         tone === "default" && "border-white/[0.1] bg-white/[0.04]"
@@ -48,12 +48,12 @@ function PanelCard({ icon, label, value, tone = "default", detail, compact }: Pa
       <p
         className={cn(
           "font-semibold tabular-nums text-slate-100",
-          compact ? "mt-0.5 text-base" : "mt-1 text-lg"
+          compact ? "mt-0 text-sm" : "mt-0.5 text-base"
         )}
       >
         {value}
       </p>
-      {detail ? (
+      {detail && !compact ? (
         <p className={cn("truncate text-slate-500", compact ? "mt-0 text-[9px]" : "mt-0.5 text-[10px]")}>
           {detail}
         </p>
@@ -85,11 +85,11 @@ export function CalendarOsOperationalPanel({
       : `${summary.roomsAvailable} rooms open`;
 
   return (
-    <aside className={cn("shrink-0 border-b border-white/[0.08] bg-[#081020]/80", className)} aria-label="Operational context">
+    <aside className={cn("shrink-0 border-b border-white/[0.06] bg-[#060d18]/90", className)} aria-label="Operational context">
       <div
         className={cn(
-          "grid grid-cols-2 gap-2 lg:grid-cols-4 xl:grid-cols-8",
-          compact ? "p-2" : "p-3"
+          "grid grid-cols-4 gap-1 lg:grid-cols-8",
+          compact ? "p-1.5" : "p-2"
         )}
       >
         <PanelCard

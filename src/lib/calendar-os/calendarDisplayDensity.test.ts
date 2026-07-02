@@ -24,9 +24,9 @@ describe("calendarDisplayDensity", () => {
     assert.ok(cmd.weekResourceLabelWidth < comfy.weekResourceLabelWidth);
   });
 
-  it("builds grid templates", () => {
-    assert.match(calendarOsWeekGridTemplate("compact", 7), /^152px repeat\(7,/);
-    assert.match(calendarOsDayGridTemplate("command", 4), /^40px repeat\(4,/);
+  it("builds fluid grid templates without horizontal overflow", () => {
+    assert.match(calendarOsWeekGridTemplate("compact", 7), /^108px repeat\(7, minmax\(0, 1fr\)\)/);
+    assert.match(calendarOsDayGridTemplate("command", 4), /^32px repeat\(4, minmax\(0, 1fr\)\)/);
   });
 
   it("validates density ids", () => {

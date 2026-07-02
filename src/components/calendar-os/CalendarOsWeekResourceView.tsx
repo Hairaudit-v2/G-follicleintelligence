@@ -147,24 +147,24 @@ export function CalendarOsWeekResourceView({
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {showSparseBanner ? <CalendarOsEmptyContext context={sparseContext} variant="week-banner" /> : null}
 
-      <div className="min-h-0 flex-1 overflow-auto overscroll-x-contain">
-        <div className="min-w-max">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="w-full min-w-0">
           <div
-            className="sticky top-0 z-[4] grid border-b border-white/[0.08] bg-[#0a1220]"
+            className="sticky top-0 z-[4] grid border-b border-white/[0.032] bg-[#060d18]"
             style={{ gridTemplateColumns: gridTemplate }}
           >
-            <div className="sticky left-0 z-[5] border-r border-white/[0.08] px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <div className="sticky left-0 z-[5] border-r border-white/[0.032] px-1.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-slate-600">
               Resource
             </div>
             {lanes.map((lane) => (
               <div
                 key={lane.dayKey}
-                className="border-r border-white/[0.06] px-1.5 py-1.5 text-center last:border-r-0"
+                className="min-w-0 border-r border-white/[0.024] px-1 py-1 text-center last:border-r-0"
               >
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-600">
                   {calendarDayHeading(lane, calendarTimezone).split(" ")[0]}
                 </p>
-                <p className="text-xs font-medium text-slate-300">
+                <p className="text-[10px] font-medium text-slate-300">
                   {calendarDayHeading(lane, calendarTimezone).split(" ").slice(1).join(" ")}
                 </p>
               </div>
@@ -176,22 +176,22 @@ export function CalendarOsWeekResourceView({
               <div className="grid bg-white/[0.02]" style={{ gridTemplateColumns: gridTemplate }}>
                 <div
                   className={cn(
-                    "sticky left-0 z-[3] col-span-full flex items-center gap-2 border-b border-white/[0.06] px-2 text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80",
+                    "sticky left-0 z-[3] col-span-full flex items-center gap-1.5 border-b border-white/[0.024] px-1.5 text-[9px] font-semibold uppercase tracking-wider text-cyan-400/70",
                     tokens.weekGroupHeaderPy
                   )}
                 >
-                  <span className="h-px flex-1 bg-cyan-500/15" aria-hidden />
+                  <span className="h-px flex-1 bg-cyan-500/8" aria-hidden />
                   {group.label}
                   <span className="text-[9px] font-normal normal-case text-slate-500">
                     {group.rows.length}
                   </span>
-                  <span className="h-px flex-1 bg-cyan-500/15" aria-hidden />
+                  <span className="h-px flex-1 bg-cyan-500/8" aria-hidden />
                 </div>
               </div>
               {group.rows.map((row) => (
                 <div
                   key={row.id}
-                  className="grid border-b border-white/[0.05]"
+                  className="grid border-b border-white/[0.02]"
                   style={{ gridTemplateColumns: gridTemplate }}
                 >
                   <CalendarOsResourceLaneLabel row={row} density={density} />
@@ -200,7 +200,7 @@ export function CalendarOsWeekResourceView({
                     return (
                       <div
                         key={`${row.id}-${lane.dayKey}`}
-                        className="space-y-0.5 border-r border-white/[0.05] p-0.5 last:border-r-0"
+                        className="min-w-0 space-y-0 border-r border-white/[0.02] p-px last:border-r-0"
                         style={{ minHeight: tokens.weekRowMinHeight }}
                       >
                         {ids.length === 0 ? (

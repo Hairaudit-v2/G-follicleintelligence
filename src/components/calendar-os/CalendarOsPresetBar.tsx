@@ -18,6 +18,7 @@ export type CalendarOsPresetBarProps = {
   tenantId: string;
   query: ParsedCalendarQuery;
   route?: CalendarRoute;
+  compact?: boolean;
   className?: string;
 };
 
@@ -25,6 +26,7 @@ export function CalendarOsPresetBar({
   tenantId,
   query,
   route = "fi-admin",
+  compact = false,
   className,
 }: CalendarOsPresetBarProps) {
   const activeId = activeCalendarOsViewPresetId(query);
@@ -38,10 +40,12 @@ export function CalendarOsPresetBar({
   }
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-1", className)}>
-      <span className="mr-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-        Presets
-      </span>
+    <div className={cn("flex flex-wrap items-center gap-0.5", className)}>
+      {!compact ? (
+        <span className="mr-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          Presets
+        </span>
+      ) : null}
       {CALENDAR_OS_VIEW_PRESETS.map((preset) => {
         const active = activeId === preset.id;
         return (
@@ -50,10 +54,11 @@ export function CalendarOsPresetBar({
             href={presetHref(preset.id)}
             title={preset.description}
             className={cn(
-              "rounded border px-2 py-0.5 text-[10px] font-medium transition-colors",
+              "rounded border font-medium transition-colors",
+              compact ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-0.5 text-[10px]",
               active
-                ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100"
-                : "border-white/[0.08] bg-white/[0.03] text-slate-400 hover:border-white/15 hover:text-slate-200"
+                ? "border-emerald-500/35 bg-emerald-500/12 text-emerald-100"
+                : "border-white/[0.06] bg-white/[0.02] text-slate-500 hover:border-white/12 hover:text-slate-300"
             )}
           >
             {preset.label}

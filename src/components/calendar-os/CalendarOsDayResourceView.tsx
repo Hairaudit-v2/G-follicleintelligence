@@ -23,6 +23,7 @@ import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import { formatWallClockMinutesFromMidnight } from "@/lib/calendar/time-slots";
 import {
+  CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR,
   calendarOsDayBodyHeightPx,
   calendarOsDayGridTemplate,
   calendarOsDensityTokens,
@@ -210,26 +211,26 @@ export function CalendarOsDayResourceView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="border-b border-white/[0.06] px-3 py-1 text-xs text-slate-400">
+      <div className="border-b border-white/[0.024] px-2 py-0.5 text-[10px] text-slate-500">
         {calendarDayHeading(lane, calendarTimezone)}
       </div>
-      <div className="min-h-0 flex-1 overflow-auto overscroll-x-contain">
-        <div className="relative min-w-max">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="relative w-full min-w-0">
           <div
             ref={headerRef}
-            className="sticky top-0 z-[4] grid border-b border-white/[0.08] bg-[#0a1220] shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
+            className="sticky top-0 z-[4] grid border-b border-white/[0.032] bg-[#060d18] shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
             style={{ gridTemplateColumns: gridTemplate }}
           >
             <div
-              className="sticky left-0 z-[5] border-r border-white/[0.08] bg-[#0a1220]"
+              className="sticky left-0 z-[5] border-r border-white/[0.032] bg-[#060d18]"
               aria-hidden
             />
             {resourceRows.map((row) => (
               <div
                 key={row.id}
                 className={cn(
-                  "border-r border-white/[0.06] last:border-r-0",
-                  row.kind === "unassigned" && "bg-amber-950/20"
+                  "min-w-0 border-r border-white/[0.024] last:border-r-0",
+                  row.kind === "unassigned" && "bg-amber-950/25"
                 )}
               >
                 <CalendarOsResourceLaneLabel row={row} density={density} horizontal sticky={false} />
@@ -239,13 +240,13 @@ export function CalendarOsDayResourceView({
 
           <div className="relative grid" style={{ gridTemplateColumns: gridTemplate }}>
             <div
-              className="sticky left-0 z-[3] border-r border-white/[0.08] bg-[#0a1220]"
+              className="sticky left-0 z-[3] border-r border-white/[0.032] bg-[#060d18]"
               style={{ height: bodyH }}
             >
               {hours.map((h) => (
                 <div
                   key={h}
-                  className="absolute left-0 right-0 border-t border-white/[0.06] pr-1 text-right tabular-nums text-slate-500"
+                  className="absolute left-0 right-0 border-t border-white/[0.024] pr-0.5 text-right tabular-nums text-slate-600"
                   style={{
                     top: (h - gridConfig.dayStartHourUtc) * pxPerHour,
                     height: pxPerHour,
@@ -263,8 +264,8 @@ export function CalendarOsDayResourceView({
                 <div
                   key={row.id}
                   className={cn(
-                    "relative border-r border-white/[0.05] last:border-r-0",
-                    row.kind === "unassigned" && "bg-amber-950/10"
+                    "relative min-w-0 border-r border-white/[0.02] last:border-r-0",
+                    row.kind === "unassigned" && "bg-amber-950/15"
                   )}
                   style={{ height: bodyH }}
                   onClick={(e) => {
@@ -285,7 +286,7 @@ export function CalendarOsDayResourceView({
                   {hours.map((h) => (
                     <div
                       key={h}
-                      className="absolute left-0 right-0 border-t border-white/[0.04]"
+                      className="absolute left-0 right-0 border-t border-white/[0.016]"
                       style={{
                         top: (h - gridConfig.dayStartHourUtc) * pxPerHour,
                       }}
@@ -311,7 +312,7 @@ export function CalendarOsDayResourceView({
                   {workforceBlocks
                     .filter((b) => b.resourceId === row.id)
                     .map((block) => {
-                      const scale = pxPerHour / 44;
+                      const scale = pxPerHour / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR;
                       const topPx = block.topPx != null ? block.topPx * scale : undefined;
                       const heightPx = block.heightPx != null ? block.heightPx * scale : 20;
                       return block.topPx != null ? (
@@ -345,8 +346,12 @@ export function CalendarOsDayResourceView({
                     const model = cardModels[placement.bookingId];
                     const booking = bookingById.get(placement.bookingId);
                     if (!model || !booking) return null;
-                    const topPx = (placement.topPx / 44) * pxPerHour;
-                    const heightPx = Math.max((placement.heightPx / 44) * pxPerHour, 18);
+                    const topPx =
+                      (placement.topPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour;
+                    const heightPx = Math.max(
+                      (placement.heightPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour,
+                      14
+                    );
                     return (
                       <div
                         key={placement.bookingId}
