@@ -3,6 +3,7 @@
  */
 
 import { countAgendaBookingsOnOperationalDayByBucket } from "@/src/components/fi-admin/operations/operationsAgendaDayStats";
+import { resolveProcedureDayNavHref } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { AgendaBucket } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
 import type {
   DashboardBookingItem,
@@ -209,8 +210,10 @@ export function buildLiveClinicFlowCards(
   data: Pick<
     TenantOperationalDashboard,
     "agendaByBucket" | "operationalDay" | "clinicToday" | "paymentCommercialKpis" | "receptionBoard"
-  >
+  >,
+  opts?: { showProcedureDayNav?: boolean }
 ): LiveClinicFlowCard[] {
+  const procedureDayHref = resolveProcedureDayNavHref(base, opts?.showProcedureDayNav === true);
   const { agendaByBucket, operationalDay, clinicToday, paymentCommercialKpis, receptionBoard } =
     data;
   const todayRows = todayAgendaRows(agendaByBucket, operationalDay);
@@ -267,7 +270,7 @@ export function buildLiveClinicFlowCards(
       label: "Procedures active",
       value: proceduresActive || clinicToday.surgeries,
       detail: "Procedure visits underway today",
-      href: `${base}/procedure-day`,
+      href: procedureDayHref,
     },
     {
       id: "rooms",

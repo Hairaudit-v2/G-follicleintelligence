@@ -8,6 +8,7 @@ import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
 
 export const metadata = {
   title: "Operations centre",
@@ -40,9 +41,10 @@ export default async function ClinicOsOperationsPage({
     );
   }
 
-  const [showCrmNav, showDiagnosticsExpanded] = await Promise.all([
+  const [showCrmNav, showDiagnosticsExpanded, showProcedureDayNav] = await Promise.all([
     getCrmShellNavAllowed(tenantId),
     canViewDashboardSystemDiagnostics(tenantId),
+    Promise.resolve(readFiProcedureDayEnabled()),
   ]);
 
   let data;
@@ -60,6 +62,7 @@ export default async function ClinicOsOperationsPage({
         data={data}
         showCrmNav={showCrmNav}
         showDiagnosticsExpanded={showDiagnosticsExpanded}
+        showProcedureDayNav={showProcedureDayNav}
       />
     </CalendarToastProvider>
   );

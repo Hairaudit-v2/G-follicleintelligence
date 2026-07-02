@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { ProcedureDayBoard } from "@/src/components/fi-admin/surgery/ProcedureDayBoard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import { loadProcedureDayBoardPayload } from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import { assertFiProcedureDayRouteAllowed } from "@/src/lib/procedureDay/procedureDayGate.server";
+import { loadProcedureDayBoardForTenant } from "@/src/lib/procedureDay/procedureDayOrchestrator.server";
 
 export const metadata = {
   title: "Procedure day",
@@ -22,6 +23,7 @@ export default async function FiAdminProcedureDayPage({
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
+  assertFiProcedureDayRouteAllowed();
   await assertFiTenantPortalAccess(tenantId);
 
   if (
@@ -41,7 +43,7 @@ export default async function FiAdminProcedureDayPage({
 
   let data;
   try {
-    data = await loadProcedureDayBoardPayload(tenantId.trim());
+    data = await loadProcedureDayBoardForTenant(tenantId.trim());
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     if (msg === "Tenant not found") notFound();

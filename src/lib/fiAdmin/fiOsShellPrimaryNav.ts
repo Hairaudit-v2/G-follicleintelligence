@@ -1,5 +1,6 @@
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { getClinicOsShellActiveNavId } from "@/src/lib/fiAdmin/clinicOsShellConfig";
+import { filterProcedureDayFromFiOsSidebarItems } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
@@ -144,7 +145,8 @@ export function resolveFiOsPrimarySidebarItems(
   showAuditOsNav: boolean = true,
   showConfigurationHubNav: boolean = true,
   showFiPaymentsInboxNav: boolean = false,
-  showHrOsNav: boolean = false
+  showHrOsNav: boolean = false,
+  showProcedureDayNav: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -452,7 +454,7 @@ export function resolveFiOsPrimarySidebarItems(
         : undefined,
     },
   ];
-  return items;
+  return filterProcedureDayFromFiOsSidebarItems(items, showProcedureDayNav);
 }
 
 function fiFeatureVisibleForNav(

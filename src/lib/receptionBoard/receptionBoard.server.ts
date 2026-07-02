@@ -22,6 +22,9 @@ import {
   sortActionAlerts,
   sortAppointmentsChronologically,
 } from "./receptionBoardCore";
+import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
+import { appendProcedureDayQuickActionIfEnabled } from "@/src/lib/procedureDay/procedureDayReceptionCore";
+
 import type { ReceptionBoardCommandCenterPayload } from "./receptionBoardTypes";
 
 async function loadBookingCaseIds(
@@ -213,7 +216,11 @@ export async function loadReceptionBoardCommandCenterPayload(
     appointments,
     queue,
     actionAlerts,
-    quickActions: buildQuickActions(base),
+    quickActions: appendProcedureDayQuickActionIfEnabled(
+      buildQuickActions(base),
+      base,
+      readFiProcedureDayEnabled()
+    ),
     tomorrowSurgeries,
     intelligence,
     liveEvents,

@@ -64,12 +64,19 @@ test("getFiOsShellActiveSidebarId: payments inbox maps to payments-inbox tab", (
   assert.equal(getFiOsShellActiveSidebarId(`${b}/payments`, b), "payments-inbox");
 });
 
-test("resolveFiOsPrimarySidebarItems: cases entry includes readiness and procedure day sub-links when enabled", () => {
+test("resolveFiOsPrimarySidebarItems: cases entry includes readiness sub-link by default", () => {
   const base = "/fi-admin/t-1";
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
   const cases = items.find((i) => i.id === "cases");
   assert.ok(cases?.subItems?.length);
   assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/surgery-readiness")));
+  assert.ok(!cases!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
+});
+
+test("resolveFiOsPrimarySidebarItems: procedure day sub-link when FI_PROCEDURE_DAY_ENABLED", () => {
+  const base = "/fi-admin/t-1";
+  const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, true);
+  const cases = items.find((i) => i.id === "cases");
   assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
 });
 

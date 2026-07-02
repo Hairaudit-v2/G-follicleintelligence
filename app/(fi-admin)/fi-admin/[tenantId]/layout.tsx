@@ -33,6 +33,7 @@ import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGua
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import { loadHrOsNavVisibleForViewer } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
+import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
 import {
   canAccessTenantReminderSettings,
@@ -203,6 +204,7 @@ export default async function TenantAdminLayout({
   }
 
   const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
+  const showProcedureDayNav = pinFloorMode ? false : readFiProcedureDayEnabled();
 
   const mainSurface = (
     <div
@@ -243,6 +245,7 @@ export default async function TenantAdminLayout({
         showAuditOsNav={showAuditOsNav}
         showConfigurationHubNav={showConfigurationHubNav}
         showFiPaymentsInboxNav={showFiPaymentsInboxNav}
+        showProcedureDayNav={showProcedureDayNav}
         showHrOsNav={showHrOsNav}
         workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}

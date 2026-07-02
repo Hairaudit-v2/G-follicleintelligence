@@ -122,7 +122,8 @@ export type ReceptionBoardQuickActionId =
   | "reschedule"
   | "cancel"
   | "view_patient"
-  | "open_calendar";
+  | "open_calendar"
+  | "open_procedure_day";
 
 export type ReceptionBoardQuickAction = {
   id: ReceptionBoardQuickActionId;

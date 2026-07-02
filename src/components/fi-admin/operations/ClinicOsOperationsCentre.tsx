@@ -17,7 +17,15 @@ import {
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
-function OperationsCentrePrimaryActions({ base }: { base: string }) {
+import { resolveProcedureDayNavHref } from "@/src/lib/procedureDay/procedureDayNavCore";
+
+function OperationsCentrePrimaryActions({
+  base,
+  showProcedureDayNav,
+}: {
+  base: string;
+  showProcedureDayNav: boolean;
+}) {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       <Link href={`${base}/calendar`} className={operationsCentreLinkButtonClass}>
@@ -26,9 +34,11 @@ function OperationsCentrePrimaryActions({ base }: { base: string }) {
       <Link href={`${base}/reception`} className={operationsCentreLinkButtonClass}>
         Open Reception Board
       </Link>
-      <Link href={`${base}/procedure-day`} className={operationsCentreLinkButtonClass}>
-        Open Procedure Day
-      </Link>
+      {showProcedureDayNav ? (
+        <Link href={resolveProcedureDayNavHref(base, true)} className={operationsCentreLinkButtonClass}>
+          Open Procedure Day
+        </Link>
+      ) : null}
       <Link href={`${base}/tomorrow`} className={operationsCentreLinkButtonClass}>
         Open Tomorrow Board
       </Link>
@@ -46,13 +56,14 @@ export function ClinicOsOperationsCentre(props: {
   data: TenantOperationalDashboard;
   showCrmNav: boolean;
   showDiagnosticsExpanded?: boolean;
+  showProcedureDayNav?: boolean;
 }) {
-  const { data, showCrmNav, showDiagnosticsExpanded = false } = props;
+  const { data, showCrmNav, showDiagnosticsExpanded = false, showProcedureDayNav = false } = props;
   const base = `/fi-admin/${data.tenantId}`;
   const tz = data.operationalDay.calendarTimezone.trim();
   const dateLine = formatCalendarLongWeekdayDate(data.operationalDay.todayYmd, tz);
 
-  const flowCards = buildLiveClinicFlowCards(base, data);
+  const flowCards = buildLiveClinicFlowCards(base, data, { showProcedureDayNav });
   const coordinationItems = buildCoordinationPriorities(base, data, showCrmNav, 5);
   const movementLanes = buildMovementBoardItems(base, data, 4);
   const roomOverview = buildRoomOverview(data.receptionBoard.cards);
@@ -95,7 +106,7 @@ export function ClinicOsOperationsCentre(props: {
             <p className="mt-2 text-sm text-[#64748B]">
               {data.tenantName} · {dateLine}
             </p>
-            <OperationsCentrePrimaryActions base={base} />
+            <OperationsCentrePrimaryActions base={base} showProcedureDayNav={showProcedureDayNav} />
           </div>
         </div>
       </DashboardCard>

@@ -53,6 +53,7 @@ export function FiOsAppShell({
   showAuditOsNav = true,
   showConfigurationHubNav = true,
   showFiPaymentsInboxNav = false,
+  showProcedureDayNav = false,
   showHrOsNav = false,
   workspaceProfileKey = "default",
   featureAccess = null,
@@ -86,6 +87,8 @@ export function FiOsAppShell({
   showConfigurationHubNav?: boolean;
   /** RevenueOS payments inbox (`/payments`) when `FI_PAYMENTS_ENABLED` is true. */
   showFiPaymentsInboxNav?: boolean;
+  /** Procedure Day board (`/procedure-day`) when `FI_PROCEDURE_DAY_ENABLED` is true. */
+  showProcedureDayNav?: boolean;
   /** HR OS primary nav when tenant entitlement + role allow. */
   showHrOsNav?: boolean;
   /** Stage UI activation — workspace persona for nav emphasis (does not bypass Stage 2). */
@@ -135,7 +138,8 @@ export function FiOsAppShell({
       showAuditOsNav,
       showConfigurationHubNav,
       showFiPaymentsInboxNav,
-      showHrOsNav
+      showHrOsNav,
+      showProcedureDayNav
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -147,6 +151,7 @@ export function FiOsAppShell({
     showConfigurationHubNav,
     showFiPaymentsInboxNav,
     showHrOsNav,
+    showProcedureDayNav,
     featureAccessMap,
   ]);
 

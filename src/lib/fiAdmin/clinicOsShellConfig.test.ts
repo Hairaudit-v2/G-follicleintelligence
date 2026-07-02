@@ -53,9 +53,7 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   const readiness = items.find((i) => i.id === "surgery-readiness-board");
   assert.ok(readiness);
   assert.equal(readiness!.href, `${base}/surgery-readiness`);
-  const procDay = items.find((i) => i.id === "procedure-day-board");
-  assert.ok(procDay);
-  assert.equal(procDay!.href, `${base}/procedure-day`);
+  assert.ok(!items.some((i) => i.id === "procedure-day-board"));
   assert.equal(byId.auditos?.href, `${base}/audit`);
   assert.equal(byId.analyticsos?.href, `${base}/analytics`);
   assert.equal(byId.foundationos?.href, `${base}/foundation-integrity`);
@@ -247,6 +245,13 @@ test("getClinicOsShellActiveNavId: Timely discovery under settings cluster", () 
     getClinicOsShellActiveNavId(`${base}/settings/integrations/timely/discovery`, base),
     "configuration"
   );
+});
+
+test("resolveClinicOsShellNavItems: procedure day board when showProcedureDayNav", () => {
+  const items = resolveClinicOsShellNavItems(base, true, true, false, true);
+  const procDay = items.find((i) => i.id === "procedure-day-board");
+  assert.ok(procDay);
+  assert.equal(procDay!.href, `${base}/procedure-day`);
 });
 
 test("resolveClinicOsShellNavItems: Admin Users gated by showManageAdminUsers", () => {

@@ -6,10 +6,9 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
-import type {
-  ProcedureDayBoardPayload,
-  ProcedureDayScheduleCard,
-} from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import type { ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import type { ProcedureDayLiveBoardPayload } from "@/src/lib/procedureDay/procedureDayWorkflowTypes";
+import { ProcedureDayLiveWorkflow } from "@/src/components/fi-admin/surgery/ProcedureDayLiveWorkflow";
 import {
   buildPostOpDischargeReadiness,
   buildProcedureDayFlowBoardItems,
@@ -111,7 +110,7 @@ function groupByLane(cards: ProcedureDayScheduleCard[]) {
   return lanes;
 }
 
-export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) {
+export function ProcedureDayBoard({ data }: { data: ProcedureDayLiveBoardPayload }) {
   const base = `/fi-admin/${data.tenantId}`;
   const tz = data.window.calendarTimezone.trim();
   const dateLine = formatCalendarLongWeekdayDate(data.window.todayYmd, tz);
@@ -145,6 +144,8 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
           <ProcedureDayPrimaryActions base={base} todayYmd={data.window.todayYmd} />
         </div>
       </DashboardCard>
+
+      <ProcedureDayLiveWorkflow data={data} />
 
       <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="pd-snapshot-heading">
         <SectionHeader

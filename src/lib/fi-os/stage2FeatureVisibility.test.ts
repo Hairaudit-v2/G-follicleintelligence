@@ -136,7 +136,7 @@ test("sidebar: null access leaves items in place", () => {
 });
 
 test("sidebar: procedure_day sub removed when procedure_day off", () => {
-  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true);
+  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, true);
   const cases = raw.find((i) => i.id === "cases");
   const m = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     procedure_day: false,

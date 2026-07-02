@@ -518,13 +518,17 @@ export function resolveClinicOsShellNavModules(
   base: string,
   showCrmNav: boolean,
   showBookingsBoard: boolean = showCrmNav,
-  showManageAdminUsers: boolean = false
+  showManageAdminUsers: boolean = false,
+  showProcedureDayNav: boolean = false
 ): ResolvedClinicOsShellNavModule[] {
   return CLINIC_OS_SHELL_NAV_MODULES.map((mod) => {
-    const items = mod.items.map((def) =>
+    const defs = showProcedureDayNav
+      ? mod.items
+      : mod.items.filter((def) => def.id !== "procedure-day-board");
+    const items = defs.map((def) =>
       resolveOneNavItem(base, def, showCrmNav, showBookingsBoard, showManageAdminUsers)
     );
-    const nonPlaceholderDefs = mod.items.filter((d) => !d.placeholder);
+    const nonPlaceholderDefs = defs.filter((d) => !d.placeholder);
     const realLinks = nonPlaceholderDefs.length;
     const duplicateModuleLabel = nonPlaceholderDefs.some((d) => d.label === mod.label);
     const showModuleLabel = realLinks > 1 && !duplicateModuleLabel;
@@ -542,13 +546,15 @@ export function resolveClinicOsShellNavItems(
   base: string,
   showCrmNav: boolean,
   showBookingsBoard: boolean = showCrmNav,
-  showManageAdminUsers: boolean = false
+  showManageAdminUsers: boolean = false,
+  showProcedureDayNav: boolean = false
 ): ResolvedClinicOsShellNavItem[] {
   return resolveClinicOsShellNavModules(
     base,
     showCrmNav,
     showBookingsBoard,
-    showManageAdminUsers
+    showManageAdminUsers,
+    showProcedureDayNav
   ).flatMap((m) => m.items);
 }
 

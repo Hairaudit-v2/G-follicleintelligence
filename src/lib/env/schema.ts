@@ -63,6 +63,7 @@ export const serverEnvSchema = z.object({
   FI_LEGACY_FI_API_ENABLED: optionalString,
   FI_LEGACY_FI_API_SECRET: optionalString,
   FI_PAYMENTS_ENABLED: optionalString,
+  FI_PROCEDURE_DAY_ENABLED: optionalString,
   FI_PAYMENT_PROVIDER: optionalString,
   STRIPE_SECRET_KEY: optionalString,
   STRIPE_WEBHOOK_SECRET: optionalString,
