@@ -594,6 +594,7 @@ function WeekViewInner({
       onSelectBooking,
       pendingAppointmentIds,
       primaryLane,
+      resourceColumns,
       resourceView,
       staffIdByUserId,
       swipeLayout,
