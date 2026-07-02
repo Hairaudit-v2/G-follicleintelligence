@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition, type ChangeEvent } from "react";
 
 import { saveCalendarSettingsAction } from "@/lib/actions/fi-calendar-settings-actions";
+import { buildConfigurationCalendarScopeHref } from "@/src/lib/calendar/configurationCalendarScopeHref";
 import type { FiCalendarSettingsDocument } from "@/src/lib/calendar/calendarSettingsCore";
 
 const inputClass =
@@ -21,10 +22,10 @@ export function CalendarSettingsSection(props: {
   clinics: ClinicOption[];
   initialSettings: FiCalendarSettingsDocument;
   canEdit: boolean;
-  /** When set, clinic scope changes navigate here instead of the standalone settings route. */
-  scopeHrefForClinicId?: (clinicId: string | null) => string;
+  /** When set, clinic scope changes navigate to the configuration calendar tab. */
+  configurationOrganisationId?: string | null;
 }) {
-  const { tenantId, clinics, canEdit, scopeHrefForClinicId } = props;
+  const { tenantId, clinics, canEdit, configurationOrganisationId } = props;
   const router = useRouter();
   const [settings, setSettings] = useState(props.initialSettings);
   const [msg, setMsg] = useState<string | null>(null);
@@ -34,8 +35,14 @@ export function CalendarSettingsSection(props: {
   const clinicId = props.clinicId;
 
   function onClinicScopeChange(nextClinicId: string) {
-    if (scopeHrefForClinicId) {
-      router.push(scopeHrefForClinicId(nextClinicId.trim() ? nextClinicId.trim() : null));
+    if (configurationOrganisationId !== undefined) {
+      router.push(
+        buildConfigurationCalendarScopeHref(
+          tenantId,
+          configurationOrganisationId,
+          nextClinicId.trim() ? nextClinicId.trim() : null
+        )
+      );
       return;
     }
     const q = nextClinicId === "" ? "" : `?clinicId=${encodeURIComponent(nextClinicId)}`;

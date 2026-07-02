@@ -30,24 +30,6 @@ import { loadCalendarSettingsSectionData } from "@/src/lib/calendar/calendarSett
 
 export const dynamic = "force-dynamic";
 
-function configurationCalendarScopeHref(
-  tenantId: string,
-  searchParams: { organisationId?: string; clinicId?: string },
-  clinicId: string | null
-): string {
-  const params = new URLSearchParams();
-  params.set("tab", "calendar");
-  if (searchParams.organisationId?.trim()) {
-    params.set("organisationId", searchParams.organisationId.trim());
-  }
-  if (clinicId?.trim()) {
-    params.set("clinicId", clinicId.trim());
-  } else if (searchParams.clinicId?.trim()) {
-    params.delete("clinicId");
-  }
-  return `/fi-admin/${tenantId.trim()}/configuration?${params.toString()}`;
-}
-
 export default async function TenantConfigurationPage({
   params,
   searchParams,
@@ -152,9 +134,7 @@ export default async function TenantConfigurationPage({
           clinics={calendarSection.clinics}
           initialSettings={calendarSection.initialSettings}
           canEdit={calendarSection.canEdit}
-          scopeHrefForClinicId={(nextClinicId) =>
-            configurationCalendarScopeHref(tenantId, sp, nextClinicId)
-          }
+          configurationOrganisationId={organisationId}
         />
       ) : (
         <>

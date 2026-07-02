@@ -6,7 +6,7 @@ import { readFiProcedureDayEnabled } from "./procedureDayEnv.server";
 import { enrichProcedureDayBoardWithLiveWorkflow } from "./procedureDayLiveLoader.server";
 import { loadProcedureDayBoardPayload } from "@/src/lib/surgery/procedureDayBoardLoader.server";
 
-import type { ProcedureDayBoardPayload, ProcedureDayLiveBoardPayload } from "./procedureDayTypes";
+import type { ProcedureDayLiveBoardPayload } from "./procedureDayTypes";
 
 export type LoadProcedureDayBoardOptions = {
   /** When set, enforces CRM tenant read gate (API routes). Page loader uses portal gate separately. */
