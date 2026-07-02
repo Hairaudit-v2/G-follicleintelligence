@@ -5,11 +5,15 @@ import test from "node:test";
 
 import type { PathologyResultItemRow } from "@/src/lib/pathology/pathologyResultTypes";
 import {
+  buildFiMedicalIntelligenceSnapshot,
   buildFiPathologyMedicalIntelligenceDisplay,
   buildFiMedicalIntelligenceTwinSummary,
   readFiMedicalIntelligenceSnapshot,
 } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceCore";
-import { FI_MEDICAL_INTELLIGENCE_SOURCE } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes";
+import {
+  FI_MEDICAL_INTELLIGENCE_SNAPSHOT_SOURCE,
+  FI_MEDICAL_INTELLIGENCE_SOURCE,
+} from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes";
 
 function fiItem(
   partial: Partial<PathologyResultItemRow> &
@@ -90,16 +94,52 @@ test("archived results do not produce medical intelligence display", () => {
 });
 
 test("readFiMedicalIntelligenceSnapshot returns stored snapshot when valid", () => {
-  const snapshot = buildFiPathologyMedicalIntelligenceDisplay({
+  const snapshot = buildFiMedicalIntelligenceSnapshot({
     result: reviewedResult,
     items: [fiItem({ test_label: "Ferritin", result_value: "25" })],
+    computedAt: "2026-07-02T12:00:00.000Z",
   });
-  assert.ok(snapshot);
   const read = readFiMedicalIntelligenceSnapshot({
     medical_intelligence_snapshot: snapshot,
   });
   assert.ok(read);
+  assert.equal(read?.fromSnapshot, true);
   assert.equal(read?.interpretedMarkers.length, 1);
+  assert.equal(read?.computedAt, "2026-07-02T12:00:00.000Z");
+});
+
+test("buildFiMedicalIntelligenceSnapshot includes audit metadata fields", () => {
+  const snapshot = buildFiMedicalIntelligenceSnapshot({
+    result: reviewedResult,
+    items: [fiItem({ test_label: "Ferritin", result_value: "25", result_unit: "ug/L" })],
+    computedAt: "2026-07-02T12:00:00.000Z",
+  });
+  assert.equal(snapshot.source, FI_MEDICAL_INTELLIGENCE_SNAPSHOT_SOURCE);
+  assert.equal(snapshot.generated_at, "2026-07-02T12:00:00.000Z");
+  assert.equal(snapshot.interpreted_markers.length, 1);
+  assert.deepEqual(snapshot.active_flags, ["Fe"]);
+  assert.ok(snapshot.active_drivers.length > 0);
+  assert.ok(snapshot.clinician_insights.length > 0);
+  assert.equal(snapshot.skipped_marker_count, 0);
+});
+
+test("loaders prefer stored snapshot over recompute when markers differ", () => {
+  const snapshot = buildFiMedicalIntelligenceSnapshot({
+    result: reviewedResult,
+    items: [fiItem({ test_label: "Ferritin", result_value: "25" })],
+    computedAt: "2026-07-02T12:00:00.000Z",
+  });
+  const display = buildFiPathologyMedicalIntelligenceDisplay({
+    result: {
+      ...reviewedResult,
+      metadata: { medical_intelligence_snapshot: snapshot },
+    },
+    items: [fiItem({ test_label: "TSH", result_value: "9.9", result_unit: "mIU/L" })],
+  });
+  assert.ok(display);
+  assert.equal(display?.fromSnapshot, true);
+  assert.equal(display?.interpretedMarkers.length, 1);
+  assert.equal(display?.interpretedMarkers[0]?.marker, "Ferritin");
 });
 
 test("buildFiMedicalIntelligenceTwinSummary produces compact twin payload", () => {

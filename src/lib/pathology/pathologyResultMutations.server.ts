@@ -3,6 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
+import {
+  buildFiMedicalIntelligenceSnapshot,
+  mergeMedicalIntelligenceSnapshotIntoMetadata,
+} from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligence.server";
 import { PATHOLOGY_PATIENT_PDF_BUCKET } from "@/src/lib/pathology/pathologyRequestLoad.server";
 import type {
   PathologyResultItemFlag,
@@ -158,20 +162,24 @@ async function appendBloodResultUploaded(params: {
   patientId: string;
   result: PathologyResultRow;
   markerCount: number;
+  client?: SupabaseClient;
 }): Promise<void> {
-  await appendCrmActivityEvent({
-    tenantId: params.tenantId,
-    patientId: params.patientId,
-    activityKind: "pathology.blood_result.uploaded",
-    title: "Blood result recorded",
-    detail: {
-      pathology_result_id: params.result.id,
-      result_date: params.result.result_date,
-      provider_name: params.result.provider_name,
-      marker_count: params.markerCount,
-      pathology_request_id: params.result.pathology_request_id,
+  await appendCrmActivityEvent(
+    {
+      tenantId: params.tenantId,
+      patientId: params.patientId,
+      activityKind: "pathology.blood_result.uploaded",
+      title: "Blood result recorded",
+      detail: {
+        pathology_result_id: params.result.id,
+        result_date: params.result.result_date,
+        provider_name: params.result.provider_name,
+        marker_count: params.markerCount,
+        pathology_request_id: params.result.pathology_request_id,
+      },
     },
-  });
+    params.client
+  );
 }
 
 async function appendBloodResultReviewed(params: {
@@ -179,20 +187,24 @@ async function appendBloodResultReviewed(params: {
   patientId: string;
   result: PathologyResultRow;
   markerCount: number;
+  client?: SupabaseClient;
 }): Promise<void> {
-  await appendCrmActivityEvent({
-    tenantId: params.tenantId,
-    patientId: params.patientId,
-    activityKind: "pathology.blood_result.reviewed",
-    title: "Blood result reviewed",
-    detail: {
-      pathology_result_id: params.result.id,
-      result_date: params.result.result_date,
-      provider_name: params.result.provider_name,
-      marker_count: params.markerCount,
-      pathology_request_id: params.result.pathology_request_id,
+  await appendCrmActivityEvent(
+    {
+      tenantId: params.tenantId,
+      patientId: params.patientId,
+      activityKind: "pathology.blood_result.reviewed",
+      title: "Blood result reviewed",
+      detail: {
+        pathology_result_id: params.result.id,
+        result_date: params.result.result_date,
+        provider_name: params.result.provider_name,
+        marker_count: params.markerCount,
+        pathology_request_id: params.result.pathology_request_id,
+      },
     },
-  });
+    params.client
+  );
 }
 
 async function appendBloodResultArchived(params: {
@@ -316,11 +328,31 @@ export async function createPathologyResult(
     result = mapResult(upd as Record<string, unknown>);
   }
 
+  if (initialStatus === "reviewed") {
+    const reviewedAtIso = reviewedAt ?? new Date().toISOString();
+    const snapshot = buildFiMedicalIntelligenceSnapshot({
+      result: { ...result, status: "reviewed" },
+      items,
+      computedAt: reviewedAtIso,
+    });
+    const nextMetadata = mergeMedicalIntelligenceSnapshotIntoMetadata(result.metadata, snapshot);
+    const { data: snapUpd, error: snapErr } = await supabase
+      .from("fi_pathology_results")
+      .update({ metadata: nextMetadata })
+      .eq("tenant_id", tid)
+      .eq("id", result.id)
+      .select("*")
+      .single();
+    if (snapErr) throw new Error(snapErr.message);
+    result = mapResult(snapUpd as Record<string, unknown>);
+  }
+
   await appendBloodResultUploaded({
     tenantId: tid,
     patientId: pid,
     result,
     markerCount: items.length,
+    client: supabase,
   });
 
   if (initialStatus === "reviewed") {
@@ -329,6 +361,7 @@ export async function createPathologyResult(
       patientId: pid,
       result,
       markerCount: items.length,
+      client: supabase,
     });
   }
 
@@ -457,7 +490,23 @@ export async function markPathologyResultReviewed(
   const before = mapResult(cur as Record<string, unknown>);
   if (before.status !== "draft") throw new Error("Only draft results can be marked reviewed.");
 
+  const { data: itemRows, error: itemsErr } = await supabase
+    .from("fi_pathology_result_items")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("result_id", rid)
+    .order("sort_order", { ascending: true });
+  if (itemsErr) throw new Error(itemsErr.message);
+  const items = ((itemRows ?? []) as Record<string, unknown>[]).map(mapItem);
+
   const reviewedAt = new Date().toISOString();
+  const snapshot = buildFiMedicalIntelligenceSnapshot({
+    result: { ...before, status: "reviewed" },
+    items,
+    computedAt: reviewedAt,
+  });
+  const metadata = mergeMedicalIntelligenceSnapshotIntoMetadata(before.metadata, snapshot);
+
   const { data: upd, error: ue } = await supabase
     .from("fi_pathology_results")
     .update({
@@ -465,6 +514,7 @@ export async function markPathologyResultReviewed(
       reviewed_at: reviewedAt,
       reviewed_by_user_id: actingUserId,
       clinical_summary: clinicalSummary?.trim() ? clinicalSummary.trim() : before.clinical_summary,
+      metadata,
     })
     .eq("tenant_id", tid)
     .eq("id", rid)
@@ -473,17 +523,12 @@ export async function markPathologyResultReviewed(
   if (ue) throw new Error(ue.message);
   const result = mapResult(upd as Record<string, unknown>);
 
-  const { count: markerCount } = await supabase
-    .from("fi_pathology_result_items")
-    .select("id", { count: "exact", head: true })
-    .eq("tenant_id", tid)
-    .eq("result_id", rid);
-
   await appendBloodResultReviewed({
     tenantId: tid,
     patientId: pid,
     result,
-    markerCount: typeof markerCount === "number" ? markerCount : 0,
+    markerCount: items.length,
+    client: supabase,
   });
   return result;
 }

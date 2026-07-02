@@ -40,7 +40,7 @@
     "test:e2e:smoke:production": "node scripts/run-e2e-smoke-production.mjs",
     "replay:intelligence-event-logs": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/replay-intelligence-event-logs.ts",
     "test:unit": "node scripts/run-unit-tests.mjs",
-    "test:medical-intelligence-core": "tsx --test src/lib/clinical-intelligence/medicalIntelligenceCore.test.ts src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceCore.test.ts",
+    "test:medical-intelligence-core": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/clinical-intelligence/medicalIntelligenceCore.test.ts src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceCore.test.ts src/lib/pathology/pathologyResultMutations.test.ts",
     "test:upload-phase3f": "tsx --test tests/hairauditImageClassifyEndpoint.test.ts",
     "test:fin-imaging-2": "tsx --test tests/unifiedImagingClassifyEndpoint.test.ts src/lib/imaging/unifiedClassifier/categoryMapping.test.ts",
     "test:imaging-os-im1": "tsx --test tests/imagingOsPhaseIm1.test.ts",

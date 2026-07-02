@@ -50,3 +50,18 @@ export type FiMedicalIntelligenceTwinSummary = {
 };
 
 export const FI_MEDICAL_INTELLIGENCE_SOURCE = "@hairlongevity/medical-intelligence-core" as const;
+
+/** Persisted audit snapshot source tag (fi_pathology_results.metadata.medical_intelligence_snapshot). */
+export const FI_MEDICAL_INTELLIGENCE_SNAPSHOT_SOURCE = "medical-intelligence-core" as const;
+
+/** JSON persisted on review — snake_case for metadata audit storage. */
+export type FiMedicalIntelligenceSnapshotMetadata = {
+  source: typeof FI_MEDICAL_INTELLIGENCE_SNAPSHOT_SOURCE;
+  generated_at: string;
+  package_version?: string | null;
+  interpreted_markers: FiMedicalIntelligenceInterpretedMarkerDisplay[];
+  active_flags: Array<Exclude<FiMedicalIntelligenceClinicalFlag, null>>;
+  active_drivers: string[];
+  clinician_insights: string[];
+  skipped_marker_count: number;
+};

@@ -15,12 +15,17 @@ try {
   process.exit(1);
 }
 
+const noop = "'use strict';\nmodule.exports = {};\n";
+
 if (!original.includes("This module cannot be imported")) {
+  if (original === noop) {
+    // Already patched from a prior run that did not restore — safe to continue.
+    process.on("exit", () => {});
+    return;
+  }
   process.stderr.write("patch-server-only-for-scripts: server-only/index.js already patched or unexpected; aborting.\n");
   process.exit(1);
 }
-
-const noop = "'use strict';\nmodule.exports = {};\n";
 
 function restore() {
   if (original == null) return;
