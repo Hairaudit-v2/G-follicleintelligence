@@ -51,7 +51,7 @@ export const DASHBOARD_QUICK_ACTION_DEFINITIONS: readonly DashboardQuickActionDe
   },
   {
     key: "lead",
-    label: "Lead",
+    label: "Enquiry",
     path: "crm",
     hash: "fi-os-crm-create-lead",
     requiresCrmShellNav: true,
@@ -120,7 +120,7 @@ export function resolveDashboardQuickActions(
 
     if (needsCrm && !flags.showCrmNav) {
       enabled = false;
-      disabledReason = "CRM / LeadFlow access required.";
+      disabledReason = "Enquiries access required.";
     } else if (needsBookings && !flags.showBookingsBoard) {
       enabled = false;
       disabledReason = "Scheduling / PatientOS access required.";

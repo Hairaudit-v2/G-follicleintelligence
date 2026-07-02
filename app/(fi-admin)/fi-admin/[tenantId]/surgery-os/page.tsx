@@ -8,7 +8,7 @@ import { resolveSurgeryOsViewerContext } from "@/src/lib/surgeryOs/surgeryOsAcce
 import { loadSurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsCommandCentreLoader.server";
 
 export const metadata = {
-  title: "SurgeryOS",
+  title: "Surgery",
   robots: { index: false, follow: false },
 };
 
@@ -52,7 +52,7 @@ export default async function FiAdminSurgeryOsPage({
     console.error("[FiAdminSurgeryOsPage]", msg || "load failed");
     return (
       <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="SurgeryOS could not load">
+        <InfoNotice variant="danger" title="Surgery could not load">
           <p className="text-sm">
             The surgical command centre failed to load. Check production Supabase migrations and
             Vercel function logs for the server error digest.

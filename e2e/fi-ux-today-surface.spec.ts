@@ -75,7 +75,7 @@ test.describe("FI-UX-REBUILD-1D Today surface @smoke", () => {
     for (const legacyLabel of [
       "Patients in clinic today",
       "Urgent operational alerts",
-      "Open Operations Centre",
+      "Open clinic flow",
     ]) {
       await expect(page.getByText(legacyLabel)).toHaveCount(0);
     }

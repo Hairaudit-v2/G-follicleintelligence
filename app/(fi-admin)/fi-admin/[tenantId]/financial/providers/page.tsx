@@ -12,7 +12,7 @@ import { loadFinanceProviders } from "@/src/lib/financialOs/financialFinanceProv
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Financing Providers",
+  title: "Finances · Financing Providers",
   robots: { index: false, follow: false },
 };
 

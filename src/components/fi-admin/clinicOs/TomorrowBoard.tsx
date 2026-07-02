@@ -76,7 +76,7 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
               "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
             )}
           >
-            Operations centre
+            Clinic flow
           </Link>
           <Link
             href={`${base}/surgery-readiness`}

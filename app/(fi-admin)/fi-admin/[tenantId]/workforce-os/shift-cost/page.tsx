@@ -5,7 +5,7 @@ import { WorkforceOsShiftCostClient } from "@/src/components/fi/workforce/Workfo
 import { loadWorkforceOsShiftCostPage } from "@/src/lib/workforce/shiftCostIntelligencePage.server";
 
 export const metadata = {
-  title: "Shift cost intelligence · WorkforceOS",
+  title: "Shift cost intelligence · Team",
   robots: { index: false, follow: false },
 };
 

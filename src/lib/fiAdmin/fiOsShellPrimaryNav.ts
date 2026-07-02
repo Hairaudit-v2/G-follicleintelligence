@@ -157,8 +157,8 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "dashboard",
       featureKey: "dashboard",
-      label: "Dashboard",
-      shortLabel: "Home",
+      label: "Today",
+      shortLabel: "Today",
       href: b,
       disabled: false,
     },
@@ -189,24 +189,24 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "operations-centre",
       featureKey: "dashboard",
-      label: "Operations centre",
-      shortLabel: "Ops",
+      label: "Clinic flow",
+      shortLabel: "Flow",
       href: hrefFor(b, "operations"),
       disabled: false,
     },
     {
       id: "reception-os",
       featureKey: "dashboard",
-      label: "ReceptionOS",
-      shortLabel: "RecOS",
+      label: "Front desk",
+      shortLabel: "Front",
       href: hrefFor(b, "reception-os"),
       disabled: false,
     },
     {
       id: "surgery-os",
       featureKey: "surgery_pipeline",
-      label: "SurgeryOS",
-      shortLabel: "SurgOS",
+      label: "Surgery",
+      shortLabel: "Surgery",
       href: hrefFor(b, "surgery-os"),
       disabled: false,
     },
@@ -241,8 +241,8 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "crm",
       featureKey: "crm",
-      label: "Leads",
-      shortLabel: "Leads",
+      label: "Enquiries",
+      shortLabel: "Enq",
       href: hrefFor(b, "leadflow"),
       disabled: !showCrmNav,
       hint: !showCrmNav ? "Requires CRM shell role for this tenant." : undefined,
@@ -251,13 +251,13 @@ export function resolveFiOsPrimarySidebarItems(
         : [
             {
               id: "leadflow-dashboard",
-              label: "LeadFlow",
+              label: "Enquiries",
               href: hrefFor(b, "leadflow"),
               featureKey: "crm",
             },
             {
               id: "crm-workspace",
-              label: "CRM workspace",
+              label: "Enquiries",
               href: hrefFor(b, "crm"),
               featureKey: "crm",
             },
@@ -266,13 +266,13 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "follow-up-queue",
       featureKey: "crm",
-      label: "Follow ups",
+      label: "Follow-ups",
       shortLabel: "Tasks",
       href: hrefFor(b, "crm"),
       disabled: !showCrmNav,
       hint: !showCrmNav
         ? "Requires CRM shell role for this tenant."
-        : "Lead pipeline and follow-up tasks live in the same workspace.",
+        : "Enquiry pipeline and follow-up tasks live in the same workspace.",
     },
     {
       id: "consultations",
@@ -317,7 +317,7 @@ export function resolveFiOsPrimarySidebarItems(
             {
               id: "surgery-os-command-centre",
               featureKey: "surgery_pipeline",
-              label: "SurgeryOS",
+              label: "Surgery",
               href: hrefFor(b, "surgery-os"),
             },
             {
@@ -373,24 +373,24 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "patient-twin",
       featureKey: "patient_twin",
-      label: "Patient Twin",
-      shortLabel: "Twin",
+      label: "Health record",
+      shortLabel: "Record",
       href: hrefFor(b, "foundation-integrity"),
       disabled: blocks.patientTwin,
       hint: blocks.patientTwin
-        ? "Foundation integrity workspace is not enabled for this admin role."
+        ? "Health record workspace is not enabled for this admin role."
         : undefined,
       anyOfFeatures: ["patient_twin", "imaging"],
     },
     {
       id: "auditos",
       featureKey: "audit",
-      label: "Audit intelligence",
-      shortLabel: "Audit",
+      label: "Quality review",
+      shortLabel: "Review",
       href: hrefFor(b, "audit"),
       disabled: auditDisabled,
       hint: auditDisabled
-        ? "Audit intelligence requires security review access or a clinical tenant role."
+        ? "Quality review requires security review access or a clinical tenant role."
         : undefined,
     },
     {
@@ -415,7 +415,7 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "financial-os",
       featureKey: "settings",
-      label: "FinancialOS",
+      label: "Finances",
       shortLabel: "Fin",
       href: hrefFor(b, "financial-os"),
       disabled: false,
@@ -423,11 +423,11 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "analytics",
       featureKey: "analytics",
-      label: "Analytics",
-      shortLabel: "Analytics",
+      label: "Insights",
+      shortLabel: "Insights",
       href: hrefFor(b, "analytics"),
       disabled: blocks.analytics,
-      hint: blocks.analytics ? "Analytics is hidden for this admin role." : undefined,
+      hint: blocks.analytics ? "Insights is hidden for this admin role." : undefined,
     },
     {
       id: "staff",
@@ -450,11 +450,11 @@ export function resolveFiOsPrimarySidebarItems(
           } satisfies FiOsPrimarySidebarItem,
           {
             id: "hr-os",
-            label: "WorkforceOS",
-            shortLabel: "Workforce",
+            label: "Team",
+            shortLabel: "Team",
             href: hrefFor(b, "workforce-os"),
             disabled: false,
-            hint: "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
+            hint: "Team onboarding, compliance, and staff governance.",
           } satisfies FiOsPrimarySidebarItem,
         ]
       : []),

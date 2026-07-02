@@ -126,7 +126,7 @@ export function ReceptionSystemDiagnostics({
           <p className="mt-4 text-xs text-[#64748B]">
             Tenant <span className="font-mono">{data.tenantId}</span> ·{" "}
             <Link href={`${base}/operations`} className="text-[#22C1FF]/80 hover:underline">
-              Operations Centre
+              Clinic flow
             </Link>
           </p>
         </DashboardCard>

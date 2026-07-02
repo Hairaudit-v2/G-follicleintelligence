@@ -54,7 +54,7 @@ function LeadFlowPrimaryActions({
         Open Conversion Board
       </Link>
       <Link href={`${base}/settings/imports/hubspot`} className={leadFlowLinkButtonClass}>
-        Import leads
+        Import enquiries
       </Link>
     </div>
   );
@@ -104,7 +104,7 @@ export function LeadFlowDashboard({
               FI OS
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-              LeadFlow
+              Enquiries
             </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
               Consultation conversion, follow-up priority, booking readiness, and revenue
@@ -159,7 +159,7 @@ export function LeadFlowDashboard({
           <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
             <p className="text-sm leading-relaxed text-[#CBD5E1]">
-              No urgent lead follow-ups detected. Keep response times tight to protect conversion.
+              No urgent enquiry follow-ups detected. Keep response times tight to protect conversion.
             </p>
           </div>
         ) : (
@@ -199,12 +199,12 @@ export function LeadFlowDashboard({
         <SectionHeader
           kicker="Booking"
           title="Booking readiness"
-          description="Leads closest to consultation booking — with a clear next step."
+          description="Enquiries closest to consultation booking — with a clear next step."
           className="mb-4"
         />
         {bookingItems.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
-            Active leads will appear here as enquiries are captured and qualified.
+            Active enquiries will appear here as they are captured and qualified.
           </p>
         ) : (
           <ul className="space-y-3">
@@ -233,7 +233,7 @@ export function LeadFlowDashboard({
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
                     <Link href={item.leadHref} className={leadFlowLinkButtonClass}>
-                      Open lead
+                      Open enquiry
                     </Link>
                     <Link href={item.bookHref} className={leadFlowLinkButtonClass}>
                       Book consult
@@ -253,11 +253,11 @@ export function LeadFlowDashboard({
         <SectionHeader
           kicker="Intervention"
           title="At-risk opportunities"
-          description="Leads that may slip away without timely outreach."
+          description="Enquiries that may slip away without timely outreach."
           className="mb-4"
         />
         {atRiskItems.length === 0 ? (
-          <p className="text-sm text-[#94A3B8]">No at-risk leads flagged right now.</p>
+          <p className="text-sm text-[#94A3B8]">No at-risk enquiries flagged right now.</p>
         ) : (
           <ul className="space-y-3">
             {atRiskItems.map((item) => (
@@ -312,13 +312,13 @@ export function LeadFlowDashboard({
       <DashboardCard className="p-5 sm:p-6">
         <SectionHeader
           kicker="Activity"
-          title="Recent lead activity"
+          title="Recent enquiry activity"
           description="Enquiries, consultations, follow-ups, and imports — newest first."
           className="mb-4"
         />
         {recentActivity.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
-            Recent lead activity will appear here as enquiries, consultations, and follow-ups are
+            Recent enquiry activity will appear here as consultations and follow-ups are
             captured.
           </p>
         ) : (

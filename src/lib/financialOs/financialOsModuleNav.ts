@@ -10,7 +10,7 @@ export type FinancialOsModule = {
 
 /** Primary FinancialOS areas — surfaced in the in-page module switcher. */
 export const FINANCIAL_OS_PRIMARY_MODULES: readonly FinancialOsModule[] = [
-  { id: "dashboard", label: "Financial dashboard", segment: "dashboard", group: "primary" },
+  { id: "dashboard", label: "Overview", segment: "dashboard", group: "primary" },
   { id: "payments", label: "Payments", segment: "payments", group: "primary" },
   {
     id: "payment-requests",

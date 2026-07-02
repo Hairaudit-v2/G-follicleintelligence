@@ -11,7 +11,7 @@ export function ReceptionOsModuleHealthPanel({ health }: { health: ReceptionOsMo
   return (
     <InfoNotice
       variant="warning"
-      title="ReceptionOS core board loaded, optional module unavailable"
+      title="Feature not available"
     >
       <div className="space-y-2 text-sm">
         <p>

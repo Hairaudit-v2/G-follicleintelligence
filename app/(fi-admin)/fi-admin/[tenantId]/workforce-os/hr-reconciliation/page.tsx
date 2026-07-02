@@ -5,7 +5,7 @@ import { HrReconciliationClient } from "@/src/components/fi/workforce/HrReconcil
 import { loadWorkforceOsHrReconciliationPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
 
 export const metadata = {
-  title: "HR Reconciliation · WorkforceOS",
+  title: "HR Reconciliation · Team",
   robots: { index: false, follow: false },
 };
 

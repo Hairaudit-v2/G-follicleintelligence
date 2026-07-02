@@ -213,7 +213,7 @@ function nextActionForStatus(row: ConsultationIndexRow): string {
   if (row.status === "completed") return "Draft and send the treatment quote.";
   if (row.status === "quoted") return "Follow up on the quote and capture patient decision.";
   if (row.status === "accepted") return "Move toward surgery planning and case creation.";
-  if (row.status === "converted_to_case") return "Open the surgery pathway in SurgeryOS.";
+  if (row.status === "converted_to_case") return "Open the surgery pathway in Surgery.";
   return "Review consultation status and plan next step.";
 }
 

@@ -22,7 +22,7 @@ test.describe("FI-UX-AUDIT-1 label pass @smoke", () => {
       timeout: 30_000,
     });
     await expect(page.getByRole("link", { name: "Open Calendar" }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Open Operations Centre" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open clinic flow" }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Quick Create Booking" }).first()).toBeVisible();
 
     await expect(page.getByRole("heading", { name: "Reception snapshot", level: 2 })).toBeVisible();
@@ -53,17 +53,17 @@ test.describe("FI-UX-AUDIT-1 label pass @smoke", () => {
 
   test("FI OS shell — sidebar nav labels", async ({ page }) => {
     await page.goto(`${BASE()}/reception`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    const nav = page.getByRole("navigation", { name: "FI OS modules" });
+    const nav = page.getByRole("navigation", { name: "Clinic navigation" });
     await expect(nav).toBeVisible({ timeout: 30_000 });
 
     for (const label of [
-      "Dashboard",
-      "Operations centre",
+      "Today",
+      "Clinic flow",
       "Reception board",
       "Tomorrow board",
       "Cases",
-      "FinancialOS",
-      "ReceptionOS",
+      "Finances",
+      "Front desk",
       "Staff",
     ]) {
       await expect(nav.getByText(label, { exact: true }).first()).toBeVisible();
@@ -75,7 +75,7 @@ test.describe("FI-UX-AUDIT-1 label pass @smoke", () => {
     await expect(page.getByRole("button", { name: /open workspace search/i })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByText(/search patients, leads, cases/i)).toBeVisible();
+    await expect(page.getByText(/search patients, enquiries, cases/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /open quick create/i })).toBeVisible();
   });
 
@@ -89,7 +89,7 @@ test.describe("FI-UX-AUDIT-1 label pass @smoke", () => {
 
   test("operations centre loads", async ({ page }) => {
     await page.goto(`${BASE()}/operations`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(page.getByText(/operations centre/i).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/clinic flow/i).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("link", { name: "Open Calendar" }).first()).toBeVisible();
   });
 });

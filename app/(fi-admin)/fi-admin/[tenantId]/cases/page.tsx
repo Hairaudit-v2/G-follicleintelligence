@@ -19,7 +19,7 @@ import { loadCasesIndexForTenant } from "@/src/lib/cases/caseLoaders";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
-  title: "SurgeryOS",
+  title: "Surgery",
   robots: { index: false, follow: false },
 };
 

@@ -14,7 +14,7 @@ import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
 
 export const metadata = {
-  title: "AnalyticsOS",
+  title: "Insights",
   description:
     "Executive intelligence across revenue, consultations, surgery, patients, workforce, and clinic performance.",
   robots: { index: false, follow: false },

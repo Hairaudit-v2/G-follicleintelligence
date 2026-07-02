@@ -30,6 +30,7 @@ test("resolveDashboardQuickActions: lead modal gated by CRM nav", () => {
   const on = resolveDashboardQuickActions(base, { showCrmNav: true, showBookingsBoard: true });
   assert.equal(off.find((i) => i.key === "lead")?.enabled, false);
   assert.equal(on.find((i) => i.key === "lead")?.enabled, true);
+  assert.equal(on.find((i) => i.key === "lead")?.label, "Enquiry");
   assert.equal(on.find((i) => i.key === "lead")?.href, `${base}/crm#fi-os-crm-create-lead`);
 });
 

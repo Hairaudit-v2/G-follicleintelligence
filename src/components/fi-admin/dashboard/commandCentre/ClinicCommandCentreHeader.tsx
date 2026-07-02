@@ -41,7 +41,7 @@ export function ClinicCommandCentreHeader(props: {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
-            Clinic Command Center
+            Today
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
             {tenantName}
@@ -71,7 +71,7 @@ export function ClinicCommandCentreHeader(props: {
         ) : null}
         <Link href={`${base}/operations`} className={headerAction}>
           <LayoutGrid className="h-4 w-4 text-cyan-400" aria-hidden />
-          Open Operations Centre
+          Open clinic flow
         </Link>
         <Link href={`${base}/reception`} className={headerAction}>
           <Users className="h-4 w-4 text-cyan-400" aria-hidden />
@@ -79,7 +79,7 @@ export function ClinicCommandCentreHeader(props: {
         </Link>
         <Link href={`${base}/surgery-os`} className={headerAction}>
           <Scissors className="h-4 w-4 text-cyan-400" aria-hidden />
-          Open SurgeryOS
+          Open surgery
         </Link>
         {bookingAction ? (
           <Link

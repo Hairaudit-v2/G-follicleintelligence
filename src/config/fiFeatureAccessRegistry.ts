@@ -85,8 +85,8 @@ const dash = FI_DASHBOARD_WIDGET_LABELS;
 export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> = {
   dashboard: {
     key: "dashboard",
-    label: "Dashboard",
-    description: "Clinic operating centre home and overview modules.",
+    label: "Today",
+    description: "Clinic home and daily overview.",
     category: "home",
     navPath: "",
   },
@@ -120,8 +120,8 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   crm: {
     key: "crm",
-    label: "Leads",
-    description: "Leads, pipeline, and CRM shell workflows.",
+    label: "Enquiries",
+    description: "Enquiries, pipeline, and follow-up workflows.",
     category: "patient_journey",
     navPath: "crm",
   },
@@ -195,8 +195,8 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   patient_twin: {
     key: "patient_twin",
-    label: "Patient Twin",
-    description: "Foundation integrity and twin-style longitudinal views.",
+    label: "Health record",
+    description: "Longitudinal health record and timeline views.",
     category: "intelligence",
     navPath: "foundation-integrity",
     defaultEnabledForRoles: {
@@ -209,8 +209,8 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   audit: {
     key: "audit",
-    label: "Audit intelligence",
-    description: "Security and operational audit surfaces.",
+    label: "Quality review",
+    description: "Outcome quality and audit review surfaces.",
     category: "intelligence",
     navPath: "audit",
     defaultEnabledForRoles: {
@@ -223,8 +223,8 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   analytics: {
     key: "analytics",
-    label: "Analytics",
-    description: "Tenant analytics and reporting entry points.",
+    label: "Insights",
+    description: "Clinic insights and reporting entry points.",
     category: "intelligence",
     navPath: "analytics",
     defaultEnabledForRoles: {

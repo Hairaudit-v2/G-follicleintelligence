@@ -11,7 +11,7 @@ import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server
 import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
 
 export const metadata = {
-  title: "Operations centre",
+  title: "Clinic flow",
   robots: { index: false, follow: false },
 };
 

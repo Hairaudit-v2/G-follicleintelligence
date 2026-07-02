@@ -81,7 +81,7 @@ export function DashboardAttentionPriorities(props: {
           className="mt-4 max-w-xl py-5 sm:px-6 sm:py-6"
           title="Clinic is on track"
           description="No urgent preparation, payment, consultation, or enquiry items need action right now."
-          actionLabel="Open Operations Centre"
+          actionLabel="Open clinic flow"
           actionHref={`${base}/operations`}
         />
       ) : (

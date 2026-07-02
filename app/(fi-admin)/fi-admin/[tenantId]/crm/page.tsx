@@ -28,7 +28,7 @@ import { loadLeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboar
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 
 export const metadata = {
-  title: "LeadFlow",
+  title: "Enquiries",
   description:
     "Consultation conversion, follow-up priority, booking readiness, and revenue opportunity across every enquiry.",
   robots: { index: false, follow: false },
@@ -98,21 +98,21 @@ export default async function CrmShellPage({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-              LeadFlow
+              Enquiries
             </p>
             <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
-              {isBoard ? "Conversion board view" : "Lead index"}
+              {isBoard ? "Conversion board view" : "Enquiry index"}
             </h1>
             <p className="max-w-2xl text-sm text-[#94A3B8]">
               {isBoard
                 ? "Stage-based kanban for pipeline management — return to Workspace for conversion priorities."
-                : "Full lead table with filters — return to Workspace for follow-up priorities and booking readiness."}
+                : "Full enquiry table with filters — return to Workspace for follow-up priorities and booking readiness."}
             </p>
             <Link
               href={base}
               className="inline-block text-sm font-medium text-[#22C1FF] hover:underline"
             >
-              ← Back to LeadFlow workspace
+              ← Back to Enquiries workspace
             </Link>
           </div>
           <div className="flex flex-col items-stretch gap-3 sm:items-end">
@@ -132,7 +132,7 @@ export default async function CrmShellPage({
         <DashboardCard className="p-3 sm:p-4">
           {board.total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
-              <p className="font-medium text-[#F8FAFC]">No leads yet</p>
+              <p className="font-medium text-[#F8FAFC]">No enquiries yet</p>
               <p className="mt-2">
                 Create an enquiry from the workspace or seed data to see cards here.
               </p>
@@ -162,7 +162,7 @@ export default async function CrmShellPage({
         <DashboardCard className="overflow-hidden p-0">
           {list!.total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
-              <p className="font-medium text-[#F8FAFC]">No leads yet</p>
+              <p className="font-medium text-[#F8FAFC]">No enquiries yet</p>
               <p className="mt-2">
                 Create an enquiry from the workspace or seed data to see rows here.
               </p>

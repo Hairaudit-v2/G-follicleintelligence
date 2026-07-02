@@ -5,7 +5,7 @@ import { WorkforceOsPayrollClient } from "@/src/components/fi/workforce/Workforc
 import { loadWorkforceOsPayrollPage } from "@/src/lib/workforce/wageProfilePage.server";
 
 export const metadata = {
-  title: "Payroll & wages · WorkforceOS",
+  title: "Payroll & wages · Team",
   robots: { index: false, follow: false },
 };
 

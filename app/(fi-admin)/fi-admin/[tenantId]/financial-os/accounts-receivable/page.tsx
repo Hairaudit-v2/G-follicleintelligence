@@ -13,7 +13,7 @@ import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRe
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Accounts receivable",
+  title: "Finances · Accounts receivable",
   robots: { index: false, follow: false },
 };
 

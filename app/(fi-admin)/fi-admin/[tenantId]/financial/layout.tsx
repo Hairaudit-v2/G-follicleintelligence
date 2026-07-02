@@ -24,7 +24,7 @@ export default async function FinancialOsLayout({
       <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
-            FinancialOS · Command centre
+            Finances
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
             Revenue & settlement

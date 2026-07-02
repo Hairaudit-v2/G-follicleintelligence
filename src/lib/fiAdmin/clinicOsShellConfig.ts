@@ -88,26 +88,26 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     items: [
       {
         id: "dashboard",
-        label: "Dashboard",
+        label: "Today",
         path: "",
         home: true,
         permissionHint: {},
-        description: "Tenant home and overview.",
+        description: "Clinic home and overview.",
       },
       {
         id: "operations-centre",
-        label: "Operations",
+        label: "Clinic flow",
         path: "operations",
         permissionHint: {},
-        description: "ClinicOS operations centre — schedule, flow, and CRM snapshot.",
+        description: "Daily schedule, patient flow, and enquiries snapshot.",
       },
       {
         id: "reception-os",
-        label: "ReceptionOS",
+        label: "Front desk",
         path: "reception-os",
         permissionHint: {},
         description:
-          "Front-desk command centre — patients, communications, pipeline, deposits, and alerts.",
+          "Front desk — patients, communications, pipeline, deposits, and alerts.",
       },
       {
         id: "reception-board",
@@ -186,18 +186,18 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "leadflow",
-    label: "LeadFlow",
-    description: "Enquiries, leads, pipeline, tasks, and follow-ups.",
+    label: "Enquiries",
+    description: "Enquiries, pipeline, tasks, and follow-ups.",
     items: [
       {
         id: "leadflow",
-        label: "LeadFlow",
+        label: "Enquiries",
         path: "leadflow",
         permissionHint: { requiresCrmShellNav: true },
       },
       {
         id: "leadflow-crm",
-        label: "CRM workspace",
+        label: "Enquiries",
         path: "crm",
         permissionHint: { requiresCrmShellNav: true },
       },
@@ -233,17 +233,17 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "surgeryos",
-    label: "SurgeryOS",
+    label: "Surgery",
     description: "Planning, procedure day, post-op, and follow-up.",
     items: [
-      { id: "surgeryos", label: "SurgeryOS", path: "cases", permissionHint: {} },
+      { id: "surgeryos", label: "Surgery", path: "cases", permissionHint: {} },
       {
         id: "surgery-os",
-        label: "Command centre",
+        label: "Surgery overview",
         path: "surgery-os",
         permissionHint: {},
         description:
-          "Live surgical command centre — theatre board, readiness, timeline, team, and alerts.",
+          "Live surgical overview — theatre board, readiness, timeline, team, and alerts.",
       },
       {
         id: "surgery-readiness-board",
@@ -279,13 +279,12 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "workforceos",
-    label: "WorkforceOS",
-    description:
-      "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
+    label: "Team",
+    description: "Workforce onboarding, compliance, and staff governance.",
     items: [
       {
         id: "workforceos",
-        label: "WorkforceOS",
+        label: "Team",
         path: "hr-os",
         permissionHint: {},
         description:
@@ -295,21 +294,21 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "analyticsos",
-    label: "AnalyticsOS",
-    description: "Executive intelligence across modules (read-only composition).",
-    items: [{ id: "analyticsos", label: "AnalyticsOS", path: "analytics", permissionHint: {} }],
+    label: "Insights",
+    description: "Executive intelligence across clinic areas (read-only composition).",
+    items: [{ id: "analyticsos", label: "Insights", path: "analytics", permissionHint: {} }],
   },
   {
     id: "foundationos-mod",
-    label: "FoundationOS",
-    description: "Patient identity, media, timelines, events, and Patient Twin health.",
+    label: "Health record",
+    description: "Patient identity, media, timelines, events, and record integrity.",
     items: [
       {
         id: "foundationos",
-        label: "FoundationOS",
+        label: "Health record",
         path: "foundation-integrity",
         permissionHint: {},
-        description: "Patient identity, media, timelines, events, and Patient Twin health.",
+        description: "Patient identity, media, timelines, events, and record integrity.",
       },
     ],
   },

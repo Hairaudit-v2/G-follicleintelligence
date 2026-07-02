@@ -12,7 +12,7 @@ import {
 } from "@/src/lib/financialOs/financialExecutiveIntelligence.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Executive finance",
+  title: "Finances · Executive finance",
   robots: { index: false, follow: false },
 };
 

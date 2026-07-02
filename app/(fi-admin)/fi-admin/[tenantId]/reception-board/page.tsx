@@ -14,7 +14,7 @@ import { loadReceptionBoardCommandCenterPayload } from "@/src/lib/receptionBoard
 import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
 
 export const metadata = {
-  title: "Reception Board · Command Center",
+  title: "Reception Board",
   robots: { index: false, follow: false },
 };
 

@@ -5,7 +5,7 @@ import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import { loadLeadFlowOperatorDashboardPayload } from "@/src/lib/fiAdmin/leadFlowOperatorDashboardLoader.server";
 
 export const metadata = {
-  title: "LeadFlow",
+  title: "Enquiries",
   description: "HubSpot-first lead intelligence for hair restoration clinics.",
   robots: { index: false, follow: false },
 };

@@ -254,7 +254,7 @@ export function buildPatientJourneyHealthCards(
       value: String(kpis.patientsWithActiveCases),
       detail:
         kpis.patientsWithActiveCases > 0
-          ? "Patients with an open surgery case on SurgeryOS"
+          ? "Patients with an open surgery case"
           : "No patients currently on the surgery pathway",
       href: `${base}/cases`,
     },
@@ -340,7 +340,7 @@ export function buildPatientAttentionPriorities(
       headline: (n) =>
         plural(n, "surgery-pathway patient", "surgery-pathway patients") +
         " may need preparation steps",
-      detail: "Confirm pre-operative readiness in SurgeryOS before procedure day.",
+      detail: "Confirm pre-operative readiness in Surgery before procedure day.",
       href: `${base}/cases`,
     },
     {
@@ -496,7 +496,7 @@ export function buildJourneyStageOverview(
       count: surgeryPreparation,
       interpretation:
         surgeryPreparation > 0
-          ? "Patients moving toward procedure day on SurgeryOS"
+          ? "Patients moving toward procedure day"
           : "No patients flagged for surgery preparation",
     },
     {

@@ -64,12 +64,12 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
     description: "Items that need a response before the clinic day moves on.",
   },
   analytics_summary: {
-    title: "Analytics summary",
-    description: "Tenant analytics highlights (module wiring lands in Stage 4).",
+    title: "Insights summary",
+    description: "Clinic insights highlights (module wiring lands in Stage 4).",
   },
   audit_summary: {
-    title: "Audit summary",
-    description: "Security and compliance snapshots (deep links follow AuditOS).",
+    title: "Quality review summary",
+    description: "Quality and compliance snapshots (deep links follow audit workflows).",
   },
   imaging_summary: {
     title: "Imaging summary",
@@ -80,8 +80,8 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
     description: "Pathology-oriented follow-ups (detailed board in Stage 4).",
   },
   crm_pipeline: {
-    title: "CRM pipeline",
-    description: "Lead and pipeline snapshot (opens CRM when enabled).",
+    title: "Enquiries pipeline",
+    description: "Enquiry and pipeline snapshot (opens Enquiries when enabled).",
   },
   consultation_queue: {
     title: "Consultation queue",
@@ -89,7 +89,7 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   },
   procedure_day_queue: {
     title: "Procedure day",
-    description: "Procedure-day preparation signals (board lives under SurgeryOS).",
+    description: "Procedure-day preparation signals (board lives under Surgery).",
   },
   follow_up_queue: {
     title: "Follow-up queue",

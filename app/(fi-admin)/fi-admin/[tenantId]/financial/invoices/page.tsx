@@ -14,7 +14,7 @@ import { loadFinancialOsInvoices } from "@/src/lib/financialOs/financialListLoad
 import { invoiceBalanceDueCents } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Invoices",
+  title: "Finances · Invoices",
   robots: { index: false, follow: false },
 };
 

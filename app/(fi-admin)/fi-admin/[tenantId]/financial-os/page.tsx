@@ -13,7 +13,7 @@ import type { RevenueAttributionDashboardFilters } from "@/src/lib/financialOs/f
 import { loadRevenueAttributionFilterOptions } from "@/src/lib/financialOs/financialRevenueAttribution.server";
 
 export const metadata = {
-  title: "FinancialOS",
+  title: "Finances",
   robots: { index: false, follow: false },
 };
 
@@ -109,7 +109,7 @@ export default async function FiAdminFinancialOsPage({
     console.error("[FiAdminFinancialOsPage]", msg || "load failed");
     return (
       <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="FinancialOS could not load">
+        <InfoNotice variant="danger" title="Finances could not load">
           <p className="text-sm">
             The command centre failed to load. Apply migration{" "}
             <code className="rounded bg-white/10 px-1 text-xs">

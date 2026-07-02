@@ -27,7 +27,7 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
   {
     id: "patient",
     label: "New patient",
-    description: "Add a patient via PatientOS entry paths.",
+    description: "Add a patient via the patients directory.",
     keywords: ["patientos", "profile", "register"],
     path: "patients/new",
     requiresBookingsBoardNav: true,
@@ -44,14 +44,14 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
   {
     id: "case",
     label: "New case",
-    description: "Open the surgery case wizard (SurgeryOS).",
+    description: "Open the surgery case wizard.",
     keywords: ["surgery", "procedure", "surgeryos"],
     path: "cases/new",
   },
   {
     id: "task",
     label: "New task",
-    description: "Open LeadFlow — open a lead, then add a task on the Timeline tab.",
+    description: "Open Enquiries — open an enquiry, then add a task on the Timeline tab.",
     keywords: ["todo", "follow-up", "crm", "leadflow"],
     path: "crm",
     requiresCrmShellNav: true,
@@ -60,7 +60,7 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
     id: "patient_photos",
     label: "Upload patient photos",
     description:
-      "FoundationOS media health — then use PatientOS / appointments for uploads where enabled.",
+      "Media health workspace — then use patient records / appointments for uploads where enabled.",
     keywords: ["media", "gallery", "images", "foundation"],
     path: "foundation-integrity",
     hash: "fi-os-foundation-media",
@@ -111,7 +111,7 @@ export function resolveFiOsQuickCreateItems(
         keywords: def.keywords,
         href: "#",
         enabled: false,
-        disabledReason: "CRM / LeadFlow access required.",
+        disabledReason: "Enquiries access required.",
       };
     }
     if (needsBookings && !showBookingsBoard) {

@@ -18,7 +18,7 @@ import {
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Surgery cost models",
+  title: "Finances · Surgery cost models",
   robots: { index: false, follow: false },
 };
 

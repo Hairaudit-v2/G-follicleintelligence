@@ -14,7 +14,7 @@ import { loadInstallmentPlansForTenant } from "@/src/lib/financialOs/financialIn
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Installments",
+  title: "Finances · Installments",
   robots: { index: false, follow: false },
 };
 

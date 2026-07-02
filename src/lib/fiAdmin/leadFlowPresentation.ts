@@ -85,7 +85,7 @@ function plural(count: number, singular: string, pluralForm?: string): string {
 function leadDisplayName(card: CrmKanbanLeadCard): string {
   const person = personMetadataDisplayLabel(card.person?.metadata ?? null);
   const summary = leadTitleFromRow(card.lead.summary, card.lead.id);
-  if (person !== "—" && !summary.startsWith("Lead ")) return `${summary} · ${person}`;
+  if (person !== "—" && !summary.startsWith("Enquiry ")) return `${summary} · ${person}`;
   if (person !== "—") return person;
   return summary;
 }
@@ -246,7 +246,7 @@ export function buildLeadFlowHealthCards(
       label: "Follow-ups due today",
       value: String(followUpsToday),
       detail:
-        followUpsToday > 0 ? "CRM tasks due for attention today" : "No follow-up tasks due today",
+        followUpsToday > 0 ? "Follow-up tasks due for attention today" : "No follow-up tasks due today",
       href: `${base}/crm?view=list`,
     },
     {
@@ -457,7 +457,7 @@ export function buildAtRiskLeadItems(
     items.push({
       id: `stale-${stale.leadId}`,
       leadName: stale.title,
-      message: `Lead may go cold — in ${stale.stageLabel.toLowerCase()} for ${stale.daysInStage} days.`,
+      message: `Enquiry may go cold — in ${stale.stageLabel.toLowerCase()} for ${stale.daysInStage} days.`,
       leadHref: `${base}/crm/leads/${stale.leadId}`,
       priorityScore: 70 + stale.daysInStage,
     });
@@ -469,7 +469,7 @@ export function buildAtRiskLeadItems(
     if (idle < staleLeadThresholdDays) continue;
     if (items.some((i) => i.id === card.lead.id || i.id === `stale-${card.lead.id}`)) continue;
 
-    let message = `Lead may go cold — last activity was over ${idle} days ago.`;
+    let message = `Enquiry may go cold — last activity was over ${idle} days ago.`;
     if (slug === "quote_sent") message = "Quote sent but no response — check decision timing.";
     if (slug === "new") message = "No contact after enquiry — respond while intent is highest.";
 
@@ -553,18 +553,18 @@ export function buildConversionSnapshotMetrics(
 function activityKindLabel(kind: string, title: string | null): string {
   const k = kind.trim().toLowerCase();
   if (k === "lead.created") return "New enquiry received";
-  if (k === "stage.changed" || k === "crm.stage.auto_advanced") return "Lead progressed";
+  if (k === "stage.changed" || k === "crm.stage.auto_advanced") return "Enquiry progressed";
   if (k === "task.completed") return "Follow-up completed";
   if (k === "task.created") return "Follow-up scheduled";
   if (k === "booking.created") return "Consultation booked";
   if (k === "booking.cancelled") return "Consultation cancelled";
   if (k === "booking.completed") return "Consultation completed";
-  if (k === "lead.converted_to_person") return "Lead moved to patient interest";
+  if (k === "lead.converted_to_person") return "Enquiry moved to patient interest";
   if (k === "crm.import.hubspot_stage1") return "Imported from HubSpot";
   if (k === "quote.accepted") return "Quote accepted";
   if (k === "lead_communication.created") return "Outreach logged";
   if (title?.trim()) return title.trim();
-  return "Lead activity recorded";
+  return "Enquiry activity recorded";
 }
 
 export function buildRecentLeadActivity(
@@ -575,7 +575,7 @@ export function buildRecentLeadActivity(
   return rows.slice(0, maxItems).map((row) => ({
     id: row.id,
     label: activityKindLabel(row.activityKind, row.title),
-    detail: row.title?.trim() || "Activity captured in LeadFlow",
+    detail: row.title?.trim() || "Activity captured in Enquiries",
     occurredAt: row.occurredAt,
     leadHref: row.leadId ? `${base}/crm/leads/${row.leadId}` : null,
   }));

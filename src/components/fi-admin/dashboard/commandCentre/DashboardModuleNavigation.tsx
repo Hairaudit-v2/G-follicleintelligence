@@ -38,7 +38,7 @@ export function DashboardModuleNavigation(props: {
     },
     {
       id: "patientos",
-      label: "PatientOS",
+      label: "Patients",
       description: "Patient records, journeys, and clinical context.",
       href: `${base}/patients`,
       icon: Stethoscope,
@@ -46,29 +46,29 @@ export function DashboardModuleNavigation(props: {
     },
     {
       id: "leadflow",
-      label: "LeadFlow",
-      description: "Enquiries, conversion, and lead follow-up.",
+      label: "Enquiries",
+      description: "Enquiries, conversion, and follow-up.",
       href: `${base}/crm`,
       icon: UserPlus,
       disabled: !showCrmNav,
     },
     {
       id: "surgeryos",
-      label: "SurgeryOS",
+      label: "Surgery",
       description: "Procedure planning, readiness, and surgical workflow.",
       href: `${base}/surgery-os`,
       icon: Scissors,
     },
     {
       id: "financialos",
-      label: "FinancialOS",
+      label: "Finances",
       description: "Payments, invoices, and financial clearance.",
       href: `${base}/financial/dashboard`,
       icon: Banknote,
     },
     {
       id: "workforceos",
-      label: "WorkforceOS",
+      label: "Team",
       description: "Staff onboarding, compliance, and team governance.",
       href: `${base}/hr-os`,
       icon: Users,
@@ -81,7 +81,7 @@ export function DashboardModuleNavigation(props: {
         id="module-nav-heading"
         kicker="Workspace"
         title="Cross-module quick workspace"
-        description="Move quickly across FI OS — each module holds the full detail."
+        description="Move quickly across your clinic workspace — each area holds the full detail."
       />
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {modules.map((mod) => {

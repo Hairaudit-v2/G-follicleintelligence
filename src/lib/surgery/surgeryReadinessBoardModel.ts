@@ -46,7 +46,7 @@ export type SurgeryReadinessIssue = {
 };
 
 export const SURGERY_READINESS_ISSUE_LABEL: Record<SurgeryReadinessIssueKind, string> = {
-  missing_case_link: "No linked SurgeryOS case",
+  missing_case_link: "No linked surgery case",
   missing_pathology: "Blood pathology result on file",
   abnormal_pathology: "Pathology markers flagged abnormal",
   missing_consent_proxy: "Consultation / quote acceptance (consent proxy)",

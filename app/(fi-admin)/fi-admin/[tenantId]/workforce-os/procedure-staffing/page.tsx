@@ -5,7 +5,7 @@ import { WorkforceOsProcedureStaffingClient } from "@/src/components/fi/workforc
 import { loadWorkforceOsProcedureStaffingPage } from "@/src/lib/workforce/procedureStaffingOptimizerPage.server";
 
 export const metadata = {
-  title: "Procedure staffing optimizer · WorkforceOS",
+  title: "Procedure staffing optimizer · Team",
   robots: { index: false, follow: false },
 };
 

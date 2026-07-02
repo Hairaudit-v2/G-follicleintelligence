@@ -197,7 +197,7 @@ export function FiOsTopBar({
             >
               <Search className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
               <span className="min-w-0 flex-1 truncate text-slate-500">
-                Search patients, leads, cases…
+                Search patients, enquiries, cases…
               </span>
               <kbd className="hidden shrink-0 select-none rounded-lg border border-white/[0.1] bg-black/20 px-2 py-0.5 font-sans text-[10px] font-medium text-slate-500 sm:inline-block">
                 {kbdHint}
@@ -217,8 +217,8 @@ export function FiOsTopBar({
             aria-label={compactCreateLabel ? "Open new" : "Open quick create"}
             title={
               compactCreateLabel
-                ? "New — consultations, patients, leads, and more"
-                : "Quick create — consultations, patients, leads, and more"
+                ? "New — consultations, patients, enquiries, and more"
+                : "Quick create — consultations, patients, enquiries, and more"
             }
           >
             <Plus className="h-4 w-4 text-cyan-400" aria-hidden />

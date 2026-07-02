@@ -13,7 +13,7 @@ import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server
 import { loadFinancialOsPaymentRequests } from "@/src/lib/financialOs/financialListLoaders.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Payment requests",
+  title: "Finances · Payment requests",
   robots: { index: false, follow: false },
 };
 

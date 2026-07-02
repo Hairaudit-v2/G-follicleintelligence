@@ -5,7 +5,7 @@ import { WorkforceOsRecruitmentClient } from "@/src/components/fi/workforce/Work
 import { loadWorkforceOsRecruitmentPage } from "@/src/lib/workforce/recruitmentPipelinePage.server";
 
 export const metadata = {
-  title: "Recruitment pipeline · WorkforceOS",
+  title: "Recruitment pipeline · Team",
   robots: { index: false, follow: false },
 };
 

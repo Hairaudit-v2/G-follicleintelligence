@@ -29,7 +29,7 @@ export function FiOsMoreNavDrawer({
       className="fixed inset-0 z-50 flex"
       role="dialog"
       aria-modal="true"
-      aria-label="FI OS modules"
+      aria-label="Clinic navigation"
     >
       <button
         type="button"
@@ -46,7 +46,7 @@ export function FiOsMoreNavDrawer({
         pathname={pathname}
         onNavigate={onClose}
         dense
-        drawerTitle="All modules"
+        drawerTitle="All areas"
         onDrawerClose={onClose}
       />
     </div>

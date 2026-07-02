@@ -25,7 +25,7 @@ export default async function WorkforceOsLayout({
     return (
       <FiModuleAccessDenied
         tenantId={tid}
-        moduleLabel="WorkforceOS"
+        moduleLabel="Team"
         reason={access.access.reason}
       />
     );

@@ -15,7 +15,7 @@ import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server
 import { loadFinancialOsDepositRules } from "@/src/lib/financialOs/financialListLoaders.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Deposit rules",
+  title: "Finances · Deposit rules",
   robots: { index: false, follow: false },
 };
 

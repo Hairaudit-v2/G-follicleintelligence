@@ -129,6 +129,20 @@ test("resolveFiOsPrimarySidebarItems: dashboard_viewer AuditOS disabled when she
   assert.equal(audit?.disabled, true);
 });
 
+test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true);
+  const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+  assert.equal(byId.dashboard?.label, "Today");
+  assert.equal(byId["operations-centre"]?.label, "Clinic flow");
+  assert.equal(byId["reception-os"]?.label, "Front desk");
+  assert.equal(byId["surgery-os"]?.label, "Surgery");
+  assert.equal(byId.crm?.label, "Enquiries");
+  assert.equal(byId["follow-up-queue"]?.label, "Follow-ups");
+  assert.equal(byId["patient-twin"]?.label, "Health record");
+  assert.equal(byId.auditos?.label, "Quality review");
+  assert.equal(byId["financial-os"]?.label, "Finances");
+  assert.equal(byId.analytics?.label, "Insights");
+});
 test("filterFiOsPrimarySidebarItemsByFeatureAccess: patient twin row respects imaging OR patient_twin", () => {
   const raw = resolveFiOsPrimarySidebarItems(base, true, true);
   const imagingOnly = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {

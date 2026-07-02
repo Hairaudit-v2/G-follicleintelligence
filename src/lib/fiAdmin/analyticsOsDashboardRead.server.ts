@@ -153,7 +153,7 @@ function buildRiskRows(
     const stale = op.data.staleLeads.length;
     if (stale > 0) {
       rows.push({
-        label: "Stale leads (pipeline hygiene)",
+        label: "Stale enquiries (pipeline hygiene)",
         count: stale,
         href: `${base}/crm`,
         linkDisabled: !showCrmNav,
@@ -162,7 +162,7 @@ function buildRiskRows(
     const tasks = op.data.tasksDue.length;
     if (tasks > 0) {
       rows.push({
-        label: "CRM tasks due (horizon)",
+        label: "Follow-up tasks due (horizon)",
         count: tasks,
         href: `${base}/crm`,
         linkDisabled: !showCrmNav,
@@ -224,7 +224,7 @@ function buildModuleHealth(
 
   const clinic: AnalyticsOsModuleHealthCard = {
     moduleId: "clinicos",
-    label: "ClinicOS",
+    label: "Clinic",
     href: base,
     status: healthFrom(
       op.state === "limited",
@@ -241,14 +241,14 @@ function buildModuleHealth(
 
   const lead: AnalyticsOsModuleHealthCard = {
     moduleId: "leadflow",
-    label: "LeadFlow",
+    label: "Enquiries",
     href: `${base}/crm`,
     linkDisabled: !showCrmNav,
     status: healthFrom(
       op.state === "limited",
       Boolean(opOk && (opOk.staleLeads.length > 0 || opOk.tasksDue.length > 0))
     ),
-    primaryMetric: opOk != null ? `${opOk.quickStats.newLeadsThisWeek} new leads · week` : "—",
+    primaryMetric: opOk != null ? `${opOk.quickStats.newLeadsThisWeek} new enquiries · week` : "—",
     detail:
       op.state === "limited"
         ? "Operational snapshot unavailable."
@@ -259,7 +259,7 @@ function buildModuleHealth(
 
   const patient: AnalyticsOsModuleHealthCard = {
     moduleId: "patientos",
-    label: "PatientOS",
+    label: "Patients",
     href: showCrmNav ? `${base}/patients` : `${base}/directory`,
     status: healthFrom(
       pat.state === "limited",
@@ -271,7 +271,7 @@ function buildModuleHealth(
 
   const surgery: AnalyticsOsModuleHealthCard = {
     moduleId: "surgeryos",
-    label: "SurgeryOS",
+    label: "Surgery",
     href: `${base}/cases`,
     status: healthFrom(
       sur.state === "limited",
@@ -285,7 +285,7 @@ function buildModuleHealth(
 
   const audit: AnalyticsOsModuleHealthCard = {
     moduleId: "auditos",
-    label: "AuditOS",
+    label: "Quality review",
     href: `${base}/audit`,
     status: healthFrom(aud.state === "limited", Boolean(audOk && audOk.kpis.pending_reviews > 0)),
     primaryMetric: audOk ? `${audOk.kpis.pending_reviews} pending reviews` : "—",
@@ -294,14 +294,14 @@ function buildModuleHealth(
 
   const foundation: AnalyticsOsModuleHealthCard = {
     moduleId: "foundationos",
-    label: "FoundationOS",
+    label: "Health record",
     href: `${base}/foundation-integrity`,
     status: healthFrom(
       found.state === "limited",
       Boolean(foundOk && foundOk.twin_health.cases_missing_foundation_patient > 0)
     ),
     primaryMetric: foundOk
-      ? `Twin readiness hint ${foundOk.twin_coverage.twin_readiness_score_hint}%`
+      ? `Record readiness hint ${foundOk.twin_coverage.twin_readiness_score_hint}%`
       : "—",
     detail: found.state === "limited" ? "Foundation health snapshot unavailable." : undefined,
   };

@@ -8,7 +8,7 @@ import { resolveSurgeryOsViewerContext } from "@/src/lib/surgeryOs/surgeryOsAcce
 import { loadSurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsCommandCentreLoader.server";
 
 export const metadata = {
-  title: "Graft counting · SurgeryOS",
+  title: "Graft counting · Surgery",
   robots: { index: false, follow: false },
 };
 

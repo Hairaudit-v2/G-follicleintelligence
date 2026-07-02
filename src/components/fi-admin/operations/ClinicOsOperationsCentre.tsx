@@ -97,7 +97,7 @@ export function ClinicOsOperationsCentre(props: {
               FI OS
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-              Operations Centre
+              Clinic flow
             </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
               Live clinic coordination across arrivals, consultations, procedures, rooms, payments,

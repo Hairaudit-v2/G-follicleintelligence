@@ -109,16 +109,16 @@ export type AnalyticsExecutiveDashboardPayload = {
 
 /** Display labels for module coverage UI. */
 export const ANALYTICS_MODULE_DISPLAY_LABELS: Record<AnalyticsModuleName, string> = {
-  workforce_os: "WorkforceOS",
-  financial_os: "FinancialOS",
-  surgery_os: "SurgeryOS",
-  consultation_os: "ConsultationOS",
-  patient_os: "PatientOS",
-  clinic_os: "ClinicOS",
-  leadflow: "LeadFlow",
-  imaging_os: "ImagingOS",
-  audit_os: "AuditOS",
-  academy_os: "AcademyOS",
+  workforce_os: "Team",
+  financial_os: "Finances",
+  surgery_os: "Surgery",
+  consultation_os: "Consultations",
+  patient_os: "Patients",
+  clinic_os: "Clinic",
+  leadflow: "Enquiries",
+  imaging_os: "Imaging",
+  audit_os: "Quality review",
+  academy_os: "Academy",
 };
 
 /** Modules expected to feed AnalyticsOS event pipeline (Phase A+B+C). */

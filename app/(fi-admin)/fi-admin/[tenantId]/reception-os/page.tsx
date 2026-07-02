@@ -8,7 +8,7 @@ import { resolveReceptionOsViewerContext } from "@/src/lib/receptionOs/reception
 import { loadReceptionOsCommandCentrePayload } from "@/src/lib/receptionOs/receptionOsCommandCentreLoader.server";
 
 export const metadata = {
-  title: "ReceptionOS",
+  title: "Front desk",
   robots: { index: false, follow: false },
 };
 
@@ -57,7 +57,7 @@ export default async function FiAdminReceptionOsPage({
     console.error("[FiAdminReceptionOsPage]", msg || "load failed");
     return (
       <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="ReceptionOS could not load">
+        <InfoNotice variant="danger" title="Front desk could not load">
           <p className="text-sm">
             The command centre failed to load. Check production Supabase migrations and Vercel
             function logs for the server error digest.

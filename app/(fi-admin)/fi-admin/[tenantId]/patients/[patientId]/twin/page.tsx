@@ -24,7 +24,7 @@ export async function generateMetadata({
   const { patientId } = await params;
   const name = patientId.trim().slice(0, 8);
   return {
-    title: `Patient Twin · ${name}`,
+    title: `Health record · ${name}`,
     robots: { index: false, follow: false },
   };
 }

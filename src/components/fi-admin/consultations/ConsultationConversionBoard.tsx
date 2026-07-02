@@ -197,7 +197,7 @@ export function ConsultationConversionBoard({
               "inline-flex px-3 py-2 text-sm font-semibold text-slate-200"
             )}
           >
-            Operations centre
+            Clinic flow
           </Link>
           <Link
             href={`${base}/reception`}

@@ -38,7 +38,7 @@ export function FiFeatureAccessDenied({
             href={base}
             className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-3 py-2 text-xs font-semibold text-white shadow-md transition hover:from-cyan-500 hover:to-sky-500"
           >
-            Back to dashboard
+            Back to Today
           </Link>
           <Link
             href={base}

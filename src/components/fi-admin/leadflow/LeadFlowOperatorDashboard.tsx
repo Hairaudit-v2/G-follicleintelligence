@@ -90,13 +90,13 @@ export function LeadFlowOperatorDashboard({
         <div className="relative space-y-5">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
-              LeadFlow
+              Enquiries
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-              LeadFlow
+              Enquiries
             </h1>
             <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-              HubSpot-first lead intelligence for hair restoration clinics
+              HubSpot-first enquiry intelligence for hair restoration clinics
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -116,8 +116,8 @@ export function LeadFlowOperatorDashboard({
       <DashboardCard className="p-5 sm:p-6">
         <SectionHeader
           kicker="Health"
-          title="Lead health"
-          description="Live counts from your LeadFlow pipeline — refreshed on each visit."
+          title="Enquiry health"
+          description="Live counts from your enquiries pipeline — refreshed on each visit."
           className="mb-4"
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">

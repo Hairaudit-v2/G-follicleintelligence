@@ -41,7 +41,7 @@ test.describe("FI-UX-REBUILD D2 navigation collapse @smoke", () => {
     await expect(page.getByRole("navigation", { name: "FI OS primary navigation" })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByRole("navigation", { name: "FI OS modules" })).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Clinic navigation" })).toHaveCount(0);
 
     for (const label of ["Today", "Calendar", "Search", "New", "More"]) {
       await expect(
@@ -61,9 +61,9 @@ test.describe("FI-UX-REBUILD D2 navigation collapse @smoke", () => {
       .getByRole("button", { name: "More" })
       .click();
 
-    const modulesNav = page.getByRole("navigation", { name: "FI OS modules" });
+    const modulesNav = page.getByRole("navigation", { name: "Clinic navigation" });
     await expect(modulesNav).toBeVisible({ timeout: 15_000 });
-    await expect(modulesNav.getByText("Operations centre", { exact: true }).first()).toBeVisible();
+    await expect(modulesNav.getByText("Clinic flow", { exact: true }).first()).toBeVisible();
   });
 
   test("calendar route still renders full page with minimal rail", async ({ page }) => {

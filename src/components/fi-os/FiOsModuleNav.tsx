@@ -155,7 +155,7 @@ export function FiOsModuleNav({
   return (
     <nav
       className={cn("flex flex-1 flex-col gap-3 px-1.5 py-1.5", className)}
-      aria-label="FI OS modules"
+      aria-label="Clinic navigation"
     >
       {sections.map((section) => (
         <div key={section.groupId} className="space-y-1">

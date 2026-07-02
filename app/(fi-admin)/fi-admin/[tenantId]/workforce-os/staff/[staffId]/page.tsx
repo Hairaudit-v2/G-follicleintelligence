@@ -5,7 +5,7 @@ import { WorkforceOsStaffProfileClient } from "@/src/components/fi/workforce/Wor
 import { loadWorkforceOsStaffProfilePage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
 
 export const metadata = {
-  title: "Staff Profile · WorkforceOS",
+  title: "Staff Profile · Team",
   robots: { index: false, follow: false },
 };
 

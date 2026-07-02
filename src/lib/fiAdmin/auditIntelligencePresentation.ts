@@ -162,7 +162,7 @@ export function buildAuditHealthCards(snapshot: AuditDashboardSnapshot): AuditHe
       value: String(total),
       detail:
         total > 0
-          ? "Cases with audit reports connected to SurgeryOS"
+          ? "Cases with audit reports connected to surgery"
           : "Link surgery cases to begin outcome review",
     },
     {
@@ -247,7 +247,7 @@ export function buildAuditAttentionPriorities(
       id: "bootstrap",
       headline: "More follow-up evidence is needed before outcome trends are reliable.",
       detail:
-        "Link surgery cases and capture consistent photo sets to strengthen audit intelligence.",
+        "Link surgery cases and capture consistent photo sets to strengthen quality review.",
       href: `${base}/cases`,
       severity: "info",
       priorityScore: 30,

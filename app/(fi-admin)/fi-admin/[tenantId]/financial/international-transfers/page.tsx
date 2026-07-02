@@ -12,7 +12,7 @@ import { loadPaymentPathwaysForTenant } from "@/src/lib/financialOs/financialPay
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · International Transfers",
+  title: "Finances · International Transfers",
   robots: { index: false, follow: false },
 };
 

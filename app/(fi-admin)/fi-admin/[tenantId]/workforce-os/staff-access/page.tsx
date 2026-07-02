@@ -7,7 +7,7 @@ import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRout
 import { loadStaffAccessCentrePage } from "@/src/lib/workforce/staffAccessCentre.server";
 
 export const metadata = {
-  title: "Staff Access Centre · WorkforceOS",
+  title: "Staff Access Centre · Team",
   robots: { index: false, follow: false },
 };
 

@@ -28,7 +28,7 @@ function ReceptionBoardPrimaryActions({ base }: { base: string }) {
         Open Calendar
       </Link>
       <Link href={`${base}/operations`} className={receptionBoardLinkButtonClass}>
-        Open Operations Centre
+        Open clinic flow
       </Link>
       <Link href={`${base}/procedure-day`} className={receptionBoardLinkButtonClass}>
         Open Procedure Day

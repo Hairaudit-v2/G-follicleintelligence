@@ -17,7 +17,7 @@ import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRe
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Dashboard",
+  title: "Finances · Dashboard",
   robots: { index: false, follow: false },
 };
 

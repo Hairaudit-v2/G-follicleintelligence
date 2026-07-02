@@ -139,7 +139,7 @@ export function readinessStatusLabel(card: SurgeryReadinessBoardCard): string {
 
 export function nextActionForReadinessCard(card: SurgeryReadinessBoardCard): string {
   const issues = displayIssues(card.issues);
-  if (!card.caseId) return "Link a SurgeryOS case before clearance can continue.";
+  if (!card.caseId) return "Link a surgery case before clearance can continue.";
   if (hasIssueKind(issues, "missing_consent_proxy"))
     return "Obtain signed consent or quote acceptance.";
   if (hasIssueKind(issues, "missing_pathology")) return "Confirm pathology results are on file.";
@@ -269,7 +269,7 @@ const CLEARANCE_PRIORITY_HEADLINES: Partial<
   missing_pathology: (n) => `${plural(n, "case", "cases")} awaiting pathology clearance`,
   abnormal_pathology: (n) =>
     `Doctor sign-off required on ${plural(n, "pathology flag", "pathology flags")}`,
-  missing_case_link: (n) => `${plural(n, "booking", "bookings")} not linked to a SurgeryOS case`,
+  missing_case_link: (n) => `${plural(n, "booking", "bookings")} not linked to a surgery case`,
   booking_unconfirmed: (n) => `${plural(n, "booking", "bookings")} still unconfirmed`,
   case_on_hold: (n) => `${plural(n, "case", "cases")} on hold`,
 };
@@ -435,13 +435,13 @@ export function procedureDayLiveStatusLabel(card: ProcedureDayScheduleCard): str
 
 export function nextActionForProcedureDayCard(card: ProcedureDayScheduleCard): string {
   const issues = displayIssues(card.issues);
-  if (!card.caseId) return "Link a SurgeryOS case before surgical prep can continue.";
+  if (!card.caseId) return "Link a surgery case before surgical prep can continue.";
   if (hasHighRiskSeverity(issues))
     return "Resolve clearance blockers before starting the procedure.";
   const lane = procedureDayFlowLaneForCard(card);
   if (lane === "scheduled") return "Confirm patient arrival and begin surgical preparation.";
   if (lane === "arrived_preparing") return "Complete pre-op checklist and hand off to theatre.";
-  if (lane === "in_procedure") return "Continue procedure documentation in SurgeryOS.";
+  if (lane === "in_procedure") return "Continue procedure documentation in Surgery.";
   if (lane === "recovery_post_op") return "Complete post-op handoff and discharge readiness.";
   if (!card.preOp.surgeonAssigned) return "Assign surgeon and theatre team.";
   if (!card.preOp.roomOk) return "Assign theatre room before start.";

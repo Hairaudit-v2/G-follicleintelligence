@@ -12,7 +12,7 @@ import { loadPaymentPathwayInbox } from "@/src/lib/financialOs/financialPaymentP
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
-  title: "FinancialOS · Pathway inbox",
+  title: "Finances · Pathway inbox",
   robots: { index: false, follow: false },
 };
 

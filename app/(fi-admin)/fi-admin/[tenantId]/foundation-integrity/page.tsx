@@ -15,7 +15,7 @@ import {
 } from "@/src/lib/patients/patientOsDashboardLoader.server";
 
 export const metadata = {
-  title: "Patient Twin",
+  title: "Health record",
   description:
     "Unified patient identity, media, clinical timeline, and treatment history across FI OS.",
   robots: { index: false, follow: false },

@@ -82,7 +82,7 @@ export function AuditOsDashboard({
   if (loading) {
     return (
       <div className="rounded-xl border border-dashed border-white/[0.1] bg-[#0c1220]/60 px-4 py-10 text-center text-sm text-[#94A3B8]">
-        Loading Audit Intelligence…
+        Loading quality review…
       </div>
     );
   }
@@ -139,24 +139,24 @@ export function AuditOsDashboard({
             id="auditos-dashboard-heading"
             className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl"
           >
-            Audit Intelligence
+            Quality review
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Clinical quality, outcome review, patient evidence, and audit readiness across surgical
+            Clinical quality, outcome review, patient evidence, and readiness across surgical
             cases.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href="/hair-audit/admin" className={auditOsLinkButtonClass}>
-              Open AuditOS
+              Open HairAudit
             </Link>
             <Link href={`${base}/cases`} className={auditOsLinkButtonClass}>
-              Open HairAudit Cases
+              Open cases
             </Link>
             <Link href={`${base}/foundation-integrity`} className={auditOsLinkButtonClass}>
-              Open Patient Twin
+              Open health record
             </Link>
             <Link href={`${base}/cases`} className={auditOsLinkButtonClass}>
-              Open SurgeryOS
+              Open surgery
             </Link>
             {pendingAnchor ? (
               <Link href={`${base}/audit${pendingAnchor}`} className={auditOsLinkButtonClass}>
