@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 import type {
   FiMedicalIntelligenceClinicalFlag,
