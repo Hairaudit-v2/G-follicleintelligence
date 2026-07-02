@@ -466,31 +466,23 @@ function entityAttentionFeedItems(
   });
 }
 
-export function buildTodayFeed(input: {
+export type TodayFeedRawItemsInput = {
   base: string;
   dashboard: TenantOperationalDashboard;
   showCrmNav: boolean;
   profileKey?: FiWorkspaceProfileKey;
   now?: Date;
-  maxPerBucket?: number;
-  /** D6E — when true (default), apply presence-aware ranking and copy hints. */
-  applyPresence?: boolean;
-}): TodayFeed {
-  const {
-    base,
-    dashboard,
-    showCrmNav,
-    profileKey,
-    now = new Date(),
-    maxPerBucket = DEFAULT_MAX_PER_BUCKET,
-    applyPresence = true,
-  } = input;
+};
 
+/** Single pass: derive all raw Today feed items from dashboard inputs. */
+export function loadTodayFeedRawItems(input: TodayFeedRawItemsInput): TodayFeedItem[] {
+  const now = input.now ?? new Date();
   const nowMs = now.getTime();
-  const parsedTodayEnd = parseMs(dashboard.operationalDay.localEndIso);
+  const parsedTodayEnd = parseMs(input.dashboard.operationalDay.localEndIso);
   const todayEndMs = parsedTodayEnd ?? nowMs + 24 * 60 * 60_000;
+  const { base, dashboard, showCrmNav, profileKey } = input;
 
-  const rawItems: TodayFeedItem[] = [
+  return [
     ...receptionItems(dashboard.receptionBoard.cards, { base, nowMs, todayEndMs, profileKey }),
     ...staleLeadItems(dashboard.staleLeads, {
       base,
@@ -508,19 +500,28 @@ export function buildTodayFeed(input: {
       suppressAggregateKeys: coveredAggregateKeys(dashboard.entityAttention ?? []),
     }),
   ];
+}
 
-  let presenceSummary: PresenceSummary | null = null;
-  let presenceContext: TodayPresencePriorityContext | undefined;
+/** Pure builder — buckets and prioritises already-loaded raw items (D6F single source of truth). */
+export function buildTodayFeedFromRawItems(input: {
+  rawItems: readonly TodayFeedItem[];
+  profileKey?: FiWorkspaceProfileKey;
+  now?: Date;
+  maxPerBucket?: number;
+  presenceSummary?: PresenceSummary | null;
+}): TodayFeed {
+  const {
+    rawItems,
+    profileKey,
+    now = new Date(),
+    maxPerBucket = DEFAULT_MAX_PER_BUCKET,
+    presenceSummary = null,
+  } = input;
 
-  if (applyPresence) {
-    presenceSummary = derivePresenceFromDashboardInput({
-      dashboard,
-      todayItems: rawItems,
-      profileKey,
-      now,
-    });
-    presenceContext = presenceContextFromSummary(presenceSummary);
-  }
+  const nowMs = now.getTime();
+  const presenceContext = presenceSummary
+    ? presenceContextFromSummary(presenceSummary)
+    : undefined;
 
   const prioritised = applyTodaySignalPriority(rawItems, {
     profileKey,
@@ -545,6 +546,44 @@ export function buildTodayFeed(input: {
   };
 }
 
+export function buildTodayFeed(input: {
+  base: string;
+  dashboard: TenantOperationalDashboard;
+  showCrmNav: boolean;
+  profileKey?: FiWorkspaceProfileKey;
+  now?: Date;
+  maxPerBucket?: number;
+  /** D6E — when true (default), apply presence-aware ranking and copy hints. */
+  applyPresence?: boolean;
+}): TodayFeed {
+  const {
+    dashboard,
+    profileKey,
+    now = new Date(),
+    applyPresence = true,
+    ...rawInput
+  } = input;
+
+  const rawItems = loadTodayFeedRawItems({ ...rawInput, dashboard, profileKey, now });
+
+  const presenceSummary = applyPresence
+    ? derivePresenceFromDashboardInput({
+        dashboard,
+        todayItems: rawItems,
+        profileKey,
+        now,
+      })
+    : null;
+
+  return buildTodayFeedFromRawItems({
+    rawItems,
+    profileKey,
+    now,
+    maxPerBucket: input.maxPerBucket,
+    presenceSummary,
+  });
+}
+
 function presenceContextFromSummary(
   summary: PresenceSummary
 ): TodayPresencePriorityContext {
@@ -567,44 +606,7 @@ export function buildTodayFeedWithPresence(input: {
   maxPerBucket?: number;
 }): { feed: TodayFeed; presence: PresenceSummary } {
   const now = input.now ?? new Date();
-  const rawItems: TodayFeedItem[] = [
-    ...receptionItems(input.dashboard.receptionBoard.cards, {
-      base: input.base,
-      nowMs: now.getTime(),
-      todayEndMs:
-        parseMs(input.dashboard.operationalDay.localEndIso) ??
-        now.getTime() + 24 * 60 * 60_000,
-      profileKey: input.profileKey,
-    }),
-    ...staleLeadItems(input.dashboard.staleLeads, {
-      base: input.base,
-      thresholdDays: input.dashboard.staleLeadThresholdDays,
-      profileKey: input.profileKey,
-    }),
-    ...taskDueItems(input.dashboard.tasksDue, {
-      base: input.base,
-      nowMs: now.getTime(),
-      todayEndMs:
-        parseMs(input.dashboard.operationalDay.localEndIso) ??
-        now.getTime() + 24 * 60 * 60_000,
-      profileKey: input.profileKey,
-    }),
-    ...reminderItems(input.dashboard.upcomingReminders, {
-      nowMs: now.getTime(),
-      todayEndMs:
-        parseMs(input.dashboard.operationalDay.localEndIso) ??
-        now.getTime() + 24 * 60 * 60_000,
-      profileKey: input.profileKey,
-    }),
-    ...entityAttentionFeedItems(input.dashboard.entityAttention ?? [], input.profileKey),
-    ...aggregateFallbackItems({
-      base: input.base,
-      actionCentre: input.dashboard.actionCentre,
-      showCrmNav: input.showCrmNav,
-      profileKey: input.profileKey,
-      suppressAggregateKeys: coveredAggregateKeys(input.dashboard.entityAttention ?? []),
-    }),
-  ];
+  const rawItems = loadTodayFeedRawItems({ ...input, now });
 
   const presence = derivePresenceFromDashboardInput({
     dashboard: input.dashboard,
@@ -613,7 +615,13 @@ export function buildTodayFeedWithPresence(input: {
     now,
   });
 
-  const feed = buildTodayFeed({ ...input, now, applyPresence: true });
+  const feed = buildTodayFeedFromRawItems({
+    rawItems,
+    profileKey: input.profileKey,
+    now,
+    maxPerBucket: input.maxPerBucket,
+    presenceSummary: presence,
+  });
 
   return { feed, presence };
 }
