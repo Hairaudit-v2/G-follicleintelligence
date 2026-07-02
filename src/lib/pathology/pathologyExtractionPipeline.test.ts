@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { confirmInboundDocumentMatch, promoteInboundPathologyDocument, uploadInboundPathologyDocument } from "@/src/lib/pathology/pathologyInboxMutations.server";
+import { promoteInboundPathologyDocument } from "@/src/lib/pathology/pathologyInboxMutations.server";
 import type {
   PathologyExtractionJobRow,
   PathologyInboundDocumentRow,

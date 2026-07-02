@@ -5,15 +5,16 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadPathologyInboxDocument } from "@/src/lib/pathology/pathologyInboxLoad.server";
 import type {
   PathologyExtractionJobRow,
-  PathologyExtractionJobStatus,
   PathologyInboundDocumentEventType,
   PathologyInboundDocumentListItem,
   PathologyInboundExtractionStatus,
 } from "@/src/lib/pathology/pathologyInboxTypes";
 import { maybeAutoCreateDraftFromExtraction } from "@/src/lib/pathology/pathologyAutoDraftResult.server";
+import { providerAuditToEventDetail } from "@/src/lib/pathology/pathologyExtractionProviderAudit";
 import { readPathologyExtractionEnabled } from "@/src/lib/pathology/pathologyExtractionEnv.server";
 import {
   downloadInboundDocumentPdf,
+  resolvePathologyExtractionJobStatus,
   runPathologyExtractionOnPdf,
 } from "@/src/lib/pathology/pathologyExtractionWorker.server";
 
@@ -259,10 +260,8 @@ export async function runPathologyExtractionJob(
     const extraction = await runPathologyExtractionOnPdf(pdfBytes);
     const completedAt = new Date().toISOString();
 
-    const finalStatus: PathologyExtractionJobStatus =
-      extraction.extractedMarkerCount > 0 ? "succeeded" : "needs_review";
-    const inboundExtractionStatus: PathologyInboundExtractionStatus =
-      extraction.extractedMarkerCount > 0 ? "succeeded" : "needs_review";
+    const { jobStatus: finalStatus, inboundStatus: inboundExtractionStatus } =
+      resolvePathologyExtractionJobStatus(extraction);
 
     const { data: updatedJob, error: updErr } = await supabase
       .from("fi_pathology_extraction_jobs")
@@ -299,6 +298,9 @@ export async function runPathologyExtractionJob(
         skipped_marker_count: extraction.skippedMarkerCount,
         ocr_confidence: extraction.ocrConfidence,
         provider: extraction.provider,
+        requires_manual_review: extraction.requiresManualReview,
+        confidence_summary: extraction.confidenceSummary,
+        provider_audit: providerAuditToEventDetail(extraction.providerAudit),
       },
     });
 
