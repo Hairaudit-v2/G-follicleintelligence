@@ -16,7 +16,6 @@ import type {
   PresenceConfidence,
   PresenceEngineContext,
   PresenceOperationalStatus,
-  PresenceSignalKind,
   PresenceSnapshot,
   PresenceState,
   PresenceSummary,

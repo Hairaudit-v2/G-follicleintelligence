@@ -170,7 +170,7 @@ export function ClinicOsGlobalSearch({
     return () => {
       cancelled = true;
     };
-  }, [open, tid, debouncedTrim]);
+  }, [open, tid, debouncedTrim, showCrmNav]);
 
   useEffect(() => {
     if (!open) return;
