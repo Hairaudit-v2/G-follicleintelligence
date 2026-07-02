@@ -18,11 +18,15 @@ type ActiveCollector = {
   payloadBytes: number;
 };
 
-let active: ActiveCollector | null = null;
+const activeStack: ActiveCollector[] = [];
+
+function currentCollector(): ActiveCollector | null {
+  return activeStack.length > 0 ? activeStack[activeStack.length - 1]! : null;
+}
 
 export function beginFiPerfCollection(surface: string, tenantId?: string | null): void {
   if (!isFiPerfDiagnosticsEnabled()) return;
-  active = {
+  activeStack.push({
     surface,
     tenantId: tenantId?.trim() || null,
     startedAt: performance.now(),
@@ -30,10 +34,11 @@ export function beginFiPerfCollection(surface: string, tenantId?: string | null)
     slowQueries: [],
     queryCount: 0,
     payloadBytes: 0,
-  };
+  });
 }
 
 export function recordFiPerfQuery(label: string, durationMs: number, detail?: string | null): void {
+  const active = currentCollector();
   if (!active) return;
   const ms = Math.round(durationMs);
   active.queryCount += 1;
@@ -47,6 +52,7 @@ export function recordFiPerfSpan(
   durationMs: number,
   extra?: { queryCount?: number; payloadBytes?: number }
 ): void {
+  const active = currentCollector();
   if (!active) return;
   active.spans.push({
     label,
@@ -57,6 +63,7 @@ export function recordFiPerfSpan(
 }
 
 export function recordFiPerfPayloadBytes(bytes: number): void {
+  const active = currentCollector();
   if (!active) return;
   active.payloadBytes += Math.max(0, Math.round(bytes));
 }
@@ -75,6 +82,7 @@ export async function withFiPerfSpan<T>(
 }
 
 export function finishFiPerfCollection(): FiPerfSnapshot | null {
+  const active = activeStack.pop();
   if (!active) return null;
   const snap: FiPerfSnapshot = {
     surface: active.surface,
@@ -89,7 +97,6 @@ export function finishFiPerfCollection(): FiPerfSnapshot | null {
   if (process.env.NODE_ENV !== "production") {
     console.info("[fi-perf]", JSON.stringify(snap));
   }
-  active = null;
   return snap;
 }
 

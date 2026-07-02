@@ -71,9 +71,17 @@ export async function loadClinicOsGlobalSearchResults(
     return { patients: [], cases: [], leads: [] };
   }
 
-  const [patientOsSearchAllowed, showCrmNav] = await Promise.all([
-    getBookingsBoardNavAllowed(tid),
-    getCrmShellNavAllowed(tid),
+  const navChecks = Promise.all([getBookingsBoardNavAllowed(tid), getCrmShellNavAllowed(tid)]);
+  const casesPromise = searchFoundationRecords({
+    tenantId: tid,
+    query,
+    type: "cases",
+    limit: GLOBAL_SEARCH_RESULT_LIMIT,
+  });
+
+  const [[patientOsSearchAllowed, showCrmNav], caseBlock] = await Promise.all([
+    navChecks,
+    casesPromise,
   ]);
 
   const sp = new URLSearchParams();
@@ -84,13 +92,7 @@ export async function loadClinicOsGlobalSearchResults(
   const esc = escapeIlikePattern(parsed.searchRaw.trim());
   parsed = attachSearchPattern(parsed, esc.length ? esc : null);
 
-  const [caseBlock, patientBlock, leadPage] = await Promise.all([
-    searchFoundationRecords({
-      tenantId: tid,
-      query,
-      type: "cases",
-      limit: GLOBAL_SEARCH_RESULT_LIMIT,
-    }),
+  const [patientBlock, leadPage] = await Promise.all([
     patientOsSearchAllowed
       ? searchFoundationRecords({
           tenantId: tid,

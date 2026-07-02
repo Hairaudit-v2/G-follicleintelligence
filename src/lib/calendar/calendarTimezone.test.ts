@@ -67,6 +67,14 @@ describe("calendarTimezone — Europe/London anchors", () => {
     assert.equal(lanes[0].startMs, mondayStart);
   });
 
+  it("builds week lanes within shell layout budget", () => {
+    buildCalendarWeek("2026-07-02", tz);
+    const t0 = performance.now();
+    buildCalendarWeek("2026-07-02", tz);
+    const elapsed = performance.now() - t0;
+    assert.ok(elapsed < 50, `warm week lane build took ${elapsed.toFixed(1)}ms`);
+  });
+
   it("converts local day minutes to ISO (BST)", () => {
     const iso = isoFromLocalDayMinutes("2026-06-10", 10 * 60, tz);
     assert.equal(iso, "2026-06-10T09:00:00.000Z");

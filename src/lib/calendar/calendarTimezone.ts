@@ -39,14 +39,20 @@ const WEEKDAY_INDEX: Record<string, number> = {
   Sat: 6,
 };
 
+const validatedTimezoneCache = new Map<string, string>();
+
 /** Validates IANA timezone; falls back to {@link FALLBACK_CALENDAR_TIMEZONE}. */
 export function normalizeCalendarTimezone(tz: string | null | undefined): string {
   const t = tz?.trim();
   if (!t) return FALLBACK_CALENDAR_TIMEZONE;
+  const cached = validatedTimezoneCache.get(t);
+  if (cached) return cached;
   try {
     Intl.DateTimeFormat(undefined, { timeZone: t });
+    validatedTimezoneCache.set(t, t);
     return t;
   } catch {
+    validatedTimezoneCache.set(t, FALLBACK_CALENDAR_TIMEZONE);
     return FALLBACK_CALENDAR_TIMEZONE;
   }
 }
@@ -87,20 +93,61 @@ export function resolveTenantCalendarTimezone(
   return normalizeCalendarTimezone(fromColumn || fromMeta || null);
 }
 
+const zonedPartsFormatterCache = new Map<string, Intl.DateTimeFormat>();
+const calendarDateFormatterCache = new Map<string, Intl.DateTimeFormat>();
+const weekdayShortFormatterCache = new Map<string, Intl.DateTimeFormat>();
+const zonedMidnightUtcMsCache = new Map<string, number | null>();
+const parseCalendarDateStringCache = new Map<string, string | null>();
+const zonedDateTimeToUtcCache = new Map<string, number | null>();
+
+function getZonedPartsFormatter(timeZone: string): Intl.DateTimeFormat {
+  const tz = normalizeCalendarTimezone(timeZone);
+  let fmt = zonedPartsFormatterCache.get(tz);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      weekday: "short",
+    });
+    zonedPartsFormatterCache.set(tz, fmt);
+  }
+  return fmt;
+}
+
+function getCalendarDateFormatter(timeZone: string): Intl.DateTimeFormat {
+  const tz = normalizeCalendarTimezone(timeZone);
+  let fmt = calendarDateFormatterCache.get(tz);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    calendarDateFormatterCache.set(tz, fmt);
+  }
+  return fmt;
+}
+
+function getWeekdayShortFormatter(timeZone: string): Intl.DateTimeFormat {
+  const tz = normalizeCalendarTimezone(timeZone);
+  let fmt = weekdayShortFormatterCache.get(tz);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: tz });
+    weekdayShortFormatterCache.set(tz, fmt);
+  }
+  return fmt;
+}
+
 function getZonedParts(ms: number, timeZone: string): ZonedParts {
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    weekday: "short",
-  });
   const parts = Object.fromEntries(
-    dtf
+    getZonedPartsFormatter(timeZone)
       .formatToParts(new Date(ms))
       .filter((p) => p.type !== "literal")
       .map((p) => [p.type, p.value])
@@ -137,25 +184,36 @@ function zonedDateTimeToUtc(
   second: number,
   timeZone: string
 ): number | null {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const cacheKey = `${year}|${month}|${day}|${hour}|${minute}|${second}|${tz}`;
+  const cached = zonedDateTimeToUtcCache.get(cacheKey);
+  if (cached !== undefined) return cached;
   const target = { year, month, day, hour, minute, second };
   const base = Date.UTC(year, month - 1, day, hour, minute, second);
   // `base` is a naive UTC interpretation of the wall clock; the true UTC instant can be many
   // hours away (e.g. Australia/Brisbane +10). Scan a full ±20h window before wider bisection.
   for (let offsetMin = -20 * 60; offsetMin <= 20 * 60; offsetMin++) {
     const candidate = base + offsetMin * 60_000;
-    const p = getZonedParts(candidate, timeZone);
-    if (compareZoned(p, target) === 0) return candidate;
+    const p = getZonedParts(candidate, tz);
+    if (compareZoned(p, target) === 0) {
+      zonedDateTimeToUtcCache.set(cacheKey, candidate);
+      return candidate;
+    }
   }
   let lo = base - 14 * 3_600_000;
   let hi = base + 14 * 3_600_000;
   for (let i = 0; i < 48; i++) {
     const mid = Math.floor((lo + hi) / 2);
-    const p = getZonedParts(mid, timeZone);
+    const p = getZonedParts(mid, tz);
     const cmp = compareZoned(p, target);
-    if (cmp === 0) return mid;
+    if (cmp === 0) {
+      zonedDateTimeToUtcCache.set(cacheKey, mid);
+      return mid;
+    }
     if (cmp < 0) lo = mid + 1;
     else hi = mid - 1;
   }
+  zonedDateTimeToUtcCache.set(cacheKey, null);
   return null;
 }
 
@@ -163,12 +221,7 @@ function zonedDateTimeToUtc(
 export function calendarDateStringFromInstant(d: Date, timeZone: string): string {
   const tz = normalizeCalendarTimezone(timeZone);
   if (tz === DEFAULT_CALENDAR_TIMEZONE) return utcCalendarDateStringFromDate(d);
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: tz,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
+  return getCalendarDateFormatter(tz).format(d);
 }
 
 /** Validates a calendar date string in the given timezone. */
@@ -176,16 +229,30 @@ export function parseCalendarDateString(ymd: string, timeZone: string): string |
   const tz = normalizeCalendarTimezone(timeZone);
   if (tz === DEFAULT_CALENDAR_TIMEZONE) return parseUtcCalendarDateString(ymd);
   const t = ymd.trim();
+  const cacheKey = `${t}|${tz}`;
+  const cached = parseCalendarDateStringCache.get(cacheKey);
+  if (cached !== undefined) return cached;
   const m = YMD_RE.exec(t);
-  if (!m) return null;
+  if (!m) {
+    parseCalendarDateStringCache.set(cacheKey, null);
+    return null;
+  }
   const y = Number(m[1]);
   const mo = Number(m[2]);
   const da = Number(m[3]);
-  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(da)) return null;
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(da)) {
+    parseCalendarDateStringCache.set(cacheKey, null);
+    return null;
+  }
   const ms = zonedDateTimeToUtc(y, mo, da, 12, 0, 0, tz);
-  if (ms == null) return null;
+  if (ms == null) {
+    parseCalendarDateStringCache.set(cacheKey, null);
+    return null;
+  }
   const normalized = calendarDateStringFromInstant(new Date(ms), tz);
-  return normalized === t ? t : null;
+  const result = normalized === t ? t : null;
+  parseCalendarDateStringCache.set(cacheKey, result);
+  return result;
 }
 
 /** UTC epoch ms for local midnight on `ymd` in `timeZone`. */
@@ -193,11 +260,16 @@ export function zonedMidnightUtcMs(ymd: string, timeZone: string): number | null
   const tz = normalizeCalendarTimezone(timeZone);
   const parsed = parseCalendarDateString(ymd, tz);
   if (!parsed) return null;
+  const cacheKey = `${parsed}|${tz}`;
+  const cached = zonedMidnightUtcMsCache.get(cacheKey);
+  if (cached !== undefined) return cached;
   const [y, mo, da] = parsed.split("-").map(Number);
-  if (tz === DEFAULT_CALENDAR_TIMEZONE) {
-    return Date.UTC(y, mo - 1, da, 0, 0, 0, 0);
-  }
-  return zonedDateTimeToUtc(y, mo, da, 0, 0, 0, tz);
+  const ms =
+    tz === DEFAULT_CALENDAR_TIMEZONE
+      ? Date.UTC(y, mo - 1, da, 0, 0, 0, 0)
+      : zonedDateTimeToUtc(y, mo, da, 0, 0, 0, tz);
+  zonedMidnightUtcMsCache.set(cacheKey, ms);
+  return ms;
 }
 
 /** e.g. "Tuesday, 18 June 2026" for clinic-local `YYYY-MM-DD` in `timeZone`. */
@@ -264,8 +336,7 @@ export function localMondayStartMsContaining(anchorMidnightMs: number, timeZone:
 }
 
 export function formatWeekdayShort(ms: number, timeZone: string): string {
-  const tz = normalizeCalendarTimezone(timeZone);
-  return new Date(ms).toLocaleDateString("en-GB", { weekday: "short", timeZone: tz });
+  return getWeekdayShortFormatter(timeZone).format(new Date(ms));
 }
 
 /** ISO instant from local calendar day + minutes-from-midnight. */

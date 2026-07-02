@@ -78,7 +78,7 @@ const MUST_FILTER: Array<{ file: string; label: string; minCount: number }> = [
   },
   { file: "src/lib/fi/foundation/patientRecord.ts", label: "patientRecord", minCount: 1 },
   {
-    file: "src/lib/fiAdmin/clinicOsGlobalSearchLoader.server.ts",
+    file: "src/lib/fi/foundation/search.ts",
     label: "clinicOsGlobalSearch",
     minCount: 1,
   },

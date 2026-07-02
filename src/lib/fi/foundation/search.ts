@@ -183,44 +183,47 @@ export async function searchFoundationRecords(
     const clinicIdsForCaseBoost = new Set<string>();
     if (query) {
       const p = `%${escapeIlikePattern(query)}%`;
-      const { data: orgMatch } = await supabase
-        .from("fi_organisations")
-        .select("id")
-        .eq("tenant_id", tid)
-        .ilike("name", p)
-        .limit(limit);
-      for (const o of orgMatch ?? []) orgIdsForCaseBoost.add(String((o as { id: string }).id));
-      const { data: clMatch } = await supabase
-        .from("fi_clinics")
-        .select("id")
-        .eq("tenant_id", tid)
-        .ilike("display_name", p)
-        .limit(limit);
-      for (const c of clMatch ?? []) clinicIdsForCaseBoost.add(String((c as { id: string }).id));
+      const [orgMatch, clMatch] = await Promise.all([
+        supabase
+          .from("fi_organisations")
+          .select("id")
+          .eq("tenant_id", tid)
+          .ilike("name", p)
+          .limit(limit),
+        supabase
+          .from("fi_clinics")
+          .select("id")
+          .eq("tenant_id", tid)
+          .ilike("display_name", p)
+          .limit(limit),
+      ]);
+      for (const o of orgMatch.data ?? []) orgIdsForCaseBoost.add(String((o as { id: string }).id));
+      for (const c of clMatch.data ?? []) clinicIdsForCaseBoost.add(String((c as { id: string }).id));
     }
 
     let q = supabase
-      .from("v_fi_case_foundation")
-      .select("*")
+      .from("fi_cases")
+      .select(
+        "id, tenant_id, foundation_patient_id, clinic_id, organisation_id, status, metadata, created_at, updated_at"
+      )
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .order("updated_at", { ascending: false })
       .limit(limit);
 
     if (query) {
       const p = `%${escapeIlikePattern(query)}%`;
       const parts = [
-        `case_type.ilike.${p}`,
         `status.ilike.${p}`,
-        `source_system.ilike.${p}`,
-        `source_case_id.ilike.${p}`,
+        `metadata->>case_type.ilike.${p}`,
+        `metadata->>event_type.ilike.${p}`,
+        `metadata->>source_system.ilike.${p}`,
+        `metadata->>source_case_id.ilike.${p}`,
       ];
       if (uuidLike(query)) {
         const id = query.trim();
-        parts.push(`case_id.eq.${id}`);
-        parts.push(`global_case_id.eq.${id}`);
+        parts.push(`id.eq.${id}`);
         parts.push(`foundation_patient_id.eq.${id}`);
-        parts.push(`global_patient_id.eq.${id}`);
-        parts.push(`person_id.eq.${id}`);
         parts.push(`clinic_id.eq.${id}`);
         parts.push(`organisation_id.eq.${id}`);
       }
@@ -236,11 +239,37 @@ export async function searchFoundationRecords(
 
     const { data: rawCases, error: cErr } = await q;
     if (cErr) throw new Error(cErr.message);
-    const enriched = await enrichCasesWithExternalAndNames(
-      supabase,
-      tid,
-      (rawCases ?? []) as Record<string, unknown>[]
-    );
+    const viewRows = (rawCases ?? []).map((row) => {
+      const r = row as {
+        id: string;
+        tenant_id: string;
+        foundation_patient_id: string | null;
+        clinic_id: string | null;
+        organisation_id: string | null;
+        status: string | null;
+        metadata: unknown;
+        updated_at: string;
+      };
+      const meta =
+        r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : {};
+      return {
+        case_id: r.id,
+        tenant_id: r.tenant_id,
+        foundation_patient_id: r.foundation_patient_id,
+        clinic_id: r.clinic_id,
+        organisation_id: r.organisation_id,
+        status: r.status,
+        case_type:
+          (typeof meta.case_type === "string" ? meta.case_type : null) ??
+          (typeof meta.event_type === "string" ? meta.event_type : null),
+        source_system: typeof meta.source_system === "string" ? meta.source_system : null,
+        source_case_id: typeof meta.source_case_id === "string" ? meta.source_case_id : null,
+        updated_at: r.updated_at,
+      };
+    });
+    const enriched = await enrichCasesWithExternalAndNames(supabase, tid, viewRows);
 
     for (const c of enriched) {
       if (seenCase.has(c.case_id)) continue;
