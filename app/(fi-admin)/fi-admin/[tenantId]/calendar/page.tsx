@@ -5,6 +5,7 @@ import { Suspense } from "react";
 
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
 import { loadOperationalCalendarShellData } from "@/src/lib/calendar/operationalCalendarLoader.server";
+import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
 import { CalendarBookingsSection } from "./CalendarBookingsSection";
 import { FiOsCalendarGridSkeleton } from "@/src/components/fi-admin/calendar/FiOsCalendarGridSkeleton";
@@ -26,6 +27,11 @@ export default async function TenantCalendarPage({
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
+  try {
+    assertNonEmptyUuid(tenantId.trim(), "tenantId");
+  } catch {
+    notFound();
+  }
 
   const sp = (await searchParams) ?? {};
   const [shell, session] = await Promise.all([

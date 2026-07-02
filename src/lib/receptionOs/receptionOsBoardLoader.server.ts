@@ -289,7 +289,7 @@ async function loadNewLeadPipelineCards(
 
   const { data: leads, error } = await supabase
     .from("fi_crm_leads")
-    .select("id, summary, status, person_id, metadata, pipeline_stage_id")
+    .select("id, summary, status, person_id, metadata")
     .eq("tenant_id", tid)
     .not("status", "in", "(archived,lost,converted)")
     .order("updated_at", { ascending: false })

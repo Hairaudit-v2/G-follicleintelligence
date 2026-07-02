@@ -1,8 +1,4 @@
 import type { StaffEmploymentStatus, StaffMemberLifecycleRow } from "./staffLifecycleTypes";
-import {
-  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
-  STAFF_EMPLOYMENT_STATUSES,
-} from "./staffLifecycleTypes";
 
 /** System-only statuses — never shown in admin employment dropdowns. */
 export const ADMIN_HIDDEN_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> = new Set([
