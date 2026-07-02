@@ -85,6 +85,7 @@ import { calendarOsOverlapRowsForDisplayContext } from "@/src/lib/calendar/calen
 import { buildCalendarOsDisplayPipelineTrace } from "@/src/lib/calendar/calendarOsDisplayPipeline";
 import { loadActiveStaffCalendarLinkIndex } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { buildOperationalFeedForGridBookings } from "@/src/lib/calendar/calendarOperationalFeed.server";
+import { resolveCalendarV2EnabledForViewer } from "@/src/lib/calendar-os/calendarOsFeatureFlag.server";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -627,6 +628,8 @@ export async function loadOperationalCalendarShellData(
     resources.staffDirectory
   );
 
+  const calendarV2Enabled = await resolveCalendarV2EnabledForViewer(tid, searchParams);
+
   const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
   logOperationalCalendarServerTiming({
     phase: "loadOperationalCalendarShellData",
@@ -665,6 +668,7 @@ export async function loadOperationalCalendarShellData(
     setupRecommendations,
     canonicalRedirectHref,
     calendarOperatorPrimaryClinicId,
+    calendarV2Enabled,
   };
 }
 

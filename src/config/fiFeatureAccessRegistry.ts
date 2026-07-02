@@ -27,6 +27,7 @@ export const FI_FEATURE_KEYS = [
   "surgery_pipeline",
   "my_workspace",
   "attention_centre",
+  "calendar_v2",
 ] as const;
 
 export type FiFeatureKey = (typeof FI_FEATURE_KEYS)[number];
@@ -281,6 +282,21 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
     description: dash.attention_centre.description ?? "",
     category: "home",
     dashboardWidgetKey: "attention_centre",
+  },
+  calendar_v2: {
+    key: "calendar_v2",
+    label: "Calendar V2",
+    description:
+      "Resource-first clinic operations calendar with FI OS intelligence overlays (beta).",
+    category: "today",
+    navPath: "calendar",
+    defaultEnabledForRoles: {
+      clinic_admin: false,
+      operations_admin: false,
+      finance_admin: false,
+      dashboard_viewer: false,
+      data_safety_admin: false,
+    },
   },
 };
 

@@ -43,6 +43,7 @@ import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
+import { CalendarOsShell } from "@/src/components/calendar-os/CalendarOsShell";
 import { CalendarOperationalDiagnosticsPanel } from "@/src/components/fi-admin/calendar/CalendarOperationalDiagnosticsPanel";
 import {
   FiCalendarWorkspaceDisplayThemeProvider,
@@ -364,6 +365,51 @@ function CalendarPageImpl({
   const sidebarForGrid = isFiOsWorkspace ? (fiOsAgendaOpen ? sidebar : null) : sidebar;
   const rightPanelForGrid = isFiOsWorkspace ? (fiOsInsightsOpen ? rightPanel : null) : rightPanel;
 
+  const calendarOsV2Active = Boolean(data.calendarV2Enabled && isFiOsWorkspace);
+
+  const weekDayGrid = calendarOsV2Active ? (
+    <CalendarOsShell
+      data={data}
+      bookings={bookings}
+      bookingDisplay={bookingDisplay}
+      route={route}
+      sidebar={sidebarForGrid}
+      rightPanel={rightPanelForGrid}
+      onSelectBooking={openBookingDrawer}
+      highlightedBookingId={highlightedBookingId}
+      onEmptySlotClick={onEmptySlotClick}
+    />
+  ) : (
+    <CalendarGrid
+      sidebar={sidebarForGrid}
+      rightPanel={rightPanelForGrid}
+      view={data.query.view as "day" | "3day" | "week"}
+      lanes={data.lanes}
+      buckets={buckets}
+      gridConfig={data.gridConfig}
+      bookingDisplay={bookingDisplay}
+      resourceColumns={data.resourceColumns}
+      resourceView={data.query.resourceView}
+      staffIdByUserId={staffIdByUserId}
+      canMutateBookings={data.canMutateBookings}
+      bookings={bookings}
+      highlightedColumnId={highlightedColumnId}
+      onSelectBooking={openBookingDrawer}
+      onRescheduleBooking={rescheduleBooking}
+      pendingAppointmentIds={pendingIds}
+      shortcuts={{
+        tenantId: data.tenantId,
+        query: data.query,
+        addAppointmentHref: `${base}/bookings/new`,
+      }}
+      highlightedBookingId={highlightedBookingId}
+      onEmptySlotClick={onEmptySlotClick}
+      onEmptySlotContextMenu={onEmptySlotContextMenu}
+      calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+      fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
+    />
+  );
+
   return (
     <div
       className={cn(
@@ -467,34 +513,7 @@ function CalendarPageImpl({
             </div>
           ) : (
             <div key={data.query.view} className="flex min-h-0 flex-1 flex-col">
-              <CalendarGrid
-                sidebar={sidebarForGrid}
-                rightPanel={rightPanelForGrid}
-                view={data.query.view as "day" | "3day" | "week"}
-                lanes={data.lanes}
-                buckets={buckets}
-                gridConfig={data.gridConfig}
-                bookingDisplay={bookingDisplay}
-                resourceColumns={data.resourceColumns}
-                resourceView={data.query.resourceView}
-                staffIdByUserId={staffIdByUserId}
-                canMutateBookings={data.canMutateBookings}
-                bookings={bookings}
-                highlightedColumnId={highlightedColumnId}
-                onSelectBooking={openBookingDrawer}
-                onRescheduleBooking={rescheduleBooking}
-                pendingAppointmentIds={pendingIds}
-                shortcuts={{
-                  tenantId: data.tenantId,
-                  query: data.query,
-                  addAppointmentHref: `${base}/bookings/new`,
-                }}
-                highlightedBookingId={highlightedBookingId}
-                onEmptySlotClick={onEmptySlotClick}
-                onEmptySlotContextMenu={onEmptySlotContextMenu}
-                calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
-                fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
-              />
+              {weekDayGrid}
             </div>
           )
         ) : (
@@ -531,34 +550,7 @@ function CalendarPageImpl({
                 className="flex min-h-0 flex-1 flex-col"
                 {...viewMotion}
               >
-                <CalendarGrid
-                  sidebar={sidebarForGrid}
-                  rightPanel={rightPanelForGrid}
-                  view={data.query.view as "day" | "3day" | "week"}
-                  lanes={data.lanes}
-                  buckets={buckets}
-                  gridConfig={data.gridConfig}
-                  bookingDisplay={bookingDisplay}
-                  resourceColumns={data.resourceColumns}
-                  resourceView={data.query.resourceView}
-                  staffIdByUserId={staffIdByUserId}
-                  canMutateBookings={data.canMutateBookings}
-                  bookings={bookings}
-                  highlightedColumnId={highlightedColumnId}
-                  onSelectBooking={openBookingDrawer}
-                  onRescheduleBooking={rescheduleBooking}
-                  pendingAppointmentIds={pendingIds}
-                  shortcuts={{
-                    tenantId: data.tenantId,
-                    query: data.query,
-                    addAppointmentHref: `${base}/bookings/new`,
-                  }}
-                  highlightedBookingId={highlightedBookingId}
-                  onEmptySlotClick={onEmptySlotClick}
-                  onEmptySlotContextMenu={onEmptySlotContextMenu}
-                  calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
-                  fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
-                />
+                {weekDayGrid}
               </motion.div>
             )}
           </AnimatePresence>

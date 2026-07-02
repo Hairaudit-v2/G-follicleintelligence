@@ -106,6 +106,8 @@ export type OperationalCalendarPageData = {
    * Used by Quick Book to auto-resolve clinic when the calendar URL has no `clinicId` filter.
    */
   calendarOperatorPrimaryClinicId?: string | null;
+  /** When true, render CalendarOS V2 resource-first grid (feature-flagged, additive). */
+  calendarV2Enabled?: boolean;
 };
 
 /** Bookings + derived grid fields streamed after the calendar shell. */
