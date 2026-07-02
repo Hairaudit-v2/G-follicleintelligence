@@ -1,17 +1,20 @@
-# FI OS Staff UAT Script — Sprint 9
+# FI OS Staff UAT Script
 
-Role-based walkthrough for real staff-style usage. Enable UAT helpers first:
+**Canonical guide:** [fi-ux-audit/05-operator-guide.md](./fi-ux-audit/05-operator-guide.md)  
+**Labels & routes:** [fi-ux-audit/02-ui-terminology-dictionary.md](./fi-ux-audit/02-ui-terminology-dictionary.md)
+
+Enable UAT helpers:
 
 ```bash
 FI_STAFF_UAT_MODE_ENABLED=1
 ```
 
-UAT mode shows collapsible screen guides, “Was this clear?” feedback (stored via `staff.uat.feedback` events), and friction telemetry (`staff.uat.friction`) for wizard abandons, unresolved alerts, validation errors, and cross-module navigation.
+UAT mode shows collapsible screen guides, “Was this clear?” feedback, and friction telemetry.
 
 **Tenant:** throwaway demo with `FI_OPERATIONAL_SMOKE_ALLOW_MUTATIONS=1`  
-**Harness baseline:** `pnpm smoke:operational-day` must pass before manual UAT.
+**Harness:** `pnpm smoke:operational-day` must pass before manual UAT.
 
-Record ratings and friction notes in [fi-os-sprint9-uat-findings.md](./fi-os-sprint9-uat-findings.md).
+Record findings in [fi-os-real-clinic-uat-checklist.md](./fi-os-real-clinic-uat-checklist.md).
 
 ---
 
@@ -21,108 +24,96 @@ Record ratings and friction notes in [fi-os-sprint9-uat-findings.md](./fi-os-spr
 
 | Step | Action | Pass criteria |
 |------|--------|---------------|
-| R1 | Open `/fi-admin/{tenant}/reception-board` | Board loads; UAT guide explains purpose (if mode on) |
-| R2 | Read action alerts | Red/yellow alerts show human titles + “Resolve in calendar →” (or specific link) |
-| R3 | Check in next scheduled patient | Button reads “Check in patient”; toast confirms |
-| R4 | Advance queue | “Start consultation” → “Complete visit” labels; no dead-end after action |
-| R5 | Empty day (if applicable) | “Open calendar” + “Find or add patient” CTAs visible |
-| R6 | Live refresh | Timestamp updates without full-page reload |
-| R7 | UAT feedback | Rate clarity 1–5 at bottom of screen |
+| R1 | Open `/fi-admin/{tenantId}/reception` | Board loads; UAT guide visible if mode on |
+| R2 | Read action alerts | Red/yellow alerts show human titles + resolve link |
+| R3 | **Check in patient** on next arrival | Toast confirms; lane → **Checked in** |
+| R4 | **Start consultation** → **Complete visit** | Labels exact; no dead-end after action |
+| R5 | Empty day | **Open Calendar** + patient find CTAs visible |
+| R6 | **Live refresh** | Timestamp updates without full-page reload |
+| R7 | UAT feedback | Rate clarity 1–5 |
 
-**Exit:** Patient checked in and consultation completed (or correctly waiting) without developer explanation.
+**Exit:** Patient checked in and visit completed without developer explanation.
 
 ---
 
 ## Nurse
 
-**Goal:** Support clinical flow — patient record, journey blockers, procedure day prep.
+**Goal:** Patient record, journey blockers, procedure day prep.
 
 | Step | Action | Pass criteria |
 |------|--------|---------------|
-| N1 | Open patient from reception or search | Patient profile loads with journey ribbon |
-| N2 | Read Patient Journey ribbon | Stage, % complete, recommended next step link |
-| N3 | Clear journey blockers | Blocker chips link to fix screens where configured |
-| N4 | Open `/procedure-day` (if `FI_PROCEDURE_DAY_ENABLED=true`) | Today’s surgeries listed; UAT guide visible |
-| N5 | Review room/team coordination | Team labels and blockers readable on cards |
-| N6 | Open WorkforceOS attention items | Critical queue items visible with severity badges |
-| N7 | UAT feedback | Rate patient profile + procedure day clarity |
+| N1 | Global search or reception → patient | Profile loads with journey ribbon |
+| N2 | Patient Journey ribbon | Stage, % complete, recommended next step |
+| N3 | Blocker chips | Deep-link to fix screens where configured |
+| N4 | Sidebar **Cases** → **Procedure day** | Today's surgeries listed (`FI_PROCEDURE_DAY_ENABLED`) |
+| N5 | Procedure cards | Team labels and blockers readable |
+| N6 | Sidebar **WorkforceOS** | Critical queue items with severity badges |
+| N7 | UAT feedback | Rate patient profile + procedure day |
 
-**Exit:** Nurse can see what the patient needs next and where to fix blockers.
+**Exit:** Nurse sees patient next steps and today's procedures.
 
 ---
 
 ## Doctor
 
-**Goal:** Consultation completion, surgery planning context, calendar visibility.
+**Goal:** Consultation completion, surgery context, calendar visibility.
 
 | Step | Action | Pass criteria |
 |------|--------|---------------|
-| D1 | Complete consultation from reception queue | Status advances; patient record reflects visit |
-| D2 | Open patient profile → clinical tab | History, consultations, procedures accessible |
-| D3 | Open `/calendar` for today | Surgery/consult cards show readiness/blockers on card |
-| D4 | Open surgery booking drawer from calendar | Staff/room assignment possible from drawer |
-| D5 | Review surgery readiness | Blocker chips deep-link to readiness or calendar |
+| D1 | **Start consultation** / **Complete visit** on reception board | Status advances |
+| D2 | Patient profile → clinical sections | History, consultations accessible |
+| D3 | Sidebar **Calendar** | Surgery/consult cards show readiness on card |
+| D4 | Booking drawer from calendar | Staff/room assignment possible |
+| D5 | Sidebar **Cases** → **Readiness board** | Blocker chips deep-link |
 | D6 | UAT feedback | Rate calendar clarity |
 
-**Exit:** Doctor can finish consult and see scheduling blockers without asking engineering.
+**Exit:** Doctor finishes consult and sees scheduling blockers unaided.
 
 ---
 
 ## Surgery coordinator
 
-**Goal:** Book surgery end-to-end with deposit, room, and surgeon captured.
+**Goal:** Book surgery with deposit, room, surgeon.
 
 | Step | Action | Pass criteria |
 |------|--------|---------------|
-| SC1 | Open patient → journey “book surgery” path | Lands on surgery booking wizard or calendar prefill |
-| SC2 | Wizard step 1–4 | Progress bar; requirements list when fields missing |
-| SC3 | Use “Find next available slots” | Suggested slots populate date/room |
-| SC4 | Confirm booking | Success screen with next actions + pre-op checklist |
-| SC5 | Verify calendar + reception | Surgery appears; blockers clear when staff/room set |
-| SC6 | Cancel mid-wizard (test friction) | “Cancel booking” returns to patients; friction logged |
-| SC7 | UAT feedback | Rate wizard clarity |
+| SC1 | Patient journey → book surgery | Wizard or calendar prefill |
+| SC2 | Wizard steps 1–4 | Progress bar; requirements when fields missing |
+| SC3 | **Find next available slots** | Suggested slots populate date/room |
+| SC4 | Confirm booking | Success screen + pre-op checklist |
+| SC5 | **Readiness board** | Blockers clear or linked to calendar |
+| SC6 | UAT feedback | Rate wizard clarity |
 
-**Exit:** Surgery booked with deposit path understood; no silent failure on step 4.
+**Exit:** Surgery booked end-to-end.
 
 ---
 
-## Finance / admin
+## CRM operator
 
-**Goal:** Payment visibility, workforce compliance, operational oversight.
+**Goal:** Capture enquiry and schedule follow-up.
 
 | Step | Action | Pass criteria |
 |------|--------|---------------|
-| A1 | Reception board payment badges | Yellow/red payment states visible on schedule cards |
-| A2 | Patient profile → payments tab | Invoice/deposit status readable |
-| A3 | Open `/workforce-os` | KPI strip, attention queue, surgical intelligence panels load |
-| A4 | Follow attention queue link | Lands on staffing/compliance fix screen (not 404) |
-| A5 | Financial dashboard (if `FI_PAYMENTS_ENABLED`) | KPIs gated message clear when payments off |
-| A6 | Cross-module navigation | Moving reception → calendar → patient does not dead-end |
-| A7 | UAT feedback | Rate workforce OS clarity |
+| C1 | Quick create → **New enquiry** | LeadFlow create form opens |
+| C2 | Create lead | Appears in pipeline |
+| C3 | Quick create → **New task** | CRM workspace → lead Timeline |
+| C4 | Global search | Patient/case first; leads appear after defer |
+| C5 | UAT feedback | Rate LeadFlow clarity |
 
-**Exit:** Admin can trace payment + staffing risks and navigate to fix screens.
+**Exit:** Enquiry captured with task scheduled.
 
 ---
 
-## Friction signals to watch
+## Clinic manager
 
-| Signal | Where logged | Staff trigger |
-|--------|--------------|---------------|
-| `wizard_step_abandoned` | Surgery wizard | Cancel booking before confirm |
-| `wizard_validation_error` | Surgery wizard | Missing requirements / submit error |
-| `alert_opened_unresolved` | Reception board | Click action alert (tracks opens) |
-| `navigation_module_bounce` | Global (UAT provider) | Rapid switches between modules |
-| `staff.uat.feedback` | All key screens | “Was this clear?” rating + comment |
+**Goal:** Day oversight without patient-level drill-down.
 
----
+| Step | Action | Pass criteria |
+|------|--------|---------------|
+| M1 | Sidebar **Operations centre** | Day snapshot loads |
+| M2 | Sidebar **ReceptionOS** | KPIs readable |
+| M3 | Sidebar **Reception board** | Flow lanes match ops snapshot |
+| M4 | Sidebar **Analytics** | Metrics load (if role allows) |
+| M5 | UAT feedback | Rate ops centre clarity |
 
-## Sign-off
-
-| Role | Tester | Date | Result |
-|------|--------|------|--------|
-| Receptionist | | | |
-| Nurse | | | |
-| Doctor | | | |
-| Surgery coordinator | | | |
-| Finance / admin | | | |
-| Engineering (automated) | Harness | | |
+**Exit:** Manager assesses clinic day health in under 5 minutes.

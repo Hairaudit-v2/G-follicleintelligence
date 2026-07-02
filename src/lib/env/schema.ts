@@ -83,6 +83,7 @@ export const serverEnvSchema = z.object({
   OPENAI_PATHOLOGY_EXTRACTION_MODEL: optionalString,
   PATHOLOGY_EMAIL_INGESTION_ENABLED: optionalString,
   PATHOLOGY_EMAIL_WEBHOOK_SECRET: optionalString,
+  PATHOLOGY_EMAIL_INBOUND_DOMAIN: optionalString,
   PATHOLOGY_EMAIL_ALLOWED_SENDERS: optionalString,
   PATHOLOGY_EMAIL_MAX_ATTACHMENT_MB: optionalString,
   AWS_ACCESS_KEY_ID: optionalString,
@@ -109,6 +110,8 @@ export const serverEnvSchema = z.object({
   FI_REMINDER_CRON_SECRET: optionalString,
   FI_HR_SYNC_CRON_SECRET: optionalString,
   FI_PHOTO_PROTOCOL_ALERTS_CRON_SECRET: optionalString,
+  FI_IMAGING_AI_ANALYSIS_CRON_SECRET: optionalString,
+  WORKFORCE_COMPLIANCE_CRON_SECRET: optionalString,
   FINANCIAL_OS_CRON_SECRET: optionalString,
   FI_PAYMENTS_CRON_SECRET: optionalString,
   FI_LEADFLOW_CRON_SECRET: optionalString,
@@ -123,6 +126,9 @@ export const serverEnvSchema = z.object({
   TIMELY_API_BASE_URL: optionalHttpUrl,
   FI_TIMELY_SYNC_CRON_SECRET: optionalString,
   FI_HUBSPOT_WEBHOOK_SECRET: optionalString,
+  HUBSPOT_CLIENT_SECRET: optionalString,
+  FI_HUBSPOT_CLIENT_SECRET: optionalString,
+  HUBSPOT_PRIVATE_APP_TOKEN: optionalString,
   IIOHR_HR_SYNC_SECRET: optionalString,
   IIOHR_FI_COMPETENCY_EXPORT_SECRET: optionalString,
   IIOHR_FI_COMPETENCY_EXPORT_ENABLED: optionalString,
@@ -136,9 +142,14 @@ export const serverEnvSchema = z.object({
   FI_INTERNAL_IMAGING_REQUIRE_HMAC: optionalString,
   FI_INTERNAL_IMAGING_ALLOWED_SOURCES: optionalString,
   IIOHR_HR_PERTH_STAFF_FEED_URL: optionalHttpUrl,
+  IIOHR_HR_STAFF_FEED_URL: optionalHttpUrl,
   IIOHR_HR_PERTH_STAFF_FEED_KEY: optionalString,
   EVOLVED_PERTH_TENANT_ID: optionalString,
   ALLOW_EMPTY_HR_SYNC: optionalString,
+  FI_OS_NEXUS_ENABLED: optionalString,
+  FI_OS_NEXUS_SECRET: optionalString,
+  FI_OS_NEXUS_CREATE_AUTH_USER: optionalString,
+  ALLOW_ENTERPRISE_DEMO_SEED: optionalString,
   STAFF_SYNC_ALERT_EMAIL: optionalString,
   STAFF_SYNC_STALE_WARNING_HOURS: optionalString,
   FI_BASE_URL: optionalHttpUrl,
@@ -173,6 +184,9 @@ export const serverEnvSchema = z.object({
   GOOGLE_CALENDAR_CLIENT_SECRET: optionalString,
   GOOGLE_CALENDAR_REDIRECT_URI: optionalHttpUrl,
   GOOGLE_CALENDAR_OAUTH_STATE_SECRET: optionalString,
+  FI_GOOGLE_CALENDAR_WEBHOOK_BASE_URL: optionalHttpUrl,
+  FI_GOOGLE_CALENDAR_WEBHOOK_SECRET: optionalString,
+  FI_GOOGLE_CALENDAR_SYNC_CRON_DISABLED: optionalString,
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   GOOGLE_OAUTH_REDIRECT_URI: optionalHttpUrl,
@@ -186,9 +200,23 @@ export const serverEnvSchema = z.object({
   FI_E2E_STAFF_ID: optionalString,
   FI_E2E_STAFF_PIN: optionalString,
   FI_E2E_ALLOW_MUTATIONS: optionalString,
+  FI_E2E_PATIENT_PORTAL_EMAIL: optionalString,
+  FI_E2E_PATIENT_PORTAL_PASSWORD: optionalString,
+  FI_E2E_VISUAL_SUMMARY_CASE_ID: optionalString,
+  FI_E2E_VISUAL_SUMMARY_PATIENT_ID: optionalString,
   FI_E2E_PERF_BUDGET_MS: optionalString,
   FI_SMOKE_TENANT_ID: optionalString,
   FI_SMOKE_OTHER_TENANT_ID: optionalString,
+  FI_SMOKE_PATIENT_ID: optionalString,
+  FI_SMOKE_C4_GATE: optionalString,
+  FI_TRIAL_REQUIRE_CONSENT_BEFORE_CAPTURE: optionalString,
+  PATIENT_VISUAL_SUMMARY_SHARE_SECRET: optionalString,
+  RECEPTION_OS_COMMUNICATION_DRY_RUN: optionalString,
+  RECEPTION_OS_EMAIL_SEND_ENABLED: optionalString,
+  RECEPTION_OS_SMS_SEND_ENABLED: optionalString,
+  RECEPTION_OS_DEMO_MODE: optionalString,
+  RECEPTION_OS_DEMO_MASK_AMOUNTS: optionalString,
+  RECEPTION_OS_PILOT_TENANT_ID: optionalString,
   CALENDAR_PERF_TENANT_ID: optionalString,
   CALENDAR_PERF_ANCHOR: optionalString,
   DEBUG_HUBSPOT_AUDIT: optionalString,
@@ -365,6 +393,11 @@ export function collectCrossEnvValidationIssues(env: NodeJS.ProcessEnv = process
     minSecretIssue("FI_HUBSPOT_WEBHOOK_SECRET", g("FI_HUBSPOT_WEBHOOK_SECRET"), 16),
     minSecretIssue("FI_LEADFLOW_CRON_SECRET", g("FI_LEADFLOW_CRON_SECRET"), 16),
     minSecretIssue("FI_GOOGLE_CALENDAR_CRON_SECRET", g("FI_GOOGLE_CALENDAR_CRON_SECRET"), 16),
+    minSecretIssue("FI_IMAGING_AI_ANALYSIS_CRON_SECRET", g("FI_IMAGING_AI_ANALYSIS_CRON_SECRET"), 16),
+    minSecretIssue("WORKFORCE_COMPLIANCE_CRON_SECRET", g("WORKFORCE_COMPLIANCE_CRON_SECRET"), 16),
+    minSecretIssue("FI_GOOGLE_CALENDAR_WEBHOOK_SECRET", g("FI_GOOGLE_CALENDAR_WEBHOOK_SECRET"), 16),
+    minSecretIssue("FI_OS_NEXUS_SECRET", g("FI_OS_NEXUS_SECRET"), 16),
+    minSecretIssue("PATIENT_VISUAL_SUMMARY_SHARE_SECRET", g("PATIENT_VISUAL_SUMMARY_SHARE_SECRET"), 16),
     minSecretIssue("IIOHR_HR_SYNC_SECRET", g("IIOHR_HR_SYNC_SECRET"), 16),
     minSecretIssue("IIOHR_FI_COMPETENCY_EXPORT_SECRET", g("IIOHR_FI_COMPETENCY_EXPORT_SECRET"), 16),
     minSecretIssue("FI_EXTERNAL_CONNECTOR_MASTER_KEY", g("FI_EXTERNAL_CONNECTOR_MASTER_KEY"), 16),
@@ -387,6 +420,39 @@ export function collectCrossEnvValidationIssues(env: NodeJS.ProcessEnv = process
     issues.push({
       variable: "FI_ADMIN_API_KEY",
       message: "Must be at least 20 characters when set",
+    });
+  }
+
+  const machineIngestMaster = g("FI_MACHINE_INGEST_MASTER_KEY");
+  if (isProd && isPresent(machineIngestMaster) && machineIngestMaster!.trim().length < 32) {
+    issues.push({
+      variable: "FI_MACHINE_INGEST_MASTER_KEY",
+      message: "Must be at least 32 characters in production when set",
+    });
+  }
+
+  if (isProd && isAffirmative(g("FI_OS_NEXUS_ENABLED"))) {
+    if (!isPresent(g("FI_OS_NEXUS_SECRET")) || g("FI_OS_NEXUS_SECRET")!.trim().length < 16) {
+      issues.push({
+        variable: "FI_OS_NEXUS_SECRET",
+        message: "Required (≥16 characters) when FI_OS_NEXUS_ENABLED is on in production",
+      });
+    }
+  }
+
+  if (isProd && isAffirmative(g("PATHOLOGY_EMAIL_INGESTION_ENABLED"))) {
+    if (!isPresent(g("PATHOLOGY_EMAIL_WEBHOOK_SECRET"))) {
+      issues.push({
+        variable: "PATHOLOGY_EMAIL_WEBHOOK_SECRET",
+        message: "Required when PATHOLOGY_EMAIL_INGESTION_ENABLED is on in production",
+      });
+    }
+  }
+
+  if (isProd && isAffirmative(g("ALLOW_ENTERPRISE_DEMO_SEED"))) {
+    issues.push({
+      variable: "ALLOW_ENTERPRISE_DEMO_SEED",
+      message: "Must not be enabled in production unless intentional demo seeding",
     });
   }
 
