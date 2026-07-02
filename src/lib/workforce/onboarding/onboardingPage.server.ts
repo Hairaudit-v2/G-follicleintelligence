@@ -45,19 +45,28 @@ function mapChecklist(raw: Record<string, unknown> | null): OnboardingChecklistS
   };
 }
 
-async function loadClinics(tenantId: string): Promise<OnboardingClinicOption[]> {
-  const { data, error } = await supabaseAdmin()
+/** Production fi_clinics columns used by Onboarding Centre (display_name only — no name column). */
+export const ONBOARDING_FI_CLINICS_SELECT = "id, display_name";
+
+export function mapOnboardingClinicOption(row: {
+  id: string;
+  display_name?: string | null;
+}): OnboardingClinicOption {
+  const label = String(row.display_name ?? "").trim() || "Clinic";
+  return { id: String(row.id), name: label };
+}
+
+async function loadClinics(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<OnboardingClinicOption[]> {
+  const { data, error } = await (client ?? supabaseAdmin())
     .from("fi_clinics")
-    .select("id, display_name, name")
+    .select(ONBOARDING_FI_CLINICS_SELECT)
     .eq("tenant_id", tenantId)
     .order("display_name", { ascending: true });
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => {
-    const row = r as { id: string; display_name?: string | null; name?: string | null };
-    const label =
-      String(row.display_name ?? "").trim() || String(row.name ?? "").trim() || "Clinic";
-    return { id: String(row.id), name: label };
-  });
+  return (data ?? []).map((r) => mapOnboardingClinicOption(r as { id: string; display_name?: string | null }));
 }
 
 function buildRoleOptions(): { value: string; label: string }[] {
@@ -67,9 +76,12 @@ function buildRoleOptions(): { value: string; label: string }[] {
   }));
 }
 
-export async function loadOnboardingPageModel(tenantId: string): Promise<OnboardingPageModel> {
+export async function loadOnboardingPageModel(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<OnboardingPageModel> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = supabaseAdmin();
+  const supabase = client ?? supabaseAdmin();
 
   const [membersRes, clinics] = await Promise.all([
     supabase
@@ -82,7 +94,7 @@ export async function loadOnboardingPageModel(tenantId: string): Promise<Onboard
       .is("merged_into", null)
       .in("employment_status", ["pending_onboarding", "inactive"])
       .order("created_at", { ascending: false }),
-    loadClinics(tid),
+    loadClinics(tid, supabase),
   ]);
   if (membersRes.error) throw new Error(membersRes.error.message);
 
