@@ -48,7 +48,12 @@ export function CalendarOsBookingCard({
   return (
     <button
       type="button"
-      onClick={onSelect}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect?.();
+      }}
+      data-testid="calendar-booking-card"
+      data-booking-id={model.bookingId}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(

@@ -499,6 +499,8 @@ function AppointmentCardInner({
           : undefined
       }
       style={dragStyle}
+      data-testid={layout ? "calendar-booking-card" : undefined}
+      data-booking-id={layout ? appointment.id : undefined}
       className={cn(
         "group relative overflow-hidden rounded-xl text-left ring-1 ring-inset ring-white/[0.04]",
         "border border-white/[0.08] bg-white/95 shadow-sm backdrop-blur-sm",

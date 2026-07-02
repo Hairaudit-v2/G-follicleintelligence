@@ -26,7 +26,7 @@ export function CalendarOsEmptyContext({
     return (
       <div
         className={cn(
-          "flex h-full min-h-[20px] items-center justify-center rounded border border-dashed border-white/[0.03] text-[8px] text-slate-700",
+          "pointer-events-none flex h-full min-h-[20px] items-center justify-center rounded border border-dashed border-white/[0.03] text-[8px] text-slate-700",
           className
         )}
         aria-hidden

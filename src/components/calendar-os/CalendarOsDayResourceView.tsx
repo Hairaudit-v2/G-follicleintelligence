@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
@@ -21,6 +21,7 @@ import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import { resolveCalendarEmptySlotClick } from "@/src/lib/calendar/calendarEmptySlotClick";
 import { formatWallClockMinutesFromMidnight } from "@/lib/calendar/time-slots";
 import {
   CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR,
@@ -170,6 +171,22 @@ export function CalendarOsDayResourceView({
 
   const bookingById = useMemo(() => new Map(bookings.map((b) => [b.id, b])), [bookings]);
 
+  const handleEmptySlotClick = (e: MouseEvent<HTMLButtonElement>, rowId: string) => {
+    if (!onEmptySlotClick) return;
+    if (e.button !== 0) return;
+    const slot = resolveCalendarEmptySlotClick({
+      dayKey: lane.dayKey,
+      columnId: rowId,
+      clientY: e.clientY,
+      targetRect: e.currentTarget.getBoundingClientRect(),
+      gridConfig,
+      pxPerMinute: pxPerMin,
+    });
+    if (!slot) return;
+    e.stopPropagation();
+    onEmptySlotClick(slot);
+  };
+
   const gridHours = gridConfig.dayEndHourUtc - gridConfig.dayStartHourUtc;
   const pxPerHour = tokens.dayPxPerHour;
   const bodyH = calendarOsDayBodyHeightPx(density, gridHours);
@@ -238,7 +255,13 @@ export function CalendarOsDayResourceView({
             ))}
           </div>
 
-          <div className="relative grid" style={{ gridTemplateColumns: gridTemplate }}>
+          <div
+            className="relative grid"
+            style={{ gridTemplateColumns: gridTemplate }}
+            data-testid="calendar-day-grid"
+            data-grid-start-hour={gridConfig.dayStartHourUtc}
+            data-grid-end-hour={gridConfig.dayEndHourUtc}
+          >
             <div
               className="sticky left-0 z-[3] border-r border-white/[0.032] bg-[#060d18]"
               style={{ height: bodyH }}
@@ -268,25 +291,11 @@ export function CalendarOsDayResourceView({
                     row.kind === "unassigned" && "bg-amber-950/15"
                   )}
                   style={{ height: bodyH }}
-                  onClick={(e) => {
-                    if (!onEmptySlotClick) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const y = e.clientY - rect.top;
-                    const gridStart = gridConfig.dayStartHourUtc * 60;
-                    const minutes = Math.floor(y / pxPerMin) + gridStart;
-                    const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
-                    const mm = String(minutes % 60).padStart(2, "0");
-                    onEmptySlotClick({
-                      dayKey: lane.dayKey,
-                      columnId: row.id,
-                      localStart: `${lane.dayKey}T${hh}:${mm}`,
-                    });
-                  }}
                 >
                   {hours.map((h) => (
                     <div
                       key={h}
-                      className="absolute left-0 right-0 border-t border-white/[0.016]"
+                      className="pointer-events-none absolute left-0 right-0 border-t border-white/[0.016]"
                       style={{
                         top: (h - gridConfig.dayStartHourUtc) * pxPerHour,
                       }}
@@ -342,33 +351,51 @@ export function CalendarOsDayResourceView({
                       );
                     })}
 
-                  {rowPlacements.map((placement) => {
-                    const model = cardModels[placement.bookingId];
-                    const booking = bookingById.get(placement.bookingId);
-                    if (!model || !booking) return null;
-                    const topPx =
-                      (placement.topPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour;
-                    const heightPx = Math.max(
-                      (placement.heightPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour,
-                      14
-                    );
-                    return (
-                      <div
-                        key={placement.bookingId}
-                        className="absolute left-0.5 right-0.5 z-[1] overflow-hidden"
-                        style={{ top: topPx, height: heightPx }}
-                      >
-                        <CalendarOsBookingCard
-                          model={model}
-                          compact
-                          ultraCompact={tokens.bookingUltraCompact}
-                          showHoverDetail={tokens.showHoverDetail}
-                          highlighted={highlightedBookingId === placement.bookingId}
-                          onSelect={() => onSelectBooking?.(booking)}
-                        />
-                      </div>
-                    );
-                  })}
+                  {onEmptySlotClick ? (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      data-testid="calendar-empty-slot-layer"
+                      data-calendar-column-id={row.id}
+                      data-calendar-resource-label={row.label}
+                      aria-label={`Create booking with ${row.label} at selected time`}
+                      className="absolute inset-0 z-[1] cursor-cell bg-transparent pointer-events-auto"
+                      style={{ height: bodyH }}
+                      onClick={(e) => handleEmptySlotClick(e, row.id)}
+                    />
+                  ) : null}
+
+                  <div className="relative z-[2] pointer-events-none" style={{ height: bodyH }}>
+                    {rowPlacements.map((placement) => {
+                      const model = cardModels[placement.bookingId];
+                      const booking = bookingById.get(placement.bookingId);
+                      if (!model || !booking) return null;
+                      const topPx =
+                        (placement.topPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour;
+                      const heightPx = Math.max(
+                        (placement.heightPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour,
+                        14
+                      );
+                      return (
+                        <div
+                          key={placement.bookingId}
+                          className="pointer-events-auto absolute left-0.5 right-0.5 overflow-hidden"
+                          style={{ top: topPx, height: heightPx }}
+                          data-testid="calendar-booking-card"
+                          data-booking-id={placement.bookingId}
+                        >
+                          <CalendarOsBookingCard
+                            model={model}
+                            compact
+                            ultraCompact={tokens.bookingUltraCompact}
+                            showHoverDetail={tokens.showHoverDetail}
+                            highlighted={highlightedBookingId === placement.bookingId}
+                            onSelect={() => onSelectBooking?.(booking)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}

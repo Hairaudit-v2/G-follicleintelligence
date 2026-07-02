@@ -338,6 +338,7 @@ export function BookingCalendarDrawer({
         }
         role="dialog"
         aria-label="Booking details"
+        data-testid="calendar-booking-drawer"
         onClick={(e) => e.stopPropagation()}
       >
         {os ? (

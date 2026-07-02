@@ -11,10 +11,16 @@ export {
 const FI_OS_MAIN_PAD =
   "relative min-h-0 flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5";
 
+/** Scrollable primary nav list — flex child must use min-h-0 for overflow-y-auto to engage. */
+export const FI_OS_SIDEBAR_NAV_SCROLL =
+  "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain px-1.5 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] [overflow-scrolling:touch]";
+
 /** Tailwind class bundles (static strings for build). */
 export const fiOsChromeClasses = {
-  shellRoot: "flex min-h-[100dvh] w-full flex-col bg-[#081020] text-[#F8FAFC]",
-  shellBody: "flex min-h-[100dvh] w-full min-h-0 flex-1",
+  /** Viewport-locked shell — only `<main>` and sidebar nav scroll vertically. */
+  shellRoot:
+    "flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#081020] text-[#F8FAFC]",
+  shellBody: "flex min-h-0 w-full flex-1 overflow-hidden",
   mainColumn: "flex min-h-0 min-w-0 flex-1 flex-col",
   /** Command bar — tighter vertical rhythm than marketing pages. */
   topBar:
@@ -29,10 +35,12 @@ export const fiOsChromeClasses = {
   tenantMainSurfaceInner: "relative px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
   /** Desktop primary rail (decorative glow applied inline in `FiOsSidebar`) */
   sidebarRail:
-    "relative z-20 hidden w-[260px] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",
+    "relative z-20 hidden min-h-0 w-[260px] shrink-0 flex-col self-stretch overflow-hidden border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",
+  /** Scrollable nav list inside rail / drawer (`FiOsModuleNav`). */
+  sidebarNavScroll: FI_OS_SIDEBAR_NAV_SCROLL,
   /** D2 minimal nav rail — icon-first primary destinations. */
   minimalNavRail:
-    "relative z-20 hidden w-[4.75rem] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 backdrop-blur-xl lg:flex",
+    "relative z-20 hidden min-h-0 w-[4.75rem] shrink-0 flex-col self-stretch overflow-hidden border-r border-white/[0.08] bg-[#060d18]/96 backdrop-blur-xl lg:flex",
   /** D2 mobile bottom action bar (replaces hamburger drawer). */
   mobileBottomNav:
     "fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around gap-0.5 border-t border-white/[0.08] bg-[#060d18]/96 px-1 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden",
@@ -40,7 +48,7 @@ export const fiOsChromeClasses = {
   mainColumnMobileBottomNavPad: "pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0",
   /** Mobile drawer panel */
   sidebarDrawer:
-    "relative flex h-full w-[min(88vw,300px)] flex-col border-r border-white/[0.1] bg-[#060d18] shadow-2xl",
+    "relative flex h-full max-h-[100dvh] min-h-0 w-[min(88vw,300px)] flex-col overflow-hidden border-r border-white/[0.1] bg-[#060d18] shadow-2xl",
   /** Login-adjacent glass card (matches login form panel feel) */
   glassCard: "rounded-xl border border-cyan-500/10 bg-white/[0.03] backdrop-blur-md",
   /** OS section eyebrow (compact modules, control centre panels). */

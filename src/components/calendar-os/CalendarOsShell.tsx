@@ -92,7 +92,10 @@ export function CalendarOsShell({
   const dayLane: CalendarDayLane | undefined = data.lanes[0];
 
   return (
-    <div className="calendar-os-v2-root relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-[#050a12]">
+    <div
+      className="calendar-os-v2-root relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-[#050a12]"
+      data-testid="calendar-os-v2-shell"
+    >
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-white/[0.06] bg-[#060d18]/95 px-2 py-1">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
           <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
@@ -143,9 +146,11 @@ export function CalendarOsShell({
               rooms={data.rooms}
               staffIdByUserId={staffIdByUserId}
               calendarTimezone={data.calendarTimezone}
+              gridConfig={data.gridConfig}
               density={density}
               onSelectBooking={onSelectBooking}
               highlightedBookingId={highlightedBookingId}
+              onEmptySlotClick={onEmptySlotClick}
             />
           )}
         </div>

@@ -106,7 +106,7 @@ export function FiOsMinimalNavRail({
         }}
         aria-hidden
       />
-      <nav className="relative flex min-h-0 flex-1 flex-col gap-1 px-2 py-3">
+      <nav className="relative flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-y-contain px-2 py-3 [overflow-scrolling:touch]">
         {items.map((item) => (
           <MinimalNavButton
             key={item.id}

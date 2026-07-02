@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { AppointmentCardFromBooking } from "@/components/calendar/AppointmentCard";
 import { BusinessTimeSlotGrid } from "@/components/calendar/BusinessTimeSlotGrid";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
+import { resolveCalendarEmptySlotClick } from "@/src/lib/calendar/calendarEmptySlotClick";
 import { calendarGridBodyHeightPx as timeSlotsGridHeightPx } from "@/lib/calendar/time-slots";
 import type { CalendarViewportRange } from "@/lib/calendar/virtualizeAppointments";
 import {
@@ -16,11 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import {
   calendarDateStringFromInstant,
-  clinicLocalSlotToUtcIso,
-  logFiCalendarTimezoneDebug,
   minutesFromLaneStart as minutesFromLaneStartTz,
   parseIsoUtcMs,
-  toDatetimeLocalValueInTimezone,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
@@ -427,22 +424,14 @@ export function ProviderColumn({
   });
 
   function slotFromClientY(clientY: number, target: HTMLButtonElement) {
-    const rect = target.getBoundingClientRect();
-    const y = clientY - rect.top;
-    const ppm = calendarPxPerMinute();
-    const rawMin = gridConfig.dayStartHourUtc * 60 + y / ppm;
-    const snapped = snapCalendarMinutes(rawMin, gridConfig);
-    const iso = clinicLocalSlotToUtcIso(dayKey, snapped, gridConfig.timeZone);
-    if (!iso) return null;
-    const localStart = toDatetimeLocalValueInTimezone(iso, gridConfig.timeZone);
-    logFiCalendarTimezoneDebug("empty-slot-click", {
+    return resolveCalendarEmptySlotClick({
       dayKey,
-      snappedMinutesFromLocalMidnight: snapped,
-      clinicTimezone: gridConfig.timeZone,
-      slotUtcIso: iso,
-      datetimeLocalValue: localStart,
+      columnId: id,
+      clientY,
+      targetRect: target.getBoundingClientRect(),
+      gridConfig,
+      pxPerMinute: calendarPxPerMinute(),
     });
-    return { localStart };
   }
 
   const handleEmptySlotClick = (e: MouseEvent<HTMLButtonElement>) => {
@@ -450,7 +439,7 @@ export function ProviderColumn({
     if (e.button !== 0) return;
     const slot = slotFromClientY(e.clientY, e.currentTarget);
     if (!slot) return;
-    onEmptySlotClick({ dayKey, columnId: id, localStart: slot.localStart });
+    onEmptySlotClick(slot);
   };
 
   const handleEmptySlotContextMenu = (e: MouseEvent<HTMLButtonElement>) => {
@@ -459,9 +448,7 @@ export function ProviderColumn({
     const slot = slotFromClientY(e.clientY, e.currentTarget);
     if (!slot) return;
     onEmptySlotContextMenu({
-      dayKey,
-      columnId: id,
-      localStart: slot.localStart,
+      ...slot,
       clientX: e.clientX,
       clientY: e.clientY,
     });
@@ -530,8 +517,11 @@ export function ProviderColumn({
           <button
             type="button"
             tabIndex={-1}
-            aria-label={`Book appointment in ${name} column at selected time`}
-            className="absolute inset-0 z-[1] cursor-cell bg-transparent"
+            data-testid="calendar-empty-slot-layer"
+            data-calendar-column-id={id}
+            data-calendar-resource-label={name}
+            aria-label={`Create booking with ${name} at selected time`}
+            className="absolute inset-0 z-[1] cursor-cell bg-transparent pointer-events-auto"
             style={{ height: bodyHeightPx }}
             onClick={handleEmptySlotClick}
             onContextMenu={handleEmptySlotContextMenu}

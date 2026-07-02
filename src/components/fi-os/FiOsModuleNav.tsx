@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
+import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
 function iconFor(id: string) {
   switch (id) {
@@ -72,7 +73,7 @@ function RowLink(props: {
   const Icon = iconFor(item.id);
   const active = !item.disabled && activeId === item.id;
   const row = cn(
-    "group relative flex items-center gap-2.5 rounded-lg border px-2.5 text-[13px] font-medium transition duration-150",
+    "group relative flex shrink-0 items-center gap-2.5 rounded-lg border px-2.5 text-[13px] font-medium transition duration-150",
     dense ? "py-1.5" : "py-2",
     item.disabled
       ? "cursor-not-allowed border-transparent text-slate-600"
@@ -108,7 +109,7 @@ function RowLink(props: {
     return (
       <span key={item.id} className={row} title={item.hint}>
         <Icon className="h-[1.125rem] w-[1.125rem] shrink-0 opacity-50" aria-hidden />
-        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+        <span className="min-w-0 flex-1 leading-snug break-words">{item.label}</span>
       </span>
     );
   }
@@ -129,7 +130,7 @@ function RowLink(props: {
           )}
           aria-hidden
         />
-        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+        <span className="min-w-0 flex-1 leading-snug break-words">{item.label}</span>
       </Link>
       {sub}
     </div>
@@ -154,7 +155,7 @@ export function FiOsModuleNav({
   const path = pathname ?? "";
   return (
     <nav
-      className={cn("flex flex-1 flex-col gap-3 px-1.5 py-1.5", className)}
+      className={cn(fiOsChromeClasses.sidebarNavScroll, className)}
       aria-label="Clinic navigation"
     >
       {sections.map((section) => (

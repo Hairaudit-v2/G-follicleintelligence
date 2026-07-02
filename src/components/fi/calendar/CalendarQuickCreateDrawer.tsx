@@ -953,6 +953,7 @@ export function CalendarQuickCreateDrawer({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        data-testid="calendar-quick-create-drawer"
         className={cn(
           drawerSurfaceClass,
           "relative m-0 flex h-[100dvh] w-full max-w-full flex-col sm:m-4 sm:h-[min(100dvh-2rem,900px)] sm:max-w-md sm:rounded-2xl"
@@ -1142,6 +1143,7 @@ export function CalendarQuickCreateDrawer({
                   <button
                     key={t.id}
                     type="button"
+                    data-testid={`calendar-quick-create-template-${t.id}`}
                     onClick={() => onTemplateChange(t.id)}
                     className={cn(
                       "rounded-xl border px-3 py-3 text-left text-sm font-semibold transition",
@@ -1191,7 +1193,11 @@ export function CalendarQuickCreateDrawer({
               ) : (
                 <p className="mt-1 text-xs text-slate-500">{tzLabel}</p>
               )}
-              <p className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums" role="status">
+              <p
+                className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums"
+                role="status"
+                data-testid="calendar-quick-create-time-summary"
+              >
                 {timeSummary}
               </p>
               <label
@@ -1203,6 +1209,7 @@ export function CalendarQuickCreateDrawer({
               >
                 Start time
                 <select
+                  data-testid="calendar-quick-create-start-time"
                   className={cn(inputClass, "text-base font-semibold tabular-nums")}
                   value={(() => {
                     const hm = normalizeQuickBookDatetimeLocal(startLocal).slice(11, 16);
@@ -1301,6 +1308,7 @@ export function CalendarQuickCreateDrawer({
                   isLightFiOsDrawer ? "text-slate-300" : "text-slate-300",
                   os.meta
                 )}
+                data-testid="calendar-quick-create-staff-field"
               >
                 Provider
                 <StaffClinicalSelect
@@ -1310,6 +1318,7 @@ export function CalendarQuickCreateDrawer({
                   onChange={setAssignedStaffId}
                   emptyLabel="Unassigned"
                   className={inputClass}
+                  id="calendar-quick-create-staff-select"
                 />
                 {legacyOwnerLabel && !assignedStaffId.trim() ? (
                   <p className="mt-1 text-[11px] text-slate-500">

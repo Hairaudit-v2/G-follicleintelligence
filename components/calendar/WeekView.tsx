@@ -654,6 +654,9 @@ function WeekViewInner({
 
       <div
         ref={gridScrollRef}
+        data-testid="calendar-v1-grid"
+        data-grid-start-hour={gridConfig.dayStartHourUtc}
+        data-grid-end-hour={gridConfig.dayEndHourUtc}
         className="flex min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain"
       >
         <div className="flex min-h-0 min-w-0 w-full flex-1" style={{ height: bodyHeightPx }}>

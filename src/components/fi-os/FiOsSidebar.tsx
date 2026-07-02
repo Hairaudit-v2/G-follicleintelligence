@@ -42,7 +42,7 @@ export function FiOsSidebar({
       <Link
         href="/fi-admin"
         className={cn(
-          "mb-1 flex items-center gap-3 rounded-xl border border-white/[0.08] px-3 py-2.5 transition",
+          "mb-1 flex shrink-0 items-center gap-3 rounded-xl border border-white/[0.08] px-3 py-2.5 transition",
           "hover:border-white/[0.12] hover:bg-white/[0.05]",
           fiOsChromeClasses.glassCard
         )}
@@ -58,7 +58,7 @@ export function FiOsSidebar({
         </div>
       </Link>
     ) : (
-      <div className="flex items-center justify-between border-b border-white/[0.08] px-3 py-3">
+      <div className="flex shrink-0 items-center justify-between border-b border-white/[0.08] px-3 py-3">
         <span className="text-sm font-semibold text-slate-50">{drawerTitle}</span>
         <button
           type="button"
@@ -73,7 +73,7 @@ export function FiOsSidebar({
 
   const logoStrip =
     logoSrc && variant === "rail" ? (
-      <div className="mt-2 flex justify-center rounded-xl border border-white/[0.06] bg-black/20 py-2">
+      <div className="mt-2 flex shrink-0 justify-center rounded-xl border border-white/[0.06] bg-black/20 py-2">
         <BrandLogoImage
           logoUrl={effective.logo_url}
           alt={brandName}
@@ -109,7 +109,7 @@ export function FiOsSidebar({
         }}
         aria-hidden
       />
-      <div className="relative flex min-h-0 flex-1 flex-col px-2.5">
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden px-2.5">
         {brandBlock}
         {logoStrip}
         <FiOsModuleNav
