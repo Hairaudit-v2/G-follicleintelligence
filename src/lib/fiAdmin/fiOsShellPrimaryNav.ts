@@ -353,6 +353,16 @@ export function resolveFiOsPrimarySidebarItems(
       hint: blocks.patients
         ? "Requires bookings operator access for this tenant."
         : "Pathology requests and results are opened from patient records.",
+      subItems: blocks.patients
+        ? undefined
+        : [
+            {
+              id: "pathology-inbox",
+              featureKey: "pathology",
+              label: "Results inbox",
+              href: hrefFor(b, "pathology/inbox"),
+            },
+          ],
     },
     {
       id: "patient-twin",
