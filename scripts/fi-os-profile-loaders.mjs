@@ -107,7 +107,7 @@ async function timed(label, fn, opts = {}) {
   const wallMs = Math.round(performance.now() - wallT0);
   const snap = peekLastFiPerfSnapshot();
   const fiPerf =
-    snap && (!fiPerfSurface || snap.surface === fiPerfSurface) ? snap : null;
+    fiPerfSurface && snap?.surface === fiPerfSurface ? snap : null;
   const spanLoaderMs =
     fiPerf && loaderSpanLabels ? sumSpanMs(fiPerf, loaderSpanLabels) : fiPerf?.totalMs ?? null;
   const bootstrapMs = fiPerf ? spanMs(fiPerf, "tenant.bootstrap") : null;
