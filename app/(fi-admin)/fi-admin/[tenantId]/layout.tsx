@@ -37,6 +37,8 @@ import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEn
 import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
 import { StaffUatLayoutMount } from "@/src/components/fi-admin/staff-uat/StaffUatLayoutMount";
 import { isTodaySurfaceEnabledForTenant } from "@/src/lib/fiOs/todaySurfaceRollout.server";
+import { isWorkspaceShellEnabledForTenant } from "@/src/lib/fiOs/workspaceShell/workspaceShellRollout.server";
+import { WorkspaceShellMount } from "@/src/components/fi-os/workspace/WorkspaceShellMount";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
 import {
   canAccessTenantReminderSettings,
@@ -83,6 +85,7 @@ export default async function TenantAdminLayout({
   const normalizedBase = base.replace(/\/+$/, "") || base;
   const isTenantHome = normalizedPath === normalizedBase;
   const todaySurfaceActive = isTenantHome && isTodaySurfaceEnabledForTenant(tenantId);
+  const workspaceShellEnabled = isWorkspaceShellEnabledForTenant(tenantId);
   const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
 
   if (isCommandCentrePresentation) {
@@ -241,7 +244,11 @@ export default async function TenantAdminLayout({
           role={staffUatRole}
           enabled={staffUatModeEnabled}
         >
-          {children}
+          {workspaceShellEnabled ? (
+            <WorkspaceShellMount tenantId={tenantId}>{children}</WorkspaceShellMount>
+          ) : (
+            children
+          )}
         </StaffUatLayoutMount>
       </div>
     </div>

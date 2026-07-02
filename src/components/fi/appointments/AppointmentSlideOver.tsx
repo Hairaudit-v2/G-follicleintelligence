@@ -59,6 +59,7 @@ import {
   type AppointmentCompletionLeadOpts,
 } from "@/src/lib/crm/appointmentCompletionLeadClient";
 import { humanizeStaffErrorMessage } from "@/src/lib/fiOs/staffUxPresentation";
+import { useWorkspaceShellOptional } from "@/src/components/fi-os/workspace/WorkspaceShellContext";
 import {
   AppointmentActionsSection,
   AppointmentAnchorFlowsSection,
@@ -147,6 +148,7 @@ export function AppointmentSlideOverProvider({
   /** Procedure catalog for create flow (durations, prices). */
   services?: FiServiceRow[];
 }) {
+  const workspaceShell = useWorkspaceShellOptional();
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
   const [createPrefill, setCreatePrefill] = useState<AppointmentCreatePrefill | null>(null);
 
@@ -154,6 +156,19 @@ export function AppointmentSlideOverProvider({
     setCreatePrefill(null);
     setAppointmentId(id.trim());
   }, []);
+
+  const bridgedOpenAppointment = useCallback(
+    (id: string) => {
+      if (workspaceShell) {
+        setCreatePrefill(null);
+        setAppointmentId(null);
+        workspaceShell.openWorkspace({ kind: "appointment", id: id.trim() });
+        return;
+      }
+      openAppointment(id);
+    },
+    [workspaceShell, openAppointment]
+  );
 
   const openCreateAppointment = useCallback(
     (prefill?: Partial<AppointmentCreatePrefill>) => {
@@ -177,9 +192,16 @@ export function AppointmentSlideOverProvider({
   );
 
   const close = useCallback(() => {
+    if (workspaceShell) {
+      workspaceShell.closeAll();
+    }
     setAppointmentId(null);
     setCreatePrefill(null);
-  }, []);
+  }, [workspaceShell]);
+
+  const resolvedAppointmentId = workspaceShell
+    ? (workspaceShell.activeOfKind("appointment")?.id ?? appointmentId)
+    : appointmentId;
 
   const value = useMemo(
     () => ({
@@ -187,9 +209,9 @@ export function AppointmentSlideOverProvider({
       operatorFiUserId,
       userRole,
       canUseClinicFeatures,
-      activeAppointmentId: appointmentId,
+      activeAppointmentId: resolvedAppointmentId,
       createPrefill,
-      openAppointment,
+      openAppointment: bridgedOpenAppointment,
       openCreateAppointment,
       close,
     }),
@@ -198,19 +220,21 @@ export function AppointmentSlideOverProvider({
       operatorFiUserId,
       userRole,
       canUseClinicFeatures,
-      appointmentId,
+      resolvedAppointmentId,
       createPrefill,
-      openAppointment,
+      bridgedOpenAppointment,
       openCreateAppointment,
       close,
     ]
   );
 
-  const shellOpen = appointmentId != null || createPrefill != null;
+  const shellOpen =
+    createPrefill != null || (!workspaceShell && appointmentId != null);
 
   return (
     <AppointmentSlideOverContext.Provider value={value}>
       {children}
+      {shellOpen ? (
       <AppointmentSlideOverShell
         tenantId={tenantId}
         appointmentId={appointmentId}
@@ -227,9 +251,14 @@ export function AppointmentSlideOverProvider({
         services={services}
         onCreated={(id) => {
           setCreatePrefill(null);
+          if (workspaceShell) {
+            workspaceShell.openWorkspace({ kind: "appointment", id });
+            return;
+          }
           setAppointmentId(id);
         }}
       />
+      ) : null}
     </AppointmentSlideOverContext.Provider>
   );
 }

@@ -19,6 +19,7 @@ import { PatientConsultationsCard } from "./shared/PatientConsultationsCard";
 import { PatientPersonLeadHistoryCard } from "./shared/PatientPersonLeadHistoryCard";
 import { PatientStatusBadge } from "./PatientStatusBadge";
 import { PatientPhotoCaptureActions } from "./PatientPhotoCaptureActions";
+import { useWorkspaceShellOptional } from "@/src/components/fi-os/workspace/WorkspaceShellContext";
 
 export type PatientShellOperatorContext = {
   tenantId: string;
@@ -62,9 +63,33 @@ export function PatientSlideOverProvider({
   canCapturePatientPhotos?: boolean;
   children: ReactNode;
 }) {
+  const workspaceShell = useWorkspaceShellOptional();
   const [patientId, setPatientId] = useState<string | null>(null);
   const openPatient = useCallback((id: string) => setPatientId(id.trim()), []);
   const close = useCallback(() => setPatientId(null), []);
+
+  const bridgedOpenPatient = useCallback(
+    (id: string) => {
+      if (workspaceShell) {
+        workspaceShell.openWorkspace({ kind: "patient", id: id.trim() });
+        return;
+      }
+      openPatient(id);
+    },
+    [workspaceShell, openPatient]
+  );
+
+  const bridgedClose = useCallback(() => {
+    if (workspaceShell) {
+      workspaceShell.closeAll();
+      return;
+    }
+    close();
+  }, [workspaceShell, close]);
+
+  const activePatientId = workspaceShell
+    ? (workspaceShell.activeOfKind("patient")?.id ?? null)
+    : patientId;
 
   const value = useMemo(
     () => ({
@@ -73,9 +98,9 @@ export function PatientSlideOverProvider({
       userRole,
       canUseClinicFeatures,
       canCapturePatientPhotos,
-      activePatientId: patientId,
-      openPatient,
-      close,
+      activePatientId,
+      openPatient: bridgedOpenPatient,
+      close: bridgedClose,
     }),
     [
       tenantId,
@@ -83,11 +108,17 @@ export function PatientSlideOverProvider({
       userRole,
       canUseClinicFeatures,
       canCapturePatientPhotos,
-      patientId,
-      openPatient,
-      close,
+      activePatientId,
+      bridgedOpenPatient,
+      bridgedClose,
     ]
   );
+
+  if (workspaceShell) {
+    return (
+      <PatientSlideOverContext.Provider value={value}>{children}</PatientSlideOverContext.Provider>
+    );
+  }
 
   return (
     <PatientSlideOverContext.Provider value={value}>

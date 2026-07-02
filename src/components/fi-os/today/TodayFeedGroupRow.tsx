@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import type { TodayFeedItem } from "@/src/lib/fiOs/todayFeedDerive";
+import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 
 const severityDot: Record<TodayFeedItem["severity"], string> = {
   critical: "bg-red-400",
@@ -42,7 +42,7 @@ export function TodayFeedGroupRow({ item }: { item: TodayFeedItem }) {
         <ul className="ml-5 mt-3 space-y-1 border-l border-white/[0.06] pl-4">
           {members.map((member) => (
             <li key={member.id}>
-              <Link
+              <WorkspaceFeedLink
                 href={member.href}
                 className="block rounded-md py-1.5 text-sm text-slate-300 transition hover:text-slate-100"
               >
@@ -56,7 +56,7 @@ export function TodayFeedGroupRow({ item }: { item: TodayFeedItem }) {
                 ) : (
                   member.actionLabel
                 )}
-              </Link>
+              </WorkspaceFeedLink>
             </li>
           ))}
         </ul>
