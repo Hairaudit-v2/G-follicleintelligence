@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import { offboardStaffMemberAction } from "@/src/lib/actions/workforce-phase-1c-sprint-2-actions";
+import { OFFBOARDING_DEPARTURE_TYPES } from "@/src/lib/workforce-os/staffLifecyclePresentation";
+
+type OffboardingDepartureType = (typeof OFFBOARDING_DEPARTURE_TYPES)[number]["value"];
 
 export type OffboardingStaffRow = {
   id: string;
@@ -34,6 +37,7 @@ export function OffboardingCentreClient({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [exitReason, setExitReason] = useState<Record<string, string>>({});
+  const [departureType, setDepartureType] = useState<Record<string, OffboardingDepartureType>>({});
 
   const onOffboard = useCallback(
     (staffId: string) => {
@@ -45,7 +49,12 @@ export function OffboardingCentreClient({
       setError(null);
       setMessage(null);
       startTransition(async () => {
-        const result = await offboardStaffMemberAction(tenantId, staffId, reason);
+        const result = await offboardStaffMemberAction(
+          tenantId,
+          staffId,
+          reason,
+          departureType[staffId] ?? "terminated"
+        );
         if (!result.ok) {
           setError(result.error);
           return;
@@ -54,7 +63,7 @@ export function OffboardingCentreClient({
         router.refresh();
       });
     },
-    [exitReason, router, tenantId]
+    [departureType, exitReason, router, tenantId]
   );
 
   return (
@@ -90,8 +99,12 @@ export function OffboardingCentreClient({
             canManage={canManage}
             pending={pending}
             exitReason={exitReason}
+            departureType={departureType}
             onExitReasonChange={(id, value) =>
               setExitReason((prev) => ({ ...prev, [id]: value }))
+            }
+            onDepartureTypeChange={(id, value) =>
+              setDepartureType((prev) => ({ ...prev, [id]: value }))
             }
             onOffboard={onOffboard}
           />
@@ -146,14 +159,18 @@ function StaffOffboardingTable({
   canManage,
   pending,
   exitReason,
+  departureType,
   onExitReasonChange,
+  onDepartureTypeChange,
   onOffboard,
 }: {
   rows: OffboardingStaffRow[];
   canManage: boolean;
   pending: boolean;
   exitReason: Record<string, string>;
+  departureType: Record<string, OffboardingDepartureType>;
   onExitReasonChange: (id: string, value: string) => void;
+  onDepartureTypeChange: (id: string, value: OffboardingDepartureType) => void;
   onOffboard: (id: string) => void;
 }) {
   return (
@@ -183,7 +200,23 @@ function StaffOffboardingTable({
               </td>
               <td className="px-4 py-3">
                 {canManage ? (
-                  <div className="flex min-w-[220px] flex-col gap-2">
+                  <div className="flex min-w-[240px] flex-col gap-2">
+                    <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      Departure type
+                      <select
+                        className="mt-1 block w-full rounded-lg border border-white/[0.1] bg-[#0B1220] px-2 py-1.5 text-xs text-slate-200"
+                        value={departureType[row.id] ?? "terminated"}
+                        onChange={(e) =>
+                          onDepartureTypeChange(row.id, e.target.value as OffboardingDepartureType)
+                        }
+                      >
+                        {OFFBOARDING_DEPARTURE_TYPES.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <input
                       type="text"
                       placeholder="Exit reason"
