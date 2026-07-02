@@ -194,12 +194,12 @@ test("extraction draft builder unchanged for duplicate suppression fixture", () 
   assert.equal(drafts[0].display_name, "Ferritin");
 });
 
-test("HLI import path resolves package exports", async () => {
-  const hliRegistry = await import("../../../../lib/longevity/bloodMarkerRegistry");
-  const hliInterpretation = await import("../../../../lib/longevity/bloodInterpretation");
-  assert.equal(typeof hliRegistry.resolveMarkerKey, "function");
-  assert.equal(typeof hliInterpretation.interpretMarker, "function");
-  assert.equal(resolveMarkerKey("Serum Ferritin"), hliRegistry.resolveMarkerKey("Serum Ferritin"));
+test("package biomarker modules resolve same exports as index", async () => {
+  const registry = await import("../biomarkers/bloodMarkerRegistry");
+  const interpretation = await import("../biomarkers/bloodInterpretation");
+  assert.equal(typeof registry.resolveMarkerKey, "function");
+  assert.equal(typeof interpretation.interpretMarker, "function");
+  assert.equal(resolveMarkerKey("Serum Ferritin"), registry.resolveMarkerKey("Serum Ferritin"));
 });
 
 console.log("\nAll medical-intelligence-core parity tests passed.");
