@@ -107,6 +107,7 @@ export function FiOsAppShell({
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
+  /** Calendar owns vertical scroll inside `<main>`; FI OS primary rail must stay mounted for module navigation. */
   const isCalendarMainLocked = useMemo(() => isFiOsTenantCalendarPath(pathname), [pathname]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
@@ -231,16 +232,14 @@ export function FiOsAppShell({
     <div className={fiOsChromeClasses.shellRoot}>
       <FiOsSkipLink />
       <div className={fiOsChromeClasses.shellBody}>
-        {!isCalendarMainLocked ? (
-          <FiOsSidebar
-            variant="rail"
-            brandName={brandName}
-            effective={effective}
-            navSections={sidebarSections}
-            activeNavId={activeSidebarId}
-            pathname={pathname}
-          />
-        ) : null}
+        <FiOsSidebar
+          variant="rail"
+          brandName={brandName}
+          effective={effective}
+          navSections={sidebarSections}
+          activeNavId={activeSidebarId}
+          pathname={pathname}
+        />
 
         <div className={fiOsChromeClasses.mainColumn}>
           <FiOsTopBar

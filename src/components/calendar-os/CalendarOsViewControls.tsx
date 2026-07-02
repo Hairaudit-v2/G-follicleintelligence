@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import {
@@ -158,8 +158,21 @@ export function CalendarOsViewControls({
   inline = false,
 }: CalendarOsViewControlsProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
   const moreActive = MORE_VIEW_MODES.some((m) => isViewModeActive(query, m.id));
   const activeMore = MORE_VIEW_MODES.find((m) => isViewModeActive(query, m.id));
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      const root = moreMenuRef.current;
+      if (root && !root.contains(event.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [moreOpen]);
 
   return (
     <div className={cn("flex flex-wrap items-center gap-1", !inline && "px-0")}>
@@ -175,7 +188,7 @@ export function CalendarOsViewControls({
           </a>
         );
       })}
-      <div className="relative">
+      <div ref={moreMenuRef} className="relative">
         <button
           type="button"
           onClick={() => setMoreOpen((v) => !v)}
@@ -190,13 +203,7 @@ export function CalendarOsViewControls({
         </button>
         {moreOpen ? (
           <>
-            <button
-              type="button"
-              className="fixed inset-0 z-[8] cursor-default"
-              aria-label="Close view menu"
-              onClick={() => setMoreOpen(false)}
-            />
-            <div className="absolute left-0 top-full z-[9] mt-0.5 min-w-[7rem] rounded border border-white/[0.1] bg-[#060d18] py-0.5 shadow-lg shadow-black/40">
+            <div className="absolute left-0 top-full z-10 mt-0.5 min-w-[7rem] rounded border border-white/[0.1] bg-[#060d18] py-0.5 shadow-lg shadow-black/40">
               {MORE_VIEW_MODES.map((mode) => (
                 <a
                   key={mode.id}

@@ -29,7 +29,7 @@ export const fiOsChromeClasses = {
   tenantMainSurfaceInner: "relative px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
   /** Desktop primary rail (decorative glow applied inline in `FiOsSidebar`) */
   sidebarRail:
-    "relative hidden w-[260px] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",
+    "relative z-20 hidden w-[260px] shrink-0 flex-col border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",
   /** Mobile drawer panel */
   sidebarDrawer:
     "relative flex h-full w-[min(88vw,300px)] flex-col border-r border-white/[0.1] bg-[#060d18] shadow-2xl",

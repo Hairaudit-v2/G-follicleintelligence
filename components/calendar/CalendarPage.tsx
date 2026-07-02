@@ -369,20 +369,8 @@ function CalendarPageImpl({
     ]
   );
 
-  const sidebarForGrid = calendarOsV2Active
-    ? null
-    : isFiOsWorkspace
-      ? fiOsAgendaOpen
-        ? sidebar
-        : null
-      : sidebar;
-  const rightPanelForGrid = calendarOsV2Active
-    ? null
-    : isFiOsWorkspace
-      ? fiOsInsightsOpen
-        ? rightPanel
-        : null
-      : rightPanel;
+  const sidebarForGrid = isFiOsWorkspace ? (fiOsAgendaOpen ? sidebar : null) : sidebar;
+  const rightPanelForGrid = isFiOsWorkspace ? (fiOsInsightsOpen ? rightPanel : null) : rightPanel;
 
   const weekDayGrid = calendarOsV2Active ? (
     <CalendarOsShell
@@ -432,7 +420,7 @@ function CalendarPageImpl({
       className={cn(
         "flex flex-col",
         isFiOsWorkspace
-          ? "fi-cal-workspace-root min-h-0 flex-1 bg-[var(--fi-cal-ws-page-bg,#050a14)]"
+          ? "fi-cal-workspace-root relative z-0 min-h-0 flex-1 bg-[var(--fi-cal-ws-page-bg,#050a14)]"
           : "-mx-3 min-h-[calc(100dvh-8rem)] bg-[#0f172a] sm:-mx-4 lg:-mx-6"
       )}
       data-fi-cal-display-theme={isFiOsWorkspace ? calendarWorkspaceDisplayTheme : undefined}
