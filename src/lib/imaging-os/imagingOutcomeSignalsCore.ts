@@ -9,7 +9,7 @@ import type { ImagingJobSummariesMetadata } from "./imagingJobReadOnlySummaries"
 
 export const IMAGINGOS_OUTCOME_SIGNALS_VERSION = "imagingos_outcome_signals_v1" as const;
 
-export type OutcomeSignalProvider = "hli_openai" | "stub" | "unavailable";
+export type OutcomeSignalProvider = "hli_vision" | "stub" | "unavailable";
 
 export type OutcomeSignalSummaryStatus = "complete" | "needs_review" | "unavailable";
 

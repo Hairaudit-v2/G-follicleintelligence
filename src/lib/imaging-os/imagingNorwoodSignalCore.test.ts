@@ -29,7 +29,7 @@ describe("imagingNorwoodSignalCore", () => {
       aiImageCategory: "front",
       liveEnabled: false,
       providerAvailable: true,
-      providerName: "hli_openai",
+      providerName: "hli_vision",
     });
     assert.equal(summary.summary_status, "unavailable");
     assert.equal(summary.provider, "unavailable");

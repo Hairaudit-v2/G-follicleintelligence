@@ -52,7 +52,7 @@ describe("patientSafeImagingExportCore", () => {
   it("redactMetadataForPatientExport strips staff and AI keys", () => {
     const redacted = redactMetadataForPatientExport({
       capture_source: "guided_capture",
-      imaging_clinical_ai: { provider: "hli_openai" },
+      imaging_clinical_ai: { provider: "hli_vision" },
       imaging_job_summaries: { outcome_score: { confidence: 0.9 } },
       imaging_staff_review: { status: "reviewed" },
       imaging_review_assignment: { assigned_to: "user-1" },

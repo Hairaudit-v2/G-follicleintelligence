@@ -31,7 +31,7 @@ describe("clinicalImageAnalysisCore", () => {
       categoryConfidence: 0.55,
       notes: "test",
     });
-    assert.equal(result.provider, "hli_openai");
+    assert.equal(result.provider, "hli_vision");
     assert.equal(result.status, "needs_review");
     assert.ok(result.reviewRequired);
     assert.ok(result.reasons.includes("low_classification_confidence"));

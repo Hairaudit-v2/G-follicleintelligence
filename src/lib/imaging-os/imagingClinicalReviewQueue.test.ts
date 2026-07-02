@@ -54,7 +54,7 @@ describe("imagingClinicalReviewQueue", () => {
     const review = imageNeedsClinicalReview({
       metadata: {
         imaging_clinical_ai: {
-          provider: "hli_openai",
+          provider: "hli_vision",
           status: "needs_review",
           confidence: 0.9,
           review_required: true,

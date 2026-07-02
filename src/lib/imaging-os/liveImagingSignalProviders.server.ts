@@ -17,7 +17,7 @@ export function resolveLiveImagingSignalProvider(
     return { providerName: "stub", providerAvailable: true };
   }
   if (isOpenAiApiKeyConfigured()) {
-    return { providerName: "hli_openai", providerAvailable: true };
+    return { providerName: "hli_vision", providerAvailable: true };
   }
   return { providerName: "unavailable", providerAvailable: false };
 }

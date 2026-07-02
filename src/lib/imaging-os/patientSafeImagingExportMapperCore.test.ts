@@ -42,7 +42,7 @@ function baseImage(overrides: Partial<PatientImageRow> = {}): PatientImageRow {
     taken_at: "2026-07-01T12:00:00.000Z",
     metadata: {
       imaging_quality: { quality_status: "pass" },
-      imaging_clinical_ai: { provider: "hli_openai", confidence: 0.9 },
+      imaging_clinical_ai: { provider: "hli_vision", confidence: 0.9 },
       imaging_job_summaries: { norwood_grade: { observations: ["Norwood III"] } },
     },
     uploaded_by_user_id: null,

@@ -31,7 +31,7 @@ describe("imagingOutcomeSignalsCore", () => {
       aiImageCategory: "donor",
       liveEnabled: flags.liveDensityEnabled,
       providerAvailable: true,
-      providerName: "hli_openai",
+      providerName: "hli_vision",
     });
     assert.equal(summary.summary_status, "unavailable");
     assert.equal(summary.provider, "unavailable");
@@ -49,10 +49,10 @@ describe("imagingOutcomeSignalsCore", () => {
       aiImageCategoryConfidence: 0.9,
       liveEnabled: true,
       providerAvailable: true,
-      providerName: "hli_openai",
+      providerName: "hli_vision",
     });
     assert.equal(summary.summary_status, "complete");
-    assert.equal(summary.provider, "hli_openai");
+    assert.equal(summary.provider, "hli_vision");
     assert.equal(summary.summary_version, IMAGINGOS_OUTCOME_SIGNALS_VERSION);
     assert.ok(summary.observations.length > 0);
   });

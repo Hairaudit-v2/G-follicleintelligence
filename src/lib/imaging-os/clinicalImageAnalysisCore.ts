@@ -13,7 +13,7 @@ import type { FiAiImageCategory } from "@/src/lib/hair-intelligence/imageClassif
 
 export const IMAGINGOS_CLINICAL_ANALYSIS_VERSION = "imagingos_clinical_v1" as const;
 
-export type ClinicalImageAnalysisProviderName = "hli_openai" | "stub" | "unavailable";
+export type ClinicalImageAnalysisProviderName = "hli_vision" | "stub" | "unavailable";
 
 export type ClinicalImageAnalysisStatus = "complete" | "needs_review" | "failed";
 
@@ -264,7 +264,7 @@ export function buildClinicalImageAnalysisFromHli(input: {
         : "complete";
 
   return {
-    provider: "hli_openai",
+    provider: "hli_vision",
     status,
     viewType,
     confidence,
@@ -435,7 +435,7 @@ export function readImagingClinicalAiMetadata(
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const m = raw as Record<string, unknown>;
   const provider = m.provider;
-  if (provider !== "hli_openai" && provider !== "stub" && provider !== "unavailable") return null;
+  if (provider !== "hli_vision" && provider !== "stub" && provider !== "unavailable") return null;
   return {
     provider,
     status:
