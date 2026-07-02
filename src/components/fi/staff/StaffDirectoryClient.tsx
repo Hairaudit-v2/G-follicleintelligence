@@ -6,7 +6,7 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
-import { createStaffAction, updateStaffAction } from "@/lib/actions/fi-staff-actions";
+import { updateStaffAction } from "@/lib/actions/fi-staff-actions";
 import { StaffFeatureAccessPanel } from "@/src/components/fi/staff/StaffFeatureAccessPanel";
 import { StaffOrganisationalIntelligencePanel } from "@/src/components/fi/staff/StaffOrganisationalIntelligencePanel";
 import { StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
@@ -38,7 +38,7 @@ import {
   type StaffWeeklyHoursMap,
 } from "@/src/lib/staff/staffWeeklyHours";
 
-type Mode = "idle" | "create" | "edit";
+type Mode = "idle" | "edit";
 
 const inputClassName =
   "mt-1 block w-full rounded-lg border border-white/[0.1] bg-[#0B1220] px-3 py-2 text-sm text-[#F8FAFC] placeholder:text-[#64748B] focus:border-[#22C1FF]/40 focus:outline-none focus:ring-1 focus:ring-[#22C1FF]/30";
@@ -140,14 +140,6 @@ export function StaffDirectoryClient({
   const showTwinLinks = canManage || Boolean(viewerStaffId);
   const intelligenceByStaffId = data.workforceIntelligence?.perStaff ?? {};
 
-  const openCreate = () => {
-    setError(null);
-    setForm(emptyForm());
-    setWeekly({});
-    setEditingId(null);
-    setMode("create");
-  };
-
   const openEdit = (row: FiStaffRow) => {
     setError(null);
     setForm(rowToForm(row));
@@ -191,16 +183,6 @@ export function StaffDirectoryClient({
     };
 
     startTransition(async () => {
-      if (mode === "create") {
-        const r = await createStaffAction(tenantId, body);
-        if (!r.ok) {
-          setError(r.error);
-          return;
-        }
-        closePanel();
-        router.refresh();
-        return;
-      }
       if (mode === "edit" && editingId) {
         const r = await updateStaffAction(tenantId, editingId, body);
         if (!r.ok) {
@@ -225,7 +207,6 @@ export function StaffDirectoryClient({
         directoryRows={visibleRows}
         intelligenceByStaffId={intelligenceByStaffId}
         operationalMetrics={data.workforceOperationalMetrics}
-        onAddStaff={openCreate}
         onEditStaff={openEdit}
       />
 
@@ -292,16 +273,14 @@ export function StaffDirectoryClient({
         </div>
       ) : null}
 
-      {(mode === "create" || mode === "edit") && canManage ? (
+      {mode === "edit" && canManage ? (
         <DashboardCard
           className="p-4 sm:p-5"
           elevated
-          aria-label={mode === "create" ? "Add staff member" : "Edit staff member"}
+          aria-label="Edit staff member"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-[#F8FAFC]">
-              {mode === "create" ? "New staff" : "Edit staff"}
-            </h2>
+            <h2 className="text-sm font-semibold text-[#F8FAFC]">Edit staff</h2>
             <button
               type="button"
               onClick={closePanel}
@@ -439,7 +418,7 @@ export function StaffDirectoryClient({
           ) : null}
           <div className="mt-4 flex gap-2">
             <Button type="button" disabled={pending || !form.full_name.trim()} onClick={submit}>
-              {pending ? "Saving…" : mode === "create" ? "Create" : "Save"}
+              {pending ? "Saving…" : "Save"}
             </Button>
             <Button type="button" variant="outline" onClick={closePanel} disabled={pending}>
               Cancel

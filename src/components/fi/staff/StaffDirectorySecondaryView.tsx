@@ -3,10 +3,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
 import { StatCard } from "@/src/components/fi-admin/dashboard-ui/StatCard";
 import type { StaffDirectoryRowView } from "@/src/lib/staff/staffDirectoryFilters";
+import {
+  buildStaffAccessCentreHref,
+  buildStaffDirectoryPrimaryActionHref,
+  staffDirectoryLifecycleGuidance,
+} from "@/src/lib/workforce/staffLifecycleUxCore";
 import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
 import {
   buildWorkforceAttentionQueue,
@@ -116,7 +120,6 @@ export function StaffDirectorySecondaryView({
   directoryRows,
   intelligenceByStaffId,
   operationalMetrics,
-  onAddStaff,
   onEditStaff,
 }: {
   base: string;
@@ -128,44 +131,67 @@ export function StaffDirectorySecondaryView({
   directoryRows: StaffDirectoryRowView[];
   intelligenceByStaffId: Record<string, StaffWorkforceIntelligence | undefined>;
   operationalMetrics?: WorkforceOperationalMetrics | null;
-  onAddStaff: () => void;
   onEditStaff: (row: StaffDirectoryRowView) => void;
 }) {
   const metrics = buildWorkforceCommandCentreMetrics(allRows, intelligenceByStaffId);
   const attentionCount = buildWorkforceAttentionQueue(allRows, intelligenceByStaffId).length;
+  const lifecycleCopy = staffDirectoryLifecycleGuidance();
+  const onboardingHref = buildStaffDirectoryPrimaryActionHref(base);
+  const staffAccessHref = buildStaffAccessCentreHref(base);
 
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Staff · Directory</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Workforce · Directory</p>
           <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">Staff Directory</h1>
           <p className="max-w-2xl text-sm text-[#94A3B8]">
-            FI staff records, roles, calendars, and access. For workforce intelligence, open the
-            Command Centre.
+            All staff records for this clinic — roles, calendars, and scheduling defaults. Use
+            Onboarding for new hires and Staff Access for login and PIN management.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
             href={workforceOsBase}
-            className="rounded-lg border border-[#22C1FF]/40 bg-[#22C1FF]/15 px-4 py-2 text-sm font-semibold text-[#22C1FF] hover:bg-[#22C1FF]/20"
+            className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[#F8FAFC] hover:bg-white/[0.07]"
           >
             Workforce Command Centre
           </Link>
+          <Link
+            href={staffAccessHref}
+            className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[#F8FAFC] hover:bg-white/[0.07]"
+          >
+            Staff Access
+          </Link>
           {canManage ? (
-            <Button type="button" onClick={onAddStaff} data-testid="add-staff-button">
-              Add staff
-            </Button>
+            <Link
+              href={onboardingHref}
+              className="rounded-lg border border-[#22C1FF]/40 bg-[#22C1FF]/15 px-4 py-2 text-sm font-semibold text-[#22C1FF] hover:bg-[#22C1FF]/20"
+              data-testid="start-onboarding-button"
+            >
+              Start onboarding
+            </Link>
           ) : null}
         </div>
       </header>
 
       <DashboardCard className="border-[#22C1FF]/15 bg-gradient-to-r from-[#0c1426]/90 to-[#0f1a30]/80 p-4 sm:p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-[#F8FAFC]">Workforce intelligence lives in WorkforceOS</p>
-            <p className="mt-1 text-xs text-[#94A3B8]">
-              Planning, payroll, procedure staffing, and compliance dashboards are on the command centre.
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-[#F8FAFC]">{lifecycleCopy.headline}</p>
+            <p className="text-xs text-[#94A3B8]">{lifecycleCopy.body}</p>
+            <p className="text-xs text-[#64748B]">
+              <Link href={onboardingHref} className="font-medium text-[#22C1FF] hover:underline">
+                Onboarding Centre
+              </Link>
+              {" · "}
+              <Link href={staffAccessHref} className="font-medium text-[#22C1FF] hover:underline">
+                Staff Access Centre
+              </Link>
+              {" · "}
+              <Link href={workforceOsBase} className="font-medium text-[#22C1FF] hover:underline">
+                Workforce Command Centre
+              </Link>
             </p>
           </div>
           <Link
@@ -198,9 +224,18 @@ export function StaffDirectorySecondaryView({
         {directoryRows.length === 0 ? (
           <DashboardCard className="p-8 text-center">
             <p className="text-sm text-[#94A3B8]">
-              {allRows.length === 0
-                ? "No staff rows yet. Add your first team member to begin."
-                : "No staff match the current filters."}
+              {allRows.length === 0 ? (
+                <>
+                  {lifecycleCopy.emptyState}{" "}
+                  {canManage ? (
+                    <Link href={onboardingHref} className="font-medium text-[#22C1FF] hover:underline">
+                      Start onboarding →
+                    </Link>
+                  ) : null}
+                </>
+              ) : (
+                "No staff match the current filters."
+              )}
             </p>
           </DashboardCard>
         ) : (
