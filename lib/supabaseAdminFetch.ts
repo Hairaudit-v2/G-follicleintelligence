@@ -14,7 +14,10 @@ function ensureUndiciHeaderBudget(): void {
   if (typeof process === "undefined" || !process.versions?.node) return;
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports -- Node-only; avoid Edge bundle
-    const undici = require("undici") as typeof import("undici");
+    const undici = require("undici") as {
+      setGlobalDispatcher?: (dispatcher: unknown) => void;
+      Agent?: new (options: { maxHeaderSize: number }) => unknown;
+    };
     if (typeof undici.setGlobalDispatcher === "function" && typeof undici.Agent === "function") {
       undici.setGlobalDispatcher(new undici.Agent({ maxHeaderSize: 262144 }));
     }
