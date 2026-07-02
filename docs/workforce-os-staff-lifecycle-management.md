@@ -7,6 +7,7 @@ Operational workforce identity governance: edit staff safely, manage employment 
 | Route | Purpose |
 |-------|---------|
 | `/fi-admin/[tenantId]/workforce-os` | Staff directory with lifecycle filters |
+| `/fi-admin/[tenantId]/workforce-os/staff-access` | Staff Access Centre — login invites for existing staff |
 | `/fi-admin/[tenantId]/workforce-os/staff/[staffId]` | Staff profile + operational actions |
 | `/fi-admin/[tenantId]/workforce-os/hr-reconciliation` | HR identity reconciliation queue |
 

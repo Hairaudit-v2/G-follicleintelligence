@@ -30,6 +30,7 @@ export function buildWorkforceOsNavItems(tenantId: string): WorkforceOsNavItem[]
       segment: "hr-reconciliation",
     },
     { label: "Members", href: `${base}/directory`, segment: "members" },
+    { label: "Staff Access", href: `${base}/staff-access`, segment: "staff-access" },
   ];
 }
 
@@ -41,6 +42,9 @@ export function isWorkforceOsNavActive(pathname: string, base: string, segment: 
     return (
       pathname.startsWith(`${base}/directory`) || pathname.startsWith(`${base}/staff/`)
     );
+  }
+  if (segment === "staff-access") {
+    return pathname.startsWith(`${base}/staff-access`);
   }
   return pathname === `${base}/${segment}` || pathname.startsWith(`${base}/${segment}/`);
 }

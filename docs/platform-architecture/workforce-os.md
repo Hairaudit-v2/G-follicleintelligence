@@ -32,6 +32,7 @@ Staff operations layer: directory, rostering, shifts, availability blocks, clini
 ## Database Tables
 
 - `fi_staff`, `fi_staff_source_ids`, `fi_staff_pins`
+- `fi_staff_members`, `fi_staff_login_invitations` (Staff Access Centre)
 - `fi_staff_availability_blocks`, `fi_staff_shifts`
 - `fi_clinical_staffing_templates`, `fi_staff_event_assignments`
 - `fi_staff_feature_access`, `fi_staff_feature_access_audit_events`
@@ -67,4 +68,6 @@ Staff operations layer: directory, rostering, shifts, availability blocks, clini
 | HR sync partial failure | Stale staff directory | `fi_staff_sync_runs` status + rerun |
 | Double booking staff | Calendar conflict | Availability blocks + CalendarOS overlap checks |
 | Feature access drift | Wrong module visibility | Audit events on access changes |
-| Unlinked fi_user | Staff not schedulable | Admin linking UI in staff directory |
+| Unlinked fi_user | Staff not schedulable | Admin linking UI in staff directory; **Staff Access Centre** for login invites |
+
+See also: [Staff Access Centre guide](../workforce/workforceos-staff-access-centre.md).
