@@ -55,7 +55,8 @@ export function CalendarOsBookingCard({
         "group relative w-full rounded border text-left transition-all",
         "border-white/[0.08] bg-[#0F1629]/90 hover:border-cyan-500/30 hover:bg-[#121c33]",
         ultraCompact ? "p-1" : compact ? "p-1.5" : "p-2",
-        isSurgery && "border-violet-500/25 bg-gradient-to-br from-violet-950/40 to-[#0F1629]/90",
+        isSurgery &&
+          "border-violet-500/30 border-l-2 border-l-violet-400 bg-gradient-to-br from-violet-950/50 to-[#0F1629]/90",
         highlighted && "ring-1 ring-cyan-400/60",
         model.isUnassigned && "border-amber-500/30"
       )}
@@ -135,11 +136,11 @@ export function CalendarOsBookingCard({
         </div>
       ) : null}
 
-      {topWarning ? (
+      {topWarning && !ultraCompact ? (
         <div
           className={cn(
             "inline-flex max-w-full items-center gap-0.5 rounded border font-medium",
-            ultraCompact ? "mt-0.5 px-0.5 py-0 text-[8px]" : "mt-1 px-1 py-0.5 text-[9px]",
+            compact ? "mt-0.5 px-1 py-0 text-[8px]" : "mt-1 px-1 py-0.5 text-[9px]",
             WARNING_TONE[topWarning.severity] ?? WARNING_TONE.warning
           )}
         >

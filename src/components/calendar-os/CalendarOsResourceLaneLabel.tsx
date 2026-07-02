@@ -75,7 +75,7 @@ export function CalendarOsResourceLaneLabel({
             <p
               className={cn(
                 "truncate font-medium text-slate-200",
-                density === "command" ? "text-[10px]" : "text-xs"
+                density === "command" ? "text-[11px]" : "text-xs"
               )}
             >
               {row.label}
@@ -97,7 +97,7 @@ export function CalendarOsResourceLaneLabel({
       className={cn(
         "flex flex-col justify-center border-r border-white/[0.08] bg-[#0a1220] px-2 py-1",
         sticky && "sticky left-0 z-[2]",
-        isUnassigned && "border-amber-500/20 bg-amber-950/30",
+        isUnassigned && "border-amber-500/35 bg-amber-950/40 ring-1 ring-inset ring-amber-500/20",
         className
       )}
       style={{ minHeight: minH }}
@@ -117,7 +117,7 @@ export function CalendarOsResourceLaneLabel({
               className={cn(
                 "truncate font-medium",
                 isUnassigned ? "text-amber-100" : "text-slate-200",
-                density === "command" ? "text-[10px]" : "text-xs"
+                density === "command" ? "text-[11px]" : "text-xs"
               )}
             >
               {row.label}

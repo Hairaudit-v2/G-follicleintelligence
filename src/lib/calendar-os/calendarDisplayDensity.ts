@@ -39,7 +39,7 @@ const DENSITY_TOKENS: Record<CalendarOsDisplayDensity, CalendarOsDensityTokens> 
   comfortable: {
     weekResourceLabelWidth: 180,
     weekDayColMinWidth: 140,
-    weekRowMinHeight: 52,
+    weekRowMinHeight: 48,
     weekGroupHeaderPy: "py-1",
     dayTimeGutterWidth: 52,
     dayResourceColMinWidth: 160,

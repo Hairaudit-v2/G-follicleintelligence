@@ -31,7 +31,7 @@ function PanelCard({ icon, label, value, tone = "default", detail, compact }: Pa
         compact ? "px-2 py-1.5" : "px-3 py-2.5",
         tone === "warning" && "border-amber-500/25 bg-amber-500/5",
         tone === "success" && "border-emerald-500/25 bg-emerald-500/5",
-        tone === "default" && "border-white/[0.08] bg-white/[0.03]"
+        tone === "default" && "border-white/[0.1] bg-white/[0.04]"
       )}
     >
       <div className="flex items-center gap-1.5 text-slate-400">
@@ -85,7 +85,7 @@ export function CalendarOsOperationalPanel({
       : `${summary.roomsAvailable} rooms open`;
 
   return (
-    <aside className={cn("shrink-0 border-b border-white/[0.06] bg-[#081020]/60", className)} aria-label="Operational context">
+    <aside className={cn("shrink-0 border-b border-white/[0.08] bg-[#081020]/80", className)} aria-label="Operational context">
       <div
         className={cn(
           "grid grid-cols-2 gap-2 lg:grid-cols-4 xl:grid-cols-8",

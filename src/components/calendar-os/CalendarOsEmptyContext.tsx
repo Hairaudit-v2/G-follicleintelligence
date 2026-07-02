@@ -8,19 +8,25 @@ import { cn } from "@/lib/utils";
 export type CalendarOsEmptyContextProps = {
   context: CalendarOsSparseContext;
   variant: "week-cell" | "week-banner" | "day-column";
+  /** Hide week-cell dash on busy days to reduce visual noise. */
+  suppressWeekCellMarker?: boolean;
   className?: string;
 };
 
 export function CalendarOsEmptyContext({
   context,
   variant,
+  suppressWeekCellMarker = false,
   className,
 }: CalendarOsEmptyContextProps) {
   if (variant === "week-cell") {
+    if (suppressWeekCellMarker || context.totalBookings > 6) {
+      return <div className={cn("min-h-[8px]", className)} aria-hidden />;
+    }
     return (
       <div
         className={cn(
-          "flex h-full min-h-[24px] items-center justify-center rounded border border-dashed border-white/[0.04] text-[9px] text-slate-600",
+          "flex h-full min-h-[20px] items-center justify-center rounded border border-dashed border-white/[0.03] text-[8px] text-slate-700",
           className
         )}
         aria-hidden

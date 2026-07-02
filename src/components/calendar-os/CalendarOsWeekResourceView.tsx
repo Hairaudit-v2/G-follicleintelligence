@@ -207,6 +207,7 @@ export function CalendarOsWeekResourceView({
                           <CalendarOsEmptyContext
                             context={sparseContext}
                             variant="week-cell"
+                            suppressWeekCellMarker={!showSparseBanner}
                           />
                         ) : (
                           ids.map((id) => {
