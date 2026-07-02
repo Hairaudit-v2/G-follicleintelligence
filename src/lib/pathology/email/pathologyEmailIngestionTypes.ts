@@ -45,6 +45,12 @@ export type PathologyEmailRouteRow = {
   updated_at: string;
 };
 
+export type PathologyEmailRouteListItem = PathologyEmailRouteRow & {
+  message_count: number;
+  last_used_at: string | null;
+  last_provider: string | null;
+};
+
 export type PathologyEmailInboundMessageRow = {
   id: string;
   tenant_id: string;

@@ -358,6 +358,14 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         description: "Google Calendar OAuth and other clinic integrations.",
       },
       {
+        id: "pathology-email-routes",
+        label: "Pathology Email Routes",
+        path: "configuration/pathology-email",
+        permissionHint: {},
+        description:
+          "Dedicated inbound pathology email addresses and webhook routing for this tenant.",
+      },
+      {
         id: "timely-zapier",
         label: "Integrations · Timely",
         path: "settings/integrations/timely",

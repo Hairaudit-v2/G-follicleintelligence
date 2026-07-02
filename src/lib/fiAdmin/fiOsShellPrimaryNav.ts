@@ -362,6 +362,12 @@ export function resolveFiOsPrimarySidebarItems(
               label: "Results inbox",
               href: hrefFor(b, "pathology/inbox"),
             },
+            {
+              id: "pathology-email-routes",
+              featureKey: "pathology",
+              label: "Email routes",
+              href: hrefFor(b, "configuration/pathology-email"),
+            },
           ],
     },
     {

@@ -26,6 +26,13 @@ test("GC-2 integrations page exists at app router path", () => {
   );
 });
 
+test("H2 pathology email routes page exists at app router path", () => {
+  assert.ok(
+    existsSync("app/(fi-admin)/fi-admin/[tenantId]/configuration/pathology-email/page.tsx"),
+    "Pathology email routes page must exist at app/(fi-admin)/fi-admin/[tenantId]/configuration/pathology-email/page.tsx"
+  );
+});
+
 test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   const items = resolveClinicOsShellNavItems(base, true);
   const byId = Object.fromEntries(items.map((i) => [i.id, i]));
@@ -70,6 +77,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.ok(integrations);
   assert.equal(integrations!.disabled, false);
   assert.equal(integrations!.href, `${base}/settings/integrations`);
+  const pathologyEmailRoutes = items.find((i) => i.id === "pathology-email-routes");
+  assert.ok(pathologyEmailRoutes);
+  assert.equal(pathologyEmailRoutes!.disabled, false);
+  assert.equal(pathologyEmailRoutes!.href, `${base}/configuration/pathology-email`);
   const timely = items.find((i) => i.id === "timely-zapier");
   assert.ok(timely);
   assert.equal(timely!.disabled, false);
@@ -85,7 +96,7 @@ test("resolveClinicOsShellNavItems: LeadFlow (CRM) enabled when showCrmNav", () 
   const leadflow = items.find((i) => i.id === "leadflow");
   assert.ok(leadflow);
   assert.equal(leadflow!.disabled, false);
-  assert.equal(leadflow!.href, `${base}/crm`);
+  assert.equal(leadflow!.href, `${base}/leadflow`);
 });
 
 test("resolveClinicOsShellNavItems: LeadFlow disabled without showCrmNav", () => {
@@ -120,8 +131,10 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/reception/extra`, base), "reception-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/tomorrow`, base), "tomorrow-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/tomorrow/sub`, base), "tomorrow-board");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/crm`, base), "leadflow");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/crm/leads`, base), "leadflow");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/leadflow`, base), "leadflow");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/leadflow/leads`, base), "leadflow");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/crm`, base), "leadflow-crm");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/crm/leads`, base), "leadflow-crm");
   assert.equal(getClinicOsShellActiveNavId(`${base}/calendar`, base), "calendar");
   assert.equal(getClinicOsShellActiveNavId(`${base}/bookings/new`, base), "bookings");
   assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1`, base), "patientos");

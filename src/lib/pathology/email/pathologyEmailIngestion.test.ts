@@ -549,6 +549,17 @@ test("tenant routing enforced via inbound address", async () => {
   assert.equal(result.tenantId, TENANT);
 });
 
+test("disabled inbound route rejects ingestion as unknown address", async () => {
+  const state = freshState();
+  state.routes = [routeRow({ route_status: "disabled" })];
+  const client = createEmailMockSupabase(state);
+  const result = await ingestPathologyEmailWebhook(basePayload(), testEnv(), client);
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.httpStatus, 404);
+  assert.equal(result.publicMessage, "Unknown inbound address.");
+});
+
 test("generic provider payload normalizes to internal shape", () => {
   const payload = normalizeGenericPathologyEmailPayload({
     provider: "generic",
