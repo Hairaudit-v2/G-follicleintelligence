@@ -2,6 +2,8 @@
 
 Concise reference for developers. Stage 5 is **foundational**: structured signals, safe loaders, explainable UI, and DB hooks for later automation — **not** clinical AI or automated medical decisions.
 
+**Medical intelligence (Sprint B):** FI OS consumes shared biomarker interpretation, insights, eligibility, and longevity signals from `@hairlongevity/medical-intelligence-core` via the adapter in `src/lib/clinical-intelligence/medicalIntelligenceCore.server.ts`. HLI remains source of truth; FI must not duplicate ferritin/thyroid/vitamin D rules. See [fi-os-medical-intelligence-consumer-bridge.md](./fi-os-medical-intelligence-consumer-bridge.md).
+
 ---
 
 ## What Stage 5 adds

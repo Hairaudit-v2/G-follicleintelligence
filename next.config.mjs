@@ -99,6 +99,7 @@ const apiNoCacheHeaders = [
 ];
 
 const nextConfig = {
+  transpilePackages: ["@hairlongevity/medical-intelligence-core"],
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
