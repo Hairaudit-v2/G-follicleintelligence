@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { disableStaffPinForTenant } from "@/src/lib/staffPin/staffPin.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 
 import {
@@ -185,6 +186,13 @@ export async function offboardStaffMember(input: {
       .update({ is_active: false, updated_at: now })
       .eq("tenant_id", tid)
       .eq("staff_member_id", fiStaffId);
+
+    await disableStaffPinForTenant({
+      tenantId: tid,
+      staffId: fiStaffId,
+      actorFiUserId: input.terminatedBy ?? null,
+      client: supabase,
+    });
 
     // TODO: SurgeryOS permission revocation table when dedicated grants ship.
     // TODO: Readiness recalculation job hook — tenant overview refresh is triggered by revalidation.

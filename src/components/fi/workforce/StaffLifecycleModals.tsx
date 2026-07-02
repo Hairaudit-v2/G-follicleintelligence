@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { X } from "lucide-react";
@@ -13,7 +14,10 @@ import {
   updateStaffProfileAction,
 } from "@/lib/actions/workforce-os-staff-lifecycle-actions";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { STAFF_EMPLOYMENT_STATUSES } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import {
+  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
+  STAFF_EMPLOYMENT_STATUSES,
+} from "@/src/lib/workforce-os/staffLifecycleTypes";
 import {
   isExternallyManagedStaff,
   resolveEditableProfileFields,
@@ -225,6 +229,10 @@ export function StaffEditModal({
   );
 }
 
+const MANAGE_EMPLOYMENT_STATUSES = STAFF_EMPLOYMENT_STATUSES.filter(
+  (s) => !OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES.has(s)
+);
+
 export function ManageEmploymentModal({
   tenantId,
   staffMemberId,
@@ -239,7 +247,7 @@ export function ManageEmploymentModal({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>("terminated");
+  const [status, setStatus] = useState<string>("inactive");
   const [reason, setReason] = useState("");
   const [effectiveDate, setEffectiveDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [archive, setArchive] = useState(true);
@@ -267,7 +275,17 @@ export function ManageEmploymentModal({
 
   return (
     <ModalShell title="Manage Employment" onClose={onClose}>
-      <form onSubmit={onSubmit} className="space-y-4">
+      <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+        To terminate, record a resignation, or end a contract, use the{" "}
+        <Link
+          href={`/fi-admin/${tenantId}/hr-os/offboarding`}
+          className="font-medium text-amber-50 underline underline-offset-2 hover:text-white"
+        >
+          HR OS Offboarding Centre
+        </Link>
+        . That flow revokes system access, PIN login, and permissions while preserving audit history.
+      </p>
+      <form onSubmit={onSubmit} className="mt-4 space-y-4">
         <label className={labelClassName}>
           New employment status
           <select
@@ -275,7 +293,7 @@ export function ManageEmploymentModal({
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            {STAFF_EMPLOYMENT_STATUSES.map((s) => (
+            {MANAGE_EMPLOYMENT_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {s.replace(/_/g, " ")}
               </option>

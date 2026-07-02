@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export type FiStaffPinAuditEventKind =
@@ -22,8 +24,9 @@ export async function insertFiStaffPinAuditEvent(opts: {
   staffId?: string | null;
   actorFiUserId?: string | null;
   detail?: Record<string, unknown>;
+  client?: SupabaseClient;
 }): Promise<void> {
-  const supabase = supabaseAdmin();
+  const supabase = opts.client ?? supabaseAdmin();
   const { error } = await supabase.from("fi_staff_pin_audit_events").insert({
     tenant_id: opts.tenantId.trim(),
     event_kind: opts.eventKind,

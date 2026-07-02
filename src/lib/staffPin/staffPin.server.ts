@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { insertFiStaffPinAuditEvent } from "./staffPinAudit.server";
@@ -35,8 +37,12 @@ type PinRow = {
   updated_at: string | null;
 };
 
-async function loadPinRow(tenantId: string, staffId: string): Promise<PinRow | null> {
-  const supabase = supabaseAdmin();
+async function loadPinRow(
+  tenantId: string,
+  staffId: string,
+  client?: SupabaseClient
+): Promise<PinRow | null> {
+  const supabase = client ?? supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_pins")
     .select(
@@ -179,11 +185,11 @@ export async function disableStaffPinForTenant(opts: {
   tenantId: string;
   staffId: string;
   actorFiUserId: string | null;
+  client?: SupabaseClient;
 }): Promise<void> {
-  const row = await loadPinRow(opts.tenantId, opts.staffId);
+  const supabase = opts.client ?? supabaseAdmin();
+  const row = await loadPinRow(opts.tenantId, opts.staffId, supabase);
   if (!row) return;
-
-  const supabase = supabaseAdmin();
   const { error } = await supabase
     .from("fi_staff_pins")
     .update({
@@ -200,6 +206,7 @@ export async function disableStaffPinForTenant(opts: {
     eventKind: "staff_pin.disabled",
     staffId: opts.staffId,
     actorFiUserId: opts.actorFiUserId,
+    client: supabase,
   });
 }
 

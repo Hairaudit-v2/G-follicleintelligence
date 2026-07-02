@@ -18,6 +18,10 @@ export type StaffEmploymentStatus = (typeof STAFF_EMPLOYMENT_STATUSES)[number];
 export const OPERATIONALLY_INELIGIBLE_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> =
   new Set(["terminated", "resigned", "contract_ended"]);
 
+/** Statuses that must use HR OS Offboarding Centre — not Manage Employment. */
+export const OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> =
+  OPERATIONALLY_INELIGIBLE_EMPLOYMENT_STATUSES;
+
 /** Statuses that block scheduling / roster / surgery pools. */
 export const SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> =
   new Set(["on_leave", "terminated", "resigned", "contract_ended", "suspended"]);
@@ -44,6 +48,7 @@ export const STAFF_LIFECYCLE_AUDIT_EVENTS = {
   HR_RECONCILED: "staff_hr_reconciled",
   HR_LINKED_MANUALLY: "staff_hr_linked_manually",
   HR_LINK_REMOVED: "staff_hr_link_removed",
+  ONBOARDING_CREATED: "staff_onboarding_created",
 } as const;
 
 export type StaffLifecycleAuditEventType =

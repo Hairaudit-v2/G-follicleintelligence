@@ -14,7 +14,11 @@ import {
 } from "./staffLifecycleCore";
 import { calculateWorkforceReadinessScore } from "./workforceReadinessEngine";
 import type { StaffMemberLifecycleRow } from "./staffLifecycleTypes";
-import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "./staffLifecycleTypes";
+import {
+  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
+  STAFF_EMPLOYMENT_STATUSES,
+  STAFF_LIFECYCLE_AUDIT_EVENTS,
+} from "./staffLifecycleTypes";
 
 function lifecycleRow(
   overrides: Partial<StaffMemberLifecycleRow> = {}
@@ -159,6 +163,18 @@ test("blank email skipped from exact match", () => {
 test("nameSimilarityScore requires meaningful overlap", () => {
   assert.ok(nameSimilarityScore("Danica Miloseski", "Danica Miloseski") >= 80);
   assert.ok(nameSimilarityScore("Danica Miloseski", "Daniel Bullen") < 60);
+});
+
+test("manage employment excludes offboarding centre statuses", () => {
+  const manageEmploymentStatuses = STAFF_EMPLOYMENT_STATUSES.filter(
+    (status) => !OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES.has(status)
+  );
+  for (const status of ["terminated", "resigned", "contract_ended"] as const) {
+    assert.ok(OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES.has(status));
+    assert.ok(!manageEmploymentStatuses.includes(status));
+  }
+  assert.ok(manageEmploymentStatuses.includes("inactive"));
+  assert.ok(manageEmploymentStatuses.includes("on_leave"));
 });
 
 test("audit event type constants exist for lifecycle", () => {

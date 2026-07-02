@@ -14,7 +14,10 @@ import type {
   StaffMemberLifecycleRow,
   StaffProfileEditInput,
 } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import {
+  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
+  STAFF_LIFECYCLE_AUDIT_EVENTS,
+} from "@/src/lib/workforce-os/staffLifecycleTypes";
 import {
   ensureStaffMemberProjection,
   loadStaffMemberLifecycle,
@@ -23,6 +26,9 @@ import {
 } from "@/src/lib/workforce-os/hrReconciliation.server";
 
 const LIFECYCLE_SOURCE = "workforce_os_staff_lifecycle";
+
+export const OFFBOARDING_CENTRE_REQUIRED_MESSAGE =
+  "Terminated, resigned, and contract-ended statuses must be processed through HR OS Offboarding Centre.";
 
 async function insertAudit(
   supabase: SupabaseClient,
@@ -148,6 +154,10 @@ export async function changeStaffEmploymentStatus(input: {
 
   const existing = await loadStaffMemberLifecycle(tid, staffMemberId, supabase);
   if (!existing) throw new Error("Staff member not found.");
+
+  if (OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES.has(input.change.employment_status)) {
+    throw new Error(OFFBOARDING_CENTRE_REQUIRED_MESSAGE);
+  }
 
   const deactivate = shouldDeactivateOnEmploymentChange(
     input.change.employment_status,

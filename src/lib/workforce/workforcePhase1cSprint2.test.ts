@@ -268,6 +268,15 @@ function baseState(): TableState {
     fi_staff_calendar_links: [
       { tenant_id: TENANT, staff_member_id: FI_STAFF_A, is_active: true },
     ],
+    fi_staff_pins: [
+      {
+        tenant_id: TENANT,
+        staff_id: FI_STAFF_A,
+        is_active: true,
+        pin_hash: "hash",
+        pin_salt: "salt",
+      },
+    ],
     fi_staff_member_audit_events: [],
   };
 }
@@ -372,6 +381,29 @@ test("offboarding sets terminated and revokes access", async () => {
   assert.equal(state.fi_staff_feature_access?.length, 0);
   assert.ok(state.fi_staff_access_grants?.[0]?.revoked_at);
   assert.equal(state.fi_staff_shifts?.[0]?.status, "cancelled");
+  const pinRow = state.fi_staff_pins?.find((p) => p.staff_id === FI_STAFF_A);
+  assert.equal(pinRow?.is_active, false);
+});
+
+test("offboarding disables fi_staff_pins.is_active directly", async () => {
+  const state = baseState();
+  const client = makeMockClient(state);
+
+  await offboardStaffMember({
+    tenantId: TENANT,
+    staffId: STAFF_A,
+    exitReason: "Role eliminated",
+    terminatedBy: "actor-1",
+    client,
+  });
+
+  const pinRow = state.fi_staff_pins?.find((p) => p.staff_id === FI_STAFF_A);
+  assert.equal(pinRow?.is_active, false);
+
+  const fiStaff = state.fi_staff?.find((s) => s.id === FI_STAFF_A);
+  assert.equal(fiStaff?.is_active, false);
+  if (fiStaff) fiStaff.is_active = true;
+  assert.equal(pinRow?.is_active, false);
 });
 
 test("offboarding preserves audit history", async () => {
