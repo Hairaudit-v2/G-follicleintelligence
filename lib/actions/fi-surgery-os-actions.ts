@@ -468,5 +468,3 @@ export async function confirmTrayGraftCountAction(
     return { ok: false as const, error: errMsg(e) };
   }
 }
-
-export { SURGERY_OS_MAJOR_PHASES, SURGERY_OS_LOGGABLE_EVENT_KINDS };

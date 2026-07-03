@@ -215,7 +215,3 @@ export async function requestStaffPinResetLinkAction(
     return { ok: false, error: errMsg(e) };
   }
 }
-
-/** Alias for spec naming — delegates to sendStaffLoginInviteAction. */
-export const sendStaffAccessInviteAction = sendStaffLoginInviteAction;
-export const resendStaffAccessInviteAction = resendStaffLoginInviteAction;
