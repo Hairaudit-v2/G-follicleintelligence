@@ -29,9 +29,10 @@ function revalidateOnboardingSurfaces(tenantId: string): void {
     `/fi-admin/${tid}/hr-os/onboarding`,
     `/fi-admin/${tid}/hr-os`,
     `/fi-admin/${tid}/workforce-os`,
+    `/fi-admin/${tid}/workforce-os/staff`,
     `/fi-admin/${tid}/staff`,
   ];
-  for (const p of paths) revalidatePath(p);
+  for (const p of paths) revalidatePath(p, "layout");
 }
 
 const createStaffSchema = z.object({

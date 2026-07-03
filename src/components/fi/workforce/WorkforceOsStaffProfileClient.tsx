@@ -124,7 +124,9 @@ export function WorkforceOsStaffProfileClient({
           roleLabel={lifecycle.role_code}
           status={overview.unifiedStatus}
           blockers={overview.blockers}
-          actions={overview.actions}
+          actionMenu={overview.actionMenu}
+          actionContext={overview.actionContext}
+          tenantId={tenantId}
           progressStages={overview.progressStages}
         />
       ) : null}

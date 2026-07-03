@@ -9,6 +9,7 @@ const LOADING = "app/(fi-admin)/fi-admin/[tenantId]/loading.tsx";
 const GLOBALS = "app/globals.css";
 const STAFF_ACCESS = "src/components/fi/workforce/StaffAccessCentreClient.tsx";
 const ONBOARDING = "src/components/fi-admin/hr/OnboardingCentreClient.tsx";
+const STAFF_PROFILE_ACTION_MENU = "src/components/fi/workforce/StaffProfileActionMenu.tsx";
 const CALENDAR_QC = "src/components/fi/calendar/CalendarQuickCreateDrawer.tsx";
 const PROVIDER = "src/components/fi-os/FiOsNavigationPendingProvider.tsx";
 
@@ -45,6 +46,13 @@ test("Onboarding resend action exposes pending label mapping", () => {
   assert.match(src, /FiOsPendingActionButton/);
   assert.match(src, /pendingActionKey/);
   assert.equal(fiOsPendingActionLabel("staff-1:send", "Send invite"), "Sending…");
+});
+
+test("Staff profile action menu uses pending action buttons", () => {
+  const src = readFileSync(STAFF_PROFILE_ACTION_MENU, "utf8");
+  assert.match(src, /FiOsPendingActionButton/);
+  assert.match(src, /pendingActionKey/);
+  assert.equal(fiOsPendingActionLabel("staff-1:resetPin", "Reset PIN"), "Resetting…");
 });
 
 test("Calendar quick create submit shows creating pending copy", () => {

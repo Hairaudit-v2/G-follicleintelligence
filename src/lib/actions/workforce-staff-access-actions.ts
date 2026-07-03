@@ -30,10 +30,11 @@ function revalidateStaffAccessSurfaces(tenantId: string): void {
     `/fi-admin/${tid}/workforce-os/staff-access`,
     `/fi-admin/${tid}/workforce-os/directory`,
     `/fi-admin/${tid}/workforce-os`,
+    `/fi-admin/${tid}/workforce-os/staff`,
     `/fi-admin/${tid}/staff`,
     `/fi-admin/${tid}/hr-os/onboarding`,
   ];
-  for (const p of paths) revalidatePath(p);
+  for (const p of paths) revalidatePath(p, "layout");
 }
 
 const staffMemberBodySchema = z.object({

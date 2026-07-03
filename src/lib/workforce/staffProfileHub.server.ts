@@ -98,10 +98,12 @@ async function loadOnboardingInviteStatus(
  */
 export async function loadStaffProfileHubOverview(
   tenantId: string,
-  lifecycle: StaffMemberLifecycleRow
+  lifecycle: StaffMemberLifecycleRow,
+  options?: { canManage?: boolean }
 ): Promise<StaffProfileHubOverviewData> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const staffMemberId = lifecycle.id;
+  const canManage = options?.canManage ?? false;
 
   const [accessPage, checklist, onboardingInvite, auditResult] = await Promise.all([
     loadStaffAccessCentrePage(tid),
@@ -135,6 +137,7 @@ export async function loadStaffProfileHubOverview(
 
   return buildStaffProfileOverviewModel({
     tenantId: tid,
+    staffMemberId,
     employmentStatus: lifecycle.employment_status,
     archivedAt: lifecycle.archived_at,
     email: lifecycle.email,
@@ -146,5 +149,8 @@ export async function loadStaffProfileHubOverview(
     workforceIntelligence,
     identityAuditRow: mapIdentityAuditSnapshot(identityAuditRow),
     pinStatus: accessRow?.pinStatus ?? null,
+    viewerCanManageAccess: canManage,
+    viewerCanManageOnboarding: canManage,
+    viewerCanManageReadiness: canManage,
   });
 }

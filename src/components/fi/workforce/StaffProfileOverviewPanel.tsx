@@ -3,13 +3,15 @@
 import Link from "next/link";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
+import { StaffProfileActionMenu } from "@/src/components/fi/workforce/StaffProfileActionMenu";
 import { StaffStatusCard } from "@/src/components/fi/workforce/StaffStatusCard";
 import type {
   StaffLifecycleBlocker,
   StaffLifecycleProgressStage,
+  StaffProfileActionContext,
+  StaffProfileActionMenuModel,
   StaffProfileExtendedStatus,
 } from "@/src/lib/workforce/staffProfileHubCore";
-import type { StaffLifecycleAction } from "@/src/lib/workforce/staffLifecycleUxCore";
 import { cn } from "@/lib/utils";
 
 function ProgressRail({ stages }: { stages: StaffLifecycleProgressStage[] }) {
@@ -83,48 +85,30 @@ function AttentionPanel({ blockers }: { blockers: StaffLifecycleBlocker[] }) {
   );
 }
 
-function ActionPanel({ actions }: { actions: StaffLifecycleAction[] }) {
-  const primary = actions.filter((a) => a.priority === "primary");
-  const secondary = actions.filter((a) => a.priority === "secondary");
-  const guidance = actions.find((a) => a.guidance)?.guidance;
+function RecommendedNextStep({
+  menu,
+  blockers,
+}: {
+  menu: StaffProfileActionMenuModel;
+  blockers: StaffLifecycleBlocker[];
+}) {
+  const step = menu.recommendedStep;
+  if (!step) return null;
+
+  const matchingBlocker = blockers[0];
 
   return (
-    <DashboardCard className="p-4 sm:p-5">
-      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Next actions</p>
-      {guidance ? (
-        <p className="mt-2 text-xs text-rose-200/90">{guidance}</p>
+    <DashboardCard className="p-4 sm:p-5" data-testid="staff-profile-recommended-step">
+      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Recommended next step</p>
+      {matchingBlocker ? (
+        <p className="mt-2 text-xs text-[#94A3B8]">{matchingBlocker.description}</p>
+      ) : step.description ? (
+        <p className="mt-2 text-xs text-[#94A3B8]">{step.description}</p>
       ) : null}
-      <div className="mt-3 flex flex-wrap gap-2">
-        {primary.map((action) =>
-          action.href ? (
-            <Link
-              key={action.id}
-              href={action.href}
-              className="rounded-lg border border-[#22C1FF]/40 bg-[#22C1FF]/15 px-3 py-1.5 text-xs font-semibold text-[#22C1FF] hover:bg-[#22C1FF]/25"
-            >
-              {action.label}
-            </Link>
-          ) : (
-            <span
-              key={action.id}
-              className="rounded-lg border border-[#22C1FF]/40 bg-[#22C1FF]/15 px-3 py-1.5 text-xs font-semibold text-[#22C1FF]"
-            >
-              {action.label}
-            </span>
-          )
-        )}
-        {secondary.map((action) =>
-          action.href ? (
-            <Link
-              key={`${action.id}-${action.label}`}
-              href={action.href}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-[#CBD5E1] hover:bg-white/5"
-            >
-              {action.label}
-            </Link>
-          ) : null
-        )}
-      </div>
+      <p className="mt-2 text-sm font-medium text-[#E2E8F0]">{step.label}</p>
+      <p className="mt-1 text-xs text-[#64748B]">
+        Use the action menu to complete this step — blockers above explain why it matters.
+      </p>
     </DashboardCard>
   );
 }
@@ -134,22 +118,49 @@ export function StaffProfileOverviewPanel({
   roleLabel,
   status,
   blockers,
-  actions,
+  actionMenu,
+  actionContext,
+  tenantId,
   progressStages,
 }: {
   name: string;
   roleLabel?: string | null;
   status: StaffProfileExtendedStatus;
   blockers: StaffLifecycleBlocker[];
-  actions: StaffLifecycleAction[];
+  actionMenu: StaffProfileActionMenuModel;
+  actionContext: StaffProfileActionContext;
+  tenantId: string;
   progressStages: StaffLifecycleProgressStage[];
 }) {
   return (
     <div className="space-y-4" data-testid="staff-profile-overview">
       <StaffStatusCard name={name} roleLabel={roleLabel} status={status} extended />
-      <ProgressRail stages={progressStages} />
-      <AttentionPanel blockers={blockers} />
-      <ActionPanel actions={actions} />
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(240px,280px)] lg:items-start">
+        <div className="space-y-4">
+          <ProgressRail stages={progressStages} />
+          <AttentionPanel blockers={blockers} />
+          <RecommendedNextStep menu={actionMenu} blockers={blockers} />
+        </div>
+
+        <aside className="space-y-4 lg:sticky lg:top-4">
+          <div className="hidden lg:block">
+            <StaffProfileActionMenu
+              menu={actionMenu}
+              context={actionContext}
+              tenantId={tenantId}
+            />
+          </div>
+          <div className="lg:hidden">
+            <StaffProfileActionMenu
+              menu={actionMenu}
+              context={actionContext}
+              tenantId={tenantId}
+              compact
+            />
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

@@ -36,6 +36,7 @@ import {
   buildStaffEntitlementsHref,
   buildStaffIdentityAuditHref,
   buildStaffProfileHref,
+  buildWorkforceCommandCentreHref,
   buildWorkforceRosterHref,
 } from "@/src/lib/workforce/staffLifecycleCopy";
 import {
@@ -91,11 +92,52 @@ export type StaffProfileExtendedStatus = StaffUnifiedStatusSnapshot & {
   identityLinkLabel: string | null;
 };
 
+export type StaffProfileActionSection =
+  | "primary"
+  | "access"
+  | "onboarding"
+  | "readiness"
+  | "roster"
+  | "advanced";
+
+export type StaffProfileActionKind = "link" | "server-action" | "copy" | "danger";
+
+export type StaffProfileAction = {
+  id: string;
+  label: string;
+  description?: string;
+  href?: string;
+  actionKind: StaffProfileActionKind;
+  section: StaffProfileActionSection;
+  disabled?: boolean;
+  disabledReason?: string;
+  confirmTitle?: string;
+  confirmDescription?: string;
+  pendingLabel?: string;
+};
+
+export type StaffProfileActionContext = {
+  tenantId: string;
+  staffMemberId: string;
+  viewerCanManageAccess: boolean;
+  viewerCanManageOnboarding: boolean;
+  viewerCanManageReadiness: boolean;
+};
+
+export type StaffProfileActionMenuModel = {
+  actions: StaffProfileAction[];
+  primaryAction: StaffProfileAction | null;
+  guidance: string | null;
+  recommendedStep: StaffProfileAction | null;
+};
+
 export type StaffProfileOverviewModel = {
   unifiedStatus: StaffProfileExtendedStatus;
   blockers: StaffLifecycleBlocker[];
   actions: StaffLifecycleAction[];
   progressStages: StaffLifecycleProgressStage[];
+  actionMenu: StaffProfileActionMenuModel;
+  actionContext: StaffProfileActionContext;
 };
 
 function onboardingStatusLabel(status: OnboardingInviteDisplayStatus | null): string | null {
@@ -441,6 +483,22 @@ export function resolveStaffProfileActions(input: {
   hasOnboardingInviteUrl: boolean;
   accessRow: StaffProfileAccessSnapshot | null;
   checklist: OnboardingChecklistState;
+  limit?: number;
+}): StaffLifecycleAction[] {
+  const actions = resolveStaffProfileLifecycleActions(input);
+  const cap = input.limit ?? 8;
+  return actions.slice(0, cap);
+}
+
+function resolveStaffProfileLifecycleActions(input: {
+  tenantId: string;
+  employmentStatus: string;
+  email: string | null;
+  systemAccessRevoked: boolean;
+  onboardingInviteStatus: OnboardingInviteDisplayStatus;
+  hasOnboardingInviteUrl: boolean;
+  accessRow: StaffProfileAccessSnapshot | null;
+  checklist: OnboardingChecklistState;
 }): StaffLifecycleAction[] {
   const onboardingHref = buildOnboardingCentreHrefForTenant(input.tenantId);
   const accessHref = buildStaffAccessCentreHrefForTenant(input.tenantId);
@@ -514,7 +572,7 @@ export function resolveStaffProfileActions(input: {
       priority: "secondary",
     },
     {
-      id: "view_profile",
+      id: "open_identity_audit",
       label: "Open Identity Audit",
       href: identityHref,
       priority: "secondary",
@@ -540,7 +598,7 @@ export function resolveStaffProfileActions(input: {
   }
 
   linkActions.push({
-    id: "view_profile",
+    id: "open_roster",
     label: "Open roster",
     href: rosterHref,
     priority: "secondary",
@@ -552,11 +610,268 @@ export function resolveStaffProfileActions(input: {
     }
   }
 
-  return actions.slice(0, 8);
+  return actions;
+}
+
+const ONBOARDING_MUTATION_IDS = new Set([
+  "send_onboarding_invite",
+  "resend_onboarding_invite",
+  "copy_onboarding_invite_link",
+]);
+
+const ACCESS_MUTATION_IDS = new Set([
+  "send_login_invite",
+  "resend_login_invite",
+  "copy_login_invite_link",
+  "reset_pin",
+]);
+
+const DANGER_ACTION_IDS = new Set(["suspend_access", "revoke_access"]);
+
+function profileActionKindForLifecycleId(id: string): StaffProfileActionKind {
+  if (DANGER_ACTION_IDS.has(id)) return "danger";
+  if (id === "copy_onboarding_invite_link" || id === "copy_login_invite_link") return "copy";
+  if (
+    ONBOARDING_MUTATION_IDS.has(id) ||
+    ACCESS_MUTATION_IDS.has(id)
+  ) {
+    return "server-action";
+  }
+  return "link";
+}
+
+function profileSectionForLifecycleId(
+  id: string,
+  isPrimary: boolean
+): StaffProfileActionSection {
+  if (isPrimary) return "primary";
+  if (
+    id === "send_login_invite" ||
+    id === "resend_login_invite" ||
+    id === "copy_login_invite_link" ||
+    id === "reset_pin" ||
+    id === "open_access_centre" ||
+    id === "open_identity_audit"
+  ) {
+    return "access";
+  }
+  if (
+    id === "start_onboarding" ||
+    id === "send_onboarding_invite" ||
+    id === "resend_onboarding_invite" ||
+    id === "copy_onboarding_invite_link" ||
+    id === "open_onboarding_centre"
+  ) {
+    return "onboarding";
+  }
+  if (
+    id === "assign_training" ||
+    id === "upload_document" ||
+    id === "open_command_centre" ||
+    id === "open_documents"
+  ) {
+    return "readiness";
+  }
+  if (id === "open_roster") return "roster";
+  if (DANGER_ACTION_IDS.has(id)) return "advanced";
+  return "access";
+}
+
+function pendingLabelForAction(id: string): string | undefined {
+  if (id === "send_onboarding_invite" || id === "send_login_invite") return "Sending…";
+  if (id === "resend_onboarding_invite" || id === "resend_login_invite") return "Resending…";
+  if (id === "copy_onboarding_invite_link" || id === "copy_login_invite_link") return "Copying…";
+  if (id === "reset_pin") return "Creating reset link…";
+  if (id === "suspend_access") return "Suspending…";
+  if (id === "revoke_access") return "Revoking…";
+  return undefined;
+}
+
+function permissionGateForAction(
+  id: string,
+  ctx: StaffProfileActionContext
+): { disabled: boolean; disabledReason?: string } {
+  if (ONBOARDING_MUTATION_IDS.has(id) && !ctx.viewerCanManageOnboarding) {
+    return { disabled: true, disabledReason: "Only admins can manage onboarding invites." };
+  }
+  if (
+    (ACCESS_MUTATION_IDS.has(id) || DANGER_ACTION_IDS.has(id)) &&
+    !ctx.viewerCanManageAccess
+  ) {
+    const reason =
+      id === "reset_pin"
+        ? "Only admins can reset staff PIN access."
+        : id === "resend_login_invite" || id === "send_login_invite"
+          ? "Only admins can resend staff invites."
+          : id === "copy_login_invite_link"
+            ? "Only admins can copy staff invite links."
+            : "Only admins can manage staff access.";
+    return { disabled: true, disabledReason: reason };
+  }
+  return { disabled: false };
+}
+
+function confirmCopyForDangerAction(id: string): {
+  confirmTitle?: string;
+  confirmDescription?: string;
+} {
+  if (id === "suspend_access") {
+    return {
+      confirmTitle: "Suspend staff access?",
+      confirmDescription:
+        "The staff member will not be able to sign in until access is reactivated in Staff Access Centre.",
+    };
+  }
+  if (id === "revoke_access") {
+    return {
+      confirmTitle: "Revoke staff access?",
+      confirmDescription:
+        "This permanently revokes login access. The staff member will need a new invite to sign in again.",
+    };
+  }
+  return {};
+}
+
+/** Resolve normalized profile action menu from lifecycle snapshot — no 8-action cap. */
+export function resolveStaffProfileActionMenu(input: {
+  tenantId: string;
+  employmentStatus: string;
+  email: string | null;
+  systemAccessRevoked: boolean;
+  onboardingInviteStatus: OnboardingInviteDisplayStatus;
+  hasOnboardingInviteUrl: boolean;
+  accessRow: StaffProfileAccessSnapshot | null;
+  checklist: OnboardingChecklistState;
+  blockers: StaffLifecycleBlocker[];
+  actionContext: StaffProfileActionContext;
+}): StaffProfileActionMenuModel {
+  const lifecycleActions = resolveStaffProfileLifecycleActions({
+    tenantId: input.tenantId,
+    employmentStatus: input.employmentStatus,
+    email: input.email,
+    systemAccessRevoked: input.systemAccessRevoked,
+    onboardingInviteStatus: input.onboardingInviteStatus,
+    hasOnboardingInviteUrl: input.hasOnboardingInviteUrl,
+    accessRow: input.accessRow,
+    checklist: input.checklist,
+  });
+
+  const onboardingHref = buildOnboardingCentreHrefForTenant(input.tenantId);
+  const accessHref = buildStaffAccessCentreHrefForTenant(input.tenantId);
+  const identityHref = buildStaffIdentityAuditHref(input.tenantId);
+  const rosterHref = buildWorkforceRosterHref(input.tenantId);
+  const entitlementsHref = buildStaffEntitlementsHref(input.tenantId);
+  const commandHref = buildWorkforceCommandCentreHref(input.tenantId);
+
+  const hrefById: Record<string, string> = {
+    start_onboarding: onboardingHref,
+    send_onboarding_invite: onboardingHref,
+    resend_onboarding_invite: onboardingHref,
+    copy_onboarding_invite_link: onboardingHref,
+    send_login_invite: accessHref,
+    resend_login_invite: accessHref,
+    copy_login_invite_link: accessHref,
+    reset_pin: accessHref,
+    open_access_centre: accessHref,
+    open_onboarding_centre: onboardingHref,
+    open_identity_audit: identityHref,
+    assign_training: onboardingHref,
+    upload_document: entitlementsHref,
+    open_roster: rosterHref,
+    open_command_centre: commandHref,
+    open_documents: `${onboardingHref}#compliance`,
+    suspend_access: accessHref,
+    revoke_access: accessHref,
+  };
+
+  const primaryLifecycle =
+    lifecycleActions.find((a) => a.id === "resend_onboarding_invite") ??
+    lifecycleActions.find((a) => a.id === "send_onboarding_invite") ??
+    lifecycleActions.find((a) => a.id === "start_onboarding") ??
+    lifecycleActions.find((a) => a.id === "resend_login_invite") ??
+    lifecycleActions.find((a) => a.id === "send_login_invite") ??
+    lifecycleActions.find((a) => a.id === "reset_pin") ??
+    lifecycleActions.find((a) => a.priority === "primary" && !a.guidance) ??
+    lifecycleActions.find((a) => a.priority === "primary") ??
+    null;
+
+  const guidanceAction = lifecycleActions.find((a) => a.guidance);
+  const guidance = guidanceAction?.guidance ?? null;
+
+  const profileActions: StaffProfileAction[] = [];
+
+  for (const action of lifecycleActions) {
+    const normalizedId =
+      action.id === "view_profile" && action.label.toLowerCase().includes("identity")
+        ? "open_identity_audit"
+        : action.id === "view_profile" && action.label.toLowerCase().includes("roster")
+          ? "open_roster"
+          : action.id;
+
+    const isPrimary = primaryLifecycle != null && action.id === primaryLifecycle.id;
+    const actionKind = profileActionKindForLifecycleId(normalizedId);
+    const section = profileSectionForLifecycleId(normalizedId, isPrimary);
+    const gate = permissionGateForAction(normalizedId, input.actionContext);
+    const confirm = confirmCopyForDangerAction(normalizedId);
+
+    profileActions.push({
+      id: normalizedId,
+      label: action.label,
+      description: action.guidance,
+      href: actionKind === "link" ? hrefById[normalizedId] ?? action.href : undefined,
+      actionKind,
+      section,
+      disabled: gate.disabled,
+      disabledReason: gate.disabledReason,
+      pendingLabel: pendingLabelForAction(normalizedId),
+      ...confirm,
+    });
+  }
+
+  const extraLinks: StaffProfileAction[] = [
+    {
+      id: "open_command_centre",
+      label: "Open Command Centre",
+      href: commandHref,
+      actionKind: "link",
+      section: "readiness",
+    },
+  ];
+
+  if (input.blockers.some((b) => b.id === "missing_documents")) {
+    extraLinks.unshift({
+      id: "open_documents",
+      label: "Open documents & compliance",
+      href: `${onboardingHref}#compliance`,
+      actionKind: "link",
+      section: "readiness",
+    });
+  }
+
+  for (const extra of extraLinks) {
+    if (!profileActions.some((a) => a.id === extra.id)) {
+      profileActions.push(extra);
+    }
+  }
+
+  const primaryAction =
+    profileActions.find((a) => a.section === "primary" && !a.disabled) ??
+    profileActions.find((a) => a.section === "primary") ??
+    null;
+
+  const recommendedStep = primaryAction;
+
+  return {
+    actions: profileActions,
+    primaryAction,
+    guidance,
+    recommendedStep,
+  };
 }
 
 export function buildStaffProfileOverviewModel(input: {
   tenantId: string;
+  staffMemberId: string;
   employmentStatus: string;
   archivedAt: string | null;
   email: string | null;
@@ -568,7 +883,42 @@ export function buildStaffProfileOverviewModel(input: {
   workforceIntelligence: StaffWorkforceIntelligence | null;
   identityAuditRow: StaffProfileIdentityAuditSnapshot | null;
   pinStatus?: string | null;
+  viewerCanManageAccess?: boolean;
+  viewerCanManageOnboarding?: boolean;
+  viewerCanManageReadiness?: boolean;
 }): StaffProfileOverviewModel {
+  const actionContext: StaffProfileActionContext = {
+    tenantId: input.tenantId,
+    staffMemberId: input.staffMemberId,
+    viewerCanManageAccess: input.viewerCanManageAccess ?? false,
+    viewerCanManageOnboarding: input.viewerCanManageOnboarding ?? false,
+    viewerCanManageReadiness: input.viewerCanManageReadiness ?? false,
+  };
+
+  const blockers = resolveStaffLifecycleBlockers({
+    tenantId: input.tenantId,
+    employmentStatus: input.employmentStatus,
+    systemAccessRevoked: input.systemAccessRevoked,
+    onboardingInviteStatus: input.onboardingInviteStatus,
+    accessRow: input.accessRow,
+    checklist: input.checklist,
+    workforceIntelligence: input.workforceIntelligence,
+    identityAuditRow: input.identityAuditRow,
+  });
+
+  const actionMenu = resolveStaffProfileActionMenu({
+    tenantId: input.tenantId,
+    employmentStatus: input.employmentStatus,
+    email: input.email,
+    systemAccessRevoked: input.systemAccessRevoked,
+    onboardingInviteStatus: input.onboardingInviteStatus,
+    hasOnboardingInviteUrl: input.hasOnboardingInviteUrl,
+    accessRow: input.accessRow,
+    checklist: input.checklist,
+    blockers,
+    actionContext,
+  });
+
   return {
     unifiedStatus: resolveStaffProfileExtendedStatus({
       employmentStatus: input.employmentStatus,
@@ -582,16 +932,7 @@ export function buildStaffProfileOverviewModel(input: {
       identityAuditRow: input.identityAuditRow,
       onboardingChecklist: input.checklist,
     }),
-    blockers: resolveStaffLifecycleBlockers({
-      tenantId: input.tenantId,
-      employmentStatus: input.employmentStatus,
-      systemAccessRevoked: input.systemAccessRevoked,
-      onboardingInviteStatus: input.onboardingInviteStatus,
-      accessRow: input.accessRow,
-      checklist: input.checklist,
-      workforceIntelligence: input.workforceIntelligence,
-      identityAuditRow: input.identityAuditRow,
-    }),
+    blockers,
     actions: resolveStaffProfileActions({
       tenantId: input.tenantId,
       employmentStatus: input.employmentStatus,
@@ -611,6 +952,8 @@ export function buildStaffProfileOverviewModel(input: {
       accessRow: input.accessRow,
       workforceIntelligence: input.workforceIntelligence,
     }),
+    actionMenu,
+    actionContext,
   };
 }
 

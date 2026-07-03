@@ -37,6 +37,10 @@ export type StaffLifecycleActionId =
   | "revoke_access"
   | "open_access_centre"
   | "open_onboarding_centre"
+  | "open_identity_audit"
+  | "open_roster"
+  | "open_command_centre"
+  | "open_documents"
   | "view_profile";
 
 export type StaffLifecycleAction = {

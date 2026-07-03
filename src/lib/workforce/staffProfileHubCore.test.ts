@@ -5,6 +5,7 @@ import { buildStaffProfileHref } from "@/src/lib/workforce/staffLifecycleCopy";
 import {
   buildStaffProfileOverviewModel,
   resolveStaffLifecycleBlockers,
+  resolveStaffProfileActionMenu,
   resolveStaffProfileActions,
 } from "@/src/lib/workforce/staffProfileHubCore";
 import {
@@ -14,6 +15,15 @@ import {
 } from "@/src/lib/workforce/staffLifecycleUxCore";
 
 const TENANT = "tenant-abc";
+const STAFF_MEMBER = "staff-member-1";
+
+const baseActionContext = {
+  tenantId: TENANT,
+  staffMemberId: STAFF_MEMBER,
+  viewerCanManageAccess: true,
+  viewerCanManageOnboarding: true,
+  viewerCanManageReadiness: true,
+};
 
 test("buildStaffProfileHref points to WorkforceOS staff profile hub", () => {
   assert.equal(
@@ -25,6 +35,7 @@ test("buildStaffProfileHref points to WorkforceOS staff profile hub", () => {
 test("Staff Profile Overview unified status includes access, PIN, onboarding, readiness and eligibility", () => {
   const overview = buildStaffProfileOverviewModel({
     tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
     employmentStatus: "pending_onboarding",
     archivedAt: null,
     email: "new@clinic.com",
@@ -77,6 +88,8 @@ test("Staff Profile Overview unified status includes access, PIN, onboarding, re
   assert.ok(overview.blockers.some((b) => b.id === "missing_identity_link"));
   assert.ok(overview.blockers.some((b) => b.id === "training_incomplete"));
   assert.ok(overview.blockers.some((b) => b.id === "missing_documents"));
+  assert.ok(overview.actionMenu.primaryAction);
+  assert.equal(overview.actionMenu.primaryAction?.id, "resend_onboarding_invite");
 });
 
 test("Pending onboarding staff show Resend/Open Staff Access action, not Reset PIN as primary", () => {
@@ -221,4 +234,186 @@ test("resolveStaffUnifiedStatus preserves access suspended semantics", () => {
   });
 
   assert.equal(status.isAccessSuspended, true);
+});
+
+test("Action menu: no invite shows Send invite or Open Staff Access as primary", () => {
+  const menu = resolveStaffProfileActionMenu({
+    tenantId: TENANT,
+    employmentStatus: "active",
+    email: "staff@clinic.com",
+    systemAccessRevoked: false,
+    onboardingInviteStatus: "accepted",
+    hasOnboardingInviteUrl: false,
+    checklist: {
+      accountCreated: true,
+      pinChosen: true,
+      permissionsAssigned: true,
+      trainingPending: false,
+    },
+    accessRow: {
+      authLoginStatus: "no_login",
+      inviteStatus: "none",
+      pinStatus: "Not set",
+      canSendInvite: true,
+      canResendInvite: false,
+      canCopyInviteLink: false,
+      canResetPin: false,
+      canSuspendAccess: false,
+      canRevokeAccess: false,
+    },
+    blockers: [],
+    actionContext: baseActionContext,
+  });
+
+  assert.ok(
+    menu.primaryAction?.id === "send_login_invite" ||
+      menu.primaryAction?.id === "open_access_centre"
+  );
+});
+
+test("Action menu: accepted login with PIN ready promotes Reset PIN as primary", () => {
+  const menu = resolveStaffProfileActionMenu({
+    tenantId: TENANT,
+    employmentStatus: "active",
+    email: "staff@clinic.com",
+    systemAccessRevoked: false,
+    onboardingInviteStatus: "accepted",
+    hasOnboardingInviteUrl: false,
+    checklist: {
+      accountCreated: true,
+      pinChosen: true,
+      permissionsAssigned: true,
+      trainingPending: false,
+    },
+    accessRow: {
+      authLoginStatus: "login_active",
+      inviteStatus: "accepted",
+      pinStatus: "Active",
+      canSendInvite: false,
+      canResendInvite: false,
+      canCopyInviteLink: false,
+      canResetPin: true,
+      canSuspendAccess: true,
+      canRevokeAccess: true,
+    },
+    blockers: [],
+    actionContext: baseActionContext,
+  });
+
+  assert.equal(menu.primaryAction?.id, "reset_pin");
+  assert.ok(!menu.actions.some((a) => a.id === "resend_login_invite"));
+});
+
+test("Action menu: non-admin viewer disables management actions with reason", () => {
+  const menu = resolveStaffProfileActionMenu({
+    tenantId: TENANT,
+    employmentStatus: "active",
+    email: "staff@clinic.com",
+    systemAccessRevoked: false,
+    onboardingInviteStatus: "accepted",
+    hasOnboardingInviteUrl: false,
+    checklist: {
+      accountCreated: true,
+      pinChosen: false,
+      permissionsAssigned: true,
+      trainingPending: false,
+    },
+    accessRow: {
+      authLoginStatus: "login_active",
+      inviteStatus: "accepted",
+      pinStatus: "Active",
+      canSendInvite: false,
+      canResendInvite: false,
+      canCopyInviteLink: false,
+      canResetPin: true,
+      canSuspendAccess: true,
+      canRevokeAccess: true,
+    },
+    blockers: [],
+    actionContext: {
+      ...baseActionContext,
+      viewerCanManageAccess: false,
+      viewerCanManageOnboarding: false,
+    },
+  });
+
+  const resetPin = menu.actions.find((a) => a.id === "reset_pin");
+  assert.equal(resetPin?.disabled, true);
+  assert.match(resetPin?.disabledReason ?? "", /Only admins can reset staff PIN access/i);
+});
+
+test("Action menu: missing documents adds compliance link in readiness", () => {
+  const menu = resolveStaffProfileActionMenu({
+    tenantId: TENANT,
+    employmentStatus: "active",
+    email: "staff@clinic.com",
+    systemAccessRevoked: false,
+    onboardingInviteStatus: "accepted",
+    hasOnboardingInviteUrl: false,
+    checklist: {
+      accountCreated: true,
+      pinChosen: true,
+      permissionsAssigned: true,
+      trainingPending: true,
+    },
+    accessRow: {
+      authLoginStatus: "login_active",
+      inviteStatus: "accepted",
+      pinStatus: "Active",
+      canSendInvite: false,
+      canResendInvite: false,
+      canCopyInviteLink: false,
+      canResetPin: true,
+      canSuspendAccess: true,
+      canRevokeAccess: true,
+    },
+    blockers: [
+      {
+        id: "missing_documents",
+        label: "Missing documents",
+        description: "Required compliance documents are missing or expired.",
+        href: "/fi-admin/tenant-abc/hr-os/onboarding#compliance",
+      },
+    ],
+    actionContext: baseActionContext,
+  });
+
+  assert.ok(menu.actions.some((a) => a.id === "open_documents"));
+  assert.ok(menu.actions.some((a) => a.id === "assign_training"));
+});
+
+test("Action menu: dangerous actions include confirmation copy", () => {
+  const menu = resolveStaffProfileActionMenu({
+    tenantId: TENANT,
+    employmentStatus: "active",
+    email: "staff@clinic.com",
+    systemAccessRevoked: false,
+    onboardingInviteStatus: "accepted",
+    hasOnboardingInviteUrl: false,
+    checklist: {
+      accountCreated: true,
+      pinChosen: true,
+      permissionsAssigned: true,
+      trainingPending: false,
+    },
+    accessRow: {
+      authLoginStatus: "login_active",
+      inviteStatus: "accepted",
+      pinStatus: "Active",
+      canSendInvite: false,
+      canResendInvite: false,
+      canCopyInviteLink: false,
+      canResetPin: true,
+      canSuspendAccess: true,
+      canRevokeAccess: true,
+    },
+    blockers: [],
+    actionContext: baseActionContext,
+  });
+
+  const suspend = menu.actions.find((a) => a.id === "suspend_access");
+  const revoke = menu.actions.find((a) => a.id === "revoke_access");
+  assert.ok(suspend?.confirmTitle);
+  assert.ok(revoke?.confirmTitle);
+  assert.equal(suspend?.actionKind, "danger");
 });

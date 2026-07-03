@@ -24,10 +24,12 @@ export default async function WorkforceOsStaffProfilePage({
   const data = await loadWorkforceOsStaffProfilePage(tenantId.trim(), staffId.trim());
   if (!data) notFound();
 
-  const overview = await loadStaffProfileHubOverview(tenantId.trim(), data.lifecycle);
+  const overview = await loadStaffProfileHubOverview(tenantId.trim(), data.lifecycle, {
+    canManage: data.canManage,
+  });
 
   return (
-    <div className="mx-auto max-w-4xl pb-8">
+    <div className="mx-auto max-w-6xl pb-8">
       <WorkforceOsStaffProfileClient
         tenantId={tenantId.trim()}
         lifecycle={data.lifecycle}
