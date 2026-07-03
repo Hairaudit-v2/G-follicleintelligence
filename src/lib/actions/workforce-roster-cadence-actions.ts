@@ -9,10 +9,7 @@ import {
   saveWorkforceRosterPlanningPolicy,
   loadWorkforceRosterPlanningPolicy,
 } from "@/src/lib/workforce/rosterCadencePolicy.server";
-import {
-  ROSTER_CADENCE_VALUES,
-  type WorkforceRosterPlanningPolicy,
-} from "@/src/lib/workforce/rosterCadencePolicyCore";
+import type { WorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicyCore";
 
 const rosterCadenceSchema = z.enum(["weekly", "fortnightly", "monthly"]);
 const weekStartDaySchema = z.enum(["monday", "sunday"]);
@@ -87,5 +84,3 @@ export async function saveWorkforceRosterPlanningPolicyAction(
     return { ok: false, error: errMsg(e) };
   }
 }
-
-export { ROSTER_CADENCE_VALUES };
