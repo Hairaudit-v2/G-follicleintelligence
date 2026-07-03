@@ -13,6 +13,9 @@ Stage 1 foundation (`fi_imaging_graft_tray_links`, tray evidence in SurgeryOS, r
 | `FI_IMAGING_ENABLE_GRAFT_TRAY_AI_COUNT` | `false` | Master switch — when off, no jobs enqueued and provider returns unavailable |
 | `FI_IMAGING_GRAFT_TRAY_AI_PROVIDER` | `stub` | `stub` or `openai_vision` (preview) |
 | `FI_IMAGING_GRAFT_TRAY_COUNT_TOLERANCE_PERCENT` | `5` | Within-tolerance threshold for AI vs manual comparison |
+| `FI_IMAGING_REQUIRE_GRAFT_TRAY_CAPTURE` | `false` | Stage 1 gate — blocks reconciliation without linked tray photo |
+
+Staging enablement and UAT steps: [imaging-os-graft-tray-staging-uat.md](./imaging-os-graft-tray-staging-uat.md).
 
 ## Provider architecture
 

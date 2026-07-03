@@ -16,9 +16,9 @@ export function deriveClinicalStaffingDisplayStatus(
   templateConfigured: boolean
 ): ClinicalStaffingDisplayStatus {
   if (!templateConfigured) return "not_configured";
-  if (status.blockedAssignments.length > 0) return "blocked";
-  if (status.missingRoles.length > 0) return "missing_roles";
-  if (status.warnings.length > 0) return "warning";
+  if ((status.blockedAssignments ?? []).length > 0) return "blocked";
+  if ((status.missingRoles ?? []).length > 0) return "missing_roles";
+  if ((status.warnings ?? []).length > 0) return "warning";
   if (status.ready) return "ready";
   return "missing_roles";
 }
@@ -71,8 +71,8 @@ export function toClinicalStaffingSummaryDto(
   };
 }
 
-export function formatRequiredRolesLine(roles: Record<string, number>): string {
-  const entries = Object.entries(roles);
+export function formatRequiredRolesLine(roles: Record<string, number> | null | undefined): string {
+  const entries = Object.entries(roles ?? {});
   if (!entries.length) return "—";
   return entries.map(([role, count]) => `${role} ×${count}`).join(", ");
 }

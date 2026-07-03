@@ -76,9 +76,11 @@ Surfaced via `collectImagingReviewReasons` → `imagingClinicalReviewQueue`.
 |----------|---------|--------|
 | `FI_IMAGING_REQUIRE_GRAFT_TRAY_CAPTURE` | `false` | Blocks final reconciliation without linked tray photo |
 
+Staging UAT checklist: [imaging-os-graft-tray-staging-uat.md](./imaging-os-graft-tray-staging-uat.md).
+
 ## Known limitations
 
-- No AI graft counting yet — `mismatch_reason` is a placeholder.
+- Full automated AI graft counting is not production-ready — see [imaging-os-ai-graft-tray-validation.md](./imaging-os-ai-graft-tray-validation.md).
 - Links require resolvable surgery context (surgery id, case, or booking).
 - Pre-migration tray photos are not backfilled automatically.
 

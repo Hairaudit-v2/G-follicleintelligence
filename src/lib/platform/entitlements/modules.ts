@@ -40,7 +40,7 @@ export const FI_MODULE_DEFAULT_ALLOWED_ROLES: Readonly<Record<FiModuleCode, read
   audit_os: ["admin", "fi_admin", "owner", "tenant_backend", "data_safety_admin"],
   academy_os: ["admin", "fi_admin", "owner", "tenant_backend"],
   analytics_os: ["admin", "fi_admin", "owner", "tenant_backend", "dashboard_viewer"],
-  hr_os: ["admin", "fi_admin", "owner", "tenant_backend", "crm_operator", "hr_manager"],
+  hr_os: ["admin", "fi_admin", "owner", "tenant_backend", "crm_operator", "hr_manager", "manager"],
 };
 
 export const FI_MODULE_DISPLAY_NAMES: Readonly<Record<FiModuleCode, string>> = {
@@ -196,7 +196,13 @@ export function resolveEffectiveAllowedRoles(
 export const HR_OS_MODULE_CODE = "hr_os" as const;
 
 /** Tighter HR OS route gate on top of module allow-list. */
-export const HR_OS_ROUTE_REQUIRED_ROLES = ["owner", "fi_admin", "admin", "hr_manager"] as const;
+export const HR_OS_ROUTE_REQUIRED_ROLES = [
+  "owner",
+  "fi_admin",
+  "admin",
+  "hr_manager",
+  "manager",
+] as const;
 
 /** Pure HR OS entitlement check — used by route gate and unit tests. */
 export function evaluateHrOsModuleEntitlement(ctx: EntitlementAccessContext): ModuleAccessResult {

@@ -23,6 +23,7 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 type PageProps = {
   params: Promise<{ tenantId: string }>;
@@ -94,6 +95,10 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
   );
   } catch (e) {
     const message = e instanceof Error ? e.message : "Roster page failed to load.";
+    const digest =
+      e instanceof Error && "digest" in e
+        ? String((e as Error & { digest?: string }).digest ?? "").trim() || undefined
+        : undefined;
     const showDetail =
       process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview";
     return (
@@ -103,6 +108,7 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
             ok: false,
             failedStep: "load_roster_payload",
             message,
+            digest,
             schemaCheckPassed: true,
             counts: {},
           }}

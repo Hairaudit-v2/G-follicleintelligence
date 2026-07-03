@@ -124,7 +124,7 @@ function entitledContext(
     subscriptionStatus: "active",
     moduleExists: true,
     moduleEnabled: true,
-    allowedRoles: ["admin", "owner", "hr_manager", "crm_operator"],
+    allowedRoles: ["admin", "owner", "hr_manager", "manager", "crm_operator"],
     userExists: true,
     userRole: "admin",
     ...overrides,
@@ -138,7 +138,7 @@ function entitledState(overrides: Partial<MockState> = {}): MockState {
     module: {
       id: MODULE_ID,
       code: "hr_os",
-      default_allowed_roles: ["admin", "owner", "hr_manager"],
+      default_allowed_roles: ["admin", "owner", "hr_manager", "manager"],
       is_active: true,
     },
     tenantModule: { enabled: true, allowed_roles: [] },
@@ -165,6 +165,7 @@ test("verified + active + enabled + wrong role denied", () => {
     "fi_admin",
     "admin",
     "hr_manager",
+    "manager",
   ]);
 });
 
@@ -318,6 +319,19 @@ test("route access allowed writes hr_os_route_access audit", async () => {
 
 test("hr_manager role allowed through HR OS route gate", async () => {
   const state = entitledState({ user: { id: USER, role: "hr_manager", auth_user_id: AUTH_USER } });
+  const supabase = createMockSupabase(state);
+
+  const result = await resolveHrOsRouteAccessWithOptions(TENANT, {
+    supabaseClientForTests: supabase,
+    authUserId: AUTH_USER,
+    platformAdminPreview: false,
+  });
+
+  assert.equal(result.ok, true);
+});
+
+test("manager role allowed through HR OS route gate", async () => {
+  const state = entitledState({ user: { id: USER, role: "manager", auth_user_id: AUTH_USER } });
   const supabase = createMockSupabase(state);
 
   const result = await resolveHrOsRouteAccessWithOptions(TENANT, {
