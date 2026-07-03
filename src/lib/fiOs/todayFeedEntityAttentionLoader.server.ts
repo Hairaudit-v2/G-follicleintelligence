@@ -27,6 +27,10 @@ import {
   consultationEntityDetailLine,
 } from "@/src/lib/fiOs/todayFeedDerive";
 import {
+  resolvePersonDisplayNameForToday,
+  todayFirstNameFromLabel,
+} from "@/src/lib/fiOs/todayPersonLabels";
+import {
   consultationEntityHref,
   pathologyResultEntityHref,
   paymentEntityHref,
@@ -56,12 +60,6 @@ export const todayEntityAttentionSignalSchema = z.object({
 export type TodayEntityAttentionPayload = {
   signals: TodayEntityAttentionSignal[];
 };
-
-function firstName(label: string): string {
-  const trimmed = label.trim();
-  if (!trimmed) return "Patient";
-  return trimmed.split(/\s+/)[0] ?? trimmed;
-}
 
 async function loadPatientLabelsById(
   tenantId: string,
@@ -309,7 +307,7 @@ async function loadFinancialEntitySignals(
           category: "financial",
           aggregateKey: "financial_clearance",
           personLabel: label,
-          actionLabel: `${firstName(label)} needs financial clearance`,
+          actionLabel: `${todayFirstNameFromLabel(label)} needs financial clearance`,
           detailLine: clearance.clearance_label?.trim() || "Confirm clearance before procedure day",
           actionHint: "Review clearance",
           href,
@@ -327,7 +325,7 @@ async function loadFinancialEntitySignals(
           category: "financial",
           aggregateKey: "surgery_payment",
           personLabel: label,
-          actionLabel: `${firstName(label)} needs payment attention`,
+          actionLabel: `${todayFirstNameFromLabel(label)} needs payment attention`,
           detailLine: pipeline.summary_label?.trim() || "Deposit or balance requires confirmation",
           actionHint: "Take payment",
           href,
@@ -370,7 +368,7 @@ async function loadFinancialEntitySignals(
       category: "financial",
       aggregateKey: "surgery_payment",
       personLabel: label,
-      actionLabel: `${firstName(label)} payment overdue`,
+      actionLabel: `${todayFirstNameFromLabel(label)} payment overdue`,
       detailLine: "Outstanding balance requires collection",
       actionHint: "Take payment",
       href: paymentEntityHref(base, row.id, "payment_record"),
@@ -442,7 +440,7 @@ async function loadSurgeryEntitySignals(
         category: "surgery",
         aggregateKey: "surgery_readiness",
         personLabel: label,
-        actionLabel: `${firstName(label)} surgery preparation incomplete`,
+        actionLabel: `${todayFirstNameFromLabel(label)} surgery preparation incomplete`,
         detailLine: `Procedure ${dayLabel} — case not linked yet`,
         actionHint: "Review case",
         href: b.patient_id ? `${base}/patients/${b.patient_id}` : `${base}/cases`,
@@ -461,7 +459,7 @@ async function loadSurgeryEntitySignals(
       category: "surgery",
       aggregateKey: "surgery_readiness",
       personLabel: label,
-      actionLabel: `${firstName(label)} surgery scheduled ${dayLabel}`,
+      actionLabel: `${todayFirstNameFromLabel(label)} surgery scheduled ${dayLabel}`,
       detailLine: "Open case workspace to confirm readiness",
       actionHint: "Open case",
       href: surgeryCaseEntityHref(base, b.case_id),
@@ -513,7 +511,7 @@ async function loadPathologyEntitySignals(
       category: "pathology",
       aggregateKey: "pathology_review",
       personLabel: label,
-      actionLabel: `Review ${firstName(label)} pathology result`,
+      actionLabel: `Review ${todayFirstNameFromLabel(label)} pathology result`,
       detailLine: "Blood result awaiting clinical review",
       actionHint: "Review",
       href: pathologyResultEntityHref(base, row.patient_id, row.id),
@@ -608,12 +606,20 @@ async function loadStaffEntitySignals(tenantId: string, base: string): Promise<T
   if (memberIds.length) {
     const { data: members, error: memberErr } = await supabase
       .from("fi_staff_members")
-      .select("id, full_name")
+      .select("id, full_name, email")
       .eq("tenant_id", tid)
       .in("id", memberIds);
     if (memberErr) throw new Error(memberErr.message);
     for (const m of members ?? []) {
-      nameById.set(String((m as { id: string }).id), String((m as { full_name: string }).full_name));
+      const row = m as { id: string; full_name: string; email: string | null };
+      nameById.set(
+        String(row.id),
+        resolvePersonDisplayNameForToday({
+          full_name: row.full_name,
+          email: row.email,
+          role: "staff",
+        }) || "Staff member"
+      );
     }
   }
 
@@ -638,7 +644,7 @@ async function loadStaffEntitySignals(tenantId: string, base: string): Promise<T
       category: "staff",
       aggregateKey: "staff_compliance",
       personLabel: name,
-      actionLabel: `${firstName(name)} — ${alertType}`,
+      actionLabel: `${todayFirstNameFromLabel(name)} — ${alertType}`,
       detailLine: row.message?.trim() || "Compliance item needs attention",
       actionHint: "Review",
       href: staffEntityHref(base, staffId),

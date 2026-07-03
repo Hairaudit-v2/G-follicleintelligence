@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolvePersonDisplayNameForToday } from "@/src/lib/fiOs/todayPersonLabels";
 
 /**
  * Auth user email for FI OS chrome (profile menu). Mirrors cookie session used by CRM gate.
@@ -49,11 +50,17 @@ export async function resolveFiOsAuthUserDisplayNameById(authUserId: string): Pr
     const { data, error } = await supabase.auth.admin.getUserById(id);
     if (error || !data?.user) return id;
     const meta = data.user.user_metadata as Record<string, unknown> | undefined;
-    const full =
-      meta && typeof meta.full_name === "string" && meta.full_name.trim().length > 0
-        ? meta.full_name.trim()
-        : "";
-    if (full) return full;
+    const resolved = resolvePersonDisplayNameForToday({
+      first_name: typeof meta?.first_name === "string" ? meta.first_name : undefined,
+      firstName: typeof meta?.firstName === "string" ? meta.firstName : undefined,
+      full_name: typeof meta?.full_name === "string" ? meta.full_name : undefined,
+      fullName: typeof meta?.fullName === "string" ? meta.fullName : undefined,
+      display_name: typeof meta?.display_name === "string" ? meta.display_name : undefined,
+      displayName: typeof meta?.displayName === "string" ? meta.displayName : undefined,
+      name: typeof meta?.name === "string" ? meta.name : undefined,
+      email: data.user.email?.trim() || undefined,
+    });
+    if (resolved) return resolved;
     const email = data.user.email?.trim();
     if (email) return email;
     return id;

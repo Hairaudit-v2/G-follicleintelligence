@@ -1,4 +1,9 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import {
+  isEmailLike,
+  resolvePersonFirstNameLabel,
+  todayFirstNameFromLabel,
+} from "@/src/lib/fiOs/todayPersonLabels";
 import { buildAttentionPriorities } from "@/src/lib/fiAdmin/dashboardCommandCentreDerive";
 import {
   coveredAggregateKeys,
@@ -117,12 +122,6 @@ function parseMs(iso: string | null | undefined): number | null {
   return Number.isFinite(t) ? t : null;
 }
 
-function firstName(label: string): string {
-  const trimmed = label.trim();
-  if (!trimmed) return "Patient";
-  return trimmed.split(/\s+/)[0] ?? trimmed;
-}
-
 function minutesUntil(nowMs: number, iso: string | null | undefined): number | null {
   const t = parseMs(iso);
   if (t == null) return null;
@@ -152,7 +151,7 @@ function receptionCopy(
     })
   ) {
     return {
-      actionLabel: `${firstName(card.displayName)} says they're here`,
+      actionLabel: `${todayFirstNameFromLabel(card.displayName)} says they're here`,
       detailLine: "Awaiting reception confirmation — not fully checked in",
       actionHint: "Confirm check-in",
       groupKey: "reception:arrival_intent",
@@ -160,7 +159,7 @@ function receptionCopy(
   }
   if (card.receptionColumn === "arrived") {
     return {
-      actionLabel: `${firstName(card.displayName)} is waiting`,
+      actionLabel: `${todayFirstNameFromLabel(card.displayName)} is waiting`,
       detailLine: card.statusLabel.trim() || "Checked in — ready to be seen",
       actionHint: "Check in",
       groupKey: "reception:waiting",
@@ -168,7 +167,7 @@ function receptionCopy(
   }
   if (card.receptionColumn === "in_treatment") {
     return {
-      actionLabel: `${firstName(card.displayName)} is in treatment`,
+      actionLabel: `${todayFirstNameFromLabel(card.displayName)} is in treatment`,
       detailLine: card.typeLabel.trim() || undefined,
       actionHint: "View",
       groupKey: "reception:in_clinic",
@@ -176,7 +175,7 @@ function receptionCopy(
   }
   if (card.receptionColumn === "in_consultation") {
     return {
-      actionLabel: `${firstName(card.displayName)} is in consultation`,
+      actionLabel: `${todayFirstNameFromLabel(card.displayName)} is in consultation`,
       detailLine: card.providerLabel.trim() || undefined,
       actionHint: "View",
       groupKey: "reception:in_clinic",
@@ -188,7 +187,7 @@ function receptionCopy(
     const arrival =
       mins <= 1 ? "arriving now" : mins === 1 ? "arriving in 1 minute" : `arriving in ${mins} minutes`;
     return {
-      actionLabel: `${firstName(card.displayName)} ${arrival}`,
+      actionLabel: `${todayFirstNameFromLabel(card.displayName)} ${arrival}`,
       detailLine: card.typeLabel.trim() || "Appointment starting soon",
       actionHint: "Check in",
       groupKey: "reception:arriving_soon",
@@ -196,7 +195,7 @@ function receptionCopy(
   }
 
   return {
-    actionLabel: `${firstName(card.displayName)} has an appointment later today`,
+    actionLabel: `${todayFirstNameFromLabel(card.displayName)} has an appointment later today`,
     detailLine: card.typeLabel.trim() || "Scheduled check-in expected",
     actionHint: "View",
   };
@@ -270,7 +269,7 @@ function staleLeadItems(
   const weight = categoryWeight(profileKey, "leads");
 
   return staleLeads.map((l) => {
-    const name = firstName(l.title);
+    const name = todayFirstNameFromLabel(l.title);
     const days = l.daysInStage;
     const dayLabel = days === 1 ? "1 day" : `${days} days`;
 
@@ -304,7 +303,7 @@ function taskDueItems(
   return tasksDue.map((t) => {
     const bucket = bucketForInstant(t.dueAt, { nowMs, todayEndMs });
     const overdue = parseMs(t.dueAt) != null && (parseMs(t.dueAt) as number) < nowMs;
-    const name = firstName(t.title);
+    const name = todayFirstNameFromLabel(t.title);
 
     return {
       id: `task-${t.id}`,
@@ -332,7 +331,7 @@ function humanizeReminderAction(r: DashboardReminderItem): { actionLabel: string
   }
   const type = r.templateType.replace(/_/g, " ").toLowerCase();
   return {
-    actionLabel: `Reminder for ${firstName(r.recipientLabel)}`,
+    actionLabel: `Reminder for ${todayFirstNameFromLabel(r.recipientLabel)}`,
     detailLine: type.charAt(0).toUpperCase() + type.slice(1),
   };
 }
@@ -659,7 +658,7 @@ export function consultationEntityActionLabel(
   personLabel: string
 ): string {
   const generic = isGenericConsultationSubject(personLabel);
-  const name = firstName(personLabel);
+  const name = todayFirstNameFromLabel(personLabel);
 
   switch (status) {
     case "draft":
@@ -696,19 +695,25 @@ export function consultationEntityDetailLine(input: {
 /** Safe first-name token for Today hero greeting — never exposes a raw email. */
 export function greetingNameFromDisplayName(displayName: string | null | undefined): string | null {
   if (!displayName?.trim()) return null;
-  const trimmed = displayName.trim();
 
-  if (trimmed.includes("@")) {
-    const local = trimmed.split("@")[0]?.trim() ?? "";
-    const segment = local.split(/[._+-]/)[0]?.trim() ?? "";
+  const trimmed = displayName.trim();
+  const resolved = resolvePersonFirstNameLabel({
+    display_name: trimmed,
+    full_name: trimmed,
+    name: trimmed,
+    email: isEmailLike(trimmed) ? trimmed : undefined,
+  });
+
+  if (!resolved || resolved === "Patient") return null;
+
+  if (isEmailLike(trimmed)) {
+    const segment = resolved.trim();
     if (!segment || !/^[a-zA-Z]/.test(segment)) return null;
-    if (/^[0-9a-f--]{12,}$/i.test(segment)) return null;
+    if (/^[0-9a-f-]{12,}$/i.test(segment)) return null;
     return segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase();
   }
 
-  const first = trimmed.split(/\s+/)[0]?.trim() ?? "";
-  if (!first || first.includes("@")) return null;
-  return first;
+  return resolved;
 }
 
 /** @deprecated Prefer `greetingNameFromDisplayName` for Today hero copy. */

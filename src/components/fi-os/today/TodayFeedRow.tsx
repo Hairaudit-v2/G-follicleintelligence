@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { TodayFeedItem } from "@/src/lib/fiOs/todayFeedDerive";
+import { todayFirstNameFromLabel } from "@/src/lib/fiOs/todayPersonLabels";
 import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFeedLink";
 
 import { TodayFeedGroupRow } from "@/src/components/fi-os/today/TodayFeedGroupRow";
@@ -19,11 +20,11 @@ export function TodayFeedRow({ item }: { item: TodayFeedItem }) {
   const RowLink = WorkspaceFeedLink;
 
   const primaryLine = item.personLabel
-    ? item.actionLabel.startsWith(firstName(item.personLabel)) ||
+    ? item.actionLabel.startsWith(todayFirstNameFromLabel(item.personLabel)) ||
       item.actionLabel.startsWith("Call ") ||
       item.actionLabel.startsWith("Follow up")
       ? item.actionLabel
-      : `${firstName(item.personLabel)} — ${item.actionLabel}`
+      : `${todayFirstNameFromLabel(item.personLabel)} — ${item.actionLabel}`
     : item.actionLabel;
 
   return (
@@ -51,10 +52,4 @@ export function TodayFeedRow({ item }: { item: TodayFeedItem }) {
       </div>
     </li>
   );
-}
-
-function firstName(label: string): string {
-  const trimmed = label.trim();
-  if (!trimmed) return "Patient";
-  return trimmed.split(/\s+/)[0] ?? trimmed;
 }
