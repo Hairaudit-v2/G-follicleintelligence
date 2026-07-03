@@ -260,7 +260,7 @@ export function StaffProfileActionMenu({
       startTransition(async () => {
         try {
           let result:
-            | { ok: true; inviteUrl?: string; emailSent?: boolean }
+            | { ok: true; inviteUrl?: string; emailSent?: boolean; warning?: string | null }
             | { ok: false; error: string };
 
           const body = { staffMemberId };
