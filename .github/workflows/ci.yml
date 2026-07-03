@@ -25,39 +25,45 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
+          node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Format check (app code)
-        run: npm run format:check:ci
+        run: pnpm run format:check:ci
 
       - name: Migration version check
-        run: npm run check:migrations
+        run: pnpm run check:migrations
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Typecheck e2e
-        run: npm run typecheck:e2e
+        run: pnpm run typecheck:e2e
 
       - name: Unit tests
-        run: npm run test:unit
+        run: pnpm run test:unit
 
       - name: Production env rules (fixture)
-        run: npm run check:env:production-rules
+        run: pnpm run check:env:production-rules
         env:
           NODE_ENV: production
 
       - name: Production build
-        run: npm run build
+        run: pnpm run build
         env:
           NODE_ENV: production
