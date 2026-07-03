@@ -3,11 +3,10 @@ import { notFound } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { RosterCommandCentreDiagnosticCard } from "@/src/components/fi/workforce/RosterCommandCentreDiagnosticCard";
 import { RosterCommandCentreView } from "@/src/components/fi/workforce/RosterCommandCentreView";
-import {
-  loadRosterCommandCentre,
-  loadRosterEventDetail,
-} from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
+import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
+import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";
 import {
   defaultRosterCommandCentreDateRange,
   parseRosterCommandCentreSearchParams,
@@ -41,53 +40,36 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
     : { startsAt: defaultRange.startsAt, endsAt: defaultRange.endsAt };
   const preselectedEventKey = resolveRosterPreselectedEventKey(parsed);
 
-  const payload = await loadRosterCommandCentre({
-    tenantId: tenantId.trim(),
-    dateRange,
-    weekStart,
-    clinicId: parsed.clinicId,
-    staffId: parsed.staffId,
-    eventType: parsed.eventType,
-    statusFilter: parsed.status,
-    preselectedEventKey,
-  });
-
-  const eventDetails: Record<
-    string,
-    {
-      candidatesByRole: Record<
-        string,
-        import("@/src/lib/workforce-os/workforceRosterCandidates").RosterAssignableCandidate[]
-      >;
-    }
-  > = {};
-
-  const keysToHydrate = new Set<string>();
-  if (preselectedEventKey) keysToHydrate.add(preselectedEventKey);
-  for (const event of payload.events) {
-    if (event.staffing.displayStatus === "missing_roles") keysToHydrate.add(event.eventKey);
-  }
-
-  for (const key of keysToHydrate) {
-    const [eventSource, eventId] = key.split(":");
-    if (!eventSource || !eventId) continue;
-    if (eventSource !== "booking") continue;
-    const detail = await loadRosterEventDetail({
+  const [result, showTechnicalDetail] = await Promise.all([
+    loadRosterCommandCentrePageData({
       tenantId: tenantId.trim(),
-      eventSource: "booking",
-      eventId,
-    });
-    if (detail.event) {
-      eventDetails[key] = { candidatesByRole: detail.candidatesByRole };
-    }
+      dateRange,
+      weekStart,
+      clinicId: parsed.clinicId,
+      staffId: parsed.staffId,
+      eventType: parsed.eventType,
+      statusFilter: parsed.status,
+      preselectedEventKey,
+    }),
+    canViewDashboardSystemDiagnostics(tenantId.trim()),
+  ]);
+
+  if (!result.ok) {
+    const showDetail =
+      showTechnicalDetail || process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview";
+    return (
+      <div className={cn(fiOsChromeClasses.pageScrollRoot, fiOsChromeClasses.pageScrollContent, "p-4 sm:p-6")}>
+        <RosterCommandCentreDiagnosticCard failure={result} showTechnicalDetail={showDetail} />
+      </div>
+    );
   }
 
   return (
     <div className={cn(fiOsChromeClasses.pageScrollRoot)}>
       <RosterCommandCentreView
         tenantId={tenantId.trim()}
-        payload={{ ...payload, preselectedEventKey }}
-        eventDetails={eventDetails}
+        payload={result.payload}
+        eventDetails={result.eventDetails}
         filters={{
           weekStart,
           clinicId: parsed.clinicId ?? "",

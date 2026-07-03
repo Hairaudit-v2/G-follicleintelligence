@@ -108,14 +108,19 @@ function dayWorkingMinutes(day: StaffStandardHoursDayInput): number {
 }
 
 /** Sum net working minutes across the week pattern. */
-export function computeStandardHoursWeeklyTotal(days: StaffStandardHoursDayInput[]): number {
+export function computeStandardHoursWeeklyTotal(
+  days: StaffStandardHoursDayInput[] | undefined
+): number {
+  if (!days?.length) return 0;
   let total = 0;
   for (const day of days) total += dayWorkingMinutes(day);
   return total;
 }
 
 /** Format weekly total as decimal hours (one decimal place). */
-export function formatStandardHoursWeeklyTotal(days: StaffStandardHoursDayInput[]): string {
+export function formatStandardHoursWeeklyTotal(
+  days: StaffStandardHoursDayInput[] | undefined
+): string {
   const mins = computeStandardHoursWeeklyTotal(days);
   return (mins / 60).toFixed(1);
 }

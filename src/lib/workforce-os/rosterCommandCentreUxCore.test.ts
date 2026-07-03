@@ -14,6 +14,7 @@ import {
 import {
   applyStandardHoursTemplate,
   formatStandardHoursSummary,
+  formatStandardHoursWeeklyTotal,
   staffHasConfiguredStandardHours,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
@@ -47,6 +48,12 @@ test("staffHasConfiguredStandardHours and summary for four_ten template", () => 
   assert.match(formatStandardHoursSummary(days), /Mon Tue Thu Fri/);
   assert.match(formatStandardHoursSummary(days), /07:30–17:30/);
   assert.equal(formatStandardHoursSummary(undefined), "No standard hours set");
+});
+
+test("formatStandardHoursWeeklyTotal handles missing staff pattern safely", () => {
+  assert.equal(formatStandardHoursWeeklyTotal(undefined), "0.0");
+  assert.equal(formatStandardHoursWeeklyTotal([]), "0.0");
+  assert.equal(formatStandardHoursWeeklyTotal(applyStandardHoursTemplate("four_ten")), "40.0");
 });
 
 test("resolveRosterCellClickIntent prefers standard hours setup before manual shift", () => {

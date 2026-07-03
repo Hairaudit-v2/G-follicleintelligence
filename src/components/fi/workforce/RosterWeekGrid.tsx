@@ -112,7 +112,7 @@ export function RosterWeekGrid({
             const standardHours = standardHoursByStaffId[staff.id];
             const hasStandardHours = staffHasConfiguredStandardHours(standardHours);
             const summary = formatStandardHoursSummary(standardHours);
-            const weeklyTotal = formatStandardHoursWeeklyTotal(standardHours);
+            const weeklyTotal = formatStandardHoursWeeklyTotal(standardHours ?? []);
 
             return (
               <tr key={staff.id} className="border-b border-white/[0.05] align-top">
