@@ -149,7 +149,6 @@ export function resolveStaffProfileExtendedStatus(input: {
     onboardingChecklistComplete: checklist ? isOnboardingChecklistComplete(checklist) : undefined,
   });
 
-  const pinRaw = String(input.pinStatus ?? "").toLowerCase();
   const clinicalBlocked =
     intel?.readinessScore != null &&
     intel.readinessScore < 70 &&

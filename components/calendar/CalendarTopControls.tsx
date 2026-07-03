@@ -36,7 +36,7 @@ import {
   calendarClinicFilterSelectValue,
   calendarStaffFilterSelectValue,
 } from "@/src/lib/calendar/calendarToolbarFilters";
-import { fiOsCalDesktopOnly, fiOsCalTabletOnly } from "@/src/lib/calendar/fiOsCalendarResponsive";
+import { fiOsCalTabletOnly } from "@/src/lib/calendar/fiOsCalendarResponsive";
 
 const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
   { id: "day", label: "Day" },
