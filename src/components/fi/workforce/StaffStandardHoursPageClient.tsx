@@ -8,7 +8,6 @@ import type { DefaultFullTimePattern, RosterCadence } from "@/src/lib/workforce/
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
-  buildStaffStandardHoursSetupIndexHref,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import { cn } from "@/lib/utils";

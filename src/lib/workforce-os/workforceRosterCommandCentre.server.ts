@@ -8,12 +8,7 @@ import {
 import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import {
-  HR_OS_ROUTE_REQUIRED_ROLES,
-  resolveHrOsRouteAccess,
-} from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { parseStaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleCore";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
