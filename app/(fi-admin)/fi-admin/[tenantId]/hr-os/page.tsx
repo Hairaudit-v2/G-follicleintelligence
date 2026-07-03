@@ -198,9 +198,17 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
           <li>
             <a
               className="text-cyan-400 hover:text-cyan-300"
-              href={`/fi-admin/${tenantId.trim()}/staff`}
+              href={`/fi-admin/${tenantId.trim()}/workforce-os`}
             >
               Workforce Command Centre
+            </a>
+          </li>
+          <li>
+            <a
+              className="text-cyan-400 hover:text-cyan-300"
+              href={`/fi-admin/${tenantId.trim()}/staff`}
+            >
+              Staff Directory
             </a>
           </li>
         </ul>

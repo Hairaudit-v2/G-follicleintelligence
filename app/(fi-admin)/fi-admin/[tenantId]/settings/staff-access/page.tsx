@@ -27,7 +27,7 @@ import {
 } from "@/src/lib/staffAccess/staffAccessRegistry";
 
 export const metadata = {
-  title: "Staff Access",
+  title: "Staff entitlements",
   robots: { index: false, follow: false } as const,
 };
 
@@ -128,17 +128,25 @@ export default async function StaffAccessSettingsPage({
           >
             Configuration
           </Link>{" "}
-          / Staff Access
+          / Staff entitlements
         </p>
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
-          Staff Access &amp; Entitlements
+          Staff entitlements
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Every staff member keeps a standard <span className="text-[#CBD5E1]">role template</span>,
-          then receives optional module/tab grants on top — so a doctor who becomes an investor can
-          see AnalyticsOS, FinancialOS, and the Investor Dashboard without changing their clinical
-          role. Grants are tenant- or clinic-scoped with read / edit / approve levels and are fully
-          audited.
+          Configure module and field grants by role — separate from operational login, invite, and
+          PIN management in{" "}
+          <Link
+            href={`/fi-admin/${tenantId}/workforce-os/staff-access`}
+            className="font-medium text-[#22C1FF] hover:underline"
+          >
+            Staff Access Centre
+          </Link>
+          . Every staff member keeps a standard{" "}
+          <span className="text-[#CBD5E1]">role template</span>, then receives optional module/tab
+          grants on top — so a doctor who becomes an investor can see AnalyticsOS, FinancialOS, and
+          the Investor Dashboard without changing their clinical role. Grants are tenant- or
+          clinic-scoped with read / edit / approve levels and are fully audited.
         </p>
       </div>
 

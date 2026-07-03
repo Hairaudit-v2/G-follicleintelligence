@@ -17,6 +17,7 @@ import {
   type StaffInviteStatus,
 } from "@/src/lib/workforce/staffAccessCentreCore";
 import { resolveStaffLifecycleOperationalState } from "@/src/lib/workforce-os/staffLifecyclePresentation";
+import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 
 export type StaffLifecycleSurface = "directory" | "profile" | "access_centre" | "command_centre";
 
@@ -94,7 +95,9 @@ export function resolveStaffUnifiedStatus(input: {
   onboardingChecklistComplete?: boolean;
 }): StaffUnifiedStatusSnapshot {
   const operationalState = resolveStaffLifecycleOperationalState({
-    employment_status: String(input.employmentStatus ?? "active"),
+    employment_status: String(
+      input.employmentStatus ?? "active"
+    ) as StaffMemberLifecycleRow["employment_status"],
     archived_at: input.archivedAt ?? null,
   });
 

@@ -146,8 +146,15 @@ export function OffboardingCentreClient({
       </section>
 
       <p className="mt-4 text-xs text-slate-500">
-        <Link href={`/fi-admin/${tenantId}/staff`} className="text-cyan-400 hover:text-cyan-300">
+        <Link
+          href={`/fi-admin/${tenantId}/workforce-os`}
+          className="text-cyan-400 hover:text-cyan-300"
+        >
           Workforce Command Centre
+        </Link>
+        {" · "}
+        <Link href={`/fi-admin/${tenantId}/staff`} className="text-cyan-400 hover:text-cyan-300">
+          Staff Directory
         </Link>
       </p>
     </div>

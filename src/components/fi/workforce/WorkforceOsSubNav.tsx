@@ -4,17 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import {
+  buildStaffDirectoryHref,
+  buildStaffIdentityAuditHref,
+  buildWorkforceRosterHref,
+  STAFF_LIFECYCLE_HELPERS,
+  STAFF_LIFECYCLE_LABELS,
+} from "@/src/lib/workforce/staffLifecycleCopy";
 
 export type WorkforceOsNavItem = {
   label: string;
   href: string;
   segment: string;
+  title?: string;
 };
 
 export function buildWorkforceOsNavItems(tenantId: string): WorkforceOsNavItem[] {
   const base = `/fi-admin/${tenantId}/workforce-os`;
   return [
-    { label: "Command Centre", href: base, segment: "" },
+    {
+      label: STAFF_LIFECYCLE_LABELS.commandCentreShort,
+      href: base,
+      segment: "",
+    },
     { label: "Planning", href: `${base}/planning`, segment: "planning" },
     {
       label: "Procedure Staffing",
@@ -30,7 +42,23 @@ export function buildWorkforceOsNavItems(tenantId: string): WorkforceOsNavItem[]
       segment: "hr-reconciliation",
     },
     { label: "Members", href: `${base}/directory`, segment: "members" },
-    { label: "Staff Access", href: `${base}/staff-access`, segment: "staff-access" },
+    {
+      label: STAFF_LIFECYCLE_LABELS.staffAccess,
+      href: `${base}/staff-access`,
+      segment: "staff-access",
+    },
+    {
+      label: STAFF_LIFECYCLE_LABELS.identityAudit,
+      href: buildStaffIdentityAuditHref(tenantId),
+      segment: "identity-audit",
+      title: STAFF_LIFECYCLE_HELPERS.identityAudit,
+    },
+    {
+      label: STAFF_LIFECYCLE_LABELS.roster,
+      href: buildWorkforceRosterHref(tenantId),
+      segment: "roster",
+      title: STAFF_LIFECYCLE_HELPERS.roster,
+    },
   ];
 }
 
@@ -45,6 +73,12 @@ export function isWorkforceOsNavActive(pathname: string, base: string, segment: 
   }
   if (segment === "staff-access") {
     return pathname.startsWith(`${base}/staff-access`);
+  }
+  if (segment === "identity-audit") {
+    return pathname.startsWith(`${base}/staff-identity-audit`);
+  }
+  if (segment === "roster") {
+    return pathname.includes("/hr-os/roster");
   }
   return pathname === `${base}/${segment}` || pathname.startsWith(`${base}/${segment}/`);
 }
@@ -65,6 +99,7 @@ export function WorkforceOsSubNav({ tenantId }: { tenantId: string }) {
           <Link
             key={item.href}
             href={item.href}
+            title={item.title}
             className={cn(
               "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
               active
@@ -77,10 +112,10 @@ export function WorkforceOsSubNav({ tenantId }: { tenantId: string }) {
         );
       })}
       <Link
-        href={`/fi-admin/${tenantId}/staff`}
+        href={buildStaffDirectoryHref(tenantId)}
         className="ml-auto rounded-full border border-white/[0.06] px-3 py-1.5 text-xs font-medium text-[#64748B] transition-colors hover:border-white/[0.12] hover:text-[#94A3B8]"
       >
-        FI Staff directory
+        {STAFF_LIFECYCLE_LABELS.staffDirectory}
       </Link>
     </nav>
   );

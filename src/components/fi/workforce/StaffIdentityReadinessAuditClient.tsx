@@ -94,9 +94,9 @@ export function StaffIdentityReadinessAuditClient({
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
           WorkforceOS
         </p>
-        <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Staff identity readiness</h1>
+        <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Identity Audit</h1>
         <p className="mt-2 max-w-2xl text-sm text-[#94A3B8]">
-          Checks whether existing staff are ready for FI OS access.
+          Check whether staff identity, login, PIN, and readiness records are linked correctly.
         </p>
       </header>
 
@@ -161,13 +161,19 @@ export function StaffIdentityReadinessAuditClient({
           href={`/fi-admin/${tenantId}/workforce-os/staff-access`}
           className="text-[#22C1FF] underline-offset-2 hover:underline"
         >
-          Open Staff Access Centre
+          Staff Access Centre
         </Link>
         <Link
-          href={`/fi-admin/${tenantId}/workforce-os/directory`}
+          href={`/fi-admin/${tenantId}/workforce-os`}
           className="text-[#22C1FF] underline-offset-2 hover:underline"
         >
-          Open staff directory
+          Workforce Command Centre
+        </Link>
+        <Link
+          href={`/fi-admin/${tenantId}/staff`}
+          className="text-[#22C1FF] underline-offset-2 hover:underline"
+        >
+          Staff Directory
         </Link>
       </div>
     </div>

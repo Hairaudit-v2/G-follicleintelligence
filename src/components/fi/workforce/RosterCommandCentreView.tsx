@@ -92,8 +92,15 @@ export function RosterCommandCentreView({
           availability.
         </p>
         <p className="mt-2 text-xs text-slate-500">
+          <Link
+            href={`/fi-admin/${tenantId}/workforce-os`}
+            className="text-cyan-400 hover:text-cyan-300"
+          >
+            Workforce Command Centre
+          </Link>
+          {" · "}
           <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">
-            ← Back to HR OS
+            HR dashboard
           </Link>
         </p>
       </header>

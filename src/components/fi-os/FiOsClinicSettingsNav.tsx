@@ -157,9 +157,9 @@ export function FiOsClinicSettingsNav({
           <Link
             href={`${base}/settings/staff-access`}
             className={linkCls(`${base}/settings/staff-access`)}
-            title="Adaptive staff access: role templates plus optional module/tab grants (SA-1 entitlements engine)."
+            title="Module and field grants by role — separate from login, invite, and PIN provisioning."
           >
-            Staff Access
+            Staff entitlements
           </Link>
         ) : null}
         {showHubspot ? (

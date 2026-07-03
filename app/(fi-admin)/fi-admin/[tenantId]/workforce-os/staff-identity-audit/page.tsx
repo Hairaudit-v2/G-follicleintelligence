@@ -8,7 +8,7 @@ import {
 } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 
 export const metadata = {
-  title: "Staff identity readiness · Team",
+  title: "Identity Audit · Team",
   robots: { index: false, follow: false },
 };
 

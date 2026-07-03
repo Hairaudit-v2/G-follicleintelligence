@@ -11,6 +11,7 @@ import {
   buildStaffDirectoryPrimaryActionHref,
   staffDirectoryLifecycleGuidance,
 } from "@/src/lib/workforce/staffLifecycleUxCore";
+import { STAFF_LIFECYCLE_LABELS } from "@/src/lib/workforce/staffLifecycleCopy";
 import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
 import {
   buildWorkforceAttentionQueue,
@@ -155,13 +156,13 @@ export function StaffDirectorySecondaryView({
             href={workforceOsBase}
             className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[#F8FAFC] hover:bg-white/[0.07]"
           >
-            Workforce Command Centre
+            {STAFF_LIFECYCLE_LABELS.workforceCommandCentre}
           </Link>
           <Link
             href={staffAccessHref}
             className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[#F8FAFC] hover:bg-white/[0.07]"
           >
-            Staff Access
+            {STAFF_LIFECYCLE_LABELS.staffAccess}
           </Link>
           {canManage ? (
             <Link
@@ -182,15 +183,15 @@ export function StaffDirectorySecondaryView({
             <p className="text-xs text-[#94A3B8]">{lifecycleCopy.body}</p>
             <p className="text-xs text-[#64748B]">
               <Link href={onboardingHref} className="font-medium text-[#22C1FF] hover:underline">
-                Onboarding Centre
+                {STAFF_LIFECYCLE_LABELS.onboardingCentre}
               </Link>
               {" · "}
               <Link href={staffAccessHref} className="font-medium text-[#22C1FF] hover:underline">
-                Staff Access Centre
+                {STAFF_LIFECYCLE_LABELS.staffAccessCentre}
               </Link>
               {" · "}
               <Link href={workforceOsBase} className="font-medium text-[#22C1FF] hover:underline">
-                Workforce Command Centre
+                {STAFF_LIFECYCLE_LABELS.workforceCommandCentre}
               </Link>
             </p>
           </div>

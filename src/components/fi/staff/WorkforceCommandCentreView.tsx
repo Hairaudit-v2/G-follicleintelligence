@@ -1,3 +1,8 @@
+/**
+ * @deprecated Orphaned legacy Staff Directory command-centre view. Superseded by
+ * `StaffDirectorySecondaryView` and `WorkforceCommandCentreClient`. Retained for Phase 4
+ * attention-queue porting — do not mount in routes.
+ */
 "use client";
 
 import Link from "next/link";
