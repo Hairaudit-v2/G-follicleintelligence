@@ -99,7 +99,7 @@ describe("ingestGenericEmailActivity", () => {
 
     const supabase = {
       from(table: string) {
-        let filters: Record<string, string> = {};
+        const filters: Record<string, string> = {};
         const chain = {
           select: () => chain,
           eq: (col: string, val: string) => {

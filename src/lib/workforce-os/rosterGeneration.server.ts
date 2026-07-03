@@ -149,7 +149,7 @@ export async function generateRosterFromStandardHoursForTenant(
       ? input.staffIds.map((id) => assertNonEmptyUuid(id, "staffId"))
       : staffRows.filter((s) => s.is_active).map((s) => s.id);
 
-  let standardHoursByStaff = await loadActiveStandardHoursForTenant(tid, staffIds);
+  const standardHoursByStaff = await loadActiveStandardHoursForTenant(tid, staffIds);
 
   for (const staff of staffRows) {
     if (!staffIds.includes(staff.id)) continue;
