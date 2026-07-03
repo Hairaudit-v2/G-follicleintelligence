@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { fiOsChromeClasses, fiOsChromeCssVars } from "@/src/components/fi-os/fiOsChromeTokens";
 
 export type RosterRightDrawerProps = {
   open: boolean;
@@ -17,6 +18,19 @@ export type RosterRightDrawerProps = {
   wide?: boolean;
 };
 
+function readFiOsShellViewportStyle(): CSSProperties {
+  if (typeof document === "undefined") return {};
+  const shell = document.querySelector<HTMLElement>(".fi-os-shell");
+  if (!shell) return {};
+  const computed = getComputedStyle(shell);
+  const top = computed.getPropertyValue(fiOsChromeCssVars.topOffset).trim();
+  const bottom = computed.getPropertyValue(fiOsChromeCssVars.bottomOffset).trim();
+  const style: Record<string, string> = {};
+  if (top) style[fiOsChromeCssVars.topOffset] = top;
+  if (bottom) style[fiOsChromeCssVars.bottomOffset] = bottom;
+  return style as CSSProperties;
+}
+
 export function RosterRightDrawer({
   open,
   title,
@@ -28,12 +42,33 @@ export function RosterRightDrawer({
   wide = false,
 }: RosterRightDrawerProps) {
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+  const [viewportStyle, setViewportStyle] = useState<CSSProperties>({});
 
-  if (!open) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  useEffect(() => {
+    if (!open) return;
+    setViewportStyle(readFiOsShellViewportStyle());
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  if (!open || !mounted) return null;
+
+  return createPortal(
     <div
-      className={cn(fiOsChromeClasses.rightDrawerOverlay, "z-[120]")}
+      className={cn(fiOsChromeClasses.rightDrawerOverlay, "z-[190]")}
+      style={viewportStyle}
       role="presentation"
       data-testid={testId}
     >
@@ -90,6 +125,7 @@ export function RosterRightDrawer({
           </div>
         ) : null}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

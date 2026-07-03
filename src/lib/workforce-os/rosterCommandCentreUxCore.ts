@@ -14,6 +14,69 @@ import {
 
 export type RosterCellClickIntent = "open_standard_hours" | "open_cell_actions";
 
+export type RosterCommandCentreDrawerState =
+  | { kind: "closed" }
+  | { kind: "setup_missing_standard_hours" }
+  | { kind: "standard_hours"; staffMemberId: string }
+  | {
+      kind: "shift";
+      mode: "add" | "edit" | "cell-actions";
+      staffMemberId: string;
+      localDate: string;
+      shiftId: string | null;
+    };
+
+export function closeRosterDrawer(): RosterCommandCentreDrawerState {
+  return { kind: "closed" };
+}
+
+export function openRosterMissingStandardHoursSetupDrawer(): RosterCommandCentreDrawerState {
+  return { kind: "setup_missing_standard_hours" };
+}
+
+export function openRosterStandardHoursDrawer(staffMemberId: string): RosterCommandCentreDrawerState {
+  return { kind: "standard_hours", staffMemberId };
+}
+
+export function openRosterShiftDrawer(input: {
+  mode: "add" | "edit" | "cell-actions";
+  staffMemberId: string;
+  localDate: string;
+  shiftId: string | null;
+}): RosterCommandCentreDrawerState {
+  return { kind: "shift", ...input };
+}
+
+export function rosterDrawerRequiresStaff(
+  drawer: RosterCommandCentreDrawerState
+): drawer is
+  | { kind: "standard_hours"; staffMemberId: string }
+  | {
+      kind: "shift";
+      mode: "add" | "edit" | "cell-actions";
+      staffMemberId: string;
+      localDate: string;
+      shiftId: string | null;
+    } {
+  return drawer.kind === "standard_hours" || drawer.kind === "shift";
+}
+
+export function resolveRosterDrawerStaffMemberId(
+  drawer: RosterCommandCentreDrawerState
+): string | null {
+  if (!rosterDrawerRequiresStaff(drawer)) return null;
+  return drawer.staffMemberId;
+}
+
+export function resolveRosterDrawerStaffName(
+  drawer: RosterCommandCentreDrawerState,
+  staffOptions: Array<{ id: string; name: string }>
+): string | null {
+  const staffMemberId = resolveRosterDrawerStaffMemberId(drawer);
+  if (!staffMemberId) return null;
+  return staffOptions.find((staff) => staff.id === staffMemberId)?.name ?? null;
+}
+
 export function resolveRosterCellClickIntent(input: {
   hasStandardHours: boolean;
 }): RosterCellClickIntent {

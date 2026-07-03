@@ -4,10 +4,16 @@ import { test } from "node:test";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
   buildRosterShiftDrawerDefaults,
+  closeRosterDrawer,
   formatRosterShiftDrawerTitle,
   formatStandardHoursDrawerTitle,
   listStaffMissingStandardHours,
+  openRosterMissingStandardHoursSetupDrawer,
+  openRosterShiftDrawer,
+  openRosterStandardHoursDrawer,
   resolveRosterCellClickIntent,
+  resolveRosterDrawerStaffMemberId,
+  resolveRosterDrawerStaffName,
   ROSTER_GRID_SCROLL_CLASSES,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -128,4 +134,33 @@ test("listStaffMissingStandardHours returns only staff without configured hours"
 
   assert.equal(missing.length, 1);
   assert.equal(missing[0]?.id, STAFF_JANE);
+});
+
+test("roster drawer state helpers open standard-hours and setup panels", () => {
+  const standardHoursDrawer = openRosterStandardHoursDrawer(STAFF_JANE);
+  assert.deepEqual(standardHoursDrawer, {
+    kind: "standard_hours",
+    staffMemberId: STAFF_JANE,
+  });
+  assert.equal(
+    resolveRosterDrawerStaffName(standardHoursDrawer, [
+      { id: STAFF_JANE, name: "Jane Doe" },
+    ]),
+    "Jane Doe"
+  );
+  assert.equal(formatStandardHoursDrawerTitle("Jane Doe"), "Jane Doe — Standard hours");
+
+  const setupDrawer = openRosterMissingStandardHoursSetupDrawer();
+  assert.deepEqual(setupDrawer, { kind: "setup_missing_standard_hours" });
+  assert.equal(resolveRosterDrawerStaffMemberId(setupDrawer), null);
+
+  const shiftDrawer = openRosterShiftDrawer({
+    mode: "cell-actions",
+    staffMemberId: STAFF_PAUL,
+    localDate: "2026-07-07",
+    shiftId: null,
+  });
+  assert.equal(shiftDrawer.kind, "shift");
+  assert.equal(resolveRosterDrawerStaffMemberId(shiftDrawer), STAFF_PAUL);
+  assert.equal(closeRosterDrawer().kind, "closed");
 });
