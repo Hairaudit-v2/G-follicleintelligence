@@ -31,20 +31,18 @@ export function hashStaffAccessInviteToken(token: string): string {
   return createHash("sha256").update(token.trim()).digest("hex");
 }
 
-function staffAccessAppBaseUrl(): string {
-  const fromPublic = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
-  const fromVercel = process.env.VERCEL_URL?.trim()
-    ? `https://${process.env.VERCEL_URL.replace(/\/+$/, "")}`
-    : null;
-  return fromPublic || fromVercel || "http://localhost:3000";
-}
+import { buildFiPublicAppUrl } from "@/src/lib/fiOs/fiPublicAppUrlCore";
 
 export function buildStaffAccessInviteUrl(tenantId: string, token: string): string {
-  return `${staffAccessAppBaseUrl()}/fi-admin/${tenantId.trim()}/workforce-os/staff-access/accept/${token.trim()}`;
+  return buildFiPublicAppUrl(
+    `/fi-admin/${tenantId.trim()}/workforce-os/staff-access/accept/${token.trim()}`
+  );
 }
 
 export function buildStaffAccessPinSetupUrl(tenantId: string, setupToken: string): string {
-  return `${staffAccessAppBaseUrl()}/fi-admin/${tenantId.trim()}/workforce-os/staff-access/pin-setup/${setupToken.trim()}`;
+  return buildFiPublicAppUrl(
+    `/fi-admin/${tenantId.trim()}/workforce-os/staff-access/pin-setup/${setupToken.trim()}`
+  );
 }
 
 export function buildStaffAccessInviteEmail(input: {

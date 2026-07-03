@@ -30,7 +30,7 @@ import {
   mapOnboardingInviteDisplayStatus,
   onboardingInviteStatusLabel,
 } from "./onboardingCentreCore";
-import { buildOnboardingInviteUrl } from "./onboardingInviteUrlCore";
+import { tryBuildOnboardingInviteUrl } from "./onboardingInviteUrlCore";
 import { syncOnboardingChecklistFromState } from "./onboardingChecklist.server";
 import {
   evaluateOnboardingStaffCreation,
@@ -164,7 +164,7 @@ export async function loadOnboardingPageModel(
       const inviteToken = inv?.invite_token != null ? String(inv.invite_token).trim() : "";
       const inviteUrl =
         inviteToken && (inviteStatus === "pending" || inviteStatus === "expired")
-          ? buildOnboardingInviteUrl(tid, inviteToken)
+          ? tryBuildOnboardingInviteUrl(tid, inviteToken)
           : null;
 
       const actionInput = {

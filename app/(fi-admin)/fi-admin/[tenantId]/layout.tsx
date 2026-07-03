@@ -36,6 +36,7 @@ import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
 import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
 import { StaffUatLayoutMount } from "@/src/components/fi-admin/staff-uat/StaffUatLayoutMount";
+import { isFiAdminTokenPublicRoute } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
 import { isNavCollapseEnabledForTenant } from "@/src/lib/fiOs/navCollapseRollout.server";
 import { isWorkspaceShellEnabledForTenant } from "@/src/lib/fiOs/workspaceShell/workspaceShellRollout.server";
 import { WorkspaceShellMount } from "@/src/components/fi-os/workspace/WorkspaceShellMount";
@@ -80,7 +81,7 @@ export default async function TenantAdminLayout({
   const pathname = headers().get("x-pathname") ?? "";
   const isStaffPinLogin =
     pathname.includes("/staff-pin-login") || pathname.includes("/staff-time-clock");
-  const isOnboardingInvite = pathname.includes("/onboarding/invite/");
+  const isTokenPublicRoute = isFiAdminTokenPublicRoute(pathname);
   const isCommandCentrePresentation = isGlobalCommandCentrePresentationPath(pathname);
   const workspaceShellEnabled = isWorkspaceShellEnabledForTenant(tenantId);
   const navCollapseActive = isNavCollapseEnabledForTenant(tenantId);
@@ -95,7 +96,7 @@ export default async function TenantAdminLayout({
     return <div className="min-h-[100dvh] bg-[#03060d]">{children}</div>;
   }
 
-  if (isStaffPinLogin || isOnboardingInvite) {
+  if (isStaffPinLogin || isTokenPublicRoute) {
     await assertFiTenantExists(tenantId);
     return <>{children}</>;
   }

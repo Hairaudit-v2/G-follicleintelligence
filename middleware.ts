@@ -3,6 +3,8 @@ import type { CookieOptions } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { isFiAdminPublicSubpath } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
+
 // Shape of the cookie list passed to the Supabase SSR `setAll` callback.
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
@@ -29,16 +31,6 @@ function withBrandingCorsHeaders(response: NextResponse): NextResponse {
 // route-level PIN validation (getStaffPinClinicSessionIfValid) for this case.
 // ---------------------------------------------------------------------------
 const STAFF_PIN_COOKIE = "fi_staff_pin_session";
-
-// ---------------------------------------------------------------------------
-// Routes within /fi-admin/* that are intentionally public (no session required
-// at the middleware layer). Route-level code applies additional checks.
-// ---------------------------------------------------------------------------
-function isFiAdminPublicSubpath(pathname: string): boolean {
-  // Kiosk staff-PIN login page (no Supabase account required)
-  if (pathname.includes("/staff-pin-login")) return true;
-  return false;
-}
 
 // ---------------------------------------------------------------------------
 // API routes that must not be gated by the middleware session check. These

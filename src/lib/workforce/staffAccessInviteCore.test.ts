@@ -36,11 +36,26 @@ test("hashStaffAccessInviteToken rotates on resend token change", () => {
   assert.notEqual(hashStaffAccessInviteToken(oldToken), hashStaffAccessInviteToken(newToken));
 });
 
-test("buildStaffAccessInviteUrl is tenant-scoped", () => {
-  const tenantId = "22222222-2222-2222-2222-222222222222";
-  const token = "33333333-3333-3333-3333-333333333333";
-  const url = buildStaffAccessInviteUrl(tenantId, token);
-  assert.match(url, new RegExp(`/fi-admin/${tenantId}/workforce-os/staff-access/accept/${token}$`));
+test("buildStaffAccessInviteUrl is tenant-scoped on canonical public URL", () => {
+  const prevFiPublic = process.env.FI_PUBLIC_APP_URL;
+  const prevVercel = process.env.VERCEL_URL;
+  process.env.FI_PUBLIC_APP_URL = "https://app.example.com";
+  process.env.VERCEL_URL = "preview.vercel.app";
+  try {
+    const tenantId = "22222222-2222-2222-2222-222222222222";
+    const token = "33333333-3333-3333-3333-333333333333";
+    const url = buildStaffAccessInviteUrl(tenantId, token);
+    assert.equal(
+      url,
+      `https://app.example.com/fi-admin/${tenantId}/workforce-os/staff-access/accept/${token}`
+    );
+    assert.doesNotMatch(url, /\.vercel\.app/);
+  } finally {
+    if (prevFiPublic === undefined) delete process.env.FI_PUBLIC_APP_URL;
+    else process.env.FI_PUBLIC_APP_URL = prevFiPublic;
+    if (prevVercel === undefined) delete process.env.VERCEL_URL;
+    else process.env.VERCEL_URL = prevVercel;
+  }
 });
 
 test("buildStaffAccessInviteEmail includes required copy", () => {

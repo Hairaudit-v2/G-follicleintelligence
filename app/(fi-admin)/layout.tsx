@@ -6,6 +6,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { resolveFiOsAuthUserEmail } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
+import { isFiAdminPublicSubpath } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
 import { assertFiAdminShellAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata: Metadata = {
@@ -15,10 +16,7 @@ export const metadata: Metadata = {
 
 export default async function FiAdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = headers().get("x-pathname") ?? "";
-  const isPublicFiAdminEntry =
-    pathname.includes("/staff-pin-login") ||
-    pathname.includes("/staff-time-clock") ||
-    pathname.includes("/onboarding/invite/");
+  const isPublicFiAdminEntry = isFiAdminPublicSubpath(pathname);
 
   if (!isPublicFiAdminEntry) {
     await assertFiAdminShellAccess();
