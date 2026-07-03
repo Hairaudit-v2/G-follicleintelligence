@@ -16,6 +16,7 @@ export const FI_IMAGE_CAPTURE_SOURCES = [
   "patient_portal",
   "iiohr_academy",
   "follow_up_outcome",
+  "legacy_follow_up",
   "unknown",
 ] as const;
 export type FiImageCaptureSource = (typeof FI_IMAGE_CAPTURE_SOURCES)[number];

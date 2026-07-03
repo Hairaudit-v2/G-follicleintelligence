@@ -18,6 +18,7 @@ import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingT
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
+import { BookingFollowUpCalendarPanel } from "@/src/components/fi-admin/followUp/BookingFollowUpCalendarPanel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
 import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
@@ -468,6 +469,14 @@ export function BookingCalendarDrawer({
                     Cancel booking
                   </button>
                 </div>
+              ) : null}
+
+              {!calendarOsEvent ? (
+                <BookingFollowUpCalendarPanel
+                  tenantId={tenantId}
+                  bookingId={row.id}
+                  patientId={row.patient_id}
+                />
               ) : null}
 
               <dl className="mt-4 space-y-2.5 border-t border-white/[0.06] pt-3 text-xs">

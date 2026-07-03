@@ -97,10 +97,30 @@ export type ReceptionNextAction = {
 export function deriveReceptionAppointmentNextAction(
   appt: ReceptionBoardAppointmentCard
 ): ReceptionNextAction | null {
+  const typeNorm = appt.appointmentType.trim().toLowerCase();
+  const isFollowUpVisit =
+    typeNorm.includes("follow") ||
+    typeNorm.includes("post-op") ||
+    typeNorm.includes("post op") ||
+    typeNorm.includes("review");
+
   if (appt.paymentStatus === "overdue" || appt.paymentStatus === "due") {
     return {
       label: appt.paymentStatus === "overdue" ? "Collect payment now" : "Collect payment",
       href: appt.hrefs.patient ?? appt.hrefs.calendar,
+      variant: "primary",
+    };
+  }
+  if (
+    isFollowUpVisit &&
+    (appt.status === "arrived" ||
+      appt.status === "checked_in" ||
+      appt.status === "waiting" ||
+      appt.status === "in_consultation")
+  ) {
+    return {
+      label: "Start follow-up",
+      href: appt.hrefs.followUp,
       variant: "primary",
     };
   }

@@ -245,6 +245,7 @@ export function AppointmentDetailPageView({
             />
           ) : null}
           <AppointmentActionsSection
+            tenantId={tenantId}
             booking={booking}
             instructionsSent={payload.instructionsSent}
             canMutate={state.canMutate}

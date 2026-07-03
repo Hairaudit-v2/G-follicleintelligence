@@ -1,6 +1,9 @@
 export type PatientImagingCaptureIntent = "camera" | "library";
 
-export type PatientPhotoQuickActionSource = "patient_profile" | "patient_slide_over";
+export type PatientPhotoQuickActionSource =
+  | "patient_profile"
+  | "patient_slide_over"
+  | "legacy_follow_up";
 
 export const PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP = "Photo capture requires imaging access";
 
@@ -77,6 +80,11 @@ export function parsePatientPhotoQuickActionSource(
   value: string | null | undefined
 ): PatientPhotoQuickActionSource | null {
   const v = value?.trim().toLowerCase();
-  if (v === "patient_profile" || v === "patient_slide_over") return v;
+  if (v === "patient_profile" || v === "patient_slide_over" || v === "legacy_follow_up") return v;
   return null;
+}
+
+export function parseImagingProtocolSessionId(value: string | null | undefined): string | null {
+  const v = value?.trim();
+  return v && v.length >= 8 ? v : null;
 }

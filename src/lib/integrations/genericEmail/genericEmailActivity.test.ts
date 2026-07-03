@@ -397,6 +397,8 @@ describe("patient timeline generic email visibility", () => {
       ],
       clinical: null,
       images: [],
+      followUpEncounters: [],
+      followUpImagingSessions: [],
     };
 
     const withoutPhi = buildPatientTimeline(bundle, {

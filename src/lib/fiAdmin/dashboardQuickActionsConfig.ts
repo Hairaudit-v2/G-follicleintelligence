@@ -10,6 +10,7 @@
 export type DashboardQuickActionKey =
   | "booking"
   | "patient"
+  | "returning_patient"
   | "lead"
   | "consultation"
   | "case"
@@ -46,6 +47,13 @@ export const DASHBOARD_QUICK_ACTION_DEFINITIONS: readonly DashboardQuickActionDe
     key: "patient",
     label: "Patient",
     path: "patients/new",
+    requiresBookingsBoardNav: true,
+    kind: "link",
+  },
+  {
+    key: "returning_patient",
+    label: "Returning follow-up",
+    path: "patients/returning",
     requiresBookingsBoardNav: true,
     kind: "link",
   },

@@ -3,9 +3,11 @@
 import type { AppointmentInstructionsSentMetadata } from "@/src/lib/bookings/appointmentMetadata";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { BookingFollowUpCalendarPanel } from "@/src/components/fi-admin/followUp/BookingFollowUpCalendarPanel";
 import { appointmentCardClass } from "./appointmentSharedStyles";
 
 export function AppointmentActionsSection({
+  tenantId,
   booking,
   instructionsSent,
   canMutate,
@@ -19,6 +21,7 @@ export function AppointmentActionsSection({
   onSendPreOp,
   onSendPostOp,
 }: {
+  tenantId: string;
   booking: FiBookingRow;
   instructionsSent: AppointmentInstructionsSentMetadata;
   canMutate: boolean;
@@ -92,6 +95,15 @@ export function AppointmentActionsSection({
 
       {actionErr ? <p className="mt-2 text-xs text-rose-300">{actionErr}</p> : null}
       {instructionsErr ? <p className="mt-2 text-xs text-rose-300">{instructionsErr}</p> : null}
+
+      {!cancelled ? (
+        <BookingFollowUpCalendarPanel
+          tenantId={tenantId}
+          bookingId={booking.id}
+          patientId={booking.patient_id}
+        />
+      ) : null}
+
       <p className="mt-2 text-xs text-gray-500">
         Instruction sends log CRM activity and timestamp; delivery uses your reminder templates when
         configured.

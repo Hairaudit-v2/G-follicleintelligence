@@ -48,6 +48,9 @@ export function assertVieProtocolCapturePolicy(input: VieCapturePolicyInput): vo
 
   if (source === "imaging_os_wizard") return;
 
+  /** Legacy follow-up / photos-only workflows manage their own protocol session. */
+  if (source === "legacy_follow_up" || source === "follow_up_encounter") return;
+
   if (!isVieProtocolRequiredSource(source)) return;
 
   const sessionId = input.protocolSessionId?.trim() ?? "";

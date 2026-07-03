@@ -56,6 +56,8 @@ export function patientTimelineSourceLabel(source: PatientTimelineSourceType): s
       return "Clinical";
     case "image":
       return "Image";
+    case "follow_up":
+      return "Follow-up";
     case "system":
       return "System";
     default:

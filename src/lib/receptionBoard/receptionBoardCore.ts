@@ -247,6 +247,7 @@ export function buildAppointmentCard(
       lead: card.leadId ? `${input.base}/crm/leads/${card.leadId}` : null,
       appointment: `${input.base}/appointments?bookingId=${card.id}`,
       calendar: `${input.base}/calendar?bookingId=${card.id}`,
+      followUp: `${input.base}/patients/returning?bookingId=${card.id}${card.patientId ? `&patientId=${card.patientId}` : ""}`,
     },
   };
 }
@@ -293,6 +294,7 @@ export function buildQueueBoard(
         lead: card.leadId ? `${input.base}/crm/leads/${card.leadId}` : null,
         appointment: `${input.base}/appointments?bookingId=${card.id}`,
         calendar: `${input.base}/calendar?bookingId=${card.id}`,
+        followUp: `${input.base}/patients/returning?bookingId=${card.id}${card.patientId ? `&patientId=${card.patientId}` : ""}`,
       },
     });
   }

@@ -9,6 +9,7 @@ import {
   Calendar,
   CreditCard,
   RefreshCw,
+  RotateCcw,
   Search,
   Stethoscope,
   Users,
@@ -248,7 +249,7 @@ export function ReceptionBoardCommandCenter(props: {
                   title="No appointments scheduled today"
                   description="Open the calendar to plan the day, or find a patient to book their next visit."
                   action={{ label: "Open calendar", href: `${base}/calendar` }}
-                  secondaryAction={{ label: "Find or add patient", href: `${base}/patients` }}
+                  secondaryAction={{ label: "Returning patient follow-up", href: `${base}/patients/returning` }}
                   icon={<Calendar className="h-10 w-10 opacity-40" aria-hidden />}
                 />
               ) : (
@@ -612,6 +613,13 @@ function AppointmentHeroCard({ appt }: { appt: ReceptionBoardAppointmentCard }) 
           >
             <Calendar className="h-3.5 w-3.5" aria-hidden />
             Calendar
+          </Link>
+          <Link
+            href={appt.hrefs.followUp}
+            className="inline-flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-950/40 px-3 py-2 text-xs font-semibold text-sky-200 hover:bg-sky-900/50"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+            Follow-up
           </Link>
         </div>
       </div>

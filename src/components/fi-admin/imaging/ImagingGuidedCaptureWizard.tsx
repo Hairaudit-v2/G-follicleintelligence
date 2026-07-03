@@ -79,6 +79,7 @@ export function ImagingGuidedCaptureWizard({
   trialConsentGate,
   captureIntent = null,
   captureSource = null,
+  initialProtocolSessionId = null,
 }: {
   tenantId: string;
   patientId: string;
@@ -87,12 +88,14 @@ export function ImagingGuidedCaptureWizard({
   initial: ImagingOsPatientPayload;
   captureIntent?: PatientImagingCaptureIntent | null;
   captureSource?: PatientPhotoQuickActionSource | null;
+  initialProtocolSessionId?: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [sessionId, setSessionId] = useState<string>(() =>
-    firstOpenSessionId(initial.protocolSessions)
-  );
+  const [sessionId, setSessionId] = useState<string>(() => {
+    if (initialProtocolSessionId?.trim()) return initialProtocolSessionId.trim();
+    return firstOpenSessionId(initial.protocolSessions);
+  });
   const [slotOverride, setSlotOverride] = useState<string | null>(null);
   const [replaceNext, setReplaceNext] = useState(false);
   const [clinicIdInput, setClinicIdInput] = useState("");
@@ -112,10 +115,11 @@ export function ImagingGuidedCaptureWizard({
 
   useEffect(() => {
     setSessionId((prev) => {
+      if (initialProtocolSessionId?.trim()) return initialProtocolSessionId.trim();
       if (prev && initial.protocolSessions.some((s) => s.id === prev)) return prev;
       return firstOpenSessionId(initial.protocolSessions);
     });
-  }, [initial.protocolSessions]);
+  }, [initial.protocolSessions, initialProtocolSessionId]);
 
   useEffect(() => {
     if (!toast) return;

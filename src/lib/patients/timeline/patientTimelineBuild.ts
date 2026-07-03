@@ -1,5 +1,10 @@
 import { buildCalendarHref } from "@/src/lib/bookings/calendarQuery";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
+import {
+  followUpEncounterTimelineTitle,
+  imagingAiReviewStatusLabel,
+} from "@/src/lib/followUpEncounters/followUpEncounterTypes";
+import type { FollowUpEncounterType, LegacyPatientSource } from "@/src/lib/followUpEncounters/followUpEncounterTypes";
 import { crmActivityTimelineTitle } from "./patientTimelineLabels";
 import { sortPatientTimelineItems } from "./patientTimelineFilters";
 import type {
@@ -350,17 +355,20 @@ export function buildPatientTimeline(
   for (const im of bundle.images) {
     const cat = String(im.image_category).replace(/_/g, " ");
     if (im.image_status === "active") {
+      const isFollowUpPhoto = Boolean(im.follow_up_encounter_id);
       items.push({
         id: `image_uploaded:${im.id}`,
         occurred_at: im.created_at,
-        item_type: "image_uploaded",
-        title: "Clinical image uploaded",
+        item_type: isFollowUpPhoto ? "follow_up_photos_captured" : "image_uploaded",
+        title: isFollowUpPhoto ? "Photos captured" : "Clinical image uploaded",
         subtitle: null,
         source_type: "image",
         source_id: im.id,
         severity: im.image_status,
-        href: null,
-        metadata_summary: `Category: ${cat}`,
+        href: isFollowUpPhoto
+          ? `/fi-admin/${ctx.tenantId.trim()}/patients/${bundle.foundationPatientId}/imaging`
+          : null,
+        metadata_summary: isFollowUpPhoto ? "Follow-up imaging session" : `Category: ${cat}`,
         is_sensitive: false,
       });
     }
@@ -379,6 +387,54 @@ export function buildPatientTimeline(
         is_sensitive: false,
       });
     }
+  }
+
+  for (const enc of bundle.followUpEncounters) {
+    const encType = enc.encounter_type as FollowUpEncounterType;
+    const legacySource = enc.legacy_source as LegacyPatientSource | null;
+    const title = followUpEncounterTimelineTitle(encType, legacySource);
+    const when = enc.completed_at ?? enc.created_at;
+    items.push({
+      id: `follow_up_encounter:${enc.id}`,
+      occurred_at: when,
+      item_type: "follow_up_encounter",
+      title,
+      subtitle: enc.visit_reason,
+      source_type: "follow_up",
+      source_id: enc.id,
+      severity: enc.status,
+      href: `/fi-admin/${ctx.tenantId.trim()}/patients/returning?patientId=${encodeURIComponent(bundle.foundationPatientId)}&encounterId=${encodeURIComponent(enc.id)}`,
+      metadata_summary:
+        enc.legacy_source === "timely"
+          ? "Returning patient from Timely · Continue care in FI OS"
+          : enc.status === "draft"
+            ? "Draft follow-up"
+            : "Follow-up completed",
+      is_sensitive: Boolean(enc.clinical_note),
+    });
+  }
+
+  for (const sess of bundle.followUpImagingSessions) {
+    const reviewLabel = imagingAiReviewStatusLabel(
+      sess.ai_review_status as Parameters<typeof imagingAiReviewStatusLabel>[0]
+    );
+    const needsReview =
+      sess.ai_review_status === "ai_pending" || sess.ai_review_status === "ai_ready_for_review";
+    items.push({
+      id: `follow_up_imaging:${sess.id}`,
+      occurred_at: sess.created_at,
+      item_type: needsReview ? "follow_up_ai_review_pending" : "follow_up_photos_captured",
+      title: needsReview ? reviewLabel : "Follow-up imaging session",
+      subtitle: sess.template_slug.replace(/_/g, " "),
+      source_type: "follow_up",
+      source_id: sess.id,
+      severity: sess.ai_status,
+      href: `/fi-admin/${ctx.tenantId.trim()}/patients/${bundle.foundationPatientId}/imaging`,
+      metadata_summary: sess.session_completeness_status
+        ? `Completeness: ${sess.session_completeness_status.replace(/_/g, " ")}`
+        : reviewLabel,
+      is_sensitive: false,
+    });
   }
 
   const p = bundle.patient;

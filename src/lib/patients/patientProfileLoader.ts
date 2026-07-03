@@ -469,23 +469,89 @@ export async function loadPatientProfile(
     .map((a) => mapActivityRowForTimeline(a as Record<string, unknown>));
 
   const timelineImages = [
-    ...patientImages.activeWithSignedUrls.map(({ image }) => ({
-      id: image.id,
-      image_category: image.image_category,
-      image_status: image.image_status,
-      caption: image.caption,
-      created_at: image.created_at,
-      archived_at: image.archived_at,
-    })),
-    ...patientImages.archived.map((image) => ({
-      id: image.id,
-      image_category: image.image_category,
-      image_status: image.image_status,
-      caption: image.caption,
-      created_at: image.created_at,
-      archived_at: image.archived_at,
-    })),
+    ...patientImages.activeWithSignedUrls.map(({ image }) => {
+      const meta =
+        image.metadata && typeof image.metadata === "object" && !Array.isArray(image.metadata)
+          ? (image.metadata as Record<string, unknown>)
+          : {};
+      return {
+        id: image.id,
+        image_category: image.image_category,
+        image_status: image.image_status,
+        caption: image.caption,
+        created_at: image.created_at,
+        archived_at: image.archived_at,
+        follow_up_encounter_id:
+          typeof meta.follow_up_encounter_id === "string" ? meta.follow_up_encounter_id : null,
+      };
+    }),
+    ...patientImages.archived.map((image) => {
+      const meta =
+        image.metadata && typeof image.metadata === "object" && !Array.isArray(image.metadata)
+          ? (image.metadata as Record<string, unknown>)
+          : {};
+      return {
+        id: image.id,
+        image_category: image.image_category,
+        image_status: image.image_status,
+        caption: image.caption,
+        created_at: image.created_at,
+        archived_at: image.archived_at,
+        follow_up_encounter_id:
+          typeof meta.follow_up_encounter_id === "string" ? meta.follow_up_encounter_id : null,
+      };
+    }),
   ];
+
+  const { data: followUpRows } = await supabase
+    .from("fi_follow_up_encounters")
+    .select(
+      "id, encounter_type, legacy_source, visit_reason, clinical_note, status, created_at, completed_at"
+    )
+    .eq("tenant_id", tid)
+    .eq("patient_id", foundationPatientId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  const followUpEncounters = (followUpRows ?? []).map((r) => {
+    const x = r as Record<string, unknown>;
+    return {
+      id: String(x.id),
+      encounter_type: String(x.encounter_type),
+      legacy_source: x.legacy_source != null ? String(x.legacy_source) : null,
+      visit_reason: x.visit_reason != null ? String(x.visit_reason) : null,
+      clinical_note: x.clinical_note != null ? String(x.clinical_note) : null,
+      status: String(x.status),
+      created_at: String(x.created_at),
+      completed_at: x.completed_at != null ? String(x.completed_at) : null,
+    };
+  });
+
+  const { data: imagingSessionRows } = await supabase
+    .from("fi_imaging_protocol_sessions")
+    .select(
+      "id, follow_up_encounter_id, template_slug, session_completeness_status, ai_status, ai_review_status, created_at"
+    )
+    .eq("tenant_id", tid)
+    .eq("patient_id", foundationPatientId)
+    .not("follow_up_encounter_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const followUpImagingSessions = (imagingSessionRows ?? []).map((r) => {
+    const x = r as Record<string, unknown>;
+    return {
+      id: String(x.id),
+      follow_up_encounter_id:
+        x.follow_up_encounter_id != null ? String(x.follow_up_encounter_id) : null,
+      template_slug: String(x.template_slug),
+      session_completeness_status:
+        x.session_completeness_status != null ? String(x.session_completeness_status) : null,
+      ai_status: x.ai_status != null ? String(x.ai_status) : null,
+      ai_review_status: x.ai_review_status != null ? String(x.ai_review_status) : null,
+      created_at: String(x.created_at),
+    };
+  });
 
   const patientTimeline: PatientTimelineBuildResult = buildPatientTimeline(
     {
@@ -541,6 +607,8 @@ export async function loadPatientProfile(
           }
         : null,
       images: timelineImages,
+      followUpEncounters,
+      followUpImagingSessions,
     },
     { hrefContext: { tenantId: tid }, limit: 100, offset: 0, sort: "newest_first", viewerCanReadClinicalPhi: opts?.viewerCanReadClinicalPhi === true }
   );

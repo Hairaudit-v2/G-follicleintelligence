@@ -28,6 +28,8 @@ function minimalBundle(
     activity: [],
     clinical: null,
     images: [],
+    followUpEncounters: [],
+    followUpImagingSessions: [],
   };
   return { ...base, ...over };
 }

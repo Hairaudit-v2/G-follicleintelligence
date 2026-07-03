@@ -1124,6 +1124,7 @@ export function AppointmentSlideOverPanel({
           ) : null}
 
           <AppointmentActionsSection
+            tenantId={tenantId}
             booking={booking}
             instructionsSent={payload.instructionsSent}
             canMutate={canMutate}

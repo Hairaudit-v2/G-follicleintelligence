@@ -13,6 +13,9 @@ export type PatientTimelineItemType =
   | "clinical_details_updated"
   | "image_uploaded"
   | "image_archived"
+  | "follow_up_encounter"
+  | "follow_up_photos_captured"
+  | "follow_up_ai_review_pending"
   | "patient_admin_updated"
   | "other";
 
@@ -24,6 +27,7 @@ export type PatientTimelineSourceType =
   | "case"
   | "clinical"
   | "image"
+  | "follow_up"
   | "system";
 
 export type PatientTimelineItem = {
@@ -117,6 +121,28 @@ export type PatientTimelineImageInput = {
   caption: string | null;
   created_at: string;
   archived_at: string | null;
+  follow_up_encounter_id?: string | null;
+};
+
+export type PatientTimelineFollowUpEncounterInput = {
+  id: string;
+  encounter_type: string;
+  legacy_source: string | null;
+  visit_reason: string | null;
+  clinical_note: string | null;
+  status: string;
+  created_at: string;
+  completed_at: string | null;
+};
+
+export type PatientTimelineFollowUpImagingInput = {
+  id: string;
+  follow_up_encounter_id: string | null;
+  template_slug: string;
+  session_completeness_status: string | null;
+  ai_status: string | null;
+  ai_review_status: string | null;
+  created_at: string;
 };
 
 /** Everything needed to build a timeline without additional I/O. */
@@ -130,6 +156,8 @@ export type PatientTimelineSourceBundle = {
   activity: readonly PatientTimelineActivityInput[];
   clinical: PatientTimelineClinicalInput | null;
   images: readonly PatientTimelineImageInput[];
+  followUpEncounters: readonly PatientTimelineFollowUpEncounterInput[];
+  followUpImagingSessions: readonly PatientTimelineFollowUpImagingInput[];
 };
 
 export type PatientTimelineBuildOptions = {

@@ -57,6 +57,14 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
     requiresCrmShellNav: true,
   },
   {
+    id: "returning_patient",
+    label: "Returning patient follow-up",
+    description: "Continue care for Timely patients — quick follow-up or photos only.",
+    keywords: ["timely", "legacy", "returning", "follow-up", "photos"],
+    path: "patients/returning",
+    requiresBookingsBoardNav: true,
+  },
+  {
     id: "patient_photos",
     label: "Upload patient photos",
     description:

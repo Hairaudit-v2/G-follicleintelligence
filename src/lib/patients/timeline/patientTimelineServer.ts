@@ -60,7 +60,7 @@ export async function loadPatientTimelineSources(
 
   const { data: imgRows, error: ie } = await supabase
     .from("fi_patient_images")
-    .select("id, image_category, image_status, caption, created_at, archived_at")
+    .select("id, image_category, image_status, caption, created_at, archived_at, metadata")
     .eq("tenant_id", tid)
     .eq("patient_id", pid)
     .order("created_at", { ascending: false })
@@ -70,6 +70,12 @@ export async function loadPatientTimelineSources(
   const images = (imgRows ?? []).map((r) => {
     const x = r as Record<string, unknown>;
     const st = String(x.image_status).toLowerCase();
+    const meta =
+      x.metadata && typeof x.metadata === "object" && !Array.isArray(x.metadata)
+        ? (x.metadata as Record<string, unknown>)
+        : {};
+    const followUpEncounterId =
+      typeof meta.follow_up_encounter_id === "string" ? meta.follow_up_encounter_id : null;
     return {
       id: String(x.id),
       image_category: String(x.image_category),
@@ -77,6 +83,59 @@ export async function loadPatientTimelineSources(
       caption: x.caption != null ? String(x.caption) : null,
       created_at: String(x.created_at),
       archived_at: x.archived_at != null ? String(x.archived_at) : null,
+      follow_up_encounter_id: followUpEncounterId,
+    };
+  });
+
+  const { data: followUpRows, error: fe } = await supabase
+    .from("fi_follow_up_encounters")
+    .select(
+      "id, encounter_type, legacy_source, visit_reason, clinical_note, status, created_at, completed_at"
+    )
+    .eq("tenant_id", tid)
+    .eq("patient_id", pid)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (fe) throw new Error(fe.message);
+
+  const followUpEncounters = (followUpRows ?? []).map((r) => {
+    const x = r as Record<string, unknown>;
+    return {
+      id: String(x.id),
+      encounter_type: String(x.encounter_type),
+      legacy_source: x.legacy_source != null ? String(x.legacy_source) : null,
+      visit_reason: x.visit_reason != null ? String(x.visit_reason) : null,
+      clinical_note: x.clinical_note != null ? String(x.clinical_note) : null,
+      status: String(x.status),
+      created_at: String(x.created_at),
+      completed_at: x.completed_at != null ? String(x.completed_at) : null,
+    };
+  });
+
+  const { data: imagingSessionRows, error: ise } = await supabase
+    .from("fi_imaging_protocol_sessions")
+    .select(
+      "id, follow_up_encounter_id, template_slug, session_completeness_status, ai_status, ai_review_status, created_at"
+    )
+    .eq("tenant_id", tid)
+    .eq("patient_id", pid)
+    .not("follow_up_encounter_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (ise) throw new Error(ise.message);
+
+  const followUpImagingSessions = (imagingSessionRows ?? []).map((r) => {
+    const x = r as Record<string, unknown>;
+    return {
+      id: String(x.id),
+      follow_up_encounter_id:
+        x.follow_up_encounter_id != null ? String(x.follow_up_encounter_id) : null,
+      template_slug: String(x.template_slug),
+      session_completeness_status:
+        x.session_completeness_status != null ? String(x.session_completeness_status) : null,
+      ai_status: x.ai_status != null ? String(x.ai_status) : null,
+      ai_review_status: x.ai_review_status != null ? String(x.ai_review_status) : null,
+      created_at: String(x.created_at),
     };
   });
 
@@ -255,6 +314,8 @@ export async function loadPatientTimelineSources(
     activity,
     clinical,
     images,
+    followUpEncounters,
+    followUpImagingSessions,
   };
 }
 

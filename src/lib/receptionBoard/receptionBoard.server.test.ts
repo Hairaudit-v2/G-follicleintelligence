@@ -120,6 +120,7 @@ describe("receptionBoard.server safety", () => {
           lead: null,
           appointment: `/fi-admin/${TENANT}/appointments?bookingId=${BOOKING}`,
           calendar: `/fi-admin/${TENANT}/calendar?bookingId=${BOOKING}`,
+          followUp: `/fi-admin/${TENANT}/patients/returning?bookingId=${BOOKING}`,
         },
       },
     ];

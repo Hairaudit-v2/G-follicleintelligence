@@ -370,7 +370,8 @@ export async function POST(
       guided_session &&
       normalizeCaptureSource(captureSourceStr) !== "vie_capture_wizard" &&
       normalizeCaptureSource(captureSourceStr) !== "surgery_os" &&
-      normalizeCaptureSource(captureSourceStr) !== "follow_up_outcome"
+      normalizeCaptureSource(captureSourceStr) !== "follow_up_outcome" &&
+      normalizeCaptureSource(captureSourceStr) !== "legacy_follow_up"
     ) {
       const protocol = getVieProtocol(templateSlugStr);
       const requiredTotal = protocol?.slots.filter((s) => s.required).length ?? 0;

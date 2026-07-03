@@ -71,6 +71,7 @@ export type ReceptionBoardAppointmentCard = {
     lead: string | null;
     appointment: string;
     calendar: string;
+    followUp: string;
   };
 };
 

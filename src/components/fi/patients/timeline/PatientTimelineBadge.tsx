@@ -10,6 +10,7 @@ const SOURCE_STYLES: Record<PatientTimelineSourceType, string> = {
   case: "bg-indigo-500/15 text-indigo-300",
   clinical: "bg-rose-500/15 text-rose-300",
   image: "bg-teal-100 text-teal-900",
+  follow_up: "bg-sky-500/15 text-sky-200",
   system: "bg-white/[0.06] text-slate-200",
 };
 

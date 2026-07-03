@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Brain, Activity, FlaskConical, ScanLine } from "lucide-react";
+import { Brain, Activity, FlaskConical, ScanLine, RotateCcw } from "lucide-react";
 
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import type { PatientDetailNextAppointment } from "@/src/lib/patients/patientDetailLoader";
@@ -146,6 +146,13 @@ export function PatientCommandHero({
           <Link href={`${base}/imaging`} className={chipIndigo}>
             <ScanLine className="h-3.5 w-3.5 shrink-0" aria-hidden />
             ImagingOS
+          </Link>
+          <Link
+            href={`/fi-admin/${tenantId}/patients/returning?patientId=${encodeURIComponent(patientId)}`}
+            className={chipGhost}
+          >
+            <RotateCcw className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            Add today&apos;s follow-up
           </Link>
         </div>
 
