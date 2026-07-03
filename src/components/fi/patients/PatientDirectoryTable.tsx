@@ -9,6 +9,7 @@ import {
 import { usePatientSlideOverOptional } from "./PatientSlideOver";
 import { PatientSlideOverTrigger } from "./PatientSlideOverTrigger";
 import { PatientStatusBadge } from "./PatientStatusBadge";
+import { LegacyPatientBadges } from "@/src/components/fi-admin/patients/LegacyPatientBadges";
 
 function fmtTs(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -39,6 +40,9 @@ export function PatientDirectoryTable({
             </th>
             <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
               Status
+            </th>
+            <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 lg:table-cell">
+              Legacy / follow-up
             </th>
             <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 sm:table-cell">
               Norwood summary
@@ -99,6 +103,9 @@ export function PatientDirectoryTable({
                 <td className="hidden px-3 py-2 text-xs text-slate-400 md:table-cell">{contact}</td>
                 <td className="px-3 py-2">
                   <PatientStatusBadge status={row.patientStatus} />
+                </td>
+                <td className="hidden max-w-[12rem] px-3 py-2 lg:table-cell">
+                  <LegacyPatientBadges badges={row.legacyBadges} />
                 </td>
                 <td
                   className="hidden max-w-[14rem] px-3 py-2 text-xs text-slate-300 sm:table-cell"

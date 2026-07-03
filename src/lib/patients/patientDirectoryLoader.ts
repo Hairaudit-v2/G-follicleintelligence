@@ -9,6 +9,17 @@ import {
 } from "@/src/lib/patients/patientDirectorySearch";
 import type { PatientDirectoryQuery } from "./patientDirectoryQuery";
 import { norwoodValuesInRange } from "./patientDirectoryQuery";
+import { patientDirectoryHasLegacyFilters } from "./patientDirectoryFilters";
+import {
+  buildLegacyVisibilitySummariesForPatients,
+  loadPatientIdsMatchingLegacyDirectoryFilters,
+} from "./legacyPatientVisibility.server";
+import {
+  deriveLegacyPatientBadges,
+  deriveLegacyPatientDisplayPolicy,
+  type LegacyPatientBadge,
+  type LegacyPatientVisibilitySummary,
+} from "./legacyPatientVisibilityCore";
 import { formatClinicalScalesSummary } from "./hairLossScales";
 import {
   countCompletedProcedures,
@@ -40,6 +51,8 @@ export type PatientDirectoryRow = {
   primaryLeadSource: string | null;
   activeCaseCount: number;
   linkedLeadCount: number;
+  legacyVisibility: LegacyPatientVisibilitySummary | null;
+  legacyBadges: LegacyPatientBadge[];
 };
 
 export type PatientDirectorySummary = {
@@ -308,7 +321,8 @@ function applyPatientIdNotIn(
 export async function loadPatientDirectoryPage(
   tenantId: string,
   query: PatientDirectoryQuery,
-  client?: SupabaseClient
+  client?: SupabaseClient,
+  opts?: { viewerRole?: string | null }
 ): Promise<PatientDirectoryPageResult> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
@@ -362,6 +376,12 @@ export async function loadPatientDirectoryPage(
     restrictPatientIds = intersectSets(
       restrictPatientIds,
       await loadPatientIdsWithLeadSource(supabase, tid, query.leadSource)
+    );
+  }
+  if (patientDirectoryHasLegacyFilters(query)) {
+    restrictPatientIds = intersectSets(
+      restrictPatientIds,
+      await loadPatientIdsMatchingLegacyDirectoryFilters(tid, query, supabase)
     );
   }
 
@@ -555,6 +575,16 @@ export async function loadPatientDirectoryPage(
     });
   }
 
+  const legacyPolicy = deriveLegacyPatientDisplayPolicy(opts?.viewerRole);
+  const legacySummaries = await buildLegacyVisibilitySummariesForPatients(
+    tid,
+    (patRows ?? []).map((raw) => ({
+      id: String((raw as { id: string }).id),
+      metadata: (raw as { metadata?: unknown }).metadata,
+    })),
+    supabase
+  );
+
   const rows: PatientDirectoryRow[] = (patRows ?? []).map((raw) => {
     const r = raw as {
       id: string;
@@ -585,6 +615,7 @@ export async function loadPatientDirectoryPage(
       : null;
     const patientBookings = bookingsByPatient.get(pid) ?? [];
     const nextAppt = pickNextAppointment(patientBookings, nowIso);
+    const legacyVisibility = legacySummaries.get(pid) ?? null;
     return {
       patientId: pid,
       personId: String(r.person_id),
@@ -604,6 +635,10 @@ export async function loadPatientDirectoryPage(
       primaryLeadSource: leadSourceByPatient.get(pid) ?? null,
       activeCaseCount: activeCaseByPatient.get(pid) ?? 0,
       linkedLeadCount: leadCountByPatient.get(pid) ?? 0,
+      legacyVisibility,
+      legacyBadges: legacyVisibility
+        ? deriveLegacyPatientBadges(legacyVisibility, legacyPolicy)
+        : [],
     };
   });
 

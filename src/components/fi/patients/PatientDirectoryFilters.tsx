@@ -148,6 +148,105 @@ export function PatientDirectoryFilters({
           </select>
         </label>
         <label className="block text-xs font-medium text-slate-300">
+          Returning from Timely
+          <select
+            name="returningFromTimely"
+            defaultValue={query.returningFromTimely === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Returning from Timely</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Legacy source
+          <select
+            name="hasLegacySource"
+            defaultValue={query.hasLegacySource === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Has legacy source</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Historical record
+          <select
+            name="historicalIncomplete"
+            defaultValue={query.historicalIncomplete === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Historical record incomplete</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Follow-up encounter
+          <select
+            name="hasFollowUpEncounter"
+            defaultValue={query.hasFollowUpEncounter === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Has follow-up encounter</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Photos captured
+          <select
+            name="hasPhotosCaptured"
+            defaultValue={query.hasPhotosCaptured === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Photos captured</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          AI review
+          <select
+            name="aiReviewPending"
+            defaultValue={query.aiReviewPending === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">AI review pending</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Clinician approved AI
+          <select
+            name="clinicianApprovedAi"
+            defaultValue={query.clinicianApprovedAi === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Clinician approved</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Merge review
+          <select
+            name="needsMergeReview"
+            defaultValue={query.needsMergeReview === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Needs merge review</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
+          Photos without AI approval
+          <select
+            name="photosNoAiApproval"
+            defaultValue={query.photosNoAiApproval === true ? "true" : ""}
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 px-2 py-1.5 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Photos captured, review not approved</option>
+          </select>
+        </label>
+        <label className="block text-xs font-medium text-slate-300">
           Sort
           <select
             name="sort"

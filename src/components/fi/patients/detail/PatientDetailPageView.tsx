@@ -32,6 +32,8 @@ import type { PatientJourneySnapshot } from "@/src/lib/patientJourney/patientJou
 import { PatientJourneyRibbon } from "@/src/components/fi-admin/patients/PatientJourneyRibbon";
 import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
 import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
+import { LegacyPatientProfileBanner } from "@/src/components/fi-admin/patients/LegacyPatientProfileBanner";
+import { LegacyPatientBadges } from "@/src/components/fi-admin/patients/LegacyPatientBadges";
 
 export function PatientDetailPageView({
   tenantId,
@@ -113,6 +115,12 @@ export function PatientDetailPageView({
         canCapturePhotos={canCapturePatientPhotos}
         trialConsentGate={profile.trialConsentGate}
       />
+
+      {profile.legacyBadges.length ? (
+        <LegacyPatientBadges badges={profile.legacyBadges} maxVisible={8} />
+      ) : null}
+
+      <LegacyPatientProfileBanner banners={profile.legacyBanners} />
 
       <PatientDetailsSummary data={profile} />
 

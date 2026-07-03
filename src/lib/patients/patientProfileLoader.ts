@@ -32,6 +32,15 @@ import {
   loadTrialConsentGateStatus,
   type TrialConsentGateStatus,
 } from "@/src/lib/patients/patientConsentGate.server";
+import {
+  deriveLegacyPatientBadges,
+  deriveLegacyPatientDisplayPolicy,
+  deriveLegacyPatientProfileBanners,
+  deriveLegacyPatientVisibilitySummary,
+  type LegacyPatientBadge,
+  type LegacyPatientProfileBanner,
+  type LegacyPatientVisibilitySummary,
+} from "./legacyPatientVisibilityCore";
 
 export type PatientProfilePerson = {
   id: string;
@@ -112,6 +121,9 @@ export type PatientProfileFoundationData = {
   patientTimeline: PatientTimelineBuildResult;
   summary: ReturnType<typeof computePatientProfileSummaryMetrics>;
   trialConsentGate: TrialConsentGateStatus;
+  legacyVisibility: LegacyPatientVisibilitySummary;
+  legacyBadges: LegacyPatientBadge[];
+  legacyBanners: LegacyPatientProfileBanner[];
 };
 
 export type PatientProfileLegacyGlobalData = {
@@ -503,10 +515,16 @@ export async function loadPatientProfile(
     }),
   ];
 
+  const { data: sourceMapRows } = await supabase
+    .from("fi_patient_source_ids")
+    .select("source_system, source_patient_id")
+    .eq("tenant_id", tid)
+    .eq("patient_id", foundationPatientId);
+
   const { data: followUpRows } = await supabase
     .from("fi_follow_up_encounters")
     .select(
-      "id, encounter_type, legacy_source, visit_reason, clinical_note, status, created_at, completed_at"
+      "id, encounter_type, legacy_source, visit_reason, clinical_note, status, booking_id, created_at, completed_at"
     )
     .eq("tenant_id", tid)
     .eq("patient_id", foundationPatientId)
@@ -522,6 +540,7 @@ export async function loadPatientProfile(
       visit_reason: x.visit_reason != null ? String(x.visit_reason) : null,
       clinical_note: x.clinical_note != null ? String(x.clinical_note) : null,
       status: String(x.status),
+      booking_id: x.booking_id != null ? String(x.booking_id) : null,
       created_at: String(x.created_at),
       completed_at: x.completed_at != null ? String(x.completed_at) : null,
     };
@@ -626,6 +645,26 @@ export async function loadPatientProfile(
     supabase
   );
 
+  const followUpImageCount = timelineImages.filter((img) => img.follow_up_encounter_id).length;
+  const latestBookingId =
+    bookingsRaw[0]?.id ?? followUpEncounters.find((e) => e.booking_id)?.booking_id ?? null;
+
+  const legacyPolicy = deriveLegacyPatientDisplayPolicy(opts?.viewerCanReadClinicalPhi ? "doctor" : "reception");
+  const legacyVisibility = deriveLegacyPatientVisibilitySummary({
+    patientId: foundationPatientId,
+    patientMetadata: patient.metadata,
+    sourceMappings: (sourceMapRows ?? []).map((r) => ({
+      source_system: String((r as { source_system: string }).source_system),
+      source_patient_id: String((r as { source_patient_id: string }).source_patient_id),
+    })),
+    encounters: followUpEncounters,
+    imagingSessions: followUpImagingSessions,
+    followUpImageCount,
+    latestBookingId: latestBookingId != null ? String(latestBookingId) : null,
+  });
+  const legacyBadges = deriveLegacyPatientBadges(legacyVisibility, legacyPolicy);
+  const legacyBanners = deriveLegacyPatientProfileBanners(legacyVisibility, tid, legacyPolicy);
+
   return {
     ok: true,
     mode: "foundation",
@@ -644,6 +683,9 @@ export async function loadPatientProfile(
       patientTimeline,
       summary,
       trialConsentGate,
+      legacyVisibility,
+      legacyBadges,
+      legacyBanners,
     },
   };
 }

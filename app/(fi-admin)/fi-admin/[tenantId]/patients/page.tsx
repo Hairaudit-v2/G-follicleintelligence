@@ -13,6 +13,8 @@ import {
   loadPatientOsOverview,
 } from "@/src/lib/patients/patientOsDashboardLoader.server";
 import { parsePatientDirectoryQuery } from "@/src/lib/patients/patientDirectoryQuery";
+import { patientDirectoryHasLegacyFilters } from "@/src/lib/patients/patientDirectoryFilters";
+import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 
 export const metadata = {
   title: "PatientOS",
@@ -42,6 +44,7 @@ function directoryQueryHasListFilters(
     query.lastVisitFrom != null ||
     query.lastVisitTo != null ||
     query.leadSource != null ||
+    patientDirectoryHasLegacyFilters(query) ||
     query.page > 1 ||
     query.sort !== "created_desc" ||
     query.pageSize !== 25
@@ -64,16 +67,19 @@ export default async function PatientsHomeRoutePage({
   const viewMode = parseViewMode(sp);
   const query = parsePatientDirectoryQuery(sp);
 
+  const session = await getCrmShellSessionIfAllowed(tid);
+  const viewerRole = session?.role ?? null;
+
   if (viewMode === "list" || directoryQueryHasListFilters(query)) {
     const [data, showBookingsBoard] = await Promise.all([
-      loadPatientDirectoryPage(tid, query),
+      loadPatientDirectoryPage(tid, query, undefined, { viewerRole }),
       getBookingsBoardNavAllowed(tid),
     ]);
     return <PatientOsListView tenantId={tid} data={data} showBookingsBoard={showBookingsBoard} />;
   }
 
   const [data, showBookingsBoard, showDiagnosticsExpanded, authId] = await Promise.all([
-    loadPatientDirectoryPage(tid, query),
+    loadPatientDirectoryPage(tid, query, undefined, { viewerRole }),
     getBookingsBoardNavAllowed(tid),
     canViewDashboardSystemDiagnostics(tid),
     resolveAuthUserId(null),

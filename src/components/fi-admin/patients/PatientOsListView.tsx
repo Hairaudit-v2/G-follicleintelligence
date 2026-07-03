@@ -11,6 +11,7 @@ import {
   patientDirectoryHasActiveFilters,
 } from "@/src/lib/patients/patientDirectoryQuery";
 import { patientOsLinkButtonClass } from "@/src/lib/fiAdmin/patientPresentation";
+import { PatientOsLegacySavedViews } from "@/src/components/fi-admin/patients/PatientOsLegacySavedViews";
 
 export function PatientOsListView({
   tenantId,
@@ -60,7 +61,8 @@ export function PatientOsListView({
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-5 space-y-4">
+          <PatientOsLegacySavedViews tenantId={tenantId} query={query} />
           <PatientDirectoryFilters
             tenantId={tenantId}
             query={query}

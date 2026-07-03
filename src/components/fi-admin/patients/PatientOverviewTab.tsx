@@ -9,6 +9,7 @@ import type { PatientTimelineItem } from "@/src/lib/patients/timeline/patientTim
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import type { PatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
 import { PatientIntelligenceSummary } from "./PatientIntelligenceSummary";
+import { LegacyPatientFollowUpSummaryCard } from "./LegacyPatientFollowUpSummaryCard";
 
 import { PatientBookNextAppointmentCard } from "@/src/components/fi/patients/shared/PatientBookNextAppointmentCard";
 import { PatientConsultationsCard } from "@/src/components/fi/patients/shared/PatientConsultationsCard";
@@ -335,6 +336,12 @@ export function PatientOverviewTab({
     <div className="grid gap-4 lg:grid-cols-12">
       {/* ── Left: Active patient journey ─────────────────────────── */}
       <div className="space-y-4 lg:col-span-7">
+        <LegacyPatientFollowUpSummaryCard
+          tenantId={tenantId}
+          patientId={patientId}
+          visibility={profile.legacyVisibility}
+        />
+
         {/* 1. Book next appointment — legacy white component, contained */}
         <LegacyCardShell>
           <PatientBookNextAppointmentCard

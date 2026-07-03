@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { PatientDirectoryRow as PatientDirectoryRowModel } from "@/src/lib/patients/patientDirectoryLoader";
 import { PatientStatusBadge } from "./PatientStatusBadge";
+import { LegacyPatientBadges } from "@/src/components/fi-admin/patients/LegacyPatientBadges";
 
 export function PatientDirectoryRow({
   tenantId,
@@ -20,7 +21,10 @@ export function PatientDirectoryRow({
       <td className="hidden px-3 py-2 text-xs text-slate-400 md:table-cell">{row.email ?? "—"}</td>
       <td className="hidden px-3 py-2 text-xs text-slate-400 lg:table-cell">{row.phone ?? "—"}</td>
       <td className="px-3 py-2">
-        <PatientStatusBadge status={row.patientStatus} />
+        <div className="space-y-1">
+          <PatientStatusBadge status={row.patientStatus} />
+          <LegacyPatientBadges badges={row.legacyBadges} />
+        </div>
       </td>
       <td className="hidden px-3 py-2 text-xs text-slate-400 sm:table-cell">
         {row.createdAt.slice(0, 10)}
