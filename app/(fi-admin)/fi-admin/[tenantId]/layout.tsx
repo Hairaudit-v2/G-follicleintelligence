@@ -240,8 +240,10 @@ export default async function TenantAdminLayout({
       />
       <div
         className={cn(
-          fiOsChromeClasses.tenantMainSurfaceInner,
-          "flex min-h-0 min-w-0 flex-1 flex-col"
+          fiOsChromeClasses.tenantMainSurfaceInnerPad,
+          isCalendarFillSurface
+            ? fiOsChromeClasses.tenantMainSurfaceInnerFill
+            : fiOsChromeClasses.tenantMainSurfaceInnerScroll
         )}
       >
         <StaffUatLayoutMount

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
+import { cn } from "@/lib/utils";
 import { WorkforceOsSubNav } from "@/src/components/fi/workforce/WorkforceOsSubNav";
 import { FiModuleAccessDenied } from "@/src/components/fi-os/FiModuleAccessDenied";
+import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 
@@ -32,7 +34,7 @@ export default async function WorkforceOsLayout({
   }
 
   return (
-    <div className="mx-auto max-w-[88rem] px-4 pt-8">
+    <div className={cn(fiOsChromeClasses.pageScrollContent, "px-4 pt-8")}>
       <WorkforceOsSubNav tenantId={tid} />
       {children}
     </div>

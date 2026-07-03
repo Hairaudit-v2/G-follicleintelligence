@@ -1114,7 +1114,10 @@ export function WorkforceCommandCentreClient({
 
       <StaffUatClarityFeedback screenKey="workforce_os" />
 
-      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08] pt-8 text-sm text-[#64748B]">
+      <footer
+        data-testid="workforce-os-page-bottom"
+        className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08] pt-8 text-sm text-[#64748B]"
+      >
         <p>
           Workforce members lifecycle view available at{" "}
           <Link href={`${base}/directory`} className="font-medium text-[#22C1FF] hover:underline">

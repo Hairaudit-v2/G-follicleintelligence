@@ -59,9 +59,20 @@ export const fiOsChromeClasses = {
     "relative min-h-[min(32vh,400px)] rounded-xl border border-white/[0.08] bg-[#050a12]/94 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_36px_rgba(0,0,0,0.32)]",
   /** Calendar fill chain — passes height to scheduling subtree (`overflow-hidden` stays on calendar layout). */
   tenantMainSurfaceFill: "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
-  /** Scroll-friendly pages (Today, settings, etc.) — content grows `<main>` scroll height. */
-  tenantMainSurfaceScroll: "flex min-w-0 flex-col",
+  /** Scroll-friendly pages — must not shrink inside `<main>`; content grows scroll height. */
+  tenantMainSurfaceScroll: "flex min-w-0 shrink-0 flex-col",
+  /** Shared inset padding for tenant route surfaces. */
+  tenantMainSurfaceInnerPad: "relative px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
+  /** Calendar fill inner — flex height chain to scheduling subtree. */
+  tenantMainSurfaceInnerFill: "flex min-h-0 min-w-0 flex-1 flex-col",
+  /** Scroll inner — natural block flow; never flex-1 (avoids viewport clip trap). */
+  tenantMainSurfaceInnerScroll: "relative w-full min-w-0 shrink-0",
+  /** @deprecated Use tenantMainSurfaceInnerPad + fill/scroll variant. */
   tenantMainSurfaceInner: "relative px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
+  /** Route page root — grows with content inside scrollable `<main>`. */
+  pageScrollRoot: "min-h-full w-full shrink-0",
+  /** Optional centred page column (WorkforceOS, settings hubs, etc.). */
+  pageScrollContent: "mx-auto w-full min-w-0 max-w-[88rem]",
   /** Desktop primary rail (decorative glow applied inline in `FiOsSidebar`) */
   sidebarRail:
     "relative z-20 hidden min-h-0 w-[260px] shrink-0 flex-col self-stretch overflow-hidden border-r border-white/[0.08] bg-[#060d18]/96 py-3 backdrop-blur-xl lg:flex lg:w-[272px]",

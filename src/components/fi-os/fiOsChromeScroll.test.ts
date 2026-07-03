@@ -47,6 +47,23 @@ test("fiOsChromeClasses: shell locks viewport height without blocking nested scr
     "tenantMainSurfaceScroll allows main column scroll"
   );
   assert.ok(
+    fiOsChromeClasses.tenantMainSurfaceScroll.includes("shrink-0"),
+    "tenantMainSurfaceScroll must not shrink inside flex main"
+  );
+  assert.ok(
+    !fiOsChromeClasses.tenantMainSurfaceInnerScroll.includes("flex-1"),
+    "tenantMainSurfaceInnerScroll avoids viewport flex-1 trap"
+  );
+  assertIncludesAll(
+    fiOsChromeClasses.tenantMainSurfaceInnerFill,
+    ["flex-1", "min-h-0"],
+    "tenantMainSurfaceInnerFill"
+  );
+  assert.ok(
+    fiOsChromeClasses.pageScrollRoot.includes("shrink-0"),
+    "pageScrollRoot grows main scroll height"
+  );
+  assert.ok(
     fiOsChromeClasses.mainScrollFloatingAssistPad.includes("safe-area-inset-bottom"),
     "main scroll pad respects safe area"
   );

@@ -84,7 +84,7 @@ export function FiOsClinicSettingsNav({
   }
 
   return (
-    <div className="border-b border-white/[0.08] bg-[#060d18]/80 px-3 py-2 sm:px-4">
+    <div className="shrink-0 border-b border-white/[0.08] bg-[#060d18]/80 px-3 py-2 sm:px-4">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-1.5">
         <span className="pr-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
           Clinic settings

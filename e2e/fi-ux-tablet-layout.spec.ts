@@ -1,5 +1,5 @@
 /**
- * Tablet layout smoke — Calendar chrome density + Today scroll contract.
+ * Tablet layout smoke — Calendar chrome density + scroll contract (Today, WorkforceOS).
  *
  * Requires FI_E2E_BASE_URL, demo admin credentials, and FI_E2E_TENANT_ID.
  * Today scroll checks also need FI_E2E_TODAY_SURFACE_ENABLED=true.
@@ -25,6 +25,38 @@ function todaySurfaceOptedIn(): boolean {
 test.beforeAll(() => {
   requireE2eBaseUrl();
 });
+
+async function expectMainColumnScrollable(
+  page: import("@playwright/test").Page,
+  sentinel: import("@playwright/test").Locator,
+) {
+  const main = page.locator("#fi-os-main-content");
+  await expect(main).toBeVisible();
+
+  const sidebar = page.getByTestId("fi-os-shell").locator("aside").first();
+  if ((await sidebar.count()) > 0) {
+    await expect(sidebar).toBeVisible();
+  }
+
+  const metrics = await main.evaluate((el) => ({
+    scrollHeight: el.scrollHeight,
+    clientHeight: el.clientHeight,
+    scrollTopMax: el.scrollHeight - el.clientHeight,
+  }));
+
+  expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight + 8);
+
+  await main.evaluate((el, max) => {
+    el.scrollTop = max;
+  }, metrics.scrollTopMax);
+
+  await expect(sentinel).toBeInViewport({ ratio: 0.15 });
+
+  const bodyOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(bodyOverflow).toBeLessThanOrEqual(24);
+}
 
 async function expectCalendarGridVisible(page: import("@playwright/test").Page) {
   await expect(page.getByTestId("calendar-top-controls")).toBeVisible({ timeout: 30_000 });
@@ -81,11 +113,29 @@ authenticatedTest.describe("FI OS tablet layout @authenticated", () => {
       timeout: 30_000,
     });
 
-    const main = page.locator("#fi-os-main-content");
-    await expect(main).toBeVisible();
+    await expectMainColumnScrollable(
+      page,
+      page.getByRole("heading", { name: /Later and tomorrow/ }),
+    );
+  });
 
-    const comingUp = page.getByRole("heading", { name: /Later and tomorrow/ });
-    await comingUp.scrollIntoViewIfNeeded();
-    await expect(comingUp).toBeInViewport({ ratio: 0.2 });
+  authenticatedTest("Workforce Intelligence Centre scrolls to page bottom at 1440x900", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE()}/workforce-os`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(
+      page.getByRole("heading", { name: "Workforce Intelligence Centre", exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+
+    await expectMainColumnScrollable(page, page.getByTestId("workforce-os-page-bottom"));
+  });
+
+  authenticatedTest("Workforce Intelligence Centre scrolls at tablet width", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto(`${BASE()}/workforce-os`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(
+      page.getByRole("heading", { name: "Workforce Intelligence Centre", exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+
+    await expectMainColumnScrollable(page, page.getByTestId("workforce-os-page-bottom"));
   });
 });
