@@ -12,13 +12,14 @@ import { RosterShiftDrawer } from "@/src/components/fi/workforce/RosterShiftDraw
 import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
 import {
-  copyPreviousRosterPeriodAction,
+  copyPreviousWeekRosterAction,
   generateRosterFromStandardHoursAction,
 } from "@/src/lib/actions/workforce-roster-actions";
 import type { RosterCommandCentrePayload } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import type { RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import {
   buildRosterCommandCentreHref,
+  rosterDateRangeFromWeekStart,
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
@@ -39,14 +40,6 @@ import {
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
   type RosterCommandCentreDrawerState,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
-import {
-  groupDatesIntoWeekRows,
-  isRosterCadenceConfigured,
-  rosterCadencePeriodLabel,
-  rosterCopyPreviousActionLabel,
-  rosterGenerateActionLabel,
-  shiftRosterPeriodStart,
-} from "@/src/lib/workforce/rosterCadencePolicyCore";
 
 const STATUS_FILTERS: Array<{ id: RosterStaffingStatusFilter | ""; label: string }> = [
   { id: "", label: "All statuses" },
@@ -65,7 +58,6 @@ export type RosterCommandCentreViewProps = {
     { candidatesByRole: Record<string, RosterAssignableCandidate[]> } | undefined
   >;
   filters: {
-    periodStart: string;
     weekStart: string;
     clinicId: string;
     staffId: string;
@@ -92,29 +84,10 @@ function rosterDrawerStaffOption(
   return staffOptions.find((staff) => staff.id === staffMemberId) ?? null;
 }
 
-function rosterGridSections(
-  payload: RosterCommandCentrePayload
-): Array<{ key: string; title?: string; dates: string[] }> {
-  const cadence = payload.rosterPlanning.rosterCadence;
-  const dates = payload.periodDayDates;
-
-  if (cadence === "fortnightly") {
-    return [
-      { key: "week-a", title: "Week A", dates: dates.slice(0, 7) },
-      { key: "week-b", title: "Week B", dates: dates.slice(7, 14) },
-    ];
-  }
-
-  if (cadence === "monthly") {
-    const rows = groupDatesIntoWeekRows(dates, payload.rosterPlanning.rosterWeekStartDay);
-    return rows.map((row, index) => ({
-      key: `month-week-${index}`,
-      title: `Week ${index + 1}`,
-      dates: row,
-    }));
-  }
-
-  return [{ key: "weekly", dates }];
+function shiftWeek(isoDate: string, deltaWeeks: number): string {
+  const d = new Date(`${isoDate.slice(0, 10)}T12:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + deltaWeeks * 7);
+  return d.toISOString().slice(0, 10);
 }
 
 export function RosterCommandCentreView({
@@ -125,8 +98,6 @@ export function RosterCommandCentreView({
   useWorkforceOsRoute = false,
 }: RosterCommandCentreViewProps) {
   const router = useRouter();
-  const cadence = payload.rosterPlanning.rosterCadence;
-  const periodLabel = rosterCadencePeriodLabel(cadence);
   const [selectedEventKey, setSelectedEventKey] = useState(payload.preselectedEventKey);
   const [drawerState, setDrawerState] = useState<RosterCommandCentreDrawerState>({
     kind: "closed",
@@ -135,12 +106,10 @@ export function RosterCommandCentreView({
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const periodRange = useMemo(
-    () => ({ startsAt: payload.dateRange.startsAt, endsAt: payload.dateRange.endsAt }),
-    [payload.dateRange]
+  const weekRange = useMemo(
+    () => rosterDateRangeFromWeekStart(filters.weekStart),
+    [filters.weekStart]
   );
-
-  const gridSections = useMemo(() => rosterGridSections(payload), [payload]);
 
   const refresh = useCallback(() => {
     router.refresh();
@@ -175,13 +144,10 @@ export function RosterCommandCentreView({
 
   function pushFilters(next: Partial<RosterCommandCentreViewProps["filters"]>) {
     const merged = { ...filters, ...next };
-    const periodStart = merged.periodStart || merged.weekStart;
     router.push(
       buildRosterCommandCentreHref({
         tenantId,
-        periodStart: cadence !== "monthly" ? periodStart : undefined,
-        monthStart: cadence === "monthly" ? periodStart.slice(0, 7) : undefined,
-        weekStart: cadence === "weekly" ? periodStart : undefined,
+        weekStart: merged.weekStart,
         clinicId: merged.clinicId || null,
         staffId: merged.staffId || null,
         eventType: merged.eventType || null,
@@ -191,11 +157,6 @@ export function RosterCommandCentreView({
         useWorkforceOsRoute,
       })
     );
-  }
-
-  function shiftPeriod(direction: -1 | 1) {
-    const next = shiftRosterPeriodStart(filters.periodStart, cadence, direction);
-    pushFilters({ periodStart: next, weekStart: next });
   }
 
   function handleCellClick(staffId: string, localDate: string) {
@@ -235,8 +196,8 @@ export function RosterCommandCentreView({
     startTransition(async () => {
       const result = await generateRosterFromStandardHoursAction({
         tenantId,
-        rangeStartIso: periodRange.startsAt,
-        rangeEndIso: periodRange.endsAt,
+        rangeStartIso: weekRange.startsAt,
+        rangeEndIso: weekRange.endsAt,
         staffIds: filters.staffId ? [filters.staffId] : undefined,
         overwriteGeneratedOnly,
       });
@@ -245,51 +206,34 @@ export function RosterCommandCentreView({
         return;
       }
       setActionMessage(
-        `${rosterGenerateActionLabel(cadence)}: ${result.data.createdCount} shifts created, ${result.data.skippedCount} skipped (${result.data.cadence}).`
+        `Generate roster: ${result.data.createdCount} shifts created, ${result.data.skippedCount} skipped.`
       );
       refresh();
     });
   }
 
-  function handleCopyPreviousPeriod() {
+  function handleCopyPreviousWeek() {
     setActionError(null);
     setActionMessage(null);
     startTransition(async () => {
-      const result = await copyPreviousRosterPeriodAction({
+      const result = await copyPreviousWeekRosterAction({
         tenantId,
-        targetPeriodStartIso: filters.periodStart,
+        targetWeekStartIso: filters.weekStart,
         staffIds: filters.staffId ? [filters.staffId] : undefined,
       });
       if (!result.ok) {
         setActionError(result.error);
         return;
       }
-      setActionMessage(
-        `${rosterCopyPreviousActionLabel(cadence)}: ${result.data.createdCount} shifts copied.`
-      );
+      setActionMessage(`Copy previous week: ${result.data.createdCount} shifts copied.`);
       refresh();
     });
   }
-
-  const periodPickerLabel =
-    cadence === "monthly"
-      ? "Month"
-      : cadence === "fortnightly"
-        ? "Fortnight starting"
-        : "Week starting";
-
-  const rosterSectionTitle =
-    cadence === "monthly"
-      ? "Monthly roster"
-      : cadence === "fortnightly"
-        ? "Fortnightly roster"
-        : "Weekly roster";
 
   return (
     <div
       className={cn(ROSTER_PAGE_SCROLL_ROOT_CLASSES, fiOsChromeClasses.pageScrollContent, "space-y-6")}
       data-testid="roster-command-centre"
-      data-roster-cadence={cadence}
     >
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
@@ -297,89 +241,48 @@ export function RosterCommandCentreView({
           Roster Command Centre
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Set standard hours once, generate the {periodLabel} roster, adjust shifts as needed, and
-          monitor clinical staffing coverage.
+          Set standard hours once, generate the weekly roster, adjust shifts as needed, and monitor
+          clinical staffing coverage.
         </p>
         <p className="mt-2 text-xs text-slate-500">
-          Cadence:{" "}
-          <span data-testid="roster-cadence-label" className="text-slate-300">
-            {cadence}
-          </span>
-          {" · "}
-          <Link
-            href={`/fi-admin/${tenantId}/settings/clinic-setup`}
-            className="text-cyan-400 hover:text-cyan-300"
-          >
-            Clinic setup
-          </Link>
-          {" · "}
           <Link
             href={`/fi-admin/${tenantId}/workforce-os`}
             className="text-cyan-400 hover:text-cyan-300"
           >
             Workforce Command Centre
           </Link>
+          {" · "}
+          <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">
+            HR dashboard
+          </Link>
         </p>
       </header>
-
-      {!isRosterCadenceConfigured(payload.rosterPlanning) ? (
-        <section
-          className="rounded-xl border border-amber-500/25 bg-amber-950/20 px-4 py-3 text-sm text-amber-100"
-          data-testid="roster-cadence-banner"
-        >
-          Roster cadence is not configured.{" "}
-          <Link
-            href={`/fi-admin/${tenantId}/settings/clinic-setup`}
-            className="font-medium text-amber-50 underline hover:text-white"
-          >
-            Configure in Clinic setup
-          </Link>{" "}
-          — defaulting to weekly planning until saved.
-        </section>
-      ) : null}
 
       <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => shiftPeriod(-1)}
+              onClick={() => pushFilters({ weekStart: shiftWeek(filters.weekStart, -1) })}
               className="rounded-lg border border-white/[0.08] px-2 py-2 text-sm text-slate-300 hover:bg-white/[0.04]"
-              aria-label={`Previous ${periodLabel}`}
+              aria-label="Previous week"
             >
               ←
             </button>
             <label className="block text-xs text-slate-400">
-              {periodPickerLabel}
-              {cadence === "monthly" ? (
-                <input
-                  type="month"
-                  value={filters.periodStart.slice(0, 7)}
-                  onChange={(e) => {
-                    const month = e.target.value;
-                    if (!month) return;
-                    pushFilters({ periodStart: `${month}-01`, weekStart: `${month}-01` });
-                  }}
-                  className="mt-1 block rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
-                  data-testid="roster-month-picker"
-                />
-              ) : (
-                <input
-                  type="date"
-                  value={filters.periodStart}
-                  onChange={(e) =>
-                    pushFilters({ periodStart: e.target.value, weekStart: e.target.value })
-                  }
-                  className="mt-1 block rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
-                  data-testid="roster-period-picker"
-                />
-              )}
+              Week starting
+              <input
+                type="date"
+                value={filters.weekStart}
+                onChange={(e) => pushFilters({ weekStart: e.target.value })}
+                className="mt-1 block rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+              />
             </label>
             <button
               type="button"
-              onClick={() => shiftPeriod(1)}
+              onClick={() => pushFilters({ weekStart: shiftWeek(filters.weekStart, 1) })}
               className="rounded-lg border border-white/[0.08] px-2 py-2 text-sm text-slate-300 hover:bg-white/[0.04]"
-              aria-label={`Next ${periodLabel}`}
+              aria-label="Next week"
             >
               →
             </button>
@@ -452,7 +355,7 @@ export function RosterCommandCentreView({
               className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
               data-testid="roster-generate-button"
             >
-              {rosterGenerateActionLabel(cadence)}
+              Generate roster
             </button>
             <button
               type="button"
@@ -465,11 +368,11 @@ export function RosterCommandCentreView({
             <button
               type="button"
               disabled={pending}
-              onClick={handleCopyPreviousPeriod}
+              onClick={handleCopyPreviousWeek}
               className="rounded-lg border border-white/[0.12] px-3 py-2 text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50"
               data-testid="roster-copy-previous-button"
             >
-              {rosterCopyPreviousActionLabel(cadence)}
+              Copy previous week
             </button>
           </div>
         </div>
@@ -521,36 +424,25 @@ export function RosterCommandCentreView({
         </section>
       ) : null}
 
-      <section className="space-y-6">
+      <section className="space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-slate-100">{rosterSectionTitle}</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Weekly roster</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Set standard hours per staff, generate the {periodLabel}, then adjust individual shifts
-            only when needed.
+            Set standard hours per staff, generate the week, then adjust individual shifts only when
+            needed.
           </p>
         </div>
-        {gridSections.map((section) => (
-          <div key={section.key} className="space-y-2">
-            {section.title ? (
-              <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                {section.title}
-              </h3>
-            ) : null}
-            <RosterWeekGrid
-              weekDayDates={section.dates}
-              staffOptions={payload.staffOptions}
-              shifts={payload.shifts}
-              availabilityCells={payload.availabilityCells}
-              standardHoursByStaffId={payload.standardHoursByStaffId}
-              rosterCadence={cadence}
-              rosterCycleAnchorDate={payload.rosterPlanning.rosterCycleAnchorDate}
-              selectedShiftId={drawerShift?.id ?? null}
-              onCellClick={handleCellClick}
-              onShiftClick={handleShiftClick}
-              onEditStandardHours={openStandardHours}
-            />
-          </div>
-        ))}
+        <RosterWeekGrid
+          weekDayDates={payload.weekDayDates}
+          staffOptions={payload.staffOptions}
+          shifts={payload.shifts}
+          availabilityCells={payload.availabilityCells}
+          standardHoursByStaffId={payload.standardHoursByStaffId}
+          selectedShiftId={drawerShift?.id ?? null}
+          onCellClick={handleCellClick}
+          onShiftClick={handleShiftClick}
+          onEditStandardHours={openStandardHours}
+        />
       </section>
 
       <RosterSidePanel
@@ -595,9 +487,7 @@ export function RosterCommandCentreView({
             staffName={drawerStaffName}
             initialDays={standardHoursDays}
             clinics={payload.clinics}
-            weekRange={periodRange}
-            rosterCadence={cadence}
-            defaultFullTimePattern={payload.rosterPlanning.defaultFullTimePattern}
+            weekRange={weekRange}
             onSaved={() => {
               closeDrawer();
               refresh();
