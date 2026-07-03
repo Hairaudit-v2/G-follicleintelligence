@@ -283,7 +283,7 @@ export function rosterPeriodDayCount(
 export function rosterDateRangeFromPeriodStart(
   periodStartIso: string,
   cadence: RosterCadence,
-  weekStartDay: RosterWeekStartDay = "monday"
+  _weekStartDay: RosterWeekStartDay = "monday"
 ): { startsAt: string; endsAt: string; periodStart: string; periodDayDates: string[] } {
   const periodStart = periodStartIso.slice(0, 10);
   const dayCount = rosterPeriodDayCount(periodStart, cadence);

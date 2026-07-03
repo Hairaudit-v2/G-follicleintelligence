@@ -8,7 +8,6 @@ import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore"
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import type { AvailabilityBlockType } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
-  isoDateForWeekday,
   normaliseCycleWeek,
   type StaffStandardHoursDayInput,
   type StandardHoursShiftSource,

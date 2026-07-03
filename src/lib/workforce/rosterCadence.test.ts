@@ -125,7 +125,6 @@ describe("fortnightly standard hours and generation", () => {
   });
 
   it("fortnightly copy previous period works", () => {
-    const range = rosterDateRangeFromPeriodStart("2026-01-19", "fortnightly");
     const copied = copyPreviousRosterPeriodShifts({
       existingShifts: [
         {
