@@ -18,7 +18,6 @@ import {
   buildGoogleCalendarBookingMetadata,
   buildWriteSummaryFromSyncAndBookings,
   detectGoogleCalendarExternalSource,
-  looksLikeGoogleCalendarAppointment,
   mapGoogleEventTypeToBookingType,
   matchPatientByEventTitle,
   resolveGoogleCalendarBackfillDateRange,

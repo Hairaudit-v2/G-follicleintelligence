@@ -1,7 +1,10 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
 import { parseStaffWeeklyHours, serializeStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import {
   standardHoursToWeeklyHoursMap,
@@ -10,6 +13,56 @@ import {
   type StaffStandardHoursDayInput,
   type StaffStandardHoursRow,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+
+export const STAFF_STANDARD_HOURS_STAFF_NOT_FOUND_MESSAGE =
+  "Staff member not found for this tenant.";
+export const STAFF_STANDARD_HOURS_CLINIC_NOT_FOUND_MESSAGE =
+  "Clinic does not belong to this tenant.";
+export const STAFF_STANDARD_HOURS_PERMISSION_DENIED_MESSAGE =
+  "Could not save standard hours. Workforce management permission is required.";
+
+type ServerOpts = { supabaseClientForTests?: SupabaseClient };
+
+function mapStandardHoursDbError(error: { message: string }): string {
+  const msg = error.message.toLowerCase();
+  if (msg.includes("row-level security") || msg.includes("permission denied")) {
+    return STAFF_STANDARD_HOURS_PERMISSION_DENIED_MESSAGE;
+  }
+  return error.message;
+}
+
+/** Ensures staff and optional clinic rows belong to the tenant before writing. */
+export async function validateStandardHoursWriteScope(
+  tenantId: string,
+  staffId: string,
+  days: StaffStandardHoursDayInput[],
+  client?: SupabaseClient
+): Promise<void> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const sid = assertNonEmptyUuid(staffId, "staffId");
+
+  const { data: staffRow, error: staffErr } = await supabase
+    .from("fi_staff")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .maybeSingle();
+  if (staffErr) throw new Error(mapStandardHoursDbError(staffErr));
+  if (!staffRow) throw new Error(STAFF_STANDARD_HOURS_STAFF_NOT_FOUND_MESSAGE);
+
+  const clinicIds = [
+    ...new Set(
+      days
+        .map((day) => day.clinic_id?.trim())
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  for (const clinicId of clinicIds) {
+    const ok = await clinicBelongsToTenant(tid, clinicId, supabase);
+    if (!ok) throw new Error(STAFF_STANDARD_HOURS_CLINIC_NOT_FOUND_MESSAGE);
+  }
+}
 
 function mapStandardHoursRow(row: Record<string, unknown>): StaffStandardHoursRow {
   return {
@@ -110,18 +163,19 @@ export async function resolveStandardHoursForStaff(
 async function syncLegacyWorkingHoursJson(
   tenantId: string,
   staffId: string,
-  days: StaffStandardHoursDayInput[]
+  days: StaffStandardHoursDayInput[],
+  client?: SupabaseClient
 ): Promise<void> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const sid = assertNonEmptyUuid(staffId, "staffId");
   const weekly = standardHoursToWeeklyHoursMap(days);
-  const supabase = supabaseAdmin();
+  const supabase = client ?? supabaseAdmin();
   const { error } = await supabase
     .from("fi_staff")
     .update({ working_hours: serializeStaffWeeklyHours(weekly) })
     .eq("tenant_id", tid)
     .eq("id", sid);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mapStandardHoursDbError(error));
 }
 
 export type SaveStaffStandardHoursInput = {
@@ -137,7 +191,8 @@ export type SaveStaffStandardHoursResult = {
 };
 
 export async function saveStaffStandardHours(
-  input: SaveStaffStandardHoursInput
+  input: SaveStaffStandardHoursInput,
+  opts: ServerOpts = {}
 ): Promise<SaveStaffStandardHoursResult> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const sid = assertNonEmptyUuid(input.staffId, "staffId");
@@ -147,7 +202,9 @@ export async function saveStaffStandardHours(
   }
 
   const effectiveFrom = input.effectiveFrom?.slice(0, 10) ?? new Date().toISOString().slice(0, 10);
-  const supabase = supabaseAdmin();
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+
+  await validateStandardHoursWriteScope(tid, sid, input.days, supabase);
 
   const { error: archiveErr } = await supabase
     .from("fi_staff_standard_hours")
@@ -155,7 +212,7 @@ export async function saveStaffStandardHours(
     .eq("tenant_id", tid)
     .eq("staff_id", sid)
     .eq("status", "active");
-  if (archiveErr) throw new Error(archiveErr.message);
+  if (archiveErr) throw new Error(mapStandardHoursDbError(archiveErr));
 
   const rows = input.days.map((day) => ({
     tenant_id: tid,
@@ -174,8 +231,8 @@ export async function saveStaffStandardHours(
   }));
 
   const { error: insertErr } = await supabase.from("fi_staff_standard_hours").insert(rows);
-  if (insertErr) throw new Error(insertErr.message);
+  if (insertErr) throw new Error(mapStandardHoursDbError(insertErr));
 
-  await syncLegacyWorkingHoursJson(tid, sid, input.days);
+  await syncLegacyWorkingHoursJson(tid, sid, input.days, supabase);
   return { days: input.days, validation };
 }
