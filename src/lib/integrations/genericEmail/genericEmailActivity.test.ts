@@ -285,6 +285,8 @@ describe("buildLiveDataHealthWarnings generic email", () => {
       googleCalendarLastSyncAt: null,
       googleCalendarStagedEventCount: 0,
       googleCalendarPromotedAppointmentCount: 0,
+      googleCalendarBackfillLastRunAt: null,
+      googleCalendarBackfillReviewCount: 0,
       hubSpotConnected: false,
       hubSpotLastSyncAt: null,
       hubSpotStagedContactCount: 0,
