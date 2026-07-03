@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
@@ -102,11 +104,12 @@ async function loadAvailabilityBlocksInRange(
 async function insertShiftCandidates(
   tenantId: string,
   candidates: RosterShiftCandidate[],
-  createdBy?: string | null
+  createdBy?: string | null,
+  supabaseClientForTests?: SupabaseClient
 ): Promise<number> {
   if (!candidates.length) return 0;
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = supabaseAdmin();
+  const supabase = supabaseClientForTests ?? supabaseAdmin();
   const rows = candidates.map((c) => ({
     tenant_id: tid,
     staff_id: c.staff_id,
@@ -121,6 +124,16 @@ async function insertShiftCandidates(
   const { error } = await supabase.from("fi_staff_shifts").insert(rows);
   if (error) throw new Error(error.message);
   return rows.length;
+}
+
+/** @internal Exported for unit tests verifying `created_by` FK resolution. */
+export async function insertShiftCandidatesForTests(
+  tenantId: string,
+  candidates: RosterShiftCandidate[],
+  createdBy: string | null | undefined,
+  supabaseClientForTests: SupabaseClient
+): Promise<number> {
+  return insertShiftCandidates(tenantId, candidates, createdBy, supabaseClientForTests);
 }
 
 async function cancelShiftsByIds(tenantId: string, shiftIds: string[]): Promise<number> {
