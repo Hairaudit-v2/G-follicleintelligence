@@ -4,12 +4,18 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import {
-  copyPreviousWeekShifts,
+  copyPreviousRosterPeriodShifts,
   generateRosterFromStandardHours,
   mondayOfWeekIso,
   type GenerateRosterFromStandardHoursResult,
   type RosterShiftCandidate,
 } from "@/src/lib/workforce-os/rosterGenerationCore";
+import {
+  rosterDateRangeFromPeriodStart,
+  rosterPeriodDayCount,
+  type RosterCadence,
+} from "@/src/lib/workforce/rosterCadencePolicyCore";
+import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import {
   loadActiveStandardHoursForTenant,
   resolveStandardHoursForStaff,
@@ -162,9 +168,10 @@ export async function generateRosterFromStandardHoursForTenant(
     staffRows.map((s) => [s.id, s.default_timezone?.trim() || "Australia/Perth"])
   );
 
-  const [existingShifts, blocksRaw] = await Promise.all([
+  const [existingShifts, blocksRaw, rosterPolicy] = await Promise.all([
     loadExistingShiftsInRange(tid, input.rangeStartIso, input.rangeEndIso, staffIds),
     loadAvailabilityBlocksInRange(tid, input.rangeStartIso, input.rangeEndIso, staffIds),
+    loadWorkforceRosterPlanningPolicy(tid),
   ]);
 
   const plan = generateRosterFromStandardHours({
@@ -177,6 +184,8 @@ export async function generateRosterFromStandardHoursForTenant(
     existingShifts,
     availabilityBlocks: blocksRaw,
     overwriteGeneratedOnly: input.overwriteGeneratedOnly,
+    rosterCadence: rosterPolicy.rosterCadence,
+    rosterCycleAnchorDate: rosterPolicy.rosterCycleAnchorDate,
   });
 
   const replacedCount = await cancelShiftsByIds(tid, plan.shiftIdsToReplace);
@@ -185,22 +194,26 @@ export async function generateRosterFromStandardHoursForTenant(
   return { ...plan, createdCount, replacedCount };
 }
 
-export type CopyPreviousWeekInput = {
+export type CopyPreviousRosterPeriodInput = {
   tenantId: string;
-  targetWeekStartIso: string;
+  targetPeriodStartIso: string;
+  cadence?: RosterCadence;
   staffIds?: string[];
   createdBy?: string | null;
 };
 
-export async function copyPreviousWeekRosterForTenant(
-  input: CopyPreviousWeekInput
-): Promise<{ createdCount: number; candidates: RosterShiftCandidate[] }> {
+export async function copyPreviousRosterPeriodForTenant(
+  input: CopyPreviousRosterPeriodInput
+): Promise<{ createdCount: number; candidates: RosterShiftCandidate[]; cadence: RosterCadence }> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const weekStart = mondayOfWeekIso(input.targetWeekStartIso.slice(0, 10));
-  const prevStart = new Date(`${weekStart}T00:00:00.000Z`);
-  prevStart.setUTCDate(prevStart.getUTCDate() - 7);
-  const prevEnd = new Date(`${weekStart}T00:00:00.000Z`);
-  prevEnd.setUTCDate(prevEnd.getUTCDate());
+  const rosterPolicy = await loadWorkforceRosterPlanningPolicy(tid);
+  const cadence = input.cadence ?? rosterPolicy.rosterCadence;
+  const periodStart = input.targetPeriodStartIso.slice(0, 10);
+  const dayCount = rosterPeriodDayCount(periodStart, cadence);
+  const range = rosterDateRangeFromPeriodStart(periodStart, cadence, rosterPolicy.rosterWeekStartDay);
+  const prevStart = new Date(range.startsAt);
+  prevStart.setUTCDate(prevStart.getUTCDate() - dayCount);
+  const prevEnd = new Date(range.startsAt);
 
   const staffRows = await loadAllStaffForTenant(tid);
   const staffIds =
@@ -219,13 +232,34 @@ export async function copyPreviousWeekRosterForTenant(
     staffIds
   );
 
-  const candidates = copyPreviousWeekShifts({
+  const candidates = copyPreviousRosterPeriodShifts({
     existingShifts,
     staffIds,
-    targetWeekStartIso: weekStart,
+    targetPeriodStartIso: periodStart,
     staffTimezoneById,
+    cadence,
   });
 
   const createdCount = await insertShiftCandidates(tid, candidates, input.createdBy);
-  return { createdCount, candidates };
+  return { createdCount, candidates, cadence };
+}
+
+export type CopyPreviousWeekInput = {
+  tenantId: string;
+  targetWeekStartIso: string;
+  staffIds?: string[];
+  createdBy?: string | null;
+};
+
+export async function copyPreviousWeekRosterForTenant(
+  input: CopyPreviousWeekInput
+): Promise<{ createdCount: number; candidates: RosterShiftCandidate[] }> {
+  const result = await copyPreviousRosterPeriodForTenant({
+    tenantId: input.tenantId,
+    targetPeriodStartIso: mondayOfWeekIso(input.targetWeekStartIso.slice(0, 10)),
+    cadence: "weekly",
+    staffIds: input.staffIds,
+    createdBy: input.createdBy,
+  });
+  return { createdCount: result.createdCount, candidates: result.candidates };
 }

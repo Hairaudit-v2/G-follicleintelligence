@@ -15,8 +15,12 @@ test("RosterCommandCentreView uses unified drawer state and standard-hours entry
   assert.match(src, /useState<RosterCommandCentreDrawerState>/);
   assert.match(src, /openRosterStandardHoursDrawer/);
   assert.match(src, /openRosterMissingStandardHoursSetupDrawer/);
+  assert.match(src, /openStandardHoursDrawer/);
+  assert.match(src, /openMissingStandardHoursSetupDrawer/);
+  assert.match(src, /data-roster-drawer-kind=\{drawerState\.kind\}/);
   assert.match(src, /data-testid="roster-standard-hours-banner-cta"/);
-  assert.match(src, /onEditStandardHours=\{openStandardHours\}/);
+  assert.match(src, /onEditStandardHours=\{openStandardHoursDrawer\}/);
+  assert.match(src, /resolveRosterPayloadWeekDayDates/);
   assert.match(src, /resolveRosterCellClickIntent/);
   assert.match(src, /formatStandardHoursDrawerTitle\(drawerStaffName\)/);
   assert.match(src, /<StaffStandardHoursPanel/);
@@ -40,6 +44,7 @@ test("RosterRightDrawer portals to document.body and uses FI OS drawer chrome", 
   assert.match(src, /"use client"/);
   assert.match(src, /createPortal/);
   assert.match(src, /document\.body/);
+  assert.match(src, /typeof document === "undefined"/);
   assert.match(src, /fiOsChromeClasses\.rightDrawerOverlay/);
   assert.match(src, /z-\[190\]/);
   assert.match(src, /type="button"/);

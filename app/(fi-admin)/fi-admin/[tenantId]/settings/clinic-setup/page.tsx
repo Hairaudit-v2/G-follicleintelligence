@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { ClinicSetupWizard } from "@/src/components/fi-admin/settings/ClinicSetupWizard";
+import { RosterPlanningSettingsPanel } from "@/src/components/fi-admin/settings/RosterPlanningSettingsPanel";
+import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { loadClinicsForTenant } from "@/src/lib/taxLocalisation/taxLocalisationSettings.server";
 
 export const metadata = {
@@ -14,7 +16,10 @@ export default async function ClinicSetupPage({
 }) {
   const { tenantId } = await params;
   const tid = tenantId.trim();
-  const clinics = await loadClinicsForTenant(tid);
+  const [clinics, rosterPlanning] = await Promise.all([
+    loadClinicsForTenant(tid),
+    loadWorkforceRosterPlanningPolicy(tid),
+  ]);
 
   if (!clinics.length) {
     return (
@@ -36,7 +41,8 @@ export default async function ClinicSetupPage({
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] px-3 pb-10 pt-2 sm:px-4">
+    <div className="mx-auto max-w-[1600px] space-y-6 px-3 pb-10 pt-2 sm:px-4">
+      <RosterPlanningSettingsPanel tenantId={tid} initialPolicy={rosterPlanning} />
       <ClinicSetupWizard
         tenantId={tid}
         clinics={clinics.map((c) => ({ id: c.id, displayName: c.displayName }))}

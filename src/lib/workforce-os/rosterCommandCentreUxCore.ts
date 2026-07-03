@@ -73,8 +73,23 @@ export function resolveRosterDrawerStaffName(
   staffOptions: Array<{ id: string; name: string }>
 ): string | null {
   const staffMemberId = resolveRosterDrawerStaffMemberId(drawer);
-  if (!staffMemberId) return null;
+  if (!staffMemberId?.trim()) return null;
   return staffOptions.find((staff) => staff.id === staffMemberId)?.name ?? null;
+}
+
+export function resolveRosterPayloadWeekDayDates(payload: {
+  periodDayDates?: string[];
+  weekDayDates?: string[];
+}): string[] {
+  if (payload.periodDayDates?.length) return payload.periodDayDates;
+  if (payload.weekDayDates?.length) return payload.weekDayDates;
+  return [];
+}
+
+export function rosterStandardHoursDrawerIsOpen(
+  drawer: RosterCommandCentreDrawerState
+): drawer is { kind: "standard_hours"; staffMemberId: string } {
+  return drawer.kind === "standard_hours";
 }
 
 export function resolveRosterCellClickIntent(input: {

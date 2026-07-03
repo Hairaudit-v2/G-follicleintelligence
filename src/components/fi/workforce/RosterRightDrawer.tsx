@@ -42,12 +42,7 @@ export function RosterRightDrawer({
   wide = false,
 }: RosterRightDrawerProps) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
   const [viewportStyle, setViewportStyle] = useState<CSSProperties>({});
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -63,7 +58,7 @@ export function RosterRightDrawer({
     };
   }, [open]);
 
-  if (!open || !mounted) return null;
+  if (!open || typeof document === "undefined") return null;
 
   return createPortal(
     <div

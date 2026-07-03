@@ -21,6 +21,7 @@ import {
   type FiStaffShiftRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
 import {
+  copyPreviousRosterPeriodForTenant,
   copyPreviousWeekRosterForTenant,
   generateRosterFromStandardHoursForTenant,
 } from "@/src/lib/workforce-os/rosterGeneration.server";
@@ -316,6 +317,7 @@ const saveStandardHoursSchema = z.object({
   days: z.array(
     z.object({
       weekday: z.number().int().min(0).max(6),
+      cycle_week: z.number().int().min(1).max(2).optional(),
       is_working_day: z.boolean(),
       start_time: z.string().nullable(),
       end_time: z.string().nullable(),
@@ -333,6 +335,12 @@ const generateRosterSchema = z.object({
   rangeEndIso: z.string().min(1),
   staffIds: z.array(z.string().uuid()).optional(),
   overwriteGeneratedOnly: z.boolean().optional(),
+});
+
+const copyPeriodSchema = z.object({
+  tenantId: z.string().uuid(),
+  targetPeriodStartIso: z.string().min(1),
+  staffIds: z.array(z.string().uuid()).optional(),
 });
 
 const copyWeekSchema = z.object({
@@ -370,6 +378,14 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
     createdCount: number;
     replacedCount: number;
     skippedCount: number;
+    cadence: string;
+    summary: {
+      generatedCount: number;
+      skippedManualCount: number;
+      skippedLeaveCount: number;
+      skippedUnavailableCount: number;
+      skippedDuplicateCount: number;
+    };
   }>
 > {
   try {
@@ -390,6 +406,7 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
       action: "roster_generated_from_standard_hours",
       created_count: result.createdCount,
       replaced_count: result.replacedCount,
+      cadence: result.cadence,
       actor_user_id: authUserId ?? fiUserId,
     });
 
@@ -400,8 +417,45 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
         createdCount: result.createdCount,
         replacedCount: result.replacedCount,
         skippedCount: result.skips.length,
+        cadence: result.cadence,
+        summary: {
+          generatedCount: result.summary.generatedCount,
+          skippedManualCount: result.summary.skippedManualCount,
+          skippedLeaveCount: result.summary.skippedLeaveCount,
+          skippedUnavailableCount: result.summary.skippedUnavailableCount,
+          skippedDuplicateCount: result.summary.skippedDuplicateCount,
+        },
       },
     };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function copyPreviousRosterPeriodAction(body: unknown): Promise<
+  WorkforceRosterActionResult<{ createdCount: number; cadence: string }>
+> {
+  try {
+    const parsed = copyPeriodSchema.parse(body);
+    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const authUserId = await resolveAuthUserId(null);
+
+    const result = await copyPreviousRosterPeriodForTenant({
+      tenantId: parsed.tenantId,
+      targetPeriodStartIso: parsed.targetPeriodStartIso,
+      staffIds: parsed.staffIds,
+      createdBy: authUserId ?? fiUserId,
+    });
+
+    await logRosterAuditEvent({
+      action: "roster_copied_previous_period",
+      created_count: result.createdCount,
+      cadence: result.cadence,
+      actor_user_id: authUserId ?? fiUserId,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: { createdCount: result.createdCount, cadence: result.cadence } };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

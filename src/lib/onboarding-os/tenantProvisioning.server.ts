@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/fiOs/platformTenantProvision.server";
 import { activateTenantModule } from "@/src/lib/platform/entitlements/activateTenantModule.server";
 import { logStructured } from "@/src/lib/server/structuredLog";
+import { seedRosterPlanningPolicyFromDeploymentTemplate } from "@/src/lib/workforce/rosterCadencePolicy.server";
 
 import {
   buildAcademyAssignmentPlan,
@@ -837,6 +838,19 @@ async function executeStepLogic(
         .from("fi_tenant_provisioning_sessions")
         .update({ tenant_id: result.tenantId, updated_at: new Date().toISOString() })
         .eq("id", session.id);
+
+      const deploymentCode =
+        input.deploymentTemplateCode?.trim() ||
+        String(
+          (session.deployment_snapshot as { templateCode?: string } | null)?.templateCode ?? ""
+        ).trim() ||
+        null;
+      await seedRosterPlanningPolicyFromDeploymentTemplate(
+        result.tenantId,
+        deploymentCode,
+        supabase
+      );
+
       return {
         ok: true,
         output: {

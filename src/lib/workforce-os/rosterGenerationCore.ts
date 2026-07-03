@@ -4,9 +4,12 @@
 
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { DEFAULT_STAFF_HOURS_FALLBACK_TZ } from "@/src/lib/staff/staffWeeklyHours";
+import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
+import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import type { AvailabilityBlockType } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
   isoDateForWeekday,
+  normaliseCycleWeek,
   type StaffStandardHoursDayInput,
   type StandardHoursShiftSource,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
@@ -65,12 +68,24 @@ export type GenerateRosterFromStandardHoursInput = {
   availabilityBlocks: AvailabilityBlockForGeneration[];
   /** When true, replace existing standard_hours shifts only; manual shifts always preserved. */
   overwriteGeneratedOnly?: boolean;
+  rosterCadence?: RosterCadence;
+  rosterCycleAnchorDate?: string;
 };
 
 export type GenerateRosterFromStandardHoursResult = {
   candidates: RosterShiftCandidate[];
   skips: RosterGenerationSkip[];
   shiftIdsToReplace: string[];
+  cadence: RosterCadence;
+  summary: {
+    generatedCount: number;
+    skippedManualCount: number;
+    skippedLeaveCount: number;
+    skippedUnavailableCount: number;
+    skippedDuplicateCount: number;
+    skippedNotWorkingCount: number;
+    skippedNoStandardHoursCount: number;
+  };
 };
 
 const BLOCKING_BLOCK_TYPES = new Set<AvailabilityBlockType>([
@@ -198,9 +213,40 @@ function enumerateLocalDates(rangeStartIso: string, rangeEndIso: string, tz: str
 
 function activeStandardDayForWeekday(
   days: StaffStandardHoursDayInput[],
-  weekday: number
+  weekday: number,
+  cycleWeek: 1 | 2 = 1
 ): StaffStandardHoursDayInput | null {
-  return days.find((d) => d.weekday === weekday) ?? null;
+  const match =
+    days.find((d) => d.weekday === weekday && normaliseCycleWeek(d.cycle_week) === cycleWeek) ??
+    (cycleWeek === 1 ? days.find((d) => d.weekday === weekday && d.cycle_week == null) : null) ??
+    (cycleWeek === 1 ? days.find((d) => d.weekday === weekday) : null);
+  return match ?? null;
+}
+
+function resolveCycleWeekForDate(
+  localDate: string,
+  cadence: RosterCadence,
+  anchorDate: string
+): 1 | 2 {
+  if (cadence === "fortnightly") {
+    return resolveFortnightCycleWeek(localDate, anchorDate);
+  }
+  return 1;
+}
+
+function buildGenerationSummary(
+  candidates: RosterShiftCandidate[],
+  skips: RosterGenerationSkip[]
+): GenerateRosterFromStandardHoursResult["summary"] {
+  return {
+    generatedCount: candidates.length,
+    skippedManualCount: skips.filter((s) => s.reason === "manual_shift_preserved").length,
+    skippedLeaveCount: skips.filter((s) => s.reason === "leave_blocked").length,
+    skippedUnavailableCount: skips.filter((s) => s.reason === "unavailable_blocked").length,
+    skippedDuplicateCount: skips.filter((s) => s.reason === "duplicate_shift").length,
+    skippedNotWorkingCount: skips.filter((s) => s.reason === "not_working_day").length,
+    skippedNoStandardHoursCount: skips.filter((s) => s.reason === "no_standard_hours").length,
+  };
 }
 
 function findExistingShiftForDay(
@@ -225,6 +271,8 @@ export function generateRosterFromStandardHours(
   const skips: RosterGenerationSkip[] = [];
   const shiftIdsToReplace: string[] = [];
   const overwriteGenerated = input.overwriteGeneratedOnly ?? false;
+  const cadence = input.rosterCadence ?? "weekly";
+  const anchorDate = input.rosterCycleAnchorDate ?? "2026-01-05";
 
   for (const staffId of input.staffIds) {
     const days = input.standardHoursByStaff.get(staffId) ?? [];
@@ -242,7 +290,8 @@ export function generateRosterFromStandardHours(
 
     for (const localDate of localDates) {
       const weekday = weekdayIndexFromLocalDate(localDate);
-      const day = activeStandardDayForWeekday(days, weekday);
+      const cycleWeek = resolveCycleWeekForDate(localDate, cadence, anchorDate);
+      const day = activeStandardDayForWeekday(days, weekday, cycleWeek);
 
       if (!day || !day.is_working_day) {
         skips.push({
@@ -320,19 +369,36 @@ export function generateRosterFromStandardHours(
     }
   }
 
-  return { candidates, skips, shiftIdsToReplace };
+  return {
+    candidates,
+    skips,
+    shiftIdsToReplace,
+    cadence,
+    summary: buildGenerationSummary(candidates, skips),
+  };
 }
 
-/** Copy shifts from the previous week into the target week. */
-export function copyPreviousWeekShifts(input: {
+export type CopyPreviousRosterPeriodInput = {
   existingShifts: ExistingShiftForGeneration[];
   staffIds: string[];
-  targetWeekStartIso: string;
+  targetPeriodStartIso: string;
   staffTimezoneById: Map<string, string>;
-}): RosterShiftCandidate[] {
-  const prevWeekStart = shiftIsoDate(input.targetWeekStartIso, -7);
-  const prevStart = prevWeekStart;
-  const prevEnd = shiftIsoDate(prevWeekStart, 6);
+  cadence: RosterCadence;
+};
+
+/** Copy shifts from the previous roster period into the target period. */
+export function copyPreviousRosterPeriodShifts(
+  input: CopyPreviousRosterPeriodInput
+): RosterShiftCandidate[] {
+  const targetStart = input.targetPeriodStartIso.slice(0, 10);
+  const dayCount =
+    input.cadence === "weekly"
+      ? 7
+      : input.cadence === "fortnightly"
+        ? 14
+        : rosterMonthDayCount(targetStart);
+  const prevStart = shiftIsoDate(targetStart, -dayCount);
+  const prevEnd = shiftIsoDate(targetStart, -1);
   const out: RosterShiftCandidate[] = [];
 
   for (const staffId of input.staffIds) {
@@ -346,11 +412,12 @@ export function copyPreviousWeekShifts(input: {
       const localDate = localDateInTz(shift.starts_at, tz);
       if (localDate < prevStart || localDate > prevEnd) continue;
 
-      const weekday = weekdayIndexFromLocalDate(localDate);
-      const targetDate = isoDateForWeekday(input.targetWeekStartIso, weekday);
+      const dayOffset = daysBetweenIso(prevStart, localDate);
+      const targetDate = shiftIsoDate(targetStart, dayOffset);
       const startHm = formatHmInTz(shift.starts_at, tz);
       const endHm = formatHmInTz(shift.ends_at, tz);
       const range = localWallTimeToUtcRange(targetDate, startHm, endHm, tz);
+      const weekday = weekdayIndexFromLocalDate(targetDate);
 
       out.push({
         staff_id: staffId,
@@ -359,7 +426,7 @@ export function copyPreviousWeekShifts(input: {
         starts_at: range.startsAt,
         ends_at: range.endsAt,
         shift_source: "copy_week",
-        notes: "Copied from previous week",
+        notes: copyPreviousPeriodNotes(input.cadence),
         localDate: targetDate,
         weekday,
       });
@@ -367,6 +434,44 @@ export function copyPreviousWeekShifts(input: {
   }
 
   return out;
+}
+
+function rosterMonthDayCount(monthStartIso: string): number {
+  const [y, m] = monthStartIso.slice(0, 7).split("-").map(Number);
+  return new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
+
+function daysBetweenIso(startIso: string, endIso: string): number {
+  const start = new Date(`${startIso.slice(0, 10)}T12:00:00.000Z`);
+  const end = new Date(`${endIso.slice(0, 10)}T12:00:00.000Z`);
+  return Math.round((end.getTime() - start.getTime()) / 86_400_000);
+}
+
+function copyPreviousPeriodNotes(cadence: RosterCadence): string {
+  switch (cadence) {
+    case "fortnightly":
+      return "Copied from previous fortnight";
+    case "monthly":
+      return "Copied from previous month";
+    default:
+      return "Copied from previous week";
+  }
+}
+
+/** Copy shifts from the previous week into the target week. */
+export function copyPreviousWeekShifts(input: {
+  existingShifts: ExistingShiftForGeneration[];
+  staffIds: string[];
+  targetWeekStartIso: string;
+  staffTimezoneById: Map<string, string>;
+}): RosterShiftCandidate[] {
+  return copyPreviousRosterPeriodShifts({
+    existingShifts: input.existingShifts,
+    staffIds: input.staffIds,
+    targetPeriodStartIso: input.targetWeekStartIso,
+    staffTimezoneById: input.staffTimezoneById,
+    cadence: "weekly",
+  });
 }
 
 function formatHmInTz(iso: string, tz: string): string {
@@ -411,7 +516,7 @@ export function shiftSourceDisplayLabel(source: StandardHoursShiftSource | null 
     case "standard_hours":
       return "Generated from standard hours";
     case "copy_week":
-      return "Copied from previous week";
+      return "Copied from previous period";
     case "manual":
     default:
       return "Manual adjustment";

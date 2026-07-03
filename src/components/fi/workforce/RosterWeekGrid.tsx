@@ -4,6 +4,7 @@ import type { RosterGridAvailabilityCell, RosterGridShift } from "@/src/lib/work
 import {
   formatStandardHoursSummary,
   formatStandardHoursWeeklyTotal,
+  normaliseCycleWeek,
   staffHasConfiguredStandardHours,
   type StaffStandardHoursDayInput,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
@@ -11,6 +12,8 @@ import {
   blockTypeDisplayLabel,
   shiftSourceDisplayLabel,
 } from "@/src/lib/workforce-os/rosterGenerationCore";
+import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
+import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { ROSTER_GRID_SCROLL_CLASSES } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +23,8 @@ export type RosterWeekGridProps = {
   shifts: RosterGridShift[];
   availabilityCells: RosterGridAvailabilityCell[];
   standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
+  rosterCadence?: RosterCadence;
+  rosterCycleAnchorDate?: string;
   onCellClick?: (staffId: string, localDate: string) => void;
   onShiftClick?: (shift: RosterGridShift) => void;
   onEditStandardHours?: (staffId: string) => void;
@@ -58,13 +63,20 @@ function availabilityForCell(
 
 function isRdoDay(
   standardHours: StaffStandardHoursDayInput[] | undefined,
-  localDate: string
+  localDate: string,
+  cadence: RosterCadence = "weekly",
+  anchorDate = "2026-01-05"
 ): boolean {
   if (!standardHours?.length) return false;
   const d = new Date(`${localDate.slice(0, 10)}T12:00:00.000Z`);
   const day = d.getUTCDay();
   const weekday = day === 0 ? 6 : day - 1;
-  const row = standardHours.find((h) => h.weekday === weekday);
+  const cycleWeek =
+    cadence === "fortnightly" ? resolveFortnightCycleWeek(localDate, anchorDate) : 1;
+  const row =
+    standardHours.find(
+      (h) => h.weekday === weekday && normaliseCycleWeek(h.cycle_week) === cycleWeek
+    ) ?? standardHours.find((h) => h.weekday === weekday && normaliseCycleWeek(h.cycle_week) === 1);
   return Boolean(row && !row.is_working_day);
 }
 
@@ -74,6 +86,8 @@ export function RosterWeekGrid({
   shifts,
   availabilityCells,
   standardHoursByStaffId,
+  rosterCadence = "weekly",
+  rosterCycleAnchorDate = "2026-01-05",
   onCellClick,
   onShiftClick,
   onEditStandardHours,
@@ -150,7 +164,7 @@ export function RosterWeekGrid({
                   const rdo =
                     cellShifts.length === 0 &&
                     cellBlocks.length === 0 &&
-                    isRdoDay(standardHours, date);
+                    isRdoDay(standardHours, date, rosterCadence, rosterCycleAnchorDate);
                   const emptyCell = cellShifts.length === 0 && cellBlocks.length === 0 && !rdo;
 
                   return (

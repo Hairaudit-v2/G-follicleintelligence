@@ -35,8 +35,13 @@ import {
   rankAssignableStaffForRole,
   type RosterAssignableCandidate,
 } from "@/src/lib/workforce-os/workforceRosterCandidates";
+import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
+import type { WorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
-  defaultRosterCommandCentreDateRange,
+  rosterDateRangeFromPeriodStart,
+  resolveRosterPeriodStart,
+} from "@/src/lib/workforce/rosterCadencePolicyCore";
+import {
   rosterDisplayStatusMatchesFilter,
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
@@ -124,8 +129,12 @@ export type RosterGridAvailabilityCell = {
 
 export type RosterCommandCentrePayload = {
   dateRange: RosterCommandCentreDateRange;
+  periodStart: string;
   weekStart: string;
+  periodDayDates: string[];
+  /** @deprecated Prefer periodDayDates — kept for older roster view bundles. */
   weekDayDates: string[];
+  rosterPlanning: WorkforceRosterPlanningPolicy;
   clinics: RosterCommandCentreClinicOption[];
   staffOptions: Array<{ id: string; name: string; role: string | null; isActive: boolean }>;
   events: RosterCommandCentreEvent[];
@@ -140,7 +149,9 @@ export type RosterCommandCentrePayload = {
 export type LoadRosterCommandCentreInput = {
   tenantId: string;
   dateRange?: RosterCommandCentreDateRange;
+  periodStart?: string | null;
   weekStart?: string | null;
+  rosterPlanning?: WorkforceRosterPlanningPolicy;
   clinicId?: string | null;
   staffId?: string | null;
   eventType?: string | null;
@@ -484,9 +495,37 @@ export async function loadRosterCommandCentre(
   input: LoadRosterCommandCentreInput
 ): Promise<RosterCommandCentrePayload> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const dateRange = input.dateRange ?? defaultRosterCommandCentreDateRange();
-  const weekStart = input.weekStart?.trim() || mondayOfWeekIso(dateRange.startsAt.slice(0, 10));
-  const weekDayDates = weekDayIsoDates(weekStart);
+  const rosterPlanning =
+    input.rosterPlanning ?? (await loadWorkforceRosterPlanningPolicy(tid));
+
+  const periodStart =
+    input.periodStart?.trim() ||
+    input.weekStart?.trim() ||
+    resolveRosterPeriodStart({
+      refDateIso: new Date().toISOString().slice(0, 10),
+      cadence: rosterPlanning.rosterCadence,
+      weekStartDay: rosterPlanning.rosterWeekStartDay,
+      rosterCycleAnchorDate: rosterPlanning.rosterCycleAnchorDate,
+    });
+
+  const fullRange = rosterDateRangeFromPeriodStart(
+    periodStart,
+    rosterPlanning.rosterCadence,
+    rosterPlanning.rosterWeekStartDay
+  );
+
+  const dateRange = input.dateRange
+    ? { startsAt: input.dateRange.startsAt, endsAt: input.dateRange.endsAt }
+    : { startsAt: fullRange.startsAt, endsAt: fullRange.endsAt };
+  const periodDayDates = fullRange.periodDayDates;
+  const weekStart =
+    rosterPlanning.rosterCadence === "monthly"
+      ? mondayOfWeekIso(periodStart)
+      : periodStart.slice(0, 10);
+  const weekDayDates =
+    rosterPlanning.rosterCadence === "weekly"
+      ? weekDayIsoDates(weekStart)
+      : periodDayDates;
   const clinicFilter = input.clinicId?.trim() || null;
   const staffFilter = input.staffId?.trim() || null;
   const eventTypeFilter = input.eventType?.trim().toLowerCase() || null;
@@ -613,8 +652,11 @@ export async function loadRosterCommandCentre(
 
   return {
     dateRange,
+    periodStart: periodStart.slice(0, 10),
     weekStart,
+    periodDayDates: weekDayDates,
     weekDayDates,
+    rosterPlanning,
     clinics,
     staffOptions,
     events,

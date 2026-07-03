@@ -1,7 +1,10 @@
-/**
- * WorkforceOS Phase 2E — roster command centre URL helpers (pure, testable).
- */
-
+import {
+  resolveRosterPeriodStart,
+  rosterDateRangeFromPeriodStart,
+  type RosterCadence,
+  type RosterWeekStartDay,
+} from "@/src/lib/workforce/rosterCadencePolicyCore";
+import { mondayOfWeekIso } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { WorkforceClinicalEventSource } from "@/src/lib/workforce-os/workforceClinicalEventMapping";
 import type { ClinicalStaffingDisplayStatus } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 
@@ -13,6 +16,8 @@ export type RosterCommandCentreSearchParams = {
   dateFrom?: string;
   dateTo?: string;
   weekStart?: string;
+  periodStart?: string;
+  monthStart?: string;
   clinicId?: string;
   staffId?: string;
   eventType?: string;
@@ -22,11 +27,20 @@ export type RosterCommandCentreSearchParams = {
   date?: string;
 };
 
+export type RosterPlanningContext = {
+  rosterCadence: RosterCadence;
+  rosterWeekStartDay: RosterWeekStartDay;
+  rosterCycleAnchorDate: string;
+  explicitlyConfigured: boolean;
+};
+
 export type BuildRosterCommandCentreHrefInput = {
   tenantId: string;
   dateFrom?: string;
   dateTo?: string;
   weekStart?: string;
+  periodStart?: string;
+  monthStart?: string;
   clinicId?: string | null;
   staffId?: string | null;
   eventType?: string | null;
@@ -53,6 +67,8 @@ export function buildRosterCommandCentreHref(input: BuildRosterCommandCentreHref
   const dateFrom = trimOrUndefined(input.dateFrom);
   const dateTo = trimOrUndefined(input.dateTo);
   const weekStart = trimOrUndefined(input.weekStart);
+  const periodStart = trimOrUndefined(input.periodStart);
+  const monthStart = trimOrUndefined(input.monthStart);
   const clinicId = trimOrUndefined(input.clinicId ?? undefined);
   const staffId = trimOrUndefined(input.staffId ?? undefined);
   const eventType = trimOrUndefined(input.eventType ?? undefined);
@@ -61,6 +77,8 @@ export function buildRosterCommandCentreHref(input: BuildRosterCommandCentreHref
   const eventId = trimOrUndefined(input.eventId ?? undefined);
   const date = trimOrUndefined(input.date ?? undefined);
 
+  if (periodStart) params.set("periodStart", periodStart);
+  if (monthStart) params.set("monthStart", monthStart);
   if (weekStart) params.set("weekStart", weekStart);
   if (dateFrom) params.set("dateFrom", dateFrom);
   if (dateTo) params.set("dateTo", dateTo);
@@ -114,6 +132,8 @@ export function parseRosterCommandCentreSearchParams(
     dateFrom: pick("dateFrom"),
     dateTo: pick("dateTo"),
     weekStart: pick("weekStart"),
+    periodStart: pick("periodStart"),
+    monthStart: pick("monthStart"),
     clinicId: pick("clinicId"),
     staffId: pick("staffId"),
     eventType: pick("eventType"),
@@ -134,24 +154,64 @@ export function resolveRosterPreselectedEventKey(
   return `${source}:${id}`;
 }
 
-/** Default command centre window: current week Mon–Sun (UTC calendar). */
-export function defaultRosterCommandCentreDateRange(now: Date = new Date()): {
+/** Default command centre window: current period for cadence (weekly Mon–Sun by default). */
+export function defaultRosterCommandCentreDateRange(
+  now: Date = new Date(),
+  planning: Pick<
+    RosterPlanningContext,
+    "rosterCadence" | "rosterWeekStartDay" | "rosterCycleAnchorDate"
+  > = {
+    rosterCadence: "weekly",
+    rosterWeekStartDay: "monday",
+    rosterCycleAnchorDate: "2026-01-05",
+  }
+): {
   startsAt: string;
   endsAt: string;
+  periodStart: string;
+  periodDayDates: string[];
+  /** @deprecated Use periodStart — kept for weekly back-compat URLs. */
   weekStart: string;
 } {
-  const start = new Date(now);
-  start.setUTCHours(0, 0, 0, 0);
-  const day = start.getUTCDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  start.setUTCDate(start.getUTCDate() + diff);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 7);
+  const ref = now.toISOString().slice(0, 10);
+  const periodStart = resolveRosterPeriodStart({
+    refDateIso: ref,
+    cadence: planning.rosterCadence,
+    weekStartDay: planning.rosterWeekStartDay,
+    rosterCycleAnchorDate: planning.rosterCycleAnchorDate,
+  });
+  const range = rosterDateRangeFromPeriodStart(
+    periodStart,
+    planning.rosterCadence,
+    planning.rosterWeekStartDay
+  );
   return {
-    startsAt: start.toISOString(),
-    endsAt: end.toISOString(),
-    weekStart: start.toISOString().slice(0, 10),
+    startsAt: range.startsAt,
+    endsAt: range.endsAt,
+    periodStart: range.periodStart,
+    periodDayDates: range.periodDayDates,
+    weekStart:
+      planning.rosterCadence === "monthly"
+        ? mondayOfWeekIso(ref)
+        : range.periodStart,
   };
+}
+
+/** Resolve date range from period start query param. */
+export function rosterDateRangeFromPeriodStartParam(
+  periodStartIso: string,
+  planning: Pick<RosterPlanningContext, "rosterCadence" | "rosterWeekStartDay">
+): {
+  startsAt: string;
+  endsAt: string;
+  periodStart: string;
+  periodDayDates: string[];
+} {
+  return rosterDateRangeFromPeriodStart(
+    periodStartIso,
+    planning.rosterCadence,
+    planning.rosterWeekStartDay
+  );
 }
 
 /** Resolve date range from weekStart query param (ISO date, Monday). */
@@ -159,13 +219,26 @@ export function rosterDateRangeFromWeekStart(weekStartIso: string): {
   startsAt: string;
   endsAt: string;
 } {
-  const start = new Date(`${weekStartIso.slice(0, 10)}T00:00:00.000Z`);
-  if (Number.isNaN(start.getTime())) {
-    return defaultRosterCommandCentreDateRange();
+  return rosterDateRangeFromPeriodStartParam(weekStartIso, {
+    rosterCadence: "weekly",
+    rosterWeekStartDay: "monday",
+  });
+}
+
+export function resolveRosterPeriodStartFromParams(
+  params: Pick<RosterCommandCentreSearchParams, "weekStart" | "periodStart" | "monthStart">,
+  planning: Pick<
+    RosterPlanningContext,
+    "rosterCadence" | "rosterWeekStartDay" | "rosterCycleAnchorDate"
+  >
+): string {
+  if (planning.rosterCadence === "monthly") {
+    const month = params.monthStart ?? params.periodStart ?? params.weekStart;
+    if (month) return `${month.slice(0, 7)}-01`;
   }
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 7);
-  return { startsAt: start.toISOString(), endsAt: end.toISOString() };
+  const explicit = params.periodStart ?? params.weekStart;
+  if (explicit) return explicit.slice(0, 10);
+  return defaultRosterCommandCentreDateRange(new Date(), planning).periodStart;
 }
 
 export function rosterDisplayStatusMatchesFilter(

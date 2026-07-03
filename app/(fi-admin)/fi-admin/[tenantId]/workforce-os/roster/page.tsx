@@ -6,12 +6,14 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { RosterCommandCentreDiagnosticCard } from "@/src/components/fi/workforce/RosterCommandCentreDiagnosticCard";
 import { RosterCommandCentreView } from "@/src/components/fi/workforce/RosterCommandCentreView";
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
+import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";
 import {
   defaultRosterCommandCentreDateRange,
   parseRosterCommandCentreSearchParams,
+  resolveRosterPeriodStartFromParams,
   resolveRosterPreselectedEventKey,
-  rosterDateRangeFromWeekStart,
+  rosterDateRangeFromPeriodStartParam,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 
 export const metadata = {
@@ -33,18 +35,19 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
 
   const rawSearch = await searchParams;
   const parsed = parseRosterCommandCentreSearchParams(rawSearch);
-  const defaultRange = defaultRosterCommandCentreDateRange();
-  const weekStart = parsed.weekStart ?? defaultRange.weekStart;
-  const dateRange = parsed.weekStart
-    ? rosterDateRangeFromWeekStart(parsed.weekStart)
-    : { startsAt: defaultRange.startsAt, endsAt: defaultRange.endsAt };
+  const rosterPlanning = await loadWorkforceRosterPlanningPolicy(tenantId.trim());
+  const defaultRange = defaultRosterCommandCentreDateRange(new Date(), rosterPlanning);
+  const periodStart = resolveRosterPeriodStartFromParams(parsed, rosterPlanning);
+  const dateRange = rosterDateRangeFromPeriodStartParam(periodStart, rosterPlanning);
   const preselectedEventKey = resolveRosterPreselectedEventKey(parsed);
 
   const [result, showTechnicalDetail] = await Promise.all([
     loadRosterCommandCentrePageData({
       tenantId: tenantId.trim(),
-      dateRange,
-      weekStart,
+      dateRange: { startsAt: dateRange.startsAt, endsAt: dateRange.endsAt },
+      periodStart,
+      weekStart: defaultRange.weekStart,
+      rosterPlanning,
       clinicId: parsed.clinicId,
       staffId: parsed.staffId,
       eventType: parsed.eventType,
@@ -71,7 +74,8 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
         payload={result.payload}
         eventDetails={result.eventDetails}
         filters={{
-          weekStart,
+          periodStart,
+          weekStart: periodStart,
           clinicId: parsed.clinicId ?? "",
           staffId: parsed.staffId ?? "",
           eventType: parsed.eventType ?? "",

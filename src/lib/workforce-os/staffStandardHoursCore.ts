@@ -26,6 +26,8 @@ export type StandardHoursShiftSource = "manual" | "standard_hours" | "copy_week"
 
 export type StaffStandardHoursDayInput = {
   weekday: number;
+  /** Fortnightly cycle week: 1=Week A, 2=Week B. Weekly/monthly use 1. */
+  cycle_week?: number;
   is_working_day: boolean;
   start_time: string | null;
   end_time: string | null;
@@ -42,6 +44,7 @@ export type StaffStandardHoursRow = StaffStandardHoursDayInput & {
   effective_from: string;
   effective_to: string | null;
   status: StandardHoursStatus;
+  cycle_week?: number;
 };
 
 export type StandardHoursTemplateId =
@@ -129,7 +132,7 @@ export function validateStandardHoursPattern(
   days: StaffStandardHoursDayInput[]
 ): StandardHoursValidationResult {
   const warnings: StandardHoursWarning[] = [];
-  const byWeekday = new Map<number, StaffStandardHoursDayInput>();
+  const byWeekday = new Map<string, StaffStandardHoursDayInput>();
 
   for (const day of days) {
     if (day.weekday < 0 || day.weekday > 6) {
@@ -139,14 +142,16 @@ export function validateStandardHoursPattern(
       });
       continue;
     }
-    if (byWeekday.has(day.weekday)) {
+    const cycleWeek = normaliseCycleWeek(day.cycle_week);
+    const key = `${cycleWeek}:${day.weekday}`;
+    if (byWeekday.has(key)) {
       warnings.push({
         code: "overlapping_windows",
-        message: `Duplicate standard hours for ${STANDARD_HOURS_WEEKDAY_LABELS[day.weekday]}.`,
+        message: `Duplicate standard hours for ${STANDARD_HOURS_WEEKDAY_LABELS[day.weekday]} (cycle week ${cycleWeek}).`,
         weekday: day.weekday,
       });
     }
-    byWeekday.set(day.weekday, day);
+    byWeekday.set(key, day);
 
     if (!day.is_working_day) continue;
 
@@ -195,9 +200,10 @@ export function validateStandardHoursPattern(
   return { valid: !blocking, weeklyHours, warnings };
 }
 
-export function emptyStandardHoursWeek(): StaffStandardHoursDayInput[] {
+export function emptyStandardHoursWeek(cycleWeek = 1): StaffStandardHoursDayInput[] {
   return Array.from({ length: 7 }, (_, weekday) => ({
     weekday,
+    cycle_week: cycleWeek,
     is_working_day: false,
     start_time: "09:00",
     end_time: "17:00",
@@ -206,6 +212,47 @@ export function emptyStandardHoursWeek(): StaffStandardHoursDayInput[] {
     shift_label: null,
     role_code: null,
   }));
+}
+
+/** Empty Week A + Week B patterns for fortnightly editing. */
+export function emptyFortnightlyStandardHours(): StaffStandardHoursDayInput[] {
+  return [...emptyStandardHoursWeek(1), ...emptyStandardHoursWeek(2)];
+}
+
+export function normaliseCycleWeek(value: number | null | undefined): 1 | 2 {
+  return value === 2 ? 2 : 1;
+}
+
+export function groupStandardHoursByCycleWeek(
+  days: StaffStandardHoursDayInput[] | undefined
+): Map<1 | 2, StaffStandardHoursDayInput[]> {
+  const out = new Map<1 | 2, StaffStandardHoursDayInput[]>([
+    [1, emptyStandardHoursWeek(1)],
+    [2, emptyStandardHoursWeek(2)],
+  ]);
+  if (!days?.length) return out;
+
+  for (const day of days) {
+    const cycle = normaliseCycleWeek(day.cycle_week);
+    const list = out.get(cycle) ?? emptyStandardHoursWeek(cycle);
+    const byWeekday = new Map(list.map((d) => [d.weekday, d]));
+    byWeekday.set(day.weekday, { ...day, cycle_week: cycle });
+    out.set(
+      cycle,
+      Array.from({ length: 7 }, (_, weekday) => byWeekday.get(weekday) ?? emptyStandardHoursWeek(cycle)[weekday]!)
+    );
+  }
+  return out;
+}
+
+export function flattenFortnightlyStandardHours(
+  weekA: StaffStandardHoursDayInput[],
+  weekB: StaffStandardHoursDayInput[]
+): StaffStandardHoursDayInput[] {
+  return [
+    ...weekA.map((d) => ({ ...d, cycle_week: 1 as const })),
+    ...weekB.map((d) => ({ ...d, cycle_week: 2 as const })),
+  ];
 }
 
 function workingDay(
@@ -217,6 +264,7 @@ function workingDay(
 ): StaffStandardHoursDayInput {
   return {
     weekday,
+    cycle_week: normaliseCycleWeek(extras.cycle_week),
     is_working_day: true,
     start_time: start,
     end_time: end,
@@ -228,9 +276,10 @@ function workingDay(
   };
 }
 
-function rdoDay(weekday: number): StaffStandardHoursDayInput {
+function rdoDay(weekday: number, cycleWeek = 1): StaffStandardHoursDayInput {
   return {
     weekday,
+    cycle_week: normaliseCycleWeek(cycleWeek),
     is_working_day: false,
     start_time: null,
     end_time: null,
@@ -334,6 +383,7 @@ export function weeklyHoursMapToStandardHours(
     const enabled = day?.enabled !== false && Boolean(day?.start?.trim() && day?.end?.trim());
     return {
       weekday: index,
+      cycle_week: 1,
       is_working_day: enabled,
       start_time: enabled ? (day?.start?.trim() ?? "09:00") : null,
       end_time: enabled ? (day?.end?.trim() ?? "17:00") : null,

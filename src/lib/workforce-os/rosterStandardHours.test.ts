@@ -58,6 +58,7 @@ test("generateRosterFromStandardHours creates Mon-Fri shifts for four_ten templa
 
   assert.equal(plan.candidates.length, 4);
   assert.ok(plan.skips.some((s) => s.reason === "not_working_day" && s.detail === "RDO"));
+  assert.equal(plan.cadence, "weekly");
 });
 
 test("generateRosterFromStandardHours skips duplicate standard_hours shifts", () => {

@@ -10,6 +10,7 @@ import {
   standardHoursToWeeklyHoursMap,
   validateStandardHoursPattern,
   weeklyHoursMapToStandardHours,
+  normaliseCycleWeek,
   type StaffStandardHoursDayInput,
   type StaffStandardHoursRow,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
@@ -71,6 +72,7 @@ function mapStandardHoursRow(row: Record<string, unknown>): StaffStandardHoursRo
     staff_id: String(row.staff_id),
     clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
     weekday: Number(row.weekday),
+    cycle_week: row.cycle_week != null ? normaliseCycleWeek(Number(row.cycle_week)) : 1,
     start_time: row.start_time != null ? String(row.start_time).slice(0, 5) : null,
     end_time: row.end_time != null ? String(row.end_time).slice(0, 5) : null,
     break_minutes: row.break_minutes != null ? Number(row.break_minutes) : null,
@@ -86,6 +88,7 @@ function mapStandardHoursRow(row: Record<string, unknown>): StaffStandardHoursRo
 function rowToDayInput(row: StaffStandardHoursRow): StaffStandardHoursDayInput {
   return {
     weekday: row.weekday,
+    cycle_week: normaliseCycleWeek(row.cycle_week),
     is_working_day: row.is_working_day,
     start_time: row.start_time,
     end_time: row.end_time,
@@ -109,6 +112,7 @@ export async function loadActiveStandardHoursForStaff(
     .eq("tenant_id", tid)
     .eq("staff_id", sid)
     .eq("status", "active")
+    .order("cycle_week", { ascending: true })
     .order("weekday", { ascending: true });
   if (error) throw new Error(error.message);
   if (!data?.length) return [];
@@ -127,6 +131,7 @@ export async function loadActiveStandardHoursForTenant(
     .eq("tenant_id", tid)
     .eq("status", "active")
     .order("staff_id", { ascending: true })
+    .order("cycle_week", { ascending: true })
     .order("weekday", { ascending: true });
 
   if (staffIds?.length) {
@@ -219,6 +224,7 @@ export async function saveStaffStandardHours(
     staff_id: sid,
     clinic_id: day.clinic_id?.trim() || null,
     weekday: day.weekday,
+    cycle_week: normaliseCycleWeek(day.cycle_week),
     start_time: day.is_working_day ? day.start_time : null,
     end_time: day.is_working_day ? day.end_time : null,
     break_minutes: day.break_minutes ?? 0,

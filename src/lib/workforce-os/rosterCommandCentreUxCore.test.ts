@@ -14,6 +14,7 @@ import {
   resolveRosterCellClickIntent,
   resolveRosterDrawerStaffMemberId,
   resolveRosterDrawerStaffName,
+  resolveRosterPayloadWeekDayDates,
   ROSTER_GRID_SCROLL_CLASSES,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -134,6 +135,21 @@ test("listStaffMissingStandardHours returns only staff without configured hours"
 
   assert.equal(missing.length, 1);
   assert.equal(missing[0]?.id, STAFF_JANE);
+});
+
+test("resolveRosterPayloadWeekDayDates prefers periodDayDates with weekDayDates fallback", () => {
+  assert.deepEqual(
+    resolveRosterPayloadWeekDayDates({
+      periodDayDates: ["2026-07-06"],
+      weekDayDates: ["2026-07-13"],
+    }),
+    ["2026-07-06"]
+  );
+  assert.deepEqual(
+    resolveRosterPayloadWeekDayDates({ weekDayDates: ["2026-07-13"] }),
+    ["2026-07-13"]
+  );
+  assert.deepEqual(resolveRosterPayloadWeekDayDates({}), []);
 });
 
 test("roster drawer state helpers open standard-hours and setup panels", () => {

@@ -37,6 +37,8 @@ import {
   resolveRosterCellClickIntent,
   resolveRosterDrawerStaffMemberId,
   resolveRosterDrawerStaffName,
+  resolveRosterPayloadWeekDayDates,
+  rosterStandardHoursDrawerIsOpen,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
   type RosterCommandCentreDrawerState,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -111,6 +113,8 @@ export function RosterCommandCentreView({
     [filters.weekStart]
   );
 
+  const weekDayDates = useMemo(() => resolveRosterPayloadWeekDayDates(payload), [payload]);
+
   const refresh = useCallback(() => {
     router.refresh();
   }, [router]);
@@ -134,13 +138,21 @@ export function RosterCommandCentreView({
     setDrawerState(closeRosterDrawer());
   }
 
-  function openStandardHours(staffId: string) {
-    setDrawerState(openRosterStandardHoursDrawer(staffId));
-  }
+  const openStandardHoursDrawer = useCallback((staffMemberId: string) => {
+    const normalizedStaffMemberId = staffMemberId?.trim();
+    if (!normalizedStaffMemberId) {
+      setActionError("Could not open standard hours for this staff member.");
+      setDrawerState(openRosterStandardHoursDrawer(""));
+      return;
+    }
+    setActionError(null);
+    setDrawerState(openRosterStandardHoursDrawer(normalizedStaffMemberId));
+  }, []);
 
-  function openSetupPanel() {
+  const openMissingStandardHoursSetupDrawer = useCallback(() => {
+    setActionError(null);
     setDrawerState(openRosterMissingStandardHoursSetupDrawer());
-  }
+  }, []);
 
   function pushFilters(next: Partial<RosterCommandCentreViewProps["filters"]>) {
     const merged = { ...filters, ...next };
@@ -165,7 +177,7 @@ export function RosterCommandCentreView({
     const intent = resolveRosterCellClickIntent({ hasStandardHours });
 
     if (intent === "open_standard_hours") {
-      openStandardHours(staffId);
+      openStandardHoursDrawer(staffId);
       return;
     }
 
@@ -234,6 +246,7 @@ export function RosterCommandCentreView({
     <div
       className={cn(ROSTER_PAGE_SCROLL_ROOT_CLASSES, fiOsChromeClasses.pageScrollContent, "space-y-6")}
       data-testid="roster-command-centre"
+      data-roster-drawer-kind={drawerState.kind}
     >
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
@@ -415,7 +428,7 @@ export function RosterCommandCentreView({
           </p>
           <button
             type="button"
-            onClick={openSetupPanel}
+            onClick={openMissingStandardHoursSetupDrawer}
             className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
             data-testid="roster-standard-hours-banner-cta"
           >
@@ -433,7 +446,7 @@ export function RosterCommandCentreView({
           </p>
         </div>
         <RosterWeekGrid
-          weekDayDates={payload.weekDayDates}
+          weekDayDates={weekDayDates}
           staffOptions={payload.staffOptions}
           shifts={payload.shifts}
           availabilityCells={payload.availabilityCells}
@@ -441,7 +454,7 @@ export function RosterCommandCentreView({
           selectedShiftId={drawerShift?.id ?? null}
           onCellClick={handleCellClick}
           onShiftClick={handleShiftClick}
-          onEditStandardHours={openStandardHours}
+          onEditStandardHours={openStandardHoursDrawer}
         />
       </section>
 
@@ -469,44 +482,41 @@ export function RosterCommandCentreView({
           clinics={payload.clinics}
           onClose={closeDrawer}
           onRefresh={refresh}
-          onEditStandardHours={openStandardHours}
+          onEditStandardHours={openStandardHoursDrawer}
         />
       ) : null}
 
-      {drawerState.kind === "standard_hours" && drawerStaffName && drawerStaffMemberId ? (
+      {rosterStandardHoursDrawerIsOpen(drawerState) ? (
         <RosterRightDrawer
           open
-          wide
-          title={formatStandardHoursDrawerTitle(drawerStaffName)}
+          wide={Boolean(drawerStaffName && drawerStaffMemberId)}
+          title={
+            drawerStaffName
+              ? formatStandardHoursDrawerTitle(drawerStaffName)
+              : "Standard hours"
+          }
           onClose={closeDrawer}
           testId="roster-standard-hours-drawer"
         >
-          <StaffStandardHoursPanel
-            tenantId={tenantId}
-            staffId={drawerStaffMemberId}
-            staffName={drawerStaffName}
-            initialDays={standardHoursDays}
-            clinics={payload.clinics}
-            weekRange={weekRange}
-            onSaved={() => {
-              closeDrawer();
-              refresh();
-            }}
-            onClose={closeDrawer}
-          />
-        </RosterRightDrawer>
-      ) : null}
-
-      {drawerState.kind === "standard_hours" && !drawerStaffName ? (
-        <RosterRightDrawer
-          open
-          title="Standard hours"
-          onClose={closeDrawer}
-          testId="roster-standard-hours-drawer-error"
-        >
-          <p className="text-sm text-rose-300" data-testid="roster-standard-hours-open-error">
-            Could not open standard hours for this staff member.
-          </p>
+          {drawerStaffName && drawerStaffMemberId ? (
+            <StaffStandardHoursPanel
+              tenantId={tenantId}
+              staffId={drawerStaffMemberId}
+              staffName={drawerStaffName}
+              initialDays={standardHoursDays}
+              clinics={payload.clinics}
+              weekRange={weekRange}
+              onSaved={() => {
+                closeDrawer();
+                refresh();
+              }}
+              onClose={closeDrawer}
+            />
+          ) : (
+            <p className="text-sm text-rose-300" data-testid="roster-standard-hours-open-error">
+              Could not open standard hours for this staff member.
+            </p>
+          )}
         </RosterRightDrawer>
       ) : null}
 
@@ -528,7 +538,7 @@ export function RosterCommandCentreView({
                 <span className="text-sm text-slate-100">{staff.name}</span>
                 <button
                   type="button"
-                  onClick={() => openStandardHours(staff.id)}
+                  onClick={() => openStandardHoursDrawer(staff.id)}
                   className="rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
                   data-testid={`roster-setup-panel-staff-${staff.id}`}
                 >
