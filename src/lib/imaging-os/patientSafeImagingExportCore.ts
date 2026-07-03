@@ -120,11 +120,17 @@ export function redactMetadataForPatientExport(
     "imaging_staff_review",
     "imaging_review_assignment",
     "ai_image_category_confidence",
+    "graft_tray_ai_estimate",
+    "graft_tray_ai_estimate_id",
+    "graft_tray_review_reasons",
+    "graft_tray_link_id",
+    "graft_tray_reconciliation_evidence",
   ]);
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(metadata)) {
     if (forbiddenKeys.has(key)) continue;
     if (key.startsWith("ai_")) continue;
+    if (key.startsWith("graft_tray_ai_")) continue;
     out[key] = value;
   }
   return out;

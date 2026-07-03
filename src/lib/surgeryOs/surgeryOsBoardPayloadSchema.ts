@@ -184,6 +184,20 @@ const graftSessionLockSchema = z.object({
   isStale: z.boolean(),
 });
 
+const graftTrayAiEstimateSummarySchema = z.object({
+  estimateId: z.string().uuid(),
+  estimatedGraftCount: z.number().int().nullable(),
+  manualGraftCount: z.number().int().nullable(),
+  mismatchBand: z.string(),
+  delta: z.number().int().nullable(),
+  confidence: z.number(),
+  confidenceBand: z.string(),
+  reviewStatus: z.string(),
+  reviewerDecision: z.string().nullable(),
+  correctedCount: z.number().int().nullable(),
+  provider: z.string(),
+});
+
 const graftTrayLinkSummarySchema = z.object({
   linkId: z.string().uuid(),
   imageId: z.string().uuid(),
@@ -191,6 +205,7 @@ const graftTrayLinkSummarySchema = z.object({
   status: z.string(),
   reviewRequired: z.boolean(),
   imagingHref: z.string().nullable(),
+  aiEstimate: graftTrayAiEstimateSummarySchema.nullable(),
 });
 
 const graftSummarySchema = z.object({

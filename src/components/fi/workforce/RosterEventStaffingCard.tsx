@@ -98,9 +98,9 @@ export function RosterEventStaffingCard({
         </div>
       </dl>
 
-      {event.staffing.missingRoles.length ? (
+      {(event.staffing.missingRoles ?? []).length ? (
         <ul className="mt-2 space-y-1 text-xs text-amber-200">
-          {event.staffing.missingRoles.map((row) => (
+          {(event.staffing.missingRoles ?? []).map((row) => (
             <li key={row.role}>
               Missing {row.role}: {row.assigned}/{row.required}
             </li>
@@ -144,9 +144,9 @@ export function RosterEventStaffingCard({
         </ul>
       ) : null}
 
-      {event.staffing.warnings.length ? (
+      {(event.staffing.warnings ?? []).length ? (
         <ul className="mt-2 space-y-1 text-xs text-amber-100/90">
-          {event.staffing.warnings.slice(0, 3).map((warning, index) => (
+          {(event.staffing.warnings ?? []).slice(0, 3).map((warning, index) => (
             <li key={`${index}-${warning}`}>{warning}</li>
           ))}
         </ul>

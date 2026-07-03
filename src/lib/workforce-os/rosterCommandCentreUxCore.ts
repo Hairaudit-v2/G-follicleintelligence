@@ -11,6 +11,11 @@ import {
   staffHasConfiguredStandardHours,
   type StaffStandardHoursDayInput,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import {
+  buildStaffStandardHoursEditorHref,
+  buildStaffStandardHoursReturnToRosterHref,
+  STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+} from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 
 export type RosterCellClickIntent = "open_standard_hours" | "open_cell_actions";
 
@@ -97,6 +102,47 @@ export function resolveRosterCellClickIntent(input: {
 }): RosterCellClickIntent {
   if (!input.hasStandardHours) return "open_standard_hours";
   return "open_cell_actions";
+}
+
+export type RosterStandardHoursEditorNavigation =
+  | { outcome: "navigate"; href: string }
+  | { outcome: "deny"; reason: string };
+
+export function resolveRosterStandardHoursEditorNavigation(input: {
+  tenantId: string;
+  staffMemberId: string;
+  canManage: boolean;
+  manageDeniedReason?: string;
+  emptyStaffMessage?: string;
+}): RosterStandardHoursEditorNavigation {
+  const normalizedStaffMemberId = input.staffMemberId?.trim();
+  if (!normalizedStaffMemberId) {
+    return {
+      outcome: "deny",
+      reason: input.emptyStaffMessage ?? "Could not open standard hours for this staff member.",
+    };
+  }
+  if (!input.canManage) {
+    return {
+      outcome: "deny",
+      reason: input.manageDeniedReason ?? STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+    };
+  }
+  return {
+    outcome: "navigate",
+    href: buildStaffStandardHoursEditorHref(input.tenantId, normalizedStaffMemberId, {
+      returnTo: buildStaffStandardHoursReturnToRosterHref(input.tenantId),
+    }),
+  };
+}
+
+export function pushRosterStandardHoursEditorNavigation(
+  router: { push: (href: string) => void },
+  input: Parameters<typeof resolveRosterStandardHoursEditorNavigation>[0]
+): RosterStandardHoursEditorNavigation {
+  const result = resolveRosterStandardHoursEditorNavigation(input);
+  if (result.outcome === "navigate") router.push(result.href);
+  return result;
 }
 
 export type RosterShiftDrawerDefaults = {

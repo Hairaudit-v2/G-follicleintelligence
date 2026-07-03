@@ -36,6 +36,8 @@ import {
   bulkUnassignImagingReviewItems,
   unassignImagingReview,
 } from "@/src/lib/imaging-os/imagingReviewAssignmentMutations.server";
+import { reviewGraftTrayAiEstimate } from "@/src/lib/imaging-os/graftTrayCountReviewMutations.server";
+import { GRAFT_TRAY_AI_REVIEW_ACTIONS } from "@/src/lib/imaging-os/graftTrayCountTypes";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -124,6 +126,7 @@ const aiJobBodySchema = z
       "recipient_assessment",
       "clinical_image_analysis",
       "outcome_score",
+      "graft_tray_count_estimate",
     ]),
   })
   .strict();
@@ -395,6 +398,46 @@ export async function markImagingReviewReviewedAction(
     revalidatePath(`/fi-admin/${tid}/imaging/review`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const graftTrayAiReviewSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    patientImageId: z.string().uuid(),
+    action: z.enum(GRAFT_TRAY_AI_REVIEW_ACTIONS),
+    correctedCount: z.number().int().min(0).optional(),
+    staffNote: z.string().max(2000).optional(),
+  })
+  .strict();
+
+export async function reviewGraftTrayAiEstimateAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<{ ok: true; reviewStatus: string } | { ok: false; error: string }> {
+  try {
+    const parsed = graftTrayAiReviewSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await reviewGraftTrayAiEstimate({
+      tenantId,
+      patientId,
+      patientImageId: parsed.patientImageId,
+      action: parsed.action,
+      reviewedByUserId: actingUserId,
+      correctedCount: parsed.correctedCount,
+      staffNote: parsed.staffNote,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os/graft-counting`);
+    return { ok: true, reviewStatus: result.reviewStatus };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

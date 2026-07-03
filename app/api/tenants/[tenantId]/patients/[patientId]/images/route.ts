@@ -47,6 +47,7 @@ import {
 } from "@/src/lib/imaging-os/canonicalCaptureResolverCore";
 import { ensureCanonicalStaffCapture } from "@/src/lib/imaging-os/canonicalCaptureResolver.server";
 import { linkGraftTrayImageAfterCapture } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
+import { maybeEnqueueGraftTrayCountEstimateJob } from "@/src/lib/imaging-os/graftTrayCountProvider.server";
 
 export const dynamic = "force-dynamic";
 
@@ -294,8 +295,9 @@ export async function POST(
       result.attribution?.quality?.quality_status === "review" ||
       result.attribution?.quality?.quality_status === "fail";
 
+    let graftTrayLinkId: string | null = null;
     try {
-      await linkGraftTrayImageAfterCapture({
+      const linkRow = await linkGraftTrayImageAfterCapture({
         tenantId: tid,
         patientId: pid,
         imageId: result.row.id,
@@ -314,8 +316,25 @@ export async function POST(
             : {},
         qualityNeedsReview,
       });
+      graftTrayLinkId = linkRow?.id ?? null;
     } catch {
       // best-effort — graft tray link must not block capture
+    }
+
+    try {
+      await maybeEnqueueGraftTrayCountEstimateJob({
+        tenantId: tid,
+        patientImageId: result.row.id,
+        protocolSlotSlug: slotSlugResolved,
+        imageCategory: result.row.image_category,
+        metadata:
+          metadata && typeof metadata === "object" && !Array.isArray(metadata)
+            ? (metadata as Record<string, unknown>)
+            : {},
+        graftTrayLinkId,
+      });
+    } catch {
+      // best-effort — AI graft estimate must not block capture
     }
 
     const qualityAlert = result.attribution?.quality?.alert_message;

@@ -10,6 +10,7 @@ export const IMAGING_AI_ANALYSIS_KINDS = [
   "recipient_assessment",
   "clinical_image_analysis",
   "outcome_score",
+  "graft_tray_count_estimate",
 ] as const;
 
 export type ImagingAiAnalysisKind = (typeof IMAGING_AI_ANALYSIS_KINDS)[number];

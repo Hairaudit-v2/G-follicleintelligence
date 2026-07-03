@@ -22,8 +22,6 @@ import {
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import {
-  buildStaffStandardHoursEditorHref,
-  buildStaffStandardHoursReturnToRosterHref,
   buildStaffStandardHoursSetupIndexHref,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
@@ -33,6 +31,7 @@ import {
   closeRosterDrawer,
   listStaffMissingStandardHours,
   openRosterShiftDrawer,
+  pushRosterStandardHoursEditorNavigation,
   resolveRosterCellClickIntent,
   resolveRosterDrawerStaffMemberId,
   resolveRosterPayloadWeekDayDates,
@@ -136,21 +135,17 @@ export function RosterCommandCentreView({
 
   const openStandardHoursDrawer = useCallback(
     (staffMemberId: string) => {
-      const normalizedStaffMemberId = staffMemberId?.trim();
-      if (!normalizedStaffMemberId) {
-        setActionError("Could not open standard hours for this staff member.");
-        return;
-      }
-      if (!canManage) {
-        setActionError(manageDeniedReason);
+      const result = pushRosterStandardHoursEditorNavigation(router, {
+        tenantId,
+        staffMemberId,
+        canManage,
+        manageDeniedReason,
+      });
+      if (result.outcome === "deny") {
+        setActionError(result.reason);
         return;
       }
       setActionError(null);
-      router.push(
-        buildStaffStandardHoursEditorHref(tenantId, normalizedStaffMemberId, {
-          returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
-        })
-      );
     },
     [canManage, manageDeniedReason, router, tenantId]
   );
@@ -204,15 +199,17 @@ export function RosterCommandCentreView({
     const intent = resolveRosterCellClickIntent({ hasStandardHours });
 
     if (intent === "open_standard_hours") {
-      if (!canManage) {
-        setActionError(manageDeniedReason);
+      const result = pushRosterStandardHoursEditorNavigation(router, {
+        tenantId,
+        staffMemberId: staffId,
+        canManage,
+        manageDeniedReason,
+      });
+      if (result.outcome === "deny") {
+        setActionError(result.reason);
         return;
       }
-      router.push(
-        buildStaffStandardHoursEditorHref(tenantId, staffId, {
-          returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
-        })
-      );
+      setActionError(null);
       return;
     }
 

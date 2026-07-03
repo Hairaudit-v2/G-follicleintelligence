@@ -163,15 +163,10 @@ export async function loadRosterCommandCentrePageData(
   }
 
   const eventDetails: RosterCommandCentrePageSuccess["eventDetails"] = {};
-  const keysToHydrate = new Set<string>();
-  if (input.preselectedEventKey?.trim()) keysToHydrate.add(input.preselectedEventKey.trim());
-  for (const event of payload.events) {
-    if (event.staffing.displayStatus === "missing_roles") keysToHydrate.add(event.eventKey);
-  }
-
-  /** Cap eager candidate hydration — full staff scans per event are expensive and can time out renders. */
-  const MAX_ROSTER_EVENT_DETAIL_HYDRATIONS = 3;
-  const hydrationKeys = [...keysToHydrate].slice(0, MAX_ROSTER_EVENT_DETAIL_HYDRATIONS);
+  /** Only hydrate explicitly selected events — missing-role scans load every staff member per role. */
+  const hydrationKeys = input.preselectedEventKey?.trim()
+    ? [input.preselectedEventKey.trim()]
+    : [];
 
   try {
     const hydrationResults = await Promise.allSettled(

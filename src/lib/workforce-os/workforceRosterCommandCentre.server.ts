@@ -417,7 +417,7 @@ function buildAssignmentRows(
       assignmentStatus: row.assignment_status,
       readinessScore: row.readiness_score,
       readinessBand: row.readiness_band,
-      warnings: row.warnings.map(String),
+      warnings: Array.isArray(row.warnings) ? row.warnings.map(String) : [],
     }));
 }
 
@@ -552,7 +552,7 @@ export async function loadRosterCommandCentre(
 
   const activeBookings = bookings.filter(isBookingActiveForStaffing);
   const staffingByBooking = await loadClinicalStaffingSummariesForBookings(tid, activeBookings, {
-    syncExistingStaff: true,
+    syncExistingStaff: false,
     allowBlockedDraft: true,
   });
   const assignmentsByBooking = await loadAssignmentsForBookings(
@@ -704,7 +704,7 @@ export async function loadRosterEventDetail(
     });
 
     const candidatesByRole: Record<string, RosterAssignableCandidate[]> = {};
-    for (const missing of staffing.missingRoles) {
+    for (const missing of staffing.missingRoles ?? []) {
       const needed = Math.max(0, missing.required - missing.assigned);
       if (needed <= 0) continue;
       candidatesByRole[missing.role] = await loadRosterAssignableStaff({

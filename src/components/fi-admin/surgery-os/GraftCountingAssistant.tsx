@@ -1267,23 +1267,72 @@ function CorrectionPanel({
             {graft.trayImageLinks.map((link) => (
               <li
                 key={link.linkId}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-sm"
+                className="rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-sm"
               >
-                <span className="text-slate-300">
-                  {new Date(link.capturedAt).toLocaleString()}
-                  {link.reviewRequired ? (
-                    <span className="ml-2 text-amber-400">· review required</span>
-                  ) : null}
-                </span>
-                {link.imagingHref ? (
-                  <Link
-                    href={link.imagingHref}
-                    className="text-violet-300 underline-offset-2 hover:text-violet-200 hover:underline"
-                  >
-                    View in imaging
-                  </Link>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-slate-300">
+                    {new Date(link.capturedAt).toLocaleString()}
+                    {link.reviewRequired ? (
+                      <span className="ml-2 text-amber-400">· review required</span>
+                    ) : null}
+                  </span>
+                  {link.imagingHref ? (
+                    <Link
+                      href={link.imagingHref}
+                      className="text-violet-300 underline-offset-2 hover:text-violet-200 hover:underline"
+                    >
+                      View in imaging
+                    </Link>
+                  ) : (
+                    <span className="text-slate-500">Image linked</span>
+                  )}
+                </div>
+                {link.aiEstimate ? (
+                  <div className="mt-2 space-y-1 text-xs text-slate-400">
+                    <p>
+                      AI estimate:{" "}
+                      <span className="font-medium text-violet-200">
+                        {link.aiEstimate.estimatedGraftCount ?? "—"}
+                      </span>
+                      {" · "}
+                      Manual count:{" "}
+                      <span className="font-medium text-slate-200">
+                        {link.aiEstimate.manualGraftCount ?? "—"}
+                      </span>
+                    </p>
+                    <p>
+                      Validation:{" "}
+                      <span
+                        className={
+                          link.aiEstimate.mismatchBand === "within_tolerance"
+                            ? "text-emerald-400"
+                            : link.aiEstimate.mismatchBand === "material_mismatch"
+                              ? "text-rose-400"
+                              : "text-amber-300"
+                        }
+                      >
+                        {link.aiEstimate.mismatchBand.replace(/_/g, " ")}
+                      </span>
+                      {link.aiEstimate.delta != null ? ` (Δ ${link.aiEstimate.delta})` : null}
+                      {" · "}
+                      Confidence: {link.aiEstimate.confidenceBand}
+                    </p>
+                    <p>
+                      Review:{" "}
+                      <span className="text-slate-300">
+                        {link.aiEstimate.reviewStatus.replace(/_/g, " ")}
+                      </span>
+                      {link.aiEstimate.reviewStatus === "pending_review" ? (
+                        <span className="ml-1 text-amber-400">
+                          — open Imaging review queue to accept, correct, or reject the AI estimate
+                        </span>
+                      ) : null}
+                    </p>
+                  </div>
                 ) : (
-                  <span className="text-slate-500">Image linked</span>
+                  <p className="mt-2 text-xs text-slate-500">
+                    No AI validation estimate yet (enable FI_IMAGING_ENABLE_GRAFT_TRAY_AI_COUNT).
+                  </p>
                 )}
               </li>
             ))}

@@ -14,6 +14,7 @@ import {
   flagImagingReviewRetakeAction,
   markImagingReviewReviewedAction,
   reassignImagingReviewViewTypeAction,
+  reviewGraftTrayAiEstimateAction,
   unassignImagingReviewAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { ALLOWED_STAFF_REASSIGN_VIEW_TYPES } from "@/src/lib/imaging-os/imagingStaffReviewCore";
@@ -37,6 +38,12 @@ const REASON_LABELS: Record<string, string> = {
   graft_tray_reconciliation_evidence_required: "Graft tray — reconciliation evidence required",
   graft_tray_count_mismatch_placeholder: "Graft tray — count mismatch review",
   graft_tray_quality_review: "Graft tray — quality needs review",
+  graft_tray_ai_count_needs_review: "AI graft tray count needs review",
+  graft_tray_ai_manual_mismatch: "AI/manual count mismatch",
+  graft_tray_ai_unable_to_assess: "AI unable to assess tray image",
+  graft_tray_ai_manual_count_missing: "Manual count missing for tray comparison",
+  graft_tray_ai_quality_insufficient: "Tray image quality insufficient",
+  graft_tray_ai_material_mismatch: "Material graft count mismatch",
 };
 
 function formatReason(reason: string): string {
@@ -61,6 +68,7 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
   const [assignee, setAssignee] = useState<Record<string, string>>({});
   const [bulkReviewerId, setBulkReviewerId] = useState("");
   const [reviewerSearch, setReviewerSearch] = useState("");
+  const [correctedCounts, setCorrectedCounts] = useState<Record<string, string>>({});
   const filteredReviewers = reviewers.filter((r) => {
     const q = reviewerSearch.trim().toLowerCase();
     if (!q) return true;
@@ -470,6 +478,139 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex min-w-[200px] flex-col gap-2">
+                      {item.isGraftTrayAiReview && item.graftTrayAiEstimate ? (
+                        <div className="rounded border border-violet-500/25 bg-violet-950/20 p-2 text-[11px] text-violet-100">
+                          <p className="font-semibold text-violet-200">Graft tray AI validation</p>
+                          <p className="mt-1">
+                            AI estimate: {item.graftTrayAiEstimate.estimated_graft_count ?? "—"} ·
+                            Manual: {item.graftTrayAiEstimate.manual_graft_count ?? "—"}
+                          </p>
+                          <p className="text-violet-200/80">
+                            {item.graftTrayAiEstimate.mismatch_band.replace(/_/g, " ")} ·{" "}
+                            {item.graftTrayAiEstimate.confidence_band} confidence
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            <button
+                              type="button"
+                              disabled={pending}
+                              className="rounded bg-emerald-900/50 px-2 py-0.5 text-[10px] text-emerald-100"
+                              onClick={() =>
+                                runAction(item.patientId, item.imageId, () =>
+                                  reviewGraftTrayAiEstimateAction(
+                                    tenantId,
+                                    item.patientId,
+                                    withAdmin({
+                                      patientImageId: item.imageId,
+                                      action: "accept_ai_estimate",
+                                      staffNote: notes[item.imageId],
+                                    })
+                                  )
+                                )
+                              }
+                            >
+                              Accept AI
+                            </button>
+                            <button
+                              type="button"
+                              disabled={pending}
+                              className="rounded bg-sky-900/50 px-2 py-0.5 text-[10px] text-sky-100"
+                              onClick={() =>
+                                runAction(item.patientId, item.imageId, () =>
+                                  reviewGraftTrayAiEstimateAction(
+                                    tenantId,
+                                    item.patientId,
+                                    withAdmin({
+                                      patientImageId: item.imageId,
+                                      action: "accept_manual_count",
+                                      staffNote: notes[item.imageId],
+                                    })
+                                  )
+                                )
+                              }
+                            >
+                              Accept manual
+                            </button>
+                            <button
+                              type="button"
+                              disabled={pending}
+                              className="rounded bg-rose-900/50 px-2 py-0.5 text-[10px] text-rose-100"
+                              onClick={() =>
+                                runAction(item.patientId, item.imageId, () =>
+                                  reviewGraftTrayAiEstimateAction(
+                                    tenantId,
+                                    item.patientId,
+                                    withAdmin({
+                                      patientImageId: item.imageId,
+                                      action: "reject_ai_estimate",
+                                      staffNote: notes[item.imageId],
+                                    })
+                                  )
+                                )
+                              }
+                            >
+                              Reject AI
+                            </button>
+                            <button
+                              type="button"
+                              disabled={pending}
+                              className="rounded bg-amber-900/50 px-2 py-0.5 text-[10px] text-amber-100"
+                              onClick={() =>
+                                runAction(item.patientId, item.imageId, () =>
+                                  reviewGraftTrayAiEstimateAction(
+                                    tenantId,
+                                    item.patientId,
+                                    withAdmin({
+                                      patientImageId: item.imageId,
+                                      action: "request_retake",
+                                      staffNote: notes[item.imageId],
+                                    })
+                                  )
+                                )
+                              }
+                            >
+                              Request retake
+                            </button>
+                          </div>
+                          <div className="mt-2 flex gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              placeholder="Corrected count"
+                              value={correctedCounts[item.imageId] ?? ""}
+                              onChange={(e) =>
+                                setCorrectedCounts((prev) => ({
+                                  ...prev,
+                                  [item.imageId]: e.target.value,
+                                }))
+                              }
+                              className="w-24 rounded border border-violet-700/40 bg-[#020617] px-2 py-0.5 text-[10px]"
+                            />
+                            <button
+                              type="button"
+                              disabled={pending || !correctedCounts[item.imageId]?.trim()}
+                              className="rounded bg-violet-900/50 px-2 py-0.5 text-[10px] text-violet-100 disabled:opacity-40"
+                              onClick={() =>
+                                runAction(item.patientId, item.imageId, () =>
+                                  reviewGraftTrayAiEstimateAction(
+                                    tenantId,
+                                    item.patientId,
+                                    withAdmin({
+                                      patientImageId: item.imageId,
+                                      action: "correct_count",
+                                      correctedCount:
+                                        Number.parseInt(correctedCounts[item.imageId] ?? "", 10) ||
+                                        0,
+                                      staffNote: notes[item.imageId],
+                                    })
+                                  )
+                                )
+                              }
+                            >
+                              Correct count
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
                       <input
                         type="text"
                         placeholder="Staff note (optional)"

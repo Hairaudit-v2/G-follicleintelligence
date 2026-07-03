@@ -29,6 +29,11 @@ import {
   type OutcomeSignalSummary,
 } from "./imagingOutcomeSignalsCore";
 import { resolveLiveImagingSignalProvider } from "./liveImagingSignalProviders.server";
+import {
+  mapEstimateRowToSummary,
+  persistGraftTrayAiEstimate,
+  runGraftTrayCountEstimate,
+} from "./graftTrayCountProvider.server";
 
 export type ProcessImagingAiJobResult = {
   jobId: string;
@@ -196,6 +201,57 @@ export async function processImagingAiAnalysisJob(
         tenantId: tid,
         jobId: job.id,
         resultPayload: { summary },
+        client: supabase,
+      });
+      return { jobId: job.id, status: "completed", analysisKind: job.analysis_kind };
+    }
+
+    if (job.analysis_kind === "graft_tray_count_estimate") {
+      const ctx = await loadPatientImageContext(supabase, tid, imageId);
+      const { data: imageRow } = await supabase
+        .from("fi_patient_images")
+        .select("imaging_protocol_slot_slug, image_category, patient_id")
+        .eq("tenant_id", tid)
+        .eq("id", imageId)
+        .maybeSingle();
+      const row = imageRow as Record<string, unknown> | null;
+      const patientId =
+        row?.patient_id != null ? String(row.patient_id) : ctx.patientId;
+      if (!patientId) throw new Error("Patient id required for graft tray estimate.");
+
+      const outcome = await runGraftTrayCountEstimate({
+        tenantId: tid,
+        patientImageId: imageId,
+        patientId,
+        protocolSlotSlug:
+          row?.imaging_protocol_slot_slug != null
+            ? String(row.imaging_protocol_slot_slug)
+            : null,
+        imageCategory: row?.image_category != null ? String(row.image_category) : null,
+        metadata: ctx.metadata,
+        client: supabase,
+      });
+
+      const estimateRow = await persistGraftTrayAiEstimate({
+        tenantId: tid,
+        patientId,
+        patientImageId: imageId,
+        analysisJobId: job.id,
+        estimate: outcome.estimate,
+        manual: outcome.manual,
+        comparison: outcome.comparison,
+        link: outcome.link,
+        client: supabase,
+      });
+
+      await completeImagingAiAnalysisJob({
+        tenantId: tid,
+        jobId: job.id,
+        resultPayload: {
+          summary: mapEstimateRowToSummary(estimateRow),
+          used_open_ai: outcome.usedOpenAi,
+          mismatch_band: outcome.comparison.mismatch_band,
+        },
         client: supabase,
       });
       return { jobId: job.id, status: "completed", analysisKind: job.analysis_kind };

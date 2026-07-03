@@ -43,6 +43,7 @@ import type {
   SurgeryOsTeamMember,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 import { loadGraftTrayLinksForSurgeries } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
+import { loadGraftTrayAiEstimatesForImages } from "@/src/lib/imaging-os/graftTrayCountProvider.server";
 import {
   computeGraftProgressPercent,
   computeConfirmedTrayTotals,
@@ -543,8 +544,20 @@ export async function loadSurgeryOsCommandCentrePayload(
     ]);
 
   let trayLinksBySurgery: Awaited<ReturnType<typeof loadGraftTrayLinksForSurgeries>> = new Map();
+  let trayAiEstimatesByImage = new Map<
+    string,
+    Awaited<ReturnType<typeof loadGraftTrayAiEstimatesForImages>> extends Map<string, infer V>
+      ? V
+      : never
+  >();
   try {
     trayLinksBySurgery = await loadGraftTrayLinksForSurgeries(tid, surgeryIds, supabase);
+    const trayImageIds = [...trayLinksBySurgery.values()]
+      .flat()
+      .map((l) => l.image_id);
+    if (trayImageIds.length) {
+      trayAiEstimatesByImage = await loadGraftTrayAiEstimatesForImages(tid, trayImageIds, supabase);
+    }
   } catch (e) {
     if (!isMissingDatabaseRelationError(e)) throw e;
   }
@@ -740,16 +753,34 @@ export async function loadSurgeryOsCommandCentrePayload(
         });
 
     const surgeryTrayLinks = trayLinksBySurgery.get(row.id) ?? [];
-    const trayImageLinks = surgeryTrayLinks.map((link) => ({
-      linkId: link.id,
-      imageId: link.image_id,
-      capturedAt: link.captured_at,
-      status: link.status,
-      reviewRequired: link.review_required,
-      imagingHref: row.patient_id
-        ? `/fi-admin/${tid}/patients/${row.patient_id}/imaging?image=${link.image_id}`
-        : null,
-    }));
+    const trayImageLinks = surgeryTrayLinks.map((link) => {
+      const ai = trayAiEstimatesByImage.get(link.image_id);
+      return {
+        linkId: link.id,
+        imageId: link.image_id,
+        capturedAt: link.captured_at,
+        status: link.status,
+        reviewRequired: link.review_required,
+        imagingHref: row.patient_id
+          ? `/fi-admin/${tid}/patients/${row.patient_id}/imaging?image=${link.image_id}`
+          : null,
+        aiEstimate: ai
+          ? {
+              estimateId: ai.estimate_id,
+              estimatedGraftCount: ai.estimated_graft_count,
+              manualGraftCount: ai.manual_graft_count,
+              mismatchBand: ai.mismatch_band,
+              delta: ai.delta,
+              confidence: ai.confidence,
+              confidenceBand: ai.confidence_band,
+              reviewStatus: ai.review_status,
+              reviewerDecision: ai.reviewer_decision,
+              correctedCount: ai.corrected_count,
+              provider: ai.provider,
+            }
+          : null,
+      };
+    });
 
     graftSummary.push({
       surgeryId: row.id,

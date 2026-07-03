@@ -171,6 +171,20 @@ export type SurgeryOsGraftCountEvent = {
   trayNumber: number | null;
 };
 
+export type SurgeryOsGraftTrayAiEstimateSummary = {
+  estimateId: string;
+  estimatedGraftCount: number | null;
+  manualGraftCount: number | null;
+  mismatchBand: string;
+  delta: number | null;
+  confidence: number;
+  confidenceBand: string;
+  reviewStatus: string;
+  reviewerDecision: string | null;
+  correctedCount: number | null;
+  provider: string;
+};
+
 export type SurgeryOsGraftTrayLinkSummary = {
   linkId: string;
   imageId: string;
@@ -178,6 +192,7 @@ export type SurgeryOsGraftTrayLinkSummary = {
   status: string;
   reviewRequired: boolean;
   imagingHref: string | null;
+  aiEstimate: SurgeryOsGraftTrayAiEstimateSummary | null;
 };
 
 export type SurgeryOsGraftSummary = {
