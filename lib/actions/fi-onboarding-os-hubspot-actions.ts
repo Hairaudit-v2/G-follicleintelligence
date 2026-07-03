@@ -6,6 +6,7 @@ import { z } from "zod";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsRoleAllowedForPlatformTenantProvisioning } from "@/src/lib/fiOs/platformTenantProvisionGate";
+import { revalidateLiveDataSurfacesForTenant } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
 import {
   approveHubspotDeal,
   approveHubspotLead,
@@ -28,6 +29,7 @@ const integrationIdSchema = z.string().uuid();
 const stagingIdSchema = z.string().uuid();
 
 function revalidateHubspotPaths(tenantId: string, sessionId?: string | null) {
+  revalidateLiveDataSurfacesForTenant(tenantId, { includeIntegrationsSettings: true });
   revalidatePath(`/fi-admin/${tenantId}/configuration`);
   if (sessionId) {
     revalidatePath(`/fi-admin/platform/onboarding/${sessionId}`);

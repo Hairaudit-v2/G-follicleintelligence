@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { revalidateLiveDataSurfacesForTenant } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsRoleAllowedForPlatformTenantProvisioning } from "@/src/lib/fiOs/platformTenantProvisionGate";
 import {
@@ -26,8 +27,7 @@ const stagingIdSchema = z.string().uuid();
 const personIdSchema = z.string().uuid();
 
 function revalidateImportPaths(tenantId: string) {
-  revalidatePath(`/fi-admin/${tenantId}/onboarding-os/import-review`);
-  revalidatePath(`/fi-admin/${tenantId}/configuration`);
+  revalidateLiveDataSurfacesForTenant(tenantId, { includeIntegrationsSettings: true });
   revalidatePath("/fi-admin/platform/onboarding");
 }
 

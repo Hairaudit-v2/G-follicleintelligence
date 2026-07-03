@@ -1,3 +1,4 @@
+import { revalidateLiveDataSurfacesForTenant } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { shallowMergeMetadata } from "@/src/lib/fi/foundation/internal";
@@ -539,12 +540,19 @@ async function finalizeTimelyAppointmentWebhookResult(
     result,
     ports
   );
-  return attachCrmStageAdvanceToTimelyAppointmentResult(
+  const finalized = await attachCrmStageAdvanceToTimelyAppointmentResult(
     supabase,
     tenantId,
     withConsultation,
     ports
   );
+  if (
+    finalized.booking_id &&
+    (finalized.action === "created" || finalized.action === "updated")
+  ) {
+    revalidateLiveDataSurfacesForTenant(tenantId);
+  }
+  return finalized;
 }
 
 async function patchTimelyBookingMetadataOnly(

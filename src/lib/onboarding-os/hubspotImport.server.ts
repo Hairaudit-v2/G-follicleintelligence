@@ -217,7 +217,7 @@ async function resolveWriteAuth(
   | { ok: true; actorAuthUserId: string; fiUserId: string | null; actorLabel: string }
   | { ok: false; error: string }
 > {
-  const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
+  const platform = await resolvePlatformAdminAuth(opts);
   if (platform.ok) {
     return {
       ok: true,
@@ -549,6 +549,186 @@ async function resolvePipelineStageId(
   return entry.id;
 }
 
+type WriteAuth = {
+  actorAuthUserId: string;
+  fiUserId: string | null;
+  actorLabel: string;
+};
+
+async function updateFiCrmLeadFromHubspotContactStaging(
+  input: {
+    supabase: SupabaseClient;
+    tid: string;
+    iid: string;
+    sid: string;
+    staging: HubspotStagingContact;
+    preview: FiLeadImportPreview;
+    leadId: string;
+    personId: string | null;
+    auth: WriteAuth;
+  }
+): Promise<HubspotImportActionResult<{ personId: string; leadId: string; patientId: string | null }>> {
+  const { supabase, tid, iid, sid, staging, preview, leadId, personId, auth } = input;
+  const stageId = await resolvePipelineStageId(tid, preview.mappedPipelineSlug, supabase);
+  const now = new Date().toISOString();
+
+  const { error: leadErr } = await supabase
+    .from("fi_crm_leads")
+    .update({
+      summary: preview.summary,
+      metadata: preview.leadMetadata,
+      current_stage_id: stageId,
+    })
+    .eq("id", leadId)
+    .eq("tenant_id", tid);
+  if (leadErr) return { ok: false, error: leadErr.message };
+
+  let patientId: string | null = null;
+  if (personId) {
+    const { error: personErr } = await supabase
+      .from("fi_persons")
+      .update({ metadata: preview.personMetadata })
+      .eq("id", personId)
+      .eq("tenant_id", tid);
+    if (personErr) return { ok: false, error: personErr.message };
+
+    if (preview.createPatient) {
+      const { data: existingPat } = await supabase
+        .from("fi_patients")
+        .select("id")
+        .eq("tenant_id", tid)
+        .eq("person_id", personId)
+        .maybeSingle();
+      patientId = existingPat ? String((existingPat as { id: string }).id) : null;
+    }
+  }
+
+  await appendCrmActivityEvent(
+    {
+      tenantId: tid,
+      leadId,
+      activityKind: "crm.import.hubspot_f5_update",
+      title: "HubSpot staged re-import (OnboardingOS F5)",
+      detail: {
+        staging_contact_id: sid,
+        hubspot_contact_id: staging.hubspotContactId,
+        updated_fields: ["summary", "metadata", "current_stage_id"],
+      },
+    },
+    supabase
+  );
+
+  await supabase
+    .from("fi_external_hubspot_contact_staging")
+    .update({ import_status: "imported", imported_at: now })
+    .eq("id", sid)
+    .eq("tenant_id", tid);
+
+  await logHubspotImportAudit({
+    integrationId: iid,
+    tenantId: tid,
+    stagingContactId: sid,
+    action: "contact_updated",
+    actorAuthUserId: auth.actorAuthUserId,
+    actorFiUserId: auth.fiUserId,
+    actorLabel: auth.actorLabel,
+    detail: { person_id: personId, lead_id: leadId, patient_id: patientId },
+    supabase,
+  });
+
+  await logImportAuditEvent({
+    tenantId: tid,
+    integrationId: iid,
+    stagingRecordType: "hubspot_contact",
+    stagingRecordId: sid,
+    eventKind: "import_updated",
+    actorAuthUserId: auth.actorAuthUserId,
+    actorFiUserId: auth.fiUserId,
+    actorLabel: auth.actorLabel,
+    detail: { person_id: personId, lead_id: leadId },
+    supabase,
+  });
+
+  return { ok: true, data: { personId: personId ?? "", leadId, patientId } };
+}
+
+async function updateFiCrmLeadFromHubspotDealStaging(
+  input: {
+    supabase: SupabaseClient;
+    tid: string;
+    iid: string;
+    sid: string;
+    staging: HubspotStagingDeal;
+    preview: FiOpportunityImportPreview;
+    leadId: string;
+    personId: string | null;
+    auth: WriteAuth;
+  }
+): Promise<HubspotImportActionResult<{ leadId: string; personId: string | null }>> {
+  const { supabase, tid, iid, sid, staging, preview, leadId, personId, auth } = input;
+  const stageId = await resolvePipelineStageId(tid, preview.mappedPipelineSlug, supabase);
+  const now = new Date().toISOString();
+
+  const { error: leadErr } = await supabase
+    .from("fi_crm_leads")
+    .update({
+      summary: preview.summary,
+      metadata: preview.leadMetadata,
+      current_stage_id: stageId,
+    })
+    .eq("id", leadId)
+    .eq("tenant_id", tid);
+  if (leadErr) return { ok: false, error: leadErr.message };
+
+  await appendCrmActivityEvent(
+    {
+      tenantId: tid,
+      leadId,
+      activityKind: "crm.import.hubspot_f5_deal_update",
+      title: "HubSpot deal re-import (OnboardingOS F5)",
+      detail: {
+        staging_deal_id: sid,
+        hubspot_deal_id: staging.hubspotDealId,
+        updated_fields: ["summary", "metadata", "current_stage_id"],
+      },
+    },
+    supabase
+  );
+
+  await supabase
+    .from("fi_external_hubspot_deal_staging")
+    .update({ import_status: "imported", imported_at: now })
+    .eq("id", sid)
+    .eq("tenant_id", tid);
+
+  await logHubspotImportAudit({
+    integrationId: iid,
+    tenantId: tid,
+    stagingDealId: sid,
+    action: "deal_updated",
+    actorAuthUserId: auth.actorAuthUserId,
+    actorFiUserId: auth.fiUserId,
+    actorLabel: auth.actorLabel,
+    detail: { person_id: personId, lead_id: leadId },
+    supabase,
+  });
+
+  await logImportAuditEvent({
+    tenantId: tid,
+    integrationId: iid,
+    stagingRecordType: "hubspot_deal",
+    stagingRecordId: sid,
+    eventKind: "import_updated",
+    actorAuthUserId: auth.actorAuthUserId,
+    actorFiUserId: auth.fiUserId,
+    actorLabel: auth.actorLabel,
+    detail: { person_id: personId, lead_id: leadId },
+    supabase,
+  });
+
+  return { ok: true, data: { leadId, personId } };
+}
+
 /** Create FI CRM lead (+ person, optional patient) from approved HubSpot contact. Never writes to HubSpot. */
 export async function createFiLeadFromHubspotContact(
   stagingContactId: string,
@@ -584,6 +764,34 @@ export async function createFiLeadFromHubspotContact(
 
   const preview = buildHubspotContactImportPreview(staging);
   const index = await loadDuplicateCheckIndex(supabase, tid, iid);
+
+  const existingMapping = index.externalMappings.find(
+    (m) => m.externalId === staging.hubspotContactId && m.sourceEntityType === "contact"
+  );
+  if (existingMapping?.fiEntityType === "lead" && !opts?.mergePersonId) {
+    const personMapping = index.externalMappings.find(
+      (m) =>
+        m.externalId === staging.hubspotContactId &&
+        m.sourceEntityType === "contact" &&
+        m.fiEntityType === "person"
+    );
+    return updateFiCrmLeadFromHubspotContactStaging({
+      supabase,
+      tid,
+      iid,
+      sid,
+      staging,
+      preview,
+      leadId: existingMapping.fiEntityId,
+      personId: personMapping?.fiEntityId ?? null,
+      auth: {
+        actorAuthUserId: auth.actorAuthUserId,
+        fiUserId: auth.fiUserId ?? null,
+        actorLabel: auth.actorLabel,
+      },
+    });
+  }
+
   const duplicateCheck = runDuplicateDetection(
     {
       email: preview.email,
@@ -599,9 +807,6 @@ export async function createFiLeadFromHubspotContact(
     return { ok: false, error: duplicateCheck.summary };
   }
 
-  const existingMapping = index.externalMappings.find(
-    (m) => m.externalId === staging.hubspotContactId && m.sourceEntityType === "contact"
-  );
   if (existingMapping && !opts?.mergePersonId) {
     return { ok: false, error: "HubSpot contact already mapped to an FI record." };
   }
@@ -811,6 +1016,38 @@ export async function createFiOpportunityFromHubspotDeal(
 
   const preview = buildHubspotDealImportPreview(staging);
   const index = await loadDuplicateCheckIndex(supabase, tid, iid);
+
+  const existingDealMapping = index.externalMappings.find(
+    (m) => m.externalId === staging.hubspotDealId && m.sourceEntityType === "deal"
+  );
+  if (existingDealMapping?.fiEntityType === "lead" && !opts?.mergeLeadId) {
+    let personId = opts?.personId?.trim() ?? null;
+    if (!personId && staging.hubspotContactId) {
+      const contactMapping = index.externalMappings.find(
+        (m) =>
+          m.externalId === staging.hubspotContactId &&
+          m.sourceEntityType === "contact" &&
+          m.fiEntityType === "person"
+      );
+      personId = contactMapping?.fiEntityId ?? null;
+    }
+    return updateFiCrmLeadFromHubspotDealStaging({
+      supabase,
+      tid,
+      iid,
+      sid,
+      staging,
+      preview,
+      leadId: existingDealMapping.fiEntityId,
+      personId,
+      auth: {
+        actorAuthUserId: auth.actorAuthUserId,
+        fiUserId: auth.fiUserId ?? null,
+        actorLabel: auth.actorLabel,
+      },
+    });
+  }
+
   const duplicateCheck = runDuplicateDetection(
     {
       email: preview.email,
@@ -826,9 +1063,6 @@ export async function createFiOpportunityFromHubspotDeal(
     return { ok: false, error: duplicateCheck.summary };
   }
 
-  const existingDealMapping = index.externalMappings.find(
-    (m) => m.externalId === staging.hubspotDealId && m.sourceEntityType === "deal"
-  );
   if (existingDealMapping && !opts?.mergeLeadId) {
     return { ok: false, error: "HubSpot deal already mapped to an FI record." };
   }

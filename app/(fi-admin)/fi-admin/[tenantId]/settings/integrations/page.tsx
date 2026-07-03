@@ -8,6 +8,7 @@ import { GoogleCalendarInboundScopeCard } from "@/src/components/fi-admin/settin
 import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationCard";
 import { GoogleCalendarMonitoringCard } from "@/src/components/fi-admin/settings/GoogleCalendarMonitoringCard";
 import { GoogleCalendarSyncReviewCard } from "@/src/components/fi-admin/settings/GoogleCalendarSyncReviewCard";
+import { LiveDataHealthDiagnosticsCard } from "@/src/components/fi-admin/settings/LiveDataHealthDiagnosticsCard";
 import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadGoogleCalendarConnectionStatus } from "@/src/lib/googleCalendar/googleCalendarConnectionStatus.server";
@@ -19,6 +20,7 @@ import { loadGoogleCalendarInboundScopePage } from "@/src/lib/googleCalendar/goo
 import { loadGoogleCalendarMonitoringPage } from "@/src/lib/googleCalendar/googleCalendarMonitoring.server";
 import { loadGoogleCalendarSyncReviewPage } from "@/src/lib/googleCalendar/googleCalendarSyncReview.server";
 import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
+import { loadLiveDataHealthSummary } from "@/src/lib/integrations/liveDataHealth.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export const metadata = {
@@ -116,6 +118,8 @@ export default async function TenantIntegrationsSettingsPage({
     canManage: canManageCalendarLinks,
   });
 
+  const liveDataHealth = await loadLiveDataHealthSummary(tenantId);
+
   return (
     <div className="space-y-4">
       <div>
@@ -152,6 +156,8 @@ export default async function TenantIntegrationsSettingsPage({
       <GoogleCalendarSyncReviewCard tenantId={tenantId} pageModel={syncReviewPage} />
 
       <ProviderCalendarLinksCard tenantId={tenantId} pageModel={providerCalendarLinksPage} />
+
+      <LiveDataHealthDiagnosticsCard tenantId={tenantId} health={liveDataHealth} />
 
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/40 p-4 sm:p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Other integrations</h2>

@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logStructured } from "@/src/lib/server/structuredLog";
+import { revalidateLiveDataSurfacesForTenant } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
 import { createGoogleCalendarProviderAdapter } from "@/src/lib/calendar/providers/googleCalendarProviderAdapter.server";
 
 import {
@@ -110,6 +111,8 @@ export async function syncGoogleCalendarIncrementalForWebhook(
       opts
     );
 
+    revalidateLiveDataSurfacesForTenant(input.tenantId, { includeIntegrationsSettings: true });
+
     return {
       ok: true,
       nextSyncToken: listResult.ok ? listResult.result.nextSyncToken : undefined,
@@ -210,6 +213,8 @@ export async function syncGoogleCalendarIncrementalForWebhook(
     },
     opts
   );
+
+  revalidateLiveDataSurfacesForTenant(input.tenantId, { includeIntegrationsSettings: true });
 
   return {
     ok: true,

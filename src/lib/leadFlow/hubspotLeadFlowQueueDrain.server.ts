@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { revalidateLiveDataSurfacesForTenants } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   processAllTenantsPendingHubSpotExternalEvents,
@@ -137,6 +139,8 @@ export async function drainHubSpotLeadFlowQueue(opts?: {
 
   const summary = summarizeLeadFlowDrainResults(events);
   const health = await loadLeadFlowQueueHealth({ tenantId: tenantId ?? undefined, supabase });
+
+  revalidateLiveDataSurfacesForTenants(summary.tenants);
 
   return {
     ...summary,

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { revalidateLiveDataSurfacesForTenant } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
 import { syncGoogleCalendarEvents } from "./googleCalendarService.server";
 import {
   beginGoogleCalendarSyncRun,
@@ -388,6 +389,8 @@ export async function syncGoogleCalendarForTenant(
     skipNoUpdateNeeded: syncResultData.skipBreakdown?.noUpdateNeeded,
     skipCancelledNoLocal: syncResultData.skipBreakdown?.cancelledNoLocal,
   });
+
+  revalidateLiveDataSurfacesForTenant(tenantId, { includeIntegrationsSettings: true });
 
   return {
     tenantId,

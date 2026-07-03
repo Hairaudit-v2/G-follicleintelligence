@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
 import {
   assertGoogleCalendarTenantAdminAccess,
   GoogleCalendarIntegrationAccessError,
 } from "@/src/lib/googleCalendar/googleCalendarIntegrationAccess.server";
+import { revalidateLiveDataSurfacesForTenant } from "@/src/lib/integrations/revalidateLiveDataPaths.server";
 import type { InboundSyncCalendarClientRow } from "@/src/lib/googleCalendar/googleCalendarInboundScopeCore";
 import {
   refreshGoogleInboundCalendarScopes,
@@ -30,9 +30,7 @@ function errMsg(e: unknown): string {
 }
 
 function revalidateInboundScopeSurfaces(tenantId: string): void {
-  const tid = tenantId.trim();
-  revalidatePath(`/fi-admin/${tid}/settings/integrations`);
-  revalidatePath(`/fi-admin/${tid}/calendar`);
+  revalidateLiveDataSurfacesForTenant(tenantId, { includeIntegrationsSettings: true });
 }
 
 export async function toggleGoogleInboundSyncCalendarAction(
