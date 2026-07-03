@@ -14,6 +14,7 @@ import {
   STAFF_ACCESS_AUDIT_EVENTS,
 } from "./staffAccessInviteAudit.server";
 import { resolveInviteStatus } from "./staffAccessCentreCore";
+import { repairStaffTenantLinkFromInvitation } from "./staffTenantLinkRepair.server";
 
 export type StaffAccessAcceptPageModel = {
   tenantId: string;
@@ -202,6 +203,15 @@ export async function acceptStaffAccessInvitation(input: {
     .eq("tenant_id", tid)
     .eq("id", invitation.id);
   if (updateError) throw new Error(updateError.message);
+
+  await repairStaffTenantLinkFromInvitation({
+    tenantId: tid,
+    staffMemberId: invitation.staffMemberId,
+    inviteEmail: invitation.inviteEmail,
+    invitationId: invitation.id,
+    fiStaffId: invitation.fiStaffId,
+    client: supabase,
+  });
 
   await insertStaffAccessAuditEvent({
     tenantId: tid,

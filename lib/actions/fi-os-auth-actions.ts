@@ -5,9 +5,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 
-import { loadFiOsIdentity, loadFirstTenantIdForAuthUser } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { resolveFiOsPublicOrigin } from "@/src/lib/fiOs/fiOsPublicOrigin.server";
 import { resolveFiOsPostLoginRedirect } from "@/src/lib/fiOs/fiOsRedirect.server";
+import { repairStaffTenantLinkOnAuthConfirm } from "@/src/lib/workforce/staffTenantLinkRepair.server";
+import { safeInternalPath } from "@/src/lib/supabase/authLinkBootstrap";
 /** Temporary diagnostic logging — env presence only; never log secrets or tokens. */
 function logFiOsSignIn(stage: string, details: Record<string, unknown>): void {
   console.info("[fi-os-auth]", stage, JSON.stringify(details));
@@ -80,16 +82,12 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
     redirect(signInErrorRedirect(formData, "invalid_credentials"));
   }
 
-  const dest = next ?? (await resolveFiOsPostLoginRedirect(data.user.id));
-  const [osIdentity, tenantId] = await Promise.all([
-    loadFiOsIdentity(data.user.id),
-    loadFirstTenantIdForAuthUser(data.user.id),
-  ]);
+  const dest = next ?? (await resolveFiOsPostLoginRedirect(data.user.id, next));
+  const osIdentity = await loadFiOsIdentity(data.user.id);
   logFiOsSignIn("membership", {
     hasOsIdentity: Boolean(osIdentity),
     osRole: osIdentity?.osRole ?? null,
-    hasTenantMembership: Boolean(tenantId),
-    tenantIdPresent: Boolean(tenantId),
+    target: dest,
   });
   logFiOsSignIn("redirect", {
     reason: next ? "explicit_next" : "post_login_resolver",
@@ -159,4 +157,46 @@ export async function fiOsSignOutAction(): Promise<void> {
 
   await supabase.auth.signOut();
   redirect("/follicle-intelligence/login");
+}
+
+/** After Supabase invite/magic-link confirm, repair tenant-scoped fi_users/fi_staff linkage. */
+export async function repairStaffTenantLinkOnAuthConfirmAction(input: {
+  nextPath: string;
+}): Promise<{ ok: true } | { ok: false }> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (!url || !anon) return { ok: false };
+
+  const cookieStore = cookies();
+  const supabase = createServerClient(url, anon, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet: Parameters<SetAllCookies>[0]) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options as CookieOptions);
+          });
+        } catch {
+          /* ignore */
+        }
+      },
+    },
+  });
+
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user?.id || !data.user.email) return { ok: false };
+
+  const nextPath = safeInternalPath(input.nextPath, "/fi-admin");
+  try {
+    await repairStaffTenantLinkOnAuthConfirm({
+      authUserId: data.user.id,
+      email: data.user.email,
+      nextPath,
+    });
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
 }

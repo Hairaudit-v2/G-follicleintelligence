@@ -320,11 +320,10 @@ export function StaffProfileActionMenu({
                 : "Onboarding invite created — copy the link if email delivery is not configured."
             );
           } else if (mutation === "send_login" || mutation === "resend_login") {
-            setMessage(
-              result.emailSent
-                ? "Login invite sent by email."
-                : "Login invite created — copy the link if email delivery is not configured."
-            );
+            const baseMessage = result.emailSent
+              ? "Login invite sent by email."
+              : "Login invite created — copy the link if email delivery is not configured.";
+            setMessage(result.warning ? `${baseMessage} ${result.warning}` : baseMessage);
           } else if (mutation === "revoke") {
             setMessage("Staff login access revoked.");
           } else if (mutation === "suspend") {

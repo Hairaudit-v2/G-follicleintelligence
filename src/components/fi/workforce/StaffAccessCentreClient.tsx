@@ -118,7 +118,7 @@ export function StaffAccessCentreClient({
         try {
         const body = { staffMemberId };
         let result:
-          | { ok: true; inviteUrl?: string; emailSent?: boolean }
+          | { ok: true; inviteUrl?: string; emailSent?: boolean; warning?: string | null }
           | { ok: false; error: string };
 
         if (action === "send") result = await sendStaffLoginInviteAction(tenantId, body);
@@ -150,11 +150,10 @@ export function StaffAccessCentreClient({
             setMessage(result.inviteUrl);
           }
         } else if (action === "send" || action === "resend") {
-          setMessage(
-            result.emailSent
-              ? "Login invite sent by email."
-              : "Login invite created — copy the link if email delivery is not configured."
-          );
+          const baseMessage = result.emailSent
+            ? "Login invite sent by email."
+            : "Login invite created — copy the link if email delivery is not configured.";
+          setMessage(result.warning ? `${baseMessage} ${result.warning}` : baseMessage);
         } else if (action === "revoke") {
           setMessage("Staff login access revoked.");
         } else if (action === "suspend") {

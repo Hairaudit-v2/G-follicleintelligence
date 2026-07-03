@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { createRecoveryBrowserClient } from "@/lib/supabase/client";
+import { repairStaffTenantLinkOnAuthConfirmAction } from "@/lib/actions/fi-os-auth-actions";
 import {
   bootstrapSupabaseSessionFromAuthLink,
   readAuthLinkCredentialsFromUrl,
@@ -60,6 +61,8 @@ export function FiOsAuthConfirmClient({
           setError(invalidLinkMessage);
           return;
         }
+
+        await repairStaffTenantLinkOnAuthConfirmAction({ nextPath: next });
 
         stripAuthParamsFromUrlKeepSearch();
         router.replace(resolvePostAuthLinkDestination(next, authType));

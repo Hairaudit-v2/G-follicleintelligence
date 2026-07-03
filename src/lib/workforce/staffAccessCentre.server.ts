@@ -6,11 +6,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { updateFiStaff } from "@/src/lib/staff/staff.server";
 import { disableStaffPinForTenant } from "@/src/lib/staffPin/staffPin.server";
-import { buildFiOsAuthConfirmUrl } from "@/src/lib/supabase/authLinkBootstrap";
+import {
+  provisionStaffAuthInviteLink,
+  repairStaffTenantLinkFromInvitation,
+} from "@/src/lib/workforce/staffTenantLinkRepair.server";
 import { loadStaffPinMetadataForStaff } from "@/src/lib/staffPin/staffPin.server";
 import { syncAllStaffProjectionsForTenant } from "@/src/lib/workforce-os/hrReconciliation.server";
 import {
@@ -360,6 +362,7 @@ export type SendStaffLoginInviteResult = {
   invitationId: string;
   inviteUrl: string;
   emailSent: boolean;
+  crossTenantWarning: string | null;
 };
 
 async function ensureFiStaffForMember(
@@ -502,74 +505,6 @@ async function assertEligibleForLoginInvite(
   }
 
   return { fiStaffId, email, fullName: String(row.full_name ?? "Staff") };
-}
-
-async function resolveOrCreateFiUser(
-  tenantId: string,
-  email: string,
-  client: SupabaseClient
-): Promise<string> {
-  const { data: existing, error: findErr } = await client
-    .from("fi_users")
-    .select("id")
-    .eq("tenant_id", tenantId)
-    .ilike("email", email)
-    .maybeSingle();
-  if (findErr) throw new Error(findErr.message);
-  if (existing) return String((existing as { id: string }).id);
-
-  const now = new Date().toISOString();
-  const { data: created, error: insErr } = await client
-    .from("fi_users")
-    .insert({
-      tenant_id: tenantId,
-      email,
-      role: "member",
-      auth_user_id: null,
-      created_at: now,
-      updated_at: now,
-    })
-    .select("id")
-    .single();
-  if (insErr || !created) throw new Error(insErr?.message ?? "Could not create fi_user.");
-  return String((created as { id: string }).id);
-}
-
-async function provisionAuthInviteLink(
-  tenantId: string,
-  email: string,
-  client: SupabaseClient
-): Promise<{ authUserId: string; inviteLink: string }> {
-  const origin = getRequestOrigin().replace(/\/$/, "");
-  const nextPath = `/fi-admin/${tenantId}`;
-  const redirectTo = buildFiOsAuthConfirmUrl(origin, nextPath);
-
-  const { data: linkData, error: linkErr } = await client.auth.admin.generateLink({
-    type: "invite",
-    email,
-    options: { redirectTo },
-  });
-  if (linkErr || !linkData.user?.id) {
-    const { data: inv, error: invErr } = await client.auth.admin.inviteUserByEmail(email, {
-      redirectTo,
-      data: { fi_tenant_id: tenantId, fi_role: "member" },
-    });
-    if (invErr || !inv.user?.id) {
-      throw new Error(FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE);
-    }
-    const retry = await client.auth.admin.generateLink({
-      type: "invite",
-      email,
-      options: { redirectTo },
-    });
-    const inviteLink = retry.data?.properties?.action_link?.trim();
-    if (!inviteLink) throw new Error(FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE);
-    return { authUserId: inv.user.id, inviteLink };
-  }
-
-  const inviteLink = linkData.properties?.action_link?.trim();
-  if (!inviteLink) throw new Error(FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE);
-  return { authUserId: linkData.user.id, inviteLink };
 }
 
 async function loadTenantDisplayName(tenantId: string, client: SupabaseClient): Promise<string> {
@@ -723,20 +658,23 @@ export async function sendStaffLoginInvite(input: {
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
   const tenantName = await loadTenantDisplayName(tid, supabase);
 
-  const fiUserId = await resolveOrCreateFiUser(tid, email, supabase);
-  const { authUserId, inviteLink: authInviteLink } = await provisionAuthInviteLink(tid, email, supabase);
-
-  await supabase
-    .from("fi_users")
-    .update({
+  const origin = getRequestOrigin();
+  const { authUserId, inviteLink: authInviteLink, crossTenantWarning } =
+    await provisionStaffAuthInviteLink({
+      tenantId: tid,
       email,
-      auth_user_id: authUserId,
-      updated_at: now.toISOString(),
-    })
-    .eq("tenant_id", tid)
-    .eq("id", fiUserId);
+      origin,
+      client: supabase,
+    });
 
-  await updateFiStaff(tid, fiStaffId, { fi_user_id: fiUserId }, supabase);
+  const { fiUserId } = await repairStaffTenantLinkFromInvitation({
+    tenantId: tid,
+    staffMemberId: mid,
+    inviteEmail: email,
+    fiStaffId,
+    authUserId,
+    client: supabase,
+  });
 
   const inviteToken = generateStaffAccessInviteToken();
   const inviteUrl = buildStaffAccessInviteUrl(tid, inviteToken);
@@ -789,7 +727,7 @@ export async function sendStaffLoginInvite(input: {
     client: supabase,
   });
 
-  return { invitationId, inviteUrl, emailSent };
+  return { invitationId, inviteUrl, emailSent, crossTenantWarning };
 }
 
 export async function resendStaffLoginInvite(input: {
@@ -827,19 +765,23 @@ export async function resendStaffLoginInvite(input: {
 
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
   const tenantName = await loadTenantDisplayName(tid, supabase);
-  const { authUserId, inviteLink: authInviteLink } = await provisionAuthInviteLink(tid, email, supabase);
-
-  const fiUserId = await resolveOrCreateFiUser(tid, email, supabase);
-  await supabase
-    .from("fi_users")
-    .update({
+  const origin = getRequestOrigin();
+  const { authUserId, inviteLink: authInviteLink, crossTenantWarning } =
+    await provisionStaffAuthInviteLink({
+      tenantId: tid,
       email,
-      auth_user_id: authUserId,
-      updated_at: now.toISOString(),
-    })
-    .eq("tenant_id", tid)
-    .eq("id", fiUserId);
-  await updateFiStaff(tid, fiStaffId, { fi_user_id: fiUserId }, supabase);
+      origin,
+      client: supabase,
+    });
+
+  const { fiUserId } = await repairStaffTenantLinkFromInvitation({
+    tenantId: tid,
+    staffMemberId: mid,
+    inviteEmail: email,
+    fiStaffId,
+    authUserId,
+    client: supabase,
+  });
 
   const inviteToken = generateStaffAccessInviteToken();
   const inviteUrl = buildStaffAccessInviteUrl(tid, inviteToken);
@@ -904,7 +846,7 @@ export async function resendStaffLoginInvite(input: {
     client: supabase,
   });
 
-  return { invitationId, inviteUrl, emailSent };
+  return { invitationId, inviteUrl, emailSent, crossTenantWarning };
 }
 
 export async function copyStaffLoginInviteLink(input: {

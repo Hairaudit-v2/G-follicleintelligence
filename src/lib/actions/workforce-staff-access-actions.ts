@@ -42,7 +42,7 @@ const staffMemberBodySchema = z.object({
 });
 
 export type StaffAccessActionResult =
-  | { ok: true; inviteUrl?: string; emailSent?: boolean }
+  | { ok: true; inviteUrl?: string; emailSent?: boolean; warning?: string | null }
   | { ok: false; error: string };
 
 export async function sendStaffLoginInviteAction(
@@ -58,7 +58,12 @@ export async function sendStaffLoginInviteAction(
       invitedBy: fiUserId,
     });
     revalidateStaffAccessSurfaces(tenantId);
-    return { ok: true, inviteUrl: result.inviteUrl, emailSent: result.emailSent };
+    return {
+      ok: true,
+      inviteUrl: result.inviteUrl,
+      emailSent: result.emailSent,
+      warning: result.crossTenantWarning,
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
@@ -77,7 +82,12 @@ export async function resendStaffLoginInviteAction(
       invitedBy: fiUserId,
     });
     revalidateStaffAccessSurfaces(tenantId);
-    return { ok: true, inviteUrl: result.inviteUrl, emailSent: result.emailSent };
+    return {
+      ok: true,
+      inviteUrl: result.inviteUrl,
+      emailSent: result.emailSent,
+      warning: result.crossTenantWarning,
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
