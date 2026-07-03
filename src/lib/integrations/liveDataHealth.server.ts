@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { parseGoogleCalendarBackfillDiagnostics } from "@/src/lib/integrations/googleCalendar/googleCalendarBackfillCore";
 import { isGenericClinicEmailIngestionEnabledFromEnv } from "@/src/lib/integrations/genericEmail/genericEmailActivityIngestionEnv";
 import { isPathologyEmailIngestionEnabledFromEnv } from "@/src/lib/pathology/email/pathologyEmailIngestionEnv";
 
@@ -18,6 +19,11 @@ export type LiveDataHealthSummary = {
   googleCalendarLastSyncAt: string | null;
   googleCalendarStagedEventCount: number;
   googleCalendarPromotedAppointmentCount: number;
+  googleCalendarBackfillLastRunAt: string | null;
+  googleCalendarBackfillLastRangeStart: string | null;
+  googleCalendarBackfillLastRangeEnd: string | null;
+  googleCalendarBackfillImportedCount: number;
+  googleCalendarBackfillReviewCount: number;
   hubSpotConnected: boolean;
   hubSpotLastSyncAt: string | null;
   hubSpotStagedContactCount: number;
@@ -51,6 +57,8 @@ export function buildLiveDataHealthWarnings(input: {
   googleCalendarLastSyncAt: string | null;
   googleCalendarStagedEventCount: number;
   googleCalendarPromotedAppointmentCount: number;
+  googleCalendarBackfillLastRunAt: string | null;
+  googleCalendarBackfillReviewCount: number;
   hubSpotConnected: boolean;
   hubSpotLastSyncAt: string | null;
   hubSpotStagedContactCount: number;
@@ -80,6 +88,20 @@ export function buildLiveDataHealthWarnings(input: {
     if (input.googleCalendarStagedEventCount > 0 && input.googleCalendarPromotedAppointmentCount === 0) {
       warnings.push(
         `${input.googleCalendarStagedEventCount} OnboardingOS calendar event(s) staged with no promoted fi_calendar_events — use CalendarOS inbound sync or import review.`
+      );
+    }
+    if (
+      input.googleCalendarConnected &&
+      input.googleCalendarPromotedAppointmentCount === 0 &&
+      input.googleCalendarBackfillLastRunAt == null
+    ) {
+      warnings.push(
+        "Google Calendar is connected but no historical backfill has run — use Import existing Google Calendar bookings for pre-connection events."
+      );
+    }
+    if (input.googleCalendarBackfillReviewCount > 0) {
+      warnings.push(
+        `${input.googleCalendarBackfillReviewCount} Google Calendar backfill event(s) need review — check sync review queue.`
       );
     }
   }
@@ -157,6 +179,7 @@ export async function loadLiveDataHealthSummary(
     genericEmailAmbiguousRes,
     genericEmailLastRes,
     crmActivityRes,
+    calendarSyncHealthRes,
   ] = await Promise.all([
     supabase
       .from("fi_calendar_integrations")
@@ -268,6 +291,13 @@ export async function loadLiveDataHealthSummary(
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
       .gte("created_at", sinceIso),
+    supabase
+      .from("fi_calendar_sync_health")
+      .select("metadata")
+      .eq("tenant_id", tid)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const results = [
@@ -290,6 +320,7 @@ export async function loadLiveDataHealthSummary(
     genericEmailAmbiguousRes,
     genericEmailLastRes,
     crmActivityRes,
+    calendarSyncHealthRes,
   ];
   for (const res of results) {
     if (res.error) throw new Error(res.error.message);
@@ -302,6 +333,10 @@ export async function loadLiveDataHealthSummary(
   const googleCalendarStagedEventCount = stagedCalendarRes.count ?? 0;
   const googleCalendarPromotedAppointmentCount =
     (calendarEventsRes.count ?? 0) + (timelyMappingsRes.count ?? 0);
+
+  const backfillDiagnostics = parseGoogleCalendarBackfillDiagnostics(
+    (calendarSyncHealthRes.data as { metadata?: Record<string, unknown> } | null)?.metadata ?? null
+  );
 
   const hubSpotConnected = Boolean(hubspotIntegrationRes.data);
   const hubSpotLastSyncAt =
@@ -328,6 +363,8 @@ export async function loadLiveDataHealthSummary(
     googleCalendarLastSyncAt,
     googleCalendarStagedEventCount,
     googleCalendarPromotedAppointmentCount,
+    googleCalendarBackfillLastRunAt: backfillDiagnostics.googleCalendarBackfillLastRunAt,
+    googleCalendarBackfillReviewCount: backfillDiagnostics.googleCalendarBackfillReviewCount,
     hubSpotConnected,
     hubSpotLastSyncAt,
     hubSpotStagedContactCount,
@@ -350,6 +387,11 @@ export async function loadLiveDataHealthSummary(
     googleCalendarLastSyncAt,
     googleCalendarStagedEventCount,
     googleCalendarPromotedAppointmentCount,
+    googleCalendarBackfillLastRunAt: backfillDiagnostics.googleCalendarBackfillLastRunAt,
+    googleCalendarBackfillLastRangeStart: backfillDiagnostics.googleCalendarBackfillLastRangeStart,
+    googleCalendarBackfillLastRangeEnd: backfillDiagnostics.googleCalendarBackfillLastRangeEnd,
+    googleCalendarBackfillImportedCount: backfillDiagnostics.googleCalendarBackfillImportedCount,
+    googleCalendarBackfillReviewCount: backfillDiagnostics.googleCalendarBackfillReviewCount,
     hubSpotConnected,
     hubSpotLastSyncAt,
     hubSpotStagedContactCount,

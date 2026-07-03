@@ -63,6 +63,14 @@ type ServerOpts = {
   integrationId?: string;
   lookbackDays?: number;
   lookaheadDays?: number;
+  /** Explicit UTC ISO lower bound — overrides lookbackDays when set. */
+  timeMin?: string;
+  /** Explicit UTC ISO upper bound — overrides lookaheadDays when set. */
+  timeMax?: string;
+  /** When true, classify and count changes without writing to FI tables. */
+  dryRun?: boolean;
+  /** Limit sync to a single Google calendar id (inbound scope filter). */
+  calendarSourceId?: string;
 };
 
 type EventRow = {
@@ -831,7 +839,7 @@ async function syncGoogleCalendarEventsForCalendar(
         localEvents: tenantLocalEvents,
         counters: reviewCounters,
       },
-      opts
+      { ...opts, dryRun: opts.dryRun }
     );
     if (stagedForReview) {
       calendarResult.eventsSkipped += 1;
@@ -892,14 +900,18 @@ async function syncGoogleCalendarEventsForCalendar(
 
     if (isGoogleEventCancelled(raw)) {
       if (existing && !existing.metadata?.deleted_from_provider) {
-        const markResult = await markLocalEventDeletedFromProvider(
-          supabase,
-          tid,
-          existing.id,
-          existing.metadata ?? {}
-        );
-        if (!markResult.ok) return { ok: false, error: markResult.error };
-        calendarResult.eventsMarkedDeleted += 1;
+        if (opts.dryRun) {
+          calendarResult.eventsMarkedDeleted += 1;
+        } else {
+          const markResult = await markLocalEventDeletedFromProvider(
+            supabase,
+            tid,
+            existing.id,
+            existing.metadata ?? {}
+          );
+          if (!markResult.ok) return { ok: false, error: markResult.error };
+          calendarResult.eventsMarkedDeleted += 1;
+        }
       } else {
         calendarResult.eventsSkipped += 1;
         skipBreakdown.cancelledNoLocal += 1;
@@ -959,6 +971,12 @@ async function syncGoogleCalendarEventsForCalendar(
         startTime: mapped.startTime,
         endTime: mapped.endTime,
       });
+
+      if (opts.dryRun) {
+        calendarResult.eventsInserted += 1;
+        insertedExternalIds.push(extId);
+        continue;
+      }
 
       const { error } = await supabase.from("fi_calendar_events").insert({
         tenant_id: tid,
@@ -1058,25 +1076,29 @@ async function syncGoogleCalendarEventsForCalendar(
       continue;
     }
 
-    const { error } = await supabase
-      .from("fi_calendar_events")
-      .update({
-        title: mapped.title,
-        description: mapped.description,
-        location: mapped.location,
-        start_time: mapped.startTime,
-        end_time: mapped.endTime,
-        event_type: mapped.eventType,
-        google_meet_url: mapped.googleMeetUrl ?? existing.googleMeetUrl,
-        calendar_id: calendarId,
-        metadata: buildGoogleSyncUpdateMetadata(existing.metadata ?? {}, syncNow, sourceCalendar),
-        updated_at: syncNow,
-      })
-      .eq("id", existing.id)
-      .eq("tenant_id", tid);
+    if (opts.dryRun) {
+      calendarResult.eventsUpdated += 1;
+    } else {
+      const { error } = await supabase
+        .from("fi_calendar_events")
+        .update({
+          title: mapped.title,
+          description: mapped.description,
+          location: mapped.location,
+          start_time: mapped.startTime,
+          end_time: mapped.endTime,
+          event_type: mapped.eventType,
+          google_meet_url: mapped.googleMeetUrl ?? existing.googleMeetUrl,
+          calendar_id: calendarId,
+          metadata: buildGoogleSyncUpdateMetadata(existing.metadata ?? {}, syncNow, sourceCalendar),
+          updated_at: syncNow,
+        })
+        .eq("id", existing.id)
+        .eq("tenant_id", tid);
 
-    if (error) return { ok: false, error: error.message };
-    calendarResult.eventsUpdated += 1;
+      if (error) return { ok: false, error: error.message };
+      calendarResult.eventsUpdated += 1;
+    }
   }
 
   const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds, {
@@ -1090,6 +1112,11 @@ async function syncGoogleCalendarEventsForCalendar(
 
     const extId = local.externalEventId?.trim();
     if (extId) deletedExternalIds.push(extId);
+
+    if (opts.dryRun) {
+      calendarResult.eventsMarkedDeleted += 1;
+      continue;
+    }
 
     const markResult = await markLocalEventDeletedFromProvider(
       supabase,
@@ -1112,6 +1139,10 @@ async function syncGoogleCalendarEventsForCalendar(
     const lookup = await lookupGoogleCalendarEventById(calendarId, extId, accessToken, opts);
     if (lookup === "not_found") {
       deletedExternalIds.push(extId);
+      if (opts.dryRun) {
+        calendarResult.eventsMarkedDeleted += 1;
+        continue;
+      }
       const markResult = await markLocalEventDeletedFromProvider(
         supabase,
         tid,
@@ -1152,7 +1183,7 @@ async function syncGoogleCalendarEventsForCalendar(
     });
   }
 
-  if (calendarScope.inboundRowId) {
+  if (calendarScope.inboundRowId && !opts.dryRun) {
     await touchInboundSyncCalendarLastSynced(calendarScope.inboundRowId, tid, opts);
   }
 
@@ -1172,10 +1203,24 @@ export async function syncGoogleCalendarEvents(
   const now = Date.now();
   const lookbackDays = opts.lookbackDays ?? SYNC_LOOKBACK_DAYS;
   const lookaheadDays = opts.lookaheadDays ?? SYNC_LOOKAHEAD_DAYS;
-  const timeMin = new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
-  const timeMax = new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
+  const timeMin =
+    opts.timeMin?.trim() ??
+    new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
+  const timeMax =
+    opts.timeMax?.trim() ??
+    new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
 
-  const calendarScopes = await getGoogleInboundCalendarScopesForIntegration(ctx.integration, opts);
+  let calendarScopes = await getGoogleInboundCalendarScopesForIntegration(ctx.integration, opts);
+  const calendarSourceId = opts.calendarSourceId?.trim();
+  if (calendarSourceId) {
+    calendarScopes = calendarScopes.filter((scope) => scope.calendarId === calendarSourceId);
+    if (calendarScopes.length === 0) {
+      return {
+        ok: false,
+        error: `Calendar source "${calendarSourceId}" is not enabled for inbound sync.`,
+      };
+    }
+  }
 
   logStructured("info", "google_calendar_sync_cycle_start", {
     tenantId: tid,

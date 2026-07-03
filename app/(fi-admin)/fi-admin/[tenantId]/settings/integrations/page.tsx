@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { GoogleCalendarBackfillCard } from "@/src/components/fi-admin/settings/GoogleCalendarBackfillCard";
 import { GoogleCalendarInboundScopeCard } from "@/src/components/fi-admin/settings/GoogleCalendarInboundScopeCard";
 import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationCard";
 import { GoogleCalendarMonitoringCard } from "@/src/components/fi-admin/settings/GoogleCalendarMonitoringCard";
@@ -20,6 +21,7 @@ import { loadGoogleCalendarInboundScopePage } from "@/src/lib/googleCalendar/goo
 import { loadGoogleCalendarMonitoringPage } from "@/src/lib/googleCalendar/googleCalendarMonitoring.server";
 import { loadGoogleCalendarSyncReviewPage } from "@/src/lib/googleCalendar/googleCalendarSyncReview.server";
 import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
+import { parseGoogleCalendarBackfillDiagnostics } from "@/src/lib/integrations/googleCalendar/googleCalendarBackfillCore";
 import { loadLiveDataHealthSummary } from "@/src/lib/integrations/liveDataHealth.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
@@ -120,6 +122,23 @@ export default async function TenantIntegrationsSettingsPage({
 
   const liveDataHealth = await loadLiveDataHealthSummary(tenantId);
 
+  const { data: syncHealthRow } = await supabase
+    .from("fi_calendar_sync_health")
+    .select("metadata")
+    .eq("tenant_id", tenantId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const backfillDiagnostics = parseGoogleCalendarBackfillDiagnostics(
+    (syncHealthRow as { metadata?: Record<string, unknown> } | null)?.metadata ?? null
+  );
+
+  const calendarSources = inboundScopePage.calendars.map((c) => ({
+    calendarId: c.googleCalendarId,
+    summary: c.summary,
+    isEnabled: c.isEnabled,
+  }));
+
   return (
     <div className="space-y-4">
       <div>
@@ -150,6 +169,14 @@ export default async function TenantIntegrationsSettingsPage({
       />
 
       <GoogleCalendarInboundScopeCard tenantId={tenantId} pageModel={inboundScopePage} />
+
+      <GoogleCalendarBackfillCard
+        tenantId={tenantId}
+        connected={inboundScopePage.connected}
+        canManage={canManageCalendarLinks}
+        calendarSources={calendarSources}
+        backfillDiagnostics={backfillDiagnostics}
+      />
 
       <GoogleCalendarMonitoringCard tenantId={tenantId} pageModel={monitoringPage} />
 

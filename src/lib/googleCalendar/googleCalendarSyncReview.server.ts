@@ -25,6 +25,7 @@ import type { FiCalendarEvent } from "./googleCalendarTypes";
 
 type ServerOpts = {
   supabaseClientForTests?: SupabaseClient;
+  dryRun?: boolean;
 };
 
 const REVIEW_SELECT =
@@ -513,6 +514,11 @@ export async function stageGoogleCalendarSyncReviewIfConflict(
     detection.mappedFields.externalEventId?.trim() ||
     input.googleEvent.id?.trim() ||
     `unknown-${Date.now()}`;
+
+  if (opts.dryRun) {
+    incrementReviewCounter(input.counters, detection.conflictType, true);
+    return true;
+  }
 
   const upsertResult = await upsertGoogleCalendarSyncReviewItem(
     {

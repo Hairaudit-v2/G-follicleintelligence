@@ -84,6 +84,20 @@ export function LiveDataHealthDiagnosticsCard({
               <dt>Promoted (fi_calendar_events + Timely)</dt>
               <dd className="text-[#CBD5E1]">{health.googleCalendarPromotedAppointmentCount}</dd>
             </div>
+            <div className="flex justify-between gap-4">
+              <dt>Last backfill</dt>
+              <dd className="text-[#CBD5E1]">{formatWhen(health.googleCalendarBackfillLastRunAt)}</dd>
+            </div>
+            {health.googleCalendarBackfillLastRangeStart &&
+            health.googleCalendarBackfillLastRangeEnd ? (
+              <div className="flex justify-between gap-4">
+                <dt>Backfill range</dt>
+                <dd className="text-[#CBD5E1]">
+                  {health.googleCalendarBackfillLastRangeStart} →{" "}
+                  {health.googleCalendarBackfillLastRangeEnd}
+                </dd>
+              </div>
+            ) : null}
           </dl>
           <p className="mt-3 text-xs text-[#64748B]">
             Calendar UI reads <code className="text-[#94A3B8]">fi_calendar_events</code> and{" "}
