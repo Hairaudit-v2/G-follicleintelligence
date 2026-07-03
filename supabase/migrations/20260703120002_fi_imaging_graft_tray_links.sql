@@ -49,9 +49,9 @@ create policy fi_imaging_graft_tray_links_select_tenant_member
   using (
     exists (
       select 1
-      from public.fi_tenant_users u
-      where u.tenant_id = fi_imaging_graft_tray_links.tenant_id
-        and u.user_id = auth.uid()
+      from public.fi_users u
+      where u.auth_user_id = auth.uid()
+        and u.tenant_id = fi_imaging_graft_tray_links.tenant_id
     )
   );
 
