@@ -210,7 +210,7 @@ export function createGoogleCalendarBackfillTestMock(input: {
         return {
           select: () => buildEventChain(),
           insert: (row: EventRow) => {
-            const full = {
+            const full: EventRow = {
               ...row,
               id: randomUUID(),
               provider: "google",
@@ -218,7 +218,9 @@ export function createGoogleCalendarBackfillTestMock(input: {
               updated_at: new Date().toISOString(),
             };
             const dup = events.find(
-              (e) => e.external_event_id && e.external_event_id === full.external_event_id
+              (e) =>
+                typeof e.external_event_id === "string" &&
+                e.external_event_id === full.external_event_id
             );
             if (dup) return { error: { code: "23505", message: "duplicate" } };
             events.push(full);

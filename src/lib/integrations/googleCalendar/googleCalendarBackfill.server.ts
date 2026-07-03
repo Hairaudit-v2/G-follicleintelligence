@@ -366,7 +366,8 @@ async function promoteSafeGoogleCalendarBookings(
     const externalSource = detectGoogleCalendarExternalSource({
       id: extId,
       summary: event.title,
-      description: typeof event.metadata?.description === "string" ? event.metadata.description : null,
+      description:
+        typeof event.metadata?.description === "string" ? event.metadata.description : undefined,
       status: "confirmed",
     });
 
@@ -652,7 +653,7 @@ export async function runGoogleCalendarBackfill(
     tenantId,
     integrationId: integration.id,
     dryRun,
-    summary,
+    summaryJson: JSON.stringify(summary),
   });
 
   return {

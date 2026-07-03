@@ -68,6 +68,8 @@ export type GoogleCalendarApiEvent = {
   start?: { dateTime?: string; date?: string; timeZone?: string };
   end?: { dateTime?: string; date?: string; timeZone?: string };
   attendees?: readonly { email?: string; responseStatus?: string }[];
+  creator?: { email?: string };
+  organizer?: { email?: string };
   status?: string;
   htmlLink?: string;
   created?: string;

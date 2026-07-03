@@ -48,8 +48,13 @@ function resolvePresetDates(preset: string | undefined): {
   return {};
 }
 
+export type GoogleCalendarBackfillSuccessResult = Extract<
+  GoogleCalendarBackfillResult,
+  { ok: true }
+>;
+
 export type RunGoogleCalendarBackfillActionResult =
-  | { ok: true; result: GoogleCalendarBackfillResult; message: string }
+  | { ok: true; result: GoogleCalendarBackfillSuccessResult; message: string }
   | { ok: false; error: string };
 
 export async function runGoogleCalendarBackfillAction(

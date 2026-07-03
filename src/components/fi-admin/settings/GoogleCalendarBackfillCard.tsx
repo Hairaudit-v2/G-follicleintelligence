@@ -105,10 +105,11 @@ export function GoogleCalendarBackfillCard({
           setError(result.error);
           return;
         }
+        const backfill = result.result;
         setMessage(result.message);
-        setLastSummary(result.result.summary);
-        setLastWasDryRun(result.result.dryRun);
-        if (!result.result.dryRun) router.refresh();
+        setLastSummary(backfill.summary);
+        setLastWasDryRun(backfill.dryRun);
+        if (!backfill.dryRun) router.refresh();
       });
     },
     [tenantId, startDate, endDate, calendarSourceId, dryRun, router]
