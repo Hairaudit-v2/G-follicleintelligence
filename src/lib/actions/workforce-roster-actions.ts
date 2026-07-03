@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
-import { CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import {
   assertHrOsRosterManageAllowed,
   loadBookingForRosterEvent,
@@ -25,6 +26,7 @@ import {
   copyPreviousWeekRosterForTenant,
   generateRosterFromStandardHoursForTenant,
 } from "@/src/lib/workforce-os/rosterGeneration.server";
+import { resolveCurrentTenantFiUserId } from "@/src/lib/workforce-os/resolveCurrentTenantFiUserId.server";
 import {
   saveStaffStandardHours,
   type SaveStaffStandardHoursResult,
@@ -109,6 +111,13 @@ function revalidateRosterSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}/appointments`);
 }
 
+async function resolveRosterActorFiUserId(tenantId: string): Promise<string> {
+  return resolveCurrentTenantFiUserId({
+    supabase: supabaseAdmin(),
+    tenantId,
+  });
+}
+
 // TODO(workforce-audit): Wire fi_staff roster audit events when a dedicated workforce audit table ships.
 async function logRosterAuditEvent(_metadata: Record<string, unknown>): Promise<void> {
   return;
@@ -121,8 +130,8 @@ export async function assignStaffToRosterEventAction(
 ): Promise<WorkforceRosterActionResult<FiStaffEventAssignmentRow>> {
   try {
     const parsed = assignStaffSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     let eventType = parsed.eventType?.trim().toLowerCase() || null;
     if (!eventType && parsed.eventSource === "booking") {
@@ -139,7 +148,7 @@ export async function assignStaffToRosterEventAction(
       assignedRole: parsed.assignedRole,
       startsAt: parsed.startsAt,
       endsAt: parsed.endsAt,
-      assignedBy: authUserId ?? fiUserId,
+      assignedBy: actorFiUserId,
       allowBlockedDraft: parsed.allowBlockedDraft ?? false,
       eventType,
     });
@@ -154,7 +163,7 @@ export async function assignStaffToRosterEventAction(
       readiness_band: assignment.readiness_band,
       warnings: assignment.warnings,
       blocking_issues: assignment.blocking_issues,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -169,8 +178,8 @@ export async function removeStaffFromRosterEventAction(
 ): Promise<WorkforceRosterActionResult<FiStaffEventAssignmentRow>> {
   try {
     const parsed = removeStaffSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     const assignment = await cancelStaffEventAssignment(parsed.tenantId, parsed.assignmentId);
 
@@ -180,7 +189,7 @@ export async function removeStaffFromRosterEventAction(
       event_id: assignment.event_id,
       staff_id: assignment.staff_id,
       assigned_role: assignment.assigned_role,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -195,8 +204,8 @@ export async function createRosterShiftAction(
 ): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
   try {
     const parsed = createShiftSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     if (Date.parse(parsed.endsAt) <= Date.parse(parsed.startsAt)) {
       return { ok: false, error: "Shift end must be after start." };
@@ -210,14 +219,14 @@ export async function createRosterShiftAction(
       startsAt: parsed.startsAt,
       endsAt: parsed.endsAt,
       notes: parsed.notes,
-      createdBy: authUserId ?? fiUserId,
+      createdBy: actorFiUserId,
     });
 
     await logRosterAuditEvent({
       action: "shift_created",
       staff_id: parsed.staffId,
       shift_id: shift.id,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -232,8 +241,8 @@ export async function createAvailabilityBlockAction(
 ): Promise<WorkforceRosterActionResult<FiStaffAvailabilityBlockRow>> {
   try {
     const parsed = createBlockSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     if (Date.parse(parsed.endsAt) <= Date.parse(parsed.startsAt)) {
       return { ok: false, error: "Availability block end must be after start." };
@@ -247,14 +256,14 @@ export async function createAvailabilityBlockAction(
       startsAt: parsed.startsAt,
       endsAt: parsed.endsAt,
       reason: parsed.reason,
-      createdBy: authUserId ?? fiUserId,
+      createdBy: actorFiUserId,
     });
 
     await logRosterAuditEvent({
       action: "availability_block_created",
       staff_id: parsed.staffId,
       block_id: block.id,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -269,8 +278,8 @@ export async function cancelRosterShiftAction(
 ): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
   try {
     const parsed = cancelShiftSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     const shift = await cancelStaffShift(parsed.tenantId, parsed.shiftId);
 
@@ -278,7 +287,7 @@ export async function cancelRosterShiftAction(
       action: "shift_cancelled",
       shift_id: shift.id,
       staff_id: shift.staff_id,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -293,8 +302,8 @@ export async function cancelAvailabilityBlockAction(
 ): Promise<WorkforceRosterActionResult<FiStaffAvailabilityBlockRow>> {
   try {
     const parsed = cancelBlockSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     const block = await cancelAvailabilityBlock(parsed.tenantId, parsed.blockId);
 
@@ -302,7 +311,7 @@ export async function cancelAvailabilityBlockAction(
       action: "availability_block_cancelled",
       block_id: block.id,
       staff_id: block.staff_id,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -425,8 +434,8 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
 > {
   try {
     const parsed = generateRosterSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     const result = await generateRosterFromStandardHoursForTenant({
       tenantId: parsed.tenantId,
@@ -434,7 +443,7 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
       rangeEndIso: parsed.rangeEndIso,
       staffIds: parsed.staffIds,
       overwriteGeneratedOnly: parsed.overwriteGeneratedOnly,
-      createdBy: authUserId ?? fiUserId,
+      createdBy: actorFiUserId,
     });
 
     await logRosterAuditEvent({
@@ -442,7 +451,7 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
       created_count: result.createdCount,
       replaced_count: result.replacedCount,
       cadence: result.cadence,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -472,21 +481,21 @@ export async function copyPreviousRosterPeriodAction(body: unknown): Promise<
 > {
   try {
     const parsed = copyPeriodSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     const result = await copyPreviousRosterPeriodForTenant({
       tenantId: parsed.tenantId,
       targetPeriodStartIso: parsed.targetPeriodStartIso,
       staffIds: parsed.staffIds,
-      createdBy: authUserId ?? fiUserId,
+      createdBy: actorFiUserId,
     });
 
     await logRosterAuditEvent({
       action: "roster_copied_previous_period",
       created_count: result.createdCount,
       cadence: result.cadence,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -501,20 +510,20 @@ export async function copyPreviousWeekRosterAction(body: unknown): Promise<
 > {
   try {
     const parsed = copyWeekSchema.parse(body);
-    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const authUserId = await resolveAuthUserId(null);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
     const result = await copyPreviousWeekRosterForTenant({
       tenantId: parsed.tenantId,
       targetWeekStartIso: parsed.targetWeekStartIso,
       staffIds: parsed.staffIds,
-      createdBy: authUserId ?? fiUserId,
+      createdBy: actorFiUserId,
     });
 
     await logRosterAuditEvent({
       action: "roster_copied_previous_week",
       created_count: result.createdCount,
-      actor_user_id: authUserId ?? fiUserId,
+      actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
