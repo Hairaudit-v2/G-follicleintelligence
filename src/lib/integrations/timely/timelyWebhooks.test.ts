@@ -11,6 +11,7 @@ import { timelyAppointmentWebhookSchema, timelyPatientWebhookSchema } from "./ti
 import {
   processTimelyAppointmentWebhook,
   resolveTimelyStaffIdByName,
+  type TimelyAppointmentPayload,
 } from "./timelyAppointmentWebhook.server";
 import { withTimelyWebhookAudit } from "./timelyWebhookAudit.server";
 import { processTimelyPatientWebhook } from "./timelyPatientWebhook.server";
@@ -23,6 +24,18 @@ const PATIENT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const LEAD_ID = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 const LEAD_ID_2 = "99999999-9999-4999-8999-999999999999";
 const SECRET = "test-timely-webhook-secret-32chars!";
+
+/** Plain Node tests run outside Next.js — skip post-ingest revalidation. */
+function processTimelyAppointmentWebhookForTest(
+  tenantId: string,
+  payload: TimelyAppointmentPayload,
+  client?: SupabaseClient,
+  ports?: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]>
+) {
+  return processTimelyAppointmentWebhook(tenantId, payload, client, ports ?? {}, {
+    skipRevalidation: true,
+  });
+}
 
 function reqWithAuth(token: string | null): Request {
   const headers = new Headers();
@@ -472,7 +485,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
   }
 
   it("returns 404 when patient mapping missing", async () => {
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("no_patient"),
@@ -486,7 +499,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
 
   it("creates booking and returns id", async () => {
     let created = 0;
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create"),
@@ -513,7 +526,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
       end_time: "2026-06-10T15:00:00.000Z",
       event_type: "appointment_rescheduled",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       rescheduled,
       makeAppointmentMockSupabase("existing"),
@@ -546,7 +559,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
       status: "Cancelled",
       event_type: "appointment_cancelled",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       cancelled,
       makeAppointmentMockSupabase("existing"),
@@ -575,7 +588,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
         timely_lead_resolution: { status: "none", checked_at: "2026-06-01T00:00:00.000Z" },
       },
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row),
@@ -646,7 +659,7 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
   it("creates ConsultationOS workspace for consultation booking", async () => {
     let consultationCreates = 0;
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create"),
@@ -679,8 +692,8 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
       },
     });
     const supabase = makeAppointmentMockSupabase("existing", row);
-    const a = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
-    const b = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const a = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
+    const b = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
     assert.equal(a.ok, true);
     assert.equal(b.ok, true);
     if (!a.ok || !b.ok || "duplicate" in a || "duplicate" in b) return;
@@ -700,7 +713,7 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
       end_time: "2026-06-10T15:00:00.000Z",
       event_type: "appointment_rescheduled",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       rescheduled,
       makeAppointmentMockSupabase("existing", row),
@@ -736,7 +749,7 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
       status: "Cancelled",
       event_type: "appointment_cancelled",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       cancelled,
       makeAppointmentMockSupabase("existing", row),
@@ -765,7 +778,7 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
       status: "No Show",
       event_type: "appointment_no_show",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       noShow,
       makeAppointmentMockSupabase("existing", row),
@@ -789,7 +802,7 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
       booking_type: "prp",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create", row, { serviceBookingType: "prp" }),
@@ -866,7 +879,7 @@ describe("Timely appointment webhook — booking_type derivation from service", 
     const { capturedBookingType, ports } = portsForBookingTypeCapture(
       "hair_transplant_consultation"
     );
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       hairTransplantPayload,
       makeAppointmentMockSupabase("create", undefined, {
@@ -885,7 +898,7 @@ describe("Timely appointment webhook — booking_type derivation from service", 
 
   it("prefers explicit fi_services.booking_type over name derivation", async () => {
     const { capturedBookingType, ports } = portsForBookingTypeCapture("consultation");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       hairTransplantPayload,
       makeAppointmentMockSupabase("create", undefined, {
@@ -905,7 +918,7 @@ describe("Timely appointment webhook — booking_type derivation from service", 
       ...hairTransplantPayload,
       service_name: "Mystery Treatment",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payload,
       makeAppointmentMockSupabase("create", undefined, {
@@ -1032,7 +1045,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
     let capturedLeadId: string | null | undefined;
     let capturedMetadata: Record<string, unknown> | undefined;
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create", row, {
@@ -1064,7 +1077,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
       lead_id: existingLead,
     });
     let updatedLeadId: string | null | undefined = "unset";
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row, {
@@ -1088,7 +1101,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
   it("returns ambiguous when multiple active CRM leads exist", async () => {
     let capturedLeadId: string | null | undefined = "unset";
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create", row, {
@@ -1114,7 +1127,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
 
   it("returns none when no CRM lead exists", async () => {
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create", row, { crmLeads: [] }),
@@ -1154,7 +1167,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
       };
     }) as typeof supabase.from;
 
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       supabase,
@@ -1176,7 +1189,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
       person_id: null,
       patient_id: null,
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row, {
@@ -1244,7 +1257,7 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
   it("moves linked lead to consult_scheduled on consultation booking", async () => {
     let crmCalls = 0;
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create", row, { crmLeads: [{ id: LEAD_ID, status: "open" }] }),
@@ -1281,8 +1294,8 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
       },
     });
     const supabase = makeAppointmentMockSupabase("existing", row);
-    const a = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
-    const b = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const a = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
+    const b = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
     assert.equal(a.ok, true);
     assert.equal(b.ok, true);
     if (!a.ok || !b.ok || "duplicate" in a || "duplicate" in b) return;
@@ -1296,7 +1309,7 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
       booking_type: "prp",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("create", row, { serviceBookingType: "prp" }),
@@ -1326,7 +1339,7 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
       status: "Cancelled",
       event_type: "appointment_cancelled",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       cancelled,
       makeAppointmentMockSupabase("existing", row),
@@ -1347,7 +1360,7 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
       booking_status: "no_show",
     });
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row),
@@ -1366,7 +1379,7 @@ describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
 
   it("does not downgrade when lead is already at a later stage", async () => {
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row),
@@ -1447,8 +1460,8 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
     );
     const ports = countingPorts(counters);
 
-    const a = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
-    const b = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const a = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
+    const b = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
 
     assert.equal(a.ok, true);
     assert.equal(b.ok, true);
@@ -1470,8 +1483,8 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
     const ports = countingPorts(counters);
 
     const [a, b] = await Promise.all([
-      processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports),
-      processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports),
+      processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports),
+      processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports),
     ]);
 
     assert.equal(a.ok, true);
@@ -1485,7 +1498,7 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
   it("existing mapping with booking_id present syncs (no new booking)", async () => {
     const counters = { creates: 0, consultations: 0, crm: 0 };
     const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       makeAppointmentMockSupabase("existing", row),
@@ -1532,7 +1545,7 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
     } as unknown as SupabaseClient;
 
     const counters = { creates: 0, consultations: 0, crm: 0 };
-    const r = await processTimelyAppointmentWebhook(
+    const r = await processTimelyAppointmentWebhookForTest(
       TENANT,
       payloadBase,
       supabase,
@@ -1563,13 +1576,13 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
       }
     );
 
-    const first = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const first = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
     assert.equal(first.ok, false);
     if (first.ok) return;
     assert.equal(first.status, 500);
 
     // Retry succeeds: the released claim let this worker re-claim and create exactly one booking.
-    const second = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const second = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
     assert.equal(second.ok, true);
     assert.equal(attempts, 2);
   });

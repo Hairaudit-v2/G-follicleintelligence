@@ -528,11 +528,17 @@ async function attachCrmStageAdvanceToTimelyAppointmentResult(
   };
 }
 
+export type ProcessTimelyAppointmentWebhookOpts = {
+  /** Test harness only — production webhooks must revalidate live-data surfaces. */
+  skipRevalidation?: boolean;
+};
+
 async function finalizeTimelyAppointmentWebhookResult(
   supabase: SupabaseClient,
   tenantId: string,
   result: ProcessTimelyAppointmentWebhookCoreSuccess,
-  ports: TimelyAppointmentWebhookPorts
+  ports: TimelyAppointmentWebhookPorts,
+  opts?: ProcessTimelyAppointmentWebhookOpts
 ): Promise<ProcessTimelyAppointmentWebhookSuccess> {
   const withConsultation = await attachConsultationWorkspaceToTimelyAppointmentResult(
     supabase,
@@ -547,6 +553,7 @@ async function finalizeTimelyAppointmentWebhookResult(
     ports
   );
   if (
+    !opts?.skipRevalidation &&
     finalized.booking_id &&
     (finalized.action === "created" || finalized.action === "updated")
   ) {
@@ -867,7 +874,8 @@ export async function processTimelyAppointmentWebhook(
   tenantId: string,
   payload: TimelyAppointmentPayload,
   client?: SupabaseClient,
-  ports: Partial<TimelyAppointmentWebhookPorts> = {}
+  ports: Partial<TimelyAppointmentWebhookPorts> = {},
+  opts?: ProcessTimelyAppointmentWebhookOpts
 ): Promise<ProcessTimelyAppointmentWebhookResult> {
   const supabase = client ?? supabaseAdmin();
   const mergedPorts = {
@@ -891,7 +899,7 @@ export async function processTimelyAppointmentWebhook(
         mergedPorts
       );
       if (!synced.ok) return synced;
-      return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
+      return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts, opts);
     }
     if (existingMapping) {
       // Claim exists but booking not yet created → another delivery owns the in-flight create.
@@ -1007,7 +1015,7 @@ export async function processTimelyAppointmentWebhook(
           mergedPorts
         );
         if (!synced.ok) return synced;
-        return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
+        return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts, opts);
       }
       return { ok: true, duplicate: true, reason: "already_processing", booking_id: null };
     }
@@ -1050,7 +1058,7 @@ export async function processTimelyAppointmentWebhook(
         mergedPorts
       );
       if (!synced.ok) return synced;
-      return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
+      return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts, opts);
     }
 
     return finalizeTimelyAppointmentWebhookResult(
@@ -1064,7 +1072,8 @@ export async function processTimelyAppointmentWebhook(
         lead_id: leadAttach.lead_id,
         lead_resolution: leadAttach.lead_resolution,
       },
-      mergedPorts
+      mergedPorts,
+      opts
     );
   } catch (e) {
     if (e instanceof TimelyWebhookHttpError) {

@@ -211,7 +211,12 @@ describe("LeadFlow LF-2B HubSpot queue drain", () => {
       activity: [],
     };
     const supabase = makeDrainStoreSupabase(store);
-    const result = await drainHubSpotLeadFlowQueue({ tenantId: TENANT, limit: 50, supabase });
+    const result = await drainHubSpotLeadFlowQueue({
+      tenantId: TENANT,
+      limit: 50,
+      supabase,
+      skipRevalidation: true,
+    });
 
     assert.equal(result.success, true);
     assert.equal(result.processed, 1);
@@ -241,7 +246,11 @@ describe("LeadFlow LF-2B HubSpot queue drain", () => {
       activity: [],
     };
     const supabase = makeDrainStoreSupabase(store);
-    const result = await drainHubSpotLeadFlowQueue({ tenantId: TENANT, supabase });
+    const result = await drainHubSpotLeadFlowQueue({
+      tenantId: TENANT,
+      supabase,
+      skipRevalidation: true,
+    });
 
     assert.equal(result.processed, 1);
     assert.equal(store.leads.length, 1);
@@ -264,7 +273,11 @@ describe("LeadFlow LF-2B HubSpot queue drain", () => {
       activity: [],
     };
     const supabase = makeDrainStoreSupabase(store);
-    const result = await drainHubSpotLeadFlowQueue({ limit: 50, supabase });
+    const result = await drainHubSpotLeadFlowQueue({
+      limit: 50,
+      supabase,
+      skipRevalidation: true,
+    });
 
     assert.equal(result.mode, "all_tenants");
     assert.equal(result.processed, 2);

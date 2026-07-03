@@ -106,6 +106,8 @@ export async function drainHubSpotLeadFlowQueue(opts?: {
   tenantId?: string;
   limit?: number;
   supabase?: SupabaseClient;
+  /** Test harness only — production cron/API drains must revalidate live-data surfaces. */
+  skipRevalidation?: boolean;
 }): Promise<HubSpotLeadFlowDrainResult> {
   const supabase = opts?.supabase ?? supabaseAdmin();
   const batchLimit = normalizeBatchLimit(opts?.limit);
@@ -140,7 +142,9 @@ export async function drainHubSpotLeadFlowQueue(opts?: {
   const summary = summarizeLeadFlowDrainResults(events);
   const health = await loadLeadFlowQueueHealth({ tenantId: tenantId ?? undefined, supabase });
 
-  revalidateLiveDataSurfacesForTenants(summary.tenants);
+  if (!opts?.skipRevalidation) {
+    revalidateLiveDataSurfacesForTenants(summary.tenants);
+  }
 
   return {
     ...summary,
