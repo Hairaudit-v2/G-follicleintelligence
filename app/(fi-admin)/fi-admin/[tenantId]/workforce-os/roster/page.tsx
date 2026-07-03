@@ -8,6 +8,7 @@ import { RosterCommandCentreView } from "@/src/components/fi/workforce/RosterCom
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";
+import { resolveStaffStandardHoursManageCapability } from "@/src/lib/workforce-os/staffStandardHoursPage.server";
 import {
   defaultRosterCommandCentreDateRange,
   parseRosterCommandCentreSearchParams,
@@ -41,7 +42,7 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
   const dateRange = rosterDateRangeFromPeriodStartParam(periodStart, rosterPlanning);
   const preselectedEventKey = resolveRosterPreselectedEventKey(parsed);
 
-  const [result, showTechnicalDetail] = await Promise.all([
+  const [result, showTechnicalDetail, manageCapability] = await Promise.all([
     loadRosterCommandCentrePageData({
       tenantId: tenantId.trim(),
       dateRange: { startsAt: dateRange.startsAt, endsAt: dateRange.endsAt },
@@ -55,6 +56,7 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
       preselectedEventKey,
     }),
     canViewDashboardSystemDiagnostics(tenantId.trim()),
+    resolveStaffStandardHoursManageCapability(tenantId.trim()),
   ]);
 
   if (!result.ok) {
@@ -82,6 +84,8 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
           status: parsed.status ?? "",
         }}
         useWorkforceOsRoute
+        canManage={manageCapability.canManage}
+        manageDeniedReason={manageCapability.manageDeniedReason}
       />
     </div>
   );

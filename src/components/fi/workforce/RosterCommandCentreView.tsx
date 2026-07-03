@@ -6,8 +6,6 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
-import { StaffStandardHoursPanel } from "@/src/components/fi/workforce/StaffStandardHoursPanel";
-import { RosterRightDrawer } from "@/src/components/fi/workforce/RosterRightDrawer";
 import { RosterShiftDrawer } from "@/src/components/fi/workforce/RosterShiftDrawer";
 import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
@@ -22,23 +20,20 @@ import {
   rosterDateRangeFromWeekStart,
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
-import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
 import {
-  emptyStandardHoursWeek,
-  staffHasConfiguredStandardHours,
-} from "@/src/lib/workforce-os/staffStandardHoursCore";
+  buildStaffStandardHoursEditorHref,
+  buildStaffStandardHoursSetupIndexHref,
+  STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+} from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
+import { staffHasConfiguredStandardHours } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import {
   closeRosterDrawer,
-  formatStandardHoursDrawerTitle,
   listStaffMissingStandardHours,
-  openRosterMissingStandardHoursSetupDrawer,
   openRosterShiftDrawer,
-  openRosterStandardHoursDrawer,
   resolveRosterCellClickIntent,
   resolveRosterDrawerStaffMemberId,
-  resolveRosterDrawerStaffName,
   resolveRosterPayloadWeekDayDates,
-  rosterStandardHoursDrawerIsOpen,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
   type RosterCommandCentreDrawerState,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -68,6 +63,8 @@ export type RosterCommandCentreViewProps = {
     status: RosterStaffingStatusFilter | "";
   };
   useWorkforceOsRoute?: boolean;
+  canManage?: boolean;
+  manageDeniedReason?: string;
 };
 
 function rosterDrawerShift(
@@ -99,6 +96,8 @@ export function RosterCommandCentreView({
   eventDetails,
   filters,
   useWorkforceOsRoute = false,
+  canManage = true,
+  manageDeniedReason = STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 }: RosterCommandCentreViewProps) {
   const router = useRouter();
   const [selectedEventKey, setSelectedEventKey] = useState(payload.preselectedEventKey);
@@ -126,34 +125,29 @@ export function RosterCommandCentreView({
   );
 
   const drawerStaff = rosterDrawerStaffOption(drawerState, payload.staffOptions);
-  const drawerStaffName = resolveRosterDrawerStaffName(drawerState, payload.staffOptions);
   const drawerStaffMemberId = resolveRosterDrawerStaffMemberId(drawerState);
   const drawerShift = rosterDrawerShift(drawerState, payload.shifts);
-  const standardHoursDays =
-    drawerState.kind === "standard_hours" &&
-    payload.standardHoursByStaffId[drawerState.staffMemberId]
-      ? payload.standardHoursByStaffId[drawerState.staffMemberId]
-      : emptyStandardHoursWeek();
 
   function closeDrawer() {
     setDrawerState(closeRosterDrawer());
   }
 
-  const openStandardHoursDrawer = useCallback((staffMemberId: string) => {
-    const normalizedStaffMemberId = staffMemberId?.trim();
-    if (!normalizedStaffMemberId) {
-      setActionError("Could not open standard hours for this staff member.");
-      setDrawerState(openRosterStandardHoursDrawer(""));
-      return;
-    }
-    setActionError(null);
-    setDrawerState(openRosterStandardHoursDrawer(normalizedStaffMemberId));
-  }, []);
-
-  const openMissingStandardHoursSetupDrawer = useCallback(() => {
-    setActionError(null);
-    setDrawerState(openRosterMissingStandardHoursSetupDrawer());
-  }, []);
+  const openStandardHoursDrawer = useCallback(
+    (staffMemberId: string) => {
+      const normalizedStaffMemberId = staffMemberId?.trim();
+      if (!normalizedStaffMemberId) {
+        setActionError("Could not open standard hours for this staff member.");
+        return;
+      }
+      if (!canManage) {
+        setActionError(manageDeniedReason);
+        return;
+      }
+      setActionError(null);
+      router.push(buildStaffStandardHoursEditorHref(tenantId, normalizedStaffMemberId));
+    },
+    [canManage, manageDeniedReason, router, tenantId]
+  );
 
   function pushFilters(next: Partial<RosterCommandCentreViewProps["filters"]>) {
     const merged = { ...filters, ...next };
@@ -178,7 +172,11 @@ export function RosterCommandCentreView({
     const intent = resolveRosterCellClickIntent({ hasStandardHours });
 
     if (intent === "open_standard_hours") {
-      openStandardHoursDrawer(staffId);
+      if (!canManage) {
+        setActionError(manageDeniedReason);
+        return;
+      }
+      router.push(buildStaffStandardHoursEditorHref(tenantId, staffId));
       return;
     }
 
@@ -427,14 +425,23 @@ export function RosterCommandCentreView({
             Some staff do not have standard hours. Patient allocation and roster generation may be
             incomplete.
           </p>
-          <button
-            type="button"
-            onClick={openMissingStandardHoursSetupDrawer}
-            className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
-            data-testid="roster-standard-hours-banner-cta"
-          >
-            Set standard hours
-          </button>
+          {canManage ? (
+            <Link
+              href={buildStaffStandardHoursSetupIndexHref(tenantId)}
+              className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
+              data-testid="roster-standard-hours-banner-cta"
+            >
+              Set standard hours
+            </Link>
+          ) : (
+            <span
+              className="shrink-0 cursor-not-allowed rounded-lg border border-white/[0.12] px-4 py-2 text-sm text-slate-500"
+              title={manageDeniedReason}
+              data-testid="roster-standard-hours-banner-cta-disabled"
+            >
+              Set standard hours
+            </span>
+          )}
         </section>
       ) : null}
 
@@ -447,11 +454,14 @@ export function RosterCommandCentreView({
           </p>
         </div>
         <RosterWeekGrid
+          tenantId={tenantId}
           weekDayDates={weekDayDates}
           staffOptions={payload.staffOptions}
           shifts={payload.shifts}
           availabilityCells={payload.availabilityCells}
           standardHoursByStaffId={payload.standardHoursByStaffId}
+          canManage={canManage}
+          manageDeniedReason={manageDeniedReason}
           selectedShiftId={drawerShift?.id ?? null}
           onCellClick={handleCellClick}
           onShiftClick={handleShiftClick}
@@ -487,69 +497,7 @@ export function RosterCommandCentreView({
         />
       ) : null}
 
-      {rosterStandardHoursDrawerIsOpen(drawerState) ? (
-        <RosterRightDrawer
-          open
-          wide={Boolean(drawerStaffName && drawerStaffMemberId)}
-          title={
-            drawerStaffName
-              ? formatStandardHoursDrawerTitle(drawerStaffName)
-              : "Standard hours"
-          }
-          onClose={closeDrawer}
-          testId="roster-standard-hours-drawer"
-        >
-          {drawerStaffName && drawerStaffMemberId ? (
-            <StaffStandardHoursPanel
-              tenantId={tenantId}
-              staffId={drawerStaffMemberId}
-              staffName={drawerStaffName}
-              initialDays={standardHoursDays}
-              clinics={payload.clinics}
-              weekRange={weekRange}
-              onSaved={() => {
-                closeDrawer();
-                refresh();
-              }}
-              onClose={closeDrawer}
-            />
-          ) : (
-            <p className="text-sm text-rose-300" data-testid="roster-standard-hours-open-error">
-              Could not open standard hours for this staff member.
-            </p>
-          )}
-        </RosterRightDrawer>
-      ) : null}
 
-      {drawerState.kind === "setup_missing_standard_hours" ? (
-        <RosterRightDrawer
-          open
-          wide
-          title="Set standard hours"
-          subtitle="Staff missing a working-hours pattern for roster generation."
-          onClose={closeDrawer}
-          testId="roster-setup-panel"
-        >
-          <ul className="space-y-2">
-            {staffMissingStandardHours.map((staff) => (
-              <li
-                key={staff.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2"
-              >
-                <span className="text-sm text-slate-100">{staff.name}</span>
-                <button
-                  type="button"
-                  onClick={() => openStandardHoursDrawer(staff.id)}
-                  className="rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
-                  data-testid={`roster-setup-panel-staff-${staff.id}`}
-                >
-                  Set standard hours
-                </button>
-              </li>
-            ))}
-          </ul>
-        </RosterRightDrawer>
-      ) : null}
     </div>
   );
 }

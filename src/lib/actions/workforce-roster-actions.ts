@@ -101,6 +101,7 @@ function revalidateRosterSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}/hr-os`);
   revalidatePath(`/fi-admin/${tid}/hr-os/roster`);
   revalidatePath(`/fi-admin/${tid}/workforce-os/roster`);
+  revalidatePath(`/fi-admin/${tid}/workforce-os/roster/standard-hours`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}/tomorrow`);
   revalidatePath(`/fi-admin/${tid}/surgery-readiness`);

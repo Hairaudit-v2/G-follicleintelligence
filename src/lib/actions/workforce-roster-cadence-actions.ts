@@ -45,6 +45,7 @@ function revalidateRosterSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}/settings/clinic-setup`);
   revalidatePath(`/fi-admin/${tid}/workforce-os/roster`);
+  revalidatePath(`/fi-admin/${tid}/workforce-os/roster/standard-hours`);
   revalidatePath(`/fi-admin/${tid}/hr-os/roster`);
 }
 

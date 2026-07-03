@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+
 import type { RosterGridAvailabilityCell, RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
+import { buildStaffStandardHoursEditorHref } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
   formatStandardHoursSummary,
   formatStandardHoursWeeklyTotal,
@@ -18,6 +21,7 @@ import { ROSTER_GRID_SCROLL_CLASSES } from "@/src/lib/workforce-os/rosterCommand
 import { cn } from "@/lib/utils";
 
 export type RosterWeekGridProps = {
+  tenantId: string;
   weekDayDates: string[];
   staffOptions: Array<{ id: string; name: string; role: string | null }>;
   shifts: RosterGridShift[];
@@ -25,6 +29,8 @@ export type RosterWeekGridProps = {
   standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
   rosterCadence?: RosterCadence;
   rosterCycleAnchorDate?: string;
+  canManage?: boolean;
+  manageDeniedReason?: string;
   onCellClick?: (staffId: string, localDate: string) => void;
   onShiftClick?: (shift: RosterGridShift) => void;
   onEditStandardHours?: (staffId: string) => void;
@@ -81,6 +87,7 @@ function isRdoDay(
 }
 
 export function RosterWeekGrid({
+  tenantId,
   weekDayDates,
   staffOptions,
   shifts,
@@ -88,6 +95,8 @@ export function RosterWeekGrid({
   standardHoursByStaffId,
   rosterCadence = "weekly",
   rosterCycleAnchorDate = "2026-01-05",
+  canManage = true,
+  manageDeniedReason = "Owner, admin, or HR manager role is required to set standard hours.",
   onCellClick,
   onShiftClick,
   onEditStandardHours,
@@ -147,16 +156,24 @@ export function RosterWeekGrid({
                   <p className="mt-0.5 text-xs text-slate-500">
                     Weekly total: {weeklyTotal} h
                   </p>
-                  {onEditStandardHours ? (
-                    <button
-                      type="button"
-                      onClick={() => onEditStandardHours(staff.id)}
+                  {canManage ? (
+                    <Link
+                      href={buildStaffStandardHoursEditorHref(tenantId, staff.id)}
+                      onClick={() => onEditStandardHours?.(staff.id)}
                       data-testid={`standard-hours-button-${staff.id}`}
                       className="mt-2 inline-flex min-h-9 items-center rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
                     >
                       {hasStandardHours ? "Edit standard hours" : "Set standard hours"}
-                    </button>
-                  ) : null}
+                    </Link>
+                  ) : (
+                    <span
+                      className="mt-2 inline-flex min-h-9 cursor-not-allowed items-center rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500"
+                      title={manageDeniedReason}
+                      data-testid={`standard-hours-button-disabled-${staff.id}`}
+                    >
+                      Set standard hours
+                    </span>
+                  )}
                 </td>
                 {weekDayDates.map((date) => {
                   const cellShifts = shiftsForCell(shifts, staff.id, date);

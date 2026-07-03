@@ -1,11 +1,22 @@
 "use client";
 
-import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { fiOsChromeClasses, fiOsChromeCssVars } from "@/src/components/fi-os/fiOsChromeTokens";
+import {
+  fiOsChromeClasses,
+  fiOsChromeCssVars,
+  FI_OS_TOP_CHROME_OFFSET_FALLBACK,
+} from "@/src/components/fi-os/fiOsChromeTokens";
 
 export type RosterRightDrawerProps = {
   open: boolean;
@@ -31,6 +42,12 @@ function readFiOsShellViewportStyle(): CSSProperties {
   return style as CSSProperties;
 }
 
+function shellViewportOffsetsMissing(style: CSSProperties): boolean {
+  const top = style[fiOsChromeCssVars.topOffset as keyof CSSProperties];
+  const bottom = style[fiOsChromeCssVars.bottomOffset as keyof CSSProperties];
+  return !top && !bottom;
+}
+
 export function RosterRightDrawer({
   open,
   title,
@@ -43,10 +60,30 @@ export function RosterRightDrawer({
 }: RosterRightDrawerProps) {
   const titleId = useId();
   const [viewportStyle, setViewportStyle] = useState<CSSProperties>({});
+  const useFullViewport = shellViewportOffsetsMissing(viewportStyle);
+
+  const syncViewportStyle = () => {
+    setViewportStyle(readFiOsShellViewportStyle());
+  };
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    syncViewportStyle();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    setViewportStyle(readFiOsShellViewportStyle());
+    syncViewportStyle();
+
+    const shell = document.querySelector<HTMLElement>(".fi-os-shell");
+    const ro = new ResizeObserver(syncViewportStyle);
+    if (shell) ro.observe(shell);
+    window.addEventListener("resize", syncViewportStyle);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", syncViewportStyle);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -60,12 +97,28 @@ export function RosterRightDrawer({
 
   if (!open || typeof document === "undefined") return null;
 
+  const overlayStyle: CSSProperties | undefined = useFullViewport
+    ? undefined
+    : {
+        ...viewportStyle,
+        [fiOsChromeCssVars.topOffset as string]:
+          viewportStyle[fiOsChromeCssVars.topOffset as keyof CSSProperties] ??
+          FI_OS_TOP_CHROME_OFFSET_FALLBACK,
+        [fiOsChromeCssVars.bottomOffset as string]:
+          viewportStyle[fiOsChromeCssVars.bottomOffset as keyof CSSProperties] ?? "0px",
+      };
+
   return createPortal(
     <div
-      className={cn(fiOsChromeClasses.rightDrawerOverlay, "z-[190]")}
-      style={viewportStyle}
+      className={cn(
+        useFullViewport
+          ? "fixed inset-0 z-[200] flex justify-end bg-black/55 backdrop-blur-[2px]"
+          : cn(fiOsChromeClasses.rightDrawerOverlay, "z-[200] bg-black/55 backdrop-blur-[2px]")
+      )}
+      style={overlayStyle}
       role="presentation"
       data-testid={testId}
+      data-roster-drawer-viewport={useFullViewport ? "full" : "chrome-aware"}
     >
       <button
         type="button"
@@ -82,6 +135,7 @@ export function RosterRightDrawer({
           "border border-white/[0.08] bg-[#0B1220]/98 shadow-2xl backdrop-blur-xl",
           wide ? "sm:max-w-2xl" : "sm:max-w-md"
         )}
+        onClick={(event) => event.stopPropagation()}
       >
         <div
           className={cn(
