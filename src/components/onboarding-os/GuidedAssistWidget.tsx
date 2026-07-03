@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { ChevronDown, ChevronUp, Compass, X } from "lucide-react";
 
@@ -11,6 +12,7 @@ import {
   snoozeGuidedAssistTipAction,
 } from "@/lib/actions/fi-onboarding-os-guided-assist-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import type { GuidedAssistSessionPayload } from "@/src/lib/onboarding-os/guidedAssistTypes";
 
 import { GuidedAssistToggle } from "./GuidedAssistToggle";
@@ -25,7 +27,9 @@ export function GuidedAssistWidget({
   className?: string;
 }) {
   const [payload, setPayload] = useState(initialPayload);
-  const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname() ?? "";
+  const onCalendarSurface = isFiOsTenantCalendarPath(pathname);
+  const [collapsed, setCollapsed] = useState(onCalendarSurface);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const shownTipCodesRef = useRef<Set<string>>(new Set());
@@ -33,6 +37,10 @@ export function GuidedAssistWidget({
   useEffect(() => {
     setPayload(initialPayload);
   }, [initialPayload]);
+
+  useEffect(() => {
+    if (onCalendarSurface) setCollapsed(true);
+  }, [onCalendarSurface, pathname]);
 
   useEffect(() => {
     if (!payload.assistEnabled || payload.tips.length === 0) return;
@@ -103,19 +111,42 @@ export function GuidedAssistWidget({
   return (
     <aside
       className={cn(
-        "pointer-events-auto fixed bottom-4 right-4 z-40 w-[min(100vw-2rem,24rem)]",
-        "rounded-xl border border-cyan-500/20 bg-[#071018]/95 shadow-2xl backdrop-blur-md",
+        "pointer-events-auto fixed z-40",
+        onCalendarSurface
+          ? "bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 w-auto max-w-[min(100vw-1.5rem,18rem)] xl:right-4 xl:left-auto xl:w-[min(100vw-2rem,24rem)]"
+          : "bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 w-[min(100vw-2rem,24rem)]",
+        collapsed
+          ? "rounded-full border border-cyan-500/25 bg-[#071018]/95 px-1 py-1 shadow-lg backdrop-blur-md"
+          : "rounded-xl border border-cyan-500/20 bg-[#071018]/95 shadow-2xl backdrop-blur-md",
         className
       )}
       aria-label="Guided Assist"
+      data-testid="guided-assist-widget"
+      data-guided-assist-collapsed={collapsed ? "true" : "false"}
     >
-      <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
+      <div
+        className={cn(
+          "flex items-start justify-between gap-3",
+          collapsed ? "px-2 py-1" : "border-b border-white/10 px-4 py-3"
+        )}
+      >
         <div className="min-w-0">
-          <p className={cn(fiOsChromeClasses.sectionEyebrow, "text-cyan-300/90")}>
-            OnboardingOS · Guided Assist
-          </p>
-          <h2 className="truncate text-sm font-medium text-slate-100">
-            {payload.assistEnabled ? "Operational guidance" : "Guided Assist is off"}
+          {!collapsed ? (
+            <p className={cn(fiOsChromeClasses.sectionEyebrow, "text-cyan-300/90")}>
+              OnboardingOS · Guided Assist
+            </p>
+          ) : null}
+          <h2
+            className={cn(
+              "truncate font-medium text-slate-100",
+              collapsed ? "text-xs" : "text-sm"
+            )}
+          >
+            {collapsed
+              ? "Guided Assist"
+              : payload.assistEnabled
+                ? "Operational guidance"
+                : "Guided Assist is off"}
           </h2>
         </div>
         <div className="flex shrink-0 items-center gap-1">

@@ -19,6 +19,10 @@ import {
   bookingsOverlappingDayKey,
   computeFiOsTodayStripCounts,
 } from "@/src/lib/calendar/fiOsCalendarTodayStrip";
+import {
+  fiOsCalTabletChipScroll,
+  fiOsCalTabletOnly,
+} from "@/src/lib/calendar/fiOsCalendarResponsive";
 import { useBookingsStableByFingerprint } from "@/src/lib/calendar/useBookingsStableByFingerprint";
 
 function chipClass(active: boolean): string {
@@ -147,7 +151,7 @@ export function FiOsCalendarTodayCommandStrip({
   const cUnassigned = query.unassignedOnly;
 
   const chipRow = (
-    <div className="flex max-w-full items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:thin]">
+    <div className={cn(fiOsCalTabletChipScroll, "xl:gap-2")}>
       <CalendarTransitionLink
         href={todayOverviewHref}
         className={chipClass(todayOverviewActive)}
@@ -255,12 +259,13 @@ export function FiOsCalendarTodayCommandStrip({
         background: "var(--fi-cal-ws-strip-bg, rgb(5 12 22 / 0.9))",
       }}
     >
-      <div className="md:hidden">
+      <div className={fiOsCalTabletOnly}>
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs text-[var(--fi-cal-ws-muted,#94a3b8)]"
+          className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-xs text-[var(--fi-cal-ws-muted,#94a3b8)]"
           onClick={() => setMobileOpen((v) => !v)}
           aria-expanded={mobileOpen}
+          data-testid="calendar-today-strip-toggle"
         >
           <span className="font-medium text-[var(--fi-cal-ws-text,#f1f5f9)]">
             Today · {counts.all} appointments
@@ -271,10 +276,12 @@ export function FiOsCalendarTodayCommandStrip({
           />
         </button>
         {mobileOpen ? (
-          <div className="border-t border-white/[0.05] px-3 pb-2 pt-1">{chipRow}</div>
+          <div className="border-t border-white/[0.05] px-3 pb-1.5 pt-1">{chipRow}</div>
         ) : null}
       </div>
-      <div className="hidden min-h-[2.25rem] px-3 py-1.5 md:block">{chipRow}</div>
+      <div className="hidden min-h-[2rem] px-3 py-1 xl:block">
+        <div className={fiOsCalTabletChipScroll}>{chipRow}</div>
+      </div>
     </div>
   );
 }

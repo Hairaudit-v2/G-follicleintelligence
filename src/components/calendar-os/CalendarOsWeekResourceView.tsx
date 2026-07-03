@@ -34,6 +34,7 @@ import { CalendarOsBookingCard } from "@/src/components/calendar-os/CalendarOsBo
 import { CalendarOsEmptyContext } from "@/src/components/calendar-os/CalendarOsEmptyContext";
 import { CalendarOsResourceLaneLabel } from "@/src/components/calendar-os/CalendarOsResourceLaneLabel";
 import { cn } from "@/lib/utils";
+import { fiOsCalFloatingAssistScrollPad } from "@/src/lib/calendar/fiOsCalendarResponsive";
 
 export type CalendarOsWeekResourceViewProps = {
   query: ParsedCalendarQuery;
@@ -154,7 +155,7 @@ export function CalendarOsWeekResourceView({
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {showSparseBanner ? <CalendarOsEmptyContext context={sparseContext} variant="week-banner" /> : null}
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <div className={cn("min-h-0 flex-1 overflow-y-auto overflow-x-hidden", fiOsCalFloatingAssistScrollPad)}>
         <div
           className="w-full min-w-0"
           data-testid="calendar-week-grid"

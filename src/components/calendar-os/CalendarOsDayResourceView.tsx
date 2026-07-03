@@ -34,6 +34,7 @@ import { CalendarOsBookingCard } from "@/src/components/calendar-os/CalendarOsBo
 import { CalendarOsEmptyContext } from "@/src/components/calendar-os/CalendarOsEmptyContext";
 import { CalendarOsResourceLaneLabel } from "@/src/components/calendar-os/CalendarOsResourceLaneLabel";
 import { cn } from "@/lib/utils";
+import { fiOsCalFloatingAssistScrollPad } from "@/src/lib/calendar/fiOsCalendarResponsive";
 
 const BLOCK_TONE: Record<string, string> = {
   rdo: "bg-slate-600/30 border-slate-500/30 text-slate-400",
@@ -231,7 +232,7 @@ export function CalendarOsDayResourceView({
       <div className="border-b border-white/[0.024] px-2 py-0.5 text-[10px] text-slate-500">
         {calendarDayHeading(lane, calendarTimezone)}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <div className={cn("min-h-0 flex-1 overflow-y-auto overflow-x-hidden", fiOsCalFloatingAssistScrollPad)}>
         <div className="relative w-full min-w-0">
           <div
             ref={headerRef}

@@ -81,7 +81,7 @@ export function FiOsTodaySurface(props: {
     feed.rightNow.length + feed.upNext.length + feed.comingUp.length;
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 pb-8 sm:space-y-10">
+    <div className="mx-auto w-full max-w-2xl space-y-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-10">
       <TodayFeedRefreshMount
         tenantId={data.tenantId}
         realtimeEnabled={todayRealtimeEnabled}

@@ -48,12 +48,19 @@ export const fiOsChromeClasses = {
   topBar:
     "sticky top-0 z-30 shrink-0 border-b border-white/[0.08] bg-[#0a1424]/92 px-3 py-2 backdrop-blur-xl sm:px-4 lg:px-5",
   /** Non-calendar tenant pages: single vertical scroll on `<main>`. */
-  mainScroll: `${FI_OS_MAIN_PAD} overflow-y-auto`,
+  mainScroll: `${FI_OS_MAIN_PAD} overflow-y-auto overscroll-y-contain [overflow-scrolling:touch]`,
   /** Calendar subtree owns scroll; `<main>` does not scroll vertically (`isFiOsTenantCalendarPath`). */
   mainScrollCalendarLock: `${FI_OS_MAIN_PAD} overflow-hidden`,
+  /** Extra bottom room for fixed Guided Assist + mobile bottom nav on scrollable main. */
+  mainScrollFloatingAssistPad:
+    "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]",
   /** Tenant route inset card behind page content (glass + soft lift). */
   tenantMainSurface:
-    "relative min-h-[min(32vh,400px)] overflow-hidden rounded-xl border border-white/[0.08] bg-[#050a12]/94 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_36px_rgba(0,0,0,0.32)]",
+    "relative min-h-[min(32vh,400px)] rounded-xl border border-white/[0.08] bg-[#050a12]/94 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_36px_rgba(0,0,0,0.32)]",
+  /** Calendar fill chain — passes height to scheduling subtree (`overflow-hidden` stays on calendar layout). */
+  tenantMainSurfaceFill: "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+  /** Scroll-friendly pages (Today, settings, etc.) — content grows `<main>` scroll height. */
+  tenantMainSurfaceScroll: "flex min-w-0 flex-col",
   tenantMainSurfaceInner: "relative px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
   /** Desktop primary rail (decorative glow applied inline in `FiOsSidebar`) */
   sidebarRail:

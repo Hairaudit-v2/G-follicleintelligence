@@ -40,6 +40,7 @@ import { isNavCollapseEnabledForTenant } from "@/src/lib/fiOs/navCollapseRollout
 import { isWorkspaceShellEnabledForTenant } from "@/src/lib/fiOs/workspaceShell/workspaceShellRollout.server";
 import { WorkspaceShellMount } from "@/src/components/fi-os/workspace/WorkspaceShellMount";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
+import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import {
   canAccessTenantReminderSettings,
   canManageTenantAdminUsersRoute,
@@ -217,9 +218,16 @@ export default async function TenantAdminLayout({
     ? "receptionist_pin"
     : tenantBackendAdminRole?.trim() || "clinic_staff";
 
+  const isCalendarFillSurface = isFiOsTenantCalendarPath(pathname);
+
   const mainSurface = (
     <div
-      className={cn(fiOsChromeClasses.tenantMainSurface, "flex min-h-0 min-w-0 flex-1 flex-col")}
+      className={cn(
+        fiOsChromeClasses.tenantMainSurface,
+        isCalendarFillSurface
+          ? fiOsChromeClasses.tenantMainSurfaceFill
+          : fiOsChromeClasses.tenantMainSurfaceScroll
+      )}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.38]"

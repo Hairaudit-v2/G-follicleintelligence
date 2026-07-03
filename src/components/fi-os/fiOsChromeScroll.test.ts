@@ -33,6 +33,23 @@ test("fiOsChromeClasses: shell locks viewport height without blocking nested scr
     fiOsChromeClasses.mainScrollCalendarLock.includes("overflow-hidden"),
     "calendar lock still contains main scroll inside calendar subtree"
   );
+  assert.ok(
+    !fiOsChromeClasses.tenantMainSurface.includes("overflow-hidden"),
+    "tenantMainSurface base no longer clips scroll pages"
+  );
+  assertIncludesAll(
+    fiOsChromeClasses.tenantMainSurfaceFill,
+    ["flex-1", "min-h-0", "overflow-hidden"],
+    "tenantMainSurfaceFill"
+  );
+  assert.ok(
+    !fiOsChromeClasses.tenantMainSurfaceScroll.includes("overflow-hidden"),
+    "tenantMainSurfaceScroll allows main column scroll"
+  );
+  assert.ok(
+    fiOsChromeClasses.mainScrollFloatingAssistPad.includes("safe-area-inset-bottom"),
+    "main scroll pad respects safe area"
+  );
 });
 
 test("fiOsChromeClasses: sidebar rail and drawer establish scroll boundaries", () => {

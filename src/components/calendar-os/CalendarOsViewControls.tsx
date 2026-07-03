@@ -10,6 +10,7 @@ import {
   type ParsedCalendarQuery,
 } from "@/src/lib/bookings/calendarQuery";
 import type { CalendarOsViewMode } from "@/src/lib/calendar-os/calendarResourceModel";
+import { fiOsCalTabletChipScroll } from "@/src/lib/calendar/fiOsCalendarResponsive";
 import { cn } from "@/lib/utils";
 
 const PRIMARY_VIEW_MODES: { id: CalendarOsViewMode; label: string }[] = [
@@ -175,7 +176,7 @@ export function CalendarOsViewControls({
   }, [moreOpen]);
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-1", !inline && "px-0")}>
+    <div className={cn(fiOsCalTabletChipScroll, "xl:flex-wrap xl:overflow-visible xl:whitespace-normal", !inline && "px-0")}>
       {PRIMARY_VIEW_MODES.map((mode) => {
         const active = isViewModeActive(query, mode.id);
         return (

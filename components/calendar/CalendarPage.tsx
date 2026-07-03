@@ -41,6 +41,7 @@ import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
 import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
 import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
+import { fiOsCalTabletGridMinHeight } from "@/src/lib/calendar/fiOsCalendarResponsive";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
 import { CalendarOsShell } from "@/src/components/calendar-os/CalendarOsShell";
@@ -487,7 +488,13 @@ function CalendarPageImpl({
         </p>
       ) : null}
 
-      <div className={cn("flex min-h-0 flex-1 flex-col", isFiOsWorkspace && "overflow-hidden")}>
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          isFiOsWorkspace && "overflow-hidden",
+          isFiOsWorkspace && fiOsCalTabletGridMinHeight
+        )}
+      >
         {/* FI OS + prefers-reduced-motion: no AnimatePresence / motion wrappers — instant view swap. */}
         {instantCalendarViewTransition ? (
           isMonthView ? (

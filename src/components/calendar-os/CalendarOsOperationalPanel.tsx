@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import {
   AlertCircle,
   CalendarCheck,
+  ChevronDown,
   CreditCard,
   DoorOpen,
   Stethoscope,
@@ -12,6 +14,7 @@ import {
 import type { CalendarOsOperationalPanelSummary } from "@/src/lib/calendar-os/calendarOperationalWarnings";
 import type { CalendarOsDisplayDensity } from "@/src/lib/calendar-os/calendarDisplayDensity";
 import { calendarOsDensityTokens } from "@/src/lib/calendar-os/calendarDisplayDensity";
+import { fiOsCalDesktopOnly, fiOsCalTabletOnly } from "@/src/lib/calendar/fiOsCalendarResponsive";
 import { cn } from "@/lib/utils";
 
 type PanelCardProps = {
@@ -73,6 +76,7 @@ export function CalendarOsOperationalPanel({
   density = "comfortable",
   className,
 }: CalendarOsOperationalPanelProps) {
+  const [tabletMetricsOpen, setTabletMetricsOpen] = useState(false);
   const compact = calendarOsDensityTokens(density).panelCompact;
   const clinicianDetail =
     summary.availableClinicians.length > 0
@@ -84,96 +88,149 @@ export function CalendarOsOperationalPanel({
       ? `${summary.todaysCapacity.availableStaff} clinicians · ${summary.roomsAvailable} rooms`
       : `${summary.roomsAvailable} rooms open`;
 
+  const warningCount =
+    summary.unassignedBookings +
+    summary.surgeryReadinessIssues +
+    summary.paymentsRequiringAttention +
+    summary.staffCoverageWarnings.length;
+
+  const metricsGrid = (
+    <div
+      className={cn(
+        "grid grid-cols-4 gap-1 lg:grid-cols-8",
+        compact ? "p-1.5" : "p-2"
+      )}
+    >
+      <PanelCard
+        compact={compact}
+        icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
+        label="Today capacity"
+        value={`${summary.todaysCapacity.booked}`}
+        detail={capacityDetail}
+      />
+      <PanelCard
+        compact={compact}
+        icon={<Users className="h-3 w-3" aria-hidden />}
+        label="Available staff"
+        value={summary.availableClinicians.length}
+        detail={clinicianDetail}
+        tone="success"
+      />
+      <PanelCard
+        compact={compact}
+        icon={<DoorOpen className="h-3 w-3" aria-hidden />}
+        label="Rooms available"
+        value={summary.roomsAvailable}
+      />
+      <PanelCard
+        compact={compact}
+        icon={<AlertCircle className="h-3 w-3" aria-hidden />}
+        label="Unassigned"
+        value={summary.unassignedBookings}
+        tone={summary.unassignedBookings > 0 ? "warning" : "default"}
+      />
+      <PanelCard
+        compact={compact}
+        icon={<Stethoscope className="h-3 w-3" aria-hidden />}
+        label="Surgery readiness"
+        value={summary.surgeryReadinessIssues}
+        detail={summary.surgeryReadinessIssues > 0 ? "Issues need review" : "All clear"}
+        tone={summary.surgeryReadinessIssues > 0 ? "warning" : "default"}
+      />
+      <PanelCard
+        compact={compact}
+        icon={<CreditCard className="h-3 w-3" aria-hidden />}
+        label="Payments"
+        value={summary.paymentsRequiringAttention}
+        detail="Requiring attention"
+        tone={summary.paymentsRequiringAttention > 0 ? "warning" : "default"}
+      />
+      <PanelCard
+        compact={compact}
+        icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
+        label="Follow-ups due"
+        value={summary.followUpsDue}
+      />
+      <PanelCard
+        compact={compact}
+        icon={<Users className="h-3 w-3" aria-hidden />}
+        label="Coverage"
+        value={summary.staffCoverageWarnings.length}
+        detail={summary.staffCoverageWarnings.length > 0 ? "Warnings active" : "Roster OK"}
+        tone={
+          summary.staffCoverageWarnings.some((w) => w.severity === "critical") ? "warning" : "default"
+        }
+      />
+    </div>
+  );
+
+  const coverageWarnings =
+    summary.staffCoverageWarnings.length > 0 ? (
+      <div className={cn("border-t border-white/[0.05]", compact ? "px-2 pb-2" : "px-3 pb-3")}>
+        <ul className="space-y-1">
+          {summary.staffCoverageWarnings.map((w) => (
+            <li
+              key={w.id}
+              className={cn(
+                "flex items-center gap-2 rounded border px-2 py-1 text-[10px]",
+                w.severity === "critical"
+                  ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
+                  : "border-amber-500/25 bg-amber-500/5 text-amber-200"
+              )}
+            >
+              <AlertCircle className="h-3 w-3 shrink-0" aria-hidden />
+              <span className="truncate">{w.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null;
+
   return (
-    <aside className={cn("shrink-0 border-b border-white/[0.06] bg-[#060d18]/90", className)} aria-label="Operational context">
-      <div
-        className={cn(
-          "grid grid-cols-4 gap-1 lg:grid-cols-8",
-          compact ? "p-1.5" : "p-2"
-        )}
-      >
-        <PanelCard
-          compact={compact}
-          icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
-          label="Today capacity"
-          value={`${summary.todaysCapacity.booked}`}
-          detail={capacityDetail}
-        />
-        <PanelCard
-          compact={compact}
-          icon={<Users className="h-3 w-3" aria-hidden />}
-          label="Available staff"
-          value={summary.availableClinicians.length}
-          detail={clinicianDetail}
-          tone="success"
-        />
-        <PanelCard
-          compact={compact}
-          icon={<DoorOpen className="h-3 w-3" aria-hidden />}
-          label="Rooms available"
-          value={summary.roomsAvailable}
-        />
-        <PanelCard
-          compact={compact}
-          icon={<AlertCircle className="h-3 w-3" aria-hidden />}
-          label="Unassigned"
-          value={summary.unassignedBookings}
-          tone={summary.unassignedBookings > 0 ? "warning" : "default"}
-        />
-        <PanelCard
-          compact={compact}
-          icon={<Stethoscope className="h-3 w-3" aria-hidden />}
-          label="Surgery readiness"
-          value={summary.surgeryReadinessIssues}
-          detail={summary.surgeryReadinessIssues > 0 ? "Issues need review" : "All clear"}
-          tone={summary.surgeryReadinessIssues > 0 ? "warning" : "default"}
-        />
-        <PanelCard
-          compact={compact}
-          icon={<CreditCard className="h-3 w-3" aria-hidden />}
-          label="Payments"
-          value={summary.paymentsRequiringAttention}
-          detail="Requiring attention"
-          tone={summary.paymentsRequiringAttention > 0 ? "warning" : "default"}
-        />
-        <PanelCard
-          compact={compact}
-          icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
-          label="Follow-ups due"
-          value={summary.followUpsDue}
-        />
-        <PanelCard
-          compact={compact}
-          icon={<Users className="h-3 w-3" aria-hidden />}
-          label="Coverage"
-          value={summary.staffCoverageWarnings.length}
-          detail={
-            summary.staffCoverageWarnings.length > 0 ? "Warnings active" : "Roster OK"
-          }
-          tone={summary.staffCoverageWarnings.some((w) => w.severity === "critical") ? "warning" : "default"}
-        />
+    <aside
+      className={cn("shrink-0 border-b border-white/[0.06] bg-[#060d18]/90", className)}
+      aria-label="Operational context"
+      data-testid="calendar-os-operational-panel"
+    >
+      <div className={fiOsCalTabletOnly}>
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-2 px-2 py-1.5 text-left sm:px-3"
+          aria-expanded={tabletMetricsOpen}
+          data-testid="calendar-os-metrics-toggle"
+          onClick={() => setTabletMetricsOpen((v) => !v)}
+        >
+          <span className="truncate text-[11px] text-slate-300">
+            <span className="font-semibold text-slate-100">{summary.todaysCapacity.booked}</span> booked
+            {" · "}
+            <span className="font-semibold text-slate-100">{summary.unassignedBookings}</span> unassigned
+            {warningCount > 0 ? (
+              <>
+                {" · "}
+                <span className="font-semibold text-amber-200">{warningCount}</span> alerts
+              </>
+            ) : null}
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+            Metrics
+            <ChevronDown
+              className={cn("h-3.5 w-3.5 transition", tabletMetricsOpen && "rotate-180")}
+              aria-hidden
+            />
+          </span>
+        </button>
+        {tabletMetricsOpen ? (
+          <>
+            {metricsGrid}
+            {coverageWarnings}
+          </>
+        ) : null}
       </div>
 
-      {summary.staffCoverageWarnings.length > 0 ? (
-        <div className={cn("border-t border-white/[0.05]", compact ? "px-2 pb-2" : "px-3 pb-3")}>
-          <ul className="space-y-1">
-            {summary.staffCoverageWarnings.map((w) => (
-              <li
-                key={w.id}
-                className={cn(
-                  "flex items-center gap-2 rounded border px-2 py-1 text-[10px]",
-                  w.severity === "critical"
-                    ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
-                    : "border-amber-500/25 bg-amber-500/5 text-amber-200"
-                )}
-              >
-                <AlertCircle className="h-3 w-3 shrink-0" aria-hidden />
-                <span className="truncate">{w.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      <div className={fiOsCalDesktopOnly}>
+        {metricsGrid}
+        {coverageWarnings}
+      </div>
     </aside>
   );
 }

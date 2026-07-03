@@ -361,6 +361,7 @@ function FiOsAppShellBody({
               isCalendarMainLocked
                 ? fiOsChromeClasses.mainScrollCalendarLock
                 : fiOsChromeClasses.mainScroll,
+              !isCalendarMainLocked && fiOsChromeClasses.mainScrollFloatingAssistPad,
               "flex min-h-0 flex-col outline-none"
             )}
           >

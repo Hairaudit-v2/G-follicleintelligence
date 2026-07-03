@@ -55,6 +55,7 @@ import {
 } from "@/src/lib/calendar/calendarTimezone";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
 import { cn } from "@/lib/utils";
+import { fiOsCalFloatingAssistScrollPad } from "@/src/lib/calendar/fiOsCalendarResponsive";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import {
@@ -657,7 +658,10 @@ function WeekViewInner({
         data-testid="calendar-v1-grid"
         data-grid-start-hour={gridConfig.dayStartHourUtc}
         data-grid-end-hour={gridConfig.dayEndHourUtc}
-        className="flex min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain"
+        className={cn(
+          "flex min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain",
+          shellIsFiOs && fiOsCalFloatingAssistScrollPad
+        )}
       >
         <div className="flex min-h-0 min-w-0 w-full flex-1" style={{ height: bodyHeightPx }}>
           <BusinessTimeGutter

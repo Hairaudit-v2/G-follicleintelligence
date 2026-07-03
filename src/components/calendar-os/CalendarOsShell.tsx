@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 
 import type { CalendarRoute } from "@/src/lib/bookings/calendarQuery";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
@@ -23,6 +24,12 @@ import { CalendarOsOperationalPanel } from "@/src/components/calendar-os/Calenda
 import { CalendarOsPresetBar } from "@/src/components/calendar-os/CalendarOsPresetBar";
 import { CalendarOsViewControls } from "@/src/components/calendar-os/CalendarOsViewControls";
 import { CalendarOsWeekResourceView } from "@/src/components/calendar-os/CalendarOsWeekResourceView";
+import {
+  fiOsCalDesktopOnly,
+  fiOsCalTabletGridMinHeight,
+  fiOsCalTabletOnly,
+} from "@/src/lib/calendar/fiOsCalendarResponsive";
+import { cn } from "@/lib/utils";
 
 export type CalendarOsShellProps = {
   data: OperationalCalendarPageData;
@@ -49,6 +56,7 @@ export function CalendarOsShell({
 }: CalendarOsShellProps) {
   const storageKey = calendarOsDensityStorageKey(data.tenantId);
   const [density, setDensity] = useState<CalendarOsDisplayDensity>("comfortable");
+  const [tabletPresetsOpen, setTabletPresetsOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -97,9 +105,31 @@ export function CalendarOsShell({
       data-testid="calendar-os-v2-shell"
     >
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-white/[0.06] bg-[#060d18]/95 px-2 py-1">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-          <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
-          <span className="hidden h-3 w-px bg-white/[0.08] sm:block" aria-hidden />
+        <div className="flex min-w-0 flex-1 items-center gap-x-2 gap-y-1">
+          <div className={fiOsCalDesktopOnly}>
+            <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
+          </div>
+          <div className={cn(fiOsCalTabletOnly, "min-w-0 flex-1")}>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded border border-white/[0.08] px-2 py-0.5 text-[10px] font-medium text-slate-400"
+              aria-expanded={tabletPresetsOpen}
+              data-testid="calendar-os-presets-toggle"
+              onClick={() => setTabletPresetsOpen((v) => !v)}
+            >
+              Presets
+              <ChevronDown
+                className={cn("h-2.5 w-2.5 transition", tabletPresetsOpen && "rotate-180")}
+                aria-hidden
+              />
+            </button>
+            {tabletPresetsOpen ? (
+              <div className="mt-1">
+                <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
+              </div>
+            ) : null}
+          </div>
+          <span className={cn("hidden h-3 w-px bg-white/[0.08] xl:block", fiOsCalDesktopOnly)} aria-hidden />
           <CalendarOsViewControls
             tenantId={data.tenantId}
             query={data.query}
@@ -112,7 +142,7 @@ export function CalendarOsShell({
 
       <CalendarOsOperationalPanel summary={panelSummary} density={density} />
 
-      <div className="flex min-h-0 min-w-0 flex-1">
+      <div className={cn("flex min-h-0 min-w-0 flex-1", fiOsCalTabletGridMinHeight)}>
         {sidebar ? (
           <div className="hidden w-48 shrink-0 border-r border-white/[0.05] lg:block">{sidebar}</div>
         ) : null}
