@@ -97,7 +97,7 @@ function localDateInTz(iso: string, tz: string): string {
   return dtf.format(new Date(iso));
 }
 
-function weekdayIndexFromLocalDate(localDate: string): number {
+export function weekdayIndexFromLocalDate(localDate: string): number {
   const d = new Date(`${localDate}T12:00:00.000Z`);
   const day = d.getUTCDay();
   return day === 0 ? 6 : day - 1;
@@ -153,7 +153,7 @@ function rangesOverlap(aStart: number, aEnd: number, bStart: number, bEnd: numbe
   return aStart < bEnd && bStart < aEnd;
 }
 
-function shiftTypeFromStandardDay(day: StaffStandardHoursDayInput): string {
+export function shiftTypeFromStandardDay(day: StaffStandardHoursDayInput): string {
   const role = day.role_code?.trim().toLowerCase();
   if (role === "theatre" || role === "surgeon" || role === "nurse") return "surgery_day";
   if (role === "reception") return "clinic_day";

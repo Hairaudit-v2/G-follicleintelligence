@@ -1,0 +1,124 @@
+/**
+ * WorkforceOS Roster Command Centre — pure UX helpers (no I/O).
+ */
+
+import {
+  shiftTypeFromStandardDay,
+  weekdayIndexFromLocalDate,
+} from "@/src/lib/workforce-os/rosterGenerationCore";
+import {
+  computeStandardHoursWeeklyTotal,
+  staffHasConfiguredStandardHours,
+  type StaffStandardHoursDayInput,
+} from "@/src/lib/workforce-os/staffStandardHoursCore";
+
+export type RosterCellClickIntent = "open_standard_hours" | "open_cell_actions";
+
+export function resolveRosterCellClickIntent(input: {
+  hasStandardHours: boolean;
+}): RosterCellClickIntent {
+  if (!input.hasStandardHours) return "open_standard_hours";
+  return "open_cell_actions";
+}
+
+export type RosterShiftDrawerDefaults = {
+  staffId: string;
+  clinicId: string;
+  shiftType: string;
+  startsAt: string;
+  endsAt: string;
+};
+
+const STAFF_ROLE_SHIFT_TYPE: Record<string, string> = {
+  reception: "clinic_day",
+  receptionist: "clinic_day",
+  nurse: "surgery_day",
+  rn: "surgery_day",
+  theatre: "surgery_day",
+  surgeon: "surgery_day",
+  doctor: "consultation_day",
+  consultant: "consultation_day",
+};
+
+export function listStaffMissingStandardHours(
+  staffOptions: Array<{ id: string; name: string }>,
+  standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>
+): Array<{ id: string; name: string }> {
+  return staffOptions.filter(
+    (s) => !staffHasConfiguredStandardHours(standardHoursByStaffId[s.id])
+  );
+}
+
+function shiftTypeFromStaffRole(role: string | null | undefined): string {
+  const key = role?.trim().toLowerCase() ?? "";
+  return STAFF_ROLE_SHIFT_TYPE[key] ?? "clinic_day";
+}
+
+function standardDayForLocalDate(
+  standardHours: StaffStandardHoursDayInput[] | undefined,
+  localDate: string
+): StaffStandardHoursDayInput | null {
+  if (!standardHours?.length) return null;
+  const weekday = weekdayIndexFromLocalDate(localDate);
+  return standardHours.find((d) => d.weekday === weekday) ?? null;
+}
+
+/** Prefill values when opening the shift drawer from a grid cell. */
+export function buildRosterShiftDrawerDefaults(input: {
+  staffId: string;
+  localDate: string;
+  staffRole: string | null;
+  filterClinicId: string;
+  standardHours: StaffStandardHoursDayInput[] | undefined;
+}): RosterShiftDrawerDefaults {
+  const day = standardDayForLocalDate(input.standardHours, input.localDate);
+  const clinicId = input.filterClinicId || day?.clinic_id?.trim() || "";
+  const shiftType = day
+    ? shiftTypeFromStandardDay(day)
+    : shiftTypeFromStaffRole(input.staffRole);
+  const startHm = day?.is_working_day ? (day.start_time ?? "09:00") : "09:00";
+  const endHm = day?.is_working_day ? (day.end_time ?? "17:00") : "17:00";
+
+  return {
+    staffId: input.staffId,
+    clinicId,
+    shiftType,
+    startsAt: `${input.localDate}T${startHm}`,
+    endsAt: `${input.localDate}T${endHm}`,
+  };
+}
+
+export function formatRosterDrawerDateLabel(localDate: string): string {
+  const d = new Date(`${localDate.slice(0, 10)}T12:00:00.000Z`);
+  return d.toLocaleDateString("en-AU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
+
+export function formatRosterShiftDrawerTitle(input: {
+  mode: "add" | "edit";
+  staffName: string;
+  localDate: string;
+}): string {
+  const dateLabel = formatRosterDrawerDateLabel(input.localDate);
+  return input.mode === "edit"
+    ? `Edit shift — ${input.staffName}, ${dateLabel}`
+    : `Add shift — ${input.staffName}, ${dateLabel}`;
+}
+
+export function formatStandardHoursDrawerTitle(staffName: string): string {
+  return `${staffName} — Standard hours`;
+}
+
+export function formatStandardHoursWeeklyTotalLabel(
+  days: StaffStandardHoursDayInput[] | undefined
+): string {
+  if (!days?.length) return "0.0 h";
+  return `${(computeStandardHoursWeeklyTotal(days) / 60).toFixed(1)} h`;
+}
+
+/** Layout contract: roster page must scroll vertically; grid scrolls horizontally. */
+export const ROSTER_PAGE_SCROLL_ROOT_CLASSES = "min-h-full w-full shrink-0";
+export const ROSTER_GRID_SCROLL_CLASSES = "overflow-x-auto";

@@ -1,11 +1,18 @@
 "use client";
 
 import type { RosterGridAvailabilityCell, RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
-import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import {
+  formatStandardHoursSummary,
+  formatStandardHoursWeeklyTotal,
+  staffHasConfiguredStandardHours,
+  type StaffStandardHoursDayInput,
+} from "@/src/lib/workforce-os/staffStandardHoursCore";
 import {
   blockTypeDisplayLabel,
   shiftSourceDisplayLabel,
 } from "@/src/lib/workforce-os/rosterGenerationCore";
+import { ROSTER_GRID_SCROLL_CLASSES } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
+import { cn } from "@/lib/utils";
 
 export type RosterWeekGridProps = {
   weekDayDates: string[];
@@ -77,17 +84,23 @@ export function RosterWeekGrid({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0F1629]/40">
-      <table className="min-w-[960px] w-full border-collapse text-xs">
+    <div
+      className={cn(
+        ROSTER_GRID_SCROLL_CLASSES,
+        "rounded-xl border border-white/[0.08] bg-[#0F1629]/40"
+      )}
+      data-testid="roster-week-grid"
+    >
+      <table className="min-w-[960px] w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-white/[0.08] bg-white/[0.02]">
-            <th className="sticky left-0 z-10 min-w-[140px] bg-[#0F1629] px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+            <th className="sticky left-0 z-10 min-w-[220px] bg-[#0F1629] px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Staff
             </th>
             {weekDayDates.map((date) => (
               <th
                 key={date}
-                className="min-w-[110px] px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-500"
+                className="min-w-[120px] px-2 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500"
               >
                 {formatDayHeader(date)}
               </th>
@@ -97,36 +110,58 @@ export function RosterWeekGrid({
         <tbody>
           {staffOptions.map((staff) => {
             const standardHours = standardHoursByStaffId[staff.id];
+            const hasStandardHours = staffHasConfiguredStandardHours(standardHours);
+            const summary = formatStandardHoursSummary(standardHours);
+            const weeklyTotal = formatStandardHoursWeeklyTotal(standardHours);
+
             return (
               <tr key={staff.id} className="border-b border-white/[0.05] align-top">
-                <td className="sticky left-0 z-10 bg-[#0F1629] px-3 py-2">
+                <td className="sticky left-0 z-10 bg-[#0F1629] px-3 py-3">
                   <p className="font-medium text-slate-100">{staff.name}</p>
                   {staff.role ? (
-                    <p className="text-[10px] capitalize text-slate-500">{staff.role}</p>
+                    <p className="text-xs capitalize text-slate-500">{staff.role}</p>
                   ) : null}
+                  <p
+                    className={cn(
+                      "mt-1 text-xs",
+                      hasStandardHours ? "text-slate-400" : "text-amber-300/90"
+                    )}
+                    data-testid={`standard-hours-summary-${staff.id}`}
+                  >
+                    {summary}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Weekly total: {weeklyTotal} h
+                  </p>
                   {onEditStandardHours ? (
                     <button
                       type="button"
                       onClick={() => onEditStandardHours(staff.id)}
-                      className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300"
+                      data-testid={`standard-hours-button-${staff.id}`}
+                      className="mt-2 inline-flex min-h-9 items-center rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
                     >
-                      Standard hours
+                      {hasStandardHours ? "Edit standard hours" : "Set standard hours"}
                     </button>
                   ) : null}
                 </td>
                 {weekDayDates.map((date) => {
                   const cellShifts = shiftsForCell(shifts, staff.id, date);
                   const cellBlocks = availabilityForCell(availabilityCells, staff.id, date);
-                  const rdo = cellShifts.length === 0 && cellBlocks.length === 0 && isRdoDay(standardHours, date);
+                  const rdo =
+                    cellShifts.length === 0 &&
+                    cellBlocks.length === 0 &&
+                    isRdoDay(standardHours, date);
+                  const emptyCell = cellShifts.length === 0 && cellBlocks.length === 0 && !rdo;
 
                   return (
                     <td
                       key={`${staff.id}-${date}`}
-                      className="min-h-[72px] border-l border-white/[0.04] px-1.5 py-1.5"
+                      className="min-h-[88px] border-l border-white/[0.04] px-1.5 py-2"
                     >
                       <button
                         type="button"
-                        className="flex min-h-[64px] w-full flex-col gap-1 rounded-lg border border-transparent p-1 text-left hover:border-white/[0.08] hover:bg-white/[0.02]"
+                        data-testid={`roster-cell-${staff.id}-${date}`}
+                        className="flex min-h-[80px] w-full flex-col gap-1 rounded-lg border border-transparent p-1.5 text-left hover:border-white/[0.08] hover:bg-white/[0.02]"
                         onClick={() => onCellClick?.(staff.id, date)}
                       >
                         {cellShifts.map((shift) => (
@@ -137,25 +172,23 @@ export function RosterWeekGrid({
                               e.stopPropagation();
                               onShiftClick?.(shift);
                             }}
-                            className={`block rounded-md px-1.5 py-1 ${
-                              selectedShiftId === shift.id
-                                ? "ring-1 ring-cyan-400/60"
-                                : ""
-                            } ${
+                            className={cn(
+                              "block rounded-md px-2 py-1.5",
+                              selectedShiftId === shift.id ? "ring-1 ring-cyan-400/60" : "",
                               shift.shift_source === "standard_hours"
                                 ? "bg-cyan-950/50 text-cyan-100"
                                 : shift.shift_source === "copy_week"
                                   ? "bg-violet-950/40 text-violet-100"
                                   : "bg-emerald-950/40 text-emerald-100"
-                            }`}
+                            )}
                           >
-                            <span className="block text-[10px] font-medium capitalize">
+                            <span className="block text-xs font-medium capitalize">
                               {shift.shift_type.replace(/_/g, " ")}
                             </span>
-                            <span className="block text-[10px] opacity-80">
+                            <span className="block text-xs opacity-80">
                               {formatShiftTime(shift.starts_at)}–{formatShiftTime(shift.ends_at)}
                             </span>
-                            <span className="block text-[9px] opacity-60">
+                            <span className="block text-[10px] opacity-60">
                               {shiftSourceDisplayLabel(shift.shift_source)}
                             </span>
                           </span>
@@ -163,7 +196,7 @@ export function RosterWeekGrid({
                         {cellBlocks.map((block) => (
                           <span
                             key={block.blockId}
-                            className="block rounded-md bg-rose-950/40 px-1.5 py-1 text-[10px] text-rose-200"
+                            className="block rounded-md bg-rose-950/40 px-2 py-1.5 text-xs text-rose-200"
                           >
                             {blockTypeDisplayLabel(
                               block.blockType as import("@/src/lib/workforce-os/workforceRosteringEngine").AvailabilityBlockType
@@ -171,12 +204,22 @@ export function RosterWeekGrid({
                           </span>
                         ))}
                         {rdo ? (
-                          <span className="block rounded-md bg-white/[0.03] px-1.5 py-1 text-[10px] text-slate-500">
+                          <span className="block rounded-md bg-white/[0.03] px-2 py-1.5 text-xs text-slate-500">
                             RDO
                           </span>
                         ) : null}
-                        {cellShifts.length === 0 && cellBlocks.length === 0 && !rdo ? (
-                          <span className="block px-1 py-2 text-[10px] text-slate-600">+ Add shift</span>
+                        {emptyCell && !hasStandardHours ? (
+                          <span
+                            className="block px-1 py-2 text-xs font-medium text-amber-300/90"
+                            data-testid={`set-standard-hours-first-${staff.id}-${date}`}
+                          >
+                            Set standard hours first
+                          </span>
+                        ) : null}
+                        {emptyCell && hasStandardHours ? (
+                          <span className="block px-1 py-2 text-xs text-cyan-300/80">
+                            Generate or add shift
+                          </span>
                         ) : null}
                       </button>
                     </td>

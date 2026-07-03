@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 
+import { cn } from "@/lib/utils";
+import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { StaffStandardHoursPanel } from "@/src/components/fi/workforce/StaffStandardHoursPanel";
+import { RosterRightDrawer } from "@/src/components/fi/workforce/RosterRightDrawer";
+import { RosterShiftDrawer } from "@/src/components/fi/workforce/RosterShiftDrawer";
 import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
 import {
@@ -19,7 +23,13 @@ import {
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
-import { emptyStandardHoursWeek } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { emptyStandardHoursWeek, staffHasConfiguredStandardHours } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import {
+  formatStandardHoursDrawerTitle,
+  listStaffMissingStandardHours,
+  resolveRosterCellClickIntent,
+  ROSTER_PAGE_SCROLL_ROOT_CLASSES,
+} from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 
 const STATUS_FILTERS: Array<{ id: RosterStaffingStatusFilter | ""; label: string }> = [
   { id: "", label: "All statuses" },
@@ -47,6 +57,13 @@ export type RosterCommandCentreViewProps = {
   useWorkforceOsRoute?: boolean;
 };
 
+type ShiftDrawerState = {
+  mode: "add" | "edit" | "cell-actions";
+  staffId: string;
+  localDate: string;
+  shift: RosterGridShift | null;
+};
+
 function shiftWeek(isoDate: string, deltaWeeks: number): string {
   const d = new Date(`${isoDate.slice(0, 10)}T12:00:00.000Z`);
   d.setUTCDate(d.getUTCDate() + deltaWeeks * 7);
@@ -62,21 +79,38 @@ export function RosterCommandCentreView({
 }: RosterCommandCentreViewProps) {
   const router = useRouter();
   const [selectedEventKey, setSelectedEventKey] = useState(payload.preselectedEventKey);
-  const [selectedShift, setSelectedShift] = useState<RosterGridShift | null>(null);
-  const [draftCell, setDraftCell] = useState<{ staffId: string; localDate: string } | null>(null);
+  const [shiftDrawer, setShiftDrawer] = useState<ShiftDrawerState | null>(null);
   const [standardHoursStaffId, setStandardHoursStaffId] = useState<string | null>(null);
+  const [setupPanelOpen, setSetupPanelOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const weekRange = useMemo(
+    () => rosterDateRangeFromWeekStart(filters.weekStart),
+    [filters.weekStart]
+  );
 
   const refresh = useCallback(() => {
     router.refresh();
   }, [router]);
 
-  const staffPickerOptions = useMemo(
-    () => payload.staffOptions.map((s) => ({ id: s.id, name: s.name })),
-    [payload.staffOptions]
+  const staffMissingStandardHours = useMemo(
+    () => listStaffMissingStandardHours(payload.staffOptions, payload.standardHoursByStaffId),
+    [payload.staffOptions, payload.standardHoursByStaffId]
   );
+
+  const shiftDrawerStaff = shiftDrawer
+    ? payload.staffOptions.find((s) => s.id === shiftDrawer.staffId)
+    : null;
+
+  const standardHoursStaff = standardHoursStaffId
+    ? payload.staffOptions.find((s) => s.id === standardHoursStaffId)
+    : null;
+  const standardHoursDays =
+    standardHoursStaffId && payload.standardHoursByStaffId[standardHoursStaffId]
+      ? payload.standardHoursByStaffId[standardHoursStaffId]
+      : emptyStandardHoursWeek();
 
   function pushFilters(next: Partial<RosterCommandCentreViewProps["filters"]>) {
     const merged = { ...filters, ...next };
@@ -95,20 +129,49 @@ export function RosterCommandCentreView({
     );
   }
 
-  function clearSelection() {
-    setSelectedShift(null);
-    setDraftCell(null);
+  function openStandardHours(staffId: string) {
+    setShiftDrawer(null);
+    setStandardHoursStaffId(staffId);
+    setSetupPanelOpen(false);
+  }
+
+  function handleCellClick(staffId: string, localDate: string) {
+    const standardHours = payload.standardHoursByStaffId[staffId];
+    const hasStandardHours = staffHasConfiguredStandardHours(standardHours);
+    const intent = resolveRosterCellClickIntent({ hasStandardHours });
+
+    if (intent === "open_standard_hours") {
+      openStandardHours(staffId);
+      return;
+    }
+
+    setStandardHoursStaffId(null);
+    setShiftDrawer({
+      mode: "cell-actions",
+      staffId,
+      localDate,
+      shift: null,
+    });
+  }
+
+  function handleShiftClick(shift: RosterGridShift) {
+    setStandardHoursStaffId(null);
+    setShiftDrawer({
+      mode: "edit",
+      staffId: shift.staff_id,
+      localDate: shift.starts_at.slice(0, 10),
+      shift,
+    });
   }
 
   function handleGenerateRoster(overwriteGeneratedOnly: boolean) {
     setActionError(null);
     setActionMessage(null);
-    const range = rosterDateRangeFromWeekStart(filters.weekStart);
     startTransition(async () => {
       const result = await generateRosterFromStandardHoursAction({
         tenantId,
-        rangeStartIso: range.startsAt,
-        rangeEndIso: range.endsAt,
+        rangeStartIso: weekRange.startsAt,
+        rangeEndIso: weekRange.endsAt,
         staffIds: filters.staffId ? [filters.staffId] : undefined,
         overwriteGeneratedOnly,
       });
@@ -141,16 +204,11 @@ export function RosterCommandCentreView({
     });
   }
 
-  const standardHoursStaff = standardHoursStaffId
-    ? payload.staffOptions.find((s) => s.id === standardHoursStaffId)
-    : null;
-  const standardHoursDays =
-    standardHoursStaffId && payload.standardHoursByStaffId[standardHoursStaffId]
-      ? payload.standardHoursByStaffId[standardHoursStaffId]
-      : emptyStandardHoursWeek();
-
   return (
-    <div className="space-y-6">
+    <div
+      className={cn(ROSTER_PAGE_SCROLL_ROOT_CLASSES, fiOsChromeClasses.pageScrollContent, "space-y-6")}
+      data-testid="roster-command-centre"
+    >
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
@@ -318,65 +376,126 @@ export function RosterCommandCentreView({
         ))}
       </section>
 
+      {staffMissingStandardHours.length > 0 ? (
+        <section
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-950/20 px-4 py-3"
+          data-testid="roster-standard-hours-banner"
+        >
+          <p className="text-sm text-amber-100">
+            Some staff do not have standard hours. Patient allocation and roster generation may be
+            incomplete.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSetupPanelOpen(true)}
+            className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
+          >
+            Set standard hours
+          </button>
+        </section>
+      ) : null}
+
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-100">Weekly roster</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Set standard hours per staff, generate the week, then adjust individual shifts only when
+            needed.
+          </p>
+        </div>
+        <RosterWeekGrid
+          weekDayDates={payload.weekDayDates}
+          staffOptions={payload.staffOptions}
+          shifts={payload.shifts}
+          availabilityCells={payload.availabilityCells}
+          standardHoursByStaffId={payload.standardHoursByStaffId}
+          selectedShiftId={shiftDrawer?.shift?.id ?? null}
+          onCellClick={handleCellClick}
+          onShiftClick={handleShiftClick}
+          onEditStandardHours={openStandardHours}
+        />
+      </section>
+
+      <RosterSidePanel
+        tenantId={tenantId}
+        events={payload.events}
+        selectedEventKey={selectedEventKey}
+        eventDetails={eventDetails}
+        onRefresh={refresh}
+        onSelectEvent={setSelectedEventKey}
+      />
+
+      {shiftDrawer && shiftDrawerStaff ? (
+        <RosterShiftDrawer
+          open
+          tenantId={tenantId}
+          mode={shiftDrawer.mode}
+          staffId={shiftDrawer.staffId}
+          staffName={shiftDrawerStaff.name}
+          staffRole={shiftDrawerStaff.role}
+          localDate={shiftDrawer.localDate}
+          filterClinicId={filters.clinicId}
+          standardHours={payload.standardHoursByStaffId[shiftDrawer.staffId]}
+          selectedShift={shiftDrawer.shift}
+          clinics={payload.clinics}
+          onClose={() => setShiftDrawer(null)}
+          onRefresh={refresh}
+          onEditStandardHours={openStandardHours}
+        />
+      ) : null}
+
       {standardHoursStaffId && standardHoursStaff ? (
-        <section className="rounded-xl border border-cyan-500/20 bg-cyan-950/10 p-4">
+        <RosterRightDrawer
+          open
+          wide
+          title={formatStandardHoursDrawerTitle(standardHoursStaff.name)}
+          onClose={() => setStandardHoursStaffId(null)}
+          testId="roster-standard-hours-drawer"
+        >
           <StaffStandardHoursPanel
             tenantId={tenantId}
             staffId={standardHoursStaffId}
             staffName={standardHoursStaff.name}
             initialDays={standardHoursDays}
             clinics={payload.clinics}
+            weekRange={weekRange}
             onSaved={() => {
               setStandardHoursStaffId(null);
               refresh();
             }}
             onClose={() => setStandardHoursStaffId(null)}
           />
-        </section>
+        </RosterRightDrawer>
       ) : null}
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-100">Weekly roster</h2>
-          <p className="mt-1 text-xs text-slate-500">
-            Click a cell to add a shift, click a shift block to edit. RDO and leave show from
-            standard hours and availability blocks.
-          </p>
-          <div className="mt-3">
-            <RosterWeekGrid
-              weekDayDates={payload.weekDayDates}
-              staffOptions={payload.staffOptions}
-              shifts={payload.shifts}
-              availabilityCells={payload.availabilityCells}
-              standardHoursByStaffId={payload.standardHoursByStaffId}
-              selectedShiftId={selectedShift?.id ?? null}
-              onCellClick={(staffId, localDate) => {
-                setSelectedShift(null);
-                setDraftCell({ staffId, localDate });
-              }}
-              onShiftClick={(shift) => {
-                setDraftCell(null);
-                setSelectedShift(shift);
-              }}
-              onEditStandardHours={(staffId) => setStandardHoursStaffId(staffId)}
-            />
-          </div>
-        </div>
-
-        <RosterSidePanel
-          tenantId={tenantId}
-          clinics={payload.clinics}
-          staffOptions={staffPickerOptions}
-          selectedShift={selectedShift}
-          draftCell={draftCell}
-          events={payload.events}
-          selectedEventKey={selectedEventKey}
-          eventDetails={eventDetails}
-          onRefresh={refresh}
-          onSelectEvent={setSelectedEventKey}
-          onClearSelection={clearSelection}
-        />
-      </section>
+      {setupPanelOpen ? (
+        <RosterRightDrawer
+          open
+          wide
+          title="Set standard hours"
+          subtitle="Staff missing a working-hours pattern for roster generation."
+          onClose={() => setSetupPanelOpen(false)}
+          testId="roster-setup-panel"
+        >
+          <ul className="space-y-2">
+            {staffMissingStandardHours.map((staff) => (
+              <li
+                key={staff.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2"
+              >
+                <span className="text-sm text-slate-100">{staff.name}</span>
+                <button
+                  type="button"
+                  onClick={() => openStandardHours(staff.id)}
+                  className="rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
+                >
+                  Set standard hours
+                </button>
+              </li>
+            ))}
+          </ul>
+        </RosterRightDrawer>
+      ) : null}
     </div>
   );
 }

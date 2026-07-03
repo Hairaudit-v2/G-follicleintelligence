@@ -364,6 +364,43 @@ export function weekDayIsoDates(weekStartIsoDate: string): string[] {
   return Array.from({ length: 7 }, (_, i) => isoDateForWeekday(weekStartIsoDate, i));
 }
 
+const STANDARD_HOURS_WEEKDAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+
+/** True when the staff member has at least one working day with net hours. */
+export function staffHasConfiguredStandardHours(
+  days: StaffStandardHoursDayInput[] | undefined
+): boolean {
+  if (!days?.length) return false;
+  return computeStandardHoursWeeklyTotal(days) > 0;
+}
+
+/** Human-readable one-line summary for roster staff rows. */
+export function formatStandardHoursSummary(
+  days: StaffStandardHoursDayInput[] | undefined
+): string {
+  if (!staffHasConfiguredStandardHours(days)) return "No standard hours set";
+
+  const working = days!.filter((d) => d.is_working_day);
+  const minsPerDay = working.map((d) => dayWorkingMinutes(d));
+  const uniformMins = minsPerDay.length > 0 && minsPerDay.every((m) => m === minsPerDay[0]);
+  const hoursLabel = uniformMins
+    ? `${Math.round(minsPerDay[0]! / 60)}h`
+    : `${(minsPerDay.reduce((a, b) => a + b, 0) / working.length / 60).toFixed(1)}h avg`;
+  const dayLabels = working.map((d) => STANDARD_HOURS_WEEKDAY_SHORT[d.weekday]).join(" ");
+  const anchor = working[0];
+  const allSameTimes = working.every(
+    (d) => d.start_time === anchor?.start_time && d.end_time === anchor?.end_time
+  );
+  const timeRange =
+    allSameTimes && anchor?.start_time && anchor?.end_time
+      ? `${anchor.start_time}–${anchor.end_time}`
+      : null;
+
+  return timeRange
+    ? `${working.length} × ${hoursLabel} · ${dayLabels} · ${timeRange}`
+    : `${working.length} × ${hoursLabel} · ${dayLabels}`;
+}
+
 export function formatHmToDisplay(hm: string | null): string {
   if (!hm) return "—";
   const m = HM_RE.exec(hm.trim());

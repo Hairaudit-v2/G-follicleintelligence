@@ -1,6 +1,8 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
+import { cn } from "@/lib/utils";
+import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { RosterCommandCentreView } from "@/src/components/fi/workforce/RosterCommandCentreView";
 import {
   loadRosterCommandCentre,
@@ -81,7 +83,7 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
   }
 
   return (
-    <div className="relative z-[1] mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+    <div className={cn(fiOsChromeClasses.pageScrollRoot)}>
       <RosterCommandCentreView
         tenantId={tenantId.trim()}
         payload={{ ...payload, preselectedEventKey }}

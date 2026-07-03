@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
-import { saveStaffStandardHoursAction } from "@/src/lib/actions/workforce-roster-actions";
+import { saveStaffStandardHoursAction, generateRosterFromStandardHoursAction } from "@/src/lib/actions/workforce-roster-actions";
 import {
   applyStandardHoursTemplate,
   computeStandardHoursWeeklyTotal,
@@ -15,6 +15,7 @@ import {
   type StaffStandardHoursDayInput,
   type StandardHoursTemplateId,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { formatStandardHoursDrawerTitle } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 
 export type StaffStandardHoursPanelProps = {
   tenantId: string;
@@ -22,6 +23,7 @@ export type StaffStandardHoursPanelProps = {
   staffName: string;
   initialDays: StaffStandardHoursDayInput[];
   clinics: Array<{ id: string; displayName: string }>;
+  weekRange?: { startsAt: string; endsAt: string };
   onSaved?: () => void;
   onClose?: () => void;
 };
@@ -40,6 +42,7 @@ export function StaffStandardHoursPanel({
   staffName,
   initialDays,
   clinics,
+  weekRange,
   onSaved,
   onClose,
 }: StaffStandardHoursPanelProps) {
@@ -60,7 +63,7 @@ export function StaffStandardHoursPanel({
     setDays(applyStandardHoursTemplate(templateId));
   }
 
-  function handleSave() {
+  function handleSave(andGenerate: boolean) {
     setError(null);
     startTransition(async () => {
       const result = await saveStaffStandardHoursAction({ tenantId, staffId, days });
@@ -68,16 +71,30 @@ export function StaffStandardHoursPanel({
         setError(result.error);
         return;
       }
+      if (andGenerate && weekRange) {
+        const gen = await generateRosterFromStandardHoursAction({
+          tenantId,
+          rangeStartIso: weekRange.startsAt,
+          rangeEndIso: weekRange.endsAt,
+          staffIds: [staffId],
+          overwriteGeneratedOnly: false,
+        });
+        if (!gen.ok) {
+          setError(gen.error);
+          return;
+        }
+      }
       onSaved?.();
     });
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="staff-standard-hours-panel">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-slate-100">Standard hours</h3>
-          <p className="mt-0.5 text-xs text-slate-400">{staffName}</p>
+          <h3 className="text-sm font-semibold text-slate-100">
+            {formatStandardHoursDrawerTitle(staffName)}
+          </h3>
         </div>
         {onClose ? (
           <button
@@ -209,9 +226,28 @@ export function StaffStandardHoursPanel({
             <span className="ml-2 text-slate-500">· RDO days excluded</span>
           ) : null}
         </p>
-        <Button type="button" size="sm" disabled={pending || !validation.valid} onClick={handleSave}>
-          {pending ? "Saving…" : "Save standard hours"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={pending || !validation.valid}
+            onClick={() => handleSave(false)}
+          >
+            {pending ? "Saving…" : "Save"}
+          </Button>
+          {weekRange ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={pending || !validation.valid}
+              onClick={() => handleSave(true)}
+              data-testid="save-and-generate-roster"
+            >
+              {pending ? "Saving…" : "Save and generate roster"}
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {validation.warnings.length > 0 ? (
