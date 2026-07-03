@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
@@ -336,7 +337,15 @@ export function OnboardingCentreClient({
               ) : (
                 staff.map((row) => (
                   <tr key={row.id} className="align-top">
-                    <td className="px-4 py-3 text-slate-100">{row.fullName}</td>
+                    <td className="px-4 py-3 text-slate-100">
+                      <Link
+                        href={`/fi-admin/${tenantId}/workforce-os/staff/${row.id}`}
+                        className="font-medium text-[#22C1FF] hover:underline"
+                        data-testid="onboarding-profile-link"
+                      >
+                        {row.fullName}
+                      </Link>
+                    </td>
                     <td className="px-4 py-3 text-slate-300">{row.email ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-300">{row.roleCode ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-300">{row.clinicName ?? "—"}</td>

@@ -77,6 +77,10 @@ export function buildStaffDirectoryPrimaryActionHref(tenantBase: string): string
   return buildStaffOnboardingCentreHref(tenantBase);
 }
 
+export function buildStaffProfileHrefFromBase(tenantBase: string, staffId: string): string {
+  return `${tenantBase.replace(/\/$/, "")}/workforce-os/staff/${staffId.trim()}`;
+}
+
 export function formatReadinessScoreLabel(score: number | null | undefined): string | null {
   if (score == null || Number.isNaN(score)) return null;
   return `Readiness ${Math.round(score)}%`;

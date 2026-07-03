@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 
@@ -254,6 +255,13 @@ export function StaffAccessCentreClient({
                   <td className="px-4 py-3">
                     <p className="font-medium text-[#F8FAFC]">{row.fullName}</p>
                     <p className="text-xs text-[#64748B]">{row.email ?? "—"}</p>
+                    <Link
+                      href={`/fi-admin/${tenantId}/workforce-os/staff/${row.staffMemberId}`}
+                      className="mt-1 inline-block text-xs font-medium text-[#22C1FF] hover:underline"
+                      data-testid="staff-access-profile-link"
+                    >
+                      Open profile
+                    </Link>
                   </td>
                   <td className="px-4 py-3 capitalize text-[#CBD5E1]">
                     {row.roleCode?.replace(/_/g, " ") ?? "—"}

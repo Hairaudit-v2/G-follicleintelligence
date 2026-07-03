@@ -39,11 +39,17 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function AuditRow({ row }: { row: StaffIdentityReadinessAuditRow }) {
+function AuditRow({ row, tenantId }: { row: StaffIdentityReadinessAuditRow; tenantId: string }) {
+  const profileHref = `/fi-admin/${tenantId}/workforce-os/staff/${row.staffMemberId}`;
+
   return (
     <tr className="border-t border-white/5 align-top">
       <td className="px-3 py-3 text-sm text-[#F8FAFC]">
-        <div className="font-medium">{row.displayLabel}</div>
+        <div className="font-medium">
+          <Link href={profileHref} className="text-[#22C1FF] hover:underline" data-testid="identity-audit-profile-link">
+            {row.displayLabel}
+          </Link>
+        </div>
         {row.roleCode ? (
           <div className="mt-1 text-xs text-[#94A3B8]">{row.roleCode}</div>
         ) : null}
@@ -149,7 +155,7 @@ export function StaffIdentityReadinessAuditClient({
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => <AuditRow key={row.staffMemberId} row={row} />)
+                rows.map((row) => <AuditRow key={row.staffMemberId} row={row} tenantId={tenantId} />)
               )}
             </tbody>
           </table>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { WorkforceOsStaffProfileClient } from "@/src/components/fi/workforce/WorkforceOsStaffProfileClient";
 import { loadWorkforceOsStaffProfilePage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { loadStaffProfileHubOverview } from "@/src/lib/workforce/staffProfileHub.server";
 
 export const metadata = {
   title: "Staff Profile · Team",
@@ -23,12 +24,15 @@ export default async function WorkforceOsStaffProfilePage({
   const data = await loadWorkforceOsStaffProfilePage(tenantId.trim(), staffId.trim());
   if (!data) notFound();
 
+  const overview = await loadStaffProfileHubOverview(tenantId.trim(), data.lifecycle);
+
   return (
     <div className="mx-auto max-w-4xl pb-8">
       <WorkforceOsStaffProfileClient
         tenantId={tenantId.trim()}
         lifecycle={data.lifecycle}
         audit={data.audit}
+        overview={overview}
         canManage={data.canManage}
         iiohrCandidates={data.iiohrCandidates}
       />

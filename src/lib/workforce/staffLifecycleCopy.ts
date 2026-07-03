@@ -70,6 +70,16 @@ export function buildStaffEntitlementsHref(tenantId: string): string {
   return `${tenantAdminBase(tenantId)}/settings/staff-access`;
 }
 
+/** Canonical WorkforceOS staff profile hub — one lifecycle overview per staff member. */
+export function buildStaffProfileHref(tenantId: string, staffId: string): string {
+  return `${tenantAdminBase(tenantId)}/workforce-os/staff/${staffId.trim()}`;
+}
+
+/** Canonical profile href when only fi_staff id is known (loader accepts fi_staff or fi_staff_members id). */
+export function buildStaffProfileHrefFromFiStaff(tenantId: string, fiStaffId: string): string {
+  return buildStaffProfileHref(tenantId, fiStaffId);
+}
+
 /** Canonical lifecycle destinations for nav integrity tests. */
 export function buildStaffLifecycleNavIntegrityLinks(tenantId: string): StaffLifecycleNavLink[] {
   return [
@@ -112,4 +122,13 @@ export function buildStaffLifecycleNavIntegrityLinks(tenantId: string): StaffLif
       helper: STAFF_LIFECYCLE_HELPERS.staffEntitlements,
     },
   ];
+}
+
+/** Profile hub is canonical per-staff lifecycle surface (Phase 2). */
+export function buildStaffProfileNavLink(tenantId: string, staffId: string): StaffLifecycleNavLink {
+  return {
+    id: "staff_profile",
+    label: "Staff profile",
+    href: buildStaffProfileHref(tenantId, staffId),
+  };
 }

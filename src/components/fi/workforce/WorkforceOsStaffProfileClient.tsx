@@ -12,17 +12,30 @@ import {
   StaffEditModal,
 } from "@/src/components/fi/workforce/StaffLifecycleModals";
 import { StaffLifecyclePanel } from "@/src/components/fi/workforce/StaffLifecyclePanel";
+import { StaffProfileOverviewPanel } from "@/src/components/fi/workforce/StaffProfileOverviewPanel";
+import type { StaffProfileOverviewModel } from "@/src/lib/workforce/staffProfileHubCore";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 import {
   isExternallyManagedStaff,
   resolveIdentitySourceBadge,
 } from "@/src/lib/workforce-os/staffLifecycleCore";
 import { resolveStaffLifecycleOperationalPresentation } from "@/src/lib/workforce-os/staffLifecyclePresentation";
+import { cn } from "@/lib/utils";
+
+type ProfileTab = "overview" | "details" | "lifecycle" | "audit";
+
+const TABS: { id: ProfileTab; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "details", label: "Details" },
+  { id: "lifecycle", label: "Lifecycle & HR" },
+  { id: "audit", label: "Audit" },
+];
 
 export function WorkforceOsStaffProfileClient({
   tenantId,
   lifecycle,
   audit,
+  overview,
   canManage,
   iiohrCandidates,
 }: {
@@ -35,15 +48,17 @@ export function WorkforceOsStaffProfileClient({
     metadata: Record<string, unknown>;
     created_at: string;
   }[];
+  overview: StaffProfileOverviewModel;
   canManage: boolean;
   iiohrCandidates: { id: string; full_name: string | null; email: string | null }[];
 }) {
   const base = `/fi-admin/${tenantId}/workforce-os`;
+  const profileHref = `${base}/staff/${lifecycle.id}`;
+  const [tab, setTab] = useState<ProfileTab>("overview");
   const [editOpen, setEditOpen] = useState(false);
   const [employmentOpen, setEmploymentOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
-  const [auditOpen, setAuditOpen] = useState(false);
 
   const identityBadge = resolveIdentitySourceBadge(lifecycle.identity_source);
   const external = isExternallyManagedStaff(lifecycle);
@@ -55,13 +70,13 @@ export function WorkforceOsStaffProfileClient({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-            WorkforceOS
+            WorkforceOS · Staff profile
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC]">
             {lifecycle.full_name}
           </h1>
           <p className="mt-2 text-sm text-[#94A3B8]">
-            Staff lifecycle profile — employment governance and HR identity management.
+            One profile for onboarding, access, readiness, and roster status.
           </p>
         </div>
         {canManage ? (
@@ -80,72 +95,101 @@ export function WorkforceOsStaffProfileClient({
                 Link HR Identity
               </Button>
             ) : null}
-            <Button size="sm" variant="ghost" onClick={() => setAuditOpen((v) => !v)}>
-              View Audit Timeline
-            </Button>
           </div>
         ) : null}
       </div>
 
-      <DashboardCard className="p-6">
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#E2E8F0]">
-            {identityBadge.label}
-          </span>
-          <span className="rounded-full border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3 py-1 text-xs font-semibold text-[#7DD3FC]">
-            {lifecycleState.label}
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#E2E8F0]">
-            {hrLinked ? "HR Linked" : "No HR Link"}
-          </span>
-          {lifecycle.archived_at ? (
-            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
-              Archived
-            </span>
-          ) : (
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-              Active directory
-            </span>
-          )}
-        </div>
-        {external ? (
-          <p className="mt-4 text-sm text-sky-100/90">
-            Managed externally — editing restricted on identity fields.
-          </p>
-        ) : null}
-        <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-[#64748B]">Email</dt>
-            <dd className="mt-1 text-[#E2E8F0]">{lifecycle.email ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-[#64748B]">Phone</dt>
-            <dd className="mt-1 text-[#E2E8F0]">{lifecycle.phone ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-[#64748B]">Role</dt>
-            <dd className="mt-1 capitalize text-[#E2E8F0]">
-              {(lifecycle.role_code ?? "—").replace(/_/g, " ")}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[#64748B]">Identity source</dt>
-            <dd className="mt-1 text-[#E2E8F0]">{lifecycle.identity_source.replace(/_/g, " ")}</dd>
-          </div>
-          <div>
-            <dt className="text-[#64748B]">Timezone</dt>
-            <dd className="mt-1 font-mono text-xs text-[#CBD5E1]">{lifecycle.timezone ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-[#64748B]">Notes</dt>
-            <dd className="mt-1 text-[#E2E8F0]">{lifecycle.notes ?? "—"}</dd>
-          </div>
-        </dl>
-      </DashboardCard>
+      <nav className="flex flex-wrap gap-2 border-b border-white/10 pb-3" aria-label="Staff profile tabs">
+        {TABS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setTab(item.id)}
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+              tab === item.id
+                ? "bg-[#22C1FF]/20 text-[#22C1FF]"
+                : "text-[#94A3B8] hover:bg-white/5 hover:text-[#E2E8F0]"
+            )}
+            data-testid={`staff-profile-tab-${item.id}`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
 
-      <StaffLifecyclePanel lifecycle={lifecycle} />
+      {tab === "overview" ? (
+        <StaffProfileOverviewPanel
+          name={lifecycle.full_name}
+          roleLabel={lifecycle.role_code}
+          status={overview.unifiedStatus}
+          blockers={overview.blockers}
+          actions={overview.actions}
+          progressStages={overview.progressStages}
+        />
+      ) : null}
 
-      {auditOpen ? (
+      {tab === "details" ? (
+        <DashboardCard className="p-6">
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#E2E8F0]">
+              {identityBadge.label}
+            </span>
+            <span className="rounded-full border border-[#22C1FF]/30 bg-[#22C1FF]/10 px-3 py-1 text-xs font-semibold text-[#7DD3FC]">
+              {lifecycleState.label}
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#E2E8F0]">
+              {hrLinked ? "HR Linked" : "No HR Link"}
+            </span>
+            {lifecycle.archived_at ? (
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                Archived
+              </span>
+            ) : (
+              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                Active directory
+              </span>
+            )}
+          </div>
+          {external ? (
+            <p className="mt-4 text-sm text-sky-100/90">
+              Managed externally — editing restricted on identity fields.
+            </p>
+          ) : null}
+          <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-[#64748B]">Email</dt>
+              <dd className="mt-1 text-[#E2E8F0]">{lifecycle.email ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Phone</dt>
+              <dd className="mt-1 text-[#E2E8F0]">{lifecycle.phone ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Role</dt>
+              <dd className="mt-1 capitalize text-[#E2E8F0]">
+                {(lifecycle.role_code ?? "—").replace(/_/g, " ")}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Identity source</dt>
+              <dd className="mt-1 text-[#E2E8F0]">{lifecycle.identity_source.replace(/_/g, " ")}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Timezone</dt>
+              <dd className="mt-1 font-mono text-xs text-[#CBD5E1]">{lifecycle.timezone ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-[#64748B]">Notes</dt>
+              <dd className="mt-1 text-[#E2E8F0]">{lifecycle.notes ?? "—"}</dd>
+            </div>
+          </dl>
+        </DashboardCard>
+      ) : null}
+
+      {tab === "lifecycle" ? <StaffLifecyclePanel lifecycle={lifecycle} /> : null}
+
+      {tab === "audit" ? (
         <DashboardCard className="p-6">
           <h2 className="text-lg font-semibold text-[#F8FAFC]">Audit timeline</h2>
           {audit.length === 0 ? (
@@ -169,8 +213,12 @@ export function WorkforceOsStaffProfileClient({
       ) : null}
 
       <p className="text-center text-sm text-[#64748B]">
-        <Link href={`${base}`} className="underline-offset-2 hover:underline">
+        <Link href={`${base}/directory`} className="underline-offset-2 hover:underline">
           Back to WorkforceOS directory
+        </Link>
+        {" · "}
+        <Link href={profileHref} className="underline-offset-2 hover:underline">
+          Profile overview
         </Link>
         {lifecycle.fi_staff_id ? (
           <>
@@ -179,7 +227,7 @@ export function WorkforceOsStaffProfileClient({
               href={`/fi-admin/${tenantId}/staff/${lifecycle.fi_staff_id}/twin`}
               className="underline-offset-2 hover:underline"
             >
-              Staff Twin
+              Staff Twin (operational view)
             </Link>
           </>
         ) : null}

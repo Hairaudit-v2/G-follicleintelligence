@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 
 import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
@@ -116,7 +117,14 @@ export function RosterEventStaffingCard({
             >
               <div>
                 <p className="font-medium text-slate-200">
-                  {row.staffName} · <span className="capitalize">{row.assignedRole}</span>
+                  <Link
+                    href={`/fi-admin/${tenantId}/workforce-os/staff/${row.staffId}`}
+                    className="text-cyan-300 hover:underline"
+                    data-testid="roster-staff-profile-link"
+                  >
+                    {row.staffName}
+                  </Link>{" "}
+                  · <span className="capitalize">{row.assignedRole}</span>
                 </p>
                 <p className="text-slate-500">
                   {row.assignmentStatus}

@@ -42,20 +42,39 @@ export function StaffStatusCard({
   roleLabel,
   status,
   compact = false,
+  extended = false,
   className,
 }: {
   name: string;
   roleLabel?: string | null;
-  status: StaffUnifiedStatusSnapshot;
+  status: StaffUnifiedStatusSnapshot & {
+    onboardingLabel?: string | null;
+    clinicalEligibilityLabel?: string | null;
+    trainingLabel?: string | null;
+    sopLabel?: string | null;
+    rosterLabel?: string | null;
+    identityLinkLabel?: string | null;
+    employmentLabel?: string;
+  };
   compact?: boolean;
+  extended?: boolean;
   className?: string;
 }) {
   const pills: { label: string; className: string }[] = [
     {
-      label: status.operationalLabel,
+      label: status.employmentLabel ?? status.operationalLabel,
       className: pillToneForOperationalState(status.operationalState),
     },
   ];
+
+  if (extended && status.onboardingLabel) {
+    pills.push({
+      label: status.onboardingLabel,
+      className: status.onboardingLabel.includes("complete")
+        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+        : "bg-sky-500/15 text-sky-300 ring-sky-500/25",
+    });
+  }
 
   if (status.loginLabel) {
     pills.push({
@@ -63,6 +82,14 @@ export function StaffStatusCard({
       className: status.isAccessSuspended
         ? "bg-rose-500/15 text-rose-300 ring-rose-500/25"
         : "bg-slate-500/15 text-slate-300 ring-slate-500/20",
+    });
+  }
+  if (status.inviteLabel && extended) {
+    pills.push({
+      label: status.inviteLabel,
+      className: status.inviteLabel.includes("Accepted")
+        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+        : "bg-amber-500/15 text-amber-200 ring-amber-500/25",
     });
   }
   if (status.pinLabel) {
@@ -79,10 +106,48 @@ export function StaffStatusCard({
       className: "bg-violet-500/15 text-violet-200 ring-violet-500/25",
     });
   }
+  if (extended && status.clinicalEligibilityLabel) {
+    pills.push({
+      label: status.clinicalEligibilityLabel,
+      className: status.clinicalEligibilityLabel.includes("eligible")
+        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+        : "bg-amber-500/15 text-amber-200 ring-amber-500/25",
+    });
+  }
   if (status.complianceLabel) {
     pills.push({
       label: status.complianceLabel,
       className: "bg-amber-500/15 text-amber-200 ring-amber-500/25",
+    });
+  }
+  if (extended && status.trainingLabel) {
+    pills.push({
+      label: status.trainingLabel,
+      className: status.trainingLabel.toLowerCase().includes("complete")
+        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+        : "bg-amber-500/15 text-amber-200 ring-amber-500/25",
+    });
+  }
+  if (extended && status.sopLabel) {
+    pills.push({
+      label: status.sopLabel,
+      className: "bg-amber-500/15 text-amber-200 ring-amber-500/25",
+    });
+  }
+  if (extended && status.rosterLabel) {
+    pills.push({
+      label: status.rosterLabel,
+      className: status.rosterLabel.includes("Next shift")
+        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+        : "bg-slate-500/15 text-slate-400 ring-slate-500/20",
+    });
+  }
+  if (extended && status.identityLinkLabel) {
+    pills.push({
+      label: status.identityLinkLabel,
+      className: status.identityLinkLabel.includes("linked")
+        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+        : "bg-rose-500/15 text-rose-300 ring-rose-500/25",
     });
   }
 

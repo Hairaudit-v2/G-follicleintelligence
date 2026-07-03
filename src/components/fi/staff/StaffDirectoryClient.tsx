@@ -280,7 +280,21 @@ export function StaffDirectoryClient({
           aria-label="Edit staff member"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-[#F8FAFC]">Edit staff</h2>
+            <div>
+              <h2 className="text-sm font-semibold text-[#F8FAFC]">Edit staff</h2>
+              {editingRow ? (
+                <p className="mt-1 text-xs text-[#64748B]">
+                  For onboarding, access, readiness and roster status,{" "}
+                  <Link
+                    href={`/fi-admin/${tenantId}/workforce-os/staff/${editingRow.id}`}
+                    className="font-medium text-[#22C1FF] hover:underline"
+                  >
+                    open Workforce profile
+                  </Link>
+                  .
+                </p>
+              ) : null}
+            </div>
             <button
               type="button"
               onClick={closePanel}

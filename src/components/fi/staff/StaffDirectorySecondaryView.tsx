@@ -42,6 +42,7 @@ function StaffRowCard({
   row,
   intel,
   base,
+  workforceOsBase,
   canManage,
   showTwinLinks,
   viewerStaffId,
@@ -50,6 +51,7 @@ function StaffRowCard({
   row: StaffDirectoryRowView;
   intel: StaffWorkforceIntelligence;
   base: string;
+  workforceOsBase: string;
   canManage: boolean;
   showTwinLinks: boolean;
   viewerStaffId: string | null;
@@ -95,6 +97,13 @@ function StaffRowCard({
           </StatusPill>
         </div>
         <div className="flex shrink-0 gap-3 text-xs">
+          <Link
+            href={`${workforceOsBase}/staff/${row.id}`}
+            className="font-medium text-[#22C1FF] hover:underline"
+            data-testid="staff-directory-profile-link"
+          >
+            Profile
+          </Link>
           {canViewTwin && showTwinLinks ? (
             <Link href={`${base}/staff/${row.id}/twin`} className="font-medium text-[#22C1FF] hover:underline">
               View
@@ -247,6 +256,7 @@ export function StaffDirectorySecondaryView({
                 row={row}
                 intel={resolveStaffWorkforceIntelligence(row, intelligenceByStaffId[row.id])}
                 base={base}
+                workforceOsBase={workforceOsBase}
                 canManage={canManage}
                 showTwinLinks={showTwinLinks}
                 viewerStaffId={viewerStaffId}
