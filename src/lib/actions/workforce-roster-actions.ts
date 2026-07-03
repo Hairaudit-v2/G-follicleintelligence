@@ -20,6 +20,15 @@ import {
   type FiStaffEventAssignmentRow,
   type FiStaffShiftRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
+import {
+  copyPreviousWeekRosterForTenant,
+  generateRosterFromStandardHoursForTenant,
+} from "@/src/lib/workforce-os/rosterGeneration.server";
+import {
+  saveStaffStandardHours,
+  type SaveStaffStandardHoursResult,
+} from "@/src/lib/workforce-os/staffStandardHours.server";
+import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 const eventSourceSchema = z.enum(["booking", "surgery", "calendar", "manual"]);
 const availabilityBlockTypeSchema = z.enum([
@@ -90,6 +99,7 @@ function revalidateRosterSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}/hr-os`);
   revalidatePath(`/fi-admin/${tid}/hr-os/roster`);
+  revalidatePath(`/fi-admin/${tid}/workforce-os/roster`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}/tomorrow`);
   revalidatePath(`/fi-admin/${tid}/surgery-readiness`);
@@ -295,6 +305,131 @@ export async function cancelAvailabilityBlockAction(
 
     revalidateRosterSurfaces(parsed.tenantId);
     return { ok: true, data: block };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const saveStandardHoursSchema = z.object({
+  tenantId: z.string().uuid(),
+  staffId: z.string().uuid(),
+  days: z.array(
+    z.object({
+      weekday: z.number().int().min(0).max(6),
+      is_working_day: z.boolean(),
+      start_time: z.string().nullable(),
+      end_time: z.string().nullable(),
+      break_minutes: z.number().int().min(0).max(480).nullable().optional(),
+      clinic_id: z.string().uuid().nullable().optional(),
+      shift_label: z.string().max(64).nullable().optional(),
+      role_code: z.string().max(64).nullable().optional(),
+    })
+  ),
+});
+
+const generateRosterSchema = z.object({
+  tenantId: z.string().uuid(),
+  rangeStartIso: z.string().min(1),
+  rangeEndIso: z.string().min(1),
+  staffIds: z.array(z.string().uuid()).optional(),
+  overwriteGeneratedOnly: z.boolean().optional(),
+});
+
+const copyWeekSchema = z.object({
+  tenantId: z.string().uuid(),
+  targetWeekStartIso: z.string().min(1),
+  staffIds: z.array(z.string().uuid()).optional(),
+});
+
+export async function saveStaffStandardHoursAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<SaveStaffStandardHoursResult>> {
+  try {
+    const parsed = saveStandardHoursSchema.parse(body);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const result = await saveStaffStandardHours({
+      tenantId: parsed.tenantId,
+      staffId: parsed.staffId,
+      days: parsed.days as StaffStandardHoursDayInput[],
+    });
+    if (!result.validation.valid) {
+      return {
+        ok: false,
+        error: result.validation.warnings.map((w) => w.message).join(" "),
+      };
+    }
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function generateRosterFromStandardHoursAction(body: unknown): Promise<
+  WorkforceRosterActionResult<{
+    createdCount: number;
+    replacedCount: number;
+    skippedCount: number;
+  }>
+> {
+  try {
+    const parsed = generateRosterSchema.parse(body);
+    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const authUserId = await resolveAuthUserId(null);
+
+    const result = await generateRosterFromStandardHoursForTenant({
+      tenantId: parsed.tenantId,
+      rangeStartIso: parsed.rangeStartIso,
+      rangeEndIso: parsed.rangeEndIso,
+      staffIds: parsed.staffIds,
+      overwriteGeneratedOnly: parsed.overwriteGeneratedOnly,
+      createdBy: authUserId ?? fiUserId,
+    });
+
+    await logRosterAuditEvent({
+      action: "roster_generated_from_standard_hours",
+      created_count: result.createdCount,
+      replaced_count: result.replacedCount,
+      actor_user_id: authUserId ?? fiUserId,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return {
+      ok: true,
+      data: {
+        createdCount: result.createdCount,
+        replacedCount: result.replacedCount,
+        skippedCount: result.skips.length,
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function copyPreviousWeekRosterAction(body: unknown): Promise<
+  WorkforceRosterActionResult<{ createdCount: number }>
+> {
+  try {
+    const parsed = copyWeekSchema.parse(body);
+    const { fiUserId } = await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const authUserId = await resolveAuthUserId(null);
+
+    const result = await copyPreviousWeekRosterForTenant({
+      tenantId: parsed.tenantId,
+      targetWeekStartIso: parsed.targetWeekStartIso,
+      staffIds: parsed.staffIds,
+      createdBy: authUserId ?? fiUserId,
+    });
+
+    await logRosterAuditEvent({
+      action: "roster_copied_previous_week",
+      created_count: result.createdCount,
+      actor_user_id: authUserId ?? fiUserId,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: { createdCount: result.createdCount } };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

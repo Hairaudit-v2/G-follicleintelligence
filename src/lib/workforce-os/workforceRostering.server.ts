@@ -31,6 +31,7 @@ import {
   type StaffShiftRecord,
   type ValidateClinicalEventStaffingResult,
 } from "@/src/lib/workforce-os/workforceRosteringEngine";
+import type { StandardHoursShiftSource } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 export type FiStaffAvailabilityBlockRow = StaffAvailabilityBlockRecord & {
   tenant_id: string;
@@ -43,6 +44,7 @@ export type FiStaffShiftRow = StaffShiftRecord & {
   staff_id: string;
   clinic_id: string | null;
   notes: string | null;
+  shift_source?: StandardHoursShiftSource | null;
 };
 
 export type FiClinicalStaffingTemplateRow = ClinicalStaffingTemplateRecord & {
@@ -167,6 +169,7 @@ function mapShift(row: Record<string, unknown>): FiStaffShiftRow {
     ends_at: String(row.ends_at),
     status: row.status as FiStaffShiftRow["status"],
     notes: row.notes != null ? String(row.notes) : null,
+    shift_source: (row.shift_source as StandardHoursShiftSource | undefined) ?? "manual",
   };
 }
 
@@ -525,6 +528,7 @@ export async function createStaffShift(input: {
   endsAt: string;
   notes?: string | null;
   createdBy?: string | null;
+  shiftSource?: StandardHoursShiftSource;
 }): Promise<FiStaffShiftRow> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const supabase = supabaseAdmin();
@@ -539,6 +543,7 @@ export async function createStaffShift(input: {
       ends_at: input.endsAt,
       notes: input.notes?.trim() || null,
       created_by: input.createdBy?.trim() || null,
+      shift_source: input.shiftSource ?? "manual",
     })
     .select("*")
     .single();

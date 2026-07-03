@@ -86,6 +86,8 @@ export const serverEnvSchema = z.object({
   PATHOLOGY_EMAIL_INBOUND_DOMAIN: optionalString,
   PATHOLOGY_EMAIL_ALLOWED_SENDERS: optionalString,
   PATHOLOGY_EMAIL_MAX_ATTACHMENT_MB: optionalString,
+  GENERIC_CLINIC_EMAIL_INGESTION_ENABLED: optionalString,
+  GENERIC_CLINIC_EMAIL_WEBHOOK_SECRET: optionalString,
   AWS_ACCESS_KEY_ID: optionalString,
   AWS_SECRET_ACCESS_KEY: optionalString,
   AWS_REGION: optionalString,

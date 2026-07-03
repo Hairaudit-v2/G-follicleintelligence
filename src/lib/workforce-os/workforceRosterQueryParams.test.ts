@@ -44,11 +44,12 @@ test("resolveRosterPreselectedEventKey returns composite key", () => {
   assert.equal(key, "booking:55555555-5555-4555-8555-555555555555");
 });
 
-test("defaultRosterCommandCentreDateRange spans today plus seven days", () => {
+test("defaultRosterCommandCentreDateRange spans current Mon–Sun week", () => {
   const now = new Date("2026-06-22T15:00:00.000Z");
   const range = defaultRosterCommandCentreDateRange(now);
   assert.equal(range.startsAt, "2026-06-22T00:00:00.000Z");
-  assert.equal(range.endsAt, "2026-06-30T00:00:00.000Z");
+  assert.equal(range.endsAt, "2026-06-29T00:00:00.000Z");
+  assert.equal(range.weekStart, "2026-06-22");
 });
 
 test("rosterDisplayStatusMatchesFilter maps no_template to not_configured", () => {

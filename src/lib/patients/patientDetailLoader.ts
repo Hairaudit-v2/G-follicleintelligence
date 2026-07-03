@@ -146,9 +146,15 @@ async function loadPatientBookingRows(
 export async function loadPatientDetailPayload(
   tenantId: string,
   patientId: string,
-  client?: SupabaseClient
+  client?: SupabaseClient,
+  opts?: { viewerCanReadClinicalPhi?: boolean }
 ): Promise<PatientDetailPayload | null> {
-  const loaded: PatientProfileLoadResult = await loadPatientProfile(tenantId, patientId, client);
+  const loaded: PatientProfileLoadResult = await loadPatientProfile(
+    tenantId,
+    patientId,
+    client,
+    opts
+  );
   if (!loaded.ok || loaded.mode !== "foundation") return null;
 
   const profile = loaded.data;

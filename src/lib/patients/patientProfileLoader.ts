@@ -183,7 +183,8 @@ function mapPerson(row: Record<string, unknown>): PatientProfilePerson {
 export async function loadPatientProfile(
   tenantId: string,
   patientSlug: string,
-  client?: SupabaseClient
+  client?: SupabaseClient,
+  opts?: { viewerCanReadClinicalPhi?: boolean }
 ): Promise<PatientProfileLoadResult> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
@@ -541,7 +542,7 @@ export async function loadPatientProfile(
         : null,
       images: timelineImages,
     },
-    { hrefContext: { tenantId: tid }, limit: 100, offset: 0, sort: "newest_first" }
+    { hrefContext: { tenantId: tid }, limit: 100, offset: 0, sort: "newest_first", viewerCanReadClinicalPhi: opts?.viewerCanReadClinicalPhi === true }
   );
 
   const summary = computePatientProfileSummaryMetrics({

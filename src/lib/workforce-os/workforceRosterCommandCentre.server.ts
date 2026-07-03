@@ -51,6 +51,13 @@ import {
   type FiStaffEventAssignmentRow,
   type FiStaffShiftRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
+import { loadActiveStandardHoursForTenant } from "@/src/lib/workforce-os/staffStandardHours.server";
+import {
+  mondayOfWeekIso,
+  weekDayIsoDates,
+  type StaffStandardHoursDayInput,
+} from "@/src/lib/workforce-os/staffStandardHoursCore";
+import type { StandardHoursShiftSource } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 export type RosterCommandCentreDateRange = {
   startsAt: string;
@@ -99,13 +106,33 @@ export type RosterCommandCentreSummaryMetrics = {
   eligibleStaffCount: number;
 };
 
+export type RosterGridShift = FiStaffShiftRow & {
+  staffName: string;
+  shift_source: StandardHoursShiftSource;
+};
+
+export type RosterGridAvailabilityCell = {
+  blockId: string;
+  staffId: string;
+  staffName: string;
+  blockType: string;
+  label: string;
+  startsAt: string;
+  endsAt: string;
+  localDate: string;
+};
+
 export type RosterCommandCentrePayload = {
   dateRange: RosterCommandCentreDateRange;
+  weekStart: string;
+  weekDayDates: string[];
   clinics: RosterCommandCentreClinicOption[];
   staffOptions: Array<{ id: string; name: string; role: string | null; isActive: boolean }>;
   events: RosterCommandCentreEvent[];
-  shifts: FiStaffShiftRow[];
+  shifts: RosterGridShift[];
   availabilityBlocks: FiStaffAvailabilityBlockRow[];
+  availabilityCells: RosterGridAvailabilityCell[];
+  standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
   summary: RosterCommandCentreSummaryMetrics;
   preselectedEventKey: string | null;
 };
@@ -113,7 +140,9 @@ export type RosterCommandCentrePayload = {
 export type LoadRosterCommandCentreInput = {
   tenantId: string;
   dateRange?: RosterCommandCentreDateRange;
+  weekStart?: string | null;
   clinicId?: string | null;
+  staffId?: string | null;
   eventType?: string | null;
   statusFilter?: RosterStaffingStatusFilter | null;
   preselectedEventKey?: string | null;
@@ -173,7 +202,12 @@ function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow {
     ends_at: String(row.ends_at),
     status: row.status as FiStaffShiftRow["status"],
     notes: row.notes != null ? String(row.notes) : null,
+    shift_source: (row.shift_source as StandardHoursShiftSource | undefined) ?? "manual",
   };
+}
+
+function localDateFromIso(iso: string): string {
+  return iso.slice(0, 10);
 }
 
 function mapAvailabilityBlockRow(row: Record<string, unknown>): FiStaffAvailabilityBlockRow {
@@ -451,11 +485,14 @@ export async function loadRosterCommandCentre(
 ): Promise<RosterCommandCentrePayload> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const dateRange = input.dateRange ?? defaultRosterCommandCentreDateRange();
+  const weekStart = input.weekStart?.trim() || mondayOfWeekIso(dateRange.startsAt.slice(0, 10));
+  const weekDayDates = weekDayIsoDates(weekStart);
   const clinicFilter = input.clinicId?.trim() || null;
+  const staffFilter = input.staffId?.trim() || null;
   const eventTypeFilter = input.eventType?.trim().toLowerCase() || null;
   const statusFilter = input.statusFilter ?? null;
 
-  const [clinics, staffRows, bookings, shiftsRes, blocksRes] = await Promise.all([
+  const [clinics, staffRows, bookings, shiftsRes, blocksRes, standardHoursMap] = await Promise.all([
     loadClinicsForTenant(tid),
     loadAllStaffForTenant(tid),
     loadBookingsForOperatorView({
@@ -473,7 +510,7 @@ export async function loadRosterCommandCentre(
       .gte("starts_at", dateRange.startsAt)
       .lt("starts_at", dateRange.endsAt)
       .order("starts_at", { ascending: true })
-      .limit(100),
+      .limit(500),
     supabaseAdmin()
       .from("fi_staff_availability_blocks")
       .select("*")
@@ -482,7 +519,8 @@ export async function loadRosterCommandCentre(
       .gte("starts_at", dateRange.startsAt)
       .lt("starts_at", dateRange.endsAt)
       .order("starts_at", { ascending: true })
-      .limit(100),
+      .limit(500),
+    loadActiveStandardHoursForTenant(tid),
   ]);
 
   if (shiftsRes.error) throw new Error(shiftsRes.error.message);
@@ -500,6 +538,55 @@ export async function loadRosterCommandCentre(
 
   const clinicNameById = new Map(clinics.map((c) => [c.id, c.displayName]));
   const staffNameById = new Map(staffRows.map((s) => [s.id, s.full_name?.trim() || "Staff"]));
+
+  let staffOptions = staffRows.map((s) => ({
+    id: s.id,
+    name: s.full_name?.trim() || "Staff",
+    role: s.staff_role,
+    isActive: s.is_active,
+  }));
+  if (staffFilter) {
+    staffOptions = staffOptions.filter((s) => s.id === staffFilter);
+  }
+
+  let shiftRows = (shiftsRes.data ?? []).map((row) => mapShiftRow(row as Record<string, unknown>));
+  if (staffFilter) {
+    shiftRows = shiftRows.filter((s) => s.staff_id === staffFilter);
+  }
+
+  const shifts: RosterGridShift[] = shiftRows.map((shift) => ({
+    ...shift,
+    staffName: staffNameById.get(shift.staff_id) ?? "Staff",
+    shift_source: shift.shift_source ?? "manual",
+  }));
+
+  let blockRows = (blocksRes.data ?? []).map((row) =>
+    mapAvailabilityBlockRow(row as Record<string, unknown>)
+  );
+  if (staffFilter) {
+    blockRows = blockRows.filter((b) => b.staff_id === staffFilter);
+  }
+
+  const availabilityCells: RosterGridAvailabilityCell[] = blockRows.map((block) => ({
+    blockId: block.id,
+    staffId: block.staff_id,
+    staffName: staffNameById.get(block.staff_id) ?? "Staff",
+    blockType: block.block_type,
+    label:
+      block.block_type === "leave" || block.block_type === "sick_leave"
+        ? "Leave"
+        : block.block_type === "unavailable"
+          ? "Unavailable"
+          : block.block_type.replace(/_/g, " "),
+    startsAt: block.starts_at,
+    endsAt: block.ends_at,
+    localDate: localDateFromIso(block.starts_at),
+  }));
+
+  const standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]> = {};
+  for (const [staffId, days] of standardHoursMap.entries()) {
+    standardHoursByStaffId[staffId] = days;
+  }
 
   let events = await buildBookingEvents({
     tenantId: tid,
@@ -526,18 +613,15 @@ export async function loadRosterCommandCentre(
 
   return {
     dateRange,
+    weekStart,
+    weekDayDates,
     clinics,
-    staffOptions: staffRows.map((s) => ({
-      id: s.id,
-      name: s.full_name?.trim() || "Staff",
-      role: s.staff_role,
-      isActive: s.is_active,
-    })),
+    staffOptions,
     events,
-    shifts: (shiftsRes.data ?? []).map((row) => mapShiftRow(row as Record<string, unknown>)),
-    availabilityBlocks: (blocksRes.data ?? []).map((row) =>
-      mapAvailabilityBlockRow(row as Record<string, unknown>)
-    ),
+    shifts,
+    availabilityBlocks: blockRows,
+    availabilityCells,
+    standardHoursByStaffId,
     summary,
     preselectedEventKey: input.preselectedEventKey?.trim() || null,
   };

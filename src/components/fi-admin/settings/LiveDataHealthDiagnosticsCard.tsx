@@ -121,12 +121,18 @@ export function LiveDataHealthDiagnosticsCard({
         </div>
 
         <div className="rounded-lg border border-white/[0.06] bg-[#0c1220]/50 p-4 sm:col-span-2">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-[#F8FAFC]">Email / activity</h3>
-            <StatusPill
-              ok={health.emailIngestionConfigured}
-              label={health.emailIngestionConfigured ? "Pathology enabled" : "Not configured"}
-            />
+            <div className="flex flex-wrap gap-2">
+              <StatusPill
+                ok={health.emailIngestionConfigured}
+                label={health.emailIngestionConfigured ? "Pathology enabled" : "Pathology off"}
+              />
+              <StatusPill
+                ok={health.genericEmailConfigured}
+                label={health.genericEmailConfigured ? "Generic email on" : "Generic email off"}
+              />
+            </div>
           </div>
           <dl className="mt-3 grid gap-2 text-sm text-[#94A3B8] sm:grid-cols-2">
             <div className="flex justify-between gap-4 sm:block">
@@ -134,10 +140,25 @@ export function LiveDataHealthDiagnosticsCard({
               <dd className="text-[#CBD5E1]">{health.recentActivityEventCount}</dd>
             </div>
             <div className="flex justify-between gap-4 sm:block">
-              <dt>Generic clinic email ingest</dt>
-              <dd className="text-[#CBD5E1]">Not implemented</dd>
+              <dt>Generic email last ingested</dt>
+              <dd className="text-[#CBD5E1]">{formatWhen(health.genericEmailLastIngestedAt)}</dd>
+            </div>
+            <div className="flex justify-between gap-4 sm:block">
+              <dt>Generic email activity (24h)</dt>
+              <dd className="text-[#CBD5E1]">{health.genericEmailRecentActivityCount}</dd>
+            </div>
+            <div className="flex justify-between gap-4 sm:block">
+              <dt>Unmatched / ambiguous (24h)</dt>
+              <dd className="text-[#CBD5E1]">
+                {health.genericEmailUnmatchedCount} / {health.genericEmailAmbiguousMatchCount}
+              </dd>
             </div>
           </dl>
+          <p className="mt-3 text-xs text-[#64748B]">
+            Pathology email ingestion is isolated from generic clinic email activity (
+            <code className="text-[#94A3B8]">fi_generic_clinic_email_activities</code>). Generic
+            email projects to LeadFlow/CRM when confidently matched.
+          </p>
         </div>
       </div>
     </section>

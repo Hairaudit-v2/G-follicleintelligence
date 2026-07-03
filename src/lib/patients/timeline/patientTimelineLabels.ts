@@ -17,6 +17,8 @@ const CRM_ACTIVITY_LABELS: Record<string, string> = {
   "lead_communication.created": "Contact log entry",
   "lead_communication.updated": "Contact log updated",
   "lead_communication.archived": "Contact log archived",
+  "email.clinic.inbound": "Inbound clinic email",
+  "email.clinic.outbound": "Outbound clinic email",
   "message.logged": "Message preview logged",
   "booking.updated": "Booking updated",
   "booking.created": "Booking activity",

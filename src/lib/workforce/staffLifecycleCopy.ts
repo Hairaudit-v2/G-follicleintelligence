@@ -55,7 +55,7 @@ export function buildStaffIdentityAuditHref(tenantId: string): string {
 }
 
 export function buildWorkforceRosterHref(tenantId: string): string {
-  return buildRosterCommandCentreHref({ tenantId });
+  return buildRosterCommandCentreHref({ tenantId, useWorkforceOsRoute: true });
 }
 
 export function buildStaffAccessCentreHrefForTenant(tenantId: string): string {

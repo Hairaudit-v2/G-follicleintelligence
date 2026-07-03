@@ -23,6 +23,11 @@ describe("buildLiveDataHealthWarnings", () => {
       hubSpotPromotedLeadCount: 0,
       hubSpotPromotedOpportunityCount: 0,
       emailIngestionConfigured: false,
+      genericEmailConfigured: false,
+      genericEmailLastIngestedAt: null,
+      genericEmailRecentActivityCount: 0,
+      genericEmailUnmatchedCount: 0,
+      genericEmailAmbiguousMatchCount: 0,
       now: NOW,
     });
     assert.ok(warnings.some((w) => w.includes("never synced")));
@@ -41,6 +46,11 @@ describe("buildLiveDataHealthWarnings", () => {
       hubSpotPromotedLeadCount: 0,
       hubSpotPromotedOpportunityCount: 0,
       emailIngestionConfigured: true,
+      genericEmailConfigured: false,
+      genericEmailLastIngestedAt: null,
+      genericEmailRecentActivityCount: 0,
+      genericEmailUnmatchedCount: 0,
+      genericEmailAmbiguousMatchCount: 0,
       now: NOW,
     });
     assert.ok(warnings.some((w) => w.includes("connector staging")));
@@ -86,6 +96,8 @@ describe("loadLiveDataHealthSummary", () => {
               fi_leads: 2,
               fi_external_record_mappings: 1,
               fi_pathology_email_routes: 0,
+              fi_generic_clinic_email_routes: 0,
+              fi_generic_clinic_email_activities: 0,
               fi_crm_activity_events: 7,
             };
             resolve(count(counts[table] ?? 0));

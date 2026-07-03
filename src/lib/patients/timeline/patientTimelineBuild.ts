@@ -10,6 +10,7 @@ import type {
   PatientTimelineItem,
   PatientTimelineSourceBundle,
 } from "./patientTimelineTypes";
+import { isGenericEmailActivityKind } from "@/src/lib/integrations/genericEmail/genericEmailActivityCore";
 
 const EXCLUDED_DUPLICATE_ACTIVITY_KINDS = new Set([
   "booking.created",
@@ -36,6 +37,7 @@ function hrefForBooking(ctx: PatientTimelineHrefContext, startAtIso: string): st
 function isSensitiveActivityKind(kind: string): boolean {
   const k = kind.trim();
   return (
+    isGenericEmailActivityKind(k) ||
     k === "message.logged" ||
     k.startsWith("lead_communication.") ||
     k.startsWith("lead_note.") ||
@@ -60,6 +62,12 @@ function safeActivityMetadataSummary(kind: string, detail: Record<string, unknow
     const typ = readString(detail, "communication_type");
     const parts = [typ, dir].filter(Boolean);
     return parts.length ? parts.join(" · ") : "Contact log";
+  }
+  if (isGenericEmailActivityKind(k)) {
+    const dir = readString(detail, "direction");
+    const preview = readString(detail, "subject_preview");
+    if (preview) return `${dir === "outbound" ? "Outbound" : "Inbound"} · ${preview}`;
+    return dir === "outbound" ? "Outbound clinic email" : "Inbound clinic email";
   }
   if (k.startsWith("task.")) {
     return "Task";
@@ -174,6 +182,12 @@ export function buildPatientTimeline(
 
   for (const ev of bundle.activity) {
     if (EXCLUDED_DUPLICATE_ACTIVITY_KINDS.has(ev.activity_kind.trim())) continue;
+    if (
+      isGenericEmailActivityKind(ev.activity_kind) &&
+      options.viewerCanReadClinicalPhi !== true
+    ) {
+      continue;
+    }
     const sens = isSensitiveActivityKind(ev.activity_kind);
     const meta =
       ev.detail && typeof ev.detail === "object" && !Array.isArray(ev.detail) ? ev.detail : {};

@@ -37,7 +37,7 @@ describe("WorkforceOsSubNav", () => {
     assert.ok(roster);
     assert.equal(roster.label, STAFF_LIFECYCLE_LABELS.roster);
     assert.equal(roster.href, buildWorkforceRosterHref(tenantId));
-    assert.match(roster.href, /\/hr-os\/roster$/);
+    assert.match(roster.href, /\/workforce-os\/roster$/);
   });
 
   it("buildWorkforceOsNavItems includes command centre and lifecycle modules", () => {
@@ -67,11 +67,11 @@ describe("WorkforceOsSubNav", () => {
       true
     );
     assert.equal(
-      isWorkforceOsNavActive(`/fi-admin/${tenantId}/hr-os/roster`, base, "roster"),
+      isWorkforceOsNavActive(`/fi-admin/${tenantId}/workforce-os/roster`, base, "roster"),
       true
     );
     assert.equal(
-      isWorkforceOsNavActive(`/fi-admin/${tenantId}/hr-os/roster?eventId=1`, base, "roster"),
+      isWorkforceOsNavActive(`/fi-admin/${tenantId}/workforce-os/roster?eventId=1`, base, "roster"),
       true
     );
   });

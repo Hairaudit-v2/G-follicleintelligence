@@ -3,10 +3,13 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isGenericClinicEmailIngestionEnabledFromEnv } from "@/src/lib/integrations/genericEmail/genericEmailActivityIngestionEnv";
 import { isPathologyEmailIngestionEnabledFromEnv } from "@/src/lib/pathology/email/pathologyEmailIngestionEnv";
 
 const STALE_SYNC_HOURS = 24;
 const RECENT_ACTIVITY_HOURS = 24;
+const STALE_GENERIC_EMAIL_HOURS = 48;
+const GENERIC_EMAIL_UNMATCHED_SPIKE = 25;
 
 export type LiveDataHealthSummary = {
   tenantId: string;
@@ -22,6 +25,11 @@ export type LiveDataHealthSummary = {
   hubSpotStagedDealCount: number;
   hubSpotPromotedOpportunityCount: number;
   emailIngestionConfigured: boolean;
+  genericEmailConfigured: boolean;
+  genericEmailLastIngestedAt: string | null;
+  genericEmailRecentActivityCount: number;
+  genericEmailUnmatchedCount: number;
+  genericEmailAmbiguousMatchCount: number;
   recentActivityEventCount: number;
   warnings: string[];
 };
@@ -50,6 +58,11 @@ export function buildLiveDataHealthWarnings(input: {
   hubSpotPromotedLeadCount: number;
   hubSpotPromotedOpportunityCount: number;
   emailIngestionConfigured: boolean;
+  genericEmailConfigured: boolean;
+  genericEmailLastIngestedAt: string | null;
+  genericEmailRecentActivityCount: number;
+  genericEmailUnmatchedCount: number;
+  genericEmailAmbiguousMatchCount: number;
   now?: Date;
 }): string[] {
   const warnings: string[] = [];
@@ -87,7 +100,28 @@ export function buildLiveDataHealthWarnings(input: {
   }
 
   if (!input.emailIngestionConfigured) {
-    warnings.push("Pathology email ingestion is not enabled (generic clinic email ingest is not implemented).");
+    warnings.push("Pathology email ingestion is not enabled.");
+  }
+
+  if (input.genericEmailConfigured) {
+    const staleHours = hoursSince(input.genericEmailLastIngestedAt, now);
+    if (staleHours == null) {
+      warnings.push("Generic clinic email is configured but no activity has been ingested yet.");
+    } else if (staleHours > STALE_GENERIC_EMAIL_HOURS) {
+      warnings.push(
+        `Generic clinic email last ingested ${Math.round(staleHours)}h ago — activity feed may be stale.`
+      );
+    }
+    if (input.genericEmailUnmatchedCount >= GENERIC_EMAIL_UNMATCHED_SPIKE) {
+      warnings.push(
+        `${input.genericEmailUnmatchedCount} generic clinic email(s) unmatched in the last 24h — review admin work queue.`
+      );
+    }
+    if (input.genericEmailAmbiguousMatchCount > 0) {
+      warnings.push(
+        `${input.genericEmailAmbiguousMatchCount} generic clinic email(s) had ambiguous identity matches in the last 24h.`
+      );
+    }
   }
 
   return warnings;
@@ -117,6 +151,11 @@ export async function loadLiveDataHealthSummary(
     leadFlowLeadsRes,
     dealMappingsRes,
     pathologyRoutesRes,
+    genericEmailRoutesRes,
+    genericEmailRecentRes,
+    genericEmailUnmatchedRes,
+    genericEmailAmbiguousRes,
+    genericEmailLastRes,
     crmActivityRes,
   ] = await Promise.all([
     supabase
@@ -194,7 +233,36 @@ export async function loadLiveDataHealthSummary(
       .from("fi_pathology_email_routes")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
-      .eq("status", "active"),
+      .eq("route_status", "active"),
+    supabase
+      .from("fi_generic_clinic_email_routes")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("route_status", "active"),
+    supabase
+      .from("fi_generic_clinic_email_activities")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .gte("created_at", sinceIso),
+    supabase
+      .from("fi_generic_clinic_email_activities")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("match_status", "unmatched")
+      .gte("created_at", sinceIso),
+    supabase
+      .from("fi_generic_clinic_email_activities")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("match_status", "ambiguous")
+      .gte("created_at", sinceIso),
+    supabase
+      .from("fi_generic_clinic_email_activities")
+      .select("created_at")
+      .eq("tenant_id", tid)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
     supabase
       .from("fi_crm_activity_events")
       .select("id", { count: "exact", head: true })
@@ -216,6 +284,11 @@ export async function loadLiveDataHealthSummary(
     leadFlowLeadsRes,
     dealMappingsRes,
     pathologyRoutesRes,
+    genericEmailRoutesRes,
+    genericEmailRecentRes,
+    genericEmailUnmatchedRes,
+    genericEmailAmbiguousRes,
+    genericEmailLastRes,
     crmActivityRes,
   ];
   for (const res of results) {
@@ -240,6 +313,14 @@ export async function loadLiveDataHealthSummary(
 
   const emailIngestionConfigured =
     isPathologyEmailIngestionEnabledFromEnv() && (pathologyRoutesRes.count ?? 0) > 0;
+  const genericEmailConfigured =
+    isGenericClinicEmailIngestionEnabledFromEnv() && (genericEmailRoutesRes.count ?? 0) > 0;
+  const genericEmailLastIngestedAt =
+    (genericEmailLastRes.data as { created_at?: string | null } | null)?.created_at?.trim() ??
+    null;
+  const genericEmailRecentActivityCount = genericEmailRecentRes.count ?? 0;
+  const genericEmailUnmatchedCount = genericEmailUnmatchedRes.count ?? 0;
+  const genericEmailAmbiguousMatchCount = genericEmailAmbiguousRes.count ?? 0;
   const recentActivityEventCount = crmActivityRes.count ?? 0;
 
   const warnings = buildLiveDataHealthWarnings({
@@ -254,6 +335,11 @@ export async function loadLiveDataHealthSummary(
     hubSpotPromotedLeadCount,
     hubSpotPromotedOpportunityCount,
     emailIngestionConfigured,
+    genericEmailConfigured,
+    genericEmailLastIngestedAt,
+    genericEmailRecentActivityCount,
+    genericEmailUnmatchedCount,
+    genericEmailAmbiguousMatchCount,
     now,
   });
 
@@ -271,6 +357,11 @@ export async function loadLiveDataHealthSummary(
     hubSpotStagedDealCount,
     hubSpotPromotedOpportunityCount,
     emailIngestionConfigured,
+    genericEmailConfigured,
+    genericEmailLastIngestedAt,
+    genericEmailRecentActivityCount,
+    genericEmailUnmatchedCount,
+    genericEmailAmbiguousMatchCount,
     recentActivityEventCount,
     warnings,
   };

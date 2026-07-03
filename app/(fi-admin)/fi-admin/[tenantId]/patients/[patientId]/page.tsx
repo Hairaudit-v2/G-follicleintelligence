@@ -7,6 +7,7 @@ import { PatientDetailPageView } from "@/src/components/fi/patients/detail/Patie
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { loadUniversalPatientRecord } from "@/src/lib/fi/foundation/patientRecord";
 import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
+import { isClinicalPhiReadRole } from "@/src/lib/crm/crmGatePolicy";
 import { loadPatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
 import { parsePatientDetailTab } from "@/src/lib/patients/patientDetailTabs";
 import { parsePatientPreviewSearchParam } from "@/src/lib/patients/patientPreviewQuery";
@@ -51,11 +52,14 @@ export default async function PatientProfileRoutePage({
   }
 
   const session = await getClinicFloorPageSession(tenantId);
+  const viewerCanReadClinicalPhi = isClinicalPhiReadRole(session.role);
   const sp = (await searchParams) ?? {};
   const previewPatientId = parsePatientPreviewSearchParam(sp.preview);
   const activeTab = parsePatientDetailTab(sp.tab);
 
-  const loaded = await loadPatientProfile(tenantId, patientId);
+  const loaded = await loadPatientProfile(tenantId, patientId, undefined, {
+    viewerCanReadClinicalPhi,
+  });
   if (!loaded.ok) notFound();
 
   if (loaded.mode === "legacy_global") {
@@ -80,7 +84,9 @@ export default async function PatientProfileRoutePage({
     );
   }
 
-  const payload = await loadPatientDetailPayload(tenantId, patientId);
+  const payload = await loadPatientDetailPayload(tenantId, patientId, undefined, {
+    viewerCanReadClinicalPhi,
+  });
   if (!payload) notFound();
 
   const [

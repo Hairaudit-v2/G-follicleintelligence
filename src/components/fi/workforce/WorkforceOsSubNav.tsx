@@ -78,7 +78,7 @@ export function isWorkforceOsNavActive(pathname: string, base: string, segment: 
     return pathname.startsWith(`${base}/staff-identity-audit`);
   }
   if (segment === "roster") {
-    return pathname.includes("/hr-os/roster");
+    return pathname.includes("/workforce-os/roster") || pathname.includes("/hr-os/roster");
   }
   return pathname === `${base}/${segment}` || pathname.startsWith(`${base}/${segment}/`);
 }

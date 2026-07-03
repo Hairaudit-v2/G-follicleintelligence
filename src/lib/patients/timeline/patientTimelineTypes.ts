@@ -138,6 +138,8 @@ export type PatientTimelineBuildOptions = {
   limit?: number;
   offset?: number;
   sort?: PatientTimelineSortDirection;
+  /** When false, generic clinic email CRM events are omitted from the timeline. */
+  viewerCanReadClinicalPhi?: boolean;
 };
 
 export type PatientTimelineBuildResult = {

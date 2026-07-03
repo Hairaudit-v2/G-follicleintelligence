@@ -563,6 +563,8 @@ function activityKindLabel(kind: string, title: string | null): string {
   if (k === "crm.import.hubspot_stage1") return "Imported from HubSpot";
   if (k === "quote.accepted") return "Quote accepted";
   if (k === "lead_communication.created") return "Outreach logged";
+  if (k === "email.clinic.inbound") return "Inbound clinic email";
+  if (k === "email.clinic.outbound") return "Outbound clinic email";
   if (title?.trim()) return title.trim();
   return "Enquiry activity recorded";
 }

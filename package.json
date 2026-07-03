@@ -72,6 +72,7 @@
     "supabase:push:remote": "node scripts/push-pending-supabase-migrations.mjs --yes",
     "supabase:watch:migrations": "node scripts/watch-supabase-migrations.mjs",
     "supabase:watch:migrations:validate": "node scripts/watch-supabase-migrations-validate.mjs",
+    "supabase:watch:migrations:validate:30m": "node scripts/watch-supabase-migrations-validate.mjs --interval=1800",
     "supabase:check:migrations:lint": "node scripts/watch-supabase-migrations-validate.mjs --once --all",
     "smoke:network-subjects": "npx supabase db reset --yes && node scripts/run-supabase-sql-docker.mjs supabase/smoke/fi_network_subjects_foundation_smoke.sql",
     "smoke:network-subjects:only": "node scripts/run-supabase-sql-docker.mjs supabase/smoke/fi_network_subjects_foundation_smoke.sql",

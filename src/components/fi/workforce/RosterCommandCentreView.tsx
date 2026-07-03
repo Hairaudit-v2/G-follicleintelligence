@@ -2,17 +2,24 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 
-import { RosterAvailabilityPanel } from "@/src/components/fi/workforce/RosterAvailabilityPanel";
-import { RosterEventStaffingCard } from "@/src/components/fi/workforce/RosterEventStaffingCard";
-import { RosterShiftPanel } from "@/src/components/fi/workforce/RosterShiftPanel";
+import { StaffStandardHoursPanel } from "@/src/components/fi/workforce/StaffStandardHoursPanel";
+import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
+import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
+import {
+  copyPreviousWeekRosterAction,
+  generateRosterFromStandardHoursAction,
+} from "@/src/lib/actions/workforce-roster-actions";
 import type { RosterCommandCentrePayload } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
+import type { RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import {
   buildRosterCommandCentreHref,
+  rosterDateRangeFromWeekStart,
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
+import { emptyStandardHoursWeek } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 const STATUS_FILTERS: Array<{ id: RosterStaffingStatusFilter | ""; label: string }> = [
   { id: "", label: "All statuses" },
@@ -31,17 +38,18 @@ export type RosterCommandCentreViewProps = {
     { candidatesByRole: Record<string, RosterAssignableCandidate[]> } | undefined
   >;
   filters: {
-    dateFrom: string;
-    dateTo: string;
+    weekStart: string;
     clinicId: string;
+    staffId: string;
     eventType: string;
     status: RosterStaffingStatusFilter | "";
   };
+  useWorkforceOsRoute?: boolean;
 };
 
-function toDateInputValue(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
+function shiftWeek(isoDate: string, deltaWeeks: number): string {
+  const d = new Date(`${isoDate.slice(0, 10)}T12:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + deltaWeeks * 7);
   return d.toISOString().slice(0, 10);
 }
 
@@ -50,9 +58,16 @@ export function RosterCommandCentreView({
   payload,
   eventDetails,
   filters,
+  useWorkforceOsRoute = false,
 }: RosterCommandCentreViewProps) {
   const router = useRouter();
   const [selectedEventKey, setSelectedEventKey] = useState(payload.preselectedEventKey);
+  const [selectedShift, setSelectedShift] = useState<RosterGridShift | null>(null);
+  const [draftCell, setDraftCell] = useState<{ staffId: string; localDate: string } | null>(null);
+  const [standardHoursStaffId, setStandardHoursStaffId] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const refresh = useCallback(() => {
     router.refresh();
@@ -68,28 +83,82 @@ export function RosterCommandCentreView({
     router.push(
       buildRosterCommandCentreHref({
         tenantId,
-        dateFrom: merged.dateFrom,
-        dateTo: merged.dateTo,
+        weekStart: merged.weekStart,
         clinicId: merged.clinicId || null,
+        staffId: merged.staffId || null,
         eventType: merged.eventType || null,
         status: merged.status || null,
         eventSource: selectedEventKey?.split(":")[0] as "booking" | undefined,
         eventId: selectedEventKey?.split(":")[1] ?? null,
+        useWorkforceOsRoute,
       })
     );
   }
 
+  function clearSelection() {
+    setSelectedShift(null);
+    setDraftCell(null);
+  }
+
+  function handleGenerateRoster(overwriteGeneratedOnly: boolean) {
+    setActionError(null);
+    setActionMessage(null);
+    const range = rosterDateRangeFromWeekStart(filters.weekStart);
+    startTransition(async () => {
+      const result = await generateRosterFromStandardHoursAction({
+        tenantId,
+        rangeStartIso: range.startsAt,
+        rangeEndIso: range.endsAt,
+        staffIds: filters.staffId ? [filters.staffId] : undefined,
+        overwriteGeneratedOnly,
+      });
+      if (!result.ok) {
+        setActionError(result.error);
+        return;
+      }
+      setActionMessage(
+        `Generate roster: ${result.data.createdCount} shifts created, ${result.data.skippedCount} skipped.`
+      );
+      refresh();
+    });
+  }
+
+  function handleCopyPreviousWeek() {
+    setActionError(null);
+    setActionMessage(null);
+    startTransition(async () => {
+      const result = await copyPreviousWeekRosterAction({
+        tenantId,
+        targetWeekStartIso: filters.weekStart,
+        staffIds: filters.staffId ? [filters.staffId] : undefined,
+      });
+      if (!result.ok) {
+        setActionError(result.error);
+        return;
+      }
+      setActionMessage(`Copy previous week: ${result.data.createdCount} shifts copied.`);
+      refresh();
+    });
+  }
+
+  const standardHoursStaff = standardHoursStaffId
+    ? payload.staffOptions.find((s) => s.id === standardHoursStaffId)
+    : null;
+  const standardHoursDays =
+    standardHoursStaffId && payload.standardHoursByStaffId[standardHoursStaffId]
+      ? payload.standardHoursByStaffId[standardHoursStaffId]
+      : emptyStandardHoursWeek();
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
           Roster Command Centre
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Operational staffing command centre for clinical days, surgeries, consultations, and
-          procedure events. Review gaps, rank eligible staff, assign safely, and manage shifts and
-          availability.
+          Set standard hours once, generate the weekly roster, adjust shifts as needed, and monitor
+          clinical staffing coverage.
         </p>
         <p className="mt-2 text-xs text-slate-500">
           <Link
@@ -106,37 +175,41 @@ export function RosterCommandCentreView({
       </header>
 
       <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <label className="block text-xs text-slate-400">
-            From
-            <input
-              type="date"
-              value={toDateInputValue(filters.dateFrom)}
-              onChange={(e) => {
-                const d = new Date(`${e.target.value}T00:00:00.000Z`);
-                pushFilters({ dateFrom: d.toISOString() });
-              }}
-              className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
-            />
-          </label>
-          <label className="block text-xs text-slate-400">
-            To
-            <input
-              type="date"
-              value={toDateInputValue(filters.dateTo)}
-              onChange={(e) => {
-                const d = new Date(`${e.target.value}T23:59:59.999Z`);
-                pushFilters({ dateTo: d.toISOString() });
-              }}
-              className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
-            />
-          </label>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => pushFilters({ weekStart: shiftWeek(filters.weekStart, -1) })}
+              className="rounded-lg border border-white/[0.08] px-2 py-2 text-sm text-slate-300 hover:bg-white/[0.04]"
+              aria-label="Previous week"
+            >
+              ←
+            </button>
+            <label className="block text-xs text-slate-400">
+              Week starting
+              <input
+                type="date"
+                value={filters.weekStart}
+                onChange={(e) => pushFilters({ weekStart: e.target.value })}
+                className="mt-1 block rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => pushFilters({ weekStart: shiftWeek(filters.weekStart, 1) })}
+              className="rounded-lg border border-white/[0.08] px-2 py-2 text-sm text-slate-300 hover:bg-white/[0.04]"
+              aria-label="Next week"
+            >
+              →
+            </button>
+          </div>
+
           <label className="block text-xs text-slate-400">
             Clinic
             <select
               value={filters.clinicId}
               onChange={(e) => pushFilters({ clinicId: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+              className="mt-1 block min-w-[140px] rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
             >
               <option value="">All clinics</option>
               {payload.clinics.map((c) => (
@@ -146,15 +219,33 @@ export function RosterCommandCentreView({
               ))}
             </select>
           </label>
+
+          <label className="block text-xs text-slate-400">
+            Staff
+            <select
+              value={filters.staffId}
+              onChange={(e) => pushFilters({ staffId: e.target.value })}
+              className="mt-1 block min-w-[140px] rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+            >
+              <option value="">All staff</option>
+              {payload.staffOptions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label className="block text-xs text-slate-400">
             Event type
             <input
               value={filters.eventType}
               onChange={(e) => pushFilters({ eventType: e.target.value })}
               placeholder="e.g. surgery"
-              className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+              className="mt-1 block rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
             />
           </label>
+
           <label className="block text-xs text-slate-400">
             Staffing status
             <select
@@ -162,7 +253,7 @@ export function RosterCommandCentreView({
               onChange={(e) =>
                 pushFilters({ status: e.target.value as RosterStaffingStatusFilter | "" })
               }
-              className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+              className="mt-1 block min-w-[140px] rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.label} value={f.id}>
@@ -171,7 +262,37 @@ export function RosterCommandCentreView({
               ))}
             </select>
           </label>
+
+          <div className="flex flex-wrap gap-2 pb-0.5">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => handleGenerateRoster(false)}
+              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
+            >
+              Generate roster
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => handleGenerateRoster(true)}
+              className="rounded-lg border border-cyan-500/40 px-3 py-2 text-sm text-cyan-300 hover:bg-cyan-950/30 disabled:opacity-50"
+            >
+              Regenerate generated
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={handleCopyPreviousWeek}
+              className="rounded-lg border border-white/[0.12] px-3 py-2 text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50"
+            >
+              Copy previous week
+            </button>
+          </div>
         </div>
+
+        {actionMessage ? <p className="mt-3 text-sm text-emerald-300">{actionMessage}</p> : null}
+        {actionError ? <p className="mt-3 text-sm text-rose-300">{actionError}</p> : null}
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -197,46 +318,64 @@ export function RosterCommandCentreView({
         ))}
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      {standardHoursStaffId && standardHoursStaff ? (
+        <section className="rounded-xl border border-cyan-500/20 bg-cyan-950/10 p-4">
+          <StaffStandardHoursPanel
+            tenantId={tenantId}
+            staffId={standardHoursStaffId}
+            staffName={standardHoursStaff.name}
+            initialDays={standardHoursDays}
+            clinics={payload.clinics}
+            onSaved={() => {
+              setStandardHoursStaffId(null);
+              refresh();
+            }}
+            onClose={() => setStandardHoursStaffId(null)}
+          />
+        </section>
+      ) : null}
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div>
-          <h2 className="text-sm font-semibold text-slate-100">Clinical events</h2>
-          {payload.events.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">
-              No clinical events match the current filters.
-            </p>
-          ) : (
-            <div className="mt-3 space-y-3">
-              {payload.events.map((event) => (
-                <RosterEventStaffingCard
-                  key={event.eventKey}
-                  tenantId={tenantId}
-                  event={event}
-                  selected={selectedEventKey === event.eventKey}
-                  candidatesByRole={eventDetails[event.eventKey]?.candidatesByRole}
-                  onSelect={() => setSelectedEventKey(event.eventKey)}
-                  onRefresh={refresh}
-                />
-              ))}
-            </div>
-          )}
+          <h2 className="text-sm font-semibold text-slate-100">Weekly roster</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Click a cell to add a shift, click a shift block to edit. RDO and leave show from
+            standard hours and availability blocks.
+          </p>
+          <div className="mt-3">
+            <RosterWeekGrid
+              weekDayDates={payload.weekDayDates}
+              staffOptions={payload.staffOptions}
+              shifts={payload.shifts}
+              availabilityCells={payload.availabilityCells}
+              standardHoursByStaffId={payload.standardHoursByStaffId}
+              selectedShiftId={selectedShift?.id ?? null}
+              onCellClick={(staffId, localDate) => {
+                setSelectedShift(null);
+                setDraftCell({ staffId, localDate });
+              }}
+              onShiftClick={(shift) => {
+                setDraftCell(null);
+                setSelectedShift(shift);
+              }}
+              onEditStandardHours={(staffId) => setStandardHoursStaffId(staffId)}
+            />
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <RosterShiftPanel
-            tenantId={tenantId}
-            shifts={payload.shifts}
-            staffOptions={staffPickerOptions}
-            clinics={payload.clinics}
-            onChanged={refresh}
-          />
-          <RosterAvailabilityPanel
-            tenantId={tenantId}
-            blocks={payload.availabilityBlocks}
-            staffOptions={staffPickerOptions}
-            clinics={payload.clinics}
-            onChanged={refresh}
-          />
-        </div>
+        <RosterSidePanel
+          tenantId={tenantId}
+          clinics={payload.clinics}
+          staffOptions={staffPickerOptions}
+          selectedShift={selectedShift}
+          draftCell={draftCell}
+          events={payload.events}
+          selectedEventKey={selectedEventKey}
+          eventDetails={eventDetails}
+          onRefresh={refresh}
+          onSelectEvent={setSelectedEventKey}
+          onClearSelection={clearSelection}
+        />
       </section>
     </div>
   );

@@ -12,7 +12,9 @@ export type RosterStaffingStatusFilter =
 export type RosterCommandCentreSearchParams = {
   dateFrom?: string;
   dateTo?: string;
+  weekStart?: string;
   clinicId?: string;
+  staffId?: string;
   eventType?: string;
   status?: RosterStaffingStatusFilter;
   eventSource?: WorkforceClinicalEventSource;
@@ -24,12 +26,16 @@ export type BuildRosterCommandCentreHrefInput = {
   tenantId: string;
   dateFrom?: string;
   dateTo?: string;
+  weekStart?: string;
   clinicId?: string | null;
+  staffId?: string | null;
   eventType?: string | null;
   status?: RosterStaffingStatusFilter | null;
   eventSource?: WorkforceClinicalEventSource | null;
   eventId?: string | null;
   date?: string | null;
+  /** When set, roster href uses workforce-os route instead of hr-os. */
+  useWorkforceOsRoute?: boolean;
 };
 
 function trimOrUndefined(value: string | null | undefined): string | undefined {
@@ -37,23 +43,29 @@ function trimOrUndefined(value: string | null | undefined): string | undefined {
   return v || undefined;
 }
 
-/** Build `/fi-admin/[tenantId]/hr-os/roster` href with optional filters and event preselection. */
+/** Build roster command centre href with optional filters and event preselection. */
 export function buildRosterCommandCentreHref(input: BuildRosterCommandCentreHrefInput): string {
-  const base = `/fi-admin/${input.tenantId.trim()}/hr-os/roster`;
+  const base = input.useWorkforceOsRoute
+    ? `/fi-admin/${input.tenantId.trim()}/workforce-os/roster`
+    : `/fi-admin/${input.tenantId.trim()}/hr-os/roster`;
   const params = new URLSearchParams();
 
   const dateFrom = trimOrUndefined(input.dateFrom);
   const dateTo = trimOrUndefined(input.dateTo);
+  const weekStart = trimOrUndefined(input.weekStart);
   const clinicId = trimOrUndefined(input.clinicId ?? undefined);
+  const staffId = trimOrUndefined(input.staffId ?? undefined);
   const eventType = trimOrUndefined(input.eventType ?? undefined);
   const status = trimOrUndefined(input.status ?? undefined);
   const eventSource = trimOrUndefined(input.eventSource ?? undefined);
   const eventId = trimOrUndefined(input.eventId ?? undefined);
   const date = trimOrUndefined(input.date ?? undefined);
 
+  if (weekStart) params.set("weekStart", weekStart);
   if (dateFrom) params.set("dateFrom", dateFrom);
   if (dateTo) params.set("dateTo", dateTo);
   if (clinicId) params.set("clinicId", clinicId);
+  if (staffId) params.set("staffId", staffId);
   if (eventType) params.set("eventType", eventType);
   if (status) params.set("status", status);
   if (eventSource) params.set("eventSource", eventSource);
@@ -101,7 +113,9 @@ export function parseRosterCommandCentreSearchParams(
   return {
     dateFrom: pick("dateFrom"),
     dateTo: pick("dateTo"),
+    weekStart: pick("weekStart"),
     clinicId: pick("clinicId"),
+    staffId: pick("staffId"),
     eventType: pick("eventType"),
     status,
     eventSource,
@@ -120,15 +134,37 @@ export function resolveRosterPreselectedEventKey(
   return `${source}:${id}`;
 }
 
-/** Default command centre window: start of today through end of day +7 (UTC). */
+/** Default command centre window: current week Mon–Sun (UTC calendar). */
 export function defaultRosterCommandCentreDateRange(now: Date = new Date()): {
   startsAt: string;
   endsAt: string;
+  weekStart: string;
 } {
   const start = new Date(now);
   start.setUTCHours(0, 0, 0, 0);
+  const day = start.getUTCDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  start.setUTCDate(start.getUTCDate() + diff);
   const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 8);
+  end.setUTCDate(end.getUTCDate() + 7);
+  return {
+    startsAt: start.toISOString(),
+    endsAt: end.toISOString(),
+    weekStart: start.toISOString().slice(0, 10),
+  };
+}
+
+/** Resolve date range from weekStart query param (ISO date, Monday). */
+export function rosterDateRangeFromWeekStart(weekStartIso: string): {
+  startsAt: string;
+  endsAt: string;
+} {
+  const start = new Date(`${weekStartIso.slice(0, 10)}T00:00:00.000Z`);
+  if (Number.isNaN(start.getTime())) {
+    return defaultRosterCommandCentreDateRange();
+  }
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 7);
   return { startsAt: start.toISOString(), endsAt: end.toISOString() };
 }
 
