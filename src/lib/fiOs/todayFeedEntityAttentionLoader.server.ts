@@ -26,10 +26,12 @@ import {
   consultationEntityActionLabel,
   consultationEntityDetailLine,
 } from "@/src/lib/fiOs/todayFeedDerive";
+import { todayFirstNameFromLabel } from "@/src/lib/fiOs/todayPersonLabels";
 import {
-  resolvePersonDisplayNameForToday,
-  todayFirstNameFromLabel,
-} from "@/src/lib/fiOs/todayPersonLabels";
+  loadStaffMemberPersonProfilesForToday,
+  resolveStaffPersonDisplayNameForToday,
+  resolveStaffPersonFirstNameForToday,
+} from "@/src/lib/fiOs/todayStaffPersonHydration.server";
 import {
   consultationEntityHref,
   pathologyResultEntityHref,
@@ -602,26 +604,7 @@ async function loadStaffEntitySignals(tenantId: string, base: string): Promise<T
       ((alertRows ?? []) as { staff_member_id: string }[]).map((r) => String(r.staff_member_id))
     ),
   ];
-  const nameById = new Map<string, string>();
-  if (memberIds.length) {
-    const { data: members, error: memberErr } = await supabase
-      .from("fi_staff_members")
-      .select("id, full_name, email")
-      .eq("tenant_id", tid)
-      .in("id", memberIds);
-    if (memberErr) throw new Error(memberErr.message);
-    for (const m of members ?? []) {
-      const row = m as { id: string; full_name: string; email: string | null };
-      nameById.set(
-        String(row.id),
-        resolvePersonDisplayNameForToday({
-          full_name: row.full_name,
-          email: row.email,
-          role: "staff",
-        }) || "Staff member"
-      );
-    }
-  }
+  const profileByStaffId = await loadStaffMemberPersonProfilesForToday(tid, memberIds, supabase);
 
   const out: TodayEntityAttentionSignal[] = [];
   for (const raw of alertRows ?? []) {
@@ -633,7 +616,9 @@ async function loadStaffEntitySignals(tenantId: string, base: string): Promise<T
       message: string | null;
     };
     const staffId = String(row.staff_member_id);
-    const name = nameById.get(staffId) ?? "Staff member";
+    const profile = profileByStaffId.get(staffId) ?? { role: "staff" };
+    const name = resolveStaffPersonDisplayNameForToday(profile);
+    const firstName = resolveStaffPersonFirstNameForToday(profile);
     const alertType = row.alert_type.replace(/_/g, " ");
     const sev = String(row.severity ?? "").toLowerCase();
     const severity =
@@ -644,7 +629,7 @@ async function loadStaffEntitySignals(tenantId: string, base: string): Promise<T
       category: "staff",
       aggregateKey: "staff_compliance",
       personLabel: name,
-      actionLabel: `${todayFirstNameFromLabel(name)} — ${alertType}`,
+      actionLabel: `${firstName} — ${alertType}`,
       detailLine: row.message?.trim() || "Compliance item needs attention",
       actionHint: "Review",
       href: staffEntityHref(base, staffId),

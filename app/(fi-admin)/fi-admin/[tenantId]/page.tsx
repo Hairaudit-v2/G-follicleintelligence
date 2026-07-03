@@ -24,7 +24,7 @@ import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 
 import {
-  resolveFiOsAuthUserDisplayNameById,
+  resolveFiOsAuthUserDisplayNameForTenant,
 } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
 
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
@@ -133,7 +133,7 @@ export default async function FiAdminTenantHomePage({
   if (todaySurfaceTenantEnabled && todaySurfaceBakeAllowed) {
     const authUserId = await resolveAuthUserId(null);
     const viewerDisplayName = authUserId
-      ? await resolveFiOsAuthUserDisplayNameById(authUserId)
+      ? await resolveFiOsAuthUserDisplayNameForTenant(authUserId, tenantId)
       : null;
 
     return (

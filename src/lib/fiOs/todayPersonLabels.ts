@@ -66,6 +66,36 @@ function emailLocalPart(email: string): string | null {
   return local || null;
 }
 
+/** True when `value` is the local-part of `email` (case-insensitive). */
+export function looksLikeEmailLocalPartLabel(
+  value: string | null | undefined,
+  email: string | null | undefined
+): boolean {
+  const trimmed = value?.trim();
+  if (!trimmed) return false;
+  const local = email ? emailLocalPart(email) : null;
+  if (local && trimmed.toLowerCase() === local.toLowerCase()) return true;
+  return isEmailLike(trimmed);
+}
+
+function isUsablePersonNameCandidate(
+  value: string | null | undefined,
+  email: string | null | undefined
+): boolean {
+  const trimmed = value?.trim();
+  if (!trimmed || isWeakPersonLabel(trimmed) || isEmailLike(trimmed)) return false;
+  return !looksLikeEmailLocalPartLabel(trimmed, email);
+}
+
+function isUsableFirstNameCandidate(
+  value: string | null | undefined,
+  email: string | null | undefined
+): boolean {
+  const trimmed = value?.trim();
+  if (!trimmed || isWeakPersonLabel(trimmed) || isEmailLike(trimmed)) return false;
+  return !looksLikeEmailLocalPartLabel(trimmed, email);
+}
+
 function firstTokenFromPersonName(name: string): string | null {
   const trimmed = name.trim();
   if (!trimmed || isEmailLike(trimmed)) return null;
@@ -104,9 +134,10 @@ export function resolvePersonFirstNameLabel(
   opts: { defaultLabel?: string } = {}
 ): string {
   const defaultLabel = opts.defaultLabel ?? "Patient";
+  const email = pickString(input.email);
 
   const explicitFirst = pickString(input.first_name, input.firstName);
-  if (explicitFirst && !isWeakPersonLabel(explicitFirst) && !isEmailLike(explicitFirst)) {
+  if (explicitFirst && isUsableFirstNameCandidate(explicitFirst, email)) {
     return explicitFirst;
   }
 
@@ -117,14 +148,14 @@ export function resolvePersonFirstNameLabel(
     input.fullName,
     input.name,
   ]) {
+    if (!isUsablePersonNameCandidate(candidate, email)) continue;
     const token = candidate ? firstTokenFromPersonName(candidate) : null;
-    if (token) return token;
+    if (token && !looksLikeEmailLocalPartLabel(token, email)) return token;
   }
 
   const roleLabel = resolveTodayRoleLabel(input.role, input.actor_type ?? input.actorType);
   if (roleLabel) return roleLabel;
 
-  const email = pickString(input.email);
   if (email) {
     const local = emailLocalPart(email);
     if (local) return local;
@@ -143,9 +174,10 @@ export function resolvePersonDisplayNameForToday(
   opts: { defaultLabel?: string } = {}
 ): string {
   const defaultLabel = opts.defaultLabel ?? "";
+  const email = pickString(input.email);
 
   const explicitFirst = pickString(input.first_name, input.firstName);
-  if (explicitFirst && !isWeakPersonLabel(explicitFirst) && !isEmailLike(explicitFirst)) {
+  if (explicitFirst && isUsableFirstNameCandidate(explicitFirst, email)) {
     return explicitFirst;
   }
 
@@ -156,16 +188,13 @@ export function resolvePersonDisplayNameForToday(
     input.displayName,
     input.name,
   ]) {
-    const trimmed = candidate?.trim();
-    if (trimmed && !isWeakPersonLabel(trimmed) && !isEmailLike(trimmed)) {
-      return trimmed;
-    }
+    if (!isUsablePersonNameCandidate(candidate, email)) continue;
+    return candidate!.trim();
   }
 
   const roleLabel = resolveTodayRoleLabel(input.role, input.actor_type ?? input.actorType);
   if (roleLabel) return roleLabel;
 
-  const email = pickString(input.email);
   if (email) {
     const local = emailLocalPart(email);
     if (local) return local;
@@ -183,18 +212,17 @@ export function todayFirstNameFromLabel(
   input: TodayPersonLabelInput = {}
 ): string {
   const trimmed = label.trim();
+  const email = pickString(input.email) ?? (trimmed && isEmailLike(trimmed) ? trimmed : undefined);
+  const labelLooksLikeEmailLocal = looksLikeEmailLocalPartLabel(trimmed, email);
+  const labelAsName =
+    trimmed && !isEmailLike(trimmed) && !labelLooksLikeEmailLocal ? trimmed : undefined;
+
   const merged: TodayPersonLabelInput = {
     ...input,
     first_name: input.first_name ?? input.firstName,
-    full_name:
-      input.full_name ??
-      input.fullName ??
-      (trimmed && !isEmailLike(trimmed) ? trimmed : undefined),
-    display_name:
-      input.display_name ??
-      input.displayName ??
-      (trimmed && !isEmailLike(trimmed) ? trimmed : undefined),
-    email: input.email ?? (trimmed && isEmailLike(trimmed) ? trimmed : undefined),
+    full_name: input.full_name ?? input.fullName ?? labelAsName,
+    display_name: input.display_name ?? input.displayName ?? labelAsName,
+    email,
   };
 
   return resolvePersonFirstNameLabel(merged);

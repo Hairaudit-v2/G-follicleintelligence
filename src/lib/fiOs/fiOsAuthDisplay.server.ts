@@ -5,6 +5,7 @@ import { createServerClient, type CookieOptions, type SetAllCookies } from "@sup
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolvePersonDisplayNameForToday } from "@/src/lib/fiOs/todayPersonLabels";
+import { loadStaffPersonProfileForAuthUserInTenant } from "@/src/lib/fiOs/todayStaffPersonHydration.server";
 
 /**
  * Auth user email for FI OS chrome (profile menu). Mirrors cookie session used by CRM gate.
@@ -67,4 +68,30 @@ export async function resolveFiOsAuthUserDisplayNameById(authUserId: string): Pr
   } catch {
     return id;
   }
+}
+
+/**
+ * Tenant-aware display label for Today hero copy — hydrates fi_staff_members / fi_staff
+ * before falling back to auth metadata and email local-part.
+ */
+export async function resolveFiOsAuthUserDisplayNameForTenant(
+  authUserId: string,
+  tenantId: string
+): Promise<string> {
+  const id = authUserId.trim();
+  const tid = tenantId.trim();
+  if (!id) return "Unknown user";
+  if (!tid) return resolveFiOsAuthUserDisplayNameById(id);
+
+  try {
+    const profile = await loadStaffPersonProfileForAuthUserInTenant(tid, id);
+    if (profile) {
+      const resolved = resolvePersonDisplayNameForToday(profile);
+      if (resolved) return resolved;
+    }
+  } catch {
+    /* fall through to auth-only resolution */
+  }
+
+  return resolveFiOsAuthUserDisplayNameById(id);
 }
