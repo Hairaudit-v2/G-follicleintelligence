@@ -482,16 +482,29 @@ async function loadAuthSnapshots(
   return out;
 }
 
+export type RunStaffIdentityReadinessAuditOptions = {
+  staffMemberId?: string;
+  supabaseClientForTests?: SupabaseClient;
+};
+
 /** Server audit loader — read-only, no mutations. */
 export async function runStaffIdentityReadinessAudit(
   tenantId: string,
-  client?: SupabaseClient
+  options?: RunStaffIdentityReadinessAuditOptions | SupabaseClient
 ): Promise<StaffIdentityReadinessAuditResult> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = client ?? supabaseAdmin();
-  await syncAllStaffProjectionsForTenant(tid);
+  const normalizedOptions: RunStaffIdentityReadinessAuditOptions =
+    options && "from" in (options as SupabaseClient)
+      ? { supabaseClientForTests: options as SupabaseClient }
+      : ((options as RunStaffIdentityReadinessAuditOptions | undefined) ?? {});
+  const staffMemberId = normalizedOptions.staffMemberId?.trim() || null;
+  const supabase = normalizedOptions.supabaseClientForTests ?? supabaseAdmin();
 
-  const { data: members, error } = await supabase
+  if (!staffMemberId) {
+    await syncAllStaffProjectionsForTenant(tid);
+  }
+
+  let memberQuery = supabase
     .from("fi_staff_members")
     .select(
       "id, full_name, email, role_code, employment_status, fi_staff_id, archived_at, system_access_revoked"
@@ -499,6 +512,10 @@ export async function runStaffIdentityReadinessAudit(
     .eq("tenant_id", tid)
     .is("merged_into", null)
     .order("full_name", { ascending: true });
+  if (staffMemberId) {
+    memberQuery = memberQuery.eq("id", staffMemberId);
+  }
+  const { data: members, error } = await memberQuery;
   if (error) throw new Error(error.message);
 
   const memberRows = (members ?? []) as MemberSourceRow[];
@@ -750,6 +767,16 @@ export function buildStaffIdentityReadinessAuditRowForTest(
   input: Parameters<typeof auditRowFromParts>[0]
 ): StaffIdentityReadinessAuditRow {
   return auditRowFromParts(input);
+}
+
+export async function runStaffIdentityReadinessAuditForMember(
+  tenantId: string,
+  staffMemberId: string
+): Promise<StaffIdentityReadinessAuditRow | null> {
+  const result = await runStaffIdentityReadinessAudit(tenantId, {
+    staffMemberId: staffMemberId.trim(),
+  });
+  return result.rows.find((row) => row.staffMemberId === staffMemberId.trim()) ?? null;
 }
 
 export { auditRowFromParts, loginExpectedForStaff, isAuditableStaffMember };

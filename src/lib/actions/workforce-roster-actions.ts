@@ -350,6 +350,40 @@ const copyWeekSchema = z.object({
   staffIds: z.array(z.string().uuid()).optional(),
 });
 
+const applyDefaultClinicStandardHoursSchema = z.object({
+  tenantId: z.string().uuid(),
+});
+
+export async function applyDefaultClinicStandardHoursAction(
+  body: unknown
+): Promise<
+  WorkforceRosterActionResult<{
+    appliedCount: number;
+    skippedCount: number;
+    appliedStaffIds: string[];
+  }>
+> {
+  try {
+    const parsed = applyDefaultClinicStandardHoursSchema.parse(body);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const { applyDefaultClinicStandardHoursToMissingStaff } = await import(
+      "@/src/lib/workforce-os/staffStandardHours.server"
+    );
+    const result = await applyDefaultClinicStandardHoursToMissingStaff(parsed.tenantId);
+    revalidateRosterSurfaces(parsed.tenantId);
+    return {
+      ok: true,
+      data: {
+        appliedCount: result.appliedCount,
+        skippedCount: result.skippedCount,
+        appliedStaffIds: result.appliedStaffIds,
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
 export async function saveStaffStandardHoursAction(
   body: unknown
 ): Promise<WorkforceRosterActionResult<SaveStaffStandardHoursResult>> {

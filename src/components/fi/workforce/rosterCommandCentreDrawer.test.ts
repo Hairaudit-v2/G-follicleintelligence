@@ -16,6 +16,8 @@ test("RosterCommandCentreView navigates to dedicated standard-hours routes", () 
   assert.match(src, /buildStaffStandardHoursSetupIndexHref/);
   assert.match(src, /buildStaffStandardHoursEditorHref/);
   assert.match(src, /data-testid="roster-standard-hours-banner-cta"/);
+  assert.match(src, /data-testid="roster-apply-default-clinic-hours"/);
+  assert.match(src, /buildStaffStandardHoursReturnToRosterHref/);
   assert.match(src, /canManage/);
   assert.match(src, /router\.push\(buildStaffStandardHoursEditorHref/);
   assert.match(src, /onEditStandardHours=\{openStandardHoursDrawer\}/);

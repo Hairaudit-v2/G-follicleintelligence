@@ -169,18 +169,28 @@ export async function loadRosterCommandCentrePageData(
     if (event.staffing.displayStatus === "missing_roles") keysToHydrate.add(event.eventKey);
   }
 
+  /** Cap eager candidate hydration — full staff scans per event are expensive and can time out renders. */
+  const MAX_ROSTER_EVENT_DETAIL_HYDRATIONS = 3;
+  const hydrationKeys = [...keysToHydrate].slice(0, MAX_ROSTER_EVENT_DETAIL_HYDRATIONS);
+
   try {
-    for (const key of keysToHydrate) {
-      const [eventSource, eventId] = key.split(":");
-      if (!eventSource || !eventId || eventSource !== "booking") continue;
-      const detail = await loadRosterEventDetail({
-        tenantId: input.tenantId.trim(),
-        eventSource: "booking",
-        eventId,
-      });
-      if (detail.event) {
-        eventDetails[key] = { candidatesByRole: detail.candidatesByRole };
-      }
+    const hydrationResults = await Promise.allSettled(
+      hydrationKeys.map(async (key) => {
+        const [eventSource, eventId] = key.split(":");
+        if (!eventSource || !eventId || eventSource !== "booking") return null;
+        const detail = await loadRosterEventDetail({
+          tenantId: input.tenantId.trim(),
+          eventSource: "booking",
+          eventId,
+        });
+        if (!detail.event) return null;
+        return { key, candidatesByRole: detail.candidatesByRole };
+      })
+    );
+
+    for (const result of hydrationResults) {
+      if (result.status !== "fulfilled" || !result.value) continue;
+      eventDetails[result.value.key] = { candidatesByRole: result.value.candidatesByRole };
     }
   } catch (e) {
     const message = e instanceof Error ? e.message : "Roster event detail load failed.";

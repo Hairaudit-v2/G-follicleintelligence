@@ -138,6 +138,10 @@ test("generateRosterFromStandardHours blocks generation on leave", () => {
   assert.ok(plan.skips.some((s) => s.reason === "leave_blocked"));
 });
 
+test("buildCoverageRoleGapLabels handles undefined missing roles", () => {
+  assert.deepEqual(buildCoverageRoleGapLabels(undefined), []);
+});
+
 test("buildCoverageRoleGapLabels formats missing clinical roles", () => {
   const labels = buildCoverageRoleGapLabels([
     { role: "rn", required: 2, assigned: 0 },

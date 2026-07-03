@@ -1,7 +1,7 @@
 /** WorkforceOS roster standard-hours setup routes (fi_staff.id). */
 
 export const STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON =
-  "Owner, admin, or HR manager role is required to set standard hours.";
+  "You do not have permission to edit standard hours.";
 
 export function buildStaffStandardHoursSetupIndexHref(tenantId: string): string {
   return `/fi-admin/${tenantId.trim()}/workforce-os/roster/standard-hours`;

@@ -365,7 +365,7 @@ function summarizeEvents(events: RosterCommandCentreEvent[]): RosterCommandCentr
     if (status === "warning") warningEvents += 1;
     if (status === "blocked") blockedEvents += 1;
     if (status === "not_configured") noTemplateEvents += 1;
-    openRequiredRoles += event.staffing.missingRoles.reduce(
+    openRequiredRoles += (event.staffing.missingRoles ?? []).reduce(
       (sum, row) => sum + Math.max(0, row.required - row.assigned),
       0
     );
@@ -471,24 +471,14 @@ async function buildBookingEvents(input: {
   return events;
 }
 
-/** HR OS roster mutations — owner, admin, or hr_manager with module access. */
+/** HR OS roster mutations — aligned with standard-hours manage gate. */
 export async function assertHrOsRosterManageAllowed(
   tenantId: string
 ): Promise<{ fiUserId: string }> {
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
-  if (!access.ok) {
-    throw new CrmAccessError(403, access.access.message);
-  }
-  if (!access.platformAdminPreview) {
-    const role = access.userRole.trim().toLowerCase();
-    if (!HR_OS_ROUTE_REQUIRED_ROLES.some((allowed) => allowed === role)) {
-      throw new CrmAccessError(
-        403,
-        "Owner, admin, or HR manager role required for roster management."
-      );
-    }
-  }
-  return { fiUserId: access.fiUserId };
+  const { assertStaffStandardHoursManageAllowed } = await import(
+    "@/src/lib/workforce-os/staffStandardHoursManageGate.server"
+  );
+  return assertStaffStandardHoursManageAllowed(tenantId);
 }
 
 export async function loadRosterCommandCentre(

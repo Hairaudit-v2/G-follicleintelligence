@@ -145,12 +145,11 @@ export function StaffStandardHoursEditorClient({
   returnTo,
 }: StaffStandardHoursEditorClientProps) {
   const router = useRouter();
-  const backHref =
-    returnTo?.trim() ||
-    buildStaffStandardHoursSetupIndexHref(tenantId);
+  const rosterHref = buildStaffStandardHoursReturnToRosterHref(tenantId);
+  const backHref = returnTo?.trim() || rosterHref;
 
   function handleSaved() {
-    router.push(backHref);
+    router.push(rosterHref);
     router.refresh();
   }
 

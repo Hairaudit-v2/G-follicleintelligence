@@ -3,7 +3,10 @@
 import Link from "next/link";
 
 import type { RosterGridAvailabilityCell, RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
-import { buildStaffStandardHoursEditorHref } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import {
+  buildStaffStandardHoursEditorHref,
+  buildStaffStandardHoursReturnToRosterHref,
+} from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
   formatStandardHoursSummary,
   formatStandardHoursWeeklyTotal,
@@ -158,7 +161,9 @@ export function RosterWeekGrid({
                   </p>
                   {canManage ? (
                     <Link
-                      href={buildStaffStandardHoursEditorHref(tenantId, staff.id)}
+                      href={buildStaffStandardHoursEditorHref(tenantId, staff.id, {
+                        returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
+                      })}
                       onClick={() => onEditStandardHours?.(staff.id)}
                       data-testid={`standard-hours-button-${staff.id}`}
                       className="mt-2 inline-flex min-h-9 items-center rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"

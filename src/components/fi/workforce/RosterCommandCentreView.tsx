@@ -10,6 +10,7 @@ import { RosterShiftDrawer } from "@/src/components/fi/workforce/RosterShiftDraw
 import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
 import {
+  applyDefaultClinicStandardHoursAction,
   copyPreviousWeekRosterAction,
   generateRosterFromStandardHoursAction,
 } from "@/src/lib/actions/workforce-roster-actions";
@@ -22,6 +23,7 @@ import {
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import {
   buildStaffStandardHoursEditorHref,
+  buildStaffStandardHoursReturnToRosterHref,
   buildStaffStandardHoursSetupIndexHref,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
@@ -144,10 +146,40 @@ export function RosterCommandCentreView({
         return;
       }
       setActionError(null);
-      router.push(buildStaffStandardHoursEditorHref(tenantId, normalizedStaffMemberId));
+      router.push(
+        buildStaffStandardHoursEditorHref(tenantId, normalizedStaffMemberId, {
+          returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
+        })
+      );
     },
     [canManage, manageDeniedReason, router, tenantId]
   );
+
+  function handleApplyDefaultClinicHours() {
+    if (!canManage) {
+      setActionError(manageDeniedReason);
+      return;
+    }
+    const count = staffMissingStandardHours.length;
+    const confirmed = window.confirm(
+      `Apply default clinic hours (Mon–Fri 08:30–17:00, 30 min break) to ${count} staff member${count === 1 ? "" : "s"} without standard hours?\n\nExisting standard hours will not be changed.`
+    );
+    if (!confirmed) return;
+
+    setActionError(null);
+    setActionMessage(null);
+    startTransition(async () => {
+      const result = await applyDefaultClinicStandardHoursAction({ tenantId });
+      if (!result.ok) {
+        setActionError(result.error);
+        return;
+      }
+      setActionMessage(
+        `Default clinic hours applied to ${result.data.appliedCount} staff (${result.data.skippedCount} skipped — already configured).`
+      );
+      refresh();
+    });
+  }
 
   function pushFilters(next: Partial<RosterCommandCentreViewProps["filters"]>) {
     const merged = { ...filters, ...next };
@@ -176,7 +208,11 @@ export function RosterCommandCentreView({
         setActionError(manageDeniedReason);
         return;
       }
-      router.push(buildStaffStandardHoursEditorHref(tenantId, staffId));
+      router.push(
+        buildStaffStandardHoursEditorHref(tenantId, staffId, {
+          returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
+        })
+      );
       return;
     }
 
@@ -426,13 +462,24 @@ export function RosterCommandCentreView({
             incomplete.
           </p>
           {canManage ? (
-            <Link
-              href={buildStaffStandardHoursSetupIndexHref(tenantId)}
-              className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
-              data-testid="roster-standard-hours-banner-cta"
-            >
-              Set standard hours
-            </Link>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Link
+                href={buildStaffStandardHoursSetupIndexHref(tenantId)}
+                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
+                data-testid="roster-standard-hours-banner-cta"
+              >
+                Set standard hours
+              </Link>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={handleApplyDefaultClinicHours}
+                className="rounded-lg border border-amber-400/40 bg-amber-950/40 px-4 py-2 text-sm font-medium text-amber-100 hover:bg-amber-950/60 disabled:opacity-50"
+                data-testid="roster-apply-default-clinic-hours"
+              >
+                Apply default clinic hours
+              </button>
+            </div>
           ) : (
             <span
               className="shrink-0 cursor-not-allowed rounded-lg border border-white/[0.12] px-4 py-2 text-sm text-slate-500"

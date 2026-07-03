@@ -6,12 +6,16 @@ import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
 import { loadWorkforceCommandCentreIntelligence } from "@/src/lib/staff/workforceCommandCentre.server";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { runStaffIdentityReadinessAudit } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
+import { runStaffIdentityReadinessAuditForMember } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 import {
   mapOnboardingInviteDisplayStatus,
 } from "@/src/lib/workforce/onboarding/onboardingCentreCore";
 import { loadOnboardingChecklist } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
-import { loadStaffAccessCentrePage } from "@/src/lib/workforce/staffAccessCentre.server";
+import {
+  loadStaffAccessCentreRowForMember,
+  type StaffAccessCentreRow,
+} from "@/src/lib/workforce/staffAccessCentre.server";
+import type { StaffIdentityReadinessAuditRow } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 import {
   buildStaffProfileOverviewModel,
   type StaffProfileAccessSnapshot,
@@ -21,9 +25,7 @@ import {
 
 export type StaffProfileHubOverviewData = StaffProfileOverviewModel;
 
-function mapAccessSnapshot(
-  row: Awaited<ReturnType<typeof loadStaffAccessCentrePage>>["rows"][number] | undefined
-): StaffProfileAccessSnapshot | null {
+function mapAccessSnapshot(row: StaffAccessCentreRow | null | undefined): StaffProfileAccessSnapshot | null {
   if (!row) return null;
   return {
     authLoginStatus: row.authLoginStatus,
@@ -39,7 +41,7 @@ function mapAccessSnapshot(
 }
 
 function mapIdentityAuditSnapshot(
-  row: Awaited<ReturnType<typeof runStaffIdentityReadinessAudit>>["rows"][number] | undefined
+  row: StaffIdentityReadinessAuditRow | null | undefined
 ): StaffProfileIdentityAuditSnapshot | null {
   if (!row) return null;
   return {
@@ -105,15 +107,12 @@ export async function loadStaffProfileHubOverview(
   const staffMemberId = lifecycle.id;
   const canManage = options?.canManage ?? false;
 
-  const [accessPage, checklist, onboardingInvite, auditResult] = await Promise.all([
-    loadStaffAccessCentrePage(tid),
+  const [accessRow, checklist, onboardingInvite, identityAuditRow] = await Promise.all([
+    loadStaffAccessCentreRowForMember(tid, staffMemberId),
     loadOnboardingChecklist(tid, staffMemberId),
     loadOnboardingInviteStatus(tid, staffMemberId),
-    runStaffIdentityReadinessAudit(tid),
+    runStaffIdentityReadinessAuditForMember(tid, staffMemberId),
   ]);
-
-  const accessRow = accessPage.rows.find((r) => r.staffMemberId === staffMemberId);
-  const identityAuditRow = auditResult.rows.find((r) => r.staffMemberId === staffMemberId);
 
   let workforceIntelligence = null;
   if (lifecycle.fi_staff_id) {

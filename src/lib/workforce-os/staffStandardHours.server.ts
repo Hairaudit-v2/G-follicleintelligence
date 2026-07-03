@@ -7,6 +7,8 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
 import { parseStaffWeeklyHours, serializeStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import {
+  applyStandardHoursTemplate,
+  staffHasConfiguredStandardHours,
   standardHoursToWeeklyHoursMap,
   validateStandardHoursPattern,
   weeklyHoursMapToStandardHours,
@@ -14,6 +16,7 @@ import {
   type StaffStandardHoursDayInput,
   type StaffStandardHoursRow,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 
 export const STAFF_STANDARD_HOURS_STAFF_NOT_FOUND_MESSAGE =
   "Staff member not found for this tenant.";
@@ -241,4 +244,55 @@ export async function saveStaffStandardHours(
 
   await syncLegacyWorkingHoursJson(tid, sid, input.days, supabase);
   return { days: input.days, validation };
+}
+
+/** Emergency default: Mon–Fri 08:30–17:00, 30 min break; Sat/Sun RDO. */
+export function defaultClinicStandardHoursWeek(): StaffStandardHoursDayInput[] {
+  return applyStandardHoursTemplate("reception_standard");
+}
+
+export type ApplyDefaultClinicStandardHoursResult = {
+  appliedStaffIds: string[];
+  skippedStaffIds: string[];
+  appliedCount: number;
+  skippedCount: number;
+};
+
+/**
+ * Apply default clinic hours only to staff with no configured standard hours.
+ * Never overwrites existing active patterns.
+ */
+export async function applyDefaultClinicStandardHoursToMissingStaff(
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<ApplyDefaultClinicStandardHoursResult> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const [staffRows, existingMap] = await Promise.all([
+    loadAllStaffForTenant(tid),
+    loadActiveStandardHoursForTenant(tid),
+  ]);
+
+  const defaultDays = defaultClinicStandardHoursWeek();
+  const appliedStaffIds: string[] = [];
+  const skippedStaffIds: string[] = [];
+
+  for (const staff of staffRows) {
+    const existing = existingMap.get(staff.id);
+    if (staffHasConfiguredStandardHours(existing)) {
+      skippedStaffIds.push(staff.id);
+      continue;
+    }
+    await saveStaffStandardHours(
+      { tenantId: tid, staffId: staff.id, days: defaultDays },
+      opts
+    );
+    appliedStaffIds.push(staff.id);
+  }
+
+  return {
+    appliedStaffIds,
+    skippedStaffIds,
+    appliedCount: appliedStaffIds.length,
+    skippedCount: skippedStaffIds.length,
+  };
 }

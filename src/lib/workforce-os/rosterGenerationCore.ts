@@ -489,9 +489,9 @@ function formatHmInTz(iso: string, tz: string): string {
 export { mondayOfWeekIso, weekDayIsoDates } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 export function buildCoverageRoleGapLabels(
-  missingRoles: Array<{ role: string; required: number; assigned: number }>
+  missingRoles: Array<{ role: string; required: number; assigned: number }> | null | undefined
 ): string[] {
-  return missingRoles
+  return (missingRoles ?? [])
     .filter((r) => r.required > r.assigned)
     .map((r) => {
       const open = r.required - r.assigned;

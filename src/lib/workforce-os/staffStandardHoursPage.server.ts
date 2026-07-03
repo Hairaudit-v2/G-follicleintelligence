@@ -4,10 +4,8 @@ import { notFound } from "next/navigation";
 
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import {
-  HR_OS_ROUTE_REQUIRED_ROLES,
-  resolveHrOsRouteAccess,
-} from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { resolveStaffStandardHoursManageCapability } from "@/src/lib/workforce-os/staffStandardHoursManageGate.server";
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import {
   loadActiveStandardHoursForStaff,
@@ -15,7 +13,7 @@ import {
 } from "@/src/lib/workforce-os/staffStandardHours.server";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import { listStaffMissingStandardHours } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
-import { STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+
 import type { RosterCommandCentreClinicOption } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
@@ -38,25 +36,6 @@ async function loadClinicsForTenant(tenantId: string): Promise<RosterCommandCent
     const r = row as { id: string; display_name: string | null };
     return { id: String(r.id), displayName: r.display_name?.trim() || "Clinic" };
   });
-}
-
-export async function resolveStaffStandardHoursManageCapability(tenantId: string): Promise<{
-  canManage: boolean;
-  manageDeniedReason: string;
-}> {
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
-  if (!access.ok) {
-    return { canManage: false, manageDeniedReason: access.access.message };
-  }
-  if (access.platformAdminPreview) {
-    return { canManage: true, manageDeniedReason: "" };
-  }
-  const role = access.userRole.trim().toLowerCase();
-  const canManage = (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
-  return {
-    canManage,
-    manageDeniedReason: canManage ? "" : STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
-  };
 }
 
 export async function loadStaffStandardHoursSetupIndexPage(tenantId: string) {

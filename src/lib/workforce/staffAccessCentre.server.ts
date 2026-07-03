@@ -126,16 +126,29 @@ async function expireStaleLoginInvitations(
     .lt("expires_at", now);
 }
 
+export type LoadStaffAccessCentrePageOptions = {
+  staffMemberId?: string;
+  supabaseClientForTests?: SupabaseClient;
+};
+
 export async function loadStaffAccessCentrePage(
   tenantId: string,
-  client?: SupabaseClient
+  options?: LoadStaffAccessCentrePageOptions | SupabaseClient
 ): Promise<StaffAccessCentrePageModel> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = client ?? supabaseAdmin();
-  await syncAllStaffProjectionsForTenant(tid);
-  await expireStaleLoginInvitations(tid, supabase);
+  const normalizedOptions: LoadStaffAccessCentrePageOptions =
+    options && "from" in (options as SupabaseClient)
+      ? { supabaseClientForTests: options as SupabaseClient }
+      : ((options as LoadStaffAccessCentrePageOptions | undefined) ?? {});
+  const staffMemberId = normalizedOptions.staffMemberId?.trim() || null;
+  const supabase = normalizedOptions.supabaseClientForTests ?? supabaseAdmin();
 
-  const { data: members, error } = await supabase
+  if (!staffMemberId) {
+    await syncAllStaffProjectionsForTenant(tid);
+    await expireStaleLoginInvitations(tid, supabase);
+  }
+
+  let memberQuery = supabase
     .from("fi_staff_members")
     .select(
       "id, full_name, email, role_code, employment_status, fi_staff_id, archived_at, system_access_revoked"
@@ -143,6 +156,10 @@ export async function loadStaffAccessCentrePage(
     .eq("tenant_id", tid)
     .is("merged_into", null)
     .order("full_name", { ascending: true });
+  if (staffMemberId) {
+    memberQuery = memberQuery.eq("id", staffMemberId);
+  }
+  const { data: members, error } = await memberQuery;
   if (error) throw new Error(error.message);
 
   const memberRows = (members ?? []) as {
@@ -350,6 +367,17 @@ export async function loadStaffAccessCentrePage(
   }
 
   return { tenantId: tid, rows, canManage: true };
+}
+
+/** Single staff member access snapshot — avoids full-tenant sync on profile pages. */
+export async function loadStaffAccessCentreRowForMember(
+  tenantId: string,
+  staffMemberId: string
+): Promise<StaffAccessCentreRow | null> {
+  const page = await loadStaffAccessCentrePage(tenantId, {
+    staffMemberId: staffMemberId.trim(),
+  });
+  return page.rows[0] ?? null;
 }
 
 function isDepartedForSuspend(status: string): boolean {
