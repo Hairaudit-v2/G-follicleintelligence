@@ -41,6 +41,7 @@ export function buildHairAuditPatientImageMetadata(input: {
 }): Record<string, unknown> {
   return {
     upload_source: HAIRAUDIT_PATIENT_IMAGE_UPLOAD_SOURCE,
+    capture_source: HAIRAUDIT_PATIENT_IMAGE_UPLOAD_SOURCE,
     hairaudit_image_type: input.hairauditImageType,
     canonical_view: input.canonicalView,
     fi_event_id: input.fiEventId,

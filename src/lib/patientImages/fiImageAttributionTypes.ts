@@ -17,6 +17,9 @@ export const FI_IMAGE_CAPTURE_SOURCES = [
   "iiohr_academy",
   "follow_up_outcome",
   "legacy_follow_up",
+  "follow_up_encounter",
+  "hairaudit",
+  "guided_capture",
   "unknown",
 ] as const;
 export type FiImageCaptureSource = (typeof FI_IMAGE_CAPTURE_SOURCES)[number];

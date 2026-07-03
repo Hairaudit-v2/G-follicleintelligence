@@ -476,8 +476,20 @@ export function assessGraftReconciliationGate(input: {
   reconciliationStatus: SurgeryOsGraftReconciliationStatus;
   pendingTrayCount: number;
   requireCompleted?: boolean;
+  /** When FI_IMAGING_REQUIRE_GRAFT_TRAY_CAPTURE=true */
+  trayImageCount?: number;
+  requireTrayCapture?: boolean;
 }): SurgeryOsGraftReconciliationGateResult {
   const reasons: string[] = [];
+
+  if (input.requireTrayCapture === true) {
+    const trayCount = input.trayImageCount ?? 0;
+    if (trayCount < 1) {
+      reasons.push(
+        "At least one graft tray photo is required before final reconciliation. Open Surgery Day capture and photograph the graft tray."
+      );
+    }
+  }
 
   if (input.implantedGrafts > input.extractedGrafts) {
     reasons.push("Implanted grafts cannot exceed extracted grafts.");
@@ -513,6 +525,8 @@ export function assertGraftReconciliationGate(input: {
   reconciliationStatus: SurgeryOsGraftReconciliationStatus;
   pendingTrayCount: number;
   requireCompleted?: boolean;
+  trayImageCount?: number;
+  requireTrayCapture?: boolean;
 }): void {
   const result = assessGraftReconciliationGate(input);
   if (!result.ok) {

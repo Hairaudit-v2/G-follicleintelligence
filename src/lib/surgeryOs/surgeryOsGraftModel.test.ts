@@ -267,6 +267,37 @@ describe("surgeryOsGraftModel", () => {
     assert.equal(open.ok, true);
   });
 
+  it("blocks reconciliation when graft tray capture flag is enabled without tray photo", () => {
+    const blocked = assessGraftReconciliationGate({
+      extractedGrafts: 1000,
+      implantedGrafts: 950,
+      discardedGrafts: 50,
+      remainingGrafts: 0,
+      reconciliationStatus: "completed",
+      pendingTrayCount: 0,
+      requireCompleted: true,
+      requireTrayCapture: true,
+      trayImageCount: 0,
+    });
+    assert.equal(blocked.ok, false);
+    if (!blocked.ok) {
+      assert.ok(blocked.reasons.some((r) => r.includes("graft tray photo")));
+    }
+
+    const open = assessGraftReconciliationGate({
+      extractedGrafts: 1000,
+      implantedGrafts: 950,
+      discardedGrafts: 50,
+      remainingGrafts: 0,
+      reconciliationStatus: "completed",
+      pendingTrayCount: 0,
+      requireCompleted: true,
+      requireTrayCapture: true,
+      trayImageCount: 1,
+    });
+    assert.equal(open.ok, true);
+  });
+
   it("blocks completed/cancelled surgeries unless admin override", () => {
     assert.equal(isSurgeryStatusEligibleForGraftCounting("in_progress"), true);
     assert.equal(isSurgeryStatusEligibleForGraftCounting("completed"), false);

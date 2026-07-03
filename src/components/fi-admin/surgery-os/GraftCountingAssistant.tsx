@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
+  Camera,
   CheckCircle2,
   Download,
   Loader2,
@@ -1252,6 +1253,49 @@ function CorrectionPanel({
         </div>
       ) : null}
 
+      {graft.trayImageLinks.length > 0 ? (
+        <div className="rounded-xl border border-violet-500/20 bg-violet-950/20 p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-violet-200">
+            <Camera className="h-4 w-4" aria-hidden />
+            Graft tray photo evidence ({graft.trayImageCount})
+          </p>
+          <p className="mt-1 text-xs text-violet-100/70">
+            Linked from Surgery Day capture — used for reconciliation evidence and future AI count
+            review.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {graft.trayImageLinks.map((link) => (
+              <li
+                key={link.linkId}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-sm"
+              >
+                <span className="text-slate-300">
+                  {new Date(link.capturedAt).toLocaleString()}
+                  {link.reviewRequired ? (
+                    <span className="ml-2 text-amber-400">· review required</span>
+                  ) : null}
+                </span>
+                {link.imagingHref ? (
+                  <Link
+                    href={link.imagingHref}
+                    className="text-violet-300 underline-offset-2 hover:text-violet-200 hover:underline"
+                  >
+                    View in imaging
+                  </Link>
+                ) : (
+                  <span className="text-slate-500">Image linked</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="rounded-xl border border-dashed border-slate-600/40 bg-slate-950/30 px-4 py-3 text-sm text-slate-500">
+          No graft tray photos linked yet. Capture the graft tray in Surgery Day imaging before final
+          reconciliation.
+        </p>
+      )}
+
       {canReconcile ? (
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-4">
           <p className="text-sm text-slate-300">
@@ -1264,6 +1308,9 @@ function CorrectionPanel({
                 {" "}
                 · {graft.pendingTrayCount} tray(s) pending review
               </span>
+            ) : null}
+            {graft.trayImageCount === 0 ? (
+              <span className="text-amber-400"> · no graft tray photo linked</span>
             ) : null}
           </p>
           <label className="mt-3 block text-sm text-slate-500">

@@ -33,6 +33,10 @@ const REASON_LABELS: Record<string, string> = {
   admin_fallback_missing_region: "Admin fallback — region missing",
   openai_not_configured: "AI provider unavailable",
   retake_required: "Retake flagged by staff",
+  graft_tray_missing_protocol_slot: "Graft tray — protocol slot missing",
+  graft_tray_reconciliation_evidence_required: "Graft tray — reconciliation evidence required",
+  graft_tray_count_mismatch_placeholder: "Graft tray — count mismatch review",
+  graft_tray_quality_review: "Graft tray — quality needs review",
 };
 
 function formatReason(reason: string): string {

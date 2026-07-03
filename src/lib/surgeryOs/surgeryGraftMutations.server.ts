@@ -8,6 +8,8 @@ import {
   assertSurgeryOsTenantRowScope,
   type SurgeryOsProcedureEventKind,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
+import { countGraftTrayLinksForSurgery } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
+import { parseRequireGraftTrayCaptureFlag } from "@/src/lib/imaging-os/imagingGraftTrayBridgeCore";
 import {
   assertGraftCountSessionLock,
   assertGraftReconciliationGate,
@@ -1120,6 +1122,9 @@ export async function reconcileGrafts(input: {
     }))
   ).pending;
 
+  const trayImageCount = await countGraftTrayLinksForSurgery(input.tenantId, input.surgeryId);
+  const requireTrayCapture = parseRequireGraftTrayCaptureFlag();
+
   assertGraftReconciliationGate({
     extractedGrafts: session.extracted_grafts,
     implantedGrafts: session.implanted_grafts,
@@ -1128,6 +1133,8 @@ export async function reconcileGrafts(input: {
     reconciliationStatus: session.reconciliation_status as SurgeryOsGraftReconciliationStatus,
     pendingTrayCount,
     requireCompleted: false,
+    trayImageCount,
+    requireTrayCapture,
   });
 
   if (remaining !== 0) {
@@ -1329,6 +1336,9 @@ export async function assertGraftReconciliationForPhaseTransition(input: {
     }))
   ).pending;
 
+  const trayImageCount = await countGraftTrayLinksForSurgery(input.tenantId, surgery.id);
+  const requireTrayCapture = parseRequireGraftTrayCaptureFlag();
+
   assertGraftReconciliationGate({
     extractedGrafts: graftSession.extracted_grafts,
     implantedGrafts: graftSession.implanted_grafts,
@@ -1337,5 +1347,7 @@ export async function assertGraftReconciliationForPhaseTransition(input: {
     reconciliationStatus: graftSession.reconciliation_status as SurgeryOsGraftReconciliationStatus,
     pendingTrayCount,
     requireCompleted: true,
+    trayImageCount,
+    requireTrayCapture,
   });
 }

@@ -42,6 +42,7 @@ import type {
   SurgeryOsReadinessSnapshot,
   SurgeryOsTeamMember,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
+import { loadGraftTrayLinksForSurgeries } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
 import {
   computeGraftProgressPercent,
   computeConfirmedTrayTotals,
@@ -541,6 +542,13 @@ export async function loadSurgeryOsCommandCentrePayload(
       loadGraftCountEventsForSurgeries(tid, surgeryIds),
     ]);
 
+  let trayLinksBySurgery: Awaited<ReturnType<typeof loadGraftTrayLinksForSurgeries>> = new Map();
+  try {
+    trayLinksBySurgery = await loadGraftTrayLinksForSurgeries(tid, surgeryIds, supabase);
+  } catch (e) {
+    if (!isMissingDatabaseRelationError(e)) throw e;
+  }
+
   const teamBySurgery = new Map<string, TeamAssignmentRow[]>();
   for (const t of teamRows) {
     const list = teamBySurgery.get(t.surgery_id) ?? [];
@@ -731,6 +739,18 @@ export async function loadSurgeryOsCommandCentrePayload(
           reconciled_at: null,
         });
 
+    const surgeryTrayLinks = trayLinksBySurgery.get(row.id) ?? [];
+    const trayImageLinks = surgeryTrayLinks.map((link) => ({
+      linkId: link.id,
+      imageId: link.image_id,
+      capturedAt: link.captured_at,
+      status: link.status,
+      reviewRequired: link.review_required,
+      imagingHref: row.patient_id
+        ? `/fi-admin/${tid}/patients/${row.patient_id}/imaging?image=${link.image_id}`
+        : null,
+    }));
+
     graftSummary.push({
       surgeryId: row.id,
       patientLabel,
@@ -758,6 +778,8 @@ export async function loadSurgeryOsCommandCentrePayload(
         confirmedTrayTotals.doubles +
         confirmedTrayTotals.triples +
         confirmedTrayTotals.multiples,
+      trayImageCount: trayImageLinks.length,
+      trayImageLinks,
       reconciledAt: graftSession?.reconciled_at ?? null,
       reconciledByLabel: graftSession?.reconciled_by_fi_user_id
         ? (userLabels.get(graftSession.reconciled_by_fi_user_id) ?? null)

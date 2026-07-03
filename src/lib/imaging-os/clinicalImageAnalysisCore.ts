@@ -489,6 +489,7 @@ export function collectImagingReviewReasons(input: {
   clinicalAi?: ImagingClinicalAiMetadataRecord | null;
   scalpRegionReviewRequired?: boolean;
   isPossibleDuplicate?: boolean;
+  graftTrayReviewReasons?: readonly string[] | null;
 }): string[] {
   const reasons: string[] = [];
   if (
@@ -519,6 +520,10 @@ export function collectImagingReviewReasons(input: {
   }
   if (input.clinicalAi?.recipient_assessment?.review_required) {
     reasons.push("recipient_assessment_needs_review");
+  }
+  for (const r of input.graftTrayReviewReasons ?? []) {
+    const key = String(r).trim();
+    if (key && !reasons.includes(key)) reasons.push(key);
   }
   return [...new Set(reasons)];
 }

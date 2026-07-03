@@ -171,6 +171,15 @@ export type SurgeryOsGraftCountEvent = {
   trayNumber: number | null;
 };
 
+export type SurgeryOsGraftTrayLinkSummary = {
+  linkId: string;
+  imageId: string;
+  capturedAt: string;
+  status: string;
+  reviewRequired: boolean;
+  imagingHref: string | null;
+};
+
 export type SurgeryOsGraftSummary = {
   surgeryId: string;
   patientLabel: string;
@@ -193,6 +202,8 @@ export type SurgeryOsGraftSummary = {
   reconciliationStatusLabel: string;
   pendingTrayCount: number;
   confirmedTrayGrafts: number;
+  trayImageCount: number;
+  trayImageLinks: SurgeryOsGraftTrayLinkSummary[];
   reconciledAt: string | null;
   reconciledByLabel: string | null;
   sessionLocks: {

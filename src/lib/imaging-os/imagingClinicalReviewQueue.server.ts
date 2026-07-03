@@ -88,6 +88,10 @@ export function imageNeedsClinicalReview(input: {
       ? metadata.ai_image_category_confidence
       : clinicalAi?.confidence ?? null);
 
+  const graftTrayReasons = Array.isArray(metadata.graft_tray_review_reasons)
+    ? metadata.graft_tray_review_reasons.map(String)
+    : null;
+
   const reasons = collectImagingReviewReasons({
     classificationConfidence,
     qualityStatus: quality?.quality_status ?? null,
@@ -95,6 +99,7 @@ export function imageNeedsClinicalReview(input: {
     clinicalAi,
     isPossibleDuplicate: quality?.duplicate_status === "possible_duplicate",
     scalpRegionReviewRequired: clinicalAi?.reasons.includes("missing_scalp_region") ?? false,
+    graftTrayReviewReasons: graftTrayReasons,
   });
 
   if (input.aiImageReviewStatus === "pending" && (classificationConfidence ?? 0) < CLINICAL_REVIEW_CONFIDENCE_THRESHOLD) {

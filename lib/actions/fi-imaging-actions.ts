@@ -15,9 +15,9 @@ import {
   finishProtocolSessionManually,
   skipOptionalProtocolSlot,
 } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
-import { PROGRESS_META_KEY } from "@/src/lib/imagingOs/imagingOsProtocol";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import { resolveOrCreateCanonicalProtocolSession } from "@/src/lib/imaging-os/canonicalCaptureResolver.server";
 import { loadOrCreateSurgeryDayVieSession } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import {
   bulkAssignImagingReviewItemsStaffNote,
@@ -211,32 +211,20 @@ export async function createImagingProtocolSessionAction(
     const supabase = supabaseAdmin();
     const tid = tenantId.trim();
     const pid = patientId.trim();
-    const now = new Date().toISOString();
-    const progressMeta: Record<string, unknown> = { status: "active" as const };
-    if (parsed.bookingId || parsed.procedureDayId || parsed.surgeryId) {
-      progressMeta.surgery_context = {
-        booking_id: parsed.bookingId ?? null,
-        procedure_day_id: parsed.procedureDayId ?? null,
-        surgery_id: parsed.surgeryId ?? null,
-        capture_surface: parsed.surgeryId ? "surgery_os" : null,
-      };
-    }
-    const { data: ins, error } = await supabase
-      .from("fi_imaging_protocol_sessions")
-      .insert({
-        tenant_id: tid,
-        patient_id: pid,
-        case_id: parsed.caseId ?? null,
-        consultation_id: parsed.consultationId ?? null,
-        template_slug: parsed.templateSlug.trim(),
-        progress: { [PROGRESS_META_KEY]: progressMeta },
-        created_at: now,
-        updated_at: now,
-      })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    const sessionId = String((ins as { id: string }).id);
+    const captureSource = parsed.surgeryId ? "surgery_os" : "imaging_os_wizard";
+    const resolved = await resolveOrCreateCanonicalProtocolSession({
+      tenantId: tid,
+      patientId: pid,
+      captureSource,
+      templateSlug: parsed.templateSlug.trim(),
+      caseId: parsed.caseId ?? null,
+      bookingId: parsed.bookingId ?? null,
+      consultationId: parsed.consultationId ?? null,
+      surgeryId: parsed.surgeryId ?? null,
+      procedureDayId: parsed.procedureDayId ?? null,
+      client: supabase,
+    });
+    const sessionId = resolved.sessionId;
 
     void publishImagingEvent({
       tenantId: tid,

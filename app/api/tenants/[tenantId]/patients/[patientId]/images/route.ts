@@ -40,6 +40,13 @@ import {
 import { loadResolvedProtocol } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
 import { buildProtocolCatalogCaptureMetadata } from "@/src/lib/imaging-os/protocolCaptureMetadataCore";
 import { resolvePatientImageUploadCaptureSource } from "@/src/lib/imaging-core/ingest/resolvePatientImageUploadCaptureSource";
+import {
+  assertCanonicalStaffCaptureSource,
+  isCanonicalCaptureLegacyExempt,
+  mergeCanonicalCaptureMetadata,
+} from "@/src/lib/imaging-os/canonicalCaptureResolverCore";
+import { ensureCanonicalStaffCapture } from "@/src/lib/imaging-os/canonicalCaptureResolver.server";
+import { linkGraftTrayImageAfterCapture } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
 
 export const dynamic = "force-dynamic";
 
@@ -108,9 +115,52 @@ export async function POST(
 
     const captureSourceNormalized = normalizeCaptureSource(captureSourceStr);
     const bookingIdStr = bookingId == null ? "" : String(bookingId).trim();
+    const caseIdStr = caseId == null ? "" : String(caseId).trim();
+    const procedureDayIdStr =
+      form.get("procedure_day_id") == null ? "" : String(form.get("procedure_day_id")).trim();
+    const surgeryIdStr = form.get("surgery_id") == null ? "" : String(form.get("surgery_id")).trim();
+
+    try {
+      assertCanonicalStaffCaptureSource(captureSourceStr ?? "");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Capture source required.";
+      return crmJsonError(400, msg);
+    }
 
     if (bookingIdStr && !captureSourceNormalized) {
       return crmJsonError(400, APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE);
+    }
+
+    let protocolSessionIdResolved = protocolSessionId;
+    let templateSlugResolved = templateSlugStr;
+    let slotSlugResolved = slotSlugStr;
+    let canonicalAuditMeta: Record<string, unknown> = {};
+
+    if (
+      captureSourceNormalized !== APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE &&
+      !isCanonicalCaptureLegacyExempt(captureSourceNormalized)
+    ) {
+      try {
+        const ensured = await ensureCanonicalStaffCapture({
+          tenantId: tid,
+          patientId: pid,
+          captureSource: captureSourceStr ?? captureSourceNormalized,
+          protocolSessionId: protocolSessionId || null,
+          protocolTemplateSlug: templateSlugStr,
+          protocolSlotSlug: slotSlugStr,
+          caseId: caseIdStr || null,
+          bookingId: bookingIdStr || null,
+          surgeryId: surgeryIdStr || null,
+          procedureDayId: procedureDayIdStr || null,
+        });
+        protocolSessionIdResolved = ensured.protocolSessionId;
+        templateSlugResolved = ensured.protocolTemplateSlug;
+        slotSlugResolved = ensured.protocolSlotSlug;
+        canonicalAuditMeta = ensured.auditMetadata;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Protocol capture required.";
+        return crmJsonError(400, msg);
+      }
     }
 
     if (captureSourceNormalized === APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE) {
@@ -124,9 +174,9 @@ export async function POST(
       try {
         assertVieProtocolCapturePolicy({
           captureSource: captureSourceStr,
-          protocolSessionId: protocolSessionId || null,
-          protocolTemplateSlug: templateSlugStr,
-          protocolSlotSlug: slotSlugStr,
+          protocolSessionId: protocolSessionIdResolved || null,
+          protocolTemplateSlug: templateSlugResolved,
+          protocolSlotSlug: slotSlugResolved,
         });
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Protocol capture required.";
@@ -134,13 +184,13 @@ export async function POST(
       }
     }
 
-    if (protocolSessionId) {
-      const slotForGuided = slotSlugStr ?? "";
+    if (protocolSessionIdResolved) {
+      const slotForGuided = slotSlugResolved ?? "";
       try {
         assertGuidedSessionUploadPreconditions({
           tenantId: tid,
           patientId: pid,
-          protocolSessionId,
+          protocolSessionId: protocolSessionIdResolved,
           slotSlug: slotForGuided,
         });
       } catch (e) {
@@ -157,17 +207,26 @@ export async function POST(
         return crmJsonError(400, "metadata must be valid JSON.");
       }
     }
-    if (protocolSessionId) {
-      metadata =
+    if (protocolSessionIdResolved) {
+      metadata = mergeCanonicalCaptureMetadata(
         metadata && typeof metadata === "object" && !Array.isArray(metadata)
-          ? { ...(metadata as Record<string, unknown>), protocol_session_id: protocolSessionId }
-          : { protocol_session_id: protocolSessionId };
+          ? (metadata as Record<string, unknown>)
+          : {},
+        { protocol_session_id: protocolSessionIdResolved, ...canonicalAuditMeta }
+      );
+    } else if (Object.keys(canonicalAuditMeta).length) {
+      metadata = mergeCanonicalCaptureMetadata(
+        metadata && typeof metadata === "object" && !Array.isArray(metadata)
+          ? (metadata as Record<string, unknown>)
+          : {},
+        canonicalAuditMeta
+      );
     }
 
-    if (templateSlugStr) {
+    if (templateSlugResolved) {
       try {
         const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
-        const resolved = await loadResolvedProtocol(tid, templateSlugStr, supabaseAdmin());
+        const resolved = await loadResolvedProtocol(tid, templateSlugResolved, supabaseAdmin());
         const catalogMeta = buildProtocolCatalogCaptureMetadata(resolved);
         metadata =
           metadata && typeof metadata === "object" && !Array.isArray(metadata)
@@ -179,13 +238,13 @@ export async function POST(
     }
 
     const procedureDayIdRaw = form.get("procedure_day_id");
-    if (captureSourceNormalized === "surgery_os" && slotSlugStr) {
+    if (captureSourceNormalized === "surgery_os" && slotSlugResolved) {
       const surgeryMeta = buildVieSurgeryImageMetadata({
         caseId: caseId == null ? null : String(caseId),
         bookingId: bookingId == null ? null : String(bookingId),
         procedureDayId: procedureDayIdRaw == null ? null : String(procedureDayIdRaw),
-        slotSlug: slotSlugStr,
-        protocolSlug: templateSlugStr ?? "surgery_day",
+        slotSlug: slotSlugResolved,
+        protocolSlug: templateSlugResolved ?? "surgery_day",
       });
       metadata =
         metadata && typeof metadata === "object" && !Array.isArray(metadata)
@@ -221,17 +280,43 @@ export async function POST(
       anatomicalRegion,
       visitType: visitType == null ? null : String(visitType),
       followUpInterval: followUpInterval == null ? null : String(followUpInterval),
-      imagingProtocolTemplateSlug:
-        imagingProtocolTemplateSlug == null ? null : String(imagingProtocolTemplateSlug),
-      imagingProtocolSlotSlug:
-        imagingProtocolSlotSlug == null ? null : String(imagingProtocolSlotSlug),
+      imagingProtocolTemplateSlug: templateSlugResolved,
+      imagingProtocolSlotSlug: slotSlugResolved,
       actingUserId,
       captureType: captureType == null ? null : String(captureType),
       captureSource: captureSourceStr,
       imageWidth: parseDim(imageWidthRaw),
       imageHeight: parseDim(imageHeightRaw),
-      protocolSessionId: protocolSessionId || null,
+      protocolSessionId: protocolSessionIdResolved || null,
     });
+
+    const qualityNeedsReview =
+      result.attribution?.quality?.quality_status === "review" ||
+      result.attribution?.quality?.quality_status === "fail";
+
+    try {
+      await linkGraftTrayImageAfterCapture({
+        tenantId: tid,
+        patientId: pid,
+        imageId: result.row.id,
+        protocolSessionId: protocolSessionIdResolved || null,
+        protocolSlotSlug: slotSlugResolved,
+        imageCategory: result.row.image_category,
+        anatomicalRegion: anatomicalRegion == null ? null : String(anatomicalRegion),
+        caseId: caseIdStr || null,
+        bookingId: bookingIdStr || null,
+        surgeryId: surgeryIdStr || null,
+        capturedByStaffId: capturedByStaffId == null ? null : String(capturedByStaffId),
+        captureSource: captureSourceStr,
+        metadata:
+          metadata && typeof metadata === "object" && !Array.isArray(metadata)
+            ? (metadata as Record<string, unknown>)
+            : {},
+        qualityNeedsReview,
+      });
+    } catch {
+      // best-effort — graft tray link must not block capture
+    }
 
     const qualityAlert = result.attribution?.quality?.alert_message;
     if (qualityAlert) {
@@ -259,25 +344,24 @@ export async function POST(
         }
       | undefined;
 
-    if (protocolSessionId) {
-      const slotSlug =
-        imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : "";
+    if (protocolSessionIdResolved) {
+      const slotSlug = slotSlugResolved ?? "";
       const replacePrevious =
         guidedReplaceRaw === "1" ||
         guidedReplaceRaw === "true" ||
         String(guidedReplaceRaw ?? "").toLowerCase() === "on";
       const isVieWizard = isVieCaptureSource(captureSourceNormalized);
 
-      if (isVieWizard && templateSlugStr && isVieProtocolSlug(templateSlugStr)) {
-        const protocol = getVieProtocol(templateSlugStr);
+      if (isVieWizard && templateSlugResolved && isVieProtocolSlug(templateSlugResolved)) {
+        const protocol = getVieProtocol(templateSlugResolved);
         const requiredTotal = protocol?.slots.filter((s) => s.required).length ?? 0;
         const intel = await runVieInstantIntelligence({
           tenantId: tid,
           patientId: pid,
           patientImageId: result.row.id,
-          protocolSessionId,
-          protocolTemplateSlug: templateSlugStr,
-          protocolSlotSlug: slotSlugStr ?? slotSlug,
+          protocolSessionId: protocolSessionIdResolved,
+          protocolTemplateSlug: templateSlugResolved,
+          protocolSlotSlug: slotSlugResolved ?? slotSlug,
           contentType: result.row.content_type ?? file.type,
           fileSizeBytes: file.size,
           imageWidth: parseDim(imageWidthRaw),
@@ -293,7 +377,7 @@ export async function POST(
         guided_session = await stageVieProtocolCapture({
           tenantId: tid,
           patientId: pid,
-          sessionId: protocolSessionId,
+          sessionId: protocolSessionIdResolved,
           slotSlug,
           newImageId: result.row.id,
           intelligence: intel,
@@ -341,7 +425,7 @@ export async function POST(
       guided_session = await applyGuidedCaptureToSession({
         tenantId: tid,
         patientId: pid,
-        sessionId: protocolSessionId,
+        sessionId: protocolSessionIdResolved,
         newImageId: result.row.id,
         slotSlug,
         replacePrevious,
@@ -363,26 +447,26 @@ export async function POST(
       | undefined;
 
     if (
-      protocolSessionId &&
-      templateSlugStr &&
-      slotSlugStr &&
-      isVieProtocolSlug(templateSlugStr) &&
+      protocolSessionIdResolved &&
+      templateSlugResolved &&
+      slotSlugResolved &&
+      isVieProtocolSlug(templateSlugResolved) &&
       guided_session &&
       normalizeCaptureSource(captureSourceStr) !== "vie_capture_wizard" &&
       normalizeCaptureSource(captureSourceStr) !== "surgery_os" &&
       normalizeCaptureSource(captureSourceStr) !== "follow_up_outcome" &&
       normalizeCaptureSource(captureSourceStr) !== "legacy_follow_up"
     ) {
-      const protocol = getVieProtocol(templateSlugStr);
+      const protocol = getVieProtocol(templateSlugResolved);
       const requiredTotal = protocol?.slots.filter((s) => s.required).length ?? 0;
       const requiredComplete = Math.round((guided_session.completionPercent / 100) * requiredTotal);
       const intel = await runVieInstantIntelligence({
         tenantId: tid,
         patientId: pid,
         patientImageId: result.row.id,
-        protocolSessionId,
-        protocolTemplateSlug: templateSlugStr,
-        protocolSlotSlug: slotSlugStr,
+        protocolSessionId: protocolSessionIdResolved,
+        protocolTemplateSlug: templateSlugResolved,
+        protocolSlotSlug: slotSlugResolved,
         contentType: result.row.content_type ?? file.type,
         fileSizeBytes: file.size,
         imageWidth: parseDim(imageWidthRaw),

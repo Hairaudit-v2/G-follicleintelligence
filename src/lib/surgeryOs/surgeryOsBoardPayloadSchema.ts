@@ -184,6 +184,15 @@ const graftSessionLockSchema = z.object({
   isStale: z.boolean(),
 });
 
+const graftTrayLinkSummarySchema = z.object({
+  linkId: z.string().uuid(),
+  imageId: z.string().uuid(),
+  capturedAt: z.string(),
+  status: z.string(),
+  reviewRequired: z.boolean(),
+  imagingHref: z.string().nullable(),
+});
+
 const graftSummarySchema = z.object({
   surgeryId: z.string().uuid(),
   patientLabel: z.string(),
@@ -206,6 +215,8 @@ const graftSummarySchema = z.object({
   reconciliationStatusLabel: z.string(),
   pendingTrayCount: z.number().int().min(0),
   confirmedTrayGrafts: z.number().int().min(0),
+  trayImageCount: z.number().int().min(0),
+  trayImageLinks: z.array(graftTrayLinkSummarySchema),
   reconciledAt: z.string().nullable(),
   reconciledByLabel: z.string().nullable(),
   sessionLocks: z.object({

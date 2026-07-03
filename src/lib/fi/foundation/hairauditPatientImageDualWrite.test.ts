@@ -179,6 +179,9 @@ describe("hairaudit patient image dual-write core", () => {
     assert.equal(meta.source_case_id, CASE);
     assert.equal(meta.global_case_id, "global-case-1");
     assert.equal(meta.classifier_status, "pending");
+    assert.equal(meta.capture_source, "hairaudit");
+    assert.equal(meta.upload_source, "hairaudit");
+    assert.equal(meta.dual_write, "imagingos_phase1_foundation");
   });
 });
 

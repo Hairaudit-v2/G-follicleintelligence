@@ -35,6 +35,17 @@ test("graftSummarySchema validates graft summary shape", () => {
     reconciliationStatusLabel: "Pending",
     pendingTrayCount: 1,
     confirmedTrayGrafts: 50,
+    trayImageCount: 1,
+    trayImageLinks: [
+      {
+        linkId: "00000000-0000-4000-8000-000000000030",
+        imageId: "00000000-0000-4000-8000-000000000031",
+        capturedAt: "2026-06-19T10:00:00.000Z",
+        status: "linked",
+        reviewRequired: true,
+        imagingHref: `/fi-admin/${tenantId}/patients/patient-1/imaging?image=00000000-0000-4000-8000-000000000031`,
+      },
+    ],
     reconciledAt: null,
     reconciledByLabel: null,
     sessionLocks: {
