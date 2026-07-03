@@ -60,6 +60,7 @@ export type RosterCommandCentreViewProps = {
     { candidatesByRole: Record<string, RosterAssignableCandidate[]> } | undefined
   >;
   filters: {
+    periodStart: string;
     weekStart: string;
     clinicId: string;
     staffId: string;
