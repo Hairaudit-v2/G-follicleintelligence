@@ -4,13 +4,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { FlatGraftTrayLinkInput, GraftTrayCaptureContext } from "./graftTrayContextTypes";
-import { parseGraftTrayLinkContext } from "./parseGraftTrayLinkContext";
 import {
-  buildGraftTrayLinkMetadata,
-  deriveGraftTrayReviewReasons,
-  type GraftTrayLinkStatus,
-} from "./imagingGraftTrayBridgeCore";
+  buildGraftTrayImageMetadataPatch,
+  buildGraftTrayLinkInsertRow,
+  isGraftTrayLinkEligible,
+  mergeGraftTrayImageMetadata,
+  resolveGraftTrayCaptureContext,
+  type FlatGraftTrayLinkInput,
+  type GraftTrayCaptureContext,
+} from "./graftTrayCaptureContext";
+import type { GraftTrayLinkStatus } from "./imagingGraftTrayBridgeCore";
 
 export type GraftTrayLinkRow = {
   id: string;
@@ -35,12 +38,12 @@ export type GraftTrayLinkRow = {
 async function resolveSurgeryIdForContext(
   client: SupabaseClient,
   tenantId: string,
-  surgery: GraftTrayCaptureContext["surgery"]
+  surgeryContext: GraftTrayCaptureContext["surgeryContext"]
 ): Promise<string | null> {
-  const explicit = surgery.surgery_id?.trim();
+  const explicit = surgeryContext.surgeryId?.trim();
   if (explicit) return explicit;
 
-  const caseId = surgery.case_id?.trim();
+  const caseId = surgeryContext.caseId?.trim();
   if (caseId) {
     const { data } = await client
       .from("fi_surgeries")
@@ -53,7 +56,7 @@ async function resolveSurgeryIdForContext(
     if (data?.id) return String(data.id);
   }
 
-  const bookingId = surgery.booking_id?.trim();
+  const bookingId = surgeryContext.bookingId?.trim();
   if (bookingId) {
     const { data } = await client
       .from("fi_surgeries")
@@ -83,85 +86,32 @@ async function resolveGraftSessionId(
   return data?.id ? String(data.id) : null;
 }
 
-function isParsedGraftTrayCaptureContext(
-  input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
-): input is GraftTrayCaptureContext {
-  return "kind" in input && input.kind === "graft_tray_capture";
-}
-
-function resolveCaptureContext(
-  input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
-): GraftTrayCaptureContext | null {
-  if (isParsedGraftTrayCaptureContext(input)) {
-    return input;
-  }
-  return parseGraftTrayLinkContext(input);
-}
-
 export async function linkGraftTrayImageAfterCapture(
   input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
 ): Promise<GraftTrayLinkRow | null> {
-  const ctx = resolveCaptureContext(input);
-  if (!ctx) {
+  const ctx = resolveGraftTrayCaptureContext(input);
+  if (!isGraftTrayLinkEligible(ctx)) {
     return null;
   }
 
-  const client = "client" in input && input.client ? input.client : supabaseAdmin();
-  const tid = ctx.tenant_id;
-  const pid = ctx.patient_id;
-  const imageId = ctx.image_id;
+  const client = !isGroupedContext(input) && input.client ? input.client : supabaseAdmin();
 
-  const surgeryId = await resolveSurgeryIdForContext(client, tid, ctx.surgery);
-  const graftSessionId = await resolveGraftSessionId(client, tid, surgeryId);
+  const surgeryId = await resolveSurgeryIdForContext(client, ctx.tenantId, ctx.surgeryContext);
+  const graftSessionId = await resolveGraftSessionId(client, ctx.tenantId, surgeryId);
 
-  const reviewReasons = deriveGraftTrayReviewReasons({
-    reviewRequired: true,
-    reconciliationEvidenceRequired: true,
-    qualityNeedsReview: ctx.quality_needs_review === true,
-    missingProtocolSlot: !ctx.protocol.protocol_slot_slug?.trim(),
-  });
-
+  const linkId = randomUUID();
   const now = new Date().toISOString();
-  const surgeryContextMeta =
-    ctx.metadata?.surgery_context && typeof ctx.metadata.surgery_context === "object"
-      ? (ctx.metadata.surgery_context as Record<string, unknown>)
-      : ctx.metadata?.vie_surgery_context && typeof ctx.metadata.vie_surgery_context === "object"
-        ? (ctx.metadata.vie_surgery_context as Record<string, unknown>)
-        : {
-            surgery_id: surgeryId,
-            case_id: ctx.surgery.case_id,
-            booking_id: ctx.surgery.booking_id,
-            procedure_day_id: ctx.surgery.procedure_day_id,
-          };
-
-  const linkMetadata = buildGraftTrayLinkMetadata({
-    captureSource: ctx.protocol.capture_source,
-    protocolSessionId: ctx.protocol.protocol_session_id,
-    surgeryContext: surgeryContextMeta,
+  const insertRow = buildGraftTrayLinkInsertRow(ctx, {
+    surgeryId,
+    graftSessionId,
+    linkId,
+    capturedAt: now,
   });
 
   const row = {
-    id: randomUUID(),
-    tenant_id: tid,
-    patient_id: pid,
-    image_id: imageId,
-    surgery_case_id: ctx.surgery.case_id?.trim() || null,
-    surgery_id: surgeryId,
-    booking_id: ctx.surgery.booking_id?.trim() || null,
-    graft_session_id: graftSessionId,
-    graft_count_event_id: null,
-    protocol_session_id: ctx.protocol.protocol_session_id?.trim() || null,
-    protocol_slot_slug: ctx.protocol.protocol_slot_slug?.trim() || ctx.slot_variant,
+    id: linkId,
+    ...insertRow,
     captured_at: now,
-    captured_by_staff_id: ctx.captured_by_staff_id?.trim() || null,
-    status: (ctx.quality_needs_review ? "review_required" : "linked") as GraftTrayLinkStatus,
-    review_required: true,
-    mismatch_reason: null,
-    metadata: {
-      ...linkMetadata,
-      slot_variant: ctx.slot_variant,
-      review_reasons: reviewReasons,
-    },
     created_at: now,
     updated_at: now,
   };
@@ -173,25 +123,23 @@ export async function linkGraftTrayImageAfterCapture(
     .single();
   if (error) throw new Error(error.message);
 
-  const graftTrayMetaPatch = {
-    graft_tray_link_id: row.id,
-    graft_tray_review_reasons: reviewReasons,
-    graft_tray_reconciliation_evidence: true,
-    graft_tray_slot_variant: ctx.slot_variant,
-  };
-
-  const existingMeta =
-    ctx.metadata && typeof ctx.metadata === "object" ? ctx.metadata : {};
+  const metaPatch = buildGraftTrayImageMetadataPatch(ctx, linkId);
   await client
     .from("fi_patient_images")
     .update({
-      metadata: { ...existingMeta, ...graftTrayMetaPatch },
+      metadata: mergeGraftTrayImageMetadata(ctx.capture.metadata, metaPatch),
       updated_at: now,
     })
-    .eq("tenant_id", tid)
-    .eq("id", imageId);
+    .eq("tenant_id", ctx.tenantId)
+    .eq("id", ctx.imageId);
 
   return data as GraftTrayLinkRow;
+}
+
+function isGroupedContext(
+  input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
+): input is GraftTrayCaptureContext {
+  return "slot" in input && "surgeryContext" in input && "capture" in input;
 }
 
 export async function countGraftTrayLinksForSurgery(

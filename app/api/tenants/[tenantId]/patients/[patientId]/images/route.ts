@@ -46,6 +46,7 @@ import {
   mergeCanonicalCaptureMetadata,
 } from "@/src/lib/imaging-os/canonicalCaptureResolverCore";
 import { ensureCanonicalStaffCapture } from "@/src/lib/imaging-os/canonicalCaptureResolver.server";
+import { buildGraftTrayCaptureContext } from "@/src/lib/imaging-os/graftTrayCaptureContext";
 import { linkGraftTrayImageAfterCapture } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
 import { maybeEnqueueGraftTrayCountEstimateJob } from "@/src/lib/imaging-os/graftTrayCountProvider.server";
 
@@ -297,7 +298,11 @@ export async function POST(
 
     let graftTrayLinkId: string | null = null;
     try {
-      const linkRow = await linkGraftTrayImageAfterCapture({
+      const imageMetadata =
+        metadata && typeof metadata === "object" && !Array.isArray(metadata)
+          ? (metadata as Record<string, unknown>)
+          : {};
+      const graftTrayCtx = buildGraftTrayCaptureContext({
         tenantId: tid,
         patientId: pid,
         imageId: result.row.id,
@@ -310,12 +315,10 @@ export async function POST(
         surgeryId: surgeryIdStr || null,
         capturedByStaffId: capturedByStaffId == null ? null : String(capturedByStaffId),
         captureSource: captureSourceStr,
-        metadata:
-          metadata && typeof metadata === "object" && !Array.isArray(metadata)
-            ? (metadata as Record<string, unknown>)
-            : {},
+        metadata: imageMetadata,
         qualityNeedsReview,
       });
+      const linkRow = await linkGraftTrayImageAfterCapture(graftTrayCtx);
       graftTrayLinkId = linkRow?.id ?? null;
     } catch {
       // best-effort — graft tray link must not block capture

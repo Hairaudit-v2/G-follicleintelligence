@@ -22,11 +22,21 @@ export {
 export type {
   FlatGraftTrayLinkInput,
   GraftTrayCaptureContext,
-  GraftTrayContextValidationResult,
-  GraftTrayProtocolLinkage,
-  GraftTraySurgeryLinkage,
-} from "./graftTrayContextTypes";
+  GraftTrayCaptureContextValidationResult,
+  GraftTrayCaptureMeta,
+  GraftTrayCaptureSlotContext,
+  GraftTrayImageMetadataPatch,
+  GraftTrayLinkInsertRow,
+  GraftTraySurgeryContextFields,
+} from "./graftTrayCaptureContext";
 export {
+  buildGraftTrayCaptureContext,
+  buildGraftTrayImageMetadataPatch,
+  buildGraftTrayLinkInsertRow,
+  isGraftTrayLinkEligible,
+  mergeGraftTrayImageMetadata,
+  parseGraftTrayCaptureContext,
   parseGraftTrayLinkContext,
+  resolveGraftTrayCaptureContext,
   validateGraftTrayCaptureContext,
-} from "./parseGraftTrayLinkContext";
+} from "./graftTrayCaptureContext";
