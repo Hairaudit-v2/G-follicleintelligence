@@ -3,6 +3,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishSurgeryEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { tryPublishSurgeryCaseIntelligenceFactsForSurgery } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublisher.server";
+import { tryEnsureStructuredHairAuditLinkForSurgery } from "@/src/lib/outcomeIntelligence/hairAuditLink.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { parseAppointmentProcedureMetadata } from "@/src/lib/bookings/appointmentMetadata";
 import {
@@ -520,6 +521,12 @@ export async function logSurgeryProcedureEvent(input: {
       void tryPublishSurgeryCaseIntelligenceFactsForSurgery({
         tenantId: input.tenantId,
         surgeryId: input.surgeryId,
+      });
+      void tryEnsureStructuredHairAuditLinkForSurgery({
+        tenantId: input.tenantId,
+        surgeryId: input.surgeryId,
+        caseId: result.surgery.case_id,
+        patientId: result.surgery.patient_id,
       });
       void syncLiveTheatreToCaseProcedure({
         tenantId: input.tenantId,

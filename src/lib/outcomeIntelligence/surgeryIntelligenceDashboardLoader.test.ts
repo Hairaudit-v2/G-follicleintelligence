@@ -118,9 +118,25 @@ function createAnalyticsEventsMock(store: StoredRow[]) {
     return chain;
   }
 
+  function emptyLinkContextChain() {
+    const result = Promise.resolve({ data: [] as StoredRow[], error: null });
+    const chain = {
+      eq: () => chain,
+      in: () => chain,
+      order: () => chain,
+      then: result.then.bind(result),
+      catch: result.catch.bind(result),
+      finally: result.finally.bind(result),
+    };
+    return { select: () => chain };
+  }
+
   const client = {
     from(table: string) {
-      assert.equal(table, "fi_analytics_events");
+      if (table === "fi_analytics_events") return api;
+      if (table === "fi_cases" || table === "fi_reports" || table === "fi_global_cases") {
+        return emptyLinkContextChain();
+      }
       return api;
     },
   } as unknown as SupabaseClient;

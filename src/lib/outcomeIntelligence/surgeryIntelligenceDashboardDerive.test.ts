@@ -228,6 +228,33 @@ describe("surgeryIntelligenceDashboardDerive", () => {
     assert.equal(parsePublishedSurgeryCaseIntelligenceEvent(foreign, TENANT_A), null);
   });
 
+  it("dashboard table rows resolve legacy and structured HairAudit links", () => {
+    const composed = composeSurgeryIntelligenceDashboardFromEvents({
+      tenantId: TENANT_A,
+      filters: {},
+      events: [
+        analyticsEvent({
+          occurredAt: "2026-07-04T10:00:00.000Z",
+          payload: factsPayload(),
+        }),
+      ],
+      caseMetadataByCaseId: {
+        [CASE]: {
+          hairaudit_case_id: "66666666-6666-4666-8666-666666666666",
+          report_id: "77777777-7777-4777-8777-777777777777",
+        },
+      },
+    });
+    assert.equal(composed.tableRows.length, 1);
+    assert.equal(composed.tableRows[0]?.hairAuditLinkLabel, "Audit ready");
+    assert.equal(composed.tableRows[0]?.hairAuditAdminHref, "/hair-audit/admin");
+    assert.equal(
+      composed.tableRows[0]?.hairAuditReportHref,
+      `/fi-admin/${TENANT_A}/audit/77777777-7777-4777-8777-777777777777`
+    );
+    assert.equal(composed.tableRows[0]?.hairAuditLinkageConflict, false);
+  });
+
   it("read-only loader does not import publisher write paths", () => {
     const loaderPath = join(
       process.cwd(),

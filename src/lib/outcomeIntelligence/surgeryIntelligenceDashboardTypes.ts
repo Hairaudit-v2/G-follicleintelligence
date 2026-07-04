@@ -85,6 +85,10 @@ export type SurgeryIntelligenceDashboardTableRow = {
   surgeryHref: string;
   imagingHref: string | null;
   caseHref: string | null;
+  hairAuditLinkLabel: string;
+  hairAuditAdminHref: string | null;
+  hairAuditReportHref: string | null;
+  hairAuditLinkageConflict: boolean;
 };
 
 export type SurgeryIntelligenceDashboardFilterOptions = {

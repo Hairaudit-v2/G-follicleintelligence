@@ -9,6 +9,10 @@ import {
   SURGERY_CASE_INTELLIGENCE_FACTS_EVENT_TYPE,
   SURGERY_CASE_INTELLIGENCE_SOURCE,
 } from "./surgeryCaseFactsPublisherCore";
+import {
+  formatHairAuditLinkDashboardLabel,
+  resolveHairAuditLinkForSurgery,
+} from "./hairAuditLinkCore";
 import type {
   SurgeryIntelligenceDashboardFilters,
   SurgeryIntelligenceDashboardMetrics,
@@ -203,6 +207,11 @@ export function formatSurgeryIntelligencePatientReference(patientId: string | nu
 export function buildSurgeryIntelligenceDashboardTableRows(input: {
   tenantId: string;
   rows: readonly SurgeryIntelligencePublishedCaseRow[];
+  caseMetadataByCaseId?: Readonly<Record<string, Record<string, unknown>>>;
+  fiReportIdByCaseId?: Readonly<Record<string, string>>;
+  globalHairAuditSourceByCaseId?: Readonly<
+    Record<string, readonly { source_system: string; source_case_id: string }[]>
+  >;
 }): SurgeryIntelligenceDashboardTableRow[] {
   const base = `/fi-admin/${input.tenantId.trim()}`;
   return [...input.rows]
@@ -212,25 +221,51 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
       if (ad !== bd) return bd.localeCompare(ad);
       return b.occurredAt.localeCompare(a.occurredAt);
     })
-    .map((row) => ({
-      eventId: row.eventId,
-      procedureDate: row.procedureDate,
-      caseId: row.caseId,
-      surgeryId: row.surgeryId,
-      patientId: row.patientId,
-      patientReference: formatSurgeryIntelligencePatientReference(row.patientId),
-      finalReviewedGraftCount: row.finalReviewedGraftCount,
-      hasFinalGraftCount: row.hasFinalGraftCount,
-      graftCountSource: row.graftCountSource,
-      mismatchBand: row.mismatchBand,
-      confidenceBand: row.confidenceBand,
-      imageQuality: row.imageQuality,
-      reviewerLabel: row.reviewerLabel,
-      graftTrayReviewPending: row.graftTrayReviewPending,
-      surgeryHref: `${base}/surgery-os`,
-      imagingHref: row.patientId ? `${base}/patients/${row.patientId}/imaging` : null,
-      caseHref: row.caseId ? `${base}/cases/${row.caseId}` : null,
-    }));
+    .map((row) => {
+      const caseMetadata =
+        row.caseId && input.caseMetadataByCaseId
+          ? input.caseMetadataByCaseId[row.caseId] ?? null
+          : null;
+      const hairAuditLink = resolveHairAuditLinkForSurgery({
+        tenantId: input.tenantId,
+        surgeryId: row.surgeryId,
+        caseId: row.caseId,
+        patientId: row.patientId,
+        caseMetadata,
+        fiReportId:
+          row.caseId && input.fiReportIdByCaseId
+            ? input.fiReportIdByCaseId[row.caseId] ?? null
+            : null,
+        globalCaseSourceIds:
+          row.caseId && input.globalHairAuditSourceByCaseId
+            ? input.globalHairAuditSourceByCaseId[row.caseId] ?? []
+            : [],
+      });
+
+      return {
+        eventId: row.eventId,
+        procedureDate: row.procedureDate,
+        caseId: row.caseId,
+        surgeryId: row.surgeryId,
+        patientId: row.patientId,
+        patientReference: formatSurgeryIntelligencePatientReference(row.patientId),
+        finalReviewedGraftCount: row.finalReviewedGraftCount,
+        hasFinalGraftCount: row.hasFinalGraftCount,
+        graftCountSource: row.graftCountSource,
+        mismatchBand: row.mismatchBand,
+        confidenceBand: row.confidenceBand,
+        imageQuality: row.imageQuality,
+        reviewerLabel: row.reviewerLabel,
+        graftTrayReviewPending: row.graftTrayReviewPending,
+        surgeryHref: `${base}/surgery-os`,
+        imagingHref: row.patientId ? `${base}/patients/${row.patientId}/imaging` : null,
+        caseHref: row.caseId ? `${base}/cases/${row.caseId}` : null,
+        hairAuditLinkLabel: formatHairAuditLinkDashboardLabel(hairAuditLink),
+        hairAuditAdminHref: hairAuditLink.hrefs.hairaudit_admin_href,
+        hairAuditReportHref: hairAuditLink.hrefs.audit_report_href,
+        hairAuditLinkageConflict: hairAuditLink.linkage_conflict,
+      };
+    });
 }
 
 export function buildSurgeryIntelligenceFilterOptions(
@@ -300,6 +335,11 @@ export function composeSurgeryIntelligenceDashboardFromEvents(input: {
   tenantId: string;
   events: readonly FiAnalyticsEventRow[];
   filters: SurgeryIntelligenceDashboardFilters;
+  caseMetadataByCaseId?: Readonly<Record<string, Record<string, unknown>>>;
+  fiReportIdByCaseId?: Readonly<Record<string, string>>;
+  globalHairAuditSourceByCaseId?: Readonly<
+    Record<string, readonly { source_system: string; source_case_id: string }[]>
+  >;
 }): {
   metrics: SurgeryIntelligenceDashboardMetrics;
   tableRows: SurgeryIntelligenceDashboardTableRow[];
@@ -320,6 +360,9 @@ export function composeSurgeryIntelligenceDashboardFromEvents(input: {
     tableRows: buildSurgeryIntelligenceDashboardTableRows({
       tenantId: input.tenantId,
       rows: filtered,
+      caseMetadataByCaseId: input.caseMetadataByCaseId,
+      fiReportIdByCaseId: input.fiReportIdByCaseId,
+      globalHairAuditSourceByCaseId: input.globalHairAuditSourceByCaseId,
     }),
     filterOptions,
     eventCountLoaded: input.events.length,

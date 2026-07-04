@@ -171,13 +171,14 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                 <th className="px-4 py-3 font-semibold">Confidence</th>
                 <th className="px-4 py-3 font-semibold">Quality</th>
                 <th className="px-4 py-3 font-semibold">Reviewer</th>
+                <th className="px-4 py-3 font-semibold">HairAudit</th>
                 <th className="px-4 py-3 font-semibold">Links</th>
               </tr>
             </thead>
             <tbody>
               {data.tableRows.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-[#64748B]">
+                  <td colSpan={10} className="px-4 py-8 text-center text-[#64748B]">
                     No published surgery intelligence facts match the current filters.
                   </td>
                 </tr>
@@ -202,6 +203,37 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                     <td className="px-4 py-3">{row.confidenceBand ?? "—"}</td>
                     <td className="px-4 py-3">{row.imageQuality ?? "—"}</td>
                     <td className="px-4 py-3">{row.reviewerLabel ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <span
+                          className={
+                            row.hairAuditLinkageConflict
+                              ? "text-amber-300"
+                              : "text-[#CBD5E1]"
+                          }
+                        >
+                          {row.hairAuditLinkLabel}
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {row.hairAuditAdminHref ? (
+                            <Link
+                              href={row.hairAuditAdminHref}
+                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-[#22C1FF] hover:border-[#22C1FF]/40"
+                            >
+                              HairAudit
+                            </Link>
+                          ) : null}
+                          {row.hairAuditReportHref ? (
+                            <Link
+                              href={row.hairAuditReportHref}
+                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-[#22C1FF] hover:border-[#22C1FF]/40"
+                            >
+                              Audit report
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         <Link

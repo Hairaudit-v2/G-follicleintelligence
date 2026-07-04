@@ -177,7 +177,14 @@ export function buildPatientTwinImagingDeepLinks(input: {
       ? input.metadata.hairaudit_source_case_id
       : typeof input.metadata.hair_audit_case_id === "string"
         ? input.metadata.hair_audit_case_id
-        : null;
+        : typeof input.metadata.hairaudit_case_id === "string"
+          ? input.metadata.hairaudit_case_id
+          : typeof input.metadata.source_case_id === "string" &&
+              (input.metadata.source_system === "hairaudit" ||
+                input.metadata.upload_source === "hairaudit" ||
+                input.metadata.capture_source === "hairaudit")
+            ? input.metadata.source_case_id
+            : null;
   const procedureDayId =
     typeof input.metadata.procedure_day_id === "string" ? input.metadata.procedure_day_id : null;
 
