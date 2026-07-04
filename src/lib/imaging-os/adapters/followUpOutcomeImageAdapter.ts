@@ -18,6 +18,9 @@ export type FollowUpOutcomeImageAdapterInput = {
   follow_up_interval?: string | null;
   visit_type?: string | null;
   captured_by_staff_id?: string | null;
+  /** Preserves legacy_follow_up / follow_up_encounter when supplied. */
+  capture_source?: string | null;
+  follow_up_encounter_id?: string | null;
   metadata?: Record<string, unknown>;
 };
 
@@ -40,11 +43,14 @@ export function buildFollowUpOutcomeImageIngestionRequest(
     uploaded_by_actor_id: input.captured_by_staff_id?.trim() || undefined,
     uploaded_by_actor_type: input.captured_by_staff_id ? "clinician" : "staff",
     metadata: {
-      capture_source: "follow_up_outcome",
+      capture_source: input.capture_source?.trim() || "follow_up_outcome",
       protocol_template_slug: input.protocol_template_slug?.trim() || "follow_up_review",
       ...(slotSlug ? { protocol_slot_slug: slotSlug } : {}),
       ...(input.follow_up_interval ? { follow_up_interval: input.follow_up_interval } : {}),
       ...(input.visit_type ? { visit_type: input.visit_type } : {}),
+      ...(input.follow_up_encounter_id?.trim()
+        ? { follow_up_encounter_id: input.follow_up_encounter_id.trim() }
+        : {}),
       ...(input.metadata ?? {}),
     },
   };

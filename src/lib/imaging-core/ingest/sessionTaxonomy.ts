@@ -36,6 +36,8 @@ function inferSessionType(input: BuildImagingSessionTaxonomyInput): string {
   }
   if (
     capture === "follow_up_outcome" ||
+    capture === "legacy_follow_up" ||
+    capture === "follow_up_encounter" ||
     template === "follow_up_review" ||
     normalizeKey(input.follow_up_interval)
   ) {

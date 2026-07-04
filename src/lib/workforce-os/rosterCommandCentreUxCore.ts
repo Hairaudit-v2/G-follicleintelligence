@@ -11,6 +11,7 @@ import {
   staffHasConfiguredStandardHours,
   type StaffStandardHoursDayInput,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { listStaffMissingStandardHoursForRoster } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
@@ -166,8 +167,16 @@ const STAFF_ROLE_SHIFT_TYPE: Record<string, string> = {
 
 export function listStaffMissingStandardHours(
   staffOptions: Array<{ id: string; name: string }>,
-  standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>
+  standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>,
+  eligibleStaffIds?: ReadonlySet<string> | readonly string[]
 ): Array<{ id: string; name: string }> {
+  if (eligibleStaffIds) {
+    return listStaffMissingStandardHoursForRoster(
+      staffOptions,
+      standardHoursByStaffId,
+      eligibleStaffIds
+    );
+  }
   return staffOptions.filter(
     (s) => !staffHasConfiguredStandardHours(standardHoursByStaffId[s.id])
   );

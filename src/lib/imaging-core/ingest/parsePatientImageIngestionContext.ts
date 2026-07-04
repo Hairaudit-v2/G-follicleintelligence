@@ -3,6 +3,11 @@
  */
 
 import { normalizeFiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionCore";
+import {
+  extractFollowUpEncounterId,
+  isLegacyFollowUpIngestContext,
+} from "./legacyFollowUpIngestCore";
+import { validateLegacyFollowUpIngestContext } from "./legacyFollowUpIngestCore";
 import type {
   ConsultationOsIngestContext,
   FlatPatientImageIngestionContext,
@@ -87,20 +92,19 @@ function resolveIngestKind(input: FlatPatientImageIngestionContext): ParsedPatie
   if (captureSource === "iiohr_academy" || uploadSource === "iiohr") {
     return "iiohr";
   }
-  if (captureSource === "consultation_os" || input.consultation_id?.trim()) {
-    return "consultation_os";
-  }
   if (captureSource === "surgery_os") {
     return "surgery_os";
   }
   if (
-    captureSource === "follow_up_outcome" ||
-    captureSource === "legacy_follow_up" ||
-    captureSource === "follow_up_encounter" ||
-    ((captureSource === "vie_capture_wizard" || captureSource === "imaging_os_wizard") &&
-      isFollowUpReviewTemplate(input.protocol_template_slug))
+    isLegacyFollowUpIngestContext({
+      capture_source: captureSource,
+      protocol_template_slug: input.protocol_template_slug,
+    })
   ) {
     return "legacy_follow_up";
+  }
+  if (captureSource === "consultation_os" || input.consultation_id?.trim()) {
+    return "consultation_os";
   }
   if (captureSource === "patient_portal") {
     return "patient_portal";
@@ -176,6 +180,7 @@ export function parsePatientImageIngestionContext(
         kind,
         ...shared,
         captured_by_staff_id: input.captured_by_staff_id,
+        follow_up_encounter_id: extractFollowUpEncounterId(input.metadata),
         ...protocolFields(input),
       } satisfies LegacyFollowUpIngestContext;
 
@@ -298,6 +303,8 @@ export function validateParsedPatientImageIngestContext(
       return validateImagingOsWizardIngestContext(ctx);
     case "vie_capture_wizard":
       return validateVieCaptureWizardIngestContext(ctx);
+    case "legacy_follow_up":
+      return validateLegacyFollowUpIngestContext(ctx);
     default:
       return { valid: true, issues: [] };
   }

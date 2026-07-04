@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { StaffStandardHoursPanel } from "@/src/components/fi/workforce/StaffStandardHoursPanel";
 import type { DefaultFullTimePattern, RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
@@ -10,6 +11,7 @@ import {
   buildStaffStandardHoursReturnToRosterHref,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import type { RosterIneligibleStaffOption } from "@/src/lib/workforce-os/rosterEligibleStaff.server";
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
@@ -24,6 +26,7 @@ export type StaffStandardHoursIndexClientProps = {
     hasStandardHours: boolean;
   }>;
   staffMissingStandardHours: Array<{ id: string; name: string }>;
+  rosterIneligibleStaffOptions?: RosterIneligibleStaffOption[];
 };
 
 export function StaffStandardHoursIndexClient({
@@ -32,7 +35,9 @@ export function StaffStandardHoursIndexClient({
   manageDeniedReason,
   staffOptions,
   staffMissingStandardHours,
+  rosterIneligibleStaffOptions = [],
 }: StaffStandardHoursIndexClientProps) {
+  const [showIneligible, setShowIneligible] = useState(false);
   const rosterHref = buildStaffStandardHoursReturnToRosterHref(tenantId);
 
   return (
@@ -114,6 +119,38 @@ export function StaffStandardHoursIndexClient({
           ))}
         </ul>
       </section>
+
+      {rosterIneligibleStaffOptions.length > 0 ? (
+        <section className="rounded-xl border border-white/[0.08] bg-[#0F1629]/30">
+          <button
+            type="button"
+            onClick={() => setShowIneligible((open) => !open)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-slate-400 hover:text-slate-200"
+            data-testid="standard-hours-ineligible-toggle"
+          >
+            <span>
+              Not rostered / inactive / on leave ({rosterIneligibleStaffOptions.length})
+            </span>
+            <span aria-hidden>{showIneligible ? "▾" : "▸"}</span>
+          </button>
+          {showIneligible ? (
+            <ul
+              className="divide-y divide-white/[0.06] border-t border-white/[0.06]"
+              data-testid="standard-hours-ineligible-list"
+            >
+              {rosterIneligibleStaffOptions.map((staff) => (
+                <li key={staff.id} className="px-4 py-3">
+                  <p className="font-medium text-slate-300">{staff.name}</p>
+                  {staff.role ? (
+                    <p className="text-xs capitalize text-slate-500">{staff.role}</p>
+                  ) : null}
+                  <p className="mt-1 text-xs text-slate-500">{staff.reasonLabel}</p>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
     </div>
   );
 }

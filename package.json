@@ -64,6 +64,7 @@
     "test:imaging-capture-unify": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/imaging-os/canonicalCaptureResolver.test.ts src/lib/imaging-os/imagingGraftTrayBridge.test.ts src/lib/imaging-os/graftTrayCountProvider.test.ts src/lib/surgeryOs/surgeryOsGraftModel.test.ts src/lib/surgeryOs/surgeryOsBoardPayloadSchema.test.ts src/lib/fi/foundation/hairauditPatientImageDualWrite.test.ts",
     "test:imaging-api-surface-1": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/imaging-os/imagingApiSurface.test.ts src/lib/imaging-os/imagingClinicalReviewQueueFilters.test.ts src/lib/patientImages/fiImageAttributionCore.test.ts",
     "test:imaging-ingest-context-1": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/imaging-core/ingest/patientImageIngestContext.test.ts src/lib/imaging-core/ingest/unifiedIngest.test.ts",
+    "test:imaging-legacy-followup-routing-1": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/imaging-core/ingest/legacyFollowUpIngestRouting.test.ts src/lib/imaging-core/ingest/unifiedIngest.test.ts src/lib/imaging-core/ingest/patientImageIngestContext.test.ts",
     "calendar:perf-smoke": "cross-env NODE_ENV=development node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/calendar-loader-perf-smoke.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

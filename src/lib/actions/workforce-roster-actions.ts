@@ -497,7 +497,11 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
 }
 
 export async function copyPreviousRosterPeriodAction(body: unknown): Promise<
-  WorkforceRosterActionResult<{ createdCount: number; cadence: string }>
+  WorkforceRosterActionResult<{
+    createdCount: number;
+    cadence: string;
+    skippedIneligibleStaffCount: number;
+  }>
 > {
   try {
     const parsed = copyPeriodSchema.parse(body);
@@ -519,14 +523,24 @@ export async function copyPreviousRosterPeriodAction(body: unknown): Promise<
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
-    return { ok: true, data: { createdCount: result.createdCount, cadence: result.cadence } };
+    return {
+      ok: true,
+      data: {
+        createdCount: result.createdCount,
+        cadence: result.cadence,
+        skippedIneligibleStaffCount: result.skippedIneligibleStaffCount,
+      },
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
 }
 
 export async function copyPreviousWeekRosterAction(body: unknown): Promise<
-  WorkforceRosterActionResult<{ createdCount: number }>
+  WorkforceRosterActionResult<{
+    createdCount: number;
+    skippedIneligibleStaffCount: number;
+  }>
 > {
   try {
     const parsed = copyWeekSchema.parse(body);
@@ -547,7 +561,13 @@ export async function copyPreviousWeekRosterAction(body: unknown): Promise<
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
-    return { ok: true, data: { createdCount: result.createdCount } };
+    return {
+      ok: true,
+      data: {
+        createdCount: result.createdCount,
+        skippedIneligibleStaffCount: result.skippedIneligibleStaffCount,
+      },
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

@@ -53,6 +53,10 @@ import {
 } from "@/src/lib/workforce-os/workforceRostering.server";
 import { loadActiveStandardHoursForTenant } from "@/src/lib/workforce-os/staffStandardHours.server";
 import {
+  loadRosterStaffEligibilityContext,
+  type RosterIneligibleStaffOption,
+} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
+import {
   mondayOfWeekIso,
   weekDayIsoDates,
   type StaffStandardHoursDayInput,
@@ -137,6 +141,8 @@ export type RosterCommandCentrePayload = {
   availabilityBlocks: FiStaffAvailabilityBlockRow[];
   availabilityCells: RosterGridAvailabilityCell[];
   standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
+  rosterEligibleStaffIds: string[];
+  rosterIneligibleStaffOptions: RosterIneligibleStaffOption[];
   summary: RosterCommandCentreSummaryMetrics;
   preselectedEventKey: string | null;
 };
@@ -612,6 +618,18 @@ export async function loadRosterCommandCentre(
     standardHoursByStaffId[staffId] = days;
   }
 
+  const rosterEligibility = await loadRosterStaffEligibilityContext(tid, {
+    periodDayDates: weekDayDates,
+    staffRows,
+    availabilityBlocks: blockRows.map((block) => ({
+      staff_id: block.staff_id,
+      block_type: block.block_type,
+      starts_at: block.starts_at,
+      ends_at: block.ends_at,
+      status: block.status,
+    })),
+  });
+
   let events = await buildBookingEvents({
     tenantId: tid,
     bookings: activeBookings,
@@ -633,7 +651,7 @@ export async function loadRosterCommandCentre(
   events.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
   const summary = summarizeEvents(events);
-  summary.eligibleStaffCount = staffRows.filter((s) => s.is_active).length;
+  summary.eligibleStaffCount = rosterEligibility.eligibleStaffIds.length;
 
   return {
     dateRange,
@@ -649,6 +667,8 @@ export async function loadRosterCommandCentre(
     availabilityBlocks: blockRows,
     availabilityCells,
     standardHoursByStaffId,
+    rosterEligibleStaffIds: rosterEligibility.eligibleStaffIds,
+    rosterIneligibleStaffOptions: rosterEligibility.ineligibleStaffOptions,
     summary,
     preselectedEventKey: input.preselectedEventKey?.trim() || null,
   };

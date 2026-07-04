@@ -40,6 +40,7 @@ export default async function StaffStandardHoursSetupIndexPage({ params }: PageP
       manageDeniedReason={data.manageDeniedReason}
       staffOptions={data.staffOptions}
       staffMissingStandardHours={data.staffMissingStandardHours}
+      rosterIneligibleStaffOptions={data.rosterIneligibleStaffOptions}
     />
   );
 }

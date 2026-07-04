@@ -118,7 +118,8 @@ async function main(): Promise<void> {
     rosterAfterSave.ok
       ? listStaffMissingStandardHours(
           rosterAfterSave.payload.staffOptions,
-          rosterAfterSave.payload.standardHoursByStaffId
+          rosterAfterSave.payload.standardHoursByStaffId,
+          rosterAfterSave.payload.rosterEligibleStaffIds
         )
       : [];
   const targetStillMissing = missingAfterSave.some((s) => s.id === targetStaff.id);

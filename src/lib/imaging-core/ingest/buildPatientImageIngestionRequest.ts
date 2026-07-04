@@ -11,6 +11,7 @@ import { buildIiohrImageIngestionRequest } from "@/src/lib/imaging-os/adapters/i
 import { buildPatientPortalImageIngestionRequest } from "@/src/lib/imaging-os/adapters/patientPortalImageAdapter";
 import { buildSurgeryOsImageIngestionRequest } from "@/src/lib/imaging-os/adapters/surgeryOsImageAdapter";
 import type { ImagingOsImageIngestionRequest } from "@/src/lib/imaging-os/intake";
+import { resolveLegacyFollowUpMetadataCaptureSource } from "./legacyFollowUpIngestCore";
 import { parsePatientImageIngestionContext } from "./parsePatientImageIngestionContext";
 import type {
   FlatPatientImageIngestionContext,
@@ -131,6 +132,8 @@ function buildFromParsedContext(
         follow_up_interval: ctx.follow_up_interval,
         visit_type: ctx.visit_type,
         captured_by_staff_id: ctx.captured_by_staff_id,
+        capture_source: resolveLegacyFollowUpMetadataCaptureSource(ctx.capture_source),
+        follow_up_encounter_id: ctx.follow_up_encounter_id,
         metadata: sharedMetadata,
       });
 

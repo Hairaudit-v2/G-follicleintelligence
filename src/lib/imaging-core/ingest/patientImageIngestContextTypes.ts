@@ -133,6 +133,8 @@ export type LegacyFollowUpIngestContext = ParsedPatientImageIngestContextBase &
   IngestProtocolFields & {
     kind: "legacy_follow_up";
     captured_by_staff_id?: string | null;
+    /** Resolved from metadata — links image ingest to fi_follow_up_encounters. */
+    follow_up_encounter_id?: string | null;
   };
 
 export type PatientPortalIngestContext = ParsedPatientImageIngestContextBase &
