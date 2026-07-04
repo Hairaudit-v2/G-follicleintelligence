@@ -1,38 +1,36 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { buildHairAuditAiVisionReadiness } from "@/src/lib/imaging-os/adapters/hairAuditAiVisionAdapter";
+import { evaluateHairAuditCaseImageProtocol } from "@/src/lib/imaging-os/adapters/hairAuditCaseProtocolAdapter";
+import { evaluateHairAuditVisualComparison } from "@/src/lib/imaging-os/adapters/hairAuditComparisonAdapter";
+import { runHairAuditAiTask } from "@/src/lib/imaging-os/adapters/hairAuditLiveAiAdapter";
+import { evaluateHairAuditOutcomeMeasurement } from "@/src/lib/imaging-os/adapters/hairAuditOutcomeMeasurementAdapter";
+import {
+  buildAiVisionRequestContract,
+  evaluateAiVisionReadiness,
+  IMAGING_AI_OUTPUT_CONTRACT_VERSION,
+  recommendAiVisionTasksForSummary,
+  validateAiVisionModelOutputContract,
+  type ImagingOsAiVisionEvidence,
+  type ImagingOsAiVisionRequestContract,
+} from "@/src/lib/imaging-os/aiVision";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
+import { evaluateVisualComparisonReadiness, type ImagingOsComparisonImage } from "@/src/lib/imaging-os/comparison";
 import {
   ALLOWED_IM12_TASKS,
   buildAiVisionExecutionPrompt,
-  buildAiVisionRequestContract,
-  buildHairAuditAiVisionReadiness,
   canExecuteAiVisionTask,
   createAiProvider,
   DEFAULT_IMAGING_AI_FLAGS,
-  evaluateAiVisionReadiness,
-  evaluateHairAuditCaseImageProtocol,
-  evaluateHairAuditOutcomeMeasurement,
-  evaluateHairAuditVisualComparison,
-  evaluateOutcomeMeasurementReadiness,
-  evaluateVisualComparisonReadiness,
   executeImagingAiVisionTask,
-  IMAGING_AI_OUTPUT_CONTRACT_VERSION,
   ImagingOsStubAiProvider,
-  recommendAiVisionTasksForSummary,
   recommendSafeAiTasks,
-  runHairAuditAiTask,
-  runImagingOsStubPipeline,
-  validateAiVisionModelOutputContract,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsAiFeatureFlags,
-  ImagingOsAiProvider,
-  ImagingOsAiVisionEvidence,
-  ImagingOsAiVisionRequestContract,
-  ImagingOsComparisonImage,
-  ImagingOsOutcomeEvidence,
-  ImagingOsTimepoint,
-} from "../src/lib/imaging-os";
+  type ImagingOsAiFeatureFlags,
+  type ImagingOsAiProvider,
+} from "@/src/lib/imaging-os/liveAi";
+import { evaluateOutcomeMeasurementReadiness, type ImagingOsOutcomeEvidence } from "@/src/lib/imaging-os/outcomes";
+import type { ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 
 const GROWTH_CATEGORIES: CanonicalHairImageCategory[] = ["front", "top", "crown"];
 

@@ -1,16 +1,16 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { evaluateHairAuditCaseImageProtocol } from "@/src/lib/imaging-os/adapters/hairAuditCaseProtocolAdapter";
+import { runImagingOsIngestionPipeline } from "@/src/lib/imaging-os/pipeline";
 import {
+  evaluateCaseImageSet,
+  evaluateImageProtocolCompleteness,
   IMAGING_OS_PROTOCOL_TYPES,
   IMAGING_PROTOCOL_REQUIREMENTS,
-  evaluateImageProtocolCompleteness,
-  evaluateCaseImageSet,
-  recommendProtocolForWorkflow,
   isImagingOsProtocolType,
-  runImagingOsIngestionPipeline,
-  evaluateHairAuditCaseImageProtocol,
-} from "../src/lib/imaging-os";
-import type { ImagingOsProtocolType } from "../src/lib/imaging-os";
+  recommendProtocolForWorkflow,
+  type ImagingOsProtocolType,
+} from "@/src/lib/imaging-os/protocol";
 
 const HAIRAUDIT_BASELINE_REQUIRED = [
   "front",

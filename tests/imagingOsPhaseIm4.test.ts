@@ -1,15 +1,15 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { runImagingOsIngestionPipeline } from "@/src/lib/imaging-os/pipeline";
 import {
   canUseImageForClinicalIntelligence,
   evaluateImageQualityFromMetadata,
   evaluateImageQualityStub,
-  getImageQualityExpectationsForCategory,
   hasMetadataForQualityEvaluation,
   IMAGING_QUALITY_METADATA_EVALUATOR_VERSION,
   isImagingOsMetadataQualityResult,
-  runImagingOsIngestionPipeline,
-} from "../src/lib/imaging-os";
+} from "@/src/lib/imaging-os/quality";
+import { getImageQualityExpectationsForCategory } from "@/src/lib/imaging-os/qualityRules";
 
 const HIGH_QUALITY_INPUT = {
   width: 1600,

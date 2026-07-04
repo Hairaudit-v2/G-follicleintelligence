@@ -78,6 +78,10 @@ describe("imagingOs barrel import allowlist", () => {
 
   it("allowlisted legacy imports still scan clean under guardrail", () => {
     const sample = IMAGING_OS_BARREL_IMPORT_ALLOWLIST[0];
+    if (!sample) {
+      assert.equal(isAllowlistedBarrelImportFile("tests/imagingOsPhaseIm1.test.ts"), false);
+      return;
+    }
     const source = fs.readFileSync(path.join(REPO_ROOT, sample), "utf8");
     const violations = findBarrelImportsInSource(source, sample);
     assert.ok(violations.length > 0, "fixture allowlisted file should still contain barrel imports");

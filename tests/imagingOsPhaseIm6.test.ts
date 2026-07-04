@@ -1,25 +1,25 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { evaluateHairAuditSurgicalOutcomeReadiness } from "@/src/lib/imaging-os/adapters/hairAuditSurgicalOutcomeAdapter";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
+import { normalizeImageIngestionRequest } from "@/src/lib/imaging-os/intake";
+import { runImagingOsIngestionPipeline } from "@/src/lib/imaging-os/pipeline";
 import {
-  IMAGING_SURGICAL_READINESS_DOMAINS,
-  IMAGING_SURGICAL_READINESS_REQUIREMENTS,
-  IMAGING_SURGICAL_READINESS_EVALUATOR_VERSION,
-  buildSurgicalImageFromIntake,
-  evaluateHairAuditSurgicalOutcomeReadiness,
   evaluateImageQualityFromMetadata,
   evaluateImageQualityStub,
+} from "@/src/lib/imaging-os/quality";
+import {
+  buildSurgicalImageFromIntake,
   evaluateSurgicalImageReadiness,
+  IMAGING_SURGICAL_READINESS_DOMAINS,
+  IMAGING_SURGICAL_READINESS_EVALUATOR_VERSION,
+  IMAGING_SURGICAL_READINESS_REQUIREMENTS,
   isImagingOsSurgicalReadinessDomain,
-  normalizeImageIngestionRequest,
   normalizeSurgicalImageEventType,
   recommendSurgicalReadinessDomain,
-  runImagingOsIngestionPipeline,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsSurgicalImage,
-  ImagingOsSurgicalImageEventType,
-} from "../src/lib/imaging-os";
+  type ImagingOsSurgicalImage,
+  type ImagingOsSurgicalImageEventType,
+} from "@/src/lib/imaging-os/surgical";
 
 const SURGERY_PLANNING_CATEGORIES: CanonicalHairImageCategory[] = [
   "front",

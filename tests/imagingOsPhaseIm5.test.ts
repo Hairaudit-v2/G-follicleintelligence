@@ -1,21 +1,27 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
+import { normalizeImageIngestionRequest } from "@/src/lib/imaging-os/intake";
 import {
-  IMAGING_PROGRESSION_ASSESSMENT_TYPES,
-  IMAGING_PROGRESSION_REQUIREMENTS,
-  IMAGING_PROGRESSION_EVALUATOR_VERSION,
+  runImagingOsIngestionPipeline,
+  runImagingOsCaseProgressionEvaluation,
+} from "@/src/lib/imaging-os/pipeline";
+import {
   buildProgressionImageFromIntake,
-  evaluateImageQualityFromMetadata,
-  evaluateImageQualityStub,
   evaluateLongitudinalProgressionReadiness,
+  IMAGING_PROGRESSION_ASSESSMENT_TYPES,
+  IMAGING_PROGRESSION_EVALUATOR_VERSION,
+  IMAGING_PROGRESSION_REQUIREMENTS,
   isImagingOsProgressionAssessmentType,
   normalizeImagingOsTimepoint,
-  normalizeImageIngestionRequest,
   recommendProgressionAssessmentForWorkflow,
-  runImagingOsCaseProgressionEvaluation,
-  runImagingOsIngestionPipeline,
-} from "../src/lib/imaging-os";
-import type { CanonicalHairImageCategory, ImagingOsProgressionImage, ImagingOsTimepoint } from "../src/lib/imaging-os";
+  type ImagingOsProgressionImage,
+  type ImagingOsTimepoint,
+} from "@/src/lib/imaging-os/progression";
+import {
+  evaluateImageQualityFromMetadata,
+  evaluateImageQualityStub,
+} from "@/src/lib/imaging-os/quality";
 
 function usableImage(
   timepoint: ImagingOsTimepoint,

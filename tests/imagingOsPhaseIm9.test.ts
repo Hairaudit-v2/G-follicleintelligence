@@ -1,33 +1,28 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { evaluateHairAuditVisualComparison } from "@/src/lib/imaging-os/adapters/hairAuditComparisonAdapter";
+import { buildHairAuditMeasurementStubs } from "@/src/lib/imaging-os/adapters/hairAuditMeasurementAdapter";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
 import {
-  IMAGING_MEASUREMENT_DOMAINS,
-  IMAGING_MEASUREMENT_REQUIREMENTS,
-  IMAGING_MEASUREMENT_EVALUATOR_VERSION,
-  buildHairAuditMeasurementStubs,
+  evaluateVisualComparisonReadiness,
+  type ImagingOsComparisonImage,
+  type ImagingOsComparisonReadinessResult,
+} from "@/src/lib/imaging-os/comparison";
+import {
   buildMeasurementStubsFromComparisonResult,
   createVisualMeasurementStub,
-  evaluateHairAuditVisualComparison,
-  evaluateLongitudinalProgressionReadiness,
-  evaluateOutcomeMeasurementReadiness,
-  evaluateSurgicalImageReadiness,
-  evaluateVisualComparisonReadiness,
+  IMAGING_MEASUREMENT_DOMAINS,
+  IMAGING_MEASUREMENT_EVALUATOR_VERSION,
+  IMAGING_MEASUREMENT_REQUIREMENTS,
   isImagingOsMeasurementDomain,
   recommendMeasurementDomainsForComparisonDomain,
-  runImagingOsStubPipeline,
   validateVisualMeasurementResult,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsComparisonImage,
-  ImagingOsComparisonReadinessResult,
-  ImagingOsOutcomeEvidence,
-  ImagingOsProgressionImage,
-  ImagingOsSurgicalImage,
-  ImagingOsSurgicalImageEventType,
-  ImagingOsTimepoint,
-  ImagingOsVisualMeasurementResult,
-} from "../src/lib/imaging-os";
+  type ImagingOsVisualMeasurementResult,
+} from "@/src/lib/imaging-os/measurement";
+import { evaluateOutcomeMeasurementReadiness, type ImagingOsOutcomeEvidence } from "@/src/lib/imaging-os/outcomes";
+import { evaluateLongitudinalProgressionReadiness, type ImagingOsProgressionImage, type ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import { evaluateSurgicalImageReadiness, type ImagingOsSurgicalImage, type ImagingOsSurgicalImageEventType } from "@/src/lib/imaging-os/surgical";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 
 const GROWTH_CATEGORIES: CanonicalHairImageCategory[] = ["front", "top", "crown"];
 

@@ -1,12 +1,14 @@
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
 import {
-  normalizeImageIngestionRequest,
-  runImagingOsIngestionPipeline,
   buildFiOsPatientImageIngestionRequest,
-  buildHliImageIngestionRequest,
+} from "@/src/lib/imaging-os/adapters/fiOsPatientImageAdapter";
+import { buildHliImageIngestionRequest } from "@/src/lib/imaging-os/adapters/hliImageAdapter";
+import { normalizeImageIngestionRequest } from "@/src/lib/imaging-os/intake";
+import {
   IMAGING_OS_INGESTION_PIPELINE_VERSION,
-} from "../src/lib/imaging-os";
+  runImagingOsIngestionPipeline,
+} from "@/src/lib/imaging-os/pipeline";
 import {
   buildStubClassificationResponse,
   buildHairAuditIngestionRequest,

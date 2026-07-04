@@ -1,41 +1,32 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { evaluateHairAuditCaseImageProtocol } from "@/src/lib/imaging-os/adapters/hairAuditCaseProtocolAdapter";
+import { evaluateHairAuditVisualComparison } from "@/src/lib/imaging-os/adapters/hairAuditComparisonAdapter";
+import { buildHairAuditMeasurementStubs } from "@/src/lib/imaging-os/adapters/hairAuditMeasurementAdapter";
+import { evaluateHairAuditOutcomeMeasurement } from "@/src/lib/imaging-os/adapters/hairAuditOutcomeMeasurementAdapter";
+import { buildHairAuditImagingSummary } from "@/src/lib/imaging-os/adapters/hairAuditSummaryAdapter";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
+import { evaluateVisualComparisonReadiness, type ImagingOsComparisonImage } from "@/src/lib/imaging-os/comparison";
+import { createVisualMeasurementStub, type ImagingOsVisualMeasurementResult } from "@/src/lib/imaging-os/measurement";
+import { evaluateOutcomeMeasurementReadiness, type ImagingOsOutcomeEvidence } from "@/src/lib/imaging-os/outcomes";
+import { evaluateLongitudinalProgressionReadiness, type ImagingOsProgressionImage, type ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import { evaluateImageQualityFromMetadata, type ImagingOsImageQualityEvaluationResult } from "@/src/lib/imaging-os/quality";
 import {
-  IMAGING_SUMMARY_EVALUATOR_VERSION,
   buildDigitalTwinImagingSummary,
-  buildHairAuditImagingSummary,
   buildHairAuditReadinessScore,
   calculateImagingComponentScores,
   calculateOverallImagingScore,
-  evaluateHairAuditCaseImageProtocol,
-  evaluateHairAuditOutcomeMeasurement,
-  evaluateHairAuditVisualComparison,
-  evaluateImageQualityFromMetadata,
-  evaluateLongitudinalProgressionReadiness,
-  evaluateOutcomeMeasurementReadiness,
-  evaluateSurgicalImageReadiness,
-  evaluateVisualComparisonReadiness,
+  IMAGING_SUMMARY_EVALUATOR_VERSION,
   recommendNextImagingActions,
   runFullImagingOsCaseEvaluation,
-  runImagingOsStubPipeline,
   scoreFromComparisonStatus,
   scoreFromOutcomeStatus,
   scoreFromProtocolStatus,
   scoreFromQualityStatus,
   scoreMeasurementResults,
-  createVisualMeasurementStub,
-  buildHairAuditMeasurementStubs,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsComparisonImage,
-  ImagingOsImageQualityEvaluationResult,
-  ImagingOsOutcomeEvidence,
-  ImagingOsProgressionImage,
-  ImagingOsSurgicalImage,
-  ImagingOsTimepoint,
-  ImagingOsVisualMeasurementResult,
-} from "../src/lib/imaging-os";
+} from "@/src/lib/imaging-os/summary";
+import { evaluateSurgicalImageReadiness, type ImagingOsSurgicalImage } from "@/src/lib/imaging-os/surgical";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 
 const GROWTH_CATEGORIES: CanonicalHairImageCategory[] = ["front", "top", "crown"];
 const HAIRAUDIT_BASELINE = ["front", "left", "right", "top", "crown", "donor"];

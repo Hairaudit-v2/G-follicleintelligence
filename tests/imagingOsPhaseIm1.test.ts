@@ -3,18 +3,22 @@ import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
 import {
-  mapExternalCategoryToCanonical,
-  isCanonicalHairImageCategory,
+  CANONICAL_HAIR_IMAGE_CATEGORIES,
   confidenceBandForScore,
-  buildImagingIntakeRecord,
+  isCanonicalHairImageCategory,
+  mapExternalCategoryToCanonical,
+} from "@/src/lib/imaging-os/categories";
+import { classifyImageCategoryStub } from "@/src/lib/imaging-os/classification";
+import {
   buildHairAuditImagingIntake,
-  evaluateImageQualityStub,
+  buildImagingIntakeRecord,
+} from "@/src/lib/imaging-os/intake";
+import {
   evaluateImageProtocol,
   findMissingProtocolCategories,
-  classifyImageCategoryStub,
-  runImagingOsStubPipeline,
-  CANONICAL_HAIR_IMAGE_CATEGORIES,
-} from "../src/lib/imaging-os";
+} from "@/src/lib/imaging-os/protocol";
+import { evaluateImageQualityStub } from "@/src/lib/imaging-os/quality";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 import {
   buildStubClassificationResponse,
   classifyHairAuditImageRequest,

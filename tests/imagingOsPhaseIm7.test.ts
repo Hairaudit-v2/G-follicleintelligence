@@ -1,28 +1,22 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { evaluateHairAuditOutcomeMeasurement } from "@/src/lib/imaging-os/adapters/hairAuditOutcomeMeasurementAdapter";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
 import {
-  IMAGING_OUTCOME_MEASUREMENT_DOMAINS,
-  IMAGING_OUTCOME_MEASUREMENT_REQUIREMENTS,
-  IMAGING_OUTCOME_MEASUREMENT_EVALUATOR_VERSION,
   buildOutcomeEvidenceFromProgressionImage,
   buildOutcomeEvidenceFromSurgicalImage,
-  evaluateHairAuditOutcomeMeasurement,
-  evaluateLongitudinalProgressionReadiness,
   evaluateOutcomeMeasurementReadiness,
-  evaluateSurgicalImageReadiness,
+  IMAGING_OUTCOME_MEASUREMENT_DOMAINS,
+  IMAGING_OUTCOME_MEASUREMENT_EVALUATOR_VERSION,
+  IMAGING_OUTCOME_MEASUREMENT_REQUIREMENTS,
   isImagingOsOutcomeMeasurementDomain,
   recommendNextCaptureRequirements,
   recommendOutcomeMeasurementDomain,
-  runImagingOsStubPipeline,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsOutcomeEvidence,
-  ImagingOsProgressionImage,
-  ImagingOsSurgicalImage,
-  ImagingOsSurgicalImageEventType,
-  ImagingOsTimepoint,
-} from "../src/lib/imaging-os";
+  type ImagingOsOutcomeEvidence,
+} from "@/src/lib/imaging-os/outcomes";
+import { evaluateLongitudinalProgressionReadiness, type ImagingOsProgressionImage, type ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import { evaluateSurgicalImageReadiness, type ImagingOsSurgicalImage, type ImagingOsSurgicalImageEventType } from "@/src/lib/imaging-os/surgical";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 
 const GROWTH_CATEGORIES: CanonicalHairImageCategory[] = ["front", "top", "crown"];
 const GROWTH_TIMEPOINTS: ImagingOsTimepoint[] = ["baseline", "month_6", "month_12"];

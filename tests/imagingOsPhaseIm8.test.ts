@@ -1,30 +1,23 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { evaluateHairAuditVisualComparison } from "@/src/lib/imaging-os/adapters/hairAuditComparisonAdapter";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
 import {
-  IMAGING_COMPARISON_DOMAINS,
-  IMAGING_COMPARISON_REQUIREMENTS,
-  IMAGING_COMPARISON_EVALUATOR_VERSION,
   buildComparisonImageFromOutcomeEvidence,
   buildComparisonImageFromProgressionImage,
   determineMeasurementTargets,
-  evaluateHairAuditVisualComparison,
-  evaluateLongitudinalProgressionReadiness,
-  evaluateOutcomeMeasurementReadiness,
-  evaluateSurgicalImageReadiness,
   evaluateVisualComparisonReadiness,
+  IMAGING_COMPARISON_DOMAINS,
+  IMAGING_COMPARISON_EVALUATOR_VERSION,
+  IMAGING_COMPARISON_REQUIREMENTS,
   isImagingOsComparisonDomain,
   recommendComparisonDomain,
-  runImagingOsStubPipeline,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsComparisonImage,
-  ImagingOsOutcomeEvidence,
-  ImagingOsProgressionImage,
-  ImagingOsSurgicalImage,
-  ImagingOsSurgicalImageEventType,
-  ImagingOsTimepoint,
-} from "../src/lib/imaging-os";
+  type ImagingOsComparisonImage,
+} from "@/src/lib/imaging-os/comparison";
+import { evaluateOutcomeMeasurementReadiness, type ImagingOsOutcomeEvidence } from "@/src/lib/imaging-os/outcomes";
+import { evaluateLongitudinalProgressionReadiness, type ImagingOsProgressionImage, type ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import { evaluateSurgicalImageReadiness, type ImagingOsSurgicalImage, type ImagingOsSurgicalImageEventType } from "@/src/lib/imaging-os/surgical";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 
 const GROWTH_CATEGORIES: CanonicalHairImageCategory[] = ["front", "top", "crown"];
 

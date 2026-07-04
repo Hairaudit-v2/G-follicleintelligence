@@ -1,36 +1,32 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import { buildHairAuditAiVisionReadiness } from "@/src/lib/imaging-os/adapters/hairAuditAiVisionAdapter";
+import { evaluateHairAuditCaseImageProtocol } from "@/src/lib/imaging-os/adapters/hairAuditCaseProtocolAdapter";
+import { evaluateHairAuditVisualComparison } from "@/src/lib/imaging-os/adapters/hairAuditComparisonAdapter";
+import { evaluateHairAuditOutcomeMeasurement } from "@/src/lib/imaging-os/adapters/hairAuditOutcomeMeasurementAdapter";
 import {
-  IMAGING_AI_AUDIT_CONTRACT_VERSION,
-  IMAGING_AI_OUTPUT_CONTRACT_VERSION,
-  IMAGING_AI_VISION_TASK_REQUIREMENTS,
-  IMAGING_AI_VISION_TASK_TYPES,
   buildAiVisionAuditLogContract,
   buildAiVisionEvidenceFromComparisonImage,
   buildAiVisionEvidenceFromIntake,
   buildAiVisionEvidenceFromOutcomeEvidence,
   buildAiVisionRequestContract,
-  buildHairAuditAiVisionReadiness,
-  createVisualMeasurementStub,
   evaluateAiVisionReadiness,
-  evaluateHairAuditCaseImageProtocol,
-  evaluateHairAuditOutcomeMeasurement,
-  evaluateHairAuditVisualComparison,
-  evaluateOutcomeMeasurementReadiness,
-  evaluateVisualComparisonReadiness,
+  IMAGING_AI_AUDIT_CONTRACT_VERSION,
+  IMAGING_AI_OUTPUT_CONTRACT_VERSION,
+  IMAGING_AI_VISION_TASK_REQUIREMENTS,
+  IMAGING_AI_VISION_TASK_TYPES,
   isImagingOsAiVisionTaskType,
-  normalizeImageIngestionRequest,
   recommendAiVisionTasksForSummary,
-  runImagingOsStubPipeline,
   validateAiVisionModelOutputContract,
-} from "../src/lib/imaging-os";
-import type {
-  CanonicalHairImageCategory,
-  ImagingOsAiVisionEvidence,
-  ImagingOsComparisonImage,
-  ImagingOsOutcomeEvidence,
-  ImagingOsTimepoint,
-} from "../src/lib/imaging-os";
+  type ImagingOsAiVisionEvidence,
+} from "@/src/lib/imaging-os/aiVision";
+import type { CanonicalHairImageCategory } from "@/src/lib/imaging-os/categories";
+import { evaluateVisualComparisonReadiness, type ImagingOsComparisonImage } from "@/src/lib/imaging-os/comparison";
+import { normalizeImageIngestionRequest } from "@/src/lib/imaging-os/intake";
+import { createVisualMeasurementStub } from "@/src/lib/imaging-os/measurement";
+import { evaluateOutcomeMeasurementReadiness, type ImagingOsOutcomeEvidence } from "@/src/lib/imaging-os/outcomes";
+import type { ImagingOsTimepoint } from "@/src/lib/imaging-os/progression";
+import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 
 const GROWTH_CATEGORIES: CanonicalHairImageCategory[] = ["front", "top", "crown"];
 
