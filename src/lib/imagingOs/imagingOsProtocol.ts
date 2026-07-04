@@ -1,3 +1,8 @@
+/**
+ * Legacy protocol slot vocabulary for guided capture / VIE.
+ * Canonical catalog resolution lives in `src/lib/imaging-os/protocolCatalogResolver*`.
+ * Do not add new core ImagingOS types here — migrate to `imaging-os/*`.
+ */
 export type ProtocolSlotDef = {
   slug: string;
   label: string;

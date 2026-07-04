@@ -1,11 +1,9 @@
-import type {
-  ImagingAnatomicalRegion,
-  ImagingLibraryAxis,
-} from "@/src/lib/imagingOs/imagingOsConstants";
 import {
   IMAGING_ANATOMICAL_REGIONS,
   IMAGING_LIBRARY_AXES,
-} from "@/src/lib/imagingOs/imagingOsConstants";
+  type ImagingAnatomicalRegion,
+  type ImagingLibraryAxis,
+} from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 import type { PatientImageCategory, PatientImageStatus } from "./patientImageTypes";
 
 export const PATIENT_IMAGES_BUCKET_DEFAULT = "patient-images";

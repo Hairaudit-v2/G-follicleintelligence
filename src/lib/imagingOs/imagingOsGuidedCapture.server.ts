@@ -1,3 +1,4 @@
+/** Legacy guided-capture server orchestration — pending migration to `src/lib/imaging-os/`. */
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";

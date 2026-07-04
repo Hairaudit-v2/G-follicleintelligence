@@ -2,7 +2,7 @@ import { isPatientImageMetadataObject } from "./patientImagePolicy";
 import type {
   ImagingAnatomicalRegion,
   ImagingLibraryAxis,
-} from "@/src/lib/imagingOs/imagingOsConstants";
+} from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 import type { PatientImageCategory } from "./patientImageTypes";
 
 export type PatientImageEditableSnapshot = {

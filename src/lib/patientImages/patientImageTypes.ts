@@ -4,7 +4,7 @@ import type { PatientImageCaptureBase } from "@/src/lib/imaging-core/ingest/pati
 import type {
   ImagingAnatomicalRegion,
   ImagingLibraryAxis,
-} from "@/src/lib/imagingOs/imagingOsConstants";
+} from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 
 /**
  * Upload-time snake_case fields aligned with {@link PatientImageCaptureBase}.

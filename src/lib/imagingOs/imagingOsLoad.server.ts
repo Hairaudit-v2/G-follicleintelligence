@@ -1,3 +1,4 @@
+/** Legacy FI admin imaging workspace loader — pending migration to `src/lib/imaging-os/`. */
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
