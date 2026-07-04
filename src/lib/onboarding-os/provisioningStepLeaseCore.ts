@@ -3,8 +3,14 @@
  * Safe for unit tests; no server-only imports.
  */
 
+import type { ProvisioningStepStatus } from "./tenantProvisioningTypes";
+
 /** Stale `running` steps older than this may be reclaimed for retry. */
 export const TENANT_PROVISIONING_STEP_LEASE_MINUTES = 15;
+
+export type ProvisioningStepRetryEligibility =
+  | { kind: "eligible"; mode: "failed" | "retry_pending" | "stale_running" }
+  | { kind: "blocked"; reason: "fresh_running" | "not_retryable" | "max_attempts" };
 
 export type ProvisioningStepLeaseAudit = {
   reclaim_reason: "stale_running_lease";
@@ -50,4 +56,32 @@ export function buildStaleProvisioningStepReclaimMetadataPatch(input: {
     ...input.existingMetadata,
     _provisioning_step_lease: lease,
   };
+}
+
+/** Whether an operator retry request may proceed (failed, retry_pending, or stale running). */
+export function resolveProvisioningStepRetryEligibility(opts: {
+  status: ProvisioningStepStatus;
+  attemptCount: number;
+  maxAttempts: number;
+  updatedAt: string;
+  nowMs?: number;
+}): ProvisioningStepRetryEligibility {
+  const nowMs = opts.nowMs ?? Date.now();
+
+  if (opts.status === "running") {
+    if (!isProvisioningStepLeaseStale(opts.updatedAt, nowMs)) {
+      return { kind: "blocked", reason: "fresh_running" };
+    }
+    return { kind: "eligible", mode: "stale_running" };
+  }
+
+  if (opts.status !== "failed" && opts.status !== "retry_pending") {
+    return { kind: "blocked", reason: "not_retryable" };
+  }
+
+  if (opts.attemptCount >= opts.maxAttempts) {
+    return { kind: "blocked", reason: "max_attempts" };
+  }
+
+  return { kind: "eligible", mode: opts.status };
 }

@@ -16,7 +16,10 @@ import { logStructured } from "@/src/lib/server/structuredLog";
 import { seedRosterPlanningPolicyFromDeploymentTemplate } from "@/src/lib/workforce/rosterCadencePolicy.server";
 
 import { resolveProvisioningStepRunGate } from "./provisioningStepGate";
-import type { ProvisioningStepLeaseAudit } from "./provisioningStepLeaseCore";
+import {
+  resolveProvisioningStepRetryEligibility,
+  type ProvisioningStepLeaseAudit,
+} from "./provisioningStepLeaseCore";
 import {
   buildAcademyAssignmentPlan,
   buildClinicDeploymentPlan,
@@ -27,7 +30,6 @@ import {
   buildSandboxSeedPreview,
   calculateProvisioningProgress,
   calculateTemplateReadiness,
-  canRetryProvisioningStep,
   parseSandboxSeedHistory,
   prepareSandboxSeedPlan as buildSandboxSeedStepPlan,
   provisioningStepStatusAfterRetryRequest,
@@ -1246,23 +1248,49 @@ export async function retryTenantProvisioningStep(
   const step = loaded.detail.steps.find((s) => s.step_code === code);
   if (!step) return { ok: false, error: "Step not found." };
 
-  if (
-    !canRetryProvisioningStep({
-      status: step.status,
-      attemptCount: step.attempt_count,
-      maxAttempts: step.max_attempts,
-    })
-  ) {
+  const eligibility = resolveProvisioningStepRetryEligibility({
+    status: step.status,
+    attemptCount: step.attempt_count,
+    maxAttempts: step.max_attempts,
+    updatedAt: step.updated_at,
+  });
+
+  if (eligibility.kind === "blocked") {
+    if (eligibility.reason === "fresh_running") {
+      return { ok: false, error: "Step is already running." };
+    }
     return { ok: false, error: "Step cannot be retried (not failed or max attempts reached)." };
   }
 
-  const nextStatus = provisioningStepStatusAfterRetryRequest(step.status);
   const now = new Date().toISOString();
 
   await supabase
     .from("fi_tenant_provisioning_sessions")
     .update({ retry_count: loaded.detail.session.retry_count + 1, updated_at: now })
     .eq("id", id);
+
+  if (eligibility.mode === "stale_running") {
+    await writeProvisioningAudit(supabase, {
+      sessionId: id,
+      tenantId: loaded.detail.session.tenant_id,
+      eventKind: "step.retry_requested",
+      actorAuthUserId: auth.actorAuthUserId,
+      stepCode: code,
+      detail: {
+        attempt_count: step.attempt_count,
+        retry_mode: "stale_running",
+        previous_running_at: step.updated_at,
+      },
+    });
+
+    return runTenantProvisioningStep(id, code, {
+      ...opts,
+      actorAuthUserId: auth.actorAuthUserId,
+      skipAuthCheck: true,
+    });
+  }
+
+  const nextStatus = provisioningStepStatusAfterRetryRequest(step.status);
 
   await supabase
     .from("fi_tenant_provisioning_steps")
@@ -1280,7 +1308,7 @@ export async function retryTenantProvisioningStep(
     eventKind: "step.retry_requested",
     actorAuthUserId: auth.actorAuthUserId,
     stepCode: code,
-    detail: { attempt_count: step.attempt_count },
+    detail: { attempt_count: step.attempt_count, retry_mode: eligibility.mode },
   });
 
   return runTenantProvisioningStep(id, code, {

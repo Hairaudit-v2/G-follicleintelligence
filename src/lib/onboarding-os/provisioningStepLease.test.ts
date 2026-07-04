@@ -13,7 +13,12 @@ import {
   buildStaleProvisioningStepReclaimMetadataPatch,
   isProvisioningStepLeaseStale,
   readProvisioningStepLeaseReclaimCount,
+  resolveProvisioningStepRetryEligibility,
 } from "./provisioningStepLeaseCore";
+import {
+  canRetryProvisioningStep,
+  provisioningStepStatusAfterRetryRequest,
+} from "./tenantProvisioningCore";
 
 const STEP_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const SESSION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -208,6 +213,100 @@ test("pending step can proceed via should_run", async () => {
     { nowMs: NOW }
   );
   assert.equal(gate.kind, "should_run");
+});
+
+test("failed and retry_pending steps remain retry-eligible", () => {
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "failed",
+      attemptCount: 1,
+      maxAttempts: 3,
+      updatedAt: "2026-07-04T10:00:00.000Z",
+      nowMs: NOW,
+    }),
+    { kind: "eligible", mode: "failed" }
+  );
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "retry_pending",
+      attemptCount: 2,
+      maxAttempts: 3,
+      updatedAt: "2026-07-04T10:00:00.000Z",
+      nowMs: NOW,
+    }),
+    { kind: "eligible", mode: "retry_pending" }
+  );
+  assert.equal(
+    canRetryProvisioningStep({ status: "failed", attemptCount: 1, maxAttempts: 3 }),
+    true
+  );
+  assert.equal(provisioningStepStatusAfterRetryRequest("failed"), "retry_pending");
+});
+
+test("failed step at max attempts is not retry-eligible", () => {
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "failed",
+      attemptCount: 3,
+      maxAttempts: 3,
+      updatedAt: "2026-07-04T10:00:00.000Z",
+      nowMs: NOW,
+    }),
+    { kind: "blocked", reason: "max_attempts" }
+  );
+});
+
+test("fresh running step is blocked from operator retry", () => {
+  const freshUpdatedAt = new Date(NOW - 60_000).toISOString();
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "running",
+      attemptCount: 1,
+      maxAttempts: 3,
+      updatedAt: freshUpdatedAt,
+      nowMs: NOW,
+    }),
+    { kind: "blocked", reason: "fresh_running" }
+  );
+});
+
+test("stale running step is eligible for operator retry reclaim", () => {
+  const staleUpdatedAt = new Date(
+    NOW - (TENANT_PROVISIONING_STEP_LEASE_MINUTES + 5) * 60_000
+  ).toISOString();
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "running",
+      attemptCount: 1,
+      maxAttempts: 3,
+      updatedAt: staleUpdatedAt,
+      nowMs: NOW,
+    }),
+    { kind: "eligible", mode: "stale_running" }
+  );
+});
+
+test("completed and pending steps are not retry-eligible", () => {
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "completed",
+      attemptCount: 1,
+      maxAttempts: 3,
+      updatedAt: "2026-07-04T10:00:00.000Z",
+      nowMs: NOW,
+    }),
+    { kind: "blocked", reason: "not_retryable" }
+  );
+  assert.deepEqual(
+    resolveProvisioningStepRetryEligibility({
+      status: "pending",
+      attemptCount: 0,
+      maxAttempts: 3,
+      updatedAt: "2026-07-04T10:00:00.000Z",
+      nowMs: NOW,
+    }),
+    { kind: "blocked", reason: "not_retryable" }
+  );
 });
 
 test("reclaim count increments across repeated stale reclaims", () => {
