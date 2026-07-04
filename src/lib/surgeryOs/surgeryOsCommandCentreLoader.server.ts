@@ -49,6 +49,7 @@ import {
   buildSurgeryOsGraftTrayIntelligenceSummary,
   mapGraftTrayAiEstimateToSurgeryOsSummary,
 } from "@/src/lib/surgeryOs/surgeryOsGraftTrayAiCore";
+import { buildSurgeryOsCaseIntelligenceFacts } from "@/src/lib/surgeryOs/surgeryOsCaseFactsCore";
 import {
   computeGraftProgressPercent,
   computeConfirmedTrayTotals,
@@ -814,7 +815,7 @@ export async function loadSurgeryOsCommandCentrePayload(
           })
         : null;
 
-    graftSummary.push({
+    const graftSummaryEntry: SurgeryOsGraftSummary = {
       surgeryId: row.id,
       patientLabel,
       sessionId: graftSession?.id ?? null,
@@ -844,6 +845,7 @@ export async function loadSurgeryOsCommandCentrePayload(
       trayImageCount: trayImageLinks.length,
       trayImageLinks,
       graftTrayIntelligence,
+      caseIntelligenceFacts: null,
       reconciledAt: graftSession?.reconciled_at ?? null,
       reconciledByLabel: graftSession?.reconciled_by_fi_user_id
         ? (userLabels.get(graftSession.reconciled_by_fi_user_id) ?? null)
@@ -878,7 +880,22 @@ export async function loadSurgeryOsCommandCentrePayload(
         case: hrefs.case,
         surgery: hrefs.surgery,
       },
+    };
+    graftSummaryEntry.caseIntelligenceFacts = buildSurgeryOsCaseIntelligenceFacts({
+      tenantId: tid,
+      patientId: row.patient_id,
+      caseId: row.case_id,
+      surgeryId: row.id,
+      bookingId: row.booking_id,
+      procedureDate: row.scheduled_date ?? row.actual_start_at ?? row.scheduled_start_at,
+      surgeonFiUserId: row.surgeon_fi_user_id,
+      teamFiUserIds: team.map((t) => t.fi_user_id),
+      surgeryStatus: row.status,
+      procedurePhase: phase,
+      liveStatus,
+      graftSummary: graftSummaryEntry,
     });
+    graftSummary.push(graftSummaryEntry);
 
     const graftAlerts = deriveGraftAlerts({
       surgeryId: row.id,

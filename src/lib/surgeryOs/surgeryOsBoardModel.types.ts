@@ -26,6 +26,7 @@ import type {
   GraftTrayAiReviewDisplayState,
 } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import type { GraftTrayFinalCountSource } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import type { SurgeryCaseIntelligenceFacts } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsCore";
 import type {
   SurgeryOsGraftCountEventType,
   SurgeryOsGraftCountSessionLock,
@@ -273,6 +274,7 @@ export type SurgeryOsGraftSummary = {
   trayImageCount: number;
   trayImageLinks: SurgeryOsGraftTrayLinkSummary[];
   graftTrayIntelligence: SurgeryOsGraftTrayCaseIntelligenceSummary | null;
+  caseIntelligenceFacts: SurgeryCaseIntelligenceFacts | null;
   reconciledAt: string | null;
   reconciledByLabel: string | null;
   sessionLocks: {

@@ -49,6 +49,7 @@ test("graftSummarySchema validates graft summary shape", () => {
       },
     ],
     graftTrayIntelligence: null,
+    caseIntelligenceFacts: null,
     reconciledAt: null,
     reconciledByLabel: null,
     sessionLocks: {

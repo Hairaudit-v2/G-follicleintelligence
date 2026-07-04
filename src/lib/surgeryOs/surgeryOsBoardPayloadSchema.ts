@@ -26,6 +26,7 @@ import {
   GRAFT_TRAY_MISMATCH_BANDS,
 } from "@/src/lib/imaging-os/graftTrayCountTypes";
 import { GRAFT_TRAY_FINAL_COUNT_SOURCES } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import { SURGERY_CASE_INTELLIGENCE_FACTS_VERSION } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsCore";
 import { GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import {
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPES,
@@ -269,6 +270,88 @@ const graftTrayLinkSummarySchema = z.object({
   intelligenceSummary: graftTrayIntelligenceSummarySchema.nullable(),
 });
 
+const surgeryCaseGraftTrayLinkFactsSchema = z.object({
+  link_id: z.string().uuid(),
+  image_id: z.string().uuid(),
+  estimate_id: z.string().uuid().nullable(),
+  final_accepted_count: z.number().int().nullable(),
+  ai_estimate: z.number().int().nullable(),
+  manual_count: z.number().int().nullable(),
+  graft_count_source: z.enum(GRAFT_TRAY_FINAL_COUNT_SOURCES).nullable(),
+  mismatch_band: z.string().nullable(),
+  confidence_band: z.string().nullable(),
+  image_quality: z.string().nullable(),
+  reviewer_id: z.string().nullable(),
+  reviewer_label: z.string().nullable(),
+  reviewed_at: z.string().nullable(),
+  superseded_stale_job: z.boolean(),
+  has_final_count: z.boolean(),
+});
+
+const graftTrayOutcomeFactSchema = z.object({
+  fact_kind: z.literal("graft_tray_reviewed_count"),
+  source_table: z.literal("fi_imaging_graft_tray_ai_estimates"),
+  source_id: z.string().uuid(),
+  image_id: z.string().uuid(),
+  captured_at: z.string(),
+  confidence_level: z.enum(["unknown", "low", "medium", "high"]),
+  metric_values: z.object({
+    graft_tray_final_count: z.number().int().nullable(),
+    graft_tray_ai_estimate: z.number().int().nullable(),
+    graft_tray_manual_count: z.number().int().nullable(),
+    graft_tray_variance_delta: z.number().int().nullable(),
+    graft_tray_mismatch_band: z.string(),
+    graft_tray_confidence_band: z.string(),
+    graft_tray_image_quality: z.string(),
+    graft_tray_final_count_source: z.string().nullable(),
+    graft_tray_review_complete: z.boolean(),
+    graft_tray_superseded_stale: z.boolean(),
+  }),
+});
+
+export const surgeryCaseIntelligenceFactsSchema = z.object({
+  facts_version: z.literal(SURGERY_CASE_INTELLIGENCE_FACTS_VERSION),
+  tenant_id: z.string().uuid(),
+  patient_id: z.string().uuid().nullable(),
+  case_id: z.string().uuid().nullable(),
+  surgery_id: z.string().uuid(),
+  booking_id: z.string().uuid().nullable(),
+  procedure_date: z.string().nullable(),
+  final_reviewed_graft_count: z.number().int().nullable(),
+  graft_tray_ai_estimate: z.number().int().nullable(),
+  graft_tray_manual_count: z.number().int().nullable(),
+  graft_count_source: z.enum(GRAFT_TRAY_FINAL_COUNT_SOURCES).nullable(),
+  mismatch_band: z.string().nullable(),
+  confidence_band: z.string().nullable(),
+  image_quality: z.string().nullable(),
+  reviewer_id: z.string().nullable(),
+  reviewer_label: z.string().nullable(),
+  reviewed_at: z.string().nullable(),
+  has_final_graft_count: z.boolean(),
+  graft_tray_review_pending: z.boolean(),
+  superseded_stale_estimate: z.boolean(),
+  graft_session_id: z.string().uuid().nullable(),
+  target_grafts: z.number().int().nullable(),
+  extracted_grafts: z.number().int().min(0),
+  implanted_grafts: z.number().int().min(0),
+  discarded_grafts: z.number().int().min(0),
+  remaining_grafts: z.number().int(),
+  reconciliation_status: z.string(),
+  graft_session_phase: z.string(),
+  reconciled_at: z.string().nullable(),
+  confirmed_tray_grafts: z.number().int().min(0),
+  surgery_status: z.string().nullable(),
+  procedure_phase: z.string().nullable(),
+  live_status: z.string().nullable(),
+  surgeon_fi_user_id: z.string().nullable(),
+  team_fi_user_ids: z.array(z.string()),
+  graft_tray_image_ids: z.array(z.string().uuid()),
+  graft_tray_link_ids: z.array(z.string().uuid()),
+  graft_tray_links: z.array(surgeryCaseGraftTrayLinkFactsSchema),
+  graft_tray_outcome_facts: z.array(graftTrayOutcomeFactSchema),
+  confidence_level: z.enum(["unknown", "low", "medium", "high"]),
+});
+
 const graftSummarySchema = z.object({
   surgeryId: z.string().uuid(),
   patientLabel: z.string(),
@@ -294,6 +377,7 @@ const graftSummarySchema = z.object({
   trayImageCount: z.number().int().min(0),
   trayImageLinks: z.array(graftTrayLinkSummarySchema),
   graftTrayIntelligence: graftTrayCaseIntelligenceSummarySchema.nullable(),
+  caseIntelligenceFacts: surgeryCaseIntelligenceFactsSchema.nullable(),
   reconciledAt: z.string().nullable(),
   reconciledByLabel: z.string().nullable(),
   sessionLocks: z.object({
