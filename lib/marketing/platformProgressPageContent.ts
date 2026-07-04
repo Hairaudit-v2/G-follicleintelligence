@@ -452,7 +452,7 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
     status: "Active Development",
     statusLabel: "Advanced Build",
-    latestMilestone: "Graft intelligence procedure-day command",
+    latestMilestone: "Surgery intelligence facts, dashboard, and backfill",
     learnMoreHref: "/platform/surgery-os",
   },
   {
@@ -749,6 +749,12 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
     title: "IHRG-DEMO-1 Demo Data Expansion Pack shipped",
   },
   {
+    id: "oi-surgery-intel-1",
+    date: "2026-07-04",
+    tag: "outcome-intelligence",
+    title: "Surgery Intelligence chain production-ready",
+  },
+  {
     id: "gc-11",
     date: "2026-06-26",
     tag: "calendar-os",
@@ -812,6 +818,15 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-07-04-outcome-intelligence-surgery-chain",
+    date: "2026-07-04",
+    tag: "outcome-intelligence",
+    title: "Graft-tray → Surgery Intelligence chain production-ready",
+    summary:
+      "Graft-tray AI review-gated workflow complete; surgery case intelligence facts publish to AnalyticsOS events; Surgery Intelligence dashboard reads published facts only; operator dry-run backfill available for historical reviewed cases.",
+    modules: ["ImagingOS", "SurgeryOS", "AnalyticsOS", "Outcome Intelligence"],
+  },
   {
     id: "2026-07-01-workforce-os-predictive-intelligence",
     date: "2026-07-01",
