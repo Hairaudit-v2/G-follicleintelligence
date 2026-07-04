@@ -83,6 +83,11 @@ export default async function ImagingClinicalReviewPage({
           failed analysis, and assessment items requiring review. No patient-facing diagnostic
           claims.
         </p>
+        <p className="text-xs text-slate-500">
+          <Link href={`/fi-admin/${tid}/imaging/ai-jobs`} className="text-violet-300 hover:underline">
+            AI review operations panel
+          </Link>
+        </p>
       </header>
 
       <ImagingClinicalReviewQueueFilters tenantId={tid} reviewers={reviewers} />

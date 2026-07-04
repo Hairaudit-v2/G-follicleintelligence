@@ -228,6 +228,49 @@ export async function failImagingAiAnalysisJob(input: {
   if (error) throw new Error(error.message);
 }
 
+export async function supersedeImagingAiAnalysisJob(input: {
+  tenantId: string;
+  jobId: string;
+  reason: string;
+  client?: SupabaseClient;
+}): Promise<void> {
+  const supabase = input.client ?? supabaseAdmin();
+  const tid = input.tenantId.trim();
+  const jobId = input.jobId.trim();
+  const now = new Date().toISOString();
+
+  const { data: job, error: loadErr } = await supabase
+    .from("fi_imaging_ai_analysis_jobs")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("id", jobId)
+    .maybeSingle();
+  if (loadErr) throw new Error(loadErr.message);
+  if (!job) throw new Error("AI analysis job not found.");
+
+  const mapped = mapImagingAiJobRow(job as Record<string, unknown>);
+  if (mapped.status === "superseded") {
+    throw new Error("AI analysis job is already superseded.");
+  }
+
+  const { error } = await supabase
+    .from("fi_imaging_ai_analysis_jobs")
+    .update({
+      status: "superseded",
+      updated_at: now,
+      completed_at: mapped.completed_at ?? now,
+      request_payload: {
+        ...mapped.request_payload,
+        superseded_reason: input.reason.trim().slice(0, 500),
+        superseded_at: now,
+      },
+    })
+    .eq("tenant_id", tid)
+    .eq("id", jobId)
+    .eq("status", mapped.status);
+  if (error) throw new Error(error.message);
+}
+
 export async function loadRegionLinkExists(
   supabase: SupabaseClient,
   tenantId: string,

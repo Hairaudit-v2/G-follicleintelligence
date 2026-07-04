@@ -38,6 +38,11 @@ import {
 } from "@/src/lib/imaging-os/imagingReviewAssignmentMutations.server";
 import { reviewGraftTrayAiEstimate } from "@/src/lib/imaging-os/graftTrayCountReviewMutations.server";
 import { GRAFT_TRAY_AI_REVIEW_ACTIONS } from "@/src/lib/imaging-os/graftTrayCountTypes";
+import {
+  markImagingAiReviewJobIgnored,
+  requeueStaleImagingAiReviewJob,
+  retryFailedImagingAiReviewJob,
+} from "@/src/lib/imaging-os/imagingAiReviewOpsMutations.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -441,6 +446,80 @@ export async function reviewGraftTrayAiEstimateAction(
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
+}
+
+const imagingAiReviewOpsJobSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    jobId: z.string().uuid(),
+  })
+  .strict();
+
+const imagingAiReviewOpsIgnoreSchema = imagingAiReviewOpsJobSchema.extend({
+  reason: z.string().min(1).max(500),
+});
+
+async function runImagingAiReviewOpsMutation(
+  tenantId: string,
+  body: { adminKey?: string },
+  mutate: (operatorUserId: string | null) => Promise<{ newJobId: string | null }>
+): Promise<{ ok: true; newJobId: string | null } | { ok: false; error: string }> {
+  try {
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: body.adminKey, request: undefined });
+    const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await mutate(actingUserId);
+    const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/imaging/ai-jobs`);
+    revalidatePath(`/fi-admin/${tid}/imaging/review`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os/graft-counting`);
+    return { ok: true, newJobId: result.newJobId };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function retryFailedImagingAiReviewJobAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; newJobId: string | null } | { ok: false; error: string }> {
+  const parsed = imagingAiReviewOpsJobSchema.parse(body);
+  return runImagingAiReviewOpsMutation(tenantId, parsed, (operatorUserId) =>
+    retryFailedImagingAiReviewJob({
+      tenantId,
+      jobId: parsed.jobId,
+      operatorUserId,
+    }).then((r) => ({ newJobId: r.newJobId }))
+  );
+}
+
+export async function requeueStaleImagingAiReviewJobAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; newJobId: string | null } | { ok: false; error: string }> {
+  const parsed = imagingAiReviewOpsJobSchema.parse(body);
+  return runImagingAiReviewOpsMutation(tenantId, parsed, (operatorUserId) =>
+    requeueStaleImagingAiReviewJob({
+      tenantId,
+      jobId: parsed.jobId,
+      operatorUserId,
+    }).then((r) => ({ newJobId: r.newJobId }))
+  );
+}
+
+export async function markImagingAiReviewJobIgnoredAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; newJobId: string | null } | { ok: false; error: string }> {
+  const parsed = imagingAiReviewOpsIgnoreSchema.parse(body);
+  return runImagingAiReviewOpsMutation(tenantId, parsed, (operatorUserId) =>
+    markImagingAiReviewJobIgnored({
+      tenantId,
+      jobId: parsed.jobId,
+      reason: parsed.reason,
+      operatorUserId,
+    }).then((r) => ({ newJobId: r.newJobId }))
+  );
 }
 
 export async function flagImagingReviewRetakeAction(

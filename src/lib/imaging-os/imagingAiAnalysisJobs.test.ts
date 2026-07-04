@@ -7,6 +7,7 @@ import {
   enqueueImagingAiAnalysisJob,
   failImagingAiAnalysisJob,
   mapImagingAiJobRow,
+  supersedeImagingAiAnalysisJob,
 } from "./imagingAiAnalysisJobs.server";
 
 type JobRow = Record<string, unknown>;
@@ -184,6 +185,21 @@ describe("imagingAiAnalysisJobs", () => {
     });
     assert.equal(rows[0].status, "completed");
     assert.deepEqual(rows[0].result_payload, { ok: true });
+  });
+
+  it("supersedes queued jobs with operator reason", async () => {
+    const { client, rows } = createJobStore([makeJob({ id: "job-1", status: "queued" })]);
+    await supersedeImagingAiAnalysisJob({
+      tenantId: "tenant-1",
+      jobId: "job-1",
+      reason: "operator_ignored: duplicate",
+      client,
+    });
+    assert.equal(rows[0].status, "superseded");
+    assert.equal(
+      (rows[0].request_payload as { superseded_reason?: string }).superseded_reason,
+      "operator_ignored: duplicate"
+    );
   });
 
   it("requeues failed jobs before max attempts", async () => {
