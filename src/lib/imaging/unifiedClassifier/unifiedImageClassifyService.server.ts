@@ -23,6 +23,63 @@ import {
 import { resolveFiOsClassifierCaptureSource } from "@/src/lib/imaging-os/imagingCaptureSourceCore";
 import type { UnifiedImageClassifyRequest } from "./unifiedImageClassifyRequest";
 
+type SourceSystemCaptureDefaults = {
+  resolveCaptureSource: (request: UnifiedImageClassifyRequest) => string;
+  defaultUploadSource: string;
+};
+
+export const SOURCE_CAPTURE_DEFAULTS: Partial<
+  Record<UnifiedImageClassifyRequest["source_system"], SourceSystemCaptureDefaults>
+> = {
+  fi_os: {
+    resolveCaptureSource: (request) =>
+      resolveFiOsClassifierCaptureSource(request.capture_source),
+    defaultUploadSource: "fi_os",
+  },
+  hairaudit: {
+    resolveCaptureSource: (request) => request.capture_source ?? "forensic_audit",
+    defaultUploadSource: "hairaudit",
+  },
+  hli: {
+    resolveCaptureSource: (request) => request.capture_source ?? "patient_portal",
+    defaultUploadSource: "hli",
+  },
+  iiohr: {
+    resolveCaptureSource: (request) => request.capture_source ?? "clinic_staff",
+    defaultUploadSource: "iiohr",
+  },
+};
+
+function applyIiohrMetadata(
+  request: UnifiedImageClassifyRequest
+): UnifiedImageClassifyRequest["metadata"] {
+  return {
+    academy_case_id: request.metadata?.academy_case_id ?? request.case_id ?? null,
+    professional_id: request.metadata?.professional_id ?? request.professional_id ?? null,
+    global_professional_id: request.metadata?.global_professional_id ?? null,
+    ...request.metadata,
+  };
+}
+
+export function applySourceDefaults(
+  request: UnifiedImageClassifyRequest
+): UnifiedImageClassifyRequest {
+  const defaults = SOURCE_CAPTURE_DEFAULTS[request.source_system];
+  if (!defaults) return request;
+
+  const next: UnifiedImageClassifyRequest = {
+    ...request,
+    capture_source: defaults.resolveCaptureSource(request),
+    upload_source: request.upload_source ?? defaults.defaultUploadSource,
+  };
+
+  if (request.source_system === "iiohr") {
+    next.metadata = applyIiohrMetadata(request);
+  }
+
+  return next;
+}
+
 export type UnifiedImageClassifyResponse = {
   success: boolean;
   classification: ImageClassificationResultV1;
@@ -39,63 +96,12 @@ export type UnifiedImageClassifyOutcome =
   | { ok: true; result: UnifiedImageClassifyResponse }
   | { ok: false; code: string; message: string; httpStatus: number };
 
-function mapIiohrSourceCapture(request: UnifiedImageClassifyRequest): UnifiedImageClassifyRequest {
-  if (request.source_system !== "iiohr") return request;
-  return {
-    ...request,
-    capture_source: request.capture_source ?? "clinic_staff",
-    upload_source: request.upload_source ?? "iiohr",
-    metadata: {
-      academy_case_id:
-        request.metadata?.academy_case_id ??
-        request.case_id ??
-        null,
-      professional_id: request.metadata?.professional_id ?? request.professional_id ?? null,
-      global_professional_id: request.metadata?.global_professional_id ?? null,
-      ...request.metadata,
-    },
-  };
-}
-
-function mapHairAuditSourceCapture(request: UnifiedImageClassifyRequest): UnifiedImageClassifyRequest {
-  if (request.source_system !== "hairaudit") return request;
-  return {
-    ...request,
-    capture_source: request.capture_source ?? "forensic_audit",
-    upload_source: request.upload_source ?? "hairaudit",
-  };
-}
-
-function mapHliSourceCapture(request: UnifiedImageClassifyRequest): UnifiedImageClassifyRequest {
-  if (request.source_system !== "hli") return request;
-  return {
-    ...request,
-    capture_source: request.capture_source ?? "patient_portal",
-    upload_source: request.upload_source ?? "hli",
-  };
-}
-
-function mapFiOsSourceCapture(request: UnifiedImageClassifyRequest): UnifiedImageClassifyRequest {
-  if (request.source_system !== "fi_os") return request;
-  return {
-    ...request,
-    capture_source: resolveFiOsClassifierCaptureSource(request.capture_source),
-    upload_source: request.upload_source ?? "fi_os",
-  };
-}
-
-export { mapFiOsSourceCapture };
-
 export async function classifyUnifiedImageRequest(
   rawRequest: UnifiedImageClassifyRequest,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<UnifiedImageClassifyOutcome> {
   const started = Date.now();
-  let request = rawRequest;
-  request = mapHairAuditSourceCapture(request);
-  request = mapIiohrSourceCapture(request);
-  request = mapHliSourceCapture(request);
-  request = mapFiOsSourceCapture(request);
+  const request = applySourceDefaults(rawRequest);
 
   logImagingClassifierEvent("fi_imaging_classifier_request", {
     source_system: request.source_system,

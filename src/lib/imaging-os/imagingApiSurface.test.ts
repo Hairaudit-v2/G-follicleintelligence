@@ -5,7 +5,7 @@ import test from "node:test";
 
 import { IMAGING_AI_ANALYSIS_KINDS } from "./ai";
 import { captureSourcesMatchForFilter, normalizeFiImageCaptureSource } from "./capture";
-import { mapFiOsSourceCapture } from "@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyService.server";
+import { applySourceDefaults } from "@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyService.server";
 import { matchesImagingReviewQueueFilters, type ReviewQueueFilterRow } from "./review";
 
 const ROOT = process.cwd();
@@ -67,7 +67,7 @@ test("review queue filter matches capture_source aliases", () => {
 });
 
 test("classifier preserves normalized capture_source from request metadata", () => {
-  const mapped = mapFiOsSourceCapture({
+  const mapped = applySourceDefaults({
     source_system: "fi_os",
     source_image_id: "img-1",
     signed_url: "https://example.test/a.jpg",
@@ -76,7 +76,7 @@ test("classifier preserves normalized capture_source from request metadata", () 
   });
   assert.equal(mapped.capture_source, "imaging_os_wizard");
 
-  const legacy = mapFiOsSourceCapture({
+  const legacy = applySourceDefaults({
     source_system: "fi_os",
     source_image_id: "img-2",
     signed_url: "https://example.test/b.jpg",
@@ -85,7 +85,7 @@ test("classifier preserves normalized capture_source from request metadata", () 
   });
   assert.equal(legacy.capture_source, "imaging_os_wizard");
 
-  const defaulted = mapFiOsSourceCapture({
+  const defaulted = applySourceDefaults({
     source_system: "fi_os",
     source_image_id: "img-3",
     signed_url: "https://example.test/c.jpg",
