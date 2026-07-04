@@ -30,7 +30,6 @@ import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforce
 import { staffHasConfiguredStandardHours } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import {
   closeRosterDrawer,
-  listStaffMissingStandardHours,
   openRosterShiftDrawer,
   pushRosterStandardHoursEditorNavigation,
   resolveRosterCellClickIntent,
@@ -121,10 +120,8 @@ export function RosterCommandCentreView({
     router.refresh();
   }, [router]);
 
-  const staffMissingStandardHours = useMemo(
-    () => listStaffMissingStandardHours(payload.staffOptions, payload.standardHoursByStaffId),
-    [payload.staffOptions, payload.standardHoursByStaffId]
-  );
+  const staffMissingStandardHours = payload.staffMissingStandardHours;
+  const ineligibleStaffOptions = payload.ineligibleStaffOptions;
 
   const drawerStaff = rosterDrawerStaffOption(drawerState, payload.staffOptions);
   const drawerStaffMemberId = resolveRosterDrawerStaffMemberId(drawerState);
@@ -489,6 +486,34 @@ export function RosterCommandCentreView({
               Set standard hours
             </span>
           )}
+        </section>
+      ) : null}
+
+      {ineligibleStaffOptions.length > 0 ? (
+        <section
+          className="rounded-xl border border-slate-500/25 bg-slate-950/30 px-4 py-3"
+          data-testid="roster-ineligible-staff-section"
+        >
+          <h2 className="text-sm font-semibold text-slate-200">
+            Not rostered this period ({ineligibleStaffOptions.length})
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Staff on leave, maternity leave, inactive, or otherwise excluded from roster generation
+            for the selected week.
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {ineligibleStaffOptions.map((staff) => (
+              <li
+                key={staff.id}
+                className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs text-slate-300"
+                data-testid={`roster-ineligible-staff-${staff.id}`}
+              >
+                <span className="font-medium text-slate-100">{staff.name}</span>
+                <span className="text-slate-500"> · </span>
+                <span className="text-amber-200/90">{staff.reasonLabel}</span>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 

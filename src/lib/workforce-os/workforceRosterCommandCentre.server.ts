@@ -53,11 +53,16 @@ import {
 } from "@/src/lib/workforce-os/workforceRostering.server";
 import { loadActiveStandardHoursForTenant } from "@/src/lib/workforce-os/staffStandardHours.server";
 import {
+  listRosterEligibleStaffMissingStandardHours,
+  loadRosterStaffEligibilityContext,
+} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
+import {
   mondayOfWeekIso,
   weekDayIsoDates,
   type StaffStandardHoursDayInput,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { StandardHoursShiftSource } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import type { RosterIneligibleStaffOption } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 
 export type RosterCommandCentreDateRange = {
   startsAt: string;
@@ -137,6 +142,9 @@ export type RosterCommandCentrePayload = {
   availabilityBlocks: FiStaffAvailabilityBlockRow[];
   availabilityCells: RosterGridAvailabilityCell[];
   standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
+  eligibleStaffIds: string[];
+  ineligibleStaffOptions: RosterIneligibleStaffOption[];
+  staffMissingStandardHours: Array<{ id: string; name: string }>;
   summary: RosterCommandCentreSummaryMetrics;
   preselectedEventKey: string | null;
 };
@@ -516,7 +524,8 @@ export async function loadRosterCommandCentre(
   const eventTypeFilter = input.eventType?.trim().toLowerCase() || null;
   const statusFilter = input.statusFilter ?? null;
 
-  const [clinics, staffRows, bookings, shiftsRes, blocksRes, standardHoursMap] = await Promise.all([
+  const [clinics, staffRows, bookings, shiftsRes, blocksRes, eligibilityBlocksRes, standardHoursMap] =
+    await Promise.all([
     loadClinicsForTenant(tid),
     loadAllStaffForTenant(tid),
     loadBookingsForOperatorView({
@@ -544,11 +553,20 @@ export async function loadRosterCommandCentre(
       .lt("starts_at", dateRange.endsAt)
       .order("starts_at", { ascending: true })
       .limit(500),
+    supabaseAdmin()
+      .from("fi_staff_availability_blocks")
+      .select("staff_id, block_type, starts_at, ends_at, status")
+      .eq("tenant_id", tid)
+      .eq("status", "active")
+      .lte("starts_at", dateRange.endsAt)
+      .gte("ends_at", dateRange.startsAt)
+      .limit(1000),
     loadActiveStandardHoursForTenant(tid),
   ]);
 
   if (shiftsRes.error) throw new Error(shiftsRes.error.message);
   if (blocksRes.error) throw new Error(blocksRes.error.message);
+  if (eligibilityBlocksRes.error) throw new Error(eligibilityBlocksRes.error.message);
 
   const activeBookings = bookings.filter(isBookingActiveForStaffing);
   const staffingByBooking = await loadClinicalStaffingSummariesForBookings(tid, activeBookings, {
@@ -634,8 +652,26 @@ export async function loadRosterCommandCentre(
 
   events.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
+  const eligibilityContext = await loadRosterStaffEligibilityContext(tid, {
+    periodDayDates: weekDayDates,
+    availabilityBlocks: (eligibilityBlocksRes.data ?? []).map((row) => ({
+      staff_id: String((row as Record<string, unknown>).staff_id),
+      block_type: String((row as Record<string, unknown>).block_type),
+      starts_at: String((row as Record<string, unknown>).starts_at),
+      ends_at: String((row as Record<string, unknown>).ends_at),
+      status: (row as Record<string, unknown>).status as string | null | undefined,
+    })),
+    staffRows,
+  });
+
+  const staffMissingStandardHours = listRosterEligibleStaffMissingStandardHours({
+    staffOptions: staffOptions.map((staff) => ({ id: staff.id, name: staff.name })),
+    standardHoursByStaffId,
+    eligibleStaffIds: eligibilityContext.eligibleStaffIds,
+  });
+
   const summary = summarizeEvents(events);
-  summary.eligibleStaffCount = staffRows.filter((s) => s.is_active).length;
+  summary.eligibleStaffCount = eligibilityContext.eligibleStaffIds.length;
 
   return {
     dateRange,
@@ -651,6 +687,9 @@ export async function loadRosterCommandCentre(
     availabilityBlocks: blockRows,
     availabilityCells,
     standardHoursByStaffId,
+    eligibleStaffIds: eligibilityContext.eligibleStaffIds,
+    ineligibleStaffOptions: eligibilityContext.ineligibleStaffOptions,
+    staffMissingStandardHours,
     summary,
     preselectedEventKey: input.preselectedEventKey?.trim() || null,
   };

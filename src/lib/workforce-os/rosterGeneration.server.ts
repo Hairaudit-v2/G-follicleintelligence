@@ -20,6 +20,10 @@ import {
 } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import {
+  loadRosterStaffEligibilityContext,
+  resolveDefaultRosterStaffIds,
+} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
+import {
   loadActiveStandardHoursForTenant,
   resolveStandardHoursForStaff,
 } from "@/src/lib/workforce-os/staffStandardHours.server";
@@ -161,10 +165,37 @@ export async function generateRosterFromStandardHoursForTenant(
 ): Promise<RosterGenerationRunResult> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const staffRows = await loadAllStaffForTenant(tid);
-  const staffIds =
-    input.staffIds?.length && input.staffIds.length > 0
-      ? input.staffIds.map((id) => assertNonEmptyUuid(id, "staffId"))
-      : staffRows.filter((s) => s.is_active).map((s) => s.id);
+  const rosterPolicy = await loadWorkforceRosterPlanningPolicy(tid);
+  const periodStart = input.rangeStartIso.slice(0, 10);
+  const periodDayDates = rosterDateRangeFromPeriodStart(
+    periodStart,
+    rosterPolicy.rosterCadence,
+    rosterPolicy.rosterWeekStartDay
+  ).periodDayDates;
+
+  const blocksRaw = await loadAvailabilityBlocksInRange(
+    tid,
+    input.rangeStartIso,
+    input.rangeEndIso
+  );
+
+  const eligibilityContext = await loadRosterStaffEligibilityContext(tid, {
+    periodDayDates,
+    staffRows,
+    availabilityBlocks: blocksRaw.map((block) => ({
+      staff_id: block.staff_id,
+      block_type: block.block_type,
+      starts_at: block.starts_at,
+      ends_at: block.ends_at,
+      status: block.status,
+    })),
+  });
+
+  const staffIds = resolveDefaultRosterStaffIds(
+    staffRows,
+    input.staffIds,
+    eligibilityContext.eligibilityByStaffId
+  );
 
   const standardHoursByStaff = await loadActiveStandardHoursForTenant(tid, staffIds);
 
@@ -179,11 +210,12 @@ export async function generateRosterFromStandardHoursForTenant(
     staffRows.map((s) => [s.id, s.default_timezone?.trim() || "Australia/Perth"])
   );
 
-  const [existingShifts, blocksRaw, rosterPolicy] = await Promise.all([
-    loadExistingShiftsInRange(tid, input.rangeStartIso, input.rangeEndIso, staffIds),
-    loadAvailabilityBlocksInRange(tid, input.rangeStartIso, input.rangeEndIso, staffIds),
-    loadWorkforceRosterPlanningPolicy(tid),
-  ]);
+  const existingShifts = await loadExistingShiftsInRange(
+    tid,
+    input.rangeStartIso,
+    input.rangeEndIso,
+    staffIds
+  );
 
   const plan = generateRosterFromStandardHours({
     tenantId: tid,
@@ -291,10 +323,15 @@ export async function copyPreviousRosterPeriodForTenant(
   const prevEnd = new Date(range.startsAt);
 
   const staffRows = await loadAllStaffForTenant(tid);
-  const staffIds =
-    input.staffIds?.length && input.staffIds.length > 0
-      ? input.staffIds.map((id) => assertNonEmptyUuid(id, "staffId"))
-      : staffRows.filter((s) => s.is_active).map((s) => s.id);
+  const eligibilityContext = await loadRosterStaffEligibilityContext(tid, {
+    periodDayDates: range.periodDayDates,
+    staffRows,
+  });
+  const staffIds = resolveDefaultRosterStaffIds(
+    staffRows,
+    input.staffIds,
+    eligibilityContext.eligibilityByStaffId
+  );
 
   const staffTimezoneById = new Map(
     staffRows.map((s) => [s.id, s.default_timezone?.trim() || "Australia/Perth"])

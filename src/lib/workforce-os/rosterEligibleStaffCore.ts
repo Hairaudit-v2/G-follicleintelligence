@@ -227,6 +227,139 @@ export function listStaffMissingStandardHoursForRoster(
   );
 }
 
+export type RosterIneligibleStaffOption = {
+  id: string;
+  name: string;
+  role: string | null;
+  reason: RosterIneligibilityReason;
+  reasonLabel: string;
+};
+
+export type RosterStaffEligibilityContext = {
+  eligibleStaffIds: string[];
+  eligibilityByStaffId: Map<string, RosterStaffEligibilitySnapshot>;
+  ineligibleStaffOptions: RosterIneligibleStaffOption[];
+  periodDayDates: string[];
+};
+
+export type RosterStaffRowContext = {
+  id: string;
+  is_active: boolean;
+  tenant_id: string | null;
+  full_name: string | null;
+  staff_role: string | null;
+  default_timezone?: string | null;
+};
+
+export type RosterStaffMemberContext = {
+  employment_status?: string | null;
+  archived_at?: string | null;
+};
+
+type RosterAvailabilityBlockRow = {
+  staff_id: string;
+  block_type: string;
+  starts_at: string;
+  ends_at: string;
+  status?: string | null;
+};
+
+function groupAvailabilityBlocksByStaffId(
+  blocks: RosterAvailabilityBlockRow[]
+): Map<string, RosterAvailabilityBlockRow[]> {
+  const out = new Map<string, RosterAvailabilityBlockRow[]>();
+  for (const block of blocks) {
+    const staffId = block.staff_id.trim();
+    if (!staffId) continue;
+    const list = out.get(staffId) ?? [];
+    list.push(block);
+    out.set(staffId, list);
+  }
+  return out;
+}
+
+export function buildRosterStaffEligibilityContext(input: {
+  staffRows: readonly RosterStaffRowContext[];
+  membersByFiStaffId: ReadonlyMap<string, RosterStaffMemberContext>;
+  periodDayDates: readonly string[];
+  availabilityBlocks?: readonly RosterAvailabilityBlockRow[];
+}): RosterStaffEligibilityContext {
+  const blocksByStaffId = groupAvailabilityBlocksByStaffId([...(input.availabilityBlocks ?? [])]);
+  const eligibilityByStaffId = new Map<string, RosterStaffEligibilitySnapshot>();
+  const eligibleStaffIds: string[] = [];
+  const ineligibleStaffOptions: RosterIneligibleStaffOption[] = [];
+
+  for (const staff of input.staffRows) {
+    const member = input.membersByFiStaffId.get(staff.id) ?? null;
+    const employmentStatus = resolveEmploymentStatusForRosterStaff({
+      isActive: staff.is_active,
+      employmentStatus: member?.employment_status,
+    });
+    const snapshot = evaluateRosterStaffEligibility({
+      staffId: staff.id,
+      isActive: staff.is_active,
+      employmentStatus,
+      archivedAt: member?.archived_at ?? null,
+      tenantId: staff.tenant_id,
+      periodDayDates: input.periodDayDates,
+      availabilityBlocks: (blocksByStaffId.get(staff.id) ?? []).map((block) => ({
+        block_type: block.block_type as AvailabilityBlockType,
+        starts_at: block.starts_at,
+        ends_at: block.ends_at,
+        status: block.status,
+      })),
+      staffTimezone: staff.default_timezone,
+    });
+
+    eligibilityByStaffId.set(staff.id, snapshot);
+    if (snapshot.eligible) {
+      eligibleStaffIds.push(staff.id);
+      continue;
+    }
+
+    if (snapshot.reason) {
+      ineligibleStaffOptions.push({
+        id: staff.id,
+        name: staff.full_name?.trim() || "Staff",
+        role: staff.staff_role?.trim() || null,
+        reason: snapshot.reason,
+        reasonLabel: rosterIneligibilityReasonLabel(snapshot.reason),
+      });
+    }
+  }
+
+  return {
+    eligibleStaffIds,
+    eligibilityByStaffId,
+    ineligibleStaffOptions,
+    periodDayDates: [...input.periodDayDates],
+  };
+}
+
+export function resolveDefaultRosterStaffIds(
+  staffRows: readonly RosterStaffRowContext[],
+  requestedStaffIds: string[] | undefined,
+  eligibilityByStaffId: ReadonlyMap<string, RosterStaffEligibilitySnapshot>
+): string[] {
+  const scope =
+    requestedStaffIds?.length && requestedStaffIds.length > 0
+      ? requestedStaffIds
+      : staffRows.map((staff) => staff.id);
+  return resolveRosterEligibleStaffIds(scope, eligibilityByStaffId);
+}
+
+export function listRosterEligibleStaffMissingStandardHours(input: {
+  staffOptions: Array<{ id: string; name: string }>;
+  standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
+  eligibleStaffIds: readonly string[];
+}): Array<{ id: string; name: string }> {
+  return listStaffMissingStandardHoursForRoster(
+    input.staffOptions,
+    input.standardHoursByStaffId,
+    input.eligibleStaffIds
+  );
+}
+
 export function resolveEmploymentStatusForRosterStaff(input: {
   isActive: boolean;
   employmentStatus: unknown;

@@ -12,7 +12,11 @@ import {
   loadActiveStandardHoursForTenant,
 } from "@/src/lib/workforce-os/staffStandardHours.server";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
-import { listStaffMissingStandardHours } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
+import {
+  listRosterEligibleStaffMissingStandardHours,
+  loadRosterStaffEligibilityContext,
+} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
+import { rosterDateRangeFromPeriodStart } from "@/src/lib/workforce/rosterCadencePolicyCore";
 
 import type { RosterCommandCentreClinicOption } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -43,11 +47,20 @@ export async function loadStaffStandardHoursSetupIndexPage(tenantId: string) {
   if (!access.ok) return null;
 
   const tid = tenantId.trim();
-  const [staffRows, standardHoursMap, clinics, manage] = await Promise.all([
+  const rosterPolicy = await loadWorkforceRosterPlanningPolicy(tid);
+  const periodStart = new Date().toISOString().slice(0, 10);
+  const periodDayDates = rosterDateRangeFromPeriodStart(
+    periodStart,
+    rosterPolicy.rosterCadence,
+    rosterPolicy.rosterWeekStartDay
+  ).periodDayDates;
+
+  const [staffRows, standardHoursMap, clinics, manage, eligibilityContext] = await Promise.all([
     loadAllStaffForTenant(tid),
     loadActiveStandardHoursForTenant(tid),
     loadClinicsForTenant(tid),
     resolveStaffStandardHoursManageCapability(tid),
+    loadRosterStaffEligibilityContext(tid, { periodDayDates }),
   ]);
 
   const staffOptions = staffRows.map((s) => ({
@@ -61,7 +74,11 @@ export async function loadStaffStandardHoursSetupIndexPage(tenantId: string) {
     standardHoursByStaffId[staffId] = days;
   }
 
-  const staffMissing = listStaffMissingStandardHours(staffOptions, standardHoursByStaffId);
+  const staffMissing = listRosterEligibleStaffMissingStandardHours({
+    staffOptions,
+    standardHoursByStaffId,
+    eligibleStaffIds: eligibilityContext.eligibleStaffIds,
+  });
   const staffWithOptions: StaffStandardHoursPageStaffOption[] = staffOptions.map((staff) => ({
     ...staff,
     hasStandardHours: Boolean(standardHoursByStaffId[staff.id]?.length),

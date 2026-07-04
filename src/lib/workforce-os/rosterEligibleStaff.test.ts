@@ -7,12 +7,10 @@ import {
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import {
   buildRosterStaffEligibilityContext,
-  listRosterEligibleStaffMissingStandardHours,
-} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
-import {
   evaluateRosterStaffEligibility,
   evaluateRosterStaffLifecycleEligibility,
   isStaffFullyUnavailableForPeriod,
+  listRosterEligibleStaffMissingStandardHours,
   listStaffMissingStandardHoursForRoster,
   resolveRosterEligibleStaffIds,
 } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
@@ -429,4 +427,40 @@ test("archived and full-period leave staff without hours do not block roster gen
 
   assert.ok(plan.candidates.length > 0);
   assert.equal(plan.skips.filter((skip) => skip.reason === "no_standard_hours").length, 0);
+});
+
+test("maternity leave staff appear in ineligible roster options", () => {
+  const maternityBlock = {
+    staff_id: STAFF_LEAVE,
+    block_type: "maternity_leave" as const,
+    starts_at: "2026-07-01T00:00:00.000Z",
+    ends_at: "2026-12-31T23:59:59.999Z",
+    status: "active" as const,
+  };
+
+  const context = buildRosterStaffEligibilityContext({
+    staffRows: [
+      staffRow({
+        id: STAFF_LEAVE,
+        full_name: "Anita Katherine Cottee",
+        is_active: true,
+      }),
+    ],
+    membersByFiStaffId: new Map([
+      [
+        STAFF_LEAVE,
+        {
+          employment_status: "on_leave",
+          archived_at: null,
+        },
+      ],
+    ]),
+    periodDayDates: PERIOD_DAYS,
+    availabilityBlocks: [maternityBlock],
+  });
+
+  assert.equal(context.eligibleStaffIds.length, 0);
+  assert.equal(context.ineligibleStaffOptions.length, 1);
+  assert.equal(context.ineligibleStaffOptions[0]?.name, "Anita Katherine Cottee");
+  assert.match(context.ineligibleStaffOptions[0]?.reasonLabel ?? "", /leave|unavailable/i);
 });
