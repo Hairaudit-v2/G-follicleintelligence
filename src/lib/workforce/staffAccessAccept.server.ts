@@ -35,6 +35,7 @@ export type StaffAccessAcceptPageModel = {
 };
 
 async function loadTenantName(tenantId: string, client: SupabaseClient): Promise<string> {
+  // tenant-guard-allow: fi_tenants registry lookup by URL/invitation tenant id
   const { data, error } = await client
     .from("fi_tenants")
     .select("name")

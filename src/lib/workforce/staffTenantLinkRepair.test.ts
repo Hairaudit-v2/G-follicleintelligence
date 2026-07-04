@@ -14,6 +14,8 @@ import {
   shouldPreferMembershipOverMetadata,
 } from "@/src/lib/workforce/staffTenantLinkRepairCore";
 import {
+  loadCrossTenantInviteWarning,
+  provisionStaffAuthInviteLink,
   repairStaffTenantLinkFromInvitation,
   repairStaffTenantLinkOnAuthConfirm,
 } from "@/src/lib/workforce/staffTenantLinkRepair.server";
@@ -31,7 +33,11 @@ const EMAIL = "staff@example.com";
 
 type TableState = Record<string, Record<string, unknown>[]>;
 
-function makeMockClient(state: TableState, authUsers: Record<string, unknown>[] = []): SupabaseClient {
+function makeMockClient(
+  state: TableState,
+  authUsers: Record<string, unknown>[] = [],
+  rpcHandlers: Record<string, (args: Record<string, unknown>) => Promise<{ data: unknown; error: null } | { data: null; error: { message: string } }>> = {}
+): SupabaseClient {
   const from = (table: string) => {
     const filters: Array<(row: Record<string, unknown>) => boolean> = [];
     let patch: Record<string, unknown> | null = null;
@@ -138,6 +144,13 @@ function makeMockClient(state: TableState, authUsers: Record<string, unknown>[] 
 
   return {
     from,
+    rpc(name: string, args: Record<string, unknown>) {
+      const handler = rpcHandlers[name];
+      if (!handler) {
+        return Promise.resolve({ data: null, error: { message: `Unhandled RPC: ${name}` } });
+      }
+      return handler(args);
+    },
     auth: {
       admin: {
         getUserById: async (id: string) => ({
@@ -153,7 +166,9 @@ function makeMockClient(state: TableState, authUsers: Record<string, unknown>[] 
           }
           return { data: { user }, error: null };
         },
-        listUsers: async () => ({ data: { users: authUsers }, error: null }),
+        listUsers: async () => {
+          throw new Error("listUsers must not be used for staff auth email lookup");
+        },
         generateLink: async () => ({
           data: {
             user: { id: AUTH_USER },
@@ -425,4 +440,94 @@ test("active staff with valid fi_user_id resolves to tenant cases path", () => {
     metadataTenantId: DEMO_TENANT,
   });
   assert.equal(dest, `/fi-admin/${EVOLVED_TENANT}/cases`);
+});
+
+test("provisionStaffAuthInviteLink finds existing auth user via RPC", async () => {
+  const client = makeMockClient({}, [], {
+    fi_admin_lookup_auth_user_id_by_email: async (args) => ({
+      data: args._email === EMAIL ? AUTH_USER : null,
+      error: null,
+    }),
+  });
+
+  const result = await provisionStaffAuthInviteLink({
+    tenantId: EVOLVED_TENANT,
+    email: EMAIL,
+    origin: "https://app.example.com",
+    client,
+  });
+
+  assert.equal(result.authUserId, AUTH_USER);
+  assert.equal(result.reusedExistingAuthUser, true);
+});
+
+test("provisionStaffAuthInviteLink treats missing RPC auth user as new invite", async () => {
+  const client = makeMockClient({}, [], {
+    fi_admin_lookup_auth_user_id_by_email: async () => ({
+      data: null,
+      error: null,
+    }),
+  });
+
+  const result = await provisionStaffAuthInviteLink({
+    tenantId: EVOLVED_TENANT,
+    email: EMAIL,
+    origin: "https://app.example.com",
+    client,
+  });
+
+  assert.equal(result.authUserId, AUTH_USER);
+  assert.equal(result.reusedExistingAuthUser, false);
+});
+
+test("provisionStaffAuthInviteLink rejects RPC failure without creating tenant links", async () => {
+  const client = makeMockClient({}, [], {
+    fi_admin_lookup_auth_user_id_by_email: async () => ({
+      data: null,
+      error: { message: "lookup failed" },
+    }),
+  });
+
+  await assert.rejects(
+    () =>
+      provisionStaffAuthInviteLink({
+        tenantId: EVOLVED_TENANT,
+        email: EMAIL,
+        origin: "https://app.example.com",
+        client,
+      }),
+    /lookup failed/
+  );
+});
+
+test("loadCrossTenantInviteWarning resolves auth user through RPC", async () => {
+  const state: TableState = {
+    fi_users: [
+      {
+        id: FI_USER,
+        tenant_id: DEMO_TENANT,
+        email: EMAIL,
+        auth_user_id: AUTH_USER,
+      },
+    ],
+    fi_tenants: [
+      { id: DEMO_TENANT, name: "Demo Clinic" },
+      { id: EVOLVED_TENANT, name: "Evolved Clinic" },
+    ],
+  };
+
+  const client = makeMockClient(state, [], {
+    fi_admin_lookup_auth_user_id_by_email: async (args) => ({
+      data: args._email === EMAIL ? AUTH_USER : null,
+      error: null,
+    }),
+  });
+
+  const warning = await loadCrossTenantInviteWarning({
+    tenantId: EVOLVED_TENANT,
+    email: EMAIL,
+    client,
+  });
+
+  assert.match(warning ?? "", /already has Follicle Intelligence access/i);
 });

@@ -34,19 +34,15 @@ async function findAuthUserIdByEmail(
   const normalized = email.trim().toLowerCase();
   if (!normalized) return null;
 
-  let page = 1;
-  while (page <= 10) {
-    const { data, error } = await client.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) throw new Error(error.message);
-    const match = data.users.find((u) => u.email?.trim().toLowerCase() === normalized);
-    if (match?.id) return String(match.id);
-    if (data.users.length < 200) break;
-    page += 1;
-  }
-  return null;
+  const { data, error } = await client.rpc("fi_admin_lookup_auth_user_id_by_email", {
+    _email: normalized,
+  });
+  if (error) throw new Error(error.message);
+  return data ? String(data) : null;
 }
 
 async function loadTenantName(tenantId: string, client: SupabaseClient): Promise<string> {
+  // tenant-guard-allow: fi_tenants registry lookup by URL/invitation tenant id
   const { data, error } = await client
     .from("fi_tenants")
     .select("name")
@@ -77,6 +73,7 @@ async function loadOtherTenantNamesForAuthUser(
   );
   if (otherTenantIds.length === 0) return [];
 
+  // tenant-guard-allow: fi_tenants registry lookup by URL/invitation tenant id
   const { data: tenants, error: tenantErr } = await client
     .from("fi_tenants")
     .select("id, name")

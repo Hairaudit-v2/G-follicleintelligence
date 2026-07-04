@@ -84,21 +84,23 @@ async function loadExistingShiftsInRange(
   return (data ?? []).map((r) => mapShiftRow(r as Record<string, unknown>));
 }
 
-async function loadAvailabilityBlocksInRange(
+/** @internal Exported for overlap-query regression tests. */
+export async function loadAvailabilityBlocksInRange(
   tenantId: string,
   rangeStartIso: string,
   rangeEndIso: string,
-  staffIds?: string[]
+  staffIds?: string[],
+  supabaseClientForTests?: SupabaseClient
 ) {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = supabaseAdmin();
+  const supabase = supabaseClientForTests ?? supabaseAdmin();
   let query = supabase
     .from("fi_staff_availability_blocks")
     .select("*")
     .eq("tenant_id", tid)
     .eq("status", "active")
-    .gte("starts_at", rangeStartIso)
-    .lt("ends_at", rangeEndIso);
+    .lte("starts_at", rangeEndIso)
+    .gte("ends_at", rangeStartIso);
 
   if (staffIds?.length) {
     query = query.in("staff_id", staffIds);
@@ -176,7 +178,9 @@ export async function generateRosterFromStandardHoursForTenant(
   const blocksRaw = await loadAvailabilityBlocksInRange(
     tid,
     input.rangeStartIso,
-    input.rangeEndIso
+    input.rangeEndIso,
+    undefined,
+    input.supabaseClientForTests
   );
 
   const eligibilityContext = await loadRosterStaffEligibilityContext(tid, {

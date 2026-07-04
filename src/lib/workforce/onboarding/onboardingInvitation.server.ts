@@ -26,6 +26,7 @@ export type SendOnboardingInviteResult = {
 };
 
 async function loadTenantName(tenantId: string, client: SupabaseClient): Promise<string> {
+  // tenant-guard-allow: fi_tenants registry lookup by URL/invitation tenant id
   const { data, error } = await client.from("fi_tenants").select("name").eq("id", tenantId).maybeSingle();
   if (error) throw new Error(error.message);
   return String((data as { name: string } | null)?.name ?? "Your clinic").trim() || "Your clinic";
