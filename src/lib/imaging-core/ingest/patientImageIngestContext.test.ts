@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { IMAGING_OS_INGESTION_PIPELINE_VERSION } from "@/src/lib/imaging-os";
+import { IMAGING_OS_INGESTION_PIPELINE_VERSION } from "@/src/lib/imaging-os/pipeline";
 import { buildPatientImageIngestionRequest } from "./buildPatientImageIngestionRequest";
 import {
   parsePatientImageIngestionContext,

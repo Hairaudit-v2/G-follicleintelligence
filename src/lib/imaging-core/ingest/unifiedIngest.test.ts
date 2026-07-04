@@ -1,15 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  buildConsultationOsImageIngestionRequest,
-  buildFollowUpOutcomeImageIngestionRequest,
-  buildHairauditImageIngestionRequest,
-  buildIiohrImageIngestionRequest,
-  buildPatientPortalImageIngestionRequest,
-  buildSurgeryOsImageIngestionRequest,
-  IMAGING_OS_INGESTION_PIPELINE_VERSION,
-} from "@/src/lib/imaging-os";
+import { buildConsultationOsImageIngestionRequest } from "@/src/lib/imaging-os/adapters/consultationOsImageAdapter";
+import { buildFollowUpOutcomeImageIngestionRequest } from "@/src/lib/imaging-os/adapters/followUpOutcomeImageAdapter";
+import { buildHairauditImageIngestionRequest } from "@/src/lib/imaging-os/adapters/hairauditImageAdapter";
+import { buildIiohrImageIngestionRequest } from "@/src/lib/imaging-os/adapters/iiohrImageAdapter";
+import { buildPatientPortalImageIngestionRequest } from "@/src/lib/imaging-os/adapters/patientPortalImageAdapter";
+import { buildSurgeryOsImageIngestionRequest } from "@/src/lib/imaging-os/adapters/surgeryOsImageAdapter";
+import { IMAGING_OS_INGESTION_PIPELINE_VERSION } from "@/src/lib/imaging-os/pipeline";
 import { buildPatientImageIngestionRequest } from "./buildPatientImageIngestionRequest";
 import { runUnifiedPatientImageIngest } from "./runUnifiedPatientImageIngest";
 import { buildImagingSessionTaxonomy } from "./sessionTaxonomy";
