@@ -3,6 +3,11 @@
  */
 
 import {
+  calendarDateStringFromInstant,
+  normalizeCalendarTimezone,
+  parseIsoUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
+import {
   shiftTypeFromStandardDay,
   weekdayIndexFromLocalDate,
 } from "@/src/lib/workforce-os/rosterGenerationCore";
@@ -246,3 +251,15 @@ export function formatStandardHoursWeeklyTotalLabel(
 /** Layout contract: roster page must scroll vertically; grid scrolls horizontally. */
 export const ROSTER_PAGE_SCROLL_ROOT_CLASSES = "min-h-full w-full shrink-0";
 export const ROSTER_GRID_SCROLL_CLASSES = "overflow-x-auto";
+
+/** Clinic/staff-local calendar day for roster availability grid cells. */
+export function rosterAvailabilityLocalDateFromIso(
+  iso: string,
+  staffTimezone: string | null | undefined,
+  tenantTimezone: string
+): string {
+  const ms = parseIsoUtcMs(iso);
+  if (ms == null) return iso.trim().slice(0, 10);
+  const tz = normalizeCalendarTimezone(staffTimezone?.trim() || tenantTimezone);
+  return calendarDateStringFromInstant(new Date(ms), tz);
+}

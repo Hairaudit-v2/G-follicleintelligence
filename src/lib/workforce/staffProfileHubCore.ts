@@ -137,6 +137,7 @@ export type StaffProfileActionContext = {
   viewerCanManageAccess: boolean;
   viewerCanManageOnboarding: boolean;
   viewerCanManageReadiness: boolean;
+  viewerCanViewIdentityAudit: boolean;
 };
 
 export type StaffProfileActionMenuModel = {
@@ -289,6 +290,7 @@ export function resolveStaffLifecycleBlockers(input: {
   workforceIntelligence: StaffWorkforceIntelligence | null;
   identityAuditRow: StaffProfileIdentityAuditSnapshot | null;
   leaveContext?: StaffProfileLeaveContext | null;
+  viewerCanViewIdentityAudit?: boolean;
 }): StaffLifecycleBlocker[] {
   const blockers: StaffLifecycleBlocker[] = [];
   const onboardingHref = buildOnboardingCentreHrefForTenant(input.tenantId);
@@ -369,7 +371,7 @@ export function resolveStaffLifecycleBlockers(input: {
     });
   }
 
-  if (input.identityAuditRow?.workspaceProfileStatus === "missing") {
+  if (input.viewerCanViewIdentityAudit !== false && input.identityAuditRow?.workspaceProfileStatus === "missing") {
     blockers.push({
       id: "missing_identity_link",
       label: "Missing staff identity link",
@@ -377,7 +379,7 @@ export function resolveStaffLifecycleBlockers(input: {
       href: identityHref,
     });
   }
-  if (input.identityAuditRow?.workspaceProfileStatus === "ambiguous") {
+  if (input.viewerCanViewIdentityAudit !== false && input.identityAuditRow?.workspaceProfileStatus === "ambiguous") {
     blockers.push({
       id: "missing_identity_link",
       label: "Ambiguous identity link",
@@ -580,6 +582,7 @@ export function resolveStaffProfileActions(input: {
   accessRow: StaffProfileAccessSnapshot | null;
   checklist: OnboardingChecklistState;
   limit?: number;
+  viewerCanViewIdentityAudit?: boolean;
 }): StaffLifecycleAction[] {
   const actions = resolveStaffProfileLifecycleActions(input);
   const cap = input.limit ?? 8;
@@ -595,6 +598,7 @@ function resolveStaffProfileLifecycleActions(input: {
   hasOnboardingInviteUrl: boolean;
   accessRow: StaffProfileAccessSnapshot | null;
   checklist: OnboardingChecklistState;
+  viewerCanViewIdentityAudit?: boolean;
 }): StaffLifecycleAction[] {
   const onboardingHref = buildOnboardingCentreHrefForTenant(input.tenantId);
   const accessHref = buildStaffAccessCentreHrefForTenant(input.tenantId);
@@ -667,13 +671,16 @@ function resolveStaffProfileLifecycleActions(input: {
       href: onboardingHref,
       priority: "secondary",
     },
-    {
+  ];
+
+  if (input.viewerCanViewIdentityAudit !== false) {
+    linkActions.push({
       id: "open_identity_audit",
       label: "Open Identity Audit",
       href: identityHref,
       priority: "secondary",
-    },
-  ];
+    });
+  }
 
   if (input.checklist.trainingPending) {
     linkActions.push({
@@ -883,6 +890,7 @@ export function resolveStaffProfileActionMenu(input: {
     hasOnboardingInviteUrl: input.hasOnboardingInviteUrl,
     accessRow: input.accessRow,
     checklist: input.checklist,
+    viewerCanViewIdentityAudit: input.actionContext.viewerCanViewIdentityAudit,
   });
 
   const onboardingHref = buildOnboardingCentreHrefForTenant(input.tenantId);
@@ -1141,6 +1149,7 @@ export function buildStaffProfileOverviewModel(input: {
   viewerCanManageAccess?: boolean;
   viewerCanManageOnboarding?: boolean;
   viewerCanManageReadiness?: boolean;
+  viewerCanViewIdentityAudit?: boolean;
   leaveContext?: StaffProfileLeaveContext | null;
 }): StaffProfileOverviewModel {
   const actionContext: StaffProfileActionContext = {
@@ -1149,6 +1158,7 @@ export function buildStaffProfileOverviewModel(input: {
     viewerCanManageAccess: input.viewerCanManageAccess ?? false,
     viewerCanManageOnboarding: input.viewerCanManageOnboarding ?? false,
     viewerCanManageReadiness: input.viewerCanManageReadiness ?? false,
+    viewerCanViewIdentityAudit: input.viewerCanViewIdentityAudit ?? false,
   };
 
   const blockers = resolveStaffLifecycleBlockers({
@@ -1161,6 +1171,7 @@ export function buildStaffProfileOverviewModel(input: {
     workforceIntelligence: input.workforceIntelligence,
     identityAuditRow: input.identityAuditRow,
     leaveContext: input.leaveContext,
+    viewerCanViewIdentityAudit: input.viewerCanViewIdentityAudit,
   });
 
   const actionMenu = resolveStaffProfileActionMenu({
@@ -1205,6 +1216,7 @@ export function buildStaffProfileOverviewModel(input: {
       hasOnboardingInviteUrl: input.hasOnboardingInviteUrl,
       accessRow: input.accessRow,
       checklist: input.checklist,
+      viewerCanViewIdentityAudit: input.viewerCanViewIdentityAudit,
     }),
     progressStages: resolveStaffLifecycleProgress({
       employmentStatus: input.employmentStatus,

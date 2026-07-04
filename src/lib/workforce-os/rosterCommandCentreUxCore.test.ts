@@ -15,6 +15,7 @@ import {
   resolveRosterDrawerStaffMemberId,
   resolveRosterDrawerStaffName,
   resolveRosterPayloadWeekDayDates,
+  rosterAvailabilityLocalDateFromIso,
   ROSTER_GRID_SCROLL_CLASSES,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -179,4 +180,17 @@ test("roster drawer state helpers open standard-hours and setup panels", () => {
   assert.equal(shiftDrawer.kind, "shift");
   assert.equal(resolveRosterDrawerStaffMemberId(shiftDrawer), STAFF_PAUL);
   assert.equal(closeRosterDrawer().kind, "closed");
+});
+
+test("rosterAvailabilityLocalDateFromIso respects AWST vs AEST on the same UTC instant", () => {
+  const iso = "2026-06-05T14:00:00.000Z";
+  assert.equal(iso.slice(0, 10), "2026-06-05");
+  assert.equal(
+    rosterAvailabilityLocalDateFromIso(iso, "Australia/Perth", "Australia/Perth"),
+    "2026-06-05"
+  );
+  assert.equal(
+    rosterAvailabilityLocalDateFromIso(iso, "Australia/Sydney", "Australia/Perth"),
+    "2026-06-06"
+  );
 });

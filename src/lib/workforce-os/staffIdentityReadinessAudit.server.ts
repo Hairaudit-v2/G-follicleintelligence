@@ -9,14 +9,7 @@ import {
   parseExplicitWorkspaceProfile,
   resolveWorkspaceProfileKeyFromSignals,
 } from "@/src/lib/fi-os/workspaceProfileDerivation";
-import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
-import {
-  isFiOsElevatedOsOperatorRole,
-  isFiOsPlatformAdminRole,
-} from "@/src/lib/fiOs/fiOsRoles";
-import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadStaffPinMetadataForStaff } from "@/src/lib/staffPin/staffPin.server";
-import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import {
   isArchivedStaff,
   isDepartedStaff,
@@ -724,37 +717,6 @@ export async function runStaffIdentityReadinessAudit(
     rows,
     summary: buildAuditSummary(rows),
   };
-}
-
-/** Route access: platform_admin, fi_admin, clinic_admin, operations_admin. */
-export async function assertStaffIdentityAuditAccess(tenantId: string): Promise<boolean> {
-  const authUserId = await resolveAuthUserId(null);
-  if (!authUserId) return false;
-
-  const os = await loadFiOsIdentity(authUserId);
-  if (isFiOsPlatformAdminRole(os?.osRole) || isFiOsElevatedOsOperatorRole(os?.osRole)) {
-    return true;
-  }
-
-  const tenantAdmin = await loadActiveTenantAdminProfileForSession(tenantId.trim(), authUserId);
-  if (
-    tenantAdmin?.adminRole === "clinic_admin" ||
-    tenantAdmin?.adminRole === "operations_admin"
-  ) {
-    return true;
-  }
-
-  const supabase = supabaseAdmin();
-  const { data } = await supabase
-    .from("fi_users")
-    .select("role")
-    .eq("tenant_id", tenantId.trim())
-    .eq("auth_user_id", authUserId.trim())
-    .maybeSingle();
-  const role = String((data as { role: string | null } | null)?.role ?? "")
-    .trim()
-    .toLowerCase();
-  return role === "fi_admin";
 }
 
 /** Exported for unit tests — builds a single audit row from preloaded parts. */

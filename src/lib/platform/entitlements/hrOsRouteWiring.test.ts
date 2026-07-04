@@ -169,6 +169,21 @@ test("verified + active + enabled + wrong role denied", () => {
   ]);
 });
 
+test("Team nav visibility aligns with HR OS route gate — crm_operator and tenant_backend denied", () => {
+  assert.equal(
+    evaluateHrOsModuleEntitlement(entitledContext({ userRole: "crm_operator" })).ok,
+    false
+  );
+  assert.equal(
+    evaluateHrOsModuleEntitlement(entitledContext({ userRole: "tenant_backend" })).ok,
+    false
+  );
+  assert.equal(
+    evaluateHrOsModuleEntitlement(entitledContext({ userRole: "hr_manager" })).ok,
+    true
+  );
+});
+
 test("verified + active + disabled module denied", () => {
   const result = evaluateHrOsModuleEntitlement(entitledContext({ moduleEnabled: false }));
   assert.equal(result.ok, false);

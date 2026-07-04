@@ -23,6 +23,7 @@ const baseActionContext = {
   viewerCanManageAccess: true,
   viewerCanManageOnboarding: true,
   viewerCanManageReadiness: true,
+  viewerCanViewIdentityAudit: true,
 };
 
 test("buildStaffProfileHref points to WorkforceOS staff profile hub", () => {

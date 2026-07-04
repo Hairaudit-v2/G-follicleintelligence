@@ -19,8 +19,12 @@ export type WorkforceOsNavItem = {
   title?: string;
 };
 
-export function buildWorkforceOsNavItems(tenantId: string): WorkforceOsNavItem[] {
+export function buildWorkforceOsNavItems(
+  tenantId: string,
+  opts?: { showIdentityAudit?: boolean }
+): WorkforceOsNavItem[] {
   const base = `/fi-admin/${tenantId}/workforce-os`;
+  const showIdentityAudit = opts?.showIdentityAudit !== false;
   return [
     {
       label: STAFF_LIFECYCLE_LABELS.commandCentreShort,
@@ -47,12 +51,16 @@ export function buildWorkforceOsNavItems(tenantId: string): WorkforceOsNavItem[]
       href: `${base}/staff-access`,
       segment: "staff-access",
     },
-    {
-      label: STAFF_LIFECYCLE_LABELS.identityAudit,
-      href: buildStaffIdentityAuditHref(tenantId),
-      segment: "identity-audit",
-      title: STAFF_LIFECYCLE_HELPERS.identityAudit,
-    },
+    ...(showIdentityAudit
+      ? [
+          {
+            label: STAFF_LIFECYCLE_LABELS.identityAudit,
+            href: buildStaffIdentityAuditHref(tenantId),
+            segment: "identity-audit",
+            title: STAFF_LIFECYCLE_HELPERS.identityAudit,
+          } satisfies WorkforceOsNavItem,
+        ]
+      : []),
     {
       label: STAFF_LIFECYCLE_LABELS.roster,
       href: buildWorkforceRosterHref(tenantId),
@@ -83,10 +91,16 @@ export function isWorkforceOsNavActive(pathname: string, base: string, segment: 
   return pathname === `${base}/${segment}` || pathname.startsWith(`${base}/${segment}/`);
 }
 
-export function WorkforceOsSubNav({ tenantId }: { tenantId: string }) {
+export function WorkforceOsSubNav({
+  tenantId,
+  showIdentityAudit = true,
+}: {
+  tenantId: string;
+  showIdentityAudit?: boolean;
+}) {
   const pathname = usePathname();
   const base = `/fi-admin/${tenantId}/workforce-os`;
-  const items = buildWorkforceOsNavItems(tenantId);
+  const items = buildWorkforceOsNavItems(tenantId, { showIdentityAudit });
 
   return (
     <nav

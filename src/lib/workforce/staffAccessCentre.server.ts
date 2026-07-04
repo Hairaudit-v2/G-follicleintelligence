@@ -72,7 +72,6 @@ export type StaffAccessCentreRow = {
 export type StaffAccessCentrePageModel = {
   tenantId: string;
   rows: StaffAccessCentreRow[];
-  canManage: boolean;
 };
 
 function firstForwardedValue(raw: string | null): string | null {
@@ -142,9 +141,8 @@ export async function loadStaffAccessCentrePage(
   const staffMemberId = normalizedOptions.staffMemberId?.trim() || null;
   const supabase = normalizedOptions.supabaseClientForTests ?? supabaseAdmin();
 
-  if (!staffMemberId) {
-    await expireStaleLoginInvitations(tid, supabase);
-  }
+  // P2: expire stale fi_staff_login_invitations via cron — send/resend mutation paths already call
+  // expireStaleLoginInvitations before writing new invites.
 
   let memberQuery = supabase
     .from("fi_staff_members")
@@ -364,7 +362,7 @@ export async function loadStaffAccessCentrePage(
     });
   }
 
-  return { tenantId: tid, rows, canManage: true };
+  return { tenantId: tid, rows };
 }
 
 /** Single staff member access snapshot — avoids full-tenant sync on profile pages. */

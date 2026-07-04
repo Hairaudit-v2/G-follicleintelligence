@@ -7,6 +7,7 @@ import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotification
 import { loadWorkforceCommandCentreIntelligence } from "@/src/lib/staff/workforceCommandCentre.server";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 import { runStaffIdentityReadinessAuditForMember } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
+import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
 import {
   mapOnboardingInviteDisplayStatus,
 } from "@/src/lib/workforce/onboarding/onboardingCentreCore";
@@ -109,11 +110,13 @@ export async function loadStaffProfileHubOverview(
   const staffMemberId = lifecycle.id;
   const canManage = options?.canManage ?? false;
 
-  const [accessRow, checklist, onboardingInvite, identityAuditRow] = await Promise.all([
+  const [accessRow, checklist, onboardingInvite, identityAuditRow, identityAuditAccess] =
+    await Promise.all([
     loadStaffAccessCentreRowForMember(tid, staffMemberId),
     loadOnboardingChecklist(tid, staffMemberId),
     loadOnboardingInviteStatus(tid, staffMemberId),
     runStaffIdentityReadinessAuditForMember(tid, staffMemberId),
+    resolveStaffIdentityAuditAccess(tid),
   ]);
 
   let workforceIntelligence = null;
@@ -161,6 +164,7 @@ export async function loadStaffProfileHubOverview(
     viewerCanManageAccess: canManage,
     viewerCanManageOnboarding: canManage,
     viewerCanManageReadiness: canManage,
+    viewerCanViewIdentityAudit: identityAuditAccess.allowed,
     leaveContext,
   });
 }

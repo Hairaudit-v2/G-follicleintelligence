@@ -2,10 +2,8 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { StaffIdentityReadinessAuditClient } from "@/src/components/fi/workforce/StaffIdentityReadinessAuditClient";
-import {
-  assertStaffIdentityAuditAccess,
-  runStaffIdentityReadinessAudit,
-} from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
+import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
+import { runStaffIdentityReadinessAudit } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 
 export const metadata = {
   title: "Identity Audit · Team",
@@ -23,7 +21,7 @@ export default async function StaffIdentityAuditPage({
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const allowed = await assertStaffIdentityAuditAccess(tenantId.trim());
+  const { allowed } = await resolveStaffIdentityAuditAccess(tenantId.trim());
   if (!allowed) notFound();
 
   const audit = await runStaffIdentityReadinessAudit(tenantId.trim());

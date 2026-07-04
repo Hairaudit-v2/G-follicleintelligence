@@ -6,6 +6,7 @@ import { FiModuleAccessDenied } from "@/src/components/fi-os/FiModuleAccessDenie
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,11 @@ export default async function WorkforceOsLayout({
     );
   }
 
+  const identityAuditAccess = await resolveStaffIdentityAuditAccess(tid);
+
   return (
     <div className={cn(fiOsChromeClasses.pageScrollContent, "px-4 pt-8")}>
-      <WorkforceOsSubNav tenantId={tid} />
+      <WorkforceOsSubNav tenantId={tid} showIdentityAudit={identityAuditAccess.allowed} />
       {children}
     </div>
   );

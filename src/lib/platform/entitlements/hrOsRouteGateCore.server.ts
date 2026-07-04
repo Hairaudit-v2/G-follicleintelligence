@@ -9,9 +9,13 @@ import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 
 import { writeEntitlementAuditEvent } from "./entitlementAudit.server";
 import type { ModuleAccessDenied, ModuleAccessResult } from "./entitlementTypes";
-import { canShowModuleNav, HR_OS_MODULE_CODE, HR_OS_ROUTE_REQUIRED_ROLES } from "./modules";
+import {
+  evaluateHrOsModuleEntitlement,
+  HR_OS_MODULE_CODE,
+  HR_OS_ROUTE_REQUIRED_ROLES,
+} from "./modules";
 import { requireModuleAccess } from "./requireModuleAccess.server";
-import { loadClientSafeTenantEntitlements } from "./tenantEntitlements.server";
+import { loadEntitlementAccessContext } from "./tenantEntitlements.server";
 
 export { HR_OS_MODULE_CODE, HR_OS_ROUTE_REQUIRED_ROLES } from "./modules";
 
@@ -177,6 +181,7 @@ export async function resolveHrOsRouteAccessWithOptions(
   };
 }
 
+/** Nav visibility aligned with {@link resolveHrOsRouteAccessWithOptions} role gate (no audit write). */
 export async function loadHrOsNavVisibleForViewerImpl(tenantId: string): Promise<boolean> {
   const tid = tenantId.trim();
   if (!tid) return false;
@@ -189,11 +194,11 @@ export async function loadHrOsNavVisibleForViewerImpl(tenantId: string): Promise
   const fiUser = await loadFiUserIdForSession(tid, authUserId);
   if (!fiUser) return false;
 
-  const entitlements = await loadClientSafeTenantEntitlements({
+  const ctx = await loadEntitlementAccessContext({
     tenantId: tid,
     userId: fiUser.id,
-    moduleCodes: [HR_OS_MODULE_CODE],
+    moduleCode: HR_OS_MODULE_CODE,
   });
 
-  return canShowModuleNav(entitlements, HR_OS_MODULE_CODE);
+  return evaluateHrOsModuleEntitlement(ctx).ok;
 }

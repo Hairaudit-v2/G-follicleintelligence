@@ -49,6 +49,12 @@ describe("WorkforceOsSubNav", () => {
     assert.equal(items.length, 11);
   });
 
+  it("hides Identity Audit nav item when showIdentityAudit is false", () => {
+    const items = buildWorkforceOsNavItems(tenantId, { showIdentityAudit: false });
+    assert.equal(items.some((i) => i.segment === "identity-audit"), false);
+    assert.equal(items.length, 10);
+  });
+
   it("isWorkforceOsNavActive matches command centre exactly", () => {
     assert.equal(isWorkforceOsNavActive(base, base, ""), true);
     assert.equal(isWorkforceOsNavActive(`${base}/`, base, ""), true);

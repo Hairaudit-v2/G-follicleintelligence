@@ -51,6 +51,10 @@ import {
   type FiStaffEventAssignmentRow,
   type FiStaffShiftRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
+import {
+  resolveTenantCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
+import { rosterAvailabilityLocalDateFromIso } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { loadActiveStandardHoursForTenant } from "@/src/lib/workforce-os/staffStandardHours.server";
 import {
   listRosterEligibleStaffMissingStandardHours,
@@ -220,8 +224,26 @@ function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow {
   };
 }
 
-function localDateFromIso(iso: string): string {
-  return iso.slice(0, 10);
+function localDateFromIso(
+  iso: string,
+  staffTimezone: string | null | undefined,
+  tenantTimezone: string
+): string {
+  return rosterAvailabilityLocalDateFromIso(iso, staffTimezone, tenantTimezone);
+}
+
+async function loadTenantCalendarTimezone(tenantId: string): Promise<string> {
+  const { data, error } = await supabaseAdmin()
+    .from("fi_tenant_settings")
+    .select("default_timezone, metadata")
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const row = data as {
+    default_timezone?: string | null;
+    metadata?: Record<string, unknown> | null;
+  } | null;
+  return resolveTenantCalendarTimezone(row);
 }
 
 function mapAvailabilityBlockRow(row: Record<string, unknown>): FiStaffAvailabilityBlockRow {
@@ -524,7 +546,7 @@ export async function loadRosterCommandCentre(
   const eventTypeFilter = input.eventType?.trim().toLowerCase() || null;
   const statusFilter = input.statusFilter ?? null;
 
-  const [clinics, staffRows, bookings, shiftsRes, blocksRes, eligibilityBlocksRes, standardHoursMap] =
+  const [clinics, staffRows, bookings, shiftsRes, blocksRes, eligibilityBlocksRes, standardHoursMap, tenantTimezone] =
     await Promise.all([
     loadClinicsForTenant(tid),
     loadAllStaffForTenant(tid),
@@ -549,8 +571,8 @@ export async function loadRosterCommandCentre(
       .select("*")
       .eq("tenant_id", tid)
       .eq("status", "active")
-      .gte("starts_at", dateRange.startsAt)
-      .lt("starts_at", dateRange.endsAt)
+      .lte("starts_at", dateRange.endsAt)
+      .gte("ends_at", dateRange.startsAt)
       .order("starts_at", { ascending: true })
       .limit(500),
     supabaseAdmin()
@@ -562,6 +584,7 @@ export async function loadRosterCommandCentre(
       .gte("ends_at", dateRange.startsAt)
       .limit(1000),
     loadActiveStandardHoursForTenant(tid),
+    loadTenantCalendarTimezone(tid),
   ]);
 
   if (shiftsRes.error) throw new Error(shiftsRes.error.message);
@@ -580,6 +603,9 @@ export async function loadRosterCommandCentre(
 
   const clinicNameById = new Map(clinics.map((c) => [c.id, c.displayName]));
   const staffNameById = new Map(staffRows.map((s) => [s.id, s.full_name?.trim() || "Staff"]));
+  const staffTimezoneById = new Map(
+    staffRows.map((s) => [s.id, s.default_timezone?.trim() || null])
+  );
 
   let staffOptions = staffRows.map((s) => ({
     id: s.id,
@@ -624,7 +650,11 @@ export async function loadRosterCommandCentre(
             : block.block_type.replace(/_/g, " "),
     startsAt: block.starts_at,
     endsAt: block.ends_at,
-    localDate: localDateFromIso(block.starts_at),
+    localDate: localDateFromIso(
+      block.starts_at,
+      staffTimezoneById.get(block.staff_id),
+      tenantTimezone
+    ),
   }));
 
   const standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]> = {};
