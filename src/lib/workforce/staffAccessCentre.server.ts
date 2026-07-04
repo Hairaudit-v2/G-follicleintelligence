@@ -14,7 +14,6 @@ import {
   repairStaffTenantLinkFromInvitation,
 } from "@/src/lib/workforce/staffTenantLinkRepair.server";
 import { loadStaffPinMetadataForStaff } from "@/src/lib/staffPin/staffPin.server";
-import { syncAllStaffProjectionsForTenant } from "@/src/lib/workforce-os/hrReconciliation.server";
 import {
   authLoginStatusLabel,
   canReceiveLoginInvite,
@@ -144,7 +143,6 @@ export async function loadStaffAccessCentrePage(
   const supabase = normalizedOptions.supabaseClientForTests ?? supabaseAdmin();
 
   if (!staffMemberId) {
-    await syncAllStaffProjectionsForTenant(tid);
     await expireStaleLoginInvitations(tid, supabase);
   }
 

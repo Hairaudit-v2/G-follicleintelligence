@@ -5,7 +5,11 @@ import { useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import { approveStaffHrLinkAction } from "@/lib/actions/workforce-os-staff-lifecycle-actions";
+import {
+  approveStaffHrLinkAction,
+  runHrProjectionSyncAction,
+} from "@/lib/actions/workforce-os-staff-lifecycle-actions";
+import type { HrProjectionHealth } from "@/src/lib/workforce-os/projectionHealthCore";
 import type {
   HrReconciliationArchivedRecord,
   HrReconciliationDiagnostics,
@@ -35,15 +39,18 @@ export function HrReconciliationClient({
   initialSuggestions,
   initialArchivedHistorical,
   initialDiagnostics,
+  initialProjectionHealth,
 }: {
   tenantId: string;
   initialMetrics: HrReconciliationMetrics;
   initialSuggestions: HrReconciliationSuggestion[];
   initialArchivedHistorical: HrReconciliationArchivedRecord[];
   initialDiagnostics: HrReconciliationDiagnostics;
+  initialProjectionHealth: HrProjectionHealth;
 }) {
   const [metrics] = useState(initialMetrics);
   const [diagnostics] = useState(initialDiagnostics);
+  const [projectionHealth, setProjectionHealth] = useState(initialProjectionHealth);
   const [suggestions, setSuggestions] = useState(initialSuggestions);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -92,6 +99,21 @@ export function HrReconciliationClient({
     setSuggestions((prev) => prev.filter((s) => s.staffMemberId !== row.staffMemberId));
   }
 
+  function onRunProjectionSync() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await runHrProjectionSyncAction(tenantId);
+      if (!res.ok) {
+        setMessage(res.error);
+        return;
+      }
+      setProjectionHealth(res.health);
+      setMessage(
+        `Projection sync completed (${res.syncedCount} staff row${res.syncedCount === 1 ? "" : "s"} checked).`
+      );
+    });
+  }
+
   return (
     <div className="space-y-6">
       <header>
@@ -129,6 +151,52 @@ export function HrReconciliationClient({
           </div>
         </DashboardCard>
       ) : null}
+
+      <DashboardCard className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-[#F8FAFC]">Workforce projection health</h2>
+          <Button size="sm" variant="outline" onClick={onRunProjectionSync} disabled={pending}>
+            {pending ? "Syncing…" : "Run projection sync / repair"}
+          </Button>
+        </div>
+        <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <dt className="text-[#64748B]">Operational fi_staff rows</dt>
+            <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">
+              {projectionHealth.operationalFiStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#64748B]">Missing projections</dt>
+            <dd
+              className={`mt-1 text-xl font-semibold ${
+                projectionHealth.missingProjectionCount > 0 ? "text-amber-300" : "text-[#F8FAFC]"
+              }`}
+            >
+              {projectionHealth.missingProjectionCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#64748B]">Stale projections</dt>
+            <dd
+              className={`mt-1 text-xl font-semibold ${
+                projectionHealth.staleProjectionCount > 0 ? "text-amber-300" : "text-[#F8FAFC]"
+              }`}
+            >
+              {projectionHealth.staleProjectionCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#64748B]">Last projection sync</dt>
+            <dd className="mt-1 text-sm font-semibold text-[#F8FAFC]">
+              {formatTimestamp(projectionHealth.lastProjectionSyncAt)}
+              {projectionHealth.lastProjectionSyncCount != null
+                ? ` · ${projectionHealth.lastProjectionSyncCount} checked`
+                : ""}
+            </dd>
+          </div>
+        </dl>
+      </DashboardCard>
 
       <DashboardCard className="p-4">
         <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">

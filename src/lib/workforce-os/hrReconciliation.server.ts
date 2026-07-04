@@ -32,6 +32,11 @@ import type {
   HrReconciliationSuggestion,
   StaffMemberLifecycleRow,
 } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { HrProjectionHealth } from "@/src/lib/workforce-os/projectionHealthCore";
+import {
+  loadTenantHrProjectionHealth,
+  recordWorkforceProjectionSyncRun,
+} from "@/src/lib/workforce-os/projectionHealth.server";
 import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/workforce-os/staffLifecycleTypes";
 
 const LIFECYCLE_SOURCE = "workforce_os_staff_lifecycle";
@@ -453,6 +458,28 @@ export async function removeStaffHrLink(input: {
     event_type: STAFF_LIFECYCLE_AUDIT_EVENTS.HR_LINK_REMOVED,
     metadata: { actor_user_id: input.actorUserId ?? null },
   });
+}
+
+export async function runHrProjectionSyncForTenant(
+  tenantId: string,
+  client?: SupabaseClient
+): Promise<{
+  syncedCount: number;
+  syncedAt: string;
+  health: HrProjectionHealth;
+}> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const supabase = client ?? supabaseAdmin();
+  const syncedAt = new Date().toISOString();
+  const syncedCount = await syncAllStaffProjectionsForTenant(tid, supabase);
+  await recordWorkforceProjectionSyncRun({
+    tenantId: tid,
+    syncedCount,
+    syncedAt,
+    client: supabase,
+  });
+  const health = await loadTenantHrProjectionHealth(tid, supabase);
+  return { syncedCount, syncedAt, health };
 }
 
 export async function syncAllStaffProjectionsForTenant(

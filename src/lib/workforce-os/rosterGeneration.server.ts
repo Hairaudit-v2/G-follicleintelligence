@@ -146,19 +146,6 @@ export async function insertShiftCandidatesForTests(
   return insertShiftCandidates(tenantId, candidates, createdBy, supabaseClientForTests);
 }
 
-async function cancelShiftsByIds(tenantId: string, shiftIds: string[]): Promise<number> {
-  if (!shiftIds.length) return 0;
-  const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = supabaseAdmin();
-  const { error } = await supabase
-    .from("fi_staff_shifts")
-    .update({ status: "cancelled", updated_at: new Date().toISOString() })
-    .eq("tenant_id", tid)
-    .in("id", shiftIds);
-  if (error) throw new Error(error.message);
-  return shiftIds.length;
-}
-
 export type GenerateRosterInput = {
   tenantId: string;
   rangeStartIso: string;

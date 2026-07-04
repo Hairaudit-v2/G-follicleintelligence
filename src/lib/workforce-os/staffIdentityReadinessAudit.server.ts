@@ -17,7 +17,6 @@ import {
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadStaffPinMetadataForStaff } from "@/src/lib/staffPin/staffPin.server";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
-import { syncAllStaffProjectionsForTenant } from "@/src/lib/workforce-os/hrReconciliation.server";
 import {
   isArchivedStaff,
   isDepartedStaff,
@@ -499,10 +498,6 @@ export async function runStaffIdentityReadinessAudit(
       : ((options as RunStaffIdentityReadinessAuditOptions | undefined) ?? {});
   const staffMemberId = normalizedOptions.staffMemberId?.trim() || null;
   const supabase = normalizedOptions.supabaseClientForTests ?? supabaseAdmin();
-
-  if (!staffMemberId) {
-    await syncAllStaffProjectionsForTenant(tid);
-  }
 
   let memberQuery = supabase
     .from("fi_staff_members")

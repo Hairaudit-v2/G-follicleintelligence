@@ -12,7 +12,7 @@ import {
   loadHrReconciliationPageData,
   manuallyLinkStaffHrIdentity,
   removeStaffHrLink,
-  syncAllStaffProjectionsForTenant,
+  runHrProjectionSyncForTenant,
 } from "@/src/lib/workforce-os/hrReconciliation.server";
 import {
   archiveStaffMember,
@@ -228,12 +228,34 @@ export async function loadHrReconciliationPageAction(
 > {
   try {
     await assertHrLifecycleManageAllowed(tenantId);
-    await syncAllStaffProjectionsForTenant(tenantId);
     const pageData = await loadHrReconciliationPageData({
       tenantId,
       ...(evolvedStaffRecords !== undefined ? { evolvedStaffRecords } : {}),
     });
     return { ok: true, pageData };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function runHrProjectionSyncAction(
+  tenantId: string
+): Promise<
+  | {
+      ok: true;
+      syncedCount: number;
+      syncedAt: string;
+      health: Awaited<
+        ReturnType<typeof import("@/src/lib/workforce-os/projectionHealth.server").loadTenantHrProjectionHealth>
+      >;
+    }
+  | { ok: false; error: string }
+> {
+  try {
+    await assertHrLifecycleManageAllowed(tenantId);
+    const result = await runHrProjectionSyncForTenant(tenantId);
+    revalidateWorkforceOsPaths(tenantId);
+    return { ok: true, ...result };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

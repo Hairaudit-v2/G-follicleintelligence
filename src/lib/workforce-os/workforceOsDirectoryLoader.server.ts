@@ -4,10 +4,9 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import {
-  mapLifecycleRow,
-  syncAllStaffProjectionsForTenant,
-} from "@/src/lib/workforce-os/hrReconciliation.server";
+import { mapLifecycleRow } from "@/src/lib/workforce-os/hrReconciliation.server";
+import { loadTenantHrProjectionHealth } from "@/src/lib/workforce-os/projectionHealth.server";
+import type { HrProjectionHealth } from "@/src/lib/workforce-os/projectionHealthCore";
 import { loadStaffMemberLifecycle } from "@/src/lib/workforce-os/staffLifecycle.server";
 import {
   loadStaffLifecycleForFiStaff,
@@ -23,7 +22,6 @@ export async function loadWorkforceOsDirectoryPage(tenantId: string): Promise<{
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) return null;
 
-  await syncAllStaffProjectionsForTenant(tenantId);
   // Tenant-scoped via the WorkforceOS guard helper (see security/tenantScopedQuery.server.ts).
   const { data, error } = await workforceTenantClient(tenantId)
     .list("fi_staff_members")
@@ -76,6 +74,7 @@ export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Pro
   suggestions: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationSuggestion[];
   archivedHistorical: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationArchivedRecord[];
   diagnostics: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationDiagnostics;
+  projectionHealth: HrProjectionHealth;
 } | null> {
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) return null;
@@ -86,12 +85,15 @@ export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Pro
     (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
   if (!canManage) return null;
 
-  await syncAllStaffProjectionsForTenant(tenantId);
   const { loadHrReconciliationPageData } = await import(
     "@/src/lib/workforce-os/hrReconciliation.server"
   );
+  const [pageData, projectionHealth] = await Promise.all([
+    loadHrReconciliationPageData({ tenantId }),
+    loadTenantHrProjectionHealth(tenantId),
+  ]);
 
-  return loadHrReconciliationPageData({ tenantId });
+  return { ...pageData, projectionHealth };
 }
 
 export async function assertWorkforceOsReadAccess(tenantId: string): Promise<boolean> {
