@@ -239,6 +239,7 @@ test("resolveStaffUnifiedStatus preserves access suspended semantics", () => {
 test("Action menu: no invite shows Send invite or Open Staff Access as primary", () => {
   const menu = resolveStaffProfileActionMenu({
     tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
     employmentStatus: "active",
     email: "staff@clinic.com",
     systemAccessRevoked: false,
@@ -274,6 +275,7 @@ test("Action menu: no invite shows Send invite or Open Staff Access as primary",
 test("Action menu: accepted login with PIN ready promotes Reset PIN as primary", () => {
   const menu = resolveStaffProfileActionMenu({
     tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
     employmentStatus: "active",
     email: "staff@clinic.com",
     systemAccessRevoked: false,
@@ -307,6 +309,7 @@ test("Action menu: accepted login with PIN ready promotes Reset PIN as primary",
 test("Action menu: non-admin viewer disables management actions with reason", () => {
   const menu = resolveStaffProfileActionMenu({
     tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
     employmentStatus: "active",
     email: "staff@clinic.com",
     systemAccessRevoked: false,
@@ -345,6 +348,7 @@ test("Action menu: non-admin viewer disables management actions with reason", ()
 test("Action menu: missing documents adds compliance link in readiness", () => {
   const menu = resolveStaffProfileActionMenu({
     tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
     employmentStatus: "active",
     email: "staff@clinic.com",
     systemAccessRevoked: false,
@@ -385,6 +389,7 @@ test("Action menu: missing documents adds compliance link in readiness", () => {
 test("Action menu: dangerous actions include confirmation copy", () => {
   const menu = resolveStaffProfileActionMenu({
     tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
     employmentStatus: "active",
     email: "staff@clinic.com",
     systemAccessRevoked: false,
@@ -460,7 +465,7 @@ test("staff on maternity leave shows leave status instead of roster eligible", (
       readinessScore: 42,
       readinessBand: "operational_warning",
       readinessBandLabel: "Developing",
-      complianceStatus: "ok",
+      complianceStatus: "current",
       trainingRequiredCount: 2,
       trainingProgressLabel: "2 required",
       nextShiftLabel: "Mon 8 Jul · 09:00",
