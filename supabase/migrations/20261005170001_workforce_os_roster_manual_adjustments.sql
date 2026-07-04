@@ -1,17 +1,3 @@
--- ---------------------------------------------------------------------------
--- RECONSTRUCTED HISTORICAL MIGRATION — drift repair (do NOT treat as new change)
---
--- This migration was ALREADY APPLIED to the Follicle Intelligence production
--- database (schema_migrations version 20261005170001) but had no corresponding
--- file in the repository, causing repo <-> production drift.
---
--- SQL recovered from remote `supabase_migrations.schema_migrations.statements`
--- and verified against live production objects (fi_roster_shift_audit_events,
--- fi_staff_shifts.adjustment_reason/updated_by/cancellation_reason,
--- fi_clear_generated_roster_shifts). Committed here only to restore accurate
--- migration history — effect is already live in production.
--- ---------------------------------------------------------------------------
-
 -- WorkforceOS — roster manual adjustments (FI-ROSTER-MANUAL-ADJUSTMENTS-1).
 
 alter table public.fi_staff_shifts
