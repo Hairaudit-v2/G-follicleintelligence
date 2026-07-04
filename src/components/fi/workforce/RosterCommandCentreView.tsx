@@ -12,14 +12,21 @@ import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
 import {
   applyDefaultClinicStandardHoursAction,
-  copyPreviousWeekRosterAction,
+  copyPreviousRosterPeriodAction,
   generateRosterFromStandardHoursAction,
 } from "@/src/lib/actions/workforce-roster-actions";
+import {
+  rosterCadencePeriodLabel,
+  rosterCopyPreviousActionLabel,
+  rosterGenerateActionLabel,
+  shiftRosterPeriodStart,
+} from "@/src/lib/workforce/rosterCadencePolicyCore";
 import type { RosterCommandCentrePayload } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import type { RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import {
   buildRosterCommandCentreHref,
-  rosterDateRangeFromWeekStart,
+  rosterCommandCentrePeriodQueryParams,
+  rosterDateRangeFromPeriodStartParam,
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import {
@@ -85,10 +92,15 @@ function rosterDrawerStaffOption(
   return staffOptions.find((staff) => staff.id === staffMemberId) ?? null;
 }
 
-function shiftWeek(isoDate: string, deltaWeeks: number): string {
-  const d = new Date(`${isoDate.slice(0, 10)}T12:00:00.000Z`);
-  d.setUTCDate(d.getUTCDate() + deltaWeeks * 7);
-  return d.toISOString().slice(0, 10);
+function rosterPeriodStartFieldLabel(cadence: RosterCommandCentrePayload["rosterPlanning"]["rosterCadence"]): string {
+  switch (cadence) {
+    case "fortnightly":
+      return "Fortnight starting";
+    case "monthly":
+      return "Month starting";
+    default:
+      return "Week starting";
+  }
 }
 
 export function RosterCommandCentreView({
@@ -109,9 +121,13 @@ export function RosterCommandCentreView({
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const weekRange = useMemo(
-    () => rosterDateRangeFromWeekStart(filters.weekStart),
-    [filters.weekStart]
+  const rosterPlanning = payload.rosterPlanning;
+  const rosterCadence = rosterPlanning.rosterCadence;
+  const periodLabel = rosterCadencePeriodLabel(rosterCadence);
+
+  const periodRange = useMemo(
+    () => rosterDateRangeFromPeriodStartParam(filters.periodStart, rosterPlanning),
+    [filters.periodStart, rosterPlanning]
   );
 
   const weekDayDates = useMemo(() => resolveRosterPayloadWeekDayDates(payload), [payload]);
@@ -179,7 +195,7 @@ export function RosterCommandCentreView({
     router.push(
       buildRosterCommandCentreHref({
         tenantId,
-        weekStart: merged.weekStart,
+        ...rosterCommandCentrePeriodQueryParams(merged.periodStart, rosterPlanning),
         clinicId: merged.clinicId || null,
         staffId: merged.staffId || null,
         eventType: merged.eventType || null,
@@ -189,6 +205,13 @@ export function RosterCommandCentreView({
         useWorkforceOsRoute,
       })
     );
+  }
+
+  function shiftDisplayedPeriod(direction: -1 | 1) {
+    pushFilters({
+      periodStart: shiftRosterPeriodStart(filters.periodStart, rosterCadence, direction),
+      weekStart: shiftRosterPeriodStart(filters.periodStart, rosterCadence, direction),
+    });
   }
 
   function handleCellClick(staffId: string, localDate: string) {
@@ -238,8 +261,8 @@ export function RosterCommandCentreView({
     startTransition(async () => {
       const result = await generateRosterFromStandardHoursAction({
         tenantId,
-        rangeStartIso: weekRange.startsAt,
-        rangeEndIso: weekRange.endsAt,
+        rangeStartIso: periodRange.startsAt,
+        rangeEndIso: periodRange.endsAt,
         staffIds: filters.staffId ? [filters.staffId] : undefined,
         overwriteGeneratedOnly,
       });
@@ -254,20 +277,22 @@ export function RosterCommandCentreView({
     });
   }
 
-  function handleCopyPreviousWeek() {
+  function handleCopyPreviousPeriod() {
     setActionError(null);
     setActionMessage(null);
     startTransition(async () => {
-      const result = await copyPreviousWeekRosterAction({
+      const result = await copyPreviousRosterPeriodAction({
         tenantId,
-        targetWeekStartIso: filters.weekStart,
+        targetPeriodStartIso: filters.periodStart,
         staffIds: filters.staffId ? [filters.staffId] : undefined,
       });
       if (!result.ok) {
         setActionError(result.error);
         return;
       }
-      setActionMessage(`Copy previous week: ${result.data.createdCount} shifts copied.`);
+      setActionMessage(
+        `${rosterCopyPreviousActionLabel(rosterCadence)}: ${result.data.createdCount} shifts copied.`
+      );
       refresh();
     });
   }
@@ -276,6 +301,7 @@ export function RosterCommandCentreView({
     <div
       className={cn(ROSTER_PAGE_SCROLL_ROOT_CLASSES, fiOsChromeClasses.pageScrollContent, "space-y-6")}
       data-testid="roster-command-centre"
+      data-roster-cadence={rosterCadence}
       data-roster-drawer-kind={drawerState.kind}
     >
       <header>
@@ -284,8 +310,8 @@ export function RosterCommandCentreView({
           Roster Command Centre
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Set standard hours once, generate the weekly roster, adjust shifts as needed, and monitor
-          clinical staffing coverage.
+          Set standard hours once, generate the {periodLabel} roster, adjust shifts as needed, and
+          monitor clinical staffing coverage.
         </p>
         <p className="mt-2 text-xs text-slate-500">
           <Link
@@ -308,26 +334,29 @@ export function RosterCommandCentreView({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => pushFilters({ weekStart: shiftWeek(filters.weekStart, -1) })}
+              onClick={() => shiftDisplayedPeriod(-1)}
               className="rounded-lg border border-white/[0.08] px-2 py-2 text-sm text-slate-300 hover:bg-white/[0.04]"
-              aria-label="Previous week"
+              aria-label={`Previous ${periodLabel}`}
             >
               ←
             </button>
             <label className="block text-xs text-slate-400">
-              Week starting
+              {rosterPeriodStartFieldLabel(rosterCadence)}
               <input
                 type="date"
-                value={filters.weekStart}
-                onChange={(e) => pushFilters({ weekStart: e.target.value })}
+                value={filters.periodStart}
+                onChange={(e) =>
+                  pushFilters({ periodStart: e.target.value, weekStart: e.target.value })
+                }
                 className="mt-1 block rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+                data-testid="roster-period-start-input"
               />
             </label>
             <button
               type="button"
-              onClick={() => pushFilters({ weekStart: shiftWeek(filters.weekStart, 1) })}
+              onClick={() => shiftDisplayedPeriod(1)}
               className="rounded-lg border border-white/[0.08] px-2 py-2 text-sm text-slate-300 hover:bg-white/[0.04]"
-              aria-label="Next week"
+              aria-label={`Next ${periodLabel}`}
             >
               →
             </button>
@@ -400,7 +429,7 @@ export function RosterCommandCentreView({
               className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
               data-testid="roster-generate-button"
             >
-              Generate roster
+              {rosterGenerateActionLabel(rosterCadence)}
             </button>
             <button
               type="button"
@@ -413,11 +442,11 @@ export function RosterCommandCentreView({
             <button
               type="button"
               disabled={pending}
-              onClick={handleCopyPreviousWeek}
+              onClick={handleCopyPreviousPeriod}
               className="rounded-lg border border-white/[0.12] px-3 py-2 text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50"
               data-testid="roster-copy-previous-button"
             >
-              Copy previous week
+              {rosterCopyPreviousActionLabel(rosterCadence)}
             </button>
           </div>
         </div>
@@ -499,7 +528,7 @@ export function RosterCommandCentreView({
           </h2>
           <p className="mt-1 text-xs text-slate-500">
             Staff on leave, maternity leave, inactive, or otherwise excluded from roster generation
-            for the selected week.
+            for the selected {periodLabel}.
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {ineligibleStaffOptions.map((staff) => (
@@ -519,10 +548,10 @@ export function RosterCommandCentreView({
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-slate-100">Weekly roster</h2>
+          <h2 className="text-sm font-semibold capitalize text-slate-100">{periodLabel} roster</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Set standard hours per staff, generate the week, then adjust individual shifts only when
-            needed.
+            Set standard hours per staff, generate the {periodLabel}, then adjust individual shifts
+            only when needed.
           </p>
         </div>
         <RosterWeekGrid
@@ -532,6 +561,8 @@ export function RosterCommandCentreView({
           shifts={payload.shifts}
           availabilityCells={payload.availabilityCells}
           standardHoursByStaffId={payload.standardHoursByStaffId}
+          rosterCadence={rosterCadence}
+          rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           canManage={canManage}
           manageDeniedReason={manageDeniedReason}
           selectedShiftId={drawerShift?.id ?? null}

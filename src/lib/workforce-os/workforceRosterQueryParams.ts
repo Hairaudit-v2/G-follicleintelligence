@@ -241,6 +241,18 @@ export function resolveRosterPeriodStartFromParams(
   return defaultRosterCommandCentreDateRange(new Date(), planning).periodStart;
 }
 
+/** Map resolved period start to roster command centre URL query params. */
+export function rosterCommandCentrePeriodQueryParams(
+  periodStartIso: string,
+  planning: Pick<RosterPlanningContext, "rosterCadence">
+): Pick<RosterCommandCentreSearchParams, "periodStart" | "monthStart" | "weekStart"> {
+  const start = periodStartIso.slice(0, 10);
+  if (planning.rosterCadence === "monthly") {
+    return { monthStart: start };
+  }
+  return { periodStart: start, weekStart: start };
+}
+
 export function rosterDisplayStatusMatchesFilter(
   displayStatus: ClinicalStaffingDisplayStatus,
   filter: RosterStaffingStatusFilter

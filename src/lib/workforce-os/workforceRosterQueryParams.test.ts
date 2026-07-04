@@ -6,6 +6,8 @@ import {
   defaultRosterCommandCentreDateRange,
   parseRosterCommandCentreSearchParams,
   resolveRosterPreselectedEventKey,
+  resolveRosterPeriodStartFromParams,
+  rosterCommandCentrePeriodQueryParams,
   rosterDisplayStatusMatchesFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 
@@ -50,6 +52,51 @@ test("defaultRosterCommandCentreDateRange spans current Mon–Sun week", () => {
   assert.equal(range.startsAt, "2026-06-22T00:00:00.000Z");
   assert.equal(range.endsAt, "2026-06-29T00:00:00.000Z");
   assert.equal(range.weekStart, "2026-06-22");
+});
+
+test("defaultRosterCommandCentreDateRange respects saved fortnightly cadence", () => {
+  const now = new Date("2026-01-15T12:00:00.000Z");
+  const range = defaultRosterCommandCentreDateRange(now, {
+    rosterCadence: "fortnightly",
+    rosterWeekStartDay: "monday",
+    rosterCycleAnchorDate: "2026-01-05",
+  });
+  assert.equal(range.periodStart, "2026-01-05");
+  assert.equal(range.periodDayDates.length, 14);
+});
+
+test("defaultRosterCommandCentreDateRange respects saved monthly cadence", () => {
+  const now = new Date("2026-07-15T12:00:00.000Z");
+  const range = defaultRosterCommandCentreDateRange(now, {
+    rosterCadence: "monthly",
+    rosterWeekStartDay: "monday",
+    rosterCycleAnchorDate: "2026-01-05",
+  });
+  assert.equal(range.periodStart, "2026-07-01");
+  assert.equal(range.periodDayDates.length, 31);
+});
+
+test("resolveRosterPeriodStartFromParams prefers monthStart for monthly cadence", () => {
+  const periodStart = resolveRosterPeriodStartFromParams(
+    { monthStart: "2026-08-15" },
+    {
+      rosterCadence: "monthly",
+      rosterWeekStartDay: "monday",
+      rosterCycleAnchorDate: "2026-01-05",
+    }
+  );
+  assert.equal(periodStart, "2026-08-01");
+});
+
+test("rosterCommandCentrePeriodQueryParams maps monthly period to monthStart", () => {
+  assert.deepEqual(
+    rosterCommandCentrePeriodQueryParams("2026-07-01", { rosterCadence: "monthly" }),
+    { monthStart: "2026-07-01" }
+  );
+  assert.deepEqual(
+    rosterCommandCentrePeriodQueryParams("2026-07-06", { rosterCadence: "weekly" }),
+    { periodStart: "2026-07-06", weekStart: "2026-07-06" }
+  );
 });
 
 test("rosterDisplayStatusMatchesFilter maps no_template to not_configured", () => {

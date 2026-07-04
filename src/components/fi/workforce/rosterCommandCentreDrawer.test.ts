@@ -123,7 +123,11 @@ test("RosterCommandCentreView exposes standard-hours banner CTA and wires editor
     'data-testid="roster-standard-hours-banner-cta"',
     'data-testid="roster-apply-default-clinic-hours"',
     "pushRosterStandardHoursEditorNavigation",
-    "onEditStandardHours={openStandardHoursDrawer}"
+    "onEditStandardHours={openStandardHoursDrawer}",
+    "data-roster-cadence={rosterCadence}",
+    "copyPreviousRosterPeriodAction",
+    "rosterGenerateActionLabel",
+    "shiftRosterPeriodStart"
   );
   assert.equal(
     buildStaffStandardHoursSetupIndexHref(TENANT),
