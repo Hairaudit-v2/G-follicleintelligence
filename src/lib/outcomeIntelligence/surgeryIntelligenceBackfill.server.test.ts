@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -78,7 +77,7 @@ function createSurgeriesMock(rows: Array<Record<string, unknown>>) {
       return {
         select() {
           return {
-            eq(col: string, val: unknown) {
+            eq(col: string, _val: unknown) {
               if (col === "tenant_id") {
                 return {
                   eq(col2: string, val2: unknown) {

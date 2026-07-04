@@ -83,7 +83,6 @@ describe("hairAuditLinkBackfill.server", () => {
   });
 
   it("write path copies legacy linkage additively", async () => {
-    const updated: Record<string, unknown> = {};
     const supabase = createMockSupabase({
       caseMetadata: { hairaudit_case_id: LEGACY_HAIRAUDIT },
     });
