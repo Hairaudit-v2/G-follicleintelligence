@@ -44,6 +44,7 @@ import type {
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 import { loadGraftTrayLinksForSurgeries } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
 import { loadGraftTrayAiEstimatesForImages } from "@/src/lib/imaging-os/graftTrayCountProvider.server";
+import { mapGraftTrayAiEstimateToSurgeryOsSummary } from "@/src/lib/surgeryOs/surgeryOsGraftTrayAiCore";
 import {
   computeGraftProgressPercent,
   computeConfirmedTrayTotals,
@@ -764,21 +765,7 @@ export async function loadSurgeryOsCommandCentrePayload(
         imagingHref: row.patient_id
           ? `/fi-admin/${tid}/patients/${row.patient_id}/imaging?image=${link.image_id}`
           : null,
-        aiEstimate: ai
-          ? {
-              estimateId: ai.estimate_id,
-              estimatedGraftCount: ai.estimated_graft_count,
-              manualGraftCount: ai.manual_graft_count,
-              mismatchBand: ai.mismatch_band,
-              delta: ai.delta,
-              confidence: ai.confidence,
-              confidenceBand: ai.confidence_band,
-              reviewStatus: ai.review_status,
-              reviewerDecision: ai.reviewer_decision,
-              correctedCount: ai.corrected_count,
-              provider: ai.provider,
-            }
-          : null,
+        aiEstimate: ai ? mapGraftTrayAiEstimateToSurgeryOsSummary(ai) : null,
       };
     });
 

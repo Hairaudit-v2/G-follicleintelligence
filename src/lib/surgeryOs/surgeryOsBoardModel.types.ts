@@ -14,6 +14,13 @@ import type {
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
 import type { SurgeryOsVieCaptureSummary } from "@/src/lib/surgeryOs/surgeryOsVieCapture.types";
 import type {
+  GraftTrayAiProviderName,
+  GraftTrayAiReviewAction,
+  GraftTrayAiReviewStatus,
+  GraftTrayConfidenceBand,
+  GraftTrayMismatchBand,
+} from "@/src/lib/imaging-os/graftTrayCountTypes";
+import type {
   SurgeryOsGraftCountEventType,
   SurgeryOsGraftCountSessionLock,
   SurgeryOsGraftReconciliationStatus,
@@ -175,14 +182,14 @@ export type SurgeryOsGraftTrayAiEstimateSummary = {
   estimateId: string;
   estimatedGraftCount: number | null;
   manualGraftCount: number | null;
-  mismatchBand: string;
+  mismatchBand: GraftTrayMismatchBand;
   delta: number | null;
   confidence: number;
-  confidenceBand: string;
-  reviewStatus: string;
-  reviewerDecision: string | null;
+  confidenceBand: GraftTrayConfidenceBand;
+  reviewStatus: GraftTrayAiReviewStatus;
+  reviewerDecision: GraftTrayAiReviewAction | null;
   correctedCount: number | null;
-  provider: string;
+  provider: GraftTrayAiProviderName;
 };
 
 export type SurgeryOsGraftTrayLinkSummary = {

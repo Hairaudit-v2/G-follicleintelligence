@@ -18,6 +18,13 @@ import {
   SURGERY_OS_ALERT_KINDS,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
 import {
+  GRAFT_TRAY_AI_PROVIDERS,
+  GRAFT_TRAY_AI_REVIEW_ACTIONS,
+  GRAFT_TRAY_AI_REVIEW_STATUSES,
+  GRAFT_TRAY_CONFIDENCE_BANDS,
+  GRAFT_TRAY_MISMATCH_BANDS,
+} from "@/src/lib/imaging-os/graftTrayCountTypes";
+import {
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPES,
   SURGERY_OS_GRAFT_RECONCILIATION_STATUSES,
   SURGERY_OS_GRAFT_SESSION_PHASES,
@@ -184,18 +191,18 @@ const graftSessionLockSchema = z.object({
   isStale: z.boolean(),
 });
 
-const graftTrayAiEstimateSummarySchema = z.object({
+export const graftTrayAiEstimateSummarySchema = z.object({
   estimateId: z.string().uuid(),
   estimatedGraftCount: z.number().int().nullable(),
   manualGraftCount: z.number().int().nullable(),
-  mismatchBand: z.string(),
+  mismatchBand: z.enum(GRAFT_TRAY_MISMATCH_BANDS),
   delta: z.number().int().nullable(),
   confidence: z.number(),
-  confidenceBand: z.string(),
-  reviewStatus: z.string(),
-  reviewerDecision: z.string().nullable(),
+  confidenceBand: z.enum(GRAFT_TRAY_CONFIDENCE_BANDS),
+  reviewStatus: z.enum(GRAFT_TRAY_AI_REVIEW_STATUSES),
+  reviewerDecision: z.enum(GRAFT_TRAY_AI_REVIEW_ACTIONS).nullable(),
   correctedCount: z.number().int().nullable(),
-  provider: z.string(),
+  provider: z.enum(GRAFT_TRAY_AI_PROVIDERS),
 });
 
 const graftTrayLinkSummarySchema = z.object({
