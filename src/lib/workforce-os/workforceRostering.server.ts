@@ -47,6 +47,10 @@ export type FiStaffShiftRow = StaffShiftRecord & {
   clinic_id: string | null;
   notes: string | null;
   shift_source?: StandardHoursShiftSource | null;
+  created_by?: string | null;
+  updated_by?: string | null;
+  adjustment_reason?: string | null;
+  cancellation_reason?: string | null;
 };
 
 export type FiClinicalStaffingTemplateRow = ClinicalStaffingTemplateRecord & {
@@ -172,6 +176,10 @@ function mapShift(row: Record<string, unknown>): FiStaffShiftRow {
     status: row.status as FiStaffShiftRow["status"],
     notes: row.notes != null ? String(row.notes) : null,
     shift_source: (row.shift_source as StandardHoursShiftSource | undefined) ?? "manual",
+    created_by: row.created_by != null ? String(row.created_by) : null,
+    updated_by: row.updated_by != null ? String(row.updated_by) : null,
+    adjustment_reason: row.adjustment_reason != null ? String(row.adjustment_reason) : null,
+    cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
   };
 }
 
@@ -565,9 +573,10 @@ export async function createAvailabilityBlock(input: {
   endsAt: string;
   reason?: string | null;
   createdBy?: string | null;
+  client?: SupabaseClient;
 }): Promise<FiStaffAvailabilityBlockRow> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const supabase = supabaseAdmin();
+  const supabase = input.client ?? supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_availability_blocks")
     .insert({

@@ -214,7 +214,7 @@ export function classifySurgeryImagingGroup(
   if (event === "pre_op") {
     if (view === "donor") return "donor";
     if (view === "recipient" || view === "front" || view === "top" || view === "crown") {
-      return view === "donor" ? "donor" : view === "recipient" ? "recipient" : "baseline_pre_op";
+      return view === "recipient" ? "recipient" : "baseline_pre_op";
     }
     return "baseline_pre_op";
   }

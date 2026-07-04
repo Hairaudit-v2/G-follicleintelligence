@@ -10,7 +10,6 @@ import type { RosterStaffEligibilitySnapshot } from "@/src/lib/workforce-os/rost
 import {
   ROSTER_SHIFT_AUDIT_ACTION_TYPES,
   canHardDeleteGeneratedDraftShift,
-  isGeneratedShiftSource,
   shiftSnapshotForAudit,
   type RosterShiftCancellationReason,
   type RosterShiftSnapshot,
@@ -33,7 +32,7 @@ import {
   type StaffShiftRecord,
 } from "@/src/lib/workforce-os/workforceRosteringEngine";
 
-function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow & RosterShiftSnapshot {
+function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow {
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
@@ -52,11 +51,27 @@ function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow & RosterShif
   };
 }
 
+function toAuditSnapshot(shift: FiStaffShiftRow): RosterShiftSnapshot {
+  return {
+    id: shift.id,
+    staff_id: shift.staff_id,
+    clinic_id: shift.clinic_id,
+    shift_type: shift.shift_type,
+    starts_at: shift.starts_at,
+    ends_at: shift.ends_at,
+    status: shift.status,
+    notes: shift.notes,
+    shift_source: shift.shift_source ?? "manual",
+    adjustment_reason: shift.adjustment_reason ?? null,
+    cancellation_reason: shift.cancellation_reason ?? null,
+  };
+}
+
 async function loadShiftForTenant(
   tenantId: string,
   shiftId: string,
   client?: SupabaseClient
-): Promise<(FiStaffShiftRow & RosterShiftSnapshot) | null> {
+): Promise<FiStaffShiftRow | null> {
   const supabase = client ?? supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_shifts")
@@ -165,7 +180,7 @@ export async function evaluateStaffShiftAssignmentWarnings(input: {
 
   for (const conflict of conflicts) {
     warnings.push({
-      code: conflict.type,
+      code: conflict.kind,
       message: conflict.message,
       blocking: !input.allowOverride,
     });
@@ -254,8 +269,8 @@ export async function updateStaffShift(input: {
     actorFiUserId: input.updatedBy,
     actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_UPDATED_MANUAL,
     reason: input.adjustmentReason ?? "manual_adjustment",
-    oldValues: shiftSnapshotForAudit(existing),
-    newValues: shiftSnapshotForAudit(shift),
+    oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
+    newValues: shiftSnapshotForAudit(toAuditSnapshot(shift)),
     client: supabase,
   });
 
@@ -278,7 +293,7 @@ export async function cancelStaffShiftWithReason(input: {
   if (!existing) throw new Error("Shift not found.");
   if (existing.status === "cancelled") return existing;
 
-  if (input.hardDeleteGeneratedDraft && canHardDeleteGeneratedDraftShift(existing)) {
+  if (input.hardDeleteGeneratedDraft && canHardDeleteGeneratedDraftShift(toAuditSnapshot(existing))) {
     const { error } = await supabase
       .from("fi_staff_shifts")
       .delete()
@@ -295,7 +310,7 @@ export async function cancelStaffShiftWithReason(input: {
       actorFiUserId: input.updatedBy,
       actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_REMOVED_GENERATED,
       reason: input.cancellationReason,
-      oldValues: shiftSnapshotForAudit(existing),
+      oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
       newValues: { deleted: true },
       client: supabase,
     });
@@ -326,8 +341,8 @@ export async function cancelStaffShiftWithReason(input: {
     actorFiUserId: input.updatedBy,
     actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_CANCELLED,
     reason: input.cancellationReason,
-    oldValues: shiftSnapshotForAudit(existing),
-    newValues: shiftSnapshotForAudit(shift),
+    oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
+    newValues: shiftSnapshotForAudit(toAuditSnapshot(shift)),
     client: supabase,
   });
 
@@ -459,9 +474,9 @@ export async function markStaffSickForShift(input: {
     actorFiUserId: input.updatedBy,
     actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.STAFF_MARKED_SICK_FOR_SHIFT,
     reason: "staff_sick",
-    oldValues: shiftSnapshotForAudit(existing),
+    oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
     newValues: {
-      shift: shiftSnapshotForAudit(cancelledShift),
+      shift: shiftSnapshotForAudit(toAuditSnapshot(cancelledShift)),
       sick_block_id: sickBlock.id,
     },
     client: supabase,
@@ -679,7 +694,7 @@ export async function createReplacementShiftForSickCover(input: {
     actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.REPLACEMENT_SHIFT_CREATED,
     reason: "sick_cover",
     oldValues: { original_shift_id: original.id, original_staff_id: original.staff_id },
-    newValues: shiftSnapshotForAudit(shift),
+    newValues: shiftSnapshotForAudit(toAuditSnapshot(shift)),
     metadata: { original_shift_id: original.id },
     client: supabase,
   });

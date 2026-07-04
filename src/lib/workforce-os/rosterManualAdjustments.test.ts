@@ -12,7 +12,6 @@ import {
 import { insertRosterShiftAuditEvent } from "@/src/lib/workforce-os/rosterShiftAudit.server";
 import {
   clearGeneratedRosterShiftsForPeriod,
-  evaluateStaffShiftAssignmentWarnings,
   updateStaffShift,
   cancelStaffShiftWithReason,
 } from "@/src/lib/workforce-os/rosterManualAdjustments.server";
@@ -20,8 +19,6 @@ import { createStaffShift } from "@/src/lib/workforce-os/workforceRostering.serv
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const STAFF_ACTIVE = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-const STAFF_INACTIVE = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-const STAFF_MATERNITY = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const FI_USER = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const SHIFT_GENERATED = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 const SHIFT_MANUAL = "ffffffff-ffff-4fff-8fff-ffffffffffff";

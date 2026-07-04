@@ -387,7 +387,10 @@ export const surgeryCaseIntelligenceFactsSchema = z.object({
   graft_tray_links: z.array(surgeryCaseGraftTrayLinkFactsSchema),
   graft_tray_outcome_facts: z.array(graftTrayOutcomeFactSchema),
   confidence_level: z.enum(["unknown", "low", "medium", "high"]),
-  imaging_intelligence_summary: surgeryImagingIntelligenceSummaryFactsSchema.nullish(),
+  imaging_intelligence_summary: z.preprocess(
+    (value) => value ?? null,
+    surgeryImagingIntelligenceSummaryFactsSchema.nullable()
+  ),
 });
 
 const graftSummarySchema = z.object({

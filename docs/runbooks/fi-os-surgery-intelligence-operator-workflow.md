@@ -8,9 +8,12 @@ Short runbook for clinic operators and platform admins running the graft-tray �
 |------------|--------|
 | Graft-tray AI review-gated workflow | Complete — staff review required before final graft counts are trusted |
 | Surgery case intelligence facts | Published to `fi_analytics_events` as `surgery_case_intelligence_facts` |
+| Surgery imaging intelligence summary | Live — baseline, donor, recipient, graft tray, immediate post-op, follow-up groups in published facts |
 | Surgery Intelligence dashboard | Live — read-only aggregates from published events only |
+| Dashboard imaging completeness metrics | Live — per-case completeness + audit-readiness columns and rollups |
 | Historical backfill | Available — dry-run preview before write |
 | HairAudit linkage | Complete — legacy-compatible resolver + dashboard column |
+| HairAudit readiness in imaging summary | Connected — `imaging_intelligence_summary.audit_readiness` uses same resolver |
 | HairAudit link backfill | Available — idempotent server workflow; dry-run first |
 
 Facts are **not** rebuilt from live SurgeryOS state on dashboard page load. The dashboard reads published analytics events only. HairAudit links are **resolved read-only** on the dashboard — linkage metadata is never mutated on page load.
@@ -22,7 +25,7 @@ Facts are **not** rebuilt from live SurgeryOS state on dashboard page load. The 
 | Review graft-tray AI estimates | `/fi-admin/{tenantId}/imaging/review` | Clinical review queue; accept AI, accept manual, correct, reject, or request retake |
 | Monitor AI analysis jobs | `/fi-admin/{tenantId}/imaging/ai-jobs` | Job health, superseded/stale estimates, replay controls |
 | Live surgery / graft counting | `/fi-admin/{tenantId}/surgery-os` | Command centre; graft tray links and intelligence summaries (read-only facts hook) |
-| Surgery Intelligence dashboard | `/fi-admin/{tenantId}/surgery-os/intelligence` | Cases → **Surgery intelligence** in sidebar; **HairAudit** column shows link status |
+| Surgery Intelligence dashboard | `/fi-admin/{tenantId}/surgery-os/intelligence` | **Imaging** + **Audit readiness** columns; **HairAudit** column shows link status |
 | Rebuild / backfill facts | Same dashboard — **Rebuild intelligence facts** card | Operator-only; dry-run first |
 | HairAudit OS admin hub | `/hair-audit/admin` | External HairAudit product entry (case ID not in URL — legacy contract) |
 | FI audit report review | `/fi-admin/{tenantId}/audit/{reportId}` | Open from dashboard **Audit report** link when `fi_report_id` resolves |
@@ -77,6 +80,82 @@ Enable **Force overwrite newer facts version** only when:
 - Force without admin key is rejected by the action schema.
 
 Normal backfill should **not** use force — same-version republish updates safely; newer versions are skipped by default.
+
+## Surgery imaging intelligence summary
+
+Published facts include `imaging_intelligence_summary` — a read-model of the full surgery imaging set beyond graft-tray counts. Built at publish time from `fi_patient_images` (by `case_id`, or `patient_id` when no case) plus HairAudit link context.
+
+### Imaging groups tracked
+
+| Group | Required views | Typical capture context |
+|-------|----------------|-------------------------|
+| Baseline / pre-op | front, top, crown | Pre-operative consultation or day-of baseline |
+| Donor | donor | Donor mapping / extraction documentation |
+| Recipient | front, top, recipient | Recipient design / implantation planning |
+| Graft tray | graft_tray | Intraoperative tray photography (links to graft-tray AI) |
+| Immediate post-op | front, top | Same-day or immediate post-procedure |
+| Follow-up | front, top, crown | Progress / outcome interval (e.g. month 12) |
+
+### What imaging completeness means
+
+- **Completeness score** — percentage of the six groups that are **complete** (usable image present for every required view in that group).
+- **Dashboard labels** — `Complete` (100%), `Strong` (≥67%), `Partial` (≥34%), `Gaps` (>0%), `Not started` (0% or no summary in published facts).
+- **Per-group detail** — each group lists `present_views`, `missing_required_views`, `usable_image_count`, and `poor_quality_count` inside published `payload_json`.
+- **Poor quality** — images with quality status `poor`, `invalid`, `fail`, or `review` are listed in `poor_quality_image_ids` and shown in the dashboard row subtitle.
+
+Older published facts **without** `imaging_intelligence_summary` still load on the dashboard — those rows show **Not started** for imaging until republished.
+
+### What audit-ready means
+
+`audit_readiness.overall_audit_ready` is true only when **all** of the following are satisfied:
+
+1. Baseline / pre-op present (usable baseline set)
+2. Donor set complete (all required donor views)
+3. Recipient set complete (all required recipient views)
+4. Immediate post-op present
+5. Follow-up captured **or** due (procedure date ≥ 10 months ago and follow-up not yet required to block readiness)
+6. Reviewed graft count present (`has_final_graft_count`)
+7. HairAudit link resolved (`hairaudit_case_id` present, no `linkage_conflict`)
+
+Dashboard **Audit readiness** column labels:
+
+| Label | Meaning |
+|-------|---------|
+| **Audit ready** | All seven criteria met |
+| **Before/after ready** | Baseline + immediate post-op + follow-up (captured or due) + no HairAudit conflict — but other criteria (e.g. donor/recipient sets, graft count) may still be open |
+| **Building** | One or more criteria still open |
+| **Conflict — review** | HairAudit `linkage_conflict` — resolve before trusting audit readiness |
+
+Rollup metrics on the dashboard: **Audit-ready cases**, **Avg imaging completeness**, **Before/after ready** count, **Imaging gaps** count, and **Imaging audit readiness** distribution.
+
+### How missing imaging views are surfaced
+
+1. **Published facts** — `missing_required_views` at summary level; per-group `missing_required_views` inside `imaging_intelligence_summary.groups`.
+2. **Dashboard row** — **Imaging** column shows completeness label, score %, and poor-quality count; **Audit readiness** column shows open requirement count via `missing_requirements`.
+3. **ImagingOS** — open **Imaging** link on the row (`/fi-admin/{tenantId}/patients/{patientId}/imaging`) to capture or retake missing views.
+4. **Republish** — after imaging capture or graft-tray review, facts republish automatically on review finalization / `procedure_completed`, or via operator backfill for historical cases.
+
+### Before/after readiness
+
+`before_after_ready` is true when:
+
+- Baseline / pre-op is present
+- Immediate post-op is present
+- Follow-up is **captured** (usable follow-up images exist) **or** **due** (≥ 10 months since procedure date)
+- No HairAudit `linkage_conflict`
+
+This is a **subset** of full audit readiness — useful for marketing / progress storytelling before donor/recipient sets or graft count are complete.
+
+### When cases are not audit-ready — operator actions
+
+| Gap | What staff should do |
+|-----|----------------------|
+| Missing baseline, donor, recipient, immediate, or follow-up views | Open **Imaging** from the dashboard row; complete guided capture in ImagingOS for the missing group/views |
+| Poor-quality images flagged | Retake affected views; confirm `quality_status` is acceptable before republish |
+| No reviewed graft count | Complete graft-tray AI review at `/fi-admin/{tenantId}/imaging/review` |
+| HairAudit not linked | Confirm legacy metadata on the case; run HairAudit link backfill (dry-run first) if legacy IDs exist |
+| **Conflict — review** | Do **not** overwrite legacy `hairaudit_case_id` / `report_id`; reconcile with audit ops (see HairAudit section below) |
+| Dashboard shows **Not started** for imaging on an old case | Run **Rebuild intelligence facts** backfill (dry-run first) to republish with imaging summary |
 
 ## HairAudit linkage (SurgeryOS → ImagingOS → Outcome Intelligence → HairAudit)
 
@@ -138,16 +217,16 @@ These loaders **build or read** intelligence data but **do not** call the publis
 - `surgeryIntelligenceDashboardLoader.server.ts` — queries `fi_analytics_events` only; resolves HairAudit links read-only
 - `surgery-os/intelligence/page.tsx` — loads dashboard only; no backfill or linkage writes on page load
 
-Verified by `surgeryIntelligenceReleaseReadiness.test.ts` and `surgeryIntelligenceHairAuditReleaseReadiness.test.ts` in CI.
+Verified by `surgeryIntelligenceReleaseReadiness.test.ts`, `surgeryIntelligenceHairAuditReleaseReadiness.test.ts`, and `surgeryIntelligenceImagingReleaseReadiness.test.ts` in CI.
 
 ## Verification commands
 
 ```bash
-pnpm test:surgery-intelligence-hairaudit-release-check-1
+pnpm test:surgery-imaging-intelligence-release-check-1
 pnpm typecheck
 ```
 
-Full release-check script runs HairAudit compatibility, surgery-to-HairAudit linkage, surgery dashboard, surgery facts backfill, graft-tray context, and read-only loader guard tests.
+Full release-check script runs surgery imaging summary, surgery dashboard, HairAudit linkage, HairAudit compatibility audit, read-only loader guards, and backward-compatible facts parsing.
 
 ## Related docs
 

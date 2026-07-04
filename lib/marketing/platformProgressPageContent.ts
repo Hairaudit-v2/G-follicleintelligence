@@ -452,7 +452,7 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
     status: "Active Development",
     statusLabel: "Advanced Build",
-    latestMilestone: "Surgery Intelligence HairAudit linkage and release check",
+    latestMilestone: "Surgery imaging intelligence summary and release check",
     learnMoreHref: "/platform/surgery-os",
   },
   {
@@ -743,6 +743,12 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 /** Chronological deployment feed — most recent first. */
 export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeploymentMilestone[] = [
   {
+    id: "oi-surgery-imaging-summary-1",
+    date: "2026-07-05",
+    tag: "outcome-intelligence",
+    title: "Surgery imaging intelligence summary production-ready",
+  },
+  {
     id: "ihrg-demo-1",
     date: "2026-06-26",
     tag: "onboarding-os",
@@ -824,6 +830,15 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-07-05-surgery-imaging-intelligence-release",
+    date: "2026-07-05",
+    tag: "outcome-intelligence",
+    title: "Surgery imaging intelligence summary production-ready",
+    summary:
+      "Surgery imaging intelligence summary live across six image groups (baseline, donor, recipient, graft tray, immediate post-op, follow-up); HairAudit readiness connected via legacy-first resolver; dashboard imaging completeness and audit-readiness metrics live; older published facts without imaging summary still parse.",
+    modules: ["SurgeryOS", "ImagingOS", "Outcome Intelligence", "HairAudit", "AnalyticsOS"],
+  },
   {
     id: "2026-07-05-surgery-intelligence-hairaudit-release",
     date: "2026-07-05",

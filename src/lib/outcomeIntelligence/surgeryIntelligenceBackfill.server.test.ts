@@ -55,6 +55,7 @@ function reviewedFacts(): SurgeryCaseIntelligenceFacts {
     graft_tray_links: [],
     graft_tray_outcome_facts: [],
     confidence_level: "high",
+    imaging_intelligence_summary: null,
   };
 }
 
