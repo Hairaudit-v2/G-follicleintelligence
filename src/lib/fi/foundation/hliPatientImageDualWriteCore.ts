@@ -7,7 +7,7 @@ import {
   mapCanonicalToPatientImageCategory,
   mapExternalCategoryToCanonical,
 } from "@/src/lib/imaging-core/vocabulary";
-import { mapTemplateSlugToImagingLibraryAxis } from "@/src/lib/imagingOs/imagingOsConstants";
+import { mapTemplateSlugToImagingLibraryAxis } from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 import type { PatientImageCategory } from "@/src/lib/patientImages/patientImageTypes";
 import type { HliDocumentUploadedPayload } from "@/src/types/fi-events";
 

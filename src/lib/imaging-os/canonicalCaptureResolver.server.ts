@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { PROGRESS_META_KEY } from "@/src/lib/imagingOs/imagingOsProtocol";
+import { PROGRESS_META_KEY } from "./protocolSlotVocabulary";
 import { loadResolvedProtocol } from "./protocolCatalogResolver.server";
 import { buildProtocolCatalogCaptureMetadata } from "./protocolCaptureMetadataCore";
 import {

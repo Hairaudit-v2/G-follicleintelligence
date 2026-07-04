@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { parseProtocolSlots } from "@/src/lib/imagingOs/imagingOsProtocol";
+import { parseProtocolSlots } from "./protocolSlotVocabulary";
 import {
   resolveProtocolCatalog,
   type HliProtocolTemplateInput,

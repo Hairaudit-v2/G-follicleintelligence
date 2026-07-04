@@ -5,7 +5,7 @@
 import {
   buildGuidedVisitType,
   mapTemplateSlugToImagingLibraryAxis,
-} from "@/src/lib/imagingOs/imagingOsConstants";
+} from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 import { getVieProtocol } from "@/src/lib/vie/vieProtocolCatalog";
 
 export const PATIENT_PORTAL_IMAGE_PROTOCOL_TEMPLATE = "follow_up_review" as const;

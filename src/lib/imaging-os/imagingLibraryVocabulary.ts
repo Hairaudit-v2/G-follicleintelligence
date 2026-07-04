@@ -1,6 +1,6 @@
 /**
  * Canonical ImagingOS library vocabulary — DB-aligned axes, regions, and UI helpers.
- * Prefer this module over `@/src/lib/imagingOs/imagingOsConstants` for new code.
+ * Canonical home for library axes, regions, and guided-capture UI helpers.
  */
 
 export const IMAGING_LIBRARY_AXES = [

@@ -5,7 +5,7 @@
  * - Core contracts: categories, intake, pipeline, protocol, quality, progression, surgical, outcomes
  * - Focused entry points: `ai`, `capture`, `review`, `graft-tray`
  * - Adapters, graft-tray bridge, clinical review queue, visual summary, AI job workers
- * - Shared vocabulary: `imagingLibraryVocabulary`, `imagingAiAnalysisKinds`, `imagingCaptureSourceCore`
+ * - Shared vocabulary: `imagingLibraryVocabulary`, `protocolSlotVocabulary`, `imagingAiAnalysisKinds`, `imagingCaptureSourceCore`
  *
  * New constants, types, and feature logic belong here.
  *

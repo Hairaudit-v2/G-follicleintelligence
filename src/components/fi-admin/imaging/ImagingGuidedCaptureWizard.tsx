@@ -9,7 +9,7 @@ import {
   recordPatientPhotoQuickActionCompletedAction,
   skipGuidedProtocolSlotAction,
 } from "@/lib/actions/fi-imaging-actions";
-import { inferCaptureDeviceType } from "@/src/lib/imagingOs/imagingOsConstants";
+import { inferCaptureDeviceType } from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 import type { ImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
 import { buildGuidedImageUploadFields } from "@/src/lib/imagingOs/imagingOsGuidedFields";
 import {

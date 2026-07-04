@@ -5,16 +5,13 @@
  */
 
 export const IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST = [
-  // Legacy workspace → canonical protocol catalog resolver (guided capture load path).
+  // Legacy workspace loaders call canonical protocol catalog resolver until guided capture migrates.
   "src/lib/imagingOs/imagingOsGuidedCapture.server.ts|@/src/lib/imaging-os/protocolCatalogResolver.server",
   "src/lib/imagingOs/imagingOsLoad.server.ts|@/src/lib/imaging-os/protocolCatalogResolver.server",
   "src/lib/imagingOs/imagingOsLoad.server.ts|@/src/lib/imaging-os/protocolCatalogResolverCore",
-  // Legacy constants shim re-exports canonical vocabulary during migration.
-  "src/lib/imagingOs/imagingOsConstants.ts|@/src/lib/imaging-os/imagingLibraryVocabulary",
-  // Canonical resolver still reads legacy protocol slot defs until catalog unification lands.
-  "src/lib/imaging-os/canonicalCaptureResolver.server.ts|@/src/lib/imagingOs/imagingOsProtocol",
-  "src/lib/imaging-os/protocolCatalogResolver.server.ts|@/src/lib/imagingOs/imagingOsProtocol",
-  "src/lib/imaging-os/protocolCatalogResolverCore.ts|@/src/lib/imagingOs/imagingOsProtocol",
+  // Legacy workspace shims re-export canonical vocabulary for in-tree callers during migration.
+  "src/lib/imagingOs/imagingOsProtocol.ts|@/src/lib/imaging-os/protocolSlotVocabulary",
+  "src/lib/imagingOs/imagingOsLibraryVocabulary.ts|@/src/lib/imaging-os/imagingLibraryVocabulary",
 ] as const;
 
 export type ImagingPathBoundaryCrossImportAllowlistEntry =

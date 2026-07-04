@@ -11,8 +11,8 @@ Legacy FI admin guided-capture load/mutation layer and protocol slot vocabulary.
 ## Rules for new code
 
 - Do **not** add new core constants, canonical types, or feature logic here.
-- Import shared vocabulary from `@/src/lib/imaging-os/imagingLibraryVocabulary`, `@/src/lib/imaging-os/ai`, or `@/src/lib/imaging-os/capture`.
-- `imagingOsConstants.ts` is a temporary shim — migrate callers to canonical modules.
+- Import shared vocabulary from `@/src/lib/imaging-os/imagingLibraryVocabulary`, `@/src/lib/imaging-os/protocolSlotVocabulary`, `@/src/lib/imaging-os/ai`, or `@/src/lib/imaging-os/capture`.
+- `imagingOsProtocol.ts` and `imagingOsLibraryVocabulary.ts` are temporary shims re-exporting canonical modules.
 
 ## Cross-tree boundary
 

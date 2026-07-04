@@ -3,7 +3,7 @@
  * Unifies VIE / ImagingOS DB / HLI sources without deleting legacy catalogs.
  */
 
-import type { ProtocolSlotDef } from "@/src/lib/imagingOs/imagingOsProtocol";
+import type { ProtocolSlotDef } from "./protocolSlotVocabulary";
 import { getVieProtocol } from "@/src/lib/vie/vieProtocolCatalog";
 
 export const PROTOCOL_CATALOG_RESOLVER_VERSION = "protocol_catalog_resolver_v1" as const;

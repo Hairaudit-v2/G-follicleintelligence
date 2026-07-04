@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { Camera, CheckCircle2, Circle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { inferCaptureDeviceType } from "@/src/lib/imagingOs/imagingOsConstants";
+import { inferCaptureDeviceType } from "@/src/lib/imaging-os/imagingLibraryVocabulary";
 import { buildGuidedImageUploadFields } from "@/src/lib/imagingOs/imagingOsGuidedFields";
 import {
   defaultSlotInstruction,
