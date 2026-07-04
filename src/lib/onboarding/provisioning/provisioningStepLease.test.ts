@@ -4,21 +4,23 @@ import test from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
+  canRetryProvisioningStep,
+  provisioningStepStatusAfterRetryRequest,
+} from "@/src/lib/onboarding-os/tenantProvisioningCore";
+
+import {
   resolveProvisioningStepRunGate,
   tryReclaimStaleProvisioningStep,
   type ProvisioningStepLeaseRow,
 } from "./provisioningStepGate";
 import {
   TENANT_PROVISIONING_STEP_LEASE_MINUTES,
-  buildStaleProvisioningStepReclaimMetadataPatch,
+  buildProvisioningStepReclaimMetadata,
+  incrementReclaimCount,
   isProvisioningStepLeaseStale,
   readProvisioningStepLeaseReclaimCount,
   resolveProvisioningStepRetryEligibility,
 } from "./provisioningStepLeaseCore";
-import {
-  canRetryProvisioningStep,
-  provisioningStepStatusAfterRetryRequest,
-} from "./tenantProvisioningCore";
 
 const STEP_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const SESSION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -146,7 +148,7 @@ test("stale running step is reclaimed and can proceed", async () => {
   assert.equal(gate.kind, "reclaimed_stale");
   const stored = state.fi_tenant_provisioning_steps?.[0];
   const lease = stored?.metadata as { _provisioning_step_lease?: Record<string, unknown> };
-  assert.equal(lease?._provisioning_step_lease?.reclaim_reason, "stale_running_lease");
+  assert.equal(lease?._provisioning_step_lease?.reclaim_reason, "stale_running_step");
   assert.equal(lease?._provisioning_step_lease?.previous_running_at, staleUpdatedAt);
   assert.equal(lease?._provisioning_step_lease?.reclaim_count, 1);
   assert.equal(lease?._provisioning_step_lease?.attempt_count_at_reclaim, 2);
@@ -197,6 +199,8 @@ test("concurrent stale reclaim only allows one processor", async () => {
 
   const reclaimedCount = [first, second].filter((r) => r.reclaimed).length;
   assert.equal(reclaimedCount, 1);
+  const loser = [first, second].find((r) => !r.reclaimed);
+  assert.equal(loser && !loser.reclaimed ? loser.reason : null, "already_running_or_reclaimed_by_other_worker");
 });
 
 test("completed step remains idempotent", async () => {
@@ -309,16 +313,17 @@ test("completed and pending steps are not retry-eligible", () => {
   );
 });
 
-test("reclaim count increments across repeated stale reclaims", () => {
-  const first = buildStaleProvisioningStepReclaimMetadataPatch({
+test("incrementReclaimCount advances reclaim_count in metadata", () => {
+  const first = buildProvisioningStepReclaimMetadata({
     existingMetadata: {},
     previousRunningAt: "2026-07-04T08:00:00.000Z",
     reclaimedAt: "2026-07-04T12:00:00.000Z",
     attemptCountAtReclaim: 2,
   });
   assert.equal(readProvisioningStepLeaseReclaimCount(first), 1);
+  assert.equal(incrementReclaimCount(first), 2);
 
-  const second = buildStaleProvisioningStepReclaimMetadataPatch({
+  const second = buildProvisioningStepReclaimMetadata({
     existingMetadata: first,
     previousRunningAt: "2026-07-04T12:00:00.000Z",
     reclaimedAt: "2026-07-04T13:00:00.000Z",

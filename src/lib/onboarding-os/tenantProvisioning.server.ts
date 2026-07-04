@@ -15,11 +15,11 @@ import { activateTenantModule } from "@/src/lib/platform/entitlements/activateTe
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { seedRosterPlanningPolicyFromDeploymentTemplate } from "@/src/lib/workforce/rosterCadencePolicy.server";
 
-import { resolveProvisioningStepRunGate } from "./provisioningStepGate";
+import { resolveProvisioningStepRunGate } from "@/src/lib/onboarding/provisioning/provisioningStepGate";
 import {
   resolveProvisioningStepRetryEligibility,
   type ProvisioningStepLeaseAudit,
-} from "./provisioningStepLeaseCore";
+} from "@/src/lib/onboarding/provisioning/provisioningStepLeaseCore";
 import {
   buildAcademyAssignmentPlan,
   buildClinicDeploymentPlan,
@@ -1093,6 +1093,12 @@ export async function runTenantProvisioningStep(
   if (gate.kind === "already_completed") return { ok: true };
   if (gate.kind === "already_running") {
     return { ok: false, error: "Step is already running." };
+  }
+  if (gate.kind === "already_running_or_reclaimed_by_other_worker") {
+    return {
+      ok: false,
+      error: "Step is already running or was reclaimed by another worker.",
+    };
   }
 
   const now = new Date().toISOString();

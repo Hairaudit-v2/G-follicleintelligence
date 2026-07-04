@@ -3,7 +3,7 @@
  * Safe for unit tests; no server-only imports.
  */
 
-import type { ProvisioningStepStatus } from "./tenantProvisioningTypes";
+import type { ProvisioningStepStatus } from "@/src/lib/onboarding-os/tenantProvisioningTypes";
 
 /** Stale `running` steps older than this may be reclaimed for retry. */
 export const TENANT_PROVISIONING_STEP_LEASE_MINUTES = 15;
@@ -13,7 +13,7 @@ export type ProvisioningStepRetryEligibility =
   | { kind: "blocked"; reason: "fresh_running" | "not_retryable" | "max_attempts" };
 
 export type ProvisioningStepLeaseAudit = {
-  reclaim_reason: "stale_running_lease";
+  reclaim_reason: "stale_running_step";
   previous_running_at: string;
   reclaimed_at: string;
   reclaim_count: number;
@@ -38,18 +38,23 @@ export function readProvisioningStepLeaseReclaimCount(
   return Number.isFinite(count) && count >= 0 ? Math.floor(count) : 0;
 }
 
-export function buildStaleProvisioningStepReclaimMetadataPatch(input: {
+export function incrementReclaimCount(
+  metadata: Record<string, unknown> | null | undefined
+): number {
+  return readProvisioningStepLeaseReclaimCount(metadata) + 1;
+}
+
+export function buildProvisioningStepReclaimMetadata(input: {
   existingMetadata: Record<string, unknown>;
   previousRunningAt: string;
   reclaimedAt: string;
   attemptCountAtReclaim: number;
 }): Record<string, unknown> {
-  const previousCount = readProvisioningStepLeaseReclaimCount(input.existingMetadata);
   const lease: ProvisioningStepLeaseAudit = {
-    reclaim_reason: "stale_running_lease",
+    reclaim_reason: "stale_running_step",
     previous_running_at: input.previousRunningAt,
     reclaimed_at: input.reclaimedAt,
-    reclaim_count: previousCount + 1,
+    reclaim_count: incrementReclaimCount(input.existingMetadata),
     attempt_count_at_reclaim: input.attemptCountAtReclaim,
   };
   return {

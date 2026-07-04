@@ -1,12 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import type {
+  ProvisioningStepCode,
+  ProvisioningStepStatus,
+} from "@/src/lib/onboarding-os/tenantProvisioningTypes";
 
 import {
-  buildStaleProvisioningStepReclaimMetadataPatch,
+  buildProvisioningStepReclaimMetadata,
   isProvisioningStepLeaseStale,
 } from "./provisioningStepLeaseCore";
-import type { ProvisioningStepCode, ProvisioningStepStatus } from "./tenantProvisioningTypes";
 
 export type ProvisioningStepLeaseRow = {
   id: string;
@@ -25,6 +28,7 @@ export type ProvisioningStepLeaseRow = {
 export type ProvisioningStepRunGate =
   | { kind: "already_completed" }
   | { kind: "already_running" }
+  | { kind: "already_running_or_reclaimed_by_other_worker" }
   | { kind: "reclaimed_stale"; step: ProvisioningStepLeaseRow }
   | { kind: "should_run"; step: ProvisioningStepLeaseRow };
 
@@ -44,8 +48,7 @@ async function loadProvisioningStepById(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const row = data as unknown as Record<string, unknown>;
-  return parseProvisioningStepLeaseRow(row);
+  return parseProvisioningStepLeaseRow(data as unknown as Record<string, unknown>);
 }
 
 function parseProvisioningStepLeaseRow(row: Record<string, unknown>): ProvisioningStepLeaseRow {
@@ -74,17 +77,20 @@ export async function tryReclaimStaleProvisioningStep(input: {
   attemptCount: number;
   client?: SupabaseClient;
   nowMs?: number;
-}): Promise<{ reclaimed: true; step: ProvisioningStepLeaseRow } | { reclaimed: false }> {
+}): Promise<
+  | { reclaimed: true; step: ProvisioningStepLeaseRow }
+  | { reclaimed: false; reason: "not_stale" | "already_running_or_reclaimed_by_other_worker" }
+> {
   const supabase = input.client ?? supabaseAdmin();
   const nowMs = input.nowMs ?? Date.now();
   const nowIso = new Date(nowMs).toISOString();
 
   if (!isProvisioningStepLeaseStale(input.expectedUpdatedAt, nowMs)) {
-    return { reclaimed: false };
+    return { reclaimed: false, reason: "not_stale" };
   }
 
   const nextAttemptCount = input.attemptCount + 1;
-  const nextMetadata = buildStaleProvisioningStepReclaimMetadataPatch({
+  const nextMetadata = buildProvisioningStepReclaimMetadata({
     existingMetadata: input.existingMetadata,
     previousRunningAt: input.expectedUpdatedAt,
     reclaimedAt: nowIso,
@@ -108,7 +114,9 @@ export async function tryReclaimStaleProvisioningStep(input: {
     .maybeSingle();
 
   if (error) throw new Error(error.message);
-  if (!data) return { reclaimed: false };
+  if (!data) {
+    return { reclaimed: false, reason: "already_running_or_reclaimed_by_other_worker" };
+  }
 
   return {
     reclaimed: true,
@@ -149,16 +157,18 @@ export async function resolveProvisioningStepRunGate(
     }
 
     const reloaded = await loadProvisioningStepById(step.id, opts?.client);
-    if (!reloaded) return { kind: "already_running" };
+    if (!reloaded) {
+      return { kind: "already_running_or_reclaimed_by_other_worker" };
+    }
 
     if (reloaded.status === "completed") {
       return { kind: "already_completed" };
     }
-    if (reloaded.status === "running" && !isProvisioningStepLeaseStale(reloaded.updated_at, nowMs)) {
-      return { kind: "already_running" };
-    }
     if (reloaded.status === "running") {
-      return { kind: "already_running" };
+      if (!isProvisioningStepLeaseStale(reloaded.updated_at, nowMs)) {
+        return { kind: "already_running_or_reclaimed_by_other_worker" };
+      }
+      return { kind: "already_running_or_reclaimed_by_other_worker" };
     }
 
     return { kind: "should_run", step: reloaded };

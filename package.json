@@ -44,7 +44,7 @@
     "test:staff-access-p0": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/workforce/staffAccessAccept.test.ts src/lib/workforce/staffTenantLinkRepair.test.ts",
     "test:payments-p0": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/payments/gatewayPaymentSuccess.test.ts src/lib/payments/stripeWebhookProcessing.test.ts src/lib/financialOs/financialPaymentReconciliationCore.test.ts",
     "test:fi-events-p0": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test lib/fi/events/processingLease.test.ts",
-    "test:onboarding-lease-p1": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/onboarding-os/provisioningStepLease.test.ts",
+    "test:onboarding-lease-p1": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/onboarding/provisioning/provisioningStepLease.test.ts",
     "test:roster-tx-p1": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/workforce-os/rosterTx.test.ts src/lib/workforce-os/staffStandardHoursSave.test.ts src/lib/workforce-os/rosterStandardHours.test.ts",
     "test:upload-phase3f": "tsx --test tests/hairauditImageClassifyEndpoint.test.ts",
     "test:fin-imaging-2": "tsx --test tests/unifiedImagingClassifyEndpoint.test.ts src/lib/imaging/unifiedClassifier/categoryMapping.test.ts",
