@@ -30,6 +30,16 @@ describe("imagingDeepLinksCore", () => {
     assert.ok(links.protocolSession?.href.includes("protocol=baseline_consultation"));
   });
 
+  it("includes HairAudit admin link when source case id present", () => {
+    const links = buildImagingDeepLinks({
+      tenantId: "11111111-1111-1111-1111-111111111111",
+      patientId: "22222222-2222-2222-2222-222222222222",
+      hairAuditSourceCaseId: "33333333-3333-3333-3333-333333333333",
+    });
+    assert.equal(links.hairAuditCase?.href, "/hair-audit/admin");
+    assert.equal(links.hairAuditCase?.label, "HairAudit case");
+  });
+
   it("omits review queue link when review not required", () => {
     const links = buildImagingDeepLinks({
       tenantId: "11111111-1111-1111-1111-111111111111",
