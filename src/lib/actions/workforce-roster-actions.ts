@@ -72,6 +72,7 @@ const createShiftSchema = z.object({
   startsAt: z.string().min(1),
   endsAt: z.string().min(1),
   notes: z.string().max(500).optional().nullable(),
+  adjustmentReason: z.string().max(64).optional().nullable(),
 });
 
 const createBlockSchema = z.object({
@@ -216,6 +217,22 @@ export async function createRosterShiftAction(
       return { ok: false, error: "Shift end must be after start." };
     }
 
+    const { evaluateStaffShiftAssignmentWarnings } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustments.server"
+    );
+    const { warnings } = await evaluateStaffShiftAssignmentWarnings({
+      tenantId: parsed.tenantId,
+      staffId: parsed.staffId,
+      clinicId: parsed.clinicId,
+      shiftType: parsed.shiftType,
+      startsAt: parsed.startsAt,
+      endsAt: parsed.endsAt,
+    });
+    const blocking = warnings.filter((warning) => warning.blocking);
+    if (blocking.length > 0) {
+      return { ok: false, error: blocking.map((warning) => warning.message).join(" ") };
+    }
+
     const shift = await createStaffShift({
       tenantId: parsed.tenantId,
       clinicId: parsed.clinicId,
@@ -225,6 +242,34 @@ export async function createRosterShiftAction(
       endsAt: parsed.endsAt,
       notes: parsed.notes,
       createdBy: actorFiUserId,
+      adjustmentReason: parsed.adjustmentReason ?? "manual_adjustment",
+    });
+
+    const { insertRosterShiftAuditEvent } = await import(
+      "@/src/lib/workforce-os/rosterShiftAudit.server"
+    );
+    const { ROSTER_SHIFT_AUDIT_ACTION_TYPES, shiftSnapshotForAudit } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustmentsCore"
+    );
+    await insertRosterShiftAuditEvent({
+      tenantId: parsed.tenantId,
+      shiftId: shift.id,
+      staffId: shift.staff_id,
+      actorFiUserId,
+      actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_CREATED_MANUAL,
+      reason: parsed.adjustmentReason ?? "manual_adjustment",
+      newValues: shiftSnapshotForAudit({
+        id: shift.id,
+        staff_id: shift.staff_id,
+        clinic_id: shift.clinic_id,
+        shift_type: shift.shift_type,
+        starts_at: shift.starts_at,
+        ends_at: shift.ends_at,
+        status: shift.status,
+        notes: shift.notes,
+        shift_source: shift.shift_source ?? "manual",
+        adjustment_reason: parsed.adjustmentReason ?? "manual_adjustment",
+      }),
     });
 
     await logRosterAuditEvent({

@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishWorkforceEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
@@ -529,9 +531,11 @@ export async function createStaffShift(input: {
   notes?: string | null;
   createdBy?: string | null;
   shiftSource?: StandardHoursShiftSource;
+  adjustmentReason?: string | null;
+  client?: SupabaseClient;
 }): Promise<FiStaffShiftRow> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const supabase = supabaseAdmin();
+  const supabase = input.client ?? supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_shifts")
     .insert({
@@ -544,6 +548,7 @@ export async function createStaffShift(input: {
       notes: input.notes?.trim() || null,
       created_by: input.createdBy?.trim() || null,
       shift_source: input.shiftSource ?? "manual",
+      adjustment_reason: input.adjustmentReason?.trim() || null,
     })
     .select("*")
     .single();
