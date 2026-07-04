@@ -321,6 +321,12 @@ export function resolveFiOsPrimarySidebarItems(
               href: hrefFor(b, "surgery-os"),
             },
             {
+              id: "surgery-intelligence-dashboard",
+              featureKey: "surgery_pipeline",
+              label: "Surgery intelligence",
+              href: hrefFor(b, "surgery-os/intelligence"),
+            },
+            {
               id: "surgery-readiness-board",
               featureKey: "cases",
               label: "Readiness board",
@@ -534,7 +540,11 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
-    if (firstEarly === "surgery-os") return "surgery-os";
+    if (firstEarly === "surgery-os") {
+      const secondEarly = restEarly.split("/")[1] ?? "";
+      if (secondEarly === "intelligence") return "cases";
+      return "surgery-os";
+    }
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "payments") return "payments-inbox";
