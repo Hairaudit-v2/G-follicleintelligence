@@ -1,9 +1,24 @@
 /** Row shape for `fi_patient_images` (application layer). */
 
+import type { PatientImageCaptureBase } from "@/src/lib/imaging-core/ingest/patientImageIngestContextTypes";
 import type {
   ImagingAnatomicalRegion,
   ImagingLibraryAxis,
 } from "@/src/lib/imagingOs/imagingOsConstants";
+
+/**
+ * Upload-time snake_case fields aligned with {@link PatientImageCaptureBase}.
+ * Maps 1:1 via tenantId→tenant_id, patientId→patient_id, etc. at ingest boundaries.
+ */
+export type PatientImageUploadCaptureCore = {
+  tenantId: string;
+  patientId: PatientImageCaptureBase["patient_id"];
+  storageBucket: PatientImageCaptureBase["storage_bucket"];
+  storagePath: PatientImageCaptureBase["storage_path"];
+  contentType?: PatientImageCaptureBase["content_type"];
+  sizeBytes?: PatientImageCaptureBase["size_bytes"];
+  metadata?: PatientImageCaptureBase["metadata"];
+};
 
 export type PatientImageCategory =
   | "consult"

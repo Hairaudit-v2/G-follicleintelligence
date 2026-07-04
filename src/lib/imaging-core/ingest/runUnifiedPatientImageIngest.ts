@@ -4,28 +4,40 @@
 
 import { runImagingOsIngestionPipeline } from "@/src/lib/imaging-os/pipeline";
 import { buildImagingOsIngestMetadata } from "./buildImagingOsIngestMetadata";
-import {
-  buildPatientImageIngestionRequest,
-  type PatientImageIngestionContext,
-} from "./buildPatientImageIngestionRequest";
+import { buildPatientImageIngestionRequest } from "./buildPatientImageIngestionRequest";
+import { parsePatientImageIngestionContext } from "./parsePatientImageIngestionContext";
+import type {
+  FlatPatientImageIngestionContext,
+  ParsedPatientImageIngestContext,
+  PatientImageIngestionContext,
+} from "./patientImageIngestContextTypes";
 import { buildImagingSessionTaxonomy } from "./sessionTaxonomy";
+
+export type { PatientImageIngestionContext } from "./patientImageIngestContextTypes";
 
 export type UnifiedPatientImageIngestResult = {
   imaging_os_ingest: ReturnType<typeof buildImagingOsIngestMetadata>;
   imaging_session: ReturnType<typeof buildImagingSessionTaxonomy>;
 };
 
+function resolveIngestContext(
+  input: FlatPatientImageIngestionContext | ParsedPatientImageIngestContext
+): ParsedPatientImageIngestContext {
+  return "kind" in input ? input : parsePatientImageIngestionContext(input);
+}
+
 /**
  * Run the universal ImagingOS ingestion pipeline for any patient image context.
  * Pure — no I/O; safe for tests and server post-capture hooks.
  */
 export function runUnifiedPatientImageIngest(
-  input: PatientImageIngestionContext
+  input: FlatPatientImageIngestionContext | ParsedPatientImageIngestContext
 ): UnifiedPatientImageIngestResult {
-  const request = buildPatientImageIngestionRequest(input);
+  const ctx = resolveIngestContext(input);
+  const request = buildPatientImageIngestionRequest(ctx);
   const pipeline = runImagingOsIngestionPipeline(request);
   const captureSource =
-    input.capture_source?.trim() ||
+    ctx.capture_source ||
     (typeof request.metadata?.capture_source === "string"
       ? request.metadata.capture_source
       : null);
@@ -34,18 +46,18 @@ export function runUnifiedPatientImageIngest(
     imaging_os_ingest: buildImagingOsIngestMetadata(pipeline),
     imaging_session: buildImagingSessionTaxonomy({
       capture_source: captureSource,
-      protocol_template_slug: input.protocol_template_slug,
-      protocol_slot_slug: input.protocol_slot_slug,
-      follow_up_interval: input.follow_up_interval,
-      visit_type: input.visit_type,
-      image_category: input.image_category,
-      upload_source: input.upload_source,
+      protocol_template_slug: ctx.protocol_template_slug,
+      protocol_slot_slug: ctx.protocol_slot_slug,
+      follow_up_interval: ctx.follow_up_interval,
+      visit_type: ctx.visit_type,
+      image_category: ctx.image_category,
+      upload_source: ctx.upload_source,
     }),
   };
 }
 
 export function buildUnifiedIngestMetadataPatch(
-  input: PatientImageIngestionContext
+  input: FlatPatientImageIngestionContext | ParsedPatientImageIngestContext
 ): Record<string, unknown> {
   const result = runUnifiedPatientImageIngest(input);
   return {
