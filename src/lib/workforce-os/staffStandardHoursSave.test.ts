@@ -67,6 +67,7 @@ function createMockSupabase(seed?: {
   staff?: StaffRow[];
   clinics?: ClinicRow[];
   denyWrites?: boolean;
+  failInsert?: boolean;
 }) {
   const staff = seed?.staff ?? [
     { id: STAFF_A, tenant_id: TENANT_A },
@@ -153,61 +154,44 @@ function createMockSupabase(seed?: {
         };
       }
 
-      if (table === "fi_staff_standard_hours") {
+      throw new Error(`Unexpected table: ${table}`);
+    },
+    async rpc(
+      fn: string,
+      args: Record<string, unknown>
+    ): Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }> {
+      if (fn !== "fi_replace_staff_standard_hours") {
+        return { data: null, error: { message: `unknown rpc ${fn}` } };
+      }
+      if (seed?.denyWrites || seed?.failInsert) {
         return {
-          update(patch: Record<string, unknown>) {
-            return {
-              eq(col: string, val: string) {
-                const filters = [{ col, val }];
-                const chain = {
-                  eq(col2: string, val2: string) {
-                    filters.push({ col: col2, val: val2 });
-                    return chain;
-                  },
-                  async then(resolve: (v: { error: { message: string } | null }) => void) {
-                    if (seed?.denyWrites) {
-                      resolve({
-                        error: { message: "new row violates row-level security policy" },
-                      });
-                      return;
-                    }
-                    for (const row of standardHours) {
-                      if (
-                        filters.every(
-                          (f) => String(row[f.col]) === f.val && row.status === "active"
-                        )
-                      ) {
-                        Object.assign(row, patch);
-                      }
-                    }
-                    resolve({ error: null });
-                  },
-                };
-                return chain;
-              },
-            };
-          },
-          insert(rows: StandardHoursRow | StandardHoursRow[]) {
-            const list = Array.isArray(rows) ? rows : [rows];
-            return {
-              async then(resolve: (v: { error: { message: string } | null }) => void) {
-                if (seed?.denyWrites) {
-                  resolve({
-                    error: { message: "new row violates row-level security policy" },
-                  });
-                  return;
-                }
-                for (const row of list) {
-                  standardHours.push({ ...row, id: randomUUID() });
-                }
-                resolve({ error: null });
-              },
-            };
-          },
+          data: null,
+          error: { message: "new row violates row-level security policy" },
         };
       }
-
-      throw new Error(`Unexpected table: ${table}`);
+      for (const row of standardHours) {
+        if (
+          row.tenant_id === args.p_tenant_id &&
+          row.staff_id === args.p_staff_id &&
+          row.status === "active"
+        ) {
+          Object.assign(row, { status: "archived" });
+        }
+      }
+      const rows = (args.p_rows as StandardHoursRow[]) ?? [];
+      for (const row of rows) {
+        standardHours.push({
+          ...row,
+          id: randomUUID(),
+          tenant_id: args.p_tenant_id,
+          staff_id: args.p_staff_id,
+          status: "active",
+        });
+      }
+      return {
+        data: { ok: true, archived_count: 0, inserted_count: rows.length },
+        error: null,
+      };
     },
   } as unknown as SupabaseClient;
 
@@ -273,6 +257,7 @@ describe("saveStaffStandardHours", () => {
     );
 
     assert.equal(result.validation.valid, true);
+    assert.equal(result.outcome, "standard_hours_saved");
     assert.equal(standardHours.length, 7);
     assert.equal(standardHours.filter((r) => r.status === "active").length, 7);
     assert.ok(workingHoursByStaff.has(STAFF_A));

@@ -9,6 +9,7 @@ import {
   copyPreviousRosterPeriodShifts,
   generateRosterFromStandardHours,
   mondayOfWeekIso,
+  type ExistingShiftForGeneration,
   type GenerateRosterFromStandardHoursResult,
   type RosterShiftCandidate,
 } from "@/src/lib/workforce-os/rosterGenerationCore";
@@ -23,11 +24,20 @@ import {
   resolveStandardHoursForStaff,
 } from "@/src/lib/workforce-os/staffStandardHours.server";
 import type { StandardHoursShiftSource } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import {
+  mapRosterShiftCandidatesToRpcRows,
+  ROSTER_TX_OUTCOMES,
+  validateRosterShiftCandidatesForReplace,
+} from "@/src/lib/workforce-os/rosterTxCore";
 import type { FiStaffShiftRow } from "@/src/lib/workforce-os/workforceRostering.server";
 
 export type RosterGenerationRunResult = GenerateRosterFromStandardHoursResult & {
+  outcome:
+    | typeof ROSTER_TX_OUTCOMES.ROSTER_REPLACE_COMMITTED
+    | typeof ROSTER_TX_OUTCOMES.ROSTER_REPLACE_FAILED_NO_CHANGES;
   createdCount: number;
   replacedCount: number;
+  validationErrors?: string[];
 };
 
 function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow & { shift_source?: StandardHoursShiftSource } {
@@ -156,6 +166,7 @@ export type GenerateRosterInput = {
   staffIds?: string[];
   overwriteGeneratedOnly?: boolean;
   createdBy?: string | null;
+  supabaseClientForTests?: SupabaseClient;
 };
 
 export async function generateRosterFromStandardHoursForTenant(
@@ -201,10 +212,74 @@ export async function generateRosterFromStandardHoursForTenant(
     rosterCycleAnchorDate: rosterPolicy.rosterCycleAnchorDate,
   });
 
-  const replacedCount = await cancelShiftsByIds(tid, plan.shiftIdsToReplace);
-  const createdCount = await insertShiftCandidates(tid, plan.candidates, input.createdBy);
+  return applyRosterGenerationPlan({
+    tenantId: tid,
+    staffIds,
+    rangeStartIso: input.rangeStartIso,
+    rangeEndIso: input.rangeEndIso,
+    plan,
+    existingShifts,
+    createdBy: input.createdBy,
+    client: input.supabaseClientForTests,
+  });
+}
 
-  return { ...plan, createdCount, replacedCount };
+/** @internal Exported for transaction-safety unit tests. */
+export async function applyRosterGenerationPlan(input: {
+  tenantId: string;
+  staffIds: string[];
+  rangeStartIso: string;
+  rangeEndIso: string;
+  plan: GenerateRosterFromStandardHoursResult;
+  existingShifts: ExistingShiftForGeneration[];
+  createdBy?: string | null;
+  client?: SupabaseClient;
+}): Promise<RosterGenerationRunResult> {
+  const validation = validateRosterShiftCandidatesForReplace({
+    tenantId: input.tenantId,
+    staffIds: input.staffIds,
+    rangeStartIso: input.rangeStartIso,
+    rangeEndIso: input.rangeEndIso,
+    candidates: input.plan.candidates,
+    shiftIdsToReplace: input.plan.shiftIdsToReplace,
+    existingShifts: input.existingShifts,
+  });
+
+  if (!validation.valid) {
+    return {
+      ...input.plan,
+      outcome: ROSTER_TX_OUTCOMES.ROSTER_REPLACE_FAILED_NO_CHANGES,
+      createdCount: 0,
+      replacedCount: 0,
+      validationErrors: validation.errors,
+    };
+  }
+
+  const supabase = input.client ?? supabaseAdmin();
+  const { data: rpcData, error: rpcErr } = await supabase.rpc("fi_replace_generated_roster_shifts", {
+    p_tenant_id: input.tenantId,
+    p_shift_ids_to_cancel: input.plan.shiftIdsToReplace,
+    p_new_shifts: mapRosterShiftCandidatesToRpcRows(input.plan.candidates, input.createdBy),
+    p_created_by: input.createdBy?.trim() || null,
+  });
+
+  if (rpcErr || !(rpcData as { ok?: boolean } | null)?.ok) {
+    return {
+      ...input.plan,
+      outcome: ROSTER_TX_OUTCOMES.ROSTER_REPLACE_FAILED_NO_CHANGES,
+      createdCount: 0,
+      replacedCount: 0,
+      validationErrors: [rpcErr?.message ?? "Roster replace transaction failed."],
+    };
+  }
+
+  const payload = rpcData as { cancelled_count?: number; inserted_count?: number };
+  return {
+    ...input.plan,
+    outcome: ROSTER_TX_OUTCOMES.ROSTER_REPLACE_COMMITTED,
+    createdCount: Number(payload.inserted_count ?? input.plan.candidates.length),
+    replacedCount: Number(payload.cancelled_count ?? input.plan.shiftIdsToReplace.length),
+  };
 }
 
 export type CopyPreviousRosterPeriodInput = {

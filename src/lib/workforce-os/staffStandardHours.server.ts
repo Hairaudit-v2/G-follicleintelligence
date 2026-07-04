@@ -16,6 +16,10 @@ import {
   type StaffStandardHoursDayInput,
   type StaffStandardHoursRow,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import {
+  mapStandardHoursDaysToRpcRows,
+  ROSTER_TX_OUTCOMES,
+} from "@/src/lib/workforce-os/rosterTxCore";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 
 export const STAFF_STANDARD_HOURS_STAFF_NOT_FOUND_MESSAGE =
@@ -194,9 +198,20 @@ export type SaveStaffStandardHoursInput = {
 };
 
 export type SaveStaffStandardHoursResult = {
+  outcome?: typeof ROSTER_TX_OUTCOMES.STANDARD_HOURS_SAVED;
   days: StaffStandardHoursDayInput[];
   validation: ReturnType<typeof validateStandardHoursPattern>;
 };
+
+export class StaffStandardHoursSaveTransactionError extends Error {
+  readonly outcome: typeof ROSTER_TX_OUTCOMES.STANDARD_HOURS_SAVE_FAILED_NO_CHANGES;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "StaffStandardHoursSaveTransactionError";
+    this.outcome = ROSTER_TX_OUTCOMES.STANDARD_HOURS_SAVE_FAILED_NO_CHANGES;
+  }
+}
 
 export async function saveStaffStandardHours(
   input: SaveStaffStandardHoursInput,
@@ -214,36 +229,27 @@ export async function saveStaffStandardHours(
 
   await validateStandardHoursWriteScope(tid, sid, input.days, supabase);
 
-  const { error: archiveErr } = await supabase
-    .from("fi_staff_standard_hours")
-    .update({ status: "archived", updated_at: new Date().toISOString() })
-    .eq("tenant_id", tid)
-    .eq("staff_id", sid)
-    .eq("status", "active");
-  if (archiveErr) throw new Error(mapStandardHoursDbError(archiveErr));
-
-  const rows = input.days.map((day) => ({
-    tenant_id: tid,
-    staff_id: sid,
-    clinic_id: day.clinic_id?.trim() || null,
-    weekday: day.weekday,
-    cycle_week: normaliseCycleWeek(day.cycle_week),
-    start_time: day.is_working_day ? day.start_time : null,
-    end_time: day.is_working_day ? day.end_time : null,
-    break_minutes: day.break_minutes ?? 0,
-    shift_label: day.shift_label?.trim() || null,
-    role_code: day.role_code?.trim() || null,
-    is_working_day: day.is_working_day,
-    effective_from: effectiveFrom,
-    effective_to: null,
-    status: "active",
-  }));
-
-  const { error: insertErr } = await supabase.from("fi_staff_standard_hours").insert(rows);
-  if (insertErr) throw new Error(mapStandardHoursDbError(insertErr));
+  const { data: rpcData, error: rpcErr } = await supabase.rpc("fi_replace_staff_standard_hours", {
+    p_tenant_id: tid,
+    p_staff_id: sid,
+    p_effective_from: effectiveFrom,
+    p_rows: mapStandardHoursDaysToRpcRows(input.days),
+  });
+  if (rpcErr) {
+    throw new StaffStandardHoursSaveTransactionError(mapStandardHoursDbError(rpcErr));
+  }
+  if (!(rpcData as { ok?: boolean } | null)?.ok) {
+    throw new StaffStandardHoursSaveTransactionError(
+      "Standard hours save failed without applying changes."
+    );
+  }
 
   await syncLegacyWorkingHoursJson(tid, sid, input.days, supabase);
-  return { days: input.days, validation };
+  return {
+    outcome: ROSTER_TX_OUTCOMES.STANDARD_HOURS_SAVED,
+    days: input.days,
+    validation,
+  };
 }
 
 /** Emergency default: Mon–Fri 08:30–17:00, 30 min break; Sat/Sun RDO. */

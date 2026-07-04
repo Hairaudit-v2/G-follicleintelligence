@@ -29,8 +29,10 @@ import {
 import { resolveCurrentTenantFiUserId } from "@/src/lib/workforce-os/resolveCurrentTenantFiUserId.server";
 import {
   saveStaffStandardHours,
+  StaffStandardHoursSaveTransactionError,
   type SaveStaffStandardHoursResult,
 } from "@/src/lib/workforce-os/staffStandardHours.server";
+import { ROSTER_TX_OUTCOMES } from "@/src/lib/workforce-os/rosterTxCore";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 const eventSourceSchema = z.enum(["booking", "surgery", "calendar", "manual"]);
@@ -123,7 +125,9 @@ async function logRosterAuditEvent(_metadata: Record<string, unknown>): Promise<
   return;
 }
 
-export type WorkforceRosterActionResult<T> = { ok: true; data: T } | { ok: false; error: string };
+export type WorkforceRosterActionResult<T> =
+  | { ok: true; data: T; outcome?: string }
+  | { ok: false; error: string; outcome?: string };
 
 export async function assignStaffToRosterEventAction(
   body: unknown
@@ -413,6 +417,13 @@ export async function saveStaffStandardHoursAction(
     revalidateRosterSurfaces(parsed.tenantId);
     return { ok: true, data: result };
   } catch (e) {
+    if (e instanceof StaffStandardHoursSaveTransactionError) {
+      return {
+        ok: false,
+        error: e.message,
+        outcome: e.outcome,
+      };
+    }
     return { ok: false, error: errMsg(e) };
   }
 }
@@ -446,6 +457,14 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
       createdBy: actorFiUserId,
     });
 
+    if (result.outcome === ROSTER_TX_OUTCOMES.ROSTER_REPLACE_FAILED_NO_CHANGES) {
+      return {
+        ok: false,
+        outcome: result.outcome,
+        error: (result.validationErrors ?? ["Roster replace failed without changes."]).join(" "),
+      };
+    }
+
     await logRosterAuditEvent({
       action: "roster_generated_from_standard_hours",
       created_count: result.createdCount,
@@ -457,6 +476,7 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
     revalidateRosterSurfaces(parsed.tenantId);
     return {
       ok: true,
+      outcome: result.outcome,
       data: {
         createdCount: result.createdCount,
         replacedCount: result.replacedCount,
