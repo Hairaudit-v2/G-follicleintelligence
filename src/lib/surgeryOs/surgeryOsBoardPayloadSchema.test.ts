@@ -45,8 +45,10 @@ test("graftSummarySchema validates graft summary shape", () => {
         reviewRequired: true,
         imagingHref: `/fi-admin/${tenantId}/patients/patient-1/imaging?image=00000000-0000-4000-8000-000000000031`,
         aiEstimate: null,
+        intelligenceSummary: null,
       },
     ],
+    graftTrayIntelligence: null,
     reconciledAt: null,
     reconciledByLabel: null,
     sessionLocks: {

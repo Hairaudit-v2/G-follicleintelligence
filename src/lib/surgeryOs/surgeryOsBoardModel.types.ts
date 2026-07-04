@@ -18,9 +18,14 @@ import type {
   GraftTrayAiReviewAction,
   GraftTrayAiReviewStatus,
   GraftTrayConfidenceBand,
+  GraftTrayImageQuality,
   GraftTrayMismatchBand,
 } from "@/src/lib/imaging-os/graftTrayCountTypes";
-import type { GraftTrayAiReviewDisplayState } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
+import type {
+  GraftTrayAiReviewAuditEntry,
+  GraftTrayAiReviewDisplayState,
+} from "@/src/lib/imaging-os/graftTrayReviewUxCore";
+import type { GraftTrayFinalCountSource } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
 import type {
   SurgeryOsGraftCountEventType,
   SurgeryOsGraftCountSessionLock,
@@ -198,6 +203,40 @@ export type SurgeryOsGraftTrayAiEstimateSummary = {
   reviewWarnings: string[];
 };
 
+export type SurgeryOsGraftTrayIntelligenceSummary = {
+  estimateId: string;
+  imageId: string;
+  graftTrayLinkId: string | null;
+  hasFinalCount: boolean;
+  finalAcceptedCount: number | null;
+  originalAiEstimate: number | null;
+  manualCount: number | null;
+  varianceDelta: number | null;
+  mismatchBand: GraftTrayMismatchBand;
+  confidenceBand: GraftTrayConfidenceBand;
+  imageQuality: GraftTrayImageQuality;
+  reviewDecision: GraftTrayAiReviewAction | null;
+  reviewStatus: GraftTrayAiReviewStatus;
+  displayState: GraftTrayAiReviewDisplayState;
+  reviewerId: string | null;
+  reviewerLabel: string | null;
+  reviewedAt: string | null;
+  finalCountSource: GraftTrayFinalCountSource | null;
+  isReadOnly: boolean;
+  supersededStaleJob: boolean;
+  sourceImageHref: string | null;
+  reviewAuditTrail: GraftTrayAiReviewAuditEntry[];
+  warnings: string[];
+};
+
+export type SurgeryOsGraftTrayCaseIntelligenceSummary = {
+  reviewedTrayCount: number;
+  pendingReviewCount: number;
+  supersededStaleCount: number;
+  totalFinalAcceptedGrafts: number | null;
+  hasSupersededStaleEstimate: boolean;
+};
+
 export type SurgeryOsGraftTrayLinkSummary = {
   linkId: string;
   imageId: string;
@@ -206,6 +245,7 @@ export type SurgeryOsGraftTrayLinkSummary = {
   reviewRequired: boolean;
   imagingHref: string | null;
   aiEstimate: SurgeryOsGraftTrayAiEstimateSummary | null;
+  intelligenceSummary: SurgeryOsGraftTrayIntelligenceSummary | null;
 };
 
 export type SurgeryOsGraftSummary = {
@@ -232,6 +272,7 @@ export type SurgeryOsGraftSummary = {
   confirmedTrayGrafts: number;
   trayImageCount: number;
   trayImageLinks: SurgeryOsGraftTrayLinkSummary[];
+  graftTrayIntelligence: SurgeryOsGraftTrayCaseIntelligenceSummary | null;
   reconciledAt: string | null;
   reconciledByLabel: string | null;
   sessionLocks: {

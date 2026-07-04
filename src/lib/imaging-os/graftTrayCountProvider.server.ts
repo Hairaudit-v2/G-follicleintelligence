@@ -20,6 +20,8 @@ import {
   mapEstimateRowToSummary,
   parseGraftTrayAiEstimateRow,
 } from "./graftTrayAiEstimateRowParser";
+import type { ImagingAiJobStatus } from "./imagingAiAnalysisKinds";
+import { parseGraftTrayReviewAuditTrail, type GraftTrayAiReviewAuditEntry } from "./graftTrayReviewUxCore";
 import type {
   GraftTrayAiEstimateRow,
   GraftTrayAiEstimateSummary,
@@ -291,6 +293,100 @@ export async function persistGraftTrayAiEstimate(input: {
   }
 
   return estimateRow;
+}
+
+export type GraftTrayIntelligenceImageContext = {
+  estimate: GraftTrayAiEstimateSummary;
+  auditTrail: GraftTrayAiReviewAuditEntry[];
+  estimateAnalysisJobStatus: ImagingAiJobStatus | null;
+  hasNewerActiveJob: boolean;
+};
+
+export async function loadGraftTrayIntelligenceContextForImages(
+  tenantId: string,
+  imageIds: readonly string[],
+  client?: SupabaseClient
+): Promise<Map<string, GraftTrayIntelligenceImageContext>> {
+  const out = new Map<string, GraftTrayIntelligenceImageContext>();
+  if (!imageIds.length) return out;
+  const supabase = client ?? supabaseAdmin();
+  const tid = tenantId.trim();
+  const ids = imageIds as string[];
+
+  const [estimateRes, imageRes, jobRes] = await Promise.all([
+    supabase
+      .from("fi_imaging_graft_tray_ai_estimates")
+      .select("*")
+      .eq("tenant_id", tid)
+      .in("image_id", ids)
+      .order("created_at", { ascending: false }),
+    supabase.from("fi_patient_images").select("id, metadata").eq("tenant_id", tid).in("id", ids),
+    supabase
+      .from("fi_imaging_ai_analysis_jobs")
+      .select("id, patient_image_id, status, created_at")
+      .eq("tenant_id", tid)
+      .eq("analysis_kind", "graft_tray_count_estimate")
+      .in("patient_image_id", ids)
+      .order("created_at", { ascending: false }),
+  ]);
+  if (estimateRes.error) throw new Error(estimateRes.error.message);
+  if (imageRes.error) throw new Error(imageRes.error.message);
+  if (jobRes.error) throw new Error(jobRes.error.message);
+
+  const metadataByImage = new Map<string, Record<string, unknown>>();
+  for (const row of imageRes.data ?? []) {
+    const r = row as { id: string; metadata: unknown };
+    metadataByImage.set(
+      r.id,
+      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+        ? (r.metadata as Record<string, unknown>)
+        : {}
+    );
+  }
+
+  const jobsByImage = new Map<string, Array<{ id: string; status: ImagingAiJobStatus }>>();
+  for (const row of jobRes.data ?? []) {
+    const r = row as { id: string; patient_image_id: string; status: string };
+    const list = jobsByImage.get(r.patient_image_id) ?? [];
+    list.push({
+      id: r.id,
+      status: r.status as ImagingAiJobStatus,
+    });
+    jobsByImage.set(r.patient_image_id, list);
+  }
+
+  const estimateByImage = new Map<string, ReturnType<typeof parseGraftTrayAiEstimateRow>>();
+  for (const row of estimateRes.data ?? []) {
+    const parsed = parseGraftTrayAiEstimateRow(row);
+    if (!estimateByImage.has(parsed.image_id)) {
+      estimateByImage.set(parsed.image_id, parsed);
+    }
+  }
+
+  for (const imageId of ids) {
+    const row = estimateByImage.get(imageId);
+    if (!row) continue;
+    const metadata = metadataByImage.get(imageId) ?? {};
+    const imageJobs = jobsByImage.get(imageId) ?? [];
+    const estimateJob = row.analysis_job_id
+      ? imageJobs.find((j) => j.id === row.analysis_job_id)
+      : null;
+    const hasNewerActiveJob = imageJobs.some(
+      (j) =>
+        j.id !== row.analysis_job_id &&
+        j.status !== "superseded" &&
+        (j.status === "queued" || j.status === "running" || j.status === "completed")
+    );
+
+    out.set(imageId, {
+      estimate: mapEstimateRowToSummary(row),
+      auditTrail: parseGraftTrayReviewAuditTrail(metadata.graft_tray_ai_review_audit),
+      estimateAnalysisJobStatus: estimateJob?.status ?? null,
+      hasNewerActiveJob,
+    });
+  }
+
+  return out;
 }
 
 export async function loadGraftTrayAiEstimatesForImages(

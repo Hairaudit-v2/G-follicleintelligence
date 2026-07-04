@@ -119,17 +119,37 @@ function GraftIntelligenceCard({
       </div>
 
       {graftSummary ? (
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          <StatCell label="Target" value={graftSummary.targetGrafts ?? "—"} />
-          <StatCell label="Extracted" value={graftSummary.extractedGrafts} />
-          <StatCell label="Implanted" value={graftSummary.implantedGrafts} />
-          <StatCell label="Remaining" value={graftSummary.remainingGrafts} />
-          <StatCell label="Discarded" value={graftSummary.discardedGrafts} />
-          <StatCell
-            label="Phase"
-            value={graftSummary.phaseLabel}
-          />
-        </div>
+        <>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            <StatCell label="Target" value={graftSummary.targetGrafts ?? "—"} />
+            <StatCell label="Extracted" value={graftSummary.extractedGrafts} />
+            <StatCell label="Implanted" value={graftSummary.implantedGrafts} />
+            <StatCell label="Remaining" value={graftSummary.remainingGrafts} />
+            <StatCell label="Discarded" value={graftSummary.discardedGrafts} />
+            <StatCell label="Phase" value={graftSummary.phaseLabel} />
+          </div>
+          {graftSummary.graftTrayIntelligence ? (
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <StatCell
+                label="Reviewed trays"
+                value={graftSummary.graftTrayIntelligence.reviewedTrayCount}
+              />
+              <StatCell
+                label="Pending AI review"
+                value={graftSummary.graftTrayIntelligence.pendingReviewCount}
+              />
+              <StatCell
+                label="Final tray grafts"
+                value={graftSummary.graftTrayIntelligence.totalFinalAcceptedGrafts ?? "—"}
+                accent={graftSummary.graftTrayIntelligence.totalFinalAcceptedGrafts != null}
+              />
+              <StatCell
+                label="Stale replay"
+                value={graftSummary.graftTrayIntelligence.supersededStaleCount}
+              />
+            </div>
+          ) : null}
+        </>
       ) : null}
 
       {actionableWarnings.length > 0 ? (

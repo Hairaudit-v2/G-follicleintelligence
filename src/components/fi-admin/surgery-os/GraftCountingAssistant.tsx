@@ -51,6 +51,7 @@ import {
   surgeryOsGraftActionAllowed,
 } from "@/src/lib/surgeryOs/surgeryOsPolicy";
 import { GraftTrayAiReviewPanel } from "@/src/components/fi-admin/imaging/GraftTrayAiReviewPanel";
+import { GraftTrayIntelligenceSummaryCard } from "@/src/components/fi-admin/imaging/GraftTrayIntelligenceSummaryCard";
 import type { GraftTrayAiEstimateSummary } from "@/src/lib/imaging-os/graftTrayCountTypes";
 import type { SurgeryOsGraftTrayAiEstimateSummary } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 
@@ -662,6 +663,9 @@ function toGraftTrayPanelEstimate(
     assessable: estimate.estimatedGraftCount != null,
     review_status: estimate.reviewStatus,
     reviewer_decision: estimate.reviewerDecision,
+    reviewed_by_fi_user_id: null,
+    reviewed_at: null,
+    analysis_job_id: null,
     corrected_count: estimate.correctedCount,
     provider: estimate.provider,
     provider_version: "surgery_os_view",
@@ -1320,7 +1324,19 @@ function CorrectionPanel({
                     <span className="text-slate-500">Image linked</span>
                   )}
                 </div>
-                {link.aiEstimate ? (
+                {link.intelligenceSummary ? (
+                  <div className="mt-2 space-y-2">
+                    <GraftTrayIntelligenceSummaryCard summary={link.intelligenceSummary} />
+                    {link.intelligenceSummary.reviewStatus === "pending_review" ? (
+                      <GraftTrayAiReviewPanel
+                        estimate={toGraftTrayPanelEstimate(link.aiEstimate!, link.imageId)}
+                        auditTrail={link.intelligenceSummary.reviewAuditTrail}
+                        mode="readonly"
+                        reviewQueueHref={reviewQueueHref}
+                      />
+                    ) : null}
+                  </div>
+                ) : link.aiEstimate ? (
                   <div className="mt-2">
                     <GraftTrayAiReviewPanel
                       estimate={toGraftTrayPanelEstimate(link.aiEstimate, link.imageId)}

@@ -43,8 +43,12 @@ import type {
   SurgeryOsTeamMember,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 import { loadGraftTrayLinksForSurgeries } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
-import { loadGraftTrayAiEstimatesForImages } from "@/src/lib/imaging-os/graftTrayCountProvider.server";
-import { mapGraftTrayAiEstimateToSurgeryOsSummary } from "@/src/lib/surgeryOs/surgeryOsGraftTrayAiCore";
+import { loadGraftTrayIntelligenceContextForImages } from "@/src/lib/imaging-os/graftTrayCountProvider.server";
+import {
+  buildSurgeryOsGraftTrayCaseIntelligence,
+  buildSurgeryOsGraftTrayIntelligenceSummary,
+  mapGraftTrayAiEstimateToSurgeryOsSummary,
+} from "@/src/lib/surgeryOs/surgeryOsGraftTrayAiCore";
 import {
   computeGraftProgressPercent,
   computeConfirmedTrayTotals,
@@ -545,9 +549,9 @@ export async function loadSurgeryOsCommandCentrePayload(
     ]);
 
   let trayLinksBySurgery: Awaited<ReturnType<typeof loadGraftTrayLinksForSurgeries>> = new Map();
-  let trayAiEstimatesByImage = new Map<
+  let trayIntelligenceByImage = new Map<
     string,
-    Awaited<ReturnType<typeof loadGraftTrayAiEstimatesForImages>> extends Map<string, infer V>
+    Awaited<ReturnType<typeof loadGraftTrayIntelligenceContextForImages>> extends Map<string, infer V>
       ? V
       : never
   >();
@@ -557,10 +561,30 @@ export async function loadSurgeryOsCommandCentrePayload(
       .flat()
       .map((l) => l.image_id);
     if (trayImageIds.length) {
-      trayAiEstimatesByImage = await loadGraftTrayAiEstimatesForImages(tid, trayImageIds, supabase);
+      trayIntelligenceByImage = await loadGraftTrayIntelligenceContextForImages(
+        tid,
+        trayImageIds,
+        supabase
+      );
     }
   } catch (e) {
     if (!isMissingDatabaseRelationError(e)) throw e;
+  }
+
+  const trayReviewerIds = uniqueStrings(
+    [...trayIntelligenceByImage.values()].flatMap((ctx) => {
+      const ids: (string | null)[] = [ctx.estimate.reviewed_by_fi_user_id];
+      for (const entry of ctx.auditTrail) {
+        ids.push(entry.reviewed_by_fi_user_id);
+      }
+      return ids.filter(Boolean) as string[];
+    })
+  );
+  if (trayReviewerIds.length) {
+    const reviewerLabels = await loadFiUserLabelsById(supabase, tid, trayReviewerIds);
+    for (const [id, label] of reviewerLabels) {
+      if (!userLabels.has(id)) userLabels.set(id, label);
+    }
   }
 
   const teamBySurgery = new Map<string, TeamAssignmentRow[]>();
@@ -755,19 +779,40 @@ export async function loadSurgeryOsCommandCentrePayload(
 
     const surgeryTrayLinks = trayLinksBySurgery.get(row.id) ?? [];
     const trayImageLinks = surgeryTrayLinks.map((link) => {
-      const ai = trayAiEstimatesByImage.get(link.image_id);
+      const ctx = trayIntelligenceByImage.get(link.image_id);
+      const imagingHref = row.patient_id
+        ? `/fi-admin/${tid}/patients/${row.patient_id}/imaging?image=${link.image_id}`
+        : null;
+      const reviewerId = ctx?.estimate.reviewed_by_fi_user_id ?? null;
+      const intelligenceSummary = ctx
+        ? buildSurgeryOsGraftTrayIntelligenceSummary({
+            estimate: ctx.estimate,
+            auditTrail: ctx.auditTrail,
+            reviewerLabel: reviewerId ? (userLabels.get(reviewerId) ?? null) : null,
+            sourceImageHref: imagingHref,
+            estimateAnalysisJobStatus: ctx.estimateAnalysisJobStatus,
+            hasNewerActiveJob: ctx.hasNewerActiveJob,
+          })
+        : null;
       return {
         linkId: link.id,
         imageId: link.image_id,
         capturedAt: link.captured_at,
         status: link.status,
         reviewRequired: link.review_required,
-        imagingHref: row.patient_id
-          ? `/fi-admin/${tid}/patients/${row.patient_id}/imaging?image=${link.image_id}`
-          : null,
-        aiEstimate: ai ? mapGraftTrayAiEstimateToSurgeryOsSummary(ai) : null,
+        imagingHref,
+        aiEstimate: ctx ? mapGraftTrayAiEstimateToSurgeryOsSummary(ctx.estimate) : null,
+        intelligenceSummary,
       };
     });
+    const graftTrayIntelligence =
+      trayImageLinks.length > 0
+        ? buildSurgeryOsGraftTrayCaseIntelligence({
+            linkSummaries: trayImageLinks
+              .map((l) => l.intelligenceSummary)
+              .filter((s): s is NonNullable<typeof s> => s != null),
+          })
+        : null;
 
     graftSummary.push({
       surgeryId: row.id,
@@ -798,6 +843,7 @@ export async function loadSurgeryOsCommandCentrePayload(
         confirmedTrayTotals.multiples,
       trayImageCount: trayImageLinks.length,
       trayImageLinks,
+      graftTrayIntelligence,
       reconciledAt: graftSession?.reconciled_at ?? null,
       reconciledByLabel: graftSession?.reconciled_by_fi_user_id
         ? (userLabels.get(graftSession.reconciled_by_fi_user_id) ?? null)

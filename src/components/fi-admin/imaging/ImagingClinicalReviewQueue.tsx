@@ -21,6 +21,8 @@ import { ALLOWED_STAFF_REASSIGN_VIEW_TYPES } from "@/src/lib/imaging-os/imagingS
 import type { ImagingClinicalReviewQueueItem } from "@/src/lib/imaging-os/imagingClinicalReviewQueue.server";
 import type { ImagingReviewerPickerOption } from "@/src/lib/imaging-os/imagingReviewerDirectoryLoader.server";
 import { GraftTrayAiReviewPanel } from "@/src/components/fi-admin/imaging/GraftTrayAiReviewPanel";
+import { GraftTrayIntelligenceSummaryCard } from "@/src/components/fi-admin/imaging/GraftTrayIntelligenceSummaryCard";
+import { buildGraftTrayIntelligenceSummary } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
 
 const REASON_LABELS: Record<string, string> = {
   low_classification_confidence: "Low classification confidence",
@@ -480,30 +482,42 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                   <td className="px-4 py-3">
                     <div className="flex min-w-[200px] flex-col gap-2">
                       {item.isGraftTrayAiReview && item.graftTrayAiEstimate ? (
-                        <GraftTrayAiReviewPanel
-                          estimate={item.graftTrayAiEstimate}
-                          auditTrail={item.graftTrayAiReviewAudit}
-                          pending={pending}
-                          mode="actions"
-                          staffNote={notes[item.imageId] ?? ""}
-                          onStaffNoteChange={(value) =>
-                            setNotes((prev) => ({ ...prev, [item.imageId]: value }))
-                          }
-                          onReview={(action, options) =>
-                            runAction(item.patientId, item.imageId, () =>
-                              reviewGraftTrayAiEstimateAction(
-                                tenantId,
-                                item.patientId,
-                                withAdmin({
-                                  patientImageId: item.imageId,
-                                  action,
-                                  correctedCount: options?.correctedCount,
-                                  staffNote: options?.staffNote ?? notes[item.imageId],
-                                })
+                        item.graftTrayAiEstimate.review_status === "pending_review" ? (
+                          <GraftTrayAiReviewPanel
+                            estimate={item.graftTrayAiEstimate}
+                            auditTrail={item.graftTrayAiReviewAudit}
+                            pending={pending}
+                            mode="actions"
+                            staffNote={notes[item.imageId] ?? ""}
+                            onStaffNoteChange={(value) =>
+                              setNotes((prev) => ({ ...prev, [item.imageId]: value }))
+                            }
+                            onReview={(action, options) =>
+                              runAction(item.patientId, item.imageId, () =>
+                                reviewGraftTrayAiEstimateAction(
+                                  tenantId,
+                                  item.patientId,
+                                  withAdmin({
+                                    patientImageId: item.imageId,
+                                    action,
+                                    correctedCount: options?.correctedCount,
+                                    staffNote: options?.staffNote ?? notes[item.imageId],
+                                  })
+                                )
                               )
-                            )
-                          }
-                        />
+                            }
+                          />
+                        ) : (
+                          <GraftTrayIntelligenceSummaryCard
+                            compact
+                            showAuditTrail
+                            summary={buildGraftTrayIntelligenceSummary({
+                              estimate: item.graftTrayAiEstimate,
+                              auditTrail: item.graftTrayAiReviewAudit,
+                              sourceImageHref: `/fi-admin/${tenantId}/patients/${item.patientId}/imaging?image=${item.imageId}`,
+                            })}
+                          />
+                        )
                       ) : null}
                       {!item.isGraftTrayAiReview ? (
                         <input

@@ -7,7 +7,10 @@ import {
 } from "@/src/lib/imaging-os/graftTrayAiEstimateRowParser";
 import { buildGraftTrayAiReviewDisplayConfig } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import { graftTrayAiEstimateSummarySchema } from "./surgeryOsBoardPayloadSchema";
-import { mapGraftTrayAiEstimateToSurgeryOsSummary } from "./surgeryOsGraftTrayAiCore";
+import {
+  buildSurgeryOsGraftTrayIntelligenceSummary,
+  mapGraftTrayAiEstimateToSurgeryOsSummary,
+} from "./surgeryOsGraftTrayAiCore";
 import type { SurgeryOsGraftTrayAiEstimateSummary } from "./surgeryOsBoardModel.types";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -139,6 +142,48 @@ describe("mapGraftTrayAiEstimateToSurgeryOsSummary", () => {
     assert.equal(mapped.displayState, "rejected_needs_recount");
     assert.equal(mapped.finalAcceptedCount, null);
     assert.ok(mapped.reviewWarnings.length === 0 || mapped.reviewWarnings.length >= 0);
+  });
+});
+
+describe("buildSurgeryOsGraftTrayIntelligenceSummary", () => {
+  it("maps accepted AI estimate to SurgeryOS intelligence summary", () => {
+    const row = parseGraftTrayAiEstimateRow({
+      id: ESTIMATE,
+      tenant_id: TENANT,
+      patient_id: PATIENT,
+      image_id: IMAGE,
+      graft_tray_link_id: null,
+      surgery_id: null,
+      estimated_graft_count: 120,
+      manual_graft_count: 118,
+      manual_count_source: "confirmed_tray_latest",
+      corrected_graft_count: null,
+      delta: 2,
+      mismatch_band: "within_tolerance",
+      confidence: 0.82,
+      confidence_band: "high",
+      image_quality: "suitable",
+      assessable: true,
+      review_status: "accepted_ai",
+      reviewer_decision: "accept_ai_estimate",
+      reviewed_by_fi_user_id: "staff-1",
+      reviewed_at: NOW,
+      analysis_job_id: null,
+      provider: "stub",
+      provider_version: "graft_tray_stub_v1",
+      review_reasons: [],
+      created_at: NOW,
+      updated_at: NOW,
+    });
+    const summary = buildSurgeryOsGraftTrayIntelligenceSummary({
+      estimate: mapEstimateRowToSummary(row),
+      reviewerLabel: "Staff Member",
+      sourceImageHref: "/imaging",
+    });
+    assert.equal(summary.hasFinalCount, true);
+    assert.equal(summary.finalAcceptedCount, 120);
+    assert.equal(summary.reviewerLabel, "Staff Member");
+    assert.equal(summary.isReadOnly, true);
   });
 });
 

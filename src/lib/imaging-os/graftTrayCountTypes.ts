@@ -84,6 +84,9 @@ export type GraftTrayAiEstimateRow = {
   assessable: boolean;
   review_status: GraftTrayAiReviewStatus;
   reviewer_decision: GraftTrayAiReviewAction | null;
+  reviewed_by_fi_user_id: string | null;
+  reviewed_at: string | null;
+  analysis_job_id: string | null;
   provider: GraftTrayAiProviderName;
   provider_version: string;
   review_reasons: unknown;
@@ -133,6 +136,9 @@ export type GraftTrayAiEstimateSummary = {
   assessable: boolean;
   review_status: GraftTrayAiReviewStatus;
   reviewer_decision: GraftTrayAiReviewAction | null;
+  reviewed_by_fi_user_id: string | null;
+  reviewed_at: string | null;
+  analysis_job_id: string | null;
   corrected_count: number | null;
   provider: GraftTrayAiProviderName;
   provider_version: string;

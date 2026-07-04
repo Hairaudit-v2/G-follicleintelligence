@@ -22,8 +22,10 @@ import {
   GRAFT_TRAY_AI_REVIEW_ACTIONS,
   GRAFT_TRAY_AI_REVIEW_STATUSES,
   GRAFT_TRAY_CONFIDENCE_BANDS,
+  GRAFT_TRAY_IMAGE_QUALITIES,
   GRAFT_TRAY_MISMATCH_BANDS,
 } from "@/src/lib/imaging-os/graftTrayCountTypes";
+import { GRAFT_TRAY_FINAL_COUNT_SOURCES } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
 import { GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import {
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPES,
@@ -211,6 +213,51 @@ export const graftTrayAiEstimateSummarySchema = z.object({
   reviewWarnings: z.array(z.string()),
 });
 
+const graftTrayReviewAuditEntrySchema = z.object({
+  reviewed_at: z.string(),
+  reviewed_by_fi_user_id: z.string().nullable(),
+  decision: z.enum(GRAFT_TRAY_AI_REVIEW_ACTIONS),
+  review_status: z.enum(GRAFT_TRAY_AI_REVIEW_STATUSES),
+  previous_ai_estimate: z.number().int().nullable(),
+  previous_manual_count: z.number().int().nullable(),
+  final_accepted_count: z.number().int().nullable(),
+  staff_note: z.string().nullable(),
+});
+
+export const graftTrayIntelligenceSummarySchema = z.object({
+  estimateId: z.string().uuid(),
+  imageId: z.string().uuid(),
+  graftTrayLinkId: z.string().uuid().nullable(),
+  hasFinalCount: z.boolean(),
+  finalAcceptedCount: z.number().int().nullable(),
+  originalAiEstimate: z.number().int().nullable(),
+  manualCount: z.number().int().nullable(),
+  varianceDelta: z.number().int().nullable(),
+  mismatchBand: z.enum(GRAFT_TRAY_MISMATCH_BANDS),
+  confidenceBand: z.enum(GRAFT_TRAY_CONFIDENCE_BANDS),
+  imageQuality: z.enum(GRAFT_TRAY_IMAGE_QUALITIES),
+  reviewDecision: z.enum(GRAFT_TRAY_AI_REVIEW_ACTIONS).nullable(),
+  reviewStatus: z.enum(GRAFT_TRAY_AI_REVIEW_STATUSES),
+  displayState: z.enum(GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES),
+  reviewerId: z.string().nullable(),
+  reviewerLabel: z.string().nullable(),
+  reviewedAt: z.string().nullable(),
+  finalCountSource: z.enum(GRAFT_TRAY_FINAL_COUNT_SOURCES).nullable(),
+  isReadOnly: z.boolean(),
+  supersededStaleJob: z.boolean(),
+  sourceImageHref: z.string().nullable(),
+  reviewAuditTrail: z.array(graftTrayReviewAuditEntrySchema),
+  warnings: z.array(z.string()),
+});
+
+const graftTrayCaseIntelligenceSummarySchema = z.object({
+  reviewedTrayCount: z.number().int().min(0),
+  pendingReviewCount: z.number().int().min(0),
+  supersededStaleCount: z.number().int().min(0),
+  totalFinalAcceptedGrafts: z.number().int().nullable(),
+  hasSupersededStaleEstimate: z.boolean(),
+});
+
 const graftTrayLinkSummarySchema = z.object({
   linkId: z.string().uuid(),
   imageId: z.string().uuid(),
@@ -219,6 +266,7 @@ const graftTrayLinkSummarySchema = z.object({
   reviewRequired: z.boolean(),
   imagingHref: z.string().nullable(),
   aiEstimate: graftTrayAiEstimateSummarySchema.nullable(),
+  intelligenceSummary: graftTrayIntelligenceSummarySchema.nullable(),
 });
 
 const graftSummarySchema = z.object({
@@ -245,6 +293,7 @@ const graftSummarySchema = z.object({
   confirmedTrayGrafts: z.number().int().min(0),
   trayImageCount: z.number().int().min(0),
   trayImageLinks: z.array(graftTrayLinkSummarySchema),
+  graftTrayIntelligence: graftTrayCaseIntelligenceSummarySchema.nullable(),
   reconciledAt: z.string().nullable(),
   reconciledByLabel: z.string().nullable(),
   sessionLocks: z.object({

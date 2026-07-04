@@ -14,7 +14,11 @@ import { ImagingClinicalIntelligencePanel } from "@/src/components/fi-admin/imag
 import { PatientVisualSummaryReportPanel } from "@/src/components/fi-admin/imaging/PatientVisualSummaryReportPanel";
 import { ImagingGuidedCaptureWizard } from "@/src/components/fi-admin/imaging/ImagingGuidedCaptureWizard";
 import { VieComparisonSuggestionsPanel } from "@/src/components/fi-admin/imaging/VieComparisonSuggestionsPanel";
+import { GraftTrayIntelligenceSummaryCard } from "@/src/components/fi-admin/imaging/GraftTrayIntelligenceSummaryCard";
 import { buildImagingClinicalIntelligenceView } from "@/src/lib/imaging-os/imagingClinicalIntelligenceSurfacing";
+import { parseGraftTrayAiEstimateSummaryFromMetadata } from "@/src/lib/imaging-os/graftTrayAiEstimateRowParser";
+import { buildGraftTrayIntelligenceSummary } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import { parseGraftTrayReviewAuditTrail } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import { IMAGING_AI_ANALYSIS_KINDS } from "@/src/lib/imaging-os/ai";
 import {
   IMAGING_COMPARE_PRESETS,
@@ -160,6 +164,21 @@ export function ImagingOsWorkspace({
       aiImageCategoryConfidence: selectedTile.image.ai_image_category_confidence ?? null,
       caseId: selectedTile.image.case_id ?? null,
       consultationId: selectedTile.image.consultation_id ?? null,
+    });
+  }, [selectedTile, tenantId, patientId]);
+
+  const selectedGraftTraySummary = useMemo(() => {
+    if (!selectedTile) return null;
+    const meta =
+      selectedTile.image.metadata && typeof selectedTile.image.metadata === "object"
+        ? (selectedTile.image.metadata as Record<string, unknown>)
+        : {};
+    const estimate = parseGraftTrayAiEstimateSummaryFromMetadata(meta);
+    if (!estimate) return null;
+    return buildGraftTrayIntelligenceSummary({
+      estimate,
+      auditTrail: parseGraftTrayReviewAuditTrail(meta.graft_tray_ai_review_audit),
+      sourceImageHref: `/fi-admin/${tenantId}/patients/${patientId}/imaging?image=${selectedTile.image.id}`,
     });
   }, [selectedTile, tenantId, patientId]);
 
@@ -311,6 +330,13 @@ export function ImagingOsWorkspace({
         <section className="space-y-3">
           {selectedIntelligence ? (
             <ImagingClinicalIntelligencePanel view={selectedIntelligence} />
+          ) : null}
+          {selectedGraftTraySummary ? (
+            <GraftTrayIntelligenceSummaryCard
+              compact
+              summary={selectedGraftTraySummary}
+              title="Reviewed graft tray summary"
+            />
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-slate-300">Library axis</span>
