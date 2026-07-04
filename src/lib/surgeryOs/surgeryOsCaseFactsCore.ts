@@ -3,10 +3,12 @@
  * Pure — maps SurgeryOS board payload shapes to outcome intelligence fact input.
  */
 
+import type { ResolveHairAuditLinkForSurgeryInput } from "@/src/lib/outcomeIntelligence/hairAuditLinkCore";
 import {
   mapSurgeryCaseIntelligenceFacts,
   type SurgeryCaseIntelligenceFacts,
 } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsCore";
+import type { SurgeryImagingIntelligenceImageInput } from "@/src/lib/outcomeIntelligence/surgeryImagingIntelligenceSummaryCore";
 import type {
   SurgeryOsGraftSummary,
   SurgeryOsGraftTrayLinkSummary,
@@ -28,6 +30,8 @@ export type BuildSurgeryOsCaseIntelligenceFactsInput = {
   procedurePhase?: string | null;
   liveStatus?: string | null;
   graftSummary: SurgeryOsGraftSummary;
+  imagingImages?: readonly SurgeryImagingIntelligenceImageInput[];
+  hairAuditLink?: ResolveHairAuditLinkForSurgeryInput;
 };
 
 function mapTrayLink(link: SurgeryOsGraftTrayLinkSummary) {
@@ -66,5 +70,7 @@ export function buildSurgeryOsCaseIntelligenceFacts(
     confirmedTrayGrafts: graft.confirmedTrayGrafts,
     trayImageLinks: graft.trayImageLinks.map(mapTrayLink),
     graftTrayIntelligence: graft.graftTrayIntelligence,
+    imagingImages: input.imagingImages,
+    hairAuditLink: input.hairAuditLink,
   });
 }

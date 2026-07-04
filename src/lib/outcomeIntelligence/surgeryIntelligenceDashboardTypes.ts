@@ -1,4 +1,5 @@
 import type { GraftTrayFinalCountSource } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import type { SurgeryImagingIntelligenceSummaryFacts } from "./surgeryImagingIntelligenceSummaryCore";
 
 export const SURGERY_INTELLIGENCE_GRAFT_COUNT_SOURCE_FILTERS = [
   "all",
@@ -44,6 +45,7 @@ export type SurgeryIntelligencePublishedCaseRow = {
   teamFiUserIds: string[];
   graftTrayAiEstimate: number | null;
   graftTrayManualCount: number | null;
+  imagingIntelligenceSummary: SurgeryImagingIntelligenceSummaryFacts | null;
 };
 
 export type SurgeryIntelligenceSourceSplit = {
@@ -65,6 +67,11 @@ export type SurgeryIntelligenceDashboardMetrics = {
   imageQualityDistribution: Record<string, number>;
   casesNeedingReview: number;
   casesMissingFinalCount: number;
+  casesAuditReady: number;
+  casesBeforeAfterReady: number;
+  averageImagingCompletenessScore: number | null;
+  casesWithImagingGaps: number;
+  imagingAuditReadinessDistribution: Record<string, number>;
 };
 
 export type SurgeryIntelligenceDashboardTableRow = {
@@ -89,6 +96,13 @@ export type SurgeryIntelligenceDashboardTableRow = {
   hairAuditAdminHref: string | null;
   hairAuditReportHref: string | null;
   hairAuditLinkageConflict: boolean;
+  imagingCompletenessScore: number;
+  imagingCompletenessLabel: string;
+  imagingAuditReadinessLabel: string;
+  imagingAuditReady: boolean;
+  imagingBeforeAfterReady: boolean;
+  imagingMissingRequirementsCount: number;
+  poorQualityImageCount: number;
 };
 
 export type SurgeryIntelligenceDashboardFilterOptions = {

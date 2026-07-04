@@ -26,7 +26,9 @@ import {
   GRAFT_TRAY_MISMATCH_BANDS,
 } from "@/src/lib/imaging-os/graftTrayCountTypes";
 import { GRAFT_TRAY_FINAL_COUNT_SOURCES } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import { HAIRAUDIT_LINK_ORIGINS } from "@/src/lib/outcomeIntelligence/hairAuditLinkCore";
 import { SURGERY_CASE_INTELLIGENCE_FACTS_VERSION } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsCore";
+import { SURGERY_IMAGING_INTELLIGENCE_GROUPS } from "@/src/lib/outcomeIntelligence/surgeryImagingIntelligenceSummaryCore";
 import { GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import {
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPES,
@@ -288,6 +290,41 @@ const surgeryCaseGraftTrayLinkFactsSchema = z.object({
   has_final_count: z.boolean(),
 });
 
+const surgeryImagingGroupSummarySchema = z.object({
+  group: z.enum(SURGERY_IMAGING_INTELLIGENCE_GROUPS),
+  image_count: z.number().int().min(0),
+  usable_image_count: z.number().int().min(0),
+  poor_quality_count: z.number().int().min(0),
+  image_ids: z.array(z.string().uuid()),
+  present_views: z.array(z.string()),
+  missing_required_views: z.array(z.string()),
+  complete: z.boolean(),
+});
+
+const surgeryImagingAuditReadinessSchema = z.object({
+  baseline_present: z.boolean(),
+  donor_set_complete: z.boolean(),
+  recipient_set_complete: z.boolean(),
+  immediate_post_op_present: z.boolean(),
+  follow_up_captured_or_due: z.boolean(),
+  reviewed_graft_count_present: z.boolean(),
+  hairaudit_link_resolved: z.boolean(),
+  hairaudit_linkage_conflict: z.boolean(),
+  before_after_ready: z.boolean(),
+  overall_audit_ready: z.boolean(),
+  missing_requirements: z.array(z.string()),
+});
+
+const surgeryImagingIntelligenceSummaryFactsSchema = z.object({
+  groups: z.array(surgeryImagingGroupSummarySchema),
+  missing_required_views: z.array(z.string()),
+  poor_quality_image_ids: z.array(z.string().uuid()),
+  audit_readiness: surgeryImagingAuditReadinessSchema,
+  completeness_score: z.number().int().min(0).max(100),
+  hairaudit_case_id: z.string().uuid().nullable(),
+  hairaudit_link_origin: z.enum(HAIRAUDIT_LINK_ORIGINS).nullable(),
+});
+
 const graftTrayOutcomeFactSchema = z.object({
   fact_kind: z.literal("graft_tray_reviewed_count"),
   source_table: z.literal("fi_imaging_graft_tray_ai_estimates"),
@@ -350,6 +387,7 @@ export const surgeryCaseIntelligenceFactsSchema = z.object({
   graft_tray_links: z.array(surgeryCaseGraftTrayLinkFactsSchema),
   graft_tray_outcome_facts: z.array(graftTrayOutcomeFactSchema),
   confidence_level: z.enum(["unknown", "low", "medium", "high"]),
+  imaging_intelligence_summary: surgeryImagingIntelligenceSummaryFactsSchema.nullish(),
 });
 
 const graftSummarySchema = z.object({

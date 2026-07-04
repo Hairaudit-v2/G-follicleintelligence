@@ -25,9 +25,14 @@ import {
   loadGraftCountEventsForSurgeries,
   loadGraftSessionsForSurgeries,
 } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
+import type { ResolveHairAuditLinkForSurgeryInput } from "@/src/lib/outcomeIntelligence/hairAuditLinkCore";
 import { buildSurgeryOsCaseIntelligenceFacts } from "@/src/lib/surgeryOs/surgeryOsCaseFactsCore";
 import { isMissingDatabaseRelationError } from "@/src/lib/surgeryOs/surgeryOsLoaderResilience";
 import type { SurgeryCaseIntelligenceFacts } from "./surgeryCaseFactsCore";
+import {
+  mapPatientImageRowToSurgeryImagingInput,
+  type SurgeryImagingIntelligenceImageInput,
+} from "./surgeryImagingIntelligenceSummaryCore";
 import type { SurgeryOsGraftSummary } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 
 type SurgeryPublishRow = {
@@ -112,6 +117,115 @@ async function loadReviewerLabels(
     out.set(row.id, label);
   }
   return out;
+}
+
+type PatientImagePublishRow = {
+  id: string;
+  image_category?: string | null;
+  anatomical_region?: string | null;
+  visit_type?: string | null;
+  follow_up_interval?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
+
+async function loadPatientImagesForSurgeryPublish(
+  client: SupabaseClient,
+  tenantId: string,
+  surgery: SurgeryPublishRow
+): Promise<SurgeryImagingIntelligenceImageInput[]> {
+  if (!surgery.case_id && !surgery.patient_id) return [];
+
+  let query = client
+    .from("fi_patient_images")
+    .select("id, image_category, anatomical_region, visit_type, follow_up_interval, metadata")
+    .eq("tenant_id", tenantId);
+
+  if (surgery.case_id) {
+    query = query.eq("case_id", surgery.case_id);
+  } else {
+    query = query.eq("patient_id", surgery.patient_id!);
+  }
+
+  const { data, error } = await query.limit(500);
+  if (error) {
+    if (isMissingDatabaseRelationError(error)) return [];
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).map((row) =>
+    mapPatientImageRowToSurgeryImagingInput(row as PatientImagePublishRow)
+  );
+}
+
+async function loadHairAuditLinkInputForPublish(
+  client: SupabaseClient,
+  tenantId: string,
+  surgery: SurgeryPublishRow
+): Promise<ResolveHairAuditLinkForSurgeryInput> {
+  const base: ResolveHairAuditLinkForSurgeryInput = {
+    tenantId,
+    surgeryId: surgery.id,
+    caseId: surgery.case_id,
+    patientId: surgery.patient_id,
+  };
+  if (!surgery.case_id) return base;
+
+  const caseId = surgery.case_id;
+  let caseMetadata: Record<string, unknown> = {};
+  let fiReportId: string | null = null;
+  const globalCaseSourceIds: Array<{ source_system: string; source_case_id: string }> = [];
+
+  const { data: caseRow, error: caseError } = await client
+    .from("fi_cases")
+    .select("metadata")
+    .eq("tenant_id", tenantId)
+    .eq("id", caseId)
+    .maybeSingle();
+  if (caseError) {
+    if (!isMissingDatabaseRelationError(caseError)) throw new Error(caseError.message);
+  } else {
+    const metadata = (caseRow as { metadata?: unknown } | null)?.metadata;
+    caseMetadata =
+      metadata && typeof metadata === "object" && !Array.isArray(metadata)
+        ? (metadata as Record<string, unknown>)
+        : {};
+  }
+
+  const { data: reports, error: reportsError } = await client
+    .from("fi_reports")
+    .select("id, created_at")
+    .eq("tenant_id", tenantId)
+    .eq("case_id", caseId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  if (reportsError) {
+    if (!isMissingDatabaseRelationError(reportsError)) throw new Error(reportsError.message);
+  } else if (reports?.[0]) {
+    fiReportId = String((reports[0] as { id: string }).id);
+  }
+
+  const { data: globalCases, error: globalError } = await client
+    .from("fi_global_cases")
+    .select("source_system, source_case_id")
+    .eq("tenant_id", tenantId)
+    .eq("fi_case_id", caseId);
+  if (globalError) {
+    if (!isMissingDatabaseRelationError(globalError)) throw new Error(globalError.message);
+  } else {
+    for (const row of globalCases ?? []) {
+      globalCaseSourceIds.push({
+        source_system: String((row as { source_system: string }).source_system),
+        source_case_id: String((row as { source_case_id: string }).source_case_id),
+      });
+    }
+  }
+
+  return {
+    ...base,
+    caseMetadata,
+    fiReportId,
+    globalCaseSourceIds,
+  };
 }
 
 function emptyGraftSessionTotals(surgery: SurgeryPublishRow) {
@@ -266,11 +380,14 @@ export async function loadAndBuildSurgeryCaseIntelligenceFactsForPublish(input: 
   const surgery = await loadSurgeryRowForPublish(client, tid, sid);
   if (!surgery) return { facts: null, clinicId: null };
 
-  const [graftSessionsBySurgery, graftEventsBySurgery, teamFiUserIds] = await Promise.all([
-    loadGraftSessionsForSurgeries(tid, [sid]),
-    loadGraftCountEventsForSurgeries(tid, [sid]),
-    loadTeamFiUserIds(client, tid, sid),
-  ]);
+  const [graftSessionsBySurgery, graftEventsBySurgery, teamFiUserIds, imagingImages, hairAuditLink] =
+    await Promise.all([
+      loadGraftSessionsForSurgeries(tid, [sid]),
+      loadGraftCountEventsForSurgeries(tid, [sid]),
+      loadTeamFiUserIds(client, tid, sid),
+      loadPatientImagesForSurgeryPublish(client, tid, surgery),
+      loadHairAuditLinkInputForPublish(client, tid, surgery),
+    ]);
 
   let trayLinksBySurgery: Awaited<ReturnType<typeof loadGraftTrayLinksForSurgeries>> = new Map();
   let trayIntelligenceByImage = new Map<
@@ -357,6 +474,8 @@ export async function loadAndBuildSurgeryCaseIntelligenceFactsForPublish(input: 
     procedurePhase: surgery.procedure_phase,
     liveStatus: surgery.live_status,
     graftSummary,
+    imagingImages,
+    hairAuditLink,
   });
 
   return { facts, clinicId: surgery.clinic_id ?? null };

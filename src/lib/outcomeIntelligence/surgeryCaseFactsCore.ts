@@ -21,6 +21,13 @@ import type {
 import type { GraftTrayAiReviewDisplayState } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import type { FiOutcomeConfidenceLevel } from "@/src/lib/fi-os/outcomeIntelligenceSignals";
 import { deriveOutcomeConfidenceLevel } from "@/src/lib/fi-os/outcomeIntelligenceSignals";
+import {
+  buildSurgeryImagingIntelligenceSummary,
+  toSurgeryImagingIntelligenceSummaryFacts,
+  type SurgeryImagingIntelligenceImageInput,
+  type SurgeryImagingIntelligenceSummaryFacts,
+} from "./surgeryImagingIntelligenceSummaryCore";
+import type { ResolveHairAuditLinkForSurgeryInput } from "./hairAuditLinkCore";
 
 export const SURGERY_CASE_INTELLIGENCE_FACTS_VERSION =
   "surgery_case_intelligence_facts_v1" as const;
@@ -84,6 +91,7 @@ export type SurgeryCaseIntelligenceFacts = {
   graft_tray_links: SurgeryCaseGraftTrayLinkFacts[];
   graft_tray_outcome_facts: GraftTrayOutcomeIntelligenceFact[];
   confidence_level: FiOutcomeConfidenceLevel;
+  imaging_intelligence_summary: SurgeryImagingIntelligenceSummaryFacts | null;
 };
 
 export type SurgeryCaseFactsTrayLinkInput = {
@@ -140,6 +148,8 @@ export type SurgeryCaseFactsInput = {
   confirmedTrayGrafts: number;
   trayImageLinks: SurgeryCaseFactsTrayLinkInput[];
   graftTrayIntelligence: SurgeryCaseFactsGraftTrayRollupInput;
+  imagingImages?: readonly SurgeryImagingIntelligenceImageInput[];
+  hairAuditLink?: ResolveHairAuditLinkForSurgeryInput;
 };
 
 function mapLinkFacts(link: SurgeryCaseFactsTrayLinkInput): SurgeryCaseGraftTrayLinkFacts {
@@ -275,6 +285,24 @@ export function mapSurgeryCaseIntelligenceFacts(
     graft_tray_reviewed_count: rollup?.reviewedTrayCount ?? 0,
   };
 
+  const imagingSummary = toSurgeryImagingIntelligenceSummaryFacts(
+    buildSurgeryImagingIntelligenceSummary({
+      tenantId: input.tenantId,
+      surgeryId: input.surgeryId,
+      caseId: input.caseId,
+      patientId: input.patientId,
+      procedureDate: input.procedureDate,
+      images: input.imagingImages ?? [],
+      hasReviewedGraftCount: hasFinalGraftCount,
+      hairAuditLink: input.hairAuditLink ?? {
+        tenantId: input.tenantId,
+        surgeryId: input.surgeryId,
+        caseId: input.caseId,
+        patientId: input.patientId,
+      },
+    })
+  );
+
   return {
     facts_version: SURGERY_CASE_INTELLIGENCE_FACTS_VERSION,
     tenant_id: input.tenantId,
@@ -322,5 +350,6 @@ export function mapSurgeryCaseIntelligenceFacts(
       sourceId: input.graftSessionId,
       metricValues,
     }),
+    imaging_intelligence_summary: imagingSummary,
   };
 }

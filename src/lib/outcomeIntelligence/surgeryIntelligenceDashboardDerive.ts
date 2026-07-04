@@ -13,6 +13,11 @@ import {
   formatHairAuditLinkDashboardLabel,
   resolveHairAuditLinkForSurgery,
 } from "./hairAuditLinkCore";
+import {
+  formatSurgeryImagingAuditReadinessLabel,
+  formatSurgeryImagingCompletenessLabel,
+  type SurgeryImagingIntelligenceSummaryFacts,
+} from "./surgeryImagingIntelligenceSummaryCore";
 import type {
   SurgeryIntelligenceDashboardFilters,
   SurgeryIntelligenceDashboardMetrics,
@@ -34,6 +39,14 @@ function readPayloadJson(metadata: Record<string, unknown>): SurgeryCaseIntellig
   const payload = metadata.payload_json;
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
   return payload as SurgeryCaseIntelligenceFacts;
+}
+
+function readImagingSummary(
+  facts: SurgeryCaseIntelligenceFacts
+): SurgeryImagingIntelligenceSummaryFacts | null {
+  const summary = facts.imaging_intelligence_summary;
+  if (!summary || typeof summary !== "object" || Array.isArray(summary)) return null;
+  return summary;
 }
 
 export function parsePublishedSurgeryCaseIntelligenceEvent(
@@ -75,6 +88,7 @@ export function parsePublishedSurgeryCaseIntelligenceEvent(
     teamFiUserIds: [...new Set((facts.team_fi_user_ids ?? []).filter(Boolean))],
     graftTrayAiEstimate: facts.graft_tray_ai_estimate,
     graftTrayManualCount: facts.graft_tray_manual_count,
+    imagingIntelligenceSummary: readImagingSummary(facts),
   };
 }
 
@@ -171,10 +185,30 @@ export function buildSurgeryIntelligenceDashboardMetrics(
   const mismatchBandDistribution: Record<string, number> = {};
   const confidenceBandDistribution: Record<string, number> = {};
   const imageQualityDistribution: Record<string, number> = {};
+  const imagingAuditReadinessDistribution: Record<string, number> = {};
+  const imagingScores: number[] = [];
+  let casesAuditReady = 0;
+  let casesBeforeAfterReady = 0;
+  let casesWithImagingGaps = 0;
+
   for (const row of rows) {
     incrementDistribution(mismatchBandDistribution, row.mismatchBand);
     incrementDistribution(confidenceBandDistribution, row.confidenceBand);
     incrementDistribution(imageQualityDistribution, row.imageQuality);
+
+    const imaging = row.imagingIntelligenceSummary;
+    if (imaging) {
+      imagingScores.push(imaging.completeness_score);
+      if (imaging.completeness_score < 100) casesWithImagingGaps += 1;
+      if (imaging.audit_readiness.overall_audit_ready) casesAuditReady += 1;
+      if (imaging.audit_readiness.before_after_ready) casesBeforeAfterReady += 1;
+      incrementDistribution(
+        imagingAuditReadinessDistribution,
+        formatSurgeryImagingAuditReadinessLabel(imaging.audit_readiness)
+      );
+    } else {
+      incrementDistribution(imagingAuditReadinessDistribution, "Not started");
+    }
   }
 
   return {
@@ -196,6 +230,16 @@ export function buildSurgeryIntelligenceDashboardMetrics(
     casesNeedingReview: rows.filter((r) => r.graftTrayReviewPending || !r.hasFinalGraftCount)
       .length,
     casesMissingFinalCount: rows.filter((r) => !r.hasFinalGraftCount).length,
+    casesAuditReady,
+    casesBeforeAfterReady,
+    averageImagingCompletenessScore:
+      imagingScores.length > 0
+        ? Math.round(
+            (imagingScores.reduce((sum, score) => sum + score, 0) / imagingScores.length) * 10
+          ) / 10
+        : null,
+    casesWithImagingGaps,
+    imagingAuditReadinessDistribution,
   };
 }
 
@@ -242,6 +286,14 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
             : [],
       });
 
+      const imaging = row.imagingIntelligenceSummary;
+      const imagingCompletenessScore = imaging?.completeness_score ?? 0;
+      const imagingAuditReadiness = imaging?.audit_readiness ?? {
+        overall_audit_ready: false,
+        before_after_ready: false,
+        hairaudit_linkage_conflict: hairAuditLink.linkage_conflict,
+      };
+
       return {
         eventId: row.eventId,
         procedureDate: row.procedureDate,
@@ -264,6 +316,19 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
         hairAuditAdminHref: hairAuditLink.hrefs.hairaudit_admin_href,
         hairAuditReportHref: hairAuditLink.hrefs.audit_report_href,
         hairAuditLinkageConflict: hairAuditLink.linkage_conflict,
+        imagingCompletenessScore,
+        imagingCompletenessLabel: formatSurgeryImagingCompletenessLabel(imagingCompletenessScore),
+        imagingAuditReadinessLabel: formatSurgeryImagingAuditReadinessLabel(
+          imaging?.audit_readiness ?? {
+            overall_audit_ready: false,
+            before_after_ready: false,
+            hairaudit_linkage_conflict: hairAuditLink.linkage_conflict,
+          }
+        ),
+        imagingAuditReady: imagingAuditReadiness.overall_audit_ready,
+        imagingBeforeAfterReady: imagingAuditReadiness.before_after_ready,
+        imagingMissingRequirementsCount: imaging?.audit_readiness.missing_requirements.length ?? 0,
+        poorQualityImageCount: imaging?.poor_quality_image_ids.length ?? 0,
       };
     });
 }

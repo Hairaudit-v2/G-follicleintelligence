@@ -63,6 +63,93 @@ function factsPayload(overrides: Record<string, unknown> = {}) {
     graft_tray_links: [],
     graft_tray_outcome_facts: [],
     confidence_level: "high",
+    imaging_intelligence_summary: null,
+    ...overrides,
+  };
+}
+
+function completeImagingSummaryFacts(overrides: Record<string, unknown> = {}) {
+  return {
+    groups: [
+      {
+        group: "baseline_pre_op",
+        image_count: 3,
+        usable_image_count: 3,
+        poor_quality_count: 0,
+        image_ids: ["11111111-1111-4111-8111-111111111111"],
+        present_views: ["crown", "front", "top"],
+        missing_required_views: [],
+        complete: true,
+      },
+      {
+        group: "donor",
+        image_count: 1,
+        usable_image_count: 1,
+        poor_quality_count: 0,
+        image_ids: ["22222222-2222-4222-8222-222222222222"],
+        present_views: ["donor"],
+        missing_required_views: [],
+        complete: true,
+      },
+      {
+        group: "recipient",
+        image_count: 3,
+        usable_image_count: 3,
+        poor_quality_count: 0,
+        image_ids: ["33333333-3333-4333-8333-333333333333"],
+        present_views: ["front", "recipient", "top"],
+        missing_required_views: [],
+        complete: true,
+      },
+      {
+        group: "graft_tray",
+        image_count: 1,
+        usable_image_count: 1,
+        poor_quality_count: 0,
+        image_ids: ["44444444-4444-4444-8444-444444444444"],
+        present_views: ["graft_tray"],
+        missing_required_views: [],
+        complete: true,
+      },
+      {
+        group: "immediate_post_op",
+        image_count: 2,
+        usable_image_count: 2,
+        poor_quality_count: 0,
+        image_ids: ["55555555-5555-4555-8555-555555555555"],
+        present_views: ["front", "top"],
+        missing_required_views: [],
+        complete: true,
+      },
+      {
+        group: "follow_up",
+        image_count: 3,
+        usable_image_count: 3,
+        poor_quality_count: 0,
+        image_ids: ["66666666-6666-4666-8666-666666666666"],
+        present_views: ["crown", "front", "top"],
+        missing_required_views: [],
+        complete: true,
+      },
+    ],
+    missing_required_views: [],
+    poor_quality_image_ids: [],
+    audit_readiness: {
+      baseline_present: true,
+      donor_set_complete: true,
+      recipient_set_complete: true,
+      immediate_post_op_present: true,
+      follow_up_captured_or_due: true,
+      reviewed_graft_count_present: true,
+      hairaudit_link_resolved: true,
+      hairaudit_linkage_conflict: false,
+      before_after_ready: true,
+      overall_audit_ready: true,
+      missing_requirements: [],
+    },
+    completeness_score: 100,
+    hairaudit_case_id: "66666666-6666-4666-8666-666666666666",
+    hairaudit_link_origin: "legacy",
     ...overrides,
   };
 }
@@ -253,6 +340,60 @@ describe("surgeryIntelligenceDashboardDerive", () => {
       `/fi-admin/${TENANT_A}/audit/77777777-7777-4777-8777-777777777777`
     );
     assert.equal(composed.tableRows[0]?.hairAuditLinkageConflict, false);
+  });
+
+  it("surfaces imaging completeness and audit readiness on dashboard rows and metrics", () => {
+    const composed = composeSurgeryIntelligenceDashboardFromEvents({
+      tenantId: TENANT_A,
+      filters: {},
+      events: [
+        analyticsEvent({
+          occurredAt: "2026-07-04T10:00:00.000Z",
+          payload: factsPayload({
+            imaging_intelligence_summary: completeImagingSummaryFacts(),
+          }),
+        }),
+        analyticsEvent({
+          occurredAt: "2026-07-05T10:00:00.000Z",
+          payload: factsPayload({
+            case_id: "88888888-8888-4888-8888-888888888888",
+            surgery_id: "99999999-9999-4999-8999-999999999999",
+            imaging_intelligence_summary: completeImagingSummaryFacts({
+              completeness_score: 50,
+              audit_readiness: {
+                baseline_present: true,
+                donor_set_complete: false,
+                recipient_set_complete: false,
+                immediate_post_op_present: false,
+                follow_up_captured_or_due: false,
+                reviewed_graft_count_present: false,
+                hairaudit_link_resolved: false,
+                hairaudit_linkage_conflict: false,
+                before_after_ready: false,
+                overall_audit_ready: false,
+                missing_requirements: ["donor_set", "recipient_set"],
+              },
+              poor_quality_image_ids: ["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"],
+            }),
+          }),
+        }),
+      ],
+    });
+
+    assert.equal(composed.metrics.casesAuditReady, 1);
+    assert.equal(composed.metrics.casesBeforeAfterReady, 1);
+    assert.equal(composed.metrics.casesWithImagingGaps, 1);
+    assert.equal(composed.metrics.averageImagingCompletenessScore, 75);
+
+    const completeRow = composed.tableRows.find((row) => row.caseId === CASE);
+    const partialRow = composed.tableRows.find(
+      (row) => row.caseId === "88888888-8888-4888-8888-888888888888"
+    );
+    assert.equal(completeRow?.imagingCompletenessLabel, "Complete");
+    assert.equal(completeRow?.imagingAuditReadinessLabel, "Audit ready");
+    assert.equal(partialRow?.imagingCompletenessLabel, "Partial");
+    assert.equal(partialRow?.imagingAuditReadinessLabel, "Building");
+    assert.equal(partialRow?.poorQualityImageCount, 1);
   });
 
   it("read-only loader does not import publisher write paths", () => {

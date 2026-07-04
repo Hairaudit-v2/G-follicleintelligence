@@ -54,7 +54,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
         <SectionHeader
           kicker="Outcome Intelligence"
           title="Surgery case intelligence"
-          description="Read-only view of published graft-tray and surgery facts from the analytics event pipeline. Facts are not rebuilt from live SurgeryOS state on this page."
+          description="Read-only view of published graft-tray, surgery imaging, and audit-readiness facts from the analytics event pipeline. Facts are not rebuilt from live SurgeryOS state on this page."
         />
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#64748B]">
           <span>
@@ -75,7 +75,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
         filterOptions={data.filterOptions}
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Reviewed cases (final count)"
           value={data.metrics.totalReviewedCasesWithFinalCount}
@@ -94,6 +94,19 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
           label="Cases needing review"
           value={data.metrics.casesNeedingReview}
           icon={<ClipboardList size={20} />}
+        />
+        <StatCard
+          label="Audit-ready cases"
+          value={data.metrics.casesAuditReady}
+          icon={<Camera size={20} />}
+        />
+        <StatCard
+          label="Avg imaging completeness"
+          value={
+            data.metrics.averageImagingCompletenessScore != null
+              ? `${data.metrics.averageImagingCompletenessScore}%`
+              : "—"
+          }
         />
       </div>
 
@@ -135,7 +148,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
         </DashboardCard>
 
         <DashboardCard className="p-5">
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <DistributionList
               title="Mismatch band"
               distribution={data.metrics.mismatchBandDistribution}
@@ -148,7 +161,15 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
               title="Image quality"
               distribution={data.metrics.imageQualityDistribution}
             />
+            <DistributionList
+              title="Imaging audit readiness"
+              distribution={data.metrics.imagingAuditReadinessDistribution}
+            />
           </div>
+          <p className="mt-4 text-sm text-[#64748B]">
+            Before/after ready: {data.metrics.casesBeforeAfterReady} · Imaging gaps:{" "}
+            {data.metrics.casesWithImagingGaps}
+          </p>
         </DashboardCard>
       </div>
 
@@ -171,6 +192,8 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                 <th className="px-4 py-3 font-semibold">Confidence</th>
                 <th className="px-4 py-3 font-semibold">Quality</th>
                 <th className="px-4 py-3 font-semibold">Reviewer</th>
+                <th className="px-4 py-3 font-semibold">Imaging</th>
+                <th className="px-4 py-3 font-semibold">Audit readiness</th>
                 <th className="px-4 py-3 font-semibold">HairAudit</th>
                 <th className="px-4 py-3 font-semibold">Links</th>
               </tr>
@@ -178,7 +201,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
             <tbody>
               {data.tableRows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-[#64748B]">
+                  <td colSpan={12} className="px-4 py-8 text-center text-[#64748B]">
                     No published surgery intelligence facts match the current filters.
                   </td>
                 </tr>
@@ -203,6 +226,40 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                     <td className="px-4 py-3">{row.confidenceBand ?? "—"}</td>
                     <td className="px-4 py-3">{row.imageQuality ?? "—"}</td>
                     <td className="px-4 py-3">{row.reviewerLabel ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <span className="font-medium text-[#F1F5F9]">
+                          {row.imagingCompletenessLabel}
+                        </span>
+                        <div className="text-xs text-[#64748B]">
+                          {row.imagingCompletenessScore}% complete
+                          {row.poorQualityImageCount > 0
+                            ? ` · ${row.poorQualityImageCount} poor quality`
+                            : ""}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <span
+                          className={
+                            row.imagingAuditReady
+                              ? "text-emerald-300"
+                              : row.imagingBeforeAfterReady
+                                ? "text-sky-300"
+                                : "text-[#CBD5E1]"
+                          }
+                        >
+                          {row.imagingAuditReadinessLabel}
+                        </span>
+                        {row.imagingMissingRequirementsCount > 0 ? (
+                          <div className="text-xs text-[#64748B]">
+                            {row.imagingMissingRequirementsCount} requirement
+                            {row.imagingMissingRequirementsCount === 1 ? "" : "s"} open
+                          </div>
+                        ) : null}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
                         <span

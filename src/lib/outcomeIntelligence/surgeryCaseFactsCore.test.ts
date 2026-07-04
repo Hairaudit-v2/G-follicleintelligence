@@ -103,6 +103,8 @@ describe("mapSurgeryCaseIntelligenceFacts", () => {
     assert.equal(facts.extracted_grafts, 1200);
     assert.deepEqual(facts.graft_tray_image_ids, [IMAGE]);
     assert.equal(facts.graft_tray_outcome_facts.length, 1);
+    assert.ok(facts.imaging_intelligence_summary);
+    assert.equal(typeof facts.imaging_intelligence_summary.completeness_score, "number");
   });
 
   it("manual/override count produces case facts", () => {
