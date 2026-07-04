@@ -17,11 +17,11 @@ export default async function StaffHrTaskMapPage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: Promise<{ staffId?: string }>;
+  searchParams: Promise<{ staffId?: string; category?: string; task?: string }>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const { staffId } = await searchParams;
+  const { staffId, category, task } = await searchParams;
   if (!tenantId?.trim()) notFound();
 
   const access = await resolveHrOsRouteAccess(tenantId.trim());
@@ -35,7 +35,12 @@ export default async function StaffHrTaskMapPage({
 
   return (
     <div className="mx-auto max-w-4xl pb-8">
-      <StaffHrTaskMapClient tenantId={tenantId.trim()} staffId={staffId?.trim() ?? null} />
+      <StaffHrTaskMapClient
+        tenantId={tenantId.trim()}
+        staffId={staffId?.trim() ?? null}
+        initialCategory={category?.trim() ?? null}
+        initialTaskId={task?.trim() ?? null}
+      />
     </div>
   );
 }

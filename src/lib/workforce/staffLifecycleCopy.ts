@@ -46,11 +46,25 @@ export function buildWorkforceCommandCentreHref(tenantId: string): string {
   return `${tenantAdminBase(tenantId)}/workforce-os`;
 }
 
-export function buildStaffHrTaskMapHref(tenantId: string, staffId?: string): string {
+export type StaffHrTaskMapHrefOptions = {
+  staffId?: string;
+  category?: string;
+  taskId?: string;
+};
+
+export function buildStaffHrTaskMapHref(
+  tenantId: string,
+  options?: string | StaffHrTaskMapHrefOptions
+): string {
   const base = `${tenantAdminBase(tenantId)}/workforce-os/hr-task-map`;
-  if (!staffId?.trim()) return base;
-  const params = new URLSearchParams({ staffId: staffId.trim() });
-  return `${base}?${params.toString()}`;
+  const resolved: StaffHrTaskMapHrefOptions =
+    typeof options === "string" ? { staffId: options } : (options ?? {});
+  const params = new URLSearchParams();
+  if (resolved.staffId?.trim()) params.set("staffId", resolved.staffId.trim());
+  if (resolved.category?.trim()) params.set("category", resolved.category.trim());
+  if (resolved.taskId?.trim()) params.set("task", resolved.taskId.trim());
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
 }
 
 export function buildStaffDirectoryHref(tenantId: string): string {

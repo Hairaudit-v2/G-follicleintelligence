@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
 import {
   buildStaffHrTaskMap,
+  findStaffHrTaskById,
   groupStaffHrTasksByCategory,
   STAFF_HR_TASK_CATEGORY_LABELS,
   type StaffHrTaskCategory,
   type StaffHrTaskDefinition,
 } from "@/src/lib/workforce/staffHrTaskMapCore";
-import { buildStaffProfileHref, buildWorkforceCommandCentreHref } from "@/src/lib/workforce/staffLifecycleCopy";
+import { parseStaffHrTaskMapCategoryParam } from "@/src/lib/workforce/staffHrTaskMapBannerCore";
+import { buildStaffProfileHref, buildStaffHrTaskMapHref, buildWorkforceCommandCentreHref } from "@/src/lib/workforce/staffLifecycleCopy";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ORDER: StaffHrTaskCategory[] = [
@@ -27,7 +29,8 @@ const CATEGORY_ORDER: StaffHrTaskCategory[] = [
 
 function TaskCard({ task }: { task: StaffHrTaskDefinition }) {
   return (
-    <DashboardCard className="p-4" data-testid={`hr-task-${task.id}`}>
+    <div id={`hr-task-${task.id}`}>
+      <DashboardCard className="p-4" data-testid={`hr-task-${task.id}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[#F8FAFC]">{task.label}</h3>
@@ -82,20 +85,42 @@ function TaskCard({ task }: { task: StaffHrTaskDefinition }) {
         </div>
       </div>
     </DashboardCard>
+    </div>
   );
 }
 
 export function StaffHrTaskMapClient({
   tenantId,
   staffId,
+  initialCategory,
+  initialTaskId,
 }: {
   tenantId: string;
   staffId?: string | null;
+  initialCategory?: string | null;
+  initialTaskId?: string | null;
 }) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<StaffHrTaskCategory | "all">("all");
-
   const tasks = useMemo(() => buildStaffHrTaskMap(tenantId, staffId ?? undefined), [tenantId, staffId]);
+  const focusedTask = useMemo(
+    () => (initialTaskId ? findStaffHrTaskById(tasks, initialTaskId) : undefined),
+    [tasks, initialTaskId]
+  );
+  const parsedCategory =
+    parseStaffHrTaskMapCategoryParam(initialCategory) ??
+    focusedTask?.category ??
+    null;
+
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<StaffHrTaskCategory | "all">(
+    parsedCategory ?? "all"
+  );
+
+  useEffect(() => {
+    if (!initialTaskId) return;
+    const el = document.getElementById(`hr-task-${initialTaskId}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [initialTaskId, tasks]);
+
   const grouped = useMemo(() => groupStaffHrTasksByCategory(tasks), [tasks]);
 
   const filtered = useMemo(() => {
@@ -110,6 +135,13 @@ export function StaffHrTaskMapClient({
       );
     });
   }, [tasks, query, category]);
+
+  const displayTasks = useMemo(() => {
+    if (initialTaskId && focusedTask) {
+      return [focusedTask];
+    }
+    return filtered;
+  }, [filtered, focusedTask, initialTaskId]);
 
   const commandHref = buildWorkforceCommandCentreHref(tenantId);
 
@@ -187,12 +219,25 @@ export function StaffHrTaskMapClient({
         </div>
       </DashboardCard>
 
-      {query || category !== "all" ? (
+      {initialTaskId && focusedTask ? (
+        <p className="text-xs text-[#94A3B8]" data-testid="hr-task-map-focused-hint">
+          Showing HR task: <span className="text-[#E2E8F0]">{focusedTask.label}</span>
+          {" · "}
+          <Link
+            href={buildStaffHrTaskMapHref(tenantId, staffId ? { staffId } : undefined)}
+            className="text-[#7DD3FC] hover:underline"
+          >
+            View all tasks
+          </Link>
+        </p>
+      ) : null}
+
+      {query || category !== "all" || initialTaskId ? (
         <div className="space-y-3">
-          {filtered.length === 0 ? (
+          {displayTasks.length === 0 ? (
             <p className="text-sm text-[#94A3B8]">No tasks match your search.</p>
           ) : (
-            filtered.map((task) => <TaskCard key={task.id} task={task} />)
+            displayTasks.map((task) => <TaskCard key={task.id} task={task} />)
           )}
         </div>
       ) : (

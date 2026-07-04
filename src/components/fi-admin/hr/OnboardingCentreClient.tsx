@@ -7,6 +7,7 @@ import { useCallback, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { FiOsPendingActionButton } from "@/src/components/fi-os/FiOsPendingActionButton";
+import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import {
   copyOnboardingInviteLinkAction,
@@ -207,6 +208,8 @@ export function OnboardingCentreClient({
           through PIN setup and permissions.
         </p>
       </header>
+
+      <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="onboarding" className="mt-6" />
 
       {!canManage ? (
         <InfoNotice variant="warning" className="mt-6">

@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { RosterShiftDrawer } from "@/src/components/fi/workforce/RosterShiftDrawer";
 import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
@@ -302,6 +303,8 @@ export function RosterCommandCentreView({
           </Link>
         </p>
       </header>
+
+      <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="roster_command_centre" />
 
       <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-4">
         <div className="flex flex-wrap items-end gap-3">

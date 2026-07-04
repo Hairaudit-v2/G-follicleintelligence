@@ -9,7 +9,7 @@ import {
   validateParsedPatientImageIngestContext,
   validateSurgeryOsIngestContext,
 } from "./parsePatientImageIngestionContext";
-import { buildUnifiedIngestMetadataPatch, runUnifiedPatientImageIngest } from "./runUnifiedPatientImageIngest";
+import { runUnifiedPatientImageIngest } from "./runUnifiedPatientImageIngest";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const PATIENT = "33333333-3333-4333-8333-333333333333";
@@ -203,7 +203,7 @@ describe("discriminated ingest preserves unified output", () => {
     assert.equal(fromFlat.imaging_session.view, "graft_tray_overview");
   });
 
-  it("buildUnifiedIngestMetadataPatch unchanged for imaging_os_wizard baseline", () => {
+  it("runUnifiedPatientImageIngest unchanged for imaging_os_wizard baseline", () => {
     const flat = {
       tenant_id: TENANT,
       patient_id: PATIENT,
@@ -216,6 +216,8 @@ describe("discriminated ingest preserves unified output", () => {
       external_category: "front",
     };
     const parsed = parsePatientImageIngestionContext(flat);
-    assert.deepEqual(buildUnifiedIngestMetadataPatch(parsed), buildUnifiedIngestMetadataPatch(flat));
+    assert.deepEqual(runUnifiedPatientImageIngest(parsed), runUnifiedPatientImageIngest(flat));
+    const result = runUnifiedPatientImageIngest(flat);
+    assert.equal(result.canonical_view, result.imaging_os_ingest.canonical_photo_category);
   });
 });

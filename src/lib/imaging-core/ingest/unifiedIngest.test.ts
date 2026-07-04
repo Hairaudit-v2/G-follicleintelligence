@@ -11,7 +11,7 @@ import {
   IMAGING_OS_INGESTION_PIPELINE_VERSION,
 } from "@/src/lib/imaging-os";
 import { buildPatientImageIngestionRequest } from "./buildPatientImageIngestionRequest";
-import { buildUnifiedIngestMetadataPatch, runUnifiedPatientImageIngest } from "./runUnifiedPatientImageIngest";
+import { runUnifiedPatientImageIngest } from "./runUnifiedPatientImageIngest";
 import { buildImagingSessionTaxonomy } from "./sessionTaxonomy";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -193,8 +193,8 @@ describe("runUnifiedPatientImageIngest", () => {
     assert.equal(result.imaging_session.protocol_version, "surgery_day");
   });
 
-  it("buildUnifiedIngestMetadataPatch includes canonical_view", () => {
-    const patch = buildUnifiedIngestMetadataPatch({
+  it("returns canonical_view matching imaging_os_ingest.canonical_photo_category", () => {
+    const result = runUnifiedPatientImageIngest({
       tenant_id: TENANT,
       patient_id: PATIENT,
       image_id: IMAGE,
@@ -205,9 +205,32 @@ describe("runUnifiedPatientImageIngest", () => {
       protocol_slot_slug: "bc_front",
       external_category: "front",
     });
-    assert.ok(patch.imaging_os_ingest);
-    assert.ok(patch.imaging_session);
-    assert.equal(patch.canonical_view, "front");
+    assert.ok(result.imaging_os_ingest);
+    assert.ok(result.imaging_session);
+    assert.equal(result.canonical_view, "front");
+    assert.equal(
+      result.canonical_view,
+      result.imaging_os_ingest.canonical_photo_category
+    );
+  });
+
+  it("produces the same metadata patch shape as the legacy wrapper", () => {
+    const input = {
+      tenant_id: TENANT,
+      patient_id: PATIENT,
+      image_id: IMAGE,
+      storage_bucket: "patient-images",
+      storage_path: STORAGE_PATH,
+      capture_source: "surgery_os",
+      protocol_template_slug: "surgery_day",
+      protocol_slot_slug: "graft_tray_overview",
+    };
+    const result = runUnifiedPatientImageIngest(input);
+    assert.deepEqual(result, {
+      imaging_os_ingest: result.imaging_os_ingest,
+      imaging_session: result.imaging_session,
+      canonical_view: result.imaging_os_ingest.canonical_photo_category,
+    });
   });
 });
 

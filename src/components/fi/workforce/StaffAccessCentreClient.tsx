@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { FiOsPendingActionButton } from "@/src/components/fi-os/FiOsPendingActionButton";
 import {
   copyStaffLoginInviteLinkAction,
@@ -189,6 +190,8 @@ export function StaffAccessCentreClient({
           <p className="mt-1 text-2xl font-semibold text-[#F8FAFC]">{needsLoginCount}</p>
         </div>
       </header>
+
+      <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="staff_access" />
 
       {!canManage ? (
         <InfoNotice variant="warning">

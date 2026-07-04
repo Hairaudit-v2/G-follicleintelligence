@@ -17,6 +17,7 @@ export type { PatientImageIngestionContext } from "./patientImageIngestContextTy
 export type UnifiedPatientImageIngestResult = {
   imaging_os_ingest: ReturnType<typeof buildImagingOsIngestMetadata>;
   imaging_session: ReturnType<typeof buildImagingSessionTaxonomy>;
+  canonical_view: string;
 };
 
 function resolveIngestContext(
@@ -41,8 +42,10 @@ export function runUnifiedPatientImageIngest(
       ? request.metadata.capture_source
       : null);
 
+  const imaging_os_ingest = buildImagingOsIngestMetadata(pipeline);
+
   return {
-    imaging_os_ingest: buildImagingOsIngestMetadata(pipeline),
+    imaging_os_ingest,
     imaging_session: buildImagingSessionTaxonomy({
       capture_source: captureSource,
       protocol_template_slug: ctx.protocol_template_slug,
@@ -52,16 +55,6 @@ export function runUnifiedPatientImageIngest(
       image_category: ctx.image_category,
       upload_source: ctx.upload_source,
     }),
-  };
-}
-
-export function buildUnifiedIngestMetadataPatch(
-  input: FlatPatientImageIngestionContext | ParsedPatientImageIngestContext
-): Record<string, unknown> {
-  const result = runUnifiedPatientImageIngest(input);
-  return {
-    imaging_os_ingest: result.imaging_os_ingest,
-    imaging_session: result.imaging_session,
-    canonical_view: result.imaging_os_ingest.canonical_photo_category,
+    canonical_view: imaging_os_ingest.canonical_photo_category,
   };
 }

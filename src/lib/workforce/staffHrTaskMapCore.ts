@@ -11,7 +11,6 @@ import {
   buildStaffIdentityAuditHref,
   buildStaffProfileHref,
   buildWorkforceCommandCentreHref,
-  buildWorkforceRosterHref,
 } from "@/src/lib/workforce/staffLifecycleCopy";
 import { buildStaffStandardHoursSetupIndexHref } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 
@@ -82,7 +81,6 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
   const hrTaskMapHref = `${buildWorkforceCommandCentreHref(tid)}/hr-task-map`;
   const offboardingHref = `/fi-admin/${tid}/hr-os/offboarding`;
   const readinessHref = `/fi-admin/${tid}/hr/staff-readiness`;
-  const roleReviewHref = `/fi-admin/${tid}/staff/role-review`;
   const standardHoursHref = staffId
     ? `${buildStaffStandardHoursSetupIndexHref(tid)}/${staffId}`
     : buildStaffStandardHoursSetupIndexHref(tid);

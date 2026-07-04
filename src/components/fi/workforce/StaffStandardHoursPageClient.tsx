@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { StaffStandardHoursPanel } from "@/src/components/fi/workforce/StaffStandardHoursPanel";
 import type { DefaultFullTimePattern, RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
@@ -49,6 +50,8 @@ export function StaffStandardHoursIndexClient({
           </Link>
         </p>
       </header>
+
+      <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="standard_hours" />
 
       {!canManage ? (
         <p
@@ -172,6 +175,8 @@ export function StaffStandardHoursEditorClient({
           </Link>
         </p>
       </header>
+
+      <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="standard_hours" />
 
       {!canManage ? (
         <p

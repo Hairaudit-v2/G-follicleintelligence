@@ -7,7 +7,7 @@ import {
   buildPatientPortalImageUploadFields,
   normalizePatientPortalImageSlotSlug,
 } from "@/src/lib/patientPortal/patientPortalImageUploadCore";
-import { buildUnifiedIngestMetadataPatch } from "./runUnifiedPatientImageIngest";
+import { runUnifiedPatientImageIngest } from "./runUnifiedPatientImageIngest";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const PATIENT = "33333333-3333-4333-8333-333333333333";
@@ -63,7 +63,7 @@ describe("patient portal unified ingest routing", () => {
   });
 
   it("produces unified ingest metadata for patient_portal capture", () => {
-    const patch = buildUnifiedIngestMetadataPatch({
+    const patch = runUnifiedPatientImageIngest({
       tenant_id: TENANT,
       patient_id: PATIENT,
       image_id: IMAGE,

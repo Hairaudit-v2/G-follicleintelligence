@@ -10,7 +10,7 @@ import { buildImagingQualityMetadataRecord } from "@/src/lib/imaging-os/imageQua
 import { IMAGING_QUALITY_POLICY_DEFAULTS } from "@/src/lib/imaging-os/imageQualityPolicy";
 import { loadImagingQualityPolicyForTenant } from "@/src/lib/imaging-os/imageQualityPolicy.server";
 import type { ImagingQualityTenantPolicy } from "@/src/lib/imaging-os/imageQualityPolicy";
-import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
+import { runUnifiedPatientImageIngest } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
 import { assertDualWriteStorageGuard } from "./dualWriteStorageGuard.server";
 import {
   planHairAuditPatientImageInsert,
@@ -213,7 +213,7 @@ export async function dualWriteHairAuditImagesToPatientLibrary(
         },
         policy: qualityPolicy,
       });
-      const unifiedIngestPatch = buildUnifiedIngestMetadataPatch({
+      const unifiedIngestPatch = runUnifiedPatientImageIngest({
         tenant_id: tenantId,
         patient_id: patientCtx.patientId,
         image_id: uploadIdsByStoragePath?.[storagePath] ?? fiEventId,

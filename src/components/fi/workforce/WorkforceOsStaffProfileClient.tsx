@@ -13,6 +13,7 @@ import {
   StaffEditModal,
 } from "@/src/components/fi/workforce/StaffLifecycleModals";
 import { StaffLifecyclePanel } from "@/src/components/fi/workforce/StaffLifecyclePanel";
+import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { StaffProfileOverviewPanel } from "@/src/components/fi/workforce/StaffProfileOverviewPanel";
 import type { StaffProfileOverviewModel } from "@/src/lib/workforce/staffProfileHubCore";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
@@ -103,6 +104,12 @@ export function WorkforceOsStaffProfileClient({
           </div>
         ) : null}
       </div>
+
+      <StaffHrTaskMapEntryBanner
+        tenantId={tenantId}
+        surface="staff_profile"
+        staffId={lifecycle.id}
+      />
 
       <nav className="flex flex-wrap gap-2 border-b border-white/10 pb-3" aria-label="Staff profile tabs">
         {TABS.map((item) => (

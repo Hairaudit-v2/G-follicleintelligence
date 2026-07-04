@@ -33,7 +33,7 @@ import type {
   FiImageMetadata,
   PatientImagePostCaptureResult,
 } from "./fiImageAttributionTypes";
-import { buildUnifiedIngestMetadataPatch } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
+import { runUnifiedPatientImageIngest } from "@/src/lib/imaging-core/ingest/runUnifiedPatientImageIngest";
 import { buildPatientImageDerivativeStoragePath } from "./patientImagePaths";
 import { PATIENT_IMAGES_BUCKET_DEFAULT } from "./patientImagePolicy";
 import type { CreatePatientImageUploadInput } from "./patientImageTypes";
@@ -211,7 +211,7 @@ export async function runPatientImagePostCapturePipeline(
       ? (existingRow.metadata as Record<string, unknown>)
       : {};
 
-  const unifiedIngestPatch = buildUnifiedIngestMetadataPatch({
+  const unifiedIngestPatch = runUnifiedPatientImageIngest({
     tenant_id: tid,
     patient_id: pid,
     image_id: existingRow.id,
