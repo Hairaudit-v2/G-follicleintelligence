@@ -34,6 +34,8 @@ import {
   reconcileGrafts,
 } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
 import { SURGERY_OS_GRAFT_TYPES } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import { publishSurgeryCaseIntelligenceFacts } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublisher.server";
+import { loadAndBuildSurgeryCaseIntelligenceFactsForPublish } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublishContext.server";
 
 const optionalAdminKey = z.object({ adminKey: z.string().optional() });
 
@@ -127,6 +129,11 @@ const confirmTrayCountSchema = graftMutationContextSchema.extend({
   tray_event_id: z.string().uuid(),
   approved: z.boolean(),
   note: z.string().max(2000).optional().nullable(),
+});
+
+const rebuildCaseIntelligenceFactsSchema = optionalAdminKey.extend({
+  surgery_id: z.string().uuid(),
+  force: z.boolean().optional(),
 });
 
 function errMsg(e: unknown): string {
@@ -464,6 +471,33 @@ export async function confirmTrayGraftCountAction(
     });
     revalidateSurgeryOsPaths(tenantId);
     return { ok: true as const, data };
+  } catch (e) {
+    return { ok: false as const, error: errMsg(e) };
+  }
+}
+
+export async function rebuildSurgeryCaseIntelligenceFactsAction(
+  tenantId: string,
+  input: z.infer<typeof rebuildCaseIntelligenceFactsSchema>
+) {
+  try {
+    const parsed = rebuildCaseIntelligenceFactsSchema.parse(input);
+    await assertSurgeryOsMutationAllowed(tenantId, "log_event", parsed.adminKey);
+    const { facts, clinicId } = await loadAndBuildSurgeryCaseIntelligenceFactsForPublish({
+      tenantId,
+      surgeryId: parsed.surgery_id,
+    });
+    if (!facts) {
+      return { ok: false as const, error: "No publishable surgery case intelligence facts found." };
+    }
+    const result = await publishSurgeryCaseIntelligenceFacts({
+      tenantId,
+      clinicId,
+      facts,
+      force: parsed.force,
+    });
+    revalidateSurgeryOsPaths(tenantId);
+    return { ok: true as const, data: result };
   } catch (e) {
     return { ok: false as const, error: errMsg(e) };
   }

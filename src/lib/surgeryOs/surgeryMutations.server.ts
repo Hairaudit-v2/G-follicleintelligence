@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishSurgeryEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import { tryPublishSurgeryCaseIntelligenceFactsForSurgery } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublisher.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { parseAppointmentProcedureMetadata } from "@/src/lib/bookings/appointmentMetadata";
 import {
@@ -515,6 +516,10 @@ export async function logSurgeryProcedureEvent(input: {
           actor_fi_user_id: input.actorFiUserId,
         },
         occurredAt: input.occurredAt ?? result.event.occurred_at,
+      });
+      void tryPublishSurgeryCaseIntelligenceFactsForSurgery({
+        tenantId: input.tenantId,
+        surgeryId: input.surgeryId,
       });
       void syncLiveTheatreToCaseProcedure({
         tenantId: input.tenantId,

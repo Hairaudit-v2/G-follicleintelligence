@@ -17,6 +17,8 @@ import {
   resolveCorrectedCountForReviewAction,
   resolveGraftTrayLinkStatusAfterReview,
 } from "./graftTrayCountReviewMutationsCore";
+import { graftTrayReviewStatusHasFinalCount } from "./graftTrayIntelligenceSummaryCore";
+import { tryPublishSurgeryCaseIntelligenceFactsForSurgery } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublisher.server";
 
 export type GraftTrayAiReviewResult = {
   estimateId: string;
@@ -150,6 +152,7 @@ export async function reviewGraftTrayAiEstimate(input: {
     .eq("tenant_id", tid)
     .eq("id", iid);
 
+  let surgeryIdForPublish = updatedRow.surgery_id?.trim() || null;
   if (estimate.graft_tray_link_id) {
     const linkStatus = resolveGraftTrayLinkStatusAfterReview({
       action: input.action,
@@ -164,6 +167,25 @@ export async function reviewGraftTrayAiEstimate(input: {
       })
       .eq("tenant_id", tid)
       .eq("id", estimate.graft_tray_link_id);
+
+    if (!surgeryIdForPublish) {
+      const { data: linkRow } = await client
+        .from("fi_imaging_graft_tray_links")
+        .select("surgery_id")
+        .eq("tenant_id", tid)
+        .eq("id", estimate.graft_tray_link_id)
+        .maybeSingle();
+      surgeryIdForPublish =
+        linkRow && typeof linkRow.surgery_id === "string" ? linkRow.surgery_id.trim() : null;
+    }
+  }
+
+  if (graftTrayReviewStatusHasFinalCount(reviewStatus) && surgeryIdForPublish) {
+    void tryPublishSurgeryCaseIntelligenceFactsForSurgery({
+      tenantId: tid,
+      surgeryId: surgeryIdForPublish,
+      client,
+    });
   }
 
   return {

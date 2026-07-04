@@ -24,6 +24,7 @@ export const SURGERY_EVENTS = [
   "surgery_started",
   "surgery_completed",
   "graft_count_recorded",
+  "surgery_case_intelligence_facts",
 ] as const;
 export type SurgeryAnalyticsEventType = (typeof SURGERY_EVENTS)[number];
 
