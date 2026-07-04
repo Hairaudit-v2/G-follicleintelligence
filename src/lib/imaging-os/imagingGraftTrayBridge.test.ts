@@ -12,6 +12,8 @@ import { collectImagingReviewReasons } from "./clinicalImageAnalysisCore";
 describe("imagingGraftTrayBridgeCore", () => {
   it("detects graft tray captures by slot, category, or region", () => {
     assert.equal(isGraftTrayCapture({ protocolSlotSlug: "graft_tray" }), true);
+    assert.equal(isGraftTrayCapture({ protocolSlotSlug: "graft_tray_overview" }), true);
+    assert.equal(isGraftTrayCapture({ protocolSlotSlug: "graft_tray_close" }), true);
     assert.equal(isGraftTrayCapture({ imageCategory: "graft_tray" }), true);
     assert.equal(isGraftTrayCapture({ anatomicalRegion: "graft_tray" }), true);
     assert.equal(isGraftTrayCapture({ protocolSlotSlug: "donor" }), false);

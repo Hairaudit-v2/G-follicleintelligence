@@ -4,10 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import type { FlatGraftTrayLinkInput, GraftTrayCaptureContext } from "./graftTrayContextTypes";
+import { parseGraftTrayLinkContext } from "./parseGraftTrayLinkContext";
 import {
   buildGraftTrayLinkMetadata,
   deriveGraftTrayReviewReasons,
-  isGraftTrayCapture,
   type GraftTrayLinkStatus,
 } from "./imagingGraftTrayBridgeCore";
 
@@ -34,25 +35,12 @@ export type GraftTrayLinkRow = {
 async function resolveSurgeryIdForContext(
   client: SupabaseClient,
   tenantId: string,
-  input: {
-    surgeryId?: string | null;
-    caseId?: string | null;
-    bookingId?: string | null;
-    metadata?: Record<string, unknown>;
-  }
+  surgery: GraftTrayCaptureContext["surgery"]
 ): Promise<string | null> {
-  const explicit = input.surgeryId?.trim();
+  const explicit = surgery.surgery_id?.trim();
   if (explicit) return explicit;
 
-  const meta = input.metadata ?? {};
-  const surgeryContext =
-    meta.surgery_context && typeof meta.surgery_context === "object"
-      ? (meta.surgery_context as Record<string, unknown>)
-      : null;
-  const fromMeta = surgeryContext?.surgery_id;
-  if (typeof fromMeta === "string" && fromMeta.trim()) return fromMeta.trim();
-
-  const caseId = input.caseId?.trim();
+  const caseId = surgery.case_id?.trim();
   if (caseId) {
     const { data } = await client
       .from("fi_surgeries")
@@ -65,7 +53,7 @@ async function resolveSurgeryIdForContext(
     if (data?.id) return String(data.id);
   }
 
-  const bookingId = input.bookingId?.trim();
+  const bookingId = surgery.booking_id?.trim();
   if (bookingId) {
     const { data } = await client
       .from("fi_surgeries")
@@ -95,62 +83,61 @@ async function resolveGraftSessionId(
   return data?.id ? String(data.id) : null;
 }
 
-export async function linkGraftTrayImageAfterCapture(input: {
-  tenantId: string;
-  patientId: string;
-  imageId: string;
-  protocolSessionId?: string | null;
-  protocolSlotSlug?: string | null;
-  imageCategory?: string | null;
-  anatomicalRegion?: string | null;
-  caseId?: string | null;
-  bookingId?: string | null;
-  surgeryId?: string | null;
-  capturedByStaffId?: string | null;
-  captureSource?: string | null;
-  metadata?: Record<string, unknown>;
-  qualityNeedsReview?: boolean;
-  client?: SupabaseClient;
-}): Promise<GraftTrayLinkRow | null> {
-  if (
-    !isGraftTrayCapture({
-      protocolSlotSlug: input.protocolSlotSlug,
-      imageCategory: input.imageCategory,
-      anatomicalRegion: input.anatomicalRegion,
-      metadata: input.metadata,
-    })
-  ) {
+function isParsedGraftTrayCaptureContext(
+  input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
+): input is GraftTrayCaptureContext {
+  return "kind" in input && input.kind === "graft_tray_capture";
+}
+
+function resolveCaptureContext(
+  input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
+): GraftTrayCaptureContext | null {
+  if (isParsedGraftTrayCaptureContext(input)) {
+    return input;
+  }
+  return parseGraftTrayLinkContext(input);
+}
+
+export async function linkGraftTrayImageAfterCapture(
+  input: FlatGraftTrayLinkInput | GraftTrayCaptureContext
+): Promise<GraftTrayLinkRow | null> {
+  const ctx = resolveCaptureContext(input);
+  if (!ctx) {
     return null;
   }
 
-  const client = input.client ?? supabaseAdmin();
-  const tid = input.tenantId.trim();
-  const pid = input.patientId.trim();
-  const imageId = input.imageId.trim();
+  const client = "client" in input && input.client ? input.client : supabaseAdmin();
+  const tid = ctx.tenant_id;
+  const pid = ctx.patient_id;
+  const imageId = ctx.image_id;
 
-  const surgeryId = await resolveSurgeryIdForContext(client, tid, {
-    surgeryId: input.surgeryId,
-    caseId: input.caseId,
-    bookingId: input.bookingId,
-    metadata: input.metadata,
-  });
+  const surgeryId = await resolveSurgeryIdForContext(client, tid, ctx.surgery);
   const graftSessionId = await resolveGraftSessionId(client, tid, surgeryId);
 
   const reviewReasons = deriveGraftTrayReviewReasons({
     reviewRequired: true,
     reconciliationEvidenceRequired: true,
-    qualityNeedsReview: input.qualityNeedsReview === true,
-    missingProtocolSlot: !input.protocolSlotSlug?.trim(),
+    qualityNeedsReview: ctx.quality_needs_review === true,
+    missingProtocolSlot: !ctx.protocol.protocol_slot_slug?.trim(),
   });
 
   const now = new Date().toISOString();
+  const surgeryContextMeta =
+    ctx.metadata?.surgery_context && typeof ctx.metadata.surgery_context === "object"
+      ? (ctx.metadata.surgery_context as Record<string, unknown>)
+      : ctx.metadata?.vie_surgery_context && typeof ctx.metadata.vie_surgery_context === "object"
+        ? (ctx.metadata.vie_surgery_context as Record<string, unknown>)
+        : {
+            surgery_id: surgeryId,
+            case_id: ctx.surgery.case_id,
+            booking_id: ctx.surgery.booking_id,
+            procedure_day_id: ctx.surgery.procedure_day_id,
+          };
+
   const linkMetadata = buildGraftTrayLinkMetadata({
-    captureSource: input.captureSource?.trim() || "surgery_os",
-    protocolSessionId: input.protocolSessionId,
-    surgeryContext:
-      input.metadata?.surgery_context && typeof input.metadata.surgery_context === "object"
-        ? (input.metadata.surgery_context as Record<string, unknown>)
-        : null,
+    captureSource: ctx.protocol.capture_source,
+    protocolSessionId: ctx.protocol.protocol_session_id,
+    surgeryContext: surgeryContextMeta,
   });
 
   const row = {
@@ -158,20 +145,21 @@ export async function linkGraftTrayImageAfterCapture(input: {
     tenant_id: tid,
     patient_id: pid,
     image_id: imageId,
-    surgery_case_id: input.caseId?.trim() || null,
+    surgery_case_id: ctx.surgery.case_id?.trim() || null,
     surgery_id: surgeryId,
-    booking_id: input.bookingId?.trim() || null,
+    booking_id: ctx.surgery.booking_id?.trim() || null,
     graft_session_id: graftSessionId,
     graft_count_event_id: null,
-    protocol_session_id: input.protocolSessionId?.trim() || null,
-    protocol_slot_slug: input.protocolSlotSlug?.trim() || "graft_tray",
+    protocol_session_id: ctx.protocol.protocol_session_id?.trim() || null,
+    protocol_slot_slug: ctx.protocol.protocol_slot_slug?.trim() || ctx.slot_variant,
     captured_at: now,
-    captured_by_staff_id: input.capturedByStaffId?.trim() || null,
-    status: (input.qualityNeedsReview ? "review_required" : "linked") as GraftTrayLinkStatus,
+    captured_by_staff_id: ctx.captured_by_staff_id?.trim() || null,
+    status: (ctx.quality_needs_review ? "review_required" : "linked") as GraftTrayLinkStatus,
     review_required: true,
     mismatch_reason: null,
     metadata: {
       ...linkMetadata,
+      slot_variant: ctx.slot_variant,
       review_reasons: reviewReasons,
     },
     created_at: now,
@@ -189,10 +177,11 @@ export async function linkGraftTrayImageAfterCapture(input: {
     graft_tray_link_id: row.id,
     graft_tray_review_reasons: reviewReasons,
     graft_tray_reconciliation_evidence: true,
+    graft_tray_slot_variant: ctx.slot_variant,
   };
 
   const existingMeta =
-    input.metadata && typeof input.metadata === "object" ? input.metadata : {};
+    ctx.metadata && typeof ctx.metadata === "object" ? ctx.metadata : {};
   await client
     .from("fi_patient_images")
     .update({
