@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { dualWriteFoundationFromFiEvent } from "@/src/lib/fi/foundation/dualWriteEvent";
 import type { FiEventEnvelope, HairAuditCaseSubmittedPayload } from "@/src/types/fi-events";
+import { resolveFiEventIngestionGate } from "../fiEventIngestionGate";
 import {
   attachFiEventError,
   createFiEventIfNotExists,
@@ -86,11 +87,13 @@ async function handleHairAuditCaseSubmittedImpl(
     payloadJson: envelope.payload,
   });
 
-  if (!eventLog.created && ["processed", "ignored"].includes(eventLog.row.status)) {
-    const linked = await loadLinkedEntities(eventLog.row.id);
+  const gate = await resolveFiEventIngestionGate(eventLog);
+
+  if (gate.kind === "terminal_processed") {
+    const linked = await loadLinkedEntities(gate.row.id);
     await dualWriteFoundationFromFiEvent({
       tenantId: envelope.tenant_id,
-      fiEventId: eventLog.row.id,
+      fiEventId: gate.row.id,
       envelope,
       resolution: {
         fiCaseId: linked.fiCaseId,
@@ -100,7 +103,7 @@ async function handleHairAuditCaseSubmittedImpl(
     });
     return {
       ok: true,
-      eventId: eventLog.row.id,
+      eventId: gate.row.id,
       fiCaseId: linked.fiCaseId,
       globalCaseId: linked.globalCaseId,
       globalPatientId: linked.globalPatientId ?? null,
@@ -109,11 +112,11 @@ async function handleHairAuditCaseSubmittedImpl(
     };
   }
 
-  if (!eventLog.created && eventLog.row.status === "processing") {
-    const linked = await loadLinkedEntities(eventLog.row.id);
+  if (gate.kind === "already_processing") {
+    const linked = await loadLinkedEntities(gate.row.id);
     return {
       ok: true,
-      eventId: eventLog.row.id,
+      eventId: gate.row.id,
       fiCaseId: linked.fiCaseId,
       globalCaseId: linked.globalCaseId,
       globalPatientId: linked.globalPatientId ?? null,
@@ -122,11 +125,13 @@ async function handleHairAuditCaseSubmittedImpl(
     };
   }
 
-  await markFiEventStatus({
-    tenantId: envelope.tenant_id,
-    eventId: eventLog.row.id,
-    status: "processing",
-  });
+  if (gate.kind === "should_process") {
+    await markFiEventStatus({
+      tenantId: envelope.tenant_id,
+      eventId: gate.row.id,
+      status: "processing",
+    });
+  }
 
   try {
     const globalPatient = await resolveOrCreateGlobalPatient({
