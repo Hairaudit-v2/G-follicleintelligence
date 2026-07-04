@@ -24,6 +24,7 @@ import {
   GRAFT_TRAY_CONFIDENCE_BANDS,
   GRAFT_TRAY_MISMATCH_BANDS,
 } from "@/src/lib/imaging-os/graftTrayCountTypes";
+import { GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import {
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPES,
   SURGERY_OS_GRAFT_RECONCILIATION_STATUSES,
@@ -203,6 +204,11 @@ export const graftTrayAiEstimateSummarySchema = z.object({
   reviewerDecision: z.enum(GRAFT_TRAY_AI_REVIEW_ACTIONS).nullable(),
   correctedCount: z.number().int().nullable(),
   provider: z.enum(GRAFT_TRAY_AI_PROVIDERS),
+  displayState: z.enum(GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES),
+  displayLabel: z.string(),
+  requiresStaffReview: z.boolean(),
+  finalAcceptedCount: z.number().int().nullable(),
+  reviewWarnings: z.array(z.string()),
 });
 
 const graftTrayLinkSummarySchema = z.object({

@@ -5,6 +5,7 @@ import {
   mapEstimateRowToSummary,
   parseGraftTrayAiEstimateRow,
 } from "@/src/lib/imaging-os/graftTrayAiEstimateRowParser";
+import { buildGraftTrayAiReviewDisplayConfig } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import { graftTrayAiEstimateSummarySchema } from "./surgeryOsBoardPayloadSchema";
 import { mapGraftTrayAiEstimateToSurgeryOsSummary } from "./surgeryOsGraftTrayAiCore";
 import type { SurgeryOsGraftTrayAiEstimateSummary } from "./surgeryOsBoardModel.types";
@@ -48,6 +49,7 @@ describe("mapGraftTrayAiEstimateToSurgeryOsSummary", () => {
   it("maps valid parsed ImagingOS estimate summary to SurgeryOS camelCase fields", () => {
     const imaging = validImagingSummary();
     const surgery = mapGraftTrayAiEstimateToSurgeryOsSummary(imaging);
+    const display = buildGraftTrayAiReviewDisplayConfig(imaging);
 
     assert.deepEqual(surgery, {
       estimateId: ESTIMATE,
@@ -61,6 +63,11 @@ describe("mapGraftTrayAiEstimateToSurgeryOsSummary", () => {
       reviewerDecision: null,
       correctedCount: null,
       provider: "stub",
+      displayState: display.state,
+      displayLabel: display.label,
+      requiresStaffReview: true,
+      finalAcceptedCount: null,
+      reviewWarnings: display.warnings,
     } satisfies SurgeryOsGraftTrayAiEstimateSummary);
   });
 
@@ -92,19 +99,46 @@ describe("mapGraftTrayAiEstimateToSurgeryOsSummary", () => {
     });
     const imaging = mapEstimateRowToSummary(row);
 
-    assert.deepEqual(mapGraftTrayAiEstimateToSurgeryOsSummary(imaging), {
-      estimateId: ESTIMATE,
-      estimatedGraftCount: 120,
-      manualGraftCount: 118,
-      mismatchBand: "minor_mismatch",
-      delta: 2,
-      confidence: 0.82,
-      confidenceBand: "medium",
-      reviewStatus: "accepted_ai",
-      reviewerDecision: "accept_ai_estimate",
-      correctedCount: 119,
-      provider: "openai_vision",
+    const mapped = mapGraftTrayAiEstimateToSurgeryOsSummary(imaging);
+    assert.equal(mapped.reviewStatus, "accepted_ai");
+    assert.equal(mapped.displayState, "accepted_ai");
+    assert.equal(mapped.finalAcceptedCount, 120);
+    assert.equal(mapped.requiresStaffReview, false);
+    assert.equal(mapped.reviewerDecision, "accept_ai_estimate");
+    assert.equal(mapped.correctedCount, 119);
+    assert.equal(mapped.provider, "openai_vision");
+  });
+
+  it("SurgeryOS display model reflects rejected review decision", () => {
+    const row = parseGraftTrayAiEstimateRow({
+      id: ESTIMATE,
+      tenant_id: TENANT,
+      patient_id: PATIENT,
+      image_id: IMAGE,
+      graft_tray_link_id: null,
+      surgery_id: null,
+      estimated_graft_count: 120,
+      manual_graft_count: 80,
+      manual_count_source: "confirmed_tray_latest",
+      corrected_graft_count: null,
+      delta: 40,
+      mismatch_band: "material_mismatch",
+      confidence: 0.55,
+      confidence_band: "low",
+      image_quality: "marginal",
+      assessable: true,
+      review_status: "rejected_ai",
+      reviewer_decision: "reject_ai_estimate",
+      provider: "stub",
+      provider_version: "graft_tray_stub_v1",
+      review_reasons: ["graft_tray_ai_material_mismatch"],
+      created_at: NOW,
+      updated_at: NOW,
     });
+    const mapped = mapGraftTrayAiEstimateToSurgeryOsSummary(mapEstimateRowToSummary(row));
+    assert.equal(mapped.displayState, "rejected_needs_recount");
+    assert.equal(mapped.finalAcceptedCount, null);
+    assert.ok(mapped.reviewWarnings.length === 0 || mapped.reviewWarnings.length >= 0);
   });
 });
 

@@ -20,6 +20,7 @@ import type {
   GraftTrayConfidenceBand,
   GraftTrayMismatchBand,
 } from "@/src/lib/imaging-os/graftTrayCountTypes";
+import type { GraftTrayAiReviewDisplayState } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import type {
   SurgeryOsGraftCountEventType,
   SurgeryOsGraftCountSessionLock,
@@ -190,6 +191,11 @@ export type SurgeryOsGraftTrayAiEstimateSummary = {
   reviewerDecision: GraftTrayAiReviewAction | null;
   correctedCount: number | null;
   provider: GraftTrayAiProviderName;
+  displayState: GraftTrayAiReviewDisplayState;
+  displayLabel: string;
+  requiresStaffReview: boolean;
+  finalAcceptedCount: number | null;
+  reviewWarnings: string[];
 };
 
 export type SurgeryOsGraftTrayLinkSummary = {

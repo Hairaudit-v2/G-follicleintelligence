@@ -50,6 +50,9 @@ import {
   resolveSurgeryOsStaffRoleCategory,
   surgeryOsGraftActionAllowed,
 } from "@/src/lib/surgeryOs/surgeryOsPolicy";
+import { GraftTrayAiReviewPanel } from "@/src/components/fi-admin/imaging/GraftTrayAiReviewPanel";
+import type { GraftTrayAiEstimateSummary } from "@/src/lib/imaging-os/graftTrayCountTypes";
+import type { SurgeryOsGraftTrayAiEstimateSummary } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 
 type CountingMode = "quick_tap" | "tray" | "batch" | "manual" | "correction";
 type CountPhase = "extraction" | "implantation";
@@ -597,6 +600,7 @@ export function GraftCountingAssistant({
         {mode === "correction" && graft ? (
           <CorrectionPanel
             graft={graft}
+            reviewQueueHref={`${base}/imaging/review`}
             canCorrect={canCorrect}
             canReconcile={canReconcile}
             pending={pending}
@@ -636,6 +640,33 @@ export function GraftCountingAssistant({
       <EventLog events={surgeryEvents} />
     </div>
   );
+}
+
+function toGraftTrayPanelEstimate(
+  estimate: SurgeryOsGraftTrayAiEstimateSummary,
+  imageId: string
+): GraftTrayAiEstimateSummary {
+  return {
+    estimate_id: estimate.estimateId,
+    image_id: imageId,
+    graft_tray_link_id: null,
+    estimated_graft_count: estimate.estimatedGraftCount,
+    manual_graft_count: estimate.manualGraftCount,
+    manual_count_source: estimate.manualGraftCount != null ? "confirmed_tray_latest" : "missing",
+    mismatch_band: estimate.mismatchBand,
+    delta: estimate.delta,
+    confidence: estimate.confidence,
+    confidence_band: estimate.confidenceBand,
+    image_quality:
+      estimate.reviewWarnings.some((w) => w.includes("marginal")) ? "marginal" : "suitable",
+    assessable: estimate.estimatedGraftCount != null,
+    review_status: estimate.reviewStatus,
+    reviewer_decision: estimate.reviewerDecision,
+    corrected_count: estimate.correctedCount,
+    provider: estimate.provider,
+    provider_version: "surgery_os_view",
+    generated_at: new Date().toISOString(),
+  };
 }
 
 function BackLink({ href }: { href: string }) {
@@ -1123,6 +1154,7 @@ function ManualEntryPanel(props: {
 
 function CorrectionPanel({
   graft,
+  reviewQueueHref,
   canCorrect,
   canReconcile,
   pending,
@@ -1130,6 +1162,7 @@ function CorrectionPanel({
   onReconcile,
 }: {
   graft: SurgeryOsGraftSummary;
+  reviewQueueHref: string;
   canCorrect: boolean;
   canReconcile: boolean;
   pending: boolean;
@@ -1288,46 +1321,12 @@ function CorrectionPanel({
                   )}
                 </div>
                 {link.aiEstimate ? (
-                  <div className="mt-2 space-y-1 text-xs text-slate-400">
-                    <p>
-                      AI estimate:{" "}
-                      <span className="font-medium text-violet-200">
-                        {link.aiEstimate.estimatedGraftCount ?? "—"}
-                      </span>
-                      {" · "}
-                      Manual count:{" "}
-                      <span className="font-medium text-slate-200">
-                        {link.aiEstimate.manualGraftCount ?? "—"}
-                      </span>
-                    </p>
-                    <p>
-                      Validation:{" "}
-                      <span
-                        className={
-                          link.aiEstimate.mismatchBand === "within_tolerance"
-                            ? "text-emerald-400"
-                            : link.aiEstimate.mismatchBand === "material_mismatch"
-                              ? "text-rose-400"
-                              : "text-amber-300"
-                        }
-                      >
-                        {link.aiEstimate.mismatchBand.replace(/_/g, " ")}
-                      </span>
-                      {link.aiEstimate.delta != null ? ` (Δ ${link.aiEstimate.delta})` : null}
-                      {" · "}
-                      Confidence: {link.aiEstimate.confidenceBand}
-                    </p>
-                    <p>
-                      Review:{" "}
-                      <span className="text-slate-300">
-                        {link.aiEstimate.reviewStatus.replace(/_/g, " ")}
-                      </span>
-                      {link.aiEstimate.reviewStatus === "pending_review" ? (
-                        <span className="ml-1 text-amber-400">
-                          — open Imaging review queue to accept, correct, or reject the AI estimate
-                        </span>
-                      ) : null}
-                    </p>
+                  <div className="mt-2">
+                    <GraftTrayAiReviewPanel
+                      estimate={toGraftTrayPanelEstimate(link.aiEstimate, link.imageId)}
+                      mode="readonly"
+                      reviewQueueHref={reviewQueueHref}
+                    />
                   </div>
                 ) : (
                   <p className="mt-2 text-xs text-slate-500">

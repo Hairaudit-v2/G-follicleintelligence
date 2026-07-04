@@ -11,6 +11,12 @@ import {
   parseGraftTrayAiEstimateRow,
 } from "./graftTrayAiEstimateRowParser";
 import type { GraftTrayAiEstimateRow } from "./graftTrayCountTypes";
+import {
+  buildGraftTrayEstimateReviewMetadata,
+  buildGraftTrayImageMetadataReviewPatch,
+  resolveCorrectedCountForReviewAction,
+  resolveGraftTrayLinkStatusAfterReview,
+} from "./graftTrayCountReviewMutationsCore";
 
 export type GraftTrayAiReviewResult = {
   estimateId: string;
@@ -25,7 +31,7 @@ async function loadEstimateForImage(
   tenantId: string,
   patientId: string,
   imageId: string
-): Promise<GraftTrayAiEstimateRow> {
+): Promise<{ row: GraftTrayAiEstimateRow; metadata: Record<string, unknown> }> {
   const { data, error } = await client
     .from("fi_imaging_graft_tray_ai_estimates")
     .select("*")
@@ -35,7 +41,12 @@ async function loadEstimateForImage(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("No graft tray AI estimate found for this image.");
-  return parseGraftTrayAiEstimateRow(data);
+  const raw = data as Record<string, unknown>;
+  const metadata =
+    raw.metadata && typeof raw.metadata === "object" && !Array.isArray(raw.metadata)
+      ? (raw.metadata as Record<string, unknown>)
+      : {};
+  return { row: parseGraftTrayAiEstimateRow(data), metadata };
 }
 
 /**
@@ -58,16 +69,17 @@ export async function reviewGraftTrayAiEstimate(input: {
   const iid = input.patientImageId.trim();
   const now = new Date().toISOString();
 
-  const estimate = await loadEstimateForImage(client, tid, pid, iid);
+  const { row: estimate, metadata: existingEstimateMeta } = await loadEstimateForImage(
+    client,
+    tid,
+    pid,
+    iid
+  );
   const reviewStatus = mapReviewActionToStatus(input.action);
-
-  let correctedCount: number | null = null;
-  if (input.action === "correct_count") {
-    if (input.correctedCount == null || !Number.isFinite(input.correctedCount) || input.correctedCount < 0) {
-      throw new Error("A non-negative corrected count is required.");
-    }
-    correctedCount = Math.round(input.correctedCount);
-  }
+  const correctedCount = resolveCorrectedCountForReviewAction({
+    action: input.action,
+    correctedCount: input.correctedCount,
+  });
 
   const { data: updated, error: updErr } = await client
     .from("fi_imaging_graft_tray_ai_estimates")
@@ -78,10 +90,15 @@ export async function reviewGraftTrayAiEstimate(input: {
       reviewed_at: now,
       corrected_graft_count: correctedCount,
       updated_at: now,
-      metadata: {
-        staff_note: input.staffNote?.trim() || null,
-        original_ai_estimate: estimate.estimated_graft_count,
-      },
+      metadata: buildGraftTrayEstimateReviewMetadata({
+        estimate,
+        action: input.action,
+        reviewedByUserId: input.reviewedByUserId,
+        reviewedAt: now,
+        correctedCount,
+        staffNote: input.staffNote,
+        existingMetadata: existingEstimateMeta,
+      }),
     })
     .eq("tenant_id", tid)
     .eq("id", estimate.id)
@@ -104,11 +121,6 @@ export async function reviewGraftTrayAiEstimate(input: {
       ? (imageRow.metadata as Record<string, unknown>)
       : {};
 
-  const graftTrayReviewReasons =
-    input.action === "request_retake"
-      ? ["graft_tray_ai_quality_insufficient", "retake_required"]
-      : [];
-
   const staffReview = buildStaffReviewRecord({
     status: input.action === "request_retake" ? "retake_required" : "reviewed",
     reviewedByUserId: input.reviewedByUserId,
@@ -117,13 +129,16 @@ export async function reviewGraftTrayAiEstimate(input: {
   });
 
   const mergedMeta = mergeImagingStaffReviewMetadata(metadata, staffReview);
-  const patch = {
-    ...mergedMeta,
-    graft_tray_ai_estimate: mapEstimateRowToSummary(updatedRow),
-    graft_tray_review_reasons: graftTrayReviewReasons.length
-      ? graftTrayReviewReasons
-      : (metadata.graft_tray_review_reasons ?? []),
-  };
+  const patch = buildGraftTrayImageMetadataReviewPatch({
+    estimate: updatedRow,
+    action: input.action,
+    reviewedByUserId: input.reviewedByUserId,
+    reviewedAt: now,
+    correctedCount,
+    staffNote: input.staffNote,
+    existingMetadata: metadata,
+    staffReviewMetadata: mergedMeta,
+  });
 
   await client
     .from("fi_patient_images")
@@ -136,17 +151,15 @@ export async function reviewGraftTrayAiEstimate(input: {
     .eq("id", iid);
 
   if (estimate.graft_tray_link_id) {
-    const linkStatus =
-      input.action === "reject_ai_estimate" || input.action === "request_retake"
-        ? "review_required"
-        : input.action === "accept_ai_estimate" && updatedRow.mismatch_band === "material_mismatch"
-          ? "mismatch_flagged"
-          : "linked";
+    const linkStatus = resolveGraftTrayLinkStatusAfterReview({
+      action: input.action,
+      mismatchBand: updatedRow.mismatch_band,
+    });
     await client
       .from("fi_imaging_graft_tray_links")
       .update({
-        status: linkStatus,
-        review_required: input.action !== "accept_manual_count" && input.action !== "accept_ai_estimate",
+        status: linkStatus.status,
+        review_required: linkStatus.reviewRequired,
         updated_at: now,
       })
       .eq("tenant_id", tid)
@@ -161,3 +174,5 @@ export async function reviewGraftTrayAiEstimate(input: {
     correctedCount,
   };
 }
+
+export { mapEstimateRowToSummary };

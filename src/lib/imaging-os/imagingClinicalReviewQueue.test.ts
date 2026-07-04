@@ -50,6 +50,34 @@ describe("imagingClinicalReviewQueue", () => {
     assert.equal(review.needsReview, false);
   });
 
+  it("flags low-confidence graft tray AI estimate for staff review", () => {
+    const review = imageNeedsClinicalReview({
+      metadata: {
+        graft_tray_ai_estimate: {
+          estimate_id: "est-1",
+          image_id: "img-1",
+          estimated_graft_count: 120,
+          manual_graft_count: 118,
+          manual_count_source: "confirmed_tray_latest",
+          mismatch_band: "within_tolerance",
+          delta: 2,
+          confidence: 0.4,
+          confidence_band: "low",
+          image_quality: "insufficient",
+          assessable: true,
+          review_status: "pending_review",
+          provider: "stub",
+          provider_version: "graft_tray_stub_v1",
+          generated_at: "2026-07-04T12:00:00.000Z",
+        },
+      },
+      aiImageCategoryConfidence: 0.9,
+    });
+    assert.equal(review.needsReview, true);
+    assert.ok(review.reasons.includes("graft_tray_ai_count_needs_review"));
+    assert.ok(review.reasons.includes("graft_tray_ai_quality_insufficient"));
+  });
+
   it("flags missing scalp region from clinical AI reasons", () => {
     const review = imageNeedsClinicalReview({
       metadata: {

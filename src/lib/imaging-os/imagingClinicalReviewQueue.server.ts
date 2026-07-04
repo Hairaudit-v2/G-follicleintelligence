@@ -21,6 +21,12 @@ import {
 import { readImagingReviewAssignmentRecord } from "./imagingReviewAssignmentCore";
 import { parseGraftTrayAiEstimateSummaryFromMetadata } from "./graftTrayAiEstimateRowParser";
 import type { GraftTrayAiEstimateSummary } from "./graftTrayCountTypes";
+import {
+  graftTrayAiHasLowConfidenceSignal,
+  graftTrayAiHasMismatchSignal,
+  parseGraftTrayReviewAuditTrail,
+  type GraftTrayAiReviewAuditEntry,
+} from "./graftTrayReviewUxCore";
 
 export type ImagingClinicalReviewQueueItem = {
   imageId: string;
@@ -44,6 +50,7 @@ export type ImagingClinicalReviewQueueItem = {
   assignmentStatus: string | null;
   retakeRequired: boolean;
   graftTrayAiEstimate: GraftTrayAiEstimateSummary | null;
+  graftTrayAiReviewAudit: GraftTrayAiReviewAuditEntry[];
   isGraftTrayAiReview: boolean;
 };
 
@@ -130,6 +137,16 @@ export function imageNeedsClinicalReview(input: {
   if (graftTrayAi?.review_status === "pending_review") {
     if (!reasons.includes("graft_tray_ai_count_needs_review")) {
       reasons.push("graft_tray_ai_count_needs_review");
+    }
+    if (graftTrayAiHasLowConfidenceSignal(graftTrayAi)) {
+      if (!reasons.includes("graft_tray_ai_quality_insufficient")) {
+        reasons.push("graft_tray_ai_quality_insufficient");
+      }
+    }
+    if (graftTrayAiHasMismatchSignal(graftTrayAi.mismatch_band)) {
+      if (!reasons.includes("graft_tray_ai_manual_mismatch")) {
+        reasons.push("graft_tray_ai_manual_mismatch");
+      }
     }
   }
 
@@ -302,6 +319,7 @@ export async function loadImagingClinicalReviewQueue(
         readImagingReviewAssignmentRecord(metadata)?.assignment_status ?? null,
       retakeRequired: readImagingStaffReviewRecord(metadata)?.status === "retake_required",
       graftTrayAiEstimate: readGraftTrayAiEstimateFromMetadata(metadata),
+      graftTrayAiReviewAudit: parseGraftTrayReviewAuditTrail(metadata.graft_tray_ai_review_audit),
       isGraftTrayAiReview:
         readGraftTrayAiEstimateFromMetadata(metadata)?.review_status === "pending_review",
     };
