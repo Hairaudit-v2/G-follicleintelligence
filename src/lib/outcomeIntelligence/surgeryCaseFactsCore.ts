@@ -27,6 +27,11 @@ import {
   type SurgeryImagingIntelligenceImageInput,
   type SurgeryImagingIntelligenceSummaryFacts,
 } from "./surgeryImagingIntelligenceSummaryCore";
+import {
+  buildLongitudinalOutcomeComparison,
+  toLongitudinalOutcomeSummaryFacts,
+  type LongitudinalOutcomeSummaryFacts,
+} from "./longitudinalOutcomeComparisonCore";
 import type { ResolveHairAuditLinkForSurgeryInput } from "./hairAuditLinkCore";
 
 export const SURGERY_CASE_INTELLIGENCE_FACTS_VERSION =
@@ -92,6 +97,12 @@ export type SurgeryCaseIntelligenceFacts = {
   graft_tray_outcome_facts: GraftTrayOutcomeIntelligenceFact[];
   confidence_level: FiOutcomeConfidenceLevel;
   imaging_intelligence_summary: SurgeryImagingIntelligenceSummaryFacts | null;
+  longitudinal_outcome_summary: LongitudinalOutcomeSummaryFacts | null;
+  before_after_ready: boolean;
+  donor_recovery_ready: boolean;
+  recipient_growth_ready: boolean;
+  follow_up_window_status: LongitudinalOutcomeSummaryFacts["follow_up_windows"];
+  missing_outcome_evidence: string[];
 };
 
 export type SurgeryCaseFactsTrayLinkInput = {
@@ -285,6 +296,14 @@ export function mapSurgeryCaseIntelligenceFacts(
     graft_tray_reviewed_count: rollup?.reviewedTrayCount ?? 0,
   };
 
+  const hairAuditLinkInput =
+    input.hairAuditLink ?? {
+      tenantId: input.tenantId,
+      surgeryId: input.surgeryId,
+      caseId: input.caseId,
+      patientId: input.patientId,
+    };
+
   const imagingSummary = toSurgeryImagingIntelligenceSummaryFacts(
     buildSurgeryImagingIntelligenceSummary({
       tenantId: input.tenantId,
@@ -294,14 +313,21 @@ export function mapSurgeryCaseIntelligenceFacts(
       procedureDate: input.procedureDate,
       images: input.imagingImages ?? [],
       hasReviewedGraftCount: hasFinalGraftCount,
-      hairAuditLink: input.hairAuditLink ?? {
-        tenantId: input.tenantId,
-        surgeryId: input.surgeryId,
-        caseId: input.caseId,
-        patientId: input.patientId,
-      },
+      hairAuditLink: hairAuditLinkInput,
     })
   );
+
+  const longitudinalComparison = buildLongitudinalOutcomeComparison({
+    tenantId: input.tenantId,
+    surgeryId: input.surgeryId,
+    caseId: input.caseId,
+    patientId: input.patientId,
+    procedureDate: input.procedureDate,
+    images: input.imagingImages ?? [],
+    imagingSummary,
+    hairAuditLink: hairAuditLinkInput,
+  });
+  const longitudinalSummary = toLongitudinalOutcomeSummaryFacts(longitudinalComparison);
 
   return {
     facts_version: SURGERY_CASE_INTELLIGENCE_FACTS_VERSION,
@@ -351,5 +377,15 @@ export function mapSurgeryCaseIntelligenceFacts(
       metricValues,
     }),
     imaging_intelligence_summary: imagingSummary,
+    longitudinal_outcome_summary: longitudinalSummary,
+    before_after_ready: longitudinalComparison.before_after_ready,
+    donor_recovery_ready:
+      longitudinalComparison.donor_recovery_evidence_status === "outcome_measured" ||
+      longitudinalComparison.donor_recovery_evidence_status === "ready_for_comparison",
+    recipient_growth_ready:
+      longitudinalComparison.recipient_growth_evidence_status === "outcome_measured" ||
+      longitudinalComparison.recipient_growth_evidence_status === "ready_for_comparison",
+    follow_up_window_status: longitudinalComparison.follow_up_windows,
+    missing_outcome_evidence: longitudinalComparison.missing_outcome_evidence,
   };
 }

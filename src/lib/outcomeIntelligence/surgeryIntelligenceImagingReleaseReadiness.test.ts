@@ -124,7 +124,7 @@ describe("surgeryIntelligenceImagingReleaseReadiness", () => {
 
     surgeryCaseIntelligenceFactsSchema.parse(payload);
     const validated = validateSurgeryCaseIntelligenceFactsForPublish(payload);
-    assert.equal(validated.imaging_intelligence_summary, undefined);
+    assert.equal(validated.imaging_intelligence_summary, null);
 
     const parsed = parsePublishedSurgeryCaseIntelligenceEvent(
       {

@@ -105,6 +105,9 @@ describe("mapSurgeryCaseIntelligenceFacts", () => {
     assert.equal(facts.graft_tray_outcome_facts.length, 1);
     assert.ok(facts.imaging_intelligence_summary);
     assert.equal(typeof facts.imaging_intelligence_summary.completeness_score, "number");
+    assert.ok(facts.longitudinal_outcome_summary);
+    assert.equal(typeof facts.before_after_ready, "boolean");
+    assert.equal(Array.isArray(facts.follow_up_window_status), true);
   });
 
   it("manual/override count produces case facts", () => {

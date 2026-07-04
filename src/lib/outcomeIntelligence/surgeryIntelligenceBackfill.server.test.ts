@@ -56,6 +56,12 @@ function reviewedFacts(): SurgeryCaseIntelligenceFacts {
     graft_tray_outcome_facts: [],
     confidence_level: "high",
     imaging_intelligence_summary: null,
+    longitudinal_outcome_summary: null,
+    before_after_ready: false,
+    donor_recovery_ready: false,
+    recipient_growth_ready: false,
+    follow_up_window_status: [],
+    missing_outcome_evidence: [],
   };
 }
 

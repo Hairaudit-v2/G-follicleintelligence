@@ -28,6 +28,10 @@ import {
 import { GRAFT_TRAY_FINAL_COUNT_SOURCES } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
 import { HAIRAUDIT_LINK_ORIGINS } from "@/src/lib/outcomeIntelligence/hairAuditLinkCore";
 import { SURGERY_CASE_INTELLIGENCE_FACTS_VERSION } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsCore";
+import {
+  LONGITUDINAL_COMPARISON_WINDOWS,
+  LONGITUDINAL_EVIDENCE_STATUSES,
+} from "@/src/lib/outcomeIntelligence/longitudinalOutcomeComparisonCore";
 import { SURGERY_IMAGING_INTELLIGENCE_GROUPS } from "@/src/lib/outcomeIntelligence/surgeryImagingIntelligenceSummaryCore";
 import { GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import {
@@ -315,6 +319,46 @@ const surgeryImagingAuditReadinessSchema = z.object({
   missing_requirements: z.array(z.string()),
 });
 
+const longitudinalImageSetSummarySchema = z.object({
+  image_ids: z.array(z.string().uuid()),
+  usable_image_count: z.number().int().min(0),
+  poor_quality_count: z.number().int().min(0),
+  present_views: z.array(z.string()),
+  missing_required_views: z.array(z.string()),
+  complete: z.boolean(),
+});
+
+const longitudinalComparisonReadinessSchema = z.object({
+  ready_for_comparison: z.boolean(),
+  outcome_measured: z.boolean(),
+  missing_comparison_views: z.array(z.string()),
+});
+
+const followUpWindowStatusSchema = z.object({
+  window: z.enum(LONGITUDINAL_COMPARISON_WINDOWS),
+  due: z.boolean(),
+  captured: z.boolean(),
+  captured_at: z.string().nullable(),
+  ready_for_comparison: z.boolean(),
+  outcome_measured: z.boolean(),
+});
+
+const longitudinalOutcomeSummaryFactsSchema = z.object({
+  baseline_image_set: longitudinalImageSetSummarySchema,
+  immediate_post_op_image_set: longitudinalImageSetSummarySchema,
+  follow_up_image_set: longitudinalImageSetSummarySchema,
+  comparison_readiness: longitudinalComparisonReadinessSchema,
+  donor_recovery_evidence_status: z.enum(LONGITUDINAL_EVIDENCE_STATUSES),
+  recipient_growth_evidence_status: z.enum(LONGITUDINAL_EVIDENCE_STATUSES),
+  before_after_ready: z.boolean(),
+  hairaudit_report_ready: z.boolean(),
+  follow_up_windows: z.array(followUpWindowStatusSchema),
+  active_follow_up_window: z.enum(LONGITUDINAL_COMPARISON_WINDOWS).nullable(),
+  missing_outcome_evidence: z.array(z.string()),
+  hairaudit_case_id: z.string().uuid().nullable(),
+  hairaudit_report_id: z.string().uuid().nullable(),
+});
+
 const surgeryImagingIntelligenceSummaryFactsSchema = z.object({
   groups: z.array(surgeryImagingGroupSummarySchema),
   missing_required_views: z.array(z.string()),
@@ -391,6 +435,18 @@ export const surgeryCaseIntelligenceFactsSchema = z.object({
     (value) => value ?? null,
     surgeryImagingIntelligenceSummaryFactsSchema.nullable()
   ),
+  longitudinal_outcome_summary: z.preprocess(
+    (value) => value ?? null,
+    longitudinalOutcomeSummaryFactsSchema.nullable()
+  ),
+  before_after_ready: z.preprocess((value) => value ?? false, z.boolean()),
+  donor_recovery_ready: z.preprocess((value) => value ?? false, z.boolean()),
+  recipient_growth_ready: z.preprocess((value) => value ?? false, z.boolean()),
+  follow_up_window_status: z.preprocess(
+    (value) => value ?? [],
+    z.array(followUpWindowStatusSchema)
+  ),
+  missing_outcome_evidence: z.preprocess((value) => value ?? [], z.array(z.string())),
 });
 
 const graftSummarySchema = z.object({

@@ -14,6 +14,11 @@ import {
   resolveHairAuditLinkForSurgery,
 } from "./hairAuditLinkCore";
 import {
+  formatLongitudinalComparisonReadinessLabel,
+  isCaseDueForFollowUp,
+  type LongitudinalOutcomeSummaryFacts,
+} from "./longitudinalOutcomeComparisonCore";
+import {
   formatSurgeryImagingAuditReadinessLabel,
   formatSurgeryImagingCompletenessLabel,
   type SurgeryImagingIntelligenceSummaryFacts,
@@ -45,6 +50,14 @@ function readImagingSummary(
   facts: SurgeryCaseIntelligenceFacts
 ): SurgeryImagingIntelligenceSummaryFacts | null {
   const summary = facts.imaging_intelligence_summary;
+  if (!summary || typeof summary !== "object" || Array.isArray(summary)) return null;
+  return summary;
+}
+
+function readLongitudinalSummary(
+  facts: SurgeryCaseIntelligenceFacts
+): LongitudinalOutcomeSummaryFacts | null {
+  const summary = facts.longitudinal_outcome_summary;
   if (!summary || typeof summary !== "object" || Array.isArray(summary)) return null;
   return summary;
 }
@@ -89,6 +102,12 @@ export function parsePublishedSurgeryCaseIntelligenceEvent(
     graftTrayAiEstimate: facts.graft_tray_ai_estimate,
     graftTrayManualCount: facts.graft_tray_manual_count,
     imagingIntelligenceSummary: readImagingSummary(facts),
+    longitudinalOutcomeSummary: readLongitudinalSummary(facts),
+    beforeAfterReady: facts.before_after_ready ?? false,
+    donorRecoveryReady: facts.donor_recovery_ready ?? false,
+    recipientGrowthReady: facts.recipient_growth_ready ?? false,
+    followUpWindowStatus: facts.follow_up_window_status ?? [],
+    missingOutcomeEvidence: facts.missing_outcome_evidence ?? [],
   };
 }
 
@@ -190,6 +209,11 @@ export function buildSurgeryIntelligenceDashboardMetrics(
   let casesAuditReady = 0;
   let casesBeforeAfterReady = 0;
   let casesWithImagingGaps = 0;
+  let casesDueForFollowUp = 0;
+  let casesReadyForBeforeAfterComparison = 0;
+  let casesMissingDonorFollowUp = 0;
+  let casesMissingRecipientFollowUp = 0;
+  let casesReadyForHairAuditOutcomeReport = 0;
 
   for (const row of rows) {
     incrementDistribution(mismatchBandDistribution, row.mismatchBand);
@@ -208,6 +232,23 @@ export function buildSurgeryIntelligenceDashboardMetrics(
       );
     } else {
       incrementDistribution(imagingAuditReadinessDistribution, "Not started");
+    }
+
+    const longitudinal = row.longitudinalOutcomeSummary;
+    if (longitudinal) {
+      if (isCaseDueForFollowUp(longitudinal)) casesDueForFollowUp += 1;
+      if (longitudinal.comparison_readiness.ready_for_comparison) {
+        casesReadyForBeforeAfterComparison += 1;
+      }
+      if (longitudinal.missing_outcome_evidence.includes("donor_follow_up")) {
+        casesMissingDonorFollowUp += 1;
+      }
+      if (longitudinal.missing_outcome_evidence.includes("recipient_follow_up")) {
+        casesMissingRecipientFollowUp += 1;
+      }
+      if (longitudinal.hairaudit_report_ready) casesReadyForHairAuditOutcomeReport += 1;
+    } else if (row.beforeAfterReady || row.imagingIntelligenceSummary?.audit_readiness.before_after_ready) {
+      casesReadyForBeforeAfterComparison += 1;
     }
   }
 
@@ -240,6 +281,11 @@ export function buildSurgeryIntelligenceDashboardMetrics(
         : null,
     casesWithImagingGaps,
     imagingAuditReadinessDistribution,
+    casesDueForFollowUp,
+    casesReadyForBeforeAfterComparison,
+    casesMissingDonorFollowUp,
+    casesMissingRecipientFollowUp,
+    casesReadyForHairAuditOutcomeReport,
   };
 }
 
@@ -287,6 +333,7 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
       });
 
       const imaging = row.imagingIntelligenceSummary;
+      const longitudinal = row.longitudinalOutcomeSummary;
       const imagingCompletenessScore = imaging?.completeness_score ?? 0;
       const imagingAuditReadiness = imaging?.audit_readiness ?? {
         overall_audit_ready: false,
@@ -329,6 +376,20 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
         imagingBeforeAfterReady: imagingAuditReadiness.before_after_ready,
         imagingMissingRequirementsCount: imaging?.audit_readiness.missing_requirements.length ?? 0,
         poorQualityImageCount: imaging?.poor_quality_image_ids.length ?? 0,
+        longitudinalComparisonLabel: formatLongitudinalComparisonReadinessLabel(
+          longitudinal?.comparison_readiness ?? {
+            ready_for_comparison: false,
+            outcome_measured: false,
+          }
+        ),
+        followUpDue: longitudinal ? isCaseDueForFollowUp(longitudinal) : false,
+        beforeAfterComparisonReady:
+          longitudinal?.before_after_ready ?? row.beforeAfterReady ?? imagingAuditReadiness.before_after_ready,
+        donorFollowUpMissing:
+          longitudinal?.missing_outcome_evidence.includes("donor_follow_up") ?? false,
+        recipientFollowUpMissing:
+          longitudinal?.missing_outcome_evidence.includes("recipient_follow_up") ?? false,
+        hairAuditOutcomeReportReady: longitudinal?.hairaudit_report_ready ?? false,
       };
     });
 }

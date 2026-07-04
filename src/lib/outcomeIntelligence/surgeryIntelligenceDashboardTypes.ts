@@ -1,4 +1,5 @@
 import type { GraftTrayFinalCountSource } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import type { LongitudinalOutcomeSummaryFacts } from "./longitudinalOutcomeComparisonCore";
 import type { SurgeryImagingIntelligenceSummaryFacts } from "./surgeryImagingIntelligenceSummaryCore";
 
 export const SURGERY_INTELLIGENCE_GRAFT_COUNT_SOURCE_FILTERS = [
@@ -46,6 +47,12 @@ export type SurgeryIntelligencePublishedCaseRow = {
   graftTrayAiEstimate: number | null;
   graftTrayManualCount: number | null;
   imagingIntelligenceSummary: SurgeryImagingIntelligenceSummaryFacts | null;
+  longitudinalOutcomeSummary: LongitudinalOutcomeSummaryFacts | null;
+  beforeAfterReady: boolean;
+  donorRecoveryReady: boolean;
+  recipientGrowthReady: boolean;
+  followUpWindowStatus: LongitudinalOutcomeSummaryFacts["follow_up_windows"];
+  missingOutcomeEvidence: string[];
 };
 
 export type SurgeryIntelligenceSourceSplit = {
@@ -72,6 +79,11 @@ export type SurgeryIntelligenceDashboardMetrics = {
   averageImagingCompletenessScore: number | null;
   casesWithImagingGaps: number;
   imagingAuditReadinessDistribution: Record<string, number>;
+  casesDueForFollowUp: number;
+  casesReadyForBeforeAfterComparison: number;
+  casesMissingDonorFollowUp: number;
+  casesMissingRecipientFollowUp: number;
+  casesReadyForHairAuditOutcomeReport: number;
 };
 
 export type SurgeryIntelligenceDashboardTableRow = {
@@ -103,6 +115,12 @@ export type SurgeryIntelligenceDashboardTableRow = {
   imagingBeforeAfterReady: boolean;
   imagingMissingRequirementsCount: number;
   poorQualityImageCount: number;
+  longitudinalComparisonLabel: string;
+  followUpDue: boolean;
+  beforeAfterComparisonReady: boolean;
+  donorFollowUpMissing: boolean;
+  recipientFollowUpMissing: boolean;
+  hairAuditOutcomeReportReady: boolean;
 };
 
 export type SurgeryIntelligenceDashboardFilterOptions = {

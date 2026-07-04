@@ -54,7 +54,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
         <SectionHeader
           kicker="Outcome Intelligence"
           title="Surgery case intelligence"
-          description="Read-only view of published graft-tray, surgery imaging, and audit-readiness facts from the analytics event pipeline. Facts are not rebuilt from live SurgeryOS state on this page."
+          description="Read-only view of published graft-tray, surgery imaging, longitudinal outcome comparison, and audit-readiness facts from the analytics event pipeline. Facts are not rebuilt from live SurgeryOS state on this page."
         />
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#64748B]">
           <span>
@@ -107,6 +107,23 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
               ? `${data.metrics.averageImagingCompletenessScore}%`
               : "—"
           }
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <StatCard label="Due for follow-up" value={data.metrics.casesDueForFollowUp} />
+        <StatCard
+          label="Before/after comparison ready"
+          value={data.metrics.casesReadyForBeforeAfterComparison}
+        />
+        <StatCard label="Missing donor follow-up" value={data.metrics.casesMissingDonorFollowUp} />
+        <StatCard
+          label="Missing recipient follow-up"
+          value={data.metrics.casesMissingRecipientFollowUp}
+        />
+        <StatCard
+          label="HairAudit outcome report ready"
+          value={data.metrics.casesReadyForHairAuditOutcomeReport}
         />
       </div>
 
@@ -194,6 +211,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                 <th className="px-4 py-3 font-semibold">Reviewer</th>
                 <th className="px-4 py-3 font-semibold">Imaging</th>
                 <th className="px-4 py-3 font-semibold">Audit readiness</th>
+                <th className="px-4 py-3 font-semibold">Longitudinal</th>
                 <th className="px-4 py-3 font-semibold">HairAudit</th>
                 <th className="px-4 py-3 font-semibold">Links</th>
               </tr>
@@ -201,7 +219,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
             <tbody>
               {data.tableRows.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-8 text-center text-[#64748B]">
+                  <td colSpan={13} className="px-4 py-8 text-center text-[#64748B]">
                     No published surgery intelligence facts match the current filters.
                   </td>
                 </tr>
@@ -264,9 +282,29 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                       <div className="space-y-1">
                         <span
                           className={
+                            row.beforeAfterComparisonReady
+                              ? "text-sky-300"
+                              : "text-[#CBD5E1]"
+                          }
+                        >
+                          {row.longitudinalComparisonLabel}
+                        </span>
+                        <div className="text-xs text-[#64748B]">
+                          {row.followUpDue ? "Follow-up due" : "Follow-up on track"}
+                          {row.donorFollowUpMissing ? " · donor gap" : ""}
+                          {row.recipientFollowUpMissing ? " · recipient gap" : ""}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <span
+                          className={
                             row.hairAuditLinkageConflict
                               ? "text-amber-300"
-                              : "text-[#CBD5E1]"
+                              : row.hairAuditOutcomeReportReady
+                                ? "text-emerald-300"
+                                : "text-[#CBD5E1]"
                           }
                         >
                           {row.hairAuditLinkLabel}
