@@ -452,7 +452,7 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
     status: "Active Development",
     statusLabel: "Advanced Build",
-    latestMilestone: "Surgery intelligence facts, dashboard, and backfill",
+    latestMilestone: "Surgery Intelligence HairAudit linkage and release check",
     learnMoreHref: "/platform/surgery-os",
   },
   {
@@ -749,6 +749,12 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
     title: "IHRG-DEMO-1 Demo Data Expansion Pack shipped",
   },
   {
+    id: "oi-surgery-hairaudit-1",
+    date: "2026-07-05",
+    tag: "outcome-intelligence",
+    title: "Surgery Intelligence → HairAudit linkage production-ready",
+  },
+  {
     id: "oi-surgery-intel-1",
     date: "2026-07-04",
     tag: "outcome-intelligence",
@@ -818,6 +824,15 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-07-05-surgery-intelligence-hairaudit-release",
+    date: "2026-07-05",
+    tag: "outcome-intelligence",
+    title: "Surgery Intelligence → HairAudit linkage production-ready",
+    summary:
+      "Legacy HairAudit compatibility locked by audit tests; structured surgery-to-HairAudit linkage added with additive metadata; Surgery Intelligence dashboard HairAudit column shows link status and report hrefs; HairAudit link dry-run backfill available; linkage_conflict surfaced for operator review — never auto-overwritten.",
+    modules: ["SurgeryOS", "ImagingOS", "Outcome Intelligence", "HairAudit", "AuditOS"],
+  },
   {
     id: "2026-07-04-outcome-intelligence-surgery-chain",
     date: "2026-07-04",
