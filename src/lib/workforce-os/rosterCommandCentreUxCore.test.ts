@@ -64,8 +64,8 @@ test("formatStandardHoursWeeklyTotal handles missing staff pattern safely", () =
   assert.equal(formatStandardHoursWeeklyTotal(applyStandardHoursTemplate("four_ten")), "40.0");
 });
 
-test("resolveRosterCellClickIntent prefers standard hours setup before manual shift", () => {
-  assert.equal(resolveRosterCellClickIntent({ hasStandardHours: false }), "open_standard_hours");
+test("resolveRosterCellClickIntent opens cell actions for empty cells", () => {
+  assert.equal(resolveRosterCellClickIntent({ hasStandardHours: false }), "open_cell_actions");
   assert.equal(resolveRosterCellClickIntent({ hasStandardHours: true }), "open_cell_actions");
 });
 

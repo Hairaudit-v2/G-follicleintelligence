@@ -13,16 +13,25 @@ import {
 } from "@/src/lib/workforce-os/rosterGenerationCore";
 import {
   computeStandardHoursWeeklyTotal,
+  normaliseCycleWeek,
   staffHasConfiguredStandardHours,
   type StaffStandardHoursDayInput,
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
+import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 
-export type RosterCellClickIntent = "open_standard_hours" | "open_cell_actions";
+export type RosterCellClickIntent = "open_cell_actions";
+
+export type RosterCellClickOutcome =
+  | { outcome: "open_drawer"; mode: "cell-actions" }
+  | { outcome: "deny"; message: string };
+
+export type RosterEmptyCellLabel = "add_shift" | "generate_or_add_shift";
 
 export type RosterCommandCentreDrawerState =
   | { kind: "closed" }
@@ -105,8 +114,76 @@ export function rosterStandardHoursDrawerIsOpen(
 export function resolveRosterCellClickIntent(input: {
   hasStandardHours: boolean;
 }): RosterCellClickIntent {
-  if (!input.hasStandardHours) return "open_standard_hours";
+  void input.hasStandardHours;
   return "open_cell_actions";
+}
+
+export function resolveRosterEmptyCellLabel(input: {
+  hasStandardHours: boolean;
+}): RosterEmptyCellLabel {
+  return input.hasStandardHours ? "generate_or_add_shift" : "add_shift";
+}
+
+export function resolveRosterCellClickOutcome(input: {
+  staffId: string;
+  eligibleStaffIds: readonly string[];
+  canManage: boolean;
+  manageDeniedReason?: string;
+  ineligibleMessage?: string;
+}): RosterCellClickOutcome {
+  const eligibleSet = new Set(input.eligibleStaffIds);
+  if (!eligibleSet.has(input.staffId)) {
+    return {
+      outcome: "deny",
+      message:
+        input.ineligibleMessage ??
+        "This staff member is not roster-eligible for this period.",
+    };
+  }
+  if (!input.canManage) {
+    return {
+      outcome: "deny",
+      message:
+        input.manageDeniedReason ?? STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+    };
+  }
+  return { outcome: "open_drawer", mode: "cell-actions" };
+}
+
+export function staffHasWorkingStandardHoursForDate(input: {
+  standardHours: StaffStandardHoursDayInput[] | undefined;
+  localDate: string;
+  rosterCadence?: RosterCadence;
+  rosterCycleAnchorDate?: string;
+}): boolean {
+  const day = resolveStandardHoursDayForLocalDate(input);
+  return Boolean(day?.is_working_day && day.start_time && day.end_time);
+}
+
+export function resolveStandardHoursDayForLocalDate(input: {
+  standardHours: StaffStandardHoursDayInput[] | undefined;
+  localDate: string;
+  rosterCadence?: RosterCadence;
+  rosterCycleAnchorDate?: string;
+}): StaffStandardHoursDayInput | null {
+  if (!input.standardHours?.length) return null;
+  const weekday = weekdayIndexFromLocalDate(input.localDate);
+  const cycleWeek =
+    input.rosterCadence === "fortnightly"
+      ? resolveFortnightCycleWeek(
+          input.localDate,
+          input.rosterCycleAnchorDate ?? "2026-01-05"
+        )
+      : 1;
+  return (
+    input.standardHours.find(
+      (row) => row.weekday === weekday && normaliseCycleWeek(row.cycle_week) === cycleWeek
+    ) ??
+    input.standardHours.find(
+      (row) => row.weekday === weekday && normaliseCycleWeek(row.cycle_week) === 1
+    ) ??
+    null
+  );
 }
 
 export type RosterStandardHoursEditorNavigation =
@@ -185,11 +262,16 @@ function shiftTypeFromStaffRole(role: string | null | undefined): string {
 
 function standardDayForLocalDate(
   standardHours: StaffStandardHoursDayInput[] | undefined,
-  localDate: string
+  localDate: string,
+  rosterCadence: RosterCadence = "weekly",
+  rosterCycleAnchorDate = "2026-01-05"
 ): StaffStandardHoursDayInput | null {
-  if (!standardHours?.length) return null;
-  const weekday = weekdayIndexFromLocalDate(localDate);
-  return standardHours.find((d) => d.weekday === weekday) ?? null;
+  return resolveStandardHoursDayForLocalDate({
+    standardHours,
+    localDate,
+    rosterCadence,
+    rosterCycleAnchorDate,
+  });
 }
 
 /** Prefill values when opening the shift drawer from a grid cell. */
@@ -199,8 +281,15 @@ export function buildRosterShiftDrawerDefaults(input: {
   staffRole: string | null;
   filterClinicId: string;
   standardHours: StaffStandardHoursDayInput[] | undefined;
+  rosterCadence?: RosterCadence;
+  rosterCycleAnchorDate?: string;
 }): RosterShiftDrawerDefaults {
-  const day = standardDayForLocalDate(input.standardHours, input.localDate);
+  const day = standardDayForLocalDate(
+    input.standardHours,
+    input.localDate,
+    input.rosterCadence,
+    input.rosterCycleAnchorDate
+  );
   const clinicId = input.filterClinicId || day?.clinic_id?.trim() || "";
   const shiftType = day
     ? shiftTypeFromStandardDay(day)

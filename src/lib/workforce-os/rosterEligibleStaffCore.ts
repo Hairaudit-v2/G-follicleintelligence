@@ -26,7 +26,8 @@ export type RosterIneligibilityReason =
   | "employment_status"
   | "departed"
   | "full_period_unavailable"
-  | "no_tenant_association";
+  | "no_tenant_association"
+  | "inactive_duplicate";
 
 export type RosterStaffLifecycleContext = {
   staffId: string;
@@ -186,7 +187,12 @@ export function evaluateRosterStaffEligibility(
   return { eligible: true, reason: null };
 }
 
-export function rosterIneligibilityReasonLabel(reason: RosterIneligibilityReason): string {
+export function rosterIneligibilityReasonLabel(
+  reason: RosterIneligibilityReason,
+  detail?: string | null
+): string {
+  if (detail?.trim()) return detail.trim();
+
   switch (reason) {
     case "inactive":
       return "Inactive";
@@ -195,16 +201,143 @@ export function rosterIneligibilityReasonLabel(reason: RosterIneligibilityReason
     case "pending_onboarding":
       return "Pending onboarding";
     case "employment_status":
-      return "On leave or unavailable";
+      return "On leave";
     case "departed":
-      return "Offboarded";
+      return "Terminated";
     case "full_period_unavailable":
-      return "On leave for this period";
+      return "Fully unavailable this period";
     case "no_tenant_association":
       return "Not linked to tenant";
+    case "inactive_duplicate":
+      return "Inactive duplicate profile";
     default:
       return "Not rostered";
   }
+}
+
+function normalizeStaffDisplayName(name: string | null | undefined): string {
+  return (name ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function formatMaternityLeaveUntilLabel(endsAt: string): string | null {
+  const ms = Date.parse(endsAt);
+  if (!Number.isFinite(ms)) return null;
+  const label = new Date(ms).toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  return `On maternity leave until ${label}`;
+}
+
+function resolveContextualIneligibilityLabel(input: {
+  reason: RosterIneligibilityReason;
+  employmentStatus: StaffEmploymentStatus;
+  availabilityBlocks: readonly RosterAvailabilityBlockContext[];
+}): string | null {
+  if (input.employmentStatus === "suspended") {
+    return "Suspended";
+  }
+  if (input.employmentStatus === "terminated") {
+    return "Terminated";
+  }
+  if (input.employmentStatus === "on_leave") {
+    const maternity = input.availabilityBlocks.find(
+      (block) => block.block_type === "maternity_leave" && block.status !== "cancelled"
+    );
+    if (maternity) {
+      return formatMaternityLeaveUntilLabel(maternity.ends_at);
+    }
+    return "On leave";
+  }
+
+  if (input.reason === "full_period_unavailable") {
+    const maternity = input.availabilityBlocks.find(
+      (block) => block.block_type === "maternity_leave" && block.status !== "cancelled"
+    );
+    if (maternity) {
+      return formatMaternityLeaveUntilLabel(maternity.ends_at);
+    }
+    return "Fully unavailable this period";
+  }
+
+  return null;
+}
+
+const DUPLICATE_EXCLUSION_REASONS = new Set<RosterIneligibilityReason>([
+  "inactive",
+  "archived",
+  "departed",
+  "employment_status",
+]);
+
+function applyInactiveDuplicateRosterExclusions(input: {
+  staffRows: readonly RosterStaffRowContext[];
+  eligibilityByStaffId: Map<string, RosterStaffEligibilitySnapshot>;
+  ineligibleStaffOptions: RosterIneligibleStaffOption[];
+}): {
+  eligibilityByStaffId: Map<string, RosterStaffEligibilitySnapshot>;
+  ineligibleStaffOptions: RosterIneligibleStaffOption[];
+  eligibleStaffIds: string[];
+} {
+  const eligibilityByStaffId = new Map(input.eligibilityByStaffId);
+  const ineligibleById = new Map(input.ineligibleStaffOptions.map((row) => [row.id, row]));
+  const byName = new Map<string, string[]>();
+
+  for (const staff of input.staffRows) {
+    const key = normalizeStaffDisplayName(staff.full_name);
+    if (!key) continue;
+    const ids = byName.get(key) ?? [];
+    ids.push(staff.id);
+    byName.set(key, ids);
+  }
+
+  for (const ids of byName.values()) {
+    if (ids.length < 2) continue;
+    const eligibleIds = ids.filter((id) => eligibilityByStaffId.get(id)?.eligible === true);
+    if (eligibleIds.length === 0) continue;
+
+    for (const staffId of ids) {
+      if (eligibleIds.includes(staffId)) continue;
+      const snapshot = eligibilityByStaffId.get(staffId);
+      if (!snapshot || snapshot.eligible || !snapshot.reason) continue;
+      if (!DUPLICATE_EXCLUSION_REASONS.has(snapshot.reason)) continue;
+
+      const nextSnapshot: RosterStaffEligibilitySnapshot = {
+        eligible: false,
+        reason: "inactive_duplicate",
+      };
+      eligibilityByStaffId.set(staffId, nextSnapshot);
+
+      const staff = input.staffRows.find((row) => row.id === staffId);
+      if (!staff) continue;
+      ineligibleById.set(staffId, {
+        id: staffId,
+        name: staff.full_name?.trim() || "Staff",
+        role: staff.staff_role?.trim() || null,
+        reason: "inactive_duplicate",
+        reasonLabel: rosterIneligibilityReasonLabel("inactive_duplicate"),
+      });
+    }
+  }
+
+  const eligibleStaffIds = input.staffRows
+    .map((staff) => staff.id)
+    .filter((staffId) => eligibilityByStaffId.get(staffId)?.eligible === true);
+
+  return {
+    eligibilityByStaffId,
+    ineligibleStaffOptions: [...ineligibleById.values()],
+    eligibleStaffIds,
+  };
+}
+
+export function filterRosterGridStaffOptions<T extends { id: string }>(
+  staffOptions: readonly T[],
+  eligibleStaffIds: readonly string[]
+): T[] {
+  const eligibleSet = new Set(eligibleStaffIds);
+  return staffOptions.filter((staff) => eligibleSet.has(staff.id));
 }
 
 export function resolveRosterEligibleStaffIds(
@@ -295,6 +428,12 @@ export function buildRosterStaffEligibilityContext(input: {
       isActive: staff.is_active,
       employmentStatus: member?.employment_status,
     });
+    const availabilityBlocks = (blocksByStaffId.get(staff.id) ?? []).map((block) => ({
+      block_type: block.block_type as AvailabilityBlockType,
+      starts_at: block.starts_at,
+      ends_at: block.ends_at,
+      status: block.status,
+    }));
     const snapshot = evaluateRosterStaffEligibility({
       staffId: staff.id,
       isActive: staff.is_active,
@@ -302,12 +441,7 @@ export function buildRosterStaffEligibilityContext(input: {
       archivedAt: member?.archived_at ?? null,
       tenantId: staff.tenant_id,
       periodDayDates: input.periodDayDates,
-      availabilityBlocks: (blocksByStaffId.get(staff.id) ?? []).map((block) => ({
-        block_type: block.block_type as AvailabilityBlockType,
-        starts_at: block.starts_at,
-        ends_at: block.ends_at,
-        status: block.status,
-      })),
+      availabilityBlocks,
       staffTimezone: staff.default_timezone,
     });
 
@@ -318,20 +452,31 @@ export function buildRosterStaffEligibilityContext(input: {
     }
 
     if (snapshot.reason) {
+      const contextualLabel = resolveContextualIneligibilityLabel({
+        reason: snapshot.reason,
+        employmentStatus,
+        availabilityBlocks,
+      });
       ineligibleStaffOptions.push({
         id: staff.id,
         name: staff.full_name?.trim() || "Staff",
         role: staff.staff_role?.trim() || null,
         reason: snapshot.reason,
-        reasonLabel: rosterIneligibilityReasonLabel(snapshot.reason),
+        reasonLabel: rosterIneligibilityReasonLabel(snapshot.reason, contextualLabel),
       });
     }
   }
 
-  return {
-    eligibleStaffIds,
+  const deduped = applyInactiveDuplicateRosterExclusions({
+    staffRows: input.staffRows,
     eligibilityByStaffId,
     ineligibleStaffOptions,
+  });
+
+  return {
+    eligibleStaffIds: deduped.eligibleStaffIds,
+    eligibilityByStaffId: deduped.eligibilityByStaffId,
+    ineligibleStaffOptions: deduped.ineligibleStaffOptions,
     periodDayDates: [...input.periodDayDates],
   };
 }

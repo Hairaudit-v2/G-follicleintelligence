@@ -12,9 +12,15 @@ import {
   buildRosterShiftDrawerDefaults,
   formatRosterDrawerDateLabel,
   formatRosterShiftDrawerTitle,
+  staffHasWorkingStandardHoursForDate,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { shiftSourceDisplayLabel } from "@/src/lib/workforce-os/rosterGenerationCore";
+import {
+  ROSTER_MANUAL_ADJUSTMENT_REASONS,
+  formatRosterAdjustmentReasonLabel,
+} from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { RosterRightDrawer } from "@/src/components/fi/workforce/RosterRightDrawer";
 
 const SHIFT_TYPES = [
@@ -37,6 +43,8 @@ export type RosterShiftDrawerProps = {
   localDate: string;
   filterClinicId: string;
   standardHours: StaffStandardHoursDayInput[] | undefined;
+  rosterCadence?: RosterCadence;
+  rosterCycleAnchorDate?: string;
   selectedShift: RosterGridShift | null;
   clinics: Array<{ id: string; displayName: string }>;
   onClose: () => void;
@@ -68,6 +76,8 @@ function RosterShiftDrawerBody({
   localDate,
   filterClinicId,
   standardHours,
+  rosterCadence = "weekly",
+  rosterCycleAnchorDate = "2026-01-05",
   selectedShift,
   clinics,
   onClose,
@@ -81,6 +91,15 @@ function RosterShiftDrawerBody({
     staffRole,
     filterClinicId,
     standardHours,
+    rosterCadence,
+    rosterCycleAnchorDate,
+  });
+
+  const canGenerateFromStandardHours = staffHasWorkingStandardHoursForDate({
+    standardHours,
+    localDate,
+    rosterCadence,
+    rosterCycleAnchorDate,
   });
 
   const [clinicId, setClinicId] = useState(defaults.clinicId);
@@ -92,11 +111,18 @@ function RosterShiftDrawerBody({
     editing ? toDatetimeLocal(editing.ends_at) : defaults.endsAt
   );
   const [notes, setNotes] = useState(editing?.notes ?? "");
+  const [adjustmentReason, setAdjustmentReason] = useState("manual_adjustment");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function handleGenerateDay() {
     setError(null);
+    if (!canGenerateFromStandardHours) {
+      setError(
+        "No standard hours are set for this staff member on this day. Add a manual shift instead."
+      );
+      return;
+    }
     startTransition(async () => {
       const result = await generateRosterFromStandardHoursAction({
         tenantId,
@@ -107,6 +133,12 @@ function RosterShiftDrawerBody({
       });
       if (!result.ok) {
         setError(result.error);
+        return;
+      }
+      if (result.data.createdCount === 0) {
+        setError(
+          "No standard hours are set for this staff member on this day. Add a manual shift instead."
+        );
         return;
       }
       onClose();
@@ -125,7 +157,8 @@ function RosterShiftDrawerBody({
         shiftType,
         startsAt: new Date(startsAt).toISOString(),
         endsAt: new Date(endsAt).toISOString(),
-        notes: notes || "Manual adjustment",
+        notes: notes || null,
+        adjustmentReason,
       });
       if (!result.ok) {
         setError(result.error);
@@ -174,13 +207,24 @@ function RosterShiftDrawerBody({
         <div className="space-y-3">
           <button
             type="button"
-            disabled={pending}
+            disabled={pending || !canGenerateFromStandardHours}
             onClick={handleGenerateDay}
             data-testid="generate-day-from-standard-hours"
-            className="w-full rounded-lg bg-cyan-600 px-4 py-3 text-left text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
+            title={
+              !canGenerateFromStandardHours
+                ? "No standard hours are set for this day."
+                : undefined
+            }
+            className="w-full rounded-lg bg-cyan-600 px-4 py-3 text-left text-sm font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Generate this day from standard hours
           </button>
+          {!canGenerateFromStandardHours ? (
+            <p className="text-xs text-amber-200/90" data-testid="generate-day-no-standard-hours">
+              No standard hours are set for this staff member on this day. Add a manual shift
+              instead.
+            </p>
+          ) : null}
           <ManualShiftForm
             staffName={staffName}
             clinicId={clinicId}
@@ -189,6 +233,7 @@ function RosterShiftDrawerBody({
             startsAt={startsAt}
             endsAt={endsAt}
             notes={notes}
+            adjustmentReason={adjustmentReason}
             pending={pending}
             showSave
             onClinicChange={setClinicId}
@@ -196,6 +241,7 @@ function RosterShiftDrawerBody({
             onStartsAtChange={setStartsAt}
             onEndsAtChange={setEndsAt}
             onNotesChange={setNotes}
+            onAdjustmentReasonChange={setAdjustmentReason}
             onSubmit={handleCreateManual}
           />
           <button
@@ -222,6 +268,7 @@ function RosterShiftDrawerBody({
             startsAt={startsAt}
             endsAt={endsAt}
             notes={notes}
+            adjustmentReason={adjustmentReason}
             pending={pending}
             showSave={!editing}
             onClinicChange={setClinicId}
@@ -229,6 +276,7 @@ function RosterShiftDrawerBody({
             onStartsAtChange={setStartsAt}
             onEndsAtChange={setEndsAt}
             onNotesChange={setNotes}
+            onAdjustmentReasonChange={setAdjustmentReason}
             onSubmit={handleCreateManual}
           />
           {editing ? (
@@ -256,6 +304,7 @@ type ManualShiftFormProps = {
   startsAt: string;
   endsAt: string;
   notes: string;
+  adjustmentReason: string;
   pending: boolean;
   showSave: boolean;
   onClinicChange: (v: string) => void;
@@ -263,6 +312,7 @@ type ManualShiftFormProps = {
   onStartsAtChange: (v: string) => void;
   onEndsAtChange: (v: string) => void;
   onNotesChange: (v: string) => void;
+  onAdjustmentReasonChange: (v: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 };
 
@@ -274,6 +324,7 @@ function ManualShiftForm({
   startsAt,
   endsAt,
   notes,
+  adjustmentReason,
   pending,
   showSave,
   onClinicChange,
@@ -281,6 +332,7 @@ function ManualShiftForm({
   onStartsAtChange,
   onEndsAtChange,
   onNotesChange,
+  onAdjustmentReasonChange,
   onSubmit,
 }: ManualShiftFormProps) {
   return (
@@ -340,6 +392,21 @@ function ManualShiftForm({
           className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
           required
         />
+      </label>
+      <label className="block text-xs text-slate-400">
+        Reason
+        <select
+          value={adjustmentReason}
+          onChange={(e) => onAdjustmentReasonChange(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+          data-testid="roster-shift-adjustment-reason"
+        >
+          {ROSTER_MANUAL_ADJUSTMENT_REASONS.map((reason) => (
+            <option key={reason} value={reason}>
+              {formatRosterAdjustmentReasonLabel(reason)}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="block text-xs text-slate-400">
         Notes

@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   pushRosterStandardHoursEditorNavigation,
   resolveRosterCellClickIntent,
+  openRosterShiftDrawer,
   resolveRosterStandardHoursEditorNavigation,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import {
@@ -87,19 +88,17 @@ test("pushRosterStandardHoursEditorNavigation denies when manage permission is m
   assert.deepEqual(router.pushes, []);
 });
 
-test("cell click without standard hours navigates to the same editor href", () => {
+test("cell click opens the shift drawer for eligible managers", () => {
   const intent = resolveRosterCellClickIntent({ hasStandardHours: false });
-  assert.equal(intent, "open_standard_hours");
+  assert.equal(intent, "open_cell_actions");
 
-  const router = createNavigationRecorder();
-  const result = pushRosterStandardHoursEditorNavigation(router, {
-    tenantId: TENANT,
+  const drawer = openRosterShiftDrawer({
+    mode: "cell-actions",
     staffMemberId: STAFF,
-    canManage: true,
+    localDate: "2026-07-06",
+    shiftId: null,
   });
-
-  assert.equal(result.outcome, "navigate");
-  assert.deepEqual(router.pushes, [expectedEditorHref(TENANT, STAFF)]);
+  assert.equal(drawer.kind, "shift");
 });
 
 test("per-staff onEditStandardHours uses the same editor navigation contract", () => {
@@ -135,14 +134,14 @@ test("RosterCommandCentreView exposes standard-hours banner CTA and wires editor
   );
 });
 
-test("RosterWeekGrid exposes per-staff standard-hours CTA and missing-hours cell hint", () => {
+test("RosterWeekGrid exposes per-staff standard-hours CTA and add-shift cell hint", () => {
   sourceIncludes(
     ROSTER_GRID,
     "buildStaffStandardHoursEditorHref",
     "data-testid={`standard-hours-button-${staff.id}`}",
     "data-testid={`standard-hours-button-disabled-${staff.id}`}",
     "onEditStandardHours?.(staff.id)",
-    "Set standard hours first"
+    "Add shift"
   );
   assert.equal(expectedEditorHref(TENANT, STAFF).includes(STAFF), true);
 });

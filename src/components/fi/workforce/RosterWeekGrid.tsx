@@ -20,7 +20,10 @@ import {
 } from "@/src/lib/workforce-os/rosterGenerationCore";
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
-import { ROSTER_GRID_SCROLL_CLASSES } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
+import {
+  resolveRosterEmptyCellLabel,
+  ROSTER_GRID_SCROLL_CLASSES,
+} from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { cn } from "@/lib/utils";
 
 export type RosterWeekGridProps = {
@@ -188,6 +191,7 @@ export function RosterWeekGrid({
                     cellBlocks.length === 0 &&
                     isRdoDay(standardHours, date, rosterCadence, rosterCycleAnchorDate);
                   const emptyCell = cellShifts.length === 0 && cellBlocks.length === 0 && !rdo;
+                  const emptyCellLabel = resolveRosterEmptyCellLabel({ hasStandardHours });
 
                   return (
                     <td
@@ -197,8 +201,18 @@ export function RosterWeekGrid({
                       <button
                         type="button"
                         data-testid={`roster-cell-${staff.id}-${date}`}
-                        className="flex min-h-[80px] w-full flex-col gap-1 rounded-lg border border-transparent p-1.5 text-left hover:border-white/[0.08] hover:bg-white/[0.02]"
-                        onClick={() => onCellClick?.(staff.id, date)}
+                        title={!canManage ? manageDeniedReason : undefined}
+                        disabled={!canManage && emptyCell}
+                        className={cn(
+                          "flex min-h-[80px] w-full flex-col gap-1 rounded-lg border border-transparent p-1.5 text-left",
+                          canManage
+                            ? "hover:border-white/[0.08] hover:bg-white/[0.02]"
+                            : "cursor-not-allowed opacity-70"
+                        )}
+                        onClick={() => {
+                          if (!canManage) return;
+                          onCellClick?.(staff.id, date);
+                        }}
                       >
                         {cellShifts.map((shift) => (
                           <span
@@ -246,15 +260,20 @@ export function RosterWeekGrid({
                         ) : null}
                         {emptyCell && !hasStandardHours ? (
                           <span
-                            className="block px-1 py-2 text-xs font-medium text-amber-300/90"
-                            data-testid={`set-standard-hours-first-${staff.id}-${date}`}
+                            className="block px-1 py-2 text-xs font-medium text-cyan-300/90"
+                            data-testid={`add-shift-${staff.id}-${date}`}
                           >
-                            Set standard hours first
+                            Add shift
                           </span>
                         ) : null}
                         {emptyCell && hasStandardHours ? (
-                          <span className="block px-1 py-2 text-xs text-cyan-300/80">
-                            Generate or add shift
+                          <span
+                            className="block px-1 py-2 text-xs text-cyan-300/80"
+                            data-testid={`generate-or-add-shift-${staff.id}-${date}`}
+                          >
+                            {emptyCellLabel === "generate_or_add_shift"
+                              ? "Generate or add shift"
+                              : "Add shift"}
                           </span>
                         ) : null}
                       </button>

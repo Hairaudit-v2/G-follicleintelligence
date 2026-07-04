@@ -67,6 +67,7 @@ import {
 } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { StandardHoursShiftSource } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { RosterIneligibleStaffOption } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
+import { filterRosterGridStaffOptions } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 
 export type RosterCommandCentreDateRange = {
   startsAt: string;
@@ -141,6 +142,8 @@ export type RosterCommandCentrePayload = {
   rosterPlanning: WorkforceRosterPlanningPolicy;
   clinics: RosterCommandCentreClinicOption[];
   staffOptions: Array<{ id: string; name: string; role: string | null; isActive: boolean }>;
+  /** Roster-eligible staff only — use for the operational grid rows. */
+  rosterGridStaffOptions: Array<{ id: string; name: string; role: string | null; isActive: boolean }>;
   events: RosterCommandCentreEvent[];
   shifts: RosterGridShift[];
   availabilityBlocks: FiStaffAvailabilityBlockRow[];
@@ -683,7 +686,7 @@ export async function loadRosterCommandCentre(
   events.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
   const eligibilityContext = await loadRosterStaffEligibilityContext(tid, {
-    periodDayDates: weekDayDates,
+    periodDayDates,
     availabilityBlocks: (eligibilityBlocksRes.data ?? []).map((row) => ({
       staff_id: String((row as Record<string, unknown>).staff_id),
       block_type: String((row as Record<string, unknown>).block_type),
@@ -695,10 +698,17 @@ export async function loadRosterCommandCentre(
   });
 
   const staffMissingStandardHours = listRosterEligibleStaffMissingStandardHours({
-    staffOptions: staffOptions.map((staff) => ({ id: staff.id, name: staff.name })),
+    staffOptions: filterRosterGridStaffOptions(staffOptions, eligibilityContext.eligibleStaffIds).map(
+      (staff) => ({ id: staff.id, name: staff.name })
+    ),
     standardHoursByStaffId,
     eligibleStaffIds: eligibilityContext.eligibleStaffIds,
   });
+
+  const rosterGridStaffOptions = filterRosterGridStaffOptions(
+    staffOptions,
+    eligibilityContext.eligibleStaffIds
+  );
 
   const summary = summarizeEvents(events);
   summary.eligibleStaffCount = eligibilityContext.eligibleStaffIds.length;
@@ -712,6 +722,7 @@ export async function loadRosterCommandCentre(
     rosterPlanning,
     clinics,
     staffOptions,
+    rosterGridStaffOptions,
     events,
     shifts,
     availabilityBlocks: blockRows,

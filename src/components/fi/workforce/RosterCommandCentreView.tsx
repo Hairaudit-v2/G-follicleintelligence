@@ -34,17 +34,17 @@ import {
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
-import { staffHasConfiguredStandardHours } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import {
   closeRosterDrawer,
   openRosterShiftDrawer,
   pushRosterStandardHoursEditorNavigation,
-  resolveRosterCellClickIntent,
+  resolveRosterCellClickOutcome,
   resolveRosterDrawerStaffMemberId,
   resolveRosterPayloadWeekDayDates,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
   type RosterCommandCentreDrawerState,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
+import { filterRosterGridStaffOptions } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 
 const STATUS_FILTERS: Array<{ id: RosterStaffingStatusFilter | ""; label: string }> = [
   { id: "", label: "All statuses" },
@@ -119,6 +119,7 @@ export function RosterCommandCentreView({
   });
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [ineligibleExpanded, setIneligibleExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const rosterPlanning = payload.rosterPlanning;
@@ -138,6 +139,9 @@ export function RosterCommandCentreView({
 
   const staffMissingStandardHours = payload.staffMissingStandardHours;
   const ineligibleStaffOptions = payload.ineligibleStaffOptions;
+  const rosterGridStaffOptions =
+    payload.rosterGridStaffOptions ??
+    filterRosterGridStaffOptions(payload.staffOptions, payload.eligibleStaffIds);
 
   const drawerStaff = rosterDrawerStaffOption(drawerState, payload.staffOptions);
   const drawerStaffMemberId = resolveRosterDrawerStaffMemberId(drawerState);
@@ -215,28 +219,22 @@ export function RosterCommandCentreView({
   }
 
   function handleCellClick(staffId: string, localDate: string) {
-    const standardHours = payload.standardHoursByStaffId[staffId];
-    const hasStandardHours = staffHasConfiguredStandardHours(standardHours);
-    const intent = resolveRosterCellClickIntent({ hasStandardHours });
+    const clickOutcome = resolveRosterCellClickOutcome({
+      staffId,
+      eligibleStaffIds: payload.eligibleStaffIds,
+      canManage,
+      manageDeniedReason,
+    });
 
-    if (intent === "open_standard_hours") {
-      const result = pushRosterStandardHoursEditorNavigation(router, {
-        tenantId,
-        staffMemberId: staffId,
-        canManage,
-        manageDeniedReason,
-      });
-      if (result.outcome === "deny") {
-        setActionError(result.reason);
-        return;
-      }
-      setActionError(null);
+    if (clickOutcome.outcome === "deny") {
+      setActionError(clickOutcome.message);
       return;
     }
 
+    setActionError(null);
     setDrawerState(
       openRosterShiftDrawer({
-        mode: "cell-actions",
+        mode: clickOutcome.mode,
         staffMemberId: staffId,
         localDate,
         shiftId: null,
@@ -518,33 +516,6 @@ export function RosterCommandCentreView({
         </section>
       ) : null}
 
-      {ineligibleStaffOptions.length > 0 ? (
-        <section
-          className="rounded-xl border border-slate-500/25 bg-slate-950/30 px-4 py-3"
-          data-testid="roster-ineligible-staff-section"
-        >
-          <h2 className="text-sm font-semibold text-slate-200">
-            Not rostered this period ({ineligibleStaffOptions.length})
-          </h2>
-          <p className="mt-1 text-xs text-slate-500">
-            Staff on leave, maternity leave, inactive, or otherwise excluded from roster generation
-            for the selected {periodLabel}.
-          </p>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {ineligibleStaffOptions.map((staff) => (
-              <li
-                key={staff.id}
-                className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs text-slate-300"
-                data-testid={`roster-ineligible-staff-${staff.id}`}
-              >
-                <span className="font-medium text-slate-100">{staff.name}</span>
-                <span className="text-slate-500"> · </span>
-                <span className="text-amber-200/90">{staff.reasonLabel}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       <section className="space-y-3">
         <div>
@@ -557,7 +528,7 @@ export function RosterCommandCentreView({
         <RosterWeekGrid
           tenantId={tenantId}
           weekDayDates={weekDayDates}
-          staffOptions={payload.staffOptions}
+          staffOptions={rosterGridStaffOptions}
           shifts={payload.shifts}
           availabilityCells={payload.availabilityCells}
           standardHoursByStaffId={payload.standardHoursByStaffId}
@@ -571,6 +542,65 @@ export function RosterCommandCentreView({
           onEditStandardHours={openStandardHoursDrawer}
         />
       </section>
+
+      {ineligibleStaffOptions.length > 0 ? (
+        <section
+          className="rounded-xl border border-slate-500/25 bg-slate-950/30 px-4 py-3"
+          data-testid="roster-ineligible-staff-section"
+        >
+          <button
+            type="button"
+            onClick={() => setIneligibleExpanded((open) => !open)}
+            className="flex w-full items-center justify-between gap-3 text-left"
+            aria-expanded={ineligibleExpanded}
+            data-testid="roster-ineligible-staff-toggle"
+          >
+            <div>
+              <h2 className="text-sm font-semibold text-slate-200">
+                Not rostered this period ({ineligibleStaffOptions.length})
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Staff on leave, maternity leave, inactive, or otherwise excluded from roster
+                generation for the selected {periodLabel}.
+              </p>
+            </div>
+            <span className="text-xs text-slate-400">{ineligibleExpanded ? "Hide" : "Show"}</span>
+          </button>
+          {ineligibleExpanded ? (
+            <ul className="mt-3 space-y-2">
+              {ineligibleStaffOptions.map((staff) => (
+                <li
+                  key={staff.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-300"
+                  data-testid={`roster-ineligible-staff-${staff.id}`}
+                >
+                  <div>
+                    <Link
+                      href={`/fi-admin/${tenantId}/hr-os/staff/${staff.id}`}
+                      className="font-medium text-slate-100 hover:text-cyan-300"
+                    >
+                      {staff.name}
+                    </Link>
+                    {staff.role ? (
+                      <span className="ml-2 capitalize text-slate-500">{staff.role}</span>
+                    ) : null}
+                    <span className="text-slate-500"> · </span>
+                    <span className="text-amber-200/90">{staff.reasonLabel}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/fi-admin/${tenantId}/hr-os/staff/${staff.id}`}
+                      className="rounded-md border border-white/[0.1] px-2 py-1 text-[11px] text-slate-300 hover:bg-white/[0.04]"
+                    >
+                      Manage employment
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
 
       <RosterSidePanel
         tenantId={tenantId}
@@ -592,6 +622,8 @@ export function RosterCommandCentreView({
           localDate={drawerState.localDate}
           filterClinicId={filters.clinicId}
           standardHours={payload.standardHoursByStaffId[drawerStaffMemberId]}
+          rosterCadence={rosterCadence}
+          rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           selectedShift={drawerShift}
           clinics={payload.clinics}
           onClose={closeDrawer}
