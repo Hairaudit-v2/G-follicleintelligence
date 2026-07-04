@@ -19,6 +19,8 @@ describe("FI image attribution core", () => {
     assert.equal(normalizeFiImageCaptureSource("patient_profile"), "patient_profile");
     assert.equal(normalizeFiImageCaptureSource("surgery_os"), "surgery_os");
     assert.equal(normalizeFiImageCaptureSource("follow_up_outcome"), "follow_up_outcome");
+    assert.equal(normalizeFiImageCaptureSource("guided_capture"), "imaging_os_wizard");
+    assert.equal(normalizeFiImageCaptureSource("vie_guided"), "vie_capture_wizard");
     assert.equal(normalizeFiImageCaptureSource(""), "unknown");
   });
 

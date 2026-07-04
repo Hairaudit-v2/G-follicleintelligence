@@ -20,6 +20,7 @@ import {
   logImagingClassifierAlert,
   logImagingClassifierEvent,
 } from "./imagingClassifierObservability";
+import { resolveFiOsClassifierCaptureSource } from "@/src/lib/imaging-os/imagingCaptureSourceCore";
 import type { UnifiedImageClassifyRequest } from "./unifiedImageClassifyRequest";
 
 export type UnifiedImageClassifyResponse = {
@@ -78,10 +79,12 @@ function mapFiOsSourceCapture(request: UnifiedImageClassifyRequest): UnifiedImag
   if (request.source_system !== "fi_os") return request;
   return {
     ...request,
-    capture_source: request.capture_source ?? "guided_capture",
+    capture_source: resolveFiOsClassifierCaptureSource(request.capture_source),
     upload_source: request.upload_source ?? "fi_os",
   };
 }
+
+export { mapFiOsSourceCapture };
 
 export async function classifyUnifiedImageRequest(
   rawRequest: UnifiedImageClassifyRequest,

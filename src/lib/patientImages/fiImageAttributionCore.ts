@@ -46,12 +46,18 @@ export function normalizeFiImageCaptureType(raw: unknown): FiImageCaptureType {
     : "upload";
 }
 
+const FI_IMAGE_CAPTURE_SOURCE_ALIASES: Record<string, FiImageCaptureSource> = {
+  guided_capture: "imaging_os_wizard",
+  vie_guided: "vie_capture_wizard",
+};
+
 export function normalizeFiImageCaptureSource(raw: unknown): FiImageCaptureSource {
   const s = String(raw ?? "")
     .trim()
     .toLowerCase();
-  return (FI_IMAGE_CAPTURE_SOURCES as readonly string[]).includes(s)
-    ? (s as FiImageCaptureSource)
+  const resolved = FI_IMAGE_CAPTURE_SOURCE_ALIASES[s] ?? s;
+  return (FI_IMAGE_CAPTURE_SOURCES as readonly string[]).includes(resolved)
+    ? (resolved as FiImageCaptureSource)
     : "unknown";
 }
 

@@ -87,6 +87,15 @@ describe("imagingClinicalReviewQueueFilters", () => {
     assert.equal(matchesImagingReviewQueueFilters(row, { viewType: "donor" }), true);
     assert.equal(matchesImagingReviewQueueFilters(row, { captureSource: "surgery_os" }), true);
     assert.equal(matchesImagingReviewQueueFilters(row, { captureSource: "guided_capture" }), false);
+
+    const wizardRow = baseRow({
+      metadata: { capture_source: "imaging_os_wizard" },
+    });
+    assert.equal(matchesImagingReviewQueueFilters(wizardRow, { captureSource: "guided_capture" }), true);
+    assert.equal(
+      matchesImagingReviewQueueFilters(wizardRow, { captureSource: "imaging_os_wizard" }),
+      true
+    );
   });
 
   it("parses search params into filter object", () => {

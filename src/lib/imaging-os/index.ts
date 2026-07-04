@@ -1,6 +1,12 @@
 /**
  * ImagingOS — shared medical image intelligence engine (Phase IM-1 foundation + IM-2 ingestion).
  *
+ * @deprecated Prefer focused entry points to reduce barrel coupling:
+ * - `@/src/lib/imaging-os/ai` — AI analysis kinds / job vocabulary
+ * - `@/src/lib/imaging-os/capture` — capture_source normalization
+ * - `@/src/lib/imaging-os/review` — clinical review queue filters
+ * - `@/src/lib/imaging-os/graft-tray` — graft tray bridge helpers
+ *
  * Pure contracts and stub evaluators. Consumers: HairAudit internal endpoint,
  * FI OS clinic uploads, HLI, IIOHR (future phases).
  */

@@ -29,14 +29,11 @@ export const IMAGING_ANATOMICAL_REGIONS = [
 
 export type ImagingAnatomicalRegion = (typeof IMAGING_ANATOMICAL_REGIONS)[number];
 
-export const IMAGING_AI_ANALYSIS_KINDS = [
-  "density_estimate",
-  "norwood_grade",
-  "donor_assessment",
-  "outcome_score",
-] as const;
-
-export type ImagingAiAnalysisKind = (typeof IMAGING_AI_ANALYSIS_KINDS)[number];
+export {
+  IMAGING_AI_ANALYSIS_KINDS,
+  type ImagingAiAnalysisKind,
+  type ImagingAiJobStatus,
+} from "@/src/lib/imaging-os/imagingAiAnalysisKinds";
 
 /** Map seeded protocol template slug → fi_patient_images.imaging_library_axis */
 export function mapTemplateSlugToImagingLibraryAxis(templateSlug: string): ImagingLibraryAxis {

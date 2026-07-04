@@ -2,6 +2,8 @@
  * ImagingOS Phase 6 — server-side review queue filter matching (pure logic).
  */
 
+import type { FiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionTypes";
+import { captureSourcesMatchForFilter } from "./imagingCaptureSourceCore";
 import { CLINICAL_REVIEW_CONFIDENCE_THRESHOLD } from "./clinicalImageAnalysisCore";
 import { readImagingClinicalAiMetadata } from "./clinicalImageAnalysisCore";
 import { readImagingReviewAssignmentRecord } from "./imagingReviewAssignmentCore";
@@ -14,7 +16,7 @@ export type ImagingClinicalReviewQueueFilters = {
   reviewReason?: string | null;
   qualityStatus?: string | null;
   confidenceBand?: ImagingReviewConfidenceBand;
-  captureSource?: string | null;
+  captureSource?: FiImageCaptureSource | string | null;
   viewType?: string | null;
   patientId?: string | null;
   caseId?: string | null;
@@ -109,7 +111,7 @@ export function matchesImagingReviewQueueFilters(
 
   if (filters.captureSource?.trim()) {
     const src = extractCaptureSource(metadata);
-    if (src !== filters.captureSource.trim()) return false;
+    if (!captureSourcesMatchForFilter(filters.captureSource, src)) return false;
   }
 
   if (filters.viewType?.trim()) {

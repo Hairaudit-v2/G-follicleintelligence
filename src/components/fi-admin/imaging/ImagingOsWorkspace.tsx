@@ -15,11 +15,8 @@ import { PatientVisualSummaryReportPanel } from "@/src/components/fi-admin/imagi
 import { ImagingGuidedCaptureWizard } from "@/src/components/fi-admin/imaging/ImagingGuidedCaptureWizard";
 import { VieComparisonSuggestionsPanel } from "@/src/components/fi-admin/imaging/VieComparisonSuggestionsPanel";
 import { buildImagingClinicalIntelligenceView } from "@/src/lib/imaging-os/imagingClinicalIntelligenceSurfacing";
-import {
-  IMAGING_AI_ANALYSIS_KINDS,
-  IMAGING_COMPARE_PRESETS,
-  IMAGING_LIBRARY_AXES,
-} from "@/src/lib/imagingOs/imagingOsConstants";
+import { IMAGING_AI_ANALYSIS_KINDS } from "@/src/lib/imaging-os/ai";
+import { IMAGING_COMPARE_PRESETS, IMAGING_LIBRARY_AXES } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { ImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
 import type { PatientTrialConsentGateView } from "@/src/lib/patients/patientTrialConsentShared";
 import type { PatientImageProfileTile } from "@/src/lib/patientImages/patientImageTypes";

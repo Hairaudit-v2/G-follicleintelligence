@@ -3,19 +3,14 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export const IMAGING_AI_ANALYSIS_KINDS = [
-  "density_estimate",
-  "norwood_grade",
-  "donor_assessment",
-  "recipient_assessment",
-  "clinical_image_analysis",
-  "outcome_score",
-  "graft_tray_count_estimate",
-] as const;
+import type { ImagingAiAnalysisKind, ImagingAiJobStatus } from "./imagingAiAnalysisKinds";
 
-export type ImagingAiAnalysisKind = (typeof IMAGING_AI_ANALYSIS_KINDS)[number];
-
-export type ImagingAiJobStatus = "queued" | "running" | "completed" | "failed" | "superseded";
+export {
+  IMAGING_AI_ANALYSIS_KINDS,
+  isImagingAiAnalysisKind,
+  type ImagingAiAnalysisKind,
+  type ImagingAiJobStatus,
+} from "./imagingAiAnalysisKinds";
 
 export type ImagingAiAnalysisJobRow = {
   id: string;

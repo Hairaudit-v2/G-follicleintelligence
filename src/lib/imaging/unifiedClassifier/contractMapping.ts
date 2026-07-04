@@ -20,6 +20,7 @@ import {
   mapExternalLabelToPhotoCategoryV1,
   mapHliCategoryToPhotoCategoryV1,
 } from "./categoryMapping";
+import { normalizeFiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionCore";
 import type { UnifiedImageClassifyRequest } from "./unifiedImageClassifyRequest";
 
 const HLI_ORIENTATION: Record<FiAiImageCategory, ImageOrientationV1> = {
@@ -36,22 +37,44 @@ const HLI_ORIENTATION: Record<FiAiImageCategory, ImageOrientationV1> = {
   unknown: "unknown",
 };
 
+function mapFiCaptureSourceToContractV1(
+  normalized: ReturnType<typeof normalizeFiImageCaptureSource>
+): ImageCaptureSourceV1 {
+  switch (normalized) {
+    case "imaging_os_wizard":
+    case "vie_capture_wizard":
+    case "guided_capture":
+      return "guided_capture";
+    case "patient_portal":
+      return "patient_portal";
+    case "surgery_os":
+      return "surgery_portal";
+    case "hairaudit":
+      return "forensic_audit";
+    case "iiohr_academy":
+    case "consultation_os":
+    case "appointment_procedure":
+    case "appointment_procedure_admin_fallback":
+      return "clinic_staff";
+    default:
+      return "unknown";
+  }
+}
+
 function resolveCaptureSource(
   request: UnifiedImageClassifyRequest
 ): ImageCaptureSourceV1 {
-  const raw = request.capture_source?.trim().toLowerCase();
+  const normalized = normalizeFiImageCaptureSource(request.capture_source);
+  if (normalized !== "unknown") {
+    return mapFiCaptureSourceToContractV1(normalized);
+  }
+
   const bySource: Partial<Record<ImageSignalSourceSystemV1, ImageCaptureSourceV1>> = {
     hairaudit: "forensic_audit",
     fi_os: "guided_capture",
     hli: "patient_portal",
     iiohr: "clinic_staff",
   };
-  if (raw === "forensic_audit") return "forensic_audit";
-  if (raw === "guided_capture") return "guided_capture";
-  if (raw === "patient_portal") return "patient_portal";
-  if (raw === "clinic_staff") return "clinic_staff";
-  if (raw === "doctor_upload") return "doctor_upload";
-  if (raw === "surgery_portal") return "surgery_portal";
   return bySource[request.source_system] ?? "unknown";
 }
 
