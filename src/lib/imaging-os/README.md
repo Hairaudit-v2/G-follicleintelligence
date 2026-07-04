@@ -6,7 +6,8 @@ Canonical ImagingOS core, features, adapters, and shared vocabulary.
 
 - Focused entry points: `ai`, `capture`, `review`, `graft-tray`
 - Direct modules: `pipeline`, `protocol`, `graftTrayCaptureContext`, etc.
-- Shared constants/types: `imagingLibraryVocabulary`, `imagingAiAnalysisKinds`
+- Shared constants/types: `imagingLibraryVocabulary`, `protocolSlotVocabulary`, `workspaceBridge`, `imagingAiAnalysisKinds`
+- Protocol catalog: `protocolCatalogResolver.server`, `protocolCatalogResolverCore`
 
 ## Do not import from here
 

@@ -1,15 +1,12 @@
 /**
  * Legacy guided-capture / VIE session progress helpers.
- * Shared slot vocabulary lives in `src/lib/imaging-os/protocolSlotVocabulary`.
+ * Shared slot vocabulary is re-exported via `imagingOsWorkspaceBridge`.
  */
-export type { ProtocolSlotDef } from "@/src/lib/imaging-os/protocolSlotVocabulary";
-export {
-  parseProtocolSlots,
-  PROGRESS_META_KEY,
-} from "@/src/lib/imaging-os/protocolSlotVocabulary";
+export type { ProtocolSlotDef } from "./imagingOsWorkspaceBridge";
+export { parseProtocolSlots, PROGRESS_META_KEY } from "./imagingOsWorkspaceBridge";
 
-import type { ProtocolSlotDef } from "@/src/lib/imaging-os/protocolSlotVocabulary";
-import { PROGRESS_META_KEY } from "@/src/lib/imaging-os/protocolSlotVocabulary";
+import type { ProtocolSlotDef } from "./imagingOsWorkspaceBridge";
+import { PROGRESS_META_KEY } from "./imagingOsWorkspaceBridge";
 
 export type ViePendingCaptureMeta = {
   patient_image_id: string;

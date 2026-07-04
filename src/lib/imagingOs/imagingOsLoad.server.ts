@@ -9,8 +9,10 @@ import {
   protocolRequiredCompletionPercent,
   type ProtocolSlotDef,
 } from "./imagingOsProtocol";
-import { loadResolvedProtocol } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
-import type { ProtocolCatalogSource } from "@/src/lib/imaging-os/protocolCatalogResolverCore";
+import {
+  loadResolvedProtocol,
+  type ProtocolCatalogSource,
+} from "./imagingOsProtocolCatalogAdapter.server";
 import type { VieComparisonPairRow } from "@/src/lib/vie/vieComparisonTypes";
 
 export const GUIDED_CAPTURE_TEMPLATE_SLUGS = [

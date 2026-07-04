@@ -2,7 +2,7 @@ import {
   buildGuidedVisitType,
   mapTemplateSlugToImagingLibraryAxis,
   type ImagingAnatomicalRegion,
-} from "./imagingOsLibraryVocabulary";
+} from "./imagingOsWorkspaceBridge";
 import { normalizeImagingAnatomicalRegion } from "@/src/lib/patientImages/patientImagePolicy";
 
 export type GuidedImageUploadFieldSnapshot = {

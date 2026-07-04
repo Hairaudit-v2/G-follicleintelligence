@@ -16,7 +16,7 @@ import {
   type ProgressMeta,
   type ProtocolSlotDef,
 } from "./imagingOsProtocol";
-import { loadResolvedProtocolSlots } from "@/src/lib/imaging-os/protocolCatalogResolver.server";
+import { loadResolvedProtocolSlots } from "./imagingOsProtocolCatalogAdapter.server";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 function publishImagingProtocolCompleted(params: {

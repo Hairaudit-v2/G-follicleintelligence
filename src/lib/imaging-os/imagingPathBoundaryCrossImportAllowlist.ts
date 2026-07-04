@@ -5,13 +5,8 @@
  */
 
 export const IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST = [
-  // Legacy workspace loaders call canonical protocol catalog resolver until guided capture migrates.
-  "src/lib/imagingOs/imagingOsGuidedCapture.server.ts|@/src/lib/imaging-os/protocolCatalogResolver.server",
-  "src/lib/imagingOs/imagingOsLoad.server.ts|@/src/lib/imaging-os/protocolCatalogResolver.server",
-  "src/lib/imagingOs/imagingOsLoad.server.ts|@/src/lib/imaging-os/protocolCatalogResolverCore",
-  // Legacy workspace shims re-export canonical vocabulary for in-tree callers during migration.
-  "src/lib/imagingOs/imagingOsProtocol.ts|@/src/lib/imaging-os/protocolSlotVocabulary",
-  "src/lib/imagingOs/imagingOsLibraryVocabulary.ts|@/src/lib/imaging-os/imagingLibraryVocabulary",
+  // Sole legacy workspace bridge — all imagingOs in-tree consumers import via this file.
+  "src/lib/imagingOs/imagingOsWorkspaceBridge.ts|@/src/lib/imaging-os/workspaceBridge",
 ] as const;
 
 export type ImagingPathBoundaryCrossImportAllowlistEntry =

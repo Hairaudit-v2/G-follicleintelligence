@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { IMAGING_ANNOTATION_SCHEMA_VERSION } from "./imagingOsLibraryVocabulary";
+import { IMAGING_ANNOTATION_SCHEMA_VERSION } from "./imagingOsWorkspaceBridge";
 import { loadPatientImageForPatient } from "@/src/lib/patientImages/patientImagesServer";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 

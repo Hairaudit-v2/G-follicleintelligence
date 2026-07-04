@@ -97,4 +97,21 @@ describe("imagingPathBoundaryGuardCore", () => {
     assert.equal(IMAGING_OS_CANONICAL_ROOT, "src/lib/imaging-os");
     assert.equal(IMAGING_OS_LEGACY_WORKSPACE_ROOT, "src/lib/imagingOs");
   });
+
+  it("allowlist reduced to sole legacy workspace bridge", () => {
+    assert.equal(IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST.length, 1);
+    assert.equal(
+      IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST[0],
+      "src/lib/imagingOs/imagingOsWorkspaceBridge.ts|@/src/lib/imaging-os/workspaceBridge"
+    );
+  });
+
+  it("canonical modules do not import legacy imagingOsProtocol", () => {
+    const violations = scanImagingPathCrossImportViolations(REPO_ROOT).filter(
+      (v) =>
+        v.fromBoundary === "canonical" &&
+        v.specifier.includes("src/lib/imagingOs/imagingOsProtocol")
+    );
+    assert.deepEqual(violations, []);
+  });
 });
