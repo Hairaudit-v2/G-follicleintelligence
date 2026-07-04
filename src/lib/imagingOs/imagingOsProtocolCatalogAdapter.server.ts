@@ -8,6 +8,8 @@ import "server-only";
 export {
   loadResolvedProtocol,
   loadResolvedProtocolSlots,
-  type NormalizedProtocol,
-  type ProtocolCatalogSource,
-} from "./imagingOsWorkspaceBridge";
+} from "@/src/lib/imaging-os/protocolCatalogResolver.server";
+export type {
+  NormalizedProtocol,
+  ProtocolCatalogSource,
+} from "@/src/lib/imaging-os/protocolCatalogResolverCore";

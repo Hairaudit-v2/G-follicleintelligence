@@ -10,8 +10,6 @@ export {
   IMAGING_COMPARE_PRESETS,
   IMAGING_LIBRARY_AXES,
   inferCaptureDeviceType,
-  loadResolvedProtocol,
-  loadResolvedProtocolSlots,
   mapTemplateSlugToImagingLibraryAxis,
   parseProtocolSlots,
   PROGRESS_META_KEY,
