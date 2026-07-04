@@ -6,7 +6,11 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { buildStaffReviewRecord, mergeImagingStaffReviewMetadata } from "./imagingStaffReviewCore";
 import { mapReviewActionToStatus } from "./graftTrayCountProviderCore";
 import type { GraftTrayAiReviewAction } from "./graftTrayCountTypes";
-import { mapEstimateRowToSummary, type GraftTrayAiEstimateRow } from "./graftTrayCountProvider.server";
+import {
+  mapEstimateRowToSummary,
+  parseGraftTrayAiEstimateRow,
+} from "./graftTrayAiEstimateRowParser";
+import type { GraftTrayAiEstimateRow } from "./graftTrayCountTypes";
 
 export type GraftTrayAiReviewResult = {
   estimateId: string;
@@ -31,7 +35,7 @@ async function loadEstimateForImage(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("No graft tray AI estimate found for this image.");
-  return data as GraftTrayAiEstimateRow;
+  return parseGraftTrayAiEstimateRow(data);
 }
 
 /**
@@ -85,7 +89,7 @@ export async function reviewGraftTrayAiEstimate(input: {
     .single();
   if (updErr) throw new Error(updErr.message);
 
-  const updatedRow = updated as GraftTrayAiEstimateRow;
+  const updatedRow = parseGraftTrayAiEstimateRow(updated);
 
   const { data: imageRow, error: imgErr } = await client
     .from("fi_patient_images")

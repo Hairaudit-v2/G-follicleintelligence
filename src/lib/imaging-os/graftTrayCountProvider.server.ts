@@ -16,38 +16,20 @@ import {
   parseGraftTrayAiFeatureFlags,
   resolveManualGraftCountFromEvents,
 } from "./graftTrayCountProviderCore";
+import {
+  mapEstimateRowToSummary,
+  parseGraftTrayAiEstimateRow,
+} from "./graftTrayAiEstimateRowParser";
 import type {
+  GraftTrayAiEstimateRow,
   GraftTrayAiEstimateSummary,
   GraftTrayCountEstimateResult,
   GraftTrayCountComparison,
   ManualGraftCountSnapshot,
 } from "./graftTrayCountTypes";
 
-export type GraftTrayAiEstimateRow = {
-  id: string;
-  tenant_id: string;
-  patient_id: string;
-  image_id: string;
-  graft_tray_link_id: string | null;
-  surgery_id: string | null;
-  estimated_graft_count: number | null;
-  manual_graft_count: number | null;
-  manual_count_source: string | null;
-  corrected_graft_count: number | null;
-  delta: number | null;
-  mismatch_band: string;
-  confidence: number;
-  confidence_band: string;
-  image_quality: string;
-  assessable: boolean;
-  review_status: string;
-  reviewer_decision: string | null;
-  provider: string;
-  provider_version: string;
-  review_reasons: unknown;
-  created_at: string;
-  updated_at: string;
-};
+export type { GraftTrayAiEstimateRow } from "./graftTrayCountTypes";
+export { mapEstimateRowToSummary } from "./graftTrayAiEstimateRowParser";
 
 async function loadGraftTrayLinkForImage(
   client: SupabaseClient,
@@ -203,30 +185,6 @@ export async function runGraftTrayCountEstimate(input: {
   return { estimate, manual, comparison, link, usedOpenAi };
 }
 
-export function mapEstimateRowToSummary(row: GraftTrayAiEstimateRow): GraftTrayAiEstimateSummary {
-  return {
-    estimate_id: row.id,
-    image_id: row.image_id,
-    graft_tray_link_id: row.graft_tray_link_id,
-    estimated_graft_count: row.estimated_graft_count,
-    manual_graft_count: row.manual_graft_count,
-    manual_count_source:
-      (row.manual_count_source as ManualGraftCountSnapshot["manual_count_source"]) ?? "missing",
-    mismatch_band: row.mismatch_band as GraftTrayAiEstimateSummary["mismatch_band"],
-    delta: row.delta,
-    confidence: row.confidence,
-    confidence_band: row.confidence_band as GraftTrayAiEstimateSummary["confidence_band"],
-    image_quality: row.image_quality as GraftTrayAiEstimateSummary["image_quality"],
-    assessable: row.assessable,
-    review_status: row.review_status as GraftTrayAiEstimateSummary["review_status"],
-    reviewer_decision: row.reviewer_decision as GraftTrayAiEstimateSummary["reviewer_decision"],
-    corrected_count: row.corrected_graft_count,
-    provider: row.provider as GraftTrayAiEstimateSummary["provider"],
-    provider_version: row.provider_version,
-    generated_at: row.created_at,
-  };
-}
-
 export async function persistGraftTrayAiEstimate(input: {
   tenantId: string;
   patientId: string;
@@ -290,7 +248,7 @@ export async function persistGraftTrayAiEstimate(input: {
     .single();
   if (error) throw new Error(error.message);
 
-  const estimateRow = data as GraftTrayAiEstimateRow;
+  const estimateRow = parseGraftTrayAiEstimateRow(data);
 
   const graftTrayMetaPatch = {
     graft_tray_ai_estimate_id: estimateRow.id,
@@ -361,7 +319,7 @@ export async function loadGraftTrayAiEstimatesForImages(
   if (error) throw new Error(error.message);
 
   for (const row of data ?? []) {
-    const r = row as GraftTrayAiEstimateRow;
+    const r = parseGraftTrayAiEstimateRow(row);
     if (!out.has(r.image_id)) {
       out.set(r.image_id, mapEstimateRowToSummary(r));
     }

@@ -19,6 +19,7 @@ import {
   type ImagingClinicalReviewQueueFilters,
 } from "./imagingClinicalReviewQueueFilters";
 import { readImagingReviewAssignmentRecord } from "./imagingReviewAssignmentCore";
+import { parseGraftTrayAiEstimateSummaryFromMetadata } from "./graftTrayAiEstimateRowParser";
 import type { GraftTrayAiEstimateSummary } from "./graftTrayCountTypes";
 
 export type ImagingClinicalReviewQueueItem = {
@@ -49,36 +50,7 @@ export type ImagingClinicalReviewQueueItem = {
 function readGraftTrayAiEstimateFromMetadata(
   metadata: Record<string, unknown>
 ): GraftTrayAiEstimateSummary | null {
-  const raw = metadata.graft_tray_ai_estimate;
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
-  const e = raw as Record<string, unknown>;
-  if (typeof e.estimate_id !== "string" || typeof e.image_id !== "string") return null;
-  return {
-    estimate_id: e.estimate_id,
-    image_id: e.image_id,
-    graft_tray_link_id: typeof e.graft_tray_link_id === "string" ? e.graft_tray_link_id : null,
-    estimated_graft_count:
-      e.estimated_graft_count != null ? Number(e.estimated_graft_count) : null,
-    manual_graft_count: e.manual_graft_count != null ? Number(e.manual_graft_count) : null,
-    manual_count_source:
-      (e.manual_count_source as GraftTrayAiEstimateSummary["manual_count_source"]) ?? "missing",
-    mismatch_band: (e.mismatch_band as GraftTrayAiEstimateSummary["mismatch_band"]) ?? "unable_to_assess",
-    delta: e.delta != null ? Number(e.delta) : null,
-    confidence: typeof e.confidence === "number" ? e.confidence : 0,
-    confidence_band:
-      (e.confidence_band as GraftTrayAiEstimateSummary["confidence_band"]) ?? "unknown",
-    image_quality:
-      (e.image_quality as GraftTrayAiEstimateSummary["image_quality"]) ?? "unknown",
-    assessable: e.assessable === true,
-    review_status:
-      (e.review_status as GraftTrayAiEstimateSummary["review_status"]) ?? "pending_review",
-    reviewer_decision:
-      (e.reviewer_decision as GraftTrayAiEstimateSummary["reviewer_decision"]) ?? null,
-    corrected_count: e.corrected_count != null ? Number(e.corrected_count) : null,
-    provider: (e.provider as GraftTrayAiEstimateSummary["provider"]) ?? "stub",
-    provider_version: typeof e.provider_version === "string" ? e.provider_version : "unknown",
-    generated_at: typeof e.generated_at === "string" ? e.generated_at : new Date().toISOString(),
-  };
+  return parseGraftTrayAiEstimateSummaryFromMetadata(metadata);
 }
 
 function readQualityRecord(metadata: Record<string, unknown>): ImagingQualityMetadataRecord | null {
