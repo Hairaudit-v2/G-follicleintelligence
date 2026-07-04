@@ -3,7 +3,6 @@
  */
 
 import { normalizeFiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionCore";
-import type { FiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionTypes";
 import type {
   ConsultationOsIngestContext,
   FlatPatientImageIngestionContext,

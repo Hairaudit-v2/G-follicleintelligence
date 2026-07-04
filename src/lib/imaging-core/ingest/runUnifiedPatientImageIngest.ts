@@ -9,7 +9,6 @@ import { parsePatientImageIngestionContext } from "./parsePatientImageIngestionC
 import type {
   FlatPatientImageIngestionContext,
   ParsedPatientImageIngestContext,
-  PatientImageIngestionContext,
 } from "./patientImageIngestContextTypes";
 import { buildImagingSessionTaxonomy } from "./sessionTaxonomy";
 

@@ -15,7 +15,6 @@ import { parsePatientImageIngestionContext } from "./parsePatientImageIngestionC
 import type {
   FlatPatientImageIngestionContext,
   ParsedPatientImageIngestContext,
-  PatientImageIngestionContext,
 } from "./patientImageIngestContextTypes";
 
 export type { PatientImageIngestionContext } from "./patientImageIngestContextTypes";
