@@ -15,6 +15,8 @@ import { activateTenantModule } from "@/src/lib/platform/entitlements/activateTe
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { seedRosterPlanningPolicyFromDeploymentTemplate } from "@/src/lib/workforce/rosterCadencePolicy.server";
 
+import { resolveProvisioningStepRunGate } from "./provisioningStepGate";
+import type { ProvisioningStepLeaseAudit } from "./provisioningStepLeaseCore";
 import {
   buildAcademyAssignmentPlan,
   buildClinicDeploymentPlan,
@@ -116,6 +118,8 @@ export type TenantProvisioningStepRow = {
   error_message: string | null;
   input_snapshot: Record<string, unknown>;
   output_snapshot: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  updated_at: string;
 };
 
 type ServerOpts = {
@@ -730,7 +734,7 @@ export async function loadTenantProvisioningSessionDetail(
   const { data: steps, error: stepsErr } = await supabase
     .from("fi_tenant_provisioning_steps")
     .select(
-      "id, session_id, step_code, step_order, status, attempt_count, max_attempts, started_at, completed_at, error_code, error_message, input_snapshot, output_snapshot"
+      "id, session_id, step_code, step_order, status, attempt_count, max_attempts, started_at, completed_at, error_code, error_message, input_snapshot, output_snapshot, metadata, updated_at"
     )
     .eq("session_id", id)
     .order("step_order", { ascending: true });
@@ -1066,23 +1070,75 @@ export async function runTenantProvisioningStep(
 
   const step = steps.find((s) => s.step_code === code);
   if (!step) return { ok: false, error: "Step not found." };
-  if (step.status === "completed") return { ok: true };
-  if (step.status === "running") return { ok: false, error: "Step is already running." };
+
+  const gate = await resolveProvisioningStepRunGate(
+    {
+      id: step.id,
+      session_id: step.session_id,
+      step_code: step.step_code,
+      status: step.status,
+      attempt_count: step.attempt_count,
+      max_attempts: step.max_attempts,
+      started_at: step.started_at,
+      error_code: step.error_code,
+      error_message: step.error_message,
+      metadata: step.metadata ?? {},
+      updated_at: step.updated_at,
+    },
+    { client: supabase }
+  );
+
+  if (gate.kind === "already_completed") return { ok: true };
+  if (gate.kind === "already_running") {
+    return { ok: false, error: "Step is already running." };
+  }
 
   const now = new Date().toISOString();
-  const attemptCount = step.attempt_count + 1;
+  let activeStep = step;
 
-  await supabase
-    .from("fi_tenant_provisioning_steps")
-    .update({
+  if (gate.kind === "reclaimed_stale") {
+    activeStep = {
+      ...step,
       status: "running",
-      attempt_count: attemptCount,
-      started_at: step.started_at ?? now,
+      attempt_count: gate.step.attempt_count,
       error_code: null,
       error_message: null,
-      updated_at: now,
-    })
-    .eq("id", step.id);
+      metadata: gate.step.metadata,
+      updated_at: gate.step.updated_at,
+    };
+
+    const lease = gate.step.metadata?._provisioning_step_lease as
+      | ProvisioningStepLeaseAudit
+      | undefined;
+    await writeProvisioningAudit(supabase, {
+      sessionId: id,
+      tenantId: session.tenant_id,
+      eventKind: "step.lease_reclaimed",
+      actorAuthUserId: auth.actorAuthUserId,
+      stepCode: code,
+      detail: {
+        previous_running_at: lease?.previous_running_at ?? null,
+        reclaimed_at: lease?.reclaimed_at ?? null,
+        reclaim_reason: lease?.reclaim_reason ?? null,
+        reclaim_count: lease?.reclaim_count ?? null,
+        attempt_count: gate.step.attempt_count,
+      },
+    });
+  } else {
+    const attemptCount = step.attempt_count + 1;
+    await supabase
+      .from("fi_tenant_provisioning_steps")
+      .update({
+        status: "running",
+        attempt_count: attemptCount,
+        started_at: step.started_at ?? now,
+        error_code: null,
+        error_message: null,
+        updated_at: now,
+      })
+      .eq("id", step.id);
+    activeStep = { ...step, status: "running", attempt_count: attemptCount, updated_at: now };
+  }
 
   if (!session.started_at) {
     await supabase
@@ -1100,7 +1156,7 @@ export async function runTenantProvisioningStep(
   const exec = await executeStepLogic(
     supabase,
     freshSession.detail.session,
-    step,
+    activeStep,
     auth.actorAuthUserId
   );
   const finishedAt = new Date().toISOString();
@@ -1115,10 +1171,10 @@ export async function runTenantProvisioningStep(
         completed_at: finishedAt,
         updated_at: finishedAt,
       })
-      .eq("id", step.id);
+      .eq("id", activeStep.id);
 
     const updatedSteps = steps.map((s) =>
-      s.id === step.id
+      s.id === activeStep.id
         ? { ...s, status: "failed" as const, error_code: exec.errorCode, error_message: exec.error }
         : s
     );
@@ -1144,7 +1200,7 @@ export async function runTenantProvisioningStep(
       completed_at: finishedAt,
       updated_at: finishedAt,
     })
-    .eq("id", step.id);
+    .eq("id", activeStep.id);
 
   const reloaded = await loadTenantProvisioningSessionDetail(id, {
     ...opts,
