@@ -18,6 +18,14 @@ export type SurgeryCaseIntelligencePublishDecision = {
   existingEventId?: string;
 };
 
+export type PublishSurgeryCaseIntelligenceFactsResult = {
+  action: "inserted" | "updated" | "skipped";
+  reason?: string;
+  eventId?: string;
+  factsVersion: string;
+  lastPublishedAt: string;
+};
+
 export class SurgeryCaseFactsPublishValidationError extends Error {
   constructor(message: string) {
     super(message);

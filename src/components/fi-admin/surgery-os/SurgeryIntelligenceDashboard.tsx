@@ -3,6 +3,7 @@ import { BarChart3, Camera, ClipboardList, Scissors } from "lucide-react";
 
 import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
 import type { SurgeryIntelligenceDashboardPayload } from "@/src/lib/outcomeIntelligence/surgeryIntelligenceDashboardTypes";
+import { SurgeryIntelligenceBackfillCard } from "./SurgeryIntelligenceBackfillCard";
 import { SurgeryIntelligenceDashboardFiltersForm } from "./SurgeryIntelligenceDashboardFiltersForm";
 
 function DistributionList({
@@ -65,6 +66,8 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
           </span>
         </div>
       </DashboardCard>
+
+      <SurgeryIntelligenceBackfillCard tenantId={data.tenantId} />
 
       <SurgeryIntelligenceDashboardFiltersForm
         baseHref={base}

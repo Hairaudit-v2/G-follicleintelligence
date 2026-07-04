@@ -34,8 +34,7 @@ import {
   reconcileGrafts,
 } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
 import { SURGERY_OS_GRAFT_TYPES } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
-import { publishSurgeryCaseIntelligenceFacts } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublisher.server";
-import { loadAndBuildSurgeryCaseIntelligenceFactsForPublish } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsPublishContext.server";
+import { processSurgeryCaseIntelligenceBackfillItem } from "@/src/lib/outcomeIntelligence/surgeryIntelligenceBackfill.server";
 
 const optionalAdminKey = z.object({ adminKey: z.string().optional() });
 
@@ -483,21 +482,35 @@ export async function rebuildSurgeryCaseIntelligenceFactsAction(
   try {
     const parsed = rebuildCaseIntelligenceFactsSchema.parse(input);
     await assertSurgeryOsMutationAllowed(tenantId, "log_event", parsed.adminKey);
-    const { facts, clinicId } = await loadAndBuildSurgeryCaseIntelligenceFactsForPublish({
+    const outcome = await processSurgeryCaseIntelligenceBackfillItem({
       tenantId,
       surgeryId: parsed.surgery_id,
-    });
-    if (!facts) {
-      return { ok: false as const, error: "No publishable surgery case intelligence facts found." };
-    }
-    const result = await publishSurgeryCaseIntelligenceFacts({
-      tenantId,
-      clinicId,
-      facts,
+      dryRun: false,
       force: parsed.force,
     });
+    if (outcome.kind === "skipped_missing_context") {
+      return { ok: false as const, error: "No publishable surgery case intelligence facts found." };
+    }
+    if (outcome.kind === "skipped_no_final_count") {
+      return {
+        ok: false as const,
+        error: "Surgery case has no final reviewed graft count to publish.",
+      };
+    }
+    if (outcome.kind === "skipped_newer_version") {
+      return { ok: false as const, error: outcome.reason };
+    }
+    if (outcome.kind === "failed") {
+      return { ok: false as const, error: outcome.reason };
+    }
     revalidateSurgeryOsPaths(tenantId);
-    return { ok: true as const, data: result };
+    return {
+      ok: true as const,
+      data: {
+        action: outcome.kind === "updated" ? "updated" : "inserted",
+        surgeryId: outcome.surgeryId,
+      },
+    };
   } catch (e) {
     return { ok: false as const, error: errMsg(e) };
   }

@@ -30,13 +30,9 @@ export type PublishSurgeryCaseIntelligenceFactsInput = {
   occurredAt?: string;
 };
 
-export type PublishSurgeryCaseIntelligenceFactsResult = {
-  action: "inserted" | "updated" | "skipped";
-  reason?: string;
-  eventId?: string;
-  factsVersion: string;
-  lastPublishedAt: string;
-};
+import type { PublishSurgeryCaseIntelligenceFactsResult } from "./surgeryCaseFactsPublisherCore";
+
+export type { PublishSurgeryCaseIntelligenceFactsResult } from "./surgeryCaseFactsPublisherCore";
 
 type ExistingFactsEventRow = {
   id: string;
