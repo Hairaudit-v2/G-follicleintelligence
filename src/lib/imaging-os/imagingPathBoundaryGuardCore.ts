@@ -5,15 +5,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import {
-  crossImportAllowlistKey,
-  IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST,
-  type ImagingPathBoundaryCrossImportAllowlistEntry,
-} from "./imagingPathBoundaryCrossImportAllowlist";
+import type { ImagingPathBoundaryCrossImportAllowlistEntry } from "./imagingPathBoundaryCrossImportAllowlist";
 import {
   IMAGING_OS_CANONICAL_ROOT,
   IMAGING_OS_LEGACY_WORKSPACE_ROOT,
 } from "./imagingPathBoundaryMap";
+import {
+  CANONICAL_WORKSPACE_BRIDGE_SPECIFIER,
+  LEGACY_WORKSPACE_BRIDGE_FILE,
+} from "./workspaceBridgeContract";
 
 const SCAN_ROOTS = ["src", "tests", "lib", "app"] as const;
 const SKIP_DIRS = new Set(["node_modules", ".git", ".next", "dist", "build", "coverage"]);
@@ -92,6 +92,36 @@ export function isPreferredCanonicalImagingImport(specifier: string): boolean {
   return boundary === "canonical";
 }
 
+/** Legacy → canonical cross-imports are permitted only via the sole workspace bridge file. */
+export function isPermittedLegacyToCanonicalCrossImport(
+  file: string,
+  specifier: string
+): boolean {
+  const posixFile = normalizePosixPath(file);
+  const normalizedSpecifier = normalizePosixPath(specifier.trim());
+  return (
+    posixFile === LEGACY_WORKSPACE_BRIDGE_FILE &&
+    normalizedSpecifier === CANONICAL_WORKSPACE_BRIDGE_SPECIFIER
+  );
+}
+
+/** Canonical imaging-os modules must not import from legacy imagingOs/*. */
+export function isForbiddenCanonicalToLegacyCrossImport(
+  violation: ImagingPathCrossImportViolation
+): boolean {
+  return violation.fromBoundary === "canonical" && violation.toBoundary === "legacy";
+}
+
+export function isPermittedCrossBoundaryImport(
+  violation: ImagingPathCrossImportViolation
+): boolean {
+  if (isForbiddenCanonicalToLegacyCrossImport(violation)) return false;
+  if (violation.fromBoundary === "legacy" && violation.toBoundary === "canonical") {
+    return isPermittedLegacyToCanonicalCrossImport(violation.file, violation.specifier);
+  }
+  return false;
+}
+
 export function findCrossBoundaryImportsInSource(
   source: string,
   filePath = "inline-fixture.ts"
@@ -119,6 +149,9 @@ function shouldScanFile(relativePath: string): boolean {
   if (posix.endsWith("src/lib/imaging-os/imagingPathBoundaryGuard.test.ts")) return false;
   if (posix.endsWith("src/lib/imaging-os/imagingPathBoundaryCrossImportAllowlist.ts")) return false;
   if (posix.endsWith("src/lib/imaging-os/imagingPathBoundaryMap.ts")) return false;
+  if (posix.endsWith("src/lib/imaging-os/workspaceBridgeContract.ts")) return false;
+  if (posix.endsWith("src/lib/imaging-os/workspaceBridgeContractCore.ts")) return false;
+  if (posix.endsWith("src/lib/imaging-os/workspaceBridgeContract.test.ts")) return false;
   return true;
 }
 
@@ -148,16 +181,14 @@ function walkScanRoots(repoRoot: string): string[] {
 }
 
 export function scanImagingPathCrossImports(repoRoot: string): ImagingPathCrossImportObservation[] {
-  const allowlist = new Set<string>(IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST);
   const observations: ImagingPathCrossImportObservation[] = [];
 
   for (const relativeFile of walkScanRoots(repoRoot)) {
     const source = fs.readFileSync(path.join(repoRoot, relativeFile), "utf8");
     for (const violation of findCrossBoundaryImportsInSource(source, relativeFile)) {
-      const key = crossImportAllowlistKey(violation.file, violation.specifier);
       observations.push({
         ...violation,
-        allowlisted: allowlist.has(key),
+        allowlisted: isPermittedCrossBoundaryImport(violation),
       });
     }
   }
@@ -171,11 +202,27 @@ export function scanImagingPathCrossImportViolations(
   return scanImagingPathCrossImports(repoRoot).filter((entry) => !entry.allowlisted);
 }
 
+export function findUnauthorizedLegacyToCanonicalCrossImports(
+  repoRoot: string
+): ImagingPathCrossImportViolation[] {
+  return scanImagingPathCrossImports(repoRoot).filter(
+    (entry) =>
+      entry.fromBoundary === "legacy" &&
+      entry.toBoundary === "canonical" &&
+      !isPermittedLegacyToCanonicalCrossImport(entry.file, entry.specifier)
+  );
+}
+
 export function isAllowlistedCrossBoundaryImport(
   file: string,
   specifier: string
 ): file is ImagingPathBoundaryCrossImportAllowlistEntry {
-  return (IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST as readonly string[]).includes(
-    crossImportAllowlistKey(file, specifier)
-  );
+  const violation: ImagingPathCrossImportViolation = {
+    file: normalizePosixPath(file),
+    line: 0,
+    specifier: specifier.trim(),
+    fromBoundary: "legacy",
+    toBoundary: "canonical",
+  };
+  return isPermittedCrossBoundaryImport(violation);
 }

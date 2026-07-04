@@ -8,10 +8,16 @@ import {
   boundaryForFilePath,
   boundaryForImportSpecifier,
   findCrossBoundaryImportsInSource,
+  findUnauthorizedLegacyToCanonicalCrossImports,
+  isPermittedLegacyToCanonicalCrossImport,
   isPreferredCanonicalImagingImport,
   scanImagingPathCrossImportViolations,
   scanImagingPathCrossImports,
 } from "./imagingPathBoundaryGuardCore";
+import {
+  CANONICAL_WORKSPACE_BRIDGE_SPECIFIER,
+  LEGACY_WORKSPACE_BRIDGE_FILE,
+} from "./workspaceBridgeContract";
 import {
   IMAGING_OS_CANONICAL_ROOT,
   IMAGING_OS_LEGACY_WORKSPACE_ROOT,
@@ -111,6 +117,51 @@ describe("imagingPathBoundaryGuardCore", () => {
       (v) =>
         v.fromBoundary === "canonical" &&
         v.specifier.includes("src/lib/imagingOs/imagingOsProtocol")
+    );
+    assert.deepEqual(violations, []);
+  });
+
+  it("permits only the sole legacy workspace bridge for imaging-os imports", () => {
+    assert.equal(
+      isPermittedLegacyToCanonicalCrossImport(
+        LEGACY_WORKSPACE_BRIDGE_FILE,
+        CANONICAL_WORKSPACE_BRIDGE_SPECIFIER
+      ),
+      true
+    );
+    assert.equal(
+      isPermittedLegacyToCanonicalCrossImport(
+        "src/lib/imagingOs/imagingOsMutations.server.ts",
+        "@/src/lib/imaging-os/workspaceBridge"
+      ),
+      false
+    );
+    assert.equal(
+      isPermittedLegacyToCanonicalCrossImport(
+        LEGACY_WORKSPACE_BRIDGE_FILE,
+        "@/src/lib/imaging-os/protocolSlotVocabulary"
+      ),
+      false
+    );
+  });
+
+  it("repo scan has no unauthorized legacy-to-canonical cross-imports", () => {
+    const unauthorized = findUnauthorizedLegacyToCanonicalCrossImports(REPO_ROOT);
+    assert.deepEqual(
+      unauthorized,
+      [],
+      unauthorized
+        .map(
+          (v) =>
+            `${v.file}:${v.line} legacy→canonical imports ${v.specifier}`
+        )
+        .join("\n")
+    );
+  });
+
+  it("repo scan has no canonical-to-legacy cross-imports", () => {
+    const violations = scanImagingPathCrossImportViolations(REPO_ROOT).filter(
+      (v) => v.fromBoundary === "canonical" && v.toBoundary === "legacy"
     );
     assert.deepEqual(violations, []);
   });

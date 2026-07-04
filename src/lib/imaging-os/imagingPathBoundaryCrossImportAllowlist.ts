@@ -1,11 +1,12 @@
 /**
- * FI-IMAGING-PATH-BOUNDARY-MAP-1 — temporary allowlist for cross-tree imaging imports.
+ * FI-IMAGING-PATH-BOUNDARY-MAP-1 — documented sole cross-tree imaging import.
  * Format: `${importerRelativePath}|${importSpecifier}` as written in source.
- * Shrink over time; prefer migrating importers to canonical `imaging-os/*` paths.
+ * Enforcement lives in `imagingPathBoundaryGuardCore` via `isPermittedCrossBoundaryImport`.
+ * Target state: shrink to 0 by migrating legacy workspace files or replacing this bridge.
  */
 
 export const IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST = [
-  // Sole legacy workspace bridge — all imagingOs in-tree consumers import via this file.
+  // Single intentional legacy bridge — imagingOsWorkspaceBridge → workspaceBridge only.
   "src/lib/imagingOs/imagingOsWorkspaceBridge.ts|@/src/lib/imaging-os/workspaceBridge",
 ] as const;
 
