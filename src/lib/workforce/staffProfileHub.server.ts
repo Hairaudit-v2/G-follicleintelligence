@@ -20,8 +20,10 @@ import {
   buildStaffProfileOverviewModel,
   type StaffProfileAccessSnapshot,
   type StaffProfileIdentityAuditSnapshot,
+  type StaffProfileLeaveContext,
   type StaffProfileOverviewModel,
 } from "@/src/lib/workforce/staffProfileHubCore";
+import { loadStaffLeaveContext } from "@/src/lib/workforce/staffLeaveWorkflow.server";
 
 export type StaffProfileHubOverviewData = StaffProfileOverviewModel;
 
@@ -115,11 +117,16 @@ export async function loadStaffProfileHubOverview(
   ]);
 
   let workforceIntelligence = null;
+  let leaveContext: StaffProfileLeaveContext | null = null;
   if (lifecycle.fi_staff_id) {
     try {
       const fiStaff = await loadStaffMemberForTenant(tid, lifecycle.fi_staff_id);
       if (fiStaff) {
-        const hrByStaffId = await loadHrNotificationByStaffId(tid, [fiStaff.id]);
+        const [hrByStaffId, leaveData] = await Promise.all([
+          loadHrNotificationByStaffId(tid, [fiStaff.id]),
+          loadStaffLeaveContext({ tenantId: tid, fiStaffId: fiStaff.id }),
+        ]);
+        leaveContext = leaveData;
         const intel = await loadWorkforceCommandCentreIntelligence(
           tid,
           [fiStaff],
@@ -129,6 +136,7 @@ export async function loadStaffProfileHubOverview(
       }
     } catch {
       workforceIntelligence = null;
+      leaveContext = null;
     }
   }
 
@@ -137,6 +145,8 @@ export async function loadStaffProfileHubOverview(
   return buildStaffProfileOverviewModel({
     tenantId: tid,
     staffMemberId,
+    fiStaffId: lifecycle.fi_staff_id,
+    staffName: lifecycle.full_name,
     employmentStatus: lifecycle.employment_status,
     archivedAt: lifecycle.archived_at,
     email: lifecycle.email,
@@ -151,5 +161,6 @@ export async function loadStaffProfileHubOverview(
     viewerCanManageAccess: canManage,
     viewerCanManageOnboarding: canManage,
     viewerCanManageReadiness: canManage,
+    leaveContext,
   });
 }

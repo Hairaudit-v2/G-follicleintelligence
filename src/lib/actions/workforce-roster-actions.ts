@@ -40,6 +40,7 @@ const availabilityBlockTypeSchema = z.enum([
   "unavailable",
   "leave",
   "sick_leave",
+  "maternity_leave",
   "training",
   "admin",
   "available_override",

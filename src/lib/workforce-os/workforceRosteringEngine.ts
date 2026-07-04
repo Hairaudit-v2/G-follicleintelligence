@@ -29,6 +29,7 @@ export type AvailabilityBlockType =
   | "unavailable"
   | "leave"
   | "sick_leave"
+  | "maternity_leave"
   | "training"
   | "admin"
   | "available_override";
@@ -221,6 +222,7 @@ const UNAVAILABLE_BLOCK_TYPES: AvailabilityBlockType[] = [
   "unavailable",
   "leave",
   "sick_leave",
+  "maternity_leave",
   "training",
   "admin",
 ];

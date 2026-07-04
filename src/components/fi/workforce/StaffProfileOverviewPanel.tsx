@@ -122,6 +122,7 @@ export function StaffProfileOverviewPanel({
   actionContext,
   tenantId,
   progressStages,
+  onModalAction,
 }: {
   name: string;
   roleLabel?: string | null;
@@ -131,6 +132,7 @@ export function StaffProfileOverviewPanel({
   actionContext: StaffProfileActionContext;
   tenantId: string;
   progressStages: StaffLifecycleProgressStage[];
+  onModalAction?: (actionId: string) => void;
 }) {
   return (
     <div className="space-y-4" data-testid="staff-profile-overview">
@@ -149,6 +151,7 @@ export function StaffProfileOverviewPanel({
               menu={actionMenu}
               context={actionContext}
               tenantId={tenantId}
+              onModalAction={onModalAction}
             />
           </div>
           <div className="lg:hidden">
@@ -157,6 +160,7 @@ export function StaffProfileOverviewPanel({
               context={actionContext}
               tenantId={tenantId}
               compact
+              onModalAction={onModalAction}
             />
           </div>
         </aside>

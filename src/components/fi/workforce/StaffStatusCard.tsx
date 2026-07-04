@@ -53,6 +53,7 @@ export function StaffStatusCard({
     trainingLabel?: string | null;
     sopLabel?: string | null;
     rosterLabel?: string | null;
+    leaveLabel?: string | null;
     identityLinkLabel?: string | null;
     employmentLabel?: string;
   };
@@ -62,8 +63,10 @@ export function StaffStatusCard({
 }) {
   const pills: { label: string; className: string }[] = [
     {
-      label: status.employmentLabel ?? status.operationalLabel,
-      className: pillToneForOperationalState(status.operationalState),
+      label: status.leaveLabel ?? status.employmentLabel ?? status.operationalLabel,
+      className: status.leaveLabel
+        ? "bg-amber-500/15 text-amber-200 ring-amber-500/25"
+        : pillToneForOperationalState(status.operationalState),
     },
   ];
 
@@ -137,9 +140,12 @@ export function StaffStatusCard({
   if (extended && status.rosterLabel) {
     pills.push({
       label: status.rosterLabel,
-      className: status.rosterLabel.includes("Next shift")
-        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
-        : "bg-slate-500/15 text-slate-400 ring-slate-500/20",
+      className:
+        status.leaveLabel || status.rosterLabel.includes("leave")
+          ? "bg-amber-500/15 text-amber-200 ring-amber-500/25"
+          : status.rosterLabel.includes("Next shift")
+            ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
+            : "bg-slate-500/15 text-slate-400 ring-slate-500/20",
     });
   }
   if (extended && status.identityLinkLabel) {

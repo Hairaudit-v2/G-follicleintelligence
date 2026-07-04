@@ -417,3 +417,79 @@ test("Action menu: dangerous actions include confirmation copy", () => {
   assert.ok(revoke?.confirmTitle);
   assert.equal(suspend?.actionKind, "danger");
 });
+
+test("staff on maternity leave shows leave status instead of roster eligible", () => {
+  const maternityBlock = {
+    id: "block-1",
+    block_type: "maternity_leave" as const,
+    starts_at: "2026-07-01T00:00:00.000Z",
+    ends_at: "2026-12-31T23:59:59.999Z",
+    status: "active",
+    reason: "maternity_leave",
+  };
+
+  const overview = buildStaffProfileOverviewModel({
+    tenantId: TENANT,
+    staffMemberId: STAFF_MEMBER,
+    fiStaffId: "fi-staff-1",
+    staffName: "Anita Katherine Cottee",
+    employmentStatus: "on_leave",
+    archivedAt: null,
+    email: "anita@clinic.com",
+    systemAccessRevoked: false,
+    onboardingInviteStatus: "accepted",
+    hasOnboardingInviteUrl: false,
+    checklist: {
+      accountCreated: true,
+      pinChosen: false,
+      permissionsAssigned: true,
+      trainingPending: true,
+    },
+    accessRow: {
+      authLoginStatus: "no_login",
+      inviteStatus: "none",
+      pinStatus: "Not set",
+      canSendInvite: true,
+      canResendInvite: false,
+      canCopyInviteLink: false,
+      canResetPin: false,
+      canSuspendAccess: false,
+      canRevokeAccess: false,
+    },
+    workforceIntelligence: {
+      readinessScore: 42,
+      readinessBand: "operational_warning",
+      readinessBandLabel: "Developing",
+      complianceStatus: "ok",
+      trainingRequiredCount: 2,
+      trainingProgressLabel: "2 required",
+      nextShiftLabel: "Mon 8 Jul · 09:00",
+      surgeryReady: false,
+    },
+    identityAuditRow: null,
+    leaveContext: {
+      availabilityBlocks: [maternityBlock],
+      futureShifts: [
+        {
+          id: "shift-1",
+          starts_at: "2026-09-01T09:00:00.000Z",
+          ends_at: "2026-09-01T17:00:00.000Z",
+          status: "scheduled",
+        },
+      ],
+    },
+  });
+
+  assert.match(overview.unifiedStatus.employmentLabel, /maternity leave until/i);
+  assert.equal(overview.unifiedStatus.rosterLabel, "On maternity leave");
+  assert.equal(overview.unifiedStatus.trainingLabel, null);
+  assert.ok(
+    overview.blockers.some((b) => b.id === "future_shifts_during_leave")
+  );
+  assert.ok(
+    overview.actionMenu.actions.some((a) => a.id === "manage_leave")
+  );
+  const rosterStage = overview.progressStages.find((s) => s.id === "roster_eligible");
+  assert.equal(rosterStage?.label, "On maternity leave");
+  assert.equal(rosterStage?.status, "blocked");
+});

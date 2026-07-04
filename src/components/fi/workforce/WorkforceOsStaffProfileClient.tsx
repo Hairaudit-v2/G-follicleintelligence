@@ -9,6 +9,7 @@ import {
   ArchiveStaffModal,
   LinkHrIdentityModal,
   ManageEmploymentModal,
+  SetMaternityLeaveModal,
   StaffEditModal,
 } from "@/src/components/fi/workforce/StaffLifecycleModals";
 import { StaffLifecyclePanel } from "@/src/components/fi/workforce/StaffLifecyclePanel";
@@ -57,6 +58,7 @@ export function WorkforceOsStaffProfileClient({
   const [tab, setTab] = useState<ProfileTab>("overview");
   const [editOpen, setEditOpen] = useState(false);
   const [employmentOpen, setEmploymentOpen] = useState(false);
+  const [maternityLeaveOpen, setMaternityLeaveOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
 
@@ -86,6 +88,9 @@ export function WorkforceOsStaffProfileClient({
             </Button>
             <Button size="sm" variant="outline" onClick={() => setEmploymentOpen(true)}>
               Manage Employment
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setMaternityLeaveOpen(true)}>
+              Set maternity leave
             </Button>
             <Button size="sm" variant="outline" onClick={() => setArchiveOpen(true)}>
               {lifecycle.archived_at ? "Restore Staff" : "Archive Staff"}
@@ -128,6 +133,17 @@ export function WorkforceOsStaffProfileClient({
           actionContext={overview.actionContext}
           tenantId={tenantId}
           progressStages={overview.progressStages}
+          onModalAction={(actionId) => {
+            if (actionId === "set_maternity_leave" || actionId === "manage_leave") {
+              setMaternityLeaveOpen(true);
+            } else if (actionId === "manage_employment" || actionId === "set_leave" || actionId === "mark_inactive") {
+              setEmploymentOpen(true);
+            } else if (actionId === "archive_staff") {
+              setArchiveOpen(true);
+            } else if (actionId === "re_enable_roster_after_return") {
+              setEmploymentOpen(true);
+            }
+          }}
         />
       ) : null}
 
@@ -248,6 +264,13 @@ export function WorkforceOsStaffProfileClient({
             staffMemberId={lifecycle.id}
             open={employmentOpen}
             onClose={() => setEmploymentOpen(false)}
+          />
+          <SetMaternityLeaveModal
+            tenantId={tenantId}
+            staffMemberId={lifecycle.id}
+            staffName={lifecycle.full_name}
+            open={maternityLeaveOpen}
+            onClose={() => setMaternityLeaveOpen(false)}
           />
           <ArchiveStaffModal
             tenantId={tenantId}

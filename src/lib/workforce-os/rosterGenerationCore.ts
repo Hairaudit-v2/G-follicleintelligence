@@ -91,6 +91,7 @@ const BLOCKING_BLOCK_TYPES = new Set<AvailabilityBlockType>([
   "unavailable",
   "leave",
   "sick_leave",
+  "maternity_leave",
   "training",
   "admin",
 ]);
@@ -186,7 +187,13 @@ function isBlockedByAvailability(
     const bStart = parseIsoMs(block.starts_at);
     const bEnd = parseIsoMs(block.ends_at);
     if (!rangesOverlap(startMs, endMs, bStart, bEnd)) continue;
-    if (block.block_type === "leave" || block.block_type === "sick_leave") return "leave_blocked";
+    if (
+      block.block_type === "leave" ||
+      block.block_type === "sick_leave" ||
+      block.block_type === "maternity_leave"
+    ) {
+      return "leave_blocked";
+    }
     return "unavailable_blocked";
   }
   return null;
@@ -528,6 +535,8 @@ export function blockTypeDisplayLabel(blockType: AvailabilityBlockType): string 
       return "Leave";
     case "sick_leave":
       return "Leave";
+    case "maternity_leave":
+      return "Maternity leave";
     case "unavailable":
       return "Unavailable";
     case "training":

@@ -120,7 +120,7 @@ describe("roster eligible staff lifecycle", () => {
     assert.equal(result.reason, "pending_onboarding");
   });
 
-  it("employment on_leave status is not roster-eligible", () => {
+  it("employment on_leave with maternity block is not roster-eligible", () => {
     const result = evaluateRosterStaffLifecycleEligibility({
       staffId: STAFF_LEAVE,
       isActive: true,
@@ -130,6 +130,26 @@ describe("roster eligible staff lifecycle", () => {
     });
     assert.equal(result.eligible, false);
     assert.equal(result.reason, "employment_status");
+  });
+
+  it("maternity_leave block type makes staff fully unavailable for period", () => {
+    const maternityLeave = [
+      {
+        block_type: "maternity_leave" as const,
+        starts_at: "2026-07-01T00:00:00.000Z",
+        ends_at: "2026-12-31T23:59:59.999Z",
+        status: "active",
+      },
+    ];
+
+    assert.equal(
+      isStaffFullyUnavailableForPeriod({
+        periodDayDates: PERIOD_DAYS,
+        availabilityBlocks: maternityLeave,
+        staffTimezone: "Australia/Perth",
+      }),
+      true
+    );
   });
 });
 

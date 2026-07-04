@@ -599,9 +599,11 @@ export async function loadRosterCommandCentre(
     label:
       block.block_type === "leave" || block.block_type === "sick_leave"
         ? "Leave"
-        : block.block_type === "unavailable"
-          ? "Unavailable"
-          : block.block_type.replace(/_/g, " "),
+        : block.block_type === "maternity_leave"
+          ? "Maternity leave"
+          : block.block_type === "unavailable"
+            ? "Unavailable"
+            : block.block_type.replace(/_/g, " "),
     startsAt: block.starts_at,
     endsAt: block.ends_at,
     localDate: localDateFromIso(block.starts_at),

@@ -46,6 +46,13 @@ export function buildWorkforceCommandCentreHref(tenantId: string): string {
   return `${tenantAdminBase(tenantId)}/workforce-os`;
 }
 
+export function buildStaffHrTaskMapHref(tenantId: string, staffId?: string): string {
+  const base = `${tenantAdminBase(tenantId)}/workforce-os/hr-task-map`;
+  if (!staffId?.trim()) return base;
+  const params = new URLSearchParams({ staffId: staffId.trim() });
+  return `${base}?${params.toString()}`;
+}
+
 export function buildStaffDirectoryHref(tenantId: string): string {
   return `${tenantAdminBase(tenantId)}/staff`;
 }

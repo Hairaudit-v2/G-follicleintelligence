@@ -22,6 +22,7 @@ import {
   restoreStaffMember,
   updateStaffProfile,
 } from "@/src/lib/workforce-os/staffLifecycle.server";
+import { setStaffMaternityLeave } from "@/src/lib/workforce/staffLeaveWorkflow.server";
 import type {
   EmploymentStatusChangeInput,
   StaffProfileEditInput,
@@ -38,6 +39,8 @@ function revalidateWorkforceOsPaths(tenantId: string, staffId?: string) {
   revalidatePath(`/fi-admin/${tid}/workforce-os`);
   revalidatePath(`/fi-admin/${tid}/staff`);
   revalidatePath(`/fi-admin/${tid}/hr-os`);
+  revalidatePath(`/fi-admin/${tid}/workforce-os/roster`);
+  revalidatePath(`/fi-admin/${tid}/workforce-os/roster/standard-hours`);
   if (staffId) {
     revalidatePath(`/fi-admin/${tid}/workforce-os/staff/${staffId}`);
     revalidatePath(`/fi-admin/${tid}/staff/${staffId}/twin`);
@@ -256,6 +259,40 @@ export async function runHrProjectionSyncAction(
     const result = await runHrProjectionSyncForTenant(tenantId);
     revalidateWorkforceOsPaths(tenantId);
     return { ok: true, ...result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export type SetStaffMaternityLeaveActionInput = {
+  startDate: string;
+  expectedReturnDate: string;
+  notes?: string | null;
+  keepLoginAccess: boolean;
+  pauseRosterEligibility: boolean;
+  pauseStandardHours: boolean;
+};
+
+export async function setStaffMaternityLeaveAction(
+  tenantId: string,
+  staffMemberId: string,
+  input: SetStaffMaternityLeaveActionInput
+): Promise<{ ok: true; blockId: string } | { ok: false; error: string }> {
+  try {
+    const { fiUserId } = await assertHrLifecycleManageAllowed(tenantId);
+    const result = await setStaffMaternityLeave({
+      tenantId,
+      staffMemberId,
+      startDate: input.startDate,
+      expectedReturnDate: input.expectedReturnDate,
+      notes: input.notes,
+      keepLoginAccess: input.keepLoginAccess,
+      pauseRosterEligibility: input.pauseRosterEligibility ?? true,
+      pauseStandardHours: input.pauseStandardHours ?? true,
+      actorUserId: fiUserId,
+    });
+    revalidateWorkforceOsPaths(tenantId, result.fiStaffId ?? undefined);
+    return { ok: true, blockId: result.blockId };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

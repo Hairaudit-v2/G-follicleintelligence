@@ -30,8 +30,10 @@ import type {
 const SECTION_LABELS: Record<Exclude<StaffProfileActionSection, "primary">, string> = {
   access: "Access",
   onboarding: "Onboarding",
+  employment: "Employment & Leave",
   readiness: "Readiness",
   roster: "Roster",
+  offboarding: "Offboarding",
   advanced: "Advanced",
 };
 
@@ -94,6 +96,7 @@ function ActionRow({
   anyPending,
   copiedActionId,
   onRun,
+  onModalAction,
 }: {
   action: StaffProfileAction;
   staffMemberId: string;
@@ -101,9 +104,11 @@ function ActionRow({
   anyPending: boolean;
   copiedActionId: string | null;
   onRun: (action: StaffProfileAction) => void;
+  onModalAction?: (actionId: string) => void;
 }) {
   const mutation = mutationForActionId(action.id);
   const isLink = action.actionKind === "link" && action.href;
+  const isModal = action.actionKind === "modal";
   const isMutation = mutation != null && !action.disabled;
 
   if (action.disabled) {
@@ -130,6 +135,22 @@ function ActionRow({
       >
         {action.label}
       </Link>
+    );
+  }
+
+  if (isModal && onModalAction) {
+    return (
+      <button
+        type="button"
+        onClick={() => onModalAction(action.id)}
+        className="block w-full rounded-lg border border-white/10 px-3 py-2 text-left text-xs font-medium text-[#CBD5E1] transition-colors hover:border-[#22C1FF]/30 hover:bg-[#22C1FF]/5 hover:text-[#22C1FF]"
+        data-testid={`staff-profile-action-${action.id}-modal`}
+      >
+        {action.label}
+        {action.description ? (
+          <span className="mt-0.5 block text-[10px] font-normal text-[#64748B]">{action.description}</span>
+        ) : null}
+      </button>
     );
   }
 
@@ -170,6 +191,7 @@ function SectionBlock({
   anyPending,
   copiedActionId,
   onRun,
+  onModalAction,
 }: {
   title: string;
   actions: StaffProfileAction[];
@@ -178,6 +200,7 @@ function SectionBlock({
   anyPending: boolean;
   copiedActionId: string | null;
   onRun: (action: StaffProfileAction) => void;
+  onModalAction?: (actionId: string) => void;
 }) {
   if (actions.length === 0) return null;
 
@@ -196,6 +219,7 @@ function SectionBlock({
             anyPending={anyPending}
             copiedActionId={copiedActionId}
             onRun={onRun}
+            onModalAction={onModalAction}
           />
         ))}
       </div>
@@ -208,11 +232,13 @@ export function StaffProfileActionMenu({
   context,
   tenantId,
   compact = false,
+  onModalAction,
 }: {
   menu: StaffProfileActionMenuModel;
   context: StaffProfileActionContext;
   tenantId: string;
   compact?: boolean;
+  onModalAction?: (actionId: string) => void;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -228,8 +254,10 @@ export function StaffProfileActionMenu({
     const grouped: Record<Exclude<StaffProfileActionSection, "primary">, StaffProfileAction[]> = {
       access: [],
       onboarding: [],
+      employment: [],
       readiness: [],
       roster: [],
+      offboarding: [],
       advanced: [],
     };
 
@@ -375,6 +403,7 @@ export function StaffProfileActionMenu({
             anyPending={pendingActionKey !== null}
             copiedActionId={copiedActionId}
             onRun={runAction}
+            onModalAction={onModalAction}
           />
         </div>
       ) : null}
@@ -389,6 +418,7 @@ export function StaffProfileActionMenu({
           anyPending={pendingActionKey !== null}
           copiedActionId={copiedActionId}
           onRun={runAction}
+          onModalAction={onModalAction}
         />
       ))}
     </div>

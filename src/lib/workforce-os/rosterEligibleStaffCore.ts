@@ -57,6 +57,7 @@ export type RosterStaffEligibilitySnapshot = {
 const FULL_PERIOD_BLOCKING_TYPES = new Set<AvailabilityBlockType>([
   "leave",
   "sick_leave",
+  "maternity_leave",
   "unavailable",
 ]);
 

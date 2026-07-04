@@ -619,6 +619,16 @@ export function buildModuleTiles(input: WorkforceCommandCentreComposeInput): Wor
       ctaLabel: "Reconcile HR",
     },
     {
+      id: "hr-task-map",
+      name: "HR Task Map",
+      valueProposition:
+        "Guide to every staff HR task — where to go, what changes, and what stays the same.",
+      keyMetric: "Onboarding, access, leave, roster, offboarding",
+      statusBadge: { label: "Help guide", variant: "neutral" },
+      href: `${base}/hr-task-map`,
+      ctaLabel: "Open HR Task Map",
+    },
+    {
       id: "staff-directory",
       name: "Staff Directory",
       valueProposition: "FI staff records, roles, calendars, and feature access management.",

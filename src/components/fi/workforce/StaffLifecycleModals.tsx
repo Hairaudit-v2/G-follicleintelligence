@@ -11,6 +11,7 @@ import {
   changeStaffEmploymentStatusAction,
   manuallyLinkStaffHrAction,
   restoreStaffAction,
+  setStaffMaternityLeaveAction,
   updateStaffProfileAction,
 } from "@/lib/actions/workforce-os-staff-lifecycle-actions";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
@@ -23,6 +24,7 @@ import {
   isExternallyManagedStaff,
   resolveEditableProfileFields,
 } from "@/src/lib/workforce-os/staffLifecycleCore";
+import { buildMaternityLeaveConfirmationSummary } from "@/src/lib/workforce/staffLeaveWorkflowCore";
 
 const inputClassName =
   "mt-1 block w-full rounded-lg border border-white/[0.1] bg-[#0B1220] px-3 py-2 text-sm text-[#F8FAFC] focus:border-[#22C1FF]/40 focus:outline-none focus:ring-1 focus:ring-[#22C1FF]/30";
@@ -380,6 +382,186 @@ export function ArchiveStaffModal({
           {pending ? "Working…" : archived ? "Restore" : "Archive"}
         </Button>
       </div>
+    </ModalShell>
+  );
+}
+
+export function SetMaternityLeaveModal({
+  tenantId,
+  staffMemberId,
+  staffName,
+  open,
+  onClose,
+}: {
+  tenantId: string;
+  staffMemberId: string;
+  staffName: string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [returnDate, setReturnDate] = useState(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 6);
+    return d.toISOString().slice(0, 10);
+  });
+  const [notes, setNotes] = useState("");
+  const [keepLoginAccess, setKeepLoginAccess] = useState(true);
+  const [pauseRosterEligibility, setPauseRosterEligibility] = useState(true);
+  const [pauseStandardHours, setPauseStandardHours] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  if (!open) return null;
+
+  const summary = buildMaternityLeaveConfirmationSummary({
+    staffName,
+    startDate,
+    expectedReturnDate: returnDate,
+    keepLoginAccess,
+    pauseRosterEligibility,
+    pauseStandardHours,
+  });
+
+  async function applyLeave() {
+    setError(null);
+    startTransition(async () => {
+      const res = await setStaffMaternityLeaveAction(tenantId, staffMemberId, {
+        startDate,
+        expectedReturnDate: returnDate,
+        notes: notes.trim() || null,
+        keepLoginAccess,
+        pauseRosterEligibility,
+        pauseStandardHours,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        setShowConfirm(false);
+        return;
+      }
+      setShowConfirm(false);
+      onClose();
+      router.refresh();
+    });
+  }
+
+  if (showConfirm) {
+    return (
+      <ModalShell title="What happens when I do this?" onClose={() => setShowConfirm(false)}>
+        <p className="text-sm text-[#E2E8F0]">{summary.changes[0]}</p>
+        <ul className="mt-3 space-y-2 text-xs text-[#94A3B8]">
+          {summary.preserves.map((line) => (
+            <li key={line} className="flex gap-2">
+              <span className="text-emerald-400">✓</span>
+              <span>{line}</span>
+            </li>
+          ))}
+          {summary.changes.slice(1).map((line) => (
+            <li key={line} className="flex gap-2">
+              <span className="text-amber-400">→</span>
+              <span>{line}</span>
+            </li>
+          ))}
+          {summary.optionalNotes.map((line) => (
+            <li key={line} className="flex gap-2">
+              <span className="text-sky-400">i</span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+        {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={() => setShowConfirm(false)} disabled={pending}>
+            Back
+          </Button>
+          <Button type="button" onClick={applyLeave} disabled={pending}>
+            {pending ? "Applying…" : "Confirm maternity leave"}
+          </Button>
+        </div>
+      </ModalShell>
+    );
+  }
+
+  return (
+    <ModalShell title="Set maternity leave" onClose={onClose}>
+      <p className="mb-4 text-sm text-[#94A3B8]">
+        Record maternity leave for {staffName}. Employment profile and history are preserved.
+      </p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setShowConfirm(true);
+        }}
+        className="space-y-4"
+      >
+        <label className={labelClassName}>
+          Start date
+          <input
+            type="date"
+            className={inputClassName}
+            required
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
+        <label className={labelClassName}>
+          Expected return date
+          <input
+            type="date"
+            className={inputClassName}
+            required
+            value={returnDate}
+            onChange={(e) => setReturnDate(e.target.value)}
+          />
+        </label>
+        <label className={labelClassName}>
+          Notes (optional)
+          <textarea
+            className={inputClassName}
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </label>
+        <label className="flex items-start gap-2 text-sm text-[#CBD5E1]">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={keepLoginAccess}
+            onChange={(e) => setKeepLoginAccess(e.target.checked)}
+          />
+          <span>Keep login access active</span>
+        </label>
+        <label className="flex items-start gap-2 text-sm text-[#CBD5E1]">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={pauseRosterEligibility}
+            onChange={(e) => setPauseRosterEligibility(e.target.checked)}
+          />
+          <span>Pause roster eligibility during leave</span>
+        </label>
+        <label className="flex items-start gap-2 text-sm text-[#CBD5E1]">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={pauseStandardHours}
+            onChange={(e) => setPauseStandardHours(e.target.checked)}
+          />
+          <span>Pause standard-hours requirements during leave</span>
+        </label>
+        {error ? <p className="text-sm text-red-300">{error}</p> : null}
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={pending}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={pending}>
+            Review changes
+          </Button>
+        </div>
+      </form>
     </ModalShell>
   );
 }

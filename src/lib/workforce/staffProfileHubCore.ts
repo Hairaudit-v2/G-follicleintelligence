@@ -31,6 +31,12 @@ export type StaffProfileAccessSnapshot = {
   canRevokeAccess: boolean;
 };
 import {
+  resolveStaffLeavePresentation,
+  type StaffLeaveBlockSnapshot,
+  type StaffShiftSnapshot,
+} from "@/src/lib/workforce/staffLeaveWorkflowCore";
+import { buildStaffStandardHoursEditorHref } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import {
   buildOnboardingCentreHrefForTenant,
   buildStaffAccessCentreHrefForTenant,
   buildStaffEntitlementsHref,
@@ -48,6 +54,11 @@ import {
 } from "@/src/lib/workforce/staffLifecycleUxCore";
 import { formatComplianceStatusLabel } from "@/src/lib/staff/workforceCommandCentre";
 
+export type StaffProfileLeaveContext = {
+  availabilityBlocks: StaffLeaveBlockSnapshot[];
+  futureShifts: StaffShiftSnapshot[];
+};
+
 export type StaffLifecycleBlockerId =
   | "invite_not_sent"
   | "invite_pending"
@@ -59,6 +70,7 @@ export type StaffLifecycleBlockerId =
   | "permissions_missing"
   | "manager_approval_pending"
   | "clinical_eligibility_blocked"
+  | "future_shifts_during_leave"
   | "roster_unavailable";
 
 export type StaffLifecycleBlocker = {
@@ -89,6 +101,7 @@ export type StaffProfileExtendedStatus = StaffUnifiedStatusSnapshot & {
   trainingLabel: string | null;
   sopLabel: string | null;
   rosterLabel: string | null;
+  leaveLabel: string | null;
   identityLinkLabel: string | null;
 };
 
@@ -96,11 +109,13 @@ export type StaffProfileActionSection =
   | "primary"
   | "access"
   | "onboarding"
+  | "employment"
   | "readiness"
   | "roster"
+  | "offboarding"
   | "advanced";
 
-export type StaffProfileActionKind = "link" | "server-action" | "copy" | "danger";
+export type StaffProfileActionKind = "link" | "server-action" | "copy" | "danger" | "modal";
 
 export type StaffProfileAction = {
   id: string;
@@ -171,10 +186,18 @@ export function resolveStaffProfileExtendedStatus(input: {
   onboardingChecklist?: OnboardingChecklistState;
   workforceIntelligence?: StaffWorkforceIntelligence | null;
   identityAuditRow?: StaffProfileIdentityAuditSnapshot | null;
+  leaveContext?: StaffProfileLeaveContext | null;
 }): StaffProfileExtendedStatus {
   const checklist = input.onboardingChecklist;
   const intel = input.workforceIntelligence;
   const audit = input.identityAuditRow;
+
+  const leavePresentation = resolveStaffLeavePresentation({
+    employmentStatus: input.employmentStatus,
+    availabilityBlocks: input.leaveContext?.availabilityBlocks ?? [],
+    futureShifts: input.leaveContext?.futureShifts ?? [],
+    nextShiftLabel: intel?.nextShiftLabel ?? null,
+  });
 
   const base = resolveStaffUnifiedStatus({
     employmentStatus: input.employmentStatus,
@@ -192,34 +215,58 @@ export function resolveStaffProfileExtendedStatus(input: {
   });
 
   const clinicalBlocked =
+    !leavePresentation.suppressTrainingBlockers &&
     intel?.readinessScore != null &&
     intel.readinessScore < 70 &&
     !intel.surgeryReady;
 
+  let rosterLabel: string | null;
+  if (leavePresentation.isOnLeave) {
+    rosterLabel = leavePresentation.rosterStatusLabel;
+  } else if (intel?.nextShiftLabel) {
+    rosterLabel = `Next shift: ${intel.nextShiftLabel}`;
+  } else if (intel?.readinessScore != null && intel.readinessScore >= 70) {
+    rosterLabel = "Roster eligible";
+  } else {
+    rosterLabel = "No roster availability";
+  }
+
+  const employmentLabel = leavePresentation.primaryStatusLabel
+    ? leavePresentation.primaryStatusLabel
+    : base.employmentLabel;
+
   return {
     ...base,
+    employmentLabel,
     onboardingLabel: onboardingStatusLabel(input.onboardingInviteStatus ?? null),
-    clinicalEligibilityLabel: intel?.surgeryReady
-      ? "Clinically eligible"
-      : clinicalBlocked
-        ? "Clinical eligibility blocked"
-        : intel?.readinessScore != null
-          ? "Clinical eligibility pending"
-          : null,
+    clinicalEligibilityLabel:
+      leavePresentation.suppressTrainingBlockers
+        ? null
+        : intel?.surgeryReady
+          ? "Clinically eligible"
+          : clinicalBlocked
+            ? "Clinical eligibility pending"
+            : intel?.readinessScore != null
+              ? "Clinical eligibility pending"
+              : null,
     trainingLabel:
-      intel?.trainingRequiredCount != null && intel.trainingRequiredCount > 0
-        ? `${intel.trainingRequiredCount} training required`
-        : checklist?.trainingPending
-          ? "Training incomplete"
-          : intel?.trainingProgressLabel && intel.trainingProgressLabel !== "—"
-            ? intel.trainingProgressLabel
-            : null,
+      leavePresentation.suppressTrainingBlockers
+        ? null
+        : intel?.trainingRequiredCount != null && intel.trainingRequiredCount > 0
+          ? `${intel.trainingRequiredCount} training required`
+          : checklist?.trainingPending
+            ? "Training incomplete"
+            : intel?.trainingProgressLabel && intel.trainingProgressLabel !== "—"
+              ? intel.trainingProgressLabel
+              : null,
     sopLabel: null,
-    rosterLabel: intel?.nextShiftLabel
-      ? `Next shift: ${intel.nextShiftLabel}`
-      : intel?.readinessScore != null && intel.readinessScore >= 70
-        ? "Roster eligible"
-        : "No roster availability",
+    rosterLabel:
+      leavePresentation.isOnLeave
+        ? leavePresentation.rosterStatusLabel
+        : leavePresentation.hideNextShift && intel?.nextShiftLabel
+          ? null
+          : rosterLabel,
+    leaveLabel: leavePresentation.primaryStatusLabel,
     identityLinkLabel: audit
       ? audit.workspaceProfileStatus === "ready"
         ? "Identity linked"
@@ -241,6 +288,7 @@ export function resolveStaffLifecycleBlockers(input: {
   checklist: OnboardingChecklistState;
   workforceIntelligence: StaffWorkforceIntelligence | null;
   identityAuditRow: StaffProfileIdentityAuditSnapshot | null;
+  leaveContext?: StaffProfileLeaveContext | null;
 }): StaffLifecycleBlocker[] {
   const blockers: StaffLifecycleBlocker[] = [];
   const onboardingHref = buildOnboardingCentreHrefForTenant(input.tenantId);
@@ -249,8 +297,26 @@ export function resolveStaffLifecycleBlockers(input: {
   const rosterHref = buildWorkforceRosterHref(input.tenantId);
   const entitlementsHref = buildStaffEntitlementsHref(input.tenantId);
 
+  const leavePresentation = resolveStaffLeavePresentation({
+    employmentStatus: input.employmentStatus,
+    availabilityBlocks: input.leaveContext?.availabilityBlocks ?? [],
+    futureShifts: input.leaveContext?.futureShifts ?? [],
+    nextShiftLabel: input.workforceIntelligence?.nextShiftLabel ?? null,
+  });
+
+  if (leavePresentation.futureShiftConflictCount > 0) {
+    const leaveKind = leavePresentation.isMaternityLeave ? "maternity leave" : "leave";
+    blockers.push({
+      id: "future_shifts_during_leave",
+      label: `Shifts scheduled during ${leaveKind}`,
+      description: `This staff member has ${leavePresentation.futureShiftConflictCount} shift(s) scheduled during ${leaveKind}. Review roster.`,
+      href: rosterHref,
+    });
+  }
+
   const employment = String(input.employmentStatus ?? "").trim().toLowerCase();
   const suspended = input.systemAccessRevoked || employment === "suspended";
+  const onFullLeave = leavePresentation.isOnLeave;
 
   if (!suspended) {
     if (input.onboardingInviteStatus === "none" && employment === "pending_onboarding") {
@@ -331,12 +397,14 @@ export function resolveStaffLifecycleBlockers(input: {
   }
 
   if (input.checklist.trainingPending || (intel?.trainingRequiredCount ?? 0) > 0) {
-    blockers.push({
-      id: "training_incomplete",
-      label: "Training incomplete",
-      description: "Assign or complete required training before staff are ready to work.",
-      href: onboardingHref,
-    });
+    if (!onFullLeave) {
+      blockers.push({
+        id: "training_incomplete",
+        label: "Training incomplete",
+        description: "Assign or complete required training before staff are ready to work.",
+        href: onboardingHref,
+      });
+    }
   }
 
   if (!input.checklist.permissionsAssigned && employment === "pending_onboarding") {
@@ -349,6 +417,7 @@ export function resolveStaffLifecycleBlockers(input: {
   }
 
   if (
+    !onFullLeave &&
     intel?.readinessScore != null &&
     intel.readinessScore < 70 &&
     !intel.surgeryReady &&
@@ -363,6 +432,7 @@ export function resolveStaffLifecycleBlockers(input: {
   }
 
   if (
+    !onFullLeave &&
     intel &&
     !intel.nextShiftLabel &&
     employment === "active" &&
@@ -387,9 +457,17 @@ export function resolveStaffLifecycleProgress(input: {
   checklist: OnboardingChecklistState;
   accessRow: StaffProfileAccessSnapshot | null;
   workforceIntelligence: StaffWorkforceIntelligence | null;
+  leaveContext?: StaffProfileLeaveContext | null;
 }): StaffLifecycleProgressStage[] {
   const employment = String(input.employmentStatus ?? "").trim().toLowerCase();
   const suspended = input.systemAccessRevoked || employment === "suspended";
+  const leavePresentation = resolveStaffLeavePresentation({
+    employmentStatus: input.employmentStatus,
+    availabilityBlocks: input.leaveContext?.availabilityBlocks ?? [],
+    futureShifts: input.leaveContext?.futureShifts ?? [],
+    nextShiftLabel: input.workforceIntelligence?.nextShiftLabel ?? null,
+  });
+  const onFullLeave = leavePresentation.isOnLeave;
   const onboardingComplete =
     input.onboardingInviteStatus === "accepted" && isOnboardingChecklistComplete(input.checklist);
   const accessActive = input.accessRow?.authLoginStatus === "login_active";
@@ -400,9 +478,11 @@ export function resolveStaffLifecycleProgress(input: {
     (input.workforceIntelligence?.readinessScore ?? 0) >= 70 ||
     Boolean(input.workforceIntelligence?.surgeryReady);
   const rosterEligible =
-    Boolean(input.workforceIntelligence?.nextShiftLabel) ||
-    (input.workforceIntelligence?.readinessScore ?? 0) >= 70;
-  const fullyActive = employment === "active" && accessActive && pinReady && readinessReady;
+    !onFullLeave &&
+    (Boolean(input.workforceIntelligence?.nextShiftLabel) ||
+      (input.workforceIntelligence?.readinessScore ?? 0) >= 70);
+  const fullyActive =
+    !onFullLeave && employment === "active" && accessActive && pinReady && readinessReady;
 
   const stages: StaffLifecycleProgressStage[] = [
     { id: "created", label: "Created", status: "complete" },
@@ -447,19 +527,35 @@ export function resolveStaffLifecycleProgress(input: {
     },
     {
       id: "roster_eligible",
-      label: "Roster eligible",
-      status: rosterEligible
-        ? "complete"
-        : readinessReady
-          ? "current"
-          : "upcoming",
-      blockReason: !rosterEligible && readinessReady ? "No working hours configured" : undefined,
+      label: onFullLeave ? (leavePresentation.isMaternityLeave ? "On maternity leave" : "On leave") : "Roster eligible",
+      status: onFullLeave
+        ? "blocked"
+        : rosterEligible
+          ? "complete"
+          : readinessReady
+            ? "current"
+            : "upcoming",
+      blockReason: onFullLeave
+        ? leavePresentation.primaryStatusLabel ?? "On leave"
+        : !rosterEligible && readinessReady
+          ? "No working hours configured"
+          : undefined,
     },
     {
       id: "active",
       label: "Active",
-      status: fullyActive ? "complete" : employment === "active" ? "current" : "upcoming",
-      blockReason: employment !== "active" ? `Employment: ${employment.replace(/_/g, " ")}` : undefined,
+      status: onFullLeave
+        ? "blocked"
+        : fullyActive
+          ? "complete"
+          : employment === "active"
+            ? "current"
+            : "upcoming",
+      blockReason: onFullLeave
+        ? leavePresentation.primaryStatusLabel ?? "On leave"
+        : employment !== "active"
+          ? `Employment: ${employment.replace(/_/g, " ")}`
+          : undefined,
     },
   ];
 
@@ -632,6 +728,17 @@ function profileActionKindForLifecycleId(id: string): StaffProfileActionKind {
   if (DANGER_ACTION_IDS.has(id)) return "danger";
   if (id === "copy_onboarding_invite_link" || id === "copy_login_invite_link") return "copy";
   if (
+    id === "set_leave" ||
+    id === "set_maternity_leave" ||
+    id === "manage_leave" ||
+    id === "manage_employment" ||
+    id === "mark_inactive" ||
+    id === "archive_staff" ||
+    id === "re_enable_roster_after_return"
+  ) {
+    return "modal";
+  }
+  if (
     ONBOARDING_MUTATION_IDS.has(id) ||
     ACCESS_MUTATION_IDS.has(id)
   ) {
@@ -673,6 +780,23 @@ function profileSectionForLifecycleId(
     return "readiness";
   }
   if (id === "open_roster") return "roster";
+  if (
+    id === "set_leave" ||
+    id === "set_maternity_leave" ||
+    id === "manage_leave" ||
+    id === "edit_standard_hours" ||
+    id === "manage_employment"
+  ) {
+    return "employment";
+  }
+  if (
+    id === "mark_inactive" ||
+    id === "archive_staff" ||
+    id === "offboard_staff" ||
+    id === "review_future_shifts"
+  ) {
+    return "offboarding";
+  }
   if (DANGER_ACTION_IDS.has(id)) return "advanced";
   return "access";
 }
@@ -735,7 +859,11 @@ function confirmCopyForDangerAction(id: string): {
 /** Resolve normalized profile action menu from lifecycle snapshot — no 8-action cap. */
 export function resolveStaffProfileActionMenu(input: {
   tenantId: string;
+  staffMemberId: string;
+  fiStaffId?: string | null;
+  staffName?: string | null;
   employmentStatus: string;
+  archivedAt?: string | null;
   email: string | null;
   systemAccessRevoked: boolean;
   onboardingInviteStatus: OnboardingInviteDisplayStatus;
@@ -744,6 +872,7 @@ export function resolveStaffProfileActionMenu(input: {
   checklist: OnboardingChecklistState;
   blockers: StaffLifecycleBlocker[];
   actionContext: StaffProfileActionContext;
+  leaveContext?: StaffProfileLeaveContext | null;
 }): StaffProfileActionMenuModel {
   const lifecycleActions = resolveStaffProfileLifecycleActions({
     tenantId: input.tenantId,
@@ -762,6 +891,21 @@ export function resolveStaffProfileActionMenu(input: {
   const rosterHref = buildWorkforceRosterHref(input.tenantId);
   const entitlementsHref = buildStaffEntitlementsHref(input.tenantId);
   const commandHref = buildWorkforceCommandCentreHref(input.tenantId);
+  const offboardingHref = `/fi-admin/${input.tenantId}/hr-os/offboarding`;
+  const standardHoursHref = input.fiStaffId
+    ? buildStaffStandardHoursEditorHref(input.tenantId, input.fiStaffId)
+    : `${buildWorkforceRosterHref(input.tenantId)}/standard-hours`;
+  const hrTaskMapHref = `${commandHref}/hr-task-map`;
+
+  const leavePresentation = resolveStaffLeavePresentation({
+    employmentStatus: input.employmentStatus,
+    availabilityBlocks: input.leaveContext?.availabilityBlocks ?? [],
+    futureShifts: input.leaveContext?.futureShifts ?? [],
+  });
+
+  const employment = String(input.employmentStatus ?? "").trim().toLowerCase();
+  const isArchived = Boolean(input.archivedAt);
+  const isActiveEmployment = employment === "active" || employment === "on_leave";
 
   const hrefById: Record<string, string> = {
     start_onboarding: onboardingHref,
@@ -854,7 +998,116 @@ export function resolveStaffProfileActionMenu(input: {
     }
   }
 
+  const employmentActions: StaffProfileAction[] = [];
+  const offboardingActions: StaffProfileAction[] = [];
+
+  if (leavePresentation.isOnLeave) {
+    employmentActions.push({
+      id: "manage_leave",
+      label: "Manage leave / return-to-work date",
+      description: "Update maternity leave dates or return to active employment.",
+      actionKind: "modal",
+      section: "primary",
+    });
+    if (leavePresentation.futureShiftConflictCount > 0) {
+      employmentActions.push({
+        id: "review_future_shifts",
+        label: "Review future shifts",
+        href: rosterHref,
+        actionKind: "link",
+        section: "employment",
+      });
+    }
+    employmentActions.push({
+      id: "manage_access_leave",
+      label: "Keep or disable login access",
+      href: accessHref,
+      actionKind: "link",
+      section: "employment",
+    });
+    employmentActions.push({
+      id: "re_enable_roster_after_return",
+      label: "Re-enable roster eligibility after return",
+      description: "Set employment to active and clear leave when staff returns.",
+      actionKind: "modal",
+      section: "employment",
+    });
+  } else if (isActiveEmployment && !isArchived) {
+    employmentActions.push(
+      {
+        id: "set_leave",
+        label: "Set leave",
+        actionKind: "modal",
+        section: "employment",
+      },
+      {
+        id: "set_maternity_leave",
+        label: "Set maternity leave",
+        description: "Exclude from roster generation while preserving employment profile.",
+        actionKind: "modal",
+        section: "employment",
+      },
+      {
+        id: "manage_employment",
+        label: "Manage employment",
+        actionKind: "modal",
+        section: "employment",
+      },
+      {
+        id: "edit_standard_hours",
+        label: "Edit standard hours",
+        href: standardHoursHref,
+        actionKind: "link",
+        section: "employment",
+      }
+    );
+  }
+
+  if (!isArchived && employment !== "terminated" && employment !== "resigned" && employment !== "contract_ended") {
+    offboardingActions.push(
+      {
+        id: "mark_inactive",
+        label: "Mark inactive",
+        actionKind: "modal",
+        section: "offboarding",
+      },
+      {
+        id: "archive_staff",
+        label: "Archive staff",
+        actionKind: "modal",
+        section: "offboarding",
+      },
+      {
+        id: "offboard_staff",
+        label: "Offboard / terminate",
+        href: offboardingHref,
+        actionKind: "link",
+        section: "offboarding",
+      }
+    );
+  }
+
+  employmentActions.push({
+    id: "open_hr_task_map",
+    label: "What do I do next?",
+    href: hrTaskMapHref,
+    actionKind: "link",
+    section: "employment",
+  });
+
+  for (const action of [...employmentActions, ...offboardingActions]) {
+    if (!profileActions.some((a) => a.id === action.id)) {
+      profileActions.push(action);
+    }
+  }
+
+  const leavePrimary =
+    leavePresentation.isOnLeave
+      ? profileActions.find((a) => a.id === "manage_leave" && !a.disabled) ?? null
+      : null;
+
   const primaryAction =
+    leavePrimary ??
     profileActions.find((a) => a.section === "primary" && !a.disabled) ??
     profileActions.find((a) => a.section === "primary") ??
     null;
@@ -872,6 +1125,8 @@ export function resolveStaffProfileActionMenu(input: {
 export function buildStaffProfileOverviewModel(input: {
   tenantId: string;
   staffMemberId: string;
+  fiStaffId?: string | null;
+  staffName?: string | null;
   employmentStatus: string;
   archivedAt: string | null;
   email: string | null;
@@ -886,6 +1141,7 @@ export function buildStaffProfileOverviewModel(input: {
   viewerCanManageAccess?: boolean;
   viewerCanManageOnboarding?: boolean;
   viewerCanManageReadiness?: boolean;
+  leaveContext?: StaffProfileLeaveContext | null;
 }): StaffProfileOverviewModel {
   const actionContext: StaffProfileActionContext = {
     tenantId: input.tenantId,
@@ -904,11 +1160,16 @@ export function buildStaffProfileOverviewModel(input: {
     checklist: input.checklist,
     workforceIntelligence: input.workforceIntelligence,
     identityAuditRow: input.identityAuditRow,
+    leaveContext: input.leaveContext,
   });
 
   const actionMenu = resolveStaffProfileActionMenu({
     tenantId: input.tenantId,
+    staffMemberId: input.staffMemberId,
+    fiStaffId: input.fiStaffId,
+    staffName: input.staffName,
     employmentStatus: input.employmentStatus,
+    archivedAt: input.archivedAt,
     email: input.email,
     systemAccessRevoked: input.systemAccessRevoked,
     onboardingInviteStatus: input.onboardingInviteStatus,
@@ -917,6 +1178,7 @@ export function buildStaffProfileOverviewModel(input: {
     checklist: input.checklist,
     blockers,
     actionContext,
+    leaveContext: input.leaveContext,
   });
 
   return {
@@ -931,6 +1193,7 @@ export function buildStaffProfileOverviewModel(input: {
       workforceIntelligence: input.workforceIntelligence,
       identityAuditRow: input.identityAuditRow,
       onboardingChecklist: input.checklist,
+      leaveContext: input.leaveContext,
     }),
     blockers,
     actions: resolveStaffProfileActions({
@@ -951,6 +1214,7 @@ export function buildStaffProfileOverviewModel(input: {
       checklist: input.checklist,
       accessRow: input.accessRow,
       workforceIntelligence: input.workforceIntelligence,
+      leaveContext: input.leaveContext,
     }),
     actionMenu,
     actionContext,
