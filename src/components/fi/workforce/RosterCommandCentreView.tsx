@@ -121,13 +121,8 @@ export function RosterCommandCentreView({
   }, [router]);
 
   const staffMissingStandardHours = useMemo(
-    () =>
-      listStaffMissingStandardHours(
-        payload.staffOptions,
-        payload.standardHoursByStaffId,
-        payload.rosterEligibleStaffIds
-      ),
-    [payload.staffOptions, payload.standardHoursByStaffId, payload.rosterEligibleStaffIds]
+    () => listStaffMissingStandardHours(payload.staffOptions, payload.standardHoursByStaffId),
+    [payload.staffOptions, payload.standardHoursByStaffId]
   );
 
   const drawerStaff = rosterDrawerStaffOption(drawerState, payload.staffOptions);
@@ -274,11 +269,7 @@ export function RosterCommandCentreView({
         setActionError(result.error);
         return;
       }
-      setActionMessage(
-        result.data.skippedIneligibleStaffCount > 0
-          ? `Copy previous week: ${result.data.createdCount} shifts copied (${result.data.skippedIneligibleStaffCount} staff skipped — inactive or on leave).`
-          : `Copy previous week: ${result.data.createdCount} shifts copied.`
-      );
+      setActionMessage(`Copy previous week: ${result.data.createdCount} shifts copied.`);
       refresh();
     });
   }

@@ -6,10 +6,6 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import {
-  loadRosterStaffEligibilityContext,
-  resolveDefaultRosterStaffIds,
-} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
-import {
   copyPreviousRosterPeriodShifts,
   generateRosterFromStandardHours,
   mondayOfWeekIso,
@@ -165,39 +161,10 @@ export async function generateRosterFromStandardHoursForTenant(
 ): Promise<RosterGenerationRunResult> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const staffRows = await loadAllStaffForTenant(tid);
-  const requestedStaffIds =
+  const staffIds =
     input.staffIds?.length && input.staffIds.length > 0
       ? input.staffIds.map((id) => assertNonEmptyUuid(id, "staffId"))
-      : undefined;
-  const scopeStaffIds = requestedStaffIds ?? staffRows.map((staff) => staff.id);
-  const periodDayDates = enumeratePeriodDayDates(input.rangeStartIso, input.rangeEndIso);
-
-  const [blocksRaw, rosterPolicy] = await Promise.all([
-    loadAvailabilityBlocksInRange(
-      tid,
-      input.rangeStartIso,
-      input.rangeEndIso,
-      scopeStaffIds
-    ),
-    loadWorkforceRosterPlanningPolicy(tid),
-  ]);
-
-  const eligibility = await loadRosterStaffEligibilityContext(tid, {
-    periodDayDates,
-    staffRows,
-    availabilityBlocks: blocksRaw.map((block) => ({
-      staff_id: block.staff_id,
-      block_type: block.block_type,
-      starts_at: block.starts_at,
-      ends_at: block.ends_at,
-      status: block.status,
-    })),
-  });
-  const staffIds = resolveDefaultRosterStaffIds(
-    staffRows,
-    requestedStaffIds,
-    eligibility.eligibilityByStaffId
-  );
+      : staffRows.filter((s) => s.is_active).map((s) => s.id);
 
   const standardHoursByStaff = await loadActiveStandardHoursForTenant(tid, staffIds);
 
@@ -212,12 +179,11 @@ export async function generateRosterFromStandardHoursForTenant(
     staffRows.map((s) => [s.id, s.default_timezone?.trim() || "Australia/Perth"])
   );
 
-  const existingShifts = await loadExistingShiftsInRange(
-    tid,
-    input.rangeStartIso,
-    input.rangeEndIso,
-    staffIds
-  );
+  const [existingShifts, blocksRaw, rosterPolicy] = await Promise.all([
+    loadExistingShiftsInRange(tid, input.rangeStartIso, input.rangeEndIso, staffIds),
+    loadAvailabilityBlocksInRange(tid, input.rangeStartIso, input.rangeEndIso, staffIds),
+    loadWorkforceRosterPlanningPolicy(tid),
+  ]);
 
   const plan = generateRosterFromStandardHours({
     tenantId: tid,
@@ -227,7 +193,7 @@ export async function generateRosterFromStandardHoursForTenant(
     rangeStartIso: input.rangeStartIso,
     rangeEndIso: input.rangeEndIso,
     existingShifts,
-    availabilityBlocks: blocksRaw.filter((block) => staffIds.includes(block.staff_id)),
+    availabilityBlocks: blocksRaw,
     overwriteGeneratedOnly: input.overwriteGeneratedOnly,
     rosterCadence: rosterPolicy.rosterCadence,
     rosterCycleAnchorDate: rosterPolicy.rosterCycleAnchorDate,
@@ -243,19 +209,6 @@ export async function generateRosterFromStandardHoursForTenant(
     createdBy: input.createdBy,
     client: input.supabaseClientForTests,
   });
-}
-
-function enumeratePeriodDayDates(rangeStartIso: string, rangeEndIso: string): string[] {
-  const dates: string[] = [];
-  let cursor = rangeStartIso.slice(0, 10);
-  const endExclusive = rangeEndIso.slice(0, 10);
-  while (cursor < endExclusive) {
-    dates.push(cursor);
-    const next = new Date(`${cursor}T12:00:00.000Z`);
-    next.setUTCDate(next.getUTCDate() + 1);
-    cursor = next.toISOString().slice(0, 10);
-  }
-  return dates;
 }
 
 /** @internal Exported for transaction-safety unit tests. */
@@ -324,17 +277,9 @@ export type CopyPreviousRosterPeriodInput = {
   createdBy?: string | null;
 };
 
-export type CopyPreviousRosterPeriodResult = {
-  createdCount: number;
-  candidates: RosterShiftCandidate[];
-  cadence: RosterCadence;
-  skippedIneligibleStaffIds: string[];
-  skippedIneligibleStaffCount: number;
-};
-
 export async function copyPreviousRosterPeriodForTenant(
   input: CopyPreviousRosterPeriodInput
-): Promise<CopyPreviousRosterPeriodResult> {
+): Promise<{ createdCount: number; candidates: RosterShiftCandidate[]; cadence: RosterCadence }> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const rosterPolicy = await loadWorkforceRosterPlanningPolicy(tid);
   const cadence = input.cadence ?? rosterPolicy.rosterCadence;
@@ -346,38 +291,10 @@ export async function copyPreviousRosterPeriodForTenant(
   const prevEnd = new Date(range.startsAt);
 
   const staffRows = await loadAllStaffForTenant(tid);
-  const requestedStaffIds =
+  const staffIds =
     input.staffIds?.length && input.staffIds.length > 0
       ? input.staffIds.map((id) => assertNonEmptyUuid(id, "staffId"))
-      : undefined;
-  const scopeStaffIds = requestedStaffIds ?? staffRows.map((staff) => staff.id);
-
-  const targetBlocks = await loadAvailabilityBlocksInRange(
-    tid,
-    range.startsAt,
-    range.endsAt,
-    scopeStaffIds
-  );
-  const eligibility = await loadRosterStaffEligibilityContext(tid, {
-    periodDayDates: range.periodDayDates,
-    staffRows,
-    availabilityBlocks: targetBlocks.map((block) => ({
-      staff_id: block.staff_id,
-      block_type: block.block_type,
-      starts_at: block.starts_at,
-      ends_at: block.ends_at,
-      status: block.status,
-    })),
-  });
-  const staffIds = resolveDefaultRosterStaffIds(
-    staffRows,
-    requestedStaffIds,
-    eligibility.eligibilityByStaffId
-  );
-  const requestedScope = requestedStaffIds ?? staffRows.map((staff) => staff.id);
-  const skippedIneligibleStaffIds = requestedScope.filter(
-    (staffId) => !staffIds.includes(staffId)
-  );
+      : staffRows.filter((s) => s.is_active).map((s) => s.id);
 
   const staffTimezoneById = new Map(
     staffRows.map((s) => [s.id, s.default_timezone?.trim() || "Australia/Perth"])
@@ -399,13 +316,7 @@ export async function copyPreviousRosterPeriodForTenant(
   });
 
   const createdCount = await insertShiftCandidates(tid, candidates, input.createdBy);
-  return {
-    createdCount,
-    candidates,
-    cadence,
-    skippedIneligibleStaffIds,
-    skippedIneligibleStaffCount: skippedIneligibleStaffIds.length,
-  };
+  return { createdCount, candidates, cadence };
 }
 
 export type CopyPreviousWeekInput = {
@@ -417,12 +328,13 @@ export type CopyPreviousWeekInput = {
 
 export async function copyPreviousWeekRosterForTenant(
   input: CopyPreviousWeekInput
-): Promise<CopyPreviousRosterPeriodResult> {
-  return copyPreviousRosterPeriodForTenant({
+): Promise<{ createdCount: number; candidates: RosterShiftCandidate[] }> {
+  const result = await copyPreviousRosterPeriodForTenant({
     tenantId: input.tenantId,
     targetPeriodStartIso: mondayOfWeekIso(input.targetWeekStartIso.slice(0, 10)),
     cadence: "weekly",
     staffIds: input.staffIds,
     createdBy: input.createdBy,
   });
+  return { createdCount: result.createdCount, candidates: result.candidates };
 }

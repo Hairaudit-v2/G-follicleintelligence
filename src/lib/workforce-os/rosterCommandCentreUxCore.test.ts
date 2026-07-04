@@ -137,20 +137,6 @@ test("listStaffMissingStandardHours returns only staff without configured hours"
   assert.equal(missing[0]?.id, STAFF_JANE);
 });
 
-test("listStaffMissingStandardHours respects roster-eligible staff filter", () => {
-  const missing = listStaffMissingStandardHours(
-    [
-      { id: STAFF_PAUL, name: "Paul Green" },
-      { id: STAFF_JANE, name: "Jane Doe" },
-    ],
-    {},
-    [STAFF_PAUL]
-  );
-
-  assert.equal(missing.length, 1);
-  assert.equal(missing[0]?.id, STAFF_PAUL);
-});
-
 test("resolveRosterPayloadWeekDayDates prefers periodDayDates with weekDayDates fallback", () => {
   assert.deepEqual(
     resolveRosterPayloadWeekDayDates({

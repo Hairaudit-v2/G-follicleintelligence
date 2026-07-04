@@ -7,16 +7,12 @@ import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { resolveStaffStandardHoursManageCapability } from "@/src/lib/workforce-os/staffStandardHoursManageGate.server";
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
-import { rosterDateRangeFromPeriodStart } from "@/src/lib/workforce/rosterCadencePolicyCore";
-import {
-  loadRosterStaffEligibilityContext,
-  listRosterEligibleStaffMissingStandardHours,
-} from "@/src/lib/workforce-os/rosterEligibleStaff.server";
 import {
   loadActiveStandardHoursForStaff,
   loadActiveStandardHoursForTenant,
 } from "@/src/lib/workforce-os/staffStandardHours.server";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { listStaffMissingStandardHours } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 
 import type { RosterCommandCentreClinicOption } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -47,41 +43,25 @@ export async function loadStaffStandardHoursSetupIndexPage(tenantId: string) {
   if (!access.ok) return null;
 
   const tid = tenantId.trim();
-  const rosterPlanning = await loadWorkforceRosterPlanningPolicy(tid);
-  const periodRange = rosterDateRangeFromPeriodStart(
-    new Date().toISOString().slice(0, 10),
-    rosterPlanning.rosterCadence,
-    rosterPlanning.rosterWeekStartDay
-  );
-
-  const [staffRows, standardHoursMap, clinics, manage, rosterEligibility] = await Promise.all([
+  const [staffRows, standardHoursMap, clinics, manage] = await Promise.all([
     loadAllStaffForTenant(tid),
     loadActiveStandardHoursForTenant(tid),
     loadClinicsForTenant(tid),
     resolveStaffStandardHoursManageCapability(tid),
-    loadRosterStaffEligibilityContext(tid, {
-      periodDayDates: periodRange.periodDayDates,
-    }),
   ]);
 
-  const staffOptions = staffRows
-    .filter((staff) => rosterEligibility.eligibleStaffIds.includes(staff.id))
-    .map((s) => ({
-      id: s.id,
-      name: s.full_name?.trim() || "Staff",
-      role: s.staff_role?.trim() || null,
-    }));
+  const staffOptions = staffRows.map((s) => ({
+    id: s.id,
+    name: s.full_name?.trim() || "Staff",
+    role: s.staff_role?.trim() || null,
+  }));
 
   const standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]> = {};
   for (const [staffId, days] of standardHoursMap) {
     standardHoursByStaffId[staffId] = days;
   }
 
-  const staffMissing = listRosterEligibleStaffMissingStandardHours({
-    staffOptions,
-    standardHoursByStaffId,
-    eligibleStaffIds: rosterEligibility.eligibleStaffIds,
-  });
+  const staffMissing = listStaffMissingStandardHours(staffOptions, standardHoursByStaffId);
   const staffWithOptions: StaffStandardHoursPageStaffOption[] = staffOptions.map((staff) => ({
     ...staff,
     hasStandardHours: Boolean(standardHoursByStaffId[staff.id]?.length),
@@ -93,7 +73,6 @@ export async function loadStaffStandardHoursSetupIndexPage(tenantId: string) {
     clinics,
     staffOptions: staffWithOptions,
     staffMissingStandardHours: staffMissing,
-    rosterIneligibleStaffOptions: rosterEligibility.ineligibleStaffOptions,
     standardHoursByStaffId,
   };
 }

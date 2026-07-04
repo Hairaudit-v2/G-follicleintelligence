@@ -21,9 +21,6 @@ import {
   ROSTER_TX_OUTCOMES,
 } from "@/src/lib/workforce-os/rosterTxCore";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
-import { rosterDateRangeFromPeriodStart } from "@/src/lib/workforce/rosterCadencePolicyCore";
-import { loadRosterStaffEligibilityContext } from "@/src/lib/workforce-os/rosterEligibleStaff.server";
 
 export const STAFF_STANDARD_HOURS_STAFF_NOT_FOUND_MESSAGE =
   "Staff member not found for this tenant.";
@@ -276,31 +273,16 @@ export async function applyDefaultClinicStandardHoursToMissingStaff(
   opts: ServerOpts = {}
 ): Promise<ApplyDefaultClinicStandardHoursResult> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const rosterPlanning = await loadWorkforceRosterPlanningPolicy(tid);
-  const periodRange = rosterDateRangeFromPeriodStart(
-    new Date().toISOString().slice(0, 10),
-    rosterPlanning.rosterCadence,
-    rosterPlanning.rosterWeekStartDay
-  );
-
-  const [staffRows, existingMap, rosterEligibility] = await Promise.all([
+  const [staffRows, existingMap] = await Promise.all([
     loadAllStaffForTenant(tid),
     loadActiveStandardHoursForTenant(tid),
-    loadRosterStaffEligibilityContext(tid, {
-      periodDayDates: periodRange.periodDayDates,
-    }),
   ]);
 
   const defaultDays = defaultClinicStandardHoursWeek();
   const appliedStaffIds: string[] = [];
   const skippedStaffIds: string[] = [];
-  const eligibleSet = new Set(rosterEligibility.eligibleStaffIds);
 
   for (const staff of staffRows) {
-    if (!eligibleSet.has(staff.id)) {
-      skippedStaffIds.push(staff.id);
-      continue;
-    }
     const existing = existingMap.get(staff.id);
     if (staffHasConfiguredStandardHours(existing)) {
       skippedStaffIds.push(staff.id);
