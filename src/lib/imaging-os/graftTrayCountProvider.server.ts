@@ -4,8 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { isOpenAiApiKeyConfigured } from "@/src/lib/hair-intelligence/imageClassification/classifyClinicalHairImageFallback";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
+import { tryBuildOpenAiVisionGraftTrayEstimate } from "./graftTrayCountOpenAiProvider.server";
 import { deriveTrayReviewStatuses } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
 import { isGraftTrayCapture } from "./imagingGraftTrayBridgeCore";
 import type { GraftTrayLinkRow } from "./imagingGraftTrayBridge.server";
@@ -156,25 +156,16 @@ export async function runGraftTrayCountEstimate(input: {
   }
 
   const classifierMode = resolveHairauditClassifierMode(process.env);
-  let estimate: GraftTrayCountEstimateResult;
-  let usedOpenAi = false;
-
-  if (flags.provider === "openai_vision" && classifierMode !== "stub" && isOpenAiApiKeyConfigured()) {
-    // Live vision path reserved — fall back to enhanced stub until dedicated model prompt ships.
-    estimate = buildStubGraftTrayCountEstimate({ imageId, manualCount: manual.manual_count });
-    estimate = {
-      ...estimate,
-      provider: "openai_vision",
-      provider_version: "graft_tray_openai_vision_v1_preview",
-      uncertainty_notes: [
-        ...estimate.uncertainty_notes,
-        "Live OpenAI vision graft counting is in preview — staff review mandatory.",
-      ],
-    };
-    usedOpenAi = true;
-  } else {
-    estimate = buildStubGraftTrayCountEstimate({ imageId, manualCount: manual.manual_count });
-  }
+  const openAiOutcome = tryBuildOpenAiVisionGraftTrayEstimate({
+    flags,
+    classifierMode,
+    imageId,
+    manualCount: manual.manual_count,
+  });
+  const estimate =
+    openAiOutcome?.estimate ??
+    buildStubGraftTrayCountEstimate({ imageId, manualCount: manual.manual_count });
+  const usedOpenAi = openAiOutcome?.usedOpenAi ?? false;
 
   const comparison = compareGraftTrayAiEstimate({
     estimate,

@@ -18,6 +18,10 @@ import {
   findMissingProtocolCategories,
 } from "@/src/lib/imaging-os/protocol";
 import { evaluateImageQualityStub } from "@/src/lib/imaging-os/quality";
+import {
+  findForbiddenProviderImportsInSource,
+  isImagingOsProviderAdapterModule,
+} from "@/src/lib/imaging-os/imagingOsProviderImportGuardCore";
 import { runImagingOsStubPipeline } from "@/src/lib/imaging-os/stubPipeline";
 import {
   buildStubClassificationResponse,
@@ -246,29 +250,39 @@ describe("ImagingOS IM-1 — HairAudit endpoint stub compatibility", () => {
 
 describe("ImagingOS IM-1 — no AI provider imports in foundation modules", () => {
   const imagingOsDir = path.join(process.cwd(), "src/lib/imaging-os");
-  /** IM-11+ modules may reference provider names in types/contracts — excluded from IM-1 guard. */
-  const postFoundationModules = new Set([
-    "liveAi.ts",
-    "aiVision.ts",
-    "liveImagingSignalProviders.server.ts",
-    "clinicalImageAnalysisProvider.server.ts",
-    "imagingAiAnalysisJobWorker.server.ts",
-  ]);
   const files = fs
     .readdirSync(imagingOsDir)
     .filter(
       (f) =>
         f.endsWith(".ts") &&
         !f.endsWith(".test.ts") &&
-        !postFoundationModules.has(f)
+        !isImagingOsProviderAdapterModule(f)
     );
 
   for (const file of files) {
-    it(`${file} does not import OpenAI/Claude/Gemini`, () => {
+    it(`${file} does not import provider SDK modules`, () => {
       const src = fs.readFileSync(path.join(imagingOsDir, file), "utf8");
-      assert.doesNotMatch(src, /openai|anthropic|claude|gemini|@google\/generative-ai/i);
+      const violations = findForbiddenProviderImportsInSource(src, `src/lib/imaging-os/${file}`);
+      assert.deepEqual(
+        violations,
+        [],
+        violations.map((v) => `${v.file}:${v.line} imports ${v.specifier}`).join("\n")
+      );
     });
   }
+
+  it("graft tray OpenAI adapter isolates live provider configuration imports", () => {
+    const src = fs.readFileSync(
+      path.join(imagingOsDir, "graftTrayCountOpenAiProvider.server.ts"),
+      "utf8"
+    );
+    assert.match(src, /isOpenAiApiKeyConfigured/);
+    const genericProviderSrc = fs.readFileSync(
+      path.join(imagingOsDir, "graftTrayCountProvider.server.ts"),
+      "utf8"
+    );
+    assert.doesNotMatch(genericProviderSrc, /isOpenAiApiKeyConfigured/);
+  });
 
   it("HairAudit stub service uses imaging-os not openai classifier", () => {
     const src = fs.readFileSync(
