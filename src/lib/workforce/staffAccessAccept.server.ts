@@ -14,6 +14,11 @@ import {
   STAFF_ACCESS_AUDIT_EVENTS,
 } from "./staffAccessInviteAudit.server";
 import { resolveInviteStatus } from "./staffAccessCentreCore";
+import {
+  assessStaffTenantLinkIntegrity,
+  resolveStaffAccessAcceptAuditKind,
+  type StaffTenantLinkSnapshot,
+} from "./staffAccessAcceptCore";
 import { repairStaffTenantLinkFromInvitation } from "./staffTenantLinkRepair.server";
 
 export type StaffAccessAcceptPageModel = {
@@ -170,6 +175,72 @@ export async function loadStaffAccessInviteByToken(
   };
 }
 
+async function loadStaffTenantLinkSnapshot(
+  tenantId: string,
+  staffMemberId: string,
+  invitation: {
+    fiStaffId: string | null;
+    fiUserId?: string | null;
+  },
+  client: SupabaseClient
+): Promise<StaffTenantLinkSnapshot> {
+  const { data: member, error: memberErr } = await client
+    .from("fi_staff_members")
+    .select("fi_staff_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", staffMemberId)
+    .maybeSingle();
+  if (memberErr) throw new Error(memberErr.message);
+
+  const memberFiStaffId =
+    (member as { fi_staff_id: string | null } | null)?.fi_staff_id != null
+      ? String((member as { fi_staff_id: string }).fi_staff_id)
+      : null;
+  const fiStaffId = invitation.fiStaffId?.trim() || memberFiStaffId;
+
+  let fiStaffFiUserId: string | null = null;
+  if (fiStaffId) {
+    const { data: staff, error: staffErr } = await client
+      .from("fi_staff")
+      .select("fi_user_id")
+      .eq("tenant_id", tenantId)
+      .eq("id", fiStaffId)
+      .maybeSingle();
+    if (staffErr) throw new Error(staffErr.message);
+    fiStaffFiUserId =
+      (staff as { fi_user_id: string | null } | null)?.fi_user_id != null
+        ? String((staff as { fi_user_id: string }).fi_user_id)
+        : null;
+  }
+
+  return {
+    staffMemberFiStaffId: memberFiStaffId,
+    fiStaffFiUserId,
+    invitationFiStaffId: invitation.fiStaffId,
+    invitationFiUserId: invitation.fiUserId ?? null,
+  };
+}
+
+async function loadInvitationLinkIds(
+  tenantId: string,
+  invitationId: string,
+  client: SupabaseClient
+): Promise<{ fiStaffId: string | null; fiUserId: string | null }> {
+  const { data, error } = await client
+    .from("fi_staff_login_invitations")
+    .select("fi_staff_id, fi_user_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", invitationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return { fiStaffId: null, fiUserId: null };
+  const row = data as { fi_staff_id: string | null; fi_user_id: string | null };
+  return {
+    fiStaffId: row.fi_staff_id != null ? String(row.fi_staff_id) : null,
+    fiUserId: row.fi_user_id != null ? String(row.fi_user_id) : null,
+  };
+}
+
 export async function acceptStaffAccessInvitation(input: {
   tenantId: string;
   inviteToken: string;
@@ -189,84 +260,83 @@ export async function acceptStaffAccessInvitation(input: {
   });
   if (status === "expired") throw new Error(STAFF_ACCESS_INVITE_ERRORS.EXPIRED);
   if (status === "revoked") throw new Error(STAFF_ACCESS_INVITE_ERRORS.NOT_ACTIVE);
-  if (status === "accepted" || invitation.acceptedAt) {
-    throw new Error(STAFF_ACCESS_INVITE_ERRORS.ALREADY_ACCEPTED);
-  }
 
-  const { error: updateError } = await supabase
-    .from("fi_staff_login_invitations")
-    .update({
-      status: "accepted",
-      accepted_at: now,
-      updated_at: now,
-    })
-    .eq("tenant_id", tid)
-    .eq("id", invitation.id);
-  if (updateError) throw new Error(updateError.message);
+  const alreadyAccepted = status === "accepted" || Boolean(invitation.acceptedAt);
+  const invitationLinks = await loadInvitationLinkIds(tid, invitation.id, supabase);
+  const linkageBefore = await loadStaffTenantLinkSnapshot(
+    tid,
+    invitation.staffMemberId,
+    {
+      fiStaffId: invitation.fiStaffId ?? invitationLinks.fiStaffId,
+      fiUserId: invitationLinks.fiUserId,
+    },
+    supabase
+  );
+  const integrityBefore = assessStaffTenantLinkIntegrity(linkageBefore);
+
+  if (alreadyAccepted && integrityBefore.valid) {
+    return {
+      staffMemberId: invitation.staffMemberId,
+      authInviteLink: invitation.authInviteLink,
+      pinSetupToken: input.pinSetupToken?.trim() || null,
+    };
+  }
 
   await repairStaffTenantLinkFromInvitation({
     tenantId: tid,
     staffMemberId: invitation.staffMemberId,
     inviteEmail: invitation.inviteEmail,
     invitationId: invitation.id,
-    fiStaffId: invitation.fiStaffId,
+    fiStaffId: invitation.fiStaffId ?? invitationLinks.fiStaffId,
     client: supabase,
   });
 
-  await insertStaffAccessAuditEvent({
-    tenantId: tid,
-    staffMemberId: invitation.staffMemberId,
-    eventType: STAFF_ACCESS_AUDIT_EVENTS.INVITE_ACCEPTED,
-    metadata: { invitation_id: invitation.id },
-    client: supabase,
+  if (!alreadyAccepted) {
+    const { error: updateError } = await supabase
+      .from("fi_staff_login_invitations")
+      .update({
+        status: "accepted",
+        accepted_at: now,
+        updated_at: now,
+      })
+      .eq("tenant_id", tid)
+      .eq("id", invitation.id);
+    if (updateError) throw new Error(updateError.message);
+  }
+
+  const auditKind = resolveStaffAccessAcceptAuditKind({
+    alreadyAccepted,
+    linkageValidBeforeRepair: integrityBefore.valid,
+    repaired: !integrityBefore.valid,
   });
+
+  if (auditKind === "newly_accepted") {
+    await insertStaffAccessAuditEvent({
+      tenantId: tid,
+      staffMemberId: invitation.staffMemberId,
+      eventType: STAFF_ACCESS_AUDIT_EVENTS.INVITE_ACCEPTED,
+      metadata: { invitation_id: invitation.id, acceptance_kind: auditKind },
+      client: supabase,
+    });
+  } else if (auditKind === "repaired_after_accepted") {
+    await insertStaffAccessAuditEvent({
+      tenantId: tid,
+      staffMemberId: invitation.staffMemberId,
+      eventType: STAFF_ACCESS_AUDIT_EVENTS.INVITE_LINK_REPAIRED,
+      metadata: {
+        invitation_id: invitation.id,
+        acceptance_kind: auditKind,
+        linkage_was_valid: integrityBefore.valid,
+      },
+      client: supabase,
+    });
+  }
 
   return {
     staffMemberId: invitation.staffMemberId,
     authInviteLink: invitation.authInviteLink,
     pinSetupToken: input.pinSetupToken?.trim() || null,
   };
-}
-
-/** Mark invitation accepted when Supabase auth confirms (login active). */
-export async function markStaffAccessInviteAcceptedByAuth(input: {
-  tenantId: string;
-  email: string;
-  client?: SupabaseClient;
-}): Promise<void> {
-  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const email = input.email.trim().toLowerCase();
-  if (!email) return;
-
-  const supabase = input.client ?? supabaseAdmin();
-  const now = new Date().toISOString();
-
-  const { data: rows, error } = await supabase
-    .from("fi_staff_login_invitations")
-    .select("id, staff_member_id, status")
-    .eq("tenant_id", tid)
-    .ilike("invite_email", email)
-    .in("status", ["pending", "sent"])
-    .order("invited_at", { ascending: false })
-    .limit(1);
-  if (error || !rows?.length) return;
-
-  const inv = rows[0] as { id: string; staff_member_id: string; status: string };
-  if (inv.status === "accepted") return;
-
-  await supabase
-    .from("fi_staff_login_invitations")
-    .update({ status: "accepted", accepted_at: now, updated_at: now })
-    .eq("tenant_id", tid)
-    .eq("id", String(inv.id));
-
-  await insertStaffAccessAuditEvent({
-    tenantId: tid,
-    staffMemberId: String(inv.staff_member_id),
-    eventType: STAFF_ACCESS_AUDIT_EVENTS.INVITE_ACCEPTED,
-    metadata: { invitation_id: inv.id, source: "auth_confirm" },
-    client: supabase,
-  });
 }
 
 export { buildStaffAccessPinSetupUrl } from "./staffAccessInviteCore";

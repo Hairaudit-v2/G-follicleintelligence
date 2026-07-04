@@ -8,6 +8,7 @@ export const STAFF_ACCESS_AUDIT_EVENTS = {
   INVITE_SENT: "staff_access_invite_sent",
   INVITE_RESENT: "staff_access_invite_resent",
   INVITE_ACCEPTED: "staff_access_invite_accepted",
+  INVITE_LINK_REPAIRED: "staff_access_invite_link_repaired",
   PIN_SETUP_LINK_CREATED: "staff_pin_setup_link_created",
   PIN_RESET_REQUESTED: "staff_pin_reset_requested",
   PIN_RESET_COMPLETED: "staff_pin_reset_completed",

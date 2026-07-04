@@ -962,7 +962,7 @@ export async function revokeStaffLoginAccess(input: {
     .update({ status: "revoked", revoked_at: now, updated_at: now })
     .eq("tenant_id", tid)
     .eq("staff_member_id", mid)
-    .eq("status", "pending");
+    .in("status", ["pending", "sent"]);
 }
 
 export async function suspendStaffLoginAccess(input: {
