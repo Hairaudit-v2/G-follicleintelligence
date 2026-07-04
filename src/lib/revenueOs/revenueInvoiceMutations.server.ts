@@ -2,6 +2,8 @@ import "server-only";
 
 import { randomBytes } from "node:crypto";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
@@ -9,6 +11,10 @@ import {
   readFiPaymentsEnabled,
   readFiPaymentProviderId,
 } from "@/src/lib/payments/fiPaymentEnv.server";
+import {
+  swallowGatewayPaymentBestEffort,
+  type GatewayPaymentSuccessOutcome,
+} from "@/src/lib/payments/gatewayPaymentSuccessCore";
 import { isFiStripeGatewayPaymentIntentDuplicateInsert } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { resolvePaymentProvider } from "@/src/lib/payments/providers/registry.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
@@ -70,9 +76,10 @@ async function syncArAfterInvoiceChangeBestEffort(
 
 async function loadInvoiceForTenant(
   tenantId: string,
-  invoiceId: string
+  invoiceId: string,
+  client?: SupabaseClient
 ): Promise<FiInvoiceRow | null> {
-  const supabase = supabaseAdmin();
+  const supabase = client ?? supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_invoices")
     .select("*")
@@ -88,10 +95,11 @@ async function patchInvoiceAfterPayment(
   tenantId: string,
   invoiceId: string,
   nextPaid: number,
-  todayYmd: string | null
+  todayYmd: string | null,
+  client?: SupabaseClient
 ): Promise<FiInvoiceRow> {
-  const supabase = supabaseAdmin();
-  const row = await loadInvoiceForTenant(tenantId, invoiceId);
+  const supabase = client ?? supabaseAdmin();
+  const row = await loadInvoiceForTenant(tenantId, invoiceId, client);
   if (!row) throw new Error("Invoice not found.");
   const ymd = todayYmd ?? new Date().toISOString().slice(0, 10);
   const baseStatus: FiInvoiceStatus = row.status === "draft" ? "awaiting_payment" : row.status;
@@ -982,15 +990,41 @@ export async function recordGatewayPaymentSuccess(args: {
   todayYmd?: string | null;
   /** When set, used as expected reconciliation amount instead of payment-request / balance lookup. */
   expectedAmountCents?: number | null;
-}): Promise<FiInvoiceRow> {
+  client?: SupabaseClient;
+}): Promise<GatewayPaymentSuccessOutcome> {
   const tid = assertUuid(args.tenantId, "tenantId");
   const iid = assertUuid(args.invoiceId, "invoiceId");
-  const inv = await loadInvoiceForTenant(tid, iid);
-  if (!inv) throw new Error("Invoice not found.");
+  const supabase = args.client ?? supabaseAdmin();
+  const inv = await loadInvoiceForTenant(tid, iid, supabase);
+  if (!inv) {
+    return {
+      status: "failed",
+      reason: "Invoice not found.",
+      invoiceId: iid,
+      paymentRequestId: args.paymentRequestId?.trim() || null,
+    };
+  }
   const payAmt = Math.max(0, Math.floor(args.amountCents));
-  const supabase = supabaseAdmin();
   const providerNorm = args.provider.trim().toLowerCase();
   const intentId = args.paymentIntentId?.trim() || null;
+  const prId = args.paymentRequestId?.trim() || null;
+
+  async function runDuplicateBestEffort(current: FiInvoiceRow, paymentId?: string | null) {
+    await swallowGatewayPaymentBestEffort(async () => {
+      await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+      await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
+      await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
+        tenantId: tid,
+        invoice: current,
+      });
+      await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
+    });
+    return {
+      status: "duplicate_already_recorded" as const,
+      invoice: current,
+      paymentId: paymentId ?? null,
+    };
+  }
 
   if (providerNorm === "stripe" && intentId) {
     const { data: existingRows, error: existingErr } = await supabase
@@ -1000,46 +1034,62 @@ export async function recordGatewayPaymentSuccess(args: {
       .eq("provider", "stripe")
       .eq("provider_payment_intent_id", intentId)
       .limit(1);
-    if (existingErr) throw new Error(existingErr.message);
+    if (existingErr) {
+      return {
+        status: "failed",
+        reason: existingErr.message,
+        invoiceId: iid,
+        paymentRequestId: prId,
+      };
+    }
     if (existingRows && existingRows.length > 0) {
-      const current = await loadInvoiceForTenant(tid, iid);
-      if (!current) throw new Error("Invoice not found.");
-      try {
-        await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
-        await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
-        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
-          tenantId: tid,
-          invoice: current,
-        });
-        await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
-      } catch {
-        /* FinancialOS best-effort */
+      const current = await loadInvoiceForTenant(tid, iid, supabase);
+      if (!current) {
+        return {
+          status: "failed",
+          reason: "Invoice not found.",
+          invoiceId: iid,
+          paymentRequestId: prId,
+        };
       }
-      return current;
+      return runDuplicateBestEffort(current, String((existingRows[0] as { id: string }).id));
     }
   }
 
   let expectedAmount =
     args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : payAmt;
-  const prId = args.paymentRequestId?.trim() || null;
   if (prId) {
-    const { data: prRow } = await supabase
+    const { data: prRow, error: prErr } = await supabase
       .from("fi_payment_requests")
       .select("total_cents, amount_cents")
       .eq("tenant_id", tid)
       .eq("id", prId)
       .maybeSingle();
-    if (prRow) {
-      const prAmt = Math.max(
-        0,
-        Number(
-          (prRow as { total_cents?: unknown }).total_cents ??
-            (prRow as { amount_cents?: unknown }).amount_cents ??
-            0
-        )
-      );
-      if (prAmt > 0) expectedAmount = prAmt;
+    if (prErr) {
+      return {
+        status: "failed",
+        reason: prErr.message,
+        invoiceId: iid,
+        paymentRequestId: prId,
+      };
     }
+    if (!prRow) {
+      return {
+        status: "ignored_or_unmatched",
+        reason: "payment_request_not_found",
+        invoiceId: iid,
+        paymentRequestId: prId,
+      };
+    }
+    const prAmt = Math.max(
+      0,
+      Number(
+        (prRow as { total_cents?: unknown }).total_cents ??
+          (prRow as { amount_cents?: unknown }).amount_cents ??
+          0
+      )
+    );
+    if (prAmt > 0) expectedAmount = prAmt;
   } else {
     expectedAmount = Math.min(expectedAmount, invoiceBalanceDueCents(inv));
   }
@@ -1054,10 +1104,29 @@ export async function recordGatewayPaymentSuccess(args: {
     receivedAmountCents: payAmt,
     currency: args.currency,
     paymentId: null,
+    client: supabase,
   });
 
-  if (!reconciliation.ok || !reconciliation.matched) {
-    return inv;
+  if (!reconciliation.ok) {
+    return {
+      status: "failed",
+      reason: reconciliation.reason,
+      invoiceId: iid,
+      paymentRequestId: prId,
+    };
+  }
+
+  if (!reconciliation.matched) {
+    return {
+      status: "reconciliation_mismatch",
+      invoice: inv,
+      reconciliationId: reconciliation.reconciliation.id,
+      varianceCents: reconciliation.varianceCents,
+      reason: `Amount mismatch: expected ${expectedAmount}¢, received ${payAmt}¢`,
+      expectedAmountCents: expectedAmount,
+      receivedAmountCents: payAmt,
+      paymentRequestId: prId,
+    };
   }
 
   const { data: payRow, error: pe } = await supabase
@@ -1090,26 +1159,27 @@ export async function recordGatewayPaymentSuccess(args: {
         paymentIntentId: args.paymentIntentId,
       })
     ) {
-      const current = await loadInvoiceForTenant(tid, iid);
-      if (!current) throw new Error("Invoice not found.");
-      try {
-        await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
-        await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
-        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
-          tenantId: tid,
-          invoice: current,
-        });
-        await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
-      } catch {
-        /* FinancialOS best-effort */
+      const current = await loadInvoiceForTenant(tid, iid, supabase);
+      if (!current) {
+        return {
+          status: "failed",
+          reason: "Invoice not found.",
+          invoiceId: iid,
+          paymentRequestId: prId,
+        };
       }
-      return current;
+      return runDuplicateBestEffort(current);
     }
-    throw new Error(pe.message);
+    return {
+      status: "failed",
+      reason: pe.message,
+      invoiceId: iid,
+      paymentRequestId: prId,
+    };
   }
 
   const nextPaid = inv.amount_paid_cents + payAmt;
-  const updated = await patchInvoiceAfterPayment(tid, iid, nextPaid, args.todayYmd ?? null);
+  const updated = await patchInvoiceAfterPayment(tid, iid, nextPaid, args.todayYmd ?? null, supabase);
   const paymentId = String((payRow as { id: string }).id);
 
   if (prId) {
@@ -1120,7 +1190,7 @@ export async function recordGatewayPaymentSuccess(args: {
       .eq("id", prId);
   }
 
-  try {
+  await swallowGatewayPaymentBestEffort(async () => {
     await supabase
       .from("fi_payment_reconciliation")
       .update({
@@ -1142,11 +1212,9 @@ export async function recordGatewayPaymentSuccess(args: {
       paymentId,
       amountCents: payAmt,
     });
-  } catch {
-    /* ledger/reconciliation best-effort */
-  }
+  });
 
-  try {
+  await swallowGatewayPaymentBestEffort(async () => {
     await appendCrmActivityEvent({
       tenantId: tid,
       leadId: inv.lead_id,
@@ -1161,11 +1229,9 @@ export async function recordGatewayPaymentSuccess(args: {
         provider: args.provider,
       },
     });
-  } catch {
-    /* optional */
-  }
+  });
 
-  try {
+  await swallowGatewayPaymentBestEffort(async () => {
     await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
     await syncArAfterInvoiceChangeBestEffort(tid, updated, args.todayYmd ?? null);
     await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
@@ -1173,11 +1239,9 @@ export async function recordGatewayPaymentSuccess(args: {
       invoice: updated,
     });
     await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: updated });
-  } catch {
-    /* FinancialOS best-effort */
-  }
+  });
 
-  return updated;
+  return { status: "payment_recorded", invoice: updated, paymentId };
 }
 
 export async function recordGatewayPaymentFailure(args: {

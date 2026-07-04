@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncArFromReconciliationMismatch } from "@/src/lib/financialOs/financialAccountsReceivable.server";
 import {
@@ -35,8 +37,9 @@ async function appendReconciliationAuditEvent(args: {
   financialTransactionId?: string | null;
   eventKind: "reconciliation_linked" | "reconciliation_mismatch";
   payload: Record<string, unknown>;
+  client?: SupabaseClient;
 }): Promise<void> {
-  const supabase = supabaseAdmin();
+  const supabase = args.client ?? supabaseAdmin();
   const { error } = await supabase.from("fi_financial_transaction_audit_events").insert({
     tenant_id: args.tenantId.trim(),
     financial_transaction_id: args.financialTransactionId?.trim() || null,
@@ -50,12 +53,12 @@ async function appendReconciliationAuditEvent(args: {
  * Upsert provider reconciliation row keyed by tenant + provider + provider_transaction_id.
  */
 export async function recordPaymentReconciliation(
-  args: RecordPaymentReconciliationArgs
+  args: RecordPaymentReconciliationArgs & { client?: SupabaseClient }
 ): Promise<FiPaymentReconciliationRow> {
   const tid = args.tenantId.trim();
   const provider = args.provider.trim().toLowerCase();
   const providerTxId = args.providerTransactionId?.trim() || null;
-  const supabase = supabaseAdmin();
+  const supabase = args.client ?? supabaseAdmin();
   const expected =
     args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : null;
   const received =
@@ -142,6 +145,7 @@ export async function reconcileGatewayPaymentAmounts(args: {
   receivedAmountCents: number;
   currency: string;
   paymentId?: string | null;
+  client?: SupabaseClient;
 }): Promise<GatewayReconciliationOutcome> {
   const check = compareReconciliationAmounts(args.expectedAmountCents, args.receivedAmountCents);
   const tid = args.tenantId.trim();
@@ -161,6 +165,7 @@ export async function reconcileGatewayPaymentAmounts(args: {
       receivedAmountCents: check.receivedCents,
       currency: args.currency,
       metadata: { variance_cents: check.varianceCents, needs_review: true },
+      client: args.client,
     });
 
     await appendReconciliationAuditEvent({
@@ -173,6 +178,7 @@ export async function reconcileGatewayPaymentAmounts(args: {
         received_amount_cents: check.receivedCents,
         variance_cents: check.varianceCents,
       },
+      client: args.client,
     });
 
     try {
@@ -202,6 +208,7 @@ export async function reconcileGatewayPaymentAmounts(args: {
     receivedAmountCents: check.receivedCents,
     currency: args.currency,
     metadata: { outcome: "success" },
+    client: args.client,
   });
 
   await appendReconciliationAuditEvent({
@@ -212,6 +219,7 @@ export async function reconcileGatewayPaymentAmounts(args: {
       payment_id: args.paymentId ?? null,
       invoice_id: args.invoiceId,
     },
+    client: args.client,
   });
 
   return { ok: true, reconciliation, matched: true };

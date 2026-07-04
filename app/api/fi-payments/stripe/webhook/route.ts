@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { isStripeWebhookDuplicateInsert } from "@/src/lib/payments/stripeWebhookIdempotency";
+import { resolveStripeCheckoutCompletedWebhookUpdate } from "@/src/lib/payments/stripeWebhookProcessingCore";
 import { createStripePaymentProvider } from "@/src/lib/payments/providers/stripe/stripePaymentProvider.server";
 import {
   recordGatewayPaymentFailure,
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (mapped.kind === "checkout_completed") {
-      await recordGatewayPaymentSuccess({
+      const outcome = await recordGatewayPaymentSuccess({
         tenantId: mapped.tenantId,
         invoiceId: mapped.invoiceId,
         amountCents: mapped.amountCents,
@@ -79,13 +80,51 @@ export async function POST(req: NextRequest) {
         paymentRequestId: mapped.paymentRequestId,
         todayYmd,
       });
+
+      const checkoutObj = (rawEvent as { data?: { object?: Record<string, unknown> } }).data
+        ?.object;
+      const customerDetails = checkoutObj?.customer_details as
+        | { email?: string | null }
+        | undefined;
+      const rowUpdate = resolveStripeCheckoutCompletedWebhookUpdate({
+        outcome,
+        mappedKind: mapped.kind,
+        context: {
+          stripeEventId: ev.id ?? null,
+          paymentIntentId: mapped.paymentIntentId,
+          amountCents: mapped.amountCents,
+          currency: mapped.currency,
+          invoiceId: mapped.invoiceId,
+          paymentRequestId: mapped.paymentRequestId,
+          customerEmail: customerDetails?.email ?? null,
+        },
+      });
+
       const completedTenantFilter = nonEmptyTenantIdForWebhookRow(mapped.tenantId);
       let completedQ = supabase
         .from("fi_payment_webhook_events")
-        .update({ processing_status: "processed", updated_at: new Date().toISOString() })
+        .update({
+          processing_status: rowUpdate.processing_status,
+          error_message: rowUpdate.error_message,
+          metadata: rowUpdate.metadata,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", webhookRowId);
       if (completedTenantFilter) completedQ = completedQ.eq("tenant_id", completedTenantFilter);
       await completedQ;
+
+      if (rowUpdate.processing_status === "error") {
+        logStructured("error", "stripe_webhook_payment_unresolved", {
+          webhook_row_id: webhookRowId,
+          stripe_event_id: ev.id ?? null,
+          stripe_event_type: ev.type ?? null,
+          mapped_kind: mapped.kind,
+          gateway_outcome: outcome.status,
+          error_message: rowUpdate.error_message,
+        });
+      }
+
+      return NextResponse.json(rowUpdate.responseBody, { status: rowUpdate.httpStatus });
     } else if (mapped.kind === "checkout_failed") {
       const tid = mapped.tenantId?.trim();
       if (tid) {
