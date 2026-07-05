@@ -115,6 +115,9 @@ const apiNoCacheHeaders = [
 ];
 
 const nextConfig = {
+  // CI/agent builds can target an alternate dist dir so they never clobber a
+  // running `next dev` instance's .next output.
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   transpilePackages: ["@hairlongevity/medical-intelligence-core"],
   experimental: {
     serverActions: {

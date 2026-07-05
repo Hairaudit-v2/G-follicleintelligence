@@ -31,6 +31,9 @@ import {
   loadWorkforceCommandCentreIntelligence,
   type WorkforceCommandCentreIntelligence,
 } from "@/src/lib/staff/workforceCommandCentre.server";
+import { loadAllTenantStaffMembers } from "@/src/lib/workforce-os/hrReconciliation.server";
+import { isStaffHrLinkedForReconciliation } from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
+import type { StaffDirectoryLifecycleSignal } from "@/src/lib/staff/staffDirectoryFilters";
 import {
   loadWorkforceOperationalMetrics,
   type WorkforceOperationalMetrics,
@@ -43,6 +46,8 @@ export type StaffDirectoryClinicOption = {
 
 export type StaffDirectoryPageResult = {
   staff: FiStaffRow[];
+  /** HR lifecycle signals keyed by `fi_staff.id` (from `fi_staff_members`). */
+  staffLifecycleByStaffId: Record<string, StaffDirectoryLifecycleSignal>;
   canManageStaff: boolean;
   /** Tenant admins / FI admins — can edit FI OS feature visibility per staff row. */
   canManageStaffFeatureVisibility: boolean;
@@ -142,7 +147,7 @@ async function loadClinicsForTenant(tenantId: string): Promise<StaffDirectoryCli
 export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDirectoryPageResult> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = supabaseAdmin();
-  const [staffRes, usersRes, clinics] = await Promise.all([
+  const [staffRes, usersRes, clinics, staffMembers] = await Promise.all([
     loadAllStaffForTenant(tid),
     supabase
       .from("fi_users")
@@ -151,8 +156,20 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
       .order("email", { ascending: true })
       .limit(200),
     loadClinicsForTenant(tid),
+    loadAllTenantStaffMembers(tid).catch(() => []),
   ]);
   if (usersRes.error) throw new Error(usersRes.error.message);
+
+  const staffLifecycleByStaffId: Record<string, StaffDirectoryLifecycleSignal> = {};
+  for (const member of staffMembers) {
+    const fiStaffId = member.fi_staff_id?.trim();
+    if (!fiStaffId) continue;
+    staffLifecycleByStaffId[fiStaffId] = {
+      employmentStatus: member.employment_status,
+      archivedAt: member.archived_at,
+      hrLinked: isStaffHrLinkedForReconciliation(member),
+    };
+  }
 
   const fiUsersForLink = ((usersRes.data ?? []) as { id: string; email: string | null }[]).map(
     (r) => ({
@@ -272,6 +289,7 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
 
   return {
     staff: staffRes,
+    staffLifecycleByStaffId,
     canManageStaff,
     canManageStaffFeatureVisibility,
     staffFeatureAccessByStaffId,

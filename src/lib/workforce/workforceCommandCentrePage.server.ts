@@ -34,6 +34,7 @@ import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceO
 import { loadWorkforcePlanningEngine } from "@/src/lib/workforce/workforcePlanningEngine.server";
 import type { WorkforcePlanningSnapshot } from "@/src/lib/workforce/workforcePlanningEngineCore";
 import { loadWorkforceOsDirectoryPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { resolveCanonicalStaffLifecycleStatus } from "@/src/lib/workforce-os/staffCanonicalLifecycle";
 import { loadProcedureStaffingOptimizer } from "@/src/lib/workforce/procedureStaffingOptimizer.server";
 import type { ProcedureStaffingOptimizerSnapshot } from "@/src/lib/workforce/procedureStaffingOptimizerCore";
 import { loadSurgeryCaseLinks } from "@/src/lib/workforce/surgicalWorkforceIntelligence.server";
@@ -150,7 +151,18 @@ export async function loadWorkforceCommandCentrePage(
       listActiveStaffForWageProfiles(tid).catch(() => []),
     ]);
 
-  const totalStaff = directory?.rows.filter((r) => !r.archived_at).length ?? 0;
+  // Canonical lifecycle: terminated/archived staff never count towards headcount,
+  // even when flags have drifted (matches Staff Directory + roster eligibility).
+  // On-leave/suspended/pending staff remain employed and stay in the headcount.
+  const totalStaff =
+    directory?.rows.filter((r) => {
+      const status = resolveCanonicalStaffLifecycleStatus({
+        isActive: true,
+        employmentStatus: r.employment_status,
+        archivedAt: r.archived_at,
+      });
+      return status !== "terminated" && status !== "archived";
+    }).length ?? 0;
   const activePipelineStages = new Set<string>(
     RECRUITMENT_PIPELINE_STAGES.filter((s) => s !== "hired" && s !== "withdrawn")
   );

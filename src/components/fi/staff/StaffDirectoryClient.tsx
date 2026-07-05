@@ -101,8 +101,14 @@ export function StaffDirectoryClient({
   );
 
   const enrichedRows = useMemo(
-    () => enrichStaffDirectoryRows(data.staff, data.payrollByStaffId, data.hrNotificationByStaffId),
-    [data.staff, data.payrollByStaffId, data.hrNotificationByStaffId]
+    () =>
+      enrichStaffDirectoryRows(
+        data.staff,
+        data.payrollByStaffId,
+        data.hrNotificationByStaffId,
+        data.staffLifecycleByStaffId
+      ),
+    [data.staff, data.payrollByStaffId, data.hrNotificationByStaffId, data.staffLifecycleByStaffId]
   );
 
   const visibleRows = useMemo(
@@ -207,6 +213,7 @@ export function StaffDirectoryClient({
         directoryRows={visibleRows}
         intelligenceByStaffId={intelligenceByStaffId}
         operationalMetrics={data.workforceOperationalMetrics}
+        filters={initialFilters}
         onEditStaff={openEdit}
       />
 

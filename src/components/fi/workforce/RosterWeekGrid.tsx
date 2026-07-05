@@ -174,13 +174,18 @@ export function RosterWeekGrid({
                       {hasStandardHours ? "Edit standard hours" : "Set standard hours"}
                     </Link>
                   ) : (
-                    <span
+                    <button
+                      type="button"
+                      // Not disabled: clicking must surface the permission message
+                      // (onEditStandardHours resolves to a deny outcome) — never a
+                      // silent no-op.
+                      onClick={() => onEditStandardHours?.(staff.id)}
                       className="mt-2 inline-flex min-h-9 cursor-not-allowed items-center rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500"
                       title={manageDeniedReason}
                       data-testid={`standard-hours-button-disabled-${staff.id}`}
                     >
                       Set standard hours
-                    </span>
+                    </button>
                   )}
                 </td>
                 {weekDayDates.map((date) => {
@@ -202,17 +207,15 @@ export function RosterWeekGrid({
                         type="button"
                         data-testid={`roster-cell-${staff.id}-${date}`}
                         title={!canManage ? manageDeniedReason : undefined}
-                        disabled={!canManage && emptyCell}
                         className={cn(
                           "flex min-h-[80px] w-full flex-col gap-1 rounded-lg border border-transparent p-1.5 text-left",
                           canManage
                             ? "hover:border-white/[0.08] hover:bg-white/[0.02]"
                             : "cursor-not-allowed opacity-70"
                         )}
-                        onClick={() => {
-                          if (!canManage) return;
-                          onCellClick?.(staff.id, date);
-                        }}
+                        // Always clickable: the parent handler resolves permission and
+                        // shows an explicit deny message instead of a silent no-op.
+                        onClick={() => onCellClick?.(staff.id, date)}
                       >
                         {cellShifts.map((shift) => (
                           <span

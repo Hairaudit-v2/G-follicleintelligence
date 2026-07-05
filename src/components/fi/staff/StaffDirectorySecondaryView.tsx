@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardCard";
 import { StatCard } from "@/src/components/fi-admin/dashboard-ui/StatCard";
-import type { StaffDirectoryRowView } from "@/src/lib/staff/staffDirectoryFilters";
+import {
+  buildStaffDirectorySearchParams,
+  type StaffDirectoryFilterState,
+  type StaffDirectoryRowView,
+} from "@/src/lib/staff/staffDirectoryFilters";
 import {
   buildStaffAccessCentreHref,
   buildStaffDirectoryPrimaryActionHref,
@@ -13,6 +18,7 @@ import {
 } from "@/src/lib/workforce/staffLifecycleUxCore";
 import { STAFF_LIFECYCLE_LABELS } from "@/src/lib/workforce/staffLifecycleCopy";
 import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
+import { canonicalStaffLifecyclePillClass } from "@/src/lib/workforce-os/staffCanonicalLifecycle";
 import {
   buildWorkforceAttentionQueue,
   buildWorkforceCommandCentreMetrics,
@@ -25,9 +31,18 @@ import {
 } from "@/src/lib/staff/workforceCommandCentre";
 import { cn } from "@/lib/utils";
 
-function StatusPill({ children, className }: { children: ReactNode; className: string }) {
+function StatusPill({
+  children,
+  className,
+  title,
+}: {
+  children: ReactNode;
+  className: string;
+  title?: string;
+}) {
   return (
     <span
+      title={title}
       className={cn(
         "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset",
         className
@@ -63,9 +78,11 @@ function StaffRowCard({
     <article
       className={cn(
         "rounded-xl border border-white/[0.07] bg-[#0c1426]/60 px-4 py-3 transition-colors hover:border-white/[0.12]",
-        !row.is_active && "opacity-70",
+        !row.isLifecycleActive && "opacity-70",
         row.needsReview && "border-amber-500/20"
       )}
+      data-testid={`staff-directory-row-${row.id}`}
+      data-lifecycle-status={row.lifecycleStatus}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
@@ -80,15 +97,17 @@ function StaffRowCard({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <StatusPill
-            className={
-              row.is_active
-                ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25"
-                : "bg-slate-500/15 text-slate-400 ring-slate-500/20"
-            }
-          >
-            {row.is_active ? "Active" : "Inactive"}
+          <StatusPill className={canonicalStaffLifecyclePillClass(row.lifecycleStatus)}>
+            {row.lifecycleLabel}
           </StatusPill>
+          {row.isDuplicate ? (
+            <StatusPill
+              className="bg-amber-500/15 text-amber-200 ring-amber-500/25"
+              title="Another staff record with the same identity is the canonical profile. Do not schedule against this record."
+            >
+              Duplicate record
+            </StatusPill>
+          ) : null}
           <StatusPill className={readinessScorePillClass(intel.readinessScore)}>
             {formatReadinessScore(intel.readinessScore)}
           </StatusPill>
@@ -120,6 +139,16 @@ function StaffRowCard({
   );
 }
 
+function activeFilterHref(
+  pathname: string,
+  filters: StaffDirectoryFilterState,
+  activeFilter: StaffDirectoryFilterState["activeFilter"]
+): string {
+  const params = buildStaffDirectorySearchParams({ ...filters, activeFilter });
+  const qs = params.toString();
+  return qs ? `${pathname}?${qs}` : pathname;
+}
+
 export function StaffDirectorySecondaryView({
   base,
   workforceOsBase,
@@ -130,6 +159,7 @@ export function StaffDirectorySecondaryView({
   directoryRows,
   intelligenceByStaffId,
   operationalMetrics,
+  filters,
   onEditStaff,
 }: {
   base: string;
@@ -141,8 +171,10 @@ export function StaffDirectorySecondaryView({
   directoryRows: StaffDirectoryRowView[];
   intelligenceByStaffId: Record<string, StaffWorkforceIntelligence | undefined>;
   operationalMetrics?: WorkforceOperationalMetrics | null;
+  filters?: StaffDirectoryFilterState;
   onEditStaff: (row: StaffDirectoryRowView) => void;
 }) {
+  const pathname = usePathname();
   const metrics = buildWorkforceCommandCentreMetrics(allRows, intelligenceByStaffId);
   const attentionCount = buildWorkforceAttentionQueue(allRows, intelligenceByStaffId).length;
   const lifecycleCopy = staffDirectoryLifecycleGuidance();
@@ -225,11 +257,36 @@ export function StaffDirectorySecondaryView({
       </section>
 
       <section aria-label="Staff list">
-        <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-[#F8FAFC]">
             Staff records ({directoryRows.length}
             {directoryRows.length !== allRows.length ? ` of ${allRows.length}` : ""})
           </h2>
+          {filters ? (
+            <nav aria-label="Staff status filter" className="flex gap-1.5 text-xs">
+              {(
+                [
+                  { id: "all", label: "All" },
+                  { id: "active", label: "Active" },
+                  { id: "inactive", label: "Inactive" },
+                ] as const
+              ).map((opt) => (
+                <Link
+                  key={opt.id}
+                  href={activeFilterHref(pathname, filters, opt.id)}
+                  data-testid={`staff-directory-filter-${opt.id}`}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 font-medium transition-colors",
+                    filters.activeFilter === opt.id
+                      ? "border-[#22C1FF]/40 bg-[#22C1FF]/15 text-[#22C1FF]"
+                      : "border-white/[0.08] text-slate-400 hover:border-white/[0.14] hover:text-slate-200"
+                  )}
+                >
+                  {opt.label}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
         </div>
         {directoryRows.length === 0 ? (
           <DashboardCard className="p-8 text-center">

@@ -145,9 +145,15 @@ export function RosterCommandCentreView({
     payload.rosterGridStaffOptions ??
     filterRosterGridStaffOptions(payload.staffOptions, payload.eligibleStaffIds);
 
-  const drawerStaff = rosterDrawerStaffOption(drawerState, payload.staffOptions);
   const drawerStaffMemberId = resolveRosterDrawerStaffMemberId(drawerState);
   const drawerShift = rosterDrawerShift(drawerState, payload.shifts);
+  // Fall back to the shift's own staff name so a shift click can never silently
+  // no-op when its staff member is missing from the filtered staff options.
+  const drawerStaff =
+    rosterDrawerStaffOption(drawerState, payload.staffOptions) ??
+    (drawerStaffMemberId && drawerShift
+      ? { id: drawerStaffMemberId, name: drawerShift.staffName ?? "Staff", role: null, isActive: true }
+      : null);
 
   function closeDrawer() {
     setDrawerState(closeRosterDrawer());
@@ -330,6 +336,17 @@ export function RosterCommandCentreView({
 
       <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="roster_command_centre" />
 
+      {!canManage ? (
+        <section
+          className="rounded-xl border border-slate-500/30 bg-slate-900/60 px-4 py-3"
+          data-testid="roster-manage-denied-banner"
+          role="status"
+        >
+          <p className="text-sm font-medium text-slate-200">View-only roster access</p>
+          <p className="mt-1 text-xs text-slate-400">{manageDeniedReason}</p>
+        </section>
+      ) : null}
+
       <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex items-center gap-2">
@@ -452,8 +469,16 @@ export function RosterCommandCentreView({
           </div>
         </div>
 
-        {actionMessage ? <p className="mt-3 text-sm text-emerald-300">{actionMessage}</p> : null}
-        {actionError ? <p className="mt-3 text-sm text-rose-300">{actionError}</p> : null}
+        {actionMessage ? (
+          <p className="mt-3 text-sm text-emerald-300" role="status" data-testid="roster-action-message">
+            {actionMessage}
+          </p>
+        ) : null}
+        {actionError ? (
+          <p className="mt-3 text-sm text-rose-300" role="alert" data-testid="roster-action-error">
+            {actionError}
+          </p>
+        ) : null}
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

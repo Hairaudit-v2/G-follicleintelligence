@@ -115,10 +115,15 @@ export function filterStaffByRoleSegment<T extends { staff_role: string }>(
   return rows.filter((row) => staffMatchesRoleSegment(row.staff_role, segment));
 }
 
+/** Canonical active check — lifecycle-resolved status, never raw `is_active`. */
+function isRowLifecycleActive(row: StaffDirectoryRowView): boolean {
+  return row.isLifecycleActive;
+}
+
 function isPendingOnboarding(row: StaffDirectoryRowView): boolean {
   if (row.needsReview) return true;
   if (row.hrNotification.onboardingStatus === "incomplete") return true;
-  if (!row.is_active) return false;
+  if (!isRowLifecycleActive(row)) return false;
   return (
     row.hrNotification.hasHrLink &&
     row.hrNotification.onboardingStatus === "unknown" &&
@@ -176,7 +181,7 @@ export function buildWorkforceCommandCentreMetrics(
   intelligenceByStaffId: Record<string, StaffWorkforceIntelligence | undefined>
 ): WorkforceCommandCentreMetrics {
   const totalStaff = rows.length;
-  const activeStaff = rows.filter((r) => r.is_active).length;
+  const activeStaff = rows.filter(isRowLifecycleActive).length;
   const pendingOnboarding = rows.filter(isPendingOnboarding).length;
 
   let complianceIssues = 0;
@@ -211,7 +216,7 @@ export function buildWorkforceIntelligencePanel(
   let complianceAttentionCount = 0;
 
   for (const row of rows) {
-    if (!row.is_active) continue;
+    if (!isRowLifecycleActive(row)) continue;
     const intel = resolveStaffWorkforceIntelligence(row, intelligenceByStaffId[row.id]);
     if (intel.surgeryReady) surgeryReadyCount += 1;
     if ((intel.trainingRequiredCount ?? 0) > 0) trainingRequiredCount += 1;
@@ -270,21 +275,24 @@ export function buildWorkforceAttentionQueue(
   const items: WorkforceAttentionItem[] = [];
 
   for (const row of rows) {
+    // Departed/archived staff are a resolved lifecycle state, not an attention item.
+    if (row.lifecycleStatus === "terminated" || row.lifecycleStatus === "archived") continue;
+
     const intel = resolveStaffWorkforceIntelligence(row, intelligenceByStaffId[row.id]);
     const reasons: WorkforceAttentionReason[] = [];
 
-    if (!row.is_active) reasons.push("inactive");
+    if (!isRowLifecycleActive(row)) reasons.push("inactive");
     if (isPendingOnboarding(row)) reasons.push("pending_onboarding");
     if (hasComplianceIssue(intel.complianceStatus)) reasons.push("missing_compliance");
     if (
       intel.readinessScore != null &&
       intel.readinessScore < LOW_READINESS_THRESHOLD &&
-      row.is_active
+      isRowLifecycleActive(row)
     ) {
       reasons.push("low_readiness");
     } else if (
       intel.readinessScore == null &&
-      row.is_active &&
+      isRowLifecycleActive(row) &&
       row.hrNotification.outstandingTaskCount > 0
     ) {
       reasons.push("low_readiness");
