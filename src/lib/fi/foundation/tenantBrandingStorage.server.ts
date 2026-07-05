@@ -94,13 +94,14 @@ export async function uploadTenantLogoFile(
       .catch(() => undefined);
   }
 
+  const now = new Date().toISOString();
   const metadata = {
     ...prevMeta,
     logo_storage_bucket: TENANT_BRANDING_BUCKET,
     logo_storage_path: storagePath,
+    logo_uploaded_at: now,
   };
 
-  const now = new Date().toISOString();
   const { error: upsertErr } = await supabase.from("fi_tenant_settings").upsert(
     {
       tenant_id: tid,
@@ -149,6 +150,7 @@ export async function removeTenantUploadedLogo(
   const nextMeta = { ...existing.metadata };
   delete nextMeta.logo_storage_bucket;
   delete nextMeta.logo_storage_path;
+  delete nextMeta.logo_uploaded_at;
 
   try {
     const { error } = await supabase

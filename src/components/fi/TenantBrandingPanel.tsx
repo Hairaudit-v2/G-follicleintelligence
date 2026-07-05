@@ -8,10 +8,10 @@ import {
 } from "@/lib/actions/fi-branding-actions";
 import { TenantLogoPreviewStrip } from "@/src/components/brand/TenantBrandMark";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
-import { buildNormalizedBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
+import { buildNormalizedBrandingCssVariables, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
 
 const inputClass =
-  "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] file:mr-3 file:rounded-md file:border-0 file:bg-[#141C33] file:px-2 file:py-1 file:text-xs file:text-[#22C1FF]";
+  "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] file:mr-3 file:rounded-md file:border-0 file:bg-[#141C33] file:px-2 file:py-1 file:text-xs file:text-[#22C1FF] disabled:opacity-50";
 
 export function TenantBrandingLogoUpload({
   tenantId,
@@ -20,6 +20,8 @@ export function TenantBrandingLogoUpload({
   branding,
   hasUploadedLogo,
   legacyLogoUrl,
+  onLocalPreviewChange,
+  onRevalidated,
 }: {
   tenantId: string;
   adminKey: string;
@@ -27,6 +29,8 @@ export function TenantBrandingLogoUpload({
   branding: NormalizedTenantBranding;
   hasUploadedLogo: boolean;
   legacyLogoUrl: string | null;
+  onLocalPreviewChange?: (url: string | null) => void;
+  onRevalidated?: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
@@ -39,41 +43,69 @@ export function TenantBrandingLogoUpload({
     };
   }, [localPreview]);
 
+  useEffect(() => {
+    onLocalPreviewChange?.(localPreview);
+  }, [localPreview, onLocalPreviewChange]);
+
+  const setPreview = (url: string | null) => {
+    if (localPreview?.startsWith("blob:")) URL.revokeObjectURL(localPreview);
+    setLocalPreview(url);
+  };
+
   const onUpload = async (file: File | null) => {
-    if (!file || !canEdit) return;
+    if (!file) return;
+    if (!canEdit) {
+      setFeedback({
+        ok: false,
+        text: "You do not have permission to upload logos for this clinic.",
+      });
+      return;
+    }
     setFeedback(null);
     setBusy(true);
-    if (localPreview?.startsWith("blob:")) URL.revokeObjectURL(localPreview);
-    setLocalPreview(URL.createObjectURL(file));
+    setPreview(URL.createObjectURL(file));
     const res = await uploadTenantLogoAction({ tenantId, adminKey, file });
     setBusy(false);
     if (res.ok) {
-      setFeedback({ ok: true, text: "Logo uploaded." });
+      setFeedback({ ok: true, text: "Logo uploaded and saved." });
+      setPreview(null);
+      if (fileRef.current) fileRef.current.value = "";
+      onRevalidated?.();
     } else {
+      setPreview(null);
       setFeedback({ ok: false, text: res.error });
     }
   };
 
   const onRemove = async () => {
-    if (!canEdit || !hasUploadedLogo) return;
+    if (!canEdit) {
+      setFeedback({
+        ok: false,
+        text: "You do not have permission to remove logos for this clinic.",
+      });
+      return;
+    }
+    if (!hasUploadedLogo) return;
     setFeedback(null);
     setBusy(true);
     const res = await removeTenantLogoAction({ tenantId, adminKey });
     setBusy(false);
     if (res.ok) {
-      if (localPreview?.startsWith("blob:")) URL.revokeObjectURL(localPreview);
-      setLocalPreview(null);
+      setPreview(null);
       if (fileRef.current) fileRef.current.value = "";
       setFeedback({ ok: true, text: "Uploaded logo removed. Legacy URL kept if set." });
+      onRevalidated?.();
     } else {
       setFeedback({ ok: false, text: res.error });
     }
   };
 
+  const displayLogoUrl = localPreview ?? branding.logoUrl;
+
   return (
     <div className="space-y-3">
       <TenantLogoPreviewStrip
-        logoUrl={branding.logoUrl}
+        logoUrl={displayLogoUrl}
         displayName={branding.clinicDisplayName}
         localPreviewUrl={localPreview}
       />
@@ -146,9 +178,9 @@ export function TenantBrandingPreviewPanel({
       logoUrlLegacy: draft.logoUrl,
       logoStoragePath: null,
       logoStorageBucket: null,
-      primaryColor: draft.primaryColour,
+      primaryColor: safeBrandingColourHex(draft.primaryColour, "#4b5563"),
       secondaryColor: "#9ca3af",
-      accentColor: draft.accentColour,
+      accentColor: safeBrandingColourHex(draft.accentColour, "#2563eb"),
       themeMode: null,
       clinicInitials: draft.brandName.trim().slice(0, 2).toUpperCase() || "CL",
     }),

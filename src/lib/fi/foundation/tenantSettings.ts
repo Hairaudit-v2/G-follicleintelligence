@@ -535,7 +535,7 @@ export type WriteFiClinicSettingsPayload = {
 
 /**
  * Upsert tenant settings by `tenant_id`. Caller must enforce FI admin gate and tenant existence.
- * Uses service-role client only; does not touch `metadata` (DB default on insert, unchanged on update).
+ * Uses service-role client only; always preserves existing `metadata` (logo upload paths, theme_mode).
  */
 export async function upsertFiTenantSettings(
   tenantId: string,
@@ -544,6 +544,8 @@ export async function upsertFiTenantSettings(
 ): Promise<void> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tid = tenantId.trim();
+  const existing = await loadTenantBranding(tid, client);
+  const metadata = existing?.metadata ?? {};
   const now = new Date().toISOString();
   const { error } = await supabase.from("fi_tenant_settings").upsert(
     {
@@ -555,6 +557,7 @@ export async function upsertFiTenantSettings(
       accent_colour: payload.accent_colour,
       support_email: payload.support_email,
       default_timezone: payload.default_timezone,
+      metadata,
       updated_at: now,
     },
     { onConflict: "tenant_id" }

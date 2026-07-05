@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   upsertClinicSettingsAction,
   upsertOrganisationSettingsAction,
@@ -19,8 +19,12 @@ import type {
   TenantConfigurationOverview,
 } from "@/src/lib/fi/foundation/tenantSettings";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
-import { parseTenantBrandingMetadata } from "@/src/lib/fi/foundation/tenantBrandingCore";
-import { safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
+import {
+  buildTenantBrandingFormInitialState,
+  buildTenantBrandingPreviewDraft,
+  buildTenantBrandingRevisionKey,
+  tenantBrandingHasUploadedLogo,
+} from "@/src/lib/fi/foundation/tenantBrandingFormCore";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -104,6 +108,7 @@ function Field({
   hint,
   type = "text",
   onChange,
+  disabled = false,
 }: {
   label: string;
   name: string;
@@ -111,6 +116,7 @@ function Field({
   hint?: string;
   type?: string;
   onChange?: (value: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <label className="block space-y-1">
@@ -121,6 +127,7 @@ function Field({
         defaultValue={defaultValue ?? ""}
         className={inputClass}
         autoComplete="off"
+        disabled={disabled}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       />
       {hint ? <span className="block text-xs text-[#64748B]">{hint}</span> : null}
@@ -144,7 +151,7 @@ export function TenantConfigurationPanel({
   tenantId,
   overview,
   effective,
-  branding,
+  tenantBranding,
   canEditBranding,
   previewOrganisationId,
   previewClinicId,
@@ -153,7 +160,8 @@ export function TenantConfigurationPanel({
   tenantId: string;
   overview: TenantConfigurationOverview;
   effective: EffectiveBranding;
-  branding: NormalizedTenantBranding;
+  /** Tenant-level resolved branding (no org/clinic cascade) for settings edit + shell parity. */
+  tenantBranding: NormalizedTenantBranding;
   canEditBranding: boolean;
   previewOrganisationId: string | null;
   previewClinicId: string | null;
@@ -163,30 +171,43 @@ export function TenantConfigurationPanel({
   const router = useRouter();
   const base = `/fi-admin/${tenantId}/configuration`;
 
-  const [adminKey, setAdminKey] = useState("");
-  const [draftBrandName, setDraftBrandName] = useState(
-    overview.tenant_settings?.brand_name ?? ""
+  const tenantSettings = overview.tenant_settings;
+  const brandingRevisionKey = buildTenantBrandingRevisionKey(tenantSettings);
+  const formInitial = useMemo(
+    () => buildTenantBrandingFormInitialState(tenantSettings),
+    [brandingRevisionKey, tenantSettings]
   );
-  const [draftPrimary, setDraftPrimary] = useState(
-    overview.tenant_settings?.primary_colour ?? ""
-  );
-  const [draftAccent, setDraftAccent] = useState(
-    overview.tenant_settings?.accent_colour ?? ""
-  );
+  const hasUploadedLogo = tenantBrandingHasUploadedLogo(tenantSettings);
 
-  const tenantMeta = overview.tenant_settings?.metadata ?? null;
-  const hasUploadedLogo = Boolean(
-    parseTenantBrandingMetadata(tenantMeta).logo_storage_path
-  );
+  const [adminKey, setAdminKey] = useState("");
+  const [draftBrandName, setDraftBrandName] = useState(formInitial.brand_name);
+  const [draftPrimary, setDraftPrimary] = useState(formInitial.primary_colour);
+  const [draftAccent, setDraftAccent] = useState(formInitial.accent_colour);
+  const [localLogoPreview, setLocalLogoPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDraftBrandName(formInitial.brand_name);
+    setDraftPrimary(formInitial.primary_colour);
+    setDraftAccent(formInitial.accent_colour);
+    setLocalLogoPreview(null);
+  }, [brandingRevisionKey, formInitial]);
 
   const previewDraft = useMemo(
-    () => ({
-      brandName: draftBrandName || branding.clinicDisplayName,
-      primaryColour: safeBrandingColourHex(draftPrimary, branding.primaryColor),
-      accentColour: safeBrandingColourHex(draftAccent, branding.accentColor),
-      logoUrl: branding.logoUrl,
-    }),
-    [draftBrandName, draftPrimary, draftAccent, branding]
+    () =>
+      buildTenantBrandingPreviewDraft(
+        {
+          brand_name: draftBrandName,
+          logo_url: formInitial.logo_url,
+          primary_colour: draftPrimary,
+          secondary_colour: formInitial.secondary_colour,
+          accent_colour: draftAccent,
+          support_email: formInitial.support_email,
+          default_timezone: formInitial.default_timezone,
+        },
+        tenantBranding,
+        localLogoPreview
+      ),
+    [draftBrandName, draftPrimary, draftAccent, formInitial, tenantBranding, localLogoPreview]
   );
 
   const [busy, setBusy] = useState<string | null>(null);
@@ -196,7 +217,9 @@ export function TenantConfigurationPanel({
     {}
   );
 
-  const tenantKey = overview.tenant_settings?.updated_at ?? "no-row";
+  const onBrandingRevalidated = () => {
+    router.refresh();
+  };
 
   return (
     <div className="space-y-8 text-sm">
@@ -246,20 +269,40 @@ export function TenantConfigurationPanel({
       />
 
       <Section title="Tenant branding">
+        {!canEditBranding ? (
+          <p className="mb-4 rounded-lg border border-amber-500/25 bg-amber-950/30 px-3 py-2 text-xs text-amber-100">
+            You can review tenant branding here. Only clinic admins with{" "}
+            <code className="rounded bg-[#141C33] px-1">manage_clinic_settings</code> (or platform
+            admins) can upload logos or save changes.
+          </p>
+        ) : null}
         <div className="mb-4 grid gap-4 md:grid-cols-2">
           <div>
             <h3 className={sectionLabelClass}>Current</h3>
-            {overview.tenant_settings ? (
+            {tenantSettings ? (
               <dl>
-                <KeyVal k="Brand name" v={overview.tenant_settings.brand_name} />
-                <KeyVal k="Logo URL" v={overview.tenant_settings.logo_url} />
+                <KeyVal k="Brand name" v={tenantSettings.brand_name} />
+                <KeyVal
+                  k="Uploaded logo"
+                  v={hasUploadedLogo ? "Yes (private storage)" : "No upload"}
+                />
+                <KeyVal k="Logo URL (legacy)" v={tenantSettings.logo_url} />
                 <div className="flex flex-wrap gap-4 py-2">
-                  <ColourSwatch label="Primary" hex={overview.tenant_settings.primary_colour} />
-                  <ColourSwatch label="Secondary" hex={overview.tenant_settings.secondary_colour} />
-                  <ColourSwatch label="Accent" hex={overview.tenant_settings.accent_colour} />
+                  <ColourSwatch
+                    label="Primary"
+                    hex={tenantSettings.primary_colour ?? tenantBranding.primaryColor}
+                  />
+                  <ColourSwatch
+                    label="Secondary"
+                    hex={tenantSettings.secondary_colour ?? tenantBranding.secondaryColor}
+                  />
+                  <ColourSwatch
+                    label="Accent"
+                    hex={tenantSettings.accent_colour ?? tenantBranding.accentColor}
+                  />
                 </div>
-                <KeyVal k="Support email" v={overview.tenant_settings.support_email} />
-                <KeyVal k="Default timezone" v={overview.tenant_settings.default_timezone} />
+                <KeyVal k="Support email" v={tenantSettings.support_email} />
+                <KeyVal k="Default timezone" v={tenantSettings.default_timezone} />
               </dl>
             ) : (
               <p className="text-xs text-[#64748B]">
@@ -273,15 +316,24 @@ export function TenantConfigurationPanel({
               tenantId={tenantId}
               adminKey={adminKey}
               canEdit={canEditBranding}
-              branding={branding}
+              branding={tenantBranding}
               hasUploadedLogo={hasUploadedLogo}
-              legacyLogoUrl={overview.tenant_settings?.logo_url ?? null}
+              legacyLogoUrl={tenantSettings?.logo_url ?? null}
+              onLocalPreviewChange={setLocalLogoPreview}
+              onRevalidated={onBrandingRevalidated}
             />
             <form
-              key={tenantKey}
+              key={brandingRevisionKey}
               className="mt-4 space-y-2"
               onSubmit={async (e) => {
                 e.preventDefault();
+                if (!canEditBranding) {
+                  setTenantFb({
+                    ok: false,
+                    text: "You do not have permission to update tenant branding.",
+                  });
+                  return;
+                }
                 setTenantFb(null);
                 setBusy("tenant");
                 const fd = new FormData(e.currentTarget);
@@ -308,45 +360,58 @@ export function TenantConfigurationPanel({
               <Field
                 label="Brand / display name"
                 name="brand_name"
-                defaultValue={overview.tenant_settings?.brand_name}
+                defaultValue={formInitial.brand_name}
+                disabled={!canEditBranding}
                 onChange={(v) => setDraftBrandName(v)}
               />
               <Field
                 label="Logo URL (legacy fallback)"
                 name="logo_url"
-                defaultValue={overview.tenant_settings?.logo_url}
+                defaultValue={formInitial.logo_url}
+                disabled={!canEditBranding}
                 hint="http(s) or /public path — used when no upload is present"
               />
               <Field
                 label="Primary colour"
                 name="primary_colour"
-                defaultValue={overview.tenant_settings?.primary_colour}
-                hint="#rgb or #rrggbb"
+                defaultValue={formInitial.primary_colour}
+                disabled={!canEditBranding}
+                hint="#rgb or #rrggbb — leave blank to keep current value"
                 onChange={(v) => setDraftPrimary(v)}
               />
               <Field
                 label="Secondary colour"
                 name="secondary_colour"
-                defaultValue={overview.tenant_settings?.secondary_colour}
+                defaultValue={formInitial.secondary_colour}
+                disabled={!canEditBranding}
+                hint="Leave blank to keep current value"
               />
               <Field
                 label="Accent colour"
                 name="accent_colour"
-                defaultValue={overview.tenant_settings?.accent_colour}
+                defaultValue={formInitial.accent_colour}
+                disabled={!canEditBranding}
+                hint="Leave blank to keep current value"
                 onChange={(v) => setDraftAccent(v)}
               />
               <Field
                 label="Support email"
                 name="support_email"
-                defaultValue={overview.tenant_settings?.support_email}
+                defaultValue={formInitial.support_email}
+                disabled={!canEditBranding}
               />
               <Field
                 label="Default timezone"
                 name="default_timezone"
-                defaultValue={overview.tenant_settings?.default_timezone}
+                defaultValue={formInitial.default_timezone}
+                disabled={!canEditBranding}
                 hint="e.g. Europe/London"
               />
-              <button type="submit" disabled={busy !== null} className={saveButtonClass}>
+              <button
+                type="submit"
+                disabled={busy !== null || !canEditBranding}
+                className={saveButtonClass}
+              >
                 {busy === "tenant" ? "Saving…" : "Save tenant settings"}
               </button>
               <div className="pt-2">

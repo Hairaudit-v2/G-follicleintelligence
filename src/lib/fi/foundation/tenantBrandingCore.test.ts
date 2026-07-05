@@ -78,14 +78,16 @@ describe("tenantBrandingCore", () => {
     assert.equal(deriveClinicInitials(""), "FI");
   });
 
-  it("parses logo storage metadata", () => {
+  it("parses logo storage metadata including logo_uploaded_at", () => {
     const meta = parseTenantBrandingMetadata({
       logo_storage_bucket: "tenant-branding",
       logo_storage_path: "tenant-branding/t1/logo/x.png",
+      logo_uploaded_at: "2026-07-05T04:00:00.000Z",
       theme_mode: "dark",
     });
     assert.equal(meta.logo_storage_bucket, "tenant-branding");
     assert.equal(meta.logo_storage_path, "tenant-branding/t1/logo/x.png");
+    assert.equal(meta.logo_uploaded_at, "2026-07-05T04:00:00.000Z");
     assert.equal(meta.theme_mode, "dark");
   });
 });

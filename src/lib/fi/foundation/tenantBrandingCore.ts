@@ -18,6 +18,7 @@ export type TenantBrandingThemeMode = "light" | "dark" | "system";
 export type TenantBrandingMetadata = {
   logo_storage_bucket?: string | null;
   logo_storage_path?: string | null;
+  logo_uploaded_at?: string | null;
   theme_mode?: TenantBrandingThemeMode | null;
 };
 
@@ -42,6 +43,7 @@ export function parseTenantBrandingMetadata(
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return {};
   const bucket = metadata.logo_storage_bucket;
   const path = metadata.logo_storage_path;
+  const uploadedAt = metadata.logo_uploaded_at;
   const theme = metadata.theme_mode;
   const themeMode =
     theme === "light" || theme === "dark" || theme === "system" ? theme : null;
@@ -49,6 +51,8 @@ export function parseTenantBrandingMetadata(
     logo_storage_bucket:
       typeof bucket === "string" && bucket.trim() ? bucket.trim() : null,
     logo_storage_path: typeof path === "string" && path.trim() ? path.trim() : null,
+    logo_uploaded_at:
+      typeof uploadedAt === "string" && uploadedAt.trim() ? uploadedAt.trim() : null,
     theme_mode: themeMode,
   };
 }

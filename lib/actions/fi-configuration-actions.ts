@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import {
   clinicBelongsToTenant,
+  loadTenantBranding,
   organisationBelongsToTenant,
   upsertFiClinicSettings,
   upsertFiOrganisationSettings,
@@ -21,6 +22,7 @@ import {
   type WriteFiOrganisationSettingsPayload,
   type WriteFiTenantSettingsPayload,
 } from "@/src/lib/fi/foundation/tenantSettings";
+import { mergeTenantSettingsSavePayload } from "@/src/lib/fi/foundation/tenantBrandingFormCore";
 
 function trimToNull(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -71,6 +73,21 @@ function optionalHttpUrl(
   }
   if (raw.length > 2048) return { ok: false, error: `${label} is too long.` };
   return { ok: true, value: raw };
+}
+
+/** Legacy tenant logo URL — http(s) or site-relative /public path. */
+function optionalTenantLogoUrl(
+  v: unknown,
+  label: string
+): { ok: true; value: string | null } | { ok: false; error: string } {
+  const raw = trimToNull(v);
+  if (raw === null) return { ok: true, value: null };
+  const lower = raw.toLowerCase();
+  if (lower.startsWith("/")) {
+    if (raw.length > 2048) return { ok: false, error: `${label} is too long.` };
+    return { ok: true, value: raw };
+  }
+  return optionalHttpUrl(raw, label);
 }
 
 function optionalEmail(
@@ -148,7 +165,7 @@ export async function upsertTenantSettingsAction(input: {
 
   const brand = optionalBoundedText(input.brand_name, 200, "Brand name");
   if (!brand.ok) return brand;
-  const logo = optionalHttpUrl(input.logo_url, "Logo URL");
+  const logo = optionalTenantLogoUrl(input.logo_url, "Logo URL");
   if (!logo.ok) return logo;
   const p1 = optionalColour(input.primary_colour, "Primary colour");
   if (!p1.ok) return p1;
@@ -161,7 +178,14 @@ export async function upsertTenantSettingsAction(input: {
   const tz = optionalTimezone(input.default_timezone, "Default timezone");
   if (!tz.ok) return tz;
 
-  const payload: WriteFiTenantSettingsPayload = {
+  let existing = null;
+  try {
+    existing = await loadTenantBranding(tenantId);
+  } catch {
+    return { ok: false, error: "Could not load existing tenant settings." };
+  }
+
+  const payload: WriteFiTenantSettingsPayload = mergeTenantSettingsSavePayload(existing, {
     brand_name: brand.value,
     logo_url: logo.value,
     primary_colour: p1.value,
@@ -169,7 +193,7 @@ export async function upsertTenantSettingsAction(input: {
     accent_colour: p3.value,
     support_email: em.value,
     default_timezone: tz.value,
-  };
+  });
 
   try {
     await upsertFiTenantSettings(tenantId, payload);

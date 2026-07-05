@@ -1,5 +1,9 @@
 /**
  * FI-BRANDING-SYSTEM-1-SMOKE — backend + data-path verification.
+ *
+ * This script validates server-side branding persistence (storage, resolver, CSS vars, audit).
+ * For authenticated UI regression, run the manual checklist printed at the end.
+ *
  * Usage: node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/smoke-fi-branding-system.ts [tenantId]
  */
 import { readFileSync } from "fs";
@@ -17,11 +21,15 @@ import {
   parseTenantBrandingMetadata,
 } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { buildNormalizedBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
-import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
+import {
+  loadTenantBranding,
+  upsertFiTenantSettings,
+} from "@/src/lib/fi/foundation/tenantSettings";
 import {
   removeTenantUploadedLogo,
   uploadTenantLogoFile,
 } from "@/src/lib/fi/foundation/tenantBrandingStorage.server";
+import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
 import { capabilitiesForTenantAdminRole } from "@/src/lib/fiAdmin/tenantAdminCapabilities";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
@@ -193,31 +201,48 @@ async function main(): Promise<void> {
       : "logoUrl missing after upload"
   );
 
-  // Step 4 — save branding colours (upsert fi_tenant_settings)
+  // Step 4 — save branding colours (same path as Settings UI save action)
   const testPrimary = "#7c3aed";
   const testAccent = "#f59e0b";
-  const now = new Date().toISOString();
-  const { error: colourErr } = await supabase.from("fi_tenant_settings").upsert(
-    {
-      tenant_id: tenantId,
-      brand_name: tenantName,
+  const beforeSave = await loadTenantBranding(tenantId);
+  try {
+    await upsertFiTenantSettings(tenantId, {
+      brand_name: beforeSave?.brand_name ?? tenantName,
+      logo_url: beforeSave?.logo_url ?? null,
       primary_colour: testPrimary,
+      secondary_colour: beforeSave?.secondary_colour ?? null,
       accent_colour: testAccent,
-      updated_at: now,
-    },
-    { onConflict: "tenant_id" }
-  );
+      support_email: beforeSave?.support_email ?? null,
+      default_timezone: beforeSave?.default_timezone ?? null,
+    });
+  } catch (e: unknown) {
+    record(
+      4,
+      "Save branding colours (upsertFiTenantSettings)",
+      false,
+      e instanceof Error ? e.message : "Save failed"
+    );
+    summarize();
+    process.exit(1);
+  }
   await insertFiTenantAdminAuditEvent({
     tenantId,
     eventKind: "settings.branding_updated",
     actorFiUserId: null,
     detail: { action: "tenant_settings_saved" },
   });
+  const afterSave = await loadTenantBranding(tenantId);
+  const metaAfterSave = parseTenantBrandingMetadata(afterSave?.metadata);
+  const logoMetaPreserved = metaAfterSave.logo_storage_path === upload.storagePath;
   record(
     4,
-    "Save branding colours",
-    !colourErr,
-    colourErr ? colourErr.message : `primary=${testPrimary} accent=${testAccent}`
+    "Save branding colours (upsertFiTenantSettings)",
+    logoMetaPreserved &&
+      afterSave?.primary_colour === testPrimary &&
+      afterSave?.accent_colour === testAccent,
+    logoMetaPreserved
+      ? `primary=${testPrimary} accent=${testAccent} logo_metadata=preserved`
+      : `logo metadata lost after colour save (path=${metaAfterSave.logo_storage_path ?? "null"})`
   );
 
   // Step 5-6 — shell resolver + CSS vars for sidebar brand area
@@ -379,19 +404,37 @@ async function main(): Promise<void> {
   );
 
   // Restore Evolved tenant colours from pre-smoke snapshot
-  await supabase.from("fi_tenant_settings").upsert(
-    {
-      tenant_id: tenantId,
-      primary_colour: "#000000",
-      accent_colour: "#C9A24D",
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "tenant_id" }
-  );
+  const restoreRow = await loadTenantBranding(tenantId);
+  await upsertFiTenantSettings(tenantId, {
+    brand_name: restoreRow?.brand_name ?? tenantName,
+    logo_url: restoreRow?.logo_url ?? null,
+    primary_colour: "#000000",
+    secondary_colour: restoreRow?.secondary_colour ?? null,
+    accent_colour: "#C9A24D",
+    support_email: restoreRow?.support_email ?? null,
+    default_timezone: restoreRow?.default_timezone ?? null,
+  });
 
   summarize();
+  printAuthenticatedUiChecklist(tenantId);
   const failed = checks.filter((c) => !c.pass);
   process.exit(failed.length > 0 ? 1 : 0);
+}
+
+function printAuthenticatedUiChecklist(tid: string): void {
+  const route = `/fi-admin/${tid}/configuration?tab=branding`;
+  console.log("\n=== FI-BRANDING-SYSTEM-1B — Authenticated UI manual smoke ===\n");
+  console.log("Run while signed in as clinic admin (manage_clinic_settings):\n");
+  console.log(`  1. Open Settings → Branding: ${route}`);
+  console.log("  2. Upload a logo — confirm preview strip updates and success toast");
+  console.log("  3. Click Save tenant settings (colours optional)");
+  console.log("  4. Hard refresh — logo still appears in Current + preview + sidebar shell");
+  console.log("  5. Set primary/accent hex colours, Save tenant settings");
+  console.log("  6. Hard refresh — colours persist in form, Current panel, and shell CSS");
+  console.log("  7. Remove uploaded logo, hard refresh — legacy URL or initials fallback");
+  console.log("\nRun while signed in as read-only tenant admin:\n");
+  console.log("  8. Form inputs and upload disabled; save shows permission error if forced");
+  console.log("\nBackend smoke above does NOT replace this UI checklist.\n");
 }
 
 function summarize(): void {

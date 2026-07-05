@@ -89,11 +89,7 @@ export default async function TenantConfigurationPage({
     organisationId: previewCtx.organisationId,
     clinicId: previewCtx.clinicId,
   });
-  const branding = await resolveTenantBranding({
-    tenantId,
-    organisationId: previewCtx.organisationId,
-    clinicId: previewCtx.clinicId,
-  });
+  const tenantBranding = await resolveTenantBranding({ tenantId });
   const canEditBranding = await canManageTenantBranding(tenantId);
 
   const calendarSection =
@@ -160,7 +156,7 @@ export default async function TenantConfigurationPage({
             tenantId={tenantId}
             overview={overview}
             effective={effective}
-            branding={branding}
+            tenantBranding={tenantBranding}
             canEditBranding={canEditBranding}
             previewOrganisationId={previewCtx.organisationId}
             previewClinicId={previewCtx.clinicId}
