@@ -14,6 +14,11 @@ import {
   resolveHairAuditLinkForSurgery,
 } from "./hairAuditLinkCore";
 import {
+  formatHairAuditOutcomeReportActionLabel,
+  formatHairAuditOutcomeReportStatusLabel,
+  resolveHairAuditOutcomeReportWorkflow,
+} from "./hairAuditOutcomeReportWorkflowCore";
+import {
   formatLongitudinalComparisonReadinessLabel,
   isCaseDueForFollowUp,
   type LongitudinalOutcomeSummaryFacts,
@@ -299,6 +304,7 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
   rows: readonly SurgeryIntelligencePublishedCaseRow[];
   caseMetadataByCaseId?: Readonly<Record<string, Record<string, unknown>>>;
   fiReportIdByCaseId?: Readonly<Record<string, string>>;
+  fiReportStatusByCaseId?: Readonly<Record<string, string>>;
   globalHairAuditSourceByCaseId?: Readonly<
     Record<string, readonly { source_system: string; source_case_id: string }[]>
   >;
@@ -390,9 +396,46 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
         recipientFollowUpMissing:
           longitudinal?.missing_outcome_evidence.includes("recipient_follow_up") ?? false,
         hairAuditOutcomeReportReady: longitudinal?.hairaudit_report_ready ?? false,
+        ...(() => {
+          const workflow = resolveHairAuditOutcomeReportWorkflow({
+            tenantId: input.tenantId,
+            facts: {
+              longitudinal_outcome_summary: longitudinal,
+              missing_outcome_evidence: row.missingOutcomeEvidence,
+              before_after_ready: row.beforeAfterReady,
+              donor_recovery_ready: row.donorRecoveryReady,
+              recipient_growth_ready: row.recipientGrowthReady,
+            },
+            hairAuditLink,
+            reportContext: row.caseId
+              ? {
+                  fiReportId:
+                    (row.caseId && input.fiReportIdByCaseId
+                      ? input.fiReportIdByCaseId[row.caseId]
+                      : null) ?? hairAuditLink.fi_report_id,
+                  reportStatus:
+                    row.caseId && input.fiReportStatusByCaseId
+                      ? input.fiReportStatusByCaseId[row.caseId]
+                      : null,
+                }
+              : null,
+          });
+          return {
+            outcomeReportStatus: workflow.report_status,
+            outcomeReportStatusLabel: formatHairAuditOutcomeReportStatusLabel(
+              workflow.report_status
+            ),
+            outcomeReportLink: workflow.report_link,
+            outcomeReportRecommendedAction: workflow.recommended_action,
+            outcomeReportAvailableActions: workflow.available_actions,
+            outcomeReportMissingEvidence: workflow.missing_evidence,
+          };
+        })(),
       };
     });
 }
+
+export { formatHairAuditOutcomeReportActionLabel };
 
 export function buildSurgeryIntelligenceFilterOptions(
   rows: readonly SurgeryIntelligencePublishedCaseRow[]
@@ -463,6 +506,7 @@ export function composeSurgeryIntelligenceDashboardFromEvents(input: {
   filters: SurgeryIntelligenceDashboardFilters;
   caseMetadataByCaseId?: Readonly<Record<string, Record<string, unknown>>>;
   fiReportIdByCaseId?: Readonly<Record<string, string>>;
+  fiReportStatusByCaseId?: Readonly<Record<string, string>>;
   globalHairAuditSourceByCaseId?: Readonly<
     Record<string, readonly { source_system: string; source_case_id: string }[]>
   >;
@@ -488,6 +532,7 @@ export function composeSurgeryIntelligenceDashboardFromEvents(input: {
       rows: filtered,
       caseMetadataByCaseId: input.caseMetadataByCaseId,
       fiReportIdByCaseId: input.fiReportIdByCaseId,
+      fiReportStatusByCaseId: input.fiReportStatusByCaseId,
       globalHairAuditSourceByCaseId: input.globalHairAuditSourceByCaseId,
     }),
     filterOptions,

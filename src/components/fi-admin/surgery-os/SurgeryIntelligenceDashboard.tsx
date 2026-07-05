@@ -5,6 +5,7 @@ import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admi
 import type { SurgeryIntelligenceDashboardPayload } from "@/src/lib/outcomeIntelligence/surgeryIntelligenceDashboardTypes";
 import { SurgeryIntelligenceBackfillCard } from "./SurgeryIntelligenceBackfillCard";
 import { SurgeryIntelligenceDashboardFiltersForm } from "./SurgeryIntelligenceDashboardFiltersForm";
+import { SurgeryIntelligenceOutcomeReportActions } from "./SurgeryIntelligenceOutcomeReportActions";
 
 function DistributionList({
   title,
@@ -213,13 +214,14 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                 <th className="px-4 py-3 font-semibold">Audit readiness</th>
                 <th className="px-4 py-3 font-semibold">Longitudinal</th>
                 <th className="px-4 py-3 font-semibold">HairAudit</th>
+                <th className="px-4 py-3 font-semibold">Outcome report</th>
                 <th className="px-4 py-3 font-semibold">Links</th>
               </tr>
             </thead>
             <tbody>
               {data.tableRows.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-8 text-center text-[#64748B]">
+                  <td colSpan={14} className="px-4 py-8 text-center text-[#64748B]">
                     No published surgery intelligence facts match the current filters.
                   </td>
                 </tr>
@@ -318,16 +320,11 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                               HairAudit
                             </Link>
                           ) : null}
-                          {row.hairAuditReportHref ? (
-                            <Link
-                              href={row.hairAuditReportHref}
-                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-[#22C1FF] hover:border-[#22C1FF]/40"
-                            >
-                              Audit report
-                            </Link>
-                          ) : null}
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <SurgeryIntelligenceOutcomeReportActions tenantId={data.tenantId} row={row} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">

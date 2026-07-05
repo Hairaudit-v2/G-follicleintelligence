@@ -20,6 +20,8 @@ const APPROVED_HAIRAUDIT_MUTATION_PATHS = [
   "src/lib/surgeryOs/surgeryMutations.server.ts",
   "src/lib/outcomeIntelligence/hairAuditLink.server.ts",
   "src/lib/outcomeIntelligence/hairAuditLinkBackfill.server.ts",
+  "src/lib/outcomeIntelligence/hairAuditOutcomeReportWorkflow.server.ts",
+  "lib/actions/fi-hairaudit-outcome-report-actions.ts",
 ] as const;
 
 function readRepoFile(relativePath: string): string {

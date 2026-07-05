@@ -1,4 +1,8 @@
 import type { GraftTrayFinalCountSource } from "@/src/lib/imaging-os/graftTrayIntelligenceSummaryCore";
+import type {
+  HairAuditOutcomeReportAction,
+  HairAuditOutcomeReportStatus,
+} from "./hairAuditOutcomeReportWorkflowCore";
 import type { LongitudinalOutcomeSummaryFacts } from "./longitudinalOutcomeComparisonCore";
 import type { SurgeryImagingIntelligenceSummaryFacts } from "./surgeryImagingIntelligenceSummaryCore";
 
@@ -121,6 +125,12 @@ export type SurgeryIntelligenceDashboardTableRow = {
   donorFollowUpMissing: boolean;
   recipientFollowUpMissing: boolean;
   hairAuditOutcomeReportReady: boolean;
+  outcomeReportStatus: HairAuditOutcomeReportStatus;
+  outcomeReportStatusLabel: string;
+  outcomeReportLink: string | null;
+  outcomeReportRecommendedAction: HairAuditOutcomeReportAction;
+  outcomeReportAvailableActions: HairAuditOutcomeReportAction[];
+  outcomeReportMissingEvidence: string[];
 };
 
 export type SurgeryIntelligenceDashboardFilterOptions = {

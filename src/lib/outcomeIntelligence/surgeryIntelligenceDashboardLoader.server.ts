@@ -28,6 +28,7 @@ async function loadHairAuditLinkContextForCases(
 ): Promise<{
   caseMetadataByCaseId: Record<string, Record<string, unknown>>;
   fiReportIdByCaseId: Record<string, string>;
+  fiReportStatusByCaseId: Record<string, string>;
   globalHairAuditSourceByCaseId: Record<
     string,
     Array<{ source_system: string; source_case_id: string }>
@@ -36,13 +37,19 @@ async function loadHairAuditLinkContextForCases(
   const uniqueCaseIds = [...new Set(caseIds.filter(Boolean))];
   const caseMetadataByCaseId: Record<string, Record<string, unknown>> = {};
   const fiReportIdByCaseId: Record<string, string> = {};
+  const fiReportStatusByCaseId: Record<string, string> = {};
   const globalHairAuditSourceByCaseId: Record<
     string,
     Array<{ source_system: string; source_case_id: string }>
   > = {};
 
   if (!uniqueCaseIds.length) {
-    return { caseMetadataByCaseId, fiReportIdByCaseId, globalHairAuditSourceByCaseId };
+    return {
+      caseMetadataByCaseId,
+      fiReportIdByCaseId,
+      fiReportStatusByCaseId,
+      globalHairAuditSourceByCaseId,
+    };
   }
 
   const { data: cases, error: casesError } = await supabase
@@ -62,7 +69,7 @@ async function loadHairAuditLinkContextForCases(
 
   const { data: reports, error: reportsError } = await supabase
     .from("fi_reports")
-    .select("id, case_id, created_at")
+    .select("id, case_id, created_at, report_status")
     .eq("tenant_id", tenantId)
     .in("case_id", uniqueCaseIds)
     .order("created_at", { ascending: false });
@@ -71,6 +78,8 @@ async function loadHairAuditLinkContextForCases(
     const caseId = String((row as { case_id: string }).case_id);
     if (!fiReportIdByCaseId[caseId]) {
       fiReportIdByCaseId[caseId] = String((row as { id: string }).id);
+      const status = (row as { report_status?: string | null }).report_status;
+      if (status) fiReportStatusByCaseId[caseId] = status;
     }
   }
 
@@ -91,7 +100,12 @@ async function loadHairAuditLinkContextForCases(
     globalHairAuditSourceByCaseId[caseId] = bucket;
   }
 
-  return { caseMetadataByCaseId, fiReportIdByCaseId, globalHairAuditSourceByCaseId };
+  return {
+    caseMetadataByCaseId,
+    fiReportIdByCaseId,
+    fiReportStatusByCaseId,
+    globalHairAuditSourceByCaseId,
+  };
 }
 
 /**
@@ -142,6 +156,7 @@ export async function loadSurgeryIntelligenceDashboard(
     filters,
     caseMetadataByCaseId: linkContext.caseMetadataByCaseId,
     fiReportIdByCaseId: linkContext.fiReportIdByCaseId,
+    fiReportStatusByCaseId: linkContext.fiReportStatusByCaseId,
     globalHairAuditSourceByCaseId: linkContext.globalHairAuditSourceByCaseId,
   });
 
