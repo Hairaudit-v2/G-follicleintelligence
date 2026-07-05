@@ -43,7 +43,7 @@ test.describe("FI-UX-REBUILD D2 navigation collapse @smoke", () => {
     });
     await expect(page.getByRole("navigation", { name: "Clinic navigation" })).toHaveCount(0);
 
-    for (const label of ["Today", "Calendar", "Search", "New", "More"]) {
+    for (const label of ["Today", "Calendar", "Patients", "Team", "Reports", "More"]) {
       await expect(
         page.getByRole("navigation", { name: "FI OS primary navigation" }).getByText(label, {
           exact: true,

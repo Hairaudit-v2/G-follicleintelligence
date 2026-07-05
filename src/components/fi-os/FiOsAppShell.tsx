@@ -101,6 +101,8 @@ type FiOsAppShellProps = {
   staffPinBreaksEnabled?: boolean;
   /** D2: Replace legacy sidebar with minimal rail / bottom bar (both rollout flags). */
   navCollapseActive?: boolean;
+  /** D6G-B: show D6 /intelligence admin links in Reports section of More drawer. */
+  showNavigationAdminSurfaces?: boolean;
   children: ReactNode;
 };
 
@@ -130,6 +132,7 @@ function FiOsAppShellBody({
   staffPinOnBreak = false,
   staffPinBreaksEnabled = false,
   navCollapseActive = false,
+  showNavigationAdminSurfaces = false,
   children,
   navigationPendingEnabled = true,
 }: FiOsAppShellProps & { navigationPendingEnabled?: boolean }) {
@@ -190,8 +193,21 @@ function FiOsAppShellBody({
   ]);
 
   const sidebarSections = useMemo(
-    () => buildFiOsSidebarWorkflowSections(sidebarItems, workspaceProfileKey),
-    [sidebarItems, workspaceProfileKey]
+    () =>
+      buildFiOsSidebarWorkflowSections(sidebarItems, workspaceProfileKey, {
+        tenantBase: base,
+        forCollapsedShell: navCollapseActive,
+        showNavigationAdminSurfaces,
+        showProcedureDayNav,
+      }),
+    [
+      sidebarItems,
+      workspaceProfileKey,
+      base,
+      navCollapseActive,
+      showNavigationAdminSurfaces,
+      showProcedureDayNav,
+    ]
   );
 
   const workspaceFocusLine = useMemo(
@@ -316,8 +332,6 @@ function FiOsAppShellBody({
           <FiOsMinimalNavRail
             items={minimalNavItems}
             activeId={activeMinimalNavId}
-            onSearch={openSearch}
-            onNew={openQuickCreate}
             onMore={openMoreNav}
           />
         ) : null}
@@ -411,8 +425,6 @@ function FiOsAppShellBody({
           <FiOsMobileBottomNav
             items={minimalNavItems}
             activeId={activeMinimalNavId}
-            onSearch={openSearch}
-            onNew={openQuickCreate}
             onMore={openMoreNav}
           />
         </div>

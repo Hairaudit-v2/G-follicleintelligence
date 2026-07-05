@@ -1,19 +1,25 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { resolveFiOsMinimalNavItems, getFiOsMinimalNavActiveId } from "@/src/lib/fiAdmin/fiOsMinimalNav";
+import {
+  getFiOsMinimalNavActiveId,
+  primaryRailSlotIds,
+  resolveFiOsMinimalNavItems,
+} from "@/src/lib/fiAdmin/fiOsMinimalNav";
 import { resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 
 const base = "/fi-admin/t-1";
 
 describe("resolveFiOsMinimalNavItems", () => {
-  it("returns Today, Calendar, Search, New, More in order", () => {
+  it("returns six D6G-B slots: Today, Calendar, Patients, Team, Reports, More", () => {
     const sidebarItems = resolveFiOsPrimarySidebarItems(base, true, true);
     const items = resolveFiOsMinimalNavItems(base, sidebarItems);
+    assert.equal(items.length, 6);
     assert.deepEqual(
       items.map((item) => item.id),
-      ["today", "calendar", "search", "new", "more"]
+      ["today", "calendar", "patients", "team", "reports", "more"]
     );
+    assert.equal(primaryRailSlotIds().length, 6);
   });
 
   it("inherits calendar disabled state from primary sidebar items", () => {
@@ -26,6 +32,7 @@ describe("resolveFiOsMinimalNavItems", () => {
     if (minimalCalendar?.kind === "link") {
       assert.equal(minimalCalendar.disabled, calendar?.disabled);
       assert.equal(minimalCalendar.hint, calendar?.hint);
+      assert.equal(minimalCalendar.href, `${base}/calendar`);
     }
   });
 });
@@ -41,7 +48,13 @@ describe("getFiOsMinimalNavActiveId", () => {
     assert.equal(getFiOsMinimalNavActiveId(`${base}/calendar/week`, base), "calendar");
   });
 
-  it("returns null for non-minimal routes", () => {
+  it("marks team and reports routes", () => {
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/workforce-os`, base), "team");
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), "reports");
+  });
+
+  it("returns null for routes grouped only under More", () => {
     assert.equal(getFiOsMinimalNavActiveId(`${base}/reception`, base), null);
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/surgery-os`, base), null);
   });
 });

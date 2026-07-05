@@ -38,6 +38,7 @@ import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
 import { StaffUatLayoutMount } from "@/src/components/fi-admin/staff-uat/StaffUatLayoutMount";
 import { isFiAdminTokenPublicRoute } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
 import { isNavCollapseEnabledForTenant } from "@/src/lib/fiOs/navCollapseRollout.server";
+import { canViewFiOsNavigationAudit } from "@/src/lib/fiOs/navigation/fiOsNavigationAuditAccess.server";
 import { isWorkspaceShellEnabledForTenant } from "@/src/lib/fiOs/workspaceShell/workspaceShellRollout.server";
 import { WorkspaceShellMount } from "@/src/components/fi-os/workspace/WorkspaceShellMount";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
@@ -182,6 +183,9 @@ export default async function TenantAdminLayout({
       ]);
   const tenantBackendAdminRole = pinFloorMode ? null : (adminProf?.adminRole ?? null);
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
+  const showNavigationAdminSurfaces = pinFloorMode
+    ? false
+    : await canViewFiOsNavigationAudit(tenantId);
 
   let featureAccessRecord =
     pinFloorMode || !featureAccessMap
@@ -290,6 +294,7 @@ export default async function TenantAdminLayout({
         staffPinOnBreak={pinBreakState?.onBreak ?? false}
         staffPinBreaksEnabled={timeClockPolicy?.breaksEnabled ?? false}
         navCollapseActive={navCollapseActive}
+        showNavigationAdminSurfaces={showNavigationAdminSurfaces}
       >
         {mainSurface}
         {!pinFloorMode && !isCommandCentrePresentation ? (

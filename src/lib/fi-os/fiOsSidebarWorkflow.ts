@@ -1,128 +1,43 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
-import { isFiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import {
+  buildD6AdminSidebarItems,
+  FI_OS_D6G_WORKFLOW_GROUP_LABELS,
+  filterSubItemsForMoreDrawer,
+  isPrimaryRailNavId,
+  orderedD6gWorkflowGroups,
+  sortNavItemsForD6gGroup,
+  workflowGroupForD6gNavItemId,
+  type FiOsD6gWorkflowGroupId,
+} from "@/src/lib/fiOs/navigation/fiOsNavigationRegroupingCore";
 
-/** Workflow rail groups (UI only; routes unchanged). */
+/** 1B workflow groups for All areas / More drawer (D6G-B). */
 export const FI_OS_WORKFLOW_GROUP_IDS = [
-  "HOME",
-  "TODAY",
-  "PATIENT_JOURNEY",
+  "FRONT_DESK",
+  "PIPELINE",
+  "PATIENTS",
   "CLINICAL",
-  "INTELLIGENCE",
+  "SURGERY",
+  "FINANCE",
+  "REPORTS",
   "TEAM",
-  "SYSTEM",
+  "SETTINGS",
 ] as const;
 
-export type FiOsWorkflowGroupId = (typeof FI_OS_WORKFLOW_GROUP_IDS)[number];
+export type FiOsWorkflowGroupId = FiOsD6gWorkflowGroupId;
 
-export const FI_OS_WORKFLOW_GROUP_LABELS: Record<FiOsWorkflowGroupId, string> = {
-  HOME: "Home",
-  TODAY: "Today",
-  PATIENT_JOURNEY: "Patient journey",
-  CLINICAL: "Clinical",
-  INTELLIGENCE: "Intelligence",
-  TEAM: "Team",
-  SYSTEM: "System",
+export const FI_OS_WORKFLOW_GROUP_LABELS: Record<FiOsWorkflowGroupId, string> =
+  FI_OS_D6G_WORKFLOW_GROUP_LABELS;
+
+export type BuildFiOsSidebarWorkflowSectionsOptions = {
+  workspaceProfile?: FiWorkspaceProfileKey | null;
+  /** Tenant shell base path, e.g. `/fi-admin/[tenantId]`. */
+  tenantBase?: string;
+  /** When true, omit primary-rail destinations from the drawer. */
+  forCollapsedShell?: boolean;
+  showNavigationAdminSurfaces?: boolean;
+  showProcedureDayNav?: boolean;
 };
-
-/** Default workflow bucket per primary nav id (before persona tweaks). */
-export const FI_OS_SIDEBAR_ITEM_DEFAULT_GROUP: Record<string, FiOsWorkflowGroupId> = {
-  dashboard: "HOME",
-  calendar: "TODAY",
-  "operations-centre": "TODAY",
-  "reception-board": "TODAY",
-  "tomorrow-board": "TODAY",
-  crm: "PATIENT_JOURNEY",
-  "follow-up-queue": "PATIENT_JOURNEY",
-  consultations: "PATIENT_JOURNEY",
-  patients: "PATIENT_JOURNEY",
-  cases: "PATIENT_JOURNEY",
-  "doctor-workspace": "CLINICAL",
-  prescriptions: "CLINICAL",
-  "pathology-nav": "CLINICAL",
-  "patient-twin": "INTELLIGENCE",
-  auditos: "INTELLIGENCE",
-  "payments-inbox": "INTELLIGENCE",
-  "financial-os": "INTELLIGENCE",
-  analytics: "INTELLIGENCE",
-  academyos: "TEAM",
-  staff: "TEAM",
-  "onboarding-centre": "TEAM",
-  "hr-os": "TEAM",
-  settings: "SYSTEM",
-};
-
-/** Persona-specific overrides only (never removes access — Stage 2 still filters rows). */
-const PROFILE_GROUP_OVERRIDES: Partial<
-  Record<FiWorkspaceProfileKey, Partial<Record<string, FiOsWorkflowGroupId>>>
-> = {
-  surgeon: { "patient-twin": "CLINICAL" },
-  doctor: { "patient-twin": "CLINICAL" },
-  nurse: { "patient-twin": "CLINICAL" },
-};
-
-/** Preferred order of items inside each group (subset may be hidden). */
-const GROUP_MEMBER_ORDER: Record<FiOsWorkflowGroupId, readonly string[]> = {
-  HOME: ["dashboard"],
-  TODAY: ["calendar", "operations-centre", "reception-board", "tomorrow-board"],
-  PATIENT_JOURNEY: ["crm", "follow-up-queue", "consultations", "patients", "cases"],
-  CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav", "patient-twin"],
-  INTELLIGENCE: ["patient-twin", "auditos", "payments-inbox", "financial-os", "analytics"],
-  TEAM: ["academyos", "staff", "onboarding-centre", "hr-os"],
-  SYSTEM: ["settings"],
-};
-
-export function workflowGroupForNavItemId(
-  itemId: string,
-  workspaceProfile: FiWorkspaceProfileKey | null | undefined
-): FiOsWorkflowGroupId {
-  const p =
-    workspaceProfile && isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
-  const override = PROFILE_GROUP_OVERRIDES[p]?.[itemId];
-  if (override) return override;
-  return FI_OS_SIDEBAR_ITEM_DEFAULT_GROUP[itemId] ?? "INTELLIGENCE";
-}
-
-/**
- * Reorders workflow groups for sidebar emphasis (Stage UI activation).
- * Feature access still removes individual rows; empty groups are dropped later.
- */
-export function orderedWorkflowGroupsForWorkspace(
-  workspaceProfile: FiWorkspaceProfileKey | null | undefined
-): FiOsWorkflowGroupId[] {
-  const p =
-    workspaceProfile && isFiWorkspaceProfileKey(workspaceProfile) ? workspaceProfile : "default";
-  const base = [...FI_OS_WORKFLOW_GROUP_IDS];
-  let ordered: FiOsWorkflowGroupId[];
-  switch (p) {
-    case "consultant":
-      ordered = ["HOME", "PATIENT_JOURNEY", "TODAY", "CLINICAL", "INTELLIGENCE", "TEAM", "SYSTEM"];
-      break;
-    case "surgeon":
-      ordered = ["HOME", "CLINICAL", "TODAY", "PATIENT_JOURNEY", "INTELLIGENCE", "TEAM", "SYSTEM"];
-      break;
-    case "doctor":
-      ordered = ["HOME", "CLINICAL", "TODAY", "PATIENT_JOURNEY", "INTELLIGENCE", "TEAM", "SYSTEM"];
-      break;
-    case "nurse":
-      ordered = ["HOME", "TODAY", "CLINICAL", "PATIENT_JOURNEY", "INTELLIGENCE", "TEAM", "SYSTEM"];
-      break;
-    case "reception":
-      ordered = ["HOME", "TODAY", "PATIENT_JOURNEY", "CLINICAL", "INTELLIGENCE", "TEAM", "SYSTEM"];
-      break;
-    case "director":
-    case "platform_admin":
-      ordered = ["HOME", "INTELLIGENCE", "TODAY", "PATIENT_JOURNEY", "CLINICAL", "TEAM", "SYSTEM"];
-      break;
-    case "clinic_manager":
-      ordered = ["HOME", "TODAY", "INTELLIGENCE", "PATIENT_JOURNEY", "CLINICAL", "TEAM", "SYSTEM"];
-      break;
-    default:
-      ordered = base;
-      break;
-  }
-  return ordered.filter((g, i) => ordered.indexOf(g) === i);
-}
 
 export type FiOsSidebarWorkflowSection = {
   groupId: FiOsWorkflowGroupId;
@@ -130,39 +45,69 @@ export type FiOsSidebarWorkflowSection = {
   items: FiOsPrimarySidebarItem[];
 };
 
-function sortItemsByGroupOrder(
-  groupId: FiOsWorkflowGroupId,
-  items: FiOsPrimarySidebarItem[]
+export function workflowGroupForNavItemId(
+  itemId: string,
+  _workspaceProfile?: FiWorkspaceProfileKey | null | undefined
+): FiOsWorkflowGroupId {
+  return workflowGroupForD6gNavItemId(itemId);
+}
+
+export function orderedWorkflowGroupsForWorkspace(
+  workspaceProfile?: FiWorkspaceProfileKey | null
+): FiOsWorkflowGroupId[] {
+  return orderedD6gWorkflowGroups(workspaceProfile ?? "default");
+}
+
+function prepareSidebarItemsForDrawer(
+  items: FiOsPrimarySidebarItem[],
+  opts: BuildFiOsSidebarWorkflowSectionsOptions
 ): FiOsPrimarySidebarItem[] {
-  const order = GROUP_MEMBER_ORDER[groupId];
-  const idx = (id: string) => {
-    const i = order.indexOf(id);
-    return i === -1 ? 999 : i;
-  };
-  return [...items].sort((a, b) => idx(a.id) - idx(b.id) || a.label.localeCompare(b.label));
+  const prepared = items
+    .filter((it) => {
+      if (opts.forCollapsedShell && isPrimaryRailNavId(it.id)) return false;
+      return true;
+    })
+    .map((it) =>
+      filterSubItemsForMoreDrawer(it, {
+        showProcedureDayNav: opts.showProcedureDayNav,
+        showNavigationAdminSurfaces: opts.showNavigationAdminSurfaces,
+      })
+    );
+
+  if (opts.showNavigationAdminSurfaces && opts.tenantBase?.trim()) {
+    prepared.push(...buildD6AdminSidebarItems(opts.tenantBase.trim()));
+  }
+
+  return prepared;
 }
 
 /**
- * Groups filtered sidebar items into workflow sections; omits sections with zero visible rows.
+ * Groups sidebar items into 1B workflow sections for legacy rail or More drawer.
  */
 export function buildFiOsSidebarWorkflowSections(
   items: FiOsPrimarySidebarItem[],
-  workspaceProfile: FiWorkspaceProfileKey | null | undefined
+  workspaceProfile?: FiWorkspaceProfileKey | null,
+  options?: BuildFiOsSidebarWorkflowSectionsOptions
 ): FiOsSidebarWorkflowSection[] {
-  const byId = new Map(items.map((it) => [it.id, it]));
-  const groupOrder = orderedWorkflowGroupsForWorkspace(workspaceProfile);
+  const opts: BuildFiOsSidebarWorkflowSectionsOptions = {
+    workspaceProfile,
+    ...options,
+  };
+  const prepared = prepareSidebarItemsForDrawer(items, opts);
+  const byId = new Map(prepared.map((it) => [it.id, it]));
+  const groupOrder = orderedD6gWorkflowGroups(opts.workspaceProfile ?? "default");
   const out: FiOsSidebarWorkflowSection[] = [];
 
   for (const groupId of groupOrder) {
     const bucket: FiOsPrimarySidebarItem[] = [];
-    for (const it of items) {
-      if (workflowGroupForNavItemId(it.id, workspaceProfile) !== groupId) continue;
+    for (const it of prepared) {
+      if (workflowGroupForD6gNavItemId(it.id) !== groupId) continue;
       if (!byId.has(it.id)) continue;
       bucket.push(it);
     }
-    const sorted = sortItemsByGroupOrder(groupId, bucket);
+    const sorted = sortNavItemsForD6gGroup(groupId, bucket);
     if (sorted.length === 0) continue;
-    out.push({ groupId, title: FI_OS_WORKFLOW_GROUP_LABELS[groupId], items: sorted });
+    out.push({ groupId, title: FI_OS_D6G_WORKFLOW_GROUP_LABELS[groupId], items: sorted });
   }
   return out;
 }

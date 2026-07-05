@@ -55,7 +55,7 @@ export function buildStaffFiOsExperiencePreview(opts: {
   const nav = filterFiOsPrimarySidebarItemsByFeatureAccess(rawNav, access);
   const sections = buildFiOsSidebarWorkflowSections(nav, profileKey);
   const primary = sections
-    .filter((s) => s.groupId !== "HOME" && s.groupId !== "SYSTEM")
+    .filter((s) => s.groupId !== "SETTINGS")
     .slice(0, 4)
     .map((s) => s.title);
   if (primary.length) {

@@ -17,21 +17,22 @@ import {
 
 const base = "/fi-admin/t-1";
 
-test("workflow: consultant emphasises patient journey before today", () => {
+test("workflow: consultant emphasises pipeline before front desk", () => {
   const order = orderedWorkflowGroupsForWorkspace("consultant");
-  assert.equal(order[1], "PATIENT_JOURNEY");
-  assert.equal(order[2], "TODAY");
+  assert.equal(order[0], "PIPELINE");
+  assert.equal(order[1], "PATIENTS");
 });
 
-test("workflow: surgeon places clinical first after home", () => {
+test("workflow: surgeon places surgery first", () => {
   const order = orderedWorkflowGroupsForWorkspace("surgeon");
+  assert.equal(order[0], "SURGERY");
   assert.equal(order[1], "CLINICAL");
-  assert.equal(order[2], "TODAY");
 });
 
-test("workflow: patient twin moves to clinical for surgeon persona", () => {
-  assert.equal(workflowGroupForNavItemId("patient-twin", "director"), "INTELLIGENCE");
-  assert.equal(workflowGroupForNavItemId("patient-twin", "surgeon"), "CLINICAL");
+test("workflow: patient twin maps to patients group", () => {
+  assert.equal(workflowGroupForNavItemId("patient-twin", "director"), "PATIENTS");
+  assert.equal(workflowGroupForNavItemId("reception-os", "surgeon"), "FRONT_DESK");
+  assert.equal(workflowGroupForNavItemId("surgery-os", "surgeon"), "SURGERY");
 });
 
 test("workflow: empty groups omitted when all items filtered by Stage 2", () => {
@@ -54,4 +55,17 @@ test("workflow: sections include staff when feature on", () => {
   const sections = buildFiOsSidebarWorkflowSections(filtered, "clinic_manager");
   const team = sections.find((s) => s.groupId === "TEAM");
   assert.ok(team?.items.some((i) => i.id === "staff"));
+});
+
+test("workflow: collapsed More omits primary rail duplicates", () => {
+  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true);
+  const sections = buildFiOsSidebarWorkflowSections(raw, "default", {
+    tenantBase: base,
+    forCollapsedShell: true,
+  });
+  const ids = sections.flatMap((s) => s.items.map((i) => i.id));
+  assert.ok(!ids.includes("calendar"));
+  assert.ok(!ids.includes("patients"));
+  assert.ok(!ids.includes("hr-os"));
+  assert.ok(!ids.includes("analytics"));
 });

@@ -121,13 +121,22 @@ export type NavigationDriftSummary = {
   exceedsPrimaryRailLimit: boolean;
 };
 
+const D6_PRIMARY_RAIL_MINIMAL_SLOT_IDS = new Set([
+  "today",
+  "calendar",
+  "patients",
+  "team",
+  "reports",
+  "more",
+]);
+
+/** Primary sidebar nav ids represented on the collapsed six-slot rail. */
 const D6_PRIMARY_RAIL_NAV_IDS = new Set([
   "dashboard",
   "calendar",
   "patients",
   "hr-os",
   "analytics",
-  "more",
 ]);
 
 const TOO_GRANULAR_PRIMARY_IDS = new Set([
@@ -306,8 +315,8 @@ export function collectFiOsCurrentNavigationModel(
       href: `${base}/${d6.routeSuffix}`,
       routeSuffix: d6.routeSuffix,
       source: "d6_intelligence",
-      workflowGroupId: "INTELLIGENCE",
-      workflowGroupLabel: FI_OS_WORKFLOW_GROUP_LABELS.INTELLIGENCE,
+      workflowGroupId: "REPORTS",
+      workflowGroupLabel: FI_OS_WORKFLOW_GROUP_LABELS.REPORTS,
     });
   }
 
@@ -331,18 +340,23 @@ export function mapCurrentNavItemTo1BDomain(item: FiOsCollectedNavItem): FiOs1BW
 
 function workflowGroupExpectsDomain(groupId: FiOsWorkflowGroupId): FiOs1BWorkflowDomain | null {
   switch (groupId) {
-    case "HOME":
-    case "TODAY":
-      return null;
-    case "PATIENT_JOURNEY":
+    case "FRONT_DESK":
+      return "Front Desk";
+    case "PIPELINE":
       return "Pipeline";
+    case "PATIENTS":
+      return "Patients";
     case "CLINICAL":
       return "Clinical";
-    case "INTELLIGENCE":
+    case "SURGERY":
+      return "Surgery";
+    case "FINANCE":
+      return "Finance";
+    case "REPORTS":
       return "Reports";
     case "TEAM":
       return "Team";
-    case "SYSTEM":
+    case "SETTINGS":
       return "Settings";
     default:
       return null;
@@ -353,15 +367,16 @@ function resolveD6Placement(
   item: FiOsCollectedNavItem,
   domain1B: FiOs1BWorkflowDomain | null
 ): D6PrimaryRailPlacement {
-  if (item.source === "minimal_rail" && item.id === "more") return "primary_rail";
-  if (item.source === "minimal_rail" && (item.id === "search" || item.id === "new")) {
-    return "not_applicable";
+  if (item.source === "minimal_rail" && D6_PRIMARY_RAIL_MINIMAL_SLOT_IDS.has(item.id)) {
+    return "primary_rail";
   }
-  if (D6_PRIMARY_RAIL_NAV_IDS.has(item.id)) return "primary_rail";
+  if (item.source === "primary_sidebar" && D6_PRIMARY_RAIL_NAV_IDS.has(item.id)) {
+    return "primary_rail";
+  }
   if (ADMIN_MORE_IDS.has(item.id) || item.source === "d6_intelligence") return "admin_only";
   if (HIDDEN_PRESERVE_IDS.has(item.id)) return "hidden_route_preserved";
   if (domain1B === "Team" || item.workflowGroupId === "TEAM") return "grouped_under_team";
-  if (domain1B === "Reports" || item.workflowGroupId === "INTELLIGENCE") {
+  if (domain1B === "Reports" || item.workflowGroupId === "REPORTS") {
     return "grouped_under_reports";
   }
   if (item.source === "primary_sub_item") return "grouped_under_more";
@@ -385,13 +400,6 @@ export function classifyNavigationDrift(
     reasons.push(`Label "${item.label}" contains an OS suffix`);
   }
 
-  if (item.workflowGroupId === "INTELLIGENCE" && domain1B && domain1B !== "Reports") {
-    if (classification === "aligned") classification = "needs_grouping";
-    reasons.push(
-      `Workflow drawer group "Intelligence" overlaps non-report domain ${domain1B}`
-    );
-  }
-
   const expectedGroupDomain = item.workflowGroupId
     ? workflowGroupExpectsDomain(item.workflowGroupId)
     : null;
@@ -399,8 +407,8 @@ export function classifyNavigationDrift(
     expectedGroupDomain &&
     domain1B &&
     domain1B !== expectedGroupDomain &&
-    !(item.workflowGroupId === "PATIENT_JOURNEY" && domain1B === "Patients") &&
-    !(item.workflowGroupId === "TODAY" && (domain1B === "Calendar" || domain1B === "Front Desk"))
+    !(item.workflowGroupId === "PATIENTS" && domain1B === "Today") &&
+    !(item.workflowGroupId === "FRONT_DESK" && domain1B === "Calendar")
   ) {
     if (classification === "aligned") classification = "wrong_domain";
     reasons.push(
@@ -541,10 +549,10 @@ export function buildNavigationDriftReport(
   const riskyChanges = [
     "Do not remove Calendar route or minimal-rail Calendar link — calendar internals are out of scope.",
     "Surgery top-level (surgery-os) and Cases sub-links share surgery workflow — consolidate UI, preserve all hrefs.",
-    "Front desk has four primary rows (Clinic flow, Front desk, Reception board, Tomorrow board) — merge cautiously.",
-    "INTELLIGENCE drawer bucket mixes Finance, Reports, Patients (Health record), and Surgery (unmapped ids) — re-group without deleting routes.",
-    "D6 intelligence routes (/intelligence/*) are admin-only today — keep URLs when hiding from staff nav.",
+    "Front desk has four primary rows (Clinic flow, Front desk, Reception board, Tomorrow board) — grouped under More / Front desk.",
+    "D6 intelligence routes (/intelligence/*) are admin-only — keep URLs when hiding from staff nav.",
     "Team vs Staff vs Onboarding Centre vs hr-os label collision — align under Team without breaking workforce-os paths.",
+    "Collapsed primary rail is six slots — do not add module-language labels to the rail.",
   ];
 
   return {

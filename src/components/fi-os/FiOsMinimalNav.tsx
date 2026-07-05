@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, LayoutGrid, Loader2, MoreHorizontal, Plus, Search } from "lucide-react";
+import {
+  BarChart3,
+  Calendar,
+  LayoutGrid,
+  Loader2,
+  MoreHorizontal,
+  Users,
+  UsersRound,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -20,10 +28,12 @@ function iconFor(id: FiOsMinimalNavItemId) {
       return LayoutGrid;
     case "calendar":
       return Calendar;
-    case "search":
-      return Search;
-    case "new":
-      return Plus;
+    case "patients":
+      return Users;
+    case "team":
+      return UsersRound;
+    case "reports":
+      return BarChart3;
     case "more":
       return MoreHorizontal;
   }
@@ -95,21 +105,15 @@ function MinimalNavButton({
 export function FiOsMinimalNavRail({
   items,
   activeId,
-  onSearch,
-  onNew,
   onMore,
 }: {
   items: FiOsMinimalNavItem[];
   activeId: FiOsMinimalNavItemId | null;
-  onSearch: () => void;
-  onNew: () => void;
   onMore: () => void;
 }) {
   const { pendingNavId } = useFiOsNavigationPending();
 
   function onAction(id: FiOsMinimalNavItemId) {
-    if (id === "search") onSearch();
-    if (id === "new") onNew();
     if (id === "more") onMore();
   }
 
@@ -141,21 +145,15 @@ export function FiOsMinimalNavRail({
 export function FiOsMobileBottomNav({
   items,
   activeId,
-  onSearch,
-  onNew,
   onMore,
 }: {
   items: FiOsMinimalNavItem[];
   activeId: FiOsMinimalNavItemId | null;
-  onSearch: () => void;
-  onNew: () => void;
   onMore: () => void;
 }) {
   const { pendingNavId } = useFiOsNavigationPending();
 
   function onAction(id: FiOsMinimalNavItemId) {
-    if (id === "search") onSearch();
-    if (id === "new") onNew();
     if (id === "more") onMore();
   }
 

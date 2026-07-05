@@ -1,10 +1,15 @@
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import {
+  FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS,
+  resolvePrimaryRailSidebarTarget,
+  type FiOsD6gPrimaryRailSlotId,
+} from "@/src/lib/fiOs/navigation/fiOsNavigationRegroupingCore";
 
-export type FiOsMinimalNavItemId = "today" | "calendar" | "search" | "new" | "more";
+export type FiOsMinimalNavItemId = FiOsD6gPrimaryRailSlotId;
 
 export type FiOsMinimalNavLinkItem = {
-  id: "today" | "calendar";
+  id: Exclude<FiOsMinimalNavItemId, "more">;
   kind: "link";
   label: string;
   href: string;
@@ -13,7 +18,7 @@ export type FiOsMinimalNavLinkItem = {
 };
 
 export type FiOsMinimalNavActionItem = {
-  id: "search" | "new" | "more";
+  id: "more";
   kind: "action";
   label: string;
 };
@@ -29,49 +34,59 @@ function normalizePath(pathname: string): string {
   return t.length === 0 ? "/" : t;
 }
 
+function linkFromRailSlot(
+  base: string,
+  slotId: Exclude<FiOsMinimalNavItemId, "more">,
+  label: string,
+  sidebarItems: readonly FiOsPrimarySidebarItem[]
+): FiOsMinimalNavLinkItem {
+  const b = normalizeBase(base);
+  const target = resolvePrimaryRailSidebarTarget(slotId, sidebarItems);
+
+  if (slotId === "today") {
+    return { id: "today", kind: "link", label: "Today", href: b };
+  }
+
+  const fallbackHref =
+    slotId === "calendar"
+      ? `${b}/calendar`
+      : slotId === "patients"
+        ? `${b}/patients`
+        : slotId === "team"
+          ? `${b}/workforce-os`
+          : `${b}/analytics`;
+
+  return {
+    id: slotId,
+    kind: "link",
+    label,
+    href: target?.href ?? fallbackHref,
+    disabled: target?.disabled ?? false,
+    hint: target?.hint,
+  };
+}
+
 /**
- * D2 minimal rail / mobile bottom bar items. Calendar href and disabled state
- * are derived from the already-resolved primary sidebar items so RBAC and
- * feature gating stay centralized in `fiOsShellPrimaryNav`.
+ * D6G-B six-slot primary rail. Calendar href/disabled state is derived from
+ * primary sidebar items (unchanged); Search/New live in the top bar only.
  */
 export function resolveFiOsMinimalNavItems(
   base: string,
   sidebarItems: readonly FiOsPrimarySidebarItem[]
 ): FiOsMinimalNavItem[] {
-  const b = normalizeBase(base);
-  const calendar = sidebarItems.find((item) => item.id === "calendar");
-
   return [
-    {
-      id: "today",
-      kind: "link",
-      label: "Today",
-      href: b,
-    },
-    {
-      id: "calendar",
-      kind: "link",
-      label: "Calendar",
-      href: calendar?.href ?? `${b}/calendar`,
-      disabled: calendar?.disabled ?? false,
-      hint: calendar?.hint,
-    },
-    {
-      id: "search",
-      kind: "action",
-      label: "Search",
-    },
-    {
-      id: "new",
-      kind: "action",
-      label: "New",
-    },
-    {
-      id: "more",
-      kind: "action",
-      label: "More",
-    },
+    linkFromRailSlot(base, "today", "Today", sidebarItems),
+    linkFromRailSlot(base, "calendar", "Calendar", sidebarItems),
+    linkFromRailSlot(base, "patients", "Patients", sidebarItems),
+    linkFromRailSlot(base, "team", "Team", sidebarItems),
+    linkFromRailSlot(base, "reports", "Reports", sidebarItems),
+    { id: "more", kind: "action", label: "More" },
   ];
+}
+
+/** Slot order exposed for tests and audit. */
+export function primaryRailSlotIds(): readonly FiOsMinimalNavItemId[] {
+  return FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS;
 }
 
 /** Which minimal nav link is active for the current route (actions return null). */
@@ -88,6 +103,27 @@ export function getFiOsMinimalNavActiveId(
 
   if (isFiOsTenantCalendarPath(pathname) || np.startsWith(`${nb}/calendar`)) {
     return "calendar";
+  }
+
+  if (np.startsWith(`${nb}/patients`) || np.startsWith(`${nb}/foundation-integrity`)) {
+    return "patients";
+  }
+
+  if (
+    np.startsWith(`${nb}/workforce-os`) ||
+    np.startsWith(`${nb}/hr-os`) ||
+    np === `${nb}/staff` ||
+    np.startsWith(`${nb}/staff/`)
+  ) {
+    return "team";
+  }
+
+  if (
+    np.startsWith(`${nb}/analytics`) ||
+    np.startsWith(`${nb}/audit`) ||
+    np.startsWith(`${nb}/intelligence`)
+  ) {
+    return "reports";
   }
 
   return null;

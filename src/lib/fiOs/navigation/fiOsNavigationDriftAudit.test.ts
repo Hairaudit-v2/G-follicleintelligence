@@ -90,18 +90,25 @@ test("Calendar remains preserved in catalog and primary rail placement", () => {
   assert.ok(report.directRoutesPreserved.includes(calendar!.href));
 });
 
-test("unmapped surgery-os and reception-os fall into Intelligence drawer bucket (drift)", () => {
+test("surgery-os and reception-os map to 1B Surgery and Front desk groups after D6G-B", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const surgeryOs = items.find((i) => i.id === "surgery-os")!;
   const receptionOs = items.find((i) => i.id === "reception-os")!;
-  assert.equal(surgeryOs.workflowGroupId, "INTELLIGENCE");
-  assert.equal(receptionOs.workflowGroupId, "INTELLIGENCE");
+  assert.equal(surgeryOs.workflowGroupId, "SURGERY");
+  assert.equal(receptionOs.workflowGroupId, "FRONT_DESK");
 
   const surgeryDrift = classifyNavigationDrift(surgeryOs, items);
-  assert.ok(
-    surgeryDrift.classification === "needs_grouping" ||
-      surgeryDrift.classification === "duplicate_surface"
-  );
+  assert.equal(surgeryDrift.classification, "duplicate_surface");
+  assert.equal(surgeryDrift.d6Placement, "grouped_under_more");
+});
+
+test("minimal rail catalog includes six D6G-B slots", () => {
+  const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
+  const minimalIds = items
+    .filter((i) => i.source === "minimal_rail")
+    .map((i) => i.id)
+    .sort();
+  assert.deepEqual(minimalIds, ["calendar", "more", "patients", "reports", "team", "today"]);
 });
 
 test("buildNavigationDriftReport summarizes Team and Reports mappings", () => {
