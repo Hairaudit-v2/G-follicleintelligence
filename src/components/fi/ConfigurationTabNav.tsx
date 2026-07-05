@@ -44,9 +44,9 @@ export function ConfigurationTabNav({
             href={hrefFor(tab)}
             role="tab"
             aria-selected={active}
-            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`fi-tenant-focus-ring whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
               active
-                ? "bg-white/[0.12] text-slate-100 shadow-sm"
+                ? "fi-tenant-tab-active text-slate-100 shadow-sm"
                 : "text-slate-500 hover:bg-white/[0.06] hover:text-slate-300"
             }`}
           >

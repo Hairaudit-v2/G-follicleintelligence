@@ -376,4 +376,63 @@ body {
   .fi-tenant-btn-primary {
     background: linear-gradient(to right, var(--fi-tenant-primary), var(--fi-tenant-accent));
   }
+
+  /* FI-BRANDING-SYSTEM-2: broader tenant theming across the FI OS shell.
+     These utilities only tint neutral chrome accents — never clinical safety
+     colours (error red, warning amber, success green, risk/compliance/readiness). */
+
+  /* Tenant accent text (eyebrows, active nav icons, group headers). */
+  .fi-tenant-accent-text {
+    color: var(--fi-tenant-accent);
+  }
+
+  /* Bottom accent strip for the top command bar. */
+  .fi-tenant-topbar-accent {
+    box-shadow: inset 0 -2px 0 0 color-mix(in srgb, var(--fi-tenant-accent) 55%, transparent);
+  }
+
+  /* Workspace hero / section header accent surface. */
+  .fi-tenant-hero-accent {
+    border-color: color-mix(in srgb, var(--fi-tenant-accent) 28%, transparent);
+    background-image: linear-gradient(
+      135deg,
+      var(--fi-tenant-brand-bg),
+      transparent 62%
+    );
+  }
+
+  /* Selected tab / segmented control. */
+  .fi-tenant-tab-active {
+    background-color: var(--fi-tenant-primary-soft);
+    box-shadow: inset 0 -2px 0 0 var(--fi-tenant-accent);
+  }
+
+  /* Focus ring for branded controls (buttons, tabs, links). */
+  .fi-tenant-focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--fi-tenant-accent) 55%, transparent);
+  }
+
+  /* Module / dashboard entry card accents. */
+  .fi-tenant-card-accent {
+    border-color: color-mix(in srgb, var(--fi-tenant-accent) 22%, transparent);
+  }
+
+  .fi-tenant-card-accent-hover:hover {
+    border-color: color-mix(in srgb, var(--fi-tenant-accent) 42%, transparent);
+    background-color: var(--fi-tenant-brand-bg);
+  }
+
+  /* Icon chip / avatar tile using tenant colours. */
+  .fi-tenant-icon-chip {
+    border-color: color-mix(in srgb, var(--fi-tenant-accent) 30%, transparent);
+    background-color: var(--fi-tenant-primary-soft);
+    color: var(--fi-tenant-accent);
+  }
+
+  /* Settings section highlight (left rail accent). */
+  .fi-tenant-section-highlight {
+    border-color: color-mix(in srgb, var(--fi-tenant-accent) 24%, transparent);
+    box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--fi-tenant-accent) 70%, transparent);
+  }
 }

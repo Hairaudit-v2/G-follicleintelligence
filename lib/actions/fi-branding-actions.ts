@@ -13,6 +13,7 @@ import {
   resolveActorFiUserIdForTenantAdminActions,
 } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import {
+  clearTenantLegacyLogoUrl,
   removeTenantUploadedLogo,
   uploadTenantLogoFile,
 } from "@/src/lib/fi/foundation/tenantBrandingStorage.server";
@@ -170,6 +171,52 @@ export async function removeTenantLogoAction(input: {
     eventKind: "settings.branding_updated",
     actorFiUserId,
     detail: { action: "logo_removed" },
+  });
+
+  revalidatePath(`/fi-admin/${tenantId}/configuration`);
+  revalidatePath(`/fi-admin/${tenantId}`);
+  return { ok: true };
+}
+
+/**
+ * Clear the legacy `logo_url` column (permission-gated). Uploaded-logo storage
+ * is untouched; after clearing, the fallback chain becomes uploaded → initials → FI mark.
+ */
+export async function clearTenantLegacyLogoUrlAction(input: {
+  tenantId: string;
+  adminKey?: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const tenantId = input.tenantId?.trim();
+  if (!tenantId || !isFiAdminUuid(tenantId)) {
+    return { ok: false, error: "Invalid tenant id." };
+  }
+
+  const identity = await debugIdentity();
+  logBrandingDebug("clearTenantLegacyLogoUrlAction:start", { ...identity, tenantId });
+
+  const perm = await assertBrandingWriteAllowed(tenantId, input.adminKey);
+  if (!perm.ok) {
+    logBrandingDebug("clearTenantLegacyLogoUrlAction:denied", { tenantId, error: perm.error });
+    return perm;
+  }
+
+  const t = await assertFiTenantExists(tenantId);
+  if (!t.ok) return { ok: false, error: t.error };
+
+  const result = await clearTenantLegacyLogoUrl(tenantId);
+  logBrandingDebug("clearTenantLegacyLogoUrlAction:result", {
+    tenantId,
+    ok: result.ok,
+    error: result.ok ? null : result.error,
+  });
+  if (!result.ok) return result;
+
+  const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tenantId);
+  await insertFiTenantAdminAuditEvent({
+    tenantId,
+    eventKind: "settings.branding_updated",
+    actorFiUserId,
+    detail: { action: "legacy_logo_url_cleared" },
   });
 
   revalidatePath(`/fi-admin/${tenantId}/configuration`);

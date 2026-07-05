@@ -56,7 +56,7 @@ export function FiOsClinicSettingsNav({
     cn(
       "rounded-md px-2.5 py-1 text-xs font-medium transition",
       pathname === href || pathname.startsWith(`${href}/`)
-        ? "bg-cyan-500/15 text-cyan-200 ring-1 ring-cyan-400/30"
+        ? "fi-tenant-tab-active text-slate-100"
         : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
     );
 

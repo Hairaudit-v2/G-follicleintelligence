@@ -80,6 +80,66 @@ export function tenantBrandingHasUploadedLogo(
   return Boolean(parseTenantBrandingMetadata(settings?.metadata ?? null).logo_storage_path);
 }
 
+export function tenantBrandingHasLegacyLogoUrl(
+  settings: FiTenantSettingsRow | null | undefined
+): boolean {
+  return Boolean(settings?.logo_url?.trim());
+}
+
+/** Ordered logo fallback chain shown in the Branding UI. */
+export const TENANT_BRANDING_LOGO_FALLBACK_ORDER = [
+  "Uploaded logo",
+  "Legacy logo URL",
+  "Clinic initials",
+  "FI mark",
+] as const;
+
+export type TenantBrandingLogoControlsState = {
+  hasUploadedLogo: boolean;
+  hasLegacyLogoUrl: boolean;
+  /** True only when the uploaded logo can actually be removed (upload exists + editable). */
+  removeUploadedEnabled: boolean;
+  /** True only when a legacy `logo_url` can be cleared (legacy set + editable). */
+  clearLegacyEnabled: boolean;
+  /** No upload present but a legacy URL is doing the work. */
+  legacyOnly: boolean;
+  /** Human status line describing which logo source is active. */
+  statusLabel: string;
+  fallbackOrder: readonly string[];
+};
+
+/**
+ * Pure derivation of Branding logo control availability + messaging.
+ * Centralised so the UI and tests agree on when Remove / Clear are enabled
+ * and which fallback source is currently active.
+ */
+export function computeTenantBrandingLogoControlsState(input: {
+  settings: FiTenantSettingsRow | null | undefined;
+  canEdit: boolean;
+  busy?: boolean;
+}): TenantBrandingLogoControlsState {
+  const hasUploadedLogo = tenantBrandingHasUploadedLogo(input.settings);
+  const hasLegacyLogoUrl = tenantBrandingHasLegacyLogoUrl(input.settings);
+  const editable = input.canEdit && !input.busy;
+  const legacyOnly = !hasUploadedLogo && hasLegacyLogoUrl;
+
+  const statusLabel = hasUploadedLogo
+    ? "Using uploaded logo."
+    : legacyOnly
+      ? "Using legacy logo URL."
+      : "No logo set — initials will show.";
+
+  return {
+    hasUploadedLogo,
+    hasLegacyLogoUrl,
+    removeUploadedEnabled: editable && hasUploadedLogo,
+    clearLegacyEnabled: editable && hasLegacyLogoUrl,
+    legacyOnly,
+    statusLabel,
+    fallbackOrder: TENANT_BRANDING_LOGO_FALLBACK_ORDER,
+  };
+}
+
 /** Preview draft values derived from form fields + resolved tenant branding logo. */
 export function buildTenantBrandingPreviewDraft(
   fields: TenantBrandingFormFields,

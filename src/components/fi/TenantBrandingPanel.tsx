@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  clearTenantLegacyLogoUrlAction,
   removeTenantLogoAction,
   uploadTenantLogoAction,
 } from "@/lib/actions/fi-branding-actions";
 import { TenantLogoPreviewStrip } from "@/src/components/brand/TenantBrandMark";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
+import { TENANT_BRANDING_LOGO_FALLBACK_ORDER } from "@/src/lib/fi/foundation/tenantBrandingFormCore";
 import { buildNormalizedBrandingCssVariables, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
 
 const inputClass =
@@ -122,7 +124,12 @@ export function TenantBrandingLogoUpload({
       if (res.ok) {
         setPreview(null);
         if (fileRef.current) fileRef.current.value = "";
-        setFeedback({ ok: true, text: "Uploaded logo removed. Legacy URL kept if set." });
+        setFeedback({
+          ok: true,
+          text: legacyLogoUrl
+            ? "Uploaded logo removed. Now falling back to the legacy logo URL."
+            : "Uploaded logo removed. Now falling back to clinic initials.",
+        });
         onRevalidated?.();
       } else {
         setFeedback({ ok: false, text: res.error });
@@ -139,7 +146,51 @@ export function TenantBrandingLogoUpload({
     }
   };
 
+  const onClearLegacy = async () => {
+    if (!canEdit) {
+      setFeedback({
+        ok: false,
+        text: "You do not have permission to update branding.",
+      });
+      return;
+    }
+    if (!legacyLogoUrl) return;
+    setFeedback(null);
+    setBusy(true);
+    try {
+      const res = await clearTenantLegacyLogoUrlAction({ tenantId, adminKey });
+      if (res.ok) {
+        setFeedback({
+          ok: true,
+          text: hasUploadedLogo
+            ? "Legacy logo URL cleared. The uploaded logo remains active."
+            : "Legacy logo URL cleared. Now falling back to clinic initials.",
+        });
+        onRevalidated?.();
+      } else {
+        setFeedback({ ok: false, text: res.error });
+      }
+    } catch (err) {
+      setFeedback({
+        ok: false,
+        text: `Clear request failed before completing: ${
+          err instanceof Error ? err.message : "unknown error"
+        }. Nothing was changed.`,
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const displayLogoUrl = localPreview ?? branding.logoUrl;
+  const removeUploadedEnabled = !busy && hasUploadedLogo;
+  const clearLegacyEnabled = !busy && Boolean(legacyLogoUrl);
+  const legacyOnly = !hasUploadedLogo && Boolean(legacyLogoUrl);
+  const statusLabel = hasUploadedLogo
+    ? "Using uploaded logo."
+    : legacyOnly
+      ? "Using legacy logo URL."
+      : "No logo set — clinic initials will show.";
 
   return (
     <div className="space-y-3">
@@ -148,6 +199,9 @@ export function TenantBrandingLogoUpload({
         displayName={branding.clinicDisplayName}
         localPreviewUrl={localPreview}
       />
+      <p className="text-xs font-medium text-[#CBD5E1]" data-testid="branding-logo-status">
+        {statusLabel}
+      </p>
       {canEdit ? (
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -161,14 +215,32 @@ export function TenantBrandingLogoUpload({
               void onUpload(f);
             }}
           />
-          {hasUploadedLogo ? (
+          <button
+            type="button"
+            disabled={!removeUploadedEnabled}
+            title={
+              hasUploadedLogo
+                ? "Delete the uploaded logo from private storage"
+                : "No uploaded logo to remove"
+            }
+            className="rounded-lg border border-rose-500/30 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-950/40 disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => void onRemove()}
+          >
+            Remove uploaded logo
+          </button>
+          {clearLegacyEnabled || legacyLogoUrl ? (
             <button
               type="button"
-              disabled={busy}
-              className="rounded-lg border border-rose-500/30 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-950/40 disabled:opacity-50"
-              onClick={() => void onRemove()}
+              disabled={!clearLegacyEnabled}
+              title={
+                legacyLogoUrl
+                  ? "Clear the legacy logo_url column"
+                  : "No legacy logo URL to clear"
+              }
+              className="rounded-lg border border-white/[0.14] px-3 py-1.5 text-xs font-medium text-[#94A3B8] hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={() => void onClearLegacy()}
             >
-              Remove uploaded logo
+              Clear legacy logo URL
             </button>
           ) : null}
         </div>
@@ -179,10 +251,13 @@ export function TenantBrandingLogoUpload({
       )}
       {legacyLogoUrl ? (
         <p className="text-xs text-[#64748B]">
-          Legacy logo URL is kept as fallback when no upload is present:{" "}
+          {hasUploadedLogo ? "Legacy logo URL (fallback, not currently shown): " : "Legacy logo URL (currently active): "}
           <code className="break-all text-[#94A3B8]">{legacyLogoUrl}</code>
         </p>
       ) : null}
+      <p className="text-[0.7rem] leading-relaxed text-[#64748B]">
+        Logo fallback order: {TENANT_BRANDING_LOGO_FALLBACK_ORDER.join(" → ")}.
+      </p>
       {feedback ? (
         <p
           role="status"
@@ -227,78 +302,157 @@ export function TenantBrandingPreviewPanel({
   );
 
   const cssVars = buildNormalizedBrandingCssVariables(branding);
+  const hasLogo = Boolean(draft.localLogoPreview || draft.logoUrl);
+
+  const navRows = [
+    { label: "Dashboard", active: true },
+    { label: "Calendar", active: false },
+    { label: "Patients", active: false },
+  ];
 
   return (
-    <div className="space-y-3 rounded-xl border border-white/[0.08] bg-[#081020]/60 p-4" style={cssVars}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Live preview</p>
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div
-          className="rounded-xl border border-white/[0.08] p-3"
-          style={{ backgroundColor: "var(--fi-tenant-brand-bg)" }}
-        >
-          <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-[#64748B]">
-            Sidebar
-          </p>
-          <div
-            className="flex items-center gap-2 rounded-lg border px-2 py-2"
-            style={{
-              borderColor: "color-mix(in srgb, var(--fi-tenant-accent) 25%, transparent)",
-              backgroundColor: "var(--fi-tenant-primary-soft)",
-              boxShadow: "inset 3px 0 0 0 var(--fi-tenant-accent)",
-            }}
-          >
+    <div
+      className="space-y-3 rounded-xl border border-white/[0.08] bg-[#081020]/60 p-4"
+      style={cssVars}
+      data-testid="branding-shell-preview"
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+          Branded shell preview
+        </p>
+        <span className="fi-tenant-accent-text text-[0.65rem] font-semibold uppercase tracking-wider">
+          Live
+        </span>
+      </div>
+
+      {/* Mock shell: sidebar + topbar + workspace with dashboard card */}
+      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#060d18]/80">
+        <div className="grid grid-cols-[128px_1fr]">
+          {/* Sidebar */}
+          <div className="border-r border-white/[0.08] bg-[#060d18] p-2">
+            <div
+              className="fi-tenant-card-accent mb-2 flex items-center gap-2 rounded-lg border px-2 py-1.5"
+              style={{ backgroundColor: "var(--fi-tenant-brand-bg)" }}
+            >
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-md text-[0.6rem] font-bold"
+                style={{ color: "var(--fi-tenant-accent)" }}
+              >
+                {branding.clinicInitials}
+              </span>
+              <span className="truncate text-[0.65rem] font-semibold text-slate-100">
+                {branding.clinicDisplayName}
+              </span>
+            </div>
+            <div className="space-y-1">
+              {navRows.map((row) => (
+                <div
+                  key={row.label}
+                  className={`rounded-md px-2 py-1 text-[0.7rem] font-medium ${
+                    row.active
+                      ? "fi-tenant-nav-active text-slate-50"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {row.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Main column */}
+          <div>
+            {/* Topbar with accent strip */}
+            <div className="fi-tenant-topbar-accent flex items-center justify-between border-b border-white/[0.08] bg-[#0a1424]/92 px-3 py-2">
+              <span className="text-[0.7rem] font-medium text-slate-300">
+                {branding.clinicDisplayName}
+              </span>
+              <button
+                type="button"
+                tabIndex={-1}
+                className="rounded-md px-2 py-1 text-[0.65rem] font-semibold text-white"
+                style={{
+                  background: `linear-gradient(to right, var(--fi-tenant-primary), var(--fi-tenant-accent))`,
+                }}
+              >
+                Quick create
+              </button>
+            </div>
+
+            {/* Workspace */}
+            <div className="space-y-2 p-3">
+              {/* Tabs */}
+              <div className="inline-flex gap-1 rounded-lg border border-white/[0.07] bg-[#0c1220]/80 p-1">
+                <span className="fi-tenant-tab-active rounded-md px-2 py-1 text-[0.65rem] font-medium text-slate-100">
+                  Branding
+                </span>
+                <span className="rounded-md px-2 py-1 text-[0.65rem] font-medium text-slate-500">
+                  Calendar
+                </span>
+              </div>
+
+              {/* Dashboard entry card */}
+              <div className="fi-tenant-card-accent flex items-start gap-2 rounded-lg border bg-[#0c1426]/60 p-2">
+                <span className="fi-tenant-icon-chip flex h-7 w-7 items-center justify-center rounded-md border text-[0.6rem] font-bold">
+                  {branding.clinicInitials}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[0.72rem] font-semibold text-slate-100">
+                    {branding.clinicDisplayName}
+                  </p>
+                  <p className="text-[0.62rem] text-slate-500">Workspace module card</p>
+                </div>
+              </div>
+
+              {/* Primary + secondary buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="fi-tenant-btn-primary rounded-lg px-3 py-1.5 text-[0.7rem] font-semibold text-white shadow-md"
+                >
+                  Save changes
+                </button>
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="fi-tenant-card-accent rounded-lg border px-3 py-1.5 text-[0.7rem] font-medium text-slate-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Logo fallback states */}
+      <div className="rounded-xl border border-white/[0.08] p-3">
+        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-[#64748B]">
+          Logo &amp; fallback states
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TenantLogoPreviewStrip
+            logoUrl={draft.logoUrl}
+            displayName={branding.clinicDisplayName}
+            localPreviewUrl={draft.localLogoPreview}
+          />
+          <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-[#0F1629] p-4">
             <span
-              className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold"
-              style={{ color: "var(--fi-tenant-accent)" }}
+              className="flex h-12 w-12 items-center justify-center rounded-lg border text-sm font-bold"
+              style={{
+                borderColor: "color-mix(in srgb, var(--fi-tenant-accent) 20%, transparent)",
+                backgroundColor: "var(--fi-tenant-brand-bg)",
+                color: "var(--fi-tenant-accent)",
+              }}
             >
               {branding.clinicInitials}
             </span>
-            <span className="truncate text-sm font-medium text-slate-100">{branding.clinicDisplayName}</span>
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.08] p-3">
-          <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-[#64748B]">
-            Primary button
-          </p>
-          <button
-            type="button"
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-md"
-            style={{
-              background: `linear-gradient(to right, var(--fi-tenant-primary), var(--fi-tenant-accent))`,
-            }}
-          >
-            Save changes
-          </button>
-          <p className="mt-3 mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-[#64748B]">
-            Selected tab
-          </p>
-          <div
-            className="inline-flex rounded-lg border px-3 py-1.5 text-xs font-medium text-slate-50"
-            style={{
-              borderColor: "color-mix(in srgb, var(--fi-tenant-accent) 30%, transparent)",
-              backgroundColor: "var(--fi-tenant-primary-soft)",
-            }}
-          >
-            Branding
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.08] p-3">
-          <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-[#64748B]">
-            Card accent
-          </p>
-          <div
-            className="rounded-lg border-l-4 bg-[#0F1629]/80 p-3"
-            style={{ borderLeftColor: "var(--fi-tenant-accent)" }}
-          >
-            <p className="text-sm font-semibold text-slate-50">{branding.clinicDisplayName}</p>
-            <p className="mt-1 text-xs text-slate-400">Support and operational defaults</p>
-          </div>
-          <div className="mt-3">
-            <TenantLogoPreviewStrip
-              logoUrl={draft.logoUrl}
-              displayName={branding.clinicDisplayName}
-              localPreviewUrl={draft.localLogoPreview}
-            />
+            <span className="text-xs text-slate-400">
+              {hasLogo
+                ? "Logo shown above; initials appear if the image fails to load."
+                : "No logo set — initials shown across the shell."}
+            </span>
           </div>
         </div>
       </div>

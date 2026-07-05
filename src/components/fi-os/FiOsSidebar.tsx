@@ -48,8 +48,7 @@ export function FiOsSidebar({
       <Link
         href="/fi-admin"
         className={cn(
-          "mb-1 flex shrink-0 items-center gap-3 rounded-xl border border-white/[0.08] px-3 py-2.5 transition",
-          "hover:border-white/[0.12] hover:bg-white/[0.05]",
+          "fi-tenant-card-accent fi-tenant-card-accent-hover fi-tenant-focus-ring mb-1 flex shrink-0 items-center gap-3 rounded-xl border px-3 py-2.5 transition",
           fiOsChromeClasses.glassCard
         )}
       >

@@ -166,3 +166,30 @@ export async function removeTenantUploadedLogo(
     return { ok: false, error: e instanceof Error ? e.message : "Remove failed." };
   }
 }
+
+/**
+ * Explicitly clear the legacy `logo_url` column. Unlike the settings-save merge
+ * (which keeps blank fields), this nulls the column so the initials/FI fallback
+ * applies. Uploaded-logo storage + metadata are left untouched.
+ */
+export async function clearTenantLegacyLogoUrl(
+  tenantId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const tid = tenantId.trim();
+  const existing = await loadTenantBranding(tid);
+  if (!existing) return { ok: true };
+
+  try {
+    const { error } = await supabaseAdmin()
+      .from("fi_tenant_settings")
+      .update({
+        logo_url: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("tenant_id", tid);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  } catch (e: unknown) {
+    return { ok: false, error: e instanceof Error ? e.message : "Clear failed." };
+  }
+}

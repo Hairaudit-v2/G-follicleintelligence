@@ -5,8 +5,11 @@ import {
   buildTenantBrandingFormInitialState,
   buildTenantBrandingPreviewDraft,
   buildTenantBrandingRevisionKey,
+  computeTenantBrandingLogoControlsState,
   mergeTenantSettingsSavePayload,
+  tenantBrandingHasLegacyLogoUrl,
   tenantBrandingHasUploadedLogo,
+  TENANT_BRANDING_LOGO_FALLBACK_ORDER,
 } from "./tenantBrandingFormCore";
 import { emptyNormalizedTenantBranding } from "./tenantBrandingCore";
 import type { FiTenantSettingsRow } from "./tenantSettings";
@@ -89,6 +92,88 @@ describe("tenantBrandingFormCore", () => {
     assert.equal(draft.logoUrl, "https://signed.example/upload.png");
     assert.equal(draft.primaryColour, "#111111");
     assert.equal(draft.accentColour, "#333333");
+  });
+
+  it("enables Remove uploaded logo only when uploaded logo metadata exists", () => {
+    const withUpload = computeTenantBrandingLogoControlsState({
+      settings: sampleRow,
+      canEdit: true,
+    });
+    assert.equal(withUpload.hasUploadedLogo, true);
+    assert.equal(withUpload.removeUploadedEnabled, true);
+
+    const noUpload = computeTenantBrandingLogoControlsState({
+      settings: { ...sampleRow, metadata: {} },
+      canEdit: true,
+    });
+    assert.equal(noUpload.hasUploadedLogo, false);
+    assert.equal(noUpload.removeUploadedEnabled, false);
+  });
+
+  it("does not enable logo controls without edit permission or while busy", () => {
+    const readOnly = computeTenantBrandingLogoControlsState({
+      settings: sampleRow,
+      canEdit: false,
+    });
+    assert.equal(readOnly.removeUploadedEnabled, false);
+    assert.equal(readOnly.clearLegacyEnabled, false);
+
+    const busy = computeTenantBrandingLogoControlsState({
+      settings: sampleRow,
+      canEdit: true,
+      busy: true,
+    });
+    assert.equal(busy.removeUploadedEnabled, false);
+    assert.equal(busy.clearLegacyEnabled, false);
+  });
+
+  it("enables Clear legacy logo URL only when a legacy URL exists", () => {
+    const withLegacy = computeTenantBrandingLogoControlsState({
+      settings: sampleRow,
+      canEdit: true,
+    });
+    assert.equal(withLegacy.hasLegacyLogoUrl, true);
+    assert.equal(withLegacy.clearLegacyEnabled, true);
+
+    const noLegacy = computeTenantBrandingLogoControlsState({
+      settings: { ...sampleRow, logo_url: null },
+      canEdit: true,
+    });
+    assert.equal(noLegacy.hasLegacyLogoUrl, false);
+    assert.equal(noLegacy.clearLegacyEnabled, false);
+  });
+
+  it("reports legacy-only status when a legacy URL is present without an upload", () => {
+    const legacyOnly = computeTenantBrandingLogoControlsState({
+      settings: { ...sampleRow, metadata: {} },
+      canEdit: true,
+    });
+    assert.equal(legacyOnly.legacyOnly, true);
+    assert.equal(legacyOnly.statusLabel, "Using legacy logo URL.");
+
+    const uploaded = computeTenantBrandingLogoControlsState({
+      settings: sampleRow,
+      canEdit: true,
+    });
+    assert.equal(uploaded.legacyOnly, false);
+    assert.equal(uploaded.statusLabel, "Using uploaded logo.");
+
+    const none = computeTenantBrandingLogoControlsState({
+      settings: { ...sampleRow, metadata: {}, logo_url: null },
+      canEdit: true,
+    });
+    assert.equal(none.statusLabel, "No logo set — initials will show.");
+    assert.equal(tenantBrandingHasLegacyLogoUrl({ ...sampleRow, logo_url: null }), false);
+    assert.equal(tenantBrandingHasLegacyLogoUrl(sampleRow), true);
+  });
+
+  it("exposes the documented fallback order", () => {
+    assert.deepEqual([...TENANT_BRANDING_LOGO_FALLBACK_ORDER], [
+      "Uploaded logo",
+      "Legacy logo URL",
+      "Clinic initials",
+      "FI mark",
+    ]);
   });
 
   it("preview draft prefers in-progress colour edits", () => {

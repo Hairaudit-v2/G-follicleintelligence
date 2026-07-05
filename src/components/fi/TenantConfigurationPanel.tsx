@@ -26,9 +26,22 @@ import {
   tenantBrandingHasUploadedLogo,
 } from "@/src/lib/fi/foundation/tenantBrandingFormCore";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  highlight = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  /** Applies tenant-branded left accent rail so the active section reads as themed. */
+  highlight?: boolean;
+}) {
   return (
-    <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
+    <section
+      className={`rounded-2xl border bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5 ${
+        highlight ? "fi-tenant-section-highlight" : "border-white/[0.08]"
+      }`}
+    >
       <h2 className="mb-3 text-base font-semibold tracking-tight text-[#F8FAFC]">{title}</h2>
       {children}
     </section>
@@ -71,7 +84,7 @@ const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";
 
 const saveButtonClass =
-  "mt-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-md transition fi-tenant-btn-primary disabled:opacity-50";
+  "mt-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-md transition fi-tenant-btn-primary fi-tenant-focus-ring disabled:opacity-50";
 
 const sectionLabelClass = "mb-2 text-xs font-semibold uppercase tracking-wide text-[#64748B]";
 
@@ -279,7 +292,7 @@ export function TenantConfigurationPanel({
         adminKey={adminKey}
       />
 
-      <Section title="Tenant branding">
+      <Section title="Tenant branding" highlight>
         {brandingDebug ? (
           <div className="mb-4 rounded-lg border border-cyan-500/25 bg-cyan-950/20 px-3 py-2 font-mono text-[0.7rem] leading-relaxed text-cyan-100">
             <p className="mb-1 font-sans text-[0.65rem] font-bold uppercase tracking-wider text-cyan-300">

@@ -40,7 +40,7 @@ export function ClinicCommandCentreHeader(props: {
     <header className="space-y-5 border-b border-white/[0.07] pb-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
+          <p className="fi-tenant-accent-text text-xs font-semibold uppercase tracking-[0.28em]">
             Today
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
@@ -53,7 +53,7 @@ export function ClinicCommandCentreHeader(props: {
           <p className="mt-1.5 text-sm text-slate-500">{dateLine}</p>
           {workspaceBadge ? (
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-              Workspace: <span className="text-cyan-400/90">{workspaceBadge}</span>
+              Workspace: <span className="fi-tenant-accent-text">{workspaceBadge}</span>
             </p>
           ) : null}
         </div>

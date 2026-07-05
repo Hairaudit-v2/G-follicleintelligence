@@ -88,7 +88,7 @@ export function DashboardModuleNavigation(props: {
           const Icon = mod.icon;
           const content = (
             <>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-950/25 text-cyan-300">
+              <span className="fi-tenant-icon-chip flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                 <Icon className="h-4 w-4" aria-hidden />
               </span>
               <span className="min-w-0">
@@ -119,8 +119,7 @@ export function DashboardModuleNavigation(props: {
               key={mod.id}
               href={mod.href}
               className={cn(
-                "flex items-start gap-3 rounded-xl border border-white/[0.07] bg-[#0c1426]/60 px-3 py-3 transition",
-                "hover:border-cyan-500/25 hover:bg-[#141c33]/75"
+                "fi-tenant-card-accent-hover fi-tenant-focus-ring flex items-start gap-3 rounded-xl border border-white/[0.07] bg-[#0c1426]/60 px-3 py-3 transition"
               )}
             >
               {content}

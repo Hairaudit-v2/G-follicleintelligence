@@ -154,7 +154,7 @@ export function FiOsTopBar({
           </button>
         </div>
       ) : null}
-      <div className={fiOsChromeClasses.topBar}>
+      <div className={cn(fiOsChromeClasses.topBar, "fi-tenant-topbar-accent")}>
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
           {!hideMobileNav ? (
             <button
@@ -211,7 +211,7 @@ export function FiOsTopBar({
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
               fiOsChromeClasses.toolbarPrimaryAccent,
-              "inline-flex h-10 shrink-0 items-center gap-2 px-3 text-sm font-semibold"
+              "fi-tenant-focus-ring inline-flex h-10 shrink-0 items-center gap-2 px-3 text-sm font-semibold"
             )}
             style={{ boxShadow: `inset 0 -1px 0 0 ${accentHex}28` }}
             aria-label={compactCreateLabel ? "Open new" : "Open quick create"}

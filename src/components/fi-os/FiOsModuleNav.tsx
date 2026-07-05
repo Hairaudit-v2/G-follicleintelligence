@@ -148,7 +148,7 @@ function RowLink(props: {
         <Icon
           className={cn(
             "h-[1.125rem] w-[1.125rem] shrink-0",
-            active ? "text-cyan-300" : "text-slate-500 group-hover:text-slate-300"
+            active ? "fi-tenant-accent-text" : "text-slate-500 group-hover:text-slate-300"
           )}
           aria-hidden
         />
@@ -301,7 +301,7 @@ export function FiOsModuleNav({
               type="button"
               className={cn(
                 "flex w-full items-center gap-1.5 rounded-lg border border-transparent px-1.5 py-1.5 text-left text-[0.6rem] font-semibold uppercase tracking-[0.2em] transition",
-                groupActive ? "text-cyan-200/95" : "text-slate-500/95 hover:bg-white/[0.04] hover:text-slate-300"
+                groupActive ? "fi-tenant-accent-text" : "text-slate-500/95 hover:bg-white/[0.04] hover:text-slate-300"
               )}
               aria-expanded={isExpanded}
               aria-controls={sectionPanelId}
