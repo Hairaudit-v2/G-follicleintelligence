@@ -35,7 +35,7 @@ test("resolveFiOsPrimarySidebarItems: CRM and patients follow flags", () => {
 
 test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () => {
   assert.equal(getFiOsShellActiveSidebarId(`${base}/foundation-integrity`, base), "patient-twin");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff-directory-legacy");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations`, base), "settings");
@@ -164,6 +164,19 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   assert.equal(byId.auditos?.label, "Quality review");
   assert.equal(byId["financial-os"]?.label, "Finances");
   assert.equal(byId.analytics?.label, "Insights");
+  assert.equal(byId.team?.label, "Team");
+});
+
+test("resolveFiOsPrimarySidebarItems: consolidated team entry with preserved legacy sub-links", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, true);
+  const team = items.find((i) => i.id === "team");
+  assert.ok(team?.subItems?.length);
+  const subIds = new Set(team!.subItems!.map((s) => s.id));
+  assert.ok(subIds.has("team-overview"));
+  assert.ok(subIds.has("team-staff"));
+  assert.ok(subIds.has("workforce-os-hub"));
+  assert.ok(subIds.has("onboarding-centre"));
+  assert.ok(!subIds.has("staff-identity-audit"));
 });
 test("filterFiOsPrimarySidebarItemsByFeatureAccess: patient twin row respects imaging OR patient_twin", () => {
   const raw = resolveFiOsPrimarySidebarItems(base, true, true);

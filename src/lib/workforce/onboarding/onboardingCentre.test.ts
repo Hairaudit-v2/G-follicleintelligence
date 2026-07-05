@@ -27,12 +27,15 @@ function withEnv(
   }
 }
 
-test("resolveFiOsPrimarySidebarItems: includes Onboarding Centre when HR OS nav visible", () => {
+test("resolveFiOsPrimarySidebarItems: includes onboarding tab when HR OS nav visible", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, true);
-  const onboarding = items.find((i) => i.id === "onboarding-centre");
+  const team = items.find((i) => i.id === "team");
+  assert.ok(team);
+  const onboarding = team?.subItems?.find((s) => s.id === "team-onboarding");
   assert.ok(onboarding);
-  assert.equal(onboarding?.href, `${base}/hr-os/onboarding`);
-  assert.equal(onboarding?.disabled, false);
+  assert.equal(onboarding?.href, `${base}/team/onboarding`);
+  const legacy = team?.subItems?.find((s) => s.id === "onboarding-centre");
+  assert.equal(legacy?.href, `${base}/hr-os/onboarding`);
 });
 
 test("getFiOsShellActiveSidebarId: hr-os onboarding maps to onboarding-centre sidebar tab", () => {
@@ -40,7 +43,7 @@ test("getFiOsShellActiveSidebarId: hr-os onboarding maps to onboarding-centre si
     getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base),
     "onboarding-centre"
   );
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/offboarding`, base), "hr-os");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/offboarding`, base), "hr-os-dashboard");
 });
 
 test("buildOnboardingInviteUrl: builds tenant-scoped invite path on canonical public URL", () => {

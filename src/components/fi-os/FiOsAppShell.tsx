@@ -177,6 +177,7 @@ function FiOsAppShellBody({
       showFiPaymentsInboxNav,
       showHrOsNav,
       showProcedureDayNav,
+      showNavigationAdminSurfaces,
       showNavigationAdminSurfaces
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
@@ -202,6 +203,7 @@ function FiOsAppShellBody({
         showNavigationAdminSurfaces,
         showProcedureDayNav,
         showSurgeryAdminSurfaces: showNavigationAdminSurfaces,
+        showTeamAdminSurfaces: showNavigationAdminSurfaces,
       }),
     [
       sidebarItems,

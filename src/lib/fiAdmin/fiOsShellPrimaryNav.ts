@@ -8,6 +8,10 @@ import {
   buildSurgerySidebarSubItems,
   FI_OS_SURGERY_NAV_ID,
 } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
+import {
+  buildTeamSidebarSubItems,
+  FI_OS_TEAM_NAV_ID,
+} from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { filterProcedureDayFromFiOsSidebarItems } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
@@ -155,7 +159,8 @@ export function resolveFiOsPrimarySidebarItems(
   showFiPaymentsInboxNav: boolean = false,
   showHrOsNav: boolean = false,
   showProcedureDayNav: boolean = false,
-  showSurgeryAdminSurfaces: boolean = false
+  showSurgeryAdminSurfaces: boolean = false,
+  showTeamAdminSurfaces: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -350,13 +355,17 @@ export function resolveFiOsPrimarySidebarItems(
         : undefined,
     },
     {
-      id: "academyos",
-      featureKey: "academy",
-      label: "Academy",
-      shortLabel: "Academy",
-      href: "#",
-      disabled: true,
-      hint: "Coming soon.",
+      id: FI_OS_TEAM_NAV_ID,
+      featureKey: "staff",
+      label: "Team",
+      shortLabel: "Team",
+      href: hrefFor(b, "team"),
+      disabled: false,
+      hint: "Staff operations, roster, onboarding, compliance, training, and access.",
+      subItems: buildTeamSidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {
+        showHrOsNav,
+        showTeamAdminSurfaces: showTeamAdminSurfaces || showSurgeryAdminSurfaces,
+      }),
     },
     {
       id: "payments-inbox",
@@ -385,35 +394,6 @@ export function resolveFiOsPrimarySidebarItems(
       disabled: blocks.analytics,
       hint: blocks.analytics ? "Insights is hidden for this admin role." : undefined,
     },
-    {
-      id: "staff",
-      featureKey: "staff",
-      label: "Staff",
-      shortLabel: "Staff",
-      href: hrefFor(b, "staff"),
-      disabled: false,
-      hint: "People, roles, and workspace defaults for this clinic.",
-    },
-    ...(showHrOsNav
-      ? [
-          {
-            id: "onboarding-centre",
-            label: "Onboarding Centre",
-            shortLabel: "Onboard",
-            href: hrefFor(b, "hr-os/onboarding"),
-            disabled: false,
-            hint: "Create staff, send invites, and track onboarding checklist progress.",
-          } satisfies FiOsPrimarySidebarItem,
-          {
-            id: "hr-os",
-            label: "Team",
-            shortLabel: "Team",
-            href: hrefFor(b, "workforce-os"),
-            disabled: false,
-            hint: "Team onboarding, compliance, and staff governance.",
-          } satisfies FiOsPrimarySidebarItem,
-        ]
-      : []),
     {
       id: "settings",
       featureKey: "settings",
@@ -490,6 +470,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
     if (firstEarly === "surgery") return FI_OS_SURGERY_NAV_ID;
+    if (firstEarly === "team") return FI_OS_TEAM_NAV_ID;
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
     if (firstEarly === "reception-board") return "reception-board-command";
@@ -507,12 +488,26 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "payments") return "payments-inbox";
     if (firstEarly === "financial-os") return "financial-os";
     if (firstEarly === "financial") return "financial-os";
-    if (firstEarly === "staff") return "staff";
+    if (firstEarly === "staff") return "staff-directory-legacy";
+    if (firstEarly === "workforce-os") {
+      const secondEarly = restEarly.split("/")[1] ?? "";
+      if (secondEarly === "staff-identity-audit") return "staff-identity-audit";
+      if (secondEarly === "staff-access") return "staff-access-legacy";
+      if (secondEarly === "hr-task-map") return "hr-task-map-legacy";
+      if (secondEarly === "roster") return "roster-command-legacy";
+      return "workforce-os-hub";
+    }
     if (firstEarly === "hr-os") {
       const secondEarly = restEarly.split("/")[1] ?? "";
       if (secondEarly === "onboarding") return "onboarding-centre";
-      return "hr-os";
+      if (secondEarly === "compliance") return "compliance-legacy";
+      if (secondEarly === "certifications") return "certifications-legacy";
+      if (secondEarly === "credentials") return "credentials-legacy";
+      if (secondEarly === "sync-health") return "hr-os-sync-health";
+      if (secondEarly === "roster") return "roster-command-legacy";
+      return "hr-os-dashboard";
     }
+    if (firstEarly === "academy") return "academyos";
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
@@ -548,8 +543,23 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (first === "hr-os") {
       const second = rest.split("/")[1] ?? "";
       if (second === "onboarding") return "onboarding-centre";
-      return "hr-os";
+      if (second === "compliance") return "compliance-legacy";
+      if (second === "certifications") return "certifications-legacy";
+      if (second === "credentials") return "credentials-legacy";
+      if (second === "sync-health") return "hr-os-sync-health";
+      if (second === "roster") return "roster-command-legacy";
+      return "hr-os-dashboard";
     }
+    if (first === "workforce-os") {
+      const second = rest.split("/")[1] ?? "";
+      if (second === "staff-identity-audit") return "staff-identity-audit";
+      if (second === "staff-access") return "staff-access-legacy";
+      if (second === "hr-task-map") return "hr-task-map-legacy";
+      if (second === "roster") return "roster-command-legacy";
+      return "workforce-os-hub";
+    }
+    if (first === "team") return FI_OS_TEAM_NAV_ID;
+    if (first === "academy") return "academyos";
   }
 
   return null;

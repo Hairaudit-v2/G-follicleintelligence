@@ -50,6 +50,8 @@ export type BuildRosterCommandCentreHrefInput = {
   date?: string | null;
   /** When set, roster href uses workforce-os route instead of hr-os. */
   useWorkforceOsRoute?: boolean;
+  /** When set, roster href uses consolidated team workspace route. */
+  useTeamRoute?: boolean;
 };
 
 function trimOrUndefined(value: string | null | undefined): string | undefined {
@@ -59,9 +61,12 @@ function trimOrUndefined(value: string | null | undefined): string | undefined {
 
 /** Build roster command centre href with optional filters and event preselection. */
 export function buildRosterCommandCentreHref(input: BuildRosterCommandCentreHrefInput): string {
-  const base = input.useWorkforceOsRoute
-    ? `/fi-admin/${input.tenantId.trim()}/workforce-os/roster`
-    : `/fi-admin/${input.tenantId.trim()}/hr-os/roster`;
+  const tid = input.tenantId.trim();
+  const base = input.useTeamRoute
+    ? `/fi-admin/${tid}/team/roster`
+    : input.useWorkforceOsRoute
+      ? `/fi-admin/${tid}/workforce-os/roster`
+      : `/fi-admin/${tid}/hr-os/roster`;
   const params = new URLSearchParams();
 
   const dateFrom = trimOrUndefined(input.dateFrom);

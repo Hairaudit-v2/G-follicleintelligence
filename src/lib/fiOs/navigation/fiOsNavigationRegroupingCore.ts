@@ -5,6 +5,7 @@
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import { FI_OS_D6_INTELLIGENCE_NAV_ENTRIES } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
 import { FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
+import { FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
 /** Six-slot collapsed primary rail link ids (More is an action). */
 export const FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS = [
@@ -23,7 +24,7 @@ export const FI_OS_D6G_PRIMARY_RAIL_NAV_IDS = new Set([
   "dashboard",
   "calendar",
   "patients",
-  "hr-os",
+  "team",
   "analytics",
 ]);
 
@@ -83,10 +84,22 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   "d6-signal-learning": "REPORTS",
   "d6-bake": "REPORTS",
   "d6-navigation-audit": "REPORTS",
+  team: "TEAM",
   academyos: "TEAM",
   staff: "TEAM",
   "onboarding-centre": "TEAM",
   "hr-os": "TEAM",
+  "workforce-os-hub": "TEAM",
+  "hr-os-dashboard": "TEAM",
+  "staff-directory-legacy": "TEAM",
+  "roster-command-legacy": "TEAM",
+  "compliance-legacy": "TEAM",
+  "certifications-legacy": "TEAM",
+  "credentials-legacy": "TEAM",
+  "staff-identity-audit": "TEAM",
+  "staff-access-legacy": "TEAM",
+  "hr-task-map-legacy": "TEAM",
+  "hr-os-sync-health": "TEAM",
   settings: "SETTINGS",
 };
 
@@ -111,12 +124,20 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "front-desk-clinic-flow": "FRONT_DESK",
   "front-desk-reception-board": "FRONT_DESK",
   "front-desk-tomorrow": "FRONT_DESK",
+  "team-overview": "TEAM",
+  "team-staff": "TEAM",
+  "team-roster": "TEAM",
+  "team-onboarding": "TEAM",
+  "team-compliance": "TEAM",
+  "team-training": "TEAM",
+  "team-identity": "TEAM",
 };
 
 /** Sub-items hidden from More drawer (routes remain live). */
 export const FI_OS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
   "pathology-email-routes",
   ...FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS,
+  ...FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS,
 ]);
 
 /** D6 admin route ids — shown in Reports when admin surfaces are allowed. */
@@ -132,7 +153,7 @@ const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
   SURGERY: ["surgery"],
   FINANCE: ["payments-inbox", "financial-os"],
   REPORTS: ["analytics", "auditos", "d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"],
-  TEAM: ["hr-os", "staff", "onboarding-centre", "academyos"],
+  TEAM: ["team"],
   SETTINGS: ["settings"],
 };
 
@@ -190,6 +211,7 @@ export function filterSubItemsForMoreDrawer(
     showProcedureDayNav?: boolean;
     showNavigationAdminSurfaces?: boolean;
     showSurgeryAdminSurfaces?: boolean;
+    showTeamAdminSurfaces?: boolean;
   }
 ): FiOsPrimarySidebarItem {
   const subs = item.subItems;
@@ -201,6 +223,15 @@ export function filterSubItemsForMoreDrawer(
       if (
         (sub.id === "surgery-intelligence-dashboard" || sub.id === "graft-counting-legacy") &&
         opts.showSurgeryAdminSurfaces
+      ) {
+        return true;
+      }
+      if (
+        (sub.id === "staff-identity-audit" ||
+          sub.id === "staff-access-legacy" ||
+          sub.id === "hr-task-map-legacy" ||
+          sub.id === "hr-os-sync-health") &&
+        opts.showTeamAdminSurfaces
       ) {
         return true;
       }
@@ -237,11 +268,7 @@ export function resolvePrimaryRailSidebarTarget(
     case "patients":
       return sidebarItems.find((i) => i.id === "patients") ?? null;
     case "team":
-      return (
-        sidebarItems.find((i) => i.id === "hr-os") ??
-        sidebarItems.find((i) => i.id === "staff") ??
-        null
-      );
+      return sidebarItems.find((i) => i.id === "team") ?? null;
     case "reports":
       return sidebarItems.find((i) => i.id === "analytics") ?? null;
     default:

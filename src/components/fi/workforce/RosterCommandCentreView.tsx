@@ -71,6 +71,7 @@ export type RosterCommandCentreViewProps = {
     status: RosterStaffingStatusFilter | "";
   };
   useWorkforceOsRoute?: boolean;
+  useTeamRoute?: boolean;
   canManage?: boolean;
   manageDeniedReason?: string;
 };
@@ -109,6 +110,7 @@ export function RosterCommandCentreView({
   eventDetails,
   filters,
   useWorkforceOsRoute = false,
+  useTeamRoute = false,
   canManage = true,
   manageDeniedReason = STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 }: RosterCommandCentreViewProps) {
@@ -207,6 +209,7 @@ export function RosterCommandCentreView({
         eventSource: selectedEventKey?.split(":")[0] as "booking" | undefined,
         eventId: selectedEventKey?.split(":")[1] ?? null,
         useWorkforceOsRoute,
+        useTeamRoute,
       })
     );
   }

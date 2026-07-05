@@ -53,7 +53,7 @@ function linkFromRailSlot(
       : slotId === "patients"
         ? `${b}/patients`
         : slotId === "team"
-          ? `${b}/workforce-os`
+          ? `${b}/team`
           : `${b}/analytics`;
 
   return {
@@ -110,6 +110,7 @@ export function getFiOsMinimalNavActiveId(
   }
 
   if (
+    np.startsWith(`${nb}/team`) ||
     np.startsWith(`${nb}/workforce-os`) ||
     np.startsWith(`${nb}/hr-os`) ||
     np === `${nb}/staff` ||

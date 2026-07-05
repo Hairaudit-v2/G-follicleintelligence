@@ -87,8 +87,12 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "payments" || f.startsWith("payments/"), feature: "settings" },
   { test: (f) => f === "financial-os" || f.startsWith("financial-os/"), feature: "settings" },
   { test: (f) => f === "financial" || f.startsWith("financial/"), feature: "settings" },
+  { test: (f) => f === "team/roster" || f.startsWith("team/roster/"), feature: "staff" },
+  { test: (f) => f === "team" || f.startsWith("team/"), feature: "staff" },
   { test: (f) => f === "staff" || f.startsWith("staff/"), feature: "staff" },
   { test: (f) => f.startsWith("hr/"), feature: "staff" },
+  { test: (f) => f === "workforce-os" || f.startsWith("workforce-os/"), feature: "staff" },
+  { test: (f) => f === "hr-os" || f.startsWith("hr-os/"), feature: "staff" },
 ];
 
 /**

@@ -135,7 +135,7 @@ const D6_PRIMARY_RAIL_NAV_IDS = new Set([
   "dashboard",
   "calendar",
   "patients",
-  "hr-os",
+  "team",
   "analytics",
 ]);
 
@@ -547,7 +547,7 @@ export function buildNavigationDriftReport(
     "Surgery consolidated under /surgery — legacy /surgery-os, /cases, /procedure-day, and /surgery-os/intelligence routes must stay live.",
     "Front desk consolidated under /front-desk — legacy /operations, /reception-os, /reception, /reception-board, /tomorrow routes must stay live.",
     "D6 intelligence routes (/intelligence/*) are admin-only — keep URLs when hiding from staff nav.",
-    "Team vs Staff vs Onboarding Centre vs hr-os label collision — align under Team without breaking workforce-os paths.",
+    "Team consolidated under /team — legacy /workforce-os, /hr-os, /staff, and Academy routes must stay live.",
     "Collapsed primary rail is six slots — do not add module-language labels to the rail.",
   ];
 

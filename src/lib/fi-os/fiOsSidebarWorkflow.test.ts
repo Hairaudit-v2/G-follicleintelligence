@@ -46,7 +46,7 @@ test("workflow: empty groups omitted when all items filtered by Stage 2", () => 
   assert.ok(!sections.some((s) => s.groupId === "TEAM"));
 });
 
-test("workflow: sections include staff when feature on", () => {
+test("workflow: sections include team when staff feature on", () => {
   const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true);
   const access = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     staff: true,
@@ -54,7 +54,7 @@ test("workflow: sections include staff when feature on", () => {
   const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, access);
   const sections = buildFiOsSidebarWorkflowSections(filtered, "clinic_manager");
   const team = sections.find((s) => s.groupId === "TEAM");
-  assert.ok(team?.items.some((i) => i.id === "staff"));
+  assert.ok(team?.items.some((i) => i.id === "team"));
 });
 
 test("workflow: collapsed More omits primary rail duplicates", () => {
@@ -66,6 +66,6 @@ test("workflow: collapsed More omits primary rail duplicates", () => {
   const ids = sections.flatMap((s) => s.items.map((i) => i.id));
   assert.ok(!ids.includes("calendar"));
   assert.ok(!ids.includes("patients"));
-  assert.ok(!ids.includes("hr-os"));
+  assert.ok(ids.includes("team"));
   assert.ok(!ids.includes("analytics"));
 });
