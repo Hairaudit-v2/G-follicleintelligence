@@ -49,7 +49,22 @@ const googleCalendarCspOrigins = {
 // inline hydration scripts that cannot be nonce-gated without additional
 // server-side nonce injection. This will be tightened in a future pass once
 // a nonce strategy is in place.
+//
+// 'unsafe-eval' is added ONLY in development: `next dev` compiles client
+// bundles with an eval-based webpack devtool, so without it the browser CSP
+// blocks module evaluation and React never hydrates. Production builds do not
+// use eval, so it is never emitted in prod.
 // ---------------------------------------------------------------------------
+const isDevelopment = process.env.NODE_ENV !== "production";
+
+const scriptSrc = [
+  "script-src 'self' 'unsafe-inline'",
+  isDevelopment ? "'unsafe-eval'" : null,
+  "https://va.vercel-analytics.com https://vitals.vercel-insights.com https://vercel.live",
+]
+  .filter(Boolean)
+  .join(" ");
+
 const securityHeaders = [
   // Prevent MIME-type sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -67,8 +82,9 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // unsafe-inline required for Next.js App Router hydration scripts
-      "script-src 'self' 'unsafe-inline' https://va.vercel-analytics.com https://vitals.vercel-insights.com https://vercel.live",
+      // unsafe-inline required for Next.js App Router hydration scripts;
+      // 'unsafe-eval' added in development only (see scriptSrc above).
+      scriptSrc,
       // unsafe-inline required for Tailwind CSS-in-JS class injection
       "style-src 'self' 'unsafe-inline'",
       // Supabase storage URLs are HTTPS; data:/blob: needed for canvas/previews
