@@ -95,3 +95,16 @@ This grants exactly `roster.manage` + `roster.standard_hours.manage` (behaviour 
 - Anita Cottee `e13edbee`: on_leave + archived — restore if on maternity leave, offboard if departed.
 - Paul Green (owner) `b5edae32`: still `pending_onboarding` — complete via Onboarding Centre.
 - PAUL GREEN `ff93d9e3`/`a7b17dbf`: pick merge target in Duplicate Review ("Paul" vs "Paul Green").
+
+## Final status (2026-07-06)
+
+FI-WORKFORCE-ROSTER-STABILISE-P0 (`8666974f`) + FI-WORKFORCE-LIVE-DATA-CLEANUP-1 (`599be182`) are complete.
+
+Staff go-live status:
+
+- Workforce lifecycle/status: **green**
+- Directory active counts: **green**
+- Duplicate staff protection: **green**
+- Roster eligibility: **green**
+- Roster manage permissions: **green**
+- Remaining manual HR decisions: Anita Cottee, Paul Green onboarding, PAUL GREEN duplicate review
