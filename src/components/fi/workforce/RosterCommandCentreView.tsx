@@ -626,6 +626,8 @@ export function RosterCommandCentreView({
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           selectedShift={drawerShift}
           clinics={payload.clinics}
+          canManage={canManage}
+          manageDeniedReason={manageDeniedReason}
           onClose={closeDrawer}
           onRefresh={refresh}
           onEditStandardHours={openStandardHoursDrawer}

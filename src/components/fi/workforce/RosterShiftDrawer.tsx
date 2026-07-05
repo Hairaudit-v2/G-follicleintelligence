@@ -17,8 +17,11 @@ import {
 import { shiftSourceDisplayLabel } from "@/src/lib/workforce-os/rosterGenerationCore";
 import {
   ROSTER_MANUAL_ADJUSTMENT_REASONS,
+  ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE,
+  ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS,
   formatRosterAdjustmentReasonLabel,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
+import { STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { RosterRightDrawer } from "@/src/components/fi/workforce/RosterRightDrawer";
@@ -47,6 +50,8 @@ export type RosterShiftDrawerProps = {
   rosterCycleAnchorDate?: string;
   selectedShift: RosterGridShift | null;
   clinics: Array<{ id: string; displayName: string }>;
+  canManage?: boolean;
+  manageDeniedReason?: string;
   onClose: () => void;
   onRefresh: () => void;
   onEditStandardHours: (staffId: string) => void;
@@ -80,6 +85,8 @@ function RosterShiftDrawerBody({
   rosterCycleAnchorDate = "2026-01-05",
   selectedShift,
   clinics,
+  canManage = true,
+  manageDeniedReason = STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
   onClose,
   onRefresh,
   onEditStandardHours,
@@ -112,11 +119,17 @@ function RosterShiftDrawerBody({
   );
   const [notes, setNotes] = useState(editing?.notes ?? "");
   const [adjustmentReason, setAdjustmentReason] = useState("manual_adjustment");
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [cancelNotes, setCancelNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function handleGenerateDay() {
     setError(null);
+    if (!canManage) {
+      setError(manageDeniedReason);
+      return;
+    }
     if (!canGenerateFromStandardHours) {
       setError(
         "No standard hours are set for this staff member on this day. Add a manual shift instead."
@@ -149,6 +162,10 @@ function RosterShiftDrawerBody({
   function handleCreateManual(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!canManage) {
+      setError(manageDeniedReason);
+      return;
+    }
     startTransition(async () => {
       const result = await createRosterShiftAction({
         tenantId,
@@ -170,10 +187,19 @@ function RosterShiftDrawerBody({
   }
 
   function handleCancelShift() {
-    if (!editing) return;
+    if (!editing || !canManage) return;
+    if (!cancellationReason.trim()) {
+      setError(ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE);
+      return;
+    }
     setError(null);
     startTransition(async () => {
-      const result = await cancelRosterShiftAction({ tenantId, shiftId: editing.id });
+      const result = await cancelRosterShiftAction({
+        tenantId,
+        shiftId: editing.id,
+        cancellationReason,
+        notes: cancelNotes || null,
+      });
       if (!result.ok) {
         setError(result.error);
         return;
@@ -182,6 +208,8 @@ function RosterShiftDrawerBody({
       onRefresh();
     });
   }
+
+  const readOnlyManageMessage = "You do not have permission to manage roster shifts.";
 
   return (
     <RosterRightDrawer
@@ -203,54 +231,71 @@ function RosterShiftDrawerBody({
       onClose={onClose}
       testId="roster-shift-drawer"
     >
+      {!canManage ? (
+        <p
+          className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-100"
+          data-testid="roster-shift-manage-denied"
+        >
+          {readOnlyManageMessage}
+        </p>
+      ) : null}
+
       {mode === "cell-actions" ? (
         <div className="space-y-3">
-          <button
-            type="button"
-            disabled={pending || !canGenerateFromStandardHours}
-            onClick={handleGenerateDay}
-            data-testid="generate-day-from-standard-hours"
-            title={
-              !canGenerateFromStandardHours
-                ? "No standard hours are set for this day."
-                : undefined
-            }
-            className="w-full rounded-lg bg-cyan-600 px-4 py-3 text-left text-sm font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Generate this day from standard hours
-          </button>
-          {!canGenerateFromStandardHours ? (
-            <p className="text-xs text-amber-200/90" data-testid="generate-day-no-standard-hours">
-              No standard hours are set for this staff member on this day. Add a manual shift
-              instead.
-            </p>
+          {canManage ? (
+            <>
+              <button
+                type="button"
+                disabled={pending || !canGenerateFromStandardHours}
+                onClick={handleGenerateDay}
+                data-testid="generate-day-from-standard-hours"
+                title={
+                  !canGenerateFromStandardHours
+                    ? "No standard hours are set for this day."
+                    : undefined
+                }
+                className="w-full rounded-lg bg-cyan-600 px-4 py-3 text-left text-sm font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Generate this day from standard hours
+              </button>
+              {!canGenerateFromStandardHours ? (
+                <p
+                  className="text-xs text-amber-200/90"
+                  data-testid="generate-day-no-standard-hours"
+                >
+                  No standard hours are set for this staff member on this day. Add a manual shift
+                  instead.
+                </p>
+              ) : null}
+              <ManualShiftForm
+                staffName={staffName}
+                clinicId={clinicId}
+                clinics={clinics}
+                shiftType={shiftType}
+                startsAt={startsAt}
+                endsAt={endsAt}
+                notes={notes}
+                adjustmentReason={adjustmentReason}
+                pending={pending}
+                readOnly={false}
+                showSave
+                onClinicChange={setClinicId}
+                onShiftTypeChange={setShiftType}
+                onStartsAtChange={setStartsAt}
+                onEndsAtChange={setEndsAt}
+                onNotesChange={setNotes}
+                onAdjustmentReasonChange={setAdjustmentReason}
+                onSubmit={handleCreateManual}
+              />
+              <button
+                type="button"
+                onClick={() => onEditStandardHours(staffId)}
+                className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-200 hover:bg-white/[0.04]"
+              >
+                Edit standard hours
+              </button>
+            </>
           ) : null}
-          <ManualShiftForm
-            staffName={staffName}
-            clinicId={clinicId}
-            clinics={clinics}
-            shiftType={shiftType}
-            startsAt={startsAt}
-            endsAt={endsAt}
-            notes={notes}
-            adjustmentReason={adjustmentReason}
-            pending={pending}
-            showSave
-            onClinicChange={setClinicId}
-            onShiftTypeChange={setShiftType}
-            onStartsAtChange={setStartsAt}
-            onEndsAtChange={setEndsAt}
-            onNotesChange={setNotes}
-            onAdjustmentReasonChange={setAdjustmentReason}
-            onSubmit={handleCreateManual}
-          />
-          <button
-            type="button"
-            onClick={() => onEditStandardHours(staffId)}
-            className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-200 hover:bg-white/[0.04]"
-          >
-            Edit standard hours
-          </button>
           {error ? <p className="text-sm text-rose-300">{error}</p> : null}
         </div>
       ) : (
@@ -270,7 +315,8 @@ function RosterShiftDrawerBody({
             notes={notes}
             adjustmentReason={adjustmentReason}
             pending={pending}
-            showSave={!editing}
+            readOnly={Boolean(editing) || !canManage}
+            showSave={!editing && canManage}
             onClinicChange={setClinicId}
             onShiftTypeChange={setShiftType}
             onStartsAtChange={setStartsAt}
@@ -279,15 +325,47 @@ function RosterShiftDrawerBody({
             onAdjustmentReasonChange={setAdjustmentReason}
             onSubmit={handleCreateManual}
           />
-          {editing ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={handleCancelShift}
-              className="rounded-lg border border-rose-500/40 px-3 py-2 text-sm text-rose-300 hover:bg-rose-950/30 disabled:opacity-50"
+          {editing && canManage ? (
+            <div
+              className="space-y-3 rounded-lg border border-rose-500/20 bg-rose-950/10 p-3"
+              data-testid="roster-shift-cancel-section"
             >
-              Cancel shift
-            </button>
+              <p className="text-sm font-medium text-rose-200">Cancel this shift</p>
+              <label className="block text-xs text-slate-400">
+                Cancellation reason
+                <select
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+                  data-testid="roster-shift-cancellation-reason"
+                >
+                  <option value="">Select a reason…</option>
+                  {ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS.map((reason) => (
+                    <option key={reason} value={reason}>
+                      {formatRosterAdjustmentReasonLabel(reason)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-xs text-slate-400">
+                Notes (optional)
+                <input
+                  value={cancelNotes}
+                  onChange={(e) => setCancelNotes(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+                  placeholder="Additional context"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={pending || !cancellationReason.trim()}
+                onClick={handleCancelShift}
+                data-testid="roster-shift-cancel-confirm"
+                className="rounded-lg border border-rose-500/40 px-3 py-2 text-sm text-rose-300 hover:bg-rose-950/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Confirm cancel shift
+              </button>
+            </div>
           ) : null}
           {error ? <p className="text-sm text-rose-300">{error}</p> : null}
         </div>
@@ -306,6 +384,7 @@ type ManualShiftFormProps = {
   notes: string;
   adjustmentReason: string;
   pending: boolean;
+  readOnly: boolean;
   showSave: boolean;
   onClinicChange: (v: string) => void;
   onShiftTypeChange: (v: string) => void;
@@ -326,6 +405,7 @@ function ManualShiftForm({
   notes,
   adjustmentReason,
   pending,
+  readOnly,
   showSave,
   onClinicChange,
   onShiftTypeChange,
@@ -349,7 +429,8 @@ function ManualShiftForm({
         <select
           value={clinicId}
           onChange={(e) => onClinicChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+          disabled={readOnly}
+          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm disabled:opacity-70"
         >
           <option value="">Any clinic</option>
           {clinics.map((c) => (
@@ -364,7 +445,8 @@ function ManualShiftForm({
         <select
           value={shiftType}
           onChange={(e) => onShiftTypeChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+          disabled={readOnly}
+          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm disabled:opacity-70"
         >
           {SHIFT_TYPES.map((t) => (
             <option key={t} value={t}>
@@ -379,8 +461,9 @@ function ManualShiftForm({
           type="datetime-local"
           value={startsAt}
           onChange={(e) => onStartsAtChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
-          required
+          disabled={readOnly}
+          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm disabled:opacity-70"
+          required={!readOnly}
         />
       </label>
       <label className="block text-xs text-slate-400">
@@ -389,31 +472,35 @@ function ManualShiftForm({
           type="datetime-local"
           value={endsAt}
           onChange={(e) => onEndsAtChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
-          required
+          disabled={readOnly}
+          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm disabled:opacity-70"
+          required={!readOnly}
         />
       </label>
-      <label className="block text-xs text-slate-400">
-        Reason
-        <select
-          value={adjustmentReason}
-          onChange={(e) => onAdjustmentReasonChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
-          data-testid="roster-shift-adjustment-reason"
-        >
-          {ROSTER_MANUAL_ADJUSTMENT_REASONS.map((reason) => (
-            <option key={reason} value={reason}>
-              {formatRosterAdjustmentReasonLabel(reason)}
-            </option>
-          ))}
-        </select>
-      </label>
+      {!readOnly ? (
+        <label className="block text-xs text-slate-400">
+          Reason
+          <select
+            value={adjustmentReason}
+            onChange={(e) => onAdjustmentReasonChange(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+            data-testid="roster-shift-adjustment-reason"
+          >
+            {ROSTER_MANUAL_ADJUSTMENT_REASONS.map((reason) => (
+              <option key={reason} value={reason}>
+                {formatRosterAdjustmentReasonLabel(reason)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
       <label className="block text-xs text-slate-400">
         Notes
         <input
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+          disabled={readOnly}
+          className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm disabled:opacity-70"
           placeholder="Manual adjustment"
         />
       </label>

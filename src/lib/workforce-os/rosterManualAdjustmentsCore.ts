@@ -23,11 +23,30 @@ export const ROSTER_SHIFT_CANCELLATION_REASONS = [
   "duplicate_generated_shift",
   "replaced_by_another_staff_member",
   "created_in_error",
+  "manual_adjustment",
   "clear_generated_roster",
   "other",
 ] as const;
 
 export type RosterShiftCancellationReason = (typeof ROSTER_SHIFT_CANCELLATION_REASONS)[number];
+
+/** User-facing cancellation reasons for roster shift drawer (excludes bulk-only codes). */
+export const ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS = [
+  "staff_sick",
+  "clinic_closed",
+  "surgery_cancelled",
+  "duplicate_generated_shift",
+  "replaced_by_another_staff_member",
+  "created_in_error",
+  "manual_adjustment",
+  "other",
+] as const;
+
+export type RosterShiftDrawerCancellationReason =
+  (typeof ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS)[number];
+
+export const ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE =
+  "Please choose a cancellation reason before cancelling this shift.";
 
 export const ROSTER_SHIFT_AUDIT_ACTION_TYPES = {
   SHIFT_CREATED_MANUAL: "shift_created_manual",

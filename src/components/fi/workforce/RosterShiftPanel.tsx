@@ -79,7 +79,11 @@ export function RosterShiftPanel({
   function handleCancel(shiftId: string) {
     setError(null);
     startTransition(async () => {
-      const result = await cancelRosterShiftAction({ tenantId, shiftId });
+      const result = await cancelRosterShiftAction({
+        tenantId,
+        shiftId,
+        cancellationReason: "other",
+      });
       if (!result.ok) {
         setError(result.error);
         return;

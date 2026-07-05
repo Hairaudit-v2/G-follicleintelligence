@@ -188,3 +188,26 @@ test("StaffStandardHoursPageClient exposes index and editor surfaces", () => {
     'data-testid="standard-hours-manage-denied"'
   );
 });
+
+test("RosterShiftDrawer passes canManage from command centre and supports read-only shift view", () => {
+  sourceIncludes(
+    ROSTER_VIEW,
+    "canManage={canManage}",
+    "manageDeniedReason={manageDeniedReason}",
+    "handleShiftClick"
+  );
+  sourceIncludes(
+    ROSTER_SHIFT_DRAWER,
+    "canManage?: boolean",
+    'data-testid="roster-shift-manage-denied"',
+    'data-testid="roster-shift-cancel-confirm"',
+    "ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS"
+  );
+});
+
+test("cancelRosterShiftAction uses audited manual adjustment cancel path", () => {
+  const actions = readFileSync("src/lib/actions/workforce-roster-actions.ts", "utf8");
+  assert.ok(actions.includes("cancelStaffShiftWithReason"));
+  assert.ok(!actions.includes("cancelStaffShift("));
+  assert.ok(actions.includes("ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE"));
+});

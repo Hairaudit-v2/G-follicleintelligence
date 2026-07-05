@@ -215,3 +215,18 @@ test("RosterShiftDrawer exposes generate and manual shift actions with reason fi
   assert.ok(src.includes('data-testid="roster-shift-adjustment-reason"'));
   assert.ok(src.includes("No standard hours are set for this staff member on this day"));
 });
+
+test("RosterShiftDrawer gates mutations when canManage is false", () => {
+  const src = readFileSync("src/components/fi/workforce/RosterShiftDrawer.tsx", "utf8");
+  assert.ok(src.includes('data-testid="roster-shift-manage-denied"'));
+  assert.ok(src.includes("You do not have permission to manage roster shifts."));
+  assert.ok(src.includes("{editing && canManage ? ("));
+  assert.ok(src.includes('data-testid="roster-shift-cancellation-reason"'));
+  assert.ok(src.includes("disabled={pending || !cancellationReason.trim()}"));
+});
+
+test("RosterCommandCentreView passes canManage into RosterShiftDrawer", () => {
+  const src = readFileSync("src/components/fi/workforce/RosterCommandCentreView.tsx", "utf8");
+  assert.ok(src.includes("canManage={canManage}"));
+  assert.ok(src.includes("manageDeniedReason={manageDeniedReason}"));
+});

@@ -524,7 +524,10 @@ describe("cancel confirmed shift retains historical record", () => {
 
     assert.equal(shift.status, "cancelled");
     assert.equal(supabase.shifts.length, 1);
+    assert.equal(supabase.shifts[0]?.updated_by, FI_USER);
+    assert.equal(supabase.shifts[0]?.cancellation_reason, "staff_sick");
     assert.equal(supabase.auditEvents[0]?.action_type, ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_CANCELLED);
+    assert.equal(supabase.auditEvents[0]?.actor_fi_user_id, FI_USER);
   });
 });
 

@@ -14,7 +14,6 @@ import {
   assignStaffToClinicalEventAction,
   cancelAvailabilityBlock,
   cancelStaffEventAssignment,
-  cancelStaffShift,
   createAvailabilityBlock,
   createStaffShift,
   type FiStaffAvailabilityBlockRow,
@@ -33,6 +32,10 @@ import {
   type SaveStaffStandardHoursResult,
 } from "@/src/lib/workforce-os/staffStandardHours.server";
 import { ROSTER_TX_OUTCOMES } from "@/src/lib/workforce-os/rosterTxCore";
+import {
+  ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE,
+  ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS,
+} from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
 const eventSourceSchema = z.enum(["booking", "surgery", "calendar", "manual"]);
@@ -88,6 +91,50 @@ const createBlockSchema = z.object({
 const cancelShiftSchema = z.object({
   tenantId: z.string().uuid(),
   shiftId: z.string().uuid(),
+  cancellationReason: z
+    .string()
+    .trim()
+    .min(1, ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE)
+    .refine(
+      (value) =>
+        (ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS as readonly string[]).includes(value),
+      ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE
+    ),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+const updateShiftSchema = z.object({
+  tenantId: z.string().uuid(),
+  shiftId: z.string().uuid(),
+  staffId: z.string().uuid().optional(),
+  clinicId: z.string().uuid().optional().nullable(),
+  shiftType: z.string().min(1).max(64).optional(),
+  startsAt: z.string().min(1).optional(),
+  endsAt: z.string().min(1).optional(),
+  notes: z.string().max(500).optional().nullable(),
+  adjustmentReason: z.string().max(64).optional().nullable(),
+  allowOverride: z.boolean().optional(),
+});
+
+const clearGeneratedRosterSchema = z.object({
+  tenantId: z.string().uuid(),
+  rangeStartIso: z.string().min(1),
+  rangeEndIso: z.string().min(1),
+  staffIds: z.array(z.string().uuid()).optional(),
+});
+
+const markStaffSickSchema = z.object({
+  tenantId: z.string().uuid(),
+  shiftId: z.string().uuid(),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+const createReplacementShiftSchema = z.object({
+  tenantId: z.string().uuid(),
+  originalShiftId: z.string().uuid(),
+  replacementStaffId: z.string().uuid(),
+  notes: z.string().max(500).optional().nullable(),
+  allowOverride: z.boolean().optional(),
 });
 
 const cancelBlockSchema = z.object({
@@ -331,17 +378,155 @@ export async function cancelRosterShiftAction(
     await assertHrOsRosterManageAllowed(parsed.tenantId);
     const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
-    const shift = await cancelStaffShift(parsed.tenantId, parsed.shiftId);
+    const { cancelStaffShiftWithReason } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustments.server"
+    );
+
+    const shift = await cancelStaffShiftWithReason({
+      tenantId: parsed.tenantId,
+      shiftId: parsed.shiftId,
+      cancellationReason: parsed.cancellationReason,
+      updatedBy: actorFiUserId,
+      hardDeleteGeneratedDraft: true,
+    });
 
     await logRosterAuditEvent({
       action: "shift_cancelled",
       shift_id: shift.id,
       staff_id: shift.staff_id,
+      cancellation_reason: parsed.cancellationReason,
+      notes: parsed.notes ?? null,
       actor_user_id: actorFiUserId,
     });
 
     revalidateRosterSurfaces(parsed.tenantId);
     return { ok: true, data: shift };
+  } catch (e) {
+    if (e instanceof ZodError) {
+      const reasonIssue = e.errors.find((issue) => issue.path[0] === "cancellationReason");
+      if (reasonIssue) {
+        return { ok: false, error: ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE };
+      }
+    }
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function updateRosterShiftAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
+  try {
+    const parsed = updateShiftSchema.parse(body);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
+
+    const { updateStaffShift } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustments.server"
+    );
+
+    const result = await updateStaffShift({
+      tenantId: parsed.tenantId,
+      shiftId: parsed.shiftId,
+      staffId: parsed.staffId,
+      clinicId: parsed.clinicId,
+      shiftType: parsed.shiftType,
+      startsAt: parsed.startsAt,
+      endsAt: parsed.endsAt,
+      notes: parsed.notes,
+      adjustmentReason: parsed.adjustmentReason ?? "manual_adjustment",
+      updatedBy: actorFiUserId,
+      allowOverride: parsed.allowOverride,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: result.shift };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function clearGeneratedRosterShiftsAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<{ cancelledCount: number }>> {
+  try {
+    const parsed = clearGeneratedRosterSchema.parse(body);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
+
+    const { clearGeneratedRosterShiftsForPeriod } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustments.server"
+    );
+
+    const result = await clearGeneratedRosterShiftsForPeriod({
+      tenantId: parsed.tenantId,
+      rangeStartIso: parsed.rangeStartIso,
+      rangeEndIso: parsed.rangeEndIso,
+      staffIds: parsed.staffIds,
+      updatedBy: actorFiUserId,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: { cancelledCount: result.cancelledCount } };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function markStaffSickForShiftAction(
+  body: unknown
+): Promise<
+  WorkforceRosterActionResult<{
+    cancelledShift: FiStaffShiftRow;
+    sickBlock: FiStaffAvailabilityBlockRow;
+    replacementCandidates: import("@/src/lib/workforce-os/workforceRosterCandidates").RosterAssignableCandidate[];
+  }>
+> {
+  try {
+    const parsed = markStaffSickSchema.parse(body);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
+
+    const { markStaffSickForShift } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustments.server"
+    );
+
+    const result = await markStaffSickForShift({
+      tenantId: parsed.tenantId,
+      shiftId: parsed.shiftId,
+      updatedBy: actorFiUserId,
+      notes: parsed.notes,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createReplacementShiftAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<FiStaffShiftRow>> {
+  try {
+    const parsed = createReplacementShiftSchema.parse(body);
+    await assertHrOsRosterManageAllowed(parsed.tenantId);
+    const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
+
+    const { createReplacementShiftForSickCover } = await import(
+      "@/src/lib/workforce-os/rosterManualAdjustments.server"
+    );
+
+    const result = await createReplacementShiftForSickCover({
+      tenantId: parsed.tenantId,
+      originalShiftId: parsed.originalShiftId,
+      replacementStaffId: parsed.replacementStaffId,
+      updatedBy: actorFiUserId,
+      notes: parsed.notes,
+      allowOverride: parsed.allowOverride,
+    });
+
+    revalidateRosterSurfaces(parsed.tenantId);
+    return { ok: true, data: result.shift };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
