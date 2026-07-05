@@ -139,6 +139,14 @@ export function FiOsClinicSettingsNav({
             Integrations
           </Link>
         ) : null}
+        {showConfiguration ? (
+          <Link
+            href={`${base}/settings/hairaudit-discovery`}
+            className={linkCls(`${base}/settings/hairaudit-discovery`)}
+          >
+            HairAudit discovery
+          </Link>
+        ) : null}
         {showReminders || showTax ? (
           <Link href={`${base}/settings/payments`} className={linkCls(`${base}/settings/payments`)}>
             Payments
