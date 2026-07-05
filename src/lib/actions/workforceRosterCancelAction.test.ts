@@ -72,8 +72,8 @@ describe("RosterShiftDrawer permission and cancel UI", () => {
       "canManage = true",
       'data-testid="roster-shift-manage-denied"',
       "You do not have permission to manage roster shifts.",
-      "readOnly={Boolean(editing) || !canManage}",
-      "showSave={!editing && canManage}"
+      "formReadOnly",
+      "showCreateSave"
     );
   });
 
@@ -89,10 +89,90 @@ describe("RosterShiftDrawer permission and cancel UI", () => {
     assert.ok(readFileSync(SHIFT_DRAWER, "utf8").includes('data-testid="roster-shift-cancel-section"'));
   });
 
-  it("hides cancel section when canManage is false", () => {
+  it("hides cancel section when canManage is false or shift is not cancellable", () => {
     const src = readFileSync(SHIFT_DRAWER, "utf8");
-    assert.ok(src.includes("{editing && canManage ? ("));
+    assert.ok(src.includes("canCancelShift && !isInlineEditing"));
     assert.ok(src.includes("{canManage ? ("));
+  });
+});
+
+describe("RosterShiftDrawer existing shift inline edit", () => {
+  it("read-only viewer cannot enter edit mode", () => {
+    const src = readFileSync(SHIFT_DRAWER, "utf8");
+    assert.ok(src.includes('data-testid="roster-shift-edit-start"'));
+    assert.ok(src.includes("canManage && canShowEditButton && !isInlineEditing"));
+    assert.ok(src.includes("if (!canManage || !canShowEditButton) return"));
+    assert.ok(src.includes("formReadOnly"));
+  });
+
+  it("manager sees Edit shift for editable scheduled shift", () => {
+    sourceIncludes(
+      SHIFT_DRAWER,
+      "resolveRosterShiftDrawerEditEligibility",
+      "buildRosterShiftFormValuesFromShift",
+      'data-testid="roster-shift-edit-start"',
+      "Edit shift"
+    );
+  });
+
+  it("cancelled shift has no Edit shift button via edit eligibility helper", () => {
+    sourceIncludes(SHIFT_DRAWER, "canShowEditButton", "resolveRosterShiftDrawerEditEligibility");
+  });
+
+  it("edit reason required when time, role, or clinic changes", () => {
+    sourceIncludes(
+      SHIFT_DRAWER,
+      "rosterShiftDrawerEditRequiresReason",
+      "ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE",
+      'data-testid="roster-shift-edit-reason"',
+      "ROSTER_SHIFT_EDIT_REASONS"
+    );
+  });
+
+  it("notes-only edit does not require reason", () => {
+    sourceIncludes(
+      SHIFT_DRAWER,
+      "editReason: editReasonRequired ? editReason : null",
+      "rosterShiftDrawerEditRequiresReason"
+    );
+  });
+
+  it("save calls updateRosterShiftAction with expected payload", () => {
+    sourceIncludes(
+      SHIFT_DRAWER,
+      "updateRosterShiftAction",
+      "shiftId: viewingExistingShift.id",
+      "clinicId: clinicId || null",
+      "shiftType",
+      "startsAt: new Date(startsAt).toISOString()",
+      "endsAt: new Date(endsAt).toISOString()",
+      "notes: notes || null"
+    );
+  });
+
+  it("cancel editing reverts local state without API call", () => {
+    sourceIncludes(
+      SHIFT_DRAWER,
+      'data-testid="roster-shift-edit-cancel"',
+      "resetFormToOriginal",
+      "setIsInlineEditing(false)",
+      "buildRosterShiftFormValuesFromShift"
+    );
+    const src = readFileSync(SHIFT_DRAWER, "utf8");
+    const cancelHandler = src.slice(
+      src.indexOf("function handleCancelInlineEdit"),
+      src.indexOf("const formReadOnly")
+    );
+    assert.ok(!cancelHandler.includes("updateRosterShiftAction"));
+  });
+
+  it("initial existing shift values come from selectedShift not create defaults", () => {
+    sourceIncludes(
+      SHIFT_DRAWER,
+      "buildRosterShiftFormValuesFromShift(viewingExistingShift)",
+      "buildRosterShiftDrawerDefaults",
+      "const initialFormValues = viewingExistingShift"
+    );
   });
 });
 

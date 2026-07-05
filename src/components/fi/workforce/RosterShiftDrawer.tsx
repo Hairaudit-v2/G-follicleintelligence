@@ -6,12 +6,17 @@ import {
   createRosterShiftAction,
   cancelRosterShiftAction,
   generateRosterFromStandardHoursAction,
+  updateRosterShiftAction,
 } from "@/src/lib/actions/workforce-roster-actions";
 import type { RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import {
   buildRosterShiftDrawerDefaults,
+  buildRosterShiftFormValuesFromShift,
   formatRosterDrawerDateLabel,
   formatRosterShiftDrawerTitle,
+  resolveRosterShiftDrawerChangedFields,
+  resolveRosterShiftDrawerEditEligibility,
+  rosterShiftDrawerEditRequiresReason,
   staffHasWorkingStandardHoursForDate,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { shiftSourceDisplayLabel } from "@/src/lib/workforce-os/rosterGenerationCore";
@@ -19,6 +24,8 @@ import {
   ROSTER_MANUAL_ADJUSTMENT_REASONS,
   ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE,
   ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS,
+  ROSTER_SHIFT_EDIT_REASONS,
+  ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE,
   formatRosterAdjustmentReasonLabel,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import { STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
@@ -57,13 +64,6 @@ export type RosterShiftDrawerProps = {
   onEditStandardHours: (staffId: string) => void;
 };
 
-function toDatetimeLocal(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 export function RosterShiftDrawer(props: RosterShiftDrawerProps) {
   if (!props.open) return null;
 
@@ -91,8 +91,12 @@ function RosterShiftDrawerBody({
   onRefresh,
   onEditStandardHours,
 }: RosterShiftDrawerProps) {
-  const editing = mode === "edit" && selectedShift ? selectedShift : null;
-  const defaults = buildRosterShiftDrawerDefaults({
+  const viewingExistingShift = mode === "edit" && selectedShift ? selectedShift : null;
+  const { canShowEditButton, canCancelShift } = resolveRosterShiftDrawerEditEligibility(
+    viewingExistingShift
+  );
+
+  const createDefaults = buildRosterShiftDrawerDefaults({
     staffId,
     localDate,
     staffRole,
@@ -102,6 +106,16 @@ function RosterShiftDrawerBody({
     rosterCycleAnchorDate,
   });
 
+  const initialFormValues = viewingExistingShift
+    ? buildRosterShiftFormValuesFromShift(viewingExistingShift)
+    : {
+        clinicId: createDefaults.clinicId,
+        shiftType: createDefaults.shiftType,
+        startsAt: createDefaults.startsAt,
+        endsAt: createDefaults.endsAt,
+        notes: "",
+      };
+
   const canGenerateFromStandardHours = staffHasWorkingStandardHoursForDate({
     standardHours,
     localDate,
@@ -109,20 +123,58 @@ function RosterShiftDrawerBody({
     rosterCycleAnchorDate,
   });
 
-  const [clinicId, setClinicId] = useState(defaults.clinicId);
-  const [shiftType, setShiftType] = useState(defaults.shiftType);
-  const [startsAt, setStartsAt] = useState(
-    editing ? toDatetimeLocal(editing.starts_at) : defaults.startsAt
-  );
-  const [endsAt, setEndsAt] = useState(
-    editing ? toDatetimeLocal(editing.ends_at) : defaults.endsAt
-  );
-  const [notes, setNotes] = useState(editing?.notes ?? "");
+  const [isInlineEditing, setIsInlineEditing] = useState(false);
+  const [clinicId, setClinicId] = useState(initialFormValues.clinicId);
+  const [shiftType, setShiftType] = useState(initialFormValues.shiftType);
+  const [startsAt, setStartsAt] = useState(initialFormValues.startsAt);
+  const [endsAt, setEndsAt] = useState(initialFormValues.endsAt);
+  const [notes, setNotes] = useState(initialFormValues.notes);
   const [adjustmentReason, setAdjustmentReason] = useState("manual_adjustment");
+  const [editReason, setEditReason] = useState("");
   const [cancellationReason, setCancellationReason] = useState("");
   const [cancelNotes, setCancelNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  function resetFormToOriginal() {
+    setClinicId(initialFormValues.clinicId);
+    setShiftType(initialFormValues.shiftType);
+    setStartsAt(initialFormValues.startsAt);
+    setEndsAt(initialFormValues.endsAt);
+    setNotes(initialFormValues.notes);
+    setEditReason("");
+    setError(null);
+  }
+
+  function handleStartInlineEdit() {
+    if (!canManage || !canShowEditButton) return;
+    setIsInlineEditing(true);
+    setError(null);
+  }
+
+  function handleCancelInlineEdit() {
+    resetFormToOriginal();
+    setIsInlineEditing(false);
+  }
+
+  const formReadOnly = Boolean(viewingExistingShift && !isInlineEditing) || !canManage;
+  const showCreateSave = !viewingExistingShift && canManage;
+  const showInlineEditControls = Boolean(viewingExistingShift && isInlineEditing && canManage);
+
+  const editFormInput = {
+    clinicId,
+    shiftType,
+    startsAt,
+    endsAt,
+    notes,
+    startsAtIso: startsAt ? new Date(startsAt).toISOString() : "",
+    endsAtIso: endsAt ? new Date(endsAt).toISOString() : "",
+  };
+
+  const editReasonRequired =
+    viewingExistingShift != null &&
+    isInlineEditing &&
+    rosterShiftDrawerEditRequiresReason(viewingExistingShift, editFormInput);
 
   function handleGenerateDay() {
     setError(null);
@@ -186,8 +238,45 @@ function RosterShiftDrawerBody({
     });
   }
 
+  function handleUpdateShift(e: React.FormEvent) {
+    e.preventDefault();
+    if (!viewingExistingShift || !canManage || !isInlineEditing) return;
+
+    setError(null);
+
+    if (editReasonRequired && !editReason.trim()) {
+      setError(ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE);
+      return;
+    }
+
+    const changedFields = resolveRosterShiftDrawerChangedFields(viewingExistingShift, editFormInput);
+    if (changedFields.length === 0) {
+      setIsInlineEditing(false);
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await updateRosterShiftAction({
+        tenantId,
+        shiftId: viewingExistingShift.id,
+        clinicId: clinicId || null,
+        shiftType,
+        startsAt: new Date(startsAt).toISOString(),
+        endsAt: new Date(endsAt).toISOString(),
+        notes: notes || null,
+        editReason: editReasonRequired ? editReason : null,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      onClose();
+      onRefresh();
+    });
+  }
+
   function handleCancelShift() {
-    if (!editing || !canManage) return;
+    if (!viewingExistingShift || !canManage) return;
     if (!cancellationReason.trim()) {
       setError(ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE);
       return;
@@ -196,7 +285,7 @@ function RosterShiftDrawerBody({
     startTransition(async () => {
       const result = await cancelRosterShiftAction({
         tenantId,
-        shiftId: editing.id,
+        shiftId: viewingExistingShift.id,
         cancellationReason,
         notes: cancelNotes || null,
       });
@@ -218,7 +307,7 @@ function RosterShiftDrawerBody({
         mode === "cell-actions"
           ? `${staffName} — ${formatRosterDrawerDateLabel(localDate)}`
           : formatRosterShiftDrawerTitle({
-              mode: editing ? "edit" : "add",
+              mode: viewingExistingShift ? "edit" : "add",
               staffName,
               localDate,
             })
@@ -276,15 +365,20 @@ function RosterShiftDrawerBody({
                 endsAt={endsAt}
                 notes={notes}
                 adjustmentReason={adjustmentReason}
+                editReason=""
+                showAdjustmentReason
+                showEditReason={false}
                 pending={pending}
                 readOnly={false}
-                showSave
+                showSave={showCreateSave}
+                saveLabel="Add manual shift"
                 onClinicChange={setClinicId}
                 onShiftTypeChange={setShiftType}
                 onStartsAtChange={setStartsAt}
                 onEndsAtChange={setEndsAt}
                 onNotesChange={setNotes}
                 onAdjustmentReasonChange={setAdjustmentReason}
+                onEditReasonChange={setEditReason}
                 onSubmit={handleCreateManual}
               />
               <button
@@ -300,11 +394,23 @@ function RosterShiftDrawerBody({
         </div>
       ) : (
         <div className="space-y-3">
-          {editing ? (
-            <p className="text-[11px] text-slate-500">
-              {shiftSourceDisplayLabel(editing.shift_source)}
+          {viewingExistingShift ? (
+            <p className="text-[11px] text-slate-500" data-testid="roster-shift-source-label">
+              {shiftSourceDisplayLabel(viewingExistingShift.shift_source)}
             </p>
           ) : null}
+
+          {canManage && canShowEditButton && !isInlineEditing ? (
+            <button
+              type="button"
+              onClick={handleStartInlineEdit}
+              data-testid="roster-shift-edit-start"
+              className="w-full rounded-lg border border-cyan-500/40 bg-cyan-950/20 px-4 py-2.5 text-sm font-medium text-cyan-200 hover:bg-cyan-950/40"
+            >
+              Edit shift
+            </button>
+          ) : null}
+
           <ManualShiftForm
             staffName={staffName}
             clinicId={clinicId}
@@ -314,18 +420,26 @@ function RosterShiftDrawerBody({
             endsAt={endsAt}
             notes={notes}
             adjustmentReason={adjustmentReason}
+            editReason={editReason}
+            showAdjustmentReason={!viewingExistingShift}
+            showEditReason={showInlineEditControls && editReasonRequired}
             pending={pending}
-            readOnly={Boolean(editing) || !canManage}
-            showSave={!editing && canManage}
+            readOnly={formReadOnly}
+            showSave={showCreateSave}
+            saveLabel="Add manual shift"
+            showInlineEditActions={showInlineEditControls}
             onClinicChange={setClinicId}
             onShiftTypeChange={setShiftType}
             onStartsAtChange={setStartsAt}
             onEndsAtChange={setEndsAt}
             onNotesChange={setNotes}
             onAdjustmentReasonChange={setAdjustmentReason}
-            onSubmit={handleCreateManual}
+            onEditReasonChange={setEditReason}
+            onSubmit={viewingExistingShift && isInlineEditing ? handleUpdateShift : handleCreateManual}
+            onCancelEdit={handleCancelInlineEdit}
           />
-          {editing && canManage ? (
+
+          {viewingExistingShift && canManage && canCancelShift && !isInlineEditing ? (
             <div
               className="space-y-3 rounded-lg border border-rose-500/20 bg-rose-950/10 p-3"
               data-testid="roster-shift-cancel-section"
@@ -383,16 +497,23 @@ type ManualShiftFormProps = {
   endsAt: string;
   notes: string;
   adjustmentReason: string;
+  editReason: string;
+  showAdjustmentReason: boolean;
+  showEditReason: boolean;
   pending: boolean;
   readOnly: boolean;
   showSave: boolean;
+  saveLabel: string;
+  showInlineEditActions?: boolean;
   onClinicChange: (v: string) => void;
   onShiftTypeChange: (v: string) => void;
   onStartsAtChange: (v: string) => void;
   onEndsAtChange: (v: string) => void;
   onNotesChange: (v: string) => void;
   onAdjustmentReasonChange: (v: string) => void;
+  onEditReasonChange: (v: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onCancelEdit?: () => void;
 };
 
 function ManualShiftForm({
@@ -404,16 +525,23 @@ function ManualShiftForm({
   endsAt,
   notes,
   adjustmentReason,
+  editReason,
+  showAdjustmentReason,
+  showEditReason,
   pending,
   readOnly,
   showSave,
+  saveLabel,
+  showInlineEditActions = false,
   onClinicChange,
   onShiftTypeChange,
   onStartsAtChange,
   onEndsAtChange,
   onNotesChange,
   onAdjustmentReasonChange,
+  onEditReasonChange,
   onSubmit,
+  onCancelEdit,
 }: ManualShiftFormProps) {
   return (
     <form
@@ -477,7 +605,7 @@ function ManualShiftForm({
           required={!readOnly}
         />
       </label>
-      {!readOnly ? (
+      {showAdjustmentReason ? (
         <label className="block text-xs text-slate-400">
           Reason
           <select
@@ -487,6 +615,25 @@ function ManualShiftForm({
             data-testid="roster-shift-adjustment-reason"
           >
             {ROSTER_MANUAL_ADJUSTMENT_REASONS.map((reason) => (
+              <option key={reason} value={reason}>
+                {formatRosterAdjustmentReasonLabel(reason)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {showEditReason ? (
+        <label className="block text-xs text-slate-400">
+          Edit reason
+          <select
+            value={editReason}
+            onChange={(e) => onEditReasonChange(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+            data-testid="roster-shift-edit-reason"
+            required
+          >
+            <option value="">Select a reason…</option>
+            {ROSTER_SHIFT_EDIT_REASONS.map((reason) => (
               <option key={reason} value={reason}>
                 {formatRosterAdjustmentReasonLabel(reason)}
               </option>
@@ -510,8 +657,29 @@ function ManualShiftForm({
           disabled={pending}
           className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm font-medium text-slate-100 hover:bg-white/[0.04] disabled:opacity-50"
         >
-          {pending ? "Saving…" : "Add manual shift"}
+          {pending ? "Saving…" : saveLabel}
         </button>
+      ) : null}
+      {showInlineEditActions ? (
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={pending}
+            data-testid="roster-shift-edit-save"
+            className="flex-1 rounded-lg border border-cyan-500/40 bg-cyan-950/30 px-4 py-2.5 text-sm font-medium text-cyan-100 hover:bg-cyan-950/50 disabled:opacity-50"
+          >
+            {pending ? "Saving…" : "Save changes"}
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={onCancelEdit}
+            data-testid="roster-shift-edit-cancel"
+            className="flex-1 rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50"
+          >
+            Cancel editing
+          </button>
+        </div>
       ) : null}
     </form>
   );

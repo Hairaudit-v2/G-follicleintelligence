@@ -24,6 +24,11 @@ import {
   buildStaffStandardHoursReturnToRosterHref,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import {
+  canEditRosterShift,
+  rosterShiftEditRequiresReason,
+  type RosterShiftSnapshot,
+} from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 
 export type RosterCellClickIntent = "open_cell_actions";
 
@@ -324,6 +329,79 @@ export function formatRosterShiftDrawerTitle(input: {
   return input.mode === "edit"
     ? `Edit shift — ${input.staffName}, ${dateLabel}`
     : `Add shift — ${input.staffName}, ${dateLabel}`;
+}
+
+export type RosterShiftDrawerFormValues = {
+  clinicId: string;
+  shiftType: string;
+  startsAt: string;
+  endsAt: string;
+  notes: string;
+};
+
+/** Datetime-local string for roster shift drawer inputs. */
+export function toRosterShiftDatetimeLocal(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Form values for an existing shift — never derived from create defaults. */
+export function buildRosterShiftFormValuesFromShift(
+  shift: RosterShiftSnapshot
+): RosterShiftDrawerFormValues {
+  return {
+    clinicId: shift.clinic_id?.trim() || "",
+    shiftType: shift.shift_type,
+    startsAt: toRosterShiftDatetimeLocal(shift.starts_at),
+    endsAt: toRosterShiftDatetimeLocal(shift.ends_at),
+    notes: shift.notes ?? "",
+  };
+}
+
+export type RosterShiftDrawerEditFormInput = RosterShiftDrawerFormValues & {
+  startsAtIso: string;
+  endsAtIso: string;
+};
+
+export function resolveRosterShiftDrawerChangedFields(
+  original: RosterShiftSnapshot,
+  next: RosterShiftDrawerEditFormInput
+): string[] {
+  const changedFields: string[] = [];
+  if (next.startsAtIso !== original.starts_at) changedFields.push("starts_at");
+  if (next.endsAtIso !== original.ends_at) changedFields.push("ends_at");
+  if (next.shiftType !== original.shift_type) changedFields.push("shift_type");
+  const originalClinicId = original.clinic_id?.trim() || null;
+  const nextClinicId = next.clinicId.trim() || null;
+  if (nextClinicId !== originalClinicId) changedFields.push("clinic_id");
+  const originalNotes = original.notes?.trim() || null;
+  const nextNotes = next.notes.trim() || null;
+  if (nextNotes !== originalNotes) changedFields.push("notes");
+  return changedFields;
+}
+
+export function rosterShiftDrawerEditRequiresReason(
+  original: RosterShiftSnapshot,
+  next: RosterShiftDrawerEditFormInput
+): boolean {
+  return rosterShiftEditRequiresReason(resolveRosterShiftDrawerChangedFields(original, next));
+}
+
+export function resolveRosterShiftDrawerEditEligibility(shift: RosterShiftSnapshot | null): {
+  canShowEditButton: boolean;
+  canCancelShift: boolean;
+} {
+  if (!shift) {
+    return { canShowEditButton: false, canCancelShift: false };
+  }
+  const editEligibility = canEditRosterShift(shift);
+  const activeStatus = shift.status === "scheduled" || shift.status === "confirmed";
+  return {
+    canShowEditButton: editEligibility.editable,
+    canCancelShift: activeStatus,
+  };
 }
 
 export function formatStandardHoursDrawerTitle(staffName: string): string {

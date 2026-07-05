@@ -220,7 +220,7 @@ test("RosterShiftDrawer gates mutations when canManage is false", () => {
   const src = readFileSync("src/components/fi/workforce/RosterShiftDrawer.tsx", "utf8");
   assert.ok(src.includes('data-testid="roster-shift-manage-denied"'));
   assert.ok(src.includes("You do not have permission to manage roster shifts."));
-  assert.ok(src.includes("{editing && canManage ? ("));
+  assert.ok(src.includes("canCancelShift && !isInlineEditing"));
   assert.ok(src.includes('data-testid="roster-shift-cancellation-reason"'));
   assert.ok(src.includes("disabled={pending || !cancellationReason.trim()}"));
 });

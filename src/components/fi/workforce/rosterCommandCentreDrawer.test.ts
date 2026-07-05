@@ -201,7 +201,9 @@ test("RosterShiftDrawer passes canManage from command centre and supports read-o
     "canManage?: boolean",
     'data-testid="roster-shift-manage-denied"',
     'data-testid="roster-shift-cancel-confirm"',
-    "ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS"
+    "ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS",
+    "updateRosterShiftAction",
+    'data-testid="roster-shift-edit-start"'
   );
 });
 

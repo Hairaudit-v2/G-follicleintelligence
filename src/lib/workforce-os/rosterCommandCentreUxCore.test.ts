@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
   buildRosterShiftDrawerDefaults,
+  buildRosterShiftFormValuesFromShift,
   closeRosterDrawer,
   formatRosterShiftDrawerTitle,
   formatStandardHoursDrawerTitle,
@@ -11,6 +12,10 @@ import {
   openRosterMissingStandardHoursSetupDrawer,
   openRosterShiftDrawer,
   openRosterStandardHoursDrawer,
+  resolveRosterShiftDrawerChangedFields,
+  resolveRosterShiftDrawerEditEligibility,
+  rosterShiftDrawerEditRequiresReason,
+  toRosterShiftDatetimeLocal,
   resolveRosterCellClickIntent,
   resolveRosterDrawerStaffMemberId,
   resolveRosterDrawerStaffName,
@@ -180,6 +185,108 @@ test("roster drawer state helpers open standard-hours and setup panels", () => {
   assert.equal(shiftDrawer.kind, "shift");
   assert.equal(resolveRosterDrawerStaffMemberId(shiftDrawer), STAFF_PAUL);
   assert.equal(closeRosterDrawer().kind, "closed");
+});
+
+test("buildRosterShiftFormValuesFromShift uses shift data not create defaults", () => {
+  const values = buildRosterShiftFormValuesFromShift({
+    id: "shift-1",
+    staff_id: STAFF_PAUL,
+    clinic_id: "clinic-a",
+    shift_type: "surgery_day",
+    starts_at: "2026-07-06T01:00:00.000Z",
+    ends_at: "2026-07-06T09:00:00.000Z",
+    status: "scheduled",
+    notes: "Existing note",
+    shift_source: "manual",
+  });
+
+  assert.equal(values.clinicId, "clinic-a");
+  assert.equal(values.shiftType, "surgery_day");
+  assert.equal(values.notes, "Existing note");
+  assert.ok(values.startsAt.includes("T"));
+  assert.ok(values.endsAt.includes("T"));
+});
+
+test("rosterShiftDrawerEditRequiresReason when time role or clinic changes", () => {
+  const original = {
+    id: "shift-1",
+    staff_id: STAFF_PAUL,
+    clinic_id: "clinic-a",
+    shift_type: "clinic_day",
+    starts_at: "2026-07-06T01:00:00.000Z",
+    ends_at: "2026-07-06T09:00:00.000Z",
+    status: "scheduled",
+    notes: null,
+    shift_source: "manual",
+  };
+
+  assert.equal(
+    rosterShiftDrawerEditRequiresReason(original, {
+      clinicId: "clinic-a",
+      shiftType: "clinic_day",
+      startsAt: toRosterShiftDatetimeLocal("2026-07-06T02:00:00.000Z"),
+      endsAt: toRosterShiftDatetimeLocal("2026-07-06T09:00:00.000Z"),
+      notes: "",
+      startsAtIso: "2026-07-06T02:00:00.000Z",
+      endsAtIso: "2026-07-06T09:00:00.000Z",
+    }),
+    true
+  );
+
+  assert.equal(
+    rosterShiftDrawerEditRequiresReason(original, {
+      clinicId: "clinic-a",
+      shiftType: "clinic_day",
+      startsAt: toRosterShiftDatetimeLocal(original.starts_at),
+      endsAt: toRosterShiftDatetimeLocal(original.ends_at),
+      notes: "Updated notes only",
+      startsAtIso: original.starts_at,
+      endsAtIso: original.ends_at,
+    }),
+    false
+  );
+
+  const changedFields = resolveRosterShiftDrawerChangedFields(original, {
+    clinicId: "clinic-a",
+    shiftType: "clinic_day",
+    startsAt: toRosterShiftDatetimeLocal(original.starts_at),
+    endsAt: toRosterShiftDatetimeLocal(original.ends_at),
+    notes: "Updated notes only",
+    startsAtIso: original.starts_at,
+    endsAtIso: original.ends_at,
+  });
+  assert.deepEqual(changedFields, ["notes"]);
+});
+
+test("resolveRosterShiftDrawerEditEligibility hides edit for cancelled shifts", () => {
+  const scheduled = resolveRosterShiftDrawerEditEligibility({
+    id: "shift-1",
+    staff_id: STAFF_PAUL,
+    clinic_id: null,
+    shift_type: "clinic_day",
+    starts_at: "2026-07-06T01:00:00.000Z",
+    ends_at: "2026-07-06T09:00:00.000Z",
+    status: "scheduled",
+    notes: null,
+    shift_source: "manual",
+  });
+  assert.equal(scheduled.canShowEditButton, true);
+  assert.equal(scheduled.canCancelShift, true);
+
+  const cancelled = resolveRosterShiftDrawerEditEligibility({
+    id: "shift-2",
+    staff_id: STAFF_PAUL,
+    clinic_id: null,
+    shift_type: "clinic_day",
+    starts_at: "2026-07-06T01:00:00.000Z",
+    ends_at: "2026-07-06T09:00:00.000Z",
+    status: "cancelled",
+    notes: null,
+    shift_source: "manual",
+    cancellation_reason: "clinic_closed",
+  });
+  assert.equal(cancelled.canShowEditButton, false);
+  assert.equal(cancelled.canCancelShift, false);
 });
 
 test("rosterAvailabilityLocalDateFromIso respects AWST vs AEST on the same UTC instant", () => {
