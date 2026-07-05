@@ -35,6 +35,9 @@ import { ROSTER_TX_OUTCOMES } from "@/src/lib/workforce-os/rosterTxCore";
 import {
   ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE,
   ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS,
+  ROSTER_SHIFT_EDIT_REASONS,
+  ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE,
+  ROSTER_SHIFT_UPDATE_OUTCOMES,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 
@@ -106,13 +109,21 @@ const cancelShiftSchema = z.object({
 const updateShiftSchema = z.object({
   tenantId: z.string().uuid(),
   shiftId: z.string().uuid(),
-  staffId: z.string().uuid().optional(),
   clinicId: z.string().uuid().optional().nullable(),
   shiftType: z.string().min(1).max(64).optional(),
   startsAt: z.string().min(1).optional(),
   endsAt: z.string().min(1).optional(),
   notes: z.string().max(500).optional().nullable(),
-  adjustmentReason: z.string().max(64).optional().nullable(),
+  editReason: z
+    .string()
+    .trim()
+    .max(64)
+    .refine(
+      (value) => !value || (ROSTER_SHIFT_EDIT_REASONS as readonly string[]).includes(value),
+      ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE
+    )
+    .optional()
+    .nullable(),
   allowOverride: z.boolean().optional(),
 });
 
@@ -428,20 +439,29 @@ export async function updateRosterShiftAction(
     const result = await updateStaffShift({
       tenantId: parsed.tenantId,
       shiftId: parsed.shiftId,
-      staffId: parsed.staffId,
       clinicId: parsed.clinicId,
       shiftType: parsed.shiftType,
       startsAt: parsed.startsAt,
       endsAt: parsed.endsAt,
       notes: parsed.notes,
-      adjustmentReason: parsed.adjustmentReason ?? "manual_adjustment",
+      editReason: parsed.editReason,
       updatedBy: actorFiUserId,
       allowOverride: parsed.allowOverride,
     });
 
+    if (result.outcome === ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED) {
+      return { ok: true, data: result.shift, outcome: ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED };
+    }
+
     revalidateRosterSurfaces(parsed.tenantId);
-    return { ok: true, data: result.shift };
+    return { ok: true, data: result.shift, outcome: ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UPDATED };
   } catch (e) {
+    if (e instanceof ZodError) {
+      const editReasonIssue = e.errors.find((issue) => issue.path[0] === "editReason");
+      if (editReasonIssue) {
+        return { ok: false, error: ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE };
+      }
+    }
     return { ok: false, error: errMsg(e) };
   }
 }

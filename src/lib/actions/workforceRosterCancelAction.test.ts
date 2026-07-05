@@ -47,7 +47,10 @@ describe("cancelRosterShiftAction production wiring", () => {
       "export async function markStaffSickForShiftAction",
       "export async function createReplacementShiftAction",
       "assertHrOsRosterManageAllowed",
-      "resolveRosterActorFiUserId"
+      "resolveRosterActorFiUserId",
+      "ROSTER_SHIFT_EDIT_REASONS",
+      "ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED",
+      "editReason: parsed.editReason"
     );
   });
 });

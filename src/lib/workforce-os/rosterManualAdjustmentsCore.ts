@@ -45,6 +45,62 @@ export const ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS = [
 export type RosterShiftDrawerCancellationReason =
   (typeof ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS)[number];
 
+export const ROSTER_SHIFT_EDIT_REASONS = [
+  "timing_change",
+  "role_change",
+  "clinic_requirement",
+  "staff_request",
+  "correction",
+  "other",
+] as const;
+
+export type RosterShiftEditReason = (typeof ROSTER_SHIFT_EDIT_REASONS)[number];
+
+export const ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE =
+  "Please choose an edit reason before changing shift timing, type, or clinic.";
+
+export const ROSTER_SHIFT_UPDATE_OUTCOMES = {
+  SHIFT_UPDATED: "shift_updated",
+  SHIFT_UNCHANGED: "shift_unchanged",
+} as const;
+
+export type RosterShiftUpdateOutcome =
+  (typeof ROSTER_SHIFT_UPDATE_OUTCOMES)[keyof typeof ROSTER_SHIFT_UPDATE_OUTCOMES];
+
+const ROSTER_SHIFT_EDIT_REASON_REQUIRED_FIELDS = new Set([
+  "starts_at",
+  "ends_at",
+  "shift_type",
+  "clinic_id",
+]);
+
+export function isValidRosterShiftEditReason(
+  reason: string | null | undefined
+): reason is RosterShiftEditReason {
+  return (
+    typeof reason === "string" &&
+    (ROSTER_SHIFT_EDIT_REASONS as readonly string[]).includes(reason)
+  );
+}
+
+export function rosterShiftEditRequiresReason(changedFields: readonly string[]): boolean {
+  return changedFields.some((field) => ROSTER_SHIFT_EDIT_REASON_REQUIRED_FIELDS.has(field));
+}
+
+/** Optional edit notes for fi_roster_shift_audit_events.metadata (omitted when blank). */
+export function rosterShiftEditAuditMetadata(input: {
+  changedFields: readonly string[];
+  notes?: string | null;
+}): Record<string, unknown> {
+  const metadata: Record<string, unknown> = {
+    source: "roster_shift_drawer",
+    changed_fields: [...input.changedFields],
+  };
+  const trimmedNotes = input.notes?.trim();
+  if (trimmedNotes) metadata.notes = trimmedNotes;
+  return metadata;
+}
+
 export const ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE =
   "Please choose a cancellation reason before cancelling this shift.";
 
@@ -89,6 +145,40 @@ export function canClearGeneratedShift(shift: RosterShiftSnapshot): boolean {
 
 export function canHardDeleteGeneratedDraftShift(shift: RosterShiftSnapshot): boolean {
   return shift.status === "scheduled" && isGeneratedShiftSource(shift.shift_source);
+}
+
+function isSickCancelledShift(shift: RosterShiftSnapshot): boolean {
+  return shift.status === "cancelled" && shift.cancellation_reason === "staff_sick";
+}
+
+function isReplacementShift(shift: RosterShiftSnapshot): boolean {
+  return shift.adjustment_reason === "sick_cover";
+}
+
+export type RosterShiftEditEligibility =
+  | { editable: true }
+  | { editable: false; reason: string };
+
+export function canEditRosterShift(shift: RosterShiftSnapshot): RosterShiftEditEligibility {
+  if (shift.status === "cancelled") {
+    if (isSickCancelledShift(shift)) {
+      return { editable: false, reason: "Sick-cancelled shifts cannot be edited." };
+    }
+    return { editable: false, reason: "Cancelled shifts cannot be edited." };
+  }
+  if (shift.status === "completed") {
+    return { editable: false, reason: "Completed shifts cannot be edited." };
+  }
+  if (shift.status === "scheduled" || shift.status === "confirmed") {
+    if (isReplacementShift(shift)) {
+      return { editable: true };
+    }
+    if (shift.shift_source === "manual" || isGeneratedShiftSource(shift.shift_source)) {
+      return { editable: true };
+    }
+    return { editable: true };
+  }
+  return { editable: false, reason: `Shifts with status "${shift.status}" cannot be edited.` };
 }
 
 export function shiftSnapshotForAudit(shift: RosterShiftSnapshot): Record<string, unknown> {

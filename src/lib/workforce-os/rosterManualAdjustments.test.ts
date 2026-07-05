@@ -5,14 +5,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
   canClearGeneratedShift,
+  canEditRosterShift,
   canHardDeleteGeneratedDraftShift,
   isGeneratedShiftSource,
   ROSTER_SHIFT_AUDIT_ACTION_TYPES,
+  ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE,
+  ROSTER_SHIFT_UPDATE_OUTCOMES,
   rosterShiftCancellationAuditMetadata,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import { insertRosterShiftAuditEvent } from "@/src/lib/workforce-os/rosterShiftAudit.server";
 import {
   clearGeneratedRosterShiftsForPeriod,
+  evaluateStaffShiftAssignmentWarnings,
   updateStaffShift,
   cancelStaffShiftWithReason,
 } from "@/src/lib/workforce-os/rosterManualAdjustments.server";
@@ -24,6 +28,10 @@ const FI_USER = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const SHIFT_GENERATED = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 const SHIFT_MANUAL = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 const SHIFT_CONFIRMED = "99999999-9999-4999-8999-999999999999";
+const SHIFT_CANCELLED = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+const SHIFT_SICK_CANCELLED = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const SHIFT_REPLACEMENT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaab";
+const STAFF_OTHER = "22222222-2222-4222-8222-222222222222";
 
 type ShiftRow = {
   id: string;
@@ -42,6 +50,25 @@ type ShiftRow = {
   cancellation_reason: string | null;
 };
 
+function sampleShift(overrides: Partial<ShiftRow> & Pick<ShiftRow, "id">): ShiftRow {
+  return {
+    tenant_id: TENANT,
+    staff_id: STAFF_ACTIVE,
+    clinic_id: null,
+    shift_type: "clinic_day",
+    starts_at: "2026-07-06T01:00:00.000Z",
+    ends_at: "2026-07-06T09:00:00.000Z",
+    status: "scheduled",
+    notes: null,
+    shift_source: "manual",
+    created_by: FI_USER,
+    updated_by: null,
+    adjustment_reason: null,
+    cancellation_reason: null,
+    ...overrides,
+  };
+}
+
 function createMockSupabase(initialShifts: ShiftRow[]) {
   const shifts = [...initialShifts];
   const auditEvents: Array<Record<string, unknown>> = [];
@@ -59,8 +86,18 @@ function createMockSupabase(initialShifts: ShiftRow[]) {
                     filters.push({ col: col2, val: val2 });
                     return chain;
                   },
-                  neq(_col: string, _val: string) {
-                    return Promise.resolve({ data: [], error: null });
+                  neq(col: string, val: string) {
+                    const rows = shifts.filter((s) => {
+                      const tenantMatch = filters.some(
+                        (f) => f.col === "tenant_id" && s.tenant_id === f.val
+                      );
+                      const staffMatch = filters.some(
+                        (f) => f.col === "staff_id" && s.staff_id === f.val
+                      );
+                      const statusOk = col === "status" ? s.status !== val : true;
+                      return tenantMatch && staffMatch && statusOk;
+                    });
+                    return Promise.resolve({ data: rows, error: null });
                   },
                   maybeSingle: async () => {
                     const row = shifts.find((s) =>
@@ -427,6 +464,84 @@ describe("roster manual adjustments core", () => {
       notes: "Patient rescheduled",
     });
   });
+
+  it("canEditRosterShift allows scheduled and confirmed manual and generated shifts", () => {
+    const base = {
+      staff_id: STAFF_ACTIVE,
+      clinic_id: null,
+      shift_type: "clinic_day",
+      starts_at: "2026-07-06T01:00:00.000Z",
+      ends_at: "2026-07-06T09:00:00.000Z",
+      notes: null,
+    };
+    assert.deepEqual(
+      canEditRosterShift({ id: SHIFT_MANUAL, ...base, status: "scheduled", shift_source: "manual" }),
+      { editable: true }
+    );
+    assert.deepEqual(
+      canEditRosterShift({
+        id: SHIFT_CONFIRMED,
+        ...base,
+        status: "confirmed",
+        shift_source: "manual",
+      }),
+      { editable: true }
+    );
+    assert.deepEqual(
+      canEditRosterShift({
+        id: SHIFT_GENERATED,
+        ...base,
+        status: "scheduled",
+        shift_source: "standard_hours",
+      }),
+      { editable: true }
+    );
+    assert.deepEqual(
+      canEditRosterShift({
+        id: SHIFT_REPLACEMENT,
+        ...base,
+        status: "scheduled",
+        shift_source: "manual",
+        adjustment_reason: "sick_cover",
+      }),
+      { editable: true }
+    );
+  });
+
+  it("canEditRosterShift rejects cancelled, sick-cancelled, and completed shifts", () => {
+    const base = {
+      staff_id: STAFF_ACTIVE,
+      clinic_id: null,
+      shift_type: "clinic_day",
+      starts_at: "2026-07-06T01:00:00.000Z",
+      ends_at: "2026-07-06T09:00:00.000Z",
+      notes: null,
+      shift_source: "manual" as const,
+    };
+    assert.equal(
+      canEditRosterShift({
+        id: SHIFT_CANCELLED,
+        ...base,
+        status: "cancelled",
+        cancellation_reason: "clinic_closed",
+      }).editable,
+      false
+    );
+    const sickCancelled = canEditRosterShift({
+      id: SHIFT_SICK_CANCELLED,
+      ...base,
+      status: "cancelled",
+      cancellation_reason: "staff_sick",
+    });
+    assert.equal(sickCancelled.editable, false);
+    if (!sickCancelled.editable) {
+      assert.match(sickCancelled.reason, /Sick-cancelled/);
+    }
+    assert.equal(
+      canEditRosterShift({ id: SHIFT_MANUAL, ...base, status: "completed" }).editable,
+      false
+    );
+  });
 });
 
 describe("manual shift create uses fi_users.id for created_by", () => {
@@ -652,32 +767,249 @@ describe("generated draft hard-delete cancellation", () => {
   });
 });
 
-describe("manual shift update uses fi_users.id for updated_by", () => {
-  it("updateStaffShift stores updated_by and writes audit event", async () => {
+describe("updateStaffShift hardening", () => {
+  it("excludes self from overlap checks on notes-only and time edits", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    const notesResult = await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      notes: "Notes only",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+    assert.equal(notesResult.shift.notes, "Notes only");
+    assert.equal(notesResult.outcome, ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UPDATED);
+
+    const timeResult = await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      startsAt: "2026-07-06T02:00:00.000Z",
+      endsAt: "2026-07-06T10:00:00.000Z",
+      editReason: "timing_change",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+    assert.equal(timeResult.shift.starts_at, "2026-07-06T02:00:00.000Z");
+  });
+
+  it("evaluateStaffShiftAssignmentWarnings excludes shift being edited", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    const withoutExclude = await evaluateStaffShiftAssignmentWarnings({
+      tenantId: TENANT,
+      staffId: STAFF_ACTIVE,
+      shiftType: "clinic_day",
+      startsAt: "2026-07-06T01:00:00.000Z",
+      endsAt: "2026-07-06T09:00:00.000Z",
+      client: supabase,
+    });
+    assert.ok(withoutExclude.warnings.some((w) => w.code === "shift_overlap"));
+
+    const withExclude = await evaluateStaffShiftAssignmentWarnings({
+      tenantId: TENANT,
+      staffId: STAFF_ACTIVE,
+      shiftType: "clinic_day",
+      startsAt: "2026-07-06T01:00:00.000Z",
+      endsAt: "2026-07-06T09:00:00.000Z",
+      excludeShiftId: SHIFT_MANUAL,
+      client: supabase,
+    });
+    assert.ok(!withExclude.warnings.some((w) => w.code === "shift_overlap"));
+  });
+
+  it("rejects cancelled and sick-cancelled shifts", async () => {
     const supabase = createMockSupabase([
-      {
-        id: SHIFT_MANUAL,
-        tenant_id: TENANT,
-        staff_id: STAFF_ACTIVE,
-        clinic_id: null,
-        shift_type: "clinic_day",
-        starts_at: "2026-07-06T01:00:00.000Z",
-        ends_at: "2026-07-06T09:00:00.000Z",
-        status: "scheduled",
-        notes: null,
-        shift_source: "manual",
-        created_by: FI_USER,
-        updated_by: null,
-        adjustment_reason: null,
-        cancellation_reason: null,
-      },
+      sampleShift({
+        id: SHIFT_CANCELLED,
+        status: "cancelled",
+        cancellation_reason: "clinic_closed",
+      }),
+      sampleShift({
+        id: SHIFT_SICK_CANCELLED,
+        status: "cancelled",
+        cancellation_reason: "staff_sick",
+      }),
     ]);
+
+    await assert.rejects(
+      () =>
+        updateStaffShift({
+          tenantId: TENANT,
+          shiftId: SHIFT_CANCELLED,
+          notes: "nope",
+          updatedBy: FI_USER,
+          client: supabase,
+        }),
+      /Cancelled shifts cannot be edited/
+    );
+    await assert.rejects(
+      () =>
+        updateStaffShift({
+          tenantId: TENANT,
+          shiftId: SHIFT_SICK_CANCELLED,
+          notes: "nope",
+          updatedBy: FI_USER,
+          client: supabase,
+        }),
+      /Sick-cancelled shifts cannot be edited/
+    );
+  });
+
+  it("allows editing scheduled manual and generated shifts without changing shift_source", async () => {
+    const supabase = createMockSupabase([
+      sampleShift({ id: SHIFT_MANUAL }),
+      sampleShift({ id: SHIFT_GENERATED, shift_source: "standard_hours" }),
+    ]);
+
+    await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      notes: "Manual note",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+    assert.equal(supabase.shifts.find((s) => s.id === SHIFT_MANUAL)?.shift_source, "manual");
+
+    await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_GENERATED,
+      notes: "Generated note",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+    assert.equal(
+      supabase.shifts.find((s) => s.id === SHIFT_GENERATED)?.shift_source,
+      "standard_hours"
+    );
+  });
+
+  it("rejects staff reassignment attempts", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    await assert.rejects(
+      () =>
+        updateStaffShift({
+          tenantId: TENANT,
+          shiftId: SHIFT_MANUAL,
+          staffId: STAFF_OTHER,
+          notes: "reassign",
+          updatedBy: FI_USER,
+          client: supabase,
+        }),
+      /Staff reassignment is not supported/
+    );
+  });
+
+  it("returns unchanged outcome without audit row on no-op update", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL, notes: "Same" })]);
+
+    const result = await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      notes: "Same",
+      updatedBy: FI_USER,
+      client: supabase,
+    });
+
+    assert.equal(result.outcome, ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED);
+    assert.equal(supabase.auditEvents.length, 0);
+    assert.equal(supabase.shifts[0]?.updated_by, null);
+  });
+
+  it("allows notes-only edit without edit reason", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
 
     const result = await updateStaffShift({
       tenantId: TENANT,
       shiftId: SHIFT_MANUAL,
       notes: "Updated notes",
-      adjustmentReason: "manual_adjustment",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+
+    assert.equal(result.shift.notes, "Updated notes");
+    assert.equal(supabase.auditEvents[0]?.reason, null);
+  });
+
+  it("rejects time edit without edit reason and accepts with valid reason", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    await assert.rejects(
+      () =>
+        updateStaffShift({
+          tenantId: TENANT,
+          shiftId: SHIFT_MANUAL,
+          startsAt: "2026-07-06T02:00:00.000Z",
+          updatedBy: FI_USER,
+          allowOverride: true,
+          client: supabase,
+        }),
+      new RegExp(ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    );
+
+    const result = await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      startsAt: "2026-07-06T02:00:00.000Z",
+      editReason: "timing_change",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+    assert.equal(result.shift.starts_at, "2026-07-06T02:00:00.000Z");
+    assert.equal(supabase.auditEvents[0]?.reason, "timing_change");
+  });
+
+  it("writes audit metadata with source and changed_fields", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      notes: "Drawer note",
+      updatedBy: FI_USER,
+      allowOverride: true,
+      client: supabase,
+    });
+
+    assert.deepEqual(supabase.auditEvents[0]?.metadata, {
+      source: "roster_shift_drawer",
+      changed_fields: ["notes"],
+      notes: "Drawer note",
+    });
+  });
+
+  it("rejects end <= start", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    await assert.rejects(
+      () =>
+        updateStaffShift({
+          tenantId: TENANT,
+          shiftId: SHIFT_MANUAL,
+          startsAt: "2026-07-06T09:00:00.000Z",
+          endsAt: "2026-07-06T01:00:00.000Z",
+          editReason: "timing_change",
+          updatedBy: FI_USER,
+          client: supabase,
+        }),
+      /Shift end must be after start/
+    );
+  });
+
+  it("updateStaffShift stores updated_by and writes audit event", async () => {
+    const supabase = createMockSupabase([sampleShift({ id: SHIFT_MANUAL })]);
+
+    const result = await updateStaffShift({
+      tenantId: TENANT,
+      shiftId: SHIFT_MANUAL,
+      notes: "Updated notes",
       updatedBy: FI_USER,
       allowOverride: true,
       client: supabase,

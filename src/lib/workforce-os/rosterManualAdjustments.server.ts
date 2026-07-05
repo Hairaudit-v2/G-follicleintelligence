@@ -9,11 +9,19 @@ import { loadRosterStaffEligibilityContext } from "@/src/lib/workforce-os/roster
 import type { RosterStaffEligibilitySnapshot } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 import {
   ROSTER_SHIFT_AUDIT_ACTION_TYPES,
+  ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE,
+  ROSTER_SHIFT_UPDATE_OUTCOMES,
+  canEditRosterShift,
   canHardDeleteGeneratedDraftShift,
+  isValidRosterShiftEditReason,
   rosterShiftCancellationAuditMetadata,
+  rosterShiftEditAuditMetadata,
+  rosterShiftEditRequiresReason,
   shiftSnapshotForAudit,
   type RosterShiftCancellationReason,
+  type RosterShiftEditReason,
   type RosterShiftSnapshot,
+  type RosterShiftUpdateOutcome,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import { insertRosterShiftAuditEvent } from "@/src/lib/workforce-os/rosterShiftAudit.server";
 import {
@@ -99,6 +107,7 @@ export async function evaluateStaffShiftAssignmentWarnings(input: {
   startsAt: string;
   endsAt: string;
   allowOverride?: boolean;
+  excludeShiftId?: string | null;
   client?: SupabaseClient;
 }): Promise<{ warnings: RosterShiftValidationWarning[]; eligibility: RosterStaffEligibilitySnapshot }> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
@@ -177,6 +186,7 @@ export async function evaluateStaffShiftAssignmentWarnings(input: {
     availabilityBlocks: blocks,
     shifts,
     eventAssignments: [],
+    excludeShiftId: input.excludeShiftId,
   });
 
   for (const conflict of conflicts) {
@@ -200,35 +210,77 @@ export async function updateStaffShift(input: {
   endsAt?: string;
   notes?: string | null;
   status?: FiStaffShiftRow["status"];
-  adjustmentReason?: string | null;
+  editReason?: RosterShiftEditReason | string | null;
   updatedBy: string;
   allowOverride?: boolean;
   client?: SupabaseClient;
-}): Promise<{ shift: FiStaffShiftRow; warnings: RosterShiftValidationWarning[] }> {
+}): Promise<{
+  shift: FiStaffShiftRow;
+  warnings: RosterShiftValidationWarning[];
+  outcome: RosterShiftUpdateOutcome;
+}> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const shiftId = assertNonEmptyUuid(input.shiftId, "shiftId");
   const supabase = input.client ?? supabaseAdmin();
 
   const existing = await loadShiftForTenant(tid, shiftId, supabase);
   if (!existing) throw new Error("Shift not found.");
-  if (existing.status === "cancelled") throw new Error("Cannot update a cancelled shift.");
-  if (existing.status === "completed") throw new Error("Cannot update a completed shift.");
 
-  const nextStaffId = input.staffId?.trim() || existing.staff_id;
+  const editEligibility = canEditRosterShift(toAuditSnapshot(existing));
+  if (!editEligibility.editable) {
+    throw new Error(editEligibility.reason);
+  }
+
+  if (input.staffId !== undefined) {
+    const requestedStaffId = input.staffId.trim();
+    if (requestedStaffId && requestedStaffId !== existing.staff_id) {
+      throw new Error("Staff reassignment is not supported.");
+    }
+  }
+
+  const nextStaffId = existing.staff_id;
   const nextStartsAt = input.startsAt ?? existing.starts_at;
   const nextEndsAt = input.endsAt ?? existing.ends_at;
+  const nextShiftType = input.shiftType ?? existing.shift_type;
+  const nextClinicId =
+    input.clinicId !== undefined ? input.clinicId?.trim() || null : existing.clinic_id;
+  const nextNotes =
+    input.notes !== undefined ? input.notes?.trim() || null : existing.notes?.trim() || null;
+
   if (Date.parse(nextEndsAt) <= Date.parse(nextStartsAt)) {
     throw new Error("Shift end must be after start.");
+  }
+
+  const changedFields: string[] = [];
+  if (nextStartsAt !== existing.starts_at) changedFields.push("starts_at");
+  if (nextEndsAt !== existing.ends_at) changedFields.push("ends_at");
+  if (nextShiftType !== existing.shift_type) changedFields.push("shift_type");
+  if (nextClinicId !== (existing.clinic_id?.trim() || null)) changedFields.push("clinic_id");
+  if (nextNotes !== (existing.notes?.trim() || null)) changedFields.push("notes");
+
+  if (changedFields.length === 0) {
+    return {
+      shift: existing,
+      warnings: [],
+      outcome: ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED,
+    };
+  }
+
+  if (rosterShiftEditRequiresReason(changedFields)) {
+    if (!isValidRosterShiftEditReason(input.editReason)) {
+      throw new Error(ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE);
+    }
   }
 
   const { warnings } = await evaluateStaffShiftAssignmentWarnings({
     tenantId: tid,
     staffId: nextStaffId,
-    clinicId: input.clinicId ?? existing.clinic_id,
-    shiftType: input.shiftType ?? existing.shift_type,
+    clinicId: nextClinicId,
+    shiftType: nextShiftType,
     startsAt: nextStartsAt,
     endsAt: nextEndsAt,
     allowOverride: input.allowOverride,
+    excludeShiftId: shiftId,
     client: supabase,
   });
 
@@ -242,16 +294,12 @@ export async function updateStaffShift(input: {
     updated_at: now,
     updated_by: input.updatedBy,
   };
-  if (input.staffId) patch.staff_id = nextStaffId;
-  if (input.clinicId !== undefined) patch.clinic_id = input.clinicId?.trim() || null;
-  if (input.shiftType) patch.shift_type = input.shiftType;
-  if (input.startsAt) patch.starts_at = input.startsAt;
-  if (input.endsAt) patch.ends_at = input.endsAt;
-  if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
+  if (changedFields.includes("starts_at")) patch.starts_at = nextStartsAt;
+  if (changedFields.includes("ends_at")) patch.ends_at = nextEndsAt;
+  if (changedFields.includes("shift_type")) patch.shift_type = nextShiftType;
+  if (changedFields.includes("clinic_id")) patch.clinic_id = nextClinicId;
+  if (changedFields.includes("notes")) patch.notes = nextNotes;
   if (input.status) patch.status = input.status;
-  if (input.adjustmentReason !== undefined) {
-    patch.adjustment_reason = input.adjustmentReason?.trim() || null;
-  }
 
   const { data, error } = await supabase
     .from("fi_staff_shifts")
@@ -269,13 +317,23 @@ export async function updateStaffShift(input: {
     staffId: shift.staff_id,
     actorFiUserId: input.updatedBy,
     actionType: ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_UPDATED_MANUAL,
-    reason: input.adjustmentReason ?? "manual_adjustment",
+    reason: rosterShiftEditRequiresReason(changedFields)
+      ? (input.editReason as RosterShiftEditReason)
+      : null,
     oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
     newValues: shiftSnapshotForAudit(toAuditSnapshot(shift)),
+    metadata: rosterShiftEditAuditMetadata({
+      changedFields,
+      notes: input.notes,
+    }),
     client: supabase,
   });
 
-  return { shift, warnings };
+  return {
+    shift,
+    warnings,
+    outcome: ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UPDATED,
+  };
 }
 
 export async function cancelStaffShiftWithReason(input: {

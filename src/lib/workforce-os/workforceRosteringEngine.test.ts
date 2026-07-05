@@ -230,6 +230,19 @@ test("getStaffAvailabilityForRange respects available_override", () => {
   assert.equal(result.available, true);
 });
 
+test("detectStaffSchedulingConflicts excludes shift being edited from overlap checks", () => {
+  const conflicts = detectStaffSchedulingConflicts({
+    staffId: "staff-1",
+    startsAt: RANGE_START,
+    endsAt: RANGE_END,
+    availabilityBlocks: [],
+    shifts: [shift({ id: "shift-being-edited" })],
+    eventAssignments: [],
+    excludeShiftId: "shift-being-edited",
+  });
+  assert.equal(conflicts.some((c) => c.kind === "shift_overlap"), false);
+});
+
 test("detectStaffSchedulingConflicts detects leave and shift overlap", () => {
   const conflicts = detectStaffSchedulingConflicts({
     staffId: "staff-1",

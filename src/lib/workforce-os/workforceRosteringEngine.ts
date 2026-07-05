@@ -122,6 +122,8 @@ export type SchedulingConflictInput = {
   eventAssignments: StaffEventAssignmentRecord[];
   /** When checking an update, exclude this assignment id from overlap checks. */
   excludeAssignmentId?: string | null;
+  /** When checking a shift update, exclude this shift id from overlap checks. */
+  excludeShiftId?: string | null;
 };
 
 export type ResolveClinicalStaffingTemplateInput = {
@@ -323,6 +325,7 @@ export function detectStaffSchedulingConflicts(
 
   for (const shift of input.shifts) {
     if (shift.status === "cancelled") continue;
+    if (input.excludeShiftId && shift.id === input.excludeShiftId) continue;
     const sr = parseTimeRangeMs(shift.starts_at, shift.ends_at);
     if (!sr || !rangesOverlap(range.startMs, range.endMs, sr.startMs, sr.endMs)) continue;
     conflicts.push({
