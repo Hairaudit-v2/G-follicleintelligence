@@ -1,7 +1,5 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import {
