@@ -9,14 +9,16 @@ import {
   type WorkforceOsTabKey,
 } from "./staffCapabilityRegistry";
 import {
-  accessLevelSatisfies,
   canEditModule,
   canViewModule,
   getModuleAccess,
   moduleSatisfies,
   type EffectiveAccessMap,
-  type StaffAccessLevel,
 } from "./staffAccessCore";
+import {
+  accessLevelSatisfies,
+  type StaffAccessLevel,
+} from "./staffAccessRegistry";
 
 /** Whether the viewer holds a capability via module edit or explicit tab grant. */
 export function staffCapabilitySatisfies(
