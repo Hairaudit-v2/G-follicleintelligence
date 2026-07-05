@@ -39,8 +39,10 @@ import {
   openRosterShiftDrawer,
   pushRosterStandardHoursEditorNavigation,
   resolveRosterCellClickOutcome,
+  resolveRosterDrawerStaffContext,
   resolveRosterDrawerStaffMemberId,
   resolveRosterPayloadWeekDayDates,
+  ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
   type RosterCommandCentreDrawerState,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -82,15 +84,6 @@ function rosterDrawerShift(
 ): RosterGridShift | null {
   if (drawer.kind !== "shift" || !drawer.shiftId) return null;
   return shifts.find((shift) => shift.id === drawer.shiftId) ?? null;
-}
-
-function rosterDrawerStaffOption(
-  drawer: RosterCommandCentreDrawerState,
-  staffOptions: RosterCommandCentrePayload["staffOptions"]
-) {
-  const staffMemberId = resolveRosterDrawerStaffMemberId(drawer);
-  if (!staffMemberId) return null;
-  return staffOptions.find((staff) => staff.id === staffMemberId) ?? null;
 }
 
 function rosterPeriodStartFieldLabel(cadence: RosterCommandCentrePayload["rosterPlanning"]["rosterCadence"]): string {
@@ -147,13 +140,12 @@ export function RosterCommandCentreView({
 
   const drawerStaffMemberId = resolveRosterDrawerStaffMemberId(drawerState);
   const drawerShift = rosterDrawerShift(drawerState, payload.shifts);
-  // Fall back to the shift's own staff name so a shift click can never silently
-  // no-op when its staff member is missing from the filtered staff options.
-  const drawerStaff =
-    rosterDrawerStaffOption(drawerState, payload.staffOptions) ??
-    (drawerStaffMemberId && drawerShift
-      ? { id: drawerStaffMemberId, name: drawerShift.staffName ?? "Staff", role: null, isActive: true }
-      : null);
+  const drawerStaff = resolveRosterDrawerStaffContext({
+    drawer: drawerState,
+    staffOptions: payload.staffOptions,
+    rosterGridStaffOptions,
+    selectedShift: drawerShift,
+  });
 
   function closeDrawer() {
     setDrawerState(closeRosterDrawer());
@@ -227,6 +219,28 @@ export function RosterCommandCentreView({
     });
   }
 
+  function openShiftDrawer(input: {
+    mode: "add" | "edit" | "cell-actions";
+    staffMemberId: string;
+    localDate: string;
+    shiftId: string | null;
+    selectedShift?: RosterGridShift | null;
+  }) {
+    const nextDrawer = openRosterShiftDrawer(input);
+    const staff = resolveRosterDrawerStaffContext({
+      drawer: nextDrawer,
+      staffOptions: payload.staffOptions,
+      rosterGridStaffOptions,
+      selectedShift: input.selectedShift ?? null,
+    });
+    if (!staff) {
+      setActionError(ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE);
+      return;
+    }
+    setActionError(null);
+    setDrawerState(nextDrawer);
+  }
+
   function handleCellClick(staffId: string, localDate: string) {
     const clickOutcome = resolveRosterCellClickOutcome({
       staffId,
@@ -240,26 +254,22 @@ export function RosterCommandCentreView({
       return;
     }
 
-    setActionError(null);
-    setDrawerState(
-      openRosterShiftDrawer({
-        mode: clickOutcome.mode,
-        staffMemberId: staffId,
-        localDate,
-        shiftId: null,
-      })
-    );
+    openShiftDrawer({
+      mode: clickOutcome.mode,
+      staffMemberId: staffId,
+      localDate,
+      shiftId: null,
+    });
   }
 
   function handleShiftClick(shift: RosterGridShift) {
-    setDrawerState(
-      openRosterShiftDrawer({
-        mode: "edit",
-        staffMemberId: shift.staff_id,
-        localDate: shift.starts_at.slice(0, 10),
-        shiftId: shift.id,
-      })
-    );
+    openShiftDrawer({
+      mode: "edit",
+      staffMemberId: shift.staff_id,
+      localDate: shift.starts_at.slice(0, 10),
+      shiftId: shift.id,
+      selectedShift: shift,
+    });
   }
 
   function handleGenerateRoster(overwriteGeneratedOnly: boolean) {

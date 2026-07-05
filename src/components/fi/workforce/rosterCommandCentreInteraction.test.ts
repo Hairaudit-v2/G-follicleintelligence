@@ -4,7 +4,9 @@ import test from "node:test";
 
 import {
   resolveRosterCellClickOutcome,
+  resolveRosterDrawerStaffContext,
   resolveRosterStandardHoursEditorNavigation,
+  openRosterShiftDrawer,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 
@@ -18,9 +20,10 @@ test("roster view shows an explicit permission banner and error surfaces (no sil
   assert.ok(src.includes('data-testid="roster-manage-denied-banner"'));
   assert.ok(src.includes('data-testid="roster-action-error"'));
   assert.ok(src.includes('role="alert"'));
-  // Drawer must fall back to the shift's own staff name — a shift click can
-  // never silently fail when staff options are filtered.
-  assert.ok(src.includes("drawerShift.staffName"));
+  // Drawer staff must resolve from grid options and shift payload — never staffOptions alone.
+  assert.ok(src.includes("resolveRosterDrawerStaffContext"));
+  assert.ok(src.includes("rosterGridStaffOptions"));
+  assert.ok(src.includes("openShiftDrawer"));
 });
 
 test("roster grid cells stay clickable without manage permission so the deny message can surface", () => {
@@ -34,7 +37,17 @@ test("roster grid cells stay clickable without manage permission so the deny mes
     !src.includes("if (!canManage) return;"),
     "grid must delegate permission handling to the parent so a message is shown"
   );
-  assert.ok(src.includes("onClick={() => onCellClick?.(staff.id, date)}"));
+  assert.ok(src.includes("onCellClick?.(staff.id, date)"));
+  assert.ok(src.includes("data-roster-shift-id"));
+  assert.ok(src.includes("onShiftClick?.(shift)"));
+  assert.ok(
+    !src.includes('role="presentation"'),
+    "shift cards must not use nested click handlers inside the cell surface"
+  );
+  assert.ok(
+    !src.match(/pointer-events-none/),
+    "interactive roster cells must not use pointer-events-none"
+  );
   // The no-permission standard-hours control is a real button wired to the
   // deny-messaging handler, not an inert span.
   assert.ok(src.includes("onClick={() => onEditStandardHours?.(staff.id)}"));
@@ -72,4 +85,42 @@ test("standard-hours editor navigation denies with a reason when manage is missi
     outcome: "deny",
     reason: STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
   });
+});
+
+test("resolveRosterDrawerStaffContext prefers grid staff when staffOptions omits the row", () => {
+  const drawer = openRosterShiftDrawer({
+    mode: "cell-actions",
+    staffMemberId: STAFF,
+    localDate: "2026-07-06",
+    shiftId: null,
+  });
+
+  const staff = resolveRosterDrawerStaffContext({
+    drawer,
+    staffOptions: [],
+    rosterGridStaffOptions: [{ id: STAFF, name: "Paul Green", role: "doctor" }],
+  });
+
+  assert.deepEqual(staff, { id: STAFF, name: "Paul Green", role: "doctor" });
+});
+
+test("resolveRosterDrawerStaffContext falls back to shift staff when lists omit the row", () => {
+  const drawer = openRosterShiftDrawer({
+    mode: "edit",
+    staffMemberId: STAFF,
+    localDate: "2026-07-06",
+    shiftId: "shift-1",
+  });
+
+  const staff = resolveRosterDrawerStaffContext({
+    drawer,
+    staffOptions: [],
+    rosterGridStaffOptions: [],
+    selectedShift: {
+      staff_id: STAFF,
+      staffName: "Paul Green",
+    },
+  });
+
+  assert.deepEqual(staff, { id: STAFF, name: "Paul Green", role: null });
 });

@@ -17,6 +17,7 @@ import {
   rosterShiftDrawerEditRequiresReason,
   toRosterShiftDatetimeLocal,
   resolveRosterCellClickIntent,
+  resolveRosterDrawerStaffContext,
   resolveRosterDrawerStaffMemberId,
   resolveRosterDrawerStaffName,
   resolveRosterPayloadWeekDayDates,
@@ -185,6 +186,24 @@ test("roster drawer state helpers open standard-hours and setup panels", () => {
   assert.equal(shiftDrawer.kind, "shift");
   assert.equal(resolveRosterDrawerStaffMemberId(shiftDrawer), STAFF_PAUL);
   assert.equal(closeRosterDrawer().kind, "closed");
+});
+
+test("resolveRosterDrawerStaffContext resolves grid staff when staffOptions is filtered out", () => {
+  const shiftDrawer = openRosterShiftDrawer({
+    mode: "cell-actions",
+    staffMemberId: STAFF_PAUL,
+    localDate: "2026-07-07",
+    shiftId: null,
+  });
+
+  assert.deepEqual(
+    resolveRosterDrawerStaffContext({
+      drawer: shiftDrawer,
+      staffOptions: [{ id: STAFF_JANE, name: "Jane Doe", role: null }],
+      rosterGridStaffOptions: [{ id: STAFF_PAUL, name: "Paul Green", role: "doctor" }],
+    }),
+    { id: STAFF_PAUL, name: "Paul Green", role: "doctor" }
+  );
 });
 
 test("buildRosterShiftFormValuesFromShift uses shift data not create defaults", () => {

@@ -203,28 +203,43 @@ export function RosterWeekGrid({
                       key={`${staff.id}-${date}`}
                       className="min-h-[88px] border-l border-white/[0.04] px-1.5 py-2"
                     >
-                      <button
-                        type="button"
+                      <div
+                        role="button"
+                        tabIndex={0}
                         data-testid={`roster-cell-${staff.id}-${date}`}
                         title={!canManage ? manageDeniedReason : undefined}
                         className={cn(
-                          "flex min-h-[80px] w-full flex-col gap-1 rounded-lg border border-transparent p-1.5 text-left",
+                          "flex min-h-[80px] w-full cursor-pointer flex-col gap-1 rounded-lg border border-transparent p-1.5 text-left",
                           canManage
                             ? "hover:border-white/[0.08] hover:bg-white/[0.02]"
                             : "cursor-not-allowed opacity-70"
                         )}
-                        // Always clickable: the parent handler resolves permission and
-                        // shows an explicit deny message instead of a silent no-op.
-                        onClick={() => onCellClick?.(staff.id, date)}
+                        onKeyDown={(event) => {
+                          if (event.key !== "Enter" && event.key !== " ") return;
+                          event.preventDefault();
+                          onCellClick?.(staff.id, date);
+                        }}
+                        onClick={(event) => {
+                          const shiftTarget = (event.target as HTMLElement).closest(
+                            "[data-roster-shift-id]"
+                          );
+                          if (shiftTarget) {
+                            const shiftId = shiftTarget.getAttribute("data-roster-shift-id");
+                            const shift = cellShifts.find((row) => row.id === shiftId);
+                            if (shift) {
+                              event.stopPropagation();
+                              onShiftClick?.(shift);
+                              return;
+                            }
+                          }
+                          onCellClick?.(staff.id, date);
+                        }}
                       >
                         {cellShifts.map((shift) => (
                           <span
                             key={shift.id}
-                            role="presentation"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onShiftClick?.(shift);
-                            }}
+                            data-roster-shift-id={shift.id}
+                            data-testid={`roster-shift-${shift.id}`}
                             className={cn(
                               "block rounded-md px-2 py-1.5",
                               selectedShiftId === shift.id ? "ring-1 ring-cyan-400/60" : "",
@@ -279,7 +294,7 @@ export function RosterWeekGrid({
                               : "Add shift"}
                           </span>
                         ) : null}
-                      </button>
+                      </div>
                     </td>
                   );
                 })}

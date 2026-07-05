@@ -101,6 +101,47 @@ export function resolveRosterDrawerStaffName(
   return staffOptions.find((staff) => staff.id === staffMemberId)?.name ?? null;
 }
 
+export type RosterDrawerStaffOption = {
+  id: string;
+  name: string;
+  role: string | null;
+};
+
+export const ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE =
+  "Could not open the roster drawer for this staff member. Refresh the page and try again.";
+
+/** Resolve staff context for the shift drawer — never rely on staffOptions alone. */
+export function resolveRosterDrawerStaffContext(input: {
+  drawer: RosterCommandCentreDrawerState;
+  staffOptions: readonly RosterDrawerStaffOption[];
+  rosterGridStaffOptions?: readonly RosterDrawerStaffOption[];
+  selectedShift?: { staff_id: string; staffName?: string | null } | null;
+}): RosterDrawerStaffOption | null {
+  const staffMemberId = resolveRosterDrawerStaffMemberId(input.drawer)?.trim();
+  if (!staffMemberId) return null;
+
+  const findStaff = (options: readonly RosterDrawerStaffOption[]) =>
+    options.find((staff) => staff.id === staffMemberId) ?? null;
+
+  const fromStaffOptions = findStaff(input.staffOptions);
+  if (fromStaffOptions) return fromStaffOptions;
+
+  const fromGrid = input.rosterGridStaffOptions
+    ? findStaff(input.rosterGridStaffOptions)
+    : null;
+  if (fromGrid) return fromGrid;
+
+  if (input.selectedShift?.staff_id === staffMemberId) {
+    return {
+      id: staffMemberId,
+      name: input.selectedShift.staffName?.trim() || "Staff",
+      role: null,
+    };
+  }
+
+  return null;
+}
+
 export function resolveRosterPayloadWeekDayDates(payload: {
   periodDayDates?: string[];
   weekDayDates?: string[];
