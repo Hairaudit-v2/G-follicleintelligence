@@ -1,9 +1,10 @@
 /**
- * FI-LH-NAV-COMPACT-1 — compact expandable LH navigation helpers.
+ * FI-LH-NAV-COMPACT-1 / FI-LH-NAV-COMPACT-1B — compact expandable LH navigation helpers.
  */
 
 import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 import {
+  FI_OS_HIDDEN_MORE_SUB_ITEM_IDS,
   FI_OS_LEGACY_MORE_SUB_ITEM_IDS,
   isStaffHiddenMoreDrawerLabel,
   moreDrawerAdminSurfacesEnabled,
@@ -146,6 +147,8 @@ export function filterSidebarItemSubLinksForStaff(
 
   const filtered = subs.filter((sub) => {
     if (FI_OS_LEGACY_MORE_SUB_ITEM_IDS.has(sub.id)) {
+      // Conditional visibility (e.g. procedure day) resolved by filterSubItemsForMoreDrawer.
+      if (FI_OS_HIDDEN_MORE_SUB_ITEM_IDS.has(sub.id)) return true;
       return adminSurfaces;
     }
     if (!adminSurfaces && isStaffHiddenMoreDrawerLabel(sub.label)) {

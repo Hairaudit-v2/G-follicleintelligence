@@ -55,6 +55,26 @@ function adminLegacySections() {
   });
 }
 
+function collapsedDrawerSections(sidebar = staffSidebar(), profile: FiWorkspaceProfileKey = "default") {
+  return buildFiOsSidebarWorkflowSections(sidebar, profile, {
+    tenantBase: base,
+    forCollapsedShell: true,
+    showNavigationAdminSurfaces: false,
+    showSettingsAdminSurfaces: false,
+  });
+}
+
+function adminCollapsedDrawerSections() {
+  return buildFiOsSidebarWorkflowSections(adminSidebar(), "default", {
+    tenantBase: base,
+    forCollapsedShell: true,
+    showNavigationAdminSurfaces: true,
+    showSettingsAdminSurfaces: true,
+    showReportsAdminSurfaces: true,
+    showTeamAdminSurfaces: true,
+  });
+}
+
 test("compact nav: route-to-group mapping for primary and deep links", () => {
   assert.equal(resolveActiveWorkflowGroupForNav("calendar"), "FRONT_DESK");
   assert.equal(resolveActiveWorkflowGroupForNav("crm"), "PIPELINE");
@@ -114,6 +134,49 @@ test("compact nav: staff legacy sidebar hides direct links; admin retains them",
   );
   assert.ok(adminSubIds.includes("workforce-os-hub"));
   assert.ok(adminSubIds.includes("d6-navigation-audit"));
+});
+
+test("compact nav 1B: All areas drawer applies staff-safe direct-link filtering", () => {
+  const staff = collapsedDrawerSections();
+  const staffSubIds = staff.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
+  );
+  const staffSubLabels = staff.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? [])
+  );
+
+  assert.ok(!staffSubIds.includes("workforce-os-hub"));
+  assert.ok(!staffSubIds.includes("reception-os"));
+  for (const label of staffSubLabels) {
+    assert.ok(!/\(direct\)/i.test(label), `staff drawer should hide direct label: ${label}`);
+  }
+
+  const admin = adminCollapsedDrawerSections();
+  const adminSubIds = admin.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
+  );
+  assert.ok(adminSubIds.includes("workforce-os-hub"));
+  assert.ok(adminSubIds.includes("d6-navigation-audit"));
+});
+
+test("compact nav 1B: collapsed All areas drawer fits within max group headers", () => {
+  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, false, false);
+  const access = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    staff: false,
+    analytics: false,
+    surgery_pipeline: false,
+    consultations: true,
+    calendar: true,
+    crm: true,
+    dashboard: true,
+    patients: true,
+  });
+  const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, access);
+  const sections = buildFiOsSidebarWorkflowSections(filtered, "reception" as FiWorkspaceProfileKey, {
+    tenantBase: base,
+    forCollapsedShell: true,
+  });
+  assert.ok(countCompactNavGroupHeaders(sections) <= FI_OS_COMPACT_NAV_MAX_GROUP_HEADERS);
 });
 
 test("compact nav: workforce and HR deep routes map to Team group", () => {

@@ -454,6 +454,7 @@ function FiOsAppShellBody({
         activeNavId={activeSidebarId}
         pathname={pathname}
         onClose={closeMoreNav}
+        navPersistenceScope={{ tenantId, userEmail }}
       />
 
       <ClinicOsGlobalSearch

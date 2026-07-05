@@ -241,7 +241,7 @@ export function FiOsModuleNav({
   onNavigate?: () => void;
   dense?: boolean;
   className?: string;
-  /** Desktop rail: collapsed workflow groups with click-to-expand. */
+  /** Collapsed workflow groups with click-to-expand (desktop rail + All areas drawer). */
   compactExpandable?: boolean;
   navPersistenceScope?: { tenantId: string; userEmail?: string | null };
 }) {

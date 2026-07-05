@@ -91,7 +91,6 @@ function prepareSidebarItemsForDrawer(
     })
     .map((it) => {
       const drawerFiltered = filterSubItemsForMoreDrawer(it, filterOpts);
-      if (opts.forCollapsedShell) return drawerFiltered;
       return filterSidebarItemSubLinksForStaff(drawerFiltered, filterOpts);
     });
 

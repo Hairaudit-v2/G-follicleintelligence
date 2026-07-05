@@ -92,13 +92,17 @@ export function FiOsSidebar({
     return (
       <div className={fiOsChromeClasses.sidebarDrawer}>
         {brandBlock}
-        <FiOsModuleNav
-          sections={navSections}
-          activeId={activeNavId}
-          pathname={pathname}
-          onNavigate={onNavigate}
-          dense={dense}
-        />
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden px-2">
+          <FiOsModuleNav
+            sections={navSections}
+            activeId={activeNavId}
+            pathname={pathname}
+            onNavigate={onNavigate}
+            dense={dense}
+            compactExpandable={compactExpandable}
+            navPersistenceScope={navPersistenceScope}
+          />
+        </div>
       </div>
     );
   }

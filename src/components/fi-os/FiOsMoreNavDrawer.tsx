@@ -15,6 +15,7 @@ export function FiOsMoreNavDrawer({
   activeNavId,
   pathname,
   onClose,
+  navPersistenceScope,
 }: {
   open: boolean;
   brandName: string;
@@ -24,6 +25,7 @@ export function FiOsMoreNavDrawer({
   activeNavId: string | null;
   pathname: string;
   onClose: () => void;
+  navPersistenceScope: { tenantId: string; userEmail?: string | null };
 }) {
   if (!open) return null;
 
@@ -52,6 +54,8 @@ export function FiOsMoreNavDrawer({
         dense
         drawerTitle="All areas"
         onDrawerClose={onClose}
+        compactExpandable
+        navPersistenceScope={navPersistenceScope}
       />
     </div>
   );
