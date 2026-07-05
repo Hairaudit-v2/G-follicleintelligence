@@ -90,8 +90,17 @@ test("Calendar route and href are unchanged on minimal rail", () => {
   }
 });
 
+function flattenMoreIds(sections = moreSections()) {
+  const top = sections.flatMap((s) => s.items.map((i) => i.id));
+  const subs = sections.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
+  );
+  return new Set([...top, ...subs]);
+}
+
 test("secondary workflow routes remain in More drawer after regrouping", () => {
-  const ids = new Set(allMoreItemIds());
+  const ids = flattenMoreIds();
+  assert.ok(ids.has("front-desk"));
   for (const expected of [
     "operations-centre",
     "reception-os",
@@ -174,9 +183,11 @@ test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in M
   assert.ok(frontDesk);
   assert.ok(surgery);
   const frontIds = frontDesk!.items.map((i) => i.id);
+  const frontSubIds = frontDesk!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   const surgeryIds = surgery!.items.map((i) => i.id);
-  assert.ok(frontIds.includes("reception-os"));
-  assert.ok(frontIds.includes("reception-board"));
+  assert.deepEqual(frontIds, ["front-desk"]);
+  assert.ok(frontSubIds.includes("reception-os"));
+  assert.ok(frontSubIds.includes("reception-board"));
   assert.ok(surgeryIds.includes("surgery-os"));
   assert.ok(surgeryIds.includes("cases"));
 });

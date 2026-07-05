@@ -57,9 +57,11 @@ export const FI_OS_D6G_WORKFLOW_GROUP_LABELS: Record<FiOsD6gWorkflowGroupId, str
 export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = {
   dashboard: "PATIENTS",
   calendar: "FRONT_DESK",
+  "front-desk": "FRONT_DESK",
   "operations-centre": "FRONT_DESK",
   "reception-os": "FRONT_DESK",
   "reception-board": "FRONT_DESK",
+  "reception-board-command": "FRONT_DESK",
   "tomorrow-board": "FRONT_DESK",
   patients: "PATIENTS",
   "patient-twin": "PATIENTS",
@@ -98,6 +100,10 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "surgery-intelligence-dashboard": "SURGERY",
   "pathology-inbox": "CLINICAL",
   "pathology-email-routes": "SETTINGS",
+  "front-desk-reception-operations": "FRONT_DESK",
+  "front-desk-clinic-flow": "FRONT_DESK",
+  "front-desk-reception-board": "FRONT_DESK",
+  "front-desk-tomorrow": "FRONT_DESK",
 };
 
 /** Sub-items hidden from More drawer (routes remain live). */
@@ -113,7 +119,7 @@ export const FI_OS_D6_ADMIN_MORE_NAV_IDS = new Set(
 );
 
 const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
-  FRONT_DESK: ["operations-centre", "reception-os", "reception-board", "tomorrow-board"],
+  FRONT_DESK: ["front-desk"],
   PIPELINE: ["crm", "follow-up-queue", "consultations"],
   PATIENTS: ["patient-twin"],
   CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav"],

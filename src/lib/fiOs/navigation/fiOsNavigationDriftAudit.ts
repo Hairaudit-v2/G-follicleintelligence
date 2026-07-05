@@ -140,10 +140,6 @@ const D6_PRIMARY_RAIL_NAV_IDS = new Set([
 ]);
 
 const TOO_GRANULAR_PRIMARY_IDS = new Set([
-  "operations-centre",
-  "reception-board",
-  "tomorrow-board",
-  "reception-os",
   "follow-up-queue",
   "pathology-nav",
 ]);
@@ -549,7 +545,7 @@ export function buildNavigationDriftReport(
   const riskyChanges = [
     "Do not remove Calendar route or minimal-rail Calendar link — calendar internals are out of scope.",
     "Surgery top-level (surgery-os) and Cases sub-links share surgery workflow — consolidate UI, preserve all hrefs.",
-    "Front desk has four primary rows (Clinic flow, Front desk, Reception board, Tomorrow board) — grouped under More / Front desk.",
+    "Front desk consolidated under /front-desk — legacy /operations, /reception-os, /reception, /reception-board, /tomorrow routes must stay live.",
     "D6 intelligence routes (/intelligence/*) are admin-only — keep URLs when hiding from staff nav.",
     "Team vs Staff vs Onboarding Centre vs hr-os label collision — align under Team without breaking workforce-os paths.",
     "Collapsed primary rail is six slots — do not add module-language labels to the rail.",

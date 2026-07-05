@@ -104,11 +104,17 @@ test("getFiOsShellActiveSidebarId: tomorrow board maps to Tmrw sidebar tab", () 
   assert.equal(getFiOsShellActiveSidebarId(`${base}/tomorrow`, base), "tomorrow-board");
 });
 
-test("resolveFiOsPrimarySidebarItems: operations and reception entries exist", () => {
+test("resolveFiOsPrimarySidebarItems: consolidated front desk entry with preserved legacy sub-links", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
-  assert.ok(items.find((i) => i.id === "operations-centre" && !i.disabled));
-  assert.ok(items.find((i) => i.id === "reception-board" && !i.disabled));
-  assert.ok(items.find((i) => i.id === "tomorrow-board" && !i.disabled));
+  const frontDesk = items.find((i) => i.id === "front-desk" && !i.disabled);
+  assert.ok(frontDesk);
+  assert.ok(frontDesk!.href.endsWith("/front-desk"));
+  const subIds = new Set(frontDesk!.subItems?.map((s) => s.id) ?? []);
+  assert.ok(subIds.has("operations-centre"));
+  assert.ok(subIds.has("reception-os"));
+  assert.ok(subIds.has("reception-board"));
+  assert.ok(subIds.has("tomorrow-board"));
+  assert.ok(subIds.has("front-desk-clinic-flow"));
 });
 
 test("resolveFiOsPrimarySidebarItems: consultations entry includes conversion board sub-link when enabled", () => {
@@ -138,8 +144,7 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
   const byId = Object.fromEntries(items.map((i) => [i.id, i]));
   assert.equal(byId.dashboard?.label, "Today");
-  assert.equal(byId["operations-centre"]?.label, "Clinic flow");
-  assert.equal(byId["reception-os"]?.label, "Front desk");
+  assert.equal(byId["front-desk"]?.label, "Front desk");
   assert.equal(byId["surgery-os"]?.label, "Surgery");
   assert.equal(byId.crm?.label, "Enquiries");
   assert.equal(byId["follow-up-queue"]?.label, "Follow-ups");

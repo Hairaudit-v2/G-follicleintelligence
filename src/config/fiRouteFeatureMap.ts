@@ -37,7 +37,13 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "appointments" || f.startsWith("appointments/"), feature: "calendar" },
   { test: (f) => f === "bookings" || f.startsWith("bookings/"), feature: "calendar" },
   { test: (f) => f === "tomorrow" || f.startsWith("tomorrow/"), feature: "calendar" },
+  {
+    test: (f) => f === "front-desk/tomorrow" || f.startsWith("front-desk/tomorrow/"),
+    feature: "calendar",
+  },
+  { test: (f) => f === "front-desk" || f.startsWith("front-desk/"), feature: "dashboard" },
   { test: (f) => f === "operations" || f.startsWith("operations/"), feature: "dashboard" },
+  { test: (f) => f === "reception-board" || f.startsWith("reception-board/"), feature: "dashboard" },
   { test: (f) => f === "reception-os" || f.startsWith("reception-os/"), feature: "dashboard" },
   { test: (f) => f === "reception" || f.startsWith("reception/"), feature: "dashboard" },
   { test: (f) => f === "surgery-os" || f.startsWith("surgery-os/"), feature: "surgery_pipeline" },

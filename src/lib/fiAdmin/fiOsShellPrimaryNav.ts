@@ -1,5 +1,9 @@
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { getClinicOsShellActiveNavId } from "@/src/lib/fiAdmin/clinicOsShellConfig";
+import {
+  buildFrontDeskSidebarSubItems,
+  FI_OS_FRONT_DESK_NAV_ID,
+} from "@/src/lib/fiOs/frontDesk/frontDeskWorkspaceCore";
 import { filterProcedureDayFromFiOsSidebarItems } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
@@ -187,20 +191,14 @@ export function resolveFiOsPrimarySidebarItems(
           : undefined,
     },
     {
-      id: "operations-centre",
-      featureKey: "dashboard",
-      label: "Clinic flow",
-      shortLabel: "Flow",
-      href: hrefFor(b, "operations"),
-      disabled: false,
-    },
-    {
-      id: "reception-os",
+      id: FI_OS_FRONT_DESK_NAV_ID,
       featureKey: "dashboard",
       label: "Front desk",
       shortLabel: "Front",
-      href: hrefFor(b, "reception-os"),
+      href: hrefFor(b, "front-desk"),
       disabled: false,
+      hint: "Clinic flow, reception board, tomorrow prep, and reception operations.",
+      subItems: buildFrontDeskSidebarSubItems(b.split("/").filter(Boolean).pop() ?? ""),
     },
     {
       id: "surgery-os",
@@ -208,22 +206,6 @@ export function resolveFiOsPrimarySidebarItems(
       label: "Surgery",
       shortLabel: "Surgery",
       href: hrefFor(b, "surgery-os"),
-      disabled: false,
-    },
-    {
-      id: "reception-board",
-      featureKey: "dashboard",
-      label: "Reception board",
-      shortLabel: "Rec",
-      href: hrefFor(b, "reception"),
-      disabled: false,
-    },
-    {
-      id: "tomorrow-board",
-      featureKey: "calendar",
-      label: "Tomorrow board",
-      shortLabel: "Tmrw",
-      href: hrefFor(b, "tomorrow"),
       disabled: false,
     },
     {
@@ -538,8 +520,10 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const restEarly = npRaw.slice(nb.length).replace(/^\//, "");
     const firstEarly = restEarly.split("/")[0] ?? "";
     if (firstEarly === "doctor") return "doctor-workspace";
+    if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
+    if (firstEarly === "reception-board") return "reception-board-command";
     if (firstEarly === "surgery-os") {
       const secondEarly = restEarly.split("/")[1] ?? "";
       if (secondEarly === "intelligence") return "cases";

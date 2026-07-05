@@ -90,11 +90,13 @@ test("Calendar remains preserved in catalog and primary rail placement", () => {
   assert.ok(report.directRoutesPreserved.includes(calendar!.href));
 });
 
-test("surgery-os and reception-os map to 1B Surgery and Front desk groups after D6G-B", () => {
+test("surgery-os and front-desk map to 1B Surgery and Front desk groups after D6G-C", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const surgeryOs = items.find((i) => i.id === "surgery-os")!;
+  const frontDesk = items.find((i) => i.id === "front-desk")!;
   const receptionOs = items.find((i) => i.id === "reception-os")!;
   assert.equal(surgeryOs.workflowGroupId, "SURGERY");
+  assert.equal(frontDesk.workflowGroupId, "FRONT_DESK");
   assert.equal(receptionOs.workflowGroupId, "FRONT_DESK");
 
   const surgeryDrift = classifyNavigationDrift(surgeryOs, items);

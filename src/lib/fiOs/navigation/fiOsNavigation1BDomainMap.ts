@@ -30,6 +30,7 @@ export type FiOsNav1BMappingEntry = {
 export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = {
   dashboard: { domain: "Today" },
   calendar: { domain: "Calendar" },
+  "front-desk": { domain: "Front Desk", notes: "Consolidated front desk workspace" },
   "operations-centre": { domain: "Front Desk", notes: "Clinic flow operational board" },
   "reception-os": { domain: "Front Desk", notes: "Front desk reception workspace" },
   "reception-board": { domain: "Front Desk", notes: "Same-day reception board" },
@@ -68,6 +69,11 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   "procedure-day-board": { domain: "Surgery", notes: "Procedure day tab inside surgery workflow" },
   "pathology-inbox": { domain: "Clinical" },
   "pathology-email-routes": { domain: "Settings", notes: "Admin configuration under clinical labs" },
+  "front-desk-reception-operations": { domain: "Front Desk" },
+  "front-desk-clinic-flow": { domain: "Front Desk" },
+  "front-desk-reception-board": { domain: "Front Desk" },
+  "front-desk-tomorrow": { domain: "Front Desk" },
+  "reception-board-command": { domain: "Front Desk" },
 };
 
 /** Label overrides when id is absent (quick-create, D6 routes). */
@@ -115,6 +121,10 @@ export const FI_OS_ROUTE_SUFFIX_1B_DOMAIN: Record<string, FiOs1BWorkflowDomain> 
   "surgery-os/intelligence": "Surgery",
   "surgery-readiness": "Surgery",
   "procedure-day": "Surgery",
+  "front-desk": "Front Desk",
+  "front-desk/clinic-flow": "Front Desk",
+  "front-desk/reception-board": "Front Desk",
+  "front-desk/tomorrow": "Front Desk",
   "workforce-os": "Team",
   "hr-os/onboarding": "Team",
   "workforce-os/roster": "Team",
