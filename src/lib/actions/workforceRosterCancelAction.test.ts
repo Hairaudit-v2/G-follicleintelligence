@@ -26,6 +26,7 @@ describe("cancelRosterShiftAction production wiring", () => {
     assert.ok(src.includes("hardDeleteGeneratedDraft: true"));
     assert.ok(src.includes("updatedBy: actorFiUserId"));
     assert.ok(src.includes("cancellationReason: parsed.cancellationReason"));
+    assert.ok(src.includes("notes: parsed.notes"));
   });
 
   it("requires cancellation reason with UI-safe error message", () => {

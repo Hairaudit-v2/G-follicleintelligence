@@ -10,6 +10,7 @@ import type { RosterStaffEligibilitySnapshot } from "@/src/lib/workforce-os/rost
 import {
   ROSTER_SHIFT_AUDIT_ACTION_TYPES,
   canHardDeleteGeneratedDraftShift,
+  rosterShiftCancellationAuditMetadata,
   shiftSnapshotForAudit,
   type RosterShiftCancellationReason,
   type RosterShiftSnapshot,
@@ -282,6 +283,7 @@ export async function cancelStaffShiftWithReason(input: {
   shiftId: string;
   cancellationReason: RosterShiftCancellationReason | string;
   updatedBy: string;
+  notes?: string | null;
   hardDeleteGeneratedDraft?: boolean;
   client?: SupabaseClient;
 }): Promise<FiStaffShiftRow> {
@@ -292,6 +294,8 @@ export async function cancelStaffShiftWithReason(input: {
   const existing = await loadShiftForTenant(tid, shiftId, supabase);
   if (!existing) throw new Error("Shift not found.");
   if (existing.status === "cancelled") return existing;
+
+  const cancellationMetadata = rosterShiftCancellationAuditMetadata(input.notes);
 
   if (input.hardDeleteGeneratedDraft && canHardDeleteGeneratedDraftShift(toAuditSnapshot(existing))) {
     const { error } = await supabase
@@ -312,6 +316,7 @@ export async function cancelStaffShiftWithReason(input: {
       reason: input.cancellationReason,
       oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
       newValues: { deleted: true },
+      metadata: cancellationMetadata,
       client: supabase,
     });
 
@@ -343,6 +348,7 @@ export async function cancelStaffShiftWithReason(input: {
     reason: input.cancellationReason,
     oldValues: shiftSnapshotForAudit(toAuditSnapshot(existing)),
     newValues: shiftSnapshotForAudit(toAuditSnapshot(shift)),
+    metadata: cancellationMetadata,
     client: supabase,
   });
 

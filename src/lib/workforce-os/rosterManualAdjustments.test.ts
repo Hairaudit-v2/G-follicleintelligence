@@ -8,6 +8,7 @@ import {
   canHardDeleteGeneratedDraftShift,
   isGeneratedShiftSource,
   ROSTER_SHIFT_AUDIT_ACTION_TYPES,
+  rosterShiftCancellationAuditMetadata,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import { insertRosterShiftAuditEvent } from "@/src/lib/workforce-os/rosterShiftAudit.server";
 import {
@@ -416,6 +417,16 @@ describe("roster manual adjustments core", () => {
       false
     );
   });
+
+  it("omits blank cancellation notes from audit metadata", () => {
+    assert.equal(rosterShiftCancellationAuditMetadata(undefined), undefined);
+    assert.equal(rosterShiftCancellationAuditMetadata(null), undefined);
+    assert.equal(rosterShiftCancellationAuditMetadata(""), undefined);
+    assert.equal(rosterShiftCancellationAuditMetadata("   "), undefined);
+    assert.deepEqual(rosterShiftCancellationAuditMetadata("Patient rescheduled"), {
+      notes: "Patient rescheduled",
+    });
+  });
 });
 
 describe("manual shift create uses fi_users.id for created_by", () => {
@@ -528,6 +539,116 @@ describe("cancel confirmed shift retains historical record", () => {
     assert.equal(supabase.shifts[0]?.cancellation_reason, "staff_sick");
     assert.equal(supabase.auditEvents[0]?.action_type, ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_CANCELLED);
     assert.equal(supabase.auditEvents[0]?.actor_fi_user_id, FI_USER);
+    assert.deepEqual(supabase.auditEvents[0]?.metadata, {});
+  });
+
+  it("persists optional cancellation notes in audit metadata", async () => {
+    const supabase = createMockSupabase([
+      {
+        id: SHIFT_CONFIRMED,
+        tenant_id: TENANT,
+        staff_id: STAFF_ACTIVE,
+        clinic_id: null,
+        shift_type: "clinic_day",
+        starts_at: "2026-07-06T01:00:00.000Z",
+        ends_at: "2026-07-06T09:00:00.000Z",
+        status: "confirmed",
+        notes: null,
+        shift_source: "manual",
+        created_by: FI_USER,
+        updated_by: null,
+        adjustment_reason: null,
+        cancellation_reason: null,
+      },
+    ]);
+
+    await cancelStaffShiftWithReason({
+      tenantId: TENANT,
+      shiftId: SHIFT_CONFIRMED,
+      cancellationReason: "clinic_closed",
+      notes: "  Public holiday closure  ",
+      updatedBy: FI_USER,
+      client: supabase,
+    });
+
+    assert.deepEqual(supabase.auditEvents[0]?.metadata, {
+      notes: "Public holiday closure",
+    });
+  });
+});
+
+describe("generated draft hard-delete cancellation", () => {
+  it("hard-deletes scheduled generated shift and writes audit without notes metadata when omitted", async () => {
+    const supabase = createMockSupabase([
+      {
+        id: SHIFT_GENERATED,
+        tenant_id: TENANT,
+        staff_id: STAFF_ACTIVE,
+        clinic_id: null,
+        shift_type: "clinic_day",
+        starts_at: "2026-07-06T01:00:00.000Z",
+        ends_at: "2026-07-06T09:00:00.000Z",
+        status: "scheduled",
+        notes: null,
+        shift_source: "standard_hours",
+        created_by: FI_USER,
+        updated_by: null,
+        adjustment_reason: null,
+        cancellation_reason: null,
+      },
+    ]);
+
+    await cancelStaffShiftWithReason({
+      tenantId: TENANT,
+      shiftId: SHIFT_GENERATED,
+      cancellationReason: "duplicate_generated_shift",
+      updatedBy: FI_USER,
+      hardDeleteGeneratedDraft: true,
+      client: supabase,
+    });
+
+    assert.equal(supabase.shifts.length, 0);
+    assert.equal(
+      supabase.auditEvents[0]?.action_type,
+      ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_REMOVED_GENERATED
+    );
+    assert.deepEqual(supabase.auditEvents[0]?.metadata, {});
+  });
+
+  it("hard-deletes scheduled generated shift and persists notes in audit metadata when provided", async () => {
+    const supabase = createMockSupabase([
+      {
+        id: SHIFT_GENERATED,
+        tenant_id: TENANT,
+        staff_id: STAFF_ACTIVE,
+        clinic_id: null,
+        shift_type: "clinic_day",
+        starts_at: "2026-07-06T01:00:00.000Z",
+        ends_at: "2026-07-06T09:00:00.000Z",
+        status: "scheduled",
+        notes: null,
+        shift_source: "standard_hours",
+        created_by: FI_USER,
+        updated_by: null,
+        adjustment_reason: null,
+        cancellation_reason: null,
+      },
+    ]);
+
+    await cancelStaffShiftWithReason({
+      tenantId: TENANT,
+      shiftId: SHIFT_GENERATED,
+      cancellationReason: "duplicate_generated_shift",
+      notes: "Duplicate from regenerate",
+      updatedBy: FI_USER,
+      hardDeleteGeneratedDraft: true,
+      client: supabase,
+    });
+
+    assert.equal(supabase.shifts.length, 0);
+    assert.deepEqual(supabase.auditEvents[0]?.metadata, {
+      notes: "Duplicate from regenerate",
+    });
   });
 });
 

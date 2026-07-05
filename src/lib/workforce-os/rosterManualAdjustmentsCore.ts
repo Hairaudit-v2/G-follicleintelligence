@@ -110,3 +110,12 @@ export function shiftSnapshotForAudit(shift: RosterShiftSnapshot): Record<string
 export function formatRosterAdjustmentReasonLabel(reason: string): string {
   return reason.replace(/_/g, " ");
 }
+
+/** Optional cancellation notes for fi_roster_shift_audit_events.metadata (omitted when blank). */
+export function rosterShiftCancellationAuditMetadata(
+  notes?: string | null
+): Record<string, unknown> | undefined {
+  const trimmed = notes?.trim();
+  if (!trimmed) return undefined;
+  return { notes: trimmed };
+}

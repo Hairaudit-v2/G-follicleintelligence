@@ -386,6 +386,7 @@ export async function cancelRosterShiftAction(
       tenantId: parsed.tenantId,
       shiftId: parsed.shiftId,
       cancellationReason: parsed.cancellationReason,
+      notes: parsed.notes,
       updatedBy: actorFiUserId,
       hardDeleteGeneratedDraft: true,
     });
