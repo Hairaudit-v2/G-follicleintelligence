@@ -181,7 +181,8 @@ function FiOsAppShellBody({
       showProcedureDayNav,
       showNavigationAdminSurfaces,
       showNavigationAdminSurfaces,
-      visibleTeamTabIds
+      visibleTeamTabIds,
+      showNavigationAdminSurfaces
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -209,6 +210,7 @@ function FiOsAppShellBody({
         showSurgeryAdminSurfaces: showNavigationAdminSurfaces,
         showTeamAdminSurfaces: showNavigationAdminSurfaces,
         showReportsAdminSurfaces: showNavigationAdminSurfaces,
+        showSettingsAdminSurfaces: showNavigationAdminSurfaces,
       }),
     [
       sidebarItems,
@@ -335,6 +337,8 @@ function FiOsAppShellBody({
             navSections={sidebarSections}
             activeNavId={activeSidebarId}
             pathname={pathname}
+            compactExpandable
+            navPersistenceScope={{ tenantId, userEmail }}
           />
         ) : null}
 

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Briefcase,
   Calendar,
+  ChevronDown,
   ClipboardCheck,
   Dna,
   GraduationCap,
@@ -22,6 +24,16 @@ import {
 import { cn } from "@/lib/utils";
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
+import type { FiOsD6gWorkflowGroupId } from "@/src/lib/fiOs/navigation/fiOsNavigationRegroupingCore";
+import {
+  buildNavExpandedGroupsStorageKey,
+  mergeExpandedNavGroups,
+  parsePersistedExpandedNavGroups,
+  resolveActiveWorkflowGroupForNav,
+  serializeExpandedNavGroups,
+  toggleNavGroupExpansion,
+  workflowGroupHasActiveRoute,
+} from "@/src/lib/fiOs/navigation/fiOsNavigationCompactCore";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
   FI_OS_NAV_PENDING_ATTR,
@@ -153,6 +165,66 @@ function RowLink(props: {
   );
 }
 
+function useCompactNavExpandedGroups({
+  compactExpandable,
+  storageKey,
+  activeGroupId,
+}: {
+  compactExpandable: boolean;
+  storageKey: string | null;
+  activeGroupId: FiOsD6gWorkflowGroupId | null;
+}) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<FiOsD6gWorkflowGroupId>>(() => {
+    if (!compactExpandable || !storageKey || typeof window === "undefined") {
+      return activeGroupId ? new Set([activeGroupId]) : new Set();
+    }
+    try {
+      const persisted = parsePersistedExpandedNavGroups(
+        window.localStorage.getItem(storageKey)
+      );
+      return mergeExpandedNavGroups(persisted, activeGroupId);
+    } catch {
+      return activeGroupId ? new Set([activeGroupId]) : new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (!compactExpandable) return;
+    setExpandedGroups((prev) => mergeExpandedNavGroups(prev, activeGroupId));
+  }, [compactExpandable, activeGroupId]);
+
+  useEffect(() => {
+    if (!compactExpandable || !storageKey || typeof window === "undefined") return;
+    try {
+      const persisted = parsePersistedExpandedNavGroups(
+        window.localStorage.getItem(storageKey)
+      );
+      setExpandedGroups(mergeExpandedNavGroups(persisted, activeGroupId));
+    } catch {
+      /* ignore */
+    }
+  }, [compactExpandable, storageKey]);
+
+  const toggleGroup = useCallback(
+    (groupId: FiOsD6gWorkflowGroupId) => {
+      setExpandedGroups((prev) => {
+        const next = toggleNavGroupExpansion(prev, groupId);
+        if (storageKey && typeof window !== "undefined") {
+          try {
+            window.localStorage.setItem(storageKey, serializeExpandedNavGroups(next));
+          } catch {
+            /* ignore */
+          }
+        }
+        return next;
+      });
+    },
+    [storageKey]
+  );
+
+  return { expandedGroups, toggleGroup };
+}
+
 export function FiOsModuleNav({
   sections,
   activeId,
@@ -160,6 +232,8 @@ export function FiOsModuleNav({
   onNavigate,
   dense,
   className,
+  compactExpandable = false,
+  navPersistenceScope,
 }: {
   sections: FiOsSidebarWorkflowSection[];
   activeId: string | null;
@@ -167,34 +241,99 @@ export function FiOsModuleNav({
   onNavigate?: () => void;
   dense?: boolean;
   className?: string;
+  /** Desktop rail: collapsed workflow groups with click-to-expand. */
+  compactExpandable?: boolean;
+  navPersistenceScope?: { tenantId: string; userEmail?: string | null };
 }) {
   const path = pathname ?? "";
   const { pendingNavId } = useFiOsNavigationPending();
+  const activeGroupId = useMemo(() => resolveActiveWorkflowGroupForNav(activeId), [activeId]);
+  const storageKey = useMemo(() => {
+    if (!compactExpandable || !navPersistenceScope) return null;
+    return buildNavExpandedGroupsStorageKey(navPersistenceScope);
+  }, [compactExpandable, navPersistenceScope]);
+
+  const { expandedGroups, toggleGroup } = useCompactNavExpandedGroups({
+    compactExpandable,
+    storageKey,
+    activeGroupId,
+  });
+
   return (
     <nav
       className={cn(fiOsChromeClasses.sidebarNavScroll, className)}
       aria-label="Clinic navigation"
     >
-      {sections.map((section) => (
-        <div key={section.groupId} className="space-y-1">
-          <p className="px-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500/95">
-            {section.title}
-          </p>
-          <div className="flex flex-col gap-0.5">
-            {section.items.map((item) => (
-              <RowLink
-                key={item.id}
-                item={item}
-                activeId={activeId}
-                pathname={path}
-                onNavigate={onNavigate}
-                dense={dense}
-                pendingNavId={pendingNavId}
+      {sections.map((section) => {
+        const isExpanded =
+          !compactExpandable ||
+          expandedGroups.has(section.groupId) ||
+          workflowGroupHasActiveRoute(section, activeId, path);
+        const groupActive = workflowGroupHasActiveRoute(section, activeId, path);
+        const sectionPanelId = `fi-os-nav-group-${section.groupId}`;
+
+        if (!compactExpandable) {
+          return (
+            <div key={section.groupId} className="space-y-1">
+              <p className="px-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500/95">
+                {section.title}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {section.items.map((item) => (
+                  <RowLink
+                    key={item.id}
+                    item={item}
+                    activeId={activeId}
+                    pathname={path}
+                    onNavigate={onNavigate}
+                    dense={dense}
+                    pendingNavId={pendingNavId}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={section.groupId} className="space-y-0.5">
+            <button
+              type="button"
+              className={cn(
+                "flex w-full items-center gap-1.5 rounded-lg border border-transparent px-1.5 py-1.5 text-left text-[0.6rem] font-semibold uppercase tracking-[0.2em] transition",
+                groupActive ? "text-cyan-200/95" : "text-slate-500/95 hover:bg-white/[0.04] hover:text-slate-300"
+              )}
+              aria-expanded={isExpanded}
+              aria-controls={sectionPanelId}
+              onClick={() => toggleGroup(section.groupId)}
+            >
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0 transition-transform duration-150",
+                  isExpanded ? "rotate-0" : "-rotate-90"
+                )}
+                aria-hidden
               />
-            ))}
+              <span className="min-w-0 flex-1 truncate">{section.title}</span>
+            </button>
+            {isExpanded ? (
+              <div id={sectionPanelId} className="flex flex-col gap-0.5 pb-1">
+                {section.items.map((item) => (
+                  <RowLink
+                    key={item.id}
+                    item={item}
+                    activeId={activeId}
+                    pathname={path}
+                    onNavigate={onNavigate}
+                    dense={dense}
+                    pendingNavId={pendingNavId}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </nav>
   );
 }
