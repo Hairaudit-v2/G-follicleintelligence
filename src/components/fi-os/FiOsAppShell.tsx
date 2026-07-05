@@ -176,7 +176,8 @@ function FiOsAppShellBody({
       showConfigurationHubNav,
       showFiPaymentsInboxNav,
       showHrOsNav,
-      showProcedureDayNav
+      showProcedureDayNav,
+      showNavigationAdminSurfaces
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -189,6 +190,7 @@ function FiOsAppShellBody({
     showFiPaymentsInboxNav,
     showHrOsNav,
     showProcedureDayNav,
+    showNavigationAdminSurfaces,
     featureAccessMap,
   ]);
 
@@ -199,6 +201,7 @@ function FiOsAppShellBody({
         forCollapsedShell: navCollapseActive,
         showNavigationAdminSurfaces,
         showProcedureDayNav,
+        showSurgeryAdminSurfaces: showNavigationAdminSurfaces,
       }),
     [
       sidebarItems,
@@ -303,7 +306,6 @@ function FiOsAppShellBody({
 
   const closeMobile = () => setMobileNav(false);
   const closeMoreNav = () => setMoreNavOpen(false);
-  const openSearch = () => setSearchOpen(true);
   const openQuickCreate = () => setQuickCreateOpen(true);
   const openMoreNav = () => setMoreNavOpen(true);
 

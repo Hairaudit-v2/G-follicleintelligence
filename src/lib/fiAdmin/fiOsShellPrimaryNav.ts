@@ -4,6 +4,10 @@ import {
   buildFrontDeskSidebarSubItems,
   FI_OS_FRONT_DESK_NAV_ID,
 } from "@/src/lib/fiOs/frontDesk/frontDeskWorkspaceCore";
+import {
+  buildSurgerySidebarSubItems,
+  FI_OS_SURGERY_NAV_ID,
+} from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
 import { filterProcedureDayFromFiOsSidebarItems } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
@@ -150,7 +154,8 @@ export function resolveFiOsPrimarySidebarItems(
   showConfigurationHubNav: boolean = true,
   showFiPaymentsInboxNav: boolean = false,
   showHrOsNav: boolean = false,
-  showProcedureDayNav: boolean = false
+  showProcedureDayNav: boolean = false,
+  showSurgeryAdminSurfaces: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -201,12 +206,18 @@ export function resolveFiOsPrimarySidebarItems(
       subItems: buildFrontDeskSidebarSubItems(b.split("/").filter(Boolean).pop() ?? ""),
     },
     {
-      id: "surgery-os",
+      id: FI_OS_SURGERY_NAV_ID,
       featureKey: "surgery_pipeline",
       label: "Surgery",
       shortLabel: "Surgery",
-      href: hrefFor(b, "surgery-os"),
-      disabled: false,
+      href: hrefFor(b, "surgery"),
+      disabled: blocks.cases,
+      hint: blocks.cases ? "Surgery workspace is not enabled for this admin role." : undefined,
+      subItems: buildSurgerySidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {
+        showProcedureDayNav,
+        showSurgeryAdminSurfaces,
+        casesBlocked: blocks.cases,
+      }),
     },
     {
       id: "patients",
@@ -278,49 +289,6 @@ export function resolveFiOsPrimarySidebarItems(
                 href: hrefFor(b, "consultation-conversion"),
               },
             ],
-    },
-    {
-      id: "cases",
-      featureKey: "cases",
-      label: "Cases",
-      shortLabel: "Cases",
-      href: hrefFor(b, "cases"),
-      disabled: blocks.cases,
-      hint: blocks.cases ? "Surgery case workspace is not enabled for this admin role." : undefined,
-      subItems: blocks.cases
-        ? undefined
-        : [
-            {
-              id: "cases-worklist",
-              featureKey: "cases",
-              label: "Case worklist",
-              href: hrefFor(b, "cases"),
-            },
-            {
-              id: "surgery-os-command-centre",
-              featureKey: "surgery_pipeline",
-              label: "Surgery",
-              href: hrefFor(b, "surgery-os"),
-            },
-            {
-              id: "surgery-intelligence-dashboard",
-              featureKey: "surgery_pipeline",
-              label: "Surgery intelligence",
-              href: hrefFor(b, "surgery-os/intelligence"),
-            },
-            {
-              id: "surgery-readiness-board",
-              featureKey: "cases",
-              label: "Readiness board",
-              href: hrefFor(b, "surgery-readiness"),
-            },
-            {
-              id: "procedure-day-board",
-              featureKey: "procedure_day",
-              label: "Procedure day",
-              href: hrefFor(b, "procedure-day"),
-            },
-          ],
     },
     {
       id: "prescriptions",
@@ -521,14 +489,19 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const firstEarly = restEarly.split("/")[0] ?? "";
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
+    if (firstEarly === "surgery") return FI_OS_SURGERY_NAV_ID;
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
     if (firstEarly === "reception-board") return "reception-board-command";
     if (firstEarly === "surgery-os") {
       const secondEarly = restEarly.split("/")[1] ?? "";
-      if (secondEarly === "intelligence") return "cases";
+      if (secondEarly === "intelligence") return "surgery-intelligence-dashboard";
+      if (secondEarly === "graft-counting") return "graft-counting-legacy";
       return "surgery-os";
     }
+    if (firstEarly === "cases") return "cases-worklist";
+    if (firstEarly === "procedure-day") return "procedure-day-board";
+    if (firstEarly === "surgery-readiness") return "surgery-readiness-board";
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "payments") return "payments-inbox";
@@ -551,12 +524,9 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "surgery-os") return "surgery-os";
   if (legacy === "reception-board") return "reception-board";
   if (legacy === "tomorrow-board") return "tomorrow-board";
-  if (
-    legacy === "surgeryos" ||
-    legacy === "surgery-readiness-board" ||
-    legacy === "procedure-day-board"
-  )
-    return "cases";
+  if (legacy === "surgeryos") return "surgery-os";
+  if (legacy === "surgery-readiness-board") return "surgery-readiness-board";
+  if (legacy === "procedure-day-board") return "procedure-day-board";
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";

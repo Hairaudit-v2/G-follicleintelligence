@@ -109,7 +109,8 @@ test("secondary workflow routes remain in More drawer after regrouping", () => {
     "crm",
     "follow-up-queue",
     "consultations",
-    "cases",
+    "surgery",
+    "cases-worklist",
     "surgery-os",
     "doctor-workspace",
     "prescriptions",
@@ -185,11 +186,13 @@ test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in M
   const frontIds = frontDesk!.items.map((i) => i.id);
   const frontSubIds = frontDesk!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   const surgeryIds = surgery!.items.map((i) => i.id);
+  const surgerySubIds = surgery!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.deepEqual(frontIds, ["front-desk"]);
   assert.ok(frontSubIds.includes("reception-os"));
   assert.ok(frontSubIds.includes("reception-board"));
-  assert.ok(surgeryIds.includes("surgery-os"));
-  assert.ok(surgeryIds.includes("cases"));
+  assert.deepEqual(surgeryIds, ["surgery"]);
+  assert.ok(surgerySubIds.includes("surgery-os"));
+  assert.ok(surgerySubIds.includes("cases-worklist"));
 });
 
 test("receptionist profile minimal rail uses workflow labels without module language", () => {

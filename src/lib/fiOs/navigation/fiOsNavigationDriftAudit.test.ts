@@ -35,7 +35,8 @@ test("domain mapping examples from D6G scope", () => {
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("auditos")!), "Reports");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("doctor-workspace")!), "Clinical");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("pathology-nav")!), "Clinical");
-  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("cases")!), "Surgery");
+  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("cases-worklist")!), "Surgery");
+  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("surgery-cases")!), "Surgery");
   assert.equal(
     mapCurrentNavItemTo1BDomain(
       items.find((i) => i.id === "surgery-readiness-board")!
@@ -47,11 +48,11 @@ test("domain mapping examples from D6G scope", () => {
 test("duplicate surfaces are detected for surgery and pipeline overlaps", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const surgeryOs = items.find((i) => i.id === "surgery-os")!;
-  const cases = items.find((i) => i.id === "cases")!;
+  const casesWorklist = items.find((i) => i.id === "cases-worklist")!;
   const surgeryReport = classifyNavigationDrift(surgeryOs, items);
-  const casesReport = classifyNavigationDrift(cases, items);
+  const casesReport = classifyNavigationDrift(casesWorklist, items);
   assert.equal(surgeryReport.classification, "duplicate_surface");
-  assert.ok(surgeryReport.reasons.some((r) => r.includes("cases")));
+  assert.ok(surgeryReport.reasons.some((r) => r.includes("cases-worklist")));
   assert.equal(casesReport.classification, "duplicate_surface");
 
   const crm = items.find((i) => i.id === "crm")!;
@@ -90,18 +91,16 @@ test("Calendar remains preserved in catalog and primary rail placement", () => {
   assert.ok(report.directRoutesPreserved.includes(calendar!.href));
 });
 
-test("surgery-os and front-desk map to 1B Surgery and Front desk groups after D6G-C", () => {
+test("surgery consolidated item and front-desk map to 1B groups after D6G-D", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
+  const surgery = items.find((i) => i.id === "surgery" && i.source === "primary_sidebar")!;
   const surgeryOs = items.find((i) => i.id === "surgery-os")!;
   const frontDesk = items.find((i) => i.id === "front-desk")!;
   const receptionOs = items.find((i) => i.id === "reception-os")!;
+  assert.equal(surgery.workflowGroupId, "SURGERY");
   assert.equal(surgeryOs.workflowGroupId, "SURGERY");
   assert.equal(frontDesk.workflowGroupId, "FRONT_DESK");
   assert.equal(receptionOs.workflowGroupId, "FRONT_DESK");
-
-  const surgeryDrift = classifyNavigationDrift(surgeryOs, items);
-  assert.equal(surgeryDrift.classification, "duplicate_surface");
-  assert.equal(surgeryDrift.d6Placement, "grouped_under_more");
 });
 
 test("minimal rail catalog includes six D6G-B slots", () => {

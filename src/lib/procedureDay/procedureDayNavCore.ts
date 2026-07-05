@@ -2,6 +2,9 @@ import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryN
 import type { ResolvedClinicOsShellNavItem } from "@/src/lib/fiAdmin/clinicOsShellConfig";
 
 export const PROCEDURE_DAY_BOARD_NAV_ID = "procedure-day-board";
+export const SURGERY_PROCEDURE_DAY_NAV_ID = "surgery-procedure-day";
+
+const PROCEDURE_DAY_NAV_IDS = new Set([PROCEDURE_DAY_BOARD_NAV_ID, SURGERY_PROCEDURE_DAY_NAV_ID]);
 
 /** Href for procedure-day deep links when the deployment flag is off (non-breaking fallback). */
 export function resolveProcedureDayNavHref(base: string, enabled: boolean): string {
@@ -16,7 +19,7 @@ export function filterProcedureDayFromFiOsSidebarItems(
   if (showProcedureDayNav) return [...items];
   return items.map((item) => {
     if (!item.subItems?.length) return item;
-    const subItems = item.subItems.filter((s) => s.id !== PROCEDURE_DAY_BOARD_NAV_ID);
+    const subItems = item.subItems.filter((s) => !PROCEDURE_DAY_NAV_IDS.has(s.id));
     if (subItems.length === item.subItems.length) return item;
     return { ...item, subItems };
   });

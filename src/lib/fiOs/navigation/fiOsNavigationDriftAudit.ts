@@ -167,7 +167,7 @@ const HIDDEN_PRESERVE_IDS = new Set([
 ]);
 
 const DUPLICATE_SURFACE_PAIRS: ReadonlyArray<readonly [string, string]> = [
-  ["surgery-os", "cases"],
+  ["surgery-os", "cases-worklist"],
   ["crm", "follow-up-queue"],
   ["reception-os", "reception-board"],
   ["patient-twin", "patients"],
@@ -544,7 +544,7 @@ export function buildNavigationDriftReport(
 
   const riskyChanges = [
     "Do not remove Calendar route or minimal-rail Calendar link — calendar internals are out of scope.",
-    "Surgery top-level (surgery-os) and Cases sub-links share surgery workflow — consolidate UI, preserve all hrefs.",
+    "Surgery consolidated under /surgery — legacy /surgery-os, /cases, /procedure-day, and /surgery-os/intelligence routes must stay live.",
     "Front desk consolidated under /front-desk — legacy /operations, /reception-os, /reception, /reception-board, /tomorrow routes must stay live.",
     "D6 intelligence routes (/intelligence/*) are admin-only — keep URLs when hiding from staff nav.",
     "Team vs Staff vs Onboarding Centre vs hr-os label collision — align under Team without breaking workforce-os paths.",

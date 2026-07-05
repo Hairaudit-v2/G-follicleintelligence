@@ -50,17 +50,23 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });
 
-test("getFiOsShellActiveSidebarId: surgery readiness route stays under Cases / SurgeryOS", () => {
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/surgery-readiness`, base), "cases");
+test("getFiOsShellActiveSidebarId: surgery readiness route maps to legacy sub-link", () => {
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/surgery-readiness`, base),
+    "surgery-readiness-board"
+  );
 });
 
-test("getFiOsShellActiveSidebarId: surgery intelligence route stays under Cases", () => {
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/surgery-os/intelligence`, base), "cases");
+test("getFiOsShellActiveSidebarId: surgery intelligence route maps to legacy sub-link", () => {
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/surgery-os/intelligence`, base),
+    "surgery-intelligence-dashboard"
+  );
 });
 
-test("getFiOsShellActiveSidebarId: procedure day route stays under Cases / SurgeryOS", () => {
+test("getFiOsShellActiveSidebarId: procedure day route maps to legacy sub-link", () => {
   const b = "/fi-admin/t-1";
-  assert.equal(getFiOsShellActiveSidebarId(`${b}/procedure-day`, b), "cases");
+  assert.equal(getFiOsShellActiveSidebarId(`${b}/procedure-day`, b), "procedure-day-board");
 });
 
 test("getFiOsShellActiveSidebarId: payments inbox maps to payments-inbox tab", () => {
@@ -68,21 +74,27 @@ test("getFiOsShellActiveSidebarId: payments inbox maps to payments-inbox tab", (
   assert.equal(getFiOsShellActiveSidebarId(`${b}/payments`, b), "payments-inbox");
 });
 
-test("resolveFiOsPrimarySidebarItems: cases entry includes readiness sub-link by default", () => {
-  const base = "/fi-admin/t-1";
-  const items = resolveFiOsPrimarySidebarItems(base, true, true);
-  const cases = items.find((i) => i.id === "cases");
-  assert.ok(cases?.subItems?.length);
-  assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/surgery-readiness")));
-  assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/surgery-os/intelligence")));
-  assert.ok(!cases!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
+test("resolveFiOsPrimarySidebarItems: consolidated surgery entry with preserved legacy sub-links", () => {
+  const b = "/fi-admin/t-1";
+  const items = resolveFiOsPrimarySidebarItems(b, true, true);
+  const surgery = items.find((i) => i.id === "surgery");
+  assert.ok(surgery?.subItems?.length);
+  const subIds = new Set(surgery!.subItems!.map((s) => s.id));
+  assert.ok(subIds.has("surgery-command"));
+  assert.ok(subIds.has("surgery-cases"));
+  assert.ok(subIds.has("surgery-review"));
+  assert.ok(subIds.has("surgery-readiness-board"));
+  assert.ok(subIds.has("cases-worklist"));
+  assert.ok(!subIds.has("surgery-intelligence-dashboard"));
 });
 
-test("resolveFiOsPrimarySidebarItems: procedure day sub-link when FI_PROCEDURE_DAY_ENABLED", () => {
-  const base = "/fi-admin/t-1";
-  const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, true);
-  const cases = items.find((i) => i.id === "cases");
-  assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
+test("resolveFiOsPrimarySidebarItems: procedure day tab when FI_PROCEDURE_DAY_ENABLED", () => {
+  const b = "/fi-admin/t-1";
+  const items = resolveFiOsPrimarySidebarItems(b, true, true, null, true, true, false, false, true);
+  const surgery = items.find((i) => i.id === "surgery");
+  const subIds = new Set(surgery!.subItems!.map((s) => s.id));
+  assert.ok(subIds.has("surgery-procedure-day"));
+  assert.ok(subIds.has("procedure-day-board"));
 });
 
 test("getFiOsShellActiveSidebarId: consultation conversion route stays under Consultations", () => {
@@ -145,7 +157,7 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   const byId = Object.fromEntries(items.map((i) => [i.id, i]));
   assert.equal(byId.dashboard?.label, "Today");
   assert.equal(byId["front-desk"]?.label, "Front desk");
-  assert.equal(byId["surgery-os"]?.label, "Surgery");
+  assert.equal(byId.surgery?.label, "Surgery");
   assert.equal(byId.crm?.label, "Enquiries");
   assert.equal(byId["follow-up-queue"]?.label, "Follow-ups");
   assert.equal(byId["patient-twin"]?.label, "Health record");

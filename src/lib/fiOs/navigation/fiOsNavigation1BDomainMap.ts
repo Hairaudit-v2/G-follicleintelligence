@@ -44,6 +44,7 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
     alternateDomain: "Clinical",
     notes: "Conversion board is pipeline; live consult workspace is clinical",
   },
+  surgery: { domain: "Surgery", notes: "Consolidated surgery workspace" },
   cases: { domain: "Surgery" },
   "surgery-os": { domain: "Surgery" },
   "doctor-workspace": { domain: "Clinical" },
@@ -74,6 +75,11 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   "front-desk-reception-board": { domain: "Front Desk" },
   "front-desk-tomorrow": { domain: "Front Desk" },
   "reception-board-command": { domain: "Front Desk" },
+  "surgery-command": { domain: "Surgery" },
+  "surgery-cases": { domain: "Surgery" },
+  "surgery-procedure-day": { domain: "Surgery" },
+  "surgery-review": { domain: "Surgery" },
+  "graft-counting-legacy": { domain: "Surgery" },
 };
 
 /** Label overrides when id is absent (quick-create, D6 routes). */
@@ -125,6 +131,10 @@ export const FI_OS_ROUTE_SUFFIX_1B_DOMAIN: Record<string, FiOs1BWorkflowDomain> 
   "front-desk/clinic-flow": "Front Desk",
   "front-desk/reception-board": "Front Desk",
   "front-desk/tomorrow": "Front Desk",
+  surgery: "Surgery",
+  "surgery/cases": "Surgery",
+  "surgery/procedure-day": "Surgery",
+  "surgery/review": "Surgery",
   "workforce-os": "Team",
   "hr-os/onboarding": "Team",
   "workforce-os/roster": "Team",

@@ -37,6 +37,7 @@ export type BuildFiOsSidebarWorkflowSectionsOptions = {
   forCollapsedShell?: boolean;
   showNavigationAdminSurfaces?: boolean;
   showProcedureDayNav?: boolean;
+  showSurgeryAdminSurfaces?: boolean;
 };
 
 export type FiOsSidebarWorkflowSection = {
@@ -71,6 +72,7 @@ function prepareSidebarItemsForDrawer(
       filterSubItemsForMoreDrawer(it, {
         showProcedureDayNav: opts.showProcedureDayNav,
         showNavigationAdminSurfaces: opts.showNavigationAdminSurfaces,
+        showSurgeryAdminSurfaces: opts.showSurgeryAdminSurfaces,
       })
     );
 

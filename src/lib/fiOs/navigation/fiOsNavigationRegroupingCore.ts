@@ -4,6 +4,7 @@
 
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import { FI_OS_D6_INTELLIGENCE_NAV_ENTRIES } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
+import { FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
 
 /** Six-slot collapsed primary rail link ids (More is an action). */
 export const FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS = [
@@ -68,6 +69,7 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   crm: "PIPELINE",
   "follow-up-queue": "PIPELINE",
   consultations: "PIPELINE",
+  surgery: "SURGERY",
   cases: "SURGERY",
   "surgery-os": "SURGERY",
   "doctor-workspace": "CLINICAL",
@@ -98,6 +100,11 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "surgery-readiness-board": "SURGERY",
   "procedure-day-board": "SURGERY",
   "surgery-intelligence-dashboard": "SURGERY",
+  "graft-counting-legacy": "SURGERY",
+  "surgery-command": "SURGERY",
+  "surgery-cases": "SURGERY",
+  "surgery-procedure-day": "SURGERY",
+  "surgery-review": "SURGERY",
   "pathology-inbox": "CLINICAL",
   "pathology-email-routes": "SETTINGS",
   "front-desk-reception-operations": "FRONT_DESK",
@@ -108,9 +115,8 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
 
 /** Sub-items hidden from More drawer (routes remain live). */
 export const FI_OS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
-  "procedure-day-board",
-  "surgery-intelligence-dashboard",
   "pathology-email-routes",
+  ...FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS,
 ]);
 
 /** D6 admin route ids — shown in Reports when admin surfaces are allowed. */
@@ -123,7 +129,7 @@ const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
   PIPELINE: ["crm", "follow-up-queue", "consultations"],
   PATIENTS: ["patient-twin"],
   CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav"],
-  SURGERY: ["surgery-os", "cases"],
+  SURGERY: ["surgery"],
   FINANCE: ["payments-inbox", "financial-os"],
   REPORTS: ["analytics", "auditos", "d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"],
   TEAM: ["hr-os", "staff", "onboarding-centre", "academyos"],
@@ -180,7 +186,11 @@ export function sortNavItemsForD6gGroup(
 
 export function filterSubItemsForMoreDrawer(
   item: FiOsPrimarySidebarItem,
-  opts: { showProcedureDayNav?: boolean; showNavigationAdminSurfaces?: boolean }
+  opts: {
+    showProcedureDayNav?: boolean;
+    showNavigationAdminSurfaces?: boolean;
+    showSurgeryAdminSurfaces?: boolean;
+  }
 ): FiOsPrimarySidebarItem {
   const subs = item.subItems;
   if (!subs?.length) return item;
@@ -188,8 +198,15 @@ export function filterSubItemsForMoreDrawer(
   const filtered = subs.filter((sub) => {
     if (FI_OS_HIDDEN_MORE_SUB_ITEM_IDS.has(sub.id)) {
       if (sub.id === "procedure-day-board" && opts.showProcedureDayNav) return true;
+      if (
+        (sub.id === "surgery-intelligence-dashboard" || sub.id === "graft-counting-legacy") &&
+        opts.showSurgeryAdminSurfaces
+      ) {
+        return true;
+      }
       return false;
     }
+    if (sub.id === "surgery-procedure-day" && !opts.showProcedureDayNav) return false;
     return true;
   });
 
