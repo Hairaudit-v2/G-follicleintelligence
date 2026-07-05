@@ -16,6 +16,9 @@ import {
   removeTenantUploadedLogo,
   uploadTenantLogoFile,
 } from "@/src/lib/fi/foundation/tenantBrandingStorage.server";
+import { readTenantLogoUploadFormData } from "@/src/lib/fi/foundation/tenantBrandingStorageCore";
+import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { loadTenantBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { brandingDebugEnabled, logBrandingDebug } from "@/src/lib/fi/foundation/brandingDebug";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
@@ -54,16 +57,21 @@ async function assertBrandingWriteAllowed(
   };
 }
 
-export async function uploadTenantLogoAction(input: {
-  tenantId: string;
-  adminKey?: string;
-  file: File;
-}): Promise<
-  | { ok: true; signedUrl: string; storagePath: string }
+/**
+ * Server Action-safe logo upload. Accepts ONLY FormData — the client must append
+ * the `File` directly to FormData (never nest it inside a plain object, which
+ * Next rejects with "Only plain objects ... can be passed to Server Actions").
+ * Always returns a plain JSON-like object; never a File/Blob/Error/class instance.
+ */
+export async function uploadTenantLogoAction(formData: FormData): Promise<
+  | { ok: true; branding: NormalizedTenantBranding; message: string }
   | { ok: false; error: string }
 > {
-  const tenantId = input.tenantId?.trim();
-  if (!tenantId || !isFiAdminUuid(tenantId)) {
+  const fields = readTenantLogoUploadFormData(formData);
+  if (!fields.ok) return { ok: false, error: fields.error };
+
+  const tenantId = fields.tenantId;
+  if (!isFiAdminUuid(tenantId)) {
     return { ok: false, error: "Invalid tenant id." };
   }
 
@@ -71,19 +79,19 @@ export async function uploadTenantLogoAction(input: {
   logBrandingDebug("uploadTenantLogoAction:start", {
     ...identity,
     tenantId,
-    fileName: input.file?.name ?? null,
-    fileType: input.file?.type ?? null,
-    fileSize: input.file?.size ?? null,
+    fileName: fields.file.name,
+    fileType: fields.file.type,
+    fileSize: fields.file.size,
   });
 
-  const perm = await assertBrandingWriteAllowed(tenantId, input.adminKey);
+  const perm = await assertBrandingWriteAllowed(tenantId, fields.adminKey ?? undefined);
   if (!perm.ok) {
     logBrandingDebug("uploadTenantLogoAction:denied", { tenantId, error: perm.error });
-    return perm;
+    return { ok: false, error: perm.error };
   }
 
   const t = await assertFiTenantExists(tenantId);
-  if (!t.ok) return t;
+  if (!t.ok) return { ok: false, error: t.error };
 
   const existingBefore = brandingDebugEnabled()
     ? await loadTenantBranding(tenantId).catch(() => null)
@@ -99,14 +107,14 @@ export async function uploadTenantLogoAction(input: {
       : null,
   });
 
-  const result = await uploadTenantLogoFile(tenantId, input.file);
+  const result = await uploadTenantLogoFile(tenantId, fields.file);
   logBrandingDebug("uploadTenantLogoAction:result", {
     tenantId,
     ok: result.ok,
     error: result.ok ? null : result.error,
     storagePath: result.ok ? result.storagePath : null,
   });
-  if (!result.ok) return result;
+  if (!result.ok) return { ok: false, error: result.error };
 
   const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tenantId);
   await insertFiTenantAdminAuditEvent({
@@ -118,7 +126,13 @@ export async function uploadTenantLogoAction(input: {
 
   revalidatePath(`/fi-admin/${tenantId}/configuration`);
   revalidatePath(`/fi-admin/${tenantId}`);
-  return result;
+
+  const branding = await resolveTenantBranding({ tenantId });
+  return {
+    ok: true,
+    branding,
+    message: "Logo uploaded and branding saved.",
+  };
 }
 
 export async function removeTenantLogoAction(input: {

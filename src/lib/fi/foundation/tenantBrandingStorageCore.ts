@@ -58,3 +58,47 @@ export function assertAllowedTenantLogoFile(file: File): {
   }
   return { ok: true, contentType };
 }
+
+/** Field names used for the Server Action-safe FormData logo upload payload. */
+export const TENANT_LOGO_UPLOAD_FIELDS = {
+  tenantId: "tenantId",
+  adminKey: "adminKey",
+  logo: "logo",
+} as const;
+
+export type TenantLogoUploadFields =
+  | { ok: true; tenantId: string; adminKey: string | null; file: File; contentType: string }
+  | { ok: false; error: string };
+
+/**
+ * Parse a Server Action logo-upload payload.
+ *
+ * Server Actions only accept serializable payloads (plain objects, FormData,
+ * primitives). A `File` must never be nested inside a plain object — it must be
+ * appended directly to `FormData`. This reads the tenant id, optional admin key,
+ * and logo `File` back out of that FormData and validates them, returning a
+ * plain result object (never a class instance / null-prototype object).
+ */
+export function readTenantLogoUploadFormData(formData: FormData): TenantLogoUploadFields {
+  if (!formData || typeof (formData as FormData).get !== "function") {
+    return { ok: false, error: "Upload payload was not sent as form data." };
+  }
+
+  const rawTenantId = formData.get(TENANT_LOGO_UPLOAD_FIELDS.tenantId);
+  const tenantId = typeof rawTenantId === "string" ? rawTenantId.trim() : "";
+  if (!tenantId) return { ok: false, error: "Invalid tenant id." };
+
+  const rawAdminKey = formData.get(TENANT_LOGO_UPLOAD_FIELDS.adminKey);
+  const adminKey =
+    typeof rawAdminKey === "string" && rawAdminKey.trim() ? rawAdminKey.trim() : null;
+
+  const logo = formData.get(TENANT_LOGO_UPLOAD_FIELDS.logo);
+  if (!(logo instanceof File)) {
+    return { ok: false, error: "No file provided." };
+  }
+
+  const check = assertAllowedTenantLogoFile(logo);
+  if (!check.ok) return check;
+
+  return { ok: true, tenantId, adminKey, file: logo, contentType: check.contentType };
+}

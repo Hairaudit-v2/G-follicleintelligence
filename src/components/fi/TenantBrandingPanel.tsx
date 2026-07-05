@@ -73,9 +73,16 @@ export function TenantBrandingLogoUpload({
     setBusy(true);
     setPreview(URL.createObjectURL(file));
     try {
-      const res = await uploadTenantLogoAction({ tenantId, adminKey, file });
+      // Server Actions reject non-serializable payloads (a File nested inside a
+      // plain object throws "Only plain objects ... can be passed to Server
+      // Actions"). Append the File directly to FormData instead.
+      const formData = new FormData();
+      formData.append("tenantId", tenantId);
+      if (adminKey) formData.append("adminKey", adminKey);
+      formData.append("logo", file);
+      const res = await uploadTenantLogoAction(formData);
       if (res.ok) {
-        setFeedback({ ok: true, text: "Logo uploaded and branding saved." });
+        setFeedback({ ok: true, text: res.message });
         setPreview(null);
         if (fileRef.current) fileRef.current.value = "";
         onRevalidated?.();
