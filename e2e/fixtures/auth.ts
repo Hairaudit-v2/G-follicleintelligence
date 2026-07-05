@@ -5,7 +5,7 @@ import { test as base, expect } from "@playwright/test";
 
 import { hasDemoCredentials } from "../helpers/credentials";
 import { LoginPage } from "../pages/login.page";
-import { e2eTenantId } from "./baseUrl";
+import { e2eTenantId, requireE2eBaseUrl } from "./baseUrl";
 
 export const TENANT_ADMIN_STORAGE_STATE = join(
   dirname(__dirname),
@@ -31,7 +31,9 @@ export const authenticatedTest = base.extend<{}, WorkerFixtures>({
     async ({ browser }, use) => {
       mkdirSync(dirname(TENANT_ADMIN_STORAGE_STATE), { recursive: true });
 
-      const context = await browser.newContext();
+      const context = await browser.newContext({
+        baseURL: requireE2eBaseUrl(),
+      });
       const page = await context.newPage();
       const login = new LoginPage(page);
       const tenantId = e2eTenantId();

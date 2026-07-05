@@ -11,6 +11,11 @@ import { normalizeFiDeploymentBaseUrl } from "../../src/lib/env/fiDeploymentBase
  * unless you're certain every test in this suite is read-only (it is, as
  * of Patch 7 — see e2e/security/*.spec.ts).
  */
+export function isLocalE2eHost(): boolean {
+  const base = process.env.FI_E2E_BASE_URL?.trim() ?? "";
+  return /localhost|127\.0\.0\.1/i.test(base);
+}
+
 export function requireE2eBaseUrl(): string {
   const raw = process.env.FI_E2E_BASE_URL?.trim();
   if (!raw) {

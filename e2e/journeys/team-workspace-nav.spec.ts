@@ -1,5 +1,5 @@
 import { authenticatedTest as test, expect } from "../fixtures/auth";
-import { e2eTenantId, requireE2eBaseUrl } from "../fixtures/baseUrl";
+import { e2eTenantId, isLocalE2eHost, requireE2eBaseUrl } from "../fixtures/baseUrl";
 
 /**
  * Team workspace tab navigation — consolidated /team/* sub-nav.
@@ -10,7 +10,7 @@ import { e2eTenantId, requireE2eBaseUrl } from "../fixtures/baseUrl";
  * Run:
  *   FI_E2E_BASE_URL=http://localhost:3000 FI_E2E_TENANT_ID=<uuid> \
  *     FI_E2E_DEMO_ADMIN_EMAIL=... FI_E2E_DEMO_ADMIN_PASSWORD=... \
- *     npx playwright test e2e/journeys/team-workspace-nav.spec.ts --project=chromium-authenticated
+ *     npx playwright test e2e/journeys/team-workspace-nav.spec.ts --project=edge-authenticated --headed
  */
 
 type TeamTabSpec = {
@@ -67,6 +67,11 @@ test.describe("Team workspace navigation @authenticated @smoke", () => {
   test("manager/admin can navigate all seven Team tabs with responsive feedback", async ({
     page,
   }) => {
+    const localDev = isLocalE2eHost();
+    const navTimeout = localDev ? 60_000 : 30_000;
+    const tabContentTimeout = localDev ? 90_000 : 30_000;
+    test.setTimeout(localDev ? 300_000 : 60_000);
+
     const tenantId = e2eTenantId();
     const teamBase = teamBasePath(tenantId);
 
@@ -89,7 +94,7 @@ test.describe("Team workspace navigation @authenticated @smoke", () => {
 
       await tabLink.click();
 
-      await expect(page).toHaveURL(urlPatternForPath(expectedPath), { timeout: 30_000 });
+      await expect(page).toHaveURL(urlPatternForPath(expectedPath), { timeout: navTimeout });
 
       const currentPath = normalizePathname(page.url());
       if (currentPath !== previousPath) {
@@ -109,10 +114,12 @@ test.describe("Team workspace navigation @authenticated @smoke", () => {
       const skeleton = page.getByTestId("team-workspace-page-loading");
       const heading = page.getByRole("heading", { name: tab.heading });
 
-      await expect(skeleton.or(heading).first()).toBeVisible({ timeout: 30_000 });
-      await expect(heading).toBeVisible({ timeout: 30_000 });
+      if (await skeleton.isVisible().catch(() => false)) {
+        await expect(skeleton).toBeHidden({ timeout: tabContentTimeout });
+      }
+      await expect(heading).toBeVisible({ timeout: tabContentTimeout });
 
-      await expect(tabLink).toHaveAttribute("aria-current", "page", { timeout: 30_000 });
+      await expect(tabLink).toHaveAttribute("aria-current", "page", { timeout: navTimeout });
 
       await expect(page.getByRole("heading", { name: ACCESS_DENIED_HEADING })).toHaveCount(0);
       await expect(page.getByRole("heading", { name: /not found|404/i })).toHaveCount(0);

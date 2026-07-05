@@ -1,6 +1,9 @@
 import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test";
 
+import { loadRepoEnvFiles } from "./scripts/lib/loadRepoEnvFiles.mjs";
 import { hasDemoCredentials } from "./e2e/helpers/credentials";
+
+loadRepoEnvFiles();
 
 /**
  * Playwright config for FI OS e2e journeys.
@@ -17,6 +20,7 @@ import { hasDemoCredentials } from "./e2e/helpers/credentials";
 
 const BROWSER_MATRIX = [
   { name: "chromium", use: devices["Desktop Chrome"] },
+  { name: "edge", use: { ...devices["Desktop Chrome"], channel: "msedge" } },
   { name: "firefox", use: devices["Desktop Firefox"] },
   { name: "webkit", use: devices["Desktop Safari"] },
   { name: "mobile-chrome", use: devices["Pixel 5"] },
@@ -28,7 +32,7 @@ function isLocalE2eHost(): boolean {
   return /localhost|127\.0\.0\.1/i.test(base);
 }
 
-/** Limit browsers locally/CI via FI_E2E_BROWSERS=chromium,firefox */
+/** Limit browsers locally/CI via FI_E2E_BROWSERS=edge,chromium,firefox */
 function activeBrowsers(): typeof BROWSER_MATRIX[number][] {
   const filter = process.env.FI_E2E_BROWSERS?.trim();
   if (!filter) return [...BROWSER_MATRIX];
