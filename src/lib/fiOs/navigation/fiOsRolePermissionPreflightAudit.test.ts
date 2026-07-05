@@ -187,7 +187,7 @@ test("receptionist with roster.manage override passes capability preflight", () 
     ],
   });
   assertFiOsRolePermissionPreflightPassed(report);
-  assert.match(report.matrixRow.teamAccess, /limited|manage/);
+  assert.equal(report.matrixRow.teamAccess, "roster override");
 });
 
 test("all standard role scenarios pass permission preflight audit", () => {

@@ -47,6 +47,8 @@ function fullSidebar(showAdmin = false) {
     true,
     true,
     showAdmin,
+    showAdmin,
+    undefined,
     showAdmin
   );
 }
@@ -71,6 +73,8 @@ function moreSections(opts?: {
     showTeamAdminSurfaces: opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
     showReportsAdminSurfaces:
       opts?.showReportsAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
+    showSettingsAdminSurfaces:
+      opts?.showNavigationAdminSurfaces ?? opts?.showReportsAdminSurfaces ?? false,
   });
 }
 

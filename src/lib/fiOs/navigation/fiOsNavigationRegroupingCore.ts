@@ -9,6 +9,7 @@ import { FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/surgery/s
 import { FI_OS_SURGERY_LEGACY_ROUTES } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
 import { FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
 import { FI_OS_REPORTS_LEGACY_ROUTES } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
+import { FI_OS_SETTINGS_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/settings/settingsWorkspaceCore";
 import { FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { FI_OS_TEAM_LEGACY_ROUTES } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
@@ -91,10 +92,10 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   "insights-legacy": "REPORTS",
   "financial-os-legacy": "REPORTS",
   "payments-inbox-legacy": "REPORTS",
-  "d6-presence": "REPORTS",
-  "d6-signal-learning": "REPORTS",
-  "d6-bake": "REPORTS",
-  "d6-navigation-audit": "REPORTS",
+  "d6-presence": "SETTINGS",
+  "d6-signal-learning": "SETTINGS",
+  "d6-bake": "SETTINGS",
+  "d6-navigation-audit": "SETTINGS",
   team: "TEAM",
   academyos: "TEAM",
   staff: "TEAM",
@@ -156,6 +157,7 @@ export const FI_OS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
   ...FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS,
+  ...FI_OS_SETTINGS_HIDDEN_MORE_SUB_ITEM_IDS,
 ]);
 
 /** Legacy deep-link sub-item ids — hidden from staff More drawer; admin may see them. */
@@ -179,12 +181,14 @@ export function moreDrawerAdminSurfacesEnabled(opts: {
   showSurgeryAdminSurfaces?: boolean;
   showTeamAdminSurfaces?: boolean;
   showReportsAdminSurfaces?: boolean;
+  showSettingsAdminSurfaces?: boolean;
 }): boolean {
   return (
     opts.showNavigationAdminSurfaces === true ||
     opts.showSurgeryAdminSurfaces === true ||
     opts.showTeamAdminSurfaces === true ||
-    opts.showReportsAdminSurfaces === true
+    opts.showReportsAdminSurfaces === true ||
+    opts.showSettingsAdminSurfaces === true
   );
 }
 
@@ -217,7 +221,14 @@ export function workflowGroupForD6gNavItemId(
   if (sub && FI_OS_D6G_SUB_ITEM_GROUP[sub]) {
     return FI_OS_D6G_SUB_ITEM_GROUP[sub];
   }
-  return FI_OS_D6G_SIDEBAR_ITEM_GROUP[itemId.trim()] ?? "SETTINGS";
+  const id = itemId.trim();
+  if (FI_OS_D6G_SIDEBAR_ITEM_GROUP[id]) {
+    return FI_OS_D6G_SIDEBAR_ITEM_GROUP[id];
+  }
+  if (FI_OS_D6G_SUB_ITEM_GROUP[id]) {
+    return FI_OS_D6G_SUB_ITEM_GROUP[id];
+  }
+  return "SETTINGS";
 }
 
 export function orderedD6gWorkflowGroups(
@@ -257,9 +268,11 @@ function shouldShowHiddenMoreSubItem(
   subId: string,
   opts: {
     showProcedureDayNav?: boolean;
+    showNavigationAdminSurfaces?: boolean;
     showSurgeryAdminSurfaces?: boolean;
     showTeamAdminSurfaces?: boolean;
     showReportsAdminSurfaces?: boolean;
+    showSettingsAdminSurfaces?: boolean;
   }
 ): boolean {
   if (subId === "procedure-day-board" && opts.showProcedureDayNav) return true;
@@ -278,13 +291,17 @@ function shouldShowHiddenMoreSubItem(
   ) {
     return true;
   }
+  if (subId === "reports-admin" && opts.showReportsAdminSurfaces) {
+    return true;
+  }
   if (
     (subId === "d6-presence" ||
       subId === "d6-signal-learning" ||
       subId === "d6-bake" ||
-      subId === "d6-navigation-audit" ||
-      subId === "reports-admin") &&
-    opts.showReportsAdminSurfaces
+      subId === "d6-navigation-audit") &&
+    (opts.showReportsAdminSurfaces ||
+      opts.showNavigationAdminSurfaces ||
+      opts.showSettingsAdminSurfaces)
   ) {
     return true;
   }
@@ -299,6 +316,7 @@ export function filterSubItemsForMoreDrawer(
     showSurgeryAdminSurfaces?: boolean;
     showTeamAdminSurfaces?: boolean;
     showReportsAdminSurfaces?: boolean;
+    showSettingsAdminSurfaces?: boolean;
   }
 ): FiOsPrimarySidebarItem {
   const subs = item.subItems;

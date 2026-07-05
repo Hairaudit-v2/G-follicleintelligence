@@ -24,6 +24,8 @@ export function FiOsSidebar({
   dense,
   drawerTitle = "FI OS",
   onDrawerClose,
+  compactExpandable = false,
+  navPersistenceScope,
 }: {
   brandName: string;
   branding: NormalizedTenantBranding;
@@ -36,6 +38,8 @@ export function FiOsSidebar({
   dense?: boolean;
   drawerTitle?: string;
   onDrawerClose?: () => void;
+  compactExpandable?: boolean;
+  navPersistenceScope?: { tenantId: string; userEmail?: string | null };
 }) {
   const logoSrc = branding.logoUrl;
 
@@ -118,6 +122,8 @@ export function FiOsSidebar({
           pathname={pathname}
           onNavigate={onNavigate}
           dense={dense}
+          compactExpandable={compactExpandable}
+          navPersistenceScope={navPersistenceScope}
         />
       </div>
     </aside>

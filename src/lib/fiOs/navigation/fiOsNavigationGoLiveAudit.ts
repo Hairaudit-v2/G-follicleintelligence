@@ -48,6 +48,7 @@ import {
   buildReportsSidebarSubItems,
   reportsSubItemUsesStaffFriendlyLabel,
 } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
+import { FI_OS_SETTINGS_ADMIN_LEGACY_ROUTES } from "@/src/lib/fiOs/settings/settingsWorkspaceCore";
 import {
   FI_OS_SURGERY_ADMIN_LEGACY_ROUTES,
   FI_OS_SURGERY_LEGACY_ROUTES,
@@ -144,6 +145,7 @@ export const GO_LIVE_LEGACY_ROUTE_SUFFIXES = [
   ...FI_OS_TEAM_ADMIN_LEGACY_ROUTES.map((r) => r.suffix),
   ...FI_OS_REPORTS_LEGACY_ROUTES.map((r) => r.suffix),
   ...FI_OS_REPORTS_ADMIN_LEGACY_ROUTES.map((r) => r.suffix),
+  ...FI_OS_SETTINGS_ADMIN_LEGACY_ROUTES.map((r) => r.suffix),
 ] as const;
 
 /** Consolidated workspace tab labels expected at go-live. */
@@ -319,6 +321,8 @@ function resolveSidebar(
     true,
     true,
     showAdmin,
+    showAdmin,
+    undefined,
     showAdmin
   );
 }
@@ -338,6 +342,8 @@ function resolveMoreSections(
       scenario.showTeamAdminSurfaces ?? scenario.showNavigationAdminSurfaces,
     showReportsAdminSurfaces:
       scenario.showReportsAdminSurfaces ?? scenario.showNavigationAdminSurfaces,
+    showSettingsAdminSurfaces:
+      scenario.showNavigationAdminSurfaces ?? scenario.showReportsAdminSurfaces,
   });
 }
 

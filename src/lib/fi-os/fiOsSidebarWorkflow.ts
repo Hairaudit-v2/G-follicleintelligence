@@ -9,6 +9,7 @@ import {
   workflowGroupForD6gNavItemId,
   type FiOsD6gWorkflowGroupId,
 } from "@/src/lib/fiOs/navigation/fiOsNavigationRegroupingCore";
+import { filterSidebarItemSubLinksForStaff } from "@/src/lib/fiOs/navigation/fiOsNavigationCompactCore";
 
 /** 1B workflow groups for All areas / More drawer (D6G-B). */
 export const FI_OS_WORKFLOW_GROUP_IDS = [
@@ -42,6 +43,7 @@ export type BuildFiOsSidebarWorkflowSectionsOptions = {
   showSurgeryAdminSurfaces?: boolean;
   showTeamAdminSurfaces?: boolean;
   showReportsAdminSurfaces?: boolean;
+  showSettingsAdminSurfaces?: boolean;
 };
 
 export type FiOsSidebarWorkflowSection = {
@@ -67,6 +69,15 @@ function prepareSidebarItemsForDrawer(
   items: FiOsPrimarySidebarItem[],
   opts: BuildFiOsSidebarWorkflowSectionsOptions
 ): FiOsPrimarySidebarItem[] {
+  const filterOpts = {
+    showProcedureDayNav: opts.showProcedureDayNav,
+    showNavigationAdminSurfaces: opts.showNavigationAdminSurfaces,
+    showSurgeryAdminSurfaces: opts.showSurgeryAdminSurfaces,
+    showTeamAdminSurfaces: opts.showTeamAdminSurfaces,
+    showReportsAdminSurfaces: opts.showReportsAdminSurfaces,
+    showSettingsAdminSurfaces: opts.showSettingsAdminSurfaces,
+  };
+
   const prepared = items
     .filter((it) => {
       if (
@@ -78,15 +89,11 @@ function prepareSidebarItemsForDrawer(
       }
       return true;
     })
-    .map((it) =>
-      filterSubItemsForMoreDrawer(it, {
-        showProcedureDayNav: opts.showProcedureDayNav,
-        showNavigationAdminSurfaces: opts.showNavigationAdminSurfaces,
-        showSurgeryAdminSurfaces: opts.showSurgeryAdminSurfaces,
-        showTeamAdminSurfaces: opts.showTeamAdminSurfaces,
-        showReportsAdminSurfaces: opts.showReportsAdminSurfaces,
-      })
-    );
+    .map((it) => {
+      const drawerFiltered = filterSubItemsForMoreDrawer(it, filterOpts);
+      if (opts.forCollapsedShell) return drawerFiltered;
+      return filterSidebarItemSubLinksForStaff(drawerFiltered, filterOpts);
+    });
 
   return prepared;
 }

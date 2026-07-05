@@ -17,6 +17,7 @@ import {
   FI_OS_TEAM_NAV_ID,
   type FiOsTeamTabId,
 } from "@/src/lib/fiOs/team/teamWorkspaceCore";
+import { buildSettingsSidebarSubItems } from "@/src/lib/fiOs/settings/settingsWorkspaceCore";
 import { filterProcedureDayFromFiOsSidebarItems } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
@@ -166,7 +167,8 @@ export function resolveFiOsPrimarySidebarItems(
   showProcedureDayNav: boolean = false,
   showSurgeryAdminSurfaces: boolean = false,
   showTeamAdminSurfaces: boolean = false,
-  visibleTeamTabIds?: readonly FiOsTeamTabId[]
+  visibleTeamTabIds?: readonly FiOsTeamTabId[],
+  showSettingsAdminSurfaces: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -404,6 +406,9 @@ export function resolveFiOsPrimarySidebarItems(
       hint: !showConfigurationHubNav
         ? "Configuration requires clinic, finance, operations, or admin-user management access."
         : undefined,
+      subItems: buildSettingsSidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {
+        showSettingsAdminSurfaces,
+      }),
     },
   ];
   return filterProcedureDayFromFiOsSidebarItems(items, showProcedureDayNav);

@@ -30,6 +30,24 @@ Internal preflight gate before **FI-UX-REBUILD D6G-G** staff go-live navigation 
 
 **Primary rail alignment:** When Team or Reports sidebar targets are filtered out by feature/SA-1 permissions, the corresponding rail slots are now **disabled** (with hint) instead of remaining clickable with fallback hrefs. Route gates were already correct; this narrows nav/route mismatch.
 
+## D6G-G0B — Staff capability overrides (G0B)
+
+**Principle:** Role + explicit SA-1 tab grants — never role inflation.
+
+Example: receptionist + `workforce_os` / `tab_key: roster` / `access_level: edit` grants `roster.manage` without manager role or identity admin.
+
+| Capability | SA-1 grant | Nav / route / mutation |
+| --- | --- | --- |
+| `roster.manage` | `workforce_os` + tab `roster` edit | Team rail enabled, roster tab, roster mutations |
+| `roster.standard_hours.manage` | tab `standard_hours` edit OR inherits from `roster.manage` | Standard hours mutations |
+| `team.identity.manage` | tab `identity` edit OR module edit | Identity tab + HR manage actions |
+
+**Audit:** `upsertStaffAccessGrantAction` writes `fi_staff_access_audit_log` with reason, approver (`granted_by`), timestamp.
+
+**Resolver chain (single source):** `staffCapabilityCore` → `staffTeamAccessCore` → nav overrides, team layout, page gates, `resolveStaffStandardHoursManageCapability`.
+
+**Override scenario:** `receptionist_roster_override` in preflight audit — PASS.
+
 ## Known architectural notes (no change in this ticket)
 
 - **Three role vocabularies:** OS roles (`fi_doctor`), workspace profiles (`surgeon`), SA-1 keys (`doctor`/`reception`). `normalizeStaffRoleKey("surgeon")` → `doctor`.

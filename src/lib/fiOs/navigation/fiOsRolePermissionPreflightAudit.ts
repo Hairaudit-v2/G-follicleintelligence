@@ -418,6 +418,8 @@ function resolveScenarioSidebar(base: string, scenario: FiOsRolePermissionPrefli
     true,
     true,
     showAdmin ?? false,
+    showAdmin ?? false,
+    undefined,
     showAdmin ?? false
   );
   const featureMap = buildEffectiveFeatureAccessMapForScenario(scenario);
@@ -439,6 +441,8 @@ function resolveScenarioMoreSections(
       scenario.showTeamAdminSurfaces ?? scenario.showNavigationAdminSurfaces ?? false,
     showReportsAdminSurfaces:
       scenario.showReportsAdminSurfaces ?? scenario.showNavigationAdminSurfaces ?? false,
+    showSettingsAdminSurfaces:
+      scenario.showNavigationAdminSurfaces ?? scenario.showReportsAdminSurfaces ?? false,
   });
 }
 

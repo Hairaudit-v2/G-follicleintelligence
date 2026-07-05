@@ -3,7 +3,6 @@
  */
 
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
-import { FI_OS_D6_INTELLIGENCE_NAV_ENTRIES } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
 
 export const FI_OS_REPORTS_NAV_ID = "reports" as const;
 
@@ -85,27 +84,15 @@ export const FI_OS_REPORTS_LEGACY_ROUTES = [
 
 /** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */
 export const FI_OS_REPORTS_ADMIN_LEGACY_ROUTES = [
-  ...FI_OS_D6_INTELLIGENCE_NAV_ENTRIES.map((entry) => ({
-    id: entry.id,
-    label:
-      entry.id === "d6-bake"
-        ? "Validation bake"
-        : entry.id === "d6-navigation-audit"
-          ? "Navigation audit"
-          : entry.id === "d6-signal-learning"
-            ? "Learning signals"
-            : entry.id === "d6-presence"
-              ? "Presence review"
-              : entry.label,
-    suffix: entry.routeSuffix,
-  })),
+  {
+    id: "surgery-intelligence-dashboard",
+    label: "Surgical performance",
+    suffix: "surgery-os/intelligence",
+  },
+  { id: "graft-counting-legacy", label: "Graft tray review", suffix: "surgery-os/graft-counting" },
 ] as const;
 
 export const FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
-  "d6-presence",
-  "d6-signal-learning",
-  "d6-bake",
-  "d6-navigation-audit",
   "surgery-intelligence-dashboard",
   "graft-counting-legacy",
   "reports-admin",

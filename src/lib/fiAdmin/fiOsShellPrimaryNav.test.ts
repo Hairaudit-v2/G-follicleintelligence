@@ -148,8 +148,9 @@ test("resolveFiOsPrimarySidebarItems: consultations disabled without CRM or book
 
 test("resolveFiOsPrimarySidebarItems: dashboard_viewer AuditOS disabled when shell strips security nav", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true, "dashboard_viewer", false);
-  const audit = items.find((i) => i.id === "auditos");
-  assert.equal(audit?.disabled, true);
+  const reports = items.find((i) => i.id === "reports");
+  const quality = reports?.subItems?.find((s) => s.id === "reports-quality");
+  assert.equal(quality, undefined);
 });
 
 test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
@@ -161,7 +162,8 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   assert.equal(byId.crm?.label, "Enquiries");
   assert.equal(byId["follow-up-queue"]?.label, "Follow-ups");
   assert.equal(byId["patient-twin"]?.label, "Health record");
-  assert.equal(byId.auditos?.label, "Quality review");
+  const qualityReview = byId.reports?.subItems?.find((s) => s.id === "reports-quality");
+  assert.equal(qualityReview?.label, "Quality review");
   assert.equal(byId["financial-os"]?.label, "Finances");
   assert.equal(byId.reports?.label, "Reports");
   assert.equal(byId.team?.label, "Team");

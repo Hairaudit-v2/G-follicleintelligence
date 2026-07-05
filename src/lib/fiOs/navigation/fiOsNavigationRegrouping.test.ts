@@ -31,6 +31,8 @@ function fullSidebar(showAdmin = false) {
     true,
     true,
     showAdmin,
+    showAdmin,
+    undefined,
     showAdmin
   );
 }
@@ -55,6 +57,8 @@ function moreSections(opts?: {
     showTeamAdminSurfaces: opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
     showReportsAdminSurfaces:
       opts?.showReportsAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
+    showSettingsAdminSurfaces:
+      opts?.showNavigationAdminSurfaces ?? opts?.showReportsAdminSurfaces ?? false,
   });
 }
 
@@ -236,9 +240,15 @@ test("Reports grouping consolidates under one reports destination on primary rai
   });
   const adminReports = adminSections.find((s) => s.groupId === "REPORTS");
   assert.ok(adminReports);
-  const adminSubIds = adminReports!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
+  const adminReportSubIds = adminReports!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
+  assert.ok(!adminReportSubIds.includes("d6-presence"));
+
+  const adminSettings = adminSections.find((s) => s.groupId === "SETTINGS");
+  assert.ok(adminSettings);
+  const adminSettingsSubIds =
+    adminSettings!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []) ?? [];
   for (const d6Id of ["d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"]) {
-    assert.ok(adminSubIds.includes(d6Id), `admin Reports should include ${d6Id}`);
+    assert.ok(adminSettingsSubIds.includes(d6Id), `admin Settings should include ${d6Id}`);
   }
 });
 
