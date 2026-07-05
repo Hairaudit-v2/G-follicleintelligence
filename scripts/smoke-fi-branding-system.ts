@@ -222,7 +222,7 @@ async function main(): Promise<void> {
 
   // Step 5-6 — shell resolver + CSS vars for sidebar brand area
   const shellBranding = await resolveTenantBranding({ tenantId });
-  const cssVars = buildNormalizedBrandingCssVariables(shellBranding);
+  const cssVars = buildNormalizedBrandingCssVariables(shellBranding) as Record<string, string>;
   const sidebarHasLogo = Boolean(shellBranding.logoUrl);
   const cssHasTenantPrimary = cssVars["--fi-tenant-primary"] === testPrimary;
   record(
