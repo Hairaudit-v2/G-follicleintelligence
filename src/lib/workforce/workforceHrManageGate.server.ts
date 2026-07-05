@@ -1,6 +1,8 @@
 import "server-only";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
+import { getStaffEffectiveAccess } from "@/src/lib/staffAccess/staffAccess.server";
+import { staffCapabilitySatisfies } from "@/src/lib/staffAccess/staffCapabilityCore";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 
 export {
@@ -25,6 +27,11 @@ export async function resolveWorkforceHrManageCapability(
   }
 
   if (workforceHrManageAllowedForRole(access.userRole, access.platformAdminPreview)) {
+    return { canManage: true, manageDeniedReason: "" };
+  }
+
+  const { access: staffAccess } = await getStaffEffectiveAccess(tenantId.trim());
+  if (staffCapabilitySatisfies(staffAccess, "team.identity.manage")) {
     return { canManage: true, manageDeniedReason: "" };
   }
 

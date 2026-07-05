@@ -14,16 +14,24 @@ import {
 
 export function TeamSubNav({
   tenantId,
+  visibleTabIds,
+  /** @deprecated Use visibleTabIds from resolveTeamWorkspaceAccessForViewer. */
   showHrOsNav = false,
 }: {
   tenantId: string;
+  visibleTabIds?: readonly FiOsTeamTab["id"][];
   showHrOsNav?: boolean;
 }) {
   const pathname = usePathname();
   const base = buildFiOsTeamBase(tenantId);
-  const tabs = FI_OS_TEAM_TABS.filter(
-    (tab) => tab.id === "overview" || tab.id === "staff" || showHrOsNav
-  );
+  const allowedIds = visibleTabIds
+    ? new Set(visibleTabIds)
+    : new Set(
+        FI_OS_TEAM_TABS.filter(
+          (tab) => tab.id === "overview" || tab.id === "staff" || showHrOsNav
+        ).map((tab) => tab.id)
+      );
+  const tabs = FI_OS_TEAM_TABS.filter((tab) => allowedIds.has(tab.id));
 
   return (
     <nav

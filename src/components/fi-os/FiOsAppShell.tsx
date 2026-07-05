@@ -11,6 +11,7 @@ import {
   buildDefaultFeatureAccessAllEnabled,
 } from "@/src/config/fiFeatureAccessRegistry";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import type { FiOsTeamTabId } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { buildFiOsSidebarWorkflowSections } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 import { buildFiOsWorkspaceFocusLine } from "@/src/lib/fi-os/fiOsWorkspaceFocusCopy";
 import {
@@ -83,6 +84,8 @@ type FiOsAppShellProps = {
   showProcedureDayNav?: boolean;
   /** HR OS primary nav when tenant entitlement + role allow. */
   showHrOsNav?: boolean;
+  /** D6G-G0B: capability-scoped Team tab ids for sidebar/More drawer (overrides showHrOsNav). */
+  visibleTeamTabIds?: readonly FiOsTeamTabId[];
   /** Stage UI activation — workspace persona for nav emphasis (does not bypass Stage 2). */
   workspaceProfileKey?: FiWorkspaceProfileKey;
   /** Stage 2: serialized feature map; null skips clinic-settings strip filtering. */
@@ -119,6 +122,7 @@ function FiOsAppShellBody({
   showFiPaymentsInboxNav = false,
   showProcedureDayNav = false,
   showHrOsNav = false,
+  visibleTeamTabIds,
   workspaceProfileKey = "default",
   featureAccess = null,
   effective,
@@ -176,7 +180,8 @@ function FiOsAppShellBody({
       showHrOsNav,
       showProcedureDayNav,
       showNavigationAdminSurfaces,
-      showNavigationAdminSurfaces
+      showNavigationAdminSurfaces,
+      visibleTeamTabIds
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -190,6 +195,7 @@ function FiOsAppShellBody({
     showHrOsNav,
     showProcedureDayNav,
     showNavigationAdminSurfaces,
+    visibleTeamTabIds,
     featureAccessMap,
   ]);
 

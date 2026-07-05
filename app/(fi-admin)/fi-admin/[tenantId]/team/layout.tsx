@@ -5,10 +5,7 @@ import { TeamSubNav } from "@/src/components/fi-os/team/TeamSubNav";
 import { FiModuleAccessDenied } from "@/src/components/fi-os/FiModuleAccessDenied";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import {
-  loadHrOsNavVisibleForViewer,
-  resolveHrOsRouteAccess,
-} from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { resolveTeamWorkspaceAccessForViewer } from "@/src/lib/staffAccess/staffTeamAccess.server";
 
 export const dynamic = "force-dynamic";
 
@@ -25,23 +22,23 @@ export default async function TeamLayout({
   const tid = tenantId.trim();
   await assertFiTenantPortalAccessUnlessStaffPinSession(tid);
 
-  const [access, showHrOsNav] = await Promise.all([
-    resolveHrOsRouteAccess(tid),
-    loadHrOsNavVisibleForViewer(tid),
-  ]);
-  if (!access.ok) {
+  const teamAccess = await resolveTeamWorkspaceAccessForViewer(tid);
+  if (!teamAccess.allowed) {
     return (
       <FiModuleAccessDenied
         tenantId={tid}
         moduleLabel="Team"
-        reason={access.access.reason}
+        reason={teamAccess.deniedReason}
       />
     );
   }
 
   return (
     <div className={cn(fiOsChromeClasses.pageScrollContent, "px-4 pt-8")}>
-      <TeamSubNav tenantId={tid} showHrOsNav={showHrOsNav} />
+      <TeamSubNav
+        tenantId={tid}
+        visibleTabIds={teamAccess.tabAccess.visibleTabIds}
+      />
       {children}
     </div>
   );

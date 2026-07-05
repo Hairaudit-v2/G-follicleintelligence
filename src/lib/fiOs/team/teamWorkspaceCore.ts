@@ -110,6 +110,8 @@ export const FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
 
 export type BuildTeamSidebarSubItemsOptions = {
   showHrOsNav?: boolean;
+  /** When set, overrides showHrOsNav for consolidated tab filtering. */
+  visibleTabIds?: readonly FiOsTeamTabId[];
   showTeamAdminSurfaces?: boolean;
 };
 
@@ -159,12 +161,14 @@ export function buildTeamSidebarSubItems(
   opts?: BuildTeamSidebarSubItemsOptions
 ): FiOsTeamSidebarSubItem[] {
   const tid = tenantId.trim();
-  const showHr = opts?.showHrOsNav === true;
   const showAdmin = opts?.showTeamAdminSurfaces === true;
 
   const consolidated = FI_OS_TEAM_TABS.filter((tab) => {
+    if (opts?.visibleTabIds) {
+      return opts.visibleTabIds.includes(tab.id);
+    }
     if (tab.id === "overview" || tab.id === "staff") return true;
-    return showHr;
+    return opts?.showHrOsNav === true;
   }).map((tab) => ({
     id: tab.navSubItemId,
     label: tab.label,

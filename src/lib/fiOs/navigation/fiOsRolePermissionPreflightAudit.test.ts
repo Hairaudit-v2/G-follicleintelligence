@@ -170,6 +170,26 @@ test("mutation guards: manager can edit roster and onboarding paths", () => {
   assert.equal(canEditModule(access, "workforce_os"), true);
 });
 
+test("receptionist with roster.manage override passes capability preflight", () => {
+  const report = buildFiOsRolePermissionPreflightReport(tenantId, {
+    persona: "receptionist_roster_override",
+    staffRoleKey: "reception",
+    featureTemplateKey: "reception_default",
+    workspaceProfile: "reception",
+    staffAccessGrants: [
+      {
+        moduleKey: "workforce_os",
+        tabKey: "roster",
+        accessLevel: "edit",
+        scope: "tenant",
+        revokedAt: null,
+      },
+    ],
+  });
+  assertFiOsRolePermissionPreflightPassed(report);
+  assert.match(report.matrixRow.teamAccess, /limited|manage/);
+});
+
 test("all standard role scenarios pass permission preflight audit", () => {
   const reports = runFiOsRolePermissionPreflightAudit(tenantId);
   assert.equal(reports.length, PREFLIGHT_ROLE_SCENARIOS.length);

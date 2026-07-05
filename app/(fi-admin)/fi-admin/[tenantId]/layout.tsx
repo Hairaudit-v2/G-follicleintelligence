@@ -32,6 +32,7 @@ import { loadWorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClock
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import { getStaffAccessNavFeatureOverrides } from "@/src/lib/staffAccess/staffAccess.server";
+import { resolveTeamWorkspaceAccessForViewer } from "@/src/lib/staffAccess/staffTeamAccess.server";
 import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import { loadHrOsNavVisibleForViewer } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
@@ -229,6 +230,13 @@ export default async function TenantAdminLayout({
 
   const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
   const showProcedureDayNav = pinFloorMode ? false : readFiProcedureDayEnabled();
+  const teamWorkspaceAccess = pinFloorMode
+    ? null
+    : await resolveTeamWorkspaceAccessForViewer(tenantId);
+  const visibleTeamTabIds =
+    teamWorkspaceAccess?.allowed === true
+      ? teamWorkspaceAccess.tabAccess.visibleTabIds
+      : undefined;
   const staffUatModeEnabled = readFiStaffUatModeEnabled();
   const staffUatRole = pinFloorMode
     ? "receptionist_pin"
@@ -294,6 +302,7 @@ export default async function TenantAdminLayout({
         showFiPaymentsInboxNav={showFiPaymentsInboxNav}
         showProcedureDayNav={showProcedureDayNav}
         showHrOsNav={showHrOsNav}
+        visibleTeamTabIds={visibleTeamTabIds}
         workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}
         effective={effective}

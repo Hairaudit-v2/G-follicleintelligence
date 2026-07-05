@@ -38,8 +38,12 @@ import {
   computeEffectiveAccess,
   computeStaffAccessNavFeatureOverrides,
   moduleSatisfies,
+  type StaffAccessGrantInput,
 } from "@/src/lib/staffAccess/staffAccessCore";
+import { staffCapabilitySatisfies } from "@/src/lib/staffAccess/staffCapabilityCore";
+import { resolveTeamWorkspaceTabAccess } from "@/src/lib/staffAccess/staffTeamAccessCore";
 import type { StaffAccessModuleKey, StaffRoleKey } from "@/src/lib/staffAccess/staffAccessRegistry";
+import type { StaffCapabilityKey } from "@/src/lib/staffAccess/staffCapabilityRegistry";
 
 /** Stage 3.5 feature template defaults (mirrors DB seed). */
 export const PREFLIGHT_FEATURE_TEMPLATE_DEFAULTS: Record<
@@ -207,6 +211,7 @@ export const PREFLIGHT_PROTECTED_ROUTE_AUDITS: ReadonlyArray<{
   suffix: string;
   module: StaffAccessModuleKey | null;
   moduleLevel: "read" | "edit" | "approve";
+  capability?: StaffCapabilityKey;
   adminOnly?: boolean;
 }> = [
   { suffix: "front-desk", module: "clinic_os", moduleLevel: "read" },
@@ -214,11 +219,21 @@ export const PREFLIGHT_PROTECTED_ROUTE_AUDITS: ReadonlyArray<{
   { suffix: "surgery/procedure-day", module: "surgery_os", moduleLevel: "read" },
   { suffix: "surgery/review", module: "surgery_os", moduleLevel: "read" },
   { suffix: "team", module: "workforce_os", moduleLevel: "read" },
-  { suffix: "team/roster", module: "workforce_os", moduleLevel: "edit" },
+  {
+    suffix: "team/roster",
+    module: "workforce_os",
+    moduleLevel: "edit",
+    capability: "roster.manage",
+  },
   { suffix: "team/onboarding", module: "workforce_os", moduleLevel: "edit" },
   { suffix: "team/compliance", module: "workforce_os", moduleLevel: "read" },
   { suffix: "team/training", module: "workforce_os", moduleLevel: "read" },
-  { suffix: "team/identity", module: "workforce_os", moduleLevel: "edit" },
+  {
+    suffix: "team/identity",
+    module: "workforce_os",
+    moduleLevel: "edit",
+    capability: "team.identity.manage",
+  },
   { suffix: "reports", module: "analytics_os", moduleLevel: "read" },
   { suffix: "reports/admin", module: null, moduleLevel: "read", adminOnly: true },
   { suffix: "intelligence/navigation-audit", module: null, moduleLevel: "read", adminOnly: true },
@@ -240,6 +255,8 @@ export type FiOsRolePermissionPreflightScenario = {
   showTeamAdminSurfaces?: boolean;
   showReportsAdminSurfaces?: boolean;
   tenantBackendAdminRole?: FiTenantAdminRole | null;
+  /** D6G-G0B explicit SA-1 tab/module grants (capability overrides). */
+  staffAccessGrants?: readonly StaffAccessGrantInput[];
 };
 
 /** Standard role scenarios for D6G-G0 preflight. */
@@ -249,6 +266,21 @@ export const PREFLIGHT_ROLE_SCENARIOS: readonly FiOsRolePermissionPreflightScena
     staffRoleKey: "reception",
     featureTemplateKey: "reception_default",
     workspaceProfile: "reception",
+  },
+  {
+    persona: "receptionist_roster_override",
+    staffRoleKey: "reception",
+    featureTemplateKey: "reception_default",
+    workspaceProfile: "reception",
+    staffAccessGrants: [
+      {
+        moduleKey: "workforce_os",
+        tabKey: "roster",
+        accessLevel: "edit",
+        scope: "tenant",
+        revokedAt: null,
+      },
+    ],
   },
   {
     persona: "clinical_staff",
@@ -357,7 +389,10 @@ export function buildEffectiveFeatureAccessMapForScenario(
     staffOverrides: {},
   });
 
-  const access = computeEffectiveAccess({ roleKey: scenario.staffRoleKey, grants: [] });
+  const access = computeEffectiveAccess({
+    roleKey: scenario.staffRoleKey,
+    grants: [...(scenario.staffAccessGrants ?? [])],
+  });
   const sa1Overrides = computeStaffAccessNavFeatureOverrides(access);
   for (const [key, value] of Object.entries(sa1Overrides)) {
     if (isFiFeatureKey(key) && value === false) {
@@ -554,12 +589,26 @@ function auditStaffMoreDrawer(
   return checks;
 }
 
+function routeModuleAllowed(
+  access: ReturnType<typeof computeEffectiveAccess>,
+  route: (typeof PREFLIGHT_PROTECTED_ROUTE_AUDITS)[number]
+): boolean {
+  if (route.module == null) return true;
+  if (route.capability && staffCapabilitySatisfies(access, route.capability)) {
+    return true;
+  }
+  return moduleSatisfies(access, route.module, route.moduleLevel);
+}
+
 function auditRouteAccess(
   base: string,
   scenario: FiOsRolePermissionPreflightScenario,
   featureMap: Map<FiFeatureKey, boolean> | null
 ): FiOsPermissionPreflightCheck[] {
-  const access = computeEffectiveAccess({ roleKey: scenario.staffRoleKey, grants: [] });
+  const access = computeEffectiveAccess({
+    roleKey: scenario.staffRoleKey,
+    grants: [...(scenario.staffAccessGrants ?? [])],
+  });
   const isBackendAdmin = scenario.tenantBackendAdminRole != null;
   const checks: FiOsPermissionPreflightCheck[] = [];
 
@@ -580,8 +629,7 @@ function auditRouteAccess(
     }
 
     const featureAllowed = featureRouteAllowed(route.suffix, base, featureMap, isBackendAdmin);
-    const moduleAllowed =
-      route.module == null ? true : moduleSatisfies(access, route.module, route.moduleLevel);
+    const moduleAllowed = routeModuleAllowed(access, route);
 
     const expectedAllow = featureAllowed && moduleAllowed;
     const requiredFeature = resolveRequiredFiFeatureForTenantSuffix(route.suffix);
@@ -603,8 +651,61 @@ function auditRouteAccess(
   return checks;
 }
 
+function auditCapabilityOverrides(
+  scenario: FiOsRolePermissionPreflightScenario
+): FiOsPermissionPreflightCheck[] {
+  if (scenario.persona !== "receptionist_roster_override") {
+    return [];
+  }
+
+  const access = computeEffectiveAccess({
+    roleKey: scenario.staffRoleKey,
+    grants: [...(scenario.staffAccessGrants ?? [])],
+  });
+  const tabAccess = resolveTeamWorkspaceTabAccess(access, { hrOsFullNav: false });
+  const checks: FiOsPermissionPreflightCheck[] = [];
+
+  checks.push(
+    check(
+      "capability_reception_roster_manage",
+      staffCapabilitySatisfies(access, "roster.manage"),
+      "Receptionist override grants roster.manage via tab grant"
+    )
+  );
+
+  checks.push(
+    check(
+      "capability_reception_no_identity_admin",
+      !staffCapabilitySatisfies(access, "team.identity.manage"),
+      "Receptionist roster override does not grant identity admin"
+    )
+  );
+
+  checks.push(
+    check(
+      "capability_reception_roster_tab_visible",
+      tabAccess.visibleTabIds.includes("roster") && !tabAccess.visibleTabIds.includes("identity"),
+      "Roster override exposes roster tab only (not identity)",
+      tabAccess.visibleTabIds
+    )
+  );
+
+  checks.push(
+    check(
+      "capability_reception_staff_nav_enabled",
+      computeStaffAccessNavFeatureOverrides(access).staff !== false,
+      "Roster override enables staff nav feature for Team workspace"
+    )
+  );
+
+  return checks;
+}
+
 function auditMutationGuards(scenario: FiOsRolePermissionPreflightScenario): FiOsPermissionPreflightCheck[] {
-  const access = computeEffectiveAccess({ roleKey: scenario.staffRoleKey, grants: [] });
+  const access = computeEffectiveAccess({
+    roleKey: scenario.staffRoleKey,
+    grants: [...(scenario.staffAccessGrants ?? [])],
+  });
   const checks: FiOsPermissionPreflightCheck[] = [];
 
   const rosterEdit = canEditModule(access, "workforce_os");
@@ -696,6 +797,24 @@ function auditMutationGuards(scenario: FiOsRolePermissionPreflightScenario): FiO
     )
   );
 
+  checks.push(
+    check(
+      "mutation_reception_roster_override",
+      scenario.persona !== "receptionist_roster_override" ||
+        staffCapabilitySatisfies(access, "roster.manage"),
+      "Receptionist with roster override can manage roster"
+    )
+  );
+
+  checks.push(
+    check(
+      "mutation_reception_override_no_identity",
+      scenario.persona !== "receptionist_roster_override" ||
+        !staffCapabilitySatisfies(access, "team.identity.manage"),
+      "Receptionist roster override does not grant identity manage"
+    )
+  );
+
   return checks;
 }
 
@@ -741,7 +860,10 @@ function buildMatrixRow(
   sections: ReturnType<typeof resolveScenarioMoreSections>,
   checks: FiOsPermissionPreflightCheck[]
 ): FiOsPermissionMatrixRow {
-  const access = computeEffectiveAccess({ roleKey: scenario.staffRoleKey, grants: [] });
+  const access = computeEffectiveAccess({
+    roleKey: scenario.staffRoleKey,
+    grants: [...(scenario.staffAccessGrants ?? [])],
+  });
   const rail = resolveFiOsMinimalNavItems(tenantBase("matrix"), sidebar);
   const railSummary = rail
     .filter((i) => i.kind === "link")
@@ -768,11 +890,15 @@ function buildMatrixRow(
     primaryRail: railSummary,
     frontDeskAccess: hasNav("front-desk") || moreHas("front-desk") ? "yes" : "no",
     surgeryAccess: canViewModule(access, "surgery_os") ? "workflow" : "no",
-    teamAccess: canViewModule(access, "workforce_os")
+    teamAccess: staffCapabilitySatisfies(access, "roster.manage")
       ? canEditModule(access, "workforce_os")
         ? "manage"
-        : "limited"
-      : "no",
+        : "roster override"
+      : canViewModule(access, "workforce_os")
+        ? canEditModule(access, "workforce_os")
+          ? "manage"
+          : "limited"
+        : "no",
     reportsAccess: canViewModule(access, "analytics_os")
       ? "analytics"
       : canViewModule(access, "audit_os")
@@ -805,6 +931,7 @@ export function buildFiOsRolePermissionPreflightReport(
     ...auditPrimaryRail(base, sidebar),
     ...auditStaffMoreDrawer(moreSections, scenario),
     ...auditRouteAccess(base, scenario, featureMap),
+    ...auditCapabilityOverrides(scenario),
     ...auditMutationGuards(scenario),
     ...auditNavRouteConsistency(base, moreSections, scenario, featureMap),
   ];

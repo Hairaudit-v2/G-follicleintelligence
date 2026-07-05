@@ -7,6 +7,8 @@ import {
   HR_OS_ROUTE_REQUIRED_ROLES,
   resolveHrOsRouteAccess,
 } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { getStaffEffectiveAccess } from "@/src/lib/staffAccess/staffAccess.server";
+import { staffCapabilitySatisfies } from "@/src/lib/staffAccess/staffCapabilityCore";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
@@ -38,7 +40,14 @@ function logManageDecisionInDevelopment(decision: StaffStandardHoursManageDecisi
 export async function resolveStaffStandardHoursManageCapability(
   tenantId: string
 ): Promise<StaffStandardHoursManageDecision> {
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
+  const tid = tenantId.trim();
+
+  const { access: staffAccess } = await getStaffEffectiveAccess(tid);
+  if (staffCapabilitySatisfies(staffAccess, "roster.manage")) {
+    return { canManage: true, manageDeniedReason: "" };
+  }
+
+  const access = await resolveHrOsRouteAccess(tid);
   if (!access.ok) {
     const decision = {
       canManage: false,
@@ -65,7 +74,7 @@ export async function resolveStaffStandardHoursManageCapability(
       return { canManage: true, manageDeniedReason: "" };
     }
 
-    const tenantAdmin = await loadActiveTenantAdminProfileForSession(tenantId.trim(), authUserId);
+    const tenantAdmin = await loadActiveTenantAdminProfileForSession(tid, authUserId);
     if (
       tenantAdmin &&
       (STAFF_STANDARD_HOURS_MANAGE_TENANT_ADMIN_ROLES as readonly string[]).includes(
@@ -88,13 +97,25 @@ export async function resolveStaffStandardHoursManageCapability(
 export async function assertStaffStandardHoursManageAllowed(
   tenantId: string
 ): Promise<{ fiUserId: string }> {
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
-  if (!access.ok) {
-    throw new CrmAccessError(403, access.access.message);
-  }
   const manage = await resolveStaffStandardHoursManageCapability(tenantId);
   if (!manage.canManage) {
     throw new CrmAccessError(403, manage.manageDeniedReason);
   }
-  return { fiUserId: access.fiUserId };
+
+  const access = await resolveHrOsRouteAccess(tenantId.trim());
+  if (access.ok) {
+    return { fiUserId: access.fiUserId };
+  }
+
+  const authUserId = await resolveAuthUserId(null);
+  if (!authUserId) {
+    throw new CrmAccessError(403, manage.manageDeniedReason);
+  }
+
+  const { principal } = await getStaffEffectiveAccess(tenantId.trim());
+  if (principal?.fiUserId) {
+    return { fiUserId: principal.fiUserId };
+  }
+
+  throw new CrmAccessError(403, manage.manageDeniedReason);
 }

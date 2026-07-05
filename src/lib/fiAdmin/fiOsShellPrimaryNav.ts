@@ -15,6 +15,7 @@ import {
 import {
   buildTeamSidebarSubItems,
   FI_OS_TEAM_NAV_ID,
+  type FiOsTeamTabId,
 } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { filterProcedureDayFromFiOsSidebarItems } from "@/src/lib/procedureDay/procedureDayNavCore";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
@@ -164,7 +165,8 @@ export function resolveFiOsPrimarySidebarItems(
   showHrOsNav: boolean = false,
   showProcedureDayNav: boolean = false,
   showSurgeryAdminSurfaces: boolean = false,
-  showTeamAdminSurfaces: boolean = false
+  showTeamAdminSurfaces: boolean = false,
+  visibleTeamTabIds?: readonly FiOsTeamTabId[]
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -370,6 +372,7 @@ export function resolveFiOsPrimarySidebarItems(
       hint: "Staff operations, roster, onboarding, compliance, training, and access.",
       subItems: buildTeamSidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {
         showHrOsNav,
+        visibleTabIds: visibleTeamTabIds,
         showTeamAdminSurfaces: showTeamAdminSurfaces || showSurgeryAdminSurfaces,
       }),
     },

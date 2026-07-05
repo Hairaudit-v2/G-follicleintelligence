@@ -3,9 +3,9 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { StaffAccessCentreClient } from "@/src/components/fi/workforce/StaffAccessCentreClient";
-import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadStaffAccessCentrePage } from "@/src/lib/workforce/staffAccessCentre.server";
 import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
+import { assertTeamTabAccessOrNotFound } from "@/src/lib/staffAccess/staffTeamTabRouteGate.server";
 import { resolveWorkforceHrManageCapability } from "@/src/lib/workforce/workforceHrManageGate.server";
 import { buildStaffIdentityAuditHref } from "@/src/lib/workforce/staffLifecycleCopy";
 
@@ -26,8 +26,7 @@ export default async function FiAdminTeamIdentityPage({
   if (!tenantId?.trim()) notFound();
 
   const tid = tenantId.trim();
-  const access = await resolveHrOsRouteAccess(tid);
-  if (!access.ok) notFound();
+  await assertTeamTabAccessOrNotFound(tid, "identity");
 
   const [data, manage, identityAuditAccess] = await Promise.all([
     loadStaffAccessCentrePage(tid),

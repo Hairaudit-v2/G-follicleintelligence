@@ -9,6 +9,7 @@ import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSyst
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";
 import { resolveStaffStandardHoursManageCapability } from "@/src/lib/workforce-os/staffStandardHoursManageGate.server";
+import { assertTeamTabAccessOrNotFound } from "@/src/lib/staffAccess/staffTeamTabRouteGate.server";
 import {
   defaultRosterCommandCentreDateRange,
   parseRosterCommandCentreSearchParams,
@@ -36,6 +37,8 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
   if (!tenantId?.trim()) notFound();
 
   const tid = tenantId.trim();
+
+  await assertTeamTabAccessOrNotFound(tid, "roster");
 
   try {
     const rawSearch = await searchParams;
