@@ -11,13 +11,15 @@ import { buildFiOsSidebarWorkflowSections } from "@/src/lib/fi-os/fiOsSidebarWor
 import {
   FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS,
   FI_OS_HIDDEN_MORE_SUB_ITEM_IDS,
+  FI_OS_LEGACY_MORE_SUB_ITEM_IDS,
   isPrimaryRailNavId,
+  isStaffHiddenMoreDrawerLabel,
 } from "@/src/lib/fiOs/navigation/fiOsNavigationRegroupingCore";
 import { labelHasLegacyModuleLanguage } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
 
 const base = "/fi-admin/t-regroup-1";
 
-function fullSidebar() {
+function fullSidebar(showAdmin = false) {
   return resolveFiOsPrimarySidebarItems(
     base,
     true,
@@ -27,7 +29,9 @@ function fullSidebar() {
     true,
     true,
     true,
-    true
+    true,
+    showAdmin,
+    showAdmin
   );
 }
 
@@ -35,14 +39,22 @@ function moreSections(opts?: {
   showNavigationAdminSurfaces?: boolean;
   showProcedureDayNav?: boolean;
   showTeamAdminSurfaces?: boolean;
+  showReportsAdminSurfaces?: boolean;
 }) {
-  const sidebar = fullSidebar();
+  const showAdmin =
+    opts?.showNavigationAdminSurfaces === true ||
+    opts?.showReportsAdminSurfaces === true ||
+    opts?.showTeamAdminSurfaces === true;
+  const sidebar = fullSidebar(showAdmin);
   return buildFiOsSidebarWorkflowSections(sidebar, "default", {
     tenantBase: base,
     forCollapsedShell: true,
     showNavigationAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
     showProcedureDayNav: opts?.showProcedureDayNav ?? false,
+    showSurgeryAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
     showTeamAdminSurfaces: opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
+    showReportsAdminSurfaces:
+      opts?.showReportsAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
   });
 }
 
@@ -100,21 +112,21 @@ function flattenMoreIds(sections = moreSections()) {
   return new Set([...top, ...subs]);
 }
 
+function flattenMoreSubLabels(sections = moreSections()) {
+  return sections.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? [])
+  );
+}
+
 test("secondary workflow routes remain in More drawer after regrouping", () => {
   const ids = flattenMoreIds();
   assert.ok(ids.has("front-desk"));
   for (const expected of [
-    "operations-centre",
-    "reception-os",
-    "reception-board",
-    "tomorrow-board",
     "crm",
     "follow-up-queue",
     "consultations",
     "surgery",
-    "cases-worklist",
-    "surgery-os",
-    "workforce-os-hub",
+    "reports",
     "doctor-workspace",
     "prescriptions",
     "pathology-nav",
@@ -123,12 +135,55 @@ test("secondary workflow routes remain in More drawer after regrouping", () => {
   }
 });
 
+test("receptionist More drawer hides legacy direct and admin labels", () => {
+  const staffSections = moreSections({ showNavigationAdminSurfaces: false });
+  const subIds = staffSections.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
+  );
+  const subLabels = flattenMoreSubLabels(staffSections);
+
+  for (const legacyId of FI_OS_LEGACY_MORE_SUB_ITEM_IDS) {
+    if (legacyId === "procedure-day-board") continue;
+    assert.ok(!subIds.includes(legacyId), `staff More should hide legacy ${legacyId}`);
+  }
+  for (const hiddenId of FI_OS_HIDDEN_MORE_SUB_ITEM_IDS) {
+    if (hiddenId === "procedure-day-board") continue;
+    assert.ok(!subIds.includes(hiddenId), `staff More should hide admin ${hiddenId}`);
+  }
+  for (const label of subLabels) {
+    assert.ok(!isStaffHiddenMoreDrawerLabel(label), `staff More should hide label: ${label}`);
+    assert.ok(!labelHasLegacyModuleLanguage(label), `staff More should hide module label: ${label}`);
+  }
+});
+
+test("platform admin More drawer retains legacy direct and D6 admin links", () => {
+  const adminSections = moreSections({
+    showNavigationAdminSurfaces: true,
+    showReportsAdminSurfaces: true,
+    showProcedureDayNav: true,
+  });
+  const adminSubIds = adminSections.flatMap((s) =>
+    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
+  );
+  assert.ok(adminSubIds.includes("reception-os"));
+  assert.ok(adminSubIds.includes("surgery-os"));
+  assert.ok(adminSubIds.includes("workforce-os-hub"));
+  assert.ok(adminSubIds.includes("analytics-legacy"));
+  for (const d6Id of ["d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"]) {
+    assert.ok(adminSubIds.includes(d6Id), `admin More should include ${d6Id}`);
+  }
+});
+
 test("primary rail destinations are excluded from collapsed More drawer", () => {
   const ids = new Set(allMoreItemIds());
-  for (const railId of ["dashboard", "calendar", "patients", "analytics"]) {
+  for (const railId of ["dashboard", "calendar", "patients"]) {
     assert.ok(!ids.has(railId), `${railId} should not duplicate on More when collapsed`);
     assert.ok(isPrimaryRailNavId(railId));
   }
+  assert.ok(ids.has("team"));
+  assert.ok(ids.has("reports"));
+  assert.ok(isPrimaryRailNavId("team"));
+  assert.ok(isPrimaryRailNavId("reports"));
 });
 
 test("no duplicate Front Desk or Surgery rows on primary minimal rail", () => {
@@ -148,9 +203,9 @@ test("Team grouping in More consolidates under one team destination on primary r
   const subIds = team!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.ok(subIds.includes("team-overview"));
   assert.ok(subIds.includes("team-staff"));
-  assert.ok(subIds.includes("workforce-os-hub"));
-  assert.ok(subIds.includes("onboarding-centre"));
-  assert.ok(subIds.includes("academyos"));
+  assert.ok(!subIds.includes("workforce-os-hub"));
+  assert.ok(!subIds.includes("onboarding-centre"));
+  assert.ok(!subIds.includes("academyos"));
 
   const teamRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "team");
   assert.equal(teamRail?.kind, "link");
@@ -159,27 +214,31 @@ test("Team grouping in More consolidates under one team destination on primary r
   }
 });
 
-test("Reports grouping includes auditos in More and analytics on primary rail; D6 admin when allowed", () => {
+test("Reports grouping consolidates under one reports destination on primary rail; D6 admin when allowed", () => {
   const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "reports");
   assert.equal(reportsRail?.kind, "link");
   if (reportsRail?.kind === "link") {
-    assert.ok(reportsRail.href.endsWith("/analytics"));
+    assert.ok(reportsRail.href.endsWith("/reports"));
   }
 
   const staffSections = moreSections({ showNavigationAdminSurfaces: false });
   const staffReports = staffSections.find((s) => s.groupId === "REPORTS");
   assert.ok(staffReports);
-  const staffIds = staffReports!.items.map((i) => i.id);
-  assert.ok(staffIds.includes("auditos"));
-  assert.ok(!staffIds.includes("analytics"));
-  assert.ok(!staffIds.includes("d6-presence"));
+  assert.deepEqual(staffReports!.items.map((i) => i.id), ["reports"]);
+  const staffSubIds = staffReports!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
+  assert.ok(staffSubIds.includes("reports-analytics"));
+  assert.ok(!staffSubIds.includes("analytics-legacy"));
+  assert.ok(!staffSubIds.includes("d6-presence"));
 
-  const adminSections = moreSections({ showNavigationAdminSurfaces: true });
+  const adminSections = moreSections({
+    showNavigationAdminSurfaces: true,
+    showReportsAdminSurfaces: true,
+  });
   const adminReports = adminSections.find((s) => s.groupId === "REPORTS");
   assert.ok(adminReports);
-  const adminIds = adminReports!.items.map((i) => i.id);
+  const adminSubIds = adminReports!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   for (const d6Id of ["d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"]) {
-    assert.ok(adminIds.includes(d6Id), `admin Reports should include ${d6Id}`);
+    assert.ok(adminSubIds.includes(d6Id), `admin Reports should include ${d6Id}`);
   }
 });
 
@@ -193,15 +252,19 @@ test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in M
   const surgeryIds = surgery!.items.map((i) => i.id);
   const surgerySubIds = surgery!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.deepEqual(frontIds, ["front-desk"]);
-  assert.ok(frontSubIds.includes("reception-os"));
-  assert.ok(frontSubIds.includes("reception-board"));
+  assert.ok(frontSubIds.includes("front-desk-clinic-flow"));
+  assert.ok(frontSubIds.includes("front-desk-reception-board"));
+  assert.ok(!frontSubIds.includes("reception-os"));
+  assert.ok(!frontSubIds.includes("operations-centre"));
   assert.deepEqual(surgeryIds, ["surgery"]);
-  assert.ok(surgerySubIds.includes("surgery-os"));
-  assert.ok(surgerySubIds.includes("cases-worklist"));
+  assert.ok(surgerySubIds.includes("surgery-command"));
+  assert.ok(surgerySubIds.includes("surgery-cases"));
+  assert.ok(!surgerySubIds.includes("surgery-os"));
+  assert.ok(!surgerySubIds.includes("cases-worklist"));
   const team = moreSections().find((s) => s.groupId === "TEAM");
   const teamSubIds = team?.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []) ?? [];
-  assert.ok(teamSubIds.includes("workforce-os-hub"));
   assert.ok(teamSubIds.includes("team-staff"));
+  assert.ok(!teamSubIds.includes("workforce-os-hub"));
 });
 
 test("receptionist profile minimal rail uses workflow labels without module language", () => {
@@ -231,6 +294,7 @@ test("minimal nav active ids cover team and reports deep links", () => {
   assert.equal(getFiOsMinimalNavActiveId(`${base}/team`, base), "team");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/workforce-os`, base), "team");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/staff`, base), "team");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), "reports");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), "reports");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/navigation-audit`, base), "reports");
 });

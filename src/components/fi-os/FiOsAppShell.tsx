@@ -204,6 +204,7 @@ function FiOsAppShellBody({
         showProcedureDayNav,
         showSurgeryAdminSurfaces: showNavigationAdminSurfaces,
         showTeamAdminSurfaces: showNavigationAdminSurfaces,
+        showReportsAdminSurfaces: showNavigationAdminSurfaces,
       }),
     [
       sidebarItems,

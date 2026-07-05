@@ -52,8 +52,14 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   "pathology-nav": { domain: "Clinical" },
   "payments-inbox": { domain: "Finance" },
   "financial-os": { domain: "Finance" },
+  reports: { domain: "Reports", notes: "Consolidated reports workspace" },
   analytics: { domain: "Reports", notes: "Insights / analytics" },
   auditos: { domain: "Reports", notes: "Quality review" },
+  "analytics-legacy": { domain: "Reports" },
+  "auditos-legacy": { domain: "Reports" },
+  "insights-legacy": { domain: "Reports" },
+  "financial-os-legacy": { domain: "Reports" },
+  "payments-inbox-legacy": { domain: "Reports" },
   team: { domain: "Team", notes: "Consolidated team workspace" },
   staff: { domain: "Team" },
   "onboarding-centre": { domain: "Team" },
@@ -97,6 +103,12 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   "credentials-legacy": { domain: "Team" },
   "staff-identity-audit": { domain: "Team" },
   "staff-access-legacy": { domain: "Team" },
+  "reports-overview": { domain: "Reports" },
+  "reports-analytics": { domain: "Reports" },
+  "reports-quality": { domain: "Reports" },
+  "reports-surgery": { domain: "Reports" },
+  "reports-performance": { domain: "Reports" },
+  "reports-admin": { domain: "Reports" },
 };
 
 /** Label overrides when id is absent (quick-create, D6 routes). */
@@ -169,6 +181,13 @@ export const FI_OS_ROUTE_SUFFIX_1B_DOMAIN: Record<string, FiOs1BWorkflowDomain> 
   "workforce-os/staff-access": "Team",
   "workforce-os/staff-identity-audit": "Team",
   academy: "Team",
+  reports: "Reports",
+  "reports/analytics": "Reports",
+  "reports/quality": "Reports",
+  "reports/surgery": "Reports",
+  "reports/performance": "Reports",
+  "reports/admin": "Reports",
+  insights: "Reports",
 };
 
 /** D6 internal intelligence surfaces (not in primary sidebar today). */

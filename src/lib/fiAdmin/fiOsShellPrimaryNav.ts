@@ -9,6 +9,10 @@ import {
   FI_OS_SURGERY_NAV_ID,
 } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
 import {
+  buildReportsSidebarSubItems,
+  FI_OS_REPORTS_NAV_ID,
+} from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
+import {
   buildTeamSidebarSubItems,
   FI_OS_TEAM_NAV_ID,
 } from "@/src/lib/fiOs/team/teamWorkspaceCore";
@@ -344,15 +348,17 @@ export function resolveFiOsPrimarySidebarItems(
       anyOfFeatures: ["patient_twin", "imaging"],
     },
     {
-      id: "auditos",
-      featureKey: "audit",
-      label: "Quality review",
-      shortLabel: "Review",
-      href: hrefFor(b, "audit"),
-      disabled: auditDisabled,
-      hint: auditDisabled
-        ? "Quality review requires security review access or a clinical tenant role."
-        : undefined,
+      id: FI_OS_REPORTS_NAV_ID,
+      featureKey: "analytics",
+      label: "Reports",
+      shortLabel: "Reports",
+      href: hrefFor(b, "reports"),
+      disabled: blocks.analytics,
+      hint: blocks.analytics ? "Reports are hidden for this admin role." : undefined,
+      subItems: buildReportsSidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {
+        showAuditOsNav: showAuditOsNav && !auditDisabled,
+        showReportsAdminSurfaces: showTeamAdminSurfaces || showSurgeryAdminSurfaces,
+      }),
     },
     {
       id: FI_OS_TEAM_NAV_ID,
@@ -384,15 +390,6 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Fin",
       href: hrefFor(b, "financial-os"),
       disabled: false,
-    },
-    {
-      id: "analytics",
-      featureKey: "analytics",
-      label: "Insights",
-      shortLabel: "Insights",
-      href: hrefFor(b, "analytics"),
-      disabled: blocks.analytics,
-      hint: blocks.analytics ? "Insights is hidden for this admin role." : undefined,
     },
     {
       id: "settings",
@@ -471,6 +468,17 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
     if (firstEarly === "surgery") return FI_OS_SURGERY_NAV_ID;
     if (firstEarly === "team") return FI_OS_TEAM_NAV_ID;
+    if (firstEarly === "reports") return FI_OS_REPORTS_NAV_ID;
+    if (firstEarly === "analytics") return "analytics-legacy";
+    if (firstEarly === "audit") return "auditos-legacy";
+    if (firstEarly === "intelligence") {
+      const secondEarly = restEarly.split("/")[1] ?? "";
+      if (secondEarly === "presence") return "d6-presence";
+      if (secondEarly === "signal-learning") return "d6-signal-learning";
+      if (secondEarly === "d6-bake") return "d6-bake";
+      if (secondEarly === "navigation-audit") return "d6-navigation-audit";
+      return "d6-navigation-audit";
+    }
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
     if (firstEarly === "reception-board") return "reception-board-command";
@@ -528,8 +536,8 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "consultation-conversion-board") return "consultations";
   if (legacy === "consultations") return "consultations";
   if (legacy === "dashboard") return "dashboard";
-  if (legacy === "auditos") return "auditos";
-  if (legacy === "analyticsos") return "analytics";
+  if (legacy === "auditos") return "auditos-legacy";
+  if (legacy === "analyticsos") return "analytics-legacy";
   if (legacy === "appointments" || legacy === "bookings") return "calendar";
 
   if (npRaw.startsWith(nb)) {
@@ -559,6 +567,19 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
       return "workforce-os-hub";
     }
     if (first === "team") return FI_OS_TEAM_NAV_ID;
+    if (first === "reports") return FI_OS_REPORTS_NAV_ID;
+    if (first === "analytics") return "analytics-legacy";
+    if (first === "audit") return "auditos-legacy";
+    if (first === "intelligence") {
+      const second = rest.split("/")[1] ?? "";
+      if (second === "presence") return "d6-presence";
+      if (second === "signal-learning") return "d6-signal-learning";
+      if (second === "d6-bake") return "d6-bake";
+      if (second === "navigation-audit") return "d6-navigation-audit";
+      return "d6-navigation-audit";
+    }
+    if (first === "payments") return "payments-inbox-legacy";
+    if (first === "financial-os") return "financial-os-legacy";
     if (first === "academy") return "academyos";
   }
 

@@ -109,10 +109,14 @@ test("consolidated front desk tabs cover clinic flow, reception board, tomorrow,
   assert.equal(buildFiOsFrontDeskBase(tenantId), `${base}/front-desk`);
 });
 
-test("legacy Front Desk routes still resolve in nav catalog and active sidebar mapping", () => {
-  const allIds = flattenMoreIds();
+test("legacy Front Desk routes remain in nav catalog; staff More hides direct links", () => {
+  const catalogIds = new Set(buildFrontDeskSidebarSubItems(tenantId).map((s) => s.id));
   for (const legacy of FI_OS_FRONT_DESK_LEGACY_ROUTES) {
-    assert.ok(allIds.has(legacy.id), `${legacy.id} should remain in More`);
+    assert.ok(catalogIds.has(legacy.id), `${legacy.id} should remain in nav catalog`);
+  }
+  const staffMoreIds = flattenMoreIds();
+  for (const legacy of FI_OS_FRONT_DESK_LEGACY_ROUTES) {
+    assert.ok(!staffMoreIds.has(legacy.id), `${legacy.id} should be hidden from staff More`);
   }
   assert.equal(getFiOsShellActiveSidebarId(`${base}/operations`, base), "operations-centre");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/reception-os`, base), "reception-os");

@@ -163,8 +163,20 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   assert.equal(byId["patient-twin"]?.label, "Health record");
   assert.equal(byId.auditos?.label, "Quality review");
   assert.equal(byId["financial-os"]?.label, "Finances");
-  assert.equal(byId.analytics?.label, "Insights");
+  assert.equal(byId.reports?.label, "Reports");
   assert.equal(byId.team?.label, "Team");
+});
+
+test("resolveFiOsPrimarySidebarItems: consolidated reports entry with preserved legacy sub-links", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, false, true);
+  const reports = items.find((i) => i.id === "reports");
+  assert.ok(reports?.subItems?.length);
+  const subIds = new Set(reports!.subItems!.map((s) => s.id));
+  assert.ok(subIds.has("reports-overview"));
+  assert.ok(subIds.has("reports-analytics"));
+  assert.ok(subIds.has("analytics-legacy"));
+  assert.ok(subIds.has("auditos-legacy"));
+  assert.ok(!subIds.has("d6-navigation-audit"));
 });
 
 test("resolveFiOsPrimarySidebarItems: consolidated team entry with preserved legacy sub-links", () => {

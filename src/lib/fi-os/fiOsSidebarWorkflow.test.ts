@@ -67,5 +67,6 @@ test("workflow: collapsed More omits primary rail duplicates", () => {
   assert.ok(!ids.includes("calendar"));
   assert.ok(!ids.includes("patients"));
   assert.ok(ids.includes("team"));
+  assert.ok(ids.includes("reports"));
   assert.ok(!ids.includes("analytics"));
 });

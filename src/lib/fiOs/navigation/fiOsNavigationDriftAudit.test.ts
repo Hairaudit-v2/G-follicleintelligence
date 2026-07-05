@@ -32,8 +32,9 @@ test("domain mapping examples from D6G scope", () => {
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("team-staff")!), "Team");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("payments-inbox")!), "Finance");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("financial-os")!), "Finance");
-  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("analytics")!), "Reports");
-  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("auditos")!), "Reports");
+  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("reports")!), "Reports");
+  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("analytics-legacy")!), "Reports");
+  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("reports-analytics")!), "Reports");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("doctor-workspace")!), "Clinical");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("pathology-nav")!), "Clinical");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("cases-worklist")!), "Surgery");
@@ -104,6 +105,15 @@ test("surgery consolidated item and front-desk map to 1B groups after D6G-D", ()
   assert.equal(receptionOs.workflowGroupId, "FRONT_DESK");
 });
 
+test("reports consolidated item maps to REPORTS group after D6G-F", () => {
+  const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
+  const reports = items.find((i) => i.id === "reports" && i.source === "primary_sidebar")!;
+  const analyticsLegacy = items.find((i) => i.id === "analytics-legacy")!;
+  assert.equal(reports.workflowGroupId, "REPORTS");
+  assert.equal(analyticsLegacy.workflowGroupId, "REPORTS");
+  assert.equal(mapCurrentNavItemTo1BDomain(reports), "Reports");
+});
+
 test("team consolidated item maps to TEAM group after D6G-E", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const team = items.find((i) => i.id === "team" && i.source === "primary_sidebar")!;
@@ -128,7 +138,7 @@ test("buildNavigationDriftReport summarizes Team and Reports mappings", () => {
   const report = buildNavigationDriftReport(TENANT, { includeQuickCreate: false });
   assert.ok(report.byDomain1B.Team.some((i) => i.id === "team"));
   assert.ok(report.byDomain1B.Team.some((i) => i.id === "onboarding-centre"));
-  assert.ok(report.byDomain1B.Reports.some((i) => i.id === "analytics"));
+  assert.ok(report.byDomain1B.Reports.some((i) => i.id === "reports"));
   assert.ok(report.byDomain1B.Finance.length >= 2);
   assert.ok(report.byDomain1B["Front Desk"].length >= 3);
   assert.ok(report.currentNavItemCount > 20);

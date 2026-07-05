@@ -87,6 +87,16 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "payments" || f.startsWith("payments/"), feature: "settings" },
   { test: (f) => f === "financial-os" || f.startsWith("financial-os/"), feature: "settings" },
   { test: (f) => f === "financial" || f.startsWith("financial/"), feature: "settings" },
+  { test: (f) => f === "reports/quality" || f.startsWith("reports/quality/"), feature: "audit" },
+  {
+    test: (f) => f === "reports/surgery" || f.startsWith("reports/surgery/"),
+    feature: "surgery_pipeline",
+  },
+  {
+    test: (f) => f === "reports/performance" || f.startsWith("reports/performance/"),
+    feature: "settings",
+  },
+  { test: (f) => f === "reports" || f.startsWith("reports/"), feature: "analytics" },
   { test: (f) => f === "team/roster" || f.startsWith("team/roster/"), feature: "staff" },
   { test: (f) => f === "team" || f.startsWith("team/"), feature: "staff" },
   { test: (f) => f === "staff" || f.startsWith("staff/"), feature: "staff" },

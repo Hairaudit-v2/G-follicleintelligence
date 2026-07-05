@@ -119,15 +119,20 @@ test("Team workspace exposes overview, staff, roster, onboarding, compliance, tr
   assert.equal(buildFiOsTeamBase(tenantId), `${base}/team`);
 });
 
-test("legacy Team routes remain in More catalog and active sidebar mapping", () => {
-  const ids = flattenMoreIds();
+test("legacy Team routes remain in nav catalog; staff More hides direct links", () => {
+  const catalogIds = new Set(
+    buildTeamSidebarSubItems(tenantId, { showHrOsNav: true }).map((s) => s.id)
+  );
   for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
-    if (legacy.id === "roster-command-legacy") continue;
-    assert.ok(ids.has(legacy.id), `${legacy.id} should remain in More`);
+    assert.ok(catalogIds.has(legacy.id), `${legacy.id} should remain in nav catalog`);
     assert.equal(
       buildFiOsTeamLegacyHref(tenantId, legacy.suffix),
       `${base}/${legacy.suffix}`
     );
+  }
+  const staffMoreIds = flattenMoreIds();
+  for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
+    assert.ok(!staffMoreIds.has(legacy.id), `${legacy.id} should be hidden from staff More`);
   }
   assert.equal(getFiOsShellActiveSidebarId(`${base}/workforce-os`, base), "workforce-os-hub");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff-directory-legacy");

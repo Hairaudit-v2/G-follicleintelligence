@@ -1,7 +1,6 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import {
-  buildD6AdminSidebarItems,
   FI_OS_D6G_WORKFLOW_GROUP_LABELS,
   filterSubItemsForMoreDrawer,
   isPrimaryRailNavId,
@@ -30,7 +29,7 @@ export const FI_OS_WORKFLOW_GROUP_LABELS: Record<FiOsWorkflowGroupId, string> =
   FI_OS_D6G_WORKFLOW_GROUP_LABELS;
 
 /** Consolidated workspaces that stay in More for sub-links while also on the primary rail. */
-const PRIMARY_RAIL_MORE_DRAWER_EXCEPTION_IDS = new Set(["team"]);
+const PRIMARY_RAIL_MORE_DRAWER_EXCEPTION_IDS = new Set(["team", "reports"]);
 
 export type BuildFiOsSidebarWorkflowSectionsOptions = {
   workspaceProfile?: FiWorkspaceProfileKey | null;
@@ -42,6 +41,7 @@ export type BuildFiOsSidebarWorkflowSectionsOptions = {
   showProcedureDayNav?: boolean;
   showSurgeryAdminSurfaces?: boolean;
   showTeamAdminSurfaces?: boolean;
+  showReportsAdminSurfaces?: boolean;
 };
 
 export type FiOsSidebarWorkflowSection = {
@@ -84,12 +84,9 @@ function prepareSidebarItemsForDrawer(
         showNavigationAdminSurfaces: opts.showNavigationAdminSurfaces,
         showSurgeryAdminSurfaces: opts.showSurgeryAdminSurfaces,
         showTeamAdminSurfaces: opts.showTeamAdminSurfaces,
+        showReportsAdminSurfaces: opts.showReportsAdminSurfaces,
       })
     );
-
-  if (opts.showNavigationAdminSurfaces && opts.tenantBase?.trim()) {
-    prepared.push(...buildD6AdminSidebarItems(opts.tenantBase.trim()));
-  }
 
   return prepared;
 }

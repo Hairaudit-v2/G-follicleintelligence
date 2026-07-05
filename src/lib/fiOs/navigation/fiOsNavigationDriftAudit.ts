@@ -136,7 +136,7 @@ const D6_PRIMARY_RAIL_NAV_IDS = new Set([
   "calendar",
   "patients",
   "team",
-  "analytics",
+  "reports",
 ]);
 
 const TOO_GRANULAR_PRIMARY_IDS = new Set([
@@ -548,6 +548,7 @@ export function buildNavigationDriftReport(
     "Front desk consolidated under /front-desk — legacy /operations, /reception-os, /reception, /reception-board, /tomorrow routes must stay live.",
     "D6 intelligence routes (/intelligence/*) are admin-only — keep URLs when hiding from staff nav.",
     "Team consolidated under /team — legacy /workforce-os, /hr-os, /staff, and Academy routes must stay live.",
+    "Reports consolidated under /reports — legacy /analytics, /audit, /intelligence/*, and surgery review routes must stay live.",
     "Collapsed primary rail is six slots — do not add module-language labels to the rail.",
   ];
 

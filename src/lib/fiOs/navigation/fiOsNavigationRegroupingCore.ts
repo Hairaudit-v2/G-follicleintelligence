@@ -4,8 +4,13 @@
 
 import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import { FI_OS_D6_INTELLIGENCE_NAV_ENTRIES } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
+import { FI_OS_FRONT_DESK_LEGACY_ROUTES } from "@/src/lib/fiOs/frontDesk/frontDeskWorkspaceCore";
 import { FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
+import { FI_OS_SURGERY_LEGACY_ROUTES } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
+import { FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
+import { FI_OS_REPORTS_LEGACY_ROUTES } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
 import { FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
+import { FI_OS_TEAM_LEGACY_ROUTES } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
 /** Six-slot collapsed primary rail link ids (More is an action). */
 export const FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS = [
@@ -25,7 +30,7 @@ export const FI_OS_D6G_PRIMARY_RAIL_NAV_IDS = new Set([
   "calendar",
   "patients",
   "team",
-  "analytics",
+  "reports",
 ]);
 
 /** 1B workflow sections for the All areas / More drawer (no module-language buckets). */
@@ -78,8 +83,14 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   "pathology-nav": "CLINICAL",
   "payments-inbox": "FINANCE",
   "financial-os": "FINANCE",
+  reports: "REPORTS",
   analytics: "REPORTS",
   auditos: "REPORTS",
+  "analytics-legacy": "REPORTS",
+  "auditos-legacy": "REPORTS",
+  "insights-legacy": "REPORTS",
+  "financial-os-legacy": "REPORTS",
+  "payments-inbox-legacy": "REPORTS",
   "d6-presence": "REPORTS",
   "d6-signal-learning": "REPORTS",
   "d6-bake": "REPORTS",
@@ -131,6 +142,12 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "team-compliance": "TEAM",
   "team-training": "TEAM",
   "team-identity": "TEAM",
+  "reports-overview": "REPORTS",
+  "reports-analytics": "REPORTS",
+  "reports-quality": "REPORTS",
+  "reports-surgery": "REPORTS",
+  "reports-performance": "REPORTS",
+  "reports-admin": "REPORTS",
 };
 
 /** Sub-items hidden from More drawer (routes remain live). */
@@ -138,7 +155,38 @@ export const FI_OS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
   "pathology-email-routes",
   ...FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS,
+  ...FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS,
 ]);
+
+/** Legacy deep-link sub-item ids — hidden from staff More drawer; admin may see them. */
+export const FI_OS_LEGACY_MORE_SUB_ITEM_IDS: ReadonlySet<string> = new Set([
+  ...FI_OS_FRONT_DESK_LEGACY_ROUTES.map((r) => r.id),
+  ...FI_OS_SURGERY_LEGACY_ROUTES.map((r) => r.id),
+  ...FI_OS_TEAM_LEGACY_ROUTES.map((r) => r.id),
+  ...FI_OS_REPORTS_LEGACY_ROUTES.map((r) => r.id),
+]);
+
+/** Staff-facing More drawer labels that expose legacy module/direct surfaces. */
+const FI_OS_STAFF_HIDDEN_MORE_DRAWER_LABEL_RE =
+  /\b(direct|engine|signal learning|intelligence validation|navigation drift audit|outcome intelligence|graft tray review|readiness board direct|SurgeryOS|ReceptionOS|HR OS|WorkforceOS|Identity Audit)\b/i;
+
+export function isStaffHiddenMoreDrawerLabel(label: string): boolean {
+  return FI_OS_STAFF_HIDDEN_MORE_DRAWER_LABEL_RE.test(label.trim());
+}
+
+export function moreDrawerAdminSurfacesEnabled(opts: {
+  showNavigationAdminSurfaces?: boolean;
+  showSurgeryAdminSurfaces?: boolean;
+  showTeamAdminSurfaces?: boolean;
+  showReportsAdminSurfaces?: boolean;
+}): boolean {
+  return (
+    opts.showNavigationAdminSurfaces === true ||
+    opts.showSurgeryAdminSurfaces === true ||
+    opts.showTeamAdminSurfaces === true ||
+    opts.showReportsAdminSurfaces === true
+  );
+}
 
 /** D6 admin route ids — shown in Reports when admin surfaces are allowed. */
 export const FI_OS_D6_ADMIN_MORE_NAV_IDS = new Set(
@@ -152,7 +200,7 @@ const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
   CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav"],
   SURGERY: ["surgery"],
   FINANCE: ["payments-inbox", "financial-os"],
-  REPORTS: ["analytics", "auditos", "d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"],
+  REPORTS: ["reports"],
   TEAM: ["team"],
   SETTINGS: ["settings"],
 };
@@ -205,6 +253,44 @@ export function sortNavItemsForD6gGroup(
   return [...items].sort((a, b) => idx(a.id) - idx(b.id) || a.label.localeCompare(b.label));
 }
 
+function shouldShowHiddenMoreSubItem(
+  subId: string,
+  opts: {
+    showProcedureDayNav?: boolean;
+    showSurgeryAdminSurfaces?: boolean;
+    showTeamAdminSurfaces?: boolean;
+    showReportsAdminSurfaces?: boolean;
+  }
+): boolean {
+  if (subId === "procedure-day-board" && opts.showProcedureDayNav) return true;
+  if (
+    (subId === "surgery-intelligence-dashboard" || subId === "graft-counting-legacy") &&
+    (opts.showSurgeryAdminSurfaces || opts.showReportsAdminSurfaces)
+  ) {
+    return true;
+  }
+  if (
+    (subId === "staff-identity-audit" ||
+      subId === "staff-access-legacy" ||
+      subId === "hr-task-map-legacy" ||
+      subId === "hr-os-sync-health") &&
+    opts.showTeamAdminSurfaces
+  ) {
+    return true;
+  }
+  if (
+    (subId === "d6-presence" ||
+      subId === "d6-signal-learning" ||
+      subId === "d6-bake" ||
+      subId === "d6-navigation-audit" ||
+      subId === "reports-admin") &&
+    opts.showReportsAdminSurfaces
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function filterSubItemsForMoreDrawer(
   item: FiOsPrimarySidebarItem,
   opts: {
@@ -212,29 +298,22 @@ export function filterSubItemsForMoreDrawer(
     showNavigationAdminSurfaces?: boolean;
     showSurgeryAdminSurfaces?: boolean;
     showTeamAdminSurfaces?: boolean;
+    showReportsAdminSurfaces?: boolean;
   }
 ): FiOsPrimarySidebarItem {
   const subs = item.subItems;
   if (!subs?.length) return item;
 
+  const adminSurfaces = moreDrawerAdminSurfacesEnabled(opts);
+
   const filtered = subs.filter((sub) => {
     if (FI_OS_HIDDEN_MORE_SUB_ITEM_IDS.has(sub.id)) {
-      if (sub.id === "procedure-day-board" && opts.showProcedureDayNav) return true;
-      if (
-        (sub.id === "surgery-intelligence-dashboard" || sub.id === "graft-counting-legacy") &&
-        opts.showSurgeryAdminSurfaces
-      ) {
-        return true;
-      }
-      if (
-        (sub.id === "staff-identity-audit" ||
-          sub.id === "staff-access-legacy" ||
-          sub.id === "hr-task-map-legacy" ||
-          sub.id === "hr-os-sync-health") &&
-        opts.showTeamAdminSurfaces
-      ) {
-        return true;
-      }
+      return shouldShowHiddenMoreSubItem(sub.id, opts);
+    }
+    if (FI_OS_LEGACY_MORE_SUB_ITEM_IDS.has(sub.id)) {
+      return adminSurfaces;
+    }
+    if (!adminSurfaces && isStaffHiddenMoreDrawerLabel(sub.label)) {
       return false;
     }
     if (sub.id === "surgery-procedure-day" && !opts.showProcedureDayNav) return false;
@@ -270,7 +349,7 @@ export function resolvePrimaryRailSidebarTarget(
     case "team":
       return sidebarItems.find((i) => i.id === "team") ?? null;
     case "reports":
-      return sidebarItems.find((i) => i.id === "analytics") ?? null;
+      return sidebarItems.find((i) => i.id === "reports") ?? null;
     default:
       return null;
   }
