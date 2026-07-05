@@ -12,7 +12,6 @@ import {
   type HairAuditLinkResolution,
   type StructuredHairAuditLink,
 } from "./hairAuditLinkCore";
-import type { LongitudinalOutcomeSummaryFacts } from "./longitudinalOutcomeComparisonCore";
 import type { SurgeryCaseIntelligenceFacts } from "./surgeryCaseFactsCore";
 
 export const HAIRAUDIT_OUTCOME_REPORT_STATUSES = [
@@ -331,7 +330,6 @@ export function planHairAuditOutcomeReportLink(input: PlanHairAuditOutcomeReport
   nextMetadata?: Record<string, unknown>;
   structuredLink?: StructuredHairAuditLink;
 } {
-  const caseId = input.caseId.trim();
   const surgeryId = input.surgeryId.trim();
 
   if (input.hairAuditLink.linkage_conflict) {
