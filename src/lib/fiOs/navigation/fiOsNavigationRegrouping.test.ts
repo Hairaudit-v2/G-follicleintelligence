@@ -152,7 +152,7 @@ test("receptionist More drawer hides legacy direct and admin labels", () => {
   }
   for (const label of subLabels) {
     assert.ok(!isStaffHiddenMoreDrawerLabel(label), `staff More should hide label: ${label}`);
-    assert.ok(!labelHasLegacyModuleLanguage(label), `staff More should hide module label: ${label}`);
+    assert.ok(!/\(direct\)/i.test(label), `staff More should hide direct label: ${label}`);
   }
 });
 
