@@ -36,9 +36,9 @@ import { SURGERY_IMAGING_INTELLIGENCE_GROUPS } from "@/src/lib/outcomeIntelligen
 import { GRAFT_TRAY_AI_REVIEW_DISPLAY_STATES } from "@/src/lib/imaging-os/graftTrayReviewUxCore";
 import {
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPES,
-  SURGERY_OS_GRAFT_RECONCILIATION_STATUSES,
   SURGERY_OS_GRAFT_SESSION_PHASES,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+} from "@/src/lib/surgeryOs/surgeryOsGraftCounting";
+import { SURGERY_OS_GRAFT_RECONCILIATION_STATUSES } from "@/src/lib/surgeryOs/surgeryOsGraftReconciliation";
 import { LIVE_PROCEDURE_TIMELINE_STAGES } from "@/src/lib/surgeryOs/liveProcedureTimelineCore";
 import { VIE_SURGERY_PHASE_GROUPS } from "@/src/lib/vie/vieProtocolTypes";
 import type { SurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";

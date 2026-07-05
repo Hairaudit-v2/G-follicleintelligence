@@ -29,11 +29,11 @@ import type { GraftTrayFinalCountSource } from "@/src/lib/imaging-os/graftTrayIn
 import type { SurgeryCaseIntelligenceFacts } from "@/src/lib/outcomeIntelligence/surgeryCaseFactsCore";
 import type {
   SurgeryOsGraftCountEventType,
-  SurgeryOsGraftCountSessionLock,
-  SurgeryOsGraftReconciliationStatus,
   SurgeryOsGraftSessionPhase,
   SurgeryOsGraftTotals,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+} from "@/src/lib/surgeryOs/surgeryOsGraftCounting";
+import type { SurgeryOsGraftCountSessionLock } from "@/src/lib/surgeryOs/surgeryOsGraftSessionLocks";
+import type { SurgeryOsGraftReconciliationStatus } from "@/src/lib/surgeryOs/surgeryOsGraftReconciliation";
 import type {
   GraftIntelligenceSnapshot,
   GraftIntelligenceWarning,

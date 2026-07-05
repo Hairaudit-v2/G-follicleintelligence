@@ -7,6 +7,8 @@ import {
   BOOKING_TYPES,
   isAllowedBookingStatus,
   isAllowedBookingType,
+  type BookingStatusInput,
+  type BookingTypeInput,
 } from "./bookingPolicy";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -35,14 +37,14 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 /** Human-readable booking type for tables and badges. */
-export function bookingTypeLabel(type: string): string {
+export function bookingTypeLabel(type: BookingTypeInput): string {
   const t = type.trim();
   if (!isAllowedBookingType(t)) return t || "Unknown";
   return TYPE_LABELS[t] ?? t;
 }
 
 /** Human-readable booking status for tables and badges. */
-export function bookingStatusLabel(status: string): string {
+export function bookingStatusLabel(status: BookingStatusInput): string {
   const s = status.trim();
   if (!isAllowedBookingStatus(s)) return s || "Unknown";
   return STATUS_LABELS[s] ?? s;

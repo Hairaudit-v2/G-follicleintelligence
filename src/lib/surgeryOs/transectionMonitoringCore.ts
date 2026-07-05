@@ -3,7 +3,7 @@
  * Tracks graft damage quality from tray review and reconciliation data.
  */
 
-import type { SurgeryOsGraftCountEventType } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import type { SurgeryOsGraftCountEventType } from "@/src/lib/surgeryOs/surgeryOsGraftCounting";
 
 export type TransectionMonitoringStatus = "excellent" | "acceptable" | "watch" | "critical";
 

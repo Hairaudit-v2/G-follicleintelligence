@@ -11,17 +11,12 @@ import {
 import { countGraftTrayLinksForSurgery } from "@/src/lib/imaging-os/imagingGraftTrayBridge.server";
 import { parseRequireGraftTrayCaptureFlag } from "@/src/lib/imaging-os/imagingGraftTrayBridgeCore";
 import {
-  assertGraftCountSessionLock,
-  assertGraftReconciliationGate,
   buildGraftTotalsFromSession,
   computeAverageHairsPerGraft,
   computeGraftCompositionTotal,
   computeGraftCorrectionMagnitude,
   computeRemainingGrafts,
   computeTrayHairTotal,
-  countTrayReviewBuckets,
-  deriveReconciliationStatus,
-  deriveTrayReviewStatusForEvent,
   formatTrayCountNote,
   graftEventTypeToTimelineKind,
   graftTimelineLabel,
@@ -31,14 +26,23 @@ import {
   validateGraftCorrection,
   validateGraftCountUpdate,
   type SurgeryOsGraftCountEventType,
-  type SurgeryOsGraftCountSessionLockKind,
   type SurgeryOsGraftSessionPhase,
   type SurgeryOsGraftType,
+} from "@/src/lib/surgeryOs/surgeryOsGraftCounting";
+import {
+  assertGraftCountSessionLock,
+  type SurgeryOsGraftCountSessionLockKind,
+} from "@/src/lib/surgeryOs/surgeryOsGraftSessionLocks";
+import {
+  assertGraftReconciliationGate,
+  countTrayReviewBuckets,
+  deriveReconciliationStatus,
+  deriveTrayReviewStatusForEvent,
   shouldBlockSurgeryPhaseForGraftReconciliation,
   type SurgeryOsGraftReconciliationStatus,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+} from "@/src/lib/surgeryOs/surgeryOsGraftReconciliation";
 import { isMissingDatabaseRelationError } from "@/src/lib/surgeryOs/surgeryOsLoaderResilience";
-import type { SurgeryOsAction } from "@/src/lib/surgeryOs/surgeryOsPolicy";
+import type { SurgeryOsAction, SurgeryOsMajorPhase } from "@/src/lib/surgeryOs/surgeryOsPolicy";
 import type {
   ProcedureEventRow,
   SurgeryMutationRow,
@@ -1299,7 +1303,7 @@ export async function loadGraftCountEventsForSurgeries(
 export async function assertGraftReconciliationForPhaseTransition(input: {
   tenantId: string;
   surgeryId: string;
-  toPhase: string;
+  toPhase: SurgeryOsMajorPhase;
 }): Promise<void> {
   if (!shouldBlockSurgeryPhaseForGraftReconciliation(input.toPhase)) return;
 

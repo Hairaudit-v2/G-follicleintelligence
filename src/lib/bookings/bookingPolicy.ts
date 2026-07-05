@@ -33,6 +33,14 @@ export const BOOKING_STATUSES = [
 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 
+/**
+ * Boundary input types: surface the known unions in signatures and
+ * autocomplete while still accepting raw DB strings that are not yet typed
+ * to the union. Prefer BookingType / BookingStatus directly for new code.
+ */
+export type BookingTypeInput = BookingType | (string & {});
+export type BookingStatusInput = BookingStatus | (string & {});
+
 const TYPE_SET = new Set<string>(BOOKING_TYPES);
 const STATUS_SET = new Set<string>(BOOKING_STATUSES);
 

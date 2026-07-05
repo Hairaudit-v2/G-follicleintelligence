@@ -6,8 +6,8 @@
 import {
   computeGraftCompositionTotal,
   computeGraftProgressPercent,
-  type SurgeryOsGraftReconciliationStatus,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+} from "@/src/lib/surgeryOs/surgeryOsGraftCounting";
+import type { SurgeryOsGraftReconciliationStatus } from "@/src/lib/surgeryOs/surgeryOsGraftReconciliation";
 
 export type GraftIntelligenceWarning = {
   kind:

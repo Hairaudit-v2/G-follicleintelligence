@@ -5,7 +5,12 @@
  * Pair with `app/globals.css` CSS variables and `tailwind.config.ts` theme extensions.
  */
 
-import type { BookingStatus, BookingType } from "@/src/lib/bookings/bookingPolicy";
+import type {
+  BookingStatus,
+  BookingStatusInput,
+  BookingType,
+  BookingTypeInput,
+} from "@/src/lib/bookings/bookingPolicy";
 
 // ---------------------------------------------------------------------------
 // Typography
@@ -593,7 +598,7 @@ export function procedureAccentDotClasses(family: FiProcedureFamily): string {
   return `${fiBadgeLayoutClassNames.dot} ${fiProcedureAccentClassNames[family]}`;
 }
 
-export function appointmentStatusBadgeClasses(status: string): string {
+export function appointmentStatusBadgeClasses(status: BookingStatusInput): string {
   const s = status.trim();
   if (s in fiExtendedStatusBadgeClassNames) {
     return `${fiBadgeLayoutClassNames.chip} ${fiExtendedStatusBadgeClassNames[s as BookingStatus]}`;
@@ -601,21 +606,21 @@ export function appointmentStatusBadgeClasses(status: string): string {
   return `${fiBadgeLayoutClassNames.chip} ${fiExtendedStatusBadgeClassNames.scheduled}`;
 }
 
-export function appointmentStatusRingClasses(status: string): string {
+export function appointmentStatusRingClasses(status: BookingStatusInput): string {
   const s = status.trim();
   if (isFiAppointmentStatus(s)) return fiAppointmentStatusRingClassNames[s];
   return "";
 }
 
 export function bookingTypeProcedureBadgeClasses(
-  bookingType: string,
+  bookingType: BookingTypeInput,
   opts?: { isVirtual?: boolean }
 ): string {
   return procedureBadgeClasses(resolveProcedureFamily({ bookingType, isVirtual: opts?.isVirtual }));
 }
 
 export function bookingTypeProcedureEventClasses(
-  bookingType: string,
+  bookingType: BookingTypeInput,
   opts?: { isVirtual?: boolean }
 ): string {
   return procedureEventClasses(resolveProcedureFamily({ bookingType, isVirtual: opts?.isVirtual }));

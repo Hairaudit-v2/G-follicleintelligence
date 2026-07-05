@@ -6,7 +6,12 @@ import {
   DEFAULT_CALENDAR_TIMEZONE,
   normalizeCalendarTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
-import { BOOKING_TYPES, type BookingType } from "./bookingPolicy";
+import {
+  BOOKING_TYPES,
+  type BookingStatusInput,
+  type BookingType,
+  type BookingTypeInput,
+} from "./bookingPolicy";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { CalendarDayLane } from "./calendarView";
 import type { CalendarViewMode } from "./calendarQuery";
@@ -51,7 +56,7 @@ export type BookingCalendarChipSurface = {
 
 /** Event chip colours: tenant catalog hex overrides tint; otherwise semantic tone per booking type. */
 export function bookingCalendarChipSurface(
-  bookingType: string,
+  bookingType: BookingTypeInput,
   catalogColor?: string | null
 ): BookingCalendarChipSurface {
   const t = bookingType.trim();
@@ -69,7 +74,7 @@ export function bookingCalendarChipSurface(
 }
 
 /** @deprecated Prefer {@link bookingCalendarChipSurface} for catalog-aware tint. */
-export function bookingTypeCalendarEventClasses(bookingType: string): string {
+export function bookingTypeCalendarEventClasses(bookingType: BookingTypeInput): string {
   return bookingCalendarChipSurface(bookingType).toneClasses;
 }
 
@@ -141,12 +146,12 @@ export function formatCalendarRangeTitle(
   return `${start.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: tz })} – ${end.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: tz })}`;
 }
 
-export function bookingTypeCalendarLegendLabel(type: string): string {
+export function bookingTypeCalendarLegendLabel(type: BookingTypeInput): string {
   return bookingTypeLabel(type);
 }
 
 /** Status ring / accent for calendar chips (non-terminal emphasis). */
-export function bookingStatusCalendarAccent(status: string): string {
+export function bookingStatusCalendarAccent(status: BookingStatusInput): string {
   const s = status.trim();
   if (s === "cancelled") return "ring-2 ring-red-300/80";
   if (s === "completed") return "ring-2 ring-emerald-400/70";

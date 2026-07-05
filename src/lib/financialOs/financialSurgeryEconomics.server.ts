@@ -162,7 +162,7 @@ export function resolveProcedureType(args: {
   return args.fallback?.trim() || null;
 }
 
-export function resolveGraftAndHairCounts(args: {
+function resolveGraftAndHairCounts(args: {
   procedureDay: CaseProcedureRow | null;
   surgeryPlan: CaseSurgeryPlanRow | null;
   liveGraftCount?: number | null;
@@ -204,7 +204,7 @@ export function resolveGraftAndHairCounts(args: {
   return { graft_count: null, hair_count: null };
 }
 
-export function resolveDurationMinutes(args: {
+function resolveDurationMinutes(args: {
   procedureDay: CaseProcedureRow | null;
   actualStartAt?: string | null;
   actualEndAt?: string | null;
@@ -219,7 +219,7 @@ export function resolveDurationMinutes(args: {
   return Math.max(1, Math.floor(args.defaultDurationMinutes));
 }
 
-export function resolveStaffCounts(procedureDay: CaseProcedureRow | null): {
+function resolveStaffCounts(procedureDay: CaseProcedureRow | null): {
   rn_count: number;
   technician_count: number;
   assistant_count: number;
@@ -251,7 +251,7 @@ export function resolveTreatmentAddonsFromChecklist(
   };
 }
 
-export function buildSurgeryEconomicsCalculationInput(args: {
+function buildSurgeryEconomicsCalculationInput(args: {
   tenantId: string;
   procedureType: string;
   costModel: FiSurgeryCostModel;
@@ -288,7 +288,7 @@ export function buildSurgeryEconomicsCalculationInput(args: {
   };
 }
 
-export async function appendSurgeryProfitabilityAuditEvent(args: {
+async function appendSurgeryProfitabilityAuditEvent(args: {
   tenantId: string;
   snapshotId: string;
   caseId?: string | null;
@@ -313,7 +313,12 @@ export async function appendSurgeryProfitabilityAuditEvent(args: {
   if (error) throw new Error(error.message);
 }
 
-export async function calculateAndPersistSurgeryProfitabilitySnapshot(args: {
+/**
+ * Snapshot write entry point. Only intended caller is
+ * financialSurgeryEconomicsSnapshotOrchestrator.server.ts — new callers should
+ * go through the orchestrator instead of invoking this directly.
+ */
+export type CalculateSurgeryProfitabilitySnapshotInput = {
   tenantId: string;
   caseId: string;
   surgeryId?: string | null;
@@ -331,7 +336,11 @@ export async function calculateAndPersistSurgeryProfitabilitySnapshot(args: {
   actorFiUserId?: string | null;
   sourceMetadata?: Record<string, unknown>;
   client?: SupabaseClient;
-}): Promise<FiSurgeryProfitabilitySnapshotRow> {
+};
+
+export async function calculateAndPersistSurgeryProfitabilitySnapshot(
+  args: CalculateSurgeryProfitabilitySnapshotInput
+): Promise<FiSurgeryProfitabilitySnapshotRow> {
   const tid = args.tenantId.trim();
   const cid = args.caseId.trim();
   const proc = args.procedureType.trim();

@@ -586,34 +586,6 @@ export function aggregateFinancialClearanceDashboardMetrics(
   };
 }
 
-export function buildFinancialClearanceInputFromPipeline(args: {
-  todayYmd: string;
-  calendarTimezone: string;
-  booking_status: string | null;
-  financial_os_status: string | null;
-  surgeryDateYmd: string | null;
-  dataLoadFailed?: boolean;
-  depositInvoiceState: FinancialInvoicePaymentState;
-  balanceInvoiceState: FinancialInvoicePaymentState;
-  amount_paid_cents: number;
-  balance_due_cents: number;
-  balance_overdue: boolean;
-  balance_due_within_14_days: boolean;
-  deposit_pending_for_confirmed_surgery: boolean;
-  failed_payment_in_last_60_days: boolean;
-  installment_overdue: boolean;
-  financialDataAvailable: boolean;
-  paymentPathway: PaymentPathwayAttentionSummary;
-  pathwayTaskAttention: PathwayTaskAttentionSummary;
-  financeApplicationAttention: FinanceApplicationAttentionSummary;
-  superReleaseApplicationAttention: SuperReleaseAttentionSummary;
-  internationalTransferApplicationAttention: InternationalTransferAttentionSummary;
-  financeSlaBreach?: boolean;
-  financeRejected?: boolean;
-}): BuildFinancialClearanceInput {
-  return args;
-}
-
 /** Convenience: map a surgery pipeline snapshot into clearance input (Phase 1B hub). */
 export function buildFinancialClearanceFromPipelineStatus(args: {
   todayYmd: string;
@@ -643,7 +615,7 @@ export function buildFinancialClearanceFromPipelineStatus(args: {
   };
 }): FinancialClearanceResult {
   return buildFinancialClearance(
-    buildFinancialClearanceInputFromPipeline({
+    {
       todayYmd: args.todayYmd,
       calendarTimezone: args.calendarTimezone,
       booking_status: args.booking_status,
@@ -668,7 +640,7 @@ export function buildFinancialClearanceFromPipelineStatus(args: {
         args.pipeline.internationalTransferApplicationAttention,
       financeSlaBreach: args.financeSlaBreach,
       financeRejected: args.financeRejected,
-    })
+    } satisfies BuildFinancialClearanceInput
   );
 }
 

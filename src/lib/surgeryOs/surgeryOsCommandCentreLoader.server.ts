@@ -52,19 +52,21 @@ import {
 import { buildSurgeryOsCaseIntelligenceFacts } from "@/src/lib/surgeryOs/surgeryOsCaseFactsCore";
 import {
   computeGraftProgressPercent,
-  computeConfirmedTrayTotals,
-  countTrayReviewBuckets,
-  deriveGraftAlerts,
-  deriveTrayReviewStatuses,
   isSurgeryStatusEligibleForGraftCounting,
   parseTrayNumberFromNote,
-  resolveGraftCountSessionLock,
   SURGERY_OS_GRAFT_COUNT_EVENT_TYPE_LABELS,
-  SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS,
   SURGERY_OS_GRAFT_SESSION_PHASE_LABELS,
-  type SurgeryOsGraftReconciliationStatus,
   type SurgeryOsGraftSessionPhase,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+} from "@/src/lib/surgeryOs/surgeryOsGraftCounting";
+import { resolveGraftCountSessionLock } from "@/src/lib/surgeryOs/surgeryOsGraftSessionLocks";
+import {
+  computeConfirmedTrayTotals,
+  countTrayReviewBuckets,
+  deriveTrayReviewStatuses,
+  SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS,
+  type SurgeryOsGraftReconciliationStatus,
+} from "@/src/lib/surgeryOs/surgeryOsGraftReconciliation";
+import { deriveGraftAlerts } from "@/src/lib/surgeryOs/surgeryOsGraftAlerts";
 import {
   graftSessionToTotals,
   loadGraftCountEventsForSurgeries,
