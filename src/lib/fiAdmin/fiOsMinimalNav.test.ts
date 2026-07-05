@@ -35,6 +35,22 @@ describe("resolveFiOsMinimalNavItems", () => {
       assert.equal(minimalCalendar.href, `${base}/calendar`);
     }
   });
+
+  it("disables team and reports rail when filtered from sidebar", () => {
+    const sidebarWithoutTeamReports = resolveFiOsPrimarySidebarItems(base, true, true).filter(
+      (item) => item.id !== "team" && item.id !== "reports"
+    );
+    const items = resolveFiOsMinimalNavItems(base, sidebarWithoutTeamReports);
+    const team = items.find((i) => i.id === "team");
+    const reports = items.find((i) => i.id === "reports");
+    if (team?.kind === "link") {
+      assert.equal(team.disabled, true);
+      assert.match(team.hint ?? "", /not available/i);
+    }
+    if (reports?.kind === "link") {
+      assert.equal(reports.disabled, true);
+    }
+  });
 });
 
 describe("getFiOsMinimalNavActiveId", () => {

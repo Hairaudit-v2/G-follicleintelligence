@@ -7,6 +7,7 @@ import {
   canEditModule,
   canViewModule,
   computeEffectiveAccess,
+  computeStaffAccessNavFeatureOverrides,
   getModuleAccess,
   getVisibleStaffNavigation,
   moduleSatisfies,
@@ -118,6 +119,19 @@ test("hidden navigation excludes blocked modules", () => {
   assert.deepEqual(nav.sort(), ["analytics_os", "financial_os", "investor_dashboard"].sort());
   assert.equal(nav.includes("patient_os"), false);
   assert.equal(nav.includes("surgery_os"), false);
+});
+
+test("computeStaffAccessNavFeatureOverrides hides blocked module feature keys", () => {
+  const reception = computeEffectiveAccess({ roleKey: "reception", grants: [] });
+  const overrides = computeStaffAccessNavFeatureOverrides(reception);
+  assert.equal(overrides.staff, false);
+  assert.equal(overrides.analytics, false);
+  assert.equal(overrides.cases, false);
+
+  const manager = computeEffectiveAccess({ roleKey: "manager", grants: [] });
+  const managerOverrides = computeStaffAccessNavFeatureOverrides(manager);
+  assert.equal(managerOverrides.staff, undefined);
+  assert.equal(managerOverrides.analytics, undefined);
 });
 
 test("server guard decision blocks direct URL access (moduleSatisfies)", () => {

@@ -216,6 +216,46 @@ export function getVisibleStaffNavigation(access: EffectiveAccessMap): StaffNavM
   return out;
 }
 
+/**
+ * Map SA-1 modules to legacy {@link FiFeatureKey} nav-visibility keys so blocked modules
+ * are excluded from feature-access-driven navigation. Mirrors `staffAccess.server.ts`.
+ */
+export const STAFF_MODULE_TO_FEATURE_KEYS: Partial<
+  Record<StaffAccessModuleKey, readonly string[]>
+> = {
+  clinic_os: ["dashboard", "calendar"],
+  lead_flow: ["crm"],
+  patient_os: ["patients"],
+  consultation_os: ["consultations"],
+  surgery_os: ["cases", "procedure_day"],
+  imaging_os: ["imaging"],
+  audit_os: ["audit"],
+  academy_os: ["academy"],
+  analytics_os: ["analytics"],
+  workforce_os: ["staff"],
+  settings: ["settings"],
+};
+
+/**
+ * Compute `FiFeatureKey → false` overrides for blocked SA-1 modules (pure, testable).
+ */
+export function computeStaffAccessNavFeatureOverrides(
+  access: EffectiveAccessMap
+): Record<string, boolean> {
+  const managed = new Set<string>();
+  const visible = new Set<string>();
+  for (const moduleKey of Object.keys(STAFF_MODULE_TO_FEATURE_KEYS) as StaffAccessModuleKey[]) {
+    const keys = STAFF_MODULE_TO_FEATURE_KEYS[moduleKey] ?? [];
+    keys.forEach((k) => managed.add(k));
+    if (canViewModule(access, moduleKey)) keys.forEach((k) => visible.add(k));
+  }
+  const overrides: Record<string, boolean> = {};
+  for (const k of managed) {
+    if (!visible.has(k)) overrides[k] = false;
+  }
+  return overrides;
+}
+
 /** Serialisable snapshot of effective access (for audit `previous_access` / `new_access`). */
 export function summariseEffectiveAccess(
   access: EffectiveAccessMap

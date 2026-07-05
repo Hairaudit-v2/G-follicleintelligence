@@ -56,13 +56,15 @@ function linkFromRailSlot(
           ? `${b}/team`
           : `${b}/reports`;
 
+  const missingFromSidebar = target == null;
+
   return {
     id: slotId,
     kind: "link",
     label,
     href: target?.href ?? fallbackHref,
-    disabled: target?.disabled ?? false,
-    hint: target?.hint,
+    disabled: missingFromSidebar ? true : (target.disabled ?? false),
+    hint: target?.hint ?? (missingFromSidebar ? "Not available for your role." : undefined),
   };
 }
 

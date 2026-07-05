@@ -19,6 +19,7 @@ import {
   canEditModule as coreCanEditModule,
   canViewModule as coreCanViewModule,
   computeEffectiveAccess,
+  computeStaffAccessNavFeatureOverrides,
   getVisibleStaffNavigation as coreGetVisibleStaffNavigation,
   type EffectiveAccessMap,
   type RoleTemplateMap,
@@ -345,24 +346,6 @@ export async function canAccessTab(
 }
 
 /**
- * Map SA-1 modules to the legacy `FiFeatureKey` nav-visibility keys so blocked modules are also
- * excluded from the existing feature-access-driven navigation (server-resolved, not client-hidden).
- */
-const STAFF_MODULE_TO_FEATURE_KEYS: Partial<Record<StaffAccessModuleKey, string[]>> = {
-  clinic_os: ["dashboard", "calendar"],
-  lead_flow: ["crm"],
-  patient_os: ["patients"],
-  consultation_os: ["consultations"],
-  surgery_os: ["cases", "procedure_day"],
-  imaging_os: ["imaging"],
-  audit_os: ["audit"],
-  academy_os: ["academy"],
-  analytics_os: ["analytics"],
-  workforce_os: ["staff"],
-  settings: ["settings"],
-};
-
-/**
  * Compute `FiFeatureKey → false` overrides for the current viewer's blocked modules, so the
  * existing nav (which filters by feature access) hides what SA-1 blocks. Returns null when SA-1
  * is not enforcing this session (no staff mapping / admin override) — callers keep base nav.
@@ -374,18 +357,7 @@ export async function getStaffAccessNavFeatureOverrides(
   if (!principal || principal.isAdminOverride || !principal.staffMemberId || !principal.roleKey) {
     return null;
   }
-  const managed = new Set<string>();
-  const visible = new Set<string>();
-  for (const moduleKey of Object.keys(STAFF_MODULE_TO_FEATURE_KEYS) as StaffAccessModuleKey[]) {
-    const keys = STAFF_MODULE_TO_FEATURE_KEYS[moduleKey] ?? [];
-    keys.forEach((k) => managed.add(k));
-    if (coreCanViewModule(access, moduleKey)) keys.forEach((k) => visible.add(k));
-  }
-  const overrides: Record<string, boolean> = {};
-  for (const k of managed) {
-    if (!visible.has(k)) overrides[k] = false;
-  }
-  return overrides;
+  return computeStaffAccessNavFeatureOverrides(access);
 }
 
 export type VisibleStaffNavItem = {
