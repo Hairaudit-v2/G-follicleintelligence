@@ -1,6 +1,7 @@
 import "server-only";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
+import { resolveWorkforceActorFiUserId } from "@/src/lib/workforce-os/resolveWorkforceActorFiUserId.server";
 import { getStaffEffectiveAccess } from "@/src/lib/staffAccess/staffAccess.server";
 import { staffCapabilitySatisfies } from "@/src/lib/staffAccess/staffCapabilityCore";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
@@ -52,5 +53,6 @@ export async function assertWorkforceHrManageAllowed(
     throw new CrmAccessError(403, manage.manageDeniedReason);
   }
 
-  return { fiUserId: access.fiUserId };
+  const fiUserId = await resolveWorkforceActorFiUserId(tenantId);
+  return { fiUserId };
 }

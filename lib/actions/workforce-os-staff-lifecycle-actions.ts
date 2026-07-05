@@ -6,6 +6,8 @@ import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
+import { resolveWorkforceActorFiUserId } from "@/src/lib/workforce-os/resolveWorkforceActorFiUserId.server";
+import { mapWorkforceFkMutationError } from "@/src/lib/workforce-os/workforceMutationErrorsCore";
 import type { EvolvedStaffRecord } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
 import {
   approveStaffHrLink,
@@ -30,7 +32,9 @@ import type {
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
-  if (e instanceof Error) return e.message;
+  if (e instanceof Error) {
+    return mapWorkforceFkMutationError(e.message) ?? e.message;
+  }
   return "Request failed.";
 }
 
@@ -57,7 +61,8 @@ async function assertHrLifecycleManageAllowed(tenantId: string): Promise<{ fiUse
       throw new CrmAccessError(403, "Owner, admin, or HR manager role required.");
     }
   }
-  return { fiUserId: access.fiUserId };
+  const fiUserId = await resolveWorkforceActorFiUserId(tenantId);
+  return { fiUserId };
 }
 
 export async function updateStaffProfileAction(

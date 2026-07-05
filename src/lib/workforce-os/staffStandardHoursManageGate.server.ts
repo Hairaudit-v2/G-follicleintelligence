@@ -3,6 +3,7 @@ import "server-only";
 import { CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
+import { resolveWorkforceActorFiUserId } from "@/src/lib/workforce-os/resolveWorkforceActorFiUserId.server";
 import {
   HR_OS_ROUTE_REQUIRED_ROLES,
   resolveHrOsRouteAccess,
@@ -102,20 +103,6 @@ export async function assertStaffStandardHoursManageAllowed(
     throw new CrmAccessError(403, manage.manageDeniedReason);
   }
 
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
-  if (access.ok) {
-    return { fiUserId: access.fiUserId };
-  }
-
-  const authUserId = await resolveAuthUserId(null);
-  if (!authUserId) {
-    throw new CrmAccessError(403, manage.manageDeniedReason);
-  }
-
-  const { principal } = await getStaffEffectiveAccess(tenantId.trim());
-  if (principal?.fiUserId) {
-    return { fiUserId: principal.fiUserId };
-  }
-
-  throw new CrmAccessError(403, manage.manageDeniedReason);
+  const fiUserId = await resolveWorkforceActorFiUserId(tenantId);
+  return { fiUserId };
 }

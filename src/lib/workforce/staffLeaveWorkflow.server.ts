@@ -151,6 +151,7 @@ export async function setStaffMaternityLeave(
     endsAt,
     reason,
     createdBy: input.actorUserId ?? null,
+    client: supabase,
   });
 
   if (!input.keepLoginAccess) {

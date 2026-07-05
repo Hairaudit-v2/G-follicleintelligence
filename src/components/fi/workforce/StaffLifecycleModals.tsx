@@ -471,7 +471,11 @@ export function SetMaternityLeaveModal({
             </li>
           ))}
         </ul>
-        {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
+        {error ? (
+          <p className="mt-3 text-sm text-red-300" role="alert">
+            {error}
+          </p>
+        ) : null}
         <div className="mt-6 flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => setShowConfirm(false)} disabled={pending}>
             Back
@@ -552,7 +556,11 @@ export function SetMaternityLeaveModal({
           />
           <span>Pause standard-hours requirements during leave</span>
         </label>
-        {error ? <p className="text-sm text-red-300">{error}</p> : null}
+        {error ? (
+          <p className="text-sm text-red-300" role="alert">
+            {error}
+          </p>
+        ) : null}
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} disabled={pending}>
             Cancel

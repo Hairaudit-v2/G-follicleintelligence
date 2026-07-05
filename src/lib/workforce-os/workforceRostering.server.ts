@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishWorkforceEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { mapWorkforceFkMutationError } from "@/src/lib/workforce-os/workforceMutationErrorsCore";
 import {
   evaluateStaffProcedurePrivilegeForEvent,
   loadAllProcedurePrivilegeRequirementsForTenant,
@@ -560,7 +561,10 @@ export async function createStaffShift(input: {
     })
     .select("*")
     .single();
-  if (error || !data) throw new Error(error?.message ?? "Could not create shift.");
+  if (error || !data) {
+    const friendly = error?.message ? mapWorkforceFkMutationError(error.message) : null;
+    throw new Error(friendly ?? error?.message ?? "Could not create shift.");
+  }
   return mapShift(data as Record<string, unknown>);
 }
 
@@ -591,7 +595,10 @@ export async function createAvailabilityBlock(input: {
     })
     .select("*")
     .single();
-  if (error || !data) throw new Error(error?.message ?? "Could not create availability block.");
+  if (error || !data) {
+    const friendly = error?.message ? mapWorkforceFkMutationError(error.message) : null;
+    throw new Error(friendly ?? error?.message ?? "Could not create availability block.");
+  }
   return mapAvailabilityBlock(data as Record<string, unknown>);
 }
 

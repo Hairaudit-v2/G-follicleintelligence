@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import {
   assertHrOsRosterManageAllowed,
@@ -25,7 +24,8 @@ import {
   copyPreviousWeekRosterForTenant,
   generateRosterFromStandardHoursForTenant,
 } from "@/src/lib/workforce-os/rosterGeneration.server";
-import { resolveCurrentTenantFiUserId } from "@/src/lib/workforce-os/resolveCurrentTenantFiUserId.server";
+import { resolveWorkforceActorFiUserId } from "@/src/lib/workforce-os/resolveWorkforceActorFiUserId.server";
+import { mapWorkforceFkMutationError } from "@/src/lib/workforce-os/workforceMutationErrorsCore";
 import {
   saveStaffStandardHours,
   StaffStandardHoursSaveTransactionError,
@@ -156,7 +156,9 @@ const cancelBlockSchema = z.object({
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
   if (e instanceof CrmAccessError) return e.message;
-  if (e instanceof Error) return e.message;
+  if (e instanceof Error) {
+    return mapWorkforceFkMutationError(e.message) ?? e.message;
+  }
   return "Request failed.";
 }
 
@@ -174,10 +176,7 @@ function revalidateRosterSurfaces(tenantId: string): void {
 }
 
 async function resolveRosterActorFiUserId(tenantId: string): Promise<string> {
-  return resolveCurrentTenantFiUserId({
-    supabase: supabaseAdmin(),
-    tenantId,
-  });
+  return resolveWorkforceActorFiUserId(tenantId);
 }
 
 // TODO(workforce-audit): Wire fi_staff roster audit events when a dedicated workforce audit table ships.
