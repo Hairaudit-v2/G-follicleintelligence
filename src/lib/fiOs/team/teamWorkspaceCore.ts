@@ -115,9 +115,13 @@ export type BuildTeamSidebarSubItemsOptions = {
   showTeamAdminSurfaces?: boolean;
 };
 
-export function buildFiOsTeamBase(tenantId: string): string {
+export function buildFiOsTeamTenantBase(tenantId: string): string {
   const tid = tenantId.trim().replace(/\/+$/, "");
-  return `/fi-admin/${tid}/team`;
+  return `/fi-admin/${tid}`;
+}
+
+export function buildFiOsTeamBase(tenantId: string): string {
+  return `${buildFiOsTeamTenantBase(tenantId)}/team`;
 }
 
 export function buildFiOsTeamTabHref(tenantId: string, tab: FiOsTeamTab): string {

@@ -1,4 +1,4 @@
-import { WorkforceOsSkeleton } from "@/src/components/fi-admin/workforce/WorkforceOsSkeleton";
+import { TeamWorkspacePageFallback } from "@/src/components/fi-os/team/TeamWorkspacePageFallback";
 
 /**
  * Team workspace loading boundary — tab navigations render an immediate
@@ -6,5 +6,5 @@ import { WorkforceOsSkeleton } from "@/src/components/fi-admin/workforce/Workfor
  * loads (which read as "clicking tabs does nothing").
  */
 export default function TeamWorkspaceLoading() {
-  return <WorkforceOsSkeleton />;
+  return <TeamWorkspacePageFallback />;
 }

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { cn } from "@/lib/utils";
 import { TeamSubNav } from "@/src/components/fi-os/team/TeamSubNav";
+import { TeamWorkspacePageFallback } from "@/src/components/fi-os/team/TeamWorkspacePageFallback";
 import { FiModuleAccessDenied } from "@/src/components/fi-os/FiModuleAccessDenied";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
@@ -39,7 +41,7 @@ export default async function TeamLayout({
         tenantId={tid}
         visibleTabIds={teamAccess.tabAccess.visibleTabIds}
       />
-      {children}
+      <Suspense fallback={<TeamWorkspacePageFallback />}>{children}</Suspense>
     </div>
   );
 }

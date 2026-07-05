@@ -371,6 +371,8 @@ export function RosterCommandCentreView({
             <label className="block text-xs text-slate-400">
               {rosterPeriodStartFieldLabel(rosterCadence)}
               <input
+                id="roster-period-start"
+                name="periodStart"
                 type="date"
                 value={filters.periodStart}
                 onChange={(e) =>
@@ -393,6 +395,8 @@ export function RosterCommandCentreView({
           <label className="block text-xs text-slate-400">
             Clinic
             <select
+              id="roster-clinic-filter"
+              name="clinicId"
               value={filters.clinicId}
               onChange={(e) => pushFilters({ clinicId: e.target.value })}
               className="mt-1 block min-w-[140px] rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
@@ -409,6 +413,8 @@ export function RosterCommandCentreView({
           <label className="block text-xs text-slate-400">
             Staff
             <select
+              id="roster-staff-filter"
+              name="staffId"
               value={filters.staffId}
               onChange={(e) => pushFilters({ staffId: e.target.value })}
               className="mt-1 block min-w-[140px] rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
@@ -425,6 +431,8 @@ export function RosterCommandCentreView({
           <label className="block text-xs text-slate-400">
             Event type
             <input
+              id="roster-event-type-filter"
+              name="eventType"
               value={filters.eventType}
               onChange={(e) => pushFilters({ eventType: e.target.value })}
               placeholder="e.g. surgery"
@@ -435,6 +443,8 @@ export function RosterCommandCentreView({
           <label className="block text-xs text-slate-400">
             Staffing status
             <select
+              id="roster-status-filter"
+              name="status"
               value={filters.status}
               onChange={(e) =>
                 pushFilters({ status: e.target.value as RosterStaffingStatusFilter | "" })
