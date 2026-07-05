@@ -4,19 +4,23 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { TenantBrandMark } from "@/src/components/brand/TenantBrandMark";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import {
   acceptOnboardingInviteAction,
   completeOnboardingPinSetupAction,
 } from "@/src/lib/actions/workforce-onboarding-actions";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import type { OnboardingInvitePageModel } from "@/src/lib/workforce/onboarding/onboardingTypes";
 
 export function OnboardingInviteClient({
   model,
   inviteToken,
+  branding,
 }: {
   model: OnboardingInvitePageModel;
   inviteToken: string;
+  branding: NormalizedTenantBranding;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -73,8 +77,9 @@ export function OnboardingInviteClient({
 
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col justify-center px-4 py-12">
-      <header className="text-center">
-        <h1 className="text-2xl font-semibold text-slate-50">Staff onboarding</h1>
+      <header className="flex flex-col items-center text-center">
+        <TenantBrandMark branding={branding} size="lg" showLabel />
+        <h1 className="mt-4 text-2xl font-semibold text-slate-50">Staff onboarding</h1>
         <p className="mt-2 text-sm text-slate-400">
           Welcome, {model.staffName}. Complete your onboarding to access the clinic workspace.
         </p>

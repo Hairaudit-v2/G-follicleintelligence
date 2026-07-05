@@ -4,6 +4,11 @@
 
 import type { CSSProperties } from "react";
 import type { EffectiveBranding } from "./tenantSettings";
+import {
+  hexToRgba,
+  normalizeTenantBranding,
+  type NormalizedTenantBranding,
+} from "./tenantBrandingCore";
 
 const HEX_COLOUR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -28,12 +33,22 @@ export function safeLogoUrlForImg(url: string | null | undefined): string | null
 }
 
 export function buildBrandingCssVariables(effective: EffectiveBranding): CSSProperties {
-  const primary = safeBrandingColourHex(effective.primary_colour, FI_ADMIN_NEUTRAL_PRIMARY);
-  const secondary = safeBrandingColourHex(effective.secondary_colour, FI_ADMIN_NEUTRAL_SECONDARY);
-  const accent = safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT);
+  return buildNormalizedBrandingCssVariables(normalizeTenantBranding({ effective }));
+}
+
+export function buildNormalizedBrandingCssVariables(
+  branding: NormalizedTenantBranding
+): CSSProperties {
+  const primary = branding.primaryColor;
+  const secondary = branding.secondaryColor;
+  const accent = branding.accentColor;
   return {
     "--fi-brand-primary": primary,
     "--fi-brand-secondary": secondary,
     "--fi-brand-accent": accent,
+    "--fi-tenant-primary": primary,
+    "--fi-tenant-accent": accent,
+    "--fi-tenant-primary-soft": hexToRgba(primary, 0.16),
+    "--fi-tenant-brand-bg": hexToRgba(primary, 0.08),
   } as CSSProperties;
 }

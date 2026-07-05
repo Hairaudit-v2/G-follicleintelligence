@@ -6,6 +6,11 @@ import {
   isFiAdminUuid,
   requireFiAdminKey,
 } from "@/lib/server/fiAdminKeyGate";
+import { insertFiTenantAdminAuditEvent } from "@/src/lib/tenantAdmin/tenantAdminAudit.server";
+import {
+  canManageTenantBranding,
+  resolveActorFiUserIdForTenantAdminActions,
+} from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import {
   clinicBelongsToTenant,
   organisationBelongsToTenant,
@@ -107,6 +112,20 @@ function optionalTimezone(
   return { ok: true, value: raw };
 }
 
+async function assertConfigurationWriteAllowed(
+  tenantId: string,
+  adminKey: string | undefined
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const sessionAllowed = await canManageTenantBranding(tenantId);
+  if (sessionAllowed) return { ok: true };
+  const gate = requireFiAdminKey(adminKey ?? "", tenantId);
+  if (gate.ok) return { ok: true };
+  return {
+    ok: false,
+    error: "You do not have permission to update configuration for this clinic.",
+  };
+}
+
 export async function upsertTenantSettingsAction(input: {
   adminKey: string;
   tenantId: string;
@@ -121,8 +140,8 @@ export async function upsertTenantSettingsAction(input: {
   const tenantId = trimToNull(input.tenantId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
 
-  const gate = requireFiAdminKey(input.adminKey, tenantId);
-  if (!gate.ok) return gate;
+  const perm = await assertConfigurationWriteAllowed(tenantId, input.adminKey);
+  if (!perm.ok) return perm;
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
@@ -154,7 +173,15 @@ export async function upsertTenantSettingsAction(input: {
 
   try {
     await upsertFiTenantSettings(tenantId, payload);
+    const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tenantId);
+    await insertFiTenantAdminAuditEvent({
+      tenantId,
+      eventKind: "settings.branding_updated",
+      actorFiUserId,
+      detail: { action: "tenant_settings_saved" },
+    });
     revalidatePath(`/fi-admin/${tenantId}/configuration`);
+    revalidatePath(`/fi-admin/${tenantId}`);
     return { ok: true };
   } catch (e: unknown) {
     return { ok: false, error: e instanceof Error ? e.message : "Save failed." };
@@ -177,8 +204,8 @@ export async function upsertOrganisationSettingsAction(input: {
   const organisationId = trimToNull(input.organisationId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
 
-  const gate = requireFiAdminKey(input.adminKey, tenantId);
-  if (!gate.ok) return gate;
+  const perm = await assertConfigurationWriteAllowed(tenantId, input.adminKey);
+  if (!perm.ok) return perm;
   if (!organisationId || !isFiAdminUuid(organisationId))
     return { ok: false, error: "Invalid organisation id." };
 
@@ -244,8 +271,8 @@ export async function upsertClinicSettingsAction(input: {
   const clinicId = trimToNull(input.clinicId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
 
-  const gate = requireFiAdminKey(input.adminKey, tenantId);
-  if (!gate.ok) return gate;
+  const perm = await assertConfigurationWriteAllowed(tenantId, input.adminKey);
+  if (!perm.ok) return perm;
   if (!clinicId || !isFiAdminUuid(clinicId)) return { ok: false, error: "Invalid clinic id." };
 
   const t = await assertFiTenantExists(tenantId);

@@ -338,3 +338,18 @@ export async function resolveActorFiUserIdForTenantAdminActions(
 export async function getTenantAdminUsersManageAllowed(tenantId: string): Promise<boolean> {
   return canManageTenantAdminUsersRoute(tenantId);
 }
+
+/** Tenant admins / platform admins may update branding (logo upload, colours). */
+export async function canManageTenantBranding(tenantId: string): Promise<boolean> {
+  const tid = tenantId.trim();
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) return true;
+
+  const os = await loadFiOsIdentity(authId);
+  if (os && isFiOsPlatformAdminRole(os.osRole)) return true;
+
+  const caps = await resolveSessionTenantAdminCapabilities(tid);
+  return caps.has("manage_clinic_settings") || caps.has("manage_admin_users");
+}

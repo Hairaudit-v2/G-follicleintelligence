@@ -4,10 +4,7 @@ import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, typ
 import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
-import {
-  FI_ADMIN_NEUTRAL_ACCENT,
-  safeBrandingColourHex,
-} from "@/src/lib/fi/foundation/brandingCss";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import {
   applyPartialFeatureOverrides,
@@ -91,6 +88,7 @@ type FiOsAppShellProps = {
   /** Stage 2: serialized feature map; null skips clinic-settings strip filtering. */
   featureAccess?: Partial<Record<FiFeatureKey, boolean>> | null;
   effective: EffectiveBranding;
+  branding: NormalizedTenantBranding;
   userEmail: string | null;
   impersonationDisplayName?: string | null;
   showFiPlatformSystemLink?: boolean;
@@ -124,6 +122,7 @@ function FiOsAppShellBody({
   workspaceProfileKey = "default",
   featureAccess = null,
   effective,
+  branding,
   userEmail,
   impersonationDisplayName,
   showFiPlatformSystemLink = false,
@@ -153,10 +152,9 @@ function FiOsAppShellBody({
   const [kbdHint, setKbdHint] = useState("Ctrl+K");
   const [quickCreateKbdHint, setQuickCreateKbdHint] = useState("Ctrl+Shift+K");
 
-  const accent = safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT);
-  const brandName = effective.brand_name?.trim() || "Follicle Intelligence";
-  const clinicLabel =
-    effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "Clinic workspace";
+  const accent = branding.accentColor;
+  const brandName = branding.clinicDisplayName;
+  const clinicLabel = branding.clinicDisplayName;
 
   const featureAccessMap = useMemo(() => {
     if (!featureAccess) return null;
@@ -326,6 +324,7 @@ function FiOsAppShellBody({
           <FiOsSidebar
             variant="rail"
             brandName={brandName}
+            branding={branding}
             effective={effective}
             navSections={sidebarSections}
             activeNavId={activeSidebarId}
@@ -414,6 +413,7 @@ function FiOsAppShellBody({
           <FiOsSidebar
             variant="drawer"
             brandName={brandName}
+            branding={branding}
             effective={effective}
             navSections={sidebarSections}
             activeNavId={activeSidebarId}
@@ -438,6 +438,7 @@ function FiOsAppShellBody({
       <FiOsMoreNavDrawer
         open={navCollapseActive && moreNavOpen}
         brandName={brandName}
+        branding={branding}
         effective={effective}
         navSections={sidebarSections}
         activeNavId={activeSidebarId}

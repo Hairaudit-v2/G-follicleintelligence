@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   upsertClinicSettingsAction,
   upsertOrganisationSettingsAction,
@@ -10,10 +10,17 @@ import {
 } from "@/lib/actions/fi-configuration-actions";
 import { FiTenantOperatingModePanel } from "@/src/components/fi-os/FiTenantOperatingModePanel";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
+import {
+  TenantBrandingLogoUpload,
+  TenantBrandingPreviewPanel,
+} from "@/src/components/fi/TenantBrandingPanel";
 import type {
   EffectiveBranding,
   TenantConfigurationOverview,
 } from "@/src/lib/fi/foundation/tenantSettings";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
+import { parseTenantBrandingMetadata } from "@/src/lib/fi/foundation/tenantBrandingCore";
+import { safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -60,7 +67,7 @@ const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";
 
 const saveButtonClass =
-  "mt-2 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition hover:from-cyan-500 hover:to-sky-500 disabled:opacity-50";
+  "mt-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-md transition fi-tenant-btn-primary disabled:opacity-50";
 
 const sectionLabelClass = "mb-2 text-xs font-semibold uppercase tracking-wide text-[#64748B]";
 
@@ -96,12 +103,14 @@ function Field({
   defaultValue,
   hint,
   type = "text",
+  onChange,
 }: {
   label: string;
   name: string;
   defaultValue?: string | null;
   hint?: string;
   type?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
     <label className="block space-y-1">
@@ -112,6 +121,7 @@ function Field({
         defaultValue={defaultValue ?? ""}
         className={inputClass}
         autoComplete="off"
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       />
       {hint ? <span className="block text-xs text-[#64748B]">{hint}</span> : null}
     </label>
@@ -134,6 +144,8 @@ export function TenantConfigurationPanel({
   tenantId,
   overview,
   effective,
+  branding,
+  canEditBranding,
   previewOrganisationId,
   previewClinicId,
   previewFromUrl = false,
@@ -141,6 +153,8 @@ export function TenantConfigurationPanel({
   tenantId: string;
   overview: TenantConfigurationOverview;
   effective: EffectiveBranding;
+  branding: NormalizedTenantBranding;
+  canEditBranding: boolean;
   previewOrganisationId: string | null;
   previewClinicId: string | null;
   /** True when `organisationId` / `clinicId` came from the page URL (shows "Clear preview"). */
@@ -150,6 +164,31 @@ export function TenantConfigurationPanel({
   const base = `/fi-admin/${tenantId}/configuration`;
 
   const [adminKey, setAdminKey] = useState("");
+  const [draftBrandName, setDraftBrandName] = useState(
+    overview.tenant_settings?.brand_name ?? ""
+  );
+  const [draftPrimary, setDraftPrimary] = useState(
+    overview.tenant_settings?.primary_colour ?? ""
+  );
+  const [draftAccent, setDraftAccent] = useState(
+    overview.tenant_settings?.accent_colour ?? ""
+  );
+
+  const tenantMeta = overview.tenant_settings?.metadata ?? null;
+  const hasUploadedLogo = Boolean(
+    parseTenantBrandingMetadata(tenantMeta).logo_storage_path
+  );
+
+  const previewDraft = useMemo(
+    () => ({
+      brandName: draftBrandName || branding.clinicDisplayName,
+      primaryColour: safeBrandingColourHex(draftPrimary, branding.primaryColor),
+      accentColour: safeBrandingColourHex(draftAccent, branding.accentColor),
+      logoUrl: branding.logoUrl,
+    }),
+    [draftBrandName, draftPrimary, draftAccent, branding]
+  );
+
   const [busy, setBusy] = useState<string | null>(null);
   const [tenantFb, setTenantFb] = useState<{ ok: boolean; text: string } | null>(null);
   const [orgFb, setOrgFb] = useState<Record<string, { ok: boolean; text: string } | null>>({});
@@ -230,9 +269,17 @@ export function TenantConfigurationPanel({
           </div>
           <div>
             <h3 className={sectionLabelClass}>Edit</h3>
+            <TenantBrandingLogoUpload
+              tenantId={tenantId}
+              adminKey={adminKey}
+              canEdit={canEditBranding}
+              branding={branding}
+              hasUploadedLogo={hasUploadedLogo}
+              legacyLogoUrl={overview.tenant_settings?.logo_url ?? null}
+            />
             <form
               key={tenantKey}
-              className="space-y-2"
+              className="mt-4 space-y-2"
               onSubmit={async (e) => {
                 e.preventDefault();
                 setTenantFb(null);
@@ -262,18 +309,20 @@ export function TenantConfigurationPanel({
                 label="Brand / display name"
                 name="brand_name"
                 defaultValue={overview.tenant_settings?.brand_name}
+                onChange={(v) => setDraftBrandName(v)}
               />
               <Field
-                label="Logo URL"
+                label="Logo URL (legacy fallback)"
                 name="logo_url"
                 defaultValue={overview.tenant_settings?.logo_url}
-                hint="http(s) only"
+                hint="http(s) or /public path — used when no upload is present"
               />
               <Field
                 label="Primary colour"
                 name="primary_colour"
                 defaultValue={overview.tenant_settings?.primary_colour}
                 hint="#rgb or #rrggbb"
+                onChange={(v) => setDraftPrimary(v)}
               />
               <Field
                 label="Secondary colour"
@@ -284,6 +333,7 @@ export function TenantConfigurationPanel({
                 label="Accent colour"
                 name="accent_colour"
                 defaultValue={overview.tenant_settings?.accent_colour}
+                onChange={(v) => setDraftAccent(v)}
               />
               <Field
                 label="Support email"
@@ -306,6 +356,9 @@ export function TenantConfigurationPanel({
                 />
               </div>
             </form>
+            <div className="mt-4">
+              <TenantBrandingPreviewPanel draft={previewDraft} />
+            </div>
           </div>
         </div>
       </Section>

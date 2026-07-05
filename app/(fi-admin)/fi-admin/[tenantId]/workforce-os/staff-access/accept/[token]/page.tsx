@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { StaffAccessAcceptClient } from "@/src/components/fi/workforce/StaffAccessAcceptClient";
+import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
 import { loadStaffAccessInviteByToken } from "@/src/lib/workforce/staffAccessAccept.server";
 
 export default async function StaffAccessAcceptPage({
@@ -24,5 +25,7 @@ export default async function StaffAccessAcceptPage({
 
   if (!model) notFound();
 
-  return <StaffAccessAcceptClient model={model} inviteToken={token} />;
+  const branding = await resolveTenantBranding({ tenantId });
+
+  return <StaffAccessAcceptClient model={model} inviteToken={token} branding={branding} />;
 }

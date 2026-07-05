@@ -18,12 +18,16 @@ import {
   resolveEffectiveBranding,
 } from "@/src/lib/fi/foundation/tenantSettings";
 import { parseConfigurationTab } from "@/src/lib/fi/configurationTabs";
+import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { canViewTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
 import { canViewGuidedAssistUsageSummary } from "@/src/lib/onboarding-os/guidedAssist.server";
 import { canViewTenantGoLiveReadiness } from "@/src/lib/onboarding-os/goLiveReadiness.server";
-import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
+import {
+  canManageTenantBranding,
+  canViewTenantConfigurationHub,
+} from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 import { getCalendarSettingsAccess } from "@/src/lib/calendar/calendarSettingsAccess.server";
 import { loadCalendarSettingsSectionData } from "@/src/lib/calendar/calendarSettings.server";
@@ -85,6 +89,12 @@ export default async function TenantConfigurationPage({
     organisationId: previewCtx.organisationId,
     clinicId: previewCtx.clinicId,
   });
+  const branding = await resolveTenantBranding({
+    tenantId,
+    organisationId: previewCtx.organisationId,
+    clinicId: previewCtx.clinicId,
+  });
+  const canEditBranding = await canManageTenantBranding(tenantId);
 
   const calendarSection =
     activeTab === "calendar"
@@ -150,6 +160,8 @@ export default async function TenantConfigurationPage({
             tenantId={tenantId}
             overview={overview}
             effective={effective}
+            branding={branding}
+            canEditBranding={canEditBranding}
             previewOrganisationId={previewCtx.organisationId}
             previewClinicId={previewCtx.clinicId}
             previewFromUrl={Boolean(organisationId || clinicId)}

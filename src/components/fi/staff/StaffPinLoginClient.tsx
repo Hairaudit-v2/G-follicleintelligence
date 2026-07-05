@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { TenantBrandMark } from "@/src/components/brand/TenantBrandMark";
 import type { StaffPinLoginPageData } from "@/src/lib/staffPin/staffPinLoginLoader.server";
 
 export function StaffPinLoginClient({ data }: { data: StaffPinLoginPageData }) {
@@ -58,8 +59,14 @@ export function StaffPinLoginClient({ data }: { data: StaffPinLoginPageData }) {
 
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-10">
+      <div className="mb-6 flex justify-center">
+        <TenantBrandMark branding={data.branding} size="lg" showLabel labelClassName="text-white" />
+      </div>
       <div className="rounded-xl border border-slate-700/60 bg-slate-900/80 p-6 shadow-xl backdrop-blur sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/90">
+        <p
+          className="text-xs font-semibold uppercase tracking-[0.2em]"
+          style={{ color: "var(--fi-tenant-accent)" }}
+        >
           Clinic floor access & time clock
         </p>
         <h1 className="mt-2 text-2xl font-semibold text-white">Staff PIN sign-in</h1>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
@@ -8,6 +9,7 @@ import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
 export function FiOsMoreNavDrawer({
   open,
   brandName,
+  branding,
   effective,
   navSections,
   activeNavId,
@@ -16,6 +18,7 @@ export function FiOsMoreNavDrawer({
 }: {
   open: boolean;
   brandName: string;
+  branding: NormalizedTenantBranding;
   effective: EffectiveBranding;
   navSections: FiOsSidebarWorkflowSection[];
   activeNavId: string | null;
@@ -40,6 +43,7 @@ export function FiOsMoreNavDrawer({
       <FiOsSidebar
         variant="drawer"
         brandName={brandName}
+        branding={branding}
         effective={effective}
         navSections={navSections}
         activeNavId={activeNavId}

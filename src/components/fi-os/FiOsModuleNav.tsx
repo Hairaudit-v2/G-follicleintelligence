@@ -85,7 +85,7 @@ function RowLink(props: {
     item.disabled
       ? "cursor-not-allowed border-transparent text-slate-600"
       : active
-        ? "border-cyan-400/25 bg-cyan-500/[0.16] text-slate-50 shadow-[inset_3px_0_0_0_rgba(34,211,238,0.9)]"
+        ? "border-transparent text-slate-50 fi-tenant-nav-active"
         : "border-transparent text-slate-400 hover:bg-white/[0.05] hover:text-slate-100"
   );
 
@@ -103,7 +103,7 @@ function RowLink(props: {
             className={cn(
               "ml-6 block rounded-md border border-transparent py-1 pl-2 pr-2 text-[12px] font-medium transition",
               subActive
-                ? "border-cyan-400/20 bg-cyan-500/15 text-cyan-100"
+                ? "fi-tenant-nav-sub-active text-slate-100"
                 : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-200"
             )}
           >

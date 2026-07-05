@@ -2,6 +2,8 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { loadActiveStaffForTenant } from "@/src/lib/staff/staff.server";
 
 import { loadStaffPinMetadataMap } from "./staffPin.server";
@@ -9,6 +11,7 @@ import { loadStaffPinMetadataMap } from "./staffPin.server";
 export type StaffPinLoginPageData = {
   tenantId: string;
   clinicName: string | null;
+  branding: NormalizedTenantBranding;
   staff: Array<{
     id: string;
     fullName: string;
@@ -36,10 +39,12 @@ export async function loadStaffPinLoginPage(
     tid,
     staffRows.map((s) => s.id)
   );
+  const branding = await resolveTenantBranding({ tenantId: tid });
 
   return {
     tenantId: tid,
     clinicName: (tenant as { name: string | null }).name ?? null,
+    branding,
     staff: staffRows
       .map((s) => ({
         id: s.id,

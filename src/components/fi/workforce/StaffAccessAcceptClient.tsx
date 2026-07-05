@@ -4,19 +4,23 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { TenantBrandMark } from "@/src/components/brand/TenantBrandMark";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import {
   acceptStaffAccessInviteAction,
   completeStaffAccessPinSetupAction,
 } from "@/src/lib/actions/workforce-staff-access-actions";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import type { StaffAccessAcceptPageModel } from "@/src/lib/workforce/staffAccessAccept.server";
 
 export function StaffAccessAcceptClient({
   model,
   inviteToken,
+  branding,
 }: {
   model: StaffAccessAcceptPageModel;
   inviteToken: string;
+  branding: NormalizedTenantBranding;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -88,8 +92,9 @@ export function StaffAccessAcceptClient({
 
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col justify-center px-4 py-12">
-      <header className="text-center">
-        <h1 className="text-2xl font-semibold text-slate-50">Staff access invitation</h1>
+      <header className="flex flex-col items-center text-center">
+        <TenantBrandMark branding={branding} size="lg" showLabel />
+        <h1 className="mt-4 text-2xl font-semibold text-slate-50">Staff access invitation</h1>
         <p className="mt-2 text-sm text-slate-400">
           Welcome, {model.staffName}. Activate your access to {model.tenantName}.
         </p>

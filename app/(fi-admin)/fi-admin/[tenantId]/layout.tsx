@@ -6,9 +6,12 @@ import { fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboa
 import { FiOsAppShell } from "@/src/components/fi-os/FiOsAppShell";
 import { GuidedAssistMount } from "@/src/components/onboarding-os/GuidedAssistMount";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
-import { buildBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
+import { buildNormalizedBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+import { normalizeEffectiveBrandingForShell } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
+import { emptyNormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import {
@@ -37,6 +40,7 @@ import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEn
 import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
 import { StaffUatLayoutMount } from "@/src/components/fi-admin/staff-uat/StaffUatLayoutMount";
 import { isFiAdminTokenPublicRoute } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
+import { TenantBrandedSurface } from "@/src/components/brand/TenantBrandedSurface";
 import { isNavCollapseEnabledForTenant } from "@/src/lib/fiOs/navCollapseRollout.server";
 import { canViewFiOsNavigationAudit } from "@/src/lib/fiOs/navigation/fiOsNavigationAuditAccess.server";
 import { isWorkspaceShellEnabledForTenant } from "@/src/lib/fiOs/workspaceShell/workspaceShellRollout.server";
@@ -88,6 +92,21 @@ export default async function TenantAdminLayout({
   const navCollapseActive = isNavCollapseEnabledForTenant(tenantId);
   const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
 
+  let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
+  let branding: NormalizedTenantBranding = emptyNormalizedTenantBranding();
+  try {
+    if (
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    ) {
+      effective = await resolveEffectiveBranding({ tenantId });
+      branding = await normalizeEffectiveBrandingForShell(tenantId, effective);
+    }
+  } catch {
+    effective = NEUTRAL_EFFECTIVE;
+    branding = emptyNormalizedTenantBranding();
+  }
+
   if (isCommandCentrePresentation) {
     if (pinSession) {
       await assertFiTenantExists(tenantId);
@@ -99,7 +118,11 @@ export default async function TenantAdminLayout({
 
   if (isStaffPinLogin || isTokenPublicRoute) {
     await assertFiTenantExists(tenantId);
-    return <>{children}</>;
+    return (
+      <TenantBrandedSurface branding={branding} className="min-h-[100dvh]">
+        {children}
+      </TenantBrandedSurface>
+    );
   }
 
   if (pinSession) {
@@ -204,18 +227,6 @@ export default async function TenantAdminLayout({
     }
   }
 
-  let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
-  try {
-    if (
-      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-    ) {
-      effective = await resolveEffectiveBranding({ tenantId });
-    }
-  } catch {
-    effective = NEUTRAL_EFFECTIVE;
-  }
-
   const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
   const showProcedureDayNav = pinFloorMode ? false : readFiProcedureDayEnabled();
   const staffUatModeEnabled = readFiStaffUatModeEnabled();
@@ -267,7 +278,7 @@ export default async function TenantAdminLayout({
   );
 
   return (
-    <div style={buildBrandingCssVariables(effective)}>
+    <div style={buildNormalizedBrandingCssVariables(branding)}>
       <FiOsAppShell
         tenantId={tenantId}
         base={base}
@@ -286,6 +297,7 @@ export default async function TenantAdminLayout({
         workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}
         effective={effective}
+        branding={branding}
         userEmail={userEmail}
         impersonationDisplayName={impersonationDisplayName}
         showFiPlatformSystemLink={pinFloorMode ? false : showFiPlatformSystemLink}

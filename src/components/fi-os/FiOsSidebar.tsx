@@ -5,8 +5,8 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
-import { BrandLogoImage } from "@/src/components/brand/BrandLogoImage";
-import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
+import { TenantBrandMark } from "@/src/components/brand/TenantBrandMark";
 import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 
 import { FiOsModuleNav } from "@/src/components/fi-os/FiOsModuleNav";
@@ -14,7 +14,8 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
 export function FiOsSidebar({
   brandName,
-  effective,
+  branding,
+  effective: _effective,
   navSections,
   activeNavId,
   pathname,
@@ -25,6 +26,7 @@ export function FiOsSidebar({
   onDrawerClose,
 }: {
   brandName: string;
+  branding: NormalizedTenantBranding;
   effective: EffectiveBranding;
   navSections: FiOsSidebarWorkflowSection[];
   activeNavId: string | null;
@@ -35,7 +37,7 @@ export function FiOsSidebar({
   drawerTitle?: string;
   onDrawerClose?: () => void;
 }) {
-  const logoSrc = resolveTenantLogoSource(effective.logo_url);
+  const logoSrc = branding.logoUrl;
 
   const brandBlock =
     variant === "rail" ? (
@@ -47,12 +49,13 @@ export function FiOsSidebar({
           fiOsChromeClasses.glassCard
         )}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/15 bg-slate-950/50 text-xs font-bold tracking-tight text-cyan-400">
-          FI
-        </div>
+        <TenantBrandMark branding={branding} size="md" />
         <div className="min-w-0">
-          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-cyan-400/90">
-            FI OS
+          <p
+            className="text-[0.6rem] font-semibold uppercase tracking-[0.2em]"
+            style={{ color: "var(--fi-tenant-accent)" }}
+          >
+            Clinic OS
           </p>
           <p className="truncate text-sm font-semibold text-slate-50">{brandName}</p>
         </div>
@@ -73,14 +76,11 @@ export function FiOsSidebar({
 
   const logoStrip =
     logoSrc && variant === "rail" ? (
-      <div className="mt-2 flex shrink-0 justify-center rounded-xl border border-white/[0.06] bg-black/20 py-2">
-        <BrandLogoImage
-          logoUrl={effective.logo_url}
-          alt={brandName}
-          width={120}
-          height={36}
-          className="h-8 w-auto max-w-[140px] object-contain opacity-90"
-        />
+      <div
+        className="mt-2 flex shrink-0 justify-center rounded-xl border border-white/[0.06] py-2"
+        style={{ backgroundColor: "var(--fi-tenant-brand-bg)" }}
+      >
+        <TenantBrandMark branding={branding} size="lg" />
       </div>
     ) : null;
 
