@@ -57,23 +57,45 @@ export function TenantBrandingLogoUpload({
     if (!canEdit) {
       setFeedback({
         ok: false,
-        text: "You do not have permission to upload logos for this clinic.",
+        text: "You do not have permission to update branding.",
       });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setFeedback({
+        ok: false,
+        text: `Logo must be 2MB or smaller (selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB). Nothing was uploaded.`,
+      });
+      if (fileRef.current) fileRef.current.value = "";
       return;
     }
     setFeedback(null);
     setBusy(true);
     setPreview(URL.createObjectURL(file));
-    const res = await uploadTenantLogoAction({ tenantId, adminKey, file });
-    setBusy(false);
-    if (res.ok) {
-      setFeedback({ ok: true, text: "Logo uploaded and saved." });
+    try {
+      const res = await uploadTenantLogoAction({ tenantId, adminKey, file });
+      if (res.ok) {
+        setFeedback({ ok: true, text: "Logo uploaded and branding saved." });
+        setPreview(null);
+        if (fileRef.current) fileRef.current.value = "";
+        onRevalidated?.();
+      } else {
+        setPreview(null);
+        setFeedback({ ok: false, text: res.error });
+      }
+    } catch (err) {
+      // Server action threw before returning (e.g. request body over the
+      // action transport limit, network drop). Distinct from a storage or
+      // settings-save failure, which return { ok: false } above.
       setPreview(null);
-      if (fileRef.current) fileRef.current.value = "";
-      onRevalidated?.();
-    } else {
-      setPreview(null);
-      setFeedback({ ok: false, text: res.error });
+      setFeedback({
+        ok: false,
+        text: `Upload request failed before completing: ${
+          err instanceof Error ? err.message : "unknown error"
+        }. Nothing was saved.`,
+      });
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -81,22 +103,32 @@ export function TenantBrandingLogoUpload({
     if (!canEdit) {
       setFeedback({
         ok: false,
-        text: "You do not have permission to remove logos for this clinic.",
+        text: "You do not have permission to update branding.",
       });
       return;
     }
     if (!hasUploadedLogo) return;
     setFeedback(null);
     setBusy(true);
-    const res = await removeTenantLogoAction({ tenantId, adminKey });
-    setBusy(false);
-    if (res.ok) {
-      setPreview(null);
-      if (fileRef.current) fileRef.current.value = "";
-      setFeedback({ ok: true, text: "Uploaded logo removed. Legacy URL kept if set." });
-      onRevalidated?.();
-    } else {
-      setFeedback({ ok: false, text: res.error });
+    try {
+      const res = await removeTenantLogoAction({ tenantId, adminKey });
+      if (res.ok) {
+        setPreview(null);
+        if (fileRef.current) fileRef.current.value = "";
+        setFeedback({ ok: true, text: "Uploaded logo removed. Legacy URL kept if set." });
+        onRevalidated?.();
+      } else {
+        setFeedback({ ok: false, text: res.error });
+      }
+    } catch (err) {
+      setFeedback({
+        ok: false,
+        text: `Remove request failed before completing: ${
+          err instanceof Error ? err.message : "unknown error"
+        }. Nothing was changed.`,
+      });
+    } finally {
+      setBusy(false);
     }
   };
 

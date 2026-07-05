@@ -156,6 +156,7 @@ export function TenantConfigurationPanel({
   previewOrganisationId,
   previewClinicId,
   previewFromUrl = false,
+  brandingDebug = null,
 }: {
   tenantId: string;
   overview: TenantConfigurationOverview;
@@ -167,6 +168,16 @@ export function TenantConfigurationPanel({
   previewClinicId: string | null;
   /** True when `organisationId` / `clinicId` came from the page URL (shows "Clear preview"). */
   previewFromUrl?: boolean;
+  /** FI-BRANDING-SYSTEM-1C: dev-only diagnostics (null in production unless FI_BRANDING_DEBUG=1). */
+  brandingDebug?: {
+    canEditBranding: boolean;
+    source: "tenant_settings" | "legacy" | "fallback";
+    logoStoragePathPresent: boolean;
+    legacyLogoUrlPresent: boolean;
+    primaryColor: string;
+    accentColor: string;
+    settingsRowUpdatedAt: string | null;
+  } | null;
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}/configuration`;
@@ -269,6 +280,22 @@ export function TenantConfigurationPanel({
       />
 
       <Section title="Tenant branding">
+        {brandingDebug ? (
+          <div className="mb-4 rounded-lg border border-cyan-500/25 bg-cyan-950/20 px-3 py-2 font-mono text-[0.7rem] leading-relaxed text-cyan-100">
+            <p className="mb-1 font-sans text-[0.65rem] font-bold uppercase tracking-wider text-cyan-300">
+              Branding debug (FI-BRANDING-SYSTEM-1C — hidden in production)
+            </p>
+            <p>canEditBranding: {String(brandingDebug.canEditBranding)}</p>
+            <p>logo source: {brandingDebug.source}</p>
+            <p>logo_storage_path present: {String(brandingDebug.logoStoragePathPresent)}</p>
+            <p>legacy logo_url present: {String(brandingDebug.legacyLogoUrlPresent)}</p>
+            <p>
+              loaded colours: primary {brandingDebug.primaryColor} · accent{" "}
+              {brandingDebug.accentColor}
+            </p>
+            <p>settings row updated_at: {brandingDebug.settingsRowUpdatedAt ?? "no row"}</p>
+          </div>
+        ) : null}
         {!canEditBranding ? (
           <p className="mb-4 rounded-lg border border-amber-500/25 bg-amber-950/30 px-3 py-2 text-xs text-amber-100">
             You can review tenant branding here. Only clinic admins with{" "}
@@ -337,23 +364,33 @@ export function TenantConfigurationPanel({
                 setTenantFb(null);
                 setBusy("tenant");
                 const fd = new FormData(e.currentTarget);
-                const res = await upsertTenantSettingsAction({
-                  adminKey,
-                  tenantId,
-                  brand_name: String(fd.get("brand_name") ?? ""),
-                  logo_url: String(fd.get("logo_url") ?? ""),
-                  primary_colour: String(fd.get("primary_colour") ?? ""),
-                  secondary_colour: String(fd.get("secondary_colour") ?? ""),
-                  accent_colour: String(fd.get("accent_colour") ?? ""),
-                  support_email: String(fd.get("support_email") ?? ""),
-                  default_timezone: String(fd.get("default_timezone") ?? ""),
-                });
-                setBusy(null);
-                if (res.ok) {
-                  setTenantFb({ ok: true, text: "Tenant settings saved." });
-                  router.refresh();
-                } else {
-                  setTenantFb({ ok: false, text: res.error });
+                try {
+                  const res = await upsertTenantSettingsAction({
+                    adminKey,
+                    tenantId,
+                    brand_name: String(fd.get("brand_name") ?? ""),
+                    logo_url: String(fd.get("logo_url") ?? ""),
+                    primary_colour: String(fd.get("primary_colour") ?? ""),
+                    secondary_colour: String(fd.get("secondary_colour") ?? ""),
+                    accent_colour: String(fd.get("accent_colour") ?? ""),
+                    support_email: String(fd.get("support_email") ?? ""),
+                    default_timezone: String(fd.get("default_timezone") ?? ""),
+                  });
+                  if (res.ok) {
+                    setTenantFb({ ok: true, text: "Tenant settings saved." });
+                    router.refresh();
+                  } else {
+                    setTenantFb({ ok: false, text: res.error });
+                  }
+                } catch (err) {
+                  setTenantFb({
+                    ok: false,
+                    text: `Save request failed before completing: ${
+                      err instanceof Error ? err.message : "unknown error"
+                    }. Nothing was saved.`,
+                  });
+                } finally {
+                  setBusy(null);
                 }
               }}
             >

@@ -19,6 +19,10 @@ import {
 } from "@/src/lib/fi/foundation/tenantSettings";
 import { parseConfigurationTab } from "@/src/lib/fi/configurationTabs";
 import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
+import {
+  brandingDebugEnabled,
+  logBrandingDebug,
+} from "@/src/lib/fi/foundation/brandingDebug";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { canViewTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
@@ -92,6 +96,46 @@ export default async function TenantConfigurationPage({
   const tenantBranding = await resolveTenantBranding({ tenantId });
   const canEditBranding = await canManageTenantBranding(tenantId);
 
+  // FI-BRANDING-SYSTEM-1C: log exactly what branding the Settings UI receives.
+  logBrandingDebug("configuration:pageLoad", {
+    tenantId,
+    canEditBranding,
+    tenantSettingsRow: overview.tenant_settings
+      ? {
+          brand_name: overview.tenant_settings.brand_name,
+          logo_url: overview.tenant_settings.logo_url,
+          primary_colour: overview.tenant_settings.primary_colour,
+          accent_colour: overview.tenant_settings.accent_colour,
+          metadata: overview.tenant_settings.metadata,
+          updated_at: overview.tenant_settings.updated_at,
+        }
+      : null,
+    tenantBranding: {
+      clinicDisplayName: tenantBranding.clinicDisplayName,
+      logoUrlPresent: Boolean(tenantBranding.logoUrl),
+      logoUrlLegacy: tenantBranding.logoUrlLegacy,
+      logoStoragePath: tenantBranding.logoStoragePath,
+      primaryColor: tenantBranding.primaryColor,
+      accentColor: tenantBranding.accentColor,
+    },
+  });
+
+  const brandingDebug = brandingDebugEnabled()
+    ? {
+        canEditBranding,
+        source: tenantBranding.logoStoragePath
+          ? ("tenant_settings" as const)
+          : tenantBranding.logoUrlLegacy
+            ? ("legacy" as const)
+            : ("fallback" as const),
+        logoStoragePathPresent: Boolean(tenantBranding.logoStoragePath),
+        legacyLogoUrlPresent: Boolean(tenantBranding.logoUrlLegacy),
+        primaryColor: tenantBranding.primaryColor,
+        accentColor: tenantBranding.accentColor,
+        settingsRowUpdatedAt: overview.tenant_settings?.updated_at ?? null,
+      }
+    : null;
+
   const calendarSection =
     activeTab === "calendar"
       ? await loadCalendarSettingsSectionData(tenantId, clinicId, calendarAccess)
@@ -161,6 +205,7 @@ export default async function TenantConfigurationPage({
             previewOrganisationId={previewCtx.organisationId}
             previewClinicId={previewCtx.clinicId}
             previewFromUrl={Boolean(organisationId || clinicId)}
+            brandingDebug={brandingDebug}
           />
         </>
       )}

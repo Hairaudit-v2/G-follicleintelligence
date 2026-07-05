@@ -23,6 +23,22 @@ import {
   type WriteFiTenantSettingsPayload,
 } from "@/src/lib/fi/foundation/tenantSettings";
 import { mergeTenantSettingsSavePayload } from "@/src/lib/fi/foundation/tenantBrandingFormCore";
+import { brandingDebugEnabled, logBrandingDebug } from "@/src/lib/fi/foundation/brandingDebug";
+import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+/** FI-BRANDING-SYSTEM-1C: identity snapshot for debug logs only. */
+async function debugIdentity(): Promise<{ authUserId: string | null; email: string | null }> {
+  if (!brandingDebugEnabled()) return { authUserId: null, email: null };
+  try {
+    const authUserId = await resolveAuthUserId(null);
+    if (!authUserId) return { authUserId: null, email: null };
+    const { data } = await supabaseAdmin().auth.admin.getUserById(authUserId);
+    return { authUserId, email: data.user?.email ?? null };
+  } catch {
+    return { authUserId: null, email: null };
+  }
+}
 
 function trimToNull(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -134,9 +150,15 @@ async function assertConfigurationWriteAllowed(
   adminKey: string | undefined
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const sessionAllowed = await canManageTenantBranding(tenantId);
+  const gate = sessionAllowed ? null : requireFiAdminKey(adminKey ?? "", tenantId);
+  logBrandingDebug("configuration:permission", {
+    tenantId,
+    canManageTenantBranding: sessionAllowed,
+    adminKeyProvided: Boolean(adminKey?.trim()),
+    adminKeyGateOk: gate?.ok ?? null,
+  });
   if (sessionAllowed) return { ok: true };
-  const gate = requireFiAdminKey(adminKey ?? "", tenantId);
-  if (gate.ok) return { ok: true };
+  if (gate?.ok) return { ok: true };
   return {
     ok: false,
     error: "You do not have permission to update configuration for this clinic.",
@@ -157,8 +179,26 @@ export async function upsertTenantSettingsAction(input: {
   const tenantId = trimToNull(input.tenantId);
   if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
 
+  const identity = await debugIdentity();
+  logBrandingDebug("upsertTenantSettingsAction:start", {
+    ...identity,
+    tenantId,
+    submitted: {
+      brand_name: input.brand_name ?? null,
+      logo_url: input.logo_url ?? null,
+      primary_colour: input.primary_colour ?? null,
+      secondary_colour: input.secondary_colour ?? null,
+      accent_colour: input.accent_colour ?? null,
+      support_email: input.support_email ?? null,
+      default_timezone: input.default_timezone ?? null,
+    },
+  });
+
   const perm = await assertConfigurationWriteAllowed(tenantId, input.adminKey);
-  if (!perm.ok) return perm;
+  if (!perm.ok) {
+    logBrandingDebug("upsertTenantSettingsAction:denied", { tenantId, error: perm.error });
+    return perm;
+  }
 
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
@@ -181,7 +221,11 @@ export async function upsertTenantSettingsAction(input: {
   let existing = null;
   try {
     existing = await loadTenantBranding(tenantId);
-  } catch {
+  } catch (e: unknown) {
+    logBrandingDebug("upsertTenantSettingsAction:loadExistingFailed", {
+      tenantId,
+      error: e instanceof Error ? e.message : String(e),
+    });
     return { ok: false, error: "Could not load existing tenant settings." };
   }
 
@@ -195,6 +239,20 @@ export async function upsertTenantSettingsAction(input: {
     default_timezone: tz.value,
   });
 
+  logBrandingDebug("upsertTenantSettingsAction:upserting", {
+    tenantId,
+    existing: existing
+      ? {
+          brand_name: existing.brand_name,
+          logo_url: existing.logo_url,
+          primary_colour: existing.primary_colour,
+          accent_colour: existing.accent_colour,
+          metadata: existing.metadata,
+        }
+      : null,
+    payload,
+  });
+
   try {
     await upsertFiTenantSettings(tenantId, payload);
     const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tenantId);
@@ -206,8 +264,13 @@ export async function upsertTenantSettingsAction(input: {
     });
     revalidatePath(`/fi-admin/${tenantId}/configuration`);
     revalidatePath(`/fi-admin/${tenantId}`);
+    logBrandingDebug("upsertTenantSettingsAction:saved", { tenantId });
     return { ok: true };
   } catch (e: unknown) {
+    logBrandingDebug("upsertTenantSettingsAction:saveFailed", {
+      tenantId,
+      error: e instanceof Error ? e.message : String(e),
+    });
     return { ok: false, error: e instanceof Error ? e.message : "Save failed." };
   }
 }

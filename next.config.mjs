@@ -100,6 +100,14 @@ const apiNoCacheHeaders = [
 
 const nextConfig = {
   transpilePackages: ["@hairlongevity/medical-intelligence-core"],
+  experimental: {
+    serverActions: {
+      // Tenant logo uploads allow files up to 2MB (TENANT_LOGO_MAX_BYTES); the
+      // Next default action body limit is 1MB, which rejected 1–2MB logos at
+      // the transport layer before validation could run.
+      bodySizeLimit: "4mb",
+    },
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
