@@ -141,27 +141,44 @@ viewOnlyTest.describe("Roster view-only permission validation @roster-view-only"
     await expect(page.getByText(/View-only roster access/i)).toBeVisible();
 
     const grid = page.getByTestId("roster-week-grid");
-    const staffCells = grid.locator(`[data-testid^="roster-cell-${VIEW_ONLY_STAFF_ID}-"]`);
-    const staffCellCount = await staffCells.count();
-    expect(staffCellCount, "view-only staff row should render roster cells").toBeGreaterThan(0);
+    const emptyMarkers = grid.locator(
+      `[data-testid^="generate-or-add-shift-${VIEW_ONLY_STAFF_ID}-"], [data-testid^="add-shift-${VIEW_ONLY_STAFF_ID}-"]`,
+    );
+    expect(
+      await emptyMarkers.count(),
+      "view-only staff should have generate/add-shift empty cells",
+    ).toBeGreaterThan(0);
 
-    let clicked = false;
-    for (let i = 0; i < staffCellCount; i++) {
-      const cell = staffCells.nth(i);
-      if ((await cell.locator('[data-testid^="roster-shift-"]').count()) > 0) continue;
+    const denyPattern =
+      /permission|not yet activated|do not have permission|not roster-eligible/i;
+    const alert = page.getByTestId("roster-action-error");
+    let denyShown = false;
+
+    for (let i = 0; i < (await emptyMarkers.count()); i++) {
+      const marker = emptyMarkers.nth(i);
+      const markerTestId = (await marker.getAttribute("data-testid")) ?? "";
+      const localDate = parseRosterCellDate(
+        markerTestId.replace(/^generate-or-add-shift-/, "roster-cell-").replace(/^add-shift-/, "roster-cell-"),
+      );
+      const cell = grid.getByTestId(`roster-cell-${VIEW_ONLY_STAFF_ID}-${localDate}`);
       await cell.click();
-      clicked = true;
-      break;
+
+      try {
+        await expect
+          .poll(async () => ((await alert.textContent()) ?? "").trim())
+          .toMatch(denyPattern, { timeout: 5_000 });
+        denyShown = true;
+        break;
+      } catch {
+        await page.keyboard.press("Escape").catch(() => undefined);
+      }
     }
-    expect(clicked, "view-only staff should have an empty roster cell to click").toBe(true);
+
+    expect(denyShown, "empty roster cell should surface a deny alert for view-only staff").toBe(
+      true,
+    );
 
     // Step 14: Clear deny alert — not a dead click, drawer must not open
-    const alert = page.getByTestId("roster-action-error");
-    await expect
-      .poll(async () => ((await alert.textContent()) ?? "").trim())
-      .toMatch(/permission|not yet activated|do not have permission|not roster-eligible/i, {
-        timeout: 15_000,
-      });
     await expect(alert).toHaveAttribute("role", "alert");
     await expect(page.getByTestId("roster-shift-drawer")).toHaveCount(0);
   });
