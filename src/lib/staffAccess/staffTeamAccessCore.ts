@@ -5,7 +5,10 @@
 import type { FiOsTeamTabId } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { FI_OS_TEAM_TABS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
-import { canAccessWorkforceTab, staffCapabilitySatisfies } from "./staffCapabilityCore";
+import {
+  canAccessWorkforceTabForTeamNav,
+  staffCapabilitySatisfies,
+} from "./staffCapabilityCore";
 import { TEAM_TAB_ID_TO_WORKFORCE_TAB_KEY } from "./staffCapabilityRegistry";
 import { canEditModule, type EffectiveAccessMap } from "./staffAccessCore";
 
@@ -43,19 +46,18 @@ function tabVisibleByCapability(
 
   if (tabId === "roster") {
     return (
-      canAccessWorkforceTab(access, "roster", "read") ||
+      canAccessWorkforceTabForTeamNav(access, "roster", "read", { hrOsFullNav: false }) ||
       staffCapabilitySatisfies(access, "roster.manage")
     );
   }
 
   if (tabId === "identity") {
-    return (
-      staffCapabilitySatisfies(access, "team.identity.manage") ||
-      canAccessWorkforceTab(access, "identity", "read")
-    );
+    return canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false });
   }
 
-  return canAccessWorkforceTab(access, workforceTabKey, "read");
+  return canAccessWorkforceTabForTeamNav(access, workforceTabKey, "read", {
+    hrOsFullNav: false,
+  });
 }
 
 /** Resolve which Team workspace tabs a viewer may see. */

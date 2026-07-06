@@ -12,13 +12,19 @@ import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
 import {
   applyDefaultClinicStandardHoursAction,
+  clearGeneratedRosterShiftsAction,
   copyPreviousRosterPeriodAction,
   generateRosterFromStandardHoursAction,
 } from "@/src/lib/actions/workforce-roster-actions";
 import {
   rosterCadencePeriodLabel,
+  rosterClearGeneratedActionLabel,
+  rosterClearGeneratedConfirmMessage,
   rosterCopyPreviousActionLabel,
+  rosterCreateBlankActionLabel,
+  rosterCreateBlankConfirmMessage,
   rosterGenerateActionLabel,
+  rosterRegenerateGeneratedActionLabel,
   shiftRosterPeriodStart,
 } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import type { RosterCommandCentrePayload } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
@@ -31,6 +37,7 @@ import {
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import {
   buildStaffStandardHoursSetupIndexHref,
+  ROSTER_MANAGE_DENIED_REASON,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
@@ -75,6 +82,7 @@ export type RosterCommandCentreViewProps = {
   useWorkforceOsRoute?: boolean;
   useTeamRoute?: boolean;
   canManage?: boolean;
+  canManageStandardHours?: boolean;
   manageDeniedReason?: string;
 };
 
@@ -105,7 +113,8 @@ export function RosterCommandCentreView({
   useWorkforceOsRoute = false,
   useTeamRoute = false,
   canManage = true,
-  manageDeniedReason = STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+  canManageStandardHours = true,
+  manageDeniedReason = ROSTER_MANAGE_DENIED_REASON,
 }: RosterCommandCentreViewProps) {
   const router = useRouter();
   const [selectedEventKey, setSelectedEventKey] = useState(payload.preselectedEventKey);
@@ -314,6 +323,47 @@ export function RosterCommandCentreView({
     });
   }
 
+  function handleClearGeneratedShifts(confirmMessage: string, successPrefix: string) {
+    if (!canManage) {
+      setActionError(manageDeniedReason);
+      return;
+    }
+    if (!window.confirm(confirmMessage)) return;
+
+    setActionError(null);
+    setActionMessage(null);
+    startTransition(async () => {
+      const result = await clearGeneratedRosterShiftsAction({
+        tenantId,
+        rangeStartIso: periodRange.startsAt,
+        rangeEndIso: periodRange.endsAt,
+        staffIds: filters.staffId ? [filters.staffId] : undefined,
+      });
+      if (!result.ok) {
+        setActionError(result.error);
+        return;
+      }
+      setActionMessage(
+        `${successPrefix}: ${result.data.cancelledCount} generated shift${result.data.cancelledCount === 1 ? "" : "s"} removed. Manual shifts were kept.`
+      );
+      refresh();
+    });
+  }
+
+  function handleCreateBlankFortnight() {
+    handleClearGeneratedShifts(
+      rosterCreateBlankConfirmMessage(rosterCadence),
+      rosterCreateBlankActionLabel(rosterCadence)
+    );
+  }
+
+  function handleResetGeneratedFortnight() {
+    handleClearGeneratedShifts(
+      rosterClearGeneratedConfirmMessage(rosterCadence),
+      rosterClearGeneratedActionLabel(rosterCadence)
+    );
+  }
+
   return (
     <div
       className={cn(ROSTER_PAGE_SCROLL_ROOT_CLASSES, fiOsChromeClasses.pageScrollContent, "space-y-6")}
@@ -327,21 +377,24 @@ export function RosterCommandCentreView({
           Roster Command Centre
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Set standard hours once, generate the {periodLabel} roster, adjust shifts as needed, and
-          monitor clinical staffing coverage.
+          Build the {periodLabel} roster manually, copy a previous period, or optionally generate
+          from standard hours. Adjust individual shifts at any time — changes persist until you
+          choose to regenerate.
         </p>
-        <p className="mt-2 text-xs text-slate-500">
-          <Link
-            href={`/fi-admin/${tenantId}/workforce-os`}
-            className="text-cyan-400 hover:text-cyan-300"
-          >
-            Workforce Command Centre
-          </Link>
-          {" · "}
-          <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">
-            HR dashboard
-          </Link>
-        </p>
+        {!useTeamRoute ? (
+          <p className="mt-2 text-xs text-slate-500">
+            <Link
+              href={`/fi-admin/${tenantId}/workforce-os`}
+              className="text-cyan-400 hover:text-cyan-300"
+            >
+              Workforce Command Centre
+            </Link>
+            {" · "}
+            <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">
+              HR dashboard
+            </Link>
+          </p>
+        ) : null}
       </header>
 
       <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="roster_command_centre" />
@@ -463,19 +516,21 @@ export function RosterCommandCentreView({
             <button
               type="button"
               disabled={pending}
-              onClick={() => handleGenerateRoster(false)}
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
-              data-testid="roster-generate-button"
+              onClick={handleCreateBlankFortnight}
+              className="rounded-lg border border-white/[0.12] px-3 py-2 text-sm font-medium text-slate-100 hover:bg-white/[0.04] disabled:opacity-50"
+              data-testid="roster-create-blank-button"
             >
-              {rosterGenerateActionLabel(rosterCadence)}
+              {rosterCreateBlankActionLabel(rosterCadence)}
             </button>
             <button
               type="button"
               disabled={pending}
-              onClick={() => handleGenerateRoster(true)}
+              onClick={() => handleGenerateRoster(false)}
               className="rounded-lg border border-cyan-500/40 px-3 py-2 text-sm text-cyan-300 hover:bg-cyan-950/30 disabled:opacity-50"
+              data-testid="roster-generate-button"
+              title="Optional — uses standard hours as a template"
             >
-              Regenerate generated
+              {rosterGenerateActionLabel(rosterCadence)}
             </button>
             <button
               type="button"
@@ -485,6 +540,25 @@ export function RosterCommandCentreView({
               data-testid="roster-copy-previous-button"
             >
               {rosterCopyPreviousActionLabel(rosterCadence)}
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={handleResetGeneratedFortnight}
+              className="rounded-lg border border-amber-500/30 px-3 py-2 text-sm text-amber-200 hover:bg-amber-950/20 disabled:opacity-50"
+              data-testid="roster-clear-generated-button"
+            >
+              {rosterClearGeneratedActionLabel(rosterCadence)}
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => handleGenerateRoster(true)}
+              className="rounded-lg border border-white/[0.08] px-3 py-2 text-xs text-slate-400 hover:bg-white/[0.04] disabled:opacity-50"
+              data-testid="roster-regenerate-button"
+              title="Replaces generated shifts only — manual shifts are preserved"
+            >
+              {rosterRegenerateGeneratedActionLabel()}
             </button>
           </div>
         </div>
@@ -524,23 +598,23 @@ export function RosterCommandCentreView({
         ))}
       </section>
 
-      {staffMissingStandardHours.length > 0 ? (
+      {staffMissingStandardHours.length > 0 && canManageStandardHours ? (
         <section
           className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-950/20 px-4 py-3"
           data-testid="roster-standard-hours-banner"
         >
           <p className="text-sm text-amber-100">
-            Some staff do not have standard hours. Patient allocation and roster generation may be
-            incomplete.
+            Some staff have no standard hours template. You can still build this roster manually —
+            standard hours are optional and only used when you choose Generate.
           </p>
           {canManage ? (
             <div className="flex shrink-0 flex-wrap gap-2">
               <Link
                 href={buildStaffStandardHoursSetupIndexHref(tenantId)}
-                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
+                className="rounded-lg border border-amber-400/40 bg-amber-950/40 px-4 py-2 text-sm font-medium text-amber-100 hover:bg-amber-950/60"
                 data-testid="roster-standard-hours-banner-cta"
               >
-                Set standard hours
+                Set standard hours (optional)
               </Link>
               <button
                 type="button"
@@ -555,7 +629,7 @@ export function RosterCommandCentreView({
           ) : (
             <span
               className="shrink-0 cursor-not-allowed rounded-lg border border-white/[0.12] px-4 py-2 text-sm text-slate-500"
-              title={manageDeniedReason}
+              title={STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON}
               data-testid="roster-standard-hours-banner-cta-disabled"
             >
               Set standard hours
@@ -569,8 +643,8 @@ export function RosterCommandCentreView({
         <div>
           <h2 className="text-sm font-semibold capitalize text-slate-100">{periodLabel} roster</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Set standard hours per staff, generate the {periodLabel}, then adjust individual shifts
-            only when needed.
+            Add shifts to empty cells, edit any shift, or copy a previous {periodLabel}. Standard
+            hours are optional — use Generate only when you want a template fill.
           </p>
         </div>
         <RosterWeekGrid
@@ -584,6 +658,7 @@ export function RosterCommandCentreView({
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           canManage={canManage}
           manageDeniedReason={manageDeniedReason}
+          showStandardHoursEditor={canManageStandardHours}
           selectedShiftId={drawerShift?.id ?? null}
           onCellClick={handleCellClick}
           onShiftClick={handleShiftClick}
@@ -676,6 +751,7 @@ export function RosterCommandCentreView({
           clinics={payload.clinics}
           canManage={canManage}
           manageDeniedReason={manageDeniedReason}
+          canManageStandardHours={canManageStandardHours}
           onClose={closeDrawer}
           onRefresh={refresh}
           onEditStandardHours={openStandardHoursDrawer}

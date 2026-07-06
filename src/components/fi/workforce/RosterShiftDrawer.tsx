@@ -27,8 +27,9 @@ import {
   ROSTER_SHIFT_EDIT_REASONS,
   ROSTER_SHIFT_EDIT_REASON_REQUIRED_MESSAGE,
   formatRosterAdjustmentReasonLabel,
+  isGeneratedShiftSource,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
-import { STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import { ROSTER_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { RosterRightDrawer } from "@/src/components/fi/workforce/RosterRightDrawer";
@@ -58,6 +59,7 @@ export type RosterShiftDrawerProps = {
   selectedShift: RosterGridShift | null;
   clinics: Array<{ id: string; displayName: string }>;
   canManage?: boolean;
+  canManageStandardHours?: boolean;
   manageDeniedReason?: string;
   onClose: () => void;
   onRefresh: () => void;
@@ -86,15 +88,15 @@ function RosterShiftDrawerBody({
   selectedShift,
   clinics,
   canManage = true,
-  manageDeniedReason = STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+  canManageStandardHours = true,
+  manageDeniedReason = ROSTER_MANAGE_DENIED_REASON,
   onClose,
   onRefresh,
   onEditStandardHours,
 }: RosterShiftDrawerProps) {
   const viewingExistingShift = mode === "edit" && selectedShift ? selectedShift : null;
-  const { canShowEditButton, canCancelShift } = resolveRosterShiftDrawerEditEligibility(
-    viewingExistingShift
-  );
+  const { canShowEditButton, canCancelShift, openInEditMode } =
+    resolveRosterShiftDrawerEditEligibility(viewingExistingShift);
 
   const createDefaults = buildRosterShiftDrawerDefaults({
     staffId,
@@ -123,7 +125,9 @@ function RosterShiftDrawerBody({
     rosterCycleAnchorDate,
   });
 
-  const [isInlineEditing, setIsInlineEditing] = useState(false);
+  const [isInlineEditing, setIsInlineEditing] = useState(
+    () => openInEditMode && canManage
+  );
   const [clinicId, setClinicId] = useState(initialFormValues.clinicId);
   const [shiftType, setShiftType] = useState(initialFormValues.shiftType);
   const [startsAt, setStartsAt] = useState(initialFormValues.startsAt);
@@ -298,7 +302,9 @@ function RosterShiftDrawerBody({
     });
   }
 
-  const readOnlyManageMessage = "You do not have permission to manage roster shifts.";
+  const readOnlyManageMessage = ROSTER_MANAGE_DENIED_REASON;
+  const shiftIsGenerated =
+    viewingExistingShift != null && isGeneratedShiftSource(viewingExistingShift.shift_source);
 
   return (
     <RosterRightDrawer
@@ -314,7 +320,7 @@ function RosterShiftDrawerBody({
       }
       subtitle={
         mode === "cell-actions"
-          ? "Generate from standard hours or add a manual exception."
+          ? "Add a manual shift, or optionally generate from standard hours."
           : null
       }
       onClose={onClose}
@@ -333,29 +339,6 @@ function RosterShiftDrawerBody({
         <div className="space-y-3">
           {canManage ? (
             <>
-              <button
-                type="button"
-                disabled={pending || !canGenerateFromStandardHours}
-                onClick={handleGenerateDay}
-                data-testid="generate-day-from-standard-hours"
-                title={
-                  !canGenerateFromStandardHours
-                    ? "No standard hours are set for this day."
-                    : undefined
-                }
-                className="w-full rounded-lg bg-cyan-600 px-4 py-3 text-left text-sm font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Generate this day from standard hours
-              </button>
-              {!canGenerateFromStandardHours ? (
-                <p
-                  className="text-xs text-amber-200/90"
-                  data-testid="generate-day-no-standard-hours"
-                >
-                  No standard hours are set for this staff member on this day. Add a manual shift
-                  instead.
-                </p>
-              ) : null}
               <ManualShiftForm
                 staffName={staffName}
                 clinicId={clinicId}
@@ -371,7 +354,7 @@ function RosterShiftDrawerBody({
                 pending={pending}
                 readOnly={false}
                 showSave={showCreateSave}
-                saveLabel="Add manual shift"
+                saveLabel="Add shift"
                 onClinicChange={setClinicId}
                 onShiftTypeChange={setShiftType}
                 onStartsAtChange={setStartsAt}
@@ -383,11 +366,35 @@ function RosterShiftDrawerBody({
               />
               <button
                 type="button"
-                onClick={() => onEditStandardHours(staffId)}
-                className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-200 hover:bg-white/[0.04]"
+                disabled={pending || !canGenerateFromStandardHours}
+                onClick={handleGenerateDay}
+                data-testid="generate-day-from-standard-hours"
+                title={
+                  !canGenerateFromStandardHours
+                    ? "No standard hours are set for this day."
+                    : "Optional template fill from standard hours"
+                }
+                className="w-full rounded-lg border border-cyan-500/35 px-4 py-2.5 text-left text-sm text-cyan-200 hover:bg-cyan-950/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Edit standard hours
+                Generate this day from standard hours (optional)
               </button>
+              {!canGenerateFromStandardHours ? (
+                <p
+                  className="text-xs text-slate-500"
+                  data-testid="generate-day-no-standard-hours"
+                >
+                  No standard hours template for this day — add a shift manually above.
+                </p>
+              ) : null}
+              {canManageStandardHours ? (
+                <button
+                  type="button"
+                  onClick={() => onEditStandardHours(staffId)}
+                  className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-400 hover:bg-white/[0.04]"
+                >
+                  Edit standard hours template
+                </button>
+              ) : null}
             </>
           ) : null}
           {error ? <p className="text-sm text-rose-300">{error}</p> : null}
@@ -444,7 +451,9 @@ function RosterShiftDrawerBody({
               className="space-y-3 rounded-lg border border-rose-500/20 bg-rose-950/10 p-3"
               data-testid="roster-shift-cancel-section"
             >
-              <p className="text-sm font-medium text-rose-200">Cancel this shift</p>
+              <p className="text-sm font-medium text-rose-200">
+                {shiftIsGenerated ? "Remove this shift" : "Cancel this shift"}
+              </p>
               <label className="block text-xs text-slate-400">
                 Cancellation reason
                 <select
@@ -477,7 +486,7 @@ function RosterShiftDrawerBody({
                 data-testid="roster-shift-cancel-confirm"
                 className="rounded-lg border border-rose-500/40 px-3 py-2 text-sm text-rose-300 hover:bg-rose-950/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Confirm cancel shift
+                {shiftIsGenerated ? "Confirm remove shift" : "Confirm cancel shift"}
               </button>
             </div>
           ) : null}

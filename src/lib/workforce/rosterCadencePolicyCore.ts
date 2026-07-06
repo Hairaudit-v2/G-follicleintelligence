@@ -389,6 +389,44 @@ export function rosterCopyPreviousActionLabel(cadence: RosterCadence): string {
   }
 }
 
+export function rosterCreateBlankActionLabel(cadence: RosterCadence): string {
+  switch (cadence) {
+    case "fortnightly":
+      return "Create blank fortnight";
+    case "monthly":
+      return "Create blank month";
+    default:
+      return "Create blank week";
+  }
+}
+
+export function rosterClearGeneratedActionLabel(cadence: RosterCadence): string {
+  void cadence;
+  return "Clear generated shifts";
+}
+
+export function rosterRegenerateGeneratedActionLabel(): string {
+  return "Regenerate from standard hours";
+}
+
+/** Confirmation before clearing generated/copied shifts to prepare manual rostering. */
+export function rosterCreateBlankConfirmMessage(cadence: RosterCadence): string {
+  const period = rosterCadencePeriodLabel(cadence);
+  return (
+    `Prepare this ${period} for manual rostering?\n\n` +
+    "Generated and copied shifts will be removed. Manual shifts you added will be kept."
+  );
+}
+
+/** Confirmation before bulk-clearing generated/copied shifts for the period. */
+export function rosterClearGeneratedConfirmMessage(cadence: RosterCadence): string {
+  const period = rosterCadencePeriodLabel(cadence);
+  return (
+    `Clear all generated and copied shifts for this ${period}?\n\n` +
+    "Manual shifts will not be removed. This cannot be undone without regenerating or re-adding shifts."
+  );
+}
+
 export function fortnightWeekLabel(
   localDate: string,
   anchorDate: string

@@ -69,6 +69,26 @@ export function canAccessWorkforceTab(
   return false;
 }
 
+/**
+ * Team sub-nav tab access when HR OS full nav is off.
+ * Does not inherit module edit — requires explicit tab grants (roster-only safe).
+ */
+export function canAccessWorkforceTabForTeamNav(
+  access: EffectiveAccessMap,
+  tabKey: WorkforceOsTabKey,
+  required: StaffAccessLevel = "read",
+  opts?: { hrOsFullNav?: boolean }
+): boolean {
+  if (opts?.hrOsFullNav === true) {
+    return canAccessWorkforceTab(access, tabKey, required);
+  }
+
+  const entry = getModuleAccess(access, "workforce_os");
+  const tab = entry.tabs[tabKey];
+  if (!tab) return false;
+  return accessLevelSatisfies(tab.level, required);
+}
+
 /** True when any workforce tab grant or module view allows Team workspace entry. */
 export function canEnterTeamWorkspace(access: EffectiveAccessMap): boolean {
   if (canViewModule(access, "workforce_os")) {

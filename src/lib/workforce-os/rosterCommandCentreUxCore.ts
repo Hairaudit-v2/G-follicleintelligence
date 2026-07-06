@@ -22,6 +22,7 @@ import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePoli
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
+  ROSTER_MANAGE_DENIED_REASON,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
@@ -164,10 +165,11 @@ export function resolveRosterCellClickIntent(input: {
   return "open_cell_actions";
 }
 
-export function resolveRosterEmptyCellLabel(input: {
+export function resolveRosterEmptyCellLabel(_input: {
   hasStandardHours: boolean;
 }): RosterEmptyCellLabel {
-  return input.hasStandardHours ? "generate_or_add_shift" : "add_shift";
+  void _input.hasStandardHours;
+  return "add_shift";
 }
 
 export function resolveRosterCellClickOutcome(input: {
@@ -189,8 +191,7 @@ export function resolveRosterCellClickOutcome(input: {
   if (!input.canManage) {
     return {
       outcome: "deny",
-      message:
-        input.manageDeniedReason ?? STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+      message: input.manageDeniedReason ?? ROSTER_MANAGE_DENIED_REASON,
     };
   }
   return { outcome: "open_drawer", mode: "cell-actions" };
@@ -433,15 +434,19 @@ export function rosterShiftDrawerEditRequiresReason(
 export function resolveRosterShiftDrawerEditEligibility(shift: RosterShiftSnapshot | null): {
   canShowEditButton: boolean;
   canCancelShift: boolean;
+  openInEditMode: boolean;
 } {
   if (!shift) {
-    return { canShowEditButton: false, canCancelShift: false };
+    return { canShowEditButton: false, canCancelShift: false, openInEditMode: false };
   }
   const editEligibility = canEditRosterShift(shift);
   const activeStatus = shift.status === "scheduled" || shift.status === "confirmed";
+  const generated =
+    shift.shift_source === "standard_hours" || shift.shift_source === "copy_week";
   return {
     canShowEditButton: editEligibility.editable,
     canCancelShift: activeStatus,
+    openInEditMode: editEligibility.editable && activeStatus && generated,
   };
 }
 

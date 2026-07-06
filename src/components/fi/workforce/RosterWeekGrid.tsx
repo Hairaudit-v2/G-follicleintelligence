@@ -21,7 +21,6 @@ import {
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
-  resolveRosterEmptyCellLabel,
   ROSTER_GRID_SCROLL_CLASSES,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { cn } from "@/lib/utils";
@@ -37,6 +36,7 @@ export type RosterWeekGridProps = {
   rosterCycleAnchorDate?: string;
   canManage?: boolean;
   manageDeniedReason?: string;
+  showStandardHoursEditor?: boolean;
   onCellClick?: (staffId: string, localDate: string) => void;
   onShiftClick?: (shift: RosterGridShift) => void;
   onEditStandardHours?: (staffId: string) => void;
@@ -102,7 +102,8 @@ export function RosterWeekGrid({
   rosterCadence = "weekly",
   rosterCycleAnchorDate = "2026-01-05",
   canManage = true,
-  manageDeniedReason = "Owner, admin, or HR manager role is required to set standard hours.",
+  manageDeniedReason = "You do not have permission to edit roster shifts.",
+  showStandardHoursEditor = true,
   onCellClick,
   onShiftClick,
   onEditStandardHours,
@@ -162,31 +163,30 @@ export function RosterWeekGrid({
                   <p className="mt-0.5 text-xs text-slate-500">
                     Weekly total: {weeklyTotal} h
                   </p>
-                  {canManage ? (
-                    <Link
-                      href={buildStaffStandardHoursEditorHref(tenantId, staff.id, {
-                        returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
-                      })}
-                      onClick={() => onEditStandardHours?.(staff.id)}
-                      data-testid={`standard-hours-button-${staff.id}`}
-                      className="mt-2 inline-flex min-h-9 items-center rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
-                    >
-                      {hasStandardHours ? "Edit standard hours" : "Set standard hours"}
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      // Not disabled: clicking must surface the permission message
-                      // (onEditStandardHours resolves to a deny outcome) — never a
-                      // silent no-op.
-                      onClick={() => onEditStandardHours?.(staff.id)}
-                      className="mt-2 inline-flex min-h-9 cursor-not-allowed items-center rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500"
-                      title={manageDeniedReason}
-                      data-testid={`standard-hours-button-disabled-${staff.id}`}
-                    >
-                      Set standard hours
-                    </button>
-                  )}
+                  {showStandardHoursEditor ? (
+                    canManage ? (
+                      <Link
+                        href={buildStaffStandardHoursEditorHref(tenantId, staff.id, {
+                          returnTo: buildStaffStandardHoursReturnToRosterHref(tenantId),
+                        })}
+                        onClick={() => onEditStandardHours?.(staff.id)}
+                        data-testid={`standard-hours-button-${staff.id}`}
+                        className="mt-2 inline-flex min-h-9 items-center rounded-lg border border-white/[0.12] px-3 py-1.5 text-xs text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+                      >
+                        {hasStandardHours ? "Edit template hours" : "Set template hours"}
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onEditStandardHours?.(staff.id)}
+                        className="mt-2 inline-flex min-h-9 cursor-not-allowed items-center rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500"
+                        title={manageDeniedReason}
+                        data-testid={`standard-hours-button-disabled-${staff.id}`}
+                      >
+                        Set template hours
+                      </button>
+                    )
+                  ) : null}
                 </td>
                 {weekDayDates.map((date) => {
                   const cellShifts = shiftsForCell(shifts, staff.id, date);
@@ -196,7 +196,6 @@ export function RosterWeekGrid({
                     cellBlocks.length === 0 &&
                     isRdoDay(standardHours, date, rosterCadence, rosterCycleAnchorDate);
                   const emptyCell = cellShifts.length === 0 && cellBlocks.length === 0 && !rdo;
-                  const emptyCellLabel = resolveRosterEmptyCellLabel({ hasStandardHours });
 
                   return (
                     <td
@@ -276,22 +275,12 @@ export function RosterWeekGrid({
                             RDO
                           </span>
                         ) : null}
-                        {emptyCell && !hasStandardHours ? (
+                        {emptyCell ? (
                           <span
                             className="block px-1 py-2 text-xs font-medium text-cyan-300/90"
                             data-testid={`add-shift-${staff.id}-${date}`}
                           >
                             Add shift
-                          </span>
-                        ) : null}
-                        {emptyCell && hasStandardHours ? (
-                          <span
-                            className="block px-1 py-2 text-xs text-cyan-300/80"
-                            data-testid={`generate-or-add-shift-${staff.id}-${date}`}
-                          >
-                            {emptyCellLabel === "generate_or_add_shift"
-                              ? "Generate or add shift"
-                              : "Add shift"}
                           </span>
                         ) : null}
                       </div>
