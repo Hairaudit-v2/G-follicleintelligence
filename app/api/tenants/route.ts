@@ -21,7 +21,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: "Server misconfigured." }, { status: 500 });
     }
 
-    const result = await resolveFiAdminTenantDirectory(request);
+    const url = new URL(request.url);
+    const includeArchived = url.searchParams.get("includeArchived") === "true";
+
+    const result = await resolveFiAdminTenantDirectory(request, { includeArchived });
     if (result.kind === "error") {
       return NextResponse.json(
         { ok: false, error: result.message, code: result.code },

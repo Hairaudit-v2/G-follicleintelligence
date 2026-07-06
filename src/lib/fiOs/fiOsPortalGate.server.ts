@@ -43,11 +43,27 @@ async function assertTenantRowExists(tenantId: string): Promise<boolean> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_tenants")
-    .select("id")
+    .select("id, archived_at")
     .eq("id", tenantId.trim())
     .maybeSingle();
   if (error) return false;
-  return Boolean(data);
+  if (!data) return false;
+  return Boolean((data as { id: string }).id);
+}
+
+async function assertTenantAccessibleForPortal(tenantId: string, authUserId: string): Promise<boolean> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_tenants")
+    .select("id, archived_at")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
+  if (error || !data) return false;
+  const archivedAt = (data as { archived_at: string | null }).archived_at;
+  if (!archivedAt?.trim()) return true;
+
+  const os = await loadFiOsIdentity(authUserId);
+  return Boolean(os && isFiOsCrossTenantDirectoryRole(os.osRole));
 }
 
 function loginUrl(nextPath: string): string {
@@ -100,6 +116,11 @@ export async function assertFiTenantPortalAccess(tenantId: string): Promise<void
   const exists = await assertTenantRowExists(tid);
   if (!exists) {
     redirect("/fi-admin");
+  }
+
+  const accessible = await assertTenantAccessibleForPortal(tid, authId);
+  if (!accessible) {
+    redirect("/fi-admin?notice=tenant_archived");
   }
 
   const os = await loadFiOsIdentity(authId);
