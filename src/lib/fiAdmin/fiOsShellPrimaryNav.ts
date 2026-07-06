@@ -14,6 +14,7 @@ import {
 } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
 import {
   buildTeamSidebarSubItems,
+  buildTeamWorkspaceLandingHref,
   FI_OS_TEAM_NAV_ID,
   type FiOsTeamTabId,
 } from "@/src/lib/fiOs/team/teamWorkspaceCore";
@@ -369,7 +370,10 @@ export function resolveFiOsPrimarySidebarItems(
       featureKey: "staff",
       label: "Team",
       shortLabel: "Team",
-      href: hrefFor(b, "team"),
+      href:
+        visibleTeamTabIds && visibleTeamTabIds.length > 0
+          ? buildTeamWorkspaceLandingHref(b.split("/").filter(Boolean).pop() ?? "", visibleTeamTabIds)
+          : hrefFor(b, "team"),
       disabled: false,
       hint: "Staff operations, roster, onboarding, compliance, training, and access.",
       subItems: buildTeamSidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {

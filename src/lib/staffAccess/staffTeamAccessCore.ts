@@ -24,7 +24,11 @@ function tabVisibleByCapability(
   tabId: FiOsTeamTabId,
   hrOsFullNav: boolean
 ): boolean {
-  if (tabId === "overview" || tabId === "staff") {
+  if (tabId === "overview") {
+    return hrOsFullNav;
+  }
+
+  if (tabId === "staff") {
     return true;
   }
 

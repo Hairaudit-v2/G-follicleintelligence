@@ -129,6 +129,46 @@ export function buildFiOsTeamTabHref(tenantId: string, tab: FiOsTeamTab): string
   return tab.segment ? `${base}/${tab.segment}` : base;
 }
 
+/** Preferred landing tab when Team overview (HR OS command centre) is unavailable. */
+const TEAM_LANDING_TAB_PRIORITY_WITHOUT_OVERVIEW: readonly FiOsTeamTabId[] = [
+  "roster",
+  "staff",
+  "onboarding",
+  "compliance",
+  "training",
+  "identity",
+];
+
+/** First Team tab a viewer should land on — aligns primary nav with route gates. */
+export function resolveTeamWorkspaceLandingTabId(
+  visibleTabIds: readonly FiOsTeamTabId[],
+  opts?: { excludeOverview?: boolean }
+): FiOsTeamTabId | null {
+  if (visibleTabIds.length === 0) return null;
+  const ids =
+    opts?.excludeOverview === true
+      ? visibleTabIds.filter((id) => id !== "overview")
+      : visibleTabIds;
+  if (ids.length === 0) return null;
+  if (ids.includes("overview")) return "overview";
+  for (const tabId of TEAM_LANDING_TAB_PRIORITY_WITHOUT_OVERVIEW) {
+    if (ids.includes(tabId)) return tabId;
+  }
+  return ids[0] ?? null;
+}
+
+export function buildTeamWorkspaceLandingHref(
+  tenantId: string,
+  visibleTabIds: readonly FiOsTeamTabId[],
+  opts?: { excludeOverview?: boolean }
+): string {
+  const tabId = resolveTeamWorkspaceLandingTabId(visibleTabIds, opts);
+  if (!tabId) return buildFiOsTeamBase(tenantId);
+  const tab = FI_OS_TEAM_TABS.find((t) => t.id === tabId);
+  if (!tab) return buildFiOsTeamBase(tenantId);
+  return buildFiOsTeamTabHref(tenantId, tab);
+}
+
 export function buildFiOsTeamLegacyHref(tenantId: string, suffix: string): string {
   const tid = tenantId.trim().replace(/\/+$/, "");
   return `/fi-admin/${tid}/${suffix.replace(/^\/+/, "")}`;
