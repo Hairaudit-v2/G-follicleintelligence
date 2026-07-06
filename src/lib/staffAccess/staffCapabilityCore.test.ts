@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   canAccessWorkforceTab,
+  canAccessWorkforceTabForTeamNav,
   canEnterTeamWorkspace,
   listSatisfiedStaffCapabilities,
   staffCapabilitySatisfies,
@@ -57,6 +58,22 @@ test("manager template retains full workforce module edit", () => {
   assert.equal(staffCapabilitySatisfies(access, "roster.manage"), true);
   assert.equal(staffCapabilitySatisfies(access, "team.identity.manage"), true);
   assert.equal(canAccessWorkforceTab(access, "identity", "edit"), true);
+});
+
+test("manager module edit does not grant team nav tabs without hrOsFullNav", () => {
+  const access = computeEffectiveAccess({ roleKey: "manager", grants: [] });
+  assert.equal(canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }), false);
+  assert.equal(canAccessWorkforceTabForTeamNav(access, "onboarding", "read", { hrOsFullNav: false }), false);
+  assert.equal(canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: true }), true);
+});
+
+test("receptionist roster tab grant satisfies team nav roster without module edit blanket", () => {
+  const access = computeEffectiveAccess({
+    roleKey: "reception",
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" })],
+  });
+  assert.equal(canAccessWorkforceTabForTeamNav(access, "roster", "read", { hrOsFullNav: false }), true);
+  assert.equal(canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }), false);
 });
 
 test("explicit identity tab grant required for sensitive tabs without module edit", () => {

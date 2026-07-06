@@ -9,6 +9,7 @@ import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSyst
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";
 import { resolveStaffStandardHoursManageCapability } from "@/src/lib/workforce-os/staffStandardHoursManageGate.server";
+import { ROSTER_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
   defaultRosterCommandCentreDateRange,
   parseRosterCommandCentreSearchParams,
@@ -89,7 +90,10 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
         }}
         useWorkforceOsRoute
         canManage={manageCapability.canManage}
-        manageDeniedReason={manageCapability.manageDeniedReason}
+        canManageStandardHours={manageCapability.canManage}
+        manageDeniedReason={
+          manageCapability.canManage ? "" : ROSTER_MANAGE_DENIED_REASON
+        }
       />
     </div>
   );

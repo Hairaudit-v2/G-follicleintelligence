@@ -8,7 +8,10 @@ import {
   resolveRosterStandardHoursEditorNavigation,
   openRosterShiftDrawer,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
-import { STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import {
+  ROSTER_MANAGE_DENIED_REASON,
+  STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+} from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 
 const ROSTER_VIEW = "src/components/fi/workforce/RosterCommandCentreView.tsx";
 const ROSTER_GRID = "src/components/fi/workforce/RosterWeekGrid.tsx";
@@ -61,7 +64,7 @@ test("cell click without manage permission resolves an explicit deny message", (
   });
   assert.deepEqual(outcome, {
     outcome: "deny",
-    message: STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
+    message: ROSTER_MANAGE_DENIED_REASON,
   });
 });
 

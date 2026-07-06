@@ -9,6 +9,8 @@ import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSyst
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";
 import { resolveStaffStandardHoursManageCapability } from "@/src/lib/workforce-os/staffStandardHoursManageGate.server";
+import { ROSTER_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
+import { resolveTeamWorkspaceAccessForViewer } from "@/src/lib/staffAccess/staffTeamAccess.server";
 import { assertTeamTabAccessOrNotFound } from "@/src/lib/staffAccess/staffTeamTabRouteGate.server";
 import {
   defaultRosterCommandCentreDateRange,
@@ -49,7 +51,7 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
     const dateRange = rosterDateRangeFromPeriodStartParam(periodStart, rosterPlanning);
     const preselectedEventKey = resolveRosterPreselectedEventKey(parsed);
 
-    const [result, showTechnicalDetail, manageCapability] = await Promise.all([
+    const [result, showTechnicalDetail, manageCapability, teamAccess] = await Promise.all([
       loadRosterCommandCentrePageData({
         tenantId: tid,
         dateRange: { startsAt: dateRange.startsAt, endsAt: dateRange.endsAt },
@@ -64,6 +66,7 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
       }),
       canViewDashboardSystemDiagnostics(tid),
       resolveStaffStandardHoursManageCapability(tid),
+      resolveTeamWorkspaceAccessForViewer(tid),
     ]);
 
     if (!result.ok) {
@@ -96,7 +99,10 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
           }}
           useTeamRoute
           canManage={manageCapability.canManage}
-          manageDeniedReason={manageCapability.manageDeniedReason}
+          canManageStandardHours={teamAccess.tabAccess.canManageStandardHours}
+          manageDeniedReason={
+            manageCapability.canManage ? "" : ROSTER_MANAGE_DENIED_REASON
+          }
         />
       </div>
     );

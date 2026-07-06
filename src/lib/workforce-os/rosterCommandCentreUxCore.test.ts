@@ -291,6 +291,21 @@ test("resolveRosterShiftDrawerEditEligibility hides edit for cancelled shifts", 
   });
   assert.equal(scheduled.canShowEditButton, true);
   assert.equal(scheduled.canCancelShift, true);
+  assert.equal(scheduled.openInEditMode, false);
+
+  const generated = resolveRosterShiftDrawerEditEligibility({
+    id: "shift-gen",
+    staff_id: STAFF_PAUL,
+    clinic_id: null,
+    shift_type: "clinic_day",
+    starts_at: "2026-07-06T01:00:00.000Z",
+    ends_at: "2026-07-06T09:00:00.000Z",
+    status: "scheduled",
+    notes: null,
+    shift_source: "standard_hours",
+  });
+  assert.equal(generated.canShowEditButton, true);
+  assert.equal(generated.openInEditMode, true);
 
   const cancelled = resolveRosterShiftDrawerEditEligibility({
     id: "shift-2",

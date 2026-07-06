@@ -116,11 +116,15 @@ test("per-staff onEditStandardHours uses the same editor navigation contract", (
   assert.deepEqual(router.pushes, [expectedEditorHref(TENANT, STAFF)]);
 });
 
-test("RosterCommandCentreView exposes standard-hours banner CTA and wires editor navigation helper", () => {
+test("RosterCommandCentreView exposes roster workflow actions and editor navigation helper", () => {
   sourceIncludes(
     ROSTER_VIEW,
     'data-testid="roster-standard-hours-banner-cta"',
     'data-testid="roster-apply-default-clinic-hours"',
+    'data-testid="roster-create-blank-button"',
+    'data-testid="roster-clear-generated-button"',
+    'data-testid="roster-regenerate-button"',
+    "clearGeneratedRosterShiftsAction",
     "pushRosterStandardHoursEditorNavigation",
     "onEditStandardHours={openStandardHoursDrawer}",
     "data-roster-cadence={rosterCadence}",
@@ -189,21 +193,25 @@ test("StaffStandardHoursPageClient exposes index and editor surfaces", () => {
   );
 });
 
-test("RosterShiftDrawer passes canManage from command centre and supports read-only shift view", () => {
+test("RosterShiftDrawer passes canManage from command centre and supports generated shift edit/remove", () => {
   sourceIncludes(
     ROSTER_VIEW,
     "canManage={canManage}",
+    "canManageStandardHours={canManageStandardHours}",
     "manageDeniedReason={manageDeniedReason}",
     "handleShiftClick"
   );
   sourceIncludes(
     ROSTER_SHIFT_DRAWER,
     "canManage?: boolean",
+    "canManageStandardHours?: boolean",
     'data-testid="roster-shift-manage-denied"',
     'data-testid="roster-shift-cancel-confirm"',
     "ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS",
     "updateRosterShiftAction",
-    'data-testid="roster-shift-edit-start"'
+    "openInEditMode",
+    "isGeneratedShiftSource",
+    "Remove this shift"
   );
 });
 

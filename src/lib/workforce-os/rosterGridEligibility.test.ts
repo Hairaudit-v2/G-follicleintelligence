@@ -146,12 +146,9 @@ describe("roster grid cell actions", () => {
     assert.equal(drawer.kind, "shift");
   });
 
-  it("empty cell labels distinguish add shift from generate-or-add", () => {
+  it("empty cell label always prompts manual add shift", () => {
     assert.equal(resolveRosterEmptyCellLabel({ hasStandardHours: false }), "add_shift");
-    assert.equal(
-      resolveRosterEmptyCellLabel({ hasStandardHours: true }),
-      "generate_or_add_shift"
-    );
+    assert.equal(resolveRosterEmptyCellLabel({ hasStandardHours: true }), "add_shift");
     assert.equal(staffHasConfiguredStandardHours(undefined), false);
   });
 
@@ -202,24 +199,24 @@ test("RosterCommandCentreView wires eligible grid rows and ineligible section be
   assert.ok(gridIndex >= 0 && ineligibleIndex > gridIndex);
 });
 
-test("RosterWeekGrid exposes add shift and generate-or-add shift cell affordances", () => {
+test("RosterWeekGrid exposes add shift cell affordance for all empty cells", () => {
   const src = readFileSync("src/components/fi/workforce/RosterWeekGrid.tsx", "utf8");
   assert.ok(src.includes('data-testid={`add-shift-${staff.id}-${date}`}'));
-  assert.ok(src.includes('data-testid={`generate-or-add-shift-${staff.id}-${date}`}'));
+  assert.ok(!src.includes("generate-or-add-shift"));
 });
 
-test("RosterShiftDrawer exposes generate and manual shift actions with reason field", () => {
+test("RosterShiftDrawer exposes optional generate and manual shift actions with reason field", () => {
   const src = readFileSync("src/components/fi/workforce/RosterShiftDrawer.tsx", "utf8");
   assert.ok(src.includes('data-testid="generate-day-from-standard-hours"'));
   assert.ok(src.includes('data-testid="roster-manual-shift-form"'));
   assert.ok(src.includes('data-testid="roster-shift-adjustment-reason"'));
-  assert.ok(src.includes("No standard hours are set for this staff member on this day"));
+  assert.ok(src.includes("No standard hours template for this day"));
 });
 
 test("RosterShiftDrawer gates mutations when canManage is false", () => {
   const src = readFileSync("src/components/fi/workforce/RosterShiftDrawer.tsx", "utf8");
   assert.ok(src.includes('data-testid="roster-shift-manage-denied"'));
-  assert.ok(src.includes("You do not have permission to manage roster shifts."));
+  assert.ok(src.includes("ROSTER_MANAGE_DENIED_REASON"));
   assert.ok(src.includes("canCancelShift && !isInlineEditing"));
   assert.ok(src.includes('data-testid="roster-shift-cancellation-reason"'));
   assert.ok(src.includes("disabled={pending || !cancellationReason.trim()}"));
