@@ -77,8 +77,15 @@ So **full tenant list is only returned** for authenticated **`fi_platform_admin`
 ## Password recovery (deployed domain)
 
 - **Forgot password** uses `resetPasswordForEmail` with `redirectTo` built from the **incoming request** (`X-Forwarded-Host` / `Host` and `X-Forwarded-Proto`), taking the **first** value when headers are comma-separated (common behind proxies). If headers are missing (rare in server actions), **`NEXT_PUBLIC_SITE_URL`** is used, then `http://localhost:3000`.
-- **Supabase Dashboard → Authentication → URL configuration**: add your production site origin and allow the path **`/follicle-intelligence/update-password`** (or use wildcard redirect URLs per Supabase docs).
-- **`/follicle-intelligence/update-password`** uses the browser Supabase client with `detectSessionInUrl` / PKCE so the recovery session can be established from the email link.
+- Redirect target path is always **`/follicle-intelligence/update-password`** via `buildFiOsPasswordResetRedirectUrl`.
+- **Supabase Dashboard → Authentication → URL configuration** redirect allowlist must include:
+  - `https://follicleintelligence.ai/follicle-intelligence/update-password`
+  - `https://www.follicleintelligence.ai/follicle-intelligence/update-password`
+  - `http://localhost:3000/follicle-intelligence/update-password`
+- If the allowlist is missing the path, Supabase falls back to **Site URL** and recovery tokens land on `/` — the marketing home page runs `FiOsRecoveryHashRedirect` to forward hash tokens to `/follicle-intelligence/update-password`.
+- **`/follicle-intelligence/update-password`** uses the browser Supabase client with explicit `setSession()` from hash tokens (`detectSessionInUrl: false` on the bootstrap client) so recovery is established safely before `updateUser({ password })`.
+- After a successful reset, the user is signed out and redirected to **`/follicle-intelligence/login?notice=password_updated`**.
+- Auth/debug logs use `redactAuthUrlForLog` — never log full recovery URLs, `access_token`, or `refresh_token`.
 
 ## Sign out
 

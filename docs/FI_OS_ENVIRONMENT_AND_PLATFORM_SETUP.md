@@ -156,7 +156,7 @@ The Next.js server uses **service role exclusively** for:
 | Setting | Requirement |
 |---------|-------------|
 | **Site URL** | Production origin, e.g. `https://www.follicleintelligence.ai` (**NEEDS CONFIRMATION** — match your deploy domain) |
-| **Redirect URLs** | Must allow: `/follicle-intelligence/update-password`, `/follicle-intelligence/login` (and wildcard variants per Supabase docs) |
+| **Redirect URLs** | Must allow exactly: `https://follicleintelligence.ai/follicle-intelligence/update-password`, `https://www.follicleintelligence.ai/follicle-intelligence/update-password`, `http://localhost:3000/follicle-intelligence/update-password` (see `FI_OS_PASSWORD_RESET_REDIRECT_ALLOWLIST` in `authLinkBootstrap.ts`) |
 | **Email provider** | Supabase Auth sends **invite** and **password recovery** emails (not Resend in current code) |
 | **Email confirmation** | Tenant admin invites use `auth.admin.inviteUserByEmail` — configure SMTP/templates in Supabase for production deliverability |
 | **Magic link / OTP** | Primary staff flow is **email + password** (`fiOsPasswordSignInAction`); magic link not used in FI OS login UI |

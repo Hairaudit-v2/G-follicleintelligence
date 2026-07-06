@@ -33,9 +33,9 @@ export function FiOsLoginMagicLinkHandler({ safeNextPath }: { safeNextPath: stri
 
       try {
         const supabase = createRecoveryBrowserClient();
-        const ok = await bootstrapSupabaseSessionFromAuthLink(supabase, credentials);
+        const result = await bootstrapSupabaseSessionFromAuthLink(supabase, credentials);
         if (cancelled) return;
-        if (!ok) {
+        if (!result.ok) {
           setActive(false);
           return;
         }

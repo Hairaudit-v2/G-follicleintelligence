@@ -19,6 +19,8 @@ function loginErrorMessage(code: string | undefined): string | null {
 function accessNoticeMessage(code: string | undefined): string | null {
   if (!code) return null;
   switch (code) {
+    case "password_updated":
+      return "Your password was updated. Sign in with your new password.";
     case "no_fi_access":
       return "This account is not provisioned for Follicle Intelligence OS. Contact your administrator.";
     case "no_tenant_access":
@@ -82,7 +84,11 @@ export function FiOsLoginScreen({
           {notice ? (
             <div
               role="status"
-              className="mb-6 rounded-lg border border-amber-500/25 bg-amber-950/35 px-4 py-3 text-sm text-amber-100"
+              className={`mb-6 rounded-lg px-4 py-3 text-sm ${
+                noticeCode === "password_updated"
+                  ? "border border-emerald-500/25 bg-emerald-950/35 text-emerald-100"
+                  : "border border-amber-500/25 bg-amber-950/35 text-amber-100"
+              }`}
             >
               {notice}
             </div>

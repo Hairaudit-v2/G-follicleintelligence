@@ -2,29 +2,36 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { createBrowserClient, createRecoveryBrowserClient } from "@/lib/supabase/client";
 import {
+  authBootstrapFailureMessage,
   bootstrapSupabaseSessionFromAuthLink,
+  isAuthHashExpired,
+  isRecoveryAuthLink,
   readAuthLinkCredentialsFromUrl,
-  safeInternalPath,
   stripAuthParamsFromUrlKeepSearch,
 } from "@/src/lib/supabase/authLinkBootstrap";
 
-const EXPIRED_MESSAGE =
-  "This reset link is invalid or has expired. Request a new one from the forgot password page.";
+const FI_OS_LOGIN_PATH = "/follicle-intelligence/login";
+const PASSWORD_UPDATED_NOTICE = "password_updated";
+
+function mapPasswordUpdateError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes("weak") || lower.includes("at least")) {
+    return "Choose a stronger password (at least 8 characters).";
+  }
+  if (lower.includes("same")) {
+    return "Choose a new password that is different from your current one.";
+  }
+  return "Could not update password. Try again or request a new reset link.";
+}
 
 export function FiOsUpdatePasswordForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const afterPasswordPath = safeInternalPath(
-    searchParams.get("next"),
-    "/follicle-intelligence/login"
-  );
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -36,13 +43,27 @@ export function FiOsUpdatePasswordForm() {
     async function bootstrapRecoverySession() {
       try {
         if (credentials.kind !== "none") {
-          const supabase = createRecoveryBrowserClient();
-          const ok = await bootstrapSupabaseSessionFromAuthLink(supabase, credentials);
-          if (cancelled) return;
-          if (!ok) {
-            setError(EXPIRED_MESSAGE);
+          if (typeof window !== "undefined" && isAuthHashExpired(window.location.hash)) {
+            if (!cancelled) setError(authBootstrapFailureMessage("expired"));
             return;
           }
+
+          if (credentials.kind === "tokens" && !isRecoveryAuthLink(credentials)) {
+            const authType = credentials.authType;
+            if (authType !== "invite" && authType !== "signup") {
+              if (!cancelled) setError(authBootstrapFailureMessage("unsupported_type"));
+              return;
+            }
+          }
+
+          const supabase = createRecoveryBrowserClient();
+          const result = await bootstrapSupabaseSessionFromAuthLink(supabase, credentials);
+          if (cancelled) return;
+          if (!result.ok) {
+            setError(authBootstrapFailureMessage(result.reason));
+            return;
+          }
+
           stripAuthParamsFromUrlKeepSearch();
           setReady(true);
           return;
@@ -53,25 +74,26 @@ export function FiOsUpdatePasswordForm() {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((event, session) => {
           if (cancelled) return;
-          if (event === "PASSWORD_RECOVERY" && session) {
+          if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && session) {
             setReady(true);
           }
         });
 
-        const { data } = await supabase.auth.getSession();
+        const { data, error: sessionError } = await supabase.auth.getSession();
         if (cancelled) {
           subscription.unsubscribe();
           return;
         }
-        if (!data.session) {
-          subscription.unsubscribe();
-          setError(EXPIRED_MESSAGE);
+        subscription.unsubscribe();
+
+        if (sessionError || !data.session) {
+          setError(authBootstrapFailureMessage("missing_token"));
           return;
         }
-        subscription.unsubscribe();
+
         setReady(true);
       } catch {
-        if (!cancelled) setError("Could not verify your session.");
+        if (!cancelled) setError(authBootstrapFailureMessage("invalid_session"));
       }
     }
 
@@ -97,30 +119,20 @@ export function FiOsUpdatePasswordForm() {
       const supabase = createBrowserClient();
       const { error: upErr } = await supabase.auth.updateUser({ password });
       if (upErr) {
-        setError(upErr.message);
+        setError(mapPasswordUpdateError(upErr.message));
         return;
       }
-      setDone(true);
-      router.replace(afterPasswordPath);
+
+      stripAuthParamsFromUrlKeepSearch();
+      await supabase.auth.signOut();
+
+      const loginUrl = `${FI_OS_LOGIN_PATH}?notice=${PASSWORD_UPDATED_NOTICE}`;
+      router.replace(loginUrl);
     } catch {
       setError("Could not update password.");
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className="space-y-4 text-center">
-        <p className="text-emerald-200">Your password was updated.</p>
-        <Link
-          href={afterPasswordPath}
-          className="inline-block rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-3 text-sm font-semibold text-white hover:from-cyan-500 hover:to-sky-500"
-        >
-          Continue
-        </Link>
-      </div>
-    );
   }
 
   return (
@@ -152,6 +164,7 @@ export function FiOsUpdatePasswordForm() {
               type="password"
               autoComplete="new-password"
               required
+              minLength={8}
               value={password}
               onChange={(ev) => setPassword(ev.target.value)}
               className="w-full rounded-lg border border-slate-600/80 bg-slate-950/80 px-3 py-2.5 text-slate-100 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/30"
@@ -169,6 +182,7 @@ export function FiOsUpdatePasswordForm() {
               type="password"
               autoComplete="new-password"
               required
+              minLength={8}
               value={password2}
               onChange={(ev) => setPassword2(ev.target.value)}
               className="w-full rounded-lg border border-slate-600/80 bg-slate-950/80 px-3 py-2.5 text-slate-100 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/30"

@@ -1,4 +1,7 @@
+import { Suspense } from "react";
+
 import { FiMarketingHomeView } from "@/components/home/FiMarketingHomeView";
+import { FiOsRecoveryHashRedirect } from "@/src/components/fi/os/FiOsRecoveryHashRedirect";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_URL } from "@/lib/seo/constants";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
@@ -24,6 +27,9 @@ export const metadata = buildPageMetadata({
 export default function HomePage() {
   return (
     <>
+      <Suspense fallback={null}>
+        <FiOsRecoveryHashRedirect />
+      </Suspense>
       <JsonLd data={buildFAQPageSchema(SITE_URL, HOME_PAGE_FAQS)} />
       <FiMarketingHomeView />
     </>

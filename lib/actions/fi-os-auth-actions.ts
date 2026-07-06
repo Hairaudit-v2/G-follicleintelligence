@@ -9,7 +9,11 @@ import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { resolveFiOsPublicOrigin } from "@/src/lib/fiOs/fiOsPublicOrigin.server";
 import { resolveFiOsPostLoginRedirect } from "@/src/lib/fiOs/fiOsRedirect.server";
 import { repairStaffTenantLinkOnAuthConfirm } from "@/src/lib/workforce/staffTenantLinkRepair.server";
-import { safeInternalPath } from "@/src/lib/supabase/authLinkBootstrap";
+import {
+  buildFiOsPasswordResetRedirectUrl,
+  redactAuthUrlForLog,
+  safeInternalPath,
+} from "@/src/lib/supabase/authLinkBootstrap";
 /** Temporary diagnostic logging — env presence only; never log secrets or tokens. */
 function logFiOsSignIn(stage: string, details: Record<string, unknown>): void {
   console.info("[fi-os-auth]", stage, JSON.stringify(details));
@@ -114,8 +118,8 @@ export async function fiOsRequestPasswordResetAction(
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const origin = (await resolveFiOsPublicOrigin()).replace(/\/+$/, "");
-  const redirectUrl = `${origin}/follicle-intelligence/update-password`;
+  const origin = await resolveFiOsPublicOrigin();
+  const redirectUrl = buildFiOsPasswordResetRedirectUrl(origin);
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: redirectUrl,
@@ -126,7 +130,10 @@ export async function fiOsRequestPasswordResetAction(
     return { ok: false, error: "Could not start password recovery. Try again or contact support." };
   }
 
-  logFiOsSignIn("password_reset_requested", { redirectHost: new URL(redirectUrl).host });
+  logFiOsSignIn("password_reset_requested", {
+    redirectPath: "/follicle-intelligence/update-password",
+    redirectUrlRedacted: redactAuthUrlForLog(redirectUrl),
+  });
   return { ok: true };
 }
 
