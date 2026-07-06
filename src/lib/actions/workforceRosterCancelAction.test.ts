@@ -71,7 +71,7 @@ describe("RosterShiftDrawer permission and cancel UI", () => {
       SHIFT_DRAWER,
       "canManage = true",
       'data-testid="roster-shift-manage-denied"',
-      "You do not have permission to manage roster shifts.",
+      "ROSTER_MANAGE_DENIED_REASON",
       "formReadOnly",
       "showCreateSave"
     );
@@ -144,8 +144,9 @@ describe("RosterShiftDrawer existing shift inline edit", () => {
       "shiftId: viewingExistingShift.id",
       "clinicId: clinicId || null",
       "shiftType",
-      "startsAt: new Date(startsAt).toISOString()",
-      "endsAt: new Date(endsAt).toISOString()",
+      "rosterShiftDatetimeLocalToUtcIso",
+      "startsAt: utcTimes.startsAt",
+      "endsAt: utcTimes.endsAt",
       "notes: notes || null"
     );
   });
@@ -169,7 +170,7 @@ describe("RosterShiftDrawer existing shift inline edit", () => {
   it("initial existing shift values come from selectedShift not create defaults", () => {
     sourceIncludes(
       SHIFT_DRAWER,
-      "buildRosterShiftFormValuesFromShift(viewingExistingShift)",
+      "buildRosterShiftFormValuesFromShift(viewingExistingShift, staffTimezone, tenantTimezone)",
       "buildRosterShiftDrawerDefaults",
       "const initialFormValues = viewingExistingShift"
     );
@@ -182,6 +183,7 @@ describe("RosterCommandCentreView passes canManage to shift drawer", () => {
       ROSTER_VIEW,
       "canManage={canManage}",
       "manageDeniedReason={manageDeniedReason}",
+      "tenantTimezone={payload.tenantTimezone}",
       "handleShiftClick"
     );
   });

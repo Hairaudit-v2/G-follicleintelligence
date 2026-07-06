@@ -16,6 +16,7 @@ import {
   formatRosterShiftDrawerTitle,
   resolveRosterShiftDrawerChangedFields,
   resolveRosterShiftDrawerEditEligibility,
+  rosterShiftDatetimeLocalToUtcIso,
   rosterShiftDrawerEditRequiresReason,
   staffHasWorkingStandardHoursForDate,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -58,6 +59,8 @@ export type RosterShiftDrawerProps = {
   rosterCycleAnchorDate?: string;
   selectedShift: RosterGridShift | null;
   clinics: Array<{ id: string; displayName: string }>;
+  staffTimezone?: string | null;
+  tenantTimezone: string;
   canManage?: boolean;
   canManageStandardHours?: boolean;
   manageDeniedReason?: string;
@@ -87,6 +90,8 @@ function RosterShiftDrawerBody({
   rosterCycleAnchorDate = "2026-01-05",
   selectedShift,
   clinics,
+  staffTimezone = null,
+  tenantTimezone,
   canManage = true,
   canManageStandardHours = true,
   manageDeniedReason = ROSTER_MANAGE_DENIED_REASON,
@@ -109,7 +114,7 @@ function RosterShiftDrawerBody({
   });
 
   const initialFormValues = viewingExistingShift
-    ? buildRosterShiftFormValuesFromShift(viewingExistingShift)
+    ? buildRosterShiftFormValuesFromShift(viewingExistingShift, staffTimezone, tenantTimezone)
     : {
         clinicId: createDefaults.clinicId,
         shiftType: createDefaults.shiftType,
@@ -165,15 +170,25 @@ function RosterShiftDrawerBody({
   const showCreateSave = !viewingExistingShift && canManage;
   const showInlineEditControls = Boolean(viewingExistingShift && isInlineEditing && canManage);
 
-  const editFormInput = {
-    clinicId,
-    shiftType,
-    startsAt,
-    endsAt,
-    notes,
-    startsAtIso: startsAt ? new Date(startsAt).toISOString() : "",
-    endsAtIso: endsAt ? new Date(endsAt).toISOString() : "",
-  };
+  const editFormInput = (() => {
+    const utcTimes = rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: startsAt,
+      endsAtLocal: endsAt,
+      staffTimezone,
+      tenantTimezone,
+    });
+    const startsAtIso = "error" in utcTimes ? "" : utcTimes.startsAt;
+    const endsAtIso = "error" in utcTimes ? "" : utcTimes.endsAt;
+    return {
+      clinicId,
+      shiftType,
+      startsAt,
+      endsAt,
+      notes,
+      startsAtIso,
+      endsAtIso,
+    };
+  })();
 
   const editReasonRequired =
     viewingExistingShift != null &&
@@ -222,14 +237,24 @@ function RosterShiftDrawerBody({
       setError(manageDeniedReason);
       return;
     }
+    const utcTimes = rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: startsAt,
+      endsAtLocal: endsAt,
+      staffTimezone,
+      tenantTimezone,
+    });
+    if ("error" in utcTimes) {
+      setError(utcTimes.error);
+      return;
+    }
     startTransition(async () => {
       const result = await createRosterShiftAction({
         tenantId,
         staffId,
         clinicId: clinicId || null,
         shiftType,
-        startsAt: new Date(startsAt).toISOString(),
-        endsAt: new Date(endsAt).toISOString(),
+        startsAt: utcTimes.startsAt,
+        endsAt: utcTimes.endsAt,
         notes: notes || null,
         adjustmentReason,
       });
@@ -259,14 +284,25 @@ function RosterShiftDrawerBody({
       return;
     }
 
+    const utcTimes = rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: startsAt,
+      endsAtLocal: endsAt,
+      staffTimezone,
+      tenantTimezone,
+    });
+    if ("error" in utcTimes) {
+      setError(utcTimes.error);
+      return;
+    }
+
     startTransition(async () => {
       const result = await updateRosterShiftAction({
         tenantId,
         shiftId: viewingExistingShift.id,
         clinicId: clinicId || null,
         shiftType,
-        startsAt: new Date(startsAt).toISOString(),
-        endsAt: new Date(endsAt).toISOString(),
+        startsAt: utcTimes.startsAt,
+        endsAt: utcTimes.endsAt,
         notes: notes || null,
         editReason: editReasonRequired ? editReason : null,
       });

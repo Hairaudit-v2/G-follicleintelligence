@@ -4,8 +4,10 @@
 
 import {
   calendarDateStringFromInstant,
+  fromDatetimeLocalValueInTimezone,
   normalizeCalendarTimezone,
   parseIsoUtcMs,
+  toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
 import {
   shiftTypeFromStandardDay,
@@ -381,23 +383,79 @@ export type RosterShiftDrawerFormValues = {
   notes: string;
 };
 
-/** Datetime-local string for roster shift drawer inputs. */
-export function toRosterShiftDatetimeLocal(iso: string): string {
+export function resolveRosterShiftStaffTimezone(
+  staffTimezone: string | null | undefined,
+  tenantTimezone: string
+): string {
+  return normalizeCalendarTimezone(staffTimezone?.trim() || tenantTimezone);
+}
+
+/** Datetime-local string for roster shift drawer inputs in staff/tenant timezone. */
+export function toRosterShiftDatetimeLocal(
+  iso: string,
+  staffTimezone?: string | null,
+  tenantTimezone?: string
+): string {
+  if (staffTimezone?.trim() || tenantTimezone?.trim()) {
+    return toDatetimeLocalValueInTimezone(
+      iso,
+      resolveRosterShiftStaffTimezone(staffTimezone, tenantTimezone ?? "UTC")
+    );
+  }
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+export const ROSTER_SHIFT_START_END_REQUIRED_MESSAGE =
+  "Start and end times are required.";
+
+export const ROSTER_SHIFT_INVALID_TIME_RANGE_MESSAGE =
+  "Shift end must be after start.";
+
+/** Convert drawer datetime-local values to UTC ISO using staff/tenant timezone. */
+export function rosterShiftDatetimeLocalToUtcIso(input: {
+  startsAtLocal: string;
+  endsAtLocal: string;
+  staffTimezone?: string | null;
+  tenantTimezone: string;
+}): { startsAt: string; endsAt: string } | { error: string } {
+  const tz = resolveRosterShiftStaffTimezone(input.staffTimezone, input.tenantTimezone);
+  const startsAt = fromDatetimeLocalValueInTimezone(input.startsAtLocal.trim(), tz);
+  const endsAt = fromDatetimeLocalValueInTimezone(input.endsAtLocal.trim(), tz);
+  if (!startsAt || !endsAt) {
+    return { error: ROSTER_SHIFT_START_END_REQUIRED_MESSAGE };
+  }
+  if (Date.parse(endsAt) <= Date.parse(startsAt)) {
+    return { error: ROSTER_SHIFT_INVALID_TIME_RANGE_MESSAGE };
+  }
+  return { startsAt, endsAt };
+}
+
+/** Match a roster grid shift to a staff/day cell using timezone-aware local date. */
+export function shiftMatchesRosterCellDate(
+  shift: { staff_id: string; starts_at: string; localDate?: string },
+  staffId: string,
+  localDate: string
+): boolean {
+  if (shift.staff_id !== staffId) return false;
+  const cellDate = localDate.slice(0, 10);
+  if (shift.localDate) return shift.localDate.slice(0, 10) === cellDate;
+  return shift.starts_at.slice(0, 10) === cellDate;
+}
+
 /** Form values for an existing shift — never derived from create defaults. */
 export function buildRosterShiftFormValuesFromShift(
-  shift: RosterShiftSnapshot
+  shift: RosterShiftSnapshot,
+  staffTimezone?: string | null,
+  tenantTimezone?: string
 ): RosterShiftDrawerFormValues {
   return {
     clinicId: shift.clinic_id?.trim() || "",
     shiftType: shift.shift_type,
-    startsAt: toRosterShiftDatetimeLocal(shift.starts_at),
-    endsAt: toRosterShiftDatetimeLocal(shift.ends_at),
+    startsAt: toRosterShiftDatetimeLocal(shift.starts_at, staffTimezone, tenantTimezone),
+    endsAt: toRosterShiftDatetimeLocal(shift.ends_at, staffTimezone, tenantTimezone),
     notes: shift.notes ?? "",
   };
 }

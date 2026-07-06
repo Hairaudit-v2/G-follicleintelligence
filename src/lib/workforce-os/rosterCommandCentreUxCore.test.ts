@@ -22,6 +22,10 @@ import {
   resolveRosterDrawerStaffName,
   resolveRosterPayloadWeekDayDates,
   rosterAvailabilityLocalDateFromIso,
+  rosterShiftDatetimeLocalToUtcIso,
+  ROSTER_SHIFT_INVALID_TIME_RANGE_MESSAGE,
+  ROSTER_SHIFT_START_END_REQUIRED_MESSAGE,
+  shiftMatchesRosterCellDate,
   ROSTER_GRID_SCROLL_CLASSES,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
@@ -333,5 +337,58 @@ test("rosterAvailabilityLocalDateFromIso respects AWST vs AEST on the same UTC i
   assert.equal(
     rosterAvailabilityLocalDateFromIso(iso, "Australia/Sydney", "Australia/Perth"),
     "2026-06-06"
+  );
+});
+
+test("rosterShiftDatetimeLocalToUtcIso converts Sydney wall times to UTC for manual create", () => {
+  const result = rosterShiftDatetimeLocalToUtcIso({
+    startsAtLocal: "2026-07-06T09:00",
+    endsAtLocal: "2026-07-06T17:00",
+    staffTimezone: "Australia/Sydney",
+    tenantTimezone: "Australia/Sydney",
+  });
+  assert.ok(!("error" in result));
+  assert.equal(result.startsAt, "2026-07-05T23:00:00.000Z");
+  assert.equal(result.endsAt, "2026-07-06T07:00:00.000Z");
+});
+
+test("shiftMatchesRosterCellDate uses localDate not UTC prefix for AU shifts", () => {
+  const shift = {
+    staff_id: STAFF_PAUL,
+    starts_at: "2026-07-05T23:00:00.000Z",
+    localDate: "2026-07-06",
+  };
+  assert.equal(shiftMatchesRosterCellDate(shift, STAFF_PAUL, "2026-07-06"), true);
+  assert.equal(shiftMatchesRosterCellDate(shift, STAFF_PAUL, "2026-07-05"), false);
+  assert.equal(shift.starts_at.slice(0, 10), "2026-07-05");
+});
+
+test("rosterShiftDatetimeLocalToUtcIso validates missing and invalid ranges", () => {
+  assert.deepEqual(
+    rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: "",
+      endsAtLocal: "2026-07-06T17:00",
+      tenantTimezone: "Australia/Sydney",
+    }),
+    { error: ROSTER_SHIFT_START_END_REQUIRED_MESSAGE }
+  );
+  assert.deepEqual(
+    rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: "2026-07-06T17:00",
+      endsAtLocal: "2026-07-06T09:00",
+      tenantTimezone: "Australia/Sydney",
+    }),
+    { error: ROSTER_SHIFT_INVALID_TIME_RANGE_MESSAGE }
+  );
+});
+
+test("toRosterShiftDatetimeLocal uses staff timezone for edit form display", () => {
+  assert.equal(
+    toRosterShiftDatetimeLocal(
+      "2026-07-05T23:00:00.000Z",
+      "Australia/Sydney",
+      "Australia/Sydney"
+    ),
+    "2026-07-06T09:00"
   );
 });

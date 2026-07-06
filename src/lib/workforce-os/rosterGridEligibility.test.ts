@@ -226,4 +226,26 @@ test("RosterCommandCentreView passes canManage into RosterShiftDrawer", () => {
   const src = readFileSync("src/components/fi/workforce/RosterCommandCentreView.tsx", "utf8");
   assert.ok(src.includes("canManage={canManage}"));
   assert.ok(src.includes("manageDeniedReason={manageDeniedReason}"));
+  assert.ok(src.includes("tenantTimezone={payload.tenantTimezone}"));
+  assert.ok(src.includes("staffTimezone={payload.staffTimezoneByStaffId"));
+});
+
+test("empty cell manual add uses createRosterShiftAction with timezone-aware UTC conversion", () => {
+  const drawerSrc = readFileSync("src/components/fi/workforce/RosterShiftDrawer.tsx", "utf8");
+  assert.ok(drawerSrc.includes("createRosterShiftAction"));
+  assert.ok(drawerSrc.includes("rosterShiftDatetimeLocalToUtcIso"));
+  assert.ok(!drawerSrc.includes("new Date(startsAt).toISOString()"));
+  assert.ok(drawerSrc.includes('saveLabel="Add shift"'));
+  assert.ok(drawerSrc.includes("handleCreateManual"));
+  assert.ok(drawerSrc.includes("updateRosterShiftAction"));
+});
+
+test("RosterWeekGrid matches shifts to cells via timezone-aware localDate", () => {
+  const gridSrc = readFileSync("src/components/fi/workforce/RosterWeekGrid.tsx", "utf8");
+  assert.ok(gridSrc.includes("shiftMatchesRosterCellDate"));
+  const loaderSrc = readFileSync(
+    "src/lib/workforce-os/workforceRosterCommandCentre.server.ts",
+    "utf8"
+  );
+  assert.ok(loaderSrc.includes("localDate: localDateFromIso"));
 });

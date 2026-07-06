@@ -275,7 +275,7 @@ export function RosterCommandCentreView({
     openShiftDrawer({
       mode: "edit",
       staffMemberId: shift.staff_id,
-      localDate: shift.starts_at.slice(0, 10),
+      localDate: shift.localDate ?? shift.starts_at.slice(0, 10),
       shiftId: shift.id,
       selectedShift: shift,
     });
@@ -749,6 +749,8 @@ export function RosterCommandCentreView({
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           selectedShift={drawerShift}
           clinics={payload.clinics}
+          staffTimezone={payload.staffTimezoneByStaffId[drawerStaffMemberId] ?? null}
+          tenantTimezone={payload.tenantTimezone}
           canManage={canManage}
           manageDeniedReason={manageDeniedReason}
           canManageStandardHours={canManageStandardHours}

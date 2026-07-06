@@ -22,6 +22,7 @@ import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore"
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
   ROSTER_GRID_SCROLL_CLASSES,
+  shiftMatchesRosterCellDate,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { cn } from "@/lib/utils";
 
@@ -58,9 +59,7 @@ function shiftsForCell(
   staffId: string,
   localDate: string
 ): RosterGridShift[] {
-  return shifts.filter(
-    (s) => s.staff_id === staffId && s.starts_at.slice(0, 10) === localDate.slice(0, 10)
-  );
+  return shifts.filter((s) => shiftMatchesRosterCellDate(s, staffId, localDate));
 }
 
 function availabilityForCell(

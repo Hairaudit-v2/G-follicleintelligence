@@ -119,6 +119,8 @@ export type RosterCommandCentreSummaryMetrics = {
 export type RosterGridShift = FiStaffShiftRow & {
   staffName: string;
   shift_source: StandardHoursShiftSource;
+  /** Staff/tenant-local calendar day for grid cell placement. */
+  localDate: string;
 };
 
 export type RosterGridAvailabilityCell = {
@@ -154,6 +156,8 @@ export type RosterCommandCentrePayload = {
   staffMissingStandardHours: Array<{ id: string; name: string }>;
   summary: RosterCommandCentreSummaryMetrics;
   preselectedEventKey: string | null;
+  tenantTimezone: string;
+  staffTimezoneByStaffId: Record<string, string | null>;
 };
 
 export type LoadRosterCommandCentreInput = {
@@ -629,6 +633,11 @@ export async function loadRosterCommandCentre(
     ...shift,
     staffName: staffNameById.get(shift.staff_id) ?? "Staff",
     shift_source: shift.shift_source ?? "manual",
+    localDate: localDateFromIso(
+      shift.starts_at,
+      staffTimezoneById.get(shift.staff_id),
+      tenantTimezone
+    ),
   }));
 
   let blockRows = (blocksRes.data ?? []).map((row) =>
@@ -733,6 +742,8 @@ export async function loadRosterCommandCentre(
     staffMissingStandardHours,
     summary,
     preselectedEventKey: input.preselectedEventKey?.trim() || null,
+    tenantTimezone,
+    staffTimezoneByStaffId: Object.fromEntries(staffTimezoneById.entries()),
   };
 }
 

@@ -199,15 +199,21 @@ test("RosterShiftDrawer passes canManage from command centre and supports genera
     "canManage={canManage}",
     "canManageStandardHours={canManageStandardHours}",
     "manageDeniedReason={manageDeniedReason}",
+    "tenantTimezone={payload.tenantTimezone}",
+    "staffTimezone={payload.staffTimezoneByStaffId",
     "handleShiftClick"
   );
   sourceIncludes(
     ROSTER_SHIFT_DRAWER,
     "canManage?: boolean",
     "canManageStandardHours?: boolean",
+    "tenantTimezone: string",
+    "staffTimezone?: string | null",
     'data-testid="roster-shift-manage-denied"',
     'data-testid="roster-shift-cancel-confirm"',
     "ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS",
+    "createRosterShiftAction",
+    "rosterShiftDatetimeLocalToUtcIso",
     "updateRosterShiftAction",
     "openInEditMode",
     "isGeneratedShiftSource",
