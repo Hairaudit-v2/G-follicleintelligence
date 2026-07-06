@@ -1,7 +1,11 @@
 import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test";
 
 import { loadRepoEnvFiles } from "./scripts/lib/loadRepoEnvFiles.mjs";
-import { hasDemoCredentials } from "./e2e/helpers/credentials";
+import {
+  hasDemoCredentials,
+  hasRosterManagerCredentials,
+  hasRosterViewOnlyCredentials,
+} from "./e2e/helpers/credentials";
 
 loadRepoEnvFiles();
 
@@ -64,7 +68,28 @@ const authenticatedProjects: PlaywrightTestConfig["projects"] = hasDemoCredentia
       name: `${browser.name}-authenticated`,
       use: { ...browser.use },
       grep: /@authenticated|@mutation/,
+      grepInvert: /@roster-manager|@roster-view-only/,
       testMatch: /journeys\/.*\.spec\.ts|fi-operational-day\.spec\.ts|fi-ux-workspace-shell-validation\.spec\.ts|fi-ux-tablet-layout\.spec\.ts|calendar-os-.*\.spec\.ts/,
+    }))
+  : [];
+
+const rosterManagerProjects: PlaywrightTestConfig["projects"] = hasRosterManagerCredentials()
+  ? activeBrowsers().map((browser) => ({
+      name: `${browser.name}-roster-manager`,
+      use: { ...browser.use },
+      grep: /@roster-manager/,
+      testMatch: /journeys\/roster-permission-validation\.spec\.ts/,
+      timeout: 300_000,
+    }))
+  : [];
+
+const rosterViewOnlyProjects: PlaywrightTestConfig["projects"] = hasRosterViewOnlyCredentials()
+  ? activeBrowsers().map((browser) => ({
+      name: `${browser.name}-roster-view-only`,
+      use: { ...browser.use },
+      grep: /@roster-view-only/,
+      testMatch: /journeys\/roster-permission-validation\.spec\.ts/,
+      timeout: 180_000,
     }))
   : [];
 
@@ -84,5 +109,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: process.env.CI ? "retain-on-failure" : "off",
   },
-  projects: [...publicProjects, ...authenticatedProjects],
+  projects: [
+    ...publicProjects,
+    ...authenticatedProjects,
+    ...rosterManagerProjects,
+    ...rosterViewOnlyProjects,
+  ],
 });

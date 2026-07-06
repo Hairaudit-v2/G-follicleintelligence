@@ -54,3 +54,45 @@ export function staffPin(): string {
 export function allowsMutations(): boolean {
   return process.env.FI_E2E_ALLOW_MUTATIONS === "1" && hasDemoCredentials();
 }
+
+/** Paul (owner) has linked auth + portal access; manager@ is tenant_backend without admin row. */
+const DEFAULT_ROSTER_MANAGER_EMAIL = "paul@evolvedhair.com.au";
+const DEFAULT_ROSTER_VIEW_ONLY_EMAIL = "danicamiloseski24@gmail.com";
+
+export function hasRosterManagerCredentials(): boolean {
+  return Boolean(
+    process.env.FI_E2E_TENANT_ID?.trim() &&
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() &&
+      rosterManagerEmail(),
+  );
+}
+
+export function rosterManagerEmail(): string {
+  const email =
+    process.env.FI_E2E_ROSTER_MANAGER_EMAIL?.trim() ||
+    process.env.FI_E2E_ROSTER_MANAGER_EMAILS?.split(",")[0]?.trim() ||
+    DEFAULT_ROSTER_MANAGER_EMAIL;
+  if (!email) throw new Error("Missing FI_E2E_ROSTER_MANAGER_EMAIL");
+  return email;
+}
+
+export function hasRosterViewOnlyCredentials(): boolean {
+  return Boolean(
+    process.env.FI_E2E_TENANT_ID?.trim() &&
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() &&
+      rosterViewOnlyEmail(),
+  );
+}
+
+export function rosterViewOnlyEmail(): string {
+  const email = process.env.FI_E2E_ROSTER_VIEW_ONLY_EMAIL?.trim() || DEFAULT_ROSTER_VIEW_ONLY_EMAIL;
+  if (!email) throw new Error("Missing FI_E2E_ROSTER_VIEW_ONLY_EMAIL");
+  return email;
+}
+
+/** Roster shift mutations on Evolved tenant (manager login path). */
+export function allowsRosterMutations(): boolean {
+  return process.env.FI_E2E_ALLOW_MUTATIONS === "1" && hasRosterManagerCredentials();
+}
