@@ -11,6 +11,7 @@ import { isTenantBackendPortalAllowed } from "@/src/lib/fiOs/tenantBackendPortal
 import { isFiOsCrossTenantDirectoryRole } from "./fiOsRoles";
 import { isFiPortalStaff, loadFiOsIdentity } from "./fiOsIdentity.server";
 import { attemptStaffTenantPortalRepair } from "@/src/lib/workforce/staffTenantLinkRepair.server";
+import { resolveWorkspaceAccessForAuthUser } from "@/src/lib/fiOs/workspaceAccessResolver.server";
 
 async function resolveTenantPortalMembershipAuthUserId(sessionAuthUserId: string): Promise<string> {
   const imp = await getFiOsImpersonationTargetAuthUserId(sessionAuthUserId);
@@ -123,6 +124,14 @@ export async function assertFiTenantPortalAccess(tenantId: string): Promise<void
 
   const backendOk = await isTenantBackendPortalAllowed(tid, row);
   if (!backendOk) {
+    redirect("/follicle-intelligence/login?notice=no_tenant_access");
+  }
+
+  const workspaceAccess = await resolveWorkspaceAccessForAuthUser({
+    tenantId: tid,
+    authUserId: authId,
+  });
+  if (!workspaceAccess.allowed) {
     redirect("/follicle-intelligence/login?notice=no_tenant_access");
   }
 }

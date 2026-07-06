@@ -12,6 +12,10 @@ import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImperso
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
+import {
+  buildWorkspaceStaffIdentity,
+  resolveWorkspaceGrantStaffIdForFiUser,
+} from "@/src/lib/fiOs/workspaceAccessResolver.server";
 
 import {
   canAccessTab as coreCanAccessTab,
@@ -86,21 +90,56 @@ async function loadActiveStaffRowForFiUser(
   tenantId: string,
   fiUserId: string
 ): Promise<{ id: string; staffRole: string } | null> {
+  const grantStaffId = await resolveWorkspaceGrantStaffIdForFiUser(tenantId, fiUserId);
+  if (!grantStaffId) return null;
+
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
     .select("id, staff_role, is_active")
     .eq("tenant_id", tenantId.trim())
-    .eq("fi_user_id", fiUserId.trim())
+    .eq("id", grantStaffId)
     .eq("is_active", true)
-    .order("created_at", { ascending: true })
-    .limit(1)
     .maybeSingle();
   if (error || !data) return null;
   return {
     id: String((data as { id: string }).id),
     staffRole: String((data as { staff_role: string | null }).staff_role ?? ""),
   };
+}
+
+async function loadStaffMemberSnapshotsForGrantStaffId(
+  tenantId: string,
+  fiStaffId: string
+): Promise<
+  Array<{
+    id: string;
+    fiStaffId: string | null;
+    roleCode: string | null;
+    archivedAt: string | null;
+    mergedInto: string | null;
+    employmentStatus: string;
+    systemAccessRevoked: boolean;
+  }>
+> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff_members")
+    .select(
+      "id, fi_staff_id, role_code, archived_at, merged_into, employment_status, system_access_revoked"
+    )
+    .eq("tenant_id", tenantId.trim())
+    .eq("fi_staff_id", fiStaffId.trim());
+  if (error || !data) return [];
+  return (data as Array<Record<string, unknown>>).map((r) => ({
+    id: String(r.id),
+    fiStaffId: r.fi_staff_id != null ? String(r.fi_staff_id) : null,
+    roleCode: r.role_code != null ? String(r.role_code) : null,
+    archivedAt: r.archived_at != null ? String(r.archived_at) : null,
+    mergedInto: r.merged_into != null ? String(r.merged_into) : null,
+    employmentStatus: String(r.employment_status ?? "active"),
+    systemAccessRevoked: Boolean(r.system_access_revoked),
+  }));
 }
 
 /**
@@ -157,17 +196,31 @@ export async function resolveStaffAccessPrincipal(
   const isTenantOwnerOverride = tenantAdminRole === "clinic_admin";
 
   const staffRow = await loadActiveStaffRowForFiUser(tid, fiUser.id);
+  const memberRows = staffRow
+    ? await loadStaffMemberSnapshotsForGrantStaffId(tid, staffRow.id)
+    : [];
+  const workspaceIdentity = buildWorkspaceStaffIdentity({
+    fiStaff: staffRow
+      ? {
+          id: staffRow.id,
+          staffRole: staffRow.staffRole,
+          isActive: true,
+          employmentStatus: "active",
+        }
+      : null,
+    memberRows,
+  });
 
   const roleKey =
-    normalizeStaffRoleKey(staffRow?.staffRole ?? null) ??
+    workspaceIdentity.roleKey ??
     normalizeStaffRoleKey(fiUser.role) ??
     normalizeStaffRoleKey(tenantAdminRole ?? null);
 
   return {
     tenantId: tid,
-    staffMemberId: staffRow?.id ?? null,
+    staffMemberId: workspaceIdentity.fiStaffId,
     roleKey,
-    rawRole: staffRow?.staffRole ?? fiUser.role ?? tenantAdminRole ?? null,
+    rawRole: workspaceIdentity.rawRole ?? fiUser.role ?? tenantAdminRole ?? null,
     isAdminOverride: isTenantOwnerOverride,
     fiUserId: fiUser.id,
     authUserId: sessionAuthId,
@@ -229,6 +282,7 @@ export async function loadStaffAccessGrants(
   staffMemberId: string | null
 ): Promise<StaffAccessGrantInput[]> {
   const tid = tenantId.trim();
+  /** Column `staff_member_id` references `fi_staff.id`, not `fi_staff_members.id`. */
   const sid = staffMemberId?.trim();
   if (!tid || !sid) return [];
   const supabase = supabaseAdmin();
