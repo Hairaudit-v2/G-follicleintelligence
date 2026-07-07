@@ -72,9 +72,9 @@ async function loadTenantTimeZone(
   tenantId: string
 ): Promise<string> {
   const { data, error } = await supabase
-    .from("fi_tenants")
+    .from("fi_tenant_settings")
     .select("default_timezone, metadata")
-    .eq("id", tenantId.trim())
+    .eq("tenant_id", tenantId.trim())
     .maybeSingle();
   if (error) throw new Error(error.message);
   return resolveTenantCalendarTimezone(

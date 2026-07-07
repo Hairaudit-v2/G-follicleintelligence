@@ -79,9 +79,9 @@ export async function runGoogleCalendarBackfillAction(
       const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
       const supabase = supabaseAdmin();
       const { data } = await supabase
-        .from("fi_tenants")
+        .from("fi_tenant_settings")
         .select("default_timezone, metadata")
-        .eq("id", tenantId.trim())
+        .eq("tenant_id", tenantId.trim())
         .maybeSingle();
       const tz = resolveTenantCalendarTimezone(
         (data as { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null) ??

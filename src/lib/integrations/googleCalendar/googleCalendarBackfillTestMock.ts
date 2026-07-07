@@ -56,16 +56,18 @@ export function createGoogleCalendarBackfillTestMock(input: {
   const bookings: Record<string, unknown>[] = [];
   const mappings: Record<string, unknown>[] = [];
   const syncHealth: Record<string, unknown>[] = [];
-  const tenants = [{ id: input.tenantId, default_timezone: "Australia/Perth", metadata: {} }];
+  const tenantSettings = [
+    { tenant_id: input.tenantId, default_timezone: "Australia/Perth", metadata: {} },
+  ];
 
   const client = {
     from(table: string) {
-      if (table === "fi_tenants") {
+      if (table === "fi_tenant_settings") {
         return {
           select: () => ({
             eq: (_c: string, val: string) => ({
               maybeSingle: async () => ({
-                data: tenants.find((t) => t.id === val) ?? null,
+                data: tenantSettings.find((t) => t.tenant_id === val) ?? null,
                 error: null,
               }),
             }),
