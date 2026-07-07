@@ -15,11 +15,10 @@ describe("developmentClinicAccess (pure)", () => {
     );
   });
 
-  it("allows CRM mutation roles and owner during development", () => {
-    for (const role of ["fi_admin", "admin", "crm_operator", "owner"] as const) {
+  it("allows CRM mutation roles, owner, and any tenant member during development", () => {
+    for (const role of ["fi_admin", "admin", "crm_operator", "owner", "member"] as const) {
       assert.equal(canUseDevelopmentClinicFeaturesFromFiUserRole(role), true, role);
     }
-    assert.equal(canUseDevelopmentClinicFeaturesFromFiUserRole("member"), false);
   });
 
   it("allows tenant clinic_admin and operations_admin", () => {
@@ -45,7 +44,7 @@ describe("developmentClinicAccess (pure)", () => {
         fiUserRole: "tenant_backend",
         tenantAdminRole: "dashboard_viewer",
       }),
-      false
+      true
     );
   });
 

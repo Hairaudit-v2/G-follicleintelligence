@@ -163,7 +163,7 @@ describe("buildCalendarOsBookingCardModel", () => {
     assert.equal(card.surgery, null);
   });
 
-  it("marks Google imports read-only and Timely imports draggable with source label", () => {
+  it("labels Google imports editable with source badge; Timely imports draggable with source label", () => {
     const google = buildCalendarOsBookingCardModel({
       booking: booking({
         id: "g1",
@@ -180,8 +180,8 @@ describe("buildCalendarOsBookingCardModel", () => {
       },
       calendarTimezone: "UTC",
     });
-    assert.equal(google.readOnlyExternal, true);
-    assert.equal(google.dragMutable, false);
+    assert.equal(google.readOnlyExternal, false);
+    assert.equal(google.dragMutable, true);
     assert.equal(google.sourceLabel, "Google Calendar");
 
     const timely = buildCalendarOsBookingCardModel({

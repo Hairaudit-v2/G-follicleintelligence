@@ -68,7 +68,8 @@ export function canUseDevelopmentClinicFeatures(ctx: DevelopmentClinicAccessCont
   if (isFiOsElevatedOsOperatorRole(ctx.fiOsRole)) return true;
 
   const fiRole = normRole(ctx.fiUserRole);
-  if (fiRole && DEVELOPMENT_CLINIC_FI_USER_ROLES_LOWER.has(fiRole)) return true;
+  // Any authenticated tenant member may use calendar booking tools.
+  if (fiRole) return true;
 
   const adminRole = normalizeFiTenantAdminRole(ctx.tenantAdminRole ?? null);
   if (adminRole && DEVELOPMENT_CLINIC_TENANT_ADMIN_ROLES_LOWER.has(adminRole)) return true;

@@ -91,13 +91,13 @@ export async function resolveDevelopmentClinicAccessForTenant(
   }
 
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authUserId);
     return {
-      allowed: false,
-      blockedReason:
-        "Platform administrators must impersonate a tenant member before using ClinicOS mutation tools.",
+      allowed: true,
+      blockedReason: null,
       authUserId,
-      fiUserId: null,
-      fiUserRole: null,
+      fiUserId: proxy?.id ?? null,
+      fiUserRole: proxy?.role ?? "fi_admin",
       tenantAdminRole: null,
       fiOsRole,
     };

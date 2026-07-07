@@ -8,6 +8,13 @@ import {
   anchorLabelForBookingRow,
   type BookingDisplayContextMaps,
 } from "@/src/lib/bookings/bookingDisplayContext";
+import {
+  extractPersonNameFromBookingTitle,
+  extractServiceLabelFromBookingTitle,
+  UNNAMED_PATIENT_LABEL,
+} from "@/src/lib/bookings/bookingDisplayName";
+import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
+import { classifyExternalCalendarEventType } from "@/src/lib/onboarding-os/googleCalendarConnectorCore";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
@@ -179,7 +186,10 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
   if (meta.deleted_from_provider === true || meta.deleted_locally === true) return null;
 
   const clientFields = calendarOsClientFieldsFromEvent(row);
-  const eventType = clientFields.eventType?.trim() || "consultation";
+  const storedType = clientFields.eventType?.trim() || "";
+  const classified = classifyExternalCalendarEventType(row.title, row.description);
+  const eventType =
+    classified !== "unknown" ? classified : storedType || "consultation";
   const safeMeta = sanitizeCalendarOsMetadataForClient(meta);
 
   return {
@@ -239,14 +249,29 @@ export function mapFiCalendarEventToBookingDisplay(
       ? Math.max(1, Math.round((endMs - startMs) / 60000))
       : 30;
 
-  const eventTypeLabel = humanizeEventType(clientFields.eventType ?? row.event_type ?? "event");
+  const storedType = clientFields.eventType?.trim() || row.event_type?.trim() || "";
+  const classified = classifyExternalCalendarEventType(row.title, row.description);
+  const eventType =
+    classified !== "unknown" ? classified : storedType || "consultation";
+  const eventTypeLabel = humanizeEventType(eventType);
+  const patientFromTitle = extractPersonNameFromBookingTitle(row.title);
+  const serviceFromTitle = extractServiceLabelFromBookingTitle(row.title);
+  const resolvedAnchor =
+    opts?.anchorLabel?.trim() && opts.anchorLabel.trim() !== UNNAMED_PATIENT_LABEL
+      ? opts.anchorLabel.trim()
+      : patientFromTitle ?? row.title?.trim() ?? eventTypeLabel;
+  const procedureLabel =
+    serviceFromTitle ??
+    opts?.procedureCatalogName?.trim() ??
+    bookingTypeLabel(eventType) ??
+    eventTypeLabel;
 
   return {
-    anchorLabel: opts?.anchorLabel?.trim() || row.title?.trim() || eventTypeLabel,
+    anchorLabel: resolvedAnchor,
     scalesSummary: null,
     durationMin,
     reminderHint: null,
-    procedureCatalogName: opts?.procedureCatalogName ?? eventTypeLabel,
+    procedureCatalogName: procedureLabel,
     procedureCatalogHex: opts?.procedureCatalogHex ?? null,
     suggestedPrice: null,
     patientEmail: null,

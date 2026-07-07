@@ -76,6 +76,19 @@ describe("CalendarOS GC-5 — calendar event mapping", () => {
     assert.equal(resolveCalendarOsProviderKind({ source: "fi_calendar_create" }), "fi");
   });
 
+  it("reclassifies consultation titles stored as surgery on read", () => {
+    const row = sampleEventRow({
+      title: "Hair transplant consultation - Aaron Diehl",
+      event_type: "surgery",
+    });
+    const booking = mapFiCalendarEventOverlapRowToBookingRow(row, "UTC");
+    assert.equal(booking!.booking_type, "consultation");
+
+    const display = mapFiCalendarEventToBookingDisplay(row);
+    assert.equal(display.anchorLabel, "Aaron Diehl");
+    assert.match(display.procedureCatalogName ?? "", /consultation/i);
+  });
+
   it("includes Google Meet link in booking display when present", () => {
     const display = mapFiCalendarEventToBookingDisplay(sampleEventRow());
     assert.equal(display.googleMeetUrl, "https://meet.google.com/abc-defg-hij");

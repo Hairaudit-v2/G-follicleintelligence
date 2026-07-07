@@ -27,7 +27,16 @@ import {
 import { mergeAppointmentProcedureMetadata } from "./appointmentMetadata";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { FiBookingRow } from "./types";
-import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import {
+  mapFiCalendarEventOverlapRowToBookingRow,
+} from "@/src/lib/calendar/calendarOsEventsCore";
+import {
+  loadFiCalendarEventForTenant,
+  updateFiCalendarEventSchedule,
+} from "@/src/lib/calendar/calendarOsEvents.server";
+import {
+  buildLocalRescheduleMetadataPatch,
+} from "@/src/lib/calendar-os/calendarOsBookingInteractionCore";
 import { AppointmentConflictError } from "./bookingErrors";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 
@@ -287,11 +296,8 @@ export async function rescheduleCalendarAppointment(
   params: RescheduleCalendarAppointmentParams
 ): Promise<CalendarAppointment> {
   const existing = await loadBookingForTenant(params.tenantId, params.appointmentId);
-  if (!existing) throw new Error("Appointment not found.");
-  if (isCalendarOsEventRow(existing)) {
-    throw new Error(
-      "Imported Google Calendar events are read-only in FI OS. Edit in Google Calendar."
-    );
+  if (!existing) {
+    return rescheduleCalendarOsEventAppointment(params);
   }
 
   const catalog = servicesByBookingType(await loadFiServicesForTenant(params.tenantId));
@@ -376,6 +382,80 @@ export async function rescheduleCalendarAppointment(
   const updated = await updateBooking(updatePayload);
 
   return mapBookingToCalendarAppointment(updated);
+}
+
+async function rescheduleCalendarOsEventAppointment(
+  params: RescheduleCalendarAppointmentParams
+): Promise<CalendarAppointment> {
+  const event = await loadFiCalendarEventForTenant(params.tenantId, params.appointmentId);
+  if (!event) throw new Error("Appointment not found.");
+
+  const catalog = servicesByBookingType(await loadFiServicesForTenant(params.tenantId));
+  const nextStart = params.startAt?.trim() ?? event.start_time?.trim() ?? "";
+  const procedure = params.procedure?.trim() ?? event.event_type?.trim() ?? "consultation";
+  let nextEnd = params.endAt?.trim();
+
+  if (!nextStart) throw new Error("Missing start time.");
+  if (!nextEnd) {
+    const existingStart = event.start_time?.trim() ?? nextStart;
+    const existingEnd = event.end_time?.trim() ?? nextStart;
+    const durationMs = Date.parse(existingEnd) - Date.parse(existingStart);
+    const durationMin =
+      Number.isFinite(durationMs) && durationMs > 0
+        ? Math.round(durationMs / 60_000)
+        : defaultProcedureDurationMinutes(procedure, catalog);
+    nextEnd = new Date(Date.parse(nextStart) + durationMin * 60_000).toISOString();
+  }
+
+  const bookingStub: FiBookingRow = {
+    id: event.id,
+    tenant_id: event.tenant_id,
+    lead_id: event.lead_id,
+    person_id: null,
+    patient_id: event.patient_id,
+    case_id: null,
+    clinic_id: null,
+    room_id: null,
+    room_required: false,
+    assigned_staff_id: null,
+    assigned_user_id: null,
+    booking_type: procedure,
+    booking_status: "scheduled",
+    title: event.title,
+    description: event.description,
+    start_at: event.start_time ?? nextStart,
+    end_at: event.end_time ?? nextEnd,
+    timezone: "UTC",
+    location: event.location,
+    metadata: { calendar_os_event: true },
+    cancelled_at: null,
+    cancelled_by_user_id: null,
+    cancellation_reason: null,
+    created_by_user_id: null,
+    created_at: event.created_at,
+    updated_at: event.updated_at,
+  };
+
+  const metadataPatch = buildLocalRescheduleMetadataPatch(
+    event.metadata ?? {},
+    bookingStub,
+    event.start_time ?? nextStart,
+    event.end_time ?? nextEnd
+  );
+
+  const updated = await updateFiCalendarEventSchedule({
+    tenantId: params.tenantId,
+    eventId: params.appointmentId,
+    startTime: nextStart,
+    endTime: nextEnd,
+    title: params.title !== undefined ? params.title : undefined,
+    eventType: params.procedure?.trim() || undefined,
+    metadataPatch,
+  });
+
+  const mapped = mapFiCalendarEventOverlapRowToBookingRow(updated, "UTC");
+  if (!mapped) throw new Error("Could not map rescheduled calendar event.");
+  return mapBookingToCalendarAppointment(mapped);
 }
 
 /** Re-export for route handlers mapping 409 conflicts. */

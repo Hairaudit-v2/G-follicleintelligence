@@ -47,12 +47,12 @@ function booking(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id">): FiBooking
 }
 
 describe("calendarOsBookingInteractionCore", () => {
-  it("blocks drag for imported Google CalendarOS events", () => {
+  it("allows drag for imported Google CalendarOS events", () => {
     const row = booking({
       id: "g1",
       metadata: { calendar_os_event: true, source: "google" },
     });
-    assert.equal(isBookingDragMutable(row), false);
+    assert.equal(isBookingDragMutable(row), true);
   });
 
   it("allows drag for FI bookings and Timely imports", () => {

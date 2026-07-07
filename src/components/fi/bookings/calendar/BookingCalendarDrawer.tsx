@@ -21,6 +21,7 @@ import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/Clinic
 import { BookingFollowUpCalendarPanel } from "@/src/components/fi-admin/followUp/BookingFollowUpCalendarPanel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import { extractPersonNameFromBookingTitle } from "@/src/lib/bookings/bookingDisplayName";
 import {
   bookingNeedsSourceUpdateWarning,
   externalSourceLabelForBooking,
@@ -236,7 +237,11 @@ export function BookingCalendarDrawer({
     calendarOsEventTypeLabel?.trim() ||
     procedureLabel?.trim() ||
     humanizeBookingType(row.booking_type);
-  const headerName = patientSummary?.trim() || row.title?.trim() || typeLabel;
+  const headerName =
+    patientSummary?.trim() ||
+    extractPersonNameFromBookingTitle(row.title) ||
+    row.title?.trim() ||
+    typeLabel;
   const locationLabel = row.location?.trim() || "—";
   const sourceLabel =
     calendarOsSourceLabel?.trim() ||
@@ -391,8 +396,8 @@ export function BookingCalendarDrawer({
             <div className={cn(fiOsChromeClasses.rightDrawerBodyScroll, "px-3 py-3")}>
               {calendarOsEvent ? (
                 <p className="mb-3 rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-2 text-[11px] leading-snug text-cyan-100/90">
-                  CalendarOS event — read-only in this phase. Edit in Google Calendar or the
-                  CalendarOS test panel.
+                  Imported from Google Calendar. Reschedules here update FI OS; sync back to Google
+                  when the calendar connection is active.
                 </p>
               ) : null}
 
@@ -406,9 +411,9 @@ export function BookingCalendarDrawer({
                 </p>
               ) : null}
 
-              {!calendarOsEvent ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {row.patient_id ? (
+              <div className="grid grid-cols-2 gap-2">
+                {!calendarOsEvent ? (
+                  row.patient_id ? (
                     <Link
                       href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}
                       className={osActionClass}
@@ -419,7 +424,9 @@ export function BookingCalendarDrawer({
                     <span className={osActionMuted} title="No linked patient">
                       Open patient
                     </span>
-                  )}
+                  )
+                ) : null}
+                {!calendarOsEvent ? (
                   <button
                     type="button"
                     className={osActionClass}
@@ -429,13 +436,17 @@ export function BookingCalendarDrawer({
                   >
                     Start consultation
                   </button>
+                ) : null}
+                {!calendarOsEvent ? (
                   <Link
                     href={`/fi-admin/${tenantId}/foundation-integrity`}
                     className={osActionClass}
                   >
                     Patient twin
                   </Link>
-                  {row.case_id ? (
+                ) : null}
+                {!calendarOsEvent ? (
+                  row.case_id ? (
                     <Link
                       href={`/fi-admin/${tenantId}/cases/${row.case_id}`}
                       className={osActionClass}
@@ -446,50 +457,54 @@ export function BookingCalendarDrawer({
                     <span className={osActionMuted} title="No linked case">
                       Open case
                     </span>
-                  )}
-                  <button
-                    type="button"
-                    className={osActionClass}
-                    disabled={busy || !canRescheduleOrComplete}
-                    title={!mut ? "No booking edit permission" : undefined}
-                    onClick={() => {
-                      onEdit(row);
-                      onClose();
-                    }}
-                  >
-                    Reschedule
-                  </button>
-                  <button
-                    type="button"
-                    className={osActionClass}
-                    disabled={busy || !canMarkArrived}
-                    title={
-                      !canMarkArrived && mut && !cancelled && !completed
-                        ? "Only from scheduled or confirmed"
-                        : undefined
-                    }
-                    onClick={() => void onMarkArrived()}
-                  >
-                    Mark arrived
-                  </button>
-                  <button
-                    type="button"
-                    className={osActionGood}
-                    disabled={busy || !canRescheduleOrComplete}
-                    onClick={() => void onComplete()}
-                  >
-                    Mark completed
-                  </button>
-                  <button
-                    type="button"
-                    className={osActionDanger}
-                    disabled={busy || !canRescheduleOrComplete}
-                    onClick={() => void onCancel()}
-                  >
-                    Cancel booking
-                  </button>
-                </div>
-              ) : null}
+                  )
+                ) : null}
+                <button
+                  type="button"
+                  className={osActionClass}
+                  disabled={busy || !canRescheduleOrComplete}
+                  title={!mut ? "No booking edit permission" : undefined}
+                  onClick={() => {
+                    onEdit(row);
+                    onClose();
+                  }}
+                >
+                  Reschedule
+                </button>
+                {!calendarOsEvent ? (
+                  <>
+                    <button
+                      type="button"
+                      className={osActionClass}
+                      disabled={busy || !canMarkArrived}
+                      title={
+                        !canMarkArrived && mut && !cancelled && !completed
+                          ? "Only from scheduled or confirmed"
+                          : undefined
+                      }
+                      onClick={() => void onMarkArrived()}
+                    >
+                      Mark arrived
+                    </button>
+                    <button
+                      type="button"
+                      className={osActionGood}
+                      disabled={busy || !canRescheduleOrComplete}
+                      onClick={() => void onComplete()}
+                    >
+                      Mark completed
+                    </button>
+                    <button
+                      type="button"
+                      className={osActionDanger}
+                      disabled={busy || !canRescheduleOrComplete}
+                      onClick={() => void onCancel()}
+                    >
+                      Cancel booking
+                    </button>
+                  </>
+                ) : null}
+              </div>
 
               {!calendarOsEvent ? (
                 <BookingFollowUpCalendarPanel
@@ -762,9 +777,21 @@ export function BookingCalendarDrawer({
               {calendarOsEvent ? (
                 <>
                   <p className="rounded border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-200">
-                    CalendarOS event — read-only display. No edits from the calendar UI in this
-                    phase.
+                    Imported from Google Calendar. You can reschedule here; changes save in FI OS.
                   </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-100 hover:bg-white/10 disabled:opacity-50"
+                      disabled={busy || !canRescheduleOrComplete}
+                      onClick={() => {
+                        onEdit(row);
+                        onClose();
+                      }}
+                    >
+                      Reschedule
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     <BookingTypeBadge type={row.booking_type} />
                     <BookingStatusBadge status={row.booking_status} />

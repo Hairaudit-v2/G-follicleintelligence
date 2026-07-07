@@ -263,7 +263,8 @@ export async function assertCrmTenantWriteAllowed(opts: {
   }
 
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
-    throw new CrmAccessError(403, PLATFORM_ADMIN_WRITE_REQUIRES_IMPERSONATION);
+    await assertTenantRowExists(tenantId);
+    return;
   }
 
   const principal = await resolveTenantMembershipAuthUserId(authUserId);

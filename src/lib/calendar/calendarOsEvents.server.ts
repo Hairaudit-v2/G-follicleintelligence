@@ -59,6 +59,78 @@ export async function loadFiCalendarEventsForOverlap(
   return rows;
 }
 
+export async function loadFiCalendarEventForTenant(
+  tenantId: string,
+  eventId: string,
+  supabaseClientForTests?: SupabaseClient
+): Promise<FiCalendarEventOverlapRow | null> {
+  const tid = tenantId.trim();
+  const eid = eventId.trim();
+  if (!tid || !eid) return null;
+
+  const { data, error } = await (supabaseClientForTests ?? supabaseAdmin())
+    .from("fi_calendar_events")
+    .select(FI_CALENDAR_EVENTS_OVERLAP_SELECT)
+    .eq("tenant_id", tid)
+    .eq("id", eid)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return (data as FiCalendarEventOverlapRow | null) ?? null;
+}
+
+export type UpdateFiCalendarEventScheduleParams = {
+  tenantId: string;
+  eventId: string;
+  startTime: string;
+  endTime: string;
+  title?: string | null;
+  eventType?: string | null;
+  metadataPatch?: Record<string, unknown>;
+};
+
+export async function updateFiCalendarEventSchedule(
+  params: UpdateFiCalendarEventScheduleParams,
+  supabaseClientForTests?: SupabaseClient
+): Promise<FiCalendarEventOverlapRow> {
+  const tid = params.tenantId.trim();
+  const eid = params.eventId.trim();
+  const startTime = params.startTime.trim();
+  const endTime = params.endTime.trim();
+  if (!tid || !eid || !startTime || !endTime) {
+    throw new Error("Missing tenant, event, or schedule fields.");
+  }
+
+  const supabase = supabaseClientForTests ?? supabaseAdmin();
+  const existing = await loadFiCalendarEventForTenant(tid, eid, supabase);
+  if (!existing) throw new Error("Calendar event not found.");
+
+  const metadata = {
+    ...(existing.metadata ?? {}),
+    ...(params.metadataPatch ?? {}),
+  };
+
+  const payload: Record<string, unknown> = {
+    start_time: startTime,
+    end_time: endTime,
+    metadata,
+    updated_at: new Date().toISOString(),
+  };
+  if (params.title !== undefined) payload.title = params.title;
+  if (params.eventType !== undefined) payload.event_type = params.eventType;
+
+  const { data, error } = await supabase
+    .from("fi_calendar_events")
+    .update(payload)
+    .eq("tenant_id", tid)
+    .eq("id", eid)
+    .select(FI_CALENDAR_EVENTS_OVERLAP_SELECT)
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as FiCalendarEventOverlapRow;
+}
+
 export {
   mapFiCalendarEventsToOperationalCalendar,
   CALENDAR_OS_EVENTS_OVERLAP_CAP,

@@ -36,7 +36,6 @@ export function isTimelyImportedBooking(row: Pick<FiBookingRow, "metadata">): bo
 export function isBookingDragMutable(
   row: Pick<FiBookingRow, "metadata" | "booking_status" | "cancelled_at">
 ): boolean {
-  if (isCalendarOsEventRow(row)) return false;
   if (row.booking_status === "completed") return false;
   if (isBookingCancelled(row)) return false;
   return true;
@@ -75,7 +74,13 @@ export function buildLocalRescheduleMetadataPatch(
 ): Record<string, unknown> {
   const base =
     existing && typeof existing === "object" && !Array.isArray(existing) ? { ...existing } : {};
-  if (isCalendarOsEventRow(booking)) return base;
+  if (isCalendarOsEventRow(booking)) {
+    return {
+      ...base,
+      [FI_LOCAL_RESCHEDULE_META_FLAG]: true,
+      fi_local_reschedule_at: new Date().toISOString(),
+    };
+  }
   if (!isTimelyImportedBooking(booking)) return base;
 
   const patch: Record<string, unknown> = {

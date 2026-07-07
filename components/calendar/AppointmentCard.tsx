@@ -19,10 +19,14 @@ import { durationMinutesFromPx, pxFromDurationMinutes } from "@/lib/calendar/dnd
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import { bookingCalendarChipSurface } from "@/src/lib/bookings/calendarLabels";
 import { cn } from "@/lib/utils";
-import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
+import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import {
+  extractPersonNameFromBookingTitle,
+  extractServiceLabelFromBookingTitle,
+  UNNAMED_PATIENT_LABEL,
+} from "@/src/lib/bookings/bookingDisplayName";
 import { parseAppointmentInvoicePreview } from "@/src/lib/bookings/appointmentInvoicePreview";
 import {
   addUtcMinutesToIso,
@@ -191,6 +195,19 @@ export function appointmentCardDataFromBooking(
 ): AppointmentCardData {
   const invoice = parseAppointmentInvoicePreview(booking);
   const meta = booking.metadata ?? {};
+  const patientFromTitle = extractPersonNameFromBookingTitle(booking.title);
+  const serviceFromTitle = extractServiceLabelFromBookingTitle(booking.title);
+  const anchorLabel = display?.anchorLabel?.trim();
+  const patientName =
+    anchorLabel && anchorLabel !== UNNAMED_PATIENT_LABEL
+      ? anchorLabel
+      : (patientFromTitle ?? booking.title?.trim()) || "Patient";
+  const procedureLabel =
+    serviceFromTitle ??
+    (display?.calendarOsEventTypeLabel?.trim() ||
+      display?.procedureCatalogName?.trim() ||
+      bookingTypeLabel(booking.booking_type) ||
+      undefined);
   const isVirtual = Boolean(
     meta.is_virtual ??
     meta.virtual ??
@@ -200,7 +217,7 @@ export function appointmentCardDataFromBooking(
 
   return {
     id: booking.id,
-    patientName: display?.anchorLabel?.trim() || booking.title?.trim() || "Patient",
+    patientName,
     procedureType: booking.booking_type,
     startAt: booking.start_at,
     endAt: booking.end_at,
@@ -212,10 +229,7 @@ export function appointmentCardDataFromBooking(
     status: booking.booking_status,
     isVirtual,
     avatarUrl: typeof meta.avatar_url === "string" ? meta.avatar_url : null,
-    procedureLabel:
-      display?.calendarOsEventTypeLabel?.trim() ||
-      display?.procedureCatalogName?.trim() ||
-      undefined,
+    procedureLabel,
     procedureCatalogColor: display?.procedureCatalogHex?.trim() || null,
     calendarOsSourceLabel: display?.calendarOsSourceLabel ?? null,
     calendarOsProvider: display?.calendarOsProvider ?? null,
@@ -224,7 +238,9 @@ export function appointmentCardDataFromBooking(
       (typeof meta.google_meet_url === "string" ? meta.google_meet_url.trim() : null) ||
       null,
     calendarOsEventTypeLabel: display?.calendarOsEventTypeLabel ?? null,
-    isSurgery: display?.operational?.isSurgery ?? booking.booking_type.trim() === "surgery",
+    isSurgery:
+      display?.operational?.isSurgery ??
+      (booking.booking_type.trim() === "surgery" && !serviceFromTitle?.match(/consult/i)),
     riskStatus: display?.operational?.riskStatus,
     readinessPercent: display?.operational?.readinessPercent ?? null,
     blockerCount: display?.operational?.blockerCount ?? 0,
@@ -872,14 +888,13 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
   const dimTerminal = cancelled || booking.booking_status === "completed";
-  const readOnlyCalendarOs = isCalendarOsEventRow(booking);
 
   return (
     <AppointmentCard
       appointment={appointment}
       layout={layout}
-      draggable={draggable && !dimTerminal && !readOnlyCalendarOs}
-      resizable={resizable && !dimTerminal && !readOnlyCalendarOs}
+      draggable={draggable && !dimTerminal}
+      resizable={resizable && !dimTerminal}
       onResizeEnd={onResizeEnd}
       onClick={onClick}
       className={className}
