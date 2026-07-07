@@ -58,7 +58,7 @@ describe("tenantBrandingFormCore", () => {
     assert.equal(tenantBrandingHasUploadedLogo({ ...sampleRow, metadata: {} }), false);
   });
 
-  it("merge preserves existing branding when incoming fields are blank", () => {
+  it("merge clears brand name when incoming is blank", () => {
     const merged = mergeTenantSettingsSavePayload(sampleRow, {
       brand_name: null,
       logo_url: null,
@@ -68,7 +68,7 @@ describe("tenantBrandingFormCore", () => {
       support_email: null,
       default_timezone: null,
     });
-    assert.equal(merged.brand_name, "Evolved Clinics");
+    assert.equal(merged.brand_name, null);
     assert.equal(merged.logo_url, "https://legacy.example/logo.png");
     assert.equal(merged.primary_colour, "#abcdef");
     assert.equal(merged.secondary_colour, "#222222");

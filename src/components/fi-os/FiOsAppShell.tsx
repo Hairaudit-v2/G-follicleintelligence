@@ -347,6 +347,8 @@ function FiOsAppShellBody({
             items={minimalNavItems}
             activeId={activeMinimalNavId}
             onMore={openMoreNav}
+            branding={branding}
+            brandName={brandName}
           />
         ) : null}
 
@@ -362,6 +364,7 @@ function FiOsAppShellBody({
               tenantId={tenantId}
               clinicLabel={clinicLabel}
               accentHex={accent}
+              branding={branding}
               workspaceProfileKey={workspaceProfileKey}
               workspaceFocusLine={workspaceFocusLine}
               userEmail={userEmail}

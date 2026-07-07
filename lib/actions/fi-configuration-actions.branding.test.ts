@@ -47,7 +47,7 @@ describe("upsertTenantSettingsAction branding merge", () => {
 
   it("save colours only preserves uploaded logo metadata companions on row", () => {
     const payload = simulateTenantSettingsSave(existing, {
-      brand_name: "",
+      brand_name: "Clinic",
       logo_url: "",
       primary_colour: "#7c3aed",
       secondary_colour: "",
@@ -60,7 +60,7 @@ describe("upsertTenantSettingsAction branding merge", () => {
     assert.equal(payload.brand_name, "Clinic");
   });
 
-  it("empty edit fields do not erase existing branding columns", () => {
+  it("empty brand name clears display name while other blank fields are preserved", () => {
     const payload = simulateTenantSettingsSave(existing, {
       brand_name: "",
       logo_url: "",
@@ -71,7 +71,7 @@ describe("upsertTenantSettingsAction branding merge", () => {
       default_timezone: "",
     });
     assert.deepEqual(payload, {
-      brand_name: "Clinic",
+      brand_name: null,
       logo_url: null,
       primary_colour: "#000000",
       secondary_colour: null,

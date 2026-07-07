@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { FiOsTenantSwitcher } from "@/src/components/fi-admin/shell/FiOsTenantSwitcher";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { getWorkspaceProfileLabel } from "@/src/config/fiWorkspaceProfiles";
 
@@ -29,6 +30,7 @@ export function FiOsTopBar({
   tenantId,
   clinicLabel,
   accentHex,
+  branding,
   workspaceProfileKey = null,
   workspaceFocusLine = null,
   userEmail,
@@ -51,6 +53,7 @@ export function FiOsTopBar({
   tenantId: string;
   clinicLabel: string;
   accentHex: string;
+  branding: NormalizedTenantBranding;
   /** When not default, shows a subtle workspace persona hint (Stage UI activation). */
   workspaceProfileKey?: FiWorkspaceProfileKey | null;
   /** Positive Stage 2 framing line when feature access is narrowed (non-admin viewers). */
@@ -175,6 +178,7 @@ export function FiOsTopBar({
               tenantId={tenantId}
               currentLabel={clinicLabel}
               accentHex={accentHex}
+              branding={branding}
             />
             {workspaceProfileKey && workspaceProfileKey !== "default" ? (
               <p className="mt-1 hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-400/75 sm:block">

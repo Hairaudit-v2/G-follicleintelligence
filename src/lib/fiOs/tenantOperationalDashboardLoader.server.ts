@@ -5,7 +5,6 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   loadTenantCalendarSettingsCached,
-  loadTenantConfigCached,
 } from "@/src/lib/performance/referenceDataCache.server";
 import { loadBookingsForOperatorView, loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -48,6 +47,8 @@ import {
 } from "@/src/lib/fiOs/receptionBoardModel";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+import { normalizeEffectiveBrandingForShell } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 
@@ -1063,8 +1064,7 @@ export async function loadTenantOperationalDashboard(
     if (staffRow) viewerStaffId = String((staffRow as { id: string }).id);
   }
 
-  const [tenantRow, calendarSettings, pipelineStages] = await Promise.all([
-    loadTenantConfigCached(tid),
+  const [calendarSettings, pipelineStages, effectiveBranding] = await Promise.all([
     loadTenantCalendarSettingsCached(tid),
     loadPipelineStages(
       {
@@ -1075,8 +1075,10 @@ export async function loadTenantOperationalDashboard(
       },
       supabase
     ),
+    resolveEffectiveBranding({ tenantId: tid }, supabase),
   ]);
-  const tenantName = String(tenantRow.name ?? "").trim() || tid;
+  const shellBranding = await normalizeEffectiveBrandingForShell(tid, effectiveBranding);
+  const tenantName = shellBranding.clinicDisplayName;
   const operationalCalendarTimezone = calendarSettings.calendarTimezone;
   const operationalLocalDayFull = computeOperationalLocalDayUtcWindow(
     now,

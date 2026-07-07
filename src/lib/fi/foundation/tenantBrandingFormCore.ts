@@ -64,7 +64,8 @@ export function mergeTenantSettingsSavePayload(
   };
 
   return {
-    brand_name: keep(incoming.brand_name, existing?.brand_name),
+    // Blank brand name is an explicit clear — unlike colours, which use "leave blank to keep".
+    brand_name: incoming.brand_name,
     logo_url: keep(incoming.logo_url, existing?.logo_url),
     primary_colour: keep(incoming.primary_colour, existing?.primary_colour),
     secondary_colour: keep(incoming.secondary_colour, existing?.secondary_colour),

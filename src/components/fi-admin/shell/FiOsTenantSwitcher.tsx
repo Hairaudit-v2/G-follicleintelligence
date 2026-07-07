@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Building2, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { TenantBrandMark } from "@/src/components/brand/TenantBrandMark";
+import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +24,12 @@ export function FiOsTenantSwitcher({
   tenantId,
   currentLabel,
   accentHex,
+  branding,
 }: {
   tenantId: string;
   currentLabel: string;
   accentHex: string;
+  branding: NormalizedTenantBranding;
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -66,7 +70,7 @@ export function FiOsTenantSwitcher({
           style={{ boxShadow: `inset 0 -1px 0 0 ${accentHex}22` }}
           aria-label="Switch clinic or tenant"
         >
-          <Building2 className="h-4 w-4 shrink-0 text-[#22C1FF]" aria-hidden />
+          <TenantBrandMark branding={branding} size="sm" />
           <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden />
         </button>

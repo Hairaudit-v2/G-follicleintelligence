@@ -412,6 +412,7 @@ export function TenantConfigurationPanel({
                 name="brand_name"
                 defaultValue={formInitial.brand_name}
                 disabled={!canEditBranding}
+                hint="Leave empty to clear tenant display name"
                 onChange={(v) => setDraftBrandName(v)}
               />
               <Field
