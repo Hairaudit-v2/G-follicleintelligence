@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 
 import { GoogleCalendarIntegrationProgressSection } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationProgressSection";
@@ -389,12 +388,12 @@ export function GoogleCalendarIntegrationCard({
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {oauthConfigured ? (
-          <Link
+          <a
             href={connectHref}
             className="inline-flex items-center rounded-lg bg-[#22C1FF] px-4 py-2 text-sm font-medium text-[#0a1424] hover:bg-[#4dd4ff]"
           >
             {connectLabel}
-          </Link>
+          </a>
         ) : (
           <button
             type="button"

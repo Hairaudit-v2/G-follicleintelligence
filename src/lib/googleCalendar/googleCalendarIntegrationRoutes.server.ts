@@ -39,11 +39,25 @@ function integrationsSettingsUrl(
   return `${base}?${params.toString()}`;
 }
 
+function isNextJsDataPrefetch(request?: Request): boolean {
+  if (!request) return false;
+  const headers = request.headers;
+  return (
+    headers.get("RSC") === "1" ||
+    headers.get("Next-Router-Prefetch") === "1" ||
+    headers.get("Purpose") === "prefetch"
+  );
+}
+
 export async function handleGoogleCalendarOAuthStart(
   tenantId: string,
-  opts: RouteOpts = {}
+  opts: RouteOpts & { request?: Request } = {}
 ): Promise<NextResponse> {
   try {
+    if (isNextJsDataPrefetch(opts.request)) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     await assertGoogleCalendarTenantAdminAccess(tenantId, opts);
 
     const result = await connectGoogleCalendar(tenantId);
