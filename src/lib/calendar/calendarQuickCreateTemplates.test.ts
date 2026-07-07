@@ -5,7 +5,8 @@ import { BOOKING_TYPES, isAllowedBookingType } from "@/src/lib/bookings/bookingP
 import { CALENDAR_QUICK_TEMPLATES } from "./calendarQuickCreateTemplates";
 
 describe("CALENDAR_QUICK_TEMPLATES (Stage 2A MVP)", () => {
-  it("exposes all seven receptionist quick-book types", () => {
+  it("exposes all eight receptionist quick-book types", () => {
+    assert.equal(CALENDAR_QUICK_TEMPLATES.length, 8);
     const labels = CALENDAR_QUICK_TEMPLATES.map((t) => t.label);
     assert.deepEqual(labels, [
       "Phone Consultation",
@@ -15,6 +16,7 @@ describe("CALENDAR_QUICK_TEMPLATES (Stage 2A MVP)", () => {
       "Follow Up",
       "Surgery Review",
       "Surgery",
+      "Blocker",
     ]);
   });
 
@@ -29,5 +31,9 @@ describe("CALENDAR_QUICK_TEMPLATES (Stage 2A MVP)", () => {
       CALENDAR_QUICK_TEMPLATES.find((t) => t.id === "phone_consult")?.catalogName,
       "Phone Consultation"
     );
+    const blocker = CALENDAR_QUICK_TEMPLATES.find((t) => t.id === "blocker");
+    assert.ok(blocker);
+    assert.equal(blocker!.bookingType, "other");
+    assert.notEqual(blocker!.bookingType, "surgery");
   });
 });
