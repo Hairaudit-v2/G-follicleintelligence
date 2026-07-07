@@ -47,6 +47,16 @@ FI_E2E_ALLOW_MUTATIONS=1 \
 NEXT_PUBLIC_SUPABASE_URL=<url> \
 SUPABASE_SERVICE_ROLE_KEY=<key> \
 pnpm exec playwright test e2e/calendar-os-v2-interactions.spec.ts --grep "@roster-view-only" --project=chromium-roster-view-only
+
+# Persisted drag — real fi_bookings PATCH + reload (SMK-3, no ?sample=1)
+FI_E2E_BASE_URL=https://<staging-host> \
+FI_E2E_TENANT_ID=<tenant-uuid> \
+FI_E2E_DEMO_ADMIN_EMAIL=<email> \
+FI_E2E_DEMO_ADMIN_PASSWORD=<password> \
+FI_E2E_ALLOW_MUTATIONS=1 \
+NEXT_PUBLIC_SUPABASE_URL=<url> \
+SUPABASE_SERVICE_ROLE_KEY=<key> \
+pnpm exec playwright test e2e/calendar-os-v2-persisted-drag.spec.ts --project=chromium-authenticated
 ```
 
 ---
@@ -94,6 +104,30 @@ pnpm exec playwright test e2e/calendar-os-v2-interactions.spec.ts --grep "@roste
 | Branded Timely confirm dialog | Still `window.confirm` — no `calendar-reschedule-confirm-dialog` test id yet |
 | Week/3-day right-click templates (scenario 2) | Day view only — SMK-3 |
 | Today/agenda revalidation (scenario 15) | Asserted in code; not browser-tested |
+| **Server PATCH + reload persistence** | **`e2e/calendar-os-v2-persisted-drag.spec.ts` (SMK-3)** |
+
+---
+
+## Persisted drag suite (SMK-3)
+
+**File:** `e2e/calendar-os-v2-persisted-drag.spec.ts`  
+**Tags:** `@authenticated @mutation`  
+**Data:** Real `fi_bookings` rows via `POST /api/tenants/{tenantId}/appointments` — **no** `?sample=1`. Titles use `SMOKETEST-*` prefix; auto-cancelled in `afterEach`.
+
+| Test | Asserts |
+|------|---------|
+| `I — real FI booking drag persists after reload` | Drag success toast; API `startAt` changes; reload keeps new time; single card |
+| `I-b — overlap drag on real booking rolls back` | Error toast; API `startAt` unchanged; card position restored; no duplicates |
+
+**Seed env (optional overrides):**
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | Resolve lead + staff on demo tenant |
+| `FI_E2E_CALENDAR_LEAD_ID` | Skip Supabase lead lookup |
+| `FI_E2E_CALENDAR_STAFF_ID` | Pin staff assignment |
+| `FI_E2E_CALENDAR_PERSISTED_DATE` | Pin calendar day (`YYYY-MM-DD`) |
+| `FI_E2E_CALENDAR_PERSISTED_HOUR_UTC` | Seed slot hour (default `6`) |
 
 ---
 
@@ -115,7 +149,7 @@ pnpm exec playwright test e2e/calendar-os-v2-interactions.spec.ts --grep "@roste
 | 12 | Attempt overlapping drag — rollback and toast error | **Pass** (code + e2e G) | Sample overlap pair under `?sample=1` | None |
 | 13 | 3-day view shows all 3 lanes, not only first lane | **Pass** (code + e2e H) | Playwright asserts 3 lane headers | None |
 | 14 | No duplicate bookings after drag/drop | **Pass** (code + e2e A/C/G) | `expectSingleBookingCard` in drag scenarios | None |
-| 15 | Live data surfaces revalidate after successful mutation | **Pass** (code) / **Pending staging** | `router.refresh()` after create (`onCreated`) and successful reschedule; optimistic Zustand upsert avoids hard reload | None for UX — server actions do not call `revalidatePath` directly; client refresh is intentional. Confirm Today/agenda surfaces update on staging refresh |
+| 15 | Live data surfaces revalidate after successful mutation | **Pass** (code) / **Partial e2e** | Client refresh on mutate; persisted drag spec verifies API after reload | Run SMK-3 on staging |
 
 ---
 
