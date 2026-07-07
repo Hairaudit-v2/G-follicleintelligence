@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
+import { CalendarOsDraggableBookingCard } from "@/src/components/calendar-os/CalendarOsDraggableBookingCard";
+import { CalendarOsDayColumnDropZone } from "@/src/components/calendar-os/CalendarOsDropZones";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -30,7 +32,6 @@ import {
   calendarOsDensityTokens,
   type CalendarOsDisplayDensity,
 } from "@/src/lib/calendar-os/calendarDisplayDensity";
-import { CalendarOsBookingCard } from "@/src/components/calendar-os/CalendarOsBookingCard";
 import { CalendarOsEmptyContext } from "@/src/components/calendar-os/CalendarOsEmptyContext";
 import { CalendarOsResourceLaneLabel } from "@/src/components/calendar-os/CalendarOsResourceLaneLabel";
 import { cn } from "@/lib/utils";
@@ -59,6 +60,15 @@ export type CalendarOsDayResourceViewProps = {
   onSelectBooking?: (booking: FiBookingRow) => void;
   highlightedBookingId?: string | null;
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
+  onEmptySlotContextMenu?: (info: {
+    clientX: number;
+    clientY: number;
+    dayKey: string;
+    columnId: string;
+    localStart: string;
+  }) => void;
+  canMutateBookings?: boolean;
+  pendingBookingIds?: Set<string>;
 };
 
 export function CalendarOsDayResourceView({
@@ -76,6 +86,9 @@ export function CalendarOsDayResourceView({
   onSelectBooking,
   highlightedBookingId,
   onEmptySlotClick,
+  onEmptySlotContextMenu,
+  canMutateBookings = false,
+  pendingBookingIds,
 }: CalendarOsDayResourceViewProps) {
   const tokens = calendarOsDensityTokens(density);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -188,6 +201,26 @@ export function CalendarOsDayResourceView({
     onEmptySlotClick(slot);
   };
 
+  const handleEmptySlotContextMenu = (e: MouseEvent<HTMLButtonElement>, rowId: string) => {
+    if (!onEmptySlotContextMenu) return;
+    e.preventDefault();
+    const slot = resolveCalendarEmptySlotClick({
+      dayKey: lane.dayKey,
+      columnId: rowId,
+      clientY: e.clientY,
+      targetRect: e.currentTarget.getBoundingClientRect(),
+      gridConfig,
+      pxPerMinute: pxPerMin,
+    });
+    if (!slot) return;
+    e.stopPropagation();
+    onEmptySlotContextMenu({
+      ...slot,
+      clientX: e.clientX,
+      clientY: e.clientY,
+    });
+  };
+
   const gridHours = gridConfig.dayEndHourUtc - gridConfig.dayStartHourUtc;
   const pxPerHour = tokens.dayPxPerHour;
   const bodyH = calendarOsDayBodyHeightPx(density, gridHours);
@@ -285,13 +318,15 @@ export function CalendarOsDayResourceView({
             {resourceRows.map((row) => {
               const rowPlacements = placementsByResource.get(row.id) ?? [];
               return (
-                <div
+                <CalendarOsDayColumnDropZone
                   key={row.id}
+                  dayKey={lane.dayKey}
+                  columnId={row.id}
+                  heightPx={bodyH}
                   className={cn(
                     "relative min-w-0 border-r border-white/[0.02] last:border-r-0",
                     row.kind === "unassigned" && "bg-amber-950/15"
                   )}
-                  style={{ height: bodyH }}
                 >
                   {hours.map((h) => (
                     <div
@@ -352,7 +387,7 @@ export function CalendarOsDayResourceView({
                       );
                     })}
 
-                  {onEmptySlotClick ? (
+                  {onEmptySlotClick || onEmptySlotContextMenu ? (
                     <button
                       type="button"
                       tabIndex={-1}
@@ -360,9 +395,10 @@ export function CalendarOsDayResourceView({
                       data-calendar-column-id={row.id}
                       data-calendar-resource-label={row.label}
                       aria-label={`Create booking with ${row.label} at selected time`}
-                      className="absolute inset-0 z-[1] cursor-cell bg-transparent pointer-events-auto"
+                      className="absolute inset-0 z-[1] cursor-cell bg-transparent pointer-events-auto hover:bg-cyan-500/[0.03]"
                       style={{ height: bodyH }}
                       onClick={(e) => handleEmptySlotClick(e, row.id)}
+                      onContextMenu={(e) => handleEmptySlotContextMenu(e, row.id)}
                     />
                   ) : null}
 
@@ -377,6 +413,8 @@ export function CalendarOsDayResourceView({
                         (placement.heightPx / CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR) * pxPerHour,
                         14
                       );
+                      const cardDraggable =
+                        Boolean(canMutateBookings) && model.dragMutable && !model.readOnlyExternal;
                       return (
                         <div
                           key={placement.bookingId}
@@ -384,20 +422,24 @@ export function CalendarOsDayResourceView({
                           style={{ top: topPx, height: heightPx }}
                           data-testid="calendar-booking-card"
                           data-booking-id={placement.bookingId}
+                          data-calendar-draggable={cardDraggable ? "true" : "false"}
                         >
-                          <CalendarOsBookingCard
+                          <CalendarOsDraggableBookingCard
                             model={model}
+                            bookingId={placement.bookingId}
+                            draggable={cardDraggable}
                             compact
                             ultraCompact={tokens.bookingUltraCompact}
                             showHoverDetail={tokens.showHoverDetail}
                             highlighted={highlightedBookingId === placement.bookingId}
+                            isPendingSave={pendingBookingIds?.has(placement.bookingId)}
                             onSelect={() => onSelectBooking?.(booking)}
                           />
                         </div>
                       );
                     })}
                   </div>
-                </div>
+                </CalendarOsDayColumnDropZone>
               );
             })}
 

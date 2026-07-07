@@ -35,6 +35,8 @@ export type CalendarRescheduleMeta = {
   assignedStaffId?: string | null;
   clinicId?: string | null;
   clearWaitlist?: boolean;
+  /** Merged onto the booking row before PATCH (e.g. FI-local override flags). */
+  metadata?: Record<string, unknown>;
 };
 
 export type CalendarRescheduleResult = {
@@ -229,6 +231,9 @@ export function useCalendarAppointments(
         delete nextMetadata.on_waitlist;
         delete nextMetadata.waitlist_notes;
       }
+      if (meta?.metadata && typeof meta.metadata === "object") {
+        Object.assign(nextMetadata, meta.metadata);
+      }
 
       const patch: CalendarReschedulePatch = {
         start_at: startIso,
@@ -252,7 +257,8 @@ export function useCalendarAppointments(
         appointmentId: b.id,
         startAt: startIso,
         endAt: endIso,
-        metadata: meta?.clearWaitlist ? nextMetadata : undefined,
+        metadata:
+          meta?.clearWaitlist || meta?.metadata ? nextMetadata : undefined,
       };
       if (meta && Object.prototype.hasOwnProperty.call(meta, "assignedStaffId")) {
         req.staffId = nextStaffId;

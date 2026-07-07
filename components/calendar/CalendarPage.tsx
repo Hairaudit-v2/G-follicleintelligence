@@ -384,6 +384,10 @@ function CalendarPageImpl({
       onSelectBooking={openBookingDrawer}
       highlightedBookingId={highlightedBookingId}
       onEmptySlotClick={onEmptySlotClick}
+      onEmptySlotContextMenu={onEmptySlotContextMenu}
+      canMutateBookings={data.canMutateBookings}
+      pendingBookingIds={pendingIds}
+      onRescheduleBooking={rescheduleBooking}
     />
   ) : (
     <CalendarGrid
@@ -665,6 +669,19 @@ function CalendarPageImpl({
                     localStart: slotContextMenu.localStart,
                   },
                   "surgery"
+                ),
+            },
+            {
+              id: "blocker",
+              label: "Blocker",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "blocker"
                 ),
             },
           ]}

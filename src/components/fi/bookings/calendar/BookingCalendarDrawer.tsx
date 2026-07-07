@@ -21,6 +21,11 @@ import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/Clinic
 import { BookingFollowUpCalendarPanel } from "@/src/components/fi-admin/followUp/BookingFollowUpCalendarPanel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import {
+  bookingNeedsSourceUpdateWarning,
+  externalSourceLabelForBooking,
+  isTimelyImportedBooking,
+} from "@/src/lib/calendar-os/calendarOsBookingInteractionCore";
 import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
@@ -208,6 +213,8 @@ export function BookingCalendarDrawer({
 
   const row = booking;
   const calendarOsEvent = isCalendarOsEventRow(row);
+  const needsSourceUpdate = bookingNeedsSourceUpdateWarning(row);
+  const timelyImported = isTimelyImportedBooking(row);
 
   const cancelled = isBookingCancelled(row);
   const completed = row.booking_status === "completed";
@@ -231,7 +238,10 @@ export function BookingCalendarDrawer({
     humanizeBookingType(row.booking_type);
   const headerName = patientSummary?.trim() || row.title?.trim() || typeLabel;
   const locationLabel = row.location?.trim() || "—";
-  const sourceLabel = calendarOsSourceLabel?.trim() || "—";
+  const sourceLabel =
+    calendarOsSourceLabel?.trim() ||
+    externalSourceLabelForBooking(row) ||
+    (timelyImported ? "Timely" : "—");
   const eventStatusLabel = calendarOsStatus?.trim() || row.booking_status;
 
   async function onComplete() {
@@ -383,6 +393,13 @@ export function BookingCalendarDrawer({
                 <p className="mb-3 rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-2 text-[11px] leading-snug text-cyan-100/90">
                   CalendarOS event — read-only in this phase. Edit in Google Calendar or the
                   CalendarOS test panel.
+                </p>
+              ) : null}
+
+              {!calendarOsEvent && needsSourceUpdate ? (
+                <p className="mb-3 rounded-md border border-amber-500/25 bg-amber-950/25 px-2.5 py-2 text-[11px] leading-snug text-amber-100/90">
+                  Rescheduled in FI OS only. Update Timely or Google separately unless source
+                  write-back is enabled.
                 </p>
               ) : null}
 

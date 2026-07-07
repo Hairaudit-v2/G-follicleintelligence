@@ -30,7 +30,8 @@ import {
   type CalendarOsDisplayDensity,
 } from "@/src/lib/calendar-os/calendarDisplayDensity";
 import { buildCalendarOsSparseContext } from "@/src/lib/calendar-os/calendarSparseContext";
-import { CalendarOsBookingCard } from "@/src/components/calendar-os/CalendarOsBookingCard";
+import { CalendarOsDraggableBookingCard } from "@/src/components/calendar-os/CalendarOsDraggableBookingCard";
+import { CalendarOsWeekCellDropZone } from "@/src/components/calendar-os/CalendarOsDropZones";
 import { CalendarOsEmptyContext } from "@/src/components/calendar-os/CalendarOsEmptyContext";
 import { CalendarOsResourceLaneLabel } from "@/src/components/calendar-os/CalendarOsResourceLaneLabel";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,8 @@ export type CalendarOsWeekResourceViewProps = {
   onSelectBooking?: (booking: FiBookingRow) => void;
   highlightedBookingId?: string | null;
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
+  canMutateBookings?: boolean;
+  pendingBookingIds?: Set<string>;
 };
 
 export function CalendarOsWeekResourceView({
@@ -68,6 +71,8 @@ export function CalendarOsWeekResourceView({
   onSelectBooking,
   highlightedBookingId,
   onEmptySlotClick,
+  canMutateBookings = false,
+  pendingBookingIds,
 }: CalendarOsWeekResourceViewProps) {
   const tokens = calendarOsDensityTokens(density);
   const gridTemplate = calendarOsWeekGridTemplate(density, lanes.length);
@@ -211,66 +216,77 @@ export function CalendarOsWeekResourceView({
                   {lanes.map((lane) => {
                     const ids = cellLookup.get(`${row.id}|${lane.dayKey}`) ?? [];
                     return (
-                      <div
+                      <CalendarOsWeekCellDropZone
                         key={`${row.id}-${lane.dayKey}`}
+                        dayKey={lane.dayKey}
+                        resourceId={row.id}
                         className="relative min-w-0 space-y-0 border-r border-white/[0.02] p-px last:border-r-0"
-                        style={{ minHeight: tokens.weekRowMinHeight }}
                       >
-                        {onEmptySlotClick ? (
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            data-testid="calendar-empty-week-cell"
-                            data-calendar-column-id={row.id}
-                            data-calendar-day-key={lane.dayKey}
-                            data-calendar-resource-label={row.label}
-                            aria-label={`Create booking with ${row.label} on ${lane.dayKey}`}
-                            className="absolute inset-0 z-[1] cursor-cell bg-transparent pointer-events-auto"
-                            onClick={() =>
-                              onEmptySlotClick({
-                                dayKey: lane.dayKey,
-                                columnId: row.id,
-                                localStart: monthEmptyDayQuickCreateLocalStart(
-                                  lane.dayKey,
-                                  gridConfig
-                                ),
-                              })
-                            }
-                          />
-                        ) : null}
-                        <div className="relative z-[2] space-y-0 pointer-events-none">
-                          {ids.length === 0 ? (
-                            <CalendarOsEmptyContext
-                              context={sparseContext}
-                              variant="week-cell"
-                              suppressWeekCellMarker={!showSparseBanner}
+                        <div style={{ minHeight: tokens.weekRowMinHeight }}>
+                          {onEmptySlotClick ? (
+                            <button
+                              type="button"
+                              tabIndex={-1}
+                              data-testid="calendar-empty-week-cell"
+                              data-calendar-column-id={row.id}
+                              data-calendar-day-key={lane.dayKey}
+                              data-calendar-resource-label={row.label}
+                              aria-label={`Create booking with ${row.label} on ${lane.dayKey}`}
+                              className="absolute inset-0 z-[1] cursor-cell bg-transparent pointer-events-auto hover:bg-cyan-500/[0.03]"
+                              onClick={() =>
+                                onEmptySlotClick({
+                                  dayKey: lane.dayKey,
+                                  columnId: row.id,
+                                  localStart: monthEmptyDayQuickCreateLocalStart(
+                                    lane.dayKey,
+                                    gridConfig
+                                  ),
+                                })
+                              }
                             />
-                          ) : (
-                            ids.map((id) => {
-                              const model = cardModels[id];
-                              const booking = bookingById.get(id);
-                              if (!model || !booking) return null;
-                              return (
-                                <div
-                                  key={id}
-                                  className="pointer-events-auto"
-                                  data-testid="calendar-booking-card"
-                                  data-booking-id={id}
-                                >
-                                  <CalendarOsBookingCard
-                                    model={model}
-                                    compact
-                                    ultraCompact={tokens.bookingUltraCompact}
-                                    showHoverDetail={tokens.showHoverDetail}
-                                    highlighted={highlightedBookingId === id}
-                                    onSelect={() => onSelectBooking?.(booking)}
-                                  />
-                                </div>
-                              );
-                            })
-                          )}
+                          ) : null}
+                          <div className="relative z-[2] space-y-0 pointer-events-none">
+                            {ids.length === 0 ? (
+                              <CalendarOsEmptyContext
+                                context={sparseContext}
+                                variant="week-cell"
+                                suppressWeekCellMarker={!showSparseBanner}
+                              />
+                            ) : (
+                              ids.map((id) => {
+                                const model = cardModels[id];
+                                const booking = bookingById.get(id);
+                                if (!model || !booking) return null;
+                                const cardDraggable =
+                                  Boolean(canMutateBookings) &&
+                                  model.dragMutable &&
+                                  !model.readOnlyExternal;
+                                return (
+                                  <div
+                                    key={id}
+                                    className="pointer-events-auto"
+                                    data-testid="calendar-booking-card"
+                                    data-booking-id={id}
+                                    data-calendar-draggable={cardDraggable ? "true" : "false"}
+                                  >
+                                    <CalendarOsDraggableBookingCard
+                                      model={model}
+                                      bookingId={id}
+                                      draggable={cardDraggable}
+                                      compact
+                                      ultraCompact={tokens.bookingUltraCompact}
+                                      showHoverDetail={tokens.showHoverDetail}
+                                      highlighted={highlightedBookingId === id}
+                                      isPendingSave={pendingBookingIds?.has(id)}
+                                      onSelect={() => onSelectBooking?.(booking)}
+                                    />
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </CalendarOsWeekCellDropZone>
                     );
                   })}
                 </div>

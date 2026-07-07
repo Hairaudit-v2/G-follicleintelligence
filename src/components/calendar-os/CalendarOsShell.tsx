@@ -20,10 +20,16 @@ import {
 } from "@/src/lib/calendar-os/calendarDisplayDensity";
 import { CalendarOsDayResourceView } from "@/src/components/calendar-os/CalendarOsDayResourceView";
 import { CalendarOsDensityToggle } from "@/src/components/calendar-os/CalendarOsDensityToggle";
+import { CalendarOsDragLayer } from "@/src/components/calendar-os/CalendarOsDragLayer";
 import { CalendarOsOperationalPanel } from "@/src/components/calendar-os/CalendarOsOperationalPanel";
 import { CalendarOsPresetBar } from "@/src/components/calendar-os/CalendarOsPresetBar";
 import { CalendarOsViewControls } from "@/src/components/calendar-os/CalendarOsViewControls";
 import { CalendarOsWeekResourceView } from "@/src/components/calendar-os/CalendarOsWeekResourceView";
+import { buildCalendarOsBookingCardModels } from "@/src/lib/calendar-os/calendarBookingCardModel";
+import type {
+  CalendarRescheduleMeta,
+  CalendarRescheduleResult,
+} from "@/hooks/useCalendarAppointments";
 import {
   fiOsCalDesktopOnly,
   fiOsCalTabletGridMinHeight,
@@ -41,6 +47,21 @@ export type CalendarOsShellProps = {
   onSelectBooking?: (booking: FiBookingRow) => void;
   highlightedBookingId?: string | null;
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
+  onEmptySlotContextMenu?: (info: {
+    clientX: number;
+    clientY: number;
+    dayKey: string;
+    columnId: string;
+    localStart: string;
+  }) => void;
+  canMutateBookings?: boolean;
+  pendingBookingIds?: Set<string>;
+  onRescheduleBooking?: (
+    booking: FiBookingRow,
+    startIso: string,
+    endIso: string,
+    meta?: CalendarRescheduleMeta
+  ) => Promise<CalendarRescheduleResult>;
 };
 
 export function CalendarOsShell({
@@ -53,6 +74,10 @@ export function CalendarOsShell({
   onSelectBooking,
   highlightedBookingId,
   onEmptySlotClick,
+  onEmptySlotContextMenu,
+  canMutateBookings = false,
+  pendingBookingIds,
+  onRescheduleBooking,
 }: CalendarOsShellProps) {
   const storageKey = calendarOsDensityStorageKey(data.tenantId);
   const [density, setDensity] = useState<CalendarOsDisplayDensity>("comfortable");
@@ -96,8 +121,68 @@ export function CalendarOsShell({
     [bookings, bookingDisplay, data.staffDirectory, data.rooms, data.lanes]
   );
 
-  const isDayLayout = data.query.view === "day" || data.query.view === "3day";
+  const isDayLayout = data.query.view === "day";
   const dayLane: CalendarDayLane | undefined = data.lanes[0];
+
+  const cardModels = useMemo(
+    () => buildCalendarOsBookingCardModels(bookings, bookingDisplay, data.calendarTimezone),
+    [bookings, bookingDisplay, data.calendarTimezone]
+  );
+
+  const grid = (
+    <div className={cn("flex min-h-0 min-w-0 flex-1", fiOsCalTabletGridMinHeight)}>
+      {sidebar ? (
+        <div className="hidden w-48 shrink-0 border-r border-white/[0.05] lg:block">{sidebar}</div>
+      ) : null}
+
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {isDayLayout && dayLane ? (
+          <CalendarOsDayResourceView
+            query={data.query}
+            lane={dayLane}
+            bookings={bookings}
+            bookingDisplay={bookingDisplay}
+            resourceColumns={data.resourceColumns}
+            staffDirectory={data.staffDirectory}
+            rooms={data.rooms}
+            staffIdByUserId={staffIdByUserId}
+            gridConfig={data.gridConfig}
+            calendarTimezone={data.calendarTimezone}
+            density={density}
+            onSelectBooking={onSelectBooking}
+            highlightedBookingId={highlightedBookingId}
+            onEmptySlotClick={onEmptySlotClick}
+            onEmptySlotContextMenu={onEmptySlotContextMenu}
+            canMutateBookings={canMutateBookings}
+            pendingBookingIds={pendingBookingIds}
+          />
+        ) : (
+          <CalendarOsWeekResourceView
+            query={data.query}
+            lanes={data.lanes}
+            bookings={bookings}
+            bookingDisplay={bookingDisplay}
+            resourceColumns={data.resourceColumns}
+            staffDirectory={data.staffDirectory}
+            rooms={data.rooms}
+            staffIdByUserId={staffIdByUserId}
+            calendarTimezone={data.calendarTimezone}
+            gridConfig={data.gridConfig}
+            density={density}
+            onSelectBooking={onSelectBooking}
+            highlightedBookingId={highlightedBookingId}
+            onEmptySlotClick={onEmptySlotClick}
+            canMutateBookings={canMutateBookings}
+            pendingBookingIds={pendingBookingIds}
+          />
+        )}
+      </div>
+
+      {rightPanel ? (
+        <div className="hidden w-64 shrink-0 border-l border-white/[0.05] xl:block">{rightPanel}</div>
+      ) : null}
+    </div>
+  );
 
   return (
     <div
@@ -142,53 +227,20 @@ export function CalendarOsShell({
 
       <CalendarOsOperationalPanel summary={panelSummary} density={density} />
 
-      <div className={cn("flex min-h-0 min-w-0 flex-1", fiOsCalTabletGridMinHeight)}>
-        {sidebar ? (
-          <div className="hidden w-48 shrink-0 border-r border-white/[0.05] lg:block">{sidebar}</div>
-        ) : null}
-
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          {isDayLayout && dayLane ? (
-            <CalendarOsDayResourceView
-              query={data.query}
-              lane={dayLane}
-              bookings={bookings}
-              bookingDisplay={bookingDisplay}
-              resourceColumns={data.resourceColumns}
-              staffDirectory={data.staffDirectory}
-              rooms={data.rooms}
-              staffIdByUserId={staffIdByUserId}
-              gridConfig={data.gridConfig}
-              calendarTimezone={data.calendarTimezone}
-              density={density}
-              onSelectBooking={onSelectBooking}
-              highlightedBookingId={highlightedBookingId}
-              onEmptySlotClick={onEmptySlotClick}
-            />
-          ) : (
-            <CalendarOsWeekResourceView
-              query={data.query}
-              lanes={data.lanes}
-              bookings={bookings}
-              bookingDisplay={bookingDisplay}
-              resourceColumns={data.resourceColumns}
-              staffDirectory={data.staffDirectory}
-              rooms={data.rooms}
-              staffIdByUserId={staffIdByUserId}
-              calendarTimezone={data.calendarTimezone}
-              gridConfig={data.gridConfig}
-              density={density}
-              onSelectBooking={onSelectBooking}
-              highlightedBookingId={highlightedBookingId}
-              onEmptySlotClick={onEmptySlotClick}
-            />
-          )}
-        </div>
-
-        {rightPanel ? (
-          <div className="hidden w-64 shrink-0 border-l border-white/[0.05] xl:block">{rightPanel}</div>
-        ) : null}
-      </div>
+      <CalendarOsDragLayer
+        bookings={bookings}
+        cardModels={cardModels}
+        lanes={data.lanes}
+        gridConfig={data.gridConfig}
+        density={density}
+        view={data.query.view === "3day" ? "3day" : data.query.view === "week" ? "week" : "day"}
+        canMutateBookings={canMutateBookings}
+        staffIdByUserId={staffIdByUserId}
+        pendingBookingIds={pendingBookingIds}
+        onRescheduleBooking={onRescheduleBooking}
+      >
+        {grid}
+      </CalendarOsDragLayer>
     </div>
   );
 }

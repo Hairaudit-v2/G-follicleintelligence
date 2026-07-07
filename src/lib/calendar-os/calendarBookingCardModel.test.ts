@@ -162,4 +162,45 @@ describe("buildCalendarOsBookingCardModel", () => {
     assert.equal(card.bookingType, "consultation");
     assert.equal(card.surgery, null);
   });
+
+  it("marks Google imports read-only and Timely imports draggable with source label", () => {
+    const google = buildCalendarOsBookingCardModel({
+      booking: booking({
+        id: "g1",
+        start_at: "2026-07-07T09:00:00.000Z",
+        end_at: "2026-07-07T10:00:00.000Z",
+        metadata: { calendar_os_event: true },
+      }),
+      display: {
+        anchorLabel: "External",
+        scalesSummary: null,
+        durationMin: 60,
+        reminderHint: null,
+        calendarOsSourceLabel: "Google Calendar",
+      },
+      calendarTimezone: "UTC",
+    });
+    assert.equal(google.readOnlyExternal, true);
+    assert.equal(google.dragMutable, false);
+    assert.equal(google.sourceLabel, "Google Calendar");
+
+    const timely = buildCalendarOsBookingCardModel({
+      booking: booking({
+        id: "t1",
+        start_at: "2026-07-07T09:00:00.000Z",
+        end_at: "2026-07-07T10:00:00.000Z",
+        metadata: { source_system: "timely", rescheduled_in_fi_os: true },
+      }),
+      display: {
+        anchorLabel: "Timely patient",
+        scalesSummary: null,
+        durationMin: 60,
+        reminderHint: null,
+      },
+      calendarTimezone: "UTC",
+    });
+    assert.equal(timely.sourceLabel, "Timely");
+    assert.equal(timely.dragMutable, true);
+    assert.equal(timely.needsSourceUpdate, true);
+  });
 });

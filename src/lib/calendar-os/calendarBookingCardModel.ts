@@ -23,6 +23,11 @@ import {
   type CalendarOsBookingWarning,
   type CalendarOsSurgeryIntelligence,
 } from "@/src/lib/calendar-os/calendarOperationalWarnings";
+import {
+  bookingNeedsSourceUpdateWarning,
+  externalSourceLabelForBooking,
+  isBookingDragMutable,
+} from "@/src/lib/calendar-os/calendarOsBookingInteractionCore";
 
 export type CalendarOsBookingCardModel = {
   bookingId: string;
@@ -44,6 +49,14 @@ export type CalendarOsBookingCardModel = {
   teamLine: string | null;
   isUnassigned: boolean;
   riskStatus: CalendarBookingIntelligence["riskStatus"] | null;
+  /** Google Calendar / Timely / FI OS source label when known. */
+  sourceLabel: string | null;
+  /** Imported external rows that cannot be mutated in CalendarOS. */
+  readOnlyExternal: boolean;
+  /** Drag-and-drop reschedule allowed for this row. */
+  dragMutable: boolean;
+  /** FI rescheduled locally; source system may still need updating. */
+  needsSourceUpdate: boolean;
 };
 
 export type CalendarOsBookingCardInput = {
@@ -156,6 +169,9 @@ export function buildCalendarOsBookingCardModel(
     !booking.assigned_user_id?.trim() &&
     warnings.some((w) => w.kind === "unassigned");
 
+  const sourceLabel = externalSourceLabelForBooking(booking, display);
+  const readOnlyExternal = !isBookingDragMutable(booking) && Boolean(sourceLabel);
+
   return {
     bookingId: booking.id,
     patientName: patientNameForBooking(booking, display, patientName),
@@ -176,6 +192,10 @@ export function buildCalendarOsBookingCardModel(
     teamLine: teamFromLine,
     isUnassigned,
     riskStatus: operational?.riskStatus ?? null,
+    sourceLabel,
+    readOnlyExternal,
+    dragMutable: isBookingDragMutable(booking),
+    needsSourceUpdate: bookingNeedsSourceUpdateWarning(booking),
   };
 }
 

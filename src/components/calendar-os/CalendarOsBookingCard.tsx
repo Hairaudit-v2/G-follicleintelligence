@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Clock, DoorOpen, Scissors, UserRound } from "lucide-react";
+import { AlertTriangle, Clock, DoorOpen, Link2, Scissors, UserRound } from "lucide-react";
 
 import { bookingCalendarChipSurface } from "@/src/lib/bookings/calendarLabels";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,8 @@ export type CalendarOsBookingCardProps = {
   showHoverDetail?: boolean;
   onSelect?: () => void;
   highlighted?: boolean;
+  /** When true, card is in a draggable context (cursor/grab affordance). */
+  draggable?: boolean;
 };
 
 export function CalendarOsBookingCard({
@@ -38,6 +40,7 @@ export function CalendarOsBookingCard({
   showHoverDetail = true,
   onSelect,
   highlighted = false,
+  draggable = false,
 }: CalendarOsBookingCardProps) {
   const [hovered, setHovered] = useState(false);
   const surface = bookingCalendarChipSurface(model.bookingType, model.catalogColor);
@@ -59,6 +62,8 @@ export function CalendarOsBookingCard({
       className={cn(
         "group relative w-full rounded border text-left transition-all",
         "border-white/[0.07] bg-[#0c1426]/95 hover:border-cyan-500/25 hover:bg-[#101c32] hover:shadow-md hover:shadow-black/30",
+        draggable && "cursor-grab active:cursor-grabbing",
+        model.readOnlyExternal && "border-cyan-500/20 bg-cyan-950/20",
         ultraCompact ? "px-1 py-0.5" : compact ? "px-1 py-0.5" : "px-1.5 py-1",
         isSurgery &&
           "border-violet-500/35 border-l-[3px] border-l-violet-400 bg-gradient-to-br from-violet-950/55 to-[#0c1426]/95 shadow-sm shadow-violet-950/40",
@@ -91,6 +96,20 @@ export function CalendarOsBookingCard({
           >
             {model.bookingTypeLabel}
           </p>
+          {model.sourceLabel ? (
+            <p
+              className={cn(
+                "truncate text-cyan-300/70",
+                ultraCompact ? "text-[7px]" : "text-[8px]"
+              )}
+            >
+              <span className="inline-flex items-center gap-0.5">
+                <Link2 className="h-2 w-2 shrink-0" aria-hidden />
+                {model.sourceLabel}
+                {model.needsSourceUpdate ? " · update source" : model.readOnlyExternal ? " · read-only" : ""}
+              </span>
+            </p>
+          ) : null}
           <p
             className={cn(
               "truncate text-slate-500",

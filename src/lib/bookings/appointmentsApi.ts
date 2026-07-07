@@ -27,6 +27,7 @@ import {
 import { mergeAppointmentProcedureMetadata } from "./appointmentMetadata";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { FiBookingRow } from "./types";
+import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
 import { AppointmentConflictError } from "./bookingErrors";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 
@@ -287,6 +288,11 @@ export async function rescheduleCalendarAppointment(
 ): Promise<CalendarAppointment> {
   const existing = await loadBookingForTenant(params.tenantId, params.appointmentId);
   if (!existing) throw new Error("Appointment not found.");
+  if (isCalendarOsEventRow(existing)) {
+    throw new Error(
+      "Imported Google Calendar events are read-only in FI OS. Edit in Google Calendar."
+    );
+  }
 
   const catalog = servicesByBookingType(await loadFiServicesForTenant(params.tenantId));
   const nextStart = params.startAt?.trim() ?? existing.start_at;

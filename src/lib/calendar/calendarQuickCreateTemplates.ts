@@ -8,7 +8,8 @@ export type CalendarQuickTemplateId =
   | "exosomes"
   | "follow_up"
   | "surgery_review"
-  | "surgery";
+  | "surgery"
+  | "blocker";
 
 export type CalendarQuickTemplate = {
   id: CalendarQuickTemplateId;
@@ -87,6 +88,13 @@ export const CALENDAR_QUICK_TEMPLATES: CalendarQuickTemplate[] = [
     catalogCategory: "Surgery",
     durationMinutes: 480,
     title: "Surgery",
+  },
+  {
+    id: "blocker",
+    label: "Blocker",
+    bookingType: "other",
+    durationMinutes: 60,
+    title: "Blocker — unavailable",
   },
 ];
 
