@@ -20,6 +20,7 @@ import {
   computeFiOsTodayStripCounts,
 } from "@/src/lib/calendar/fiOsCalendarTodayStrip";
 import {
+  fiOsCalDesktopOnly,
   fiOsCalTabletChipScroll,
   fiOsCalTabletOnly,
 } from "@/src/lib/calendar/fiOsCalendarResponsive";
@@ -50,6 +51,7 @@ export function FiOsCalendarTodayCommandStrip({
   route?: CalendarRoute;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopOpen, setDesktopOpen] = useState(true);
   const hrefOpts = { route };
   const tz = query.calendarTimezone;
   const todayYmd = calendarDateStringFromInstant(new Date(), tz);
@@ -279,8 +281,27 @@ export function FiOsCalendarTodayCommandStrip({
           <div className="border-t border-white/[0.05] px-3 pb-1.5 pt-1">{chipRow}</div>
         ) : null}
       </div>
-      <div className="hidden min-h-[2rem] px-3 py-1 xl:block">
-        <div className={fiOsCalTabletChipScroll}>{chipRow}</div>
+      <div className={cn(fiOsCalDesktopOnly, desktopOpen ? "px-3 py-1" : "px-3 py-1.5")}>
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-2 text-left text-xs text-[var(--fi-cal-ws-muted,#94a3b8)]"
+          onClick={() => setDesktopOpen((v) => !v)}
+          aria-expanded={desktopOpen}
+          data-testid="calendar-today-strip-desktop-toggle"
+        >
+          <span className="font-medium text-[var(--fi-cal-ws-text,#f1f5f9)]">
+            Today · {counts.all} appointments
+          </span>
+          <ChevronDown
+            className={cn("h-4 w-4 shrink-0 text-slate-500 transition", desktopOpen && "rotate-180")}
+            aria-hidden
+          />
+        </button>
+        {desktopOpen ? (
+          <div className="mt-1 min-h-[2rem] pb-1">
+            <div className={fiOsCalTabletChipScroll}>{chipRow}</div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

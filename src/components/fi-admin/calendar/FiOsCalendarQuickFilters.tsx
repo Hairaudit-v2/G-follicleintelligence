@@ -42,6 +42,7 @@ export function FiOsCalendarQuickFilters({
 }) {
   const router = useRouter();
   const [tabletOpen, setTabletOpen] = useState(false);
+  const [desktopOpen, setDesktopOpen] = useState(true);
   const hrefOpts = { route };
 
   function typeHref(t: string): string {
@@ -191,15 +192,33 @@ export function FiOsCalendarQuickFilters({
       <div
         className={cn(
           fiOsCalDesktopOnly,
-          "hidden flex-wrap items-center gap-2 border-b px-3 py-2 backdrop-blur-md sm:px-4 xl:flex"
+          "border-b backdrop-blur-md",
+          desktopOpen ? "px-3 py-2 sm:px-4" : "px-3 py-1.5 sm:px-4"
         )}
         style={stripStyle}
         data-testid="calendar-quick-filters-desktop"
       >
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fi-cal-ws-time-label,#64748b)]">
-          Quick filters
-        </span>
-        {filterChips}
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-2 text-left"
+          aria-expanded={desktopOpen}
+          onClick={() => setDesktopOpen((v) => !v)}
+          data-testid="calendar-quick-filters-desktop-toggle"
+        >
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--fi-cal-ws-time-label,#64748b)]">
+            <Filter className="h-3.5 w-3.5" aria-hidden />
+            Quick filters
+          </span>
+          <ChevronDown
+            className={cn("h-4 w-4 shrink-0 text-slate-500 transition", desktopOpen && "rotate-180")}
+            aria-hidden
+          />
+        </button>
+        {desktopOpen ? (
+          <div className={cn("mt-2 flex flex-wrap items-center gap-2", fiOsCalTabletChipScroll)}>
+            {filterChips}
+          </div>
+        ) : null}
       </div>
     </>
   );
