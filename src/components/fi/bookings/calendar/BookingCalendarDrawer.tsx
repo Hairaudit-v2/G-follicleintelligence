@@ -354,7 +354,7 @@ export function BookingCalendarDrawer({
         }
         role="dialog"
         aria-label="Booking details"
-        data-testid="calendar-booking-drawer"
+        data-testid="calendar-appointment-drawer"
         onClick={(e) => e.stopPropagation()}
       >
         {os ? (
@@ -397,7 +397,10 @@ export function BookingCalendarDrawer({
               ) : null}
 
               {!calendarOsEvent && needsSourceUpdate ? (
-                <p className="mb-3 rounded-md border border-amber-500/25 bg-amber-950/25 px-2.5 py-2 text-[11px] leading-snug text-amber-100/90">
+                <p
+                  data-testid="calendar-local-override-warning"
+                  className="mb-3 rounded-md border border-amber-500/25 bg-amber-950/25 px-2.5 py-2 text-[11px] leading-snug text-amber-100/90"
+                >
                   Rescheduled in FI OS only. Update Timely or Google separately unless source
                   write-back is enabled.
                 </p>

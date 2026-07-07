@@ -47,6 +47,7 @@ export function CalendarOsDraggableBookingCard({
     <div
       ref={setNodeRef}
       style={style}
+      data-testid={draggable ? "calendar-booking-drag-handle" : undefined}
       className={cn(
         "h-full",
         draggable && "cursor-grab active:cursor-grabbing",

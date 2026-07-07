@@ -55,7 +55,7 @@ export function CalendarOsBookingCard({
         e.stopPropagation();
         onSelect?.();
       }}
-      data-testid="calendar-booking-card"
+      data-testid={`calendar-booking-card-${model.bookingId}`}
       data-booking-id={model.bookingId}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -98,6 +98,7 @@ export function CalendarOsBookingCard({
           </p>
           {model.sourceLabel ? (
             <p
+              data-testid="calendar-booking-source-label"
               className={cn(
                 "truncate text-cyan-300/70",
                 ultraCompact ? "text-[7px]" : "text-[8px]"

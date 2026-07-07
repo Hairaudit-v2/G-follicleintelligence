@@ -88,7 +88,7 @@ const rosterViewOnlyProjects: PlaywrightTestConfig["projects"] = hasRosterViewOn
       name: `${browser.name}-roster-view-only`,
       use: { ...browser.use },
       grep: /@roster-view-only/,
-      testMatch: /journeys\/roster-permission-validation\.spec\.ts/,
+      testMatch: /journeys\/roster-permission-validation\.spec\.ts|calendar-os-v2-interactions\.spec\.ts/,
       timeout: 180_000,
     }))
   : [];

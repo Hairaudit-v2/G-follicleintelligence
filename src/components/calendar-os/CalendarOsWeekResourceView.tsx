@@ -156,8 +156,11 @@ export function CalendarOsWeekResourceView({
 
   const showSparseBanner = sparseContext.totalBookings <= 3;
 
+  const weekViewTestId =
+    query.view === "3day" ? "calendar-v2-three-day-view" : "calendar-v2-week-view";
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden" data-testid={weekViewTestId}>
       {showSparseBanner ? <CalendarOsEmptyContext context={sparseContext} variant="week-banner" /> : null}
 
       <div className={cn("min-h-0 flex-1 overflow-y-auto overflow-x-hidden", fiOsCalFloatingAssistScrollPad)}>
@@ -177,6 +180,8 @@ export function CalendarOsWeekResourceView({
             {lanes.map((lane) => (
               <div
                 key={lane.dayKey}
+                data-testid={query.view === "3day" ? "calendar-three-day-lane" : undefined}
+                data-calendar-day-key={lane.dayKey}
                 className="min-w-0 border-r border-white/[0.024] px-1 py-1 text-center last:border-r-0"
               >
                 <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-600">
@@ -265,7 +270,7 @@ export function CalendarOsWeekResourceView({
                                   <div
                                     key={id}
                                     className="pointer-events-auto"
-                                    data-testid="calendar-booking-card"
+                                    data-testid={`calendar-booking-card-${id}`}
                                     data-booking-id={id}
                                     data-calendar-draggable={cardDraggable ? "true" : "false"}
                                   >

@@ -15,13 +15,15 @@ export class CalendarE2ePage {
 
   async gotoCalendar(opts: {
     v2: boolean;
-    view: "day" | "week";
+    view: "day" | "week" | "3day";
     dateAnchor?: string;
+    sample?: boolean;
   }): Promise<void> {
     const tid = e2eTenantId();
     const params = new URLSearchParams({ view: opts.view });
     if (opts.v2) params.set("calendarV2", "1");
     if (opts.dateAnchor?.trim()) params.set("date", opts.dateAnchor.trim());
+    if (opts.sample) params.set("sample", "1");
 
     await this.page.goto(`/fi-admin/${tid}/calendar?${params.toString()}`);
     await expect(this.page.locator("body")).toBeVisible({ timeout: 20_000 });
@@ -56,11 +58,15 @@ export class CalendarE2ePage {
   }
 
   emptyDaySlotLayer(columnIdPrefix?: string): Locator {
-    const base = this.page.getByTestId("calendar-empty-slot-layer");
-    if (!columnIdPrefix) return base.first();
+    if (!columnIdPrefix) {
+      return this.page
+        .getByTestId("calendar-empty-slot")
+        .or(this.page.getByTestId("calendar-empty-slot-layer"))
+        .first();
+    }
     return this.page
       .locator(
-        `[data-testid="calendar-empty-slot-layer"][data-calendar-column-id^="${columnIdPrefix}"]`,
+        `[data-testid="calendar-empty-slot"][data-calendar-column-id^="${columnIdPrefix}"], [data-testid="calendar-empty-slot-layer"][data-calendar-column-id^="${columnIdPrefix}"]`,
       )
       .first();
   }
@@ -118,7 +124,7 @@ export class CalendarE2ePage {
   async expectBookingDrawerBelowTopChrome(): Promise<void> {
     const topChrome = this.page.getByTestId("fi-os-top-chrome");
     await expect(topChrome).toBeVisible({ timeout: 10_000 });
-    const drawer = this.page.getByTestId("calendar-booking-drawer");
+    const drawer = this.bookingDrawer();
     await expect(drawer).toBeVisible({ timeout: 10_000 });
 
     const chromeBox = await topChrome.boundingBox();
@@ -135,8 +141,14 @@ export class CalendarE2ePage {
     await expect(this.page.getByTestId("calendar-quick-create-drawer")).toHaveCount(0);
   }
 
+  bookingDrawer(): Locator {
+    return this.page
+      .getByTestId("calendar-appointment-drawer")
+      .or(this.page.getByTestId("calendar-booking-drawer"));
+  }
+
   async expectBookingDrawerOpen(): Promise<void> {
-    await expect(this.page.getByTestId("calendar-booking-drawer")).toBeVisible({
+    await expect(this.bookingDrawer()).toBeVisible({
       timeout: 10_000,
     });
   }
@@ -159,7 +171,7 @@ export class CalendarE2ePage {
   }
 
   async closeBookingDrawer(): Promise<void> {
-    const drawer = this.page.getByTestId("calendar-booking-drawer");
+    const drawer = this.bookingDrawer();
     if (!(await drawer.isVisible().catch(() => false))) return;
     await drawer.getByRole("button", { name: /^close$/i }).click();
     await expect(drawer).toHaveCount(0);

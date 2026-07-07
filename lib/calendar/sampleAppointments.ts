@@ -7,6 +7,7 @@ import { utcCalendarDateStringFromDate } from "@/src/lib/bookings/calendarQuery"
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingDurationMinutesUtc } from "@/src/lib/calendar/calendarTimezone";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import { generateInteractionSampleBookings } from "@/lib/calendar/interactionSampleBookings";
 
 export const SAMPLE_BOOKING_ID_PREFIX = "sample-";
 
@@ -212,7 +213,10 @@ export function mergeBookingsWithSamples(
   tenantId: string,
   dateAnchor: string
 ): FiBookingRow[] {
-  const samples = generateSampleCalendarBookings(tenantId, dateAnchor);
+  const samples = [
+    ...generateSampleCalendarBookings(tenantId, dateAnchor),
+    ...generateInteractionSampleBookings(tenantId, dateAnchor, baseRow),
+  ];
   const sampleIds = new Set(samples.map((b) => b.id));
   const filtered = serverBookings.filter((b) => !sampleIds.has(b.id));
   return [...filtered, ...samples].sort((a, b) => a.start_at.localeCompare(b.start_at));

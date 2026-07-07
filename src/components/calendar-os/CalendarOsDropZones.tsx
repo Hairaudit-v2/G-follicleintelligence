@@ -30,7 +30,7 @@ export function CalendarOsDayColumnDropZone({
       ref={setNodeRef}
       className={cn(className, isOver && "ring-1 ring-inset ring-cyan-400/40")}
       style={{ height: heightPx }}
-      data-testid="calendar-os-drop-zone"
+      data-testid="calendar-drop-zone"
       data-calendar-drop-day={dayKey}
       data-calendar-drop-column={columnId}
     >
@@ -59,7 +59,7 @@ export function CalendarOsWeekCellDropZone({
     <div
       ref={setNodeRef}
       className={cn(className, isOver && "ring-1 ring-inset ring-cyan-400/35")}
-      data-testid="calendar-os-week-drop-zone"
+      data-testid="calendar-drop-zone"
       data-calendar-drop-day={dayKey}
       data-calendar-drop-resource={resourceId}
     >

@@ -60,6 +60,7 @@ export function CalendarSlotContextMenu({
       ref={ref}
       role="menu"
       aria-label="Calendar slot actions"
+      data-testid="calendar-quick-create-menu"
       className={cn(
         fiSurfaceVariantClassNames.darkGlass,
         "fixed z-[122] min-w-[11.5rem] py-1.5 text-sm text-slate-100 shadow-2xl"

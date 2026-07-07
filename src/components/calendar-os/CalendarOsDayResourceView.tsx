@@ -261,7 +261,7 @@ export function CalendarOsDayResourceView({
   }, [lane.startMs, lane.endMs, gridConfig.dayStartHourUtc, gridConfig.dayEndHourUtc, pxPerMin]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden" data-testid="calendar-v2-day-view">
       <div className="border-b border-white/[0.024] px-2 py-0.5 text-[10px] text-slate-500">
         {calendarDayHeading(lane, calendarTimezone)}
       </div>
@@ -391,7 +391,7 @@ export function CalendarOsDayResourceView({
                     <button
                       type="button"
                       tabIndex={-1}
-                      data-testid="calendar-empty-slot-layer"
+                      data-testid="calendar-empty-slot"
                       data-calendar-column-id={row.id}
                       data-calendar-resource-label={row.label}
                       aria-label={`Create booking with ${row.label} at selected time`}
@@ -420,7 +420,7 @@ export function CalendarOsDayResourceView({
                           key={placement.bookingId}
                           className="pointer-events-auto absolute left-0.5 right-0.5 overflow-hidden"
                           style={{ top: topPx, height: heightPx }}
-                          data-testid="calendar-booking-card"
+                          data-testid={`calendar-booking-card-${placement.bookingId}`}
                           data-booking-id={placement.bookingId}
                           data-calendar-draggable={cardDraggable ? "true" : "false"}
                         >

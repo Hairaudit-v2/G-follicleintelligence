@@ -68,6 +68,7 @@ export function CalendarToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
+            data-testid={toast.tone === "success" ? "calendar-toast-success" : "calendar-toast-error"}
             className={cn(
               "pointer-events-auto flex items-start gap-2 rounded-xl border px-3 py-2.5 shadow-lg backdrop-blur-sm transition-all animate-in slide-in-from-bottom-2 fade-in",
               toast.tone === "success"
